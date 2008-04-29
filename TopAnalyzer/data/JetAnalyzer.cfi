@@ -1,0 +1,30 @@
+module analyzeJets = JetAnalyzer{
+#---------------------------------------------
+# sources/steerables
+#---------------------------------------------
+  InputTag source = selectedLayer1Jets
+  InputTag weight = eventWeight
+
+  string hist = "analyzeJets.hist"
+
+  bool id         = true
+  bool kinematics = true
+  bool resolution = true
+
+#---------------------------------------------
+# Id
+#---------------------------------------------
+  int32 nJetsId   = 4
+
+#---------------------------------------------
+# Kinematics
+#---------------------------------------------
+  int32 nJetsKin  = 4
+
+#---------------------------------------------
+# Resolution
+#---------------------------------------------
+  int32 nJetsRes  = 4
+  vdouble binsPt  = {0.,  10.,  30.,  50.,  70., 100., 150., 200.}
+  double matchDR  = 0.1
+}

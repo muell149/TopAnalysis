@@ -1,0 +1,30 @@
+module analyzeMuon = MuonAnalyzer{          
+#---------------------------------------------
+# sources/steerables
+#---------------------------------------------
+  InputTag source = selectedLayer1Muons
+  InputTag weight = eventWeight
+
+  string hist = "analyzeTopMuon.hist"
+
+  bool id         = true
+  bool kinematics = true
+  bool resolution = true
+
+#---------------------------------------------
+# Id
+#---------------------------------------------
+
+#---------------------------------------------
+# Kinematics
+#---------------------------------------------
+  InputTag towers = caloTowers
+  InputTag tracks = ctfWithMaterialTracks
+  double dRMax    = 0.1
+
+#---------------------------------------------
+# Resolution
+#---------------------------------------------
+  vdouble binsPt  = {0., 20., 30., 50.,  80., 120., 180.}
+  double matchDR  = 0.1
+}
