@@ -6,8 +6,7 @@
 
 
 JetKinematic::JetKinematic(const edm::ParameterSet& cfg):
-  jets_ ( cfg.getParameter<edm::InputTag>( "jets"  ) ),
-  nJets_( cfg.getParameter<double>(        "nJets" ) )
+  nJets_( cfg.getParameter<int>( "nJetsKin" ) )
 {
 }
 

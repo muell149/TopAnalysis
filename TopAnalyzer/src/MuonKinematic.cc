@@ -16,78 +16,80 @@ void
 MuonKinematic::fill(const edm::Event& evt, const std::vector<pat::Muon>& muons, const double& weight=1.)
 {
   std::vector<pat::Muon>::const_iterator muon=muons.begin();
-  //---------------------------------------------
-  // basic kinematics
-  //---------------------------------------------
-  en_ ->Fill( muon->energy(), weight );
-  pt_ ->Fill( muon->et(),     weight );    
-  eta_->Fill( muon->eta(),    weight );
-  phi_->Fill( muon->phi(),    weight );
-
-  //---------------------------------------------
-  // calo isolation
-  //---------------------------------------------
-  edm::Handle<reco::CandidateCollection> towers;
-  evt.getByLabel(towers_, towers);
-
-  //---------------------------------------------
-  // count number of towers in cone
-  //---------------------------------------------
-  int nTowers = 0;
-  for(reco::CandidateCollection::const_iterator tower = towers->begin(); 
-      tower != towers->end(); ++tower) {
-    double dR=deltaR( muon->eta(), muon->phi(), tower->eta(), tower->phi() );
-    dRCalN_ ->Fill(dR);
-    dRCalPt_->Fill(dR, tower->et());
-    if(dR<dRMax_)++nTowers;
+  if(muon!=muons.end()){
+    //---------------------------------------------
+    // basic kinematics
+    //---------------------------------------------
+    en_ ->Fill( muon->energy(), weight );
+    pt_ ->Fill( muon->et(),     weight );    
+    eta_->Fill( muon->eta(),    weight );
+    phi_->Fill( muon->phi(),    weight );
+    
+    //---------------------------------------------
+    // calo isolation
+    //---------------------------------------------
+    edm::Handle<reco::CandidateCollection> towers;
+    evt.getByLabel(towers_, towers);
+    
+    //---------------------------------------------
+    // count number of towers in cone
+    //---------------------------------------------
+    int nTowers = 0;
+    for(reco::CandidateCollection::const_iterator tower = towers->begin(); 
+	tower != towers->end(); ++tower) {
+      double dR=deltaR( muon->eta(), muon->phi(), tower->eta(), tower->phi() );
+      dRCalN_ ->Fill(dR);
+      dRCalPt_->Fill(dR, tower->et());
+      if(dR<dRMax_)++nTowers;
+    }
+    isoCalN_->Fill(nTowers, weight);
+    
+    //---------------------------------------------
+    // track isolation
+    //---------------------------------------------
+    edm::Handle<reco::TrackCollection> tracks;
+    evt.getByLabel(tracks_, tracks);
+    
+    //---------------------------------------------
+    // search for track closest to the muon
+    //---------------------------------------------
+    double dRmin = -1.;
+    for(reco::TrackCollection::const_iterator track = tracks->begin(); 
+	track != tracks->end(); ++track) {
+      double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
+      if(dRmin<0 || dR<dRmin) dRmin=dR;
+    }
+    closestCtf_->Fill(dRmin);
+    
+    //---------------------------------------------
+    // count number of tracks in cone
+    //---------------------------------------------
+    int nTracks = 0;
+    for(reco::TrackCollection::const_iterator track = tracks->begin(); 
+	track != tracks->end(); ++track) {
+      double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
+      if( dR==dRmin) 
+	continue;
+      dRTrkN_->Fill(dR);
+      if(track->pt()<100.)
+	dRTrkPt_->Fill(dR, track->pt());    
+      if(dR<dRMax_) ++nTracks;
+    }
+    isoTrkN_->Fill(nTracks, weight);
+    
+    //---------------------------------------------
+    // fill std isolation plots
+    //---------------------------------------------
+    isoTrk_ ->Fill( muon->trackIso(), weight );
+    isoCal_ ->Fill( muon->caloIso (), weight );
+    isoEcal_->Fill( muon->ecalIso (), weight );
+    isoHcal_->Fill( muon->hcalIso (), weight );
+    
+    ptVsTrkIso_ ->Fill( muon->pt(), muon->trackIso() );
+    ptVsCalIso_ ->Fill( muon->pt(), muon->caloIso () );
+    ptVsEcalIso_->Fill( muon->pt(), muon->ecalIso () );
+    ptVsHcalIso_->Fill( muon->pt(), muon->hcalIso () );
   }
-  isoCalN_->Fill(nTowers, weight);
-
-  //---------------------------------------------
-  // track isolation
-  //---------------------------------------------
-  edm::Handle<reco::TrackCollection> tracks;
-  evt.getByLabel(tracks_, tracks);
-
-  //---------------------------------------------
-  // search for track closest to the muon
-  //---------------------------------------------
-  double dRmin = -1.;
-  for(reco::TrackCollection::const_iterator track = tracks->begin(); 
-      track != tracks->end(); ++track) {
-    double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
-    if(dRmin<0 || dR<dRmin) dRmin=dR;
-  }
-  closestCtf_->Fill(dRmin);
-
-  //---------------------------------------------
-  // count number of tracks in cone
-  //---------------------------------------------
-  int nTracks = 0;
-  for(reco::TrackCollection::const_iterator track = tracks->begin(); 
-      track != tracks->end(); ++track) {
-    double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
-    if( dR==dRmin) 
-      continue;
-    dRTrkN_->Fill(dR);
-    if(track->pt()<100.)
-      dRTrkPt_->Fill(dR, track->pt());    
-    if(dR<dRMax_) ++nTracks;
-  }
-  isoTrkN_->Fill(nTracks, weight);
-  
-  //---------------------------------------------
-  // fill std isolation plots
-  //---------------------------------------------
-  isoTrk_ ->Fill( muon->trackIso(), weight );
-  isoCal_ ->Fill( muon->caloIso (), weight );
-  isoEcal_->Fill( muon->ecalIso (), weight );
-  isoHcal_->Fill( muon->hcalIso (), weight );
-  
-  ptVsTrkIso_ ->Fill( muon->pt(), muon->trackIso() );
-  ptVsCalIso_ ->Fill( muon->pt(), muon->caloIso () );
-  ptVsEcalIso_->Fill( muon->pt(), muon->ecalIso () );
-  ptVsHcalIso_->Fill( muon->pt(), muon->hcalIso () );
 }
 
 void 

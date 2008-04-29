@@ -31,8 +31,7 @@ class JetResolution{
  private:
 
   // additional evt content/steerings
-  edm::InputTag jets_;
-  double nJets_;
+  int nJets_;
   std::vector<double> binsPt_;
   double matchDR_;
 

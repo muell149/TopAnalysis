@@ -31,8 +31,7 @@ class JetKinematic{
  private:
 
   // additional evt content/steerings
-  edm::InputTag jets_;
-  double nJets_;
+  int nJets_;
 
   TH1F *mult_;
   TH1F *n10_;

@@ -6,8 +6,7 @@
 
 
 JetResolution::JetResolution(const edm::ParameterSet& cfg):
-  jets_( cfg.getParameter<edm::InputTag> ( "jets" ) ),
-  nJets_( cfg.getParameter<double> ( "nJets" ) ),
+  nJets_( cfg.getParameter<int> ( "nJetsRes" ) ),
   binsPt_( cfg.getParameter<std::vector<double> >( "binsPt" ) ),
   matchDR_( cfg.getParameter<double>( "matchDR" ) )
 {

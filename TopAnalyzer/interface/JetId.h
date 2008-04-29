@@ -30,7 +30,6 @@ class JetId{
  private:
 
   // additional evt content/steerings  
-  edm::InputTag jets_;
   int nJets_;
 
   TH1F *aEmf_;

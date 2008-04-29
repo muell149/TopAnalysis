@@ -2,7 +2,7 @@ module analyzeJets = JetAnalyzer{
 #---------------------------------------------
 # sources/steerables
 #---------------------------------------------
-  InputTag source = selectedLayer1Jets
+  InputTag input  = selectedLayer1Jets
   InputTag weight = eventWeight
 
   string hist = "analyzeJets.hist"

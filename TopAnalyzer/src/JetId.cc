@@ -6,8 +6,7 @@
 
 
 JetId::JetId(const edm::ParameterSet& cfg):
-  jets_ ( cfg.getParameter<edm::InputTag>( "jets" ) ),
-  nJets_( cfg.getParameter<int>( "nJets" ) )
+  nJets_( cfg.getParameter<int>( "nJetsId" ) )
 {
 }
 

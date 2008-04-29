@@ -8,6 +8,7 @@ ElecId::ElecId(const edm::ParameterSet& cfg):
   bshp_( cfg.getParameter<edm::InputTag>( "barrel_shape" ) ),
   eshp_( cfg.getParameter<edm::InputTag>( "endcap_shape" ) )  
 {
+  std::cout << "ok object built" << std::endl;
 }
 
 void
@@ -22,28 +23,27 @@ ElecId::fill(const edm::Event& evt, const std::vector<pat::Electron>& elecs, con
     deta_->Fill( elec->deltaEtaSeedClusterTrackAtCalo(), weight );
     dphi_->Fill( elec->deltaPhiSeedClusterTrackAtCalo(), weight );
     
-    reco::GsfTrackRef track = elec->gsfTrack();
-    reco::Particle::Vector iMom = track->innerMomentum();
-    reco::Particle::Vector oMom = track->outerMomentum();
+    //reco::GsfTrackRef track = elec->gsfTrack();
+    //reco::Particle::Vector iMom = track->innerMomentum();
+    //reco::Particle::Vector oMom = track->outerMomentum();
     
-    tdpt_ ->Fill( (iMom.Rho()-oMom.Rho())/iMom.Rho(), weight );
-    tdeta_->Fill( (iMom.Eta()-oMom.Eta())/iMom.Eta(), weight );
-    tdphi_->Fill( (iMom.Phi()-oMom.Phi())/iMom.Phi(), weight );
-    nohit_->Fill( track->recHitsSize(),               weight );
-    nvhit_->Fill( track->found(),                     weight );
-    chi2_ ->Fill( track->chi2()/track->ndof(),        weight );
-    
+    //tdpt_ ->Fill( (iMom.Rho()-oMom.Rho())/iMom.Rho(), weight );
+    //tdeta_->Fill( (iMom.Eta()-oMom.Eta())/iMom.Eta(), weight );
+    //tdphi_->Fill( (iMom.Phi()-oMom.Phi())/iMom.Phi(), weight );
+    //nohit_->Fill( track->recHitsSize(),               weight );
+    //nvhit_->Fill( track->found(),                     weight );
+    //chi2_ ->Fill( track->chi2()/track->ndof(),        weight );
+
     reco::SuperClusterRef clus = elec->superCluster();
     math::XYZPoint tPos(elec->TrackPositionAtCalo().X(), 
 			elec->TrackPositionAtCalo().Y(),
 			elec->TrackPositionAtCalo().Z());
-    
     drtk_->Fill( (clus->position()-tPos).R(), weight );  
     
     edm::Handle<reco::BasicClusterShapeAssociationCollection> barrel, endcap;
     evt.getByLabel(bshp_, barrel);
     evt.getByLabel(eshp_, endcap);
-    
+
     reco::BasicClusterShapeAssociationCollection::const_iterator shapes;
     
     // find the entry in the map corresponding to
@@ -54,8 +54,7 @@ ElecId::fill(const edm::Event& evt, const std::vector<pat::Electron>& elecs, con
     }
     else {
       shapes = endcap->find(clus->seed());
-    }
-    
+    }    
     const reco::ClusterShapeRef& shp = shapes->val;
     s1os9_->Fill( shp->eMax()/shp->e3x3(), weight );
   }

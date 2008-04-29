@@ -2,7 +2,7 @@ module analyzeElec = ElecAnalyzer{
 #---------------------------------------------
 # sources/steerables
 #---------------------------------------------
-  InputTag source = selectedLayer1Electrons
+  InputTag input  = allLayer1Electrons
   InputTag weight = eventWeight
 
   string hist = "analyzeElec.hist"
