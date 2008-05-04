@@ -17,7 +17,7 @@ JetKinematic::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, con
   unsigned int idx=0;
   int n10=0, n20=0, n30=0, n40=0;
   for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); 
-      jet!=jets.end(); ++jet) {
+      jet!=jets.end(); ++jet, ++idx) {
     allEn_ ->Fill( jet->energy(), weight );
     allEt_ ->Fill( jet->et(), weight );
     allEta_->Fill( jet->eta(), weight );

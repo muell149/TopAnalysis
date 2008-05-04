@@ -15,7 +15,7 @@ JetId::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, const doub
 {
   unsigned int idx=0;
   for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); 
-       jet!=jets.end(); ++jet) {
+      jet!=jets.end(); ++jet, ++idx) {
     aEmf_->Fill( jet->emEnergyFraction(), weight );
     aHad_->Fill( jet->energyFractionHadronic(), weight );
     aHof_->Fill( jet->hadEnergyInHO(), weight );

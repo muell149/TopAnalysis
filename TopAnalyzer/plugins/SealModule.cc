@@ -18,7 +18,16 @@ typedef ObjectAnalyzer<std::vector<pat::Jet>, JetId, JetKinematic, JetResolution
 typedef ObjectAnalyzer<std::vector<pat::Muon>, MuonId, MuonKinematic, MuonResolution> MuonAnalyzer;
 typedef ObjectAnalyzer<std::vector<pat::Electron>, ElecId, ElecKinematic, ElecResolution> ElecAnalyzer;
 
+#include "TopAnalysis/TopAnalyzer/plugins/EventShapeAnalyzer.h"
+typedef EventShapeAnalyzer<std::vector<pat::Muon> > EventShapeAnalyzerMuon;
+typedef EventShapeAnalyzer<std::vector<pat::Electron> > EventShapeAnalyzerElec;
+
+#include "TopAnalysis/TopAnalyzer/plugins/PartonMatchAnalyzer.h"
+
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( JetAnalyzer  );
 DEFINE_FWK_MODULE( MuonAnalyzer );
 DEFINE_FWK_MODULE( ElecAnalyzer );
+DEFINE_FWK_MODULE( PartonMatchAnalyzer );
+DEFINE_FWK_MODULE( EventShapeAnalyzerMuon );
+DEFINE_FWK_MODULE( EventShapeAnalyzerElec );

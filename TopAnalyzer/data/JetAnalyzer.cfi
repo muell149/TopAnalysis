@@ -2,14 +2,14 @@ module analyzeJets = JetAnalyzer{
 #---------------------------------------------
 # sources/steerables
 #---------------------------------------------
-  InputTag input  = selectedLayer1Jets
+  InputTag input  = allLayer1Jets
   InputTag weight = eventWeight
 
   string hist = "analyzeJets.hist"
 
-  bool id         = true
+  bool id         = false
   bool kinematics = true
-  bool resolution = true
+  bool resolution = false
 
 #---------------------------------------------
 # Id

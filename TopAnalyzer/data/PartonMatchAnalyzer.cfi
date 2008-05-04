@@ -1,0 +1,12 @@
+module analyzePartonMatch = PartonMatchAnalyzer{
+#---------------------------------------------
+# sources/steerables
+#---------------------------------------------
+  InputTag jets   = allLayer1Jets
+  string file     = "analyzePartonMatch.txt"
+
+  int32 nJets     = 4
+  bool useDeltaR  = true
+  bool useMaxDist = true
+  bool maxDist    = 0.3
+}

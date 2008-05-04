@@ -2,7 +2,7 @@ module analyzeMuon = MuonAnalyzer{
 #---------------------------------------------
 # sources/steerables
 #---------------------------------------------
-  InputTag input  = selectedLayer1Muons
+  InputTag input  = allLayer1Muons
   InputTag weight = eventWeight
 
   string hist = "analyzeMuon.hist"

@@ -17,7 +17,7 @@ JetResolution::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, co
 {
   unsigned int idx=0;
   for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); 
-       jet!=jets.end(); ++jet) {
+      jet!=jets.end(); ++jet, ++idx) {
     if( abs(jet->genJet()->pdgId())!=0){ 
       double dR=deltaR( jet->eta(), jet->phi(), jet->genJet()->eta(), jet->genJet()->phi() ); 
       if(dR<matchDR_){
