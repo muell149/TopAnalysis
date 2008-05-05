@@ -19,12 +19,16 @@ class EventFilter : public edm::EDFilter {
   
  private:
 
-  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void beginJob(const edm::EventSetup&);
   virtual bool filter(edm::Event&, const edm::EventSetup&);
+  virtual void endJob(){filter_.summarize();};
 
  private:
   
   edm::InputTag src_;
+
+ private:
+  
   Filter filter_;
 };
 
@@ -39,7 +43,7 @@ bool EventFilter<Collection, Filter>::filter(edm::Event& evt, const edm::EventSe
 {
   edm::Handle<Collection> src; 
   evt.getByLabel(src_, src);
-  return filter_(*src);
+  return filter_(evt, *src);
 }
 
 template <typename Collection, typename Filter> 

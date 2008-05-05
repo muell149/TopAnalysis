@@ -26,14 +26,18 @@ class PtFilter {
 
  public:
 
-  bool operator()(const Collection&);
+  bool operator()(edm::Event&, const Collection&);
+  void summarize(){cut_.print();};
+
+ private:
+
+  std::string name_;
+  std::vector<double> minPt_;
+  std::vector<double> maxPt_;
 
  private:
 
   CutMonitor cut_;
-  std::string name_;
-  std::vector<double> minPt_;
-  std::vector<double> maxPt_;
 };
 
 template <typename Collection> 
@@ -51,7 +55,7 @@ PtFilter<Collection>::PtFilter(const edm::ParameterSet& cfg):
 }
 
 template <typename Collection> 
-bool PtFilter<Collection>::operator()(const Collection& objs)
+bool PtFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
   // start cut monitoring
   cut_.select("sample", true);  

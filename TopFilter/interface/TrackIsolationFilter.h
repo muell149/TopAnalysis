@@ -26,13 +26,17 @@ class TrackIsolationFilter {
 
  public:
 
-  bool operator()(const Collection&);
+  bool operator()(edm::Event&, const Collection&);
+  void summarize(){cut_.print();};
+
+ private:
+
+  std::string name_;
+  std::vector<double> iso_;
 
  private:
 
   CutMonitor cut_;
-  std::string name_;
-  std::vector<double> iso_;
 };
 
 template <typename Collection> 
@@ -47,7 +51,7 @@ TrackIsolationFilter<Collection>::TrackIsolationFilter(const edm::ParameterSet& 
 }
 
 template <typename Collection> 
-bool TrackIsolationFilter<Collection>::operator()(const Collection& objs)
+bool TrackIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
   // start cut monitoring
   cut_.select("sample", true);  

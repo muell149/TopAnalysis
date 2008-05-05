@@ -26,14 +26,18 @@ class EtaFilter {
 
  public:
 
-  bool operator()(const Collection&);
+  bool operator()(edm::Event&, const Collection&);
+  void summarize(){cut_.print();};
+
+ private:
+
+  std::string name_;
+  std::vector<double> minEta_;
+  std::vector<double> maxEta_;
 
  private:
 
   CutMonitor cut_;
-  std::string name_;
-  std::vector<double> minEta_;
-  std::vector<double> maxEta_;
 };
 
 template <typename Collection> 
@@ -51,7 +55,7 @@ EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
 }
 
 template <typename Collection> 
-bool EtaFilter<Collection>::operator()(const Collection& objs)
+bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
   // start cut monitoring
   cut_.select("sample", true);  

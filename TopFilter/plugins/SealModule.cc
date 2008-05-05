@@ -3,47 +3,53 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
 #include "TopAnalysis/TopFilter/interface/PtFilter.h"
-typedef PtFilter<std::vector<pat::Jet> > JetPtFilter;
-typedef PtFilter<std::vector<pat::Muon> > MuonPtFilter;
-typedef PtFilter<std::vector<pat::Electron> > ElecPtFilter;
-
 #include "TopAnalysis/TopFilter/interface/EtaFilter.h"
-typedef EtaFilter<std::vector<pat::Jet> > JetEtaFilter;
-typedef EtaFilter<std::vector<pat::Muon> > MuonEtaFilter;
-typedef EtaFilter<std::vector<pat::Electron> > ElecEtaFilter;
-
+#include "TopAnalysis/TopFilter/interface/JetIsolationFilter.h"
+#include "TopAnalysis/TopFilter/interface/CaloIsolationFilter.h"
 #include "TopAnalysis/TopFilter/interface/TrackIsolationFilter.h"
-typedef TrackIsolationFilter<std::vector<pat::Muon> > MuonTrackIsolationFilter;
+
+// object filter expansions
+typedef PtFilter            <std::vector<pat::Jet>      > JetPtFilter;
+typedef EtaFilter           <std::vector<pat::Jet>      > JetEtaFilter;
+typedef PtFilter            <std::vector<pat::Muon>     > MuonPtFilter;
+typedef EtaFilter           <std::vector<pat::Muon>     > MuonEtaFilter;
+typedef JetIsolationFilter  <std::vector<pat::Muon>     > MuonJetIsolationFilter;
+typedef CaloIsolationFilter <std::vector<pat::Muon>     > MuonCaloIsolationFilter;
+typedef TrackIsolationFilter<std::vector<pat::Muon>     > MuonTrackIsolationFilter;
+typedef PtFilter            <std::vector<pat::Electron> > ElecPtFilter;
+typedef EtaFilter           <std::vector<pat::Electron> > ElecEtaFilter;
+typedef JetIsolationFilter  <std::vector<pat::Electron> > ElecJetIsolationFilter;
+typedef CaloIsolationFilter <std::vector<pat::Electron> > ElecCaloIsolationFilter;
 typedef TrackIsolationFilter<std::vector<pat::Electron> > ElecTrackIsolationFilter;
 
-#include "TopAnalysis/TopFilter/interface/CaloIsolationFilter.h"
-typedef CaloIsolationFilter<std::vector<pat::Muon> > MuonCaloIsolationFilter;
-typedef CaloIsolationFilter<std::vector<pat::Electron> > ElecCaloIsolationFilter;
-
-
 #include "TopAnalysis/TopFilter/plugins/EventFilter.h"
-typedef EventFilter<std::vector<pat::Jet>, JetPtFilter > JetPtEvtFilter;
-typedef EventFilter<std::vector<pat::Muon>, MuonPtFilter > MuonPtEvtFilter;
-typedef EventFilter<std::vector<pat::Electron>, ElecPtFilter > ElecPtEvtFilter;
 
-typedef EventFilter<std::vector<pat::Jet>, JetEtaFilter > JetEtaEvtFilter;
-typedef EventFilter<std::vector<pat::Muon>, MuonEtaFilter > MuonEtaEvtFilter;
-typedef EventFilter<std::vector<pat::Electron>, ElecEtaFilter > ElecEtaEvtFilter;
-
-typedef EventFilter<std::vector<pat::Muon>, MuonTrackIsolationFilter > MuonTrackIsolationEvtFilter;
-typedef EventFilter<std::vector<pat::Electron>, ElecTrackIsolationFilter > ElecTrackIsolationEvtFilter;
-
-typedef EventFilter<std::vector<pat::Muon>, MuonCaloIsolationFilter > MuonCaloIsolationEvtFilter;
-typedef EventFilter<std::vector<pat::Electron>, ElecCaloIsolationFilter > ElecCaloIsolationEvtFilter;
+// event filter expansions
+typedef EventFilter<std::vector<pat::Jet>,      JetPtFilter              > JetPtEventFilter;
+typedef EventFilter<std::vector<pat::Jet>,      JetEtaFilter             > JetEtaEventFilter;
+typedef EventFilter<std::vector<pat::Muon>,     MuonPtFilter             > MuonPtEventFilter;
+typedef EventFilter<std::vector<pat::Muon>,     MuonEtaFilter            > MuonEtaEventFilter;
+typedef EventFilter<std::vector<pat::Muon>,     MuonJetIsolationFilter   > MuonJetIsolationEventFilter;
+typedef EventFilter<std::vector<pat::Muon>,     MuonCaloIsolationFilter  > MuonCaloIsolationEventFilter;
+typedef EventFilter<std::vector<pat::Muon>,     MuonTrackIsolationFilter > MuonTrackIsolationEventFilter;
+typedef EventFilter<std::vector<pat::Electron>, ElecPtFilter             > ElecPtEventFilter;
+typedef EventFilter<std::vector<pat::Electron>, ElecEtaFilter            > ElecEtaEventFilter;
+typedef EventFilter<std::vector<pat::Electron>, ElecJetIsolationFilter   > ElecJetIsolationEventFilter;
+typedef EventFilter<std::vector<pat::Electron>, ElecCaloIsolationFilter  > ElecCaloIsolationEventFilter;
+typedef EventFilter<std::vector<pat::Electron>, ElecTrackIsolationFilter > ElecTrackIsolationEventFilter;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE( JetPtEvtFilter   );
-DEFINE_FWK_MODULE( MuonPtEvtFilter  );
-DEFINE_FWK_MODULE( ElecPtEvtFilter  );
-DEFINE_FWK_MODULE( JetEtaEvtFilter  );
-DEFINE_FWK_MODULE( MuonEtaEvtFilter );
-DEFINE_FWK_MODULE( ElecEtaEvtFilter );
-DEFINE_FWK_MODULE( MuonTrackIsolationEvtFilter );
-DEFINE_FWK_MODULE( ElecTrackIsolationEvtFilter );
-DEFINE_FWK_MODULE( MuonCaloIsolationEvtFilter  );
-DEFINE_FWK_MODULE( ElecCaloIsolationEvtFilter  );
+
+// plugin definition
+DEFINE_FWK_MODULE( JetPtEventFilter              );
+DEFINE_FWK_MODULE( JetEtaEventFilter             );
+DEFINE_FWK_MODULE( MuonPtEventFilter             );
+DEFINE_FWK_MODULE( MuonEtaEventFilter            );
+DEFINE_FWK_MODULE( MuonJetIsolationEventFilter   );
+DEFINE_FWK_MODULE( MuonCaloIsolationEventFilter  );
+DEFINE_FWK_MODULE( MuonTrackIsolationEventFilter );
+DEFINE_FWK_MODULE( ElecPtEventFilter             );
+DEFINE_FWK_MODULE( ElecEtaEventFilter            );
+DEFINE_FWK_MODULE( ElecJetIsolationEventFilter   );
+DEFINE_FWK_MODULE( ElecCaloIsolationEventFilter  );
+DEFINE_FWK_MODULE( ElecTrackIsolationEventFilter );

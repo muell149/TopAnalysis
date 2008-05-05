@@ -26,13 +26,17 @@ class CaloIsolationFilter {
 
  public:
 
-  bool operator()(const Collection&);
+  bool operator()(edm::Event&, const Collection&);
+  void summarize(){cut_.print();};
+
+ private:
+
+  std::string name_;
+  std::vector<double> iso_;
 
  private:
 
   CutMonitor cut_;
-  std::string name_;
-  std::vector<double> iso_;
 };
 
 template <typename Collection> 
@@ -47,7 +51,7 @@ CaloIsolationFilter<Collection>::CaloIsolationFilter(const edm::ParameterSet& cf
 }
 
 template <typename Collection> 
-bool CaloIsolationFilter<Collection>::operator()(const Collection& objs)
+bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
   // start cut monitoring
   cut_.select("sample", true);  
