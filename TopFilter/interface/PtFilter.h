@@ -46,7 +46,7 @@ PtFilter<Collection>::PtFilter(const edm::ParameterSet& cfg):
   cut_.add("sample", Cut::Boolean, true);
   for(unsigned int idx=0; idx<minPt_.size(); ++idx)
     cut_.add("minPt", idx,  Cut::Greater, minPt_[idx]);
-  for(unsigned int idx=0; idx<minPt_.size(); ++idx)
+  for(unsigned int idx=0; idx<maxPt_.size(); ++idx)
     cut_.add("maxPt", idx,  Cut::Lower,   maxPt_[idx]);
 }
 

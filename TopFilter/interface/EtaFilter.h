@@ -46,7 +46,7 @@ EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
   cut_.add("sample", Cut::Boolean, true);
   for(unsigned int idx=0; idx<minEta_.size(); ++idx)
     cut_.add("minEta", idx,  Cut::Greater, minEta_[idx]);
-  for(unsigned int idx=0; idx<minEta_.size(); ++idx)
+  for(unsigned int idx=0; idx<maxEta_.size(); ++idx)
     cut_.add("maxEta", idx,  Cut::Lower,   maxEta_[idx]);
 }
 
