@@ -47,7 +47,8 @@ EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
   maxEta_( cfg.getParameter<std::vector<double> >( "maxEta" ) )
 {
   cut_.name( name_.c_str() );
-  cut_.add("sample", Cut::Boolean, true);
+  cut_.add("events checked", Cut::Boolean, true);
+  cut_.add("events passed ", Cut::Boolean, true);
   for(unsigned int idx=0; idx<minEta_.size(); ++idx)
     cut_.add("minEta", idx,  Cut::Greater, minEta_[idx]);
   for(unsigned int idx=0; idx<maxEta_.size(); ++idx)
@@ -57,23 +58,27 @@ EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
 template <typename Collection> 
 bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
-  // start cut monitoring
-  cut_.select("sample", true);  
+  bool passed=true;
+  cut_.select("events checked", passed);  
+
+  if( objs.size()<minEta_.size() || objs.size()<maxEta_.size() )
+    passed=false;
 
   unsigned int idx=0;
   for(typename Collection::const_iterator obj=objs.begin();
       obj!=objs.end(); ++obj) {
     if( idx<minEta_.size() ) // check for minEta as long as vector is long enough
-      if( !cut_.select("minEta", idx, obj->eta()) ) return false;
+      if( !cut_.select("minEta", idx, obj->eta()) ) passed=false;
     if( idx<maxEta_.size() ) // check for maxEta as long as vector is long enough
-      if( !cut_.select("maxEta", idx, obj->eta()) ) return false;
-
+      if( !cut_.select("maxEta", idx, obj->eta()) ) passed=false;
+    
     // break slope if both vector lengths are exceeded
     ++idx;
     if( idx>minEta_.size() && idx>maxEta_.size())
       break;
   }
-  return true;
+  cut_.select("events passed ", passed);  
+  return passed;
 }
 
 #endif

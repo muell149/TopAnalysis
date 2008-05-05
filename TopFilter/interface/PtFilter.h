@@ -47,7 +47,8 @@ PtFilter<Collection>::PtFilter(const edm::ParameterSet& cfg):
   maxPt_( cfg.getParameter<std::vector<double> >( "maxPt" ) )
 {
   cut_.name( name_.c_str() );
-  cut_.add("sample", Cut::Boolean, true);
+  cut_.add("events checked", Cut::Boolean, true);
+  cut_.add("events passed ", Cut::Boolean, true);
   for(unsigned int idx=0; idx<minPt_.size(); ++idx)
     cut_.add("minPt", idx,  Cut::Greater, minPt_[idx]);
   for(unsigned int idx=0; idx<maxPt_.size(); ++idx)
@@ -57,23 +58,27 @@ PtFilter<Collection>::PtFilter(const edm::ParameterSet& cfg):
 template <typename Collection> 
 bool PtFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
-  // start cut monitoring
-  cut_.select("sample", true);  
+  bool passed=true;
+  cut_.select("events checked", passed);  
+
+  if( objs.size()<minPt_.size() || objs.size()<maxPt_.size() )
+    passed=false;
 
   unsigned int idx=0;
   for(typename Collection::const_iterator obj=objs.begin();
       obj!=objs.end(); ++obj) {
     if( idx<minPt_.size() ) // check for minPt as long as vector is long enough
-      if( !cut_.select("minPt", idx, obj->pt()) ) return false;
+      if( !cut_.select("minPt", idx, obj->pt()) ) passed=false;
     if( idx<maxPt_.size() ) // check for maxPt as long as vector is long enough
-      if( !cut_.select("maxPt", idx, obj->pt()) ) return false;
+      if( !cut_.select("maxPt", idx, obj->pt()) ) passed=false;
 
     // break slope if both vector lengths are exceeded
     ++idx;
     if( idx>minPt_.size() && idx>maxPt_.size())
       break;
   }
-  return true;
+  cut_.select("events passed ", passed);  
+  return passed;
 }
 
 #endif
