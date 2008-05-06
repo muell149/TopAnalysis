@@ -27,6 +27,7 @@ class MuonId{
   void book();
   void book(ofstream&);
   void fill(const edm::Event&, const std::vector<pat::Muon>&, const double&);
+  void norm(){};
   
  private:
 

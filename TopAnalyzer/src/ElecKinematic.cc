@@ -6,6 +6,7 @@
 
 
 ElecKinematic::ElecKinematic(const edm::ParameterSet& cfg):
+  jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) ),
   towers_( cfg.getParameter<edm::InputTag>( "towers" ) ),
   tracks_( cfg.getParameter<edm::InputTag>( "tracks" ) ),  
   dRMax_ ( cfg.getParameter<double>( "dRMax" ) )  
@@ -24,6 +25,21 @@ ElecKinematic::fill(const edm::Event& evt, const std::vector<pat::Electron>& ele
     pt_ ->Fill( elec->et(),     weight );    
     eta_->Fill( elec->eta(),    weight );
     phi_->Fill( elec->phi(),    weight );
+    
+    //---------------------------------------------
+    // jet isolation
+    //---------------------------------------------
+    edm::Handle<std::vector<pat::Jet> > jets; 
+    evt.getByLabel(jets_, jets);
+
+    double minDR=-1.;
+    for(std::vector<pat::Jet>::const_iterator jet = jets->begin(); 
+	jet!=jets->end(); ++jet) {
+      double dR=deltaR(elec->eta(), elec->phi(), jet->eta(), jet->phi());
+      if( minDR<0 || dR<minDR ) minDR=dR;
+    }
+    if( minDR>=0 )
+      isoJet_->Fill( minDR, weight );  
     
     //---------------------------------------------
     // calo isolation
@@ -106,6 +122,7 @@ ElecKinematic::book()
   phi_= fs->make<TH1F>(kin.name( "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
 
   NameScheme iso("iso");
+  isoJet_  = fs->make<TH1F>(iso.name( "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
   isoTrk_  = fs->make<TH1F>(iso.name( "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
   isoCal_  = fs->make<TH1F>(iso.name( "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
   isoEcal_ = fs->make<TH1F>(iso.name( "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);
@@ -138,6 +155,7 @@ ElecKinematic::book(ofstream& file)
   phi_= fs->make<TH1F>(kin.name( file, "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
 
   NameScheme iso("iso");
+  isoJet_  = fs->make<TH1F>(iso.name( file, "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
   isoTrk_  = fs->make<TH1F>(iso.name( file, "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
   isoCal_  = fs->make<TH1F>(iso.name( file, "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
   isoEcal_ = fs->make<TH1F>(iso.name( file, "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);

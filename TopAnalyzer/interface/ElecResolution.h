@@ -27,6 +27,7 @@ class ElecResolution{
   void book();
   void book(ofstream&);
   void fill(const edm::Event&, const std::vector<pat::Electron>&, const double&);
+  void norm(){};
 
  private:
 

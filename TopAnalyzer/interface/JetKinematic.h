@@ -27,7 +27,8 @@ class JetKinematic{
   void book();
   void book(ofstream&);
   void fill(const edm::Event&, const std::vector<pat::Jet>&, const double&);
-  
+  void norm(){};  
+
  private:
 
   // additional evt content/steerings

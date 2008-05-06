@@ -21,6 +21,7 @@ class ObjectAnalyzer : public edm::EDAnalyzer {
   
   virtual void beginJob(const edm::EventSetup&) ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void endJob();
   
  private:
 
@@ -86,6 +87,14 @@ void ObjectAnalyzer<Collection, Id, Kin, Res>::beginJob(const edm::EventSetup&)
     if( doKin_) kin_->book(hist);
     if( doRes_) res_->book(hist);
   }
+}
+
+template <typename Collection, typename Id, typename Kin, typename Res> 
+void ObjectAnalyzer<Collection, Id, Kin, Res>::endJob()
+{
+  if( doId_ ) id_ ->norm();
+  if( doKin_) kin_->norm();
+  if( doRes_) res_->norm();
 }
 
 #endif

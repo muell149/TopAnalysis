@@ -6,6 +6,7 @@
 
 
 MuonKinematic::MuonKinematic(const edm::ParameterSet& cfg):
+  jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) ),
   towers_( cfg.getParameter<edm::InputTag>( "towers" ) ),
   tracks_( cfg.getParameter<edm::InputTag>( "tracks" ) ),  
   dRMax_ ( cfg.getParameter<double>( "dRMax" ) )  
@@ -24,7 +25,22 @@ MuonKinematic::fill(const edm::Event& evt, const std::vector<pat::Muon>& muons, 
     pt_ ->Fill( muon->et(),     weight );    
     eta_->Fill( muon->eta(),    weight );
     phi_->Fill( muon->phi(),    weight );
-    
+
+    //---------------------------------------------
+    // jet isolation
+    //---------------------------------------------
+    edm::Handle<std::vector<pat::Jet> > jets; 
+    evt.getByLabel(jets_, jets);
+
+    double minDR=-1.;
+    for(std::vector<pat::Jet>::const_iterator jet = jets->begin(); 
+	jet!=jets->end(); ++jet) {
+      double dR=deltaR(muon->eta(), muon->phi(), jet->eta(), jet->phi());
+      if( minDR<0 || dR<minDR ) minDR=dR;
+    }
+    if( minDR>=0 )
+      isoJet_->Fill( minDR, weight );
+
     //---------------------------------------------
     // calo isolation
     //---------------------------------------------
@@ -59,7 +75,7 @@ MuonKinematic::fill(const edm::Event& evt, const std::vector<pat::Muon>& muons, 
       double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
       if(dRmin<0 || dR<dRmin) dRmin=dR;
     }
-    closestCtf_->Fill(dRmin);
+    closestCtf_->Fill(TMath::Log10(dRmin), weight);
     
     //---------------------------------------------
     // count number of tracks in cone
@@ -106,6 +122,7 @@ MuonKinematic::book()
   phi_= fs->make<TH1F>(kin.name( "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
 
   NameScheme iso("iso");
+  isoJet_  = fs->make<TH1F>(iso.name( "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
   isoTrk_  = fs->make<TH1F>(iso.name( "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
   isoCal_  = fs->make<TH1F>(iso.name( "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
   isoEcal_ = fs->make<TH1F>(iso.name( "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);
@@ -116,7 +133,7 @@ MuonKinematic::book()
   dRCalN_  = fs->make<TH1F>(iso.name( "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,   2.);
   isoTrkN_ = fs->make<TH1F>(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1.,  20.);
   isoCalN_ = fs->make<TH1F>(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1.,  30.);
-  closestCtf_= fs->make<TH1F>(iso.name( "closestCtf" ), iso.name("closestCtf" ), 20, 0., 0.2);
+  closestCtf_= fs->make<TH1F>(iso.name( "closestCtf" ), iso.name("closestCtf" ), 25, -6., -1.);
 
   ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
   ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
@@ -138,6 +155,7 @@ MuonKinematic::book(ofstream& file)
   phi_= fs->make<TH1F>(kin.name( file, "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
 
   NameScheme iso("iso");
+  isoJet_  = fs->make<TH1F>(iso.name( file, "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
   isoTrk_  = fs->make<TH1F>(iso.name( file, "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
   isoCal_  = fs->make<TH1F>(iso.name( file, "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
   isoEcal_ = fs->make<TH1F>(iso.name( file, "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);
@@ -148,11 +166,10 @@ MuonKinematic::book(ofstream& file)
   dRCalN_  = fs->make<TH1F>(iso.name( file, "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,   2.);
   isoTrkN_ = fs->make<TH1F>(iso.name( file, "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1.,  20.);
   isoCalN_ = fs->make<TH1F>(iso.name( file, "isoCalN" ), iso.name("isoCaloN"), 31,  -1.,  30.);
-  closestCtf_= fs->make<TH1F>(iso.name( file, "closestCtf" ), iso.name("closestCtf" ), 20, 0., 0.2);
+  closestCtf_= fs->make<TH1F>(iso.name( file, "closestCtf" ), iso.name("closestCtf" ), 25, -6., -1.);
 
   ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
   ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
   ptVsEcalIso_= fs->make<TH2F>(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
   ptVsHcalIso_= fs->make<TH2F>(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
 }
-

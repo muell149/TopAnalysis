@@ -6,16 +6,19 @@
 
 
 JetId::JetId(const edm::ParameterSet& cfg):
-  nJets_( cfg.getParameter<int>( "nJetsId" ) )
+  nJets_( cfg.getParameter<int>( "nJetsId" ) ),
+  normEvt_( 0 ), normJet_( 0 )
 {
 }
 
 void
 JetId::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, const double& weight=1.)
 {
+  normEvt_+=weight;
   unsigned int idx=0;
   for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); 
       jet!=jets.end(); ++jet, ++idx) {
+    normJet_+=weight;
     aEmf_->Fill( jet->emEnergyFraction(), weight );
     aHad_->Fill( jet->energyFractionHadronic(), weight );
     aHof_->Fill( jet->hadEnergyInHO(), weight );
