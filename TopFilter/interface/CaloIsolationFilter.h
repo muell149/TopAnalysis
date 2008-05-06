@@ -13,8 +13,6 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-#include "TopAnalysis/TopUtils/interface/CutMonitor.h"
-
 
 template <typename Collection> 
 class CaloIsolationFilter {
@@ -27,7 +25,7 @@ class CaloIsolationFilter {
  public:
 
   bool operator()(edm::Event&, const Collection&);
-  void summarize(){cut_.print();};
+  void summarize();
 
  private:
 
@@ -36,27 +34,22 @@ class CaloIsolationFilter {
 
  private:
 
-  CutMonitor cut_;
+  unsigned int beforeCut_, afterCut_;
 };
 
 template <typename Collection> 
 CaloIsolationFilter<Collection>::CaloIsolationFilter(const edm::ParameterSet& cfg):
   name_( cfg.getParameter<std::string>("name") ),
-  iso_ ( cfg.getParameter<std::vector<double> >( "CaloIsolation" ) )
+  iso_ ( cfg.getParameter<std::vector<double> >( "CaloIsolation" ) ),
+  beforeCut_( 0 ), afterCut_( 0 )
 {
-  cut_.name( name_.c_str() );
-  cut_.add("events checked", Cut::Boolean, true);
-  cut_.add("events passed ", Cut::Boolean, true);
-  for(unsigned int idx=0; idx<iso_.size(); ++idx)
-    cut_.add("iso", idx,  Cut::Lower, iso_[idx]);
 }
 
 template <typename Collection> 
 bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
+  ++beforeCut_;
   bool passed=true;
-  cut_.select("events checked", passed);  
-
   if( objs.size()<iso_.size() )
     passed=false;
 
@@ -64,15 +57,34 @@ bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collecti
   for(typename Collection::const_iterator obj=objs.begin();
       obj!=objs.end(); ++obj) {
     if( idx<iso_.size() ) // check for isolation as long as vector is long enough
-      if( !cut_.select("iso", idx, obj->caloIso()) ) passed=false;
-
+      if( !(obj->caloIso()<iso_[idx]) ) passed=false;
+    
     // break slope if both vector lengths are exceeded
     ++idx;
     if( idx>iso_.size() )
       break;
   }
-  cut_.select("events passed ", passed);  
+  if( passed ) ++afterCut_;
   return passed;
+}
+
+template <typename Collection> 
+void CaloIsolationFilter<Collection>::summarize()
+{
+  using std::cout;
+  using std::endl;
+
+  cout << "******************************************************" << endl;
+  for(unsigned int idx=0; idx<iso_.size(); ++idx)
+    if(idx==0) cout << ::std::setw( 20 ) 
+		    << name_ << ": " 
+		    << " CaloIsolation  < " << iso_[idx] << endl;
+    else       cout << ::std::setw( 20 ) 
+		    << ": " 
+		    << " CaloIsolation  < " << iso_[idx] << endl;
+  cout << "------------------------------------------------------" << endl 
+       << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
+       << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
 }
 
 #endif

@@ -15,7 +15,6 @@
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "TopAnalysis/TopUtils/interface/CutMonitor.h"
 
 
 template <typename Collection> 
@@ -29,7 +28,7 @@ class JetIsolationFilter {
  public:
 
   bool operator()(edm::Event&, const Collection&);
-  void summarize(){cut_.print();};
+  void summarize();
 
  private:
 
@@ -39,27 +38,23 @@ class JetIsolationFilter {
 
  private:
 
-  CutMonitor cut_;
+  unsigned int beforeCut_, afterCut_;
 };
 
 template <typename Collection> 
 JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg):
   jets_( cfg.getParameter<edm::InputTag>("jets") ),
   name_( cfg.getParameter<std::string>("name") ),
-  iso_ ( cfg.getParameter<std::vector<double> >( "JetIsolation" ) )
+  iso_ ( cfg.getParameter<std::vector<double> >( "JetIsolation" ) ),
+  beforeCut_( 0 ), afterCut_( 0 )
 {
-  cut_.name( name_.c_str() );
-  cut_.add("events checked", Cut::Boolean, true);
-  cut_.add("events passed ", Cut::Boolean, true);
-  for(unsigned int idx=0; idx<iso_.size(); ++idx)
-    cut_.add("iso", idx,  Cut::Greater, iso_[idx]);
 }
 
 template <typename Collection> 
 bool JetIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
+  ++beforeCut_;
   bool passed=true;
-  cut_.select("events checked", passed);  
 
   edm::Handle<std::vector<pat::Jet> > jets; 
   evt.getByLabel(jets_, jets);
@@ -81,15 +76,34 @@ bool JetIsolationFilter<Collection>::operator()(edm::Event& evt, const Collectio
 	edm::LogWarning ( "NoJetFound" ) << "no jet nearest to object found";
 	minDR=999.;
       }
-      if( !cut_.select("iso", idx, minDR) ) passed=false;
+      if( !(minDR>iso_[idx]) ) passed=false;
     }
     // break slope if both vector lengths are exceeded
     ++idx;
     if( idx>iso_.size() )
       break;
   }
-  cut_.select("events passed ", passed);  
+  if( passed ) ++afterCut_;
   return passed;
+}
+
+template <typename Collection> 
+void JetIsolationFilter<Collection>::summarize()
+{
+  using std::cout;
+  using std::endl;
+
+  cout << "******************************************************" << endl;
+  for(unsigned int idx=0; idx<iso_.size(); ++idx)
+    if(idx==0) cout << ::std::setw( 20 ) 
+		    << name_ << ": " 
+		    << " JetIsolation   < " << iso_[idx] << endl;
+    else       cout << ::std::setw( 20 ) 
+		    << ": " 
+		    << " JetIsolation   < " << iso_[idx] << endl;
+  cout << "------------------------------------------------------" << endl 
+       << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
+       << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
 }
 
 #endif

@@ -13,8 +13,6 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-#include "TopAnalysis/TopUtils/interface/CutMonitor.h"
-
 
 template <typename Collection> 
 class EtaFilter {
@@ -27,7 +25,7 @@ class EtaFilter {
  public:
 
   bool operator()(edm::Event&, const Collection&);
-  void summarize(){cut_.print();};
+  void summarize();
 
  private:
 
@@ -37,30 +35,23 @@ class EtaFilter {
 
  private:
 
-  CutMonitor cut_;
+  unsigned int beforeCut_, afterCut_;
 };
 
 template <typename Collection> 
 EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
   name_ ( cfg.getParameter<std::string>("name") ),
   minEta_( cfg.getParameter<std::vector<double> >( "minEta" ) ),
-  maxEta_( cfg.getParameter<std::vector<double> >( "maxEta" ) )
+  maxEta_( cfg.getParameter<std::vector<double> >( "maxEta" ) ),
+  beforeCut_( 0 ), afterCut_( 0 )
 {
-  cut_.name( name_.c_str() );
-  cut_.add("events checked", Cut::Boolean, true);
-  cut_.add("events passed ", Cut::Boolean, true);
-  for(unsigned int idx=0; idx<minEta_.size(); ++idx)
-    cut_.add("minEta", idx,  Cut::Greater, minEta_[idx]);
-  for(unsigned int idx=0; idx<maxEta_.size(); ++idx)
-    cut_.add("maxEta", idx,  Cut::Lower,   maxEta_[idx]);
 }
 
 template <typename Collection> 
 bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
+  ++beforeCut_;
   bool passed=true;
-  cut_.select("events checked", passed);  
-
   if( objs.size()<minEta_.size() || objs.size()<maxEta_.size() )
     passed=false;
 
@@ -68,17 +59,38 @@ bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
   for(typename Collection::const_iterator obj=objs.begin();
       obj!=objs.end(); ++obj) {
     if( idx<minEta_.size() ) // check for minEta as long as vector is long enough
-      if( !cut_.select("minEta", idx, obj->eta()) ) passed=false;
+      if( !(obj->eta()>minEta_[idx]) ) passed=false;
     if( idx<maxEta_.size() ) // check for maxEta as long as vector is long enough
-      if( !cut_.select("maxEta", idx, obj->eta()) ) passed=false;
+      if( !(obj->eta()<maxEta_[idx]) ) passed=false;
     
     // break slope if both vector lengths are exceeded
     ++idx;
     if( idx>minEta_.size() && idx>maxEta_.size())
       break;
   }
-  cut_.select("events passed ", passed);  
+  if( passed ) ++afterCut_;
   return passed;
+}
+
+template <typename Collection> 
+void EtaFilter<Collection>::summarize()
+{
+  using std::cout;
+  using std::endl;
+
+  unsigned int maxSize=minEta_.size();
+  if(maxEta_.size()>maxSize) maxSize=maxEta_.size();
+  cout << "******************************************************" << endl;
+  for(unsigned int idx=0; idx<maxSize; ++idx){
+    cout << ::std::setw( 20 );
+    if(idx==0) cout << name_; else cout << "   ";  
+    cout << ": ";
+    if(idx<minEta_.size()) cout << minEta_[idx] << " < Eta"; else cout << "   Eta"; 
+    if(idx<maxEta_.size()) cout << " < " << maxEta_[idx] << endl;
+  }
+  cout << "------------------------------------------------------" << endl 
+       << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
+       << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
 }
 
 #endif
