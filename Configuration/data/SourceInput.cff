@@ -1,0 +1,60 @@
+source = PoolSource{
+  untracked vstring fileNames = {
+  }
+  #uncomment to skip some events
+  #untracked uint32 skipEvents=0
+}
+
+#-----------------------------------------------------------------------
+# uncomment sample of choice
+#-----------------------------------------------------------------------
+
+ #Top samples
+ #include "TopAnalysis/Configuration/test/ttbar_0jet_152_aodsim.cff"              # 0.19
+ #include "TopAnalysis/Configuration/samples/ttbar_1jet_152_aodsim.cff"              # 0.20
+ #include "TopAnalysis/Configuration/samples/ttbar_2jet_152_aodsim.cff"              # 0.52
+ #include "TopAnalysis/Configuration/samples/ttbar_3jet_152_aodsim.cff"              # 1.00
+ #include "TopAnalysis/Configuration/samples/ttbar_4jet_152_aodsim.cff"              # 1.00
+
+ #W+jet samples
+ #include "TopAnalysis/Configuration/samples/w0jet_alpgen_152_aodsim.cff"            # 0.996 
+ #include "TopAnalysis/Configuration/samples/w1jet_0ptw100_alpgen_152_aodsim.cff"    # 0.997  
+ #include "TopAnalysis/Configuration/samples/w1jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000 
+ #include "TopAnalysis/Configuration/samples/w2jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/w2jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ #include "TopAnalysis/Configuration/samples/w3jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/w3jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ #include "TopAnalysis/Configuration/samples/w4jet_0ptw100_alpgen_152_aodsim.cff"    # 0.960  
+ #include "TopAnalysis/Configuration/samples/w4jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ #include "TopAnalysis/Configuration/samples/w5jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/w5jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000 
+  
+ #Z+jet samples
+ #include "TopAnalysis/Configuration/samples/z0jet_alpgen_152_aodsim.cff"            # 1.000 
+ #include "TopAnalysis/Configuration/samples/z1jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/z1jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000 
+ #include "TopAnalysis/Configuration/samples/z2jet_0ptw100_alpgen_152_aodsim.cff"    # 0.917  
+ #include "TopAnalysis/Configuration/samples/z2jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ #include "TopAnalysis/Configuration/samples/z3jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/z3jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ #include "TopAnalysis/Configuration/samples/z4jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/z4jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ #include "TopAnalysis/Configuration/samples/z5jet_0ptw100_alpgen_152_aodsim.cff"    # 1.000  
+ #include "TopAnalysis/Configuration/samples/z5jet_100ptw300_alpgen_152_aodsim.cff"  # 1.000  
+ 
+ #QCD samples
+ #include "TopAnalysis/Configuration/samples/qcd_0-15_152_aodsim.cff"                # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_15-20_152_aodsim.cff"               # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_20-30_152_aodsim.cff"               # 0.73
+ #include "TopAnalysis/Configuration/samples/qcd_30-50_152_aodsim.cff"               # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_50-80_152_aodsim.cff"               # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_80-120_152_aodsim.cff"              # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_120-170_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_170-230_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_230-300_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_300-380_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_380-470_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_470-600_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_600-800_152_aodsim.cff"             # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_800-1000_152_aodsim.cff"            # 1.00
+ #include "TopAnalysis/Configuration/samples/qcd_1000-1400_152_aodsim.cff"           # 1.00
