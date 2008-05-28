@@ -30,8 +30,8 @@ JetId::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, const doub
     //---------------------------------------------
     // check jet profiles
     //---------------------------------------------
-    nTwr_->Fill(jet->getConstituents().size(), weight);
-    std::vector<CaloTowerRef> caloTowerRef = jet->getConstituents();
+    nTwr_->Fill(jet->getCaloConstituents().size(), weight);
+    std::vector<CaloTowerRef> caloTowerRef = jet->getCaloConstituents();
     for(unsigned int jdx=0; jdx<caloTowerRef.size(); ++jdx){
       aProfEta_->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et() );
       aProfPhi_->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et() );

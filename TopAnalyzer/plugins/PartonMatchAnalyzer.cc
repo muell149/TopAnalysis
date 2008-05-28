@@ -38,7 +38,7 @@ PartonMatchAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
   partons.push_back( genEvt->leptonicDecayB() );
 
   // prepare vector of jets
-  std::vector<reco::CaloJet> jets;
+  std::vector<pat::JetType> jets;
   for(unsigned int idx=0; idx<topJets->size(); ++idx){
     if(nJets_>=partons.size() && idx == nJets_) break;
     jets.push_back( (*topJets)[idx].recJet() );
