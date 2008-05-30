@@ -24,6 +24,10 @@ typedef EventShapeAnalyzer<std::vector<pat::Electron> > EventShapeAnalyzerElec;
 
 #include "TopAnalysis/TopAnalyzer/plugins/PartonMatchAnalyzer.h"
 
+#include "TopAnalysis/TopAnalyzer/plugins/CutAnalyzer.h"
+typedef CutAnalyzer<std::vector<pat::Muon>, MuonId, MuonKinematic, MuonResolution > CutAnalyzerMuon;
+//typedef CutAnalyzer<std::vector<pat::Electron>, ElecId, ElecKinematic, ElecResolution> CutAnalyzerElec;
+
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( JetAnalyzer  );
 DEFINE_FWK_MODULE( MuonAnalyzer );
@@ -31,3 +35,5 @@ DEFINE_FWK_MODULE( ElecAnalyzer );
 DEFINE_FWK_MODULE( PartonMatchAnalyzer );
 DEFINE_FWK_MODULE( EventShapeAnalyzerMuon );
 DEFINE_FWK_MODULE( EventShapeAnalyzerElec );
+DEFINE_FWK_MODULE( CutAnalyzerMuon  );
+//DEFINE_FWK_MODULE( CutAnalyzerElec  );

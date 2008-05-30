@@ -21,10 +21,13 @@ class EtaFilter {
 
   explicit EtaFilter(const edm::ParameterSet&);
   ~EtaFilter(){};
+  explicit EtaFilter(const std::string&, const std::vector<double>&,const std::vector<double>&); 
 
  public:
 
   bool operator()(edm::Event&, const Collection&);
+  bool operator()(const edm::Event&, const Collection&);
+  bool filter(const Collection& );
   void summarize();
 
  private:
@@ -48,10 +51,41 @@ EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
 }
 
 template <typename Collection> 
+EtaFilter<Collection>::EtaFilter(const std::string& name,const std::vector<double>&minEta,const std::vector<double>&maxEta):
+  name_ ( name ),
+  minEta_ ( minEta),
+  maxEta_ ( maxEta )
+			       // beforeCut_( 0 ), afterCut_( 0 )
+{
+}
+
+template <typename Collection> 
 bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
-  ++beforeCut_;
-  bool passed=true;
+   ++beforeCut_;
+  if( filter(objs) ) {
+    ++afterCut_;
+    return true;
+  }
+  return false;
+}
+
+template <typename Collection> 
+bool EtaFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
+{
+  
+   ++beforeCut_;
+  if( filter(objs) ) {
+    ++afterCut_;
+    return true;
+  }
+  return false;
+}
+
+template <typename Collection> 
+bool EtaFilter<Collection>::filter(const Collection& objs)
+{
+   bool passed=true;
   if( objs.size()<minEta_.size() || objs.size()<maxEta_.size() )
     passed=false;
 
@@ -68,7 +102,7 @@ bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
     if( idx>minEta_.size() && idx>maxEta_.size())
       break;
   }
-  if( passed ) ++afterCut_;
+ 
   return passed;
 }
 

@@ -21,10 +21,13 @@ class PtFilter {
 
   explicit PtFilter(const edm::ParameterSet&);
   ~PtFilter(){};
-
+  explicit PtFilter(const std::string&,const std::vector<double>&,const std::vector<double>&);
+ 
  public:
 
   bool operator()(edm::Event&, const Collection&);
+ bool operator()(const edm::Event&, const Collection&);
+ bool filter( const Collection&);
   void summarize();
 
  private:
@@ -48,9 +51,40 @@ PtFilter<Collection>::PtFilter(const edm::ParameterSet& cfg):
 }
 
 template <typename Collection> 
+PtFilter<Collection>::PtFilter(const std::string& name,const  std::vector<double>&minPt,const  std::vector<double>&maxPt):
+  name_ ( name ),
+  minPt_ ( minPt),
+  maxPt_ ( maxPt )
+			       // beforeCut_( 0 ), afterCut_( 0 )
+{
+}
+
+template <typename Collection> 
 bool PtFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
   ++beforeCut_;
+  if( filter(objs) ) {
+    ++afterCut_;
+    return true;
+  }
+  return false;
+}
+
+template <typename Collection> 
+bool PtFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
+{
+  ++beforeCut_;
+  if( filter(objs) ) {
+    ++afterCut_;
+    return true;
+  }
+  return false;
+}
+
+template <typename Collection> 
+bool PtFilter<Collection>::filter( const Collection& objs)
+{
+ 
   bool passed=true;
   if( objs.size()<minPt_.size() || objs.size()<maxPt_.size() )
     passed=false;
@@ -68,10 +102,8 @@ bool PtFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
     if( idx>minPt_.size() && idx>maxPt_.size())
       break;
   }
-  if( passed ) ++afterCut_;
-  return passed;
+   return passed;
 }
-
 template <typename Collection> 
 void PtFilter<Collection>::summarize()
 {

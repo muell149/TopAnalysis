@@ -21,10 +21,12 @@ class CaloIsolationFilter {
 
   explicit CaloIsolationFilter(const edm::ParameterSet&);
   ~CaloIsolationFilter(){};
-
+ explicit CaloIsolationFilter(const std::string&, const std::vector<double>&);
  public:
 
   bool operator()(edm::Event&, const Collection&);
+  bool operator()(const edm::Event&, const Collection&);
+  bool filter(const Collection&);
   void summarize();
 
  private:
@@ -44,11 +46,39 @@ CaloIsolationFilter<Collection>::CaloIsolationFilter(const edm::ParameterSet& cf
   beforeCut_( 0 ), afterCut_( 0 )
 {
 }
-
+template <typename Collection> 
+CaloIsolationFilter<Collection>::CaloIsolationFilter(const std::string& name, const std::vector<double>&iso):
+  name_( name ),
+  iso_ ( iso ),
+  beforeCut_( 0 ), afterCut_( 0 )
+{
+}
 template <typename Collection> 
 bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 {
   ++beforeCut_;
+  if( filter(objs) ) {
+    ++afterCut_;
+    return true;
+  }
+  return false;
+}
+
+template <typename Collection> 
+bool CaloIsolationFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
+{
+  ++beforeCut_;
+  if( filter(objs) ) {
+    ++afterCut_;
+    return true;
+  }
+  return false;
+}
+
+template <typename Collection> 
+bool CaloIsolationFilter<Collection>::filter(const Collection& objs)
+{
+ 
   bool passed=true;
   if( objs.size()<iso_.size() )
     passed=false;
@@ -64,7 +94,7 @@ bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collecti
     if( idx>iso_.size() )
       break;
   }
-  if( passed ) ++afterCut_;
+ 
   return passed;
 }
 
