@@ -14,26 +14,20 @@
 #include "TopAnalysis/TopAnalyzer/interface/ElecResolution.h"
 
 #include "TopAnalysis/TopAnalyzer/plugins/ObjectAnalyzer.h"
-typedef ObjectAnalyzer<std::vector<pat::Jet>, JetId, JetKinematic, JetResolution> JetAnalyzer;
-typedef ObjectAnalyzer<std::vector<pat::Muon>, MuonId, MuonKinematic, MuonResolution> MuonAnalyzer;
+typedef ObjectAnalyzer<std::vector<pat::Jet     >, JetId,  JetKinematic,  JetResolution>  JetAnalyzer;
+typedef ObjectAnalyzer<std::vector<pat::Muon    >, MuonId, MuonKinematic, MuonResolution> MuonAnalyzer;
 typedef ObjectAnalyzer<std::vector<pat::Electron>, ElecId, ElecKinematic, ElecResolution> ElecAnalyzer;
 
 #include "TopAnalysis/TopAnalyzer/plugins/EventShapeAnalyzer.h"
-typedef EventShapeAnalyzer<std::vector<pat::Muon> > EventShapeAnalyzerMuon;
+typedef EventShapeAnalyzer<std::vector<pat::Muon    > > EventShapeAnalyzerMuon;
 typedef EventShapeAnalyzer<std::vector<pat::Electron> > EventShapeAnalyzerElec;
 
 #include "TopAnalysis/TopAnalyzer/plugins/PartonMatchAnalyzer.h"
-
-#include "TopAnalysis/TopAnalyzer/plugins/CutAnalyzer.h"
-typedef CutAnalyzer<std::vector<pat::Muon>, MuonId, MuonKinematic, MuonResolution > CutAnalyzerMuon;
-//typedef CutAnalyzer<std::vector<pat::Electron>, ElecId, ElecKinematic, ElecResolution> CutAnalyzerElec;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( JetAnalyzer  );
 DEFINE_FWK_MODULE( MuonAnalyzer );
 DEFINE_FWK_MODULE( ElecAnalyzer );
-DEFINE_FWK_MODULE( PartonMatchAnalyzer );
+DEFINE_FWK_MODULE( PartonMatchAnalyzer    );
 DEFINE_FWK_MODULE( EventShapeAnalyzerMuon );
 DEFINE_FWK_MODULE( EventShapeAnalyzerElec );
-DEFINE_FWK_MODULE( CutAnalyzerMuon  );
-//DEFINE_FWK_MODULE( CutAnalyzerElec  );
