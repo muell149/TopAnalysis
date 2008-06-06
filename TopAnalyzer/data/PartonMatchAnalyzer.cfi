@@ -8,5 +8,5 @@ module analyzePartonMatch = PartonMatchAnalyzer{
   int32 nJets     = 4
   bool useDeltaR  = true
   bool useMaxDist = true
-  bool maxDist    = 0.3
+  double maxDist  = 0.3
 }
