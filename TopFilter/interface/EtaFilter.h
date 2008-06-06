@@ -21,15 +21,13 @@ class EtaFilter {
 
   explicit EtaFilter(const edm::ParameterSet&);
   ~EtaFilter(){};
-  explicit EtaFilter(const std::string&, const std::vector<double>&,const std::vector<double>&); 
 
  public:
 
-  bool operator()(edm::Event&, const Collection&);
-  bool operator()(const edm::Event&, const Collection&);
-  bool filter(const Collection& );
+  bool operator()(edm::Event&, const std::vector<Collection>&);
+  bool filter(const std::vector<Collection>&);
   void summarize();
-
+  
  private:
 
   std::string name_;
@@ -51,16 +49,7 @@ EtaFilter<Collection>::EtaFilter(const edm::ParameterSet& cfg):
 }
 
 template <typename Collection> 
-EtaFilter<Collection>::EtaFilter(const std::string& name,const std::vector<double>&minEta,const std::vector<double>&maxEta):
-  name_ ( name ),
-  minEta_ ( minEta),
-  maxEta_ ( maxEta )
-			       // beforeCut_( 0 ), afterCut_( 0 )
-{
-}
-
-template <typename Collection> 
-bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
+bool EtaFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
 {
    ++beforeCut_;
   if( filter(objs) ) {
@@ -71,39 +60,33 @@ bool EtaFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 }
 
 template <typename Collection> 
-bool EtaFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
+bool EtaFilter<Collection>::filter(const std::vector<Collection>& objs)
 {
-  
-   ++beforeCut_;
-  if( filter(objs) ) {
-    ++afterCut_;
-    return true;
-  }
-  return false;
-}
-
-template <typename Collection> 
-bool EtaFilter<Collection>::filter(const Collection& objs)
-{
-   bool passed=true;
-  if( objs.size()<minEta_.size() || objs.size()<maxEta_.size() )
-    passed=false;
-
-  unsigned int idx=0;
-  for(typename Collection::const_iterator obj=objs.begin();
-      obj!=objs.end(); ++obj) {
-    if( idx<minEta_.size() ) // check for minEta as long as vector is long enough
-      if( !(obj->eta()>minEta_[idx]) ) passed=false;
-    if( idx<maxEta_.size() ) // check for maxEta as long as vector is long enough
-      if( !(obj->eta()<maxEta_[idx]) ) passed=false;
+  bool passedWeak=false, passedStrong=true;
+  for(unsigned int jdx=0; jdx<objs.size(); ++jdx){
+    bool passedOnce=true;
+    // skip if this collection has less members than required
+    // by the length of the vectors of minEta_ or maxEta_ 
+    if( objs[jdx].size()<minEta_.size() || objs[jdx].size()<maxEta_.size() )
+      passedOnce=false;
     
-    // break slope if both vector lengths are exceeded
-    ++idx;
-    if( idx>minEta_.size() && idx>maxEta_.size())
-      break;
+    unsigned int idx=0;
+    for(typename Collection::const_iterator obj=objs[jdx].begin();
+	obj!=objs[jdx].end(); ++obj) {
+      if( idx<minEta_.size() ) // check for minEta as long as vector is long enough
+	if( !(obj->eta()>minEta_[idx]) ) passedOnce=false;
+      if( idx<maxEta_.size() ) // check for maxEta as long as vector is long enough
+	if( !(obj->eta()<maxEta_[idx]) ) passedOnce=false;
+      
+      // break slope if both vector lengths are exceeded
+      ++idx;
+      if( idx>minEta_.size() && idx>maxEta_.size())
+	break;
+    }
+    if(  passedOnce ) passedWeak=true;
+    if( !passedOnce ) passedStrong=false;
   }
- 
-  return passed;
+  return passedWeak;
 }
 
 template <typename Collection> 

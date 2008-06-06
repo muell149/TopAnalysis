@@ -21,14 +21,13 @@ class CaloIsolationFilter {
 
   explicit CaloIsolationFilter(const edm::ParameterSet&);
   ~CaloIsolationFilter(){};
- explicit CaloIsolationFilter(const std::string&, const std::vector<double>&);
+ 
  public:
-
-  bool operator()(edm::Event&, const Collection&);
-  bool operator()(const edm::Event&, const Collection&);
-  bool filter(const Collection&);
+  
+  bool operator()(edm::Event&, const std::vector<Collection>&);
+  bool filter(const std::vector<Collection>&);
   void summarize();
-
+  
  private:
 
   std::string name_;
@@ -46,15 +45,9 @@ CaloIsolationFilter<Collection>::CaloIsolationFilter(const edm::ParameterSet& cf
   beforeCut_( 0 ), afterCut_( 0 )
 {
 }
+
 template <typename Collection> 
-CaloIsolationFilter<Collection>::CaloIsolationFilter(const std::string& name, const std::vector<double>&iso):
-  name_( name ),
-  iso_ ( iso ),
-  beforeCut_( 0 ), afterCut_( 0 )
-{
-}
-template <typename Collection> 
-bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
+bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
 {
   ++beforeCut_;
   if( filter(objs) ) {
@@ -65,37 +58,31 @@ bool CaloIsolationFilter<Collection>::operator()(edm::Event& evt, const Collecti
 }
 
 template <typename Collection> 
-bool CaloIsolationFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
+bool CaloIsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
 {
-  ++beforeCut_;
-  if( filter(objs) ) {
-    ++afterCut_;
-    return true;
-  }
-  return false;
-}
-
-template <typename Collection> 
-bool CaloIsolationFilter<Collection>::filter(const Collection& objs)
-{
- 
-  bool passed=true;
-  if( objs.size()<iso_.size() )
-    passed=false;
-
-  unsigned int idx=0;
-  for(typename Collection::const_iterator obj=objs.begin();
-      obj!=objs.end(); ++obj) {
-    if( idx<iso_.size() ) // check for isolation as long as vector is long enough
-      if( !(obj->caloIso()<iso_[idx]) ) passed=false;
+  bool passedWeak=false, passedStrong=true;
+  for(unsigned int jdx=0; jdx<objs.size(); ++jdx){ 
+    bool passedOnce=true;
+    // skip if this collection has less members than required
+    // by the length of the vector iso_ 
+    if( objs[jdx].size()<iso_.size() )
+      passedOnce=false;
     
-    // break slope if both vector lengths are exceeded
-    ++idx;
-    if( idx>iso_.size() )
-      break;
+    unsigned int idx=0;
+    for(typename Collection::const_iterator obj=objs[jdx].begin();
+	obj!=objs[jdx].end(); ++obj) {
+      if( idx<iso_.size() ) // check for isolation as long as vector is long enough
+	if( !(obj->caloIso()<iso_[idx]) ) passedOnce=false;
+      
+      // break slope if both vector lengths are exceeded
+      ++idx;
+      if( idx>iso_.size() )
+	break;
+    }
+    if(  passedOnce ) passedWeak=true;
+    if( !passedOnce ) passedStrong=false;
   }
- 
-  return passed;
+  return passedWeak;
 }
 
 template <typename Collection> 

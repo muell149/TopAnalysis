@@ -25,7 +25,7 @@ class EventFilter : public edm::EDFilter {
 
  private:
   
-  edm::InputTag src_;
+  std::vector<edm::InputTag> src_;
 
  private:
   
@@ -34,16 +34,21 @@ class EventFilter : public edm::EDFilter {
 
 template <typename Collection, typename Filter> 
 EventFilter<Collection, Filter>::EventFilter(const edm::ParameterSet& cfg):
-  src_( cfg.getParameter<edm::InputTag>( "input" ) ), filter_( cfg )
+  src_( cfg.getParameter<std::vector<edm::InputTag> >( "input" ) ), filter_( cfg )
 {
 }
 
 template <typename Collection, typename Filter> 
 bool EventFilter<Collection, Filter>::filter(edm::Event& evt, const edm::EventSetup& setup)
 {
-  edm::Handle<Collection> src; 
-  evt.getByLabel(src_, src);
-  return filter_(evt, *src);
+  std::vector<Collection> objs;
+  for(std::vector<edm::InputTag>::const_iterator tag = src_.begin(); 
+      tag!=src_.end(); ++tag){
+    edm::Handle<Collection> src;
+    evt.getByLabel(*tag, src);
+    objs.push_back(*src);
+  }
+  return filter_(evt, objs);
 }
 
 template <typename Collection, typename Filter> 

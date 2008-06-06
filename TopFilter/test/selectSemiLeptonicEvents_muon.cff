@@ -46,6 +46,8 @@
   replace jetCutKin.resolution       = false
 
 # filter semileptonic events with muons
+  include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
+
   include "TopAnalysis/TopFilter/data/JetPtEventFilter.cfi"
   include "TopAnalysis/TopFilter/data/JetEtaEventFilter.cfi"
   include "TopAnalysis/TopFilter/data/MuonPtEventFilter.cfi"

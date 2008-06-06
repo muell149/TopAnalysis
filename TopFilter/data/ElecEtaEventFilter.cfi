@@ -1,6 +1,6 @@
-include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_elec.cff"
+#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_elec.cff"
 
 module filterElecEta = ElecEtaEventFilter{
- InputTag input = selectedLayer1Elecs
+ VInputTag input = {selectedLayer1Elecs}
  using ElecEtaCut
 }

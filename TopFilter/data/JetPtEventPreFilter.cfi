@@ -1,0 +1,6 @@
+#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
+
+module filterJetPt = CaloJetPtEventFilter{
+ VInputTag input = {iterativeCone5CaloJets, fastjet6CaloJets}
+ using JetPtCut
+}

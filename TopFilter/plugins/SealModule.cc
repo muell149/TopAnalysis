@@ -9,6 +9,8 @@
 #include "TopAnalysis/TopFilter/interface/TrackIsolationFilter.h"
 
 // object filter expansions
+typedef PtFilter            <std::vector<reco::CaloJet> > CaloJetPtFilter;
+typedef EtaFilter           <std::vector<reco::CaloJet> > CaloJetEtaFilter;
 typedef PtFilter            <std::vector<pat::Jet>      > JetPtFilter;
 typedef EtaFilter           <std::vector<pat::Jet>      > JetEtaFilter;
 typedef PtFilter            <std::vector<pat::Muon>     > MuonPtFilter;
@@ -25,6 +27,8 @@ typedef TrackIsolationFilter<std::vector<pat::Electron> > ElecTrackIsolationFilt
 #include "TopAnalysis/TopFilter/plugins/EventFilter.h"
 
 // event filter expansions
+typedef EventFilter<std::vector<reco::CaloJet>, CaloJetPtFilter          > JetPtEventPreFilter;
+typedef EventFilter<std::vector<reco::CaloJet>, CaloJetEtaFilter         > JetEtaEventPreFilter;
 typedef EventFilter<std::vector<pat::Jet>,      JetPtFilter              > JetPtEventFilter;
 typedef EventFilter<std::vector<pat::Jet>,      JetEtaFilter             > JetEtaEventFilter;
 typedef EventFilter<std::vector<pat::Muon>,     MuonPtFilter             > MuonPtEventFilter;
@@ -38,9 +42,16 @@ typedef EventFilter<std::vector<pat::Electron>, ElecJetIsolationFilter   > ElecJ
 typedef EventFilter<std::vector<pat::Electron>, ElecCaloIsolationFilter  > ElecCaloIsolationEventFilter;
 typedef EventFilter<std::vector<pat::Electron>, ElecTrackIsolationFilter > ElecTrackIsolationEventFilter;
 
-#include "FWCore/Framework/interface/MakerMacros.h"
+#include "TopAnalysis/TopFilter/plugins/SemiLepNMinusOneFilter.h"
+
+// n-1 filter expansions
+typedef SemiLepNMinusOneFilter<std::vector<pat::Muon>, std::vector<pat::Jet> > SemiLepMuonNMinusOneFilter;
+
 
 // plugin definition
+#include "FWCore/Framework/interface/MakerMacros.h"
+DEFINE_FWK_MODULE( JetPtEventPreFilter           );
+DEFINE_FWK_MODULE( JetEtaEventPreFilter          );
 DEFINE_FWK_MODULE( JetPtEventFilter              );
 DEFINE_FWK_MODULE( JetEtaEventFilter             );
 DEFINE_FWK_MODULE( MuonPtEventFilter             );
@@ -53,3 +64,4 @@ DEFINE_FWK_MODULE( ElecEtaEventFilter            );
 DEFINE_FWK_MODULE( ElecJetIsolationEventFilter   );
 DEFINE_FWK_MODULE( ElecCaloIsolationEventFilter  );
 DEFINE_FWK_MODULE( ElecTrackIsolationEventFilter );
+DEFINE_FWK_MODULE( SemiLepMuonNMinusOneFilter    );

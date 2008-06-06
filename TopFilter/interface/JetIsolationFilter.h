@@ -24,24 +24,21 @@ class JetIsolationFilter {
 
   explicit JetIsolationFilter(const edm::ParameterSet&);
   ~JetIsolationFilter(){};
-  explicit JetIsolationFilter(const std::string&, const std::vector<double>&, const edm::InputTag&);
-
 
  public:
 
-  bool operator()(edm::Event&, const Collection&);
-  bool operator()(const edm::Event&, const Collection&);
-  bool filter(edm::Handle<std::vector<pat::Jet> >& , const Collection&);  
+  bool operator()(edm::Event&, const std::vector<Collection>&);
+  bool filter(edm::Handle<std::vector<pat::Jet> >& , const std::vector<Collection>&);  
   void summarize();
-
+  
  private:
-
+  
   edm::InputTag jets_;
   std::string name_;
   std::vector<double> iso_;
-
+  
  private:
-
+  
   unsigned int beforeCut_, afterCut_;
 };
 
@@ -53,71 +50,57 @@ JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg)
   beforeCut_( 0 ), afterCut_( 0 )
 {
 }
+
 template <typename Collection> 
-JetIsolationFilter<Collection>::JetIsolationFilter(const std::string&name, const std::vector<double>&iso,const edm::InputTag& jets):
-  jets_( jets ),
-  name_( name),
-  iso_ ( iso ),
-  beforeCut_( 0 ), afterCut_( 0 )
+bool JetIsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
 {
-}
-template <typename Collection> 
-bool JetIsolationFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
-{
- edm::Handle<std::vector<pat::Jet> > jets;
- evt.getByLabel(jets_, jets);
- ++beforeCut_;
- if( filter(jets, objs) ){
+  edm::Handle<std::vector<pat::Jet> > jets;
+  evt.getByLabel(jets_, jets);
+  ++beforeCut_;
+  if( filter(jets, objs) ){
    ++afterCut_;
    return true;
   }
- return false;
+  return false;
 }
+
 template <typename Collection> 
-bool JetIsolationFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
+bool JetIsolationFilter<Collection>::filter(edm::Handle<std::vector<pat::Jet> >& jets, const std::vector<Collection>& objs)
 {
- edm::Handle<std::vector<pat::Jet> > jets;
- evt.getByLabel(jets_, jets);
- ++beforeCut_;
- if( filter(jets, objs) ){
-   ++afterCut_;
-   return true;
+  bool passedWeak=false, passedStrong=true;
+  for(unsigned int jdx=0; jdx<objs.size(); ++jdx){
+    bool passedOnce=true;
+    // skip if this collection has less members than required
+    // by the length of the vector iso_ 
+    if( objs[jdx].size()<iso_.size() )
+      passedOnce=false;
+    
+    unsigned int idx=0;
+    for(typename Collection::const_iterator obj=objs[jdx].begin();
+	obj!=objs[jdx].end(); ++obj) {
+      if( idx<iso_.size() ){ // check for isolation as long as vector is long enough       
+	double minDR=-1.;
+	for(std::vector<pat::Jet>::const_iterator jet = jets->begin();
+	    jet!=jets->end(); ++jet) {
+	  double dR=deltaR(obj->eta(), obj->phi(), jet->eta(), jet->phi());
+	  if( minDR<0 || dR<minDR ) minDR=dR;
+	}
+	if( minDR<0 ){
+	  edm::LogWarning ( "NoJetFound" ) << "no jet nearest to object found";
+	  minDR=999.;
+	}
+	if( !(minDR>iso_[idx]) ) passedOnce=false;
+      }
+      // break slope if both vector lengths are exceeded
+      ++idx;
+      if( idx>iso_.size() )
+	break;
+    }
+    if(  passedOnce ) passedWeak=true;
+    if( !passedOnce ) passedStrong=false;
   }
- return false;
+  return passedWeak;
 }
-template <typename Collection> 
-
-bool JetIsolationFilter<Collection>::filter(edm::Handle<std::vector<pat::Jet> >& jets, const Collection& objs)
-{
- bool passed=true;
-
- if( objs.size()<iso_.size() )
-   passed=false;
-
- unsigned int idx=0;
- for(typename Collection::const_iterator obj=objs.begin();
-     obj!=objs.end(); ++obj) {
-   if( idx<iso_.size() ){ // check for isolation as long as vector is long enough       
-     double minDR=-1.;
-     for(std::vector<pat::Jet>::const_iterator jet = jets->begin();
-     jet!=jets->end(); ++jet) {
-   double dR=deltaR(obj->eta(), obj->phi(), jet->eta(), jet->phi());
-   if( minDR<0 || dR<minDR ) minDR=dR;
-     }
-     if( minDR<0 ){
-   edm::LogWarning ( "NoJetFound" ) << "no jet nearest to object found";
-   minDR=999.;
-     }
-     if( !(minDR>iso_[idx]) ) passed=false;
-   }
-   // break slope if both vector lengths are exceeded
-   ++idx;
-   if( idx>iso_.size() )
-     break;
- }
- return passed;
-}
-
 
 template <typename Collection> 
 void JetIsolationFilter<Collection>::summarize()

@@ -1,6 +1,6 @@
-include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
+#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
 
 module filterJetEta = JetEtaEventFilter{
- InputTag input = selectedLayer1Jets
+ VInputTag input = {selectedLayer1Jets}
  using JetEtaCut
 }

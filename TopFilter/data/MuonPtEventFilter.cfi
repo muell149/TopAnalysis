@@ -1,6 +1,6 @@
-include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
+#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
 
 module filterMuonPt = MuonPtEventFilter{
- InputTag input = selectedLayer1Muons
+ VInputTag input = {selectedLayer1Muons}
  using MuonPtCut
 }

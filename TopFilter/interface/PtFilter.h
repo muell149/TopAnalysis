@@ -21,13 +21,11 @@ class PtFilter {
 
   explicit PtFilter(const edm::ParameterSet&);
   ~PtFilter(){};
-  explicit PtFilter(const std::string&,const std::vector<double>&,const std::vector<double>&);
  
  public:
 
-  bool operator()(edm::Event&, const Collection&);
- bool operator()(const edm::Event&, const Collection&);
- bool filter( const Collection&);
+  bool operator()(edm::Event&, const std::vector<Collection>&);
+  bool filter( const std::vector<Collection>&);
   void summarize();
 
  private:
@@ -51,16 +49,7 @@ PtFilter<Collection>::PtFilter(const edm::ParameterSet& cfg):
 }
 
 template <typename Collection> 
-PtFilter<Collection>::PtFilter(const std::string& name,const  std::vector<double>&minPt,const  std::vector<double>&maxPt):
-  name_ ( name ),
-  minPt_ ( minPt),
-  maxPt_ ( maxPt )
-			       // beforeCut_( 0 ), afterCut_( 0 )
-{
-}
-
-template <typename Collection> 
-bool PtFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
+bool PtFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
 {
   ++beforeCut_;
   if( filter(objs) ) {
@@ -71,39 +60,36 @@ bool PtFilter<Collection>::operator()(edm::Event& evt, const Collection& objs)
 }
 
 template <typename Collection> 
-bool PtFilter<Collection>::operator()(const edm::Event& evt, const Collection& objs)
-{
-  ++beforeCut_;
-  if( filter(objs) ) {
-    ++afterCut_;
-    return true;
-  }
-  return false;
-}
+bool PtFilter<Collection>::filter(const std::vector<Collection>& objs)
 
-template <typename Collection> 
-bool PtFilter<Collection>::filter( const Collection& objs)
 {
- 
-  bool passed=true;
-  if( objs.size()<minPt_.size() || objs.size()<maxPt_.size() )
-    passed=false;
-
-  unsigned int idx=0;
-  for(typename Collection::const_iterator obj=objs.begin();
-      obj!=objs.end(); ++obj) {
-    if( idx<minPt_.size() ) // check for minPt as long as vector is long enough
-      if( !(obj->pt()>minPt_[idx]) ) passed=false;
-    if( idx<maxPt_.size() ) // check for maxPt as long as vector is long enough
-      if( !(obj->pt()<maxPt_[idx]) ) passed=false;
+  bool passedWeak=false, passedStrong=true;
+  for(unsigned int jdx=0; jdx<objs.size(); ++jdx){
+    bool passedOnce=true;
+    // skip if this collection has less members than required
+    // by the length of the vectors of minPt_ or maxPt_ 
+    if( objs[jdx].size()<minPt_.size() || objs[jdx].size()<maxPt_.size() )
+      passedOnce=false;
     
-    // break slope if both vector lengths are exceeded
-    ++idx;
-    if( idx>minPt_.size() && idx>maxPt_.size())
-      break;
+    unsigned int idx=0;
+    for(typename Collection::const_iterator obj=objs[jdx].begin();
+	obj!=objs[jdx].end(); ++obj) {
+      if( idx<minPt_.size() ) // check for minPt as long as vector is long enough
+	if( !(obj->pt()>minPt_[idx]) ) passedOnce=false;
+      if( idx<maxPt_.size() ) // check for maxPt as long as vector is long enough
+	if( !(obj->pt()<maxPt_[idx]) ) passedOnce=false;
+      
+      // break slope if both vector lengths are exceeded
+      ++idx;
+      if( idx>minPt_.size() && idx>maxPt_.size())
+	break;
+    }
+    if(  passedOnce ) passedWeak=true;
+    if( !passedOnce ) passedStrong=false;
   }
-   return passed;
+  return passedWeak;
 }
+
 template <typename Collection> 
 void PtFilter<Collection>::summarize()
 {
