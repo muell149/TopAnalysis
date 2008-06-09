@@ -3,6 +3,6 @@ module filterJetsEta = JetsEtaPreFilter{
   PSet cuts = {
     string name  = "jetsEtaCut"
     vdouble minEta = {-3.25, -3.25, -3.25, -3.25}
-    vdouble maxEta = { 3.25,  3.25,  3.25., 3.25}
+    vdouble maxEta = { 3.25,  3.25,  3.25,  3.25}
   }
 }
