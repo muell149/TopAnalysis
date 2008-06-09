@@ -1,6 +1,0 @@
-#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_elec.cff"
-
-module filterElecPt = ElecPtEventFilter{
- VInputTag input = {selectedLayer1Elecs}
- using ElecPtCut
-}

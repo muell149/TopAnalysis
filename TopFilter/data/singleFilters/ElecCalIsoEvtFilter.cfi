@@ -1,0 +1,7 @@
+module filterElecCalIsolation = ElecCalIsoEvtFilter{
+  VInputTag input = {selectedLayer1Elecs}
+  PSet cut{
+    string name   = "elecCalIsoCut"
+    vdouble CaloIsolation = { 5.}
+  }
+}

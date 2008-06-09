@@ -1,7 +1,0 @@
-#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
-
-module filterMuonJetIsolation = MuonJetIsolationEventFilter{
- VInputTag input = {selectedLayer1Muons}
- InputTag jets  = allLayer1Jets
- using MuonJetIsolationCut
-}

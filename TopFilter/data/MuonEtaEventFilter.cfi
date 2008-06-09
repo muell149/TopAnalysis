@@ -1,6 +1,0 @@
-#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
-
-module filterMuonEta = MuonEtaEventFilter{
- VInputTag input = {selectedLayer1Muons}
- using MuonEtaCut
-}

@@ -1,6 +1,0 @@
-#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_elec.cff"
-
-module filterElecTrackIsolation = ElecTrackIsolationEventFilter{
- VInputTag input = {selectedLayer1Elecs}
- using ElecTrackIsolationCut
-}

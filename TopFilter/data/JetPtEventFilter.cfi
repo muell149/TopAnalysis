@@ -1,6 +1,0 @@
-#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_muon.cff"
-
-module filterJetPt = JetPtEventFilter{
- VInputTag input = {selectedLayer1Jets}
- using JetPtCut
-}

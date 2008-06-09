@@ -1,0 +1,7 @@
+module filterMuonCalIso = MuonCalIsoEvtFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = {
+    string name = "muonCalIsoCut"
+    vdouble CaloIsolation = { 5.}
+  }
+}

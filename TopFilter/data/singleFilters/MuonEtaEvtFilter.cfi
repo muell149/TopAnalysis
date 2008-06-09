@@ -1,0 +1,8 @@
+module filterMuonEta = MuonEtaEvtFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = {
+    string name  = "muonEtaCut"
+    vdouble minEta = {-2.4}
+    vdouble maxEta = { 2.4}
+  }
+}

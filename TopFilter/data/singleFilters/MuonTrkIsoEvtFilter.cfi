@@ -1,0 +1,7 @@
+module filterMuonTrkIso = MuonTrkIsoEvtFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = {
+    string name = "muonTrackIsolationCut"
+    vdouble TrackIsolation = { 3.}
+  }
+}

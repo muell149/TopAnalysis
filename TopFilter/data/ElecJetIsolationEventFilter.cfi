@@ -1,7 +1,0 @@
-#include "TopAnalysis/TopFilter/test/semiLeptonicEventSelection_elec.cff"
-
-module filterElecJetIsolation = ElecJetIsolationEventFilter{
- VInputTag input = {selectedLayer1Elecs}
- InputTag jets  = allLayer1Jets
- using ElecJetIsolationCut
-}

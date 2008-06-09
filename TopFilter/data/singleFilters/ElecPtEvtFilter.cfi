@@ -1,0 +1,8 @@
+module filterElecPt = ElecPtEvtFilter{
+  VInputTag input = {selectedLayer1Elecs}
+  PSet cut = {
+    string name = "elecPtCut"
+    vdouble minPt = { 30.}
+    vdouble maxPt = {999.}
+  }
+}

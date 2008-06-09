@@ -1,0 +1,82 @@
+# ----------------------------
+# initialize analyzers
+# ----------------------------
+  module muonSample    = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module muonCutKin    = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module muonCutJetIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi" 
+  module muonCutCalIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi" 
+  module muonCutTrkIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi" 
+  module jetsSample    = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module jetsCutKin    = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+
+# ----------------------------
+# configure analyzers
+# ----------------------------
+
+# muon sample
+  replace muonSample.input         = allLayer1Muons
+  replace muonSample.id            = false
+  replace muonSample.kinematics    = true
+  replace muonSample.resolution    = false
+
+# after kinematic cuts
+  replace muonCutKin.input         = selectedLayer1Muons
+  replace muonCutKin.id            = true
+  replace muonCutKin.kinematics    = true
+  replace muonCutKin.resolution    = true
+
+# after jet isolation
+  replace muonCutJetIso.input      = selectedLayer1Muons
+  replace muonCutJetIso.id         = false
+  replace muonCutJetIso.kinematics = true
+  replace muonCutJetIso.resolution = true
+
+# after calo isolation
+  replace muonCutCalIso.input      = selectedLayer1Muons
+  replace muonCutCalIso.id         = false
+  replace muonCutCalIso.kinematics = true
+  replace muonCutCalIso.resolution = false
+
+# after track isolation
+  replace muonCutTrkIso.input      = selectedLayer1Muons
+  replace muonCutTrkIso.id         = false
+  replace muonCutTrkIso.kinematics = true
+  replace muonCutTrkIso.resolution = false
+
+# jet sample
+  replace jetsSample.input         = selectedLayer1Jets
+  replace jetsSample.id            = false
+  replace jetsSample.kinematics    = true
+  replace jetsSample.resolution    = false
+
+# after kinematic cuts
+  replace jetsCutKin.input         = selectedLayer1Jets
+  replace jetsCutKin.id            = false
+  replace jetsCutKin.kinematics    = true
+  replace jetsCutKin.resolution    = false
+
+# ----------------------------
+# initialize filters
+# ----------------------------
+  include "TopAnalysis/TopFilter/data/singleFilters/JetsPtEvtFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEvtFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonPtEvtFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEvtFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonJetIsoEvtFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonCalIsoEvtFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonTrkIsoEvtFilter.cfi"
+
+# ----------------------------
+# reconfigure filters
+# ----------------------------
+  
+
+#
+  sequence muonKinematic = {muonSample, filterMuonEta, filterMuonPt, muonCutKin}
+  sequence muonJetIso    = {muonCutJetIso, filterMuonJetIso}
+  sequence muonCalIso    = {muonCutCalIso, filterMuonCalIso}
+  sequence muonTrkIso    = {muonCutTrkIso, filterMuonTrkIso}
+  sequence muonIsolation = {muonTrkIso, muonCalIso}
+  sequence muonSelection = {muonKinematic, muonIsolation}
+  sequence jetsKinematic = {jetsSample, filterJetsEta, filterJetsPt, jetsCutKin}
+  sequence jetsSelection = {jetsKinematic}

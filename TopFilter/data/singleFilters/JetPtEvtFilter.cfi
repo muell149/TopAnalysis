@@ -1,0 +1,8 @@
+module filterJetsPt = JetsPtEvtFilter{
+  VInputTag input = {selectedLayer1Jets}
+  PSet cuts = {
+    string name  = "jetsPtCut"
+    vdouble minPt = { 40.,  40.,  40.,  40.}
+    vdouble maxPt = {999., 999., 999., 999.}
+  }
+}

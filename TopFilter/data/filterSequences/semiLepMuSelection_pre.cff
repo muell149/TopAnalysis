@@ -1,0 +1,73 @@
+# ----------------------------
+# initialize analyzers
+# ----------------------------
+  module semiMu_muonSample = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMu_muonCutKin = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMu_jetsSample = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiMu_jetsCutKin = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+
+# ----------------------------
+# configure analyzers
+# ----------------------------
+
+# muon sample
+  replace semiMu_muonSample.input      = allLayer1Muons
+  replace semiMu_muonSample.id         = false
+  replace semiMu_muonSample.kinematics = true
+  replace semiMu_muonSample.resolution = false
+
+# after kinematic cuts
+  replace semiMu_muonCutKin.input      = selectedLayer1Muons
+  replace semiMu_muonCutKin.id         = true
+  replace semiMu_muonCutKin.kinematics = true
+  replace semiMu_muonCutKin.resolution = true
+
+# jet sample
+  replace semiMu_jetsSample.input      = selectedLayer1Jets
+  replace semiMu_jetsSample.id         = false
+  replace semiMu_jetsSample.kinematics = true
+  replace semiMu_jetsSample.resolution = false
+
+# after kinematic cuts
+  replace semiMu_jetsCutKin.input      = selectedLayer1Jets
+  replace semiMu_jetsCutKin.id         = false
+  replace semiMu_jetsCutKin.kinematics = true
+  replace semiMu_jetsCutKin.resolution = false
+
+# ----------------------------
+# initialize filters
+# ----------------------------
+  module semiMu_filterJetsPt  = filterJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtPreFilter.cfi"
+  module semiMu_filterJetsEta = filterJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaPreFilter.cfi"
+  module semiMu_filterMuonPt  = filterMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtPreFilter.cfi"
+  module semiMu_filterMuonEta = filterMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaPreFilter.cfi"
+
+# ----------------------------
+# reconfigure filters
+# ----------------------------
+
+# muon pt filter
+  replace semiMu_filterMuonPt.cuts.name    = "muonPtCut"
+  replace semiMu_filterMuonPt.cuts.minPt   = {  20.}
+  replace semiMu_filterMuonPt.cuts.maxPt   = {9999.}
+
+# muon eta filter
+  replace semiMu_filterMuonEta.cuts.name   = "muonEtaCut"
+  replace semiMu_filterMuonEta.cuts.minEta = { -2.5}
+  replace semiMu_filterMuonEta.cuts.maxEta = {  2.5}
+
+# jets pt filter
+  replace semiMu_filterJetsPt.cuts.name    = "jetsPtCut"
+  replace semiMu_filterJetsPt.cuts.minPt   = {   5.,    5.,    5.,    5.}
+  replace semiMu_filterJetsPt.cuts.maxPt   = {9999., 9999., 9999., 9999.}
+
+# jets eta filter
+  replace semiMu_filterJetsEta.cuts.name   = "jetsEtaCut"
+  replace semiMu_filterJetsEta.cuts.minEta = {-3.25, -3.25, -3.25, -3.25}
+  replace semiMu_filterJetsEta.cuts.maxEta = { 3.25,  3.25,  3.25,  3.25}
+
+#
+  sequence semiMu_muonKinematic = {semiMu_muonSample, semiMu_filterMuonEta, semiMu_filterMuonPt, semiMu_muonCutKin}
+  sequence semiMu_muonSelection = {semiMu_muonKinematic}
+  sequence semiMu_jetsKinematic = {semiMu_jetsSample, semiMu_filterJetsEta, semiMu_filterJetsPt, semiMu_jetsCutKin}
+  sequence semiMu_jetsSelection = {semiMu_jetsKinematic}

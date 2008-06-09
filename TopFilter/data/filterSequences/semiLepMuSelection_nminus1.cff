@@ -1,0 +1,35 @@
+# ----------------------------
+# initialize analyzers
+# ----------------------------
+  module allCuts    = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module muonCutKin = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module muonCutIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi" 
+  module jetsCutKin = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+
+# ----------------------------
+# configure analyzers
+# ----------------------------
+
+
+# ----------------------------
+# initialize filters
+# ----------------------------
+   module filterAllCuts = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
+   module filterMuonKin = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
+   module filterMuonIso = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
+   module filterJetsKin = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
+
+# plots to be monitored
+  replace filterMuonKin.useLepEta = false
+  replace filterMuonKin.useLepPt  = false
+  replace filterMuonIso.useJetIso = false
+  replace filterMuonIso.useCalIso = false
+  replace filterMuonIso.useTrkIso = false
+  replace filterJetsKin.useJetEta = false
+  replace filterJetsKin.useJetPt  = false
+
+#
+  sequence makeMuonKin = {filterMuonKin, muonCutKin}
+  sequence makeMuonIso = {filterMuonIso, muonCutIso}
+  sequence makeJetsKin = {filterJetsKin, jetsCutKin}
+  sequence makeAllCuts = {filterAllCuts, allCuts}
