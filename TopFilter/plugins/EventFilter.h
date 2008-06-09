@@ -34,7 +34,8 @@ class EventFilter : public edm::EDFilter {
 
 template <typename Collection, typename Filter> 
 EventFilter<Collection, Filter>::EventFilter(const edm::ParameterSet& cfg):
-  src_( cfg.getParameter<std::vector<edm::InputTag> >( "input" ) ), filter_( cfg )
+  src_( cfg.getParameter<std::vector<edm::InputTag> >( "input" ) ), 
+  filter_( cfg.template getParameter<edm::ParameterSet> ("cuts" ) )
 {
 }
 

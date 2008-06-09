@@ -1,5 +1,5 @@
-#ifndef SemiLepNMinusOneFilter_h
-#define SemiLepNMinusOneFilter_h
+#ifndef SemiLepFilter_h
+#define SemiLepFilter_h
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -15,7 +15,7 @@
 #include "TopAnalysis/TopFilter/interface/TrackIsolationFilter.h"
 
 template <typename Leps, typename Jets> 
-class SemiLepNMinusOneFilter : public edm::EDFilter {
+class SemiLepFilter : public edm::EDFilter {
 
  public:
   
@@ -29,8 +29,8 @@ class SemiLepNMinusOneFilter : public edm::EDFilter {
   
  public:
 
-  explicit SemiLepNMinusOneFilter(const edm::ParameterSet&);
-  ~SemiLepNMinusOneFilter(){};
+  explicit SemiLepFilter(const edm::ParameterSet&);
+  ~SemiLepFilter(){};
   
  private:
   
@@ -60,9 +60,9 @@ class SemiLepNMinusOneFilter : public edm::EDFilter {
 };
 
 template <typename Leps, typename Jets> 
-SemiLepNMinusOneFilter<Leps, Jets>::SemiLepNMinusOneFilter(const edm::ParameterSet& cfg):
-  leps_( cfg.template getParameter<std::vector<edm::InputTag> >("leptons" ) ),
-  jets_( cfg.template getParameter<std::vector<edm::InputTag> >("jets"    ) ),
+SemiLepFilter<Leps, Jets>::SemiLepFilter(const edm::ParameterSet& cfg):
+  leps_( cfg.template getParameter<std::vector<edm::InputTag> >("leps" ) ),
+  jets_( cfg.template getParameter<std::vector<edm::InputTag> >("jets" ) ),
   useJetEta_( cfg.template getParameter<bool>("useJetEta" ) ),
   useJetPt_ ( cfg.template getParameter<bool>("useJetPt"  ) ),
   useLepEta_( cfg.template getParameter<bool>("useLepEta" ) ),
@@ -70,13 +70,18 @@ SemiLepNMinusOneFilter<Leps, Jets>::SemiLepNMinusOneFilter(const edm::ParameterS
   useTrkIso_( cfg.template getParameter<bool>("useTrkIso" ) ),
   useCalIso_( cfg.template getParameter<bool>("useCalIso" ) ),
   useJetIso_( cfg.template getParameter<bool>("useJetIso" ) ),
-  jetPt_ (cfg), jetEta_(cfg), lepPt_(cfg), lepEta_(cfg), 
-  trkIso_(cfg), calIso_(cfg), jetIso_(cfg)
+  jetPt_ ( cfg.template getParameter<edm::ParameterSet> ("jetPt" ) ), 
+  jetEta_( cfg.template getParameter<edm::ParameterSet> ("jetEta") ), 
+  lepPt_ ( cfg.template getParameter<edm::ParameterSet> ("lepPt" ) ), 
+  lepEta_( cfg.template getParameter<edm::ParameterSet> ("lepEta") ), 
+  trkIso_( cfg.template getParameter<edm::ParameterSet> ("trkIso") ), 
+  calIso_( cfg.template getParameter<edm::ParameterSet> ("calIso") ), 
+  jetIso_( cfg.template getParameter<edm::ParameterSet> ("jetIso") )
 {
 }
 
 template <typename Leps, typename Jets> 
-bool SemiLepNMinusOneFilter<Leps, Jets>::filter(edm::Event& evt, const edm::EventSetup& setup)
+bool SemiLepFilter<Leps, Jets>::filter(edm::Event& evt, const edm::EventSetup& setup)
 {
   // receive lepton input tags
   std::vector<Leps> leps;
@@ -109,7 +114,7 @@ bool SemiLepNMinusOneFilter<Leps, Jets>::filter(edm::Event& evt, const edm::Even
 }
 
 template <typename Leptons, typename Jets> 
-void SemiLepNMinusOneFilter<Leptons, Jets>::beginJob(const edm::EventSetup&)
+void SemiLepFilter<Leptons, Jets>::beginJob(const edm::EventSetup&)
 {
 }
 
