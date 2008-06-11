@@ -16,7 +16,7 @@ ElecResolution::fill(const edm::Event& evt, const std::vector<pat::Electron>& el
 {
   std::vector<pat::Electron>::const_iterator elec=elecs.begin();
   if(elec!=elecs.end()){
-    if( abs(elec->genLepton()->pdgId())!=0){ 
+    if( elec->genLepton()!=0 ){ 
       double dR=deltaR( elec->eta(), elec->phi(), elec->genLepton()->eta(), elec->genLepton()->phi() ); 
       if(dR<matchDR_){
 	double dPt=(elec->pt()-elec->genLepton()->pt())/(elec->genLepton())->pt();

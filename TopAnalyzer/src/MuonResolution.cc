@@ -16,7 +16,7 @@ MuonResolution::fill(const edm::Event& evt, const std::vector<pat::Muon>& muons,
 {
   std::vector<pat::Muon>::const_iterator muon=muons.begin();
   if(muon!=muons.end()){
-    if( abs(muon->genLepton()->pdgId())!=0){ 
+    if( muon->genLepton()!=0 ){ 
       double dR=deltaR( muon->eta(), muon->phi(), muon->genLepton()->eta(), muon->genLepton()->phi() ); 
       if(dR<matchDR_){
 	double dPt=(muon->pt()-muon->genLepton()->pt())/(muon->genLepton())->pt();
