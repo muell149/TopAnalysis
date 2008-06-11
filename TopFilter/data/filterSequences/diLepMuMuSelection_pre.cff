@@ -52,7 +52,7 @@
   replace diMuMu_filterMuonPt.cuts.maxPt   = {9999., 9999.}
 
 # muon eta filter
-  replace diMuMu_filterMuonEta.cuts.name   = "muonPtCut"
+  replace diMuMu_filterMuonEta.cuts.name   = "muonEtaCut"
   replace diMuMu_filterMuonEta.cuts.minEta = { -2.5, -2.5}
   replace diMuMu_filterMuonEta.cuts.maxEta = {  2.5,  2.5}
 
