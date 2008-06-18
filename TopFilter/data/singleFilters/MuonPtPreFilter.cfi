@@ -1,8 +1,0 @@
-module filterMuonPt = MuonPtPreFilter{
-  VInputTag input = {muons}
-  PSet cuts = {
-    string name = "muonPtCut"
-    vdouble minPt = { 30.}
-    vdouble maxPt = {999.}
-  }
-}

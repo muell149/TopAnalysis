@@ -1,0 +1,4 @@
+module filterMuonCalIsolation = MuonIsolationEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  using CalIsolationCut
+}

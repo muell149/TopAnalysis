@@ -14,10 +14,13 @@
 # ----------------------------
 # initialize filters
 # ----------------------------
-   module filterAllCuts = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
-   module filterMuonKin = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
-   module filterMuonIso = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
-   module filterJetsKin = semiLepMuonFilter from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonFilter.cfi"
+# include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_fin.cff"
+
+   module filterAllCuts = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterMuonKin = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterMuonIso = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterJetsKin = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
 
 # plots to be monitored
   replace filterMuonKin.useLepEta = false
@@ -29,7 +32,7 @@
   replace filterJetsKin.useJetPt  = false
 
 #
-  sequence makeMuonKin = {filterMuonKin, muonCutKin}
-  sequence makeMuonIso = {filterMuonIso, muonCutIso}
-  sequence makeJetsKin = {filterJetsKin, jetsCutKin}
-  sequence makeAllCuts = {filterAllCuts, allCuts}
+  sequence makeMuonKinematic = {filterMuonKin, muonCutKin}
+  sequence makeMuonIsolation = {filterMuonIso, muonCutIso}
+  sequence makeJetsKinematic = {filterJetsKin, jetsCutKin}
+  sequence makeAllCuts       = {filterAllCuts, allCuts   }

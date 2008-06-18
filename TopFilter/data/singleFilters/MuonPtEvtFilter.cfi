@@ -1,8 +1,0 @@
-module filterMuonPt = MuonPtEvtFilter{
-  VInputTag input = {selectedLayer1Muons}
-  PSet cuts = {
-    string name = "muonPtCut"
-    vdouble minPt = { 30.}
-    vdouble maxPt = {999.}
-  }
-}

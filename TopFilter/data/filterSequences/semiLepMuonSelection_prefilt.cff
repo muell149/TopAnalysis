@@ -37,37 +37,25 @@
 # ----------------------------
 # initialize filters
 # ----------------------------
-  module semiMu_filterJetsPt  = filterJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtPreFilter.cfi"
-  module semiMu_filterJetsEta = filterJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaPreFilter.cfi"
-  module semiMu_filterMuonPt  = filterMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtPreFilter.cfi"
-  module semiMu_filterMuonEta = filterMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaPreFilter.cfi"
+  include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_pre.cff"
+
+  module semiMu_filterJetsPt  = filterJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
+  module semiMu_filterMuonPt  = filterMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
+  module semiMu_filterJetsEta = filterJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
+  module semiMu_filterMuonEta = filterMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
+
+  replace semiMu_filterJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
+  replace semiMu_filterJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
 
 # ----------------------------
 # reconfigure filters
 # ----------------------------
 
-# muon pt filter
-  replace semiMu_filterMuonPt.cuts.name    = "muonPtCut"
-  replace semiMu_filterMuonPt.cuts.minPt   = {  20.}
-  replace semiMu_filterMuonPt.cuts.maxPt   = {9999.}
 
-# muon eta filter
-  replace semiMu_filterMuonEta.cuts.name   = "muonEtaCut"
-  replace semiMu_filterMuonEta.cuts.minEta = { -2.5}
-  replace semiMu_filterMuonEta.cuts.maxEta = {  2.5}
-
-# jets pt filter
-  replace semiMu_filterJetsPt.cuts.name    = "jetsPtCut"
-  replace semiMu_filterJetsPt.cuts.minPt   = {   5.,    5.,    5.,    5.}
-  replace semiMu_filterJetsPt.cuts.maxPt   = {9999., 9999., 9999., 9999.}
-
-# jets eta filter
-  replace semiMu_filterJetsEta.cuts.name   = "jetsEtaCut"
-  replace semiMu_filterJetsEta.cuts.minEta = {-3.25, -3.25, -3.25, -3.25}
-  replace semiMu_filterJetsEta.cuts.maxEta = { 3.25,  3.25,  3.25,  3.25}
-
-#
+# for muons
   sequence semiMu_muonKinematic = {semiMu_muonSample, semiMu_filterMuonEta, semiMu_filterMuonPt, semiMu_muonCutKin}
   sequence semiMu_muonSelection = {semiMu_muonKinematic}
+
+# for jets
   sequence semiMu_jetsKinematic = {semiMu_jetsSample, semiMu_filterJetsEta, semiMu_filterJetsPt, semiMu_jetsCutKin}
   sequence semiMu_jetsSelection = {semiMu_jetsKinematic}

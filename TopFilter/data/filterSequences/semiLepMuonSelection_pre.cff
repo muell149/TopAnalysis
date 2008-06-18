@@ -1,32 +1,32 @@
 block MuonPtCut {
   PSet cuts = {
     string name = "muonPtCut"
-    vdouble minPt = { 15.,  15.}
-    vdouble maxPt = {999., 999.}
+    vdouble minPt = { 20.}
+    vdouble maxPt = {999.}
   }
 }
 
 block JetsPtCut {
   PSet cuts = {
     string name = "jetsPtCut"
-    vdouble minPt = {  5.,   5.}
-    vdouble maxPt = {999., 999.}
+    vdouble minPt = {  5.,   5.,   5.,   5.}
+    vdouble maxPt = {999., 999., 999., 999.}
   }
 }
 
 block MuonEtaCut {
   PSet cuts = {
     string name = "muonEtaCut"
-    vdouble minEta = {-2.5, -2.5}
-    vdouble maxEta = { 2.5, -2.5}
+    vdouble minEta = {-2.5}
+    vdouble maxEta = { 2.5}
   }
 }
 
 block JetsEtaCut {
   PSet cuts = {
     string name = "jetsEtaCut"
-    vdouble minEta  = {-3.25, -3.25}
-    vdouble maxEta  = { 3.25,  3.25}
+    vdouble minEta  = {-3.25, -3.25, -3.25, -3.25}
+    vdouble maxEta  = { 3.25,  3.25,  3.25,  3.25}
   }
 }
 

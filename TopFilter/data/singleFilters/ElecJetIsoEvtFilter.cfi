@@ -1,8 +1,0 @@
-module filterElecJetIsolation = ElecJetIsoEvtFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cut = {
-    string name   = "elecJetIsoCut"
-    InputTag jets = allLayer1Jets
-    vdouble JetIsolation = { .5}
-  }
-}

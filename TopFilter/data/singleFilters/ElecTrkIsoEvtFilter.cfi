@@ -1,7 +1,0 @@
-module filterElecTrkIsolation = ElecTrkIsoEvtFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cut = {
-    string name  = "elecTrackIsoCut"
-    vdouble TrackIsolation = { 3.}
-  }
-}

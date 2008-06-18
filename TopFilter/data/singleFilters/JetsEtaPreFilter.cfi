@@ -1,8 +1,0 @@
-module filterJetsEta = JetsEtaPreFilter{
-  VInputTag input = {iterativeCone5CaloJets, fastjet6CaloJets}
-  PSet cuts = {
-    string name  = "jetsEtaCut"
-    vdouble minEta = {-3.25, -3.25, -3.25, -3.25}
-    vdouble maxEta = { 3.25,  3.25,  3.25,  3.25}
-  }
-}

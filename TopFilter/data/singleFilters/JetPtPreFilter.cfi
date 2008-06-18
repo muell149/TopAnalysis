@@ -1,8 +1,0 @@
-module filterJetsPt = JetsPtPreFilter{
-  VInputTag input  = {iterativeCone5CaloJets, fastjet6CaloJets}
-  PSet cuts = {
-    string name  = "jetsPtCut"
-    vdouble minPt = {   5.,    5.,    5.,    5.}
-    vdouble maxPt = {9999., 9999., 9999., 9999.}
-  }
-}

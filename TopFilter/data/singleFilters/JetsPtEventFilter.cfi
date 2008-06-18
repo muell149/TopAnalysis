@@ -1,0 +1,4 @@
+module filterJetsPt = PtEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  using JetsPtCut
+}

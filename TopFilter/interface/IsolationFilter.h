@@ -1,5 +1,5 @@
-#ifndef TrackIsolationFilter_h
-#define TrackIsolationFilter_h
+#ifndef IsolationFilter_h
+#define IsolationFilter_h
 
 #include <memory>
 #include <string>
@@ -11,16 +11,17 @@
 
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
 
 template <typename Collection> 
-class TrackIsolationFilter {
+class IsolationFilter {
 
  public:
 
-  explicit TrackIsolationFilter(const edm::ParameterSet&);
-  ~TrackIsolationFilter(){};
+  explicit IsolationFilter(const edm::ParameterSet&);
+  ~IsolationFilter(){};
 
  public:
   
@@ -30,8 +31,10 @@ class TrackIsolationFilter {
 
  private:
 
-  std::string name_;
-  std::vector<double> iso_;
+  std::string name_;         // cut name (for monitoring)
+  std::vector<double> iso_;  // isolation threshold(s)
+  unsigned int mode_;        // choose 0: for trk isolation
+                             // choose 1: for cal isolation
 
  private:
 
@@ -39,15 +42,16 @@ class TrackIsolationFilter {
 };
 
 template <typename Collection> 
-TrackIsolationFilter<Collection>::TrackIsolationFilter(const edm::ParameterSet& cfg):
-  name_( cfg.getParameter<std::string>("name") ),
-  iso_ ( cfg.getParameter<std::vector<double> >( "TrackIsolation" ) ),
+IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
+  name_( cfg.getParameter<std::string> ("name") ),
+  iso_ ( cfg.getParameter<std::vector<double> >( "isolation" ) ),
+  mode_( cfg.getParameter<unsigned int>("mode") ),
   beforeCut_( 0 ), afterCut_( 0 )
 {
 }
 
 template <typename Collection> 
-bool TrackIsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
+bool IsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
 {
   ++beforeCut_;
   if( filter(objs) ) {
@@ -58,7 +62,7 @@ bool TrackIsolationFilter<Collection>::operator()(edm::Event& evt, const std::ve
 }
 
 template <typename Collection> 
-bool TrackIsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
+bool IsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
 {
   bool passedWeak=false, passedStrong=true;
   for(unsigned int jdx=0; jdx<objs.size(); ++jdx){
@@ -71,8 +75,16 @@ bool TrackIsolationFilter<Collection>::filter(const std::vector<Collection>& obj
     unsigned int idx=0;
     for(typename Collection::const_iterator obj=objs[jdx].begin();
 	obj!=objs[jdx].end(); ++obj) {
-      if( idx<iso_.size() ) // check for isolation as long as vector is long enough
-	if( !(obj->trackIso()<iso_[idx]) ) passedOnce=false;
+      if( idx<iso_.size() ){ // check for isolation as long as vector is long enough
+	if( mode_==0 ) // trk isolation
+	  if( !(obj->trackIso()<iso_[idx]) ) passedOnce=false;
+	if( mode_==1 ) // cal isolation
+	  if( !(obj->caloIso() <iso_[idx]) ) passedOnce=false;
+	if( !(mode_==0 || mode_==1) ){
+	  edm::LogWarning ( "UnknownIsoMode" ) << "Isolation mode: " << mode_ << "is not known";
+	  passedOnce=false;
+	}
+      }
       
       // break slope if both vector lengths are exceeded
       ++idx;
@@ -85,19 +97,20 @@ bool TrackIsolationFilter<Collection>::filter(const std::vector<Collection>& obj
   return passedWeak;
 }
 template <typename Collection> 
-void TrackIsolationFilter<Collection>::summarize()
+void IsolationFilter<Collection>::summarize()
 {
   using std::cout;
   using std::endl;
 
   cout << "******************************************************" << endl;
-  for(unsigned int idx=0; idx<iso_.size(); ++idx)
-    if(idx==0) cout << ::std::setw( 20 ) 
-		    << name_ << ": " 
-		    << " TrackIsolation < " << iso_[idx] << endl;
-    else       cout << ::std::setw( 20 ) 
-		    << ": " 
-		    << " TrackIsolation < " << iso_[idx] << endl;
+  for(unsigned int idx=0; idx<iso_.size(); ++idx){
+    cout << ::std::setw( 20 );
+    if( idx  ==0 ) cout << name_;
+    cout << ": ";
+    if( mode_==0 ) cout << " Trk";
+    if( mode_==1 ) cout << " Cal"; 
+    cout << "Isolation < " << iso_[idx] << endl;
+  }
   cout << "------------------------------------------------------" << endl 
        << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
        << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;

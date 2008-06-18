@@ -1,8 +1,0 @@
-module filterElecEta = ElecEtaEvtFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cut = {
-    string name    = "elecEtaCut"
-    vdouble minEta = {-2.4}
-    vdouble maxEta = { 2.4}
-  }
-}

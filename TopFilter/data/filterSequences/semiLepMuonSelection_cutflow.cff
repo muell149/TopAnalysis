@@ -58,25 +58,30 @@
 # ----------------------------
 # initialize filters
 # ----------------------------
-  include "TopAnalysis/TopFilter/data/singleFilters/JetsPtEvtFilter.cfi"
-  include "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEvtFilter.cfi"
-  include "TopAnalysis/TopFilter/data/singleFilters/MuonPtEvtFilter.cfi"
-  include "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEvtFilter.cfi"
-  include "TopAnalysis/TopFilter/data/singleFilters/MuonJetIsoEvtFilter.cfi"
-  include "TopAnalysis/TopFilter/data/singleFilters/MuonCalIsoEvtFilter.cfi"
-  include "TopAnalysis/TopFilter/data/singleFilters/MuonTrkIsoEvtFilter.cfi"
+# include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_fin.cff"
+
+  include "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonTrkIsolationEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonCalIsolationEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/MuonJetIsolationEventFilter.cfi"
 
 # ----------------------------
 # reconfigure filters
 # ----------------------------
   
 
-#
-  sequence muonKinematic = {muonSample, filterMuonEta, filterMuonPt, muonCutKin}
-  sequence muonJetIso    = {muonCutJetIso, filterMuonJetIso}
-  sequence muonCalIso    = {muonCutCalIso, filterMuonCalIso}
-  sequence muonTrkIso    = {muonCutTrkIso, filterMuonTrkIso}
-  sequence muonIsolation = {muonTrkIso, muonCalIso}
-  sequence muonSelection = {muonKinematic, muonIsolation}
-  sequence jetsKinematic = {jetsSample, filterJetsEta, filterJetsPt, jetsCutKin}
-  sequence jetsSelection = {jetsKinematic}
+# for muons
+  sequence makeMuonKinematic    = {muonSample, filterMuonEta, filterMuonPt, muonCutKin}
+  sequence makeMuonJetIsolation = {muonCutJetIso, filterMuonJetIsolation}
+  sequence makeMuonCalIsolation = {muonCutCalIso, filterMuonCalIsolation}
+  sequence makeMuonTrkIsolation = {muonCutTrkIso, filterMuonTrkIsolation}
+  sequence makeMuonIsolation    = {makeMuonTrkIsolation, makeMuonCalIsolation}
+  sequence makeMuonSelection    = {makeMuonKinematic,    makeMuonIsolation   }
+
+# for jets
+  sequence makeJetsKinematic    = {jetsSample, filterJetsEta, filterJetsPt, jetsCutKin}
+  sequence makeJetsSelection    = {makeJetsKinematic}

@@ -1,4 +1,4 @@
-module semiLepMuonFilter = SemiLepMuonFilter{          
+module semiLepMuonEvent = SemiLepMuonEventFilter{          
  #
   VInputTag leps = {selectedLayer1Muons}
   VInputTag jets = {allLayer1Jets}
@@ -13,9 +13,9 @@ module semiLepMuonFilter = SemiLepMuonFilter{
  #
   PSet lepEta = { using MuonEtaCut }
   PSet lepPt  = { using MuonPtCut  }
-  PSet trkIso = { using MuonTrackIsolationCut }
-  PSet calIso = { using MuonCaloIsolationCut  }
-  PSet jetIso = { using MuonJetIsolationCut   }
-  PSet jetEta = { using JetEtaCut }
-  PSet jetPt  = { using JetPtCut  }
+  PSet trkIso = { using TrkIsolationCut }
+  PSet calIso = { using CalIsolationCut }
+  PSet jetIso = { using JetIsolationCut }
+  PSet jetEta = { using JetsEtaCut }
+  PSet jetPt  = { using JetsPtCut  }
 }

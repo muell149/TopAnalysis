@@ -1,5 +1,5 @@
-#ifndef EventFilter_h
-#define EventFilter_h
+#ifndef SpecificEventFilter_h
+#define SpecificEventFilter_h
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -10,12 +10,12 @@
 
 
 template <typename Collection, typename Filter> 
-class EventFilter : public edm::EDFilter {
+class SpecificEventFilter : public edm::EDFilter {
 
  public:
 
-  explicit EventFilter(const edm::ParameterSet&);
-  ~EventFilter(){};
+  explicit SpecificEventFilter(const edm::ParameterSet&);
+  ~SpecificEventFilter(){};
   
  private:
 
@@ -33,14 +33,14 @@ class EventFilter : public edm::EDFilter {
 };
 
 template <typename Collection, typename Filter> 
-EventFilter<Collection, Filter>::EventFilter(const edm::ParameterSet& cfg):
+SpecificEventFilter<Collection, Filter>::SpecificEventFilter(const edm::ParameterSet& cfg):
   src_( cfg.getParameter<std::vector<edm::InputTag> >( "input" ) ), 
   filter_( cfg.template getParameter<edm::ParameterSet> ("cuts" ) )
 {
 }
 
 template <typename Collection, typename Filter> 
-bool EventFilter<Collection, Filter>::filter(edm::Event& evt, const edm::EventSetup& setup)
+bool SpecificEventFilter<Collection, Filter>::filter(edm::Event& evt, const edm::EventSetup& setup)
 {
   std::vector<Collection> objs;
   for(std::vector<edm::InputTag>::const_iterator tag = src_.begin(); 
@@ -53,7 +53,7 @@ bool EventFilter<Collection, Filter>::filter(edm::Event& evt, const edm::EventSe
 }
 
 template <typename Collection, typename Filter> 
-void EventFilter<Collection, Filter>::beginJob(const edm::EventSetup& setup)
+void SpecificEventFilter<Collection, Filter>::beginJob(const edm::EventSetup& setup)
 {
 }
 

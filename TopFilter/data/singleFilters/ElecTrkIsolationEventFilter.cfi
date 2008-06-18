@@ -1,0 +1,4 @@
+module filterElecTrkIsolation = ElecIsolationEventFilter{
+  VInputTag input = {selectedLayer1Elecs}
+  using TrkIsolationCut
+}

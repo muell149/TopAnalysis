@@ -1,0 +1,4 @@
+module filterElecCalIsolation = ElecIsolationEventFilter{
+  VInputTag input = {selectedLayer1Elecs}
+  using CalIsolationCut  
+}

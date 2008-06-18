@@ -1,0 +1,14 @@
+module filterMuonEta = EtaEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  using MuonEtaCut
+}
+
+module filterElecEta = EtaEventFilter{
+  VInputTag input = {selectedLayer1Elecs}
+  using ElecEtaCut
+}
+
+module filterJetsEta = EtaEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  using JetsEtaCut
+}

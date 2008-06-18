@@ -1,0 +1,4 @@
+module filterMuonTrkIsolation = MuonIsolationEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  using TrkIsolationCut
+}

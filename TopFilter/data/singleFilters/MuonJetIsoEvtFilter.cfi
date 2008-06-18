@@ -1,8 +1,0 @@
-module filterMuonJetIso = MuonJetIsoEvtFilter{
-  VInputTag input = {selectedLayer1Muons}
-  PSet cuts = {
-    string name   = "muonJetIsolationCut"
-    InputTag jets = allLayer1Jets
-    vdouble JetIsolation = { .5}
-  }
-}

@@ -1,0 +1,61 @@
+# ----------------------------
+# initialize analyzers
+# ----------------------------
+  module diMuMu_muonSample = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module diMuMu_muonCutKin = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module diMuMu_jetsSample = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module diMuMu_jetsCutKin = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+
+# ----------------------------
+# configure analyzers
+# ----------------------------
+
+# muon sample
+  replace diMuMu_muonSample.input      = allLayer1Muons
+  replace diMuMu_muonSample.id         = false
+  replace diMuMu_muonSample.kinematics = true
+  replace diMuMu_muonSample.resolution = false
+
+# after kinematic cuts
+  replace diMuMu_muonCutKin.input      = selectedLayer1Muons
+  replace diMuMu_muonCutKin.id         = true
+  replace diMuMu_muonCutKin.kinematics = true
+  replace diMuMu_muonCutKin.resolution = true
+
+# jet sample
+  replace diMuMu_jetsSample.input      = selectedLayer1Jets
+  replace diMuMu_jetsSample.id         = false
+  replace diMuMu_jetsSample.kinematics = true
+  replace diMuMu_jetsSample.resolution = false
+
+# after kinematic cuts
+  replace diMuMu_jetsCutKin.input      = selectedLayer1Jets
+  replace diMuMu_jetsCutKin.id         = false
+  replace diMuMu_jetsCutKin.kinematics = true
+  replace diMuMu_jetsCutKin.resolution = false
+
+# ----------------------------
+# initialize filters
+# ----------------------------
+  include "TopAnalysis/TopFilter/data/filterSequences/diLepMuMuSelection_pre.cff"
+
+  module diMuMu_filterJetsPt  = filterJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
+  module diMuMu_filterMuonPt  = filterMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
+  module diMuMu_filterJetsEta = filterJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
+  module diMuMu_filterMuonEta = filterMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
+
+  replace diMuMu_filterJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
+  replace diMuMu_filterJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
+
+# ----------------------------
+# reconfigure filters
+# ----------------------------
+
+
+# for muons
+  sequence diMuMu_muonKinematic = {diMuMu_muonSample, diMuMu_filterMuonEta, diMuMu_filterMuonPt, diMuMu_muonCutKin}
+  sequence diMuMu_muonSelection = {diMuMu_muonKinematic}
+
+# for jets
+  sequence diMuMu_jetsKinematic = {diMuMu_jetsSample, diMuMu_filterJetsEta, diMuMu_filterJetsPt, diMuMu_jetsCutKin}
+  sequence diMuMu_jetsSelection = {diMuMu_jetsKinematic}

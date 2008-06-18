@@ -1,8 +1,0 @@
-module filterJetsEta = JetsEtaEvtFilter{
-  VInputTag input   = {selectedLayer1Jets}
-  PSet cuts = {
-    string name     = "jetsEtaCut"
-    vdouble minEta  = {-1.4, -1.4, -1.4, -1.4}
-    vdouble maxEta  = { 1.4,  1.4,  1.4,  1.4}
-  }
-}

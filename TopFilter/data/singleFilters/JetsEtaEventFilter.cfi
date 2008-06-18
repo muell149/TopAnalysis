@@ -1,0 +1,4 @@
+module filterJetsEta = EtaEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  using JetsEtaCut
+}

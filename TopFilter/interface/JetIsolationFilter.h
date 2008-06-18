@@ -46,7 +46,7 @@ template <typename Collection>
 JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg):
   jets_( cfg.getParameter<edm::InputTag>("jets") ),
   name_( cfg.getParameter<std::string>("name") ),
-  iso_ ( cfg.getParameter<std::vector<double> >( "JetIsolation" ) ),
+  iso_ ( cfg.getParameter<std::vector<double> >( "isolation" ) ),
   beforeCut_( 0 ), afterCut_( 0 )
 {
 }

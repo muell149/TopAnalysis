@@ -1,8 +1,0 @@
-module filterMuonEta = MuonEtaPreFilter{
-  VInputTag input = {muons}
-  PSet cuts = {
-    string name  = "muonEtaCut"
-    vdouble minEta = {-2.4}
-    vdouble maxEta = { 2.4}
-  }
-}
