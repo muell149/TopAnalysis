@@ -10,9 +10,8 @@
 
 #include "TopAnalysis/TopFilter/interface/PtFilter.h"
 #include "TopAnalysis/TopFilter/interface/EtaFilter.h"
+#include "TopAnalysis/TopFilter/interface/IsolationFilter.h"
 #include "TopAnalysis/TopFilter/interface/JetIsolationFilter.h"
-#include "TopAnalysis/TopFilter/interface/CaloIsolationFilter.h"
-#include "TopAnalysis/TopFilter/interface/TrackIsolationFilter.h"
 
 template <typename Lep> 
 class SemiLepEventFilter : public edm::EDFilter {
