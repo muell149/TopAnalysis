@@ -1,129 +1,139 @@
 #include "TopAnalysis/TopAnalyzer/plugins/PartonMatchAnalyzer.h"
-#include "TopQuarkAnalysis/TopTools/interface/JetPartonMatching.h"
+
+#include "FWCore/Utilities/interface/EDMException.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
 PartonMatchAnalyzer::PartonMatchAnalyzer(const edm::ParameterSet& cfg):
-  jets_ (cfg.getParameter<edm::InputTag>("jets")),
-  hist_ (cfg.getParameter<std::string>("file")),
-  nJets_(cfg.getParameter<int>("nJets")),
-  useDeltaR_(cfg.getParameter<bool>("useDeltaR")),
-  useMaxDist_(cfg.getParameter<bool>("useMaxDist")),
-  maxDist_(cfg.getParameter<double>("maxDist"))
+  matches_(cfg.getParameter<std::vector<edm::InputTag> >("matches")),
+  quarks_ (cfg.getParameter<std::vector<int > >("quarks")),
+  jets_   (cfg.getParameter<std::vector<int > >("jets")),
+  sumDR_  (cfg.getParameter<edm::InputTag>("sumDR" )),
+  sumDPt_ (cfg.getParameter<edm::InputTag>("sumDPt")),
+  hist_   (cfg.getParameter<std::string>("hist")),
+  ref_ (cfg.getParameter<unsigned int>("ref")), 
+  normQrks_(0), normJets_(0)
 {
-  cutmon.name("JetPartonMatchAnalyzer");
-  cutmon.add("sample",                      Cut::Boolean, true);
-  cutmon.add("outlier in totalMinDist",     Cut::Boolean, true);
-  cutmon.add("outlier in minSumDist",       Cut::Boolean, true);
-  cutmon.add("outlier in ptOrderedMinDist", Cut::Boolean, true);
-  cutmon.add("outlier in unambiguousOnly",  Cut::Boolean, true);
-  cutmon.add("allConsistent",               Cut::Boolean, true);
-  cutmon.add("inconsistencies (w/o outl.)", Cut::Boolean, true);
+  if( ref_>matches_.size() )
+    throw edm::Exception( edm::errors::Configuration, "ref match outof bounds of match vector" );
 }
 
 void
 PartonMatchAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  cutmon.select("sample", true);
-
-  edm::Handle<TtGenEvent> genEvt;
-  evt.getByLabel("genEvt", genEvt);
-
-  edm::Handle<std::vector<pat::Jet> > topJets;
-  evt.getByLabel(jets_, topJets);
-
-  // prepare vector of partons
-  std::vector<const reco::Candidate*> partons;
-  partons.push_back( genEvt->hadronicDecayQuark() );
-  partons.push_back( genEvt->hadronicDecayQuarkBar() );
-  partons.push_back( genEvt->hadronicDecayB() );
-  partons.push_back( genEvt->leptonicDecayB() );
-
-  // prepare vector of jets
-  std::vector<pat::JetType> jets;
-  for(unsigned int idx=0; idx<topJets->size(); ++idx){
-    if(nJets_>=partons.size() && idx == nJets_) break;
-    jets.push_back( (*topJets)[idx].recJet() );
+  // recieve all matches of interest
+  std::vector<std::vector<int> > matches;
+  for(std::vector<edm::InputTag>::const_iterator tag=matches_.begin();
+      tag!=matches_.end(); ++tag){
+    edm::Handle<std::vector<int> > match;
+    evt.getByLabel(*tag, match);
+    matches.push_back(*match);
   }
 
-  // do the matching
-  std::vector<JetPartonMatching> jetPartonMatch;
-
-  // fill vector of algorithms; number 
-  // of available algorithms is 4, idx 
-  // is the number od the algorithm
-  unsigned int nAlgos = 4;
-  for(unsigned int idx=0; idx<nAlgos; ++idx){
-    jetPartonMatch.push_back( JetPartonMatching(partons, jets, idx, useMaxDist_, useDeltaR_, maxDist_) );
-  }
-
-  // check if different algorithms give 
-  // the same matching
-  bool consistent=true;
-  bool outlierRejected=false;
-  for(unsigned int idx=0; idx<nAlgos; idx++) {
-    if(jetPartonMatch[idx].getNumberOfUnmatchedPartons()>0) {
-      outlierRejected=true;
-      switch(idx) {
-      case JetPartonMatching::totalMinDist:
-	cutmon.select("outlier in totalMinDist", true);
-	break;
-      case JetPartonMatching::minSumDist:
-	cutmon.select("outlier in minSumDist", true);
-	break;
-      case JetPartonMatching::ptOrderedMinDist:
-	cutmon.select("outlier in ptOrderedMinDist", true);
-	break;
-      case JetPartonMatching::unambiguousOnly:
-	cutmon.select("outlier in unambiguousOnly", true);
-      }
-    }
-  }
-
-  if(!outlierRejected){
-    for(unsigned int idx=0; idx<partons.size(); ++idx){
-      // loop over the four partons
-      for(unsigned int jdx=1; jdx<nAlgos; ++jdx){
-	// loop over algorithms
-	if(jetPartonMatch[0].getMatchForParton(idx)!=jetPartonMatch[jdx].getMatchForParton(idx)){
-	  consistent = false;
-	  break;
+  // fill corr_ hist for each quark in the list of considered 
+  // quarks; in case the list is empty fill it for each quark
+  for(unsigned int q=0; q<matches[ref_].size(); ++q){
+    if(quarks_.empty() || std::count(quarks_.begin(), quarks_.end(), (int)q)>0 ){
+      for(unsigned int ref=0; ref<matches.size(); ++ref){
+	for(unsigned int smp=0; smp<matches.size();++smp){
+	  if( ( (matches[ref])[q]>=0 &&  (matches[smp])[q]>=0) || 
+	      (!(matches[ref])[q]>=0 && !(matches[smp])[q]>=0) )
+	    corr_->Fill( ref, smp, +1 );
+	  else
+	    corr_->Fill( ref, smp, -1 );
 	}
       }
-      if(!consistent) break;
     }
-    if(consistent)
-      cutmon.select("allConsistent", true);
-    else{
-      cutmon.select("inconsistencies", true);
-      std::cout << "Inconsistency between different jet-parton matching algorithms!" << std::endl;
-      for(unsigned int idx=0; idx<partons.size(); ++idx){
-	for(unsigned int jdx=0; jdx<nAlgos; ++jdx)
-	  std::cout << jetPartonMatch[jdx].getMatchForParton(idx) << " ";
-	std::cout << std::endl;
+  }
+  
+  // fill alg_ histograms
+  for(unsigned int q=0; q<matches[ref_].size(); ++q){
+    if(quarks_.empty() || std::count(quarks_.begin(), quarks_.end(), (int)q)>0 ){ 
+      for(unsigned int alg=0; alg<matches.size(); ++alg){ 
+	if( (matches[ref_])[q]>=0 && (matches[alg])[q]>=0 )
+	  algQrks_->Fill(alg, +1);
       }
-      for(unsigned int idx=0; idx<nAlgos; ++idx){
-	// loop over algorithms
-	std::cout << "Algorithm " << idx << " : "
-		  << "SumDeltaR / SumDeltaE / SumDeltaPt = ";
-	std::cout << jetPartonMatch[idx].getSumDeltaR() << " / "
-		  << jetPartonMatch[idx].getSumDeltaE() << " / "
-		  << jetPartonMatch[idx].getSumDeltaPt() << std::endl;
+    }
+    if(jets_.empty() || std::count(jets_.begin(), jets_.end(), (matches[ref_])[q])>0 ){ 
+      for(unsigned int alg=0; alg<matches.size(); ++alg){ 
+	if( (matches[ref_])[q]>=0 && (matches[alg])[q]>=0 )
+	  algJets_->Fill(alg, +1);
       }
     }
   }
+
+
+  // fill eff histograms
+  for(unsigned int q=0; q<matches[ref_].size(); ++q){
+    ++normQrks_;
+    if( (matches[ref_])[q]>=0  )
+      effQrks_->Fill(q, +1);
+      purQrks_->Fill(q, +1);
+  }
+  for(unsigned int q=0; q<matches[ref_].size(); ++q){
+    for(int j=0; j<6; ++j){ 
+      if( (matches[ref_])[q]==j )
+	effJets_->Fill(j, +1);
+	purJets_->Fill(j, +1);
+    }
+  }  
+
+  // fill mon histograms
+  edm::Handle<double> sumDR;
+  evt.getByLabel(sumDR_, sumDR);
+  monDR_ ->Fill(*sumDR);
+
+  edm::Handle<double> sumDPt;
+  evt.getByLabel(sumDPt_, sumDPt);
+  monDPt_->Fill(*sumDPt);
 }
 
 void 
 PartonMatchAnalyzer::beginJob(const edm::EventSetup&)
 {
+  edm::Service<TFileService> fs;
+  if( !fs )
+    throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
+
+  NameScheme corr("corr"), mon("mon"), eff("eff"), pur("pur"), alg("alg");
+  int bin = (int)matches_.size();
+  double max = (double)matches_.size();
+  if(hist_.empty()){
+    corr_ = fs->make<TH2F>(corr.name("matches" ), corr.name("matches" ), bin, 0., max, bin, 0., max); 
+
+    monDR_  = fs->make<TH1F>(mon.name(      "dr"  ), mon.name("dr"  ), 100, 0.,  1.); 
+    monDPt_ = fs->make<TH1F>(mon.name(      "dpt" ), mon.name("dpt" ), 100, 0.,  1.); 
+    algJets_= fs->make<TH1F>(alg.name(      "jets"), alg.name("jets"), bin, 0., max); 
+    algQrks_= fs->make<TH1F>(alg.name(      "qrks"), alg.name("qrks"), bin, 0., max); 
+    effJets_= fs->make<TH1F>(eff.name(      "jets"), eff.name("jets"),   6, 0.,  6.);
+    purJets_= fs->make<TH1F>(pur.name(      "jets"), pur.name("jets"),   6, 0.,  6.);
+    effQrks_= fs->make<TH1F>(eff.name(      "qrks"), eff.name("qrks"),   4, 0.,  4.);
+    purQrks_= fs->make<TH1F>(pur.name(      "qrks"), pur.name("qrks"),   4, 0.,  4.);
+  }
+  else{
+    ofstream file(hist_.c_str(), std::ios::out);
+    corr_ = fs->make<TH2F>(corr.name(file, "matches" ), corr.name("matches" ), bin, 0., max, bin, 0., max); 
+
+    monDR_  = fs->make<TH1F>(mon.name(file, "dr"  ), mon.name("dr"  ), 100, 0.,  1.); 
+    monDPt_ = fs->make<TH1F>(mon.name(file, "dpt" ), mon.name("dpt" ), 100, 0.,  1.);
+    algJets_= fs->make<TH1F>(alg.name(file, "jets"), alg.name("jets"), bin, 0., max); 
+    algQrks_= fs->make<TH1F>(alg.name(file, "qrks"), alg.name("qrks"), bin, 0., max);  
+    effJets_= fs->make<TH1F>(eff.name(file, "jets"), eff.name("jets"),   6, 0.,  6.);
+    purJets_= fs->make<TH1F>(pur.name(file, "jets"), pur.name("jets"),   6, 0.,  6.);
+    effQrks_= fs->make<TH1F>(eff.name(file, "qrks"), eff.name("qrks"),   4, 0.,  4.);
+    purQrks_= fs->make<TH1F>(pur.name(      "qrks"), pur.name("qrks"),   4, 0.,  4.);
+  }
 }
 
 void 
 PartonMatchAnalyzer::endJob() 
 {
-  if(hist_.empty())
-    cutmon.print();
-  else{
-    ofstream hist(hist_.c_str(), std::ios::out);
-    cutmon.print( hist );
-  }
+  // get proper normalization of histograms
+  corr_   ->Scale(1./corr_->GetBinContent(1, 1)   );
+  algQrks_->Scale(1./algQrks_->GetBinContent(ref_));
+  algJets_->Scale(1./algJets_->GetBinContent(ref_));  
+  purQrks_->Scale(1./purQrks_->Integral());
+  purJets_->Scale(1./purJets_->Integral());
+  effQrks_->Scale(1./normQrks_);
+  effJets_->Scale(1./normJets_);
 }

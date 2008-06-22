@@ -2,11 +2,12 @@ module analyzePartonMatch = PartonMatchAnalyzer{
 #---------------------------------------------
 # sources/steerables
 #---------------------------------------------
-  InputTag jets   = allLayer1Jets
-  string file     = "analyzePartonMatch.txt"
+  VInputTag matches = {ttSemiEvtJetPartonMatch}
+  InputTag sumDR    =  ttSemiEvtJetPartonMatch:SumDR
+  InputTag sumDPt   =  ttSemiEvtJetPartonMatch:SumPt
+  vint32 quarks     = {}
+  vint32 jets       = {}
 
-  int32 nJets     = 4
-  bool useDeltaR  = true
-  bool useMaxDist = true
-  double maxDist  = 0.3
+  string hist = "analyzePartonMatch.hist"
+  uint32 ref  = 0
 }
