@@ -23,11 +23,13 @@ typedef EventShapeAnalyzer<std::vector<pat::Muon    > > EventShapeAnalyzerMuon;
 typedef EventShapeAnalyzer<std::vector<pat::Electron> > EventShapeAnalyzerElec;
 
 #include "TopAnalysis/TopAnalyzer/plugins/PartonMatchAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/SemiLepHypothesesAnalyzer.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( JetAnalyzer  );
 DEFINE_FWK_MODULE( MuonAnalyzer );
 DEFINE_FWK_MODULE( ElecAnalyzer );
-DEFINE_FWK_MODULE( PartonMatchAnalyzer    );
-DEFINE_FWK_MODULE( EventShapeAnalyzerMuon );
-DEFINE_FWK_MODULE( EventShapeAnalyzerElec );
+DEFINE_FWK_MODULE( PartonMatchAnalyzer       );
+DEFINE_FWK_MODULE( SemiLepHypothesesAnalyzer );
+DEFINE_FWK_MODULE( EventShapeAnalyzerMuon    );
+DEFINE_FWK_MODULE( EventShapeAnalyzerElec    );
