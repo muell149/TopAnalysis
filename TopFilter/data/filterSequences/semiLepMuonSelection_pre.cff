@@ -1,4 +1,4 @@
-block MuonPtCut {
+block MuonPtCut = {
   PSet cuts = {
     string name = "muonPtCut"
     vdouble minPt = { 20.}
@@ -6,7 +6,7 @@ block MuonPtCut {
   }
 }
 
-block JetsPtCut {
+block JetsPtCut = {
   PSet cuts = {
     string name = "jetsPtCut"
     vdouble minPt = {  5.,   5.,   5.,   5.}
@@ -14,7 +14,7 @@ block JetsPtCut {
   }
 }
 
-block MuonEtaCut {
+block MuonEtaCut = {
   PSet cuts = {
     string name = "muonEtaCut"
     vdouble minEta = {-2.5}
@@ -22,7 +22,7 @@ block MuonEtaCut {
   }
 }
 
-block JetsEtaCut {
+block JetsEtaCut = {
   PSet cuts = {
     string name = "jetsEtaCut"
     vdouble minEta  = {-3.25, -3.25, -3.25, -3.25}
@@ -30,7 +30,7 @@ block JetsEtaCut {
   }
 }
 
-block TrkIsolationCut {
+block TrkIsolationCut = {
   PSet cuts = {
     uint32 mode = 0
     string name = "trackIsolationCut"
@@ -38,16 +38,16 @@ block TrkIsolationCut {
   }
 }
 
-block CalIsolationCut {
-  PSet cut = {
+block CalIsolationCut = {
+  PSet cuts = {
     uint32 mode = 1
     string name = "calIsolationCut"
     vdouble isolation = { 999.}
   }
 }
 
-block jetIsolationCut {
-  PSet cut = {
+block JetIsolationCut = {
+  PSet cuts = {
     string name = "jetIsolationCut"
     InputTag jets = allLayer1Jets
     vdouble isolation = {   0.}
