@@ -107,13 +107,13 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
 
   // do the event selection
   bool passed=true;
-  if(useLepEta_) passed=lepEta_(evt, kinLeps);
-  if(useLepPt_ ) passed=lepPt_ (evt, kinLeps);
-  if(useTrkIso_) passed=trkIso_(evt, isoLeps);
-  if(useCalIso_) passed=calIso_(evt, isoLeps);
-  if(useJetIso_) passed=jetIso_(evt, isoLeps);
-  if(useJetEta_) passed=jetEta_(evt, kinJets);
-  if(useJetPt_ ) passed=jetPt_ (evt, kinJets);
+  if(passed && useLepEta_) passed=lepEta_(evt, kinLeps);
+  if(passed && useLepPt_ ) passed=lepPt_ (evt, kinLeps);
+  if(passed && useTrkIso_) passed=trkIso_(evt, isoLeps);
+  if(passed && useCalIso_) passed=calIso_(evt, isoLeps);
+  if(passed && useJetIso_) passed=jetIso_(evt, isoLeps);
+  if(passed && useJetEta_) passed=jetEta_(evt, kinJets);
+  if(passed && useJetPt_ ) passed=jetPt_ (evt, kinJets);
   return passed;
 }
 
