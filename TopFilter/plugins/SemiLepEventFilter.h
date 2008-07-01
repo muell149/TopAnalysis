@@ -135,37 +135,21 @@ void SemiLepEventFilter<Lep>::endJob()
   cout << " useCalIso_ [" << useCalIso_ << "]" << endl;
   cout << " useJetIso_ [" << useJetIso_ << "]" << endl;
   cout << " useJetEta_ [" << useJetEta_ << "]" << endl;
-  cout << " useLepPt_  [" << useJetPt_  << "]" << endl;
+  cout << " useJetPt_  [" << useJetPt_  << "]" << endl;
   cout << "----------------------------------" << endl;
 
-  if( !useJetPt_){
-    if( !useJetEta_){
-      if( !useJetIso_){
-	if( !useCalIso_){
-	  if( !useTrkIso_){
-	    if( !useLepPt_){
-	      if( !useLepEta_)
-		cout << "no cuts were applied..." << endl;
-	      else
-		lepEta_.summarize();
-	    }
-	    else
-	      lepPt_.summarize();	      
-	  }
-	  else
-	    trkIso_.summarize();
-	}
-	else
-	  calIso_.summarize();
-      }
-      else
-	jetIso_.summarize();
-      }
-    else
-      jetEta_.summarize();
+  if( !useLepEta_ && !useLepPt_ && !useTrkIso_ && !useCalIso_ && !useJetIso_
+      && !useJetEta_ && !useJetPt_ )
+    cout << "no cuts were applied..." << endl;
+  else {
+    if(useLepEta_) lepEta_.summarize();
+    if(useLepPt_ ) lepPt_ .summarize();
+    if(useTrkIso_) trkIso_.summarize();
+    if(useCalIso_) calIso_.summarize();
+    if(useJetIso_) jetIso_.summarize();
+    if(useJetEta_) jetEta_.summarize();
+    if(useJetPt_ ) jetPt_ .summarize();
   }
-  else
-    jetPt_.summarize();
 }
 
 #endif
