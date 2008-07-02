@@ -1,4 +1,4 @@
 module filterMuonPt = PtEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  using MuonPtCut
+  PSet cuts = { using MuonPtCut }
 }

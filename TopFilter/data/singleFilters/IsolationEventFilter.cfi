@@ -1,31 +1,31 @@
 module filterMuonTrkIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  using TrkIsolationCut
+  PSet cuts = { using TrkIsolationCut }
 }
 
 module filterElecTrkIsolation = ElecIsolationEventFilter{
   VInputTag input = {selectedLayer1Elecs}
-  using TrkIsolationCut
+  PSet cuts = { using TrkIsolationCut }
 }
 
 module filterMuonCalIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  using CalIsolationCut
+  PSet cuts = { using CalIsolationCut }
 }
 
 module filterElecCalIsolation = ElecIsolationEventFilter{
   VInputTag input = {selectedLayer1Elecs}
-  using CalIsolationCut  
+  PSet cuts = { using CalIsolationCut }
 }
 
 module filterMuonJetIsolation = MuonJetIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  using JetIsolationCut
+  PSet cuts = { using JetIsolationCut }
 }
 
 module filterElecJetIsolation = ElecJetIsolationEventFilter{
   VInputTag input = {selectedLayer1Elecs}
-  using JetIsolationCut  
+  PSet cuts = { using JetIsolationCut }
 }
 
 

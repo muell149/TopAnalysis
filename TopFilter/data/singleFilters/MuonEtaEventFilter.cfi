@@ -1,4 +1,4 @@
 module filterMuonEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  using MuonEtaCut
+  PSet cuts = { using MuonEtaCut }
 }

@@ -1,4 +1,4 @@
 module filterElecPt = PtEventFilter{
   VInputTag input = {selectedLayer1Elecs}
-  using ElecPtCut
+  PSet cuts = { using ElecPtCut }
 }
