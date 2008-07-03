@@ -36,6 +36,7 @@ class JetIsolationFilter {
   edm::InputTag jets_;
   std::string name_;
   std::vector<double> iso_;
+  std::vector<double> minJetPt_;
   
  private:
   
@@ -44,11 +45,14 @@ class JetIsolationFilter {
 
 template <typename Collection> 
 JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg):
-  jets_( cfg.getParameter<edm::InputTag>("jets") ),
-  name_( cfg.getParameter<std::string>("name") ),
-  iso_ ( cfg.getParameter<std::vector<double> >( "isolation" ) ),
+  jets_     ( cfg.getParameter<edm::InputTag>       ("jets"      ) ),
+  name_     ( cfg.getParameter<std::string>         ("name"      ) ),
+  iso_      ( cfg.getParameter<std::vector<double> >("isolation" ) ),
+  minJetPt_ ( cfg.getParameter<std::vector<double> >("minJetPt" ) ),
   beforeCut_( 0 ), afterCut_( 0 )
 {
+  if( iso_.size() != minJetPt_.size() )
+    throw edm::Exception( edm::errors::Configuration,"Vector 'isolation' has different length than vector 'minJetPt'" );
 }
 
 template <typename Collection> 
@@ -71,7 +75,7 @@ bool JetIsolationFilter<Collection>::filter(edm::Handle<std::vector<pat::Jet> >&
   for(unsigned int jdx=0; jdx<objs.size(); ++jdx){
     bool passedOnce=true;
     // skip if this collection has less members than required
-    // by the length of the vector iso_ 
+    // by the length of the vector iso_
     if( objs[jdx].size()<iso_.size() )
       passedOnce=false;
     
@@ -82,6 +86,7 @@ bool JetIsolationFilter<Collection>::filter(edm::Handle<std::vector<pat::Jet> >&
 	double minDR=-1.;
 	for(std::vector<pat::Jet>::const_iterator jet = jets->begin();
 	    jet!=jets->end(); ++jet) {
+	  if( jet->pt()<minJetPt_[idx] ) continue; // skip jet if too soft
 	  double dR=deltaR(obj->eta(), obj->phi(), jet->eta(), jet->phi());
 	  if( minDR<0 || dR<minDR ) minDR=dR;
 	}

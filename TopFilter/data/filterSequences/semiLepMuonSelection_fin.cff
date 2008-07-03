@@ -38,4 +38,5 @@ block JetIsolationCut = {
   string name = "jetIsolationCut"
   InputTag jets = allLayer1Jets
   vdouble isolation = {0.5}
+  vdouble minJetPt  = {10.}
 }

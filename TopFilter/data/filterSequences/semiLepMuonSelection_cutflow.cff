@@ -79,7 +79,7 @@
   sequence makeMuonJetIsolation = {muonCutJetIso, filterMuonJetIsolation}
   sequence makeMuonCalIsolation = {muonCutCalIso, filterMuonCalIsolation}
   sequence makeMuonTrkIsolation = {muonCutTrkIso, filterMuonTrkIsolation}
-  sequence makeMuonIsolation    = {makeMuonTrkIsolation, makeMuonCalIsolation}
+  sequence makeMuonIsolation    = {makeMuonTrkIsolation, makeMuonCalIsolation, makeMuonJetIsolation}
   sequence makeMuonSelection    = {makeMuonKinematic,    makeMuonIsolation   }
 
 # for jets
