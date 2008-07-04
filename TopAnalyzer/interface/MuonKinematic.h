@@ -52,6 +52,10 @@ class MuonKinematic{
   TH1F *phi_;
 
   TH1F *isoJet_;
+  TH1F *isoJet5_;
+  TH1F *isoJet10_;
+  TH1F *isoJet15_;
+  TH1F *isoJet20_;
   TH1F *isoTrk_;
   TH1F *isoCal_;
   TH1F *isoEcal_;
