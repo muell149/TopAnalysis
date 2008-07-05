@@ -14,46 +14,46 @@
 # ----------------------------
 
 # muon sample
-  replace muonSample.input         = allLayer1Muons
-  replace muonSample.id            = false
-  replace muonSample.kinematics    = true
-  replace muonSample.resolution    = false
+  replace muonSample.input    = allLayer1Muons
+  replace muonSample.doId     = false
+  replace muonSample.doKin    = true
+  replace muonSample.doRes    = false
 
 # after kinematic cuts
-  replace muonCutKin.input         = selectedLayer1Muons
-  replace muonCutKin.id            = true
-  replace muonCutKin.kinematics    = true
-  replace muonCutKin.resolution    = true
+  replace muonCutKin.input    = selectedLayer1Muons
+  replace muonCutKin.doId     = true
+  replace muonCutKin.doKin    = true
+  replace muonCutKin.doRes    = true
 
 # after jet isolation
-  replace muonCutJetIso.input      = selectedLayer1Muons
-  replace muonCutJetIso.id         = false
-  replace muonCutJetIso.kinematics = true
-  replace muonCutJetIso.resolution = true
+  replace muonCutJetIso.input = selectedLayer1Muons
+  replace muonCutJetIso.doId  = false
+  replace muonCutJetIso.doKin = true
+  replace muonCutJetIso.doRes = true
 
 # after calo isolation
-  replace muonCutCalIso.input      = selectedLayer1Muons
-  replace muonCutCalIso.id         = false
-  replace muonCutCalIso.kinematics = true
-  replace muonCutCalIso.resolution = false
+  replace muonCutCalIso.input = selectedLayer1Muons
+  replace muonCutCalIso.doId  = false
+  replace muonCutCalIso.doKin = true
+  replace muonCutCalIso.doRes = false
 
 # after track isolation
-  replace muonCutTrkIso.input      = selectedLayer1Muons
-  replace muonCutTrkIso.id         = false
-  replace muonCutTrkIso.kinematics = true
-  replace muonCutTrkIso.resolution = false
+  replace muonCutTrkIso.input = selectedLayer1Muons
+  replace muonCutTrkIso.doId  = false
+  replace muonCutTrkIso.doKin = true
+  replace muonCutTrkIso.doRes = false
 
 # jet sample
-  replace jetsSample.input         = selectedLayer1Jets
-  replace jetsSample.id            = false
-  replace jetsSample.kinematics    = true
-  replace jetsSample.resolution    = false
+  replace jetsSample.input    = selectedLayer1Jets
+  replace jetsSample.doId     = false
+  replace jetsSample.doKin    = true
+  replace jetsSample.doRes    = false
 
 # after kinematic cuts
-  replace jetsCutKin.input         = selectedLayer1Jets
-  replace jetsCutKin.id            = false
-  replace jetsCutKin.kinematics    = true
-  replace jetsCutKin.resolution    = false
+  replace jetsCutKin.input    = selectedLayer1Jets
+  replace jetsCutKin.doId     = false
+  replace jetsCutKin.doKin    = true
+  replace jetsCutKin.doRes    = false
 
 # ----------------------------
 # initialize filters

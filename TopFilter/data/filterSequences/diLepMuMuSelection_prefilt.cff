@@ -11,28 +11,28 @@
 # ----------------------------
 
 # muon sample
-  replace diMuMu_muonSample.input      = allLayer1Muons
-  replace diMuMu_muonSample.id         = false
-  replace diMuMu_muonSample.kinematics = true
-  replace diMuMu_muonSample.resolution = false
+  replace diMuMu_muonSample.input = allLayer1Muons
+  replace diMuMu_muonSample.doId  = false
+  replace diMuMu_muonSample.doKin = true
+  replace diMuMu_muonSample.doRes = false
 
 # after kinematic cuts
-  replace diMuMu_muonCutKin.input      = selectedLayer1Muons
-  replace diMuMu_muonCutKin.id         = true
-  replace diMuMu_muonCutKin.kinematics = true
-  replace diMuMu_muonCutKin.resolution = true
+  replace diMuMu_muonCutKin.input = selectedLayer1Muons
+  replace diMuMu_muonCutKin.doId  = true
+  replace diMuMu_muonCutKin.doKin = true
+  replace diMuMu_muonCutKin.doRes = true
 
 # jet sample
-  replace diMuMu_jetsSample.input      = selectedLayer1Jets
-  replace diMuMu_jetsSample.id         = false
-  replace diMuMu_jetsSample.kinematics = true
-  replace diMuMu_jetsSample.resolution = false
+  replace diMuMu_jetsSample.input = selectedLayer1Jets
+  replace diMuMu_jetsSample.doId  = false
+  replace diMuMu_jetsSample.doKin = true
+  replace diMuMu_jetsSample.doRes = false
 
 # after kinematic cuts
-  replace diMuMu_jetsCutKin.input      = selectedLayer1Jets
-  replace diMuMu_jetsCutKin.id         = false
-  replace diMuMu_jetsCutKin.kinematics = true
-  replace diMuMu_jetsCutKin.resolution = false
+  replace diMuMu_jetsCutKin.input = selectedLayer1Jets
+  replace diMuMu_jetsCutKin.doId  = false
+  replace diMuMu_jetsCutKin.doKin = true
+  replace diMuMu_jetsCutKin.doRes = false
 
 # ----------------------------
 # initialize filters

@@ -1,41 +1,55 @@
 block MuonPtCut {
-  string name = "muonPtCut"
-  vdouble minPt = { 15.,  15.}
-  vdouble maxPt = {999., 999.}
+  PSet cuts = {
+    string name = "muonPtCut"
+    vdouble minPt = { 15.,  15.}
+    vdouble maxPt = {999., 999.}
+  }
 }
 
 block JetsPtCut {
-  string name = "jetsPtCut"
-  vdouble minPt = {  5.,   5.}
-  vdouble maxPt = {999., 999.}
+  PSet cuts = {
+    string name = "jetsPtCut"
+    vdouble minPt = {  5.,   5.}
+    vdouble maxPt = {999., 999.}
+  }
 }
 
 block MuonEtaCut {
-  string name = "muonEtaCut"
-  vdouble minEta = {-2.5, -2.5}
-  vdouble maxEta = { 2.5, -2.5}
+  PSet cuts = {
+    string name = "muonEtaCut"
+    vdouble minEta = {-2.5, -2.5}
+    vdouble maxEta = { 2.5, -2.5}
+  }
 }
 
 block JetsEtaCut {
-  string name = "jetsEtaCut"
-  vdouble minEta  = {-3.25, -3.25}
-  vdouble maxEta  = { 3.25,  3.25}
+  PSet cuts = {
+    string name = "jetsEtaCut"
+    vdouble minEta  = {-3.25, -3.25}
+    vdouble maxEta  = { 3.25,  3.25}
+  }
 }
 
 block TrkIsolationCut {
-  uint32 mode = 0
-  string name = "trackIsolationCut"
-  vdouble isolation = { 999.}
+  PSet cuts = {
+    uint32 mode = 0
+    string name = "trackIsolationCut"
+    vdouble isolation = { 999.}
+  }
 }
 
 block CalIsolationCut {
-  uint32 mode = 1
-  string name = "calIsolationCut"
-  vdouble isolation = { 999.}
+  PSet cuts = {
+    uint32 mode = 1
+    string name = "calIsolationCut"
+    vdouble isolation = { 999.}
+  }
 }
 
 block jetIsolationCut {
-  string name = "jetIsolationCut"
-  InputTag jets = allLayer1Jets
-  vdouble isolation = {   0.}
+  PSet cuts = {
+    string name = "jetIsolationCut"
+    InputTag jets = allLayer1Jets
+    vdouble isolation = {   0.}
+  }
 }
