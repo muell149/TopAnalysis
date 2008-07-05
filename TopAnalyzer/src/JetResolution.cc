@@ -6,7 +6,7 @@
 
 
 JetResolution::JetResolution(const edm::ParameterSet& cfg):
-  nJets_( cfg.getParameter<int> ( "nJetsRes" ) ),
+  nJets_( cfg.getParameter<int> ( "nJets" ) ),
   binsPt_( cfg.getParameter<std::vector<double> >( "binsPt" ) ),
   matchDR_( cfg.getParameter<double>( "matchDR" ) )
 {
@@ -18,14 +18,14 @@ JetResolution::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, co
   unsigned int idx=0;
   for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); 
       jet!=jets.end(); ++jet, ++idx) {
-    if( jet->genJet()!=0 ){ 
+    if( jet->genJet() ){ 
       double dR=deltaR( jet->eta(), jet->phi(), jet->genJet()->eta(), jet->genJet()->phi() ); 
       if(dR<matchDR_){
 	double dPt=(jet->pt()-jet->genJet()->pt())/(jet->genJet())->pt();
 	for(unsigned int jdx=0; jdx<(binsPt_.size()-1); ++jdx) {
 	  if( (binsPt_[jdx]<jet->genJet()->pt()) && (jet->genJet()->pt()<binsPt_[jdx+1]) ){
 	    relPtAll_[jdx]->Fill(dPt, weight);
-	    if( idx< relPtAll_.size() ){
+	    if( idx< relPtJet_.size() ){
 	      (relPtJet_[idx])[jdx]->Fill(dPt, weight);
 	    }
 	  }

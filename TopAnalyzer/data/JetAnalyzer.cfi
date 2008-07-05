@@ -7,24 +7,28 @@ module analyzeJets = JetAnalyzer{
 
   string hist = "analyzeJets.hist"
 
-  bool id         = false
-  bool kinematics = true
-  bool resolution = false
+  bool doId  = true
+  bool doKin = true
+  bool doRes = true
 
 #---------------------------------------------
 # Id
 #---------------------------------------------
-  int32 nJetsId   = 4
-
+  PSet id = { 
+    int32 nJets = 4
+  }
 #---------------------------------------------
 # Kinematics
 #---------------------------------------------
-  int32 nJetsKin  = 4
-
+  PSet kin = { 
+    int32 nJets = 4
+  }
 #---------------------------------------------
 # Resolution
 #---------------------------------------------
-  int32 nJetsRes  = 4
-  vdouble binsPt  = {0.,  10.,  30.,  50.,  70., 100., 150., 200.}
-  double matchDR  = 0.1
+  PSet res = { 
+    int32 nJets = 4
+    vdouble binsPt  = {0.,  10.,  30.,  50.,  70., 100., 150., 200.}
+    double matchDR  = 0.1
+  }
 }

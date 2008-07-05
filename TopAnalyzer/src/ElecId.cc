@@ -8,7 +8,6 @@ ElecId::ElecId(const edm::ParameterSet& cfg):
   bshp_( cfg.getParameter<edm::InputTag>( "barrel_shape" ) ),
   eshp_( cfg.getParameter<edm::InputTag>( "endcap_shape" ) )  
 {
-  std::cout << "ok object built" << std::endl;
 }
 
 void

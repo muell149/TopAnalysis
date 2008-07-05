@@ -7,27 +7,31 @@ module analyzeElec = ElecAnalyzer{
 
   string hist = "analyzeElec.hist"
 
-  bool id         = true
-  bool kinematics = true
-  bool resolution = true
+  bool doId  = true
+  bool doKin = true
+  bool doRes = true
 
 #---------------------------------------------
 # Id
 #---------------------------------------------
-  InputTag barrel_shape = hybridSuperClusters:hybridShapeAssoc
-  InputTag endcap_shape = islandBasicClusters:islandEndcapShapeAssoc
-
+  PSet id = { 
+    InputTag barrel_shape = hybridSuperClusters:hybridShapeAssoc
+    InputTag endcap_shape = islandBasicClusters:islandEndcapShapeAssoc
+  }
 #---------------------------------------------
 # Kinematics
 #---------------------------------------------
-  InputTag jets   = allLayer1Jets
-  InputTag towers = caloTowers
-  InputTag tracks = ctfWithMaterialTracks
-  double dRMax    = 0.1
-
+  PSet kin = { 
+    InputTag jets   = allLayer1Jets
+    InputTag towers = caloTowers
+    InputTag tracks = ctfWithMaterialTracks
+    double dRMax    = 0.1
+  }
 #---------------------------------------------
 # Resolution
 #---------------------------------------------
-  vdouble binsPt  = {0., 20., 30., 50.,  80., 120., 180.}
-  double matchDR  = 0.1
+  PSet res = { 
+    vdouble binsPt  = {0., 20., 30., 50.,  80., 120., 180.}
+    double matchDR  = 0.1
+  }
 }

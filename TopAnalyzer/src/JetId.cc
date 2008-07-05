@@ -6,7 +6,7 @@
 
 
 JetId::JetId(const edm::ParameterSet& cfg):
-  nJets_( cfg.getParameter<int>( "nJetsId" ) ),
+  nJets_( cfg.getParameter<int>( "nJets" ) ),
   normEvt_( 0 ), normJet_( 0 )
 {
 }
@@ -31,13 +31,15 @@ JetId::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, const doub
     // check jet profiles
     //---------------------------------------------
     nTwr_->Fill(jet->getCaloConstituents().size(), weight);
-    std::vector<CaloTowerRef> caloTowerRef = jet->getCaloConstituents();
-    for(unsigned int jdx=0; jdx<caloTowerRef.size(); ++jdx){
-      aProfEta_->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et() );
-      aProfPhi_->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et() );
-      
-      if( idx<profEta_.size()) profEta_[idx]->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et() );
-      if( idx<profPhi_.size()) profPhi_[idx]->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et() );
+    if(jet->et()>0.){
+      std::vector<CaloTowerRef> caloTowerRef = jet->getCaloConstituents();
+      for(unsigned int jdx=0; jdx<caloTowerRef.size(); ++jdx){
+	aProfEta_->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et()/jet->et() );
+	aProfPhi_->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et()/jet->et() );
+	
+	if( idx<profEta_.size()) profEta_[idx]->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et()/jet->et() );
+	if( idx<profPhi_.size()) profPhi_[idx]->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et()/jet->et() );
+      }
     }
   }
 }
@@ -50,9 +52,9 @@ JetId::book()
     throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
   
   NameScheme id("id");
-  aEmf_= fs->make<TH1F>(id.name("allEmf"),  id.name("All em. energy frac."  ), 60, -0.1,  1.1);
-  aHad_= fs->make<TH1F>(id.name("allHdf"),  id.name("All hadr. energy frac."), 60, -0.1,  1.1);
-  aHof_= fs->make<TH1F>(id.name("allHdHO"), id.name("All hadr. energy in HO"), 55, -10., 100.);
+  aEmf_= fs->make<TH1F>(id.name("allEmf"),  id.name("allEmf" ), 60, -0.1,  1.1);
+  aHad_= fs->make<TH1F>(id.name("allHdf"),  id.name("allHdf" ), 60, -0.1,  1.1);
+  aHof_= fs->make<TH1F>(id.name("allHdHO"), id.name("allHdHO"), 55, -10., 100.);
   
   for(int idx=0; idx<nJets_; ++idx){
     emf_.push_back( fs->make<TH1F>(id.name("emf",idx), id.name("emf",idx), 60, -0.1,  1.1) );

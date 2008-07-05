@@ -40,13 +40,13 @@ ObjectAnalyzer<Collection, Id, Kin, Res>::ObjectAnalyzer(const edm::ParameterSet
   src_( cfg.getParameter<edm::InputTag>( "input" ) ),
   wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
   hist_ ( cfg.getParameter<std::string>( "hist" ) ),
-  doId_ ( cfg.getParameter<bool>( "id"  ) ),
-  doKin_( cfg.getParameter<bool>( "kinematics" ) ),
-  doRes_( cfg.getParameter<bool>( "resolution" ) )
+  doId_ ( cfg.getParameter<bool>( "doId"  ) ),
+  doKin_( cfg.getParameter<bool>( "doKin" ) ),
+  doRes_( cfg.getParameter<bool>( "doRes" ) )
 {
-  if( doId_ ) id_  = new Id ( cfg );
-  if( doKin_) kin_ = new Kin( cfg );
-  if( doRes_) res_ = new Res( cfg );
+  if( doId_ ) id_  = new Id ( cfg.getParameter<edm::ParameterSet>("id" ) );
+  if( doKin_) kin_ = new Kin( cfg.getParameter<edm::ParameterSet>("kin") );
+  if( doRes_) res_ = new Res( cfg.getParameter<edm::ParameterSet>("res") );
 }
 
 template <typename Collection, typename Id, typename Kin, typename Res> 
