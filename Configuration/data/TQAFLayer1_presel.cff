@@ -1,0 +1,35 @@
+### TQAF Layer 1 default sequence
+
+#-----------------------------------------------------------------
+# build the TopLayer0 Objects (Jets, Muons, Electrons, METs, Taus)
+#-----------------------------------------------------------------
+  include "PhysicsTools/PatAlgos/data/patLayer0.cff"
+
+# define the TopLayer0 input
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer0_Jets.cff"
+  include "TopAnalysis/Configuration/data/TQAFLayer0_Muons_presel.cff"
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer0_Electrons.cff"
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer0_Taus.cff"
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer0_METs.cff"
+
+#-----------------------------------------------------------------
+# build the TopLayer1 Objects (Jets, Muons, Electrons, METs, Taus)
+#-----------------------------------------------------------------
+  include "PhysicsTools/PatAlgos/data/patLayer1.cff"
+
+# define the TopLayer1 Object input selection
+  include "TopAnalysis/Configuration/data/TQAFLayer1_Jets_presel.cff"
+  include "TopAnalysis/Configuration/data/TQAFLayer1_Muons_presel.cff"
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer1_Electrons.cff"
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer1_Taus.cff"
+  include "TopQuarkAnalysis/TopObjectProducers/data/TQAFLayer1_METs.cff"
+
+sequence tqafLayer1 = {
+    patLayer0,
+    patLayer1
+}
+
+sequence tqafLayer1_withoutTrigMatch = {
+    patLayer0_withoutTrigMatch,
+    patLayer1
+}
