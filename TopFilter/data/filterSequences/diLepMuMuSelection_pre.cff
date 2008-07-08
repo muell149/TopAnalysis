@@ -18,7 +18,7 @@ block DiMuonEtaCut ={
 
     string name = "muonEtaCut"
     vdouble minEta = {-2.5, -2.5}
-    vdouble maxEta = { 2.5, -2.5}
+    vdouble maxEta = { 2.5,  2.5}
  
 }
 
