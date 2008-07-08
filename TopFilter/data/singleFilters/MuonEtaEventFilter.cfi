@@ -1,4 +1,9 @@
-module filterMuonEta = EtaEventFilter{
+module filterSemiMuonEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using MuonEtaCut }
+  PSet cuts = { using SemiMuonEtaCut }
+}
+
+module filterDiMuonEta = EtaEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using DiMuonEtaCut }
 }

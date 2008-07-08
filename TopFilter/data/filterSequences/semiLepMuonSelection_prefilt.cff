@@ -39,10 +39,10 @@
 # ----------------------------
   include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_pre.cff"
 
-  module semiMu_filterJetsPt  = filterJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
-  module semiMu_filterMuonPt  = filterMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
-  module semiMu_filterJetsEta = filterJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
-  module semiMu_filterMuonEta = filterMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
+  module semiMu_filterJetsPt  = filterSemiJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
+  module semiMu_filterMuonPt  = filterSemiMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
+  module semiMu_filterJetsEta = filterSemiJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
+  module semiMu_filterMuonEta = filterSemiMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
 
   replace semiMu_filterJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
   replace semiMu_filterJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}

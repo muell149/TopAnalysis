@@ -1,4 +1,9 @@
-module filterJetsEta = EtaEventFilter{
+module filterSemiJetsEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Jets}
-  PSet cuts = { using JetsEtaCut }
+  PSet cuts = { using SemiJetsEtaCut }
+}
+
+module filterDiJetsEta = EtaEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  PSet cuts = { using DiJetsEtaCut }
 }

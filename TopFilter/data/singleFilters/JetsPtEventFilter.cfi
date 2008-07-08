@@ -1,4 +1,9 @@
-module filterJetsPt = PtEventFilter{
+module filterSemiJetsPt = PtEventFilter{
   VInputTag input = {selectedLayer1Jets}
-  PSet cuts = { using JetsPtCut }
+  PSet cuts = { using SemiJetsPtCut }
+}
+
+module filterDiJetsPt = PtEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  PSet cuts = { using DiJetsPtCut }
 }

@@ -39,10 +39,10 @@
 # ----------------------------
   include "TopAnalysis/TopFilter/data/filterSequences/diLepMuMuSelection_pre.cff"
 
-  module diMuMu_filterJetsPt  = filterJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
-  module diMuMu_filterMuonPt  = filterMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
-  module diMuMu_filterJetsEta = filterJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
-  module diMuMu_filterMuonEta = filterMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
+  module diMuMu_filterJetsPt  = filterDiJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
+  module diMuMu_filterMuonPt  = filterDiMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
+  module diMuMu_filterJetsEta = filterDiJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
+  module diMuMu_filterMuonEta = filterDiMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
 
   replace diMuMu_filterJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
   replace diMuMu_filterJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
