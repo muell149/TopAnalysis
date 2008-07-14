@@ -25,11 +25,15 @@ private:
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
 	
-	int eleCounter_, muCounter_;
-	
 	edm::InputTag muons_;
+	
+	int eleCounter_, muCounter_, numberOfRatioBins_, numberOfMuonBins_,
+			numberOfElecBins_ ;
+	double minRatio_, maxRatio_, minNmuon_, maxNmuon_,minNelec_, maxNelec_;
+	
+	
 	typedef std::vector<pat::Muon> TopMuonCollection;
 	
-	TH1F *muonElecRatio_;
+	TH1F *muonElecRatio_, *numberOfMuons_, *numberOfElecs_;
 };
 #endif

@@ -7,8 +7,16 @@ using std::cout;
 using std::endl;
 using reco::GenParticle;
 
-LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :
-	muons_(cfg.getParameter<edm::InputTag>("muons")) {
+LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :	muons_(cfg.getParameter<edm::InputTag>("muons")),
+			numberOfRatioBins_(cfg.getParameter<int>("numberOfRatioBins")),
+			numberOfMuonBins_(cfg.getParameter<int>("numberOfMuonBins")),
+			numberOfElecBins_(cfg.getParameter<int>("numberOfElecBins")),
+			minRatio_(cfg.getParameter<double>("minRatio")),
+			maxRatio_(cfg.getParameter<double>("maxRatio")),
+			minNmuon_(cfg.getParameter<double>("minRatio")),
+			maxNmuon_(cfg.getParameter<double>("maxRatio")),
+			minNelec_(cfg.getParameter<double>("minRatio")),
+			maxNelec_(cfg.getParameter<double>("maxRatio")) {
 	eleCounter_ = 0;
 	muCounter_ = 0;
 
@@ -19,7 +27,13 @@ LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :
 	}
 
 	muonElecRatio_ = fs->make<TH1F>("MuonToElectronRatio",
-			"MuonToElectronRatio", 600, 0., 300.);
+			"MuonToElectronRatio", numberOfRatioBins_, minRatio_, maxRatio_);
+
+	numberOfMuons_ = fs->make<TH1F>("numberOfMuons", "numberOfMuons",
+			numberOfMuonBins_, minNmuon_, maxNmuon_);
+
+	numberOfElecs_ = fs->make<TH1F>("numberOfElecs", "numberOfElecs",
+			numberOfElecBins_, minNelec_, maxNelec_);
 }
 
 LeptonCounter::~LeptonCounter() {
@@ -30,25 +44,26 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 	evt.getByLabel("genParticles", genParticles);
 
 	edm::Handle<double> weightHandle;
-	evt.getByLabel("weight", "weight", weightHandle);
+	evt.getByLabel("eventWeight", weightHandle);
 
 	double weight = *weightHandle;
-//	LogInfo("ControlOutput") << "weight:  " << weight << endl;
-
-	//	edm::Handle<edm::View<pat::Muon> > recMuons;
-	//	evt.getByLabel(muons_, recMuons);
-	//
-	//	cout << "Muons in sample: " << recMuons->size() << endl;
+	int evtEl, evtMu;
+	evtEl = 0;
+	evtMu = 0;
 	for (reco::GenParticleCollection::const_iterator part =
 			genParticles->begin(); part!=genParticles->end(); ++part) {
 		if (fabs(part->pdgId()) == 13) {
 			muCounter_++;
+			evtMu++;
 		}
 		if (fabs(part->pdgId()) == 11) {
 			eleCounter_++;
+			evtEl++;
 		}
 	}
 	muonElecRatio_->Fill(muCounter_/eleCounter_, weight);
+	numberOfMuons_->Fill(evtMu, weight);
+	numberOfElecs_->Fill(evtEl, weight);
 
 }
 
