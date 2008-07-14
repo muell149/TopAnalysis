@@ -1,4 +1,0 @@
-module filterElecEta = EtaEventFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cuts = { using ElecEtaCut }
-}

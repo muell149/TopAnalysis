@@ -1,7 +1,0 @@
-module filterElecJetIsolation = ElecJetIsolationEventFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cuts = { using JetIsolationCut }
-}
-
-
-

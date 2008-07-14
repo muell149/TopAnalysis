@@ -1,32 +1,35 @@
-module filterMuonTrkIsolation = MuonIsolationEventFilter{
+#
+# isolation filters for semi-leptonic(mu)
+#
+module filterSemiMuonTrkIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using TrkIsolationCut }
+  PSet cuts = { using SemiTrkIsolationCut }
 }
 
-module filterElecTrkIsolation = ElecIsolationEventFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cuts = { using TrkIsolationCut }
-}
-
-module filterMuonCalIsolation = MuonIsolationEventFilter{
+module filterSemiMuonCalIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using CalIsolationCut }
+  PSet cuts = { using SemiCalIsolationCut }
 }
 
-module filterElecCalIsolation = ElecIsolationEventFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cuts = { using CalIsolationCut }
-}
-
-module filterMuonJetIsolation = MuonJetIsolationEventFilter{
+module filterSemiMuonJetIsolation = MuonJetIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using JetIsolationCut }
+  PSet cuts = { using SemiJetIsolationCut }
 }
 
-module filterElecJetIsolation = ElecJetIsolationEventFilter{
-  VInputTag input = {selectedLayer1Elecs}
-  PSet cuts = { using JetIsolationCut }
+#
+# isolation filters for dileptonic(mu/mu)
+#
+module filterDiMuonTrkIsolation = MuonIsolationEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using DiTrkIsolationCut }
 }
 
+module filterDiMuonCalIsolation = MuonIsolationEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using DiCalIsolationCut }
+}
 
-
+module filterDiMuonJetIsolation = MuonJetIsolationEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using DiJetIsolationCut }
+}

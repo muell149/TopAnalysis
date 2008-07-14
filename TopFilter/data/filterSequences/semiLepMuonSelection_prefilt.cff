@@ -1,61 +1,55 @@
 # ----------------------------
 # initialize analyzers
 # ----------------------------
-  module semiMu_muonSample = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module semiMu_muonCutKin = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module semiMu_jetsSample = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
-  module semiMu_jetsCutKin = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiMuonRaw = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonNon = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonLep = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonJet = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+
+  module semiJetsRaw = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsNon = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsLep = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsJet = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
 
 # ----------------------------
 # configure analyzers
 # ----------------------------
 
 # muon sample
-  replace semiMu_muonSample.input = allLayer1Muons
-  replace semiMu_muonSample.doId  = false
-  replace semiMu_muonSample.doKin = true
-  replace semiMu_muonSample.doRes = false
-
-# after kinematic cuts
-  replace semiMu_muonCutKin.input = selectedLayer1Muons
-  replace semiMu_muonCutKin.doId  = true
-  replace semiMu_muonCutKin.doKin = true
-  replace semiMu_muonCutKin.doRes = true
+  replace semiMuonRaw.input = allLayer1Muons
+  replace semiMuonNon.input = selectedLayer1Muons
+  replace semiMuonLep.input = selectedLayer1Muons
+  replace semiMuonJet.input = selectedLayer1Muons
 
 # jet sample
-  replace semiMu_jetsSample.input = selectedLayer1Jets
-  replace semiMu_jetsSample.doId  = false
-  replace semiMu_jetsSample.doKin = true
-  replace semiMu_jetsSample.doRes = false
-
-# after kinematic cuts
-  replace semiMu_jetsCutKin.input = selectedLayer1Jets
-  replace semiMu_jetsCutKin.doId  = false
-  replace semiMu_jetsCutKin.doKin = true
-  replace semiMu_jetsCutKin.doRes = false
+  replace semiJetsRaw.input = allLayer1Jets
+  replace semiJetsNon.input = selectedLayer1Jets
+  replace semiJetsLep.input = selectedLayer1Jets
+  replace semiJetsJet.input = selectedLayer1Jets
 
 # ----------------------------
 # initialize filters
 # ----------------------------
-  include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/diLepMuMuSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/semiLepMuonSelection_pre.cff"
 
-  module semiMu_filterJetsPt  = filterSemiJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
-  module semiMu_filterMuonPt  = filterSemiMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
-  module semiMu_filterJetsEta = filterSemiJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
-  module semiMu_filterMuonEta = filterSemiMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
-
-  replace semiMu_filterJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
-  replace semiMu_filterJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
+  include "TopAnalysis/TopFilter/data/singleFilters/PtEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/EtaEventFilter.cfi"
 
 # ----------------------------
-# reconfigure filters
+# configure filters
 # ----------------------------
 
+  replace filterSemiJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
+  replace filterSemiJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
 
-# for muons
-  sequence semiMu_muonKinematic = {semiMu_muonSample, semiMu_filterMuonEta, semiMu_filterMuonPt, semiMu_muonCutKin}
-  sequence semiMu_muonSelection = {semiMu_muonKinematic}
 
-# for jets
-  sequence semiMu_jetsKinematic = {semiMu_jetsSample, semiMu_filterJetsEta, semiMu_filterJetsPt, semiMu_jetsCutKin}
-  sequence semiMu_jetsSelection = {semiMu_jetsKinematic}
+#
+  sequence makeSemiMuonKinematic = {filterSemiMuonEta, filterSemiMuonPt, 
+                                    semiMuonLep, semiJetsLep}
+  sequence makeSemiJetsKinematic = {filterSemiJetsEta, filterSemiJetsPt, 
+                                    semiMuonJet, semiJetsJet}
+
+  sequence makeSemiReference     = {semiMuonRaw, semiJetsRaw, semiMuonNon, semiJetsNon}
+  sequence makeSemiMuonSelection = {makeSemiMuonKinematic}
+  sequence makeSemiJetsSelection = {makeSemiJetsKinematic}

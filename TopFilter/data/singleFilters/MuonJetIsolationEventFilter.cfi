@@ -1,4 +1,0 @@
-module filterMuonJetIsolation = MuonJetIsolationEventFilter{
-  VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using JetIsolationCut }
-}

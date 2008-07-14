@@ -1,38 +1,71 @@
 # ----------------------------
 # initialize analyzers
 # ----------------------------
-  module allCuts    = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module muonCutKin = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module muonCutIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi" 
-  module jetsCutKin = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiMuonNon = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonLep = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonJet = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonAll = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+
+  module semiJetsNon = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsLep = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsIso = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsJet = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsAll = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
 
 # ----------------------------
 # configure analyzers
 # ----------------------------
 
+# muon sample
+  replace semiMuonNon.input = selectedLayer1Muons
+  replace semiMuonLep.input = selectedLayer1Muons
+  replace semiMuonIso.input = selectedLayer1Muons
+  replace semiMuonJet.input = selectedLayer1Muons
+  replace semiMuonAll.input = selectedLayer1Muons
+
+# jet sample
+  replace semiJetsNon.input = selectedLayer1Jets
+  replace semiJetsLep.input = selectedLayer1Jets
+  replace semiJetsIso.input = selectedLayer1Jets
+  replace semiJetsJet.input = selectedLayer1Jets
+  replace semiJetsAll.input = selectedLayer1Jets
 
 # ----------------------------
 # initialize filters
 # ----------------------------
-# include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_pre.cff"
-  include "TopAnalysis/TopFilter/data/filterSequences/semiLepMuonSelection_fin.cff"
+# include "TopAnalysis/TopFilter/data/semiLepMuonSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/semiLepMuonSelection_fin.cff"
 
-   module filterAllCuts = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
-   module filterMuonKin = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
-   module filterMuonIso = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
-   module filterJetsKin = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterSemiMuonNon = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterSemiMuonLep = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterSemiMuonIso = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterSemiMuonJet = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
+   module filterSemiMuonAll = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
 
-# plots to be monitored
-  replace filterMuonKin.useLepEta = false
-  replace filterMuonKin.useLepPt  = false
-  replace filterMuonIso.useJetIso = false
-  replace filterMuonIso.useCalIso = false
-  replace filterMuonIso.useTrkIso = false
-  replace filterJetsKin.useJetEta = false
-  replace filterJetsKin.useJetPt  = false
+# ----------------------------
+# configure filters
+# ----------------------------
+
+  replace filterSemiMuonNon.useLepEta = false
+  replace filterSemiMuonNon.useLepPt  = false
+  replace filterSemiMuonNon.useJetIso = false
+  replace filterSemiMuonNon.useCalIso = false
+  replace filterSemiMuonNon.useTrkIso = false
+  replace filterSemiMuonNon.useJetEta = false
+  replace filterSemiMuonNon.useJetPt  = false
+
+  replace filterSemiMuonLep.useLepEta = false
+  replace filterSemiMuonLep.useLepPt  = false
+  replace filterSemiMuonIso.useJetIso = false
+  replace filterSemiMuonIso.useCalIso = false
+  replace filterSemiMuonIso.useTrkIso = false
+  replace filterSemiMuonJet.useJetEta = false
+  replace filterSemiMuonJet.useJetPt  = false
 
 #
-  sequence makeMuonKinematic = {filterMuonKin, muonCutKin}
-  sequence makeMuonIsolation = {filterMuonIso, muonCutIso}
-  sequence makeJetsKinematic = {filterJetsKin, jetsCutKin}
-  sequence makeAllCuts       = {filterAllCuts, allCuts   }
+  sequence makeSemiMuonNon = {semiMuonNon} 
+  sequence makeSemiMuonLep = {filterSemiMuonLep, semiMuonLep}
+  sequence makeSemiMuonIso = {filterSemiMuonIso, semiMuonIso}
+  sequence makeSemiMuonJet = {filterSemiMuonJet, semiMuonJet}
+  sequence makeSemiMuonAll = {filterSemiMuonAll, semiMuonAll}

@@ -1,61 +1,55 @@
 # ----------------------------
 # initialize analyzers
 # ----------------------------
-  module diMuMu_muonSample = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module diMuMu_muonCutKin = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module diMuMu_jetsSample = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
-  module diMuMu_jetsCutKin = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module diMuonRaw = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module diMuonNon = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module diMuonLep = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module diMuonJet = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+
+  module diJetsRaw = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module diJetsNon = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module diJetsLep = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module diJetsJet = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
 
 # ----------------------------
 # configure analyzers
 # ----------------------------
 
 # muon sample
-  replace diMuMu_muonSample.input = allLayer1Muons
-  replace diMuMu_muonSample.doId  = false
-  replace diMuMu_muonSample.doKin = true
-  replace diMuMu_muonSample.doRes = false
-
-# after kinematic cuts
-  replace diMuMu_muonCutKin.input = selectedLayer1Muons
-  replace diMuMu_muonCutKin.doId  = true
-  replace diMuMu_muonCutKin.doKin = true
-  replace diMuMu_muonCutKin.doRes = true
+  replace diMuonRaw.input = allLayer1Muons
+  replace diMuonNon.input = selectedLayer1Muons
+  replace diMuonLep.input = selectedLayer1Muons
+  replace diMuonJet.input = selectedLayer1Muons
 
 # jet sample
-  replace diMuMu_jetsSample.input = selectedLayer1Jets
-  replace diMuMu_jetsSample.doId  = false
-  replace diMuMu_jetsSample.doKin = true
-  replace diMuMu_jetsSample.doRes = false
-
-# after kinematic cuts
-  replace diMuMu_jetsCutKin.input = selectedLayer1Jets
-  replace diMuMu_jetsCutKin.doId  = false
-  replace diMuMu_jetsCutKin.doKin = true
-  replace diMuMu_jetsCutKin.doRes = false
+  replace diJetsRaw.input = allLayer1Jets
+  replace diJetsNon.input = selectedLayer1Jets
+  replace diJetsLep.input = selectedLayer1Jets
+  replace diJetsJet.input = selectedLayer1Jets
 
 # ----------------------------
 # initialize filters
 # ----------------------------
-  include "TopAnalysis/TopFilter/data/filterSequences/diLepMuMuSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/diLepMuMuSelection_pre.cff"
+  include "TopAnalysis/TopFilter/data/semiLepMuonSelection_pre.cff"
 
-  module diMuMu_filterJetsPt  = filterDiJetsPt  from "TopAnalysis/TopFilter/data/singleFilters/JetsPtEventFilter.cfi"
-  module diMuMu_filterMuonPt  = filterDiMuonPt  from "TopAnalysis/TopFilter/data/singleFilters/MuonPtEventFilter.cfi"
-  module diMuMu_filterJetsEta = filterDiJetsEta from "TopAnalysis/TopFilter/data/singleFilters/JetsEtaEventFilter.cfi"
-  module diMuMu_filterMuonEta = filterDiMuonEta from "TopAnalysis/TopFilter/data/singleFilters/MuonEtaEventFilter.cfi"
-
-  replace diMuMu_filterJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
-  replace diMuMu_filterJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
+  include "TopAnalysis/TopFilter/data/singleFilters/PtEventFilter.cfi"
+  include "TopAnalysis/TopFilter/data/singleFilters/EtaEventFilter.cfi"
 
 # ----------------------------
-# reconfigure filters
+# configure filters
 # ----------------------------
 
+  replace filterDiJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
+  replace filterDiJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
 
-# for muons
-  sequence diMuMu_muonKinematic = {diMuMu_muonSample, diMuMu_filterMuonEta, diMuMu_filterMuonPt, diMuMu_muonCutKin}
-  sequence diMuMu_muonSelection = {diMuMu_muonKinematic}
 
-# for jets
-  sequence diMuMu_jetsKinematic = {diMuMu_jetsSample, diMuMu_filterJetsEta, diMuMu_filterJetsPt, diMuMu_jetsCutKin}
-  sequence diMuMu_jetsSelection = {diMuMu_jetsKinematic}
+#
+  sequence makeDiMuonKinematic = {filterDiMuonEta, filterDiMuonPt, 
+                                    diMuonLep, diJetsLep}
+  sequence makeDiJetsKinematic = {filterDiJetsEta, filterDiJetsPt, 
+                                    diMuonJet, diJetsJet}
+
+  sequence makeDiReference     = {diMuonRaw, diJetsRaw, diMuonNon, diJetsNon}
+  sequence makeDiMuonSelection = {makeDiMuonKinematic}
+  sequence makeDiJetsSelection = {makeDiJetsKinematic}

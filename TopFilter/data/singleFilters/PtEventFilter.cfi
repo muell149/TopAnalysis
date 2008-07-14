@@ -1,0 +1,25 @@
+#
+# pt filters for semi-leptonic(mu)
+#
+module filterSemiMuonPt = PtEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using SemiMuonPtCut }
+}
+
+module filterSemiJetsPt = PtEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  PSet cuts = { using SemiJetsPtCut }
+}
+
+#
+# pt filters dileptonic(mu/mu)
+#
+module filterDiMuonPt = PtEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using DiMuonPtCut }
+}
+
+module filterDiJetsPt = PtEventFilter{
+  VInputTag input = {selectedLayer1Jets}
+  PSet cuts = { using DiJetsPtCut }
+}
