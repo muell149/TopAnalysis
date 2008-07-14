@@ -1,0 +1,3 @@
+module countLeptons = LeptonCounter{
+InputTag muons = allLayer1Muons
+}

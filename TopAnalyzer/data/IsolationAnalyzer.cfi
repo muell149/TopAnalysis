@@ -1,0 +1,12 @@
+module analyzeisolationMET = IsolationAnalyzer {
+#-------------------------------------------------
+# sources
+#-------------------------------------------------
+InputTag muons = selectedLayer1TopMuons
+#InputTag missingEt = met
+InputTag missingEt = allLayer1METs
+InputTag genEvent = genEvt
+InputTag jets = selectedLayer1TopJets
+#InputTag missingEt = allLayer0METs
+vdouble ptBins= {0.0, 80.0, 170.0, 250.0, 9999.0}
+}
