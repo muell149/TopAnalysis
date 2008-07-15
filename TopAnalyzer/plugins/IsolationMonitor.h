@@ -12,10 +12,15 @@
 class IsolationMonitor {
 public:
 	explicit IsolationMonitor();
-	IsolationMonitor(std::string);
+//	IsolationMonitor(std::string);
 	~IsolationMonitor();
 	void book(ofstream& file);
 	void fill(const pat::Muon&, const pat::MET&, double);
+	void fill(std::string, double, double, double);
+	/**
+	 *  adds a histogram to the Isolation Monitor
+	 */
+	void addHist(std::string, TH2F*);
 	/**
 	 * prints the CorrelationFactors of the histograms
 	 */
@@ -27,10 +32,13 @@ public:
 //	map<string,double> getCorrelationFactors();
 	Double_t getCaloCorrelationFactor();
 	Double_t getTrackCorrelationFactor();
+	Double_t getCorrelationFactor(std::string);
 
 private:
-	TH2F *trackIsoMET_;
-	TH2F *caloIsoMET_;
+	std::map<string, TH2F*> histos_;
+//	TH2F *trackIsoMET_;
+//	TH2F *caloIsoMET_;
+//	std::string name_;
 	//	TH2F *minDisJetIsoMET_;
 };
 #endif

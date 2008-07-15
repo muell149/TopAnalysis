@@ -26,15 +26,59 @@ IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
 				"TFile Service is not registered in cfg file" );
 	}
 
-	//for each ptBin new IsolationMonitor
+	TH2F *trackIsoMET, *caloIsoMET, *ptMET;
 	isomon_ = new IsolationMonitor();
+	trackIsoMET = fs->make<TH2F>("test_TrackIsoMETCorrelation",
+			"test_TrackIsoMETCorrelation", 300, 0., 300., 60, 0., 60.);
+	caloIsoMET = fs->make<TH2F>("test_CaloIsoMETCorrelation",
+			"test_CaloIsoMETCorrelation", 300, 0., 300., 60, 0., 60.);
+	ptMET = fs->make<TH2F>("test_PtMETCorrelation", "test_PtMETCorrelation",
+			300, 0., 300., 300, 0., 300.);
+
+	isomon_->addHist("trackIso", trackIsoMET);
+	isomon_->addHist("caloIso", caloIsoMET);
+	isomon_->addHist("pt", ptMET);
+
+	//ttbar MC only
+	//for each ptBin new IsolationMonitor
 	for (unsigned int x=0; x< ptBins_.size()-1; x++) {
 		std::stringstream had, semi;
 		double t = ptBins_.at(x);
-		had << "thad_" << t;
-		semi << "tsemi_" <<t;
-		IsolationMonitor *temph = new IsolationMonitor(had.str());
-		IsolationMonitor *temps = new IsolationMonitor(semi.str());
+		had << "thad_" << t << "_";
+		semi << "tsemi_" << t << "_";
+		string st = semi.str() + "TrackIsoMETCorrelation";
+		string sc = semi.str() + "CaloIsoMETCorrelation";
+		string sp = semi.str() + "PtMETCorrelation";
+		string ht = had.str() + "TrackIsoMETCorrelation";
+		string hc = had.str() + "CaloIsoMETCorrelation";
+		string hp = had.str() + "PtMETCorrelation";
+
+		IsolationMonitor *temph = new IsolationMonitor();
+		IsolationMonitor *temps = new IsolationMonitor();
+		//TODO: addHist
+		TH2F *trackIsoMET1, *caloIsoMET1, *ptMET1;
+		TH2F *trackIsoMET2, *caloIsoMET2, *ptMET2;
+
+		trackIsoMET1 = fs->make<TH2F>(ht.c_str(), ht.c_str(), 300, 0., 300., 60,
+				0., 60.);
+		caloIsoMET1 = fs->make<TH2F>(hc.c_str(), hc.c_str(), 300, 0., 300., 60,
+				0., 60.);
+		ptMET1 = fs->make<TH2F>(hp.c_str(), hp.c_str(), 300, 0., 300., 300, 0.,
+				300.);
+
+		trackIsoMET2 = fs->make<TH2F>(st.c_str(), st.c_str(), 300, 0., 300., 60,
+				0., 60.);
+		caloIsoMET2 = fs->make<TH2F>(sc.c_str(), sc.c_str(), 300, 0., 300., 60,
+				0., 60.);
+		ptMET2 = fs->make<TH2F>(sp.c_str(), sp.c_str(), 300, 0., 300., 300, 0.,
+				300.);
+		temph->addHist("trackCorrelation", trackIsoMET1);
+		temph->addHist("caloCorrelation", caloIsoMET1);
+		temph->addHist("pt", ptMET1);
+		temps->addHist("trackCorrelation", trackIsoMET2);
+		temps->addHist("caloCorrelation", caloIsoMET2);
+		temps->addHist("pt", ptMET2);
+
 		hmonitors_.push_back(temph);
 		smonitors_.push_back(temps);
 	}
@@ -69,15 +113,14 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 		const edm::EventSetup& setup) {
 
 	//	const reco::MET *met;
-//	const reco::CaloMET *met;
+	//	const reco::CaloMET *met;
 	const pat::MET *met;
 	// Get Reconstructed MET
-//	edm::Handle<reco::CaloMETCollection> hmetcol;
+	//	edm::Handle<reco::CaloMETCollection> hmetcol;
 	edm::Handle<std::vector<pat::MET> > metH;
 	evt.getByLabel(met_, metH);
-//	const reco::CaloMETCollection *metcol = hmetcol.product();
+	//	const reco::CaloMETCollection *metcol = hmetcol.product();
 	met = &(*metH)[0];
-	
 
 	//get muons
 	//	edm::Handle<TopMuonCollection> muons;
@@ -91,13 +134,13 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 	evt.getByLabel(ttgen_, genEvt);
 
 	edm::Handle<double> weightHandle;
-	evt.getByLabel("weight", "weight", weightHandle);
+	evt.getByLabel("eventWeight", weightHandle);
 
 	double weight = *weightHandle;
 	LogInfo("ControlOutput") << "weight:  " << weight << endl;
 
 	edm::Handle<TopJetCollection> jets;
-	evt.getByLabel("selectedLayer1TopJets", jets);
+	evt.getByLabel(jets_, jets);
 
 	TtGenEvent event = *genEvt;
 	//	cout << "semi? : " << event.isSemiLeptonic() << endl;
@@ -152,10 +195,18 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 		//in bins:
 		for (unsigned int i=0; i < ptBins_.size()-1; i++) {
 			if (thad && tlep) {
-				if (thad->pt() >= ptBins_[i] && thad->pt() < ptBins_[i+1])
+				if (thad->pt() >= ptBins_[i] && thad->pt() < ptBins_[i+1]) {
 					hmonitors_[i]->fill(mu, *met, weight);
-				if (tlep->pt() >= ptBins_[i] && tlep->pt() < ptBins_[i+1])
+					hmonitors_[i]->fill("trackCorrelation", met->pt(),
+							mu.trackIso(), weight);
+					hmonitors_[i]->fill("caloCorrelation", met->pt(),
+							mu.caloIso(), weight);
+					hmonitors_[i]->fill("pt", met->pt(), mu.pt(), weight);
+				}
+
+				if (tlep->pt() >= ptBins_[i] && tlep->pt() < ptBins_[i+1]) {
 					smonitors_[i]->fill(mu, *met, weight);
+				}
 			}
 		}
 		//TODO: find a way to get trackIsolation and caloIsolation

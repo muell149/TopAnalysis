@@ -61,7 +61,7 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 			evtEl++;
 		}
 	}
-	muonElecRatio_->Fill(muCounter_/eleCounter_, weight);
+	muonElecRatio_->Fill(evtMu/evtEl, weight);
 	numberOfMuons_->Fill(evtMu, weight);
 	numberOfElecs_->Fill(evtEl, weight);
 

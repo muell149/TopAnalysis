@@ -304,36 +304,3 @@ int MatrixAnalyzer::numberOfmatchedMuons(
 	return matchedmu;
 }
 
-//int MatrixAnalyzer::pdgOfMother(reco::Muon matchedMuon,
-//		edm::Handle<reco::GenParticleCollection> genParticles) {
-//	int ret = 0;
-//	for (reco::GenParticleCollection::const_iterator part =
-//			genParticles->begin(); part!=genParticles->end(); ++part) {
-//		if (abs(part->pdgId()) == 13)
-//			log(part->pdgId(), "::pdgOfMother", true);
-//		if (matchedMuonIsContainedInDaughter(part, matchedMuon) ) {
-//			ret = part->pdgId();
-//			break;
-//		} else {
-//			log("wrong", "::pdgOfMother", true);
-//			ret = part->pdgId();
-//			break;
-//		}
-//
-//	}
-//	return ret;
-//}
-//
-//bool MatrixAnalyzer::matchedMuonIsContainedInDaughter(
-//		reco::GenParticleCollection::const_iterator part, reco::Muon muon) {
-//	bool ret = false;
-//	for (unsigned int x = 0; x< part->numberOfDaughters(); x++) {
-//		const reco::Candidate* partDaughter = part->daughter(x);
-//		if (partDaughter->pdgId() == muon.pdgId()) {
-//			ret = true;
-//			break;
-//		}
-//
-//	}
-//	return ret;
-//}
