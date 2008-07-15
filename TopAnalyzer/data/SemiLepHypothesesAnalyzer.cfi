@@ -1,5 +1,10 @@
 module analyzeSemiLepHypotheses = SemiLepHypothesesAnalyzer{
 
   InputTag semiEvent = ttSemiEvent
+  InputTag hypoKey   = ttSemiHypothesisMaxSumPtWMass:Key
+
+  uint32 nJetsMax = 8
+
+  string hist = "analyzeSemiLepHypotheses.hist"
 
 }
