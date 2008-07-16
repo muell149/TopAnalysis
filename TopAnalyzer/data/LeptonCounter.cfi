@@ -2,16 +2,16 @@ module countLeptons = LeptonCounter{
 InputTag muons = allLayer1Muons
 
 #histogram controlls
-int32 numberOfRatioBins = 100
+int32 numberOfRatioBins = 200
 double minRatio = 0.
 double maxRatio = 10.
 
-int32 numberOfMuonBins = 100
+int32 numberOfMuonBins = 30
 double minNmuon = 0.
-double maxNmuon_ = 100.
+double maxNmuon = 30.
 
-int32 numberOfElecBins = 100
+int32 numberOfElecBins = 30
 double minNelec = 0.
-double maxNelec = 100.
+double maxNelec = 30.
 
 }

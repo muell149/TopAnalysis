@@ -7,19 +7,25 @@ using std::cout;
 using std::endl;
 using reco::GenParticle;
 
-LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :	muons_(cfg.getParameter<edm::InputTag>("muons")),
+LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :
+	muons_(cfg.getParameter<edm::InputTag>("muons")),
 			numberOfRatioBins_(cfg.getParameter<int>("numberOfRatioBins")),
 			numberOfMuonBins_(cfg.getParameter<int>("numberOfMuonBins")),
 			numberOfElecBins_(cfg.getParameter<int>("numberOfElecBins")),
 			minRatio_(cfg.getParameter<double>("minRatio")),
 			maxRatio_(cfg.getParameter<double>("maxRatio")),
-			minNmuon_(cfg.getParameter<double>("minRatio")),
-			maxNmuon_(cfg.getParameter<double>("maxRatio")),
-			minNelec_(cfg.getParameter<double>("minRatio")),
-			maxNelec_(cfg.getParameter<double>("maxRatio")) {
+			minNmuon_(cfg.getParameter<double>("minNmuon")),
+			maxNmuon_(cfg.getParameter<double>("maxNmuon")),
+			minNelec_(cfg.getParameter<double>("minNelec")),
+			maxNelec_(cfg.getParameter<double>("maxNelec")) {
 	eleCounter_ = 0;
 	muCounter_ = 0;
+}
 
+LeptonCounter::~LeptonCounter() {
+}
+
+void LeptonCounter::beginJob(const edm::EventSetup&) {
 	edm::Service<TFileService> fs;
 	if ( !fs) {
 		throw edm::Exception( edm::errors::Configuration,
@@ -36,9 +42,6 @@ LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :	muons_(cfg.getParam
 			numberOfElecBins_, minNelec_, maxNelec_);
 }
 
-LeptonCounter::~LeptonCounter() {
-}
-
 void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
 	edm::Handle<reco::GenParticleCollection> genParticles;
 	evt.getByLabel("genParticles", genParticles);
@@ -47,6 +50,7 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 	evt.getByLabel("eventWeight", weightHandle);
 
 	double weight = *weightHandle;
+
 	int evtEl, evtMu;
 	evtEl = 0;
 	evtMu = 0;
@@ -61,13 +65,13 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 			evtEl++;
 		}
 	}
-	muonElecRatio_->Fill(evtMu/evtEl, weight);
+//	cout << weight << " " << evtMu << " " << evtEl << endl;
+	double ratio = 0.;
+	if(evtEl > 0) ratio = evtMu/evtEl;
+	
+	muonElecRatio_->Fill(ratio, weight);
 	numberOfMuons_->Fill(evtMu, weight);
 	numberOfElecs_->Fill(evtEl, weight);
-
-}
-
-void LeptonCounter::beginJob(const edm::EventSetup&) {
 
 }
 
