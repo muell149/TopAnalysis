@@ -250,18 +250,18 @@ SemiLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
 
   NameScheme ns("qual1D");
 
-  genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sum #Delta R (genMatch)"          , 50, 0., 5.);
-  genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sum #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
-  mvaDisc_       = fs->make<TH1F>(ns.name(hist, "mvaDisc"),       "MVA discrim."                      , 20, 0., 1.);
+  genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
+  genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
+  mvaDisc_       = fs->make<TH1F>(ns.name(hist, "mvaDisc"),       "MVA discrim."                        , 20, 0., 1.);
 
   NameScheme ns2("qual2D");
 
-  genMatchSumDRVsSumPt_      = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsSumPt"),      "genMatchSumDRVsSumPt"     , 50, 0., 5., 40, 0., 400.);
-  genMatchSumDRVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadWMass"),   "genMatchSumDRVsHadWMass"  , 50, 0., 5., 50, 0., 500.);
-  genMatchSumDRVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadTopMass"), "genMatchSumDRVsHadTopMass", 50, 0., 5., 60, 0., 600.);
-  genMatchSumDRVsMVADisc_    = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsMVADisc"),    "genMatchSumDRVsMVADisc"   , 50, 0., 5., 20, 0., 1.);
-  mvaDiscVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadWMass"),   "mvaDiscVsHadWMass"  , 20, 0., 1., 50, 0., 500.);
-  mvaDiscVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadTopMass"), "mvaDiscVsHadTopMass", 20, 0., 1., 60, 0., 600.);
+  genMatchSumDRVsSumPt_      = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsSumPt"),      "#Sigma #Delta R (genMatch) vs. #Sigma #Delta p_{T} (genMatch) [GeV]", 50, 0., 5., 40, 0., 400.);
+  genMatchSumDRVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadWMass"),   "#Sigma #Delta R (genMatch) vs. M (W_{had}) [GeV] (genMatch)"        , 50, 0., 5., 50, 0., 500.);
+  genMatchSumDRVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadTopMass"), "#Sigma #Delta R (genMatch) vs. M (t_{had}) [GeV] (genMatch)"        , 50, 0., 5., 60, 0., 600.);
+  genMatchSumDRVsMVADisc_    = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsMVADisc"),    "#Sigma #Delta R (genMatch) vs. MVA discrim."                        , 50, 0., 5., 20, 0., 1.);
+  mvaDiscVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadWMass"),   "MVA discrim. vs. M (W_{had}) [GeV] (MVADisc)"  , 20, 0., 1., 50, 0., 500.);
+  mvaDiscVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadTopMass"), "MVA discrim. vs. M (t_{had}) [GeV] (MVADisc)", 20, 0., 1., 60, 0., 600.);
 
 }
 
