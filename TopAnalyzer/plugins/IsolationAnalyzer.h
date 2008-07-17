@@ -13,7 +13,7 @@
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "TopAnalysis/TopUtils/interface/RootSystem.h"
 #include "TopAnalysis/TopUtils/interface/RootHistograms.h"
-#include "TopAnalysis/TopAnalyzer/plugins/IsolationMonitor.h"
+#include "TopAnalysis/TopAnalyzer/plugins/CorrelationMonitor.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -34,12 +34,12 @@ private:
 	edm::InputTag ttgen_;
 	edm::InputTag jets_;
 	
-	IsolationMonitor *isomon_;
+	CorrelationMonitor *isomon_;
 	vector<double> ptBins_;
-	vector<IsolationMonitor*> hmonitors_;
-	vector<IsolationMonitor*> smonitors_;
+	vector<CorrelationMonitor*> hmonitors_;
+	vector<CorrelationMonitor*> smonitors_;
 	TH1F *thadpt_, *tleppt_;
-	TH1F *hcaloCorr_, *htrackCorr_, *lcaloCorr_, *ltrackCorr_;
+	TH1F *hcaloCorr_, *htrackCorr_, *lcaloCorr_, *ltrackCorr_, *lptCorr_, *hptCorr_;
 	TH1F *minDPhiMETJet_, *dPhiMETjet1_, *dPhiMETjet2_, *dPhiMETjet3_, *dPhiMETjet4_, *dPhiMETmuon_; 
 	
 	typedef std::vector<pat::Muon> TopMuonCollection;

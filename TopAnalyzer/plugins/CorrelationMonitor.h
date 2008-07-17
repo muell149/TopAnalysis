@@ -1,5 +1,5 @@
-#ifndef IsolationMonitor_h
-#define IsolationMonitor_h
+#ifndef CorrelationMonitor_h
+#define CorrelationMonitor_h
 
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
@@ -9,12 +9,15 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 
-class IsolationMonitor {
+class CorrelationMonitor {
 public:
-	explicit IsolationMonitor();
+	explicit CorrelationMonitor();
 //	IsolationMonitor(std::string);
-	~IsolationMonitor();
+	~CorrelationMonitor();
 	void book(ofstream& file);
+	/**
+	 * @deprecated
+	 */
 	void fill(const pat::Muon&, const pat::MET&, double);
 	void fill(std::string, double, double, double);
 	/**

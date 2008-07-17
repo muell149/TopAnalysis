@@ -20,6 +20,10 @@ IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
 			ttgen_(cfg.getParameter<edm::InputTag>("genEvent")),
 			jets_(cfg.getParameter<edm::InputTag>("jets")),
 			ptBins_(cfg.getParameter<std::vector<double> >("ptBins")) {
+
+}
+
+void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 	edm::Service<TFileService> fs;
 	if ( !fs) {
 		throw edm::Exception( edm::errors::Configuration,
@@ -27,7 +31,7 @@ IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
 	}
 
 	TH2F *trackIsoMET, *caloIsoMET, *ptMET;
-	isomon_ = new IsolationMonitor();
+	isomon_ = new CorrelationMonitor();
 	trackIsoMET = fs->make<TH2F>("test_TrackIsoMETCorrelation",
 			"test_TrackIsoMETCorrelation", 300, 0., 300., 60, 0., 60.);
 	caloIsoMET = fs->make<TH2F>("test_CaloIsoMETCorrelation",
@@ -53,8 +57,8 @@ IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
 		string hc = had.str() + "CaloIsoMETCorrelation";
 		string hp = had.str() + "PtMETCorrelation";
 
-		IsolationMonitor *temph = new IsolationMonitor();
-		IsolationMonitor *temps = new IsolationMonitor();
+		CorrelationMonitor *temph = new CorrelationMonitor();
+		CorrelationMonitor *temps = new CorrelationMonitor();
 		//TODO: addHist
 		TH2F *trackIsoMET1, *caloIsoMET1, *ptMET1;
 		TH2F *trackIsoMET2, *caloIsoMET2, *ptMET2;
@@ -112,21 +116,12 @@ IsolationAnalyzer::~IsolationAnalyzer() {
 void IsolationAnalyzer::analyze(const edm::Event& evt,
 		const edm::EventSetup& setup) {
 
-	//	const reco::MET *met;
-	//	const reco::CaloMET *met;
 	const pat::MET *met;
-	// Get Reconstructed MET
-	//	edm::Handle<reco::CaloMETCollection> hmetcol;
+
 	edm::Handle<std::vector<pat::MET> > metH;
 	evt.getByLabel(met_, metH);
-	//	const reco::CaloMETCollection *metcol = hmetcol.product();
-	met = &(*metH)[0];
 
-	//get muons
-	//	edm::Handle<TopMuonCollection> muons;
-	//	evt.getByLabel(muons_, muons);
-
-	edm::Handle<std::vector<pat::Muon> > muons;
+	edm::Handle<TopMuonCollection> muons;
 	evt.getByLabel(muons_, muons);
 
 	//the event
@@ -136,67 +131,81 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 	edm::Handle<double> weightHandle;
 	evt.getByLabel("eventWeight", weightHandle);
 
-	double weight = *weightHandle;
-	LogInfo("ControlOutput") << "weight:  " << weight << endl;
-
 	edm::Handle<TopJetCollection> jets;
 	evt.getByLabel(jets_, jets);
 
+	met = &(*metH)[0];
+
+	double weight = *weightHandle;
+
+	//MC information @deprecated
 	TtGenEvent event = *genEvt;
-	//	cout << "semi? : " << event.isSemiLeptonic() << endl;
 	const reco::GenParticle* thad = event.hadronicDecayTop();
 	const reco::GenParticle* tlep = event.leptonicDecayTop();
 
 	if (tlep) {
+		LogInfo("IsolationAnalyzer") << "tlep-pt | weight " << tlep->pt()
+				<< " | " << weight << endl;
 		tleppt_->Fill(tlep->pt(), weight);
-		//		cout << "tl pt: " << tlep->pt() << endl;		
 	}
 
 	if (thad) {
+		LogInfo("IsolationAnalyzer") << "thad-pt | weight" << thad->pt()
+				<< " | " << weight << endl;
 		thadpt_->Fill(thad->pt(), weight);
-		//		cout << "th pt: " << thad->pt() << endl;
 	}
 
-	int size = muons->size();
-	//	cout <<"suize : " << size << endl;
-	double dp1, dp2, dp3, dp4 = 0;
-	if (jets->size() < 4) {
+	if (jets->size() >= 4) {
+		double dp1, dp2, dp3, dp4;
 		TopJetCollection::const_iterator jet = jets->begin();
 		dp1 = deltaPhi(met->phi(), jet->phi());
-		cout << "1st jet-met dPhi: " << dp1 << endl;
+		LogInfo("IsolationAnalyzer") << "1st jet-met dPhi: " << dp1 << endl;
 
 		++jet;
 		dp2 = deltaPhi(met->phi(), jet->phi());
-		cout << "2nd jet-met dPhi: " << dp2 << endl;
+		LogInfo("IsolationAnalyzer") << "2nd jet-met dPhi: " << dp2 << endl;
 
 		++jet;
 		dp3 = deltaPhi(met->phi(), jet->phi());
-		cout << "3rd jet-met dPhi: " << dp3 << endl;
+		LogInfo("IsolationAnalyzer") << "3rd jet-met dPhi: " << dp3 << endl;
 
 		++jet;
 		dp4 = deltaPhi(met->phi(), jet->phi());
-		cout << "4st jet-met dPhi: " << dp4 << endl;
-	}
-	double mindp = 0;
-	mindp = min(dp1, dp2);
-	mindp = min(mindp, dp3);
-	mindp = min(mindp, dp4);
+		LogInfo("IsolationAnalyzer") << "4st jet-met dPhi: " << dp4 << endl;
 
-	minDPhiMETJet_->Fill(mindp, weight);
-	dPhiMETjet1_->Fill(dp1, weight);
-	dPhiMETjet2_->Fill(dp2, weight);
-	dPhiMETjet3_->Fill(dp3, weight);
-	dPhiMETjet4_->Fill(dp4, weight);
+		double mindp;
+		mindp = min(dp1, dp2);
+		mindp = min(mindp, dp3);
+		mindp = min(mindp, dp4);
+		LogInfo("IsolationAnalyzer") << "Min-delta-phi: " << mindp << endl;
+
+		minDPhiMETJet_->Fill(mindp, weight);
+		dPhiMETjet1_->Fill(dp1, weight);
+		dPhiMETjet2_->Fill(dp2, weight);
+		dPhiMETjet3_->Fill(dp3, weight);
+		dPhiMETjet4_->Fill(dp4, weight);
+	}
+
+	int size = muons->size();
 	for (int i = 0; i < size; ++i) {
-		pat::Muon mu = (pat::Muon)(* muons)[i];
-		isomon_->fill(mu, *met, weight);
+		pat::Muon mu = (pat::Muon) (*muons)[i];
+		LogInfo("IsolationAnalyzer") << "mu-pt: " << mu.pt() << endl;
+		LogInfo("IsolationAnalyzer") << "mu-trackIso: " << mu.trackIso()
+				<< endl;
+		LogInfo("IsolationAnalyzer") << "mu-caloIso: " << mu.caloIso() << endl;
+		LogInfo("IsolationAnalyzer") << "MET-pt: " << met->pt() << endl;
+
+		isomon_->fill("trackIso", met->pt(), mu.trackIso(), weight);
+		isomon_->fill("caloIso", met->pt(), mu.caloIso(), weight);
+		isomon_->fill("pt", met->pt(), mu.pt(), weight);
+		//delta-phi between leading muon and MET
 		if (i == 0)
-			dPhiMETmuon_->Fill(deltaPhi(mu.phi(), met->phi()));
-		//in bins:
+			dPhiMETmuon_->Fill(deltaPhi(mu.phi(), met->phi()), weight);
+		//pt bins of top (MC only, later on reco-lvl):
+		//TODO: get top-pt from reco lvl
 		for (unsigned int i=0; i < ptBins_.size()-1; i++) {
 			if (thad && tlep) {
 				if (thad->pt() >= ptBins_[i] && thad->pt() < ptBins_[i+1]) {
-					hmonitors_[i]->fill(mu, *met, weight);
 					hmonitors_[i]->fill("trackCorrelation", met->pt(),
 							mu.trackIso(), weight);
 					hmonitors_[i]->fill("caloCorrelation", met->pt(),
@@ -205,45 +214,49 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 				}
 
 				if (tlep->pt() >= ptBins_[i] && tlep->pt() < ptBins_[i+1]) {
-					smonitors_[i]->fill(mu, *met, weight);
+					//					smonitors_[i]->fill(mu, *met, weight);
+					smonitors_[i]->fill("trackCorrelation", met->pt(),
+							mu.trackIso(), weight);
+					smonitors_[i]->fill("caloCorrelation", met->pt(),
+							mu.caloIso(), weight);
+					smonitors_[i]->fill("pt", met->pt(), mu.pt(), weight);
 				}
 			}
 		}
-		//TODO: find a way to get trackIsolation and caloIsolation
-		LogInfo("ControlOutput") << "trackIso: " << mu.trackIso() << endl;
-		LogInfo("ControlOutput") << "caloIso: " << mu.caloIso() << endl;
 	}
-	LogInfo("ControlOutput") << "MET: " << met->pt() << endl;
-
-}
-
-void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
+	LogInfo("IsolationAnalyzer") << "MET: " << met->pt() << endl;
 
 }
 
 void IsolationAnalyzer::endJob() {
 
 	isomon_->printCorrelation();
-	cout << smonitors_.size() << endl;
-	for (unsigned int x = 0; x< smonitors_.size(); x++) {
-		hcaloCorr_->SetBinContent(x+1,
-				hmonitors_[x]->getCaloCorrelationFactor());
-		lcaloCorr_->SetBinContent(x+1,
-				smonitors_[x]->getCaloCorrelationFactor());
-		htrackCorr_->SetBinContent(x+1,
-				hmonitors_[x]->getTrackCorrelationFactor());
-		ltrackCorr_->SetBinContent(x+1,
-				smonitors_[x]->getTrackCorrelationFactor());
 
-		std::stringstream xlabel;
-		xlabel << ptBins_.at(x) << "-" << ptBins_.at(x+1);
-		hcaloCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
-		lcaloCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
-		htrackCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
-		ltrackCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
-
-		smonitors_[x]->printCorrelation();
-		hmonitors_[x]->printCorrelation();
-	}
+//	for (unsigned int x = 0; x< smonitors_.size(); x++) {
+//		hcaloCorr_->SetBinContent(x+1,
+//				hmonitors_[x]->getCorrelationFactor("caloCorrelation"));
+//		lcaloCorr_->SetBinContent(x+1,
+//				smonitors_[x]->getCorrelationFactor("caloCorrelation"));
+//
+//		htrackCorr_->SetBinContent(x+1,
+//				hmonitors_[x]->getCorrelationFactor("trackCorrelation"));
+//		ltrackCorr_->SetBinContent(x+1,
+//				smonitors_[x]->getCorrelationFactor("trackCorrelation"));
+//
+//		hptCorr_->SetBinContent(x+1, hmonitors_[x]->getCorrelationFactor("pt"));
+//		lptCorr_->SetBinContent(x+1, smonitors_[x]->getCorrelationFactor("pt"));
+//
+//		std::stringstream xlabel;
+//		xlabel << ptBins_.at(x) << "-" << ptBins_.at(x+1);
+//		hcaloCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
+//		lcaloCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
+//		htrackCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
+//		ltrackCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
+//		hptCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
+//		lptCorr_->GetXaxis()->SetBinLabel(x+1, xlabel.str().c_str());
+//
+//		smonitors_[x]->printCorrelation();
+//		hmonitors_[x]->printCorrelation();
+//	}
 }
 

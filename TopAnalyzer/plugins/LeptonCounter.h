@@ -28,12 +28,12 @@ private:
 	edm::InputTag muons_;
 	
 	int eleCounter_, muCounter_, numberOfRatioBins_, numberOfMuonBins_,
-			numberOfElecBins_ ;
+			numberOfElecBins_, nOfEvents_;
 	double minRatio_, maxRatio_, minNmuon_, maxNmuon_,minNelec_, maxNelec_;
 	
 	
 	typedef std::vector<pat::Muon> TopMuonCollection;
-	
+	//TODO: genMuons, AllLayer1Muons(optional + custom), SelectedLayer1Muons(optional + custom)
 	TH1F *muonElecRatio_, *numberOfMuons_, *numberOfElecs_;
 };
 #endif

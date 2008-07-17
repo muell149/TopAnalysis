@@ -20,6 +20,7 @@ LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :
 			maxNelec_(cfg.getParameter<double>("maxNelec")) {
 	eleCounter_ = 0;
 	muCounter_ = 0;
+	nOfEvents_ = 0;
 }
 
 LeptonCounter::~LeptonCounter() {
@@ -43,8 +44,12 @@ void LeptonCounter::beginJob(const edm::EventSetup&) {
 }
 
 void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
+	nOfEvents_++;
 	edm::Handle<reco::GenParticleCollection> genParticles;
 	evt.getByLabel("genParticles", genParticles);
+	
+//	edm::Handle<edm::View<pat::Muon> > recMuons;
+//	evt.getByLabel("muons", recMuons);
 
 	edm::Handle<double> weightHandle;
 	evt.getByLabel("eventWeight", weightHandle);
@@ -54,6 +59,7 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 	int evtEl, evtMu;
 	evtEl = 0;
 	evtMu = 0;
+//	evtRMu = recMuons->size();
 	for (reco::GenParticleCollection::const_iterator part =
 			genParticles->begin(); part!=genParticles->end(); ++part) {
 		if (fabs(part->pdgId()) == 13) {
@@ -65,10 +71,10 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 			evtEl++;
 		}
 	}
-//	cout << weight << " " << evtMu << " " << evtEl << endl;
 	double ratio = 0.;
-	if(evtEl > 0) ratio = evtMu/evtEl;
-	
+	if (evtEl > 0)
+		ratio = evtMu/evtEl;
+
 	muonElecRatio_->Fill(ratio, weight);
 	numberOfMuons_->Fill(evtMu, weight);
 	numberOfElecs_->Fill(evtEl, weight);
@@ -77,5 +83,9 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
 void LeptonCounter::endJob() {
 	cout << "# of e :" << eleCounter_ << endl;
+	cout << "average # of e per event :" 
+	<< eleCounter_/nOfEvents_ << endl;
 	cout << "# of mu :" << muCounter_ << endl;
+	cout << "average # of mu per event:" 
+	<< muCounter_/nOfEvents_ << endl;
 }
