@@ -40,6 +40,8 @@
 # configure filters
 # ----------------------------
 
+  replace filterDiMuonPt.input  = {muons}
+  replace filterDiMuonEta.input = {muons}
   replace filterDiJetsPt.input  = {iterativeCone5CaloJets, fastjet6CaloJets}
   replace filterDiJetsEta.input = {iterativeCone5CaloJets, fastjet6CaloJets}
 
