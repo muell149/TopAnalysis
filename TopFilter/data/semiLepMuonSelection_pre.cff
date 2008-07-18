@@ -1,13 +1,13 @@
 block SemiMuonPtCut = {
   string name = "muonPtCut"
-  vdouble minPt = { 20.}
-  vdouble maxPt = {999.}
+  vdouble minPt = {   20.}
+  vdouble maxPt = {99999.}
 }
 
 block SemiJetsPtCut = {
   string name = "jetsPtCut"
-  vdouble minPt = {  5.,   5.,   5.,   5.}
-  vdouble maxPt = {999., 999., 999., 999.}
+  vdouble minPt = {    5.,     5.,     5.,     5.}
+  vdouble maxPt = {99999., 99999., 99999., 99999.}
 }
 
 block SemiMuonEtaCut = {
