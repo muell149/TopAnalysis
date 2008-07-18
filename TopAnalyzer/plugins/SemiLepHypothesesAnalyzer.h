@@ -54,6 +54,9 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   std::vector<TH1F*> leptonKin_;
   std::vector<TH1F*> neutriKin_;
 
+  TH1F* hadTopLepTopMassDiff;
+  TH1F* hadWLepWMassDiff;
+
   std::vector<TH1F*> hadTopKinRes_;
   std::vector<TH1F*> hadWKinRes_;
   std::vector<TH1F*> hadBKinRes_;

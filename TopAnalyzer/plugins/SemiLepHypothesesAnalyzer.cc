@@ -48,6 +48,9 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   fillKinHistos(leptonKin_, *Lepton  );
   fillKinHistos(neutriKin_, *Neutrino);
 
+  hadTopLepTopMassDiff->Fill( HadTop->mass() - LepTop->mass() );
+  hadWLepWMassDiff    ->Fill( HadW  ->mass() - LepW  ->mass() );
+
   // -----------------------
   // fill resolution histos for kinematic variables
   // with respect to the generator particles
@@ -167,6 +170,9 @@ SemiLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs, ofstrea
   neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriEta" ), "#eta (neutrino)"       ,  60, -3. ,   3. ) );
   neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriPhi" ), "#phi (neutrino)"       ,  70, -3.5,   3.5) );
   neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriMass"), "M (neutrino) [GeV]"    ,  60,  0. , 600. ) );  
+
+  hadTopLepTopMassDiff = fs->make<TH1F>(ns.name(hist, "hadTopLepTopMassDiff"), "M (t_{had}) -  M (t_{lep}) [GeV]", 60, -300., 300);
+  hadWLepWMassDiff     = fs->make<TH1F>(ns.name(hist, "hadWLepWMassDiff"    ), "M (W_{had}) -  M (W_{lep}) [GeV]", 60, -300., 300);
 
 }
 
