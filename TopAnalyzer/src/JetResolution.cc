@@ -46,7 +46,7 @@ JetResolution::book()
   for(int jdx=0; jdx<nJets_; ++jdx){
     std::vector<TH1F*> buffer;
     calPtJet_.push_back(fs->make<TH1F>(cal.name("calPt",jdx), cal.name("calPt",jdx), ((int)binsPt_.size()-1), &binsPt_[0]));
-    resPtJet_.push_back(fs->make<TH1F>(res.name("resPt",jdx), res.name("resPt",jdx), ((int)binsPt_.size()-1), &binsPt_[0]));
+    resPtJet_.push_back(fs->make<TH1F>(res.name("relPt",jdx), res.name("relPt",jdx), ((int)binsPt_.size()-1), &binsPt_[0]));
     for(int idx=0; idx<((int)binsPt_.size()-1); ++idx)
       buffer.push_back( fs->make<TH1F>(fit.name("relPt",jdx,idx), fit.name("relPt",jdx,idx), 100, -0.5, 0.5) );
     relPtJet_.push_back(buffer); 
@@ -55,7 +55,7 @@ JetResolution::book()
     relPtAll_.push_back( fs->make<TH1F>(fit.name("relPt",idx), fit.name("relPt",idx), 100, -0.5, 0.5) );
   }
   calPtAll_= fs->make<TH1F>(cal.name("calPt"), cal.name("calPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
-  resPtAll_= fs->make<TH1F>(res.name("resPt"), res.name("resPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
+  resPtAll_= fs->make<TH1F>(res.name("relPt"), res.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
 }
 
 void
@@ -69,7 +69,7 @@ JetResolution::book(ofstream& file)
   for(int jdx=0; jdx<nJets_; ++jdx){
     std::vector<TH1F*> buffer;
     calPtJet_.push_back(fs->make<TH1F>(cal.name(file,"calPt",jdx), cal.name("calPt",jdx), ((int)binsPt_.size()-1), &binsPt_[0]));
-    resPtJet_.push_back(fs->make<TH1F>(res.name(file,"resPt",jdx), res.name("resPt",jdx), ((int)binsPt_.size()-1), &binsPt_[0]));
+    resPtJet_.push_back(fs->make<TH1F>(res.name(file,"relPt",jdx), res.name("relPt",jdx), ((int)binsPt_.size()-1), &binsPt_[0]));
     for(int idx=0; idx<((int)binsPt_.size()-1); ++idx)
       buffer.push_back( fs->make<TH1F>(fit.name(file,"relPt",jdx,idx), fit.name("relPt",jdx,idx), 100, -0.5, 0.5) );
     relPtJet_.push_back(buffer); 
@@ -78,6 +78,6 @@ JetResolution::book(ofstream& file)
     relPtAll_.push_back( fs->make<TH1F>(fit.name(file,"relPt",idx), fit.name("relPt",idx), 100, -0.5, 0.5) );
   }
   calPtAll_= fs->make<TH1F>(cal.name(file,"calPt"), cal.name("calPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
-  resPtAll_= fs->make<TH1F>(res.name(file,"resPt"), res.name("resPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
+  resPtAll_= fs->make<TH1F>(res.name(file,"relPt"), res.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
 }
 

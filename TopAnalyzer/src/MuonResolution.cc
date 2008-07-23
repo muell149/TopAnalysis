@@ -41,8 +41,8 @@ MuonResolution::book()
   for(int idx = 0; idx < ((int)binsPt_.size()-1); ++idx) {
     relPt_.push_back( fs->make<TH1F>(fit.name("relPt",idx), fit.name("relPt",idx), 100, -0.5, 0.5) );
   }
-  calPt_= fs->make<TH1F>(cal.name("pt"), cal.name("pt"), ((int)binsPt_.size()-1), &binsPt_[0]);
-  resPt_= fs->make<TH1F>(res.name("pt"), res.name("pt"), ((int)binsPt_.size()-1), &binsPt_[0]);
+  calPt_= fs->make<TH1F>(cal.name("relPt"), cal.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
+  resPt_= fs->make<TH1F>(res.name("relPt"), res.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
 }
 
 void 
@@ -56,6 +56,6 @@ MuonResolution::book(ofstream& file)
   for(int idx = 0; idx < ((int)binsPt_.size()-1); ++idx) {
     relPt_.push_back( fs->make<TH1F>(fit.name(file,"relPt",idx), fit.name("relPt",idx), 100, -0.5, 0.5) );
   }
-  calPt_= fs->make<TH1F>(cal.name(file,"pt"), cal.name("pt"), ((int)binsPt_.size()-1), &binsPt_[0]);
-  resPt_= fs->make<TH1F>(res.name(file,"pt"), res.name("pt"), ((int)binsPt_.size()-1), &binsPt_[0]);
+  calPt_= fs->make<TH1F>(cal.name(file,"relPt"), cal.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
+  resPt_= fs->make<TH1F>(res.name(file,"relPt"), res.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
 }
