@@ -6,6 +6,9 @@ InputTag muons = selectedLayer1Muons
 InputTag missingEt = allLayer1METs #met, allLayer0METs
 InputTag genEvent = genEvt
 InputTag jets = selectedLayer1Jets
+
 #pt-bins for reconstructed top
 vdouble ptBins= {0.0, 80.0, 170.0, 250.0, 9999.0}
+bool ttbarMC = true
+string hist = "Isolation.hist"
 }

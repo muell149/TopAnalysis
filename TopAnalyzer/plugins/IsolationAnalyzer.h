@@ -29,6 +29,7 @@ private:
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
 	
+	std::string hist_;
 	edm::InputTag muons_;
 	edm::InputTag met_;
 	edm::InputTag ttgen_;
@@ -36,6 +37,9 @@ private:
 	
 	CorrelationMonitor *isomon_;
 	vector<double> ptBins_;
+	bool ttbarMC_;
+	double isoMaxBin_;
+	int isoBins_;
 	vector<CorrelationMonitor*> hmonitors_;
 	vector<CorrelationMonitor*> smonitors_;
 	TH1F *thadpt_, *tleppt_;
