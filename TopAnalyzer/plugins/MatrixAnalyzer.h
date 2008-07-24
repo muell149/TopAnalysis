@@ -3,7 +3,7 @@
 /**
  *  class:   MatrixAnalyzer.h
  * @author: Lukas Kreczko, Uni Hamburg (lkreczko@mail.desy.de)
- * version $Id: MatrixAnalyzer.h,v 0.2 2008/07/04 $
+ * version $Id: MatrixAnalyzer.h,v 1.1 2008/07/14 05:26:28 kreczko Exp $
 
  ________________________________________________________________**/
 #include "FWCore/Framework/interface/Event.h"
@@ -51,6 +51,7 @@ private:
 	//double eff_Signal, eff_Bg;
 	int hadrCount_, lCount_, llCount_, mlCount_, noBins_, beforeBin_, afterBin_;
 	int rhadrCount_, rlCount_, rllCount_, rmlCount_;
+	double whadrCount_, wlCount_, wllCount_, wmlCount_;
 	Double_t bgBefore_, slBefore_, dlBefore_, mlBefore_;
 	double effBG_, effSL_, effDL_, effML_, sampleweight_;
 	edm::InputTag muons_;

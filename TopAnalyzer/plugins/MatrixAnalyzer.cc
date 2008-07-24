@@ -28,6 +28,10 @@ MatrixAnalyzer::MatrixAnalyzer(const edm::ParameterSet& cfg) :
 	rllCount_ = 0;
 	rmlCount_ = 0;
 	sampleweight_ = 0;
+	whadrCount_ = 0;
+	wlCount_ = 0;
+	wllCount_ = 0;
+	wmlCount_ = 0;
 }
 
 MatrixAnalyzer::~MatrixAnalyzer() {
@@ -72,10 +76,10 @@ void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 void MatrixAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
 
 	//get muons
-	if (!before_)
-		cout << "----------------------after-----------------------" << endl;
-	else
-		cout << "----------------------before-----------------------" << endl;
+	//	if (!before_)
+	//		cout << "----------------------after-----------------------" << endl;
+	//	else
+	//		cout << "----------------------before-----------------------" << endl;
 	edm::Handle<reco::GenParticleCollection> genParticles;
 	evt.getByLabel("genParticles", genParticles);
 
@@ -92,63 +96,67 @@ void MatrixAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
 	evt.getByLabel("eventWeight", weightHandle);
 
 	sampleweight_ = *weightHandle;
-	cout << "sw: " << sampleweight_ << endl;
+	//	cout << "sw: " << sampleweight_ << endl;
 
 	int matchedmu = 0;
-	for (reco::GenParticleCollection::const_iterator part =
-			genParticles->begin(); part!=genParticles->end(); ++part) {
-		if (fabs(part->pdgId()) == 13) {
-			if (part->numberOfMothers() > 0) {
-				log("-------", "-------------", false);
-				log(part->mother(0)->pdgId(), "::analyze >> genMother ID", true);
-				log(part->mother(0)->status(), "::analyze >> genMother ST", true);
-				log(part->mother(0)->eta(), "::analyze >> eta", true);
+	//	for (reco::GenParticleCollection::const_iterator part =
+	//			genParticles->begin(); part!=genParticles->end(); ++part) {
+	//		if (fabs(part->pdgId()) == 13) {
+	//			if (part->numberOfMothers() > 0) {
+	//				log("-------", "-------------", false);
+	//				log(part->mother(0)->pdgId(), "::analyze >> genMother ID", true);
+	//				log(part->mother(0)->status(), "::analyze >> genMother ST", true);
+	//				log(part->mother(0)->eta(), "::analyze >> eta", true);
+	//			}
+	//			int size = muons->size();
+	//			for (int i = 0; i != size; ++i) {
+	//				//					reco::Muon
+	//				pat::Muon mu = (pat::Muon)(* muons)[i];
+	//				const reco::GenParticle genL = *((*muons)[i]).genLepton();
+	//				//simple MC match
+	//
+	//				// TopMuon has no mother, but its genParticle has.
+	//
+	//				if (part->numberOfMothers() > 0 && genL.numberOfMothers() > 0) {
+	//					//log("muons have mothers", "::analyze >> MCmatch", true);
+	//					//					log(part->mother(0)->pdgId(), "::analyze >> MCmatch", true);
+	//					//					log(genL.mother(0)->pdgId(), "::analyze >> MCmatch", true);
+	//					if (part->mother(0) == genL.mother(0)) {
+	//						mothermap_[part->mother(0)->pdgId()].push_back(mu);
+	//						log("found match", "::analyze >> MCmatch", true);
+	//						matchedmu++;
+	//						log(genL.mother(0)->pdgId(),
+	//								"::analyze >> MCmatch >> recoMother", true);
+	//						log(part->mother(0)->pdgId(),
+	//								"::analyze >> MCmatch >> genMother", true);
+	//					}
+	//				}
+	//				if (genL.numberOfDaughters() > 0)
+	//					log(genL.daughter(0)->pdgId(), "::analyze >> recoDaughter", true);
+	//			}
+	//
+	//		}
+	//	}
 
-			}
-			int size = muons->size();
-			for (int i = 0; i != size; ++i) {
-				//					reco::Muon
-				pat::Muon mu = (pat::Muon)(* muons)[i];
-				const reco::GenParticle genL = *((*muons)[i]).genLepton();
-				//simple MC match
-
-				// TopMuon has no mother, but its genParticle has.
-
-				if (part->numberOfMothers() > 0 && genL.numberOfMothers() > 0) {
-					//log("muons have mothers", "::analyze >> MCmatch", true);
-					//					log(part->mother(0)->pdgId(), "::analyze >> MCmatch", true);
-					//					log(genL.mother(0)->pdgId(), "::analyze >> MCmatch", true);
-					if (part->mother(0) == genL.mother(0)) {
-						mothermap_[part->mother(0)->pdgId()].push_back(mu);
-						log("found match", "::analyze >> MCmatch", true);
-						matchedmu++;
-						log(genL.mother(0)->pdgId(),
-								"::analyze >> MCmatch >> recoMother", true);
-						log(part->mother(0)->pdgId(),
-								"::analyze >> MCmatch >> genMother", true);
-					}
-				}
-				if (genL.numberOfDaughters() > 0)
-					log(genL.daughter(0)->pdgId(), "::analyze >> recoDaughter", true);
-			}
-
-		}
-	}
-
-	log(matchedmu, "::analyze >> matched muons", true);
+	//	log(matchedmu, "::analyze >> matched muons", true);
 
 	if (muons->size() < 1) {
 		hadrCount_++;
-
+		whadrCount_ += sampleweight_;
 	}
 
 	if (muons->size() == 1) {
 		lCount_++;
+		wlCount_ += sampleweight_;
 	}
-	if (muons->size() == 2)
+	if (muons->size() == 2) {
 		llCount_++;
-	if (muons->size() > 2)
+		wllCount_ += sampleweight_;
+	}
+	if (muons->size() > 2) {
 		mlCount_++;
+		wmlCount_ += sampleweight_;
+	}
 
 	//only matched muons:
 	if (matchedmu < 1)
@@ -235,15 +243,19 @@ void MatrixAnalyzer::endJob() {
 }
 
 void MatrixAnalyzer::setEnv(int &bin) {
-	cout << "hadr >> " << hadrCount_ << "(" << rhadrCount_ << ")" << endl;
-	cout << "lep >> "<< lCount_ << "(" << rlCount_ << ")" << endl;
-	cout << "llep >> "<< llCount_ << "(" << rllCount_ << ")" << endl;
-	cout << "mlep >> "<< mlCount_ << "(" << rmlCount_ << ")" << endl;
+	cout << "hadr >> " << whadrCount_<< "(" << hadrCount_ << ")"<< "("
+			<< rhadrCount_ << ")" << endl;
+	cout << "lep >> " << wlCount_ << "(" << lCount_ << ")" << "(" << rlCount_
+			<< ")" << endl;
+	cout << "llep >> " <<wllCount_ << "(" << llCount_ << ")" << "("
+			<< rllCount_ << ")" << endl;
+	cout << "mlep >> " << wmlCount_ << "(" << mlCount_ << ")" << "("
+			<< rmlCount_ << ")" << endl;
 
-	background_->SetBinContent(bin, hadrCount_*1.0);
-	lep_->SetBinContent(bin, lCount_*1.0);
-	llep_->SetBinContent(bin, llCount_*1.0);
-	multilep_->SetBinContent(bin, mlCount_*1.0);
+	background_->SetBinContent(bin, whadrCount_);
+	lep_->SetBinContent(bin, wlCount_);
+	llep_->SetBinContent(bin, wllCount_);
+	multilep_->SetBinContent(bin, wmlCount_);
 }
 
 void MatrixAnalyzer::getBefore() {
