@@ -188,23 +188,23 @@ void MatrixAnalyzer::endJob() {
 
 		getBefore();
 		if (bgBefore_ !=0) {
-			effBG_ = hadrCount_/bgBefore_;
+			effBG_ = whadrCount_/bgBefore_;
 			deff_bg = sqrt(effBG_*(1-effBG_)/bgBefore_);
 		}
 
 		if (slBefore_ != 0) {
-			effSL_ = lCount_/slBefore_;
+			effSL_ = wlCount_/slBefore_;
 			deff_sl = sqrt(effSL_*(1-effSL_)/slBefore_);
 			//log(deffs, "::endjob >> delta_eff", true);
 		}
 
 		if (dlBefore_ != 0) {
-			effDL_ = llCount_/dlBefore_;
+			effDL_ = wllCount_/dlBefore_;
 			deff_dl = sqrt(effDL_*(1-effDL_)/dlBefore_);
 		}
 
 		if (mlBefore_ != 0) {
-			effML_ = mlCount_/mlBefore_;
+			effML_ = wmlCount_/mlBefore_;
 			deff_ml = sqrt(effML_*(1-effML_)/mlBefore_);
 		}
 

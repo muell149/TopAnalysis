@@ -119,6 +119,12 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 		ltrackCorr_ = fs->make<TH1F>(nam.name(hist2, "lepTopTrackCorr"),
 				nam.name("lepTopTrackCorr"), ptBins_.size()-1, 0.,
 				ptBins_.size()-1*1.0);
+		hptCorr_ = fs->make<TH1F>(nam.name(hist2, "hadTopPtCorr"),
+				nam.name("hadTopPtCorr"), ptBins_.size()-1, 0., ptBins_.size()
+						-1*1.0);
+		lptCorr_ = fs->make<TH1F>(nam.name(hist2, "lepTopPtCorr"),
+				nam.name("lepTopPtCorr"), ptBins_.size()-1, 0., ptBins_.size()
+						-1*1.0);
 	}
 	minDPhiMETJet_ = fs->make<TH1F>(nam.name(hist, "minDeltaPhiMETJets"),
 			nam.name("minDeltaPhiMETJets"), 100, -4., 4.);
