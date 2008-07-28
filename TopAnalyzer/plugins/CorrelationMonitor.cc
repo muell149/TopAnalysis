@@ -1,66 +1,15 @@
 #include "TopAnalysis/TopAnalyzer/plugins/CorrelationMonitor.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-//IsolationMonitor::IsolationMonitor(std::string name) {
-//	edm::Service<TFileService> fs;
-//	if ( !fs) {
-//		throw edm::Exception( edm::errors::Configuration,
-//				"TFile Service is not registered in cfg file" );
-//	}
-//	//new
-//	name_ = name;
-//	//string -> const char*
-//	std::string t = "iso_" + name + "_";
-//	NameScheme nam(t.c_str());
-//	trackIsoMET_ = fs->make<TH2F>(nam.name("TrackIsoMETCorrelation"),
-//			nam.name("TrackIsoMETCorrelation"), 300, 0., 300., 60, 0., 60.);
-//	caloIsoMET_ = fs->make<TH2F>(nam.name("CaloIsoMETCorrelation"),
-//			nam.name("CaloIsoMETCorrelation"), 300, 0., 300., 60, 0., 60.);
-//	//box and temperature plots
-//	TStyle *st = new TStyle();
-//	st->SetPalette(1);
-//	trackIsoMET_->SetDrawOption("COLZ");
-//	caloIsoMET_->SetDrawOption("COLZ");
-//	//	minDisJetIsoMET_ = fs->make<TH2F>(nam.name("minDisJetIsoMETCorrelation"),
-//	//			nam.name("minDisJetIsoMETCorrelation"), 300, 0., 300., 300, 0., 300.);
-//}
-
 CorrelationMonitor::CorrelationMonitor() {
-	//	edm::Service<TFileService> fs;
-	//	if ( !fs) {
-	//		throw edm::Exception( edm::errors::Configuration,
-	//				"TFile Service is not registered in cfg file" );
-	//	}
-
-	//	NameScheme nam("iso");
-	//	trackIsoMET_ = fs->make<TH2F>(nam.name("TrackIsoMETCorrelation"),
-	//			nam.name("TrackIsoMETCorrelation"), 300, 0., 300., 60, 0., 60.);
-	//	caloIsoMET_ = fs->make<TH2F>(nam.name("CaloIsoMETCorrelation"),
-	//			nam.name("CaloIsoMETCorrelation"), 300, 0., 300., 60, 0., 60.);
-	//box and temperature plots
-	//		trackIsoMET_->SetDrawOption("COLZ");
-	//		caloIsoMET_->SetDrawOption("COLZ");
-	//	minDisJetIsoMET_ = fs->make<TH2F>(nam.name("minDisJetIsoMETCorrelation"),
-	//			nam.name("minDisJetIsoMETCorrelation"), 300, 0., 300., 300, 0., 300.);
 }
 CorrelationMonitor::~CorrelationMonitor() {
 }
 
-void CorrelationMonitor::fill(const pat::Muon& topmu, const pat::MET& met,
-		double weight) {
-	//	cout << "MET: " << met.pt() << endl;
-	//	cout << "trackiso: " << topmu.getTrackIso() << endl;
-	//	cout << "caloist: " << topmu.getCaloIso() << endl;
-	//	cout << "weight: " << weight << endl;
-	//	trackIsoMET_->Fill(met.pt(), topmu.trackIso(), weight);
-	//	caloIsoMET_->Fill(met.pt(), topmu.caloIso(), weight);
-	//	minDisJetIsoMET_->Fill(topmu.getTrackIso(), met.pt(), weight);
-}
-
 void CorrelationMonitor::fill(std::string name, double v1, double v2,
 		double weight) {
-	map<string,TH2F*>::iterator iter = histos_.find(name);
-	if (iter != histos_.end() ) {
+	map<string, TH2F*>::iterator iter = histos_.find(name);
+	if (iter != histos_.end()) {
 		iter->second->Fill(v1, v2, weight);
 	}
 }
@@ -70,16 +19,7 @@ void CorrelationMonitor::book(ofstream& file) {
 }
 
 void CorrelationMonitor::printCorrelation() {
-	//	cout << trackIsoMET_->GetTitle() << "Track Corr: "
-	//			<< trackIsoMET_->GetCorrelationFactor(1, 2) << endl;
-	//	cout << caloIsoMET_->GetTitle() << "Calo Corr: "
-	//			<< caloIsoMET_->GetCorrelationFactor(1, 2) << endl;
-	//	cout << trackIsoMET_->GetTitle() << "Track Conv: "
-	//			<< trackIsoMET_->GetCovariance(1, 2) << endl;
-	//	cout << caloIsoMET_->GetTitle() << "Calo Conv: "
-	//			<< caloIsoMET_->GetCovariance(1, 2) << endl;
-
-	map<string,TH2F*>::iterator iter;
+	map<string, TH2F*>::iterator iter;
 	for (iter = histos_.begin(); iter != histos_.end(); ++iter) {
 		cout << iter->second->GetTitle() << " " << iter->first << " Cor. "
 				<< iter->second->GetCorrelationFactor(1, 2) << endl;
@@ -97,19 +37,45 @@ Double_t CorrelationMonitor::getTrackCorrelationFactor() {
 }
 
 Double_t CorrelationMonitor::getCorrelationFactor(std::string name) {
-	map<string,TH2F*>::iterator iter = histos_.find(name);
-	if (iter != histos_.end() ) {
+	map<string, TH2F*>::iterator iter = histos_.find(name);
+	if (iter != histos_.end()) {
 		return iter->second->GetCorrelationFactor(1, 2);
 	} else {
 		return -2.;// factor goes from -1 to 1
 	}
 }
 
-void CorrelationMonitor::addHist(string name, TH2F* hist) {
-	//	std::string t = "iso_" + name_ + "_"+hist->GetName();
-	//	hist->SetName(t.c_str());
-	//	t = "iso_" + name_ + "_"+hist->GetTitle();
-	//	hist->SetTitle(t.c_str());
+Double_t CorrelationMonitor::getCorrelationError(std::string name) {
+	map<string, TH2F*>::iterator iter = histos_.find(name);
+	Double_t corr = -2.;
+	Double_t rms1 = 0.;
+	Double_t rms2 = 0.;
+	Double_t errrms1 = 0.;
+	Double_t errrms2 = 0.;
+	Double_t err2cov = 0.;
+	Double_t cov = 0.;
+	Double_t stats[7];
+	if (iter != histos_.end()) {
+		corr = iter->second->GetCorrelationFactor(1, 2);
+		rms1 = iter->second->GetRMS(1);
+		rms2 = iter->second->GetRMS(2);
+		errrms1 = iter->second->GetRMSError(1);
+		errrms2 = iter->second->GetRMSError(2);
+		iter->second->GetStats(stats);
+	}
+	if (rms1 == 0)
+		return 0;
+	if (rms2 == 0)
+		return 0;
+	//squared error
+	err2cov = stats[1];
+	Double_t rel1 = errrms1/rms1;
+	Double_t rel2 = errrms2/rms2;
 
+	return sqrt((rel1^2 + rel2^2)*corr + err2cov/rms1^2/rms2^2);
+}
+
+void CorrelationMonitor::addHist(string name, TH2F* hist) {
+	hist->SetDrawOption("COLZ");
 	histos_.insert(make_pair(name, hist));
 }
