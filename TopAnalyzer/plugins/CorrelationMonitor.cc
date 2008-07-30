@@ -53,7 +53,7 @@ Double_t CorrelationMonitor::getCorrelationError(std::string name) {
 	Double_t errrms1 = 0.;
 	Double_t errrms2 = 0.;
 	Double_t err2cov = 0.;
-	Double_t cov = 0.;
+// 	Double_t cov = 0.;
 	Double_t stats[7];
 	if (iter != histos_.end()) {
 		corr = iter->second->GetCorrelationFactor(1, 2);
@@ -72,7 +72,7 @@ Double_t CorrelationMonitor::getCorrelationError(std::string name) {
 	Double_t rel1 = errrms1/rms1;
 	Double_t rel2 = errrms2/rms2;
 
-	return sqrt((rel1^2 + rel2^2)*corr + err2cov/rms1^2/rms2^2);
+	return sqrt((rel1*rel1 + rel2*rel2)*corr + err2cov/rms1*rms1/rms2*rms2);
 }
 
 void CorrelationMonitor::addHist(string name, TH2F* hist) {

@@ -37,6 +37,6 @@ public:
 
 private:
 	std::map<string, TH2F*> histos_;
-	const std::string drawOption_ = "COLZ";
+// 	const std::string drawOption_ = "COLZ";
 };
 #endif
