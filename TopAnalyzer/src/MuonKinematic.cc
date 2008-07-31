@@ -3,15 +3,13 @@
 
 /// constructor for FWLite analyzer
 MuonKinematic::MuonKinematic(double dRMax):
-  jets_(), towers_(), tracks_(), dRMax_(dRMax)
+  jets_(), dRMax_(dRMax)
 { 
 }
 
 /// constructor for full FW analyzer
 MuonKinematic::MuonKinematic(const edm::ParameterSet& cfg):
   jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) ),
-  towers_( cfg.getParameter<edm::InputTag>( "towers" ) ),
-  tracks_( cfg.getParameter<edm::InputTag>( "tracks" ) ),  
   dRMax_ ( cfg.getParameter<double>( "dRMax" ) )  
 {
 }
@@ -25,23 +23,13 @@ MuonKinematic::fill(const edm::Event& evt, const std::vector<pat::Muon>& muons, 
   // jet isolation
   edm::Handle<std::vector<pat::Jet> > jets; 
   evt.getByLabel(jets_, jets);
-
-  // track isolation
-  edm::Handle<reco::TrackCollection> tracks;
-  evt.getByLabel(tracks_, tracks);
   
-  // calo isolation
-  edm::Handle<reco::CandidateCollection> towers;
-  evt.getByLabel(towers_, towers);
-  
-  fill(*jets, *tracks, *towers, muons, weight);
+  fill(*jets, muons, weight);
 }
 
 /// fill interface for FWLite analyzer
 void
 MuonKinematic::fill(const std::vector<pat::Jet>& jets, 
-		    const reco::TrackCollection& tracks, 
-		    const reco::CandidateCollection& towers,
 		    const std::vector<pat::Muon>& muons, const double& weight=1.)
 {
   std::vector<pat::Muon>::const_iterator muon=muons.begin();
@@ -76,68 +64,35 @@ MuonKinematic::fill(const std::vector<pat::Jet>& jets,
     if( minDR_10>=0 ) isoJet10_->Fill( minDR_10, weight );
     if( minDR_15>=0 ) isoJet15_->Fill( minDR_15, weight );
     if( minDR_20>=0 ) isoJet20_->Fill( minDR_20, weight );
+    
+    //---------------------------------------------
+    // track & calo isolation
+    //---------------------------------------------
+    const pat::IsoDeposit *trackDep=0, *ecalDep=0, *hcalDep=0;  
+    trackDep = muon->trackerIsoDeposit();
+    ecalDep  = muon->ecalIsoDeposit();
+    hcalDep  = muon->hcalIsoDeposit();
+    
+    // fill profiles
+    double dR=-0.1;
+    for(unsigned idx=0; idx<42; ++idx){
+      dR+=0.05;
+      dRCalN_ ->Fill(dR, hcalDep ->depositAndCountWithin(dR).second );
+      dRCalPt_->Fill(dR, hcalDep ->depositAndCountWithin(dR).first  );
+      dRTrkN_ ->Fill(dR, trackDep->depositAndCountWithin(dR).second );
+      dRTrkPt_->Fill(dR, trackDep->depositAndCountWithin(dR).first  );
+    }
+    // fill summed deposits 
+    double stdDR = 0.3;
+    double stdThreshold = 0.3;
+    isoCalN_ ->Fill( hcalDep->depositAndCountWithin(stdDR, reco::MuIsoDeposit::Vetos(), stdThreshold).second, weight );
+    isoTrkN_ ->Fill( hcalDep->depositAndCountWithin(stdDR, reco::MuIsoDeposit::Vetos(), stdThreshold).second, weight );
+    isoTrkPt_->Fill( muon->trackIso(), weight );
+    isoCalPt_->Fill( muon->caloIso (), weight );
 
-    //---------------------------------------------
-    // calo isolation
-    //---------------------------------------------
-    
-    // count number of towers in cone
-    int nTowers = 0;
-    for(reco::CandidateCollection::const_iterator tower = towers.begin(); 
-	tower != towers.end(); ++tower) {
-      double dR=deltaR( muon->eta(), muon->phi(), tower->eta(), tower->phi() );
-      dRCalN_ ->Fill(dR);
-      dRCalPt_->Fill(dR, tower->et());
-      if(dR<dRMax_)++nTowers;
-    }
-    isoCalN_->Fill(nTowers, weight);
-    
-    //---------------------------------------------
-    // track isolation
-    //---------------------------------------------
-
-    // search for track closest to the muon
-    double dRmin = -1.;
-    for(reco::TrackCollection::const_iterator track = tracks.begin(); 
-	track != tracks.end(); ++track) {
-      double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
-      if(dRmin<0 || dR<dRmin) dRmin=dR;
-    }
-    closestCtf_->Fill(TMath::Log10(dRmin), weight);
-    
-    // count number of tracks in cone
-    int nTracks = 0;
-    for(reco::TrackCollection::const_iterator track = tracks.begin(); 
-	track != tracks.end(); ++track) {
-      double dR=deltaR( muon->eta(), muon->phi(), track->eta(), track->phi() );
-      if( dR==dRmin) 
-	continue;
-      dRTrkN_->Fill(dR);
-      if(track->pt()<100.)
-	dRTrkPt_->Fill(dR, track->pt());    
-      if(dR<dRMax_) ++nTracks;
-    }
-    isoTrkN_->Fill(nTracks, weight);
-
-    //test
-    double offset=-0.1;
-    for(int i=0; i<42; ++i){
-      offset+=i*(2.1/42);
-      std::cout << "isoDeposit: " << offset << " : " << muon->trackerIsoDeposit()-> depositWithin(offset);
-    }
-    
-    //---------------------------------------------
-    // fill std isolation plots
-    //---------------------------------------------
-    isoTrk_ ->Fill( muon->trackIso(), weight );
-    isoCal_ ->Fill( muon->caloIso (), weight );
-    isoEcal_->Fill( muon->ecalIso (), weight );
-    isoHcal_->Fill( muon->hcalIso (), weight );
-    
+    // fill correlation plots   
     ptVsTrkIso_ ->Fill( muon->pt(), muon->trackIso() );
     ptVsCalIso_ ->Fill( muon->pt(), muon->caloIso () );
-    ptVsEcalIso_->Fill( muon->pt(), muon->ecalIso () );
-    ptVsHcalIso_->Fill( muon->pt(), muon->hcalIso () );
   }
 }
 
@@ -157,22 +112,17 @@ MuonKinematic::book()
   isoJet10_  = new TH1F(iso.name( "isoJet10"), iso.name("isoJet10"), 80,   0.,  4.);
   isoJet15_  = new TH1F(iso.name( "isoJet15"), iso.name("isoJet15"), 80,   0.,  4.);
   isoJet20_  = new TH1F(iso.name( "isoJet20"), iso.name("isoJet20"), 80,   0.,  4.);
-  isoTrk_    = new TH1F(iso.name( "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,  5.);
-  isoCal_    = new TH1F(iso.name( "isoCal"  ), iso.name("isoCal"  ), 40, -10., 30.);
-  isoEcal_   = new TH1F(iso.name( "isoEcal" ), iso.name("isoEcal" ), 40, -10., 30.);
-  isoHcal_   = new TH1F(iso.name( "isoHcal" ), iso.name("isoHcal" ), 40, -10., 30.);
+  isoTrkPt_  = new TH1F(iso.name( "isoTrkPt"), iso.name("isoTrkPt"), 60,  -1.,  5.);
+  isoCalPt_  = new TH1F(iso.name( "isoCalPt"), iso.name("isoCalPt"), 40, -10., 30.);
+  isoTrkN_   = new TH1F(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
+  isoCalN_   = new TH1F(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
   dRTrkPt_   = new TH1F(iso.name( "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,  2.);
   dRTrkN_    = new TH1F(iso.name( "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,  2.);
   dRCalPt_   = new TH1F(iso.name( "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,  2.);
   dRCalN_    = new TH1F(iso.name( "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,  2.);
-  isoTrkN_   = new TH1F(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
-  isoCalN_   = new TH1F(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
-  closestCtf_= new TH1F(iso.name( "closestCtf" ), iso.name("closestCtf" ), 25, -6., -1.);
 
   ptVsTrkIso_ = new TH2F(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
   ptVsCalIso_ = new TH2F(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
-  ptVsEcalIso_= new TH2F(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
-  ptVsHcalIso_= new TH2F(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
 }
 
 /// book for full FW
@@ -191,22 +141,17 @@ MuonKinematic::book(edm::Service<TFileService>& fs)
   isoJet10_= fs->make<TH1F>(iso.name( "isoJet10"), iso.name("isoJet10"), 80,   0.,  4.);
   isoJet15_= fs->make<TH1F>(iso.name( "isoJet15"), iso.name("isoJet15"), 80,   0.,  4.);
   isoJet20_= fs->make<TH1F>(iso.name( "isoJet20"), iso.name("isoJet20"), 80,   0.,  4.);
-  isoTrk_  = fs->make<TH1F>(iso.name( "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,  5.);
-  isoCal_  = fs->make<TH1F>(iso.name( "isoCal"  ), iso.name("isoCal"  ), 40, -10., 30.);
-  isoEcal_ = fs->make<TH1F>(iso.name( "isoEcal" ), iso.name("isoEcal" ), 40, -10., 30.);
-  isoHcal_ = fs->make<TH1F>(iso.name( "isoHcal" ), iso.name("isoHcal" ), 40, -10., 30.);
+  isoTrkPt_= fs->make<TH1F>(iso.name( "isoTrkPt"), iso.name("isoTrkPt"), 60,  -1.,  5.);
+  isoCalPt_= fs->make<TH1F>(iso.name( "isoCalPt"), iso.name("isoCalPt"), 40, -10., 30.);
+  isoTrkN_ = fs->make<TH1F>(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
+  isoCalN_ = fs->make<TH1F>(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
   dRTrkPt_ = fs->make<TH1F>(iso.name( "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,  2.);
   dRTrkN_  = fs->make<TH1F>(iso.name( "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,  2.);
   dRCalPt_ = fs->make<TH1F>(iso.name( "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,  2.);
   dRCalN_  = fs->make<TH1F>(iso.name( "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,  2.);
-  isoTrkN_ = fs->make<TH1F>(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
-  isoCalN_ = fs->make<TH1F>(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
-  closestCtf_= fs->make<TH1F>(iso.name( "closestCtf" ), iso.name("closestCtf" ), 25, -6., -1.);
 
   ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
   ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
-  ptVsEcalIso_= fs->make<TH2F>(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
-  ptVsHcalIso_= fs->make<TH2F>(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
 }
 
 /// book for full FW with output stream
@@ -225,22 +170,17 @@ MuonKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
   isoJet10_= fs->make<TH1F>(iso.name( file, "isoJet10"), iso.name("isoJet10"), 80,   0.,  4.);
   isoJet15_= fs->make<TH1F>(iso.name( file, "isoJet15"), iso.name("isoJet15"), 80,   0.,  4.);
   isoJet20_= fs->make<TH1F>(iso.name( file, "isoJet20"), iso.name("isoJet20"), 80,   0.,  4.);
-  isoTrk_  = fs->make<TH1F>(iso.name( file, "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,  5.);
-  isoCal_  = fs->make<TH1F>(iso.name( file, "isoCal"  ), iso.name("isoCal"  ), 40, -10., 30.);
-  isoEcal_ = fs->make<TH1F>(iso.name( file, "isoEcal" ), iso.name("isoEcal" ), 40, -10., 30.);
-  isoHcal_ = fs->make<TH1F>(iso.name( file, "isoHcal" ), iso.name("isoHcal" ), 40, -10., 30.);
+  isoTrkPt_= fs->make<TH1F>(iso.name( file, "isoTrkPt"), iso.name("isoTrkPt"), 60,  -1.,  5.);
+  isoCalPt_= fs->make<TH1F>(iso.name( file, "isoCalPt"), iso.name("isoCalPt"), 40, -10., 30.);
+  isoTrkN_ = fs->make<TH1F>(iso.name( file, "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
+  isoCalN_ = fs->make<TH1F>(iso.name( file, "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
   dRTrkPt_ = fs->make<TH1F>(iso.name( file, "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,  2.);
   dRTrkN_  = fs->make<TH1F>(iso.name( file, "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,  2.);
   dRCalPt_ = fs->make<TH1F>(iso.name( file, "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,  2.);
   dRCalN_  = fs->make<TH1F>(iso.name( file, "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,  2.);
-  isoTrkN_ = fs->make<TH1F>(iso.name( file, "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
-  isoCalN_ = fs->make<TH1F>(iso.name( file, "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
-  closestCtf_= fs->make<TH1F>(iso.name( file, "closestCtf" ), iso.name("closestCtf" ), 25, -6., -1.);
 
   ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
   ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
-  ptVsEcalIso_= fs->make<TH2F>(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
-  ptVsHcalIso_= fs->make<TH2F>(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
 }
 
 /// write to file and free allocated space for FWLite
@@ -264,21 +204,18 @@ MuonKinematic::write(const char* filename, const char* directory)
   isoJet10_->Write( );
   isoJet15_->Write( );
   isoJet20_->Write( );
-  isoTrk_  ->Write( );
-  isoCal_  ->Write( );
-  isoEcal_ ->Write( );
-  isoHcal_ ->Write( );
+  isoTrkPt_->Write( );
+  isoCalPt_->Write( );
+  isoTrkN_ ->Write( );
+  isoCalN_ ->Write( );
   dRTrkPt_ ->Write( );
   dRTrkN_  ->Write( );
   dRCalPt_ ->Write( );
   dRCalN_  ->Write( );
-  closestCtf_ ->Write( );
 
   /// correlations
   ptVsTrkIso_ ->Write( );
   ptVsCalIso_ ->Write( );
-  ptVsEcalIso_->Write( );
-  ptVsHcalIso_->Write( );
 
   outFile.Close();
 
@@ -294,19 +231,16 @@ MuonKinematic::write(const char* filename, const char* directory)
   delete isoJet10_;
   delete isoJet15_;
   delete isoJet20_;
-  delete isoTrk_;
-  delete isoCal_;
-  delete isoEcal_;
-  delete isoHcal_;
+  delete isoTrkPt_;
+  delete isoCalPt_;
+  delete isoTrkN_;
+  delete isoCalN_;
   delete dRTrkPt_;
   delete dRTrkN_;
   delete dRCalPt_;
   delete dRCalN_;
-  delete closestCtf_;
 
   /// correlations
   delete ptVsTrkIso_;
   delete ptVsCalIso_;
-  delete ptVsEcalIso_;
-  delete ptVsHcalIso_;
 }

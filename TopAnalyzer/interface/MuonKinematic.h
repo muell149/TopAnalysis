@@ -39,8 +39,6 @@ class MuonKinematic{
   void book(edm::Service<TFileService>&, ofstream&);
   void fill(const edm::Event&, const std::vector<pat::Muon>&, const double&);
   void fill(const std::vector<pat::Jet>& jets,
-	    const reco::TrackCollection& tracks, 
-	    const reco::CandidateCollection& towers,
 	    const std::vector<pat::Muon>& muons, const double&);
   void norm(){ 
     dRTrkPt_->Scale(1./dRTrkPt_->GetEntries()); 
@@ -53,7 +51,7 @@ class MuonKinematic{
  private:
 
   // additional evt content/steerings
-  edm::InputTag jets_, towers_, tracks_;
+  edm::InputTag jets_;
   double dRMax_;
 
   TH1F *en_;
@@ -66,22 +64,17 @@ class MuonKinematic{
   TH1F *isoJet10_;
   TH1F *isoJet15_;
   TH1F *isoJet20_;
-  TH1F *isoTrk_;
-  TH1F *isoCal_;
-  TH1F *isoEcal_;
-  TH1F *isoHcal_;
-  TH1F *dRTrkPt_;
-  TH1F *dRTrkN_;
-  TH1F *dRCalPt_;
-  TH1F *dRCalN_;
-  TH1F *isoCalN_;
+  TH1F *isoTrkPt_;
+  TH1F *isoCalPt_;
   TH1F *isoTrkN_;
-  TH1F *closestCtf_;
+  TH1F *isoCalN_;
+  TH1F *dRTrkPt_;
+  TH1F *dRCalPt_;
+  TH1F *dRTrkN_;
+  TH1F *dRCalN_;
 
   TH2F *ptVsTrkIso_;
   TH2F *ptVsCalIso_;
-  TH2F *ptVsEcalIso_;
-  TH2F *ptVsHcalIso_;
 };
 
 #endif

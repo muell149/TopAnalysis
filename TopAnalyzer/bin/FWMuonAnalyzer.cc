@@ -50,18 +50,12 @@ int main(int argc, char* argv[])
 
     fwlite::Handle<std::vector<pat::Jet> > jets;
     jets.getByLabel(event, "selectedLayer1Jets");
-
-    fwlite::Handle<reco::TrackCollection> tracks;
-    tracks.getByLabel(event, "ctfWithMaterialTracks");    
-
-    fwlite::Handle<reco::CandidateCollection> towers;
-    towers.getByLabel(event, "caloTowers");
     
     // -------------------------------------------------  
     if(ievt>0 && ievt%100==0) std::cout << "  processing event: " << ievt << std::endl;
     // -------------------------------------------------  
     
-    mukin.fill( *(jets.ptr()), *(tracks.ptr()), *(towers.ptr()), *(muons.ptr()), 1.);
+    mukin.fill( *(jets.ptr()), *(muons.ptr()), 1.);
   }
   // -------------------------------------------------  
   std::cout << "close file" << std::endl;
