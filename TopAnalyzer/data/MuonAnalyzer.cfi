@@ -20,8 +20,6 @@ module analyzeMuon = MuonAnalyzer{
 #---------------------------------------------
   PSet kin = { 
     InputTag jets   = allLayer1Jets
-    InputTag towers = caloTowers
-    InputTag tracks = ctfWithMaterialTracks
     double dRMax    = 0.1
   }
 #---------------------------------------------
