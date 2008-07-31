@@ -12,7 +12,7 @@
 class CorrelationMonitor {
 public:
 	explicit CorrelationMonitor();
-//	IsolationMonitor(std::string);
+	//	IsolationMonitor(std::string);
 	~CorrelationMonitor();
 	void book(ofstream& file);
 
@@ -26,17 +26,15 @@ public:
 	 */
 	void printCorrelation();
 	/**
-	 * Gives the correlation-factors of the histograms in a
-	 * map<histogramname,correlation-factor>
+	 * Gives the correlation-factor of the histograms named 'string'
 	 */
-//	map<string,double> getCorrelationFactors();
-	Double_t getCaloCorrelationFactor();
-	Double_t getTrackCorrelationFactor();
 	Double_t getCorrelationFactor(std::string);
+	/**
+	 * Gives the correlation-factor error of the histograms named 'string'
+	 */
 	Double_t getCorrelationError(std::string);
 
 private:
 	std::map<string, TH2F*> histos_;
-// 	const std::string drawOption_ = "COLZ";
 };
 #endif

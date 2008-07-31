@@ -28,14 +28,6 @@ void CorrelationMonitor::printCorrelation() {
 	}
 }
 
-Double_t CorrelationMonitor::getCaloCorrelationFactor() {
-	return -2.;//caloIsoMET_->GetCorrelationFactor(1, 2);
-}
-
-Double_t CorrelationMonitor::getTrackCorrelationFactor() {
-	return -2.;//trackIsoMET_->GetCorrelationFactor(1, 2);
-}
-
 Double_t CorrelationMonitor::getCorrelationFactor(std::string name) {
 	map<string, TH2F*>::iterator iter = histos_.find(name);
 	if (iter != histos_.end()) {
@@ -53,7 +45,6 @@ Double_t CorrelationMonitor::getCorrelationError(std::string name) {
 	Double_t errrms1 = 0.;
 	Double_t errrms2 = 0.;
 	Double_t err2cov = 0.;
-// 	Double_t cov = 0.;
 	Double_t stats[7];
 	if (iter != histos_.end()) {
 		corr = iter->second->GetCorrelationFactor(1, 2);
@@ -72,7 +63,7 @@ Double_t CorrelationMonitor::getCorrelationError(std::string name) {
 	Double_t rel1 = errrms1/rms1;
 	Double_t rel2 = errrms2/rms2;
 
-	return sqrt((rel1*rel1 + rel2*rel2)*corr + err2cov/rms1*rms1/rms2*rms2);
+	return sqrt((rel1*rel1 + rel2*rel2)*corr + err2cov/rms1/rms1/rms2/rms2);
 }
 
 void CorrelationMonitor::addHist(string name, TH2F* hist) {
