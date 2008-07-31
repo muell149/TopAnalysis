@@ -1,17 +1,35 @@
 #include "TopAnalysis/TopAnalyzer/interface/ElecId.h"
 
-#include "FWCore/Utilities/interface/EDMException.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+/// constructor for FWLite analyzer
+ElecId::ElecId()  
+{
+}
+
+/// constructor for full FW analyzer
 ElecId::ElecId(const edm::ParameterSet& cfg):
   bshp_( cfg.getParameter<edm::InputTag>( "barrel_shape" ) ),
   eshp_( cfg.getParameter<edm::InputTag>( "endcap_shape" ) )  
 {
 }
 
+/// fill interface for full FW analyzer
 void
 ElecId::fill(const edm::Event& evt, const std::vector<pat::Electron>& elecs, const double& weight=1.)
+{
+  edm::Handle<reco::BasicClusterShapeAssociationCollection> barrel, endcap;
+  evt.getByLabel(bshp_, barrel);
+  evt.getByLabel(eshp_, endcap);
+
+ if(elecs.begin()==elecs.end()) return;
+ fill(*barrel, *endcap, elecs, weight);
+}
+
+/// fill interface for FWLite analyzer
+void
+ElecId::fill(const reco::BasicClusterShapeAssociationCollection& barrel, 
+	     const reco::BasicClusterShapeAssociationCollection& endcap, 
+	     const std::vector<pat::Electron>& elecs, const double& weight=1.)
 {
   std::vector<pat::Electron>::const_iterator elec=elecs.begin();
   if(elec!=elecs.end()){
@@ -39,33 +57,46 @@ ElecId::fill(const edm::Event& evt, const std::vector<pat::Electron>& elecs, con
 			elec->TrackPositionAtCalo().Z());
     drtk_->Fill( (clus->position()-tPos).R(), weight );  
     
-    edm::Handle<reco::BasicClusterShapeAssociationCollection> barrel, endcap;
-    evt.getByLabel(bshp_, barrel);
-    evt.getByLabel(eshp_, endcap);
-
     reco::BasicClusterShapeAssociationCollection::const_iterator shapes;
-    
     // find the entry in the map corresponding to
     // the seed BasicCluster of the SuperCluster
     DetId id = clus->seed()->getHitsByDetId()[0];
     if (id.subdetId() == EcalBarrel) {
-      shapes = barrel->find(clus->seed());
+      shapes = barrel.find(clus->seed());
     }
     else {
-      shapes = endcap->find(clus->seed());
+      shapes = endcap.find(clus->seed());
     }    
     const reco::ClusterShapeRef& shp = shapes->val;
     s1os9_->Fill( shp->eMax()/shp->e3x3(), weight );
   }
 }
 
+/// book for FWLite
 void 
 ElecId::book()
 {
-  edm::Service<TFileService> fs;
-  if( !fs )
-    throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
+  NameScheme id("id");
+  eops_ = new TH1F(id.name("eops" ), id.name("eops" ), 50,   0.,   5.);
+  eopb_ = new TH1F(id.name("eopb" ), id.name("eopb" ), 50,   0.,   5.);
+  nocl_ = new TH1F(id.name("nocl" ), id.name("nocl" ), 20,   0.,  20.);
+  deta_ = new TH1F(id.name("deta" ), id.name("deta" ), 40,-0.02, 0.02);
+  dphi_ = new TH1F(id.name("dphi" ), id.name("dphi" ), 40,-0.02, 0.02);
+  hoem_ = new TH1F(id.name("hoem" ), id.name("hoem" ), 50,  -5.,   0.);
+  tdpt_ = new TH1F(id.name("tdpt" ), id.name("dpt"  ), 30, -1.5,  1.5);
+  tdeta_= new TH1F(id.name("tdeta"), id.name("deta" ), 30, -1.5,  1.5);
+  tdphi_= new TH1F(id.name("tdphi"), id.name("dphi" ), 30, -1.5,  1.5);
+  nohit_= new TH1F(id.name("nohit"), id.name("nohit"), 25,   0.,  25.);
+  nvhit_= new TH1F(id.name("nvhit"), id.name("nvhit"), 25,   0.,  25.);
+  chi2_ = new TH1F(id.name("chi2" ), id.name("chi2" ), 50,   0.,  10.);
+  drtk_ = new TH1F(id.name("drtrk"), id.name("drtrk"), 31, -0.1,   3.);
+  s1os9_= new TH1F(id.name("s1os9"), id.name("s1os9"), 25,   0.,   1.);
+}
 
+/// book for full FW
+void 
+ElecId::book(edm::Service<TFileService>& fs)
+{
   NameScheme id("id");
   eops_ = fs->make<TH1F>(id.name("eops" ), id.name("eops" ), 50,   0.,   5.);
   eopb_ = fs->make<TH1F>(id.name("eopb" ), id.name("eopb" ), 50,   0.,   5.);
@@ -83,13 +114,10 @@ ElecId::book()
   s1os9_= fs->make<TH1F>(id.name("s1os9"), id.name("s1os9"), 25,   0.,   1.);
 }
 
+/// book for full FW with output stream
 void 
-ElecId::book(ofstream& file)
+ElecId::book(edm::Service<TFileService>& fs, ofstream& file)
 {
-  edm::Service<TFileService> fs;
-  if( !fs )
-    throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
-
   NameScheme id("id");
   eops_ = fs->make<TH1F>(id.name(file, "eops" ), id.name("eops" ), 50,   0.,   5.);
   eopb_ = fs->make<TH1F>(id.name(file, "eopb" ), id.name("eopb" ), 50,   0.,   5.);
@@ -105,4 +133,48 @@ ElecId::book(ofstream& file)
   chi2_ = fs->make<TH1F>(id.name(file, "chi2" ), id.name("chi2" ), 50,   0.,  10.);
   drtk_ = fs->make<TH1F>(id.name(file, "drtrk"), id.name("drtrk"), 31, -0.1,   3.);
   s1os9_= fs->make<TH1F>(id.name(file, "s1os9"), id.name("s1os9"), 25,   0.,   1.);
+}
+
+/// write to file and free allocated space for FWLite
+void 
+ElecId::write(const char* filename, const char* directory)
+{
+  /// save histograms to file
+  TFile outFile( filename, "recreate" );
+  outFile.mkdir( directory );
+  outFile.cd( directory );
+
+  /// basic kinematic
+  eops_ ->Write( );
+  eopb_ ->Write( );
+  nocl_ ->Write( );
+  deta_ ->Write( );
+  dphi_ ->Write( );
+  hoem_ ->Write( );
+  tdpt_ ->Write( );
+  tdeta_->Write( );
+  tdphi_->Write( );
+  nohit_->Write( );
+  nvhit_->Write( );
+  chi2_ ->Write( );
+  drtk_ ->Write( );
+  s1os9_->Write( );
+
+  outFile.Close();
+
+  // free allocated space
+  delete eops_; 
+  delete eopb_; 
+  delete nocl_; 
+  delete deta_; 
+  delete dphi_;
+  delete hoem_; 
+  delete tdpt_; 
+  delete tdeta_; 
+  delete tdphi_; 
+  delete nohit_; 
+  delete nvhit_; 
+  delete chi2_;
+  delete drtk_; 
+  delete s1os9_; 
 }

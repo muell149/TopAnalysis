@@ -1,13 +1,22 @@
 #ifndef ObjectAnalyzer_h
 #define ObjectAnalyzer_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include <memory>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <iostream>
+
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "FWCore/Utilities/interface/EDMException.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
 template <typename Collection, typename Id, typename Kin, typename Res> 
 class ObjectAnalyzer : public edm::EDAnalyzer {
@@ -76,16 +85,20 @@ void ObjectAnalyzer<Collection, Id, Kin, Res>::analyze(const edm::Event& evt, co
 template <typename Collection, typename Id, typename Kin, typename Res> 
 void ObjectAnalyzer<Collection, Id, Kin, Res>::beginJob(const edm::EventSetup&)
 {
+  edm::Service<TFileService> fs;
+  if( !fs )
+    throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
+    
   if(hist_.empty()){
-    if( doId_ ) id_ ->book(    );
-    if( doKin_) kin_->book(    );
-    if( doRes_) res_->book(    );
+    if( doId_ ) id_ ->book(fs);
+    if( doKin_) kin_->book(fs);
+    if( doRes_) res_->book(fs);
   }
   else{
-    ofstream hist(hist_.c_str(), std::ios::out);
-    if( doId_ ) id_ ->book(hist);
-    if( doKin_) kin_->book(hist);
-    if( doRes_) res_->book(hist);
+    std::ofstream hist(hist_.c_str(), std::ios::out);
+    if( doId_ ) id_ ->book(fs, hist);
+    if( doKin_) kin_->book(fs, hist);
+    if( doRes_) res_->book(fs, hist);
   }
 }
 

@@ -1,17 +1,28 @@
 #include "TopAnalysis/TopAnalyzer/interface/JetKinematic.h"
 
-#include "FWCore/Utilities/interface/EDMException.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+/// constructor for FWLite analyzer
+JetKinematic::JetKinematic(int nJets):
+  nJets_(nJets)
+{
+}
 
+/// constructor for full FW analyzer
 JetKinematic::JetKinematic(const edm::ParameterSet& cfg):
   nJets_( cfg.getParameter<int>( "nJets" ) )
 {
 }
 
+/// fill interface for full FW analyzer
 void
 JetKinematic::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, const double& weight)
+{
+  fill(jets, weight);
+}
+
+/// fill interface for FWLite analyzer
+void
+JetKinematic::fill(const std::vector<pat::Jet>& jets, const double& weight)
 {
   double sumEt=0;
   unsigned int idx=0;
@@ -50,13 +61,36 @@ JetKinematic::fill(const edm::Event& evt, const std::vector<pat::Jet>& jets, con
   n40_ ->Fill( n40, weight );
 }
 
+/// book for FWLite
 void 
 JetKinematic::book()
 {
-  edm::Service<TFileService> fs;
-  if( !fs )
-    throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
+  NameScheme kin("kin");
+  allEn_ = new TH1F(kin.name("allE"  ), kin.name("allE"  ), 50, 0., 500.);
+  allEt_ = new TH1F(kin.name("allEt" ), kin.name("allEt" ), 30, 0., 300.);
+  allEta_= new TH1F(kin.name("allEta"), kin.name("allEta"), 35, -3.5,  3.5);
+  allPhi_= new TH1F(kin.name("allPhi"), kin.name("allPhi"), 35, -3.5,  3.5);
+  scalSum4_ = new TH1F(kin.name("scalSum4"), kin.name("scalSum4"), 40, 0., 800.);
+  scalSum6_ = new TH1F(kin.name("scalSum6"), kin.name("scalSum6"), 40, 0., 800.);
 
+  for(int idx=0; idx<nJets_; ++idx){
+    en_.push_back ( new TH1F(kin.name("e",  idx), kin.name("en",  idx), 50,   0., 500.) );
+    et_.push_back ( new TH1F(kin.name("et", idx), kin.name("et",  idx), 30,   0., 300.) );
+    eta_.push_back( new TH1F(kin.name("eta",idx), kin.name("eta", idx), 35, -3.5,  3.5) );
+    phi_.push_back( new TH1F(kin.name("phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
+  }
+
+  mult_= new TH1F(kin.name("n"  ), kin.name("n"  ), 21, 0., 20.);
+  n10_ = new TH1F(kin.name("n10"), kin.name("n10"), 21, 0., 20.);
+  n20_ = new TH1F(kin.name("n20"), kin.name("n20"), 21, 0., 20.);
+  n30_ = new TH1F(kin.name("n30"), kin.name("n30"), 21, 0., 20.);
+  n40_ = new TH1F(kin.name("n40"), kin.name("n40"), 21, 0., 20.);
+}
+
+/// book for full FW
+void 
+JetKinematic::book(edm::Service<TFileService>& fs)
+{
   NameScheme kin("kin");
   allEn_ = fs->make<TH1F>(kin.name("allE"  ), kin.name("allE"  ), 50, 0., 500.);
   allEt_ = fs->make<TH1F>(kin.name("allEt" ), kin.name("allEt" ), 30, 0., 300.);
@@ -79,13 +113,10 @@ JetKinematic::book()
   n40_ = fs->make<TH1F>(kin.name("n40"), kin.name("n40"), 21, 0., 20.);
 }
 
+/// book for full FW with output stream
 void 
-JetKinematic::book(ofstream& file)
+JetKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
 {
-  edm::Service<TFileService> fs;
-  if( !fs )
-    throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
-
   NameScheme kin("kin");
   allEn_ = fs->make<TH1F>(kin.name(file, "allE"  ), kin.name("allE"  ), 50, 0., 500.);
   allEt_ = fs->make<TH1F>(kin.name(file, "allEt" ), kin.name("allEt" ), 30, 0., 300.);
@@ -106,4 +137,30 @@ JetKinematic::book(ofstream& file)
   n20_ = fs->make<TH1F>(kin.name(file, "n20"), kin.name("n20"), 21, 0., 20.);
   n30_ = fs->make<TH1F>(kin.name(file, "n30"), kin.name("n30"), 21, 0., 20.);
   n40_ = fs->make<TH1F>(kin.name(file, "n40"), kin.name("n40"), 21, 0., 20.);
+}
+
+/// write to file and free allocated space for FWLite
+void 
+JetKinematic::write(const char* filename, const char* directory)
+{
+  /// save histograms to file
+  TFile outFile( filename, "recreate" );
+  outFile.mkdir( directory );
+  outFile.cd( directory );
+
+  /// basic kinematic
+  mult_->Write( );
+  n10_ ->Write( );
+  n20_ ->Write( );
+  n30_ ->Write( );
+  n40_ ->Write( );
+
+  outFile.Close();
+
+  // free allocated space
+  delete mult_;
+  delete n10_;
+  delete n20_;
+  delete n30_;
+  delete n40_;
 }
