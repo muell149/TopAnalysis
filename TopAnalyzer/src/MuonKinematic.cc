@@ -2,15 +2,14 @@
 
 
 /// constructor for FWLite analyzer
-MuonKinematic::MuonKinematic(double dRMax):
-  jets_(), dRMax_(dRMax)
+MuonKinematic::MuonKinematic():
+  jets_()
 { 
 }
 
 /// constructor for full FW analyzer
 MuonKinematic::MuonKinematic(const edm::ParameterSet& cfg):
-  jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) ),
-  dRMax_ ( cfg.getParameter<double>( "dRMax" ) )  
+  jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) )  
 {
 }
 

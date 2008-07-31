@@ -30,7 +30,7 @@ class MuonKinematic{
 
  public:
 
-  explicit MuonKinematic(double);
+  explicit MuonKinematic();
   explicit MuonKinematic(const edm::ParameterSet&);
   ~MuonKinematic(){};
 
@@ -52,7 +52,6 @@ class MuonKinematic{
 
   // additional evt content/steerings
   edm::InputTag jets_;
-  double dRMax_;
 
   TH1F *en_;
   TH1F *pt_;

@@ -20,7 +20,6 @@ module analyzeMuon = MuonAnalyzer{
 #---------------------------------------------
   PSet kin = { 
     InputTag jets   = allLayer1Jets
-    double dRMax    = 0.1
   }
 #---------------------------------------------
 # Resolution

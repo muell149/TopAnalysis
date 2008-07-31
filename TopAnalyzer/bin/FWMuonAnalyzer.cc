@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   setNiceStyle();
 
   // define some histograms 
-  MuonKinematic mukin(0.3);  
+  MuonKinematic mukin;  
   mukin.book();
 
   // -------------------------------------------------  
