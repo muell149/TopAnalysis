@@ -23,6 +23,15 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   evt.getByLabel(hypoKey_, hypoKeyHandle);
   TtSemiEvent::HypoKey& hypoKey = (TtSemiEvent::HypoKey&) *hypoKeyHandle;
 
+  if( !semiEvt->isHypoAvailable(hypoKey) ){
+    edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not available for this event";
+    return;
+  }
+  if( !semiEvt->isHypoValid(hypoKey) ){
+    edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
+    return;
+  }
+
   // -----------------------
   // fill histos for basic kinematic variables
   // -----------------------
