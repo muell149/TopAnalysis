@@ -117,10 +117,10 @@ void JetIsolationFilter<Collection>::summarize()
   for(unsigned int idx=0; idx<iso_.size(); ++idx)
     if(idx==0) cout << ::std::setw( 20 ) 
 		    << name_ << ": " 
-		    << " JetIsolation   < " << iso_[idx] << endl;
+		    << " JetIsolation   > " << iso_[idx] << endl;
     else       cout << ::std::setw( 20 ) 
 		    << ": " 
-		    << " JetIsolation   < " << iso_[idx] << endl;
+		    << " JetIsolation   > " << iso_[idx] << endl;
   cout << "------------------------------------------------------" << endl 
        << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
        << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
