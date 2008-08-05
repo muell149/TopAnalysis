@@ -31,6 +31,9 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   edm::InputTag semiEvt_;
   edm::InputTag hypoKey_;
   unsigned int nJetsMax_;
+  double maxSumDRGenMatch_;
+  double minProbKinFit_;
+  double minMVADisc_; 
   std::string hist_;
 
   void bookKinHistos      (edm::Service<TFileService>&, ofstream&);
@@ -73,16 +76,24 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   TH2F* hadPJetCorrel_;
   TH2F* lepBJetCorrel_;
 
+  TH1F* goodHypo_;
+
   TH1F* genMatchSumDR_;
   TH1F* genMatchSumPt_;
   TH1F* mvaDisc_;
+  TH1F* fitChi2_;
+  TH1F* fitProb_;
 
   TH2F* genMatchSumDRVsSumPt_;
   TH2F* genMatchSumDRVsHadWMass_;
   TH2F* genMatchSumDRVsHadTopMass_;
   TH2F* genMatchSumDRVsMVADisc_;
+  TH2F* genMatchSumDRVsFitProb_;
   TH2F* mvaDiscVsHadWMass_;
   TH2F* mvaDiscVsHadTopMass_;
+  TH2F* mvaDiscVsFitProb_;
+  TH2F* fitProbVsHadWMass_;
+  TH2F* fitProbVsHadTopMass_;
 
 };
 

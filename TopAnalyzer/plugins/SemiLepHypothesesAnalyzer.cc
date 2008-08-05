@@ -5,10 +5,13 @@
 #include "TopQuarkAnalysis/TopTools/interface/TtSemiEvtPartons.h"
 
 SemiLepHypothesesAnalyzer::SemiLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
-  semiEvt_ (cfg.getParameter<edm::InputTag>("semiEvent")),
-  hypoKey_ (cfg.getParameter<edm::InputTag>("hypoKey"  )),
-  nJetsMax_(cfg.getParameter<unsigned int> ("nJetsMax" )),
-  hist_    (cfg.getParameter<std::string>  ("hist"     ))
+  semiEvt_         (cfg.getParameter<edm::InputTag>("semiEvent"       )),
+  hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )),
+  nJetsMax_        (cfg.getParameter<unsigned int> ("nJetsMax"        )),
+  maxSumDRGenMatch_(cfg.getParameter<double>       ("maxSumDRGenMatch")),
+  minProbKinFit_   (cfg.getParameter<double>       ("minProbKinFit"   )),
+  minMVADisc_      (cfg.getParameter<double>       ("minMVADisc"      )),
+  hist_            (cfg.getParameter<std::string>  ("hist"            ))
 {
 }
 
@@ -23,14 +26,27 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   evt.getByLabel(hypoKey_, hypoKeyHandle);
   TtSemiEvent::HypoKey& hypoKey = (TtSemiEvent::HypoKey&) *hypoKeyHandle;
 
+  // -----------------------
+  // check if hypothesis is valid in this event
+  // and if it satisfies some quality criteria
+  // -----------------------
+
   if( !semiEvt->isHypoAvailable(hypoKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not available for this event";
-    return;
   }
   if( !semiEvt->isHypoValid(hypoKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
+  }
+  
+  if( !semiEvt->isHypoValid(hypoKey) ||
+      (hypoKey==TtSemiEvent::kGenMatch && semiEvt->genMatchSumDR()>maxSumDRGenMatch_) ||
+      (hypoKey==TtSemiEvent::kKinFit   && semiEvt->fitProb()<minProbKinFit_         ) ||
+      (hypoKey==TtSemiEvent::kMVADisc  && semiEvt->mvaDisc()<minMVADisc_            )
+      ) {
+    goodHypo_->Fill(0); // not a good hypothesis
     return;
   }
+  else goodHypo_->Fill(1); // good hypothesis
 
   // -----------------------
   // fill histos for basic kinematic variables
@@ -130,58 +146,58 @@ SemiLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs, ofstrea
 
   NameScheme ns("kin");
 
-  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopPt"  ), "p_{T} (t_{had}) [GeV]", 100,  0. , 500. ) );
-  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopEta" ), "#eta (t_{had})"       ,  60, -3. ,   3. ) );
-  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopPhi" ), "#phi (t_{had})"       ,  70, -3.5,   3.5) );
-  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopMass"), "M (t_{had}) [GeV]"    ,  60,  0. , 600. ) );
+  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopPt"  ), "p_{T} (t_{had}) [GeV]", 50,  0. , 500. ) );
+  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopEta" ), "#eta (t_{had})"       , 34, -3.4,   3.4) );
+  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopPhi" ), "#phi (t_{had})"       , 34, -3.4,   3.4) );
+  hadTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadTopMass"), "M (t_{had}) [GeV]"    , 30,  0. , 600. ) );
 
-  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWPt"  ), "p_{T} (W_{had}) [GeV]", 100,  0. , 500. ) );
-  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWEta" ), "#eta (W_{had})"       ,  60, -3. ,   3. ) );
-  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWPhi" ), "#phi (W_{had})"       ,  70, -3.5,   3.5) );
-  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWMass"), "M (W_{had}) [GeV]"    ,  50,  0. , 500. ) );
+  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWPt"  ), "p_{T} (W_{had}) [GeV]", 50,  0. , 500. ) );
+  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWEta" ), "#eta (W_{had})"       , 34, -3.4,   3.4) );
+  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWPhi" ), "#phi (W_{had})"       , 34, -3.4,   3.4) );
+  hadWKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadWMass"), "M (W_{had}) [GeV]"    , 25,  0. , 250. ) );
 
-  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBPt"  ), "p_{T} (b_{had}) [GeV]", 100,  0. , 500. ) );
-  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBEta" ), "#eta (b_{had})"       ,  60, -3. ,   3. ) );
-  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBPhi" ), "#phi (b_{had})"       ,  70, -3.5,   3.5) );
-  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBMass"), "M (b_{had}) [GeV]"    ,  60,  0. , 600. ) );
+  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBPt"  ), "p_{T} (b_{had}) [GeV]", 50,  0. , 500. ) );
+  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBEta" ), "#eta (b_{had})"       , 34, -3.4,   3.4) );
+  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBPhi" ), "#phi (b_{had})"       , 34, -3.4,   3.4) );
+  hadBKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadBMass"), "M (b_{had}) [GeV]"    , 30,  0. , 150. ) );
 
-  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQPt"  ), "p_{T} (q_{had}) [GeV]", 100,  0. , 500. ) );
-  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQEta" ), "#eta (q_{had})"       ,  60, -3. ,   3. ) );
-  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQPhi" ), "#phi (q_{had})"       ,  70, -3.5,   3.5) );
-  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQMass"), "M (q_{had}) [GeV]"    ,  60,  0. , 600. ) );
+  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQPt"  ), "p_{T} (q_{had}) [GeV]", 40,  0. , 400. ) );
+  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQEta" ), "#eta (q_{had})"       , 34, -3.4,   3.4) );
+  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQPhi" ), "#phi (q_{had})"       , 34, -3.4,   3.4) );
+  hadQKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadQMass"), "M (q_{had}) [GeV]"    , 20,  0. , 100. ) );
 
-  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPPt"  ), "p_{T} (#bar q_{had}) [GeV]", 100,  0. , 500. ) );
-  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPEta" ), "#eta (#bar q_{had})"       ,  60, -3. ,   3. ) );
-  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPPhi" ), "#phi (#bar q_{had})"       ,  70, -3.5,   3.5) );
-  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPMass"), "M (#bar q_{had}) [GeV]"    ,  60,  0. , 600. ) );
+  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPPt"  ), "p_{T} (#bar q_{had}) [GeV]", 40,  0. , 400. ) );
+  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPEta" ), "#eta (#bar q_{had})"       , 34, -3.4,   3.4) );
+  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPPhi" ), "#phi (#bar q_{had})"       , 34, -3.4,   3.4) );
+  hadPKin_.push_back( fs->make<TH1F>(ns.name(hist, "hadPMass"), "M (#bar q_{had}) [GeV]"    , 20,  0. , 100. ) );
 
-  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopPt"  ), "p_{T} (t_{lep}) [GeV]", 100,  0. , 500. ) );
-  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopEta" ), "#eta (t_{lep})"       ,  60, -3. ,   3. ) );
-  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopPhi" ), "#phi (t_{lep})"       ,  70, -3.5,   3.5) );
-  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopMass"), "M (t_{lep}) [GeV]"    ,  60,  0. , 600. ) );
+  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopPt"  ), "p_{T} (t_{lep}) [GeV]", 50,  0. , 500. ) );
+  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopEta" ), "#eta (t_{lep})"       , 34, -3.4,   3.4) );
+  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopPhi" ), "#phi (t_{lep})"       , 34, -3.4,   3.4) );
+  lepTopKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepTopMass"), "M (t_{lep}) [GeV]"    , 30,  0. , 600. ) );
 
-  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWPt"  ), "p_{T} (W_{lep}) [GeV]", 100,  0. , 500. ) );
-  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWEta" ), "#eta (W_{lep})"       ,  60, -3. ,   3. ) );
-  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWPhi" ), "#phi (W_{lep})"       ,  70, -3.5,   3.5) );
-  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWMass"), "M (W_{lep}) [GeV]"    ,  50,  0. , 500. ) );
+  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWPt"  ), "p_{T} (W_{lep}) [GeV]", 50,  0. , 500. ) );
+  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWEta" ), "#eta (W_{lep})"       , 34, -3.4,   3.4) );
+  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWPhi" ), "#phi (W_{lep})"       , 34, -3.4,   3.4) );
+  lepWKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepWMass"), "M (W_{lep}) [GeV]"    , 25,  0. , 250. ) );
 
-  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBPt"  ), "p_{T} (b_{lep}) [GeV]", 100,  0. , 500. ) );
-  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBEta" ), "#eta (b_{lep})"       ,  60, -3. ,   3. ) );
-  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBPhi" ), "#phi (b_{lep})"       ,  70, -3.5,   3.5) );
-  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBMass"), "M (b_{lep}) [GeV]"    ,  60,  0. , 600. ) );
+  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBPt"  ), "p_{T} (b_{lep}) [GeV]", 50,  0. , 500. ) );
+  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBEta" ), "#eta (b_{lep})"       , 34, -3.4,   3.4) );
+  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBPhi" ), "#phi (b_{lep})"       , 34, -3.4,   3.4) );
+  lepBKin_.push_back( fs->make<TH1F>(ns.name(hist, "lepBMass"), "M (b_{lep}) [GeV]"    , 30,  0. , 150. ) );
 
-  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonPt"  ), "p_{T} (lepton) [GeV]", 100,  0. , 500. ) );
-  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonEta" ), "#eta (lepton)"       ,  60, -3. ,   3. ) );
-  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonPhi" ), "#phi (lepton)"       ,  70, -3.5,   3.5) );
-  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonMass"), "M (lepton) [GeV]"    ,  60,  0. , 600. ) );
+  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonPt"  ), "p_{T} (lepton) [GeV]", 30,  0. , 300. ) );
+  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonEta" ), "#eta (lepton)"       , 34, -3.4,   3.4) );
+  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonPhi" ), "#phi (lepton)"       , 34, -3.4,   3.4) );
+  leptonKin_.push_back( fs->make<TH1F>(ns.name(hist, "leptonMass"), "M (lepton) [GeV]"    , 25,  0. ,  50. ) );
 
-  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriPt"  ), "p_{T} (neutrino) [GeV]", 100,  0. , 500. ) );
-  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriEta" ), "#eta (neutrino)"       ,  60, -3. ,   3. ) );
-  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriPhi" ), "#phi (neutrino)"       ,  70, -3.5,   3.5) );
-  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriMass"), "M (neutrino) [GeV]"    ,  60,  0. , 600. ) );  
+  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriPt"  ), "p_{T} (neutrino) [GeV]", 40,  0. , 400. ) );
+  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriEta" ), "#eta (neutrino)"       , 34, -3.4,   3.4) );
+  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriPhi" ), "#phi (neutrino)"       , 34, -3.4,   3.4) );
+  neutriKin_.push_back( fs->make<TH1F>(ns.name(hist, "neutriMass"), "M (neutrino) [GeV]"    , 25,  0. ,  50. ) );  
 
-  hadTopLepTopMassDiff = fs->make<TH1F>(ns.name(hist, "hadTopLepTopMassDiff"), "M (t_{had}) -  M (t_{lep}) [GeV]", 60, -300., 300);
-  hadWLepWMassDiff     = fs->make<TH1F>(ns.name(hist, "hadWLepWMassDiff"    ), "M (W_{had}) -  M (W_{lep}) [GeV]", 60, -300., 300);
+  hadTopLepTopMassDiff = fs->make<TH1F>(ns.name(hist, "hadTopLepTopMassDiff"), "M (t_{had}) -  M (t_{lep}) [GeV]", 40, -400., 400);
+  hadWLepWMassDiff     = fs->make<TH1F>(ns.name(hist, "hadWLepWMassDiff"    ), "M (W_{had}) -  M (W_{lep}) [GeV]", 40, -200., 200);
 
 }
 
@@ -265,9 +281,13 @@ SemiLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
 
   NameScheme ns("qual1D");
 
+  goodHypo_ = fs->make<TH1F>(ns.name(hist, "goodHypo"), "good hypothesis", 2, -0.5, 1.5);
+
   genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
   genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
   mvaDisc_       = fs->make<TH1F>(ns.name(hist, "mvaDisc"),       "MVA discrim."                        , 20, 0., 1.);
+  fitChi2_       = fs->make<TH1F>(ns.name(hist, "fitChi2"),       "#chi^{2} (kinFit)"                   , 20, 0., 2.);
+  fitProb_       = fs->make<TH1F>(ns.name(hist, "fitProb"),       "#chi^{2} probability (kinFit)"       , 20, 0., 1.);
 
   NameScheme ns2("qual2D");
 
@@ -275,8 +295,12 @@ SemiLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
   genMatchSumDRVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadWMass"),   "#Sigma #Delta R (genMatch) vs. M (W_{had}) [GeV] (genMatch)"        , 50, 0., 5., 50, 0., 500.);
   genMatchSumDRVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadTopMass"), "#Sigma #Delta R (genMatch) vs. M (t_{had}) [GeV] (genMatch)"        , 50, 0., 5., 60, 0., 600.);
   genMatchSumDRVsMVADisc_    = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsMVADisc"),    "#Sigma #Delta R (genMatch) vs. MVA discrim."                        , 50, 0., 5., 20, 0., 1.);
+  genMatchSumDRVsFitProb_    = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsFitProb"),    "#Sigma #Delta R (genMatch) vs. #chi^{2} probability (kinFit)"                      , 50, 0., 5., 20, 0., 1.);
   mvaDiscVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadWMass"),   "MVA discrim. vs. M (W_{had}) [GeV] (MVADisc)"  , 20, 0., 1., 50, 0., 500.);
   mvaDiscVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadTopMass"), "MVA discrim. vs. M (t_{had}) [GeV] (MVADisc)", 20, 0., 1., 60, 0., 600.);
+  mvaDiscVsFitProb_       = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsFitProb"), "MVA discrim. vs. #chi^{2} probability (kinFit)", 20, 0., 1., 20, 0., 1.);
+  fitProbVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "fitProbVsHadWMass"),   "#chi^{2} probability (kinFit) vs. M (W_{had}) [GeV] (MVADisc)"  , 20, 0., 1., 50, 0., 500.);
+  fitProbVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "fitProbVsHadTopMass"), "#chi^{2} probability (kinFit) vs. M (t_{had}) [GeV] (MVADisc)", 20, 0., 1., 60, 0., 600.);
 
 }
 
@@ -317,12 +341,21 @@ SemiLepHypothesesAnalyzer::fillQualityHistos(const TtSemiEvent& semiEvt)
   genMatchSumDR_->Fill( semiEvt.genMatchSumDR() );
   genMatchSumPt_->Fill( semiEvt.genMatchSumPt() );
   mvaDisc_      ->Fill( semiEvt.mvaDisc() );
+  fitChi2_      ->Fill( semiEvt.fitChi2() );
+  fitProb_      ->Fill( semiEvt.fitProb() );
 
   genMatchSumDRVsSumPt_     ->Fill( semiEvt.genMatchSumDR(), semiEvt.genMatchSumPt()                             );
   genMatchSumDRVsHadWMass_  ->Fill( semiEvt.genMatchSumDR(), semiEvt.hadronicW  (TtSemiEvent::kGenMatch)->mass() );
   genMatchSumDRVsHadTopMass_->Fill( semiEvt.genMatchSumDR(), semiEvt.hadronicTop(TtSemiEvent::kGenMatch)->mass() );
   genMatchSumDRVsMVADisc_   ->Fill( semiEvt.genMatchSumDR(), semiEvt.mvaDisc()                                   );
+  genMatchSumDRVsFitProb_   ->Fill( semiEvt.genMatchSumDR(), semiEvt.fitProb()                                   );
   mvaDiscVsHadWMass_        ->Fill( semiEvt.mvaDisc()      , semiEvt.hadronicW  (TtSemiEvent::kMVADisc)->mass()  );
   mvaDiscVsHadTopMass_      ->Fill( semiEvt.mvaDisc()      , semiEvt.hadronicTop(TtSemiEvent::kMVADisc)->mass()  );
+  mvaDiscVsFitProb_         ->Fill( semiEvt.mvaDisc()      , semiEvt.fitProb()                                   );
+
+  if( semiEvt.isHypoValid(TtSemiEvent::kKinFit) ) {
+    fitProbVsHadWMass_      ->Fill( semiEvt.fitProb()      , semiEvt.hadronicW   (TtSemiEvent::kKinFit)->mass()  );
+    fitProbVsHadTopMass_    ->Fill( semiEvt.fitProb()      , semiEvt.hadronicTop (TtSemiEvent::kKinFit)->mass()  );
+  }
 
 }
