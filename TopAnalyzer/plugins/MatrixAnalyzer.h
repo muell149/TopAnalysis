@@ -3,7 +3,7 @@
 /**
  *  class:   MatrixAnalyzer.h
  * @author: Lukas Kreczko, Uni Hamburg (lkreczko@mail.desy.de)
- * version $Id: MatrixAnalyzer.h,v 1.1 2008/07/14 05:26:28 kreczko Exp $
+ * version $Id: MatrixAnalyzer.h,v 1.2 2008/07/24 14:07:11 kreczko Exp $
 
  ________________________________________________________________**/
 #include "FWCore/Framework/interface/Event.h"
@@ -24,7 +24,7 @@
 #include "TopAnalysis/TopUtils/interface/RootSystem.h"
 #include "TopAnalysis/TopUtils/interface/RootHistograms.h"
 
-class MatrixAnalyzer : public edm::EDAnalyzer {
+class MatrixAnalyzer: public edm::EDAnalyzer {
 
 public:
 	explicit MatrixAnalyzer(const edm::ParameterSet&);
@@ -39,7 +39,7 @@ private:
 	virtual Double_t getHist(TString, TString, int&);
 	//	virtual int pdgOfMother(pat::Muon matchedMuon,edm::Handle<reco::GenParticleCollection> genParticles);
 	//	virtual bool matchedMuonIsContainedInDaughter(reco::GenParticleCollection::const_iterator part, reco::Muon muon);
-	template <typename T1, typename T2> void log(T1 msg, T2 from, bool debug) {
+	template<typename T1, typename T2> void log(T1 msg, T2 from, bool debug) {
 		if (debug && debug_ || !debug)
 			cout << from << ": " << msg << endl;
 	}
@@ -72,6 +72,61 @@ private:
 
 	//TODO: boolean for before and after. use same histogramms, but different bins
 	//TODO: try to find a way to store double directly in root file
+
+	class LeptonCounter {
+	public:
+		LeptonCounter() {
+			slep = 0;
+			dlep = 0;
+			mlep = 0;
+			had = 0;
+		}
+
+		void addSemiLeptonic() {
+			slep++;
+		}
+
+		void addDiLeptonic() {
+			dlep++;
+		}
+
+		void MaddMultiLeptonic() {
+			mlep++;
+		}
+
+		void addPureHadronic() {
+			had++;
+		}
+
+		int getSemiLeptonic() {
+			return slep;
+		}
+
+		int getDiLeptonic() {
+			return dlep;
+		}
+
+		int getMultiLeptonic() {
+			return mlep;
+		}
+
+		int getPureHadronic() {
+			return had;
+		}
+		//		explicit LeptonCounter();
+		//		~LeptonCounter();
+		//		void addSemiLeptonic();
+		//		void addDiLeptonic();
+		//		void addPureHadronic();
+		//		void addMultiLeptonic();
+		//		int getSemiLeptonic();
+		//		int getDiLeptonic();
+		//		int getMultiLeptonic();
+		//		int getPureHadronic();
+	private:
+		int slep, dlep, mlep, had;
+
+	};
 
 };
 #endif
