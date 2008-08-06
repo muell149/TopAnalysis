@@ -3,12 +3,12 @@
 
 
 /// constructor for FWLite analyzer
-MuonId::MuonId()  
-{
-}
+MuonId::MuonId() : 
+  fwLite_(true ) { }
 
 /// constructor for full FW analyzer
-MuonId::MuonId(const edm::ParameterSet& cfg)  
+MuonId::MuonId(const edm::ParameterSet& cfg): 
+  fwLite_(false)    
 {
 }
 
@@ -81,14 +81,10 @@ MuonId::book(edm::Service<TFileService>& fs, ofstream& file)
 
 /// write to file and free allocated space for FWLite
 void 
-MuonId::write(const char* filename, const char* directory)
+MuonId::write(TFile& file, const char* directory)
 {
   /// save histograms to file
-  TFile outFile( filename, "recreate" );
-  outFile.mkdir( directory );
-  outFile.cd( directory );
-
-  /// basic kinematic
+  file.cd( directory );
   muComp_ ->Write( );
   muEm_   ->Write( );
   muEmS9_ ->Write( );
@@ -96,15 +92,4 @@ MuonId::write(const char* filename, const char* directory)
   muHadS9_->Write( );
   muHo_   ->Write( );
   muHoS9_ ->Write( );
-
-  outFile.Close();
-
-  // free allocated space
-  delete muComp_; 
-  delete muEm_; 
-  delete muEmS9_; 
-  delete muHad_; 
-  delete muHadS9_;
-  delete muHo_; 
-  delete muHoS9_; 
 }

@@ -2,14 +2,12 @@
 
 
 /// constructor for FWLite analyzer
-MuonKinematic::MuonKinematic():
-  jets_()
-{ 
-}
+MuonKinematic::MuonKinematic(): 
+  fwLite_(true ), jets_() { }
 
 /// constructor for full FW analyzer
 MuonKinematic::MuonKinematic(const edm::ParameterSet& cfg):
-  jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) )  
+  fwLite_(false), jets_  ( cfg.getParameter<edm::InputTag>( "jets" ) )
 {
 }
 
@@ -184,20 +182,13 @@ MuonKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
 
 /// write to file and free allocated space for FWLite
 void 
-MuonKinematic::write(const char* filename, const char* directory)
+MuonKinematic::write(TFile& file, const char* directory)
 {
-  /// save histograms to file
-  TFile outFile( filename, "recreate" );
-  outFile.mkdir( directory );
-  outFile.cd( directory );
-
-  /// basic kinematic
-  en_ ->Write( );
-  pt_ ->Write( );
-  eta_->Write( );
-  phi_->Write( );
-
-  /// isolation
+  file.cd( directory );
+  en_      ->Write( );
+  pt_      ->Write( );
+  eta_     ->Write( );
+  phi_     ->Write( );
   isoJet_  ->Write( );
   isoJet5_ ->Write( );
   isoJet10_->Write( );
@@ -211,35 +202,6 @@ MuonKinematic::write(const char* filename, const char* directory)
   dRTrkN_  ->Write( );
   dRCalPt_ ->Write( );
   dRCalN_  ->Write( );
-
-  /// correlations
   ptVsTrkIso_ ->Write( );
   ptVsCalIso_ ->Write( );
-
-  outFile.Close();
-
-  // free allocated space
-  delete en_;
-  delete pt_;
-  delete eta_;
-  delete phi_;
-
-  /// isolation
-  delete isoJet_;
-  delete isoJet5_;
-  delete isoJet10_;
-  delete isoJet15_;
-  delete isoJet20_;
-  delete isoTrkPt_;
-  delete isoCalPt_;
-  delete isoTrkN_;
-  delete isoCalN_;
-  delete dRTrkPt_;
-  delete dRTrkN_;
-  delete dRCalPt_;
-  delete dRCalN_;
-
-  /// correlations
-  delete ptVsTrkIso_;
-  delete ptVsCalIso_;
 }

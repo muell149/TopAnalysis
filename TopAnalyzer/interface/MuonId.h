@@ -26,7 +26,18 @@ class MuonId{
 
   explicit MuonId();
   explicit MuonId(const edm::ParameterSet&);
-  ~MuonId(){};
+  ~MuonId(){
+    // free allocated space
+    if(fwLite_){
+      delete muComp_; 
+      delete muEm_; 
+      delete muEmS9_; 
+      delete muHad_; 
+      delete muHadS9_;
+      delete muHo_; 
+      delete muHoS9_; 
+    }
+  };
 
   void book();
   void book(edm::Service<TFileService>&);
@@ -34,9 +45,11 @@ class MuonId{
   void fill(const edm::Event&, const std::vector<pat::Muon>&, const double&);
   void fill(const std::vector<pat::Muon>&, const double&);
   void norm(){};
-  void write(const char*, const char*);
+  void write(TFile&, const char*);
   
  private:
+
+  bool fwLite_;
 
   TH1F *muComp_;
   TH1F *muEm_;

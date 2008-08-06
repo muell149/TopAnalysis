@@ -25,20 +25,29 @@ class MuonResolution{
 
  public:
 
-  explicit MuonResolution(std::vector<double>, double);
+  explicit MuonResolution();
   explicit MuonResolution(const edm::ParameterSet&);
-  ~MuonResolution(){};
-
+  ~MuonResolution(){
+    // free allocated space
+    if(fwLite_){    
+      delete calPt_;
+      delete resPt_;
+    }
+  };
+  
   void book();
   void book(edm::Service<TFileService>&);
   void book(edm::Service<TFileService>&, ofstream&);
   void fill(const edm::Event&, const std::vector<pat::Muon>&, const double&);
   void fill(const std::vector<pat::Muon>&, const double&);
   void norm(){};
-  void write(const char*, const char*);
+  void write(TFile&, const char*);
+  void setMatchDR(double match) {matchDR_=match;};
+  void setBinsPt(std::vector<double> bins) {binsPt_=bins;};
 
  private:
 
+  bool fwLite_;
   std::vector<double> binsPt_;
   double matchDR_;
 

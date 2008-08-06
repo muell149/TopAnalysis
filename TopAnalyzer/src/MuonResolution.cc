@@ -2,13 +2,12 @@
 
 
 /// constructor for FWLite analyzer
-MuonResolution::MuonResolution(std::vector<double> binsPt, double matchDR):
-  binsPt_(binsPt), matchDR_(matchDR)  
-{
-}
+MuonResolution::MuonResolution():
+  fwLite_(true ) { }
 
 /// constructor for full FW analyzer
 MuonResolution::MuonResolution(const edm::ParameterSet& cfg):
+  fwLite_(true ),   
   binsPt_ ( cfg.getParameter<std::vector<double> >( "binsPt" ) ),
   matchDR_( cfg.getParameter<double>( "matchDR" ) )
 {
@@ -73,27 +72,17 @@ MuonResolution::book(edm::Service<TFileService>& fs, ofstream& file)
   NameScheme fit("fit"), cal("cal"), res("res");
   for(int idx = 0; idx < ((int)binsPt_.size()-1); ++idx) {
     relPt_.push_back( fs->make<TH1F>(fit.name(file,"relPt",idx), fit.name("relPt",idx), 100, -0.5, 0.5) );
-  }
+  } 
   calPt_= fs->make<TH1F>(cal.name(file,"relPt"), cal.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
   resPt_= fs->make<TH1F>(res.name(file,"relPt"), res.name("relPt"), ((int)binsPt_.size()-1), &binsPt_[0]);
 }
 
 /// write to file and free allocated space for FWLite
 void 
-MuonResolution::write(const char* filename, const char* directory)
+MuonResolution::write(TFile& file, const char* directory)
 {
   /// save histograms to file
-  TFile outFile( filename, "recreate" );
-  outFile.mkdir( directory );
-  outFile.cd( directory );
-
-  /// basic kinematic
+  file.cd( directory );
   calPt_->Write( );
   resPt_->Write( );
-
-  outFile.Close();
-
-  // free allocated space
-  delete calPt_;
-  delete resPt_;
 }

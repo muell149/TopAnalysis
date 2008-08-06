@@ -32,8 +32,31 @@ class MuonKinematic{
 
   explicit MuonKinematic();
   explicit MuonKinematic(const edm::ParameterSet&);
-  ~MuonKinematic(){};
-
+  ~MuonKinematic(){
+    // free allocated space
+    if(fwLite_){
+      delete en_;
+      delete pt_;
+      delete eta_;
+      delete phi_;
+      delete isoJet_;
+      delete isoJet5_;
+      delete isoJet10_;
+      delete isoJet15_;
+      delete isoJet20_;
+      delete isoTrkPt_;
+      delete isoCalPt_;
+      delete isoTrkN_;
+      delete isoCalN_;
+      delete dRTrkPt_;
+      delete dRTrkN_;
+      delete dRCalPt_;
+      delete dRCalN_;
+      delete ptVsTrkIso_;
+      delete ptVsCalIso_;
+    }
+  };
+  
   void book();
   void book(edm::Service<TFileService>&);
   void book(edm::Service<TFileService>&, ofstream&);
@@ -46,11 +69,11 @@ class MuonKinematic{
     dRCalPt_->Scale(1./dRCalPt_->GetEntries()); 
     dRCalN_ ->Scale(1./dRCalN_ ->GetEntries()); 
   };
-  void write(const char*, const char*);
+  void write(TFile&, const char*);
   
  private:
 
-  // additional evt content/steerings
+  bool fwLite_;
   edm::InputTag jets_;
 
   TH1F *en_;
