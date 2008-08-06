@@ -3,7 +3,7 @@
 /**
  *  class:   MatrixAnalyzer.h
  * @author: Lukas Kreczko, Uni Hamburg (lkreczko@mail.desy.de)
- * version $Id: MatrixAnalyzer.h,v 1.2 2008/07/24 14:07:11 kreczko Exp $
+ * version $Id: MatrixAnalyzer.h,v 1.3 2008/08/05 16:28:59 kreczko Exp $
 
  ________________________________________________________________**/
 #include "FWCore/Framework/interface/Event.h"
@@ -23,6 +23,7 @@
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "TopAnalysis/TopUtils/interface/RootSystem.h"
 #include "TopAnalysis/TopUtils/interface/RootHistograms.h"
+#include "TopAnalysis/TopAnalyzer/plugins/LeptonCounter.h"
 
 class MatrixAnalyzer: public edm::EDAnalyzer {
 
@@ -31,6 +32,7 @@ public:
 	~MatrixAnalyzer();
 
 private:
+
 	virtual void beginJob(const edm::EventSetup&);
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
@@ -55,6 +57,7 @@ private:
 	Double_t bgBefore_, slBefore_, dlBefore_, mlBefore_;
 	double effBG_, effSL_, effDL_, effML_, sampleweight_;
 	edm::InputTag muons_;
+	std::vector<double> varBins_;
 	typedef std::vector<pat::Muon> TopMuonCollection;
 
 	std::map<int, TopMuonCollection> mothermap_;
@@ -69,64 +72,12 @@ private:
 	TH1F *eff_;
 
 	TFile *f_;
+	std::vector<LeptonCounter*> counters_;
 
-	//TODO: boolean for before and after. use same histogramms, but different bins
+	//TODO: boolean for before and after. use same histograms, but different bins
 	//TODO: try to find a way to store double directly in root file
 
-	class LeptonCounter {
-	public:
-		LeptonCounter() {
-			slep = 0;
-			dlep = 0;
-			mlep = 0;
-			had = 0;
-		}
 
-		void addSemiLeptonic() {
-			slep++;
-		}
-
-		void addDiLeptonic() {
-			dlep++;
-		}
-
-		void MaddMultiLeptonic() {
-			mlep++;
-		}
-
-		void addPureHadronic() {
-			had++;
-		}
-
-		int getSemiLeptonic() {
-			return slep;
-		}
-
-		int getDiLeptonic() {
-			return dlep;
-		}
-
-		int getMultiLeptonic() {
-			return mlep;
-		}
-
-		int getPureHadronic() {
-			return had;
-		}
-		//		explicit LeptonCounter();
-		//		~LeptonCounter();
-		//		void addSemiLeptonic();
-		//		void addDiLeptonic();
-		//		void addPureHadronic();
-		//		void addMultiLeptonic();
-		//		int getSemiLeptonic();
-		//		int getDiLeptonic();
-		//		int getMultiLeptonic();
-		//		int getPureHadronic();
-	private:
-		int slep, dlep, mlep, had;
-
-	};
 
 };
 #endif

@@ -5,16 +5,17 @@ using std::endl;
 using reco::GenParticle;
 
 MatrixAnalyzer::MatrixAnalyzer(const edm::ParameterSet& cfg) :
-	hist_(cfg.getParameter<std::string>("hist")),
-			pmodulename_(cfg.getParameter<std::string>("pmn")),
-			before_(cfg.getParameter<bool>("before")),
-			muons_(cfg.getParameter<edm::InputTag>("muons")) {
+hist_(cfg.getParameter<std::string> ("hist")),
+pmodulename_(cfg.getParameter<std::string> ("pmn")),
+before_(cfg.getParameter<bool> ("before")),
+muons_(cfg.getParameter<edm::InputTag> ("muons")),
+varBins_(cfg.getParameter<std::vector<double> > ("varBins")) {
 	debug_ = true;
 	hadrCount_ = 0;
 	lCount_ = 0;
 	bgBefore_ = 0.0;
 	slBefore_ = .0;
-	llCount_= 0;
+	llCount_ = 0;
 	noBins_ = 5;
 	beforeBin_ = 2;
 	afterBin_ = 4;
@@ -32,6 +33,10 @@ MatrixAnalyzer::MatrixAnalyzer(const edm::ParameterSet& cfg) :
 	wlCount_ = 0;
 	wllCount_ = 0;
 	wmlCount_ = 0;
+	for(unsigned int x=0; x< varBins_.size(); x++){
+		LeptonCounter *t = new LeptonCounter();
+		counters_.push_back(t);
+	}
 }
 
 MatrixAnalyzer::~MatrixAnalyzer() {
@@ -39,14 +44,14 @@ MatrixAnalyzer::~MatrixAnalyzer() {
 
 void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 
-	if (hist_.empty() )
+	if (hist_.empty())
 		return;
 
 	//TODO: Beim 2ten durchlauf sollen die histogramme geladen werden.
 	edm::Service<TFileService> fs;
-	if ( !fs) {
-		throw edm::Exception( edm::errors::Configuration,
-				"TFile Service is not registered in cfg file" );
+	if (!fs) {
+		throw edm::Exception(edm::errors::Configuration,
+				"TFile Service is not registered in cfg file");
 	}
 	f_ = &fs->file();
 	ofstream hist(hist_.c_str(), std::ios::out);
@@ -54,16 +59,16 @@ void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 	NameScheme nam("mbg");
 
 	//make histograms
-	background_ = fs->make<TH1F>(nam.name(hist, "N_background"),
-			nam.name("background"), 300, 0, 1.);
-	lep_ = fs->make<TH1F>(nam.name(hist, "N_semilepton"), nam.name("lepton"),
+	background_ = fs->make<TH1F> (nam.name(hist, "N_background"), nam.name(
+			"background"), 300, 0, 1.);
+	lep_ = fs->make<TH1F> (nam.name(hist, "N_semilepton"), nam.name("lepton"),
 			300, 0, 1.);
-	llep_ = fs->make<TH1F>(nam.name(hist, "N_dilepton"), nam.name("ll"), 300, 0,
-			1.);
-	multilep_ = fs->make<TH1F>(nam.name(hist, "N_multilepton"), nam.name("ml"),
-			300, 0, 1.);
-	eff_ = fs->make<TH1F>(nam.name(hist, "efficency"), nam.name("eff"), 300, 0,
-			1.);
+	llep_ = fs->make<TH1F> (nam.name(hist, "N_dilepton"), nam.name("ll"), 300,
+			0, 1.);
+	multilep_ = fs->make<TH1F> (nam.name(hist, "N_multilepton"),
+			nam.name("ml"), 300, 0, 1.);
+	eff_ = fs->make<TH1F> (nam.name(hist, "efficency"), nam.name("eff"), 300,
+			0, 1.);
 
 	//set number of bins (noBins_)
 	background_->SetBins(noBins_, 0., 5.);
@@ -73,7 +78,8 @@ void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 	eff_->SetBins(9, 0., 5.);
 }
 
-void MatrixAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
+void MatrixAnalyzer::analyze(const edm::Event& evt,
+		const edm::EventSetup& setup) {
 
 	//get muons
 	//	if (!before_)
@@ -187,25 +193,25 @@ void MatrixAnalyzer::endJob() {
 	} else {
 
 		getBefore();
-		if (bgBefore_ !=0) {
-			effBG_ = whadrCount_/bgBefore_;
-			deff_bg = sqrt(effBG_*(1-effBG_)/bgBefore_);
+		if (bgBefore_ != 0) {
+			effBG_ = whadrCount_ / bgBefore_;
+			deff_bg = sqrt(effBG_ * (1 - effBG_) / bgBefore_);
 		}
 
 		if (slBefore_ != 0) {
-			effSL_ = wlCount_/slBefore_;
-			deff_sl = sqrt(effSL_*(1-effSL_)/slBefore_);
+			effSL_ = wlCount_ / slBefore_;
+			deff_sl = sqrt(effSL_ * (1 - effSL_) / slBefore_);
 			//log(deffs, "::endjob >> delta_eff", true);
 		}
 
 		if (dlBefore_ != 0) {
-			effDL_ = wllCount_/dlBefore_;
-			deff_dl = sqrt(effDL_*(1-effDL_)/dlBefore_);
+			effDL_ = wllCount_ / dlBefore_;
+			deff_dl = sqrt(effDL_ * (1 - effDL_) / dlBefore_);
 		}
 
 		if (mlBefore_ != 0) {
-			effML_ = wmlCount_/mlBefore_;
-			deff_ml = sqrt(effML_*(1-effML_)/mlBefore_);
+			effML_ = wmlCount_ / mlBefore_;
+			deff_ml = sqrt(effML_ * (1 - effML_) / mlBefore_);
 		}
 
 		eff_->SetBinContent(2, effBG_);
@@ -237,17 +243,18 @@ void MatrixAnalyzer::endJob() {
 	//TODO: Fill in histogram.
 	for (map<int, TopMuonCollection>::iterator iter = mothermap_.begin(); iter
 			!= mothermap_.end(); iter++) {
-		cout << "total matched mu from " << (*iter).first << " : " << (*iter).second.size() << endl;
+		cout << "total matched mu from " << (*iter).first << " : "
+				<< (*iter).second.size() << endl;
 	}
 
 }
 
 void MatrixAnalyzer::setEnv(int &bin) {
-	cout << "hadr >> " << whadrCount_<< "(" << hadrCount_ << ")"<< "("
+	cout << "hadr >> " << whadrCount_ << "(" << hadrCount_ << ")" << "("
 			<< rhadrCount_ << ")" << endl;
 	cout << "lep >> " << wlCount_ << "(" << lCount_ << ")" << "(" << rlCount_
 			<< ")" << endl;
-	cout << "llep >> " <<wllCount_ << "(" << llCount_ << ")" << "("
+	cout << "llep >> " << wllCount_ << "(" << llCount_ << ")" << "("
 			<< rllCount_ << ")" << endl;
 	cout << "mlep >> " << wmlCount_ << "(" << mlCount_ << ")" << "("
 			<< rmlCount_ << ")" << endl;
@@ -268,14 +275,14 @@ void MatrixAnalyzer::getBefore() {
 Double_t MatrixAnalyzer::getHist(TString dir, TString hist, int & bin) {
 	TH1F *dummy;
 	TString directory(dir);
-	directory+="/";
+	directory += "/";
 	TString name;
 	name = hist;
-	directory+=name;
+	directory += name;
 
-	dummy = (TH1F*)f_->Get(directory);
+	dummy = (TH1F*) f_->Get(directory);
 
-	if ( !dummy) {
+	if (!dummy) {
 		cerr << "WARNING:" << " Didn't find indicated hist" << " ["
 				<< directory << "]" << endl;
 		return 0.0;
@@ -290,8 +297,9 @@ int MatrixAnalyzer::numberOfmatchedMuons(
 	int size = recMuons->size();
 	cout << "<pdgId, status, mother.pdgId>" << endl;
 	cout << "ID: ";
-	for (int i=0; i< size; ++i) {
-		edm::RefToBase<reco::Candidate> muonRef = recMuons->refAt(i)->originalObjectRef();
+	for (int i = 0; i < size; ++i) {
+		edm::RefToBase<reco::Candidate> muonRef =
+				recMuons->refAt(i)->originalObjectRef();
 		reco::GenParticleRef genMuon = (*genMatch)[muonRef];
 
 		int mid = 0;
@@ -299,7 +307,7 @@ int MatrixAnalyzer::numberOfmatchedMuons(
 		if (genMuon->numberOfMothers() > 0) {
 			mid = genMuon->mother(0)->pdgId();
 			st = genMuon->mother(0)->status();
-			cout << "mothers " <<genMuon->numberOfMothers() << endl;
+			cout << "mothers " << genMuon->numberOfMothers() << endl;
 			if (genMuon->mother(0)->numberOfMothers() > 0) {
 				cout << genMuon->mother(0)->pdgId() << endl;
 				cout << genMuon->mother(0)->status() << endl;
@@ -307,8 +315,8 @@ int MatrixAnalyzer::numberOfmatchedMuons(
 			}
 		}
 
-		cout << "<" << genMuon->pdgId() << "," << genMuon->status()<< ","
-				<< mid << "," << st<<"> ";
+		cout << "<" << genMuon->pdgId() << "," << genMuon->status() << ","
+				<< mid << "," << st << "> ";
 		if (fabs(mid) == 13)
 			matchedmu++;
 	}
