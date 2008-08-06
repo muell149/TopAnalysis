@@ -338,24 +338,37 @@ void
 SemiLepHypothesesAnalyzer::fillQualityHistos(const TtSemiEvent& semiEvt)
 {
 
-  genMatchSumDR_->Fill( semiEvt.genMatchSumDR() );
-  genMatchSumPt_->Fill( semiEvt.genMatchSumPt() );
-  mvaDisc_      ->Fill( semiEvt.mvaDisc() );
-  fitChi2_      ->Fill( semiEvt.fitChi2() );
-  fitProb_      ->Fill( semiEvt.fitProb() );
+  // genMatch histos
+  if( semiEvt.isHypoValid(TtSemiEvent::kGenMatch) ) {
+    genMatchSumDR_->Fill( semiEvt.genMatchSumDR() );
+    genMatchSumPt_->Fill( semiEvt.genMatchSumPt() );
+    genMatchSumDRVsSumPt_     ->Fill( semiEvt.genMatchSumDR(), semiEvt.genMatchSumPt()                             );
+    genMatchSumDRVsHadWMass_  ->Fill( semiEvt.genMatchSumDR(), semiEvt.hadronicW  (TtSemiEvent::kGenMatch)->mass() );
+    genMatchSumDRVsHadTopMass_->Fill( semiEvt.genMatchSumDR(), semiEvt.hadronicTop(TtSemiEvent::kGenMatch)->mass() );
+    // vs. MVADisc
+    if( semiEvt.isHypoValid(TtSemiEvent::kMVADisc) )
+      genMatchSumDRVsMVADisc_->Fill( semiEvt.genMatchSumDR(), semiEvt.mvaDisc() );
+    // vs. KinFit
+    if( semiEvt.isHypoValid(TtSemiEvent::kKinFit) )
+      genMatchSumDRVsFitProb_->Fill( semiEvt.genMatchSumDR(), semiEvt.fitProb() );
+  }
 
-  genMatchSumDRVsSumPt_     ->Fill( semiEvt.genMatchSumDR(), semiEvt.genMatchSumPt()                             );
-  genMatchSumDRVsHadWMass_  ->Fill( semiEvt.genMatchSumDR(), semiEvt.hadronicW  (TtSemiEvent::kGenMatch)->mass() );
-  genMatchSumDRVsHadTopMass_->Fill( semiEvt.genMatchSumDR(), semiEvt.hadronicTop(TtSemiEvent::kGenMatch)->mass() );
-  genMatchSumDRVsMVADisc_   ->Fill( semiEvt.genMatchSumDR(), semiEvt.mvaDisc()                                   );
-  genMatchSumDRVsFitProb_   ->Fill( semiEvt.genMatchSumDR(), semiEvt.fitProb()                                   );
-  mvaDiscVsHadWMass_        ->Fill( semiEvt.mvaDisc()      , semiEvt.hadronicW  (TtSemiEvent::kMVADisc)->mass()  );
-  mvaDiscVsHadTopMass_      ->Fill( semiEvt.mvaDisc()      , semiEvt.hadronicTop(TtSemiEvent::kMVADisc)->mass()  );
-  mvaDiscVsFitProb_         ->Fill( semiEvt.mvaDisc()      , semiEvt.fitProb()                                   );
+  // MVADisc histos
+  if( semiEvt.isHypoValid(TtSemiEvent::kMVADisc) ) {
+    mvaDisc_->Fill( semiEvt.mvaDisc() );
+    mvaDiscVsHadWMass_  ->Fill( semiEvt.mvaDisc(), semiEvt.hadronicW  (TtSemiEvent::kMVADisc)->mass() );
+    mvaDiscVsHadTopMass_->Fill( semiEvt.mvaDisc(), semiEvt.hadronicTop(TtSemiEvent::kMVADisc)->mass() );
+    // vs. kinFit
+    if( semiEvt.isHypoValid(TtSemiEvent::kKinFit) )
+      mvaDiscVsFitProb_->Fill( semiEvt.mvaDisc(), semiEvt.fitProb() );
+  }
 
+  // kinFit histos
   if( semiEvt.isHypoValid(TtSemiEvent::kKinFit) ) {
-    fitProbVsHadWMass_      ->Fill( semiEvt.fitProb()      , semiEvt.hadronicW   (TtSemiEvent::kKinFit)->mass()  );
-    fitProbVsHadTopMass_    ->Fill( semiEvt.fitProb()      , semiEvt.hadronicTop (TtSemiEvent::kKinFit)->mass()  );
+    fitChi2_->Fill( semiEvt.fitChi2() );
+    fitProb_->Fill( semiEvt.fitProb() );
+    fitProbVsHadWMass_  ->Fill( semiEvt.fitProb(), semiEvt.hadronicW   (TtSemiEvent::kKinFit)->mass() );
+    fitProbVsHadTopMass_->Fill( semiEvt.fitProb(), semiEvt.hadronicTop (TtSemiEvent::kKinFit)->mass() );
   }
 
 }
