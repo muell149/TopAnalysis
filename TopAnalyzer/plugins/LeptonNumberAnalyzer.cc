@@ -1,4 +1,4 @@
-#include "TopAnalysis/TopAnalyzer/plugins/LeptonNunberAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/LeptonNumberAnalyzer.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -7,7 +7,7 @@ using std::cout;
 using std::endl;
 using reco::GenParticle;
 
-LeptonNunberAnalyzer::LeptonNunberAnalyzer(const edm::ParameterSet& cfg) :
+LeptonNumberAnalyzer::LeptonNumberAnalyzer(const edm::ParameterSet& cfg) :
 	muons_(cfg.getParameter<edm::InputTag>("muons")),
 			numberOfRatioBins_(cfg.getParameter<int>("numberOfRatioBins")),
 			numberOfMuonBins_(cfg.getParameter<int>("numberOfMuonBins")),
@@ -23,10 +23,10 @@ LeptonNunberAnalyzer::LeptonNunberAnalyzer(const edm::ParameterSet& cfg) :
 	nOfEvents_ = 0;
 }
 
-LeptonCounter::~LeptonCounter() {
+LeptonNumberAnalyzer::~LeptonNumberAnalyzer() {
 }
 
-void LeptonNunberAnalyzer::beginJob(const edm::EventSetup&) {
+void LeptonNumberAnalyzer::beginJob(const edm::EventSetup&) {
 	edm::Service<TFileService> fs;
 	if ( !fs) {
 		throw edm::Exception( edm::errors::Configuration,
@@ -43,7 +43,7 @@ void LeptonNunberAnalyzer::beginJob(const edm::EventSetup&) {
 			numberOfElecBins_, minNelec_, maxNelec_);
 }
 
-void LeptonNunberAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
+void LeptonNumberAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
 	nOfEvents_++;
 	edm::Handle<reco::GenParticleCollection> genParticles;
 	evt.getByLabel("genParticles", genParticles);
@@ -81,7 +81,7 @@ void LeptonNunberAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
 
 }
 
-void LeptonNunberAnalyzer::endJob() {
+void LeptonNumberAnalyzer::endJob() {
 	cout << "# of e :" << eleCounter_ << endl;
 	cout << "average # of e per event :"
 	<< eleCounter_/nOfEvents_ << endl;

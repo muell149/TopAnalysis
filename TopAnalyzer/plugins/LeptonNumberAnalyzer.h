@@ -15,10 +15,10 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 
-class LeptonNunberAnalyzer : public edm::EDAnalyzer {
+class LeptonNumberAnalyzer : public edm::EDAnalyzer {
 public:
-	explicit LeptonNunberAnalyzer(const edm::ParameterSet&);
-	~LeptonNunberAnalyzer();
+	explicit LeptonNumberAnalyzer(const edm::ParameterSet&);
+	~LeptonNumberAnalyzer();
 
 private:
 	virtual void beginJob(const edm::EventSetup&);
