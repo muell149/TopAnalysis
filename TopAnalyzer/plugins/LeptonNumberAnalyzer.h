@@ -1,5 +1,5 @@
-#ifndef LeptonCounter_h
-#define LeptonCounter_h
+#ifndef LeptonNunberAnalyzer_h
+#define LeptonNunberAnalyzer_h
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -15,23 +15,23 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 
-class LeptonCounter : public edm::EDAnalyzer {
+class LeptonNunberAnalyzer : public edm::EDAnalyzer {
 public:
-	explicit LeptonCounter(const edm::ParameterSet&);
-	~LeptonCounter();
-	
+	explicit LeptonNunberAnalyzer(const edm::ParameterSet&);
+	~LeptonNunberAnalyzer();
+
 private:
 	virtual void beginJob(const edm::EventSetup&);
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
-	
+
 	edm::InputTag muons_;
-	
+
 	int eleCounter_, muCounter_, numberOfRatioBins_, numberOfMuonBins_,
 			numberOfElecBins_, nOfEvents_;
 	double minRatio_, maxRatio_, minNmuon_, maxNmuon_,minNelec_, maxNelec_;
-	
-	
+
+
 	typedef std::vector<pat::Muon> TopMuonCollection;
 	//TODO: genMuons, AllLayer1Muons(optional + custom), SelectedLayer1Muons(optional + custom)
 	TH1F *muonElecRatio_, *numberOfMuons_, *numberOfElecs_;

@@ -39,7 +39,7 @@ typedef EventShapeAnalyzer<std::vector<pat::Electron> > EventShapeAnalyzerElec;
 //
 // Analyzers for QCD BG Studies
 //
-#include "TopAnalysis/TopAnalyzer/plugins/LeptonCounter.h"
+#include "TopAnalysis/TopAnalyzer/plugins/LeptonNumberAnalyzer.h"
 #include "TopAnalysis/TopAnalyzer/plugins/MatrixAnalyzer.h"
 #include "TopAnalysis/TopAnalyzer/plugins/IsolationAnalyzer.h"
 
@@ -54,6 +54,6 @@ DEFINE_FWK_MODULE(PartonMatchAnalyzer);
 DEFINE_FWK_MODULE(SemiLepHypothesesAnalyzer);
 DEFINE_FWK_MODULE(EventShapeAnalyzerMuon);
 DEFINE_FWK_MODULE(EventShapeAnalyzerElec);
-DEFINE_FWK_MODULE(LeptonCounter);
+DEFINE_FWK_MODULE(LeptonNumberAnalyzer);
 DEFINE_FWK_MODULE(IsolationAnalyzer);
 DEFINE_FWK_MODULE(MatrixAnalyzer);

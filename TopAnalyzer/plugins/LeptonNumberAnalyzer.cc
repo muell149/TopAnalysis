@@ -1,4 +1,4 @@
-#include "TopAnalysis/TopAnalyzer/plugins/LeptonCounter.h"
+#include "TopAnalysis/TopAnalyzer/plugins/LeptonNunberAnalyzer.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -7,7 +7,7 @@ using std::cout;
 using std::endl;
 using reco::GenParticle;
 
-LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :
+LeptonNunberAnalyzer::LeptonNunberAnalyzer(const edm::ParameterSet& cfg) :
 	muons_(cfg.getParameter<edm::InputTag>("muons")),
 			numberOfRatioBins_(cfg.getParameter<int>("numberOfRatioBins")),
 			numberOfMuonBins_(cfg.getParameter<int>("numberOfMuonBins")),
@@ -26,7 +26,7 @@ LeptonCounter::LeptonCounter(const edm::ParameterSet& cfg) :
 LeptonCounter::~LeptonCounter() {
 }
 
-void LeptonCounter::beginJob(const edm::EventSetup&) {
+void LeptonNunberAnalyzer::beginJob(const edm::EventSetup&) {
 	edm::Service<TFileService> fs;
 	if ( !fs) {
 		throw edm::Exception( edm::errors::Configuration,
@@ -43,11 +43,11 @@ void LeptonCounter::beginJob(const edm::EventSetup&) {
 			numberOfElecBins_, minNelec_, maxNelec_);
 }
 
-void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
+void LeptonNunberAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup) {
 	nOfEvents_++;
 	edm::Handle<reco::GenParticleCollection> genParticles;
 	evt.getByLabel("genParticles", genParticles);
-	
+
 //	edm::Handle<edm::View<pat::Muon> > recMuons;
 //	evt.getByLabel("muons", recMuons);
 
@@ -81,11 +81,11 @@ void LeptonCounter::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
 }
 
-void LeptonCounter::endJob() {
+void LeptonNunberAnalyzer::endJob() {
 	cout << "# of e :" << eleCounter_ << endl;
-	cout << "average # of e per event :" 
+	cout << "average # of e per event :"
 	<< eleCounter_/nOfEvents_ << endl;
 	cout << "# of mu :" << muCounter_ << endl;
-	cout << "average # of mu per event:" 
+	cout << "average # of mu per event:"
 	<< muCounter_/nOfEvents_ << endl;
 }
