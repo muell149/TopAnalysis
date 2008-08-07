@@ -13,7 +13,7 @@
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 
-#include "AnalysisDataFormats/TopObjects/interface/TtSemiEvent.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
 
 class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
 
