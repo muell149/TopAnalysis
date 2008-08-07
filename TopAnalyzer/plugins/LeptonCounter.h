@@ -3,6 +3,8 @@
 
 #include <string>
 #include <map>
+#include <utility>
+
 class LeptonCounter {
 public:
 	explicit LeptonCounter();
@@ -17,17 +19,25 @@ public:
 
 	void addPureHadronic(std::string);
 
-	int getSemiLeptonic(std::string);
+	void addSemiLeptonic(std::string, double);
 
-	int getDiLeptonic(std::string);
+	void addDiLeptonic(std::string, double);
 
-	int getMultiLeptonic(std::string);
+	void addMultiLeptonic(std::string, double);
 
-	int getPureHadronic(std::string);
+	void addPureHadronic(std::string, double);
+
+	double getSemiLeptonic(std::string);
+
+	double getDiLeptonic(std::string);
+
+	double getMultiLeptonic(std::string);
+
+	double getPureHadronic(std::string);
 
 private:
 	//0 = had, 1= semiLep, 2 = diLep, 3= multiLep
-	typedef int Counter [4];
-	std::map<std::string, Counter> counters_;
+	typedef double Counter[4];
+	std::map<std::string, Counter*> counters_;
 };
 #endif

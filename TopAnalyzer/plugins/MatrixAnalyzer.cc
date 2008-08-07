@@ -5,11 +5,12 @@ using std::endl;
 using reco::GenParticle;
 
 MatrixAnalyzer::MatrixAnalyzer(const edm::ParameterSet& cfg) :
-hist_(cfg.getParameter<std::string> ("hist")),
-pmodulename_(cfg.getParameter<std::string> ("pmn")),
-before_(cfg.getParameter<bool> ("before")),
-muons_(cfg.getParameter<edm::InputTag> ("muons")),
-varBins_(cfg.getParameter<std::vector<double> > ("varBins")) {
+	hist_(cfg.getParameter<std::string> ("hist")),
+	pmodulename_(cfg.getParameter<std::string> ("pmn")),
+	before_(cfg.getParameter<bool> ("before")),
+	muons_(cfg.getParameter<edm::InputTag> ("muons")),
+	var_(cfg.getParameter<edm::InputTag> ("var")),
+	varBins_(cfg.getParameter<std::vector<double> > ("varBins")) {
 	debug_ = true;
 	hadrCount_ = 0;
 	lCount_ = 0;
@@ -33,9 +34,29 @@ varBins_(cfg.getParameter<std::vector<double> > ("varBins")) {
 	wlCount_ = 0;
 	wllCount_ = 0;
 	wmlCount_ = 0;
-	for(unsigned int x=0; x< varBins_.size(); x++){
-		LeptonCounter *t = new LeptonCounter();
-		counters_.push_back(t);
+
+	weightedCounters_ = new LeptonCounter();
+	matchedCounters_ = new LeptonCounter();
+	simpleCounters_ = new LeptonCounter();
+	for (unsigned int x = 0; x < varBins_.size() - 1; x++) {
+		double t = varBins_.at(x);
+		std::stringstream tmp;
+		tmp << t;
+		weightedCounters_->addCounter(tmp.str());
+	}
+
+	for (unsigned int x = 0; x < varBins_.size() - 1; x++) {
+		double t = varBins_.at(x);
+		std::stringstream tmp;
+		tmp << t;
+		matchedCounters_->addCounter(tmp.str());
+	}
+
+	for (unsigned int x = 0; x < varBins_.size() - 1; x++) {
+		double t = varBins_.at(x);
+		std::stringstream tmp;
+		tmp << t;
+		simpleCounters_->addCounter(tmp.str());
 	}
 }
 
@@ -95,6 +116,9 @@ void MatrixAnalyzer::analyze(const edm::Event& evt,
 	edm::Handle<edm::View<pat::Muon> > recMuons;
 	evt.getByLabel(muons_, recMuons);
 
+	edm::Handle<edm::View<reco::RecoCandidate> > recVars;
+	evt.getByLabel(var_, recVars);
+
 	edm::Handle<edm::Association<reco::GenParticleCollection> > genMatch;
 	evt.getByLabel("muonMatch", genMatch);
 
@@ -102,7 +126,6 @@ void MatrixAnalyzer::analyze(const edm::Event& evt,
 	evt.getByLabel("eventWeight", weightHandle);
 
 	sampleweight_ = *weightHandle;
-	//	cout << "sw: " << sampleweight_ << endl;
 
 	int matchedmu = 0;
 	//	for (reco::GenParticleCollection::const_iterator part =
@@ -146,9 +169,20 @@ void MatrixAnalyzer::analyze(const edm::Event& evt,
 
 	//	log(matchedmu, "::analyze >> matched muons", true);
 
+	Double_t pt = (*recVars)[0].pt();
+	for(unsigned int i=0; i < varBins_.size()-1; i++){
+		if (pt >= varBins_[i] && pt < varBins_[i + 1]) {
+			std::stringstream tmp;
+			tmp << varBins_[i];
+			if (muons->size() < 1)
+				weightedCounters_->addPureHadronic("", sampleweight_);
+
+		}
+	}
 	if (muons->size() < 1) {
 		hadrCount_++;
 		whadrCount_ += sampleweight_;
+//		weightedCounters_->addPureHadronic("", sampleweight_);
 	}
 
 	if (muons->size() == 1) {

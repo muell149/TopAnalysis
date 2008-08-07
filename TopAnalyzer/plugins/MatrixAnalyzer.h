@@ -3,7 +3,7 @@
 /**
  *  class:   MatrixAnalyzer.h
  * @author: Lukas Kreczko, Uni Hamburg (lkreczko@mail.desy.de)
- * version $Id: MatrixAnalyzer.h,v 1.3 2008/08/05 16:28:59 kreczko Exp $
+ * version $Id: MatrixAnalyzer.h,v 1.4 2008/08/06 15:09:17 kreczko Exp $
 
  ________________________________________________________________**/
 #include "FWCore/Framework/interface/Event.h"
@@ -24,6 +24,8 @@
 #include "TopAnalysis/TopUtils/interface/RootSystem.h"
 #include "TopAnalysis/TopUtils/interface/RootHistograms.h"
 #include "TopAnalysis/TopAnalyzer/plugins/LeptonCounter.h"
+
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 
 class MatrixAnalyzer: public edm::EDAnalyzer {
 
@@ -57,6 +59,7 @@ private:
 	Double_t bgBefore_, slBefore_, dlBefore_, mlBefore_;
 	double effBG_, effSL_, effDL_, effML_, sampleweight_;
 	edm::InputTag muons_;
+	edm::InputTag var_;
 	std::vector<double> varBins_;
 	typedef std::vector<pat::Muon> TopMuonCollection;
 
@@ -72,7 +75,9 @@ private:
 	TH1F *eff_;
 
 	TFile *f_;
-	std::vector<LeptonCounter*> counters_;
+	LeptonCounter* weightedCounters_;
+	LeptonCounter* matchedCounters_;
+	LeptonCounter* simpleCounters_;
 
 	//TODO: boolean for before and after. use same histograms, but different bins
 	//TODO: try to find a way to store double directly in root file
