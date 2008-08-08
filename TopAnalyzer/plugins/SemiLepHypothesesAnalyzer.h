@@ -28,7 +28,7 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob();
 
-  edm::InputTag semiEvt_;
+  edm::InputTag semiLepEvt_;
   edm::InputTag hypoKey_;
   unsigned int nJetsMax_;
   double maxSumDRGenMatch_;
@@ -44,7 +44,7 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   void fillKinHistos      (std::vector<TH1F*>&, const reco::Candidate&);
   void fillKinResHistos   (std::vector<TH1F*>&, const reco::Candidate&, const reco::Candidate&);
   void fillJetCorrelHistos(const std::vector<int>&, const std::vector<int>&);
-  void fillQualityHistos  (const TtSemiEvent&);
+  void fillQualityHistos  (const TtSemiLeptonicEvent&);
 
   std::vector<TH1F*> hadTopKin_;
   std::vector<TH1F*> hadWKin_;
