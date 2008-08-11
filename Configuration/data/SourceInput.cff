@@ -10,8 +10,7 @@ source = PoolSource{
 # uncomment sample of choice
 #-----------------------------------------------------------------------
 
-  include "TopAnalysis/Configuration/test/csa07AllEventsSkim_ttbar.cff"
-# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_wjets.cff"
-# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_zjets.cff"
-# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_qcd.cff"
+  include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Ttbar.cff"
+# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Wjets.cff"
+# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Zjets.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCD.cff"
