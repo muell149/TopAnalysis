@@ -7,5 +7,5 @@
 <use name=root> 
 
 <environment>
- <bin file="FWMuonAnalyzer.cc"> </bin>
+ <bin file="FWLiteMuonAnalyzer.cc"> </bin>
 </environment>
