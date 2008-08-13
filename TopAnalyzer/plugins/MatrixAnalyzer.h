@@ -3,7 +3,7 @@
 /**
  *  class:   MatrixAnalyzer.h
  * @author: Lukas Kreczko, Uni Hamburg (lkreczko@mail.desy.de)
- * version $Id: MatrixAnalyzer.h,v 1.4 2008/08/06 15:09:17 kreczko Exp $
+ * version $Id: MatrixAnalyzer.h,v 1.5 2008/08/07 14:59:33 kreczko Exp $
 
  ________________________________________________________________**/
 #include "FWCore/Framework/interface/Event.h"
@@ -64,21 +64,19 @@ private:
 	typedef std::vector<pat::Muon> TopMuonCollection;
 
 	std::map<int, TopMuonCollection> mothermap_;
-	TH1F *background_;
 
-	TH1F *lep_;
+	TH1F *background_, *binnedBkg_;
 
-	TH1F *llep_;
+	TH1F *lep_, *binnedSemiLep_;
 
-	TH1F * multilep_;
+	TH1F *llep_, *binnedDiLep_;
 
-	TH1F *eff_;
+	TH1F * multilep_, *binnedMultiLep_;
+
+	TH1F *eff_, *binnedEff_;
 
 	TFile *f_;
-	LeptonCounter* weightedCounters_;
-	LeptonCounter* matchedCounters_;
-	LeptonCounter* simpleCounters_;
-
+	LeptonCounter *weightedCounters_, *matchedCounters_, *simpleCounters_, *weightedBefore_, *effCounter_, *effErrors_;
 	//TODO: boolean for before and after. use same histograms, but different bins
 	//TODO: try to find a way to store double directly in root file
 

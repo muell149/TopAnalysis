@@ -27,6 +27,14 @@ public:
 
 	void addPureHadronic(std::string, double);
 
+	void setPureHadronic(std::string, double);
+
+	void setSemiLeptonic(std::string, double);
+
+	void setDiLeptonic(std::string, double);
+
+	void setMultiLeptonic(std::string, double);
+
 	double getSemiLeptonic(std::string);
 
 	double getDiLeptonic(std::string);
@@ -37,7 +45,6 @@ public:
 
 private:
 	//0 = had, 1= semiLep, 2 = diLep, 3= multiLep
-	typedef double Counter[4];
-	std::map<std::string, Counter*> counters_;
+	std::map<std::string, double*> counters_;
 };
 #endif
