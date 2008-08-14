@@ -2,6 +2,8 @@
 # initialize analyzers
 # ----------------------------
 
+  module analyzeGeom          = analyzeSemiLepHypotheses from "TopAnalysis/TopAnalyzer/data/SemiLepHypothesesAnalyzer.cfi"
+  module analyzeWMassMaxSumPt = analyzeSemiLepHypotheses from "TopAnalysis/TopAnalyzer/data/SemiLepHypothesesAnalyzer.cfi"
   module analyzeMaxSumPtWMass = analyzeSemiLepHypotheses from "TopAnalysis/TopAnalyzer/data/SemiLepHypothesesAnalyzer.cfi"
   module analyzeKinFit        = analyzeSemiLepHypotheses from "TopAnalysis/TopAnalyzer/data/SemiLepHypothesesAnalyzer.cfi"
   module analyzeGenMatch      = analyzeSemiLepHypotheses from "TopAnalysis/TopAnalyzer/data/SemiLepHypothesesAnalyzer.cfi"
@@ -11,13 +13,22 @@
 # configure analyzers
 # ----------------------------
 
-  replace analyzeMaxSumPtWMass.hypoKey = ttSemiHypothesisMaxSumPtWMass:Key
-  replace analyzeKinFit.hypoKey        = ttSemiHypothesisKinFit:Key
-  replace analyzeGenMatch.hypoKey      = ttSemiHypothesisGenMatch:Key
-  replace analyzeMVADisc.hypoKey       = ttSemiHypothesisMVADisc:Key
+  replace analyzeGeom.hypoKey          = ttSemiLepGeom:Key
+  replace analyzeWMassMaxSumPt.hypoKey = ttSemiLepWMassMaxSumPt:Key
+  replace analyzeMaxSumPtWMass.hypoKey = ttSemiLepMaxSumPtWMass:Key
+  replace analyzeKinFit.hypoKey        = ttSemiLepKinFit:Key
+  replace analyzeGenMatch.hypoKey      = ttSemiLepGenMatch:Key
+  replace analyzeMVADisc.hypoKey       = ttSemiLepMVADisc:Key
 
 # ----------------------------
 # define sequence
 # ----------------------------
 
-  sequence analyzeAllSemiLepHypotheses = {analyzeMaxSumPtWMass, analyzeKinFit, analyzeGenMatch, analyzeMVADisc}
+  sequence analyzeAllSemiLepHypotheses = {
+    analyzeGeom,
+    analyzeWMassMaxSumPt,
+    analyzeMaxSumPtWMass,
+    analyzeKinFit,
+    analyzeGenMatch,
+    analyzeMVADisc
+  }
