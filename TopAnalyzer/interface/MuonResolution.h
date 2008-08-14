@@ -16,6 +16,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
@@ -29,9 +30,13 @@ class MuonResolution{
   explicit MuonResolution(const edm::ParameterSet&);
   ~MuonResolution(){
     // free allocated space
-    if(fwLite_){    
+    if(fwLite_){
       delete calPt_;
       delete resPt_;
+      delete calEta_;
+      delete resEta_;
+      delete calPhi_;
+      delete resPhi_;
     }
   };
   
@@ -49,10 +54,14 @@ class MuonResolution{
 
   bool fwLite_;
   std::vector<double> binsPt_;
+  std::vector<double> binsEta_;
+  std::vector<double> binsPhi_;
   double matchDR_;
 
-  TH1F *calPt_, *resPt_;
+  TH1F *calPt_, *resPt_, *calEta_, *resEta_, *calPhi_, *resPhi_;
   std::vector<TH1F*> relPt_;
+  std::vector<TH1F*> Eta_;
+  std::vector<TH1F*> Phi_;
 };
 
 #endif
