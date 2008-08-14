@@ -61,6 +61,8 @@ esac
 sampleFile="TopAnalysis/Configuration/test/csa07AllEventsSkim_$src.cff"
 outFile="analyzeSemiLepMuonEvents_cutflow_$out.root"
 endPath="  endpath p = {$filter wght, cutflow }"
+outDump=cmsRun.cutflow.$1.out
+errDump=cmsRun.cutflow.$1.err
 
 if [ ! -e $sampleFile ]
     then
@@ -78,6 +80,10 @@ echo "... $outFile"
 echo "The following endpath will be used in the cfg file:"
 echo "... $endPath"
 
+echo "Screen output will be redirect to the following two files:"
+echo "... $outDump"
+echo "... $errDump"
+
 echo "-------------------------------------------------------"
 
 ##################################################
@@ -86,7 +92,7 @@ echo "-------------------------------------------------------"
 status=0
 while [ $status = 0 ]
   do
-  echo -n "Start now? [y/n] "
+  echo -n "Start job now and send it to the background? [y/n] "
   read answer
   case $answer in
       y|Y) status=1;;
@@ -126,13 +132,44 @@ TEXT2="$endPath"
 sed -i "s%$TEXT1%$TEXT2%" $cfgFile
 
 ##################################################
-# run the job
+# remove old files with dumped screen output
 ##################################################
-cmsRun TopAnalysis/TopFilter/test/semiLepMuonSelection_cutflow.cfg
+if [ -e $outDump ]
+    then
+    rm -f $outDump
+fi
+if [ -e $errDump ]
+    then
+    rm -f $errDump
+fi
+
+##################################################
+# run the job (in the background)
+##################################################
+cmsRun TopAnalysis/TopFilter/test/semiLepMuonSelection_cutflow.cfg > $outDump 2> $errDump < /dev/null&
+
+##################################################
+# wait for 1st event to be processed
+##################################################
+echo "Waiting for the 1st event to be processed..."
+status=0
+while [ $status = 0 ]
+  do
+  sleep 5s
+  if [ -s $errDump ]
+      then
+      status=1
+      echo "First report from MessageLogger:"
+      echo "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+      cat $errDump
+      echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+  fi
+done
 
 ##################################################
 # restore the original cff and cfg files
 ##################################################
+echo -n "Restoring original steering files... "
 if [ -e $srcFile.tmp ]
     then
     mv $srcFile.tmp $srcFile
@@ -141,3 +178,5 @@ if [ -e $cfgFile.tmp ]
     then
     mv $cfgFile.tmp $cfgFile
 fi
+echo "done."
+echo "Your job is running in the background. Good luck!"
