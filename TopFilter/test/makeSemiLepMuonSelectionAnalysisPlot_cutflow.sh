@@ -251,7 +251,7 @@ if [ $option = "ps" -a -e $outDir/inspect.ps ]
 fi
 
 ##################################################
-# 7: inspect before jet eta cuts
+# 7: inspect before jet pt cuts
 ##################################################
 echo "Going to inspect before jet pt cuts..."
 # choose hist file
