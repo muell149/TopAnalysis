@@ -10,13 +10,13 @@ using reco::GenParticle;
 using edm::LogInfo;
 
 IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
-	hist_(cfg.getParameter<std::string > ("hist")), muons_(cfg.getParameter<
-			edm::InputTag > ("muons")), met_(cfg.getParameter<edm::InputTag > (
-			"missingEt")),
-			ttgen_(cfg.getParameter<edm::InputTag > ("genEvent")), jets_(
-					cfg.getParameter<edm::InputTag > ("jets")), ptBins_(
-					cfg.getParameter<std::vector<double> > ("ptBins")),
-			ttbarMC_(cfg.getParameter<bool > ("ttbarMC")) {
+	hist_(cfg.getParameter<std::string > ("hist")),
+	muons_(cfg.getParameter<edm::InputTag > ("muons")),
+	met_(cfg.getParameter<edm::InputTag > ("missingEt")),
+	ttgen_(cfg.getParameter<edm::InputTag > ("genEvent")),
+	jets_(cfg.getParameter<edm::InputTag > ("jets")),
+	ptBins_(cfg.getParameter<std::vector<double> > ("ptBins")),
+	ttbarMC_(cfg.getParameter<bool > ("ttbarMC")) {
 	isoMaxBin_ = 10.;
 	isoBins_ = 100;
 	event_ = 0;
@@ -33,16 +33,19 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 	}
 
 	ofstream hist(hist_.c_str(), std::ios::out);
+	std::string tmp = "2D.hist";
+	std::string hist2dd = hist_.replace(hist_.find(".hist", 0), tmp.length(), tmp);
+	ofstream hist2D(hist2dd.c_str(),std::ios::out);
 	NameScheme nam("iso");
 	TH2F *trackIsoMET, *caloIsoMET, *ptMET;
 	isomon_ = new CorrelationMonitor();
-	trackIsoMET = fs->make<TH2F > (nam.name(hist, "TrackIsoMETCorrelation"),
+	trackIsoMET = fs->make<TH2F > (nam.name(hist2D, "TrackIsoMETCorrelation"),
 			nam.name("TrackIsoMETCorrelation"), 300, 0., 300., isoBins_, 0.,
 			isoMaxBin_);
-	caloIsoMET = fs->make<TH2F > (nam.name(hist, "CaloIsoMETCorrelation"),
+	caloIsoMET = fs->make<TH2F > (nam.name(hist2D, "CaloIsoMETCorrelation"),
 			nam.name("CaloIsoMETCorrelation"), 300, 0., 300., 10, 0.,
 			isoMaxBin_);
-	ptMET = fs->make<TH2F > (nam.name(hist, "PtMETCorrelation"), nam.name(
+	ptMET = fs->make<TH2F > (nam.name(hist2D, "PtMETCorrelation"), nam.name(
 			"PtMETCorrelation"), 300, 0., 300., 300, 0., 300.);
 
 	isomon_->addHist("trackIso", trackIsoMET);
