@@ -1,35 +1,91 @@
 # ----------------------------
 # initialize analyzers
 # ----------------------------
-  module semiMuonRaw = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module semiMuonNon = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module semiMuonLep = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module semiMuonIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
-  module semiMuonJet = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonRaw    = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonNon    = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonMuEta  = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonMuPt   = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonTrkIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonCalIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonJetIso = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonJetEta = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
+  module semiMuonJetPt  = analyzeMuon from "TopAnalysis/TopAnalyzer/data/MuonAnalyzer.cfi"
 
-  module semiJetsRaw = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
-  module semiJetsNon = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
-  module semiJetsLep = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
-  module semiJetsIso = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
-  module semiJetsJet = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsRaw    = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsNon    = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsMuEta  = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsMuPt   = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsTrkIso = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsCalIso = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsJetIso = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsJetEta = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
+  module semiJetsJetPt  = analyzeJets from "TopAnalysis/TopAnalyzer/data/JetAnalyzer.cfi"
 
 # ----------------------------
 # configure analyzers
 # ----------------------------
 
 # muon sample
-  replace semiMuonRaw.input = allLayer1Muons
-  replace semiMuonNon.input = selectedLayer1Muons
-  replace semiMuonLep.input = selectedLayer1Muons
-  replace semiMuonIso.input = selectedLayer1Muons
-  replace semiMuonJet.input = selectedLayer1Muons
+  replace semiMuonRaw.input    = allLayer1Muons
+  replace semiMuonNon.input    = selectedLayer1Muons
+  replace semiMuonMuEta.input  = selectedLayer1Muons
+  replace semiMuonMuPt.input   = selectedLayer1Muons
+  replace semiMuonTrkIso.input = selectedLayer1Muons
+  replace semiMuonCalIso.input = selectedLayer1Muons
+  replace semiMuonJetIso.input = selectedLayer1Muons
+  replace semiMuonJetEta.input = selectedLayer1Muons
+  replace semiMuonJetPt.input  = selectedLayer1Muons
+
+  replace semiMuonRaw.doId    = false
+  replace semiMuonNon.doId    = false
+  replace semiMuonMuEta.doId  = false
+  replace semiMuonMuPt.doId   = false
+  replace semiMuonTrkIso.doId = false
+  replace semiMuonCalIso.doId = false
+  replace semiMuonJetIso.doId = false
+  replace semiMuonJetEta.doId = false
+  replace semiMuonJetPt.doId  = false
+
+  replace semiMuonRaw.doRes    = false
+  replace semiMuonNon.doRes    = false
+  replace semiMuonMuEta.doRes  = false
+  replace semiMuonMuPt.doRes   = false
+  replace semiMuonTrkIso.doRes = false
+  replace semiMuonCalIso.doRes = false
+  replace semiMuonJetIso.doRes = false
+  replace semiMuonJetEta.doRes = false
+  replace semiMuonJetPt.doRes  = false
 
 # jet sample
-  replace semiJetsRaw.input = allLayer1Jets
-  replace semiJetsNon.input = selectedLayer1Jets
-  replace semiJetsLep.input = selectedLayer1Jets
-  replace semiJetsIso.input = selectedLayer1Jets
-  replace semiJetsJet.input = selectedLayer1Jets
+  replace semiJetsRaw.input    = allLayer1Jets
+  replace semiJetsNon.input    = selectedLayer1Jets
+  replace semiJetsMuEta.input  = selectedLayer1Jets
+  replace semiJetsMuPt.input   = selectedLayer1Jets
+  replace semiJetsTrkIso.input = selectedLayer1Jets
+  replace semiJetsCalIso.input = selectedLayer1Jets
+  replace semiJetsJetIso.input = selectedLayer1Jets
+  replace semiJetsJetEta.input = selectedLayer1Jets
+  replace semiJetsJetPt.input  = selectedLayer1Jets
+
+  replace semiJetsRaw.doId    = false
+  replace semiJetsNon.doId    = false
+  replace semiJetsMuEta.doId  = false
+  replace semiJetsMuPt.doId   = false
+  replace semiJetsTrkIso.doId = false
+  replace semiJetsCalIso.doId = false
+  replace semiJetsJetIso.doId = false
+  replace semiJetsJetEta.doId = false
+  replace semiJetsJetPt.doId  = false
+
+  replace semiJetsRaw.doRes    = false
+  replace semiJetsNon.doRes    = false
+  replace semiJetsMuEta.doRes  = false
+  replace semiJetsMuPt.doRes   = false
+  replace semiJetsTrkIso.doRes = false
+  replace semiJetsCalIso.doRes = false
+  replace semiJetsJetIso.doRes = false
+  replace semiJetsJetEta.doRes = false
+  replace semiJetsJetPt.doRes  = false
 
 # ----------------------------
 # initialize filters
@@ -44,17 +100,15 @@
 # ----------------------------
 # configure filters
 # ----------------------------
-  
 
 #
-  sequence makeSemiMuonKinematic = {filterSemiMuonEta, filterSemiMuonPt, 
-                                    semiMuonLep, semiJetsLep}
-  sequence makeSemiMuonIsolation = {filterSemiMuonTrkIsolation, 
-                                    filterSemiMuonCalIsolation,
-                                    filterSemiMuonJetIsolation, 
-                                    semiMuonIso, semiJetsIso}
-  sequence makeSemiJetsKinematic = {filterSemiJetsEta, filterSemiJetsPt, 
-                                    semiMuonJet, semiJetsJet}
+  sequence makeSemiMuonKinematic = {filterSemiMuonEta, semiMuonMuEta, semiJetsMuEta,
+                                    filterSemiMuonPt, semiMuonMuPt, semiJetsMuPt}
+  sequence makeSemiMuonIsolation = {filterSemiMuonTrkIsolation, semiMuonTrkIso, semiJetsTrkIso,
+                                    filterSemiMuonCalIsolation, semiMuonCalIso, semiJetsCalIso,
+                                    filterSemiMuonJetIsolation, semiMuonJetIso, semiJetsJetIso}
+  sequence makeSemiJetsKinematic = {filterSemiJetsEta, semiMuonJetEta, semiJetsJetEta,
+                                    filterSemiJetsPt, semiMuonJetPt, semiJetsJetPt}
 
   sequence makeSemiReference     = {semiMuonRaw, semiJetsRaw, semiMuonNon, semiJetsNon}
   sequence makeSemiMuonSelection = {makeSemiMuonKinematic,  makeSemiMuonIsolation}
