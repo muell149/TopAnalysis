@@ -23,9 +23,13 @@ if [ $1 ]
 	    exit 0
 	fi
     fi
+    echo "Option chosen for output format: $1"
+else
+    option="ps"
+    echo "Option chosen for output format: ps"
 fi
 
-echo "Option chosen for output format: $1"
+
 
 ##################################################
 # choose steering file to use
@@ -70,7 +74,7 @@ echo "... $jetsHist"
 ##################################################
 outDir="inspect_SemiLepCutflow"
 
-echo "Output files will be written to the following directory"
+echo "Output file(s) will be written to the following directory"
 echo "(directory will be created if it is not yet existing):"
 echo "... $outDir"
 
