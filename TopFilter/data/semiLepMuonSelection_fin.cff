@@ -18,8 +18,8 @@ block SemiMuonEtaCut = {
 
 block SemiJetsEtaCut = {
   string name = "jetsEtaCut"
-  vdouble minEta  = {-1.4, -1.4, -1.4, -1.4}
-  vdouble maxEta  = { 1.4,  1.4,  1.4,  1.4}
+  vdouble minEta  = {-2.4, -2.4, -2.4, -2.4}
+  vdouble maxEta  = { 2.4,  2.4,  2.4,  2.4}
 }
 
 block SemiTrkIsolationCut = {
@@ -38,5 +38,5 @@ block SemiJetIsolationCut = {
   string name = "jetIsolationCut"
   InputTag jets = allLayer1Jets
   vdouble isolation = {0.5}
-  vdouble minJetPt  = {10.}
+  vdouble minJetPt  = {20.}
 }
