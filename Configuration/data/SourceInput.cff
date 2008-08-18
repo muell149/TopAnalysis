@@ -10,7 +10,20 @@ source = PoolSource{
 # uncomment sample of choice
 #-----------------------------------------------------------------------
 
+#<<<<<<< SourceInput.cff
+#include "TopAnalysis/Configuration/test/csa07AllEventsSkim_ttbar.cff"
+# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_wjets.cff"
+ include "TopAnalysis/Configuration/test/csa07AllEventsSkim_zjets.cff"
+ #include "TopAnalysis/Configuration/test/csa07AllEventsSkim_qcd.cff"
+#  include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCD.cff"
+
+#local files
+#replace PoolSource.fileNames = {"file:semiDiLepMuSelection_qcd_9.root"}
+#replace PoolSource.fileNames = {"file:semiDiLepMuSelection_ttbar_6.root"}
+#replace PoolSource.fileNames = {"dcap://dcache-ses-cms.desy.de/pnfs/desy.de/cms/analysis/top/rwolf/ttbar/semiDiLepMuSelection_ttbar_6.root"}
+#=======
   include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Ttbar.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Wjets.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Zjets.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCD.cff"
+#>>>>>>> 1.9
