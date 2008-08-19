@@ -80,11 +80,11 @@ JetKinematic::book()
     phi_.push_back( new TH1F(kin.name("phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
   }
 
-  mult_= new TH1F(kin.name("n"  ), kin.name("n"  ), 21, 0., 20.);
-  n10_ = new TH1F(kin.name("n10"), kin.name("n10"), 21, 0., 20.);
-  n20_ = new TH1F(kin.name("n20"), kin.name("n20"), 21, 0., 20.);
-  n30_ = new TH1F(kin.name("n30"), kin.name("n30"), 21, 0., 20.);
-  n40_ = new TH1F(kin.name("n40"), kin.name("n40"), 21, 0., 20.);
+  mult_= new TH1F(kin.name("n"  ), kin.name("n"  ), 15, 0., 15.);
+  n10_ = new TH1F(kin.name("n10"), kin.name("n10"), 15, 0., 15.);
+  n20_ = new TH1F(kin.name("n20"), kin.name("n20"), 15, 0., 15.);
+  n30_ = new TH1F(kin.name("n30"), kin.name("n30"), 15, 0., 15.);
+  n40_ = new TH1F(kin.name("n40"), kin.name("n40"), 15, 0., 15.);
 }
 
 /// book for full FW
@@ -106,11 +106,11 @@ JetKinematic::book(edm::Service<TFileService>& fs)
     phi_.push_back( fs->make<TH1F>(kin.name("phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
   }
 
-  mult_= fs->make<TH1F>(kin.name("n"  ), kin.name("n"  ), 21, 0., 20.);
-  n10_ = fs->make<TH1F>(kin.name("n10"), kin.name("n10"), 21, 0., 20.);
-  n20_ = fs->make<TH1F>(kin.name("n20"), kin.name("n20"), 21, 0., 20.);
-  n30_ = fs->make<TH1F>(kin.name("n30"), kin.name("n30"), 21, 0., 20.);
-  n40_ = fs->make<TH1F>(kin.name("n40"), kin.name("n40"), 21, 0., 20.);
+  mult_= fs->make<TH1F>(kin.name("n"  ), "N_{jets}"                 , 15, 0., 15.);
+  n10_ = fs->make<TH1F>(kin.name("n10"), "N_{jets} (p_{T} > 10 GeV)", 15, 0., 15.);
+  n20_ = fs->make<TH1F>(kin.name("n20"), "N_{jets} (p_{T} > 20 GeV)", 15, 0., 15.);
+  n30_ = fs->make<TH1F>(kin.name("n30"), "N_{jets} (p_{T} > 30 GeV)", 15, 0., 15.);
+  n40_ = fs->make<TH1F>(kin.name("n40"), "N_{jets} (p_{T} > 40 GeV)", 15, 0., 15.);
 }
 
 /// book for full FW with output stream
@@ -132,11 +132,11 @@ JetKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
     phi_.push_back( fs->make<TH1F>(kin.name(file, "phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
   }
 
-  mult_= fs->make<TH1F>(kin.name(file, "n"  ), kin.name("n"  ), 21, 0., 20.);
-  n10_ = fs->make<TH1F>(kin.name(file, "n10"), kin.name("n10"), 21, 0., 20.);
-  n20_ = fs->make<TH1F>(kin.name(file, "n20"), kin.name("n20"), 21, 0., 20.);
-  n30_ = fs->make<TH1F>(kin.name(file, "n30"), kin.name("n30"), 21, 0., 20.);
-  n40_ = fs->make<TH1F>(kin.name(file, "n40"), kin.name("n40"), 21, 0., 20.);
+  mult_= fs->make<TH1F>(kin.name(file, "n"  ), "N_{jets}"                 , 15, 0., 15.);
+  n10_ = fs->make<TH1F>(kin.name(file, "n10"), "N_{jets} (p_{T} > 10 GeV)", 15, 0., 15.);
+  n20_ = fs->make<TH1F>(kin.name(file, "n20"), "N_{jets} (p_{T} > 20 GeV)", 15, 0., 15.);
+  n30_ = fs->make<TH1F>(kin.name(file, "n30"), "N_{jets} (p_{T} > 30 GeV)", 15, 0., 15.);
+  n40_ = fs->make<TH1F>(kin.name(file, "n40"), "N_{jets} (p_{T} > 40 GeV)", 15, 0., 15.);
 }
 
 /// write to file and free allocated space for FWLite

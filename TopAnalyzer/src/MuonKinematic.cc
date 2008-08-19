@@ -127,19 +127,19 @@ void
 MuonKinematic::book(edm::Service<TFileService>& fs)
 {
   NameScheme kin("kin");
-  en_ = fs->make<TH1F>(kin.name( "en"  ), kin.name("en"  ), 60,   0., 300.);
-  pt_ = fs->make<TH1F>(kin.name( "pt"  ), kin.name("pt"  ), 30,   0., 150.);
-  eta_= fs->make<TH1F>(kin.name( "eta" ), kin.name("eta" ), 35, -3.5,  3.5);
-  phi_= fs->make<TH1F>(kin.name( "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
+  en_ = fs->make<TH1F>(kin.name( "en"  ), "E (muon) [GeV]"    , 60,   0., 300.);
+  pt_ = fs->make<TH1F>(kin.name( "pt"  ), "p_{T} (muon) [GeV]", 24,   0., 120.);
+  eta_= fs->make<TH1F>(kin.name( "eta" ), "#eta (muon)"       , 35, -3.5,  3.5);
+  phi_= fs->make<TH1F>(kin.name( "phi" ), "#phi (muon)"       , 35, -3.5,  3.5);
 
   NameScheme iso("iso");
-  isoJet_  = fs->make<TH1F>(iso.name( "isoJet"  ), iso.name("isoJet"  ), 80,   0.,  4.);
-  isoJet5_ = fs->make<TH1F>(iso.name( "isoJet5" ), iso.name("isoJet5" ), 80,   0.,  4.);
-  isoJet10_= fs->make<TH1F>(iso.name( "isoJet10"), iso.name("isoJet10"), 80,   0.,  4.);
-  isoJet15_= fs->make<TH1F>(iso.name( "isoJet15"), iso.name("isoJet15"), 80,   0.,  4.);
-  isoJet20_= fs->make<TH1F>(iso.name( "isoJet20"), iso.name("isoJet20"), 80,   0.,  4.);
-  isoTrkPt_= fs->make<TH1F>(iso.name( "isoTrkPt"), iso.name("isoTrkPt"), 60,  -1.,  5.);
-  isoCalPt_= fs->make<TH1F>(iso.name( "isoCalPt"), iso.name("isoCalPt"), 40, -10., 30.);
+  isoJet_  = fs->make<TH1F>(iso.name( "isoJet"  ), "smallest #Delta R (muon, jet)"         , 35, 0.,  3.5);
+  isoJet5_ = fs->make<TH1F>(iso.name( "isoJet5" ), "smallest #Delta R (muon, jet_{5 GeV})" , 35, 0.,  3.5);
+  isoJet10_= fs->make<TH1F>(iso.name( "isoJet10"), "smallest #Delta R (muon, jet_{10 GeV})", 35, 0.,  3.5);
+  isoJet15_= fs->make<TH1F>(iso.name( "isoJet15"), "smallest #Delta R (muon, jet_{15 GeV})", 35, 0.,  3.5);
+  isoJet20_= fs->make<TH1F>(iso.name( "isoJet20"), "smallest #Delta R (muon, jet_{20 GeV})", 35, 0.,  3.5);
+  isoTrkPt_= fs->make<TH1F>(iso.name( "isoTrkPt"), "muon trk. isol. [GeV]", 20, 0., 10.);
+  isoCalPt_= fs->make<TH1F>(iso.name( "isoCalPt"), "muon cal. isol. [GeV]", 20, 0., 10.);
   isoTrkN_ = fs->make<TH1F>(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
   isoCalN_ = fs->make<TH1F>(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
   dRTrkPt_ = fs->make<TH1F>(iso.name( "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,  2.);
@@ -156,25 +156,25 @@ void
 MuonKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
 {
   NameScheme kin("kin");
-  en_ = fs->make<TH1F>(kin.name( file, "en"  ), kin.name("en"  ), 60,   0., 300.);
-  pt_ = fs->make<TH1F>(kin.name( file, "pt"  ), kin.name("pt"  ), 30,   0., 150.);
-  eta_= fs->make<TH1F>(kin.name( file, "eta" ), kin.name("eta" ), 35, -3.5,  3.5);
-  phi_= fs->make<TH1F>(kin.name( file, "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
+  en_ = fs->make<TH1F>(kin.name( file, "en"  ), "E (muon) [GeV]"    , 60,   0., 300.);
+  pt_ = fs->make<TH1F>(kin.name( file, "pt"  ), "p_{T} (muon) [GeV]", 24,   0., 120.);
+  eta_= fs->make<TH1F>(kin.name( file, "eta" ), "#eta (muon)"       , 35, -3.5,  3.5);
+  phi_= fs->make<TH1F>(kin.name( file, "phi" ), "#phi (muon)"       , 35, -3.5,  3.5);
 
   NameScheme iso("iso");
-  isoJet_  = fs->make<TH1F>(iso.name( file, "isoJet"  ), iso.name("isoJet"  ), 80,   0.,  4.);
-  isoJet5_ = fs->make<TH1F>(iso.name( file, "isoJet5" ), iso.name("isoJet5" ), 80,   0.,  4.);
-  isoJet10_= fs->make<TH1F>(iso.name( file, "isoJet10"), iso.name("isoJet10"), 80,   0.,  4.);
-  isoJet15_= fs->make<TH1F>(iso.name( file, "isoJet15"), iso.name("isoJet15"), 80,   0.,  4.);
-  isoJet20_= fs->make<TH1F>(iso.name( file, "isoJet20"), iso.name("isoJet20"), 80,   0.,  4.);
-  isoTrkPt_= fs->make<TH1F>(iso.name( file, "isoTrkPt"), iso.name("isoTrkPt"), 60,  -1.,  5.);
-  isoCalPt_= fs->make<TH1F>(iso.name( file, "isoCalPt"), iso.name("isoCalPt"), 40, -10., 30.);
-  isoTrkN_ = fs->make<TH1F>(iso.name( file, "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
-  isoCalN_ = fs->make<TH1F>(iso.name( file, "isoCalN" ), iso.name("isoCaloN"), 31,  -1., 30.);
-  dRTrkPt_ = fs->make<TH1F>(iso.name( file, "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,  2.);
-  dRTrkN_  = fs->make<TH1F>(iso.name( file, "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,  2.);
-  dRCalPt_ = fs->make<TH1F>(iso.name( file, "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,  2.);
-  dRCalN_  = fs->make<TH1F>(iso.name( file, "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,  2.);
+  isoJet_  = fs->make<TH1F>(iso.name( file, "isoJet"  ), "smallest #Delta R (muon, jet)"         , 35, 0.,  3.5);
+  isoJet5_ = fs->make<TH1F>(iso.name( file, "isoJet5" ), "smallest #Delta R (muon, jet_{5 GeV})" , 35, 0.,  3.5);
+  isoJet10_= fs->make<TH1F>(iso.name( file, "isoJet10"), "smallest #Delta R (muon, jet_{10 GeV})", 35, 0.,  3.5);
+  isoJet15_= fs->make<TH1F>(iso.name( file, "isoJet15"), "smallest #Delta R (muon, jet_{15 GeV})", 35, 0.,  3.5);
+  isoJet20_= fs->make<TH1F>(iso.name( file, "isoJet20"), "smallest #Delta R (muon, jet_{20 GeV})", 35, 0.,  3.5);
+  isoTrkPt_= fs->make<TH1F>(iso.name( file, "isoTrkPt"), "muon trk. isol. [GeV]", 20, 0., 10.);
+  isoCalPt_= fs->make<TH1F>(iso.name( file, "isoCalPt"), "muon cal. isol. [GeV]", 20, 0., 10.);
+  isoTrkN_ = fs->make<TH1F>(iso.name( file, "isoTrkN" ), "isoTrkN" , 21,  -1., 20. );
+  isoCalN_ = fs->make<TH1F>(iso.name( file, "isoCalN" ), "isoCaloN", 31,  -1., 30. );
+  dRTrkPt_ = fs->make<TH1F>(iso.name( file, "dRTrkPt" ), "dRTrkPt" , 42, -0.1,  2. );
+  dRTrkN_  = fs->make<TH1F>(iso.name( file, "dRTrkN"  ), "dRTrkN"  , 42, -0.1,  2. );
+  dRCalPt_ = fs->make<TH1F>(iso.name( file, "dRCalPt" ), "dRCalPt" , 42, -0.1,  2. );
+  dRCalN_  = fs->make<TH1F>(iso.name( file, "dRCalN"  ), "dRCalN"  , 42, -0.1,  2. );
 
   ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
   ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
