@@ -7,6 +7,7 @@
 SemiLepHypothesesAnalyzer::SemiLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   semiLepEvt_      (cfg.getParameter<edm::InputTag>("semiLepEvent"    )),
   hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )),
+  wgt_             (cfg.getParameter<edm::InputTag>("weight"          )),
   nJetsMax_        (cfg.getParameter<unsigned int> ("nJetsMax"        )),
   maxSumDRGenMatch_(cfg.getParameter<double>       ("maxSumDRGenMatch")),
   minProbKinFit_   (cfg.getParameter<double>       ("minProbKinFit"   )),
@@ -26,6 +27,10 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   evt.getByLabel(hypoKey_, hypoKeyHandle);
   TtSemiLeptonicEvent::HypoKey& hypoKey = (TtSemiLeptonicEvent::HypoKey&) *hypoKeyHandle;
 
+  edm::Handle<double> wgt;
+  evt.getByLabel(wgt_, wgt);
+  double weight = *wgt;
+
   // -----------------------
   // check if hypothesis is valid in this event
   // and if it satisfies some quality criteria
@@ -43,10 +48,27 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
       (hypoKey==TtSemiLeptonicEvent::kKinFit   && semiLepEvt->fitProb()<minProbKinFit_         ) ||
       (hypoKey==TtSemiLeptonicEvent::kMVADisc  && semiLepEvt->mvaDisc()<minMVADisc_            )
       ) {
-    goodHypo_->Fill(0); // not a good hypothesis
-    return;
+    goodHypo_->Fill(0., weight); // not a good hypothesis
   }
-  else goodHypo_->Fill(1); // good hypothesis
+  else goodHypo_->Fill(1., weight); // good hypothesis
+
+  if( !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGeom         ) ||
+      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kWMassMaxSumPt) ||
+      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMaxSumPtWMass) ||
+      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGenMatch     ) ||
+      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMVADisc      ) ||
+      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kKinFit       ) )
+    return;  // return if any of the hypotheses is not valid
+
+  // -----------------------
+  // fill histos related to quality of the TtSemiLeptonicEvent
+  // -----------------------
+  fillQualityHistos(*semiLepEvt, weight);
+
+  if( semiLepEvt->genMatchSumDR() > maxSumDRGenMatch_ ||
+      semiLepEvt->fitProb() < minProbKinFit_          ||
+      semiLepEvt->mvaDisc() < minMVADisc_ )
+    return; // return if any of the quality criteria is not fulfilled
 
   // -----------------------
   // fill histos for basic kinematic variables
@@ -62,19 +84,19 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   const reco::Candidate* Lepton   = semiLepEvt->lepton     (hypoKey);
   const reco::Candidate* Neutrino = semiLepEvt->neutrino   (hypoKey);
 
-  fillKinHistos(hadTopKin_, *HadTop  );
-  fillKinHistos(hadWKin_,   *HadW    );
-  fillKinHistos(hadBKin_,   *HadB    );
-  fillKinHistos(hadQKin_,   *HadQ    );
-  fillKinHistos(hadPKin_,   *HadP    );
-  fillKinHistos(lepTopKin_, *LepTop  );
-  fillKinHistos(lepWKin_,   *LepW    );
-  fillKinHistos(lepBKin_,   *LepB    );
-  fillKinHistos(leptonKin_, *Lepton  );
-  fillKinHistos(neutriKin_, *Neutrino);
+  fillKinHistos(hadTopKin_, *HadTop  , weight);
+  fillKinHistos(hadWKin_,   *HadW    , weight);
+  fillKinHistos(hadBKin_,   *HadB    , weight);
+  fillKinHistos(hadQKin_,   *HadQ    , weight);
+  fillKinHistos(hadPKin_,   *HadP    , weight);
+  fillKinHistos(lepTopKin_, *LepTop  , weight);
+  fillKinHistos(lepWKin_,   *LepW    , weight);
+  fillKinHistos(lepBKin_,   *LepB    , weight);
+  fillKinHistos(leptonKin_, *Lepton  , weight);
+  fillKinHistos(neutriKin_, *Neutrino, weight);
 
-  hadTopLepTopMassDiff->Fill( HadTop->mass() - LepTop->mass() );
-  hadWLepWMassDiff    ->Fill( HadW  ->mass() - LepW  ->mass() );
+  hadTopLepTopMassDiff->Fill( HadTop->mass()-LepTop->mass() , weight );
+  hadWLepWMassDiff    ->Fill( HadW  ->mass()-LepW  ->mass() , weight );
 
   // -----------------------
   // fill resolution histos for kinematic variables
@@ -93,28 +115,25 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
     const reco::Candidate* genLepton   = semiLepEvt->genLepton();
     const reco::Candidate* genNeutrino = semiLepEvt->genNeutrino();
 
-    fillKinResHistos(hadTopKinRes_, *HadTop  , *genHadTop);
-    fillKinResHistos(hadWKinRes_,   *HadW    , *genHadW);
-    fillKinResHistos(hadBKinRes_,   *HadB    , *genHadB);
-    fillKinResHistos(hadQKinRes_,   *HadQ    , *genHadQ);
-    fillKinResHistos(hadPKinRes_,   *HadP    , *genHadP);
-    fillKinResHistos(lepTopKinRes_, *LepTop  , *genLepTop);
-    fillKinResHistos(lepWKinRes_,   *LepW    , *genLepW);
-    fillKinResHistos(lepBKinRes_,   *LepB    , *genLepB);
-    fillKinResHistos(leptonKinRes_, *Lepton  , *genLepton);
-    fillKinResHistos(neutriKinRes_, *Neutrino, *genNeutrino);
+    fillKinResHistos(hadTopKinRes_, *HadTop  , *genHadTop  , weight);
+    fillKinResHistos(hadWKinRes_  , *HadW    , *genHadW    , weight);
+    fillKinResHistos(hadBKinRes_  , *HadB    , *genHadB    , weight);
+    fillKinResHistos(hadQKinRes_  , *HadQ    , *genHadQ    , weight);
+    fillKinResHistos(hadPKinRes_  , *HadP    , *genHadP    , weight);
+    fillKinResHistos(lepTopKinRes_, *LepTop  , *genLepTop  , weight);
+    fillKinResHistos(lepWKinRes_  , *LepW    , *genLepW    , weight);
+    fillKinResHistos(lepBKinRes_  , *LepB    , *genLepB    , weight);
+    fillKinResHistos(leptonKinRes_, *Lepton  , *genLepton  , weight);
+    fillKinResHistos(neutriKinRes_, *Neutrino, *genNeutrino, weight);
 
   }
 
   // -----------------------
   // fill correlation histos for jet parton association
   // -----------------------
-  fillJetCorrelHistos( semiLepEvt->jetMatch(hypoKey), semiLepEvt->jetMatch(TtSemiLeptonicEvent::kGenMatch) );
-
-  // -----------------------
-  // fill histos related to quality of the TtSemiLeptonicEvent
-  // -----------------------
-  fillQualityHistos( *semiLepEvt );
+  fillJetCorrelHistos(semiLepEvt->jetMatch(hypoKey),
+		      semiLepEvt->jetMatch(TtSemiLeptonicEvent::kGenMatch),
+		      weight);
 
 }
 
@@ -305,70 +324,70 @@ SemiLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
 }
 
 void
-SemiLepHypothesesAnalyzer::fillKinHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate)
+SemiLepHypothesesAnalyzer::fillKinHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate, const double& weight)
 {
-  histos[0]->Fill( candidate.pt()   );
-  histos[1]->Fill( candidate.eta()  );
-  histos[2]->Fill( candidate.phi()  );
-  histos[3]->Fill( candidate.mass() );
+  histos[0]->Fill( candidate.pt()   , weight );
+  histos[1]->Fill( candidate.eta()  , weight );
+  histos[2]->Fill( candidate.phi()  , weight );
+  histos[3]->Fill( candidate.mass() , weight );
 }
 
 void
 SemiLepHypothesesAnalyzer::fillKinResHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate,
-					    const reco::Candidate& genCandidate)
+					    const reco::Candidate& genCandidate, const double& weight)
 {
-  histos[0]->Fill( ( candidate.pt()   - genCandidate.pt()   ) / genCandidate.pt()   );
-  histos[1]->Fill( ( candidate.eta()  - genCandidate.eta()  ) / genCandidate.eta()  );
-  histos[2]->Fill( ( candidate.phi()  - genCandidate.phi()  ) / genCandidate.phi()  );
-  histos[3]->Fill( ( candidate.mass() - genCandidate.mass() ) / genCandidate.mass() );
+  histos[0]->Fill( (candidate.pt()  -genCandidate.pt()  )/genCandidate.pt()   , weight );
+  histos[1]->Fill( (candidate.eta() -genCandidate.eta() )/genCandidate.eta()  , weight );
+  histos[2]->Fill( (candidate.phi() -genCandidate.phi() )/genCandidate.phi()  , weight );
+  histos[3]->Fill( (candidate.mass()-genCandidate.mass())/genCandidate.mass() , weight );
 }
 
 void
-SemiLepHypothesesAnalyzer::fillJetCorrelHistos(const std::vector<int>& match, const std::vector<int>& matchCompare)
+SemiLepHypothesesAnalyzer::fillJetCorrelHistos(const std::vector<int>& match, const std::vector<int>& matchCompare, const double& weight)
 {
 
-  hadBJetCorrel_->Fill( match[TtSemiEvtPartons::HadB]      +1, matchCompare[TtSemiEvtPartons::HadB]      +1);
-  hadQJetCorrel_->Fill( match[TtSemiEvtPartons::LightQ]    +1, matchCompare[TtSemiEvtPartons::LightQ]    +1);
-  hadPJetCorrel_->Fill( match[TtSemiEvtPartons::LightQBar] +1, matchCompare[TtSemiEvtPartons::LightQBar] +1);
-  lepBJetCorrel_->Fill( match[TtSemiEvtPartons::LepB]      +1, matchCompare[TtSemiEvtPartons::LepB]      +1);
+  hadBJetCorrel_->Fill( match[TtSemiEvtPartons::HadB]     +1, matchCompare[TtSemiEvtPartons::HadB]     +1, weight );
+  hadQJetCorrel_->Fill( match[TtSemiEvtPartons::LightQ]   +1, matchCompare[TtSemiEvtPartons::LightQ]   +1, weight );
+  hadPJetCorrel_->Fill( match[TtSemiEvtPartons::LightQBar]+1, matchCompare[TtSemiEvtPartons::LightQBar]+1, weight );
+  lepBJetCorrel_->Fill( match[TtSemiEvtPartons::LepB]     +1, matchCompare[TtSemiEvtPartons::LepB]     +1, weight );
 
 }
 
 void
-SemiLepHypothesesAnalyzer::fillQualityHistos(const TtSemiLeptonicEvent& semiLepEvt)
+SemiLepHypothesesAnalyzer::fillQualityHistos(const TtSemiLeptonicEvent& semiLepEvt, const double& weight)
 {
 
   // genMatch histos
   if( semiLepEvt.isHypoValid(TtSemiLeptonicEvent::kGenMatch) ) {
-    genMatchSumDR_->Fill( semiLepEvt.genMatchSumDR() );
-    genMatchSumPt_->Fill( semiLepEvt.genMatchSumPt() );
-    genMatchSumDRVsSumPt_     ->Fill( semiLepEvt.genMatchSumDR(), semiLepEvt.genMatchSumPt()                                     );
-    genMatchSumDRVsHadWMass_  ->Fill( semiLepEvt.genMatchSumDR(), semiLepEvt.hadronicW  (TtSemiLeptonicEvent::kGenMatch)->mass() );
-    genMatchSumDRVsHadTopMass_->Fill( semiLepEvt.genMatchSumDR(), semiLepEvt.hadronicTop(TtSemiLeptonicEvent::kGenMatch)->mass() );
+    genMatchSumDR_->Fill( semiLepEvt.genMatchSumDR() , weight );
+    genMatchSumPt_->Fill( semiLepEvt.genMatchSumPt() , weight );
+    genMatchSumDRVsSumPt_     ->Fill( semiLepEvt.genMatchSumDR() , semiLepEvt.genMatchSumPt()                                     , weight );
+    genMatchSumDRVsHadWMass_  ->Fill( semiLepEvt.genMatchSumDR() , semiLepEvt.hadronicW  (TtSemiLeptonicEvent::kGenMatch)->mass() , weight );
+    genMatchSumDRVsHadTopMass_->Fill( semiLepEvt.genMatchSumDR() , semiLepEvt.hadronicTop(TtSemiLeptonicEvent::kGenMatch)->mass() , weight );
     // vs. MVADisc
     if( semiLepEvt.isHypoValid(TtSemiLeptonicEvent::kMVADisc) )
-      genMatchSumDRVsMVADisc_->Fill( semiLepEvt.genMatchSumDR(), semiLepEvt.mvaDisc() );
+      genMatchSumDRVsMVADisc_->Fill( semiLepEvt.genMatchSumDR() , semiLepEvt.mvaDisc() , weight );
     // vs. KinFit
     if( semiLepEvt.isHypoValid(TtSemiLeptonicEvent::kKinFit) )
-      genMatchSumDRVsFitProb_->Fill( semiLepEvt.genMatchSumDR(), semiLepEvt.fitProb() );
+      genMatchSumDRVsFitProb_->Fill( semiLepEvt.genMatchSumDR() , semiLepEvt.fitProb() , weight );
   }
 
   // MVADisc histos
   if( semiLepEvt.isHypoValid(TtSemiLeptonicEvent::kMVADisc) ) {
-    mvaDisc_->Fill( semiLepEvt.mvaDisc() );
-    mvaDiscVsHadWMass_  ->Fill( semiLepEvt.mvaDisc(), semiLepEvt.hadronicW  (TtSemiLeptonicEvent::kMVADisc)->mass() );
-    mvaDiscVsHadTopMass_->Fill( semiLepEvt.mvaDisc(), semiLepEvt.hadronicTop(TtSemiLeptonicEvent::kMVADisc)->mass() );
+    mvaDisc_->Fill( semiLepEvt.mvaDisc() , weight );
+    mvaDiscVsHadWMass_  ->Fill( semiLepEvt.mvaDisc() , semiLepEvt.hadronicW  (TtSemiLeptonicEvent::kMVADisc)->mass() , weight );
+    mvaDiscVsHadTopMass_->Fill( semiLepEvt.mvaDisc() , semiLepEvt.hadronicTop(TtSemiLeptonicEvent::kMVADisc)->mass() , weight );
     // vs. kinFit
     if( semiLepEvt.isHypoValid(TtSemiLeptonicEvent::kKinFit) )
-      mvaDiscVsFitProb_->Fill( semiLepEvt.mvaDisc(), semiLepEvt.fitProb() );
+      mvaDiscVsFitProb_->Fill( semiLepEvt.mvaDisc() , semiLepEvt.fitProb() , weight );
   }
 
   // kinFit histos
   if( semiLepEvt.isHypoValid(TtSemiLeptonicEvent::kKinFit) ) {
-    fitChi2_->Fill( semiLepEvt.fitChi2() );
-    fitProb_->Fill( semiLepEvt.fitProb() );
-    fitProbVsHadWMass_  ->Fill( semiLepEvt.fitProb(), semiLepEvt.hadronicW   (TtSemiLeptonicEvent::kKinFit)->mass() );
-    fitProbVsHadTopMass_->Fill( semiLepEvt.fitProb(), semiLepEvt.hadronicTop (TtSemiLeptonicEvent::kKinFit)->mass() );
+    fitChi2_->Fill( semiLepEvt.fitChi2() , weight );
+    fitProb_->Fill( semiLepEvt.fitProb() , weight );
+    fitProbVsHadWMass_  ->Fill( semiLepEvt.fitProb() , semiLepEvt.hadronicW   (TtSemiLeptonicEvent::kKinFit)->mass() , weight );
+    fitProbVsHadTopMass_->Fill( semiLepEvt.fitProb() , semiLepEvt.hadronicTop (TtSemiLeptonicEvent::kKinFit)->mass() , weight );
   }
 
 }

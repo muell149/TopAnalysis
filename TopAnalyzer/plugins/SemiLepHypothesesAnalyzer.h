@@ -30,6 +30,7 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
 
   edm::InputTag semiLepEvt_;
   edm::InputTag hypoKey_;
+  edm::InputTag wgt_;
   unsigned int nJetsMax_;
   double maxSumDRGenMatch_;
   double minProbKinFit_;
@@ -41,10 +42,10 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   void bookJetCorrelHistos(edm::Service<TFileService>&, ofstream&);
   void bookQualityHistos  (edm::Service<TFileService>&, ofstream&);
 
-  void fillKinHistos      (std::vector<TH1F*>&, const reco::Candidate&);
-  void fillKinResHistos   (std::vector<TH1F*>&, const reco::Candidate&, const reco::Candidate&);
-  void fillJetCorrelHistos(const std::vector<int>&, const std::vector<int>&);
-  void fillQualityHistos  (const TtSemiLeptonicEvent&);
+  void fillKinHistos      (std::vector<TH1F*>&, const reco::Candidate&, const double&);
+  void fillKinResHistos   (std::vector<TH1F*>&, const reco::Candidate&, const reco::Candidate&, const double&);
+  void fillJetCorrelHistos(const std::vector<int>&, const std::vector<int>&, const double&);
+  void fillQualityHistos  (const TtSemiLeptonicEvent&, const double&);
 
   std::vector<TH1F*> hadTopKin_;
   std::vector<TH1F*> hadWKin_;
