@@ -2,7 +2,7 @@ module matrixmodule = MatrixAnalyzer {
 #-------------------------------------------------
 # sources
 #-------------------------------------------------
-        InputTag muons = selectedLayer1Muons
+        InputTag muons = allLayer1Muons
         InputTag var = selectedLayer1METs
 #InputTag jets = selectedLayer1TopJets
 
@@ -22,5 +22,5 @@ module matrixmodule = MatrixAnalyzer {
                 #name of the previous module
                 string pmn = ""
 #binning for the variable you want to see the dependencie from.
-vdouble varBins= {0.0, 80.0, 170.0, 250.0, 9999.0}
+vdouble varBins= {0.0, 40.0, 80.0, 170.0, 250.0, 9999.0}
 }

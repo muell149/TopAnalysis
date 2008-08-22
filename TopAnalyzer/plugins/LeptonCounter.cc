@@ -130,3 +130,20 @@ double LeptonCounter::getPureHadronic(string name) {
 	} else
 		return -1.;
 }
+
+double LeptonCounter::getAllLeptonic(string name) {
+	double ret, s, d, m;
+	ret = 0;
+	s = getSemiLeptonic(name);
+	d = getDiLeptonic(name);
+	m = getMultiLeptonic(name);
+	if (s >= 0)
+		ret += s;
+	if (d >= 0)
+		ret += d;
+	if (m >= 0)
+		ret += m;
+	if (s < 0 && d < 0 && m < 0)
+		ret = -1.;
+	return ret;
+}

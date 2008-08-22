@@ -43,6 +43,8 @@ public:
 
 	double getPureHadronic(std::string);
 
+	double getAllLeptonic(std::string);
+
 private:
 	//0 = had, 1= semiLep, 2 = diLep, 3= multiLep
 	std::map<std::string, double*> counters_;
