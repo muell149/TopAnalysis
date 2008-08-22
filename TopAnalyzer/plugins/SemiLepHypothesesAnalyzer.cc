@@ -2,7 +2,7 @@
 
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 
-#include "TopQuarkAnalysis/TopTools/interface/TtSemiEvtPartons.h"
+#include "TopQuarkAnalysis/TopTools/interface/TtSemiLepEvtPartons.h"
 
 SemiLepHypothesesAnalyzer::SemiLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   semiLepEvt_      (cfg.getParameter<edm::InputTag>("semiLepEvent"    )),
@@ -346,10 +346,10 @@ void
 SemiLepHypothesesAnalyzer::fillJetCorrelHistos(const std::vector<int>& match, const std::vector<int>& matchCompare, const double& weight)
 {
 
-  hadBJetCorrel_->Fill( match[TtSemiEvtPartons::HadB]     +1, matchCompare[TtSemiEvtPartons::HadB]     +1, weight );
-  hadQJetCorrel_->Fill( match[TtSemiEvtPartons::LightQ]   +1, matchCompare[TtSemiEvtPartons::LightQ]   +1, weight );
-  hadPJetCorrel_->Fill( match[TtSemiEvtPartons::LightQBar]+1, matchCompare[TtSemiEvtPartons::LightQBar]+1, weight );
-  lepBJetCorrel_->Fill( match[TtSemiEvtPartons::LepB]     +1, matchCompare[TtSemiEvtPartons::LepB]     +1, weight );
+  hadBJetCorrel_->Fill( match[TtSemiLepEvtPartons::HadB]     +1, matchCompare[TtSemiLepEvtPartons::HadB]     +1, weight );
+  hadQJetCorrel_->Fill( match[TtSemiLepEvtPartons::LightQ]   +1, matchCompare[TtSemiLepEvtPartons::LightQ]   +1, weight );
+  hadPJetCorrel_->Fill( match[TtSemiLepEvtPartons::LightQBar]+1, matchCompare[TtSemiLepEvtPartons::LightQBar]+1, weight );
+  lepBJetCorrel_->Fill( match[TtSemiLepEvtPartons::LepB]     +1, matchCompare[TtSemiLepEvtPartons::LepB]     +1, weight );
 
 }
 

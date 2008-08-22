@@ -13,12 +13,12 @@
 # configure analyzers
 # ----------------------------
 
-  replace analyzeGeom.hypoKey          = ttSemiLepGeom:Key
-  replace analyzeWMassMaxSumPt.hypoKey = ttSemiLepWMassMaxSumPt:Key
-  replace analyzeMaxSumPtWMass.hypoKey = ttSemiLepMaxSumPtWMass:Key
-  replace analyzeKinFit.hypoKey        = ttSemiLepKinFit:Key
-  replace analyzeGenMatch.hypoKey      = ttSemiLepGenMatch:Key
-  replace analyzeMVADisc.hypoKey       = ttSemiLepMVADisc:Key
+  replace analyzeGeom.hypoKey          = ttSemiLepHypGeom:Key
+  replace analyzeWMassMaxSumPt.hypoKey = ttSemiLepHypWMassMaxSumPt:Key
+  replace analyzeMaxSumPtWMass.hypoKey = ttSemiLepHypMaxSumPtWMass:Key
+  replace analyzeKinFit.hypoKey        = ttSemiLepHypKinFit:Key
+  replace analyzeGenMatch.hypoKey      = ttSemiLepHypGenMatch:Key
+  replace analyzeMVADisc.hypoKey       = ttSemiLepHypMVADisc:Key
 
 # ----------------------------
 # define sequence

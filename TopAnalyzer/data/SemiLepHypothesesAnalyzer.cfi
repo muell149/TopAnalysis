@@ -1,7 +1,7 @@
 module analyzeSemiLepHypotheses = SemiLepHypothesesAnalyzer{
 
   InputTag semiLepEvent = ttSemiLepEvent
-  InputTag hypoKey      = ttSemiLepWMassMaxSumPt:Key
+  InputTag hypoKey      = ttSemiLepHypWMassMaxSumPt:Key
   InputTag weight       = eventWeight
 
   uint32 nJetsMax = 8
