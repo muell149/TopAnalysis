@@ -2,6 +2,7 @@ module semiLepMuonEvent = SemiLepMuonEventFilter{
  #
   VInputTag leps = {selectedLayer1Muons}
   VInputTag jets = {selectedLayer1Jets}
+  InputTag weight = eventWeight
  #
   bool useLepEta = true
   bool useLepPt  = true
