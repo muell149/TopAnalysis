@@ -4,11 +4,13 @@
 module filterSemiMuonEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using SemiMuonEtaCut }
+  InputTag weight = eventWeight
 }
 
 module filterSemiJetsEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Jets}
   PSet cuts = { using SemiJetsEtaCut }
+  InputTag weight = eventWeight
 }
 
 #
@@ -17,9 +19,11 @@ module filterSemiJetsEta = EtaEventFilter{
 module filterDiMuonEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using DiMuonEtaCut }
+  InputTag weight = eventWeight
 }
 
 module filterDiJetsEta = EtaEventFilter{
   VInputTag input = {selectedLayer1Jets}
   PSet cuts = { using DiJetsEtaCut }
+  InputTag weight = eventWeight
 }

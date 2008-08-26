@@ -5,16 +5,19 @@ PtFilter::PtFilter(const edm::ParameterSet& cfg):
   name_ ( cfg.getParameter<std::string>("name") ),
   minPt_( cfg.getParameter<std::vector<double> >( "minPt" ) ),
   maxPt_( cfg.getParameter<std::vector<double> >( "maxPt" ) ),
-  beforeCut_( 0 ), afterCut_( 0 )
+  beforeCut_( 0 ), afterCut_( 0 ),
+  beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
 }
 
 bool 
-PtFilter::operator()(edm::Event& evt, const std::vector<edm::View<reco::Candidate> >& objs)
+PtFilter::operator()(edm::Event& evt, const std::vector<edm::View<reco::Candidate> >& objs, const double& weight)
 {
   ++beforeCut_;
+  beforeCutWeighted_ += weight;
   if( filter(objs) ) {
     ++afterCut_;
+    afterCutWeighted_ += weight;
     return true;
   }
   return false;
@@ -61,12 +64,16 @@ PtFilter::summarize()
   cout << "******************************************************" << endl;
   for(unsigned int idx=0; idx<maxSize; ++idx){
     cout << ::std::setw( 20 );
-    if(idx==0) cout << name_; else cout << "   "; 
+    if(idx==0) cout << name_; else cout << " ";
     cout << ": ";
     if(idx<minPt_.size()) cout << minPt_[idx] << " < Pt"; else cout << "   Pt"; 
     if(idx<maxPt_.size()) cout << " < " << maxPt_[idx] << endl;
   }
   cout << "------------------------------------------------------" << endl 
-       << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
-       << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
+       << " Events Before Cut (Weighted): "
+       << ::std::setw( 10 ) << ::std::right << beforeCut_
+       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
+       << " Events After  Cut (Weighted): "
+       << ::std::setw( 10 ) << ::std::right << afterCut_ 
+       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
 }

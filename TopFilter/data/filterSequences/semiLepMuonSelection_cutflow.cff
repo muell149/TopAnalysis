@@ -108,24 +108,28 @@
     PSet cuts = { string name = "muonEtaPreSelCut"
 	vdouble minEta = {-2.5}
 	vdouble maxEta = { 2.5} }
+    InputTag weight = eventWeight
   }
   module filterSemiMuonPtPre = PtEventFilter{
     VInputTag input = {allLayer1Muons}
     PSet cuts = { string name = "muonPtPreSelCut"
 	vdouble minPt = {   20.}
 	vdouble maxPt = {99999.} }
+    InputTag weight = eventWeight
   }
   module filterSemiJetsEtaPre = EtaEventFilter{
     VInputTag input = {allLayer1Jets}
     PSet cuts = { string name = "jetsEtaPreSelCut"
 	vdouble minEta = {-3.25, -3.25, -3.25, -3.25}
 	vdouble maxEta = { 3.25,  3.25,  3.25,  3.25} }
+    InputTag weight = eventWeight
   }
   module filterSemiJetsPtPre = PtEventFilter{
     VInputTag input = {allLayer1Jets}
     PSet cuts = { string name = "jetsPtPreSelCut"
 	vdouble minPt = {    5.,     5.,     5.,     5.}
 	vdouble maxPt = {99999., 99999., 99999., 99999.} }
+    InputTag weight = eventWeight
   }
  
 # ----------------------------

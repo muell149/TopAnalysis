@@ -37,6 +37,8 @@ class SemiLepEventFilter : public edm::EDFilter {
   std::vector<edm::InputTag> leps_;
   std::vector<edm::InputTag> jets_;
 
+  edm::InputTag wgt_;
+
   bool useJetEta_;
   bool useJetPt_;
   bool useLepEta_;
@@ -58,6 +60,7 @@ template <typename Lep>
 SemiLepEventFilter<Lep>::SemiLepEventFilter(const edm::ParameterSet& cfg):
   leps_( cfg.template getParameter<std::vector<edm::InputTag> >("leps" ) ),
   jets_( cfg.template getParameter<std::vector<edm::InputTag> >("jets" ) ),
+  wgt_ ( cfg.getParameter<edm::InputTag>( "weight" ) ),
   useJetEta_( cfg.template getParameter<bool>("useJetEta" ) ),
   useJetPt_ ( cfg.template getParameter<bool>("useJetPt"  ) ),
   useLepEta_( cfg.template getParameter<bool>("useLepEta" ) ),
@@ -78,6 +81,11 @@ SemiLepEventFilter<Lep>::SemiLepEventFilter(const edm::ParameterSet& cfg):
 template <typename Lep> 
 bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& setup)
 {
+  // get event weight
+  edm::Handle<double> wgt;
+  evt.getByLabel(wgt_, wgt);
+  double weight = *wgt;
+
   // receive input tags for lepton kinematic
   std::vector<edm::View<reco::Candidate> > kinLeps;
   for(std::vector<edm::InputTag>::const_iterator tag = leps_.begin(); 
@@ -107,13 +115,13 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
 
   // do the event selection
   bool passed=true;
-  if(passed && useLepEta_) passed=lepEta_(evt, kinLeps);
-  if(passed && useLepPt_ ) passed=lepPt_ (evt, kinLeps);
-  if(passed && useTrkIso_) passed=trkIso_(evt, isoLeps);
-  if(passed && useCalIso_) passed=calIso_(evt, isoLeps);
-  if(passed && useJetIso_) passed=jetIso_(evt, isoLeps);
-  if(passed && useJetEta_) passed=jetEta_(evt, kinJets);
-  if(passed && useJetPt_ ) passed=jetPt_ (evt, kinJets);
+  if(passed && useLepEta_) passed=lepEta_(evt, kinLeps, weight);
+  if(passed && useLepPt_ ) passed=lepPt_ (evt, kinLeps, weight);
+  if(passed && useTrkIso_) passed=trkIso_(evt, isoLeps, weight);
+  if(passed && useCalIso_) passed=calIso_(evt, isoLeps, weight);
+  if(passed && useJetIso_) passed=jetIso_(evt, isoLeps, weight);
+  if(passed && useJetEta_) passed=jetEta_(evt, kinJets, weight);
+  if(passed && useJetPt_ ) passed=jetPt_ (evt, kinJets, weight);
   return passed;
 }
 

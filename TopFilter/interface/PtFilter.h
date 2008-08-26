@@ -24,7 +24,7 @@ class PtFilter {
  
  public:
 
-  bool operator()(edm::Event&, const std::vector<edm::View<reco::Candidate> >&);
+  bool operator()(edm::Event&, const std::vector<edm::View<reco::Candidate> >&, const double&);
   bool filter(const std::vector<edm::View<reco::Candidate> >&);
   void summarize();
 
@@ -37,6 +37,7 @@ class PtFilter {
  private:
 
   unsigned int beforeCut_, afterCut_;
+  double beforeCutWeighted_, afterCutWeighted_;
 };
 
 #endif

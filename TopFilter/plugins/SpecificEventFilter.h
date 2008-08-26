@@ -27,6 +27,8 @@ class SpecificEventFilter : public edm::EDFilter {
   
   std::vector<edm::InputTag> src_;
 
+  edm::InputTag wgt_;
+
  private:
   
   Filter filter_;
@@ -34,7 +36,8 @@ class SpecificEventFilter : public edm::EDFilter {
 
 template <typename Collection, typename Filter> 
 SpecificEventFilter<Collection, Filter>::SpecificEventFilter(const edm::ParameterSet& cfg):
-  src_( cfg.getParameter<std::vector<edm::InputTag> >( "input" ) ), 
+  src_( cfg.getParameter<std::vector<edm::InputTag> >( "input" ) ),
+  wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
   filter_( cfg.template getParameter<edm::ParameterSet> ("cuts" ) )
 {
 }
@@ -42,6 +45,10 @@ SpecificEventFilter<Collection, Filter>::SpecificEventFilter(const edm::Paramete
 template <typename Collection, typename Filter> 
 bool SpecificEventFilter<Collection, Filter>::filter(edm::Event& evt, const edm::EventSetup& setup)
 {
+  // get weight
+  edm::Handle<double> wgt;
+  evt.getByLabel(wgt_, wgt);
+  // get input objects
   std::vector<Collection> objs;
   for(std::vector<edm::InputTag>::const_iterator tag = src_.begin(); 
       tag!=src_.end(); ++tag){
@@ -49,7 +56,8 @@ bool SpecificEventFilter<Collection, Filter>::filter(edm::Event& evt, const edm:
     evt.getByLabel(*tag, src);
     objs.push_back(*src);
   }
-  return filter_(evt, objs);
+  // perform cuts
+  return filter_(evt, objs, *wgt);
 }
 
 template <typename Collection, typename Filter> 

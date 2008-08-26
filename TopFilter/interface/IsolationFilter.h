@@ -25,7 +25,7 @@ class IsolationFilter {
 
  public:
   
-  bool operator()(edm::Event&, const std::vector<Collection>&);
+  bool operator()(edm::Event&, const std::vector<Collection>&, const double&);
   bool filter(const std::vector<Collection>&); 
   void summarize();
 
@@ -39,6 +39,7 @@ class IsolationFilter {
  private:
 
   unsigned int beforeCut_, afterCut_;
+  double beforeCutWeighted_, afterCutWeighted_;
 };
 
 template <typename Collection> 
@@ -46,16 +47,19 @@ IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
   name_( cfg.getParameter<std::string> ("name") ),
   iso_ ( cfg.getParameter<std::vector<double> >( "isolation" ) ),
   mode_( cfg.getParameter<unsigned int>("mode") ),
-  beforeCut_( 0 ), afterCut_( 0 )
+  beforeCut_( 0 ), afterCut_( 0 ),
+  beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
 }
 
 template <typename Collection> 
-bool IsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
+bool IsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs, const double& weight)
 {
   ++beforeCut_;
+  beforeCutWeighted_ += weight;
   if( filter(objs) ) {
     ++afterCut_;
+    afterCutWeighted_ += weight;
     return true;
   }
   return false;
@@ -112,8 +116,12 @@ void IsolationFilter<Collection>::summarize()
     cout << "Isolation < " << iso_[idx] << endl;
   }
   cout << "------------------------------------------------------" << endl 
-       << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
-       << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
+       << " Events Before Cut (Weighted): "
+       << ::std::setw( 10 ) << ::std::right << beforeCut_
+       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
+       << " Events After  Cut (Weighted): "
+       << ::std::setw( 10 ) << ::std::right << afterCut_ 
+       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
 }
 
 #endif

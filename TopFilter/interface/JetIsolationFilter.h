@@ -27,7 +27,7 @@ class JetIsolationFilter {
 
  public:
 
-  bool operator()(edm::Event&, const std::vector<Collection>&);
+  bool operator()(edm::Event&, const std::vector<Collection>&, const double&);
   bool filter(edm::Handle<std::vector<pat::Jet> >& , const std::vector<Collection>&);  
   void summarize();
   
@@ -41,6 +41,7 @@ class JetIsolationFilter {
  private:
   
   unsigned int beforeCut_, afterCut_;
+  double beforeCutWeighted_, afterCutWeighted_;
 };
 
 template <typename Collection> 
@@ -56,13 +57,15 @@ JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg)
 }
 
 template <typename Collection> 
-bool JetIsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs)
+bool JetIsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<Collection>& objs, const double& weight)
 {
   edm::Handle<std::vector<pat::Jet> > jets;
   evt.getByLabel(jets_, jets);
   ++beforeCut_;
+  beforeCutWeighted_ += weight;
   if( filter(jets, objs) ){
-   ++afterCut_;
+    ++afterCut_;
+   afterCutWeighted_ += weight;
    return true;
   }
   return false;
@@ -114,16 +117,21 @@ void JetIsolationFilter<Collection>::summarize()
   using std::endl;
 
   cout << "******************************************************" << endl;
-  for(unsigned int idx=0; idx<iso_.size(); ++idx)
-    if(idx==0) cout << ::std::setw( 20 ) 
-		    << name_ << ": " 
-		    << " JetIsolation   > " << iso_[idx] << endl;
-    else       cout << ::std::setw( 20 ) 
-		    << ": " 
-		    << " JetIsolation   > " << iso_[idx] << endl;
+  for(unsigned int idx=0; idx<iso_.size(); ++idx) {
+    cout << ::std::setw( 20 );
+    if(idx==0) cout << name_; else cout << " ";
+    cout << ": "
+	 << "JetIsolation > " << iso_[idx] << endl
+	 << ::std::setw( 20 ) << " "
+	 << "   using jetPt > " << minJetPt_[idx] << endl;
+  }
   cout << "------------------------------------------------------" << endl 
-       << "  Events Before Cut: " << ::std::setw( 10 ) << ::std::right << beforeCut_ << endl
-       << "  Events After  Cut: " << ::std::setw( 10 ) << ::std::right << afterCut_  << endl;
+       << " Events Before Cut (Weighted): "
+       << ::std::setw( 10 ) << ::std::right << beforeCut_
+       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
+       << " Events After  Cut (Weighted): "
+       << ::std::setw( 10 ) << ::std::right << afterCut_ 
+       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
 }
 
 #endif

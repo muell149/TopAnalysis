@@ -4,16 +4,19 @@
 module filterSemiMuonTrkIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using SemiTrkIsolationCut }
+  InputTag weight = eventWeight
 }
 
 module filterSemiMuonCalIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using SemiCalIsolationCut }
+  InputTag weight = eventWeight
 }
 
 module filterSemiMuonJetIsolation = MuonJetIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using SemiJetIsolationCut }
+  InputTag weight = eventWeight
 }
 
 #
@@ -22,14 +25,17 @@ module filterSemiMuonJetIsolation = MuonJetIsolationEventFilter{
 module filterDiMuonTrkIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using DiTrkIsolationCut }
+  InputTag weight = eventWeight
 }
 
 module filterDiMuonCalIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using DiCalIsolationCut }
+  InputTag weight = eventWeight
 }
 
 module filterDiMuonJetIsolation = MuonJetIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using DiJetIsolationCut }
+  InputTag weight = eventWeight
 }
