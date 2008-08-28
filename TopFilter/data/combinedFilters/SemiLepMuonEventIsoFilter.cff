@@ -1,14 +1,8 @@
-#module semiLepMuonEventIso = semiLepMuonEvent from "TopAnalysis/TopFilter/data/combinedFilters/SemiLepMuonEventFilter.cfi"
-#only using the isolationfilters and not kinematic
-#replace semiLepMuonEventIso.useLepEta = false
-#replace semiLepMuonEventIso.useLepPt  = false
-#replace semiLepMuonEventIso.useJetEta = false
-#replace semiLepMuonEventIso.useJetPt  = false
-
 module semiLepMuonEventIso = SemiLepMuonEventFilter{          
  #
   VInputTag leps = {selectedLayer1Muons}
   VInputTag jets = {selectedLayer1Jets}
+  InputTag weight = eventWeight
  #
   bool useLepEta = false
   bool useLepPt  = false
