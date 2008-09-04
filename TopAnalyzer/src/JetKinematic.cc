@@ -68,7 +68,7 @@ JetKinematic::book()
   NameScheme kin("kin");
   allEn_ = new TH1F(kin.name("allE"  ), kin.name("allE"  ), 50, 0., 500.);
   allEt_ = new TH1F(kin.name("allEt" ), kin.name("allEt" ), 30, 0., 300.);
-  allEta_= new TH1F(kin.name("allEta"), kin.name("allEta"), 35, -3.5,  3.5);
+  allEta_= new TH1F(kin.name("allEta"), kin.name("allEta"), 34, -3.4,  3.4);
   allPhi_= new TH1F(kin.name("allPhi"), kin.name("allPhi"), 35, -3.5,  3.5);
   scalSum4_ = new TH1F(kin.name("scalSum4"), kin.name("scalSum4"), 40, 0., 800.);
   scalSum6_ = new TH1F(kin.name("scalSum6"), kin.name("scalSum6"), 40, 0., 800.);
@@ -76,7 +76,7 @@ JetKinematic::book()
   for(int idx=0; idx<nJets_; ++idx){
     en_.push_back ( new TH1F(kin.name("e",  idx), kin.name("en",  idx), 50,   0., 500.) );
     et_.push_back ( new TH1F(kin.name("et", idx), kin.name("et",  idx), 30,   0., 300.) );
-    eta_.push_back( new TH1F(kin.name("eta",idx), kin.name("eta", idx), 35, -3.5,  3.5) );
+    eta_.push_back( new TH1F(kin.name("eta",idx), kin.name("eta", idx), 34, -3.4,  3.4) );
     phi_.push_back( new TH1F(kin.name("phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
   }
 
@@ -94,7 +94,7 @@ JetKinematic::book(edm::Service<TFileService>& fs)
   NameScheme kin("kin");
   allEn_ = fs->make<TH1F>(kin.name("allE"  ), kin.name("allE"  ), 50, 0., 500.);
   allEt_ = fs->make<TH1F>(kin.name("allEt" ), kin.name("allEt" ), 30, 0., 300.);
-  allEta_= fs->make<TH1F>(kin.name("allEta"), kin.name("allEta"), 35, -3.5,  3.5);
+  allEta_= fs->make<TH1F>(kin.name("allEta"), kin.name("allEta"), 34, -3.4,  3.4);
   allPhi_= fs->make<TH1F>(kin.name("allPhi"), kin.name("allPhi"), 35, -3.5,  3.5);
   scalSum4_ = fs->make<TH1F>(kin.name("scalSum4"), kin.name("scalSum4"), 40, 0., 800.);
   scalSum6_ = fs->make<TH1F>(kin.name("scalSum6"), kin.name("scalSum6"), 40, 0., 800.);
@@ -102,7 +102,7 @@ JetKinematic::book(edm::Service<TFileService>& fs)
   for(int idx=0; idx<nJets_; ++idx){
     en_.push_back ( fs->make<TH1F>(kin.name("e",  idx), kin.name("en",  idx), 50,   0., 500.) );
     et_.push_back ( fs->make<TH1F>(kin.name("et", idx), kin.name("et",  idx), 30,   0., 300.) );
-    eta_.push_back( fs->make<TH1F>(kin.name("eta",idx), kin.name("eta", idx), 35, -3.5,  3.5) );
+    eta_.push_back( fs->make<TH1F>(kin.name("eta",idx), kin.name("eta", idx), 34, -3.4,  3.4) );
     phi_.push_back( fs->make<TH1F>(kin.name("phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
   }
 
@@ -120,7 +120,7 @@ JetKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
   NameScheme kin("kin");
   allEn_ = fs->make<TH1F>(kin.name(file, "allE"  ), kin.name("allE"  ), 50, 0., 500.);
   allEt_ = fs->make<TH1F>(kin.name(file, "allEt" ), kin.name("allEt" ), 30, 0., 300.);
-  allEta_= fs->make<TH1F>(kin.name(file, "allEta"), kin.name("allEta"), 35, -3.5,  3.5);
+  allEta_= fs->make<TH1F>(kin.name(file, "allEta"), kin.name("allEta"), 34, -3.4,  3.4);
   allPhi_= fs->make<TH1F>(kin.name(file, "allPhi"), kin.name("allPhi"), 35, -3.5,  3.5);
   scalSum4_ = fs->make<TH1F>(kin.name(file, "scalSum4"), kin.name("scalSum4"), 40, 0., 800.);
   scalSum6_ = fs->make<TH1F>(kin.name(file, "scalSum6"), kin.name("scalSum6"), 40, 0., 800.);
@@ -128,7 +128,7 @@ JetKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
   for(int idx=0; idx<nJets_; ++idx){
     en_.push_back ( fs->make<TH1F>(kin.name(file, "e",  idx), kin.name("en",  idx), 50,   0., 500.) );
     et_.push_back ( fs->make<TH1F>(kin.name(file, "et", idx), kin.name("et",  idx), 30,   0., 300.) );
-    eta_.push_back( fs->make<TH1F>(kin.name(file, "eta",idx), kin.name("eta", idx), 35, -3.5,  3.5) );
+    eta_.push_back( fs->make<TH1F>(kin.name(file, "eta",idx), kin.name("eta", idx), 34, -3.4,  3.4) );
     phi_.push_back( fs->make<TH1F>(kin.name(file, "phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
   }
 

@@ -100,7 +100,7 @@ MuonKinematic::book()
   NameScheme kin("kin");
   en_ = new TH1F(kin.name( "en"  ), kin.name("en"  ), 60,   0., 300.);
   pt_ = new TH1F(kin.name( "pt"  ), kin.name("pt"  ), 30,   0., 150.);
-  eta_= new TH1F(kin.name( "eta" ), kin.name("eta" ), 35, -3.5,  3.5);
+  eta_= new TH1F(kin.name( "eta" ), kin.name("eta" ), 34, -3.4,  3.4);
   phi_= new TH1F(kin.name( "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
 
   NameScheme iso("iso");
@@ -129,7 +129,7 @@ MuonKinematic::book(edm::Service<TFileService>& fs)
   NameScheme kin("kin");
   en_ = fs->make<TH1F>(kin.name( "en"  ), "E (muon) [GeV]"    , 60,   0., 300.);
   pt_ = fs->make<TH1F>(kin.name( "pt"  ), "p_{T} (muon) [GeV]", 24,   0., 120.);
-  eta_= fs->make<TH1F>(kin.name( "eta" ), "#eta (muon)"       , 35, -3.5,  3.5);
+  eta_= fs->make<TH1F>(kin.name( "eta" ), "#eta (muon)"       , 34, -3.4,  3.4);
   phi_= fs->make<TH1F>(kin.name( "phi" ), "#phi (muon)"       , 35, -3.5,  3.5);
 
   NameScheme iso("iso");
@@ -158,7 +158,7 @@ MuonKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
   NameScheme kin("kin");
   en_ = fs->make<TH1F>(kin.name( file, "en"  ), "E (muon) [GeV]"    , 60,   0., 300.);
   pt_ = fs->make<TH1F>(kin.name( file, "pt"  ), "p_{T} (muon) [GeV]", 24,   0., 120.);
-  eta_= fs->make<TH1F>(kin.name( file, "eta" ), "#eta (muon)"       , 35, -3.5,  3.5);
+  eta_= fs->make<TH1F>(kin.name( file, "eta" ), "#eta (muon)"       , 34, -3.4,  3.4);
   phi_= fs->make<TH1F>(kin.name( file, "phi" ), "#phi (muon)"       , 35, -3.5,  3.5);
 
   NameScheme iso("iso");
