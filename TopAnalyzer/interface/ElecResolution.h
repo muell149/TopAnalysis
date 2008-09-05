@@ -16,6 +16,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -41,10 +42,14 @@ class ElecResolution{
 
   // additional evt content/steerings
   std::vector<double> binsPt_;
+  std::vector<double> binsEta_;
+  std::vector<double> binsPhi_;
   double matchDR_;
 
-  TH1F *calPt_, *resPt_;
+  TH1F *calPt_, *resPt_, *calEta_, *resEta_, *calPhi_, *resPhi_;
   std::vector<TH1F*> relPt_;
+  std::vector<TH1F*> Eta_;
+  std::vector<TH1F*> Phi_;
 };
 
 #endif
