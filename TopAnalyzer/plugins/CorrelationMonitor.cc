@@ -23,8 +23,6 @@ void CorrelationMonitor::printCorrelation() {
 	for (iter = histos_.begin(); iter != histos_.end(); ++iter) {
 		cout << iter->second->GetTitle() << " " << iter->first << " Cor. "
 				<< iter->second->GetCorrelationFactor(1, 2) << endl;
-		cout << iter->second->GetTitle() << " " << iter->first << " Con. "
-				<< iter->second->GetCovariance(1, 2) << endl;
 	}
 }
 

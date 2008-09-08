@@ -16,6 +16,8 @@ MatrixAnalyzer::MatrixAnalyzer(const edm::ParameterSet& cfg) :
 	beforeBin_ = 2;
 	afterBin_ = 4;
 	sampleweight_ = 0.;
+	notNeededHists_ = "QCDnotNeeded.hist";
+	cout << "module " << pmodulename_ << endl;
 
 
 	Counters_ = new LeptonCounter();
@@ -26,7 +28,9 @@ MatrixAnalyzer::MatrixAnalyzer(const edm::ParameterSet& cfg) :
 		std::stringstream tmp;
 		tmp << varBins_.at(x);
 		Counters_->addCounter(tmp.str());
+		Counters_->addCounter(tmp.str() + "simple");
 		countersBefore_->addCounter(tmp.str());
+		countersBefore_->addCounter(tmp.str() + "simple");
 		effCounter_->addCounter(tmp.str());
 		effErrors_->addCounter(tmp.str());
 	}
@@ -57,44 +61,52 @@ void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 	}
 	f_ = &fs->file();
 	ofstream hist(hist_.c_str(), std::ios::out);
+	ofstream non(notNeededHists_.c_str(), std::ios::out);
 
 	NameScheme nam("mbg");
 
 	//make histograms
-	background_ = fs->make<TH1F> (nam.name(hist, "N_background"), nam.name(
-			"background"), 300, 0, 1.);
-	lep_ = fs->make<TH1F> (nam.name(hist, "N_semilepton"), nam.name("lepton"),
-			300, 0, 1.);
-	llep_ = fs->make<TH1F> (nam.name(hist, "N_dilepton"), nam.name("ll"), 300,
-			0, 1.);
-	multilep_ = fs->make<TH1F> (nam.name(hist, "N_multilepton"),
-			nam.name("ml"), 300, 0, 1.);
-	overall_ = fs->make<TH1F> (nam.name(hist, "N_overall"),
+	background_ = fs->make<TH1F> (nam.name(non, "N_background"), nam.name(
+			"background"), 5, 0, 5.);
+	lep_ = fs->make<TH1F> (nam.name(non, "N_semilepton"), nam.name("lepton"),
+			5, 0, 5.);
+	llep_ = fs->make<TH1F> (nam.name(non, "N_dilepton"), nam.name("ll"), 5, 0, 5.);
+	multilep_ = fs->make<TH1F> (nam.name(non, "N_multilepton"),
+			nam.name("ml"), 5, 0, 5.);
+	overall_ = fs->make<TH1F> (nam.name(non, "N_overall"),
 			nam.name("overall"), noBins_, 0, noBins_);
 
-	eff_ = fs->make<TH1F> (nam.name(hist, "efficency"), nam.name("eff"), 300,
-			0, 1.);
+	if(!before_) eff_ = fs->make<TH1F> (nam.name(hist, "efficency"), nam.name("eff"), 9, 0, 9.);
 
-	binnedBkg_ = fs->make<TH1F> (nam.name(hist, "binnedBkg"), nam.name(
-			"binnedBkg"), varBins_.size() * 2 + 2, 0, 1.);
-	binnedSemiLep_ = fs->make<TH1F> (nam.name(hist, "binnedSemiLep"), nam.name(
-			"binnedSemiLep"), varBins_.size() * 2 + 2, 0, 1.);
-	binnedDiLep_ = fs->make<TH1F> (nam.name(hist, "binnedDiLep"), nam.name(
-			"binnedDiLep"), varBins_.size() * 2 + 2, 0, 1.);
-	binnedMultiLep_ = fs->make<TH1F> (nam.name(hist, "binnedMultiLep"),
-			nam.name("binnedMultiLep"), varBins_.size() * 2 + 2, 0, 1.);
-	binnedEff_ = fs->make<TH1F> (nam.name(hist, "binnedEff"), nam.name(
+	binnedBkg_ = fs->make<TH1F> (nam.name(non, "binnedBkg"), nam.name(
+			"binnedBkg"), varBins_.size()  + 2, 0, 1.);
+	binnedSemiLep_ = fs->make<TH1F> (nam.name(non, "binnedSemiLep"), nam.name(
+			"binnedSemiLep"), varBins_.size() + 2, 0, 1.);
+	binnedDiLep_ = fs->make<TH1F> (nam.name(non, "binnedDiLep"), nam.name(
+			"binnedDiLep"), varBins_.size() + 2, 0, 1.);
+	binnedMultiLep_ = fs->make<TH1F> (nam.name(non, "binnedMultiLep"),
+			nam.name("binnedMultiLep"), varBins_.size() + 2, 0, 1.);
+	if(!before_) binnedEff_ = fs->make<TH1F> (nam.name(hist, "binnedEff"), nam.name(
 			"binnedEff"), varBins_.size() + 2, 0, 1.);
-	binnedOverall_ = fs->make<TH1F> (nam.name(hist, "binnedOverall"), nam.name(
-			"binnedOverall"), varBins_.size()*2 + 2, 0, 1.);
+	binnedOverall_ = fs->make<TH1F> (nam.name(non, "binnedOverall"), nam.name(
+			"binnedOverall"), varBins_.size() + 2, 0, 1.);
+
+	binnedSimpleBkg_ = fs->make<TH1F> (nam.name(non, "binnedSimpleBkg"),
+			nam.name("binnedSimpleBkg"), varBins_.size() + 2, 0, 1.);
+	binnedSimpleSemiLep_ = fs->make<TH1F> (
+			nam.name(non, "binnedSimpleSemiLep"), nam.name(
+					"binnedSimpleSemiLep"), varBins_.size() + 2, 0, 1.);
+	binnedSimpleDiLep_ = fs->make<TH1F> (nam.name(non, "binnedSimpleDiLep"),
+			nam.name("binnedSimpleDiLep"), varBins_.size() + 2, 0, 1.);
+	binnedSimpleMultiLep_ = fs->make<TH1F> (nam.name(non,
+			"binnedSimpleMultiLep"), nam.name("binnedSimpleMultiLep"),
+			varBins_.size() * 2 + 2, 0, 1.);
+	binnedSimpleOverall_ = fs->make<TH1F> (
+			nam.name(non, "binnedSimpleOverall"), nam.name(
+					"binnedSimpleOverall"), varBins_.size() + 2, 0, 1.);
+
 	varPlot_ = fs->make<TH1F> (nam.name(hist, var_.label().c_str()), nam.name(var_.label().c_str()),
-			500, 0, 500);
-	//set number of bins (noBins_)
-	background_->SetBins(noBins_, 0., 5.);
-	lep_->SetBins(noBins_, 0., 5.);
-	llep_->SetBins(noBins_, 0., 5.);
-	multilep_->SetBins(noBins_, 0., 5.);
-	eff_->SetBins(9, 0., 5.);
+			250, 0, 500);
 }
 
 void MatrixAnalyzer::analyze(const edm::Event& evt,
@@ -127,15 +139,19 @@ void MatrixAnalyzer::analyze(const edm::Event& evt,
 			std::stringstream tmp;
 			tmp << t;
 			if (muons->size() < 1) {
+				Counters_->addPureHadronic(tmp.str() + "simple");
 				Counters_->addPureHadronic(tmp.str(), sampleweight_);
 			}
 			else if (muons->size() == 1) {
+				Counters_->addSemiLeptonic(tmp.str() + "simple");
 				Counters_->addSemiLeptonic(tmp.str(), sampleweight_);
 			}
 			else if (muons->size() == 2) {
+				Counters_->addDiLeptonic(tmp.str() + "simple");
 				Counters_->addDiLeptonic(tmp.str(),sampleweight_);
 			}
 			else if (muons->size() > 2) {
+				Counters_->addMultiLeptonic(tmp.str() + "simple");
 				Counters_->addMultiLeptonic(tmp.str(), sampleweight_);
 			}
 		}
@@ -162,46 +178,44 @@ void MatrixAnalyzer::analyze(const edm::Event& evt,
 void MatrixAnalyzer::endJob() {
 	if (before_) {
 		cout << "#----- before (" << "Module: " << pmodulename_ <<")-----#" << endl;
-		setEnv(beforeBin_);
+		setEnv();
 		cout << endl;
 	} else {
 		getBefore();
 		cout << "#----- after (" << "Module: " << pmodulename_ <<")-----#" << endl;
 		log(sampleweight_, "::endJob >> sampleweight", false);
-		setEnv(afterBin_);
+		setEnv();
 		cout.precision(10);
-		if (countersBefore_->getPureHadronic("weighted") != 0) {
+		if (countersBefore_->getPureHadronic("weighted") != 0 and countersBefore_->getPureHadronic("simple") !=0) {
 			double eff, err;
-			eff = Counters_->getPureHadronic("weighted") / countersBefore_->getPureHadronic("weighted");
-			err = sqrt(eff * (1 - eff) / countersBefore_->getPureHadronic("weighted"));
+			eff = Counters_->getPureHadronic("weighted") / countersBefore_->getPureHadronic("simple");
+			err = sqrt(eff * (1 - eff) / countersBefore_->getPureHadronic("simple"));
 			cout << "hadEff " << eff << " +- " << err << endl;
 			effCounter_->setPureHadronic("weighted", eff);
 			effErrors_->setPureHadronic("weighted", err);
 		}
 
-		if (countersBefore_->getSemiLeptonic("weighted") != 0) {
+		if (countersBefore_->getSemiLeptonic("weighted") != 0 and countersBefore_->getSemiLeptonic("simple") !=0) {
 			double eff, err;
 			eff = Counters_->getSemiLeptonic("weighted") / countersBefore_->getSemiLeptonic("weighted");
-			err = sqrt(eff * (1 - eff) / countersBefore_->getSemiLeptonic(
-					"weighted"));
+			err = sqrt(eff * (1 - eff) / countersBefore_->getSemiLeptonic("simple"));
 			cout << "semiEff " << eff << " +- " << err << endl;
 			effCounter_->setSemiLeptonic("weighted", eff);
 			effErrors_->setSemiLeptonic("weighted", err);
 		}
-		if (countersBefore_->getDiLeptonic("weighted") != 0) {
+		if (countersBefore_->getDiLeptonic("weighted") != 0 and countersBefore_->getDiLeptonic("simple") !=0) {
 			double eff, err;
 			eff = Counters_->getDiLeptonic("weighted") / countersBefore_->getDiLeptonic("weighted");
-			err = sqrt(eff * (1 - eff) / countersBefore_->getDiLeptonic(
-					"weighted"));
+			err = sqrt(eff * (1 - eff) / countersBefore_->getDiLeptonic("simple"));
 			cout << "diEff " << eff << " +- " << err << endl;
 			effCounter_->setDiLeptonic("weighted", eff);
 			effErrors_->setDiLeptonic("weighted", err);
 		}
-		if (countersBefore_->getMultiLeptonic("weighted") != 0) {
+		if (countersBefore_->getMultiLeptonic("weighted") != 0 and countersBefore_->getMultiLeptonic(
+				"simple") !=0) {
 			double eff, err;
 			eff = Counters_->getMultiLeptonic("weighted") / countersBefore_->getMultiLeptonic("weighted");
-			err = sqrt(eff * (1 - eff) / countersBefore_->getMultiLeptonic(
-					"weighted"));
+			err = sqrt(eff * (1 - eff) / countersBefore_->getMultiLeptonic("simple"));
 			cout << "multiEff " << eff << " +- " << err << endl;
 			effCounter_->setMultiLeptonic("weighted", eff);
 			effErrors_->setMultiLeptonic("weighted", err);
@@ -211,6 +225,7 @@ void MatrixAnalyzer::endJob() {
 			std::stringstream tmp;
 			tmp << varBins_.at(i);
 			double b, s, d, m, bb, sb, db, mb, o, ob;
+			double sbb, ssb, sdb, smb, sob;
 			b = Counters_->getPureHadronic(tmp.str());
 			s = Counters_->getSemiLeptonic(tmp.str());
 			d = Counters_->getDiLeptonic(tmp.str());
@@ -222,46 +237,54 @@ void MatrixAnalyzer::endJob() {
 			db = countersBefore_->getDiLeptonic(tmp.str());
 			mb = countersBefore_->getMultiLeptonic(tmp.str());
 			ob = countersBefore_->getAllLeptonic(tmp.str());
-			if (bb != 0.) {
+
+			sbb = countersBefore_->getPureHadronic(tmp.str() + "simple");
+			ssb = countersBefore_->getSemiLeptonic(tmp.str() + "simple");
+			sdb = countersBefore_->getDiLeptonic(tmp.str() + "simple");
+			smb = countersBefore_->getMultiLeptonic(tmp.str() + "simple");
+			sob = countersBefore_->getAllLeptonic(tmp.str() + "simple");
+
+			if (bb != 0. and sbb != 0.) {
 				double eff,err;
 				eff = b / bb;
-				err = sqrt(eff * (1 - eff) / bb);
+				err = sqrt(eff * (1 - eff) / sbb);
 				effCounter_->setPureHadronic(tmp.str(), eff);
 				effErrors_->setPureHadronic(tmp.str(), err);
-				cout << tmp.str() << " (had) " << eff << " +- " << err << endl;
+//				cout << tmp.str() << " (had) " << eff << " +- " << err << endl;
 			}
-			if (sb != 0.) {
+			if (sb != 0. and ssb != 0.) {
 				double eff,err;
 				eff = s/sb;
-				err = sqrt(eff * (1 - eff) / sb);
+				err = sqrt(eff * (1 - eff) / ssb);
 				effCounter_->setSemiLeptonic(tmp.str(), eff);
 				effErrors_->setSemiLeptonic(tmp.str(), err);
 				cout << tmp.str() << " (semi) " << eff << " +- " << err << endl;
 			}
-			if (db != 0.) {
+			if (db != 0. and sdb != 0.) {
 				double eff, err;
 				eff = d / db;
-				err = sqrt(eff * (1 - eff) / db);
+				err = sqrt(eff * (1 - eff) / sdb);
 				effCounter_->setDiLeptonic(tmp.str(),eff);
 				effErrors_->setDiLeptonic(tmp.str(), err);
-				cout << tmp.str() << " (di) " << eff << " +- " << err << endl;
+//				cout << tmp.str() << " (di) " << eff << " +- " << err << endl;
 			}
-			if (mb != 0.) {
+			if (mb != 0. and smb != 0.) {
 				double eff, err;
 				eff = m / mb;
-				err = sqrt(eff * (1 - eff) / mb);
+				err = sqrt(eff * (1 - eff) / smb);
 				effCounter_->setMultiLeptonic(tmp.str(), eff);
 				effErrors_->setMultiLeptonic(tmp.str(), err);
-				cout << tmp.str() << " (multi) " << eff << " +- " << err << endl;
+//				cout << tmp.str() << " (multi) " << eff << " +- " << err << endl;
 			}
 
-			if (ob != 0.) {
+			if (ob != 0. and sob != 0.) {
 				double eff, err;
 				eff = o / ob;
-				err = sqrt(eff * (1 - eff) / ob);
-//				effCounter_->setSemiLeptonic(tmp.str(), eff);
-//				effErrors_->setSemiLeptonic(tmp.str(), err);
-				cout << tmp.str() << " (overall) " << eff << " +- " << err << endl;
+				err = sqrt(eff * (1 - eff) / sob);
+				effCounter_->setSemiLeptonic(tmp.str(), eff);
+				effErrors_->setSemiLeptonic(tmp.str(), err);
+				cout << tmp.str() << " (overall) " << eff << " +- " << err
+						<< endl;
 			}
 
 			binnedEff_->SetBinContent(i+1, effCounter_->getSemiLeptonic(tmp.str()));
@@ -281,11 +304,11 @@ void MatrixAnalyzer::endJob() {
 		eff_->SetBinContent(8, effCounter_->getMultiLeptonic("weighted"));
 		eff_->SetBinError(8, effErrors_->getMultiLeptonic("weighted"));
 
-		background_->SetBinContent(beforeBin_, countersBefore_->getPureHadronic("weighted"));
-		lep_->SetBinContent(beforeBin_, countersBefore_->getSemiLeptonic("weighted"));
-		llep_->SetBinContent(beforeBin_, countersBefore_->getDiLeptonic("weighted"));
-		multilep_->SetBinContent(beforeBin_, countersBefore_->getMultiLeptonic("weighted"));
-		overall_->SetBinContent(beforeBin_, countersBefore_->getAllLeptonic("weighted"));
+//		background_->SetBinContent(beforeBin_, countersBefore_->getPureHadronic("weighted"));
+//		lep_->SetBinContent(beforeBin_, countersBefore_->getSemiLeptonic("weighted"));
+//		llep_->SetBinContent(beforeBin_, countersBefore_->getDiLeptonic("weighted"));
+//		multilep_->SetBinContent(beforeBin_, countersBefore_->getMultiLeptonic("weighted"));
+//		overall_->SetBinContent(beforeBin_, countersBefore_->getAllLeptonic("weighted"));
 
 
 	}
@@ -298,9 +321,9 @@ void MatrixAnalyzer::endJob() {
 
 }
 
-void MatrixAnalyzer::setEnv(int &bin) {
+void MatrixAnalyzer::setEnv() {
 	if(!before_){
-		cout << "type >> events with muons (after) <> weighted events with muons (before) <> gen. events" << endl;
+//		cout << "type >> events with muons (after) <> weighted events with muons (before) <> gen. events" << endl;
 		//cout << "hadr >> " << Counters_->getPureHadronic("weighted") << " <> " << countersBefore_->getPureHadronic("weighted") << " <> " << Counters_->getPureHadronic("simple") << ")" << endl;
 		cout << "semi >> " << Counters_->getSemiLeptonic("weighted") << " <> " << countersBefore_->getSemiLeptonic("weighted") << " <> " << Counters_->getSemiLeptonic("simple") << ")" << endl;
 		//cout << "llep >> " << Counters_->getDiLeptonic("weighted") << " <> " << countersBefore_->getPureHadronic("weighted") << " <> " << Counters_->getPureHadronic("simple") << ")" << endl;
@@ -313,11 +336,21 @@ void MatrixAnalyzer::setEnv(int &bin) {
 		std::stringstream tmp;
 		tmp << varBins_.at(i);
 		double b, s, d, m, o, bb, sb, db, mb, ob;
+		double sbb, ssb, sdb, smb, sob;
+		double _sb, _ss, _sd, _sm, _so;
+		int bbin = i+1;
+
 		b = Counters_->getPureHadronic(tmp.str());
 		s = Counters_->getSemiLeptonic(tmp.str());
 		d = Counters_->getDiLeptonic(tmp.str());
 		m = Counters_->getMultiLeptonic(tmp.str());
 		o = Counters_->getAllLeptonic(tmp.str());
+
+		_sb = Counters_->getPureHadronic(tmp.str() + "simple");
+		_ss = Counters_->getSemiLeptonic(tmp.str() + "simple");
+		_sd = Counters_->getDiLeptonic(tmp.str() + "simple");
+		_sm = Counters_->getMultiLeptonic(tmp.str() + "simple");
+		_so = Counters_->getAllLeptonic(tmp.str() + "simple");
 
 		bb = countersBefore_->getPureHadronic(tmp.str());
 		sb = countersBefore_->getSemiLeptonic(tmp.str());
@@ -325,74 +358,99 @@ void MatrixAnalyzer::setEnv(int &bin) {
 		mb = countersBefore_->getMultiLeptonic(tmp.str());
 		ob = countersBefore_->getAllLeptonic(tmp.str());
 
-		cout << varBins_[i] << " (semi):" << s << " <> " << sb << endl;
-		cout << varBins_[i] << " (overall):" << o << " <> " << ob <<  endl;
-		if(before_){
-			binnedBkg_->SetBinContent(2 * i + 1, b);
-			binnedSemiLep_->SetBinContent(2 * i + 1, s);
-			binnedDiLep_->SetBinContent(2 * i + 1, d);
-			binnedMultiLep_->SetBinContent(2 * i + 1, m);
-			binnedOverall_->SetBinContent(2 * i + 1, o);
-			binnedOverall_->GetXaxis()->SetBinLabel(2 * i + 1, "B");
-		}
-		else {
-			binnedBkg_->SetBinContent(2 * i + 2, b);
-			binnedSemiLep_->SetBinContent(2 * i + 2, s);
-			binnedDiLep_->SetBinContent(2 * i + 2, d);
-			binnedMultiLep_->SetBinContent(2 * i + 2, m);
-			binnedOverall_->SetBinContent(2 * i + 2, o);
+		sbb = countersBefore_->getPureHadronic(tmp.str() + "simple");
+		ssb = countersBefore_->getSemiLeptonic(tmp.str() + "simple");
+		sdb = countersBefore_->getDiLeptonic(tmp.str() + "simple");
+		smb = countersBefore_->getMultiLeptonic(tmp.str() + "simple");
+		sob = countersBefore_->getAllLeptonic(tmp.str() + "simple");
 
-			binnedBkg_->SetBinContent(2 * i + 1, bb);
-			binnedSemiLep_->SetBinContent(2 * i + 1, sb);
-			binnedDiLep_->SetBinContent(2 * i + 1, db);
-			binnedMultiLep_->SetBinContent(2 * i + 1, mb);
-			binnedOverall_->SetBinContent(2 * i + 1, ob);
+		cout << varBins_[i] << " (semi):" << s << " <> " << sb << " <> " << _sb << endl;
+		cout << varBins_[i] << " (overall):" << o << " <> " << ob << " <> " << _so << endl;
+//		cout << varBins_[i] << " (semi):" << s << " <> " << sb << endl;
+//		cout << varBins_[i] << " (overall):" << o << " <> " << ob <<  endl;
+//		if(before_){
+			binnedBkg_->SetBinContent(bbin, b);
+			binnedSemiLep_->SetBinContent(bbin, s);
+			binnedDiLep_->SetBinContent(bbin, d);
+			binnedMultiLep_->SetBinContent(bbin, m);
+			binnedOverall_->SetBinContent(bbin, o);
 
-		}
-		binnedBkg_->GetXaxis()->SetBinLabel(2 * i + 1, "B");
-		binnedBkg_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
+			binnedSimpleBkg_->SetBinContent(bbin, _sb);
+			binnedSimpleSemiLep_->SetBinContent(bbin, _ss);
+			binnedSimpleDiLep_->SetBinContent(bbin, _sd);
+			binnedSimpleMultiLep_->SetBinContent(bbin, _sm);
+			binnedSimpleOverall_->SetBinContent(bbin, _so);
+//		}
+//		else {
+//			binnedBkg_->SetBinContent(2 * i + 2, b);
+//			binnedSemiLep_->SetBinContent(2 * i + 2, s);
+//			binnedDiLep_->SetBinContent(2 * i + 2, d);
+//			binnedMultiLep_->SetBinContent(2 * i + 2, m);
+//			binnedOverall_->SetBinContent(2 * i + 2, o);
+//
+//			binnedBkg_->SetBinContent(2 * i + 1, bb);
+//			binnedSemiLep_->SetBinContent(2 * i + 1, sb);
+//			binnedDiLep_->SetBinContent(2 * i + 1, db);
+//			binnedMultiLep_->SetBinContent(2 * i + 1, mb);
+//			binnedOverall_->SetBinContent(2 * i + 1, ob);
+//
+//			binnedSimpleBkg_->SetBinContent(2 * i + 2, _sb);
+//			binnedSimpleSemiLep_->SetBinContent(2 * i + 2, _ss);
+//			binnedSimpleDiLep_->SetBinContent(2 * i + 2, _sd);
+//			binnedSimpleMultiLep_->SetBinContent(2 * i + 2, _sm);
+//			binnedSimpleOverall_->SetBinContent(2 * i + 2, _so);
+//
+//			binnedSimpleBkg_->SetBinContent(2 * i + 1, sbb);
+//			binnedSimpleSemiLep_->SetBinContent(2 * i + 1, ssb);
+//			binnedSimpleDiLep_->SetBinContent(2 * i + 1, sdb);
+//			binnedSimpleMultiLep_->SetBinContent(2 * i + 1, smb);
+//			binnedSimpleOverall_->SetBinContent(2 * i + 1, sob);
+//
+//		}
+		binnedBkg_->GetXaxis()->SetBinLabel(bbin, tmp.str().c_str());
+//		binnedBkg_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
 
-		binnedSemiLep_->GetXaxis()->SetBinLabel(2 * i + 1, "B");
-		binnedSemiLep_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
+		binnedSemiLep_->GetXaxis()->SetBinLabel(bbin, tmp.str().c_str());
+//		binnedSemiLep_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
 
-		binnedDiLep_->GetXaxis()->SetBinLabel(2 * i + 1, "B");
-		binnedDiLep_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
+		binnedDiLep_->GetXaxis()->SetBinLabel(bbin, tmp.str().c_str());
+//		binnedDiLep_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
 
-		binnedMultiLep_->GetXaxis()->SetBinLabel(2 * i + 1, "B");
-		binnedMultiLep_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
+		binnedMultiLep_->GetXaxis()->SetBinLabel(bbin, tmp.str().c_str());
+//		binnedMultiLep_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
 
-		binnedOverall_->GetXaxis()->SetBinLabel(2 * i + 1, "B");
-		binnedOverall_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
+		binnedOverall_->GetXaxis()->SetBinLabel(bbin, tmp.str().c_str());
+//		binnedOverall_->GetXaxis()->SetBinLabel(2 * i + 2, "A");
 
 	}
 
-	background_->SetBinContent(bin, Counters_->getPureHadronic("weighted"));
-	lep_->SetBinContent(bin, Counters_->getSemiLeptonic("weighted"));
-	llep_->SetBinContent(bin, Counters_->getDiLeptonic("weighted"));
-	multilep_->SetBinContent(bin, Counters_->getMultiLeptonic("weighted"));
-	overall_->SetBinContent(bin, Counters_->getAllLeptonic("weighted"));
-	if (before_) {
-		background_->GetXaxis()->SetBinLabel(bin, "before");
-		lep_->GetXaxis()->SetBinLabel(bin, "before");
-		llep_->GetXaxis()->SetBinLabel(bin, "before");
-		multilep_->GetXaxis()->SetBinLabel(bin, "before");
-		overall_->GetXaxis()->SetBinLabel(bin, "before");
-	}
-	else {
-		background_->GetXaxis()->SetBinLabel(bin, "after");
-		lep_->GetXaxis()->SetBinLabel(bin, "after");
-		llep_->GetXaxis()->SetBinLabel(bin, "after");
-		multilep_->GetXaxis()->SetBinLabel(bin, "after");
-		overall_->GetXaxis()->SetBinLabel(bin, "after");
-	}
+	background_->SetBinContent(2, Counters_->getPureHadronic("weighted"));
+	lep_->SetBinContent(2, Counters_->getSemiLeptonic("weighted"));
+	llep_->SetBinContent(2, Counters_->getDiLeptonic("weighted"));
+	multilep_->SetBinContent(2, Counters_->getMultiLeptonic("weighted"));
+	overall_->SetBinContent(2, Counters_->getAllLeptonic("weighted"));
+//	if (before_) {
+//		background_->GetXaxis()->SetBinLabel(bin, "before");
+//		lep_->GetXaxis()->SetBinLabel(bin, "before");
+//		llep_->GetXaxis()->SetBinLabel(bin, "before");
+//		multilep_->GetXaxis()->SetBinLabel(bin, "before");
+//		overall_->GetXaxis()->SetBinLabel(bin, "before");
+//	}
+//	else {
+//		background_->GetXaxis()->SetBinLabel(bin, "after");
+//		lep_->GetXaxis()->SetBinLabel(bin, "after");
+//		llep_->GetXaxis()->SetBinLabel(bin, "after");
+//		multilep_->GetXaxis()->SetBinLabel(bin, "after");
+//		overall_->GetXaxis()->SetBinLabel(bin, "after");
+//	}
 
 }
 
 void MatrixAnalyzer::getBefore() {
-	countersBefore_->setPureHadronic("weighted", getHist(pmodulename_, "mbg_N_background", beforeBin_));
-	countersBefore_->setSemiLeptonic("weighted", getHist(pmodulename_, "mbg_N_semilepton", beforeBin_));
-	countersBefore_->setDiLeptonic("weighted", getHist(pmodulename_, "mbg_N_dilepton", beforeBin_));
-	countersBefore_->setMultiLeptonic("weighted",getHist(pmodulename_, "mbg_N_multilepton", beforeBin_));
+	countersBefore_->setPureHadronic("weighted", getHist(pmodulename_, "mbg_N_background", 2));
+	countersBefore_->setSemiLeptonic("weighted", getHist(pmodulename_, "mbg_N_semilepton", 2));
+	countersBefore_->setDiLeptonic("weighted", getHist(pmodulename_, "mbg_N_dilepton", 2));
+	countersBefore_->setMultiLeptonic("weighted",getHist(pmodulename_, "mbg_N_multilepton", 2));
 
 	cout << "getBefore s" << countersBefore_->getSemiLeptonic("weighted") << endl;
 	cout << "getBefore o" << countersBefore_->getAllLeptonic("weighted") << endl;
@@ -400,20 +458,31 @@ void MatrixAnalyzer::getBefore() {
 		std::stringstream tmp;
 		tmp << varBins_.at(i);
 		double b, s, d, m;
-		int bbin = 2 * i + 1;
+		double sb, ss, sd, sm;
+		int bbin = i + 1;
 		b = getHist(pmodulename_, "mbg_binnedBkg", bbin);
 		s = getHist(pmodulename_, "mbg_binnedSemiLep", bbin);
 		d = getHist(pmodulename_, "mbg_binnedDiLep", bbin);
 		m = getHist(pmodulename_, "mbg_binnedMultiLep", bbin);
 
+		sb = getHist(pmodulename_, "mbg_binnedSimpleBkg", bbin);
+		ss = getHist(pmodulename_, "mbg_binnedSimpleSemiLep", bbin);
+		sd = getHist(pmodulename_, "mbg_binnedSimpleDiLep", bbin);
+		sm = getHist(pmodulename_, "mbg_binnedSimpleMultiLep", bbin);
+
 		countersBefore_->setPureHadronic(tmp.str(), b);
 		countersBefore_->setSemiLeptonic(tmp.str(), s);
 		countersBefore_->setDiLeptonic(tmp.str(), d);
 		countersBefore_->setMultiLeptonic(tmp.str(), m);
+
+		countersBefore_->setPureHadronic(tmp.str() + "simple", sb);
+		countersBefore_->setSemiLeptonic(tmp.str() + "simple", ss);
+		countersBefore_->setDiLeptonic(tmp.str() + "simple", sd);
+		countersBefore_->setMultiLeptonic(tmp.str() + "simple", sm);
 	}
 }
 
-double MatrixAnalyzer::getHist(TString dir, TString hist, int & bin) {
+double MatrixAnalyzer::getHist(TString dir, TString hist, int bin) {
 	TH1F *dummy;
 	TString directory(dir);
 	directory += "/";
@@ -428,6 +497,7 @@ double MatrixAnalyzer::getHist(TString dir, TString hist, int & bin) {
 				<< directory << "]" << endl;
 		return 2.0;
 	}
+	cout << "getHist ( " << bin << " ): " << directory << " = " <<  dummy->GetBinContent(bin) << endl;
 	return dummy->GetBinContent(bin);
 }
 
