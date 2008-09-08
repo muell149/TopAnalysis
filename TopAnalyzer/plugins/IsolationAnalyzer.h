@@ -18,6 +18,7 @@
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 
 class IsolationAnalyzer : public edm::EDAnalyzer {
 
@@ -26,9 +27,14 @@ public:
 	~IsolationAnalyzer();
 
 private:
+	typedef std::vector<pat::Muon> TopMuonCollection;
+	typedef std::vector<pat::Jet>  TopJetCollection;
+
 	virtual void beginJob(const edm::EventSetup&);
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
+	virtual unsigned int getClosestJet(edm::Handle<TopJetCollection>&, const pat::MET* &);
+
 
 	std::string hist_;
 	edm::InputTag muons_;
@@ -46,9 +52,7 @@ private:
 	TH1F *thadpt_, *tleppt_;
 	TH1F *hcaloCorr_, *htrackCorr_, *lcaloCorr_, *ltrackCorr_, *lptCorr_, *hptCorr_;
 	TH1F *minDPhiMETJet_, *dPhiMETjet1_, *dPhiMETjet2_, *dPhiMETjet3_, *dPhiMETjet4_, *dPhiMETmuon_;
+	TH1F * phiTimesDelta;
 	TGraph *hDeltaPhi_, *lDeltaPhi_;
-
-	typedef std::vector<pat::Muon> TopMuonCollection;
-	typedef std::vector<pat::Jet>  TopJetCollection;
 };
 #endif

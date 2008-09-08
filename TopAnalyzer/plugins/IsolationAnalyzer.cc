@@ -1,6 +1,6 @@
 #include "TopAnalysis/TopAnalyzer/plugins/IsolationAnalyzer.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 
@@ -133,18 +133,20 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 //		lDeltaPhi_ = fs->make<TH1F > (nam.name(hist2, "dPhiMETmuvslepTopPt"), nam.name(
 //						"dPhiMETmuvslepTopPt"),  100, 0., 600.);
 	}
-	minDPhiMETJet_ = fs->make<TH1F > (nam.name(hist, "minDeltaPhiMETJets"),
+	minDPhiMETJet_ = fs->make<TH1F> (nam.name(hist, "minDeltaPhiMETJets"),
 			nam.name("minDeltaPhiMETJets"), 100, 0., 4.);
-	dPhiMETjet1_ = fs->make<TH1F > (nam.name(hist, "deltaPhiMetJet1"),
-			nam.name("deltaPhiMetJet1"), 80, -4., 4.);
-	dPhiMETjet2_ = fs->make<TH1F > (nam.name(hist, "deltaPhiMetJet2"),
-			nam.name("deltaPhiMetJet2"), 80, -4., 4.);
-	dPhiMETjet3_ = fs->make<TH1F > (nam.name(hist, "deltaPhiMetJet3"),
-			nam.name("deltaPhiMetJet3"), 80, -4., 4.);
-	dPhiMETjet4_ = fs->make<TH1F > (nam.name(hist, "deltaPhiMetJet4"),
-			nam.name("deltaPhiMetJet4"), 80, -4., 4.);
-	dPhiMETmuon_ = fs->make<TH1F > (nam.name(hist, "deltaPhiMetleadingMuon"),
+	dPhiMETjet1_ = fs->make<TH1F> (nam.name(hist, "deltaPhiMetJet1"), nam.name(
+			"deltaPhiMetJet1"), 80, -4., 4.);
+	dPhiMETjet2_ = fs->make<TH1F> (nam.name(hist, "deltaPhiMetJet2"), nam.name(
+			"deltaPhiMetJet2"), 80, -4., 4.);
+	dPhiMETjet3_ = fs->make<TH1F> (nam.name(hist, "deltaPhiMetJet3"), nam.name(
+			"deltaPhiMetJet3"), 80, -4., 4.);
+	dPhiMETjet4_ = fs->make<TH1F> (nam.name(hist, "deltaPhiMetJet4"), nam.name(
+			"deltaPhiMetJet4"), 80, -4., 4.);
+	dPhiMETmuon_ = fs->make<TH1F> (nam.name(hist, "deltaPhiMetleadingMuon"),
 			nam.name("deltaPhiMetMuon"), 80, -4., 4.);
+	phiTimesDelta = fs->make<TH1F> (nam.name(hist, "phiTimesDelta"), nam.name(
+			"phiTimesDelta"), 100, 0., 10.);
 }
 
 IsolationAnalyzer::~IsolationAnalyzer() {
@@ -195,22 +197,39 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 	}
 
 	if (jets->size() >= 4) {
-		double dp1, dp2, dp3, dp4;
 		TopJetCollection::const_iterator jet = jets->begin();
+
+		double dp1, dp2, dp3, dp4, dpTde;
+		dpTde = 10000.;
+		unsigned int jetno = getClosestJet(jets, met);
+		unsigned int x = 1;
+
 		dp1 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "1st jet-met dPhi: " << dp1 << endl;
+		if (x == jetno)
+			dpTde = dp1 * (met->phi(), jet->phi());
+		x++;
 
 		++jet;
 		dp2 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "2nd jet-met dPhi: " << dp2 << endl;
+		if (x == jetno)
+			dpTde = dp1 * (met->phi(), jet->phi());
+		x++;
 
 		++jet;
 		dp3 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "3rd jet-met dPhi: " << dp3 << endl;
+		if (x == jetno)
+			dpTde = dp1 * (met->phi(), jet->phi());
+		x++;
 
 		++jet;
 		dp4 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "4st jet-met dPhi: " << dp4 << endl;
+		if (x == jetno)
+			dpTde = dp1 * (met->phi(), jet->phi());
+		x++;
 
 		double mindp;
 		mindp = min(fabs(dp1), fabs(dp2));
@@ -223,6 +242,7 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 		dPhiMETjet2_->Fill(dp2, weight);
 		dPhiMETjet3_->Fill(dp3, weight);
 		dPhiMETjet4_->Fill(dp4, weight);
+		phiTimesDelta->Fill(dpTde, weight);
 	}
 
 	int size = muons->size();
@@ -318,9 +338,25 @@ void IsolationAnalyzer::endJob() {
 
 			smonitors_[x]->printCorrelation();
 			hmonitors_[x]->printCorrelation();
-			lDeltaPhi_->Sort();
-			hDeltaPhi_->Sort();
+//			lDeltaPhi_->Sort();
+//			hDeltaPhi_->Sort();
 		}
 	}
+}
+
+unsigned int IsolationAnalyzer::getClosestJet(edm::Handle<TopJetCollection> & j,const pat::MET* &r){
+	unsigned int i = 0;
+	if (j->size() >= 4) {
+		double dr2 = 999.;
+		TopJetCollection::const_iterator jet = j->begin();
+		for(unsigned x = 0; x< 4;x++){
+			double temp = deltaR2(*jet, *r);
+			if (temp < dr2){
+				dr2 = temp;
+				i = x+1;
+			}
+		}
+	}
+	return i;
 }
 
