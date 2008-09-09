@@ -146,7 +146,7 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 	dPhiMETmuon_ = fs->make<TH1F> (nam.name(hist, "deltaPhiMetleadingMuon"),
 			nam.name("deltaPhiMetMuon"), 80, -4., 4.);
 	phiTimesDelta = fs->make<TH1F> (nam.name(hist, "phiTimesDelta"), nam.name(
-			"phiTimesDelta"), 100, 0., 10.);
+			"phiTimesDelta"), 50, 0., 10.);
 }
 
 IsolationAnalyzer::~IsolationAnalyzer() {
@@ -207,28 +207,28 @@ void IsolationAnalyzer::analyze(const edm::Event& evt,
 		dp1 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "1st jet-met dPhi: " << dp1 << endl;
 		if (x == jetno)
-			dpTde = dp1 * (met->phi(), jet->phi());
+			dpTde = dp1 * fabs(met->eta() - jet->eta());
 		x++;
 
 		++jet;
 		dp2 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "2nd jet-met dPhi: " << dp2 << endl;
 		if (x == jetno)
-			dpTde = dp1 * (met->phi(), jet->phi());
+			dpTde = dp2 * fabs(met->eta() - jet->eta());
 		x++;
 
 		++jet;
 		dp3 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "3rd jet-met dPhi: " << dp3 << endl;
 		if (x == jetno)
-			dpTde = dp1 * (met->phi(), jet->phi());
+			dpTde = dp3 * fabs(met->eta() - jet->eta());
 		x++;
 
 		++jet;
 		dp4 = deltaPhi(met->phi(), jet->phi());
 		LogInfo("IsolationAnalyzer") << "4st jet-met dPhi: " << dp4 << endl;
 		if (x == jetno)
-			dpTde = dp1 * (met->phi(), jet->phi());
+			dpTde = dp4 * fabs(met->eta() - jet->eta());
 		x++;
 
 		double mindp;
