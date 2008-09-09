@@ -22,5 +22,6 @@ module matrixmodule = MatrixAnalyzer {
                 #name of the previous module
                 string pmn = ""
 #binning for the variable you want to see the dependencie from.
-vdouble varBins= {0.0, 40.0, 80.0, 170.0, 250.0, 9999.0}
+#last bin in the config is only for histogramm, there is no upper limit coded for the last bin
+vdouble varBins= {0.0, 20.0, 40.0, 60.0, 100.0, 150.0, 300.}
 }
