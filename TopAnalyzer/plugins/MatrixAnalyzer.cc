@@ -50,6 +50,12 @@ MatrixAnalyzer::~MatrixAnalyzer() {
 
 void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 
+	double *t = &varBins_[0];
+	for(unsigned int i = 0; i< varBins_.size();i++){
+		cout << varBins_[i] << endl;
+		cout << t[i] << endl;
+
+	}
 	if (hist_.empty())
 		return;
 
@@ -76,34 +82,34 @@ void MatrixAnalyzer::beginJob(const edm::EventSetup&) {
 	overall_ = fs->make<TH1F> (nam.name(non, "N_overall"),
 			nam.name("overall"), noBins_, 0, noBins_);
 
-	if(!before_) eff_ = fs->make<TH1F> (nam.name(hist, "efficency"), nam.name("eff"), 9, 0, 9.);
+	if(!before_) eff_ = fs->make<TH1F> (nam.name(hist, "efficency"), nam.name("eff"), varBins_.size()-1, &varBins_[0]);
 
 	binnedBkg_ = fs->make<TH1F> (nam.name(non, "binnedBkg"), nam.name(
-			"binnedBkg"), varBins_.size()  + 2, 0, 1.);
+			"binnedBkg"), varBins_.size() -1, &varBins_[0]);
 	binnedSemiLep_ = fs->make<TH1F> (nam.name(non, "binnedSemiLep"), nam.name(
-			"binnedSemiLep"), varBins_.size() + 2, 0, 1.);
+			"binnedSemiLep"), varBins_.size() -1, &varBins_[0]);
 	binnedDiLep_ = fs->make<TH1F> (nam.name(non, "binnedDiLep"), nam.name(
-			"binnedDiLep"), varBins_.size() + 2, 0, 1.);
+			"binnedDiLep"), varBins_.size() -1, &varBins_[0]);
 	binnedMultiLep_ = fs->make<TH1F> (nam.name(non, "binnedMultiLep"),
-			nam.name("binnedMultiLep"), varBins_.size() + 2, 0, 1.);
+			nam.name("binnedMultiLep"), varBins_.size() -1, &varBins_[0]);
 	if(!before_) binnedEff_ = fs->make<TH1F> (nam.name(hist, "binnedEff"), nam.name(
-			"binnedEff"), varBins_.size() + 2, 0, 1.);
+			"binnedEff"), varBins_.size() -1, &varBins_[0]);
 	binnedOverall_ = fs->make<TH1F> (nam.name(non, "binnedOverall"), nam.name(
-			"binnedOverall"), varBins_.size() + 2, 0, 1.);
+			"binnedOverall"), varBins_.size() -1, &varBins_[0]);
 
 	binnedSimpleBkg_ = fs->make<TH1F> (nam.name(non, "binnedSimpleBkg"),
-			nam.name("binnedSimpleBkg"), varBins_.size() + 2, 0, 1.);
+			nam.name("binnedSimpleBkg"), varBins_.size() -1, &varBins_[0]);
 	binnedSimpleSemiLep_ = fs->make<TH1F> (
 			nam.name(non, "binnedSimpleSemiLep"), nam.name(
-					"binnedSimpleSemiLep"), varBins_.size() + 2, 0, 1.);
+					"binnedSimpleSemiLep"), varBins_.size() -1, &varBins_[0]);
 	binnedSimpleDiLep_ = fs->make<TH1F> (nam.name(non, "binnedSimpleDiLep"),
-			nam.name("binnedSimpleDiLep"), varBins_.size() + 2, 0, 1.);
+			nam.name("binnedSimpleDiLep"), varBins_.size() -1, &varBins_[0]);
 	binnedSimpleMultiLep_ = fs->make<TH1F> (nam.name(non,
 			"binnedSimpleMultiLep"), nam.name("binnedSimpleMultiLep"),
-			varBins_.size() * 2 + 2, 0, 1.);
+			varBins_.size() -1, &varBins_[0]);
 	binnedSimpleOverall_ = fs->make<TH1F> (
 			nam.name(non, "binnedSimpleOverall"), nam.name(
-					"binnedSimpleOverall"), varBins_.size() + 2, 0, 1.);
+					"binnedSimpleOverall"), varBins_.size() -1, &varBins_[0]);
 
 	varPlot_ = fs->make<TH1F> (nam.name(hist, var_.label().c_str()), nam.name(var_.label().c_str()),
 			250, 0, 500);
@@ -134,7 +140,7 @@ void MatrixAnalyzer::analyze(const edm::Event& evt,
 	Double_t pt = (*recVars)[0].pt();
 	varPlot_->Fill(pt, sampleweight_);
 	for (unsigned int i = 0; i < varBins_.size() - 1; i++) {
-		if (pt >= varBins_[i] && pt < varBins_[i + 1]) {
+		if (pt >= varBins_[i] && (pt < varBins_[i + 1] || i == varBins_.size() - 2)) {
 			double t = varBins_.at(i);
 			std::stringstream tmp;
 			tmp << t;
