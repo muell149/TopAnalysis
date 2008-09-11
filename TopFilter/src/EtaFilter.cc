@@ -63,8 +63,7 @@ bool EtaFilter::filter(const std::vector<edm::View<reco::Candidate> >& objs)
 
 void EtaFilter::summarize()
 {
-  std::cout << " " << name_ 
-	    << ::std::setw( 10 ) << ::std::right << " : "
+  std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
 	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
 	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
 	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
