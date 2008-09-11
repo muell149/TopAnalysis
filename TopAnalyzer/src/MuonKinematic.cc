@@ -47,6 +47,10 @@ MuonKinematic::fill(const std::vector<pat::Jet>& jets,
     double minDR_10=-1.;
     double minDR_15=-1.;
     double minDR_20=-1.;
+    double minDR_25=-1.;
+    double minDR_30=-1.;
+    double minDR_35=-1.;
+    double minDR_40=-1.;
     for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); 
 	jet!=jets.end(); ++jet) {
       double dR=deltaR(muon->eta(), muon->phi(), jet->eta(), jet->phi());
@@ -55,12 +59,20 @@ MuonKinematic::fill(const std::vector<pat::Jet>& jets,
       if( (minDR_10<0 || dR<minDR_10) && jet->pt()>10 ) minDR_10=dR;
       if( (minDR_15<0 || dR<minDR_15) && jet->pt()>15 ) minDR_15=dR;
       if( (minDR_20<0 || dR<minDR_20) && jet->pt()>20 ) minDR_20=dR;
+      if( (minDR_25<0 || dR<minDR_25) && jet->pt()>25 ) minDR_25=dR;
+      if( (minDR_30<0 || dR<minDR_30) && jet->pt()>30 ) minDR_30=dR;
+      if( (minDR_35<0 || dR<minDR_35) && jet->pt()>35 ) minDR_35=dR;
+      if( (minDR_40<0 || dR<minDR_40) && jet->pt()>40 ) minDR_40=dR;
     }
     if( minDR   >=0 ) isoJet_  ->Fill( minDR   , weight );
     if( minDR_5 >=0 ) isoJet5_ ->Fill( minDR_5 , weight );
     if( minDR_10>=0 ) isoJet10_->Fill( minDR_10, weight );
     if( minDR_15>=0 ) isoJet15_->Fill( minDR_15, weight );
     if( minDR_20>=0 ) isoJet20_->Fill( minDR_20, weight );
+    if( minDR_25>=0 ) isoJet25_->Fill( minDR_25, weight );
+    if( minDR_30>=0 ) isoJet30_->Fill( minDR_30, weight );
+    if( minDR_35>=0 ) isoJet35_->Fill( minDR_35, weight );
+    if( minDR_40>=0 ) isoJet40_->Fill( minDR_40, weight );
     
     //---------------------------------------------
     // track & calo isolation
@@ -109,6 +121,10 @@ MuonKinematic::book()
   isoJet10_  = new TH1F(iso.name( "isoJet10"), iso.name("isoJet10"), 80,   0.,  4.);
   isoJet15_  = new TH1F(iso.name( "isoJet15"), iso.name("isoJet15"), 80,   0.,  4.);
   isoJet20_  = new TH1F(iso.name( "isoJet20"), iso.name("isoJet20"), 80,   0.,  4.);
+  isoJet25_  = new TH1F(iso.name( "isoJet25"), iso.name("isoJet25"), 80,   0.,  4.);
+  isoJet30_  = new TH1F(iso.name( "isoJet30"), iso.name("isoJet30"), 80,   0.,  4.);
+  isoJet35_  = new TH1F(iso.name( "isoJet35"), iso.name("isoJet35"), 80,   0.,  4.);
+  isoJet40_  = new TH1F(iso.name( "isoJet40"), iso.name("isoJet40"), 80,   0.,  4.);
   isoTrkPt_  = new TH1F(iso.name( "isoTrkPt"), iso.name("isoTrkPt"), 60,  -1.,  5.);
   isoCalPt_  = new TH1F(iso.name( "isoCalPt"), iso.name("isoCalPt"), 40, -10., 30.);
   isoTrkN_   = new TH1F(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
@@ -138,6 +154,10 @@ MuonKinematic::book(edm::Service<TFileService>& fs)
   isoJet10_= fs->make<TH1F>(iso.name( "isoJet10"), "smallest #Delta R (muon, jet_{10 GeV})", 35, 0.,  3.5);
   isoJet15_= fs->make<TH1F>(iso.name( "isoJet15"), "smallest #Delta R (muon, jet_{15 GeV})", 35, 0.,  3.5);
   isoJet20_= fs->make<TH1F>(iso.name( "isoJet20"), "smallest #Delta R (muon, jet_{20 GeV})", 35, 0.,  3.5);
+  isoJet25_= fs->make<TH1F>(iso.name( "isoJet25"), "smallest #Delta R (muon, jet_{25 GeV})", 35, 0.,  3.5);
+  isoJet30_= fs->make<TH1F>(iso.name( "isoJet30"), "smallest #Delta R (muon, jet_{30 GeV})", 35, 0.,  3.5);
+  isoJet35_= fs->make<TH1F>(iso.name( "isoJet35"), "smallest #Delta R (muon, jet_{35 GeV})", 35, 0.,  3.5);
+  isoJet40_= fs->make<TH1F>(iso.name( "isoJet40"), "smallest #Delta R (muon, jet_{40 GeV})", 35, 0.,  3.5);
   isoTrkPt_= fs->make<TH1F>(iso.name( "isoTrkPt"), "muon trk. isol. [GeV]", 20, 0., 10.);
   isoCalPt_= fs->make<TH1F>(iso.name( "isoCalPt"), "muon cal. isol. [GeV]", 20, 0., 10.);
   isoTrkN_ = fs->make<TH1F>(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1., 20.);
@@ -167,6 +187,10 @@ MuonKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
   isoJet10_= fs->make<TH1F>(iso.name( file, "isoJet10"), "smallest #Delta R (muon, jet_{10 GeV})", 35, 0.,  3.5);
   isoJet15_= fs->make<TH1F>(iso.name( file, "isoJet15"), "smallest #Delta R (muon, jet_{15 GeV})", 35, 0.,  3.5);
   isoJet20_= fs->make<TH1F>(iso.name( file, "isoJet20"), "smallest #Delta R (muon, jet_{20 GeV})", 35, 0.,  3.5);
+  isoJet25_= fs->make<TH1F>(iso.name( file, "isoJet25"), "smallest #Delta R (muon, jet_{25 GeV})", 35, 0.,  3.5);
+  isoJet30_= fs->make<TH1F>(iso.name( file, "isoJet30"), "smallest #Delta R (muon, jet_{30 GeV})", 35, 0.,  3.5);
+  isoJet35_= fs->make<TH1F>(iso.name( file, "isoJet35"), "smallest #Delta R (muon, jet_{35 GeV})", 35, 0.,  3.5);
+  isoJet40_= fs->make<TH1F>(iso.name( file, "isoJet40"), "smallest #Delta R (muon, jet_{40 GeV})", 35, 0.,  3.5);
   isoTrkPt_= fs->make<TH1F>(iso.name( file, "isoTrkPt"), "muon trk. isol. [GeV]", 20, 0., 10.);
   isoCalPt_= fs->make<TH1F>(iso.name( file, "isoCalPt"), "muon cal. isol. [GeV]", 20, 0., 10.);
   isoTrkN_ = fs->make<TH1F>(iso.name( file, "isoTrkN" ), "isoTrkN" , 21,  -1., 20. );
@@ -194,6 +218,10 @@ MuonKinematic::write(TFile& file, const char* directory)
   isoJet10_->Write( );
   isoJet15_->Write( );
   isoJet20_->Write( );
+  isoJet25_->Write( );
+  isoJet30_->Write( );
+  isoJet35_->Write( );
+  isoJet40_->Write( );
   isoTrkPt_->Write( );
   isoCalPt_->Write( );
   isoTrkN_ ->Write( );

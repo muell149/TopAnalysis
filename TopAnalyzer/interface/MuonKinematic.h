@@ -44,6 +44,10 @@ class MuonKinematic{
       delete isoJet10_;
       delete isoJet15_;
       delete isoJet20_;
+      delete isoJet25_;
+      delete isoJet30_;
+      delete isoJet35_;
+      delete isoJet40_;
       delete isoTrkPt_;
       delete isoCalPt_;
       delete isoTrkN_;
@@ -86,6 +90,10 @@ class MuonKinematic{
   TH1F *isoJet10_;
   TH1F *isoJet15_;
   TH1F *isoJet20_;
+  TH1F *isoJet25_;
+  TH1F *isoJet30_;
+  TH1F *isoJet35_;
+  TH1F *isoJet40_;
   TH1F *isoTrkPt_;
   TH1F *isoCalPt_;
   TH1F *isoTrkN_;
