@@ -47,50 +47,50 @@ foreach my $file (@myfiles) {
     # accumulate else voice error message ; first occurrence
     # semi leptonic second dileptonic preselection
     my $failed = 0;
-    if($beforeMuonEtaCut[0] =~ /Events\sBefore\sCut:\s+(\d+)/) {
+    if($beforeMuonEtaCut[0] =~ /Events\sBefore\sCut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num1 = $num1 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: could not get first number for muonEtaCut from $file <<\n";
     };
-    if($beforeMuonPtCut[0]  =~ /Events\sBefore\sCut:\s+(\d+)/) {
+    if($beforeMuonPtCut[0]  =~ /Events\sBefore\sCut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num3 = $num3 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: could not get first number for muonPtCut  from $file <<\n";
-	};
-    if($beforeJetsEtaCut[0] =~ /Events\sBefore\sCut:\s+(\d+)/) {
+    };
+    if($beforeJetsEtaCut[0] =~ /\sEvents\sBefore\sCut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num5 = $num5 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: could not get first number for jetsEtaCut from $file <<\n";
     };
-    if($beforeJetsPtCut[0]  =~ /Events\sBefore\sCut:\s+(\d+)/) {
+    if($beforeJetsPtCut[0]  =~ /Events\sBefore\sCut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num7 = $num7 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: could not get first number for jetsPtCut  from $file <<\n";
     };
 
-    if($afterMuonEtaCut[0]  =~ /Events\sAfter\s+Cut:\s+(\d+)/) {
+    if($afterMuonEtaCut[0]  =~ /Events\sAfter\s+Cut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num2 = $num2 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: could not get last  number for muonEtaCut from $file <<\n";
     };
-    if($afterMuonPtCut[0]   =~ /Events\sAfter\s+Cut:\s+(\d+)/) {
+    if($afterMuonPtCut[0]   =~ /Events\sAfter\s+Cut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num4 = $num4 + $1;
     } else {
       $failed = 1;
       print ">> ERROR: Could not get last  number for muontPtCut  from $file <<\n";
     };
-    if($afterJetsEtaCut[0]  =~ /Events\sAfter\s+Cut:\s+(\d+)/) {
+    if($afterJetsEtaCut[0]  =~ /Events\sAfter\s+Cut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) {
       $num6 = $num6 + $1;  
     } else {
       $failed = 1;
       print ">> ERROR: Could not get last  number for jetsEtaCut from $file <<\n";
     };
-    if($afterJetsPtCut[0]   =~ /Events\sAfter\s+Cut:\s+(\d+)/) { 
+    if($afterJetsPtCut[0]   =~ /Events\sAfter\s+Cut\s\(Weighted\):\s+(\d+)\s\(\s+\d+\w/) { 
       $num8 = $num8 + $1;  
     } else {
       $failed = 1;
@@ -113,7 +113,7 @@ print "\n            \t before: \t after: \n";
 print "  muonEtaCut: \t $num1 \t $num2 \n";
 print "  muonPtCut : \t $num3 \t $num4 \n";
 print "  jetsEtaCut: \t $num5 \t $num6 \n";
-print "  jetsPtCut : \t $num7 \t \t $num8 \n";
+print "  jetsPtCut : \t $num7 \t $num8 \n";
 print "----------------------------------------------\n";
 
 exit;
