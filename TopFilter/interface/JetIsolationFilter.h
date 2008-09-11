@@ -53,7 +53,17 @@ JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg)
   beforeCut_( 0 ), afterCut_( 0 )
 {
   if( iso_.size() != minJetPt_.size() )
-    throw edm::Exception( edm::errors::Configuration,"Vector 'isolation' has different length than vector 'minJetPt'" );
+    throw edm::Exception( edm::errors::Configuration,
+			  "Length of vector 'isolation' is different from length of vector 'minJetPt'" );
+  // print applied cuts
+  for(unsigned int idx=0; idx<iso_.size(); ++idx) {
+    std::cout << ::std::setw( 20 );
+    if(idx==0) std::cout << name_; else std::cout << " ";
+    std::cout << ": "
+	      << "JetIsolation > " << iso_[idx] << std::endl
+	      << ::std::setw( 20 ) << " "
+	      << "   using jetPt > " << minJetPt_[idx] << std::endl;
+  }
 }
 
 template <typename Collection> 
@@ -113,25 +123,12 @@ bool JetIsolationFilter<Collection>::filter(edm::Handle<std::vector<pat::Jet> >&
 template <typename Collection> 
 void JetIsolationFilter<Collection>::summarize()
 {
-  using std::cout;
-  using std::endl;
-
-  cout << "******************************************************" << endl;
-  for(unsigned int idx=0; idx<iso_.size(); ++idx) {
-    cout << ::std::setw( 20 );
-    if(idx==0) cout << name_; else cout << " ";
-    cout << ": "
-	 << "JetIsolation > " << iso_[idx] << endl
-	 << ::std::setw( 20 ) << " "
-	 << "   using jetPt > " << minJetPt_[idx] << endl;
-  }
-  cout << "------------------------------------------------------" << endl 
-       << " Events Before Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << beforeCut_
-       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
-       << " Events After  Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << afterCut_ 
-       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
+  std::cout << " " << name_ 
+	    << ::std::setw( 10 ) << ::std::right << " : "
+	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
+	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
+	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
+	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
 }
 
 #endif

@@ -8,6 +8,16 @@ PtFilter::PtFilter(const edm::ParameterSet& cfg):
   beforeCut_( 0 ), afterCut_( 0 ),
   beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
+  // print applied cuts
+  unsigned int maxSize=minPt_.size();
+  if(maxPt_.size()>maxSize) maxSize=maxPt_.size();
+  for(unsigned int idx=0; idx<maxSize; ++idx){
+    std::cout << ::std::setw( 20 );
+    if(idx==0) std::cout << name_; else std::cout << " ";
+    std::cout << ": ";
+    if(idx<minPt_.size()) std::cout << minPt_[idx] << " < Pt"; else std::cout << "   Pt"; 
+    if(idx<maxPt_.size()) std::cout << " < " << maxPt_[idx] << std::endl;
+  }
 }
 
 bool 
@@ -56,24 +66,10 @@ PtFilter::filter(const std::vector<edm::View<reco::Candidate> >& objs)
 void 
 PtFilter::summarize()
 {
-  using std::cout;
-  using std::endl;
-
-  unsigned int maxSize=minPt_.size();
-  if(maxPt_.size()>maxSize) maxSize=maxPt_.size();
-  cout << "******************************************************" << endl;
-  for(unsigned int idx=0; idx<maxSize; ++idx){
-    cout << ::std::setw( 20 );
-    if(idx==0) cout << name_; else cout << " ";
-    cout << ": ";
-    if(idx<minPt_.size()) cout << minPt_[idx] << " < Pt"; else cout << "   Pt"; 
-    if(idx<maxPt_.size()) cout << " < " << maxPt_[idx] << endl;
-  }
-  cout << "------------------------------------------------------" << endl 
-       << " Events Before Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << beforeCut_
-       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
-       << " Events After  Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << afterCut_ 
-       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
+  std::cout << " " << name_ 
+	    << ::std::setw( 10 ) << ::std::right << " : "
+	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
+	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
+	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
+	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
 }

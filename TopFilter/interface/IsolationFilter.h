@@ -50,6 +50,15 @@ IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
   beforeCut_( 0 ), afterCut_( 0 ),
   beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
+  // print applied cuts
+  for(unsigned int idx=0; idx<iso_.size(); ++idx){
+    std::cout << ::std::setw( 20 );
+    if( idx  ==0 ) std::cout << name_;
+    std::cout << ": ";
+    if( mode_==0 ) std::cout << " Trk";
+    if( mode_==1 ) std::cout << " Cal"; 
+    std::cout << "Isolation < " << iso_[idx] << std::endl;
+  }
 }
 
 template <typename Collection> 
@@ -103,25 +112,12 @@ bool IsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
 template <typename Collection> 
 void IsolationFilter<Collection>::summarize()
 {
-  using std::cout;
-  using std::endl;
-
-  cout << "******************************************************" << endl;
-  for(unsigned int idx=0; idx<iso_.size(); ++idx){
-    cout << ::std::setw( 20 );
-    if( idx  ==0 ) cout << name_;
-    cout << ": ";
-    if( mode_==0 ) cout << " Trk";
-    if( mode_==1 ) cout << " Cal"; 
-    cout << "Isolation < " << iso_[idx] << endl;
-  }
-  cout << "------------------------------------------------------" << endl 
-       << " Events Before Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << beforeCut_
-       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
-       << " Events After  Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << afterCut_ 
-       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
+  std::cout << " " << name_ 
+	    << ::std::setw( 10 ) << ::std::right << " : "
+	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
+	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
+	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
+	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
 }
 
 #endif

@@ -8,6 +8,16 @@ EtaFilter::EtaFilter(const edm::ParameterSet& cfg):
   beforeCut_( 0 ), afterCut_( 0 ),
   beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
+  // print applied cuts
+  unsigned int maxSize=minEta_.size();
+  if(maxEta_.size()>maxSize) maxSize=maxEta_.size();
+  for(unsigned int idx=0; idx<maxSize; ++idx){
+    std::cout << ::std::setw( 20 );
+    if(idx==0) std::cout << name_; else std::cout << " ";
+    std::cout << ": ";
+    if(idx<minEta_.size()) std::cout << minEta_[idx] << " < Eta"; else std::cout << "   Eta"; 
+    if(idx<maxEta_.size()) std::cout << " < " << maxEta_[idx] << std::endl;
+  }
 }
 
 bool EtaFilter::operator()(edm::Event& evt, const std::vector<edm::View<reco::Candidate> >& objs, const double& weight)
@@ -53,24 +63,10 @@ bool EtaFilter::filter(const std::vector<edm::View<reco::Candidate> >& objs)
 
 void EtaFilter::summarize()
 {
-  using std::cout;
-  using std::endl;
-
-  unsigned int maxSize=minEta_.size();
-  if(maxEta_.size()>maxSize) maxSize=maxEta_.size();
-  cout << "******************************************************" << endl;
-  for(unsigned int idx=0; idx<maxSize; ++idx){
-    cout << ::std::setw( 20 );
-    if(idx==0) cout << name_; else cout << " ";
-    cout << ": ";
-    if(idx<minEta_.size()) cout << minEta_[idx] << " < Eta"; else cout << "   Eta"; 
-    if(idx<maxEta_.size()) cout << " < " << maxEta_[idx] << endl;
-  }
-  cout << "------------------------------------------------------" << endl 
-       << " Events Before Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << beforeCut_
-       << " (" << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << endl
-       << " Events After  Cut (Weighted): "
-       << ::std::setw( 10 ) << ::std::right << afterCut_ 
-       << " (" << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ")" << endl;
+  std::cout << " " << name_ 
+	    << ::std::setw( 10 ) << ::std::right << " : "
+	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
+	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
+	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
+	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
 }
