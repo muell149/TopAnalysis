@@ -14,4 +14,6 @@ source = PoolSource{
   include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Ttbar.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Wjets.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_Zjets.cff"
+# include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCDMu.cff"
 # include "TopAnalysis/Configuration/test/csa07AllEventsSkim_QCD.cff"
+
