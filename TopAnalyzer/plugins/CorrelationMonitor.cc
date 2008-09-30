@@ -1,11 +1,14 @@
 #include "TopAnalysis/TopAnalyzer/plugins/CorrelationMonitor.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
+//#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 CorrelationMonitor::CorrelationMonitor() {
 }
 CorrelationMonitor::~CorrelationMonitor() {
 }
 
+/**
+ * fills a stored histogramm with name = name with values v1 and v2 with a certain weight
+ */
 void CorrelationMonitor::fill(std::string name, double v1, double v2,
 		double weight) {
 	map<string, TH2F*>::iterator iter = histos_.find(name);
@@ -18,6 +21,9 @@ void CorrelationMonitor::book(ofstream& file) {
 
 }
 
+/**
+ * prints the correlation of all histogramms to the std output
+ */
 void CorrelationMonitor::printCorrelation() {
 	map<string, TH2F*>::iterator iter;
 	for (iter = histos_.begin(); iter != histos_.end(); ++iter) {
@@ -26,6 +32,9 @@ void CorrelationMonitor::printCorrelation() {
 	}
 }
 
+/**
+ * returns the correlation error
+ */
 Double_t CorrelationMonitor::getCorrelationFactor(std::string name) {
 	map<string, TH2F*>::iterator iter = histos_.find(name);
 	if (iter != histos_.end()) {
@@ -35,6 +44,9 @@ Double_t CorrelationMonitor::getCorrelationFactor(std::string name) {
 	}
 }
 
+/**
+ * returns the correlation error
+ */
 Double_t CorrelationMonitor::getCorrelationError(std::string name) {
 	map<string, TH2F*>::iterator iter = histos_.find(name);
 	Double_t corr = -2.;
@@ -60,10 +72,13 @@ Double_t CorrelationMonitor::getCorrelationError(std::string name) {
 	err2cov = stats[1];
 	Double_t rel1 = errrms1/rms1;
 	Double_t rel2 = errrms2/rms2;
-
+	//error calculation from http://.... or paper.....
 	return sqrt((rel1*rel1 + rel2*rel2)*corr + err2cov/rms1/rms1/rms2/rms2);
 }
 
+/**
+ * adds a histogramm to the collection and makes its draw option to 'COLZ'
+ */
 void CorrelationMonitor::addHist(string name, TH2F* hist) {
 	hist->SetDrawOption("COLZ");
 	histos_.insert(make_pair(name, hist));
