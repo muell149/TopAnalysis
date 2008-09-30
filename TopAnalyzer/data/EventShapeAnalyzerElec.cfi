@@ -11,6 +11,6 @@ module analyzeEventShapeElec = EventShapeAnalyzerElec{
   double maxEta   = 1.4
 
   bool doMatching      = true
-  bool maxDeltaRLepton = 0.3
-  bool maxDeltaRJet    = 0.3
+  double maxDeltaRLepton = 0.3
+  double maxDeltaRJet    = 0.3
 }
