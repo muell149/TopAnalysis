@@ -1,6 +1,5 @@
 #include "TopAnalysis/TopAnalyzer/plugins/IsolationAnalyzer.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
-#include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 
@@ -350,7 +349,7 @@ unsigned int IsolationAnalyzer::getClosestJet(edm::Handle<TopJetCollection> & j,
 		double dr2 = 999.;
 		TopJetCollection::const_iterator jet = j->begin();
 		for(unsigned x = 0; x< 4;x++){
-			double temp = deltaR2(*jet, *r);
+		  double temp = reco::deltaR2(*jet, *r);
 			if (temp < dr2){
 				dr2 = temp;
 				i = x+1;

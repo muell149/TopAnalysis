@@ -1,6 +1,5 @@
 #include "TopAnalysis/TopAnalyzer/interface/MuonKinematic.h"
 
-
 /// constructor for FWLite analyzer
 MuonKinematic::MuonKinematic(): 
   fwLite_(true ), jets_() { }
@@ -94,8 +93,8 @@ MuonKinematic::fill(const std::vector<pat::Jet>& jets,
     // fill summed deposits 
     double stdDR = 0.3;
     double stdThreshold = 0.3;
-    isoCalN_ ->Fill( hcalDep->depositAndCountWithin(stdDR, reco::MuIsoDeposit::Vetos(), stdThreshold).second, weight );
-    isoTrkN_ ->Fill( hcalDep->depositAndCountWithin(stdDR, reco::MuIsoDeposit::Vetos(), stdThreshold).second, weight );
+    isoCalN_ ->Fill( hcalDep->depositAndCountWithin(stdDR, reco::IsoDeposit::Vetos(), stdThreshold).second, weight );
+    isoTrkN_ ->Fill( hcalDep->depositAndCountWithin(stdDR, reco::IsoDeposit::Vetos(), stdThreshold).second, weight );
     isoTrkPt_->Fill( muon->trackIso(), weight );
     isoCalPt_->Fill( muon->caloIso (), weight );
 

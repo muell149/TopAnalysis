@@ -515,9 +515,9 @@ int MatrixAnalyzer::numberOfmatchedMuons(
 	cout << "<pdgId, status, mother.pdgId>" << endl;
 	cout << "ID: ";
 	for (int i = 0; i < size; ++i) {
-		edm::RefToBase<reco::Candidate> muonRef =
+		edm::Ptr<reco::Candidate> muonPtr =
 				recMuons->refAt(i)->originalObjectRef();
-		reco::GenParticleRef genMuon = (*genMatch)[muonRef];
+		reco::GenParticleRef genMuon = (*genMatch)[muonPtr];
 
 		int mid = 0;
 		int st = 0;

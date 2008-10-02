@@ -43,13 +43,13 @@ JetId::fill(const std::vector<pat::Jet>& jets, const double& weight=1.)
     //---------------------------------------------
     nTwr_->Fill(jet->getCaloConstituents().size(), weight);
     if(jet->et()>0.){
-      std::vector<CaloTowerRef> caloTowerRef = jet->getCaloConstituents();
-      for(unsigned int jdx=0; jdx<caloTowerRef.size(); ++jdx){
-	aProfEta_->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et()/jet->et() );
-	aProfPhi_->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et()/jet->et() );
+      std::vector<CaloTowerPtr> caloTowerPtr = jet->getCaloConstituents();
+      for(unsigned int jdx=0; jdx<caloTowerPtr.size(); ++jdx){
+	aProfEta_->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
+	aProfPhi_->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );
 	
-	if( idx<profEta_.size()) profEta_[idx]->Fill( jet->eta()-caloTowerRef[jdx]->eta(), caloTowerRef[jdx]->et()/jet->et() );
-	if( idx<profPhi_.size()) profPhi_[idx]->Fill( jet->phi()-caloTowerRef[jdx]->phi(), caloTowerRef[jdx]->et()/jet->et() );
+	if( idx<profEta_.size()) profEta_[idx]->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
+	if( idx<profPhi_.size()) profPhi_[idx]->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );
       }
     }
   }

@@ -26,8 +26,8 @@ MuonId::fill(const std::vector<pat::Muon>& muons, const double& weight=1.)
 {
   std::vector<pat::Muon>::const_iterator muon=muons.begin();
   if(muon!=muons.end()){
-    reco::MuonEnergy muEnergy = muon->getCalEnergy();   
-    muComp_ ->Fill( muon->getCaloCompatibility(), weight );
+    reco::MuonEnergy muEnergy = muon->calEnergy();   
+    muComp_ ->Fill( muon->caloCompatibility(), weight );
     muEm_   ->Fill( muEnergy.em, weight );
     muEmS9_ ->Fill( muEnergy.emS9, weight );  
     muHad_  ->Fill( muEnergy.had, weight );
