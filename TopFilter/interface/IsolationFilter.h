@@ -89,11 +89,17 @@ bool IsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
     for(typename Collection::const_iterator obj=objs[jdx].begin();
 	obj!=objs[jdx].end(); ++obj) {
       if( idx<iso_.size() ){ // check for isolation as long as vector is long enough
-	if( mode_==0 ) // trk isolation
+	if( mode_==0 ) { // trk isolation
 	  if( !(obj->trackIso()<iso_[idx]) ) passedOnce=false;
-	if( mode_==1 ) // cal isolation
+	}
+	if( mode_==1 ) { // cal isolation
 	  if( !(obj->caloIso() <iso_[idx]) ) passedOnce=false;
-	if( !(mode_==0 || mode_==1) ){
+	}
+	if( mode_==2 ) { // combined isolation
+	  double combIso = obj->pt()/( obj->pt()+obj->caloIso()+obj->trackIso() );
+	  if( !(combIso >iso_[idx]) ) passedOnce=false;  
+	}  
+	if( !(mode_==0 || mode_==1 || mode_==2) ){
 	  edm::LogWarning ( "UnknownIsoMode" ) << "Isolation mode: " << mode_ << "is not known";
 	  passedOnce=false;
 	}
