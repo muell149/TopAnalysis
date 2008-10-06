@@ -10,13 +10,13 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
     id = cms.PSet(
         barrel_shape = cms.InputTag("hybridSuperClusters","hybridShapeAssoc"),
         endcap_shape = cms.InputTag("islandBasicClusters","islandEndcapShapeAssoc")
-    )
+    ),
     doId  = cms.bool(True),
                              
     ## fill kin histograms
     kin = cms.PSet(
-        jets    = cms.InputTag("allLayer1Jets"),
         towers  = cms.InputTag("caloTowers"),
+        jets    = cms.InputTag("allLayer1Jets"),
         tracks  = cms.InputTag("ctfWithMaterialTracks"),
         dRMax   = cms.double(0.1)
     ),
@@ -24,7 +24,7 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
 
     ## fill res histograms
     res = cms.PSet(
-        matchDR = cms.double (0.1),
+        matchDR = cms.double ( 0.1 ),
         binsPt  = cms.vdouble( 0.0,   20.0, 30.0, 50.0, 80.0, 120.0, 180.0),
         binsEta = cms.vdouble(-2.5,   -1.3, -0.5,  0.0,  0.5,   1.3,   2.5),
         binsPhi = cms.vdouble(-3.14, -1.57,  0.0, 1.57, 3.14)

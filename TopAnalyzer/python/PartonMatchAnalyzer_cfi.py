@@ -1,13 +1,13 @@
 import FWCore.ParameterSet.Config as cms
 
 analyzePartonMatch = cms.EDAnalyzer("PartonMatchAnalyzer",
+    hist    = cms.string('analyzePartonMatch.hist'),
     matches = cms.VInputTag(cms.InputTag("ttSemiEvtJetPartonMatch")),
-    sumDR = cms.InputTag("ttSemiEvtJetPartonMatch","SumDR"),
-    quarks = cms.vint32(),
-    hist = cms.string('analyzePartonMatch.hist'),
-    sumDPt = cms.InputTag("ttSemiEvtJetPartonMatch","SumPt"),
-    jets = cms.vint32(),
-    ref = cms.uint32(0)
+    sumDR   = cms.InputTag("ttSemiEvtJetPartonMatch","SumDR"),
+    sumDPt  = cms.InputTag("ttSemiEvtJetPartonMatch","SumPt"),
+    quarks  = cms.vint32(),
+    jets    = cms.vint32(),
+    ref     = cms.uint32(0)
 )
 
 
