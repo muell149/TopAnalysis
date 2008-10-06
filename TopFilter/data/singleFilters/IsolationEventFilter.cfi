@@ -22,6 +22,13 @@ module filterSemiMuonJetIsolation = MuonJetIsolationEventFilter{
 #
 # isolation filters for dileptonic(mu/mu)
 #
+module filterDiMuonCombIsolation = MuonIsolationEventFilter{
+  VInputTag input = {selectedLayer1Muons}
+  PSet cuts = { using DiCombIsolationCut }
+}
+
+# following modules are not used at the moment
+
 module filterDiMuonTrkIsolation = MuonIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using DiTrkIsolationCut }
