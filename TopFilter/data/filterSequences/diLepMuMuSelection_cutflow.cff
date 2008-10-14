@@ -45,14 +45,12 @@
 # configure filters
 # ----------------------------
   
-
 #
   sequence makeDiMuonKinematic = {filterDiMuonEta, filterDiMuonPt, 
                                     diMuonLep, diJetsLep}
-  sequence makeDiMuonIsolation = {filterDiMuonTrkIsolation, 
-                                    filterDiMuonCalIsolation,
-                                    filterDiMuonJetIsolation, 
-                                    diMuonIso, diJetsIso}
+  sequence makeDiMuonIsolation = {filterDiMuonCombIsolation, 
+                                  filterDiMuonJetIsolation, 
+                                  diMuonIso, diJetsIso}
   sequence makeDiJetsKinematic = {filterDiJetsEta, filterDiJetsPt, 
                                     diMuonJet, diJetsJet}
 
