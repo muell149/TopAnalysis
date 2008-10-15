@@ -50,7 +50,8 @@ JetIsolationFilter<Collection>::JetIsolationFilter(const edm::ParameterSet& cfg)
   name_     ( cfg.getParameter<std::string>         ("name"      ) ),
   iso_      ( cfg.getParameter<std::vector<double> >("isolation" ) ),
   minJetPt_ ( cfg.getParameter<std::vector<double> >("minJetPt" ) ),
-  beforeCut_( 0 ), afterCut_( 0 )
+  beforeCut_( 0 ), afterCut_( 0 ),
+  beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
   if( iso_.size() != minJetPt_.size() )
     throw edm::Exception( edm::errors::Configuration,
@@ -131,4 +132,5 @@ void JetIsolationFilter<Collection>::summarize()
 }
 
 #endif
+  
   
