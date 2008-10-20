@@ -27,20 +27,6 @@ module filterDiMuonCombIsolation = MuonIsolationEventFilter{
   PSet cuts = { using DiCombIsolationCut }
 }
 
-# following modules are not used at the moment
-
-module filterDiMuonTrkIsolation = MuonIsolationEventFilter{
-  VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using DiTrkIsolationCut }
-  InputTag weight = eventWeight
-}
-
-module filterDiMuonCalIsolation = MuonIsolationEventFilter{
-  VInputTag input = {selectedLayer1Muons}
-  PSet cuts = { using DiCalIsolationCut }
-  InputTag weight = eventWeight
-}
-
 module filterDiMuonJetIsolation = MuonJetIsolationEventFilter{
   VInputTag input = {selectedLayer1Muons}
   PSet cuts = { using DiJetIsolationCut }
