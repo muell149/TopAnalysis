@@ -1,50 +1,65 @@
+# kinematic muon cuts
+
 block DiMuonPtCut ={
   string name = "diMuonPtCut"
-  vdouble minPt = {   15.,    15.}
-  vdouble maxPt = {99999., 99999.}
-}
-
-block DiJetsPtCut ={
-  string name = "diJetsPtCut"
-  vdouble minPt = {   50.,   50.}
-  vdouble maxPt = {99999., 99999.}
+  vdouble minPt = {   15.,    15.}     
+  vdouble maxPt = {99999., 99999.}     
 }
 
 block DiMuonEtaCut ={
   string name = "diMuonEtaCut"
-  vdouble minEta = {-2.4, -2.4}
-  vdouble maxEta = { 2.4,  2.4}
+  vdouble minEta = {-2.1, -2.1}
+  vdouble maxEta = { 2.1,  2.1}
+}
+
+# kinematic jet cuts
+
+block DiJetsPtCut ={
+  string name = "diJetsPtCut"
+  vdouble minPt = {   30.,    30.}      
+  vdouble maxPt = {99999., 99999.}      
 }
 
 block DiJetsEtaCut ={
   string name = "diJetsEtaCut"
-  vdouble minEta  = {-2.4, -2.4}
-  vdouble maxEta  = { 2.4,  2.4}
+  vdouble minEta  = {-2.4, -2.4}         
+  vdouble maxEta  = { 2.4,  2.4}        
 }
+
+# muon isolation
 
 block DiCombIsolationCut ={
   uint32 mode = 2
   string name = "combinedIsolationCut"
-  vdouble isolation = { 0.95 }
-}
-
-# following blocks are not used at the moment
-
-block DiTrkIsolationCut ={
-  uint32 mode = 0
-  string name = "diTrackIsolationCut"
-  vdouble isolation = { 999.}
-}
-
-block DiCalIsolationCut ={
-  uint32 mode = 1
-  string name = "diCalIsolationCut"
-  vdouble isolation = { 999.}
+  vdouble isolation = { 0.90, 0.90 }     
 }
 
 block DiJetIsolationCut ={
   string name = "diJetIsolationCut"
   InputTag jets = allLayer1Jets
-  vdouble isolation = {0.5}
-  vdouble minJetPt  = {10.}
+  vdouble isolation = {0.3, 0.3}
+  vdouble minJetPt  = {25., 25.}
+}
+
+# muon track quality
+
+block DiMuonNormChiCut ={
+  string name = "diMuonNormChiCut"
+  uint32 mode = 0
+  string type = "globalMuon"
+  vdouble quality  = {2.5, 2.5}
+}
+
+block DiMuonD0Cut ={
+  string name = "diMuonD0Cut"
+  uint32 mode = 1
+  string type = "trackerMuon"
+  vdouble quality  = {0.2, 0.2}
+}
+
+block DiMuonNHitsCut ={
+  string name = "diMuonNHitsCut"
+  uint32 mode = 2
+  string type = "trackerMuon"
+  vdouble quality  = {10, 10}
 }
