@@ -35,6 +35,7 @@ class IsolationFilter {
   std::vector<double> iso_;  // isolation threshold(s)
   unsigned int mode_;        // choose 0: for trk isolation
                              // choose 1: for cal isolation
+			     // choose 2: for comb isolation
 
  private:
 
@@ -53,10 +54,11 @@ IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
   // print applied cuts
   for(unsigned int idx=0; idx<iso_.size(); ++idx){
     std::cout << ::std::setw( 20 );
-    if( idx  ==0 ) std::cout << name_;
+    if( idx  ==0 ) std::cout << name_; else std::cout << " ";
     std::cout << ": ";
-    if( mode_==0 ) std::cout << " Trk";
-    if( mode_==1 ) std::cout << " Cal"; 
+    if( mode_==0 ) std::cout << "Trk";
+    if( mode_==1 ) std::cout << "Cal"; 
+    if( mode_==2 ) std::cout << "Cmb";
     std::cout << "Isolation < " << iso_[idx] << std::endl;
   }
 }
@@ -71,7 +73,7 @@ bool IsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<
     afterCutWeighted_ += weight;
     return true;
   }
-  return false;
+  return false; 
 }
 
 template <typename Collection> 
@@ -115,6 +117,7 @@ bool IsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
   }
   return passedWeak;
 }
+
 template <typename Collection> 
 void IsolationFilter<Collection>::summarize()
 {
@@ -126,4 +129,3 @@ void IsolationFilter<Collection>::summarize()
 }
 
 #endif
-  
