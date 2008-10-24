@@ -38,9 +38,7 @@ class ElecId{
   void book(edm::Service<TFileService>&);
   void book(edm::Service<TFileService>&, ofstream&);
   void fill(const edm::Event&, const std::vector<pat::Electron>&, const double&);
-  void fill(const reco::BasicClusterShapeAssociationCollection& barrel, 
-	    const reco::BasicClusterShapeAssociationCollection& endcap, 
-	    const std::vector<pat::Electron>&, const double&);
+  void fill(const std::vector<pat::Electron>&, const double&);
   void norm(){};
   void write(const char*, const char*);
   

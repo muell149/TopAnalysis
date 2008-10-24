@@ -10,8 +10,6 @@ ElecId::ElecId()
 
 /// constructor for full FW analyzer
 ElecId::ElecId(const edm::ParameterSet& cfg):
-  bshp_( cfg.getParameter<edm::InputTag>( "barrel_shape" ) ),
-  eshp_( cfg.getParameter<edm::InputTag>( "endcap_shape" ) )  
 {
 }
 
@@ -19,19 +17,14 @@ ElecId::ElecId(const edm::ParameterSet& cfg):
 void
 ElecId::fill(const edm::Event& evt, const std::vector<pat::Electron>& elecs, const double& weight=1.)
 {
-  edm::Handle<reco::BasicClusterShapeAssociationCollection> barrel, endcap;
-  evt.getByLabel(bshp_, barrel);
-  evt.getByLabel(eshp_, endcap);
 
  if(elecs.begin()==elecs.end()) return;
- fill(*barrel, *endcap, elecs, weight);
+ fill( elecs, weight);
 }
 
 /// fill interface for FWLite analyzer
 void
-ElecId::fill(const reco::BasicClusterShapeAssociationCollection& barrel, 
-	     const reco::BasicClusterShapeAssociationCollection& endcap, 
-	     const std::vector<pat::Electron>& elecs, const double& weight=1.)
+ElecId::fill(const std::vector<pat::Electron>& elecs, const double& weight=1.)
 {
   std::vector<pat::Electron>::const_iterator elec=elecs.begin();
   if(elec!=elecs.end()){
@@ -59,18 +52,6 @@ ElecId::fill(const reco::BasicClusterShapeAssociationCollection& barrel,
 			elec->TrackPositionAtCalo().Z());
     drtk_->Fill( (clus->position()-tPos).R(), weight );  
     
-    reco::BasicClusterShapeAssociationCollection::const_iterator shapes;
-    // find the entry in the map corresponding to
-    // the seed BasicCluster of the SuperCluster
-    DetId id = clus->seed()->getHitsByDetId()[0];
-    if (id.subdetId() == EcalBarrel) {
-      shapes = barrel.find(clus->seed());
-    }
-    else {
-      shapes = endcap.find(clus->seed());
-    }    
-    const reco::ClusterShapeRef& shp = shapes->val;
-    s1os9_->Fill( shp->eMax()/shp->e3x3(), weight );
   }
 }
 
