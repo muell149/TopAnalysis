@@ -40,7 +40,7 @@ class ElecKinematic{
   void fill(const edm::Event&, const std::vector<pat::Electron>&, const double&);
   void fill(const std::vector<pat::Jet>& jets,
 	    const reco::TrackCollection& tracks, 
-	    const reco::CandidateCollection& towers,
+	    const CaloTowerCollection& towers,
 	    const std::vector<pat::Electron>& elecs, const double&);
   void norm(){ 
     dRTrkPt_->Scale(1./dRTrkPt_->GetEntries()); 

@@ -31,7 +31,7 @@ ElecKinematic::fill(const edm::Event& evt, const std::vector<pat::Electron>& ele
   evt.getByLabel(tracks_, tracks);
 
   // calo isolation
-  edm::Handle<reco::CandidateCollection> towers;
+  edm::Handle<CaloTowerCollection> towers;
   evt.getByLabel(towers_, towers);
 
   fill(*jets, *tracks, *towers, elecs, weight);  
@@ -41,7 +41,7 @@ ElecKinematic::fill(const edm::Event& evt, const std::vector<pat::Electron>& ele
 void
 ElecKinematic::fill(const std::vector<pat::Jet>& jets, 
 		    const reco::TrackCollection& tracks, 
-		    const reco::CandidateCollection& towers,
+		    const CaloTowerCollection& towers,
 		    const std::vector<pat::Electron>& elecs, const double& weight=1.)
 {
   std::vector<pat::Electron>::const_iterator elec=elecs.begin();
@@ -72,7 +72,7 @@ ElecKinematic::fill(const std::vector<pat::Jet>& jets,
 
     // count number of towers in cone
     int nTowers = 0;
-    for(reco::CandidateCollection::const_iterator tower = towers.begin(); 
+    for(CaloTowerCollection::const_iterator tower = towers.begin(); 
 	tower != towers.end(); ++tower) {
       double dR=deltaR( elec->eta(), elec->phi(), tower->eta(), tower->phi() );
       dRCalN_ ->Fill(dR);
