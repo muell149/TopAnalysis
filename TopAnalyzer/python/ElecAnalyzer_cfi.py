@@ -15,9 +15,9 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
                              
     ## fill kin histograms
     kin = cms.PSet(
-        towers  = cms.InputTag("caloTowers"),
+        towers  = cms.InputTag("towerMaker"),
         jets    = cms.InputTag("allLayer1Jets"),
-        tracks  = cms.InputTag("ctfWithMaterialTracks"),
+        tracks  = cms.InputTag("generalTracks"),
         dRMax   = cms.double(0.1)
     ),
     doKin = cms.bool(True),
