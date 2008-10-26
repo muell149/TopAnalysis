@@ -9,7 +9,7 @@ ElecId::ElecId()
 }
 
 /// constructor for full FW analyzer
-ElecId::ElecId(const edm::ParameterSet& cfg):
+ElecId::ElecId(const edm::ParameterSet& cfg)
 {
 }
 
