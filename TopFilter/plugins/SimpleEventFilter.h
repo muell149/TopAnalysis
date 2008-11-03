@@ -6,6 +6,7 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/InputTag.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 
@@ -26,7 +27,6 @@ class SimpleEventFilter : public edm::EDFilter {
  private:
   
   std::vector<edm::InputTag> src_;
-
   edm::InputTag wgt_;
 
  private:
@@ -56,7 +56,7 @@ bool SimpleEventFilter<Filter>::filter(edm::Event& evt, const edm::EventSetup& s
     evt.getByLabel(*tag, src);
     objs.push_back(*src);
   }
-  // perform cuts
+  // perform filter
   return filter_(evt, objs, *wgt);
 }
 

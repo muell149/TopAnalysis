@@ -1,4 +1,4 @@
-block SemiMuonPtCut = {
+PSet SemiMuonPtCut = {
   string name = "semiMuonPtCut"
   vdouble minPt = {   20.}
   vdouble maxPt = {99999.}

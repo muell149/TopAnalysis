@@ -10,18 +10,17 @@
 
 #include "TopAnalysis/TopFilter/interface/PtFilter.h"
 #include "TopAnalysis/TopFilter/interface/EtaFilter.h"
+#include "TopAnalysis/TopFilter/interface/DistanceFilter.h"
 #include "TopAnalysis/TopFilter/interface/IsolationFilter.h"
-#include "TopAnalysis/TopFilter/interface/JetIsolationFilter.h"
+
 
 template <typename Lep> 
 class SemiLepEventFilter : public edm::EDFilter {
 
  public:
   
-  typedef IsolationFilter <Lep> LepIsolationFilter;
-  typedef JetIsolationFilter <Lep> LepJetIsolationFilter;
-  
- public:
+  typedef DistanceFilter<Lep> LepDistanceFilter;
+  typedef IsolationFilter<Lep> LepIsolationFilter;
 
   explicit SemiLepEventFilter(const edm::ParameterSet&);
   ~SemiLepEventFilter(){};
@@ -34,48 +33,49 @@ class SemiLepEventFilter : public edm::EDFilter {
   
  private:
 
-  std::vector<edm::InputTag> leps_;
-  std::vector<edm::InputTag> jets_;
-
   edm::InputTag wgt_;
+  std::vector<edm::InputTag> jets_;
+  std::vector<edm::InputTag> leps_;
 
-  bool useJetEta_;
-  bool useJetPt_;
-  bool useLepEta_;
-  bool useLepPt_;
-  bool useTrkIso_;
-  bool useCalIso_;
-  bool useJetIso_;
+  /// switches 
+  bool doJetEta_;
+  bool doJetPt_;
+  bool doLepEta_;
+  bool doLepPt_;
+  bool doTrkIso_;
+  bool doCalIso_;
+  bool doDist_;
 
+  /// filters
   PtFilter  jetPt_;
   PtFilter  lepPt_;
   EtaFilter jetEta_; 
   EtaFilter lepEta_; 
+  LepDistanceFilter jetDist_;
   LepIsolationFilter trkIso_;
   LepIsolationFilter calIso_;
-  LepJetIsolationFilter jetIso_;
 };
 
 template <typename Lep> 
 SemiLepEventFilter<Lep>::SemiLepEventFilter(const edm::ParameterSet& cfg):
-  leps_( cfg.template getParameter<std::vector<edm::InputTag> >("leps" ) ),
-  jets_( cfg.template getParameter<std::vector<edm::InputTag> >("jets" ) ),
-  wgt_ ( cfg.getParameter<edm::InputTag>( "weight" ) ),
-  useJetEta_( cfg.template getParameter<bool>("useJetEta" ) ),
-  useJetPt_ ( cfg.template getParameter<bool>("useJetPt"  ) ),
-  useLepEta_( cfg.template getParameter<bool>("useLepEta" ) ),
-  useLepPt_ ( cfg.template getParameter<bool>("useLepPt"  ) ),
-  useTrkIso_( cfg.template getParameter<bool>("useTrkIso" ) ),
-  useCalIso_( cfg.template getParameter<bool>("useCalIso" ) ),
-  useJetIso_( cfg.template getParameter<bool>("useJetIso" ) ),
-  jetPt_ ( cfg.template getParameter<edm::ParameterSet> ("jetPt" ) ), 
-  lepPt_ ( cfg.template getParameter<edm::ParameterSet> ("lepPt" ) ),
-  jetEta_( cfg.template getParameter<edm::ParameterSet> ("jetEta") ), 
-  lepEta_( cfg.template getParameter<edm::ParameterSet> ("lepEta") ), 
-  trkIso_( cfg.template getParameter<edm::ParameterSet> ("trkIso") ), 
-  calIso_( cfg.template getParameter<edm::ParameterSet> ("calIso") ), 
-  jetIso_( cfg.template getParameter<edm::ParameterSet> ("jetIso") )
+  wgt_     ( cfg.template getParameter<edm::InputTag>( "weight" ) ),
+  jets_    ( cfg.template getParameter<std::vector<edm::InputTag> >("jets" ) ),
+  leps_    ( cfg.template getParameter<std::vector<edm::InputTag> >("leptons" ) ),
+  jetPt_   ( cfg.template getParameter<edm::ParameterSet>("jetPtFilter"  ) ), 
+  lepPt_   ( cfg.template getParameter<edm::ParameterSet>("lepPtFilter"  ) ),
+  jetEta_  ( cfg.template getParameter<edm::ParameterSet>("jetEtaFilter" ) ), 
+  lepEta_  ( cfg.template getParameter<edm::ParameterSet>("lepEtaFilter" ) ), 
+  jetDist_ ( cfg.template getParameter<edm::ParameterSet>("jetDistFilter") ),
+  trkIso_  ( cfg.template getParameter<edm::ParameterSet>("trkIsoFilter" ) ), 
+  calIso_  ( cfg.template getParameter<edm::ParameterSet>("calIsoFilter" ) ) 
 {
+  doJetEta_= cfg.template getParameter<bool>("jetEta" );
+  doJetPt_ = cfg.template getParameter<bool>("jetPt"  );
+  doLepEta_= cfg.template getParameter<bool>("lepEta" );
+  doLepPt_ = cfg.template getParameter<bool>("lepPt"  );
+  doTrkIso_= cfg.template getParameter<bool>("trkIso" );
+  doCalIso_= cfg.template getParameter<bool>("calIso" );
+  doDist_  = cfg.template getParameter<bool>("jetDist");
 }
 
 template <typename Lep> 
@@ -115,13 +115,13 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
 
   // do the event selection
   bool passed=true;
-  if(passed && useLepEta_) passed=lepEta_(evt, kinLeps, weight);
-  if(passed && useLepPt_ ) passed=lepPt_ (evt, kinLeps, weight);
-  if(passed && useTrkIso_) passed=trkIso_(evt, isoLeps, weight);
-  if(passed && useCalIso_) passed=calIso_(evt, isoLeps, weight);
-  if(passed && useJetIso_) passed=jetIso_(evt, isoLeps, weight);
-  if(passed && useJetEta_) passed=jetEta_(evt, kinJets, weight);
-  if(passed && useJetPt_ ) passed=jetPt_ (evt, kinJets, weight);
+  if(passed && doLepEta_) passed=lepEta_ (evt, kinLeps, weight);
+  if(passed && doLepPt_ ) passed=lepPt_  (evt, kinLeps, weight);
+  if(passed && doTrkIso_) passed=trkIso_ (evt, isoLeps, weight);
+  if(passed && doCalIso_) passed=calIso_ (evt, isoLeps, weight);
+  if(passed && doDist_  ) passed=jetDist_(evt, isoLeps, weight);
+  if(passed && doJetEta_) passed=jetEta_ (evt, kinJets, weight);
+  if(passed && doJetPt_ ) passed=jetPt_  (evt, kinJets, weight);
   return passed;
 }
 
@@ -136,27 +136,27 @@ void SemiLepEventFilter<Lep>::endJob()
   using std::cout;
   using std::endl;
 
-  cout << "----------------------------------" << endl;
-  cout << " useLepEta_ [" << useLepEta_ << "]" << endl;
-  cout << " useLepPt_  [" << useLepPt_  << "]" << endl;
-  cout << " useTrkIso_ [" << useTrkIso_ << "]" << endl;
-  cout << " useCalIso_ [" << useCalIso_ << "]" << endl;
-  cout << " useJetIso_ [" << useJetIso_ << "]" << endl;
-  cout << " useJetEta_ [" << useJetEta_ << "]" << endl;
-  cout << " useJetPt_  [" << useJetPt_  << "]" << endl;
-  cout << "----------------------------------" << endl;
+  cout << "----------------------------------"  << endl;
+  cout << " applyLepEta  [" << doLepEta_ << "]" << endl;
+  cout << " applyLepPt   [" << doLepPt_  << "]" << endl;
+  cout << " applyTrkIso  [" << doTrkIso_ << "]" << endl;
+  cout << " applyCalIso  [" << doCalIso_ << "]" << endl;
+  cout << " applyDist    [" << doDist_   << "]" << endl;
+  cout << " applyJetEta  [" << doJetEta_ << "]" << endl;
+  cout << " applyJetPt   [" << doJetPt_  << "]" << endl;
+  cout << "----------------------------------"  << endl;
 
-  if( !useLepEta_ && !useLepPt_ && !useTrkIso_ && !useCalIso_ && !useJetIso_
-      && !useJetEta_ && !useJetPt_ )
+  if( !doLepEta_ && !doLepPt_ && !doTrkIso_ && !doCalIso_ && !doDist_
+      && !doJetEta_ && !doJetPt_ )
     cout << "no cuts were applied..." << endl;
   else {
-    if(useLepEta_) lepEta_.summarize();
-    if(useLepPt_ ) lepPt_ .summarize();
-    if(useTrkIso_) trkIso_.summarize();
-    if(useCalIso_) calIso_.summarize();
-    if(useJetIso_) jetIso_.summarize();
-    if(useJetEta_) jetEta_.summarize();
-    if(useJetPt_ ) jetPt_ .summarize();
+    if(doLepEta_ ) lepEta_ .summarize();
+    if(doLepPt_  ) lepPt_  .summarize();
+    if(doTrkIso_ ) trkIso_ .summarize();
+    if(doCalIso_ ) calIso_ .summarize();
+    if(doDist_   ) jetDist_.summarize();
+    if(doJetEta_ ) jetEta_ .summarize();
+    if(doJetPt_  ) jetPt_  .summarize();
   }
 }
 

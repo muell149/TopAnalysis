@@ -1,71 +1,49 @@
 #include "TopAnalysis/TopFilter/interface/EtaFilter.h"
 
 
-EtaFilter::EtaFilter(const edm::ParameterSet& cfg):
-  name_ ( cfg.getParameter<std::string>("name") ),
-  minEta_( cfg.getParameter<std::vector<double> >( "minEta" ) ),
-  maxEta_( cfg.getParameter<std::vector<double> >( "maxEta" ) ),
-  beforeCut_( 0 ), afterCut_( 0 ),
-  beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
+/// default constructor
+EtaFilter::EtaFilter(const edm::ParameterSet& cfg): ViewFilter(cfg)
 {
-  // print applied cuts
-  unsigned int maxSize=minEta_.size();
-  if(maxEta_.size()>maxSize) maxSize=maxEta_.size();
-  for(unsigned int idx=0; idx<maxSize; ++idx){
-    std::cout << ::std::setw( 20 );
-    if(idx==0) std::cout << name_; else std::cout << " ";
-    std::cout << ": ";
-    if(idx<minEta_.size()) std::cout << minEta_[idx] << " < Eta"; else std::cout << "   Eta"; 
-    if(idx<maxEta_.size()) std::cout << " < " << maxEta_[idx] << std::endl;
-  }
 }
 
-bool EtaFilter::operator()(edm::Event& evt, const std::vector<edm::View<reco::Candidate> >& objs, const double& weight)
-{
-   ++beforeCut_;
-  beforeCutWeighted_ += weight;
-  if( filter(objs) ) {
-    ++afterCut_;
-    afterCutWeighted_ += weight;
-    return true;
-  }
-  return false;
-}
-
+/// filter (worker class):
 bool EtaFilter::filter(const std::vector<edm::View<reco::Candidate> >& objs)
 {
+  // recieves a vector of objects and filters according to a vector of cuts;
+  // first cut acts on the leading object, second on the second leading aso; 
+  // passedWeak: at least one cut was passed; passedStrong all cuts were 
+  // passed
+
   bool passedWeak=false, passedStrong=true;
   for(unsigned int jdx=0; jdx<objs.size(); ++jdx){
     bool passedOnce=true;
     // skip if this collection has less members than required
-    // by the length of the vectors of minEta_ or maxEta_ 
-    if( objs[jdx].size()<minEta_.size() || objs[jdx].size()<maxEta_.size() )
+    // by the length of the vectors of min or max 
+    if( objs[jdx].size()<min_.size() || objs[jdx].size()<max_.size() )
       passedOnce=false;
     
     unsigned int idx=0;
     for(edm::View<reco::Candidate>::const_iterator obj=objs[jdx].begin();
 	obj!=objs[jdx].end(); ++obj) {
-      if( idx<minEta_.size() ) // check for minEta as long as vector is long enough
-	if( !(obj->eta()>minEta_[idx]) ) passedOnce=false;
-      if( idx<maxEta_.size() ) // check for maxEta as long as vector is long enough
-	if( !(obj->eta()<maxEta_[idx]) ) passedOnce=false;
+      if( idx<min_.size() ) // check for min Eta as long as vector is long enough
+	if( !(obj->eta()>min_[idx]) ) passedOnce=false;
+      if( idx<max_.size() ) // check for max Eta as long as vector is long enough
+	if( !(obj->eta()<max_[idx]) ) passedOnce=false;
       
       // break slope if both vector lengths are exceeded
       ++idx;
-      if( idx>minEta_.size() && idx>maxEta_.size())
+      if( idx>min_.size() && idx>max_.size())
 	break;
     }
-    if(  passedOnce ) passedWeak=true;
+    if(  passedOnce ) passedWeak  =true;
     if( !passedOnce ) passedStrong=false;
   }
-  return passedWeak;
-}
 
-void EtaFilter::summarize()
-{
-  std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
-	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
-	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
-	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
-	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
+  // return filter result
+  bool passed = false;
+  switch(mode_){
+  case kStrong: passed = passedWeak;
+  case kWeak  : passed = passedWeak;
+  }
+  return passed;
 }
