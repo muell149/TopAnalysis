@@ -22,7 +22,7 @@ unambiguousOnly.algorithm  = 3
 from TopAnalysis.TopAnalyzer.PartonMatchAnalyzer_cfi import *
 
 ## reconfigure
-analyzePartonMatch.matches  = [totalMinDist, minSumDist, ptOrderedMinDist, unambiguousOnly]
+analyzePartonMatch.matches  = ['totalMinDist', 'minSumDist', 'ptOrderedMinDist', 'unambiguousOnly']
 analyzePartonMatch.sumDR    = 'totalMinDist:SumDR'
 analyzePartonMatch.sumDPt   = 'totalMinDist:SumPt' 
 analyzePartonMatch.quarks   = []
