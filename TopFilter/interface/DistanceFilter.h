@@ -69,7 +69,7 @@ DistanceFilter<Collection>::DistanceFilter(const edm::ParameterSet& cfg):
   unsigned int maxSize=min_.size();
   if(max_.size()>maxSize) maxSize=max_.size();
   for(unsigned int idx=0; idx<maxSize; ++idx){
-    std::cout << ::std::setw( 20 );
+    std::cout << ::std::setw( 20 ) << ::std::left;
     if(idx==0) std::cout << name_; else std::cout << " ";
     std::cout << ": ";
     if(idx<min_.size()) std::cout << "min = " << ::std::setw( 8 ) << ::std::right 

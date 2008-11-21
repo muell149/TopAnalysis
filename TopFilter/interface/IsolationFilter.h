@@ -73,7 +73,7 @@ IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
   unsigned int maxSize=min_.size();
   if(max_.size()>maxSize) maxSize=max_.size();
   for(unsigned int idx=0; idx<maxSize; ++idx){
-    std::cout << ::std::setw( 20 );
+    std::cout << ::std::setw( 20 ) << ::std::left;
     if(idx==0) std::cout << name_; else std::cout << " ";
     std::cout << ": ";
     if(idx<min_.size()) std::cout << "min = " << ::std::setw( 8 ) << ::std::right 
@@ -131,42 +131,42 @@ bool IsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
 	obj!=objs[jdx].end(); ++obj) {
       switch(type_){
       case kAbsoluteTrack:
-	if( idx<min_.size() ) // check for min Eta as long as vector is long enough
+	if( idx<min_.size() ) // check for min iso as long as vector is long enough
 	  if( !(obj->trackIso()>min_[idx]) ) 
 	    passedOnce=false;
-	if( idx<max_.size() ) // check for max Eta as long as vector is long enough
+	if( idx<max_.size() ) // check for max iso as long as vector is long enough
 	  if( !(obj->trackIso()<max_[idx]) ) 
 	    passedOnce=false;
 	break;
       case kRelativeTrack:
-	if( idx<min_.size() ) // check for min Eta as long as vector is long enough
+	if( idx<min_.size() ) // check for min iso as long as vector is long enough
 	  if( !(obj->trackIso()/obj->pt()>min_[idx]) ) 
 	    passedOnce=false;
-	if( idx<max_.size() ) // check for max Eta as long as vector is long enough
+	if( idx<max_.size() ) // check for max iso as long as vector is long enough
 	  if( !(obj->trackIso()/obj->pt()<max_[idx]) ) 
 	    passedOnce=false;
 	break;
       case kAbsoluteCalo:
-	if( idx<min_.size() ) // check for min Eta as long as vector is long enough
+	if( idx<min_.size() ) // check for min iso as long as vector is long enough
 	  if( !(obj->caloIso()>min_[idx]) ) 
 	    passedOnce=false;
-	if( idx<max_.size() ) // check for max Eta as long as vector is long enough
+	if( idx<max_.size() ) // check for max iso as long as vector is long enough
 	  if( !(obj->caloIso()<max_[idx]) ) 
 	    passedOnce=false;
 	break;
       case kRelativeCalo:
-	if( idx<min_.size() ) // check for min Eta as long as vector is long enough
+	if( idx<min_.size() ) // check for min iso as long as vector is long enough
 	  if( !(obj->caloIso()/obj->pt()>min_[idx]) ) 
 	    passedOnce=false;
-	if( idx<max_.size() ) // check for max Eta as long as vector is long enough
+	if( idx<max_.size() ) // check for max iso as long as vector is long enough
 	  if( !(obj->caloIso()/obj->pt()<max_[idx]) ) 
 	    passedOnce=false;
 	break;
       case kRelIso:
-	if( idx<min_.size() ) // check for min Eta as long as vector is long enough
+	if( idx<min_.size() ) // check for min iso as long as vector is long enough
 	  if( !(obj->pt()/( obj->pt()+obj->caloIso()+obj->trackIso() )>min_[idx]) ) 
 	    passedOnce=false;
-	if( idx<max_.size() ) // check for max Eta as long as vector is long enough
+	if( idx<max_.size() ) // check for max iso as long as vector is long enough
 	  if( !(obj->pt()/( obj->pt()+obj->caloIso()+obj->trackIso() )<max_[idx]) ) 
 	    passedOnce=false;
 	break;
