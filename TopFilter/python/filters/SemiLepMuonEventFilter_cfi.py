@@ -17,78 +17,50 @@ filterSemiLepMuonEvent = cms.EDFilter("SemiLepMuonEventFilter",
 
     ## predefine selection structure
     lepEtaFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
         mode = cms.uint32 ( 0),
         name = cms.string (''),
         min  = cms.vdouble(  ),
         max  = cms.vdouble(  )
-      )              
     ),
     lepPtFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
         mode = cms.uint32 ( 0),
         name = cms.string (''),
         min  = cms.vdouble(  ),
         max  = cms.vdouble(  )
-      )              
     ),
     jetEtaFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
         mode = cms.uint32 ( 0),
         name = cms.string (''),
         min  = cms.vdouble(  ),
         max  = cms.vdouble(  )
-      )              
     ),
     jetPtFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
         mode = cms.uint32 ( 0),
         name = cms.string (''),
         min  = cms.vdouble(  ),
         max  = cms.vdouble(  )
-      )              
     ),
     trkIsoFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
         type = cms.uint32 ( 0),
         mode = cms.uint32 ( 0),
         name = cms.string (''),
         min  = cms.vdouble(  ),
         max  = cms.vdouble(  )
-      )     
     ),
     calIsoFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
         type = cms.uint32 ( 0),
         mode = cms.uint32 ( 0),
         name = cms.string (''),
         min  = cms.vdouble(  ),
         max  = cms.vdouble(  )
-      )     
     ),
     jetDistFilter = cms.PSet(
-      weight = cms.InputTag("eventWeight"),
-      input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-      cuts   = cms.PSet(
-        refs = cms.VInputTag(cms.InputTag("selectedLayer1Jets")),
-        thres= cms.double( 0),
-        mode = cms.uint32( 0),
-        name = cms.string (''),
-        min  = cms.vdouble(  ),
-        max  = cms.vdouble(  )
-      )    
+        refs  = cms.InputTag("selectedLayer1Jets"),
+        thresh= cms.vdouble( 0),
+        mode  = cms.uint32( 0),
+        name  = cms.string (''),
+        min   = cms.vdouble(  ),
+        max   = cms.vdouble(  )
     )
 )
 
