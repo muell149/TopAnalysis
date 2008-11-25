@@ -16,6 +16,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
@@ -42,12 +43,14 @@ class JetResolution{
   // additional evt content/steerings
   int nJets_;
   std::vector<double> binsPt_;
+  std::vector<double> binsEta_;
+  std::vector<double> binsPhi_;
   double matchDR_;
 
-  TH1F *calPtAll_, *resPtAll_;
-  std::vector<TH1F*> relPtAll_;
-  std::vector<TH1F*> calPtJet_, resPtJet_;
-  std::vector< std::vector<TH1F*> > relPtJet_;
+  TH1F *calPtAll_, *resPtAll_, *calEtaAll_, *resEtaAll_, *calPhiAll_, *resPhiAll_;
+  std::vector<TH1F*> relPtAll_, EtaAll_, PhiAll_;
+  std::vector<TH1F*> calPtJet_, resPtJet_, calEtaJet_, resEtaJet_, calPhiJet_, resPhiJet_;
+  std::vector< std::vector<TH1F*> > relPtJet_, EtaJet_, PhiJet_;
 };
 
 #endif
