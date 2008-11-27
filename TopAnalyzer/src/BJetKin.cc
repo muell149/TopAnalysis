@@ -15,21 +15,21 @@ BJetKin::~BJetKin()
 }
 
 void
-BJetKin::fill(const pat::Jet& jet, double weight)
+BJetKin::fill(const pat::Jet& jet)
 {
-  e_       ->Fill( jet.energy()          , weight );
-  et_      ->Fill( jet.et()              , weight );  
-  p_       ->Fill( jet.p()               , weight );
-  pt_      ->Fill( jet.pt()              , weight );      
-  eta_     ->Fill( jet.eta()             , weight );
-  theta_   ->Fill( jet.theta()*180/3.1416, weight );  
-  rapidity_->Fill( jet.rapidity()        , weight );  
-  phi_     ->Fill( jet.phi()*180/3.1416  , weight );
-  mass_    ->Fill( jet.mass()            , weight );
-  mt_      ->Fill( jet.mt()              , weight );
-  n60_     ->Fill( jet.n60()             , weight );
-  n90_     ->Fill( jet.n90()             , weight );
-  nConst_  ->Fill( jet.nConstituents()   , weight );
+  e_       ->Fill( jet.energy()           );
+  et_      ->Fill( jet.et()               );  
+  p_       ->Fill( jet.p()                );
+  pt_      ->Fill( jet.pt()               );      
+  eta_     ->Fill( jet.eta()              );
+  theta_   ->Fill( jet.theta()*180/3.1416 );  
+  rapidity_->Fill( jet.rapidity()         );  
+  phi_     ->Fill( jet.phi()*180/3.1416   );
+  mass_    ->Fill( jet.mass()             );
+  mt_      ->Fill( jet.mt()               );
+  n60_     ->Fill( jet.n60()              );
+  n90_     ->Fill( jet.n90()              );
+  nConst_  ->Fill( jet.nConstituents()    );
 }
 
 void 
@@ -42,9 +42,9 @@ BJetKin::book(ofstream& file, char* name)
   et_      = fs->make<TH1F>(e.name( file, "et"       ), e.name("et"       ), 40,    0. , 200.  );
   p_       = fs->make<TH1F>(e.name( file, "p"        ), e.name("p"        ), 60,    0. , 300.  );
   pt_      = fs->make<TH1F>(e.name( file, "pt"       ), e.name("pt"       ), 40,    0. , 200.  );  
-  eta_     = fs->make<TH1F>(e.name( file, "eta"      ), e.name("eta"      ), 50,   -2.5,   2.5 );
+  eta_     = fs->make<TH1F>(e.name( file, "eta"      ), e.name("eta"      ), 70,   -3.5,   3.5 );
   theta_   = fs->make<TH1F>(e.name( file, "theta"    ), e.name("theta"    ), 36,    0. , 180.  );  
-  rapidity_= fs->make<TH1F>(e.name( file, "rapidity" ), e.name("rapidity" ), 50,   -2.5,   2.5 );  
+  rapidity_= fs->make<TH1F>(e.name( file, "rapidity" ), e.name("rapidity" ), 70,   -3.5,   3.5 );  
   phi_     = fs->make<TH1F>(e.name( file, "phi"      ), e.name("phi"      ), 36, -180. , 180.  );
   mass_    = fs->make<TH1F>(e.name( file, "mass"     ), e.name("mass"     ), 25,    0. ,  25.  );  
   mt_      = fs->make<TH1F>(e.name( file, "mt"       ), e.name("mt"       ), 50,    0. , 100.  );  

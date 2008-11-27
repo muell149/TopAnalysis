@@ -43,12 +43,7 @@ BJetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {    
   edm::Handle<PatJetCollection> jets; 
   evt.getByLabel(jets_, jets); 
-                 
-  double weight = 1.;
-  edm::Handle<double> weightHandle; 
-  evt.getByLabel("eventWeight", weightHandle); 
-  weight = *weightHandle; 
-   
+                    
   int i=1;    
   for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) { 
     
@@ -77,24 +72,24 @@ BJetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
       	       
     if( doKin_ ){ 
       switch(flavor){
-        case  1 : kin_uds_ ->fill( *jet, weight ); break;
-	case  2 : kin_uds_ ->fill( *jet, weight ); break;
-	case  3 : kin_uds_ ->fill( *jet, weight ); break;
-	case  4 : kin_c_   ->fill( *jet, weight ); break;
-        case  5 : kin_b_   ->fill( *jet, weight ); break;
-        case 21 : kin_g_   ->fill( *jet, weight ); break;
+        case  1 : kin_uds_ ->fill( *jet ); break;
+	case  2 : kin_uds_ ->fill( *jet ); break;
+	case  3 : kin_uds_ ->fill( *jet ); break;
+	case  4 : kin_c_   ->fill( *jet ); break;
+        case  5 : kin_b_   ->fill( *jet ); break;
+        case 21 : kin_g_   ->fill( *jet ); break;
 	default : cout << "Jet matched to parton " << flavor << endl;
       }
     }
    
     if( doBtag_){ 
       switch(flavor){
-        case  1 : btg_uds_ ->fill( *jet, weight ); break;
-	case  2 : btg_uds_ ->fill( *jet, weight ); break;
-	case  3 : btg_uds_ ->fill( *jet, weight ); break;
-	case  4 : btg_c_   ->fill( *jet, weight ); break;
-        case  5 : btg_b_   ->fill( *jet, weight ); break;
-        case 21 : btg_g_   ->fill( *jet, weight ); break;
+        case  1 : btg_uds_ ->fill( *jet ); break;
+	case  2 : btg_uds_ ->fill( *jet ); break;
+	case  3 : btg_uds_ ->fill( *jet ); break;
+	case  4 : btg_c_   ->fill( *jet ); break;
+        case  5 : btg_b_   ->fill( *jet ); break;
+        case 21 : btg_g_   ->fill( *jet ); break;
 	default : cout << "Jet matched to parton " << flavor << endl;
       }
     }

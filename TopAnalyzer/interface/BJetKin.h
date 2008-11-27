@@ -11,7 +11,7 @@ class BJetKin{
   ~BJetKin();
 
   void book(ofstream&, char*);
-  void fill(const pat::Jet&, double);
+  void fill(const pat::Jet&);
   
  private:
 
