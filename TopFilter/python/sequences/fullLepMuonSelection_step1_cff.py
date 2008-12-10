@@ -36,16 +36,15 @@ fullLepJets42 = analyzeJets.clone()    ##     x     |     x     |     x     |   
 ## import selection cuts here
 from TopAnalysis.TopFilter.selections.fullLepMuonSelection_step1_cff import *
 
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterMuonEta
+from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi       import filterMuonEta
 filterFullLep10 = filterMuonEta.clone()
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterJetsEta
+from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi       import filterJetsEta
 filterFullLep01 = filterJetsEta.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterMuonPt
+from TopAnalysis.TopFilter.filters.PtEventFilter_cfi        import filterMuonPt
 filterFullLep20 = filterMuonPt.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterJetsPt
+from TopAnalysis.TopFilter.filters.PtEventFilter_cfi        import filterJetsPt
 filterFullLep02 = filterJetsPt.clone()
-
-from TopAnalysis.TopFilter.filters.IsolationEventFilter_cfi  import filterMuonIsolation
+from TopAnalysis.TopFilter.filters.IsolationEventFilter_cfi import filterMuonIsolation
 filterFullLep30 = filterMuonIsolation.clone()
 from TopAnalysis.TopFilter.filters.DistanceEventFilter_cfi  import filterMuonDistance
 filterFullLep40 = filterMuonDistance.clone()
@@ -60,28 +59,28 @@ filterFullLep40.cuts = fullLepMuonJetDistance
 
 ## define sequences
 makeFullMuonMuonKinematics = cms.Sequence(fullLepMuon00 + fullLepJets00 *
-                                        filterFullLep10 *
-                                        fullLepMuon10 + fullLepJets10 *
-                                        filterFullLep20 *
-                                        fullLepMuon20 + fullLepJets20 
-				       )
+                                          filterFullLep10 *
+                                          fullLepMuon10 + fullLepJets10 *
+                                          filterFullLep20 *
+                                          fullLepMuon20 + fullLepJets20 
+                                          )
 
 makeFullMuonJetsKinematics = cms.Sequence(filterFullLep01 *
-                                        fullLepMuon21 + fullLepJets21 *
-                                        filterFullLep02 *
-                                        fullLepMuon22 + fullLepJets22 
-				       )
+                                          fullLepMuon21 + fullLepJets21 *
+                                          filterFullLep02 *
+                                          fullLepMuon22 + fullLepJets22 
+                                          )
 
 makeFullMuonMuonIsolation  = cms.Sequence(filterFullLep30 *
-				        fullLepMuon32 + fullLepJets32 *
-				        filterFullLep40 *
-				        fullLepMuon42 + fullLepJets42 
-				       )
+                                          fullLepMuon32 + fullLepJets32 *
+                                          filterFullLep40 *
+                                          fullLepMuon42 + fullLepJets42 
+                                          )
 
 selectFullLepMuon = cms.Sequence(makeFullMuonMuonKinematics *
-                               makeFullMuonJetsKinematics * 
-                               makeFullMuonMuonIsolation
-                              )
+                                 makeFullMuonJetsKinematics * 
+                                 makeFullMuonMuonIsolation
+                                 )
 
 
 
