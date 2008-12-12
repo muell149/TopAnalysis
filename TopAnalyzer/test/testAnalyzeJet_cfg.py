@@ -18,8 +18,16 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    #PAT test sample
-    'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
+    ## PAT test sample
+    #'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
+    ## madgraph pre-production test sample
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/249ACBCC-37BF-DD11-A191-00144F2031D4.root',
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/2CF2748D-6BBC-DD11-815C-001EC9DB3AD3.root',
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/30E599BC-66BC-DD11-B985-001E4F3DC624.root',
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/40313322-27BF-DD11-9773-0015C5E9C030.root',
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/B4AE994C-72BF-DD11-9909-001EC9DAED82.root',
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/EAC1080E-65BC-DD11-B8B8-001EC9DB1EF1.root',
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/F25A6622-27BF-DD11-AEA0-0015C5E9C186.root'
     )
 )
 
@@ -51,8 +59,16 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #-------------------------------------------------
 
 ## std sequence for tqaf layer1
-process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_full_cff")
+process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
+
+## necessary fixes to run 2.2.X on 2.1.X data
+## comment this when running on samples produced
+## with 22X
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
+run22XonSummer08AODSIM(process)
+
 process.p0 = cms.Path(process.tqafLayer1)
+
 #-------------------------------------------------
 # private uni Hamburg analysis code
 #-------------------------------------------------
