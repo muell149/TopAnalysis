@@ -41,6 +41,8 @@ $=====================================================================
                                                                       $
   writePlotsAs = ps                                                   $ decide wether to write histograms to [ps] or 
                                                                       $ [eps] files
+  outputFileName = analyzeElec					      $ gives the filename of the ps-output
+	   						   	      $ the filename is 'inspect' in the case of left blank
 
 $ -- configBlockHist -- $
 $=====================================================================

@@ -9,6 +9,7 @@ process = cms.Process("TEST")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
+#process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #-------------------------------------------------
 # process configuration
