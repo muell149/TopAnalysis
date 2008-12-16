@@ -127,7 +127,7 @@ $=====================================================================
                  "dR(muon,tower)";
                  "N_{track}^{dR<0.3}";
                  "N_{tower}^{dR<0.3}";
-                 "log_{10}(#delta(cft,combined))";
+                 "log_{10}(#delta(ctf,combined))";
 
   yAxes        = "events";
                  "events";

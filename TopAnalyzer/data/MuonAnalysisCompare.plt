@@ -149,10 +149,10 @@ $=====================================================================
                  "a.u.";
                  "a.u.";
                  "a.u.";
-                 "a.u.";
-                 "a.u.";
-                 "a.u.";
-                 "a.u.";
+                 "1/N_{muon} #Sigma (p_{t}(track)) [GeV]";
+                 "1/N_{muon} #Sigma (N_{track})";
+                 "1/N_{muon} #Sigma (E_{t}(tower)) [GeV]";
+                 "1/N_{muon} #Sigma (N_{tower})";
                  "a.u.";
                  "a.u.";
                  "a.u.";

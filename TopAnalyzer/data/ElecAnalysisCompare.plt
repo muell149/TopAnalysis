@@ -153,10 +153,10 @@ $=====================================================================
                  "a.u.";
                  "a.u.";
                  "a.u.";
-                 "a.u.";
-                 "a.u.";
-                 "a.u.";
-                 "a.u.";
+                 "1/N_{electron} #Sigma (p_{t}(track)) [GeV]";
+                 "1/N_{electron} #Sigma (N_{track})";
+                 "1/N_{electron} #Sigma (E_{t}(tower)) [GeV]";
+                 "1/N_{electron} #Sigma (N_{tower})";
                  "a.u.";
                  "a.u.";
                  "a.u.";

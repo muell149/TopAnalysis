@@ -130,7 +130,7 @@ $=====================================================================
                  "dR(electron,tower)";
                  "N_{track}^{dR<0.3}";
                  "N_{tower}^{dR<0.3}";
-                 "#delta(cft,gsf)";
+                 "#delta(ctf,gsf)";
 
   yAxes        = "events";
                  "events";
