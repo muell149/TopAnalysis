@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyzeTtDimuon = cms.EDAnalyzer("TtDimuonAnalyzer",
+analyzeTtDimuon = cms.EDAnalyzer("TtDiMuonAnalyzer",
 
     # sources
     muons = cms.InputTag("selectedLayer1Muons"),
