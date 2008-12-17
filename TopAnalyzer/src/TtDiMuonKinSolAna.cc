@@ -15,14 +15,14 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 
 TtDiMuonKinSolAna::TtDiMuonKinSolAna(const edm::ParameterSet& cfg): 
-  solutions_        ( cfg.getParameter<edm::InputTag>( "solutions"         ) ),
-  muons_            ( cfg.getParameter<edm::InputTag>( "muons"             ) ),    
-  leptonPtCut_      ( cfg.getParameter<double>       ( "leptonPtCut"       ) ),  
-  jetPtCut_         ( cfg.getParameter<double>       ( "jetPtCut"          ) ),
-  metCut_           ( cfg.getParameter<double>       ( "metCut"            ) ),  
-  DiMuonMassLowZCut_ ( cfg.getParameter<double>       ( "DiMuonMassLowZCut"  ) ),  
-  DiMuonMassHighZCut_( cfg.getParameter<double>       ( "DiMuonMassHighZCut" ) ),
-  DiMuonMassQCDCut_  ( cfg.getParameter<double>       ( "DiMuonMassQCDCut"   ) )  
+  solutions_         ( cfg.getParameter<edm::InputTag>( "solutions"         ) ),
+  muons_             ( cfg.getParameter<edm::InputTag>( "muons"             ) ),    
+  leptonPtCut_       ( cfg.getParameter<double>       ( "leptonPtCut"       ) ),  
+  jetPtCut_          ( cfg.getParameter<double>       ( "jetPtCut"          ) ),
+  metCut_            ( cfg.getParameter<double>       ( "metCut"            ) ),  
+  DiMuonMassLowZCut_ ( cfg.getParameter<double>       ( "DilepMassLowZCut"  ) ),  
+  DiMuonMassHighZCut_( cfg.getParameter<double>       ( "DilepMassHighZCut" ) ),
+  DiMuonMassQCDCut_  ( cfg.getParameter<double>       ( "DilepMassQCDCut"   ) )  
 {
 }
 
@@ -38,7 +38,7 @@ TtDiMuonKinSolAna::book(ofstream& file)
 
   NameScheme e("kin");
   mass_         = fs->make<TH1F>(e.name( file, "mass"        ), e.name("mass"        ), 51,  99., 301.);
-  DiMuonmass_    = fs->make<TH1F>(e.name( file, "DiMuonmass"   ), e.name("DiMuonmass"   ), 50,   0., 250.); 
+  DiMuonmass_   = fs->make<TH1F>(e.name( file, "DiMuonmass"  ), e.name("DiMuonmass"  ), 50,   0., 250.); 
   weightmax_    = fs->make<TH1F>(e.name( file, "weightmax"   ), e.name("weightmax"   ), 50,   0.,   1.);
   maxweightmax_ = fs->make<TH1F>(e.name( file, "maxweightmax"), e.name("maxweightmax"), 50,   0.,   1.);
   massBbW_      = fs->make<TH1F>(e.name( file, "massBbW"     ), e.name("massBbW"     ), 51,  99., 301.);
