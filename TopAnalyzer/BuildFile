@@ -14,6 +14,7 @@
 <use name=DataFormats/PatCandidates>
 <use name=DataFormats/Math>
 <use name=TopAnalysis/TopUtils>
+<use name=AnalysisDataFormats/TopObjects>
 
 <export>
   <use name=FWCore/Framework>
@@ -22,6 +23,7 @@
   <use name=FWCore/ParameterSet>
   <use name=FWCore/ServiceRegistry>
   <use name=TopAnalysis/TopUtils>
+  <use name=AnalysisDataFormats/TopObjects>
   <use name=root>
   <lib name=TopAnalysisTopAnalyzer>
 </export>
