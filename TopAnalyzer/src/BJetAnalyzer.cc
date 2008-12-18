@@ -47,6 +47,9 @@ BJetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   int i=1;    
   for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) { 
     
+    int njets = jets->size();
+    nJets_->Fill(njets);
+    
     // only take the first muons from the collection
     if(i>onlyLeading_) break;
     ++i; 
@@ -84,12 +87,12 @@ BJetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
    
     if( doBtag_){ 
       switch(flavor){
-        case  1 : btg_uds_ ->fill( *jet ); break;
-	case  2 : btg_uds_ ->fill( *jet ); break;
-	case  3 : btg_uds_ ->fill( *jet ); break;
-	case  4 : btg_c_   ->fill( *jet ); break;
-        case  5 : btg_b_   ->fill( *jet ); break;
-        case 21 : btg_g_   ->fill( *jet ); break;
+        case  1 : btg_uds_ ->fill( *jet, njets ); break;
+	case  2 : btg_uds_ ->fill( *jet, njets ); break;
+	case  3 : btg_uds_ ->fill( *jet, njets ); break;
+	case  4 : btg_c_   ->fill( *jet, njets ); break;
+        case  5 : btg_b_   ->fill( *jet, njets ); break;
+        case 21 : btg_g_   ->fill( *jet, njets ); break;
 	default : cout << "Jet matched to parton " << flavor << endl;
       }
     }
@@ -123,7 +126,8 @@ BJetAnalyzer::beginJob(const edm::EventSetup&)
     btg_b_  ->book(hist, "btg_b"  );    
     btg_g_  ->book(hist, "btg_g"  );    
   }
-  nFlav_ = fs->make<TH1F>(n.name( hist, "nFlav" ), n.name("nFlav" ), 5, 0, 5);
+  nFlav_ = fs->make<TH1F>(n.name( hist, "nFlav" ), n.name("nFlav" ),  5,   0,   5);
+  nJets_ = fs->make<TH1F>(n.name( hist, "nJets" ), n.name("nJets" ), 16,-0.5,15.5);
 
 }
 

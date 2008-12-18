@@ -11,7 +11,7 @@ class BJetTag{
   ~BJetTag();
 
   void book(ofstream&, char*);
-  void fill(const pat::Jet&);
+  void fill(const pat::Jet&, size_t);
   void evaluate();
   
  private:
@@ -30,7 +30,8 @@ class BJetTag{
   vector<double> etaBins_;
   vector<double> ptBins_;  
   
-  int nBins;
+  size_t nBins;
+  size_t nJetBins;
   
   TH1F *trkCountHighEffBJetTags_;
   TH1F *trkCountHighPurBJetTags_;  
@@ -66,8 +67,20 @@ class BJetTag{
   vector<TH1F*> ptDiscrCombSvMva_;   
   vector<TH1F*> ptDiscrSoftMu_;
   vector<TH1F*> ptDiscrSoftMuNoIP_;  
-  vector<TH1F*> ptDiscrSoftElec_;     
-    
+  vector<TH1F*> ptDiscrSoftElec_;   
+
+  vector<TH1F*> njDiscrTrkCountEff_;        
+  vector<TH1F*> njDiscrTrkCountPur_;       
+  vector<TH1F*> njDiscrJetProb_;
+  vector<TH1F*> njDiscrJetBProb_;   
+  vector<TH1F*> njDiscrImpactParMva_;    
+  vector<TH1F*> njDiscrSimpleSv_;  
+  vector<TH1F*> njDiscrCombSv_;   
+  vector<TH1F*> njDiscrCombSvMva_;   
+  vector<TH1F*> njDiscrSoftMu_;
+  vector<TH1F*> njDiscrSoftMuNoIP_;  
+  vector<TH1F*> njDiscrSoftElec_; 
+        
   TH1F *etaEffTrkCountEff_;
   TH1F *etaEffTrkCountPur_;  
   TH1F *etaEffJetProb_;  
@@ -78,7 +91,7 @@ class BJetTag{
   TH1F *etaEffCombSvMva_;  
   TH1F *etaEffSoftMu_;  
   TH1F *etaEffSoftMuNoIP_;  
-  TH1F *etaEffSoftElec_;  
+  TH1F *etaEffSoftElec_;    
   
   TH1F *ptEffTrkCountEff_;
   TH1F *ptEffTrkCountPur_;  
@@ -90,9 +103,24 @@ class BJetTag{
   TH1F *ptEffCombSvMva_;  
   TH1F *ptEffSoftMu_;  
   TH1F *ptEffSoftMuNoIP_;    
-  TH1F *ptEffSoftElec_; 
+  TH1F *ptEffSoftElec_;
+  
+  TH1F *njEffTrkCountEff_;
+  TH1F *njEffTrkCountPur_;  
+  TH1F *njEffJetProb_;  
+  TH1F *njEffJetBProb_;  
+  TH1F *njEffImpactParMva_;  
+  TH1F *njEffSimpleSv_;  
+  TH1F *njEffCombSv_;  
+  TH1F *njEffCombSvMva_;  
+  TH1F *njEffSoftMu_;  
+  TH1F *njEffSoftMuNoIP_;    
+  TH1F *njEffSoftElec_;    
+  
+  TH2F *impParSimpleSvCorr_;
+  TH2F *impParCombSvMvaCorr_;
        
-  double binomerror(double, double);  
+  double binomError(double, double);  
   void   fillEfficencyHist(TH1F*, vector<TH1F*>, size_t, double);
 };
 
