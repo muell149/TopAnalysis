@@ -42,11 +42,12 @@ class ElecKinematic{
 	    const reco::TrackCollection& tracks, 
 	    const CaloTowerCollection& towers,
 	    const std::vector<pat::Electron>& elecs, const double&);
-  void norm(){ 
-    dRTrkPt_->Scale(1./dRTrkPt_->GetEntries()); 
-    dRTrkN_ ->Scale(1./dRTrkN_ ->GetEntries()); 
-    dRCalPt_->Scale(1./dRCalPt_->GetEntries()); 
-    dRCalN_ ->Scale(1./dRCalN_ ->GetEntries()); 
+  void norm(){
+    double totalNumberOfElectrons = en_->GetEntries();
+    dRTrkPt_->Scale( 1./totalNumberOfElectrons ); 
+    dRTrkN_ ->Scale( 1./totalNumberOfElectrons ); 
+    dRCalPt_->Scale( 1./totalNumberOfElectrons ); 
+    dRCalN_ ->Scale( 1./totalNumberOfElectrons ); 
   };  
   void write(const char*, const char*);
 
