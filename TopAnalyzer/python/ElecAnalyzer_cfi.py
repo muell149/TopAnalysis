@@ -6,10 +6,8 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
     weight  = cms.InputTag("eventWeight"),
     input   = cms.InputTag("allLayer1Electrons"),
                              
-    ## fill id  histograms
+    ## fill id histograms
     id = cms.PSet(
-        barrel_shape = cms.InputTag("hybridSuperClusters","hybridShapeAssoc"),
-        endcap_shape = cms.InputTag("islandBasicClusters","islandEndcapShapeAssoc")
     ),
     doId  = cms.bool(True),
                              
@@ -18,7 +16,7 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
         towers  = cms.InputTag("towerMaker"),
         jets    = cms.InputTag("allLayer1Jets"),
         tracks  = cms.InputTag("generalTracks"),
-        dRMax   = cms.double(0.1)
+        dRMax   = cms.double(0.3)
     ),
     doKin = cms.bool(True),
 
