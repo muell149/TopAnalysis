@@ -44,6 +44,7 @@ class BJetAnalyzer : public edm::EDAnalyzer {
   typedef std::vector<pat::Jet> PatJetCollection; 
   
   TH1F *nFlav_;
+  TH1F *nJets_;
 };
 
 #endif
