@@ -60,7 +60,6 @@ class ElecId{
   TH1F *nohit_;
   TH1F *nvhit_;
   TH1F *chi2_;
-  TH1F *s1os9_;
 };
 
 #endif
