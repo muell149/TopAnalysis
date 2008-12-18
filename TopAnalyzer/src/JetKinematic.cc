@@ -92,25 +92,31 @@ void
 JetKinematic::book(edm::Service<TFileService>& fs)
 {
   NameScheme kin("kin");
-  allEn_ = fs->make<TH1F>(kin.name("allE"  ), kin.name("allE"  ), 50, 0., 500.);
-  allEt_ = fs->make<TH1F>(kin.name("allEt" ), kin.name("allEt" ), 30, 0., 300.);
-  allEta_= fs->make<TH1F>(kin.name("allEta"), kin.name("allEta"), 34, -3.4,  3.4);
-  allPhi_= fs->make<TH1F>(kin.name("allPhi"), kin.name("allPhi"), 35, -3.5,  3.5);
-  scalSum4_ = fs->make<TH1F>(kin.name("scalSum4"), kin.name("scalSum4"), 40, 0., 800.);
-  scalSum6_ = fs->make<TH1F>(kin.name("scalSum6"), kin.name("scalSum6"), 40, 0., 800.);
+  allEn_    = fs->make<TH1F>(kin.name("allE"    ), "E(jet) [GeV]"  , 50, 0., 500.);
+  allEt_    = fs->make<TH1F>(kin.name("allEt"   ), "E_{T}(jet) [GeV]" , 30, 0., 300.);
+  allEta_   = fs->make<TH1F>(kin.name("allEta"  ), "#eta(jet)", 34, -3.4,  3.4);
+  allPhi_   = fs->make<TH1F>(kin.name("allPhi"  ), "#phi(jet)", 35, -3.5,  3.5);
+  scalSum4_ = fs->make<TH1F>(kin.name("scalSum4"), "#Sigma_{jet1-jet4}(E_{T}) [GeV]", 40, 0., 800.);
+  scalSum6_ = fs->make<TH1F>(kin.name("scalSum6"), "#Sigma_{jet1-jet6}(E_{T}) [GeV]", 40, 0., 800.);
 
   for(int idx=0; idx<nJets_; ++idx){
-    en_.push_back ( fs->make<TH1F>(kin.name("e",  idx), kin.name("en",  idx), 50,   0., 500.) );
-    et_.push_back ( fs->make<TH1F>(kin.name("et", idx), kin.name("et",  idx), 30,   0., 300.) );
-    eta_.push_back( fs->make<TH1F>(kin.name("eta",idx), kin.name("eta", idx), 34, -3.4,  3.4) );
-    phi_.push_back( fs->make<TH1F>(kin.name("phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
+    int idj = idx+1;
+    TString titleBase = "(jet"; titleBase += idj; titleBase += ")";
+    TString title_en  = "E"     + titleBase + " [GeV]";
+    TString title_et  = "E_{T}" + titleBase + " [GeV]";
+    TString title_eta = "#eta"  + titleBase;
+    TString title_phi = "phi"   + titleBase;
+    en_.push_back ( fs->make<TH1F>(kin.name("e",  idx), title_en , 50,   0., 500.) );
+    et_.push_back ( fs->make<TH1F>(kin.name("et", idx), title_et , 30,   0., 300.) );
+    eta_.push_back( fs->make<TH1F>(kin.name("eta",idx), title_eta, 34, -3.4,  3.4) );
+    phi_.push_back( fs->make<TH1F>(kin.name("phi",idx), title_phi, 35, -3.5,  3.5) );
   }
 
-  mult_= fs->make<TH1F>(kin.name("n"  ), "N_{jets}"                 , 15, 0., 15.);
-  n10_ = fs->make<TH1F>(kin.name("n10"), "N_{jets} (p_{T} > 10 GeV)", 15, 0., 15.);
-  n20_ = fs->make<TH1F>(kin.name("n20"), "N_{jets} (p_{T} > 20 GeV)", 15, 0., 15.);
-  n30_ = fs->make<TH1F>(kin.name("n30"), "N_{jets} (p_{T} > 30 GeV)", 15, 0., 15.);
-  n40_ = fs->make<TH1F>(kin.name("n40"), "N_{jets} (p_{T} > 40 GeV)", 15, 0., 15.);
+  mult_= fs->make<TH1F>(kin.name("n"  ), "N_{jets}"              , 15, 0., 15.);
+  n10_ = fs->make<TH1F>(kin.name("n10"), "N_{jets}(p_{T}>10 GeV)", 15, 0., 15.);
+  n20_ = fs->make<TH1F>(kin.name("n20"), "N_{jets}(p_{T}>20 GeV)", 15, 0., 15.);
+  n30_ = fs->make<TH1F>(kin.name("n30"), "N_{jets}(p_{T}>30 GeV)", 15, 0., 15.);
+  n40_ = fs->make<TH1F>(kin.name("n40"), "N_{jets}(p_{T}>40 GeV)", 15, 0., 15.);
 }
 
 /// book for full FW with output stream
@@ -118,25 +124,31 @@ void
 JetKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
 {
   NameScheme kin("kin");
-  allEn_ = fs->make<TH1F>(kin.name(file, "allE"  ), kin.name("allE"  ), 50, 0., 500.);
-  allEt_ = fs->make<TH1F>(kin.name(file, "allEt" ), kin.name("allEt" ), 30, 0., 300.);
-  allEta_= fs->make<TH1F>(kin.name(file, "allEta"), kin.name("allEta"), 34, -3.4,  3.4);
-  allPhi_= fs->make<TH1F>(kin.name(file, "allPhi"), kin.name("allPhi"), 35, -3.5,  3.5);
-  scalSum4_ = fs->make<TH1F>(kin.name(file, "scalSum4"), kin.name("scalSum4"), 40, 0., 800.);
-  scalSum6_ = fs->make<TH1F>(kin.name(file, "scalSum6"), kin.name("scalSum6"), 40, 0., 800.);
+  allEn_    = fs->make<TH1F>(kin.name(file, "allE"    ), "E(jet) [GeV]"  , 50, 0., 500.);
+  allEt_    = fs->make<TH1F>(kin.name(file, "allEt"   ), "E_{T}(jet) [GeV]" , 30, 0., 300.);
+  allEta_   = fs->make<TH1F>(kin.name(file, "allEta"  ), "#eta(jet)", 34, -3.4,  3.4);
+  allPhi_   = fs->make<TH1F>(kin.name(file, "allPhi"  ), "#phi(jet)", 35, -3.5,  3.5);
+  scalSum4_ = fs->make<TH1F>(kin.name(file, "scalSum4"), "#Sigma_{jet1-jet4}(E_{T}) [GeV]", 40, 0., 800.);
+  scalSum6_ = fs->make<TH1F>(kin.name(file, "scalSum6"), "#Sigma_{jet1-jet6}(E_{T}) [GeV]", 40, 0., 800.);
 
   for(int idx=0; idx<nJets_; ++idx){
-    en_.push_back ( fs->make<TH1F>(kin.name(file, "e",  idx), kin.name("en",  idx), 50,   0., 500.) );
-    et_.push_back ( fs->make<TH1F>(kin.name(file, "et", idx), kin.name("et",  idx), 30,   0., 300.) );
-    eta_.push_back( fs->make<TH1F>(kin.name(file, "eta",idx), kin.name("eta", idx), 34, -3.4,  3.4) );
-    phi_.push_back( fs->make<TH1F>(kin.name(file, "phi",idx), kin.name("phi", idx), 35, -3.5,  3.5) );
+    int idj = idx+1;
+    TString titleBase = "(jet"; titleBase += idj; titleBase += ")";
+    TString title_en  = "E"     + titleBase + " [GeV]";
+    TString title_et  = "E_{T}" + titleBase + " [GeV]";
+    TString title_eta = "#eta"  + titleBase;
+    TString title_phi = "phi"   + titleBase;
+    en_.push_back ( fs->make<TH1F>(kin.name(file, "e",  idx), title_en , 50,   0., 500.) );
+    et_.push_back ( fs->make<TH1F>(kin.name(file, "et", idx), title_et , 30,   0., 300.) );
+    eta_.push_back( fs->make<TH1F>(kin.name(file, "eta",idx), title_eta, 34, -3.4,  3.4) );
+    phi_.push_back( fs->make<TH1F>(kin.name(file, "phi",idx), title_phi, 35, -3.5,  3.5) );
   }
 
-  mult_= fs->make<TH1F>(kin.name(file, "n"  ), "N_{jets}"                 , 15, 0., 15.);
-  n10_ = fs->make<TH1F>(kin.name(file, "n10"), "N_{jets} (p_{T} > 10 GeV)", 15, 0., 15.);
-  n20_ = fs->make<TH1F>(kin.name(file, "n20"), "N_{jets} (p_{T} > 20 GeV)", 15, 0., 15.);
-  n30_ = fs->make<TH1F>(kin.name(file, "n30"), "N_{jets} (p_{T} > 30 GeV)", 15, 0., 15.);
-  n40_ = fs->make<TH1F>(kin.name(file, "n40"), "N_{jets} (p_{T} > 40 GeV)", 15, 0., 15.);
+  mult_= fs->make<TH1F>(kin.name(file, "n"  ), "N_{jets}"              , 15, 0., 15.);
+  n10_ = fs->make<TH1F>(kin.name(file, "n10"), "N_{jets}(p_{T}>10 GeV)", 15, 0., 15.);
+  n20_ = fs->make<TH1F>(kin.name(file, "n20"), "N_{jets}(p_{T}>20 GeV)", 15, 0., 15.);
+  n30_ = fs->make<TH1F>(kin.name(file, "n30"), "N_{jets}(p_{T}>30 GeV)", 15, 0., 15.);
+  n40_ = fs->make<TH1F>(kin.name(file, "n40"), "N_{jets}(p_{T}>40 GeV)", 15, 0., 15.);
 }
 
 /// write to file and free allocated space for FWLite

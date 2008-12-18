@@ -128,29 +128,30 @@ void
 ElecKinematic::book()
 {
   NameScheme kin("kin");
-  en_ = new TH1F(kin.name( "en"  ), kin.name("en"  ), 60,   0., 300.);
-  pt_ = new TH1F(kin.name( "pt"  ), kin.name("pt"  ), 30,   0., 150.);
-  eta_= new TH1F(kin.name( "eta" ), kin.name("eta" ), 35, -3.5,  3.5);
-  phi_= new TH1F(kin.name( "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
+  en_ = new TH1F(kin.name("en" ), "en" , 60,   0., 300.);
+  pt_ = new TH1F(kin.name("pt" ), "pt" , 30,   0., 150.);
+  eta_= new TH1F(kin.name("eta"), "eta", 35, -3.5,  3.5);
+  phi_= new TH1F(kin.name("phi"), "phi", 35, -3.5,  3.5);
 
   NameScheme iso("iso");
-  isoJet_    = new TH1F(iso.name( "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
-  isoTrk_    = new TH1F(iso.name( "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
-  isoCal_    = new TH1F(iso.name( "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
-  isoEcal_   = new TH1F(iso.name( "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);
-  isoHcal_   = new TH1F(iso.name( "isoHcal" ), iso.name("isoHcal" ), 40, -10.,  30.);
-  dRTrkPt_   = new TH1F(iso.name( "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,   2.);
-  dRTrkN_    = new TH1F(iso.name( "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,   2.);
-  dRCalPt_   = new TH1F(iso.name( "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,   2.);
-  dRCalN_    = new TH1F(iso.name( "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,   2.);
-  isoTrkN_   = new TH1F(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1.,  20.);
-  isoCalN_   = new TH1F(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1.,  30.);
-  closestCtf_= new TH1F(iso.name( "closestCtf" ), iso.name("closestCtf" ), 20, 0., 0.2);
+  isoJet_    = new TH1F(iso.name("isoJet"    ), "isoJet"    , 60,   0., 1.5);
+  closestCtf_= new TH1F(iso.name("closestCtf"), "closestCtf", 20,   0., 0.2);
+  isoTrk_    = new TH1F(iso.name("isoTrk"    ), "isoTrk"    , 60,  -1.,  5.);
+  isoCal_    = new TH1F(iso.name("isoCal"    ), "isoCal"    , 40, -10., 30.);
+  isoEcal_   = new TH1F(iso.name("isoEcal"   ), "isoEcal"   , 40, -10., 30.);
+  isoHcal_   = new TH1F(iso.name("isoHcal"   ), "isoHcal"   , 40, -10., 30.);
+  isoTrkN_   = new TH1F(iso.name("isoTrkN"   ), "isoTrkN"   , 21,  -1., 20.);
+  isoCalN_   = new TH1F(iso.name("isoCalN"   ), "isoCaloN"  , 31,  -1., 30.);
+  dRTrkPt_   = new TH1F(iso.name("dRTrkPt"   ), "dRTrkPt"   , 42, -0.1,  2.);
+  dRTrkN_    = new TH1F(iso.name("dRTrkN"    ), "dRTrkN"    , 42, -0.1,  2.);
+  dRCalPt_   = new TH1F(iso.name("dRCalPt"   ), "dRCalPt"   , 42, -0.1,  2.);
+  dRCalN_    = new TH1F(iso.name("dRCalN"    ), "dRCalN"    , 42, -0.1,  2.);
 
-  ptVsTrkIso_ = new TH2F(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
-  ptVsCalIso_ = new TH2F(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
-  ptVsEcalIso_= new TH2F(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
-  ptVsHcalIso_= new TH2F(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
+  NameScheme iso2d("iso2d");
+  ptVsTrkIso_ = new TH2F(iso2d.name("ptVsTrkIso" ), "ptVsTrkIso" , 100, 0., 100., 50,   0., 25.);
+  ptVsCalIso_ = new TH2F(iso2d.name("ptVsCalIso" ), "ptVsCalIso" , 100, 0., 100., 50, -10., 25.);
+  ptVsEcalIso_= new TH2F(iso2d.name("ptVsEcalIso"), "ptVsEcalIso", 100, 0., 100., 50, -10., 25.);
+  ptVsHcalIso_= new TH2F(iso2d.name("ptVsHcalIso"), "ptVsHcalIso", 100, 0., 100., 50, -10., 25.);
 }
 
 /// book for full FW
@@ -158,29 +159,30 @@ void
 ElecKinematic::book(edm::Service<TFileService>& fs)
 {
   NameScheme kin("kin");
-  en_ = fs->make<TH1F>(kin.name( "en"  ), kin.name("en"  ), 60,   0., 300.);
-  pt_ = fs->make<TH1F>(kin.name( "pt"  ), kin.name("pt"  ), 30,   0., 150.);
-  eta_= fs->make<TH1F>(kin.name( "eta" ), kin.name("eta" ), 35, -3.5,  3.5);
-  phi_= fs->make<TH1F>(kin.name( "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
+  en_ = fs->make<TH1F>(kin.name("en" ), "E(electron) [GeV]"    , 60,   0., 300.);
+  pt_ = fs->make<TH1F>(kin.name("pt" ), "p_{T}(electron) [GeV]", 30,   0., 150.);
+  eta_= fs->make<TH1F>(kin.name("eta"), "#eta(electron)"       , 35, -3.5,  3.5);
+  phi_= fs->make<TH1F>(kin.name("phi"), "#phi(electron)"       , 35, -3.5,  3.5);
 
   NameScheme iso("iso");
-  isoJet_  = fs->make<TH1F>(iso.name( "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
-  isoTrk_  = fs->make<TH1F>(iso.name( "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
-  isoCal_  = fs->make<TH1F>(iso.name( "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
-  isoEcal_ = fs->make<TH1F>(iso.name( "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);
-  isoHcal_ = fs->make<TH1F>(iso.name( "isoHcal" ), iso.name("isoHcal" ), 40, -10.,  30.);
-  dRTrkPt_ = fs->make<TH1F>(iso.name( "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,   2.);
-  dRTrkN_  = fs->make<TH1F>(iso.name( "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,   2.);
-  dRCalPt_ = fs->make<TH1F>(iso.name( "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,   2.);
-  dRCalN_  = fs->make<TH1F>(iso.name( "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,   2.);
-  isoTrkN_ = fs->make<TH1F>(iso.name( "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1.,  20.);
-  isoCalN_ = fs->make<TH1F>(iso.name( "isoCalN" ), iso.name("isoCaloN"), 31,  -1.,  30.);
-  closestCtf_= fs->make<TH1F>(iso.name( "closestCtf" ), iso.name("closestCtf" ), 20, 0., 0.2);
+  isoJet_    = fs->make<TH1F>(iso.name("isoJet"    ), "smallest dR(electron,jet))"               , 60,   0.,  1.5);
+  closestCtf_= fs->make<TH1F>(iso.name("closestCtf"), "smallest dR(electron,track)"              , 20,   0.,  0.2);
+  isoTrk_    = fs->make<TH1F>(iso.name("isoTrk"    ), "#Sigma_{#delta R<0.3}(p_{T}(track))"      , 60,  -1.,   5.);
+  isoCal_    = fs->make<TH1F>(iso.name("isoCal"    ), "#Sigma_{#delta R<0.3}(E_{T}(tower))"      , 40, -10.,  30.);
+  isoEcal_   = fs->make<TH1F>(iso.name("isoEcal"   ), "#Sigma_{#delta R<0.3}(E_{T}^{em}(tower))" , 40, -10.,  30.);
+  isoHcal_   = fs->make<TH1F>(iso.name("isoHcal"   ), "#Sigma_{#delta R<0.3}(E_{T}^{had}(tower))", 40, -10.,  30.);
+  isoTrkN_   = fs->make<TH1F>(iso.name("isoTrkN"   ), "N_{track}^{dR<0.3}"                       , 21,  -1.,  20.);
+  isoCalN_   = fs->make<TH1F>(iso.name("isoCalN"   ), "N_{tower}^{dR<0.3}"                       , 31,  -1.,  30.);
+  dRTrkPt_   = fs->make<TH1F>(iso.name("dRTrkPt"   ), "dR(electron,track)"                       , 42, -0.1,   2.);
+  dRTrkN_    = fs->make<TH1F>(iso.name("dRTrkN"    ), "dR(electron,track)"                       , 42, -0.1,   2.);
+  dRCalPt_   = fs->make<TH1F>(iso.name("dRCalPt"   ), "dR(electron,tower)"                       , 42, -0.1,   2.);
+  dRCalN_    = fs->make<TH1F>(iso.name("dRCalN"    ), "dR(electron,tower)"                       , 42, -0.1,   2.);
 
-  ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
-  ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
-  ptVsEcalIso_= fs->make<TH2F>(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
-  ptVsHcalIso_= fs->make<TH2F>(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
+  NameScheme iso2d("iso2d");
+  ptVsTrkIso_ = fs->make<TH2F>(iso2d.name("ptVsTrkIso" ), "ptVsTrkIso" , 100, 0., 100., 50,   0., 25.);
+  ptVsCalIso_ = fs->make<TH2F>(iso2d.name("ptVsCalIso" ), "ptVsCalIso" , 100, 0., 100., 50, -10., 25.);
+  ptVsEcalIso_= fs->make<TH2F>(iso2d.name("ptVsEcalIso"), "ptVsEcalIso", 100, 0., 100., 50, -10., 25.);
+  ptVsHcalIso_= fs->make<TH2F>(iso2d.name("ptVsHcalIso"), "ptVsHcalIso", 100, 0., 100., 50, -10., 25.);
 }
 
 /// book for full FW with output stream
@@ -188,29 +190,30 @@ void
 ElecKinematic::book(edm::Service<TFileService>& fs, ofstream& file)
 {
   NameScheme kin("kin");
-  en_ = fs->make<TH1F>(kin.name( file, "en"  ), kin.name("en"  ), 60,   0., 300.);
-  pt_ = fs->make<TH1F>(kin.name( file, "pt"  ), kin.name("pt"  ), 30,   0., 150.);
-  eta_= fs->make<TH1F>(kin.name( file, "eta" ), kin.name("eta" ), 35, -3.5,  3.5);
-  phi_= fs->make<TH1F>(kin.name( file, "phi" ), kin.name("phi" ), 35, -3.5,  3.5);
+  en_ = fs->make<TH1F>(kin.name(file, "en" ), "E(electron) [GeV]"    , 60,   0., 300.);
+  pt_ = fs->make<TH1F>(kin.name(file, "pt" ), "p_{T}(electron) [GeV]", 30,   0., 150.);
+  eta_= fs->make<TH1F>(kin.name(file, "eta"), "#eta(electron)"       , 35, -3.5,  3.5);
+  phi_= fs->make<TH1F>(kin.name(file, "phi"), "#phi(electron)"       , 35, -3.5,  3.5);
 
   NameScheme iso("iso");
-  isoJet_    = fs->make<TH1F>(iso.name( file, "isoJet"  ), iso.name("isoJet"  ), 60,   0.,  1.5);
-  isoTrk_    = fs->make<TH1F>(iso.name( file, "isoTrk"  ), iso.name("isoTrk"  ), 60,  -1.,   5.);
-  isoCal_    = fs->make<TH1F>(iso.name( file, "isoCal"  ), iso.name("isoCal"  ), 40, -10.,  30.);
-  isoEcal_   = fs->make<TH1F>(iso.name( file, "isoEcal" ), iso.name("isoEcal" ), 40, -10.,  30.);
-  isoHcal_   = fs->make<TH1F>(iso.name( file, "isoHcal" ), iso.name("isoHcal" ), 40, -10.,  30.);
-  dRTrkPt_   = fs->make<TH1F>(iso.name( file, "dRTrkPt" ), iso.name("dRTrkPt" ), 42, -0.1,   2.);
-  dRTrkN_    = fs->make<TH1F>(iso.name( file, "dRTrkN"  ), iso.name("dRTrkN"  ), 42, -0.1,   2.);
-  dRCalPt_   = fs->make<TH1F>(iso.name( file, "dRCalPt" ), iso.name("dRCalPt" ), 42, -0.1,   2.);
-  dRCalN_    = fs->make<TH1F>(iso.name( file, "dRCalN"  ), iso.name("dRCalN"  ), 42, -0.1,   2.);
-  isoTrkN_   = fs->make<TH1F>(iso.name( file, "isoTrkN" ), iso.name("isoTrkN" ), 21,  -1.,  20.);
-  isoCalN_   = fs->make<TH1F>(iso.name( file, "isoCalN" ), iso.name("isoCaloN"), 31,  -1.,  30.);
-  closestCtf_= fs->make<TH1F>(iso.name( file, "closestCtf" ), iso.name("closestCtf" ), 20, 0., 0.2);
+  isoJet_    = fs->make<TH1F>(iso.name(file, "isoJet"    ), "smallest dR(electron,jet))"               , 60,   0.,  1.5);
+  closestCtf_= fs->make<TH1F>(iso.name(file, "closestCtf"), "smallest dR(electron,track)"              , 20,   0.,  0.2);
+  isoTrk_    = fs->make<TH1F>(iso.name(file, "isoTrk"    ), "#Sigma_{#delta R<0.3}(p_{t}(track))"      , 60,  -1.,   5.);
+  isoCal_    = fs->make<TH1F>(iso.name(file, "isoCal"    ), "#Sigma_{#delta R<0.3}(E_{t}(tower))"      , 40, -10.,  30.);
+  isoEcal_   = fs->make<TH1F>(iso.name(file, "isoEcal"   ), "#Sigma_{#delta R<0.3}(E_{t}^{em}(tower))" , 40, -10.,  30.);
+  isoHcal_   = fs->make<TH1F>(iso.name(file, "isoHcal"   ), "#Sigma_{#delta R<0.3}(E_{t}^{had}(tower))", 40, -10.,  30.);
+  isoTrkN_   = fs->make<TH1F>(iso.name(file, "isoTrkN"   ), "N_{track}^{dR<0.3}"                       , 21,  -1.,  20.);
+  isoCalN_   = fs->make<TH1F>(iso.name(file, "isoCalN"   ), "N_{tower}^{dR<0.3}"                       , 31,  -1.,  30.);
+  dRTrkPt_   = fs->make<TH1F>(iso.name(file, "dRTrkPt"   ), "dR(electron,track)"                       , 42, -0.1,   2.);
+  dRTrkN_    = fs->make<TH1F>(iso.name(file, "dRTrkN"    ), "dR(electron,track)"                       , 42, -0.1,   2.);
+  dRCalPt_   = fs->make<TH1F>(iso.name(file, "dRCalPt"   ), "dR(electron,tower)"                       , 42, -0.1,   2.);
+  dRCalN_    = fs->make<TH1F>(iso.name(file, "dRCalN"    ), "dR(electron,tower)"                       , 42, -0.1,   2.);
 
-  ptVsTrkIso_ = fs->make<TH2F>(iso.name( "ptVsTrkIso" ), iso.name( "ptVsTrkIso" ), 100, 0., 100., 50,   0., 25.);
-  ptVsCalIso_ = fs->make<TH2F>(iso.name( "ptVsCalIso" ), iso.name( "ptVsCalIso" ), 100, 0., 100., 50, -10., 25.);
-  ptVsEcalIso_= fs->make<TH2F>(iso.name( "ptVsEcalIso"), iso.name( "ptVsEcalIso"), 100, 0., 100., 50, -10., 25.);
-  ptVsHcalIso_= fs->make<TH2F>(iso.name( "ptVsHcalIso"), iso.name( "ptVsHcalIso"), 100, 0., 100., 50, -10., 25.);
+  NameScheme iso2d("iso2d");
+  ptVsTrkIso_ = fs->make<TH2F>(iso2d.name(file, "ptVsTrkIso" ), "ptVsTrkIso" , 100, 0., 100., 50,   0., 25.);
+  ptVsCalIso_ = fs->make<TH2F>(iso2d.name(file, "ptVsCalIso" ), "ptVsCalIso" , 100, 0., 100., 50, -10., 25.);
+  ptVsEcalIso_= fs->make<TH2F>(iso2d.name(file, "ptVsEcalIso"), "ptVsEcalIso", 100, 0., 100., 50, -10., 25.);
+  ptVsHcalIso_= fs->make<TH2F>(iso2d.name(file, "ptVsHcalIso"), "ptVsHcalIso", 100, 0., 100., 50, -10., 25.);
 }
 
 /// write to file and free allocated space for FWLite

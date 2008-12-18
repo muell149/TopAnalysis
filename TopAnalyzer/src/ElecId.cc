@@ -17,7 +17,6 @@ ElecId::ElecId(const edm::ParameterSet& cfg)
 void
 ElecId::fill(const edm::Event& evt, const std::vector<pat::Electron>& elecs, const double& weight=1.)
 {
-
  if(elecs.begin()==elecs.end()) return;
  fill( elecs, weight);
 }
@@ -35,16 +34,16 @@ ElecId::fill(const std::vector<pat::Electron>& elecs, const double& weight=1.)
     deta_->Fill( elec->deltaEtaSeedClusterTrackAtCalo(), weight );
     dphi_->Fill( elec->deltaPhiSeedClusterTrackAtCalo(), weight );
     
-    //reco::GsfTrackRef track = elec->gsfTrack();
-    //reco::Particle::Vector iMom = track->innerMomentum();
-    //reco::Particle::Vector oMom = track->outerMomentum();
+    reco::GsfTrackRef track = elec->gsfTrack();
+    reco::Particle::Vector iMom = track->innerMomentum();
+    reco::Particle::Vector oMom = track->outerMomentum();
     
-    //tdpt_ ->Fill( (iMom.Rho()-oMom.Rho())/iMom.Rho(), weight );
-    //tdeta_->Fill( (iMom.Eta()-oMom.Eta())/iMom.Eta(), weight );
-    //tdphi_->Fill( (iMom.Phi()-oMom.Phi())/iMom.Phi(), weight );
-    //nohit_->Fill( track->recHitsSize(),               weight );
-    //nvhit_->Fill( track->found(),                     weight );
-    //chi2_ ->Fill( track->chi2()/track->ndof(),        weight );
+    tdpt_ ->Fill( (iMom.Rho()-oMom.Rho())/iMom.Rho(), weight );
+    tdeta_->Fill( (iMom.Eta()-oMom.Eta())/iMom.Eta(), weight );
+    tdphi_->Fill( (iMom.Phi()-oMom.Phi())/iMom.Phi(), weight );
+    nohit_->Fill( track->recHitsSize(),               weight );
+    nvhit_->Fill( track->found(),                     weight );
+    chi2_ ->Fill( track->chi2()/track->ndof(),        weight );
 
     reco::SuperClusterRef clus = elec->superCluster();
     math::XYZPoint tPos(elec->TrackPositionAtCalo().X(), 
@@ -60,20 +59,19 @@ void
 ElecId::book()
 {
   NameScheme id("id");
-  eops_ = new TH1F(id.name("eops" ), id.name("eops" ), 50,   0.,   5.);
-  eopb_ = new TH1F(id.name("eopb" ), id.name("eopb" ), 50,   0.,   5.);
-  nocl_ = new TH1F(id.name("nocl" ), id.name("nocl" ), 20,   0.,  20.);
-  deta_ = new TH1F(id.name("deta" ), id.name("deta" ), 40,-0.02, 0.02);
-  dphi_ = new TH1F(id.name("dphi" ), id.name("dphi" ), 40,-0.02, 0.02);
-  hoem_ = new TH1F(id.name("hoem" ), id.name("hoem" ), 50,  -5.,   0.);
-  tdpt_ = new TH1F(id.name("tdpt" ), id.name("dpt"  ), 30, -1.5,  1.5);
-  tdeta_= new TH1F(id.name("tdeta"), id.name("deta" ), 30, -1.5,  1.5);
-  tdphi_= new TH1F(id.name("tdphi"), id.name("dphi" ), 30, -1.5,  1.5);
-  nohit_= new TH1F(id.name("nohit"), id.name("nohit"), 25,   0.,  25.);
-  nvhit_= new TH1F(id.name("nvhit"), id.name("nvhit"), 25,   0.,  25.);
-  chi2_ = new TH1F(id.name("chi2" ), id.name("chi2" ), 50,   0.,  10.);
-  drtk_ = new TH1F(id.name("drtrk"), id.name("drtrk"), 31, -0.1,   3.);
-  s1os9_= new TH1F(id.name("s1os9"), id.name("s1os9"), 25,   0.,   1.);
+  eops_ = new TH1F(id.name("eops" ), "eops" , 50,   0.,   5.);
+  eopb_ = new TH1F(id.name("eopb" ), "eopb" , 50,   0.,   5.);
+  nocl_ = new TH1F(id.name("nocl" ), "nocl" , 20,   0.,  20.);
+  deta_ = new TH1F(id.name("deta" ), "deta" , 40,-0.02, 0.02);
+  dphi_ = new TH1F(id.name("dphi" ), "dphi" , 40,-0.02, 0.02);
+  hoem_ = new TH1F(id.name("hoem" ), "hoem" , 50,  -5.,   0.);
+  tdpt_ = new TH1F(id.name("tdpt" ), "dpt"  , 30, -1.5,  1.5);
+  tdeta_= new TH1F(id.name("tdeta"), "deta" , 30, -1.5,  1.5);
+  tdphi_= new TH1F(id.name("tdphi"), "dphi" , 30, -1.5,  1.5);
+  nohit_= new TH1F(id.name("nohit"), "nohit", 25,   0.,  25.);
+  nvhit_= new TH1F(id.name("nvhit"), "nvhit", 25,   0.,  25.);
+  chi2_ = new TH1F(id.name("chi2" ), "chi2" , 50,   0.,  10.);
+  drtk_ = new TH1F(id.name("drtrk"), "drtrk", 31, -0.1,   3.);
 }
 
 /// book for full FW
@@ -81,20 +79,19 @@ void
 ElecId::book(edm::Service<TFileService>& fs)
 {
   NameScheme id("id");
-  eops_ = fs->make<TH1F>(id.name("eops" ), id.name("eops" ), 50,   0.,   5.);
-  eopb_ = fs->make<TH1F>(id.name("eopb" ), id.name("eopb" ), 50,   0.,   5.);
-  nocl_ = fs->make<TH1F>(id.name("nocl" ), id.name("nocl" ), 20,   0.,  20.);
-  deta_ = fs->make<TH1F>(id.name("deta" ), id.name("deta" ), 40,-0.02, 0.02);
-  dphi_ = fs->make<TH1F>(id.name("dphi" ), id.name("dphi" ), 40,-0.02, 0.02);
-  hoem_ = fs->make<TH1F>(id.name("hoem" ), id.name("hoem" ), 50,  -5.,   0.);
-  tdpt_ = fs->make<TH1F>(id.name("tdpt" ), id.name("dpt"  ), 30, -1.5,  1.5);
-  tdeta_= fs->make<TH1F>(id.name("tdeta"), id.name("deta" ), 30, -1.5,  1.5);
-  tdphi_= fs->make<TH1F>(id.name("tdphi"), id.name("dphi" ), 30, -1.5,  1.5);
-  nohit_= fs->make<TH1F>(id.name("nohit"), id.name("nohit"), 25,   0.,  25.);
-  nvhit_= fs->make<TH1F>(id.name("nvhit"), id.name("nvhit"), 25,   0.,  25.);
-  chi2_ = fs->make<TH1F>(id.name("chi2" ), id.name("chi2" ), 50,   0.,  10.);
-  drtk_ = fs->make<TH1F>(id.name("drtrk"), id.name("drtrk"), 31, -0.1,   3.);
-  s1os9_= fs->make<TH1F>(id.name("s1os9"), id.name("s1os9"), 25,   0.,   1.);
+  eops_ = fs->make<TH1F>(id.name("eops" ), "(E/p)_{SC}(electron)"    , 50,    0.,   5.);
+  eopb_ = fs->make<TH1F>(id.name("eopb" ), "(E/p)_{BC}(electron)"    , 50,    0.,   5.);
+  nocl_ = fs->make<TH1F>(id.name("nocl" ), "number of clusters"      , 20,    0.,  20.);
+  deta_ = fs->make<TH1F>(id.name("deta" ), "d#eta(track,cluster)"    , 40, -0.02, 0.02);
+  dphi_ = fs->make<TH1F>(id.name("dphi" ), "d#phi(track,cluster)"    , 40, -0.02, 0.02);
+  hoem_ = fs->make<TH1F>(id.name("hoem" ), "log_{10}(E_{had}/E_{em})", 50,   -5.,   0.);
+  tdpt_ = fs->make<TH1F>(id.name("tdpt" ), "(p_{t}^{inner}-p_{t}^{outer})/p_{t}^{inner}(track)", 30,  -1.5,  1.5);
+  tdeta_= fs->make<TH1F>(id.name("tdeta"), "(#eta^{inner}-#eta^{outer})/#eta^{inner}(track)"   , 30,  -1.5,  1.5);
+  tdphi_= fs->make<TH1F>(id.name("tdphi"), "(#phi^{inner}-#phi^{outer})/#phi^{inner}(track)"   , 30,  -1.5,  1.5);
+  nohit_= fs->make<TH1F>(id.name("nohit"), "N_{hits}(track)"         , 25,    0.,  25.);
+  nvhit_= fs->make<TH1F>(id.name("nvhit"), "N_{hits}^{used}(track)"  , 25,    0.,  25.);
+  chi2_ = fs->make<TH1F>(id.name("chi2" ), "#chi^{2}/d.o.f track fit", 50,    0.,  10.);
+  drtk_ = fs->make<TH1F>(id.name("drtrk"), "dca(track,cluster)"      , 31,  -0.1,   3.);
 }
 
 /// book for full FW with output stream
@@ -102,20 +99,19 @@ void
 ElecId::book(edm::Service<TFileService>& fs, ofstream& file)
 {
   NameScheme id("id");
-  eops_ = fs->make<TH1F>(id.name(file, "eops" ), id.name("eops" ), 50,   0.,   5.);
-  eopb_ = fs->make<TH1F>(id.name(file, "eopb" ), id.name("eopb" ), 50,   0.,   5.);
-  nocl_ = fs->make<TH1F>(id.name(file, "nocl" ), id.name("nocl" ), 20,   0.,  20.);
-  deta_ = fs->make<TH1F>(id.name(file, "deta" ), id.name("deta" ), 40,-0.02, 0.02);
-  dphi_ = fs->make<TH1F>(id.name(file, "dphi" ), id.name("dphi" ), 40,-0.02, 0.02);
-  hoem_ = fs->make<TH1F>(id.name(file, "hoem" ), id.name("hoem" ), 50,  -5.,   0.);
-  tdpt_ = fs->make<TH1F>(id.name(file, "tdpt" ), id.name("dpt"  ), 30, -1.5,  1.5);
-  tdeta_= fs->make<TH1F>(id.name(file, "tdeta"), id.name("deta" ), 30, -1.5,  1.5);
-  tdphi_= fs->make<TH1F>(id.name(file, "tdphi"), id.name("dphi" ), 30, -1.5,  1.5);
-  nohit_= fs->make<TH1F>(id.name(file, "nohit"), id.name("nohit"), 25,   0.,  25.);
-  nvhit_= fs->make<TH1F>(id.name(file, "nvhit"), id.name("nvhit"), 25,   0.,  25.);
-  chi2_ = fs->make<TH1F>(id.name(file, "chi2" ), id.name("chi2" ), 50,   0.,  10.);
-  drtk_ = fs->make<TH1F>(id.name(file, "drtrk"), id.name("drtrk"), 31, -0.1,   3.);
-  s1os9_= fs->make<TH1F>(id.name(file, "s1os9"), id.name("s1os9"), 25,   0.,   1.);
+  eops_ = fs->make<TH1F>(id.name(file, "eops" ), "(E/p)_{SC}(electron)"    , 50,    0.,   5.);
+  eopb_ = fs->make<TH1F>(id.name(file, "eopb" ), "(E/p)_{BC}(electron)"    , 50,    0.,   5.);
+  nocl_ = fs->make<TH1F>(id.name(file, "nocl" ), "number of clusters"      , 20,    0.,  20.);
+  deta_ = fs->make<TH1F>(id.name(file, "deta" ), "d#eta(track,cluster)"    , 40, -0.02, 0.02);
+  dphi_ = fs->make<TH1F>(id.name(file, "dphi" ), "d#phi(track,cluster)"    , 40, -0.02, 0.02);
+  hoem_ = fs->make<TH1F>(id.name(file, "hoem" ), "log_{10}(E_{had}/E_{em})", 50,   -5.,   0.);
+  tdpt_ = fs->make<TH1F>(id.name(file, "tdpt" ), "(p_{t}^{inner}-p_{t}^{outer})/p_{t}^{inner}(track)", 30,  -1.5,  1.5);
+  tdeta_= fs->make<TH1F>(id.name(file, "tdeta"), "(#eta^{inner}-#eta^{outer})/#eta^{inner}(track)"   , 30,  -1.5,  1.5);
+  tdphi_= fs->make<TH1F>(id.name(file, "tdphi"), "(#phi^{inner}-#phi^{outer})/#phi^{inner}(track)"   , 30,  -1.5,  1.5);
+  nohit_= fs->make<TH1F>(id.name(file, "nohit"), "N_{hits}(track)"         , 25,    0.,  25.);
+  nvhit_= fs->make<TH1F>(id.name(file, "nvhit"), "N_{hits}^{used}(track)"  , 25,    0.,  25.);
+  chi2_ = fs->make<TH1F>(id.name(file, "chi2" ), "#chi^{2}/d.o.f track fit", 50,    0.,  10.);
+  drtk_ = fs->make<TH1F>(id.name(file, "drtrk"), "dca(track,cluster)"     , 31,  -0.1,   3.);
 }
 
 /// write to file and free allocated space for FWLite
@@ -141,7 +137,6 @@ ElecId::write(const char* filename, const char* directory)
   nvhit_->Write( );
   chi2_ ->Write( );
   drtk_ ->Write( );
-  s1os9_->Write( );
 
   outFile.Close();
 
@@ -159,5 +154,4 @@ ElecId::write(const char* filename, const char* directory)
   delete nvhit_; 
   delete chi2_;
   delete drtk_; 
-  delete s1os9_; 
 }
