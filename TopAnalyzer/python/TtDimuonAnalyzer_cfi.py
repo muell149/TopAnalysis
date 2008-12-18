@@ -22,7 +22,7 @@ analyzeTtDimuon = cms.EDAnalyzer("TtDiMuonAnalyzer",
     leptonPtCut = cms.double(20.0),
     jetPtCut = cms.double(40.0),
     metCut = cms.double(0.0),            
-    dilepMassLowZCut = cms.double(80.0),            
-    dilepMassHighZCut = cms.double(100.0),
-    dilepMassQCDCut = cms.double(5.0)   
+    diMuonMassLowZCut = cms.double(80.0),            
+    diMuonMassHighZCut = cms.double(100.0),
+    diMuonMassQCDCut = cms.double(5.0)   
 )

@@ -20,9 +20,9 @@ TtDiMuonKinSolAna::TtDiMuonKinSolAna(const edm::ParameterSet& cfg):
   leptonPtCut_       ( cfg.getParameter<double>       ( "leptonPtCut"       ) ),  
   jetPtCut_          ( cfg.getParameter<double>       ( "jetPtCut"          ) ),
   metCut_            ( cfg.getParameter<double>       ( "metCut"            ) ),  
-  DiMuonMassLowZCut_ ( cfg.getParameter<double>       ( "DilepMassLowZCut"  ) ),  
-  DiMuonMassHighZCut_( cfg.getParameter<double>       ( "DilepMassHighZCut" ) ),
-  DiMuonMassQCDCut_  ( cfg.getParameter<double>       ( "DilepMassQCDCut"   ) )  
+  diMuonMassLowZCut_ ( cfg.getParameter<double>       ( "diMuonMassLowZCut"  ) ),  
+  diMuonMassHighZCut_( cfg.getParameter<double>       ( "diMuonMassHighZCut" ) ),
+  diMuonMassQCDCut_  ( cfg.getParameter<double>       ( "diMuonMassQCDCut"   ) )  
 {
 }
 
@@ -38,7 +38,7 @@ TtDiMuonKinSolAna::book(ofstream& file)
 
   NameScheme e("kin");
   mass_         = fs->make<TH1F>(e.name( file, "mass"        ), e.name("mass"        ), 51,  99., 301.);
-  DiMuonmass_   = fs->make<TH1F>(e.name( file, "DiMuonmass"  ), e.name("DiMuonmass"  ), 50,   0., 250.); 
+  dimuonmass_   = fs->make<TH1F>(e.name( file, "dimuonmass"  ), e.name("dimuonmass"  ), 50,   0., 250.); 
   weightmax_    = fs->make<TH1F>(e.name( file, "weightmax"   ), e.name("weightmax"   ), 50,   0.,   1.);
   maxweightmax_ = fs->make<TH1F>(e.name( file, "maxweightmax"), e.name("maxweightmax"), 50,   0.,   1.);
   massBbW_      = fs->make<TH1F>(e.name( file, "massBbW"     ), e.name("massBbW"     ), 51,  99., 301.);
@@ -74,9 +74,9 @@ TtDiMuonKinSolAna::fill(const  edm::Event& evt,
   }   
     
   double DiMuonMass = (DiMuonLVector).M();    
-  DiMuonmass_->Fill( DiMuonMass, weight);
+  dimuonmass_->Fill( DiMuonMass, weight);
     
-  if( (DiMuonMass > DiMuonMassLowZCut_ && DiMuonMass < DiMuonMassHighZCut_ ) || DiMuonMass < DiMuonMassQCDCut_ ) return;
+  if( (DiMuonMass > diMuonMassLowZCut_ && DiMuonMass < diMuonMassHighZCut_ ) || DiMuonMass < diMuonMassQCDCut_ ) return;
   
   // solutions   
   edm::Handle<TtDilepEvtSolCollection> solutions; 

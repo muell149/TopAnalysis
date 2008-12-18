@@ -37,12 +37,12 @@ class TtDiMuonKinSolAna{
   double leptonPtCut_;
   double jetPtCut_;
   double metCut_; 
-  double DiMuonMassLowZCut_;
-  double DiMuonMassHighZCut_;
-  double DiMuonMassQCDCut_;  
+  double diMuonMassLowZCut_;
+  double diMuonMassHighZCut_;
+  double diMuonMassQCDCut_;  
       
   TH1F * mass_;
-  TH1F * DiMuonmass_;
+  TH1F * dimuonmass_;
   TH1F * weightmax_;
   TH1F * maxweightmax_;
   TH1F * massBbW_;
