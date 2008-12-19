@@ -16,9 +16,9 @@ $=====================================================================
                                                                       $ this  corresponds to the module name of the 
                                                                       $ Analyzer in the cfg file (separated by blanks)
                                                                       $
-  histFilter   = id_eops id_eopb id_nocl id_deta id_dphi id_hoem      $ list of filter strings; only histograms con-
-                 id_drtrk                                             $ taining these stings as substrings are loaded
-                 kin iso                                              $ (separated by blanks); empty means everything
+  histFilter   = id kin iso_                                          $ list of filter strings; only histograms con-
+                                                                      $ taining these stings as substrings are loaded
+                                                                      $ (separated by blanks); empty means everything
                                                                       $ is plotted 
                                                                       $
   plotFilter   =                                                      $ list of filter strings; only histograms con-
@@ -68,15 +68,15 @@ $=====================================================================
                                                                       $
   histScale    = 1 1 1 1 1 1 1 1 1 1                                  $ histogram scale; can be steered for each 
                  1 1 1 1 1 1 1 1 1 1                                  $ histogram individually; empty means scale
-                 1 1 1 1 1 1 1 1 1 1                                  $ is _1_
+                 1 1 1 1 1                                            $ is _1_
                                                                       $
   histMinimum  = 0 0 0 0 0 0 0 0 0 0                                  $ histogram minimum; can be steered for 
                  0 0 0 0 0 0 0 0 0 0                                  $ each histogram individually; empty means 
-                 0 0 0 0 0 0 0 0 0 0                                  $ set to _0_
+                 0 0 0 0 0                                            $ set to _0_
                                                                       $
-  histMaximum  = .2  .2  .3  .2  .2  .2                               $ histogram maximum; can be steered for 
-                         .1      .2  .2  .1  .1  .4  .9               $ each histogram individually; empty means
-                 .4  1.  .4  .1  .1  .2  .1  .5  .5  1.               $ set automatically
+  histMaximum  = .2  .2  .3  .2  .2  .2  .4  .7  .5  .5               $ histogram maximum; can be steered for 
+                 1.3 1.1 .1  .2  .2  .1  .1  .4  1.2 .9               $ each histogram individually; empty means
+                 .4  1.1 .4  .2  .1                                   $ set automatically
                                                                       $
   histErrors   =                                                      $ draw histogram errors; can be steered for 
                                                                       $ each sample; empty means no errors
@@ -99,50 +99,17 @@ $=====================================================================
                                                                       $
                                                                       $ set axes titles for each histograms;
                                                                       $ has to be givin in '"' and end with ';'
-  xAxes        = "(E/p)_{SC}(electron)";
-                 "(E/p)_{BC}(electron)";
-                 "Number of clusters";
-                 "#delta #eta (track, cluster)";
-                 "#delta #phi (track, cluster)";
-                 "log_{10}(E_{had}/E_{em})";
-                 $ "(p_{t}^{inner}-p_{t}^{outer})/p_{t}^{inner}(track)";
-                 $ "(#eta^{inner} - #eta^{outer})(track)";
-                 $ "(#phi^{inner} - #phi^{outer})(track)";
-                 $ "N_{Hits}(track)";
-                 $ "N_{Hits}^{used}(track)";
-                 $ "#chi^{2} Track Fit";
-                 "dca(track, cluster)";
-                 $ "S1OverS9";
-                 "E(electron) [GeV]";
-                 "p_{t}(electron) [GeV]";
-                 "#eta(electron)";
-                 "#phi(electron)";
-                 "min(#delta R (electron, jet))";
-                 "#Sigma_{#delta R<0.3}(p_{t}(track))";
-                 "#Sigma_{#delta R<0.3}(E_{t}(tower))";
-                 "#Sigma_{#delta R<0.3}(E_{t}^{em}(tower))";
-                 "#Sigma_{#delta R<0.3}(E_{t}^{had}(tower))";
-                 "dR(electron,track)";
-                 "dR(electron,track)";
-                 "dR(electron,tower)";
-                 "dR(electron,tower)";
-                 "N_{track}^{dR<0.3}";
-                 "N_{tower}^{dR<0.3}";
-                 "#delta(ctf,gsf)";
+  xAxes        =
 
   yAxes        = "a.u.";
                  "a.u.";
                  "a.u.";
                  "a.u.";
                  "a.u.";
-                 $ "a.u.";
-                 $ "a.u.";
-                 $ "a.u.";
-                 $ "a.u.";
-                 $ "a.u.";
-                 $ "a.u.";
                  "a.u.";
-                 $ "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u."; 
                  "a.u.";
                  "a.u.";
                  "a.u.";
@@ -153,15 +120,16 @@ $=====================================================================
                  "a.u.";
                  "a.u.";
                  "a.u.";
-                 "1/N_{electron} #Sigma (p_{t}(track)) [GeV]";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "1/N_{electron} #Sigma (p_{T}(track)) [GeV]";
                  "1/N_{electron} #Sigma (N_{track})";
-                 "1/N_{electron} #Sigma (E_{t}(tower)) [GeV]";
+                 "1/N_{electron} #Sigma (E_{T}(tower)) [GeV]";
                  "1/N_{electron} #Sigma (N_{tower})";
-                 "a.u.";
-                 "a.u.";
-                 "a.u.";
-
-
 
                                                                       $
                                                                       $ should contain a legend entry for each 
