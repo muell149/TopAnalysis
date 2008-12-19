@@ -1,7 +1,7 @@
 #include "TMath.h"
 #include "TopAnalysis/TopAnalyzer/interface/ElecId.h"
-#include "DataFormats/EgammaReco/interface/ClusterShape.h"
-#include "DataFormats/EgammaReco/interface/BasicCluster.h"
+//#include "DataFormats/EgammaReco/interface/ClusterShape.h"
+//#include "DataFormats/EgammaReco/interface/BasicCluster.h"
 
 /// constructor for FWLite analyzer
 ElecId::ElecId()  
