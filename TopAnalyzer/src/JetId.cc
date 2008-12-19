@@ -85,23 +85,33 @@ void
 JetId::book(edm::Service<TFileService>& fs)
 {
   NameScheme id("id");
-  aEmf_= fs->make<TH1F>(id.name("allEmf"),  id.name("allEmf" ), 60, -0.1,  1.1);
-  aHad_= fs->make<TH1F>(id.name("allHdf"),  id.name("allHdf" ), 60, -0.1,  1.1);
-  aHof_= fs->make<TH1F>(id.name("allHdHO"), id.name("allHdHO"), 55, -10., 100.);
+  aEmf_= fs->make<TH1F>(id.name("allEmf"),  "em. energy frac. (jet)"  , 60, -0.1,  1.1);
+  aHad_= fs->make<TH1F>(id.name("allHdf"),  "hadr. energy frac. (jet)", 60, -0.1,  1.1);
+  aHof_= fs->make<TH1F>(id.name("allHdHO"), "E_{HO}(jet) [GeV]"       , 55, -10., 100.);
   
   for(int idx=0; idx<nJets_; ++idx){
-    emf_.push_back( fs->make<TH1F>(id.name("emf",idx), id.name("emf",idx), 60, -0.1,  1.1) );
-    had_.push_back( fs->make<TH1F>(id.name("had",idx), id.name("had",idx), 60, -0.1,  1.1) );
-    hof_.push_back( fs->make<TH1F>(id.name("hof",idx), id.name("hof",idx), 55, -10., 100.) );
+    int idj = idx+1;
+    TString titleBase = "(jet"; titleBase += idj; titleBase += ")";
+    TString title_emf = "em. energy frac. "   + titleBase;
+    TString title_had = "hadr. energy frac. " + titleBase;
+    TString title_hof = "E_{HO}"              + titleBase + " [GeV]";
+    emf_.push_back( fs->make<TH1F>(id.name("emf", idx), title_emf, 60, -0.1,  1.1) );
+    had_.push_back( fs->make<TH1F>(id.name("had", idx), title_had, 60, -0.1,  1.1) );
+    hof_.push_back( fs->make<TH1F>(id.name("hof", idx), title_hof, 55, -10., 100.) );
   }
+
   NameScheme pro("pro");
-  nTwr_ = fs->make<TH1F>(pro.name("nTwr"), pro.name("nTwr"), 100, 0., 100.);
-  aProfEta_= fs->make<TH1F>(pro.name("allEta"), pro.name("allEta"), 50, -0.5, 0.5);
-  aProfPhi_= fs->make<TH1F>(pro.name("allPhi"), pro.name("allPhi"), 50, -0.5, 0.5);
-  
+  nTwr_    = fs->make<TH1F>(pro.name("nTwr"  ), "N_{tower}(jet)"           , 100,   0., 100.);
+  aProfEta_= fs->make<TH1F>(pro.name("allEta"), "(#eta_{jet}-#eta_{tower})",  50, -0.5,  0.5);
+  aProfPhi_= fs->make<TH1F>(pro.name("allPhi"), "(#phi_{jet}-#phi_{tower})",  50, -0.5,  0.5);
+
   for(int idx=0; idx<nJets_; ++idx){
-    profEta_.push_back( fs->make<TH1F>(pro.name("eta", idx),pro.name("eta", idx), 50, -0.5, 0.5) );
-    profPhi_.push_back( fs->make<TH1F>(pro.name("phi", idx),pro.name("phi", idx), 50, -0.5, 0.5) );
+    int idj = idx+1;
+    TString titleBase = "jet"; titleBase += idj;
+    TString title_profEta = "(#eta_{" + titleBase + "}-#eta_{tower})";
+    TString title_profPhi = "(#phi_{" + titleBase + "}-#phi_{tower})";
+    profEta_.push_back( fs->make<TH1F>(pro.name("eta", idx), title_profEta, 50, -0.5, 0.5) );
+    profPhi_.push_back( fs->make<TH1F>(pro.name("phi", idx), title_profPhi, 50, -0.5, 0.5) );
   }
 }
 
@@ -110,23 +120,33 @@ void
 JetId::book(edm::Service<TFileService>& fs, ofstream& file)
 {
   NameScheme id("id");
-  aEmf_= fs->make<TH1F>(id.name(file, "allEmf"),  id.name("All em. energy frac."  ), 60, -0.1,  1.1);
-  aHad_= fs->make<TH1F>(id.name(file, "allHdf"),  id.name("All hadr. energy frac."), 60, -0.1,  1.1);
-  aHof_= fs->make<TH1F>(id.name(file, "allHdHO"), id.name("All hadr. energy in HO"), 55, -10., 100.);
+  aEmf_= fs->make<TH1F>(id.name(file, "allEmf"),  "em. energy frac. (jet)"  , 60, -0.1,  1.1);
+  aHad_= fs->make<TH1F>(id.name(file, "allHdf"),  "hadr. energy frac. (jet)", 60, -0.1,  1.1);
+  aHof_= fs->make<TH1F>(id.name(file, "allHdHO"), "E_{HO}(jet) [GeV]"       , 55, -10., 100.);
   
   for(int idx=0; idx<nJets_; ++idx){
-    emf_.push_back( fs->make<TH1F>(id.name(file, "emf",idx), id.name("emf",idx), 60, -0.1,  1.1) );
-    had_.push_back( fs->make<TH1F>(id.name(file, "had",idx), id.name("had",idx), 60, -0.1,  1.1) );
-    hof_.push_back( fs->make<TH1F>(id.name(file, "hof",idx), id.name("hof",idx), 55, -10., 100.) );
+    int idj = idx+1;
+    TString titleBase = "(jet"; titleBase += idj; titleBase += ")";
+    TString title_emf = "em. energy frac. "   + titleBase;
+    TString title_had = "hadr. energy frac. " + titleBase;
+    TString title_hof = "E_{HO}"              + titleBase + " [GeV]";
+    emf_.push_back( fs->make<TH1F>(id.name(file, "emf", idx), title_emf, 60, -0.1,  1.1) );
+    had_.push_back( fs->make<TH1F>(id.name(file, "had", idx), title_had, 60, -0.1,  1.1) );
+    hof_.push_back( fs->make<TH1F>(id.name(file, "hof", idx), title_hof, 55, -10., 100.) );
   }
+
   NameScheme pro("pro");
-  nTwr_ = fs->make<TH1F>(pro.name(file,"nTwr"), pro.name("nTwr"), 100, 0., 100.);
-  aProfEta_= fs->make<TH1F>(pro.name(file,"allEta"), pro.name("allEta"), 50, -0.5, 0.5);
-  aProfPhi_= fs->make<TH1F>(pro.name(file,"allPhi"), pro.name("allPhi"), 50, -0.5, 0.5);
-  
+  nTwr_    = fs->make<TH1F>(pro.name(file, "nTwr"  ), "N_{tower}(jet)"           , 100,   0., 100.);
+  aProfEta_= fs->make<TH1F>(pro.name(file, "allEta"), "(#eta_{jet}-#eta_{tower})",  50, -0.5,  0.5);
+  aProfPhi_= fs->make<TH1F>(pro.name(file, "allPhi"), "(#phi_{jet}-#phi_{tower})",  50, -0.5,  0.5);
+
   for(int idx=0; idx<nJets_; ++idx){
-    profEta_.push_back( fs->make<TH1F>(pro.name(file,"eta", idx),pro.name("eta", idx), 50, -0.5, 0.5) );
-    profPhi_.push_back( fs->make<TH1F>(pro.name(file,"phi", idx),pro.name("phi", idx), 50, -0.5, 0.5) );
+    int idj = idx+1;
+    TString titleBase = "jet"; titleBase += idj;
+    TString title_profEta = "(#eta_{" + titleBase + "}-#eta_{tower})";
+    TString title_profPhi = "(#phi_{" + titleBase + "}-#phi_{tower})";
+    profEta_.push_back( fs->make<TH1F>(pro.name(file, "eta", idx), title_profEta, 50, -0.5, 0.5) );
+    profPhi_.push_back( fs->make<TH1F>(pro.name(file, "phi", idx), title_profPhi, 50, -0.5, 0.5) );
   }
 }
 
