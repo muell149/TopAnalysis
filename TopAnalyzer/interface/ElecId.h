@@ -16,11 +16,11 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-#include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterFwd.h"
-#include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
-#include "DataFormats/EgammaReco/interface/ClusterShapeFwd.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
+//#include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
+//#include "DataFormats/EgammaReco/interface/BasicClusterFwd.h"
+//#include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
+//#include "DataFormats/EgammaReco/interface/ClusterShapeFwd.h"
+//#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
 
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
