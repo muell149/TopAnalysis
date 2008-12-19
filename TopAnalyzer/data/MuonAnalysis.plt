@@ -16,7 +16,7 @@ $=====================================================================
                                                                       $ this  corresponds to the module name of the 
                                                                       $ Analyzer in the cfg file (separated by blanks)
                                                                       $
-  histFilter   = id kin iso                                           $ list of filter strings; only histograms con-
+  histFilter   = id kin iso_                                          $ list of filter strings; only histograms con-
                                                                       $ taining these stings as substrings are loaded
                                                                       $ (separated by blanks); empty means everything
                                                                       $ is plotted 
@@ -101,35 +101,15 @@ $=====================================================================
                                                                       $
                                                                       $ set axes titles for each histograms;
                                                                       $ has to be givin in '"' and end with ';'
-  xAxes        = "#mu compatibility";
-                 "E_{em} [GeV]";
-                 "E_{em}^{3X3} [GeV]";
-                 "E_{had} [GeV]";
-                 "E_{had}^{3x3} [GeV]";
-                 "E_{HO} [GeV]";
-                 "E_{HO}^{3x3} [GeV]";
-                 "E(muon) [GeV]";
-                 "p_{t}(muon) [GeV]";
-                 "#eta(muon)";
-                 "#phi(muon)";
-                 "min(#delta R (muon, jet))_{all}";
-                 "min(#delta R (muon, jet))_{p_{t}>5 GeV}";
-                 "min(#delta R (muon, jet))_{p_{t}>10 GeV}";
-                 "min(#delta R (muon, jet))_{p_{t}>15 GeV}";
-                 "min(#delta R (muon, jet))_{p_{t}>20 GeV}";
-                 "#Sigma_{#delta R<0.3}(p_{t}(track))";
-                 "#Sigma_{#delta R<0.3}(E_{t}(tower))";
-                 "#Sigma_{#delta R<0.3}(E_{t}^{em}(tower))";
-                 "#Sigma_{#delta R<0.3}(E_{t}^{had}(tower))";
-                 "dR(muon,track)";
-                 "dR(muon,track)";
-                 "dR(muon,tower)";
-                 "dR(muon,tower)";
-                 "N_{track}^{dR<0.3}";
-                 "N_{tower}^{dR<0.3}";
-                 "log_{10}(#delta(ctf,combined))";
+  xAxes        =
 
   yAxes        = "events";
+                 "events";
+                 "events";
+                 "events";
+                 "events";
+                 "events";
+                 "events";
                  "events";
                  "events";
                  "events";
@@ -153,11 +133,8 @@ $=====================================================================
                  "1/N_{muon} #Sigma (N_{track})";
                  "1/N_{muon} #Sigma (E_{t}(tower)) [GeV]";
                  "1/N_{muon} #Sigma (N_{tower})";
-                 "events";
-                 "events";
-                 "events";
-
-
+                 "1/N_{muon} #Sigma (E_{t}(tower)) [GeV]";
+                 "1/N_{muon} #Sigma (N_{tower})";
 
                                                                       $
                                                                       $ should contain a legend entry for each 
