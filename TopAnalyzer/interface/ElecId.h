@@ -44,9 +44,6 @@ class ElecId{
   
  private:
 
-  // additional evt content/steerings  
-  edm::InputTag bshp_, eshp_;
-
   TH1F *eops_;
   TH1F *eopb_;
   TH1F *nocl_;
