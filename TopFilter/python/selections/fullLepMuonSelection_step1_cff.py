@@ -40,7 +40,7 @@ fullLepMuonJetDistance = cms.PSet(
     refs  = cms.InputTag("selectedLayer1Jets"),
     thresh= cms.vdouble(  20.),
     mode  = cms.uint32(   0 ),    
-    name = cms.string('semiLepMuonIsoJet'),
+    name = cms.string('fullLepMuonIsoJet'),
     min  = cms.vdouble(  0.0, 0.0),
     max  = cms.vdouble(  0.3, 0.3)
 )
