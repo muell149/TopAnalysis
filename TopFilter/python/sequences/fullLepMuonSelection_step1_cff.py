@@ -17,7 +17,7 @@ fullLepMuon42 = analyzeMuon.clone()    ##     x     |     x     |     x     |   
 ## put any extra configuration here:
 
 from TopAnalysis.TopAnalyzer.JetAnalyzer_cfi  import analyzeJets
-## -------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
+## -------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt  | muon iso  |  muon dist
 fullLepJets00 = analyzeJets.clone()    ##     -     |     -     |     -     |     -     |     -     |     -
 fullLepJets10 = analyzeJets.clone()    ##     x     |     -     |     -     |     -     |     -     |     -
 fullLepJets20 = analyzeJets.clone()    ##     x     |     x     |     -     |     -     |     -     |     -
@@ -31,7 +31,40 @@ fullLepJets32 = analyzeJets.clone()    ##     x     |     x     |     x     |   
 fullLepJets42 = analyzeJets.clone()    ##     x     |     x     |     x     |     x     |     x     |     x
 
 ## put any extra configuration here:
+fullLepMuon00.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon00.doKin = cms.bool(False)                        # doKin is set to 'false' since this features requires
+fullLepMuon10.input = cms.InputTag("selectedLayer1Muons")    # the allLayer1Jets collection which is dropped in the 
+fullLepMuon10.doKin = cms.bool(False)                        # PAT tuple. Alternatively you can replace
+fullLepMuon20.input = cms.InputTag("selectedLayer1Muons")    # fullLepMuonXY.kin = cms.PSet(
+fullLepMuon20.doKin = cms.bool(False)                        #     jets = cms.InputTag("allLayer1Jets")
+fullLepMuon01.input = cms.InputTag("selectedLayer1Muons")    # )
+fullLepMuon01.doKin = cms.bool(False)                        # but i don't know if this would make sense.
+fullLepMuon02.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon02.doKin = cms.bool(False)
+fullLepMuon11.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon11.doKin = cms.bool(False)
+fullLepMuon12.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon12.doKin = cms.bool(False)
+fullLepMuon21.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon21.doKin = cms.bool(False)
+fullLepMuon22.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon22.doKin = cms.bool(False)
+fullLepMuon32.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon32.doKin = cms.bool(False)
+fullLepMuon42.input = cms.InputTag("selectedLayer1Muons")
+fullLepMuon42.doKin = cms.bool(False)
 
+fullLepJets00.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets10.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets20.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets01.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets02.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets11.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets12.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets21.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets22.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets32.input = cms.InputTag("selectedLayer1Jets")
+fullLepJets42.input = cms.InputTag("selectedLayer1Jets")
 
 ## import selection cuts here
 from TopAnalysis.TopFilter.selections.fullLepMuonSelection_step1_cff import *
@@ -63,24 +96,24 @@ makeFullMuonMuonKinematics = cms.Sequence(fullLepMuon00 + fullLepJets00 *
                                           fullLepMuon10 + fullLepJets10 *
                                           filterFullLep20 *
                                           fullLepMuon20 + fullLepJets20 
-                                          )
+                                         )
 
 makeFullMuonJetsKinematics = cms.Sequence(filterFullLep01 *
                                           fullLepMuon21 + fullLepJets21 *
                                           filterFullLep02 *
                                           fullLepMuon22 + fullLepJets22 
-                                          )
+                                         )
 
 makeFullMuonMuonIsolation  = cms.Sequence(filterFullLep30 *
                                           fullLepMuon32 + fullLepJets32 *
                                           filterFullLep40 *
                                           fullLepMuon42 + fullLepJets42 
-                                          )
+                                         )
 
 selectFullLepMuon = cms.Sequence(makeFullMuonMuonKinematics *
                                  makeFullMuonJetsKinematics * 
                                  makeFullMuonMuonIsolation
-                                 )
+                                )
 
 
 
