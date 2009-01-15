@@ -277,8 +277,8 @@ void
 BJetTag::fillEfficencyHist(TH1F* hist, vector<TH1F*> src, size_t n, double cut)
 {
   for(size_t i=0; i<n; ++i){ 
-    int cutBin = cut*nBins+1;   
-    double integral = src[i]->Integral(cutBin, nBins+1);      
+    double cutBin = cut*nBins+1;   
+    double integral = src[i]->Integral(static_cast<int>(cutBin), nBins+1);      
     double norm = src[i]->GetEntries();                  
     if(norm==0) continue; 
     double efficency = integral/norm; 
