@@ -3,7 +3,7 @@
 
 /// default constructor
 ViewFilter::ViewFilter(const edm::ParameterSet& cfg):
-  beforeCut_( 0 ), afterCut_( 0 ), beforeCutWeighted_( 0. ), afterCutWeighted_( 0. ),
+  beforeCut_( 0 ), afterCut_( 0 ), beforeCutWeighted_( 0. ), afterCutWeighted_( 0. ),  
   name_( cfg.getParameter<std::string>("name") ),
   min_ ( cfg.getParameter<std::vector<double> >("min") ),
   max_ ( cfg.getParameter<std::vector<double> >("max") )
@@ -13,9 +13,9 @@ ViewFilter::ViewFilter(const edm::ParameterSet& cfg):
   case  0: mode_=kStrong; break;
   case  1: mode_=kWeak;   break;
   default: throw edm::Exception(edm::errors::Configuration, 
-				"unknown mode for filter; choose between 0(strong) or 1(weak) \n");
+				"unknown mode for filter; choose between 0(strong) or 1(weak) \n");				
   }
-
+  
   // print cuts
   unsigned int maxSize=min_.size();
   if(max_.size()>maxSize) maxSize=max_.size();
@@ -47,9 +47,17 @@ bool ViewFilter::operator()(edm::Event& evt, const std::vector<edm::View<reco::C
 /// summarize event counting
 void ViewFilter::summarize()
 {
+  // if no event weight or dummy weight is used a simplified summary format is taken
+  if(beforeCut_ != beforeCutWeighted_){
   std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
 	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
-	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
+	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") out of "
 	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
 	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
+  }
+  else{
+  std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
+	    << ::std::setw( 10 ) << ::std::right << afterCut_ << "  out of "
+	    << ::std::setw( 10 ) << ::std::right << beforeCut_ << std::endl;  
+  }
 }
