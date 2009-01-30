@@ -1,62 +1,83 @@
 import FWCore.ParameterSet.Config as cms
 
 from TopAnalysis.TopAnalyzer.MuonAnalyzer_cfi import analyzeMuon
-## -------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-fullLepMuon00pre = analyzeMuon.clone()    ##     -     |     -     |     -     |     -
-fullLepMuon10pre = analyzeMuon.clone()    ##     x     |     -     |     -     |     -
-fullLepMuon20pre = analyzeMuon.clone()    ##     x     |     x     |     -     |     -
-fullLepMuon01pre = analyzeMuon.clone()    ##     -     |     -     |     x     |     -
-fullLepMuon02pre = analyzeMuon.clone()    ##     -     |     -     |     x     |     x
-fullLepMuon11pre = analyzeMuon.clone()    ##     x     |     -     |     x     |     -
-fullLepMuon12pre = analyzeMuon.clone()    ##     x     |     -     |     x     |     x
-fullLepMuon21pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     -
-fullLepMuon22pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     x
+## ------------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
+fullLepMuonMuon00pre = analyzeMuon.clone()    ##     -     |     -     |     -     |     -
+fullLepMuonMuon10pre = analyzeMuon.clone()    ##     x     |     -     |     -     |     -
+fullLepMuonMuon20pre = analyzeMuon.clone()    ##     x     |     x     |     -     |     -
+fullLepMuonMuon21pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     -
+fullLepMuonMuon22pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     x
 
 ## put any extra configuration here:
+fullLepMuonMuon00pre.input = cms.InputTag("selectedLayer1Muons")                       
+fullLepMuonMuon10pre.input = cms.InputTag("selectedLayer1Muons")                          
+fullLepMuonMuon20pre.input = cms.InputTag("selectedLayer1Muons")                        
+fullLepMuonMuon21pre.input = cms.InputTag("selectedLayer1Muons")    
+fullLepMuonMuon22pre.input = cms.InputTag("selectedLayer1Muons")
+
+fullLepMuonMuon00pre.useEventWeight = cms.bool(False)                       
+fullLepMuonMuon10pre.useEventWeight = cms.bool(False)                          
+fullLepMuonMuon20pre.useEventWeight = cms.bool(False)                        
+fullLepMuonMuon21pre.useEventWeight = cms.bool(False)    
+fullLepMuonMuon22pre.useEventWeight = cms.bool(False)
+
 
 from TopAnalysis.TopAnalyzer.JetAnalyzer_cfi  import analyzeJets
-## -------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-fullLepJets00pre = analyzeJets.clone()    ##     -     |     -     |     -     |     -
-fullLepJets10pre = analyzeJets.clone()    ##     x     |     -     |     -     |     -
-fullLepJets20pre = analyzeJets.clone()    ##     x     |     x     |     -     |     -
-fullLepJets01pre = analyzeJets.clone()    ##     -     |     -     |     x     |     -
-fullLepJets02pre = analyzeJets.clone()    ##     -     |     -     |     x     |     x
-fullLepJets11pre = analyzeJets.clone()    ##     x     |     -     |     x     |     -
-fullLepJets12pre = analyzeJets.clone()    ##     x     |     -     |     x     |     x
-fullLepJets21pre = analyzeJets.clone()    ##     x     |     x     |     x     |     -
-fullLepJets22pre = analyzeJets.clone()    ##     x     |     x     |     x     |     x
+## ------------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
+fullLepMuonJets00pre = analyzeJets.clone()    ##     -     |     -     |     -     |     -
+fullLepMuonJets10pre = analyzeJets.clone()    ##     x     |     -     |     -     |     -
+fullLepMuonJets20pre = analyzeJets.clone()    ##     x     |     x     |     -     |     -
+fullLepMuonJets21pre = analyzeJets.clone()    ##     x     |     x     |     x     |     -
+fullLepMuonJets22pre = analyzeJets.clone()    ##     x     |     x     |     x     |     x
 
 ## put any extra configuration here:
+fullLepMuonJets00pre.input = cms.InputTag("selectedLayer1Jets")
+fullLepMuonJets10pre.input = cms.InputTag("selectedLayer1Jets")
+fullLepMuonJets20pre.input = cms.InputTag("selectedLayer1Jets")
+fullLepMuonJets21pre.input = cms.InputTag("selectedLayer1Jets")
+fullLepMuonJets22pre.input = cms.InputTag("selectedLayer1Jets")
+
+fullLepMuonJets00pre.useEventWeight = cms.bool(False)                       
+fullLepMuonJets10pre.useEventWeight = cms.bool(False)                          
+fullLepMuonJets20pre.useEventWeight = cms.bool(False)                        
+fullLepMuonJets21pre.useEventWeight = cms.bool(False)    
+fullLepMuonJets22pre.useEventWeight = cms.bool(False)
 
 
 ## import selection cuts here
 from TopAnalysis.TopFilter.selections.fullLepMuonSelection_step0_cff import *
 
 from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterMuonEta
-prefilterFullLep10 = filterMuonEta.clone()
+prefilterFullLepMuon10 = filterMuonEta.clone()
 from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterJetsEta
-prefilterFullLep01 = filterJetsEta.clone()
+prefilterFullLepMuon01 = filterJetsEta.clone()
 from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterMuonPt
-prefilterFullLep20 = filterMuonPt.clone()
+prefilterFullLepMuon20 = filterMuonPt.clone()
 from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterJetsPt
-prefilterFullLep02 = filterJetsPt.clone()
+prefilterFullLepMuon02 = filterJetsPt.clone()
 
 ## put any extra configuration here:
-prefilterFullLep10.cuts = fullLepMuonEta
-prefilterFullLep01.cuts = fullLepJetsEta
-prefilterFullLep20.cuts = fullLepMuonPt
-prefilterFullLep02.cuts = fullLepJetsPt
+prefilterFullLepMuon10.cuts = fullLepMuonEta
+prefilterFullLepMuon01.cuts = fullLepJetsEta
+prefilterFullLepMuon20.cuts = fullLepMuonPt
+prefilterFullLepMuon02.cuts = fullLepJetsPt
+
+prefilterFullLepMuon10.useEventWeight = False
+prefilterFullLepMuon01.useEventWeight = False
+prefilterFullLepMuon20.useEventWeight = False
+prefilterFullLepMuon02.useEventWeight = False
+
 
 ## define sequences
-preselectFullLepMuon = cms.Sequence(fullLepMuon00pre + fullLepJets00pre *
-                                    prefilterFullLep10 *
-                                    fullLepMuon10pre + fullLepJets10pre *
-                                    prefilterFullLep20 *
-                                    fullLepMuon20pre + fullLepJets20pre *
-                                    prefilterFullLep01 *
-                                    fullLepMuon21pre + fullLepJets21pre *
-                                    prefilterFullLep02 *
-                                    fullLepMuon22pre + fullLepJets22pre
+preselectFullLepMuon = cms.Sequence(fullLepMuonMuon00pre + fullLepMuonJets00pre *
+                                    prefilterFullLepMuon10 *
+                                    fullLepMuonMuon10pre + fullLepMuonJets10pre *
+                                    prefilterFullLepMuon20 *
+                                    fullLepMuonMuon20pre + fullLepMuonJets20pre #* # no Jet selection
+                                    #prefilterFullLepMuon01 *
+                                    #fullLepMuonMuon21pre + fullLepMuonJets21pre *
+                                    #prefilterFullLepMuon02 *
+                                    #fullLepMuonMuon22pre + fullLepMuonJets22pre
                                    )
 
 
