@@ -1,9 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
 analyzeMuon = cms.EDAnalyzer("MuonAnalyzer",
-    weight  = cms.InputTag("eventWeight"),
-    input   = cms.InputTag("selectedLayer1Muons"),
+    input   = cms.InputTag("allLayer1Muons"),
     hist    = cms.string('analyzeMuon.hist'),
+
+    ## event weight
+    useEventWeight = cms.bool(True),
+    weight  = cms.InputTag("eventWeight"),  
                              
     ## fill id  histograms
     id = cms.PSet(
@@ -12,7 +15,7 @@ analyzeMuon = cms.EDAnalyzer("MuonAnalyzer",
 
     ## fill kin histograms
     kin = cms.PSet(
-        jets = cms.InputTag("selectedLayer1Jets")
+        jets = cms.InputTag("allLayer1Jets")
     ),
     doKin = cms.bool(True),
 

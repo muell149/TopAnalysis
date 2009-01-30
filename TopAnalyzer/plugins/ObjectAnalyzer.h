@@ -37,7 +37,7 @@ class ObjectAnalyzer : public edm::EDAnalyzer {
   edm::InputTag src_;
   edm::InputTag wgt_;
   std::string hist_;
-  bool doId_,  doKin_, doRes_;
+  bool useEvtWgt_, doId_,  doKin_, doRes_;
 
   Id  *id_;
   Kin *kin_;
@@ -49,9 +49,10 @@ ObjectAnalyzer<Collection, Id, Kin, Res>::ObjectAnalyzer(const edm::ParameterSet
   src_( cfg.getParameter<edm::InputTag>( "input" ) ),
   wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
   hist_ ( cfg.getParameter<std::string>( "hist" ) ),
-  doId_ ( cfg.getParameter<bool>( "doId"  ) ),
-  doKin_( cfg.getParameter<bool>( "doKin" ) ),
-  doRes_( cfg.getParameter<bool>( "doRes" ) )
+  useEvtWgt_( cfg.getParameter<bool>( "useEventWeight" ) ),  
+  doId_     ( cfg.getParameter<bool>( "doId"  ) ),
+  doKin_    ( cfg.getParameter<bool>( "doKin" ) ),
+  doRes_    ( cfg.getParameter<bool>( "doRes" ) )
 {
   if( doId_ ) id_  = new Id ( cfg.getParameter<edm::ParameterSet>("id" ) );
   if( doKin_) kin_ = new Kin( cfg.getParameter<edm::ParameterSet>("kin") );
@@ -73,10 +74,12 @@ void ObjectAnalyzer<Collection, Id, Kin, Res>::analyze(const edm::Event& evt, co
   evt.getByLabel(src_, src);
   Collection sources = *src;
 
-  edm::Handle<double> wgt;
-  evt.getByLabel(wgt_, wgt);
-  double weight = *wgt;
-
+  double weight = 1;
+  if(useEvtWgt_) {
+    edm::Handle<double> wgt;
+    evt.getByLabel(wgt_, wgt);
+    weight = *wgt;
+  }
   if( doId_ ) id_ ->fill(evt, sources, weight );
   if( doKin_) kin_->fill(evt, sources, weight );
   if( doRes_) res_->fill(evt, sources, weight );

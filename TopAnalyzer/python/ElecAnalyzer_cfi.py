@@ -1,10 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
 analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
-    ## necessary inputs
-    hist    = cms.string  ('analyzeElec.hist'),
-    weight  = cms.InputTag("eventWeight"),
     input   = cms.InputTag("allLayer1Electrons"),
+    hist    = cms.string  ('analyzeElec.hist'),
+       
+    ## event weight
+    useEventWeight = cms.bool(True), 
+    weight  = cms.InputTag("eventWeight"),      
                              
     ## fill id histograms
     id = cms.PSet(
