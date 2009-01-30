@@ -100,12 +100,19 @@ bool DistanceFilter<Collection>::operator()(edm::Event& evt, const std::vector<C
 template <typename Collection> 
 void DistanceFilter<Collection>::summarize()
 {
+  // if no event weight or dummy weight is used a simplified summary format is taken
+  if(beforeCut_ != beforeCutWeighted_){
   std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
 	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
-	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") outof "
+	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") out of "
 	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
 	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
-}
+  }
+  else{
+  std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
+	    << ::std::setw( 10 ) << ::std::right << afterCut_ << "  out of "
+	    << ::std::setw( 10 ) << ::std::right << beforeCut_ << std::endl;  
+  }}
 
 /// filter (worker class):
 template <typename Collection> 
