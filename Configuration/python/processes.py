@@ -79,6 +79,10 @@ source['desy']+= '\'/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDE
 ##
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
+## Events      : 1 005 206
+## xsec(pb)  LO:       320
+## xsec(pb) NLO:       414
+## eff         :      0.33
 ######################################################################
 sizes ['ttbar1'] = 1005206
 source['ttbar1'] = '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1/0008/001E41B0-51D3-DD11-85CF-00E08140EAB7.root\','
@@ -524,6 +528,10 @@ source['ttbar1']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1/
 ##
 ## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
+## Events      :   147 000
+## xsec(pb)  LO:       242
+## xsec(pb) NLO:       414
+## eff         :         1
 ######################################################################
 sizes ['ttbar2'] = 147000
 source['ttbar2'] = '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/0004/16AAC418-218A-DD11-AC33-001F2908F0E4.root\','
@@ -577,6 +585,10 @@ source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 ##
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
+## Events      : 6 238 383 
+## xsec(pb)  LO: 509100000
+## xsec(pb) NLO:       NAN
+## eff         :  0.000239
 ######################################################################
 sizes ['qcd1'] = 6238383
 source['qcd1'] = '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/0003/00282FEF-F1AB-DD11-886E-003048770C6A.root\','
