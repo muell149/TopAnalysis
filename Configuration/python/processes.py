@@ -66,9 +66,18 @@ source['cern'] = '\'/store/relval/CMSSW_2_1_10/RelValTTbar/GEN-SIM-DIGI-RAW-HLTD
 ## test sample at desy
 ##
 ######################################################################
-sizes ['desy'] = 0
-source['desy'] = ''
-
+sizes ['desy'] = 100000
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_1.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_2.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_3.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_4.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_5.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_6.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_7.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_8.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_9.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_10.root\','
+source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_11.root\''
 
 
 
