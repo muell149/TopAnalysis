@@ -23,9 +23,9 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   edm::Handle<TtSemiLeptonicEvent> semiLepEvt;
   evt.getByLabel(semiLepEvt_, semiLepEvt);
 
-  edm::Handle<int> hypoKeyHandle;
-  evt.getByLabel(hypoKey_, hypoKeyHandle);
-  TtSemiLeptonicEvent::HypoKey& hypoKey = (TtSemiLeptonicEvent::HypoKey&) *hypoKeyHandle;
+  edm::Handle<int> hypoClassKeyHandle;
+  evt.getByLabel(hypoKey_, hypoClassKeyHandle);
+  TtSemiLeptonicEvent::HypoClassKey& hypoClassKey = (TtSemiLeptonicEvent::HypoClassKey&) *hypoClassKeyHandle;
 
   edm::Handle<double> wgt;
   evt.getByLabel(wgt_, wgt);
@@ -36,22 +36,23 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // and if it satisfies some quality criteria
   // -----------------------
 
-  if( !semiLepEvt->isHypoAvailable(hypoKey) ){
+  if( !semiLepEvt->isHypoAvailable(hypoClassKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not available for this event";
   }
-  if( !semiLepEvt->isHypoValid(hypoKey) ){
+  if( !semiLepEvt->isHypoValid(hypoClassKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
   }
   
-  if( !semiLepEvt->isHypoValid(hypoKey) ||
-      (hypoKey==TtSemiLeptonicEvent::kGenMatch && semiLepEvt->genMatchSumDR()>maxSumDRGenMatch_) ||
-      (hypoKey==TtSemiLeptonicEvent::kKinFit   && semiLepEvt->fitProb()<minProbKinFit_         ) ||
-      (hypoKey==TtSemiLeptonicEvent::kMVADisc  && semiLepEvt->mvaDisc()<minMVADisc_            )
+  if( !semiLepEvt->isHypoValid(hypoClassKey) ||
+      (hypoClassKey==TtSemiLeptonicEvent::kGenMatch && semiLepEvt->genMatchSumDR()>maxSumDRGenMatch_) ||
+      (hypoClassKey==TtSemiLeptonicEvent::kKinFit   && semiLepEvt->fitProb()<minProbKinFit_         ) ||
+      (hypoClassKey==TtSemiLeptonicEvent::kMVADisc  && semiLepEvt->mvaDisc()<minMVADisc_            )
       ) {
     goodHypo_->Fill(0., weight); // not a good hypothesis
   }
-  else goodHypo_->Fill(1., weight); // good hypothesis
-
+  else {
+    goodHypo_->Fill(1., weight); // good hypothesis
+  }
   if( !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGeom         ) ||
       !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kWMassMaxSumPt) ||
       !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMaxSumPtWMass) ||
@@ -73,16 +74,16 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // -----------------------
   // fill histos for basic kinematic variables
   // -----------------------
-  const reco::Candidate* HadTop   = semiLepEvt->hadronicTop(hypoKey);
-  const reco::Candidate* HadW     = semiLepEvt->hadronicW  (hypoKey);
-  const reco::Candidate* HadB     = semiLepEvt->hadronicB  (hypoKey);
-  const reco::Candidate* HadQ     = semiLepEvt->lightQuarkQ(hypoKey);
-  const reco::Candidate* HadP     = semiLepEvt->lightQuarkP(hypoKey);
-  const reco::Candidate* LepTop   = semiLepEvt->leptonicTop(hypoKey);
-  const reco::Candidate* LepW     = semiLepEvt->leptonicW  (hypoKey);
-  const reco::Candidate* LepB     = semiLepEvt->leptonicB  (hypoKey);
-  const reco::Candidate* Lepton   = semiLepEvt->lepton     (hypoKey);
-  const reco::Candidate* Neutrino = semiLepEvt->neutrino   (hypoKey);
+  const reco::Candidate* HadTop   = semiLepEvt->hadronicTop(hypoClassKey);
+  const reco::Candidate* HadW     = semiLepEvt->hadronicW  (hypoClassKey);
+  const reco::Candidate* HadB     = semiLepEvt->hadronicB  (hypoClassKey);
+  const reco::Candidate* HadQ     = semiLepEvt->lightQuarkQ(hypoClassKey);
+  const reco::Candidate* HadP     = semiLepEvt->lightQuarkP(hypoClassKey);
+  const reco::Candidate* LepTop   = semiLepEvt->leptonicTop(hypoClassKey);
+  const reco::Candidate* LepW     = semiLepEvt->leptonicW  (hypoClassKey);
+  const reco::Candidate* LepB     = semiLepEvt->leptonicB  (hypoClassKey);
+  const reco::Candidate* Lepton   = semiLepEvt->lepton     (hypoClassKey);
+  const reco::Candidate* Neutrino = semiLepEvt->neutrino   (hypoClassKey);
 
   fillKinHistos(hadTopKin_, *HadTop  , weight);
   fillKinHistos(hadWKin_,   *HadW    , weight);
@@ -131,8 +132,8 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // -----------------------
   // fill correlation histos for jet parton association
   // -----------------------
-  fillJetCorrelHistos(semiLepEvt->jetMatch(hypoKey),
-		      semiLepEvt->jetMatch(TtSemiLeptonicEvent::kGenMatch),
+  fillJetCorrelHistos(semiLepEvt->jetLepComb(hypoClassKey),
+		      semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch),
 		      weight);
 
 }
