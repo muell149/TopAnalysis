@@ -48,13 +48,13 @@ filterSemiLep20.cuts = semiLepMuonPt
 filterSemiLep02.cuts = semiLepJetsPt
 
 ## define sequences
-selectSemiLepMuon = cms.Sequence(semiLepMuon00 + semiLepJets00 *
-                                 filterSemiLep10 *
-                                 semiLepMuon10 + semiLepJets10 *
-                                 filterSemiLep20 *
-                                 semiLepMuon20 + semiLepJets20 *
-                                 filterSemiLep01 *
-                                 semiLepMuon21 + semiLepJets21 *
-                                 filterSemiLep02 *
-                                 semiLepMuon22 + semiLepJets22
-                                 )
+preselectSemiLepMuon = cms.Sequence(semiLepMuon00 + semiLepJets00 *
+                                    filterSemiLep10 *
+                                    semiLepMuon10 + semiLepJets10 *
+                                    filterSemiLep20 *
+                                    semiLepMuon20 + semiLepJets20 *
+                                    filterSemiLep01 *
+                                    semiLepMuon21 + semiLepJets21 *
+                                    filterSemiLep02 *
+                                    semiLepMuon22 + semiLepJets22
+                                    )
