@@ -83,12 +83,12 @@ source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_11.root
 
 ######################################################################
 ##
-## /TTJets-madgraph/Fall08_IDEAL_V9_v1/GEN-SIM-RECO
+## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 ##
 ## Events      :   1026391
 ## xsec(pb)  LO:       320
 ## xsec(pb) NLO:       414
-## eff         :      0.33
+## eff         :       1.0
 ######################################################################
 sizes ['ttbar1'] = 1026391
 source['ttbar1'] = '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/027B51E9-8EED-DD11-9045-0015C5E9C0E1.root\','
@@ -632,7 +632,7 @@ source['ttbar1']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/
 ## Events      :    147000
 ## xsec(pb)  LO:       242
 ## xsec(pb) NLO:       414
-## eff         :         1
+## eff         :       1.0
 ######################################################################
 sizes ['ttbar2'] = 147000
 source['ttbar2'] = '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/0004/16AAC418-218A-DD11-AC33-001F2908F0E4.root\','
@@ -686,7 +686,7 @@ source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 ##
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
-## Events      : 6 238 383 
+## Events      :   6238383 
 ## xsec(pb)  LO: 509100000
 ## xsec(pb) NLO:       NAN
 ## eff         :  0.000239
@@ -1750,7 +1750,7 @@ source['qcd6'] = ''
 ## Events      : 101467739
 ## xsec(pb)  LO:     35000
 ## xsec(pb) NLO:       NAN
-## eff         :      0.45
+## eff         :      1.00
 ######################################################################
 sizes ['wjets'] = 0
 source['wjets'] = ''
@@ -1763,7 +1763,7 @@ source['wjets'] = ''
 ## Events      :   9964055
 ## xsec(pb)  LO:      3700
 ## xsec(pb) NLO:       NAN
-## eff         :      0.40
+## eff         :      1.00
 ######################################################################
 sizes ['zjets'] = 0
 source['zjets'] = ''

@@ -74,8 +74,8 @@ process.pat = cms.Path(process.patTuple_reduced)
 
 ## add event weight information
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.eventWeight.nevts = 101467739
-process.eventWeight.xsec  = 35000
+process.eventWeight.nevts = 9964055
+process.eventWeight.xsec  = 3700
 process.eventWeight.lumi  = 1000
 process.eventWeight.eff   = 1.0
 
@@ -93,7 +93,7 @@ process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('combinedSelection_step0_wjets.root')
+    fileName = cms.string('combinedSelection_step0_zjets.root')
 )
 
 #-------------------------------------------------
@@ -147,7 +147,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     process.patTupleEventContent,
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_wjets.root')
+    fileName = cms.untracked.string('patTuple_zjets.root')
 )
 
 process.outpath = cms.EndPath(process.out)

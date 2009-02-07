@@ -65,7 +65,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
 run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patTuple_reduced)
+process.pat = cms.Path(process.patTuple)
 
 
 #-------------------------------------------------
@@ -74,10 +74,10 @@ process.pat = cms.Path(process.patTuple_reduced)
 
 ## add event weight information
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.eventWeight.nevts = 101467739
-process.eventWeight.xsec  = 35000
+process.eventWeight.nevts = 6238383
+process.eventWeight.xsec  = 509100000
 process.eventWeight.lumi  = 1000
-process.eventWeight.eff   = 1.0
+process.eventWeight.eff   = 0.000239
 
 process.wght = cms.Path(process.eventWeight)   
 
@@ -93,7 +93,7 @@ process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('combinedSelection_step0_wjets.root')
+    fileName = cms.string('combinedSelection_step0_qcd_incl.root')
 )
 
 #-------------------------------------------------
@@ -147,7 +147,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     process.patTupleEventContent,
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_wjets.root')
+    fileName = cms.untracked.string('patTuple_qcd_incl.root')
 )
 
 process.outpath = cms.EndPath(process.out)

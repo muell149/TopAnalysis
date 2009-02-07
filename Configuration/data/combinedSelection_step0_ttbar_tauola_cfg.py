@@ -65,7 +65,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
 run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patTuple_reduced)
+process.pat = cms.Path(process.patTuple)
 
 
 #-------------------------------------------------
@@ -74,26 +74,26 @@ process.pat = cms.Path(process.patTuple_reduced)
 
 ## add event weight information
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.eventWeight.nevts = 101467739
-process.eventWeight.xsec  = 35000
+process.eventWeight.nevts = 147000
+process.eventWeight.xsec  = 414
 process.eventWeight.lumi  = 1000
 process.eventWeight.eff   = 1.0
 
 process.wght = cms.Path(process.eventWeight)   
 
-## test basic event selection
-process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
-process.semiLepMuonSelection = cms.Path(process.preselectSemiLepMuon)   
+## basic event selection
+#process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
+#process.semiLepMuonSelection = cms.Path(process.preselectSemiLepMuon)   
 
-process.load("TopAnalysis.TopFilter.sequences.fullLepElMuSelection_step0_cff")
-process.fullLepElMuSelection = cms.Path(process.preselectFullLepElMu)
+#process.load("TopAnalysis.TopFilter.sequences.fullLepElMuSelection_step0_cff")
+#process.fullLepElMuSelection = cms.Path(process.preselectFullLepElMu)
 
-process.load("TopAnalysis.TopFilter.sequences.fullLepMuonSelection_step0_cff")
-process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
+#process.load("TopAnalysis.TopFilter.sequences.fullLepMuonSelection_step0_cff")
+#process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('combinedSelection_step0_wjets.root')
+    fileName = cms.string('combinedSelection_step0_ttbar_tauola.root')
 )
 
 #-------------------------------------------------
@@ -136,9 +136,7 @@ process.patTupleEventContent.outputCommands.extend(process.topAnalysisEventConte
 ## define event selection
 process.EventSelection = cms.PSet(
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('semiLepMuonSelection',
-                                   'fullLepElMuSelection',
-                                   'fullLepMuonSelection')
+        SelectEvents = cms.vstring('pat')
     )
 )
 
@@ -147,7 +145,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     process.patTupleEventContent,
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_wjets.root')
+    fileName = cms.untracked.string('patTuple_ttbar_tauola.root')
 )
 
 process.outpath = cms.EndPath(process.out)
