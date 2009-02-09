@@ -66,19 +66,12 @@ source['cern'] = '\'/store/relval/CMSSW_2_1_10/RelValTTbar/GEN-SIM-DIGI-RAW-HLTD
 ## test sample at desy
 ##
 ######################################################################
-sizes ['desy'] = 100000
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_1.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_2.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_3.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_4.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_5.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_6.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_7.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_8.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_9.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_10.root\','
-source['desy'] = '\'/store/user/rwolf/test/combinedSelection_step0_wjets_11.root\''
-
+sizes ['desy'] = 147000
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar0.root\''
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar1.root\','
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar3.root\','
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar4.root\''
 
 
 ######################################################################
@@ -681,6 +674,24 @@ source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/0005/CED0ECE9-2F8A-DD11-925F-001F2907DA48.root\','
 source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/0005/DC1CF760-278A-DD11-95B8-001CC47D2F90.root\','
 source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/0005/E0DA23B9-268A-DD11-9C2C-001CC47C813C.root\''
+
+######################################################################
+##
+## /TauolaTTbar/Summer08_IDEAL_V9_v1/PAT
+##
+## Events      :    147000
+## xsec(pb)  LO:       242
+## xsec(pb) NLO:       414
+## eff         :       1.0
+######################################################################
+sizes ['ttbar3'] = 147000
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar0.root\''
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar1.root\','
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar3.root\','
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar4.root\''
+
+
 
 ######################################################################
 ##
