@@ -8,8 +8,8 @@ $=====================================================================
   histInput    = analyzeJets.hist                                     $ hist file, which contains the names of the 
                                                                       $ histograms to be plottet 
                                                                       $
-  rootInput    = analyzeJets.Madgraph.root                            $ root input file(s) corresponding to samples
-                 analyzeJets.RelVal.root                              $ (separated by blanks)
+  rootInput    = analyzeJets.QCD.root                                 $ root input file(s) corresponding to samples
+                 analyzeJets.ZJets.root                               $ (separated by blanks)
                                                                       $
   inputDirs    = analyzeSelJets                                       $ directory in which the histograms are kept
                                                                       $ within the root file; for edm::Analyzers 
@@ -64,11 +64,15 @@ $=====================================================================
                  1 1 1 1 1 1 1 1 1 1
                  1 1 1 1 1 1 1 1 1 1
                  1 1 1 1 1 1 1 1 1 1
+                 1 1 1 1 1 1 1 1 1 1
+                 1 1 1 1 1 1 1 1 1 1
 
   yGrid        = 1 1 1 1 1 1 1 1 1 1
                  1 1 1 1 1 1 1 1 1 1   
                  1 1 1 1 1 1 1 1 1 1   
                  1 1 1 1 1 1 1 1 1 1 
+                 1 1 1 1 1 1 1 1 1 1
+                 1 1 1 1 1 1 1 1 1 1
                  1 1 1 1 1 1 1 1 1 1
                  1 1 1 1 1 1 1 1 1 1
                                                                       $
@@ -77,21 +81,27 @@ $=====================================================================
                  1 1 1 1 1 1 1 1 1 1                                  $ is _1_
                  1 1 1 1 1 1 1 1 1 1                                  $
 		 1 1 1 1 1 1 1 1 1 1
-	         1 1 1
+                 1 1 1 1 1 1 1 1 1 1
+                 1 1 1 1 1 1 1 1 1 1
+                 1 1 1 1 1 1 1 1 1 1
 
   histMinimum  = 0 0 0 0 0 0 0 0 0 0                                  $ histogram minimum; can be steered for 
                  0 0 0 0 0 0 0 0 0 0                                  $ each histogram individually; empty means 
                  0 0 0 0 0 0 0 0 0 0                                  $ set to _0_
                  0 0 0 0 0 0 0 0 0 0                                  $
                  0 0 0 0 0 0 0 0 0 0
-                 0 0 0
+                 0 0 0 0 0 0 0 0 0 0
+                 0 0 0 0 0 0 0 0 0 0
+                 0 0 0 0 0 0 0 0 0 0
 
   histMaximum  = .1  .1  1.2 .1  .1  1.2 .1  .1  1.2 .1               $ histogram maximum; can be steered for 
-                 .1  1.2 .1  .1  1.2 .1  .2  .2  .3  .2               $ each histogram individually; empty means
-                 .3  .2  .2  .2  .2  .2  .1  .3  .1  .1               $ set automatically
-                 .2  .2  .1  .2  .1  .1  .1  .2  .1  .1
+                 .1  1.2 .1  .1  1.2 .3  .4  .3  .6  .3               $ each histogram individually; empty means
+                 .4  .3  .6  .3  .4  .3  .6  .3  .4  .3               $ set automatically
+                 .6  .3  .4  .3  .6  .3  .4  .3  .6  .1
                  .2  .3  .1  .1  .2  .3  .1  .1  .3  .3
-                 .3  .4  .4
+                 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.
+                 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.
+                 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.
                                                                       $
   histErrors   =                                                      $ draw histogram errors; can be steered for 
                                                                       $ each sample; empty means no errors
@@ -169,14 +179,33 @@ $=====================================================================
                  "a.u.";
                  "a.u.";
                  "a.u.";
-
-
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
+                 "a.u.";
 
                                                                       $
                                                                       $ should contain a legend entry for each 
                                                                       $ sample in '"' and separated by ';'
-  legEntries   = "Madgraph";                                     
-                 "RelVal";
+  legEntries   = "QCD";                                     
+                 "Z+Jets";
                                                                       $
   legXLeft     = 0.30                                                 $ so far a steering of the legend coord's 
                                                                       $ is only supported globally

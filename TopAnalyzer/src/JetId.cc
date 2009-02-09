@@ -5,6 +5,11 @@
 JetId::JetId(int nJets):
   nJets_(nJets), normEvt_( 0 ), normJet_( 0 ) 
 {
+  eJetBins_ = 5;
+  eJetLimits_.push_back( 40. );
+  eJetLimits_.push_back( 80. );
+  eJetLimits_.push_back( 200. );
+  eJetLimits_.push_back( 800. );
 }
 
 /// constructor for full FW analyzer
@@ -12,6 +17,11 @@ JetId::JetId(const edm::ParameterSet& cfg):
   nJets_( cfg.getParameter<int>( "nJets" ) ),
   normEvt_( 0 ), normJet_( 0 )
 {
+  eJetBins_ = 5;
+  eJetLimits_.push_back( 40. );
+  eJetLimits_.push_back( 80. );
+  eJetLimits_.push_back( 200. );
+  eJetLimits_.push_back( 800. );
 }
 
 /// fill interface for full FW analyzer
@@ -37,19 +47,40 @@ JetId::fill(const std::vector<pat::Jet>& jets, const double& weight=1.)
     if( idx<emf_.size() ) emf_[idx]->Fill( jet->emEnergyFraction(), weight );
     if( idx<had_.size() ) had_[idx]->Fill( jet->energyFractionHadronic(), weight );
     if( idx<hof_.size() ) hof_[idx]->Fill( jet->hadEnergyInHO(), weight );
-    
+
+    unsigned int eJetBin=999;
+    for(unsigned int edx=0; edx<=eJetLimits_.size(); edx++) {
+      if( edx==0                            && jet->energy()< eJetLimits_[edx]   ) { eJetBin=edx+1; break; }
+      if( edx==eJetLimits_.size()           && jet->energy()>=eJetLimits_[edx-1] ) { eJetBin=edx+1; break; }
+      if( jet->energy()>=eJetLimits_[edx-1] && jet->energy()< eJetLimits_[edx]   ) { eJetBin=edx+1; break; }
+    }
+    if(eJetBin<1 || eJetBin>=nTwr_eJetBins_.size()
+                 || eJetBin>=profEta_eJetBins_.size()
+                 || eJetBin>=profPhi_eJetBins_.size()
+                 || eJetBin>=eTwrJet_eJetBins_.size() )
+	throw edm::Exception( edm::errors::Configuration,
+	                      "Conflict between vector<double> eJetLimits and size of one the vector<TH1F> XYZ_eJetBins_" );
+
     //---------------------------------------------
     // check jet profiles
     //---------------------------------------------
-    nTwr_->Fill(jet->getCaloConstituents().size(), weight);
+    nTwr_eJetBins_[0]      ->Fill(jet->getCaloConstituents().size(), weight);
+    nTwr_eJetBins_[eJetBin]->Fill(jet->getCaloConstituents().size(), weight);
     if(jet->et()>0.){
       std::vector<CaloTowerPtr> caloTowerPtr = jet->getCaloConstituents();
       for(unsigned int jdx=0; jdx<caloTowerPtr.size(); ++jdx){
-	aProfEta_->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
-	aProfPhi_->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );
-	
-	if( idx<profEta_.size()) profEta_[idx]->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
-	if( idx<profPhi_.size()) profPhi_[idx]->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );
+	profEta_eJetBins_[0]      ->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
+	profEta_eJetBins_[eJetBin]->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
+	profPhi_eJetBins_[0]      ->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );	
+	profPhi_eJetBins_[eJetBin]->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );	
+	if( idx<profEta_.size() )
+	  profEta_[idx]->Fill( jet->eta()-caloTowerPtr[jdx]->eta(), caloTowerPtr[jdx]->et()/jet->et() );
+	if( idx<profPhi_.size() )
+	  profPhi_[idx]->Fill( jet->phi()-caloTowerPtr[jdx]->phi(), caloTowerPtr[jdx]->et()/jet->et() );
+
+	eTwrJet_eJetBins_[0]      ->Fill( caloTowerPtr[jdx]->energy()/jet->energy() );
+	eTwrJet_eJetBins_[eJetBin]->Fill( caloTowerPtr[jdx]->energy()/jet->energy() );
+
       }
     }
   }
@@ -70,9 +101,18 @@ JetId::book()
     hof_.push_back( new TH1F(id.name("hof",idx), id.name("hof",idx), 55, -10., 100.) );
   }
   NameScheme pro("pro");
-  nTwr_ = new TH1F(pro.name("nTwr"), pro.name("nTwr"), 100, 0., 100.);
-  aProfEta_= new TH1F(pro.name("allEta"), pro.name("allEta"), 50, -0.5, 0.5);
-  aProfPhi_= new TH1F(pro.name("allPhi"), pro.name("allPhi"), 50, -0.5, 0.5);
+  for(int idx=0; idx<(eJetBins_+1); ++idx){
+    nTwr_eJetBins_.push_back(    new TH1F(pro.name("nTwr_eJetBins"   , idx), pro.name("nTwr_eJetBins"   ), 100,   0., 
+100.) 
+);
+    profEta_eJetBins_.push_back( new TH1F(pro.name("eta_eJetBins"    , idx), pro.name("eta_eJetBins"    ),  50, -0.5,  0.5) 
+);
+    profPhi_eJetBins_.push_back( new TH1F(pro.name("phi_eJetBins"    , idx), pro.name("phi_eJetBins"    ),  50, -0.5,  
+0.5) 
+);
+    eTwrJet_eJetBins_.push_back( new TH1F(pro.name("eTwrJet_eJetBins", idx), pro.name("eTwrJet_eJetBins"),  20,   0.,   1.) 
+);
+  }
   
   for(int idx=0; idx<nJets_; ++idx){
     profEta_.push_back( new TH1F(pro.name("eta", idx),pro.name("eta", idx), 50, -0.5, 0.5) );
@@ -101,9 +141,22 @@ JetId::book(edm::Service<TFileService>& fs)
   }
 
   NameScheme pro("pro");
-  nTwr_    = fs->make<TH1F>(pro.name("nTwr"  ), "N_{tower}(jet)"           , 100,   0., 100.);
-  aProfEta_= fs->make<TH1F>(pro.name("allEta"), "(#eta_{jet}-#eta_{tower})",  50, -0.5,  0.5);
-  aProfPhi_= fs->make<TH1F>(pro.name("allPhi"), "(#phi_{jet}-#phi_{tower})",  50, -0.5,  0.5);
+  for(int idx=0; idx<(eJetBins_+1); ++idx){
+    TString suffix;
+    if(idx==0) suffix = "(all jets)";
+    else if(idx==1)         { suffix = "(E_{jet}<"; suffix+=(int)eJetLimits_[0]; suffix+="GeV)"; }
+    else if(idx==eJetBins_) { suffix = "(E_{jet}>"; suffix+=(int)eJetLimits_[eJetBins_-2]; suffix+="GeV)"; }
+    else                    { suffix = "("; suffix+=(int)eJetLimits_[idx-2]; suffix+="GeV<E_{jet}<"; 
+suffix+=(int)eJetLimits_[idx-1]; suffix+="GeV)"; }
+    TString title_nTwr    = "N_{tower}(jet) "            + suffix;
+    TString title_profEta = "(#eta_{jet}-#eta_{tower}) " + suffix;
+    TString title_profPhi = "(#phi_{jet}-#phi_{tower}) " + suffix;
+    TString title_eTwrJet = "E_{tower}/E_{jet} "         + suffix;
+    nTwr_eJetBins_   .push_back( fs->make<TH1F>(pro.name("nTwr_eJetBins"   , idx), title_nTwr,   100,   0., 100.) );
+    profEta_eJetBins_.push_back( fs->make<TH1F>(pro.name("eta_eJetBins"    , idx), title_profEta, 50, -0.5,  0.5) );
+    profPhi_eJetBins_.push_back( fs->make<TH1F>(pro.name("phi_eJetBins"    , idx), title_profPhi, 50, -0.5,  0.5) );
+    eTwrJet_eJetBins_.push_back( fs->make<TH1F>(pro.name("eTwrJet_eJetBins", idx), title_eTwrJet, 20,   0.,   1.) );
+  }
 
   for(int idx=0; idx<nJets_; ++idx){
     int idj = idx+1;
@@ -136,9 +189,22 @@ JetId::book(edm::Service<TFileService>& fs, ofstream& file)
   }
 
   NameScheme pro("pro");
-  nTwr_    = fs->make<TH1F>(pro.name(file, "nTwr"  ), "N_{tower}(jet)"           , 100,   0., 100.);
-  aProfEta_= fs->make<TH1F>(pro.name(file, "allEta"), "(#eta_{jet}-#eta_{tower})",  50, -0.5,  0.5);
-  aProfPhi_= fs->make<TH1F>(pro.name(file, "allPhi"), "(#phi_{jet}-#phi_{tower})",  50, -0.5,  0.5);
+  for(int idx=0; idx<(eJetBins_+1); ++idx){
+    TString suffix;
+    if(idx==0) suffix = "(all jets)";
+    else if(idx==1)         { suffix = "(E_{jet}<"; suffix+=(int)eJetLimits_[0]; suffix+="GeV)"; }
+    else if(idx==eJetBins_) { suffix = "(E_{jet}>"; suffix+=(int)eJetLimits_[eJetBins_-2]; suffix+="GeV)"; }
+    else                    { suffix = "("; suffix+=(int)eJetLimits_[idx-2]; suffix+="GeV<E_{jet}<"; 
+suffix+=(int)eJetLimits_[idx-1]; suffix+="GeV)"; }
+    TString title_nTwr    = "N_{tower}(jet) "            + suffix;
+    TString title_profEta = "(#eta_{jet}-#eta_{tower}) " + suffix;
+    TString title_profPhi = "(#phi_{jet}-#phi_{tower}) " + suffix;
+    TString title_eTwrJet = "E_{tower}/E_{jet} "         + suffix;
+    nTwr_eJetBins_   .push_back( fs->make<TH1F>(pro.name(file, "nTwr_eJetBins"   , idx), title_nTwr,   100,   0., 100.) );
+    profEta_eJetBins_.push_back( fs->make<TH1F>(pro.name(file, "eta_eJetBins"    , idx), title_profEta, 50, -0.5,  0.5) );
+    profPhi_eJetBins_.push_back( fs->make<TH1F>(pro.name(file, "phi_eJetBins"    , idx), title_profPhi, 50, -0.5,  0.5) );
+    eTwrJet_eJetBins_.push_back( fs->make<TH1F>(pro.name(file, "eTwrJet_eJetBins", idx), title_eTwrJet, 20,   0.,   1.) );
+  }
 
   for(int idx=0; idx<nJets_; ++idx){
     int idj = idx+1;
@@ -159,13 +225,9 @@ JetId::write(const char* filename, const char* directory)
   outFile.mkdir( directory );
   outFile.cd( directory );
 
-  /// basic kinematic
   aEmf_->Write( );
   aHad_->Write( );
   aHof_->Write( );
-  nTwr_->Write( );
-  aProfEta_->Write( );
-  aProfPhi_->Write( );
 
   outFile.Close();
 
@@ -173,7 +235,4 @@ JetId::write(const char* filename, const char* directory)
   delete aEmf_; 
   delete aHad_; 
   delete aHof_; 
-  delete nTwr_; 
-  delete aProfEta_;
-  delete aProfPhi_; 
 }
