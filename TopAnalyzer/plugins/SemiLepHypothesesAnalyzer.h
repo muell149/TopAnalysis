@@ -29,13 +29,18 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   virtual void endJob();
 
   edm::InputTag semiLepEvt_;
-  edm::InputTag hypoKey_;
+  edm::InputTag hypoClassKey_;
   edm::InputTag wgt_;
   unsigned int nJetsMax_;
   double maxSumDRGenMatch_;
   double minProbKinFit_;
   double minMVADisc_; 
   std::string hist_;
+
+  int nEventsTotal;
+  int nEventsValid;
+  int nEventsQuali;
+  int nEventsGood[7];
 
   void bookKinHistos      (edm::Service<TFileService>&, ofstream&);
   void bookKinResHistos   (edm::Service<TFileService>&, ofstream&);
@@ -46,6 +51,9 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   void fillKinResHistos   (std::vector<TH1F*>&, const reco::Candidate&, const reco::Candidate&, const double&);
   void fillJetCorrelHistos(const std::vector<int>&, const std::vector<int>&, const double&);
   void fillQualityHistos  (const TtSemiLeptonicEvent&, const double&);
+
+  bool sameJets(const TtSemiLeptonicEvent&,
+		const TtSemiLeptonicEvent::HypoClassKey&, const TtSemiLeptonicEvent::HypoClassKey&, const std::vector<int>&);
 
   std::vector<TH1F*> hadTopKin_;
   std::vector<TH1F*> hadWKin_;
@@ -78,6 +86,8 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   TH2F* lepBJetCorrel_;
 
   TH1F* goodHypo_;
+  TH1F* numbEvents_;
+  TH1F* fracEvents_;
 
   TH1F* genMatchSumDR_;
   TH1F* genMatchSumPt_;

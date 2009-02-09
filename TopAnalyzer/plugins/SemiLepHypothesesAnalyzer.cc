@@ -6,7 +6,7 @@
 
 SemiLepHypothesesAnalyzer::SemiLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   semiLepEvt_      (cfg.getParameter<edm::InputTag>("semiLepEvent"    )),
-  hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )),
+  hypoClassKey_    (cfg.getParameter<edm::InputTag>("hypoClassKey"    )),
   wgt_             (cfg.getParameter<edm::InputTag>("weight"          )),
   nJetsMax_        (cfg.getParameter<unsigned int> ("nJetsMax"        )),
   maxSumDRGenMatch_(cfg.getParameter<double>       ("maxSumDRGenMatch")),
@@ -24,12 +24,14 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   evt.getByLabel(semiLepEvt_, semiLepEvt);
 
   edm::Handle<int> hypoClassKeyHandle;
-  evt.getByLabel(hypoKey_, hypoClassKeyHandle);
+  evt.getByLabel(hypoClassKey_, hypoClassKeyHandle);
   TtSemiLeptonicEvent::HypoClassKey& hypoClassKey = (TtSemiLeptonicEvent::HypoClassKey&) *hypoClassKeyHandle;
 
   edm::Handle<double> wgt;
   evt.getByLabel(wgt_, wgt);
   double weight = *wgt;
+
+  nEventsTotal++;
 
   // -----------------------
   // check if hypothesis is valid in this event
@@ -38,10 +40,13 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
 
   if( !semiLepEvt->isHypoAvailable(hypoClassKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not available for this event";
+    return;
   }
   if( !semiLepEvt->isHypoValid(hypoClassKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
+    return;
   }
+  else nEventsValid++;
   
   if( !semiLepEvt->isHypoValid(hypoClassKey) ||
       (hypoClassKey==TtSemiLeptonicEvent::kGenMatch && semiLepEvt->genMatchSumDR()>maxSumDRGenMatch_) ||
@@ -49,27 +54,55 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
       (hypoClassKey==TtSemiLeptonicEvent::kMVADisc  && semiLepEvt->mvaDisc()<minMVADisc_            )
       ) {
     goodHypo_->Fill(0., weight); // not a good hypothesis
+    return;
   }
   else {
     goodHypo_->Fill(1., weight); // good hypothesis
+    nEventsQuali++;
   }
-  if( !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGeom         ) ||
-      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kWMassMaxSumPt) ||
-      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMaxSumPtWMass) ||
-      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGenMatch     ) ||
-      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMVADisc      ) ||
-      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kKinFit       ) )
-    return;  // return if any of the hypotheses is not valid
+//  if( !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGeom         ) ||
+//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kWMassMaxSumPt) ||
+//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMaxSumPtWMass) ||
+//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGenMatch     ) ||
+//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMVADisc      ) ||
+//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kKinFit       ) )
+//    return;  // return if any of the hypotheses is not valid
 
   // -----------------------
   // fill histos related to quality of the TtSemiLeptonicEvent
   // -----------------------
   fillQualityHistos(*semiLepEvt, weight);
 
-  if( semiLepEvt->genMatchSumDR() > maxSumDRGenMatch_ ||
-      semiLepEvt->fitProb() < minProbKinFit_          ||
-      semiLepEvt->mvaDisc() < minMVADisc_ )
-    return; // return if any of the quality criteria is not fulfilled
+  bool good[7];
+
+  std::vector<int> wHadJets;
+  wHadJets.push_back( TtSemiLepEvtPartons::LightQ    );
+  wHadJets.push_back( TtSemiLepEvtPartons::LightQBar );
+
+  std::vector<int> tHadJets;
+  tHadJets.push_back( TtSemiLepEvtPartons::LightQ    );
+  tHadJets.push_back( TtSemiLepEvtPartons::LightQBar );
+  tHadJets.push_back( TtSemiLepEvtPartons::HadB      );
+  
+  good[0] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, wHadJets);
+
+  good[1] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, tHadJets);
+
+  good[2] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::LepB] ==
+	     semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::LepB]);
+
+  good[3] = (good[0] && good[1]);
+  good[4] = (good[0] && good[2]);
+  good[5] = (good[1] && good[2]);
+  good[6] = (good[0] && good[1] && good[2]);
+
+  for(unsigned i=0; i<7; i++)
+    if(good[i]) ++nEventsGood[i];
+
+//  if( semiLepEvt->genMatchSumDR() > maxSumDRGenMatch_ ||
+//      semiLepEvt->fitProb() < minProbKinFit_          ||
+//      semiLepEvt->mvaDisc() < minMVADisc_ )
+//    return; // return if any of the quality criteria is not fulfilled
 
   // -----------------------
   // fill histos for basic kinematic variables
@@ -153,11 +186,44 @@ SemiLepHypothesesAnalyzer::beginJob(const edm::EventSetup&)
   bookJetCorrelHistos(fs, hist);
   bookQualityHistos  (fs, hist);
 
+  nEventsTotal = 0;
+  nEventsValid = 0;
+  nEventsQuali = 0;
+  for(unsigned i=0; i<7; i++)
+    nEventsGood[i] = 0;
+
 }
 
 void
 SemiLepHypothesesAnalyzer::endJob() 
 {
+
+  numbEvents_->SetBinContent(1, nEventsTotal);
+  fracEvents_->SetBinContent(1, (double)nEventsTotal/nEventsTotal);
+
+  numbEvents_->SetBinContent(2, nEventsValid);
+  fracEvents_->SetBinContent(2, (double)nEventsValid/nEventsTotal);
+
+  numbEvents_->SetBinContent(3, nEventsQuali);
+  fracEvents_->SetBinContent(3, (double)nEventsQuali/nEventsTotal);
+
+  for(unsigned i=0; i<7; i++) {
+    numbEvents_->SetBinContent(4+i, nEventsGood[i]);
+    fracEvents_->SetBinContent(4+i, (double)nEventsGood[i]/nEventsQuali);
+  }
+
+  edm::LogInfo summary("SemiLepHypothesesAnalyzer");
+  summary << "HypoKey: " << hypoClassKey_.label() << "\n";
+  summary << "Number, fraction of events (total): "
+	  << setw(6) << nEventsTotal << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsTotal/nEventsTotal << "\n";
+  summary << "Number, fraction of events (valid): "
+	  << setw(6) << nEventsValid << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsValid/nEventsTotal << "\n";
+  summary << "Number, fraction of events (quali): "
+	  << setw(6) << nEventsQuali << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsQuali/nEventsTotal << "\n";
+  for(unsigned i=0; i<7; i++)
+    summary << "Number, fraction of events (good" << i+1 << "): "
+	    << setw(6) << nEventsGood[i] << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsGood[i]/nEventsQuali << "\n";
+
 }
 
 void
@@ -303,6 +369,9 @@ SemiLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
 
   goodHypo_ = fs->make<TH1F>(ns.name(hist, "goodHypo"), "good hypothesis", 2, -0.5, 1.5);
 
+  numbEvents_ = fs->make<TH1F>(ns.name(hist, "numbEvents"), "number of events"         , 10, 0., 10.);
+  fracEvents_ = fs->make<TH1F>(ns.name(hist, "fracEvents"), "relative number of events", 10, 0., 10.);
+
   genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
   genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
   mvaDisc_       = fs->make<TH1F>(ns.name(hist, "mvaDisc"),       "MVA discrim."                        , 20, 0., 1.);
@@ -391,4 +460,26 @@ SemiLepHypothesesAnalyzer::fillQualityHistos(const TtSemiLeptonicEvent& semiLepE
     fitProbVsHadTopMass_->Fill( semiLepEvt.fitProb() , semiLepEvt.hadronicTop (TtSemiLeptonicEvent::kKinFit)->mass() , weight );
   }
 
+}
+
+bool
+SemiLepHypothesesAnalyzer::sameJets(const TtSemiLeptonicEvent& semiLepEvt,
+				    const TtSemiLeptonicEvent::HypoClassKey& hyp1,
+				    const TtSemiLeptonicEvent::HypoClassKey& hyp2,
+				    const std::vector<int>& jetsToCompare)
+{
+
+  std::vector<int> jetIndicesHyp1;
+  std::vector<int> jetIndicesHyp2;
+
+  for(unsigned i = 0; i < jetsToCompare.size(); i++) {
+    jetIndicesHyp1.push_back( (semiLepEvt.jetLepComb(hyp1))[ jetsToCompare[i] ] );
+    jetIndicesHyp2.push_back( (semiLepEvt.jetLepComb(hyp2))[ jetsToCompare[i] ] );
+  }
+
+  std::sort( jetIndicesHyp1.begin(), jetIndicesHyp1.end() );
+  std::sort( jetIndicesHyp2.begin(), jetIndicesHyp2.end() );
+
+  return (jetIndicesHyp1==jetIndicesHyp2);
+  
 }
