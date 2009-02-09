@@ -10,12 +10,12 @@ analyzeGenMatch      = analyzeSemiLepHypotheses.clone()
 analyzeMVADisc       = analyzeSemiLepHypotheses.clone()
 
 ## do replacements
-analyzeGeom.hypoKey          = 'ttSemiLepHypGeom:Key'
-analyzeWMassMaxSumPt.hypoKey = 'ttSemiLepHypWMassMaxSumPt:Key'
-analyzeMaxSumPtWMass.hypoKey = 'ttSemiLepHypMaxSumPtWMass:Key'
-analyzeKinFit.hypoKey        = 'ttSemiLepHypKinFit:Key'
-analyzeGenMatch.hypoKey      = 'ttSemiLepHypGenMatch:Key'
-analyzeMVADisc.hypoKey       = 'ttSemiLepHypMVADisc:Key'
+analyzeGeom.hypoClassKey          = 'ttSemiLepHypGeom:Key'
+analyzeWMassMaxSumPt.hypoClassKey = 'ttSemiLepHypWMassMaxSumPt:Key'
+analyzeMaxSumPtWMass.hypoClassKey = 'ttSemiLepHypMaxSumPtWMass:Key'
+analyzeKinFit.hypoClassKey        = 'ttSemiLepHypKinFit:Key'
+analyzeGenMatch.hypoClassKey      = 'ttSemiLepHypGenMatch:Key'
+analyzeMVADisc.hypoClassKey       = 'ttSemiLepHypMVADisc:Key'
 
 analyzeAllSemiLepHypotheses = cms.Sequence(analyzeGeom          +
                                            analyzeWMassMaxSumPt +
