@@ -26,17 +26,10 @@ source['cern'] = ''
 ## test sample at desy
 ##
 ######################################################################
-<<<<<<< processes.py
 sizes ['desy'] = 0
 source['desy'] = ''
-=======
-sizes ['desy'] = 147000
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\''
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
->>>>>>> 1.12
+
+
 
 
 ######################################################################
@@ -597,6 +590,7 @@ source['ttbarx0'] = ''
 
 
 
+
 ######################################################################
 ##
 ## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
@@ -664,21 +658,13 @@ source['ttbar1']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 ## xsec(pb) NLO:       414
 ## eff         :       1.0
 ######################################################################
-<<<<<<< processes.py
 sizes ['ttbarx1'] = 147000
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar0.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar1.root\','
+source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\','
+source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
 source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar3.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar4.root\''
-=======
-sizes ['ttbar3'] = 147000
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\''
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
->>>>>>> 1.12
+source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
+source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
+
 
 
 
@@ -1664,7 +1650,6 @@ source['qcd0']+= '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/
 source['qcd0']+= '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/0009/BC761B75-73B7-DD11-9C4E-00163691DC0E.root\','
 source['qcd0']+= '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/0011/1E2FB402-E4BF-DD11-810B-00163691DD9A.root\''
 
-
 ######################################################################
 ## PAT Tuple:
 ## -----------
@@ -1713,6 +1698,8 @@ source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_34_qcd0.root\''
 
 
+
+
 ######################################################################
 ## PAT Tuple:
 ## -----------
@@ -1734,17 +1721,19 @@ source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_32.root\','
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_33.root\''
 
 
+
+
 ######################################################################
 ## PAT Tuples:
 ## -----------
 ## /Zjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 ##
-## Events      :   9964055 (5060131 processed)
+## Events      :   9964055 (6060131 processed)
 ## xsec(pb)  LO:      3700
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['zjetsx0'] = 100460
+sizes ['zjetsx0'] = 120633
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_4.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_5.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_6.root\','
@@ -1754,9 +1743,11 @@ source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_10.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_11.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_12.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_13.root\','
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_14.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_17.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_18.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_19.root\','
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_20.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_21.root\''
 
 
