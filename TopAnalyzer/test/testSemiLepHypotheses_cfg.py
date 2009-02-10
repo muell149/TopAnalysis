@@ -82,8 +82,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #-------------------------------------------------
 
 ## std sequence for tqaf layer1
-process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
-process.p0 = cms.Path(process.tqafLayer1)
+#process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
+#process.p0 = cms.Path(process.tqafLayer1)
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced
@@ -128,8 +128,7 @@ process.TFileService = cms.Service("TFileService",
 # paths
 #-------------------------------------------------
 
-process.p2 = cms.Path(process.tqafLayer1 *
-                      process.makeGenEvt *
+process.p2 = cms.Path(process.makeGenEvt *
                       process.ttSemiLeptonicFilter *
                       process.makeTtSemiLepEvent *
                       process.eventWeight *
