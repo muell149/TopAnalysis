@@ -67,11 +67,11 @@ source['cern'] = '\'/store/relval/CMSSW_2_1_10/RelValTTbar/GEN-SIM-DIGI-RAW-HLTD
 ##
 ######################################################################
 sizes ['desy'] = 147000
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar0.root\''
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar1.root\','
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\''
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
 source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar3.root\','
-source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar4.root\''
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
+source['desy'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
 
 
 ######################################################################
@@ -685,11 +685,11 @@ source['ttbar2']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 ## eff         :       1.0
 ######################################################################
 sizes ['ttbar3'] = 147000
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar0.root\''
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar1.root\','
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\''
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
 source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar3.root\','
-source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar4.root\''
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
+source['ttbar3'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
 
 
 
