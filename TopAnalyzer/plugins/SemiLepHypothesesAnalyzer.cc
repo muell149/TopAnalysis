@@ -73,30 +73,38 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // -----------------------
   fillQualityHistos(*semiLepEvt, weight);
 
-  bool good[7];
+  // good0: LepB correct
+  // good1: HadB correct
+  // good2: HadW correct
+  // good3: HadT correct
+  // good4: good1 && good2
+  // good5: good0 && good4
 
-  std::vector<int> wHadJets;
-  wHadJets.push_back( TtSemiLepEvtPartons::LightQ    );
-  wHadJets.push_back( TtSemiLepEvtPartons::LightQBar );
+  bool good[6];
 
-  std::vector<int> tHadJets;
-  tHadJets.push_back( TtSemiLepEvtPartons::LightQ    );
-  tHadJets.push_back( TtSemiLepEvtPartons::LightQBar );
-  tHadJets.push_back( TtSemiLepEvtPartons::HadB      );
-  
-  good[0] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, wHadJets);
-
-  good[1] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, tHadJets);
-
-  good[2] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::LepB] ==
+  good[0] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::LepB] ==
 	     semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::LepB]);
 
-  good[3] = (good[0] && good[1]);
-  good[4] = (good[0] && good[2]);
-  good[5] = (good[1] && good[2]);
-  good[6] = (good[0] && good[1] && good[2]);
+  good[1] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::HadB] ==
+	     semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::HadB]);
 
-  for(unsigned i=0; i<7; i++)
+  std::vector<int> HadWJets;
+  HadWJets.push_back( TtSemiLepEvtPartons::LightQ    );
+  HadWJets.push_back( TtSemiLepEvtPartons::LightQBar );
+
+  std::vector<int> HadTJets;
+  HadTJets.push_back( TtSemiLepEvtPartons::LightQ    );
+  HadTJets.push_back( TtSemiLepEvtPartons::LightQBar );
+  HadTJets.push_back( TtSemiLepEvtPartons::HadB      );
+  
+  good[2] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, HadWJets);
+
+  good[3] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, HadTJets);
+
+  good[4] = (good[1] && good[2]);
+  good[5] = (good[0] && good[4]);
+
+  for(unsigned i=0; i<6; i++)
     if(good[i]) ++nEventsGood[i];
 
 //  if( semiLepEvt->genMatchSumDR() > maxSumDRGenMatch_ ||
@@ -189,7 +197,7 @@ SemiLepHypothesesAnalyzer::beginJob(const edm::EventSetup&)
   nEventsTotal = 0;
   nEventsValid = 0;
   nEventsQuali = 0;
-  for(unsigned i=0; i<7; i++)
+  for(unsigned i=0; i<6; i++)
     nEventsGood[i] = 0;
 
 }
@@ -207,7 +215,7 @@ SemiLepHypothesesAnalyzer::endJob()
   numbEvents_->SetBinContent(3, nEventsQuali);
   fracEvents_->SetBinContent(3, (double)nEventsQuali/nEventsTotal);
 
-  for(unsigned i=0; i<7; i++) {
+  for(unsigned i=0; i<6; i++) {
     numbEvents_->SetBinContent(4+i, nEventsGood[i]);
     fracEvents_->SetBinContent(4+i, (double)nEventsGood[i]/nEventsQuali);
   }
@@ -220,7 +228,7 @@ SemiLepHypothesesAnalyzer::endJob()
 	  << setw(6) << nEventsValid << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsValid/nEventsTotal << "\n";
   summary << "Number, fraction of events (quali): "
 	  << setw(6) << nEventsQuali << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsQuali/nEventsTotal << "\n";
-  for(unsigned i=0; i<7; i++)
+  for(unsigned i=0; i<6; i++)
     summary << "Number, fraction of events (good" << i+1 << "): "
 	    << setw(6) << nEventsGood[i] << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsGood[i]/nEventsQuali << "\n";
 

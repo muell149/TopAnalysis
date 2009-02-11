@@ -40,7 +40,7 @@ class SemiLepHypothesesAnalyzer : public edm::EDAnalyzer {
   int nEventsTotal;
   int nEventsValid;
   int nEventsQuali;
-  int nEventsGood[7];
+  int nEventsGood[6];
 
   void bookKinHistos      (edm::Service<TFileService>&, ofstream&);
   void bookKinResHistos   (edm::Service<TFileService>&, ofstream&);
