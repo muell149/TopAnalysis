@@ -580,14 +580,56 @@ source['ttbar0']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/
 ## -----------
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 ##
-## Events      :   1026391 (0 processed)
+## Events      :   1026391 (903233 processed)
 ## xsec(pb)  LO:       320
 ## xsec(pb) NLO:       414
 ## eff         :       1.0
 ######################################################################
-sizes ['ttbarx0'] = 0
-source['ttbarx0'] = ''
-
+sizes ['ttbarx0'] = 903233
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_0_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_1_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_2_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_3_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_4_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_5_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_6_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_7_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_8_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_9_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_10_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_11_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_12_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_13_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_14_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_15_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_16_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_17_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_18_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_19_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_20_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_21_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_22_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_23_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_24_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_25_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_26_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_27_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_28_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_29_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_30_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_31_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_32_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_33_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_34_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_35_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_36_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_37_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_38_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_39_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_40_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_42_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_43_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_44_ttbar0.root\''
 
 
 
@@ -1655,12 +1697,12 @@ source['qcd0']+= '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/
 ## -----------
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-DIGI-RECO
 ##
-## Events      :   6238383 (3499972 processed) 
+## Events      :   6238383 (3327104 processed) 
 ## xsec(pb)  LO: 509100000
 ## xsec(pb) NLO:       NAN
 ## eff         :  0.000239
 ######################################################################
-sizes ['qcdx0'] = 300591
+sizes ['qcdx0'] = 285836
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_0_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_1_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_2_qcd0.root\','
@@ -1688,14 +1730,11 @@ source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_24_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_25_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_26_qcd0.root\','
-source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_27_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_28_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_29_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_30_qcd0.root\','
 source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_31_qcd0.root\','
-source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_32_qcd0.root\','
-source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_33_qcd0.root\','
-source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_34_qcd0.root\''
+source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_32_qcd0.root\''
 
 
 
@@ -1728,12 +1767,14 @@ source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_33.root\''
 ## -----------
 ## /Zjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 ##
-## Events      :   9964055 (6060131 processed)
+## Events      :   9964055 (8964055 processed)
 ## xsec(pb)  LO:      3700
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['zjetsx0'] = 120633
+sizes ['zjetsx0'] = 172955
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_2.root\','
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_3.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_4.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_5.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_6.root\','
@@ -1744,6 +1785,8 @@ source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_11.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_12.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_13.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_14.root\','
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_15.root\','
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_16.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_17.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_18.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_19.root\','
