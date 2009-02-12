@@ -26,8 +26,8 @@ source['cern'] = ''
 ## test sample at desy
 ##
 ######################################################################
-sizes ['desy'] = 0
-source['desy'] = ''
+sizes ['desy'] = 99999
+source['desy'] = '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/0003/9CA63F45-DFAB-DD11-BAE1-00E08133CD36.root\''
 
 
 
@@ -1744,12 +1744,12 @@ source['qcdx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/qcd0/patTuple_
 ## -----------
 ## /Wjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 ## 
-## Events      : 101467739 (9649685 processed)
+## Events      : 101467739 (10240162 processed)
 ## xsec(pb)  LO:     35000
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['wjetsx0'] = 115759
+sizes ['wjetsx0'] = 122959
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_1.root\','
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_10.root\','
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_13.root\','
@@ -1757,7 +1757,8 @@ source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_14.root\','
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_25.root\','
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_26.root\','
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_32.root\','
-source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_33.root\''
+source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_33.root\','
+source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_34.root\''
 
 
 
@@ -1767,18 +1768,20 @@ source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_33.root\''
 ## -----------
 ## /Zjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 ##
-## Events      :   9964055 (8964055 processed)
+## Events      :   9964055 (9964055 processed)
 ## xsec(pb)  LO:      3700
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['zjetsx0'] = 172955
+sizes ['zjetsx0'] = 193159
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_1.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_2.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_3.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_4.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_5.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_6.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_7.root\','
+source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_8.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_9.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_10.root\','
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_11.root\','
