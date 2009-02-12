@@ -60,19 +60,13 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
     goodHypo_->Fill(1., weight); // good hypothesis
     nEventsQuali++;
   }
-//  if( !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGeom         ) ||
-//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kWMassMaxSumPt) ||
-//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMaxSumPtWMass) ||
-//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGenMatch     ) ||
-//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kMVADisc      ) ||
-//      !semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kKinFit       ) )
-//    return;  // return if any of the hypotheses is not valid
 
   // -----------------------
   // fill histos related to quality of the TtSemiLeptonicEvent
   // -----------------------
   fillQualityHistos(*semiLepEvt, weight);
 
+  bool good[6];
   // good0: LepB correct
   // good1: HadB correct
   // good2: HadW correct
@@ -80,37 +74,36 @@ SemiLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // good4: good1 && good2
   // good5: good0 && good4
 
-  bool good[6];
+  if( semiLepEvt->isHypoValid(TtSemiLeptonicEvent::kGenMatch) && semiLepEvt->genMatchSumDR()<=maxSumDRGenMatch_ ) {
 
-  good[0] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::LepB] ==
-	     semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::LepB]);
+    nEventsStudy++;
+    
+    good[0] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::LepB] ==
+	       semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::LepB]);
+    
+    good[1] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::HadB] ==
+	       semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::HadB]);
+    
+    std::vector<int> HadWJets;
+    HadWJets.push_back( TtSemiLepEvtPartons::LightQ    );
+    HadWJets.push_back( TtSemiLepEvtPartons::LightQBar );
+    
+    std::vector<int> HadTJets;
+    HadTJets.push_back( TtSemiLepEvtPartons::LightQ    );
+    HadTJets.push_back( TtSemiLepEvtPartons::LightQBar );
+    HadTJets.push_back( TtSemiLepEvtPartons::HadB      );
+    
+    good[2] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, HadWJets);
+    
+    good[3] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, HadTJets);
+    
+    good[4] = (good[1] && good[2]);
+    good[5] = (good[0] && good[4]);
 
-  good[1] = (semiLepEvt->jetLepComb(hypoClassKey)                  [TtSemiLepEvtPartons::HadB] ==
-	     semiLepEvt->jetLepComb(TtSemiLeptonicEvent::kGenMatch)[TtSemiLepEvtPartons::HadB]);
+    for(unsigned i=0; i<6; i++)
+      if(good[i]) ++nEventsGood[i];
 
-  std::vector<int> HadWJets;
-  HadWJets.push_back( TtSemiLepEvtPartons::LightQ    );
-  HadWJets.push_back( TtSemiLepEvtPartons::LightQBar );
-
-  std::vector<int> HadTJets;
-  HadTJets.push_back( TtSemiLepEvtPartons::LightQ    );
-  HadTJets.push_back( TtSemiLepEvtPartons::LightQBar );
-  HadTJets.push_back( TtSemiLepEvtPartons::HadB      );
-  
-  good[2] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, HadWJets);
-
-  good[3] = sameJets( *semiLepEvt, hypoClassKey, TtSemiLeptonicEvent::kGenMatch, HadTJets);
-
-  good[4] = (good[1] && good[2]);
-  good[5] = (good[0] && good[4]);
-
-  for(unsigned i=0; i<6; i++)
-    if(good[i]) ++nEventsGood[i];
-
-//  if( semiLepEvt->genMatchSumDR() > maxSumDRGenMatch_ ||
-//      semiLepEvt->fitProb() < minProbKinFit_          ||
-//      semiLepEvt->mvaDisc() < minMVADisc_ )
-//    return; // return if any of the quality criteria is not fulfilled
+  }
 
   // -----------------------
   // fill histos for basic kinematic variables
@@ -197,6 +190,7 @@ SemiLepHypothesesAnalyzer::beginJob(const edm::EventSetup&)
   nEventsTotal = 0;
   nEventsValid = 0;
   nEventsQuali = 0;
+  nEventsStudy = 0;
   for(unsigned i=0; i<6; i++)
     nEventsGood[i] = 0;
 
@@ -207,30 +201,30 @@ SemiLepHypothesesAnalyzer::endJob()
 {
 
   numbEvents_->SetBinContent(1, nEventsTotal);
-  fracEvents_->SetBinContent(1, (double)nEventsTotal/nEventsTotal);
-
   numbEvents_->SetBinContent(2, nEventsValid);
-  fracEvents_->SetBinContent(2, (double)nEventsValid/nEventsTotal);
-
   numbEvents_->SetBinContent(3, nEventsQuali);
-  fracEvents_->SetBinContent(3, (double)nEventsQuali/nEventsTotal);
+  numbEvents_->SetBinContent(4, nEventsStudy);
 
   for(unsigned i=0; i<6; i++) {
-    numbEvents_->SetBinContent(4+i, nEventsGood[i]);
-    fracEvents_->SetBinContent(4+i, (double)nEventsGood[i]/nEventsQuali);
+    numbEvents_->SetBinContent(5+i, nEventsGood[i]);
   }
 
   edm::LogInfo summary("SemiLepHypothesesAnalyzer");
+
   summary << "HypoKey: " << hypoClassKey_.label() << "\n";
+
   summary << "Number, fraction of events (total): "
 	  << setw(6) << nEventsTotal << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsTotal/nEventsTotal << "\n";
   summary << "Number, fraction of events (valid): "
 	  << setw(6) << nEventsValid << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsValid/nEventsTotal << "\n";
   summary << "Number, fraction of events (quali): "
 	  << setw(6) << nEventsQuali << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsQuali/nEventsTotal << "\n";
+  summary << "Number, fraction of events (study): "
+	  << setw(6) << nEventsStudy << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsStudy/nEventsTotal << "\n";
+
   for(unsigned i=0; i<6; i++)
     summary << "Number, fraction of events (good" << i+1 << "): "
-	    << setw(6) << nEventsGood[i] << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsGood[i]/nEventsQuali << "\n";
+	    << setw(6) << nEventsGood[i] << ", " << setw(6) << fixed << setprecision(3) << (double)nEventsGood[i]/nEventsStudy << "\n";
 
 }
 
@@ -378,7 +372,6 @@ SemiLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
   goodHypo_ = fs->make<TH1F>(ns.name(hist, "goodHypo"), "good hypothesis", 2, -0.5, 1.5);
 
   numbEvents_ = fs->make<TH1F>(ns.name(hist, "numbEvents"), "number of events"         , 10, 0., 10.);
-  fracEvents_ = fs->make<TH1F>(ns.name(hist, "fracEvents"), "relative number of events", 10, 0., 10.);
 
   genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
   genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
