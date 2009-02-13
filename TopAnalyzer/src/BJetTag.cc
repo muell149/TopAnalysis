@@ -20,7 +20,8 @@ BJetTag::BJetTag(const edm::ParameterSet& cfg):
   
   etaBins_( cfg.getParameter<vector<double> >( "eta_bins" ) ),
   ptBins_ ( cfg.getParameter<vector<double> >( "pt_bins"  ) )    
-{ 
+{
+  nJetBins = 13; 
 }
 
 BJetTag::~BJetTag()
@@ -168,8 +169,6 @@ BJetTag::book(ofstream& file, char* name)
     hist = fs->make<TH1F>(e.name(file, "ptBinsSoftElec", i)    , e.name("ptBinsSoftElec", i)    , nBins, 0.0, 1.0);
     ptDiscrSoftElec_.push_back(hist);             
   }
-
-  nJetBins = 13;
   
   for(size_t i=0; i<nJetBins; ++i){
     TH1F* hist;  
@@ -271,6 +270,18 @@ BJetTag::evaluate()
   fillEfficencyHist(ptEffSoftMu_      , ptDiscrSoftMu_      , nPt, softMuonCut_       );
   fillEfficencyHist(ptEffSoftMuNoIP_  , ptDiscrSoftMuNoIP_  , nPt, softMuonNoIPCut_   );
   fillEfficencyHist(ptEffSoftElec_    , ptDiscrSoftElec_    , nPt, softElecCut_       );   
+
+  fillEfficencyHist(njEffTrkCountEff_ , njDiscrTrkCountEff_ , nJetBins, trkCountHighEffCut_);
+  fillEfficencyHist(njEffTrkCountPur_ , njDiscrTrkCountPur_ , nJetBins, trkCountHighPurCut_);  
+  fillEfficencyHist(njEffJetProb_     , njDiscrJetProb_     , nJetBins, jetProbCut_        );  
+  fillEfficencyHist(njEffJetBProb_    , njDiscrJetBProb_    , nJetBins, jetBProbCut_       );  
+  fillEfficencyHist(njEffImpactParMva_, njDiscrImpactParMva_, nJetBins, impactParMvaCut_   );  
+  fillEfficencyHist(njEffSimpleSv_    , njDiscrSimpleSv_    , nJetBins, simpleSvCut_       );  
+  fillEfficencyHist(njEffCombSv_      , njDiscrCombSv_      , nJetBins, combSvCut_         );  
+  fillEfficencyHist(njEffCombSvMva_   , njDiscrCombSvMva_   , nJetBins, combSvMvaCut_      );  
+  fillEfficencyHist(njEffSoftMu_      , njDiscrSoftMu_      , nJetBins, softMuonCut_       );
+  fillEfficencyHist(njEffSoftMuNoIP_  , njDiscrSoftMuNoIP_  , nJetBins, softMuonNoIPCut_   );
+  fillEfficencyHist(njEffSoftElec_    , njDiscrSoftElec_    , nJetBins, softElecCut_       );     
 }
 
 void
