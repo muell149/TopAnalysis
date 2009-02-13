@@ -34,6 +34,7 @@ typedef EventShapeAnalyzer<std::vector<pat::Electron> > EventShapeAnalyzerElec;
 // Analyzers for Jet Parton Association
 //
 #include "TopAnalysis/TopAnalyzer/plugins/PartonMatchAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/FullLepHypothesesAnalyzer.h"
 #include "TopAnalysis/TopAnalyzer/plugins/SemiLepHypothesesAnalyzer.h"
 
 //
@@ -51,6 +52,7 @@ DEFINE_FWK_MODULE(JetAnalyzer);
 DEFINE_FWK_MODULE(MuonAnalyzer);
 DEFINE_FWK_MODULE(ElecAnalyzer);
 DEFINE_FWK_MODULE(PartonMatchAnalyzer);
+DEFINE_FWK_MODULE(FullLepHypothesesAnalyzer);
 DEFINE_FWK_MODULE(SemiLepHypothesesAnalyzer);
 DEFINE_FWK_MODULE(EventShapeAnalyzerMuon);
 DEFINE_FWK_MODULE(EventShapeAnalyzerElec);
