@@ -46,32 +46,24 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
     return;
   }
   Nava++;
+  
+  if( !FullLepEvt->isHypoValid(hypoKey) )  {
+    goodHypo_->Fill(0., weight); // not a good hypothesis
+  }
+  else goodHypo_->Fill(1., weight); // good hypothesis
+
   if( !FullLepEvt->isHypoValid(hypoKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
-    return;
+    return;  // return if any of the hypotheses is not valid
   }
-  Nval++;
-  
-  //if( !FullLepEvt->isHypoValid(hypoKey) ||
-  //    (hypoKey==TtFullLeptonicEvent::kGenMatch && FullLepEvt->genMatchSumDR()>maxSumDRGenMatch_) ||
-  //    (hypoKey==TtFullLeptonicEvent::kKinFit   && FullLepEvt->fitProb()<minProbKinFit_         ) 
-  //    ) {
-  //  goodHypo_->Fill(0., weight); // not a good hypothesis
-  //}
-  //else goodHypo_->Fill(1., weight); // good hypothesis
-
-  //if( !FullLepEvt->isHypoValid(TtFullLeptonicEvent::kGenMatch     ) ||
-  //    !FullLepEvt->isHypoValid(TtFullLeptonicEvent::kKinFit       ) )
-  //  return;  // return if any of the hypotheses is not valid
+  Nval++;  
 
   // -----------------------
   // fill histos related to quality of the TtFullLeptonicEvent
   // -----------------------
-  //fillQualityHistos(*FullLepEvt, weight);
+  fillQualityHistos(*FullLepEvt, weight);
 
-  //if( FullLepEvt->genMatchSumDR() > maxSumDRGenMatch_ ||
-  //    FullLepEvt->fitProb() < minProbKinFit_          ||
-  //    FullLepEvt->mvaDisc() < minMVADisc_ )
+  //if( FullLepEvt->genMatchSumDR() > maxSumDRGenMatch_ )
   //  return; // return if any of the quality criteria is not fulfilled
 
   // -----------------------
@@ -103,18 +95,39 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   fillKinHistos(NuBarKin_,  *NuBar,  weight);
   
   // -----------------------
-  // fill correlation histos for jet parton association
+  // fill resolution histos for kinematic variables
+  // with respect to the generator particles
   // -----------------------
-//  fillJetCorrelHistos(FullLepEvt->jetMatch(hypoKey),
-//		      FullLepEvt->jetMatch(TtFullLeptonicEvent::kGenMatch),
-//		      weight);
+  if( FullLepEvt->genEvent()->isFullLeptonic() ) {   
+    const reco::Candidate* genTop    = FullLepEvt->genTop();
+    const reco::Candidate* genWplus  = FullLepEvt->genWPlus();
+    const reco::Candidate* genB      = FullLepEvt->genB();
+    const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
+    const reco::Candidate* genNu     = FullLepEvt->genNeutrino();
+  
+    const reco::Candidate* genTopBar = FullLepEvt->genTopBar();
+    const reco::Candidate* genWminus = FullLepEvt->genWMinus();
+    const reco::Candidate* genBBar   = FullLepEvt->genBBar();
+    const reco::Candidate* genLep    = FullLepEvt->genLepton();
+    const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
 
+    fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+    fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+    fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
+    fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+    fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+
+    fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+    fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+    fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+    fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+    fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
+  }      
 }
 
 void 
 FullLepHypothesesAnalyzer::beginJob(const edm::EventSetup&)
 {
-
   if( hist_.empty() ) throw edm::Exception( edm::errors::Configuration, "Empty string for hist in cfi file" );
   ofstream hist(hist_.c_str(), std::ios::out);
 
@@ -122,10 +135,8 @@ FullLepHypothesesAnalyzer::beginJob(const edm::EventSetup&)
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
 
   bookKinHistos      (fs, hist);
-  //bookKinResHistos   (fs, hist);
-  //bookJetCorrelHistos(fs, hist);
-  //bookQualityHistos  (fs, hist);
-
+  bookKinResHistos   (fs, hist);
+  bookQualityHistos  (fs, hist);
 }
 
 void
@@ -195,51 +206,74 @@ FullLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs, ofstrea
   NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMass"), "M (#bar{#nu}^{-}) [GeV]"    , 30,  0. , 600. ) );      
 }
 
+void
+FullLepHypothesesAnalyzer::bookKinResHistos(edm::Service<TFileService>& fs, ofstream& hist)
+{
 
-// void
-// FullLepHypothesesAnalyzer::bookJetCorrelHistos(edm::Service<TFileService>& fs, ofstream& hist)
-// {
-// 
-//   NameScheme ns("jetCorrel");
-// 
-//   int nBins = nJetsMax_;
-//   double upEdge = nJetsMax_ + 0.5;
-// 
-//   hadBJetCorrel_ = fs->make<TH2F>(ns.name(hist, "hadB"), ns.name("hadB"), nBins, 0.5, upEdge, nBins, 0.5, upEdge);
-//   hadQJetCorrel_ = fs->make<TH2F>(ns.name(hist, "hadQ"), ns.name("hadQ"), nBins, 0.5, upEdge, nBins, 0.5, upEdge);
-//   hadPJetCorrel_ = fs->make<TH2F>(ns.name(hist, "hadP"), ns.name("hadP"), nBins, 0.5, upEdge, nBins, 0.5, upEdge);
-//   lepBJetCorrel_ = fs->make<TH2F>(ns.name(hist, "lepB"), ns.name("lepB"), nBins, 0.5, upEdge, nBins, 0.5, upEdge);
-// 
-// }
+  NameScheme ns("res");
 
-// void
-// FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofstream& hist)
-// {
-// 
-//   NameScheme ns("qual1D");
-// 
-//   goodHypo_ = fs->make<TH1F>(ns.name(hist, "goodHypo"), "good hypothesis", 2, -0.5, 1.5);
-// 
-//   genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
-//   genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
-//   mvaDisc_       = fs->make<TH1F>(ns.name(hist, "mvaDisc"),       "MVA discrim."                        , 20, 0., 1.);
-//   fitChi2_       = fs->make<TH1F>(ns.name(hist, "fitChi2"),       "#chi^{2} (kinFit)"                   , 20, 0., 2.);
-//   fitProb_       = fs->make<TH1F>(ns.name(hist, "fitProb"),       "#chi^{2} probability (kinFit)"       , 20, 0., 1.);
-// 
-//   NameScheme ns2("qual2D");
-// 
-//   genMatchSumDRVsSumPt_      = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsSumPt"),      "#Sigma #Delta R (genMatch) vs. #Sigma #Delta p_{T} (genMatch) [GeV]", 50, 0., 5., 40, 0., 400.);
-//   genMatchSumDRVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadWMass"),   "#Sigma #Delta R (genMatch) vs. M (W_{had}) [GeV] (genMatch)"        , 50, 0., 5., 50, 0., 500.);
-//   genMatchSumDRVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsHadTopMass"), "#Sigma #Delta R (genMatch) vs. M (t_{had}) [GeV] (genMatch)"        , 50, 0., 5., 60, 0., 600.);
-//   genMatchSumDRVsMVADisc_    = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsMVADisc"),    "#Sigma #Delta R (genMatch) vs. MVA discrim."                        , 50, 0., 5., 20, 0., 1.);
-//   genMatchSumDRVsFitProb_    = fs->make<TH2F>(ns2.name(hist, "genMatchSumDRVsFitProb"),    "#Sigma #Delta R (genMatch) vs. #chi^{2} probability (kinFit)"                      , 50, 0., 5., 20, 0., 1.);
-//   mvaDiscVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadWMass"),   "MVA discrim. vs. M (W_{had}) [GeV] (MVADisc)"  , 20, 0., 1., 50, 0., 500.);
-//   mvaDiscVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsHadTopMass"), "MVA discrim. vs. M (t_{had}) [GeV] (MVADisc)", 20, 0., 1., 60, 0., 600.);
-//   mvaDiscVsFitProb_       = fs->make<TH2F>(ns2.name(hist, "mvaDiscVsFitProb"), "MVA discrim. vs. #chi^{2} probability (kinFit)", 20, 0., 1., 20, 0., 1.);
-//   fitProbVsHadWMass_   = fs->make<TH2F>(ns2.name(hist, "fitProbVsHadWMass"),   "#chi^{2} probability (kinFit) vs. M (W_{had}) [GeV] (MVADisc)"  , 20, 0., 1., 50, 0., 500.);
-//   fitProbVsHadTopMass_ = fs->make<TH2F>(ns2.name(hist, "fitProbVsHadTopMass"), "#chi^{2} probability (kinFit) vs. M (t_{had}) [GeV] (MVADisc)", 20, 0., 1., 60, 0., 600.);
-// 
-// }
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (t)",    20, -1.2, 1.2 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (t)", 20, -1.2, 1.2 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (t)", 20, -1.2, 1.2 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassRes"), "M_{rec}-M_{gen}/M_{gen} (t)",          20, -1.2, 1.2 ) );
+  
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{+})",    20, -1.2, 1.2 ) );
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{+})", 20, -1.2, 1.2 ) );
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{+})", 20, -1.2, 1.2 ) );
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassRes"), "M_{rec}-M_{gen}/M_{gen} (W^{+})",          20, -1.2, 1.2 ) );  
+
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (b)",    20, -1.2, 1.2 ) );
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (b)", 20, -1.2, 1.2 ) );
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (b)", 20, -1.2, 1.2 ) );
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BMassRes"), "M_{rec}-M_{gen}/M_{gen} (b)",          20, -1.2, 1.2 ) );  
+
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l^{+})",    20, -1.2, 1.2 ) );
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l^{+})", 20, -1.2, 1.2 ) );
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l^{+})", 20, -1.2, 1.2 ) );
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (l^{+})",          20, -1.2, 1.2 ) ); 
+
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #nu",    20, -1.2, 1.2 ) );
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #nu", 20, -1.2, 1.2 ) );
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #nu", 20, -1.2, 1.2 ) );
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassRes"), "M_{rec}-M_{gen}/M_{gen} #nu",          20, -1.2, 1.2 ) ); 
+
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #bar{t}",    20, -1.2, 1.2 ) );
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #bar{t}", 20, -1.2, 1.2 ) );
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #bar{t}", 20, -1.2, 1.2 ) );
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassRes"), "M_{rec}-M_{gen}/M_{gen} #bar{t}",          20, -1.2, 1.2 ) ); 
+
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{-})",    20, -1.2, 1.2 ) );
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{-})", 20, -1.2, 1.2 ) );
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{-})", 20, -1.2, 1.2 ) );
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassRes"), "M_{rec}-M_{gen}/M_{gen} (W^{-})",          20, -1.2, 1.2 ) ); 
+
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{b})",    20, -1.2, 1.2 ) );
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{b})", 20, -1.2, 1.2 ) );
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{b})", 20, -1.2, 1.2 ) );
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{b})",          20, -1.2, 1.2 ) ); 
+  
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l)",    20, -1.2, 1.2 ) );
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l)", 20, -1.2, 1.2 ) );
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l)", 20, -1.2, 1.2 ) );
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassRes"), "M_{rec}-M_{gen}/M_{gen} (l)",          20, -1.2, 1.2 ) ); 
+  
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    20, -1.2, 1.2 ) );
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 20, -1.2, 1.2 ) );
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 20, -1.2, 1.2 ) );
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          20, -1.2, 1.2 ) );   
+}
+
+void
+FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofstream& hist)
+{
+
+  NameScheme ns("qual1D");
+
+  goodHypo_ = fs->make<TH1F>(ns.name(hist, "goodHypo"), "good hypothesis", 2, -0.5, 1.5);
+
+  genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
+  genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
+}
 
 void
 FullLepHypothesesAnalyzer::fillKinHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate, const double& weight)
@@ -250,52 +284,23 @@ FullLepHypothesesAnalyzer::fillKinHistos(std::vector<TH1F*>& histos, const reco:
   histos[3]->Fill( candidate.mass() , weight );
 }
 
-// void
-// FullLepHypothesesAnalyzer::fillJetCorrelHistos(const std::vector<int>& match, const std::vector<int>& matchCompare, const double& weight)
-// {
-// 
-//   hadBJetCorrel_->Fill( match[TtFullLepEvtPartons::HadB]     +1, matchCompare[TtFullLepEvtPartons::HadB]     +1, weight );
-//   hadQJetCorrel_->Fill( match[TtFullLepEvtPartons::LightQ]   +1, matchCompare[TtFullLepEvtPartons::LightQ]   +1, weight );
-//   hadPJetCorrel_->Fill( match[TtFullLepEvtPartons::LightQBar]+1, matchCompare[TtFullLepEvtPartons::LightQBar]+1, weight );
-//   lepBJetCorrel_->Fill( match[TtFullLepEvtPartons::LepB]     +1, matchCompare[TtFullLepEvtPartons::LepB]     +1, weight );
-// 
-// }
+void
+FullLepHypothesesAnalyzer::fillKinResHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate,
+					    const reco::Candidate& genCandidate, const double& weight)
+{
+  histos[0]->Fill( (candidate.pt()  -genCandidate.pt()  )/genCandidate.pt()   , weight );
+  histos[1]->Fill( (candidate.eta() -genCandidate.eta() )/genCandidate.eta()  , weight );
+  histos[2]->Fill( (candidate.phi() -genCandidate.phi() )/genCandidate.phi()  , weight );
+  histos[3]->Fill( (candidate.mass()-genCandidate.mass())/genCandidate.mass() , weight );
+}
 
-// void
-// FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, const double& weight)
-// {
-// 
-//   // genMatch histos
-//   if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kGenMatch) ) {
-//     genMatchSumDR_->Fill( FullLepEvt.genMatchSumDR() , weight );
-//     genMatchSumPt_->Fill( FullLepEvt.genMatchSumPt() , weight );
-//     genMatchSumDRVsSumPt_     ->Fill( FullLepEvt.genMatchSumDR() , FullLepEvt.genMatchSumPt()                                     , weight );
-//     genMatchSumDRVsHadWMass_  ->Fill( FullLepEvt.genMatchSumDR() , FullLepEvt.hadronicW  (TtFullLeptonicEvent::kGenMatch)->mass() , weight );
-//     genMatchSumDRVsHadTopMass_->Fill( FullLepEvt.genMatchSumDR() , FullLepEvt.hadronicTop(TtFullLeptonicEvent::kGenMatch)->mass() , weight );
-//     // vs. MVADisc
-//     if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kMVADisc) )
-//       genMatchSumDRVsMVADisc_->Fill( FullLepEvt.genMatchSumDR() , FullLepEvt.mvaDisc() , weight );
-//     // vs. KinFit
-//     if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kKinFit) )
-//       genMatchSumDRVsFitProb_->Fill( FullLepEvt.genMatchSumDR() , FullLepEvt.fitProb() , weight );
-//   }
-// 
-//   // MVADisc histos
-//   if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kMVADisc) ) {
-//     mvaDisc_->Fill( FullLepEvt.mvaDisc() , weight );
-//     mvaDiscVsHadWMass_  ->Fill( FullLepEvt.mvaDisc() , FullLepEvt.hadronicW  (TtFullLeptonicEvent::kMVADisc)->mass() , weight );
-//     mvaDiscVsHadTopMass_->Fill( FullLepEvt.mvaDisc() , FullLepEvt.hadronicTop(TtFullLeptonicEvent::kMVADisc)->mass() , weight );
-//     // vs. kinFit
-//     if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kKinFit) )
-//       mvaDiscVsFitProb_->Fill( FullLepEvt.mvaDisc() , FullLepEvt.fitProb() , weight );
-//   }
-// 
-//   // kinFit histos
-//   if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kKinFit) ) {
-//     fitChi2_->Fill( FullLepEvt.fitChi2() , weight );
-//     fitProb_->Fill( FullLepEvt.fitProb() , weight );
-//     fitProbVsHadWMass_  ->Fill( FullLepEvt.fitProb() , FullLepEvt.hadronicW   (TtFullLeptonicEvent::kKinFit)->mass() , weight );
-//     fitProbVsHadTopMass_->Fill( FullLepEvt.fitProb() , FullLepEvt.hadronicTop (TtFullLeptonicEvent::kKinFit)->mass() , weight );
-//   }
-// 
-// }
+void
+FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, const double& weight)
+{
+
+  // genMatch histos
+  if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kGenMatch) ) {
+    genMatchSumDR_->Fill( FullLepEvt.genMatchSumDR() , weight );
+    genMatchSumPt_->Fill( FullLepEvt.genMatchSumPt() , weight ); 
+  }  
+}
