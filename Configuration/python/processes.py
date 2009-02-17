@@ -7,7 +7,7 @@ sizes  = {}  ## sample sizes
 source = {}  ## input sources
 
 ## list of allowed processes
-allowedProcs = 'ttbar0, ttbarx0, ttbar1, ttbarx1, qcd0, qcdx0, wjetsx0, zjetsx0, cern, desy'
+allowedProcs = 'ttbar0, ttbarx0, ttbar1, ttbarx1, qcd0, qcdx0, wjetsx0, wjets1, zjetsx0, zjets1, cern, desy'
 
 
 
