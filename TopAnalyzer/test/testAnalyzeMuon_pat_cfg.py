@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 #-------------------------------------------------
-# test cfg file for tqaflayer1 & 2 production from
-# fullsim for semi-leptonic ttbar events 
+# cfg file for the analysis of selected muon
+# quantities
 #-------------------------------------------------
-process = cms.Process("TEST")
+process = cms.Process("Muon")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -18,7 +18,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-     ## add your favourite file here
+    ## add your favourite file here
     )
 )
 
@@ -33,7 +33,7 @@ process.options = cms.untracked.PSet(
 )
 
 #-------------------------------------------------
-# here is where my analyzer goes
+# muon analysis
 #-------------------------------------------------
 
 ## analyze muons

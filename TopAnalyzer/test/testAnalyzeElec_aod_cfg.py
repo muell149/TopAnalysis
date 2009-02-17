@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 #-------------------------------------------------
-# test cfg file for tqaflayer1 & 2 production from
-# fullsim for semi-leptonic ttbar events 
+# cfg file for the analysis of selected electron
+# quantities
 #-------------------------------------------------
-process = cms.Process("TEST")
+process = cms.Process("Elec")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -18,30 +18,13 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    ## PAT test sample
-    #file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
-    ## RelVal sample
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/02EC71C1-7E6C-DD11-9822-000423D944DC.root',
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/145944C5-7E6C-DD11-AC78-001617C3B79A.root',
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/2E1AB0F6-7E6C-DD11-9CBB-0019DB29C614.root',
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/3E0BD034-7F6C-DD11-9882-000423D9A212.root',
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/3E6FD0C6-7E6C-DD11-8258-001617C3B706.root',
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/40A974C8-7E6C-DD11-A9A0-001617E30CE8.root',
-    '/store/relval/CMSSW_2_1_4/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V6_v1/0004/50F05233-7F6C-DD11-A908-000423D99EEE.root'
-    ## madgraph pre-production test sample
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/249ACBCC-37BF-DD11-A191-00144F2031D4.root',
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/2CF2748D-6BBC-DD11-815C-001EC9DB3AD3.root',
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/30E599BC-66BC-DD11-B985-001E4F3DC624.root',
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/40313322-27BF-DD11-9773-0015C5E9C030.root',
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/B4AE994C-72BF-DD11-9909-001EC9DAED82.root',
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/EAC1080E-65BC-DD11-B8B8-001EC9DB1EF1.root',
-    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1_pre-production/0000/F25A6622-27BF-DD11-AEA0-0015C5E9C186.root'
+    ## add your favourite file here
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100 )
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -78,30 +61,20 @@ run22XonSummer08AODSIM(process)
 process.p0 = cms.Path(process.tqafLayer1)
 
 #-------------------------------------------------
-# private uni Hamburg analysis code
+# elec analysis
 #-------------------------------------------------
 
 ## add event weight information
-from TopAnalysis.TopUtils.EventWeightPlain_cfi import *
-process.eventWeight = eventWeight
+process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
 
-## analyze electrons
-from TopAnalysis.TopAnalyzer.ElecAnalyzer_cfi import analyzeElec
-process.analyzeElec = analyzeElec
-
-process.analyzeAllElec = process.analyzeElec.clone()
-process.analyzeSelElec = process.analyzeElec.clone()
-
-## reconfigure
-process.analyzeAllElec.input = 'allLayer1Electrons'
-process.analyzeSelElec.input = 'selectedLayer1Electrons'
+## analyze muons
+process.load("TopAnalysis.TopAnalyzer.ElecAnalyzer_cfi")
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeElec.root')
 )
 
-process.p1 = cms.Path(process.eventWeight    *
-                      process.analyzeAllElec +
-                      process.analyzeSelElec
+process.p1 = cms.Path(process.eventWeight *
+                      process.analyzeElec 
                       )
