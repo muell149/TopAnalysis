@@ -581,7 +581,7 @@ source['ttbar0']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/
 ## -----------
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 ##
-## Events      :   1026391 (903233 processed)
+## Events      :   1026391 (944285 processed)
 ## xsec(pb)  LO:       320
 ## xsec(pb) NLO:       414
 ## eff         :       1.0
@@ -628,10 +628,11 @@ source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTu
 source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_38_ttbar0.root\','
 source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_39_ttbar0.root\','
 source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_40_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_41_ttbar0.root\','
 source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_42_ttbar0.root\','
 source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_43_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_44_ttbar0.root\''
-
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_44_ttbar0.root\','
+source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_48_ttbar0.root\''
 
 
 
@@ -1762,15 +1763,16 @@ source['qcd1'] = ''
 ######################################################################
 ## PAT Tuple:
 ## -----------
-## /Wjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO## 
-## Events      : 101467739 (94691934 processed)
+## /Wjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
+## Events      : 101467739 (101467739 processed)
 ## xsec(pb)  LO:     35000
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
 sizes ['wjetsx0'] = 1074750
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_1.root\','  
-source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_2.root\',' 
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_2.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_3.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_4.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_5.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_6.root\',' 
@@ -1786,7 +1788,9 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_16.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_17.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_18.root\',' 
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_19.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_20.root\',' 
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_21.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_22.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_23.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_24.root\','
@@ -1815,6 +1819,7 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_47.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_48.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_49.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_50.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_51.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_52.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_53.root\','
@@ -1865,6 +1870,7 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_98.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_99.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_100.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_101.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_102.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_103.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_104.root\','
@@ -1891,6 +1897,7 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_125.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_126.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_127.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_128.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_129.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_130.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_131.root\','
@@ -1899,6 +1906,7 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_134.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_135.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_136.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_137.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_138.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_139.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_140.root\','
@@ -1913,17 +1921,21 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_149.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_150.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_151.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_152.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_153.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_154.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_155.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_156.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_157.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_158.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_159.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_160.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_161.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_162.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_163.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_164.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_165.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_166.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_167.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_168.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_169.root\','
@@ -1935,9 +1947,11 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_175.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_176.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_177.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_178.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_179.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_180.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_181.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_182.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_183.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_184.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_185.root\','
@@ -1953,19 +1967,23 @@ source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_w
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_195.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_196.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_197.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_198.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_199.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_200.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_201.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_202.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_203.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_204.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_205.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_206.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_207.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_208.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_209.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_210.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_211.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_212.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_213.root\','
+source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_214.root\',' 
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_215.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_216.root\','
 source['wjetsx0'] = '\'/pnfs/desy.de/cms/tier2/store/user/rwolf/wjets/patTuple_wjets_v1_217.root\','
@@ -3176,6 +3194,46 @@ source['wjets1'] = '\'/store/mc/Fall08/WJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1/0
 source['wjets1'] = '\'/store/mc/Fall08/WJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v1/0014/FEFAD28A-81CA-DD11-A77C-00E08134C310.root\''
 
 
+######################################################################
+## PAT Tuples:
+## -----------
+## /WJets-madgraph/Fall08_IDEAL_V9_v1/GEN-SIM-RECO
+## 
+## Events      :  10079826 (8084561 processed)
+## xsec(pb)  LO:     35000
+## xsec(pb) NLO:       NAN
+## eff         :      1.00
+######################################################################
+sizes ['wjetsx1'] = 55594
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_1.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_3.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_4.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_5.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_6.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_7.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_8.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_9.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_10.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_11.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_12.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_13.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_14.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_15.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_16.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_17.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_18.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_19.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_20.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_21.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_22.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_23.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_24.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_25.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_26.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_28.root\','
+source['wjetsx1'] ='\'/store/user/rwolf/wjets/patTuple_wjets_v2_29.root\''
+
+
 
 
 ######################################################################
@@ -3535,3 +3593,24 @@ source['zjets1'] = '\'/store/mc/Fall08/ZJets-madgraph/GEN-SIM-RECO/IDEAL_V9_reco
 source['zjets1'] = '\'/store/mc/Fall08/ZJets-madgraph/GEN-SIM-RECO/IDEAL_V9_reco-v2/0000/FE3D7252-DFF4-DD11-9D83-003048673EAA.root\','
 source['zjets1'] = '\'/store/mc/Fall08/ZJets-madgraph/GEN-SIM-RECO/IDEAL_V9_reco-v2/0000/FEEEDA9F-79F3-DD11-A505-00304866C51E.root\','
 source['zjets1'] = '\'/store/mc/Fall08/ZJets-madgraph/GEN-SIM-RECO/IDEAL_V9_reco-v2/0000/FEF43647-57F3-DD11-AA37-001A64789454.root\''
+
+
+######################################################################
+## PAT Tuples:
+## -----------
+## /ZJets-madgraph/Fall08_IDEAL_V9_reco-v2/GEN-SIM-RECO
+##
+## Events      :   1163479 (1163479 processed)
+## xsec(pb)  LO:      3700
+## xsec(pb) NLO:       NAN
+## eff         :      1.00
+######################################################################
+sizes ['zjetsx1'] = 14979
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_1.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_2.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_3.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_4.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_5.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_6.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_7.root\','
+source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_8.root\''

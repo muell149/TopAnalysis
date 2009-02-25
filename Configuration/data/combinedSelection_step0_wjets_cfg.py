@@ -93,7 +93,7 @@ process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('combinedSelection_step0_wjets_v1.root')
+    fileName = cms.string('combinedSelection_step0_wjets_v2.root')
 )
 
 #-------------------------------------------------
@@ -147,7 +147,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     process.patTupleEventContent,
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_wjets_v1.root')
+    fileName = cms.untracked.string('patTuple_wjets_v2.root')
 )
 
 process.outpath = cms.EndPath(process.out)
