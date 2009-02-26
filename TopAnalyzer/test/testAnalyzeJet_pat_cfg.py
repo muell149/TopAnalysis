@@ -37,7 +37,7 @@ process.options = cms.untracked.PSet(
 #-------------------------------------------------
 
 ## analyze muons
-process.load("TopAnalysis.TopAnalyzer.JetsAnalyzer_cfi")
+process.load("TopAnalysis.TopAnalyzer.JetAnalyzer_cfi")
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",

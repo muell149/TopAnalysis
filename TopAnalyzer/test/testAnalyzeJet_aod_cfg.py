@@ -68,7 +68,7 @@ process.p0 = cms.Path(process.tqafLayer1)
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
 
 ## analyze muons
-process.load("TopAnalysis.TopAnalyzer.JetsAnalyzer_cfi")
+process.load("TopAnalysis.TopAnalyzer.JetAnalyzer_cfi")
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
