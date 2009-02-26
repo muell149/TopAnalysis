@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
-    input   = cms.InputTag("allLayer1Electrons"),
+    input   = cms.InputTag("selectedLayer1Electrons"),
     hist    = cms.string  ('analyzeElec.hist'),
        
     ## event weight
@@ -16,7 +16,7 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
     ## fill kin histograms
     kin = cms.PSet(
         towers  = cms.InputTag("towerMaker"),
-        jets    = cms.InputTag("allLayer1Jets"),
+        jets    = cms.InputTag("selectedLayer1Jets"),
         tracks  = cms.InputTag("generalTracks"),
         dRMax   = cms.double(0.3)
     ),

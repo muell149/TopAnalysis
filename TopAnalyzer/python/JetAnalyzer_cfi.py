@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 analyzeJets = cms.EDAnalyzer("JetAnalyzer",
-    input   = cms.InputTag("allLayer1Jets"),
+    input   = cms.InputTag("selectedLayer1Jets"),
     hist    = cms.string('analyzeJets.hist'),
 
     ## event weight
