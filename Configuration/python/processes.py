@@ -1758,7 +1758,7 @@ source['qcd1'] = ''
 ## eff         :      1.00
 ######################################################################
 sizes ['wjetsx0'] = 1746727 ## semilep 1074750
-source['wjetsx0']+= '\'/store/user/rwolf/wjets/patTuple_wjets_v1_1.root\','  
+source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_v1_1.root\','  
 source['wjetsx0']+= '\'/store/user/rwolf/wjets/patTuple_wjets_v1_2.root\','
 source['wjetsx0']+= '\'/store/user/rwolf/wjets/patTuple_wjets_v1_3.root\',' 
 source['wjetsx0']+= '\'/store/user/rwolf/wjets/patTuple_wjets_v1_4.root\',' 
