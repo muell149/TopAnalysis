@@ -706,10 +706,10 @@ source['ttbar1']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 ######################################################################
 sizes ['ttbarx1'] = 147000
 source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
-source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
+source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
+source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
+source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
+source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
 
 
 
