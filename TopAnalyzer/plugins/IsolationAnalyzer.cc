@@ -37,7 +37,7 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 	ofstream hist2D(hist2dd.c_str(),std::ios::out);
 	NameScheme nam("iso");
 	TH2F *trackIsoMET, *caloIsoMET, *ptMET;
-	isomon_ = new CorrelationMonitor();
+	isomon_ = new CorrelationMonitor(fs, hist_);
 	trackIsoMET = fs->make<TH2F > (nam.name(hist2D, "TrackIsoMETCorrelation"),
 			nam.name("TrackIsoMETCorrelation"), 300, 0., 300., isoBins_, 0.,
 			isoMaxBin_);
@@ -68,8 +68,8 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 			string hc = had.str() + "CaloIsoMETCorrelation";
 			string hp = had.str() + "PtMETCorrelation";
 
-			CorrelationMonitor *temph = new CorrelationMonitor();
-			CorrelationMonitor *temps = new CorrelationMonitor();
+			CorrelationMonitor *temph = new CorrelationMonitor(fs, hist_);
+			CorrelationMonitor *temps = new CorrelationMonitor(fs, hist_);
 			//TODO: addHist
 			TH2F *trackIsoMET1, *caloIsoMET1, *ptMET1;
 			TH2F *trackIsoMET2, *caloIsoMET2, *ptMET2;
