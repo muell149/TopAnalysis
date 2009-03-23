@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import os
 
 #-------------------------------------------------
 # test cfg file for mva training for jet parton 
@@ -17,7 +18,12 @@ process.MessageLogger.cerr.threshold = 'INFO'
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
+    ## test-file at lxplus
+    #'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
+    ## one file from the madgraph ttbar sample at desy
+    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/027B51E9-8EED-DD11-9045-0015C5E9C0E1.root'
+    ## one file from the tauola ttbar sample at desy
+    #'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v2/0009/0054812D-26F7-DD11-99D7-001F2908F0E4.root'
     )
 )
 
@@ -74,7 +80,7 @@ process.ttSemiLepJetPartonMatch.maxNJets   = 4
 process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff")
 process.trainTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 
-## make trainer looper known to the process
+## make trainer looper known to the process and set xml-file for trainer
 from TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff import looper
 process.looper = looper
 process.looper.trainers = cms.VPSet(cms.PSet(
@@ -83,8 +89,10 @@ process.looper.trainers = cms.VPSet(cms.PSet(
     saveState  = cms.untracked.bool(True),
     calibrationRecord = cms.string('ttSemiLepJetCombMVA'),
     trainDescription = cms.untracked.string(
-    'TopAnalysis/TopAnalyzer/data/TtSemiLepJetCombMVATrainTreeSaver.xml')
-    ))
+    # the absolute path is specified here since otherwise crab will not find the xml-file
+    os.environ['CMSSW_BASE']+'/src/TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainTreeSaver.xml')
+    )
+)
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced with 22X
