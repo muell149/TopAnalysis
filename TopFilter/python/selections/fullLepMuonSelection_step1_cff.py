@@ -21,6 +21,7 @@ fullLepJetsEta = cms.PSet(
     min  = cms.vdouble(-2.4, -2.4),
     max  = cms.vdouble( 2.4,  2.4)
 )
+
 fullLepJetsPt = cms.PSet(
     mode = cms.uint32 ( 0),    
     name = cms.string ('fullLepJetsPt'),
@@ -35,15 +36,8 @@ fullLepCombIsolation = cms.PSet(
     name = cms.string('fullLepMuonCombIso'),
     min  = cms.vdouble(  0.9, 0.9),
     max  = cms.vdouble(  1.0, 1.0)   
-)    
-fullLepMuonJetDistance = cms.PSet(
-    refs  = cms.InputTag("selectedLayer1Jets"),
-    thresh= cms.vdouble(  20.),
-    mode  = cms.uint32(   0 ),    
-    name = cms.string('fullLepMuonIsoJet'),
-    min  = cms.vdouble(  0.0, 0.0),
-    max  = cms.vdouble(  0.3, 0.3)
-)
+)   
+
 
 
 
