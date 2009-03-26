@@ -9,18 +9,6 @@ fullLepMuonMuon21pre = analyzeMuon.clone()    ##     x     |     x     |     x  
 fullLepMuonMuon22pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     x
 
 ## put any extra configuration here:
-fullLepMuonMuon00pre.input = cms.InputTag("selectedLayer1Muons")                       
-fullLepMuonMuon10pre.input = cms.InputTag("selectedLayer1Muons")                          
-fullLepMuonMuon20pre.input = cms.InputTag("selectedLayer1Muons")                        
-fullLepMuonMuon21pre.input = cms.InputTag("selectedLayer1Muons")    
-fullLepMuonMuon22pre.input = cms.InputTag("selectedLayer1Muons")
-
-fullLepMuonMuon00pre.useEventWeight = cms.bool(False)                       
-fullLepMuonMuon10pre.useEventWeight = cms.bool(False)                          
-fullLepMuonMuon20pre.useEventWeight = cms.bool(False)                        
-fullLepMuonMuon21pre.useEventWeight = cms.bool(False)    
-fullLepMuonMuon22pre.useEventWeight = cms.bool(False)
-
 
 from TopAnalysis.TopAnalyzer.JetAnalyzer_cfi  import analyzeJets
 ## ------------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
@@ -31,18 +19,6 @@ fullLepMuonJets21pre = analyzeJets.clone()    ##     x     |     x     |     x  
 fullLepMuonJets22pre = analyzeJets.clone()    ##     x     |     x     |     x     |     x
 
 ## put any extra configuration here:
-fullLepMuonJets00pre.input = cms.InputTag("selectedLayer1Jets")
-fullLepMuonJets10pre.input = cms.InputTag("selectedLayer1Jets")
-fullLepMuonJets20pre.input = cms.InputTag("selectedLayer1Jets")
-fullLepMuonJets21pre.input = cms.InputTag("selectedLayer1Jets")
-fullLepMuonJets22pre.input = cms.InputTag("selectedLayer1Jets")
-
-fullLepMuonJets00pre.useEventWeight = cms.bool(False)                       
-fullLepMuonJets10pre.useEventWeight = cms.bool(False)                          
-fullLepMuonJets20pre.useEventWeight = cms.bool(False)                        
-fullLepMuonJets21pre.useEventWeight = cms.bool(False)    
-fullLepMuonJets22pre.useEventWeight = cms.bool(False)
-
 
 ## import selection cuts here
 from TopAnalysis.TopFilter.selections.fullLepMuonSelection_step0_cff import *
@@ -61,12 +37,6 @@ prefilterFullLepMuon10.cuts = fullLepMuonEta
 prefilterFullLepMuon01.cuts = fullLepJetsEta
 prefilterFullLepMuon20.cuts = fullLepMuonPt
 prefilterFullLepMuon02.cuts = fullLepJetsPt
-
-prefilterFullLepMuon10.useEventWeight = False
-prefilterFullLepMuon01.useEventWeight = False
-prefilterFullLepMuon20.useEventWeight = False
-prefilterFullLepMuon02.useEventWeight = False
-
 
 ## define sequences
 preselectFullLepMuon = cms.Sequence(fullLepMuonMuon00pre + fullLepMuonJets00pre *
