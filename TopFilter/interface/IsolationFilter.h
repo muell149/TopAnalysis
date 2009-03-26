@@ -71,16 +71,17 @@ IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
 
   // print cuts
   unsigned int maxSize=min_.size();
+  edm::LogVerbatim log("topFilter");  
   if(max_.size()>maxSize) maxSize=max_.size();
   for(unsigned int idx=0; idx<maxSize; ++idx){
-    std::cout << ::std::setw( 20 ) << ::std::left;
-    if(idx==0) std::cout << name_; else std::cout << " ";
-    std::cout << ": ";
-    if(idx<min_.size()) std::cout << "min = " << ::std::setw( 8 ) << ::std::right 
-				  <<  min_[idx] << "  "; else std::cout << "   "; 
-    if(idx<max_.size()) std::cout << "max = " << ::std::setw( 8 ) << ::std::right
-				  << max_[idx] 
-				  << std::endl;
+    log << ::std::setw( 20 ) << ::std::left;
+    if(idx==0) log << name_; else log << " ";
+    log << ": ";
+    if(idx<min_.size()) log << "min = " << ::std::setw( 8 ) << ::std::right 
+		            <<  min_[idx] << "  "; else std::cout << "   "; 
+    if(idx<max_.size()) log << "max = " << ::std::setw( 8 ) << ::std::right
+			    << max_[idx] 
+			    << "\n";
   }
 }
 
@@ -102,18 +103,20 @@ bool IsolationFilter<Collection>::operator()(edm::Event& evt, const std::vector<
 template <typename Collection> 
 void IsolationFilter<Collection>::summarize()
 {
-  // if no event weight or dummy weight is used a simplified summary format is taken
+  // if no event weight or dummy weight is in 
+  // use a simplified summary format is taken
+  edm::LogVerbatim log("topFilter");
   if(beforeCut_ != beforeCutWeighted_){
-  std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
-	    << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
-	    << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") out of "
-	    << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
-	    << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << std::endl;
+  log << ::std::setw( 20 ) << ::std::left  << name_ << " : "
+      << ::std::setw( 10 ) << ::std::right << afterCut_ << " (" 
+      << ::std::setw( 10 ) << ::std::right << afterCutWeighted_  << ") out of "
+      << ::std::setw( 10 ) << ::std::right << beforeCut_<< " (" 
+      << ::std::setw( 10 ) << ::std::right << beforeCutWeighted_ << ")" << "\n";
   }
   else{
-  std::cout << ::std::setw( 20 ) << ::std::left  << name_ << " : "
-	    << ::std::setw( 10 ) << ::std::right << afterCut_ << "  out of "
-	    << ::std::setw( 10 ) << ::std::right << beforeCut_ << std::endl;  
+    log << ::std::setw( 20 ) << ::std::left  << name_ << " : "
+	<< ::std::setw( 10 ) << ::std::right << afterCut_ << "  out of "
+	<< ::std::setw( 10 ) << ::std::right << beforeCut_ << "\n";  
   }
 }
 
