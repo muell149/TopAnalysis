@@ -27,7 +27,7 @@ process.TFileService = cms.Service("TFileService",
 #
 # Event Selector for certain Ttbar decay channels on generator level
 #
-process.load("TopAnalysis.TopFilter.TtbarChannelSelector_cfi")
+process.load("TopAnalysis.TopFilter.filters.TtbarChannelSelector_cfi")
 process.selectChannel.Ttbar_MuonMuon = cms.bool(True)
 #
 # filter for kinematics, muon iso and quality
