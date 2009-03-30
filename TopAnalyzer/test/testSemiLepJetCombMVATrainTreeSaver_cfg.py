@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-import os
 
 #-------------------------------------------------
 # test cfg file for mva training for jet parton 
@@ -88,9 +87,8 @@ process.looper.trainers = cms.VPSet(cms.PSet(
     loadState  = cms.untracked.bool(False),
     saveState  = cms.untracked.bool(True),
     calibrationRecord = cms.string('ttSemiLepJetCombMVA'),
-    trainDescription = cms.untracked.string(
-    # the absolute path is specified here since otherwise crab will not find the xml-file
-    os.environ['CMSSW_BASE']+'/src/TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainTreeSaver.xml')
+    trainDescription = cms.untracked.FileInPath(
+    'TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainTreeSaver.xml')
     )
 )
 
