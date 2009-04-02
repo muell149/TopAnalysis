@@ -581,58 +581,28 @@ source['ttbar0']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/
 ## -----------
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 ##
-## Events      :   1026391 (944285 processed)
+## Events      :   1026391 (1026391 processed)
 ## xsec(pb)  LO:       320
 ## xsec(pb) NLO:       414
 ## eff         :       1.0
 ######################################################################
-sizes ['ttbarx0'] = 903233
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_0_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_1_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_2_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_3_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_4_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_5_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_6_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_7_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_8_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_9_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_10_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_11_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_12_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_13_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_14_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_15_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_16_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_17_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_18_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_19_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_20_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_21_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_22_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_23_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_24_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_25_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_26_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_27_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_28_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_29_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_30_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_31_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_32_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_33_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_34_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_35_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_36_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_37_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_38_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_39_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_40_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_41_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_42_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_43_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_44_ttbar0.root\','
-source['ttbarx0'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar1/patTuple_48_ttbar0.root\''
+sizes ['ttbarx0'] = 1026391
+source['ttbarx0'] = '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_1.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_2.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_3.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_4.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_5.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_6.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_7.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_8.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_9.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_10.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_11.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_12.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_13.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_14.root\','
+source['ttbarx0']+= '\'/store/user/rwolf/ttbar/patTuple_ttbar_madgraph_15.root\''
+
 
 
 
@@ -706,10 +676,10 @@ source['ttbar1']+= '\'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/00
 ######################################################################
 sizes ['ttbarx1'] = 147000
 source['ttbarx1'] = '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\','
-source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
-source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
-source['ttbarx1'] += '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
+source['ttbarx1']+= '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
+source['ttbarx1']+= '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
+source['ttbarx1']+= '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
+source['ttbarx1']+= '\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
 
 
 
@@ -1702,32 +1672,82 @@ source['qcd0']+= '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/
 ## -----------
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
-## Events      :   6238383 (??? processed) 
+## Events      :   6238383 (6238383 processed) 
 ## xsec(pb)  LO: 509100000
 ## xsec(pb) NLO:       NAN
 ## eff         :  0.000239
 ######################################################################
 sizes ['qcdx0'] = -1
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_1.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_2.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_3.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_4.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_5.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_7.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_8.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_9.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_10.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_11.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_12.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_14.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_15.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_16.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_17.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_18.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_19.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_20.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_21.root\','
-source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_22.root\''
+source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_1.root\','                                    
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_2.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_3.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_4.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_5.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_6.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_7.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_8.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_9.root\','
+source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_10.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_11.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_12.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_13.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_14.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_15.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_16.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_17.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_18.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_19.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_20.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_21.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_22.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_23.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_24.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_25.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_26.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_27.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_28.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_29.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_30.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_31.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_32.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_33.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_34.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_35.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_36.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_37.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_38.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_39.root\','                                   
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_40.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_41.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_42.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_43.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_44.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_45.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_46.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_47.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_48.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_49.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_50.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_51.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_52.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_53.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_54.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_55.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_56.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_57.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_58.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_59.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_60.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_61.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_62.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_63.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_64.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_65.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_66.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_67.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_68.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_69.root\','
+source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_70.root\''
 
 
 
@@ -1757,7 +1777,7 @@ source['qcd1'] = ''
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['wjetsx0'] = 1746727 ## semilep 1074750
+sizes ['wjetsx0'] = 1746727
 source['wjetsx0'] = '\'/store/user/rwolf/wjets/patTuple_wjets_v1_1.root\','  
 source['wjetsx0']+= '\'/store/user/rwolf/wjets/patTuple_wjets_v1_2.root\','
 source['wjetsx0']+= '\'/store/user/rwolf/wjets/patTuple_wjets_v1_3.root\',' 
@@ -3221,8 +3241,6 @@ source['wjetsx1']+='\'/store/user/rwolf/wjets/patTuple_wjets_v2_26.root\','
 source['wjetsx1']+='\'/store/user/rwolf/wjets/patTuple_wjets_v2_27.root\''
 
 
-
-
 ######################################################################
 ## PAT Tuples:
 ## -----------
@@ -3233,7 +3251,7 @@ source['wjetsx1']+='\'/store/user/rwolf/wjets/patTuple_wjets_v2_27.root\''
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['zjetsx0'] = 1690137 ## 193159 semilep
+sizes ['zjetsx0'] = 1690137
 source['zjetsx0'] = '\'/store/user/rwolf/zjets/patTuple_zjets_1.root\','
 source['zjetsx0']+= '\'/store/user/rwolf/zjets/patTuple_zjets_2.root\','
 source['zjetsx0']+= '\'/store/user/rwolf/zjets/patTuple_zjets_3.root\','
@@ -3255,8 +3273,6 @@ source['zjetsx0']+= '\'/store/user/rwolf/zjets/patTuple_zjets_18.root\','
 source['zjetsx0']+= '\'/store/user/rwolf/zjets/patTuple_zjets_19.root\','
 source['zjetsx0']+= '\'/store/user/rwolf/zjets/patTuple_zjets_20.root\','
 source['zjetsx0']+= '\'/store/user/rwolf/zjets/patTuple_zjets_21.root\''
-
-
 
 
 ######################################################################
@@ -3592,7 +3608,7 @@ source['zjets1']+= '\'/store/mc/Fall08/ZJets-madgraph/GEN-SIM-RECO/IDEAL_V9_reco
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['zjetsx1'] = 190675 ## semilep 14979 
+sizes ['zjetsx1'] = 190675
 source['zjetsx1'] = '\'/store/user/rwolf/zjets/patTuple_zjets_v1_1.root\','
 source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_2.root\','
 source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_3.root\','
