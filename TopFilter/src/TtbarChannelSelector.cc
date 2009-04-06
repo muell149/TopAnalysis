@@ -27,12 +27,13 @@ class TtbarChannelSelector : public edm::EDFilter {
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void endJob(); 
 
+  bool check(edm::Event&, const edm::EventSetup&);  
   int wDecay(); 
   int tauDecay();
   
   edm::InputTag src_;
   int nEvents_;
-  int nHits;
+  int nEvts, nHits;
 
   bool SingleTopHadronic_;
   bool SingleTopElectron_;
@@ -86,6 +87,7 @@ TtbarChannelSelector::TtbarChannelSelector(const edm::ParameterSet& cfg) :
   TauMuon_          (cfg.getParameter<bool>("Tau_Muon"          )),
   invert_           (cfg.getParameter<bool>("invert_selection"  ))              
 {
+  nEvts = 0;
   nHits = 0;     
 }
 
@@ -95,22 +97,29 @@ TtbarChannelSelector::~TtbarChannelSelector() {
 
 
 bool TtbarChannelSelector::filter(edm::Event& evt, const edm::EventSetup& es) {
+    nEvts++;
+    bool result = check( evt, es);
+    if(result) nHits++;
+    return result;
+}
+
+bool TtbarChannelSelector::check(edm::Event& evt, const edm::EventSetup& es) {  
   if(nEvents_!=-1){
     if(nHits >= nEvents_){
       return false;      
     }
   }
   
-  bool False;
-  bool True;
+  bool Pass;
+  bool Block;
   
   if (invert_==false){
-    False = false;
-    True  = true;
+    Block = false;
+    Pass  = true;
   }
   else{
-    False = true;
-    True  = false;    
+    Block = true;
+    Pass  = false;    
   }
         
   int decayVl = 0;
@@ -138,7 +147,7 @@ bool TtbarChannelSelector::filter(edm::Event& evt, const edm::EventSetup& es) {
     // in few event the top decays to s or d
     if(bquark==0){ 
       cout << "MESSAGE: top does not decay to b." << endl;
-      return False;
+      return Block;
     }
     // in some MC the w is not in the decay chain but directly its decay products
     if(wbos==0){
@@ -165,12 +174,12 @@ bool TtbarChannelSelector::filter(edm::Event& evt, const edm::EventSetup& es) {
     }
     if(wdaugh1==0 || wdaugh2==0){
       cout << "MESSAGE: top has no good daughters" << endl;
-      return False;	
+      return Block;	
     }
     // calculate the decay value from the w decays
     int wNumber = wDecay();
     
-    if(wNumber<0) return False;
+    if(wNumber<0) return Block;
     
     if(cand->pdgId()==6){ 
       decayVl = decayVl + 10*wNumber;
@@ -184,15 +193,14 @@ bool TtbarChannelSelector::filter(edm::Event& evt, const edm::EventSetup& es) {
     if(decayVl==selectedChannels.at(i)){ 
       int selectedTauChannel = selectedChannels[i];     
       if(selectedTauChannel/10 > 3 || selectedTauChannel%10 > 3){ //that means if a tau channel is selected
-        if(!TauHadronic_ && (decayVl/10==4 || decayVl%10==4)) return False;
-        if(!TauElec_     && (decayVl/10==5 || decayVl%10==5)) return False;
-        if(!TauMuon_     && (decayVl/10==6 || decayVl%10==6)) return False;	  	    	
+        if(!TauHadronic_ && (decayVl/10==4 || decayVl%10==4)) return Block;
+        if(!TauElec_     && (decayVl/10==5 || decayVl%10==5)) return Block;
+        if(!TauMuon_     && (decayVl/10==6 || decayVl%10==6)) return Block;	  	    	
       }           
-      nHits++;
-      return True;
+      return Pass;
     }
   }      
-  return False;
+  return Block;
 }   
 
 int TtbarChannelSelector::wDecay(){
@@ -328,7 +336,7 @@ void TtbarChannelSelector::beginJob(const edm::EventSetup&) {
 
 void TtbarChannelSelector::endJob() {  
   cout << "==============================================================" << endl;
-  cout << "       Selected: " << nHits                                     << endl;
+  cout << "       Selected: " << nHits  << " of " << nEvts                 << endl;
   cout << "==============================================================" << endl;     
 }
 
