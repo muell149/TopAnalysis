@@ -49,6 +49,6 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('patTuple_semiLepMuonSelection_step0.root')
 )
 
-process.p1 = cms.Path(process.selectSemiLepMuon *
+process.p1 = cms.Path(process.preselectSemiLepMuon *
                       process.out
                       )
