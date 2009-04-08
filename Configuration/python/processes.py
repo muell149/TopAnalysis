@@ -7,7 +7,7 @@ sizes  = {}  ## sample sizes
 source = {}  ## input sources
 
 ## list of allowed processes
-allowedProcs = 'ttbar0, ttbarx0, ttbar1, ttbarx1, qcd0, qcdx0, wjetsx0, wjets1, wjetsx1, zjetsx0, zjets1, zjetsx1, cern, desy'
+allowedProcs = 'ttbar0, ttbarx0, ttbar1, ttbarx1, qcd0, qcdx0, wjetsx0, wjets1, wjetsx1, zjetsx0, zjets1, zjetsx1, wwx0, zzx0, cern, desy'
 
 
 
@@ -36,12 +36,12 @@ source['desy'] = ''
 ##
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 ##
-## Events      :   1026391
+## Events      :   1028322
 ## xsec(pb)  LO:       320
 ## xsec(pb) NLO:       414
 ## eff         :       1.0
 ######################################################################
-sizes ['ttbar0'] = 1026391
+sizes ['ttbar0'] = 1028322
 source['ttbar0'] = '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/027B51E9-8EED-DD11-9045-0015C5E9C0E1.root\','
 source['ttbar0']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/0297592D-D1ED-DD11-8D29-001E4F3D764C.root\','
 source['ttbar0']+= '\'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/02D3028D-B4ED-DD11-9413-00144F0D84D8.root\','
@@ -1687,7 +1687,7 @@ source['qcd0']+= '\'/store/mc/Summer08/InclusiveMuPt15/GEN-SIM-RECO/IDEAL_V9_v1/
 ## xsec(pb) NLO:       NAN
 ## eff         :  0.000239
 ######################################################################
-sizes ['qcdx0'] = 849910
+sizes ['qcdx0'] = 982407
 source['qcdx0'] = '\'/store/user/rwolf/qcd/patTuple_qcd_incl_1.root\','                                    
 source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_2.root\','
 source['qcdx0']+= '\'/store/user/rwolf/qcd/patTuple_qcd_incl_3.root\','
@@ -3627,3 +3627,37 @@ source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_5.root\','
 source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_6.root\','
 source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_7.root\','
 source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_8.root\''
+
+
+######################################################################
+## PAT Tuples:
+## -----------
+## /WW/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
+##
+## Events      :   200000 (200000 processed)
+## xsec(pb)  LO:      44.8
+## xsec(pb) NLO:       NAN
+## eff         :      1.00
+######################################################################
+sizes ['wwx1'] = 16932
+source['wwx1'] = '\'/store/user/dammann/ww/patTuple_ww_1.root\','
+source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_2.root\','
+source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_3.root\','
+source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_4.root\''
+
+
+######################################################################
+## PAT Tuples:
+## -----------
+## /ZZ/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
+##
+## Events      :   200000 (200000 processed)
+## xsec(pb)  LO:       7.1
+## xsec(pb) NLO:       NAN
+## eff         :      1.00
+######################################################################
+sizes ['zzx1'] = 13319
+source['zzx1'] = '\'/store/user/dammann/zz/patTuple_zz_1.root\','
+source['zzx1']+= '\'/store/user/dammann/zz/patTuple_zz_2.root\','
+source['zzx1']+= '\'/store/user/dammann/zz/patTuple_zz_3.root\','
+source['zzx1']+= '\'/store/user/dammann/zz/patTuple_zz_4.root\''
