@@ -3649,6 +3649,23 @@ source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_4.root\''
 ######################################################################
 ## PAT Tuples:
 ## -----------
+## /WZ/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
+##
+## Events      :   200000 (200000 processed)
+## xsec(pb)  LO:      17.4
+## xsec(pb) NLO:       NAN
+## eff         :      1.00
+######################################################################
+sizes ['wzx1'] = 13637
+source['wzx1'] = '\'/store/user/dammann/wz/patTuple_wz_1.root\','
+source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_2.root\','
+source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_3.root\','
+source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_4.root\''
+
+
+######################################################################
+## PAT Tuples:
+## -----------
 ## /ZZ/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
 ##
 ## Events      :   200000 (200000 processed)
