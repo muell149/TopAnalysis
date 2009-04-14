@@ -7,7 +7,7 @@ sizes  = {}  ## sample sizes
 source = {}  ## input sources
 
 ## list of allowed processes
-allowedProcs = 'ttbar0, ttbarx0, ttbar1, ttbarx1, qcd0, qcdx0, wjetsx0, wjets1, wjetsx1, zjetsx0, zjets1, zjetsx1, wwx0, zzx0, cern, desy'
+allowedProcs = 'ttbar0, ttbarx0, ttbar1, ttbarx1, qcd0, qcdx0, wjetsx0, wjets1, wjetsx1, zjetsx0, zjets1, zjetsx1, wwx0, wzx0, zzx0, cern, desy'
 
 
 
@@ -3639,11 +3639,11 @@ source['zjetsx1']+= '\'/store/user/rwolf/zjets/patTuple_zjets_v1_8.root\''
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['wwx1'] = 16932
-source['wwx1'] = '\'/store/user/dammann/ww/patTuple_ww_1.root\','
-source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_2.root\','
-source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_3.root\','
-source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_4.root\''
+sizes ['wwx0'] = 16932
+source['wwx0'] = '\'/store/user/dammann/ww/patTuple_ww_1.root\','
+source['wwx0']+= '\'/store/user/dammann/ww/patTuple_ww_2.root\','
+source['wwx0']+= '\'/store/user/dammann/ww/patTuple_ww_3.root\','
+source['wwx0']+= '\'/store/user/dammann/ww/patTuple_ww_4.root\''
 
 
 ######################################################################
@@ -3656,11 +3656,11 @@ source['wwx1']+= '\'/store/user/dammann/ww/patTuple_ww_4.root\''
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['wzx1'] = 13637
-source['wzx1'] = '\'/store/user/dammann/wz/patTuple_wz_1.root\','
-source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_2.root\','
-source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_3.root\','
-source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_4.root\''
+sizes ['wzx0'] = 13637
+source['wzx0'] = '\'/store/user/dammann/wz/patTuple_wz_1.root\','
+source['wzx0']+= '\'/store/user/dammann/wz/patTuple_wz_2.root\','
+source['wzx0']+= '\'/store/user/dammann/wz/patTuple_wz_3.root\','
+source['wzx0']+= '\'/store/user/dammann/wz/patTuple_wz_4.root\''
 
 
 ######################################################################
@@ -3673,8 +3673,8 @@ source['wzx1']+= '\'/store/user/dammann/wz/patTuple_wz_4.root\''
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
 ######################################################################
-sizes ['zzx1'] = 13319
-source['zzx1'] = '\'/store/user/dammann/zz/patTuple_zz_1.root\','
-source['zzx1']+= '\'/store/user/dammann/zz/patTuple_zz_2.root\','
-source['zzx1']+= '\'/store/user/dammann/zz/patTuple_zz_3.root\','
-source['zzx1']+= '\'/store/user/dammann/zz/patTuple_zz_4.root\''
+sizes ['zzx0'] = 13319
+source['zzx0'] = '\'/store/user/dammann/zz/patTuple_zz_1.root\','
+source['zzx0']+= '\'/store/user/dammann/zz/patTuple_zz_2.root\','
+source['zzx0']+= '\'/store/user/dammann/zz/patTuple_zz_3.root\','
+source['zzx0']+= '\'/store/user/dammann/zz/patTuple_zz_4.root\''
