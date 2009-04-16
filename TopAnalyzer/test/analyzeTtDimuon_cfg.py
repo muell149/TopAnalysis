@@ -5,9 +5,10 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.categories.append('topFilter')
+process.MessageLogger.categories.append('TopChannelSelector')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 #
 #  Source
@@ -16,8 +17,8 @@ import FWCore.ParameterSet.Config as cms
 #
 # Source
 #
-#process.load("TopAnalysis.Configuration.samples.ttbar_pat_cff")
-process.load("TopAnalysis.Configuration.samples.qcd_pat_cff")
+process.load("TopAnalysis.Configuration.samples.ttbar_pat_cff")
+#process.load("TopAnalysis.Configuration.samples.qcd_pat_cff")
 #
 # Output file
 #
@@ -27,7 +28,11 @@ process.TFileService = cms.Service("TFileService",
 #
 # Event Selector for certain Ttbar decay channels on generator level
 #
+<<<<<<< analyzeTtDimuon_cfg.py
+process.load("TopAnalysis.TopFilter.filters.TopChannelSelector_cfi")
+=======
 process.load("TopAnalysis.TopFilter.filters.TtbarChannelSelector_cfi")
+>>>>>>> 1.2
 process.selectChannel.Ttbar_MuonMuon = cms.bool(True)
 #
 # filter for kinematics, muon iso and quality
@@ -58,7 +63,7 @@ process.solutions.tmassstep = 1.0
 process.load("TopAnalysis.TopAnalyzer.TtDimuonAnalyzer_cfi")
 process.analyzeTtDimuon.show_Gen_Event = False
 
-process.p1 = cms.Path(#process.selectChannel*
+process.p1 = cms.Path(process.selectChannel*
 		      process.selectFullMuonMuonKinematics*
                       process.selectFullMuonJetsKinematics*                      
 		      process.analyzeMuonPair*
