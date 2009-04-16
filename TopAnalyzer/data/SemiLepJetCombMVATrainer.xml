@@ -8,231 +8,202 @@
 
         <input id="input">
 
-                <!-- =================================================================== -->
+                <var name="target" multiple="true" optional="false"/>
+                <!-- ===================================================================== -->
                 <!-- mass, pt, eta, phi and theta of single candidates of the ttbar system -->
                 <!-- ===================================================================== -->
                 <!--  hadronic top quark -->
-                <var name="massHadTop"  multiple="false" optional="false"/>
-                <var name="ptHadTop"    multiple="false" optional="false"/>
-                <var name="etaHadTop"   multiple="false" optional="false"/>
-                <var name="phiHadTop"   multiple="false" optional="false"/>
-                <var name="thetaHadTop" multiple="false" optional="false"/>
+                <var name="massHadTop"  multiple="true" optional="false"/>
+                <var name="ptHadTop"    multiple="true" optional="false"/>
+                <var name="etaHadTop"   multiple="true" optional="false"/>
+                <var name="phiHadTop"   multiple="true" optional="false"/>
+                <var name="thetaHadTop" multiple="true" optional="false"/>
                 <!-- leptonic top quark -->
-                <var name="massLepTop"  multiple="false" optional="false"/>
-                <var name="ptLepTop"    multiple="false" optional="false"/>
-                <var name="etaLepTop"   multiple="false" optional="false"/>
-                <var name="phiLepTop"   multiple="false" optional="false"/>
-                <var name="thetaLepTop" multiple="false" optional="false"/>
+                <var name="massLepTop"  multiple="true" optional="false"/>
+                <var name="ptLepTop"    multiple="true" optional="false"/>
+                <var name="etaLepTop"   multiple="true" optional="false"/>
+                <var name="phiLepTop"   multiple="true" optional="false"/>
+                <var name="thetaLepTop" multiple="true" optional="false"/>
                 <!-- hadronic W boson -->
-                <var name="massHadW"  multiple="false" optional="false"/>
-                <var name="ptHadW"    multiple="false" optional="false"/>
-                <var name="etaHadW"   multiple="false" optional="false"/>
-                <var name="phiHadW"   multiple="false" optional="false"/>
-                <var name="thetaHadW" multiple="false" optional="false"/>
-                <!-- leptonic W boson -->
-                <var name="massLepW"  multiple="false" optional="false"/>
-                <var name="ptLepW"    multiple="false" optional="false"/>
-                <var name="etaLepW"   multiple="false" optional="false"/>
-                <var name="phiLepW"   multiple="false" optional="false"/>
-                <var name="thetaLepW" multiple="false" optional="false"/>
+                <var name="massHadW"  multiple="true" optional="false"/>
+                <var name="ptHadW"    multiple="true" optional="false"/>
+                <var name="etaHadW"   multiple="true" optional="false"/>
+                <var name="phiHadW"   multiple="true" optional="false"/>
+                <var name="thetaHadW" multiple="true" optional="false"/>
                 <!-- hadronic b quark -->
-                <var name="ptHadB"    multiple="false" optional="false"/>
-                <var name="etaHadB"   multiple="false" optional="false"/>
-                <var name="phiHadB"   multiple="false" optional="false"/>
-                <var name="thetaHadB" multiple="false" optional="false"/>
+                <var name="ptHadB"    multiple="true" optional="false"/>
+                <var name="etaHadB"   multiple="true" optional="false"/>
+                <var name="phiHadB"   multiple="true" optional="false"/>
+                <var name="thetaHadB" multiple="true" optional="false"/>
                 <!-- leptonic b quark -->
-                <var name="ptLepB"    multiple="false" optional="false"/>
-                <var name="etaLepB"   multiple="false" optional="false"/>
-                <var name="phiLepB"   multiple="false" optional="false"/>
-                <var name="thetaLepB" multiple="false" optional="false"/>
+                <var name="ptLepB"    multiple="true" optional="false"/>
+                <var name="etaLepB"   multiple="true" optional="false"/>
+                <var name="phiLepB"   multiple="true" optional="false"/>
+                <var name="thetaLepB" multiple="true" optional="false"/>
                 <!-- light quark -->
-                <var name="ptLightQ"    multiple="false" optional="false"/>
-                <var name="etaLightQ"   multiple="false" optional="false"/>
-                <var name="phiLightQ"   multiple="false" optional="false"/>
-                <var name="thetaLightQ" multiple="false" optional="false"/>
+                <var name="ptLightQ"    multiple="true" optional="false"/>
+                <var name="etaLightQ"   multiple="true" optional="false"/>
+                <var name="phiLightQ"   multiple="true" optional="false"/>
+                <var name="thetaLightQ" multiple="true" optional="false"/>
                 <!-- light anti-quark -->
-                <var name="ptLightQBar"    multiple="false" optional="false"/>
-                <var name="etaLightQBar"   multiple="false" optional="false"/>
-                <var name="phiLightQBar"   multiple="false" optional="false"/>
-                <var name="thetaLightQBar" multiple="false" optional="false"/>
-                <!-- lepton -->
-                <var name="ptLepton"    multiple="false" optional="false"/>
-                <var name="etaLepton"   multiple="false" optional="false"/>
-                <var name="phiLepton"   multiple="false" optional="false"/>
-                <var name="thetaLepton" multiple="false" optional="false"/>
-                <!-- neutrino -->
-                <var name="ptNeutrino"    multiple="false" optional="false"/>
-                <var name="etaNeutrino"   multiple="false" optional="false"/>
-                <var name="phiNeutrino"   multiple="false" optional="false"/>
-                <var name="thetaNeutrino" multiple="false" optional="false"/>
+                <var name="ptLightQBar"    multiple="true" optional="false"/>
+                <var name="etaLightQBar"   multiple="true" optional="false"/>
+                <var name="phiLightQBar"   multiple="true" optional="false"/>
+                <var name="thetaLightQBar" multiple="true" optional="false"/>
                 <!-- ==================================================================================== -->
                 <!-- compare two candidates of the ttbar system in DeltaM, DeltaR, DeltaPhi or DeltaTheta -->
                 <!-- ==================================================================================== -->
                 <!-- the two top quarks -->
-                <var name="deltaMHadTopLepTop"     multiple="false" optional="false"/>
-                <var name="deltaRHadTopLepTop"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopLepTop"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopLepTop" multiple="false" optional="false"/>
+                <var name="deltaMHadTopLepTop"     multiple="true" optional="false"/>
+                <var name="deltaRHadTopLepTop"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopLepTop"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopLepTop" multiple="true" optional="false"/>
                 <!-- the two W bosons -->
-                <var name="deltaMHadWLepW"     multiple="false" optional="false"/>
-                <var name="deltaRHadWLepW"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadWLepW"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadWLepW" multiple="false" optional="false"/>
+                <var name="deltaMHadWLepW"     multiple="true" optional="false"/>
+                <var name="deltaRHadWLepW"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadWLepW"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadWLepW" multiple="true" optional="false"/>
                 <!-- the two b quarks -->
-                <var name="deltaRHadBLepB"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadBLepB"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadBLepB" multiple="false" optional="false"/>
+                <var name="deltaRHadBLepB"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadBLepB"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadBLepB" multiple="true" optional="false"/>
                 <!-- the two light quarks -->
-                <var name="deltaRHadQHadQBar"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadQHadQBar"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadQHadQBar" multiple="false" optional="false"/>
-                <!-- lepton and neutrino -->
-                <var name="deltaRLeptonNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiLeptonNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaLeptonNeutrino" multiple="false" optional="false"/>
+                <var name="deltaRHadQHadQBar"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadQHadQBar"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadQHadQBar" multiple="true" optional="false"/>
                 <!-- the hadronic top and the hadronic W -->
-                <var name="deltaMHadTopHadW"     multiple="false" optional="false"/>
-                <var name="deltaRHadTopHadW"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopHadW"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopHadW" multiple="false" optional="false"/>
+                <var name="deltaMHadTopHadW"     multiple="true" optional="false"/>
+                <var name="deltaRHadTopHadW"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopHadW"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopHadW" multiple="true" optional="false"/>
                 <!-- the leptonic top and the leptonic W -->
-                <var name="deltaMLepTopLepW"     multiple="false" optional="false"/>
-                <var name="deltaRLepTopLepW"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepTopLepW"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepTopLepW" multiple="false" optional="false"/>
+                <var name="deltaMLepTopLepW"     multiple="true" optional="false"/>
+                <var name="deltaRLepTopLepW"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepTopLepW"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepTopLepW" multiple="true" optional="false"/>
                 <!-- the hadronic top and the leptonic W -->
-                <var name="deltaMHadTopLepW"     multiple="false" optional="false"/>
-                <var name="deltaRHadTopLepW"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopLepW"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopLepW" multiple="false" optional="false"/>
+                <var name="deltaMHadTopLepW"     multiple="true" optional="false"/>
+                <var name="deltaRHadTopLepW"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopLepW"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopLepW" multiple="true" optional="false"/>
                 <!-- the leptonic top and the hadronic W -->
-                <var name="deltaMLepTopHadW"     multiple="false" optional="false"/>
-                <var name="deltaRLepTopHadW"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepTopHadW"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepTopHadW" multiple="false" optional="false"/>
+                <var name="deltaMLepTopHadW"     multiple="true" optional="false"/>
+                <var name="deltaRLepTopHadW"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepTopHadW"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepTopHadW" multiple="true" optional="false"/>
                 <!-- the hadronic top and the hadronic b -->
-                <var name="deltaRHadTopHadB"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopHadB"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopHadB" multiple="false" optional="false"/>
+                <var name="deltaRHadTopHadB"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopHadB"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopHadB" multiple="true" optional="false"/>
                 <!-- the leptonic top and the leptonic b -->
-                <var name="deltaRLepTopLepB"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepTopLepB"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepTopLepB" multiple="false" optional="false"/>
+                <var name="deltaRLepTopLepB"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepTopLepB"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepTopLepB" multiple="true" optional="false"/>
                 <!-- the hadronic top and the leptonic b -->
-                <var name="deltaRHadTopLepB"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopLepB"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopLepB" multiple="false" optional="false"/>
+                <var name="deltaRHadTopLepB"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopLepB"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopLepB" multiple="true" optional="false"/>
                 <!-- the leptonic top and the hadronic b -->
-                <var name="deltaRLepTopHadB"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepTopHadB"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepTopHadB" multiple="false" optional="false"/>
+                <var name="deltaRLepTopHadB"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepTopHadB"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepTopHadB" multiple="true" optional="false"/>
                 <!-- the hadronic W and the hadronic b -->
-                <var name="deltaRHadWHadB"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadWHadB"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadWHadB" multiple="false" optional="false"/>
+                <var name="deltaRHadWHadB"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadWHadB"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadWHadB" multiple="true" optional="false"/>
                 <!-- the leptonic W and the leptonic b -->
-                <var name="deltaRLepWLepB"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepWLepB"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepWLepB" multiple="false" optional="false"/>
+                <var name="deltaRLepWLepB"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepWLepB"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepWLepB" multiple="true" optional="false"/>
                 <!-- the hadronic W and the leptonic b -->
-                <var name="deltaRHadWLepB"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadWLepB"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadWLepB" multiple="false" optional="false"/>
+                <var name="deltaRHadWLepB"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadWLepB"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadWLepB" multiple="true" optional="false"/>
                 <!-- the leptonic W and the hadronic b -->
-                <var name="deltaRLepWHadB"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepWHadB"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepWHadB" multiple="false" optional="false"/>
+                <var name="deltaRLepWHadB"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepWHadB"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepWHadB" multiple="true" optional="false"/>
                 <!-- the hadronic top and the lepton -->
-                <var name="deltaRHadTopLepton"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopLepton"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopLepton" multiple="false" optional="false"/>
+                <var name="deltaRHadTopLepton"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopLepton"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopLepton" multiple="true" optional="false"/>
                 <!-- the leptonic top and the lepton -->
-                <var name="deltaRLepTopLepton"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepTopLepton"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepTopLepton" multiple="false" optional="false"/>
+                <var name="deltaRLepTopLepton"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepTopLepton"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepTopLepton" multiple="true" optional="false"/>
                 <!-- the hadronic top and the neutrino -->
-                <var name="deltaRHadTopNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadTopNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadTopNeutrino" multiple="false" optional="false"/>
+                <var name="deltaRHadTopNeutrino"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadTopNeutrino"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadTopNeutrino" multiple="true" optional="false"/>
                 <!-- the leptonic top and the neutrino -->
-                <var name="deltaRLepTopNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepTopNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepTopNeutrino" multiple="false" optional="false"/>
+                <var name="deltaRLepTopNeutrino"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepTopNeutrino"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepTopNeutrino" multiple="true" optional="false"/>
                 <!-- the hadronic W and the lepton -->
-                <var name="deltaRHadWLepton"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadWLepton"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadWLepton" multiple="false" optional="false"/>
-                <!-- the leptonic W and the lepton -->
-                <var name="deltaRLepWLepton"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepWLepton"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepWLepton" multiple="false" optional="false"/>
+                <var name="deltaRHadWLepton"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadWLepton"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadWLepton" multiple="true" optional="false"/>
                 <!-- the hadronic W and the neutrino -->
-                <var name="deltaRHadWNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadWNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadWNeutrino" multiple="false" optional="false"/>
-                <!-- the leptonic W and the neutrino -->
-                <var name="deltaRLepWNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepWNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepWNeutrino" multiple="false" optional="false"/>
+                <var name="deltaRHadWNeutrino"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadWNeutrino"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadWNeutrino" multiple="true" optional="false"/>
                 <!-- the hadronic b and the lepton -->
-                <var name="deltaRHadBLepton"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadBLepton"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadBLepton" multiple="false" optional="false"/>
+                <var name="deltaRHadBLepton"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadBLepton"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadBLepton" multiple="true" optional="false"/>
                 <!-- the leptonic b and the lepton -->
-                <var name="deltaRLepBLepton"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepBLepton"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepBLepton" multiple="false" optional="false"/>
+                <var name="deltaRLepBLepton"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepBLepton"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepBLepton" multiple="true" optional="false"/>
                 <!-- the hadronic b and the neutrino -->
-                <var name="deltaRHadBNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiHadBNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaHadBNeutrino" multiple="false" optional="false"/>
+                <var name="deltaRHadBNeutrino"     multiple="true" optional="false"/>
+                <var name="deltaPhiHadBNeutrino"   multiple="true" optional="false"/>
+                <var name="deltaThetaHadBNeutrino" multiple="true" optional="false"/>
                 <!-- the leptonic b and the neutrino -->
-                <var name="deltaRLepBNeutrino"     multiple="false" optional="false"/>
-                <var name="deltaPhiLepBNeutrino"   multiple="false" optional="false"/>
-                <var name="deltaThetaLepBNeutrino" multiple="false" optional="false"/>
+                <var name="deltaRLepBNeutrino"     multiple="true" optional="false"/>
+                <var name="deltaPhiLepBNeutrino"   multiple="true" optional="false"/>
+                <var name="deltaThetaLepBNeutrino" multiple="true" optional="false"/>
                 <!-- ============================================== -->
                 <!-- special variables combining the pt of the jets -->
                 <!-- ============================================== -->
-                <var name="relativePtHadronicTop" multiple="false" optional="false"/>
-                <var name="bOverLightQPt"         multiple="false" optional="false"/>
+                <var name="relativePtHadronicTop" multiple="true" optional="false"/>
+                <var name="bOverLightQPt"         multiple="true" optional="false"/>
                 <!-- ========================================================== -->
                 <!-- variables based on b-tagging with six different algorithms -->
                 <!-- ========================================================== -->
                 <!-- hadronic b quark candidate -->
-                <var name="bTagHadBTrkCntHighEff" multiple="false" optional="false"/>
-                <var name="bTagHadBTrkCntHighPur" multiple="false" optional="false"/>
-                <var name="bTagHadBSoftMuon"      multiple="false" optional="false"/>
-                <var name="bTagHadBSimpSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagHadBCombSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagHadBImpactParaMVA" multiple="false" optional="false"/>
+                <var name="bTagHadBTrkCntHighEff" multiple="true" optional="false"/>
+                <var name="bTagHadBTrkCntHighPur" multiple="true" optional="false"/>
+                <var name="bTagHadBSoftMuon"      multiple="true" optional="false"/>
+                <var name="bTagHadBSimpSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagHadBCombSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagHadBImpactParaMVA" multiple="true" optional="false"/>
                 <!-- leptonic b quark candidate -->
-                <var name="bTagLepBTrkCntHighEff" multiple="false" optional="false"/>
-                <var name="bTagLepBTrkCntHighPur" multiple="false" optional="false"/>
-                <var name="bTagLepBSoftMuon"      multiple="false" optional="false"/>
-                <var name="bTagLepBSimpSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagLepBCombSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagLepBImpactParaMVA" multiple="false" optional="false"/>
+                <var name="bTagLepBTrkCntHighEff" multiple="true" optional="false"/>
+                <var name="bTagLepBTrkCntHighPur" multiple="true" optional="false"/>
+                <var name="bTagLepBSoftMuon"      multiple="true" optional="false"/>
+                <var name="bTagLepBSimpSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagLepBCombSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagLepBImpactParaMVA" multiple="true" optional="false"/>
                 <!-- summed b-tags of the two b quark candidates -->
-                <var name="bTagSumTrkCntHighEff" multiple="false" optional="false"/>
-                <var name="bTagSumTrkCntHighPur" multiple="false" optional="false"/>
-                <var name="bTagSumSoftMuon"      multiple="false" optional="false"/>
-                <var name="bTagSumSimpSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagSumCombSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagSumImpactParaMVA" multiple="false" optional="false"/>
+                <var name="bTagSumTrkCntHighEff" multiple="true" optional="false"/>
+                <var name="bTagSumTrkCntHighPur" multiple="true" optional="false"/>
+                <var name="bTagSumSoftMuon"      multiple="true" optional="false"/>
+                <var name="bTagSumSimpSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagSumCombSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagSumImpactParaMVA" multiple="true" optional="false"/>
                 <!-- multiplied b-tags of the two b quark candidates -->
-                <var name="bTagProdTrkCntHighEff" multiple="false" optional="false"/>
-                <var name="bTagProdTrkCntHighPur" multiple="false" optional="false"/>
-                <var name="bTagProdSoftMuon"      multiple="false" optional="false"/>
-                <var name="bTagProdSimpSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagProdCombSecondVtx" multiple="false" optional="false"/>
-                <var name="bTagProdImpactParaMVA" multiple="false" optional="false"/>
+                <var name="bTagProdImpactParaMVA" multiple="true" optional="false"/>
 
         </input>
 
-        <processor id="norm" name="ProcNormalize">
-                <input>
+        <!-- the following processor defines that the subsequent 5 processors
+             are called for each jetComb hypothesis separately in every event -->
 
-                        <!-- ===================================================================== -->
+	<processor id="loop" name="ProcForeach">
+		<input>
+	                <var source="input" name="target"/>
+			<!-- ===================================================================== -->
                         <!-- mass, pt, eta, phi and theta of single candidates of the ttbar system -->
                         <!-- ===================================================================== -->
                         <!--  hadronic top quark -->
@@ -253,12 +224,6 @@
                         <var source="input" name="etaHadW"  />
                         <var source="input" name="phiHadW"  />
                         <var source="input" name="thetaHadW"/>
-                        <!-- leptonic W boson -->
-                        <var source="input" name="massLepW" />
-                        <var source="input" name="ptLepW"   />
-                        <var source="input" name="etaLepW"  />
-                        <var source="input" name="phiLepW"  />
-                        <var source="input" name="thetaLepW"/>
                         <!-- hadronic b quark -->
                         <var source="input" name="ptHadB"   />
                         <var source="input" name="etaHadB"  />
@@ -279,16 +244,6 @@
                         <var source="input" name="etaLightQBar"  />
                         <var source="input" name="phiLightQBar"  />
                         <var source="input" name="thetaLightQBar"/>
-                        <!-- lepton -->
-                        <var source="input" name="ptLepton"   />
-                        <var source="input" name="etaLepton"  />
-                        <var source="input" name="phiLepton"  />
-                        <var source="input" name="thetaLepton"/>
-                        <!-- neutrino -->
-                        <var source="input" name="ptNeutrino"   />
-                        <var source="input" name="etaNeutrino"  />
-                        <var source="input" name="phiNeutrino"  />
-                        <var source="input" name="thetaNeutrino"/>
                         <!-- ==================================================================================== -->
                         <!-- compare two candidates of the ttbar system in DeltaM, DeltaR, DeltaPhi or DeltaTheta -->
                         <!-- ==================================================================================== -->
@@ -310,10 +265,6 @@
                         <var source="input" name="deltaRHadQHadQBar"    />
                         <var source="input" name="deltaPhiHadQHadQBar"  />
                         <var source="input" name="deltaThetaHadQHadQBar"/>
-                        <!-- lepton and neutrino -->
-                        <var source="input" name="deltaRLeptonNeutrino"    />
-                        <var source="input" name="deltaPhiLeptonNeutrino"  />
-                        <var source="input" name="deltaThetaLeptonNeutrino"/>
                         <!-- the hadronic top and the hadronic W -->
                         <var source="input" name="deltaMHadTopHadW"    />
                         <var source="input" name="deltaRHadTopHadW"    />
@@ -386,18 +337,10 @@
                         <var source="input" name="deltaRHadWLepton"    />
                         <var source="input" name="deltaPhiHadWLepton"  />
                         <var source="input" name="deltaThetaHadWLepton"/>
-                        <!-- the leptonic W and the lepton -->
-                        <var source="input" name="deltaRLepWLepton"    />
-                        <var source="input" name="deltaPhiLepWLepton"  />
-                        <var source="input" name="deltaThetaLepWLepton"/>
                         <!-- the hadronic W and the neutrino -->
                         <var source="input" name="deltaRHadWNeutrino"    />
                         <var source="input" name="deltaPhiHadWNeutrino"  />
                         <var source="input" name="deltaThetaHadWNeutrino"/>
-                        <!-- the leptonic W and the neutrino -->
-                        <var source="input" name="deltaRLepWNeutrino"    />
-                        <var source="input" name="deltaPhiLepWNeutrino"  />
-                        <var source="input" name="deltaThetaLepWNeutrino"/>
                         <!-- the hadronic b and the lepton -->
                         <var source="input" name="deltaRHadBLepton"    />
                         <var source="input" name="deltaPhiHadBLepton"  />
@@ -444,16 +387,414 @@
                         <var source="input" name="bTagSumCombSecondVtx"/>
                         <var source="input" name="bTagSumImpactParaMVA"/>
                         <!-- multiplied b-tags of the two b quark candidates -->
-                        <var source="input" name="bTagProdTrkCntHighEff"/>
-                        <var source="input" name="bTagProdTrkCntHighPur"/>
-                        <var source="input" name="bTagProdSoftMuon"     />
-                        <var source="input" name="bTagProdSimpSecondVtx"/>
-                        <var source="input" name="bTagProdCombSecondVtx"/>
                         <var source="input" name="bTagProdImpactParaMVA"/>
+		</input>
+		<config>
+			<procs next="5"/>
+		</config>
+		<output>
+			<var name="index"/>
+                        <var name="target"/>
+			<!-- ===================================================================== -->
+                        <!-- mass, pt, eta, phi and theta of single candidates of the ttbar system -->
+                        <!-- ===================================================================== -->
+                        <!--  hadronic top quark -->
+                        <var name="massHadTop" />
+                        <var name="ptHadTop"   />
+                        <var name="etaHadTop"  />
+                        <var name="phiHadTop"  />
+                        <var name="thetaHadTop"/>
+                        <!-- leptonic top quark -->
+                        <var name="massLepTop" />
+                        <var name="ptLepTop"   />
+                        <var name="etaLepTop"  />
+                        <var name="phiLepTop"  />
+                        <var name="thetaLepTop"/>
+                        <!-- hadronic W boson -->
+                        <var name="massHadW" />
+                        <var name="ptHadW"   />
+                        <var name="etaHadW"  />
+                        <var name="phiHadW"  />
+                        <var name="thetaHadW"/>
+                        <!-- hadronic b quark -->
+                        <var name="ptHadB"   />
+                        <var name="etaHadB"  />
+                        <var name="phiHadB"  />
+                        <var name="thetaHadB"/>
+                        <!-- leptonic b quark -->
+                        <var name="ptLepB"   />
+                        <var name="etaLepB"  />
+                        <var name="phiLepB"  />
+                        <var name="thetaLepB"/>
+                        <!-- light quark -->
+                        <var name="ptLightQ"   />
+                        <var name="etaLightQ"  />
+                        <var name="phiLightQ"  />
+                        <var name="thetaLightQ"/>
+                        <!-- light anti-quark -->
+                        <var name="ptLightQBar"   />
+                        <var name="etaLightQBar"  />
+                        <var name="phiLightQBar"  />
+                        <var name="thetaLightQBar"/>
+                        <!-- ==================================================================================== -->
+                        <!-- compare two candidates of the ttbar system in DeltaM, DeltaR, DeltaPhi or DeltaTheta -->
+                        <!-- ==================================================================================== -->
+                        <!-- the two top quarks -->
+                        <var name="deltaMHadTopLepTop"    />
+                        <var name="deltaRHadTopLepTop"    />
+                        <var name="deltaPhiHadTopLepTop"  />
+                        <var name="deltaThetaHadTopLepTop"/>
+                        <!-- the two W bosons -->
+                        <var name="deltaMHadWLepW"    />
+                        <var name="deltaRHadWLepW"    />
+                        <var name="deltaPhiHadWLepW"  />
+                        <var name="deltaThetaHadWLepW"/>
+                        <!-- the two b quarks -->
+                        <var name="deltaRHadBLepB"    />
+                        <var name="deltaPhiHadBLepB"  />
+                        <var name="deltaThetaHadBLepB"/>
+                        <!-- the two light quarks -->
+                        <var name="deltaRHadQHadQBar"    />
+                        <var name="deltaPhiHadQHadQBar"  />
+                        <var name="deltaThetaHadQHadQBar"/>
+                        <!-- the hadronic top and the hadronic W -->
+                        <var name="deltaMHadTopHadW"    />
+                        <var name="deltaRHadTopHadW"    />
+                        <var name="deltaPhiHadTopHadW"  />
+                        <var name="deltaThetaHadTopHadW"/>
+                        <!-- the leptonic top and the leptonic W -->
+                        <var name="deltaMLepTopLepW"    />
+                        <var name="deltaRLepTopLepW"    />
+                        <var name="deltaPhiLepTopLepW"  />
+                        <var name="deltaThetaLepTopLepW"/>
+                        <!-- the hadronic top and the leptonic W -->
+                        <var name="deltaMHadTopLepW"    />
+                        <var name="deltaRHadTopLepW"    />
+                        <var name="deltaPhiHadTopLepW"  />
+                        <var name="deltaThetaHadTopLepW"/>
+                        <!-- the leptonic top and the hadronic W -->
+                        <var name="deltaMLepTopHadW"    />
+                        <var name="deltaRLepTopHadW"    />
+                        <var name="deltaPhiLepTopHadW"  />
+                        <var name="deltaThetaLepTopHadW"/>
+                        <!-- the hadronic top and the hadronic b -->
+                        <var name="deltaRHadTopHadB"    />
+                        <var name="deltaPhiHadTopHadB"  />
+                        <var name="deltaThetaHadTopHadB"/>
+                        <!-- the leptonic top and the leptonic b -->
+                        <var name="deltaRLepTopLepB"    />
+                        <var name="deltaPhiLepTopLepB"  />
+                        <var name="deltaThetaLepTopLepB"/>
+                        <!-- the hadronic top and the leptonic b -->
+                        <var name="deltaRHadTopLepB"    />
+                        <var name="deltaPhiHadTopLepB"  />
+                        <var name="deltaThetaHadTopLepB"/>
+                        <!-- the leptonic top and the hadronic b -->
+                        <var name="deltaRLepTopHadB"    />
+                        <var name="deltaPhiLepTopHadB"  />
+                        <var name="deltaThetaLepTopHadB"/>
+                        <!-- the hadronic W and the hadronic b -->
+                        <var name="deltaRHadWHadB"    />
+                        <var name="deltaPhiHadWHadB"  />
+                        <var name="deltaThetaHadWHadB"/>
+                        <!-- the leptonic W and the leptonic b -->
+                        <var name="deltaRLepWLepB"    />
+                        <var name="deltaPhiLepWLepB"  />
+                        <var name="deltaThetaLepWLepB"/>
+                        <!-- the hadronic W and the leptonic b -->
+                        <var name="deltaRHadWLepB"    />
+                        <var name="deltaPhiHadWLepB"  />
+                        <var name="deltaThetaHadWLepB"/>
+                        <!-- the leptonic W and the hadronic b -->
+                        <var name="deltaRLepWHadB"    />
+                        <var name="deltaPhiLepWHadB"  />
+                        <var name="deltaThetaLepWHadB"/>
+                        <!-- the hadronic top and the lepton -->
+                        <var name="deltaRHadTopLepton"    />
+                        <var name="deltaPhiHadTopLepton"  />
+                        <var name="deltaThetaHadTopLepton"/>
+                        <!-- the leptonic top and the lepton -->
+                        <var name="deltaRLepTopLepton"    />
+                        <var name="deltaPhiLepTopLepton"  />
+                        <var name="deltaThetaLepTopLepton"/>
+                        <!-- the hadronic top and the neutrino -->
+                        <var name="deltaRHadTopNeutrino"    />
+                        <var name="deltaPhiHadTopNeutrino"  />
+                        <var name="deltaThetaHadTopNeutrino"/>
+                        <!-- the leptonic top and the neutrino -->
+                        <var name="deltaRLepTopNeutrino"    />
+                        <var name="deltaPhiLepTopNeutrino"  />
+                        <var name="deltaThetaLepTopNeutrino"/>
+                        <!-- the hadronic W and the lepton -->
+                        <var name="deltaRHadWLepton"    />
+                        <var name="deltaPhiHadWLepton"  />
+                        <var name="deltaThetaHadWLepton"/>
+                        <!-- the hadronic W and the neutrino -->
+                        <var name="deltaRHadWNeutrino"    />
+                        <var name="deltaPhiHadWNeutrino"  />
+                        <var name="deltaThetaHadWNeutrino"/>
+                        <!-- the hadronic b and the lepton -->
+                        <var name="deltaRHadBLepton"    />
+                        <var name="deltaPhiHadBLepton"  />
+                        <var name="deltaThetaHadBLepton"/>
+                        <!-- the leptonic b and the lepton -->
+                        <var name="deltaRLepBLepton"    />
+                        <var name="deltaPhiLepBLepton"  />
+                        <var name="deltaThetaLepBLepton"/>
+                        <!-- the hadronic b and the neutrino -->
+                        <var name="deltaRHadBNeutrino"    />
+                        <var name="deltaPhiHadBNeutrino"  />
+                        <var name="deltaThetaHadBNeutrino"/>
+                        <!-- the leptonic b and the neutrino -->
+                        <var name="deltaRLepBNeutrino"    />
+                        <var name="deltaPhiLepBNeutrino"  />
+                        <var name="deltaThetaLepBNeutrino"/>
+                        <!-- ============================================== -->
+                        <!-- special variables combining the pt of the jets -->
+                        <!-- ============================================== -->
+                        <var name="relativePtHadronicTop"/>
+                        <var name="bOverLightQPt"        />
+                        <!-- ========================================================== -->
+                        <!-- variables based on b-tagging with six different algorithms -->
+                        <!-- ========================================================== -->
+                        <!-- hadronic b quark candidate -->
+                        <var name="bTagHadBTrkCntHighEff"/>
+                        <var name="bTagHadBTrkCntHighPur"/>
+                        <var name="bTagHadBSoftMuon"     />
+                        <var name="bTagHadBSimpSecondVtx"/>
+                        <var name="bTagHadBCombSecondVtx"/>
+                        <var name="bTagHadBImpactParaMVA"/>
+                        <!-- leptonic b quark candidate -->
+                        <var name="bTagLepBTrkCntHighEff"/>
+                        <var name="bTagLepBTrkCntHighPur"/>
+                        <var name="bTagLepBSoftMuon"     />
+                        <var name="bTagLepBSimpSecondVtx"/>
+                        <var name="bTagLepBCombSecondVtx"/>
+                        <var name="bTagLepBImpactParaMVA"/>
+                        <!-- summed b-tags of the two b quark candidates -->
+                        <var name="bTagSumTrkCntHighEff"/>
+                        <var name="bTagSumTrkCntHighPur"/>
+                        <var name="bTagSumSoftMuon"     />
+                        <var name="bTagSumSimpSecondVtx"/>
+                        <var name="bTagSumCombSecondVtx"/>
+                        <var name="bTagSumImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two b quark candidates -->
+                        <var name="bTagProdImpactParaMVA"/>
+		</output>
+	</processor>
 
+        <!-- create target variable from input variable "target":
+             0 (bakground) : if "target" <= 0.5;
+             1 (signal)    : else -->
+
+	<processor id="target_hyp" name="ProcCategory">
+		<input>
+			<var source="loop" name="target"/>
+		</input>
+		<config>
+			<group><box><range max="0.5"/></box></group>
+			<group><box><range/></box></group>
+		</config>
+		<output>
+			<var name="target"/>
+		</output>
+	</processor>
+
+        <!-- normalize input variables -->
+
+        <processor id="norm" name="ProcNormalize">
+                <input>
+			<!-- ===================================================================== -->
+                        <!-- mass, pt, eta, phi and theta of single candidates of the ttbar system -->
+                        <!-- ===================================================================== -->
+                        <!--  hadronic top quark -->
+                        <var source="loop" name="massHadTop" />
+                        <var source="loop" name="ptHadTop"   />
+                        <var source="loop" name="etaHadTop"  />
+                        <var source="loop" name="phiHadTop"  />
+                        <var source="loop" name="thetaHadTop"/>
+                        <!-- leptonic top quark -->
+                        <var source="loop" name="massLepTop" />
+                        <var source="loop" name="ptLepTop"   />
+                        <var source="loop" name="etaLepTop"  />
+                        <var source="loop" name="phiLepTop"  />
+                        <var source="loop" name="thetaLepTop"/>
+                        <!-- hadronic W boson -->
+                        <var source="loop" name="massHadW" />
+                        <var source="loop" name="ptHadW"   />
+                        <var source="loop" name="etaHadW"  />
+                        <var source="loop" name="phiHadW"  />
+                        <var source="loop" name="thetaHadW"/>
+                        <!-- hadronic b quark -->
+                        <var source="loop" name="ptHadB"   />
+                        <var source="loop" name="etaHadB"  />
+                        <var source="loop" name="phiHadB"  />
+                        <var source="loop" name="thetaHadB"/>
+                        <!-- leptonic b quark -->
+                        <var source="loop" name="ptLepB"   />
+                        <var source="loop" name="etaLepB"  />
+                        <var source="loop" name="phiLepB"  />
+                        <var source="loop" name="thetaLepB"/>
+                        <!-- light quark -->
+                        <var source="loop" name="ptLightQ"   />
+                        <var source="loop" name="etaLightQ"  />
+                        <var source="loop" name="phiLightQ"  />
+                        <var source="loop" name="thetaLightQ"/>
+                        <!-- light anti-quark -->
+                        <var source="loop" name="ptLightQBar"   />
+                        <var source="loop" name="etaLightQBar"  />
+                        <var source="loop" name="phiLightQBar"  />
+                        <var source="loop" name="thetaLightQBar"/>
+                        <!-- ==================================================================================== -->
+                        <!-- compare two candidates of the ttbar system in DeltaM, DeltaR, DeltaPhi or DeltaTheta -->
+                        <!-- ==================================================================================== -->
+                        <!-- the two top quarks -->
+                        <var source="loop" name="deltaMHadTopLepTop"    />
+                        <var source="loop" name="deltaRHadTopLepTop"    />
+                        <var source="loop" name="deltaPhiHadTopLepTop"  />
+                        <var source="loop" name="deltaThetaHadTopLepTop"/>
+                        <!-- the two W bosons -->
+                        <var source="loop" name="deltaMHadWLepW"    />
+                        <var source="loop" name="deltaRHadWLepW"    />
+                        <var source="loop" name="deltaPhiHadWLepW"  />
+                        <var source="loop" name="deltaThetaHadWLepW"/>
+                        <!-- the two b quarks -->
+                        <var source="loop" name="deltaRHadBLepB"    />
+                        <var source="loop" name="deltaPhiHadBLepB"  />
+                        <var source="loop" name="deltaThetaHadBLepB"/>
+                        <!-- the two light quarks -->
+                        <var source="loop" name="deltaRHadQHadQBar"    />
+                        <var source="loop" name="deltaPhiHadQHadQBar"  />
+                        <var source="loop" name="deltaThetaHadQHadQBar"/>
+                        <!-- the hadronic top and the hadronic W -->
+                        <var source="loop" name="deltaMHadTopHadW"    />
+                        <var source="loop" name="deltaRHadTopHadW"    />
+                        <var source="loop" name="deltaPhiHadTopHadW"  />
+                        <var source="loop" name="deltaThetaHadTopHadW"/>
+                        <!-- the leptonic top and the leptonic W -->
+                        <var source="loop" name="deltaMLepTopLepW"    />
+                        <var source="loop" name="deltaRLepTopLepW"    />
+                        <var source="loop" name="deltaPhiLepTopLepW"  />
+                        <var source="loop" name="deltaThetaLepTopLepW"/>
+                        <!-- the hadronic top and the leptonic W -->
+                        <var source="loop" name="deltaMHadTopLepW"    />
+                        <var source="loop" name="deltaRHadTopLepW"    />
+                        <var source="loop" name="deltaPhiHadTopLepW"  />
+                        <var source="loop" name="deltaThetaHadTopLepW"/>
+                        <!-- the leptonic top and the hadronic W -->
+                        <var source="loop" name="deltaMLepTopHadW"    />
+                        <var source="loop" name="deltaRLepTopHadW"    />
+                        <var source="loop" name="deltaPhiLepTopHadW"  />
+                        <var source="loop" name="deltaThetaLepTopHadW"/>
+                        <!-- the hadronic top and the hadronic b -->
+                        <var source="loop" name="deltaRHadTopHadB"    />
+                        <var source="loop" name="deltaPhiHadTopHadB"  />
+                        <var source="loop" name="deltaThetaHadTopHadB"/>
+                        <!-- the leptonic top and the leptonic b -->
+                        <var source="loop" name="deltaRLepTopLepB"    />
+                        <var source="loop" name="deltaPhiLepTopLepB"  />
+                        <var source="loop" name="deltaThetaLepTopLepB"/>
+                        <!-- the hadronic top and the leptonic b -->
+                        <var source="loop" name="deltaRHadTopLepB"    />
+                        <var source="loop" name="deltaPhiHadTopLepB"  />
+                        <var source="loop" name="deltaThetaHadTopLepB"/>
+                        <!-- the leptonic top and the hadronic b -->
+                        <var source="loop" name="deltaRLepTopHadB"    />
+                        <var source="loop" name="deltaPhiLepTopHadB"  />
+                        <var source="loop" name="deltaThetaLepTopHadB"/>
+                        <!-- the hadronic W and the hadronic b -->
+                        <var source="loop" name="deltaRHadWHadB"    />
+                        <var source="loop" name="deltaPhiHadWHadB"  />
+                        <var source="loop" name="deltaThetaHadWHadB"/>
+                        <!-- the leptonic W and the leptonic b -->
+                        <var source="loop" name="deltaRLepWLepB"    />
+                        <var source="loop" name="deltaPhiLepWLepB"  />
+                        <var source="loop" name="deltaThetaLepWLepB"/>
+                        <!-- the hadronic W and the leptonic b -->
+                        <var source="loop" name="deltaRHadWLepB"    />
+                        <var source="loop" name="deltaPhiHadWLepB"  />
+                        <var source="loop" name="deltaThetaHadWLepB"/>
+                        <!-- the leptonic W and the hadronic b -->
+                        <var source="loop" name="deltaRLepWHadB"    />
+                        <var source="loop" name="deltaPhiLepWHadB"  />
+                        <var source="loop" name="deltaThetaLepWHadB"/>
+                        <!-- the hadronic top and the lepton -->
+                        <var source="loop" name="deltaRHadTopLepton"    />
+                        <var source="loop" name="deltaPhiHadTopLepton"  />
+                        <var source="loop" name="deltaThetaHadTopLepton"/>
+                        <!-- the leptonic top and the lepton -->
+                        <var source="loop" name="deltaRLepTopLepton"    />
+                        <var source="loop" name="deltaPhiLepTopLepton"  />
+                        <var source="loop" name="deltaThetaLepTopLepton"/>
+                        <!-- the hadronic top and the neutrino -->
+                        <var source="loop" name="deltaRHadTopNeutrino"    />
+                        <var source="loop" name="deltaPhiHadTopNeutrino"  />
+                        <var source="loop" name="deltaThetaHadTopNeutrino"/>
+                        <!-- the leptonic top and the neutrino -->
+                        <var source="loop" name="deltaRLepTopNeutrino"    />
+                        <var source="loop" name="deltaPhiLepTopNeutrino"  />
+                        <var source="loop" name="deltaThetaLepTopNeutrino"/>
+                        <!-- the hadronic W and the lepton -->
+                        <var source="loop" name="deltaRHadWLepton"    />
+                        <var source="loop" name="deltaPhiHadWLepton"  />
+                        <var source="loop" name="deltaThetaHadWLepton"/>
+                        <!-- the hadronic W and the neutrino -->
+                        <var source="loop" name="deltaRHadWNeutrino"    />
+                        <var source="loop" name="deltaPhiHadWNeutrino"  />
+                        <var source="loop" name="deltaThetaHadWNeutrino"/>
+                        <!-- the hadronic b and the lepton -->
+                        <var source="loop" name="deltaRHadBLepton"    />
+                        <var source="loop" name="deltaPhiHadBLepton"  />
+                        <var source="loop" name="deltaThetaHadBLepton"/>
+                        <!-- the leptonic b and the lepton -->
+                        <var source="loop" name="deltaRLepBLepton"    />
+                        <var source="loop" name="deltaPhiLepBLepton"  />
+                        <var source="loop" name="deltaThetaLepBLepton"/>
+                        <!-- the hadronic b and the neutrino -->
+                        <var source="loop" name="deltaRHadBNeutrino"    />
+                        <var source="loop" name="deltaPhiHadBNeutrino"  />
+                        <var source="loop" name="deltaThetaHadBNeutrino"/>
+                        <!-- the leptonic b and the neutrino -->
+                        <var source="loop" name="deltaRLepBNeutrino"    />
+                        <var source="loop" name="deltaPhiLepBNeutrino"  />
+                        <var source="loop" name="deltaThetaLepBNeutrino"/>
+                        <!-- ============================================== -->
+                        <!-- special variables combining the pt of the jets -->
+                        <!-- ============================================== -->
+                        <var source="loop" name="relativePtHadronicTop"/>
+                        <var source="loop" name="bOverLightQPt"        />
+                        <!-- ========================================================== -->
+                        <!-- variables based on b-tagging with six different algorithms -->
+                        <!-- ========================================================== -->
+                        <!-- hadronic b quark candidate -->
+                        <var source="loop" name="bTagHadBTrkCntHighEff"/>
+                        <var source="loop" name="bTagHadBTrkCntHighPur"/>
+                        <var source="loop" name="bTagHadBSoftMuon"     />
+                        <var source="loop" name="bTagHadBSimpSecondVtx"/>
+                        <var source="loop" name="bTagHadBCombSecondVtx"/>
+                        <var source="loop" name="bTagHadBImpactParaMVA"/>
+                        <!-- leptonic b quark candidate -->
+                        <var source="loop" name="bTagLepBTrkCntHighEff"/>
+                        <var source="loop" name="bTagLepBTrkCntHighPur"/>
+                        <var source="loop" name="bTagLepBSoftMuon"     />
+                        <var source="loop" name="bTagLepBSimpSecondVtx"/>
+                        <var source="loop" name="bTagLepBCombSecondVtx"/>
+                        <var source="loop" name="bTagLepBImpactParaMVA"/>
+                        <!-- summed b-tags of the two b quark candidates -->
+                        <var source="loop" name="bTagSumTrkCntHighEff"/>
+                        <var source="loop" name="bTagSumTrkCntHighPur"/>
+                        <var source="loop" name="bTagSumSoftMuon"     />
+                        <var source="loop" name="bTagSumSimpSecondVtx"/>
+                        <var source="loop" name="bTagSumCombSecondVtx"/>
+                        <var source="loop" name="bTagSumImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two b quark candidates -->
+                        <var source="loop" name="bTagProdImpactParaMVA"/>
+                        <!-- ========================================================== -->
+                        <!-- TARGET -->
+                        <!-- ========================================================== -->
+			<var source="target_hyp" name="target" target="true"/>
                 </input>
                 <config>
-
                         <pdf/>
                         <pdf/>
                         <pdf/>
@@ -590,214 +931,206 @@
                         <pdf/>
                         <pdf/>
                         <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/> <!-- 140 -->
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/> <!-- 150 -->
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-                        <pdf/> <!-- 160 -->
-                        <pdf/>
-                        <pdf/>
-                        <pdf/>
-
                 </config>
                 <output>
-
-                        <var name="var001"/>
-                        <var name="var002"/>
-                        <var name="var003"/>
-                        <var name="var004"/>
-                        <var name="var005"/>
-                        <var name="var006"/>
-                        <var name="var007"/>
-                        <var name="var008"/>
-                        <var name="var009"/>
-                        <var name="var010"/>
-                        <var name="var011"/>
-                        <var name="var012"/>
-                        <var name="var013"/>
-                        <var name="var014"/>
-                        <var name="var015"/>
-                        <var name="var016"/>
-                        <var name="var017"/>
-                        <var name="var018"/>
-                        <var name="var019"/>
-                        <var name="var020"/>
-                        <var name="var021"/>
-                        <var name="var022"/>
-                        <var name="var023"/>
-                        <var name="var024"/>
-                        <var name="var025"/>
-                        <var name="var026"/>
-                        <var name="var027"/>
-                        <var name="var028"/>
-                        <var name="var029"/>
-                        <var name="var030"/>
-                        <var name="var031"/>
-                        <var name="var032"/>
-                        <var name="var033"/>
-                        <var name="var034"/>
-                        <var name="var035"/>
-                        <var name="var036"/>
-                        <var name="var037"/>
-                        <var name="var038"/>
-                        <var name="var039"/>
-                        <var name="var040"/>
-                        <var name="var041"/>
-                        <var name="var042"/>
-                        <var name="var043"/>
-                        <var name="var044"/>
-                        <var name="var045"/>
-                        <var name="var046"/>
-                        <var name="var047"/>
-                        <var name="var048"/>
-                        <var name="var049"/>
-                        <var name="var050"/>
-                        <var name="var051"/>
-                        <var name="var052"/>
-                        <var name="var053"/>
-                        <var name="var054"/>
-                        <var name="var055"/>
-                        <var name="var056"/>
-                        <var name="var057"/>
-                        <var name="var058"/>
-                        <var name="var059"/>
-                        <var name="var060"/>
-                        <var name="var061"/>
-                        <var name="var062"/>
-                        <var name="var063"/>
-                        <var name="var064"/>
-                        <var name="var065"/>
-                        <var name="var066"/>
-                        <var name="var067"/>
-                        <var name="var068"/>
-                        <var name="var069"/>
-                        <var name="var070"/>
-                        <var name="var071"/>
-                        <var name="var072"/>
-                        <var name="var073"/>
-                        <var name="var074"/>
-                        <var name="var075"/>
-                        <var name="var076"/>
-                        <var name="var077"/>
-                        <var name="var078"/>
-                        <var name="var079"/>
-                        <var name="var080"/>
-                        <var name="var081"/>
-                        <var name="var082"/>
-                        <var name="var083"/>
-                        <var name="var084"/>
-                        <var name="var085"/>
-                        <var name="var086"/>
-                        <var name="var087"/>
-                        <var name="var088"/>
-                        <var name="var089"/>
-                        <var name="var090"/>
-                        <var name="var091"/>
-                        <var name="var092"/>
-                        <var name="var093"/>
-                        <var name="var094"/>
-                        <var name="var095"/>
-                        <var name="var096"/>
-                        <var name="var097"/>
-                        <var name="var098"/>
-                        <var name="var099"/>
-                        <var name="var100"/>
-                        <var name="var101"/>
-                        <var name="var102"/>
-                        <var name="var103"/>
-                        <var name="var104"/>
-                        <var name="var105"/>
-                        <var name="var106"/>
-                        <var name="var107"/>
-                        <var name="var108"/>
-                        <var name="var109"/>
-                        <var name="var110"/>
-                        <var name="var111"/>
-                        <var name="var112"/>
-                        <var name="var113"/>
-                        <var name="var114"/>
-                        <var name="var115"/>
-                        <var name="var116"/>
-                        <var name="var117"/>
-                        <var name="var118"/>
-                        <var name="var119"/>
-                        <var name="var120"/>
-                        <var name="var121"/>
-                        <var name="var122"/>
-                        <var name="var123"/>
-                        <var name="var124"/>
-                        <var name="var125"/>
-                        <var name="var126"/>
-                        <var name="var127"/>
-                        <var name="var128"/>
-                        <var name="var129"/>
-                        <var name="var130"/>
-                        <var name="var131"/>
-                        <var name="var132"/>
-                        <var name="var133"/>
-                        <var name="var134"/>
-                        <var name="var135"/>
-                        <var name="var136"/>
-                        <var name="var137"/>
-                        <var name="var138"/>
-                        <var name="var139"/>
-                        <var name="var140"/>
-                        <var name="var141"/>
-                        <var name="var142"/>
-                        <var name="var143"/>
-                        <var name="var144"/>
-                        <var name="var145"/>
-                        <var name="var146"/>
-                        <var name="var147"/>
-                        <var name="var148"/>
-                        <var name="var149"/>
-                        <var name="var150"/>
-                        <var name="var151"/>
-                        <var name="var152"/>
-                        <var name="var153"/>
-                        <var name="var154"/>
-                        <var name="var155"/>
-                        <var name="var156"/>
-                        <var name="var157"/>
-                        <var name="var158"/>
-                        <var name="var159"/>
-                        <var name="var160"/>
-                        <var name="var161"/>
-                        <var name="var162"/>
-                        <var name="var163"/>
-
+			<!-- ===================================================================== -->
+                        <!-- mass, pt, eta, phi and theta of single candidates of the ttbar system -->
+                        <!-- ===================================================================== -->
+                        <!--  hadronic top quark -->
+                        <var name="massHadTop" />
+                        <var name="ptHadTop"   />
+                        <var name="etaHadTop"  />
+                        <var name="phiHadTop"  />
+                        <var name="thetaHadTop"/>
+                        <!-- leptonic top quark -->
+                        <var name="massLepTop" />
+                        <var name="ptLepTop"   />
+                        <var name="etaLepTop"  />
+                        <var name="phiLepTop"  />
+                        <var name="thetaLepTop"/>
+                        <!-- hadronic W boson -->
+                        <var name="massHadW" />
+                        <var name="ptHadW"   />
+                        <var name="etaHadW"  />
+                        <var name="phiHadW"  />
+                        <var name="thetaHadW"/>
+                        <!-- hadronic b quark -->
+                        <var name="ptHadB"   />
+                        <var name="etaHadB"  />
+                        <var name="phiHadB"  />
+                        <var name="thetaHadB"/>
+                        <!-- leptonic b quark -->
+                        <var name="ptLepB"   />
+                        <var name="etaLepB"  />
+                        <var name="phiLepB"  />
+                        <var name="thetaLepB"/>
+                        <!-- light quark -->
+                        <var name="ptLightQ"   />
+                        <var name="etaLightQ"  />
+                        <var name="phiLightQ"  />
+                        <var name="thetaLightQ"/>
+                        <!-- light anti-quark -->
+                        <var name="ptLightQBar"   />
+                        <var name="etaLightQBar"  />
+                        <var name="phiLightQBar"  />
+                        <var name="thetaLightQBar"/>
+                        <!-- ==================================================================================== -->
+                        <!-- compare two candidates of the ttbar system in DeltaM, DeltaR, DeltaPhi or DeltaTheta -->
+                        <!-- ==================================================================================== -->
+                        <!-- the two top quarks -->
+                        <var name="deltaMHadTopLepTop"    />
+                        <var name="deltaRHadTopLepTop"    />
+                        <var name="deltaPhiHadTopLepTop"  />
+                        <var name="deltaThetaHadTopLepTop"/>
+                        <!-- the two W bosons -->
+                        <var name="deltaMHadWLepW"    />
+                        <var name="deltaRHadWLepW"    />
+                        <var name="deltaPhiHadWLepW"  />
+                        <var name="deltaThetaHadWLepW"/>
+                        <!-- the two b quarks -->
+                        <var name="deltaRHadBLepB"    />
+                        <var name="deltaPhiHadBLepB"  />
+                        <var name="deltaThetaHadBLepB"/>
+                        <!-- the two light quarks -->
+                        <var name="deltaRHadQHadQBar"    />
+                        <var name="deltaPhiHadQHadQBar"  />
+                        <var name="deltaThetaHadQHadQBar"/>
+                        <!-- the hadronic top and the hadronic W -->
+                        <var name="deltaMHadTopHadW"    />
+                        <var name="deltaRHadTopHadW"    />
+                        <var name="deltaPhiHadTopHadW"  />
+                        <var name="deltaThetaHadTopHadW"/>
+                        <!-- the leptonic top and the leptonic W -->
+                        <var name="deltaMLepTopLepW"    />
+                        <var name="deltaRLepTopLepW"    />
+                        <var name="deltaPhiLepTopLepW"  />
+                        <var name="deltaThetaLepTopLepW"/>
+                        <!-- the hadronic top and the leptonic W -->
+                        <var name="deltaMHadTopLepW"    />
+                        <var name="deltaRHadTopLepW"    />
+                        <var name="deltaPhiHadTopLepW"  />
+                        <var name="deltaThetaHadTopLepW"/>
+                        <!-- the leptonic top and the hadronic W -->
+                        <var name="deltaMLepTopHadW"    />
+                        <var name="deltaRLepTopHadW"    />
+                        <var name="deltaPhiLepTopHadW"  />
+                        <var name="deltaThetaLepTopHadW"/>
+                        <!-- the hadronic top and the hadronic b -->
+                        <var name="deltaRHadTopHadB"    />
+                        <var name="deltaPhiHadTopHadB"  />
+                        <var name="deltaThetaHadTopHadB"/>
+                        <!-- the leptonic top and the leptonic b -->
+                        <var name="deltaRLepTopLepB"    />
+                        <var name="deltaPhiLepTopLepB"  />
+                        <var name="deltaThetaLepTopLepB"/>
+                        <!-- the hadronic top and the leptonic b -->
+                        <var name="deltaRHadTopLepB"    />
+                        <var name="deltaPhiHadTopLepB"  />
+                        <var name="deltaThetaHadTopLepB"/>
+                        <!-- the leptonic top and the hadronic b -->
+                        <var name="deltaRLepTopHadB"    />
+                        <var name="deltaPhiLepTopHadB"  />
+                        <var name="deltaThetaLepTopHadB"/>
+                        <!-- the hadronic W and the hadronic b -->
+                        <var name="deltaRHadWHadB"    />
+                        <var name="deltaPhiHadWHadB"  />
+                        <var name="deltaThetaHadWHadB"/>
+                        <!-- the leptonic W and the leptonic b -->
+                        <var name="deltaRLepWLepB"    />
+                        <var name="deltaPhiLepWLepB"  />
+                        <var name="deltaThetaLepWLepB"/>
+                        <!-- the hadronic W and the leptonic b -->
+                        <var name="deltaRHadWLepB"    />
+                        <var name="deltaPhiHadWLepB"  />
+                        <var name="deltaThetaHadWLepB"/>
+                        <!-- the leptonic W and the hadronic b -->
+                        <var name="deltaRLepWHadB"    />
+                        <var name="deltaPhiLepWHadB"  />
+                        <var name="deltaThetaLepWHadB"/>
+                        <!-- the hadronic top and the lepton -->
+                        <var name="deltaRHadTopLepton"    />
+                        <var name="deltaPhiHadTopLepton"  />
+                        <var name="deltaThetaHadTopLepton"/>
+                        <!-- the leptonic top and the lepton -->
+                        <var name="deltaRLepTopLepton"    />
+                        <var name="deltaPhiLepTopLepton"  />
+                        <var name="deltaThetaLepTopLepton"/>
+                        <!-- the hadronic top and the neutrino -->
+                        <var name="deltaRHadTopNeutrino"    />
+                        <var name="deltaPhiHadTopNeutrino"  />
+                        <var name="deltaThetaHadTopNeutrino"/>
+                        <!-- the leptonic top and the neutrino -->
+                        <var name="deltaRLepTopNeutrino"    />
+                        <var name="deltaPhiLepTopNeutrino"  />
+                        <var name="deltaThetaLepTopNeutrino"/>
+                        <!-- the hadronic W and the lepton -->
+                        <var name="deltaRHadWLepton"    />
+                        <var name="deltaPhiHadWLepton"  />
+                        <var name="deltaThetaHadWLepton"/>
+                        <!-- the hadronic W and the neutrino -->
+                        <var name="deltaRHadWNeutrino"    />
+                        <var name="deltaPhiHadWNeutrino"  />
+                        <var name="deltaThetaHadWNeutrino"/>
+                        <!-- the hadronic b and the lepton -->
+                        <var name="deltaRHadBLepton"    />
+                        <var name="deltaPhiHadBLepton"  />
+                        <var name="deltaThetaHadBLepton"/>
+                        <!-- the leptonic b and the lepton -->
+                        <var name="deltaRLepBLepton"    />
+                        <var name="deltaPhiLepBLepton"  />
+                        <var name="deltaThetaLepBLepton"/>
+                        <!-- the hadronic b and the neutrino -->
+                        <var name="deltaRHadBNeutrino"    />
+                        <var name="deltaPhiHadBNeutrino"  />
+                        <var name="deltaThetaHadBNeutrino"/>
+                        <!-- the leptonic b and the neutrino -->
+                        <var name="deltaRLepBNeutrino"    />
+                        <var name="deltaPhiLepBNeutrino"  />
+                        <var name="deltaThetaLepBNeutrino"/>
+                        <!-- ============================================== -->
+                        <!-- special variables combining the pt of the jets -->
+                        <!-- ============================================== -->
+                        <var name="relativePtHadronicTop"/>
+                        <var name="bOverLightQPt"        />
+                        <!-- ========================================================== -->
+                        <!-- variables based on b-tagging with six different algorithms -->
+                        <!-- ========================================================== -->
+                        <!-- hadronic b quark candidate -->
+                        <var name="bTagHadBTrkCntHighEff"/>
+                        <var name="bTagHadBTrkCntHighPur"/>
+                        <var name="bTagHadBSoftMuon"     />
+                        <var name="bTagHadBSimpSecondVtx"/>
+                        <var name="bTagHadBCombSecondVtx"/>
+                        <var name="bTagHadBImpactParaMVA"/>
+                        <!-- leptonic b quark candidate -->
+                        <var name="bTagLepBTrkCntHighEff"/>
+                        <var name="bTagLepBTrkCntHighPur"/>
+                        <var name="bTagLepBSoftMuon"     />
+                        <var name="bTagLepBSimpSecondVtx"/>
+                        <var name="bTagLepBCombSecondVtx"/>
+                        <var name="bTagLepBImpactParaMVA"/>
+                        <!-- summed b-tags of the two b quark candidates -->
+                        <var name="bTagSumTrkCntHighEff"/>
+                        <var name="bTagSumTrkCntHighPur"/>
+                        <var name="bTagSumSoftMuon"     />
+                        <var name="bTagSumSimpSecondVtx"/>
+                        <var name="bTagSumCombSecondVtx"/>
+                        <var name="bTagSumImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two b quark candidates -->
+                        <var name="bTagProdImpactParaMVA"/>
                 </output>
         </processor>
 
+       <!-- decorrelate input variables using matrix ration -->
+
 	<processor id="rot" name="ProcMatrix">
 		<input>
-                        <var source="norm" name="var001"/>
-                        <var source="norm" name="var002"/>
-                        <var source="norm" name="var003"/>
-                        <var source="norm" name="var004"/>
-                        <var source="norm" name="var005"/>
-                        <var source="norm" name="var006"/>
-                        <var source="norm" name="var007"/>
-                        <var source="norm" name="var008"/>
+			<var source="target_hyp" name="target" target="true"/>
+                        <var source="norm" name="massHadW"/>
+                        <var source="norm" name="deltaThetaHadTopLepB"/>
+                        <var source="norm" name="deltaThetaLepBLepton"/>
+                        <var source="norm" name="relativePtHadronicTop"/>
+                        <var source="norm" name="bTagSumSimpSecondVtx"/>
 		</input>
 		<config>
 			<fill signal="true" background="true"/>
@@ -808,22 +1141,24 @@
 			<var name="rot3"/>
 			<var name="rot4"/>
 			<var name="rot5"/>
-			<var name="rot6"/>
-			<var name="rot7"/>
-			<var name="rot8"/>
 		</output>
 	</processor>
 
-	<processor id="likelihood" name="ProcLikelihood">
+        <!-- combine variables into likelihood -->
+
+	<processor id="like" name="ProcLikelihood">
 		<input>
-                        <var source="rot" name="rot1"/>
+			<var source="target_hyp" name="target" target="true"/>
+                        <var source="norm" name="massHadW"/>
+                        <var source="norm" name="deltaThetaHadTopLepB"/>
+                        <var source="norm" name="deltaThetaLepBLepton"/>
+                        <var source="norm" name="relativePtHadronicTop"/>
+                        <var source="norm" name="bTagSumSimpSecondVtx"/>
+<!--                    <var source="rot" name="rot1"/>
                         <var source="rot" name="rot2"/>
                         <var source="rot" name="rot3"/>
                         <var source="rot" name="rot4"/>
-                        <var source="rot" name="rot5"/>
-                        <var source="rot" name="rot6"/>
-                        <var source="rot" name="rot7"/>
-                        <var source="rot" name="rot8"/>
+                        <var source="rot" name="rot5"/> -->
 		</input>
 		<config>
 			<sigbkg smooth="3"/>
@@ -831,17 +1166,104 @@
 			<sigbkg smooth="3"/>
 			<sigbkg smooth="3"/>
 			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
 		</config>
 		<output>
-			<var name="discriminator"/>
+			<var name="discr"/>
 		</output>
 	</processor>
 
-        <output>
-                <var source="likelihood" name="discriminator"/>
-        </output>
+        <!-- this is just a workaround to get monitoring histograms for the likelihood for each hypothesis-->
+
+        <processor id="norm_monitor_hyp" name="ProcNormalize">
+                <input>
+			<var source="target_hyp" name="target" target="true"/>
+			<var source="like" name="discr"/>
+                </input>
+                <config>
+                        <pdf/>
+                </config>
+                <output>
+                        <var name="var_dummy1"/>
+                </output>
+        </processor>
+
+        <!-- end of ProcForEach loop -->
+
+        <!-- sort hypotheses w.r.t. the discriminator (second input variable, therefore index="1")
+             in descending order, i.e. from the highest discriminator to the lowest -->
+
+	<processor id="sort" name="ProcSort">
+		<input>
+			<var source="target_hyp" name="target"/>
+			<var source="like" name="discr"/>
+		</input>
+		<config>
+			<key index="1" descending="true"/>
+		</config>
+		<output>
+			<var name="index"/>
+			<var name="target"/>
+			<var name="discr"/>
+		</output>
+	</processor>
+
+        <!-- separate best hypothesis from the rest -->
+
+	<processor id="split_best" name="ProcSplitter">
+		<input>
+			<var source="sort" name="target"/>
+			<var source="sort" name="discr"/>
+		</input>
+		<config>
+			<select first="1"/>
+		</config>
+		<output>
+			<var name="target"/>
+			<var name="targetRest"/>
+			<var name="discr"/>        <!-- this variable is the final mva output for each event -->
+			<var name="discrRest"/>
+		</output>
+	</processor>
+
+        <!-- create target variable for the event (only for calculating purities and efficiencies):
+             0 (background) : best hypothesis was background;
+             1 (signal)     : best hypothesis was signal -->
+
+	<processor id="target_evt" name="ProcCategory">
+		<input>
+			<var source="split_best" name="target"/>
+		</input>
+		<config>
+			<group><box><range max="0.5"/></box></group>
+			<group><box><range/></box></group>
+		</config>
+		<output>
+			<var name="target"/>
+		</output>
+	</processor>
+
+        <!-- this is just a workaround to get monitoring histograms from ProcSplitter -->
+
+        <processor id="norm_monitor_evt" name="ProcNormalize">
+                <input>
+                        <var source="split_best" name="discr"/>
+                        <var source="split_best" name="discrRest"/>
+			<var source="target_evt" name="target" target="true"/>
+                </input>
+                <config>
+                        <pdf/>
+                        <pdf/>
+                </config>
+                <output>
+                        <var name="var_dummy1"/>
+                        <var name="var_dummy2"/>
+                </output>
+        </processor>
+
+        <!-- final output is the discriminator of the best hypothesis -->
+
+	<output>
+		<var source="split_best" name="discr"/>
+	</output>
 
 </MVATrainer>
