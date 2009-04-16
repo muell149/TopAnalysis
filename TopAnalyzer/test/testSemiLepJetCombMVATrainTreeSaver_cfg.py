@@ -18,9 +18,9 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     ## test-file at lxplus
-    #'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
+    'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
     ## one file from the madgraph ttbar sample at desy
-    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/027B51E9-8EED-DD11-9045-0015C5E9C0E1.root'
+    #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/027B51E9-8EED-DD11-9045-0015C5E9C0E1.root'
     ## one file from the tauola ttbar sample at desy
     #'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v2/0009/0054812D-26F7-DD11-99D7-001F2908F0E4.root'
     )
@@ -28,7 +28,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -45,7 +45,6 @@ process.GlobalTag.globaltag = cms.string('IDEAL_V9::All')
 
 ## load magnetic field
 process.load("Configuration.StandardSequences.MagneticField_cff")
-
 
 #-------------------------------------------------
 # tqaf configuration
@@ -73,24 +72,15 @@ process.load("TopQuarkAnalysis.TopTools.TtSemiLepJetPartonMatch_cfi")
 process.ttSemiLepJetPartonMatch.algorithm  = 3 # 1 = minSumDist, 3 = unambiguousOnly
 process.ttSemiLepJetPartonMatch.useMaxDist = True
 process.ttSemiLepJetPartonMatch.maxDist    = 0.3
-process.ttSemiLepJetPartonMatch.maxNJets   = 4
+process.ttSemiLepJetPartonMatch.maxNJets   = 5
 
 ## configure mva trainer
 process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff")
 process.trainTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 
-## make trainer looper known to the process and set xml-file for trainer
+## make trainer looper known to the process
 from TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff import looper
 process.looper = looper
-process.looper.trainers = cms.VPSet(cms.PSet(
-    monitoring = cms.untracked.bool(False),
-    loadState  = cms.untracked.bool(False),
-    saveState  = cms.untracked.bool(True),
-    calibrationRecord = cms.string('ttSemiLepJetCombMVA'),
-    trainDescription = cms.untracked.FileInPath(
-    'TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainTreeSaver.xml')
-    )
-)
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced with 22X
