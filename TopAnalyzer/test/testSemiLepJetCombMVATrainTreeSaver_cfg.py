@@ -9,6 +9,11 @@ process = cms.Process("TEST")
 ## add message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.categories.append('TtSemiLepJetCombMVATrainer')
+process.MessageLogger.cerr.INFO = cms.untracked.PSet(
+    default                    = cms.untracked.PSet( limit = cms.untracked.int32( 0) ),
+    TtSemiLepJetCombMVATrainer = cms.untracked.PSet( limit = cms.untracked.int32(-1) )
+)
 
 #-------------------------------------------------
 # process configuration
@@ -53,7 +58,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 ## std sequence for tqaf layer1
 process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
 process.selectedLayer1Jets.cut  = 'et > 40. & abs(eta) < 3.0 & nConstituents > 0'
-process.selectedLayer1Muons.cut = 'pt > 30. & abs(eta) < 3.0 & trackIso < 3. & caloIso < 5.'
+process.selectedLayer1Muons.cut = 'pt > 30. & abs(eta) < 3.0 & (trackIso+caloIso)/pt < 0.1'
 process.countLayer1Jets .minNumber = 4
 process.countLayer1Muons.minNumber = 1
 process.countLayer1Muons.maxNumber = 1
