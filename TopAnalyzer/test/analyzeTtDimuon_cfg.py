@@ -28,11 +28,7 @@ process.TFileService = cms.Service("TFileService",
 #
 # Event Selector for certain Ttbar decay channels on generator level
 #
-<<<<<<< analyzeTtDimuon_cfg.py
 process.load("TopAnalysis.TopFilter.filters.TopChannelSelector_cfi")
-=======
-process.load("TopAnalysis.TopFilter.filters.TtbarChannelSelector_cfi")
->>>>>>> 1.2
 process.selectChannel.Ttbar_MuonMuon = cms.bool(True)
 #
 # filter for kinematics, muon iso and quality
