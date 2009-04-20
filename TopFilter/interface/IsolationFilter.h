@@ -18,7 +18,7 @@ class IsolationFilter {
   /// choose whether all cut (strong) or at least one cut (weak) should be passed
   enum modes {kStrong, kWeak}; 
   /// choose from these filter types
-  enum types {kAbsoluteTrack, kRelativeTrack, kAbsoluteCalo,  kRelativeCalo, kRelIso}; 
+  enum types {kAbsoluteTrack, kRelativeTrack, kAbsoluteCalo,  kRelativeCalo, kRelCombIso}; 
 
   explicit IsolationFilter(const edm::ParameterSet&);
   ~IsolationFilter(){};
@@ -56,9 +56,9 @@ IsolationFilter<Collection>::IsolationFilter(const edm::ParameterSet& cfg):
   case  1: type_=kRelativeTrack; break;
   case  2: type_=kAbsoluteCalo;  break;
   case  3: type_=kRelativeCalo;  break;
-  case  4: type_=kRelIso;  break;
+  case  4: type_=kRelCombIso;    break;
   default: throw edm::Exception(edm::errors::Configuration, 
-				"unknown choice for filter type; choose between 0(absolute track), 1(relative track), 2(absolute calo), 3(relative calo), 4(rel isolation) \n");
+				"unknown choice for filter type; choose between 0(absolute track), 1(relative track), 2(absolute calo), 3(relative calo), 4(relative combined isolation) \n");
   }
 
   // choose operation mode (weak or strong filtering)
@@ -173,12 +173,12 @@ bool IsolationFilter<Collection>::filter(const std::vector<Collection>& objs)
 	  if( !(obj->caloIso()/obj->pt()<max_[idx]) ) 
 	    passedOnce=false;
 	break;
-      case kRelIso:
+      case kRelCombIso:
 	if( idx<min_.size() ) // check for min iso as long as vector is long enough
-	  if( !(obj->pt()/( obj->pt()+obj->caloIso()+obj->trackIso() )>min_[idx]) ) 
+	  if( !( obj->caloIso()+obj->trackIso()/(obj->pt() )>min_[idx]) ) 
 	    passedOnce=false;
 	if( idx<max_.size() ) // check for max iso as long as vector is long enough
-	  if( !(obj->pt()/( obj->pt()+obj->caloIso()+obj->trackIso() )<max_[idx]) ) 
+	  if( !( obj->caloIso()+obj->trackIso()/(obj->pt() )<max_[idx]) ) 
 	    passedOnce=false;
 	break;
       default:

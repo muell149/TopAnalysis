@@ -34,8 +34,8 @@ fullLepCombIsolation = cms.PSet(
     type = cms.uint32 (  4  ),
     mode = cms.uint32 (  0  ),    
     name = cms.string('fullLepMuonCombIso'),
-    min  = cms.vdouble(  0.9, 0.9),
-    max  = cms.vdouble(  1.0, 1.0)   
+    min  = cms.vdouble(  .0, .0),
+    max  = cms.vdouble(  .1, .1)   
 )   
 
 
