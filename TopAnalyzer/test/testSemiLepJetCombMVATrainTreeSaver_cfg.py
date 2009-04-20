@@ -59,9 +59,9 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
 process.selectedLayer1Jets.cut  = 'et > 40. & abs(eta) < 3.0 & nConstituents > 0'
 process.selectedLayer1Muons.cut = 'pt > 30. & abs(eta) < 3.0 & (trackIso+caloIso)/pt < 0.1'
-process.countLayer1Jets .minNumber = 4
-process.countLayer1Muons.minNumber = 1
-process.countLayer1Muons.maxNumber = 1
+process.minLayer1Jets .minNumber = 4
+process.minLayer1Muons.minNumber = 1
+process.maxLayer1Muons.maxNumber = 1
 
 ## std sequence for ttGenEvent
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
@@ -96,11 +96,8 @@ run22XonSummer08AODSIM(process)
 # process paths
 #-------------------------------------------------
 
-## produce tqafLayer1 and ttGenEvt
-process.p0 = cms.Path(process.tqafLayer1 *
-                      process.makeGenEvt)
-
-## make jet parton match and save tree for MVA training
-process.p1 = cms.Path(process.ttSemiLeptonicFilter *
-                      process.ttSemiLepJetPartonMatch *
-                      process.saveTtSemiLepJetCombMVATrainTree)
+process.p = cms.Path(process.tqafLayer1 *
+                     process.makeGenEvt *
+                     process.ttSemiLeptonicFilter *
+                     process.ttSemiLepJetPartonMatch *
+                     process.saveTtSemiLepJetCombMVATrainTree)
