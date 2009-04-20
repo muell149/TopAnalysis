@@ -29,6 +29,9 @@ process.maxEvents = cms.untracked.PSet(
 
 ## configure process options
 process.options = cms.untracked.PSet(
+    ## reduce memory consumption    
+    fileMode = cms.untracked.string('FULLMERGE'),
+    ## switch event summary off
     wantSummary = cms.untracked.bool(False)
 )
 
