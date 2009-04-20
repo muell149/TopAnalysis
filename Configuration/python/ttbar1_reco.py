@@ -5,7 +5,7 @@ from TopAnalysis.Configuration.defines import source
 ##
 ## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
-## Events      :    147000
+## Events      :    106540
 ## xsec(pb)  LO:       242
 ## xsec(pb) NLO:       414
 ## eff         :       1.0

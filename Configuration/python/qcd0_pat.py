@@ -6,7 +6,7 @@ from TopAnalysis.Configuration.defines import source
 ## -----------
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 ##
-## Events      :   6238383 (6238383 processed) 
+## Events      :    982407 (6238383 processed) 
 ## xsec(pb)  LO: 509100000
 ## xsec(pb) NLO:       NAN
 ## eff         :  0.000239

@@ -5,7 +5,7 @@ from TopAnalysis.Configuration.defines import source
 ## PAT Tuple:
 ## -----------
 ## /Wjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
-## Events      : 101467739 (101467739 processed)
+## Events      :   1746727 (101467739 processed)
 ## xsec(pb)  LO:     35000
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00

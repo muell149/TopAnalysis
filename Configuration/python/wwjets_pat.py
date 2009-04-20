@@ -6,7 +6,7 @@ from TopAnalysis.Configuration.defines import source
 ## -----------
 ## /WW/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
 ##
-## Events      :   200000 (200000 processed)
+## Events      :     16932 (200000 processed)
 ## xsec(pb)  LO:      44.8
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00

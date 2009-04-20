@@ -6,7 +6,7 @@ from TopAnalysis.Configuration.defines import source
 ## -----------
 ## /ZJets-madgraph/Fall08_IDEAL_V9_reco-v2/GEN-SIM-RECO
 ##
-## Events      :   1163479 (1163479 processed)
+## Events      :    190675 (1163479 processed)
 ## xsec(pb)  LO:      3700
 ## xsec(pb) NLO:       NAN
 ## eff         :      1.00
