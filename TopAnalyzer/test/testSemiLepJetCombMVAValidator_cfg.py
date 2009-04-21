@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 #-------------------------------------------------
-# test cfg file for mva training for jet parton 
-# association
+# test cfg file for validation of mva training for
+# jet parton association
 #-------------------------------------------------
 process = cms.Process("TEST")
 
@@ -10,11 +10,6 @@ process = cms.Process("TEST")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
-process.MessageLogger.categories.append('TtSemiLepJetCombMVATrainer')
-process.MessageLogger.cerr.INFO = cms.untracked.PSet(
-    default                    = cms.untracked.PSet( limit = cms.untracked.int32( 0) ),
-    TtSemiLepJetCombMVATrainer = cms.untracked.PSet( limit = cms.untracked.int32(-1) )
-)
 
 #-------------------------------------------------
 # process configuration
@@ -80,18 +75,24 @@ process.ttSemiLepJetPartonMatch.useMaxDist = True
 process.ttSemiLepJetPartonMatch.maxDist    = 0.3
 process.ttSemiLepJetPartonMatch.maxNJets   = 5
 
-## configure mva trainer
-process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff")
-process.trainTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
+## configure mva computer
+process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVAComputer_Muons_cff")
+process.findTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
+process.findTtSemiLepJetCombMVA.maxNComb = -1 # -1 = take all
+process.TtSemiLepJetCombMVAFileSource.ttSemiLepJetCombMVA = 'TopAnalysis/TopAnalyzer/data/SemiLepJetComb.mva'
 
-## make trainer looper known to the process
-from TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff import looper
-process.looper = looper
+## configure mva validator
+process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAValidator_cfi")
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced with 22X
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
 run22XonSummer08AODSIM(process)
+
+## register TFileService
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('validateSemiLepJetCombMVA.root')
+)
 
 #-------------------------------------------------
 # process paths
@@ -101,4 +102,5 @@ process.p = cms.Path(process.tqafLayer1 *
                      process.makeGenEvt *
                      process.ttSemiLeptonicFilter *
                      process.ttSemiLepJetPartonMatch *
-                     process.saveTtSemiLepJetCombMVATrainTree)
+                     process.findTtSemiLepJetCombMVA *
+                     process.validateSemiLepJetCombMVA)
