@@ -10,7 +10,7 @@ analyzeisolationMET = cms.EDAnalyzer("IsolationAnalyzer",
     muons = cms.InputTag("selectedLayer1Muons"),
     genEvent = cms.InputTag("genEvt"),
     discriminator = cms.string('DiscSel'),
-    useMVA = cms.bool(False)
+    useMVA = cms.bool(True)
 )
 
 

@@ -38,10 +38,11 @@ process.options = cms.untracked.PSet(
 
 ## analyze muons
 process.load("TopAnalysis.TopAnalyzer.IsolationAnalyzer_cfi")
-
+process.load("TopAnalysis.TopUtils.QCDBkgMVAComputer_cff")
+process.analyzeisolationMET.modulename = "findQCDBkgMVA"
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMuonIso.root')
 )
 
-process.p1 = cms.Path(process.analyzeisolationMET)
+process.p1 = cms.Path(process.findQCDBkgMVA, process.analyzeisolationMET)
