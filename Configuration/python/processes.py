@@ -149,3 +149,8 @@ source['wzx0'   ] = 'wzx0_0'
 from TopAnalysis.Configuration.zzjets_pat import *
 sizes ['zzx0'   ] = 'blocks'
 source['zzx0'   ] = 'zzx0_0'
+
+## qcd preselected samples
+from TopAnalysis.Configuration.qcdsxs0 import *
+sizes ['qcdsxs0'] = 'blocks'
+source['qcdsxs0'] = 'qcdsxs0_0,'+'qcdsxs0_1'

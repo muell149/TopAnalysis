@@ -29,6 +29,9 @@ process.maxEvents = cms.untracked.PSet(
 
 ## configure process options
 process.options = cms.untracked.PSet(
+    ## reduce memory consumption    
+    fileMode = cms.untracked.string('FULLMERGE'),
+    ## switch event summary off
     wantSummary = cms.untracked.bool(False)
 )
 
@@ -38,10 +41,11 @@ process.options = cms.untracked.PSet(
 
 ## test basic event selection
 process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step1_cff")
+process.p0 = cms.Path(process.selectSemiLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('semiLepMuonSelection_step1.root')
+    fileName = cms.string('selection_step1.root')
 )
 
 ## configure output module

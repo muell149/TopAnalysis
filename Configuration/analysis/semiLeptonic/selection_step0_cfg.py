@@ -8,6 +8,13 @@ process = cms.Process("Step0")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.categories.append('topFilter')
+process.MessageLogger.cout = cms.untracked.PSet(
+ INFO = cms.untracked.PSet(
+   limit     = cms.untracked.int32( 0 ),
+   topFilter = cms.untracked.PSet( limit = cms.untracked.int32(10) )
+  )
+)
 process.MessageLogger.cerr.threshold = 'INFO'
 #process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
