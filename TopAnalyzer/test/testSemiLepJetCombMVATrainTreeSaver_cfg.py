@@ -56,11 +56,24 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # analysis configuration
 #-------------------------------------------------
 
-## tqafLayer1, ttGenEvent, ttGenEventFilter, jetPartonMatch
+## tqafLayer1, ttGenEvent, ttGenEventFilter, jetPartonMatch, etc.
 process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAStudy_cff")
+
+## switch jet collection to sisCone5CaloJets
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process, 
+        'sisCone5CaloJets',    # Jet collection; must be already in the event when patLayer0 sequence is executed
+        layers=[0,1],          # If you're not runnint patLayer1, set 'layers=[0]' 
+        runCleaner="CaloJet",  # =None if not to clean
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+        jetCorrLabel=('SC5','Calo'), # example jet correction name; set to None for no JEC
+        doType1MET=True,       # recompute Type1 MET using these jets
+        genJetCollection=cms.InputTag("sisCone5GenJets"))
 
 ## configure mva trainer
 process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff")
+process.trainTtSemiLepJetCombMVA.jets = "selectedLayer1JetsLowPt"
 process.trainTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 
 ## make trainer looper known to the process

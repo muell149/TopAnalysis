@@ -54,8 +54,21 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 ## tqafLayer1, ttGenEvent, ttGenEventFilter, jetPartonMatch
 process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAStudy_cff")
 
+## switch jet collection to sisCone5CaloJets
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process, 
+        'sisCone5CaloJets',    # Jet collection; must be already in the event when patLayer0 sequence is executed
+        layers=[0,1],          # If you're not runnint patLayer1, set 'layers=[0]' 
+        runCleaner="CaloJet",  # =None if not to clean
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+        jetCorrLabel=('SC5','Calo'), # example jet correction name; set to None for no JEC
+        doType1MET=True,       # recompute Type1 MET using these jets
+        genJetCollection=cms.InputTag("sisCone5GenJets"))
+
 ## configure mva computer
 process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVAComputer_Muons_cff")
+process.findTtSemiLepJetCombMVA.jets = "selectedLayer1JetsLowPt"
 process.findTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 process.findTtSemiLepJetCombMVA.maxNComb = -1 # -1 = take all
 #process.TtSemiLepJetCombMVAFileSource.ttSemiLepJetCombMVA = 'TopAnalysis/TopAnalyzer/data/SemiLepJetComb.mva'
