@@ -67,14 +67,14 @@ process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
 ## process.eventWeight.eff   = 1.0
 
 ## qcd pythia preselected
-process.eventWeight.nevts = 6238383
-process.eventWeight.xsec  = 509100000
-process.eventWeight.lumi  = 1000
-process.eventWeight.eff   = 0.000239
+## process.eventWeight.nevts = 6238383
+## process.eventWeight.xsec  = 509100000
+## process.eventWeight.lumi  = 1000
+## process.eventWeight.eff   = 0.000239
 
 ## test basic event selection
 process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
-process.p0 = cms.Path(process.preselectSemiLepMuon)
+process.p0 = cms.Path(process.eventWeight * process.preselectSemiLepMuon)
     
 ## register TFileService
 process.TFileService = cms.Service("TFileService",

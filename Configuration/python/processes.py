@@ -150,7 +150,24 @@ from TopAnalysis.Configuration.zzjets_pat import *
 sizes ['zzx0'   ] = 'blocks'
 source['zzx0'   ] = 'zzx0_0'
 
-## qcd preselected samples
-from TopAnalysis.Configuration.qcdsxs0 import *
-sizes ['qcdsxs0'] = 'blocks'
-source['qcdsxs0'] = 'qcdsxs0_0,'+'qcdsxs0_1'
+## /Zprime_semi_m750_w7_10TeV_GEN_RAW_HLT_CMSSW225-v3/sperries-Zprime_semi_m750_w7_10TeV_RECO_CMSSW225-v3-7194a034bc413eedae0ebe7ee022de30/USER
+from TopAnalysis.Configuration.zprime0_pat import *
+sizes ['zprimex0'] = 'blocks'
+source['zprimex0'] = 'zprimex0_0,'+'zprimex0_1,'+'zprimex0_2,'+'zprimex0_3,'+'zprimex0_4'
+
+## semi-leptonic preselected samples
+from TopAnalysis.Configuration.qcdsxs0   import *
+sizes ['qcdsxs0'  ] = 'blocks'
+source['qcdsxs0'  ] = 'qcdsxs0_0,'  +'qcdsxs0_1,'  +'qcdsxs0_2,'  +'qcdsxs0_3'
+
+from TopAnalysis.Configuration.wjetssxs0 import *
+sizes ['wjetssxs0'] = 'blocks'
+source['wjetssxs0'] = 'wjetssxs0_0,'+'wjetssxs0_1,'+'wjetssxs0_2,'+'wjetssxs0_3'
+
+from TopAnalysis.Configuration.zjetssxs0 import *
+sizes ['zjetssxs0'] = 'blocks'
+source['zjetssxs0'] = 'zjetssxs0_0,'+'zjetssxs0_1,'+'zjetssxs0_2,'+'zjetssxs0_3'
+
+from TopAnalysis.Configuration.ttbarsxs0 import *
+sizes ['ttbarsxs0'] = 'blocks'
+source['ttbarsxs0'] = 'ttbarsxs0_0,'+'ttbarsxs0_1,'+'ttbarsxs0_2,'+'ttbarsxs0_3'

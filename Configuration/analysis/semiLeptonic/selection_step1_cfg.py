@@ -8,6 +8,13 @@ process = cms.Process("Step1")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.categories.append('topFilter')
+process.MessageLogger.cout = cms.untracked.PSet(
+ INFO = cms.untracked.PSet(
+   limit     = cms.untracked.int32( 0 ),
+   topFilter = cms.untracked.PSet( limit = cms.untracked.int32(10) )
+  )
+)
 process.MessageLogger.cerr.threshold = 'INFO'
 #process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
@@ -50,9 +57,9 @@ process.TFileService = cms.Service("TFileService",
 
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",
+##  outputCommands = cms.untracked.vstring('keep *'),
+    SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p0') ),
     fileName = cms.untracked.string('patTuple_semiLepMuonSelection_step1.root')
 )
 
-process.p1 = cms.Path(process.selectSemiLepMuon *
-                      process.out
-                      )
+process.p1 = cms.Path(process.out)
