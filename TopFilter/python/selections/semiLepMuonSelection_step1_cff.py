@@ -10,7 +10,7 @@ semiLepMuonEta = cms.PSet(
 semiLepMuonPt  = cms.PSet(
     mode = cms.uint32 ( 0),    
     name = cms.string ('semiLepMuonPt' ),
-    min  = cms.vdouble(   30.0),
+    min  = cms.vdouble(   20.0),
     max  = cms.vdouble(99999.0)
 )
 
@@ -18,13 +18,13 @@ semiLepMuonPt  = cms.PSet(
 semiLepJetsEta = cms.PSet(
     mode = cms.uint32 ( 0),    
     name = cms.string ('semiLepJetsEta'),
-    min  = cms.vdouble(-3.0, -3.0, -3.0, -3.0),
-    max  = cms.vdouble( 3.0,  3.0,  3.0,  3.0)
+    min  = cms.vdouble(-2.4, -2.4, -2.4, -2.4),
+    max  = cms.vdouble( 2.4,  2.4,  2.4,  2.4)
 )
 semiLepJetsPt  = cms.PSet(
     mode = cms.uint32 ( 0),    
     name = cms.string ('semiLepJetsPt' ),
-    min  = cms.vdouble(   40.0,    40.0,    40.0,    40.0),
+    min  = cms.vdouble(   30.0,    30.0,    30.0,    30.0),
     max  = cms.vdouble(99999.0, 99999.0, 99999.0, 99999.0)
 )
 
