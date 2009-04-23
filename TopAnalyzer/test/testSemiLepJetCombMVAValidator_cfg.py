@@ -48,38 +48,17 @@ process.GlobalTag.globaltag = cms.string('IDEAL_V9::All')
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
 #-------------------------------------------------
-# tqaf configuration
+# analysis configuration
 #-------------------------------------------------
 
-## std sequence for tqaf layer1
-process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
-process.selectedLayer1Jets.cut  = 'et > 40. & abs(eta) < 3.0 & nConstituents > 0'
-process.selectedLayer1Muons.cut = 'pt > 30. & abs(eta) < 3.0 & (trackIso+caloIso)/pt < 0.1'
-process.minLayer1Jets .minNumber = 4
-process.minLayer1Muons.minNumber = 1
-process.maxLayer1Muons.maxNumber = 1
-
-## std sequence for ttGenEvent
-process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
-
-## configure ttGenEventFilters
-process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff")
-process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = False
-process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
-process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = False
-
-## configure jet parton matching
-process.load("TopQuarkAnalysis.TopTools.TtSemiLepJetPartonMatch_cfi")
-process.ttSemiLepJetPartonMatch.algorithm  = 3 # 1 = minSumDist, 3 = unambiguousOnly
-process.ttSemiLepJetPartonMatch.useMaxDist = True
-process.ttSemiLepJetPartonMatch.maxDist    = 0.3
-process.ttSemiLepJetPartonMatch.maxNJets   = 5
+## tqafLayer1, ttGenEvent, ttGenEventFilter, jetPartonMatch
+process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAStudy_cff")
 
 ## configure mva computer
 process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVAComputer_Muons_cff")
 process.findTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 process.findTtSemiLepJetCombMVA.maxNComb = -1 # -1 = take all
-process.TtSemiLepJetCombMVAFileSource.ttSemiLepJetCombMVA = 'TopAnalysis/TopAnalyzer/data/SemiLepJetComb.mva'
+#process.TtSemiLepJetCombMVAFileSource.ttSemiLepJetCombMVA = 'TopAnalysis/TopAnalyzer/data/SemiLepJetComb.mva'
 
 ## configure mva validator
 process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAValidator_cfi")
@@ -95,12 +74,9 @@ process.TFileService = cms.Service("TFileService",
 )
 
 #-------------------------------------------------
-# process paths
+# process path
 #-------------------------------------------------
 
-process.p = cms.Path(process.tqafLayer1 *
-                     process.makeGenEvt *
-                     process.ttSemiLeptonicFilter *
-                     process.ttSemiLepJetPartonMatch *
+process.p = cms.Path(process.prepareSemiLepJetCombMVAStudy *
                      process.findTtSemiLepJetCombMVA *
                      process.validateSemiLepJetCombMVA)
