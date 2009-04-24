@@ -48,29 +48,11 @@ process.options = cms.untracked.PSet(
 
 ## add event weight information
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-## ttbar madgraph fullsim
-## process.eventWeight.nevts = 1028322
-## process.eventWeight.xsec  = 414
-## process.eventWeight.lumi  = 1000
-## process.eventWeight.eff   = 1.0
-
 ## wjets madgraph fastsim
-## process.eventWeight.nevts = 101467739
-## process.eventWeight.xsec  = 35000
-## process.eventWeight.lumi  = 1000
-## process.eventWeight.eff   = 1.0
-
-## zjets madgraph fastsim
-## process.eventWeight.nevts = 9964055
-## process.eventWeight.xsec  = 3700
-## process.eventWeight.lumi  = 1000
-## process.eventWeight.eff   = 1.0
-
-## qcd pythia preselected
-## process.eventWeight.nevts = 6238383
-## process.eventWeight.xsec  = 509100000
-## process.eventWeight.lumi  = 1000
-## process.eventWeight.eff   = 0.000239
+process.eventWeight.nevts = 101467739
+process.eventWeight.xsec  = 35000
+process.eventWeight.lumi  = 1000
+process.eventWeight.eff   = 1.0
 
 ## test basic event selection
 process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
