@@ -158,16 +158,29 @@ source['zprimex0'] = 'zprimex0_0,'+'zprimex0_1,'+'zprimex0_2,'+'zprimex0_3,'+'zp
 ## semi-leptonic preselected samples
 from TopAnalysis.Configuration.qcdsxs0   import *
 sizes ['qcdsxs0'  ] = 'blocks'
-source['qcdsxs0'  ] = 'qcdsxs0_0,'  +'qcdsxs0_1,'  +'qcdsxs0_2,'  +'qcdsxs0_3'
+source['qcdsxs0'  ] = 'qcdsxs0_0,'   +'qcdsxs0_1,'   +'qcdsxs0_2,'   +'qcdsxs0_3,'   +'qcdsxs0_4,'
+source['qcdsxs0'  ]+= 'qcdsxs0_5,'   +'qcdsxs0_6,'   +'qcdsxs0_7,'   +'qcdsxs0_8,'   +'qcdsxs0_9,'
+source['qcdsxs0'  ]+= 'qcdsxs0_10,'  +'qcdsxs0_11,'  +'qcdsxs0_12,'  +'qcdsxs0_13,'  +'qcdsxs0_14,'
+source['qcdsxs0'  ]+= 'qcdsxs0_15,'  +'qcdsxs0_16,'  +'qcdsxs0_17,'  +'qcdsxs0_18,'  +'qcdsxs0_19'
+
 
 from TopAnalysis.Configuration.wjetssxs0 import *
 sizes ['wjetssxs0'] = 'blocks'
-source['wjetssxs0'] = 'wjetssxs0_0,'+'wjetssxs0_1,'+'wjetssxs0_2,'+'wjetssxs0_3'
+source['wjetssxs0'] = 'wjetssxs0_0,' +'wjetssxs0_1,' +'wjetssxs0_2,' +'wjetssxs0_3,' +'wjetssxs0_4,'
+source['wjetssxs0']+= 'wjetssxs0_5,' +'wjetssxs0_6,' +'wjetssxs0_7,' +'wjetssxs0_8,' +'wjetssxs0_9,'
+source['wjetssxs0']+= 'wjetssxs0_10,'+'wjetssxs0_11,'+'wjetssxs0_12,'+'wjetssxs0_13,'+'wjetssxs0_14,'
+source['wjetssxs0']+= 'wjetssxs0_15,'+'wjetssxs0_16,'+'wjetssxs0_17,'+'wjetssxs0_18,'+'wjetssxs0_19'
 
 from TopAnalysis.Configuration.zjetssxs0 import *
 sizes ['zjetssxs0'] = 'blocks'
-source['zjetssxs0'] = 'zjetssxs0_0,'+'zjetssxs0_1,'+'zjetssxs0_2,'+'zjetssxs0_3'
+source['zjetssxs0'] = 'zjetssxs0_0,' +'zjetssxs0_1,' +'zjetssxs0_2,' +'zjetssxs0_3,' +'zjetssxs0_4,'
+source['zjetssxs0']+= 'zjetssxs0_5,' +'zjetssxs0_6,' +'zjetssxs0_7,' +'zjetssxs0_8,' +'zjetssxs0_9,'
+source['zjetssxs0']+= 'zjetssxs0_10,'+'zjetssxs0_11,'+'zjetssxs0_12,'+'zjetssxs0_13,'+'zjetssxs0_14,'
+source['zjetssxs0']+= 'zjetssxs0_15,'+'zjetssxs0_16,'+'zjetssxs0_17,'+'zjetssxs0_18,'+'zjetssxs0_19'
 
 from TopAnalysis.Configuration.ttbarsxs0 import *
 sizes ['ttbarsxs0'] = 'blocks'
-source['ttbarsxs0'] = 'ttbarsxs0_0,'+'ttbarsxs0_1,'+'ttbarsxs0_2,'+'ttbarsxs0_3'
+source['ttbarsxs0'] = 'ttbarsxs0_0,' +'ttbarsxs0_1,' +'ttbarsxs0_2,' +'ttbarsxs0_3,' +'ttbarsxs0_4,'
+source['ttbarsxs0']+= 'ttbarsxs0_5,' +'ttbarsxs0_6,' +'ttbarsxs0_7,' +'ttbarsxs0_8,' +'ttbarsxs0_9,'
+source['ttbarsxs0']+= 'ttbarsxs0_10,'+'ttbarsxs0_11,'+'ttbarsxs0_12,'+'ttbarsxs0_13,'+'ttbarsxs0_14,'
+source['ttbarsxs0']+= 'ttbarsxs0_15,'+'ttbarsxs0_16,'+'ttbarsxs0_17,'+'ttbarsxs0_18,'+'ttbarsxs0_19'
