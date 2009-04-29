@@ -25,6 +25,11 @@ minLayer1Jets.minNumber = 4
 ## use recalculated MET after scaling of jet energy
 selectedLayer1METs.src = "scaledJetEnergy:allLayer1METs"
 
+## filter events with overlapping jets
+from TopAnalysis.TopFilter.filters.JetOverlapEventFilter_cfi import *
+filterJetOverlapEvent.src    = "selectedLayer1JetsLowPt"
+filterJetOverlapEvent.deltaR = 0.0 # 0.0 = no filtering
+
 ## std sequence for ttGenEvent
 from TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff import *
 
@@ -37,7 +42,8 @@ ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = False
 ## configure jet parton matching
 from TopQuarkAnalysis.TopTools.TtSemiLepJetPartonMatch_cfi import *
 ttSemiLepJetPartonMatch.jets = "selectedLayer1JetsLowPt"
-ttSemiLepJetPartonMatch.algorithm  = 3 # 1 = minSumDist, 3 = unambiguousOnly
+# 0 = totalMinDist, 1 = minSumDist, 2 = ptOrderedMinDist, 3 = unambiguousOnly
+ttSemiLepJetPartonMatch.algorithm  = 3
 ttSemiLepJetPartonMatch.useMaxDist = True
 ttSemiLepJetPartonMatch.maxDist    = 0.3
 ttSemiLepJetPartonMatch.maxNJets   = 5
@@ -67,6 +73,7 @@ patLayer1_withScaledJets = cms.Sequence(patLayer1_allObjects*
 
 prepareSemiLepJetCombMVAStudy = cms.Sequence(patLayer0_patTuple *
                                              patLayer1_withScaledJets *
+                                             filterJetOverlapEvent *
                                              makeGenEvt *
                                              ttSemiLeptonicFilter *
                                              ttSemiLepJetPartonMatch)
