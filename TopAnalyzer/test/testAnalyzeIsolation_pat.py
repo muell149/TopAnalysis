@@ -48,11 +48,11 @@ process.load("TopAnalysis.TopUtils.QCDBkgMVAComputer_cff")
 from TopAnalysis.TopFilter.selectlions.semiLepMuonSelection_step1_cff import *
 from TopAnalysis.TopFilter.filters.SemiLepMuonEventFilter_cfi import filterSemiLepMuonEvent
 #process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step1_cff")
-tight = filterSemiLepMuonEvent.clone()
-loose = filterSemiLepMuonEvent.clone()
-loose.trkIso = False
-loose.calIso = False
-loose.jetDist = False
+process.tight = filterSemiLepMuonEvent.clone()
+process.loose = filterSemiLepMuonEvent.clone()
+process.loose.trkIso = False
+process.loose.calIso = False
+process.loose.jetDist = False
 semiLepJetsPt.min = 20.0, 20.0, 20.0, 20.0
 semiLepMuonPt.min = 20.0,
 ## register TFileService
@@ -60,4 +60,4 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMuonIso.root')
 )
 
-process.p1 = cms.Path(process.findQCDBkgMVA * loose * before * tight * after)
+process.p1 = cms.Path(process.findQCDBkgMVA * process.loose * process.before * process.tight * process.after)
