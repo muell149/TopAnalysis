@@ -1149,11 +1149,11 @@
 	<processor id="like" name="ProcLikelihood">
 		<input>
 			<var source="target_hyp" name="target" target="true"/>
-                        <var source="norm" name="massHadW"/>
-                        <var source="norm" name="deltaThetaHadTopLepB"/>
-                        <var source="norm" name="deltaThetaLepBLepton"/>
-                        <var source="norm" name="relativePtHadronicTop"/>
-                        <var source="norm" name="bTagSumTrkCntHighEff"/>
+                        <var source="rot" name="rot1"/>
+                        <var source="rot" name="rot2"/>
+                        <var source="rot" name="rot3"/>
+                        <var source="rot" name="rot4"/>
+                        <var source="rot" name="rot5"/>
 		</input>
 		<config>
 			<sigbkg smooth="3"/>
