@@ -18,6 +18,8 @@ typedef SpecificEventFilter<std::vector<pat::Muon>,     MuonDistanceFilter > Muo
 typedef SpecificEventFilter<std::vector<pat::Electron>, ElecIsolationFilter> ElecIsolationEventFilter;
 typedef SpecificEventFilter<std::vector<pat::Electron>, ElecDistanceFilter > ElecDistanceEventFilter;
 
+#include "TopAnalysis/TopFilter/plugins/JetOverlapEventFilter.h"
+
 // n-1 filter expansions
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -35,6 +37,7 @@ DEFINE_FWK_MODULE( MuonDistanceEventFilter  );
 DEFINE_FWK_MODULE( MuonIsolationEventFilter );
 DEFINE_FWK_MODULE( ElecDistanceEventFilter  );
 DEFINE_FWK_MODULE( ElecIsolationEventFilter );
+DEFINE_FWK_MODULE( JetOverlapEventFilter    );
 
 // full event filters
 DEFINE_FWK_MODULE( SemiLepMuonEventFilter   );
