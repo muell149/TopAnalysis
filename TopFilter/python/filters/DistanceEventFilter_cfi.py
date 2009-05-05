@@ -6,10 +6,10 @@ filterMuonDistance = cms.EDFilter("MuonDistanceEventFilter",
     useEventWeight = cms.bool(True),
     weight = cms.InputTag("eventWeight"), 
     cuts    = cms.PSet(
-      refs  = cms.VInputTag(cms.InputTag("selectedLayer1Jets")),
-      thresh= cms.uint32 ( 0),
+      refs  = cms.InputTag("selectedLayer1Jets"),
+      thresh= cms.vdouble( 0),
       mode  = cms.uint32 ( 0),
-      name  = cms.string (''),
+      name  = cms.string ('MuonDistanceEventFilter'),
       min   = cms.vdouble(  ),
       max   = cms.vdouble(  )
     )    
