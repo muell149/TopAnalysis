@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 ## define basic event filters
-filterMuonDistance = cms.EDFilter("MuonDistanceEventFilter",
+filterMuonJetDistance = cms.EDFilter("MuonDistanceEventFilter",
     input  = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),    
     useEventWeight = cms.bool(True),
     weight = cms.InputTag("eventWeight"), 
