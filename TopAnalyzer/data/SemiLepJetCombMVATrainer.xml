@@ -194,6 +194,15 @@
                 <var name="bTagSumImpactParaMVA" multiple="true" optional="false"/>
                 <!-- multiplied b-tags of the two b quark candidates -->
                 <var name="bTagProdImpactParaMVA" multiple="true" optional="false"/>
+                <!-- summed b-tags of the two light quark candidates -->
+                <var name="bTagSumHadQHadQBarTrkCntHighEff" multiple="true" optional="false"/>
+                <var name="bTagSumHadQHadQBarTrkCntHighPur" multiple="true" optional="false"/>
+                <var name="bTagSumHadQHadQBarSoftMuon"      multiple="true" optional="false"/>
+                <var name="bTagSumHadQHadQBarSimpSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagSumHadQHadQBarCombSecondVtx" multiple="true" optional="false"/>
+                <var name="bTagSumHadQHadQBarImpactParaMVA" multiple="true" optional="false"/>
+                <!-- multiplied b-tags of the two light quark candidates -->
+                <var name="bTagProdHadQHadQBarImpactParaMVA" multiple="true" optional="false"/>
 
         </input>
 
@@ -388,6 +397,15 @@
                         <var source="input" name="bTagSumImpactParaMVA"/>
                         <!-- multiplied b-tags of the two b quark candidates -->
                         <var source="input" name="bTagProdImpactParaMVA"/>
+                        <!-- summed b-tags of the two light quark candidates -->
+                        <var source="input" name="bTagSumHadQHadQBarTrkCntHighEff"/>
+                        <var source="input" name="bTagSumHadQHadQBarTrkCntHighPur"/>
+                        <var source="input" name="bTagSumHadQHadQBarSoftMuon"     />
+                        <var source="input" name="bTagSumHadQHadQBarSimpSecondVtx"/>
+                        <var source="input" name="bTagSumHadQHadQBarCombSecondVtx"/>
+                        <var source="input" name="bTagSumHadQHadQBarImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two light quark candidates -->
+                        <var source="input" name="bTagProdHadQHadQBarImpactParaMVA"/>
 		</input>
 		<config>
 			<procs next="5"/>
@@ -580,6 +598,15 @@
                         <var name="bTagSumImpactParaMVA"/>
                         <!-- multiplied b-tags of the two b quark candidates -->
                         <var name="bTagProdImpactParaMVA"/>
+                        <!-- summed b-tags of the two light quark candidates -->
+                        <var name="bTagSumHadQHadQBarTrkCntHighEff"/>
+                        <var name="bTagSumHadQHadQBarTrkCntHighPur"/>
+                        <var name="bTagSumHadQHadQBarSoftMuon"     />
+                        <var name="bTagSumHadQHadQBarSimpSecondVtx"/>
+                        <var name="bTagSumHadQHadQBarCombSecondVtx"/>
+                        <var name="bTagSumHadQHadQBarImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two light quark candidates -->
+                        <var name="bTagProdHadQHadQBarImpactParaMVA"/>
 		</output>
 	</processor>
 
@@ -789,6 +816,15 @@
                         <var source="loop" name="bTagSumImpactParaMVA"/>
                         <!-- multiplied b-tags of the two b quark candidates -->
                         <var source="loop" name="bTagProdImpactParaMVA"/>
+                        <!-- summed b-tags of the two light quark candidates -->
+                        <var source="loop" name="bTagSumHadQHadQBarTrkCntHighEff"/>
+                        <var source="loop" name="bTagSumHadQHadQBarTrkCntHighPur"/>
+                        <var source="loop" name="bTagSumHadQHadQBarSoftMuon"     />
+                        <var source="loop" name="bTagSumHadQHadQBarSimpSecondVtx"/>
+                        <var source="loop" name="bTagSumHadQHadQBarCombSecondVtx"/>
+                        <var source="loop" name="bTagSumHadQHadQBarImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two light quark candidates -->
+                        <var source="loop" name="bTagProdHadQHadQBarImpactParaMVA"/>
                         <!-- ========================================================== -->
                         <!-- TARGET -->
                         <!-- ========================================================== -->
@@ -928,6 +964,13 @@
                         <pdf/>
                         <pdf/>
                         <pdf/>
+                        <pdf/>
+                        <pdf/>
+                        <pdf/>
+                        <pdf/>
+                        <pdf/>
+                        <pdf/>
+                        <pdf/> <!-- 140 -->
                         <pdf/>
                         <pdf/>
                         <pdf/>
@@ -1118,6 +1161,15 @@
                         <var name="bTagSumImpactParaMVA"/>
                         <!-- multiplied b-tags of the two b quark candidates -->
                         <var name="bTagProdImpactParaMVA"/>
+                        <!-- summed b-tags of the two light quark candidates -->
+                        <var name="bTagSumHadQHadQBarTrkCntHighEff"/>
+                        <var name="bTagSumHadQHadQBarTrkCntHighPur"/>
+                        <var name="bTagSumHadQHadQBarSoftMuon"     />
+                        <var name="bTagSumHadQHadQBarSimpSecondVtx"/>
+                        <var name="bTagSumHadQHadQBarCombSecondVtx"/>
+                        <var name="bTagSumHadQHadQBarImpactParaMVA"/>
+                        <!-- multiplied b-tags of the two light quark candidates -->
+                        <var name="bTagProdHadQHadQBarImpactParaMVA"/>
                 </output>
         </processor>
 
