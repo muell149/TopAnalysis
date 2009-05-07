@@ -52,7 +52,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #-------------------------------------------------
 
 ## tqafLayer1, ttGenEvent, ttGenEventFilter, jetPartonMatch
-process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAStudy_cff")
+process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAStudy_muons_cff")
 
 ## switch jet collection to sisCone5CaloJets
 from PhysicsTools.PatAlgos.tools.jetTools import *
