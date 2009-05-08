@@ -75,12 +75,12 @@ switchJetCollection(process,
         genJetCollection=cms.InputTag("sisCone5GenJets"))
 
 ## configure mva trainer
-process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff")
+process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_cff")
 process.trainTtSemiLepJetCombMVA.jets = "selectedLayer1JetsLowPt"
 process.trainTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 
 ## make trainer looper known to the process
-from TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_Muons_cff import looper
+from TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_cff import looper
 process.looper = looper
 
 ## necessary fixes to run 2.2.X on 2.1.X data
