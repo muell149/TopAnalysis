@@ -3,6 +3,9 @@
 ## define input vectors for ConfigRunner
 ##
 ######################################################################
+evts   = {}  ## produced events
+xsec   = {}  ## production cross section
+eff    = {}  ## generator efficiency
 sizes  = {}  ## sample sizes
 source = {}  ## input sources
 

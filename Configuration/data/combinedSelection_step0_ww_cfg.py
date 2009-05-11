@@ -75,11 +75,6 @@ process.pat = cms.Path(process.patTuple_reduced)
 
 ## add event weight information
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.eventWeight.nevts = 200000
-process.eventWeight.xsec  = 44.8
-process.eventWeight.lumi  = 1000
-process.eventWeight.eff   = 1.0
-
 process.wght = cms.Path(process.eventWeight)   
 
 ## test basic event selection

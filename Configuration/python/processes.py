@@ -1,6 +1,10 @@
+## automatic lumi calculationlumi 
+from TopAnalysis.Configuration.defines import eff
+from TopAnalysis.Configuration.defines import evts
+from TopAnalysis.Configuration.defines import xsec
+## automatic input & size estimation
 from TopAnalysis.Configuration.defines import sizes
 from TopAnalysis.Configuration.defines import source
-
 
 ## test sample at cern
 sizes ['cern'] = 0
@@ -12,6 +16,9 @@ source['desy'] = ''
 
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 from TopAnalysis.Configuration.ttbar0_reco import *
+evts  ['ttbar0' ] =   1028322           ## number of produced events
+xsec  ['ttbar0' ] =       414           ## NLO in pb
+eff   ['ttbar0' ] =       1.0           ## generator efficiency on gen level
 sizes ['ttbar0' ] = 'blocks'
 source['ttbar0' ] = 'ttbar0_0,' +'ttbar0_1,' +'ttbar0_2,' +'ttbar0_3,' +'ttbar0_4,'
 source['ttbar0' ]+= 'ttbar0_5,' +'ttbar0_6,' +'ttbar0_7,' +'ttbar0_8,' +'ttbar0_9,'
@@ -27,22 +34,34 @@ source['ttbar0' ]+= 'ttbar0_50,'+'ttbar0_51,'+'ttbar0_52,'+'ttbar0_53'
 
 ## /TTJets-madgraph/Fall08_IDEAL_V9_v2/GEN-SIM-RECO
 from TopAnalysis.Configuration.ttbar0_pat import *
+evts  ['ttbarx0'] =   1028322           ## number of produced events
+xsec  ['ttbarx0'] =       414           ## NLO in pb
+eff   ['ttbarx0'] =       1.0           ## generator efficiency on gen level
 sizes ['ttbarx0'] = 'blocks'
 source['ttbarx0'] = 'ttbarx0_0,'+'ttbarx0_1'
 
 ## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.ttbar1_reco import *
+evts  ['ttbar1' ] =    146996           ## number of produced events
+xsec  ['ttbar1' ] =       414           ## NLO in pb
+eff   ['ttbar1' ] =       1.0           ## generator efficiency on gen level
 sizes ['ttbar1' ] = 'blocks'
 source['ttbar1' ] = 'ttbar1_0,' +'ttbar1_1,' +'ttbar1_2,' +'ttbar1_3,' +'ttbar1_4,'
 source['ttbar1' ]+= 'ttbar1_5'
 
 ## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.ttbar1_pat import *
+evts  ['ttbarx1'] =    146996           ## number of produced events
+xsec  ['ttbarx1'] =       414           ## NLO in pb
+eff   ['ttbarx1'] =       1.0           ## generator efficiency on gen level
 sizes ['ttbarx1'] = 'blocks'
 source['ttbarx1'] = 'ttbarx1_0'
 
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.qcd0_reco import *
+evts  ['qcd0'   ] =   6238383           ## number of produced events
+xsec  ['qcd0'   ] = 509100000           ## LO in pb
+eff   ['qcd0'   ] =  0.000239           ## generator efficiency on gen level
 sizes ['qcd0'   ] = 'blocks'
 source['qcd0'   ] = 'qcd0_0,' +'qcd0_1,' +'qcd0_2,' +'qcd0_3,' +'qcd0_4,'
 source['qcd0'   ]+= 'qcd0_5,' +'qcd0_6,' +'qcd0_7,' +'qcd0_8,' +'qcd0_9,'
@@ -57,17 +76,26 @@ source['qcd0'   ]+= 'qcd0_45,'+'qcd0_46,'+'qcd0_47,'+'qcd0_48'
 
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.qcd0_pat import *
+evts  ['qcdx0'  ] =   6238383           ## number of produced events
+xsec  ['qcdx0'  ] = 509100000           ## LO in pb
+eff   ['qcdx0'  ] =  0.000239           ## generator efficiency on gen level
 sizes ['qcdx0'  ] = 'blocks'
 source['qcdx0'  ] = 'qcdx0_0,' +'qcdx0_1,' +'qcdx0_2,' +'qcdx0_3,' +'qcdx0_4,'
 source['qcdx0'  ]+= 'qcdx0_5,' +'qcdx0_6,' +'qcdx0_7,' +'qcdx0_8,' +'qcdx0_9,'
 source['qcdx0'  ]+= 'qcdx0_10,'+'qcdx0_11,'+'qcdx0_12,'+'qcdx0_13'
 
 ## /InclusiveMuPt15/Summer08_IDEAL_V11_redigi_v1/GEN-SIM-RECO
+evts  ['qcd0'   ] = 1                   ## number of produced events
+xsec  ['qcd0'   ] = 1                   ## LO in pb
+eff   ['qcd0'   ] = 1                   ## generator efficiency on gen level
 sizes ['qcd1'   ] = 0
 source['qcd1'   ] = ''
 
 ## /Wjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.wjets0_pat import *
+evts  ['wjetsx0'] = 101467739           ## number of produced events
+xsec  ['wjetsx0'] =     35000           ## NLO in pb
+eff   ['wjetsx0'] =       1.0           ## generator efficiency on gen level
 sizes ['wjetsx0'] = 'blocks'
 source['wjetsx0'] = 'wjetsx0_0,' +'wjetsx0_1,' +'wjetsx0_2,' +'wjetsx0_3,' +'wjetsx0_4,'
 source['wjetsx0']+= 'wjetsx0_5,' +'wjetsx0_6,' +'wjetsx0_7,' +'wjetsx0_8,' +'wjetsx0_9,'
@@ -81,6 +109,9 @@ source['wjetsx0']+= 'wjetsx0_40,'+'wjetsx0_41,'+'wjetsx0_42,'+'wjetsx0_43,'+'wje
 
 ## /WJets-madgraph/Fall08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.wjets1_reco import *
+evts  ['wjets1' ] =  10079826           ## number of produced events
+xsec  ['wjets1' ] =     35000           ## NLO in pb
+eff   ['wjets1' ] =       1.0           ## generator efficiency on gen level
 sizes ['wjets1' ] = 'blocks'
 source['wjets1' ] = 'wjets1_0,'  +'wjets1_1,'  +'wjets1_2,'  +'wjets1_3,'  +'wjets1_4,'
 source['wjets1' ]+= 'wjets1_5,'  +'wjets1_6,'  +'wjets1_7,'  +'wjets1_8,'  +'wjets1_9,'
@@ -109,18 +140,26 @@ source['wjets1' ]+= 'wjets1_115,' +'wjets1_116,' +'wjets1_117,' +'wjets1_118'
 
 ## /WJets-madgraph/Fall08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.wjets1_pat import *
-
+evts  ['wjetsx1'] =  10079826           ## number of produced events
+xsec  ['wjetsx1'] =     35000           ## NLO in pb
+eff   ['wjetsx1'] =       1.0           ## generator efficiency on gen level
 sizes ['wjetsx1'] ='blocks'
 source['wjetsx1'] ='wjetsx1_0,' +'wjetsx1_1,' +'wjetsx1_2,' +'wjetsx1_3,' +'wjetsx1_4,'
 source['wjetsx1']+='wjetsx1_5'
 
 ## /Zjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.zjets0_pat import *
+evts  ['zjetsx0'] =   9964055           ## number of produced events
+xsec  ['zjetsx0'] =      3700           ## NLO in pb
+eff   ['zjetsx0'] =       1.0           ## generator efficiency on gen level
 sizes ['zjetsx0'] = 'blocks'
 source['zjetsx0'] = 'zjetsx0_0,' +'zjetsx0_1,' +'zjetsx0_2,' +'zjetsx0_3,' +'zjetsx0_4'
 
 ## /ZJets-madgraph/Fall08_IDEAL_V9_reco-v2/GEN-SIM-RECO
 from TopAnalysis.Configuration.zjets1_reco import *
+evts  ['zjets1' ] =   1163479           ## number of produced events
+xsec  ['zjets1' ] =      3700           ## NLO in pb
+eff   ['zjets1' ] =       1.0           ## generator efficiency on gen level
 sizes ['zjets1' ] = 'blocks'
 source['zjets1' ] = 'zjets1_0,'  +'zjets1_1,'  +'zjets1_2,'  +'zjets1_3,'  +'zjets1_4,'
 source['zjets1' ]+= 'zjets1_5,'  +'zjets1_6,'  +'zjets1_7,'  +'zjets1_8,'  +'zjets1_9'
@@ -132,31 +171,49 @@ source['zjets1' ]+= 'zjets1_30,' +'zjets1_31'
 
 ## /ZJets-madgraph/Fall08_IDEAL_V9_reco-v2/GEN-SIM-RECO
 from TopAnalysis.Configuration.zjets1_pat import *
+evts  ['zjetsx1'] =   1163479           ## number of produced events
+xsec  ['zjetsx1'] =      3700           ## NLO in pb
+eff   ['zjetsx1'] =       1.0           ## generator efficiency on gen level
 sizes ['zjetsx1'] = 'blocks'
 source['zjetsx1'] = 'zjetsx1_0,'+'zjetsx1_1'
 
 ## /WW/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.wwjets_pat import *
+evts  ['wwx0'   ] =    200000           ## number of produced events
+xsec  ['wwx0'   ] =      44.8           ## NLO in pb
+eff   ['wwx0'   ] =       1.0           ## generator efficiency on gen level
 sizes ['wwx0'   ] = 'blocks'
 source['wwx0'   ] = 'wwx0_0'
 
 ## /WZ/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.wzjets_pat import *
+evts  ['wzx0'   ] =    200000           ## number of produced events
+xsec  ['wzx0'   ] =      17.4           ## NLO in pb
+eff   ['wzx0'   ] =       1.0           ## generator efficiency on gen level
 sizes ['wzx0'   ] = 'blocks'
 source['wzx0'   ] = 'wzx0_0'
 
 ## /ZZ/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.zzjets_pat import *
+evts  ['zzx0'   ] =    200000           ## number of produced events
+xsec  ['zzx0'   ] =       7.1           ## NLO in pb
+eff   ['zzx0'   ] =       1.0           ## generator efficiency on gen level
 sizes ['zzx0'   ] = 'blocks'
 source['zzx0'   ] = 'zzx0_0'
 
 ## /Zprime_semi_m750_w7_10TeV_GEN_RAW_HLT_CMSSW225-v3/sperries-Zprime_semi_m750_w7_10TeV_RECO_CMSSW225-v3-7194a034bc413eedae0ebe7ee022de30/USER
 from TopAnalysis.Configuration.zprime0_pat import *
+evts  ['zprimex0'] =        1           ## number of produced events
+xsec  ['zprimex0'] =        1           ## NLO in pb
+eff   ['zprimex0'] =        1           ## generator efficiency on gen level
 sizes ['zprimex0'] = 'blocks'
 source['zprimex0'] = 'zprimex0_0,'+'zprimex0_1,'+'zprimex0_2,'+'zprimex0_3,'+'zprimex0_4'
 
 ## semi-leptonic preselected samples
 from TopAnalysis.Configuration.qcdsxs0   import *
+evts  ['qcdsxs0'  ] =   6238383         ## number of produced events
+xsec  ['qcdsxs0'  ] = 509100000         ## LO in pb
+eff   ['qcdsxs0'  ] =  0.000239         ## generator efficiency on gen level
 sizes ['qcdsxs0'  ] = 'blocks'
 source['qcdsxs0'  ] = 'qcdsxs0_0,'   +'qcdsxs0_1,'   +'qcdsxs0_2,'   +'qcdsxs0_3,'   +'qcdsxs0_4,'
 source['qcdsxs0'  ]+= 'qcdsxs0_5,'   +'qcdsxs0_6,'   +'qcdsxs0_7,'   +'qcdsxs0_8,'   +'qcdsxs0_9,'
@@ -165,6 +222,9 @@ source['qcdsxs0'  ]+= 'qcdsxs0_15,'  +'qcdsxs0_16,'  +'qcdsxs0_17,'  +'qcdsxs0_1
 
 
 from TopAnalysis.Configuration.wjetssxs0 import *
+evts  ['wjetssxs0'] = 101467739         ## number of produced events
+xsec  ['wjetssxs0'] =     35000         ## NLO in pb
+eff   ['wjetssxs0'] =       1.0         ## generator efficiency on gen level
 sizes ['wjetssxs0'] = 'blocks'
 source['wjetssxs0'] = 'wjetssxs0_0,' +'wjetssxs0_1,' +'wjetssxs0_2,' +'wjetssxs0_3,' +'wjetssxs0_4,'
 source['wjetssxs0']+= 'wjetssxs0_5,' +'wjetssxs0_6,' +'wjetssxs0_7,' +'wjetssxs0_8,' +'wjetssxs0_9,'
@@ -172,6 +232,9 @@ source['wjetssxs0']+= 'wjetssxs0_10,'+'wjetssxs0_11,'+'wjetssxs0_12,'+'wjetssxs0
 source['wjetssxs0']+= 'wjetssxs0_15,'+'wjetssxs0_16,'+'wjetssxs0_17,'+'wjetssxs0_18,'+'wjetssxs0_19'
 
 from TopAnalysis.Configuration.zjetssxs0 import *
+evts  ['zjetssxs0'] =   9964055         ## number of produced events
+xsec  ['zjetssxs0'] =      3700         ## NLO in pb
+eff   ['zjetssxs0'] =       1.0         ## generator efficiency on gen level
 sizes ['zjetssxs0'] = 'blocks'
 source['zjetssxs0'] = 'zjetssxs0_0,' +'zjetssxs0_1,' +'zjetssxs0_2,' +'zjetssxs0_3,' +'zjetssxs0_4,'
 source['zjetssxs0']+= 'zjetssxs0_5,' +'zjetssxs0_6,' +'zjetssxs0_7,' +'zjetssxs0_8,' +'zjetssxs0_9,'
@@ -179,6 +242,9 @@ source['zjetssxs0']+= 'zjetssxs0_10,'+'zjetssxs0_11,'+'zjetssxs0_12,'+'zjetssxs0
 source['zjetssxs0']+= 'zjetssxs0_15,'+'zjetssxs0_16,'+'zjetssxs0_17,'+'zjetssxs0_18,'+'zjetssxs0_19'
 
 from TopAnalysis.Configuration.ttbarsxs0 import *
+evts  ['ttbarsxs0'] =   1028322         ## number of produced events
+xsec  ['ttbarsxs0'] =       414         ## NLO in pb
+eff   ['ttbarsxs0'] =       1.0         ## generator efficiency on gen level
 sizes ['ttbarsxs0'] = 'blocks'
 source['ttbarsxs0'] = 'ttbarsxs0_0,' +'ttbarsxs0_1,' +'ttbarsxs0_2,' +'ttbarsxs0_3,' +'ttbarsxs0_4,'
 source['ttbarsxs0']+= 'ttbarsxs0_5,' +'ttbarsxs0_6,' +'ttbarsxs0_7,' +'ttbarsxs0_8,' +'ttbarsxs0_9,'

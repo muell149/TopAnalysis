@@ -16,7 +16,6 @@ process.MessageLogger.cout = cms.untracked.PSet(
    topFilter = cms.untracked.PSet( limit = cms.untracked.int32(10) )
   )
 )
-
 process.MessageLogger.cerr.threshold = 'INFO'
 #process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
@@ -26,7 +25,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 
 ## define input
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/mc/Winter09/ZmumuJet_Pt50to80/GEN-SIM-DIGI-RECO/IDEAL_V11_FastSim_v1/0000/32DA26F8-F6EE-DD11-A9E1-003048C1872C.root')
+    fileNames = cms.untracked.vstring('')
 )
 
 ## define maximal number of events to loop over
@@ -39,15 +38,11 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(False)
 )
 
-## configure geometry
+## configure geometry & conditions
 process.load("Configuration.StandardSequences.Geometry_cff")
-
-## configure conditions
+process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string('STARTUP_V7::All')
-
-## Magnetic field now needs to be in the high-level py
-process.load("Configuration.StandardSequences.MagneticField_cff")
 
 #-------------------------------------------------
 # tqaf configuration; if you want just to produce 
@@ -75,11 +70,6 @@ process.pat = cms.Path(process.patTuple_reduced)
 
 ## add event weight information
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.eventWeight.nevts = 200000
-process.eventWeight.xsec  = 7.1
-process.eventWeight.lumi  = 1000
-process.eventWeight.eff   = 1.0
-
 process.wght = cms.Path(process.eventWeight)   
 
 ## test basic event selection
