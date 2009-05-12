@@ -17,9 +17,6 @@ selectedLayer1Jets.src = "scaledJetEnergy:allLayer1Jets"
 selectedLayer1Jets.cut = 'pt > 30. & abs(eta) < 2.4 & nConstituents > 0 & emEnergyFraction < 0.9'
 countLayer1Jets.minNumber = 4
 
-## use recalculated MET after scaling of jet energy
-# FIXME !!!
-
 ## filter events with overlapping jets
 from TopAnalysis.TopFilter.filters.JetOverlapEventFilter_cfi import *
 filterJetOverlapEvent.src    = "selectedLayer1JetsLowPt"
@@ -63,6 +60,7 @@ patDefaultSequence_withScaledJets = cms.Sequence(beforeLayer1Objects *   # part 
 prepareSemiLepJetCombMVAStudy = cms.Sequence(makeGenEvt *
                                              ttSemiLeptonicFilter *
                                              patDefaultSequence_withScaledJets *
+                                             selectedLayer1JetsLowPt *
                                              filterMuonJetDistance *
                                              filterElecJetDistance *
                                              filterJetOverlapEvent *
