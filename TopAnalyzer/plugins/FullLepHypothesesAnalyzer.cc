@@ -2,7 +2,7 @@
 
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 
-#include "TopQuarkAnalysis/TopTools/interface/TtFullLepEvtPartons.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
 
 
 int Nava;
