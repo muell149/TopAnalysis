@@ -27,11 +27,11 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    ## test-file at lxplus
+    ## test-file on cern afs
     'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
-    ## one file from the madgraph ttbar sample at desy
+    ## one file from the madgraph ttbar sample
     #'/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V9_v2/0000/027B51E9-8EED-DD11-9045-0015C5E9C0E1.root'
-    ## one file from the tauola ttbar sample at desy
+    ## one file from the tauola ttbar sample
     #'/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v2/0009/0054812D-26F7-DD11-99D7-001F2908F0E4.root'
     )
 )
@@ -60,24 +60,23 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # analysis configuration
 #-------------------------------------------------
 
-## tqafLayer1, ttGenEvent, ttGenEventFilter, jetPartonMatch, etc.
+## pat, ttGenEvent, ttGenEventFilter, jetPartonMatch, etc.
 process.load("TopAnalysis.TopAnalyzer.SemiLepJetCombMVAStudy_muons_cff")
 
 ## switch jet collection to sisCone5CaloJets
 from PhysicsTools.PatAlgos.tools.jetTools import *
 switchJetCollection(process, 
-        'sisCone5CaloJets',    # Jet collection; must be already in the event when patLayer0 sequence is executed
-        layers=[0,1],          # If you're not runnint patLayer1, set 'layers=[0]' 
-        runCleaner="CaloJet",  # =None if not to clean
-        doJTA=True,            # Run Jet-Track association & JetCharge
-        doBTagging=True,       # Run b-tagging
-        jetCorrLabel=('SC5','Calo'), # example jet correction name; set to None for no JEC
-        doType1MET=True,       # recompute Type1 MET using these jets
+        cms.InputTag('sisCone5CaloJets'), # Jet collection; must be already in the event when patDefaultSequence is executed
+        doJTA=True,                       # Run Jet-Track association & JetCharge
+        doBTagging=True,                  # Run b-tagging
+        jetCorrLabel=('SC5','Calo'),      # Example jet correction name; set to None for no JEC
+        doType1MET=True,                  # Recompute Type1 MET using these jets
         genJetCollection=cms.InputTag("sisCone5GenJets"))
 
 ## configure mva trainer
 process.load("TopQuarkAnalysis.TopJetCombination.TtSemiLepJetCombMVATrainTreeSaver_cff")
 process.trainTtSemiLepJetCombMVA.jets = "selectedLayer1JetsLowPt"
+process.trainTtSemiLepJetCombMVA.mets = "scaledJetEnergy:layer1METs"
 process.trainTtSemiLepJetCombMVA.maxNJets = process.ttSemiLepJetPartonMatch.maxNJets
 
 ## make trainer looper known to the process
@@ -88,6 +87,8 @@ process.looper = looper
 ## comment this when running on samples produced with 22X
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
 run22XonSummer08AODSIM(process)
+process.patDefaultSequence.remove(process.patPFCandidateIsoDepositSelection)
+process.patDefaultSequence.remove(process.patPFTauIsolation)
 
 #-------------------------------------------------
 # process path
