@@ -1,20 +1,19 @@
 #!/bin/sh
 
-#LIST="default
-#      tauola
-#      looseSelection
-#      tightSelection
-#      4jets
-#      6jets
-#      minSumDist
-#      totalMinDist
-#      totalMinDist_rejectOutliers
-#      ptOrderedMinDist
-#      ptOrderedMinDist_rejectOutliers
-#      electrons"
-
-LIST="default
-      electrons"
+LIST="4jets                          
+      6jets                          
+      default                        
+      electrons                      
+      jetOverlap                     
+      looseSelection                 
+      minSumDist                     
+      minSumDist_rejectOutliers       
+      ptOrderedMinDist                
+      ptOrderedMinDist_rejectOutliers 
+      tauola                          
+      tightSelection                  
+      totalMinDist                    
+      totalMinDist_rejectOutliers"    
 
 for NAME in $LIST
   do
