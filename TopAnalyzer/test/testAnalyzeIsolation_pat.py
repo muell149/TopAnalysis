@@ -54,10 +54,19 @@ process.loose.trkIso = False
 process.loose.calIso = False
 process.loose.jetDist = False
 semiLepJetsPt.min = 20.0, 20.0, 20.0, 20.0
-semiLepMuonPt.min = 20.0,
+semiLepMuonPt.min = [20.0]
+## std sequence to produce the ttGenEvt
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+## configure ttGenEventFilters
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff")
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = False
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = False
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMuonIso.root')
 )
 
-process.p1 = cms.Path(process.findQCDBkgMVA * process.loose * process.before * process.tight * process.after)
+process.p1 = cms.Path(process.makeGenEvt *
+                      process.ttSemiLeptonicFilter * 
+                      process.findQCDBkgMVA * process.loose * process.before * process.tight * process.after)
