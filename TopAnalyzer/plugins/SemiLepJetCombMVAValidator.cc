@@ -4,6 +4,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
+#include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 
 SemiLepJetCombMVAValidator::SemiLepJetCombMVAValidator(const edm::ParameterSet& cfg):

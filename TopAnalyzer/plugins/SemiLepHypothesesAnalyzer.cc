@@ -2,7 +2,7 @@
 
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 
-#include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 
 SemiLepHypothesesAnalyzer::SemiLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   semiLepEvt_      (cfg.getParameter<edm::InputTag>("semiLepEvent"    )),
