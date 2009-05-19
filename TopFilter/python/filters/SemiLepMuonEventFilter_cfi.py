@@ -11,9 +11,10 @@ filterSemiLepMuonEvent = cms.EDFilter("SemiLepMuonEventFilter",
     lepPt  = cms.bool(True),
     jetEta = cms.bool(True),
     jetPt  = cms.bool(True),                                      
-    trkIso = cms.bool(True),
-    calIso = cms.bool(True),
-    jetDist= cms.bool(True),
+    trkIso = cms.bool(False),
+    calIso = cms.bool(False),
+    jetDist= cms.bool(False),
+    relComb = cms.bool(True),
 
     ## predefine selection structure
     lepEtaFilter = cms.PSet(
@@ -48,6 +49,13 @@ filterSemiLepMuonEvent = cms.EDFilter("SemiLepMuonEventFilter",
         max  = cms.vdouble(  )
     ),
     calIsoFilter = cms.PSet(
+        type = cms.uint32 ( 0),
+        mode = cms.uint32 ( 0),
+        name = cms.string (''),
+        min  = cms.vdouble(  ),
+        max  = cms.vdouble(  )
+    ),
+    combIsoFilter = cms.PSet(
         type = cms.uint32 ( 0),
         mode = cms.uint32 ( 0),
         name = cms.string (''),

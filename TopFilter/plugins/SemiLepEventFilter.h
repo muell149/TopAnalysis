@@ -14,30 +14,30 @@
 #include "TopAnalysis/TopFilter/interface/IsolationFilter.h"
 
 
-template <typename Lep> 
+template <typename Lep>
 class SemiLepEventFilter : public edm::EDFilter {
 
  public:
-  
+
   typedef DistanceFilter<Lep> LepDistanceFilter;
   typedef IsolationFilter<Lep> LepIsolationFilter;
 
   explicit SemiLepEventFilter(const edm::ParameterSet&);
   ~SemiLepEventFilter(){};
-  
+
  private:
-  
+
   virtual void beginJob(const edm::EventSetup&) ;
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void endJob();
-  
+
  private:
 
   edm::InputTag wgt_;
   std::vector<edm::InputTag> jets_;
   std::vector<edm::InputTag> leps_;
 
-  /// switches 
+  /// switches
   bool doJetEta_;
   bool doJetPt_;
   bool doLepEta_;
@@ -45,29 +45,32 @@ class SemiLepEventFilter : public edm::EDFilter {
   bool doTrkIso_;
   bool doCalIso_;
   bool doDist_;
+  bool doComb_;
 
   /// filters
   PtFilter  jetPt_;
   PtFilter  lepPt_;
-  EtaFilter jetEta_; 
-  EtaFilter lepEta_; 
+  EtaFilter jetEta_;
+  EtaFilter lepEta_;
   LepDistanceFilter jetDist_;
   LepIsolationFilter trkIso_;
   LepIsolationFilter calIso_;
+  LepIsolationFilter combIso_;
 };
 
-template <typename Lep> 
+template <typename Lep>
 SemiLepEventFilter<Lep>::SemiLepEventFilter(const edm::ParameterSet& cfg):
   wgt_     ( cfg.template getParameter<edm::InputTag>( "weight" ) ),
   jets_    ( cfg.template getParameter<std::vector<edm::InputTag> >("jets" ) ),
   leps_    ( cfg.template getParameter<std::vector<edm::InputTag> >("leptons" ) ),
-  jetPt_   ( cfg.template getParameter<edm::ParameterSet>("jetPtFilter"  ) ), 
+  jetPt_   ( cfg.template getParameter<edm::ParameterSet>("jetPtFilter"  ) ),
   lepPt_   ( cfg.template getParameter<edm::ParameterSet>("lepPtFilter"  ) ),
-  jetEta_  ( cfg.template getParameter<edm::ParameterSet>("jetEtaFilter" ) ), 
-  lepEta_  ( cfg.template getParameter<edm::ParameterSet>("lepEtaFilter" ) ), 
+  jetEta_  ( cfg.template getParameter<edm::ParameterSet>("jetEtaFilter" ) ),
+  lepEta_  ( cfg.template getParameter<edm::ParameterSet>("lepEtaFilter" ) ),
   jetDist_ ( cfg.template getParameter<edm::ParameterSet>("jetDistFilter") ),
-  trkIso_  ( cfg.template getParameter<edm::ParameterSet>("trkIsoFilter" ) ), 
-  calIso_  ( cfg.template getParameter<edm::ParameterSet>("calIsoFilter" ) ) 
+  trkIso_  ( cfg.template getParameter<edm::ParameterSet>("trkIsoFilter" ) ),
+  calIso_  ( cfg.template getParameter<edm::ParameterSet>("calIsoFilter" ) ),
+  combIso_  ( cfg.template getParameter<edm::ParameterSet>("combIsoFilter" ) )
 {
   doJetEta_= cfg.template getParameter<bool>("jetEta" );
   doJetPt_ = cfg.template getParameter<bool>("jetPt"  );
@@ -76,9 +79,10 @@ SemiLepEventFilter<Lep>::SemiLepEventFilter(const edm::ParameterSet& cfg):
   doTrkIso_= cfg.template getParameter<bool>("trkIso" );
   doCalIso_= cfg.template getParameter<bool>("calIso" );
   doDist_  = cfg.template getParameter<bool>("jetDist");
+  doComb_  = cfg.template getParameter<bool>("relComb");
 }
 
-template <typename Lep> 
+template <typename Lep>
 bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& setup)
 {
   // get event weight
@@ -88,7 +92,7 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
 
   // receive input tags for lepton kinematic
   std::vector<edm::View<reco::Candidate> > kinLeps;
-  for(std::vector<edm::InputTag>::const_iterator tag = leps_.begin(); 
+  for(std::vector<edm::InputTag>::const_iterator tag = leps_.begin();
       tag!=leps_.end(); ++tag){
     edm::Handle<edm::View<reco::Candidate> > src;
     evt.getByLabel(*tag, src);
@@ -97,7 +101,7 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
 
   // receive input tags for lepton isolation
   std::vector<Lep> isoLeps;
-  for(std::vector<edm::InputTag>::const_iterator tag = leps_.begin(); 
+  for(std::vector<edm::InputTag>::const_iterator tag = leps_.begin();
       tag!=leps_.end(); ++tag){
     edm::Handle<Lep> src;
     evt.getByLabel(*tag, src);
@@ -106,7 +110,7 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
 
   // receive input tags for jet kinematic
   std::vector<edm::View<reco::Candidate> > kinJets;
-  for(std::vector<edm::InputTag>::const_iterator tag = jets_.begin(); 
+  for(std::vector<edm::InputTag>::const_iterator tag = jets_.begin();
       tag!=jets_.end(); ++tag){
     edm::Handle<edm::View<reco::Candidate> > src;
     evt.getByLabel(*tag, src);
@@ -119,18 +123,19 @@ bool SemiLepEventFilter<Lep>::filter(edm::Event& evt, const edm::EventSetup& set
   if(passed && doLepPt_ ) passed=lepPt_  (evt, kinLeps, weight);
   if(passed && doTrkIso_) passed=trkIso_ (evt, isoLeps, weight);
   if(passed && doCalIso_) passed=calIso_ (evt, isoLeps, weight);
+  if(passed && doComb_ ) passed=combIso_  (evt, isoLeps, weight);
   if(passed && doDist_  ) passed=jetDist_(evt, isoLeps, weight);
   if(passed && doJetEta_) passed=jetEta_ (evt, kinJets, weight);
   if(passed && doJetPt_ ) passed=jetPt_  (evt, kinJets, weight);
   return passed;
 }
 
-template <typename Lep> 
+template <typename Lep>
 void SemiLepEventFilter<Lep>::beginJob(const edm::EventSetup&)
 {
 }
 
-template <typename Lep> 
+template <typename Lep>
 void SemiLepEventFilter<Lep>::endJob()
 {
   using std::cout;
@@ -141,13 +146,14 @@ void SemiLepEventFilter<Lep>::endJob()
   cout << " applyLepPt   [" << doLepPt_  << "]" << endl;
   cout << " applyTrkIso  [" << doTrkIso_ << "]" << endl;
   cout << " applyCalIso  [" << doCalIso_ << "]" << endl;
+  cout << " applyCombIso  [" << doComb_ << "]" << endl;
   cout << " applyDist    [" << doDist_   << "]" << endl;
   cout << " applyJetEta  [" << doJetEta_ << "]" << endl;
   cout << " applyJetPt   [" << doJetPt_  << "]" << endl;
   cout << "----------------------------------"  << endl;
 
   if( !doLepEta_ && !doLepPt_ && !doTrkIso_ && !doCalIso_ && !doDist_
-      && !doJetEta_ && !doJetPt_ )
+      && !doJetEta_ && !doJetPt_ && !doComb_ )
     cout << "no cuts were applied..." << endl;
   else {
     if(doLepEta_ ) lepEta_ .summarize();
@@ -157,6 +163,7 @@ void SemiLepEventFilter<Lep>::endJob()
     if(doDist_   ) jetDist_.summarize();
     if(doJetEta_ ) jetEta_ .summarize();
     if(doJetPt_  ) jetPt_  .summarize();
+    if(doComb_) combIso_.summarize();
   }
 }
 

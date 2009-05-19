@@ -43,6 +43,13 @@ semiLepMuonIsolationCal = cms.PSet(
     min  = cms.vdouble(  0.0),
     max  = cms.vdouble(  5.0)
 )
+semiLepMuonIsolationRelComb = cms.PSet(
+    type = cms.uint32 (  4  ),
+    mode = cms.uint32 (  0  ),    
+    name = cms.string('semiLepMuonIsolationRelComb'),
+    min  = cms.vdouble(  0.0),
+    max  = cms.vdouble(  0.1)
+)
 semiLepMuonJetDistance = cms.PSet(
     refs  = cms.VInputTag(cms.InputTag("selectedLayer1Jets")),
     thresh= cms.double(  20.),
