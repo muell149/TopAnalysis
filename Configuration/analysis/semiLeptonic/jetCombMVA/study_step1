@@ -18,6 +18,8 @@ sets["tauola"                         ] = True
 sets["tightSelection"                 ] = True
 sets["totalMinDist"                   ] = True
 sets["totalMinDist_rejectOutliers"    ] = True
+sets["hadronicTopOnly"                ] = True
+sets["lightQuarksOnly"                ] = True
 
 append = { }
 ########################################################################################################################
@@ -54,6 +56,10 @@ append["totalMinDist"                   ] =  "process.ttSemiLepJetPartonMatch.al
 append["totalMinDist"                   ] += "process.ttSemiLepJetPartonMatch.useMaxDist = False                     \n"
 ########################################################################################################################
 append["totalMinDist_rejectOutliers"    ] =  "process.ttSemiLepJetPartonMatch.algorithm = 0                          \n"
+#######################################################################################################################
+append["hadronicTopOnly"                ] =  "process.ttSemiLepJetPartonMatch.partonsToIgnore = ['LepB']             \n"
+########################################################################################################################
+append["lightQuarksOnly"                ] =  "process.ttSemiLepJetPartonMatch.partonsToIgnore = ['HadB', 'LepB']     \n"
 ########################################################################################################################
 
 testDir = "TopAnalysis/TopAnalyzer/test/"
@@ -113,6 +119,9 @@ def main():
     print "Submitting jobs to the batch system via crab..."
     for set in k:
         if(sets[set] == True):
+            if(os.path.exists("crab_JetCombMVATrainTree_" + set)):
+                print "Found existing working directory. Cleaning up..."
+                os.system("crab -clean -c crab_JetCombMVATrainTree_" + set)
             os.system("crab -create -cfg " +confDir + "trainTreeSaver_" + set + ".cfg -submit 1-40")
 
 if __name__ == '__main__':
