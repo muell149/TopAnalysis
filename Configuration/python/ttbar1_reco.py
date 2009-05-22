@@ -3,7 +3,7 @@ from TopAnalysis.Configuration.defines import source
 
 ######################################################################
 ##
-## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
+## /TauolaTTbar/Summer08_IDEAL_V9_v2/GEN-SIM-RECO
 ##
 ## Events      :    106540
 ## xsec(pb)  LO:       242
