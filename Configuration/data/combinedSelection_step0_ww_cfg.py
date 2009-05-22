@@ -26,7 +26,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 
 ## define input
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/mc/Winter09/ZmumuJet_Pt50to80/GEN-SIM-DIGI-RECO/IDEAL_V11_FastSim_v1/0000/32DA26F8-F6EE-DD11-A9E1-003048C1872C.root')
+    fileNames = cms.untracked.vstring('')
 )
 
 ## define maximal number of events to loop over
@@ -56,17 +56,17 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # production sequence
 #-------------------------------------------------
 
-## std sequence for pat tuples
-process.load("TopQuarkAnalysis.TopObjectProducers.patTuple_cff")
+## std sequence for pat
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced
 ## with 22X
-#from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
-#run22XonSummer08AODSIM(process)
+## from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
+## run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patTuple_reduced)
+process.pat = cms.Path(process.patDefaultSequence)
 
 
 #-------------------------------------------------
@@ -89,7 +89,7 @@ process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('combinedSelection_step0_ww.root')
+    fileName = cms.string('combinedSelection_step0_PATv2_ww.root')
 )
 
 #-------------------------------------------------
@@ -98,28 +98,28 @@ process.TFileService = cms.Service("TFileService",
 # content is added
 #-------------------------------------------------
 
-## define pat tuple event content
-from TopQuarkAnalysis.TopObjectProducers.patTuple_EventContent_cff import *
-makePatTupleEventContent(process)
-
-## change jet collection
+## add/change jet collection
 from PhysicsTools.PatAlgos.tools.jetTools import *
 
-switchJetCollection(process, 
-                    'sisCone5CaloJets',             # jet collection; must be already in the event when patLayer0 sequence is executed
-                    layers       = [0,1],           # if you're not running patLayer1, set 'layers=[0]' 
-                    runCleaner   = "CaloJet",       # =None if not to clean
-                    doJTA        = True,            # run jet-track association & JetCharge
-                    doBTagging   = True,            # run b-tagging
-                    jetCorrLabel = ('SC5', 'Calo'), # example jet correction name; set to None for no JEC
-                    doType1MET   = True             # recompute Type1 MET using these jets
-                    )
+addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetIcone5'),
+                 'JPTc',
+                 doJTA        = True,
+                 doBTagging   = True,
+                 jetCorrLabel = ('IC5','JPT'),
+                 doType1MET   = True,
+                 doL1Counters = True,
+                 genJetCollection = cms.InputTag("iterativeCone5GenJets")
+                 )
 
-## add TopAnalysis specifics
-process.topAnalysisEventContent = cms.PSet(
-    outputCommands = cms.untracked.vstring('keep *_eventWeight_*_*')  ## event weight
-    )
-process.patTupleEventContent.outputCommands.extend(process.topAnalysisEventContent.outputCommands)
+addJetCollection(process,cms.InputTag('sisCone5CaloJets'),
+                 'SC5',
+                 doJTA        = True,
+                 doBTagging   = True,
+                 jetCorrLabel = ('SC5','Calo'),
+                 doType1MET   = True,
+                 doL1Counters = False,
+                 genJetCollection=cms.InputTag("sisCone5GenJets")
+                 )
 
 #-------------------------------------------------
 # process output; first the event selection is
@@ -141,9 +141,20 @@ process.EventSelection = cms.PSet(
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
-    process.patTupleEventContent,
+    outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_ww.root')
+    fileName = cms.untracked.string('patTuple_PATv2_ww.root')
 )
+# save PAT Layer 1 output
+from PhysicsTools.PatAlgos.patEventContent_cff import *
+process.out.outputCommands += patTriggerEventContent
+process.out.outputCommands += patExtraAodEventContent
+process.out.outputCommands += patEventContentTriggerMatch
+process.out.outputCommands += patEventContentNoLayer1Cleaning
+process.out.outputCommands += ["keep *_selectedLayer1Jets*_*_*",
+                               "keep *_layer1METs*_*_*"]
+process.out.outputCommands += ["keep *_eventWeight_*_*"]
+# drop stuff which is not needed
+process.out.outputCommands += ["drop *_towerMaker_*_*"]
 
 process.outpath = cms.EndPath(process.out)
