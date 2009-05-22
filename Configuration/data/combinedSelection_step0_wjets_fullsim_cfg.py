@@ -88,7 +88,7 @@ process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('combinedSelection_step0_PATv2_wjets.root')
+    fileName = cms.string('combinedSelection_step0_PATv2_wjets_fullsim.root')
 )
 
 #-------------------------------------------------
@@ -142,7 +142,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_PATv2_wjets.root')
+    fileName = cms.untracked.string('patTuple_PATv2_wjets_fullsim.root')
 )
 # save PAT Layer 1 output
 from PhysicsTools.PatAlgos.patEventContent_cff import *
