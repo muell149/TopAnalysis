@@ -31,18 +31,34 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   edm::InputTag FullLepEvt_;
   edm::InputTag hypoKey_;
   edm::InputTag wgt_;
-  unsigned int nJetsMax_;
+  bool useWrongCharge_;
   double maxSumDRGenMatch_;
   double minProbKinFit_;
   std::string hist_;
+  
+  int Nava;
+  int Nval;
 
   void bookKinHistos      (edm::Service<TFileService>&, ofstream&);
   void bookKinResHistos   (edm::Service<TFileService>&, ofstream&);
   void bookQualityHistos  (edm::Service<TFileService>&, ofstream&);
 
-  void fillKinHistos      (std::vector<TH1F*>&, const reco::Candidate&, const double&);
-  void fillKinResHistos   (std::vector<TH1F*>&, const reco::Candidate&, const reco::Candidate&, const double&);
-  void fillQualityHistos  (const TtFullLeptonicEvent&, const double&);
+  void fillKinHistos           (std::vector<TH1F*>&, 
+                                const reco::Candidate&, 
+				const double&);
+  void fillWrongChargeKinHistos(std::vector<TH1F*>&, 
+                                const reco::Candidate&, 
+                                const double&);  
+  void fillKinResHistos        (std::vector<TH1F*>&, 
+                                const reco::Candidate&, 
+				const reco::Candidate&, 
+				const double&);
+  void fillWrongChargeKinResHistos        (std::vector<TH1F*>&, 
+                                const reco::Candidate&, 
+				const reco::Candidate&, 
+				const double&);				
+  void fillQualityHistos       (const TtFullLeptonicEvent&, 
+                                const double&);
 
   std::vector<TH1F*> TopKin_;
   std::vector<TH1F*> WplusKin_;
@@ -69,7 +85,11 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   TH1F* goodHypo_;
   
   TH1F* genMatchSumDR_;
-  TH1F* genMatchSumPt_;  
+  TH1F* genMatchSumPt_;
+  
+  TH1F* kinSolWeight_;
+  TH1F* kinSolWeightWrong_;  
+  TH1F* wrongCharge_;    
 };
 
 #endif

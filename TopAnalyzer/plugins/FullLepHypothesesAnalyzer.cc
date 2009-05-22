@@ -4,15 +4,11 @@
 
 #include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
 
-
-int Nava;
-int Nval;
-
 FullLepHypothesesAnalyzer::FullLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent"    )),
   hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )),
   wgt_             (cfg.getParameter<edm::InputTag>("weight"          )),
-  nJetsMax_        (cfg.getParameter<unsigned int> ("nJetsMax"        )),
+  useWrongCharge_  (cfg.getParameter<bool>         ("alsoWrongCharge" )),
   maxSumDRGenMatch_(cfg.getParameter<double>       ("maxSumDRGenMatch")),
   minProbKinFit_   (cfg.getParameter<double>       ("minProbKinFit"   )),
   hist_            (cfg.getParameter<std::string>  ("hist"            ))
@@ -40,23 +36,23 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // check if hypothesis is valid in this event
   // and if it satisfies some quality criteria
   // -----------------------
-  
+         
   if( !FullLepEvt->isHypoAvailable(hypoKey) ){
     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not available for this event";
     return;
   }
-  Nava++;
+  else Nava++;
   
   if( !FullLepEvt->isHypoValid(hypoKey) )  {
     goodHypo_->Fill(0., weight); // not a good hypothesis
   }
   else goodHypo_->Fill(1., weight); // good hypothesis
 
-  if( !FullLepEvt->isHypoValid(hypoKey) ){
-    edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
-    return;  // return if any of the hypotheses is not valid
-  }
-  Nval++;  
+   if( !FullLepEvt->isHypoValid(hypoKey) ){
+     edm::LogWarning ( "NonValidHyp" ) << "Hypothesis not valid for this event";
+     return;  // return if any of the hypotheses is not valid
+   }
+  else Nval++;  
 
   // -----------------------
   // fill histos related to quality of the TtFullLeptonicEvent
@@ -81,19 +77,32 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   const reco::Candidate* Lep    = FullLepEvt->lepton(hypoKey);
   const reco::Candidate* NuBar  = FullLepEvt->neutrinoBar(hypoKey);  
   
+  if(!FullLepEvt->isWrongCharge()){
+    fillKinHistos(TopKin_,    *Top,    weight);
+    fillKinHistos(WplusKin_,  *Wplus,  weight);
+    fillKinHistos(BKin_,      *B,      weight);
+    fillKinHistos(LepBarKin_, *LepBar, weight);
+    fillKinHistos(NuKin_,     *Nu,     weight);
 
-  fillKinHistos(TopKin_,    *Top,    weight);
-  fillKinHistos(WplusKin_,  *Wplus,  weight);
-  fillKinHistos(BKin_,      *B,      weight);
-  fillKinHistos(LepBarKin_, *LepBar, weight);
-  fillKinHistos(NuKin_,     *Nu,     weight);
-  
-  fillKinHistos(TopBarKin_, *TopBar, weight);
-  fillKinHistos(WminusKin_, *Wminus, weight);
-  fillKinHistos(BBarKin_,   *BBar,   weight);
-  fillKinHistos(LepKin_,    *Lep,    weight);
-  fillKinHistos(NuBarKin_,  *NuBar,  weight);
-  
+    fillKinHistos(TopBarKin_, *TopBar, weight);
+    fillKinHistos(WminusKin_, *Wminus, weight);
+    fillKinHistos(BBarKin_,   *BBar,   weight);
+    fillKinHistos(LepKin_,    *Lep,    weight);
+    fillKinHistos(NuBarKin_,  *NuBar,  weight);
+  }
+  else{
+    fillWrongChargeKinHistos(TopKin_,    *Top,    weight);
+    fillWrongChargeKinHistos(WplusKin_,  *Wplus,  weight);
+    fillWrongChargeKinHistos(BKin_,      *B,      weight);
+    fillWrongChargeKinHistos(LepBarKin_, *LepBar, weight);
+    fillWrongChargeKinHistos(NuKin_,     *Nu,     weight);
+
+    fillWrongChargeKinHistos(TopBarKin_, *TopBar, weight);
+    fillWrongChargeKinHistos(WminusKin_, *Wminus, weight);
+    fillWrongChargeKinHistos(BBarKin_,   *BBar,   weight);
+    fillWrongChargeKinHistos(LepKin_,    *Lep,    weight);
+    fillWrongChargeKinHistos(NuBarKin_,  *NuBar,  weight);  
+  }
   // -----------------------
   // fill resolution histos for kinematic variables
   // with respect to the generator particles
@@ -111,17 +120,32 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
     const reco::Candidate* genLep    = FullLepEvt->genLepton();
     const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
 
-    fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
-    fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
-    fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
-    fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
-    fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+    if(!FullLepEvt->isWrongCharge()){
+      fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+      fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+      fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
+      fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+      fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
 
-    fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
-    fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
-    fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
-    fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
-    fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
+      fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+      fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+      fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+      fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+      fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
+    }
+    else{
+      fillWrongChargeKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+      fillWrongChargeKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+      fillWrongChargeKinResHistos(BKinRes_,      *B,     *genB,      weight);
+      fillWrongChargeKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+      fillWrongChargeKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+
+      fillWrongChargeKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+      fillWrongChargeKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+      fillWrongChargeKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+      fillWrongChargeKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+      fillWrongChargeKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight);     
+    }
   }      
 }
 
@@ -203,7 +227,60 @@ FullLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs, ofstrea
   NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPt"  ), "p_{t} (#bar{#nu}^{-}) [GeV]", 50,  0. , 500. ) );
   NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEta" ), "#eta (#bar{#nu}^{-})"       , 34, -3.4,   3.4) );
   NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhi" ), "#phi (#bar{#nu}^{-})"       , 34, -3.4,   3.4) );
-  NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMass"), "M (#bar{#nu}^{-}) [GeV]"    , 30,  0. , 600. ) );      
+  NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMass"), "M (#bar{#nu}^{-}) [GeV]"    , 30,  0. , 600. ) );  
+  
+  // push back the same histograms for wrong charge event solutions if demanded
+  if(useWrongCharge_){
+    TopKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtWrong"  ), "p_{t} (t) [GeV]", 50,  0. , 500. ) );
+    TopKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaWrong" ), "#eta (t)"       , 34, -3.4,   3.4) );
+    TopKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiWrong" ), "#phi (t)"       , 34, -3.4,   3.4) );
+    TopKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassWrong"), "M (top) [GeV]"    , 30,  0. , 600. ) );
+
+    WplusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtWrong"  ), "p_{t} (W^{+}) [GeV]", 50,  0. , 500. ) );
+    WplusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaWrong" ), "#eta (W^{+})"       , 34, -3.4,   3.4) );
+    WplusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiWrong" ), "#phi (W^{+})"       , 34, -3.4,   3.4) );
+    WplusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassWrong"), "M (W^{+}) [GeV]"    , 30,  0. , 600. ) );
+
+    BKin_.push_back( fs->make<TH1F>(ns.name(hist, "BPtWrong"  ), "p_{t} (b) [GeV]", 50,  0. , 500. ) );
+    BKin_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaWrong" ), "#eta (b)"       , 34, -3.4,   3.4) );
+    BKin_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiWrong" ), "#phi (b)"       , 34, -3.4,   3.4) );
+    BKin_.push_back( fs->make<TH1F>(ns.name(hist, "BMassWrong"), "M (b) [GeV]"    , 30,  0. , 600. ) );
+
+    LepBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtWrong"  ), "p_{t} (l^{+}) [GeV]", 50,  0. , 500. ) );
+    LepBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaWrong" ), "#eta (l^{+})"       , 34, -3.4,   3.4) );
+    LepBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiWrong" ), "#phi (l^{+})"       , 34, -3.4,   3.4) );
+    LepBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassWrong"), "M (l^{+}) [GeV]"    , 30,  0. , 600. ) ); 
+
+    NuKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtWrong"  ), "p_{t} (#nu^{-}) [GeV]", 50,  0. , 500. ) );
+    NuKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaWrong" ), "#eta (#nu^{-})"       , 34, -3.4,   3.4) );
+    NuKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiWrong" ), "#phi (#nu^{-})"       , 34, -3.4,   3.4) );
+    NuKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassWrong"), "M (#nu^{-}) [GeV]"    , 30,  0. , 600. ) );
+
+    TopBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtWrong"  ), "p_{t} (#bar{t}) [GeV]", 50,  0. , 500. ) );
+    TopBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaWrong" ), "#eta (#bar{t})"       , 34, -3.4,   3.4) );
+    TopBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiWrong" ), "#phi (#bar{t})"       , 34, -3.4,   3.4) );
+    TopBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassWrong"), "M (#bar{t}) [GeV]"    , 30,  0. , 600. ) );
+
+    WminusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtWrong"  ), "p_{t} (W^{-}) [GeV]", 50,  0. , 500. ) );
+    WminusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaWrong" ), "#eta (W^{-})"       , 34, -3.4,   3.4) );
+    WminusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiWrong" ), "#phi (W^{-})"       , 34, -3.4,   3.4) );
+    WminusKin_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassWrong"), "M (W^{-}) [GeV]"    , 30,  0. , 600. ) );
+
+    BBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtWrong"  ), "p_{t} (#bar{b}) [GeV]", 50,  0. , 500. ) );
+    BBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaWrong" ), "#eta (#bar{b})"       , 34, -3.4,   3.4) );
+    BBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiWrong" ), "#phi (#bar{b})"       , 34, -3.4,   3.4) );
+    BBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassWrong"), "M (#bar{b}) [GeV]"    , 30,  0. , 600. ) ); 
+
+    LepKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtWrong"  ), "p_{t} (l^{-}) [GeV]", 50,  0. , 500. ) );
+    LepKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaWrong" ), "#eta (l^{-})"       , 34, -3.4,   3.4) );
+    LepKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiWrong" ), "#phi (l^{-})"       , 34, -3.4,   3.4) );
+    LepKin_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassWrong"), "M (l^{-}) [GeV]"    , 30,  0. , 600. ) );
+
+    NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtWrong"  ), "p_{t} (#bar{#nu}^{-}) [GeV]", 50,  0. , 500. ) );
+    NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaWrong" ), "#eta (#bar{#nu}^{-})"       , 34, -3.4,   3.4) );
+    NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiWrong" ), "#phi (#bar{#nu}^{-})"       , 34, -3.4,   3.4) );
+    NuBarKin_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassWrong"), "M (#bar{#nu}^{-}) [GeV]"    , 30,  0. , 600. ) );      
+  }    
 }
 
 void
@@ -260,7 +337,60 @@ FullLepHypothesesAnalyzer::bookKinResHistos(edm::Service<TFileService>& fs, ofst
   NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    20, -1.2, 1.2 ) );
   NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 20, -1.2, 1.2 ) );
   NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 20, -1.2, 1.2 ) );
-  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          20, -1.2, 1.2 ) );   
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          20, -1.2, 1.2 ) );  
+  
+  // push back the same histograms for wrong charge event solutions if demanded
+  if(useWrongCharge_){
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (t)",    20, -1.2, 1.2 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (t)", 20, -1.2, 1.2 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (t)", 20, -1.2, 1.2 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (t)",          20, -1.2, 1.2 ) );
+
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{+})",    20, -1.2, 1.2 ) );
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{+})", 20, -1.2, 1.2 ) );
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{+})", 20, -1.2, 1.2 ) );
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (W^{+})",          20, -1.2, 1.2 ) );  
+
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (b)",    20, -1.2, 1.2 ) );
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (b)", 20, -1.2, 1.2 ) );
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (b)", 20, -1.2, 1.2 ) );
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (b)",          20, -1.2, 1.2 ) );  
+
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l^{+})",    20, -1.2, 1.2 ) );
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l^{+})", 20, -1.2, 1.2 ) );
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l^{+})", 20, -1.2, 1.2 ) );
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (l^{+})",          20, -1.2, 1.2 ) ); 
+
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #nu",    20, -1.2, 1.2 ) );
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #nu", 20, -1.2, 1.2 ) );
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #nu", 20, -1.2, 1.2 ) );
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassResWrong"), "M_{rec}-M_{gen}/M_{gen} #nu",          20, -1.2, 1.2 ) ); 
+
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #bar{t}",    20, -1.2, 1.2 ) );
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #bar{t}", 20, -1.2, 1.2 ) );
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #bar{t}", 20, -1.2, 1.2 ) );
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} #bar{t}",          20, -1.2, 1.2 ) ); 
+
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{-})",    20, -1.2, 1.2 ) );
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{-})", 20, -1.2, 1.2 ) );
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{-})", 20, -1.2, 1.2 ) );
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (W^{-})",          20, -1.2, 1.2 ) ); 
+
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{b})",    20, -1.2, 1.2 ) );
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{b})", 20, -1.2, 1.2 ) );
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{b})", 20, -1.2, 1.2 ) );
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (#bar{b})",          20, -1.2, 1.2 ) ); 
+
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l)",    20, -1.2, 1.2 ) );
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l)", 20, -1.2, 1.2 ) );
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l)", 20, -1.2, 1.2 ) );
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (l)",          20, -1.2, 1.2 ) ); 
+
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    20, -1.2, 1.2 ) );
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 20, -1.2, 1.2 ) );
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 20, -1.2, 1.2 ) );
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          20, -1.2, 1.2 ) );    
+  }   
 }
 
 void
@@ -273,6 +403,10 @@ FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
 
   genMatchSumDR_ = fs->make<TH1F>(ns.name(hist, "genMatchSumDR"), "#Sigma #Delta R (genMatch)"          , 50, 0., 5.);
   genMatchSumPt_ = fs->make<TH1F>(ns.name(hist, "genMatchSumPt"), "#Sigma #Delta p_{T} (genMatch) [GeV]", 40, 0., 400.);
+  
+  kinSolWeight_      = fs->make<TH1F>(ns.name(hist, "kinSolWeight"), "Weight of kin solution", 50,  0. , 1. );
+  kinSolWeightWrong_ = fs->make<TH1F>(ns.name(hist, "kinSolWeightWrong"), "Weight of kin solution", 50,  0. , 1. );  
+  wrongCharge_       = fs->make<TH1F>(ns.name(hist, "wrongCharge"),  "is event wrong charge",   2, -0.5, 1.5);  
 }
 
 void
@@ -282,6 +416,15 @@ FullLepHypothesesAnalyzer::fillKinHistos(std::vector<TH1F*>& histos, const reco:
   histos[1]->Fill( candidate.eta()  , weight );
   histos[2]->Fill( candidate.phi()  , weight );
   histos[3]->Fill( candidate.mass() , weight );
+}
+
+void
+FullLepHypothesesAnalyzer::fillWrongChargeKinHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate, const double& weight)
+{
+  histos[4]->Fill( candidate.pt()   , weight );
+  histos[5]->Fill( candidate.eta()  , weight );
+  histos[6]->Fill( candidate.phi()  , weight );
+  histos[7]->Fill( candidate.mass() , weight );
 }
 
 void
@@ -295,6 +438,16 @@ FullLepHypothesesAnalyzer::fillKinResHistos(std::vector<TH1F*>& histos, const re
 }
 
 void
+FullLepHypothesesAnalyzer::fillWrongChargeKinResHistos(std::vector<TH1F*>& histos, const reco::Candidate& candidate,
+					    const reco::Candidate& genCandidate, const double& weight)
+{
+  histos[4]->Fill( (candidate.pt()  -genCandidate.pt()  )/genCandidate.pt()   , weight );
+  histos[5]->Fill( (candidate.eta() -genCandidate.eta() )/genCandidate.eta()  , weight );
+  histos[6]->Fill( (candidate.phi() -genCandidate.phi() )/genCandidate.phi()  , weight );
+  histos[7]->Fill( (candidate.mass()-genCandidate.mass())/genCandidate.mass() , weight );
+}
+
+void
 FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, const double& weight)
 {
 
@@ -302,5 +455,11 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
   if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kGenMatch) ) {
     genMatchSumDR_->Fill( FullLepEvt.genMatchSumDR() , weight );
     genMatchSumPt_->Fill( FullLepEvt.genMatchSumPt() , weight ); 
-  }  
+  } 
+  
+  if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kKinSolution) ) {
+    if(!FullLepEvt.isWrongCharge()) kinSolWeight_->Fill( FullLepEvt.solWeight() , weight );
+    else kinSolWeightWrong_->Fill( FullLepEvt.solWeight() , weight );
+    wrongCharge_ ->Fill( FullLepEvt.isWrongCharge() , weight ); 
+  }    
 }

@@ -2,15 +2,15 @@ import FWCore.ParameterSet.Config as cms
 
 from TopAnalysis.TopAnalyzer.FullLepHypothesesAnalyzer_cfi import analyzeFullLepHypotheses
 ## clone module
-analyzeKinFit   = analyzeFullLepHypotheses.clone()
-analyzeGenMatch = analyzeFullLepHypotheses.clone()
+analyzeKinSolution = analyzeFullLepHypotheses.clone()
+analyzeGenMatch    = analyzeFullLepHypotheses.clone()
 
 ## do replacements
-analyzeKinFit.hypoKey    = 'ttFullLepHypKinFit:Key'
-analyzeGenMatch.hypoKey  = 'ttFullLepHypGenMatch:Key'
+analyzeKinSolution.hypoKey = 'ttFullLepHypKinSolution:Key'
+analyzeGenMatch.hypoKey    = 'ttFullLepHypGenMatch:Key'
 
-analyzeAllFullLepHypotheses = cms.Sequence(#analyzeKinFit   +
-                                           analyzeGenMatch     
+analyzeAllFullLepHypotheses = cms.Sequence(analyzeGenMatch +
+                                           analyzeKinSolution     
                                           )
 
 
