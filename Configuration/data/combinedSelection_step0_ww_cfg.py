@@ -66,7 +66,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patDefaultSequence)
+process.pat = cms.Path(process.patDefaultSequenceNocleaning)
 
 
 #-------------------------------------------------
@@ -79,13 +79,13 @@ process.wght = cms.Path(process.eventWeight)
 
 ## test basic event selection
 process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
-process.semiLepMuonSelection = cms.Path(process.preselectSemiLepMuon)   
+process.semiLepMuonSelection = cms.Path(process.slmFilterFullMon )   
 
 process.load("TopAnalysis.TopFilter.sequences.fullLepElMuSelection_step0_cff")
-process.fullLepElMuSelection = cms.Path(process.preselectFullLepElMu)
+process.fullLepElMuSelection = cms.Path(process.flemFilterFullMon)
 
 process.load("TopAnalysis.TopFilter.sequences.fullLepMuonSelection_step0_cff")
-process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
+process.fullLepMuonSelection = cms.Path(process.flmmFilterFullMon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",

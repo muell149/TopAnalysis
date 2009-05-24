@@ -65,7 +65,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
 run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patDefaultSequence)
+process.pat = cms.Path(process.patDefaultSequenceNoCleaning)
 
 
 #-------------------------------------------------

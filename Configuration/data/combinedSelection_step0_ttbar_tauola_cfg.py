@@ -65,7 +65,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run22XonSummer08AODSIM
 run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patDefaultSequence)
+process.pat = cms.Path(process.patDefaultSequenceNoCleaning)
 
 
 #-------------------------------------------------
@@ -78,13 +78,13 @@ process.wght = cms.Path(process.eventWeight)
 
 ## basic event selection
 #process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
-#process.semiLepMuonSelection = cms.Path(process.preselectSemiLepMuon)   
+#process.semiLepMuonSelection = cms.Path(process.slmFilterFullMon )   
 
 #process.load("TopAnalysis.TopFilter.sequences.fullLepElMuSelection_step0_cff")
-#process.fullLepElMuSelection = cms.Path(process.preselectFullLepElMu)
+#process.fullLepElMuSelection = cms.Path(process.flemFilterFullMon)
 
 #process.load("TopAnalysis.TopFilter.sequences.fullLepMuonSelection_step0_cff")
-#process.fullLepMuonSelection = cms.Path(process.preselectFullLepMuon)
+#process.fullLepMuonSelection = cms.Path(process.flmmFilterFullMon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
