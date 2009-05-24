@@ -51,8 +51,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #-------------------------------------------------
 
 ## std sequence for tqaf layer1
-process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_full_cff")
-process.p0 = cms.Path(process.tqafLayer1)
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+process.p0 = cms.Path(process.patDefaultSequenceNoCleaning)
 #-------------------------------------------------
 # private uni Hamburg analysis code
 #-------------------------------------------------
@@ -69,5 +69,5 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.p1 = cms.Path(process.eventWeight   *
-                      process.selectFullLepMuon
+                      process.flmmFilterFullMon
                       )

@@ -38,7 +38,7 @@ process.wght = cms.Path(process.eventWeight)
 
 ## test basic event selection
 process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step1_cff")
-process.semiLepMuonSelection = cms.Path(process.selectSemiLepMuon)
+process.semiLepMuonSelection = cms.Path(process.slmFilterFullMon)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",

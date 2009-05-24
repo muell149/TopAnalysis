@@ -53,8 +53,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 #-------------------------------------------------
 
 ## std sequence for tqaf layer1
-process.load("TopQuarkAnalysis.TopObjectProducers.tqafLayer1_cff")
-process.p0 = cms.Path(process.tqafLayer1)
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+process.p0 = cms.Path(process.patDefaultSequenceNoCleaning)
 
 ## necessary fixes to run 2.2.X on 2.1.X data
 ## comment this when running on samples produced
@@ -82,7 +82,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('patTuple_semiLepMuonSelection_step0.root')
 )
 
-process.p1 = cms.Path(process.eventWeight       *
-                      process.selectSemiLepMuon *
+process.p1 = cms.Path(process.eventWeight      *
+                      process.slmFilterFullMon *
                       process.out
                       )
