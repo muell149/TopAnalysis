@@ -11,7 +11,7 @@ analyzeElec = cms.EDAnalyzer("ElecAnalyzer",
     ## fill id histograms
     id = cms.PSet(
     ),
-    doId  = cms.bool(True),
+    doId  = cms.bool(False),
                              
     ## fill kin histograms
     kin = cms.PSet(
