@@ -2,89 +2,101 @@ import FWCore.ParameterSet.Config as cms
 
 from TopAnalysis.TopAnalyzer.ElecAnalyzer_cfi import analyzeElec
 ## ------------------------------------------ Elec eta  |  Elec pt  | Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-fullLepElMuElec000pre = analyzeElec.clone()    ##     -     |     -     |     -     |     -     |     -     |     -
-fullLepElMuElec100pre = analyzeElec.clone()    ##     x     |     -     |     -     |     -     |     -     |     -
-fullLepElMuElec200pre = analyzeElec.clone()    ##     x     |     x     |     -     |     -     |     -     |     -
-fullLepElMuElec210pre = analyzeElec.clone()    ##     x     |     x     |     x     |     -     |     -     |     -
-fullLepElMuElec220pre = analyzeElec.clone()    ##     x     |     x     |     x     |     x     |     -     |     -
-fullLepElMuElec221pre = analyzeElec.clone()    ##     x     |     x     |     x     |     x     |     x     |     -
-fullLepElMuElec222pre = analyzeElec.clone()    ##     x     |     x     |     x     |     x     |     x     |     x
-
-## put any extra configuration here:
-fullLepElMuElec000pre.doId = cms.bool(False)
-fullLepElMuElec100pre.doId = cms.bool(False)
-fullLepElMuElec200pre.doId = cms.bool(False)
-fullLepElMuElec210pre.doId = cms.bool(False)
-fullLepElMuElec220pre.doId = cms.bool(False)
-fullLepElMuElec221pre.doId = cms.bool(False)
-fullLepElMuElec222pre.doId = cms.bool(False)
-
+flemElec000 = analyzeElec.clone()          ##     -     |     -     |     -     |     -     |     -     |     -
+flemElec100 = analyzeElec.clone()          ##     x     |     -     |     -     |     -     |     -     |     -
+flemElec200 = analyzeElec.clone()          ##     x     |     x     |     -     |     -     |     -     |     -
+flemElec210 = analyzeElec.clone()          ##     x     |     x     |     x     |     -     |     -     |     -
+flemElec220 = analyzeElec.clone()          ##     x     |     x     |     x     |     x     |     -     |     -
+flemElec221 = analyzeElec.clone()          ##     x     |     x     |     x     |     x     |     x     |     -
+flemElec222 = analyzeElec.clone()          ##     x     |     x     |     x     |     x     |     x     |     x
 
 from TopAnalysis.TopAnalyzer.MuonAnalyzer_cfi import analyzeMuon
 ## ------------------------------------------ Elec eta  |  Elec pt  | Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-fullLepElMuMuon000pre = analyzeMuon.clone()    ##     -     |     -     |     -     |     -     |     -     |     -
-fullLepElMuMuon100pre = analyzeMuon.clone()    ##     x     |     -     |     -     |     -     |     -     |     -
-fullLepElMuMuon200pre = analyzeMuon.clone()    ##     x     |     x     |     -     |     -     |     -     |     -
-fullLepElMuMuon210pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     -     |     -     |     -
-fullLepElMuMuon220pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     x     |     -     |     -
-fullLepElMuMuon221pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     x     |     x     |     -
-fullLepElMuMuon222pre = analyzeMuon.clone()    ##     x     |     x     |     x     |     x     |     x     |     x
-
-## put any extra configuration here:
- 
+flemMuon000 = analyzeMuon.clone()          ##     -     |     -     |     -     |     -     |     -     |     -
+flemMuon100 = analyzeMuon.clone()          ##     x     |     -     |     -     |     -     |     -     |     -
+flemMuon200 = analyzeMuon.clone()          ##     x     |     x     |     -     |     -     |     -     |     -
+flemMuon210 = analyzeMuon.clone()          ##     x     |     x     |     x     |     -     |     -     |     -
+flemMuon220 = analyzeMuon.clone()          ##     x     |     x     |     x     |     x     |     -     |     -
+flemMuon221 = analyzeMuon.clone()          ##     x     |     x     |     x     |     x     |     x     |     -
+flemMuon222 = analyzeMuon.clone()          ##     x     |     x     |     x     |     x     |     x     |     x
 
 from TopAnalysis.TopAnalyzer.JetAnalyzer_cfi  import analyzeJets
 ## ------------------------------------------ Elec eta  |  Elec pt  | Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-fullLepElMuJets000pre = analyzeJets.clone()    ##     -     |     -     |     -     |     -     |     -     |     -
-fullLepElMuJets100pre = analyzeJets.clone()    ##     x     |     -     |     -     |     -     |     -     |     -
-fullLepElMuJets200pre = analyzeJets.clone()    ##     x     |     x     |     -     |     -     |     -     |     -
-fullLepElMuJets210pre = analyzeJets.clone()    ##     x     |     x     |     x     |     -     |     -     |     -
-fullLepElMuJets220pre = analyzeJets.clone()    ##     x     |     x     |     x     |     x     |     -     |     -
-fullLepElMuJets221pre = analyzeJets.clone()    ##     x     |     x     |     x     |     x     |     x     |     -
-fullLepElMuJets222pre = analyzeJets.clone()    ##     x     |     x     |     x     |     x     |     x     |     x
-
-## put any extra configuration here:
+flemJets000 = analyzeJets.clone()          ##     -     |     -     |     -     |     -     |     -     |     -
+flemJets100 = analyzeJets.clone()          ##     x     |     -     |     -     |     -     |     -     |     -
+flemJets200 = analyzeJets.clone()          ##     x     |     x     |     -     |     -     |     -     |     -
+flemJets210 = analyzeJets.clone()          ##     x     |     x     |     x     |     -     |     -     |     -
+flemJets220 = analyzeJets.clone()          ##     x     |     x     |     x     |     x     |     -     |     -
+flemJets221 = analyzeJets.clone()          ##     x     |     x     |     x     |     x     |     x     |     -
+flemJets222 = analyzeJets.clone()          ##     x     |     x     |     x     |     x     |     x     |     x
 
 
 ## import selection cuts here
+from TopAnalysis.TopFilter.filters.ptEventFilters_cff import *
+from TopAnalysis.TopFilter.filters.etaEventFilters_cff import *
 from TopAnalysis.TopFilter.selections.fullLepElMuSelection_step0_cff import *
 
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterElecEta
-prefilterFullLepElMu100 = filterElecEta.clone()
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterMuonEta
-prefilterFullLepElMu010 = filterMuonEta.clone()
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterJetsEta
-prefilterFullLepElMu001 = filterJetsEta.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterElecPt
-prefilterFullLepElMu200 = filterElecPt.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterMuonPt
-prefilterFullLepElMu020 = filterMuonPt.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterJetsPt
-prefilterFullLepElMu002 = filterJetsPt.clone()
-
-## put any extra configuration here:
-prefilterFullLepElMu100.cuts = fullLepElecEta
-prefilterFullLepElMu010.cuts = fullLepMuonEta
-prefilterFullLepElMu001.cuts = fullLepJetsEta
-prefilterFullLepElMu200.cuts = fullLepElecPt
-prefilterFullLepElMu020.cuts = fullLepMuonPt
-prefilterFullLepElMu002.cuts = fullLepJetsPt
+flemFilter100 = filterElecEta.clone(cut = fullLepElecEta)
+flemFilter200 = filterElecPt.clone (cut = fullLepElecPt )
+flemFilter010 = filterMuonEta.clone(cut = fullLepMuonEta)
+flemFilter020 = filterMuonPt.clone (cut = fullLepMuonPt )
+flemFilter001 = filterJetsEta.clone(cut = fullLepJetsEta)
+flemFilter002 = filterJetsPt.clone (cut = fullLepJetsPt )
 
 
-## define sequences
-preselectFullLepElMu = cms.Sequence(fullLepElMuElec000pre + fullLepElMuMuon000pre + fullLepElMuJets000pre *
-                                    prefilterFullLepElMu100 *
-                                    fullLepElMuElec100pre + fullLepElMuMuon100pre + fullLepElMuJets100pre *
-                                    prefilterFullLepElMu200 *
-                                    fullLepElMuElec200pre + fullLepElMuMuon200pre + fullLepElMuJets200pre *
-                                    prefilterFullLepElMu010 *
-                                    fullLepElMuElec210pre + fullLepElMuMuon210pre + fullLepElMuJets210pre *
-                                    prefilterFullLepElMu020 *
-                                    fullLepElMuElec220pre + fullLepElMuMuon220pre + fullLepElMuJets220pre #*
-                                    #prefilterFullLepElMu001 *
-                                    #fullLepElMuElec221pre + fullLepElMuMuon221pre + fullLepElMuJets221pre *
-                                    #prefilterFullLepElMu002 *				    
-                                    #fullLepElMuElec222pre + fullLepElMuMuon222pre + fullLepElMuJets222pre				    
-                                   )
+## selection sequences w/o monitoring
+flemFilterElec = cms.Sequence(flemFilter100  *
+                              flemFilter200
+                              )
 
+flemFilterMuon = cms.Sequence(flemFilter010  *
+                              flemFilter020
+                              )
 
+flemFilterJets = cms.Sequence(flemFilter001  *
+                              flemFilter002
+                              )
+
+flemFilterFull = cms.Sequence(flemFilterElec *
+                              flemFilterMuon *
+                              flemFilterJets                              
+                              )
+
+## selection sequences with monitoring
+flemFilterElecMon = cms.Sequence(flemElec000   +
+                                 flemMuon000   +
+                                 flemJets000   *
+                                 flemFilter100 *
+                                 flemElec100   +
+                                 flemMuon100   +
+                                 flemJets100   *
+                                 flemFilter200
+                                 )
+
+flemFilterMuonMon = cms.Sequence(flemElec200   +
+                                 flemMuon200   +
+                                 flemJets200   *
+                                 flemFilter010 *
+                                 flemElec210   +
+                                 flemMuon210   +
+                                 flemJets210   *
+                                 flemFilter020
+                                 )
+
+flemFilterJetsMon = cms.Sequence(flemElec220   +
+                                 flemMuon220   +
+                                 flemJets220   *
+                                 flemFilter001 *
+                                 flemElec221   +
+                                 flemMuon221   +
+                                 flemJets221   *
+                                 flemFilter002
+                                 )
+
+flemFilterFullMon = cms.Sequence(flemFilterElecMon *
+                                 flemFilterMuonMon *
+                                 flemFilterJetsMon *                                 
+                                 flemElec222       +
+                                 flemMuon222       +
+                                 flemJets222
+                                 )

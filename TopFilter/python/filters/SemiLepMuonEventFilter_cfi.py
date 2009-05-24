@@ -71,5 +71,3 @@ filterSemiLepMuonEvent = cms.EDFilter("SemiLepMuonEventFilter",
         max   = cms.vdouble(  )
     )
 )
-
-

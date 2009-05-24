@@ -2,59 +2,72 @@ import FWCore.ParameterSet.Config as cms
 
 from TopAnalysis.TopAnalyzer.MuonAnalyzer_cfi import analyzeMuon
 ## -------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-semiLepMuon00 = analyzeMuon.clone()  ##     -     |     -     |     -     |     -
-semiLepMuon10 = analyzeMuon.clone()  ##     x     |     -     |     -     |     -
-semiLepMuon20 = analyzeMuon.clone()  ##     x     |     x     |     -     |     -
-semiLepMuon01 = analyzeMuon.clone()  ##     -     |     -     |     x     |     -
-semiLepMuon02 = analyzeMuon.clone()  ##     -     |     -     |     x     |     x
-semiLepMuon11 = analyzeMuon.clone()  ##     x     |     -     |     x     |     -
-semiLepMuon12 = analyzeMuon.clone()  ##     x     |     -     |     x     |     x
-semiLepMuon21 = analyzeMuon.clone()  ##     x     |     x     |     x     |     -
-semiLepMuon22 = analyzeMuon.clone()  ##     x     |     x     |     x     |     x
-
-## put any extra configuration here:
+slmMuon00 = analyzeMuon.clone()      ##     -     |     -     |     -     |     -
+slmMuon10 = analyzeMuon.clone()      ##     x     |     -     |     -     |     -
+slmMuon20 = analyzeMuon.clone()      ##     x     |     x     |     -     |     -
+slmMuon01 = analyzeMuon.clone()      ##     -     |     -     |     x     |     -
+slmMuon02 = analyzeMuon.clone()      ##     -     |     -     |     x     |     x
+slmMuon11 = analyzeMuon.clone()      ##     x     |     -     |     x     |     -
+slmMuon12 = analyzeMuon.clone()      ##     x     |     -     |     x     |     x
+slmMuon21 = analyzeMuon.clone()      ##     x     |     x     |     x     |     -
+slmMuon22 = analyzeMuon.clone()      ##     x     |     x     |     x     |     x
 
 from TopAnalysis.TopAnalyzer.JetAnalyzer_cfi  import analyzeJets
 ## -------------------------------------Muon eta  |  Muon pt  | Jets eta  |  Jets pt
-semiLepJets00 = analyzeJets.clone()  ##     -     |     -     |     -     |     -
-semiLepJets10 = analyzeJets.clone()  ##     x     |     -     |     -     |     -
-semiLepJets20 = analyzeJets.clone()  ##     x     |     x     |     -     |     -
-semiLepJets01 = analyzeJets.clone()  ##     -     |     -     |     x     |     -
-semiLepJets02 = analyzeJets.clone()  ##     -     |     -     |     x     |     x
-semiLepJets11 = analyzeJets.clone()  ##     x     |     -     |     x     |     -
-semiLepJets12 = analyzeJets.clone()  ##     x     |     -     |     x     |     x
-semiLepJets21 = analyzeJets.clone()  ##     x     |     x     |     x     |     -
-semiLepJets22 = analyzeJets.clone()  ##     x     |     x     |     x     |     x
-
-## put any extra configuration here:
+slmJets00 = analyzeJets.clone()      ##     -     |     -     |     -     |     -
+slmJets10 = analyzeJets.clone()      ##     x     |     -     |     -     |     -
+slmJets20 = analyzeJets.clone()      ##     x     |     x     |     -     |     -
+slmJets01 = analyzeJets.clone()      ##     -     |     -     |     x     |     -
+slmJets02 = analyzeJets.clone()      ##     -     |     -     |     x     |     x
+slmJets11 = analyzeJets.clone()      ##     x     |     -     |     x     |     -
+slmJets12 = analyzeJets.clone()      ##     x     |     -     |     x     |     x
+slmJets21 = analyzeJets.clone()      ##     x     |     x     |     x     |     -
+slmJets22 = analyzeJets.clone()      ##     x     |     x     |     x     |     x
 
 
-## import selection cuts here
+## import filters & selection cuts here
+from TopAnalysis.TopFilter.filters.ptEventFilters_cff import *
+from TopAnalysis.TopFilter.filters.etaEventFilters_cff import *
 from TopAnalysis.TopFilter.selections.semiLepMuonSelection_step0_cff import *
 
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterMuonEta
-filterSemiLep10 = filterMuonEta.clone()
-from TopAnalysis.TopFilter.filters.EtaEventFilter_cfi import filterJetsEta
-filterSemiLep01 = filterJetsEta.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterMuonPt
-filterSemiLep20 = filterMuonPt.clone()
-from TopAnalysis.TopFilter.filters.PtEventFilter_cfi  import filterJetsPt
-filterSemiLep02 = filterJetsPt.clone()
+slmFilter10 = filterMuonEta.clone(cuts = semiLepMuonEta)
+slmFilter20 = filterMuonPt.clone (cuts = semiLepMuonPt )
+slmFilter01 = filterJetsEta.clone(cuts = semiLepJetsEta)
+slmFilter02 = filterJetsPt.clone (cuts = semiLepJetsPt )
 
-## put any extra configuration here:
-filterSemiLep10.cuts = semiLepMuonEta
-filterSemiLep01.cuts = semiLepJetsEta
-filterSemiLep20.cuts = semiLepMuonPt
-filterSemiLep02.cuts = semiLepJetsPt
 
-## define sequences
-preselectSemiLepMuon = cms.Sequence(semiLepMuon00 + semiLepJets00 *
-                                    filterSemiLep10 *
-                                    semiLepMuon10 + semiLepJets10 *
-                                    filterSemiLep20 *
-                                    semiLepMuon20 + semiLepJets20 *
-                                    filterSemiLep01 *
-                                    semiLepMuon21 + semiLepJets21 *
-                                    filterSemiLep02 *
-                                    semiLepMuon22 + semiLepJets22
-                                    )
+## selection sequences w/o monitoring
+slmFilterMuon = cms.Sequence(slmFilter10   *
+                             slmFilter20
+                             )
+
+slmFilterJets = cms.Sequence(slmFilter01   *
+                             slmFilter02
+                             )
+
+slmFilterFull = cms.Sequence(slmFilterMuon *
+                             slmFilterJets
+                             )
+
+## selection sequences with monitoring
+slmFilterMuonMon = cms.Sequence(slmMuon00     +
+                                slmJets00     *
+                                slmFilter10   *
+                                slmMuon10     +
+                                slmJets10     *
+                                slmFilter20
+                                )
+
+slmFilterJetsMon = cms.Sequence(slmMuon20     +
+                                slmJets20     *
+                                slmFilter01   *
+                                slmMuon21     +
+                                slmJets21     *
+                                slmFilter02
+                                )
+
+slmFilterFullMon = cms.Sequence(slmFilterMuonMon *
+                                slmFilterJetsMon *
+                                slmMuon22        +
+                                slmJets22
+                                )
