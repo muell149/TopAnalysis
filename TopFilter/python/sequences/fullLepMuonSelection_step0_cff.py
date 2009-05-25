@@ -22,10 +22,10 @@ from TopAnalysis.TopFilter.filters.ptEventFilters_cff import *
 from TopAnalysis.TopFilter.filters.etaEventFilters_cff import *
 from TopAnalysis.TopFilter.selections.fullLepMuonSelection_step0_cff import *
 
-flmmFilter10 = filterMuonEta.clone(cut = fullLepMuonEta)
-flmmFilter01 = filterJetsEta.clone(cut = fullLepJetsEta)
-flmmFilter20 = filterMuonPt.clone (cut = fullLepMuonPt )
-flmmFilter02 = filterJetsPt.clone (cut = fullLepJetsPt )
+flmmFilter10 = filterMuonEta.clone(cuts = fullLepMuonEta)
+flmmFilter01 = filterJetsEta.clone(cuts = fullLepJetsEta)
+flmmFilter20 = filterMuonPt.clone (cuts = fullLepMuonPt )
+flmmFilter02 = filterJetsPt.clone (cuts = fullLepJetsPt )
 
 
 ## selection sequences w/o monitoring

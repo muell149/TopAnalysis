@@ -36,12 +36,12 @@ from TopAnalysis.TopFilter.filters.ptEventFilters_cff import *
 from TopAnalysis.TopFilter.filters.etaEventFilters_cff import *
 from TopAnalysis.TopFilter.selections.fullLepElMuSelection_step0_cff import *
 
-flemFilter100 = filterElecEta.clone(cut = fullLepElecEta)
-flemFilter200 = filterElecPt.clone (cut = fullLepElecPt )
-flemFilter010 = filterMuonEta.clone(cut = fullLepMuonEta)
-flemFilter020 = filterMuonPt.clone (cut = fullLepMuonPt )
-flemFilter001 = filterJetsEta.clone(cut = fullLepJetsEta)
-flemFilter002 = filterJetsPt.clone (cut = fullLepJetsPt )
+flemFilter100 = filterElecEta.clone(cuts = fullLepElecEta)
+flemFilter200 = filterElecPt.clone (cuts = fullLepElecPt )
+flemFilter010 = filterMuonEta.clone(cuts = fullLepMuonEta)
+flemFilter020 = filterMuonPt.clone (cuts = fullLepMuonPt )
+flemFilter001 = filterJetsEta.clone(cuts = fullLepJetsEta)
+flemFilter002 = filterJetsPt.clone (cuts = fullLepJetsPt )
 
 
 ## selection sequences w/o monitoring
