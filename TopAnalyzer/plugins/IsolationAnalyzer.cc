@@ -281,9 +281,15 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 			double trackIso = mu.trackIso();
 
 			//set isolation
-			helper_->setCaloIso(caloIso);
-			helper_->setTrackIso(trackIso);
+			helper_->setAbsCaloIso(caloIso);
+			helper_->setAbsTrackIso(trackIso);
 			helper_->setJetIso(jetIso);
+
+			helper_->setRelCaloIso(caloIso/mu.pt());
+			helper_->setRelTrackIso(trackIso/mu.pt());
+
+			helper_->setAbsCombIso(caloIso + trackIso);
+			helper_->setRelCombIso((caloIso + trackIso)/mu.pt());
 			if (i == 0) {
 				TVector3 lep(mu.px(), mu.py(), mu.pz());
 				p.push_back(lep);
@@ -438,40 +444,40 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 	}
 }
 
-	void IsolationAnalyzer::endJob() {
-		helper_->makeSummaryPlots();
-			helper_->normalize();
-			if (ttbarMC_) {
-				//loop over all helpers and make summaryPlots and normalize them
-				map<string, IsolationHelper*>::iterator iter;
-				for (iter = ttBarHelper_.begin(); iter != ttBarHelper_.end(); ++iter) {
-					IsolationHelper *helper = iter->second;
-					helper->makeSummaryPlots("Ttbar");
-					helper->normalize();
-				}
-			}
-			if (recoMETUncorrectedMET_->Integral() != 0) {
-				recoMETUncorrectedMET_->Scale(1 / recoMETUncorrectedMET_->Integral());
-			}
-	}
-
-	pat::Jet IsolationAnalyzer::getClosestJetInDeltaPhi(edm::Handle<TopJetCollection> & j, double phi) {
-		pat::Jet closestJet;
-		if (j->size() >= 4) {
-			double dr2 = 999.;
-			TopJetCollection::const_iterator jet = j->begin();
-			//only the four highest jets
-			for (unsigned x = 0; x < 4; x++) {
-				if (jet == j->end())
-					break;
-				double temp = fabs(deltaPhi(jet->phi(), phi));
-				if (temp < dr2) {
-					dr2 = temp;
-					closestJet = *jet;
-				}
-				++jet;
-			}
+void IsolationAnalyzer::endJob() {
+	helper_->makeSummaryPlots();
+	helper_->normalize();
+	if (ttbarMC_) {
+		//loop over all helpers and make summaryPlots and normalize them
+		map<string, IsolationHelper*>::iterator iter;
+		for (iter = ttBarHelper_.begin(); iter != ttBarHelper_.end(); ++iter) {
+			IsolationHelper *helper = iter->second;
+			helper->makeSummaryPlots("Ttbar");
+			helper->normalize();
 		}
-		return closestJet;
 	}
+	if (recoMETUncorrectedMET_->Integral() != 0) {
+		recoMETUncorrectedMET_->Scale(1 / recoMETUncorrectedMET_->Integral());
+	}
+}
+
+pat::Jet IsolationAnalyzer::getClosestJetInDeltaPhi(edm::Handle<TopJetCollection> & j, double phi) {
+	pat::Jet closestJet;
+	if (j->size() >= 4) {
+		double dr2 = 999.;
+		TopJetCollection::const_iterator jet = j->begin();
+		//only the four highest jets
+		for (unsigned x = 0; x < 4; x++) {
+			if (jet == j->end())
+				break;
+			double temp = fabs(deltaPhi(jet->phi(), phi));
+			if (temp < dr2) {
+				dr2 = temp;
+				closestJet = *jet;
+			}
+			++jet;
+		}
+	}
+	return closestJet;
+}
 
