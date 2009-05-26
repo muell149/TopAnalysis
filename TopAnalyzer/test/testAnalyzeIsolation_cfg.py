@@ -57,6 +57,7 @@ filterSemiLepMuonEvent.trkIsoFilter = semiLepMuonIsolationTrk
 filterSemiLepMuonEvent.calIsoFilter = semiLepMuonIsolationCal
 #filterSemiLepMuonEvent.jetDistFilter = semiLepMuonJetDistance
 filterSemiLepMuonEvent.combIsoFilter = semiLepMuonIsolationRelComb
+filterSemiLepMuonEvent.combIsoFilter.max = [0.3]
 #process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step1_cff")
 process.tight = filterSemiLepMuonEvent.clone()
 process.loose = filterSemiLepMuonEvent.clone()
@@ -68,6 +69,9 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = False
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = False
+process.load("TopAnalysis.TopAnalyzer.MuonAnalyzer_cfi")
+process.analyzeAllMuons = process.analyzeMuon.clone()
+process.analyzeIsolatedMuons = process.analyzeMuon.clone()
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMuonIso.root')
@@ -75,4 +79,4 @@ process.TFileService = cms.Service("TFileService",
 
 process.p1 = cms.Path(process.makeGenEvt *
                       process.ttSemiLeptonicFilter * 
-                      process.findQCDBkgMVA * process.loose * process.before * process.tight * process.after)
+                      process.findQCDBkgMVA * process.analyzeAllMuons *process.loose * process.before * process.tight * process.analyzeIsolatedMuons * process.after)
