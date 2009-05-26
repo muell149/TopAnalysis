@@ -60,7 +60,7 @@ private:
 	edm::InputTag jets_;
 
 	vector<double> ptBins_;
-	bool ttbarMC_, useMVA_;
+	bool useMVA_;
 	std::string module_;
 	std::string discinput_;
 
@@ -69,6 +69,6 @@ private:
 
 	IsolationHelper *helper_;
 	//for ttbar Binning
-	map<string, IsolationHelper*> ttBarHelper_;
+//	map<string, IsolationHelper*> ttBarHelper_;
 };
 #endif

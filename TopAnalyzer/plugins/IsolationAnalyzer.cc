@@ -67,10 +67,9 @@ IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
 	hist_(cfg.getParameter<std::string> ("hist")), muons_(cfg.getParameter<edm::InputTag> ("muons")), met_(
 			cfg.getParameter<edm::InputTag> ("missingEt")), ttgen_(cfg.getParameter<edm::InputTag> ("genEvent")),
 			jets_(cfg.getParameter<edm::InputTag> ("jets")),
-			ptBins_(cfg.getParameter<std::vector<double> > ("ptBins")), ttbarMC_(cfg.getParameter<bool> ("ttbarMC")),
+			ptBins_(cfg.getParameter<std::vector<double> > ("ptBins")),
 			useMVA_(cfg.getParameter<bool> ("useMVA")), module_(cfg.getParameter<std::string> ("modulename")),
 			discinput_(cfg.getParameter<std::string> ("discriminator")) {
-	ttbarMC_ = false;
 }
 
 void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
@@ -84,43 +83,6 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 
 	helper_ = new IsolationHelper(fs, hist_);
 
-	//disable ttbarMC for now
-	if (ttbarMC_) {
-		//for each ptBin new IsolationHelper
-		for (unsigned int x = 0; x < ptBins_.size() - 1; x++) {
-			IsolationHelper *helper = new IsolationHelper(fs, "ttbarMC_" + hist_);
-			double bin = ptBins_.at(x);
-			double nextBin = ptBins_.at(x + 1);
-			stringstream name;
-			name << ptBins_.at(x);
-			stringstream pres;
-			pres << "Ttbar_ " << bin << "-" << nextBin << "_";
-			string pre = pres.str();
-			helper->addHistogram(pre + "invariantMassJ3andJ4", 40, 0., 80.);
-			helper->addHistogram(pre + "minDeltaPhiMETJets", 100, 0., 4.);
-			helper->addHistogram(pre + "deltaPhiMetJet1", 80, -4., 4.);
-			helper->addHistogram(pre + "deltaPhiMetJet2", 80, -4., 4.);
-			helper->addHistogram(pre + "deltaPhiMetJet3", 80, -4., 4.);
-			helper->addHistogram(pre + "deltaPhiMetJet4", 80, -4., 4.);
-			helper->addHistogram(pre + "deltaPhiMetleadingMuon", 80, -4., 4.);
-			helper->addHistogram(pre + "deltaPhiMetMuons", 80, -4., 4.);
-			helper->addHistogram(pre + "DeltaPhiTimesDeltaEta", 50, -10., 10.);
-			helper->addHistogram(pre + "METTimesleadingJetEt", 70, 0., 7000.);
-			helper->addHistogram(pre + "Jet3EtOverJet1EtJet3Et", 25, 0., 0.5);
-			helper->addHistogram(pre + "Jet3EtOverJet2EtJet3Et", 25, 0., 0.5);
-			helper->addHistogram(pre + "Jet4EtOverJet1EtJet4Et", 25, 0., 0.5);
-			helper->addHistogram(pre + "Jet4EtOverJet2EtJet3Et", 25, 0., 0.5);
-			helper->addHistogram(pre + "JetEtSum34", 150, 0., 300.);
-			helper->addHistogram(pre + "DeltaPhiMuonJet3", 80, -4., 4.);
-			helper->addHistogram(pre + "DeltaPhiMuonJet4", 80, -4., 4.);
-			helper->addHistogram(pre + "DeltaPhiMuonJet12", 80, -4., 4.);
-			helper->addHistogram(pre + "SumJet1ET2TimesMuEt", 80, 60., 500);
-			helper->addHistogram(pre + "Sum4JetsMuEt", 100, 100., 600);
-			helper->addHistogram(pre + "VectorSumJetsMu", 60, 0., 300.);
-			helper->addHistogram(pre + "MET", 70, 0., 350.);
-			ttBarHelper_.insert(make_pair(name.str(), helper));
-		}
-	}
 	helper_->addHistogram("invariantMassJ3andJ4", 50, 0., 200.);
 	helper_->addHistogram("minDeltaPhiMETJets", 100, 0., 4.);
 	helper_->addHistogram("deltaPhiMetJet1", 80, -4., 4.);
@@ -367,79 +329,6 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 				//2nd leading muon
 			}
 			helper_->fill("deltaPhiMetMuons", deltaPhi(met->phi(), mu.phi()));
-
-			if (ttbarMC_) {
-				TtGenEvent event = *genEvt;
-				const reco::GenParticle* thad = event.hadronicDecayTop();
-				const reco::GenParticle* tlep = event.leptonicDecayTop();
-
-				if (i == 0) {
-					for (unsigned int x = 0; x < ptBins_.size() - 1; x++) {
-						if (thad && tlep) {
-							//get the responsible helper here
-							IsolationHelper *helper;
-							stringstream name;
-							name << ptBins_.at(x);
-							map<string, IsolationHelper*>::iterator iter = ttBarHelper_.find(name.str());
-							if (iter != ttBarHelper_.end()) {
-								helper = iter->second;
-								if (thad->pt() >= ptBins_[x] && thad->pt() < ptBins_[x + 1]) {
-									helper->fill("METTimesleadingJetEt", jet1Et * met->et());
-									helper->fill("deltaPhiMetleadingMuon", deltaPhi(met->phi(), mu.phi()));
-									helper->fill("deltaPhiMetJet1", deltaPhi(met->phi(), jet1Phi));
-									helper->fill("deltaPhiMetJet2", deltaPhi(met->phi(), jet2Phi));
-									helper->fill("deltaPhiMetJet3", deltaPhi(met->phi(), jet3Phi));
-									helper->fill("deltaPhiMetJet4", deltaPhi(met->phi(), jet4Phi));
-									helper->fill("deltaPhiMetleadingMuon", deltaPhi(met->phi(), mu.phi()));
-									helper->fill("DeltaPhiTimesDeltaEta", deltaPhi(met->phi(), jet1Phi) * (met->eta()
-											* jet1Eta));
-									helper->fill("METTimesleadingJetEt", met->et() * jet1Et);
-									helper->fill("Jet3EtOverJet1EtJet3Et", jet3Et / (jet3Et + jet1Et));
-									helper->fill("Jet3EtOverJet2EtJet3Et", jet3Et / (jet3Et + jet2Et));
-									helper->fill("Jet4EtOverJet1EtJet4Et", jet4Et / (jet4Et + jet1Et));
-									helper->fill("Jet4EtOverJet2EtJet3Et", jet4Et / (jet4Et + jet2Et));
-									helper->fill("JetEtSum34", jet3Et + jet4Et);
-									helper->fill("DeltaPhiMuonJet3", deltaPhi(mu.phi(), jet3Phi));
-									helper->fill("DeltaPhiMuonJet4", deltaPhi(mu.phi(), jet4Phi));
-									helper->fill("DeltaPhiMuonJet12", deltaPhi(mu.phi(), jet1Phi) + deltaPhi(mu.phi(),
-											jet2Phi));
-									helper->fill("invariantMassJ3andJ4", mt34);
-									helper->fill("Sum4JetsMuEt", jet1Et + jet2Et + jet3Et + jet4Et + mu.et());
-									helper->fill("SumJet1ET2TimesMuEt", jet1Et + 2 * mu.et());
-									helper->fill("VectorSumJetsMu", vec.pt());
-									helper->fill("MET", met->et());
-								}
-
-								if (tlep->pt() >= ptBins_[x] && tlep->pt() < ptBins_[x + 1]) {
-									helper->fill("METTimesleadingJetEt", jet1Et * met->et());
-									helper->fill("deltaPhiMetleadingMuon", deltaPhi(met->phi(), mu.phi()));
-									helper->fill("deltaPhiMetJet1", deltaPhi(met->phi(), jet1Phi));
-									helper->fill("deltaPhiMetJet2", deltaPhi(met->phi(), jet2Phi));
-									helper->fill("deltaPhiMetJet3", deltaPhi(met->phi(), jet3Phi));
-									helper->fill("deltaPhiMetJet4", deltaPhi(met->phi(), jet4Phi));
-									helper->fill("DeltaPhiTimesDeltaEta", deltaPhi(met->phi(), jet1Phi) * (met->eta()
-											* jet1Eta));
-									helper->fill("METTimesleadingJetEt", met->et() * jet1Et);
-									helper->fill("Jet3EtOverJet1EtJet3Et", jet3Et / (jet3Et + jet1Et));
-									helper->fill("Jet3EtOverJet2EtJet3Et", jet3Et / (jet3Et + jet2Et));
-									helper->fill("Jet4EtOverJet1EtJet4Et", jet4Et / (jet4Et + jet1Et));
-									helper->fill("Jet4EtOverJet2EtJet3Et", jet4Et / (jet4Et + jet2Et));
-									helper->fill("JetEtSum34", jet3Et + jet4Et);
-									helper->fill("DeltaPhiMuonJet3", deltaPhi(mu.phi(), jet3Phi));
-									helper->fill("DeltaPhiMuonJet4", deltaPhi(mu.phi(), jet4Phi));
-									helper->fill("DeltaPhiMuonJet12", deltaPhi(mu.phi(), jet1Phi) + deltaPhi(mu.phi(),
-											jet2Phi));
-									helper->fill("invariantMassJ3andJ4", mt34);
-									helper->fill("Sum4JetsMuEt", jet1Et + jet2Et + jet3Et + jet4Et + mu.et());
-									helper->fill("SumJet1ET2TimesMuEt", jet1Et + 2 * mu.et());
-									helper->fill("VectorSumJetsMu", vec.pt());
-									helper->fill("MET", met->et());
-								}
-							}
-						}
-					}
-				}
-			}
 		}
 	}
 }
@@ -447,15 +336,15 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 void IsolationAnalyzer::endJob() {
 	helper_->makeSummaryPlots();
 	helper_->normalize();
-	if (ttbarMC_) {
-		//loop over all helpers and make summaryPlots and normalize them
-		map<string, IsolationHelper*>::iterator iter;
-		for (iter = ttBarHelper_.begin(); iter != ttBarHelper_.end(); ++iter) {
-			IsolationHelper *helper = iter->second;
-			helper->makeSummaryPlots("Ttbar");
-			helper->normalize();
-		}
-	}
+//	if (ttbarMC_) {
+//		//loop over all helpers and make summaryPlots and normalize them
+//		map<string, IsolationHelper*>::iterator iter;
+//		for (iter = ttBarHelper_.begin(); iter != ttBarHelper_.end(); ++iter) {
+//			IsolationHelper *helper = iter->second;
+//			helper->makeSummaryPlots("Ttbar");
+//			helper->normalize();
+//		}
+//	}
 	if (recoMETUncorrectedMET_->Integral() != 0) {
 		recoMETUncorrectedMET_->Scale(1 / recoMETUncorrectedMET_->Integral());
 	}
