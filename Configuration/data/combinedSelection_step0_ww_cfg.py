@@ -66,8 +66,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## run22XonSummer08AODSIM(process)
 
 ## process path
-process.pat = cms.Path(process.patDefaultSequenceNocleaning)
-
+process.pat = cms.Path(process.patDefaultSequenceNoCleaning)
 
 #-------------------------------------------------
 # private uni Hamburg analysis code
