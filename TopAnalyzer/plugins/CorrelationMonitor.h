@@ -9,9 +9,9 @@
 
 class CorrelationMonitor {
 public:
-	CorrelationMonitor(edm::Service<TFileService> fs, std::string file) {
+	CorrelationMonitor(edm::Service<TFileService> fs) {
 		fs_ = fs;
-		file_ = file;
+//		file_ = file;
 	}
 
 	void fill(std::string name, double v1, double v2, double weight) {
@@ -31,8 +31,7 @@ public:
 	void addHist(std::string name, unsigned int numberOfBins1, double min1, double max1, unsigned int numberOfBins2,
 			double min2, double max2) {
 		NameScheme nam("corr");
-		ofstream out(file_.c_str(), std::ios::out);
-		TH2F *hist = fs_->make<TH2F> (nam.name(out, name.c_str()), nam.name(name.c_str()), numberOfBins1, min1, max1,
+		TH2F *hist = fs_->make<TH2F> (nam.name(name.c_str()), nam.name(name.c_str()), numberOfBins1, min1, max1,
 				numberOfBins2, min2, max2);
 		addHist(name, hist);
 	}
@@ -97,6 +96,5 @@ public:
 private:
 	std::map<string, TH2F*> histos_;
 	edm::Service<TFileService> fs_;
-	std::string file_;
 };
 #endif

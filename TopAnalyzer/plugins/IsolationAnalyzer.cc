@@ -64,7 +64,7 @@ double newWeightCirc(double var, bool signalLike = true) {
  * http://
  */
 IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
-	hist_(cfg.getParameter<std::string> ("hist")), muons_(cfg.getParameter<edm::InputTag> ("muons")), met_(
+	muons_(cfg.getParameter<edm::InputTag> ("muons")), met_(
 			cfg.getParameter<edm::InputTag> ("missingEt")), ttgen_(cfg.getParameter<edm::InputTag> ("genEvent")),
 			jets_(cfg.getParameter<edm::InputTag> ("jets")),
 			ptBins_(cfg.getParameter<std::vector<double> > ("ptBins")),
@@ -73,15 +73,12 @@ IsolationAnalyzer::IsolationAnalyzer(const edm::ParameterSet& cfg) :
 }
 
 void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
-	if (hist_.empty())
-		return;
-
 	edm::Service<TFileService> fs;
 	if (!fs) {
 		throw edm::Exception(edm::errors::Configuration, "TFile Service is not registered in cfg file");
 	}
 
-	helper_ = new IsolationHelper(fs, hist_);
+	helper_ = new IsolationHelper(fs);
 
 	helper_->addHistogram("invariantMassJ3andJ4", 50, 0., 200.);
 	helper_->addHistogram("minDeltaPhiMETJets", 100, 0., 4.);
@@ -114,15 +111,14 @@ void IsolationAnalyzer::beginJob(const edm::EventSetup&) {
 	if (useMVA_)
 		helper_->addHistogram("MVAdisc", 20, 0., 1.);
 	NameScheme nam("var");
-	ofstream off(hist_.c_str(), std::ios::app);
-	sumDeltaPhiMuvsdeltaPhiJ1J2_ = fs->make<TH2F> (nam.name(off, "dPhiSumMuTwoJestvsdPhij1j2"), nam.name(
+	sumDeltaPhiMuvsdeltaPhiJ1J2_ = fs->make<TH2F> (nam.name("dPhiSumMuTwoJestvsdPhij1j2"), nam.name(
 			"dPhiSumMuTwoJestvsdPhij1j2"), 80, -7., 7., 80, -4., 4.);
-	recoMETUncorrectedMET_ = fs->make<TH1F> (nam.name(off, "recoMETUncorrectedMET"), nam.name("recoMETUncorrectedMET"),
+	recoMETUncorrectedMET_ = fs->make<TH1F> (nam.name("recoMETUncorrectedMET"), nam.name("recoMETUncorrectedMET"),
 			200, -100., 100.);
-	genMetRecoDiff_ = fs->make<TH1F> (nam.name(off, "recoMETGenMET"), nam.name("recoMETGenMET"), 200, -100., 100.);
-	norm_genMetRecoDiff_ = fs->make<TH1F> (nam.name(off, "normed_recoMETGenMET"), nam.name("recoMETGenMET"), 1000,
+	genMetRecoDiff_ = fs->make<TH1F> (nam.name("recoMETGenMET"), nam.name("recoMETGenMET"), 200, -100., 100.);
+	norm_genMetRecoDiff_ = fs->make<TH1F> (nam.name("normed_recoMETGenMET"), nam.name("recoMETGenMET"), 1000,
 			-50., 50.);
-	realWPt_ = fs->make<TH1F> (nam.name(off, "var_realWPt"), nam.name("var_realWPt"), 200, 0., 100.);
+	realWPt_ = fs->make<TH1F> (nam.name("var_realWPt"), nam.name("var_realWPt"), 200, 0., 100.);
 }
 
 IsolationAnalyzer::~IsolationAnalyzer() {
@@ -243,14 +239,14 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 			double trackIso = mu.trackIso();
 
 			//set isolation
-			helper_->setAbsCaloIso(caloIso);
-			helper_->setAbsTrackIso(trackIso);
+//			helper_->setAbsCaloIso(caloIso);
+//			helper_->setAbsTrackIso(trackIso);
 			helper_->setJetIso(jetIso);
 
 			helper_->setRelCaloIso(caloIso/mu.pt());
 			helper_->setRelTrackIso(trackIso/mu.pt());
 
-			helper_->setAbsCombIso(caloIso + trackIso);
+//			helper_->setAbsCombIso(caloIso + trackIso);
 			helper_->setRelCombIso((caloIso + trackIso)/mu.pt());
 			if (i == 0) {
 				TVector3 lep(mu.px(), mu.py(), mu.pz());
@@ -279,11 +275,11 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 				phi7 = phi5 + 0.5 * deltaPhi(closestMuJet.phi(), phi5);
 				phi8 = closestMuJet.phi() + 0.5 * deltaPhi(phi5, closestMuJet.phi());
 
-				//fill histogramms
+				//fill histogramms, TODO: make this choice in the cfg file
 				//helper_->setWeight(weight*newWeightCirc(eventshape.circularity(p), false));
 				//helper_->setWeight(weight*newWeightPt(mu.pt(), false));
-				helper_->setWeight(weight * newWeightDphiMuJ1J2(deltaPhi(mu.phi(), jet1Phi) + deltaPhi(mu.phi(),
-						jet2Phi), true));
+//				helper_->setWeight(weight * newWeightDphiMuJ1J2(deltaPhi(mu.phi(), jet1Phi) + deltaPhi(mu.phi(),
+//						jet2Phi), true));
 				//helper_->setWeight(weight*newWeightDphiMETMu(deltaPhi(met->phi(), mu.phi()),true));
 
 				helper_->fill("METTimesleadingJetEt", jet1Et * met->et());
@@ -335,16 +331,7 @@ void IsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
 
 void IsolationAnalyzer::endJob() {
 	helper_->makeSummaryPlots();
-	helper_->normalize();
-//	if (ttbarMC_) {
-//		//loop over all helpers and make summaryPlots and normalize them
-//		map<string, IsolationHelper*>::iterator iter;
-//		for (iter = ttBarHelper_.begin(); iter != ttBarHelper_.end(); ++iter) {
-//			IsolationHelper *helper = iter->second;
-//			helper->makeSummaryPlots("Ttbar");
-//			helper->normalize();
-//		}
-//	}
+
 	if (recoMETUncorrectedMET_->Integral() != 0) {
 		recoMETUncorrectedMET_->Scale(1 / recoMETUncorrectedMET_->Integral());
 	}

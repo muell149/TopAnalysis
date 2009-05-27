@@ -53,7 +53,6 @@ private:
 	}
 
 
-	std::string hist_;
 	edm::InputTag muons_;
 	edm::InputTag met_;
 	edm::InputTag ttgen_;
