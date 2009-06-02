@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<MVATrainer>
+<MVATrainer xmlns:xi="http://www.w3.org/2001/XInclude">
 
         <general>
                 <option name="id">TtSemiLepJetCombMVATrainer</option>
@@ -10,7 +10,7 @@
 	        <xslt-varlist>
 		        <var name="target"/>
 		</xslt-varlist>
-		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="SemiLepJetCombMVATrainer_vars.xml"/>
+		<xi:include href="SemiLepJetCombMVATrainer_vars.xml"/>
 	</xslt-input>
 
         <!-- the following processor defines that the subsequent 5 processors
@@ -20,7 +20,7 @@
 	        <xslt-varlist>
 		        <var name="target"/>
 		</xslt-varlist>
-		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="SemiLepJetCombMVATrainer_vars.xml"/>
+		<xi:include href="SemiLepJetCombMVATrainer_vars.xml"/>
 	</xslt-ProcForeach>
 
         <!-- create target variable from input variable "target":
@@ -43,7 +43,7 @@
         <!-- normalize input variables -->
 
 	<xslt-ProcNormalize id="norm" source="loop">
-		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="SemiLepJetCombMVATrainer_vars.xml"/>
+		<xi:include href="SemiLepJetCombMVATrainer_vars.xml"/>
 	        <xslt-varlist>
 			<var source="target_hyp" name="target" target="true"/>
 		</xslt-varlist>
