@@ -13,10 +13,10 @@
 		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="SemiLepJetCombMVATrainer_vars.xml"/>
 	</xslt-input>
 
-        <!-- the following processor defines that the subsequent 5 processors
+        <!-- the following processor defines that the subsequent 6 processors
              are called for each jetComb hypothesis separately in every event -->
 
-	<xslt-ProcForeach id="loop" source="input" next="5">
+	<xslt-ProcForeach id="loop" source="input" next="6">
 	        <xslt-varlist>
 		        <var name="target"/>
 		</xslt-varlist>
@@ -49,28 +49,23 @@
 		</xslt-varlist>
 	</xslt-ProcNormalize>
 
-        <!-- decorrelate input variables using matrix ration -->
+        <!-- linearize input variables-->
 
-	<processor id="rot" name="ProcMatrix">
-		<input>
+	<xslt-ProcLikelihood id="rank" source="norm" individual="true">
+	        <xslt-varlist>
 			<var source="target_hyp" name="target" target="true"/>
-                        <var source="norm" name="massHadW"/>
-                        <var source="norm" name="deltaThetaHadTopLepB"/>
-                        <var source="norm" name="deltaThetaLepBLepton"/>
-                        <var source="norm" name="relativePtHadronicTop"/>
-                        <var source="norm" name="bTagSumTrkCntHighEff"/>
-		</input>
-		<config>
-			<fill signal="true" background="true"/>
-		</config>
-		<output>
-			<var name="rot1"/>
-			<var name="rot2"/>
-			<var name="rot3"/>
-			<var name="rot4"/>
-			<var name="rot5"/>
-		</output>
-	</processor>
+		</xslt-varlist>
+		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="SemiLepJetCombMVATrainer_vars.xml"/>
+	</xslt-ProcLikelihood>
+
+        <!-- perform variable ranking -->
+
+	<xslt-ProcMatrix id="ranking" source="rank" ranking="true">
+	        <xslt-varlist>
+			<var source="target_hyp" name="target" target="true"/>
+		</xslt-varlist>
+		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="SemiLepJetCombMVATrainer_vars.xml"/>
+	</xslt-ProcMatrix>
 
         <!-- combine variables into likelihood -->
 
