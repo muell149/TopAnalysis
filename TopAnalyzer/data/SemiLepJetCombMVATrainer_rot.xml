@@ -51,64 +51,38 @@
 
         <!-- decorrelate input variables using matrix ration -->
 
-	<processor id="rot" name="ProcMatrix">
-		<input>
+	<xslt-ProcMatrix id="rot" source="norm">
+	        <xslt-varlist>
 			<var source="target_hyp" name="target" target="true"/>
-                        <var source="norm" name="massHadW"/>
-                        <var source="norm" name="deltaThetaHadTopLepB"/>
-                        <var source="norm" name="deltaThetaLepBLepton"/>
-                        <var source="norm" name="relativePtHadronicTop"/>
-                        <var source="norm" name="bTagSumTrkCntHighEff"/>
-		</input>
-		<config>
-			<fill signal="true" background="true"/>
-		</config>
-		<output>
-			<var name="rot1"/>
-			<var name="rot2"/>
-			<var name="rot3"/>
-			<var name="rot4"/>
-			<var name="rot5"/>
-		</output>
-	</processor>
+                        <var name="massHadW"/>
+                        <var name="deltaThetaHadTopLepB"/>
+                        <var name="deltaThetaLepBLepton"/>
+                        <var name="relativePtHadronicTop"/>
+                        <var name="bTagSumTrkCntHighEff"/>
+		</xslt-varlist>
+	</xslt-ProcMatrix>
 
         <!-- combine variables into likelihood -->
 
-	<processor id="like" name="ProcLikelihood">
-		<input>
+	<xslt-ProcLikelihood id="like" source="rot" smooth="3">
+	        <xslt-varlist>
 			<var source="target_hyp" name="target" target="true"/>
-                        <var source="norm" name="massHadW"/>
-                        <var source="norm" name="deltaThetaHadTopLepB"/>
-                        <var source="norm" name="deltaThetaLepBLepton"/>
-                        <var source="norm" name="relativePtHadronicTop"/>
-                        <var source="norm" name="bTagSumTrkCntHighEff"/>
-		</input>
-		<config>
-			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
-			<sigbkg smooth="3"/>
-		</config>
-		<output>
-			<var name="discr"/>
-		</output>
-	</processor>
+                        <var name="rot2"/>
+                        <var name="rot3"/>
+                        <var name="rot4"/>
+                        <var name="rot5"/>
+                        <var name="rot6"/>
+		</xslt-varlist>
+	</xslt-ProcLikelihood>
 
         <!-- this is just a workaround to get monitoring histograms for the likelihood for each hypothesis-->
 
-        <processor id="norm_monitor_hyp" name="ProcNormalize">
-                <input>
+	<xslt-ProcNormalize id="norm_monitor_hyp">
+	        <xslt-varlist>
 			<var source="target_hyp" name="target" target="true"/>
-			<var source="like" name="discr"/>
-                </input>
-                <config>
-                        <pdf/>
-                </config>
-                <output>
-                        <var name="var_dummy1"/>
-                </output>
-        </processor>
+			<var source="like" name="discriminator"/>
+	        </xslt-varlist>
+	</xslt-ProcNormalize>
 
         <!-- end of ProcForEach loop -->
 
@@ -118,7 +92,7 @@
 	<processor id="sort" name="ProcSort">
 		<input>
 			<var source="target_hyp" name="target"/>
-			<var source="like" name="discr"/>
+			<var source="like" name="discriminator"/>
 		</input>
 		<config>
 			<key index="1" descending="true"/>
@@ -167,21 +141,13 @@
 
         <!-- this is just a workaround to get monitoring histograms from ProcSplitter -->
 
-        <processor id="norm_monitor_evt" name="ProcNormalize">
-                <input>
+	<xslt-ProcNormalize id="norm_monitor_evt">
+	        <xslt-varlist>
                         <var source="split_best" name="discr"/>
                         <var source="split_best" name="discrRest"/>
 			<var source="target_evt" name="target" target="true"/>
-                </input>
-                <config>
-                        <pdf/>
-                        <pdf/>
-                </config>
-                <output>
-                        <var name="var_dummy1"/>
-                        <var name="var_dummy2"/>
-                </output>
-        </processor>
+	        </xslt-varlist>
+	</xslt-ProcNormalize>
 
         <!-- final output is the discriminator of the best hypothesis -->
 
