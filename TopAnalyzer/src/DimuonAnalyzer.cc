@@ -30,13 +30,19 @@ DimuonAnalyzer::beginJob(const edm::EventSetup&)
   }
 
   ofstream hist(hist_.c_str(), std::ios::out);
+  // define logarithmic bins for a histogram with 50 bins going from 10^0 to 10^2.4 =~ 250
+  const int nbins = 50;
+  double logmin =  0.0;
+  double logmax =  2.4;
+  double bins[nbins+1];
+  for (int i = 0; i <= nbins; i++) {
+    double log = logmin + (logmax-logmin)*i/nbins;
+    bins[i] = std::pow(10.0, log);
+  }
 
   NameScheme e("dimuon");
-  dimassRC_    = fs->make<TH1F>(e.name(hist, "dimassRC"    ), e.name("dimassRC"    ), 50,   0.,  200.);
-  Dimass4RC_   = fs->make<TH1F>(e.name(hist, "Dimass4RC"   ), e.name("Dimass4RC"   ),160,   0.,    4.); 
-  
-  dimassWC_    = fs->make<TH1F>(e.name(hist, "dimassWC"    ), e.name("dimassWC"    ), 50,   0.,  200.);
-  Dimass4WC_   = fs->make<TH1F>(e.name(hist, "Dimass4WC"   ), e.name("Dimass4WC"   ),160,   0.,    4.); 
+  dimassRC_    = fs->make<TH1F>(e.name(hist, "dimassRC"    ), e.name("dimassRC"    ), nbins, bins);  
+  dimassWC_    = fs->make<TH1F>(e.name(hist, "dimassWC"    ), e.name("dimassWC"    ), nbins, bins);
          
   isoDimassCorrelation_ = fs->make<TH2F>(e.name(hist, "isoDimassCorrelation" ), e.name("isoDimassCorrelation" ), 10,   0.,   200., 10, 0., 1.);
   
@@ -95,14 +101,12 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   double dilepMass = (diLepLVector).M();
        
   
-  if(mu1.charge()*mu2.charge()<0.){    
-    dimassRC_  ->Fill( dilepMass, weight);  
-    Dimass4RC_ ->Fill( dilepMass, weight);  
-  }
-  if(mu1.charge()*mu2.charge()>0.){    
-    dimassWC_  ->Fill( dilepMass, weight);  
-    Dimass4WC_ ->Fill( dilepMass, weight);  
-  }    
+  if(mu1.charge()*mu2.charge()<0.)  
+    dimassRC_  ->Fill( dilepMass, weight);    
+  
+  if(mu1.charge()*mu2.charge()>0.) 
+    dimassWC_  ->Fill( dilepMass, weight);    
+     
     
   double absTrackIso1 = mu1.trackIso();
   double absTrackIso2 = mu2.trackIso();

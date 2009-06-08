@@ -49,10 +49,8 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     typedef std::vector<pat::Muon> PatMuonCollection; 
     
     TH1F * dimassRC_;
-    TH1F * Dimass4RC_;
-        
     TH1F * dimassWC_;
-    TH1F * Dimass4WC_;       
+      
             
     TH2F * isoDimassCorrelation_;   
     
