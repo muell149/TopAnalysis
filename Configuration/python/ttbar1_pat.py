@@ -11,10 +11,8 @@ from TopAnalysis.Configuration.defines import source
 ## xsec(pb) NLO:       414
 ## eff         :       1.0
 ######################################################################
-sizes ['ttbarx1_0'] = 146996
-source['ttbarx1_0'] ='\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_0_ttbar2.root\','
-source['ttbarx1_0']+='\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_1_ttbar2.root\','
-source['ttbarx1_0']+='\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_2_ttbar2.root\','
-source['ttbarx1_0']+='\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_3_ttbar2.root\','
-source['ttbarx1_0']+='\'file:/scratch/current/cms/user/rwolf/samples/ttbar2/patTuple_4_ttbar2.root\''
+sizes ['ttbarx1_0'] = 106540
+source['ttbarx1_0'] ='\'/store/user/rwolf/ttbar/patTuple_PATv2_ttbar_tauola_1.root\','
+source['ttbarx1_0']+='\'/store/user/rwolf/ttbar/patTuple_PATv2_ttbar_tauola_2.root\','
+source['ttbarx1_0']+='\'/store/user/rwolf/ttbar/patTuple_PATv2_ttbar_tauola_3.root\''
 

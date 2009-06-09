@@ -38,7 +38,7 @@ evts  ['ttbarx0'] =   1028322           ## number of produced events
 xsec  ['ttbarx0'] =       414           ## NLO in pb
 eff   ['ttbarx0'] =       1.0           ## generator efficiency on gen level
 sizes ['ttbarx0'] = 'blocks'
-source['ttbarx0'] = 'ttbarx0_0,'+'ttbarx0_1'
+source['ttbarx0'] = 'ttbarx0_0,'+'ttbarx0_1'+'ttbarx0_2'
 
 ## /TauolaTTbar/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.ttbar1_reco import *
