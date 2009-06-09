@@ -5,7 +5,7 @@ analyzeTtDimuon = cms.EDAnalyzer("TtDiMuonAnalyzer",
     # sources
     muons = cms.InputTag("selectedLayer1Muons"),
     jets = cms.InputTag("selectedLayer1Jets"),
-    met = cms.InputTag("selectedLayer1METs"),
+    met = cms.InputTag("layer1METs"),
     genEvt = cms.InputTag("genEvt"),
     solutions = cms.InputTag("solutions"),
     
