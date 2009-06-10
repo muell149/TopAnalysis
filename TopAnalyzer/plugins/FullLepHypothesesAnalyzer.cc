@@ -57,7 +57,7 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // -----------------------
   // fill histos related to quality of the TtFullLeptonicEvent
   // -----------------------
-  fillQualityHistos(*FullLepEvt, weight);
+  fillQualityHistos(*FullLepEvt, hypoKey, weight);
 
   //if( FullLepEvt->genMatchSumDR() > maxSumDRGenMatch_ )
   //  return; // return if any of the quality criteria is not fulfilled
@@ -447,6 +447,13 @@ FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
   kinSolWeight_      = fs->make<TH1F>(ns.name(hist, "kinSolWeight"), "Weight of kin solution", 50,  0. , 1. );
   kinSolWeightWrong_ = fs->make<TH1F>(ns.name(hist, "kinSolWeightWrong"), "Weight of kin solution", 50,  0. , 1. );  
   wrongCharge_       = fs->make<TH1F>(ns.name(hist, "wrongCharge"),  "is event wrong charge",   2, -0.5, 1.5);  
+  
+  bJetIdcs_   = fs->make<TH1F>(ns.name(hist, "bJetIdcs"   ),  "b jet indices used for hypo"     , 4, -0.5, 3.5);
+  bBarJetIdcs_= fs->make<TH1F>(ns.name(hist, "bBarJetIdcs"),  "bbar jet indices used for hypo"  , 4, -0.5, 3.5);  
+  elec1Idcs_  = fs->make<TH1F>(ns.name(hist, "elec1Idcs"   ),  "electron 1 indices used for hypo", 5, -1.5, 3.5);
+  elec2Idcs_  = fs->make<TH1F>(ns.name(hist, "elec2Idcs"   ),  "electron 2 indices used for hypo", 5, -1.5, 3.5);    
+  muon1Idcs_  = fs->make<TH1F>(ns.name(hist, "muon1Idcs"   ),  "muon 1 indices used for hypo"    , 5, -1.5, 3.5); 
+  muon2Idcs_  = fs->make<TH1F>(ns.name(hist, "muon2Idcs"   ),  "muon 2 indices used for hypo"    , 5, -1.5, 3.5);     
 }
 
 void
@@ -492,9 +499,17 @@ FullLepHypothesesAnalyzer::fillWrongChargeKinResHistos(std::vector<TH1F*>& histo
 }
 
 void
-FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, const double& weight)
+FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, 
+                                             const TtEvent::HypoClassKey& hypoKey, 
+					     const double& weight)
 {
-
+  bJetIdcs_   ->Fill(FullLepEvt.jetLepComb(hypoKey)[0] );
+  bBarJetIdcs_->Fill(FullLepEvt.jetLepComb(hypoKey)[1] );  
+  elec1Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[2] );  
+  elec2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[3] );  
+  muon1Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[4] );  
+  muon2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[5] );  
+  
   // genMatch histos
   if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kGenMatch) ) {
     genMatchSumDR_->Fill( FullLepEvt.genMatchSumDR() , weight );

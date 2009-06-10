@@ -57,7 +57,8 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
                                 const reco::Candidate&, 
 				const reco::Candidate&, 
 				const double&);				
-  void fillQualityHistos       (const TtFullLeptonicEvent&, 
+  void fillQualityHistos       (const TtFullLeptonicEvent&,
+                                const TtEvent::HypoClassKey&,
                                 const double&);
 
   std::vector<TH1F*> TopKin_;
@@ -89,7 +90,14 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   
   TH1F* kinSolWeight_;
   TH1F* kinSolWeightWrong_;  
-  TH1F* wrongCharge_;    
+  TH1F* wrongCharge_; 
+  
+  TH1F* bJetIdcs_;
+  TH1F* bBarJetIdcs_;  
+  TH1F* elec1Idcs_;
+  TH1F* elec2Idcs_;  
+  TH1F* muon1Idcs_;  
+  TH1F* muon2Idcs_;     
 };
 
 #endif
