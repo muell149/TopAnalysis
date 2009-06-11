@@ -153,7 +153,8 @@ evts  ['zjetsx0'] =   9964055           ## number of produced events
 xsec  ['zjetsx0'] =      3700           ## NLO in pb
 eff   ['zjetsx0'] =       1.0           ## generator efficiency on gen level
 sizes ['zjetsx0'] = 'blocks'
-source['zjetsx0'] = 'zjetsx0_0,'+'zjetsx0_1,'+'zjetsx0_2,'+'zjetsx0_3,'+'zjetsx0_4'+'zjetsx0_5,'+'zjetsx0_6'
+source['zjetsx0'] = 'zjetsx0_0,'+'zjetsx0_1,'+'zjetsx0_2,'+'zjetsx0_3,'
+source['zjetsx0']+= 'zjetsx0_4,'+'zjetsx0_5,'+'zjetsx0_6,'+'zjetsx0_7'
 
 ## /ZJets-madgraph/Fall08_IDEAL_V9_reco-v2/GEN-SIM-RECO
 from TopAnalysis.Configuration.zjets1_reco import *
@@ -175,7 +176,7 @@ evts  ['zjetsx1'] =   1163479           ## number of produced events
 xsec  ['zjetsx1'] =      3700           ## NLO in pb
 eff   ['zjetsx1'] =       1.0           ## generator efficiency on gen level
 sizes ['zjetsx1'] = 'blocks'
-source['zjetsx1'] = 'zjetsx1_0,'+'zjetsx1_1'+'zjetsx1_2'
+source['zjetsx1'] = 'zjetsx1_0,'+'zjetsx1_1'
 
 ## /WW/Winter09_IDEAL_V12_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.wwjets_pat import *
