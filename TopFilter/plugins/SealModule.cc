@@ -30,6 +30,9 @@ typedef SemiLepEventFilter<std::vector<pat::Muon> > SemiLepMuonEventFilter;
 // plugin definition
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+// di-muon-mass filter
+#include "TopAnalysis/TopFilter/interface/DiMuonMassFilter.h"
+
 // simple event filters
 DEFINE_FWK_MODULE( PtEventFilter            );
 DEFINE_FWK_MODULE( EtaEventFilter           );
@@ -38,6 +41,8 @@ DEFINE_FWK_MODULE( MuonIsolationEventFilter );
 DEFINE_FWK_MODULE( ElecDistanceEventFilter  );
 DEFINE_FWK_MODULE( ElecIsolationEventFilter );
 DEFINE_FWK_MODULE( JetOverlapEventFilter    );
+
+DEFINE_FWK_MODULE( DiMuonMassFilter    );
 
 // full event filters
 DEFINE_FWK_MODULE( SemiLepMuonEventFilter   );
