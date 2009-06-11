@@ -18,6 +18,7 @@
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/CaloTowers/interface/CaloTower.h"
