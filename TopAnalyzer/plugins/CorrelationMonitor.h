@@ -25,12 +25,13 @@ public:
 	 */
 	void addHist(std::string name, TH2F* hist) {
 		hist->SetDrawOption("COLZ");
-		histos_.insert(make_pair(name, hist));
+		histos_.insert(make_pair<string, TH2F*>(name, hist));
 	}
 
 	void addHist(std::string name, unsigned int numberOfBins1, double min1, double max1, unsigned int numberOfBins2,
 			double min2, double max2) {
 		NameScheme nam("corr");
+//		std::cout << "booking TH2F" << numberOfBins1 << " " << numberOfBins2 << endl;
 		TH2F *hist = fs_->make<TH2F> (nam.name(name.c_str()), nam.name(name.c_str()), numberOfBins1, min1, max1,
 				numberOfBins2, min2, max2);
 		addHist(name, hist);

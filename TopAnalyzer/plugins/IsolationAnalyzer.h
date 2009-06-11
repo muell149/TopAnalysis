@@ -21,6 +21,7 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
+#include "TopAnalysis/TopUtils/interface/QCDBkgEstimateSelector.h"
 
 class IsolationAnalyzer : public edm::EDAnalyzer {
 
@@ -36,14 +37,13 @@ private:
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
 	template <class T>
-	pat::Jet getClosestJet(edm::Handle<TopJetCollection>&, T);
-	virtual pat::Jet getClosestJetInDeltaPhi(edm::Handle<TopJetCollection> &, double phi);
+//	pat::Jet getClosestJet(TopJetCollection, T);
+//	virtual pat::Jet getClosestJetInDeltaPhi(TopJetCollection, double phi);
 
-	double getJetIso(edm::Handle<TopJetCollection> jets, edm::Handle<TopMuonCollection> muons, double minJetPt) {
-		TopMuonCollection::const_iterator muon = muons->begin();
+	double getJetIso(TopJetCollection jets, pat::Muon *muon, double minJetPt) {
 		double minDR = -1.;
-		if (muon != muons->end()) {
-			for (TopJetCollection::const_iterator jet = jets->begin(); jet != jets->end(); ++jet) {
+		if (muon) {
+			for (TopJetCollection::const_iterator jet = jets.begin(); jet != jets.end(); ++jet) {
 				double dR = deltaR(muon->eta(), muon->phi(), jet->eta(), jet->phi());
 				if ((minDR < 0 || dR < minDR) && jet->pt() > minJetPt)
 					minDR = dR;
@@ -55,18 +55,19 @@ private:
 
 	edm::InputTag muons_;
 	edm::InputTag met_;
-	edm::InputTag ttgen_;
+//	edm::InputTag ttgen_;
 	edm::InputTag jets_;
 
-	vector<double> ptBins_;
+//	vector<double> ptBins_;
 	bool useMVA_;
 	std::string module_;
 	std::string discinput_;
 
-	TH1F *recoMETUncorrectedMET_, *genMetRecoDiff_, *norm_genMetRecoDiff_, *realWPt_;
+	TH1F *recoMETUncorrectedMET_, *genMetRecoDiff_, *norm_genMetRecoDiff_;//, *realWPt_;
 	TH2F *sumDeltaPhiMuvsdeltaPhiJ1J2_;
 
 	IsolationHelper *helper_;
+    QCDBkgEstimateSelector *selector;
 	//for ttbar Binning
 //	map<string, IsolationHelper*> ttBarHelper_;
 };
