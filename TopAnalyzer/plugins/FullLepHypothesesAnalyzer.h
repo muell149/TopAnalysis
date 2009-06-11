@@ -97,7 +97,9 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   TH1F* elec1Idcs_;
   TH1F* elec2Idcs_;  
   TH1F* muon1Idcs_;  
-  TH1F* muon2Idcs_;     
+  TH1F* muon2Idcs_; 
+  
+  TH1F* deltaM_;    
 };
 
 #endif

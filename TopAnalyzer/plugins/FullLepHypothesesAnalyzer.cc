@@ -453,7 +453,9 @@ FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
   elec1Idcs_  = fs->make<TH1F>(ns.name(hist, "elec1Idcs"   ),  "electron 1 indices used for hypo", 5, -1.5, 3.5);
   elec2Idcs_  = fs->make<TH1F>(ns.name(hist, "elec2Idcs"   ),  "electron 2 indices used for hypo", 5, -1.5, 3.5);    
   muon1Idcs_  = fs->make<TH1F>(ns.name(hist, "muon1Idcs"   ),  "muon 1 indices used for hypo"    , 5, -1.5, 3.5); 
-  muon2Idcs_  = fs->make<TH1F>(ns.name(hist, "muon2Idcs"   ),  "muon 2 indices used for hypo"    , 5, -1.5, 3.5);     
+  muon2Idcs_  = fs->make<TH1F>(ns.name(hist, "muon2Idcs"   ),  "muon 2 indices used for hypo"    , 5, -1.5, 3.5);  
+  
+  deltaM_  = fs->make<TH1F>(ns.name(hist, "deltaM"   ),  "M_{top}-M{#bar{t}}"    , 50, -25., 25.);       
 }
 
 void
@@ -508,15 +510,16 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
   elec1Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[2] );  
   elec2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[3] );  
   muon1Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[4] );  
-  muon2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[5] );  
-  
+  muon2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[5] ); 
+    
   // genMatch histos
-  if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kGenMatch) ) {
+  if( hypoKey==3 ) {
     genMatchSumDR_->Fill( FullLepEvt.genMatchSumDR() , weight );
     genMatchSumPt_->Fill( FullLepEvt.genMatchSumPt() , weight ); 
   } 
   
-  if( FullLepEvt.isHypoValid(TtFullLeptonicEvent::kKinSolution) ) {
+  if( hypoKey==6 ) {
+    deltaM_->Fill(FullLepEvt.top(hypoKey)->mass()-FullLepEvt.topBar(hypoKey)->mass()); 
     if(!FullLepEvt.isWrongCharge()) kinSolWeight_->Fill( FullLepEvt.solWeight() , weight );
     else kinSolWeightWrong_->Fill( FullLepEvt.solWeight() , weight );
     wrongCharge_ ->Fill( FullLepEvt.isWrongCharge() , weight ); 
