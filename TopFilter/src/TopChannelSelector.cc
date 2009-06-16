@@ -389,6 +389,12 @@ void TopChannelSelector::beginJob(const edm::EventSetup&) {
   
   edm::LogInfo log("TopChannelSelector");
   
+  bool saidTau     = false;
+  bool saidTauTau  = false;
+  bool saidTauMuon = false;
+  bool saidTauElec = false;
+  bool saidTauHadr = false;
+  
   log << "==============================================================\n";
   if(invert_==false) log << "List of selected decay channels:\n";
   else log << "All decay channels selected except of:\n";
@@ -397,40 +403,55 @@ void TopChannelSelector::beginJob(const edm::EventSetup&) {
     int first = channel/10;
     int second = channel%10;
   
+    std::cout << channel << std::endl;
+  
     if(first == 0 || second==0){
       if(first==1) log << "single top to hadrons\n";
       else if(first==2) log << "single top to electron\n";
       else if(first==3) log << "single top to muon\n";
-      else if(first>3) log << "single top to tau\n";
+      else if(first>3 && !saidTau){ 
+        log << "single top to tau\n";
+        saidTau = true;
+      }
     }
   
     else if(channel==11) log << "fullhadronic\n";
   
-    else if(first == second){
-      log << "dileptonic ";
-      if(channel==22) log << "e e\n";
-      else if(channel==33) log << "mu mu\n";
-      else log << "tau tau\n";
+    else if((first == second) || (first >= 4 && second >= 4)){
+      if(channel==22) log << "dileptonic e e\n";
+      else if(channel==33) log << "dileptonic mu mu\n";
+      else if(!saidTauTau){ 
+        log << "dileptonic tau tau\n";
+	saidTauTau = true;
+      }
     }
     
     else if(first > second){
       if(second>1){
-        log << "dilepton ";
-	if(first==3) log << "mu e\n";
-	else if(first>=4 && second==3) log << "tau mu\n";
-	else log << "tau e\n";
+	if(first==3) log << "dilepton mu e\n";
+	else if(first>=4 && second==3 && !saidTauMuon){
+	  log << "dilepton tau mu\n";
+	  saidTauMuon = true;
+	}
+	else if(second==2 && !saidTauElec){
+	  log << "tau e\n";
+	  saidTauElec = true; 
+	}
       }
       else{
         log << "semileptonic with ";
 	if(first==2) log << "electron\n";
 	else if(first==3) log << "muon\n";
-	else log << "tau\n";
+	else if(!saidTauHadr){  
+	  log << "tau\n";
+	  saidTauHadr = true;
+	}
       }
     }      
   } 
-  if(!Tau2Had_ || !Tau2Elec_ || !Tau2Muon_){
+  if(!Tau2Had_ || !Tau2Elec_ || !Tau2Muon_ ){
     log << "\nTaus decaying to ";
-    if(!Tau2Had_) log << "hadrons ";
+    if(!Tau2Had_ ) log << "hadrons ";
     if(!Tau2Elec_) log << "electrons ";
     if(!Tau2Muon_)  log << "muons ";
     log << "are excluded form selection.\n";
