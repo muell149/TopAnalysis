@@ -82,7 +82,8 @@ eff   ['qcdx0'  ] =  0.000239           ## generator efficiency on gen level
 sizes ['qcdx0'  ] = 'blocks'
 source['qcdx0'  ] = 'qcdx0_0,' +'qcdx0_1,' +'qcdx0_2,' +'qcdx0_3,' +'qcdx0_4,'
 source['qcdx0'  ]+= 'qcdx0_5,' +'qcdx0_6,' +'qcdx0_7,' +'qcdx0_8,' +'qcdx0_9,'
-source['qcdx0'  ]+= 'qcdx0_10,'+'qcdx0_11,'+'qcdx0_12,'+'qcdx0_13'
+source['qcdx0'  ]+= 'qcdx0_10,'+'qcdx0_11,'+'qcdx0_12,'+'qcdx0_13,'+'qcdx0_14,'
+source['qcdx0'  ]+= 'qcdx0_15,'+'qcdx0_16'
 
 ## /InclusiveMuPt15/Summer08_IDEAL_V11_redigi_v1/GEN-SIM-RECO
 evts  ['qcd0'   ] = 1                   ## number of produced events
@@ -145,7 +146,10 @@ xsec  ['wjetsx1'] =     35000           ## NLO in pb
 eff   ['wjetsx1'] =       1.0           ## generator efficiency on gen level
 sizes ['wjetsx1'] ='blocks'
 source['wjetsx1'] ='wjetsx1_0,' +'wjetsx1_1,' +'wjetsx1_2,' +'wjetsx1_3,' +'wjetsx1_4,'
-source['wjetsx1']+='wjetsx1_5'
+source['wjetsx1']+='wjetsx1_5,' +'wjetsx1_6,' +'wjetsx1_7,' +'wjetsx1_8,' +'wjetsx1_9,'
+source['wjetsx1']+='wjetsx1_10,' +'wjetsx1_11,' +'wjetsx1_12,' +'wjetsx1_13,' +'wjetsx1_14,'
+source['wjetsx1']+='wjetsx1_15,' +'wjetsx1_16,' +'wjetsx1_17,' +'wjetsx1_18,' +'wjetsx1_19,'
+source['wjetsx1']+='wjetsx1_20'
 
 ## /Zjets-madgraph/Winter09_IDEAL_V11_FastSim_v1/GEN-SIM-DIGI-RECO
 from TopAnalysis.Configuration.zjets0_pat import *
