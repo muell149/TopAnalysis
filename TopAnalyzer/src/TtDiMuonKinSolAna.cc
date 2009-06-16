@@ -37,15 +37,15 @@ TtDiMuonKinSolAna::book(ofstream& file)
   edm::Service<TFileService> fs;
 
   NameScheme e("kin");
-  mass_         = fs->make<TH1F>(e.name( file, "mass"        ), e.name("mass"        ), 51,  99., 301.);
-  dimuonmass_   = fs->make<TH1F>(e.name( file, "dimuonmass"  ), e.name("dimuonmass"  ), 50,   0., 250.); 
-  weightmax_    = fs->make<TH1F>(e.name( file, "weightmax"   ), e.name("weightmax"   ), 50,   0.,   1.);
-  maxweightmax_ = fs->make<TH1F>(e.name( file, "maxweightmax"), e.name("maxweightmax"), 50,   0.,   1.);
-  massBbW_      = fs->make<TH1F>(e.name( file, "massBbW"     ), e.name("massBbW"     ), 51,  99., 301.);
-  massBbM_      = fs->make<TH1F>(e.name( file, "massBbM"     ), e.name("massBbM"     ), 51,  99., 301.);  
-  muPt_         = fs->make<TH1F>(e.name( file, "muPt"        ), e.name("muPt"        ), 60,   0., 300.);  
-  jetPt_        = fs->make<TH1F>(e.name( file, "jetPt"       ), e.name("jetPt"       ), 60,   0., 300.);   
-  met_          = fs->make<TH1F>(e.name( file, "met"         ), e.name("met"         ), 60,   0., 300.);   
+  mass_         = fs->make<TH1F>(e.name( file, "mass"        ), e.name("mass"        ), 30, 50., 350.);
+  dimuonmass_   = fs->make<TH1F>(e.name( file, "dimuonmass"  ), e.name("dimuonmass"  ), 50,  0., 250.); 
+  weightmax_    = fs->make<TH1F>(e.name( file, "weightmax"   ), e.name("weightmax"   ), 50,  0.,   1.);
+  maxweightmax_ = fs->make<TH1F>(e.name( file, "maxweightmax"), e.name("maxweightmax"), 50,  0.,   1.);
+  massBbW_      = fs->make<TH1F>(e.name( file, "massBbW"     ), e.name("massBbW"     ), 30, 50., 350.);
+  massBbM_      = fs->make<TH1F>(e.name( file, "massBbM"     ), e.name("massBbM"     ), 30, 50., 350.);  
+  muPt_         = fs->make<TH1F>(e.name( file, "muPt"        ), e.name("muPt"        ), 60,  0., 300.);  
+  jetPt_        = fs->make<TH1F>(e.name( file, "jetPt"       ), e.name("jetPt"       ), 60,  0., 300.);   
+  met_          = fs->make<TH1F>(e.name( file, "met"         ), e.name("met"         ), 60,  0., 300.);   
 }
 
 int Nsolutions = 0;
