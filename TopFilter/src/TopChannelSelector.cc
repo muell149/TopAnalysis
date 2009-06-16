@@ -402,9 +402,7 @@ void TopChannelSelector::beginJob(const edm::EventSetup&) {
     int channel = selectedChannels[i];
     int first = channel/10;
     int second = channel%10;
-  
-    std::cout << channel << std::endl;
-  
+    
     if(first == 0 || second==0){
       if(first==1) log << "single top to hadrons\n";
       else if(first==2) log << "single top to electron\n";
