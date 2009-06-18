@@ -1,7 +1,5 @@
 #include "TopAnalysis/TopAnalyzer/plugins/FullLepHypothesesAnalyzer.h"
-
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
-
 #include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
 
 FullLepHypothesesAnalyzer::FullLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
@@ -437,7 +435,7 @@ void
 FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofstream& hist)
 {
 
-  NameScheme ns("qual1D");
+  NameScheme ns("qual");
 
   goodHypo_ = fs->make<TH1F>(ns.name(hist, "goodHypo"), "good hypothesis", 2, -0.5, 1.5);
 
@@ -455,7 +453,10 @@ FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs, ofs
   muon1Idcs_  = fs->make<TH1F>(ns.name(hist, "muon1Idcs"   ),  "muon 1 indices used for hypo"    , 5, -1.5, 3.5); 
   muon2Idcs_  = fs->make<TH1F>(ns.name(hist, "muon2Idcs"   ),  "muon 2 indices used for hypo"    , 5, -1.5, 3.5);  
   
-  deltaM_  = fs->make<TH1F>(ns.name(hist, "deltaM"   ),  "M_{top}-M{#bar{t}}"    , 50, -25., 25.);       
+  deltaM_  = fs->make<TH1F>(ns.name(hist, "deltaM"   ), "M_{top}-M{#bar{t}}", 50, -25., 25.);
+  
+  compare_  = fs->make<TH2F>(ns.name(hist, "compare"   ), "Indices", 15, -0.5, 14.5, 15, -0.5, 14.5);
+  spectrum_ = fs->make<TH2F>(ns.name(hist, "spectrum"   ),"Nu spectrum", 50, 0., 250., 50, 0., 250.);       
 }
 
 void
@@ -511,6 +512,8 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
   elec2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[3] );  
   muon1Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[4] );  
   muon2Idcs_  ->Fill(FullLepEvt.jetLepComb(hypoKey)[5] ); 
+  
+  spectrum_->Fill(FullLepEvt.neutrino(hypoKey)->energy(), FullLepEvt.neutrinoBar(hypoKey)->energy());
     
   // genMatch histos
   if( hypoKey==3 ) {
@@ -523,5 +526,16 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
     if(!FullLepEvt.isWrongCharge()) kinSolWeight_->Fill( FullLepEvt.solWeight() , weight );
     else kinSolWeightWrong_->Fill( FullLepEvt.solWeight() , weight );
     wrongCharge_ ->Fill( FullLepEvt.isWrongCharge() , weight ); 
-  }    
+  } 
+  
+  // indices Hist (for muon muon only) 
+  const TtEvent::HypoClassKey genKey = TtEvent::HypoClassKey(3);
+  const TtEvent::HypoClassKey kinKey = TtEvent::HypoClassKey(6);
+   
+  if(FullLepEvt.isHypoValid(genKey) && FullLepEvt.isHypoValid(kinKey)){
+    compare_->Fill(FullLepEvt.jetLepComb(genKey)[0]  , FullLepEvt.jetLepComb(kinKey)[0]  );
+    compare_->Fill(FullLepEvt.jetLepComb(genKey)[1]+4, FullLepEvt.jetLepComb(kinKey)[1]+4);   
+    compare_->Fill(FullLepEvt.jetLepComb(genKey)[4]+8, FullLepEvt.jetLepComb(kinKey)[4]+8);
+    compare_->Fill(FullLepEvt.jetLepComb(genKey)[5]+12, FullLepEvt.jetLepComb(kinKey)[5]+12);           
+  }   
 }
