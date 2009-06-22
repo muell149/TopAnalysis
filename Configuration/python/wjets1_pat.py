@@ -3,15 +3,15 @@ from TopAnalysis.Configuration.defines import source
 
 ######################################################################
 #                                                                     
-# -----------                                                         
+# /WJets-madgraph/Fall08_IDEAL_V9_v1/GEN-SIM-RECO                                                         
 #                                                                     
 #                                                                     
-# Events      :                                                       
-# xsec(pb)  LO:                                                       
-# xsec(pb) NLO:                                                       
-# eff         :                                                       
+# Events      : 584054 (??? processed)                                                      
+# xsec(pb)  LO: 35000                                                      
+# xsec(pb) NLO: NAN                                                      
+# eff         : ???                                                      
 ######################################################################
-sizes ['wjetsx1_0'] = 99999999
+sizes ['wjetsx1_0'] = 28558
 source['wjetsx1_0'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_1.root\','
 source['wjetsx1_0']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_10.root\','
 source['wjetsx1_0']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_100.root\','
@@ -23,7 +23,7 @@ source['wjetsx1_0']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_0']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_106.root\','
 source['wjetsx1_0']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_107.root\''
 
-sizes ['wjetsx1_1'] = 99999999
+sizes ['wjetsx1_1'] = 28978
 source['wjetsx1_1'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_108.root\','
 source['wjetsx1_1']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_109.root\','
 source['wjetsx1_1']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_11.root\','
@@ -35,7 +35,7 @@ source['wjetsx1_1']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_1']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_115.root\','
 source['wjetsx1_1']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_116.root\''
 
-sizes ['wjetsx1_2'] = 99999999
+sizes ['wjetsx1_2'] = 27546
 source['wjetsx1_2'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_117.root\','
 source['wjetsx1_2']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_118.root\','
 source['wjetsx1_2']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_119.root\','
@@ -47,7 +47,7 @@ source['wjetsx1_2']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_2']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_124.root\','
 source['wjetsx1_2']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_125.root\''
 
-sizes ['wjetsx1_3'] = 99999999
+sizes ['wjetsx1_3'] = 29137
 source['wjetsx1_3'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_126.root\','
 source['wjetsx1_3']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_127.root\','
 source['wjetsx1_3']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_128.root\','
@@ -59,7 +59,7 @@ source['wjetsx1_3']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_3']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_133.root\','
 source['wjetsx1_3']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_134.root\''
 
-sizes ['wjetsx1_4'] = 99999999
+sizes ['wjetsx1_4'] = 26281
 source['wjetsx1_4'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_135.root\','
 source['wjetsx1_4']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_136.root\','
 source['wjetsx1_4']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_137.root\','
@@ -71,7 +71,7 @@ source['wjetsx1_4']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_4']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_142.root\','
 source['wjetsx1_4']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_143.root\''
 
-sizes ['wjetsx1_5'] = 99999999
+sizes ['wjetsx1_5'] = 28212
 source['wjetsx1_5'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_144.root\','
 source['wjetsx1_5']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_15.root\','
 source['wjetsx1_5']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_150.root\','
@@ -83,7 +83,7 @@ source['wjetsx1_5']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_5']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_156.root\','
 source['wjetsx1_5']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_157.root\''
 
-sizes ['wjetsx1_6'] = 99999999
+sizes ['wjetsx1_6'] = 28249
 source['wjetsx1_6'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_158.root\','
 source['wjetsx1_6']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_159.root\','
 source['wjetsx1_6']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_16.root\','
@@ -95,7 +95,7 @@ source['wjetsx1_6']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_6']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_165.root\','
 source['wjetsx1_6']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_166.root\''
 
-sizes ['wjetsx1_7'] = 99999999
+sizes ['wjetsx1_7'] = 29210
 source['wjetsx1_7'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_167.root\','
 source['wjetsx1_7']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_168.root\','
 source['wjetsx1_7']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_169.root\','
@@ -107,7 +107,7 @@ source['wjetsx1_7']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_7']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_174.root\','
 source['wjetsx1_7']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_175.root\''
 
-sizes ['wjetsx1_8'] = 99999999
+sizes ['wjetsx1_8'] = 24703
 source['wjetsx1_8'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_176.root\','
 source['wjetsx1_8']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_177.root\','
 source['wjetsx1_8']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_178.root\','
@@ -119,7 +119,7 @@ source['wjetsx1_8']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_8']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_183.root\','
 source['wjetsx1_8']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_184.root\''
 
-sizes ['wjetsx1_9'] = 99999999
+sizes ['wjetsx1_9'] = 28872
 source['wjetsx1_9'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_185.root\','
 source['wjetsx1_9']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_186.root\','
 source['wjetsx1_9']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_187.root\','
@@ -131,7 +131,7 @@ source['wjetsx1_9']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsi
 source['wjetsx1_9']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_192.root\','
 source['wjetsx1_9']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_193.root\''
 
-sizes ['wjetsx1_10'] = 99999999
+sizes ['wjetsx1_10'] = 26364
 source['wjetsx1_10'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_194.root\','
 source['wjetsx1_10']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_195.root\','
 source['wjetsx1_10']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_196.root\','
@@ -143,7 +143,7 @@ source['wjetsx1_10']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_10']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_201.root\','
 source['wjetsx1_10']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_202.root\''
 
-sizes ['wjetsx1_11'] = 99999999
+sizes ['wjetsx1_11'] = 28943
 source['wjetsx1_11'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_203.root\','
 source['wjetsx1_11']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_204.root\','
 source['wjetsx1_11']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_205.root\','
@@ -155,7 +155,7 @@ source['wjetsx1_11']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_11']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_210.root\','
 source['wjetsx1_11']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_211.root\''
 
-sizes ['wjetsx1_12'] = 99999999
+sizes ['wjetsx1_12'] = 26535
 source['wjetsx1_12'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_212.root\','
 source['wjetsx1_12']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_213.root\','
 source['wjetsx1_12']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_214.root\','
@@ -167,7 +167,7 @@ source['wjetsx1_12']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_12']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_25.root\','
 source['wjetsx1_12']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_26.root\''
 
-sizes ['wjetsx1_13'] = 99999999
+sizes ['wjetsx1_13'] = 27424
 source['wjetsx1_13'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_27.root\','
 source['wjetsx1_13']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_28.root\','
 source['wjetsx1_13']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_29.root\','
@@ -179,7 +179,7 @@ source['wjetsx1_13']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_13']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_34.root\','
 source['wjetsx1_13']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_35.root\''
 
-sizes ['wjetsx1_14'] = 99999999
+sizes ['wjetsx1_14'] = 28636
 source['wjetsx1_14'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_36.root\','
 source['wjetsx1_14']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_37.root\','
 source['wjetsx1_14']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_38.root\','
@@ -191,7 +191,7 @@ source['wjetsx1_14']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_14']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_43.root\','
 source['wjetsx1_14']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_44.root\''
 
-sizes ['wjetsx1_15'] = 99999999
+sizes ['wjetsx1_15'] = 26821
 source['wjetsx1_15'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_45.root\','
 source['wjetsx1_15']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_46.root\','
 source['wjetsx1_15']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_47.root\','
@@ -203,7 +203,7 @@ source['wjetsx1_15']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_15']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_52.root\','
 source['wjetsx1_15']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_53.root\''
 
-sizes ['wjetsx1_16'] = 99999999
+sizes ['wjetsx1_16'] = 28504
 source['wjetsx1_16'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_54.root\','
 source['wjetsx1_16']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_55.root\','
 source['wjetsx1_16']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_56.root\','
@@ -215,7 +215,7 @@ source['wjetsx1_16']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_16']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_61.root\','
 source['wjetsx1_16']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_62.root\''
 
-sizes ['wjetsx1_17'] = 99999999
+sizes ['wjetsx1_17'] = 29185
 source['wjetsx1_17'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_63.root\','
 source['wjetsx1_17']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_64.root\','
 source['wjetsx1_17']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_65.root\','
@@ -227,7 +227,7 @@ source['wjetsx1_17']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_17']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_70.root\','
 source['wjetsx1_17']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_71.root\''
 
-sizes ['wjetsx1_18'] = 99999999
+sizes ['wjetsx1_18'] = 25987
 source['wjetsx1_18'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_72.root\','
 source['wjetsx1_18']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_73.root\','
 source['wjetsx1_18']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_74.root\','
@@ -239,7 +239,7 @@ source['wjetsx1_18']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_18']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_8.root\','
 source['wjetsx1_18']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_80.root\''
 
-sizes ['wjetsx1_19'] = 99999999
+sizes ['wjetsx1_19'] = 28907
 source['wjetsx1_19'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_81.root\','
 source['wjetsx1_19']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_82.root\','
 source['wjetsx1_19']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_83.root\','
@@ -251,7 +251,7 @@ source['wjetsx1_19']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fulls
 source['wjetsx1_19']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_89.root\','
 source['wjetsx1_19']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_9.root\''
 
-sizes ['wjetsx1_20'] = 99999999
+sizes ['wjetsx1_20'] = 27002
 source['wjetsx1_20'] ='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_90.root\','
 source['wjetsx1_20']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_91.root\','
 source['wjetsx1_20']+='\'/store/user/maldayam/wjetsv2/patTuple_PATv2_wjets_fullsim_92.root\','
