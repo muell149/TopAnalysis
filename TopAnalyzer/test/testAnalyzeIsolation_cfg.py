@@ -9,7 +9,11 @@ process = cms.Process("Muon")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-## process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+# ignoreTotal=cms.untracked.int32(1),
+# oncePerEventMode=cms.untracked.bool(False)
+#)
 
 #-------------------------------------------------
 # process configuration
@@ -39,10 +43,10 @@ process.options = cms.untracked.PSet(
 ## analyze muon isolation
 process.load("TopAnalysis.TopAnalyzer.IsolationAnalyzer_cfi")
 from TopAnalysis.TopAnalyzer.IsolationAnalyzer_cfi import analyzeisolationMET
-before = analyzeisolationMET.clone()
-after = analyzeisolationMET.clone()
-before.modulename = "findQCDBkgMVA"
-after.modulename = "findQCDBkgMVA"
+process.before = analyzeisolationMET.clone()
+process.after = analyzeisolationMET.clone()
+process.before.modulename = "findQCDBkgMVA"
+process.after.modulename = "findQCDBkgMVA"
 process.load("TopAnalysis.TopUtils.QCDBkgMVAComputer_cff")
 ## import selection cuts here
 from TopAnalysis.TopFilter.selections.semiLepMuonSelection_step1_cff import *
@@ -52,6 +56,7 @@ filterSemiLepMuonEvent.lepPtFilter = semiLepMuonPt
 filterSemiLepMuonEvent.lepPtFilter.min = [20.0]
 filterSemiLepMuonEvent.jetEtaFilter = semiLepJetsEta
 filterSemiLepMuonEvent.jetPtFilter = semiLepJetsPt
+#use lower cuts for higher QCD statistics
 filterSemiLepMuonEvent.jetPtFilter.min = [20.0, 20.0, 20.0, 20.0]
 filterSemiLepMuonEvent.trkIsoFilter = semiLepMuonIsolationTrk
 filterSemiLepMuonEvent.calIsoFilter = semiLepMuonIsolationCal
