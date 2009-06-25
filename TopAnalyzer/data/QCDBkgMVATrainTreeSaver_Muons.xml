@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<MVATrainer>
+	<general>
+		<option name="trainfiles">train_%1$s%2$s.%3$s</option>
+        </general>
+
+        <input id="input">
+                <var name="dphiMETJet1" multiple="false" optional="false"/>
+                <var name="dphiMETJet2" multiple="false" optional="false"/>
+                <var name="dphiMETJet3" multiple="false" optional="false"/>
+                <var name="dphiMETJet4" multiple="false" optional="false"/>
+                
+                <var name="dphiMETLepton" multiple="false" optional="false"/>
+                <var name="dphiMuJ1J2" multiple="false" optional="false"/>
+                <var name="METTimesLeadingJet" multiple="false" optional="false"/>
+                <var name="sumEtJet3And4" multiple="false" optional="false"/>
+                
+                <var name="sumAllJetsEtAndLepton" multiple="false" optional="false"/>
+                <var name="vecSumAllJetsAndLepton" multiple="false" optional="false"/>
+                <var name="sumEtleadingJetAnd2TimesLeptonPt" multiple="false" optional="false"/>
+                <var name="MET" multiple="false" optional="false"/>
+                
+                <var name="leptonPt" multiple="false" optional="false"/>
+                
+                <var name="aplanarity" multiple="false" optional="false"/>
+                <var name="sphericity" multiple="false" optional="false"/>
+                <var name="circularity" multiple="false" optional="false"/>                
+                 <var name="isotropy" multiple="false" optional="false"/>
+                 
+                <var name="Jet3EtOverJet1EtJet3Et" multiple="false" optional="false"/>
+                <var name="Jet3EtOverJet2EtJet3Et" multiple="false" optional="false"/>
+                <var name="Jet4EtOverJet1EtJet4Et" multiple="false" optional="false"/>
+                 <var name="Jet4EtOverJet2EtJet4Et" multiple="false" optional="false"/>
+                 
+                 <var name="invariantMassJ3andJ4" multiple="false" optional="false"/>
+                <var name="DeltaPhiMuonJet3" multiple="false" optional="false"/>
+                <var name="DeltaPhiMuonJet4" multiple="false" optional="false"/>
+                 <var name="deltaPhiJet1Jet2" multiple="false" optional="false"/>
+                 
+                 <var name="DeltaPhiTtbar" multiple="false" optional="false"/>
+                <var name="TriJetTMass" multiple="false" optional="false"/>
+                <var name="DeltaPhiTimesDeltaEta" multiple="false" optional="false"/>
+                 <var name="minDeltaPhiMETJets" multiple="false" optional="false"/>
+                
+                
+                
+        </input>
+<!--   Don't forget to checkout TreeSaver.cc from PhysicsTools/MVATrainer/src/     -->
+<processor id="save" name="TreeSaver">
+		<input>
+			<var source="input" name="dphiMETJet1"/>
+            <var source="input" name="dphiMETJet2"/>
+            <var source="input" name="dphiMETJet3"/>
+            <var source="input" name="dphiMETJet4"/>
+            
+            <var source="input" name="dphiMETLepton"/>
+            <var source="input" name="dphiMuJ1J2"/>
+            <var source="input" name="METTimesLeadingJet"/>
+            <var source="input" name="sumEtJet3And4"/>
+            
+            <var source="input" name="sumAllJetsEtAndLepton"/>
+            <var source="input" name="vecSumAllJetsAndLepton"/>
+            <var source="input" name="sumEtleadingJetAnd2TimesLeptonPt"/>
+            <var source="input" name="MET"/>
+            
+            <var source="input" name="leptonPt"/>
+            
+            <var source="input" name="aplanarity"/>
+            <var source="input" name="sphericity"/>
+            <var source="input" name="circularity"/>
+            <var source="input" name="isotropy"/>
+            
+            <var source="input" name="Jet3EtOverJet1EtJet3Et"/>
+            <var source="input" name="Jet3EtOverJet2EtJet3Et"/>
+            <var source="input" name="Jet4EtOverJet1EtJet4Et"/>
+            <var source="input" name="Jet4EtOverJet2EtJet4Et"/>
+            
+            <var source="input" name="invariantMassJ3andJ4"/>
+            <var source="input" name="DeltaPhiMuonJet3"/>
+            <var source="input" name="DeltaPhiMuonJet4"/>
+            <var source="input" name="deltaPhiJet1Jet2"/>
+            
+            <var source="input" name="DeltaPhiTtbar"/>
+            <var source="input" name="TriJetTMass"/>
+            <var source="input" name="DeltaPhiTimesDeltaEta"/>
+            <var source="input" name="minDeltaPhiMETJets"/>
+		</input>
+		<config>
+		</config>
+		<output>
+		</output>
+	</processor>
+ 
+         <output>
+               <var source="input" name="dphiMETLepton"/>
+        </output>
+
+</MVATrainer>
