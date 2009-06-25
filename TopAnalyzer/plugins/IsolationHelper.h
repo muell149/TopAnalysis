@@ -77,7 +77,7 @@ public:
 				histos_.size(), -1., 1.);
 //		summary_jet_iso_ = fs_->make<TH1F> (nam.name(jetIsoName.c_str()), nam.name(jetIsoName.c_str()), histos_.size(),
 //				-1., 1.);
-		summary_abs_Comb_ = fs_->make<TH1F> (nam.name(rel_combName.c_str()), nam.name(rel_combName.c_str()),
+		summary_abs_Comb_ = fs_->make<TH1F> (nam.name(abs_combName.c_str()), nam.name(abs_combName.c_str()),
 				histos_.size(), -1., 1.);
 		summary_rel_Comb_ = fs_->make<TH1F> (nam.name(rel_combName.c_str()), nam.name(rel_combName.c_str()),
 				histos_.size(), -1., 1.);
