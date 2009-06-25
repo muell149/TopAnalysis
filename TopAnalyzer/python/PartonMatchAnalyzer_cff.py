@@ -14,10 +14,11 @@ ptOrderedMinDist = ttSemiLepJetPartonMatch.clone()
 unambiguousOnly  = ttSemiLepJetPartonMatch.clone()  
 
 ## replacements
-totalMinDist.algorithm     = 0
-minSumDist.algorithm       = 1
-ptOrderedMinDist.algorithm = 2
-unambiguousOnly.algorithm  = 3
+# totalMinDist, minSumDist, ptOrderedMinDist, unambiguousOnly
+totalMinDist.algorithm     = "totalMinDist"
+minSumDist.algorithm       = "minSumDist"
+ptOrderedMinDist.algorithm = "ptOrderedMinDist"
+unambiguousOnly.algorithm  = "unambiguousOnly"
 
 from TopAnalysis.TopAnalyzer.PartonMatchAnalyzer_cfi import *
 
