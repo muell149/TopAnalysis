@@ -10,17 +10,17 @@ from PhysicsTools.PatAlgos.patSequences_cff import *
 ## clone selectedLayer1Jets with lowered pt threshold for analysis
 selectedLayer1JetsLowPt     = selectedLayer1Jets.clone()
 selectedLayer1JetsLowPt.src = "scaledJetEnergy:allLayer1Jets"
-selectedLayer1JetsLowPt.cut = 'pt > 20. & abs(eta) < 2.4 & nConstituents > 0 & emEnergyFraction < 0.9'
+selectedLayer1JetsLowPt.cut = 'pt > 20. & abs(eta) < 2.4 & nConstituents > 0'
 
 ## jets for event selection
 selectedLayer1Jets.src = "scaledJetEnergy:allLayer1Jets"
-selectedLayer1Jets.cut = 'pt > 30. & abs(eta) < 2.4 & nConstituents > 0 & emEnergyFraction < 0.9'
+selectedLayer1Jets.cut = 'pt > 30. & abs(eta) < 2.4 & nConstituents > 0'
 countLayer1Jets.minNumber = 4
 
 ## filter events with overlapping jets
 from TopAnalysis.TopFilter.filters.JetOverlapEventFilter_cfi import *
 filterJetOverlapEvent.src    = "selectedLayer1JetsLowPt"
-filterJetOverlapEvent.deltaR = 0.6 # 0.0 = no filtering
+filterJetOverlapEvent.deltaR = 0.0 # 0.0 = no filtering
 
 ## import filters for dR(jet, lepton)
 ## they are enabled in the muon and electron specific cff-files
@@ -40,8 +40,8 @@ from TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff import *
 ## configure jet-parton matching
 from TopQuarkAnalysis.TopTools.TtSemiLepJetPartonMatch_cfi import *
 ttSemiLepJetPartonMatch.jets = "selectedLayer1JetsLowPt"
-# 0 = totalMinDist, 1 = minSumDist, 2 = ptOrderedMinDist, 3 = unambiguousOnly
-ttSemiLepJetPartonMatch.algorithm  = 3
+# totalMinDist, minSumDist, ptOrderedMinDist, unambiguousOnly
+ttSemiLepJetPartonMatch.algorithm  = "unambiguousOnly"
 ttSemiLepJetPartonMatch.useMaxDist = True
 ttSemiLepJetPartonMatch.maxDist    = 0.3
 ttSemiLepJetPartonMatch.maxNJets   = 5
