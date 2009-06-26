@@ -13,7 +13,9 @@ LIST="4jets
       tauola                          
       tightSelection                  
       totalMinDist                    
-      totalMinDist_rejectOutliers"    
+      totalMinDist_rejectOutliers
+      hadronicTopOnly
+      lightQuarksOnly"
 
 for NAME in $LIST
   do
@@ -73,9 +75,8 @@ for NAME in $LIST
   do
   echo "++++++++++++++++++++++++++++++++++++++++++++"
   echo "Running the mvaTreeTrainer for $NAME..."
-  mvaTreeTrainer TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainer.xml $DIR/SemiLepJetComb_$NAME.mva $DIR/train_save.$NAME.root
+  mvaTreeTrainer --xslt=TopAnalysis/TopAnalyzer/data/MVATrainer.xsl \
+      TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainer_rank.xml \
+      $DIR/SemiLepJetComb_$NAME.mva $DIR/train_save.$NAME.root
   cp train_monitoring.root $DIR/train_monitoring.$NAME.root
-  #echo "Running the mvaTreeTrainer for $NAME.rot"
-  #mvaTreeTrainer TopAnalysis/TopAnalyzer/data/SemiLepJetCombMVATrainer_rot.xml $DIR/SemiLepJetComb_$NAME.rot.mva $DIR/train_save.$NAME.root
-  #cp train_monitoring.root $DIR/train_monitoring.$NAME.rot.root
 done
