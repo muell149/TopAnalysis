@@ -248,7 +248,7 @@ int TopChannelSelector::tauDecay(){
     if(abs(tau->daughter(i)->pdgId())==13){ 
       return 6;
     }
-    if(abs(tau->daughter(i)->pdgId())==15) {
+    if(abs(tau->daughter(i)->pdgId())==15||abs(tau->daughter(i)->pdgId())==24){
       tau = tau->daughter(i);
       return tauDecay();
     }  
