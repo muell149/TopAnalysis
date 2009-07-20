@@ -3,16 +3,16 @@
 /// constructor for FWLite analyzer
 BSMKinematic::BSMKinematic(const edm::ParameterSet& cfg,int nMuons): 
   fwLite_(true ), jets_(),
-  nMuons_(nMuons),
-  metSource_       ( cfg.getParameter<edm::InputTag>("metSource"))
+  metSource_       ( cfg.getParameter<edm::InputTag>("metSource")),
+  nMuons_(nMuons)
 { 
 }
 
 /// constructor for full FW analyzer
 BSMKinematic::BSMKinematic(const edm::ParameterSet& cfg):
-  nMuons_( cfg.getParameter<int>( "nMuons" ) ),
   fwLite_(false), jets_  ( cfg.getParameter<edm::InputTag>( "jets" )),
-  metSource_       ( cfg.getParameter<edm::InputTag>("metSource"))
+  metSource_       ( cfg.getParameter<edm::InputTag>("metSource")),
+  nMuons_( cfg.getParameter<int>( "nMuons" ) )  
 {
 }
 
