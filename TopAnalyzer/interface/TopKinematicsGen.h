@@ -10,7 +10,7 @@
 // framework or framework lite
 //
 
-class TopKinematicsGen : public TopKinematics<const TtGenEvent> {
+class TopKinematicsGen : public TopKinematics<TtGenEvent> {
 
  public:
   /// default constructor for fw lite

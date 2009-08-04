@@ -15,13 +15,16 @@ void
 TopKinematicsMatch::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
   if( tops.isHypoValid(hypoKey_) ){
-    if( tops.hadronicTop(hypoKey_) && tops.leptonicTop(hypoKey_) ){
-      if( tops.genEvent()->isTtBar() ){
-	if( tops.genEvent()->hadronicDecayTop() && tops.genEvent()->leptonicDecayTop() ){	
-	  TopKinematics<const TtSemiLeptonicEvent>::fill(tops.hadronicTop(hypoKey_), tops.leptonicTop(hypoKey_), 
-							 tops.genEvent()->hadronicDecayTop(), tops.genEvent()->leptonicDecayTop(), weight);
-	}
-      }
+    if( tops.genEvent()->isSemiLeptonic(WDecay::kMuon) ){
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.lepton     (hypoKey_) , tops.genLepton()      , "muon"   , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.leptonicB  (hypoKey_) , tops.genLeptonicB()   , "bottom" , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.leptonicTop(hypoKey_) , tops.genLeptonicTop() , "top"    , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.lightQuarkP(hypoKey_) , tops.genHadronicQ()   , "light"  , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.lightQuarkQ(hypoKey_) , tops.genHadronicP()   , "light"  , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicB  (hypoKey_) , tops.genHadronicB()   , "bottom" , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicTop(hypoKey_) , tops.genHadronicTop() , "top"    , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicTop(hypoKey_) , tops.genHadronicTop() , tops.leptonicTop(hypoKey_), tops.genLeptonicTop(), weight);
     }
   }
 }
+

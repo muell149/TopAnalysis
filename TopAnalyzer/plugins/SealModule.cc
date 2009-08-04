@@ -21,13 +21,13 @@ DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
 
 #include "TopAnalysis/TopAnalyzer/interface/TopKinematicsGen.h"
-typedef SingleObjectAnalyzer<const TtGenEvent, TopKinematicsGen> TopKinematicsGenAnalyzer;
+typedef SingleObjectAnalyzer<TtGenEvent, TopKinematicsGen> TopKinematicsGenAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/TopKinematicsRec.h"
-typedef SingleObjectAnalyzer<const TtSemiLeptonicEvent, TopKinematicsRec> TopKinematicsRecAnalyzer;
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematicsRec> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/TopKinematicsMatch.h"
-typedef SingleObjectAnalyzer<const TtSemiLeptonicEvent, TopKinematicsMatch> TopKinematicsMatchAnalyzer;
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematicsMatch> TopKinematicsMatchAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsMatchAnalyzer);

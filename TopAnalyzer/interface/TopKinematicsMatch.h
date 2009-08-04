@@ -22,10 +22,6 @@ class TopKinematicsMatch : public TopKinematicsRec {
   /// histogram filling interface for rec level for access
   /// with fwlite or full framework (override from rec class)
   void fill(const TtSemiLeptonicEvent& tops, const double& weight=1.);
-
- private:
-  /// class key of hypothesis
-  TtEvent::HypoClassKey hypoKey_;
 };
 
 #endif

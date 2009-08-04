@@ -24,24 +24,46 @@ class TopKinematics : public SingleAnalyzer<Collection> {
 
   /// histogramm booking for fwlite 
   void book();
-  /// histogramm booking for full fw
+  /// histogramm booking for fw
   void book(edm::Service<TFileService>& fileService);
-  /// histogram filling interface for rec or gen level for access with fwlite or full framework
-  virtual void fill(Collection& tops, const double& weight=1.) = 0;
-  /// histogram filling for fwlite and for full fw
-  void fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight=1.);
-  /// histogram filling for fwlite and for full fw (for stability and purity calculation)
-  void fill(const reco::Candidate* genTopA, const reco::Candidate* genTopB, const reco::Candidate* recTopA, const reco::Candidate* recTopB, const double& weight=1.);
-  /// helper function to determine stability and purity
-  void fillHistogramMatched(TH1F* hist, const double& genTop, const double& recTop, const double& weight);
   /// everything which needs to be done after the event loop
   void process(){};
+
+  /// histogram filling interface for rec or gen level for access with fw or fwlite; 
+  /// take care that all relevant parts of the top kinematics get properly filled here 
+  virtual void fill(const Collection& tops, const double& weight=1.) = 0;
+
+  /// histogram filling for candidate of special type (used for histogram booking)
+  void fill(const reco::Candidate* cand, const char* candidateType, const double& weight=1.);
+  /// histogram filling for candidate of special type (used for histogram booking) for stability and purity calculation
+  void fill(const reco::Candidate* recCand, const reco::Candidate* genCand, const char* candidateType, const double& weight=1.);
+  /// histogram filling for candidate of special type (used for histogram booking)
+  void fill(const reco::Particle::LorentzVector& cand, const char* candidateType, const double& weight=1.);
+  /// histogram filling for candidate of special type (used for histogram booking) for stability and purity calculation
+  void fill(const reco::Particle::LorentzVector& recCand, const reco::Particle::LorentzVector& genCand, const char* candidateType, const double& weight=1.);
+  /// histogram filling for topA, topB candidate
+  void fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight=1.);
+  /// histogram filling for topA, topB candidate (for stability and purity calculation)
+  void fill(const reco::Candidate* recTopA, const reco::Candidate* genTopA, const reco::Candidate* recTopB, const reco::Candidate* genTopB, const double& weight=1.);
+
+ protected:
+  /// helper function to determine stability and purity
+  void matched(TH1F* hist, const double& genValue, const double& recTop, const double& weight);
 };
 
 template <typename Collection> 
 void TopKinematics<Collection>::book()
 {
   NameScheme kin("kin");
+  SingleAnalyzer<Collection>::hists_["muonPt"     ] = new TH1F(kin("muonPt"     ), "muonPt"     ,   30,     0.,    150.);
+  SingleAnalyzer<Collection>::hists_["muonEta"    ] = new TH1F(kin("muonEta"    ), "muonEta"    ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["muonPhi"    ] = new TH1F(kin("muonPhi"    ), "muonPhi"    ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["bottomPt"   ] = new TH1F(kin("bottomPt"   ), "bottomPt"   ,   30,     0.,    150.);
+  SingleAnalyzer<Collection>::hists_["bottomEta"  ] = new TH1F(kin("bottomEta"  ), "bottomEta"  ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["bottomPhi"  ] = new TH1F(kin("bottomPhi"  ), "bottomPhi"  ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["lightPt"    ] = new TH1F(kin("lightPt"    ), "lightPt"    ,   30,     0.,    150.);
+  SingleAnalyzer<Collection>::hists_["lightEta"   ] = new TH1F(kin("lightEta"   ), "lightEta"   ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["lightPhi"   ] = new TH1F(kin("lightPhi"   ), "lightPhi"   ,   70,    -3.5,    3.5);
   SingleAnalyzer<Collection>::hists_["topPt"      ] = new TH1F(kin("topPt"      ), "topPt"      ,   15,     0.,    150.);
   SingleAnalyzer<Collection>::hists_["topEta"     ] = new TH1F(kin("topEta"     ), "topEta"     ,   10,   -3.5,     3.5);
   SingleAnalyzer<Collection>::hists_["topPhi"     ] = new TH1F(kin("topPhi"     ), "topPhi"     ,   10,   -3.5,     3.5);
@@ -56,6 +78,15 @@ template <typename Collection>
 void TopKinematics<Collection>::book(edm::Service<TFileService>& fs)
 {
   NameScheme kin("kin");
+  SingleAnalyzer<Collection>::hists_["muonPt"     ] = fs->make<TH1F>(kin("muonPt"     ), "muonPt"     ,   30,     0.,    150.);
+  SingleAnalyzer<Collection>::hists_["muonEta"    ] = fs->make<TH1F>(kin("muonEta"    ), "muonEta"    ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["muonPhi"    ] = fs->make<TH1F>(kin("muonPhi"    ), "muonPhi"    ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["bottomPt"   ] = fs->make<TH1F>(kin("bottomPt"   ), "bottomPt"   ,   30,     0.,    150.);
+  SingleAnalyzer<Collection>::hists_["bottomEta"  ] = fs->make<TH1F>(kin("bottomEta"  ), "bottomEta"  ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["bottomPhi"  ] = fs->make<TH1F>(kin("bottomPhi"  ), "bottomPhi"  ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["lightPt"    ] = fs->make<TH1F>(kin("lightPt"    ), "lightPt"    ,   30,     0.,    150.);
+  SingleAnalyzer<Collection>::hists_["lightEta"   ] = fs->make<TH1F>(kin("lightEta"   ), "lightEta"   ,   70,    -3.5,    3.5);
+  SingleAnalyzer<Collection>::hists_["lightPhi"   ] = fs->make<TH1F>(kin("lightPhi"   ), "lightPhi"   ,   70,    -3.5,    3.5);
   SingleAnalyzer<Collection>::hists_["topPt"      ] = fs->make<TH1F>(kin("topPt"      ), "topPt"      ,   15,     0.,    150.);
   SingleAnalyzer<Collection>::hists_["topEta"     ] = fs->make<TH1F>(kin("topEta"     ), "topEta"     ,   10,   -3.5,     3.5);
   SingleAnalyzer<Collection>::hists_["topPhi"     ] = fs->make<TH1F>(kin("topPhi"     ), "topPhi"     ,   10,   -3.5,     3.5);
@@ -66,60 +97,76 @@ void TopKinematics<Collection>::book(edm::Service<TFileService>& fs)
   SingleAnalyzer<Collection>::hists_["ttbarDelPhi"] = fs->make<TH1F>(kin("ttbarDelPhi"), "ttbarDelPhi",   10,   -3.5,     3.5);
 }
 
-/// histogram filling for fwlite and for full fw
+/// histogram filling for candidate of special type (used for histogram booking)
+template <typename Collection>
+void
+TopKinematics<Collection>::fill(const reco::Candidate* cand, const char* candidateName, const double& weight)
+{
+  fill(cand->p4(), candidateName, weight);  
+}
+
+/// histogram filling for candidate of special type (used for histogram booking) for stability and purity calculation
+template <typename Collection>
+void
+TopKinematics<Collection>::fill(const reco::Candidate* recCand, const reco::Candidate* genCand, const char* candidateName, const double& weight)
+{
+  fill(recCand->p4(), genCand->p4(), candidateName, weight);  
+}
+
+/// histogram filling for candidate of special type (used for histogram booking)
+template <typename Collection>
+void
+TopKinematics<Collection>::fill(const reco::Particle::LorentzVector& cand, const char* candidateName, const double& weight)
+{
+  std::string histName(candidateName);
+  SingleAnalyzer<Collection>::hists_.find(histName+"Pt" )->second->Fill( cand.pt()  , weight );
+  SingleAnalyzer<Collection>::hists_.find(histName+"Eta")->second->Fill( cand.eta() , weight );
+  SingleAnalyzer<Collection>::hists_.find(histName+"Phi")->second->Fill( cand.phi() , weight );
+}
+
+/// histogram filling for candidate of special type (used for histogram booking)
+template <typename Collection>
+void
+TopKinematics<Collection>::fill(const reco::Particle::LorentzVector& recCand, const reco::Particle::LorentzVector& genCand, const char* candidateName, const double& weight)
+{
+  std::string histName(candidateName);
+  matched( SingleAnalyzer<Collection>::hists_.find(histName+"Pt" )->second , recCand.pt () , genCand.pt () , weight );
+  matched( SingleAnalyzer<Collection>::hists_.find(histName+"Eta")->second , recCand.eta() , genCand.eta() , weight );
+  matched( SingleAnalyzer<Collection>::hists_.find(histName+"Phi")->second , recCand.phi() , genCand.phi() , weight );
+}
+
+/// histogram filling for topA, topB candidate (for stability and purity calculation)
 template <typename Collection>
 void
 TopKinematics<Collection>::fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight)
 {
-  // fill basic kinematics for top&topBar candidate
-  SingleAnalyzer<Collection>::hists_["topPt"      ]->Fill( topA->pt()  ,   weight );
-  SingleAnalyzer<Collection>::hists_["topPt"      ]->Fill( topB->pt()  ,   weight );
-  SingleAnalyzer<Collection>::hists_["topEta"     ]->Fill( topA->eta() ,   weight );
-  SingleAnalyzer<Collection>::hists_["topEta"     ]->Fill( topB->eta() ,   weight );
-  SingleAnalyzer<Collection>::hists_["topPhi"     ]->Fill( topA->phi() ,   weight );
-  SingleAnalyzer<Collection>::hists_["topPhi"     ]->Fill( topB->phi() ,   weight );
-
-  // fill basic kinematics for ttbar system
-  reco::Particle::LorentzVector ttbar = topA->p4() + topB->p4();
-  SingleAnalyzer<Collection>::hists_["ttbarPt"    ]->Fill( ttbar.pt()  ,   weight );
-  SingleAnalyzer<Collection>::hists_["ttbarEta"   ]->Fill( ttbar.eta() ,   weight );
-  SingleAnalyzer<Collection>::hists_["ttbarPhi"   ]->Fill( ttbar.phi() ,   weight );
-  SingleAnalyzer<Collection>::hists_["ttbarMass"  ]->Fill( ttbar.mass(),   weight );
-  SingleAnalyzer<Collection>::hists_["ttbarDelPhi"]->Fill( deltaPhi(topA->phi(), topB->phi()), weight );
+  fill( topA->p4()+topB->p4(), "ttbar" ,  weight );  
+  SingleAnalyzer<Collection>::hists_.find("ttbarMass"  )->second->Fill( (topA->p4()+topB->p4()).mass()     , weight );
+  SingleAnalyzer<Collection>::hists_.find("ttbarDelPhi")->second->Fill( deltaPhi(topA->phi(), topB->phi()) , weight );
 }
 
-/// histogram filling for fwlite and for full fw (for stability and purity calculation)
+/// histogram filling for topA, topB candidate (for stability and purity calculation)
 template <typename Collection>
 void 
-TopKinematics<Collection>::fill(const reco::Candidate* genTopA, const reco::Candidate* genTopB, const reco::Candidate* recTopA, const reco::Candidate* recTopB, const double& weight)
+TopKinematics<Collection>::fill(const reco::Candidate* recTopA, const reco::Candidate* genTopA, const reco::Candidate* recTopB, const reco::Candidate* genTopB, const double& weight)
 {
-  // fill basic kinematics for top&topBar candidate
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["topPt"      ], genTopA->pt()  , recTopA->pt()  ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["topPt"      ], genTopB->pt()  , recTopB->pt()  ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["topEta"     ], genTopA->eta() , recTopA->eta() ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["topEta"     ], genTopB->eta() , recTopB->eta() ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["topPhi"     ], genTopA->phi() , recTopA->phi() ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["topPhi"     ], genTopB->phi() , recTopB->phi() ,   weight );
-
-  // fill basic kinematics for ttbar system
-  reco::Particle::LorentzVector genTtbar = genTopA->p4() + genTopB->p4();
-  reco::Particle::LorentzVector recTtbar = recTopA->p4() + recTopB->p4();
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["ttbarPt"    ], genTtbar.pt()  , recTtbar.pt()  ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["ttbarEta"   ], genTtbar.eta() , recTtbar.eta() ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["ttbarPhi"   ], genTtbar.phi() , recTtbar.phi() ,   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["ttbarMass"  ], genTtbar.mass(), recTtbar.mass(),   weight );
-  fillHistogramMatched(SingleAnalyzer<Collection>::hists_["ttbarDelPhi"], deltaPhi(genTopA->phi(), genTopB->phi()), deltaPhi(recTopA->phi(), recTopB->phi()),   weight );
+  reco::Particle::LorentzVector genTtbar = genTopA->p4()+genTopB->p4();
+  reco::Particle::LorentzVector recTtbar = recTopA->p4()+recTopB->p4();
+  fill( recTtbar, genTtbar, "ttbar" ,  weight );  
+  matched(SingleAnalyzer<Collection>::hists_.find("ttbarMass"  )->second, genTtbar.mass(), recTtbar.mass(),   weight );
+  matched(SingleAnalyzer<Collection>::hists_.find("ttbarDelPhi")->second, deltaPhi(genTopA->phi(), genTopB->phi()), deltaPhi(recTopA->phi(), recTopB->phi()),   weight );
 }
 
+/// helper function to determine stability and purity
 template <typename Collection>
 void 
-TopKinematics<Collection>::fillHistogramMatched(TH1F* hist, const double& genTop, const double& recTop, const double& weight)
+TopKinematics<Collection>::matched(TH1F* hist, const double& genValue, const double& recValue, const double& weight)
 {
   for(int bin=1; bin<=hist->GetNbinsX(); ++bin){
     double lowerEdge = hist->GetBinLowEdge(bin);
     double upperEdge = hist->GetBinLowEdge(bin)+hist->GetBinWidth(bin);
-    if( (lowerEdge<genTop && genTop<=upperEdge) && (lowerEdge<recTop && recTop<=upperEdge) ){
-      hist->Fill(recTop, weight);
+    if( (lowerEdge<genValue && genValue<=upperEdge) && (lowerEdge<recValue && recValue<=upperEdge) ){
+      hist->Fill(recValue, weight);
       break;
     }
   }

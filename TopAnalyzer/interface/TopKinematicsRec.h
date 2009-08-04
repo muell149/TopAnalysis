@@ -10,7 +10,7 @@
 // framework or framework lite
 //
 
-class TopKinematicsRec : public TopKinematics<const TtSemiLeptonicEvent> {
+class TopKinematicsRec : public TopKinematics<TtSemiLeptonicEvent> {
 
  public:
   /// default constructor for fw lite
@@ -23,7 +23,7 @@ class TopKinematicsRec : public TopKinematics<const TtSemiLeptonicEvent> {
   /// histogram filling interface for rec level for access with fwlite or full framework
   void fill(const TtSemiLeptonicEvent& tops, const double& weight=1.);
 
- private:
+ protected:
   /// class key of hypothesis
   TtEvent::HypoClassKey hypoKey_;
 };
