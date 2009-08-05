@@ -16,14 +16,14 @@ TopKinematicsMatch::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
   if( tops.isHypoValid(hypoKey_) ){
     if( tops.genEvent()->isSemiLeptonic(WDecay::kMuon) ){
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.lepton     (hypoKey_) , tops.genLepton()      , "muon"   , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.leptonicB  (hypoKey_) , tops.genLeptonicB()   , "bottom" , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.leptonicTop(hypoKey_) , tops.genLeptonicTop() , "top"    , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.lightQuarkP(hypoKey_) , tops.genHadronicQ()   , "light"  , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.lightQuarkQ(hypoKey_) , tops.genHadronicP()   , "light"  , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicB  (hypoKey_) , tops.genHadronicB()   , "bottom" , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicTop(hypoKey_) , tops.genHadronicTop() , "top"    , weight);
-      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicTop(hypoKey_) , tops.genHadronicTop() , tops.leptonicTop(hypoKey_), tops.genLeptonicTop(), weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.singleLepton     (hypoKey_)     , tops.singleLepton()         , "muon"   , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.leptonicDecayB   (hypoKey_)     , tops.leptonicDecayB()       , "bottom" , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.leptonicDecayTop (hypoKey_)     , tops.leptonicDecayTop()     , "top"    , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicDecayQuark(hypoKey_)    , tops.hadronicDecayQuark()   , "light"  , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicDecayQuarkBar(hypoKey_) , tops.hadronicDecayQuarkBar(), "light"  , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicDecayB   (hypoKey_)     , tops.hadronicDecayB()       , "bottom" , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicDecayTop (hypoKey_)     , tops.hadronicDecayTop()     , "top"    , weight);
+      TopKinematics<TtSemiLeptonicEvent>::fill(tops.hadronicDecayTop (hypoKey_)     , tops.hadronicDecayTop()     , tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), weight);
     }
   }
 }
