@@ -8,11 +8,9 @@ TopKinematicsRec::TopKinematicsRec(const int& hypoKey)
 }
 
 /// default constructor for full fw
-TopKinematicsRec::TopKinematicsRec(const edm::ParameterSet& cfg)
+TopKinematicsRec::TopKinematicsRec(const edm::ParameterSet& cfg):
+  hypoKey_( cfg.getParameter<std::string>("hypoKey") )
 {
-  // get hypothesis class key from the event; sorry the 
-  // structure does not allow to dig it outof the event
-  hypoKey_ = (TtEvent::HypoClassKey) cfg.getParameter<int>("hypoKey");
 }
 
 /// histogram filling interface for rec level for access with fwlite or full framework

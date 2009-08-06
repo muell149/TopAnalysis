@@ -9,7 +9,7 @@ analyzeTopMatchKinematics = cms.EDAnalyzer("TopKinematicsMatchAnalyzer",
     useWeight = cms.bool(True),
     ## analyzer specific configurables
     analyze   = cms.PSet(
-      hypoKey = cms.int32(3)
+      hypoKey = cms.string("kGenMatch")
     )    
 )
 

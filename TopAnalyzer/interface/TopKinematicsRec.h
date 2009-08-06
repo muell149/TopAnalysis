@@ -25,7 +25,7 @@ class TopKinematicsRec : public TopKinematics<TtSemiLeptonicEvent> {
 
  protected:
   /// class key of hypothesis
-  TtEvent::HypoClassKey hypoKey_;
+   std::string hypoKey_;
 };
 
 #endif

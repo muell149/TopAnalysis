@@ -11,6 +11,7 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 ## process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
+
 #-------------------------------------------------
 # process configuration
 #-------------------------------------------------
@@ -39,9 +40,13 @@ process.options = cms.untracked.PSet(
 
 ## produce top generated event
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff")
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = False
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
 
 ## produce top reconstructed event
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
+## process.ttSemiLepJetPartonMatch.verbosity = 1
 
 ## analyze top quarks on generator level
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_gen_cfi")
@@ -54,6 +59,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.p1 = cms.Path(process.makeGenEvt *
+                      process.ttSemiLeptonicFilter *
                       process.makeTtSemiLepEvent *
                       process.analyzeTopGenKinematics +
                       process.analyzeTopRecKinematics +

@@ -51,10 +51,15 @@ class TopKinematics : public SingleAnalyzer<Collection> {
   void matched(TH1F* hist, const double& genValue, const double& recTop, const double& weight);
 };
 
+/// histogramm booking for fwlite 
 template <typename Collection> 
 void TopKinematics<Collection>::book()
 {
   NameScheme kin("kin");
+
+  //double test[] = {0., 13., 100.};
+  //SingleAnalyzer<Collection>::hists_["muonPt"     ] = new TH1F(kin("muonPt"     ), "muonPt"     ,   2, test);
+
   SingleAnalyzer<Collection>::hists_["muonPt"     ] = new TH1F(kin("muonPt"     ), "muonPt"     ,   30,     0.,    150.);
   SingleAnalyzer<Collection>::hists_["muonEta"    ] = new TH1F(kin("muonEta"    ), "muonEta"    ,   70,    -3.5,    3.5);
   SingleAnalyzer<Collection>::hists_["muonPhi"    ] = new TH1F(kin("muonPhi"    ), "muonPhi"    ,   70,    -3.5,    3.5);
@@ -74,10 +79,15 @@ void TopKinematics<Collection>::book()
   SingleAnalyzer<Collection>::hists_["ttbarDelPhi"] = new TH1F(kin("ttbarDelPhi"), "ttbarDelPhi",   10,   -3.5,     3.5);
 }
 
+/// histogramm booking for fw
 template <typename Collection> 
 void TopKinematics<Collection>::book(edm::Service<TFileService>& fs)
 {
   NameScheme kin("kin");
+
+  //double test[] = {0., 13., 100.};
+  //SingleAnalyzer<Collection>::hists_["muonPt"     ] = fs->make<TH1F>(kin("muonPt"     ), "muonPt"     ,   2, test);
+
   SingleAnalyzer<Collection>::hists_["muonPt"     ] = fs->make<TH1F>(kin("muonPt"     ), "muonPt"     ,   30,     0.,    150.);
   SingleAnalyzer<Collection>::hists_["muonEta"    ] = fs->make<TH1F>(kin("muonEta"    ), "muonEta"    ,   70,    -3.5,    3.5);
   SingleAnalyzer<Collection>::hists_["muonPhi"    ] = fs->make<TH1F>(kin("muonPhi"    ), "muonPhi"    ,   70,    -3.5,    3.5);
@@ -135,7 +145,7 @@ TopKinematics<Collection>::fill(const reco::Particle::LorentzVector& recCand, co
   matched( SingleAnalyzer<Collection>::hists_.find(histName+"Phi")->second , recCand.phi() , genCand.phi() , weight );
 }
 
-/// histogram filling for topA, topB candidate (for stability and purity calculation)
+/// histogram filling for topA, topB candidate
 template <typename Collection>
 void
 TopKinematics<Collection>::fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight)
