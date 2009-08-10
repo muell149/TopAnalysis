@@ -1,5 +1,5 @@
-#ifndef SingleAnalyzer_h
-#define SingleAnalyzer_h
+#ifndef SingleObject_h
+#define SingleObject_h
 
 #include <memory>
 #include <string>
@@ -23,15 +23,15 @@
 //
 
 template <typename Collection> 
-class SingleAnalyzer{
+class SingleObject{
 
  public:
   /// default constructor for fw lite
-  explicit SingleAnalyzer(){};
+  explicit SingleObject(){};
   /// default constructor for full fw
-  explicit SingleAnalyzer(const edm::ParameterSet& configFile){};
+  explicit SingleObject(const edm::ParameterSet& configFile){};
   /// default destructor
-  virtual ~SingleAnalyzer(){};
+  virtual ~SingleObject(){};
   /// write histograms to file for fwlite
   void write(TFile& file, const char* directory);
 
@@ -52,7 +52,7 @@ class SingleAnalyzer{
 
 /// writing histograms to file in fwlite
 template <typename Collection> 
-void SingleAnalyzer<Collection>::write(TFile& file, const char* directory)
+void SingleObject<Collection>::write(TFile& file, const char* directory)
 {
   file.cd( directory );
   for(std::map<std::string, TH1F*>::const_iterator hist = hists_.begin(); hist !=hists_.end(); ++hist){

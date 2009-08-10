@@ -1,5 +1,5 @@
-#ifndef DoubleAnalyzer_h
-#define DoubleAnalyzer_h
+#ifndef DoubleObject_h
+#define DoubleObject_h
 
 #include <memory>
 #include <string>
@@ -23,15 +23,15 @@
 //
 
 template <typename CollectionA, typename CollectionB> 
-class DoubleAnalyzer{
+class DoubleObject{
 
  public:
   /// default constructor for fw lite
-  explicit DoubleAnalyzer(){};
+  explicit DoubleObject(){};
   /// default constructor for full fw
-  explicit DoubleAnalyzer(const edm::ParameterSet& configFile){};
+  explicit DoubleObject(const edm::ParameterSet& configFile){};
   /// default destructor
-  virtual ~DoubleAnalyzer(){};
+  virtual ~DoubleObject(){};
   /// write histograms to file for fwlite
   void write(TFile& file, const char* directory);
 
@@ -52,7 +52,7 @@ class DoubleAnalyzer{
 
 /// writing histograms to file in fwlite
 template <typename CollectionA, typename CollectionB> 
-  void DoubleAnalyzer<CollectionA, CollectionB>::write(TFile& file, const char* directory)
+  void DoubleObject<CollectionA, CollectionB>::write(TFile& file, const char* directory)
 {
   file.cd( directory );
   for(std::map<std::string, TH1F*>::const_iterator hist = hists_.begin(); hist !=hists_.end(); ++hist){

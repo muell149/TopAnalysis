@@ -3,8 +3,6 @@
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
 
-using namespace std;
-
 /// default constructor for fw lite
 MuonResolution::MuonResolution(double matchDR, std::vector<double> binsPt, std::vector<double> binsEta, std::vector<double> binsPhi):
   matchDR_( matchDR ), 
@@ -23,42 +21,22 @@ MuonResolution::MuonResolution(const edm::ParameterSet& cfg):
 {
 }
 
-/// book a vector of histograms according to a given binning
-void 
-MuonResolution::bookHistogram(std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary)
-{
-  NameScheme res("res");
-  for(unsigned int idx=0; idx<binning.size()-1; ++idx){
-    hists.push_back( new TH1F(res(kin, binning[idx], binning[idx]+1), res.name(kin,binning[idx], binning[idx+1]), nBins, -boundary, boundary) );
-  }  
-}
-
 /// histogramm booking for fwlite 
 void 
 MuonResolution::book()
 {
-  bookHistogram(pt_,  "pt" , binsPt_,  100,   0.5);
-  bookHistogram(eta_, "eta", binsEta_, 100, 0.005);
-  bookHistogram(phi_, "phi", binsPhi_, 100, 0.005);
-}
-
-/// book a vector of histograms according to a given binning
-void 
-MuonResolution::bookHistogram(edm::Service<TFileService>& fs, std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary)
-{
-  NameScheme res("res");
-  for(unsigned int idx=0; idx<binning.size()-1; ++idx){
-    hists.push_back( fs->make<TH1F>(res(kin, binning[idx], binning[idx+1]), res.name(kin,binning[idx], binning[idx+1]), nBins, -boundary, boundary) );
-  }  
+  book(pt_,  "pt" , binsPt_,  100,   0.5);
+  book(eta_, "eta", binsEta_, 100, 0.005);
+  book(phi_, "phi", binsPhi_, 100, 0.005);
 }
 
 /// histogramm booking for full fw
 void 
 MuonResolution::book(edm::Service<TFileService>& fs)
 {
-  bookHistogram(fs, pt_,  "pt" , binsPt_,  100,   0.5);
-  bookHistogram(fs, eta_, "eta", binsEta_, 100, 0.005);
-  bookHistogram(fs, phi_, "phi", binsPhi_, 100, 0.005);
+  book(fs, pt_,  "pt" , binsPt_,  100,   0.5);
+  book(fs, eta_, "eta", binsEta_, 100, 0.005);
+  book(fs, phi_, "phi", binsPhi_, 100, 0.005);
 }
 
 /// histogram filling for fwlite and for full fw
@@ -106,4 +84,24 @@ MuonResolution::write(TFile& file, const char* directory)
      const TH1F* out = *hist;
     out->Write();
   }
+}
+
+/// book a vector of histograms according to a given binning
+void 
+MuonResolution::book(edm::Service<TFileService>& fs, std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary)
+{
+  NameScheme res("res");
+  for(unsigned int idx=0; idx<binning.size()-1; ++idx){
+    hists.push_back( fs->make<TH1F>(res(kin, binning[idx], binning[idx+1]), res.name(kin,binning[idx], binning[idx+1]), nBins, -boundary, boundary) );
+  }  
+}
+
+/// book a vector of histograms according to a given binning
+void 
+MuonResolution::book(std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary)
+{
+  NameScheme res("res");
+  for(unsigned int idx=0; idx<binning.size()-1; ++idx){
+    hists.push_back( new TH1F(res(kin, binning[idx], binning[idx]+1), res.name(kin,binning[idx], binning[idx+1]), nBins, -boundary, boundary) );
+  }  
 }

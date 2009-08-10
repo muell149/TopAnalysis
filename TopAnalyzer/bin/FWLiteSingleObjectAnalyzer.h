@@ -4,15 +4,15 @@
 #include <cstdlib>
 #include "TopAnalysis/TopAnalyzer/interface/FWLiteLooper.h"
 
-//
-// template pluging to be used for the analysis of objects like 
-// electrons, muons, jets, or reconstructed top candidates with 
-// the full framework:
-//
-// Collection  :  input collection   
-// Analyze     :  analyzer class for a single object type
-//
+/**
+   \class   FWLiteSingleObjectAnalyzer FWLiteSingleObjectAnalyzer.h "TopAnalysis/TopAnalyzer/bin/FWLiteSingleObjectAnalyzer.h"
 
+   \brief   Base class interface to analyze objects of a single type in fwlite
+
+   The following templates have to be expanded:
+   Collection  :  input collection   
+   Analyze     :  analyzer class for a single object type
+*/
 
 template <typename Collection, typename Analyze> 
 class FWLiteSingleObjectAnalyzer : public FWLiteLooper {
@@ -21,7 +21,7 @@ class FWLiteSingleObjectAnalyzer : public FWLiteLooper {
   /// default contstructor  
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt);
   /// default contstructor for reco top type derived classes 
-  explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const int& hypoClass);
+    explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const bool& matchForStabilityAndPurity);
   /// default contstructor for resolution type derived classes 
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, double matchDR, std::vector<double>& binsPt, std::vector<double>& binsEta, std::vector<double>& binsPhi);
   /// default destructor
@@ -59,13 +59,13 @@ template <typename Collection, typename Analyze>
 
 /// default contstructor for reco top type derived classes 
 template <typename Collection, typename Analyze> 
-  FWLiteSingleObjectAnalyzer<Collection, Analyze>::FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const int& hypoClass) : 
+  FWLiteSingleObjectAnalyzer<Collection, Analyze>::FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const bool& matchForStabilityAndPurity) : 
   src_ ( src ),
   wgt_ ( wgt ),
   useWgt_ ( useWgt )
 {
   // construct the common analyzer class
-  analyze_ = new Analyze(hypoClass);
+  analyze_ = new Analyze(hypoClass, matchForStabilityAndPurity);
 }
 
 /// default contstructor for resolution type derived classes 

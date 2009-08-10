@@ -3,14 +3,19 @@
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-#include "TopAnalysis/TopAnalyzer/interface/DoubleAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
 
-//
-// muon kinematics analyzer equally usable for full 
-// framework or framework lite
-//
+/**
+   \class   MuonJetKinematics MuonJetKinematics.h "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
 
-class MuonJetKinematics : public DoubleAnalyzer<const std::vector<pat::Muon>, const std::vector<pat::Jet> > {
+   \brief   Derived class to analyze the relations in muon jet kinematocs on reconstruction level
+
+   The structure keeps histograms to analyze the releation between muon and jet kinematics. These 
+   histograms can be filled from std::vector<pat::Muon> only. The class is derived from the DoubleObject 
+   interface, which makes it usable in full framework (fw) or fwlite. 
+*/
+
+class MuonJetKinematics : public DoubleObject<const std::vector<pat::Muon>, const std::vector<pat::Jet> > {
 
  public:
   /// default constructor for fw lite

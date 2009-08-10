@@ -2,20 +2,25 @@
 #define MuonResolution_h
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
-#include "TopAnalysis/TopAnalyzer/interface/SingleAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/interface/SingleObject.h"
 
-//
-// muon resolution analyzer equally usable for full 
-// framework or framework lite
-//
+/**
+   \class   MuonResolution MuonResolution.h "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
 
-class MuonResolution : public SingleAnalyzer<const std::vector<pat::Muon> > {
+   \brief   Derived class to analyze the resolution of muons on reconstruction using generator level information
+
+   The structure keeps histograms to derive the resolution of muons using generator level information. 
+   These histograms are to be filled  be filled from std::vector<pat::Muon> only. The class is derived 
+   from the SingleObject interface, which makes it usable in full framework (fw) or fwlite. 
+*/
+
+class MuonResolution : public SingleObject<const std::vector<pat::Muon> > {
 
  public:
   /// default constructor for fw lite
   explicit MuonResolution(double matchDR, std::vector<double> binsPt, std::vector<double> binsEta, std::vector<double> binsPhi);
   /// default constructor for full fw
-  explicit MuonResolution(const edm::ParameterSet& confgiFile);
+  explicit MuonResolution(const edm::ParameterSet& configFile);
   /// default destructor
   ~MuonResolution(){};
   
@@ -23,16 +28,18 @@ class MuonResolution : public SingleAnalyzer<const std::vector<pat::Muon> > {
   void book();
   /// histogramm booking for full fw
   void book(edm::Service<TFileService>& fileService);
-  /// book a vector of histograms according to a given binning
-  void bookHistogram(std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary);
-  /// book a vector of histograms according to a given binning
-  void bookHistogram(edm::Service<TFileService>& fs, std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary);
   /// histogram filling for fwlite and for full fw
   void fill(const std::vector<pat::Muon>& muons, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process(){};
   /// writing histograms to file in fwlite (override from base class)
   void write(TFile& file, const char* directory);
+
+ private:
+  /// book a vector of histograms according to a given binning
+  void book(std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary);
+  /// book a vector of histograms according to a given binning
+  void book(edm::Service<TFileService>& fs, std::vector<TH1F*>& hists, const char* kin, std::vector<double> binning, unsigned int nBins, double boundary);
 
  private:
   /// maximally acceptable distasnce in dR for matching

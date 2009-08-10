@@ -1,15 +1,13 @@
 #include "DataFormats/Math/interface/deltaR.h"
-#include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
 
-
 /// default constructor for fw lite
-MuonJetKinematics::MuonJetKinematics():norm_(0.)
+MuonJetKinematics::MuonJetKinematics() : norm_(0.)
 {
 }
 
 /// default constructor for full fw
-MuonJetKinematics::MuonJetKinematics(const edm::ParameterSet& cfg):norm_(0.)
+MuonJetKinematics::MuonJetKinematics(const edm::ParameterSet& cfg) : norm_(0.)
 {
 }
 
@@ -17,26 +15,24 @@ MuonJetKinematics::MuonJetKinematics(const edm::ParameterSet& cfg):norm_(0.)
 void
 MuonJetKinematics::book()
 {
-  NameScheme kin("kin");
-  hists_["dR20N" ] = new TH1F(kin("dR20N" ), "dR20N"  ,    20,    0.,    1.);
-  hists_["dR30N" ] = new TH1F(kin("dR30N" ), "dR30N"  ,    20,    0.,    1.);
-  hists_["dR40N" ] = new TH1F(kin("dR40N" ), "dR40N"  ,    20,    0.,    1.);
-  hists_["dR20Pt"] = new TH1F(kin("dR20Pt"), "dR20Pt" ,    20,    0.,    1.);
-  hists_["dR30Pt"] = new TH1F(kin("dR30Pt"), "dR30Pt" ,    20,    0.,    1.);
-  hists_["dR40Pt"] = new TH1F(kin("dR40Pt"), "dR40Pt" ,    20,    0.,    1.);
+  hists_["dR20N" ] = new TH1F( "dR20N"  , "dR20N"  ,    20,    0.,    1.);
+  hists_["dR30N" ] = new TH1F( "dR30N"  , "dR30N"  ,    20,    0.,    1.);
+  hists_["dR40N" ] = new TH1F( "dR40N"  , "dR40N"  ,    20,    0.,    1.);
+  hists_["dR20Pt"] = new TH1F( "dR20Pt" , "dR20Pt" ,    20,    0.,    1.);
+  hists_["dR30Pt"] = new TH1F( "dR30Pt" , "dR30Pt" ,    20,    0.,    1.);
+  hists_["dR40Pt"] = new TH1F( "dR40Pt" , "dR40Pt" ,    20,    0.,    1.);
 }
 
 /// histogramm booking for full fw
 void
 MuonJetKinematics::book(edm::Service<TFileService>& fs)
 {
-  NameScheme kin("kin");
-  hists_["dR20N" ] = fs->make<TH1F>(kin("dR20N" ), "dR20N"  ,    20,    0.,    1.);
-  hists_["dR30N" ] = fs->make<TH1F>(kin("dR30N" ), "dR30N"  ,    20,    0.,    1.);
-  hists_["dR40N" ] = fs->make<TH1F>(kin("dR40N" ), "dR40N"  ,    20,    0.,    1.);
-  hists_["dR20Pt"] = fs->make<TH1F>(kin("dR20Pt"), "dR20Pt" ,    20,    0.,    1.);
-  hists_["dR30Pt"] = fs->make<TH1F>(kin("dR30Pt"), "dR30Pt" ,    20,    0.,    1.);
-  hists_["dR40Pt"] = fs->make<TH1F>(kin("dR40Pt"), "dR40Pt" ,    20,    0.,    1.);
+  hists_["dR20N" ] = fs->make<TH1F>( "dR20N"  , "dR20N"  ,    20,    0.,    1.);
+  hists_["dR30N" ] = fs->make<TH1F>( "dR30N"  , "dR30N"  ,    20,    0.,    1.);
+  hists_["dR40N" ] = fs->make<TH1F>( "dR40N"  , "dR40N"  ,    20,    0.,    1.);
+  hists_["dR20Pt"] = fs->make<TH1F>( "dR20Pt" , "dR20Pt" ,    20,    0.,    1.);
+  hists_["dR30Pt"] = fs->make<TH1F>( "dR30Pt" , "dR30Pt" ,    20,    0.,    1.);
+  hists_["dR40Pt"] = fs->make<TH1F>( "dR40Pt" , "dR40Pt" ,    20,    0.,    1.);
 }
 
 /// histogram filling for fwlite and for full fw
@@ -72,12 +68,12 @@ MuonJetKinematics::fill(const std::vector<pat::Muon>& muons, const std::vector<p
 
     // fill enegry flow and object flow histograms
     norm_+=weight; 
-    hists_["dR20N"  ]->Fill( minDR20, weight  );
-    hists_["dR30N"  ]->Fill( minDR30, weight  );
-    hists_["dR40N"  ]->Fill( minDR40, weight  );
-    hists_["dR20Pt" ]->Fill( minDR20, minPt20 );
-    hists_["dR30Pt" ]->Fill( minDR30, minPt30 );
-    hists_["dR40Pt" ]->Fill( minDR40, minPt40 );
+    hists_.find( "dR20N"  )->second->Fill( minDR20, weight  );
+    hists_.find( "dR30N"  )->second->Fill( minDR30, weight  );
+    hists_.find( "dR40N"  )->second->Fill( minDR40, weight  );
+    hists_.find( "dR20Pt" )->second->Fill( minDR20, minPt20 );
+    hists_.find( "dR30Pt" )->second->Fill( minDR30, minPt30 );
+    hists_.find( "dR40Pt" )->second->Fill( minDR40, minPt40 );
   }
 }
 
@@ -86,10 +82,10 @@ void
 MuonJetKinematics::process()
 {
   // normalize histograms to the number of muons, then went in
-  hists_["dR20N" ]->Scale( 1./norm_ );
-  hists_["dR30N" ]->Scale( 1./norm_ );
-  hists_["dR40N" ]->Scale( 1./norm_ );
-  hists_["dR20Pt"]->Scale( 1./norm_ );
-  hists_["dR30Pt"]->Scale( 1./norm_ );
-  hists_["dR40Pt"]->Scale( 1./norm_ );
+  hists_.find( "dR20N"  )->second->Scale( 1./norm_ );
+  hists_.find( "dR30N"  )->second->Scale( 1./norm_ );
+  hists_.find( "dR40N"  )->second->Scale( 1./norm_ );
+  hists_.find( "dR20Pt" )->second->Scale( 1./norm_ );
+  hists_.find( "dR30Pt" )->second->Scale( 1./norm_ );
+  hists_.find( "dR40Pt" )->second->Scale( 1./norm_ );
 }

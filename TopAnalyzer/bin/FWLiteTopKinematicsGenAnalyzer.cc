@@ -1,8 +1,8 @@
 #include "TopAnalysis/TopUtils/bin/NiceStyle.cc"
-#include "TopAnalysis/TopAnalyzer/interface/TopKinematicsGen.h"
+#include "TopAnalysis/TopAnalyzer/interface/TopKinematics.h"
 #include "TopAnalysis/TopAnalyzer/bin/FWLiteSingleObjectAnalyzer.h"
 
-typedef FWLiteSingleObjectAnalyzer<const TtGenEvent, TopKinematicsGen> FWLiteTopKinematicsGenAnalyzer;
+typedef FWLiteSingleObjectAnalyzer<const TtGenEvent, TopKinematics> FWLiteTopKinematicsGenAnalyzer;
 
 
 int main(int argc, char* argv[]) 

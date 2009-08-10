@@ -4,14 +4,16 @@
 #include <cstdlib>
 #include "TopAnalysis/TopAnalyzer/interface/FWLiteLooper.h"
 
-//
-// template pluging to be used for the analysis of relations of
-// two different object types like with framework lite: 
-//
-// CollectionA :  input collection for object type A
-// CollectionB :  input collection for object type B
-// Analyze     :  analyzer class for two object types A & B
-//
+/**
+   \class   FWLiteDoubleObjectAnalyzer FWLiteDoubleObjectAnalyzer.h "TopAnalysis/TopAnalyzer/bin/FWLiteDoubleObjectAnalyzer.h"
+
+   \brief   Base class interface to analyze the relation of two different objects in fwlite
+
+   The following templates have to be expanded:
+   CollectionA :  input collection for object type A
+   CollectionB :  input collection for object type B
+   Analyze     :  analyzer class for two object types A & B
+*/
 
 template <typename CollectionA, typename CollectionB, typename Analyze> 
 class FWLiteDoubleObjectAnalyzer : public FWLiteLooper {

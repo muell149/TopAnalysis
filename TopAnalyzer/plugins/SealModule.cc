@@ -20,14 +20,8 @@ typedef DoubleObjectAnalyzer<std::vector<pat::Muon>, std::vector<pat::Jet>, Muon
 DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
 
-#include "TopAnalysis/TopAnalyzer/interface/TopKinematicsGen.h"
-typedef SingleObjectAnalyzer<TtGenEvent, TopKinematicsGen> TopKinematicsGenAnalyzer;
+#include "TopAnalysis/TopAnalyzer/interface/TopKinematics.h"
+typedef SingleObjectAnalyzer<TtGenEvent, TopKinematics> TopKinematicsGenAnalyzer;
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
-
-#include "TopAnalysis/TopAnalyzer/interface/TopKinematicsRec.h"
-typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematicsRec> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
-
-#include "TopAnalysis/TopAnalyzer/interface/TopKinematicsMatch.h"
-typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematicsMatch> TopKinematicsMatchAnalyzer;
-DEFINE_FWK_MODULE(TopKinematicsMatchAnalyzer);

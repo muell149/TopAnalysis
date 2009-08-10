@@ -1,8 +1,8 @@
 #include "TopAnalysis/TopUtils/bin/NiceStyle.cc"
-#include "TopAnalysis/TopAnalyzer/interface/TopKinematicsRec.h"
+#include "TopAnalysis/TopAnalyzer/interface/TopKinematics.h"
 #include "TopAnalysis/TopAnalyzer/bin/FWLiteSingleObjectAnalyzer.h"
 
-typedef FWLiteSingleObjectAnalyzer<const TtSemiLeptonicEvent, TopKinematicsRec> FWLiteTopKinematicsRecAnalyzer;
+typedef FWLiteSingleObjectAnalyzer<const TtSemiLeptonicEvent, TopKinematics> FWLiteTopKinematicsRecAnalyzer;
 
 
 int main(int argc, char* argv[]) 
@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
   setNiceStyle();
 
   // define worker class
-  int hypoKey = 1;
-  FWLiteTopKinematicsRecAnalyzer topana("ttSemiLepEvent", "eventWeight", true, hypoKey); 
+  std::string hypoKey("kGenMatch");
+  FWLiteTopKinematicsRecAnalyzer topana("ttSemiLepEvent", "eventWeight", true, hypoKey, false); 
   // configure
   topana.beginJob(cfgFile);
   // keep this! It's the event loop
