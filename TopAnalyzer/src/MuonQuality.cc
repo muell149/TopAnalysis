@@ -95,8 +95,8 @@ MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
     hists_.find( "isoCalPt" )->second->Fill( muon->caloIso () , weight );
 
     // fill relative isolation
-    hists_.find("isoRelComb")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt()            , weight );
-    hists_.find("isoRelPt"  )->second->Fill( muon->pt()/(muon->pt()+muon->trackIso()+muon->caloIso()) , weight );
+    hists_.find("isoRelCmb")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt()            , weight );
+    hists_.find("isoRelPt" )->second->Fill( muon->pt()/(muon->pt()+muon->trackIso()+muon->caloIso()) , weight );
   }
 }
 

@@ -51,7 +51,7 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_c
 ## analyze top quarks on generator level
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_gen_cfi")
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_rec_cfi")
-process.load("TopAnalysis.TopAnalyzer.TopKinematics_match_cfi")
+process.load("TopAnalysis.TopAnalyzer.TopKinematics_match_cff")
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
@@ -63,5 +63,5 @@ process.p1 = cms.Path(process.makeGenEvt *
                       process.makeTtSemiLepEvent *
                       process.analyzeTopGenKinematics +
                       process.analyzeTopRecKinematics +
-                      process.analyzeTopMatchKinematics
+                      process.analyzeTopRecKinematicsMatched
                       )

@@ -15,5 +15,4 @@
  # TopQuark binaries
  <bin file="FWLiteTopKinematicsGenAnalyzer.cc"> </bin>
  <bin file="FWLiteTopKinematicsRecAnalyzer.cc"> </bin>
- <bin file="FWLiteTopKinematicsMatchAnalyzer.cc"> </bin>
 </environment>

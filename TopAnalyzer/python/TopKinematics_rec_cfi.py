@@ -9,7 +9,10 @@ analyzeTopRecKinematics = cms.EDAnalyzer("TopKinematicsRecAnalyzer",
     useWeight = cms.bool(True),
     ## analyzer specific configurables
     analyze   = cms.PSet(
-      hypoKey = cms.string("kGenMatch")
+      ## hypothesis key on reco level
+      hypoKey = cms.string("kGenMatch"),
+      ## apply matchin for stability&purity determination or not
+      matchForStabilityAndPurity = cms.bool(False)
     )    
 )
 

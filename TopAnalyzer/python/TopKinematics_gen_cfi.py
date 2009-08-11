@@ -8,7 +8,12 @@ analyzeTopGenKinematics = cms.EDAnalyzer("TopKinematicsGenAnalyzer",
     ## use the weight or not                             
     useWeight = cms.bool(True),
     ## analyzer specific configurables
-    analyze   = cms.PSet()    
+    analyze   = cms.PSet(
+      ## hypothesis key on reco level
+      hypoKey = cms.string("None"),
+      ## apply matchin for stability&purity determination or not
+      matchForStabilityAndPurity = cms.bool(False)
+    )
 )
 
 

@@ -16,6 +16,7 @@ TopKinematics::TopKinematics(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
   matchForStabilityAndPurity_( cfg.getParameter<bool>("matchForStabilityAndPurity") )
 {
+  std::cout << "match = " << matchForStabilityAndPurity_ << std::endl;
 }
 
 /// histogramm booking for fwlite 

@@ -47,7 +47,7 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMuon.root')
 )
 
-process.p1 = cms.Path(process.analyzeMuonQuality    +
-                      process.analyzeMuonKinematics +
-                      process.analyzeMuonResolution
+process.p1 = cms.Path(process.analyzeMuonQuality #   +
+                      #process.analyzeMuonKinematics +
+                      #process.analyzeMuonResolution
                       )
