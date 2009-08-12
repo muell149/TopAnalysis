@@ -37,17 +37,24 @@ process.options = cms.untracked.PSet(
 # muon analysis
 #-------------------------------------------------
 
+## produce selectedLayer1TopMuons
+process.load("TopAnalysis.TopUtils.TopMuonSelector_cff")
+
 ## analyze muons
 process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
+process.analyzeMuonQuality.input    = "selectedLayer1TopMuon:rec"
 process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
+process.analyzeMuonKinematics.input = "selectedLayer1TopMuon:rec"
 process.load("TopAnalysis.TopAnalyzer.MuonResolution_cfi")
+process.analyzeMuonResolution.input = "selectedLayer1TopMuon:rec"
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('analyzeMuon.root')
+    fileName = cms.string('analyzeMuon_rec.root')
 )
 
-process.p1 = cms.Path(process.analyzeMuonQuality #   +
-                      #process.analyzeMuonKinematics +
-                      #process.analyzeMuonResolution
+process.p1 = cms.Path(process.makeSelectedLayer1TopMuons *
+                      process.analyzeMuonQuality    +
+                      process.analyzeMuonKinematics +
+                      process.analyzeMuonResolution
                       )
