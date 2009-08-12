@@ -8,7 +8,7 @@
 /**
    \class   MuonJetKinematics MuonJetKinematics.h "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
 
-   \brief   Derived class to analyze the relations in muon jet kinematocs on reconstruction level
+   \brief   Derived class to analyze the relations in muon jet kinematics on reconstruction level
 
    The structure keeps histograms to analyze the releation between muon and jet kinematics. These 
    histograms can be filled from std::vector<pat::Muon> only. The class is derived from the DoubleObject 

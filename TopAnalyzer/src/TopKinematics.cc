@@ -16,7 +16,6 @@ TopKinematics::TopKinematics(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
   matchForStabilityAndPurity_( cfg.getParameter<bool>("matchForStabilityAndPurity") )
 {
-  std::cout << "match = " << matchForStabilityAndPurity_ << std::endl;
 }
 
 /// histogramm booking for fwlite 
@@ -113,7 +112,7 @@ TopKinematics::fill(const reco::Candidate* recTopA, const reco::Candidate* genTo
 
 /// helper function to determine stability and purity
 void 
-TopKinematics::match(TH1F* hist, const double& recValue, const double& genValue, const double& weight)
+TopKinematics::match(TH1* hist, const double& recValue, const double& genValue, const double& weight)
 {
   for(int bin=1; bin<=hist->GetNbinsX(); ++bin){
     double lowerEdge = hist->GetBinLowEdge(bin);

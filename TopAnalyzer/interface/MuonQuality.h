@@ -37,10 +37,10 @@ class MuonQuality : public SingleObject<const std::vector<pat::Muon> > {
  private:
   /// get energy of objects within a ring in deltaR corresponding to the 
   /// bin width of the histogram 'hist' from 'deposit' & fill hist with it
-  void energyFlow(TH1F* hist, const pat::IsoDeposit* deposit);
+  void energyFlow(TH1* hist, const pat::IsoDeposit* deposit);
   /// get number of objects within a ring in deltaR corresponding to the 
   /// bin width of the histogram 'hist' from 'deposit' and fill hist with it
-  void objectFlow(TH1F* hist, const pat::IsoDeposit* deposit);
+  void objectFlow(TH1* hist, const pat::IsoDeposit* deposit);
 
  private:
   /// number of (weighted) histogram entries for normalization

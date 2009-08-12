@@ -116,7 +116,7 @@ MuonQuality::process()
 /// get number of objects within a ring in deltaR corresponding to the bin width 
 /// of the histogram 'hist' from 'deposit' and fill hist with it
 void
-MuonQuality::objectFlow(TH1F* hist, const pat::IsoDeposit* deposit)
+MuonQuality::objectFlow(TH1* hist, const pat::IsoDeposit* deposit)
 {
   if(hist && deposit){
     for(int bin=1; bin<=hist->GetNbinsX(); ++bin){
@@ -130,7 +130,7 @@ MuonQuality::objectFlow(TH1F* hist, const pat::IsoDeposit* deposit)
 /// get energy of objects within a ring in deltaR corresponding to the bin width 
 /// of the histogram 'hist' from 'deposit' and fill hist with it
 void
-MuonQuality::energyFlow(TH1F* hist, const pat::IsoDeposit* deposit)
+MuonQuality::energyFlow(TH1* hist, const pat::IsoDeposit* deposit)
 {
   if(hist && deposit){
     for(int bin=1; bin<=hist->GetNbinsX(); ++bin){

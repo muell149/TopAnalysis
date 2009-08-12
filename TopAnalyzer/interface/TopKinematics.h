@@ -46,7 +46,7 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
   void fill(const reco::Candidate* recTopA, const reco::Candidate* genTopA, const reco::Candidate* recTopB, const reco::Candidate* genTopB, const double& weight=1.);
   /// helper function for determining stability and purity
-  void match(TH1F* hist, const double& genValue, const double& recValue, const double& weight);
+  void match(TH1* hist, const double& genValue, const double& recValue, const double& weight);
 
  private:
   /// class key of hypothesis
