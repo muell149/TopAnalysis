@@ -20,8 +20,10 @@ class FWLiteSingleObjectAnalyzer : public FWLiteLooper {
  public:
   /// default contstructor  
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt);
+  /// default contstructor with one additional int value
+  explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, int value);
   /// default contstructor for reco top type derived classes 
-    explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const bool& matchForStabilityAndPurity);
+  explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const bool& matchForStabilityAndPurity);
   /// default contstructor for resolution type derived classes 
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, double matchDR, std::vector<double>& binsPt, std::vector<double>& binsEta, std::vector<double>& binsPhi);
   /// default destructor
@@ -55,6 +57,17 @@ template <typename Collection, typename Analyze>
 {
   // construct the common analyzer class
   analyze_ = new Analyze();
+}
+
+/// default constructor
+template <typename Collection, typename Analyze> 
+  FWLiteSingleObjectAnalyzer<Collection, Analyze>::FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, int value) : 
+  src_ ( src ),
+  wgt_ ( wgt ),
+  useWgt_ ( useWgt )
+{
+  // construct the common analyzer class
+  analyze_ = new Analyze(value);
 }
 
 /// default contstructor for reco top type derived classes 

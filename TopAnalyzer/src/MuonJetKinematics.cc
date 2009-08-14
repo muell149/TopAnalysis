@@ -2,12 +2,12 @@
 #include "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
 
 /// default constructor for fw lite
-MuonJetKinematics::MuonJetKinematics() : norm_(0.)
+MuonJetKinematics::MuonJetKinematics()
 {
 }
 
 /// default constructor for full fw
-MuonJetKinematics::MuonJetKinematics(const edm::ParameterSet& cfg) : norm_(0.)
+MuonJetKinematics::MuonJetKinematics(const edm::ParameterSet& cfg)
 {
 }
 
@@ -15,77 +15,52 @@ MuonJetKinematics::MuonJetKinematics(const edm::ParameterSet& cfg) : norm_(0.)
 void
 MuonJetKinematics::book()
 {
-  hists_["dR20N" ] = new TH1F( "dR20N"  , "dR20N"  ,    20,    0.,    1.);
-  hists_["dR30N" ] = new TH1F( "dR30N"  , "dR30N"  ,    20,    0.,    1.);
-  hists_["dR40N" ] = new TH1F( "dR40N"  , "dR40N"  ,    20,    0.,    1.);
-  hists_["dR20Pt"] = new TH1F( "dR20Pt" , "dR20Pt" ,    20,    0.,    1.);
-  hists_["dR30Pt"] = new TH1F( "dR30Pt" , "dR30Pt" ,    20,    0.,    1.);
-  hists_["dR40Pt"] = new TH1F( "dR40Pt" , "dR40Pt" ,    20,    0.,    1.);
+  /** 
+      Distance between muon and closest jet in deltaR for different pt thresholds
+  **/
+  // jets with pt>20
+  hists_["dist20_"] = new TH1F( "dist20_" , "dist20_" ,   20,   0.,   1.);
+  // jets with pt>30
+  hists_["dist30_"] = new TH1F( "dist30_" , "dist30_" ,   20,   0.,   1.);
+  // jets with pt>40
+  hists_["dist40_"] = new TH1F( "dist40_" , "dist40_" ,   20,   0.,   1.);
 }
 
 /// histogramm booking for full fw
 void
 MuonJetKinematics::book(edm::Service<TFileService>& fs)
 {
-  hists_["dR20N" ] = fs->make<TH1F>( "dR20N"  , "dR20N"  ,    20,    0.,    1.);
-  hists_["dR30N" ] = fs->make<TH1F>( "dR30N"  , "dR30N"  ,    20,    0.,    1.);
-  hists_["dR40N" ] = fs->make<TH1F>( "dR40N"  , "dR40N"  ,    20,    0.,    1.);
-  hists_["dR20Pt"] = fs->make<TH1F>( "dR20Pt" , "dR20Pt" ,    20,    0.,    1.);
-  hists_["dR30Pt"] = fs->make<TH1F>( "dR30Pt" , "dR30Pt" ,    20,    0.,    1.);
-  hists_["dR40Pt"] = fs->make<TH1F>( "dR40Pt" , "dR40Pt" ,    20,    0.,    1.);
+  /** 
+      Distance between muon and closest jet in deltaR for different pt thresholds
+  **/
+  // jets with pt>20
+  hists_["dist20_"] = fs->make<TH1F>( "dist20_" , "dist20_" ,   20,   0.,   1.);
+  // jets with pt>30
+  hists_["dist30_"] = fs->make<TH1F>( "dist30_" , "dist30_" ,   20,   0.,   1.);
+  // jets with pt>40
+  hists_["dist40_"] = fs->make<TH1F>( "dist40_" , "dist40_" ,   20,   0.,   1.);
 }
 
 /// histogram filling for fwlite and for full fw
 void
 MuonJetKinematics::fill(const std::vector<pat::Muon>& muons, const std::vector<pat::Jet>& jets, const double& weight)
 {
-  std::vector<pat::Muon>::const_iterator muon=muons.begin();
-  if(muon!=muons.end()){
-
-    double minDR20=-1., minDR30=-1., minDR40=-1.;
-    double minPt20=-1., minPt30=-1., minPt40=-1.;
-    for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); jet!=jets.end(); ++jet) {
+  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
+    double dist20=-1., dist30=-1., dist40=-1.;
+    for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); jet!=jets.end(); ++jet){
       double dR=deltaR(muon->eta(), muon->phi(), jet->eta(), jet->phi());
-      if(fabs(jet->eta())<2.4 && jet->pt()>20){
-	if(dR<minDR20 || minDR20<0.){
-	  minDR20=dR;
-	  minPt20=jet->pt();
-	}
-      }
-      if(fabs(jet->eta())<2.4 && jet->pt()>30){
-	if(dR<minDR30 || minDR30<0.){
-	  minDR30=dR;
-	  minPt30=jet->pt();
-	}
-      }
-      if(fabs(jet->eta())<2.4 && jet->pt()>40){
-	if(dR<minDR40 || minDR40<0.){
-	  minDR40=dR;
-	  minPt40=jet->pt();
-	}
-      }
+      // determine closest jet muon with pt>20
+      if( jet->pt()>20 && (dR<dist20 || dist20<0.) ){ dist20=dR; }
+      // determine closest jet muon with pt>30
+      if( jet->pt()>30 && (dR<dist30 || dist30<0.) ){ dist30=dR; }
+      // determine closest jet muon with pt>40
+      if( jet->pt()>40 && (dR<dist40 || dist40<0.) ){ dist40=dR; }
     }
-
-    // fill enegry flow and object flow histograms
-    norm_+=weight; 
-    hists_.find( "dR20N"  )->second->Fill( minDR20, weight  );
-    hists_.find( "dR30N"  )->second->Fill( minDR30, weight  );
-    hists_.find( "dR40N"  )->second->Fill( minDR40, weight  );
-    hists_.find( "dR20Pt" )->second->Fill( minDR20, minPt20 );
-    hists_.find( "dR30Pt" )->second->Fill( minDR30, minPt30 );
-    hists_.find( "dR40Pt" )->second->Fill( minDR40, minPt40 );
+    /**
+       Fill Distance histograms
+    **/    
+    if( dist20>=0 ) hists_.find("dist20_" )->second->Fill( dist20, weight );
+    if( dist30>=0 ) hists_.find("dist30_" )->second->Fill( dist30, weight );
+    if( dist40>=0 ) hists_.find("dist40_" )->second->Fill( dist40, weight );
   }
-}
-
-/// everything which needs to be done after the event loop
-void 
-MuonJetKinematics::process()
-{
-  // normalize histograms to the number of muons, then went in
-  hists_.find( "dR20N"  )->second->Scale( 1./norm_ );
-  hists_.find( "dR30N"  )->second->Scale( 1./norm_ );
-  hists_.find( "dR40N"  )->second->Scale( 1./norm_ );
-  hists_.find( "dR20Pt" )->second->Scale( 1./norm_ );
-  hists_.find( "dR30Pt" )->second->Scale( 1./norm_ );
-  hists_.find( "dR40Pt" )->second->Scale( 1./norm_ );
 }

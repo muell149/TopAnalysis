@@ -17,29 +17,39 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-//
-// interface class for a common object analyzer, which should 
-// be equally usable for full framework or framework lite 
-//
+/**
+   \class   SingleObject SingleObject.h "TopAnalysis/TopAnalyzer/interface/SingleObject.h"
+
+   \brief   Interface class to analyze single objects within full framework of fwlite
+
+   The class is an interface to a common analyer or a corresponding fwlite mimic
+   in TopAnalysis/TopAnalzyer/bin. It takes a single object class as argument. 
+   An interface to a common book, fill & process function is expected by the common 
+   analyzer (mimic) class. Each derived class has to be provide these.
+*/
 
 template <typename Collection> 
 class SingleObject{
 
  public:
-  /// default constructor for fw lite
+  /// default constructor for fwlite
   explicit SingleObject(){};
-  /// default constructor for full fw
+  /// default constructor for fwfull
   explicit SingleObject(const edm::ParameterSet& configFile){};
   /// default destructor
   virtual ~SingleObject(){};
   /// write histograms to file for fwlite
   void write(TFile& file, const char* directory);
 
+  /**
+     The following functions have to be implemented for any class
+     derived from SingleObject<Collection>
+  **/
   /// histogramm booking for fwlite 
   virtual void book() = 0;
-  /// histogramm booking for full fw
+  /// histogramm booking for fwfull
   virtual void book(edm::Service<TFileService>& fileService) = 0;
-  /// histogram filling for fwlite and for full fw
+  /// histogram filling for fwlite and for fwfull
   virtual void fill(const Collection& inputCollection, const double& weight=1.) = 0;
   /// everything which needs to be done after the event loop
   virtual void process() = 0;

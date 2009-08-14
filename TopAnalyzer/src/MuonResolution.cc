@@ -5,10 +5,7 @@
 
 /// default constructor for fw lite
 MuonResolution::MuonResolution(double matchDR, std::vector<double> binsPt, std::vector<double> binsEta, std::vector<double> binsPhi):
-  matchDR_( matchDR ), 
-  binsPt_ ( binsPt  ),
-  binsEta_( binsEta ),
-  binsPhi_( binsPhi )
+  matchDR_( matchDR ), binsPt_ ( binsPt ), binsEta_( binsEta ), binsPhi_( binsPhi )
 { 
 }
 
@@ -25,38 +22,46 @@ MuonResolution::MuonResolution(const edm::ParameterSet& cfg):
 void 
 MuonResolution::book()
 {
-  book(pt_,  "pt" , binsPt_,  100,   0.5);
-  book(eta_, "eta", binsEta_, 100, 0.005);
-  book(phi_, "phi", binsPhi_, 100, 0.005);
+  /** 
+      Resolution Histograms
+  **/
+  book( pt_  ,  "pt" ,  binsPt_  ,  100 ,    0.5 );
+  book( eta_ , "eta" ,  binsEta_ ,  100 ,  0.005 );
+  book( phi_ , "phi" ,  binsPhi_ ,  100 ,  0.005 );
 }
 
-/// histogramm booking for full fw
+/// histogramm booking for fwfull
 void 
 MuonResolution::book(edm::Service<TFileService>& fs)
 {
-  book(fs, pt_,  "pt" , binsPt_,  100,   0.5);
-  book(fs, eta_, "eta", binsEta_, 100, 0.005);
-  book(fs, phi_, "phi", binsPhi_, 100, 0.005);
+  /** 
+      Resolution Histograms
+  **/
+  book( fs , pt_  ,  "pt"  , binsPt_  ,  100 ,    0.5 );
+  book( fs , eta_ ,  "eta" , binsEta_ ,  100 ,  0.005 );
+  book( fs , phi_ ,  "phi" , binsPhi_ ,  100 ,  0.005 );
 }
 
 /// histogram filling for fwlite and for full fw
 void
 MuonResolution::fill(const std::vector<pat::Muon>& muons, const double& weight)
 {
-  std::vector<pat::Muon>::const_iterator muon=muons.begin();
-  if(muon!=muons.end()){
+  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
     if( muon->genLepton() ){ 
       if(deltaR( muon->eta(), muon->phi(), muon->genLepton()->eta(), muon->genLepton()->phi() )<matchDR_){
+	// fill resolution histograms binned in pt
 	for(unsigned int idx=0; idx<(binsPt_.size()-1); ++idx) {
 	  if( (binsPt_[idx]<muon->genLepton()->pt()) && (muon->genLepton()->pt()<binsPt_[idx+1]) ){
 	    pt_[idx]->Fill((muon->pt()-muon->genLepton()->pt())/(muon->genLepton())->pt(), weight);
 	  }
 	}
+	// fill resolution histograms binned in eta
 	for(unsigned int idx=0; idx<(binsEta_.size()-1); ++idx) {
 	  if( (binsEta_[idx]<muon->genLepton()->eta()) && (muon->genLepton()->eta()<binsEta_[idx+1]) ){
 	    eta_[idx]->Fill(muon->eta()-muon->genLepton()->eta(), weight);
 	  }
 	}
+	// fill resolution histograms binned in phi
 	for(unsigned int idx=0; idx<(binsPhi_.size()-1); ++idx) {
 	  if( (binsPhi_[idx]<muon->genLepton()->phi()) && (muon->genLepton()->phi()<binsPhi_[idx+1]) ){
 	    phi_[idx]->Fill(deltaPhi(muon->phi(), muon->genLepton()->phi()), weight);
@@ -71,15 +76,19 @@ MuonResolution::fill(const std::vector<pat::Muon>& muons, const double& weight)
 void
 MuonResolution::write(TFile& file, const char* directory)
 {
+  // move to the proper directory
   file.cd( directory );
+  // write resolution histograms binned in pt to the file
   for(std::vector<TH1F*>::const_iterator hist=pt_ .begin(); hist!=pt_ .end(); ++hist){
     const TH1F* out = *hist;
     out->Write();
   }
+  // write resolution histograms binned in eta to the file
   for(std::vector<TH1F*>::const_iterator hist=eta_.begin(); hist!=eta_.end(); ++hist){
      const TH1F* out = *hist;
     out->Write();
   }
+  // write resolution histograms binned in phi to the file
   for(std::vector<TH1F*>::const_iterator hist=phi_.begin(); hist!=phi_.end(); ++hist){
      const TH1F* out = *hist;
     out->Write();

@@ -17,10 +17,16 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-//
-// interface class for a common object analyzer, which should 
-// be equally usable for full framework or framework lite 
-//
+/**
+   \class   DoubleObject DoubleObject.h "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
+
+   \brief   Interface class to analyze the relation of two object types within full framework of fwlite
+
+   The class is an interface to a common analyer or a corresponding fwlite mimic
+   in TopAnalysis/TopAnalzyer/bin. It takes a two object classes as argument. An 
+   interface to a common book, fill & process function is expected by the common 
+   analyzer (mimic) class. Each derived class has to be provided these.
+*/
 
 template <typename CollectionA, typename CollectionB> 
 class DoubleObject{
@@ -28,18 +34,22 @@ class DoubleObject{
  public:
   /// default constructor for fw lite
   explicit DoubleObject(){};
-  /// default constructor for full fw
+  /// default constructor for fwfull
   explicit DoubleObject(const edm::ParameterSet& configFile){};
   /// default destructor
   virtual ~DoubleObject(){};
   /// write histograms to file for fwlite
   void write(TFile& file, const char* directory);
 
+  /**
+     The following functions have to be implemented for any class
+     derived from DoubleObject<CollectionA, CollectionB>
+  **/
   /// histogramm booking for fwlite 
   virtual void book() = 0;
-  /// histogramm booking for full fw
+  /// histogramm booking for fwfull
   virtual void book(edm::Service<TFileService>& fileService) = 0;
-  /// histogram filling for fwlite and for full fw
+  /// histogram filling for fwlite and for fwfull
   virtual void fill(CollectionA& inputCollectionA, CollectionB& inputCollectionB, const double& weight=1.) = 0;
   /// everything which needs to be done after the event loop
   virtual void process() = 0;

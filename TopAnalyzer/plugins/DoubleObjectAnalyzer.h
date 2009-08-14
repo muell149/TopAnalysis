@@ -18,14 +18,38 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-//
-// template pluging to be used for the analysis of relations of 
-// two different object types like with the full framework:
-//
-// CollectionA :  input collection for object type A
-// CollectionB :  input collection for object type B
-// Analyze     :  analyzer class for two object types A & B
-//
+/**
+   \class   DoubleObjectAnalyzer DoubleObjectAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/DoubleObjectAnalyzer.h"
+
+   \brief   Template plugin to be used for the analysis of two object types within the full framework
+
+   The class is a template to be used for the analysis of objects of two object types, 
+   like muons & jets or others. The class expects the following arguments:
+
+      - CollectionA  :  input collection or class A
+      - CollectionB  :  input collection or class B
+      - Analyze     :  analyzer class for a single object type
+
+   The Analyze class is expected to contain all analysis implementation to be applied 
+   on the Collections (or classes). The class Analyze is expected to be of the type 
+   DoubleObject<CollectionA, CollectionB>, where CollectionA and CollectionB are the 
+   same Collections (or classes) as for this class. It calls the  Analyze::book method 
+   using the TFileService at the beginning of cmsRun the Analyze::analyze method 
+   during the event loop and the Analyze::process method from Analyze at the end of 
+   the job. 
+
+   It provides a fixed interface for the following tasks:
+
+      - receive the input collectionA/classA from the event content (parameter: 'srcA')
+      - receive the input collectionB/classB from the event content (parameter: 'srcB')
+      - receive a potential event weight (parameter: 'weight')
+      - a flag to determine whether this event weight should be used or not (parameter:
+        'useWeight')
+
+   requiring the correspongin parameters in the initializing configuration file (cfi). 
+   Additinal parameters required by the class Analyze may be added using an arbitary 
+   edm::ParameterSet 'analyze'.
+*/
 
 template <typename CollectionA, typename CollectionB, typename Analyze> 
 class DoubleObjectAnalyzer : public edm::EDAnalyzer {
@@ -36,7 +60,6 @@ class DoubleObjectAnalyzer : public edm::EDAnalyzer {
   /// default destructor
   ~DoubleObjectAnalyzer();
   
-
  private:
   /// everything which has to be done before the event loop  
   virtual void beginJob(const edm::EventSetup& setup) ;
@@ -45,7 +68,6 @@ class DoubleObjectAnalyzer : public edm::EDAnalyzer {
   /// everything which has to be done after the event loop 
   virtual void endJob();
   
-
  private:
   /// input collection for object type A
   edm::InputTag srcA_;
@@ -63,14 +85,14 @@ class DoubleObjectAnalyzer : public edm::EDAnalyzer {
 /// default constructor
 template <typename CollectionA, typename CollectionB, typename Analyze> 
 DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::DoubleObjectAnalyzer(const edm::ParameterSet& cfg) :
-  srcA_( cfg.getParameter<edm::InputTag>( "inputA"  ) ),
-  srcB_( cfg.getParameter<edm::InputTag>( "inputB"  ) ),
+  srcA_( cfg.getParameter<edm::InputTag>( "srcA"  ) ),
+  srcB_( cfg.getParameter<edm::InputTag>( "srcB"  ) ),
   wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
   useWgt_( cfg.getParameter<bool>( "useWeight" ) )
 {
   // construct the common analyzer class with
   // corresponding parameter sets as input 
-  analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") );
+  cfg.exists("analyze") ? analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") ) : analyze_ = new Analyze( edm::ParameterSet() );
 }
 
 /// default destructor

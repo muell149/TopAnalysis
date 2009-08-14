@@ -18,14 +18,37 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
-//
-// template pluging to be used for the analysis of objects like 
-// electrons, muons, jets, or reconstructed top candidates with 
-// the full framework:
-//
-// Collection  :  input collection   
-// Analyze     :  analyzer class for a single object type
-//
+/**
+   \class   SingleObjectAnalyzer SingleObjectAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/SingleObjectAnalyzer.h"
+
+   \brief   Template plugin to be used for the analysis of single objects within the full framework
+
+   The class is a template to be used for the analysis of objects of a single object 
+   type, like electrons, muons, jets but also for reconstructed ttbar pairs (TtEvent 
+   like classes) or ttbar pairs on generator level (TopGenEvent like classes). The 
+   class expects the following arguments:
+
+      - Collection  :  input collection or class 
+      - Analyze     :  analyzer class for a single object type
+
+   The Analyze class is expected to contain all analysis implementation to be applied 
+   on the Collection (or class). The class Analyze is expected to be of the type 
+   SingleObject<Collection>, where Collection is the same Collection (or class) as for 
+   this class. It calls the  Analyze::book method using the TFileService at the 
+   beginning of cmsRun the Analyze::analyze method during the event loop and the 
+   Analyze::process method from Analyze at the end of the job. 
+
+   It provides a fixed interface for the following tasks:
+
+      - receive the input collection/class from the event content (parameter: 'src')
+      - receive a potential event weight (parameter: 'weight')
+      - a flag to determine whether this event weight should be used or not (parameter:
+        'useWeight')
+
+   requiring the correspongin parameters in the initializing configuration file (cfi).
+   Additinal parameters required by the class Analyze may be added using an arbitary 
+   edm::ParameterSet 'analyze'.
+*/
 
 template <typename Collection, typename Analyze> 
 class SingleObjectAnalyzer : public edm::EDAnalyzer {
@@ -36,7 +59,6 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
   /// default destructor
   ~SingleObjectAnalyzer();
   
-
  private:
   /// everything which has to be done before the event loop  
   virtual void beginJob(const edm::EventSetup& setup) ;
@@ -45,7 +67,6 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
   /// everything which has to be done after the event loop 
   virtual void endJob();
   
-
  private:
   /// input collection
   edm::InputTag src_;
@@ -61,13 +82,13 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
 /// default constructor
 template <typename Collection, typename Analyze> 
 SingleObjectAnalyzer<Collection, Analyze>::SingleObjectAnalyzer(const edm::ParameterSet& cfg) :
-  src_( cfg.getParameter<edm::InputTag>( "input"  ) ),
+  src_( cfg.getParameter<edm::InputTag>( "src"  ) ),
   wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
   useWgt_( cfg.getParameter<bool>( "useWeight" ) )
 {
   // construct the common analyzer class with
   // corresponding parameter sets as input 
-  analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") );
+  cfg.exists("analyze") ? analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") ) : analyze_ = new Analyze( edm::ParameterSet() );
 }
 
 /// default destructor

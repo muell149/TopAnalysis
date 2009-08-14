@@ -12,9 +12,9 @@
    \brief   Derived class to analyze the kinematics of top quarks on reconstruction and generator level
 
    The structure keeps histograms for the kinematics of top quarks and ttbar pairs. These histograms 
-   can be filled from the TtSemiLeptonicEvent (with an extra option to require matching for purity &
-   stability studies) or from TtGenEvent. The class is derived from the SingleObject interface, which 
-   makes it usable in full framework (fw) or fwlite. 
+   can be filled from the TtSemiLeptonicEvent class (with an extra option to require matching for 
+   purity & stability studies) or from the TtGenEvent class. The class is derived from the 
+   SingleObject<Collection> interface, which makes it usable in full framework or fwlite. 
 */
 
 class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
@@ -24,23 +24,32 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   explicit TopKinematics();
   /// default constructor for reco level analysis in fw lite
   explicit TopKinematics(const std::string& hypoKey, const bool& matchForStabilityAndPurity);
-  /// default constructor for full fw
+  /// default constructor for fwfull
   explicit TopKinematics(const edm::ParameterSet& configFile);
   /// default destructor
   ~TopKinematics(){};
 
+  /**
+     The following functions have to be implemented for any class
+     derived from SingleObject<Collection>. The fill function is
+     overloaded to serve both for the TtGenEvent class directoy or 
+     the TtSemiLeptonicEvent class.
+  **/
   /// histogramm booking for fwlite 
   void book();
   /// histogramm booking for fw
   void book(edm::Service<TFileService>& fileService);
-  /// histogram filling interface for rec level for access with fw or fwlite
+  /// histogram filling interface for reconstruction level for access with fw or fwlite
   void fill(const TtSemiLeptonicEvent& tops, const double& weight=1.);
-  /// histogram filling interface for gen level for access with fw or fwlite 
+  /// histogram filling interface for generator level for access with fw or fwlite 
   void fill(const TtGenEvent& tops, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process(){};
 
  private:
+  /**
+     Helper function for special histogram management
+  **/
   /// histogram filling for candidates topA and topB
   void fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight=1.);
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
