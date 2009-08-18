@@ -52,14 +52,18 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   /** 
       Top Variables for Cross Section Measurement
   **/
-  // this is for docummentation how to book histograms with variable binning
-  // double ptBinning[] = {0., 10., 30., 50., 80., 120.};
-  // hists_["topPt"] = fs->make<TH1F>( "topPt" , "topPt" , 5, topBinning);
+  // binning for top variables
+  double ptTopBinning    [] = {  0.,    9.,  33.,   63., 99.,  135., 171.,  216., 300.};
+  double etaTopBinning   [] = { -3., -1.92, -1.2, -0.48,  0.,  0.48,  1.2,  1.92,   3.};
+  // binning for ttbar variables
+  //double massTtBarBinning[] = {300., 342., 398., 489., 615., 790., 1000.  };
+  //double ptTtbarBinning  [] = {0., 10., 20., 30., 40., 60., 80., 130., 200.};
+  //double etaTtBarBinning [] = { -3., -2.3, -1.6, 0., 1.6, 2.3, 3. };
 
   // top pt (at the moment both top candidates are filled in one histogram)
-  hists_["topPt"      ] = fs->make<TH1F>( "topPt"       , "topPt"      ,   15,     0.,    150. );
+  hists_["topPt"      ] = fs->make<TH1F>( "topPt"       , "topPt"      ,    8, ptTopBinning  );
   // top eta (at the moment both top candidates are filled in one histogram)
-  hists_["topEta"     ] = fs->make<TH1F>( "topEta"      , "topEta"     ,   10,   -3.5,     3.5 );
+  hists_["topEta"     ] = fs->make<TH1F>( "topEta"      , "topEta"     ,    8, etaTopBinning );
   // top phi (at the moment both top candidates are filled in one histogram)
   hists_["topPhi"     ] = fs->make<TH1F>( "topPhi"      , "topPhi"     ,   10,  -3.14,    3.14 );
   // ttbar pair pt
@@ -72,6 +76,13 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"   , "ttbarMass"  ,   15,   300.,   1000. );
   // deltaPhi between both top quarks
   hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi" , "ttbarDelPhi",   10,  -3.14,    3.14 );
+
+//2 D Hist
+  hists_["genRecTopPt"] = (TH2F*)(fs->make<TH2F>)("genRecTopPt", "genRecTopPt",  100,   0.,     300., 100,   0.,     300.);
+//   hists_["genRecTopEta"] = fs->make<TH2F>("genRecTopEta", "genRecTopEta", 100,   -3.,     3., 100,   -3.,     3.);
+//   hists_["genRecTtbarEta"] = fs->make<TH2F>("genRecTtbarEta", "genRecTtbarEta", 100,   -3.,     3., 100,   -3., 3.);
+//   hists_["genRecTtbarPt"] = fs->make<TH2F>("genRecTtbarPt", "genRecTtbarPt",  100,   0.,     200., 100,   0.,     200.);
+//   hists_["genRecTtbarMass"] = fs->make<TH2F>("genRecTtbarMass", "genRecTtbarMass",  100,   300.,     1000., 100,   300.,     1000.);
 }
 
 
@@ -83,7 +94,7 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
   // a muon in the final state
   if( tops.isSemiLeptonic(WDecay::kMuon) ){
     fill(tops.hadronicDecayTop(), tops.leptonicDecayTop(), weight);
-  }    
+  }
 }
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
@@ -100,6 +111,22 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     else{
       fill(tops.hadronicDecayTop(hypoKey_), tops.leptonicDecayTop(hypoKey_), weight);
     }
+
+    if( dynamic_cast<TH2F*>(hists_.find("genRecTopPt" )->second) ){
+      dynamic_cast<TH2F*>(hists_.find("genRecTopPt")->second)->Fill( tops.hadronicDecayTop(hypoKey_)->pt(), tops.hadronicDecayTop()->pt() , weight );
+    }
+//    hists_.find("genRecTopPt" )->second->Fill( tops.leptonicDecayTop(hypoKey_)->pt() , tops.leptonicDecayTop()->pt(), weight );
+    
+//     hists_.find("genRecTopEta" )->second->Fill( genTopA->eta(), recTopA->eta() , weight );
+//     hists_.find("genRecTopEta" )->second->Fill( genTopB->eta() , recTopB->eta(), weight );
+
+//     reco::Particle::LorentzVector genTtbar = genTopA->p4()+genTopB->p4();
+//     reco::Particle::LorentzVector recTtbar = recTopA->p4()+recTopB->p4();
+    
+//     hists_.find("genRecTtbarEta" )->second->Fill( genTtbar.eta(), recTtbar.eta() , weight );
+//     hists_.find("genRecTtbarEta" )->second->Fill( genTtbar.eta() , recTtbar.eta(), weight );
+//     hists_.find("genRecTtbarPt" )->second->Fill( genTtbar.pt() , recTtbar.pt(), weight );
+//     hists_.find("genRecTtbarMass" )->second->Fill( genTtbar.mass() , recTtbar.mass(), weight );    
   }
 }
 
