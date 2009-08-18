@@ -3,7 +3,6 @@
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "TopAnalysis/TopAnalyzer/interface/SingleObject.h"
-#include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
 
 /**
@@ -16,6 +15,15 @@
    purity & stability studies) or from the TtGenEvent class. The class is derived from the 
    SingleObject<Collection> interface, which makes it usable in full framework or fwlite. 
 */
+
+namespace CrossSection{
+  // binning for top & ttbar cross section histograms
+  double topPt    [] = {    0.,    9.,   33.,   63.,   99.,  135.,  171.,  216.,  300. };
+  double topEta   [] = {   -3., -1.92,  -1.2, -0.48,    0.,  0.48,   1.2,  1.92,    3. };
+  double ttbarMass[] = {                300.,  342.,  398.,  489.,  615.,  790., 1000. };
+  double ttbarPt  [] = {    0.,   10.,   20.,   30.,   40.,   60.,   80.,  130.,  200. };
+  double ttbarEta [] = {                 -3.,  -2.3,  -1.6,    0.,   1.6,   2.3,    3. };
+}
 
 class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
 
@@ -62,6 +70,9 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   std::string hypoKey_;
   /// apply matchin for stability and purity or not
   bool matchForStabilityAndPurity_;
+
+  /// histogram container for correlation plots
+  std::map<std::string, TH2*> corrs_;
 };
 
 #endif

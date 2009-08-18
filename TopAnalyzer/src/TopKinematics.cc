@@ -24,26 +24,22 @@ void TopKinematics::book()
   /** 
       Top Variables for Cross Section Measurement
   **/
-  // this is for docummentation how to book histograms with variable binning
-  // double ptBinning[] = {0., 10., 30., 50., 80., 120.};
-  // hists_["topPt"] = new TH1F( "topPt" , "topPt" , 5, topBinning);
-
   // top pt (at the moment both top candidates are filled in one histogram)
-  hists_["topPt"      ] = new TH1F( "topPt"       , "topPt"      ,   15,     0.,    150. );
+  hists_["topPt"      ] = new TH1F( "topPt"       , "topPt"      ,    8, CrossSection::topPt     );
   // top eta (at the moment both top candidates are filled in one histogram)
-  hists_["topEta"     ] = new TH1F( "topEta"      , "topEta"     ,   10,   -3.5,     3.5 );
+  hists_["topEta"     ] = new TH1F( "topEta"      , "topEta"     ,    8, CrossSection::topEta    );
   // top phi (at the moment both top candidates are filled in one histogram)
-  hists_["topPhi"     ] = new TH1F( "topPhi"      , "topPhi"     ,   10,  -3.14,    3.14 );
+  hists_["topPhi"     ] = new TH1F( "topPhi"      , "topPhi"     ,   10,   -3.14,    3.14        );
   // ttbar pair pt
-  hists_["ttbarPt"    ] = new TH1F( "ttbarPt"     , "ttbarPt"    ,   15,     0.,    150. );
+  hists_["ttbarPt"    ] = new TH1F( "ttbarPt"     , "ttbarPt"    ,    8, CrossSection::ttbarPt   );
   // ttbar pair eta
-  hists_["ttbarEta"   ] = new TH1F( "ttbarEta"    , "ttbarEta"   ,   10,   -3.5,     3.5 );
+  hists_["ttbarEta"   ] = new TH1F( "ttbarEta"    , "ttbarEta"   ,    6, CrossSection::ttbarEta  );
   // ttbar pair phi
-  hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"    , "ttbarPhi"   ,   10,  -3.14,    3.14 );
+  hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"    , "ttbarPhi"   ,   10,   -3.14,    3.14        );
   // ttbar pair invariant mass
-  hists_["ttbarMass"  ] = new TH1F( "ttbarMass"   , "ttbarMass"  ,   15,   300.,   1000. );
+  hists_["ttbarMass"  ] = new TH1F( "ttbarMass"   , "ttbarMass"  ,    6, CrossSection::ttbarMass );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi"] = new TH1F( "ttbarDelPhi" , "ttbarDelPhi",   10,  -3.14,    3.14 );
+  hists_["ttbarDelPhi"] = new TH1F( "ttbarDelPhi" , "ttbarDelPhi",   10,   -3.14,    3.14        );
 }
 
 /// histogramm booking for fw
@@ -52,37 +48,36 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   /** 
       Top Variables for Cross Section Measurement
   **/
-  // binning for top variables
-  double ptTopBinning    [] = {  0.,    9.,  33.,   63., 99.,  135., 171.,  216., 300.};
-  double etaTopBinning   [] = { -3., -1.92, -1.2, -0.48,  0.,  0.48,  1.2,  1.92,   3.};
-  // binning for ttbar variables
-  //double massTtBarBinning[] = {300., 342., 398., 489., 615., 790., 1000.  };
-  //double ptTtbarBinning  [] = {0., 10., 20., 30., 40., 60., 80., 130., 200.};
-  //double etaTtBarBinning [] = { -3., -2.3, -1.6, 0., 1.6, 2.3, 3. };
-
   // top pt (at the moment both top candidates are filled in one histogram)
-  hists_["topPt"      ] = fs->make<TH1F>( "topPt"       , "topPt"      ,    8, ptTopBinning  );
+  hists_["topPt"       ] = fs->make<TH1F>( "topPt"       , "topPt"      ,    8, CrossSection::topPt     );
   // top eta (at the moment both top candidates are filled in one histogram)
-  hists_["topEta"     ] = fs->make<TH1F>( "topEta"      , "topEta"     ,    8, etaTopBinning );
+  hists_["topEta"      ] = fs->make<TH1F>( "topEta"      , "topEta"     ,    8, CrossSection::topEta    );
   // top phi (at the moment both top candidates are filled in one histogram)
-  hists_["topPhi"     ] = fs->make<TH1F>( "topPhi"      , "topPhi"     ,   10,  -3.14,    3.14 );
+  hists_["topPhi"      ] = fs->make<TH1F>( "topPhi"      , "topPhi"     ,   10,   -3.14,    3.14        );
   // ttbar pair pt
-  hists_["ttbarPt"    ] = fs->make<TH1F>( "ttbarPt"     , "ttbarPt"    ,   15,     0.,    150. );
+  hists_["ttbarPt"     ] = fs->make<TH1F>( "ttbarPt"     , "ttbarPt"    ,    8, CrossSection::ttbarPt   );
   // ttbar pair eta
-  hists_["ttbarEta"   ] = fs->make<TH1F>( "ttbarEta"    , "ttbarEta"   ,   10,   -3.5,     3.5 );
+  hists_["ttbarEta"    ] = fs->make<TH1F>( "ttbarEta"    , "ttbarEta"   ,    6, CrossSection::ttbarEta  );
   // ttbar pair phi
-  hists_["ttbarPhi"   ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   10,  -3.14,    3.14 );
+  hists_["ttbarPhi"    ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   10,   -3.14,    3.14        );
   // ttbar pair invariant mass
-  hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"   , "ttbarMass"  ,   15,   300.,   1000. );
+  hists_["ttbarMass"   ] = fs->make<TH1F>( "ttbarMass"   , "ttbarMass"  ,    6, CrossSection::ttbarMass );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi" , "ttbarDelPhi",   10,  -3.14,    3.14 );
+  hists_["ttbarDelPhi" ] = fs->make<TH1F>( "ttbarDelPhi" , "ttbarDelPhi",   10,   -3.14,    3.14        );
 
-//2 D Hist
-  hists_["genRecTopPt"] = (TH2F*)(fs->make<TH2F>)("genRecTopPt", "genRecTopPt",  100,   0.,     300., 100,   0.,     300.);
-//   hists_["genRecTopEta"] = fs->make<TH2F>("genRecTopEta", "genRecTopEta", 100,   -3.,     3., 100,   -3.,     3.);
-//   hists_["genRecTtbarEta"] = fs->make<TH2F>("genRecTtbarEta", "genRecTtbarEta", 100,   -3.,     3., 100,   -3., 3.);
-//   hists_["genRecTtbarPt"] = fs->make<TH2F>("genRecTtbarPt", "genRecTtbarPt",  100,   0.,     200., 100,   0.,     200.);
-//   hists_["genRecTtbarMass"] = fs->make<TH2F>("genRecTtbarMass", "genRecTtbarMass",  100,   300.,     1000., 100,   300.,     1000.);
+  /** 
+      Correlation Plots
+  **/
+  // gen-rec level correlation top pt
+  corrs_["topPt_"      ] = fs->make<TH2F>( "topPt_"      ,  "topPt_"    ,  100,    0.,  300.,    100,   0.,  300.);
+  // gen-rec level correlation top eta
+  corrs_["topEta_"     ] = fs->make<TH2F>( "topEta_"     ,  "topEta_"   ,  100,   -3.,    3.,    100,  -3.,    3.);
+  // gen-rec level correlation ttbar pt
+  corrs_["ttbarPt_"    ] = fs->make<TH2F>( "ttbarPt_"    ,  "ttbarPt_"  ,  100,    0.,  200.,    100,   0.,  200.);
+  // gen-rec level correlation ttbar eta
+  corrs_["ttbarEta_"   ] = fs->make<TH2F>( "ttbarEta_"   ,  "ttbarEta_" ,  100,   -3.,    3.,    100,  -3.,    3.);
+  // gen-rec level correlation ttbar mass
+  corrs_["ttbarMass_"  ] = fs->make<TH2F>( "ttbarMass_"  ,  "ttbarMass_",  100,  300., 1000.,    100, 300., 1000.);
 }
 
 
@@ -103,30 +98,32 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
   // make sure to have a valid hypothesis on reconstruction level. If this is the case
   // fill matched (for stability & purity determination) or normal depending on the 
-  //value of matchForStabilityAndPurity_
-  if( tops.isHypoValid(hypoKey_) ){
+  // value of matchForStabilityAndPurity_
+  if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && tops.isHypoValid(hypoKey_) ){
     if(matchForStabilityAndPurity_){
-      fill(tops.hadronicDecayTop(hypoKey_), tops.genEvent()->hadronicDecayTop(), tops.leptonicDecayTop(hypoKey_), tops.genEvent()->leptonicDecayTop(), weight);
+      fill(tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), weight);
     } 
     else{
       fill(tops.hadronicDecayTop(hypoKey_), tops.leptonicDecayTop(hypoKey_), weight);
     }
 
-    if( dynamic_cast<TH2F*>(hists_.find("genRecTopPt" )->second) ){
-      dynamic_cast<TH2F*>(hists_.find("genRecTopPt")->second)->Fill( tops.hadronicDecayTop(hypoKey_)->pt(), tops.hadronicDecayTop()->pt() , weight );
-    }
-//    hists_.find("genRecTopPt" )->second->Fill( tops.leptonicDecayTop(hypoKey_)->pt() , tops.leptonicDecayTop()->pt(), weight );
-    
-//     hists_.find("genRecTopEta" )->second->Fill( genTopA->eta(), recTopA->eta() , weight );
-//     hists_.find("genRecTopEta" )->second->Fill( genTopB->eta() , recTopB->eta(), weight );
-
-//     reco::Particle::LorentzVector genTtbar = genTopA->p4()+genTopB->p4();
-//     reco::Particle::LorentzVector recTtbar = recTopA->p4()+recTopB->p4();
-    
-//     hists_.find("genRecTtbarEta" )->second->Fill( genTtbar.eta(), recTtbar.eta() , weight );
-//     hists_.find("genRecTtbarEta" )->second->Fill( genTtbar.eta() , recTtbar.eta(), weight );
-//     hists_.find("genRecTtbarPt" )->second->Fill( genTtbar.pt() , recTtbar.pt(), weight );
-//     hists_.find("genRecTtbarMass" )->second->Fill( genTtbar.mass() , recTtbar.mass(), weight );    
+    // fill rec-gen level correlation plots
+    reco::Particle::LorentzVector genTtbar = tops.hadronicDecayTop()->p4()+tops.leptonicDecayTop()->p4();
+    reco::Particle::LorentzVector recTtbar = tops.hadronicDecayTop(hypoKey_)->p4()+tops.leptonicDecayTop(hypoKey_)->p4();
+    // fill pt correlation plot for ttbar pair    
+    corrs_.find("ttbarPt_"   )->second->Fill( genTtbar.pt()   , recTtbar.pt()  , weight );
+    // fill eta correlation plot for ttbar pair
+    corrs_.find("ttbarEta_"  )->second->Fill( genTtbar.eta()  , recTtbar.eta() , weight );
+    // fill mass correlation plot for ttbar pair
+    corrs_.find("ttbarMass_" )->second->Fill( genTtbar.mass() , recTtbar.mass(), weight );    
+    // fill pt correlation plot for hadronic top candidate
+    corrs_.find("topPt_"    )->second->Fill( tops.hadronicDecayTop()->pt() , tops.hadronicDecayTop(hypoKey_)->pt() , weight );
+    // fill pt correlation plot for hadronic top candidate
+    corrs_.find("topPt_"    )->second->Fill( tops.leptonicDecayTop()->pt() , tops.leptonicDecayTop(hypoKey_)->pt() , weight );    
+    // fill eta correlation plot for hadronic top candidate
+    corrs_.find("topEta_"   )->second->Fill( tops.leptonicDecayTop()->eta(), tops.leptonicDecayTop(hypoKey_)->eta(), weight );
+    // fill eta correlation plot for hadronic top candidate
+    corrs_.find("topEta_"   )->second->Fill( tops.leptonicDecayTop()->eta(), tops.leptonicDecayTop(hypoKey_)->eta(), weight );
   }
 }
 
