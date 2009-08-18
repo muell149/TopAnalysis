@@ -25,7 +25,7 @@
    The class is an interface to a common analyer or a corresponding fwlite mimic
    in TopAnalysis/TopAnalzyer/bin. It takes a single object class as argument. 
    An interface to a common book, fill & process function is expected by the common 
-   analyzer (mimic) class. Each derived class has to be provide these.
+   analyzer (mimic) class. Each derived class has to provide these.
 */
 
 template <typename Collection> 
