@@ -48,6 +48,9 @@ process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
 ## process.ttSemiLepJetPartonMatch.verbosity = 1
 
+## apply realistic event selection
+process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
+
 ## analyze top quarks on generator level
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_gen_cfi")
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_rec_cfi")
@@ -58,7 +61,8 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeTopQuarks.root')
 )
 
-process.p1 = cms.Path(process.makeGenEvt *
+process.p1 = cms.Path(process.semiLeptonicSelection *   ## comment this line to run w/o selection
+                      process.makeGenEvt *
                       process.ttSemiLeptonicFilter *
                       process.makeTtSemiLepEvent *
                       process.analyzeTopGenKinematics +
