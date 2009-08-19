@@ -59,7 +59,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // ttbar pair eta
   hists_["ttbarEta"    ] = fs->make<TH1F>( "ttbarEta"    , "ttbarEta"   ,    6, CrossSection::ttbarEta  );
   // ttbar pair phi
-  hists_["ttbarPhi"    ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   10,   -3.14,    3.14        );
+  hists_["ttbarPhi"    ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   6,   -3.14,    3.14        );
   // ttbar pair invariant mass
   hists_["ttbarMass"   ] = fs->make<TH1F>( "ttbarMass"   , "ttbarMass"  ,    6, CrossSection::ttbarMass );
   // deltaPhi between both top quarks
@@ -77,7 +77,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // gen-rec level correlation ttbar eta
   corrs_["ttbarEta_"   ] = fs->make<TH2F>( "ttbarEta_"   ,  "ttbarEta_" ,  100,   -3.,    3.,    100,  -3.,    3.);
   // gen-rec level correlation ttbar mass
-  corrs_["ttbarMass_"  ] = fs->make<TH2F>( "ttbarMass_"  ,  "ttbarMass_",  100,  300., 1000.,    100, 300., 1000.);
+  corrs_["ttbarMass_"  ] = fs->make<TH2F>( "ttbarMass_"  ,  "ttbarMass_",  100,  342., 1000.,    100, 342., 1000.);
 }
 
 
