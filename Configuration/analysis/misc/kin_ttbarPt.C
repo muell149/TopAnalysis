@@ -31,9 +31,9 @@ int kin_ttbarPt()
   float s3=9530./13323.;
 
   //lese histogramm aus
-  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/kin_ttbarPt");
-  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/kin_ttbarPt");
-  myHist3a = (TH1F*)myFile1->Get("analyzeTopMatchKinematics/kin_ttbarPt");
+  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/ttbarPt");
+  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/ttbarPt");
+  myHist3a = (TH1F*)myFile1->Get("analyzeTopRecKinematicsMatched/ttbarPt");
 
 // erzeuge die verteilungsdichte
 

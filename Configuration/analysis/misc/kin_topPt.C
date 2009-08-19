@@ -30,9 +30,9 @@ int kin_topPt()
 
   
   //lese histogramm aus
-  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/kin_topPt");
-  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/kin_topPt");
-  myHist3a = (TH1F*)myFile1->Get("analyzeTopMatchKinematics/kin_topPt");
+  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/topPt");
+  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/topPt");
+  myHist3a = (TH1F*)myFile1->Get("analyzeTopRecKinematicsMatched/topPt");
 
 // erzeuge die verteilungsdichte
 

@@ -39,7 +39,7 @@ for (int i=0 ; i< binN+1 ; i++)
 TH2F* myHist2d;
 
  
-  myHist2d = (TH2F*)myFile1->Get("analyzeTopMatchKinematics/kin_genRecTtbarEta");
+  myHist2d = (TH2F*)myFile1->Get("analyzeTopRecKinematicsMatched/ttbarEta_");
 
  
 

@@ -18,7 +18,7 @@ TH1F* myHist1a = new TH1F( "Projektion" , "Projektion"  ,   100,   0., 300.);
 TH2F* myHist2d;
 
  
-  myHist2d = (TH2F*)myFile1->Get("analyzeTopMatchKinematics/kin_genRecTopPt");
+  myHist2d = (TH2F*)myFile1->Get("analyzeTopRecKinematicsMatched/topPt_");
 
   //definiere canvas aussehen
  // myHist1a->GetXaxis()->SetTitle("kin_bottomPt");

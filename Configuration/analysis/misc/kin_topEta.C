@@ -31,9 +31,9 @@ int kin_topEta()
   float s3=9530./13323.;
 
   //lese histogramm aus
-  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/kin_topEta");
-  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/kin_topEta");
-  myHist3a = (TH1F*)myFile1->Get("analyzeTopMatchKinematics/kin_topEta");
+  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/topEta");
+  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/topEta");
+  myHist3a = (TH1F*)myFile1->Get("analyzeTopRecKinematicsMatched/topEta");
 
 
 // erzeuge die verteilungsdichte

@@ -6,7 +6,7 @@ TH1F* myHist2a;
 TH1F* myHist3a;
 TH1F myPurity;
 TH1F myStability;
-TH1F myDestribution;
+
 
 
 
@@ -36,9 +36,9 @@ int kin_topPhi()
   float s3=9530./13323.;
 
   //lese histogramm aus
-  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/kin_topPhi");
-  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/kin_topPhi");
-  myHist3a = (TH1F*)myFile1->Get("analyzeTopMatchKinematics/kin_topPhi");
+  myHist1a = (TH1F*)myFile1->Get("analyzeTopGenKinematics/topPhi");
+  myHist2a = (TH1F*)myFile1->Get("analyzeTopRecKinematics/topPhi");
+  myHist3a = (TH1F*)myFile1->Get("analyzeTopRecKinematicsMatched/topPhi");
 
 // erzeuge die verteilungsdichte
 
@@ -166,25 +166,6 @@ legb =new TLegend(0.65,0.65,0.85,0.85);
 	legb->AddEntry( &myPurity,"Purity" ,"l");
 
 legb->Draw("box");
-
-
-//Phi Destribution
-
-
-TCanvas *c=new TCanvas("c","c",1);
-
-myDestribution = ((*myHist1a)-(*myHist2a))/(*myHist1a);
-
-myDestribution->SetLineColor(4.);
-myDestribution->SetLineWidth(3.);
-
-myDestribution->Draw();
-
-legc =new TLegend(0.65,0.65,0.85,0.85);
-
- 	legc->AddEntry( &myDestribution,"(phi(gen)-phi(rec))/phi(gen)" ,"l");
-
-legc->Draw("box");
 
 
   a->SaveAs("kin_top_Phi.pdf");

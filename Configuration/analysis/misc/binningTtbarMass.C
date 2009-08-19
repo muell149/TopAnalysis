@@ -39,7 +39,7 @@ for (int i=0 ; i< binN+1 ; i++)
 TH2F* myHist2d;
 
  
-  myHist2d = (TH2F*)myFile1->Get("analyzeTopMatchKinematics/kin_genRecTtbarMass");
+  myHist2d = (TH2F*)myFile1->Get("analyzeTopRecKinematicsMatched/ttbarMass_");
 
  
 
@@ -50,7 +50,7 @@ TH2F* myHist2d;
 for (int k=0; k< binN ; k++)
  		{
 
-TH1F* myHist1a = new TH1F( "Projektion" , "Projektion"  ,  100,   300., 1000.);
+TH1F* myHist1a = new TH1F( "Projektion" , "Projektion"  ,  100,   342., 1000.);
 
 // for 100 Bins and 300 Pt steps get bin centre
 // bins[k]+bins[k+1] gives 2*center -> diagonal over the canvas to estimate the distribution
