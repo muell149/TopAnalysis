@@ -9,7 +9,7 @@ process = cms.Process("Muon")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-## process.MessageLogger.cerr.FwkReport.reportEvery = 100
+#process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 #-------------------------------------------------
@@ -20,7 +20,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    "/store/user/rwolf/ttbar/patTuple_PATv2_ttbar_madgraph_1.root"
+    "file:patTuple.root"
     )
 )
 
@@ -50,6 +50,8 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_c
 
 ## apply realistic event selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
+#from TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff import disableCountFilter
+#disableCountFilter(process.bottomJetSelection)
 
 ## analyze top quarks on generator level
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_gen_cfi")

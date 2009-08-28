@@ -59,6 +59,9 @@ lightQJetSelection = countLayer1Jets.clone(src = 'tightLightQJets', minNumber = 
 ## at least one of them should be a b-jet
 bottomJetSelection = countLayer1Jets.clone(src = 'tightBottomJets', minNumber = 1)
 
+## ---
+##    provide a sequence
+## ---
 semiLeptonicSelection = cms.Sequence( hltHighLevel                           * 
                                      (looseMuons      * secondMuonVeto     ) *
                                      (looseElectrons  * electronVeto       ) *
@@ -66,3 +69,10 @@ semiLeptonicSelection = cms.Sequence( hltHighLevel                           *
                                      (tightLightQJets * lightQJetSelection ) *
                                      (tightBottomJets * bottomJetSelection )
                                      )
+
+## ---
+##    provide a function to disable parts of the selection
+## ---
+def disableCountFilter(whichCountFilter):
+    whichCountFilter.minNumber = 0
+    whichCountFilter.maxNumber = 999999
