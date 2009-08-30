@@ -34,7 +34,7 @@ looseMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons', cut = 'pt > 
 looseElectrons = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', cut = 'et > 15. & abs(eta) < 2.5 & (trackIso+caloIso)/et <  0.2')
 
 ## ---
-##    setup muon and lepton veto filters
+##    setup lepton filters
 ## ---
 ## at least one tight muon
 muonSelection  = countLayer1Muons.clone(src = 'tightMuons', minNumber = 1, maxNumber = 1)
@@ -47,27 +47,27 @@ electronVeto   = countLayer1Electrons.clone(src = 'looseElectrons', maxNumber = 
 ##    setup jet selection
 ## ---
 ## tight jet selection
-tightLightQJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets', cut = 'pt > 30. & abs(eta) < 2.4 & 0.05 < emEnergyFraction & emEnergyFraction < 0.95')
+tightLeadingJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets', cut = 'pt > 30. & abs(eta) < 2.4 & 0.05 < emEnergyFraction & emEnergyFraction < 0.95')
 ## tight b jet selection
-tightBottomJets = selectedLayer1Jets.clone(src = 'tightLightQJets', cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 2.0')
+tightBottomJets  = selectedLayer1Jets.clone(src = 'tightLeadingJets', cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 2.0')
 
 ## ---
 ##    setup jet filter
 ## ---
 ## at least four jets
-lightQJetSelection = countLayer1Jets.clone(src = 'tightLightQJets', minNumber = 4)
+leadingJetSelection = countLayer1Jets.clone(src = 'tightLeadingJets', minNumber = 4)
 ## at least one of them should be a b-jet
-bottomJetSelection = countLayer1Jets.clone(src = 'tightBottomJets', minNumber = 1)
+bottomJetSelection  = countLayer1Jets.clone(src = 'tightBottomJets', minNumber = 1)
 
 ## ---
 ##    provide a sequence
 ## ---
-semiLeptonicSelection = cms.Sequence( hltHighLevel                           * 
-                                     (looseMuons      * secondMuonVeto     ) *
-                                     (looseElectrons  * electronVeto       ) *
-                                     (tightMuons      * muonSelection      ) *
-                                     (tightLightQJets * lightQJetSelection ) *
-                                     (tightBottomJets * bottomJetSelection )
+semiLeptonicSelection = cms.Sequence( hltHighLevel                             * 
+                                     (tightMuons       * muonSelection       ) *
+                                     (looseMuons       * secondMuonVeto      ) *
+                                     (looseElectrons   * electronVeto        ) *
+                                     (tightLeadingJets * leadingJetSelection ) *
+                                     (tightBottomJets  * bottomJetSelection  )
                                      )
 
 ## ---
