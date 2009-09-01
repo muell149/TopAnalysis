@@ -19,9 +19,12 @@ DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
 typedef DoubleObjectAnalyzer<std::vector<pat::Muon>, std::vector<pat::Jet>, MuonJetKinematics> MuonJetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
-
 #include "TopAnalysis/TopAnalyzer/interface/TopKinematics.h"
 typedef SingleObjectAnalyzer<TtGenEvent, TopKinematics> TopKinematicsGenAnalyzer;
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/JetCombinatorics.h"
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, JetCombinatorics> JetCombinatoricsAnalyzer;
+DEFINE_FWK_MODULE(JetCombinatoricsAnalyzer);
