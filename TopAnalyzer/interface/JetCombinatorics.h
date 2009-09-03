@@ -37,9 +37,11 @@ class JetCombinatorics : public SingleObject<TtSemiLeptonicEvent> {
  private:
   /// class key of hypothesis
   std::string hypoKey_;
-  /// total number of events used in this study
-  int nEventsStudy_;
-  ///
+  /// total number of events passed to this analyzer
+  int nEventsTotal_;
+  /// number of events used in this study
+  std::vector<int> nEventsStudy_;
+  /// number of events in which the chosen hypothesis had the same jets as the GenMatch hypothesis
   std::vector<int> nEventsGood_;
 };
 
