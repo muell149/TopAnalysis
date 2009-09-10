@@ -1,8 +1,6 @@
 #ifndef JetOverlapEventFilter_h
 #define JetOverlapEventFilter_h
 
-#include <Math/VectorUtil.h>
-
 #include "FWCore/Framework/interface/EDFilter.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"

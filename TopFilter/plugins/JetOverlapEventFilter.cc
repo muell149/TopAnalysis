@@ -1,5 +1,7 @@
 #include "TopAnalysis/TopFilter/plugins/JetOverlapEventFilter.h"
 
+#include <Math/VectorUtil.h>
+
 JetOverlapEventFilter::JetOverlapEventFilter(const edm::ParameterSet& cfg):
   src_           ( cfg.getParameter<edm::InputTag>("src"            ) ),
   deltaR_        ( cfg.getParameter<double>       ("deltaR"         ) ),
