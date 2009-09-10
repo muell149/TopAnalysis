@@ -3,6 +3,8 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
+#include <Math/VectorUtil.h>
+
 #include <iostream>
 #include <iomanip>
 
@@ -12,26 +14,31 @@ JetCombinatorics::JetCombinatorics(const edm::ParameterSet& cfg) :
 {
 
   nEventsTotal_ = 0;
+  nEventsStudy_ = 0;
  
-  for(unsigned i=0; i<6; i++) {
-    nEventsStudy_.push_back(0);
+  for(unsigned i=0; i<6; i++)
     nEventsGood_.push_back(0);
-  }
 
 }
 
 /// histogramm booking
 void JetCombinatorics::book(edm::Service<TFileService>& fs)
 {
+
   hists_["numbEvents"] = fs->make<TH1F>( "numbEvents", "number of events", 6, 0., 6.);
+
   // parton Pt
   hists_["partonPtLepB"] = fs->make<TH1F>( "partonPtLepB", "partonPtLepB", 40, 0., 200.);
   hists_["partonPtHadB"] = fs->make<TH1F>( "partonPtHadB", "partonPtHadB", 40, 0., 200.);
   hists_["partonPtHadQ"] = fs->make<TH1F>( "partonPtHadQ", "partonPtHadQ", 40, 0., 200.);
+
   // parton Eta
   hists_["partonEtaLepB"] = fs->make<TH1F>( "partonEtaLepB", "partonEtaLepB", 40, 0., 4.);
   hists_["partonEtaHadB"] = fs->make<TH1F>( "partonEtaHadB", "partonEtaHadB", 40, 0., 4.);
   hists_["partonEtaHadQ"] = fs->make<TH1F>( "partonEtaHadQ", "partonEtaHadQ", 40, 0., 4.);
+
+  hists_["partonDeltaRHadQ"] = fs->make<TH1F>( "partonDeltaRHadQ", "partonDeltaRHadQ", 40, 0., 4.);
+
 }
 
 /// histogram filling
@@ -51,7 +58,14 @@ JetCombinatorics::fill(const TtSemiLeptonicEvent& semiLepEvt, const double& weig
   hists_.find("partonEtaHadQ")->second->Fill( semiLepEvt.hadronicDecayQuark()   ->eta() , weight );
   hists_.find("partonEtaHadQ")->second->Fill( semiLepEvt.hadronicDecayQuarkBar()->eta() , weight );
 
-  if( !semiLepEvt.isHypoValid(hypoKey_) ) return;
+  hists_.find("partonDeltaRHadQ")->second->Fill( ROOT::Math::VectorUtil::DeltaR(semiLepEvt.hadronicDecayQuark   ()->p4(),
+										semiLepEvt.hadronicDecayQuarkBar()->p4()) ,
+						 weight );
+
+  if( (!semiLepEvt.isHypoValid(hypoKey_) && hypoKey_!="kGenMatch") 
+      || (hypoKey_=="kKinFit" && semiLepEvt.fitProb()<0.01)) return;
+
+  nEventsStudy_++;
 
   bool valid[6];
   bool good [6];
@@ -64,13 +78,13 @@ JetCombinatorics::fill(const TtSemiLeptonicEvent& semiLepEvt, const double& weig
   
   valid[0] = (semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LepB] >= 0 );
 
-  good[0] = (semiLepEvt.jetLeptonCombination(hypoKey_)   [TtSemiLepEvtPartons::LepB] ==
-	     semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LepB]);
+  good[0] = (valid[0] && semiLepEvt.jetLeptonCombination(hypoKey_)   [TtSemiLepEvtPartons::LepB] ==
+	                 semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LepB]);
 
   valid[1] = (semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB] >= 0 );    
 
-  good[1] = (semiLepEvt.jetLeptonCombination(hypoKey_)   [TtSemiLepEvtPartons::HadB] ==
-	     semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB]);
+  good[1] = (valid[1] && semiLepEvt.jetLeptonCombination(hypoKey_)   [TtSemiLepEvtPartons::HadB] ==
+	                 semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB]);
     
   std::vector<int> HadWJets;
   HadWJets.push_back( TtSemiLepEvtPartons::LightQ    );
@@ -79,7 +93,7 @@ JetCombinatorics::fill(const TtSemiLeptonicEvent& semiLepEvt, const double& weig
   valid[2] = (semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ   ] >= 0 &&
 	      semiLepEvt.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar] >= 0);
     
-  good[2] = sameJets( semiLepEvt, hypoKey_, "kGenMatch", HadWJets);
+  good[2] = (valid[2] && sameJets( semiLepEvt, hypoKey_, "kGenMatch", HadWJets));
 
   std::vector<int> HadTJets;
   HadTJets.push_back( TtSemiLepEvtPartons::LightQ    );
@@ -88,20 +102,18 @@ JetCombinatorics::fill(const TtSemiLeptonicEvent& semiLepEvt, const double& weig
 
   valid[3] = (valid[1] && valid[2]);
   
-  good[3] = sameJets( semiLepEvt, hypoKey_, "kGenMatch", HadTJets);
+  good[3] = (valid[3] && sameJets( semiLepEvt, hypoKey_, "kGenMatch", HadTJets));
 
   valid[4] = valid[3];
 
-  good[4] = (good[1] && good[2]);
+  good[4] = (valid[4] && good[1] && good[2]);
 
   valid[5] = (valid[0] && valid[3]);
 
-  good[5] = (good[0] && good[4]);
+  good[5] = (valid[5] && good[0] && good[4]);
 
-  for(unsigned i=0; i<6; i++) {
-    if(valid[i]) nEventsStudy_.at(i)++;
-    if(good [i]) nEventsGood_.at(i)++;
-  }
+  for(unsigned i=0; i<6; i++)
+    if(good[i]) nEventsGood_.at(i)++;
 
 }
 
@@ -127,6 +139,12 @@ JetCombinatorics::sameJets(const TtSemiLeptonicEvent& semiLepEvt,
   
 }
 
+double efficiencyError(const int eventsAfter, const int eventsBefore)
+{
+  double eff = (double)eventsAfter/eventsBefore;
+  return sqrt(eff*(1-eff)/eventsBefore);
+}
+
 void
 JetCombinatorics::process()
 {
@@ -143,11 +161,24 @@ JetCombinatorics::process()
 
   summary << "Number, fraction of events (total): "
 	  << std::setw(6) << nEventsTotal_ <<  " / " << nEventsTotal_ << " , "
-	  << std::setw(6) << std::fixed << std::setprecision(3) << (double)nEventsTotal_/nEventsTotal_ << "\n";
+	  << std::setw(6) << std::fixed << std::setprecision(4) << (double)nEventsTotal_/nEventsTotal_ << "\n";
+
+  summary << "Number, fraction of events (study): "
+	  << std::setw(6) << nEventsStudy_ <<  " / " << nEventsTotal_ << " , "
+	  << std::setw(6) << std::fixed << std::setprecision(4) << (double)nEventsStudy_/nEventsTotal_
+	  << " +/- "
+	  << std::setw(6) << std::fixed << std::setprecision(4) << efficiencyError(nEventsStudy_,
+										   nEventsTotal_)
+	  << "\n";
+  
 
   for(unsigned i=0; i<6; i++)
     summary << "Number, fraction of events (good" << i << "): "
-	    << std::setw(6) << nEventsGood_.at(i) << " / " << nEventsStudy_.at(i) << " , "
-	    << std::setw(6) << std::fixed << std::setprecision(3) << (double)nEventsGood_.at(i)/nEventsStudy_.at(i) << "\n";
+	    << std::setw(6) << nEventsGood_.at(i) << " / " << nEventsStudy_ << " , "
+	    << std::setw(6) << std::fixed << std::setprecision(4) << (double)nEventsGood_.at(i)/nEventsStudy_
+	    << " +/- "
+	    << std::setw(6) << std::fixed << std::setprecision(4) << efficiencyError(nEventsGood_.at(i),
+										     nEventsStudy_)
+	    << "\n";
 
 }
