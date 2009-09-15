@@ -154,7 +154,7 @@ MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
     /**
        Fill Selection Variables
     **/
-    if( (index_<0 || index_==index++) && muon->isGlobalMuon() ){
+    if( (index_<0 || index_==index) && muon->isGlobalMuon() ){
       // number of valid hits in silicon tracker
       hists_.find("nHit")->second->Fill( muon->track()->numberOfValidHits(), weight );    
       // normalized chi2 of global muon track fit

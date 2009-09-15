@@ -58,7 +58,7 @@ MuonKinematics::fill(const std::vector<reco::GenParticle>& muons, const double& 
   **/
   int index=0;
   for(std::vector<reco::GenParticle>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
-    if( (index_<0 || index_==index++) && muon->isGlobalMuon() ){
+    if( (index_<0 || index_==index) && muon->isGlobalMuon() ){
       // energy of the muon
       hists_.find("en"  )->second->Fill( muon->energy() , weight );
       // transverse momentum of the muon
