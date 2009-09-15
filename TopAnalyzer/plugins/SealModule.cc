@@ -2,6 +2,9 @@
 #include "TopAnalysis/TopAnalyzer/plugins/SingleObjectAnalyzer.h"
 #include "TopAnalysis/TopAnalyzer/plugins/DoubleObjectAnalyzer.h"
 
+/**
+    Define modules needed for the analysis of the muon
+**/
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonQuality.h"
 typedef SingleObjectAnalyzer<std::vector<pat::Muon>, MuonQuality> MuonQualityAnalyzer;
@@ -15,15 +18,37 @@ DEFINE_FWK_MODULE(MuonKinematicsAnalyzer);
 typedef SingleObjectAnalyzer<std::vector<pat::Muon>, MuonResolution> MuonResolutionAnalyzer;
 DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
 
+
+/**
+    Define modules needed for the analysis of the jets
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/JetKinematics.h"
+typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetKinematics> JetKinematicsAnalyzer;
+DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
+
+
+/**
+    Define modules needed for the analysis of muon jet relations
+**/
+
 #include "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
 typedef DoubleObjectAnalyzer<std::vector<pat::Muon>, std::vector<pat::Jet>, MuonJetKinematics> MuonJetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
+
+/**
+    Define modules needed for the analysis of the top quarks
+**/
+
 #include "TopAnalysis/TopAnalyzer/interface/TopKinematics.h"
 typedef SingleObjectAnalyzer<TtGenEvent, TopKinematics> TopKinematicsGenAnalyzer;
-typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
+
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
+
+
 
 #include "TopAnalysis/TopAnalyzer/interface/JetCombinatorics.h"
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, JetCombinatorics> JetCombinatoricsAnalyzer;
