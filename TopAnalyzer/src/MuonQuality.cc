@@ -151,10 +151,13 @@ MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
 {
   int index=0;
   for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
-    /**
-       Fill Selection Variables
-    **/
+    // NOTE: against the common policy *not* to have any implicit selection cuts 
+    // within analyzers these plots are restricted to global muons, as otherwise
+    // some of the monitor histograms cannot be filled
     if( (index_<0 || index_==index) && muon->isGlobalMuon() ){
+      /**
+	 Fill Selection Variables
+      **/
       // number of valid hits in silicon tracker
       hists_.find("nHit")->second->Fill( muon->track()->numberOfValidHits(), weight );    
       // normalized chi2 of global muon track fit

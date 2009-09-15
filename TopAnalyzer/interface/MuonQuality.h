@@ -9,8 +9,8 @@
 
    \brief   Derived class to analyze the quality/id of muons on reconstruction level
 
-   The structure keeps histograms for the identification and (high quality) reconstructed 
-   muons. These histograms can be filled from std::vector<pat::Muon> only(!). The class 
+   The structure keeps histograms for the identification and (high quality) of reconstruc- 
+   ted muons. These histograms can be filled from std::vector<pat::Muon> only(!). The class 
    is derived from the SingleObject<Collection> interface, which makes it usable in fwfull
    or fwlite. 
 */
@@ -39,6 +39,9 @@ class MuonQuality : public SingleObject<const std::vector<pat::Muon> > {
   void process();
 
  private:
+  /**
+     Helper functions to fill energy/object flow histograms
+  **/
   /// get energy of objects within a ring in deltaR corresponding to the 
   /// bin width of the histogram 'hist' from 'deposit' & fill hist with it
   void energyFlow(TH1* hist, const pat::IsoDeposit* deposit);
