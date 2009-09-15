@@ -80,16 +80,19 @@ MuonKinematics::fill(const std::vector<pat::Muon>& muons, const double& weight)
   /** 
       Fill Kinematic Variables
   **/
-  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
-    // energy of the muon
-    hists_.find( "en"  )->second->Fill( muon->energy() , weight );
-    // transverse momentum of the muon
-    hists_.find( "pt"  )->second->Fill( muon->et() , weight );
-    // pseudorapidity eta of the muon
-    hists_.find( "eta" )->second->Fill( muon->eta() , weight );
-    // azimuthal angle phi of the muon
-    hists_.find( "phi" )->second->Fill( muon->phi() , weight );
+  int index=0;
+  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
+    if( (index_<0 || index_==index) && muon->isGlobalMuon() ){
+      // energy of the muon
+      hists_.find( "en"  )->second->Fill( muon->energy() , weight );
+      // transverse momentum of the muon
+      hists_.find( "pt"  )->second->Fill( muon->et() , weight );
+      // pseudorapidity eta of the muon
+      hists_.find( "eta" )->second->Fill( muon->eta() , weight );
+      // azimuthal angle phi of the muon
+      hists_.find( "phi" )->second->Fill( muon->phi() , weight );
+    }
+    // muon multiplicty
+    hists_.find("n"  )->second->Fill( muons.size() , weight );
   }
-  // muon multiplicty
-  hists_.find("n"  )->second->Fill( muons.size() , weight );
 }
