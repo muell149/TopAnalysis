@@ -18,11 +18,11 @@
 
 namespace CrossSection{
   // binning for top & ttbar cross section histograms
-  double topPt    [] = {    0.,    9.,   33.,   63.,   99.,  135.,  171.,  216.,  300. };
-  double topEta   [] = {   -3., -1.92,  -1.2, -0.48,    0.,  0.48,   1.2,  1.92,    3. };
-  double ttbarMass[] = {                300.,  342.,  398.,  489.,  615.,  790., 1000. };
-  double ttbarPt  [] = {    0.,   10.,   20.,   30.,   40.,   60.,   80.,  130.,  200. };
-  double ttbarEta [] = {                 -3.,  -2.3,  -1.6,    0.,   1.6,   2.3,    3. };
+  double topPt    [] = {    0.,    10.,    35.,    65.,   100.,   135.,   170.,   215.,   300. };
+  double topY     [] = {   -3.,  -1.92,   -1.2,  -0.48,     0.,   0.48,    1.2,   1.92,     3. };
+  double ttbarMass[] = {                  300.,   345.,   400.,   490.,   615.,   790.,  1000. };
+  double ttbarPt  [] = {    0.,    10.,    20.,    30.,    40.,    60.,    80.,   130.,   200. };
+  double ttbarY   [] = {                   -3.,   -2.3,   -1.6,     0.,    1.6,    2.3,     3. };
 }
 
 class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
@@ -56,7 +56,7 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
 
  private:
   /**
-     Helper function for special histogram management
+     Helper functions for special histogram management
   **/
   /// histogram filling for candidates topA and topB
   void fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight=1.);
