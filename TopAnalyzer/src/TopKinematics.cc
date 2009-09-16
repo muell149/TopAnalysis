@@ -121,8 +121,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   // make sure to have a valid hypothesis on reconstruction level. If this is the case
   // fill matched (for stability & purity determination) or normal depending on the 
   // value of matchForStabilityAndPurity_
-  if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && tops.isHypoValid(hypoKey_) ){
-    if(matchForStabilityAndPurity_){
+  if( tops.isHypoValid(hypoKey_) ){
+    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && matchForStabilityAndPurity_){
       fill(tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), weight);
 
       // fill rec versus gen level correlation plots
