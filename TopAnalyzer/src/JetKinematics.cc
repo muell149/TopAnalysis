@@ -68,7 +68,7 @@ JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
       // energy of the jet
       hists_.find("en"  )->second->Fill( jet->energy() , weight );
       // transverse momentum of the jet
-      hists_.find("pt"  )->second->Fill( jet->et() , weight );
+      hists_.find("pt"  )->second->Fill( jet->pt() , weight );
       // pseudorapidity eta of the jet
       hists_.find("eta" )->second->Fill( jet->eta() , weight );
       // azimuthal angle phi of the jet
@@ -120,7 +120,7 @@ JetKinematics::fill(const std::vector<pat::Jet>& jets, const double& weight)
       // energy of the jet
       hists_.find( "en"  )->second->Fill( jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
       // transverse momentum of the jet
-      hists_.find( "pt"  )->second->Fill( jet->correctedJet(correctionStep(), correctionFlavor()).et() , weight );
+      hists_.find( "pt"  )->second->Fill( jet->correctedJet(correctionStep(), correctionFlavor()).pt() , weight );
       // pseudorapidity eta of the jet
       hists_.find( "eta" )->second->Fill( jet->eta() , weight );
       // azimuthal angle phi of the jet
