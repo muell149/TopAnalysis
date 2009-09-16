@@ -26,13 +26,13 @@ void TopKinematics::book()
   **/
   // top pt (at the moment both top candidates are filled in one histogram)
   hists_["topPt"      ] = new TH1F( "topPt"       , "topPt"      ,    8, CrossSection::topPt     );
-  // top eta (at the moment both top candidates are filled in one histogram)
+  // top y (at the moment both top candidates are filled in one histogram)
   hists_["topY"       ] = new TH1F( "topY"        , "topY"       ,    8, CrossSection::topY      );
   // top phi (at the moment both top candidates are filled in one histogram)
   hists_["topPhi"     ] = new TH1F( "topPhi"      , "topPhi"     ,   10,   -3.14,    3.14        );
   // ttbar pair pt
   hists_["ttbarPt"    ] = new TH1F( "ttbarPt"     , "ttbarPt"    ,    8, CrossSection::ttbarPt   );
-  // ttbar pair eta
+  // ttbar pair y
   hists_["ttbarY"     ] = new TH1F( "ttbarY"      , "ttbarY"     ,    6, CrossSection::ttbarY    );
   // ttbar pair phi
   hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"    , "ttbarPhi"   ,   10,   -3.14,    3.14        );
@@ -50,11 +50,11 @@ void TopKinematics::book()
   **/
   // gen-rec level correlation top pt
   corrs_["topPt_"     ] = new TH2F( "topPt_"      ,  "topPt_"    ,  100,    0.,  300.,    100,   0.,  300.);
-  // gen-rec level correlation top eta
+  // gen-rec level correlation top y
   corrs_["topY_"      ] = new TH2F( "topY_"       ,  "topY_"     ,  100,   -3.,    3.,    100,  -3.,    3.);
   // gen-rec level correlation ttbar pt
   corrs_["ttbarPt_"   ] = new TH2F( "ttbarPt_"    ,  "ttbarPt_"  ,  100,    0.,  200.,    100,   0.,  200.);
-  // gen-rec level correlation ttbar eta
+  // gen-rec level correlation ttbar y
   corrs_["ttbarY_"    ] = new TH2F( "ttbarY_"     ,  "ttbarY_"   ,  100,   -3.,    3.,    100,  -3.,    3.);
   // gen-rec level correlation ttbar mass
   corrs_["ttbarMass_" ] = new TH2F( "ttbarMass_"  ,  "ttbarMass_",  100,  342., 1000.,    100, 342., 1000.);
@@ -68,13 +68,13 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   **/
   // top pt (at the moment both top candidates are filled in one histogram)
   hists_["topPt"       ] = fs->make<TH1F>( "topPt"       , "topPt"      ,    8, CrossSection::topPt     );
-  // top eta (at the moment both top candidates are filled in one histogram)
+  // top y (at the moment both top candidates are filled in one histogram)
   hists_["topY"        ] = fs->make<TH1F>( "topY"        , "topY"       ,    8, CrossSection::topY      );
   // top phi (at the moment both top candidates are filled in one histogram)
   hists_["topPhi"      ] = fs->make<TH1F>( "topPhi"      , "topPhi"     ,   10,   -3.14,    3.14        );
   // ttbar pair pt
   hists_["ttbarPt"     ] = fs->make<TH1F>( "ttbarPt"     , "ttbarPt"    ,    8, CrossSection::ttbarPt   );
-  // ttbar pair eta
+  // ttbar pair y
   hists_["ttbarY"      ] = fs->make<TH1F>( "ttbarY"      , "ttbarY"     ,    6, CrossSection::ttbarY    );
   // ttbar pair phi
   hists_["ttbarPhi"    ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   6,   -3.14,    3.14        );
@@ -92,11 +92,11 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   **/
   // gen-rec level correlation top pt
   corrs_["topPt_"      ] = fs->make<TH2F>( "topPt_"      ,  "topPt_"    ,  100,    0.,  300.,    100,   0.,  300.);
-  // gen-rec level correlation top eta
+  // gen-rec level correlation top y
   corrs_["topY_"       ] = fs->make<TH2F>( "topY_"       ,  "topY_"     ,  100,   -3.,    3.,    100,  -3.,    3.);
   // gen-rec level correlation ttbar pt
   corrs_["ttbarPt_"    ] = fs->make<TH2F>( "ttbarPt_"    ,  "ttbarPt_"  ,  100,    0.,  200.,    100,   0.,  200.);
-  // gen-rec level correlation ttbar eta
+  // gen-rec level correlation ttbar y
   corrs_["ttbarY_"     ] = fs->make<TH2F>( "ttbarY_"     ,  "ttbarY_"   ,  100,   -3.,    3.,    100,  -3.,    3.);
   // gen-rec level correlation ttbar mass
   corrs_["ttbarMass_"  ] = fs->make<TH2F>( "ttbarMass_"  ,  "ttbarMass_",  100,  342., 1000.,    100, 342., 1000.);
@@ -131,7 +131,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 
       // fill pt correlation plot for ttbar pair    
       corrs_.find("ttbarPt_"   )->second->Fill( genTtbar.pt()        , recTtbar.pt()       , weight );
-      // fill eta correlation plot for ttbar pair
+      // fill y correlation plot for ttbar pair
       corrs_.find("ttbarY_"    )->second->Fill( genTtbar.Rapidity()  , recTtbar.Rapidity() , weight );
       // fill mass correlation plot for ttbar pair
       corrs_.find("ttbarMass_" )->second->Fill( genTtbar.mass()      , recTtbar.mass()     , weight );    
@@ -139,9 +139,9 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("topPt_"    )->second->Fill( tops.hadronicDecayTop()->pt()      , tops.hadronicDecayTop(hypoKey_)->pt()      , weight );
       // fill pt correlation plot for hadronic top candidate
       corrs_.find("topPt_"    )->second->Fill( tops.leptonicDecayTop()->pt()      , tops.leptonicDecayTop(hypoKey_)->pt()      , weight );    
-      // fill eta correlation plot for hadronic top candidate
+      // fill y correlation plot for hadronic top candidate
       corrs_.find("topY_"     )->second->Fill( tops.leptonicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity(), weight );
-      // fill eta correlation plot for hadronic top candidate
+      // fill y correlation plot for hadronic top candidate
       corrs_.find("topY_"     )->second->Fill( tops.leptonicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity(), weight );
     } 
     else{
@@ -160,20 +160,20 @@ TopKinematics::fill(const reco::Candidate* topA, const reco::Candidate* topB, co
   reco::Particle::LorentzVector ttBar = topA->p4() + topB->p4();
   // fill top pt for topA candidate
   hists_.find("topPt"       )->second->Fill( topA->p4().pt ()      , weight );
-  // fill top eta for topA candidate
+  // fill top y for topA candidate
   hists_.find("topY"        )->second->Fill( topA->p4().Rapidity() , weight );
   // fill top phi for topA candidate
   hists_.find("topPhi"      )->second->Fill( topA->p4().phi()      , weight );
   // fill top pt for topB candidate
   hists_.find("topPt"       )->second->Fill( topB->p4().pt ()      , weight );
-  // fill top eta for topB candidate
+  // fill top y for topB candidate
   hists_.find("topY"        )->second->Fill( topB->p4().Rapidity() , weight );
   // fill top phi for topB candidate
   hists_.find("topPhi"      )->second->Fill( topB->p4().phi()      , weight );
   // fill ttbar pt
   hists_.find("ttbarPt"     )->second->Fill( ttBar.pt  ()          , weight );
-  // fill ttbar eta
-  hists_.find("ttbarY"      )->second->Fill( ttBar.eta ()          , weight );
+  // fill ttbar y
+  hists_.find("ttbarY"      )->second->Fill( ttBar.Rapidity()      , weight );
   // fill ttbar phi
   hists_.find("ttbarPhi"    )->second->Fill( ttBar.phi ()          , weight );
   // fill ttbar invariant mass
@@ -197,19 +197,19 @@ TopKinematics::fill(const reco::Candidate* recTopA, const reco::Candidate* genTo
   reco::Particle::LorentzVector recTtBar = recTopA->p4() + recTopB->p4();
   // fill top pt for topA candidate
   match( hists_.find("topPt"       )->second , recTopA->p4().pt ()      , genTopA->p4().pt ()      , weight );
-  // fill top eta for topA candidate
+  // fill top y for topA candidate
   match( hists_.find("topY"        )->second , recTopA->p4().Rapidity() , genTopA->p4().Rapidity() , weight );
   // fill top phi for topA candidate
   match( hists_.find("topPhi"      )->second , recTopA->p4().phi()      , genTopA->p4().phi()      , weight );
   // fill top pt for topB candidate
   match( hists_.find("topPt"       )->second , recTopB->p4().pt ()      , genTopB->p4().pt ()      , weight );
-  // fill top eta for topB candidate
+  // fill top y for topB candidate
   match( hists_.find("topY"        )->second , recTopB->p4().Rapidity() , genTopB->p4().Rapidity() , weight );
   // fill top phi for topB candidate
   match( hists_.find("topPhi"      )->second , recTopB->p4().phi()      , genTopB->p4().phi()      , weight );
   // fill ttbar pt
   match( hists_.find("ttbarPt"     )->second , recTtBar.pt  ()          , genTtBar.pt  ()          , weight );
-  // fill ttbar eta
+  // fill ttbar y
   match( hists_.find("ttbarY"      )->second , recTtBar.Rapidity ()     , genTtBar.Rapidity ()     , weight );
   // fill ttbar phi
   match( hists_.find("ttbarPhi"    )->second , recTtBar.phi ()          , genTtBar.phi ()          , weight );
