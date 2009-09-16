@@ -12,7 +12,7 @@
    The structure keeps histograms to derive the resolution of muons using generator level information. 
    These histograms are to be filled from std::vector<pat::Muon>'s only(!). The class is derived from 
    the ObjectResolution<Collection> interface, which makes it usable in fwfull or fwlite. It needs a 
-   dedicated contructor for fwlite to obtain the information of histogram binnings in pt, eta and phi 
+   dedicated constructor for fwlite to obtain the information of histogram binnings in pt, eta and phi 
    of the muon.
 */
 
