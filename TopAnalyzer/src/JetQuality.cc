@@ -1,13 +1,14 @@
 #include "TopAnalysis/TopAnalyzer/interface/JetQuality.h"
 
 /// default constructor for fw lite
-JetQuality::JetQuality(const int index) : index_(index)
+JetQuality::JetQuality(const int index, std::string flavor) : index_(index), flavor_(flavor)
 { 
 }
 
 /// constructor for full FW analyzer
 JetQuality::JetQuality(const edm::ParameterSet& cfg) :
-  index_( cfg.getParameter<int>( "index" ) )
+  index_ ( cfg.getParameter<int>( "index" ) ),
+  flavor_( cfg.getParameter<std::string>( "flavor" ) )
 {
 }
 
@@ -18,7 +19,7 @@ JetQuality::book()
   /** 
       Selection Variables
   **/
-  // electromagnetic fraction of jet
+  // electromagnetic fraction of jet energy
   hists_["emf"                  ] = new TH1F( "emf"                  ,  "emf"                  ,   40,   0.,    1. );
   // btag track counting high purity
   hists_["btagTrkCntHighPurity" ] = new TH1F( "btagTrkCntHighPurity" ,  "btagTrkCntHighPurity" ,   80,   0.,   20. );
@@ -27,11 +28,38 @@ JetQuality::book()
       Monitoring Variables
   **/
   // number of jet constituents
-  hists_["nConst_"            ] = new TH1F( "nConst_"                ,  "nConst_"              ,   50,   0.,  50. );
-  // ntag track counting high efficiency
-  hists_["btagTrkCntHighEff_" ] = new TH1F( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
-  // ntag track counting high efficiency
-  hists_["btagSimpleSecVtx_"  ] = new TH1F( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,   0.,  20. ); 
+  hists_["nConst_"              ] = new TH1F( "nConst_"                ,  "nConst_"              ,   50,   0.,  50. );
+  // btag track counting high efficiency
+  hists_["btagTrkCntHighEff_"   ] = new TH1F( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
+  // btag simple secondary vertex
+  hists_["btagSimpleSecVtx_"    ] = new TH1F( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,   0.,  20. ); 
+  // btag simple secondary vertex (neg bjet tags)
+  hists_["btagSimpleSecVtxNeg_" ] = new TH1F( "btagSimpleSecVtxNeg_"   ,  "btagSimpleSecVtxNeg_" ,   80,   0.,  20. ); 
+
+  /** 
+      JEC Monitoring Variables
+  **/
+  // jet pt raw
+  hists_["ptL0_" ] = new TH1F( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. );
+  // jet pt L2Relative
+  hists_["ptL2_" ] = new TH1F( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. );
+  // jet pt L3Absolute
+  hists_["ptL3_" ] = new TH1F( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. );
+  // jet pt L5Hadron
+  hists_["ptL5_" ] = new TH1F( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. );
+  // jet pt L7Parton
+  hists_["ptL7_" ] = new TH1F( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. );
+
+  // jet eta raw
+  hists_["etaL0_"] = new TH1F( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L2Relative
+  hists_["etaL2_"] = new TH1F( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L3Absolute
+  hists_["etaL3_"] = new TH1F( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L5Hadron
+  hists_["etaL5_"] = new TH1F( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L7Parton
+  hists_["etaL7_"] = new TH1F( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 );
 }
 
 /// histogramm booking for full fw
@@ -41,7 +69,7 @@ JetQuality::book(edm::Service<TFileService>& fs)
   /** 
       Selection Variables
   **/
-  // electromagnetic fraction of jet
+  // electromagnetic fraction of jet energy
   hists_["emf"                  ] = fs->make<TH1F>( "emf"                  ,  "emf"                  ,   40,   0.,    1. );
   // btag track counting high purity
   hists_["btagTrkCntHighPurity" ] = fs->make<TH1F>( "btagTrkCntHighPurity" ,  "btagTrkCntHighPurity" ,   80,   0.,   20. );
@@ -50,11 +78,38 @@ JetQuality::book(edm::Service<TFileService>& fs)
       Monitoring Variables
   **/
   // number of jet constituents
-  hists_["nConst_"            ] = fs->make<TH1F>( "nConst_"                ,  "nConst_"              ,   50,   0.,  50. );
-  // ntag track counting high efficiency
-  hists_["btagTrkCntHighEff_" ] = fs->make<TH1F>( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
-  // ntag track counting high efficiency
-  hists_["btagSimpleSecVtx_"  ] = fs->make<TH1F>( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,   0.,  20. ); 
+  hists_["nConst_"              ] = fs->make<TH1F>( "nConst_"                ,  "nConst_"              ,   50,   0.,  50. );
+  // btag track counting high efficiency
+  hists_["btagTrkCntHighEff_"   ] = fs->make<TH1F>( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
+  // btag simple secondary vertex
+  hists_["btagSimpleSecVtx_"    ] = fs->make<TH1F>( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,   0.,  20. ); 
+  // btag simple secondary vertex (neg bjet tags)
+  hists_["btagSimpleSecVtxNeg_" ] = fs->make<TH1F>( "btagSimpleSecVtxNeg_"   ,  "btagSimpleSecVtxNeg_" ,   80,   0.,  20. ); 
+
+  /** 
+      JEC Monitoring Variables
+  **/
+  // jet pt raw
+  hists_["ptL0_" ] = fs->make<TH1F>( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. );
+  // jet pt L2Relative
+  hists_["ptL2_" ] = fs->make<TH1F>( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. );
+  // jet pt L3Absolute
+  hists_["ptL3_" ] = fs->make<TH1F>( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. );
+  // jet pt L5Hadron
+  hists_["ptL5_" ] = fs->make<TH1F>( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. );
+  // jet pt L7Parton
+  hists_["ptL7_" ] = fs->make<TH1F>( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. );
+
+  // jet eta raw
+  hists_["etaL0_"] = fs->make<TH1F>( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L2Relative
+  hists_["etaL2_"] = fs->make<TH1F>( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L3Absolute
+  hists_["etaL3_"] = fs->make<TH1F>( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L5Hadron
+  hists_["etaL5_"] = fs->make<TH1F>( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 );
+  // jet eta L7Parton
+  hists_["etaL7_"] = fs->make<TH1F>( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 );
 }
 
 /// histogram filling for fwlite and for full fw from reco objects
@@ -68,11 +123,50 @@ JetQuality::fill(const std::vector<pat::Jet>& jets, const double& weight)
       /**
 	 Fill Selection Variables
       **/
-
+      // electromagnetic fraction of jet energy
+      hists_.find( "emf"                 )->second->Fill( jet->emEnergyFraction() , weight );
+      // btag track counting high purity
+      hists_.find( "btagTrkCntHighPurity")->second->Fill( jet->bDiscriminator("trackCountingHighPurBJetTags") , weight );
       
       /** 
 	  Fill Monitoring Variables
       **/
+      // number of jet constituents
+      unsigned int nConst = 0;
+      if( jet->isCaloJet() ) jet->getCaloConstituents().size();	
+      else if( jet->isPFJet() )jet->getPFConstituents().size();
+      hists_.find( "nConst"              )->second->Fill( nConst , weight );
+      // btag track counting high efficiency
+      hists_.find( "btagTrkCntHighEff_"  )->second->Fill( jet->bDiscriminator("trackCountingHighEffBJetTags") , weight );
+      // btag simple secondary vertex
+      hists_.find( "btagSimpleSecVtx_"   )->second->Fill( jet->bDiscriminator("simpleSecondaryVertexBJetTags") , weight );
+      // btag simple secondary vertex (neg bjet tags)
+      hists_.find( "btagSimpleSecVtxNeg_")->second->Fill( jet->bDiscriminator("simpleSecondaryVertexNegativeBJetTags") , weight );
+
+      /** 
+	  Fill JEC Monitoring Variables
+      **/
+      // jet pt raw
+      hists_.find( "ptL0_"  )->second->Fill( jet->correctedJet("raw").pt()  , weight );
+      // jet pt L2Relative
+      hists_.find( "ptL2_"  )->second->Fill( jet->correctedJet("rel").pt()  , weight );
+      // jet pt L3Absolute
+      hists_.find( "ptL3_"  )->second->Fill( jet->correctedJet("abs").pt()  , weight );
+      // jet pt L5Hadron
+      hists_.find( "ptL5_"  )->second->Fill( jet->correctedJet("had",  flavor_).pt()  , weight );
+      // jet pt L7Parton
+      hists_.find( "ptL7_"  )->second->Fill( jet->correctedJet("part", flavor_).pt()  , weight );
+
+      // jet eta raw
+      hists_.find( "etaL0_" )->second->Fill( jet->correctedJet("raw").eta() , weight );
+      // jet eta L2Relative
+      hists_.find( "etaL2_" )->second->Fill( jet->correctedJet("rel").eta() , weight );
+      // jet eta L3Absolute
+      hists_.find( "etaL3_" )->second->Fill( jet->correctedJet("abs").eta() , weight );
+      // jet eta L5Hadron
+      hists_.find( "etaL5_" )->second->Fill( jet->correctedJet("had",  flavor_).eta() , weight );
+      // jet eta L7Parton
+      hists_.find( "etaL7_" )->second->Fill( jet->correctedJet("part", flavor_).eta() , weight );
     }
   }
 }

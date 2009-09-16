@@ -19,7 +19,7 @@ class JetQuality : public SingleObject<const std::vector<pat::Jet> > {
 
  public:
   /// default constructor for fwlite
-  explicit JetQuality(const int index);
+  explicit JetQuality(const int index, std::string flavor);
   /// default constructor for fwfull
   explicit JetQuality(const edm::ParameterSet& configFile);
   /// default destructor
@@ -41,6 +41,9 @@ class JetQuality : public SingleObject<const std::vector<pat::Jet> > {
  private:
   /// index of jet to be plotted
   int index_;
+  /// decide which flaor to be used for the L5 and L7 flavor dependend 
+  /// JEC monitoring plots
+  std::string flavor_;
 };
 
 #endif
