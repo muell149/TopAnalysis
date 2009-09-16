@@ -23,9 +23,17 @@ DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
     Define modules needed for the analysis of the jets
 **/
 
+#include "TopAnalysis/TopAnalyzer/interface/JetQuality.h"
+typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetQuality> JetQualityAnalyzer;
+DEFINE_FWK_MODULE(JetQualityAnalyzer);
+
 #include "TopAnalysis/TopAnalyzer/interface/JetKinematics.h"
 typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetKinematics> JetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/JetResolution.h"
+typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetResolution> JetResolutionAnalyzer;
+DEFINE_FWK_MODULE(JetResolutionAnalyzer);
 
 
 /**
