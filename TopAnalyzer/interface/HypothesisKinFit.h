@@ -41,18 +41,14 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
   void process(){};
 
  private:
-  /// input tag for selected jets
-  edm::InputTag jets_;
-  /// input tag for selected mets
-  edm::InputTag mets_;
-  /// input tag for selected muons
-  edm::InputTag muons_;
+  /// helper function to recieve the object index in the reco collection for hypothesis
+  /// 'hypo' and object index 'index' in the TtSemiLepEvtPartons definition
+  int objectIndex(const TtSemiLeptonicEvent& tops, const std::string& hypo, const int& index) const { return tops.jetLeptonCombination(hypo)[index]; };
+  /// helper function to recieve the difference of object indices in the reco 
+  /// collections  between the genMatch and kinFit hypotheses
+  int delObjectIndex(const TtSemiLeptonicEvent& tops, const int& index) const { return objectIndex(tops, "kGenMatch", index)-objectIndex(tops, "kKinFit", index); };
 
-  /// maximal allowed sum of DR for genMatch hypothesis
-  double maxGenMatchSumDR_;
-  /// maximal allowed sum of Pt for genMatch hypothesis
-  double maxGenMatchSumPt_;
-
+ private:
   /// histogram container for correlation plots
   std::map<std::string, TH2*> corrs_;
 };
