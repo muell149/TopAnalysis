@@ -57,7 +57,7 @@ MuonQuality::book()
   // summed track pt in isolation cone
   hists_["trkIso_" ] = new TH1F( "trkIso_"  ,  "trkIso_"  ,   40,   0.,  10. );
   // number of ecal crystals above noise threshold in isolation cone
-  hists_["eclIsoN_"] = new TH1F( "enlIsoN_" ,  "eclIsoN_" ,   30,   0.,  30. );
+  hists_["eclIsoN_"] = new TH1F( "eclIsoN_" ,  "eclIsoN_" ,   30,   0.,  30. );
   // number of hcal towers above noise threshold in isolation cone
   hists_["hclIsoN_"] = new TH1F( "hclIsoN_" ,  "hclIsoN_" ,   30,   0.,  30. );
   // summed energy in ecal crystals and hcal towers above noise threshold in isolation cone (recHit based)
@@ -102,7 +102,7 @@ MuonQuality::book(edm::Service<TFileService>& fs)
       Monitoring Variables
   **/
   // compatibility of the energy deposits in the calorimeter with the muon hypothesis
-  hists_["calCmp_" ] = fs->make<TH1F>( "calCmp"   ,  "calCmp_"  ,   50,   0.,   1. );
+  hists_["calCmp_" ] = fs->make<TH1F>( "calCmp_"   ,  "calCmp_"  ,   50,   0.,   1. );
   // energy deposited in crossed ecal crystals (recHist based)
   hists_["ecalEn_" ] = fs->make<TH1F>( "ecalEn_"  ,  "ecalEn_"  ,   40,   0.,  10. ); 
   // energy deposited in 3x3 crystal shape around cerntral crystal (recHits based)
@@ -124,7 +124,7 @@ MuonQuality::book(edm::Service<TFileService>& fs)
   // summed track pt in isolation cone
   hists_["trkIso_" ] = fs->make<TH1F>( "trkIso_"  ,  "trkIso_"  ,   40,   0.,  10. );
   // number of ecal crystals above noise threshold in isolation cone
-  hists_["eclIsoN_"] = fs->make<TH1F>( "enlIsoN_" ,  "eclIsoN_" ,   30,   0.,  30. );
+  hists_["eclIsoN_"] = fs->make<TH1F>( "eclIsoN_" ,  "eclIsoN_" ,   30,   0.,  30. );
   // number of hcal towers above noise threshold in isolation cone
   hists_["hclIsoN_"] = fs->make<TH1F>( "hclIsoN_" ,  "hclIsoN_" ,   30,   0.,  30. );
   // summed energy in ecal crystals and hcal towers above noise threshold in isolation cone (recHit based)
