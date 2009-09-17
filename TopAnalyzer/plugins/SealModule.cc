@@ -46,6 +46,15 @@ DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
 
 /**
+    Define modules needed for the analysis of different event hypothesis
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFit.h"
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, HypothesisKinFit> HypothesisKinFitAnalyzer;
+DEFINE_FWK_MODULE(HypothesisKinFitAnalyzer);
+
+
+/**
     Define modules needed for the analysis of the top quarks
 **/
 
