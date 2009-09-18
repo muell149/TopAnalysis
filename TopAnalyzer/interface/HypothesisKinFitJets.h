@@ -12,11 +12,11 @@
    \brief   Derived class to analyze the kinematic fit hypothesis of semileptonic ttbar events
 
    The structure keeps control histograms to analyze the relation between the fitted four vectors 
-   of the kinematics fit hypothesis of semi-leptonic ttbar events and the original input vectors 
-   of the selected pat::Jets. These histograms are be filled from the TtSemiLeptonicEvent and from 
-   std::vector<pat::Jet>'s. The class is derived from the DoubleObject<CollectionA, CollectionB> 
+   of the kinematic fit hypothesis of semi-leptonic ttbar events and the original input vectors 
+   of the selected pat::Jets. These histograms are to be filled from the TtSemiLeptonicEvent and 
+   from std::vector<pat::Jet>'s. The class is derived from the DoubleObject<CollectionA, CollectionB> 
    interface, which makes it usable in fwfull or fwlite.  This class is expected to be run with 
-   the same je collection from which the kinematic fit hypothesis was derived, otherwise it will 
+   the same jet collection from which the kinematic fit hypothesis was derived, otherwise it will 
    lead to wrong results!
 */
 

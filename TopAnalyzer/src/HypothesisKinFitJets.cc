@@ -94,7 +94,7 @@ HypothesisKinFitJets::fill(const TtSemiLeptonicEvent& tops, const std::vector<pa
   // make sure to have a valid hypothesis on reconstruction level
   if( tops.isHypoValid("kKinFit") ){
     /** 
-	Fill the Pull Distributions (Relative to the MC Truth)
+	Fill the Pull Distributions (Relative to the Reco Input)
     **/
     // define indices in pat::Jet collection
     int lightQ    = tops.jetLeptonCombination("kKinFit")[TtSemiLepEvtPartons::LightQ   ];
