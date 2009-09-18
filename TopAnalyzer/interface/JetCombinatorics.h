@@ -1,7 +1,6 @@
 #ifndef JetCombinatorics_h
 #define JetCombinatorics_h
 
-//#include "DataFormats/Candidate/interface/Candidate.h"
 #include "TopAnalysis/TopAnalyzer/interface/SingleObject.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
 
@@ -27,7 +26,6 @@ class JetCombinatorics : public SingleObject<TtSemiLeptonicEvent> {
   void process();
 
  private:
-
   /// compare a subset of jet combinations in two hypotheses
   bool sameJets(const TtSemiLeptonicEvent& semiLepEvt,
 		const std::string& hyp1,
