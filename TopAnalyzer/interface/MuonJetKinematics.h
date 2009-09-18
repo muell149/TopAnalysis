@@ -11,10 +11,11 @@
    \brief   Derived class to analyze the relation between muons jets on reconstruction level
 
    The structure keeps histograms to analyze the relation between muons and jets on recostruction level. 
-   These histograms can be filled from std::vector<pat::Muon>'s only(!). The class is derived from the 
-   DoubleObject<CollectionA, CollectionB> interface, which makes it usable in fwfull or fwlite. This 
-   class is expected to be used with well defined isolated muons and a well defined collection of jets.
-   There is no implicit eta restriction on the jet collection applied within the analyzer!
+   These histograms can be filled from std::vector<pat::Muon>'s and std::vector<pat::Jet>'s only(!). The 
+   class is derived from the DoubleObject<CollectionA, CollectionB> interface, which makes it usable in 
+   fwfull or fwlite. This class is expected to be used with well defined isolated muons and a well defined 
+   collection of jets. There is no implicit eta restriction on the jet collection applied within the 
+   analyzer!
 */
 
 class MuonJetKinematics : public DoubleObject<const std::vector<pat::Muon>, const std::vector<pat::Jet> > {
