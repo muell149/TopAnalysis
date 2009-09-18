@@ -50,7 +50,7 @@ class DoubleObject{
   /// histogramm booking for fwfull
   virtual void book(edm::Service<TFileService>& fileService) = 0;
   /// histogram filling for fwlite and for fwfull
-  virtual void fill(CollectionA& inputCollectionA, CollectionB& inputCollectionB, const double& weight=1.) = 0;
+  virtual void fill(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& weight=1.) = 0;
   /// everything which needs to be done after the event loop
   virtual void process() = 0;
 
