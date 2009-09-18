@@ -6,7 +6,7 @@ analyzeTopGenKinematics = cms.EDAnalyzer("TopKinematicsGenAnalyzer",
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             
-    useWeight = cms.bool(True),
+    useWeight = cms.bool(False),
     ## analyzer specific configurables
     analyze   = cms.PSet(
       ## hypothesis key on reco level

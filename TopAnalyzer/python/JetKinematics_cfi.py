@@ -6,7 +6,7 @@ analyzeJetKinematics = cms.EDAnalyzer("JetKinematicsAnalyzer",
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             
-    useWeight = cms.bool(True),
+    useWeight = cms.bool(False),
     ## special parameters for muon quality analysis
     analyze   = cms.PSet(
       ## fill histograms for 1.,2.,3.,... leading
