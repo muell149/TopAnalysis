@@ -53,6 +53,18 @@ DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, HypothesisKinFit> HypothesisKinFitAnalyzer;
 DEFINE_FWK_MODULE(HypothesisKinFitAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitJets.h"
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, std::vector<pat::Jet>, HypothesisKinFitJets> HypothesisKinFitJetsAnalyzer;
+DEFINE_FWK_MODULE(HypothesisKinFitJetsAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMuon.h"
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, std::vector<pat::Muon>, HypothesisKinFitMuon> HypothesisKinFitMuonAnalyzer;
+DEFINE_FWK_MODULE(HypothesisKinFitMuonAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMET.h"
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, std::vector<pat::MET> , HypothesisKinFitMET> HypothesisKinFitMETAnalyzer;
+DEFINE_FWK_MODULE(HypothesisKinFitMETAnalyzer);
+
 
 /**
     Define modules needed for the analysis of the top quarks
