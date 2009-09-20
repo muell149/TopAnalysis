@@ -11,11 +11,13 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
 combinedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
                                           cut = 'combinedMuon.isNull = 0'
                                           )
-centralMuons  = selectedLayer1Muons.clone(src = 'combinedMuons',
-                                          cut = 'abs(eta) < 2.1'
+centralMuons  = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                          cut = 'combinedMuon.isNull = 0 &'
+                                                'abs(eta) < 2.1'
                                           )
-goodMuons     = selectedLayer1Muons.clone(src = 'combinedMuons',
-                                          cut = 'abs(eta) < 2.1 & pt > 20.'
+goodMuons     = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                          cut = 'combinedMuon.isNull = 0 &'
+                                                'abs(eta) < 2.1 & pt > 20.'
                                           )
 
 ## a kinematically well defined global muon,
@@ -23,7 +25,6 @@ goodMuons     = selectedLayer1Muons.clone(src = 'combinedMuons',
 selectGoodMuons = cms.Sequence(combinedMuons *
                                centralMuons
                                )
-
                                
 ## check tracker related muon qualities
 validHits     = selectedLayer1Muons.clone(src = 'goodMuons',
@@ -62,10 +63,10 @@ goldenMuons   = selectedLayer1Muons.clone(src = 'trackMuons',
                                           )
 ## a trackMuon withgood MIP characteristics
 ## in both calorimeters
-makeGoldenMuons = cms.Sequence(trackMuons *
-                               ecalDep    *
-                               hcalDep
-                               )
+selectGoldenMuons = cms.Sequence(trackMuons *
+                                 ecalDep    *
+                                 hcalDep
+                                 )
 
 ## check for isolation
 trackIsoMuons = selectedLayer1Muons.clone(src = 'goldenMuons',
@@ -75,12 +76,12 @@ caloIsoMuons  = selectedLayer1Muons.clone(src = 'goldenMuons',
                                           cut = 'caloIso  < 5.'
                                         )
 relIsoMuons   = selectedLayer1Muons.clone(src = 'goldenMuons',
-                                          cut = '(trackIso+caloIso)/pt < 0.1'
+                                          cut = '(trackIso+caloIso)/pt < 0.05'
                                           )
 
 ## a goodMuons which are isolated
-makeIsolatedMuons = cms.Sequence(goldonMuons   *
-                                 caloIsoMuons  *
-                                 trackIsoMuons *
-                                 isolatedMuons
-                                 )
+selectIsolatedMuons = cms.Sequence(goldenMuons   *
+                                   caloIsoMuons  *
+                                   trackIsoMuons *
+                                   relIsoMuons
+                                   )
