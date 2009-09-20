@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 # cfg file for the analysis of selected muon
 # quantities
 #-------------------------------------------------
-process = cms.Process("Muon")
+process = cms.Process("TopQuark")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -20,8 +20,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    #"file:patTuple.root"
-    "file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_ttbar09_all_0_ttbar09.root"
+    "file:patTuple.root"
     )
 )
 

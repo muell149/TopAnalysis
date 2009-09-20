@@ -133,9 +133,9 @@ JetQuality::fill(const std::vector<pat::Jet>& jets, const double& weight)
       **/
       // number of jet constituents
       unsigned int nConst = 0;
-      if( jet->isCaloJet() ) jet->getCaloConstituents().size();	
-      else if( jet->isPFJet() )jet->getPFConstituents().size();
-      hists_.find( "nConst"              )->second->Fill( nConst , weight );
+      if( jet->isCaloJet() ) nConst = jet->getCaloConstituents().size();	
+      else if( jet->isPFJet() ) nConst = jet->getPFConstituents().size();
+      hists_.find( "nConst_"             )->second->Fill( nConst , weight );
       // btag track counting high efficiency
       hists_.find( "btagTrkCntHighEff_"  )->second->Fill( jet->bDiscriminator("trackCountingHighEffBJetTags") , weight );
       // btag simple secondary vertex
