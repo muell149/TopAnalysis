@@ -3,13 +3,13 @@ from TopAnalysis.Configuration.defines import source
 
 ######################################################################
 #                                                                     
-# -----------                                                         
+# Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1
 #                                                                     
 #                                                                     
-# Events      :                                                       
-# xsec(pb)  LO:                                                       
-# xsec(pb) NLO:                                                       
-# eff         :                                                       
+# Events      :  529750                                                     
+# xsec(pb)  LO:      --                                                
+# xsec(pb) NLO:     165                                                   
+# eff         :     1.0                                                  
 ######################################################################
 sizes ['ttbar09_0'] = 99999999
 source['ttbar09_0'] ='\'/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0024/068F7867-2C88-DE11-B3C2-001F29C9A5AE.root\','
