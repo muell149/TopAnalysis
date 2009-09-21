@@ -15,7 +15,7 @@ void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 
-void analyzeJetKinematics()
+void analyzeJetBTagging()
 {
   // ---
   //    set root style 
@@ -34,24 +34,19 @@ void analyzeJetKinematics()
   // ---
   //    get histograms
   // ---
-  std::vector<TH1F*> n_, pt_, eta_, phi_;
+  std::vector<TH1F*> btag0_, btag1_, btag2_, btag3_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    n_  .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/n"  ) );
-    pt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt" ) );
-    eta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
-    phi_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/phi") );
-
-//     n_  .push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/n"  ) );
-//     pt_ .push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/pt" ) );
-//     eta_.push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/eta") );
-//     phi_.push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/phi") );
+    btag0_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetQuality/btagSimpleSecVtx_"    ) );
+    btag1_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetQuality/btagSimpleSecVtxNeg_" ) );
+    btag2_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetQuality/btagTrkCntHighEff_"   ) );
+    btag3_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetQuality/btagTrkCntHighPurity" ) );
   }
 
   // bugfix for in between
-  n_  [kAll]->Add( n_  [kSignal]  );
-  pt_ [kAll]->Add( pt_ [kSignal] );
-  eta_[kAll]->Add( eta_[kSignal] );
-  phi_[kAll]->Add( phi_[kSignal] );
+  btag0_[kAll]->Add( btag0_[kSignal] );
+  btag1_[kAll]->Add( btag1_[kSignal] );
+  btag2_[kAll]->Add( btag2_[kSignal] );
+  btag3_[kAll]->Add( btag3_[kSignal] );
 
   // ---
   //    close input files
@@ -64,27 +59,26 @@ void analyzeJetKinematics()
   //    configure histograms
   // ---
 
-  // n_
-  histogramStyle(*n_  [kAll       ], kAll       );
-  histogramStyle(*n_  [kSignal    ], kSignal    );
-  histogramStyle(*n_  [kBackground], kBackground);
+  // btag0_
+  histogramStyle(*btag0_  [kAll       ], kAll       );
+  histogramStyle(*btag0_  [kSignal    ], kSignal    );
+  histogramStyle(*btag0_  [kBackground], kBackground);
 
 
-  // pt_
-  histogramStyle(*pt_ [kAll       ], kAll       );
-  histogramStyle(*pt_ [kSignal    ], kSignal    );
-  histogramStyle(*pt_ [kBackground], kBackground);
+  // btag1_
+  histogramStyle(*btag1_ [kAll       ], kAll       );
+  histogramStyle(*btag1_ [kSignal    ], kSignal    );
+  histogramStyle(*btag1_ [kBackground], kBackground);
 
-  // eta_
-  histogramStyle(*eta_[kAll       ], kAll       );
-  histogramStyle(*eta_[kSignal    ], kSignal    );
-  histogramStyle(*eta_[kBackground], kBackground);
+  // btag2_
+  histogramStyle(*btag2_[kAll       ], kAll       );
+  histogramStyle(*btag2_[kSignal    ], kSignal    );
+  histogramStyle(*btag2_[kBackground], kBackground);
 
-  // phi_
-  histogramStyle(*phi_[kAll       ], kAll       );
-  histogramStyle(*phi_[kSignal    ], kSignal    );
-  histogramStyle(*phi_[kBackground], kBackground);
-
+  // btag3_
+  histogramStyle(*btag3_[kAll       ], kAll       );
+  histogramStyle(*btag3_[kSignal    ], kSignal    );
+  histogramStyle(*btag3_[kBackground], kBackground);
 
   // ---
   //    do the printing for n_
@@ -96,29 +90,28 @@ void analyzeJetKinematics()
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("Top-Antitop(Phythia)");
-  leg0->AddEntry( n_  [kAll       ] , "inclusive"         , "PL" );
-  leg0->AddEntry( n_  [kSignal    ] , "semi-lep. ( #mu )" , "FL" );
-  leg0->AddEntry( n_  [kBackground] , "other decays"      , "FL" );
+  leg0->AddEntry( btag0_[kAll       ] , "inclusive"         , "PL" );
+  leg0->AddEntry( btag0_[kSignal    ] , "semi-lep. ( #mu )" , "FL" );
+  leg0->AddEntry( btag0_[kBackground] , "other decays"      , "FL" );
 
   // create a legend (in upper center)
   TLegend *leg1 = new TLegend(0.35, 0.65, 1.05, 0.9);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
   leg1->SetHeader("Top-Antitop(Phythia)");
-  leg1->AddEntry( n_  [kAll       ] , "inclusive"         , "PL" );
-  leg1->AddEntry( n_  [kSignal    ] , "semi-lep. ( #mu )" , "FL" );
-  leg1->AddEntry( n_  [kBackground] , "other decays"      , "FL" );
+  leg1->AddEntry( btag0_[kAll       ] , "inclusive"         , "PL" );
+  leg1->AddEntry( btag0_[kSignal    ] , "semi-lep. ( #mu )" , "FL" );
+  leg1->AddEntry( btag0_[kBackground] , "other decays"      , "FL" );
   
   // draw canvas
   canv0->cd(0);
-  canv0->SetLogy(1);
-  axesStyle(*n_  [kAll], "N_{#mu}(pt>20 GeV, |#eta|<2.1)", "events");
-  n_  [kAll       ]->SetMinimum(1.);
-  n_  [kAll       ]->SetMaximum( 2.5* n_  [kAll]->GetMaximum() );
-  n_  [kAll       ]->Draw();
-  n_  [kSignal    ]->Draw("same");
-  n_  [kBackground]->Draw("same");
-  //n_  [kAll       ]->Draw("esame");
+  axesStyle(*btag0_[kAll], "BTag(Simple Secondary Vtx)", "events");
+  btag0_[kAll       ]->SetMinimum(0.);
+  btag0_[kAll       ]->SetMaximum( 1.3* btag0_[kAll]->GetMaximum() );
+  btag0_[kAll       ]->Draw();
+  btag0_[kSignal    ]->Draw("same");
+  btag0_[kBackground]->Draw("same");
+  //btag0_  [kAll       ]->Draw("esame");
   leg0->Draw("same");
 
   // ---
@@ -128,12 +121,12 @@ void analyzeJetKinematics()
 
   // draw canvas
   canv1->cd(0);
-  axesStyle(*pt_ [kAll], "pt( #mu ) [GeV]", "events");
-  pt_ [kAll       ]->SetMaximum( 1.2* pt_ [kAll]->GetMaximum() );
-  pt_ [kAll       ]->Draw();
-  pt_ [kSignal    ]->Draw("same");
-  pt_ [kBackground]->Draw("same");
-  //pt_ [kAll       ]->Draw("same");
+  axesStyle(*btag1_[kAll], "BTag_{Neg}(Simple Secondary Vtx)", "events");
+  btag1_[kAll       ]->SetMaximum( 1.3* btag1_[kAll]->GetMaximum() );
+  btag1_[kAll       ]->Draw();
+  btag1_[kSignal    ]->Draw("same");
+  btag1_[kBackground]->Draw("same");
+  //btag1_ [kAll       ]->Draw("same");
   leg0->Draw("same");
 
   // ---
@@ -143,12 +136,12 @@ void analyzeJetKinematics()
 
   // draw canvas
   canv2->cd(0);
-  axesStyle(*eta_[kAll], "#eta( #mu )", "events");
-  eta_[kAll       ]->SetMinimum( 0 );
-  eta_[kAll       ]->SetMaximum( 1.7* eta_[kAll]->GetMaximum() );
-  eta_[kAll       ]->Draw();
-  eta_[kSignal    ]->Draw("same");
-  eta_[kBackground]->Draw("same");
+  axesStyle(*btag2_[kAll], "BTag_{Eff}(Track Counting)", "events");
+  btag2_[kAll       ]->SetMinimum( 0 );
+  btag2_[kAll       ]->SetMaximum( 1.3* btag2_[kAll]->GetMaximum() );
+  btag2_[kAll       ]->Draw();
+  btag2_[kSignal    ]->Draw("same");
+  btag2_[kBackground]->Draw("same");
   //eta_[kAll       ]->Draw("same");
   leg1->Draw("same");
 
@@ -159,13 +152,13 @@ void analyzeJetKinematics()
 
   // draw canvas
   canv3->cd(0);
-  axesStyle(*phi_[kAll], "#phi( #mu )", "events");
-  phi_[kAll       ]->SetMinimum( 0 );
-  phi_[kAll       ]->SetMaximum( 2.0* phi_[kAll]->GetMaximum() );
-  phi_[kAll       ]->Draw();
-  phi_[kSignal    ]->Draw("same");
-  phi_[kBackground]->Draw("same");
-  //phi_[kAll       ]->Draw("same");
+  axesStyle(*btag3_[kAll], "BTag_{Pure}(Track Counting)", "events");
+  btag3_[kAll       ]->SetMinimum( 0 );
+  btag3_[kAll       ]->SetMaximum( 1.3* btag3_[kAll]->GetMaximum() );
+  btag3_[kAll       ]->Draw();
+  btag3_[kSignal    ]->Draw("same");
+  btag3_[kBackground]->Draw("same");
+  //btag3_[kAll       ]->Draw("same");
   leg1->Draw("same");
 }
 
@@ -219,7 +212,7 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY)
   hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.06);
   hist.GetXaxis()->SetTitleColor (    1);
-  hist.GetXaxis()->SetTitleOffset(  0.8);
+  hist.GetXaxis()->SetTitleOffset(  0.9);
   hist.GetXaxis()->SetTitleFont  (   62);
   hist.GetXaxis()->SetLabelSize  ( 0.05);
   hist.GetXaxis()->SetLabelFont  (   62);
