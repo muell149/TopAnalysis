@@ -5,7 +5,6 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-signalChannel = True
 signalInvert  = True
 writeOutput   = False
 
@@ -43,27 +42,16 @@ process.TFileService = cms.Service("TFileService",
 ## ---
 ##    decide whether to run on:  * all *, * signal only *, * background only *
 ## ---
-if(signalChannel):
-    ## std sequence to produce the ttGenEvt
-    process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
-    ## filter for semi-leptonic 
-    process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
-    process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
-    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
-    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchB.muon = False
-    process.ttSemiLeptonicFilter.invert = signalInvert
+## std sequence to produce the ttGenEvt
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
-    ## adapt output filename
-    if(not signalInvert):
-        process.TFileService.fileName = 'analyzeSemiLeptonicSelection_sig.root'
-    else:
-        process.TFileService.fileName = 'analyzeSemiLeptonicSelection_bkg.root'        
-
-    ## run the first independent part of the path as p0
-    process.p0 = cms.Path(process.makeGenEvt *
-                          process.ttSemiLeptonicFilter
-                          )
+## filter for semi-leptonic 
+process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
+process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchB.muon = False
+process.ttSemiLeptonicFilter.invert = signalInvert
 
 ## ---
 ##    configure the cutflow scenario
@@ -126,7 +114,10 @@ process.monitorJetsQuality = cms.Sequence(process.tightBottomJetQuality +
 ## ---
 ##    run the final sequence
 ## ---
-process.p1 = cms.Path(## do the trigger selection
+process.p1 = cms.Path(## do the gen evetn selection
+                      process.makeGenEvt            *
+                      process.ttSemiLeptonicFilter  *
+                      ## do the trigger selection
                       process.hltMu9                * 
                       ## do the selections
                       process.semiLeptonicSelection *
