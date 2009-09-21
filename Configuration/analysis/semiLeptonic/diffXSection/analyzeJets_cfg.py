@@ -5,6 +5,7 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
+useAntikt5    = False
 signalInvert  = True
 
 
@@ -66,18 +67,47 @@ process.load("TopAnalysis.TopFilter.sequences.jetSelection_cff")
 ## high level trigger filter
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
 
+## replace sisCone5 by antikt5
+if( useAntikt5 ):
+    process.goodJets.src = 'selectedLayer1JetsAK5'
+
+## define ordered jets
+abs0  = cms.PSet(index = cms.int32( 0), correctionLevel = cms.string('abs')   )
+abs1  = cms.PSet(index = cms.int32( 1), correctionLevel = cms.string('abs')   )
+abs2  = cms.PSet(index = cms.int32( 2), correctionLevel = cms.string('abs')   )
+abs3  = cms.PSet(index = cms.int32( 3), correctionLevel = cms.string('abs')   )
+
+## define jet correction levels
+L0Raw = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('raw')   )
+L2Rel = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('rel')   )
+L3Abs = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('abs')   )
+L5Had = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('had:b') )
+L7Part= cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('part:b'))
 
 ## collect kinematics analyzers
 process.goodJetKinematics     = process.analyzeJetKinematics.clone(src = 'goodJets'     )
 process.centralJetKinematics  = process.analyzeJetKinematics.clone(src = 'centralJets'  )
 process.reliableJetKinematics = process.analyzeJetKinematics.clone(src = 'reliableJets' )
+process.goodJet_0_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs0  )
+process.goodJet_1_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs1  )
+process.goodJet_2_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs2  )
+process.goodJet_3_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs3  )
+process.goodJet_L0_Kinematics = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = L0Raw )
+process.goodJet_L1_Kinematics = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = L2Rel )
+process.goodJet_L2_Kinematics = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = L3Abs )
 
 
 ## to be called with jet quality monitoring
-process.monitorJetKinematics  = cms.Sequence(process.goodJetKinematics    +
-                                             process.centralJetKinematics +
-                                             process.reliableJetKinematics
-                                             
+process.monitorJetKinematics  = cms.Sequence(process.goodJetKinematics     +
+                                             process.centralJetKinematics  +
+                                             process.reliableJetKinematics +
+                                             process.goodJet_0_Kinematics  +
+                                             process.goodJet_1_Kinematics  +
+                                             process.goodJet_2_Kinematics  +
+                                             process.goodJet_3_Kinematics  +
+                                             process.goodJet_L0_Kinematics +
+                                             process.goodJet_L1_Kinematics +
+                                             process.goodJet_L2_Kinematics
                                              ) 
 
 ## collect quality analyzers for goodJets
