@@ -57,6 +57,33 @@ eff   ['ttbarx1'] =       1.0           ## generator efficiency on gen level
 sizes ['ttbarx1'] = 'blocks'
 source['ttbarx1'] = 'ttbarx1_0'
 
+## new ttbar sample...
+from TopAnalysis.Configuration.ttbar09_reco import *
+evts  ['ttbar09'] =    529750           ## number of produced events
+xsec  ['ttbar09'] =       165           ## NLO in pb
+eff   ['ttbar09'] =       1.0           ## generator efficiency on gen level
+sizes ['ttbar09'] = 'blocks'
+source['ttbar09'] = 'ttbar09_0,' +'ttbar09_1,' +'ttbar09_2,' +'ttbar09_3,' +'ttbar09_4,'
+source['ttbar09']+= 'ttbar09_5,' +'ttbar09_6,' +'ttbar09_7,' +'ttbar09_8,' +'ttbar09_9,'
+source['ttbar09']+= 'ttbar09_10'
+
+
+from TopAnalysis.Configuration.ttbar09_pat import *
+evts  ['ttbarx09'] =    529750           ## number of produced events
+xsec  ['ttbarx09'] =       165           ## NLO in pb
+eff   ['ttbarx09'] =       1.0           ## generator efficiency on gen level
+sizes ['ttbarx09'] = 'blocks'
+source['ttbarx09'] = 'ttbarx09_0,' +'ttbarx09_1'
+
+
+from TopAnalysis.Configuration.ttbar09_sig import *
+evts  ['ttbary09'] =     77140           ## number of produced events
+xsec  ['ttbary09'] =       165           ## NLO in pb
+eff   ['ttbary09'] =       1.0           ## generator efficiency on gen level
+sizes ['ttbary09'] = 'blocks'
+source['ttbary09'] = 'ttbary09_0'
+
+
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.qcd0_reco import *
 evts  ['qcd0'   ] =   6238383           ## number of produced events
