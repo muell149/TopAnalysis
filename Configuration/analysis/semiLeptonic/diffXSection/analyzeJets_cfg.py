@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 ##    modules...
 ## --- 
 useAntikt5    = False
-signalInvert  = True
+signalInvert  = False
 
 
 # analyse muon quantities
@@ -77,13 +77,6 @@ abs1  = cms.PSet(index = cms.int32( 1), correctionLevel = cms.string('abs')   )
 abs2  = cms.PSet(index = cms.int32( 2), correctionLevel = cms.string('abs')   )
 abs3  = cms.PSet(index = cms.int32( 3), correctionLevel = cms.string('abs')   )
 
-## define jet correction levels
-L0Raw = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('raw')   )
-L2Rel = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('rel')   )
-L3Abs = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('abs')   )
-L5Had = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('had:b') )
-L7Part= cms.PSet(index = cms.int32(-1), correctionLevel = cms.string('part:b'))
-
 ## collect kinematics analyzers
 process.goodJetKinematics     = process.analyzeJetKinematics.clone(src = 'goodJets'     )
 process.centralJetKinematics  = process.analyzeJetKinematics.clone(src = 'centralJets'  )
@@ -92,10 +85,6 @@ process.goodJet_0_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJe
 process.goodJet_1_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs1  )
 process.goodJet_2_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs2  )
 process.goodJet_3_Kinematics  = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = abs3  )
-process.goodJet_L0_Kinematics = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = L0Raw )
-process.goodJet_L1_Kinematics = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = L2Rel )
-process.goodJet_L2_Kinematics = process.analyzeJetKinematics.clone(src = 'goodJets', analyze = L3Abs )
-
 
 ## to be called with jet quality monitoring
 process.monitorJetKinematics  = cms.Sequence(process.goodJetKinematics     +
@@ -104,10 +93,7 @@ process.monitorJetKinematics  = cms.Sequence(process.goodJetKinematics     +
                                              process.goodJet_0_Kinematics  +
                                              process.goodJet_1_Kinematics  +
                                              process.goodJet_2_Kinematics  +
-                                             process.goodJet_3_Kinematics  +
-                                             process.goodJet_L0_Kinematics +
-                                             process.goodJet_L1_Kinematics +
-                                             process.goodJet_L2_Kinematics
+                                             process.goodJet_3_Kinematics
                                              ) 
 
 ## collect quality analyzers for goodJets
@@ -138,8 +124,8 @@ process.monitorBTaggedJets = cms.Sequence(process.trackCountingHighPurBJetQualit
 ##    run the final sequence
 ## ---
 process.p1 = cms.Path(## do the gen evetn selection
-                      process.makeGenEvt           *
-                      process.ttSemiLeptonicFilter *
+                      #process.makeGenEvt           *
+                      #process.ttSemiLeptonicFilter *
                       ## do the trigger selection
                       process.hltMu9               * 
                       ## do the selections
