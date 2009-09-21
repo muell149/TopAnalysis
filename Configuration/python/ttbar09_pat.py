@@ -11,7 +11,7 @@ from TopAnalysis.Configuration.defines import source
 # xsec(pb) NLO:     165                                                   
 # eff         :     1.0                                                  
 ######################################################################
-sizes ['ttbarx09_0'] = 99999999
+sizes ['ttbarx09_0'] = 264860
 source['ttbarx09_0'] ='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_0_ttbar09.root\','
 source['ttbarx09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_10_ttbar09.root\','
 source['ttbarx09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_11_ttbar09.root\','
@@ -23,7 +23,7 @@ source['ttbarx09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09
 source['ttbarx09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_17_ttbar09.root\','
 source['ttbarx09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_18_ttbar09.root\''
 
-sizes ['ttbarx09_1'] = 99999999
+sizes ['ttbarx09_1'] = 264871
 source['ttbarx09_1'] ='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_19_ttbar09.root\','
 source['ttbarx09_1']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_1_ttbar09.root\','
 source['ttbarx09_1']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_all_2_ttbar09.root\','
