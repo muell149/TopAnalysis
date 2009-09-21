@@ -5,6 +5,7 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
+useAntikt5    = True
 signalInvert  = True
 writeOutput   = False
 
@@ -71,6 +72,18 @@ process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 
 
+## define ordered jets
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs')   )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs')   )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs')   )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs')   )
+bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('had:b') )
+bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('had:b') )
+
+## replace sisCone5 by antikt5
+if( useAntikt5 ):
+    process.goodJets.src = 'selectedLayer1JetsAK5'
+    
 ## collect kinematics analyzers
 process.goodMuonKinematics        = process.analyzeMuonKinematics.clone(src = 'goodMuons'       )
 process.trackMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'trackMuons'      )
@@ -79,6 +92,12 @@ process.tightMuonKinematics       = process.analyzeMuonKinematics.clone(src = 't
 process.goldenMuonKinematics      = process.analyzeMuonKinematics.clone(src = 'goldenMuons'     )
 process.tightBottomJetKinematics  = process.analyzeJetKinematics.clone (src = 'tightBottomJets' )
 process.tightLeadingJetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
+process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
+process.tightLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1 )
+process.tightLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2 )
+process.tightLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3 )
+process.tightBJet_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = uds0 )
+process.tightBJet_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = uds1 )
 
 ## to be called with semiLeptonicSelection
 process.monitorMuonKinematics = cms.Sequence(process.goodMuonKinematics   +
@@ -87,8 +106,14 @@ process.monitorMuonKinematics = cms.Sequence(process.goodMuonKinematics   +
                                              process.looseMuonKinematics  +
                                              process.goldenMuonKinematics     
                                              ) 
-process.monitorJetsKinematics = cms.Sequence(process.tightBottomJetKinematics +
-                                             process.tightLeadingJetKinematics
+process.monitorJetsKinematics = cms.Sequence(process.tightBottomJetKinematics  +
+                                             process.tightBJet_0_JetKinematics +
+                                             process.tightBJet_1_JetKinematics +                                             
+                                             process.tightLeadingJetKinematics +
+                                             process.tightLead_0_JetKinematics +
+                                             process.tightLead_1_JetKinematics +
+                                             process.tightLead_2_JetKinematics +
+                                             process.tightLead_3_JetKinematics                                             
                                              )
 
 ## collect quality analyzers for goldenMuon
