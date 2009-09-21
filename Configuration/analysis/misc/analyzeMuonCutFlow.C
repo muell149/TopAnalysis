@@ -7,7 +7,7 @@
 #include <TLegend.h>
 #include <TROOT.h>
 
-void setHistoStyle(TH1* hist1, TH1* hist2, unsigned int i, bool norm = false);
+void setHistoStyle(TH1* hist1, TH1* hist2, bool norm = false);
 void setAxesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 void analyzeMuonCutFlow()
@@ -18,7 +18,7 @@ void analyzeMuonCutFlow()
   TFile* fileSig = new TFile("analyzeMuonCutFlow_sig.root");
   TFile* fileBkg = new TFile("analyzeMuonCutFlow_bkg.root");
 
-  const int nrOfDirs = 10;
+  const unsigned int nrOfDirs = 10;
 
   TString directories[2*nrOfDirs] = {"analyzeMuonQuality",
 				     "QualityCombinedMuons",
@@ -212,54 +212,54 @@ void analyzeMuonCutFlow()
   // histograms for selection variables
 
   for(unsigned int i = 0; i < nrOfDirs; i++) {
-    setHistoStyle(nHit_sig  [i], nHit_bkg  [i], i);
-    setHistoStyle(chi2_sig  [i], chi2_bkg  [i], i);
-    setHistoStyle(d0_sig    [i], d0_bkg    [i], i);
-    setHistoStyle(eisoEn_sig[i], eisoEn_bkg[i], i);
-    setHistoStyle(hisoEn_sig[i], hisoEn_bkg[i], i);
-    setHistoStyle(relIso_sig[i], relIso_bkg[i], i);
+    setHistoStyle(nHit_sig  [i], nHit_bkg  [i]);
+    setHistoStyle(chi2_sig  [i], chi2_bkg  [i]);
+    setHistoStyle(d0_sig    [i], d0_bkg    [i]);
+    setHistoStyle(eisoEn_sig[i], eisoEn_bkg[i]);
+    setHistoStyle(hisoEn_sig[i], hisoEn_bkg[i]);
+    setHistoStyle(relIso_sig[i], relIso_bkg[i]);
   }
 
   // histograms for monitoring variables
 
   for(unsigned int i = 0; i < nrOfDirs; i++) {
-    setHistoStyle(calCmp_sig[i], calCmp_bkg[i], i);
-    setHistoStyle(ecalEn_sig[i], ecalEn_bkg[i], i);
-    setHistoStyle(ecalS9_sig[i], ecalS9_bkg[i], i);
-    setHistoStyle(hcalEn_sig[i], hcalEn_bkg[i], i);
-    setHistoStyle(hcalS9_sig[i], hcalS9_bkg[i], i);
-    setHistoStyle(houtEn_sig[i], houtEn_bkg[i], i);
-    setHistoStyle(houtS9_sig[i], houtS9_bkg[i], i);
+    setHistoStyle(calCmp_sig[i], calCmp_bkg[i]);
+    setHistoStyle(ecalEn_sig[i], ecalEn_bkg[i]);
+    setHistoStyle(ecalS9_sig[i], ecalS9_bkg[i]);
+    setHistoStyle(hcalEn_sig[i], hcalEn_bkg[i]);
+    setHistoStyle(hcalS9_sig[i], hcalS9_bkg[i]);
+    setHistoStyle(houtEn_sig[i], houtEn_bkg[i]);
+    setHistoStyle(houtS9_sig[i], houtS9_bkg[i]);
   }
 
   // histograms for isolation monitoring variables
 
   for(unsigned int i = 0; i < nrOfDirs; i++) {
-    setHistoStyle(trkIsoN_sig[i], trkIsoN_bkg[i], i);
-    setHistoStyle(trkIso_sig [i], trkIso_bkg [i], i);
-    setHistoStyle(eclIsoN_sig[i], eclIsoN_bkg[i], i);
-    setHistoStyle(hclIsoN_sig[i], hclIsoN_bkg[i], i);
-    setHistoStyle(calIso_sig [i], calIso_bkg [i], i);
+    setHistoStyle(trkIsoN_sig[i], trkIsoN_bkg[i]);
+    setHistoStyle(trkIso_sig [i], trkIso_bkg [i]);
+    setHistoStyle(eclIsoN_sig[i], eclIsoN_bkg[i]);
+    setHistoStyle(hclIsoN_sig[i], hclIsoN_bkg[i]);
+    setHistoStyle(calIso_sig [i], calIso_bkg [i]);
   }
 
   // histograms for energy & object flow variables
 
   for(unsigned int i = 0; i < nrOfDirs; i++) {
-    setHistoStyle(trkDRN_sig[i], trkDRN_bkg[i], i);
-    setHistoStyle(trkDR_sig [i], trkDR_bkg [i], i);
-    setHistoStyle(eclDRN_sig[i], eclDRN_bkg[i], i);
-    setHistoStyle(hclDRN_sig[i], hclDRN_bkg[i], i);
-    setHistoStyle(calDR_sig [i], calDR_bkg [i], i);
+    setHistoStyle(trkDRN_sig[i], trkDRN_bkg[i]);
+    setHistoStyle(trkDR_sig [i], trkDR_bkg [i]);
+    setHistoStyle(eclDRN_sig[i], eclDRN_bkg[i]);
+    setHistoStyle(hclDRN_sig[i], hclDRN_bkg[i]);
+    setHistoStyle(calDR_sig [i], calDR_bkg [i]);
   }
 
   // histograms for kinematic variables
 
   for(unsigned int i = 0; i < nrOfDirs; i++) {
-    setHistoStyle(en_sig [i], en_bkg [i], i);
-    setHistoStyle(pt_sig [i], pt_bkg [i], i);
-    setHistoStyle(eta_sig[i], eta_bkg[i], i);
-    setHistoStyle(phi_sig[i], phi_bkg[i], i);
-    setHistoStyle(n_sig  [i], n_bkg  [i], i);
+    setHistoStyle(en_sig [i], en_bkg [i]);
+    setHistoStyle(pt_sig [i], pt_bkg [i]);
+    setHistoStyle(eta_sig[i], eta_bkg[i]);
+    setHistoStyle(phi_sig[i], phi_bkg[i]);
+    setHistoStyle(n_sig  [i], n_bkg  [i]);
   }
 
   // create a legend
@@ -289,7 +289,7 @@ void analyzeMuonCutFlow()
   TCanvas* canvasKinVar = new TCanvas("canvasKinVar", "kinematic variables", 900, 600);
   canvasKinVar->Divide(3,2);
 
-  char cutChar[30];
+  char cutChar[40];
 
   for(unsigned int i = 0; i < nrOfDirs; i++) {
 
@@ -316,8 +316,8 @@ void analyzeMuonCutFlow()
     eisoEn_bkg[i]->Draw("same");
 
     canvasSelVar->cd(5);
-    hcalEn_sig[i]->Draw("");
-    hcalEn_bkg[i]->Draw("same");
+    hisoEn_sig[i]->Draw("");
+    hisoEn_bkg[i]->Draw("same");
 
     canvasSelVar->cd(6);
     relIso_sig[i]->Draw("");
@@ -426,7 +426,7 @@ void analyzeMuonCutFlow()
     canvasKinVar->cd(1);
     en_sig[i]->Draw("");
     en_bkg[i]->Draw("same");
-  
+
     canvasKinVar->cd(2);
     pt_sig[i]->Draw("");
     pt_bkg[i]->Draw("same");
@@ -448,10 +448,14 @@ void analyzeMuonCutFlow()
     else canvasKinVar->Print("analyzeMuonCutFlow.ps");
 
   }
-
+  delete canvasSelVar;
+  delete canvasMonVar;
+  delete canvasIsoMonVar;
+  delete canvasFlowVar;
+  delete canvasKinVar;
 }
 
-void setHistoStyle(TH1* hist1, TH1* hist2, unsigned int i, bool norm) {
+void setHistoStyle(TH1* hist1, TH1* hist2, bool norm) {
 
   hist1->SetLineWidth(2);
   hist2->SetLineWidth(2);
