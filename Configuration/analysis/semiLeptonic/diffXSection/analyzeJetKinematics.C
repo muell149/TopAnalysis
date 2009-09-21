@@ -15,7 +15,7 @@ void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 
-void analyzeJetKinematics()
+void analyzeJetKinematics(bool runOnBTaggedJets=false)
 {
   // ---
   //    set root style 
@@ -36,15 +36,18 @@ void analyzeJetKinematics()
   // ---
   std::vector<TH1F*> n_, pt_, eta_, phi_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    n_  .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/n"  ) );
-    pt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt" ) );
-    eta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
-    phi_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/phi") );
-
-//     n_  .push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/n"  ) );
-//     pt_ .push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/pt" ) );
-//     eta_.push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/eta") );
-//     phi_.push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/phi") );
+    if( !runOnBTaggedJets ){
+      n_  .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/n"  ) );
+      pt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt" ) );
+      eta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
+      phi_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/phi") );
+    }
+    else{
+      n_  .push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/n"  ) );
+      pt_ .push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/pt" ) );
+      eta_.push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/eta") );
+      phi_.push_back( (TH1F*)files_[idx]->Get("tightBottomJetKinematics/phi") );
+    }
   }
 
   // bugfix for in between
@@ -109,12 +112,25 @@ void analyzeJetKinematics()
   leg1->AddEntry( n_  [kSignal    ] , "semi-lep. ( #mu )" , "FL" );
   leg1->AddEntry( n_  [kBackground] , "other decays"      , "FL" );
   
+  // prepare axes labels
+  if( !runOnBTaggedJets ){
+    axesStyle(*n_  [kAll], "N_{Jet}(pt>30 GeV, |#eta|<2.4)", "events" );
+    axesStyle(*pt_ [kAll], "pt( Jet ) [GeV]", "events" );
+    axesStyle(*eta_[kAll], "#eta( Jet )", "events" );
+    axesStyle(*phi_[kAll], "#phi( Jet )", "events");
+  }
+  else{
+    axesStyle(*n_  [kAll], "N_{B-Jet}(pt>30 GeV, |#eta|<2.4)", "events");
+    axesStyle(*pt_ [kAll], "pt( B-Jet ) [GeV]", "events");
+    axesStyle(*eta_[kAll], "#eta( B-Jet )", "events");
+    axesStyle(*phi_[kAll], "#phi( B-Jet )", "events");
+  }
+
   // draw canvas
   canv0->cd(0);
   canv0->SetLogy(1);
-  axesStyle(*n_  [kAll], "N_{#mu}(pt>20 GeV, |#eta|<2.1)", "events");
   n_  [kAll       ]->SetMinimum(1.);
-  n_  [kAll       ]->SetMaximum( 2.5* n_  [kAll]->GetMaximum() );
+  n_  [kAll       ]->SetMaximum( 5000* n_  [kAll]->GetMaximum() );
   n_  [kAll       ]->Draw();
   n_  [kSignal    ]->Draw("same");
   n_  [kBackground]->Draw("same");
@@ -128,8 +144,7 @@ void analyzeJetKinematics()
 
   // draw canvas
   canv1->cd(0);
-  axesStyle(*pt_ [kAll], "pt( #mu ) [GeV]", "events");
-  pt_ [kAll       ]->SetMaximum( 1.2* pt_ [kAll]->GetMaximum() );
+  pt_ [kAll       ]->SetMaximum( 1.75* pt_ [kAll]->GetMaximum() );
   pt_ [kAll       ]->Draw();
   pt_ [kSignal    ]->Draw("same");
   pt_ [kBackground]->Draw("same");
@@ -143,7 +158,6 @@ void analyzeJetKinematics()
 
   // draw canvas
   canv2->cd(0);
-  axesStyle(*eta_[kAll], "#eta( #mu )", "events");
   eta_[kAll       ]->SetMinimum( 0 );
   eta_[kAll       ]->SetMaximum( 1.7* eta_[kAll]->GetMaximum() );
   eta_[kAll       ]->Draw();
@@ -159,7 +173,6 @@ void analyzeJetKinematics()
 
   // draw canvas
   canv3->cd(0);
-  axesStyle(*phi_[kAll], "#phi( #mu )", "events");
   phi_[kAll       ]->SetMinimum( 0 );
   phi_[kAll       ]->SetMaximum( 2.0* phi_[kAll]->GetMaximum() );
   phi_[kAll       ]->Draw();
