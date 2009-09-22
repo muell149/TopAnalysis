@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyzeHypothesisKinFit = cms.EDAnalyzer("HypothesisKinFitJetsAnalyzer",
+analyzeHypothesisKinFitJets = cms.EDAnalyzer("HypothesisKinFitJetsAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("ttSemiLepEvent"),
     ## input collectionB                            
