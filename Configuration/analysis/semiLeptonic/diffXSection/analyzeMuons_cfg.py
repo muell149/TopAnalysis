@@ -12,7 +12,6 @@ import sys
 ## ---
 ##    decide whether to run on:  * all *, * signal only *, * background only *
 ## ---
-
 eventFilter  = 'signal only' # 'all' # 'background only'
 
 

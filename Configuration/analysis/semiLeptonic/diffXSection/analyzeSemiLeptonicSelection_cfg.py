@@ -57,7 +57,7 @@ process.ttSemiLeptonicFilter.invert = signalInvert
 
 if(eventFilter):
     ## sequence with filter
-    process.filterSequence = cms.Sequence(process.makeGenEvt           *
+    process.filterSequence = cms.Sequence(process.makeGenEvt *
                                           process.ttSemiLeptonicFilter
                                           )
     ## adapt output filename
