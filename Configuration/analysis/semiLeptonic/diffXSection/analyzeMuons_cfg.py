@@ -1,12 +1,19 @@
 import FWCore.ParameterSet.Config as cms
 
+## system imports
+import sys
+
 ## ---
 ##    here we need a general description of what the config id good for and the
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## ---
-eventFilter  = True # False
-signalInvert = False # True
+
+## ---
+##    decide whether to run on:  * all *, * signal only *, * background only *
+## ---
+
+eventFilter  = 'signal only' # 'all' # 'background only'
 
 
 # analyse muon quantities
@@ -40,10 +47,6 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMuons_all.root')
 )
 
-## ---
-##    decide whether to run on:  * all *, * signal only *, * background only *
-## ---
-
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
@@ -52,18 +55,21 @@ process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi"
 process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchB.muon = False
-process.ttSemiLeptonicFilter.invert = signalInvert
+if(eventFilter=='background'):process.ttSemiLeptonicFilter.invert = True
 
-if(eventFilter):
+if(not eventFilter=='all'):
     ## sequence with filter
     process.filterSequence = cms.Sequence(process.makeGenEvt           *
                                           process.ttSemiLeptonicFilter
                                           )
     ## adapt output filename
-    if(not signalInvert):
+    if(eventFilter=='signal only'):
         process.TFileService.fileName = 'analyzeMuons_sig.root'
+    elif(eventFilter=='background only'):
+        process.TFileService.fileName = 'analyzeMuons_bkg.root'
     else:
-        process.TFileService.fileName = 'analyzeMuons_bkg.root'        
+        print "you misspelled the eventFilter name choose 'all', 'signal only' or 'background only'"
+        sys.exit(0)
 else:
     ## sequence without filter
     process.filterSequence = cms.Sequence(process.makeGenEvt)
