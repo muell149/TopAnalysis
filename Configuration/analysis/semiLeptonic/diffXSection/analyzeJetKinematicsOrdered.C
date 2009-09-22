@@ -15,7 +15,7 @@ void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 
-void analyzeJetKinematics_ordered(bool plotEta=false)
+void analyzeJetKinematicsOrdered(bool plotEta=false)
 {
   // ---
   //    set root style 
