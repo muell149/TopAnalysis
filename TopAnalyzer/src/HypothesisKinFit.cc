@@ -158,7 +158,7 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       // difference of hadBQuark index between genMatch and kinFit
       hists_.find("hadBQuark" )->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::HadB), weight);
       // difference of lepBQuark index between genMatch and kinFit 
-      hists_.find("hadBQuark" )->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LepB), weight);
+      hists_.find("lepBQuark" )->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LepB), weight);
       // smallest difference of the two lightQuark indices between genMatch and kinFit 
       // (taking into accont that the two indices can be switched)
       abs(delObjectIndex(tops, TtSemiLepEvtPartons::LightQ)) < abs(delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar)) ? hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQ   ), weight ) : hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar), weight);
@@ -210,9 +210,9 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	Correlation Plots
     **/
     // correlation between jet hypothesis and jet index
-    corrs_.find("jetHypo_" )->second->SetBinContent(TtSemiLepEvtPartons::LightQ   +1, objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ   )+1 );
-    corrs_.find("jetHypo_" )->second->SetBinContent(TtSemiLepEvtPartons::LightQBar+1, objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar)+1 );
-    corrs_.find("jetHypo_" )->second->SetBinContent(TtSemiLepEvtPartons::HadB     +1, objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::HadB     )+1 );
-    corrs_.find("jetHypo_" )->second->SetBinContent(TtSemiLepEvtPartons::LepB     +1, objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LepB     )+1 );
+    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ   ) );
+    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar) );
+    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::HadB     ) );
+    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LepB     ) );
   }
 }
