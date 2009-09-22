@@ -5,11 +5,12 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-useAntikt5    = False
-signalInvert  = False
+useAntikt5   = False # True
+eventFilter  = True # False
+signalInvert = False # True
 
 
-# analyse muon quantities
+# analyse jet quantities
 process = cms.Process("analyzeJets")
 
 ## configure message logger
@@ -54,15 +55,29 @@ process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchB.muon = False
 process.ttSemiLeptonicFilter.invert = signalInvert
 
+if(eventFilter):
+    ## sequence with filter
+    process.filterSequence = cms.Sequence(process.makeGenEvt           *
+                                          process.ttSemiLeptonicFilter
+                                          )
+    ## adapt output filename
+    if(not signalInvert):
+        process.TFileService.fileName = 'analyzeJets_sig.root'
+    else:
+        process.TFileService.fileName = 'analyzeJets_bkg.root'        
+else:
+    ## sequence without filter
+    process.filterSequence = cms.Sequence(process.makeGenEvt)
+
 ## ---
 ##    configure the cutflow scenario
 ## ---
 
-## muon quality analyzer
+## jet quality analyzer
 process.load("TopAnalysis.TopAnalyzer.JetQuality_cfi")
-## muon kinematics analyzer
+## jet kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
-## pre-defined muon selection
+## pre-defined jet selection
 process.load("TopAnalysis.TopFilter.sequences.jetSelection_cff")
 ## high level trigger filter
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
@@ -124,8 +139,7 @@ process.monitorBTaggedJets = cms.Sequence(process.trackCountingHighPurBJetQualit
 ##    run the final sequence
 ## ---
 process.p1 = cms.Path(## do the gen evetn selection
-                      #process.makeGenEvt           *
-                      #process.ttSemiLeptonicFilter *
+                      process.filterSequence       *
                       ## do the trigger selection
                       process.hltMu9               * 
                       ## do the selections

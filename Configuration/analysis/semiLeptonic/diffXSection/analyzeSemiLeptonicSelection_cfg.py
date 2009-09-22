@@ -5,9 +5,10 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-useAntikt5    = True
-signalInvert  = True
-writeOutput   = False
+useAntikt5   = True # False
+eventFilter  = True # False
+signalInvert = False # True
+writeOutput  = False # True
 
 # analyse muon quantities
 process = cms.Process("Selection")
@@ -15,7 +16,7 @@ process = cms.Process("Selection")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -54,15 +55,29 @@ process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchB.muon = False
 process.ttSemiLeptonicFilter.invert = signalInvert
 
+if(eventFilter):
+    ## sequence with filter
+    process.filterSequence = cms.Sequence(process.makeGenEvt           *
+                                          process.ttSemiLeptonicFilter
+                                          )
+    ## adapt output filename
+    if(not signalInvert):
+        process.TFileService.fileName = 'analyzeSemiLeptonicSelection_sig.root'
+    else:
+        process.TFileService.fileName = 'analyzeSemiLeptonicSelection_bkg.root'        
+else:
+    ## sequence without filter
+    process.filterSequence = cms.Sequence(process.makeGenEvt)
+
 ## ---
 ##    configure the cutflow scenario
 ## ---
 
-## muon quality analyzer
+## jet quality analyzer
 process.load("TopAnalysis.TopAnalyzer.JetQuality_cfi")
 ## muon quality analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
-## muon kinematics analyzer
+## jet kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
 ## muon kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
@@ -140,8 +155,7 @@ process.monitorJetsQuality = cms.Sequence(process.tightBottomJetQuality +
 ##    run the final sequence
 ## ---
 process.p1 = cms.Path(## do the gen evetn selection
-                      process.makeGenEvt            *
-                      process.ttSemiLeptonicFilter  *
+                      process.filterSequence        *
                       ## do the trigger selection
                       process.hltMu9                * 
                       ## do the selections
