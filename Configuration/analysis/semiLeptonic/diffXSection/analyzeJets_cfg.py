@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 ##    modules...
 ## --- 
 useAntikt5   = False # True
-eventFilter  = True  # False
+eventFilter  = False # False
 signalInvert = False # True
 
 

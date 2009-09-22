@@ -12,7 +12,7 @@ import sys
 ## ---
 ##    decide whether to run on:  * all *, * signal only *, * background only *
 ## ---
-eventFilter  = 'signal only' # 'all' # 'background only'
+eventFilter  = 'all' # 'signal only' # 'background only'
 
 
 # analyse muon quantities

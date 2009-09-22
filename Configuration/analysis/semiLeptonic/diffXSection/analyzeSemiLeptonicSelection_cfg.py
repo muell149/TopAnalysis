@@ -5,10 +5,10 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-useAntikt5   = True # False
-eventFilter  = True # False
+useAntikt5   = False # False
+eventFilter  = False # False
 signalInvert = False # True
-writeOutput  = False # True
+writeOutput  = True  # True
 
 # analyse muon quantities
 process = cms.Process("Selection")

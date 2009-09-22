@@ -5,12 +5,11 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-eventFilter  = False  # False
-signalInvert = False  # True
+eventFilter  = True  # False
+signalInvert = False # True
 
-
-# analyse the kinFit hypothesis
-process = cms.Process("KinFit")
+# analyse top quark quantities
+process = cms.Process("TopQuark")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -33,12 +32,12 @@ process.maxEvents = cms.untracked.PSet(
 
 ## configure process options
 process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True)
+    wantSummary = cms.untracked.bool(False)
 )
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('analyzeHypothesisKinFit.root')
+    fileName = cms.string('analyzeTopQuarks.root')
 )
 
 ## ---
@@ -62,15 +61,15 @@ if(eventFilter):
                                           )
     ## adapt output filename
     if(not signalInvert):
-        process.TFileService.fileName = 'analyzeHypothesisKinFit_sig.root'
+        process.TFileService.fileName = 'analyzeTopQuarks_sig.root'
     else:
-        process.TFileService.fileName = 'analyzeHypothesisKinFit_bkg.root'        
+        process.TFileService.fileName = 'analyzeTopQuarks_bkg.root'        
 else:
     ## sequence without filter
     process.filterSequence = cms.Sequence(process.makeGenEvt)
 
 ## ---
-##    configure the KinFit hypothesis
+##    configure the eventHypotheses this part should be stored centrally soon
 ## ---
 
 ## produce top reconstructed event
@@ -82,16 +81,23 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 
-
 ## ---
 ##    configure the analyzer
 ## ---
 
+## define PSets
+matchedGenMatch = cms.PSet(hypoKey=cms.string('kGenMatch'), matchForStabilityAndPurity=cms.bool(True ) )
+matchedKinFit   = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(True ) )
+recoGenMatch    = cms.PSet(hypoKey=cms.string('kGenMatch'), matchForStabilityAndPurity=cms.bool(False) )
+recoKinFit      = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(False) )
+
 ## analyze top quarks on generator level
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi")
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi" )
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
+process.load("TopAnalysis.TopAnalyzer.TopKinematics_gen_cfi")
+process.load("TopAnalysis.TopAnalyzer.TopKinematics_rec_cfi")
+process.analyzeTopRecoKinematicsKinFit      = process.analyzeTopRecKinematics.clone(analyze=recoKinFit      )
+process.analyzeTopRecoKinematicsGenMatch    = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch    )
+process.analyzeTopMatchedKinematicsKinFit   = process.analyzeTopRecKinematics.clone(analyze=matchedKinFit   )
+process.analyzeTopMatchedKinematicsGenMatch = process.analyzeTopRecKinematics.clone(analyze=matchedGenMatch )
 
 ## ---
 ##    run the final sequence
@@ -100,9 +106,10 @@ process.p1 = cms.Path(## do the gen evetn selection
                       process.filterSequence              *
                       ## make the semi-leptonic event hyotheses
                       process.makeTtSemiLepEvent          *
-                      ## analyze the output
-                      process.analyzeHypothesisKinFit     +
-                      process.analyzeHypothesisKinFitMET  +
-                      process.analyzeHypothesisKinFitJets +
-                      process.analyzeHypothesisKinFitMuon
+                       ## analyze the output
+                      process.analyzeTopGenKinematics     +
+                      process.analyzeTopRecoKinematicsKinFit     +
+                      process.analyzeTopRecoKinematicsGenMatch   +
+                      process.analyzeTopMatchedKinematicsKinFit  +
+                      process.analyzeTopMatchedKinematicsGenMatch
                       )
