@@ -1,6 +1,6 @@
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFit.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
-
+#include "DataFormats/Math/interface/deltaPhi.h"
 /// default constructor for fw lite
 HypothesisKinFit::HypothesisKinFit()
 {
@@ -53,11 +53,11 @@ void HypothesisKinFit::book()
   // lightQuark b phi
   hists_["lightQuarkPhi"] = new TH1F( "lightQuarkPhi" , "lightQuarkPhi"  ,  100,  -5.,   5. );
   // lepton pt
-  hists_["leptonPt"     ] = new TH1F( "leptonPt"      , "leptonPt"       ,  100,  -5.,   5. );
+  hists_["leptonPt"     ] = new TH1F( "leptonPt"      , "leptonPt"       ,  100,  -.5,   .5 );
   // lepton eta
-  hists_["leptonEta"    ] = new TH1F( "leptonEta"     , "leptonEta"      ,  100,  -5.,   5. );
+  hists_["leptonEta"    ] = new TH1F( "leptonEta"     , "leptonEta"      ,  100,  -.5,   .5 );
   // lepton phi
-  hists_["leptonPhi"    ] = new TH1F( "leptonPhi"     , "leptonPhi"      ,  100,  -5.,   5. );
+  hists_["leptonPhi"    ] = new TH1F( "leptonPhi"     , "leptonPhi"      ,  100,  -.5,   .5 );
   // neutrino pt
   hists_["neutrinoPt"   ] = new TH1F( "neutrinoPt"    , "neutrinoPt"     ,  100,  -5.,   5. );
   // neutrino eta
@@ -114,11 +114,11 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
   // lightQuark b phi
   hists_["lightQuarkPhi" ] = fs->make<TH1F>( "lightQuarkPhi"  , "lightQuarkPhi"   ,  100,  -5.,   5. );
   // lepton pt
-  hists_["leptonPt"      ] = fs->make<TH1F>( "leptonPt"       , "leptonPt"        ,  100,  -5.,   5. );
+  hists_["leptonPt"      ] = fs->make<TH1F>( "leptonPt"       , "leptonPt"        ,  100,  -.5,   .5 );
   // lepton eta
-  hists_["leptonEta"     ] = fs->make<TH1F>( "leptonEta"      , "leptonEta"       ,  100,  -5.,   5. );
+  hists_["leptonEta"     ] = fs->make<TH1F>( "leptonEta"      , "leptonEta"       ,  100,  -.5,   .5 );
   // lepton phi
-  hists_["leptonPhi"     ] = fs->make<TH1F>( "leptonPhi"      , "leptonPhi"       ,  100,  -5.,   5. );
+  hists_["leptonPhi"     ] = fs->make<TH1F>( "leptonPhi"      , "leptonPhi"       ,  100,  -.5,   .5 );
   // neutrino pt
   hists_["neutrinoPt"    ] = fs->make<TH1F>( "neutrinoPt"     , "neutrinoPt"      ,  100,  -5.,   5. );
   // neutrino eta
@@ -173,37 +173,37 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       // hadronic top b eta
       hists_.find("hadBQuarkEta"  )->second->Fill( tops.hadronicDecayB()->eta()-tops.hadronicDecayB("kKinFit")->eta() );
       // hadronic top b phi
-      hists_.find("hadBQuarkPhi"  )->second->Fill( tops.hadronicDecayB()->phi()-tops.hadronicDecayB("kKinFit")->phi() );
+      hists_.find("hadBQuarkPhi"  )->second->Fill( deltaPhi(tops.hadronicDecayB()->phi(), tops.hadronicDecayB("kKinFit")->phi()) );
       // leptonic top b pt
       hists_.find("lepBQuarkPt"   )->second->Fill( (tops.leptonicDecayB()->pt()-tops.leptonicDecayB("kKinFit")->pt())/tops.leptonicDecayB()->pt() );
       // leptonic top b eta
       hists_.find("lepBQuarkEta"  )->second->Fill( tops.leptonicDecayB()->eta()-tops.leptonicDecayB("kKinFit")->eta() );
       // leptonic top b phi
-      hists_.find("lepBQuarkPhi"  )->second->Fill( tops.leptonicDecayB()->phi()-tops.leptonicDecayB("kKinFit")->phi() );
+      hists_.find("lepBQuarkPhi"  )->second->Fill( deltaPhi(tops.leptonicDecayB()->phi(), tops.leptonicDecayB("kKinFit")->phi()) );
       // lightQuark pt
       hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark("kKinFit")->pt())/tops.hadronicDecayQuark()->pt() );
       // lightQuark b eta
       hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuark()->eta()-tops.hadronicDecayQuark("kKinFit")->eta() );
       // lightQuark b phi
-      hists_.find("lightQuarkPhi" )->second->Fill( tops.hadronicDecayQuark()->phi()-tops.hadronicDecayQuark("kKinFit")->phi() );
+      hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuark()->phi(), tops.hadronicDecayQuark("kKinFit")->phi()) );
       // lightQuark pt
       hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar("kKinFit")->pt())/tops.hadronicDecayQuarkBar()->pt() );
       // lightQuark b eta
       hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuarkBar()->eta()-tops.hadronicDecayQuarkBar("kKinFit")->eta() );
       // lightQuark b phi
-      hists_.find("lightQuarkPhi" )->second->Fill( tops.hadronicDecayQuarkBar()->phi()-tops.hadronicDecayQuarkBar("kKinFit")->phi() );
+      hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuarkBar()->phi(), tops.hadronicDecayQuarkBar("kKinFit")->phi()) );
       // lepton pt
       hists_.find("leptonPt"      )->second->Fill( (tops.singleLepton()->pt()-tops.singleLepton("kKinFit")->pt())/tops.singleLepton()->pt() );
       // lepton eta
       hists_.find("leptonEta"     )->second->Fill( tops.singleLepton()->eta()-tops.singleLepton("kKinFit")->eta() );
       // lepton phi
-      hists_.find("leptonPhi"     )->second->Fill( tops.singleLepton()->phi()-tops.singleLepton("kKinFit")->phi() );
+      hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton("kKinFit")->phi()) );
       // neutrino pt
       hists_.find("neutrinoPt"    )->second->Fill( (tops.singleNeutrino()->pt()-tops.singleNeutrino("kKinFit")->pt())/tops.singleNeutrino()->pt() );
       // neutrino eta
       hists_.find("neutrinoEta"   )->second->Fill( tops.singleNeutrino()->eta()-tops.singleNeutrino("kKinFit")->eta() );
       // neutrino phi
-      hists_.find("neutrinoPhi"   )->second->Fill( tops.singleNeutrino()->phi()-tops.singleNeutrino("kKinFit")->phi() );
+      hists_.find("neutrinoPhi"   )->second->Fill( deltaPhi(tops.singleNeutrino()->phi(), tops.singleNeutrino("kKinFit")->phi()) );
     }
 
     /** 
