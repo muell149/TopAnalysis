@@ -66,6 +66,8 @@ MuonQuality::book()
   /** 
       Energy & Object Flow Variables
   **/
+  // conserve the normalization information (for the use with hadd)
+  hists_["norm_"   ] = new TH1F( "norm_"    ,  "norm_"    ,    1,   0.,   1. );
   // <number of tracks> as a function of deltaR 
   hists_["trkDRN_" ] = new TH1F( "trkDRN_"  ,  "trkDRN_"  ,   20,   0.,   1. );
   // <summerd pt of tracks> as a function of deltaR 
@@ -227,13 +229,11 @@ MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
 void 
 MuonQuality::process()
 {
-  // normalize histograms to the number of muons, that 
-  // went into the histogram (weighted)
-  hists_.find("trkDRN_" )->second->Scale( 1./norm_ );
-  hists_.find("trkDR_"  )->second->Scale( 1./norm_ );
-  hists_.find("eclDRN_" )->second->Scale( 1./norm_ );
-  hists_.find("hclDRN_" )->second->Scale( 1./norm_ );
-  hists_.find("calDR_"  )->second->Scale( 1./norm_ );
+  // fill normalization histogramwith the number of muons, 
+  // that went into the eflow histograms (weighted); we 
+  // need this workaround to be able to normalize even 
+  // after the use of hadd, when running in batch mode...
+  hists_.find("norm_" )->second->SetBinContent( 1, norm_ );
 }
 
 /// get number of objects within a ring in deltaR corresponding to the bin width 
@@ -259,7 +259,10 @@ MuonQuality::energyFlow(TH1* hist, const pat::IsoDeposit* deposit)
     for(int bin=1; bin<=hist->GetNbinsX(); ++bin){
       double lowerEdge = hist->GetBinLowEdge(bin);
       double upperEdge = hist->GetBinLowEdge(bin)+hist->GetBinWidth(bin);
-      hist->Fill(hist->GetBinCenter(bin), deposit->depositWithin(upperEdge) - deposit->depositWithin(lowerEdge));
+      // restrict the differential energy deposit to less than 10GeV
+      // in order not to have too high weight in the plot
+      if(deposit->depositWithin(upperEdge) - deposit->depositWithin(lowerEdge) < 10)
+	hist->Fill(hist->GetBinCenter(bin), deposit->depositWithin(upperEdge) - deposit->depositWithin(lowerEdge));
     }
   }
 }
