@@ -27,15 +27,15 @@ void analyzeHypothesisKinFit()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("analyzeHypothesisKinFit_test.root") );
-  files_.push_back(new TFile("analyzeHypothesisKinFit_test.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeHypothesisKinFit_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeHypothesisKinFit_sig.root") );
 
   // ---
   //    get histograms
   // ---
   std::vector<TH2F*> jetHypo_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    jetHypo_.push_back( (TH2F*)files_[idx]->Get("analyzeHypothesisKinFit/jetHypo_"     ) );
+    jetHypo_.push_back( (TH2F*)files_[idx]->Get("analyzeHypothesisKinFit/mapGenMatch_"     ) );
   }
 
   std::vector<TH1F*> prob_, chi2_, hadBQuark_, lepBQuark_, lightQuark_;
@@ -77,17 +77,17 @@ void analyzeHypothesisKinFit()
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("Top-Antitop(Phythia)");
-  leg0->AddEntry( prob_[kAll       ] , "inclusive"         , "PL" );
-  leg0->AddEntry( prob_[kSignal    ] , "semi-lep. ( #mu )" , "FL" );
+  leg0->SetHeader("Kin. Fit (after selection)");
+  leg0->AddEntry( prob_[kAll       ] , "all events"    , "PL" );
+  leg0->AddEntry( prob_[kSignal    ] , "signal events" , "FL" );
 
   // create a legend (in upper center)
   TLegend *leg1 = new TLegend(0.35, 0.65, 1.05, 0.9);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg1->SetHeader("Top-Antitop(Phythia)");
-  leg1->AddEntry( prob_[kAll       ] , "inclusive"         , "PL" );
-  leg1->AddEntry( prob_[kSignal    ] , "semi-lep. ( #mu )" , "FL" );
+  leg1->SetHeader("Kin. Fit (after selection)");
+  leg1->AddEntry( prob_[kAll       ] , "all events"    , "PL" );
+  leg1->AddEntry( prob_[kSignal    ] , "signal events" , "FL" );
 
   // ---
   //    do the printing for prob_
@@ -178,8 +178,8 @@ void analyzeHypothesisKinFit()
   //canv4->SetLogy(1);
   jetHypo_[kAll]->SetTitle("");
   jetHypo_[kAll]->GetXaxis( )->SetTitle();
-  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 1, "lighQ"     );
-  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 2, "lighQBar"  );
+  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 1, "lightQ"     );
+  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 2, "lightQBar"  );
   jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 3, "hadronicB" );
   jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 4, "leptonicB" );
   jetHypo_[kAll]->GetXaxis( )->SetLabelColor(      1   );
@@ -199,7 +199,7 @@ void analyzeHypothesisKinFit()
   jetHypo_[kAll]->GetYaxis()->SetNdivisions (  505);
 
   jetHypo_[kAll]->SetStats(kFALSE);
-  jetHypo_[kAll]->SetFillColor( kBlue );
+  jetHypo_[kAll]->SetFillColor( kRed );
   jetHypo_[kAll]->Draw("box");
   //leg1->Draw("same");
 }

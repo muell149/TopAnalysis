@@ -27,9 +27,9 @@ void analyzeJetKinematicsOrdered(bool plotEta=false)
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_all_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_sig_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_bkg_0_ttbarx09.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_bkg.root") );
 
   // ---
   //    get histograms
@@ -37,24 +37,18 @@ void analyzeJetKinematicsOrdered(bool plotEta=false)
   std::vector<TH1F*> lead0_, lead1_, lead2_, lead3_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     if( !plotEta ){
-      lead0_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt") );
-      lead1_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt") );
-      lead2_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt") );
-      lead3_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/pt") );
+      lead0_.push_back( (TH1F*)files_[idx]->Get("tightLead_0_JetKinematics/pt") );
+      lead1_.push_back( (TH1F*)files_[idx]->Get("tightLead_1_JetKinematics/pt") );
+      lead2_.push_back( (TH1F*)files_[idx]->Get("tightLead_2_JetKinematics/pt") );
+      lead3_.push_back( (TH1F*)files_[idx]->Get("tightLead_3_JetKinematics/pt") );
     }
     else{
-      lead0_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
-      lead1_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
-      lead2_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
-      lead3_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/eta") );
+      lead0_.push_back( (TH1F*)files_[idx]->Get("tightLead_0_JetKinematics/eta") );
+      lead1_.push_back( (TH1F*)files_[idx]->Get("tightLead_1_JetKinematics/eta") );
+      lead2_.push_back( (TH1F*)files_[idx]->Get("tightLead_2_JetKinematics/eta") );
+      lead3_.push_back( (TH1F*)files_[idx]->Get("tightLead_3_JetKinematics/eta") );
     }
   }
-
-  // bugfix for in between
-  lead0_[kAll]->Add( lead0_[kSignal] );
-  lead1_[kAll]->Add( lead1_[kSignal] );
-  lead2_[kAll]->Add( lead2_[kSignal] );
-  lead3_[kAll]->Add( lead3_[kSignal] );
 
   // ---
   //    close input files
@@ -72,7 +66,6 @@ void analyzeJetKinematicsOrdered(bool plotEta=false)
   histogramStyle(*lead0_[kSignal    ], kSignal    );
   histogramStyle(*lead0_[kBackground], kBackground);
 
-
   // lead1_
   histogramStyle(*lead1_[kAll       ], kAll       );
   histogramStyle(*lead1_[kSignal    ], kSignal    );
@@ -87,12 +80,6 @@ void analyzeJetKinematicsOrdered(bool plotEta=false)
   histogramStyle(*lead3_[kAll       ], kAll       );
   histogramStyle(*lead3_[kSignal    ], kSignal    );
   histogramStyle(*lead3_[kBackground], kBackground);
-
-
-  // ---
-  //    do the printing for lead0_
-  // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
 
   // create a legend (in upper right corner)
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
@@ -125,6 +112,11 @@ void analyzeJetKinematicsOrdered(bool plotEta=false)
     axesStyle(*lead2_[kAll], "#eta( 3. Leading Jet )", "events");
     axesStyle(*lead3_[kAll], "#eta( 4. Leading Jet )", "events");
   }
+
+  // ---
+  //    do the printing for lead0_
+  // ---
+  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
 
   // draw canvas
   canv0->cd(0);

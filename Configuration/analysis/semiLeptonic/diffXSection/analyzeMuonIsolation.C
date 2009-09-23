@@ -27,9 +27,9 @@ void analyzeMuonIsolation()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_all_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_sig_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_bkg_0_ttbarx09.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_bkg.root") );
 
   // ---
   //    get histograms
@@ -43,14 +43,6 @@ void analyzeMuonIsolation()
     eclIsoN_.push_back( (TH1F*)files_[idx]->Get("goldenMuonQuality/eclIsoN_") );
     hclIsoN_.push_back( (TH1F*)files_[idx]->Get("goldenMuonQuality/hclIsoN_") );
   }
-
-  // bugfix for in between
-  relIso_ [kAll]->Add( relIso_ [kSignal] );
-  trkIso_ [kAll]->Add( trkIso_ [kSignal] );
-  calIso_ [kAll]->Add( calIso_ [kSignal] );
-  trkIsoN_[kAll]->Add( trkIsoN_[kSignal] );
-  eclIsoN_[kAll]->Add( eclIsoN_[kSignal] );
-  hclIsoN_[kAll]->Add( hclIsoN_[kSignal] );
 
   // ---
   //    close input files

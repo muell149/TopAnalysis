@@ -27,9 +27,9 @@ void analyzeMuonKinematics()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_all_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_sig_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_bkg_0_ttbarx09.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_bkg.root") );
 
   // ---
   //    get histograms
@@ -41,12 +41,6 @@ void analyzeMuonKinematics()
     eta_.push_back( (TH1F*)files_[idx]->Get("goldenMuonKinematics/eta") );
     phi_.push_back( (TH1F*)files_[idx]->Get("goldenMuonKinematics/phi") );
   }
-
-  // bugfix for in between
-  n_  [kAll]->Add( n_ [kSignal]  );
-  pt_ [kAll]->Add( pt_ [kSignal] );
-  eta_[kAll]->Add( eta_[kSignal] );
-  phi_[kAll]->Add( phi_[kSignal] );
 
   // ---
   //    close input files

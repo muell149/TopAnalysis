@@ -27,9 +27,9 @@ void analyzeJetBTagging()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_all_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_sig_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_bkg_0_ttbarx09.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_bkg.root") );
 
   // ---
   //    get histograms
@@ -41,12 +41,6 @@ void analyzeJetBTagging()
     btag2_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetQuality/btagTrkCntHighEff_"   ) );
     btag3_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetQuality/btagTrkCntHighPurity" ) );
   }
-
-  // bugfix for in between
-  btag0_[kAll]->Add( btag0_[kSignal] );
-  btag1_[kAll]->Add( btag1_[kSignal] );
-  btag2_[kAll]->Add( btag2_[kSignal] );
-  btag3_[kAll]->Add( btag3_[kSignal] );
 
   // ---
   //    close input files

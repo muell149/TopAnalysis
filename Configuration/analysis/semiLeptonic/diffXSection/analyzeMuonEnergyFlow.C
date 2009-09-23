@@ -27,15 +27,16 @@ void analyzeMuonEnergyFlow()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_all_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_sig_0_ttbarx09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeSemiLeptonicSelection_bkg_0_ttbarx09.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSelection_bkg.root") );
 
   // ---
   //    get histograms
   // ---
-  std::vector<TH1F*> trkDRN_, trkDR_, eclDRN_, hclDRN_, calDR_;
+  std::vector<TH1F*> norm_, trkDRN_, trkDR_, eclDRN_, hclDRN_, calDR_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    norm_  .push_back( (TH1F*)files_[idx]->Get("goldenMuonQuality/norm_"   ) );
     trkDRN_.push_back( (TH1F*)files_[idx]->Get("goldenMuonQuality/trkDRN_" ) );
     trkDR_ .push_back( (TH1F*)files_[idx]->Get("goldenMuonQuality/trkDR_"  ) );
     eclDRN_.push_back( (TH1F*)files_[idx]->Get("goldenMuonQuality/eclDRN_" ) );
@@ -53,6 +54,14 @@ void analyzeMuonEnergyFlow()
   // ---
   //    configure histograms
   // ---
+
+  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    trkDRN_[idx]->Scale(1./norm_[idx]->Integral());  
+    trkDR_ [idx]->Scale(1./norm_[idx]->Integral());  
+    eclDRN_[idx]->Scale(1./norm_[idx]->Integral());  
+    hclDRN_[idx]->Scale(1./norm_[idx]->Integral());  
+    calDR_ [idx]->Scale(1./norm_[idx]->Integral());  
+  }
 
   // trkDRN_
   histogramStyle(*trkDRN_[kAll       ], kAll       );
@@ -107,7 +116,7 @@ void analyzeMuonEnergyFlow()
   //canv0->SetLogy(1);
   axesStyle(*trkDRN_[kAll], "#Delta R (#mu, track)", "1/N_{#mu} #Sigma N_{trk}");
   //trkDRN_[kAll       ]->SetMinimum(1.);
-  trkDRN_[kAll       ]->SetMaximum( 2.5* trkDRN_[kAll]->GetMaximum() );
+  trkDRN_[kAll       ]->SetMaximum( 1.7* trkDRN_[kAll]->GetMaximum() );
   trkDRN_[kAll       ]->Draw();
   trkDRN_[kSignal    ]->Draw("same");
   trkDRN_[kBackground]->Draw("same");
@@ -124,7 +133,7 @@ void analyzeMuonEnergyFlow()
   //canv1->SetLogy(1);
   axesStyle(*trkDR_ [kAll], "#Delta R (#mu, track)", "1/N_{#mu} #Sigma pt_{trk} [GeV]");
   //trkDR_ [kAll       ]->SetMinimum(1.);
-  trkDR_ [kAll       ]->SetMaximum( 2.5* trkDR_ [kAll]->GetMaximum() );
+  trkDR_ [kAll       ]->SetMaximum( 1.7* trkDR_ [kAll]->GetMaximum() );
   trkDR_ [kAll       ]->Draw();
   trkDR_ [kSignal    ]->Draw("same");
   trkDR_ [kBackground]->Draw("same");
@@ -141,7 +150,7 @@ void analyzeMuonEnergyFlow()
   //canv2->SetLogy(1);
   axesStyle(*eclDRN_ [kAll], "#Delta R (#mu, deposit)", "1/N_{#mu} #Sigma N_{ecal}");
   //eclDRN_ [kAll       ]->SetMinimum(1.);
-  eclDRN_ [kAll       ]->SetMaximum( 2.5* eclDRN_ [kAll]->GetMaximum() );
+  eclDRN_ [kAll       ]->SetMaximum( 1.7* eclDRN_ [kAll]->GetMaximum() );
   eclDRN_ [kAll       ]->Draw();
   eclDRN_ [kSignal    ]->Draw("same");
   eclDRN_ [kBackground]->Draw("same");
@@ -158,7 +167,7 @@ void analyzeMuonEnergyFlow()
   //canv3->SetLogy(1);
   axesStyle(*hclDRN_[kAll], "#Delta R (#mu, deposit)", "1/N_{#mu} #Sigma N_{hcal}");
   //hclDRN_[kAll       ]->SetMinimum(1.);
-  hclDRN_[kAll       ]->SetMaximum( 10.0* hclDRN_[kAll]->GetMaximum() );
+  hclDRN_[kAll       ]->SetMaximum( 1.7* hclDRN_[kAll]->GetMaximum() );
   hclDRN_[kAll       ]->Draw();
   hclDRN_[kSignal    ]->Draw("same");
   hclDRN_[kBackground]->Draw("same");
@@ -175,7 +184,7 @@ void analyzeMuonEnergyFlow()
   //canv4->SetLogy(1);
   axesStyle(*calDR_[kAll], "#Delta R (#mu, deposit)", "1/N_{#mu} #Sigma pt_{calo}");
   //calDR_[kAll       ]->SetMinimum( 1.);
-  calDR_[kAll       ]->SetMaximum( 5.0* calDR_[kAll]->GetMaximum() );
+  calDR_[kAll       ]->SetMaximum( 1.7* calDR_[kAll]->GetMaximum() );
   calDR_[kAll       ]->Draw();
   calDR_[kSignal    ]->Draw("same");
   calDR_[kBackground]->Draw("same");

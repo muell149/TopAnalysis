@@ -27,26 +27,27 @@ void analyzeJetCorrections(bool plotEta=false)
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeJets_sig_0_ttbary09.root") );
+  //files_.push_back(new TFile("./rootfiles/analyzeJets_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeJets_bkg_calib.root") );
 
   // ---
   //    get histograms
   // ---
-  std::vector<TH1F*> respPt_, respEta_;
+  std::vector<TH1F*> resp_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     if( !plotEta ){
-      respPt_ .push_back( (TH1F*)files_[idx]->Get("tightRespingJetKinematics/ptL0" ) );
-      respPt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/ptL2" ) );
-      respPt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/ptL3" ) );
-      respPt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/ptL5" ) );
-      respPt_ .push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/ptL7" ) );
+      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL0_" ) );
+      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL2_" ) );
+      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL3_" ) );
+      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL5_" ) );
+      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL7_" ) );
     }
     else{
-      respEta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/etaL0") );
-      respEta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/etaL2") );
-      respEta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/etaL3") );
-      respEta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/etaL5") );
-      respEta_.push_back( (TH1F*)files_[idx]->Get("tightLeadingJetKinematics/etaL7") );
+      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL0_") );
+      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL2_") );
+      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL3_") );
+      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL5_") );
+      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL7_") );
     }
   }
 
@@ -61,82 +62,57 @@ void analyzeJetCorrections(bool plotEta=false)
   //    configure histograms
   // ---
 
-  // respPt_
-  histogramStyle(*respPt_ [kRaw], kRaw);
-  histogramStyle(*respPt_ [kL2 ], kL2 );
-  histogramStyle(*respPt_ [kL3 ], kL3 );
-  histogramStyle(*respPt_ [kL5 ], kL5 );
-  histogramStyle(*respPt_ [kL7 ], kL7 );
-
-
-  // respEta_
-  histogramStyle(*respEta_[kRaw], kRaw);
-  histogramStyle(*respEta_[kL2 ], kL2 );
-  histogramStyle(*respEta_[kL3 ], kL3 );
-  histogramStyle(*respEta_[kL5 ], kL5 );
-  histogramStyle(*respEta_[kL7 ], kL7 );
-
-  // ---
-  //    do the printing for resp0_
-  // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
+  // resp_
+  histogramStyle(*resp_ [kRaw], kRaw);
+  histogramStyle(*resp_ [kL2 ], kL2 );
+  histogramStyle(*resp_ [kL3 ], kL3 );
+  histogramStyle(*resp_ [kL5 ], kL5 );
+  histogramStyle(*resp_ [kL7 ], kL7 );
 
   // create a legend (in upper right corner)
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("Jet Energy Corrections");
-  leg0->AddEntry( respPt_[kRaw] , "Raw"        , "PL" );
-  leg0->AddEntry( respPt_[kL2 ] , "L2Relative" , "PL" );
-  leg0->AddEntry( respPt_[kL3 ] , "L3Absolute" , "PL" );
-  leg0->AddEntry( respPt_[kL5 ] , "L5Hadron"   , "PL" );
-  leg0->AddEntry( respPt_[kL7 ] , "L7Parton"   , "PL" );
+  //leg0->AddEntry( resp_[kRaw] , "Raw"        , "PL" );
+  leg0->AddEntry( resp_[kL2 ] , "L2Relative" , "PL" );
+  leg0->AddEntry( resp_[kL3 ] , "L3Absolute" , "PL" );
+  leg0->AddEntry( resp_[kL5 ] , "L5Hadron"   , "PL" );
+  leg0->AddEntry( resp_[kL7 ] , "L7Parton"   , "PL" );
 
   // create a legend (in upper center)
   TLegend *leg1 = new TLegend(0.35, 0.65, 1.05, 0.9);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
   leg1->SetHeader("Jet Energy Corrections");
-  leg1->AddEntry( respPt_[kRaw] , "Raw"        , "PL" );
-  leg1->AddEntry( respPt_[kL2 ] , "L2Relative" , "PL" );
-  leg1->AddEntry( respPt_[kL3 ] , "L3Absolute" , "PL" );
-  leg1->AddEntry( respPt_[kL5 ] , "L5Hadron"   , "PL" );
-  leg1->AddEntry( respPt_[kL7 ] , "L7Parton"   , "PL" );
+  //leg1->AddEntry( resp_[kRaw] , "Raw"        , "PL" );
+  leg1->AddEntry( resp_[kL2 ] , "L2Relative" , "PL" );
+  leg1->AddEntry( resp_[kL3 ] , "L3Absolute" , "PL" );
+  leg1->AddEntry( resp_[kL5 ] , "L5Hadron"   , "PL" );
+  leg1->AddEntry( resp_[kL7 ] , "L7Parton"   , "PL" );
   
   // prepare axes labels
   if( !plotEta ){
-    axesStyle(*respPt_ [kRaw], "pt( Jet ) [GeV]", "events" );
+    axesStyle(*resp_ [kL7], "pt( Jet ) [GeV]", "events" );
   }
   else{
-    axesStyle(*respEta_[kRaw], "#eta( 1. Leading Jet )", "events");
+    axesStyle(*resp_[kL7], "#eta( Jet )", "events");
   }
 
-  // draw canvas
-  canv0->cd(0);
-  respPt_[kRaw]->SetMinimum(  0.);
-  respPt_[kRaw]->SetMaximum(1.25);
-  respPt_[kRaw]->Draw();
-  respPt_[kL2 ]->Draw("esame");
-  respPt_[kL3 ]->Draw("esame");
-  respPt_[kL5 ]->Draw("esame");
-  respPt_[kL7 ]->Draw("esame");
-  leg0->Draw("same");
-
   // ---
-  //    do the printing for resp1_
+  //    do the printing for resp0_
   // ---
-  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
+  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
 
   // draw canvas
-  // draw canvas
   canv0->cd(0);
-  respEta_[kRaw]->SetMinimum(  0.);
-  respEta_[kRaw]->SetMaximum(1.25);
-  respEta_[kRaw]->Draw();
-  respEta_[kL2 ]->Draw("esame");
-  respEta_[kL3 ]->Draw("esame");
-  respEta_[kL5 ]->Draw("esame");
-  respEta_[kL7 ]->Draw("esame");
+  resp_[kL7]->SetMinimum(  0.);
+  resp_[kL7]->SetMaximum(1.75*resp_[kL7]->GetMaximum() );
+  //resp_[kRaw]->Draw();
+  resp_[kL7 ]->Draw();
+  resp_[kL3 ]->Draw("same");
+  resp_[kL5 ]->Draw("same");
+  resp_[kL2 ]->Draw("same");
   leg0->Draw("same");
 }
 
@@ -181,9 +157,9 @@ void histogramStyle(TH1& hist, unsigned int style)
   hist.SetStats(kFALSE);
   hist.SetLineColor  (color[style]);
   hist.SetFillColor  (color[style]);
-  hist.SetMarkerColor(color[style]);
+  //hist.SetMarkerColor(color[style]);
   hist.SetFillStyle  (fill [style]);
-  hist.SetMarkerStyle(marker[style]);
+  //hist.SetMarkerStyle(marker[style]);
   hist.SetMarkerSize (1.4);
 }
 

@@ -27,9 +27,9 @@ void analyzeJetQuality()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeJets_all_0_ttbary09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeJets_sig_0_ttbary09.root") );
-  files_.push_back(new TFile("~rwolf/public/rootfiles/analyzeJets_bkg_0_ttbary09.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeJets_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeJets_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeJets_bkg.root") );
 
   // ---
   //    get histograms
@@ -41,12 +41,6 @@ void analyzeJetQuality()
     n90_.push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/n90_" ) );
     n60_.push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/n60_" ) );
   }
-
-  // bugfix for in between
-  emf_     [kAll]->Add( emf_     [kSignal] );
-  n_  [kAll]->Add( n_  [kSignal] );
-  n90_[kAll]->Add( n90_[kSignal] );
-  n60_[kAll]->Add( n60_[kSignal] );
 
   // ---
   //    close input files
@@ -79,12 +73,6 @@ void analyzeJetQuality()
   histogramStyle(*n60_ [kSignal    ], kSignal    );
   histogramStyle(*n60_ [kBackground], kBackground);
 
-
-  // ---
-  //    do the printing for emf_
-  // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
-
   // create a legend (in upper right corner)
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg0->SetFillStyle(0);
@@ -102,6 +90,11 @@ void analyzeJetQuality()
   leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
   leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "FL" );
   leg1->AddEntry( emf_[kBackground] , "other decays"      , "FL" );
+
+  // ---
+  //    do the printing for emf_
+  // ---
+  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
   
   // draw canvas
   canv0->cd(0);
@@ -132,10 +125,10 @@ void analyzeJetQuality()
   // ---
   //    do the printing for n90_
   // ---
-  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
+  TCanvas* canv2 = new TCanvas("canv2", "canv2", 600, 600); canvasStyle(*canv2);
 
   // draw canvas
-  canv1->cd(0);
+  canv2->cd(0);
   axesStyle(*n90_[kAll], "Number of Constituents", "events");
   n90_[kAll       ]->SetMaximum( 1.3* n90_[kAll]->GetMaximum() );
   n90_[kAll       ]->Draw();
@@ -147,10 +140,10 @@ void analyzeJetQuality()
   // ---
   //    do the printing for n60_
   // ---
-  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
+  TCanvas* canv3 = new TCanvas("canv3", "canv3", 600, 600); canvasStyle(*canv3);
 
   // draw canvas
-  canv1->cd(0);
+  canv3->cd(0);
   axesStyle(*n60_[kAll], "Number of Constituents", "events");
   n60_[kAll       ]->SetMaximum( 1.3* n60_[kAll]->GetMaximum() );
   n60_[kAll       ]->Draw();
