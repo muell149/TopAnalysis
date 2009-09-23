@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-eventFilter  = True  # False
+eventFilter  = False # False
 signalInvert = False # True
 
 # analyse top quark quantities

@@ -5,9 +5,9 @@ import FWCore.ParameterSet.Config as cms
 ##    switches mean. This should be in analogy of the Doxygen commentsin the
 ##    modules...
 ## --- 
-useAntikt5   = False # True
-eventFilter  = False # False
-signalInvert = False # True
+useAntikt5   = True  # True
+eventFilter  = True  # False
+signalInvert = True  # True
 
 
 # analyse jet quantities

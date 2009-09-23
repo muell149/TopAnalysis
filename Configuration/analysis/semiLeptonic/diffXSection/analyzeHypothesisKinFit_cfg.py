@@ -21,7 +21,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_selected_sig_0_ttbarx09.root'
+    'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_selected_all_0_ttbarx09.root'
     ## "file:patTuple.root"
     )
 )
