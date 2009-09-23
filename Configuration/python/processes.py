@@ -83,6 +83,20 @@ eff   ['ttbary09'] =       1.0           ## generator efficiency on gen level
 sizes ['ttbary09'] = 'blocks'
 source['ttbary09'] = 'ttbary09_0'
 
+from TopAnalysis.Configuration.ttbar09_sel import *
+evts  ['ttbarz09'] =     12664           ## number of produced events
+xsec  ['ttbarz09'] =       165           ## NLO in pb
+eff   ['ttbarz09'] =       1.0           ## generator efficiency on gen level
+sizes ['ttbarz09'] = 'blocks'
+source['ttbarz09'] = 'ttbarz09_0'
+
+from TopAnalysis.Configuration.ttbar09_sel1 import *
+evts  ['ttbarzs09']=     10833           ## number of produced events
+xsec  ['ttbarzs09']=       165           ## NLO in pb
+eff   ['ttbarzs09']=       1.0           ## generator efficiency on gen level
+sizes ['ttbarzs09']= 'blocks'
+source['ttbarzs09']= 'ttbarzs09_0'
+
 
 ## /InclusiveMuPt15/Summer08_IDEAL_V9_v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.qcd0_reco import *
