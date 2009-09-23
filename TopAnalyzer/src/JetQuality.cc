@@ -159,16 +159,32 @@ JetQuality::fill(const std::vector<pat::Jet>& jets, const double& weight)
 	  Fill JEC Monitoring Variables
       **/
       if( jet->genJet() ){
+// 	// jet pt raw
+// 	hists_.find( "ptL0_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() );
+// 	// jet pt L2Relative
+// 	hists_.find( "ptL2_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("rel").pt()/jet->genJet()->pt() );
+// 	// jet pt L3Absolute
+// 	hists_.find( "ptL3_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("abs").pt()/jet->genJet()->pt() );
+// 	// jet pt L5Hadron
+// 	hists_.find( "ptL5_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("had",  flavor_).pt()/jet->genJet()->pt() );
+// 	// jet pt L7Parton
+// 	hists_.find( "ptL7_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("part", flavor_).pt()/jet->genJet()->pt() );
+
+//
+//
+// keep this untill the other historams are fixed!
+//
+//
 	// jet pt raw
-	hists_.find( "ptL0_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() );
+	hists_.find( "ptL0_"  )->second->Fill( jet->correctedJet("raw").pt(), weight );
 	// jet pt L2Relative
-	hists_.find( "ptL2_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("rel").pt()/jet->genJet()->pt() );
+	hists_.find( "ptL2_"  )->second->Fill( jet->correctedJet("rel").pt(), weight );
 	// jet pt L3Absolute
-	hists_.find( "ptL3_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("abs").pt()/jet->genJet()->pt() );
+	hists_.find( "ptL3_"  )->second->Fill( jet->correctedJet("abs").pt(), weight );
 	// jet pt L5Hadron
-	hists_.find( "ptL5_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("had",  flavor_).pt()/jet->genJet()->pt() );
+	hists_.find( "ptL5_"  )->second->Fill( jet->correctedJet("had",  flavor_).pt(), weight );
 	// jet pt L7Parton
-	hists_.find( "ptL7_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("part", flavor_).pt()/jet->genJet()->pt() );
+	hists_.find( "ptL7_"  )->second->Fill( jet->correctedJet("part", flavor_).pt(), weight );
 	
 	// jet eta raw
 	hists_.find( "etaL0_" )->second->Fill( jet->genJet()->eta(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() );

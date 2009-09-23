@@ -69,7 +69,9 @@ void HypothesisKinFit::book()
       Correlation Plots
   **/
   // correlation between jet hypothesis and jet index 
-  corrs_["jetHypo_"      ] = new TH2F( "jetHypo_" ,  "jetHypo_"  ,   4,  0.,  4.,  4,  0.,  4.);
+  corrs_["mapGenMatch_"    ] = new TH2F( "mapGenMatch_",  "mapGenMatch_",   4,  0.,  4.,  4,  0.,  4.);
+  // correlation between jet hypothesis and jet index 
+  corrs_["mapKinFit_"      ] = new TH2F( "mapKinFit_"  ,  "mapKinFit_"  ,   4,  0.,  4.,  4,  0.,  4.);
 }
 
 /// histogramm booking for fw
@@ -130,7 +132,9 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
       Correlation Plots
   **/
   // correlation between jet hypothesis and jet index 
-  corrs_["jetHypo_"      ] = fs->make<TH2F>( "jetHypo_" ,  "jetHypo_"  ,   4,  0.,  4.,  4,  0.,  4.);
+  corrs_["mapGenMatch_"    ] = fs->make<TH2F>( "mapGenMatch_",  "mapGenMatch_",   4,  0.,  4.,  4,  0.,  4.);
+  // correlation between jet hypothesis and jet index 
+  corrs_["mapKinFit_"      ] = fs->make<TH2F>( "mapKinFit_"  ,  "mapKinFit_"  ,   4,  0.,  4.,  4,  0.,  4.);
 }
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
@@ -150,7 +154,7 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // make sure that a second best fit hypothesis exists to be able to fill these plots
     if( tops.fitChi2(1) >= 0 ){
       // delta chi2 between best and second best fit hyothesis
-      hists_.find("delChi2")->second->Fill( tops.fitChi2(0)-tops.fitChi2(1), weight);
+      hists_.find("delChi2")->second->Fill( tops.fitChi2(1)-tops.fitChi2(2), weight);
     }
     // make sure that the genMatch hypothesis exists to be able to fill these plots
 
@@ -168,51 +172,69 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	Fill the Pull Distributions (Relative to the MC Truth)
     **/
     if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) ){
-      // hadronic top b pt
-      hists_.find("hadBQuarkPt"   )->second->Fill( (tops.hadronicDecayB()->pt()-tops.hadronicDecayB("kKinFit")->pt())/tops.hadronicDecayB()->pt() );
-      // hadronic top b eta
-      hists_.find("hadBQuarkEta"  )->second->Fill( tops.hadronicDecayB()->eta()-tops.hadronicDecayB("kKinFit")->eta() );
-      // hadronic top b phi
-      hists_.find("hadBQuarkPhi"  )->second->Fill( deltaPhi(tops.hadronicDecayB()->phi(), tops.hadronicDecayB("kKinFit")->phi()) );
-      // leptonic top b pt
-      hists_.find("lepBQuarkPt"   )->second->Fill( (tops.leptonicDecayB()->pt()-tops.leptonicDecayB("kKinFit")->pt())/tops.leptonicDecayB()->pt() );
-      // leptonic top b eta
-      hists_.find("lepBQuarkEta"  )->second->Fill( tops.leptonicDecayB()->eta()-tops.leptonicDecayB("kKinFit")->eta() );
-      // leptonic top b phi
-      hists_.find("lepBQuarkPhi"  )->second->Fill( deltaPhi(tops.leptonicDecayB()->phi(), tops.leptonicDecayB("kKinFit")->phi()) );
-      // lightQuark pt
-      hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark("kKinFit")->pt())/tops.hadronicDecayQuark()->pt() );
-      // lightQuark b eta
-      hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuark()->eta()-tops.hadronicDecayQuark("kKinFit")->eta() );
-      // lightQuark b phi
-      hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuark()->phi(), tops.hadronicDecayQuark("kKinFit")->phi()) );
-      // lightQuark pt
-      hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar("kKinFit")->pt())/tops.hadronicDecayQuarkBar()->pt() );
-      // lightQuark b eta
-      hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuarkBar()->eta()-tops.hadronicDecayQuarkBar("kKinFit")->eta() );
-      // lightQuark b phi
-      hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuarkBar()->phi(), tops.hadronicDecayQuarkBar("kKinFit")->phi()) );
-      // lepton pt
-      hists_.find("leptonPt"      )->second->Fill( (tops.singleLepton()->pt()-tops.singleLepton("kKinFit")->pt())/tops.singleLepton()->pt() );
-      // lepton eta
-      hists_.find("leptonEta"     )->second->Fill( tops.singleLepton()->eta()-tops.singleLepton("kKinFit")->eta() );
-      // lepton phi
-      hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton("kKinFit")->phi()) );
-      // neutrino pt
-      hists_.find("neutrinoPt"    )->second->Fill( (tops.singleNeutrino()->pt()-tops.singleNeutrino("kKinFit")->pt())/tops.singleNeutrino()->pt() );
-      // neutrino eta
-      hists_.find("neutrinoEta"   )->second->Fill( tops.singleNeutrino()->eta()-tops.singleNeutrino("kKinFit")->eta() );
-      // neutrino phi
-      hists_.find("neutrinoPhi"   )->second->Fill( deltaPhi(tops.singleNeutrino()->phi(), tops.singleNeutrino("kKinFit")->phi()) );
+      if( tops.hadronicDecayB() && tops.hadronicDecayB("kKinFit") ){
+	// hadronic top b pt
+	hists_.find("hadBQuarkPt"   )->second->Fill( (tops.hadronicDecayB()->pt()-tops.hadronicDecayB("kKinFit")->pt())/tops.hadronicDecayB()->pt() );
+	// hadronic top b eta
+	hists_.find("hadBQuarkEta"  )->second->Fill( tops.hadronicDecayB()->eta()-tops.hadronicDecayB("kKinFit")->eta() );
+	// hadronic top b phi
+	hists_.find("hadBQuarkPhi"  )->second->Fill( deltaPhi(tops.hadronicDecayB()->phi(), tops.hadronicDecayB("kKinFit")->phi()) );
+      }
+      if( tops.leptonicDecayB() && tops.leptonicDecayB("kKinFit") ){
+	// leptonic top b pt
+	hists_.find("lepBQuarkPt"   )->second->Fill( (tops.leptonicDecayB()->pt()-tops.leptonicDecayB("kKinFit")->pt())/tops.leptonicDecayB()->pt() );
+	// leptonic top b eta
+	hists_.find("lepBQuarkEta"  )->second->Fill( tops.leptonicDecayB()->eta()-tops.leptonicDecayB("kKinFit")->eta() );
+	// leptonic top b phi
+	hists_.find("lepBQuarkPhi"  )->second->Fill( deltaPhi(tops.leptonicDecayB()->phi(), tops.leptonicDecayB("kKinFit")->phi()) );
+      }
+      if( tops.hadronicDecayQuark() && tops.hadronicDecayQuark("kKinFit") ){
+	// lightQuark pt
+	hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark("kKinFit")->pt())/tops.hadronicDecayQuark()->pt() );
+	// lightQuark b eta
+	hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuark()->eta()-tops.hadronicDecayQuark("kKinFit")->eta() );
+	// lightQuark b phi
+	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuark()->phi(), tops.hadronicDecayQuark("kKinFit")->phi()) );
+      }
+      if( tops.hadronicDecayQuarkBar() && tops.hadronicDecayQuarkBar("kKinFit") ){
+	// lightQuark pt
+	hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar("kKinFit")->pt())/tops.hadronicDecayQuarkBar()->pt() );
+	// lightQuark b eta
+	hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuarkBar()->eta()-tops.hadronicDecayQuarkBar("kKinFit")->eta() );
+	// lightQuark b phi
+	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuarkBar()->phi(), tops.hadronicDecayQuarkBar("kKinFit")->phi()) );
+      }
+      if( tops.singleLepton() && tops.singleLepton("kKinFit") ){
+	// lepton pt
+	hists_.find("leptonPt"      )->second->Fill( (tops.singleLepton()->pt()-tops.singleLepton("kKinFit")->pt())/tops.singleLepton()->pt() );
+	// lepton eta
+	hists_.find("leptonEta"     )->second->Fill( tops.singleLepton()->eta()-tops.singleLepton("kKinFit")->eta() );
+	// lepton phi
+	hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton("kKinFit")->phi()) );
+      }
+      if( tops.singleNeutrino() && tops.singleNeutrino("kKinFit") ){
+	// neutrino pt
+	hists_.find("neutrinoPt"    )->second->Fill( (tops.singleNeutrino()->pt()-tops.singleNeutrino("kKinFit")->pt())/tops.singleNeutrino()->pt() );
+	// neutrino eta
+	hists_.find("neutrinoEta"   )->second->Fill( tops.singleNeutrino()->eta()-tops.singleNeutrino("kKinFit")->eta() );
+	// neutrino phi
+	hists_.find("neutrinoPhi"   )->second->Fill( deltaPhi(tops.singleNeutrino()->phi(), tops.singleNeutrino("kKinFit")->phi()) );
+      }
     }
 
     /** 
 	Correlation Plots
     **/
     // correlation between jet hypothesis and jet index
-    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ   ) );
-    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar) );
-    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::HadB     ) );
-    corrs_.find("jetHypo_" )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LepB     ) );
+    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   ) );
+    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar) );
+    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::HadB     ) );
+    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LepB     ) );
+
+    // correlation between jet hypothesis and jet index
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LightQ   ) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LightQBar) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::HadB     ) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LepB     ) );
   }
 }

@@ -121,6 +121,8 @@ MuonQuality::book(edm::Service<TFileService>& fs)
   /** 
       Isolation Monitoring Variables
   **/
+  // conserve the normalization information (for the use with hadd)
+  hists_["norm_"   ] = fs->make<TH1F>( "norm_"    ,  "norm_"    ,    1,   0.,   1. );
   // number of tracks in isolation cone
   hists_["trkIsoN_"] = fs->make<TH1F>( "trkIsoN_" ,  "isoTkN_"  ,   20,   0.,  20. );
   // summed track pt in isolation cone

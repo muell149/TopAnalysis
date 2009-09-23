@@ -25,15 +25,15 @@ void TopKinematics::book()
       Top Variables for Cross Section Measurement
   **/
   // top pt (at the moment both top candidates are filled in one histogram)
-  hists_["topPt"      ] = new TH1F( "topPt"       , "topPt"      ,    8, CrossSection::topPt     );
+  hists_["topPt"      ] = new TH1F( "topPt"       , "topPt"      ,    9, CrossSection::topPt     );
   // top y (at the moment both top candidates are filled in one histogram)
-  hists_["topY"       ] = new TH1F( "topY"        , "topY"       ,    8, CrossSection::topY      );
+  hists_["topY"       ] = new TH1F( "topY"        , "topY"       ,   10, CrossSection::topY      );
   // top phi (at the moment both top candidates are filled in one histogram)
   hists_["topPhi"     ] = new TH1F( "topPhi"      , "topPhi"     ,   10,   -3.14,    3.14        );
   // ttbar pair pt
   hists_["ttbarPt"    ] = new TH1F( "ttbarPt"     , "ttbarPt"    ,    8, CrossSection::ttbarPt   );
   // ttbar pair y
-  hists_["ttbarY"     ] = new TH1F( "ttbarY"      , "ttbarY"     ,    6, CrossSection::ttbarY    );
+  hists_["ttbarY"     ] = new TH1F( "ttbarY"      , "ttbarY"     ,   10, CrossSection::ttbarY    );
   // ttbar pair phi
   hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"    , "ttbarPhi"   ,   10,   -3.14,    3.14        );
   // ttbar pair invariant mass
@@ -67,17 +67,17 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
       Top Variables for Cross Section Measurement
   **/
   // top pt (at the moment both top candidates are filled in one histogram)
-  hists_["topPt"       ] = fs->make<TH1F>( "topPt"       , "topPt"      ,    8, CrossSection::topPt     );
+  hists_["topPt"       ] = fs->make<TH1F>( "topPt"       , "topPt"      ,    9, CrossSection::topPt     );
   // top y (at the moment both top candidates are filled in one histogram)
-  hists_["topY"        ] = fs->make<TH1F>( "topY"        , "topY"       ,    8, CrossSection::topY      );
+  hists_["topY"        ] = fs->make<TH1F>( "topY"        , "topY"       ,   10, CrossSection::topY      );
   // top phi (at the moment both top candidates are filled in one histogram)
   hists_["topPhi"      ] = fs->make<TH1F>( "topPhi"      , "topPhi"     ,   10,   -3.14,    3.14        );
   // ttbar pair pt
   hists_["ttbarPt"     ] = fs->make<TH1F>( "ttbarPt"     , "ttbarPt"    ,    8, CrossSection::ttbarPt   );
   // ttbar pair y
-  hists_["ttbarY"      ] = fs->make<TH1F>( "ttbarY"      , "ttbarY"     ,    6, CrossSection::ttbarY    );
+  hists_["ttbarY"      ] = fs->make<TH1F>( "ttbarY"      , "ttbarY"     ,   10, CrossSection::ttbarY    );
   // ttbar pair phi
-  hists_["ttbarPhi"    ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   6,   -3.14,    3.14        );
+  hists_["ttbarPhi"    ] = fs->make<TH1F>( "ttbarPhi"    , "ttbarPhi"   ,   10,   -3.14,    3.14        );
   // ttbar pair invariant mass
   hists_["ttbarMass"   ] = fs->make<TH1F>( "ttbarMass"   , "ttbarMass"  ,    6, CrossSection::ttbarMass );
   // deltaPhi between both top quarks
