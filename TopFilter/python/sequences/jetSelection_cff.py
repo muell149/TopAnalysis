@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-## muon selector
+## jet selector
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 
 ## ---
