@@ -105,6 +105,7 @@ process.trackMuonKinematics       = process.analyzeMuonKinematics.clone(src = 't
 process.looseMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'trackMuons'      )
 process.tightMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'tightMuons'      )
 process.goldenMuonKinematics      = process.analyzeMuonKinematics.clone(src = 'goldenMuons'     )
+process.isolatedMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'isolatedMuons'   )
 process.tightBottomJetKinematics  = process.analyzeJetKinematics.clone (src = 'tightBottomJets' )
 process.tightLeadingJetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
 process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
@@ -119,8 +120,10 @@ process.monitorMuonKinematics = cms.Sequence(process.goodMuonKinematics   +
                                              process.trackMuonKinematics  +
                                              process.tightMuonKinematics  +
                                              process.looseMuonKinematics  +
-                                             process.goldenMuonKinematics     
-                                             ) 
+                                             process.goldenMuonKinematics +
+                                             process.isolatedMuonKinematics     
+                                             )
+
 process.monitorJetsKinematics = cms.Sequence(process.tightBottomJetKinematics  +
                                              process.tightBJet_0_JetKinematics +
                                              process.tightBJet_1_JetKinematics +                                             
