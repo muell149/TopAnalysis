@@ -54,21 +54,21 @@ process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi"
 process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchB.muon = False
-if(eventFilter=='background'):process.ttSemiLeptonicFilter.invert = True
 
 if(not eventFilter=='all'):
-    ## sequence with filter
-    process.filterSequence = cms.Sequence(process.makeGenEvt           *
-                                          process.ttSemiLeptonicFilter
-                                          )
     ## adapt output filename
     if(eventFilter=='signal only'):
         process.TFileService.fileName = 'analyzeMuons_sig.root'
     elif(eventFilter=='background only'):
+        process.ttSemiLeptonicFilter.invert = True
         process.TFileService.fileName = 'analyzeMuons_bkg.root'
     else:
-        print "you misspelled the eventFilter name choose 'all', 'signal only' or 'background only'"
-        sys.exit(0)
+        raise NameError, "'"+eventFilter+"' is not a prober eventFilter name choose: 'all', 'signal only' or 'background only'"
+    
+    ## sequence with filter
+    process.filterSequence = cms.Sequence(process.makeGenEvt           *
+                                          process.ttSemiLeptonicFilter
+                                          )
 else:
     ## sequence without filter
     process.filterSequence = cms.Sequence(process.makeGenEvt)
