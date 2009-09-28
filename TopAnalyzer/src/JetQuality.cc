@@ -36,7 +36,7 @@ JetQuality::book()
   // btag track counting high efficiency
   hists_["btagTrkCntHighEff_"   ] = new TH1F( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
   // btag simple secondary vertex
-  hists_["btagSimpleSecVtx_"    ] = new TH1F( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,   0.,  20. ); 
+  hists_["btagSimpleSecVtx_"    ] = new TH1F( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,  -5.,  15. ); 
   // btag simple secondary vertex (neg bjet tags)
   hists_["btagSimpleSecVtxNeg_" ] = new TH1F( "btagSimpleSecVtxNeg_"   ,  "btagSimpleSecVtxNeg_" ,   80, -20.,   0. ); 
 
@@ -90,9 +90,9 @@ JetQuality::book(edm::Service<TFileService>& fs)
   // btag track counting high efficiency
   hists_["btagTrkCntHighEff_"   ] = fs->make<TH1F>( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
   // btag simple secondary vertex
-  hists_["btagSimpleSecVtx_"    ] = fs->make<TH1F>( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,   0.,  20. ); 
+  hists_["btagSimpleSecVtx_"    ] = fs->make<TH1F>( "btagSimpleSecVtx_"      ,  "btagSimpleSecVtx_"    ,   80,  -5.,  15. ); 
   // btag simple secondary vertex (neg bjet tags)
-  hists_["btagSimpleSecVtxNeg_" ] = fs->make<TH1F>( "btagSimpleSecVtxNeg_"   ,  "btagSimpleSecVtxNeg_" ,   80,   0.,  20. ); 
+  hists_["btagSimpleSecVtxNeg_" ] = fs->make<TH1F>( "btagSimpleSecVtxNeg_"   ,  "btagSimpleSecVtxNeg_" ,   80,-1005.,-985.); 
 
   /** 
       JEC Monitoring Variables
@@ -152,7 +152,7 @@ JetQuality::fill(const std::vector<pat::Jet>& jets, const double& weight)
       hists_.find( "btagTrkCntHighEff_"  )->second->Fill( jet->bDiscriminator("trackCountingHighEffBJetTags") , weight );
       // btag simple secondary vertex
       hists_.find( "btagSimpleSecVtx_"   )->second->Fill( jet->bDiscriminator("simpleSecondaryVertexBJetTags") , weight );
-      // btag simple secondary vertex (neg bjet tags)
+      // btag simple secondary vertex (neg bjet tags) makes no sense yet, value is -1000 for every jet regardless of the btagging
       hists_.find( "btagSimpleSecVtxNeg_")->second->Fill( jet->bDiscriminator("simpleSecondaryVertexNegativeBJetTags") , weight );
 
       /** 
