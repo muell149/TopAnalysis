@@ -15,7 +15,7 @@ void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 
-void analyzeMuonKinematics()
+void analyzeMuonKinematics(TString whichMuons = "golden")  //  "good" // "tight" //
 {
   // ---
   //    set root style 
@@ -27,19 +27,19 @@ void analyzeMuonKinematics()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./rootfiles/analyzeSelection_all.root") );
-  files_.push_back(new TFile("./rootfiles/analyzeSelection_sig.root") );
-  files_.push_back(new TFile("./rootfiles/analyzeSelection_bkg.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSemiLeptonicSelection_all.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSemiLeptonicSelection_sig.root") );
+  files_.push_back(new TFile("./rootfiles/analyzeSemiLeptonicSelection_bkg.root") );
 
   // ---
   //    get histograms
   // ---
   std::vector<TH1F*> n_, pt_, eta_, phi_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    n_  .push_back( (TH1F*)files_[idx]->Get("goldenMuonKinematics/n"  ) );
-    pt_ .push_back( (TH1F*)files_[idx]->Get("goldenMuonKinematics/pt" ) );
-    eta_.push_back( (TH1F*)files_[idx]->Get("goldenMuonKinematics/eta") );
-    phi_.push_back( (TH1F*)files_[idx]->Get("goldenMuonKinematics/phi") );
+    n_  .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/n"  )->Clone() );
+    pt_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/pt" )->Clone() );
+    eta_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/eta")->Clone() );
+    phi_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/phi")->Clone() );
   }
 
   // ---
