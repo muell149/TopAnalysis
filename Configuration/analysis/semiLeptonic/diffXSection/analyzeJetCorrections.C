@@ -36,18 +36,18 @@ void analyzeJetCorrections(bool plotEta=false)
   std::vector<TH1F*> resp_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     if( !plotEta ){
-      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL0_" ) );
-      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL2_" ) );
-      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL3_" ) );
-      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL5_" ) );
-      resp_ .push_back( (TH1F*)files_[idx]->Get("goodJetQuality/ptL7_" ) );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/ptL0_" ))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/ptL2_" ))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/ptL3_" ))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/ptL5_" ))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/ptL7_" ))->ProfileX() );
     }
     else{
-      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL0_") );
-      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL2_") );
-      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL3_") );
-      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL5_") );
-      resp_.push_back( (TH1F*)files_[idx]->Get("goodJetQuality/etaL7_") );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/etaL0_"))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/etaL2_"))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/etaL3_"))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/etaL5_"))->ProfileX() );
+      resp_.push_back( (TH1F*)((TH2F*)files_[idx]->Get("goodJetQuality/etaL7_"))->ProfileX() );
     }
   }
 
