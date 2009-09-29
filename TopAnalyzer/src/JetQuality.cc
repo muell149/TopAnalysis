@@ -44,26 +44,26 @@ JetQuality::book()
       JEC Monitoring Variables
   **/
   // jet pt raw
-  hists_["ptL0_" ] = new TH1F( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. );
+  hists_["ptL0_" ] = new TH2F( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L2Relative
-  hists_["ptL2_" ] = new TH1F( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. );
+  hists_["ptL2_" ] = new TH2F( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L3Absolute
-  hists_["ptL3_" ] = new TH1F( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. );
+  hists_["ptL3_" ] = new TH2F( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L5Hadron
-  hists_["ptL5_" ] = new TH1F( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. );
+  hists_["ptL5_" ] = new TH2F( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L7Parton
-  hists_["ptL7_" ] = new TH1F( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. );
+  hists_["ptL7_" ] = new TH2F( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
 
   // jet eta raw
-  hists_["etaL0_"] = new TH1F( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL0_"] = new TH2F( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L2Relative
-  hists_["etaL2_"] = new TH1F( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL2_"] = new TH2F( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L3Absolute
-  hists_["etaL3_"] = new TH1F( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL3_"] = new TH2F( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L5Hadron
-  hists_["etaL5_"] = new TH1F( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL5_"] = new TH2F( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L7Parton
-  hists_["etaL7_"] = new TH1F( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL7_"] = new TH2F( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
 }
 
 /// histogramm booking for full fw
@@ -98,26 +98,26 @@ JetQuality::book(edm::Service<TFileService>& fs)
       JEC Monitoring Variables
   **/
   // jet pt raw
-  hists_["ptL0_" ] = fs->make<TH1F>( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. );
+  hists_["ptL0_" ] = fs->make<TH2F>( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L2Relative
-  hists_["ptL2_" ] = fs->make<TH1F>( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. );
+  hists_["ptL2_" ] = fs->make<TH2F>( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L3Absolute
-  hists_["ptL3_" ] = fs->make<TH1F>( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. );
+  hists_["ptL3_" ] = fs->make<TH2F>( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L5Hadron
-  hists_["ptL5_" ] = fs->make<TH1F>( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. );
+  hists_["ptL5_" ] = fs->make<TH2F>( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L7Parton
-  hists_["ptL7_" ] = fs->make<TH1F>( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. );
+  hists_["ptL7_" ] = fs->make<TH2F>( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
 
   // jet eta raw
-  hists_["etaL0_"] = fs->make<TH1F>( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL0_"] = fs->make<TH2F>( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L2Relative
-  hists_["etaL2_"] = fs->make<TH1F>( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL2_"] = fs->make<TH2F>( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L3Absolute
-  hists_["etaL3_"] = fs->make<TH1F>( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL3_"] = fs->make<TH2F>( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L5Hadron
-  hists_["etaL5_"] = fs->make<TH1F>( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL5_"] = fs->make<TH2F>( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L7Parton
-  hists_["etaL7_"] = fs->make<TH1F>( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 );
+  hists_["etaL7_"] = fs->make<TH2F>( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
 }
 
 /// histogram filling for fwlite and for full fw from reco objects
@@ -159,32 +159,16 @@ JetQuality::fill(const std::vector<pat::Jet>& jets, const double& weight)
 	  Fill JEC Monitoring Variables
       **/
       if( jet->genJet() ){
-// 	// jet pt raw
-// 	hists_.find( "ptL0_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() );
-// 	// jet pt L2Relative
-// 	hists_.find( "ptL2_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("rel").pt()/jet->genJet()->pt() );
-// 	// jet pt L3Absolute
-// 	hists_.find( "ptL3_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("abs").pt()/jet->genJet()->pt() );
-// 	// jet pt L5Hadron
-// 	hists_.find( "ptL5_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("had",  flavor_).pt()/jet->genJet()->pt() );
-// 	// jet pt L7Parton
-// 	hists_.find( "ptL7_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("part", flavor_).pt()/jet->genJet()->pt() );
-
-//
-//
-// keep this untill the other historams are fixed!
-//
-//
 	// jet pt raw
-	hists_.find( "ptL0_"  )->second->Fill( jet->correctedJet("raw").pt(), weight );
+	hists_.find( "ptL0_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() );
 	// jet pt L2Relative
-	hists_.find( "ptL2_"  )->second->Fill( jet->correctedJet("rel").pt(), weight );
+	hists_.find( "ptL2_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("rel").pt()/jet->genJet()->pt() );
 	// jet pt L3Absolute
-	hists_.find( "ptL3_"  )->second->Fill( jet->correctedJet("abs").pt(), weight );
+	hists_.find( "ptL3_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("abs").pt()/jet->genJet()->pt() );
 	// jet pt L5Hadron
-	hists_.find( "ptL5_"  )->second->Fill( jet->correctedJet("had",  flavor_).pt(), weight );
+	hists_.find( "ptL5_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("had",  flavor_).pt()/jet->genJet()->pt() );
 	// jet pt L7Parton
-	hists_.find( "ptL7_"  )->second->Fill( jet->correctedJet("part", flavor_).pt(), weight );
+	hists_.find( "ptL7_"  )->second->Fill( jet->genJet()->pt(),  jet->correctedJet("part", flavor_).pt()/jet->genJet()->pt() );
 	
 	// jet eta raw
 	hists_.find( "etaL0_" )->second->Fill( jet->genJet()->eta(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() );
