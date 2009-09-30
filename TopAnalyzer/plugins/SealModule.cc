@@ -35,6 +35,10 @@ DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
 typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetResolution> JetResolutionAnalyzer;
 DEFINE_FWK_MODULE(JetResolutionAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/JetEnergyCorrections.h"
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, JetEnergyCorrections> JetEnergyCorrectionsAnalyzer;
+DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
+
 
 /**
     Define modules needed for the analysis of muon jet relations
@@ -48,6 +52,10 @@ DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 /**
     Define modules needed for the analysis of different event hypothesis
 **/
+
+#include "TopAnalysis/TopAnalyzer/interface/JetCombinatorics.h"
+typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, JetCombinatorics> JetCombinatoricsAnalyzer;
+DEFINE_FWK_MODULE(JetCombinatoricsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFit.h"
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, HypothesisKinFit> HypothesisKinFitAnalyzer;
@@ -76,9 +84,3 @@ DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
 
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
-
-
-
-#include "TopAnalysis/TopAnalyzer/interface/JetCombinatorics.h"
-typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, JetCombinatorics> JetCombinatoricsAnalyzer;
-DEFINE_FWK_MODULE(JetCombinatoricsAnalyzer);
