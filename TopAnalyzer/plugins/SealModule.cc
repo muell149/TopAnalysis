@@ -35,8 +35,7 @@ DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
 typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetResolution> JetResolutionAnalyzer;
 DEFINE_FWK_MODULE(JetResolutionAnalyzer);
 
-#include "TopAnalysis/TopAnalyzer/interface/JetEnergyCorrections.h"
-typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, JetEnergyCorrections> JetEnergyCorrectionsAnalyzer;
+#include "TopAnalysis/TopAnalyzer/interface/JetEnergyCorrectionsAnalyzer.h"
 DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
 
 

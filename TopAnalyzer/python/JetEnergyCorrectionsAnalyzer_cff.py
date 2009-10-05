@@ -2,7 +2,28 @@ import FWCore.ParameterSet.Config as cms
 
 from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
 
-from TopAnalysis.TopAnalyzer.JetEnergyCorrections_cfi import *
+from TopAnalysis.TopAnalyzer.JetEnergyCorrectionsAnalyzer_cfi import *
+
+##########################################################################################
+## configure recJet-parton matching
+##########################################################################################
+
+ttSemiLepJetPartonMatch.jets       = 'goodJets'
+ttSemiLepJetPartonMatch.algorithm  = 'unambiguousOnly'
+ttSemiLepJetPartonMatch.useMaxDist = True
+ttSemiLepJetPartonMatch.maxDist    = 0.5
+ttSemiLepJetPartonMatch.maxNJets   = -1
+
+##########################################################################################
+## configure genJet-parton matching
+##########################################################################################
+
+ttSemiLepGenJetPartonMatch            = ttSemiLepJetPartonMatch.clone()
+ttSemiLepGenJetPartonMatch.jets       = "antikt5GenJets"
+ttSemiLepGenJetPartonMatch.algorithm  = "unambiguousOnly"
+ttSemiLepGenJetPartonMatch.useMaxDist = True
+ttSemiLepGenJetPartonMatch.maxDist    = 0.5
+ttSemiLepGenJetPartonMatch.maxNJets   = -1
 
 ##########################################################################################
 ## produce genMatch hypothesis for different jet energy correction levels
@@ -54,14 +75,14 @@ ttSemiLepEvent_multilevel = cms.Sequence(ttSemiLepEventRaw  *
 ## analyze ttSemiLeptonicEvent for different jet energy correction levels
 ##########################################################################################
 
-analyzeJetEnergyCorrections_raw  = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventRaw" )
-analyzeJetEnergyCorrections_off  = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventOff" ) ## L1
-analyzeJetEnergyCorrections_rel  = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventRel" ) ## L2
-analyzeJetEnergyCorrections_abs  = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventAbs" ) ## L3
-analyzeJetEnergyCorrections_emf  = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventEmf" ) ## L4
-analyzeJetEnergyCorrections_had  = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventHad" ) ## L5
-analyzeJetEnergyCorrections_ue   = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventUe"  ) ## L6
-analyzeJetEnergyCorrections_part = analyzeJetEnergyCorrections.clone(src = "ttSemiLepEventPart") ## L7
+analyzeJetEnergyCorrections_raw  = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventRaw" )
+analyzeJetEnergyCorrections_off  = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventOff" ) ## L1
+analyzeJetEnergyCorrections_rel  = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventRel" ) ## L2
+analyzeJetEnergyCorrections_abs  = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventAbs" ) ## L3
+analyzeJetEnergyCorrections_emf  = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventEmf" ) ## L4
+analyzeJetEnergyCorrections_had  = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventHad" ) ## L5
+analyzeJetEnergyCorrections_ue   = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventUe"  ) ## L6
+analyzeJetEnergyCorrections_part = analyzeJetEnergyCorrections.clone(semiLepEvt = "ttSemiLepEventPart") ## L7
 
 analyzeJetEnergyCorrections_multilevel = cms.Sequence(analyzeJetEnergyCorrections_raw  *
                                                       analyzeJetEnergyCorrections_off  *
@@ -78,6 +99,7 @@ analyzeJetEnergyCorrections_multilevel = cms.Sequence(analyzeJetEnergyCorrection
 ##########################################################################################
 
 makeJetEnergyCorrectionsAnalysis = cms.Sequence(ttSemiLepJetPartonMatch *
+                                                ttSemiLepGenJetPartonMatch *
                                                 ttSemiLepHypGenMatch_multilevel *
                                                 ttSemiLepEvent_multilevel *
                                                 analyzeJetEnergyCorrections_multilevel
