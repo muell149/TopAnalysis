@@ -1,0 +1,134 @@
+import FWCore.ParameterSet.Config as cms
+
+#-------------------------------------------------
+# cfg file for the analysis of jet energy corrections
+#-------------------------------------------------
+process = cms.Process("JetEnergyCorrections")
+
+## configure message logger
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.categories.append('TtSemiLeptonicEvent')
+process.MessageLogger.categories.append('JetPartonMatching')
+process.MessageLogger.cerr.TtSemiLeptonicEvent = cms.untracked.PSet(
+    limit = cms.untracked.int32(100)
+)
+process.MessageLogger.cerr.JetPartonMatching = cms.untracked.PSet(
+    limit = cms.untracked.int32(100)
+)
+
+#-------------------------------------------------
+# process configuration
+#-------------------------------------------------
+
+## define input
+process.source = cms.Source("PoolSource",
+    fileNames = cms.untracked.vstring(
+    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0026/F2B6764A-6D89-DE11-8585-0018FEFAC384.root'
+    )
+)
+
+## define maximal number of events to loop over
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(100)
+)
+
+## configure process options
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True)
+)
+
+## configure geometry & conditions
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
+
+#-------------------------------------------------
+# event selection
+#-------------------------------------------------
+
+## select events that were generated in the semileptonic muon channel
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff")
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = False
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
+process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = False
+
+## apply realistic event selection
+process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
+process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
+from TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff import disableCountFilter
+disableCountFilter(process.bottomJetSelection)
+
+#-------------------------------------------------
+# pat configuration
+#-------------------------------------------------
+
+## std sequence for pat
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+## restrict input to AOD
+from PhysicsTools.PatAlgos.tools.coreTools import *
+restrictInputToAOD(process, ['All'])
+
+## switch jet collection
+from PhysicsTools.PatAlgos.tools.jetTools import *
+## antikt
+#switchJetCollection(process, 
+#                    cms.InputTag('antikt5CaloJets'),   
+#                    doJTA            = True,            
+#                    doBTagging       = True,            
+#                    jetCorrLabel     = ('AK5','Calo'),  
+#                    doType1MET       = True,            
+#                    genJetCollection = cms.InputTag("antikt5GenJets")
+#                    )
+## sisCone
+switchJetCollection(process, 
+                    cms.InputTag('sisCone5CaloJets'),
+                    doJTA            = True,
+                    doBTagging       = True,
+                    jetCorrLabel     = ('SC5','Calo'),
+                    doType1MET       = True,
+                    genJetCollection = cms.InputTag("sisCone5GenJets")
+                    )
+
+## choose sample type for flavor dependent JEC
+process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
+
+#-------------------------------------------------
+# top analysis
+#-------------------------------------------------
+
+## analyze jet energy corrections
+process.load("TopAnalysis.TopAnalyzer.JetEnergyCorrectionsAnalyzer_cff")
+myGenJets = "sisCone5GenJets"
+process.ttSemiLepGenJetPartonMatch.jets = myGenJets
+process.analyzeJetEnergyCorrections_raw .genJets = myGenJets
+process.analyzeJetEnergyCorrections_off .genJets = myGenJets
+process.analyzeJetEnergyCorrections_rel .genJets = myGenJets
+process.analyzeJetEnergyCorrections_abs .genJets = myGenJets
+process.analyzeJetEnergyCorrections_emf .genJets = myGenJets
+process.analyzeJetEnergyCorrections_had .genJets = myGenJets
+process.analyzeJetEnergyCorrections_ue  .genJets = myGenJets
+process.analyzeJetEnergyCorrections_part.genJets = myGenJets
+
+## printout for debugging
+process.ttSemiLepJetPartonMatch   .verbosity = 1
+process.ttSemiLepGenJetPartonMatch.verbosity = 1
+process.ttSemiLepEvent            .verbosity = 1
+
+## register TFileService
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('analyzeJetEnergyCorrections.root')
+)
+
+process.p1 = cms.Path(process.makeGenEvt *
+                      process.ttSemiLeptonicFilter *
+                      process.hltMu9 *
+                      process.patDefaultSequence *
+                      process.semiLeptonicSelection *
+                      process.semiLeptonicEvents *
+                      process.makeJetEnergyCorrectionsAnalysis
+                      )
