@@ -73,27 +73,6 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 from PhysicsTools.PatAlgos.tools.coreTools import *
 restrictInputToAOD(process, ['All'])
 
-## switch jet collection
-from PhysicsTools.PatAlgos.tools.jetTools import *
-## antikt
-switchJetCollection(process, 
-                    cms.InputTag('antikt5CaloJets'),   
-                    doJTA            = True,            
-                    doBTagging       = True,            
-                    jetCorrLabel     = ('AK5','Calo'),  
-                    doType1MET       = True,            
-                    genJetCollection = cms.InputTag("antikt5GenJets")
-                    )
-## sisCone
-#switchJetCollection(process, 
-#                    cms.InputTag('sisCone5CaloJets'),
-#                    doJTA            = True,
-#                    doBTagging       = True,
-#                    jetCorrLabel     = ('SC5','Calo'),
-#                    doType1MET       = True,
-#                    genJetCollection = cms.InputTag("sisCone5GenJets")
-#                    )
-
 ## choose sample type for flavor dependent JEC
 process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
@@ -103,16 +82,6 @@ process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
 ## analyze jet energy corrections
 process.load("TopAnalysis.TopAnalyzer.JetEnergyCorrectionsAnalyzer_cff")
-myGenJets = "antikt5GenJets"
-process.ttSemiLepGenJetPartonMatch.jets = myGenJets
-process.analyzeJetEnergyCorrections_raw .genJets = myGenJets
-process.analyzeJetEnergyCorrections_off .genJets = myGenJets
-process.analyzeJetEnergyCorrections_rel .genJets = myGenJets
-process.analyzeJetEnergyCorrections_abs .genJets = myGenJets
-process.analyzeJetEnergyCorrections_emf .genJets = myGenJets
-process.analyzeJetEnergyCorrections_had .genJets = myGenJets
-process.analyzeJetEnergyCorrections_ue  .genJets = myGenJets
-process.analyzeJetEnergyCorrections_part.genJets = myGenJets
 
 ## printout for debugging
 process.ttSemiLepJetPartonMatch   .verbosity = 1
