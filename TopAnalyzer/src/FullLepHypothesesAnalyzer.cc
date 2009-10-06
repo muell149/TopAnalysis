@@ -114,43 +114,43 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
     const reco::Candidate* genLep    = FullLepEvt->genLepton();
     const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
     
-    fillKinGenHistos(TopKinGen_,    *genTop,    weight);
-    fillKinGenHistos(WplusKinGen_,  *genWplus,  weight);
-    fillKinGenHistos(BKinGen_,      *genB,      weight);
-    fillKinGenHistos(LepBarKinGen_, *genLepBar, weight);
-    fillKinGenHistos(NuKinGen_,     *genNu,     weight);   
+    if(genTop)    fillKinGenHistos(TopKinGen_,    *genTop,    weight);
+    if(genWplus)  fillKinGenHistos(WplusKinGen_,  *genWplus,  weight);
+    if(genB)      fillKinGenHistos(BKinGen_,      *genB,      weight);
+    if(genLepBar) fillKinGenHistos(LepBarKinGen_, *genLepBar, weight);
+    if(genNu)     fillKinGenHistos(NuKinGen_,     *genNu,     weight);   
     
-    fillKinGenHistos(TopBarKinGen_, *genTopBar, weight);
-    fillKinGenHistos(WminusKinGen_, *genWminus, weight);
-    fillKinGenHistos(BBarKinGen_,   *genBBar,   weight);
-    fillKinGenHistos(LepKinGen_,    *genLep,    weight);
-    fillKinGenHistos(NuBarKinGen_,  *genNuBar,  weight);      
+    if(genTopBar) fillKinGenHistos(TopBarKinGen_, *genTopBar, weight);
+    if(genWminus) fillKinGenHistos(WminusKinGen_, *genWminus, weight);
+    if(genBBar)   fillKinGenHistos(BBarKinGen_,   *genBBar,   weight);
+    if(genLep)    fillKinGenHistos(LepKinGen_,    *genLep,    weight);
+    if(genNuBar)  fillKinGenHistos(NuBarKinGen_,  *genNuBar,  weight);      
 
     if(!FullLepEvt->isWrongCharge()){
-      fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
-      fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
-      fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
-      fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
-      fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+      if(genTop)    fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+      if(genWplus)  fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+      if(genB)      fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
+      if(genLepBar) fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+      if(genNu)     fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
 
-      fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
-      fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
-      fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
-      fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
-      fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
+      if(genTopBar) fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+      if(genWminus) fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+      if(genBBar)   fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+      if(genLep)    fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+      if(genNuBar)  fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
     }
     else{ //should never be the case: right charge reconstructed as wrong charge
-      fillWrongChargeKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
-      fillWrongChargeKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
-      fillWrongChargeKinResHistos(BKinRes_,      *B,     *genB,      weight);
-      fillWrongChargeKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
-      fillWrongChargeKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+      if(genTop)    fillWrongChargeKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+      if(genWplus)  fillWrongChargeKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+      if(genB)      fillWrongChargeKinResHistos(BKinRes_,      *B,     *genB,      weight);
+      if(genLepBar) fillWrongChargeKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+      if(genNu)     fillWrongChargeKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
 
-      fillWrongChargeKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
-      fillWrongChargeKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
-      fillWrongChargeKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
-      fillWrongChargeKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
-      fillWrongChargeKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight);     
+      if(genTopBar) fillWrongChargeKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+      if(genWminus) fillWrongChargeKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+      if(genBBar)   fillWrongChargeKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+      if(genLep)    fillWrongChargeKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+      if(genNuBar)  fillWrongChargeKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight);   
     }
   }      
 }
@@ -385,127 +385,127 @@ FullLepHypothesesAnalyzer::bookKinResHistos(edm::Service<TFileService>& fs, ofst
 
   NameScheme ns("res");
 
-  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (t)",    20, -1.0, 1.0 ) );
-  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (t)"      ,    20, -1.0, 1.0 ) );  
-  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (t)", 20, -1.0, 1.0 ) );
-  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (t)", 20, -1.0, 1.0 ) );
-  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassRes"), "M_{rec}-M_{gen}/M_{gen} (t)",          20, -1.0, 1.0 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (t)",    40, -1.0, 1.0 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (t)"      ,    40, -1.0, 1.0 ) );  
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (t)", 40, -1.0, 1.0 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (t)", 40, -1.0, 1.0 ) );
+  TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassRes"), "M_{rec}-M_{gen}/M_{gen} (t)",          40, -1.0, 1.0 ) );
   
-  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{+})",    20, -1.0, 1.0 ) );
-  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (W^{+})",          20, -1.0, 1.0 ) );  
-  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{+})", 20, -1.0, 1.0 ) );
-  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{+})", 20, -1.0, 1.0 ) );
-  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassRes"), "M_{rec}-M_{gen}/M_{gen} (W^{+})",          20, -1.0, 1.0 ) );  
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{+})",    40, -1.0, 1.0 ) );
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (W^{+})",          40, -1.0, 1.0 ) );  
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{+})", 40, -1.0, 1.0 ) );
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{+})", 40, -1.0, 1.0 ) );
+  WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassRes"), "M_{rec}-M_{gen}/M_{gen} (W^{+})",          40, -1.0, 1.0 ) );  
 
-  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (b)",    20, -1.0, 1.0 ) );
-  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (b)",          20, -1.0, 1.0 ) );  
-  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (b)", 20, -1.0, 1.0 ) );
-  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (b)", 20, -1.0, 1.0 ) );
-  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BMassRes"), "M_{rec}-M_{gen}/M_{gen} (b)",          20, -1.0, 1.0 ) );  
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (b)",    40, -1.0, 1.0 ) );
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (b)",          40, -1.0, 1.0 ) );  
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (b)", 40, -1.0, 1.0 ) );
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (b)", 40, -1.0, 1.0 ) );
+  BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BMassRes"), "M_{rec}-M_{gen}/M_{gen} (b)",          40, -1.0, 1.0 ) );  
 
-  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l^{+})",    20, -1.0, 1.0 ) );
-  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (l^{+})",          20, -1.0, 1.0 ) );  
-  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l^{+})", 20, -1.0, 1.0 ) );
-  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l^{+})", 20, -1.0, 1.0 ) );
-  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (l^{+})",          20, -1.0, 1.0 ) ); 
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l^{+})",    40, -1.0, 1.0 ) );
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (l^{+})",          40, -1.0, 1.0 ) );  
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l^{+})", 40, -1.0, 1.0 ) );
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l^{+})", 40, -1.0, 1.0 ) );
+  LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (l^{+})",          40, -1.0, 1.0 ) ); 
 
-  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #nu",    20, -1.0, 1.0 ) );
-  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEnRes"  ), "E_{rec}-E_{gen}/E_{gen} #nu",          20, -1.0, 1.0 ) );  
-  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #nu", 20, -1.0, 1.0 ) );
-  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #nu", 20, -1.0, 1.0 ) );
-  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassRes"), "M_{rec}-M_{gen}/M_{gen} #nu",          20, -1.0, 1.0 ) ); 
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #nu",    40, -1.0, 1.0 ) );
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEnRes"  ), "E_{rec}-E_{gen}/E_{gen} #nu",          40, -1.0, 1.0 ) );  
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #nu", 40, -1.0, 1.0 ) );
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #nu", 40, -1.0, 1.0 ) );
+  NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassRes"), "M_{rec}-M_{gen}/M_{gen} #nu",          40, -1.0, 1.0 ) ); 
 
-  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #bar{t}",    20, -1.0, 1.0 ) );
-  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} #bar{t}",         20, -1.0, 1.0 ) );  
-  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #bar{t}", 20, -1.0, 1.0 ) );
-  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #bar{t}", 20, -1.0, 1.0 ) );
-  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassRes"), "M_{rec}-M_{gen}/M_{gen} #bar{t}",          20, -1.0, 1.0 ) ); 
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #bar{t}",    40, -1.0, 1.0 ) );
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} #bar{t}",         40, -1.0, 1.0 ) );  
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #bar{t}", 40, -1.0, 1.0 ) );
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #bar{t}", 40, -1.0, 1.0 ) );
+  TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassRes"), "M_{rec}-M_{gen}/M_{gen} #bar{t}",          40, -1.0, 1.0 ) ); 
 
-  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{-})",    20, -1.0, 1.0 ) );
-  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (W^{-})",          20, -1.0, 1.0 ) );  
-  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{-})", 20, -1.0, 1.0 ) );
-  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{-})", 20, -1.0, 1.0 ) );
-  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassRes"), "M_{rec}-M_{gen}/M_{gen} (W^{-})",          20, -1.0, 1.0 ) ); 
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{-})",    40, -1.0, 1.0 ) );
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (W^{-})",          40, -1.0, 1.0 ) );  
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{-})", 40, -1.0, 1.0 ) );
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{-})", 40, -1.0, 1.0 ) );
+  WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassRes"), "M_{rec}-M_{gen}/M_{gen} (W^{-})",          40, -1.0, 1.0 ) ); 
 
-  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{b})",    20, -1.0, 1.0 ) );
-  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{b})",          20, -1.0, 1.0 ) );  
-  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{b})", 20, -1.0, 1.0 ) );
-  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{b})", 20, -1.0, 1.0 ) );
-  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{b})",          20, -1.0, 1.0 ) ); 
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{b})",    40, -1.0, 1.0 ) );
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{b})",          40, -1.0, 1.0 ) );  
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{b})", 40, -1.0, 1.0 ) );
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{b})", 40, -1.0, 1.0 ) );
+  BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{b})",          40, -1.0, 1.0 ) ); 
   
-  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l)",    20, -1.0, 1.0 ) );
-  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (l)",          20, -1.0, 1.0 ) );  
-  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l)", 20, -1.0, 1.0 ) );
-  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l)", 20, -1.0, 1.0 ) );
-  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassRes"), "M_{rec}-M_{gen}/M_{gen} (l)",          20, -1.0, 1.0 ) ); 
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l)",    40, -1.0, 1.0 ) );
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (l)",          40, -1.0, 1.0 ) );  
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l)", 40, -1.0, 1.0 ) );
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l)", 40, -1.0, 1.0 ) );
+  LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassRes"), "M_{rec}-M_{gen}/M_{gen} (l)",          40, -1.0, 1.0 ) ); 
   
-  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    20, -1.0, 1.0 ) );
-  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{#nu})",          20, -1.0, 1.0 ) );  
-  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 20, -1.0, 1.0 ) );
-  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 20, -1.0, 1.0 ) );
-  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          20, -1.0, 1.0 ) );  
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtRes"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    40, -1.0, 1.0 ) );
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) );  
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 40, -1.0, 1.0 ) );
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 40, -1.0, 1.0 ) );
+  NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) );  
   
   // push back the same histograms for wrong charge event solutions if demanded
   if(useWrongCharge_){
-    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (t)",    20, -1.0, 1.0 ) );
-    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (t)"      ,    20, -1.0, 1.0 ) );  
-    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (t)", 20, -1.0, 1.0 ) );
-    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (t)", 20, -1.0, 1.0 ) );
-    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (t)",          20, -1.0, 1.0 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (t)",    40, -1.0, 1.0 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (t)"      ,    40, -1.0, 1.0 ) );  
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (t)", 40, -1.0, 1.0 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (t)", 40, -1.0, 1.0 ) );
+    TopKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (t)",          40, -1.0, 1.0 ) );
 
-    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{+})",    20, -1.0, 1.0 ) );
-    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (W^{+})",          20, -1.0, 1.0 ) );  
-    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{+})", 20, -1.0, 1.0 ) );
-    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{+})", 20, -1.0, 1.0 ) );
-    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (W^{+})",          20, -1.0, 1.0 ) );  
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{+})",    40, -1.0, 1.0 ) );
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (W^{+})",          40, -1.0, 1.0 ) );  
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{+})", 40, -1.0, 1.0 ) );
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{+})", 40, -1.0, 1.0 ) );
+    WplusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WplusMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (W^{+})",          40, -1.0, 1.0 ) );  
 
-    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (b)",    20, -1.0, 1.0 ) );
-    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (b)",          20, -1.0, 1.0 ) );  
-    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (b)", 20, -1.0, 1.0 ) );
-    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (b)", 20, -1.0, 1.0 ) );
-    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (b)",          20, -1.0, 1.0 ) );  
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (b)",    40, -1.0, 1.0 ) );
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (b)",          40, -1.0, 1.0 ) );  
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (b)", 40, -1.0, 1.0 ) );
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (b)", 40, -1.0, 1.0 ) );
+    BKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (b)",          40, -1.0, 1.0 ) );  
 
-    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l^{+})",    20, -1.0, 1.0 ) );
-    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (l^{+})",          20, -1.0, 1.0 ) );  
-    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l^{+})", 20, -1.0, 1.0 ) );
-    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l^{+})", 20, -1.0, 1.0 ) );
-    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (l^{+})",          20, -1.0, 1.0 ) ); 
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l^{+})",    40, -1.0, 1.0 ) );
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (l^{+})",          40, -1.0, 1.0 ) );  
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l^{+})", 40, -1.0, 1.0 ) );
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l^{+})", 40, -1.0, 1.0 ) );
+    LepBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (l^{+})",          40, -1.0, 1.0 ) ); 
 
-    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #nu",    20, -1.0, 1.0 ) );
-    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} #nu",          20, -1.0, 1.0 ) );  
-    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #nu", 20, -1.0, 1.0 ) );
-    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #nu", 20, -1.0, 1.0 ) );
-    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassResWrong"), "M_{rec}-M_{gen}/M_{gen} #nu",          20, -1.0, 1.0 ) ); 
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #nu",    40, -1.0, 1.0 ) );
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} #nu",          40, -1.0, 1.0 ) );  
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #nu", 40, -1.0, 1.0 ) );
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #nu", 40, -1.0, 1.0 ) );
+    NuKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuMassResWrong"), "M_{rec}-M_{gen}/M_{gen} #nu",          40, -1.0, 1.0 ) ); 
 
-    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #bar{t}",    20, -1.0, 1.0 ) );
-    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} #bar{t}",         20, -1.0, 1.0 ) );  
-    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #bar{t}", 20, -1.0, 1.0 ) );
-    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #bar{t}", 20, -1.0, 1.0 ) );
-    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} #bar{t}",          20, -1.0, 1.0 ) ); 
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} #bar{t}",    40, -1.0, 1.0 ) );
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} #bar{t}",         40, -1.0, 1.0 ) );  
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} #bar{t}", 40, -1.0, 1.0 ) );
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} #bar{t}", 40, -1.0, 1.0 ) );
+    TopBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "TopBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} #bar{t}",          40, -1.0, 1.0 ) ); 
 
-    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{-})",    20, -1.0, 1.0 ) );
-    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (W^{-})",          20, -1.0, 1.0 ) );  
-    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{-})", 20, -1.0, 1.0 ) );
-    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{-})", 20, -1.0, 1.0 ) );
-    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (W^{-})",          20, -1.0, 1.0 ) ); 
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (W^{-})",    40, -1.0, 1.0 ) );
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (W^{-})",          40, -1.0, 1.0 ) );  
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (W^{-})", 40, -1.0, 1.0 ) );
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (W^{-})", 40, -1.0, 1.0 ) );
+    WminusKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "WminusMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (W^{-})",          40, -1.0, 1.0 ) ); 
 
-    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{b})",    20, -1.0, 1.0 ) );
-    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{b})",          20, -1.0, 1.0 ) );  
-    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{b})", 20, -1.0, 1.0 ) );
-    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{b})", 20, -1.0, 1.0 ) );
-    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (#bar{b})",          20, -1.0, 1.0 ) ); 
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{b})",    40, -1.0, 1.0 ) );
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{b})",          40, -1.0, 1.0 ) );  
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{b})", 40, -1.0, 1.0 ) );
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{b})", 40, -1.0, 1.0 ) );
+    BBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "BBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (#bar{b})",          40, -1.0, 1.0 ) ); 
 
-    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l)",    20, -1.0, 1.0 ) );
-    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (l)",          20, -1.0, 1.0 ) );  
-    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l)", 20, -1.0, 1.0 ) );
-    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l)", 20, -1.0, 1.0 ) );
-    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (l)",          20, -1.0, 1.0 ) ); 
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (l)",    40, -1.0, 1.0 ) );
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (l)",          40, -1.0, 1.0 ) );  
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (l)", 40, -1.0, 1.0 ) );
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (l)", 40, -1.0, 1.0 ) );
+    LepKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "LepMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (l)",          40, -1.0, 1.0 ) ); 
 
-    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    20, -1.0, 1.0 ) );
-    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{#nu})",          20, -1.0, 1.0 ) );  
-    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 20, -1.0, 1.0 ) );
-    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 20, -1.0, 1.0 ) );
-    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          20, -1.0, 1.0 ) );   
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPtResWrong"  ), "p_{t,rec}-p_{t,gen}/p_{t,gen} (#bar{#nu})",    40, -1.0, 1.0 ) );
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEnResWrong"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) );  
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarEtaResWrong" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 40, -1.0, 1.0 ) );
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarPhiResWrong" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 40, -1.0, 1.0 ) );
+    NuBarKinRes_.push_back( fs->make<TH1F>(ns.name(hist, "NuBarMassResWrong"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) );   
   }   
 }
 
