@@ -75,7 +75,7 @@ void drawHLine(TH1 *thisHisto, Double_t y,
   f->Draw("L same");
 }
 
-//                        L1  L2  L3  L4  L5  L6  L7
+//                       (L1)(L2) L3 (L4) L5 (L6) L7
 int markerColor[8] = { 2,  6,  6,  4,  6,  1,  6,  8};
 int markerStyle[8] = {22, 24, 24, 23, 24, 20, 24, 29};
 
@@ -107,8 +107,10 @@ void drawResponse(TH2F* hist, const unsigned i, TString xTitle, TString yTitle, 
 }
 
 /// main function
-void analyzeJetEnergyCorrections()
+void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root")
 {
+
+  name.Resize(name.Index(".root"));
 
   TString levels[8] = {"raw" ,
 		       "off" ,  //L1
@@ -119,7 +121,10 @@ void analyzeJetEnergyCorrections()
 		       "ue"  ,  //L6
 		       "part"}; //L7
 
-  TFile* file = new TFile("analyzeJetEnergyCorrections.root");
+  TFile* file = TFile::Open(name + ".root");
+  
+  if(!file)
+    abort();
 
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -138,8 +143,6 @@ void analyzeJetEnergyCorrections()
   TH2F* respBGenJetEta            [8];
   TH2F* respBPartonPtParton       [8];
   TH2F* respBPartonPtParton_barrel[8];
-
-  //responseLGenJetPtGenJet
 
   for(unsigned int i = 0; i < 8; i++) {
     TString dirBase = "analyzeJetEnergyCorrections_";
@@ -161,8 +164,8 @@ void analyzeJetEnergyCorrections()
   }
 
   file->Close();
-
-  TString outDir = "analyzeJetEnergyCorrections";
+  
+  TString outDir = name;
   gSystem->mkdir(outDir);
 
   TCanvas* canvasMassW = new TCanvas("canvasMassW", "W mass"                 , 900, 900);
@@ -173,6 +176,7 @@ void analyzeJetEnergyCorrections()
   canvasMassT->Divide(3,3);
   canvasRespL->Divide(3,3);
   canvasRespB->Divide(3,3);
+
 
   for(unsigned int i = 0; i < 8; i++) {
     massW[i]->SetTitle("JEC level: " + levels[i]);
@@ -209,17 +213,24 @@ void analyzeJetEnergyCorrections()
     if(i==1 || i==2 || i==4 || i==6)
       continue;
 
-    massW[i]->Scale(1. / massW[i]->Integral());
-    massT[i]->Scale(1. / massT[i]->Integral());
+    if(massW[i]->GetEntries()==0 &&
+       massT[i]->GetEntries()==0)
+      continue;
+
+    if(massW[i]->Integral())
+      massW[i]->Scale(1. / massW[i]->Integral());
+
+    if(massW[i]->Integral())
+      massT[i]->Scale(1. / massT[i]->Integral());
 
     fitGauss(massW[i]);
     fitGauss(massT[i]);
-
+    
     double mean  = massW[i]->GetFunction("gaus")->GetParameter(1);
     double relSigma = massW[i]->GetFunction("gaus")->GetParameter(2) / mean;
     sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
     txtMassW->AddText(levels[i] + tmpTxt);
-
+    
     mean  = massT[i]->GetFunction("gaus")->GetParameter(1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
     sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
@@ -249,8 +260,10 @@ void analyzeJetEnergyCorrections()
     canvasMassW->cd(9);
     setPadStyle();
     massW[i]->DrawCopy(drawOption);
-    massW[i]->GetFunction("gaus")->SetLineWidth(1);
-    massW[i]->GetFunction("gaus")->DrawCopy("same");
+    if(massW[i]->GetListOfFunctions()->FindObject("gaus")) {
+      massW[i]->GetFunction("gaus")->SetLineWidth(1);
+      massW[i]->GetFunction("gaus")->DrawCopy("same");
+    }
     txtMassW->Draw();
     if(i==7)
       gPad->Print(outDir+"/massW.eps");
@@ -258,8 +271,10 @@ void analyzeJetEnergyCorrections()
     canvasMassT->cd(9);
     setPadStyle();
     massT[i]->DrawCopy(drawOption);
-    massT[i]->GetFunction("gaus")->SetLineWidth(1);
-    massT[i]->GetFunction("gaus")->DrawCopy("same");
+    if(massT[i]->GetListOfFunctions()->FindObject("gaus")) {
+      massT[i]->GetFunction("gaus")->SetLineWidth(1);
+      massT[i]->GetFunction("gaus")->DrawCopy("same");
+    }
     txtMassT->Draw();
     if(i==7)
       gPad->Print(outDir+"/massT.eps");
@@ -356,10 +371,12 @@ void analyzeJetEnergyCorrections()
 
   // print one ps-file
 
-  canvasMassW->Print("analyzeJetEnergyCorrections.ps(");
-  canvasMassT->Print("analyzeJetEnergyCorrections.ps" );
-  canvasRespL->Print("analyzeJetEnergyCorrections.ps" );
-  canvasRespB->Print("analyzeJetEnergyCorrections.ps)");
+  TString psName = name + ".ps";
+
+  canvasMassW->Print(psName +"(");
+  canvasMassT->Print(psName);
+  canvasRespL->Print(psName);
+  canvasRespB->Print(psName + ")");
 
   // clean up
 
