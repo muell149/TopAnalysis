@@ -3,6 +3,9 @@
 #include "TopAnalysis/TopFilter/plugins/DiMuonMassFilter.h"
 DEFINE_FWK_MODULE(DiMuonMassFilter);
 
+#include "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
+DEFINE_FWK_MODULE(FullLepHypothesesFilter);
+
 #include "TopAnalysis/TopFilter/plugins/MuonJetOverlapSelector.h"
 DEFINE_FWK_MODULE(MuonJetOverlapSelector);
 
