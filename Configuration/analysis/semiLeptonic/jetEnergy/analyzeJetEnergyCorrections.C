@@ -79,7 +79,8 @@ void drawHLine(TH1 *thisHisto, Double_t y,
 int markerColor[8] = { 2,  6,  6,  4,  6,  1,  6,  8};
 int markerStyle[8] = {22, 24, 24, 23, 24, 20, 24, 29};
 
-void drawResponse(TH2F* hist, const unsigned i, TString xTitle, TString yTitle, bool logX=true)
+void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TString yTitle, const bool logX=true,
+		  const double yMin = 0.4, const double yMax = 1.6)
 {
 
   setPadStyle();
@@ -89,8 +90,8 @@ void drawResponse(TH2F* hist, const unsigned i, TString xTitle, TString yTitle, 
 
   histFit->SetMarkerColor(markerColor[i]);
   histFit->SetMarkerStyle(markerStyle[i]);
-  histFit->SetMinimum(0.4);
-  histFit->SetMaximum(1.6);
+  histFit->SetMinimum(yMin);
+  histFit->SetMaximum(yMax);
   histFit->SetTitle("");
   histFit->SetXTitle(xTitle);
   histFit->SetYTitle(yTitle);
@@ -168,15 +169,39 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   TString outDir = name;
   gSystem->mkdir(outDir);
 
-  TCanvas* canvasMassW = new TCanvas("canvasMassW", "W mass"                 , 900, 900);
-  TCanvas* canvasMassT = new TCanvas("canvasMassT", "top mass"               , 900, 900);
-  TCanvas* canvasRespL = new TCanvas("canvasRespL", "response for light jets", 900, 900);
-  TCanvas* canvasRespB = new TCanvas("canvasRespB", "response for b jets"    , 900, 900);
-  canvasMassW->Divide(3,3);
-  canvasMassT->Divide(3,3);
-  canvasRespL->Divide(3,3);
-  canvasRespB->Divide(3,3);
+  for(unsigned int i = 0; i < 8; i++) {
+    massW                     [i]->Sumw2();
+    massT                     [i]->Sumw2();
+    respLGenJetPtGenJet       [i]->Sumw2();
+    respLGenJetPtGenJet_barrel[i]->Sumw2();
+    respLGenJetEta            [i]->Sumw2();
+    respLPartonPtParton       [i]->Sumw2();
+    respLPartonPtParton_barrel[i]->Sumw2();
+    respBGenJetPtGenJet       [i]->Sumw2();
+    respBGenJetPtGenJet_barrel[i]->Sumw2();
+    respBGenJetEta            [i]->Sumw2();
+    respBPartonPtParton       [i]->Sumw2();
+    respBPartonPtParton_barrel[i]->Sumw2();   
+  }
 
+  // create canvases
+
+  TCanvas* canvasMassW      = new TCanvas("canvasMassW"     , "W mass"                        , 900, 900);
+  TCanvas* canvasMassT      = new TCanvas("canvasMassT"     , "top mass"                      , 900, 900);
+  TCanvas* canvasMassW_perr = new TCanvas("canvasMassW_perr", "W mass (peak error)"           , 900, 900);
+  TCanvas* canvasMassT_perr = new TCanvas("canvasMassT_perr", "top mass (peak error)"         , 900, 900);
+  TCanvas* canvasRespL      = new TCanvas("canvasRespL"     , "response for light jets"       , 900, 900);
+  TCanvas* canvasRespB      = new TCanvas("canvasRespB"     , "response for b jets"           , 900, 900);
+  TCanvas* canvasRespL_zoom = new TCanvas("canvasRespL_zoom", "response for light jets (zoom)", 900, 900);
+  TCanvas* canvasRespB_zoom = new TCanvas("canvasRespB_zoom", "response for b jets (zoom)"    , 900, 900);
+  canvasMassW     ->Divide(3,3);
+  canvasMassT     ->Divide(3,3);
+  canvasMassW_perr->Divide(3,3);
+  canvasMassT_perr->Divide(3,3);
+  canvasRespL     ->Divide(3,3);
+  canvasRespB     ->Divide(3,3);
+  canvasRespL_zoom->Divide(3,3);
+  canvasRespB_zoom->Divide(3,3);
 
   for(unsigned int i = 0; i < 8; i++) {
     massW[i]->SetTitle("JEC level: " + levels[i]);
@@ -195,6 +220,12 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasMassT->cd(i+1);
     massT[i]->DrawCopy();
 
+    canvasMassW_perr->cd(i+1);
+    massW[i]->DrawCopy();
+
+    canvasMassT_perr->cd(i+1);
+    massT[i]->DrawCopy();
+
   }  
 
   TPaveText *txtMassW = new TPaveText(0.28, 0.68, 0.88, 0.88, "NDC");
@@ -207,6 +238,9 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   txtMassT->SetFillColor(0);
   txtMassW->SetBorderSize(0);
   txtMassT->SetBorderSize(0);
+
+  TPaveText *txtMassW_perr = (TPaveText*) txtMassW->Clone();
+  TPaveText *txtMassT_perr = (TPaveText*) txtMassT->Clone();
 
   for(unsigned int i = 0; i < 8; i++) {
 
@@ -226,15 +260,23 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     fitGauss(massW[i]);
     fitGauss(massT[i]);
     
-    double mean  = massW[i]->GetFunction("gaus")->GetParameter(1);
+    double mean     = massW[i]->GetFunction("gaus")->GetParameter(1);
     double relSigma = massW[i]->GetFunction("gaus")->GetParameter(2) / mean;
     sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
     txtMassW->AddText(levels[i] + tmpTxt);
+
+    double mean_err = massW[i]->GetFunction("gaus")->GetParError(1);
+    sprintf(tmpTxt, ": #mu = %4.1f GeV #pm %4.1f", mean, mean_err);
+    txtMassW_perr->AddText(levels[i] + tmpTxt);
     
-    mean  = massT[i]->GetFunction("gaus")->GetParameter(1);
+    mean     = massT[i]->GetFunction("gaus")->GetParameter(1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
     sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
     txtMassT->AddText(levels[i] + tmpTxt);
+
+    mean_err = massT[i]->GetFunction("gaus")->GetParError(1);
+    sprintf(tmpTxt, ": #mu = %4.1f GeV #pm %4.1f", mean, mean_err);
+    txtMassT_perr->AddText(levels[i] + tmpTxt);
 
   }
 
@@ -279,6 +321,30 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     if(i==7)
       gPad->Print(outDir+"/massT.eps");
 
+    // with error on peak from Gauss fit
+
+    canvasMassW_perr->cd(9);
+    setPadStyle();
+    massW[i]->DrawCopy(drawOption);
+    if(massW[i]->GetListOfFunctions()->FindObject("gaus")) {
+      massW[i]->GetFunction("gaus")->SetLineWidth(1);
+      massW[i]->GetFunction("gaus")->DrawCopy("same");
+    }
+    txtMassW_perr->Draw();
+    if(i==7)
+      gPad->Print(outDir+"/massW_perr.eps");
+
+    canvasMassT_perr->cd(9);
+    setPadStyle();
+    massT[i]->DrawCopy(drawOption);
+    if(massT[i]->GetListOfFunctions()->FindObject("gaus")) {
+      massT[i]->GetFunction("gaus")->SetLineWidth(1);
+      massT[i]->GetFunction("gaus")->DrawCopy("same");
+    }
+    txtMassT_perr->Draw();
+    if(i==7)
+      gPad->Print(outDir+"/massT_perr.eps");
+
   }
 
 //  TH1D* fitRespLGenJetPtGenJet       [8];
@@ -292,6 +358,9 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 //  TH1D* fitRespBGenJetEta            [8];
 //  TH1D* fitRespBPartonPtParton       [8];
 //  TH1D* fitRespBPartonPtParton_barrel[8];
+
+  double yMin_zoom = 0.8;
+  double yMax_zoom = 1.2;
 
   for(unsigned int i = 0; i < 8; i++) {
 
@@ -315,6 +384,28 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasRespL->cd(5);
     drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
 
+    // response light jets (zoom)
+
+    canvasRespL_zoom->cd(1);
+    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+		 true, yMin_zoom, yMax_zoom);
+
+    canvasRespL_zoom->cd(2);
+    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+		 true, yMin_zoom, yMax_zoom);
+
+    canvasRespL_zoom->cd(3);
+    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)",
+		 false, yMin_zoom, yMax_zoom);
+
+    canvasRespL_zoom->cd(4);
+    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+		 true, yMin_zoom, yMax_zoom);
+
+    canvasRespL_zoom->cd(5);
+    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+		 true, yMin_zoom, yMax_zoom);
+
     // response b jets
 
     canvasRespB->cd(1);
@@ -331,6 +422,28 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     canvasRespB->cd(5);
     drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
+
+    // response b jets (zoom)
+
+    canvasRespB_zoom->cd(1);
+    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+		 true, yMin_zoom, yMax_zoom);
+
+    canvasRespB_zoom->cd(2);
+    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+		 true, yMin_zoom, yMax_zoom);
+
+    canvasRespB_zoom->cd(3);
+    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)",
+		 false, yMin_zoom, yMax_zoom);
+
+    canvasRespB_zoom->cd(4);
+    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+		 true, yMin_zoom, yMax_zoom);
+
+    canvasRespB_zoom->cd(5);
+    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+		 true, yMin_zoom, yMax_zoom);
 
   }
 
@@ -363,9 +476,17 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     legend->Draw();
     gPad->Print(outDir+"/responseLight" + suffix);
 
+    canvasRespL_zoom->cd(i);
+    legend->Draw();
+    gPad->Print(outDir+"/responseLight_zoom" + suffix);
+
     canvasRespB->cd(i);
     legend->Draw();
     gPad->Print(outDir+"/responseB" + suffix);
+
+    canvasRespB_zoom->cd(i);
+    legend->Draw();
+    gPad->Print(outDir+"/responseB_zoom" + suffix);
 
   }
 
@@ -373,10 +494,14 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   TString psName = name + ".ps";
 
-  canvasMassW->Print(psName +"(");
-  canvasMassT->Print(psName);
-  canvasRespL->Print(psName);
-  canvasRespB->Print(psName + ")");
+  canvasMassW     ->Print(psName +"(");
+  canvasMassW_perr->Print(psName);
+  canvasMassT     ->Print(psName);
+  canvasMassT_perr->Print(psName);
+  canvasRespL     ->Print(psName);
+  canvasRespL_zoom->Print(psName);
+  canvasRespB     ->Print(psName);
+  canvasRespB_zoom->Print(psName + ")");
 
   // clean up
 
