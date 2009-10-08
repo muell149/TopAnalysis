@@ -24,12 +24,15 @@ process.MessageLogger.cerr.JetPartonMatching = cms.untracked.PSet(
 
 ## define input
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0026/F2B6764A-6D89-DE11-8585-0018FEFAC384.root'
-    )
+    fileNames = cms.untracked.vstring()
 )
+execfile("TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/Source_10TeV_cff.py")
 
 ## define maximal number of events to loop over
+## ----------------------
+## 50/pb at  7 TeV :  8,250
+## 50/pb at 10 TeV : 20,750
+## ----------------------
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
 )
