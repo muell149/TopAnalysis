@@ -24,14 +24,26 @@ void JetEnergyCorrectionsAnalyzer::beginJob(const edm::EventSetup&)
   edm::Service<TFileService> fs;
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
 
+  double binningLogPt[15] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+			     120, 150, 200, 250, 300};
+
   hists_["mW"  ] = fs->make<TH1F>("mW"  , "mW"  , 28, 0., 140.);
   hists_["mTop"] = fs->make<TH1F>("mTop", "mTop", 60, 0., 300.);
 
+  hists_["mW_Pt1" ] = fs->make<TH2F>("mW_Pt1" , "mW_Pt1" , 14, binningLogPt, 41, 0., 160.);
+  hists_["mW_Pt2" ] = fs->make<TH2F>("mW_Pt2" , "mW_Pt2" , 14, binningLogPt, 41, 0., 160.);
+  hists_["mW_Eta1"] = fs->make<TH2F>("mW_Eta1", "mW_Eta1", 30, -3., 3.     , 41, 0., 160.);
+  hists_["mW_Eta2"] = fs->make<TH2F>("mW_Eta2", "mW_Eta2", 30, -3., 3.     , 41, 0., 160.);
+
+  hists_["mTop_Pt1" ] = fs->make<TH2F>("mTop_Pt1" , "mTop_Pt1" , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_Pt2" ] = fs->make<TH2F>("mTop_Pt2" , "mTop_Pt2" , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_PtB" ] = fs->make<TH2F>("mTop_PtB" , "mTop_PtB" , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_Eta1"] = fs->make<TH2F>("mTop_Eta1", "mTop_Eta1", 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_Eta2"] = fs->make<TH2F>("mTop_Eta2", "mTop_Eta2", 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_EtaB"] = fs->make<TH2F>("mTop_EtaB", "mTop_EtaB", 30, -3., 3.     , 51, 0., 350.);
+
   hists_["mW_barrel"  ] = fs->make<TH1F>("mW_barrel"  , "mW_barrel"  , 28, 0., 140.);
   hists_["mTop_barrel"] = fs->make<TH1F>("mTop_barrel", "mTop_barrel", 60, 0., 300.);
-
-  double binningLogPt[15] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-			     120, 150, 200, 250, 300};
 
   // response light jets
 
@@ -119,8 +131,34 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
 
   // invariant mass of W and top
 
-  hists_.find("mW"  )->second->Fill( semiLepEvt->hadronicDecayW  (hypoKey_)->mass() );
-  hists_.find("mTop")->second->Fill( semiLepEvt->hadronicDecayTop(hypoKey_)->mass() );
+  const reco::Candidate* jet1 = semiLepEvt->hadronicDecayQuark   (hypoKey_);
+  const reco::Candidate* jet2 = semiLepEvt->hadronicDecayQuarkBar(hypoKey_);
+  const reco::Candidate* jetB = semiLepEvt->hadronicDecayB       (hypoKey_);
+
+  if(jet1->pt() < jet2->pt()) {
+    jet1 = semiLepEvt->hadronicDecayQuarkBar(hypoKey_);
+    jet2 = semiLepEvt->hadronicDecayQuark   (hypoKey_);    
+  }
+
+  double mW   = semiLepEvt->hadronicDecayW  (hypoKey_)->mass();
+  double mTop = semiLepEvt->hadronicDecayTop(hypoKey_)->mass();
+
+  hists_.find("mW"  )->second->Fill( mW   );
+  hists_.find("mTop")->second->Fill( mTop );
+
+  hists_.find("mW_Pt1")->second->Fill( jet1->pt(), mW );
+  hists_.find("mW_Pt2")->second->Fill( jet2->pt(), mW );
+
+  hists_.find("mW_Eta1")->second->Fill( jet2->eta(), mW );
+  hists_.find("mW_Eta2")->second->Fill( jet2->eta(), mW );
+
+  hists_.find("mTop_Pt1")->second->Fill( jet1->pt(), mTop );
+  hists_.find("mTop_Pt2")->second->Fill( jet2->pt(), mTop );
+  hists_.find("mTop_PtB")->second->Fill( jetB->pt(), mTop );
+
+  hists_.find("mTop_Eta1")->second->Fill( jet2->eta(), mTop );
+  hists_.find("mTop_Eta2")->second->Fill( jet2->eta(), mTop );
+  hists_.find("mTop_EtaB")->second->Fill( jetB->eta(), mTop );
 
   // in the barrel only
 
