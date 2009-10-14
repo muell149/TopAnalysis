@@ -75,6 +75,30 @@ void drawHLine(TH1 *thisHisto, Double_t y,
   f->Draw("L same");
 }
 
+void hatch_bin(TH1 *thisHisto, Int_t bin, TString option = "", Double_t ymax_fac = 1.)
+{
+
+  Double_t xmin = thisHisto->GetBinLowEdge(bin);
+  Double_t xmax = xmin + thisHisto->GetBinWidth(bin);
+  Double_t ymin = thisHisto->GetMinimum();
+  Double_t ymax = ymax_fac*thisHisto->GetMaximum();
+  // draw box
+  TBox *box = new TBox();
+  box->SetFillStyle(3944);
+  box->SetFillColor(kGray);
+  box->DrawBox(xmin, ymin, xmax, ymax);
+  // draw lines at left and right border if desired
+  if(option.Contains("bl") || option.Contains("br")) {
+    TLine *line = new TLine();
+    line->SetLineColor(40);
+    line->SetLineStyle(2);
+    if(option.Contains("bl")) line->DrawLine(xmin, ymin, xmin, ymax);
+    if(option.Contains("br")) line->DrawLine(xmax, ymin, xmax, ymax);
+  }
+  gPad->RedrawAxis();
+
+}
+
 //                       (L1)(L2) L3 (L4) L5 (L6) L7
 int markerColor[8] = { 2,  6,  6,  4,  6,  1,  6,  8};
 int markerStyle[8] = {22, 24, 24, 23, 24, 20, 24, 29};
@@ -103,6 +127,10 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
   
   histFit->DrawCopy(drawOption);
   drawHLine(histFit, yLine);
+  if(logX) {
+    hatch_bin(histFit, 1);
+    hatch_bin(histFit, 2);
+  }
   histFit->DrawCopy(drawOption);
 
 }
@@ -198,6 +226,31 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   gSystem->mkdir(outDir);
 
   for(unsigned int i = 0; i < 8; i++) {
+    double scaleFactor = 1.;
+    //    double scaleFactor = 0.039; //50 pb^-1 at 10 TeV
+    //    double scaleFactor = 0.014; //50 pb^-1 at 7 TeV
+    massW                     [i]->Scale(scaleFactor);
+    massT                     [i]->Scale(scaleFactor);
+    massW_Pt1                 [i]->Scale(scaleFactor);
+    massW_Pt2                 [i]->Scale(scaleFactor);
+    massW_Eta1                [i]->Scale(scaleFactor);
+    massW_Eta2                [i]->Scale(scaleFactor);
+    massT_Pt1                 [i]->Scale(scaleFactor);
+    massT_Pt2                 [i]->Scale(scaleFactor);
+    massT_PtB                 [i]->Scale(scaleFactor);
+    massT_Eta1                [i]->Scale(scaleFactor);
+    massT_Eta2                [i]->Scale(scaleFactor);
+    massT_EtaB                [i]->Scale(scaleFactor);
+    respLGenJetPtGenJet       [i]->Scale(scaleFactor);
+    respLGenJetPtGenJet_barrel[i]->Scale(scaleFactor);
+    respLGenJetEta            [i]->Scale(scaleFactor);
+    respLPartonPtParton       [i]->Scale(scaleFactor);
+    respLPartonPtParton_barrel[i]->Scale(scaleFactor);
+    respBGenJetPtGenJet       [i]->Scale(scaleFactor);
+    respBGenJetPtGenJet_barrel[i]->Scale(scaleFactor);
+    respBGenJetEta            [i]->Scale(scaleFactor);
+    respBPartonPtParton       [i]->Scale(scaleFactor);
+    respBPartonPtParton_barrel[i]->Scale(scaleFactor);
     massW                     [i]->Sumw2();
     massT                     [i]->Sumw2();
     massW_Pt1                 [i]->Sumw2();
@@ -219,7 +272,14 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     respBGenJetPtGenJet_barrel[i]->Sumw2();
     respBGenJetEta            [i]->Sumw2();
     respBPartonPtParton       [i]->Sumw2();
-    respBPartonPtParton_barrel[i]->Sumw2();   
+    respBPartonPtParton_barrel[i]->Sumw2();
+  }
+
+  for(unsigned int i = 0; i < 8; i++) {
+    massW_Pt1 [i]->Add(massW_Pt2 [i]);
+    massW_Eta1[i]->Add(massW_Eta2[i]);
+    massT_Pt1 [i]->Add(massT_Pt2 [i]);
+    massT_Eta1[i]->Add(massT_Eta2[i]);
   }
 
   // create canvases
@@ -301,24 +361,33 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     fitGauss(massW[i]);
     fitGauss(massT[i]);
+
+    massW[i]->SetLineColor(markerColor[i]);
+    massT[i]->SetLineColor(markerColor[i]);
+
+    TText* ttxt = 0;
     
     double mean     = massW[i]->GetFunction("gaus")->GetParameter(1);
     double relSigma = massW[i]->GetFunction("gaus")->GetParameter(2) / mean;
     sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
-    txtMassW->AddText(levels[i] + tmpTxt);
+    ttxt = txtMassW->AddText(levels[i] + tmpTxt);
+    ttxt->SetTextColor(markerColor[i]);
 
     double mean_err = massW[i]->GetFunction("gaus")->GetParError(1);
-    sprintf(tmpTxt, ": #mu = %4.1f GeV #pm %4.1f", mean, mean_err);
-    txtMassW_perr->AddText(levels[i] + tmpTxt);
+    sprintf(tmpTxt, ": #mu = %4.1f #pm %4.1f GeV", mean, mean_err);
+    ttxt = txtMassW_perr->AddText(levels[i] + tmpTxt);
+    ttxt->SetTextColor(markerColor[i]);
     
     mean     = massT[i]->GetFunction("gaus")->GetParameter(1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
     sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
-    txtMassT->AddText(levels[i] + tmpTxt);
+    ttxt = txtMassT->AddText(levels[i] + tmpTxt);
+    ttxt->SetTextColor(markerColor[i]);
 
     mean_err = massT[i]->GetFunction("gaus")->GetParError(1);
-    sprintf(tmpTxt, ": #mu = %4.1f GeV #pm %4.1f", mean, mean_err);
-    txtMassT_perr->AddText(levels[i] + tmpTxt);
+    sprintf(tmpTxt, ": #mu = %4.1f #pm %4.1f GeV", mean, mean_err);
+    ttxt = txtMassT_perr->AddText(levels[i] + tmpTxt);
+    ttxt->SetTextColor(markerColor[i]);
 
   }
 
@@ -346,6 +415,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     massW[i]->DrawCopy(drawOption);
     if(massW[i]->GetListOfFunctions()->FindObject("gaus")) {
       massW[i]->GetFunction("gaus")->SetLineWidth(1);
+      massW[i]->GetFunction("gaus")->SetLineColor(markerColor[i]);
       massW[i]->GetFunction("gaus")->DrawCopy("same");
     }
     txtMassW->Draw();
@@ -357,6 +427,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     massT[i]->DrawCopy(drawOption);
     if(massT[i]->GetListOfFunctions()->FindObject("gaus")) {
       massT[i]->GetFunction("gaus")->SetLineWidth(1);
+      massT[i]->GetFunction("gaus")->SetLineColor(markerColor[i]);
       massT[i]->GetFunction("gaus")->DrawCopy("same");
     }
     txtMassT->Draw();
@@ -397,33 +468,21 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // W mass
     
     canvasMassW_2dim->cd(1);
-    drawResponse(massW_Pt1[i], i, "p_{T,1} [GeV]", "m_{jj} [GeV]", true, 0., 160., 80.4);
-
-    canvasMassW_2dim->cd(2);
-    drawResponse(massW_Pt2[i], i, "p_{T,2} [GeV]", "m_{jj} [GeV]", true, 0., 160., 80.4);
+    drawResponse(massW_Pt1[i], i, "p_{T,j} [GeV]", "m_{jj} [GeV]", true, 0., 160., 80.4);
 
     canvasMassW_2dim->cd(4);
-    drawResponse(massW_Eta1[i], i, "#eta_{1}", "m_{jj} [GeV]", false, 0., 160., 80.4);
-
-    canvasMassW_2dim->cd(5);
-    drawResponse(massW_Eta2[i], i, "#eta_{2}", "m_{jj} [GeV]", false, 0., 160., 80.4);
+    drawResponse(massW_Eta1[i], i, "#eta_{j}", "m_{jj} [GeV]", false, 0., 160., 80.4);
 
     // top mass
 
     canvasMassT_2dim->cd(1);
-    drawResponse(massT_Pt1[i], i, "p_{T,1} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
-
-    canvasMassT_2dim->cd(2);
-    drawResponse(massT_Pt2[i], i, "p_{T,2} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
+    drawResponse(massT_Pt1[i], i, "p_{T,j} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(3);
     drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(4);
-    drawResponse(massT_Eta1[i], i, "#eta_{1}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
-
-    canvasMassT_2dim->cd(5);
-    drawResponse(massT_Eta2[i], i, "#eta_{2}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
+    drawResponse(massT_Eta1[i], i, "#eta_{j}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(6);
     drawResponse(massT_EtaB[i], i, "#eta_{b}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
@@ -543,7 +602,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     suffix += i;
     suffix += ".eps";
 
-    if(i!=3 && i!=6) {
+    if(i==1 || i==4) {
       canvasMassW_2dim->cd(i);
       legend->Draw();
       gPad->Print(outDir+"/massW_2dim" + suffix);
