@@ -14,7 +14,7 @@ process = cms.Process("TopQuark")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-#process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -71,6 +71,9 @@ else:
 ## ---
 ##    configure the eventHypotheses this part should be stored centrally soon
 ## ---
+    
+process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
+process.p0 = cms.Path(process.semiLeptonicSelection)
 
 ## produce top reconstructed event
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
@@ -80,6 +83,13 @@ process.kinFitTtSemiLepEventHypothesis.jets = "tightLeadingJets"
 process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+    
+## choose which hypotheses to produce
+from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
+addTtSemiLepHypotheses(process,
+                       ["kKinFit"]
+                       )
+#removeTtSemiLepHypGenMatch(process)
 
 ## ---
 ##    configure the analyzer
