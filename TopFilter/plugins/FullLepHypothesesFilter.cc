@@ -1,6 +1,8 @@
 #include "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
 #include "TLorentzVector.h"
 
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 FullLepHypothesesFilter::FullLepHypothesesFilter(const edm::ParameterSet& cfg):
   hypoKey_    (cfg.getParameter<edm::InputTag>(       "hypoKey"        )),
   FullLepEvt_ (cfg.getParameter<edm::InputTag>(       "FullLepEvent"   )),

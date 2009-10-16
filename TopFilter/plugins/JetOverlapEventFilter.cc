@@ -1,5 +1,8 @@
 #include "TopAnalysis/TopFilter/plugins/JetOverlapEventFilter.h"
 
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 #include <Math/VectorUtil.h>
 
 JetOverlapEventFilter::JetOverlapEventFilter(const edm::ParameterSet& cfg):

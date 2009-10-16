@@ -1,6 +1,8 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TopAnalysis/TopFilter/plugins/DiMuonMassFilter.h"
 
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 /// default constructor 
 DiMuonMassFilter::DiMuonMassFilter(const edm::ParameterSet& cfg):
   muons_ (cfg.getParameter<edm::InputTag>(       "muons"  )),

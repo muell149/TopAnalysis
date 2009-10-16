@@ -2,6 +2,8 @@
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
 
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 FullLepHypothesesAnalyzer::FullLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent"    )),
   hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )),
