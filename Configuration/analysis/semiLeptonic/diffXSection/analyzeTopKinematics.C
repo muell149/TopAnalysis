@@ -49,7 +49,7 @@ void analyzeTopKinematics()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./rootfiles/analyzeTopQuarks_sig_new.root") );
+  files_.push_back(new TFile("./analyzeTopQuarks.root") );
 
   // ---
   //    get histograms

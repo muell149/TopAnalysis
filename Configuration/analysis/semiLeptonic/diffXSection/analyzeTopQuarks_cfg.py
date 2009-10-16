@@ -20,7 +20,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_selected_sig_0_ttbarx09.root'
+    '/store/user/henderle/OctEx/SD_Mu9/TTbar/PATtuple_1.root'
+    #'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_selected_sig_0_ttbarx09.root'
     ## "file:patTuple.root"
     )
 )
