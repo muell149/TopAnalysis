@@ -89,7 +89,14 @@ process.load("TopAnalysis.TopAnalyzer.JetEnergyCorrectionsAnalyzer_cff")
 ## printout for debugging
 process.ttSemiLepJetPartonMatch   .verbosity = 1
 process.ttSemiLepGenJetPartonMatch.verbosity = 1
-process.ttSemiLepEvent            .verbosity = 1
+process.ttSemiLepEventRaw         .verbosity = 1
+#process.ttSemiLepEventOff         .verbosity = 1
+#process.ttSemiLepEventRel         .verbosity = 1
+#process.ttSemiLepEventAbs         .verbosity = 1
+#process.ttSemiLepEventEmf         .verbosity = 1
+#process.ttSemiLepEventHad         .verbosity = 1
+#process.ttSemiLepEventUe          .verbosity = 1
+#process.ttSemiLepEventPart        .verbosity = 1
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
