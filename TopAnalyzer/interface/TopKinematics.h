@@ -18,11 +18,14 @@
 
 namespace CrossSection{
  // binning for top & ttbar cross section histograms
- double topPt    [] = {             0. ,    10. ,    35. ,    65. ,   100. ,   135. ,   170. ,   215. ,   300. ,   400.  };
- double topY     [] = {   -4. ,    -3. ,  -1.92 ,   -1.2 ,  -0.48 ,     0. ,   0.48 ,    1.2 ,   1.92 ,     3. ,     4.  };
- double ttbarMass[] = {                                      300. ,   345. ,   400. ,   490. ,   615. ,   790. ,  1000.  };
- double ttbarPt  [] = {                      0. ,    10. ,    20. ,    30. ,    40. ,    60. ,    80. ,   130. ,   200.  };
- double ttbarY   [] = {   -5. ,    -4. ,    -3. ,   -2.3 ,   -1.6 ,     0. ,    1.6 ,    2.3 ,     3. ,     4. ,     5.  };
+ double topPt       [] = {             0. ,    10. ,    35. ,    65. ,   100. ,   135. ,   170. ,   215. ,   300. ,   400.  };
+ double topY        [] = {   -4. ,    -3. ,  -1.92 ,   -1.2 ,  -0.48 ,     0. ,   0.48 ,    1.2 ,   1.92 ,     3. ,     4.  };
+ double topPhi      [] = {                                     -3.14 ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,   3.14  };
+ double ttbarMass   [] = {                                      300. ,   345. ,   400. ,   490. ,   615. ,   790. ,  1000.  };
+ double ttbarPt     [] = {                      0. ,    10. ,    20. ,    30. ,    40. ,    60. ,    80. ,   130. ,   200.  };
+ double ttbarY      [] = {   -5. ,    -4. ,    -3. ,   -2.3 ,   -1.6 ,     0. ,    1.6 ,    2.3 ,     3. ,     4. ,     5.  };
+ double ttbarPhi    [] = {                                     -3.14 ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,   3.14  };
+ double ttbarDelPhi [] = {                                     -3.14 ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,   3.14  };
 }
 
 class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
@@ -59,16 +62,16 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
      Helper functions for special histogram management
   **/
   /// histogram filling for candidates topA and topB
-  void fill(const reco::Candidate* topA, const reco::Candidate* topB, const double& weight=1.);
+  void fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, const double& weight=1.);
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
-  void fill(const reco::Candidate* recTopA, const reco::Candidate* genTopA, const reco::Candidate* recTopB, const reco::Candidate* genTopB, const double& weight=1.);
+  void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const double& weight=1.);
   /// helper function for determining stability and purity
   void match(TH1* hist, const double& genValue, const double& recValue, const double& weight);
 
  private:
   /// class key of hypothesis
   std::string hypoKey_;
-  /// apply matchin for stability and purity or not
+  /// apply matching for stability and purity or not
   bool matchForStabilityAndPurity_;
 
   /// histogram container for correlation plots
