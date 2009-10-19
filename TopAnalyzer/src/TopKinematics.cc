@@ -39,7 +39,7 @@ void TopKinematics::book()
   // ttbar pair invariant mass
   hists_["ttbarMass"   ] = new TH1F( "ttbarMass"   , "ttbarMass"  ,    6, CrossSection::ttbarMass  );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi" ] = new TH1F( "ttbarDelPhi" , "ttbarDelPhi",   10, CrossSection::ttbarDelPhi);
+  hists_["ttbarDelPhi" ] = new TH1F( "ttbarDelPhi" , "ttbarDelPhi",    6, CrossSection::ttbarDelPhi);
   // deltaY between both top quarks
   hists_["ttbarDelY"   ] = new TH1F( "ttbarDelY"   , "ttbarDelY"  ,   10,     -5.,      5.        );
   // sum of y of both top quarks
@@ -55,14 +55,12 @@ void TopKinematics::book()
   hists_["topYHad_"    ] = new TH1F( "topYHad_"    , "topYHad_"   ,  10 , CrossSection::topY      );
   // y  of the hadronically decaying top candidate
   hists_["topPhiHad_"  ] = new TH1F( "topPhiHad_"   , "topPhiHad_" ,  6 , CrossSection::topPhi    );
-
   // pt of the leptonically decaying top candidate
   hists_["topPtLep_"   ] = new TH1F( "topPtLep_"   , "topPtLep_"  ,   9 , CrossSection::topPt     );
   // y  of the leptonically decaying top candidate
   hists_["topYLep_"    ] = new TH1F( "topYLep_"    , "topYLep_"   ,  10 , CrossSection::topY      );
   // y  of the leptonically decaying top candidate
   hists_["topPhiLep_"  ] = new TH1F( "topPhiLep_"   , "topPhiLep_" ,  6 , CrossSection::topPhi    );
-
 
   /** 
       Correlation Plots
@@ -102,12 +100,11 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // ttbar pair invariant mass
   hists_["ttbarMass"   ] = fs->make<TH1F>( "ttbarMass"   , "ttbarMass"  ,    6, CrossSection::ttbarMass  );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi" ] = fs->make<TH1F>( "ttbarDelPhi" , "ttbarDelPhi",   10, CrossSection::ttbarDelPhi);
+  hists_["ttbarDelPhi" ] = fs->make<TH1F>( "ttbarDelPhi" , "ttbarDelPhi",    6, CrossSection::ttbarDelPhi);
   // deltaY between both top quarks
   hists_["ttbarDelY"   ] = fs->make<TH1F>( "ttbarDelY"   , "ttbarDelY"  ,   10,     -5.,      5.        );
   // sum of y of both top quarks
   hists_["ttbarSumY"   ] = fs->make<TH1F>( "ttbarSumY"   , "ttbarSumY"  ,   10,     -5.,      5.        );
-
 
   /**
      Top Variables for Cross Checks
