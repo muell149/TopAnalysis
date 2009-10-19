@@ -306,7 +306,7 @@ sizes ['inclMu15_SD'] = 'blocks'
 source['inclMu15_SD'] = 'inclMu15_SD_0,' + 'inclMu15_SD_1,'
 source['inclMu15_SD']+= 'inclMu15_SD_2,' + 'inclMu15_SD_3,'
 source['inclMu15_SD']+= 'inclMu15_SD_4,' + 'inclMu15_SD_5,'
-source['inclMu15_SD']+= 'inclMu15_SD_6,'
+source['inclMu15_SD']+= 'inclMu15_SD_6'
 
 ## /InclusiveMu15/Summer09-MC_31X_V3_SD_Mu9-v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.qcd09_pat import *
@@ -328,7 +328,7 @@ source['qcd09_pat']+= 'qcd09_pat_10,'
 source['qcd09_pat']+= 'qcd09_pat_11,'
 source['qcd09_pat']+= 'qcd09_pat_12,'
 source['qcd09_pat']+= 'qcd09_pat_13,'
-source['qcd09_pat']+= 'qcd09_pat_14,'
+source['qcd09_pat']+= 'qcd09_pat_14'
 
 ## /Wmunu/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.wmunu09_pat import *
@@ -341,7 +341,7 @@ source['wmunu09_pat']+= 'wmunu09_pat_1,'
 source['wmunu09_pat']+= 'wmunu09_pat_2,'
 source['wmunu09_pat']+= 'wmunu09_pat_3,'
 source['wmunu09_pat']+= 'wmunu09_pat_4,'
-source['wmunu09_pat']+= 'wmunu09_pat_5,' + 'wmunu09_pat_6,'
+source['wmunu09_pat']+= 'wmunu09_pat_5,' + 'wmunu09_pat_6'
 
 ## /Zmumu/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.zmumu09_pat import *
@@ -354,4 +354,4 @@ source['zmumu09_pat']+= 'zmumu09_pat_1,'
 source['zmumu09_pat']+= 'zmumu09_pat_2,'
 source['zmumu09_pat']+= 'zmumu09_pat_3,'
 source['zmumu09_pat']+= 'zmumu09_pat_4,'
-source['zmumu09_pat']+= 'zmumu09_pat_5,'
+source['zmumu09_pat']+= 'zmumu09_pat_5'
