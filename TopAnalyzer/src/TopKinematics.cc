@@ -52,14 +52,14 @@ void TopKinematics::book()
   // pt of the hadronically decaying top candidate
   hists_["topPtHad_"   ] = new TH1F( "topPtHad_"   , "topPtHad_"  ,   9 , CrossSection::topPt     );
   // y  of the hadronically decaying top candidate
-  hists_["topYHad_"    ] = new TH1F( "topYHad_"    , "topYHad_"   ,   8 , CrossSection::topY      );
+  hists_["topYHad_"    ] = new TH1F( "topYHad_"    , "topYHad_"   ,  10 , CrossSection::topY      );
   // y  of the hadronically decaying top candidate
   hists_["topPhiHad_"  ] = new TH1F( "topPhiHad_"   , "topPhiHad_" ,  6 , CrossSection::topPhi    );
 
   // pt of the leptonically decaying top candidate
   hists_["topPtLep_"   ] = new TH1F( "topPtLep_"   , "topPtLep_"  ,   9 , CrossSection::topPt     );
   // y  of the leptonically decaying top candidate
-  hists_["topYLep_"    ] = new TH1F( "topYLep_"    , "topYLep_"   ,   8 , CrossSection::topY      );
+  hists_["topYLep_"    ] = new TH1F( "topYLep_"    , "topYLep_"   ,  10 , CrossSection::topY      );
   // y  of the leptonically decaying top candidate
   hists_["topPhiLep_"  ] = new TH1F( "topPhiLep_"   , "topPhiLep_" ,  6 , CrossSection::topPhi    );
 
@@ -115,14 +115,14 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // pt of the hadronically decaying top candidate
   hists_["topPtHad_"   ] = fs->make<TH1F>( "topPtHad_"   , "topPtHad_"  ,   9 , CrossSection::topPt     );
   // y  of the hadronically decaying top candidate
-  hists_["topYHad_"    ] = fs->make<TH1F>( "topYHad_"    , "topYHad_"   ,   8 , CrossSection::topY      );
+  hists_["topYHad_"    ] = fs->make<TH1F>( "topYHad_"    , "topYHad_"   ,  10 , CrossSection::topY      );
   // y  of the hadronically decaying top candidate
   hists_["topPhiHad_"  ] = fs->make<TH1F>( "topPhiHad_"   , "topPhiHad_" ,  6 , CrossSection::topPhi    );
 
   // pt of the leptonically decaying top candidate
   hists_["topPtLep_"   ] = fs->make<TH1F>( "topPtLep_"   , "topPtLep_"  ,   9 , CrossSection::topPt     );
   // y  of the leptonically decaying top candidate
-  hists_["topYLep_"    ] = fs->make<TH1F>( "topYLep_"    , "topYLep_"   ,   8 , CrossSection::topY      );
+  hists_["topYLep_"    ] = fs->make<TH1F>( "topYLep_"    , "topYLep_"   ,  10 , CrossSection::topY      );
   // y  of the leptonically decaying top candidate
   hists_["topPhiLep_"  ] = fs->make<TH1F>( "topPhiLep_"   , "topPhiLep_" ,  6 , CrossSection::topPhi    );
 
