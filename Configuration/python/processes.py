@@ -296,3 +296,62 @@ source['ttbarsxs0'] = 'ttbarsxs0_0,' +'ttbarsxs0_1,' +'ttbarsxs0_2,' +'ttbarsxs0
 source['ttbarsxs0']+= 'ttbarsxs0_5,' +'ttbarsxs0_6,' +'ttbarsxs0_7,' +'ttbarsxs0_8,' +'ttbarsxs0_9,'
 source['ttbarsxs0']+= 'ttbarsxs0_10,'+'ttbarsxs0_11,'+'ttbarsxs0_12,'+'ttbarsxs0_13,'+'ttbarsxs0_14,'
 source['ttbarsxs0']+= 'ttbarsxs0_15,'+'ttbarsxs0_16,'+'ttbarsxs0_17,'+'ttbarsxs0_18,'+'ttbarsxs0_19'
+
+## /InclusiveMu15/Summer09-MC_31X_V3_SD_Mu9-v1/GEN-SIM-RECO (prescale 4, 1.2M events after HLT_Mu9)
+from TopAnalysis.Configuration.inclMu15_SD import *
+evts  ['inclMu15_SD'] =     1642742       ## number of produced events
+xsec  ['inclMu15_SD'] = 509100000.0       ## NLO in pb
+eff   ['inclMu15_SD'] =         1.0       ## generator efficiency on gen level
+sizes ['inclMu15_SD'] = 'blocks'
+source['inclMu15_SD'] = 'inclMu15_SD_0,' + 'inclMu15_SD_1,'
+source['inclMu15_SD']+= 'inclMu15_SD_2,' + 'inclMu15_SD_3,'
+source['inclMu15_SD']+= 'inclMu15_SD_4,' + 'inclMu15_SD_5,'
+source['inclMu15_SD']+= 'inclMu15_SD_6,'
+
+## /InclusiveMu15/Summer09-MC_31X_V3_SD_Mu9-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.qcd09_pat import *
+evts  ['qcd09_pat'] =     6570971         ## number of produced events
+xsec  ['qcd09_pat'] = 509100000.0         ## NLO in pb
+eff   ['qcd09_pat'] =         1.0         ## generator efficiency on gen level
+sizes ['qcd09_pat'] = 'blocks'
+source['qcd09_pat'] = 'qcd09_pat_0,'
+source['qcd09_pat']+= 'qcd09_pat_1,'
+source['qcd09_pat']+= 'qcd09_pat_2,'
+source['qcd09_pat']+= 'qcd09_pat_3,'
+source['qcd09_pat']+= 'qcd09_pat_4,'
+source['qcd09_pat']+= 'qcd09_pat_5,'
+source['qcd09_pat']+= 'qcd09_pat_6,'
+source['qcd09_pat']+= 'qcd09_pat_7,'
+source['qcd09_pat']+= 'qcd09_pat_8,'
+source['qcd09_pat']+= 'qcd09_pat_9,'
+source['qcd09_pat']+= 'qcd09_pat_10,'
+source['qcd09_pat']+= 'qcd09_pat_11,'
+source['qcd09_pat']+= 'qcd09_pat_12,'
+source['qcd09_pat']+= 'qcd09_pat_13,'
+source['qcd09_pat']+= 'qcd09_pat_14,'
+
+## /Wmunu/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.wmunu09_pat import *
+evts  ['wmunu09_pat'] = 2082633           ## number of produced events
+xsec  ['wmunu09_pat'] = 11840.0           ## NLO in pb
+eff   ['wmunu09_pat'] =     1.0           ## generator efficiency on gen level
+sizes ['wmunu09_pat'] = 'blocks'
+source['wmunu09_pat'] = 'wmunu09_pat_0,'
+source['wmunu09_pat']+= 'wmunu09_pat_1,'
+source['wmunu09_pat']+= 'wmunu09_pat_2,'
+source['wmunu09_pat']+= 'wmunu09_pat_3,'
+source['wmunu09_pat']+= 'wmunu09_pat_4,'
+source['wmunu09_pat']+= 'wmunu09_pat_5,' + 'wmunu09_pat_6,'
+
+## /Zmumu/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.zmumu09_pat import *
+evts  ['zmumu09_pat'] = 2000500           ## number of produced events
+xsec  ['zmumu09_pat'] =  1944.0           ## NLO in pb
+eff   ['zmumu09_pat'] =     1.0           ## generator efficiency on gen level
+sizes ['zmumu09_pat'] = 'blocks'
+source['zmumu09_pat'] = 'zmumu09_pat_0,'
+source['zmumu09_pat']+= 'zmumu09_pat_1,'
+source['zmumu09_pat']+= 'zmumu09_pat_2,'
+source['zmumu09_pat']+= 'zmumu09_pat_3,'
+source['zmumu09_pat']+= 'zmumu09_pat_4,'
+source['zmumu09_pat']+= 'zmumu09_pat_5,'
