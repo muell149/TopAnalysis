@@ -14,8 +14,7 @@ switchJetCollection(process,
                     genJetCollection = cms.InputTag("antikt5GenJets")
                     )
 
-process.jetCorrFactors.L2Relative = 'Summer09_7TeV_L2Relative_AK5Calo'
-process.jetCorrFactors.L3Absolute = 'Summer09_7TeV_L3Absolute_AK5Calo'
+process.jetCorrFactors.corrSample = 'Summer09_7TeV'
 
 myGenJets = "antikt5GenJets"
 process.ttSemiLepGenJetPartonMatch.jets = myGenJets

@@ -72,9 +72,17 @@ disableCountFilter(process.bottomJetSelection)
 ## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-## restrict input to AOD
-from PhysicsTools.PatAlgos.tools.coreTools import *
-restrictInputToAOD(process, ['All'])
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process, 
+                    cms.InputTag('antikt5CaloJets'),   
+                    doJTA            = True,            
+                    doBTagging       = True,            
+                    jetCorrLabel     = ('AK5','Calo'),  
+                    doType1MET       = True,
+                    genJetCollection = cms.InputTag("antikt5GenJets"),
+                    doJetID          = False,
+                    jetIdLabel       = "antikt5"
+                    )
 
 ## choose sample type for flavor dependent JEC
 process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
