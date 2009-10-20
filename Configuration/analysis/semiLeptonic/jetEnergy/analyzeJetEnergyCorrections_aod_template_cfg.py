@@ -72,6 +72,13 @@ disableCountFilter(process.bottomJetSelection)
 ## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+from PhysicsTools.PatAlgos.tools.coreTools import *
+removeSpecificPATObjects(process,
+                         ['Photons', 'Taus'],
+                         outputInProcess=False)
+removeCleaning(process,
+               outputInProcess=False)
+
 from PhysicsTools.PatAlgos.tools.jetTools import *
 switchJetCollection(process, 
                     cms.InputTag('antikt5CaloJets'),   
