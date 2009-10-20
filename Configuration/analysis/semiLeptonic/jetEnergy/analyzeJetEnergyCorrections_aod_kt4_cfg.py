@@ -21,7 +21,4 @@ process.analyzeJetEnergyCorrections_had .genJets = myGenJets
 process.analyzeJetEnergyCorrections_ue  .genJets = myGenJets
 process.analyzeJetEnergyCorrections_part.genJets = myGenJets
 
-process.ttSemiLepJetPartonMatch   .maxDist = 0.4
-process.ttSemiLepGenJetPartonMatch.maxDist = 0.4
-
 process.TFileService.fileName = 'analyzeJetEnergyCorrections_kt4.root'
