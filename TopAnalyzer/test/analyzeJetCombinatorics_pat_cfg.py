@@ -116,17 +116,24 @@ process.findTtSemiLepJetCombMVA       .jets = "leadingJets"
 process.kinFitTtSemiLepEventHypothesis.jets = "leadingJets"
 process.ttSemiLepJetPartonMatch.algorithm  = "unambiguousOnly"
 process.ttSemiLepJetPartonMatch.maxDist  = 0.5
+#process.ttSemiLepHypGeom.useBTagging = True
 process.kinFitTtSemiLepEventHypothesis.maxNrIter = 0
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 
 ## analyze jet combinatorics
 process.load("TopAnalysis.TopAnalyzer.JetCombinatorics_cfi")
-process.analyzeJetCombinatoricsGenMatch      = process.analyzeJetCombinatorics.clone(hypoKey = "kGenMatch"     )
-process.analyzeJetCombinatoricsGeom          = process.analyzeJetCombinatorics.clone(hypoKey = "kGeom"         )
-process.analyzeJetCombinatoricsMaxSumPtWMass = process.analyzeJetCombinatorics.clone(hypoKey = "kMaxSumPtWMass")
-process.analyzeJetCombinatoricsWMassMaxSumPt = process.analyzeJetCombinatorics.clone(hypoKey = "kWMassMaxSumPt")
-process.analyzeJetCombinatoricsMVADisc       = process.analyzeJetCombinatorics.clone(hypoKey = "kMVADisc"      )
-process.analyzeJetCombinatoricsKinFit        = process.analyzeJetCombinatorics.clone(hypoKey = "kKinFit"       )
+process.analyzeJetCombinatoricsGenMatch      = process.analyzeJetCombinatorics.clone()
+process.analyzeJetCombinatoricsGeom          = process.analyzeJetCombinatorics.clone()
+process.analyzeJetCombinatoricsMaxSumPtWMass = process.analyzeJetCombinatorics.clone()
+process.analyzeJetCombinatoricsWMassMaxSumPt = process.analyzeJetCombinatorics.clone()
+process.analyzeJetCombinatoricsMVADisc       = process.analyzeJetCombinatorics.clone()
+process.analyzeJetCombinatoricsKinFit        = process.analyzeJetCombinatorics.clone()
+process.analyzeJetCombinatoricsGenMatch     .analyze.hypoKey = "kGenMatch"
+process.analyzeJetCombinatoricsGeom         .analyze.hypoKey = "kGeom"
+process.analyzeJetCombinatoricsMaxSumPtWMass.analyze.hypoKey = "kMaxSumPtWMass"
+process.analyzeJetCombinatoricsWMassMaxSumPt.analyze.hypoKey = "kWMassMaxSumPt"
+process.analyzeJetCombinatoricsMVADisc      .analyze.hypoKey = "kMVADisc"
+process.analyzeJetCombinatoricsKinFit       .analyze.hypoKey = "kKinFit"
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
