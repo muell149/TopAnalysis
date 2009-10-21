@@ -42,9 +42,14 @@ void analyzeTopKinematics()
   // ---
   //    set root style 
   // ---
-  //gROOT->cd();
-  //gROOT->SetStyle("Plain");
-
+  gROOT->cd();
+  gROOT->SetStyle("Plain");
+  
+  // ---
+  //    create ps file
+  // ---
+  TString *psfile = new TString("TopKinematics.ps"); 
+  
   // ---
   //    open input files
   // ---
@@ -124,7 +129,7 @@ void analyzeTopKinematics()
   //    do the printing for topPt_
   // ---
   TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
-  
+
   // draw canvas
   canv0->cd(0);
   //canv0->SetLogy(1);
@@ -136,7 +141,8 @@ void analyzeTopKinematics()
   topPt_  [kKinFit  ]->Draw("same");
   //topPt_  [kGen       ]->Draw("esame");
   leg0->Draw("same");
-  canv0->Print("ptTopQuark.eps");
+  canv0->Print(psfile->Copy().Append("["));
+  canv0->Print(*psfile);
 
   // ---
   //    do the printing for topY_
@@ -154,7 +160,7 @@ void analyzeTopKinematics()
   topY_  [kKinFit  ]->Draw("same");
   //topY_  [kGen       ]->Draw("esame");
   leg0->Draw("same");
-  canv1->Print("etaTopQuark.eps");
+  canv1->Print(*psfile);
 
   // ---
   //    do the printing for topPhi_
@@ -172,7 +178,7 @@ void analyzeTopKinematics()
   topPhi_  [kKinFit  ]->Draw("same");
   //topPhi_  [kGen       ]->Draw("esame");
   leg0->Draw("same");
-  canv2->Print("phiTopQuark.eps");
+  canv2->Print(*psfile);
 
   // ---
   //    do the printing for ttbarPt_
@@ -190,7 +196,7 @@ void analyzeTopKinematics()
   ttbarPt_  [kKinFit  ]->Draw("same");
   //ttbarPt_  [kGen       ]->Draw("esame");
   leg0->Draw("same");
-  canv3->Print("ptTTbar.eps");
+  canv3->Print(*psfile);
 
   // ---
   //    do the printing for ttbarY_
@@ -208,7 +214,7 @@ void analyzeTopKinematics()
   ttbarY_  [kKinFit  ]->Draw("same");
   //ttbarY_  [kGen       ]->Draw("esame");
   leg0->Draw("same");
-  canv4->Print("etaTTbar.eps");
+  canv4->Print(*psfile);
 
   // ---
   //    do the printing for ttbarMass_
@@ -226,7 +232,8 @@ void analyzeTopKinematics()
   ttbarMass_  [kKinFit  ]->Draw("same");
   //ttbarMass_  [kGen       ]->Draw("esame");
   leg0->Draw("same");
-  canv5->Print("MassTTbar.eps");
+  canv5->Print(*psfile);
+  canv5->Print(psfile->Copy().Append("]"));
 }
 
 void canvasStyle(TCanvas& canv) 
