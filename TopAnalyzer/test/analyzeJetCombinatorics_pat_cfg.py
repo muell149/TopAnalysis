@@ -68,7 +68,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -96,8 +96,12 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
 ## produce reconstructed top events
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
-process.ttSemiLepJetPartonMatch.verbosity = 1
+#process.ttSemiLepJetPartonMatch.verbosity = 1
 process.ttSemiLepEvent.verbosity = 1
+from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
+addTtSemiLepHypotheses(process,
+                       ["kGeom", "kWMassMaxSumPt", "kMaxSumPtWMass", "kMVADisc", "kKinFit"]
+                       )
 process.ttSemiLepHypGeom              .maxNJets = 4
 process.ttSemiLepHypMaxSumPtWMass     .maxNJets = 4
 process.ttSemiLepHypWMassMaxSumPt     .maxNJets = 4
@@ -117,18 +121,12 @@ process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 
 ## analyze jet combinatorics
 process.load("TopAnalysis.TopAnalyzer.JetCombinatorics_cfi")
-process.analyzeJetCombinatoricsGenMatch = process.analyzeJetCombinatorics.clone()
-process.analyzeJetCombinatoricsGenMatch.analyze.hypoKey = "kGenMatch"
-process.analyzeJetCombinatoricsGeom = process.analyzeJetCombinatorics.clone()
-process.analyzeJetCombinatoricsGeom.analyze.hypoKey = "kGeom"
-process.analyzeJetCombinatoricsMaxSumPtWMass = process.analyzeJetCombinatorics.clone()
-process.analyzeJetCombinatoricsMaxSumPtWMass.analyze.hypoKey = "kMaxSumPtWMass"
-process.analyzeJetCombinatoricsWMassMaxSumPt = process.analyzeJetCombinatorics.clone()
-process.analyzeJetCombinatoricsWMassMaxSumPt.analyze.hypoKey = "kWMassMaxSumPt"
-process.analyzeJetCombinatoricsMVADisc = process.analyzeJetCombinatorics.clone()
-process.analyzeJetCombinatoricsMVADisc.analyze.hypoKey = "kMVADisc"
-process.analyzeJetCombinatoricsKinFit = process.analyzeJetCombinatorics.clone()
-process.analyzeJetCombinatoricsKinFit.analyze.hypoKey = "kKinFit"
+process.analyzeJetCombinatoricsGenMatch      = process.analyzeJetCombinatorics.clone(hypoKey = "kGenMatch"     )
+process.analyzeJetCombinatoricsGeom          = process.analyzeJetCombinatorics.clone(hypoKey = "kGeom"         )
+process.analyzeJetCombinatoricsMaxSumPtWMass = process.analyzeJetCombinatorics.clone(hypoKey = "kMaxSumPtWMass")
+process.analyzeJetCombinatoricsWMassMaxSumPt = process.analyzeJetCombinatorics.clone(hypoKey = "kWMassMaxSumPt")
+process.analyzeJetCombinatoricsMVADisc       = process.analyzeJetCombinatorics.clone(hypoKey = "kMVADisc"      )
+process.analyzeJetCombinatoricsKinFit        = process.analyzeJetCombinatorics.clone(hypoKey = "kKinFit"       )
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
