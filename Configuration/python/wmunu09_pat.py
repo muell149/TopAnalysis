@@ -6,7 +6,7 @@ from TopAnalysis.Configuration.defines import source
 # /Wmunu/Summer09-MC_31X_V3-v1/GEN-SIM-RECO                           
 #                                                                     
 #                                                                     
-# Events      : 2032633   (2082633 processed)                         
+# Events      : 2082633                                               
 # xsec(pb)  LO:                                                       
 # xsec(pb) NLO:                                                       
 # eff         :                                                       
@@ -83,6 +83,7 @@ source['wmunu09_pat_5']+='\'/store/user/henderle/OctEx/Wmunu/PATtuple_62.root\',
 source['wmunu09_pat_5']+='\'/store/user/henderle/OctEx/Wmunu/PATtuple_7.root\','
 source['wmunu09_pat_5']+='\'/store/user/henderle/OctEx/Wmunu/PATtuple_8.root\''
 
-sizes ['wmunu09_pat_6'] = 46078
-source['wmunu09_pat_6'] ='\'/store/user/henderle/OctEx/Wmunu/PATtuple_9.root\''
+sizes ['wmunu09_pat_6'] = 96078
+source['wmunu09_pat_6'] ='\'/store/user/henderle/OctEx/Wmunu/PATtuple_9.root\','
+source['wmunu09_pat_6']+='\'/store/user/henderle/OctEx/Wmunu/PATtuple_10.root\''
 
