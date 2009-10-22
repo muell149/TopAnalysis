@@ -102,18 +102,9 @@ from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import
 addTtSemiLepHypotheses(process,
                        ["kGeom", "kWMassMaxSumPt", "kMaxSumPtWMass", "kMVADisc", "kKinFit"]
                        )
-process.ttSemiLepHypGeom              .maxNJets = 4
-process.ttSemiLepHypMaxSumPtWMass     .maxNJets = 4
-process.ttSemiLepHypWMassMaxSumPt     .maxNJets = 4
-process.ttSemiLepJetPartonMatch       .maxNJets = -1
-process.findTtSemiLepJetCombMVA       .maxNJets = 4
-process.kinFitTtSemiLepEventHypothesis.maxNJets = 4
-process.ttSemiLepHypGeom              .jets = "leadingJets"
-process.ttSemiLepHypMaxSumPtWMass     .jets = "leadingJets"
-process.ttSemiLepHypWMassMaxSumPt     .jets = "leadingJets"
-process.ttSemiLepJetPartonMatch       .jets = "leadingJets"
-process.findTtSemiLepJetCombMVA       .jets = "leadingJets"
-process.kinFitTtSemiLepEventHypothesis.jets = "leadingJets"
+#setForAllTtSemiLepHypotheses(process, "maxNJets", 4)
+process.ttSemiLepJetPartonMatch.maxNJets = -1
+setForAllTtSemiLepHypotheses(process, "jets", "leadingJets")
 process.ttSemiLepJetPartonMatch.algorithm  = "unambiguousOnly"
 process.ttSemiLepJetPartonMatch.maxDist  = 0.5
 #process.ttSemiLepHypGeom.useBTagging = True
