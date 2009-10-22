@@ -73,10 +73,10 @@ MuonKinematics::fill(const std::vector<reco::GenParticle>& muons, const double& 
       // azimuthal angle phi of the muon
       hists_.find("phi" )->second->Fill( muon->phi() , weight );
     }
-    // muon multiplicty is always filled the same way
-    // independent from the choice of index_
-    hists_.find("n"  )->second->Fill( index , weight );
   }
+  // muon multiplicty is always filled the same way
+  // independent from the choice of index_
+  hists_.find("n"  )->second->Fill( index , weight );
 }
 
 /// histogram filling for fwlite and for full fw
@@ -103,8 +103,8 @@ MuonKinematics::fill(const std::vector<pat::Muon>& muons, const double& weight)
       // azimuthal angle phi of the muon
       hists_.find( "phi" )->second->Fill( muon->phi() , weight );
     }
-    // muon multiplicty is always filled the same way
-    // independent from the choice of index_
-    hists_.find("n"  )->second->Fill( muons.size() , weight );
   }
+  // muon multiplicty is always filled the same way
+  // independent from the choice of index_
+  hists_.find("n"  )->second->Fill( muons.size() , weight );
 }

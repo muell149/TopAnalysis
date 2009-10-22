@@ -74,10 +74,10 @@ JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
       // azimuthal angle phi of the jet
       hists_.find("phi" )->second->Fill( jet->phi() , weight );
     }
-    // jet multiplicty is always filled the same way
-    // independent from the choice of index_
-    hists_.find("n"  )->second->Fill( index , weight );
   }
+  // jet multiplicty is always filled the same way
+  // independent from the choice of index_
+  hists_.find("n"  )->second->Fill( index , weight );
 }
 
 /// return the desired correction step from the configuration string, which is expected to be of type 'step' or 'step:flavor'
@@ -126,8 +126,8 @@ JetKinematics::fill(const std::vector<pat::Jet>& jets, const double& weight)
       // azimuthal angle phi of the jet
       hists_.find( "phi" )->second->Fill( jet->phi() , weight );
     }
-    // jet multiplicty is always filled the same way
-    // independent from the choice of index_
-    hists_.find("n"  )->second->Fill( jets.size() , weight );
   }
+  // jet multiplicty is always filled the same way
+  // independent from the choice of index_
+  hists_.find("n"  )->second->Fill( jets.size() , weight );
 }
