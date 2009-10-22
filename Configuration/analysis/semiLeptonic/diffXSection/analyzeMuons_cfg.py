@@ -12,7 +12,7 @@ import sys
 ## ---
 ##    decide whether to run on:  * all *, * signal only *, * background only *
 ## ---
-eventFilter  = 'background only' # 'signal only' # 'all'
+eventFilter  = 'all' # 'background only' # 'signal only'
 
 
 # analyse muon quantities
@@ -147,8 +147,9 @@ process.p1 = cms.Path(## do the gen evetn selection
                       ## do the trigger selection
                       process.hltMu9                * 
                       ## do the selections
-                      process.selectGoodMuons       +
+                      process.selectTriggerMuons    +
                       process.selectTrackMuons      +
+                      process.selectGoodMuons       +
                       process.selectGoldenMuons     +
                       process.selectIsolatedMuons   +
                       ## do the monitoring
