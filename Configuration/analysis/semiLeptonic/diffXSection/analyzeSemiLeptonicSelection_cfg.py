@@ -110,7 +110,7 @@ if( useAntikt5 ):
 ## collect kinematics analyzers
 process.goodMuonKinematics        = process.analyzeMuonKinematics.clone(src = 'goodMuons'       )
 process.trackMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'trackMuons'      )
-process.looseMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'trackMuons'      )
+process.looseMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'looseMuons'      )
 process.tightMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'tightMuons'      )
 process.goldenMuonKinematics      = process.analyzeMuonKinematics.clone(src = 'goldenMuons'     )
 process.tightBottomJetKinematics  = process.analyzeJetKinematics.clone (src = 'tightBottomJets' )
