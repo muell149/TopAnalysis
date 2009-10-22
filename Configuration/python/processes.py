@@ -8,7 +8,7 @@ from TopAnalysis.Configuration.defines import source
 
 ## test sample at cern
 sizes ['cern'] = 0
-source['cern'] = ''
+source['cern'] = 'test'
 
 ## test sample at desy
 sizes ['desy'] = ''
