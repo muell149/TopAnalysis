@@ -155,7 +155,13 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
 
   }
 
-  // light jets
+  ////////////////////////////////////////////////////////////////////////////////////////
+  // do the rest only in case of the GenMatch hypothesis
+  ////////////////////////////////////////////////////////////////////////////////////////
+  if(hypoKey_ != "kGenMatch")
+    return;
+
+  // quarks from W
 
   hists_.find("pdgIdLJet")->second->Fill( abs(semiLepEvt->hadronicDecayQuark()   ->pdgId()) );
   hists_.find("pdgIdLJet")->second->Fill( abs(semiLepEvt->hadronicDecayQuarkBar()->pdgId()) );
@@ -165,7 +171,7 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
   analyzeFlavorComposition(*semiLepEvt->hadronicDecayQuarkBar(hypoKey_),
 			   *semiLepEvt->hadronicDecayQuarkBar());
 
-  // b jets
+  // b quarks
 
   hists_.find("pdgIdBJet")->second->Fill( abs(semiLepEvt->hadronicDecayB()->pdgId()) );
 
