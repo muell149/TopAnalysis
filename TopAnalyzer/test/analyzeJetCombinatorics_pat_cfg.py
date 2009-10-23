@@ -96,7 +96,7 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
 ## produce reconstructed top events
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
-#process.ttSemiLepJetPartonMatch.verbosity = 1
+process.ttSemiLepJetPartonMatch.verbosity = 1
 process.ttSemiLepEvent.verbosity = 1
 from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
 addTtSemiLepHypotheses(process,
@@ -105,10 +105,17 @@ addTtSemiLepHypotheses(process,
 #setForAllTtSemiLepHypotheses(process, "maxNJets", 4)
 process.ttSemiLepJetPartonMatch.maxNJets = -1
 setForAllTtSemiLepHypotheses(process, "jets", "leadingJets")
-process.ttSemiLepJetPartonMatch.algorithm  = "unambiguousOnly"
-process.ttSemiLepJetPartonMatch.maxDist  = 0.5
-#process.ttSemiLepHypGeom.useBTagging = True
-process.kinFitTtSemiLepEventHypothesis.maxNrIter = 0
+
+## GenMatch
+process.ttSemiLepJetPartonMatch.algorithm = "unambiguousOnly"
+process.ttSemiLepJetPartonMatch.maxDist   = 0.5
+## Geom
+#process.ttSemiLepHypGeom.useBTagging       = True
+#process.ttSemiLepHypGeom.bTagAlgorithm     = "trackCountingHighEffBJetTags" #"trackCountingHighPurBJetTags"
+#process.ttSemiLepHypGeom.minBDiscBJets     = 1.90 #2.17
+#process.ttSemiLepHypGeom.maxBDiscLightJets = 3.99 #4.31
+## KinFit
+process.kinFitTtSemiLepEventHypothesis.maxNrIter   = 0
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 
 ## analyze jet combinatorics
