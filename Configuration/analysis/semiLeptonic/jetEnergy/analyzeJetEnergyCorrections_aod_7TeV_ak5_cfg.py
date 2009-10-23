@@ -18,13 +18,23 @@ process.jetCorrFactors.corrSample = 'Summer09_7TeV'
 
 myGenJets = "antikt5GenJets"
 process.ttSemiLepGenJetPartonMatch.jets = myGenJets
-process.analyzeJetEnergyCorrections_raw .genJets = myGenJets
-process.analyzeJetEnergyCorrections_off .genJets = myGenJets
-process.analyzeJetEnergyCorrections_rel .genJets = myGenJets
-process.analyzeJetEnergyCorrections_abs .genJets = myGenJets
-process.analyzeJetEnergyCorrections_emf .genJets = myGenJets
-process.analyzeJetEnergyCorrections_had .genJets = myGenJets
-process.analyzeJetEnergyCorrections_ue  .genJets = myGenJets
-process.analyzeJetEnergyCorrections_part.genJets = myGenJets
+
+process.analyzeJetEnergyGenMatch_raw .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_off .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_rel .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_abs .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_emf .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_had .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_ue  .genJets = myGenJets
+process.analyzeJetEnergyGenMatch_part.genJets = myGenJets
+
+process.analyzeJetEnergyGeom_raw .genJets = myGenJets
+process.analyzeJetEnergyGeom_off .genJets = myGenJets
+process.analyzeJetEnergyGeom_rel .genJets = myGenJets
+process.analyzeJetEnergyGeom_abs .genJets = myGenJets
+process.analyzeJetEnergyGeom_emf .genJets = myGenJets
+process.analyzeJetEnergyGeom_had .genJets = myGenJets
+process.analyzeJetEnergyGeom_ue  .genJets = myGenJets
+process.analyzeJetEnergyGeom_part.genJets = myGenJets
 
 process.TFileService.fileName = 'analyzeJetEnergyCorrections_7TeV_ak5.root'
