@@ -111,24 +111,6 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
   if( !semiLepEvt->isHypoValid(hypoKey_) )
     return;
 
-  // get genJets
-  edm::Handle<reco::GenJetCollection> genJets;
-  event.getByLabel(genJets_, genJets);
-
-  // get genJet matching
-  edm::Handle< std::vector< std::vector<int> > > genJetMatchingHandle;
-  event.getByLabel(genJetMatching_, genJetMatchingHandle);
-  std::vector<int> genJetMatching = *(genJetMatchingHandle->begin());
-
-  // outlier rejection w.r.t. genJet-parton matching
-  for(unsigned int i=0; i<genJetMatching.size(); i++)
-    if(genJetMatching[i] < 0 && genJetMatching[i] != -3)
-      return;
-
-  const reco::GenJet genJetLightQ    = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQ   ]];
-  const reco::GenJet genJetLightQBar = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQBar]];
-  const reco::GenJet genJetHadronicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::HadB     ]];
-
   // invariant mass of W and top
 
   const reco::Candidate* jet1 = semiLepEvt->hadronicDecayQuark   (hypoKey_);
@@ -189,6 +171,24 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
 
   analyzeFlavorComposition(*semiLepEvt->hadronicDecayB(hypoKey_),
 			   *semiLepEvt->hadronicDecayB());
+
+  // get genJets
+  edm::Handle<reco::GenJetCollection> genJets;
+  event.getByLabel(genJets_, genJets);
+
+  // get genJet matching
+  edm::Handle< std::vector< std::vector<int> > > genJetMatchingHandle;
+  event.getByLabel(genJetMatching_, genJetMatchingHandle);
+  std::vector<int> genJetMatching = *(genJetMatchingHandle->begin());
+
+  // outlier rejection w.r.t. genJet-parton matching
+  for(unsigned int i=0; i<genJetMatching.size(); i++)
+    if(genJetMatching[i] < 0 && genJetMatching[i] != -3)
+      return;
+
+  const reco::GenJet genJetLightQ    = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQ   ]];
+  const reco::GenJet genJetLightQBar = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQBar]];
+  const reco::GenJet genJetHadronicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::HadB     ]];
 
   // response
   {
