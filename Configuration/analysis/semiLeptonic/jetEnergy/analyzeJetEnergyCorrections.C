@@ -136,7 +136,8 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
 }
 
 /// main function
-void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root")
+void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root",
+				 TString hypoClass = "GenMatch")
 {
 
   name.Resize(name.Index(".root"));
@@ -188,7 +189,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   TH2F* respBPartonPtParton_barrel[8];
 
   for(unsigned int i = 0; i < 8; i++) {
-    TString dirBase = "analyzeJetEnergyCorrections_";
+    TString dirBase = "analyzeJetEnergy" + hypoClass + "_";
 
     massW[i] = (TH1F*) file->Get(dirBase + levels[i] + "/mW"  )->Clone();
     massT[i] = (TH1F*) file->Get(dirBase + levels[i] + "/mTop")->Clone();
@@ -224,6 +225,8 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   
   TString outDir = name;
   gSystem->mkdir(outDir);
+
+  TString baseName = outDir + "/" + hypoClass + "_";
 
   for(unsigned int i = 0; i < 8; i++) {
     double scaleFactor = 1.;
@@ -420,7 +423,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     }
     txtMassW->Draw();
     if(i==7)
-      gPad->Print(outDir+"/massW.eps");
+      gPad->Print(baseName+"massW.eps");
 
     canvasMassT->cd(9);
     setPadStyle();
@@ -432,7 +435,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     }
     txtMassT->Draw();
     if(i==7)
-      gPad->Print(outDir+"/massT.eps");
+      gPad->Print(baseName+"massT.eps");
 
     // with error on peak from Gauss fit
 
@@ -445,7 +448,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     }
     txtMassW_perr->Draw();
     if(i==7)
-      gPad->Print(outDir+"/massW_perr.eps");
+      gPad->Print(baseName+"massW_perr.eps");
 
     canvasMassT_perr->cd(9);
     setPadStyle();
@@ -456,7 +459,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     }
     txtMassT_perr->Draw();
     if(i==7)
-      gPad->Print(outDir+"/massT_perr.eps");
+      gPad->Print(baseName+"massT_perr.eps");
 
   }
 
@@ -605,12 +608,12 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     if(i==1 || i==4) {
       canvasMassW_2dim->cd(i);
       legend->Draw();
-      gPad->Print(outDir+"/massW_2dim" + suffix);
+      gPad->Print(baseName+"massW_2dim" + suffix);
     }
 
     canvasMassT_2dim->cd(i);
     legend->Draw();
-    gPad->Print(outDir+"/massT_2dim" + suffix);
+    gPad->Print(baseName+"massT_2dim" + suffix);
 
   }
 
@@ -622,27 +625,27 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     canvasRespL->cd(i);
     legend->Draw();
-    gPad->Print(outDir+"/responseLight" + suffix);
+    gPad->Print(baseName+"responseLight" + suffix);
 
     canvasRespL_zoom->cd(i);
     legend->Draw();
-    gPad->Print(outDir+"/responseLight_zoom" + suffix);
+    gPad->Print(baseName+"responseLight_zoom" + suffix);
 
     canvasRespB->cd(i);
     legend->Draw();
-    gPad->Print(outDir+"/responseB" + suffix);
+    gPad->Print(baseName+"responseB" + suffix);
 
     canvasRespB_zoom->cd(i);
     legend->Draw();
-    gPad->Print(outDir+"/responseB_zoom" + suffix);
+    gPad->Print(baseName+"responseB_zoom" + suffix);
 
   }
 
   // print one ps-file
 
-  TString psName = name + ".ps";
+  TString psName = outDir + "/" + name + "_" + hypoClass + ".ps";
 
-  canvasMassW     ->Print(psName +"(");
+  canvasMassW     ->Print(psName + "(");
   canvasMassW_perr->Print(psName);
   canvasMassW_2dim->Print(psName);
   canvasMassT     ->Print(psName);
