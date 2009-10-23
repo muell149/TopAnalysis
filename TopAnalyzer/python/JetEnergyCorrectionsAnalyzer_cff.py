@@ -144,9 +144,11 @@ analyzeJetEnergyGeom_multilevel = cms.Sequence(analyzeJetEnergyGeom_raw  *
 ## bundle everything into one sequence
 ##########################################################################################
 
-makeJetEnergyCorrectionsAnalysis = cms.Sequence(ttSemiLepJetPartonMatch *
-                                                ttSemiLepGenJetPartonMatch *
-                                                ttSemiLepHypGenMatch_multilevel *
+makeHypGenMatch = cms.Sequence(ttSemiLepJetPartonMatch *
+                               ttSemiLepGenJetPartonMatch *
+                               ttSemiLepHypGenMatch_multilevel)
+
+makeJetEnergyCorrectionsAnalysis = cms.Sequence(makeHypGenMatch *
                                                 ttSemiLepHypGeom_multilevel *
                                                 ttSemiLepEvent_multilevel *
                                                 analyzeJetEnergyGenMatch_multilevel *
