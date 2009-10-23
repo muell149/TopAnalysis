@@ -1,15 +1,11 @@
 #ifndef DimuonAnalyzer_h
 #define DimuonAnalyzer_h
 
-#include <string>
-#include <vector>
-#include <fstream>
 #include <iostream>
 
-#include "TString.h"
-#include "TFile.h"
+#include "TH1.h"
+#include "TH2.h"
 
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -20,10 +16,6 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
-
-#include "TopAnalysis/TopUtils/interface/NameScheme.h"
-#include "TopAnalysis/TopUtils/interface/RootSystem.h"
-#include "TopAnalysis/TopUtils/interface/RootHistograms.h"
 
 /**
    \class   DimuonAnalyzer DimuonAnalyzer.h "TopAnalysis/TopAnalyzer/interface/DimuonAnalyzer.h"
