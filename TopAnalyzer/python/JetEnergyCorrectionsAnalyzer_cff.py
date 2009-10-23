@@ -61,6 +61,24 @@ ttSemiLepHypGeomHad  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionL
 ttSemiLepHypGeomUe   = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "ue"  ) ## L6
 ttSemiLepHypGeomPart = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "part") ## L7
 
+ttSemiLepHypGeomRaw .minBDiscBJets = 1.90
+ttSemiLepHypGeomOff .minBDiscBJets = 1.90
+ttSemiLepHypGeomRel .minBDiscBJets = 1.90
+ttSemiLepHypGeomAbs .minBDiscBJets = 1.90
+ttSemiLepHypGeomEmf .minBDiscBJets = 1.90
+ttSemiLepHypGeomHad .minBDiscBJets = 1.90
+ttSemiLepHypGeomUe  .minBDiscBJets = 1.90
+ttSemiLepHypGeomPart.minBDiscBJets = 1.90
+
+ttSemiLepHypGeomRaw .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomOff .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomRel .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomAbs .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomEmf .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomHad .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomUe  .maxBDiscLightJets = 3.99
+ttSemiLepHypGeomPart.maxBDiscLightJets = 3.99
+
 ttSemiLepHypGeom_multilevel = cms.Sequence(ttSemiLepHypGeomRaw  *
                                            ttSemiLepHypGeomOff  *
                                            ttSemiLepHypGeomRel  *
