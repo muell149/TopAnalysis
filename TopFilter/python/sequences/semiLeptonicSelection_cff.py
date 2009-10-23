@@ -49,8 +49,9 @@ tightBottomJets  = selectedLayer1Jets.clone(src = 'trackCountingHighPurBJets',
 ## event selection; on these collection monitoring
 ## can still be performed
 semiLeptonicSelection = cms.Sequence(looseElectrons   *
-                                     goodMuons        *
+                                     triggerMuons     *
                                      trackMuons       *
+                                     goodMuons        *
                                      goldenMuons      *
                                      looseMuons       *
                                      tightMuons       *
