@@ -198,7 +198,7 @@ MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
       **/
       static const double STANDARD_CONE_SIZE = 0.3;
       // number of tracks in isolation cone
-      hists_.find("trkIsoN_" )->second->Fill( muon->trackerIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
+      hists_.find("trkIsoN_" )->second->Fill( muon->trackIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
       // summed track pt in isolation cone
       hists_.find("trkIso_"  )->second->Fill( muon->trackIso() , weight );
       // number of ecal crystals above noise threshold in isolation cone
@@ -214,9 +214,9 @@ MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
       // increment hitogram normalization
       norm_+=weight;
       // <number of tracks> as a function of deltaR (differential) 
-      objectFlow( hists_.find("trkDRN_" )->second , muon->trackerIsoDeposit() );
+      objectFlow( hists_.find("trkDRN_" )->second , muon->trackIsoDeposit() );
       // <summerd pt of tracks> as a function of deltaR (differential)
-      energyFlow( hists_.find("trkDR_"  )->second , muon->trackerIsoDeposit() );
+      energyFlow( hists_.find("trkDR_"  )->second , muon->trackIsoDeposit() );
       // <number of ecal crystals above noise threshold> as a function of deltaR (differential)
       objectFlow( hists_.find("eclDRN_" )->second , muon->ecalIsoDeposit() );
       // <number of hcal towers above noise threshold> as a function of deltaR (differential)
