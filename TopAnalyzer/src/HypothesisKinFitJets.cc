@@ -35,18 +35,6 @@ void HypothesisKinFitJets::book()
   hists_["lightQuarkEta" ] = new TH1F( "lightQuarkEta"  , "lightQuarkEta"   ,  100,  -5.,   5. );
   // lightQuark b phi
   hists_["lightQuarkPhi" ] = new TH1F( "lightQuarkPhi"  , "lightQuarkPhi"   ,  100,  -5.,   5. );
-  // lepton pt
-  hists_["leptonPt"      ] = new TH1F( "leptonPt"       , "leptonPt"        ,  100,  -5.,   5. );
-  // lepton eta
-  hists_["leptonEta"     ] = new TH1F( "leptonEta"      , "leptonEta"       ,  100,  -5.,   5. );
-  // lepton phi
-  hists_["leptonPhi"     ] = new TH1F( "leptonPhi"      , "leptonPhi"       ,  100,  -5.,   5. );
-  // neutrino pt
-  hists_["neutrinoPt"    ] = new TH1F( "neutrinoPt"     , "neutrinoPt"      ,  100,  -5.,   5. );
-  // neutrino eta
-  hists_["neutrinoEta"   ] = new TH1F( "neutrinoEta"    , "neutrinoEta"     ,  100,  -5.,   5. );
-  // neutrino phi
-  hists_["neutrinoPhi"   ] = new TH1F( "neutrinoPhi"    , "neutrinoPhi"     ,  100,  -5.,   5. );
 }
 
 /// histogramm booking for fw
@@ -73,18 +61,6 @@ void HypothesisKinFitJets::book(edm::Service<TFileService>& fs)
   hists_["lightQuarkEta" ] = fs->make<TH1F>( "lightQuarkEta"  , "lightQuarkEta"   ,  100,  -5.,   5. );
   // lightQuark b phi
   hists_["lightQuarkPhi" ] = fs->make<TH1F>( "lightQuarkPhi"  , "lightQuarkPhi"   ,  100,  -5.,   5. );
-  // lepton pt
-  hists_["leptonPt"      ] = fs->make<TH1F>( "leptonPt"       , "leptonPt"        ,  100,  -5.,   5. );
-  // lepton eta
-  hists_["leptonEta"     ] = fs->make<TH1F>( "leptonEta"      , "leptonEta"       ,  100,  -5.,   5. );
-  // lepton phi
-  hists_["leptonPhi"     ] = fs->make<TH1F>( "leptonPhi"      , "leptonPhi"       ,  100,  -5.,   5. );
-  // neutrino pt
-  hists_["neutrinoPt"    ] = fs->make<TH1F>( "neutrinoPt"     , "neutrinoPt"      ,  100,  -5.,   5. );
-  // neutrino eta
-  hists_["neutrinoEta"   ] = fs->make<TH1F>( "neutrinoEta"    , "neutrinoEta"     ,  100,  -5.,   5. );
-  // neutrino phi
-  hists_["neutrinoPhi"   ] = fs->make<TH1F>( "neutrinoPhi"    , "neutrinoPhi"     ,  100,  -5.,   5. );
 }
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
