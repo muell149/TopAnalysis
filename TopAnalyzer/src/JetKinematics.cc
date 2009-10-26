@@ -105,7 +105,7 @@ const std::string JetKinematics::correctionFlavor() const
 
 /// histogram filling for fwlite and for full fw
 void
-JetKinematics::fill(const std::vector<pat::Jet>& jets, const double& weight)
+JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
 {
   /** 
       Fill Kinematic Variables
@@ -115,7 +115,7 @@ JetKinematics::fill(const std::vector<pat::Jet>& jets, const double& weight)
   // where index_=-1 means 'fill all jets' and index_=n
   // n>=-1 means 'fill only n-th leading jet'
   int index=0;
-  for(std::vector<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
+  for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
     if( index_<0 || index_==index ){
       // energy of the jet
       hists_.find( "en"  )->second->Fill( jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );

@@ -43,11 +43,11 @@ MuonJetKinematics::book(edm::Service<TFileService>& fs)
 
 /// histogram filling for fwlite and for full fw
 void
-MuonJetKinematics::fill(const std::vector<pat::Muon>& muons, const std::vector<pat::Jet>& jets, const double& weight)
+MuonJetKinematics::fill(const edm::View<pat::Muon>& muons, const edm::View<pat::Jet>& jets, const double& weight)
 {
-  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
+  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
     double dist20=-1., dist30=-1., dist40=-1.;
-    for(std::vector<pat::Jet>::const_iterator jet = jets.begin(); jet!=jets.end(); ++jet){
+    for(edm::View<pat::Jet>::const_iterator jet = jets.begin(); jet!=jets.end(); ++jet){
       double dR=deltaR(muon->eta(), muon->phi(), jet->eta(), jet->phi());
       // determine closest jet muon with pt>20
       if( jet->pt()>20 && (dR<dist20 || dist20<0.) ){ dist20=dR; }

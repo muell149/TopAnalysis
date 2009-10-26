@@ -89,7 +89,7 @@ void HypothesisKinFitJets::book(edm::Service<TFileService>& fs)
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
 void
-HypothesisKinFitJets::fill(const TtSemiLeptonicEvent& tops, const std::vector<pat::Jet>& jets, const double& weight)
+HypothesisKinFitJets::fill(const TtSemiLeptonicEvent& tops, const edm::View<pat::Jet>& jets, const double& weight)
 {
   // make sure to have a valid hypothesis on reconstruction level
   if( tops.isHypoValid("kKinFit") ){

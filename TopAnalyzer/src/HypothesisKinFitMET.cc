@@ -41,7 +41,7 @@ void HypothesisKinFitMET::book(edm::Service<TFileService>& fs)
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
 void
-HypothesisKinFitMET::fill(const TtSemiLeptonicEvent& tops, const std::vector<pat::MET>& mets, const double& weight)
+HypothesisKinFitMET::fill(const TtSemiLeptonicEvent& tops, const edm::View<pat::MET>& mets, const double& weight)
 {
   // make sure to have a valid hypothesis on reconstruction level
   if( tops.isHypoValid("kKinFit") ){

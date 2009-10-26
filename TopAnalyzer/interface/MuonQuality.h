@@ -10,12 +10,12 @@
    \brief   Derived class to analyze the quality/id of muons on reconstruction level
 
    The structure keeps histograms for the identification and (high quality) of reconstruc- 
-   ted muons. These histograms can be filled from std::vector<pat::Muon> only(!). The class 
+   ted muons. These histograms can be filled from edm::View<pat::Muon> only(!). The class 
    is derived from the SingleObject<Collection> interface, which makes it usable in fwfull
    or fwlite. 
 */
 
-class MuonQuality : public SingleObject<const std::vector<pat::Muon> > {
+class MuonQuality : public SingleObject<const edm::View<pat::Muon> > {
 
  public:
   /// default constructor for fwlite
@@ -34,7 +34,7 @@ class MuonQuality : public SingleObject<const std::vector<pat::Muon> > {
   /// histogramm booking for fwfull
   void book(edm::Service<TFileService>& fileService);
   /// histogram filling for fwlite and for fwfull from reco objects
-  void fill(const std::vector<pat::Muon>& muons, const double& weight=1.);
+  void fill(const edm::View<pat::Muon>& muons, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process();
 

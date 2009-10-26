@@ -14,13 +14,13 @@
    The structure keeps control histograms to analyze the relation between the fitted four vectors 
    of the kinematic fit hypothesis of semi-leptonic ttbar events and the original input vectors 
    of the selected pat::Muon. These histograms are to be filled from the TtSemiLeptonicEvent and 
-   from std::vector<pat::Muon>'s. The class is derived from the DoubleObject<CollectionA, CollectionB> 
+   from edm::View<pat::Muon>'s. The class is derived from the DoubleObject<CollectionA, CollectionB> 
    interface, which makes it usable in fwfull or fwlite.  This class is expected to be run with 
    the same muon collection from which the kinematic fit hypothesis was derived, otherwise it will 
    lead to wrong results!
 */
 
-class HypothesisKinFitMuon : public DoubleObject<TtSemiLeptonicEvent, const std::vector<pat::Muon> > {
+class HypothesisKinFitMuon : public DoubleObject<TtSemiLeptonicEvent, const edm::View<pat::Muon> > {
 
  public:
   /// default constructor for fw lite
@@ -39,7 +39,7 @@ class HypothesisKinFitMuon : public DoubleObject<TtSemiLeptonicEvent, const std:
   /// histogramm booking for fw
   void book(edm::Service<TFileService>& fileService);
   /// histogram filling interface for reconstruction level for access with fw or fwlite
-  void fill(const TtSemiLeptonicEvent& tops, const std::vector<pat::Muon>& muons, const double& weight=1.);
+  void fill(const TtSemiLeptonicEvent& tops, const edm::View<pat::Muon>& muons, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process(){};
 

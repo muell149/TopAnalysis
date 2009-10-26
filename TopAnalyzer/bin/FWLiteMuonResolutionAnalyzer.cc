@@ -2,7 +2,7 @@
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
 #include "TopAnalysis/TopAnalyzer/bin/FWLiteSingleObjectAnalyzer.h"
 
-typedef FWLiteSingleObjectAnalyzer<std::vector<pat::Muon>, MuonResolution> FWLiteMuonResolutionAnalyzer;
+typedef FWLiteSingleObjectAnalyzer<edm::View<pat::Muon>, MuonResolution> FWLiteMuonResolutionAnalyzer;
 
 
 int main(int argc, char* argv[]) 

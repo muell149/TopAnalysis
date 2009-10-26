@@ -2,7 +2,7 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
 
-typedef ObjectResolution<std::vector<pat::Muon> > BaseClass;
+typedef ObjectResolution<edm::View<pat::Muon> > BaseClass;
 
 /// default constructor for fw lite
 MuonResolution::MuonResolution(double matchDR, std::vector<double> binsPt, std::vector<double> binsEta, std::vector<double> binsPhi):
@@ -42,9 +42,9 @@ MuonResolution::book(edm::Service<TFileService>& fs)
 
 /// histogram filling for fwlite and for full fw
 void
-MuonResolution::fill(const std::vector<pat::Muon>& muons, const double& weight)
+MuonResolution::fill(const edm::View<pat::Muon>& muons, const double& weight)
 {
-  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
+  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon){
     if( muon->genLepton() ){ 
       if(deltaR( muon->eta(), muon->phi(), muon->genLepton()->eta(), muon->genLepton()->phi() )<matchDR_){
 	// fill resolution histograms binned in pt

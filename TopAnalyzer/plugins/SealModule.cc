@@ -7,15 +7,15 @@
 **/
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonQuality.h"
-typedef SingleObjectAnalyzer<std::vector<pat::Muon>, MuonQuality> MuonQualityAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonQuality> MuonQualityAnalyzer;
 DEFINE_FWK_MODULE(MuonQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonKinematics.h"
-typedef SingleObjectAnalyzer<std::vector<pat::Muon>, MuonKinematics> MuonKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonKinematics> MuonKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonKinematicsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
-typedef SingleObjectAnalyzer<std::vector<pat::Muon>, MuonResolution> MuonResolutionAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonResolution> MuonResolutionAnalyzer;
 DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
 
 
@@ -24,15 +24,15 @@ DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
 **/
 
 #include "TopAnalysis/TopAnalyzer/interface/JetQuality.h"
-typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetQuality> JetQualityAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Jet>, JetQuality> JetQualityAnalyzer;
 DEFINE_FWK_MODULE(JetQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/JetKinematics.h"
-typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetKinematics> JetKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Jet>, JetKinematics> JetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/JetResolution.h"
-typedef SingleObjectAnalyzer<std::vector<pat::Jet>, JetResolution> JetResolutionAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Jet>, JetResolution> JetResolutionAnalyzer;
 DEFINE_FWK_MODULE(JetResolutionAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/JetEnergyCorrectionsAnalyzer.h"
@@ -44,7 +44,7 @@ DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
 **/
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
-typedef DoubleObjectAnalyzer<std::vector<pat::Muon>, std::vector<pat::Jet>, MuonJetKinematics> MuonJetKinematicsAnalyzer;
+typedef DoubleObjectAnalyzer<edm::View<pat::Muon>, edm::View<pat::Jet>, MuonJetKinematics> MuonJetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
 
@@ -61,15 +61,15 @@ typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, HypothesisKinFit> HypothesisKi
 DEFINE_FWK_MODULE(HypothesisKinFitAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitJets.h"
-typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, std::vector<pat::Jet>, HypothesisKinFitJets> HypothesisKinFitJetsAnalyzer;
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::Jet>, HypothesisKinFitJets> HypothesisKinFitJetsAnalyzer;
 DEFINE_FWK_MODULE(HypothesisKinFitJetsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMuon.h"
-typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, std::vector<pat::Muon>, HypothesisKinFitMuon> HypothesisKinFitMuonAnalyzer;
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::Muon>, HypothesisKinFitMuon> HypothesisKinFitMuonAnalyzer;
 DEFINE_FWK_MODULE(HypothesisKinFitMuonAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMET.h"
-typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, std::vector<pat::MET> , HypothesisKinFitMET> HypothesisKinFitMETAnalyzer;
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::MET> , HypothesisKinFitMET> HypothesisKinFitMETAnalyzer;
 DEFINE_FWK_MODULE(HypothesisKinFitMETAnalyzer);
 
 

@@ -10,13 +10,13 @@
    \brief   Derived class to analyze the resolution of jets on reconstruction level using generator level information
 
    The structure keeps histograms to derive the resolution of jets using generator level information. 
-   These histograms are to be filled from std::vector<pat::Jet>'s only(!). The class is derived from 
+   These histograms are to be filled from edm::View<pat::Jet>'s only(!). The class is derived from 
    the ObjectResolution<Collection> interface, which makes it usable in fwfull or fwlite. It needs a 
    dedicated constructor for fwlite to obtain the information of histogram binnings in pt, eta and 
    phi of the jet.
 */
 
-class JetResolution : public ObjectResolution<std::vector<pat::Jet> > {
+class JetResolution : public ObjectResolution<edm::View<pat::Jet> > {
 
  public:
   /// default constructor for fw lite
@@ -35,7 +35,7 @@ class JetResolution : public ObjectResolution<std::vector<pat::Jet> > {
      derived from SingleObject<Collection>
   **/
   /// histogram filling for fwlite and for fwfull
-  void fill(const std::vector<pat::Jet>& jets, const double& weight=1.);
+  void fill(const edm::View<pat::Jet>& jets, const double& weight=1.);
 
  private:
   /// there are no additional data memebers with respect to the base class

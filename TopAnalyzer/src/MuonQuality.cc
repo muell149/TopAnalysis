@@ -151,10 +151,10 @@ MuonQuality::book(edm::Service<TFileService>& fs)
 
 /// histogram filling for fwlite and for full fw from reco objects
 void
-MuonQuality::fill(const std::vector<pat::Muon>& muons, const double& weight)
+MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
 {
   int index=0;
-  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
+  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     // NOTE: against the common policy *not* to have any implicit selection cuts 
     // within analyzers these plots are restricted to global muons, as otherwise
     // some of the monitor histograms cannot be filled

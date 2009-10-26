@@ -81,7 +81,7 @@ MuonKinematics::fill(const std::vector<reco::GenParticle>& muons, const double& 
 
 /// histogram filling for fwlite and for full fw
 void
-MuonKinematics::fill(const std::vector<pat::Muon>& muons, const double& weight)
+MuonKinematics::fill(const edm::View<pat::Muon>& muons, const double& weight)
 {
   /** 
       Fill Kinematic Variables
@@ -92,7 +92,7 @@ MuonKinematics::fill(const std::vector<pat::Muon>& muons, const double& weight)
   // where index_=-1 means 'fill all muons' and index_=n
   // n>=-1 means 'fill only n-th leading muon'
   int index=0;
-  for(std::vector<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
+  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     if( index_<0 || index_==index ){
       // energy of the muon
       hists_.find( "en"  )->second->Fill( muon->energy() , weight );

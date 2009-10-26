@@ -122,10 +122,10 @@ JetQuality::book(edm::Service<TFileService>& fs)
 
 /// histogram filling for fwlite and for full fw from reco objects
 void
-JetQuality::fill(const std::vector<pat::Jet>& jets, const double& weight)
+JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
 {
   int index=0;
-  for(std::vector<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
+  for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
     // NOTE: These histograms still need to be filled apropriately
     if( index_<0 || index_==index ){
       /**

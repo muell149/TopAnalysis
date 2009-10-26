@@ -2,7 +2,7 @@
 #include "TopAnalysis/TopAnalyzer/interface/MuonJetKinematics.h"
 #include "TopAnalysis/TopAnalyzer/bin/FWLiteDoubleObjectAnalyzer.h"
 
-typedef FWLiteDoubleObjectAnalyzer<std::vector<pat::Muon>, std::vector<pat::Jet>, MuonJetKinematics> FWLiteMuonJetKinematicsAnalyzer;
+typedef FWLiteDoubleObjectAnalyzer<edm::View<pat::Muon>, edm::View<pat::Jet>, MuonJetKinematics> FWLiteMuonJetKinematicsAnalyzer;
 
 
 int main(int argc, char* argv[]) 

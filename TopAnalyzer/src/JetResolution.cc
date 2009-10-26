@@ -2,7 +2,7 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "TopAnalysis/TopAnalyzer/interface/JetResolution.h"
 
-typedef ObjectResolution<std::vector<pat::Jet> > BaseClass;
+typedef ObjectResolution<edm::View<pat::Jet> > BaseClass;
 
 /// default constructor for fw lite
 JetResolution::JetResolution(double matchDR, std::vector<double> binsPt, std::vector<double> binsEta, std::vector<double> binsPhi):
@@ -42,9 +42,9 @@ JetResolution::book(edm::Service<TFileService>& fs)
 
 /// histogram filling for fwlite and for full fw
 void
-JetResolution::fill(const std::vector<pat::Jet>& jets, const double& weight)
+JetResolution::fill(const edm::View<pat::Jet>& jets, const double& weight)
 {
-  for(std::vector<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet){
+  for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet){
     if( jet->genParton() ){ 
       if(deltaR( jet->eta(), jet->phi(), jet->genParton()->eta(), jet->genParton()->phi() )<matchDR_){
 	// fill resolution histograms binned in pt
