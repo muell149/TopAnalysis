@@ -12,7 +12,7 @@
 /*
    \class   DiMuonMassFilter DiMuonMassFilter.h "TopAnalysis/TopFilter/plugins/DiMuonMassFilter.h"
 
-   \brief   Plugin to veto events with two muons, which pass a Z to mu mu hypothesis
+   \brief   Plugin to veto events with two muons which give a certain invariant mass like Z, J/Psi, ...
 
    The class vetos events where the invariant mass of the two leading muons lies between two values given in the
    config-file or with an invariant mass lower than a certain value. Note that there is no selection of the muons 
@@ -36,7 +36,9 @@ class DiMuonMassFilter : public edm::EDFilter {
  private:
   /// muon collection label
   edm::InputTag muons_;
+  /// veto cut on low mass resonances like J/Psi, default is 20GeV 
   double qcdCut_;
+  /// veto cuts on Z-mass, default values are 80GeV, 105GeV
   std::vector<double> zCut_;
   
 };  

@@ -1,20 +1,4 @@
-/* \class TopChannelSelector
- *
- * \author Dirk Dammann
- *
- * \decription: filter for single top or ttbar decay channels
- *              on generator level.
- *              decay channels are internaly coded by numbers:
- *              1 stands for a hadronically decaying top
- *              2 is top to electron
- *              3 muon
- *              4 tau further decaying to hadrons
- *              5 tau to electron
- *              6 tau to muon.
- *              in two digit numbers the first digit is the top
- *              and the second the antitop.
- *              so e.g. dimuon channel is 33 or single electron is 21 and 12             
- */
+
 #include <memory>  
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -23,53 +7,119 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
+/*
+  \class   TopChannelSelector TopChannelSelector.h "TopAnalysis/TopFilter/plugins/TopChannel.h"
+
+  \brief   EDFilter to select ttbar or single top decays on generator level
+ 
+  filter for single top or ttbar decay channels on generator level.
+  decay channels are internally coded by integer numbers:
+  1 stands for a hadronically decaying top
+  2 is top to electron
+  3 muon
+  4 tau further decaying to hadrons
+  5 tau to electron
+  6 tau to muon.
+  in two digit numbers the first digit is the top and the second the antitop.
+  so e.g. dimuon channel is 33 or single electron is 21 and 12             
+*/
+
 using namespace std;
 
 class TopChannelSelector : public edm::EDFilter {
  public:
+  /// default constructor
   explicit TopChannelSelector(const edm::ParameterSet&);
+  /// default destructor
   ~TopChannelSelector();
   
- private:  
+ private:
+  /// read in which channels are going to be selected and print out
   virtual void beginJob(const edm::EventSetup&);
+  /// the real filtering procedure is implemendted in analyze(), wDecay() and tauDecay()
   virtual bool filter(edm::Event&, const edm::EventSetup&);
-  virtual void endJob(); 
-
-  bool analyze(edm::Event&, const edm::EventSetup&);  
+  /// gives a summary how many events have been selected
+  virtual void endJob();
+   
+  /// finds out if event passes or is blocked. Remark: if invert_selection is set as true in 
+  /// config then the meaning of blocked and passed swapes
+  bool analyze(edm::Event&, const edm::EventSetup&);
+  /// gives back an index corresponding to the decay of the W  
+  /// -1 in case of an error
+  ///  1 for hadron
+  ///  2 for electron
+  ///  3 for muon
+  ///  4 - 7 for tau (depending on output of tauDecay() )
   int wDecay(); 
+  /// gives back an index corresponding to the decay of the tau 
+  ///  4 for hadronic tau decay
+  ///  5 for electron
+  ///  6 for muon
+  ///  7 for unknown
   int tauDecay();
   
+  /// as source the gen particle collection shoud be used
   edm::InputTag src_;
+  /// how many events do you want to be selected?
   int nEvents_;
-  int nEvts, nHits;
+  /// counter for number of events
+  int nEvts; 
+  /// counter for filtered events
+  int nHits;
 
+  /// bool from config: select this channel?
   bool SingleTopHadronic_;
+  /// bool from config: select this channel?
   bool SingleTopElectron_;
+  /// bool from config: select this channel?
   bool SingleTopMuon_; 
+  /// bool from config: select this channel?
   bool SingleTopTau_;
+  /// bool from config: select this channel?
   bool TtbarHadronic_;
+  /// bool from config: select this channel?
   bool TtbarSemiElec_;
+  /// bool from config: select this channel?
   bool TtbarSemiMuon_; 
+  /// bool from config: select this channel?
   bool TtbarSemiTau_;
+  /// bool from config: select this channel?
   bool TtbarElecElec_;
+  /// bool from config: select this channel?
   bool TtbarMuonMuon_;
+  /// bool from config: select this channel?
   bool TtbarTauTau_;
+  /// bool from config: select this channel?
   bool TtbarElecMuon_;
+  /// bool from config: select this channel?
   bool TtbarElecTau_;    
+  /// bool from config: select this channel?
   bool TtbarMuonTau_; 
+  /// bool from config: select this tau decay?
   bool Tau2Had_;
+  /// bool from config: select this tau decay?
   bool Tau2Elec_; 
+  /// bool from config: select this tau decay?
   bool Tau2Muon_;
+  /// bool from config: invert the selection?
   bool invert_;   
-    
+  
+  /// vector to store the index numbers of the channels to be selected  
   vector<int> selectedChannels; 
+  /// length of vector<int> selectedChannels;
   unsigned int selChSize; 
   
+  /// pointer on bquark
   const reco::Candidate* bquark;
+  /// pointer on W boson
   const reco::Candidate* wbos;
+  /// pointer on tau
   const reco::Candidate* tau;
+  /// pointer on first daughter from W
   const reco::Candidate* wdaugh1;
-  const reco::Candidate* wdaugh2;     
+  /// pointer on second daughter from W
+  const reco::Candidate* wdaugh2; 
+      
 };
 
 
@@ -458,7 +508,6 @@ void TopChannelSelector::beginJob(const edm::EventSetup&) {
 
 void TopChannelSelector::endJob() {  
   edm::LogInfo log("TopChannelSelector");
-
   log << "==============================================================\n";
   log << "       Selected: " << nHits  << " of " << nEvts << "\n";
   log << "==============================================================\n";   
