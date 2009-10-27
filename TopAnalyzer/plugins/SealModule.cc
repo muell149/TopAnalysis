@@ -35,7 +35,7 @@ DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
 typedef SingleObjectAnalyzer<edm::View<pat::Jet>, JetResolution> JetResolutionAnalyzer;
 DEFINE_FWK_MODULE(JetResolutionAnalyzer);
 
-#include "TopAnalysis/TopAnalyzer/interface/JetEnergyCorrectionsAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/JetEnergyCorrectionsAnalyzer.h"
 DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
 
 

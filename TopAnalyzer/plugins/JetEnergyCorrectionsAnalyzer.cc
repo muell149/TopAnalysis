@@ -1,4 +1,4 @@
-#include "TopAnalysis/TopAnalyzer/interface/JetEnergyCorrectionsAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/JetEnergyCorrectionsAnalyzer.h"
 
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "FWCore/Framework/interface/Event.h"
