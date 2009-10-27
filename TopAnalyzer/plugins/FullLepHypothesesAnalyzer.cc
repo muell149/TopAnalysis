@@ -1,4 +1,4 @@
-#include "TopAnalysis/TopAnalyzer/interface/FullLepHypothesesAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/FullLepHypothesesAnalyzer.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -681,5 +681,4 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 DEFINE_FWK_MODULE( FullLepHypothesesAnalyzer );

@@ -1,5 +1,5 @@
 #include "TLorentzVector.h"
-#include "TopAnalysis/TopAnalyzer/interface/DimuonAnalyzer.h"
+#include "TopAnalysis/TopAnalyzer/plugins/DimuonAnalyzer.h"
 
 /// default constructor
 DimuonAnalyzer::DimuonAnalyzer(const edm::ParameterSet& cfg):
@@ -133,5 +133,4 @@ DimuonAnalyzer::endJob()
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 DEFINE_FWK_MODULE( DimuonAnalyzer );
