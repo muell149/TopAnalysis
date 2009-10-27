@@ -67,6 +67,10 @@ void JetEnergyCorrectionsAnalyzer::beginJob(const edm::EventSetup&)
 							    "responseLPartonPtParton_barrel",
 							    14, binningLogPt, 51, 0., 2.);
 
+  hists_["responseLPartonEta"            ] = fs->make<TH2F>("responseLPartonEta",
+							    "responseLPartonEta",
+							    30, -3., 3. , 51, 0., 2.);
+
   // response b jets
 
   hists_["responseBGenJetPtGenJet"       ] = fs->make<TH2F>("responseBGenJetPtGenJet",
@@ -88,6 +92,10 @@ void JetEnergyCorrectionsAnalyzer::beginJob(const edm::EventSetup&)
   hists_["responseBPartonPtParton_barrel"] = fs->make<TH2F>("responseBPartonPtParton_barrel",
 							    "responseBPartonPtParton_barrel",
 							    14, binningLogPt, 51, 0., 2.);
+
+  hists_["responseBPartonEta"            ] = fs->make<TH2F>("responseBPartonEta",
+							    "responseBPartonEta",
+							    30, -3., 3. , 51, 0., 2.);
 
   hists_["pdgIdLJet"] = fs->make<TH1F>("pdgIdLJet", "pdgIdLJet", 25, 0., 25.);
   hists_["pdgIdBJet"] = fs->make<TH1F>("pdgIdBJet", "pdgIdBJet", 25, 0., 25.);
@@ -195,64 +203,77 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
   const reco::GenJet genJetLightQ    = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQ   ]];
   const reco::GenJet genJetLightQBar = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQBar]];
   const reco::GenJet genJetHadronicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::HadB     ]];
+  const reco::GenJet genJetLeptonicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LepB     ]];
 
-  // response
-  {
-    double response = semiLepEvt->hadronicDecayQuark(hypoKey_)->pt() / genJetLightQ.pt();
+  analyzeLightJetResponse( *semiLepEvt->hadronicDecayQuark(hypoKey_), genJetLightQ,
+			   *semiLepEvt->hadronicDecayQuark() );
+			  
+  analyzeLightJetResponse( *semiLepEvt->hadronicDecayQuarkBar(hypoKey_), genJetLightQBar,
+			   *semiLepEvt->hadronicDecayQuarkBar() );
 
-    hists_.find("responseLGenJetPtGenJet")->second->Fill( genJetLightQ.pt(), response );
+  analyzeBJetResponse( *semiLepEvt->hadronicDecayB(hypoKey_), genJetHadronicB,
+		       *semiLepEvt->hadronicDecayB() );
 
-    if( std::abs(semiLepEvt->hadronicDecayQuark(hypoKey_)->eta()) < 1.3 )
-      hists_.find("responseLGenJetPtGenJet_barrel")->second->Fill( genJetLightQ.pt(), response );
+  analyzeBJetResponse( *semiLepEvt->leptonicDecayB(hypoKey_), genJetLeptonicB,
+		       *semiLepEvt->leptonicDecayB() );
 
-    hists_.find("responseLGenJetEta")->second->Fill( genJetLightQ.eta(), response );
+}
 
-    response = semiLepEvt->hadronicDecayQuark(hypoKey_)->pt() / semiLepEvt->hadronicDecayQuark()->pt();
+/// fill histograms related to the response of light jets
+void
+JetEnergyCorrectionsAnalyzer::analyzeLightJetResponse(const reco::Candidate& recJet,
+						      const reco::GenJet& genJet,
+						      const reco::GenParticle& parton)
+{
 
-    hists_.find("responseLPartonPtParton")->second->Fill( semiLepEvt->hadronicDecayQuark()->pt(), response );
+  // genJet response
 
-    if( std::abs(semiLepEvt->hadronicDecayQuark(hypoKey_)->eta()) < 1.3 )
-      hists_.find("responseLPartonPtParton_barrel")->second->Fill( semiLepEvt->hadronicDecayQuark()->pt(), response );
+  double response = recJet.pt() / genJet.pt();
 
-  }
+  hists_.find("responseLGenJetPtGenJet")->second->Fill( genJet.pt() , response );
+  hists_.find("responseLGenJetEta"     )->second->Fill( genJet.eta(), response );
 
-  {
-    double response = semiLepEvt->hadronicDecayQuarkBar(hypoKey_)->pt() / genJetLightQBar.pt();
+  if( std::abs(genJet.eta()) < 1.3 )
+    hists_.find("responseLGenJetPtGenJet_barrel")->second->Fill( genJet.pt(), response );
 
-    hists_.find("responseLGenJetPtGenJet")->second->Fill( genJetLightQBar.pt(), response );
+  // parton response
 
-    if( std::abs(semiLepEvt->hadronicDecayQuarkBar(hypoKey_)->eta()) < 1.3 )
-      hists_.find("responseLGenJetPtGenJet_barrel")->second->Fill( genJetLightQBar.pt(), response );
+  response = recJet.pt() / parton.pt();
 
-    hists_.find("responseLGenJetEta")->second->Fill( genJetLightQBar.eta(), response );
+  hists_.find("responseLPartonPtParton")->second->Fill( parton.pt() , response );
+  hists_.find("responseLPartonEta"     )->second->Fill( parton.eta(), response );
+  
+  if( std::abs(parton.eta()) < 1.3 )
+    hists_.find("responseLPartonPtParton_barrel")->second->Fill( parton.pt(), response );
 
-    response = semiLepEvt->hadronicDecayQuarkBar(hypoKey_)->pt() / semiLepEvt->hadronicDecayQuarkBar()->pt();
+}
 
-    hists_.find("responseLPartonPtParton")->second->Fill( semiLepEvt->hadronicDecayQuarkBar()->pt(), response );
+/// fill histograms related to the response of b jets
+void
+JetEnergyCorrectionsAnalyzer::analyzeBJetResponse(const reco::Candidate& recJet,
+						  const reco::GenJet& genJet,
+						  const reco::GenParticle& parton)
+{
 
-    if( std::abs(semiLepEvt->hadronicDecayQuarkBar(hypoKey_)->eta()) < 1.3 )
-      hists_.find("responseLPartonPtParton_barrel")->second->Fill( semiLepEvt->hadronicDecayQuarkBar()->pt(), response );
+  // genJet response
 
-  }
+  double response = recJet.pt() / genJet.pt();
 
-  {
-    double response = semiLepEvt->hadronicDecayB(hypoKey_)->pt() / genJetHadronicB.pt();
+  hists_.find("responseBGenJetPtGenJet")->second->Fill( genJet.pt() , response );
+  hists_.find("responseBGenJetEta"     )->second->Fill( genJet.eta(), response );
 
-    hists_.find("responseBGenJetPtGenJet")->second->Fill( genJetHadronicB.pt(), response );
+  if( std::abs(genJet.eta()) < 1.3 )
+    hists_.find("responseBGenJetPtGenJet_barrel")->second->Fill( genJet.pt(), response );
 
-    if( std::abs(semiLepEvt->hadronicDecayB(hypoKey_)->eta()) < 1.3 )
-      hists_.find("responseBGenJetPtGenJet_barrel")->second->Fill( genJetHadronicB.pt(), response );
+  // parton response
 
-    hists_.find("responseBGenJetEta")->second->Fill( genJetHadronicB.eta(), response );
+  response = recJet.pt() / parton.pt();
 
-    response = semiLepEvt->hadronicDecayB(hypoKey_)->pt() / semiLepEvt->hadronicDecayB()->pt();
-
-    hists_.find("responseBPartonPtParton")->second->Fill( semiLepEvt->hadronicDecayB()->pt(), response );
-
-    if( std::abs(semiLepEvt->hadronicDecayB(hypoKey_)->eta()) < 1.3 )
-      hists_.find("responseBPartonPtParton_barrel")->second->Fill( semiLepEvt->hadronicDecayB()->pt(), response );
-
-  }
+  hists_.find("responseBPartonPtParton")->second->Fill( parton.pt() , response );
+  hists_.find("responseBPartonEta"     )->second->Fill( parton.eta(), response );
+  
+  if( std::abs(parton.eta()) < 1.3 )
+    hists_.find("responseBPartonPtParton_barrel")->second->Fill( parton.pt(), response );
 
 }
 
