@@ -12,14 +12,14 @@ from TopAnalysis.Configuration.defines import source
 # eff         :    1.0                                                   
 ######################################################################
 sizes ['ttbary09_0'] = 77140
-source['ttbary09_0'] ='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_0_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_1_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_2_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_3_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_4_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_5_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_6_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_7_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_8_ttbarx09.root\','
-source['ttbary09_0']+='\'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_sig_9_ttbarx09.root\''
+source['ttbary09_0'] ='\'/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_1_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_2_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_3_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_4_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_5_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_6_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_7_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_8_ttbarx09.root\','
+source['ttbary09_0']+='\'/store/user/rwolf/ttbar09/patTuple_sig_9_ttbarx09.root\''
 
