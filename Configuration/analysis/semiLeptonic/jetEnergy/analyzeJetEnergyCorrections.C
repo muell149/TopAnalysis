@@ -181,12 +181,14 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   TH2F* respLGenJetEta            [8];
   TH2F* respLPartonPtParton       [8];
   TH2F* respLPartonPtParton_barrel[8];
+  TH2F* respLPartonEta            [8];
 
   TH2F* respBGenJetPtGenJet       [8];
   TH2F* respBGenJetPtGenJet_barrel[8];
   TH2F* respBGenJetEta            [8];
   TH2F* respBPartonPtParton       [8];
   TH2F* respBPartonPtParton_barrel[8];
+  TH2F* respBPartonEta            [8];
 
   for(unsigned int i = 0; i < 8; i++) {
     TString dirBase = "analyzeJetEnergy" + hypoClass + "_";
@@ -213,12 +215,14 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     respLGenJetEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLGenJetEta"            )->Clone();
     respLPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLPartonPtParton"       )->Clone();
     respLPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLPartonPtParton_barrel")->Clone();
+    respLPartonEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLPartonEta"            )->Clone();
 
     respBGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBGenJetPtGenJet"       )->Clone();
     respBGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBGenJetPtGenJet_barrel")->Clone();
     respBGenJetEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBGenJetEta"            )->Clone();
     respBPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonPtParton"       )->Clone();
-    respBPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonPtParton_barrel")->Clone();   
+    respBPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonPtParton_barrel")->Clone();
+    respBPartonEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonEta"            )->Clone();
   }
 
   file->Close();
@@ -249,11 +253,13 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     respLGenJetEta            [i]->Scale(scaleFactor);
     respLPartonPtParton       [i]->Scale(scaleFactor);
     respLPartonPtParton_barrel[i]->Scale(scaleFactor);
+    respLPartonEta            [i]->Scale(scaleFactor);
     respBGenJetPtGenJet       [i]->Scale(scaleFactor);
     respBGenJetPtGenJet_barrel[i]->Scale(scaleFactor);
     respBGenJetEta            [i]->Scale(scaleFactor);
     respBPartonPtParton       [i]->Scale(scaleFactor);
     respBPartonPtParton_barrel[i]->Scale(scaleFactor);
+    respBPartonEta            [i]->Scale(scaleFactor);
     massW                     [i]->Sumw2();
     massT                     [i]->Sumw2();
     massW_Pt1                 [i]->Sumw2();
@@ -271,11 +277,13 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     respLGenJetEta            [i]->Sumw2();
     respLPartonPtParton       [i]->Sumw2();
     respLPartonPtParton_barrel[i]->Sumw2();
+    respLPartonEta            [i]->Sumw2();
     respBGenJetPtGenJet       [i]->Sumw2();
     respBGenJetPtGenJet_barrel[i]->Sumw2();
     respBGenJetEta            [i]->Sumw2();
     respBPartonPtParton       [i]->Sumw2();
     respBPartonPtParton_barrel[i]->Sumw2();
+    respBPartonEta            [i]->Sumw2();
   }
 
   for(unsigned int i = 0; i < 8; i++) {
@@ -473,7 +481,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasMassW_2dim->cd(1);
     drawResponse(massW_Pt1[i], i, "p_{T,j} [GeV]", "m_{jj} [GeV]", true, 0., 160., 80.4);
 
-    canvasMassW_2dim->cd(4);
+    canvasMassW_2dim->cd(2);
     drawResponse(massW_Eta1[i], i, "#eta_{j}", "m_{jj} [GeV]", false, 0., 160., 80.4);
 
     // top mass
@@ -481,13 +489,13 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasMassT_2dim->cd(1);
     drawResponse(massT_Pt1[i], i, "p_{T,j} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
 
-    canvasMassT_2dim->cd(3);
-    drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
-
-    canvasMassT_2dim->cd(4);
+    canvasMassT_2dim->cd(2);
     drawResponse(massT_Eta1[i], i, "#eta_{j}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
 
-    canvasMassT_2dim->cd(6);
+    canvasMassT_2dim->cd(4);
+    drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
+
+    canvasMassT_2dim->cd(5);
     drawResponse(massT_EtaB[i], i, "#eta_{b}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
 
   }
@@ -517,6 +525,9 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasRespL->cd(5);
     drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
 
+    canvasRespL->cd(6);
+    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", false);
+
     // response light jets (zoom)
 
     canvasRespL_zoom->cd(1);
@@ -539,6 +550,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
 		 true, yMin_zoom, yMax_zoom);
 
+    canvasRespL_zoom->cd(6);
+    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)",
+		 false, yMin_zoom, yMax_zoom);
+
     // response b jets
 
     canvasRespB->cd(1);
@@ -555,6 +570,9 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     canvasRespB->cd(5);
     drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
+
+    canvasRespB->cd(6);
+    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", false);
 
     // response b jets (zoom)
 
@@ -578,6 +596,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
 		 true, yMin_zoom, yMax_zoom);
 
+    canvasRespB_zoom->cd(6);
+    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)",
+		 false, yMin_zoom, yMax_zoom);
+
   }
 
   // legend
@@ -599,13 +621,15 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   }
 
-  for(unsigned int i = 1; i < 7; i++) {
+  for(unsigned int i = 1; i < 6; i++) {
+
+    if(i==3) continue;
 
     TString suffix = "_";
     suffix += i;
     suffix += ".eps";
 
-    if(i==1 || i==4) {
+    if(i<3) {
       canvasMassW_2dim->cd(i);
       legend->Draw();
       gPad->Print(baseName+"massW_2dim" + suffix);
@@ -617,7 +641,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   }
 
-  for(unsigned int i = 1; i < 6; i++) {
+  for(unsigned int i = 1; i < 7; i++) {
 
     TString suffix = "_";
     suffix += i;
