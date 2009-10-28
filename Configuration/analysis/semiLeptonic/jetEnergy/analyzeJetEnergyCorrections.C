@@ -423,8 +423,8 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   massW[0]->SetMaximum( 1.5*massW[0]->GetMaximum() );
   massT[0]->SetMaximum( 1.5*massT[0]->GetMaximum() );
-  massW[0]->SetTitle("");
-  massT[0]->SetTitle("");
+  massW[0]->SetTitle("algo: " + algo);
+  massT[0]->SetTitle("algo: " + algo);
   massW[0]->SetYTitle("a.u.");
   massT[0]->SetYTitle("a.u.");
   massW[0]->SetStats(kFALSE);
