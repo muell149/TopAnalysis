@@ -54,6 +54,7 @@ process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
 
 ## select events that were generated in the semileptonic muon channel
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+process.decaySubset.fillMode = "kME" # use the status 3 partons from the hard process (Matrix Element)
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEventFilters_cff")
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = False
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = True
