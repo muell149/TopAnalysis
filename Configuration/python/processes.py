@@ -111,3 +111,14 @@ source['zmumu09_pat']+= 'zmumu09_pat_2,'
 source['zmumu09_pat']+= 'zmumu09_pat_3,'
 source['zmumu09_pat']+= 'zmumu09_pat_4,'
 source['zmumu09_pat']+= 'zmumu09_pat_5'
+
+## /TTbar/Summer09-MC_31X_V3_7TeV-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_pat7 import *
+evts  ['ttbarx09_7'] =  626610           ## number of produced events
+xsec  ['ttbarx09_7'] =    94.3           ## NLO in pb
+eff   ['ttbarx09_7'] =     1.0           ## generator efficiency on gen level
+sizes ['ttbarx09_7'] = 'blocks'
+source['ttbarx09_7'] = 'ttbarx09_7_0,' + 'ttbarx09_7_1,'
+source['ttbarx09_7']+= 'ttbarx09_7_2,' + 'ttbarx09_7_3,'
+source['ttbarx09_7']+= 'ttbarx09_7_4,' + 'ttbarx09_7_5,'
+source['ttbarx09_7']+= 'ttbarx09_7_6,' + 'ttbarx09_7_7'
