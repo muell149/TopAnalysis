@@ -139,14 +139,14 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
   hists_.find("mW_Pt1")->second->Fill( jet1->pt(), mW );
   hists_.find("mW_Pt2")->second->Fill( jet2->pt(), mW );
 
-  hists_.find("mW_Eta1")->second->Fill( jet2->eta(), mW );
+  hists_.find("mW_Eta1")->second->Fill( jet1->eta(), mW );
   hists_.find("mW_Eta2")->second->Fill( jet2->eta(), mW );
 
   hists_.find("mTop_Pt1")->second->Fill( jet1->pt(), mTop );
   hists_.find("mTop_Pt2")->second->Fill( jet2->pt(), mTop );
   hists_.find("mTop_PtB")->second->Fill( jetB->pt(), mTop );
 
-  hists_.find("mTop_Eta1")->second->Fill( jet2->eta(), mTop );
+  hists_.find("mTop_Eta1")->second->Fill( jet1->eta(), mTop );
   hists_.find("mTop_Eta2")->second->Fill( jet2->eta(), mTop );
   hists_.find("mTop_EtaB")->second->Fill( jetB->eta(), mTop );
 
