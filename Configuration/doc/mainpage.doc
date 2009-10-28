@@ -6,6 +6,8 @@ CMSSW release and tags used: <a href="showtags.txt">showtags.txt</a>
 
 Printout from scram: <a href="scram.txt">scram.txt</a>
 
+Printout from the libchecker: <a href="libchecker.txt">libchecker.txt</a>
+
 Printout from cmsRun and ROOT: <a href="test.txt">test.txt</a>
 
 Test plots: <a href="plots">plots</a>
