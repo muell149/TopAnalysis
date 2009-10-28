@@ -6,6 +6,7 @@
 #include <TLegend.h>
 #include <TPaveText.h>
 #include <TROOT.h>
+#include <TStyle.h>
 #include <TSystem.h>
 
 void setPadStyle()
@@ -103,8 +104,8 @@ void hatch_bin(TH1 *thisHisto, Int_t bin, TString option = "", Double_t ymax_fac
 int markerColor[8] = { 2,  6,  6,  4,  6,  1,  6,  8};
 int markerStyle[8] = {22, 24, 24, 23, 24, 20, 24, 29};
 
-void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TString yTitle, const bool logX=true,
-		  const double yMin = 0.4, const double yMax = 1.6, const double yLine = 1.0)
+void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TString yTitle, const TString hTitle,
+		  const bool logX=true, const double yMin = 0.4, const double yMax = 1.6, const double yLine = 1.0)
 {
 
   setPadStyle();
@@ -116,7 +117,7 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
   histFit->SetMarkerStyle(markerStyle[i]);
   histFit->SetMinimum(yMin);
   histFit->SetMaximum(yMax);
-  histFit->SetTitle("");
+  histFit->SetTitle(hTitle);
   histFit->SetXTitle(xTitle);
   histFit->SetYTitle(yTitle);
   histFit->SetStats(kFALSE);
@@ -135,12 +136,26 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
 
 }
 
+TString title(const TString algo, const TString flavor = "", const TString eta = "")
+{
+  TString title = "";
+  if(flavor != "") title += "flavor: " + flavor + ", ";
+  title += "algo: " + algo;
+  if(eta != "") title += ", #eta < " + eta;
+  return title;
+}
+
 /// main function
 void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root",
 				 TString hypoClass = "GenMatch")
 {
 
   name.Resize(name.Index(".root"));
+
+  TString algo = "AK5";
+  if(name.Contains("IC5")) algo = "IC5";
+  if(name.Contains("KT4")) algo = "KT4";
+  if(name.Contains("SC5")) algo = "SC5";
 
   TString levels[8] = {"raw" ,
 		       "off" ,  //L1
@@ -158,6 +173,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   gROOT->cd();
   gROOT->SetStyle("Plain");
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetTitleFontSize(.05);
+  gStyle->SetTitleX(.18);
+  gStyle->SetTitleY(.97);
 
   TH1F* massW[8];
   TH1F* massT[8];
@@ -479,24 +498,24 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // W mass
     
     canvasMassW_2dim->cd(1);
-    drawResponse(massW_Pt1[i], i, "p_{T,j} [GeV]", "m_{jj} [GeV]", true, 0., 160., 80.4);
+    drawResponse(massW_Pt1[i], i, "p_{T,j} [GeV]", "m_{jj} [GeV]", title(algo), true, 0., 160., 80.4);
 
     canvasMassW_2dim->cd(2);
-    drawResponse(massW_Eta1[i], i, "#eta_{j}", "m_{jj} [GeV]", false, 0., 160., 80.4);
+    drawResponse(massW_Eta1[i], i, "#eta_{j}", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
 
     // top mass
 
     canvasMassT_2dim->cd(1);
-    drawResponse(massT_Pt1[i], i, "p_{T,j} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
+    drawResponse(massT_Pt1[i], i, "p_{T,j} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(2);
-    drawResponse(massT_Eta1[i], i, "#eta_{j}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
+    drawResponse(massT_Eta1[i], i, "#eta_{j}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(4);
-    drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", true, 0., 350., 172.5);
+    drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(5);
-    drawResponse(massT_EtaB[i], i, "#eta_{b}", "m_{jjb} [GeV]", false, 0., 350., 172.5);
+    drawResponse(massT_EtaB[i], i, "#eta_{b}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
 
   }
 
@@ -511,93 +530,93 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // response light jets
 
     canvasRespL->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)");
+    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"));
 
     canvasRespL->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)");
+    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc","1.3"));
 
     canvasRespL->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", false);
+    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"), false);
 
     canvasRespL->cd(4);
-    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
+    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"));
 
     canvasRespL->cd(5);
-    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
+    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","1.3"));
 
     canvasRespL->cd(6);
-    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", false);
+    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"), false);
 
     // response light jets (zoom)
 
     canvasRespL_zoom->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc","1.3"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)",
+    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"),
 		 false, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(4);
-    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(5);
-    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","1.3"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(6);
-    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)",
+    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
 		 false, yMin_zoom, yMax_zoom);
 
     // response b jets
 
     canvasRespB->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)");
+    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"));
 
     canvasRespB->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)");
+    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b","1.3"));
 
     canvasRespB->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", false);
+    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"), false);
 
     canvasRespB->cd(4);
-    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
+    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"));
 
     canvasRespB->cd(5);
-    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)");
+    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"));
 
     canvasRespB->cd(6);
-    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", false);
+    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"), false);
 
     // response b jets (zoom)
 
     canvasRespB_zoom->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)",
+    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b","1.3"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)",
+    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"),
 		 false, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(4);
-    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(5);
-    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(6);
-    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)",
+    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
 		 false, yMin_zoom, yMax_zoom);
 
   }
