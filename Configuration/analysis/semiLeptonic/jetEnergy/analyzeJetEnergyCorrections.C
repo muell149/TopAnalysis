@@ -58,8 +58,23 @@ TH1D* fitGauss2D(TH2F* hist)
   delete (TH1D*) gDirectory->Get( histName+"_2" );
   delete (TH1D*) gDirectory->Get( histName+"_chi2" );
 
-  // return histo with mean of gaussians
-  return (TH1D*) gDirectory->Get( histName+"_1" );
+  // get histo with mean of gaussians
+  TH1D* gauss = (TH1D*) gDirectory->Get( histName+"_1" );
+
+  // remove x-bins that have less than 20 entries along y
+  // (this assumes weight=1 for all entries)
+  for(int bx = 1; bx <= hist->GetNbinsX(); bx++) {
+    double bincontent = 0;
+    for(int by = 1; by <= hist->GetNbinsY(); by++)
+      bincontent += hist->GetBinContent(bx, by);
+    if(bincontent<20) {
+      gauss->SetBinContent(bx, 0.);
+      gauss->SetBinError(bx, 0.);
+    }
+  }
+
+  // return result
+  return gauss;
 
 }
 
