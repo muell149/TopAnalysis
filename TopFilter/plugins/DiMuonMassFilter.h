@@ -9,7 +9,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-/*
+/**
    \class   DiMuonMassFilter DiMuonMassFilter.h "TopAnalysis/TopFilter/plugins/DiMuonMassFilter.h"
 
    \brief   Plugin to veto events with two muons which give a certain invariant mass like Z, J/Psi, ...
@@ -17,7 +17,7 @@
    The class vetos events where the invariant mass of the two leading muons lies between two values given in the
    config-file or with an invariant mass lower than a certain value. Note that there is no selection of the muons 
    within the event filer. 
-**/
+*/
 
 class DiMuonMassFilter : public edm::EDFilter {
 

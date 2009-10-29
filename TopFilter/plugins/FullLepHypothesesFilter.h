@@ -8,7 +8,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtFullLeptonicEvent.h"
 
-/*
+/**
    \class   FullLepHypothesesFilter FullLepHypothesesFilter.h "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
 
    \brief   Filter on FullLeptonicEvent hypotheses cuts on invariant lepton lepton mass or b-tags can be applied
@@ -17,7 +17,7 @@
    invariant mass of the two leptons from the event solution lies between two values given in the config-file or with 
    an invariant mass lower than a certain value. A cut on the b-tagging discriminator of one or both jets can be applied. 
    The b-tagging algorithm as the cut(s) can be steered in the config-file
-**/
+*/
 
 class FullLepHypothesesFilter : public edm::EDFilter {
 

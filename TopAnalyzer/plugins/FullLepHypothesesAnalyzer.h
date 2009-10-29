@@ -13,7 +13,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtFullLeptonicEvent.h"
 
-/*
+/**
    \class   FullLepHypothesesAnalyzer FullLepHypothesesAnalyzer.h "TopAnalysis/TopAnalyzer/interface/FullLepHypothesesAnalyzer.h"
 
    \brief   EDAnalyzer for FullLeptonicEvent hypotheses with electrons and muons

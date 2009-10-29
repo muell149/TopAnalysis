@@ -7,7 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-/*
+/**
   \class   TopChannelSelector TopChannelSelector.h "TopAnalysis/TopFilter/plugins/TopChannel.h"
 
   \brief   EDFilter to select ttbar or single top decays on generator level
