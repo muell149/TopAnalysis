@@ -1,6 +1,6 @@
 #include "TopAnalysis/TopAnalyzer/plugins/JetEnergyCorrectionsAnalyzer.h"
 
-#include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/JetReco/interface/Jet.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
@@ -187,7 +187,7 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
 			   *semiLepEvt->hadronicDecayB());
 
   // get genJets
-  edm::Handle<reco::GenJetCollection> genJets;
+  edm::Handle<edm::View<reco::Jet> > genJets;
   event.getByLabel(genJets_, genJets);
 
   // get genJet matching
@@ -200,10 +200,10 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
     if(genJetMatching[i] < 0 && genJetMatching[i] != -3)
       return;
 
-  const reco::GenJet genJetLightQ    = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQ   ]];
-  const reco::GenJet genJetLightQBar = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQBar]];
-  const reco::GenJet genJetHadronicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::HadB     ]];
-  const reco::GenJet genJetLeptonicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LepB     ]];
+  const reco::Jet genJetLightQ    = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQ   ]];
+  const reco::Jet genJetLightQBar = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LightQBar]];
+  const reco::Jet genJetHadronicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::HadB     ]];
+  const reco::Jet genJetLeptonicB = (*genJets)[genJetMatching[TtSemiLepEvtPartons::LepB     ]];
 
   analyzeLightJetResponse( *semiLepEvt->hadronicDecayQuark(hypoKey_), genJetLightQ,
 			   *semiLepEvt->hadronicDecayQuark() );
@@ -222,7 +222,7 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
 /// fill histograms related to the response of light jets
 void
 JetEnergyCorrectionsAnalyzer::analyzeLightJetResponse(const reco::Candidate& recJet,
-						      const reco::GenJet& genJet,
+						      const reco::Candidate& genJet,
 						      const reco::GenParticle& parton)
 {
 
@@ -251,7 +251,7 @@ JetEnergyCorrectionsAnalyzer::analyzeLightJetResponse(const reco::Candidate& rec
 /// fill histograms related to the response of b jets
 void
 JetEnergyCorrectionsAnalyzer::analyzeBJetResponse(const reco::Candidate& recJet,
-						  const reco::GenJet& genJet,
+						  const reco::Candidate& genJet,
 						  const reco::GenParticle& parton)
 {
 

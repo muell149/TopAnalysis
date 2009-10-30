@@ -8,7 +8,6 @@
 
 namespace reco {
   class Candidate;
-  class GenJet;
   class GenParticle;
 }
 
@@ -30,9 +29,9 @@ class JetEnergyCorrectionsAnalyzer : public edm::EDAnalyzer {
   
   private:
   /// fill histograms related to the response of light jets  
-  void analyzeLightJetResponse(const reco::Candidate& recJet, const reco::GenJet& genJet, const reco::GenParticle& parton);
+  void analyzeLightJetResponse(const reco::Candidate& recJet, const reco::Candidate& genJet, const reco::GenParticle& parton);
   /// fill histograms related to the response of b jets
-  void analyzeBJetResponse(const reco::Candidate& recJet, const reco::GenJet& genJet, const reco::GenParticle& parton);
+  void analyzeBJetResponse(const reco::Candidate& recJet, const reco::Candidate& genJet, const reco::GenParticle& parton);
   /// fill pdgId specific histograms
   void analyzeFlavorComposition(const reco::Candidate& jet, const reco::GenParticle& parton);
 
