@@ -38,10 +38,11 @@ class TagAndProbeAnalyzer : public edm::EDAnalyzer {
   edm::InputTag jets_;  
 
   /// tag and probe histograms
-  TH1F* pt;
-  TH1F* eta;
-  TH1F* phi;
-  TH1F* minDR_Hist;
-  TH1F* mult_Hist;
+  TH1F* pt_;
+  TH1F* eta_;
+  TH1F* phi_;
+  TH1F* mult_;
+  TH1F* minDR_;
+
 };
 

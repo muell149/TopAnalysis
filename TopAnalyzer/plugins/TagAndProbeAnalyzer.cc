@@ -1,6 +1,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+//#include "DataFormats/PatCandidates/interface/Jet.h"
+//#include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
@@ -8,7 +9,8 @@
 
 /// default constructor
 TagAndProbeAnalyzer::TagAndProbeAnalyzer(const edm::ParameterSet& cfg):
-  muons_( cfg.getParameter<edm::InputTag>("muons") )
+  muons_( cfg.getParameter<edm::InputTag>("muons") ),
+  jets_( cfg.getParameter<edm::InputTag>("jets") )
 { 
 }
 
@@ -21,45 +23,30 @@ TagAndProbeAnalyzer::~TagAndProbeAnalyzer()
 void 
 TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  edm::Handle<edm::View<pat::Muon> > muons;
+  edm::Handle<edm::View<reco::Candidate> > muons;
   evt.getByLabel(muons_, muons);
 
-  edm::Handle<edm::View<pat::Jet> > jets;
+  edm::Handle<edm::View<reco::Candidate> > jets;
   evt.getByLabel(jets_, jets);
   //...
 
-
-    double mult=0;
-    double minDR=-1;
-
-
+  double minDR=-1;
   // only as an example
-  for(edm::View<pat::Muon>::const_iterator muon=muons->begin(); muon!=muons->end(); ++muon)
+  for(edm::View<reco::Candidate>::const_iterator muon=muons->begin(); muon!=muons->end(); ++muon)
   {
-    pt ->Fill(muon->pt ());
-    eta->Fill(muon->eta());
-    phi->Fill(muon->phi());
+    pt_ ->Fill(muon->pt ());
+    eta_->Fill(muon->eta());
+    phi_->Fill(muon->phi());
 
-	
-	for (edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet)
-	{
-	double dR = deltaR(jet->eta(), jet->phi(), muon->eta(), muon->phi());
-	  if(minDR<0 || dR<minDR)
-	  {
-	  minDR=dR;
-	  }
-  	} 
-
-
-    ++mult;
-
+    for (edm::View<reco::Candidate>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
+      double dR = deltaR(jet->eta(), jet->phi(), muon->eta(), muon->phi());
+      if(minDR<0 || dR<minDR){
+	minDR=dR;
+      }
+    } 
   }
-
-    
-    mult_Hist->Fill(mult);
-    minDR_Hist->Fill(minDR);
-
-  
+  mult_ ->Fill(jets->size());
+  minDR_->Fill(minDR);
 }
 
 
@@ -69,8 +56,7 @@ TagAndProbeAnalyzer::beginJob()
 {
   // laod TFile Service
   edm::Service<TFileService> fs;
-  if( !fs )
-  {
+  if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
@@ -80,15 +66,11 @@ TagAndProbeAnalyzer::beginJob()
   **/
   
   // pt of the tag/probe objects
-  pt   		= fs->make<TH1F>( "pt" , "pt" , 50,   0.   , 150.);
-  eta 		= fs->make<TH1F>( "eta", "eta", 50,  -5.   , 5.  );
-  phi 		= fs->make<TH1F>( "phi", "phi", 50,  -3.14 , 3.14);
-
-  minDR_Hist		= fs->make<TH1F>( "minDR" , "minDelRMuJet" , 50,   0.   , 150.);
-
-  mult_Hist  	= fs->make<TH1F>( "mult" , "mult" , 10,   0.   , 10.);
-
-  // ...
+  pt_  	 = fs->make<TH1F>( "pt"    , "pt"   , 50,   0.   , 150.);
+  eta_ 	 = fs->make<TH1F>( "eta"   , "eta"  , 50,  -5.   , 5.  );
+  phi_	 = fs->make<TH1F>( "phi"   , "phi"  , 50,  -3.14 , 3.14);
+  mult_  = fs->make<TH1F>( "mult"  ,"mult"  , 10,   0.   , 10. );
+  minDR_ = fs->make<TH1F>( "minDR" , "minDelRMuJet" , 50,   0. , 10.);
 }
 
 /// ...
