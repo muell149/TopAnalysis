@@ -32,18 +32,25 @@ void JetEnergyCorrectionsAnalyzer::beginJob(const edm::EventSetup&)
 
   hists_["mW_Pt1" ] = fs->make<TH2F>("mW_Pt1" , "mW_Pt1" , 14, binningLogPt, 41, 0., 160.);
   hists_["mW_Pt2" ] = fs->make<TH2F>("mW_Pt2" , "mW_Pt2" , 14, binningLogPt, 41, 0., 160.);
+  hists_["mW_PtW" ] = fs->make<TH2F>("mW_PtW" , "mW_PtW" , 14, binningLogPt, 41, 0., 160.);
   hists_["mW_Eta1"] = fs->make<TH2F>("mW_Eta1", "mW_Eta1", 30, -3., 3.     , 41, 0., 160.);
   hists_["mW_Eta2"] = fs->make<TH2F>("mW_Eta2", "mW_Eta2", 30, -3., 3.     , 41, 0., 160.);
+  hists_["mW_EtaW"] = fs->make<TH2F>("mW_EtaW", "mW_EtaW", 30, -3., 3.     , 41, 0., 160.);
 
-  hists_["mTop_Pt1" ] = fs->make<TH2F>("mTop_Pt1" , "mTop_Pt1" , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_Pt2" ] = fs->make<TH2F>("mTop_Pt2" , "mTop_Pt2" , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_PtB" ] = fs->make<TH2F>("mTop_PtB" , "mTop_PtB" , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_Eta1"] = fs->make<TH2F>("mTop_Eta1", "mTop_Eta1", 30, -3., 3.     , 51, 0., 350.);
-  hists_["mTop_Eta2"] = fs->make<TH2F>("mTop_Eta2", "mTop_Eta2", 30, -3., 3.     , 51, 0., 350.);
-  hists_["mTop_EtaB"] = fs->make<TH2F>("mTop_EtaB", "mTop_EtaB", 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_Pt1"   ] = fs->make<TH2F>("mTop_Pt1"   , "mTop_Pt1"   , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_Pt2"   ] = fs->make<TH2F>("mTop_Pt2"   , "mTop_Pt2"   , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_PtB"   ] = fs->make<TH2F>("mTop_PtB"   , "mTop_PtB"   , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_PtTop" ] = fs->make<TH2F>("mTop_PtTop" , "mTop_PtTop" , 14, binningLogPt, 51, 0., 350.);
+  hists_["mTop_Eta1"  ] = fs->make<TH2F>("mTop_Eta1"  , "mTop_Eta1"  , 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_Eta2"  ] = fs->make<TH2F>("mTop_Eta2"  , "mTop_Eta2"  , 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_EtaB"  ] = fs->make<TH2F>("mTop_EtaB"  , "mTop_EtaB"  , 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_EtaTop"] = fs->make<TH2F>("mTop_EtaTop", "mTop_EtaTop", 30, -3., 3.     , 51, 0., 350.);
 
   hists_["mW_barrel"  ] = fs->make<TH1F>("mW_barrel"  , "mW_barrel"  , 28, 0., 140.);
   hists_["mTop_barrel"] = fs->make<TH1F>("mTop_barrel", "mTop_barrel", 60, 0., 300.);
+
+  hists_["deltaM_PtB" ] = fs->make<TH2F>("deltaM_PtB" , "deltaM_PtB" , 14, binningLogPt, 41, 0., 180.);
+  hists_["deltaM_EtaB"] = fs->make<TH2F>("deltaM_EtaB", "deltaM_EtaB", 30, -3., 3.     , 41, 0., 180.);
 
   // response light jets
 
@@ -138,17 +145,26 @@ JetEnergyCorrectionsAnalyzer::analyze(const edm::Event& event, const edm::EventS
 
   hists_.find("mW_Pt1")->second->Fill( jet1->pt(), mW );
   hists_.find("mW_Pt2")->second->Fill( jet2->pt(), mW );
+  hists_.find("mW_PtW")->second->Fill( semiLepEvt->hadronicDecayW(hypoKey_)->pt(), mW );
 
   hists_.find("mW_Eta1")->second->Fill( jet1->eta(), mW );
   hists_.find("mW_Eta2")->second->Fill( jet2->eta(), mW );
+  hists_.find("mW_EtaW")->second->Fill( semiLepEvt->hadronicDecayW(hypoKey_)->eta(), mW );
 
-  hists_.find("mTop_Pt1")->second->Fill( jet1->pt(), mTop );
-  hists_.find("mTop_Pt2")->second->Fill( jet2->pt(), mTop );
-  hists_.find("mTop_PtB")->second->Fill( jetB->pt(), mTop );
+  hists_.find("mTop_Pt1"  )->second->Fill( jet1->pt(), mTop );
+  hists_.find("mTop_Pt2"  )->second->Fill( jet2->pt(), mTop );
+  hists_.find("mTop_PtB"  )->second->Fill( jetB->pt(), mTop );
+  hists_.find("mTop_PtTop")->second->Fill( semiLepEvt->hadronicDecayTop(hypoKey_)->pt(), mTop );
 
   hists_.find("mTop_Eta1")->second->Fill( jet1->eta(), mTop );
   hists_.find("mTop_Eta2")->second->Fill( jet2->eta(), mTop );
   hists_.find("mTop_EtaB")->second->Fill( jetB->eta(), mTop );
+  hists_.find("mTop_EtaTop")->second->Fill( semiLepEvt->hadronicDecayTop(hypoKey_)->eta(), mTop );
+
+  double deltaM = mTop - mW;
+
+  hists_.find("deltaM_PtB" )->second->Fill( jetB->pt() , deltaM );
+  hists_.find("deltaM_EtaB")->second->Fill( jetB->eta(), deltaM );
 
   // in the barrel only
 
