@@ -38,6 +38,19 @@ ttSemiLepHypGenMatchHad  = ttSemiLepHypGenMatch.clone(jetCorrectionLevel = "had"
 ttSemiLepHypGenMatchUe   = ttSemiLepHypGenMatch.clone(jetCorrectionLevel = "ue"  ) ## L6
 ttSemiLepHypGenMatchPart = ttSemiLepHypGenMatch.clone(jetCorrectionLevel = "part") ## L7
 
+list = [ttSemiLepHypGenMatchRaw,
+        ttSemiLepHypGenMatchOff,
+        ttSemiLepHypGenMatchRel,
+        ttSemiLepHypGenMatchAbs,
+        ttSemiLepHypGenMatchEmf,
+        ttSemiLepHypGenMatchHad,
+        ttSemiLepHypGenMatchUe,
+        ttSemiLepHypGenMatchPart]
+
+for obj in range(len(list)):
+    list[obj].jets = "goodJets"
+    list[obj].leps = "tightMuons"
+
 ttSemiLepHypGenMatch_multilevel = cms.Sequence(ttSemiLepHypGenMatchRaw  *
                                                ttSemiLepHypGenMatchOff  *
                                                ttSemiLepHypGenMatchRel  *
@@ -52,32 +65,30 @@ ttSemiLepHypGenMatch_multilevel = cms.Sequence(ttSemiLepHypGenMatchRaw  *
 ## produce geom hypothesis for different jet energy correction levels
 ##########################################################################################
 
-ttSemiLepHypGeomRaw  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "raw" )
-ttSemiLepHypGeomOff  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "off" ) ## L1
-ttSemiLepHypGeomRel  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "rel" ) ## L2
-ttSemiLepHypGeomAbs  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "abs" ) ## L3
-ttSemiLepHypGeomEmf  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "emf" ) ## L4
-ttSemiLepHypGeomHad  = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "had" ) ## L5
-ttSemiLepHypGeomUe   = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "ue"  ) ## L6
-ttSemiLepHypGeomPart = ttSemiLepHypGeom.clone(useBTagging = True, jetCorrectionLevel = "part") ## L7
+ttSemiLepHypGeomRaw  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "raw" )
+ttSemiLepHypGeomOff  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "off" ) ## L1
+ttSemiLepHypGeomRel  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "rel" ) ## L2
+ttSemiLepHypGeomAbs  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "abs" ) ## L3
+ttSemiLepHypGeomEmf  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "emf" ) ## L4
+ttSemiLepHypGeomHad  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "had" ) ## L5
+ttSemiLepHypGeomUe   = ttSemiLepHypGeom.clone(jetCorrectionLevel = "ue"  ) ## L6
+ttSemiLepHypGeomPart = ttSemiLepHypGeom.clone(jetCorrectionLevel = "part") ## L7
 
-ttSemiLepHypGeomRaw .minBDiscBJets = 1.90
-ttSemiLepHypGeomOff .minBDiscBJets = 1.90
-ttSemiLepHypGeomRel .minBDiscBJets = 1.90
-ttSemiLepHypGeomAbs .minBDiscBJets = 1.90
-ttSemiLepHypGeomEmf .minBDiscBJets = 1.90
-ttSemiLepHypGeomHad .minBDiscBJets = 1.90
-ttSemiLepHypGeomUe  .minBDiscBJets = 1.90
-ttSemiLepHypGeomPart.minBDiscBJets = 1.90
+list = [ttSemiLepHypGeomRaw,
+        ttSemiLepHypGeomOff,
+        ttSemiLepHypGeomRel,
+        ttSemiLepHypGeomAbs,
+        ttSemiLepHypGeomEmf,
+        ttSemiLepHypGeomHad,
+        ttSemiLepHypGeomUe,
+        ttSemiLepHypGeomPart]
 
-ttSemiLepHypGeomRaw .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomOff .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomRel .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomAbs .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomEmf .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomHad .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomUe  .maxBDiscLightJets = 3.99
-ttSemiLepHypGeomPart.maxBDiscLightJets = 3.99
+for obj in range(len(list)):
+    list[obj].jets = "goodJets"
+    list[obj].leps = "tightMuons"
+    list[obj].useBTagging       = True
+    list[obj].minBDiscBJets     = 1.90
+    list[obj].maxBDiscLightJets = 3.99
 
 ttSemiLepHypGeom_multilevel = cms.Sequence(ttSemiLepHypGeomRaw  *
                                            ttSemiLepHypGeomOff  *
