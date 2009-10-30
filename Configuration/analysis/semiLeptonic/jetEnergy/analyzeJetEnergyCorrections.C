@@ -49,32 +49,55 @@ void fitGauss(TH1F* hist)
 TH1D* fitGauss2D(TH2F* hist)
 {
 
-  // fit a gaussian in all bins along x
-  hist->FitSlicesY();
-
-  // delete the three histogram that we do not want at the moment
   TString histName = hist->GetName();
-  delete (TH1D*) gDirectory->Get( histName+"_0" );
-  delete (TH1D*) gDirectory->Get( histName+"_2" );
-  delete (TH1D*) gDirectory->Get( histName+"_chi2" );
 
-  // get histo with mean of gaussians
-  TH1D* gauss = (TH1D*) gDirectory->Get( histName+"_1" );
+  // fit a gaussian in all x-bins
+  TObjArray tmp;
+  hist->FitSlicesY(0,0,-1,0,"QNR",&tmp);
 
-  // remove x-bins that have less than 20 entries along y
-  // (this assumes weight=1 for all entries)
+  // get histos with mean and sigma of gaussians and clone them
+  TH1D* means  = (TH1D*) tmp.FindObject(histName+"_1")->Clone(histName+"_1_0");
+  TH1D* sigmas = (TH1D*) tmp.FindObject(histName+"_2")->Clone(histName+"_2_0");
+
+  // clean-up
+  tmp.Delete();
+
+  // loop over all x-bins
   for(int bx = 1; bx <= hist->GetNbinsX(); bx++) {
+    // sum bin contents along y-axis
     double bincontent = 0;
     for(int by = 1; by <= hist->GetNbinsY(); by++)
       bincontent += hist->GetBinContent(bx, by);
-    if(bincontent<20) {
-      gauss->SetBinContent(bx, 0.);
-      gauss->SetBinError(bx, 0.);
+    ////// hist->GetXaxis()->SetRange(bx, bx);
+    // remove x-bins that have less than 20 entries along y
+    // (this assumes weight=1 for all entries)
+    if(bincontent<20) { ////// || hist->GetMean(2) / hist->GetRMS(2) <= 3
+      means->SetBinContent(bx, 0.);
+      means->SetBinError  (bx, 0.);
+    }
+    // perform a second gauss fit for all other bins
+    // restricting the fitting range according to
+    // mean and sigma from the first gauss fit
+    else {
+      double mean  = means ->GetBinContent(bx);
+      double sigma = sigmas->GetBinContent(bx);
+      TF1* f = new TF1("f","gaus", mean-1.5*sigma, mean+1.5*sigma);
+      hist->FitSlicesY(f,bx,bx,0,"QNR",&tmp);
+      mean  = ((TH1D*) tmp.FindObject(histName+"_1"))->GetBinContent(bx);
+      sigma = ((TH1D*) tmp.FindObject(histName+"_1"))->GetBinError  (bx);
+      means->SetBinContent(bx, mean );
+      means->SetBinError  (bx, sigma);
+      tmp.Delete();
     }
   }
+  // reset range
+  ////// hist->GetXaxis()->SetRange(1, hist->GetNbinsX());
+
+  // clean-up
+  delete sigmas;
 
   // return result
-  return gauss;
+  return means;
 
 }
 
@@ -168,9 +191,9 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   name.Resize(name.Index(".root"));
 
   TString algo = "AK5";
-  if(name.Contains("IC5")) algo = "IC5";
-  if(name.Contains("KT4")) algo = "KT4";
-  if(name.Contains("SC5")) algo = "SC5";
+  if(name.Contains("IC5", TString::kIgnoreCase)) algo = "IC5";
+  if(name.Contains("KT4", TString::kIgnoreCase)) algo = "KT4";
+  if(name.Contains("SC5", TString::kIgnoreCase)) algo = "SC5";
 
   TString levels[8] = {"raw" ,
 		       "off" ,  //L1
@@ -714,31 +737,17 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   canvasRespB     ->Print(psName);
   canvasRespB_zoom->Print(psName + ")");
 
-  // clean up
+  // clean-up
 
-//  delete file;
-//  delete canvasMassW;
-//  delete canvasMassT;
-//  delete canvasRespL;
-//  delete canvasRespB;
-//  for(unsigned int i = 0; i < 8; i++) {
-//    delete massW[i];
-//    delete massT[i];
-//    delete respLGenJetPtGenJet       [i];
-//    delete respLGenJetPtGenJet_barrel[i];
-//    delete respLGenJetEta            [i];
-//    delete respLPartonPtParton       [i];
-//    delete respLPartonPtParton_barrel[i];
-//    delete respBGenJetPtGenJet       [i];
-//    delete respBGenJetPtGenJet_barrel[i];
-//    delete respBGenJetEta            [i];
-//    delete respBPartonPtParton       [i];
-//    delete respBPartonPtParton_barrel[i];
-//    delete dummyHist[i];
-//  }
-//  delete txtMassW;
-//  delete txtMassT;
-//  delete tmpTxt;
-//  delete legend;
+  delete canvasMassW;
+  delete canvasMassW_perr;
+  delete canvasMassW_2dim;
+  delete canvasMassT;
+  delete canvasMassT_perr;
+  delete canvasMassT_2dim;
+  delete canvasRespL;
+  delete canvasRespL_zoom;
+  delete canvasRespB;
+  delete canvasRespB_zoom;
 
 }
