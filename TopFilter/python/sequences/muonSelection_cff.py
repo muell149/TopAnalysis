@@ -30,12 +30,12 @@ chi2Fit       = selectedLayer1Muons.clone(src = 'triggerMuons',
                                           cut = 'combinedMuon.normalizedChi2 < 10.0'
                                           )
 trackSig      = selectedLayer1Muons.clone(src = 'triggerMuons',
-                                          cut = 'abs(track.d0) < 0.2'
+                                          cut = 'abs(dB) < 0.2'
                                           )
 trackMuons    = selectedLayer1Muons.clone(src = 'triggerMuons',
                                           cut = 'track.numberOfValidHits >= 11 &'
                                                 'combinedMuon.normalizedChi2 < 10.0 &'
-                                                'abs(track.d0) < 0.2'
+                                                'abs(dB) < 0.2'
                                           )
 
 ## a triggerMuon with good tracker quality
