@@ -354,8 +354,6 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   TCanvas* canvasMassW      = new TCanvas("canvasMassW"     , "W mass"                        , 900, 900);
   TCanvas* canvasMassT      = new TCanvas("canvasMassT"     , "top mass"                      , 900, 900);
-  TCanvas* canvasMassW_perr = new TCanvas("canvasMassW_perr", "W mass (peak error)"           , 900, 900);
-  TCanvas* canvasMassT_perr = new TCanvas("canvasMassT_perr", "top mass (peak error)"         , 900, 900);
   TCanvas* canvasMassW_2dim = new TCanvas("canvasMassW_2dim", "W mass (2 dim.)"               , 900, 900);
   TCanvas* canvasMassT_2dim = new TCanvas("canvasMassT_2dim", "top mass (2 dim.)"             , 900, 900);
   TCanvas* canvasRespL      = new TCanvas("canvasRespL"     , "response for light jets"       , 900, 900);
@@ -364,8 +362,6 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   TCanvas* canvasRespB_zoom = new TCanvas("canvasRespB_zoom", "response for b jets (zoom)"    , 900, 900);
   canvasMassW     ->Divide(3,3);
   canvasMassT     ->Divide(3,3);
-  canvasMassW_perr->Divide(3,3);
-  canvasMassT_perr->Divide(3,3);
   canvasMassW_2dim->Divide(3,3);
   canvasMassT_2dim->Divide(3,3);
   canvasRespL     ->Divide(3,3);
@@ -390,27 +386,18 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasMassT->cd(i+1);
     massT[i]->DrawCopy();
 
-    canvasMassW_perr->cd(i+1);
-    massW[i]->DrawCopy();
-
-    canvasMassT_perr->cd(i+1);
-    massT[i]->DrawCopy();
-
   }  
 
-  TPaveText *txtMassW = new TPaveText(0.28, 0.68, 0.88, 0.88, "NDC");
-  TPaveText *txtMassT = new TPaveText(0.23, 0.68, 0.88, 0.88, "NDC");
+  TPaveText *txtMassW = new TPaveText(0.22, 0.68, 0.9, 0.88, "NDC");
+  TPaveText *txtMassT = new TPaveText(0.17, 0.68, 0.9, 0.88, "NDC");
   char *tmpTxt = new char[100];
 
   txtMassW->SetTextAlign(32);
   txtMassT->SetTextAlign(32);
-  txtMassW->SetFillColor(0);
-  txtMassT->SetFillColor(0);
+  txtMassW->SetFillStyle(0);
+  txtMassT->SetFillStyle(0);
   txtMassW->SetBorderSize(0);
   txtMassT->SetBorderSize(0);
-
-  TPaveText *txtMassW_perr = (TPaveText*) txtMassW->Clone();
-  TPaveText *txtMassT_perr = (TPaveText*) txtMassT->Clone();
 
   for(unsigned int i = 0; i < 8; i++) {
 
@@ -436,25 +423,19 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     TText* ttxt = 0;
     
     double mean     = massW[i]->GetFunction("gaus")->GetParameter(1);
+    double mean_err = massW[i]->GetFunction("gaus")->GetParError (1);
     double relSigma = massW[i]->GetFunction("gaus")->GetParameter(2) / mean;
-    sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
-    ttxt = txtMassW->AddText(levels[i] + tmpTxt);
-    ttxt->SetTextColor(markerColor[i]);
 
-    double mean_err = massW[i]->GetFunction("gaus")->GetParError(1);
-    sprintf(tmpTxt, ": #mu = %4.1f #pm %4.1f GeV", mean, mean_err);
-    ttxt = txtMassW_perr->AddText(levels[i] + tmpTxt);
+    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    ttxt = txtMassW->AddText(levels[i] + tmpTxt);
     ttxt->SetTextColor(markerColor[i]);
     
     mean     = massT[i]->GetFunction("gaus")->GetParameter(1);
+    mean_err = massT[i]->GetFunction("gaus")->GetParError (1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
-    sprintf(tmpTxt, ": #mu = %4.1f GeV ;  #sigma/#mu = %4.2f", mean, relSigma);
-    ttxt = txtMassT->AddText(levels[i] + tmpTxt);
-    ttxt->SetTextColor(markerColor[i]);
 
-    mean_err = massT[i]->GetFunction("gaus")->GetParError(1);
-    sprintf(tmpTxt, ": #mu = %4.1f #pm %4.1f GeV", mean, mean_err);
-    ttxt = txtMassT_perr->AddText(levels[i] + tmpTxt);
+    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    ttxt = txtMassT->AddText(levels[i] + tmpTxt);
     ttxt->SetTextColor(markerColor[i]);
 
   }
@@ -487,8 +468,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
       massW[i]->GetFunction("gaus")->DrawCopy("same");
     }
     txtMassW->Draw();
-    if(i==7)
+    if(i==7) {
+      massW[0]->DrawCopy("sameaxis");
       gPad->Print(baseName+"massW.eps");
+    }
 
     canvasMassT->cd(9);
     setPadStyle();
@@ -499,32 +482,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
       massT[i]->GetFunction("gaus")->DrawCopy("same");
     }
     txtMassT->Draw();
-    if(i==7)
+    if(i==7) {
+      massT[0]->DrawCopy("sameaxis");
       gPad->Print(baseName+"massT.eps");
-
-    // with error on peak from Gauss fit
-
-    canvasMassW_perr->cd(9);
-    setPadStyle();
-    massW[i]->DrawCopy(drawOption);
-    if(massW[i]->GetListOfFunctions()->FindObject("gaus")) {
-      massW[i]->GetFunction("gaus")->SetLineWidth(1);
-      massW[i]->GetFunction("gaus")->DrawCopy("same");
     }
-    txtMassW_perr->Draw();
-    if(i==7)
-      gPad->Print(baseName+"massW_perr.eps");
-
-    canvasMassT_perr->cd(9);
-    setPadStyle();
-    massT[i]->DrawCopy(drawOption);
-    if(massT[i]->GetListOfFunctions()->FindObject("gaus")) {
-      massT[i]->GetFunction("gaus")->SetLineWidth(1);
-      massT[i]->GetFunction("gaus")->DrawCopy("same");
-    }
-    txtMassT_perr->Draw();
-    if(i==7)
-      gPad->Print(baseName+"massT_perr.eps");
 
   }
 
@@ -727,10 +688,8 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   TString psName = outDir + "/" + name + "_" + hypoClass + ".ps";
 
   canvasMassW     ->Print(psName + "(");
-  canvasMassW_perr->Print(psName);
   canvasMassW_2dim->Print(psName);
   canvasMassT     ->Print(psName);
-  canvasMassT_perr->Print(psName);
   canvasMassT_2dim->Print(psName);
   canvasRespL     ->Print(psName);
   canvasRespL_zoom->Print(psName);
@@ -740,10 +699,8 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   // clean-up
 
   delete canvasMassW;
-  delete canvasMassW_perr;
   delete canvasMassW_2dim;
   delete canvasMassT;
-  delete canvasMassT_perr;
   delete canvasMassT_2dim;
   delete canvasRespL;
   delete canvasRespL_zoom;
