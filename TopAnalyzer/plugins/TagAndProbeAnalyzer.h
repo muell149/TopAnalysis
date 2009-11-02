@@ -34,15 +34,11 @@ class TagAndProbeAnalyzer : public edm::EDAnalyzer {
 
  private:
   /// ...
-  edm::InputTag muons_;
+  edm::InputTag probes_;
+  edm::InputTag tests_;
   edm::InputTag jets_;  
 
-  /// tag and probe histograms
-  TH1F* pt_;
-  TH1F* eta_;
-  TH1F* phi_;
-  TH1F* mult_;
-  TH1F* minDR_;
-
+  /// tag and probe histogram
+  std::map<std::string, TH1F*> hists_;
 };
 
