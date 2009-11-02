@@ -166,7 +166,7 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
   
   histFit->DrawCopy(drawOption);
   drawHLine(histFit, yLine);
-  if(logX) {
+  if(logX && !xTitle.Contains("jj")) {
     hatch_bin(histFit, 1);
     hatch_bin(histFit, 2);
   }
@@ -221,17 +221,24 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   TH2F* massW_Pt1[8];
   TH2F* massW_Pt2[8];
+  TH2F* massW_PtW[8];
 
   TH2F* massW_Eta1[8];
   TH2F* massW_Eta2[8];
+  TH2F* massW_EtaW[8];
 
   TH2F* massT_Pt1[8];
   TH2F* massT_Pt2[8];
   TH2F* massT_PtB[8];
+  TH2F* massT_PtT[8];
 
   TH2F* massT_Eta1[8];
   TH2F* massT_Eta2[8];
   TH2F* massT_EtaB[8];
+  TH2F* massT_EtaT[8];
+
+  TH2F* deltaM_PtB [8];
+  TH2F* deltaM_EtaB[8];
 
   TH2F* respLGenJetPtGenJet       [8];
   TH2F* respLGenJetPtGenJet_barrel[8];
@@ -255,17 +262,24 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     massW_Pt1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Pt1")->Clone();
     massW_Pt2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Pt2")->Clone();
+    massW_PtW[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_PtW")->Clone();
 
     massW_Eta1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Eta1")->Clone();
     massW_Eta2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Eta2")->Clone();
+    massW_EtaW[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_EtaW")->Clone();
 
-    massT_Pt1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Pt1")->Clone();
-    massT_Pt2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Pt2")->Clone();
-    massT_PtB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_PtB")->Clone();
+    massT_Pt1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Pt1"  )->Clone();
+    massT_Pt2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Pt2"  )->Clone();
+    massT_PtB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_PtB"  )->Clone();
+    massT_PtT[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_PtTop")->Clone();
 
-    massT_Eta1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Eta1")->Clone();
-    massT_Eta2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Eta2")->Clone();
-    massT_EtaB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_EtaB")->Clone();
+    massT_Eta1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Eta1"  )->Clone();
+    massT_Eta2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Eta2"  )->Clone();
+    massT_EtaB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_EtaB"  )->Clone();
+    massT_EtaT[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_EtaTop")->Clone();
+
+    deltaM_PtB [i] = (TH2F*) file->Get(dirBase + levels[i] + "/deltaM_PtB" )->Clone();
+    deltaM_EtaB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/deltaM_EtaB")->Clone();
 
     respLGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLGenJetPtGenJet"       )->Clone();
     respLGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLGenJetPtGenJet_barrel")->Clone();
@@ -297,14 +311,20 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     massT                     [i]->Scale(scaleFactor);
     massW_Pt1                 [i]->Scale(scaleFactor);
     massW_Pt2                 [i]->Scale(scaleFactor);
+    massW_PtW                 [i]->Scale(scaleFactor);
     massW_Eta1                [i]->Scale(scaleFactor);
     massW_Eta2                [i]->Scale(scaleFactor);
+    massW_EtaW                [i]->Scale(scaleFactor);
     massT_Pt1                 [i]->Scale(scaleFactor);
     massT_Pt2                 [i]->Scale(scaleFactor);
     massT_PtB                 [i]->Scale(scaleFactor);
+    massT_PtT                 [i]->Scale(scaleFactor);
     massT_Eta1                [i]->Scale(scaleFactor);
     massT_Eta2                [i]->Scale(scaleFactor);
     massT_EtaB                [i]->Scale(scaleFactor);
+    massT_EtaT                [i]->Scale(scaleFactor);
+    deltaM_PtB                [i]->Scale(scaleFactor);
+    deltaM_EtaB               [i]->Scale(scaleFactor);
     respLGenJetPtGenJet       [i]->Scale(scaleFactor);
     respLGenJetPtGenJet_barrel[i]->Scale(scaleFactor);
     respLGenJetEta            [i]->Scale(scaleFactor);
@@ -321,14 +341,20 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     massT                     [i]->Sumw2();
     massW_Pt1                 [i]->Sumw2();
     massW_Pt2                 [i]->Sumw2();
+    massW_PtW                 [i]->Sumw2();
     massW_Eta1                [i]->Sumw2();
     massW_Eta2                [i]->Sumw2();
+    massW_EtaW                [i]->Sumw2();
     massT_Pt1                 [i]->Sumw2();
     massT_Pt2                 [i]->Sumw2();
     massT_PtB                 [i]->Sumw2();
+    massT_PtT                 [i]->Sumw2();
     massT_Eta1                [i]->Sumw2();
     massT_Eta2                [i]->Sumw2();
     massT_EtaB                [i]->Sumw2();
+    massT_EtaT                [i]->Sumw2();
+    deltaM_PtB                [i]->Sumw2();
+    deltaM_EtaB               [i]->Sumw2();
     respLGenJetPtGenJet       [i]->Sumw2();
     respLGenJetPtGenJet_barrel[i]->Sumw2();
     respLGenJetEta            [i]->Sumw2();
@@ -502,6 +528,12 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasMassW_2dim->cd(2);
     drawResponse(massW_Eta1[i], i, "#eta_{j}", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
 
+    canvasMassW_2dim->cd(3);
+    drawResponse(massW_PtW[i], i, "p_{jj} [GeV]", "m_{jj} [GeV]", title(algo), true, 0., 160., 80.4);
+
+    canvasMassW_2dim->cd(6);
+    drawResponse(massW_EtaW[i], i, "#eta_{jj}", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
+
     // top mass
 
     canvasMassT_2dim->cd(1);
@@ -510,11 +542,23 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     canvasMassT_2dim->cd(2);
     drawResponse(massT_Eta1[i], i, "#eta_{j}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
 
+    canvasMassT_2dim->cd(3);
+    drawResponse(massT_PtT[i], i, "p_{T,jjb} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
+
     canvasMassT_2dim->cd(4);
     drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(5);
     drawResponse(massT_EtaB[i], i, "#eta_{b}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
+
+    canvasMassT_2dim->cd(6);
+    drawResponse(massT_EtaT[i], i, "#eta_{jjb}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
+
+    canvasMassT_2dim->cd(7);
+    drawResponse(deltaM_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb}-m_{jj} [GeV]", title(algo), true, 0., 180., 92.1);
+
+    canvasMassT_2dim->cd(8);
+    drawResponse(deltaM_EtaB[i], i, "#eta_{b}", "m_{jjb}-m_{jj} [GeV]", title(algo), false, 0., 180., 92.1);
 
   }
 
@@ -639,15 +683,13 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   }
 
-  for(unsigned int i = 1; i < 6; i++) {
-
-    if(i==3) continue;
+  for(unsigned int i = 1; i < 9; i++) {
 
     TString suffix = "_";
     suffix += i;
     suffix += ".eps";
 
-    if(i<3) {
+    if(i<4 || i==6) {
       canvasMassW_2dim->cd(i);
       legend->Draw();
       gPad->Print(baseName+"massW_2dim" + suffix);
