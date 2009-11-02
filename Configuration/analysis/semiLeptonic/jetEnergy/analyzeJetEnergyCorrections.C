@@ -523,42 +523,42 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // W mass
     
     canvasMassW_2dim->cd(1);
-    drawResponse(massW_Pt1[i], i, "p_{T,j} [GeV]", "m_{jj} [GeV]", title(algo), true, 0., 160., 80.4);
+    drawResponse(massW_Pt1[i], i, "p_{T,j} (rec) [GeV]", "m_{jj} [GeV]", title(algo), true, 0., 160., 80.4);
 
     canvasMassW_2dim->cd(2);
-    drawResponse(massW_Eta1[i], i, "#eta_{j}", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
+    drawResponse(massW_Eta1[i], i, "#eta_{j} (rec)", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
 
     canvasMassW_2dim->cd(3);
-    drawResponse(massW_PtW[i], i, "p_{jj} [GeV]", "m_{jj} [GeV]", title(algo), true, 0., 160., 80.4);
+    drawResponse(massW_PtW[i], i, "p_{T,jj} (rec) [GeV]", "m_{jj} [GeV]", title(algo), true, 0., 160., 80.4);
 
     canvasMassW_2dim->cd(6);
-    drawResponse(massW_EtaW[i], i, "#eta_{jj}", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
+    drawResponse(massW_EtaW[i], i, "#eta_{jj} (rec)", "m_{jj} [GeV]", title(algo), false, 0., 160., 80.4);
 
     // top mass
 
     canvasMassT_2dim->cd(1);
-    drawResponse(massT_Pt1[i], i, "p_{T,j} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
+    drawResponse(massT_Pt1[i], i, "p_{T,j} (rec) [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(2);
-    drawResponse(massT_Eta1[i], i, "#eta_{j}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
+    drawResponse(massT_Eta1[i], i, "#eta_{j} (rec)", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(3);
-    drawResponse(massT_PtT[i], i, "p_{T,jjb} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
+    drawResponse(massT_PtT[i], i, "p_{T,jjb} (rec) [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(4);
-    drawResponse(massT_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
+    drawResponse(massT_PtB[i], i, "p_{T,b} (rec) [GeV]", "m_{jjb} [GeV]", title(algo), true, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(5);
-    drawResponse(massT_EtaB[i], i, "#eta_{b}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
+    drawResponse(massT_EtaB[i], i, "#eta_{b} (rec)", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(6);
-    drawResponse(massT_EtaT[i], i, "#eta_{jjb}", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
+    drawResponse(massT_EtaT[i], i, "#eta_{jjb} (rec)", "m_{jjb} [GeV]", title(algo), false, 0., 350., 172.5);
 
     canvasMassT_2dim->cd(7);
-    drawResponse(deltaM_PtB[i], i, "p_{T,b} [GeV]", "m_{jjb}-m_{jj} [GeV]", title(algo), true, 0., 180., 92.1);
+    drawResponse(deltaM_PtB[i], i, "p_{T,b} (rec) [GeV]", "m_{jjb}-m_{jj} [GeV]", title(algo), true, 0., 180., 92.1);
 
     canvasMassT_2dim->cd(8);
-    drawResponse(deltaM_EtaB[i], i, "#eta_{b}", "m_{jjb}-m_{jj} [GeV]", title(algo), false, 0., 180., 92.1);
+    drawResponse(deltaM_EtaB[i], i, "#eta_{b} (rec)", "m_{jjb}-m_{jj} [GeV]", title(algo), false, 0., 180., 92.1);
 
   }
 
@@ -579,7 +579,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc","1.3"));
 
     canvasRespL->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"), false);
+    drawResponse(respLGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"), false);
 
     canvasRespL->cd(4);
     drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"));
@@ -588,7 +588,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","1.3"));
 
     canvasRespL->cd(6);
-    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"), false);
+    drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"), false);
 
     // response light jets (zoom)
 
@@ -601,7 +601,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"),
+    drawResponse(respLGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"),
 		 false, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(4);
@@ -613,7 +613,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(6);
-    drawResponse(respLPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
+    drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
 		 false, yMin_zoom, yMax_zoom);
 
     // response b jets
@@ -625,7 +625,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b","1.3"));
 
     canvasRespB->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"), false);
+    drawResponse(respBGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"), false);
 
     canvasRespB->cd(4);
     drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"));
@@ -634,7 +634,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"));
 
     canvasRespB->cd(6);
-    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"), false);
+    drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"), false);
 
     // response b jets (zoom)
 
@@ -647,7 +647,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"),
+    drawResponse(respBGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"),
 		 false, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(4);
@@ -659,7 +659,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(6);
-    drawResponse(respBPartonEta[i], i, "#eta", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
+    drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
 		 false, yMin_zoom, yMax_zoom);
 
   }
