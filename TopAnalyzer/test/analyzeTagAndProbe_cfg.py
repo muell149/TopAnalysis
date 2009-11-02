@@ -60,10 +60,9 @@ process.testMuons = selectedLayer1Muons.clone(src = 'probeMuons',
 
 
 ## analyze muons
-from TopAnalysis.TopAnalyzer.TagAndProbeAnalyzer_cfi import tagAndProbeAnalyzer
-process.probeAnalyzer = tagAndProbeAnalyzer.clone(jets = 'selectedJets', muons = 'probeMuons')
-process.testAnalyzer  = tagAndProbeAnalyzer.clone(jets = 'selectedJets', muons = 'testMuons' )
-
+process.load("TopAnalysis/TopAnalyzer/python/TagAndProbeAnalyzer_cfi")
+process.tagAndProbeAnalyzer.tests  = "testMuons"
+process.tagAndProbeAnalyzer.probes = "probeMuons"
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
@@ -78,6 +77,5 @@ process.p1 = cms.Path(
     process.probeMuons    *
     process.testMuons     *
     ## analyze probe and test collections
-    process.probeAnalyzer *
-    process.testAnalyzer
+    process.tagAndProbeAnalyzer
     )
