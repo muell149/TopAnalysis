@@ -30,6 +30,14 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
   evt.getByLabel(jets_, jets);
   //...
 
+/** 
+	histogram filling
+
+ 	filling: for all muons of all events		  : pt, eta, phi 
+		 for all events				  : number of jets (multiplicity)
+  		 for all muons and all jets of all events: minimum of R between jet an muon
+**/	
+
   double minDR=-1;
   // only as an example
   for(edm::View<reco::Candidate>::const_iterator muon=muons->begin(); muon!=muons->end(); ++muon)
@@ -62,7 +70,9 @@ TagAndProbeAnalyzer::beginJob()
   }
 
  /**
-     tag and probe histograms
+	histogram booking
+
+	tag and probe histograms
   **/
   
   // pt of the tag/probe objects
