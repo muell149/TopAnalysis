@@ -36,13 +36,39 @@ void setAxisStyle(TH1* hist)
 
 }
 
+void cleverRebinning(TH1F* hist)
+{
+
+  if(hist->GetEntries() / hist->GetNbinsX() < 4.) {
+    hist->Rebin(); // reduces number of bins by a factor of two, merging adjacent bins
+    cleverRebinning(hist); // recursion
+  }
+
+}
+
 void fitGauss(TH1F* hist)
 {
 
-  hist->Fit("gaus", "Q0");
+  cleverRebinning(hist);
+  TString fitOptions = "M0E";
+  // first iteration
+  hist->Fit("gaus", fitOptions);
+  // second iteration
+//  if(hist->GetEntries() / hist->GetNbinsX() < 10.)
+//    fitOptions += "LL"; // use Loglikelihood method instead of chisquare in case of low statistics
   double mean  = hist->GetFunction("gaus")->GetParameter(1);
   double sigma = hist->GetFunction("gaus")->GetParameter(2);
-  hist->Fit("gaus", "QM0", "", mean-1.5*sigma, mean+1.5*sigma);
+  if(hist->GetEntries() / hist->GetNbinsX() > 10.)
+    hist->Fit("gaus", fitOptions, "", mean-1.25*sigma, mean+1.25*sigma);
+  else
+    hist->Fit("gaus", fitOptions);
+  // third iteration
+  mean  = hist->GetFunction("gaus")->GetParameter(1);
+  sigma = hist->GetFunction("gaus")->GetParameter(2);
+  if(hist->GetEntries() / hist->GetNbinsX() > 10.)
+    hist->Fit("gaus", fitOptions, "", mean-1.25*sigma, mean+1.25*sigma);
+  else
+    hist->Fit("gaus", fitOptions);
 
 }
 
@@ -573,13 +599,13 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // response light jets
 
     canvasRespL->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"));
+    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
 
     canvasRespL->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc","1.3"));
+    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"));
 
     canvasRespL->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"), false);
+    drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"), false);
 
     canvasRespL->cd(4);
     drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"));
@@ -593,15 +619,15 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // response light jets (zoom)
 
     canvasRespL_zoom->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"),
+    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc","1.3"),
+    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"udsc"),
+    drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
 		 false, yMin_zoom, yMax_zoom);
 
     canvasRespL_zoom->cd(4);
@@ -619,13 +645,13 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // response b jets
 
     canvasRespB->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"));
+    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
 
     canvasRespB->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b","1.3"));
+    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"));
 
     canvasRespB->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"), false);
+    drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"), false);
 
     canvasRespB->cd(4);
     drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"));
@@ -639,15 +665,15 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     // response b jets (zoom)
 
     canvasRespB_zoom->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"),
+    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (gen) [GeV]", "p_{T} (rec) / p_{T} (gen)", title(algo,"b","1.3"),
+    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"),
 		 true, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta (gen)", "p_{T} (rec) / p_{T} (gen)", title(algo,"b"),
+    drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
 		 false, yMin_zoom, yMax_zoom);
 
     canvasRespB_zoom->cd(4);
