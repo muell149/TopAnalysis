@@ -1,7 +1,9 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-//#include "DataFormats/PatCandidates/interface/Jet.h"
-//#include "DataFormats/PatCandidates/interface/Muon.h"
+
+#include "DataFormats/Common/interface/Association.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/Common/interface/RefToBaseVector.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
@@ -24,6 +26,42 @@ TagAndProbeAnalyzer::~TagAndProbeAnalyzer()
 void 
 TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
+//   //
+//   // EXAMPLE: How to use edm::Associations
+//   //
+
+//   // recieve the input collection
+//   edm::Handle<edm::View<reco::Candidate> > probes; 
+//   evt.getByLabel(probes_, probes);
+  
+//   // recieve the match association to the generator particles
+//   edm::Handle<edm::Association<edm::View<reco::Candidate> > > matches; 
+//   evt.getByLabel("testMap", matches);
+  
+//   // iterate input collection 
+//   for(edm::View<reco::Candidate>::const_iterator probe=probes->begin(); probe!=probes->end(); ++probe){
+//     // define index in the collection
+//     unsigned int idx = probe-probes->begin();
+
+//     // first possibility
+//     if( matches->contains(probes->id()) ){
+//       edm::Ref<edm::View<reco::Candidate>, reco::Candidate> match = matches->get(probes->id(), idx);
+//       if (match.isNonnull() && match.isAvailable() ) {
+// 	std::cout << "This is the pt of the associated muon in test : " << match->pt() << std::endl;
+//       }
+//     }
+
+//     // second possibility
+//     // define a reference to the base object
+//     edm::RefToBase<reco::Candidate> probeRef = probes->refAt(idx);
+//     // check if there exists a non-null entry in the association or not
+//     if( match->contains(probeRef.id()) ){
+//       if ((*match)[probeRef].isNonnull() && (*match)[probeRef].isAvailable()) {
+// 	std::cout << "This is the pt of the associated muon in test : " << (*match)[probeRef]->pt() << std::endl;
+//       }
+//     }
+//   }
+  
   // get probe collection
   edm::Handle<edm::View<reco::Candidate> > probes;
   evt.getByLabel(probes_, probes);
