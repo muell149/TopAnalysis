@@ -19,7 +19,9 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    "/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root"
+    ##"/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root"
+    ## for testing at cern
+    '/store/relval/CMSSW_3_3_0/RelValTTbar/GEN-SIM-RECO/STARTUP31X_V8-v1/0001/3291E09D-67B7-DE11-9ED6-003048678C9A.root'
     )
 )
 
@@ -59,6 +61,27 @@ process.testMuons = selectedLayer1Muons.clone(src = 'probeMuons',
                                               )
 
 
+## pat sequences
+
+## Geometry and Detector Conditions (needed for a few patTuple production steps)
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+## global tag for 33X
+process.GlobalTag.globaltag = cms.string('STARTUP31X_V1::All')
+## global tag for 34X
+## process.GlobalTag.globaltag = cms.string('STARTUP3XY_V9::All')
+process.load("Configuration.StandardSequences.MagneticField_cff")
+
+## Standard PAT Configuration File
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+
+## association map
+process.load("TopAnalysis/TopUtils/python/TagAndProbeAssociator_cfi")
+process.testMap.src = "probeMuons"
+process.testMap.matched = "testMuons"
+
+
 ## analyze muons
 process.load("TopAnalysis/TopAnalyzer/python/TagAndProbeAnalyzer_cfi")
 process.tagAndProbeAnalyzer.tests  = "testMuons"
@@ -71,11 +94,12 @@ process.TFileService = cms.Service("TFileService",
 
 process.p1 = cms.Path(
     ## apply tag selection
-    
+    process.patDefaultSequence *
     ## create probe and test collections
     process.selectedJets  *
     process.probeMuons    *
     process.testMuons     *
+    process.testMap       *
     ## analyze probe and test collections
     process.tagAndProbeAnalyzer
     )
