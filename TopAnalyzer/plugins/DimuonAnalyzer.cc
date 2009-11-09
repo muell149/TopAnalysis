@@ -3,8 +3,10 @@
 
 /// default constructor
 DimuonAnalyzer::DimuonAnalyzer(const edm::ParameterSet& cfg):
-  muons_      ( cfg.getParameter<edm::InputTag>( "muons"          ) ), 
-  useEvtWgt_  ( cfg.getParameter<bool>         ( "useEventWeight" ) ) 
+  muons_      ( cfg.getParameter<edm::InputTag>        ( "muons"          ) ), 
+  useEvtWgt_  ( cfg.getParameter<bool>                 ( "useEventWeight" ) ),
+  isoBins_    ( cfg.getParameter<std::vector<double> > ( "isoBins"        ) )
+   
 {
 }
 
@@ -50,6 +52,18 @@ DimuonAnalyzer::beginJob(const edm::EventSetup&)
   combCount_   = fs->make<TH1F>( "combCount"  , "combCount"   ,100,  0.0,  1.0); 
   // quadratically added combined isolation
   diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  2.0);
+  
+  for(size_t i=0; i<isoBins_.size()-1; ++i){ 
+    TH1F* hist;
+    TString strRC = "dimassRC_";
+    strRC += i;
+    TString strWC = "dimassWC_"; 
+    strWC += i; 
+    hist = fs->make<TH1F>(strRC, strRC, 20, 5, 255);
+    dimassRCIsoBins_.push_back(hist);  
+    hist = fs->make<TH1F>(strWC, strWC, 20, 5, 255);
+    dimassWCIsoBins_.push_back(hist);        
+  }  
 }
 
 /// everything which has to be done during the event loop: analyze and fill histos
@@ -78,13 +92,18 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   TLorentzVector diLepLVector = TLorentzVector(mu1.px()+mu2.px(), mu1.py()+mu2.py(), 
                                                mu1.pz()+mu2.pz(), mu1.energy()+mu2.energy());   
   double dilepMass = (diLepLVector).M();
+     
+  // wrong or right charge?
+  isWrongCharge = false;
+  if(mu1.charge()*mu2.charge()>0.) isWrongCharge = true;
+     
        
   // fill dimuon mass histograms:
   //right charge
-  if(mu1.charge()*mu2.charge()<0.)  
+  if(!isWrongCharge)  
     dimassRC_  ->Fill( dilepMass, weight);    
   // wrong charge
-  if(mu1.charge()*mu2.charge()>0.) 
+  else 
     dimassWC_  ->Fill( dilepMass, weight);    
      
   // get different isos  
@@ -123,7 +142,17 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
     if(absTrackIso1<(0.5*i) && absCaloIso1<(0.5*i) && absTrackIso2<(0.5*i) && absCaloIso2<(0.5*i)){
       absCount_->SetBinContent(i,absCount_->GetBinContent(i)+1);
     }      
-  }     
+  }
+  
+  // fill dilepmass histograms in bins of diCombIso
+  for(size_t i=0; i<isoBins_.size()-1; ++i){  
+    if(diCombIso>isoBins_[i] && diCombIso<isoBins_[i+1]){
+      if(!isWrongCharge) 
+        dimassRCIsoBins_[i] ->Fill(dilepMass, weight);
+      else
+        dimassWCIsoBins_[i] ->Fill(dilepMass, weight);	
+    }  
+  }    
 }
 
 /// everything which has to be done during the event loop: analyze and fill histos: empty

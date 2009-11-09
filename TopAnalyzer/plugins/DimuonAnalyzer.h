@@ -5,6 +5,7 @@
 
 #include "TH1.h"
 #include "TH2.h"
+#include "TString.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -27,8 +28,6 @@
    different kinds of isolation cuts on both muons. 
 */
 
-class TH1F;
-class TH2F;
 class DimuonAnalyzer : public edm::EDAnalyzer {
 
   public:
@@ -49,8 +48,12 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     edm::InputTag muons_;
     /// input bool: use a event weight?     
     bool useEvtWgt_;
+    /// combined isolation bins of both muons from config
+    std::vector<double> isoBins_;
     /// define a PatMuonCollection as a vector of PatMuons      
-    typedef std::vector<pat::Muon> PatMuonCollection; 
+    typedef std::vector<pat::Muon> PatMuonCollection;
+    /// true if leading muons have same charge
+    bool isWrongCharge; 
     /// plots for right-charge dimuon mass    
     TH1F * dimassRC_;
     /// plots for wrong-charge dimuon mass
@@ -67,6 +70,12 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     TH1F * combCount_;
     /// isolation efficiency for quadratically added combined isolation
     TH1F * diCombCount_;
+    
+    /// histograms for the right charge dimuon mass in bins of di-combined isolation
+    std::vector<TH1F*> dimassRCIsoBins_;
+    
+    /// histograms for the wrong charge dimuon mass in bins of di-combined isolation
+    std::vector<TH1F*> dimassWCIsoBins_;    
 };
 
 #endif
