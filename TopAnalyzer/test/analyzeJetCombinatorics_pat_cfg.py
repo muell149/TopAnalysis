@@ -86,7 +86,7 @@ process.leadingJets = selectedLayer1Jets.clone()
 process.leadingJets.src = "selectedLayer1Jets"
 process.leadingJets.cut = "pt > 20 & abs(eta) < 2.4 & 0.05 < emEnergyFraction & emEnergyFraction < 0.95"
 
-## produce generated top event
+## remove events with overlapping jets
 process.load("TopAnalysis.TopFilter.filters.JetOverlapEventFilter_cfi")
 process.filterJetOverlapEvent.src = "leadingJets"
 process.filterJetOverlapEvent.deltaR = 1.0
