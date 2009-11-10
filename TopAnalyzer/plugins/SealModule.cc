@@ -72,6 +72,9 @@ DEFINE_FWK_MODULE(HypothesisKinFitMuonAnalyzer);
 typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::MET> , HypothesisKinFitMET> HypothesisKinFitMETAnalyzer;
 DEFINE_FWK_MODULE(HypothesisKinFitMETAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/plugins/FullHadHypothesisAnalyzer.h"
+DEFINE_FWK_MODULE(FullHadHypothesisAnalyzer);
+
 
 /**
     Define modules needed for the analysis of the top quarks
