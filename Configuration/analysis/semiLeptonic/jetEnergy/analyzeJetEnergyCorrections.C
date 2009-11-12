@@ -1,6 +1,7 @@
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TF1.h>
+#include <TGaxis.h>
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TLegend.h>
@@ -13,10 +14,11 @@ void setPadStyle()
 {
 
   gPad->SetBorderMode(0);
-  gPad->SetLeftMargin(.16);
+  gPad->SetLeftMargin(.2);
   gPad->SetRightMargin(.1);
-  gPad->SetBottomMargin(.15);
+  gPad->SetBottomMargin(.21);
   gPad->SetTopMargin(.1);
+  TGaxis::SetMaxDigits(3);
 
 }
 
@@ -24,13 +26,13 @@ void setAxisStyle(TH1* hist)
 {
 
   hist->GetXaxis()->SetNdivisions(505);
-  hist->GetXaxis()->SetLabelSize(0.05);
-  hist->GetXaxis()->SetTitleSize(0.05);
+  hist->GetXaxis()->SetLabelSize(0.07);
+  hist->GetXaxis()->SetTitleSize(0.07);
   hist->GetXaxis()->SetTitleOffset(1.2);
   hist->GetXaxis()->CenterTitle();
   hist->GetYaxis()->SetNdivisions(505);
-  hist->GetYaxis()->SetLabelSize(0.05);
-  hist->GetYaxis()->SetTitleSize(0.05);
+  hist->GetYaxis()->SetLabelSize(0.07);
+  hist->GetYaxis()->SetTitleSize(0.07);
   hist->GetYaxis()->SetTitleOffset(1.4);
   hist->GetYaxis()->CenterTitle();
 
@@ -221,12 +223,21 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   if(name.Contains("KT4", TString::kIgnoreCase)) algo = "KT4";
   if(name.Contains("SC5", TString::kIgnoreCase)) algo = "SC5";
 
+  TString dirs[8] = {"raw" ,
+		     "off" ,  //L1
+		     "rel" ,  //L2
+		     "abs" ,  //L3
+		     "emf" ,  //L4
+		     "had" ,  //L5
+		     "ue"  ,  //L6
+		     "part"}; //L7
+
   TString levels[8] = {"raw" ,
 		       "off" ,  //L1
 		       "rel" ,  //L2
 		       "abs" ,  //L3
 		       "emf" ,  //L4
-		       "had" ,  //L5
+		       "flav",  //L5
 		       "ue"  ,  //L6
 		       "part"}; //L7
 
@@ -239,7 +250,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   gROOT->SetStyle("Plain");
   gStyle->SetTitleBorderSize(0);
   gStyle->SetTitleFontSize(.05);
-  gStyle->SetTitleX(.18);
+  gStyle->SetTitleX(.4);
   gStyle->SetTitleY(.97);
 
   TH1F* massW[8];
@@ -283,43 +294,43 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   for(unsigned int i = 0; i < 8; i++) {
     TString dirBase = "analyzeJetEnergy" + hypoClass + "_";
 
-    massW[i] = (TH1F*) file->Get(dirBase + levels[i] + "/mW"  )->Clone();
-    massT[i] = (TH1F*) file->Get(dirBase + levels[i] + "/mTop")->Clone();
+    massW[i] = (TH1F*) file->Get(dirBase + dirs[i] + "/mW"  )->Clone();
+    massT[i] = (TH1F*) file->Get(dirBase + dirs[i] + "/mTop")->Clone();
 
-    massW_Pt1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Pt1")->Clone();
-    massW_Pt2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Pt2")->Clone();
-    massW_PtW[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_PtW")->Clone();
+    massW_Pt1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Pt1")->Clone();
+    massW_Pt2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Pt2")->Clone();
+    massW_PtW[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_PtW")->Clone();
 
-    massW_Eta1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Eta1")->Clone();
-    massW_Eta2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_Eta2")->Clone();
-    massW_EtaW[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mW_EtaW")->Clone();
+    massW_Eta1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Eta1")->Clone();
+    massW_Eta2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Eta2")->Clone();
+    massW_EtaW[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_EtaW")->Clone();
 
-    massT_Pt1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Pt1"  )->Clone();
-    massT_Pt2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Pt2"  )->Clone();
-    massT_PtB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_PtB"  )->Clone();
-    massT_PtT[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_PtTop")->Clone();
+    massT_Pt1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Pt1"  )->Clone();
+    massT_Pt2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Pt2"  )->Clone();
+    massT_PtB[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_PtB"  )->Clone();
+    massT_PtT[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_PtTop")->Clone();
 
-    massT_Eta1[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Eta1"  )->Clone();
-    massT_Eta2[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_Eta2"  )->Clone();
-    massT_EtaB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_EtaB"  )->Clone();
-    massT_EtaT[i] = (TH2F*) file->Get(dirBase + levels[i] + "/mTop_EtaTop")->Clone();
+    massT_Eta1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Eta1"  )->Clone();
+    massT_Eta2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Eta2"  )->Clone();
+    massT_EtaB[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_EtaB"  )->Clone();
+    massT_EtaT[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_EtaTop")->Clone();
 
-    deltaM_PtB [i] = (TH2F*) file->Get(dirBase + levels[i] + "/deltaM_PtB" )->Clone();
-    deltaM_EtaB[i] = (TH2F*) file->Get(dirBase + levels[i] + "/deltaM_EtaB")->Clone();
+    deltaM_PtB [i] = (TH2F*) file->Get(dirBase + dirs[i] + "/deltaM_PtB" )->Clone();
+    deltaM_EtaB[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/deltaM_EtaB")->Clone();
 
-    respLGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLGenJetPtGenJet"       )->Clone();
-    respLGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLGenJetPtGenJet_barrel")->Clone();
-    respLGenJetEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLGenJetEta"            )->Clone();
-    respLPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLPartonPtParton"       )->Clone();
-    respLPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLPartonPtParton_barrel")->Clone();
-    respLPartonEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseLPartonEta"            )->Clone();
+    respLGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLGenJetPtGenJet"       )->Clone();
+    respLGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLGenJetPtGenJet_barrel")->Clone();
+    respLGenJetEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLGenJetEta"            )->Clone();
+    respLPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLPartonPtParton"       )->Clone();
+    respLPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLPartonPtParton_barrel")->Clone();
+    respLPartonEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLPartonEta"            )->Clone();
 
-    respBGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBGenJetPtGenJet"       )->Clone();
-    respBGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBGenJetPtGenJet_barrel")->Clone();
-    respBGenJetEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBGenJetEta"            )->Clone();
-    respBPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonPtParton"       )->Clone();
-    respBPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonPtParton_barrel")->Clone();
-    respBPartonEta            [i]  = (TH2F*) file->Get(dirBase + levels[i] + "/responseBPartonEta"            )->Clone();
+    respBGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBGenJetPtGenJet"       )->Clone();
+    respBGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBGenJetPtGenJet_barrel")->Clone();
+    respBGenJetEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBGenJetEta"            )->Clone();
+    respBPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBPartonPtParton"       )->Clone();
+    respBPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBPartonPtParton_barrel")->Clone();
+    respBPartonEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBPartonEta"            )->Clone();
   }
 
   file->Close();
@@ -440,31 +451,33 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   }  
 
-  TPaveText *txtMassW = new TPaveText(0.22, 0.68, 0.9, 0.88, "NDC");
-  TPaveText *txtMassT = new TPaveText(0.17, 0.68, 0.9, 0.88, "NDC");
+  //TPaveText *txtMassW = new TPaveText(0.3, 0.68, 0.89, 0.88, "NDC");
+  //TPaveText *txtMassT = new TPaveText(0.3, 0.68, 0.89, 0.88, "NDC");
+  TPaveText *txtMassW = new TPaveText(0.3, 0.75, 0.89, 0.88, "NDC");
+  TPaveText *txtMassT = new TPaveText(0.3, 0.75, 0.89, 0.88, "NDC");
   char *tmpTxt = new char[100];
 
   txtMassW->SetTextAlign(32);
   txtMassT->SetTextAlign(32);
-  txtMassW->SetFillStyle(0);
-  txtMassT->SetFillStyle(0);
+  txtMassW->SetFillColor(0);
+  txtMassT->SetFillColor(0);
   txtMassW->SetBorderSize(0);
   txtMassT->SetBorderSize(0);
 
-  for(unsigned int i = 0; i < 8; i++) {
+  for(unsigned int i = 0; i < 6; i++) {
 
-    if(i==1 || i==2 || i==4 || i==6)
+    if(i==1 || i==2 || i==3 || i==4)
       continue;
 
-    if(massW[i]->GetEntries()==0 &&
+    if(massW[i]->GetEntries()==0 ||
        massT[i]->GetEntries()==0)
       continue;
 
-    if(massW[i]->Integral())
-      massW[i]->Scale(1. / massW[i]->Integral());
-
-    if(massW[i]->Integral())
-      massT[i]->Scale(1. / massT[i]->Integral());
+//    if(massW[i]->Integral())
+//      massW[i]->Scale(1. / massW[i]->Integral());
+//
+//    if(massW[i]->Integral())
+//      massT[i]->Scale(1. / massT[i]->Integral());
 
     fitGauss(massW[i]);
     fitGauss(massT[i]);
@@ -478,7 +491,8 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     double mean_err = massW[i]->GetFunction("gaus")->GetParError (1);
     double relSigma = massW[i]->GetFunction("gaus")->GetParameter(2) / mean;
 
-    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    //    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    sprintf(tmpTxt, ": %4.1f#pm%4.1f GeV", mean, mean_err);
     ttxt = txtMassW->AddText(levels[i] + tmpTxt);
     ttxt->SetTextColor(markerColor[i]);
     
@@ -486,7 +500,8 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     mean_err = massT[i]->GetFunction("gaus")->GetParError (1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
 
-    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    //    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    sprintf(tmpTxt, ": %4.1f#pm%4.1f GeV", mean, mean_err);
     ttxt = txtMassT->AddText(levels[i] + tmpTxt);
     ttxt->SetTextColor(markerColor[i]);
 
@@ -496,16 +511,16 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   massT[0]->SetMaximum( 1.5*massT[0]->GetMaximum() );
   massW[0]->SetTitle("algo: " + algo);
   massT[0]->SetTitle("algo: " + algo);
-  massW[0]->SetYTitle("a.u.");
-  massT[0]->SetYTitle("a.u.");
+  //  massW[0]->SetYTitle("a.u.");
+  //  massT[0]->SetYTitle("a.u.");
   massW[0]->SetStats(kFALSE);
   massT[0]->SetStats(kFALSE);
   setAxisStyle(massW[0]);
   setAxisStyle(massT[0]);
 
-  for(unsigned int i = 0; i < 8; i++) {
+  for(unsigned int i = 0; i < 6; i++) {
 
-    if(i==1 || i==2 || i==4 || i==6)
+    if(i==1 || i==2 || i==3 || i==4)
       continue;
 
     TString drawOption = "hist";
@@ -520,10 +535,6 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
       massW[i]->GetFunction("gaus")->DrawCopy("same");
     }
     txtMassW->Draw();
-    if(i==7) {
-      massW[0]->DrawCopy("sameaxis");
-      gPad->Print(baseName+"massW.eps");
-    }
 
     canvasMassT->cd(9);
     setPadStyle();
@@ -534,16 +545,20 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
       massT[i]->GetFunction("gaus")->DrawCopy("same");
     }
     txtMassT->Draw();
-    if(i==7) {
-      massT[0]->DrawCopy("sameaxis");
-      gPad->Print(baseName+"massT.eps");
-    }
 
   }
 
-  for(unsigned int i = 0; i < 8; i++) {
+  canvasMassW->cd(9);
+  gPad->Print(baseName+"massW.eps");
 
-    if(i==1 || i==2 || i==4 || i==6)
+  canvasMassT->cd(9);
+  gPad->Print(baseName+"massT.eps");
+
+  gStyle->SetTitleX(.2);
+
+  for(unsigned int i = 0; i < 6; i++) {
+
+    if(i==1 || i==2 || i==4)
       continue;
 
     // W mass
@@ -588,7 +603,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   }
 
-  double yMin_zoom = 0.8;
+  double yMin_zoom = 0.9;
   double yMax_zoom = 1.2;
 
   for(unsigned int i = 0; i < 8; i++) {
@@ -598,14 +613,18 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     // response light jets
 
-    canvasRespL->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
+    if(i!=7) {
 
-    canvasRespL->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"));
+      canvasRespL->cd(1);
+      drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
 
-    canvasRespL->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"), false);
+      canvasRespL->cd(2);
+      drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"));
+
+      canvasRespL->cd(3);
+      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"), false);
+
+    }
 
     canvasRespL->cd(4);
     drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"));
@@ -644,14 +663,18 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
     // response b jets
 
-    canvasRespB->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
+    if(i!=7) {
 
-    canvasRespB->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"));
+      canvasRespB->cd(1);
+      drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
 
-    canvasRespB->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"), false);
+      canvasRespB->cd(2);
+      drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"));
+
+      canvasRespB->cd(3);
+      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"), false);
+
+    }
 
     canvasRespB->cd(4);
     drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"));
@@ -692,8 +715,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
 
   // legend
   
-  TLegend* legend = new TLegend(0.75, 0.7, 0.9, 0.9);
+  TLegend* legend = new TLegend(0.67, 0.67, 0.9, 0.9);
   legend->SetFillColor(0);
+
+  TLegend* legend_zoom = (TLegend*) legend->Clone();
 
   TH1F* dummyHist[8];
   
@@ -705,7 +730,12 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     dummyHist[i] = new TH1F();
     dummyHist[i]->SetMarkerColor(markerColor[i]);
     dummyHist[i]->SetMarkerStyle(markerStyle[i]);
-    legend->AddEntry(dummyHist[i], levels[i]);
+
+    if(i!=7)
+      legend->AddEntry(dummyHist[i], levels[i]);
+
+    if(i!=0)
+      legend_zoom->AddEntry(dummyHist[i], levels[i]);    
 
   }
 
@@ -738,7 +768,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     gPad->Print(baseName+"responseLight" + suffix);
 
     canvasRespL_zoom->cd(i);
-    legend->Draw();
+    legend_zoom->Draw();
     gPad->Print(baseName+"responseLight_zoom" + suffix);
 
     canvasRespB->cd(i);
@@ -746,7 +776,7 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
     gPad->Print(baseName+"responseB" + suffix);
 
     canvasRespB_zoom->cd(i);
-    legend->Draw();
+    legend_zoom->Draw();
     gPad->Print(baseName+"responseB_zoom" + suffix);
 
   }
