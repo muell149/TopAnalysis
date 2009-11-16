@@ -11,6 +11,7 @@ analyzeJetKinematics = cms.EDAnalyzer("JetKinematicsAnalyzer",
     analyze   = cms.PSet(
       ## fill histograms for 1.,2.,3.,... leading
       ## jet? -1 corresponds to 'all'
+      ## counting starts with 0=leading Jet! 
       index = cms.int32(-1),
       ## correct jets up to the correction level given
       ## at SWGuidePATDataFormats#pat_JetCorrFactors;
