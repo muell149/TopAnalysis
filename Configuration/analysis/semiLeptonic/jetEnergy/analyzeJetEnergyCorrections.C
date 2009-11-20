@@ -107,14 +107,21 @@ TH1D* fitGauss2D(TH2F* hist)
     else {
       double mean  = means ->GetBinContent(bx);
       double sigma = sigmas->GetBinContent(bx);
-      TF1* f = new TF1("f","gaus", mean-1.5*sigma, mean+1.5*sigma);
-      hist->FitSlicesY(f,bx,bx,0,"QNR",&tmp);
-      mean  = ((TH1D*) tmp.FindObject(histName+"_1"))->GetBinContent(bx);
-      sigma = ((TH1D*) tmp.FindObject(histName+"_1"))->GetBinError  (bx);
-      means->SetBinContent(bx, mean );
-      means->SetBinError  (bx, sigma);
-      tmp.Delete();
-      delete f;
+      if( mean-1.5*sigma >= hist->GetYaxis()->GetXmin() &&
+	  mean+1.5*sigma <  hist->GetYaxis()->GetXmax() ) {
+	TF1* f = new TF1("f","gaus", mean-1.5*sigma, mean+1.5*sigma);
+	hist->FitSlicesY(f,bx,bx,0,"QNR",&tmp);
+	mean  = ((TH1D*) tmp.FindObject(histName+"_1"))->GetBinContent(bx);
+	sigma = ((TH1D*) tmp.FindObject(histName+"_1"))->GetBinError  (bx);
+	means->SetBinContent(bx, mean );
+	means->SetBinError  (bx, sigma);
+	tmp.Delete();
+	delete f;
+      }
+      else {
+	means->SetBinContent(bx, 0.);
+	means->SetBinError  (bx, 0.);
+      }
     }
   }
 
