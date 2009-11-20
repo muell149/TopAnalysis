@@ -5,6 +5,7 @@
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TLegend.h>
+#include <TPad.h>
 #include <TPaveText.h>
 #include <TROOT.h>
 #include <TStyle.h>
@@ -94,7 +95,6 @@ TH1D* fitGauss2D(TH2F* hist)
     double bincontent = 0;
     for(int by = 1; by <= hist->GetNbinsY(); by++)
       bincontent += hist->GetBinContent(bx, by);
-    ////// hist->GetXaxis()->SetRange(bx, bx);
     // remove x-bins that have less than 20 entries along y
     // (this assumes weight=1 for all entries)
     if(bincontent<20) {
@@ -114,6 +114,7 @@ TH1D* fitGauss2D(TH2F* hist)
       means->SetBinContent(bx, mean );
       means->SetBinError  (bx, sigma);
       tmp.Delete();
+      delete f;
     }
   }
 
@@ -208,8 +209,8 @@ TString title(const TString algo, const TString flavor = "", const TString eta =
 }
 
 /// main function
-void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root",
-				 TString hypoClass = "GenMatch")
+int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root",
+				TString hypoClass = "GenMatch")
 {
 
   name.Resize(name.Index(".root"));
@@ -776,4 +777,10 @@ void analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.roo
   delete canvasRespB;
   delete canvasRespB_zoom;
 
+  return 0;
+}
+
+int main(int argc, char** argv)
+{
+  return analyzeJetEnergyCorrections(argv[1], argv[2]);
 }
