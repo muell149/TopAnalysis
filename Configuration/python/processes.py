@@ -73,7 +73,7 @@ source['inclMu15_SD']+= 'inclMu15_SD_6'
 from TopAnalysis.Configuration.qcd09_pat import *
 evts  ['qcd09_pat'] =     6570971         ## number of produced events
 xsec  ['qcd09_pat'] = 509100000.0         ## NLO in pb from configfile
-eff   ['qcd09_pat'] =         1.0         ## generator efficiency on gen level
+eff   ['qcd09_pat'] =         0.0002881   ## generator efficiency on gen level
 sizes ['qcd09_pat'] = 'blocks'
 source['qcd09_pat'] = 'qcd09_pat_0,'
 source['qcd09_pat']+= 'qcd09_pat_1,'
