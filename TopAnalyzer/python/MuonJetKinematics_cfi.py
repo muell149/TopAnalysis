@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyzeMuonKinematics = cms.EDAnalyzer("MuonJetKinematicsAnalyzer",
+analyzeMuonJetKinematics = cms.EDAnalyzer("MuonJetKinematicsAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("selectedLayer1Muons"),
     ## input collectionB
