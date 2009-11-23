@@ -19,11 +19,11 @@ MuonJetKinematics::book()
       Distance between muon and closest jet in deltaR for different pt thresholds
   **/
   // jets with pt>20
-  hists_["dist20_"] = new TH1F( "dist20_" , "dist20_" ,   20,   0.,   1.);
+  hists_["dist20_"] = new TH1F( "dist20_" , "dist20_" ,   40,   0.,   1.);
   // jets with pt>30
-  hists_["dist30_"] = new TH1F( "dist30_" , "dist30_" ,   20,   0.,   1.);
+  hists_["dist30_"] = new TH1F( "dist30_" , "dist30_" ,   40,   0.,   1.);
   // jets with pt>40
-  hists_["dist40_"] = new TH1F( "dist40_" , "dist40_" ,   20,   0.,   1.);
+  hists_["dist40_"] = new TH1F( "dist40_" , "dist40_" ,   40,   0.,   1.);
 }
 
 /// histogramm booking for full fw
