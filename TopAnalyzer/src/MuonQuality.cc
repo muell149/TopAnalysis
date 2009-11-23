@@ -19,17 +19,17 @@ MuonQuality::book()
       Selection Variables
   **/
   // number of valid hits in silicon tracker
-  hists_["nHit"     ] = new TH1F( "nHit"    ,  "nHit"     ,   30,   0.,  30. );
+  hists_["nHit"     ] = new TH1F( "nHit"    ,  "nHit"     ,   35,  -0.5,  34.5 );
   // normalized chi2 of global muon track fit
-  hists_["chi2"     ] = new TH1F( "chi2"    ,  "chi2"     ,   30,   0.,  30. );
+  hists_["chi2"     ] = new TH1F( "chi2"    ,  "chi2"     ,   30,   0. ,  30. );
   // d0 significance of track (still to nominal IP)
-  hists_["d0"       ] = new TH1F( "d0"      ,  "d0"       ,   80,   0.,   2. );
+  hists_["d0"       ] = new TH1F( "d0"      ,  "d0"       ,   200,  0. ,  1.  );
   // energy in ecal attached to the candidate trajectory
-  hists_["ecalEn"   ] = new TH1F( "ecalEn"  ,  "ecalEn"   ,   40,   0.,  10. );
+  hists_["ecalEn"   ] = new TH1F( "ecalEn"  ,  "ecalEn"   ,   40,   0. ,  10. );
   // energy in hcal attached to the candidate trajectory
-  hists_["hcalEn"   ] = new TH1F( "hcalEn"  ,  "hcalEn"   ,   40,   0.,  10. );
+  hists_["hcalEn"   ] = new TH1F( "hcalEn"  ,  "hcalEn"   ,   40,   0. ,  10. );
   // relative isolation (tracker and calo combined)
-  hists_["relIso"   ] = new TH1F( "relIso"  ,  "relIso"   ,   50,   0.,  1.0 );
+  hists_["relIso"   ] = new TH1F( "relIso"  ,  "relIso"   ,   50,   0. ,  1.0 );
 
   /** 
       Monitoring Variables
@@ -88,17 +88,17 @@ MuonQuality::book(edm::Service<TFileService>& fs)
       Selection Variables
   **/
   // number of valid hits in silicon tracker
-  hists_["nHit"     ] = fs->make<TH1F>( "nHit"    ,  "nHit"     ,   30,   0.,  30. );
+  hists_["nHit"     ] = fs->make<TH1F>( "nHit"    ,  "nHit"     ,   35,  -0.5, 34.5 );
   // normalized chi2 of global muon track fit
-  hists_["chi2"     ] = fs->make<TH1F>( "chi2"    ,  "chi2"     ,   30,   0.,  30. );
+  hists_["chi2"     ] = fs->make<TH1F>( "chi2"    ,  "chi2"     ,   30,   0.,  30.  );
   // d0 significance of track (still to nominal IP)
-  hists_["d0"       ] = fs->make<TH1F>( "d0"      ,  "d0"       ,   80,   0.,   2. );
+  hists_["d0"       ] = fs->make<TH1F>( "d0"      ,  "d0"       ,   200,  0.,  1.   );
   // energy in ecal attached to the candidate trajectory
-  hists_["ecalEn"   ] = fs->make<TH1F>( "ecalEn"  ,  "ecalEn"   ,   40,   0.,  10. );
+  hists_["ecalEn"   ] = fs->make<TH1F>( "ecalEn"  ,  "ecalEn"   ,   40,   0.,  10.  );
   // energy in hcal attached to the candidate trajectory
-  hists_["hcalEn"   ] = fs->make<TH1F>( "hcalEn"  ,  "hcalEn"   ,   40,   0.,  10. );
+  hists_["hcalEn"   ] = fs->make<TH1F>( "hcalEn"  ,  "hcalEn"   ,   40,   0.,  10.  );
   // relative isolation (tracker and calo combined)
-  hists_["relIso"   ] = fs->make<TH1F>( "relIso"  ,  "relIso"   ,   50,   0.,  1.0 );
+  hists_["relIso"   ] = fs->make<TH1F>( "relIso"  ,  "relIso"   ,   50,   0.,  1.0  );
 
   /** 
       Monitoring Variables
@@ -167,7 +167,7 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
       // normalized chi2 of global muon track fit
       hists_.find("chi2")->second->Fill( muon->combinedMuon()->normalizedChi2(), weight );    
       // d0 significance of track (still to nominal IP)
-      hists_.find("d0"  )->second->Fill( muon->track()->d0(), weight );    
+      hists_.find("d0"  )->second->Fill( muon->combinedMuon()->d0(), weight );    
       // energy in ecal attached to the candidate trajectory
       hists_.find("ecalEn")->second->Fill( muon->ecalIsoDeposit()->candEnergy(), weight );    
       // energy in hcal attached to the candidate trajectory
