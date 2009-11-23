@@ -9,10 +9,12 @@
 #include <TLegend.h>
 #include <TLine.h>
 
+///     description     ///
 // This Macro analyzes some mu-Cut variables like number of valid Trackerhits,
 // chi^2, d0, energies in ecal and hcal and relIso within ttbarsignal, qcd, wmunu and zmumu-sample  
 // default: nhit, chi^2 and d0 for trigger mu, ecal und hcal deposit for good mu and relIso for golden mu
 // lumiweighting needs to be adapted   
+///       ---          ///
 
 enum styles {kAll,kSignal, kBackground, kQCD, kWmunu, kZmumu, kBoson};
 
@@ -41,22 +43,30 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Wmunu.root") );
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Zmumu.root") );
 
-  // std::cout<<"open input files ok"<<std::endl;
-
   // ---
-  // histogram scaling because of lumiweighting
+  // define weights concerning luminosity
   // ---
   std::vector<double> lumiweight;
+
+  // add scaling factors here!
+
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+
   // ttbar (all, bg, sg - coming from the same sample)
-  lumiweight.push_back(0.0156);
-  lumiweight.push_back(0.0156);
-  lumiweight.push_back(0.0156);
+  //  lumiweight.push_back(0.0156);
+  //  lumiweight.push_back(0.0156);
+  // lumiweight.push_back(0.0156);
   // QCD
-  lumiweight.push_back(1.1161);
+  //  lumiweight.push_back(1.1161);
   // Wmunu
-  lumiweight.push_back(0.2212);
+  //  lumiweight.push_back(0.2212);
   // Zmumu
-  lumiweight.push_back(0.0458);
+  //  lumiweight.push_back(0.0458);
 
   // ---
   //    get histograms
@@ -65,38 +75,28 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   if(whichMuons != ""){
     for(int i=0; i<6; i++){
       thoseMuons.push_back(whichMuons);
-      //     std::cout<<"getting histograms of choice "<<i<<std::endl;
     }
   }
   else{
        for(int i=0; i<3; i++){
          thoseMuons.push_back("trigger");
-	 //         std::cout<<"getting histograms of trigger mu"<<i<<std::endl;
     }
     for(int i=0; i<2; i++){
       thoseMuons.push_back("good");
-      //     std::cout<<"getting histograms of good mu "<<i<<std::endl;
-    }
+     }
     thoseMuons.push_back("golden");
-    //     std::cout<<"getting histogram of golden mu "<<i<<std::endl;
     
   }
-  //  std::cout<<"all muons ok"<<std::endl;
+
   std::vector<TH1F*> nHit_, chi2_, d0_, ecalEn_, hcalEn_, relIso_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[0]+"MuonQuality/nHit"  )->Clone() );
-    //    std::cout<<"getting nhits for file "<<idx<<std::endl;
     chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[1]+"MuonQuality/chi2"  )->Clone() );
-    //    std::cout<<"getting chi2 for file "<<idx<<std::endl;
     d0_    .push_back( (TH1F*)files_[idx]->Get(thoseMuons[2]+"MuonQuality/d0"    )->Clone() );
-    //    std::cout<<"getting d0 for file "<<idx<<std::endl;
     ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[3]+"MuonQuality/ecalEn")->Clone() );
-    //    std::cout<<"getting ecalen for file "<<idx<<std::endl;
     hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[4]+"MuonQuality/hcalEn")->Clone() );
-    //    std::cout<<"getting hcalen for file "<<idx<<std::endl;
     relIso_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[5]+"MuonQuality/relIso")->Clone() );
   }
-  //  std::cout<<"get histograms ok"<<std::endl;
 
   // ---
   //    close input files
@@ -162,7 +162,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   relIso_[kSignal]->Scale(lumiweight[kSignal]); 
   relIso_[kBackground]->Scale(lumiweight[kBackground]);
 
-  //  std::cout<<"lumi weighting ok"<<std::endl;
   // ---
   //    configure histograms
   // ---
@@ -174,7 +173,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(nHit_  [kZmumu      ], kZmumu      );
   histogramStyle(nHit_  [kBackground ], kBackground );
   histogramStyle(nHit_  [kBoson      ], kBoson      );
-  //  std::cout<<"setting up nHits style ok"<<std::endl;
 
   // chi2_
   histogramStyle(chi2_ [kSignal     ], kSignal     );
@@ -183,7 +181,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(chi2_ [kZmumu      ], kZmumu      );
   histogramStyle(chi2_ [kBackground ], kBackground );
   histogramStyle(chi2_ [kBoson      ], kBoson      );
-  //  std::cout<<"setting up chi2style ok"<<std::endl;
 
   // d0_
   histogramStyle(d0_[kSignal     ], kSignal     );
@@ -192,7 +189,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(d0_[kZmumu      ], kZmumu      );
   histogramStyle(d0_[kBackground ], kBackground );
   histogramStyle(d0_[kBoson      ], kBoson      );
-  //  std::cout<<"setting up d0style ok"<<std::endl;
 
   // ecalEn_
   histogramStyle(ecalEn_[kSignal     ], kSignal     );
@@ -201,7 +197,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(ecalEn_[kZmumu      ], kZmumu      ); 
   histogramStyle(ecalEn_[kBackground ], kBackground );
   histogramStyle(ecalEn_[kBoson      ], kBoson      );
-  //  std::cout<<"setting up ecalEnstyle ok"<<std::endl;
 
   // hcalEn_
 
@@ -211,7 +206,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(hcalEn_[kZmumu      ], kZmumu      ); 
   histogramStyle(hcalEn_[kBackground ], kBackground );
   histogramStyle(hcalEn_[kBoson      ], kBoson      );
-  //  std::cout<<"setting up hcalEnstyle ok"<<std::endl;
 
   // relIso_
   histogramStyle(relIso_[kSignal     ], kSignal     );
@@ -220,9 +214,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(relIso_[kZmumu      ], kZmumu      ); 
   histogramStyle(relIso_[kBackground ], kBackground );
   histogramStyle(relIso_[kBoson      ], kBoson      );
-  // std::cout<<"setting up relIsostyle ok"<<std::endl;
-
-  // std::cout<<"configure histograms ok"<<std::endl;
 
   // ---
   //    do the printing for nHit_
@@ -276,8 +267,6 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   leg5->SetFillStyle(3001);
   leg5->SetBorderSize(0);
   leg5->SetHeader("golden  #mu");
-
-  //  std::cout<<"legends ok"<<std::endl;
 
   // draw canvas
   canv0->cd(0);
@@ -476,40 +465,40 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   if(whichMuons==""){
     
     //  pictures
-    canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/trackerHitsTriggerMuons.png");
-     canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/chi2TriggerMuons.png");
-     canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/d0TriggerMuons.png");
-     canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/eCalEnDepositGoodMuons.png");
-     canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/hCalEnDepositGoodMuons.png");
-     canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/relIsoGoldenMuons.png");
+//     canv0->Print("./analyzeMuonCutflow/trackerHitstriggerMuons.png");
+//     canv1->Print("./analyzeMuonCutflow/chi2triggerMuons.png"       );
+//     canv2->Print("./analyzeMuonCutflow/d0triggerMuons.png"         );
+//     canv3->Print("./analyzeMuonCutflow/eCalEnDepositgoodMuons.png" );
+//     canv4->Print("./analyzeMuonCutflow/hCalEnDepositgoodMuons.png" );
+//     canv5->Print("./analyzeMuonCutflow/relIsogoldenMuons.png"      );
      
      //  psfile
-     canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps(");
-    canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
-    canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
-    canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
-    canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
-    canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps)");
+    canv0->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps(");
+    canv1->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
+    canv2->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
+    canv3->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
+    canv4->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
+    canv5->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps)");
 
   }
   
   else{
     
     //  pictures
-    canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/trackerHits"+whichMuons+"Muons.png");
-    canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/chi2"+whichMuons+"Muons.png");
-    canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/d0"+whichMuons+"Muons.png");
-    canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/eCalEnDeposit"+whichMuons+"Muons.png");
-    canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/hCalEnDeposit"+whichMuons+"Muons.png");
-    canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/relIso"+whichMuons+"Muons.png");
+//     canv0->Print("./analyzeMuonCutflow/trackerHits"+whichMuons+"Muons.png"  );
+//     canv1->Print("./analyzeMuonCutflow/chi2"+whichMuons+"Muons.png"         );
+//     canv2->Print("./analyzeMuonCutflow/d0"+whichMuons+"Muons.png"           );
+//     canv3->Print("./analyzeMuonCutflow/eCalEnDeposit"+whichMuons+"Muons.png");
+//     canv4->Print("./analyzeMuonCutflow/hCalEnDeposit"+whichMuons+"Muons.png");
+//     canv5->Print("./analyzeMuonCutflow/relIso"+whichMuons+"Muons.png"       );
     
     //  psfile
-    canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps(");
-    canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
-    canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
-    canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
-    canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
-    canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps)");
+    canv0->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps(");
+    canv1->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
+    canv2->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
+    canv3->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
+    canv4->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
+    canv5->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps)");
   }
 
 }
