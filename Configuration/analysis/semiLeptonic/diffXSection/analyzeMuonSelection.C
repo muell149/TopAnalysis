@@ -9,17 +9,23 @@
 #include <TLegend.h>
 #include <TLine.h>
 
-enum styles {kSignal, kQCD, kWmunu, kZmumu};
+// This Macro analyzes some mu-Cut variables like number of valid Trackerhits,
+// chi^2, d0, energies in ecal and hcal and relIso within ttbarsignal, qcd, wmunu and zmumu-sample  
+// default: nhit, chi^2 and d0 for trigger mu, ecal und hcal deposit for good mu and relIso for golden mu
+// lumiweighting needs to be adapted   
+
+enum styles {kAll,kSignal, kBackground, kQCD, kWmunu, kZmumu, kBoson};
 
 void canvasStyle(TCanvas* canv);
 void histogramStyle(TH1* hist, unsigned int style);
 void axesStyle(TH1* hist, const char* titleX, const char* titleY);
 void drawcutline(double cutval, double maximum);
 
-void analyzeMuonSelection(TString whichMuons = "")
+void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "loose" // "track" // "good" // "combined" // "unselected"
 {
   // ---
   //    set root style 
+
   // ---
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -28,31 +34,69 @@ void analyzeMuonSelection(TString whichMuons = "")
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./analyzeMuons_TTbar_sig.root") );
-  files_.push_back(new TFile("./analyzeMuons_QCD.root") );
-  files_.push_back(new TFile("./analyzeMuons_Wmunu.root") );
-  files_.push_back(new TFile("./analyzeMuons_Zmumu.root") );
+  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_all.root"  ) );
+  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_sig.root"  ) );
+  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_bkg.root"  ) );
+  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_QCD.root"  ) );
+  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Wmunu.root") );
+  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Zmumu.root") );
+
+  // std::cout<<"open input files ok"<<std::endl;
+
+  // ---
+  // histogram scaling because of lumiweighting
+  // ---
+  std::vector<double> lumiweight;
+  // ttbar (all, bg, sg - coming from the same sample)
+  lumiweight.push_back(0.0156);
+  lumiweight.push_back(0.0156);
+  lumiweight.push_back(0.0156);
+  // QCD
+  lumiweight.push_back(1.1161);
+  // Wmunu
+  lumiweight.push_back(0.2212);
+  // Zmumu
+  lumiweight.push_back(0.0458);
 
   // ---
   //    get histograms
   // ---
   std::vector<TString> thoseMuons;
-  if(whichMuons != "")
-    for(int i=0; i<6; i++)thoseMuons.push_back(whichMuons);
+  if(whichMuons != ""){
+    for(int i=0; i<6; i++){
+      thoseMuons.push_back(whichMuons);
+      //     std::cout<<"getting histograms of choice "<<i<<std::endl;
+    }
+  }
   else{
-    for(int i=0; i<3; i++)thoseMuons.push_back("triggerMuon");
-    for(int i=0; i<2; i++)thoseMuons.push_back("goodMuon");
-    thoseMuons.push_back("goldenMuon");
+       for(int i=0; i<3; i++){
+         thoseMuons.push_back("trigger");
+	 //         std::cout<<"getting histograms of trigger mu"<<i<<std::endl;
+    }
+    for(int i=0; i<2; i++){
+      thoseMuons.push_back("good");
+      //     std::cout<<"getting histograms of good mu "<<i<<std::endl;
+    }
+    thoseMuons.push_back("golden");
+    //     std::cout<<"getting histogram of golden mu "<<i<<std::endl;
+    
   }
-    std::vector<TH1F*> nHit_, chi2_, d0_, ecalEn_, hcalEn_, relIso_;
+  //  std::cout<<"all muons ok"<<std::endl;
+  std::vector<TH1F*> nHit_, chi2_, d0_, ecalEn_, hcalEn_, relIso_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[0]+"Quality/nHit"  )->Clone() );
-    chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[1]+"Quality/chi2"  )->Clone() );
-    d0_    .push_back( (TH1F*)files_[idx]->Get(thoseMuons[2]+"Quality/d0"    )->Clone() );
-    ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[3]+"Quality/ecalEn")->Clone() );
-    hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[4]+"Quality/hcalEn")->Clone() );
-    relIso_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[5]+"Quality/relIso")->Clone() );
+    nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[0]+"MuonQuality/nHit"  )->Clone() );
+    //    std::cout<<"getting nhits for file "<<idx<<std::endl;
+    chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[1]+"MuonQuality/chi2"  )->Clone() );
+    //    std::cout<<"getting chi2 for file "<<idx<<std::endl;
+    d0_    .push_back( (TH1F*)files_[idx]->Get(thoseMuons[2]+"MuonQuality/d0"    )->Clone() );
+    //    std::cout<<"getting d0 for file "<<idx<<std::endl;
+    ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[3]+"MuonQuality/ecalEn")->Clone() );
+    //    std::cout<<"getting ecalen for file "<<idx<<std::endl;
+    hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[4]+"MuonQuality/hcalEn")->Clone() );
+    //    std::cout<<"getting hcalen for file "<<idx<<std::endl;
+    relIso_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[5]+"MuonQuality/relIso")->Clone() );
   }
+  //  std::cout<<"get histograms ok"<<std::endl;
 
   // ---
   //    close input files
@@ -62,46 +106,123 @@ void analyzeMuonSelection(TString whichMuons = "")
   }
   
   // ---
+  // Normalization and adding Vektor Bosons
+  // ---
+  nHit_[kWmunu]->Scale(lumiweight[kWmunu]);
+  nHit_[kZmumu]->Scale(lumiweight[kZmumu]);
+  nHit_.push_back( (TH1F*)nHit_[kWmunu]->Clone());
+  nHit_[kBoson]->Add(nHit_[kZmumu]);
+  nHit_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  nHit_[kAll]->Scale(lumiweight[kAll]);  
+  nHit_[kSignal]->Scale(lumiweight[kSignal]); 
+  nHit_[kBackground]->Scale(lumiweight[kBackground]); 
+
+  chi2_[kWmunu]->Scale(lumiweight[kWmunu]);
+  chi2_[kZmumu]->Scale(lumiweight[kZmumu]);
+  chi2_.push_back( (TH1F*)chi2_[kWmunu]->Clone());
+  chi2_[kBoson]->Add(chi2_[kZmumu]);
+  chi2_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  chi2_[kAll]->Scale(lumiweight[kAll]);  
+  chi2_[kSignal]->Scale(lumiweight[kSignal]); 
+  chi2_[kBackground]->Scale(lumiweight[kBackground]); 
+
+  d0_[kWmunu]->Scale(lumiweight[kWmunu]);
+  d0_[kZmumu]->Scale(lumiweight[kZmumu]);
+  d0_.push_back( (TH1F*)d0_[kWmunu]->Clone());
+  d0_[kBoson]->Add(d0_[kZmumu]);
+  d0_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  d0_[kAll]->Scale(lumiweight[kAll]);  
+  d0_[kSignal]->Scale(lumiweight[kSignal]); 
+  d0_[kBackground]->Scale(lumiweight[kBackground]); 
+
+  ecalEn_[kWmunu]->Scale(lumiweight[kWmunu]);
+  ecalEn_[kZmumu]->Scale(lumiweight[kZmumu]);
+  ecalEn_.push_back( (TH1F*)ecalEn_[kWmunu]->Clone());
+  ecalEn_[kBoson]->Add(ecalEn_[kZmumu]);
+  ecalEn_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  ecalEn_[kAll]->Scale(lumiweight[kAll]);  
+  ecalEn_[kSignal]->Scale(lumiweight[kSignal]); 
+  ecalEn_[kBackground]->Scale(lumiweight[kBackground]); 
+
+  hcalEn_[kWmunu]->Scale(lumiweight[kWmunu]);
+  hcalEn_[kZmumu]->Scale(lumiweight[kZmumu]);
+  hcalEn_.push_back( (TH1F*)hcalEn_[kWmunu]->Clone());
+  hcalEn_[kBoson]->Add(hcalEn_[kZmumu]);
+  hcalEn_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  hcalEn_[kAll]->Scale(lumiweight[kAll]);  
+  hcalEn_[kSignal]->Scale(lumiweight[kSignal]); 
+  hcalEn_[kBackground]->Scale(lumiweight[kBackground]); 
+
+  relIso_[kWmunu]->Scale(lumiweight[kWmunu]);
+  relIso_[kZmumu]->Scale(lumiweight[kZmumu]);
+  relIso_.push_back( (TH1F*)relIso_[kWmunu]->Clone());
+  relIso_[kBoson]->Add(relIso_[kZmumu]);
+  relIso_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  relIso_[kAll]->Scale(lumiweight[kAll]);  
+  relIso_[kSignal]->Scale(lumiweight[kSignal]); 
+  relIso_[kBackground]->Scale(lumiweight[kBackground]);
+
+  //  std::cout<<"lumi weighting ok"<<std::endl;
+  // ---
   //    configure histograms
   // ---
 
   // nHit_
-  histogramStyle(nHit_  [kSignal], kSignal);
-  histogramStyle(nHit_  [kQCD   ], kQCD   );
-  histogramStyle(nHit_  [kWmunu ], kWmunu );
-  histogramStyle(nHit_  [kZmumu ], kZmumu );
-
+  histogramStyle(nHit_  [kSignal     ], kSignal     );
+  histogramStyle(nHit_  [kQCD        ], kQCD        );
+  //  histogramStyle(nHit_  [kWmunu      ], kWmunu      );
+  //  histogramStyle(nHit_  [kZmumu      ], kZmumu      );
+  histogramStyle(nHit_  [kBackground ], kBackground );
+  histogramStyle(nHit_  [kBoson      ], kBoson      );
+  //  std::cout<<"setting up nHits style ok"<<std::endl;
 
   // chi2_
-  histogramStyle(chi2_ [kSignal], kSignal);
-  histogramStyle(chi2_ [kQCD   ], kQCD   );
-  histogramStyle(chi2_ [kWmunu ], kWmunu );
-  histogramStyle(chi2_ [kZmumu ], kZmumu );
+  histogramStyle(chi2_ [kSignal     ], kSignal     );
+  histogramStyle(chi2_ [kQCD        ], kQCD        );
+  //  histogramStyle(chi2_ [kWmunu      ], kWmunu      );
+  //  histogramStyle(chi2_ [kZmumu      ], kZmumu      );
+  histogramStyle(chi2_ [kBackground ], kBackground );
+  histogramStyle(chi2_ [kBoson      ], kBoson      );
+  //  std::cout<<"setting up chi2style ok"<<std::endl;
 
   // d0_
-  histogramStyle(d0_[kSignal], kSignal);
-  histogramStyle(d0_[kQCD   ], kQCD   );
-  histogramStyle(d0_[kWmunu ], kWmunu );
-  histogramStyle(d0_[kZmumu ], kZmumu );
+  histogramStyle(d0_[kSignal     ], kSignal     );
+  histogramStyle(d0_[kQCD        ], kQCD        );
+  //  histogramStyle(d0_[kWmunu      ], kWmunu      );
+  //  histogramStyle(d0_[kZmumu      ], kZmumu      );
+  histogramStyle(d0_[kBackground ], kBackground );
+  histogramStyle(d0_[kBoson      ], kBoson      );
+  //  std::cout<<"setting up d0style ok"<<std::endl;
 
   // ecalEn_
-  histogramStyle(ecalEn_[kSignal], kSignal);
-  histogramStyle(ecalEn_[kQCD   ], kQCD   );
-  histogramStyle(ecalEn_[kWmunu ], kWmunu );
-  histogramStyle(ecalEn_[kZmumu ], kZmumu ); 
+  histogramStyle(ecalEn_[kSignal     ], kSignal     );
+  histogramStyle(ecalEn_[kQCD        ], kQCD        );
+  //  histogramStyle(ecalEn_[kWmunu      ], kWmunu      );
+  //  histogramStyle(ecalEn_[kZmumu      ], kZmumu      ); 
+  histogramStyle(ecalEn_[kBackground ], kBackground );
+  histogramStyle(ecalEn_[kBoson      ], kBoson      );
+  //  std::cout<<"setting up ecalEnstyle ok"<<std::endl;
 
   // hcalEn_
-  histogramStyle(hcalEn_[kSignal], kSignal);
-  histogramStyle(hcalEn_[kQCD   ], kQCD   );
-  histogramStyle(hcalEn_[kWmunu ], kWmunu );
-  histogramStyle(hcalEn_[kZmumu ], kZmumu ); 
+
+  histogramStyle(hcalEn_[kSignal     ], kSignal     );
+  histogramStyle(hcalEn_[kQCD        ], kQCD        );
+  //  histogramStyle(hcalEn_[kWmunu      ], kWmunu      );
+  //  histogramStyle(hcalEn_[kZmumu      ], kZmumu      ); 
+  histogramStyle(hcalEn_[kBackground ], kBackground );
+  histogramStyle(hcalEn_[kBoson      ], kBoson      );
+  //  std::cout<<"setting up hcalEnstyle ok"<<std::endl;
 
   // relIso_
-  histogramStyle(relIso_[kSignal], kSignal);
-  histogramStyle(relIso_[kQCD   ], kQCD   );
-  histogramStyle(relIso_[kWmunu ], kWmunu );
-  histogramStyle(relIso_[kZmumu ], kZmumu ); 
+  histogramStyle(relIso_[kSignal     ], kSignal     );
+  histogramStyle(relIso_[kQCD        ], kQCD        );
+  //  histogramStyle(relIso_[kWmunu      ], kWmunu      );
+  //  histogramStyle(relIso_[kZmumu      ], kZmumu      ); 
+  histogramStyle(relIso_[kBackground ], kBackground );
+  histogramStyle(relIso_[kBoson      ], kBoson      );
+  // std::cout<<"setting up relIsostyle ok"<<std::endl;
 
+  // std::cout<<"configure histograms ok"<<std::endl;
 
   // ---
   //    do the printing for nHit_
@@ -110,42 +231,80 @@ void analyzeMuonSelection(TString whichMuons = "")
 
   // create a legend (in upper right corner)
   
-  TLegend *leg0 = new TLegend(0.55, 0.65, 1.15, 0.9);
+  TLegend *leg0 = new TLegend(0.50, 0.65, 1.00, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("Top-Antitop(Phythia)");
-  leg0->AddEntry( nHit_  [kSignal] , "semi-lep. ( #mu )"         , "PL" );
-  leg0->AddEntry( nHit_  [kQCD   ] , "QCD" , "FL" );
-  leg0->AddEntry( nHit_  [kWmunu ] , "W->#mu#nu"      , "FL" );
-  leg0->AddEntry( nHit_  [kZmumu ] , "Z->#mu#mu"      , "FL" );
+  leg0->AddEntry( nHit_  [kSignal    ] , "ttbar semi-lep.( #mu )", "PL" );
+  leg0->AddEntry( nHit_  [kBackground] , "ttbar other"    , "PL" );
+  leg0->AddEntry( nHit_  [kQCD       ] , "QCD"                    , "PL" );
+  //  leg0->AddEntry( nHit_  [kWmunu ] , "W#mu#nu"      , "PL" );
+  //  leg0->AddEntry( nHit_  [kZmumu ] , "Z#mu#mu"      , "PL" );
+  leg0->AddEntry( nHit_  [kBoson     ] , "Z#mu#mu + W#mu#nu"      , "PL" );
+
 
   // create a legend (in upper center)
   TLegend *leg1 = new TLegend(0.35, 0.65, 0.95, 0.9);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
   leg1->SetHeader("Top-Antitop(Phythia)");
-  leg1->AddEntry( nHit_  [kSignal] , "semi-lep. ( #mu )"         , "PL" );
-  leg1->AddEntry( nHit_  [kQCD   ] , "QCD" , "FL" );
-  leg1->AddEntry( nHit_  [kWmunu ] , "W->#mu#nu"      , "FL" );
-  leg1->AddEntry( nHit_  [kZmumu ] , "Z->#mu#mu"      , "FL" );
-  
+  leg1->AddEntry( nHit_  [kSignal]     , "ttbar semi-lep. ( #mu )", "PL" );
+  leg1->AddEntry( nHit_  [kBackground] , "ttbar other ( #mu )"    , "PL" );
+  leg1->AddEntry( nHit_  [kQCD   ] , "QCD"                        , "PL" );
+  //  leg1->AddEntry( nHit_  [kWmunu ] , "W#mu#nu"      , "PL" );
+  //  leg1->AddEntry( nHit_  [kZmumu ] , "Z#mu#mu"      , "PL" );
+  leg1->AddEntry( nHit_  [kBoson     ] , "Z#mu#mu + W#mu#nu"      , "PL" );
+
+  // create an info legend containig the used mu-cut
+   TLegend *leg2 = new TLegend(0.228, 0.912, 0.7818, 0.997);
+  leg2->SetFillStyle(3001);
+  leg2->SetBorderSize(0);
+  leg2->SetHeader(whichMuons+" #mu");
+ 
+  // create legends containig the used mu-cut for default configuration
+  TLegend *leg3 = new TLegend(0.228, 0.912, 0.7818, 0.997);
+  leg3->SetFillStyle(3001);
+  leg3->SetBorderSize(0);
+  leg3->SetHeader("trigger  #mu");
+    
+  TLegend *leg4 = new TLegend(0.228, 0.912, 0.7818, 0.997);
+  leg4->SetFillStyle(3001);
+  leg4->SetBorderSize(0);
+  leg4->SetHeader("good  #mu");
+
+  TLegend *leg5 = new TLegend(0.228, 0.912, 0.7818, 0.997);
+  leg5->SetFillStyle(3001);
+  leg5->SetBorderSize(0);
+  leg5->SetHeader("golden  #mu");
+
+  //  std::cout<<"legends ok"<<std::endl;
+
   // draw canvas
   canv0->cd(0);
   canv0->SetLogy(1);
-  axesStyle(nHit_  [kSignal], "NHit_{#mu trk}", "events");
-  nHit_  [kSignal]->SetMinimum(1.);
+  canv0->SetTitle("TrackerHits leading " +whichMuons+" #mu");
+  axesStyle(nHit_  [kSignal], "N_{Hits trk}( lead #mu )", "events");
+  nHit_[kSignal]->SetMinimum(1.);
   double max=nHit_[kSignal]->GetMaximum();
-  if(max<nHit_[kQCD]->GetMaximum())max=nHit_[kQCD]->GetMaximum();
-  if(max<nHit_[kWmunu]->GetMaximum())max=nHit_[kWmunu]->GetMaximum();
-  if(max<nHit_[kZmumu]->GetMaximum())max=nHit_[kZmumu]->GetMaximum();
-  nHit_  [kSignal]->SetMaximum( 1.7* max );
-  nHit_  [kSignal]->Draw();
-  nHit_  [kQCD   ]->Draw("same");
-  nHit_  [kWmunu]->Draw("same");
-  nHit_  [kZmumu]->Draw("same");
-  //n_  [kSignal       ]->Draw("esame");
-  leg0->Draw("same");
-  drawcutline(11., max);
+  if(max<nHit_[kQCD       ]->GetMaximum())max=nHit_[kQCD]       ->GetMaximum();
+  if(max<nHit_[kBackground]->GetMaximum())max=nHit_[kBackground]->GetMaximum();
+  if(max<nHit_[kBoson     ]->GetMaximum())max=nHit_[kBoson     ]->GetMaximum();
+  nHit_  [kSignal    ]->SetMaximum( 1000.0* max );
+  nHit_  [kSignal    ]->Draw();
+  nHit_  [kBackground]->Draw("same");
+  nHit_  [kQCD       ]->Draw("same");
+  nHit_  [kBoson     ]->Draw("same");
+  //  nHit_  [kWmunu ]->Draw("same");
+  //  nHit_  [kZmumu ]->Draw("same");
+  leg1                ->Draw("same");
+  if(whichMuons==""){
+    canv0->SetTitle("TrackerHits leading trigger #mu");
+    leg3->Draw("same");
+  }
+  else{
+    leg2->Draw("same");
+  }
+  drawcutline(10.5,0.4* max);
 
   // ---
   //    do the printing for chi2_
@@ -155,18 +314,29 @@ void analyzeMuonSelection(TString whichMuons = "")
   // draw canvas
   canv1->cd(0);
   canv1->SetLogy(1);
-  axesStyle(chi2_ [kSignal], "#chi^{2}( #mu ) [GeV]", "events");
-  max=chi2_[kSignal]->GetMaximum();
-  if(max<chi2_[kQCD]->GetMaximum())max=chi2_[kQCD]->GetMaximum();
-  if(max<chi2_[kWmunu]->GetMaximum())max=chi2_[kWmunu]->GetMaximum();
-  if(max<chi2_[kZmumu]->GetMaximum())max=chi2_[kZmumu]->GetMaximum();
-  chi2_ [kSignal       ]->SetMaximum( 1.7* max );
-  chi2_ [kSignal       ]->Draw();
-  chi2_ [kQCD    ]->Draw("same");
-  chi2_ [kWmunu]->Draw("same");
-  chi2_ [kZmumu]->Draw("same");
-  leg0->Draw("same");
-  drawcutline(10., max);
+  canv1->SetTitle("#chi^{2} leading "+whichMuons+" #mu");
+  axesStyle(chi2_ [kSignal], "#chi^{2} ( lead #mu ) [GeV]", "events");
+  max=chi2_[kSignal]       ->GetMaximum();
+  if(max<chi2_[kQCD       ]->GetMaximum())max=chi2_[kQCD]       ->GetMaximum();
+  if(max<chi2_[kBackground]->GetMaximum())max=chi2_[kBackground]->GetMaximum();
+  if(max<chi2_[kBoson     ]->GetMaximum())max=chi2_[kZmumu]     ->GetMaximum();
+  chi2_ [kSignal    ]->SetMaximum( 1.7* max );
+  chi2_ [kSignal    ]->SetMinimum(1.);
+  chi2_ [kSignal    ]->Draw();
+  chi2_ [kBackground]->Draw("same");
+  chi2_ [kQCD       ]->Draw("same");
+  chi2_ [kBoson     ]->Draw("same");
+  //  chi2_ [kWmunu ]->Draw("same");
+  //  chi2_ [kZmumu ]->Draw("same");
+  leg0                   ->Draw("same");
+  if(whichMuons==""){
+    canv1->SetTitle("#chi^{2} leading trigger #mu");
+    leg3->Draw("same");
+  }
+  else{
+    leg2->Draw("same");
+  }
+    drawcutline(10., 0.6*max);
 
   // ---
   //    do the printing for d0_
@@ -176,19 +346,29 @@ void analyzeMuonSelection(TString whichMuons = "")
   // draw canvas
   canv2->cd(0);
   canv2->SetLogy(1);
-  axesStyle(d0_[kSignal], "d0( #mu )", "events");
-  //d0_[kSignal       ]->SetMinimum( 0 );
-  max=d0_[kSignal]->GetMaximum();
-  if(max<d0_[kQCD]->GetMaximum())max=d0_[kQCD]->GetMaximum();
-  if(max<d0_[kWmunu]->GetMaximum())max=d0_[kWmunu]->GetMaximum();
-  if(max<d0_[kZmumu]->GetMaximum())max=d0_[kZmumu]->GetMaximum();
-  d0_[kSignal       ]->SetMaximum( 1.7* max );
-  d0_[kSignal       ]->Draw();
-  d0_[kQCD    ]->Draw("same");
-  d0_[kWmunu]->Draw("same");
-  d0_[kZmumu]->Draw("same");
-  leg0->Draw("same");
-  drawcutline(0.2, max);
+  canv2->SetTitle("d_{0} leading "+whichMuons+" #mu");
+  axesStyle(d0_[kSignal], "d_{0} ( lead #mu )", "events");
+   d0_[kSignal]->SetAxisRange(0.,0.3 ,"X");
+  max=d0_[kSignal]       ->GetMaximum();
+  if(max<d0_[kQCD]       ->GetMaximum())max=d0_[kQCD]       ->GetMaximum();
+  if(max<d0_[kBackground]->GetMaximum())max=d0_[kBackground]->GetMaximum();
+  if(max<d0_[kBoson]     ->GetMaximum())max=d0_[kBoson]     ->GetMaximum();
+  d0_[kSignal    ]->SetMaximum( 1.7* max );
+  d0_[kSignal    ]->Draw();
+  d0_[kBackground]->Draw("same");
+  d0_[kQCD       ]->Draw("same");
+  d0_[kBoson     ]->Draw("same");
+  //  d0_[kWmunu ]->Draw("same");
+  //  d0_[kZmumu ]->Draw("same");
+  leg0            ->Draw("same");
+  if(whichMuons==""){
+    canv2->SetTitle("d_{0} leading trigger #mu");
+    leg3->Draw("same");
+  }
+  else{
+    leg2->Draw("same");
+  }
+  drawcutline(0.02, max);
 
   // ---
   //    do the printing for ecalEn_
@@ -198,18 +378,28 @@ void analyzeMuonSelection(TString whichMuons = "")
   // draw canvas
   canv3->cd(0);
   canv3->SetLogy(1);
-  axesStyle(ecalEn_[kSignal], "ECal Endergy Deposit( #mu ) [GeV]", "events");
-  max=ecalEn_[kSignal]->GetMaximum();
-  if(max<ecalEn_[kQCD]->GetMaximum())max=ecalEn_[kQCD]->GetMaximum();
-  if(max<ecalEn_[kWmunu]->GetMaximum())max=ecalEn_[kWmunu]->GetMaximum();
-  if(max<ecalEn_[kZmumu]->GetMaximum())max=ecalEn_[kZmumu]->GetMaximum();
-  ecalEn_[kSignal       ]->SetMaximum( 2.0* max );
-  ecalEn_[kSignal       ]->Draw();
-  ecalEn_[kQCD    ]->Draw("same");
-  ecalEn_[kWmunu]->Draw("same");
-  ecalEn_[kZmumu]->Draw("same");
-  leg0->Draw("same");
-  drawcutline(4., max);
+  canv3->SetTitle("Ecaldeposit leading "+whichMuons+" #mu");
+  axesStyle(ecalEn_[kSignal], "E_{Cal} Energy Deposit ( lead #mu ) [GeV]", "events");
+  max=ecalEn_[kSignal   ]->GetMaximum();
+  if(max<ecalEn_[kQCD        ]->GetMaximum())max=ecalEn_[kQCD       ]->GetMaximum();
+  if(max<ecalEn_[kBackground ]->GetMaximum())max=ecalEn_[kBackground]->GetMaximum();
+  if(max<ecalEn_[kBoson      ]->GetMaximum())max=ecalEn_[kBoson     ]->GetMaximum();
+  ecalEn_[kSignal    ]->SetMaximum( 2.0* max );
+  ecalEn_[kSignal    ]->Draw();
+  ecalEn_[kBackground]->Draw("same");
+  ecalEn_[kQCD       ]->Draw("same");
+  ecalEn_[kBoson     ]->Draw("same");
+  //  ecalEn_[kWmunu ]->Draw("same");
+  //  ecalEn_[kZmumu ]->Draw("same");
+  leg0                ->Draw("same");
+  if(whichMuons==""){
+    canv3->SetTitle("Ecaldeposit leading good #mu");
+    leg4->Draw("same");
+  }
+  else{
+    leg2->Draw("same");
+  }
+  drawcutline(4., 0.8*max);
 
   // ---
   //    do the printing for hcalEn_
@@ -219,19 +409,29 @@ void analyzeMuonSelection(TString whichMuons = "")
   // draw canvas
   canv4->cd(0);
   canv4->SetLogy(1);
-  axesStyle(hcalEn_[kSignal], "HCal Endergy Deposit( #mu ) [GeV]", "events");
+  canv4->SetTitle("Hcaldeposit leading "+whichMuons+" #mu");  
+  axesStyle(hcalEn_[kSignal], "H_{Cal} Energy Deposit ( lead #mu ) [GeV]", "events");
   //hcalEn_[kSignal       ]->SetMinimum( 0 );
-  max=hcalEn_[kSignal]->GetMaximum();
-  if(max<hcalEn_[kQCD]->GetMaximum())max=hcalEn_[kQCD]->GetMaximum();
-  if(max<hcalEn_[kWmunu]->GetMaximum())max=hcalEn_[kWmunu]->GetMaximum();
-  if(max<hcalEn_[kZmumu]->GetMaximum())max=hcalEn_[kZmumu]->GetMaximum();
-  hcalEn_[kSignal       ]->SetMaximum( 2.0* max );
-  hcalEn_[kSignal       ]->Draw();
-  hcalEn_[kQCD    ]->Draw("same");
-  hcalEn_[kWmunu]->Draw("same");
-  hcalEn_[kZmumu]->Draw("same");
-  leg0->Draw("same");
-  drawcutline(6., max);
+  max=hcalEn_[kSignal  ]->GetMaximum();
+  if(max<hcalEn_[kQCD       ]->GetMaximum())max=hcalEn_[kQCD       ]->GetMaximum();
+  if(max<hcalEn_[kBackground]->GetMaximum())max=hcalEn_[kBackground]->GetMaximum();
+  if(max<hcalEn_[kBoson     ]->GetMaximum())max=hcalEn_[kBoson     ]->GetMaximum();
+  hcalEn_[kSignal    ]->SetMaximum( 20.0* max );
+  hcalEn_[kSignal    ]->Draw();
+  hcalEn_[kBackground]->Draw("same");
+  hcalEn_[kQCD       ]->Draw("same");
+  hcalEn_[kBoson     ]->Draw("same");
+  //  hcalEn_[kWmunu ]->Draw("same");
+  //  hcalEn_[kZmumu ]->Draw("same");
+  leg0                ->Draw("same");
+  if(whichMuons==""){
+    canv4->SetTitle("Hcaldeposit leading good #mu");
+    leg4->Draw("same");
+  }
+  else{
+    leg2->Draw("same");
+  }
+  drawcutline(6., 0.2*max);
 
   // ---
   //    do the printing for relIso_
@@ -241,19 +441,77 @@ void analyzeMuonSelection(TString whichMuons = "")
   // draw canvas
   canv5->cd(0);
   canv5->SetLogy(1);
-  axesStyle(relIso_[kSignal], "relIso( #mu )", "events");
+  canv5->SetTitle("relIso leading "+whichMuons+" #mu");  
+  axesStyle(relIso_[kSignal], "relIso ( lead #mu )", "events");
   //relIso_[kSignal       ]->SetMinimum( 0 );
-  max=relIso_[kSignal]->GetMaximum();
-  if(max<relIso_[kQCD]->GetMaximum())max=relIso_[kQCD]->GetMaximum();
-  if(max<relIso_[kWmunu]->GetMaximum())max=relIso_[kWmunu]->GetMaximum();
-  if(max<relIso_[kZmumu]->GetMaximum())max=relIso_[kZmumu]->GetMaximum();
-  relIso_[kSignal       ]->SetMaximum( 2.0* max );
-  relIso_[kSignal       ]->Draw();
-  relIso_[kQCD    ]->Draw("same");
-  relIso_[kWmunu]->Draw("same");
-  relIso_[kZmumu]->Draw("same");
-  leg0->Draw("same");
-  drawcutline(0.05, max);
+  max=relIso_[kSignal  ]->GetMaximum();
+  if(max<relIso_[kQCD       ]->GetMaximum())max=relIso_[kQCD       ]->GetMaximum();
+  if(max<relIso_[kBackground]->GetMaximum())max=relIso_[kBackground]->GetMaximum();
+  if(max<relIso_[kBoson     ]->GetMaximum())max=relIso_[kBoson     ]->GetMaximum();
+  relIso_[kSignal    ]->SetMaximum( 20.0* max );
+  relIso_[kSignal    ]->Draw();
+  relIso_[kBackground]->Draw("same");
+  relIso_[kQCD       ]->Draw("same");
+  relIso_[kBoson     ]->Draw("same");
+  //  relIso_[kWmunu     ]->Draw("same");
+  //  relIso_[kZmumu     ]->Draw("same");
+  leg0                ->Draw("same");
+  if(whichMuons==""){
+    canv5->SetTitle("relIso leading golden #mu");
+    leg5->Draw("same");
+  }
+  else{
+    leg2->Draw("same");
+  }
+  drawcutline(0.05, 1.1*max);
+
+  // ---
+  // saving
+  // ---
+
+
+
+
+
+  if(whichMuons==""){
+    
+    //  pictures
+    canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/trackerHitsTriggerMuons.png");
+     canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/chi2TriggerMuons.png");
+     canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/d0TriggerMuons.png");
+     canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/eCalEnDepositGoodMuons.png");
+     canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/hCalEnDepositGoodMuons.png");
+     canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/relIsoGoldenMuons.png");
+     
+     //  psfile
+     canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps(");
+    canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
+    canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
+    canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
+    canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps");
+    canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps)");
+
+  }
+  
+  else{
+    
+    //  pictures
+    canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/trackerHits"+whichMuons+"Muons.png");
+    canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/chi2"+whichMuons+"Muons.png");
+    canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/d0"+whichMuons+"Muons.png");
+    canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/eCalEnDeposit"+whichMuons+"Muons.png");
+    canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/hCalEnDeposit"+whichMuons+"Muons.png");
+    canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/relIso"+whichMuons+"Muons.png");
+    
+    //  psfile
+    canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps(");
+    canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
+    canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
+    canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
+    canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps");
+    canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps)");
+  }
+
 }
 
 void drawcutline(double cutval, double maximum)
@@ -278,17 +536,23 @@ void histogramStyle(TH1* hist, unsigned int style)
 {
   // pre-defined line style
   std::vector<int> color;
-  color.push_back( kBlack); 
-  color.push_back( kRed  ); 
-  color.push_back( kBlue );
+  color.push_back( kRed   ); 
+  color.push_back( kRed   ); 
+  color.push_back( kBlue  );
   color.push_back( kGreen );
+  color.push_back(   5    );
+  color.push_back(  46    );
+  color.push_back( kBlack );
 
   // pre-defined fill style
   std::vector<int> fill;
-  fill.push_back(   1); 
-  fill.push_back(3004); 
-  fill.push_back(3005);
-  fill.push_back(3006);
+  fill.push_back( 1   ); 
+  fill.push_back( 3004); 
+  fill.push_back( 1   );
+  fill.push_back( 1   );
+  fill.push_back( 1   );
+  fill.push_back( 1   );
+  fill.push_back( 1   );
 
   // pre-defined marker style
   std::vector<int> marker;
@@ -315,9 +579,9 @@ void axesStyle(TH1* hist, const char* titleX, const char* titleY)
 
   hist->GetXaxis()->SetTitle(titleX);
   hist->GetXaxis()->CenterTitle();
-  hist->GetXaxis()->SetTitleSize  ( 0.06);
+  hist->GetXaxis()->SetTitleSize  ( 0.05);
   hist->GetXaxis()->SetTitleColor (    1);
-  hist->GetXaxis()->SetTitleOffset(  0.8);
+  hist->GetXaxis()->SetTitleOffset(  1.0);
   hist->GetXaxis()->SetTitleFont  (   62);
   hist->GetXaxis()->SetLabelSize  ( 0.05);
   hist->GetXaxis()->SetLabelFont  (   62);
@@ -330,4 +594,5 @@ void axesStyle(TH1* hist, const char* titleX, const char* titleY)
   hist->GetYaxis()->SetTitleFont  (   62);
   hist->GetYaxis()->SetLabelSize  ( 0.04);
   hist->GetYaxis()->SetLabelFont  (   62);
+  hist->GetYaxis()->CenterTitle   ( true);
 }
