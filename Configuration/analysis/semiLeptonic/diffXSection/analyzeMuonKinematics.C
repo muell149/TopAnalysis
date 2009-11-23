@@ -32,21 +32,28 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_QCD.root"  ) );
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Wmunu.root") );
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Zmumu.root") );
-  //  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Bosons.root"));
-
 
   // histogram scaling because of lumiweighting
   std::vector<double> lumiweight;
+
+  // add scaling factors here!!!
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+
   // ttbar (all, bg, sg - coming from the same sample)
-  lumiweight.push_back(0.0156);
-  lumiweight.push_back(0.0156);
-  lumiweight.push_back(0.0156);
+  //  lumiweight.push_back(0.0156);
+  //  lumiweight.push_back(0.0156);
+  //  lumiweight.push_back(0.0156);
   // QCD
-  lumiweight.push_back(1.1161);
+  //  lumiweight.push_back(1.1161);
   // Wmunu
-  lumiweight.push_back(0.2212);
+  //  lumiweight.push_back(0.2212);
   // Zmumu
-  lumiweight.push_back(0.0458);
+  //  lumiweight.push_back(0.0458);
 
 
   // ---
@@ -187,7 +194,7 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   leg3->SetBorderSize(0);
   leg3->SetHeader(whichMuons+" #mu");
 
-  // create a legend for Wmunu and Zmumu separeted (in upper right corner)
+  // create a legend for Wmunu and Zmumu separately (in upper right corner)
   TLegend *leg4 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg4->SetFillStyle(0);
   leg4->SetBorderSize(0);
@@ -222,7 +229,6 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
 
   if(whichMuons=="track"){
   axesStyle(*n_  [kSignal], "N_{#mu}: nhit>10, #chi^{2}<10, d_{0}<0.02, |#eta|<2.5, p_{t}>10 ", "events");
-  // need change of fontsize because of many infos 
   n_[kSignal]->GetXaxis()->SetTitleSize(0.04);
   n_[kSignal]->GetXaxis()->SetTitleOffset(1.3);
   }
@@ -336,15 +342,16 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
 // saving 
 
 // 1.as picture 
-//canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Multiplicity"+whichMuons+"Muons.png");
-canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Pt"+whichMuons+"Muons.png");
-//canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Eta"+whichMuons+"Muons.png");
-//canv3->Print("/afs/naf.desy.de/user/g/goerner//workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Phi"+whichMuons+"Muons.png");
+canv0->Print("./analyzeMuonCutflow/Multiplicity"+whichMuons+"Muons.png");
+canv1->Print("./analyzeMuonCutflow/Pt"+whichMuons+"Muons.png"          );
+canv2->Print("./analyzeMuonCutflow/Eta"+whichMuons+"Muons.png"         );
+canv3->Print("./analyzeMuonCutflow/Phi"+whichMuons+"Muons.png"         );
+
 //2.as ps-file
-//canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps(");
-//canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps");
-//canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)");
-//canv3->Print("/afs/naf.desy.de/user/g/goerner//workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Phi"+whichMuons+"Muons.ps)");
+canv0->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps(");
+canv1->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps" );
+canv2->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)");
+canv3->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)"       );
 
 }
 
@@ -397,22 +404,6 @@ void histogramStyle(TH1& hist, unsigned int style)
     hist.SetMarkerStyle(marker[style]);
     hist.SetMarkerSize(1.4);
   }
-
-  // Lumi weights to get 50 pb^-1
-  //  std::vector<double> lumiweight;
-  // ttbar (all, bg, sg - coming from the same sample)
-  //  lumiweight.push_back(0.0156);
-  //  lumiweight.push_back(0.0156);
-  //  lumiweight.push_back(0.0156);
-//   // QCD
-// /  lumiweight.push_back(0.0338);
-//   // Wmunu
-//   lumiweight.push_back(0.2212);
-//   // Zmumu
-//   lumiweight.push_back(0.0458);
-
-//   hist.Scale(lumiweight[style]);
-
 }
 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY) 
