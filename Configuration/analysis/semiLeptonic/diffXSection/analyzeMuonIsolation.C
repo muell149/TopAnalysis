@@ -1,7 +1,8 @@
 
 // ---------description----------
 // --------------------------
-// this Macro analzyes different Qualities of the Muon concerning Isolation: Endeposit in Hcal and Ecal, number of Hits around Track, Response in Ecal and Hcal, distance of mu to next jet for different Jet-pt-thresholds
+// this Macro analzyes different Qualities of the Muon concerning Isolation: Endeposit in Hcal and Ecal,
+// number of Hits around Track, Response in Ecal and Hcal, distance of mu to next jet for different Jet-pt-thresholds
 // --------------------------
 // --------------------------
 
@@ -43,8 +44,6 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Wmunu.root") );
   files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Zmumu.root") );
 
-  //  std::cout<<"open input files ok"<<std::endl;
-
   // ---
   //    get histograms
   // ---
@@ -60,7 +59,6 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
     jmudist30_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"Muon"+whichJets+"JetKinematics/dist30_") );
     jmudist40_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"Muon"+whichJets+"JetKinematics/dist40_") );
   }
-  //  std::cout<<"getting histograms ok"<<std::endl;
 
   // ---
   //    close input files
@@ -69,26 +67,32 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
     //files_[idx]->Close();
   }
   
-
   // ---
-  // histogram scaling because of lumiweighting
+  // define weights concerning luminosity
   // ---
   std::vector<double> lumiweight;
-  // ttbar (all, bg, sg - coming from the same sample)
-  lumiweight.push_back(0.0156);
-  lumiweight.push_back(0.0156);
-  lumiweight.push_back(0.0156);
-  // QCD
-  lumiweight.push_back(1.1161);
-  // Wmunu
-  lumiweight.push_back(0.2212);
-  // Zmumu
-  lumiweight.push_back(0.0458);
 
-  //  std::cout<<"lumiweightvecyor created"<<std::endl;
+  // add scaling factors here!
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+
+  // ttbar (all, bg, sg - coming from the same sample)
+  //  lumiweight.push_back(0.0156);
+  //  lumiweight.push_back(0.0156);
+  // lumiweight.push_back(0.0156);
+  // QCD
+  //  lumiweight.push_back(1.1161);
+  // Wmunu
+  //  lumiweight.push_back(0.2212);
+  // Zmumu
+  //  lumiweight.push_back(0.0458);
 
   // ---
-  // Normalization and adding Vektor Bosons
+  // do lumiweighting and adding Vektor Bosons
   // ---
   relIso_[kWmunu     ]->Scale(lumiweight[kWmunu]);
   relIso_[kZmumu     ]->Scale(lumiweight[kZmumu]);
@@ -144,8 +148,6 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
   hclIsoN_[kSignal    ]->Scale(lumiweight[kSignal]); 
   hclIsoN_[kBackground]->Scale(lumiweight[kBackground]);
 
-  //  std::cout<<"lumiweighting for Isolation variables done"<<std::endl;
-
   jmudist20_[kWmunu     ]->Scale(lumiweight[kWmunu]);
   jmudist20_[kZmumu     ]->Scale(lumiweight[kZmumu]);
   jmudist20_.push_back( (TH1F*)jmudist20_[kWmunu]->Clone());
@@ -174,8 +176,6 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
   //  jmudist40_[kAll]->Scale(lumiweight[kAll]);  
   jmudist40_[kSignal    ]->Scale(lumiweight[kSignal]); 
   jmudist40_[kBackground]->Scale(lumiweight[kBackground]);
-
-  //  std::cout<<"lumiweighting and adding Vectorbosons ok"<<std::endl;
 
   // ---
   //    configure histograms
@@ -262,8 +262,6 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
   histogramStyle(*jmudist40_[kZmumu     ], kZmumu     );
   //  histogramStyle(*jmudist40_[kBoson     ], kBoson );
 
-  //  std::cout<<"configuring histograms ok"<<std::endl;
-
   // create a legend (in upper right corner)
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg0->SetFillStyle(0);
@@ -313,9 +311,7 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
   leg4->AddEntry( relIso_ [kQCD       ] , "QCD"                    , "PL" );
   leg4->AddEntry( jmudist30_ [kWmunu     ] , "W#mu#nu"                , "PL" );
   leg4->AddEntry( jmudist30_ [kZmumu     ] , "Z#mu#mu"                , "PL" );
-//  leg0->AddEntry( relIso_ [kBoson     ] , "W#mu#nu + Z#mu#mu"      , "PL" );
-
-
+  //  leg0->AddEntry( relIso_ [kBoson     ] , "W#mu#nu + Z#mu#mu"      , "PL" );
 
   // ---
   //    do the printing for relIso_
@@ -568,40 +564,34 @@ void analyzeMuonIsolation(TString whichMuons = "tight") // choose between: "good
   leg4                     ->Draw("same");
   leg3                     ->Draw("same");
 
-
-  //  std::cout<<"canvases printed"<<std::endl;
-
   // ---
   // saving
   // ---
 
  //pictures
 
-//   canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/relIso"+whichMuons+"Muons.png");
-//   canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/trackIso"+whichMuons+"Muons.png");
-//   canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/caloIso"+whichMuons+"Muons.png");
-//   canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/trackIsoNum"+whichMuons+"Muons.png");
-//   canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/ecalIsoN"+whichMuons+"Muons.png");
-//   canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/hcalIsoN"+whichMuons+"Muons.png");
-//  canv6->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/dist20"+whichMuons+"Muons"+whichJets+"Jet.png");  
-  canv7->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/dist30"+whichMuons+"Muons"+whichJets+"Jet.png");  
-  canv8->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/dist40"+whichMuons+"Muons"+whichJets+"Jet.png");  
+//   canv0->Print("./analyzeMuonCutflow/relIso"+whichMuons+"Muons.png"                );
+//   canv1->Print("./analyzeMuonCutflow/trackIso"+whichMuons+"Muons.png"              );
+//   canv2->Print("./analyzeMuonCutflow/caloIso"+whichMuons+"Muons.png"               );
+//   canv3->Print("./analyzeMuonCutflow/trackIsoNum"+whichMuons+"Muons.png"           );
+//   canv4->Print("./analyzeMuonCutflow/ecalIsoN"+whichMuons+"Muons.png"              );
+//   canv5->Print("./analyzeMuonCutflow/hcalIsoN"+whichMuons+"Muons.png"              );
+//   canv6->Print("./analyzeMuonCutflow/dist20"+whichMuons+"Muons"+whichJets+"Jet.png");  
+//   canv7->Print("./analyzeMuonCutflow/dist40"+whichMuons+"Muons"+whichJets+"Jet.png");  
   
 
   //psfile
 
-//   canv0->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps(");
-//   canv1->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//   canv2->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//   canv3->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//   canv4->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//   canv5->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//  canv6->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//  canv7->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps");
-//  canv8->Print("/afs/naf.desy.de/user/g/goerner/workafs/CMSSW_3_3_2/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJe
-//	      ts+"Jet.ps)");
+  canv0->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps(");
+  canv1->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv2->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv3->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv4->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv5->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv6->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv7->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps" );
+  canv8->Print("./analyzeMuonCutflow/Isolation"+whichMuons+"Muons"+whichJets+"Jet.ps)");
 
-  // std::cout<<"saving ok"<<std::endl;
 }
 
 void canvasStyle(TCanvas& canv) 
