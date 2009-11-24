@@ -9,13 +9,13 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 
 ## getting started
 centralJets  = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
-                                        cut = 'abs(eta) < 3.0'
+                                        cut = 'abs(eta) < 2.4'
                                         )
 reliableJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
-                                        cut = 'abs(eta) < 3.0 & pt > 30.'
+                                        cut = 'abs(eta) < 2.4 & pt > 30.'
                                         )
 goodJets     = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
-                                        cut = 'abs(eta) < 3.0 & pt > 30. &'
+                                        cut = 'abs(eta) < 2.4 & pt > 30. &'
                                               '0.05 < emEnergyFraction   & '
                                               '0.95 > emEnergyFraction'
                                         )
