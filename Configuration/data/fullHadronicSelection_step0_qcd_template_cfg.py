@@ -134,7 +134,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_qcd_template.root')
+    fileName = cms.untracked.string('patTuple_qcd.root')
 )
 
 #-------------------------------------------------
