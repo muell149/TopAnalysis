@@ -62,7 +62,7 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     /// correlation between dimuon mass and isolation        
     TH2F * isoDimassCorrelation_;   
     
-    /// isolation efficiency for abslute cut
+    /// isolation efficiency for absolute cut
     TH1F * absCount_;
     /// isolation efficiency for relative cut
     TH1F * relCount_;

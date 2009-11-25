@@ -49,9 +49,9 @@ DimuonAnalyzer::beginJob(const edm::EventSetup&)
   // relative isolation efficiency       
   relCount_    = fs->make<TH1F>( "relCount"   , "relCount"    ,100,  0.,   5.0); 
   // combined isolation efficiency
-  combCount_   = fs->make<TH1F>( "combCount"  , "combCount"   ,100,  0.0,  1.0); 
+  combCount_   = fs->make<TH1F>( "combCount"  , "combCount"   ,100,  0.0,  5.0); 
   // quadratically added combined isolation
-  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  2.0);
+  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  7.5);
   
   for(size_t i=0; i<isoBins_.size()-1; ++i){ 
     TH1F* hist;
@@ -119,8 +119,8 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   double relCaloIso1 = mu1.caloIso()/mu1.pt();
   double relCaloIso2 = mu2.caloIso()/mu2.pt();  
   
-  double combIso1 = mu1.pt()/(mu1.pt()+mu1.trackIso()+mu1.caloIso());
-  double combIso2 = mu2.pt()/(mu2.pt()+mu2.trackIso()+mu2.caloIso());     
+  double combIso1 = (mu1.trackIso()+mu1.caloIso())/mu1.pt();
+  double combIso2 = (mu2.trackIso()+mu2.caloIso())/mu2.pt();     
   
   double diCombIso = sqrt(combIso1*combIso1+combIso2*combIso2);
   
@@ -130,10 +130,10 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   
   // fill isolation efficiency hists    
   for(int i=1;i<=100;++i){
-    if(diCombIso>0.02*i){
+    if(diCombIso<0.075*i){
       diCombCount_->SetBinContent(i,diCombCount_->GetBinContent(i)+1);
     }
-    if(combIso1>0.01*i && combIso2>0.01*i){
+    if(combIso1<0.05*i && combIso2<0.05*i){
       combCount_->SetBinContent(i,combCount_->GetBinContent(i)+1);
     }
     if(relTrackIso1<(0.05*i) && relCaloIso1<(0.05*i) && relTrackIso2<(0.05*i) && relCaloIso2<(0.05*i)){
