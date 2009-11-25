@@ -7,7 +7,7 @@ filterDiMuonMass = cms.EDAnalyzer("DiMuonMassFilter",
     
     ## cuts on muon muon mass
     qcdCut = cms.double(20.),
-    zCut   = cms.vdouble(80.,105.)
+    zCut   = cms.vdouble(76.,106.)
 )
 
 
