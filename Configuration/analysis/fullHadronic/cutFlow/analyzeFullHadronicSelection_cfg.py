@@ -9,7 +9,7 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 ##    decide whether to run on:  * all *, * signal only *, * background only *
 ## ---
-eventFilter  = 'all' # 'signal only' # 'background only' # 'all'
+eventFilter  = 'signal only' # 'signal only' # 'background only' # 'all'
 
 ## NOT YET REIMPLEMENTED
 useAntikt5   = True # False
@@ -86,13 +86,13 @@ if(not eventFilter=='all'):
         raise NameError, "'"+eventFilter+"' is not a prober eventFilter name choose: 'all', 'signal only' or 'background only'"
     
     ## sequence with filter
-    process.filterSequence = cms.Sequence(process.patDefaultSequence *
+    process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.makeGenEvt *
                                           process.ttFullHadronicFilter
                                           )
 else:
     ## sequence without filter
-    process.filterSequence = cms.Sequence(process.patDefaultSequence *
+    process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.makeGenEvt)
 
 ## ---
@@ -125,8 +125,8 @@ bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('had:b') )
 bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('had:b') )
 
 ## replace sisCone5 by antikt5
-#if( useAntikt5 ):
-#    process.goodJets.src = 'selectedLayer1JetsAK5'
+if( useAntikt5 ):
+    process.goodJets.src = 'selectedLayer1JetsAK5'
     
 ## collect kinematics analyzers
 process.tightBottomJetKinematics  = process.analyzeJetKinematics.clone (src = 'tightBottomJets' )
@@ -171,8 +171,6 @@ process.monitorJetsQuality = cms.Sequence(process.tightBottomJetQuality        +
 ## ---
 process.p1 = cms.Path(## do the gen evetn selection
                       process.filterSequence        *
-                      ## do the trigger selection
-                      process.hltMu9                * 
                       ## do the selections
                       process.fullHadronicSelection *
                       ## do the matching
