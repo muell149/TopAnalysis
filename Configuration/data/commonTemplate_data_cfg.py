@@ -45,11 +45,11 @@ process.source = cms.Source("PoolSource",
     )
 )
 process.source.firstRun = cms.untracked.uint32(123596)
-
+process.source.lastRun  = cms.untracked.uint32(123596)
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -64,14 +64,25 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string('GR09_P_V7::All')
 
 #-------------------------------------------------
+# trigger configuration
+#-------------------------------------------------
+
+process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
+process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
+process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
+
+## select the "physics bits"
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('40 OR 41')
+
+#-------------------------------------------------
 # pat configuration
 #-------------------------------------------------
 
 ## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-## process path
-process.pat = cms.Path(process.patDefaultSequence)
+## use the correct jet energy corrections
+process.jetCorrFactors.corrSample = "900GeV"
 
 ## switch off MC matching
 from PhysicsTools.PatAlgos.tools.coreTools import *
@@ -132,10 +143,14 @@ process.TFileService = cms.Service("TFileService",
 # are dropped before the patTuple content is added
 #-------------------------------------------------
 
+## process path
+process.p1 = cms.Path(process.hltLevel1GTSeed *
+                      process.patDefaultSequence)
+
 ## define event selection
 process.EventSelection = cms.PSet(
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('pat')
+        SelectEvents = cms.vstring('p1')
     )
 )
 
@@ -144,7 +159,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple123596.root')
+    fileName = cms.untracked.string('patTuple_Run123596.root')
 )
 # save pat output
 from PhysicsTools.PatAlgos.patEventContent_cff import *
