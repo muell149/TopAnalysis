@@ -40,6 +40,15 @@ DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
 
 
 /**
+    Define modules needed for the analysis of event shapes
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/EventShapes.h"
+typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, EventShapes> EventShapeAnalyzer;
+DEFINE_FWK_MODULE(EventShapeAnalyzer);
+
+
+/**
     Define modules needed for the analysis of muon jet relations
 **/
 

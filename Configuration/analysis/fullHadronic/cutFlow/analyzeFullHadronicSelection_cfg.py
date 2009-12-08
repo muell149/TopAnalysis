@@ -107,6 +107,8 @@ process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
 process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
 ## muon kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
+## event shape analyzer
+process.load("TopAnalysis.TopAnalyzer.EventShapes_cfi")
 ## high level trigger filter
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
 ## semileptonic selection
@@ -166,6 +168,13 @@ process.monitorJetsQuality = cms.Sequence(process.tightBottomJetQuality        +
                                           process.tightMatchedLightQJetQuality
                                           )
 
+## collect event shape analyzers
+process.eventShapes = process.analyzeEventShapes.clone()
+
+## monitor sequence for event shape analyzers
+process.monitorEventShapes = cms.Sequence(process.eventShapes
+                                          )
+
 ## ---
 ##    run the final sequence
 ## ---
@@ -178,6 +187,7 @@ process.p1 = cms.Path(## do the gen evetn selection
                       ## do the monitoring
                       process.monitorJetsQuality    *
                       process.monitorJetsKinematics *
+                      process.monitorEventShapes    * 
                       ## do the event selection
                       process.fullHadronicEvents
                       )
