@@ -19,7 +19,7 @@
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
 /**
-   \class   DimuonAnalyzer DimuonAnalyzer.h "TopAnalysis/TopAnalyzer/interface/DimuonAnalyzer.h"
+   \class   DimuonAnalyzer DimuonAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/DimuonAnalyzer.h"
 
    \brief   EDAnalyzer for the dimuon mass and some isolation plots
 

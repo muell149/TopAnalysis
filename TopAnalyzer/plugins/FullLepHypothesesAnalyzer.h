@@ -14,7 +14,7 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtFullLeptonicEvent.h"
 
 /**
-   \class   FullLepHypothesesAnalyzer FullLepHypothesesAnalyzer.h "TopAnalysis/TopAnalyzer/interface/FullLepHypothesesAnalyzer.h"
+   \class   FullLepHypothesesAnalyzer FullLepHypothesesAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/FullLepHypothesesAnalyzer.h"
 
    \brief   EDAnalyzer for FullLeptonicEvent hypotheses with electrons and muons
 
