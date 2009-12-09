@@ -225,12 +225,13 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     /** 
 	Correlation Plots
     **/
-    // correlation between jet hypothesis and jet index
-    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   ) );
-    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar) );
-    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::HadB     ) );
-    corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LepB     ) );
-
+    if( tops.isHypoValid("kGenMatch") ){
+      // correlation between jet hypothesis and jet index
+      corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   ) );
+      corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar) );
+      corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::HadB     ) );
+      corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LepB     ) );
+    }
     // correlation between jet hypothesis and jet index
     corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LightQ   ) );
     corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LightQBar) );
