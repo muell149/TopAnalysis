@@ -55,31 +55,31 @@ EventShapes::book(edm::Service<TFileService>& fs)
   /// the return value is 1 for spherical events and 0 for events linear in r-phi. This function 
   /// needs the number of steps to determine how fine the granularity of the algorithm in phi 
   /// should be
-  hists_["isotropy"] = fs->make<TH1F>( "isotropy" , "isotropy" ,  100 , -5. ,  5. );
+  hists_["isotropy"] = fs->make<TH1F>( "isotropy" , "isotropy" ,  100 , 0. ,  1. );
 
   /// the return value is 1 for spherical and 0 linear events in r-phi. This function needs the 
   /// number of steps to determine how fine the granularity of the algorithm in phi should be
-  hists_["circularity"] = fs->make<TH1F>( "circularity" , "circularity" ,  100 , -5. ,  5. );
+  hists_["circularity"] = fs->make<TH1F>( "circularity" , "circularity" ,  100 , 0. ,  1. );
 
   /// 1.5*(q1+q2) where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return values are 1 for spherical, 3/4 for 
   /// plane and 0 for linear events
-  hists_["sphericity"] = fs->make<TH1F>( "sphericity" , "sphericity" ,  100 , -5. ,  5. );
+  hists_["sphericity"] = fs->make<TH1F>( "sphericity" , "sphericity" ,  100 , 0. ,  1. );
 
   /// 1.5*q1 where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return values are 0.5 for spherical and 0 
   /// for plane and linear events
-  hists_["aplanarity"] = fs->make<TH1F>( "aplanarity" , "aplanarity" ,  100 , -5. ,  5. );
+  hists_["aplanarity"] = fs->make<TH1F>( "aplanarity" , "aplanarity" ,  100 , 0. ,  1. );
 
   /// 3.*(q1*q2+q1*q3+q2*q3) where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return value is between 0 and 1 
   /// and measures the 3-jet structure of the event (C vanishes for a "perfect" 2-jet event)
-  hists_["C"]  = fs->make<TH1F>( "C" , "C",  100 , -5. ,  5. );
+  hists_["C"]  = fs->make<TH1F>( "C" , "C",  100 , 0. ,  1. );
 
   /// 27.*(q1*q2*q3) where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return value is between 0 and 1 
   /// and measures the 4-jet structure of the event (D vanishes for a planar event)
-  hists_["D"] = fs->make<TH1F>( "D" , "D" ,  100 , -5. ,  5. );
+  hists_["D"] = fs->make<TH1F>( "D" , "D" ,  100 , 0. ,  1. );
 
 }
 
