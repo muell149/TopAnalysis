@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 # test cfg file for patTuple production
 #-------------------------------------------------
 
-process = cms.Process("PatTuple")
+process = cms.Process("PAT")
 
 #-------------------------------------------------
 # process configuration
@@ -23,12 +23,12 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     ## files from Run 123801
-    #'/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/10F05FA3-41E4-DE11-89C9-0030487D1BCC.root',
-    #'/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/2E275957-49E4-DE11-B903-003048D37538.root',
-    #'/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/30FECAA5-3CE4-DE11-9648-001617E30D52.root',
-    #'/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/40953857-49E4-DE11-8C7B-000423D94990.root', ##!!!
-    #'/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/AEC3C258-49E4-DE11-8512-003048D37514.root',
-    #'/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/EAB34A72-3FE4-DE11-848C-001617C3B778.root'
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/10F05FA3-41E4-DE11-89C9-0030487D1BCC.root',
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/2E275957-49E4-DE11-B903-003048D37538.root',
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/30FECAA5-3CE4-DE11-9648-001617E30D52.root',
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/40953857-49E4-DE11-8C7B-000423D94990.root', ##!!!
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/AEC3C258-49E4-DE11-8512-003048D37514.root',
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/EAB34A72-3FE4-DE11-848C-001617C3B778.root'
     )
 )
 #process.source.firstRun = cms.untracked.uint32(123615)
@@ -41,7 +41,7 @@ process.maxEvents = cms.untracked.PSet(
 
 ## configure process options
 process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(False)
+    wantSummary = cms.untracked.bool(True)
 )
 
 ## configure geometry & conditions
@@ -59,7 +59,7 @@ process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
 process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
 
 ## select the "physics bits"
-process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('40 OR 41')
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41)')
 
 #-------------------------------------------------
 # pat configuration
@@ -147,9 +147,9 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_Run123615.root')
+    fileName = cms.untracked.string('patTuple_Run123909.root')
 )
-# save pat output
+## save pat output
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
 process.out.outputCommands += patExtraAodEventContent
@@ -157,8 +157,9 @@ process.out.outputCommands += patEventContentTriggerMatch
 process.out.outputCommands += patEventContentNoLayer1Cleaning
 process.out.outputCommands += ["keep *_selectedLayer1Jets*_*_*",
                                "keep *_layer1METs*_*_*"]
+## and products from our UserCode
 process.out.outputCommands += ["keep *_eventWeight_*_*"]
-# drop stuff which is not needed
-process.out.outputCommands += ["drop *_towerMaker_*_*"]
+## drop stuff which is not needed
+#process.out.outputCommands += ["drop *_towerMaker_*_*"]
 
 process.outpath = cms.EndPath(process.out)
