@@ -15,20 +15,19 @@ process = cms.Process("KinFit")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-#process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    'file:/afs/naf.desy.de/user/r/rwolf/data/samples/ttbar09/patTuple_selected_all_0_ttbarx09.root'
-    ## "file:patTuple.root"
+    '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -76,12 +75,24 @@ else:
 ## produce top reconstructed event
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
 ## process.ttSemiLepJetPartonMatch.verbosity = 1
-process.kinFitTtSemiLepEventHypothesis.leps = "tightMuons"
-process.kinFitTtSemiLepEventHypothesis.jets = "tightLeadingJets"
-process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
-process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 
+## choose which hypotheses to produce
+from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
+addTtSemiLepHypotheses(process,
+                       ["kKinFit"]
+                       )
+#removeTtSemiLepHypGenMatch(process)
+
+## make collections known to the process
+process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
+process.p0 = cms.Path(process.semiLeptonicSelection)
+
+## change some attribute for all hypotheses
+setForAllTtSemiLepHypotheses(process, "leps", "tightMuons")
+setForAllTtSemiLepHypotheses(process, "jets", "tightLeadingJets")
+setForAllTtSemiLepHypotheses(process, "maxNJets", 5)
+setForAllTtSemiLepHypotheses(process, "maxNComb", 3)
 
 ## ---
 ##    configure the analyzer
