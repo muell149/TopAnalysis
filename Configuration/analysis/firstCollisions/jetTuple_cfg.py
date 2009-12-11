@@ -22,27 +22,32 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_1.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_10.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_11.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_12.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_13.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_14.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_15.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_16.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_17.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_18.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_19.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_2.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_20.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_21.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_3.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_4.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_5.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_6.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_7.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_8.root',
-    '/store/user/snaumann/firstCollisions/patTuple_Run123615_9.root'
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_1.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_10.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_11.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_12.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_13.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_14.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_15.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_16.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_17.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_18.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_19.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_2.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_20.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_21.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_22.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_23.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_24.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_25.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_26.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_3.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_4.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_5.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_6.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_7.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_8.root',
+    '/store/user/snaumann/firstCollisions/patTuple_Run123909_9.root'
     )
 )
 
@@ -64,9 +69,9 @@ process.options = cms.untracked.PSet(
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 process.goodJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
                                             cut =
-                                            'abs(eta) < 2.4 & pt > 20. &'
-                                            '0.05 < emEnergyFraction   &'
-                                            '0.95 > emEnergyFraction'
+                                            'abs(eta) < 5 & pt > 20. &'
+                                            '0.01 < emEnergyFraction &'
+                                            '0.99 > emEnergyFraction'
                                             )
 
 ## select events with good jets
@@ -95,7 +100,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('keep *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('jetTuple_Run123615.root')
+    fileName = cms.untracked.string('jetTuple_Run123909.root')
 )
 
 process.outpath = cms.EndPath(process.out)
