@@ -84,6 +84,10 @@ DEFINE_FWK_MODULE(HypothesisKinFitMETAnalyzer);
 #include "TopAnalysis/TopAnalyzer/plugins/FullHadHypothesisAnalyzer.h"
 DEFINE_FWK_MODULE(FullHadHypothesisAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/KinFitQuality.h"
+typedef DoubleObjectAnalyzer<TtFullHadronicEvent, edm::View<pat::Jet>, KinFitQuality> KinFitQualityAnalyzer;
+DEFINE_FWK_MODULE(KinFitQualityAnalyzer);
+
 
 /**
     Define modules needed for the analysis of the top quarks
