@@ -46,7 +46,7 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
   int objectIndex(const TtSemiLeptonicEvent& tops, const std::string& hypo, const int& index) const { return tops.jetLeptonCombination(hypo)[index]; };
   /// helper function to recieve the difference of object indices in the reco 
   /// collections  between the genMatch and kinFit hypotheses
-  int delObjectIndex(const TtSemiLeptonicEvent& tops, const int& index) const { return objectIndex(tops, "kGenMatch", index)-objectIndex(tops, "kKinFit", index); };
+  int delObjectIndex(const TtSemiLeptonicEvent& tops, const int& index);
 
  private:
   /// histogram container for correlation plots

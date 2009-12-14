@@ -137,6 +137,18 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
   corrs_["mapKinFit_"      ] = fs->make<TH2F>( "mapKinFit_"  ,  "mapKinFit_"  ,   4,  0.,  4.,  4,  0.,  4.);
 }
 
+/// calculating difference of object indices in the reco collections between the genMatch and kinFit hypotheses
+int
+HypothesisKinFit::delObjectIndex(const TtSemiLeptonicEvent& tops, const int& index)
+{
+  if(index==TtSemiLepEvtPartons::LightQ)
+     return std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar))) < std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ))) ? objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ) : objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar);
+  else if(index==TtSemiLepEvtPartons::LightQBar)
+    return std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar))) < std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ))) ? objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar) : objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ);
+  else
+    return objectIndex(tops, "kGenMatch", index)-objectIndex(tops, "kKinFit", index);
+}
+
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
 void
 HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
@@ -164,8 +176,9 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       // difference of lepBQuark index between genMatch and kinFit 
       hists_.find("lepBQuark" )->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LepB), weight);
       // smallest difference of the two lightQuark indices between genMatch and kinFit 
-      // (taking into accont that the two indices can be switched)
-      abs(delObjectIndex(tops, TtSemiLepEvtPartons::LightQ)) < abs(delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar)) ? hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQ   ), weight ) : hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar), weight);
+      // (taking into account that the two indices can be switched)
+      hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQ   ), weight);
+      hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar), weight);
     }
 
     /** 
