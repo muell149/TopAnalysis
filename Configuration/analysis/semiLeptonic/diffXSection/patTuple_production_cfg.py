@@ -4,13 +4,19 @@ from PhysicsTools.PatAlgos.patTemplate_cfg import *
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 from PhysicsTools.PatAlgos.tools.coreTools import *
-## Restrict Output to AOD (no JetID)
-restrictInputToAOD(process, ['All',])
 ## Remove Photons and Taus from the Event
 removeSpecificPATObjects(process, ['Photons','Taus'])
 
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
+## Run 3_3_x version on 3_1_x-samples
+run33xOn31xMC(process,
+               jetSrc = cms.InputTag("antikt5CaloJets"),
+               jetIdTag = "antikt5"
+              )
+
 ## Add antikt and siscone jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
+addJetID(process, "sisCone5CaloJets", "sc5")
 addJetCollection(process,cms.InputTag('sisCone5CaloJets'),
                  'SC5',
                  doJTA        = True,
@@ -19,18 +25,23 @@ addJetCollection(process,cms.InputTag('sisCone5CaloJets'),
                  doType1MET   = True,
                  doL1Cleaning = False,                 
                  doL1Counters = False,
-                 genJetCollection=cms.InputTag("sisCone5GenJets")
+                 genJetCollection=cms.InputTag("sisCone5GenJets"),
+                 doJetID      = True,
+                 jetIdLabel   = "sc5"                 
                  )
 
-addJetCollection(process,cms.InputTag('antikt5CaloJets'),
-                 'AK5',
+addJetID(process, "iterativeCone5CaloJets", "ic5")
+addJetCollection(process,cms.InputTag('iterativeCone5CaloJets'),
+                 'IC5',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5','Calo'),
+                 jetCorrLabel = ('IC5', 'Calo'),
                  doType1MET   = True,
                  doL1Cleaning = False,                 
                  doL1Counters = False,
-                 genJetCollection=cms.InputTag("antikt5GenJets")
+                 genJetCollection=cms.InputTag("iterativeCone5GenJets"),
+                 doJetID      = True,
+                 jetIdLabel   = "ic5"
                  )
 
 ## Check the Event Content
@@ -42,17 +53,14 @@ process.p = cms.Path(
 
 ## Special Replacements
 
-## Hadron Level Corrections for sisCone5
+## sample type used for flavour dependend jet corrections
 process.jetCorrFactors.sampleType = 'ttbar'
-process.jetCorrFactors.L5Flavor = 'L5Flavor_IC5'
-process.jetCorrFactors.L7Parton = 'L7Parton_SC5'
-## Parton Level Corrections for antikt5
-process.jetCorrFactorsAK5.sampleType = 'ttbar'
-process.jetCorrFactorsAK5.L5Flavor = 'L5Flavor_IC5'
-process.jetCorrFactorsAK5.L7Parton = 'L7Parton_SC5'
+process.jetCorrFactorsIC5.sampleType = 'ttbar'
+process.jetCorrFactorsSC5.sampleType = 'ttbar'
 
 ## Define Event Contet
 from PhysicsTools.PatAlgos.patEventContent_cff import *
+process.out.fileName = cms.untracked.string('PATtuple.root')
 process.out.outputCommands = patExtraAodEventContent
 process.out.outputCommands+= patEventContentNoLayer1Cleaning
 process.out.outputCommands+= ['keep *_selectedLayer1Jets*_*_*', 'keep *_layer1METs*_*_*']
@@ -62,7 +70,7 @@ process.out.outputCommands+= ['keep *_selectedLayer1Jets*_*_*', 'keep *_layer1ME
 process.maxEvents.input    = 100
 
 ## Input Files for Testing
-process.source.fileNames   = ['/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0024/068F7867-2C88-DE11-B3C2-001F29C9A5AE.root']   
+process.source.fileNames   = ['/store/mc/Summer09/ZmumuJet_Pt50to80/GEN-SIM-RECO/MC_31X_V3-v1/0034/A02B9E45-F18D-DE11-ADC7-00E0812DB027.root']
 
 ## Options and Output Report
 process.options.wantSummary = False
