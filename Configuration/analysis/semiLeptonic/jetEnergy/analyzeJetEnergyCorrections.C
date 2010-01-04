@@ -174,6 +174,19 @@ void hatch_bin(TH1 *thisHisto, Int_t bin, TString option = "", Double_t ymax_fac
 int markerColor[8] = { 2,  6,  6,  4,  6,  1,  6,  8};
 int markerStyle[8] = {22, 24, 24, 23, 24, 20, 24, 29};
 
+unsigned int getNumberOfHistosOnPad()
+{
+  TIter iter(gPad->GetListOfPrimitives());
+  TObject *obj;
+  unsigned int n = 0;
+  while( (obj = (TObject*)iter.Next()) ) {
+    if(obj->InheritsFrom("TH1"))
+      n++;
+  }
+  return n;
+}
+
+
 void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TString yTitle, const TString hTitle,
 		  const bool logX=true, const double yMin = 0.4, const double yMax = 1.6, const double yLine = 1.0)
 {
@@ -194,7 +207,7 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
   setAxisStyle(histFit);
 
   TString drawOption = "p";
-  if(i > 0) drawOption += " same";
+  if(getNumberOfHistosOnPad() > 0) drawOption += " same";
   
   histFit->DrawCopy(drawOption);
   drawHLine(histFit, yLine);
@@ -211,7 +224,7 @@ TString title(const TString algo, const TString flavor = "", const TString eta =
   TString title = "";
   if(flavor != "") title += "flavor: " + flavor + ", ";
   title += "algo: " + algo;
-  if(eta != "") title += ", #eta < " + eta;
+  if(eta != "") title += ", |#eta| < " + eta;
   return title;
 }
 
@@ -426,16 +439,12 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   TCanvas* canvasMassT_2dim = new TCanvas("canvasMassT_2dim", "top mass (2 dim.)"             , 900, 900);
   TCanvas* canvasRespL      = new TCanvas("canvasRespL"     , "response for light jets"       , 900, 900);
   TCanvas* canvasRespB      = new TCanvas("canvasRespB"     , "response for b jets"           , 900, 900);
-  TCanvas* canvasRespL_zoom = new TCanvas("canvasRespL_zoom", "response for light jets (zoom)", 900, 900);
-  TCanvas* canvasRespB_zoom = new TCanvas("canvasRespB_zoom", "response for b jets (zoom)"    , 900, 900);
   canvasMassW     ->Divide(3,3);
   canvasMassT     ->Divide(3,3);
   canvasMassW_2dim->Divide(3,3);
   canvasMassT_2dim->Divide(3,3);
   canvasRespL     ->Divide(3,3);
   canvasRespB     ->Divide(3,3);
-  canvasRespL_zoom->Divide(3,3);
-  canvasRespB_zoom->Divide(3,3);
 
   for(unsigned int i = 0; i < 8; i++) {
     massW[i]->SetTitle("JEC level: " + levels[i]);
@@ -606,102 +615,109 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     // response light jets
 
-    canvasRespL->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
+    if(i!=7) {
+
+      canvasRespL->cd(1);
+      drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
     
-    canvasRespL->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"));
+      canvasRespL->cd(2);
+      drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"));
 
-    canvasRespL->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"), false);
+      canvasRespL->cd(3);
+      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"), false);
 
-    canvasRespL->cd(4);
-    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"));
+    }
+    
+    if(i!=7) {
 
-    canvasRespL->cd(5);
-    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","1.3"));
+      canvasRespL->cd(4);
+      drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
+		   true, yMin_zoom, yMax_zoom);
 
-    canvasRespL->cd(6);
-    drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"), false);
+      canvasRespL->cd(5);
+      drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"),
+		   true, yMin_zoom, yMax_zoom);
 
-    // response light jets (zoom)
+      canvasRespL->cd(6);
+      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
+		   false, yMin_zoom, yMax_zoom);
 
-    canvasRespL_zoom->cd(1);
-    drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
-		 true, yMin_zoom, yMax_zoom);
+    }
 
-    canvasRespL_zoom->cd(2);
-    drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"),
-		 true, yMin_zoom, yMax_zoom);
+    if(i==5 || i==7) {
 
-    canvasRespL_zoom->cd(3);
-    drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
-		 false, yMin_zoom, yMax_zoom);
+      canvasRespL->cd(7);
+      drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
+		   true, yMin_zoom, yMax_zoom);
 
-    canvasRespL_zoom->cd(4);
-    drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
-		 true, yMin_zoom, yMax_zoom);
+      canvasRespL->cd(8);
+      drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
+		   title(algo,"udsc","1.3"), true, yMin_zoom, yMax_zoom);
 
-    canvasRespL_zoom->cd(5);
-    drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","1.3"),
-		 true, yMin_zoom, yMax_zoom);
+      canvasRespL->cd(9);
+      drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
+		   false, yMin_zoom, yMax_zoom);
 
-    canvasRespL_zoom->cd(6);
-    drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
-		 false, yMin_zoom, yMax_zoom);
+    }
 
     // response b jets
 
-    canvasRespB->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
+    if(i!=7) {
+
+      canvasRespB->cd(1);
+      drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
     
-    canvasRespB->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"));
+      canvasRespB->cd(2);
+      drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"));
 
-    canvasRespB->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"), false);
+      canvasRespB->cd(3);
+      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"), false);
 
-    canvasRespB->cd(4);
-    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"));
+    }
 
-    canvasRespB->cd(5);
-    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"));
+    if(i!=7) {
 
-    canvasRespB->cd(6);
-    drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"), false);
+      canvasRespB->cd(4);
+      drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
+		   true, yMin_zoom, yMax_zoom);
 
-    // response b jets (zoom)
+      canvasRespB->cd(5);
+      drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"),
+		   true, yMin_zoom, yMax_zoom);
 
-    canvasRespB_zoom->cd(1);
-    drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
-		 true, yMin_zoom, yMax_zoom);
+      canvasRespB->cd(6);
+      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
+		   false, yMin_zoom, yMax_zoom);
 
-    canvasRespB_zoom->cd(2);
-    drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"),
-		 true, yMin_zoom, yMax_zoom);
+    }
 
-    canvasRespB_zoom->cd(3);
-    drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
-		 false, yMin_zoom, yMax_zoom);
+    if(i==5 || i==7) {
+      
+      canvasRespB->cd(7);
+      drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
+		   true, yMin_zoom, yMax_zoom);
 
-    canvasRespB_zoom->cd(4);
-    drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
-		 true, yMin_zoom, yMax_zoom);
+      canvasRespB->cd(8);
+      drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"),
+		   true, yMin_zoom, yMax_zoom);
 
-    canvasRespB_zoom->cd(5);
-    drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"),
-		 true, yMin_zoom, yMax_zoom);
+      canvasRespB->cd(9);
+      drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
+		   false, yMin_zoom, yMax_zoom);
 
-    canvasRespB_zoom->cd(6);
-    drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
-		 false, yMin_zoom, yMax_zoom);
+    }
 
   }
 
   // legend
   
-  TLegend* legend = new TLegend(0.75, 0.67, 0.9, 0.9);
-  legend->SetFillColor(0);
+  TLegend* legend_035 = new TLegend(0.75, 0.66, 0.9, 0.9);
+  legend_035->SetFillColor(0);
+
+  TLegend* legend_35 = (TLegend*) legend_035->Clone();
+  legend_35->SetY1(0.74);
+
+  TLegend* legend_57 = (TLegend*) legend_35->Clone();
 
   TH1F* dummyHist[8];
   
@@ -714,7 +730,14 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     dummyHist[i]->SetMarkerColor(markerColor[i]);
     dummyHist[i]->SetMarkerStyle(markerStyle[i]);
 
-    legend->AddEntry(dummyHist[i], levels[i]);
+    if(i==0 || i==3 || i==5)
+      legend_035->AddEntry(dummyHist[i], levels[i]);
+
+    if(i==3 || i==5)
+      legend_35->AddEntry(dummyHist[i], levels[i]);
+
+    if(i==5 || i==7)
+      legend_57->AddEntry(dummyHist[i], levels[i]);
 
   }
 
@@ -726,37 +749,39 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     if(i<4 || i==6) {
       canvasMassW_2dim->cd(i);
-      legend->Draw();
+      legend_035->Draw();
       gPad->Print(baseName+"massW_2dim" + suffix);
     }
 
     canvasMassT_2dim->cd(i);
-    legend->Draw();
+    legend_035->Draw();
     gPad->Print(baseName+"massT_2dim" + suffix);
 
   }
 
-  for(unsigned int i = 1; i < 7; i++) {
+  for(unsigned int i = 1; i <= 9; i++) {
 
     TString suffix = "_";
     suffix += i;
     suffix += ".eps";
 
     canvasRespL->cd(i);
-    legend->Draw();
+    if(i <= 3)
+      legend_035->Draw();
+    else if(i <= 6)
+      legend_35->Draw();
+    else
+      legend_57->Draw();
     gPad->Print(baseName+"responseLight" + suffix);
 
-    canvasRespL_zoom->cd(i);
-    legend->Draw();
-    gPad->Print(baseName+"responseLight_zoom" + suffix);
-
     canvasRespB->cd(i);
-    legend->Draw();
+    if(i <= 3)
+      legend_035->Draw();
+    else if(i <= 6)
+      legend_35->Draw();
+    else
+      legend_57->Draw();
     gPad->Print(baseName+"responseB" + suffix);
-
-    canvasRespB_zoom->cd(i);
-    legend->Draw();
-    gPad->Print(baseName+"responseB_zoom" + suffix);
 
   }
 
@@ -769,9 +794,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   canvasMassT     ->Print(psName);
   canvasMassT_2dim->Print(psName);
   canvasRespL     ->Print(psName);
-  canvasRespL_zoom->Print(psName);
-  canvasRespB     ->Print(psName);
-  canvasRespB_zoom->Print(psName + ")");
+  canvasRespB     ->Print(psName + ")");
 
   // clean-up
 
@@ -780,9 +803,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   delete canvasMassT;
   delete canvasMassT_2dim;
   delete canvasRespL;
-  delete canvasRespL_zoom;
   delete canvasRespB;
-  delete canvasRespB_zoom;
 
   return 0;
 }
