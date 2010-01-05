@@ -219,12 +219,11 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
 
 }
 
-TString title(const TString algo, const TString flavor = "", const TString eta = "")
+TString title(const TString algo, const TString flavor = "", const TString cut = "")
 {
-  TString title = "";
-  if(flavor != "") title += "flavor: " + flavor + ", ";
-  title += "algo: " + algo;
-  if(eta != "") title += ", |#eta| < " + eta;
+  TString title = algo;
+  if(flavor != "") title += ", flavor: " + flavor;
+  if(cut    != "") title += ", " + cut;
   return title;
 }
 
@@ -269,7 +268,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   gStyle->SetTitleBorderSize(0);
   gStyle->SetTitleFontSize(.05);
   gStyle->SetTitleX(.4);
-  gStyle->SetTitleY(.97);
+  gStyle->SetTitleY(.98);
 
   TH1F* massW[8];
   TH1F* massT[8];
@@ -621,10 +620,11 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
       drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
     
       canvasRespL->cd(2);
-      drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"));
+      drawResponse(respLGenJetPtGenJet_barrel[i], i,
+		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","|#eta| < 1.3"));
 
       canvasRespL->cd(3);
-      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"), false);
+      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","p_{T} > 30 GeV"), false);
 
     }
     
@@ -635,11 +635,12 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 		   true, yMin_zoom, yMax_zoom);
 
       canvasRespL->cd(5);
-      drawResponse(respLGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","1.3"),
+      drawResponse(respLGenJetPtGenJet_barrel[i], i,
+		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","|#eta| < 1.3"),
 		   true, yMin_zoom, yMax_zoom);
 
       canvasRespL->cd(6);
-      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
+      drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
     }
@@ -652,10 +653,10 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
       canvasRespL->cd(8);
       drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
-		   title(algo,"udsc","1.3"), true, yMin_zoom, yMax_zoom);
+		   title(algo,"udsc","|#eta| < 1.3"), true, yMin_zoom, yMax_zoom);
 
       canvasRespL->cd(9);
-      drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
+      drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
     }
@@ -668,10 +669,11 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
       drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
     
       canvasRespB->cd(2);
-      drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"));
+      drawResponse(respBGenJetPtGenJet_barrel[i], i,
+		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","|#eta| < 1.3"));
 
       canvasRespB->cd(3);
-      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"), false);
+      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b","p_{T} > 30 GeV"), false);
 
     }
 
@@ -682,11 +684,12 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 		   true, yMin_zoom, yMax_zoom);
 
       canvasRespB->cd(5);
-      drawResponse(respBGenJetPtGenJet_barrel[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","1.3"),
+      drawResponse(respBGenJetPtGenJet_barrel[i], i,
+		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","|#eta| < 1.3"),
 		   true, yMin_zoom, yMax_zoom);
 
       canvasRespB->cd(6);
-      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
+      drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
     }
@@ -698,11 +701,12 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 		   true, yMin_zoom, yMax_zoom);
 
       canvasRespB->cd(8);
-      drawResponse(respBPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","1.3"),
+      drawResponse(respBPartonPtParton_barrel[i], i,
+		   "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","|#eta| < 1.3"),
 		   true, yMin_zoom, yMax_zoom);
 
       canvasRespB->cd(9);
-      drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
+      drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
     }
