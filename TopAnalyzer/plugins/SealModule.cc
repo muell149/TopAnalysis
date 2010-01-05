@@ -47,6 +47,18 @@ DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
 typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, EventShapes> EventShapeAnalyzer;
 DEFINE_FWK_MODULE(EventShapeAnalyzer);
 
+/**
+    Define modules needed for the analysis of fully hadronic events
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/FullHadSpecial.h"
+typedef SingleObjectAnalyzer<edm::View<pat::Jet>, FullHadSpecial> FullHadSpecialAnalyzer;
+DEFINE_FWK_MODULE(FullHadSpecialAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/FullHadTopReco.h"
+typedef DoubleObjectAnalyzer<TtFullHadronicEvent, edm::View<pat::Jet>, FullHadTopReco> FullHadTopRecoAnalyzer;
+DEFINE_FWK_MODULE(FullHadTopRecoAnalyzer);
+
 
 /**
     Define modules needed for the analysis of muon jet relations
