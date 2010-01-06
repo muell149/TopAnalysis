@@ -12,7 +12,7 @@ analyzeMuonKinematics = cms.EDAnalyzer("MuonKinematicsAnalyzer",
       ## fill histograms for 1.,2.,3.,... leading
       ## counting starts with 0=leading Muon! 
       ## muon? -1 corresponds to 'all'
-      index = cms.int32(-1)
+      index = cms.int32(0)
     )                                       
 )
 
