@@ -34,7 +34,7 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
   edm::Handle<edm::View<reco::Candidate> > probes; 
   evt.getByLabel(probes_, probes);
   
-  // recieve the match association to the generator particles
+  // receive the match association to the selected objects
   edm::Handle<edm::Association<edm::View<reco::Candidate> > > matches; 
   evt.getByLabel("testMap", matches);
   
