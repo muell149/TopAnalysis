@@ -14,7 +14,7 @@ void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
-void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "loose" // "track" // "good" // "combined" // "unselected"
+void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose" // "track" // "good" // "combined" // "unselected" // ...
 {
   // ---
   //    set root style 
@@ -44,16 +44,16 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   lumiweight.push_back(1.0);
   lumiweight.push_back(1.0);
 
-  // ttbar (all, bg, sg - coming from the same sample)
-  //  lumiweight.push_back(0.0156);
-  //  lumiweight.push_back(0.0156);
-  //  lumiweight.push_back(0.0156);
-  // QCD
-  //  lumiweight.push_back(1.1161);
-  // Wmunu
-  //  lumiweight.push_back(0.2212);
-  // Zmumu
-  //  lumiweight.push_back(0.0458);
+  // for current 10 TeV Pythia sample: ttbar (all, bg, sg - coming from the same sample)
+//    lumiweight.push_back(0.039);
+//    lumiweight.push_back(0.039);
+//    lumiweight.push_back(0.039);
+//    //  QCD
+//    lumiweight.push_back(1.1161);
+//    // Wmunu
+//    lumiweight.push_back(0.2212);
+//    //  Zmumu
+//    lumiweight.push_back(0.0458);
 
 
   // ---
@@ -152,11 +152,6 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   histogramStyle(*phi_[kWmunu]     , kWmunu     );
   histogramStyle(*phi_[kZmumu]     , kZmumu     );
 
-   // ---
-  //    do the printing for n_
-  // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
-
   // create a legend (in upper right corner)
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg0->SetFillStyle(0);
@@ -183,7 +178,7 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   //  leg1->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "FL" );
   leg1->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
 
-  // create an info legend containig the used mu-cut
+  // create an info legend containig the used mu-collection
   TLegend *leg2 = new TLegend(0.15, 1.15, 0.40, 0.80);
   leg2->SetFillStyle(0);
   leg2->SetBorderSize(0);
@@ -207,6 +202,11 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   leg4->AddEntry( pt_  [kZmumu     ] , "Zmumu"             , "PL" );
   //  leg4->AddEntry( pt_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
 
+  // ---
+  //    do the printing for n_
+  // ---
+  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
+
   // draw canvas
   canv0->cd(0);
   canv0->SetLogy(1);
@@ -214,7 +214,7 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
 
   // Set axis style for different collections
   if(whichMuons=="unselected"){
-  axesStyle(*n_  [kSignal], "N_{#mu}: leading #mu", "events");
+  axesStyle(*n_  [kSignal], "N_{#mu}: hltMu9 #mu", "events");
     n_[kSignal]->GetXaxis()->SetTitleOffset(1.1);
   }
   if(whichMuons=="combined"){
@@ -256,7 +256,7 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
 
   n_  [kSignal       ]->SetNdivisions(10);
   n_  [kSignal       ]->SetMinimum(1.);
-  n_  [kSignal       ]->SetMaximum( 25* n_  [kBoson]->GetMaximum() );
+  n_  [kSignal       ]->SetMaximum( 250* n_  [kBoson]->GetMaximum() );
   //  n_  [kAll       ]->Draw();
   n_  [kSignal    ]->Draw();
   n_  [kBackground]->Draw("same");
@@ -273,6 +273,7 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
   // ---
 
   TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
+
   // draw canvas
   canv1->cd(0);
   canv1->SetLogy(1);
@@ -303,11 +304,12 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
 
   // draw canvas
   canv2->cd(0);
+  canv2->SetLogy(1);
   //  canv2->SetLogy(1);
   canv2->SetTitle("#eta " +whichMuons+" #mu");
   axesStyle(*eta_[kSignal], "#eta( #mu )", "events");
   eta_[kSignal       ]->SetMinimum( 1 );
-  eta_[kSignal       ]->SetMaximum( 1.8* eta_[kQCD]->GetMaximum() ); //180.0 kBoson
+  eta_[kSignal       ]->SetMaximum( 1800* eta_[kQCD]->GetMaximum() ); //180.0 kBoson
   //  eta_[kAll       ]->Draw();
   eta_[kSignal    ]->Draw();
   eta_[kBackground]->Draw("same");
@@ -326,15 +328,17 @@ void analyzeMuonKinematics(TString whichMuons = "unselected")  //  "tight" // "l
 
   // draw canvas
   canv3->cd(0);
-  axesStyle(*phi_[kAll], "#phi( #mu )", "events");
-  phi_[kSignal       ]->SetMinimum( 0 );
-  phi_[kSignal       ]->SetMaximum( 1.2* phi_[kWmunu]->GetMaximum() );
+  canv3->SetLogy(1);
+  axesStyle(*phi_[kSignal], "#phi( #mu )", "events");
+  phi_[kSignal       ]->SetMinimum( 1 );
+  phi_[kSignal       ]->SetMaximum( 50.0* phi_[kBoson]->GetMaximum() );
   //  phi_[kAll       ]->Draw();
   phi_[kSignal    ]->Draw();
   phi_[kBackground]->Draw("same");
   phi_[kQCD       ]->Draw("same");
-  phi_[kWmunu     ]->Draw("same");
-  phi_[kZmumu     ]->Draw("same");
+  //  phi_[kWmunu     ]->Draw("same");
+  //  phi_[kZmumu     ]->Draw("same");
+  phi_[kBoson       ]->Draw("same");
   //phi_[kAll       ]->Draw("same");
   leg1->Draw("same");
   leg2->Draw("same");
@@ -351,7 +355,7 @@ canv3->Print("./analyzeMuonCutflow/Phi"+whichMuons+"Muons.png"         );
 canv0->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps(");
 canv1->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps" );
 canv2->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)");
-canv3->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)"       );
+//canv3->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)");
 
 }
 
