@@ -38,6 +38,17 @@ DEFINE_FWK_MODULE(JetResolutionAnalyzer);
 #include "TopAnalysis/TopAnalyzer/plugins/JetEnergyCorrectionsAnalyzer.h"
 DEFINE_FWK_MODULE(JetEnergyCorrectionsAnalyzer);
 
+/**
+    Define modules needed for the analysis of the electron
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/ElectronQuality.h"
+typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronQuality> ElectronQualityAnalyzer;
+DEFINE_FWK_MODULE(ElectronQualityAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/ElectronKinematics.h"
+typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronKinematics> ElectronKinematicsAnalyzer;
+DEFINE_FWK_MODULE(ElectronKinematicsAnalyzer);
 
 /**
     Define modules needed for the analysis of event shapes
