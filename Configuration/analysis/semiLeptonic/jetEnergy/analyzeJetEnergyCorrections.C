@@ -512,8 +512,8 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   massW[0]->SetMaximum( 1.5*massW[0]->GetMaximum() );
   massT[0]->SetMaximum( 1.5*massT[0]->GetMaximum() );
-  massW[0]->SetTitle("algo: " + algo);
-  massT[0]->SetTitle("algo: " + algo);
+  massW[0]->SetTitle("       " + algo);
+  massT[0]->SetTitle("       " + algo);
   massW[0]->SetStats(kFALSE);
   massT[0]->SetStats(kFALSE);
   setAxisStyle(massW[0]);
@@ -559,48 +559,50 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   for(unsigned int i = 0; i < 8; i++) {
 
-    if(i==1 || i==2 || i==4 || i==6)
+    if(!(i==0 || i==3 || i==7))
       continue;
+
+    TString space = "                       ";
 
     // W mass
     
     canvasMassW_2dim->cd(1);
-    drawResponse(massW_Pt1[i], i, "p_{T,j} (rec) [GeV]", "m_{jj} [GeV]", title(algo), true, 30., 130., 80.4);
+    drawResponse(massW_Pt1[i], i, "p_{T,j} (rec) [GeV]", "m_{jj} [GeV]", space+algo, true, 30., 130., 80.4);
 
     canvasMassW_2dim->cd(2);
-    drawResponse(massW_Eta1[i], i, "#eta_{j} (rec)", "m_{jj} [GeV]", title(algo), false, 30., 130., 80.4);
+    drawResponse(massW_Eta1[i], i, "#eta_{j} (rec)", "m_{jj} [GeV]", space+algo, false, 30., 130., 80.4);
 
     canvasMassW_2dim->cd(3);
-    drawResponse(massW_PtW[i], i, "p_{T,jj} (rec) [GeV]", "m_{jj} [GeV]", title(algo), true, 30., 130., 80.4);
+    drawResponse(massW_PtW[i], i, "p_{T,jj} (rec) [GeV]", "m_{jj} [GeV]", space+algo, true, 30., 130., 80.4);
 
     canvasMassW_2dim->cd(6);
-    drawResponse(massW_EtaW[i], i, "#eta_{jj} (rec)", "m_{jj} [GeV]", title(algo), false, 30., 130., 80.4);
+    drawResponse(massW_EtaW[i], i, "#eta_{jj} (rec)", "m_{jj} [GeV]", space+algo, false, 30., 130., 80.4);
 
     // top mass
 
     canvasMassT_2dim->cd(1);
-    drawResponse(massT_Pt1[i], i, "p_{T,j} (rec) [GeV]", "m_{jjb} [GeV]", title(algo), true, 60., 290., 172.5);
+    drawResponse(massT_Pt1[i], i, "p_{T,j} (rec) [GeV]", "m_{jjb} [GeV]", space+algo, true, 60., 290., 172.5);
 
     canvasMassT_2dim->cd(2);
-    drawResponse(massT_Eta1[i], i, "#eta_{j} (rec)", "m_{jjb} [GeV]", title(algo), false, 60., 290., 172.5);
+    drawResponse(massT_Eta1[i], i, "#eta_{j} (rec)", "m_{jjb} [GeV]", space+algo, false, 60., 290., 172.5);
 
     canvasMassT_2dim->cd(3);
-    drawResponse(massT_PtT[i], i, "p_{T,jjb} (rec) [GeV]", "m_{jjb} [GeV]", title(algo), true, 60., 290., 172.5);
+    drawResponse(massT_PtT[i], i, "p_{T,jjb} (rec) [GeV]", "m_{jjb} [GeV]", space+algo, true, 60., 290., 172.5);
 
     canvasMassT_2dim->cd(4);
-    drawResponse(massT_PtB[i], i, "p_{T,b} (rec) [GeV]", "m_{jjb} [GeV]", title(algo), true, 60., 290., 172.5);
+    drawResponse(massT_PtB[i], i, "p_{T,b} (rec) [GeV]", "m_{jjb} [GeV]", space+algo, true, 60., 290., 172.5);
 
     canvasMassT_2dim->cd(5);
-    drawResponse(massT_EtaB[i], i, "#eta_{b} (rec)", "m_{jjb} [GeV]", title(algo), false, 60., 290., 172.5);
+    drawResponse(massT_EtaB[i], i, "#eta_{b} (rec)", "m_{jjb} [GeV]", space+algo, false, 60., 290., 172.5);
 
     canvasMassT_2dim->cd(6);
-    drawResponse(massT_EtaT[i], i, "#eta_{jjb} (rec)", "m_{jjb} [GeV]", title(algo), false, 60., 290., 172.5);
+    drawResponse(massT_EtaT[i], i, "#eta_{jjb} (rec)", "m_{jjb} [GeV]", space+algo, false, 60., 290., 172.5);
 
     canvasMassT_2dim->cd(7);
-    drawResponse(deltaM_PtB[i], i, "p_{T,b} (rec) [GeV]", "m_{jjb}-m_{jj} [GeV]", title(algo), true, 30., 150., 92.1);
+    drawResponse(deltaM_PtB[i], i, "p_{T,b} (rec) [GeV]", "m_{jjb}-m_{jj} [GeV]", space+algo, true, 30., 150., 92.1);
 
     canvasMassT_2dim->cd(8);
-    drawResponse(deltaM_EtaB[i], i, "#eta_{b} (rec)", "m_{jjb}-m_{jj} [GeV]", title(algo), false, 30., 150., 92.1);
+    drawResponse(deltaM_EtaB[i], i, "#eta_{b} (rec)", "m_{jjb}-m_{jj} [GeV]", space+algo, false, 30., 150., 92.1);
 
   }
 
@@ -718,6 +720,8 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   TLegend* legend_035 = new TLegend(0.75, 0.66, 0.9, 0.9);
   legend_035->SetFillColor(0);
 
+  TLegend* legend_037 = (TLegend*) legend_035->Clone();
+
   TLegend* legend_35 = (TLegend*) legend_035->Clone();
   legend_35->SetY1(0.74);
 
@@ -737,6 +741,9 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     if(i==0 || i==3 || i==5)
       legend_035->AddEntry(dummyHist[i], levels[i]);
 
+    if(i==0 || i==3 || i==7)
+      legend_037->AddEntry(dummyHist[i], levels[i]);
+
     if(i==3 || i==5)
       legend_35->AddEntry(dummyHist[i], levels[i]);
 
@@ -753,12 +760,12 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     if(i<4 || i==6) {
       canvasMassW_2dim->cd(i);
-      legend_035->Draw();
+      legend_037->Draw();
       gPad->Print(baseName+"massW_2dim" + suffix);
     }
 
     canvasMassT_2dim->cd(i);
-    legend_035->Draw();
+    legend_037->Draw();
     gPad->Print(baseName+"massT_2dim" + suffix);
 
   }
