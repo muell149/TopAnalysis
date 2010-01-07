@@ -130,6 +130,167 @@ source['ttbarx09_7']+= 'ttbarx09_7_2,' + 'ttbarx09_7_3,'
 source['ttbarx09_7']+= 'ttbarx09_7_4,' + 'ttbarx09_7_5,'
 source['ttbarx09_7']+= 'ttbarx09_7_6,' + 'ttbarx09_7_7'
 
+## /TTbarJets-madgraph/Summer09-MC_31X_V3-v2/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_patMad import *
+evts  ['ttbarx09_mad'] =  1075985          ## number of produced events
+xsec  ['ttbarx09_mad'] =      414          ## NLO in pb from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+eff   ['ttbarx09_mad'] =      1.0          ## generator efficiency on gen level
+sizes ['ttbarx09_mad'] = 'blocks'
+source['ttbarx09_mad'] = 'ttbarx09_mad_0,' + 'ttbarx09_mad_1,'
+source['ttbarx09_mad']+= 'ttbarx09_mad_2,' + 'ttbarx09_mad_3,'
+source['ttbarx09_mad']+= 'ttbarx09_mad_4,' + 'ttbarx09_mad_5'
+
+## /TTbar-mcatnlo/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_patNLO import *
+evts  ['ttbarx09_nlo'] =   994573          ## number of produced events
+xsec  ['ttbarx09_nlo'] =      414          ## NLO in pb from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+eff   ['ttbarx09_nlo'] =      1.0          ## generator efficiency on gen level
+sizes ['ttbarx09_nlo'] = 'blocks'
+source['ttbarx09_nlo'] = 'ttbarx09_nlo_0,' + 'ttbarx09_nlo_1,'
+source['ttbarx09_nlo']+= 'ttbarx09_nlo_2'
+
+## /TTbarJets-madgraph/Summer09-MC_31X_V3_7TeV-v2/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_patMad7 import *
+evts  ['ttbarx09_mad7'] =  1062730         ## number of produced events
+xsec  ['ttbarx09_mad7'] =      187         ## NLO in pb from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+eff   ['ttbarx09_mad7'] =      1.0         ## generator efficiency on gen level
+sizes ['ttbarx09_mad7'] = 'blocks'
+source['ttbarx09_mad7'] = 'ttbarx09_mad7_0,' + 'ttbarx09_mad7_1,'
+source['ttbarx09_mad7']+= 'ttbarx09_mad7_2,' + 'ttbarx09_mad7_3,'
+source['ttbarx09_mad7']+= 'ttbarx09_mad7_4,' + 'ttbarx09_mad7_5'
+
+## /TTbar-mcatnlo/Summer09-MC_31X_V3_7TeV-v2/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_patNLO7 import *
+evts  ['ttbarx09_nlo7'] =   993455         ## number of produced events
+xsec  ['ttbarx09_nlo7'] =      187         ## NLO in pb from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+eff   ['ttbarx09_nlo7'] =      1.0         ## generator efficiency on gen level
+sizes ['ttbarx09_nlo7'] = 'blocks'
+source['ttbarx09_nlo7'] = 'ttbarx09_nlo7_0,' + 'ttbarx09_nlo7_1,'
+source['ttbarx09_nlo7']+= 'ttbarx09_nlo7_2'
+
+## /WJets-madgraph/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.wjets09_patMad import *
+evts  ['wjets09_pat'] = 11024540       ## number of produced events
+xsec  ['wjets09_pat'] =        1       ## NLO in pb from configfile
+eff   ['wjets09_pat'] =      1.0       ## generator efficiency on gen level
+sizes ['wjets09_pat'] = 'blocks'
+source['wjets09_pat'] = 'wjets09_pat_0,' + 'wjets09_pat_1,'
+source['wjets09_pat']+= 'wjets09_pat_2,' + 'wjets09_pat_3,'
+source['wjets09_pat']+= 'wjets09_pat_4,' + 'wjets09_pat_5,'
+source['wjets09_pat']+= 'wjets09_pat_6,' + 'wjets09_pat_7,'
+source['wjets09_pat']+= 'wjets09_pat_8,' + 'wjets09_pat_9,'
+source['wjets09_pat']+= 'wjets09_pat_10,' + 'wjets09_pat_11,'
+source['wjets09_pat']+= 'wjets09_pat_12,' + 'wjets09_pat_13,'
+source['wjets09_pat']+= 'wjets09_pat_14,' + 'wjets09_pat_15,'
+source['wjets09_pat']+= 'wjets09_pat_16,' + 'wjets09_pat_17,'
+source['wjets09_pat']+= 'wjets09_pat_18,' + 'wjets09_pat_19,'
+source['wjets09_pat']+= 'wjets09_pat_20,' + 'wjets09_pat_21,'
+source['wjets09_pat']+= 'wjets09_pat_22'
+
+## /WJets-madgraph/Summer09-MC_31X_V3_7TeV-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.wjets09_patMad7 import *
+evts  ['wjets09_pat7'] = 11377412       ## number of produced events
+xsec  ['wjets09_pat7'] =        1       ## NLO in pb from configfile
+eff   ['wjets09_pat7'] =      1.0       ## generator efficiency on gen level
+sizes ['wjets09_pat7'] = 'blocks'
+source['wjets09_pat7'] = 'wjets09_pat7_0,' + 'wjets09_pat7_1,'
+source['wjets09_pat7']+= 'wjets09_pat7_2,' + 'wjets09_pat7_3,'
+source['wjets09_pat7']+= 'wjets09_pat7_4,' + 'wjets09_pat7_5,'
+source['wjets09_pat7']+= 'wjets09_pat7_6,' + 'wjets09_pat7_7,'
+source['wjets09_pat7']+= 'wjets09_pat7_8,' + 'wjets09_pat7_9,'
+source['wjets09_pat7']+= 'wjets09_pat7_10,' + 'wjets09_pat7_11,'
+source['wjets09_pat7']+= 'wjets09_pat7_12,' + 'wjets09_pat7_13,'
+source['wjets09_pat7']+= 'wjets09_pat7_14,' + 'wjets09_pat7_15,'
+source['wjets09_pat7']+= 'wjets09_pat7_16,' + 'wjets09_pat7_17,'
+source['wjets09_pat7']+= 'wjets09_pat7_18,' + 'wjets09_pat7_19,'
+source['wjets09_pat7']+= 'wjets09_pat7_20,' + 'wjets09_pat7_21,'
+source['wjets09_pat7']+= 'wjets09_pat7_22,' + 'wjets09_pat7_23,'
+source['wjets09_pat7']+= 'wjets09_pat7_24,' + 'wjets09_pat7_25,'
+source['wjets09_pat7']+= 'wjets09_pat7_26,' + 'wjets09_pat7_27,'
+source['wjets09_pat7']+= 'wjets09_pat7_28,' + 'wjets09_pat7_29,'
+source['wjets09_pat7']+= 'wjets09_pat7_30,' + 'wjets09_pat7_31,'
+source['wjets09_pat7']+= 'wjets09_pat7_32,' + 'wjets09_pat7_33,'
+source['wjets09_pat7']+= 'wjets09_pat7_34,' + 'wjets09_pat7_35,'
+source['wjets09_pat7']+= 'wjets09_pat7_36,' + 'wjets09_pat7_37,'
+source['wjets09_pat7']+= 'wjets09_pat7_38,' + 'wjets09_pat7_39,'
+source['wjets09_pat7']+= 'wjets09_pat7_40,' + 'wjets09_pat7_41,'
+source['wjets09_pat7']+= 'wjets09_pat7_42,' + 'wjets09_pat7_43,'
+source['wjets09_pat7']+= 'wjets09_pat7_44,' + 'wjets09_pat7_45'
+
+## /ZJets-madgraph/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.zjets09_patMad import *
+evts  ['zjets09_pat'] =   932532       ## number of produced events
+xsec  ['zjets09_pat'] =        1       ## NLO in pb from configfile
+eff   ['zjets09_pat'] =      1.0       ## generator efficiency on gen level
+sizes ['zjets09_pat'] = 'blocks'
+source['zjets09_pat'] = 'zjets09_pat_0,' + 'zjets09_pat_1,'
+source['zjets09_pat']+= 'zjets09_pat_2,' + 'zjets09_pat_3,'
+source['zjets09_pat']+= 'zjets09_pat_4,' + 'zjets09_pat_5'
+
+## /ZJets-madgraph/Summer09-MC_31X_V3_7TeV-v2/GEN-SIM-RECO
+from TopAnalysis.Configuration.zjets09_patMad7 import *
+evts  ['zjets09_pat7'] =  1068735       ## number of produced events
+xsec  ['zjets09_pat7'] =        1       ## NLO in pb from configfile
+eff   ['zjets09_pat7'] =      1.0       ## generator efficiency on gen level
+sizes ['zjets09_pat7'] = 'blocks'
+source['zjets09_pat7'] = 'zjets09_pat7_0,' + 'zjets09_pat7_1,'
+source['zjets09_pat7']+= 'zjets09_pat7_2,' + 'zjets09_pat7_3,'
+source['zjets09_pat7']+= 'zjets09_pat7_4,' + 'zjets09_pat7_5'
+
+## /Wmunu/Summer09-MC_31X_V3_7TeV-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.wmunu09_pat7 import *
+evts  ['wmunu09_pat7'] =  2073721       ## number of produced events
+xsec  ['wmunu09_pat7'] =     7899       ## NLO in pb from configfile
+eff   ['wmunu09_pat7'] =    0.742       ## generator efficiency on gen level
+sizes ['wmunu09_pat7'] = 'blocks'
+source['wmunu09_pat7'] = 'wmunu09_pat7_0,' + 'wmunu09_pat7_1,'
+source['wmunu09_pat7']+= 'wmunu09_pat7_2,' + 'wmunu09_pat7_3,'
+source['wmunu09_pat7']+= 'wmunu09_pat7_4,' + 'wmunu09_pat7_5,'
+source['wmunu09_pat7']+= 'wmunu09_pat7_6,' + 'wmunu09_pat7_7,'
+source['wmunu09_pat7']+= 'wmunu09_pat7_8,' + 'wmunu09_pat7_9'
+
+## /Zmumu/Summer09-MC_31X_V3_7TeV-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.zmumu09_pat7 import *
+evts  ['zmumu09_pat7'] =  2060340       ## number of produced events
+xsec  ['zmumu09_pat7'] =     1300       ## NLO in pb from configfile
+eff   ['zmumu09_pat7'] =      1.0       ## generator efficiency on gen level
+sizes ['zmumu09_pat7'] = 'blocks'
+source['zmumu09_pat7'] = 'zmumu09_pat7_0,' + 'zmumu09_pat7_1,'
+source['zmumu09_pat7']+= 'zmumu09_pat7_2,' + 'zmumu09_pat7_3,'
+source['zmumu09_pat7']+= 'zmumu09_pat7_4,' + 'zmumu09_pat7_5,'
+source['zmumu09_pat7']+= 'zmumu09_pat7_6,' + 'zmumu09_pat7_7,'
+source['zmumu09_pat7']+= 'zmumu09_pat7_8,' + 'zmumu09_pat7_9'
+
+## /InclusiveMu15/Summer09-MC_31X_V3_7TeV-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.qcd09_pat7 import *
+evts  ['qcd09_pat7'] =    5340172        ## number of produced events
+xsec  ['qcd09_pat7'] =  296900000        ## NLO in pb from configfile
+eff   ['qcd09_pat7'] =    0.00037        ## generator efficiency on gen level
+sizes ['qcd09_pat7'] = 'blocks'
+source['qcd09_pat7'] = 'qcd09_pat7_0,' + 'qcd09_pat7_1,'
+source['qcd09_pat7']+= 'qcd09_pat7_2,' + 'qcd09_pat7_3,'
+source['qcd09_pat7']+= 'qcd09_pat7_4,' + 'qcd09_pat7_5,'
+source['qcd09_pat7']+= 'qcd09_pat7_6,' + 'qcd09_pat7_7,'
+source['qcd09_pat7']+= 'qcd09_pat7_8,' + 'qcd09_pat7_9,'
+source['qcd09_pat7']+= 'qcd09_pat7_10,' + 'qcd09_pat7_11,'
+source['qcd09_pat7']+= 'qcd09_pat7_12,' + 'qcd09_pat7_13,'
+source['qcd09_pat7']+= 'qcd09_pat7_14,' + 'qcd09_pat7_15,'
+source['qcd09_pat7']+= 'qcd09_pat7_16,' + 'qcd09_pat7_17,'
+source['qcd09_pat7']+= 'qcd09_pat7_18,' + 'qcd09_pat7_19,'
+source['qcd09_pat7']+= 'qcd09_pat7_20,' + 'qcd09_pat7_21,'
+source['qcd09_pat7']+= 'qcd09_pat7_22,' + 'qcd09_pat7_23,'
+source['qcd09_pat7']+= 'qcd09_pat7_24,' + 'qcd09_pat7_25,'
+source['qcd09_pat7']+= 'qcd09_pat7_26,' + 'qcd09_pat7_27,'
+source['qcd09_pat7']+= 'qcd09_pat7_28,' + 'qcd09_pat7_29,'
+source['qcd09_pat7']+= 'qcd09_pat7_30,' + 'qcd09_pat7_31,'
+source['qcd09_pat7']+= 'qcd09_pat7_32,' + 'qcd09_pat7_33,'
+source['qcd09_pat7']+= 'qcd09_pat7_34,' + 'qcd09_pat7_35,'
+source['qcd09_pat7']+= 'qcd09_pat7_36,' + 'qcd09_pat7_37,'
+source['qcd09_pat7']+= 'qcd09_pat7_38,' + 'qcd09_pat7_39,'
+source['qcd09_pat7']+= 'qcd09_pat7_40,' + 'qcd09_pat7_41,'
+source['qcd09_pat7']+= 'qcd09_pat7_42,' + 'qcd09_pat7_43,'
+source['qcd09_pat7']+= 'qcd09_pat7_44'
+
 ## /mc/Summer09/QCD_Pt15/GEN-SIM-RECO/MC_31X_V3-v1
 from TopAnalysis.Configuration.qcd09_pt15_reco import *
 evts  ['qcd09_pt15_reco'] = 5665829           ## number of produced events
