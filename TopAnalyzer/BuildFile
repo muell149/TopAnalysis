@@ -13,6 +13,7 @@
 <use name=DataFormats/CaloTowers>
 <use name=DataFormats/EgammaCandidates>
 <use name=DataFormats/PatCandidates>
+<use name=DataFormats/GsfTrackReco>
 <use name=DataFormats/Math>
 <use name=TopAnalysis/TopUtils>
 <use name=AnalysisDataFormats/TopObjects>
