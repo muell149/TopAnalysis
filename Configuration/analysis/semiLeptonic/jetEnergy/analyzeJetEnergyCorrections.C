@@ -39,7 +39,7 @@ void setAxisStyle(TH1* hist)
 
 }
 
-void cleverRebinning(TH1F* hist)
+void cleverRebinning(TH1* hist)
 {
 
   if(hist->GetEntries() / hist->GetNbinsX() < 4.) {
@@ -49,7 +49,7 @@ void cleverRebinning(TH1F* hist)
 
 }
 
-void fitGauss(TH1F* hist)
+void fitGauss(TH1* hist)
 {
 
   cleverRebinning(hist);
@@ -272,6 +272,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   TH1F* massW[8];
   TH1F* massT[8];
+  TH1D* deltaM[8];
 
   TH2F* massW_Pt1[8];
   TH2F* massW_Pt2[8];
@@ -430,6 +431,11 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     massT_Eta1[i]->Add(massT_Eta2[i]);
   }
 
+  for(unsigned int i = 0; i < 8; i++) {
+    TString name = "_"; name += i;
+    deltaM[i] = deltaM_EtaB[i]->ProjectionY(name);
+  }
+
   // create canvases
 
   TCanvas* canvasMassW      = new TCanvas("canvasMassW"     , "W mass"                        , 900, 900);
@@ -464,16 +470,15 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   }  
 
-  TPaveText *txtMassW = new TPaveText(0.22, 0.68, 0.89, 0.88, "NDC");
-  TPaveText *txtMassT = new TPaveText(0.22, 0.68, 0.89, 0.88, "NDC");
+  TPaveText* txtMassW = new TPaveText(0.22, 0.68, 0.89, 0.88, "NDC");
   char *tmpTxt = new char[100];
 
   txtMassW->SetTextAlign(32);
-  txtMassT->SetTextAlign(32);
   txtMassW->SetFillColor(0);
-  txtMassT->SetFillColor(0);
   txtMassW->SetBorderSize(0);
-  txtMassT->SetBorderSize(0);
+
+  TPaveText* txtMassT  = (TPaveText*) txtMassW->Clone();
+  TPaveText* txtDeltaM = (TPaveText*) txtMassW->Clone();
 
   for(unsigned int i = 0; i < 8; i++) {
 
@@ -484,11 +489,13 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
        massT[i]->GetEntries()==0)
       continue;
 
-    fitGauss(massW[i]);
-    fitGauss(massT[i]);
+    fitGauss(massW [i]);
+    fitGauss(massT [i]);
+    fitGauss(deltaM[i]);
 
-    massW[i]->SetLineColor(markerColor[i]);
-    massT[i]->SetLineColor(markerColor[i]);
+    massW [i]->SetLineColor(markerColor[i]);
+    massT [i]->SetLineColor(markerColor[i]);
+    deltaM[i]->SetLineColor(markerColor[i]);
 
     TText* ttxt = 0;
     
@@ -508,16 +515,30 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     ttxt = txtMassT->AddText(levels[i] + tmpTxt);
     ttxt->SetTextColor(markerColor[i]);
 
+    mean     = deltaM[i]->GetFunction("gaus")->GetParameter(1);
+    mean_err = deltaM[i]->GetFunction("gaus")->GetParError (1);
+    relSigma = deltaM[i]->GetFunction("gaus")->GetParameter(2) / mean;
+
+    sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
+    ttxt = txtDeltaM->AddText(levels[i] + tmpTxt);
+    ttxt->SetTextColor(markerColor[i]);
+
   }
 
-  massW[0]->SetMaximum( 1.5*massW[0]->GetMaximum() );
-  massT[0]->SetMaximum( 1.5*massT[0]->GetMaximum() );
-  massW[0]->SetTitle("       " + algo);
-  massT[0]->SetTitle("       " + algo);
-  massW[0]->SetStats(kFALSE);
-  massT[0]->SetStats(kFALSE);
-  setAxisStyle(massW[0]);
-  setAxisStyle(massT[0]);
+  massW [0]->SetMaximum( 1.5*massW [0]->GetMaximum() );
+  massT [0]->SetMaximum( 1.5*massT [0]->GetMaximum() );
+  deltaM[0]->SetMaximum( 1.5*deltaM[0]->GetMaximum() );
+  massW [0]->SetTitle("       " + algo);
+  massT [0]->SetTitle("       " + algo);
+  deltaM[0]->SetTitle("       " + algo);
+  deltaM[0]->SetXTitle("m_{jjb}-m_{jj} [GeV]");
+  deltaM[0]->SetYTitle("events");
+  massW [0]->SetStats(kFALSE);
+  massT [0]->SetStats(kFALSE);
+  deltaM[0]->SetStats(kFALSE);
+  setAxisStyle(massW [0]);
+  setAxisStyle(massT [0]);
+  setAxisStyle(deltaM[0]);
 
   for(unsigned int i = 0; i < 8; i++) {
 
@@ -547,6 +568,16 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     }
     txtMassT->Draw();
 
+    canvasMassT_2dim->cd(9);
+    setPadStyle();
+    deltaM[i]->DrawCopy(drawOption);
+    if(deltaM[i]->GetListOfFunctions()->FindObject("gaus")) {
+      deltaM[i]->GetFunction("gaus")->SetLineWidth(1);
+      deltaM[i]->GetFunction("gaus")->SetLineColor(markerColor[i]);
+      deltaM[i]->GetFunction("gaus")->DrawCopy("same");
+    }
+    txtDeltaM->Draw();
+
   }
 
   canvasMassW->cd(9);
@@ -554,6 +585,9 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   canvasMassT->cd(9);
   gPad->Print(baseName+"massT.eps");
+
+  canvasMassT_2dim->cd(9);
+  gPad->Print(baseName+"deltaM.eps");
 
   gStyle->SetTitleX(.2);
 
