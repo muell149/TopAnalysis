@@ -122,3 +122,11 @@ DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
 
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
+
+/**
+    Define modules needed for the analysis of b-tags
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/BTags.h"
+typedef SingleObjectAnalyzer<edm::View<pat::Jet>, BTags> BTagsAnalyzer;
+DEFINE_FWK_MODULE(BTagsAnalyzer);
