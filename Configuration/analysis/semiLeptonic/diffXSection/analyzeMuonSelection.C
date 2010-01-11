@@ -12,7 +12,7 @@
 //     description     //
 // This Macro analyzes some mu-Cut variables like number of valid Trackerhits,
 // chi^2, d0, energies in ecal and hcal and relIso within ttbarsignal, qcd, wmunu and zmumu-sample  
-// default: nhit, chi^2 and d0 for trigger mu, ecal und hcal deposit for good mu and relIso for golden mu
+// default: nhit, chi^2 and d0, dz for trigger mu, ecal und hcal deposit for good mu and relIso for golden mu
 // lumiweighting needs to be adapted   
 //       ---          //
 
@@ -50,23 +50,23 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
 
   // add scaling factors here!
 
-//   lumiweight.push_back(1.0);
-//   lumiweight.push_back(1.0);
-//   lumiweight.push_back(1.0);
-//   lumiweight.push_back(1.0);
-//   lumiweight.push_back(1.0);
-//   lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
+  lumiweight.push_back(1.0);
 
-  // ttbar (all, bg, sg - coming from the same sample)
-  lumiweight.push_back(0.039);
-  lumiweight.push_back(0.039);
-  lumiweight.push_back(0.039);
-  // QCD
-  lumiweight.push_back(1.1161);
-  // Wmunu
-  lumiweight.push_back(0.2212);
-  // Zmumu
-  lumiweight.push_back(0.0458);
+//   // ttbar (all, bg, sg - coming from the same sample)
+//   lumiweight.push_back(0.039);
+//   lumiweight.push_back(0.039);
+//   lumiweight.push_back(0.039);
+//   // QCD
+//   lumiweight.push_back(1.1161);
+//   // Wmunu
+//   lumiweight.push_back(0.2212);
+//   // Zmumu
+//   lumiweight.push_back(0.0458);
 
   // ---
   //    get histograms
@@ -78,7 +78,7 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
     }
   }
   else{
-       for(int i=0; i<3; i++){
+       for(int i=0; i<4; i++){
          thoseMuons.push_back("trigger");
     }
     for(int i=0; i<2; i++){
@@ -88,11 +88,12 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
     
   }
 
-  std::vector<TH1F*> nHit_, chi2_, d0_, ecalEn_, hcalEn_, relIso_;
+  std::vector<TH1F*> nHit_, chi2_, d0_, ecalEn_, hcalEn_, relIso_, dz_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[0]+"MuonQuality/nHit"  )->Clone() );
     chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseMuons[1]+"MuonQuality/chi2"  )->Clone() );
     d0_    .push_back( (TH1F*)files_[idx]->Get(thoseMuons[2]+"MuonQuality/dB"    )->Clone() );
+    dz_    .push_back( (TH1F*)files_[idx]->Get(thoseMuons[2]+"MuonQuality/dz"    )->Clone() );
     ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[3]+"MuonQuality/ecalEn")->Clone() );
     hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[4]+"MuonQuality/hcalEn")->Clone() );
     relIso_.push_back( (TH1F*)files_[idx]->Get(thoseMuons[5]+"MuonQuality/relIso")->Clone() );
@@ -134,6 +135,15 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  d0_[kAll]->Scale(lumiweight[kAll]);  
   d0_[kSignal]->Scale(lumiweight[kSignal]); 
   d0_[kBackground]->Scale(lumiweight[kBackground]); 
+
+  dz_[kWmunu]->Scale(lumiweight[kWmunu]);
+  dz_[kZmumu]->Scale(lumiweight[kZmumu]);
+  dz_.push_back( (TH1F*)dz_[kWmunu]->Clone());
+  dz_[kBoson]->Add(dz_[kZmumu]);
+  dz_[kQCD]->Scale(lumiweight[kQCD]);  
+  //  dz_[kAll]->Scale(lumiweight[kAll]);  
+  dz_[kSignal]->Scale(lumiweight[kSignal]); 
+  dz_[kBackground]->Scale(lumiweight[kBackground]);
 
   ecalEn_[kWmunu]->Scale(lumiweight[kWmunu]);
   ecalEn_[kZmumu]->Scale(lumiweight[kZmumu]);
@@ -189,6 +199,15 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   //  histogramStyle(d0_[kZmumu      ], kZmumu      );
   histogramStyle(d0_[kBackground ], kBackground );
   histogramStyle(d0_[kBoson      ], kBoson      );
+
+  // dz_
+  //  histogramStyle(dz_[kAll     ], kAll           );
+  histogramStyle(dz_[kSignal     ], kSignal     );
+  histogramStyle(dz_[kQCD        ], kQCD        );
+  histogramStyle(dz_[kWmunu      ], kWmunu      );
+  histogramStyle(dz_[kZmumu      ], kZmumu      );
+  histogramStyle(dz_[kBackground ], kBackground );
+  //  histogramStyle(dz_[kBoson      ], kBoson      );
 
   // ecalEn_
   histogramStyle(ecalEn_[kSignal     ], kSignal     );
@@ -458,6 +477,32 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
   drawcutline(0.05, 1.1*max);
 
   // ---
+  //    do the printing for dz_
+  // ---
+  TCanvas* canv6 = new TCanvas("canv6", "canv6", 600, 600); canvasStyle(canv6);
+
+  // draw canvas
+  canv6->cd(0);
+  canv6->SetLogy(1);
+  canv6->SetTitle("d_{z} leading "+whichMuons+" mu");
+  axesStyle(dz_[kSignal], "d_{z} ( #mu )", "events");
+   dz_[kSignal]->SetAxisRange(-15.,15 ,"X");
+  max=dz_[kSignal]       ->GetMaximum();
+  if(max<dz_[kQCD]       ->GetMaximum())max=dz_[kQCD]       ->GetMaximum();
+  if(max<dz_[kBackground]->GetMaximum())max=dz_[kBackground]->GetMaximum();
+  if(max<dz_[kBoson]     ->GetMaximum())max=dz_[kBoson]     ->GetMaximum();
+  dz_[kSignal    ]->SetMaximum( 10* max );
+  dz_[kSignal    ]->SetMinimum( 1 );
+  dz_[kSignal    ]->Draw();
+  dz_[kBackground]->Draw("same");
+  dz_[kQCD       ]->Draw("same");
+  //  dz_[kBoson     ]->Draw("same");
+  dz_[kWmunu ]->Draw("same");
+  dz_[kZmumu ]->Draw("same");
+  leg0            ->Draw("same");
+  leg2            ->Draw("same");
+
+  // ---
   // saving
   // ---
 
@@ -471,6 +516,7 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
     canv0->Print("./analyzeMuonCutflow/trackerHitstriggerMuons.png");
     canv1->Print("./analyzeMuonCutflow/chi2triggerMuons.png"       );
     canv2->Print("./analyzeMuonCutflow/dBtriggerMuons.png"         );
+    canv6->Print("./analyzeMuonCutflow/dztriggerMuons.png"         );
     canv3->Print("./analyzeMuonCutflow/eCalEnDepositgoodMuons.png" );
     canv4->Print("./analyzeMuonCutflow/hCalEnDepositgoodMuons.png" );
     canv5->Print("./analyzeMuonCutflow/relIsogoldenMuons.png"      );
@@ -479,6 +525,7 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
     canv0->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps(");
     canv1->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
     canv2->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
+    canv6->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
     canv3->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
     canv4->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps" );
     canv5->Print("./analyzeMuonCutflow/SelectionVariablesOfMuonsBeforeCutApplied.ps)");
@@ -491,6 +538,7 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
     canv0->Print("./analyzeMuonCutflow/trackerHits"+whichMuons+"Muons.png"  );
     canv1->Print("./analyzeMuonCutflow/chi2"+whichMuons+"Muons.png"         );
     canv2->Print("./analyzeMuonCutflow/dB"+whichMuons+"Muons.png"           );
+    canv6->Print("./analyzeMuonCutflow/dz"+whichMuons+"Muons.png"           );
     canv3->Print("./analyzeMuonCutflow/eCalEnDeposit"+whichMuons+"Muons.png");
     canv4->Print("./analyzeMuonCutflow/hCalEnDeposit"+whichMuons+"Muons.png");
     canv5->Print("./analyzeMuonCutflow/relIso"+whichMuons+"Muons.png"       );
@@ -499,6 +547,7 @@ void analyzeMuonSelection(TString whichMuons = "")  //  "golden" // "tight" // "
     canv0->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps(");
     canv1->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
     canv2->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
+    canv6->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
     canv3->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
     canv4->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps" );
     canv5->Print("./analyzeMuonCutflow/Selection"+whichMuons+"Muons.ps)");
