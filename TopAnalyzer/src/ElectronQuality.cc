@@ -21,19 +21,23 @@ ElectronQuality::book()
   // number of valid hits in silicon tracker   
   hists_["nHit"            ] = new TH1F( "nHit"             ,  "nHit"             ,   35,  -0.5,  34.5 );
   // normalized chi2 of global electron track fit
-  hists_["chi2"            ] = new TH1F( "chi2"             ,  "chi2"             ,   30,   0. ,  30.  );
+  hists_["chi2"            ] = new TH1F( "chi2"             ,  "chi2"             ,   30,   0. ,  15.  );
   // d0 significance of track (still to nominal IP)
-  hists_["d0"              ] = new TH1F( "d0"               ,  "d0"               ,   200,  0. ,  1.   );
-  // energy in ecal attached to the candidate trajectory
+  hists_["d0"              ] = new TH1F( "d0"               ,  "d0"               ,   90,   0. ,  0.3  );
+  // energy in ecal corrected on SC level
   hists_["ecalEn"          ] = new TH1F( "ecalEn"           ,  "ecalEn"           ,   40,   0. ,  10.  );
+  // energy from super cluster attached to the candidate trajectory
+  hists_["ecalEnCluster"   ] = new TH1F( "ecalEnCluster"    ,  "ecalEnCluster"    ,   50,   0. ,  50.  );
   // energy in hcal attached to the candidate trajectory
-  hists_["hcalEnOverEcalEn"] = new TH1F( "hcalEnOverEcalEn" ,  "hcalEnOverEcalEn" ,   40,   0. ,  10.  );
+  hists_["hcalEnOverEcalEn"] = new TH1F( "hcalEnOverEcalEn" ,  "hcalEnOverEcalEn" ,   100,  0. ,  1.0  );
   // relative isolation (tracker and calo combined)
   hists_["relIso"          ] = new TH1F( "relIso"           ,  "relIso"           ,   50,   0. ,  1.0  );
   // the supercluster eta - track eta position at calo extrapolated from innermost track state
-  hists_["deltaEtaIn"      ] = new TH1F( "deltaEtaIn"     ,    "deltaEtaIn"       ,   50,   0.,   0.2  );
+  hists_["deltaEtaIn"      ] = new TH1F( "deltaEtaIn"       ,  "deltaEtaIn"       ,   100,  0.,   0.1  );
   // the seed cluster phi - track phi position at calo extrapolated from the innermost track state
-  hists_["deltaPhiIn"      ] = new TH1F( "deltaPhiIn"     ,    "deltaPhiIn"       ,   50,   0.,   0.4  );
+  hists_["deltaPhiIn"      ] = new TH1F( "deltaPhiIn"       ,  "deltaPhiIn"       ,   100,  0.,   0.3  );
+  // weighted cluster rms along eta and inside 5x5
+  hists_["sigmaIetaIeta"   ] = new TH1F( "sigmaIetaIeta"    ,  "sigmaIetaIeta"    ,   100,  0.,  0.3  );
 
 }
 
@@ -48,20 +52,25 @@ ElectronQuality::book(edm::Service<TFileService>& fs)
   // number of valid hits in silicon tracker
   hists_["nHit"     ]        = fs->make<TH1F>( "nHit"              ,  "nHit"               ,   35,  -0.5, 34.5 );
   // normalized chi2 of global electron track fit
-  hists_["chi2"     ]        = fs->make<TH1F>( "chi2"              ,  "chi2"               ,   30,   0.,  30.  );
+  hists_["chi2"     ]        = fs->make<TH1F>( "chi2"              ,  "chi2"               ,   30,   0.,  15.  );
   // d0 significance of track (still to nominal IP)
-  hists_["d0"       ]        = fs->make<TH1F>( "d0"                ,  "d0"                 ,   200,  0.,  1.   );
-  // energy in ecal attached to the candidate trajectory
+  hists_["d0"       ]        = fs->make<TH1F>( "d0"                ,  "d0"                 ,   90,   0.,  0.3  );
+  // energy in ecal corrected on SC level
   hists_["ecalEn"   ]        = fs->make<TH1F>( "ecalEn"            ,  "ecalEn"             ,   40,   0.,  10.  );
+  // energy from super cluster attached to the candidate trajectory
+  hists_["ecalEnCluster"   ] = fs->make<TH1F>( "ecalEnCluster"     ,  "ecalEnCluster"      ,   50,   0.,  50.  );
   // energy in hcal attached to the candidate trajectory
-  hists_["hcalEnOverEcalEn"] = fs->make<TH1F>( "hcalEnOverEcalEn"  ,  "hcalEnOverEcalEn"   ,   1000,  0.,  5.  );
+  hists_["hcalEnOverEcalEn"] = fs->make<TH1F>( "hcalEnOverEcalEn"  ,  "hcalEnOverEcalEn"   ,   100,  0.,  1.0  );
   // relative isolation (tracker and calo combined)
   hists_["relIso"   ]        = fs->make<TH1F>( "relIso"            ,  "relIso"             ,   50,   0.,  1.0  );
   // the supercluster eta - track eta position at calo extrapolated from innermost track state
-  hists_["deltaEtaIn"]       = fs->make<TH1F>( "deltaEtaIn"        ,  "deltaEtaIn"         ,   50,   0.,  0.2  );
+  hists_["deltaEtaIn"]       = fs->make<TH1F>( "deltaEtaIn"        ,  "deltaEtaIn"         ,   100,  0.,  0.1  );
   // the seed cluster phi - track phi position at calo extrapolated from the innermost track state
-  hists_["deltaPhiIn"]       = fs->make<TH1F>( "deltaPhiIn"        ,  "deltaPhiIn"         ,   50,   0.,  0.4  );
-
+  hists_["deltaPhiIn"]       = fs->make<TH1F>( "deltaPhiIn"        ,  "deltaPhiIn"         ,   100,  0.,  0.3  );
+  // weighted cluster rms along eta and inside 5x5
+  hists_["sigmaIetaIeta"]    = fs->make<TH1F>( "sigmaIetaIeta"     ,  "sigmaIetaIeta"      ,   100,  0.,  0.3  );
+  // test
+  //  hists_["test"]             = fs->make<TH1F>( "test"              ,  "EnergySuperCluster-EnergyfromPat without correction" ,   50,  -0.5,  0.5  );
 
   // conserve the normalization information (for the use with hadd)
   //  hists_["norm_"   ] = fs->make<TH1F>( "norm_"    ,  "norm_"    ,    1,   0.,   1. );
@@ -87,14 +96,25 @@ ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& w
       hists_.find("d0"  )            ->second->Fill( electron->gsfTrack()->d0(), weight );
       // relative isolation (tracker and calo combined)
       hists_.find("relIso")          ->second->Fill( (electron->trackIso()+electron->caloIso())/electron->et() , weight );    
-      // energy in ecal attached to the candidate trajectory
-      hists_.find("ecalEn")          ->second->Fill( electron->ecalEnergy(), weight ); 
+      // energy in ecal corrected on SC level
+      hists_.find("ecalEn")          ->second->Fill( electron->ecalEnergy(), weight );
+      // energy from super cluster attached to the candidate trajectory
+      hists_.find("ecalEnCluster")   ->second->Fill( electron->superCluster()->energy(), weight );
+      // test meaning of electron->ecalEnergy()
+      //      if(electron->isEcalEnergyCorrected()==false){
+      //	double diff = 0;
+      //	diff = electron->superCluster()->energy()- electron->ecalEnergy();
+      //	hists_.find("test")          ->second->Fill( diff, weight );
+      //           }
       // ratio of energy deposit in hcal and ecal
-      hists_.find("hcalEnOverEcalEn")->second->Fill( electron->hcalOverEcal() , weight );
+      hists_.find("hcalEnOverEcalEn")->second->Fill(  electron->hcalOverEcal() , weight );
       // the supercluster eta - track eta position at calo extrapolated from innermost track state
       hists_.find("deltaEtaIn")      ->second->Fill(  electron->deltaEtaSuperClusterTrackAtVtx(), weight );
       // the seed cluster phi - track phi position at calo extrapolated from the innermost track state
       hists_.find("deltaPhiIn")      ->second->Fill(  electron->deltaPhiSuperClusterTrackAtVtx(), weight );    
+      // weighted cluster rms along eta and inside 5x5
+      hists_.find("sigmaIetaIeta") ->second->Fill(  electron->sigmaIetaIeta() , weight );   
+
     }
   }
 }
