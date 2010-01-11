@@ -25,9 +25,9 @@ ElectronKinematics::book()
   // transverse momentum of the electron
   hists_["et" ] = new TH1F( "et"  , "et"  ,  30 ,     0. , 150.  );
   // pseudorapidity eta of the electron
-  hists_["eta"] = new TH1F( "eta" , "eta" ,  70 ,  -3.5  ,   3.5 );
+  hists_["eta"] = new TH1F( "eta" , "eta" ,  35 ,  -3.5  ,   3.5 );
   // azimuthal angle phi of the electron
-  hists_["phi"] = new TH1F( "phi" , "phi" ,  70 ,  -3.14 ,   3.14);
+  hists_["phi"] = new TH1F( "phi" , "phi" ,  30 ,  -3.14 ,   3.14);
 }
 
 /// histogramm booking for full fw
@@ -44,9 +44,9 @@ ElectronKinematics::book(edm::Service<TFileService>& fs)
   // transverse momentum of the electron
   hists_["et" ] = fs->make<TH1F>( "et"  , "et"  ,  30 ,     0. ,   150. );
   // pseudorapidity eta of the electron
-  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
+  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  35 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the electron
-  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  70 ,  -3.14 ,   3.14 );
+  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  30 ,  -3.14 ,   3.14 );
 }
 
 /// histogram filling for fwlite and for full fw
