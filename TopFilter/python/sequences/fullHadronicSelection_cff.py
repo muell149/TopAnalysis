@@ -30,15 +30,15 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 tightLeadingJets = selectedLayer1Jets.clone(src = 'goodJets',
                                             cut = 'pt > 40'
                                             )
-tightBottomJets  = selectedLayer1Jets.clone(src = 'combinedSecondaryVertexBJetTags',
+tightBottomJets  = selectedLayer1Jets.clone(src = 'trackCountingHighPurBJets',
                                             cut = 'pt > 50'
                                             )
 
 ## setting up the collections for the fully-hadronic
 ## event selection; on these collection monitoring
 ## can still be performed
-fullHadronicSelection = cms.Sequence(goodJets         *
-                                     combinedSecondaryVertexBJetTags *
+fullHadronicSelection = cms.Sequence(goodJets *
+                                     trackCountingHighPurBJets *
                                      tightLeadingJets *
                                      tightBottomJets
                                      )
