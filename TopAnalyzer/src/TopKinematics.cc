@@ -149,7 +149,7 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
   // make sure to have a ttbar pair belonging to the semi-leptonic decay channel with 
   // a muon in the final state
   if( tops.isSemiLeptonic(WDecay::kMuon) ){
-    fill(tops.hadronicDecayTop(), tops.leptonicDecayTop(), weight);
+    fill(tops.leptonicDecayTop(), tops.hadronicDecayTop(), weight);
   }
 }
 
@@ -162,7 +162,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   // value of matchForStabilityAndPurity_
   if( tops.isHypoValid(hypoKey_) ){
     if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && matchForStabilityAndPurity_){
-      fill(tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), weight);
+      fill(tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), weight);
 
       // fill rec versus gen level correlation plots
       reco::Particle::LorentzVector genTtbar = tops.hadronicDecayTop(        )->p4()+tops.leptonicDecayTop(        )->p4();
@@ -178,15 +178,15 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("ttbarMass_" )->second->Fill( genTtbar.mass()      , recTtbar.mass()     , weight );    
       // fill pt correlation plot for hadronic top candidate
       corrs_.find("topPt_"    )->second->Fill( tops.hadronicDecayTop()->pt()      , tops.hadronicDecayTop(hypoKey_)->pt()      , weight );
-      // fill pt correlation plot for hadronic top candidate
-      corrs_.find("topPt_"    )->second->Fill( tops.leptonicDecayTop()->pt()      , tops.leptonicDecayTop(hypoKey_)->pt()      , weight );    
+      // fill pt correlation plot for leptonic top candidate
+      corrs_.find("topPt_"    )->second->Fill( tops.leptonicDecayTop()->pt()      , tops.leptonicDecayTop(hypoKey_)->pt()      , weight );
       // fill y correlation plot for hadronic top candidate
-      corrs_.find("topY_"     )->second->Fill( tops.leptonicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity(), weight );
-      // fill y correlation plot for hadronic top candidate
+      corrs_.find("topY_"     )->second->Fill( tops.hadronicDecayTop()->rapidity(), tops.hadronicDecayTop(hypoKey_)->rapidity(), weight );
+      // fill y correlation plot for leptonic top candidate
       corrs_.find("topY_"     )->second->Fill( tops.leptonicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity(), weight );
       // fill phi correlation plot for hadronic top candidate
-      corrs_.find("topPhi_"     )->second->Fill( tops.leptonicDecayTop()->phi()   , tops.leptonicDecayTop(hypoKey_)->phi()     , weight );
-      // fill phi correlation plot for hadronic top candidate
+      corrs_.find("topPhi_"     )->second->Fill( tops.hadronicDecayTop()->phi()   , tops.hadronicDecayTop(hypoKey_)->phi()     , weight );
+      // fill phi correlation plot for leptonic top candidate
       corrs_.find("topPhi_"     )->second->Fill( tops.leptonicDecayTop()->phi()   , tops.leptonicDecayTop(hypoKey_)->phi()     , weight );
 
 
@@ -195,7 +195,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       **/
     } 
     else{
-      fill(tops.hadronicDecayTop(hypoKey_), tops.leptonicDecayTop(hypoKey_), weight);
+      fill(tops.leptonicDecayTop(hypoKey_), tops.hadronicDecayTop(hypoKey_), weight);
     }
   }
 }
@@ -208,18 +208,30 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
       Fill Top Variables for Cross Section Measurement
   **/
   reco::Particle::LorentzVector ttBar = leptonicTop->p4() + hadronicTop->p4();
-  // fill top pt for leptonicTop candidate
+  // fill top pt for leptonicTop candidate in combined histogram
   hists_.find("topPt"       )->second->Fill( leptonicTop->p4().pt ()      , weight );
-  // fill top y for leptonicTop candidate
+  // fill top y for leptonicTop candidate in combined histogram
   hists_.find("topY"        )->second->Fill( leptonicTop->p4().Rapidity() , weight );
-  // fill top phi for leptonicTop candidate
+  // fill top phi for leptonicTop candidate in combined histogram
   hists_.find("topPhi"      )->second->Fill( leptonicTop->p4().phi()      , weight );
-  // fill top pt for hadronicTop candidate
+  // fill top pt for hadronicTop candidate in combined histogram
   hists_.find("topPt"       )->second->Fill( hadronicTop->p4().pt ()      , weight );
-  // fill top y for hadronicTop candidate
+  // fill top y for hadronicTop candidate in combined histogram
   hists_.find("topY"        )->second->Fill( hadronicTop->p4().Rapidity() , weight );
-  // fill top phi for hadronicTop candidate
+  // fill top phi for hadronicTop candidate in combined histogram
   hists_.find("topPhi"      )->second->Fill( hadronicTop->p4().phi()      , weight );
+  // fill top pt for leptonicTop candidate in separate histogram
+  hists_.find("topPtLep_"       )->second->Fill( leptonicTop->p4().pt ()      , weight );
+  // fill top y for leptonicTop candidate in separate histogram
+  hists_.find("topYLep_"        )->second->Fill( leptonicTop->p4().Rapidity() , weight );
+  // fill top phi for leptonicTop candidate in separate histogram
+  hists_.find("topPhiLep_"      )->second->Fill( leptonicTop->p4().phi()      , weight );
+  // fill top pt for hadronicTop candidate in separate histogram
+  hists_.find("topPtHad_"       )->second->Fill( hadronicTop->p4().pt ()      , weight );
+  // fill top y for hadronicTop candidate in separate histogram
+  hists_.find("topYHad_"        )->second->Fill( hadronicTop->p4().Rapidity() , weight );
+  // fill top phi for hadronicTop candidate in separate histogram
+  hists_.find("topPhiHad_"      )->second->Fill( hadronicTop->p4().phi()      , weight );
   // fill ttbar pt
   hists_.find("ttbarPt"     )->second->Fill( ttBar.pt  ()          , weight );
   // fill ttbar y
@@ -245,18 +257,30 @@ TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate
   **/
   reco::Particle::LorentzVector genTtBar = leptonicTopGen->p4() + hadronicTopGen->p4();
   reco::Particle::LorentzVector recTtBar = leptonicTopRec->p4() + hadronicTopRec->p4();
-  // fill top pt for topA candidate
+  // fill top pt for topA candidate in combined histogram
   match( hists_.find("topPt"       )->second , leptonicTopRec->p4().pt ()      , leptonicTopGen->p4().pt ()      , weight );
-  // fill top y for topA candidate
+  // fill top y for topA candidate in combined histogram
   match( hists_.find("topY"        )->second , leptonicTopRec->p4().Rapidity() , leptonicTopGen->p4().Rapidity() , weight );
-  // fill top phi for topA candidate
+  // fill top phi for topA candidate in combined histogram
   match( hists_.find("topPhi"      )->second , leptonicTopRec->p4().phi()      , leptonicTopGen->p4().phi()      , weight );
-  // fill top pt for topB candidate
+  // fill top pt for topB candidate in combined histogram
   match( hists_.find("topPt"       )->second , hadronicTopRec->p4().pt ()      , hadronicTopGen->p4().pt ()      , weight );
-  // fill top y for topB candidate
+  // fill top y for topB candidate in combined histogram
   match( hists_.find("topY"        )->second , hadronicTopRec->p4().Rapidity() , hadronicTopGen->p4().Rapidity() , weight );
-  // fill top phi for topB candidate
+  // fill top phi for topB candidate in combined histogram
   match( hists_.find("topPhi"      )->second , hadronicTopRec->p4().phi()      , hadronicTopGen->p4().phi()      , weight );
+  // fill top pt for topA candidate in separate histogram
+  match( hists_.find("topPtLep_"       )->second , leptonicTopRec->p4().pt ()      , leptonicTopGen->p4().pt ()      , weight );
+  // fill top y for topA candidate in separate histogram
+  match( hists_.find("topYLep_"        )->second , leptonicTopRec->p4().Rapidity() , leptonicTopGen->p4().Rapidity() , weight );
+  // fill top phi for topA candidate in separate histogram
+  match( hists_.find("topPhiLep_"      )->second , leptonicTopRec->p4().phi()      , leptonicTopGen->p4().phi()      , weight );
+  // fill top pt for topB candidate in separate histogram
+  match( hists_.find("topPtHad_"       )->second , hadronicTopRec->p4().pt ()      , hadronicTopGen->p4().pt ()      , weight );
+  // fill top y for topB candidate in separate histogram
+  match( hists_.find("topYHad_"        )->second , hadronicTopRec->p4().Rapidity() , hadronicTopGen->p4().Rapidity() , weight );
+  // fill top phi for topB candidate in separate histogram
+  match( hists_.find("topPhiHad_"      )->second , hadronicTopRec->p4().phi()      , hadronicTopGen->p4().phi()      , weight );
   // fill ttbar pt
   match( hists_.find("ttbarPt"     )->second , recTtBar.pt  ()          , genTtBar.pt  ()          , weight );
   // fill ttbar y
