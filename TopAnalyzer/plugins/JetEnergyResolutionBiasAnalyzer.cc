@@ -56,6 +56,13 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massWzoom_40"] = fs->make<TH1F>("massWzoom_40", "massWzoom_40", 80, 60., 100.);
   hists_["massWzoom_50"] = fs->make<TH1F>("massWzoom_50", "massWzoom_50", 80, 60., 100.);
 
+  hists_["massWPt_0" ] = fs->make<TH2F>("massWPt_0 ", "massWPt_0 ", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPt_10"] = fs->make<TH2F>("massWPt_10", "massWPt_10", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPt_20"] = fs->make<TH2F>("massWPt_20", "massWPt_20", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPt_30"] = fs->make<TH2F>("massWPt_30", "massWPt_30", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPt_40"] = fs->make<TH2F>("massWPt_40", "massWPt_40", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPt_50"] = fs->make<TH2F>("massWPt_50", "massWPt_50", 50, 0., 250., 28, 0., 140.);
+
   hists_["massT_0" ] = fs->make<TH1F>("massT_0 ", "massT_0 ", 60, 0., 300.);
   hists_["massT_10"] = fs->make<TH1F>("massT_10", "massT_10", 60, 0., 300.);
   hists_["massT_20"] = fs->make<TH1F>("massT_20", "massT_20", 60, 0., 300.);
@@ -69,6 +76,13 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massTzoom_30"] = fs->make<TH1F>("massTzoom_30", "massTzoom_30", 100, 150., 200.);
   hists_["massTzoom_40"] = fs->make<TH1F>("massTzoom_40", "massTzoom_40", 100, 150., 200.);
   hists_["massTzoom_50"] = fs->make<TH1F>("massTzoom_50", "massTzoom_50", 100, 150., 200.);
+
+  hists_["massTPt_0" ] = fs->make<TH2F>("massTPt_0 ", "massTPt_0 ", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPt_10"] = fs->make<TH2F>("massTPt_10", "massTPt_10", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPt_20"] = fs->make<TH2F>("massTPt_20", "massTPt_20", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPt_30"] = fs->make<TH2F>("massTPt_30", "massTPt_30", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPt_40"] = fs->make<TH2F>("massTPt_40", "massTPt_40", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPt_50"] = fs->make<TH2F>("massTPt_50", "massTPt_50", 50, 0., 250., 60, 0., 300.);
 
   randNumGen_ = new TRandom3(0);
 }
@@ -145,11 +159,20 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
     name = "massWzoom_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecW.M() );
 
+    name = "massWPt_"; name += ptcut;
+    hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecW.M() );
+    hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecW.M() );
+
     name = "massT_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecT.M() );
 
     name = "massTzoom_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecT.M() );
+
+    name = "massTPt_"; name += ptcut;
+    hists_.find((std::string)name)->second->Fill( vecB.Pt(), vecT.M() );
+    hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecT.M() );
+    hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecT.M() );
 
   }
 
@@ -164,8 +187,12 @@ JetEnergyResolutionBiasAnalyzer::endJob()
 void
 JetEnergyResolutionBiasAnalyzer::smearPt(TLorentzVector &vec)
 {
-  vec *= randNumGen_->Gaus(1., resFact_ * sqrt(resParS_*resParS_ / (vec.Pt()*vec.Pt())
-					       + resParN_*resParN_ / vec.Pt() + resParC_*resParC_) );
+  double factor = 1.;
+  do {
+    factor = randNumGen_->Gaus(1., resFact_ * sqrt(resParS_*resParS_ / (vec.Pt()*vec.Pt())
+						   + resParN_*resParN_ / vec.Pt() + resParC_*resParC_) );
+  } while(factor <= 0. || factor >= 2.);
+  vec *= factor;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
