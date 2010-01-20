@@ -130,3 +130,11 @@ DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
 #include "TopAnalysis/TopAnalyzer/interface/BTags.h"
 typedef SingleObjectAnalyzer<edm::View<pat::Jet>, BTags> BTagsAnalyzer;
 DEFINE_FWK_MODULE(BTagsAnalyzer);
+
+/**
+    Define modules needed for the analysis of generator information
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/GenParticle.h"
+typedef SingleObjectAnalyzer<edm::View<reco::GenParticle>, GenParticle> GenParticleAnalyzer;
+DEFINE_FWK_MODULE(GenParticleAnalyzer);
