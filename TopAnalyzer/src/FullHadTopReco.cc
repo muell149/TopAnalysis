@@ -42,7 +42,11 @@ void FullHadTopReco::book()
   // top phi
   hists_["topQuarkPhi"   ] = new TH1F( "topQuarkPhi"    , "topQuarkPhi"    ,   32, -3.2, 3.2   );
   // top mass
-  hists_["topQuarkMass"  ] = new TH1F( "topQuarkMass"   , "topQuarkMass"   ,   60,  0. , 600.  );
+  hists_["topQuarkMass"  ] = new TH1F( "topQuarkMass"   , "topQuarkMass"   ,   50,  0. , 1000. );
+  // top mass of kinFit
+  hists_["topQuarkMassKF"] = new TH1F( "topQuarkMassKF" , "topQuarkMassKF" ,   50,  0. , 1000. );
+  /// mtop fit vs. mtop reco
+  hists2D_["topMassFitReco"] = new TH2F( "topMassFitReco" , "topMassFitReco" ,  300, 100.,  400. , 300, 100., 400. );
   // W pt
   hists_["wPt"           ] = new TH1F( "wPt"           , "wPt"             ,   50,  0. , 1000. );
   // W eta
@@ -50,7 +54,9 @@ void FullHadTopReco::book()
   // W phi
   hists_["wPhi"          ] = new TH1F( "wPhi"          , "wPhi"            ,   32, -3.2, 3.2   );
   // W mass
-  hists_["wMass"         ] = new TH1F( "wMass"         , "wMass"           ,   40,  0. , 400.  );
+  hists_["wMass"         ] = new TH1F( "wMass"         , "wMass"           ,   30,  0. , 600.  );
+  // btag vs. di-jet-mass of w candidate
+  hists2D_["bTagVsMjjW"    ] = new TH2F( "bTagVsMjjW"    , "bTagVsMjjW"      ,  120, 74.4,  86.4, 50, 0. , 5.  );
 }
 
 /// histogramm booking for fw
@@ -84,6 +90,18 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   hists_["topQuarkPhi"   ] = fs->make<TH1F>( "topQuarkPhi"    , "topQuarkPhi"    ,   32, -3.2, 3.2   );
   // top mass
   hists_["topQuarkMass"  ] = fs->make<TH1F>( "topQuarkMass"   , "topQuarkMass"   ,   50,  0. , 1000.  );
+  // top mass of kinFit
+  hists_["topQuarkMassKF"] = fs->make<TH1F>( "topQuarkMassKF" , "topQuarkMassKF" ,   50,  0. , 1000.  );
+  // top mass with b-tag (HighPurity) for b-jets
+  hists_["topQuarkMassBTagged"  ] = fs->make<TH1F>( "topQuarkMassBTagged"   , "topQuarkMassBTagged"   ,   50,  0. , 1000.  );
+  // top mass of kinFit with b-tag (HighPurity) for b-jets
+  hists_["topQuarkMassKFBTagged"] = fs->make<TH1F>( "topQuarkMassKFBTagged" , "topQuarkMassKFBTagged" ,   50,  0. , 1000.  );
+  // top mass with b-tag (SecVertex) for b-jets
+  hists_["topQuarkMassBTagged2"  ] = fs->make<TH1F>( "topQuarkMassBTagged2"   , "topQuarkMassBTagged2"   ,   50,  0. , 1000.  );
+  // top mass of kinFit with b-tag (SecVertex) for b-jets
+  hists_["topQuarkMassKFBTagged2"] = fs->make<TH1F>( "topQuarkMassKFBTagged2" , "topQuarkMassKFBTagged2" ,   50,  0. , 1000.  );
+  /// mtop fit vs. mtop reco
+  hists2D_["topMassFitReco"] = fs->make<TH2F>( "topMassFitReco" , "topMassFitReco" ,  300, 100.,  400. , 300, 100., 400. );
   // W pt
   hists_["wPt"           ] = fs->make<TH1F>( "wPt"           , "wPt"             ,   50,  0. , 1000. );
   // W eta
@@ -92,6 +110,8 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   hists_["wPhi"          ] = fs->make<TH1F>( "wPhi"          , "wPhi"            ,   32, -3.2, 3.2   );
   // W mass
   hists_["wMass"         ] = fs->make<TH1F>( "wMass"         , "wMass"           ,   30,  0. , 600.  );
+  // btag vs. di-jet-mass of w candidate
+  hists2D_["bTagVsMjjW"    ] = fs->make<TH2F>( "bTagVsMjjW"    , "bTagVsMjjW"      ,  120, 74.4,  86.4, 50, 0. , 5.  );
 }
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
@@ -112,6 +132,28 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
     int lightP    = tops.jetLeptonCombination(hypo_)[TtFullHadEvtPartons::LightP   ];
     int lightPBar = tops.jetLeptonCombination(hypo_)[TtFullHadEvtPartons::LightPBar];
 
+    // top mass of kinFit
+    hists_.find("topQuarkMassKF")->second->Fill( tops.top(hypo_)->mass() );
+    // topBar mass of kinFit
+    hists_.find("topQuarkMassKF")->second->Fill( tops.topBar(hypo_)->mass() );
+
+    if( b >=0 && b < (int)jets.size() &&  bBar >= 0 && bBar< (int)jets.size() &&
+	jets[b].bDiscriminator("trackCountingHighPurBJetTags") > 3. &&
+	jets[bBar].bDiscriminator("trackCountingHighPurBJetTags") > 3.){
+      // top mass of kinFit with b-tag (HighPurity) for b-jets
+      hists_.find("topQuarkMassKFBTagged")->second->Fill( tops.top(hypo_)->mass() );
+      // topBar mass of kinFit with b-tag (HighPurity) for b-jets
+      hists_.find("topQuarkMassKFBTagged")->second->Fill( tops.topBar(hypo_)->mass() );
+    }
+
+    if( b >=0 && b < (int)jets.size() &&  bBar >= 0 && bBar< (int)jets.size() &&
+	jets[b].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9 &&
+	jets[bBar].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9){
+      // top mass of kinFit with b-tag (SecVertex) for b-jets
+      hists_.find("topQuarkMassKFBTagged2")->second->Fill( tops.top(hypo_)->mass() );
+      // topBar mass of kinFit with b-tag (SecVertex) for b-jets
+      hists_.find("topQuarkMassKFBTagged2")->second->Fill( tops.topBar(hypo_)->mass() );
+    }
 
     // make sure the b-jet index is in the range of the jet collection
     if( b >=0 && b < (int)jets.size() ){
@@ -199,6 +241,21 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
 	hists_.find("topQuarkPhi" )->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).phi()  );
 	// top mass
 	hists_.find("topQuarkMass")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass() );
+	// top mass kinFit vs. reco
+	hists2D_.find("topMassFitReco")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass(), 
+						       tops.top(hypo_)->mass() );
+	// bTag discri vs. W mass
+	hists2D_.find("bTagVsMjjW")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4()).mass() ,
+						   jets[b].bDiscriminator("trackCountingHighPurBJetTags"));
+
+	if(jets[b].bDiscriminator("trackCountingHighPurBJetTags") > 3. &&
+	   jets[bBar].bDiscriminator("trackCountingHighPurBJetTags") > 3.){
+	  hists_.find("topQuarkMassBTagged")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass() );
+	}
+	if(jets[b].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9 &&
+	   jets[bBar].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9){
+	  hists_.find("topQuarkMassBTagged2")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass() );
+	}
       }
     }
     // make sure all the light quark indecies are in the range of the jet collection
@@ -221,6 +278,21 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
 	hists_.find("topQuarkPhi" )->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).phi()  );
 	// top mass
 	hists_.find("topQuarkMass")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass() );
+	// top mass kinFit vs. reco
+	hists2D_.find("topMassFitReco")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass(), 
+						       tops.topBar(hypo_)->mass() );
+	// bTag discri vs. W mass
+	hists2D_.find("bTagVsMjjW")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4()).mass() ,
+						   jets[bBar].bDiscriminator("trackCountingHighPurBJetTags"));
+
+	if(jets[b].bDiscriminator("trackCountingHighPurBJetTags") > 3. &&
+	   jets[bBar].bDiscriminator("trackCountingHighPurBJetTags") > 3.){
+	  hists_.find("topQuarkMassBTagged")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass() );
+	}
+	if(jets[b].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9 &&
+	   jets[bBar].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9){
+	  hists_.find("topQuarkMassBTagged2")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass() );
+	}
       }
     }
   }
