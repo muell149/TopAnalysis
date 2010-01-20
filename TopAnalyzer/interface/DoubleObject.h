@@ -57,6 +57,7 @@ class DoubleObject{
  protected:
   /// histogram container
   std::map<std::string, TH1*> hists_;
+  std::map<std::string, TH2*> hists2D_;
 };
 
 
@@ -66,6 +67,9 @@ template <typename CollectionA, typename CollectionB>
 {
   file.cd( directory );
   for(std::map<std::string, TH1*>::const_iterator hist = hists_.begin(); hist !=hists_.end(); ++hist){
+    hist->second->Write( );
+  }
+  for(std::map<std::string, TH2*>::const_iterator hist = hists2D_.begin(); hist !=hists2D_.end(); ++hist){
     hist->second->Write( );
   }
 }
