@@ -66,9 +66,9 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
      Helper functions for special histogram management
   **/
   /// histogram filling for candidates topA and topB
-  void fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, const reco::Candidate* leptonicW, const reco::Candidate* hadronicW, const double& weight=1.);
+  void fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, const reco::Candidate* leptonicW, const reco::Candidate* hadronicW, double HT, const double& weight=1.);
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
-  void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, const double& weight=1.);
+  void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, double HTrec, double HTgen, const double& weight=1.);
   /// helper function for determining stability and purity
   void match(TH1* hist, const double& genValue, const double& recValue, const double& weight);
 

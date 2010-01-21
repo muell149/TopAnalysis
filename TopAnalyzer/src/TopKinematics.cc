@@ -50,6 +50,8 @@ void TopKinematics::book()
   hists_["ttbarDelY"   ] = new TH1F( "ttbarDelY"   , "ttbarDelY"   ,  10,     -5.,      5.          );
   // sum of y of both top quarks
   hists_["ttbarSumY"   ] = new TH1F( "ttbarSumY"   , "ttbarSumY"   ,  10,     -5.,      5.          );
+  // HT of the 4 jets assigned to the ttbar decay
+  hists_["ttbarHT"     ] = new TH1F( "ttbarHT"     , "ttbarHT"     ,  10,      0.,   1000.          );
 
 
   /**
@@ -87,6 +89,9 @@ void TopKinematics::book()
   corrs_["ttbarY_"      ] = new TH2F( "ttbarY_"      , "ttbarY_"      , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation ttbar mass
   corrs_["ttbarMass_"   ] = new TH2F( "ttbarMass_"   , "ttbarMass_"   ,  700,  300., 1000.,     700, 300., 1000.);
+  // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
+  corrs_["ttbarHT_"     ] = new TH2F( "ttbarHT_"     , "ttbarHT_"     , 1000,    0., 1000.,    1000,   0., 1000.);
+
 }
 
 /// histogramm booking for fw
@@ -119,6 +124,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["ttbarDelY"   ] = fs->make<TH1F>( "ttbarDelY"   , "ttbarDelY"   ,  10,     -5.,      5.          );
   // sum of y of both top quarks
   hists_["ttbarSumY"   ] = fs->make<TH1F>( "ttbarSumY"   , "ttbarSumY"   ,  10,     -5.,      5.          );
+  // HT of the 4 jets assigned to the ttbar decay
+  hists_["ttbarHT"     ] = fs->make<TH1F>( "ttbarHT"     , "ttbarHT"     ,  10,      0.,   1000.          );
 
   /**
      Top Variables for Cross Checks
@@ -157,6 +164,9 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   corrs_["ttbarY_"      ] = fs->make<TH2F>( "ttbarY_"      , "ttbarY_"      , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation ttbar mass
   corrs_["ttbarMass_"   ] = fs->make<TH2F>( "ttbarMass_"   , "ttbarMass_"   ,  700,  300., 1000.,     700, 300., 1000.);
+  // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
+  corrs_["ttbarHT_"     ] = fs->make<TH2F>( "ttbarHT_"     , "ttbarHT_"     , 1000,    0., 1000.,    1000,   0., 1000.);
+
 }
 
 
@@ -167,7 +177,8 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
   // make sure to have a ttbar pair belonging to the semi-leptonic decay channel with 
   // a muon in the final state
   if( tops.isSemiLeptonic(WDecay::kMuon) ){
-    fill(tops.leptonicDecayTop(), tops.hadronicDecayTop(), tops.leptonicDecayW(), tops.hadronicDecayW(), weight);
+    double HT = tops.leptonicDecayB()->pt() + tops.hadronicDecayB()->pt() + tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
+    fill(tops.leptonicDecayTop(), tops.hadronicDecayTop(), tops.leptonicDecayW(), tops.hadronicDecayW(), HT, weight);
   }
 }
 
@@ -179,8 +190,10 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   // fill matched (for stability & purity determination) or normal depending on the 
   // value of matchForStabilityAndPurity_
   if( tops.isHypoValid(hypoKey_) ){
+    double HTrec = tops.leptonicDecayB(hypoKey_)->pt() + tops.hadronicDecayB(hypoKey_)->pt() + tops.hadronicDecayQuark(hypoKey_)->pt() + tops.hadronicDecayQuarkBar(hypoKey_)->pt();
     if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && matchForStabilityAndPurity_){
-      fill(tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), tops.leptonicDecayW(hypoKey_), tops.leptonicDecayW(), tops.hadronicDecayW(hypoKey_), tops.hadronicDecayW(), weight);
+      double HTgen = tops.leptonicDecayB()->pt() + tops.hadronicDecayB()->pt() + tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
+      fill(tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), tops.leptonicDecayW(hypoKey_), tops.leptonicDecayW(), tops.hadronicDecayW(hypoKey_), tops.hadronicDecayW(), HTrec, HTgen, weight);
 
       // fill rec versus gen level correlation plots
       reco::Particle::LorentzVector genTtbar = tops.hadronicDecayTop(        )->p4()+tops.leptonicDecayTop(        )->p4();
@@ -194,6 +207,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("ttbarY_"    )->second->Fill( genTtbar.Rapidity()  , recTtbar.Rapidity() , weight );
       // fill mass correlation plot for ttbar pair
       corrs_.find("ttbarMass_" )->second->Fill( genTtbar.mass()      , recTtbar.mass()     , weight );    
+      // fill HT correlation plot for the 4 jets assigned to the ttbar decay
+      corrs_.find("ttbarHT_"   )->second->Fill( HTgen                , HTrec               , weight ); 
       // fill pt correlation plot for hadronic top candidate
       corrs_.find("topPt_"    )->second->Fill( tops.hadronicDecayTop()->pt()      , tops.hadronicDecayTop(hypoKey_)->pt()      , weight );
       // fill pt correlation plot for leptonic top candidate
@@ -232,14 +247,14 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 
     } 
     else{
-      fill(tops.leptonicDecayTop(hypoKey_), tops.hadronicDecayTop(hypoKey_), tops.leptonicDecayW(hypoKey_), tops.hadronicDecayW(hypoKey_), weight);
+      fill(tops.leptonicDecayTop(hypoKey_), tops.hadronicDecayTop(hypoKey_), tops.leptonicDecayW(hypoKey_), tops.hadronicDecayW(hypoKey_), HTrec, weight);
     }
   }
 }
 
 /// histogram filling for topA, topB candidate
 void
-TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, const reco::Candidate* leptonicW, const reco::Candidate* hadronicW, const double& weight)
+TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, const reco::Candidate* leptonicW, const reco::Candidate* hadronicW, double HT, const double& weight)
 {
   /** 
       Fill Top Variables for Cross Section Measurement
@@ -299,11 +314,13 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   hists_.find("ttbarDelY"   )->second->Fill( leptonicTop->rapidity()-hadronicTop->rapidity()  , weight );
   // fill sum of y of both top quarks 
   hists_.find("ttbarSumY"   )->second->Fill( leptonicTop->rapidity()+hadronicTop->rapidity()  , weight );
+  // fill HT of the 4 jets assigned to the ttbar decay
+  hists_.find("ttbarHT"   )->second->Fill( HT  , weight );
 }
 
 /// histogram filling for candidate topA and topB (for stability and purity calculation)
 void 
-TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, const double& weight)
+TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, double HTrec, double HTgen, const double& weight)
 {
   /** 
       Fill Top Variables for Cross Section Measurement
@@ -370,6 +387,8 @@ TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate
   match( hists_.find("ttbarDelY"   )->second , leptonicTopRec->rapidity()-hadronicTopRec->rapidity() , leptonicTopGen->rapidity()-hadronicTopGen->rapidity() , weight );
   // fill sum of y of both top quarks 
   match( hists_.find("ttbarSumY"   )->second , leptonicTopRec->rapidity()+hadronicTopRec->rapidity() , leptonicTopGen->rapidity()+hadronicTopGen->rapidity() , weight );
+  // fill HT of the 4 jets assigned to the ttbar decay
+  match( hists_.find("ttbarHT"   )->second , HTrec , HTgen , weight );
 }
 
 /// helper function to determine stability and purity
