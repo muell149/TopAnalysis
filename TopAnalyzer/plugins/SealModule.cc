@@ -18,6 +18,9 @@ DEFINE_FWK_MODULE(MuonKinematicsAnalyzer);
 typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonResolution> MuonResolutionAnalyzer;
 DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
+typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, MuonCrossSection> MuonCrossSectionAnalyzer;
+DEFINE_FWK_MODULE(MuonCrossSectionAnalyzer);
 
 /**
     Define modules needed for the analysis of the jets
