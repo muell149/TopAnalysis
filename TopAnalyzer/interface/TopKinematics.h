@@ -20,16 +20,16 @@ double pi = TMath::Pi();
 
 namespace CrossSection{
  // binning for top & ttbar cross section histograms
- double topPt       [] = {             0. ,    10. ,    35. ,    65. ,   100. ,   135. ,   170. ,   215. ,   300. ,   400.  };
- double topY        [] = {   -4. ,    -3. ,  -1.92 ,   -1.2 ,  -0.48 ,     0. ,   0.48 ,    1.2 ,   1.92 ,     3. ,     4.  };
- double topPhi      [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
- double ttbarMass   [] = {                                      300. ,   345. ,   400. ,   490. ,   615. ,   790. ,  1000.  };
- double ttbarPt     [] = {                      0. ,    10. ,    20. ,    30. ,    40. ,    60. ,    80. ,   130. ,   200.  };
- double ttbarY      [] = {   -5. ,    -4. ,    -3. ,   -2.3 ,   -1.6 ,     0. ,    1.6 ,    2.3 ,     3. ,     4. ,     5.  };
- double ttbarPhi    [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
- double ttbarDelPhi [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
- double topWAnglelab[] = {                                        0. ,   0.15 ,   0.25 ,    0.4 ,    0.6 ,     1. ,     pi  };
- double topWAngletop[] = {                                        0. , 1./6*pi, 1./3*pi, 1./2*pi, 2./3*pi, 5./6*pi,     pi  };
+ double topPt      [] = {             0. ,    10. ,    35. ,    65. ,   100. ,   135. ,   170. ,   215. ,   300. ,   400.  };
+ double topY       [] = {   -4. ,    -3. ,  -1.92 ,   -1.2 ,  -0.48 ,     0. ,   0.48 ,    1.2 ,   1.92 ,     3. ,     4.  };
+ double topPhi     [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
+ double ttbarMass  [] = {                                      300. ,   345. ,   400. ,   490. ,   615. ,   790. ,  1000.  };
+ double ttbarPt    [] = {                      0. ,    10. ,    20. ,    30. ,    40. ,    60. ,    80. ,   130. ,   200.  };
+ double ttbarY     [] = {   -5. ,    -4. ,    -3. ,   -2.3 ,   -1.6 ,     0. ,    1.6 ,    2.3 ,     3. ,     4. ,     5.  };
+ double ttbarPhi   [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
+ double ttbarDelPhi[] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
+ double topWAngle  [] = {                                        0. , 1./6*pi, 1./3*pi, 1./2*pi, 2./3*pi, 5./6*pi,     pi  };
+ double ttbarHT    [] = {                                       50. ,   150. ,   225. ,   300. ,   400. ,   600. ,  1000.  };
 }
 
 class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
