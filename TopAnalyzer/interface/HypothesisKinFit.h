@@ -49,6 +49,8 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
   int delObjectIndex(const TtSemiLeptonicEvent& tops, const int& index);
 
  private:
+  /// class key of hypothesis
+  std::string hypoKey_;
   /// histogram container for correlation plots
   std::map<std::string, TH2*> corrs_;
 };

@@ -7,7 +7,8 @@ HypothesisKinFit::HypothesisKinFit()
 }
 
 /// default constructor for full fw
-HypothesisKinFit::HypothesisKinFit(const edm::ParameterSet& cfg)
+HypothesisKinFit::HypothesisKinFit(const edm::ParameterSet& cfg) :
+  hypoKey_( cfg.getParameter<std::string>("hypoKey") )
 {
 }
 
@@ -18,18 +19,20 @@ void HypothesisKinFit::book()
       Monitoring Variables
   **/
   // fit probability of the best fit hypothesis
-  hists_["prob"       ] = new TH1F( "prob"       , "prob"      ,   100,    0.,    1. );
+  hists_["prob"       ] = new TH1F( "prob"       , "prob"       ,   100,    0.,    1. );
   // chi2 of the best fit hypothesis
-  hists_["chi2"       ] = new TH1F( "chi2"       , "chi2"      ,   100,    0.,   10. );
+  hists_["chi2"       ] = new TH1F( "chi2"       , "chi2"       ,   100,    0.,   10. );
   // delta chi2 between best and second best fit hyothesis
-  hists_["delChi2"    ] = new TH1F( "delChi2"    , "delChi2"   ,   100,    0.,   10. );
+  hists_["delChi2"    ] = new TH1F( "delChi2"    , "delChi2"    ,   100,    0.,   10. );
   // difference of hadBQuark index between genMatch and kinFit 
-  hists_["hadBQuark"  ] = new TH1F( "hadBQuark"  , "hadBQuark" ,     9,   -4.,    4. );
+  hists_["hadBQuark"  ] = new TH1F( "hadBQuark"  , "hadBQuark"  ,     9,  -4.5,   4.5 );
   // difference of lepBQuark index between genMatch and kinFit 
-  hists_["lepBQuark"  ] = new TH1F( "lepBQuark"  , "lepBQuark" ,     9,   -4.,    4. );
+  hists_["lepBQuark"  ] = new TH1F( "lepBQuark"  , "lepBQuark"  ,     9,  -4.5,   4.5 );
   // smallest difference of the two lightQuark indices between genMatch and kinFit 
   // (taking into accont that the two indices can be switched)
-  hists_["lightQuark" ] = new TH1F( "lightQuark" , "lightQuark",     9,   -4.,    4. );
+  hists_["lightQuark" ] = new TH1F( "lightQuark" , "lightQuark" ,     9,  -4.5,   4.5 );
+  // number of quarks differing in the index between genMatch and the other hypothesis
+  hists_["wrongAssign"] = new TH1F( "wrongAssign", "wrongAssign",     5,  -0.5,   4.5 );
 
   /** 
       Pull Distributions (Relative to the MC Truth)
@@ -81,18 +84,20 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
       Monitoring Variables
   **/
   // fit probability of the best fit hypothesis
-  hists_["prob"       ] = fs->make<TH1F>( "prob"       , "prob"      ,   100,    0.,    1. );
+  hists_["prob"       ] = fs->make<TH1F>( "prob"       , "prob"       ,   100,    0.,    1. );
   // chi2 of the best fit hypothesis
-  hists_["chi2"       ] = fs->make<TH1F>( "chi2"       , "chi2"      ,   100,    0.,   10. );
+  hists_["chi2"       ] = fs->make<TH1F>( "chi2"       , "chi2"       ,   100,    0.,   10. );
   // delta chi2 between best and second best fit hyothesis
-  hists_["delChi2"    ] = fs->make<TH1F>( "delChi2"    , "delChi2"   ,   100,    0.,   10. );
+  hists_["delChi2"    ] = fs->make<TH1F>( "delChi2"    , "delChi2"    ,   100,    0.,   10. );
   // difference of hadBQuark index between genMatch and kinFit 
-  hists_["hadBQuark"  ] = fs->make<TH1F>( "hadBQuark"  , "hadBQuark" ,     9,   -4.,    4. );
+  hists_["hadBQuark"  ] = fs->make<TH1F>( "hadBQuark"  , "hadBQuark"  ,     9,  -4.5,   4.5 );
   // difference of lepBQuark index between genMatch and kinFit 
-  hists_["lepBQuark"  ] = fs->make<TH1F>( "lepBQuark"  , "lepBQuark" ,     9,   -4.,    4. );
+  hists_["lepBQuark"  ] = fs->make<TH1F>( "lepBQuark"  , "lepBQuark"  ,     9,  -4.5,   4.5 );
   // smallest difference of the two lightQuark indices between genMatch and kinFit 
   // (taking into accont that the two indices can be switched)
-  hists_["lightQuark" ] = fs->make<TH1F>( "lightQuark" , "lightQuark",     9,   -4.,    4. );
+  hists_["lightQuark" ] = fs->make<TH1F>( "lightQuark" , "lightQuark" ,     9,  -4.5,   4.5 );
+  // number of quarks differing in the index between genMatch and the other hypothesis
+  hists_["wrongAssign"] = fs->make<TH1F>( "wrongAssign", "wrongAssign",     5,  -0.5,   4.5 );
 
   /** 
       Pull Distributions (Relative to the MC Truth)
@@ -142,11 +147,11 @@ int
 HypothesisKinFit::delObjectIndex(const TtSemiLeptonicEvent& tops, const int& index)
 {
   if(index==TtSemiLepEvtPartons::LightQ)
-     return std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar))) < std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ))) ? objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ) : objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar);
+     return std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQ)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQBar))) < std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQBar)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQ))) ? objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQ) : objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQBar);
   else if(index==TtSemiLepEvtPartons::LightQBar)
-    return std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar))) < std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ))) ? objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQBar) : objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, "kKinFit", TtSemiLepEvtPartons::LightQ);
+    return std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQ)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQBar))) < std::min(abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQBar)),abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQ))) ? objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQBar) : objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, hypoKey_, TtSemiLepEvtPartons::LightQ);
   else
-    return objectIndex(tops, "kGenMatch", index)-objectIndex(tops, "kKinFit", index);
+    return objectIndex(tops, "kGenMatch", index)-objectIndex(tops, hypoKey_, index);
 }
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
@@ -154,22 +159,24 @@ void
 HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
   // make sure to have a valid hypothesis on reconstruction level
-  if( tops.isHypoValid("kKinFit") ){
+  if( tops.isHypoValid(hypoKey_) ){
     /** 
 	Fill the Monitoring Variables
     **/
-    // fit probability of the best fit hypothesis
-    hists_.find("prob")->second->Fill( tops.fitProb(), weight);
-    // chi2 of the best fit hypothesis
-    hists_.find("chi2")->second->Fill( tops.fitChi2(), weight);
+    if( hypoKey_ == "kKinFit" ){
+      // fit probability of the best fit hypothesis
+      hists_.find("prob")->second->Fill( tops.fitProb(), weight);
+      // chi2 of the best fit hypothesis
+      hists_.find("chi2")->second->Fill( tops.fitChi2(), weight);
 
-    // make sure that a second best fit hypothesis exists to be able to fill these plots
-    if( tops.fitChi2(1) >= 0 ){
-      // delta chi2 between best and second best fit hyothesis
-      hists_.find("delChi2")->second->Fill( tops.fitChi2(1)-tops.fitChi2(2), weight);
+      // make sure that a second best fit hypothesis exists to be able to fill these plots
+      if( tops.fitChi2(1) >= 0 ){
+	// delta chi2 between best and second best fit hyothesis
+	hists_.find("delChi2")->second->Fill( tops.fitChi2(1)-tops.fitChi2(0), weight);
+      }
     }
-    // make sure that the genMatch hypothesis exists to be able to fill these plots
 
+    // make sure that the genMatch hypothesis exists to be able to fill these plots
     if( tops.isHypoValid("kGenMatch") ){
       // difference of hadBQuark index between genMatch and kinFit
       hists_.find("hadBQuark" )->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::HadB), weight);
@@ -179,59 +186,66 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       // (taking into account that the two indices can be switched)
       hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQ   ), weight);
       hists_.find("lightQuark")->second->Fill( delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar), weight);
+      // number of quarks differing in the index between genMatch and the other hypothesis
+      int numberOfDifferingIndices = 0;
+      if(delObjectIndex(tops, TtSemiLepEvtPartons::HadB     ))numberOfDifferingIndices++;
+      if(delObjectIndex(tops, TtSemiLepEvtPartons::LepB     ))numberOfDifferingIndices++;
+      if(delObjectIndex(tops, TtSemiLepEvtPartons::LightQ   ))numberOfDifferingIndices++;
+      if(delObjectIndex(tops, TtSemiLepEvtPartons::LightQBar))numberOfDifferingIndices++;
+      hists_.find("wrongAssign")->second->Fill( numberOfDifferingIndices, weight);
     }
 
     /** 
 	Fill the Pull Distributions (Relative to the MC Truth)
     **/
     if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) ){
-      if( tops.hadronicDecayB() && tops.hadronicDecayB("kKinFit") ){
+      if( tops.hadronicDecayB() && tops.hadronicDecayB(hypoKey_) ){
 	// hadronic top b pt
-	hists_.find("hadBQuarkPt"   )->second->Fill( (tops.hadronicDecayB()->pt()-tops.hadronicDecayB("kKinFit")->pt())/tops.hadronicDecayB()->pt() );
+	hists_.find("hadBQuarkPt"   )->second->Fill( (tops.hadronicDecayB()->pt()-tops.hadronicDecayB(hypoKey_)->pt())/tops.hadronicDecayB()->pt() );
 	// hadronic top b eta
-	hists_.find("hadBQuarkEta"  )->second->Fill( tops.hadronicDecayB()->eta()-tops.hadronicDecayB("kKinFit")->eta() );
+	hists_.find("hadBQuarkEta"  )->second->Fill( tops.hadronicDecayB()->eta()-tops.hadronicDecayB(hypoKey_)->eta() );
 	// hadronic top b phi
-	hists_.find("hadBQuarkPhi"  )->second->Fill( deltaPhi(tops.hadronicDecayB()->phi(), tops.hadronicDecayB("kKinFit")->phi()) );
+	hists_.find("hadBQuarkPhi"  )->second->Fill( deltaPhi(tops.hadronicDecayB()->phi(), tops.hadronicDecayB(hypoKey_)->phi()) );
       }
-      if( tops.leptonicDecayB() && tops.leptonicDecayB("kKinFit") ){
+      if( tops.leptonicDecayB() && tops.leptonicDecayB(hypoKey_) ){
 	// leptonic top b pt
-	hists_.find("lepBQuarkPt"   )->second->Fill( (tops.leptonicDecayB()->pt()-tops.leptonicDecayB("kKinFit")->pt())/tops.leptonicDecayB()->pt() );
+	hists_.find("lepBQuarkPt"   )->second->Fill( (tops.leptonicDecayB()->pt()-tops.leptonicDecayB(hypoKey_)->pt())/tops.leptonicDecayB()->pt() );
 	// leptonic top b eta
-	hists_.find("lepBQuarkEta"  )->second->Fill( tops.leptonicDecayB()->eta()-tops.leptonicDecayB("kKinFit")->eta() );
+	hists_.find("lepBQuarkEta"  )->second->Fill( tops.leptonicDecayB()->eta()-tops.leptonicDecayB(hypoKey_)->eta() );
 	// leptonic top b phi
-	hists_.find("lepBQuarkPhi"  )->second->Fill( deltaPhi(tops.leptonicDecayB()->phi(), tops.leptonicDecayB("kKinFit")->phi()) );
+	hists_.find("lepBQuarkPhi"  )->second->Fill( deltaPhi(tops.leptonicDecayB()->phi(), tops.leptonicDecayB(hypoKey_)->phi()) );
       }
-      if( tops.hadronicDecayQuark() && tops.hadronicDecayQuark("kKinFit") ){
+      if( tops.hadronicDecayQuark() && tops.hadronicDecayQuark(hypoKey_) ){
 	// lightQuark pt
-	hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark("kKinFit")->pt())/tops.hadronicDecayQuark()->pt() );
+	hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt())/tops.hadronicDecayQuark()->pt() );
 	// lightQuark b eta
-	hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuark()->eta()-tops.hadronicDecayQuark("kKinFit")->eta() );
+	hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuark()->eta()-tops.hadronicDecayQuark(hypoKey_)->eta() );
 	// lightQuark b phi
-	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuark()->phi(), tops.hadronicDecayQuark("kKinFit")->phi()) );
+	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuark()->phi(), tops.hadronicDecayQuark(hypoKey_)->phi()) );
       }
-      if( tops.hadronicDecayQuarkBar() && tops.hadronicDecayQuarkBar("kKinFit") ){
+      if( tops.hadronicDecayQuarkBar() && tops.hadronicDecayQuarkBar(hypoKey_) ){
 	// lightQuark pt
-	hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar("kKinFit")->pt())/tops.hadronicDecayQuarkBar()->pt() );
+	hists_.find("lightQuarkPt"  )->second->Fill( (tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt())/tops.hadronicDecayQuarkBar()->pt() );
 	// lightQuark b eta
-	hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuarkBar()->eta()-tops.hadronicDecayQuarkBar("kKinFit")->eta() );
+	hists_.find("lightQuarkEta" )->second->Fill( tops.hadronicDecayQuarkBar()->eta()-tops.hadronicDecayQuarkBar(hypoKey_)->eta() );
 	// lightQuark b phi
-	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuarkBar()->phi(), tops.hadronicDecayQuarkBar("kKinFit")->phi()) );
+	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuarkBar()->phi(), tops.hadronicDecayQuarkBar(hypoKey_)->phi()) );
       }
-      if( tops.singleLepton() && tops.singleLepton("kKinFit") ){
+      if( tops.singleLepton() && tops.singleLepton(hypoKey_) ){
 	// lepton pt
-	hists_.find("leptonPt"      )->second->Fill( (tops.singleLepton()->pt()-tops.singleLepton("kKinFit")->pt())/tops.singleLepton()->pt() );
+	hists_.find("leptonPt"      )->second->Fill( (tops.singleLepton()->pt()-tops.singleLepton(hypoKey_)->pt())/tops.singleLepton()->pt() );
 	// lepton eta
-	hists_.find("leptonEta"     )->second->Fill( tops.singleLepton()->eta()-tops.singleLepton("kKinFit")->eta() );
+	hists_.find("leptonEta"     )->second->Fill( tops.singleLepton()->eta()-tops.singleLepton(hypoKey_)->eta() );
 	// lepton phi
-	hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton("kKinFit")->phi()) );
+	hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton(hypoKey_)->phi()) );
       }
-      if( tops.singleNeutrino() && tops.singleNeutrino("kKinFit") ){
+      if( tops.singleNeutrino() && tops.singleNeutrino(hypoKey_) ){
 	// neutrino pt
-	hists_.find("neutrinoPt"    )->second->Fill( (tops.singleNeutrino()->pt()-tops.singleNeutrino("kKinFit")->pt())/tops.singleNeutrino()->pt() );
+	hists_.find("neutrinoPt"    )->second->Fill( (tops.singleNeutrino()->pt()-tops.singleNeutrino(hypoKey_)->pt())/tops.singleNeutrino()->pt() );
 	// neutrino eta
-	hists_.find("neutrinoEta"   )->second->Fill( tops.singleNeutrino()->eta()-tops.singleNeutrino("kKinFit")->eta() );
+	hists_.find("neutrinoEta"   )->second->Fill( tops.singleNeutrino()->eta()-tops.singleNeutrino(hypoKey_)->eta() );
 	// neutrino phi
-	hists_.find("neutrinoPhi"   )->second->Fill( deltaPhi(tops.singleNeutrino()->phi(), tops.singleNeutrino("kKinFit")->phi()) );
+	hists_.find("neutrinoPhi"   )->second->Fill( deltaPhi(tops.singleNeutrino()->phi(), tops.singleNeutrino(hypoKey_)->phi()) );
       }
     }
 
@@ -246,9 +260,9 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("mapGenMatch_" )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LepB     ) );
     }
     // correlation between jet hypothesis and jet index
-    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LightQ   ) );
-    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LightQBar) );
-    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::HadB     ) );
-    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, "kKinFit"  , TtSemiLepEvtPartons::LepB     ) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQ   , objectIndex(tops, hypoKey_  , TtSemiLepEvtPartons::LightQ   ) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LightQBar, objectIndex(tops, hypoKey_  , TtSemiLepEvtPartons::LightQBar) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::HadB     , objectIndex(tops, hypoKey_  , TtSemiLepEvtPartons::HadB     ) );
+    corrs_.find("mapKinFit_"   )->second->Fill(TtSemiLepEvtPartons::LepB     , objectIndex(tops, hypoKey_  , TtSemiLepEvtPartons::LepB     ) );
   }
 }

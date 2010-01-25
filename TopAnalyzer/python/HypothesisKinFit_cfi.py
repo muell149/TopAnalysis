@@ -9,7 +9,8 @@ analyzeHypothesisKinFit = cms.EDAnalyzer("HypothesisKinFitAnalyzer",
     useWeight = cms.bool(False),
     ## analyzer specific configurables
     analyze   = cms.PSet(
-      ## no additional configurables needed in this case
+      ## hypothesis key on reco level
+      hypoKey = cms.string("kKinFit")
     )    
 )
 
