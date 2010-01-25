@@ -11,6 +11,7 @@
 */
 
 class TH1;
+class TH3;
 
 class JetEnergyResolutionBiasAnalyzer : public edm::EDAnalyzer {
 
@@ -24,11 +25,12 @@ public:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob();
 
-  void smearPt(TLorentzVector&);
+  void smearEnergy(TLorentzVector&);
   
 protected:
   /// histogram container
   std::map<std::string, TH1*> hists_;
+  std::map<std::string, TH3*> hists3d_;
   /// random number generator object
   TRandom3 *randNumGen_;
   /// parameters read from config file

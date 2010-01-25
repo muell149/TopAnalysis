@@ -8,6 +8,7 @@
 
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TH3F.h"
 
 /// default constructor
 JetEnergyResolutionBiasAnalyzer::JetEnergyResolutionBiasAnalyzer(const edm::ParameterSet& cfg):
@@ -28,6 +29,11 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["eta"] = fs->make<TH1F>("eta", "eta", 30, -3.,   3.);
   hists_["pt" ] = fs->make<TH1F>("pt" , "pt" , 50,  0., 250.);
 
+  hists_["ptSmeared"] = fs->make<TH1F>("ptSmeared", "ptSmeared", 50, 0., 250.);
+
+  hists_["energySmearedOverGen" ] = fs->make<TH2F>("energySmearedOverGen", "energySmearedOverGen",
+						   50, 0., 250., 51, 0., 2.);
+
   hists_["resp_0" ] = fs->make<TH1F>("resp_0" , "resp_0" , 51, 0., 2.);
   hists_["resp_10"] = fs->make<TH1F>("resp_10", "resp_10", 51, 0., 2.);
   hists_["resp_20"] = fs->make<TH1F>("resp_20", "resp_20", 51, 0., 2.);
@@ -41,6 +47,13 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["respPt_30"] = fs->make<TH2F>("respPt_30", "respPt_30", 50, 0., 250., 51, 0., 2.);
   hists_["respPt_40"] = fs->make<TH2F>("respPt_40", "respPt_40", 50, 0., 250., 51, 0., 2.);
   hists_["respPt_50"] = fs->make<TH2F>("respPt_50", "respPt_50", 50, 0., 250., 51, 0., 2.);
+
+  hists_["respPtSmear_0" ] = fs->make<TH2F>("respPtSmear_0" , "respPtSmear_0" , 50, 0., 250., 51, 0., 2.);
+  hists_["respPtSmear_10"] = fs->make<TH2F>("respPtSmear_10", "respPtSmear_10", 50, 0., 250., 51, 0., 2.);
+  hists_["respPtSmear_20"] = fs->make<TH2F>("respPtSmear_20", "respPtSmear_20", 50, 0., 250., 51, 0., 2.);
+  hists_["respPtSmear_30"] = fs->make<TH2F>("respPtSmear_30", "respPtSmear_30", 50, 0., 250., 51, 0., 2.);
+  hists_["respPtSmear_40"] = fs->make<TH2F>("respPtSmear_40", "respPtSmear_40", 50, 0., 250., 51, 0., 2.);
+  hists_["respPtSmear_50"] = fs->make<TH2F>("respPtSmear_50", "respPtSmear_50", 50, 0., 250., 51, 0., 2.);
 
   hists_["massW_0" ] = fs->make<TH1F>("massW_0 ", "massW_0 ", 28, 0., 140.);
   hists_["massW_10"] = fs->make<TH1F>("massW_10", "massW_10", 28, 0., 140.);
@@ -63,6 +76,13 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massWPt_40"] = fs->make<TH2F>("massWPt_40", "massWPt_40", 50, 0., 250., 28, 0., 140.);
   hists_["massWPt_50"] = fs->make<TH2F>("massWPt_50", "massWPt_50", 50, 0., 250., 28, 0., 140.);
 
+  hists_["massWPtSmear_0" ] = fs->make<TH2F>("massWPtSmear_0 ", "massWPtSmear_0 ", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPtSmear_10"] = fs->make<TH2F>("massWPtSmear_10", "massWPtSmear_10", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPtSmear_20"] = fs->make<TH2F>("massWPtSmear_20", "massWPtSmear_20", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPtSmear_30"] = fs->make<TH2F>("massWPtSmear_30", "massWPtSmear_30", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPtSmear_40"] = fs->make<TH2F>("massWPtSmear_40", "massWPtSmear_40", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPtSmear_50"] = fs->make<TH2F>("massWPtSmear_50", "massWPtSmear_50", 50, 0., 250., 28, 0., 140.);
+
   hists_["massT_0" ] = fs->make<TH1F>("massT_0 ", "massT_0 ", 60, 0., 300.);
   hists_["massT_10"] = fs->make<TH1F>("massT_10", "massT_10", 60, 0., 300.);
   hists_["massT_20"] = fs->make<TH1F>("massT_20", "massT_20", 60, 0., 300.);
@@ -83,6 +103,22 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massTPt_30"] = fs->make<TH2F>("massTPt_30", "massTPt_30", 50, 0., 250., 60, 0., 300.);
   hists_["massTPt_40"] = fs->make<TH2F>("massTPt_40", "massTPt_40", 50, 0., 250., 60, 0., 300.);
   hists_["massTPt_50"] = fs->make<TH2F>("massTPt_50", "massTPt_50", 50, 0., 250., 60, 0., 300.);
+
+  hists_["massTPtSmear_0" ] = fs->make<TH2F>("massTPtSmear_0 ", "massTPtSmear_0 ", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPtSmear_10"] = fs->make<TH2F>("massTPtSmear_10", "massTPtSmear_10", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPtSmear_20"] = fs->make<TH2F>("massTPtSmear_20", "massTPtSmear_20", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPtSmear_30"] = fs->make<TH2F>("massTPtSmear_30", "massTPtSmear_30", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPtSmear_40"] = fs->make<TH2F>("massTPtSmear_40", "massTPtSmear_40", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPtSmear_50"] = fs->make<TH2F>("massTPtSmear_50", "massTPtSmear_50", 50, 0., 250., 60, 0., 300.);
+
+  std::string name = "massWPt1SmearPt2Smear";
+  hists3d_[name] = fs->make<TH3F>(name.c_str(), name.c_str(), 50, 0., 250., 50, 0., 250., 28, 0., 140.);
+  name = "massWE1SmearE2Smear";
+  hists3d_[name] = fs->make<TH3F>(name.c_str(), name.c_str(), 50, 0., 250., 50, 0., 250., 28, 0., 140.);
+  name = "ptWPt1SmearPt2Smear";
+  hists3d_[name] = fs->make<TH3F>(name.c_str(), name.c_str(), 50, 0., 250., 50, 0., 250., 28, 0., 140.);
+  name = "ptWE1SmearE2Smear";
+  hists3d_[name] = fs->make<TH3F>(name.c_str(), name.c_str(), 50, 0., 250., 50, 0., 250., 28, 0., 140.);
 
   randNumGen_ = new TRandom3(0);
 }
@@ -123,9 +159,17 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
   hists_.find("pt" )->second->Fill( vecP.Pt() );
   hists_.find("pt" )->second->Fill( vecQ.Pt() );
 
-  smearPt(vecB);
-  smearPt(vecP);
-  smearPt(vecQ);
+  smearEnergy(vecB);
+  smearEnergy(vecP);
+  smearEnergy(vecQ);
+
+  hists_.find("ptSmeared")->second->Fill( vecB.Pt() );
+  hists_.find("ptSmeared")->second->Fill( vecP.Pt() );
+  hists_.find("ptSmeared")->second->Fill( vecQ.Pt() );
+
+  hists_.find("energySmearedOverGen")->second->Fill( hadB->energy(), vecB.Energy() / hadB->energy() );
+  hists_.find("energySmearedOverGen")->second->Fill( hadP->energy(), vecP.Energy() / hadP->energy() );
+  hists_.find("energySmearedOverGen")->second->Fill( hadQ->energy(), vecQ.Energy() / hadQ->energy() );
 
   TLorentzVector vecW = vecP + vecQ;
   TLorentzVector vecT = vecB + vecW;
@@ -143,6 +187,8 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
     if( vecP.Pt() < ptcut ) continue;
     if( vecQ.Pt() < ptcut ) continue;
 
+    // fill response plots
+
     TString name = "resp_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecB.Pt() / hadB->pt() );
     hists_.find((std::string)name)->second->Fill( vecP.Pt() / hadP->pt() );
@@ -153,6 +199,13 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
     hists_.find((std::string)name)->second->Fill( hadP->pt(), vecP.Pt() / hadP->pt() );
     hists_.find((std::string)name)->second->Fill( hadQ->pt(), vecQ.Pt() / hadQ->pt() );
 
+    name = "respPtSmear_"; name += ptcut;
+    hists_.find((std::string)name)->second->Fill( vecB.Pt(), vecB.Pt() / hadB->pt() );
+    hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecP.Pt() / hadP->pt() );
+    hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecQ.Pt() / hadQ->pt() );
+
+    // fill W mass plots
+
     name = "massW_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecW.M() );
 
@@ -160,8 +213,19 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
     hists_.find((std::string)name)->second->Fill( vecW.M() );
 
     name = "massWPt_"; name += ptcut;
+    hists_.find((std::string)name)->second->Fill( hadP->pt(), vecW.M() );
+    hists_.find((std::string)name)->second->Fill( hadQ->pt(), vecW.M() );
+
+    name = "massWPtSmear_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecW.M() );
     hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecW.M() );
+
+    hists3d_.find("massWPt1SmearPt2Smear")->second->Fill( vecP.Pt(), vecQ.Pt(), vecW.M()  );
+    hists3d_.find("massWE1SmearE2Smear"  )->second->Fill( vecP.E() , vecQ.E() , vecW.M()  );
+    hists3d_.find("ptWPt1SmearPt2Smear"  )->second->Fill( vecP.Pt(), vecQ.Pt(), vecW.Pt() );
+    hists3d_.find("ptWE1SmearE2Smear"    )->second->Fill( vecP.E() , vecQ.E() , vecW.Pt() );
+
+    // fill top mass plots
 
     name = "massT_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecT.M() );
@@ -170,6 +234,11 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
     hists_.find((std::string)name)->second->Fill( vecT.M() );
 
     name = "massTPt_"; name += ptcut;
+    hists_.find((std::string)name)->second->Fill( hadB->pt(), vecT.M() );
+    hists_.find((std::string)name)->second->Fill( hadP->pt(), vecT.M() );
+    hists_.find((std::string)name)->second->Fill( hadQ->pt(), vecT.M() );
+
+    name = "massTPtSmear_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecB.Pt(), vecT.M() );
     hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecT.M() );
     hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecT.M() );
@@ -185,13 +254,14 @@ JetEnergyResolutionBiasAnalyzer::endJob()
 }
 					 
 void
-JetEnergyResolutionBiasAnalyzer::smearPt(TLorentzVector &vec)
+JetEnergyResolutionBiasAnalyzer::smearEnergy(TLorentzVector &vec)
 {
-  double factor = 1.;
-  do {
-    factor = randNumGen_->Gaus(1., resFact_ * sqrt(resParS_*resParS_ / (vec.Pt()*vec.Pt())
-						   + resParN_*resParN_ / vec.Pt() + resParC_*resParC_) );
-  } while(factor <= 0. || factor >= 2.);
+  double factor = randNumGen_->Gaus(1., resFact_ * sqrt(resParN_*resParN_ / (vec.E()*vec.E())
+							+ resParS_*resParS_ / vec.E() + resParC_*resParC_) );
+
+  if(factor < 0.)
+    factor = 0.;
+
   vec *= factor;
 }
 

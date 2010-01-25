@@ -15,12 +15,12 @@ analyzeJetEnergyResolutionBias = cms.EDAnalyzer("JetEnergyResolutionBiasAnalyzer
 
   ####################################################################
   ## parameters of the resolution function:
-  ## (sigma/pt)^2 = (S/sqrt(pt))^2 + (N/pt)^2 + C^2
+  ## (sigma/E)^2 = (N/E)^2 + (S/sqrt(pt))^2 + C^2
   ## where S is the stochastic,
   ##       N the noise and
   ##       C the constant term
   ####################################################################
-  resParS = cms.double(4.44),
-  resParN = cms.double(1.11),
+  resParN = cms.double(4.44),
+  resParS = cms.double(1.11),
   resParC = cms.double(0.03)
 )
