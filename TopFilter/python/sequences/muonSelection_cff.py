@@ -8,13 +8,16 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
 ## ---
 
 ## getting started
-combinedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
-                                          cut = 'combinedMuon.isNull = 0'
-                                          )
-triggerMuons  = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
-                                          cut = 'combinedMuon.isNull = 0 &'
-                                                'abs(eta) < 2.5 & pt > 10.'
-                                          )
+standAloneMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                            cut = 'standAloneMuon.isNull = 0'
+                                            )
+combinedMuons   = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                            cut = 'combinedMuon.isNull = 0'
+                                            )
+triggerMuons    = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                            cut = 'combinedMuon.isNull = 0 &'
+                                            'abs(eta) < 2.5 & pt > 10.'
+                                            )
 
 ## a kinematically well defined global muon,
 ## with some chance to pass the std triggers
