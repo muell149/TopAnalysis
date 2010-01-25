@@ -27,14 +27,13 @@ tightMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
 					     '& (trackIso+caloIso)/pt < 0.25' 
 				      )
 
-## tight electron selection for veto
+## loose electron selection for veto
 looseElectrons = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
                                                cut = 'et > 20.' 
 					             '& abs(eta) < 2.4' 
 					             '& (trackIso+caloIso)/et <  0.2'
 					      )
 
-  
 ## tight jet selection
 hardJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets', 
                                     cut = 'pt > 40.' 
