@@ -26,6 +26,9 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   edm::Service<TFileService> fs;
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
 
+  double binningLogPt[15] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+			     120, 150, 200, 250, 300};
+
   hists_["eta"] = fs->make<TH1F>("eta", "eta", 30, -3.,   3.);
   hists_["pt" ] = fs->make<TH1F>("pt" , "pt" , 50,  0., 250.);
 
@@ -41,19 +44,19 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["resp_40"] = fs->make<TH1F>("resp_40", "resp_40", 51, 0., 2.);
   hists_["resp_50"] = fs->make<TH1F>("resp_50", "resp_50", 51, 0., 2.);
 
-  hists_["respPt_0" ] = fs->make<TH2F>("respPt_0" , "respPt_0" , 50, 0., 250., 51, 0., 2.);
-  hists_["respPt_10"] = fs->make<TH2F>("respPt_10", "respPt_10", 50, 0., 250., 51, 0., 2.);
-  hists_["respPt_20"] = fs->make<TH2F>("respPt_20", "respPt_20", 50, 0., 250., 51, 0., 2.);
-  hists_["respPt_30"] = fs->make<TH2F>("respPt_30", "respPt_30", 50, 0., 250., 51, 0., 2.);
-  hists_["respPt_40"] = fs->make<TH2F>("respPt_40", "respPt_40", 50, 0., 250., 51, 0., 2.);
-  hists_["respPt_50"] = fs->make<TH2F>("respPt_50", "respPt_50", 50, 0., 250., 51, 0., 2.);
+  hists_["respPt_0" ] = fs->make<TH2F>("respPt_0" , "respPt_0" , 14, binningLogPt, 51, 0., 2.);
+  hists_["respPt_10"] = fs->make<TH2F>("respPt_10", "respPt_10", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPt_20"] = fs->make<TH2F>("respPt_20", "respPt_20", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPt_30"] = fs->make<TH2F>("respPt_30", "respPt_30", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPt_40"] = fs->make<TH2F>("respPt_40", "respPt_40", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPt_50"] = fs->make<TH2F>("respPt_50", "respPt_50", 14, binningLogPt, 51, 0., 2.);
 
-  hists_["respPtSmear_0" ] = fs->make<TH2F>("respPtSmear_0" , "respPtSmear_0" , 50, 0., 250., 51, 0., 2.);
-  hists_["respPtSmear_10"] = fs->make<TH2F>("respPtSmear_10", "respPtSmear_10", 50, 0., 250., 51, 0., 2.);
-  hists_["respPtSmear_20"] = fs->make<TH2F>("respPtSmear_20", "respPtSmear_20", 50, 0., 250., 51, 0., 2.);
-  hists_["respPtSmear_30"] = fs->make<TH2F>("respPtSmear_30", "respPtSmear_30", 50, 0., 250., 51, 0., 2.);
-  hists_["respPtSmear_40"] = fs->make<TH2F>("respPtSmear_40", "respPtSmear_40", 50, 0., 250., 51, 0., 2.);
-  hists_["respPtSmear_50"] = fs->make<TH2F>("respPtSmear_50", "respPtSmear_50", 50, 0., 250., 51, 0., 2.);
+  hists_["respPtSmear_0" ] = fs->make<TH2F>("respPtSmear_0" , "respPtSmear_0" , 14, binningLogPt, 51, 0., 2.);
+  hists_["respPtSmear_10"] = fs->make<TH2F>("respPtSmear_10", "respPtSmear_10", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPtSmear_20"] = fs->make<TH2F>("respPtSmear_20", "respPtSmear_20", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPtSmear_30"] = fs->make<TH2F>("respPtSmear_30", "respPtSmear_30", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPtSmear_40"] = fs->make<TH2F>("respPtSmear_40", "respPtSmear_40", 14, binningLogPt, 51, 0., 2.);
+  hists_["respPtSmear_50"] = fs->make<TH2F>("respPtSmear_50", "respPtSmear_50", 14, binningLogPt, 51, 0., 2.);
 
   hists_["massW_0" ] = fs->make<TH1F>("massW_0 ", "massW_0 ", 28, 0., 140.);
   hists_["massW_10"] = fs->make<TH1F>("massW_10", "massW_10", 28, 0., 140.);
@@ -69,19 +72,19 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massWzoom_40"] = fs->make<TH1F>("massWzoom_40", "massWzoom_40", 80, 60., 100.);
   hists_["massWzoom_50"] = fs->make<TH1F>("massWzoom_50", "massWzoom_50", 80, 60., 100.);
 
-  hists_["massWPt_0" ] = fs->make<TH2F>("massWPt_0 ", "massWPt_0 ", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPt_10"] = fs->make<TH2F>("massWPt_10", "massWPt_10", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPt_20"] = fs->make<TH2F>("massWPt_20", "massWPt_20", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPt_30"] = fs->make<TH2F>("massWPt_30", "massWPt_30", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPt_40"] = fs->make<TH2F>("massWPt_40", "massWPt_40", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPt_50"] = fs->make<TH2F>("massWPt_50", "massWPt_50", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPt_0" ] = fs->make<TH2F>("massWPt_0 ", "massWPt_0 ", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPt_10"] = fs->make<TH2F>("massWPt_10", "massWPt_10", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPt_20"] = fs->make<TH2F>("massWPt_20", "massWPt_20", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPt_30"] = fs->make<TH2F>("massWPt_30", "massWPt_30", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPt_40"] = fs->make<TH2F>("massWPt_40", "massWPt_40", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPt_50"] = fs->make<TH2F>("massWPt_50", "massWPt_50", 14, binningLogPt, 28, 0., 140.);
 
-  hists_["massWPtSmear_0" ] = fs->make<TH2F>("massWPtSmear_0 ", "massWPtSmear_0 ", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPtSmear_10"] = fs->make<TH2F>("massWPtSmear_10", "massWPtSmear_10", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPtSmear_20"] = fs->make<TH2F>("massWPtSmear_20", "massWPtSmear_20", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPtSmear_30"] = fs->make<TH2F>("massWPtSmear_30", "massWPtSmear_30", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPtSmear_40"] = fs->make<TH2F>("massWPtSmear_40", "massWPtSmear_40", 50, 0., 250., 28, 0., 140.);
-  hists_["massWPtSmear_50"] = fs->make<TH2F>("massWPtSmear_50", "massWPtSmear_50", 50, 0., 250., 28, 0., 140.);
+  hists_["massWPtSmear_0" ] = fs->make<TH2F>("massWPtSmear_0 ", "massWPtSmear_0 ", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPtSmear_10"] = fs->make<TH2F>("massWPtSmear_10", "massWPtSmear_10", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPtSmear_20"] = fs->make<TH2F>("massWPtSmear_20", "massWPtSmear_20", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPtSmear_30"] = fs->make<TH2F>("massWPtSmear_30", "massWPtSmear_30", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPtSmear_40"] = fs->make<TH2F>("massWPtSmear_40", "massWPtSmear_40", 14, binningLogPt, 28, 0., 140.);
+  hists_["massWPtSmear_50"] = fs->make<TH2F>("massWPtSmear_50", "massWPtSmear_50", 14, binningLogPt, 28, 0., 140.);
 
   hists_["massT_0" ] = fs->make<TH1F>("massT_0 ", "massT_0 ", 60, 0., 300.);
   hists_["massT_10"] = fs->make<TH1F>("massT_10", "massT_10", 60, 0., 300.);
@@ -97,19 +100,19 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massTzoom_40"] = fs->make<TH1F>("massTzoom_40", "massTzoom_40", 100, 150., 200.);
   hists_["massTzoom_50"] = fs->make<TH1F>("massTzoom_50", "massTzoom_50", 100, 150., 200.);
 
-  hists_["massTPt_0" ] = fs->make<TH2F>("massTPt_0 ", "massTPt_0 ", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPt_10"] = fs->make<TH2F>("massTPt_10", "massTPt_10", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPt_20"] = fs->make<TH2F>("massTPt_20", "massTPt_20", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPt_30"] = fs->make<TH2F>("massTPt_30", "massTPt_30", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPt_40"] = fs->make<TH2F>("massTPt_40", "massTPt_40", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPt_50"] = fs->make<TH2F>("massTPt_50", "massTPt_50", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPt_0" ] = fs->make<TH2F>("massTPt_0 ", "massTPt_0 ", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPt_10"] = fs->make<TH2F>("massTPt_10", "massTPt_10", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPt_20"] = fs->make<TH2F>("massTPt_20", "massTPt_20", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPt_30"] = fs->make<TH2F>("massTPt_30", "massTPt_30", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPt_40"] = fs->make<TH2F>("massTPt_40", "massTPt_40", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPt_50"] = fs->make<TH2F>("massTPt_50", "massTPt_50", 14, binningLogPt, 60, 0., 300.);
 
-  hists_["massTPtSmear_0" ] = fs->make<TH2F>("massTPtSmear_0 ", "massTPtSmear_0 ", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPtSmear_10"] = fs->make<TH2F>("massTPtSmear_10", "massTPtSmear_10", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPtSmear_20"] = fs->make<TH2F>("massTPtSmear_20", "massTPtSmear_20", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPtSmear_30"] = fs->make<TH2F>("massTPtSmear_30", "massTPtSmear_30", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPtSmear_40"] = fs->make<TH2F>("massTPtSmear_40", "massTPtSmear_40", 50, 0., 250., 60, 0., 300.);
-  hists_["massTPtSmear_50"] = fs->make<TH2F>("massTPtSmear_50", "massTPtSmear_50", 50, 0., 250., 60, 0., 300.);
+  hists_["massTPtSmear_0" ] = fs->make<TH2F>("massTPtSmear_0 ", "massTPtSmear_0 ", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPtSmear_10"] = fs->make<TH2F>("massTPtSmear_10", "massTPtSmear_10", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPtSmear_20"] = fs->make<TH2F>("massTPtSmear_20", "massTPtSmear_20", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPtSmear_30"] = fs->make<TH2F>("massTPtSmear_30", "massTPtSmear_30", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPtSmear_40"] = fs->make<TH2F>("massTPtSmear_40", "massTPtSmear_40", 14, binningLogPt, 60, 0., 300.);
+  hists_["massTPtSmear_50"] = fs->make<TH2F>("massTPtSmear_50", "massTPtSmear_50", 14, binningLogPt, 60, 0., 300.);
 
   std::string name = "massWPt1SmearPt2Smear";
   hists3d_[name] = fs->make<TH3F>(name.c_str(), name.c_str(), 50, 0., 250., 50, 0., 250., 28, 0., 140.);
