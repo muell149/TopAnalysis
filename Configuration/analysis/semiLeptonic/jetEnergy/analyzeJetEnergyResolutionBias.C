@@ -56,6 +56,13 @@ void setAxisStyle(TH1* hist)
   hist->GetYaxis()->CenterTitle();
 }
 
+void setPaveTextStyle(TPaveText* txt, const Short_t txtAlign = 12)
+{
+  txt->SetTextAlign(txtAlign);
+  txt->SetFillColor(0);
+  txt->SetBorderSize(0);
+}
+
 void fitGauss1D(TH1F* hist, TH1F* histResult = 0, unsigned bin = 1, bool draw = true)
 {
   if(hist->GetRMS() == 0.) {
@@ -230,8 +237,11 @@ int analyzeJetEnergyResolutionBias()
   //
 
   TH1F* pt;
-  TH1F* eta;
   TH1F* ptSmeared;
+  TH1F* energy;
+  TH1F* energySmeared;
+  TH1F* eta;
+  TH1F* theta;
   TH2F* energySmearedOverGen;
 
   TH1F* resp       [6][4];
@@ -258,10 +268,14 @@ int analyzeJetEnergyResolutionBias()
 		       "_m20",   // resolution 20% better
 		       "_p20"};  // resolution 20% worse
 
-  pt  = cloneObjectFromFile<TH1F*>(file, inDirBase + "/pt" );
-  eta = cloneObjectFromFile<TH1F*>(file, inDirBase + "/eta");
-
+  pt        = cloneObjectFromFile<TH1F*>(file, inDirBase + "/pt" );
   ptSmeared = cloneObjectFromFile<TH1F*>(file, inDirBase + "/ptSmeared");
+
+  energy        = cloneObjectFromFile<TH1F*>(file, inDirBase + "/energy" );
+  energySmeared = cloneObjectFromFile<TH1F*>(file, inDirBase + "/energySmeared");
+
+  eta = cloneObjectFromFile<TH1F*>(file, inDirBase + "/eta");
+  theta = cloneObjectFromFile<TH1F*>(file, inDirBase + "/theta");
 
   energySmearedOverGen = cloneObjectFromFile<TH2F*>(file, inDirBase + "/energySmearedOverGen");
 
@@ -349,6 +363,8 @@ int analyzeJetEnergyResolutionBias()
   // configure histos and draw them on pads
   //
 
+  char *tmpTxt = new char[100];
+
   setAxisStyle(pt);
   pt->SetTitle("");
   pt->SetXTitle("p_{T}^{gen} (parton) [GeV]");
@@ -357,14 +373,38 @@ int analyzeJetEnergyResolutionBias()
   canvasBase->cd(1);
   setPadStyle();
   pt->DrawCopy();
+  TPaveText* txtPt = new TPaveText(0.5, 0.73, 0.88, 0.88, "NDC");
+  setPaveTextStyle(txtPt, 32);
+  sprintf(tmpTxt, "Mean = %4.2f #pm", pt->GetMean());
+  txtPt->AddText(tmpTxt);
+  sprintf(tmpTxt, "%4.2f GeV", pt->GetMeanError());
+  txtPt->AddText(tmpTxt);
+  txtPt->Draw();
   gPad->Print(outDir + "/ptGen.eps");
+
+  setAxisStyle(energy);
+  energy->SetTitle("");
+  energy->SetXTitle("E^{gen} (parton) [GeV]");
+  energy->SetYTitle("partons");
+  energy->SetStats(kFALSE);
+  canvasBase->cd(2);
+  setPadStyle();
+  energy->DrawCopy();
+  TPaveText* txtEnergy = new TPaveText(0.5, 0.73, 0.88, 0.88, "NDC");
+  setPaveTextStyle(txtEnergy, 32);
+  sprintf(tmpTxt, "Mean = %4.2f #pm", energy->GetMean());
+  txtEnergy->AddText(tmpTxt);
+  sprintf(tmpTxt, "%4.2f GeV", energy->GetMeanError());
+  txtEnergy->AddText(tmpTxt);
+  txtEnergy->Draw();
+  gPad->Print(outDir + "/energyGen.eps");
 
   setAxisStyle(eta);
   eta->SetTitle("");
   eta->SetXTitle("#eta (parton)");
   eta->SetYTitle("partons");
   eta->SetStats(kFALSE);
-  canvasBase->cd(2);
+  canvasBase->cd(3);
   setPadStyle();
   eta->DrawCopy();
   gPad->Print(outDir + "/eta.eps");
@@ -377,10 +417,34 @@ int analyzeJetEnergyResolutionBias()
   canvasBase->cd(4);
   setPadStyle();
   ptSmeared->DrawCopy();
+  TPaveText* txtPtSmeared = new TPaveText(0.5, 0.73, 0.88, 0.88, "NDC");
+  setPaveTextStyle(txtPtSmeared, 32);
+  sprintf(tmpTxt, "Mean = %4.2f #pm", ptSmeared->GetMean());
+  txtPtSmeared->AddText(tmpTxt);
+  sprintf(tmpTxt, "%4.2f GeV", ptSmeared->GetMeanError());
+  txtPtSmeared->AddText(tmpTxt);
+  txtPtSmeared->Draw();
   gPad->Print(outDir + "/ptSmeared.eps");
 
-  fitGauss2D(energySmearedOverGen, means, sigmas);
+  setAxisStyle(energySmeared);
+  energySmeared->SetTitle("");
+  energySmeared->SetXTitle("E^{smear} (parton) [GeV]");
+  energySmeared->SetYTitle("partons");
+  energySmeared->SetStats(kFALSE);
   canvasBase->cd(5);
+  setPadStyle();
+  energySmeared->DrawCopy();
+  TPaveText* txtEnergySmeared = new TPaveText(0.5, 0.73, 0.88, 0.88, "NDC");
+  setPaveTextStyle(txtEnergySmeared, 32);
+  sprintf(tmpTxt, "Mean = %4.2f #pm", energySmeared->GetMean());
+  txtEnergySmeared->AddText(tmpTxt);
+  sprintf(tmpTxt, "%4.2f GeV", energySmeared->GetMeanError());
+  txtEnergySmeared->AddText(tmpTxt);
+  txtEnergySmeared->Draw();
+  gPad->Print(outDir + "/energySmeared.eps");
+
+  fitGauss2D(energySmearedOverGen, means, sigmas);
+  canvasBase->cd(6);
   setPadStyle();
   setAxisStyle(&sigmas);
   sigmas.SetMinimum(.0);
@@ -397,11 +461,8 @@ int analyzeJetEnergyResolutionBias()
     sigmas.GetFunction("f")->SetLineColor(kGray);
     sigmas.GetFunction("f")->DrawCopy("same");
     
-    TPaveText* txt = new TPaveText(0.35, 0.68, 0.89, 0.88, "NDC");
-    char *tmpTxt = new char[100];
-    txt->SetTextAlign(12);
-    txt->SetFillColor(0);
-    txt->SetBorderSize(0);
+    TPaveText* txtEsOg = new TPaveText(0.35, 0.68, 0.89, 0.88, "NDC");
+    setPaveTextStyle(txtEsOg);
     
     double N     = sigmas.GetFunction("f")->GetParameter(0);
     double N_err = sigmas.GetFunction("f")->GetParError (0);
@@ -410,15 +471,32 @@ int analyzeJetEnergyResolutionBias()
     double C     = sigmas.GetFunction("f")->GetParameter(2);
     double C_err = sigmas.GetFunction("f")->GetParError (2);
     sprintf(tmpTxt, "N = %4.2f #pm %4.2f GeV", N, N_err);
-    txt->AddText(tmpTxt);
+    txtEsOg->AddText(tmpTxt);
     sprintf(tmpTxt, "S = %4.2f #pm %4.2f  #sqrt{GeV}", S, S_err);
-    txt->AddText(tmpTxt);
+    txtEsOg->AddText(tmpTxt);
     sprintf(tmpTxt, "C = %4.2f #pm %4.2f", C, C_err);
-    txt->AddText(tmpTxt);
+    txtEsOg->AddText(tmpTxt);
     
-    txt->Draw();
+    txtEsOg->Draw();
   }
   gPad->Print(outDir + "/resolution.eps");
+
+  setAxisStyle(theta);
+  theta->SetStats(kFALSE);
+  theta->SetTitle("");
+  theta->SetXTitle("#theta_{q #bar{q}}");
+  theta->SetYTitle("events");
+  canvasBase->cd(7);
+  setPadStyle();
+  theta->DrawCopy();
+  TPaveText* txtTheta = new TPaveText(0.58, 0.73, 0.9, 0.88, "NDC");
+  setPaveTextStyle(txtTheta, 32);
+  sprintf(tmpTxt, "Mean = %4.3f", theta->GetMean());
+  txtTheta->AddText(tmpTxt);
+  sprintf(tmpTxt, "#pm %4.3f", theta->GetMeanError());
+  txtTheta->AddText(tmpTxt);
+  txtTheta->Draw();
+  gPad->Print(outDir + "/theta.eps");
 
   for(unsigned i = 0; i < 6; i++) {
     TString title = "p_{T}^{smear} > ";
@@ -572,20 +650,28 @@ int analyzeJetEnergyResolutionBias()
   w3D->SetContour(1, contLevels);
   w3D->DrawCopy("cont1");
 
-  massWE1SmearE2Smear->FitSlicesZ();
-  tmpName = massWE1SmearE2Smear->GetName();
-  w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
-  setAxisStyle(w3D);
-  w3D->SetStats(kFALSE);
-  w3D->SetTitle("m_{qq} [GeV]");
-  w3D->SetXTitle("E_{q}^{smear} [GeV]");
-  w3D->SetYTitle("E_{#bar{q}}^{smear} [GeV]");
-  w3D->SetMinimum(60.);
-  w3D->SetMaximum(100.);
+  TH2* project3D = (TH2*) massWE1SmearE2Smear->Project3D("xy");
+  project3D->Rebin2D(4, 4);
+  setAxisStyle(project3D);
+  project3D->SetStats(kFALSE);
+  project3D->SetTitle("");
+  project3D->SetXTitle("E_{q}^{smear} [GeV]");
+  project3D->SetYTitle("E_{#bar{q}}^{smear} [GeV]");
   canvasW3D->cd(2);
   setPadStyle();
-  w3D->SetContour(1, contLevels);
-  w3D->DrawCopy("cont1");
+  project3D->DrawCopy("box");
+  // theta = 60 degr. ( cos theta = 1/2)
+  TF1* fE1E2t60 = new TF1("fE1E2t60", "80.4*80.4/x", 0., 250.);
+  fE1E2t60->SetLineColor(kGreen);
+  fE1E2t60->DrawCopy("same");
+  // theta = 90 degr. ( cos theta = 0)
+  TF1* fE1E2t90 = new TF1("fE1E2t90", "80.4*80.4/(2*x)", 0., 250.);
+  fE1E2t90->SetLineColor(kBlue);
+  fE1E2t90->DrawCopy("same");
+  // theta = 180 degr. ( cos theta = -1)
+  TF1* fE1E2t120 = new TF1("fE1E2t120", "80.4*80.4/(4*x)", 0., 250.);
+  fE1E2t120->SetLineColor(kRed);
+  fE1E2t120->DrawCopy("same");
 
   ptWPt1SmearPt2Smear->FitSlicesZ();
   tmpName = ptWPt1SmearPt2Smear->GetName();
