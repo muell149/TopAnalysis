@@ -29,10 +29,14 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   double binningLogPt[15] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
 			     120, 150, 200, 250, 300};
 
-  hists_["eta"] = fs->make<TH1F>("eta", "eta", 30, -3.,   3.);
-  hists_["pt" ] = fs->make<TH1F>("pt" , "pt" , 50,  0., 250.);
+  hists_["eta"      ] = fs->make<TH1F>("eta"      , "eta"      , 30, -3.,   3.);
+  hists_["pt"       ] = fs->make<TH1F>("pt"       , "pt"       , 50,  0., 250.);
+  hists_["ptSmeared"] = fs->make<TH1F>("ptSmeared", "ptSmeared", 50,  0., 250.);
 
-  hists_["ptSmeared"] = fs->make<TH1F>("ptSmeared", "ptSmeared", 50, 0., 250.);
+  hists_["energy"       ] = fs->make<TH1F>("energy"       , "energy"       , 50,  0., 250.);
+  hists_["energySmeared"] = fs->make<TH1F>("energySmeared", "energySmeared", 50,  0., 250.);
+
+  hists_["theta"] = fs->make<TH1F>("theta", "theta", 21, 0., 3.15);
 
   hists_["energySmearedOverGen" ] = fs->make<TH2F>("energySmearedOverGen", "energySmearedOverGen",
 						   50, 0., 250., 51, 0., 2.);
@@ -158,9 +162,15 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
   hists_.find("eta")->second->Fill( vecP.Eta() );
   hists_.find("eta")->second->Fill( vecQ.Eta() );
 
-  hists_.find("pt" )->second->Fill( vecB.Pt() );
-  hists_.find("pt" )->second->Fill( vecP.Pt() );
-  hists_.find("pt" )->second->Fill( vecQ.Pt() );
+  hists_.find("pt")->second->Fill( vecB.Pt() );
+  hists_.find("pt")->second->Fill( vecP.Pt() );
+  hists_.find("pt")->second->Fill( vecQ.Pt() );
+
+  hists_.find("energy")->second->Fill( vecB.E() );
+  hists_.find("energy")->second->Fill( vecP.E() );
+  hists_.find("energy")->second->Fill( vecQ.E() );
+
+  hists_.find("theta")->second->Fill( vecP.Angle(vecQ.Vect()) );
 
   smearEnergy(vecB);
   smearEnergy(vecP);
@@ -169,6 +179,10 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
   hists_.find("ptSmeared")->second->Fill( vecB.Pt() );
   hists_.find("ptSmeared")->second->Fill( vecP.Pt() );
   hists_.find("ptSmeared")->second->Fill( vecQ.Pt() );
+
+  hists_.find("energySmeared")->second->Fill( vecB.E() );
+  hists_.find("energySmeared")->second->Fill( vecP.E() );
+  hists_.find("energySmeared")->second->Fill( vecQ.E() );
 
   hists_.find("energySmearedOverGen")->second->Fill( hadB->energy(), vecB.Energy() / hadB->energy() );
   hists_.find("energySmearedOverGen")->second->Fill( hadP->energy(), vecP.Energy() / hadP->energy() );
