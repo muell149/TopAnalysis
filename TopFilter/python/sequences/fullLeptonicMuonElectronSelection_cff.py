@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
 ## jet selector
-from TopAnalysis.TopAnalyze.jetSelection_cff import *
+from TopAnalysis.TopFilter.sequences.jetSelection_cff import *
 ## muon selector
-from TopAnalysis.TopAnalyze.muonSelection_cff import *
+from TopAnalysis.TopFilter.sequences.muonSelection_cff import *
 ## electron selector
-from TopAnalysis.TopAnalyze.electronSelection_cff import *
+from TopAnalysis.TopFilter.sequences.electronSelection_cff import *
 
 ## jet count filter
 from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
