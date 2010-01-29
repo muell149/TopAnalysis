@@ -29,17 +29,29 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   double binningLogPt[15] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
 			     120, 150, 200, 250, 300};
 
-  hists_["eta"      ] = fs->make<TH1F>("eta"      , "eta"      , 30, -3.,   3.);
-  hists_["pt"       ] = fs->make<TH1F>("pt"       , "pt"       , 50,  0., 250.);
-  hists_["ptSmeared"] = fs->make<TH1F>("ptSmeared", "ptSmeared", 50,  0., 250.);
+  hists_["eta"] = fs->make<TH1F>("eta", "eta", 30, -3., 3.);
 
+  hists_["pt"           ] = fs->make<TH1F>("pt"           , "pt"           , 50,  0., 250.);
+  hists_["ptSmeared"    ] = fs->make<TH1F>("ptSmeared"    , "ptSmeared"    , 50,  0., 250.);
   hists_["energy"       ] = fs->make<TH1F>("energy"       , "energy"       , 50,  0., 250.);
   hists_["energySmeared"] = fs->make<TH1F>("energySmeared", "energySmeared", 50,  0., 250.);
 
+  hists_.find("pt"           )->second->StatOverflows(kTRUE);
+  hists_.find("ptSmeared"    )->second->StatOverflows(kTRUE);
+  hists_.find("energy"       )->second->StatOverflows(kTRUE);
+  hists_.find("energySmeared")->second->StatOverflows(kTRUE);
+
   hists_["theta"] = fs->make<TH1F>("theta", "theta", 21, 0., 3.15);
 
-  hists_["energySmearedOverGen" ] = fs->make<TH2F>("energySmearedOverGen", "energySmearedOverGen",
-						   50, 0., 250., 51, 0., 2.);
+  hists_["energySmearVsGen"] = fs->make<TH2F>("energySmearVsGen", "energySmearVsGen",
+					       50, 0., 250., 51, 0., 2.);
+
+  hists_["energySmearOverGen_0" ] = fs->make<TH1F>("energySmearOverGen_0" , "energySmearOverGen_0" , 51, 0., 2.);
+  hists_["energySmearOverGen_10"] = fs->make<TH1F>("energySmearOverGen_10", "energySmearOverGen_10", 51, 0., 2.);
+  hists_["energySmearOverGen_20"] = fs->make<TH1F>("energySmearOverGen_20", "energySmearOverGen_20", 51, 0., 2.);
+  hists_["energySmearOverGen_30"] = fs->make<TH1F>("energySmearOverGen_30", "energySmearOverGen_30", 51, 0., 2.);
+  hists_["energySmearOverGen_40"] = fs->make<TH1F>("energySmearOverGen_40", "energySmearOverGen_40", 51, 0., 2.);
+  hists_["energySmearOverGen_50"] = fs->make<TH1F>("energySmearOverGen_50", "energySmearOverGen_50", 51, 0., 2.);
 
   hists_["resp_0" ] = fs->make<TH1F>("resp_0" , "resp_0" , 51, 0., 2.);
   hists_["resp_10"] = fs->make<TH1F>("resp_10", "resp_10", 51, 0., 2.);
@@ -184,9 +196,9 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
   hists_.find("energySmeared")->second->Fill( vecP.E() );
   hists_.find("energySmeared")->second->Fill( vecQ.E() );
 
-  hists_.find("energySmearedOverGen")->second->Fill( hadB->energy(), vecB.Energy() / hadB->energy() );
-  hists_.find("energySmearedOverGen")->second->Fill( hadP->energy(), vecP.Energy() / hadP->energy() );
-  hists_.find("energySmearedOverGen")->second->Fill( hadQ->energy(), vecQ.Energy() / hadQ->energy() );
+  hists_.find("energySmearVsGen")->second->Fill( hadB->energy(), vecB.Energy() / hadB->energy() );
+  hists_.find("energySmearVsGen")->second->Fill( hadP->energy(), vecP.Energy() / hadP->energy() );
+  hists_.find("energySmearVsGen")->second->Fill( hadQ->energy(), vecQ.Energy() / hadQ->energy() );
 
   TLorentzVector vecW = vecP + vecQ;
   TLorentzVector vecT = vecB + vecW;
@@ -206,7 +218,12 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
 
     // fill response plots
 
-    TString name = "resp_"; name += ptcut;
+    TString name = "energySmearOverGen_"; name += ptcut;
+    hists_.find((std::string)name)->second->Fill( vecB.E() / hadB->energy() );
+    hists_.find((std::string)name)->second->Fill( vecP.E() / hadP->energy() );
+    hists_.find((std::string)name)->second->Fill( vecQ.E() / hadQ->energy() );
+
+    name = "resp_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecB.Pt() / hadB->pt() );
     hists_.find((std::string)name)->second->Fill( vecP.Pt() / hadP->pt() );
     hists_.find((std::string)name)->second->Fill( vecQ.Pt() / hadQ->pt() );
