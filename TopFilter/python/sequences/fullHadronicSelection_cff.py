@@ -110,9 +110,9 @@ from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import
 kinFitTtFullHadEventHypothesis.jets = 'tightLeadingJets'
 kinFitTtFullHadEventHypothesis.maxNComb = -1
 #kinFitTtFullHadEventHypothesis.bTags = 1
-kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexBJetTags'
-kinFitTtFullHadEventHypothesis.minBTagValueBJet = 0.9
-kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.9
+#kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexBJetTags'
+#kinFitTtFullHadEventHypothesis.minBTagValueBJet = 0.9
+#kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.9
 
 ## kinfit analyzer
 from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
