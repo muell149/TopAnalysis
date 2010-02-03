@@ -26,7 +26,7 @@ process.MessageLogger.cerr.JetPartonMatching = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring()
 )
-execfile("TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/Source_10TeV_cff.py")
+execfile("TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/Source_7TeV_cff.py")
 
 ## define maximal number of events to loop over
 ## ----------------------
@@ -92,6 +92,7 @@ switchJetCollection(process,
                     jetIdLabel       = "antikt5"
                     )
 
+process.jetCorrFactors.corrSample = 'Summer09_7TeV'
 ## choose sample type for flavor dependent JEC
 process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
@@ -103,9 +104,9 @@ process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 process.load("TopAnalysis.TopAnalyzer.JetEnergyCorrectionsAnalyzer_cff")
 
 ## printout for debugging
-process.ttSemiLepJetPartonMatch   .verbosity = 1
-process.ttSemiLepGenJetPartonMatch.verbosity = 1
-process.ttSemiLepEventRaw         .verbosity = 1
+#process.ttSemiLepJetPartonMatch   .verbosity = 1
+#process.ttSemiLepGenJetPartonMatch.verbosity = 1
+#process.ttSemiLepEventRaw         .verbosity = 1
 #process.ttSemiLepEventOff         .verbosity = 1
 #process.ttSemiLepEventRel         .verbosity = 1
 #process.ttSemiLepEventAbs         .verbosity = 1
