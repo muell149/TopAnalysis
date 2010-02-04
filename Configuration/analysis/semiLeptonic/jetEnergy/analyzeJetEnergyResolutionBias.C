@@ -5,12 +5,14 @@
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TH3F.h>
+#include <TLegend.h>
 #include <TPaveText.h>
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TSystem.h>
 
 #include <iostream>
+#include <stdlib.h>
 
 template <typename T>
 T cloneObjectFromFile(TFile* file, TString name)
@@ -398,9 +400,9 @@ int analyzeJetEnergyResolutionBias()
   energy->DrawCopy();
   TPaveText* txtEnergy = new TPaveText(0.5, 0.73, 0.88, 0.88, "NDC");
   setPaveTextStyle(txtEnergy, 32);
-  sprintf(tmpTxt, "Mean = %4.2f #pm", energy->GetMean());
+  sprintf(tmpTxt, "Mean = %4.1f #pm", energy->GetMean());
   txtEnergy->AddText(tmpTxt);
-  sprintf(tmpTxt, "%4.2f GeV", energy->GetMeanError());
+  sprintf(tmpTxt, "%4.1f GeV", energy->GetMeanError());
   txtEnergy->AddText(tmpTxt);
   txtEnergy->Draw();
   gPad->Print(outDir + "/energyGen.eps");
@@ -442,9 +444,9 @@ int analyzeJetEnergyResolutionBias()
   energySmeared->DrawCopy();
   TPaveText* txtEnergySmeared = new TPaveText(0.5, 0.73, 0.88, 0.88, "NDC");
   setPaveTextStyle(txtEnergySmeared, 32);
-  sprintf(tmpTxt, "Mean = %4.2f #pm", energySmeared->GetMean());
+  sprintf(tmpTxt, "Mean = %4.1f #pm", energySmeared->GetMean());
   txtEnergySmeared->AddText(tmpTxt);
-  sprintf(tmpTxt, "%4.2f GeV", energySmeared->GetMeanError());
+  sprintf(tmpTxt, "%4.1f GeV", energySmeared->GetMeanError());
   txtEnergySmeared->AddText(tmpTxt);
   txtEnergySmeared->Draw();
   gPad->Print(outDir + "/energySmeared.eps");
@@ -457,7 +459,7 @@ int analyzeJetEnergyResolutionBias()
   sigmas.SetMaximum(1.);
   sigmas.SetStats(kFALSE);
   sigmas.SetTitle("");
-  sigmas.SetXTitle("E [GeV]");
+  sigmas.SetXTitle("E (parton) [GeV]");
   sigmas.SetYTitle("#sigma (E) / E");
   sigmas.DrawCopy("E1");
   if(sigmas.GetEntries() > 0) {
@@ -548,7 +550,7 @@ int analyzeJetEnergyResolutionBias()
     drawAndFitTwo2D(canvasRespPtGen, respPtGen[i], i, .9, 1.8, title,
 		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", outDir+"/respPtGen_means_");
 
-    drawAndFitTwo2D(canvasRespPtSmear, respPtSmear[i], i, .9, 1.1, title,
+    drawAndFitTwo2D(canvasRespPtSmear, respPtSmear[i], i, .89, 1.05, title,
 		    "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", outDir+"/respPtSmear_means_");
 
     drawAndFitTwo2D(canvasMassWPtGen, mWPtGen[i], i, 75., 110., title,
@@ -557,7 +559,7 @@ int analyzeJetEnergyResolutionBias()
     drawAndFitTwo2D(canvasMassWPtSmear, mWPtSmear[i], i, 75., 85., title,
 		    "p_{T}^{smear} (parton) [GeV]", "m_{qq} [GeV]", outDir+"/massWPtSmear_means_");
 
-    drawAndFitTwo2D(canvasMassTPtGen, mTPtGen[i], i, 165., 205., title,
+    drawAndFitTwo2D(canvasMassTPtGen, mTPtGen[i], i, 165., 200., title,
 		    "p_{T}^{gen} (parton) [GeV]", "m_{qqb} [GeV]", outDir+"/massTPtGen_means_");
 
     drawAndFitTwo2D(canvasMassTPtSmear, mTPtSmear[i], i, 165., 180., title,
@@ -596,12 +598,13 @@ int analyzeJetEnergyResolutionBias()
   canvasEnResp->cd(7);
   setPadStyle();
   setAxisStyle(enRespPtCut[1]);
+  enRespPtCut[1]->GetXaxis()->SetNdivisions(205);
   enRespPtCut[1]->SetStats(kFALSE);
   enRespPtCut[1]->SetTitle("");
   enRespPtCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
   enRespPtCut[1]->SetYTitle("E^{smear} / E^{gen} (parton)");
   enRespPtCut[1]->SetMinimum(0.998);
-  enRespPtCut[1]->SetMaximum(1.03);
+  enRespPtCut[1]->SetMaximum(1.032);
   enRespPtCut[1]->SetLineColor(kBlue);
   enRespPtCut[1]->SetLineStyle(2);
   enRespPtCut[0]->SetFillColor(kGray);
@@ -612,17 +615,24 @@ int analyzeJetEnergyResolutionBias()
   enRespPtCut[3]->DrawCopy("E3 same");
   enRespPtCut[0]->DrawCopy("E3 same");
   enRespPtCut[0]->DrawCopy("E1 same");
+  TLegend* legend = new TLegend(0.3, 0.69, 0.6, 0.89);
+  legend->SetFillColor(0);
+  legend->SetBorderSize(0);
+  legend->AddEntry(enRespPtCut[3], " #sigma +20%", "F");
+  legend->AddEntry(enRespPtCut[2], " #sigma -20%", "F");
+  legend->Draw();
   gPad->Print(outDir + "/enRespPtCut.eps");
 
   canvasResp->cd(7);
   setPadStyle();
   setAxisStyle(respPtCut[1]);
+  respPtCut[1]->GetXaxis()->SetNdivisions(205);
   respPtCut[1]->SetStats(kFALSE);
   respPtCut[1]->SetTitle("");
   respPtCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
   respPtCut[1]->SetYTitle("p_{T}^{smear} / p_{T}^{gen} (parton)");
   respPtCut[1]->SetMinimum(0.998);
-  respPtCut[1]->SetMaximum(1.03);
+  respPtCut[1]->SetMaximum(1.032);
   respPtCut[1]->SetLineColor(kBlue);
   respPtCut[1]->SetLineStyle(2);
   respPtCut[0]->SetFillColor(kGray);
@@ -633,17 +643,19 @@ int analyzeJetEnergyResolutionBias()
   respPtCut[3]->DrawCopy("E3 same");
   respPtCut[0]->DrawCopy("E3 same");
   respPtCut[0]->DrawCopy("E1 same");
+  legend->Draw();
   gPad->Print(outDir + "/respPtCut.eps");
 
   canvasMassW->cd(7);
   setPadStyle();
   setAxisStyle(massWptCut[1]);
+  massWptCut[1]->GetXaxis()->SetNdivisions(205);
   massWptCut[1]->SetStats(kFALSE);
   massWptCut[1]->SetTitle("");
   massWptCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
   massWptCut[1]->SetYTitle("m_{qq} [GeV]");
   massWptCut[1]->SetMinimum(79.6);
-  massWptCut[1]->SetMaximum(83.6);
+  massWptCut[1]->SetMaximum(84.0);
   massWptCut[1]->SetLineColor(kBlue);
   massWptCut[1]->SetLineStyle(2);
   massWptCut[0]->SetFillColor(kGray);
@@ -654,17 +666,19 @@ int analyzeJetEnergyResolutionBias()
   massWptCut[3]->DrawCopy("E3 same");
   massWptCut[0]->DrawCopy("E3 same");
   massWptCut[0]->DrawCopy("E1 same");
+  legend->Draw();
   gPad->Print(outDir + "/massWptCut.eps");
 
   canvasMassT->cd(7);
   setPadStyle();
   setAxisStyle(massTptCut[1]);
+  massTptCut[1]->GetXaxis()->SetNdivisions(205);
   massTptCut[1]->SetStats(kFALSE);
   massTptCut[1]->SetTitle("");
   massTptCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
   massTptCut[1]->SetYTitle("m_{qqb} [GeV]");
   massTptCut[1]->SetMinimum(170.);
-  massTptCut[1]->SetMaximum(178.);
+  massTptCut[1]->SetMaximum(179.);
   massTptCut[1]->SetLineColor(kBlue);
   massTptCut[1]->SetLineStyle(2);
   massTptCut[0]->SetFillColor(kGray);
@@ -675,6 +689,7 @@ int analyzeJetEnergyResolutionBias()
   massTptCut[3]->DrawCopy("E3 same");
   massTptCut[0]->DrawCopy("E3 same");
   massTptCut[0]->DrawCopy("E1 same");
+  legend->Draw();
   gPad->Print(outDir + "/massTptCut.eps");
 
   massWPt1SmearPt2Smear->FitSlicesZ();

@@ -46,7 +46,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
+process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
 
 #-------------------------------------------------
 # event selection

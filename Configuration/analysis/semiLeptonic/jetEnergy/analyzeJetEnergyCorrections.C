@@ -11,6 +11,8 @@
 #include <TStyle.h>
 #include <TSystem.h>
 
+#include <stdlib.h>
+
 void setPadStyle()
 {
 
