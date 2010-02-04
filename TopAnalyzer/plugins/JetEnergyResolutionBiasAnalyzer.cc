@@ -153,8 +153,6 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
   if( !genEvent->isSemiLeptonic() )
     return;
 
-  //  std::cout << genEvent->semiLeptonicChannel() << std::endl;
-
   const reco::GenParticle* hadB = genEvent->hadronicDecayB();
   const reco::GenParticle* hadP = genEvent->hadronicDecayQuark();
   const reco::GenParticle* hadQ = genEvent->hadronicDecayQuarkBar();
