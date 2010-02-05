@@ -87,6 +87,12 @@ void TopKinematics::book()
   corrs_["ttbarMass_"] = new TH2F( "ttbarMass_", "ttbarMass_",  700,  300., 1000.,     700, 300., 1000.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
   corrs_["ttbarHT_"  ] = new TH2F( "ttbarHT_"  , "ttbarHT_"  , 1000,    0., 1000.,    1000,   0., 1000.);
+  // gen-rec level correlation ttbar deltaPhi
+  corrs_["ttbarDelPhi_"]= new TH2F( "ttbarDelPhi_", "ttbarDelPhi_", 628, -3.14,  3.14,     628,-3.14,  3.14);
+  // gen-rec level correlation ttbar deltaY
+  corrs_["ttbarDelY_" ] = new TH2F( "ttbarDelY_"  , "ttbarDelY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
+  // gen-rec level correlation ttbar sumY
+  corrs_["ttbarSumY_" ] = new TH2F( "ttbarSumY_"  , "ttbarSumY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
 
 }
 
@@ -158,6 +164,12 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   corrs_["ttbarMass_" ] = fs->make<TH2F>( "ttbarMass_"  , "ttbarMass_" ,  700,  300., 1000.,     700, 300., 1000.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
   corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   , 1000,    0., 1000.,    1000,   0., 1000.);
+  // gen-rec level correlation ttbar deltaPhi
+  corrs_["ttbarDelPhi_"]= fs->make<TH2F>( "ttbarDelPhi_", "ttbarDelPhi_", 628, -3.14,  3.14,     628,-3.14,  3.14);
+  // gen-rec level correlation ttbar deltaY
+  corrs_["ttbarDelY_" ] = fs->make<TH2F>( "ttbarDelY_"  , "ttbarDelY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
+  // gen-rec level correlation ttbar sumY
+  corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
 
 }
 
@@ -213,6 +225,12 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("topPhi_"   )->second->Fill( tops.hadronicDecayTop()->phi()     , tops.hadronicDecayTop(hypoKey_)->phi()     , weight );
       // fill phi correlation plot for leptonic top candidate
       corrs_.find("topPhi_"   )->second->Fill( tops.leptonicDecayTop()->phi()     , tops.leptonicDecayTop(hypoKey_)->phi()     , weight );
+      // fill deltaPhi correlation plot for ttbar pair
+      corrs_.find("ttbarDelPhi_")->second->Fill( deltaPhi(tops.leptonicDecayTop()->phi(), tops.hadronicDecayTop()->phi()), deltaPhi(tops.leptonicDecayTop(hypoKey_)->phi(), tops.hadronicDecayTop(hypoKey_)->phi()), weight );
+      // fill deltaY correlation plot for ttbar
+      corrs_.find("ttbarDelY_"  )->second->Fill( tops.leptonicDecayTop()->rapidity()-tops.hadronicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity()-tops.hadronicDecayTop(hypoKey_)->rapidity(), weight );
+      // fill sumY correlation plot for ttbar p
+      corrs_.find("ttbarSumY_"  )->second->Fill( tops.leptonicDecayTop()->rapidity()+tops.hadronicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity()+tops.hadronicDecayTop(hypoKey_)->rapidity(), weight );
 
       // boost the W to the top rest frame
       ROOT::Math::Boost CoMBoostRecHadTop(tops.hadronicDecayTop(hypoKey_)->p4().BoostToCM());
