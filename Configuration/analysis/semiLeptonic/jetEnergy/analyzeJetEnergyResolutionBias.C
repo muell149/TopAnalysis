@@ -12,6 +12,7 @@
 #include <TSystem.h>
 
 #include <iostream>
+#include <iomanip>
 #include <stdlib.h>
 
 template <typename T>
@@ -775,6 +776,117 @@ int analyzeJetEnergyResolutionBias()
   canvasMassTPtGen  ->Print(psName);
   canvasMassTPtSmear->Print(psName);
   canvasW3D         ->Print(psName + ")");
+
+  //
+  // calculate and print exact bias with errors for a given pt cut value
+  //
+
+  double diffEnResp[4];
+  double diffResp  [4];
+  double diffW     [4];
+  double diffT     [4];
+  double relDiffW  [4];
+  double relDiffT  [4];
+  for(unsigned i=0; i<4; i++) {
+    diffEnResp[i] = (enRespPtCut[i]->GetBinContent(4) - enRespPtCut[1]->GetBinContent(4)) * 100;
+    diffResp  [i] = (respPtCut  [i]->GetBinContent(4) - respPtCut  [1]->GetBinContent(4)) * 100;
+    diffW     [i] = massWptCut [i]->GetBinContent(4) - massWptCut [1]->GetBinContent(4);
+    diffT     [i] = massTptCut [i]->GetBinContent(4) - massTptCut [1]->GetBinContent(4);
+    relDiffW  [i] = diffW[i] / massWptCut[1]->GetBinContent(4) * 100;
+    relDiffT  [i] = diffT[i] / massTptCut[1]->GetBinContent(4) * 100;
+  }
+
+  std::cout << "==========================================================================" << std::endl;
+
+  std::cout << "Effect on energy response with cut at " << enRespPtCut[0]->GetBinCenter(4) << " GeV" << std::endl
+	    << "-------------------------------------" << std::endl;
+  std::cout << "Res off : "
+	    << enRespPtCut[1]->GetBinContent(4) << " +/- " << enRespPtCut[1]->GetBinError(4) << "   (diff: "
+	    << diffEnResp[1] << " %)" << std::endl;
+  std::cout << "Res -20 : "
+	    << enRespPtCut[2]->GetBinContent(4) << " +/- " << enRespPtCut[2]->GetBinError(4) << "   (diff: "
+	    << diffEnResp[2] << " %)" << std::endl;
+  std::cout << "Res std : "
+	    << enRespPtCut[0]->GetBinContent(4) << " +/- " << enRespPtCut[0]->GetBinError(4) << "   (diff: "
+	    << diffEnResp[0] << " %)" << std::endl;
+  std::cout << "Res +20 : "
+	    << enRespPtCut[3]->GetBinContent(4) << " +/- " << enRespPtCut[3]->GetBinError(4) << "   (diff: "
+	    << diffEnResp[3] << " %)" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Effect on pt response with cut at " << respPtCut[0]->GetBinCenter(4) << " GeV" << std::endl
+	    << "-------------------------------------" << std::endl;
+  std::cout << "Res off : "
+	    << respPtCut[1]->GetBinContent(4) << " +/- " << respPtCut[1]->GetBinError(4) << "   (diff: "
+	    << diffResp[1] << ")" << std::endl;
+  std::cout << "Res -20 : "
+	    << respPtCut[2]->GetBinContent(4) << " +/- " << respPtCut[2]->GetBinError(4) << "   (diff: "
+	    << diffResp[2] << ")" << std::endl;
+  std::cout << "Res std : "
+	    << respPtCut[0]->GetBinContent(4) << " +/- " << respPtCut[0]->GetBinError(4) << "   (diff: "
+	    << diffResp[0] << ")" << std::endl;
+  std::cout << "Res +20 : "
+	    << respPtCut[3]->GetBinContent(4) << " +/- " << respPtCut[3]->GetBinError(4) << "   (diff: "
+	    << diffResp[3] << ")" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Effect on W mass with cut at " << massWptCut[0]->GetBinCenter(4) << " GeV" << std::endl
+	    << "-------------------------------------" << std::endl;
+  std::cout << "Res off : "
+	    << massWptCut[1]->GetBinContent(4) << " +/- " << massWptCut[1]->GetBinError(4) << " GeV   (diff: "
+	    << diffW[1] << " GeV, " << relDiffW[1] << " %)" << std::endl;
+  std::cout << "Res -20 : "
+	    << massWptCut[2]->GetBinContent(4) << " +/- " << massWptCut[2]->GetBinError(4) << " GeV   (diff: "
+	    << diffW[2] << " GeV, " << relDiffW[2] << " %)" << std::endl;
+  std::cout << "Res std : "
+	    << massWptCut[0]->GetBinContent(4) << " +/- " << massWptCut[0]->GetBinError(4) << " GeV   (diff: "
+	    << diffW[0] << " GeV, " << relDiffW[0] << " %)" << std::endl;
+  std::cout << "Res +20 : "
+	    << massWptCut[3]->GetBinContent(4) << " +/- " << massWptCut[3]->GetBinError(4) << " GeV   (diff: "
+	    << diffW[3] << " GeV, " << relDiffW[3] << " %)" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Effect on T mass with cut at " << massTptCut[0]->GetBinCenter(4) << " GeV" << std::endl
+	    << "-------------------------------------" << std::endl;
+  std::cout << "Res off : "
+	    << massTptCut[1]->GetBinContent(4) << " +/- " << massTptCut[1]->GetBinError(4) << " GeV   (diff: "
+	    << diffT[1] << " GeV, " << relDiffT[1] << " %)" << std::endl;
+  std::cout << "Res -20 : "
+	    << massTptCut[2]->GetBinContent(4) << " +/- " << massTptCut[2]->GetBinError(4) << " GeV   (diff: "
+	    << diffT[2] << " GeV, " << relDiffT[2] << " %)" << std::endl;
+  std::cout << "Res std : "
+	    << massTptCut[0]->GetBinContent(4) << " +/- " << massTptCut[0]->GetBinError(4) << " GeV   (diff: "
+	    << diffT[0] << " GeV, " << relDiffT[0] << " %)" << std::endl;
+  std::cout << "Res +20 : "
+	    << massTptCut[3]->GetBinContent(4) << " +/- " << massTptCut[3]->GetBinError(4) << " GeV   (diff: "
+	    << diffT[3] << " GeV, " << relDiffT[3] << " %)" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << std::setprecision(1) << std::fixed;
+
+  std::cout << "E response  --> "
+	    << diffEnResp[0] << " +" << diffEnResp[3] - diffEnResp[0] << diffEnResp[2] - diffEnResp[0] << " %"
+	    << std::endl;
+
+  std::cout << "Pt response --> "
+	    << diffResp[0] << " +" << diffResp[3] - diffResp[0] << diffResp[2] - diffResp[0] << " %"
+	    << std::endl;
+
+  std::cout << "W mass --> " << diffW[0] << " +" << diffW[3] - diffW[0] << diffW[2] - diffW[0] << " GeV"
+	    << std::endl;
+  std::cout << "       --> " << relDiffW[0] << " +" << relDiffW[3] - relDiffW[0] << relDiffW[2] - relDiffW[0] << " %"
+	    << std::endl;
+
+  std::cout << "T mass --> " << diffT[0] << " +" << diffT[3] - diffT[0] << diffT[2] - diffT[0] << " GeV"
+	    << std::endl;
+  std::cout << "       --> " << relDiffT[0] << " +" << relDiffT[3] - relDiffT[0] << relDiffT[2] - relDiffT[0] << " %"
+	    << std::endl;
+
+  std::cout << "==========================================================================" << std::endl;
+
+  //
+  // the end
+  //
 
   return 0;
 }
