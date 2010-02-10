@@ -19,7 +19,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonResolution> MuonResolutio
 DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
-typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, MuonCrossSection> MuonCrossSectionAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonCrossSection> MuonCrossSectionAnalyzer;
 DEFINE_FWK_MODULE(MuonCrossSectionAnalyzer);
 
 /**
