@@ -130,6 +130,13 @@ source['ttbarx09_7']+= 'ttbarx09_7_2,' + 'ttbarx09_7_3,'
 source['ttbarx09_7']+= 'ttbarx09_7_4,' + 'ttbarx09_7_5,'
 source['ttbarx09_7']+= 'ttbarx09_7_6,' + 'ttbarx09_7_7'
 
+from TopAnalysis.Configuration.ttbar09_sig7 import *
+evts  ['ttbarsig09_7'] =   91752           ## number of produced events
+xsec  ['ttbarsig09_7'] =    94.3           ## NLO in pb from configfile
+eff   ['ttbarsig09_7'] =     1.0           ## generator efficiency on gen level
+sizes ['ttbarsig09_7'] = 'blocks'
+source['ttbarsig09_7'] = 'ttbarsig09_7_0'
+
 ## /TTbarJets-madgraph/Summer09-MC_31X_V3-v2/GEN-SIM-RECO
 from TopAnalysis.Configuration.ttbar09_patMad import *
 evts  ['ttbarx09_mad'] =  1075985          ## number of produced events
