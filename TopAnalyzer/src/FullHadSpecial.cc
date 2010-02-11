@@ -68,11 +68,53 @@ FullHadSpecial::book()
   /// (thrust - real) vs Ht
   //hists_["thrustHt"] = new TH1F( "thrustHt" , "thrustHt" ,   100 ,  0. ,     1. );
   /// eta-eta-moment
-  //hists_["etaeta"  ] = new TH1F( "etaeta"   , "etaeta"   ,   100 ,  0. ,     1. );
+  hists_["etaeta"  ] = new TH1F( "etaeta" , "etaeta" , 100 , 0. , 0.2 );
   /// eta-phi-moment
-  //hists_["etaphi"  ] = new TH1F( "etaphi"   , "etaphi"   ,   100 ,  0. ,     1. );
+  hists_["etaphi"  ] = new TH1F( "etaphi" , "etaphi" , 200 , -0.2 , 0.2 );
   /// phi-phi-moment
-  //hists_["phiphi"  ] = new TH1F( "phiphi"   , "phiphi"   ,   100 ,  0. ,     1. );
+  hists_["phiphi"  ] = new TH1F( "phiphi" , "phiphi" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment
+  hists2D_["etaetaphiphi"] = new TH2F( "etaetaphiphi" , "etaetaphiphi" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment
+  hists2D_["etaetaetaphi"] = new TH2F( "etaetaetaphi" , "etaetaetaphi" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment
+  hists2D_["etaphiphiphi"] = new TH2F( "etaphiphiphi" , "etaphiphiphi" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment for b jets
+  hists_["etaeta_b"  ] = new TH1F( "etaeta_b" , "etaeta_b" , 100 , 0. , 0.2 );
+  /// eta-phi-moment for b jets
+  hists_["etaphi_b"  ] = new TH1F( "etaphi_b" , "etaphi_b" , 200 , -0.2 , 0.2 );
+  /// phi-phi-moment for b jets
+  hists_["phiphi_b"  ] = new TH1F( "phiphi_b" , "phiphi_b" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment for b jets
+  hists2D_["etaetaphiphi_b"] = new TH2F( "etaetaphiphi_b" , "etaetaphiphi_b" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment for b jets
+  hists2D_["etaetaetaphi_b"] = new TH2F( "etaetaetaphi_b" , "etaetaetaphi_b" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment for b jets
+  hists2D_["etaphiphiphi_b"] = new TH2F( "etaphiphiphi_b" , "etaphiphiphi_b" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment for q jets
+  hists_["etaeta_q"  ] = new TH1F( "etaeta_q" , "etaeta_q" , 100 , 0. , 0.2 );
+  /// eta-phi-moment for q jets
+  hists_["etaphi_q"  ] = new TH1F( "etaphi_q" , "etaphi_q" , 200 , -0.2 , 0.2 );
+  /// phi-phi-moment for q jets
+  hists_["phiphi_q"  ] = new TH1F( "phiphi_q" , "phiphi_q" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment for q jets
+  hists2D_["etaetaphiphi_q"] = new TH2F( "etaetaphiphi_q" , "etaetaphiphi_q" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment for q jets
+  hists2D_["etaetaetaphi_q"] = new TH2F( "etaetaetaphi_q" , "etaetaetaphi_q" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment for q jets
+  hists2D_["etaphiphiphi_q"] = new TH2F( "etaphiphiphi_q" , "etaphiphiphi_q" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment for g jets
+  hists_["etaeta_g"  ] = new TH1F( "etaeta_g" , "etaeta_g" , 100 , 0. , 0.2 );
+  /// eta-phi-moment for g jets
+  hists_["etaphi_g"  ] = new TH1F( "etaphi_g" , "etaphi_g" , 200 , -0.2 , 0.2 );
+  /// phi-phi-moment for g jets
+  hists_["phiphi_g"  ] = new TH1F( "phiphi_g" , "phiphi_g" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment for g jets
+  hists2D_["etaetaphiphi_g"] = new TH2F( "etaetaphiphi_g" , "etaetaphiphi_g" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment for g jets
+  hists2D_["etaetaetaphi_g"] = new TH2F( "etaetaetaphi_g" , "etaetaetaphi_g" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment for g jets
+  hists2D_["etaphiphiphi_g"] = new TH2F( "etaphiphiphi_g" , "etaphiphiphi_g" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
 }
 
 /// histogramm booking for full fw
@@ -132,11 +174,53 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// (thrust - real) vs Ht
   //hists_["thrustHt"] = fs->make<TH1F>( "thrustHt" , "thrustHt" ,   100 ,  0. ,     1. );
   /// eta-eta-moment
-  //hists_["etaeta"  ] = fs->make<TH1F>( "etaeta"   , "etaeta"   ,   100 ,  0. ,     1. );
+  hists_["etaeta"  ] = fs->make<TH1F>( "etaeta" , "etaeta" , 100 , 0. , 0.2 );
   /// eta-phi-moment
-  //hists_["etaphi"  ] = fs->make<TH1F>( "etaphi"   , "etaphi"   ,   100 ,  0. ,     1. );
+  hists_["etaphi"  ] = fs->make<TH1F>( "etaphi" , "etaphi" , 200 , -0.2 , 0.2 );
   /// phi-phi-moment
-  //hists_["phiphi"  ] = fs->make<TH1F>( "phiphi"   , "phiphi"   ,   100 ,  0. ,     1. );
+  hists_["phiphi"  ] = fs->make<TH1F>( "phiphi" , "phiphi" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment
+  hists2D_["etaetaphiphi"] = fs->make<TH2F>( "etaetaphiphi" , "etaetaphiphi" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment
+  hists2D_["etaetaetaphi"] = fs->make<TH2F>( "etaetaetaphi" , "etaetaetaphi" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment
+  hists2D_["etaphiphiphi"] = fs->make<TH2F>( "etaphiphiphi" , "etaphiphiphi" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment for b jets
+  hists_["etaeta_b"  ] = fs->make<TH1F>( "etaeta_b" , "etaeta_b" , 100 , 0. , 0.2 );
+  /// eta-phi-moment for b jets
+  hists_["etaphi_b"  ] = fs->make<TH1F>( "etaphi_b" , "etaphi_b" , 200 , -0.2 , 0.2 );
+  /// phi-phi-moment for b jets
+  hists_["phiphi_b"  ] = fs->make<TH1F>( "phiphi_b" , "phiphi_b" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment for b jets
+  hists2D_["etaetaphiphi_b"] = fs->make<TH2F>( "etaetaphiphi_b" , "etaetaphiphi_b" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment for b jets
+  hists2D_["etaetaetaphi_b"] = fs->make<TH2F>( "etaetaetaphi_b" , "etaetaetaphi_b" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment for b jets
+  hists2D_["etaphiphiphi_b"] = fs->make<TH2F>( "etaphiphiphi_b" , "etaphiphiphi_b" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment for q jets
+  hists_["etaeta_q"  ] = fs->make<TH1F>( "etaeta_q" , "etaeta_q" , 100 , 0. , 0.2 );
+  /// eta-phi-moment for q jets
+  hists_["etaphi_q"  ] = fs->make<TH1F>( "etaphi_q" , "etaphi_q" , 200 , -0.2 , 0.2 );
+  /// phi-phi-moment for q jets
+  hists_["phiphi_q"  ] = fs->make<TH1F>( "phiphi_q" , "phiphi_q" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment for q jets
+  hists2D_["etaetaphiphi_q"] = fs->make<TH2F>( "etaetaphiphi_q" , "etaetaphiphi_q" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment for q jets
+  hists2D_["etaetaetaphi_q"] = fs->make<TH2F>( "etaetaetaphi_q" , "etaetaetaphi_q" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment for q jets
+  hists2D_["etaphiphiphi_q"] = fs->make<TH2F>( "etaphiphiphi_q" , "etaphiphiphi_q" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment for g jets
+  hists_["etaeta_g"  ] = fs->make<TH1F>( "etaeta_g" , "etaeta_g" , 100 , 0. , 0.2 );
+  /// eta-phi-moment for g jets
+  hists_["etaphi_g"  ] = fs->make<TH1F>( "etaphi_g" , "etaphi_g" , 200 , -0.2 , 0.2 );
+  /// phi-phi-moment for g jets
+  hists_["phiphi_g"  ] = fs->make<TH1F>( "phiphi_g" , "phiphi_g" , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. phi-phi-moment for g jets
+  hists2D_["etaetaphiphi_g"] = fs->make<TH2F>( "etaetaphiphi_g" , "etaetaphiphi_g" , 100 , 0. , 0.2 , 100 , 0. , 0.2 );
+  /// eta-eta-moment vs. eta-phi-moment for g jets
+  hists2D_["etaetaetaphi_g"] = fs->make<TH2F>( "etaetaetaphi_g" , "etaetaetaphi_g" , 100 , 0. , 0.2 , 200 , -0.2 , 0.2 );
+  /// eta-phi-moment vs. phi-phi-moment for g jets
+  hists2D_["etaphiphiphi_g"] = fs->make<TH2F>( "etaphiphiphi_g" , "etaphiphiphi_g" , 200 , -0.2 , 0.2 , 100 , 0. , 0.2 );
 }
 
 /// histogram filling for fwlite and for full fw
@@ -210,17 +294,51 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
       hists2D_.find("pt5pt6")->second->Fill( Jet5.correctedJet(corL_).pt(), Jet6.correctedJet(corL_).pt(), weight );
     }
 
-/*
+
     hists_.find("etaeta")->second->Fill( jets[idx].etaetaMoment() , weight );
     hists_.find("etaphi")->second->Fill( jets[idx].etaphiMoment() , weight );
     hists_.find("phiphi")->second->Fill( jets[idx].phiphiMoment() , weight );
-*/
+
+    hists2D_.find("etaetaphiphi")->second->Fill( jets[idx].etaetaMoment() , jets[idx].phiphiMoment() , weight );
+    hists2D_.find("etaetaetaphi")->second->Fill( jets[idx].etaetaMoment() , jets[idx].etaphiMoment() , weight );
+    hists2D_.find("etaphiphiphi")->second->Fill( jets[idx].etaphiMoment() , jets[idx].phiphiMoment() , weight );
+
+    if(jets[idx].genParticle() != 0) {
+      if(jets[idx].genParticle()->pdgId() == 5 || jets[idx].genParticle()->pdgId() == -5){
+	hists_.find("etaeta_b")->second->Fill( jets[idx].etaetaMoment() , weight );
+	hists_.find("etaphi_b")->second->Fill( jets[idx].etaphiMoment() , weight );
+	hists_.find("phiphi_b")->second->Fill( jets[idx].phiphiMoment() , weight );
+	
+	hists2D_.find("etaetaphiphi_b")->second->Fill( jets[idx].etaetaMoment() , jets[idx].phiphiMoment() , weight );
+	hists2D_.find("etaetaetaphi_b")->second->Fill( jets[idx].etaetaMoment() , jets[idx].etaphiMoment() , weight );
+	hists2D_.find("etaphiphiphi_b")->second->Fill( jets[idx].etaphiMoment() , jets[idx].phiphiMoment() , weight );
+      }
+      if(jets[idx].genParticle()->pdgId() < 5 || jets[idx].genParticle()->pdgId() > -5){
+	hists_.find("etaeta_q")->second->Fill( jets[idx].etaetaMoment() , weight );
+	hists_.find("etaphi_q")->second->Fill( jets[idx].etaphiMoment() , weight );
+	hists_.find("phiphi_q")->second->Fill( jets[idx].phiphiMoment() , weight );
+	
+	hists2D_.find("etaetaphiphi_q")->second->Fill( jets[idx].etaetaMoment() , jets[idx].phiphiMoment() , weight );
+	hists2D_.find("etaetaetaphi_q")->second->Fill( jets[idx].etaetaMoment() , jets[idx].etaphiMoment() , weight );
+	hists2D_.find("etaphiphiphi_q")->second->Fill( jets[idx].etaphiMoment() , jets[idx].phiphiMoment() , weight );
+      }
+      if(jets[idx].genParticle()->pdgId() == 9  || jets[idx].genParticle()->pdgId() == -9 ||
+	 jets[idx].genParticle()->pdgId() == 21 || jets[idx].genParticle()->pdgId() == -21){
+	hists_.find("etaeta_g")->second->Fill( jets[idx].etaetaMoment() , weight );
+	hists_.find("etaphi_g")->second->Fill( jets[idx].etaphiMoment() , weight );
+	hists_.find("phiphi_g")->second->Fill( jets[idx].phiphiMoment() , weight );
+	
+	hists2D_.find("etaetaphiphi_g")->second->Fill( jets[idx].etaetaMoment() , jets[idx].phiphiMoment() , weight );
+	hists2D_.find("etaetaetaphi_g")->second->Fill( jets[idx].etaetaMoment() , jets[idx].etaphiMoment() , weight );
+	hists2D_.find("etaphiphiphi_g")->second->Fill( jets[idx].etaphiMoment() , jets[idx].phiphiMoment() , weight );
+      }
+    }
+
     if(jets[idx].bDiscriminator("trackCountingHighPurBJetTags") > 3.){
       if(jets[idx].genParticle() != 0) {
 	++bJetCounter;
 	if(bJetCounter == 1) bJet1 = jets[idx];
 	if(bJetCounter == 2) hists2D_.find("ptb1ptb2")->second->Fill( bJet1.correctedJet(corB_).pt(), jets[idx].correctedJet(corB_).pt(), weight );
-	//std::cout << "PDG-ID of b-jet (HighPur): " << jets[idx].genParticle()->pdgId() << std::endl;
 	if(jets[idx].genParticle()->pdgId() == 5 || jets[idx].genParticle()->pdgId() == -5){
 	  hists_.find("realB")->second->Fill(  0.5 , weight );
 	}
@@ -232,7 +350,6 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
 
     if(jets[idx].bDiscriminator("combinedSecondaryVertexBJetTags") > 0.9){
       if(jets[idx].genParticle() != 0) {
-	//std::cout << "PDG-ID of b-jet (SecVert): " << jets[idx].genParticle()->pdgId() << std::endl;
 	if(jets[idx].genParticle()->pdgId() == 5 || jets[idx].genParticle()->pdgId() == -5){
 	  hists_.find("realBCSV")->second->Fill(  0.5 , weight );
 	}
@@ -244,7 +361,6 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
 
     if(jets[idx].bDiscriminator("softMuonBJetTags") > 0.3){
       if(jets[idx].genParticle() != 0) {
-	//std::cout << "PDG-ID of b-jet (SoftMu ): " << jets[idx].genParticle()->pdgId() << std::endl;
 	if(jets[idx].genParticle()->pdgId() == 5 || jets[idx].genParticle()->pdgId() == -5){
 	  hists_.find("realBSM")->second->Fill(  0.5 , weight );
 	}
@@ -300,9 +416,3 @@ const std::string FullHadSpecial::correctionFlavor() const
   }
   return flavor;
 }
-
-// /// histogram filling for fwlite and for full fw
-// void
-// FullHadSpecial::fill(const edm::View<reco::Candidate>& jets, const double& weight)
-// {
-// }
