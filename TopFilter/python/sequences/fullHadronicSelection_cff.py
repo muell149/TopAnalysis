@@ -46,7 +46,8 @@ tightBottomJets  = selectedLayer1Jets.clone(src = 'trackCountingHighPurBJets',
 ## setting up the collections for the fully-hadronic
 ## event selection; on these collection monitoring
 ## can still be performed
-fullHadronicSelection = cms.Sequence(goodJets *
+fullHadronicSelection = cms.Sequence(reliableJets *
+                                     goodJets *
                                      trackCountingHighPurBJets *
                                      tightLeadingJets *
                                      tightBottomJets
@@ -113,6 +114,7 @@ kinFitTtFullHadEventHypothesis.maxNComb = -1
 #kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexBJetTags'
 #kinFitTtFullHadEventHypothesis.minBTagValueBJet = 0.9
 #kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.9
+kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'had'
 
 ## kinfit analyzer
 from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
