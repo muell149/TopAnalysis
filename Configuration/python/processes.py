@@ -175,6 +175,24 @@ sizes ['ttbarx09_nlo7'] = 'blocks'
 source['ttbarx09_nlo7'] = 'ttbarx09_nlo7_0,' + 'ttbarx09_nlo7_1,'
 source['ttbarx09_nlo7']+= 'ttbarx09_nlo7_2'
 
+## /TTbar-mcatnlo/Summer09-MC_31X_V3_7TeV-v2/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_NLO7_pat import *
+evts  ['ttbar09_NLO7_pat'] =   993455  ## number of produced events
+xsec  ['ttbar09_NLO7_pat'] =      165  ## NLO in pb from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+eff   ['ttbar09_NLO7_pat'] =      1.0  ## generator efficiency on gen level
+sizes ['ttbar09_NLO7_pat'] = 'blocks'
+source['ttbar09_NLO7_pat'] = 'ttbar09_NLO7_pat_0,' + 'ttbar09_NLO7_pat_1,' + 'ttbar09_NLO7_pat_2'
+
+## /TTbar/Summer09-MC_31X_V3_7TeV-v1/GEN-SIM-RECO
+from TopAnalysis.Configuration.ttbar09_PYT7_pat import *
+evts  ['ttbar09_PYT7_pat'] =   626610  ## number of produced events
+xsec  ['ttbar09_PYT7_pat'] =      165  ## NLO in pb from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+eff   ['ttbar09_PYT7_pat'] =      1.0  ## generator efficiency on gen level
+sizes ['ttbar09_PYT7_pat'] = 'blocks'
+source['ttbar09_PYT7_pat'] = 'ttbar09_PYT7_pat_0,' + 'ttbar09_PYT7_pat_1,' + 'ttbar09_PYT7_pat_2,' + 'ttbar09_PYT7_pat_3,' + 'ttbar09_PYT7_pat_4,' + 'ttbar09_PYT7_pat_5,'
+source['ttbar09_PYT7_pat'] = 'ttbar09_PYT7_pat_6,' + 'ttbar09_PYT7_pat_7,' + 'ttbar09_PYT7_pat_8,' + 'ttbar09_PYT7_pat_9,' + 'ttbar09_PYT7_pat_10,' + 'ttbar09_PYT7_pat_11,'
+source['ttbar09_PYT7_pat'] = 'ttbar09_PYT7_pat_12,' + 'ttbar09_PYT7_pat_13,' + 'ttbar09_PYT7_pat_14,' + 'ttbar09_PYT7_pat_15,' + 'ttbar09_PYT7_pat_16'
+
 ## /WJets-madgraph/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.wjets09_patMad import *
 evts  ['wjets09_pat'] = 11024540       ## number of produced events
@@ -814,3 +832,108 @@ xsec  ['qcd09_pt3000_pat_her'] = 0.000009259 ## NLO in pb from configfile
 eff   ['qcd09_pt3000_pat_her'] = 1.0         ## generator efficiency on gen level
 sizes ['qcd09_pt3000_pat_her'] = 'blocks'
 source['qcd09_pt3000_pat_her'] = 'qcd09_pt3000_pat_her_0,' + 'qcd09_pt3000_pat_her_1'
+
+## /mc/Summer09/QCD_Pt15/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt15_PYT7_pat import *
+evts  ['qcd09_pt15_PYT7_pat'] = 1132      ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 6256300)
+xsec  ['qcd09_pt15_PYT7_pat'] = 876200000 ## NLO in pb from configfile
+eff   ['qcd09_pt15_PYT7_pat'] = 1.0       ## generator efficiency on gen level
+sizes ['qcd09_pt15_PYT7_pat'] = 'blocks'
+source['qcd09_pt15_PYT7_pat'] = 'qcd09_pt15_PYT7_pat_0,' + 'qcd09_pt15_PYT7_pat_1'
+
+## /mc/Summer09/QCD_Pt30/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt30_PYT7_pat import *
+evts  ['qcd09_pt30_PYT7_pat'] = 10666    ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 5238992)
+xsec  ['qcd09_pt30_PYT7_pat'] = 60410000 ## NLO in pb from configfile
+eff   ['qcd09_pt30_PYT7_pat'] = 1.0       ## generator efficiency on gen level
+sizes ['qcd09_pt30_PYT7_pat'] = 'blocks'
+source['qcd09_pt30_PYT7_pat'] = 'qcd09_pt30_PYT7_pat_0,' + 'qcd09_pt30_PYT7_pat_1,' + 'qcd09_pt30_PYT7_pat_2,' + 'qcd09_pt30_PYT7_pat_3'
+
+## /mc/Summer09/QCD_Pt80/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt80_PYT7_pat import *
+evts  ['qcd09_pt80_PYT7_pat'] = 102634  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 3203440)
+xsec  ['qcd09_pt80_PYT7_pat'] = 923800  ## NLO in pb from configfile
+eff   ['qcd09_pt80_PYT7_pat'] = 1.0     ## generator efficiency on gen level
+sizes ['qcd09_pt80_PYT7_pat'] = 'blocks'
+source['qcd09_pt80_PYT7_pat'] = 'qcd09_pt80_PYT7_pat_0,' + 'qcd09_pt80_PYT7_pat_1,' + 'qcd09_pt80_PYT7_pat_2'
+
+## /mc/Summer09/QCD_Pt170/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt170_PYT7_pat import *
+evts  ['qcd09_pt170_PYT7_pat'] = 330086  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 3132800)
+xsec  ['qcd09_pt170_PYT7_pat'] = 25470   ## NLO in pb from configfile
+eff   ['qcd09_pt170_PYT7_pat'] = 1.0     ## generator efficiency on gen level
+sizes ['qcd09_pt170_PYT7_pat'] = 'blocks'
+source['qcd09_pt170_PYT7_pat'] = 'qcd09_pt170_PYT7_pat_0,' + 'qcd09_pt170_PYT7_pat_1,' + 'qcd09_pt170_PYT7_pat_2'
+
+## /mc/Summer09/QCD_Pt300/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+#from TopAnalysis.Configuration.qcd09_pt300_PYT7_pat import *
+
+## /mc/Summer09/QCD_Pt470/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt470_PYT7_pat import *
+evts  ['qcd09_pt470_PYT7_pat'] = 430366  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 2143390)
+xsec  ['qcd09_pt470_PYT7_pat'] = 87.98   ## NLO in pb from configfile
+eff   ['qcd09_pt470_PYT7_pat'] = 1.0     ## generator efficiency on gen level
+sizes ['qcd09_pt470_PYT7_pat'] = 'blocks'
+source['qcd09_pt470_PYT7_pat'] = 'qcd09_pt470_PYT7_pat_0,' + 'qcd09_pt470_PYT7_pat_1,' + 'qcd09_pt470_PYT7_pat_2,' + 'qcd09_pt470_PYT7_pat_3,' + 'qcd09_pt470_PYT7_pat_4,'
+source['qcd09_pt470_PYT7_pat'] = 'qcd09_pt470_PYT7_pat_5,' + 'qcd09_pt470_PYT7_pat_6,' + 'qcd09_pt470_PYT7_pat_7,' + 'qcd09_pt470_PYT7_pat_8,' + 'qcd09_pt470_PYT7_pat_9,'
+source['qcd09_pt470_PYT7_pat'] = 'qcd09_pt470_PYT7_pat_10,' + 'qcd09_pt470_PYT7_pat_11,' + 'qcd09_pt470_PYT7_pat_12,' + 'qcd09_pt470_PYT7_pat_13,' + 'qcd09_pt470_PYT7_pat_14'
+
+## /mc/Summer09/QCD_Pt800/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt800_PYT7_pat import *
+evts  ['qcd09_pt800_PYT7_pat'] = 457296  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 2143921)
+xsec  ['qcd09_pt800_PYT7_pat'] = 2.186   ## NLO in pb from configfile
+eff   ['qcd09_pt800_PYT7_pat'] = 1.0     ## generator efficiency on gen level
+sizes ['qcd09_pt800_PYT7_pat'] = 'blocks'
+source['qcd09_pt800_PYT7_pat'] = 'qcd09_pt800_PYT7_pat_0,' + 'qcd09_pt800_PYT7_pat_1,' + 'qcd09_pt800_PYT7_pat_2'
+
+## /mc/Summer09/QCD_Pt1400/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt1400_PYT7_pat import *
+evts  ['qcd09_pt1400_PYT7_pat'] = 222633   ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 1184123)
+xsec  ['qcd09_pt1400_PYT7_pat'] = 0.01122  ## NLO in pb from configfile
+eff   ['qcd09_pt1400_PYT7_pat'] = 1.0      ## generator efficiency on gen level
+sizes ['qcd09_pt1400_PYT7_pat'] = 'blocks'
+source['qcd09_pt1400_PYT7_pat'] = 'qcd09_pt1400_PYT7_pat_0,' + 'qcd09_pt1400_PYT7_pat_1,' + 'qcd09_pt1400_PYT7_pat_2'
+
+## /mc/Summer09/QCD_Pt15-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt15_HER7_pat import *
+evts  ['qcd09_pt15_HER7_pat'] = 138       ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 1517806)
+xsec  ['qcd09_pt15_HER7_pat'] = 893300000 ## NLO in pb from configfile
+eff   ['qcd09_pt15_HER7_pat'] = 1.0       ## generator efficiency on gen level
+sizes ['qcd09_pt15_HER7_pat'] = 'blocks'
+source['qcd09_pt15_HER7_pat'] = 'qcd09_pt15_HER7_pat_0,' + 'qcd09_pt15_HER7_pat_1'
+
+## /mc/Summer09/QCD_Pt30-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+#from TopAnalysis.Configuration.qcd09_pt30_HER7_pat import *
+
+## /mc/Summer09/QCD_Pt80-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+#from TopAnalysis.Configuration.qcd09_pt80_HER7_pat import *
+
+## /mc/Summer09/QCD_Pt170-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt170_HER7_pat import *
+evts  ['qcd09_pt170_HER7_pat'] = 111615  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 890505)
+xsec  ['qcd09_pt170_HER7_pat'] = 28030   ## NLO in pb from configfile
+eff   ['qcd09_pt170_HER7_pat'] = 1.0     ## generator efficiency on gen level
+sizes ['qcd09_pt170_HER7_pat'] = 'blocks'
+source['qcd09_pt170_HER7_pat'] = 'qcd09_pt170_HER7_pat_0,' + 'qcd09_pt170_HER7_pat_1,' + 'qcd09_pt170_HER7_pat_2'
+
+## /mc/Summer09/QCD_Pt300-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt300_HER7_pat import *
+evts  ['qcd09_pt300_HER7_pat'] = 152158 ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 726035)
+xsec  ['qcd09_pt300_HER7_pat'] = 1401   ## NLO in pb from configfile
+eff   ['qcd09_pt300_HER7_pat'] = 1.0    ## generator efficiency on gen level
+sizes ['qcd09_pt300_HER7_pat'] = 'blocks'
+source['qcd09_pt300_HER7_pat'] = 'qcd09_pt300_HER7_pat_0,' + 'qcd09_pt300_HER7_pat_1'
+
+## /mc/Summer09/QCD_Pt470-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+from TopAnalysis.Configuration.qcd09_pt470_HER7_pat import *
+evts  ['qcd09_pt470_HER7_pat'] = 91980  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 361757)
+xsec  ['qcd09_pt470_HER7_pat'] = 98.1   ## NLO in pb from configfile
+eff   ['qcd09_pt470_HER7_pat'] = 1.0    ## generator efficiency on gen level
+sizes ['qcd09_pt470_HER7_pat'] = 'blocks'
+source['qcd09_pt470_HER7_pat'] = 'qcd09_pt470_HER7_pat_0,' + 'qcd09_pt470_HER7_pat_1'
+
+## /mc/Summer09/QCD_Pt800-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+#from TopAnalysis.Configuration.qcd09_pt800_HER7_pat import *
+
+## /mc/Summer09/QCD_Pt1400-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
+#from TopAnalysis.Configuration.qcd09_pt1400_HER7_pat import *
