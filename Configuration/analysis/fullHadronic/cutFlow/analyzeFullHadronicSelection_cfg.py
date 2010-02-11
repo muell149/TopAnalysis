@@ -12,8 +12,8 @@ import FWCore.ParameterSet.Config as cms
 eventFilter  = 'signal only'
 
 ## NOT YET REIMPLEMENTED
-useAntikt5   = True # False
-writeOutput  = False # True
+usePF       = False # False
+writeOutput = False # True
 
 # analyse muon quantities
 process = cms.Process("Selection")
@@ -22,33 +22,35 @@ process = cms.Process("Selection")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-##process.MessageLogger.categories.append('TtFullHadronicEvent')
-##process.MessageLogger.categories.append('TtFullHadKinFitter')
-##process.MessageLogger.categories.append('KinFitter')
-##process.MessageLogger.cerr.TtFullHadronicEvent = cms.untracked.PSet(
-##    limit = cms.untracked.int32(-1)
-##)
-##process.MessageLogger.cerr.TtFullHadKinFitter = cms.untracked.PSet(
-##    limit = cms.untracked.int32(-1)
-##)
-##process.MessageLogger.cerr.KinFitter = cms.untracked.PSet(
-##    limit = cms.untracked.int32(-1)
-##)
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_10_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_11_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_12_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_13_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_14_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_15_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_16_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_17_ttbar09.root',
-    '/store/user/rwolf/ttbar09/patTuple_all_18_ttbar09.root'
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_1.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_2.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_3.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_4.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_5.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_6.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_7.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_8.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_9.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_10.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_11.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_12.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_13.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_14.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_15.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_16.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_17.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_18.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_19.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_20.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_21.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_22.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_23.root',
+    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_24.root'
     )
 )
 
@@ -106,10 +108,6 @@ else:
 ## full hadronic selection
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
 
-## replace sisCone5 by antikt5
-if( useAntikt5 ):
-    process.goodJets.src = 'selectedLayer1JetsAK5'
-
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 
 addTtFullHadHypotheses(process,
@@ -126,6 +124,20 @@ process.p1 = cms.Path(## do the genEvent selection
                       ## do the filtering
                       process.analyseFullHadronicSelection
                       )
+
+## replace antikt5 calojets bei antikt5 particleflow jets
+## not jet working because goodJets still have to be calo jets
+if( usePF ):
+    print "######################################"
+    print "## Using PFJets instead of CaloJets ##"
+    print "######################################"
+    print "##   Switching to an appropriate    ##"
+    print "##  jet collection for PF as input  ##"
+    print "######################################"
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.p1, 'goodJets', 'reliableJets')
+
+    process.reliableJets.src = 'selectedLayer1JetsPF'
 
 ## Output Module Configuration
 if(writeOutput):
