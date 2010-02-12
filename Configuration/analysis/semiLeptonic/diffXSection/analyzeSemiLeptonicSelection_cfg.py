@@ -20,7 +20,8 @@ import FWCore.ParameterSet.Config as cms
 eventFilter  = 'all'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 
-useAntikt5   = True # False
+useAntikt5   = False # True
+## in new CMSSW-Version(33 or higher) is AK5 standard as selected layer 1 jets, so use !!False!! for these samples to get no error concerning collection names
 writeOutput  = False # True
 
 # analyse muon quantities
@@ -36,8 +37,10 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
 
 ## add your favourite file here
-      '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
-    # '/store/user/henderle/OctEx/InclusiveMu15/PATtuple_1.root'
+
+      '/store/user/henderle/samples/Zjets_madgraph_10TeV/PATtuple_11.root'
+    # '/store/user/henderle/samples/Wjets_madgraph_10TeV/PATtuple_1.root'
+    # '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
     # '/store/user/henderle/OctEx/Wmunu/PATtuple_1.root'
     # '/store/user/henderle/OctEx/Zmumu/PATtuple_1.root'
     # '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root''
@@ -47,7 +50,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(1000)
 )
 
 ## configure process options
@@ -140,16 +143,31 @@ process.load("TopAnalysis.TopFilter.sequences.muonSelection_cff")
 process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
 ## electron quality analyzer
 process.load("TopAnalysis.TopAnalyzer.ElectronQuality_cfi")
-
+## muon matching to W
+## prune gen particles
+process.load("TopAnalysis.TopUtils.genParticlePruning_cfi")
+## get muon match
+process.load("TopAnalysis.TopUtils.genMatchedMuons_cff")
+## get particle content of sample with IDs
+process.load("TopAnalysis.TopAnalyzer.GenParticle_cfi")
+process.analyzeGenParticlesSample        = process.analyzeGenParticles.clone()
+process.analyzeGenParticlesPassinghltMu9 = process.analyzeGenParticles.clone()
+process.analyzeGenParticlesMuonCut       = process.analyzeGenParticles.clone()
+process.analyzeGenParticlesJetCut        = process.analyzeGenParticles.clone()
+process.analyzeGenParticlesBtag          = process.analyzeGenParticles.clone()
+process.analyzeGenParticlesVeto          = process.analyzeGenParticles.clone()
 ## including some muon and jet collections
 from TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff import combinedMuons
 process.combinedMuons = combinedMuons
-#from TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff import isoMuons
-#process.isoMuons = isoMuons
 from TopAnalysis.TopFilter.sequences.jetSelection_cff import reliableJets
 process.reliableJets = reliableJets
 from TopAnalysis.TopFilter.sequences.jetSelection_cff import centralJets
 process.centralJets = centralJets
+from TopAnalysis.TopFilter.sequences.muonSelection_cff import trackIsoMuons
+process.trackIsoMuons = trackIsoMuons
+## TEST REPLACEMENT: use it for muons matched to WBoson
+#process.trackIsoMuons.src = 'genMatchedMuons'
+
 
 ## define ordered jets
 uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'    ) )
@@ -169,7 +187,6 @@ if( useAntikt5 ):
 process.unselectedMuonKinematics  = process.analyzeMuonKinematics.clone(src = 'selectedLayer1Muons'              )
 process.combinedMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'combinedMuons'                    )
 process.triggerMuonKinematics     = process.analyzeMuonKinematics.clone(src = 'triggerMuons'                     )
-#process.isoMuonKinematics         = process.analyzeMuonKinematics.clone(src = 'isoMuons'                         )
 process.trackMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'trackMuons'                       )
 process.goodMuonKinematics        = process.analyzeMuonKinematics.clone(src = 'goodMuons'                        )
 process.goldenMuonKinematics      = process.analyzeMuonKinematics.clone(src = 'goldenMuons'                      )
@@ -227,7 +244,6 @@ process.tightBJet_1_JetKinematics = process.analyzeJetKinematics.clone (src = 't
 
   ## e) Muon and Jet Collection Kinematics for monitoring after all cuts
 process.tightMuonKinematicsAfter       = process.analyzeMuonKinematics.clone(src = 'tightMuons'                       )
-#process.isoMuonKinematicsAfter         = process.analyzeMuonKinematics.clone(src = 'isoMuons'                         )
 
 process.tightLeadingJetKinematicsAfter = process.analyzeJetKinematics.clone (src = 'tightLeadingJets'                 )
 process.tightLead_0_JetKinematicsAfter = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
@@ -244,8 +260,7 @@ process.tightBJet_1_JetKinematicsAfter = process.analyzeJetKinematics.clone (src
 process.monitorMuonKinematics = cms.Sequence(process.unselectedMuonKinematics +
                                              process.combinedMuonKinematics   +
                                              process.triggerMuonKinematics    +                         
-                                             process.trackMuonKinematics      +
-                                             #process.isoMuonKinematics        +
+                                             process.trackMuonKinematics      +                                        
                                              process.goodMuonKinematics       +
                                              process.goldenMuonKinematics     +
                                              process.tightMuonKinematics      
@@ -297,7 +312,6 @@ process.monitorJetsKinematicsBefore = cms.Sequence(process.tightBottomJetKinemat
 process.unselectedMuonQuality  = process.analyzeMuonQuality.clone(src = 'selectedLayer1Muons'              )
 process.combinedMuonQuality    = process.analyzeMuonQuality.clone(src = 'combinedMuons'                    )
 process.triggerMuonQuality     = process.analyzeMuonQuality.clone(src = 'triggerMuons'                     )
-#process.isoMuonQuality         = process.analyzeMuonQuality.clone(src = 'isoMuons'                         )
 process.trackMuonQuality       = process.analyzeMuonQuality.clone(src = 'trackMuons'                       )
 process.goodMuonQuality        = process.analyzeMuonQuality.clone(src = 'goodMuons'                        )
 process.goldenMuonQuality      = process.analyzeMuonQuality.clone(src = 'goldenMuons'                      )
@@ -320,7 +334,6 @@ process.tightMatchedBJetQuality      = process.analyzeJetQuality.clone (src = 't
 process.tightMatchedLightQJetQuality = process.analyzeJetQuality.clone (src = 'tightMatchedLightQJets'           )
 
   ## d) Muon Collection Qualities performed after cuts
-#process.isoMuonQualityAfter               = process.analyzeMuonQuality.clone(src = 'isoMuons'                         )
 process.tightMuonQualityAfter             = process.analyzeMuonQuality.clone(src = 'tightMuons'                       )
 process.tightLeadingJetQualityAfter       = process.analyzeJetQuality.clone (src = 'tightLeadingJets'                 )
 process.tightBottomJetQualityAfter        = process.analyzeJetQuality.clone (src = 'tightBottomJets'                  )
@@ -328,14 +341,17 @@ process.tightLeadingJetQualityAfter       = process.analyzeJetQuality.clone (src
 process.tightMatchedBJetQualityAfter      = process.analyzeJetQuality.clone (src = 'tightMatchedBottomJets'           )
 process.tightMatchedLightQJetQualityAfter = process.analyzeJetQuality.clone (src = 'tightMatchedLightQJets'           )
 
+  ## e) check Ecaldeposit differences of the samples after some trackIsolation is done
+## Monitoring with muons matched to W at the moment
+process.trackIsoMuonQuality             = process.analyzeMuonQuality.clone(src = 'trackIsoMuons'                      )
+
 ## choosing the quality-monitoring you want to use
 ## to be called with the *selectGoldenMuons* sequence
 process.monitorMuonQuality = cms.Sequence(process.unselectedMuonQuality +
                                           process.combinedMuonQuality   +
                                           process.triggerMuonQuality    +
                                           process.trackMuonQuality      +
-                                          process.goodMuonQuality       +
-                                          #process.isoMuonQuality        +
+                                          process.goodMuonQuality       +                                        
                                           process.goldenMuonQuality     +
                                           process.tightMuonQuality
                                           )
@@ -396,38 +412,58 @@ process.monitorQualitiesAfterSelection = cms.Sequence(  process.tightMuonKinemat
 ## ---
 ##    run the final sequence
 ## ---
-process.p1 = cms.Path(## do the gen event selection (decay channel) and the trigger selection (hltMu9)
+
+process.p1 = cms.Path(
+                      ## see particle content of sample
+                      process.analyzeGenParticlesSample           *
+                      ## do the gen event selection (decay channel) and the trigger selection (hltMu9)
                       process.filterSequence                      *
+                      ## see particle content passing hltMu9
+                      process.analyzeGenParticlesPassinghltMu9    *
+                      ## create collection with trackIsomuons matched to W
+#                      process.prunedGenParticles                  *
+#                      process.makeGenMatchedMuons                 *
                       ## introduce some collecions
                       process.semiLeptonicSelection               *
                       reliableJets                                *
                       centralJets                                 *
                       combinedMuons                               *
+#                      process.trackIsoMuons                       *
                       ## do the matching
                       process.matchJetsToPartons                  *
                       ## do monitoring before cuts
-                      process.monitorMuonQuality                  *
-                      process.monitorJetsQuality                  *
-                      process.monitorJetsKinematics               *
-                      process.monitorMuonKinematics               *
-                      process.monitorMuonJetKinematics            *
-                      ## do the complete event selection
+#                      process.monitorMuonQuality                  *
+#                      process.monitorJetsQuality                  *
+#                      process.monitorJetsKinematics               *
+#                      process.monitorMuonKinematics               *
+#                      process.monitorMuonJetKinematics            *
+#                      process.trackIsoMuonQuality                 *    
+#                      process.trackIsoGenMatchedMuonQuality       * 
+                      ## do the complete event selection at once
 #                      process.semiLeptonicEvents                  *  
                       ## do the event selection for muon
                       process.muonSelection                       *
+                      ## see particle content passing muon cut
+                      process.analyzeGenParticlesMuonCut          *
                       ## monitoring for veto cut selections
-                      process.monitorVetoCollections              *
+#                      process.monitorVetoCollections              *
+                      ## see particle content passing veto cuts
+                      process.analyzeGenParticlesVeto             * 
                       ## do event selection veto cuts
                       process.secondMuonVeto                      *
                       process.electronVeto                        *
                       ## do the monitoring for jet quantities
-                      process.monitorJetsKinematicsBefore         *
-                      ## do event selection jets
+#                      process.monitorJetsKinematicsBefore         *
+                      ## do event selection concerning jets
                       process.leadingJetSelection                 *
+                      ## see particle content passing jet cuts
+                      process.analyzeGenParticlesJetCut           *
                       ## do monitoring after full cuts (no btag)
-                      process.monitorQualitiesAfterSelection      *
+#                      process.monitorQualitiesAfterSelection      *
                       ## btag
-                      process.bottomJetSelection
+                      process.bottomJetSelection                  *
+                      ## see particle content passing b-tag
+                      process.analyzeGenParticlesBtag 
                       )
 
 ## Output Module Configuration

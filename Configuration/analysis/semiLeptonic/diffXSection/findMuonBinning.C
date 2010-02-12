@@ -6,6 +6,9 @@
 // in each bin and calculates then purity,
 // stability and acceptance for this binning 
 // --------------------------
+// careful: automtic reduction of bins when
+// upper Value for last bin exceeds the chosen 
+// upperLimit value (200 GeV)
 // --------------------------
 
 #include <vector>
@@ -17,6 +20,7 @@
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <TText.h>
 #include <TLine.h>
 
 enum styles {kSig};
@@ -54,8 +58,8 @@ void findMuonBinning()
     corrPhi_   .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPhi_"   ) );
   }
   
-  // optional choices: number of toal bins
-  int totalBinNumber = 4;
+  // optional choices: number of total bins
+  int totalBinNumber = 5;
     
   // create 1D pt histo for reco Muons as projection of correlation plot
 
@@ -65,16 +69,27 @@ void findMuonBinning()
   }
 
 
+  // create Vector to store output statements
+  std::vector<TString> output_;
+
+
    // 1st step: calculate total number of events
 
+  int upperLimit =200;
   int totalEventNumber = 0;
   for(int i=0; i<=401; i++){
       totalEventNumber+= ptMuReco_[kSig]->GetBinContent(i);
 
   }
+  TString textHelper = "unweighted total number of events: ";
+
   std::cout << "" << std::endl;
   std::cout << "statistics of sample:" << std::endl;
+  output_ .push_back("statistics of sample:");
   std::cout << "unweighted total number of events: " << totalEventNumber << std::endl;
+  textHelper = "unweighted total number of events: ";
+  textHelper += totalEventNumber;
+  output_ .push_back(textHelper);
 
   // 2nd step: calculate events per bin
 
@@ -90,9 +105,17 @@ void findMuonBinning()
   binValue_ .push_back(19);
 
   std::cout << "aspired (unweighted) events per bin: " << eventsPerBin << std::endl;
+  textHelper = "aspired (unweighted) events per bin: ";
+  textHelper += eventsPerBin;
+  output_ .push_back(textHelper);
   std::cout << "" << std::endl;
   std::cout << "best binning:" << std::endl;
+  output_ .push_back("best binning:");
   std::cout << "1st bin starts at " << binValue_[1]+1 << " (chosen by hand)" << std::endl;
+  textHelper = "1st bin starts at ";
+  textHelper += (binValue_[1]+1);
+  textHelper += " (chosen by hand)";
+  output_ .push_back(textHelper);
 
   // j: calculate upper limit value for each bin
   for(int j=0; j<(totalBinNumber-1); j++){
@@ -113,18 +136,56 @@ void findMuonBinning()
     
     
     std::cout << "bin content of " << j+1 << ". bin: " << binContent_[j] << std::endl;
+    textHelper =  "bin content of ";
+    textHelper += (j+1);
+    textHelper += ". bin: ";
+    textHelper += binContent_[j];
+    output_ .push_back(textHelper);
     std::cout << "upper limit for " << j+1 << ". bin is " << binValue_[j+2] << " GeV" << std::endl;
+    textHelper = "upper limit for ";
+    textHelper += (j+1);
+    textHelper += ". bin is ";
+    textHelper += binValue_[j+2];
+    textHelper += " GeV";
+    output_ .push_back(textHelper);
+
+    // when manually chosen upper limit is exceeded, reduce binning
+    if(binValue_[j+2]>=upperLimit){
+      std::cout << "!!!reduced binning!!!" << std::endl;
+      binValue_[(binValue_.size()-1)] = 200;
+      break;
+     }
   }
 
   // set end of last bin per hand due to keep it at handy size
-  binValue_.push_back(200);  
+  if(binValue_[binValue_.size()-1]<upperLimit){
+    binValue_.push_back(upperLimit);
+  } 
+  // when upper limit is exceeded, reduce binning
+  else{
+    totalBinNumber= ((binValue_.size())-2);
+  }
+
   std::cout << "upper limit for " << binValue_.size()-2 << ". bin is " << binValue_[(binValue_.size()-1)] << " GeV (chosen by hand) " << std::endl;
   int lastBinContent =0;
   for(int i= binValue_[(binValue_.size()-2)]+1; i<=binValue_[(binValue_.size()-1)]; i++){
     lastBinContent+=ptMuReco_[kSig]->GetBinContent(i);
   }
   std::cout << "bin content within last bin is " << lastBinContent << std::endl;
+    textHelper =  "bin content within last bin is ";
+    textHelper += lastBinContent;
+    output_ .push_back(textHelper);
   std::cout << "task was: find " << totalBinNumber << " bins within " << binValue_[1]+1 << " and " << binValue_[binValue_.size()-1] << " GeV with equal event numbers per bin" << std::endl;
+    textHelper =  "task was: find ";
+    textHelper += totalBinNumber;
+    textHelper += " bins within ";
+    textHelper += (binValue_[1]+1);
+    textHelper += " and ";
+    textHelper += binValue_[binValue_.size()-1];
+    textHelper += " GeV"; 
+    output_ .push_back(textHelper);
+    textHelper ="with equal event numbers per bin";
+    output_ .push_back(textHelper);
 
   // ---
   // 4th step: calculate number of entries in each (gen,reco)-bin from correlation plot
@@ -163,11 +224,19 @@ void findMuonBinning()
       (genRecoBins_[k])[l]=eventsInGenRecoBin;
       
       std::cout << "content (gen,reco) = (" << k << "," << l  << ") pt-Bin is " << eventsInGenRecoBin << std::endl;
+    textHelper =  "content (gen,reco) = (";
+    textHelper += k;
+    textHelper += ",";
+    textHelper += l;
+    textHelper += ") pt-Bin is ";
+    textHelper += eventsInGenRecoBin;
+    output_ .push_back(textHelper);
     }
   }
   
   std::cout << "" << std::endl;
   std::cout << "purity and stability for optimal binning:" << std::endl;
+    output_ .push_back("purity and stability for optimal binning:");
 
   // ---
   // 5th step: calculate stability and purity for pt
@@ -185,7 +254,14 @@ void findMuonBinning()
     }
     purity_    .push_back( (double)((genRecoBins_[i])[i]) /  recoTotalBinI );
     stability_ .push_back( (double)((genRecoBins_[i])[i]) /  genTotalBinI  );
-    std::cout << "purity and stability for "<< i << ". bin are " << purity_[i-1] << " and " << stability_[i-1] << std::endl;
+    std::cout << "purity and stability for " << i << ". bin are " << purity_[i-1] << " and " << stability_[i-1] << std::endl;
+    textHelper =  "purity/stability for ";
+    textHelper += i;
+    textHelper += ". bin : ";
+    textHelper += purity_[i-1];
+    textHelper += "/";
+    textHelper += stability_[i-1];
+    output_ .push_back(textHelper);   
   }
 
   // ---
@@ -195,10 +271,16 @@ void findMuonBinning()
 
   std::cout << "" << std::endl;
   std::cout << "acceptance for optimal binning:" << std::endl;
+    output_ .push_back("acceptance for optimal binning:");   
 
   for(unsigned int i=0; i<purity_.size(); i++){
     acceptance_.push_back(purity_[i] / stability_[i]);
     std::cout << "acceptance for "<< i+1 << ". bin is " << acceptance_[i] << std::endl; 
+    textHelper = "acceptance for ";
+    textHelper += i+1;
+    textHelper += ". bin is ";
+    textHelper += acceptance_[i];
+    output_ .push_back(textHelper); 
   }
 
   // ---
@@ -237,6 +319,21 @@ void findMuonBinning()
   ptAcceptance->SetBinContent( 1,0 );
   for(unsigned int i=1; i<binValue_.size()-1; i++){
     ptAcceptance->SetBinContent( i+1 ,acceptance_[i-1] );
+  }
+
+
+  TLegend *leg0 = new TLegend(-0.1, 0.0, 0.5, 1.0);
+  leg0->SetFillStyle(3001);
+  leg0->SetBorderSize(0);
+  for(unsigned int i=0; i< (unsigned int)(((double)(output_.size()))/2.0); i++){
+    leg0->AddEntry( ptStability, output_[i]  , "" );;
+  }
+
+  TLegend *leg1 = new TLegend(0.35, 0.0, 1.0, 1.0);
+  leg1->SetFillStyle(3001);
+  leg1->SetBorderSize(0);
+  for(unsigned int i= ((unsigned int)(((double)(output_.size()))/2.0)); i< output_.size(); i++){
+    leg1->AddEntry( ptStability, output_[i]  , "" );;
   }
 
   // ---
@@ -374,6 +471,34 @@ void findMuonBinning()
   ptAcceptance->SetStats(kFALSE);
   ptAcceptance->Draw("");
 
+
+  // ---
+  //    do the printing for the output text
+  // ---
+  TCanvas* canv5 = new TCanvas("canv5", "canv5", 600, 600); canvasStyle(*canv5);
+
+  // draw canvas
+  canv5->cd(0);
+  canv5->SetTitle("detail numbers");
+  leg1->Draw("");
+  leg0->Draw("same");
+  
+  // ---
+  // saving
+  // ---
+  
+
+  // ps
+  canv0->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps(");
+  canv1->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
+  canv2->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
+  canv3->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
+  canv4->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
+  canv5->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps)");
+
+  for(unsigned int i=0; i<output_.size(); i++){
+    std::cout << output_[i]<< std::endl;
+  }
 }
 
 void drawBinningValue(double cutval, double maximum)

@@ -23,59 +23,158 @@ void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 
-void analyzeJetQuality(TString whichJets = "reliable")
+void analyzeJetQuality(TString whichJets = "reliable", TString whichsample = "pythia10")
   // choose whichJets = unselected, central, reliable, tight for different steps in jetcuts
 {
+
+  // set the certain step in cutflow when monitoring is applied
+  TString CutStep = "";
+  // ""       : before jet cuts are applied, before  muon cuts and Veto Cuts are applied
+  // "After"  : after  jet cuts are applied, after   muon cuts and Veto Cuts are applied
+
+  // choose the sample
+  // "pythia10" // "madgraph10" // "nlo10"
+  // "pythia7"  // "madgraph7"  // "nlo7"
+
   // ---
   //    set root style 
   // ---
-  //gROOT->cd();
-  //gROOT->SetStyle("Plain");
+  gROOT->cd();
+  gROOT->SetStyle("Plain");
 
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_all.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_sig.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_bkg.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_QCD.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Wmunu.root") );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Zmumu.root") );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_all.root"  ) );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_sig.root"  ) );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_bkg.root"  ) );
+  if(whichsample == "pythia10" || whichsample == "madgraph10" || whichsample == "nlo10" ){
+    files_.push_back(new TFile("./pythia10/analyzeSemiLeptonicSelection_QCD.root"       ) );
+  }
+  else{
+    files_.push_back(new TFile("./pythia7/analyzeSemiLeptonicSelection_QCD.root"        ) );
+  }
+  if(whichsample == "nlo10" || whichsample == "nlo7"){
+    if(whichsample == "nlo10"){
+      files_.push_back(new TFile("./madgraph10/analyzeSemiLeptonicSelection_Wmunu.root") );
+      files_.push_back(new TFile("./madgraph10/analyzeSemiLeptonicSelection_Zmumu.root") );  
+    }
+    if(whichsample == "nlo7"){
+      files_.push_back(new TFile("./madgraph7/analyzeSemiLeptonicSelection_Wmunu.root") );
+      files_.push_back(new TFile("./madgraph7/analyzeSemiLeptonicSelection_Zmumu.root") );  
+    }
+  }
+  else{
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_Wmunu.root") );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_Zmumu.root") );
+  }
 
   // histogram scaling because of lumiweighting
   std::vector<double> lumiweight;
 
 
   // add scaling factors here!!!
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
 
-  // ttbar (all, bg, sg - coming from the same sample)
-//    lumiweight.push_back(0.039);
-//    lumiweight.push_back(0.039);
-//    lumiweight.push_back(0.039 );
-//    //  QCD
-//    lumiweight.push_back(1.1161);
-//    //  Wmunu
-//    lumiweight.push_back(0.2212);
-//    //  Zmumu
-//    lumiweight.push_back(0.0458);
+ // for current 10 TeV Pythia sample
+  if( whichsample == "pythia10"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0391);
+    lumiweight.push_back(0.0391);
+    lumiweight.push_back(0.0391);
+    //  QCD
+    lumiweight.push_back(1.1161);
+    //  Wmunu
+    lumiweight.push_back(0.2522);
+    //  Zmumu
+    lumiweight.push_back(0.0351);
+  }
 
+  // for current 10 TeV Madgraph sample
+  if( whichsample == "madgraph10"){
+    //ttbar+jets (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0192);
+    lumiweight.push_back(0.0192);
+    lumiweight.push_back(0.0192);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.1161);
+    //  W+jets
+    lumiweight.push_back(0.2068);
+    //  Z+jets
+    lumiweight.push_back(0.2262);
+  }
+
+  // for current 10 TeV Mc@NLO sample
+  if( whichsample == "nlo10"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0208);
+    lumiweight.push_back(0.0208);
+    lumiweight.push_back(0.0208);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.1161);
+    //  W+jets MADGRAPH!!!!!!!
+    lumiweight.push_back(0.2068);
+    //  Z+jets MADGRAPH!!!!!!!
+    lumiweight.push_back(0.2262);
+  }
+
+ // for current 7 TeV Pythia sample
+  if( whichsample == "pythia7"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0149);
+    lumiweight.push_back(0.0149);
+    lumiweight.push_back(0.0149);
+    //  QCD
+    lumiweight.push_back(1.0286);
+    //  Wmunu
+    lumiweight.push_back(0.1632);
+    //  Zmumu
+    lumiweight.push_back(0.0212);
+  }
+
+  // for current 7 TeV Madgraph sample
+  if( whichsample == "madgraph7"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0088);
+    lumiweight.push_back(0.0088);
+    lumiweight.push_back(0.0088);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.0286);
+    //  W+jets 
+    lumiweight.push_back(0.1202);
+    //  Z+jets
+    lumiweight.push_back(0.1227);
+  }
+
+  // for current 7 TeV NLO sample
+  if( whichsample == "nlo7"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0094);
+    lumiweight.push_back(0.0094);
+    lumiweight.push_back(0.0094);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.0286);
+    //  W+jets MADGRAPH!!!!
+    lumiweight.push_back(0.1202);
+    //  Z+jets MADGRAPH!!!!
+    lumiweight.push_back(0.1227);
+  }
 
   // ---
   //    get histograms
   // ---
   std::vector<TH1F*> emf_, n_, n90_, n60_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    emf_.push_back( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality/emf"  ) );
-    n_.push_back  ( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality/n_"   ) );
-    n90_.push_back( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality/n90_" ) );
-    n60_.push_back( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality/n60_" ) );
+    emf_.push_back( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality"+CutStep+"/emf"  ) );
+    n_.push_back  ( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality"+CutStep+"/n_"   ) );
+    n90_.push_back( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality"+CutStep+"/n90_" ) );
+    n60_.push_back( (TH1F*)files_[idx]->Get(whichJets+"LeadingJetQuality"+CutStep+"/n60_" ) );
   }
 
   // ---
@@ -166,31 +265,173 @@ void analyzeJetQuality(TString whichJets = "reliable")
   //  histogramStyle(*n60_  [kZmumu]     , kZmumu     );
   histogramStyle(*n60_  [kBoson]     ,   kBoson   );
 
-  // create a legend (in upper right corner)
-  TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->SetHeader("Top-Antitop(Phythia)");
-  //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
-  leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
-  leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
-  leg0->AddEntry( emf_  [kQCD       ] , "QCD"               , "PL" );
-  //  leg0->AddEntry( emf_  [kWmunu     ] , "Wmunu"             , "PL" );
-  //  leg0->AddEntry( emf_  [kZmumu     ] , "Zmumu"             , "PL" );
-  leg0->AddEntry( emf_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
 
-  // create a legend (in upper center)
+  // ---
+  //    create legends depending on the used sample
+  // ---
+
+  TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   TLegend *leg1 = new TLegend(0.35, 0.65, 1.05, 0.9);
-  leg1->SetFillStyle(0);
-  leg1->SetBorderSize(0);
-  leg1->SetHeader("Top-Antitop(Phythia)");
-  //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
-  leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
-  leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
-  leg1->AddEntry( emf_  [kQCD       ] , "QCD"               , "PL" );
-  //  leg1->AddEntry( emf_  [kWmunu     ] , "Wmunu"             , "PL" );
-  //  leg1->AddEntry( emf_  [kZmumu     ] , "Zmumu"             , "PL" );
-  leg1->AddEntry( emf_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+
+ if( whichsample == "pythia10"){    
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Phythia, 10TeV)");
+    //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( emf_  [kQCD       ] , "QCD"               , "PL" );
+    //  leg0->AddEntry( emf_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg0->AddEntry( emf_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg0->AddEntry( emf_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Phythia, 10TeV)");
+    //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( emf_[kQCD     ] , "QCD"               , "PL" );
+    //  leg1->AddEntry( emf_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg1->AddEntry( emf_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg1->AddEntry( emf_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+  }
+  
+ if( whichsample == "madgraph10"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Madgraph, 10TeV)");
+    //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( emf_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( emf_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg0->AddEntry( emf_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg0->AddEntry( emf_  [kBoson]      , "Wjets + Zjets", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Madgraph, 10TeV)");
+    //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( emf_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( emf_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg1->AddEntry( emf_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg1->AddEntry( emf_  [kBoson]      , "Wjets + Zjets", "PL"  );
+  }
+
+ if( whichsample == "nlo10"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Mc@NLO, 10TeV)");
+    //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( emf_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( emf_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg0->AddEntry( emf_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg0->AddEntry( emf_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Mc@NLO, 10TeV)");
+    //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( emf_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( emf_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg1->AddEntry( emf_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg1->AddEntry( emf_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+  }
+ if( whichsample == "pythia7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Phythia, 7TeV)");
+    //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( emf_  [kQCD       ] , "QCD"               , "PL" );
+    //  leg0->AddEntry( emf_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg0->AddEntry( emf_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg0->AddEntry( emf_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Phythia, 7TeV)");
+    //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( emf_[kQCD     ] , "QCD"               , "PL" );
+    //  leg1->AddEntry( emf_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg1->AddEntry( emf_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg1->AddEntry( emf_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+  }
+  
+ if( whichsample == "madgraph7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Madgraph, 7TeV)");
+    //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( emf_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( emf_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg0->AddEntry( emf_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg0->AddEntry( emf_  [kBoson]      , "Wjets + Zjets", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Madgraph, 7TeV)");
+    //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( emf_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( emf_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg1->AddEntry( emf_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg1->AddEntry( emf_  [kBoson]      , "Wjets + Zjets", "PL"  );
+  }
+
+ if( whichsample == "nlo7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Mc@NLO, 7TeV)");
+    //  leg0->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( emf_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( emf_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg0->AddEntry( emf_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg0->AddEntry( emf_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Mc@NLO, 7TeV)");
+    //  leg1->AddEntry( emf_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( emf_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( emf_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( emf_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( emf_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg1->AddEntry( emf_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg1->AddEntry( emf_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+  }
 
   // create a legend indicating the used jetcuts
   TLegend *leg2 = new TLegend(0.29, 0.92, 0.81, 0.99);
@@ -208,7 +449,11 @@ void analyzeJetQuality(TString whichJets = "reliable")
   canv0->SetLogy(1);
   axesStyle(*emf_[kSignal], "Electromagnetic Fraction", "events");
   emf_[kSignal       ]->SetMinimum(1.);
-  emf_[kSignal       ]->SetMaximum( 1700* emf_[kQCD]->GetMaximum() );
+  double max=emf_[kSignal]->GetMaximum();
+  if(max<emf_[kQCD       ]->GetMaximum())max=emf_[kQCD]       ->GetMaximum();
+  if(max<emf_[kBackground]->GetMaximum())max=emf_[kBackground]->GetMaximum();
+  if(max<emf_[kBoson     ]->GetMaximum())max=emf_[kBoson     ]->GetMaximum();
+  emf_[kSignal       ]->SetMaximum( 1700* max );
   //  emf_[kAll       ]->Draw();
   emf_[kSignal    ]->Draw();
   emf_[kBackground]->Draw("same");
@@ -227,7 +472,11 @@ void analyzeJetQuality(TString whichJets = "reliable")
   canv1->cd(0);
   canv1->SetLogy(1);
   axesStyle(*n_[kSignal], "Number of Constituents", "events");
-  n_[kSignal       ]->SetMaximum( 1300* n_[kQCD]->GetMaximum() );
+  max=n_[kSignal]->GetMaximum();
+  if(max<n_[kQCD       ]->GetMaximum())max=n_[kQCD]       ->GetMaximum();
+  if(max<n_[kBackground]->GetMaximum())max=n_[kBackground]->GetMaximum();
+  if(max<n_[kBoson     ]->GetMaximum())max=n_[kBoson     ]->GetMaximum();
+  n_[kSignal       ]->SetMaximum( 1300* max );
   //  n_[kAll       ]->Draw();
   n_[kSignal    ]->Draw();
   n_[kBackground]->Draw("same");
@@ -246,7 +495,11 @@ void analyzeJetQuality(TString whichJets = "reliable")
   canv2->cd(0);
   canv2->SetLogy(1);
   axesStyle(*n90_[kSignal], "Number of Constituents n90", "events");
-  n90_[kSignal       ]->SetMaximum( 1.3* n90_[kQCD]->GetMaximum() );
+  max=n90_[kSignal]->GetMaximum();
+  if(max<n90_[kQCD       ]->GetMaximum())max=n90_[kQCD]       ->GetMaximum();
+  if(max<n90_[kBackground]->GetMaximum())max=n90_[kBackground]->GetMaximum();
+  if(max<n90_[kBoson     ]->GetMaximum())max=n90_[kBoson     ]->GetMaximum();
+  n90_[kSignal       ]->SetMaximum( 1.3* max );
   //  n90_[kAll       ]->Draw();
   n90_[kSignal    ]->Draw();
   n90_[kBackground]->Draw("same");
@@ -265,7 +518,11 @@ void analyzeJetQuality(TString whichJets = "reliable")
   canv3->cd(0);
   canv3->SetLogy(1);
   axesStyle(*n60_[kSignal], "Number of Constituents n60", "events");
-  n60_[kSignal       ]->SetMaximum( 1.3* n60_[kQCD]->GetMaximum() );
+  max=n60_[kSignal]->GetMaximum();
+  if(max<n60_[kQCD       ]->GetMaximum())max=n60_[kQCD]       ->GetMaximum();
+  if(max<n60_[kBackground]->GetMaximum())max=n60_[kBackground]->GetMaximum();
+  if(max<n60_[kBoson     ]->GetMaximum())max=n60_[kBoson     ]->GetMaximum();
+  n60_[kSignal       ]->SetMaximum( 1.3* max );
   //  n60_[kAll       ]->Draw();
   n60_[kSignal    ]->Draw();
   n60_[kBackground]->Draw("same");
@@ -279,16 +536,16 @@ void analyzeJetQuality(TString whichJets = "reliable")
 
 
   // 1.as picture 
-  canv0->Print("./analyzeJetQuantities/"+whichJets+"JetEmf.png"            );
-  canv1->Print("./analyzeJetQuantities/"+whichJets+"JetNumConstituents.png");
-  //  canv2->Print("./analyzeJetQuantities/"+whichJets+"JetN90.png"            );
-  //  canv3->Print("./analyzeJetQuantities/"+whichJets+"JetN60.png"            );
+  canv0->Print("./analyzeJetQuantities/"+whichJets+"JetEmf"+CutStep+whichsample+".png"            );
+  canv1->Print("./analyzeJetQuantities/"+whichJets+"JetNumConstituents"+CutStep+whichsample+".png");
+  //  canv2->Print("./analyzeJetQuantities/"+whichJets+"JetN90"+CutStep+whichsample+".png"            );
+  //  canv3->Print("./analyzeJetQuantities/"+whichJets+"JetN60"+CutStep+whichsample+".png"            );
   
   // 2.as ps-file
-  canv0->Print("./analyzeJetQuantities/"+whichJets+"JetQualities.ps(");
-  canv1->Print("./analyzeJetQuantities/"+whichJets+"JetQualities.ps)" );
-  //  canv2->Print("./analyzeJetQuantities/"+whichJets+"JetQualities.ps" );
-  //  canv3->Print("./analyzeJetQuantities/"+whichJets+"JetQualities.ps)");
+  canv0->Print("./analyzeJetQuantities/"+whichJets+"JetQualities"+CutStep+whichsample+".ps(");
+  canv1->Print("./analyzeJetQuantities/"+whichJets+"JetQualities"+CutStep+whichsample+".ps)" );
+  //  canv2->Print("./analyzeJetQuantities/"+whichJets+"JetQualities"+CutStep+whichsample+".ps" );
+  //  canv3->Print("./analyzeJetQuantities/"+whichJets+"JetQualities"+CutStep+whichsample+".ps)");
 }
 
 void canvasStyle(TCanvas& canv) 

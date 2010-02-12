@@ -8,69 +8,177 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 
+  // ---
+  //  introduction
+  // ---
+  //  this makro plots the Multiplizity, pt, eta and phi distributions 
+  //  of different Muon Collections for ttbar and different
+  //  BG-sample in different steps of the cutflow
+  // ---
+
 enum styles {kAll, kSignal, kBackground, kQCD, kWmunu, kZmumu, kBoson};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
-void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose" // "track" // "good" // "combined" // "unselected" // ...
+void analyzeMuonKinematics(TString whichMuons = "tight", TString whichsample = "pythia10")  //  "tight" // "loose" // "track" // "good" // "combined" // "unselected" // ...
 {
+
+  // set the certain step in cutflow when monitoring is applied
+  TString CutStep = "";
+  // ""       : before jet cuts are applied, before  muon cuts and Veto Cuts are applied
+  // "After"  : after  jet cuts are applied, after   muon cuts and Veto Cuts are applied
+
+  // choose the sample
+  // "pythia10" // "madgraph10" // "nlo10"
+  // "pythia7"  // "madgraph7"  // "nlo7"
+
   // ---
   //    set root style 
   // ---
-  //gROOT->cd();
-  //gROOT->SetStyle("Plain");
+  gROOT->cd();
+  gROOT->SetStyle("Plain");
 
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_all.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_sig.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_bkg.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_QCD.root"  ) );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Wmunu.root") );
-  files_.push_back(new TFile("./analyzeSemiLeptonicSelection_Zmumu.root") );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_all.root"  ) );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_sig.root"  ) );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_bkg.root"  ) );
+  if(whichsample == "pythia10" || whichsample == "madgraph10" || whichsample == "nlo10" ){
+    files_.push_back(new TFile("./pythia10/analyzeSemiLeptonicSelection_QCD.root"       ) );
+  }
+  else{
+    files_.push_back(new TFile("./pythia7/analyzeSemiLeptonicSelection_QCD.root"        ) );
+  }
+  if(whichsample == "nlo10" || whichsample == "nlo7"){
+    if(whichsample == "nlo10"){
+      files_.push_back(new TFile("./madgraph10/analyzeSemiLeptonicSelection_Wmunu.root") );
+      files_.push_back(new TFile("./madgraph10/analyzeSemiLeptonicSelection_Zmumu.root") );  
+    }
+    if(whichsample == "nlo7"){
+      files_.push_back(new TFile("./madgraph7/analyzeSemiLeptonicSelection_Wmunu.root") );
+      files_.push_back(new TFile("./madgraph7/analyzeSemiLeptonicSelection_Zmumu.root") );  
+    }
+  }
+  else{
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_Wmunu.root") );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_Zmumu.root") );
+  }
 
   // histogram scaling because of lumiweighting
   std::vector<double> lumiweight;
 
   // add scaling factors here!!!
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
-  lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
+//   lumiweight.push_back(1.0);
 
-  // for current 10 TeV Pythia sample: ttbar (all, bg, sg - coming from the same sample)
-//    lumiweight.push_back(0.039);
-//    lumiweight.push_back(0.039);
-//    lumiweight.push_back(0.039);
-//    //  QCD
-//    lumiweight.push_back(1.1161);
-//    // Wmunu
-//    lumiweight.push_back(0.2212);
-//    //  Zmumu
-//    lumiweight.push_back(0.0458);
+  // for current 10 TeV Pythia sample
+  if( whichsample == "pythia10"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0391);
+    lumiweight.push_back(0.0391);
+    lumiweight.push_back(0.0391);
+    //  QCD
+    lumiweight.push_back(1.1161);
+    //  Wmunu
+    lumiweight.push_back(0.2522);
+    //  Zmumu
+    lumiweight.push_back(0.0351);
+  }
 
+  // for current 10 TeV Madgraph sample
+  if( whichsample == "madgraph10"){
+    //ttbar+jets (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0192);
+    lumiweight.push_back(0.0192);
+    lumiweight.push_back(0.0192);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.1161);
+    //  W+jets
+    lumiweight.push_back(0.2068);
+    //  Z+jets
+    lumiweight.push_back(0.2262);
+  }
+
+  // for current 10 TeV Mc@NLO sample
+  if( whichsample == "nlo10"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0208);
+    lumiweight.push_back(0.0208);
+    lumiweight.push_back(0.0208);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.1161);
+    //  W+jets MADGRAPH!!!!!!!
+    lumiweight.push_back(0.2068);
+    //  Z+jets MADGRAPH!!!!!!!
+    lumiweight.push_back(0.2262);
+  }
+
+ // for current 7 TeV Pythia sample
+  if( whichsample == "pythia7"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0149);
+    lumiweight.push_back(0.0149);
+    lumiweight.push_back(0.0149);
+    //  QCD
+    lumiweight.push_back(1.0286);
+    //  Wmunu
+    lumiweight.push_back(0.1632);
+    //  Zmumu
+    lumiweight.push_back(0.0212);
+  }
+
+  // for current 7 TeV Madgraph sample
+  if( whichsample == "madgraph7"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0088);
+    lumiweight.push_back(0.0088);
+    lumiweight.push_back(0.0088);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.0286);
+    //  W+jets 
+    lumiweight.push_back(0.1202);
+    //  Z+jets
+    lumiweight.push_back(0.1227);
+  }
+
+  // for current 7 TeV NLO sample
+  if( whichsample == "nlo7"){
+    //ttbar (all, bg, sg - coming from the same sample)
+    lumiweight.push_back(0.0094);
+    lumiweight.push_back(0.0094);
+    lumiweight.push_back(0.0094);
+    //  QCD PYTHIA!!!!!!!
+    lumiweight.push_back(1.0286);
+    //  W+jets MADGRAPH!!!!
+    lumiweight.push_back(0.1202);
+    //  Z+jets MADGRAPH!!!!
+    lumiweight.push_back(0.1227);
+  }
 
   // ---
   //    get histograms
   // ---
   std::vector<TH1F*> n_, pt_, eta_, phi_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    n_  .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/n"    )->Clone() );
-    pt_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/pt"   )->Clone() );
-    eta_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/eta"  )->Clone() );
-    phi_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics/phi"  )->Clone() );
+    n_  .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics"+CutStep+"/n"    )->Clone() );
+    pt_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics"+CutStep+"/pt"   )->Clone() );
+    eta_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics"+CutStep+"/eta"  )->Clone() );
+    phi_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonKinematics"+CutStep+"/phi"  )->Clone() );
   }
 
   // ---
 
  //    close input files
   // ---
+
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     //files_[idx]->Close();
   }
@@ -107,11 +215,12 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   phi_[kWmunu]->Scale(lumiweight[kWmunu]);
   phi_[kZmumu]->Scale(lumiweight[kZmumu]);
   phi_.push_back( (TH1F*)phi_[kWmunu]->Clone());
-  phi_[kBoson]->Add(eta_[kZmumu]);
+  phi_[kBoson]->Add(phi_[kZmumu]);
   phi_[kQCD]->Scale(lumiweight[kQCD]);  
   phi_[kAll]->Scale(lumiweight[kAll]);  
   phi_[kSignal]->Scale(lumiweight[kSignal]); 
   phi_[kBackground]->Scale(lumiweight[kBackground]);
+
 
   // ---
   //    configure histograms
@@ -131,9 +240,9 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   histogramStyle(*pt_ [kSignal    ], kSignal    );
   histogramStyle(*pt_ [kBackground], kBackground);
   histogramStyle(*pt_ [kQCD]       , kQCD       );
-  histogramStyle(*pt_ [kWmunu]     , kWmunu     );
-  histogramStyle(*pt_ [kZmumu]     , kZmumu     );
-  //  histogramStyle(*pt_ [kBoson]     ,   kBoson    );
+  //  histogramStyle(*pt_ [kWmunu]     , kWmunu     );
+  //  histogramStyle(*pt_ [kZmumu]     , kZmumu     );
+  histogramStyle(*pt_ [kBoson]     ,   kBoson    );
 
   // eta_
   histogramStyle(*eta_[kAll       ], kAll       );
@@ -149,34 +258,177 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   histogramStyle(*phi_[kSignal    ], kSignal    );
   histogramStyle(*phi_[kBackground], kBackground);
   histogramStyle(*phi_[kQCD]       , kQCD       );
-  histogramStyle(*phi_[kWmunu]     , kWmunu     );
-  histogramStyle(*phi_[kZmumu]     , kZmumu     );
+  //  histogramStyle(*phi_[kWmunu]     , kWmunu     );
+  //  histogramStyle(*phi_[kZmumu]     , kZmumu     );
+  histogramStyle(*phi_[kBoson]     , kBoson     );
 
-  // create a legend (in upper right corner)
+
+  // ---
+  //    create legends depending on the used sample
+  // ---
+
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->SetHeader("Top-Antitop(Phythia)");  
-  //  leg0->AddEntry( n_  [kAll       ] , "inclusive"         , "PL" );
-  leg0->AddEntry( n_  [kSignal    ] , "semi-lep. ( #mu )" , "PL" );
-  leg0->AddEntry( n_  [kBackground] , "other decays ttbar", "PL" );
-  leg0->AddEntry( n_  [kQCD       ] , "QCD"               , "PL" );
-  //  leg0->AddEntry( n_  [kWmunu     ] , "Wmunu"             , "FL" );
-  //  leg0->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "FL" );
-  leg0->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
-
-  // create a legend (in upper center)
   TLegend *leg1 = new TLegend(0.40, 0.75, 1.05, 0.95);
-  leg1->SetFillStyle(0);
-  leg1->SetBorderSize(0);
-  leg1->SetHeader("Top-Antitop(Phythia)");
-  //  leg1->AddEntry( n_  [kAll       ] , "inclusive"         , "PL" );
-  leg1->AddEntry( n_  [kSignal    ] , "semi-lep. ( #mu )" , "PL" );
-  leg1->AddEntry( n_  [kBackground] , "other decays"      , "PL" );
-  leg1->AddEntry( n_  [kQCD       ] , "QCD"               , "PL" );
-  //  leg1->AddEntry( n_  [kWmunu     ] , "Wmunu"             , "FL" );
-  //  leg1->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "FL" );
-  leg1->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+
+ if( whichsample == "pythia10"){    
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Phythia, 10TeV)");
+    //  leg0->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( n_  [kQCD       ] , "QCD"               , "PL" );
+    //  leg0->AddEntry( n_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg0->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg0->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Phythia, 10TeV)");
+    //  leg1->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( n_[kQCD     ] , "QCD"               , "PL" );
+    //  leg1->AddEntry( n_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg1->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg1->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+  }
+  
+ if( whichsample == "madgraph10"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Madgraph, 10TeV)");
+    //  leg0->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( n_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( n_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg0->AddEntry( n_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg0->AddEntry( n_  [kBoson]      , "Wjets + Zjets", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Madgraph, 10TeV)");
+    //  leg1->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( n_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( n_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg1->AddEntry( n_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg1->AddEntry( n_  [kBoson]      , "Wjets + Zjets", "PL"  );
+  }
+
+ if( whichsample == "nlo10"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Mc@NLO, 10TeV)");
+    //  leg0->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( n_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( n_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg0->AddEntry( n_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg0->AddEntry( n_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Mc@NLO, 10TeV)");
+    //  leg1->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( n_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( n_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg1->AddEntry( n_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg1->AddEntry( n_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+  }
+ if( whichsample == "pythia7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Phythia, 7TeV)");
+    //  leg0->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( n_  [kQCD       ] , "QCD"               , "PL" );
+    //  leg0->AddEntry( n_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg0->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg0->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Phythia, 7TeV)");
+    //  leg1->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( n_[kQCD     ] , "QCD"               , "PL" );
+    //  leg1->AddEntry( n_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg1->AddEntry( n_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg1->AddEntry( n_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+  }
+  
+ if( whichsample == "madgraph7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Madgraph, 7TeV)");
+    //  leg0->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( n_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( n_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg0->AddEntry( n_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg0->AddEntry( n_  [kBoson]      , "Wjets + Zjets", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Madgraph, 7TeV)");
+    //  leg1->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( n_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( n_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg1->AddEntry( n_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg1->AddEntry( n_  [kBoson]      , "Wjets + Zjets", "PL"  );
+  }
+
+ if( whichsample == "nlo7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Mc@NLO, 7TeV)");
+    //  leg0->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( n_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( n_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg0->AddEntry( n_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg0->AddEntry( n_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Mc@NLO, 7TeV)");
+    //  leg1->AddEntry( n_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( n_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( n_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( n_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( n_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg1->AddEntry( n_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg1->AddEntry( n_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+  }
 
   // create an info legend containig the used mu-collection
   TLegend *leg2 = new TLegend(0.15, 1.15, 0.40, 0.80);
@@ -189,20 +441,7 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   leg3->SetBorderSize(0);
   leg3->SetHeader(whichMuons+" #mu");
 
-  // create a legend for Wmunu and Zmumu separately (in upper right corner)
-  TLegend *leg4 = new TLegend(0.45, 0.65, 1.05, 0.9);
-  leg4->SetFillStyle(0);
-  leg4->SetBorderSize(0);
-  leg4->SetHeader("Top-Antitop(Phythia)");  
-  //  leg0->AddEntry( n_  [kAll       ] , "inclusive"         , "PL" );
-  leg4->AddEntry( pt_  [kSignal    ] , "semi-lep. ( #mu )" , "PL" );
-  leg4->AddEntry( pt_  [kBackground] , "other decays ttbar", "PL" );
-  leg4->AddEntry( pt_  [kQCD       ] , "QCD"               , "PL" );
-  leg4->AddEntry( pt_  [kWmunu     ] , "Wmunu"             , "PL" );
-  leg4->AddEntry( pt_  [kZmumu     ] , "Zmumu"             , "PL" );
-  //  leg4->AddEntry( pt_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
-
-  // ---
+   // ---
   //    do the printing for n_
   // ---
   TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
@@ -256,7 +495,11 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
 
   n_  [kSignal       ]->SetNdivisions(10);
   n_  [kSignal       ]->SetMinimum(1.);
-  n_  [kSignal       ]->SetMaximum( 250* n_  [kBoson]->GetMaximum() );
+  double max=n_[kSignal]->GetMaximum();
+  if(max<n_[kQCD       ]->GetMaximum())max=n_[kQCD]       ->GetMaximum();
+  if(max<n_[kBackground]->GetMaximum())max=n_[kBackground]->GetMaximum();
+  if(max<n_[kBoson     ]->GetMaximum())max=n_[kBoson     ]->GetMaximum();
+  n_  [kSignal       ]->SetMaximum( 250* max );
   //  n_  [kAll       ]->Draw();
   n_  [kSignal    ]->Draw();
   n_  [kBackground]->Draw("same");
@@ -284,18 +527,22 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   else{
     axesStyle(*pt_ [kSignal], "p_{t}( lead #mu ) [GeV]", "events");
   }
-  pt_[kSignal    ]->SetMaximum( 250* pt_ [kBoson]->GetMaximum() );
+  max=pt_[kSignal]->GetMaximum();
+  if(max<pt_[kQCD       ]->GetMaximum())max=pt_[kQCD]       ->GetMaximum();
+  if(max<pt_[kBackground]->GetMaximum())max=pt_[kBackground]->GetMaximum();
+  if(max<pt_[kBoson     ]->GetMaximum())max=pt_[kBoson     ]->GetMaximum();
+  pt_[kSignal    ]->SetMaximum( 250* max );
   pt_[kSignal    ]->SetMinimum( 1 );
   pt_[kSignal]->GetXaxis()->SetTitleOffset(1.1);
   //  pt_[kAll       ]->Draw();
   pt_[kSignal    ]->Draw();
   pt_[kBackground]->Draw("same");
   pt_[kQCD       ]->Draw("same");
-  pt_[kWmunu     ]->Draw("same");
-  pt_[kZmumu     ]->Draw("same");
-  //  pt_[kBoson     ]->Draw("same");
+  //  pt_[kWmunu     ]->Draw("same");
+  //  pt_[kZmumu     ]->Draw("same");
+  pt_[kBoson     ]->Draw("same");
   leg2->Draw("same");
-  leg4->Draw("same");
+  leg0->Draw("same");
 
   // ---
   //    do the printing for eta_
@@ -309,7 +556,11 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   canv2->SetTitle("#eta " +whichMuons+" #mu");
   axesStyle(*eta_[kSignal], "#eta( #mu )", "events");
   eta_[kSignal       ]->SetMinimum( 1 );
-  eta_[kSignal       ]->SetMaximum( 1800* eta_[kQCD]->GetMaximum() ); //180.0 kBoson
+  max=eta_[kSignal]->GetMaximum();
+  if(max<eta_[kQCD       ]->GetMaximum())max=eta_[kQCD]       ->GetMaximum();
+  if(max<eta_[kBackground]->GetMaximum())max=eta_[kBackground]->GetMaximum();
+  if(max<eta_[kBoson     ]->GetMaximum())max=eta_[kBoson     ]->GetMaximum();
+  eta_[kSignal       ]->SetMaximum( 180* max );
   //  eta_[kAll       ]->Draw();
   eta_[kSignal    ]->Draw();
   eta_[kBackground]->Draw("same");
@@ -331,7 +582,11 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
   canv3->SetLogy(1);
   axesStyle(*phi_[kSignal], "#phi( #mu )", "events");
   phi_[kSignal       ]->SetMinimum( 1 );
-  phi_[kSignal       ]->SetMaximum( 50.0* phi_[kBoson]->GetMaximum() );
+  max=phi_[kSignal]->GetMaximum();
+  if(max<phi_[kQCD       ]->GetMaximum())max=phi_[kQCD]       ->GetMaximum();
+  if(max<phi_[kBackground]->GetMaximum())max=phi_[kBackground]->GetMaximum();
+  if(max<phi_[kBoson     ]->GetMaximum())max=phi_[kBoson     ]->GetMaximum();
+  phi_[kSignal       ]->SetMaximum( 50.0* max );
   //  phi_[kAll       ]->Draw();
   phi_[kSignal    ]->Draw();
   phi_[kBackground]->Draw("same");
@@ -346,16 +601,22 @@ void analyzeMuonKinematics(TString whichMuons = "tight")  //  "tight" // "loose"
 // saving 
 
 // 1.as picture 
-canv0->Print("./analyzeMuonCutflow/Multiplicity"+whichMuons+"Muons.png");
-canv1->Print("./analyzeMuonCutflow/Pt"+whichMuons+"Muons.png"          );
-canv2->Print("./analyzeMuonCutflow/Eta"+whichMuons+"Muons.png"         );
-canv3->Print("./analyzeMuonCutflow/Phi"+whichMuons+"Muons.png"         );
+canv0->Print("./analyzeMuonCutflow/Multiplicity"+whichMuons+"Muons"+CutStep+whichsample+".png");
+canv1->Print("./analyzeMuonCutflow/Pt"+whichMuons+"Muons"+CutStep+whichsample+".png"          );
+canv2->Print("./analyzeMuonCutflow/Eta"+whichMuons+"Muons"+CutStep+whichsample+".png"         );
+canv3->Print("./analyzeMuonCutflow/Phi"+whichMuons+"Muons"+CutStep+whichsample+".png"         );
 
 //2.as ps-file
-canv0->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps(");
-canv1->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps" );
-canv2->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)");
-//canv3->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons.ps)");
+canv0->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons"+CutStep+whichsample+".ps(");
+canv1->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons"+CutStep+whichsample+".ps" );
+canv2->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons"+CutStep+whichsample+".ps)");
+//canv3->Print("./analyzeMuonCutflow/Kinematics"+whichMuons+"Muons"+CutStep+whichsample+".ps)");
+
+
+
+ cout << "you can choose between muon collections via whichMuons-TString" << endl;
+ cout << "you can look at the plots at different steps of event selection by changing the CutStep-Tstring in the file" << endl;
+ cout << "you can change the inputsample via the whichsample-TString in the file (pythia,madgraph,mc@nlo for 7 and 10 TeV)" << endl;
 
 }
 

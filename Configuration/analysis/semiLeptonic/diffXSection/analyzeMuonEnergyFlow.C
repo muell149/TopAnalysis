@@ -8,13 +8,14 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 
-
-///   ---  ///
-// This macro shows MuonCutflow Variables like the averaged number of Trackerhits,
-// summed pt in tracker, number of activated hcall-cells, number of activated 
-// ecal-cells and edeposit in calorimeter as a function of the distance to the 
-// reconstructed muon (differential)
-///   ---  ///
+  //   ---
+  //  introduction
+  //   ---  
+  // This macro shows MuonCutflow Variables like the averaged number of Trackerhits,
+  // summed pt in tracker, number of activated hcall-cells, number of activated 
+  // ecal-cells and edeposit in calorimeter as a function of the distance to the 
+  // reconstructed muon (differential)
+  //   ---  
 
 enum styles {kAll, kSignal, kBackground, kQCD, kWmunu, kZmumu, kBoson};
 
@@ -23,36 +24,63 @@ void histogramStyle(TH1& hist, unsigned int style);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 
-void analyzeMuonEnergyFlow(TString whichMuons = "tight") // choose between "unselected", "combined", "trigger", "track", "good", "golden", "tight" 
+void analyzeMuonEnergyFlow(TString whichMuons = "tight", TString whichsample = "pythia10") // choose between "unselected", "combined", "trigger", "track", "good", "golden", "tight" 
 {
+
+  // set the certain step in cutflow when monitoring is applied
+  TString CutStep = "";
+  // ""       : before jet cuts are applied, before  muon cuts and Veto Cuts are applied
+  // "After"  : !only for tight muons! after  jet cuts are applied, after   muon cuts and Veto Cuts are applied
+
+  // choose the sample
+  // "pythia10" // "madgraph10" // "nlo10"
+  // "pythia7"  // "madgraph7"  // "nlo7"
+
   // ---
   //    set root style 
   // ---
-  //gROOT->cd();
-  //gROOT->SetStyle("Plain");
+  gROOT->cd();
+  gROOT->SetStyle("Plain");
 
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("analyzeSemiLeptonicSelection_all.root"  ) );
-  files_.push_back(new TFile("analyzeSemiLeptonicSelection_sig.root"  ) );
-  files_.push_back(new TFile("analyzeSemiLeptonicSelection_bkg.root"  ) );
-  files_.push_back(new TFile("analyzeSemiLeptonicSelection_QCD.root"  ) );
-  files_.push_back(new TFile("analyzeSemiLeptonicSelection_Wmunu.root") );
-  files_.push_back(new TFile("analyzeSemiLeptonicSelection_Zmumu.root") );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_all.root"  ) );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_sig.root"  ) );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_bkg.root"  ) );
+  if(whichsample == "pythia10" || whichsample == "madgraph10" || whichsample == "nlo10" ){
+    files_.push_back(new TFile("./pythia10/analyzeSemiLeptonicSelection_QCD.root"       ) );
+  }
+  else{
+    files_.push_back(new TFile("./pythia7/analyzeSemiLeptonicSelection_QCD.root"        ) );
+  }
+  if(whichsample == "nlo10" || whichsample == "nlo7"){
+    if(whichsample == "nlo10"){
+      files_.push_back(new TFile("./madgraph10/analyzeSemiLeptonicSelection_Wmunu.root") );
+      files_.push_back(new TFile("./madgraph10/analyzeSemiLeptonicSelection_Zmumu.root") );  
+    }
+    if(whichsample == "nlo7"){
+      files_.push_back(new TFile("./madgraph7/analyzeSemiLeptonicSelection_Wmunu.root") );
+      files_.push_back(new TFile("./madgraph7/analyzeSemiLeptonicSelection_Zmumu.root") );  
+    }
+  }
+  else{
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_Wmunu.root") );
+  files_.push_back(new TFile("./"+whichsample+"/analyzeSemiLeptonicSelection_Zmumu.root") );
+  }
 
   // ---
   //    get histograms
   // ---
   std::vector<TH1F*> norm_, trkDRN_, trkDR_, eclDRN_, hclDRN_, calDR_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    norm_  .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality/norm_"   ) );
-    trkDRN_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality/trkDRN_" ) );
-    trkDR_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality/trkDR_"  ) );
-    eclDRN_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality/eclDRN_" ) );
-    hclDRN_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality/hclDRN_" ) );
-    calDR_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality/calDR_"  ) );
+    norm_  .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality"+CutStep+"/norm_"   ) );
+    trkDRN_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality"+CutStep+"/trkDRN_" ) );
+    trkDR_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality"+CutStep+"/trkDR_"  ) );
+    eclDRN_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality"+CutStep+"/eclDRN_" ) );
+    hclDRN_.push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality"+CutStep+"/hclDRN_" ) );
+    calDR_ .push_back( (TH1F*)files_[idx]->Get(whichMuons+"MuonQuality"+CutStep+"/calDR_"  ) );
   }
 
   // ---
@@ -131,34 +159,178 @@ void analyzeMuonEnergyFlow(TString whichMuons = "tight") // choose between "unse
   histogramStyle(*calDR_ [kBoson     ], kBoson     );
 
 
-  // create a legend (in upper right corner)
-  TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->SetHeader("Top-Antitop(Phythia)");
-  //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
-  leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )"   , "PL" );
-  leg0->AddEntry( trkDRN_[kBackground] , "other ttbar decays"  , "PL" );
-  leg0->AddEntry( trkDRN_[kQCD       ] , "QCD"                 , "PL" );
-  leg0->AddEntry( trkDRN_[kBoson    ] , "W#mu#nu + Z#mu#mu"   , "PL" );
+  // ---
+  //    create legends depending on the used sample
+  // ---
 
-  // create a legend (in upper center)
+  TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   TLegend *leg1 = new TLegend(0.35, 0.65, 1.05, 0.9);
-  leg1->SetFillStyle(0);
-  leg1->SetBorderSize(0);
-  leg1->SetHeader("Top-Antitop(Phythia)");
-  //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
-  leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )"   , "PL" );
-  leg1->AddEntry( trkDRN_[kBackground] , "other ttbar decays"  , "PL" );
-  leg1->AddEntry( trkDRN_[kQCD       ] , "QCD"                 , "PL" );
-  leg1->AddEntry( trkDRN_[kBoson     ] , "W#mu#nu + Z#mu#mu"   , "PL" );
+
+ if( whichsample == "pythia10"){    
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Phythia, 10TeV)");
+    //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( trkDRN_  [kQCD       ] , "QCD"               , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg0->AddEntry( trkDRN_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Phythia, 10TeV)");
+    //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( trkDRN_[kQCD     ] , "QCD"               , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg1->AddEntry( trkDRN_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+  }
+  
+ if( whichsample == "madgraph10"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Madgraph, 10TeV)");
+    //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( trkDRN_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg0->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Madgraph, 10TeV)");
+    //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( trkDRN_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg1->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets", "PL"  );
+  }
+
+ if( whichsample == "nlo10"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Mc@NLO, 10TeV)");
+    //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( trkDRN_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg0->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Mc@NLO, 10TeV)");
+    //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( trkDRN_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg1->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+  }
+ if( whichsample == "pythia7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Phythia, 7TeV)");
+    //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( trkDRN_  [kQCD       ] , "QCD"               , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg0->AddEntry( trkDRN_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Phythia, 7TeV)");
+    //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( trkDRN_[kQCD     ] , "QCD"               , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kWmunu     ] , "Wmunu"             , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kZmumu     ] , "Zmumu"             , "PL" );
+    leg1->AddEntry( trkDRN_  [kBoson]      , "W#mu#nu + Z#mu#mu", "PL"  );
+  }
+  
+ if( whichsample == "madgraph7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Madgraph, 7TeV)");
+    //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( trkDRN_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg0->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Madgraph, 7TeV)");
+    //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( trkDRN_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kWmunu     ] , "W+jets"             , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets"             , "PL" );
+    leg1->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets", "PL"  );
+  }
+
+ if( whichsample == "nlo7"){
+
+    // create a legend (in upper right corner)
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("Top-Antitop(Mc@NLO, 7TeV)");
+    //  leg0->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg0->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg0->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg0->AddEntry( trkDRN_[kQCD       ] , "QCD (Pythia)"        , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg0->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg0->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+    
+    // create a legend (in upper center)
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Top-Antitop(Mc@NLO, 7TeV)");
+    //  leg1->AddEntry( trkDRN_[kAll       ] , "inclusive"         , "PL" );
+    leg1->AddEntry( trkDRN_[kSignal    ] , "semi-lep. ( #mu )" , "PL" );
+    leg1->AddEntry( trkDRN_[kBackground] , "other decays"      , "PL" );
+    leg1->AddEntry( trkDRN_[kQCD     ] , "QCD (Pythia)"               , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kWmunu     ] , "W+jets (Madgraph)"             , "PL" );
+    //  leg1->AddEntry( trkDRN_  [kZmumu     ] , "Z+jets (Madgraph)"             , "PL" );
+    leg1->AddEntry( trkDRN_  [kBoson]      , "Wjets + Zjets (Madgraph)", "PL"  );
+  }
 
   // create an info legend containig the used mu-cut
   TLegend *leg2 = new TLegend(0.228, 0.912, 0.7818, 0.997);
   leg2->SetFillStyle (0);
   leg2->SetBorderSize(0);
   leg2->SetHeader(whichMuons+" #mu");
-
 
   // ---
   //    do the printing for trkDRN_
@@ -269,21 +441,26 @@ void analyzeMuonEnergyFlow(TString whichMuons = "tight") // choose between "unse
   // saving
   //---
 
-  //  pictures
+  // as pictures
 
-//   canv0->Print("./analyzeMuonCutflow/trkDRN"+whichMuons+"Muons.png");
-//   canv1->Print("./analyzeMuonCutflow/trkDR"+whichMuons+"Muons.png" );
-//   canv2->Print("./analyzeMuonCutflow/eclDRN"+whichMuons+"Muons.png");
-//   canv3->Print("./analyzeMuonCutflow/hclDR"+whichMuons+"Muons.png" );
-//   canv4->Print("./analyzeMuonCutflow/calDR"+whichMuons+"Muons.png" );
+  canv0->Print("./analyzeMuonCutflow/trkDRN"+whichMuons+"Muons"+CutStep+whichsample+".png");
+  canv1->Print("./analyzeMuonCutflow/trkDR"+whichMuons+"Muons"+CutStep+whichsample+".png" );
+  canv2->Print("./analyzeMuonCutflow/eclDRN"+whichMuons+"Muons"+CutStep+whichsample+".png");
+  canv3->Print("./analyzeMuonCutflow/hclDR"+whichMuons+"Muons"+CutStep+whichsample+".png" );
+  canv4->Print("./analyzeMuonCutflow/calDR"+whichMuons+"Muons"+CutStep+whichsample+".png" );
   
-  //  psfile
+  // as psfile
 
-  canv0->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons.ps(");
-  canv1->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons.ps" );
-  canv2->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons.ps" );
-  canv3->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons.ps" );
-  canv4->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons.ps)");
+  canv0->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons"+CutStep+whichsample+".ps(");
+  canv1->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons"+CutStep+whichsample+".ps" );
+  canv2->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons"+CutStep+whichsample+".ps" );
+  canv3->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons"+CutStep+whichsample+".ps" );
+  canv4->Print("./analyzeMuonCutflow/EnergyFlow"+whichMuons+"Muons"+CutStep+whichsample+".ps)");
+
+
+  cout << "you can choose muonCollection via whichMuons-TString" << endl;
+  cout << "you can look at the plots at different steps of event selection by changing the CutStep-Tstring in the file" << endl;
+  cout << "you can change the inputsample via the whichsample-TString in the file (pythia,madgraph,mc@nlo for 7 and 10 TeV)" << endl;
 
 }
 void canvasStyle(TCanvas& canv) 
