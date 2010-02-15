@@ -190,8 +190,8 @@ xsec  ['ttbar09_PYT7_pat'] =      165  ## NLO in pb from https://twiki.cern.ch/t
 eff   ['ttbar09_PYT7_pat'] =      1.0  ## generator efficiency on gen level
 sizes ['ttbar09_PYT7_pat'] = 'blocks'
 source['ttbar09_PYT7_pat'] = 'ttbar09_PYT7_pat_0,' + 'ttbar09_PYT7_pat_1,' + 'ttbar09_PYT7_pat_2,' + 'ttbar09_PYT7_pat_3,' + 'ttbar09_PYT7_pat_4,' + 'ttbar09_PYT7_pat_5,'
-source['ttbar09_PYT7_pat'] = 'ttbar09_PYT7_pat_6,' + 'ttbar09_PYT7_pat_7,' + 'ttbar09_PYT7_pat_8,' + 'ttbar09_PYT7_pat_9,' + 'ttbar09_PYT7_pat_10,' + 'ttbar09_PYT7_pat_11,'
-source['ttbar09_PYT7_pat'] = 'ttbar09_PYT7_pat_12,' + 'ttbar09_PYT7_pat_13,' + 'ttbar09_PYT7_pat_14,' + 'ttbar09_PYT7_pat_15,' + 'ttbar09_PYT7_pat_16'
+source['ttbar09_PYT7_pat']+= 'ttbar09_PYT7_pat_6,' + 'ttbar09_PYT7_pat_7,' + 'ttbar09_PYT7_pat_8,' + 'ttbar09_PYT7_pat_9,' + 'ttbar09_PYT7_pat_10,' + 'ttbar09_PYT7_pat_11,'
+source['ttbar09_PYT7_pat']+= 'ttbar09_PYT7_pat_12,' + 'ttbar09_PYT7_pat_13,' + 'ttbar09_PYT7_pat_14,' + 'ttbar09_PYT7_pat_15,' + 'ttbar09_PYT7_pat_16'
 
 ## /WJets-madgraph/Summer09-MC_31X_V3-v1/GEN-SIM-RECO
 from TopAnalysis.Configuration.wjets09_patMad import *
@@ -872,9 +872,9 @@ xsec  ['qcd09_pt300_PYT7_pat'] = 1256   ## NLO in pb from configfile
 eff   ['qcd09_pt300_PYT7_pat'] = 1.0    ## generator efficiency on gen level
 sizes ['qcd09_pt300_PYT7_pat'] = 'blocks'
 source['qcd09_pt300_PYT7_pat'] = 'qcd09_pt300_PYT7_pat_0,' + 'qcd09_pt300_PYT7_pat_1,' + 'qcd09_pt300_PYT7_pat_2,' + 'qcd09_pt300_PYT7_pat_3,' + 'qcd09_pt300_PYT7_pat_4,'
-source['qcd09_pt300_PYT7_pat'] = 'qcd09_pt300_PYT7_pat_5,' + 'qcd09_pt300_PYT7_pat_6,' + 'qcd09_pt300_PYT7_pat_7,' + 'qcd09_pt300_PYT7_pat_8,' + 'qcd09_pt300_PYT7_pat_9,'
-source['qcd09_pt300_PYT7_pat'] = 'qcd09_pt300_PYT7_pat_10,' + 'qcd09_pt300_PYT7_pat_11,' + 'qcd09_pt300_PYT7_pat_12,' + 'qcd09_pt300_PYT7_pat_13,' + 'qcd09_pt300_PYT7_pat_14,'
-source['qcd09_pt300_PYT7_pat'] = 'qcd09_pt300_PYT7_pat_15,' + 'qcd09_pt300_PYT7_pat_16,' + 'qcd09_pt300_PYT7_pat_17'
+source['qcd09_pt300_PYT7_pat']+= 'qcd09_pt300_PYT7_pat_5,' + 'qcd09_pt300_PYT7_pat_6,' + 'qcd09_pt300_PYT7_pat_7,' + 'qcd09_pt300_PYT7_pat_8,' + 'qcd09_pt300_PYT7_pat_9,'
+source['qcd09_pt300_PYT7_pat']+= 'qcd09_pt300_PYT7_pat_10,' + 'qcd09_pt300_PYT7_pat_11,' + 'qcd09_pt300_PYT7_pat_12,' + 'qcd09_pt300_PYT7_pat_13,' + 'qcd09_pt300_PYT7_pat_14,'
+source['qcd09_pt300_PYT7_pat']+= 'qcd09_pt300_PYT7_pat_15,' + 'qcd09_pt300_PYT7_pat_16,' + 'qcd09_pt300_PYT7_pat_17'
 
 ## /mc/Summer09/QCD_Pt470/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
 from TopAnalysis.Configuration.qcd09_pt470_PYT7_pat import *
@@ -883,8 +883,8 @@ xsec  ['qcd09_pt470_PYT7_pat'] = 87.98   ## NLO in pb from configfile
 eff   ['qcd09_pt470_PYT7_pat'] = 1.0     ## generator efficiency on gen level
 sizes ['qcd09_pt470_PYT7_pat'] = 'blocks'
 source['qcd09_pt470_PYT7_pat'] = 'qcd09_pt470_PYT7_pat_0,' + 'qcd09_pt470_PYT7_pat_1,' + 'qcd09_pt470_PYT7_pat_2,' + 'qcd09_pt470_PYT7_pat_3,' + 'qcd09_pt470_PYT7_pat_4,'
-source['qcd09_pt470_PYT7_pat'] = 'qcd09_pt470_PYT7_pat_5,' + 'qcd09_pt470_PYT7_pat_6,' + 'qcd09_pt470_PYT7_pat_7,' + 'qcd09_pt470_PYT7_pat_8,' + 'qcd09_pt470_PYT7_pat_9,'
-source['qcd09_pt470_PYT7_pat'] = 'qcd09_pt470_PYT7_pat_10,' + 'qcd09_pt470_PYT7_pat_11,' + 'qcd09_pt470_PYT7_pat_12,' + 'qcd09_pt470_PYT7_pat_13,' + 'qcd09_pt470_PYT7_pat_14'
+source['qcd09_pt470_PYT7_pat']+= 'qcd09_pt470_PYT7_pat_5,' + 'qcd09_pt470_PYT7_pat_6,' + 'qcd09_pt470_PYT7_pat_7,' + 'qcd09_pt470_PYT7_pat_8,' + 'qcd09_pt470_PYT7_pat_9,'
+source['qcd09_pt470_PYT7_pat']+= 'qcd09_pt470_PYT7_pat_10,' + 'qcd09_pt470_PYT7_pat_11,' + 'qcd09_pt470_PYT7_pat_12,' + 'qcd09_pt470_PYT7_pat_13,' + 'qcd09_pt470_PYT7_pat_14'
 
 ## /mc/Summer09/QCD_Pt800/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
 from TopAnalysis.Configuration.qcd09_pt800_PYT7_pat import *
