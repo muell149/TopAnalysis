@@ -33,7 +33,7 @@ EventShapes::book()
   /// 1.5*q1 where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return values are 0.5 for spherical and 0 
   /// for plane and linear events
-  hists_["aplanarity" ] = new TH1F( "aplanarity"  , "aplanarity"  ,  100 , 0. ,  1. );
+  hists_["aplanarity" ] = new TH1F( "aplanarity"  , "aplanarity"  ,  50 , 0. ,  0.5 );
   /// 3.*(q1*q2+q1*q3+q2*q3) where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return value is between 0 and 1 
   /// and measures the 3-jet structure of the event (C vanishes for a "perfect" 2-jet event)
@@ -69,7 +69,7 @@ EventShapes::book(edm::Service<TFileService>& fs)
   /// 1.5*q1 where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return values are 0.5 for spherical and 0 
   /// for plane and linear events
-  hists_["aplanarity"] = fs->make<TH1F>( "aplanarity" , "aplanarity" ,  100 , 0. ,  1. );
+  hists_["aplanarity"] = fs->make<TH1F>( "aplanarity" , "aplanarity" ,  50 , 0. ,  0.5 );
 
   /// 3.*(q1*q2+q1*q3+q2*q3) where 0<=q1<=q2<=q3 are the eigenvalues of the momemtum tensor 
   /// sum{p_j[a]*p_j[b]}/sum{p_j**2} normalized to 1. Return value is between 0 and 1 
@@ -87,18 +87,18 @@ EventShapes::book(edm::Service<TFileService>& fs)
 
   hists2D_["iso_cir"] = fs->make<TH2F>( "iso_cir" , "iso_cir" ,  100 , 0. ,  1. , 100 , 0. , 1. );
   hists2D_["iso_sph"] = fs->make<TH2F>( "iso_sph" , "iso_sph" ,  100 , 0. ,  1. , 100 , 0. , 1. );
-  hists2D_["iso_apl"] = fs->make<TH2F>( "iso_apl" , "iso_apl" ,  100 , 0. ,  1. , 100 , 0. , 1. );
+  hists2D_["iso_apl"] = fs->make<TH2F>( "iso_apl" , "iso_apl" ,  100 , 0. ,  1. , 50 , 0. , 0.5 );
   hists2D_["iso_c"  ] = fs->make<TH2F>( "iso_c"   , "iso_c"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
   hists2D_["iso_d"  ] = fs->make<TH2F>( "iso_d"   , "iso_d"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
   hists2D_["cir_sph"] = fs->make<TH2F>( "cir_sph" , "cir_sph" ,  100 , 0. ,  1. , 100 , 0. , 1. );
-  hists2D_["cir_apl"] = fs->make<TH2F>( "cir_apl" , "cir_apl" ,  100 , 0. ,  1. , 100 , 0. , 1. );
+  hists2D_["cir_apl"] = fs->make<TH2F>( "cir_apl" , "cir_apl" ,  100 , 0. ,  1. , 50 , 0. , 0.5 );
   hists2D_["cir_c"  ] = fs->make<TH2F>( "cir_c"   , "cir_c"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
   hists2D_["cir_d"  ] = fs->make<TH2F>( "cir_d"   , "cir_d"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
-  hists2D_["sph_apl"] = fs->make<TH2F>( "sph_apl" , "sph_apl" ,  100 , 0. ,  1. , 100 , 0. , 1. );
+  hists2D_["sph_apl"] = fs->make<TH2F>( "sph_apl" , "sph_apl" ,  100 , 0. ,  1. , 50 , 0. , 0.5 );
   hists2D_["sph_c"  ] = fs->make<TH2F>( "sph_c"   , "sph_c"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
   hists2D_["sph_d"  ] = fs->make<TH2F>( "sph_d"   , "sph_d"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
-  hists2D_["apl_c"  ] = fs->make<TH2F>( "apl_c"   , "apl_c"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
-  hists2D_["apl_d"  ] = fs->make<TH2F>( "apl_d"   , "apl_d"   ,  100 , 0. ,  1. , 100 , 0. , 1. );
+  hists2D_["apl_c"  ] = fs->make<TH2F>( "apl_c"   , "apl_c"   ,  50 , 0. ,  0.5 , 100 , 0. , 1. );
+  hists2D_["apl_d"  ] = fs->make<TH2F>( "apl_d"   , "apl_d"   ,  50 , 0. ,  0.5 , 100 , 0. , 1. );
   hists2D_["c_d"    ] = fs->make<TH2F>( "c_d"     , "c_d"     ,  100 , 0. ,  1. , 100 , 0. , 1. );
 
 }
