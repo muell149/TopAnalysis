@@ -100,7 +100,7 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   hists_["topQuarkMassBTagged2"  ] = fs->make<TH1F>( "topQuarkMassBTagged2"   , "topQuarkMassBTagged2"   ,   50,  0. , 1000.  );
   // top mass of hypothesis with b-tag (SecVertex) for b-jets
   hists_["topQuarkMassHypoBTagged2"] = fs->make<TH1F>( "topQuarkMassHypoBTagged2" , "topQuarkMassHypoBTagged2" ,   50,  0. , 1000.  );
-  /// mtop fit vs. mtop reco
+  /// mtop hypo vs. mtop reco
   hists2D_["topMassHypoReco"] = fs->make<TH2F>( "topMassHypoReco" , "topMassHypoReco" ,  300, 100.,  400. , 300, 100., 400. );
   // W pt
   hists_["wPt"           ] = fs->make<TH1F>( "wPt"           , "wPt"             ,   50,  0. , 1000. );
@@ -241,8 +241,8 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
 	hists_.find("topQuarkPhi" )->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).phi()  );
 	// top mass
 	hists_.find("topQuarkMass")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass() );
-	// top mass kinFit vs. reco
-	hists2D_.find("topMassFitReco")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass(), 
+	// top mass hypo vs. reco
+	hists2D_.find("topMassHypoReco")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4()).mass(), 
 						       tops.top(hypo_)->mass() );
 	// bTag discri vs. W mass
 	hists2D_.find("bTagVsMjjW")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4()).mass() ,
@@ -278,8 +278,8 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
 	hists_.find("topQuarkPhi" )->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).phi()  );
 	// top mass
 	hists_.find("topQuarkMass")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass() );
-	// top mass kinFit vs. reco
-	hists2D_.find("topMassFitReco")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass(), 
+	// top mass hypo vs. reco
+	hists2D_.find("topMassHypoReco")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass(), 
 						       tops.topBar(hypo_)->mass() );
 	// bTag discri vs. W mass
 	hists2D_.find("bTagVsMjjW")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4()).mass() ,
