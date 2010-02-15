@@ -44,6 +44,7 @@ void setAxisStyle(TH1* hist)
 void cleverRebinning(TH1* hist)
 {
 
+  //  if(hist->GetEntries() / hist->GetNbinsX() < 10.) {
   if(hist->GetEntries() / hist->GetNbinsX() < 4.) {
     hist->Rebin(); // reduces number of bins by a factor of two, merging adjacent bins
     cleverRebinning(hist); // recursion
@@ -544,7 +545,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   for(unsigned int i = 0; i < 8; i++) {
 
-    if(i==1 || i==2 || i==4)
+    if(i==1 || i==2 || i==4 | i==6)
       continue;
 
     TString drawOption = "hist";
