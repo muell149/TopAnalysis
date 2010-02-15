@@ -13,13 +13,13 @@ GenParticle::GenParticle(const edm::ParameterSet& cfg)
 /// histogramm booking for fwlite 
 void GenParticle::book()
 {
-  hists_["genParticles"] = new TH1F( "genParticles" , "genParticles" ,   40, 0. , 40. );
+  hists_["genParticles"] = new TH1F( "genParticles" , "genParticles" ,   40, -0.5 , 39.5 );
 }
 
 /// histogramm booking for fw
 void GenParticle::book(edm::Service<TFileService>& fs)
 {
-  hists_["genParticles"] = fs->make<TH1F>( "genParticles" , "genParticles" ,   40, 0. , 40. );
+  hists_["genParticles"] = fs->make<TH1F>( "genParticles" , "genParticles" ,   40, -0.5 , 39.5 );
 }
 
 
@@ -28,6 +28,7 @@ void
 GenParticle::fill(const edm::View<reco::GenParticle>& parts, const double& weight)
 {
   for(edm::View<reco::GenParticle>::const_iterator part=parts.begin(); part!=parts.end(); ++part){
-    hists_.find("genParticles")->second->Fill( fabs(part->pdgId()) + 0.5 , weight );
+    if(part->pdgId()>=0) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
+    else                 hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
   }
 }
