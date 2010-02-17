@@ -8,10 +8,22 @@ Printout from scram: <a href="scram.txt">scram.txt</a>
 
 Printout from the libchecker: <a href="libchecker.txt">libchecker.txt</a>
 
+Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a>
+
+<hr/>
+
+<b>Test of semileptonic event selection:</b>
+
+Trigger summary: <a href="testSemiLepMuonSelection.txt">testSemiLepMuonSelection.txt</a>
+
+Diff to reference: <a href="testSemiLepMuonSelection-diff.txt">testSemiLepMuonSelection-diff.txt</a>
+
+<hr/>
+
+<b>Test job for differential cross sections in the semileptonic channel:</b>
+
 Printout from cmsRun and ROOT: <a href="test.txt">test.txt</a>
 
-Test plots: <a href="plots">plots</a>
-
-Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a>
+Plots: <a href="plots">plots</a>
 
 */
