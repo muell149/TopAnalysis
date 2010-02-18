@@ -4,11 +4,11 @@
 
 CMSSW release and tags used: <a href="showtags.txt">showtags.txt</a>
 
-Printout from scram: <a href="scram.txt">scram.txt</a>
+Printout from scram: <a href="scram.txt">scram.txt</a> <img href="scram.jpg"/>
 
 Printout from the libchecker: <a href="libchecker.txt">libchecker.txt</a>
 
-Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a>
+Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a> <img href="doxyWarn.jpg"/>
 
 <hr/>
 
@@ -17,13 +17,6 @@ Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a>
 Trigger summary: <a href="testSemiLepMuonSelection.txt">testSemiLepMuonSelection.txt</a>
 
 Diff to reference: <a href="testSemiLepMuonSelection-diff.txt">testSemiLepMuonSelection-diff.txt</a>
-
-<hr/>
-
-<b>Test job for differential cross sections in the semileptonic channel:</b>
-
-Printout from cmsRun and ROOT: <a href="test.txt">test.txt</a>
-
-Plots: <a href="plots">plots</a>
+<img href="testSemiLepMuonSelection-diff.jpg"/>
 
 */
