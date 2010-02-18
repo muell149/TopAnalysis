@@ -65,6 +65,12 @@ ttSemiLepHypGenMatch_multilevel = cms.Sequence(ttSemiLepHypGenMatchRaw  *
 ## produce geom hypothesis for different jet energy correction levels
 ##########################################################################################
 
+findTtSemiLepJetCombGeom.jets = "goodJets"
+findTtSemiLepJetCombGeom.leps = "tightMuons"
+findTtSemiLepJetCombGeom.useBTagging       = True
+findTtSemiLepJetCombGeom.minBDiscBJets     = 1.90
+findTtSemiLepJetCombGeom.maxBDiscLightJets = 3.99
+
 ttSemiLepHypGeomRaw  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "raw" )
 ttSemiLepHypGeomOff  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "off" ) ## L1
 ttSemiLepHypGeomRel  = ttSemiLepHypGeom.clone(jetCorrectionLevel = "rel" ) ## L2
@@ -84,13 +90,12 @@ list = [ttSemiLepHypGeomRaw,
         ttSemiLepHypGeomPart]
 
 for obj in range(len(list)):
-    list[obj].jets = "goodJets"
-    list[obj].leps = "tightMuons"
-    list[obj].useBTagging       = True
-    list[obj].minBDiscBJets     = 1.90
-    list[obj].maxBDiscLightJets = 3.99
+    list[obj].jets  = "goodJets"
+    list[obj].leps  = "tightMuons"
+    list[obj].match = "findTtSemiLepJetCombGeom"
 
-ttSemiLepHypGeom_multilevel = cms.Sequence(ttSemiLepHypGeomRaw  *
+ttSemiLepHypGeom_multilevel = cms.Sequence(findTtSemiLepJetCombGeom *
+                                           ttSemiLepHypGeomRaw  *
                                            ttSemiLepHypGeomOff  *
                                            ttSemiLepHypGeomRel  *
                                            ttSemiLepHypGeomAbs  *
