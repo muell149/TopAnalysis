@@ -412,7 +412,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # and error messages should be written. If left blank the output is written 
 # to stderr.
 
-WARN_LOGFILE           = /afs/desy.de/user/s/snaumann/www/doc/TopAnalysis/doxyWarn.log
+WARN_LOGFILE           = /afs/desy.de/group/uh2/www/wwwiexp.desy.de/groups/cms/topphysics/TopAnalysis/doxyWarn.log
 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
