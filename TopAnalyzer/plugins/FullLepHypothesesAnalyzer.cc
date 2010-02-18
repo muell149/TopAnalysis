@@ -200,7 +200,7 @@ FullLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
   TopKin_.push_back( fs->make<TH1F>(ns.name("TopEnergy"), "E (t) [GeV]"    , 50,  0. , 500. ) );  
   TopKin_.push_back( fs->make<TH1F>(ns.name("TopEta"   ), "#eta (t)"       , 34, -3.4,   3.4) );
   TopKin_.push_back( fs->make<TH1F>(ns.name("TopPhi"   ), "#phi (t)"       , 34, -3.4,   3.4) );
-  TopKin_.push_back( fs->make<TH1F>(ns.name("TopMass"  ), "M (top) [GeV]"  , 30, 50. , 350. ) );
+  TopKin_.push_back( fs->make<TH1F>(ns.name("TopMass"  ), "M (top) [GeV]"  , 40,  0. , 400. ) );
 
   WplusKin_.push_back( fs->make<TH1F>(ns.name("WplusPt"    ), "p_{t} (W^{+}) [GeV]", 50,  0. , 500. ) );
   WplusKin_.push_back( fs->make<TH1F>(ns.name("WplusEnergy"), "E (W^{+}) [GeV]"    , 50,  0. , 500. ) );
@@ -230,7 +230,7 @@ FullLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
   TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarEnergy"), "E (#bar{t}) [GeV]"    , 50,  0. , 500. ) );
   TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarEta"   ), "#eta (#bar{t})"       , 34, -3.4,   3.4) );
   TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarPhi"   ), "#phi (#bar{t})"       , 34, -3.4,   3.4) );
-  TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarMass"  ), "M (#bar{t}) [GeV]"    , 30, 50. , 350. ) );
+  TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarMass"  ), "M (#bar{t}) [GeV]"    , 40,  0. , 400. ) );
 
   WminusKin_.push_back( fs->make<TH1F>(ns.name("WminusPt"    ), "p_{t} (W^{-}) [GeV]", 50,  0. , 500. ) );
   WminusKin_.push_back( fs->make<TH1F>(ns.name("WminusEnergy"), "E (W^{-}) [GeV]"    , 50,  0. , 500. ) );
@@ -262,7 +262,7 @@ FullLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
     TopKin_.push_back( fs->make<TH1F>(ns.name("TopEnergyWrong"), "E (t) [GeV]"    , 50,  0. , 500. ) );  
     TopKin_.push_back( fs->make<TH1F>(ns.name("TopEtaWrong"   ), "#eta (t)"       , 34, -3.4,   3.4) );
     TopKin_.push_back( fs->make<TH1F>(ns.name("TopPhiWrong"   ), "#phi (t)"       , 34, -3.4,   3.4) );
-    TopKin_.push_back( fs->make<TH1F>(ns.name("TopMassWrong"  ), "M (top) [GeV]"  , 30, 50. , 350. ) );
+    TopKin_.push_back( fs->make<TH1F>(ns.name("TopMassWrong"  ), "M (top) [GeV]"  , 40,  0. , 400. ) );
 
     WplusKin_.push_back( fs->make<TH1F>(ns.name("WplusPtWrong"    ), "p_{t} (W^{+}) [GeV]", 50,  0. , 500. ) );
     WplusKin_.push_back( fs->make<TH1F>(ns.name("WplusEnergyWrong"), "E (W^{+}) [GeV]"    , 50,  0. , 500. ) );
@@ -292,7 +292,7 @@ FullLepHypothesesAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
     TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarEnergyWrong"), "E (#bar{t}) [GeV]"    , 50,  0. , 500. ) );
     TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarEtaWrong"   ), "#eta (#bar{t})"       , 34, -3.4,   3.4) );
     TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarPhiWrong"   ), "#phi (#bar{t})"       , 34, -3.4,   3.4) );
-    TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarMassWrong"  ), "M (#bar{t}) [GeV]"    , 30, 50. , 350. ) );
+    TopBarKin_.push_back( fs->make<TH1F>(ns.name("TopBarMassWrong"  ), "M (#bar{t}) [GeV]"    , 40,  0. , 400. ) );
 
     WminusKin_.push_back( fs->make<TH1F>(ns.name("WminusPtWrong"    ), "p_{t} (W^{-}) [GeV]", 50,  0. , 500. ) );
     WminusKin_.push_back( fs->make<TH1F>(ns.name("WminusEnergyWrong"), "E (W^{-}) [GeV]"    , 50,  0. , 500. ) );
@@ -331,7 +331,7 @@ FullLepHypothesesAnalyzer::bookKinGenHistos(edm::Service<TFileService>& fs)
   TopKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopEnergy"), "E (t) [GeV]"    , 50,  0. , 500. ) );  
   TopKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopEta"   ), "#eta (t)"       , 34, -3.4,   3.4) );
   TopKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopPhi"   ), "#phi (t)"       , 34, -3.4,   3.4) );
-  TopKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopMass"  ), "M (top) [GeV]"  , 30, 50. , 350. ) );
+  TopKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopMass"  ), "M (top) [GeV]"  , 40,  0. , 400. ) );
 
   WplusKinGen_.push_back( fs->make<TH1F>(ns.name("GenWplusPt"    ), "p_{t} (W^{+}) [GeV]", 50,  0. , 500. ) );
   WplusKinGen_.push_back( fs->make<TH1F>(ns.name("GenWplusEnergy"), "E (W^{+}) [GeV]"    , 50,  0. , 500. ) );
@@ -361,7 +361,7 @@ FullLepHypothesesAnalyzer::bookKinGenHistos(edm::Service<TFileService>& fs)
   TopBarKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopBarEnergy"), "E (#bar{t}) [GeV]"    , 50,  0. , 500. ) );
   TopBarKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopBarEta"   ), "#eta (#bar{t})"       , 34, -3.4,   3.4) );
   TopBarKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopBarPhi"   ), "#phi (#bar{t})"       , 34, -3.4,   3.4) );
-  TopBarKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopBarMass"  ), "M (#bar{t}) [GeV]"    , 30, 50. , 350. ) );
+  TopBarKinGen_.push_back( fs->make<TH1F>(ns.name("GenTopBarMass"  ), "M (#bar{t}) [GeV]"    , 40,  0. , 400. ) );
 
   WminusKinGen_.push_back( fs->make<TH1F>(ns.name("GenWminusPt"    ), "p_{t} (W^{-}) [GeV]", 50,  0. , 500. ) );
   WminusKinGen_.push_back( fs->make<TH1F>(ns.name("GenWminusEnergy"), "E (W^{-}) [GeV]"    , 50,  0. , 500. ) );
