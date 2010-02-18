@@ -4,7 +4,7 @@ filterFullLepHypothesis = cms.EDAnalyzer("FullLepHypothesesFilter",
     hypoKey = cms.InputTag("ttFullLepHypKinSolution","Key"),
     FullLepEvent = cms.InputTag("ttFullLepEvent"),
     weight = cms.InputTag("eventWeight"),
-    jets = cms.InputTag("selectedLayer1Jets"),
+    jets = cms.InputTag("tightJets"),
         
     ## cuts on muon muon mass
     qcdCut = cms.double(20.),
