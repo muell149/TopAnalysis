@@ -170,17 +170,18 @@ void fitGauss2D(TH2F* hist, TH1D& means, TH1D& sigmas)
 
 void drawAndFitTwo2D(TCanvas* canvas, TH2F** hists, const unsigned i,
 		     const double yMin, const double yMax, const TString title,
-		     const TString xTitle, const TString yTitle, TString epsNameBase)
+		     const TString xTitle, const TString yTitle)
 {
   canvas->cd(i+1);
   setPadStyle();
   gPad->SetLogx();
-  for(int d = 1; d >= 0; d--) {
+  int fillClr[4] = {kGray, kBlue, kGreen, kRed};
+  for(int d = 3; d >= 0; d--) {
     TH1D means;
     TH1D sigmas;
     fitGauss2D(hists[d], means, sigmas);
     
-    if(d==1) {
+    if(d==3) {
       setAxisStyle(&means);
       means.GetXaxis()->SetMoreLogLabels();
       means.GetXaxis()->SetNoExponent();
@@ -190,17 +191,23 @@ void drawAndFitTwo2D(TCanvas* canvas, TH2F** hists, const unsigned i,
       means.SetTitle(title);
       means.SetXTitle(xTitle);
       means.SetYTitle(yTitle);
+    }
+
+    if(d==1) {
       means.SetLineColor(kBlue);
       means.SetLineStyle(2);
-      means.DrawCopy("hist ][");
+      means.DrawCopy("hist ][ same");
     }
     else {
-      means.SetFillColor(kGray);
+      TString drawOption = "E5";
+      if(d!=3) drawOption += " same";
+      means.SetFillColor(fillClr[d]);
+      means.DrawCopy(drawOption);
+    }
+
+    if(d==0) {
       means.SetMarkerStyle(20);
-      means.DrawCopy("E5 same");
       means.DrawCopy("p E1 same");
-      epsNameBase += (i*10);
-      gPad->Print(epsNameBase + ".eps");
     }
   }
 }
@@ -548,23 +555,23 @@ int analyzeJetEnergyResolutionBias()
     mT[i][0]->SetYTitle("events");
     mT[i][0]->DrawCopy();
 
-    drawAndFitTwo2D(canvasRespPtGen, respPtGen[i], i, .9, 1.8, title,
-		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", outDir+"/respPtGen_means_");
+    drawAndFitTwo2D(canvasRespPtGen, respPtGen[i], i, .95, 1.9, title,
+		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)");
 
-    drawAndFitTwo2D(canvasRespPtSmear, respPtSmear[i], i, .89, 1.05, title,
-		    "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", outDir+"/respPtSmear_means_");
+    drawAndFitTwo2D(canvasRespPtSmear, respPtSmear[i], i, .87, 1.06, title,
+		    "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)");
 
-    drawAndFitTwo2D(canvasMassWPtGen, mWPtGen[i], i, 75., 110., title,
-		    "p_{T}^{gen} (parton) [GeV]", "m_{qq} [GeV]", outDir+"/massWPtGen_means_");
+    drawAndFitTwo2D(canvasMassWPtGen, mWPtGen[i], i, 76., 114., title,
+		    "p_{T}^{gen} (parton) [GeV]", "m_{qq} [GeV]");
 
-    drawAndFitTwo2D(canvasMassWPtSmear, mWPtSmear[i], i, 75., 85., title,
-		    "p_{T}^{smear} (parton) [GeV]", "m_{qq} [GeV]", outDir+"/massWPtSmear_means_");
+    drawAndFitTwo2D(canvasMassWPtSmear, mWPtSmear[i], i, 73., 86., title,
+		    "p_{T}^{smear} (parton) [GeV]", "m_{qq} [GeV]");
 
-    drawAndFitTwo2D(canvasMassTPtGen, mTPtGen[i], i, 165., 200., title,
-		    "p_{T}^{gen} (parton) [GeV]", "m_{qqb} [GeV]", outDir+"/massTPtGen_means_");
+    drawAndFitTwo2D(canvasMassTPtGen, mTPtGen[i], i, 168., 216., title,
+		    "p_{T}^{gen} (parton) [GeV]", "m_{qqb} [GeV]");
 
-    drawAndFitTwo2D(canvasMassTPtSmear, mTPtSmear[i], i, 165., 180., title,
-		    "p_{T}^{smear} (parton) [GeV]", "m_{qqb} [GeV]", outDir+"/massTPtSmear_means_");
+    drawAndFitTwo2D(canvasMassTPtSmear, mTPtSmear[i], i, 163., 181., title,
+		    "p_{T}^{smear} (parton) [GeV]", "m_{qqb} [GeV]");
 
   }
 
@@ -692,6 +699,53 @@ int analyzeJetEnergyResolutionBias()
   massTptCut[0]->DrawCopy("E1 same");
   legend->Draw();
   gPad->Print(outDir + "/massTptCut.eps");
+
+  TLegend* legendUpperRight = (TLegend*) legend->Clone();
+  legendUpperRight->SetX1NDC(0.64);
+  legendUpperRight->SetX2NDC(0.92);
+
+  TLegend* legendLowerRight = (TLegend*) legendUpperRight->Clone();
+  legendLowerRight->SetY1NDC(0.29);
+  legendLowerRight->SetY2NDC(0.49);
+
+  for(unsigned i = 0; i < 6; i++) {
+    canvasRespPtGen->cd(i+1);
+    if(i!=0)
+      legendUpperRight->Draw();
+    TString epsName = outDir+"/respPtGen_means_";
+    epsName += (i*10);
+    gPad->Print(epsName + ".eps");
+
+    canvasRespPtSmear->cd(i+1);
+    legendLowerRight->Draw();
+    epsName = outDir+"/respPtSmear_means_";
+    epsName += (i*10);
+    gPad->Print(epsName + ".eps");
+
+    canvasMassWPtGen->cd(i+1);
+    legendUpperRight->Draw();
+    epsName = outDir+"/massWPtGen_means_";
+    epsName += (i*10);
+    gPad->Print(epsName + ".eps");
+
+    canvasMassWPtSmear->cd(i+1);
+    legendLowerRight->Draw();
+    epsName = outDir+"/massWPtSmear_means_";
+    epsName += (i*10);
+    gPad->Print(epsName + ".eps");
+
+    canvasMassTPtGen->cd(i+1);
+    legendUpperRight->Draw();
+    epsName = outDir+"/massTPtGen_means_";
+    epsName += (i*10);
+    gPad->Print(epsName + ".eps");
+
+    canvasMassTPtSmear->cd(i+1);
+    legendLowerRight->Draw();
+    epsName = outDir+"/massTPtSmear_means_";
+    epsName += (i*10);
+    gPad->Print(epsName + ".eps");
+  }
 
   massWPt1SmearPt2Smear->FitSlicesZ();
   TString tmpName = massWPt1SmearPt2Smear->GetName();
