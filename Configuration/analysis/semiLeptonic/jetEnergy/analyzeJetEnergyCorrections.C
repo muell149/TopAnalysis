@@ -208,16 +208,17 @@ void drawResponse(TH2F* hist, const unsigned i, const TString xTitle, const TStr
   histFit->SetYTitle(yTitle);
   histFit->SetStats(kFALSE);
   setAxisStyle(histFit);
+  if(logX && !xTitle.Contains("jj")) {
+    histFit->GetXaxis()->SetNoExponent();
+    histFit->GetXaxis()->SetMoreLogLabels();
+    histFit->GetXaxis()->SetRange(3., histFit->GetNbinsX());
+  }
 
   TString drawOption = "p";
   if(getNumberOfHistosOnPad() > 0) drawOption += " same";
   
   histFit->DrawCopy(drawOption);
   drawHLine(histFit, yLine);
-  if(logX && !xTitle.Contains("jj")) {
-    hatch_bin(histFit, 1);
-    hatch_bin(histFit, 2);
-  }
   histFit->DrawCopy(drawOption);
 
 }
