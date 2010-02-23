@@ -12,10 +12,18 @@ Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a> <img src="doxyWar
 
 <hr>
 
-<b>Test of semileptonic event selection:</b>
+<b>Test of single leptonic event selection:</b>
 
 Trigger summary: <a href="testSemiLepMuonSelection.txt">testSemiLepMuonSelection.txt</a>
 
 Diff to reference: <a href="testSemiLepMuonSelection-diff.txt">testSemiLepMuonSelection-diff.txt</a> <img src="testSemiLepMuonSelection-diff.jpg" alt="testSemiLepMuonSelection-diff.jpg" width="10" height="10" border="1">
+
+<hr>
+
+<b>Test of fully hadronic event selection:</b>
+
+Trigger summary: <a href="testFullHadSelection.txt">testFullHadSelection.txt</a>
+
+Diff to reference: <a href="testFullHadSelection-diff.txt">testFullHadSelection-diff.txt</a> <img src="testFullHadSelection-diff.jpg" alt="testFullHadSelection-diff.jpg" width="10" height="10" border="1">
 
 */
