@@ -63,14 +63,14 @@ void fitGauss(TH1* hist)
   double mean  = hist->GetFunction("gaus")->GetParameter(1);
   double sigma = hist->GetFunction("gaus")->GetParameter(2);
   if(hist->GetEntries() / hist->GetNbinsX() > 10.)
-    hist->Fit("gaus", fitOptions, "", mean-1.25*sigma, mean+1.25*sigma);
+    hist->Fit("gaus", fitOptions, "", mean-1.5*sigma, mean+1.5*sigma);
   else
     hist->Fit("gaus", fitOptions);
   // third iteration
   mean  = hist->GetFunction("gaus")->GetParameter(1);
   sigma = hist->GetFunction("gaus")->GetParameter(2);
   if(hist->GetEntries() / hist->GetNbinsX() > 10.)
-    hist->Fit("gaus", fitOptions, "", mean-1.25*sigma, mean+1.25*sigma);
+    hist->Fit("gaus", fitOptions, "", mean-1.5*sigma, mean+1.5*sigma);
   else
     hist->Fit("gaus", fitOptions);
 
