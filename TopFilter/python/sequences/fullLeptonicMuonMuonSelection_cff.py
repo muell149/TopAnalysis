@@ -1,3 +1,4 @@
+
 import FWCore.ParameterSet.Config as cms
 
 ## jet selector
@@ -14,46 +15,59 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 ## electron count filter
 from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
-## tight muon selection
-tightMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons', 
-                                       cut = 'combinedMuon.isNull = 0'
+## phase space cuts
+hardMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons', 
+                                      cut = 'combinedMuon.isNull = 0'
 					     '& pt > 20.'
 					     '& abs(eta) < 2.4'    
-                			     '& track.numberOfValidHits >= 11' 
-					     '& abs(track.d0) < 0.2'
-					     '& combinedMuon.normalizedChi2 < 10.0'
-					     '& ecalIsoDeposit.candEnergy < 4'
-					     '& hcalIsoDeposit.candEnergy < 6'
-					     '& (trackIso+caloIso)/pt < 0.25' 
-				      )
+				     )
+				      
+## default qualtiy cuts
+qualityMuons = selectedLayer1Muons.clone(src = 'hardMuons', 
+                                         cut = 'track.numberOfValidHits >= 11' 
+					       '& abs(track.d0) < 0.2'
+					       '& combinedMuon.normalizedChi2 < 10.0'
+					       '& ecalIsoDeposit.candEnergy < 4'
+					       '& hcalIsoDeposit.candEnergy < 6'
+				        )				      
 
-## loose electron selection for veto
-looseElectrons = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
-                                               cut = 'et > 20.' 
-					             '& abs(eta) < 2.4' 
-					             '& (trackIso+caloIso)/et <  0.2'
-					      )
+## isolation cut				      				      
+isolatedMuons = selectedLayer1Muons.clone(src = 'qualityMuons', 
+                                          cut = '(trackIso+caloIso)/pt < 0.25' 
+				         )				      
 
-## tight jet selection
+## hard jet selection
 hardJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets', 
                                     cut = 'pt > 40.' 
-					  '& abs(eta) < 2.3' 
-				          '& 0.05 < emEnergyFraction' 
-					  '& emEnergyFraction < 0.95'
 			           )
 
-## at least two tight muons
-muonSelection  = countLayer1Muons.clone(src = 'tightMuons', minNumber = 2, maxNumber = 999)
-## no additional tight electron
-electronVeto   = countLayer1Electrons.clone(src = 'looseElectrons', maxNumber = 0)
+## thight jet selection				   
+tightJets = selectedLayer1Jets.clone(src = 'hardJets', 
+                                     cut = 'abs(eta) < 2.3' 
+				           #'& 0.05 < emEnergyFraction' 
+					   #'& emEnergyFraction < 0.95'
+			            )
+				        
+## muon count filter in three steps
+hardMuonSelection      = countLayer1Muons.clone(src = 'hardMuons',     minNumber = 2, maxNumber = 999)
+qualityMuonSelection   = countLayer1Muons.clone(src = 'qualityMuons',  minNumber = 2, maxNumber = 999)
+isolatedMuonSelection  = countLayer1Muons.clone(src = 'isolatedMuons', minNumber = 2, maxNumber = 999)
+
+
 ## at least two jets
-jetSelection   = countLayer1Jets.clone(src = 'bJetCandidates', minNumber = 2)
+hardJetSelection   = countLayer1Jets.clone(src = 'hardJets',  minNumber = 2)
+tightJetSelection  = countLayer1Jets.clone(src = 'tightJets', minNumber = 2)
 
-
-buildCollections = cms.Sequence(tightMuons *
-                                hardJets 
+buildCollections = cms.Sequence(hardMuons *
+                                qualityMuons *
+				isolatedMuons *
+				hardJets *
+				tightJets				
 			       )			       			       
 
-fullLeptonicMuonMuonSelection = cms.Sequence(muonSelection #* jetSelection *
-                                             #looseElectrons  * electronVeto   
+fullLeptonicMuonMuonSelection = cms.Sequence(hardMuonSelection * 
+                                             qualityMuonSelection * 
+                                             isolatedMuonSelection * 
+                                             hardJetSelection *
+					     tightJetSelection
                                             )
