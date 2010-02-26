@@ -280,7 +280,9 @@ JetEnergyCorrectionsAnalyzer::analyzeBJetResponse(const reco::Candidate& recJet,
   double response = recJet.pt() / genJet.pt();
 
   hists_.find("responseBGenJetPtGenJet")->second->Fill( genJet.pt() , response );
-  hists_.find("responseBGenJetEta"     )->second->Fill( genJet.eta(), response );
+
+  if( genJet.pt() > 30. )
+    hists_.find("responseBGenJetEta"     )->second->Fill( genJet.eta(), response );
 
   if( std::abs(genJet.eta()) < 1.3 )
     hists_.find("responseBGenJetPtGenJet_barrel")->second->Fill( genJet.pt(), response );
@@ -290,7 +292,9 @@ JetEnergyCorrectionsAnalyzer::analyzeBJetResponse(const reco::Candidate& recJet,
   response = recJet.pt() / parton.pt();
 
   hists_.find("responseBPartonPtParton")->second->Fill( parton.pt() , response );
-  hists_.find("responseBPartonEta"     )->second->Fill( parton.eta(), response );
+
+  if( parton.pt() > 30. )
+    hists_.find("responseBPartonEta"     )->second->Fill( parton.eta(), response );
   
   if( std::abs(parton.eta()) < 1.3 )
     hists_.find("responseBPartonPtParton_barrel")->second->Fill( parton.pt(), response );
