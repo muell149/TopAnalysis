@@ -641,7 +641,7 @@ int analyzeJetEnergyResolutionBias()
   enRespPtCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
   enRespPtCut[1]->SetYTitle("E^{smear} / E^{gen} (parton)");
   enRespPtCut[1]->SetMinimum(0.998);
-  enRespPtCut[1]->SetMaximum(1.032);
+  enRespPtCut[1]->SetMaximum(1.034);
   enRespPtCut[1]->SetLineColor(kBlue);
   enRespPtCut[1]->SetLineStyle(2);
   enRespPtCut[0]->SetFillColor(kGray);
@@ -669,7 +669,7 @@ int analyzeJetEnergyResolutionBias()
   respPtCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
   respPtCut[1]->SetYTitle("p_{T}^{smear} / p_{T}^{gen} (parton)");
   respPtCut[1]->SetMinimum(0.998);
-  respPtCut[1]->SetMaximum(1.032);
+  respPtCut[1]->SetMaximum(1.034);
   respPtCut[1]->SetLineColor(kBlue);
   respPtCut[1]->SetLineStyle(2);
   respPtCut[0]->SetFillColor(kGray);
