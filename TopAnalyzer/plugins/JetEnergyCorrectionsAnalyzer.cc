@@ -24,85 +24,85 @@ void JetEnergyCorrectionsAnalyzer::beginJob(const edm::EventSetup&)
   edm::Service<TFileService> fs;
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
 
-  double binningLogPt[15] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-			     120, 150, 200, 250, 300};
+  double binningLogPt[14] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+			     120, 150, 200, 250};
 
   hists_["mW"  ] = fs->make<TH1F>("mW"  , "mW"  , 28, 0., 140.);
   hists_["mTop"] = fs->make<TH1F>("mTop", "mTop", 60, 0., 300.);
 
-  hists_["mW_Pt1" ] = fs->make<TH2F>("mW_Pt1" , "mW_Pt1" , 14, binningLogPt, 41, 0., 160.);
-  hists_["mW_Pt2" ] = fs->make<TH2F>("mW_Pt2" , "mW_Pt2" , 14, binningLogPt, 41, 0., 160.);
-  hists_["mW_PtW" ] = fs->make<TH2F>("mW_PtW" , "mW_PtW" , 14, binningLogPt, 41, 0., 160.);
-  hists_["mW_Eta1"] = fs->make<TH2F>("mW_Eta1", "mW_Eta1", 30, -3., 3.     , 41, 0., 160.);
-  hists_["mW_Eta2"] = fs->make<TH2F>("mW_Eta2", "mW_Eta2", 30, -3., 3.     , 41, 0., 160.);
-  hists_["mW_EtaW"] = fs->make<TH2F>("mW_EtaW", "mW_EtaW", 30, -3., 3.     , 41, 0., 160.);
+  hists_["mW_Pt1" ] = fs->make<TH2F>("mW_Pt1" , "mW_Pt1" , 13, binningLogPt, 41, 0., 160.);
+  hists_["mW_Pt2" ] = fs->make<TH2F>("mW_Pt2" , "mW_Pt2" , 13, binningLogPt, 41, 0., 160.);
+  hists_["mW_PtW" ] = fs->make<TH2F>("mW_PtW" , "mW_PtW" , 13, binningLogPt, 41, 0., 160.);
+  hists_["mW_Eta1"] = fs->make<TH2F>("mW_Eta1", "mW_Eta1", 12, -2.4, 2.4   , 41, 0., 160.);
+  hists_["mW_Eta2"] = fs->make<TH2F>("mW_Eta2", "mW_Eta2", 12, -2.4, 2.4   , 41, 0., 160.);
+  hists_["mW_EtaW"] = fs->make<TH2F>("mW_EtaW", "mW_EtaW", 12, -2.4, 2.4   , 41, 0., 160.);
 
-  hists_["mTop_Pt1"   ] = fs->make<TH2F>("mTop_Pt1"   , "mTop_Pt1"   , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_Pt2"   ] = fs->make<TH2F>("mTop_Pt2"   , "mTop_Pt2"   , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_PtB"   ] = fs->make<TH2F>("mTop_PtB"   , "mTop_PtB"   , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_PtTop" ] = fs->make<TH2F>("mTop_PtTop" , "mTop_PtTop" , 14, binningLogPt, 51, 0., 350.);
-  hists_["mTop_Eta1"  ] = fs->make<TH2F>("mTop_Eta1"  , "mTop_Eta1"  , 30, -3., 3.     , 51, 0., 350.);
-  hists_["mTop_Eta2"  ] = fs->make<TH2F>("mTop_Eta2"  , "mTop_Eta2"  , 30, -3., 3.     , 51, 0., 350.);
-  hists_["mTop_EtaB"  ] = fs->make<TH2F>("mTop_EtaB"  , "mTop_EtaB"  , 30, -3., 3.     , 51, 0., 350.);
-  hists_["mTop_EtaTop"] = fs->make<TH2F>("mTop_EtaTop", "mTop_EtaTop", 30, -3., 3.     , 51, 0., 350.);
+  hists_["mTop_Pt1"   ] = fs->make<TH2F>("mTop_Pt1"   , "mTop_Pt1"   , 13, binningLogPt, 51, 0., 350.);
+  hists_["mTop_Pt2"   ] = fs->make<TH2F>("mTop_Pt2"   , "mTop_Pt2"   , 13, binningLogPt, 51, 0., 350.);
+  hists_["mTop_PtB"   ] = fs->make<TH2F>("mTop_PtB"   , "mTop_PtB"   , 13, binningLogPt, 51, 0., 350.);
+  hists_["mTop_PtTop" ] = fs->make<TH2F>("mTop_PtTop" , "mTop_PtTop" , 13, binningLogPt, 51, 0., 350.);
+  hists_["mTop_Eta1"  ] = fs->make<TH2F>("mTop_Eta1"  , "mTop_Eta1"  , 12, -2.4, 2.4   , 51, 0., 350.);
+  hists_["mTop_Eta2"  ] = fs->make<TH2F>("mTop_Eta2"  , "mTop_Eta2"  , 12, -2.4, 2.4   , 51, 0., 350.);
+  hists_["mTop_EtaB"  ] = fs->make<TH2F>("mTop_EtaB"  , "mTop_EtaB"  , 12, -2.4, 2.4   , 51, 0., 350.);
+  hists_["mTop_EtaTop"] = fs->make<TH2F>("mTop_EtaTop", "mTop_EtaTop", 12, -2.4, 2.4   , 51, 0., 350.);
 
   hists_["mW_barrel"  ] = fs->make<TH1F>("mW_barrel"  , "mW_barrel"  , 28, 0., 140.);
   hists_["mTop_barrel"] = fs->make<TH1F>("mTop_barrel", "mTop_barrel", 60, 0., 300.);
 
-  hists_["deltaM_PtB" ] = fs->make<TH2F>("deltaM_PtB" , "deltaM_PtB" , 14, binningLogPt, 41, 0., 180.);
-  hists_["deltaM_EtaB"] = fs->make<TH2F>("deltaM_EtaB", "deltaM_EtaB", 30, -3., 3.     , 41, 0., 180.);
+  hists_["deltaM_PtB" ] = fs->make<TH2F>("deltaM_PtB" , "deltaM_PtB" , 13, binningLogPt, 41, 0., 180.);
+  hists_["deltaM_EtaB"] = fs->make<TH2F>("deltaM_EtaB", "deltaM_EtaB", 12, -2.4, 2.4   , 41, 0., 180.);
 
   // response light jets
 
   hists_["responseLGenJetPtGenJet"       ] = fs->make<TH2F>("responseLGenJetPtGenJet",
 							    "responseLGenJetPtGenJet",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseLGenJetPtGenJet_barrel"] = fs->make<TH2F>("responseLGenJetPtGenJet_barrel",
 							    "responseLGenJetPtGenJet_barrel",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseLGenJetEta"            ] = fs->make<TH2F>("responseLGenJetEta",
 							    "responseLGenJetEta",
-							    30, -3., 3. , 51, 0., 2.);
+							    12, -2.4, 2.4 , 51, 0., 2.);
 
   hists_["responseLPartonPtParton"       ] = fs->make<TH2F>("responseLPartonPtParton",
 							    "responseLPartonPtParton",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseLPartonPtParton_barrel"] = fs->make<TH2F>("responseLPartonPtParton_barrel",
 							    "responseLPartonPtParton_barrel",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseLPartonEta"            ] = fs->make<TH2F>("responseLPartonEta",
 							    "responseLPartonEta",
-							    30, -3., 3. , 51, 0., 2.);
+							    12, -2.4, 2.4 , 51, 0., 2.);
 
   // response b jets
 
   hists_["responseBGenJetPtGenJet"       ] = fs->make<TH2F>("responseBGenJetPtGenJet",
 							    "responseBGenJetPtGenJet",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseBGenJetPtGenJet_barrel"] = fs->make<TH2F>("responseBGenJetPtGenJet_barrel",
 							    "responseBGenJetPtGenJet_barrel",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseBGenJetEta"            ] = fs->make<TH2F>("responseBGenJetEta",
 							    "responseBGenJetEta",
-							    30, -3., 3. , 51, 0., 2.);
+							    12, -2.4, 2.4 , 51, 0., 2.);
 
   hists_["responseBPartonPtParton"       ] = fs->make<TH2F>("responseBPartonPtParton",
 							    "responseBPartonPtParton",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseBPartonPtParton_barrel"] = fs->make<TH2F>("responseBPartonPtParton_barrel",
 							    "responseBPartonPtParton_barrel",
-							    14, binningLogPt, 51, 0., 2.);
+							    13, binningLogPt, 51, 0., 2.);
 
   hists_["responseBPartonEta"            ] = fs->make<TH2F>("responseBPartonEta",
 							    "responseBPartonEta",
-							    30, -3., 3. , 51, 0., 2.);
+							    12, -2.4, 2.4 , 51, 0., 2.);
 
   hists_["pdgIdLJet"] = fs->make<TH1F>("pdgIdLJet", "pdgIdLJet", 25, 0., 25.);
   hists_["pdgIdBJet"] = fs->make<TH1F>("pdgIdBJet", "pdgIdBJet", 25, 0., 25.);
