@@ -45,8 +45,7 @@ void findMuonBinning()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMadgraph7TeV.root"  ) );
-  //  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigPythia10TeV.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"  ) );
 
   // ---
   //    get histograms
@@ -487,14 +486,20 @@ void findMuonBinning()
   // saving
   // ---
   
+  // png
+  canv0->Print("./diffXSecFromSignal/plots/ptRecoMcatnlo7TeVoptiBin.png"               );
+  canv1->Print("./diffXSecFromSignal/plots/ptGenRecoCorrelationMcatnlo7TeVoptiBin.png" );
+  canv2->Print("./diffXSecFromSignal/plots/purityMcatnlo7TeVoptiBin.png"               );
+  canv3->Print("./diffXSecFromSignal/plots/stabilityMcatnlo7TeVoptiBin.png"            );
+  canv4->Print("./diffXSecFromSignal/plots/acceptanceMcatnlo7TeVoptiBin.png"           );
 
   // ps
-  canv0->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps(");
-  canv1->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
-  canv2->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
-  canv3->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
-  canv4->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps" );
-  canv5->Print("./diffXSecFromSignal/optimalBinningMadgraph7TeV.ps)");
+  canv0->Print("./diffXSecFromSignal/plots/optimalBinningMcatnlo7TeV.ps(");
+  canv1->Print("./diffXSecFromSignal/plots/optimalBinningMcatnlo7TeV.ps" );
+  canv2->Print("./diffXSecFromSignal/plots/optimalBinningMcatnlo7TeV.ps" );
+  canv3->Print("./diffXSecFromSignal/plots/optimalBinningMcatnlo7TeV.ps" );
+  canv4->Print("./diffXSecFromSignal/plots/optimalBinningMcatnlo7TeV.ps" );
+  canv5->Print("./diffXSecFromSignal/plots/optimalBinningMcatnlo7TeV.ps)");
 
   for(unsigned int i=0; i<output_.size(); i++){
     std::cout << output_[i]<< std::endl;
