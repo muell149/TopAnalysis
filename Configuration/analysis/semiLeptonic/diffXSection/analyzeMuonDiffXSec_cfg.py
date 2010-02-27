@@ -12,8 +12,8 @@ import FWCore.ParameterSet.Config as cms
 ##    signal is semileptonic with mu
 ##    background is ttbar other channels
 ##    'all' does no selection
-
 ## ---
+
 eventFilter  = 'signal only'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 
@@ -27,7 +27,7 @@ process = cms.Process("Selection")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -40,14 +40,15 @@ process.source = cms.Source("PoolSource",
     # '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
     # '/store/user/henderle/OctEx/Wmunu/PATtuple_1.root'
     # '/store/user/henderle/OctEx/Zmumu/PATtuple_1.root'
-      '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root'
-    #  '/store/user/snaumann/firstCollisions/muTuple_Run123596.root'
+     '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root'
+    # '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_1.root','/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_10.root'
+    # '/store/user/snaumann/firstCollisions/muTuple_Run123596.root'
     )
  )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5000)
+    input = cms.untracked.int32(1000)
 )
 
 ## configure process options
@@ -67,7 +68,8 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
 ## cross section module
 process.load("TopAnalysis.TopAnalyzer.MuonCrossSection_cfi")
-
+## jet kinematics analyzer
+process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
 
 ## filter for different ttbar decay channels
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
@@ -128,9 +130,36 @@ process.load("TopAnalysis.TopFilter.sequences.generatorMatching_cff")
 ## muon selection
 process.load("TopAnalysis.TopFilter.sequences.muonSelection_cff")
 
+## define ordered jets
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'    ) )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'    ) )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'    ) )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'    ) )
+
+## Kinematic modules
+process.unselectedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds0 )
+process.unselectedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds1 )
+process.unselectedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds2 )
+process.unselectedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds3 )
+process.shiftedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds0 )
+process.shiftedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds1 )
+process.shiftedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds2 )
+process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds3 )
+
+process.unshiftedJets = cms.Sequence(process.unselectedLead_0_JetKinematics+
+                                     process.unselectedLead_1_JetKinematics+
+                                     process.unselectedLead_2_JetKinematics+
+                                     process.unselectedLead_3_JetKinematics
+                                     )
+
+process.shiftedJets = cms.Sequence(process.shiftedLead_0_JetKinematics+
+                                   process.shiftedLead_1_JetKinematics+
+                                   process.shiftedLead_2_JetKinematics+
+                                   process.shiftedLead_3_JetKinematics
+                                   )
+                                   
 ## set up distribution for cross section measurement
 process.analyzeTightMuonCrossSection = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
-
 
 ## ---
 ##    run the final sequence
@@ -139,12 +168,10 @@ process.analyzeTightMuonCrossSection = process.analyzeMuonCrossSection.clone(src
 process.p1 = cms.Path(
                       ## do the gen event selection (decay channel) and the trigger selection (hltMu9)
                       process.filterSequence                      *
-                      ## introduce some collecions
+                      ## introduce some collections
                       process.semiLeptonicSelection               *
-                      ## do the matching
-                      process.matchJetsToPartons                  *
-                      ## do the complete event selection at once
-#                      process.semiLeptonicEvents                  *  
+                      ## monitor jet Kinematics (to see JES effects)
+                      process.unshiftedJets                       *
                       ## do the event selection for muon
                       process.muonSelection                       *
                       ## do event selection veto cuts
@@ -157,6 +184,7 @@ process.p1 = cms.Path(
                       ## btag
                       process.bottomJetSelection                  
                       )
+
 
 ## Output Module Configuration
 if(writeOutput):
