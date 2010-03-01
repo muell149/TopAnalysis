@@ -30,8 +30,8 @@ Diff to reference: <a href="testFullHadSelection-diff.txt">testFullHadSelection-
 
 <b>Test of dileptonic event selection:</b>
 
-Trigger summary: <a href="testFullLepSelection.txt">testFullLepSelection.txt</a>
+Trigger summary: <a href="testFullLepMuonSelection.txt">testFullLepMuonSelection.txt</a>
 
-Diff to reference: <a href="testFullLepSelection-diff.txt">testFullLepSelection-diff.txt</a> <img src="testFullLepSelection-diff.jpg" alt="testFullLepSelection-diff.jpg" width="10" height="10" border="1">
+Diff to reference: <a href="testFullLepMuonSelection-diff.txt">testFullLepMuonSelection-diff.txt</a> <img src="testFullLepMuonSelection-diff.jpg" alt="testFullLepMuonSelection-diff.jpg" width="10" height="10" border="1">
 
 */
