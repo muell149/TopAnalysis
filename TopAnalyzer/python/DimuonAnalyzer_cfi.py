@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 analyzeMuonPair = cms.EDAnalyzer("DimuonAnalyzer",
     # source
-    muons = cms.InputTag("selectedLayer1Muons"),     
+    muons = cms.InputTag("selectedPatMuons"),     
     # option to weight events
     useEventWeight = cms.bool(True),
     # bins of di-combined two muon isolation

@@ -137,7 +137,7 @@ if( usePF ):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.p1, 'goodJets', 'reliableJets')
 
-    process.reliableJets.src = 'selectedLayer1JetsPF'
+    process.reliableJets.src = 'selectedPatJetsPF'
 
 ## Output Module Configuration
 if(writeOutput):

@@ -16,14 +16,14 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
 ## phase space cuts
-hardMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons', 
+hardMuons = selectedPatMuons.clone(src = 'selectedPatMuons', 
                                       cut = 'combinedMuon.isNull = 0'
 					     '& pt > 20.'
 					     '& abs(eta) < 2.4'    
 				     )
 				      
 ## default qualtiy cuts
-qualityMuons = selectedLayer1Muons.clone(src = 'hardMuons', 
+qualityMuons = selectedPatMuons.clone(src = 'hardMuons', 
                                          cut = 'track.numberOfValidHits >= 11' 
 					       '& abs(track.d0) < 0.2'
 					       '& combinedMuon.normalizedChi2 < 10.0'
@@ -32,31 +32,31 @@ qualityMuons = selectedLayer1Muons.clone(src = 'hardMuons',
 				        )				      
 
 ## isolation cut				      				      
-isolatedMuons = selectedLayer1Muons.clone(src = 'qualityMuons', 
+isolatedMuons = selectedPatMuons.clone(src = 'qualityMuons', 
                                           cut = '(trackIso+caloIso)/pt < 0.25' 
 				         )				      
 
 ## hard jet selection
-hardJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets', 
+hardJets = selectedPatJets.clone(src = 'selectedPatJets', 
                                     cut = 'pt > 40.' 
 			           )
 
 ## thight jet selection				   
-tightJets = selectedLayer1Jets.clone(src = 'hardJets', 
+tightJets = selectedPatJets.clone(src = 'hardJets', 
                                      cut = 'abs(eta) < 2.3' 
 				           #'& 0.05 < emEnergyFraction' 
 					   #'& emEnergyFraction < 0.95'
 			            )
 				        
 ## muon count filter in three steps
-hardMuonSelection      = countLayer1Muons.clone(src = 'hardMuons',     minNumber = 2, maxNumber = 999)
-qualityMuonSelection   = countLayer1Muons.clone(src = 'qualityMuons',  minNumber = 2, maxNumber = 999)
-isolatedMuonSelection  = countLayer1Muons.clone(src = 'isolatedMuons', minNumber = 2, maxNumber = 999)
+hardMuonSelection      = countPatMuons.clone(src = 'hardMuons',     minNumber = 2, maxNumber = 999)
+qualityMuonSelection   = countPatMuons.clone(src = 'qualityMuons',  minNumber = 2, maxNumber = 999)
+isolatedMuonSelection  = countPatMuons.clone(src = 'isolatedMuons', minNumber = 2, maxNumber = 999)
 
 
 ## at least two jets
-hardJetSelection   = countLayer1Jets.clone(src = 'hardJets',  minNumber = 2)
-tightJetSelection  = countLayer1Jets.clone(src = 'tightJets', minNumber = 2)
+hardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
+tightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
 
 buildCollections = cms.Sequence(hardMuons *
                                 qualityMuons *

@@ -38,7 +38,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
+process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
 
 #-------------------------------------------------
 # pat configuration
@@ -66,9 +66,9 @@ switchJetCollection(process,
                     jetIdLabel       = "antikt5"
                     )
 
-process.jetCorrFactors.corrSample = 'Summer09_7TeV'
+process.patJetCorrFactors.corrSample = 'Summer09_7TeV'
 ## choose sample type for flavor dependent JEC
-process.jetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
+process.patJetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
 #-------------------------------------------------
 # event selection
@@ -108,7 +108,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 ## save pat output
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands = patExtraAodEventContent
-process.out.outputCommands += patEventContentNoLayer1Cleaning
+process.out.outputCommands += patEventContentNoCleaning
 process.out.outputCommands += ["keep *_*GenJets_*_*"]
 process.out.outputCommands += ["drop *_towerMaker_*_*"]
 

@@ -11,7 +11,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 
 
 ## tight muon selection
-hardMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons', 
+hardMuons = selectedPatMuons.clone(src = 'selectedPatMuons', 
                                        cut = 'combinedMuon.isNull = 0'
 					     '& pt > 20.'
 					     '& abs(eta) < 2.4' )
@@ -20,7 +20,7 @@ hardMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
 
 
 ## at least two tight muons
-muonSelection  = countLayer1Muons.clone(src = 'hardMuons', minNumber = 2, maxNumber = 999)
+muonSelection  = countPatMuons.clone(src = 'hardMuons', minNumber = 2, maxNumber = 999)
 
 fullLeptonicMuonMuonPreselection = cms.Sequence(hardMuons * 
                                                 muonSelection 

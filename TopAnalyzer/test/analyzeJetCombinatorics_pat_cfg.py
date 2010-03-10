@@ -81,9 +81,9 @@ process.options = cms.untracked.PSet(
 #-------------------------------------------------
 
 # produce jet collection to be used for further analysis
-from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import selectedLayer1Jets
-process.leadingJets = selectedLayer1Jets.clone()
-process.leadingJets.src = "selectedLayer1Jets"
+from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import selectedPatJets
+process.leadingJets = selectedPatJets.clone()
+process.leadingJets.src = "selectedPatJets"
 process.leadingJets.cut = "pt > 20 & abs(eta) < 2.4 & 0.05 < emEnergyFraction & emEnergyFraction < 0.95"
 
 ## remove events with overlapping jets

@@ -29,13 +29,13 @@ append["6jets"                          ] =  "process.ttSemiLepJetPartonMatch.ma
 ########################################################################################################################
 append["default"                        ] =  ""
 ########################################################################################################################
-append["electrons"                      ] =  "process.trainTtSemiLepJetCombMVA.leptons    = 'selectedLayer1Electrons' \n"
+append["electrons"                      ] =  "process.trainTtSemiLepJetCombMVA.leptons    = 'selectedPatElectrons' \n"
 append["electrons"                      ] += "process.trainTtSemiLepJetCombMVA.leptonType = 'kElec'                   \n"
 ########################################################################################################################
 append["jetOverlap"                     ] =  "process.filterJetOverlapEvent.deltaR = 0.6 \n"
 ########################################################################################################################
-append["looseSelection"                 ] =  "process.selectedLayer1Muons.cut = 'pt > 15. & abs(eta) < 2.1 & (trackIso+caloIso)/pt < 0.1' \n"
-append["looseSelection"                 ] += "process.selectedLayer1Jets .cut = 'pt > 25. & abs(eta) < 2.4 & nConstituents > 0'           \n"
+append["looseSelection"                 ] =  "process.selectedPatMuons.cut = 'pt > 15. & abs(eta) < 2.1 & (trackIso+caloIso)/pt < 0.1' \n"
+append["looseSelection"                 ] += "process.selectedPatJets .cut = 'pt > 25. & abs(eta) < 2.4 & nConstituents > 0'           \n"
 ########################################################################################################################
 append["minSumDist"                     ] =  "process.ttSemiLepJetPartonMatch.algorithm  = 1                         \n"
 append["minSumDist"                     ] += "process.ttSemiLepJetPartonMatch.useMaxDist = False                     \n"
@@ -49,8 +49,8 @@ append["ptOrderedMinDist_rejectOutliers"] =  "process.ttSemiLepJetPartonMatch.al
 ########################################################################################################################
 append["tauola"                         ] =  ""
 ########################################################################################################################
-append["tightSelection"                 ] =  "process.selectedLayer1Muons.cut = 'pt > 25. & abs(eta) < 2.1 & (trackIso+caloIso)/pt < 0.1' \n"
-append["tightSelection"                 ] += "process.selectedLayer1Jets .cut = 'pt > 35. & abs(eta) < 2.4 & nConstituents > 0'           \n"
+append["tightSelection"                 ] =  "process.selectedPatMuons.cut = 'pt > 25. & abs(eta) < 2.1 & (trackIso+caloIso)/pt < 0.1' \n"
+append["tightSelection"                 ] += "process.selectedPatJets .cut = 'pt > 35. & abs(eta) < 2.4 & nConstituents > 0'           \n"
 ########################################################################################################################
 append["totalMinDist"                   ] =  "process.ttSemiLepJetPartonMatch.algorithm  = 0                         \n"
 append["totalMinDist"                   ] += "process.ttSemiLepJetPartonMatch.useMaxDist = False                     \n"

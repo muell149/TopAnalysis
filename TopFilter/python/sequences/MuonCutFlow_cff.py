@@ -19,23 +19,23 @@ hltHighLevel.HLTPaths = ["HLT_Mu9"]
 ##    setup muon cutflow
 ## ---
 ## combined muons
-combinedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons', cut = 'combinedMuon.isNull = 0')
+combinedMuons = selectedPatMuons.clone(src = 'selectedPatMuons', cut = 'combinedMuon.isNull = 0')
 ## high pt muons
-highptMuons = selectedLayer1Muons.clone(src = 'combinedMuons', cut = 'pt > 20.')
+highptMuons = selectedPatMuons.clone(src = 'combinedMuons', cut = 'pt > 20.')
 ## central muons
-centralMuons = selectedLayer1Muons.clone(src = 'highptMuons', cut = 'abs(eta) < 2.1')
+centralMuons = selectedPatMuons.clone(src = 'highptMuons', cut = 'abs(eta) < 2.1')
 ## muons with a minimum number of tracker hits
-enoughHitsMuons = selectedLayer1Muons.clone(src = 'centralMuons', cut = 'track.numberOfValidHits >= 11')
+enoughHitsMuons = selectedPatMuons.clone(src = 'centralMuons', cut = 'track.numberOfValidHits >= 11')
 ## significant muons
-significantMuons = selectedLayer1Muons.clone(src = 'enoughHitsMuons', cut = 'abs(track.d0) < 0.2')
+significantMuons = selectedPatMuons.clone(src = 'enoughHitsMuons', cut = 'abs(track.d0) < 0.2')
 ## global muon with reliable track fit
-reliableFitMuons = selectedLayer1Muons.clone(src = 'significantMuons', cut = 'combinedMuon.normalizedChi2 < 10.0')
+reliableFitMuons = selectedPatMuons.clone(src = 'significantMuons', cut = 'combinedMuon.normalizedChi2 < 10.0')
 ## muons with low ECAL energy
-lowEcalMuons = selectedLayer1Muons.clone(src = 'reliableFitMuons', cut = 'ecalIsoDeposit.candEnergy < 4')
+lowEcalMuons = selectedPatMuons.clone(src = 'reliableFitMuons', cut = 'ecalIsoDeposit.candEnergy < 4')
 ## muons with low HCAL energy
-lowHcalMuons = selectedLayer1Muons.clone(src = 'lowEcalMuons', cut = 'hcalIsoDeposit.candEnergy < 6')
+lowHcalMuons = selectedPatMuons.clone(src = 'lowEcalMuons', cut = 'hcalIsoDeposit.candEnergy < 6')
 ## isolated muons
-isolatedMuons = selectedLayer1Muons.clone(src = 'lowHcalMuons', cut = '(trackIso+caloIso)/pt < 0.1')
+isolatedMuons = selectedPatMuons.clone(src = 'lowHcalMuons', cut = '(trackIso+caloIso)/pt < 0.1')
 
 QualityCombinedMuons = analyzeMuonQuality.clone(src = 'combinedMuons')
 QualityHighptMuons = analyzeMuonQuality.clone(src = 'highptMuons')

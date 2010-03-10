@@ -69,8 +69,8 @@ process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41)'
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 ## use the correct jet energy corrections
-process.jetCorrFactors.corrSample = "900GeV"
-#process.jetCorrFactors.corrSample = "2360GeV"
+process.patJetCorrFactors.corrSample = "900GeV"
+#process.patJetCorrFactors.corrSample = "2360GeV"
 
 ## switch off MC matching
 from PhysicsTools.PatAlgos.tools.coreTools import *
@@ -154,9 +154,9 @@ from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
 process.out.outputCommands += patExtraAodEventContent
 process.out.outputCommands += patEventContentTriggerMatch
-process.out.outputCommands += patEventContentNoLayer1Cleaning
-process.out.outputCommands += ["keep *_selectedLayer1Jets*_*_*",
-                               "keep *_layer1METs*_*_*"]
+process.out.outputCommands += patEventContentNoCleaning
+process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
+                               "keep *_patMETs*_*_*"]
 ## and products from our UserCode
 process.out.outputCommands += ["keep *_eventWeight_*_*"]
 ## drop stuff which is not needed

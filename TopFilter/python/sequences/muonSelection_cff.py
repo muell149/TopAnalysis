@@ -8,13 +8,13 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
 ## ---
 
 ## getting started
-standAloneMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+standAloneMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                             cut = 'standAloneMuon.isNull = 0'
                                             )
-combinedMuons   = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+combinedMuons   = selectedPatMuons.clone(src = 'selectedPatMuons',
                                             cut = 'combinedMuon.isNull = 0'
                                             )
-triggerMuons    = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+triggerMuons    = selectedPatMuons.clone(src = 'selectedPatMuons',
                                             cut = 'combinedMuon.isNull = 0 &'
                                             'abs(eta) < 2.5 & pt > 10.'
                                             )
@@ -26,16 +26,16 @@ selectTriggerMuons = cms.Sequence(combinedMuons *
                                   )
                                
 ## check tracker related muon qualities
-validHits     = selectedLayer1Muons.clone(src = 'triggerMuons',
+validHits     = selectedPatMuons.clone(src = 'triggerMuons',
                                           cut = 'track.numberOfValidHits >= 11'
                                           )
-chi2Fit       = selectedLayer1Muons.clone(src = 'triggerMuons',
+chi2Fit       = selectedPatMuons.clone(src = 'triggerMuons',
                                           cut = 'combinedMuon.normalizedChi2 < 10.0'
                                           )
-trackSig      = selectedLayer1Muons.clone(src = 'triggerMuons',
+trackSig      = selectedPatMuons.clone(src = 'triggerMuons',
                                           cut = 'abs(dB) < 0.02'
                                           )
-trackMuons    = selectedLayer1Muons.clone(src = 'triggerMuons',
+trackMuons    = selectedPatMuons.clone(src = 'triggerMuons',
                                           cut = 'track.numberOfValidHits >= 11 &'
                                                 'combinedMuon.normalizedChi2 < 10.0 &'
                                                 'abs(dB) < 0.02'
@@ -49,13 +49,13 @@ selectTrackMuons = cms.Sequence(validHits *
                                 )
 
 ## check muon kinematics
-centralMuons  = selectedLayer1Muons.clone(src = 'trackMuons',
+centralMuons  = selectedPatMuons.clone(src = 'trackMuons',
                                           cut = 'abs(eta) < 2.1'
                                           )
-highptMuons   = selectedLayer1Muons.clone(src = 'trackMuons',
+highptMuons   = selectedPatMuons.clone(src = 'trackMuons',
                                           cut = 'pt > 20.'
                                           )
-goodMuons     = selectedLayer1Muons.clone(src = 'trackMuons',
+goodMuons     = selectedPatMuons.clone(src = 'trackMuons',
                                           cut = 'pt > 20. & abs(eta) < 2.1'
                                           )
 ## a kinematically well defined trackMuon
@@ -67,13 +67,13 @@ selectGoodMuons = cms.Sequence(centralMuons *
 
 ## check for well behaved MIP qualities in
 ## both calorimeters
-ecalDep       = selectedLayer1Muons.clone(src = 'goodMuons',
+ecalDep       = selectedPatMuons.clone(src = 'goodMuons',
                                           cut = 'ecalIsoDeposit.candEnergy < 4'
                                           )
-hcalDep       = selectedLayer1Muons.clone(src = 'goodMuons',
+hcalDep       = selectedPatMuons.clone(src = 'goodMuons',
                                           cut = 'hcalIsoDeposit.candEnergy < 6'
                                           )
-goldenMuons   = selectedLayer1Muons.clone(src = 'goodMuons',
+goldenMuons   = selectedPatMuons.clone(src = 'goodMuons',
                                           cut = 'ecalIsoDeposit.candEnergy < 4 &'
                                                 'hcalIsoDeposit.candEnergy < 6'
                                           )
@@ -85,13 +85,13 @@ selectGoldenMuons = cms.Sequence(ecalDep    *
                                  )
 
 ## check for isolation
-trackIsoMuons = selectedLayer1Muons.clone(src = 'goldenMuons',
+trackIsoMuons = selectedPatMuons.clone(src = 'goldenMuons',
                                           cut = 'trackIso < 1.'
                                         )
-caloIsoMuons  = selectedLayer1Muons.clone(src = 'goldenMuons',
+caloIsoMuons  = selectedPatMuons.clone(src = 'goldenMuons',
                                           cut = 'caloIso  < 5.'
                                         )
-relIsoMuons   = selectedLayer1Muons.clone(src = 'goldenMuons',
+relIsoMuons   = selectedPatMuons.clone(src = 'goldenMuons',
                                           cut = '(trackIso+caloIso)/pt < 0.05'
                                           )
 

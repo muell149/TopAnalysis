@@ -25,23 +25,23 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 ## ---
 
 ## setup the lepton selection collections
-tightMuons     = selectedLayer1Muons.clone(src = 'goldenMuons',
+tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
                                            cut = '(trackIso+caloIso)/pt < 0.05'
                                            )
-looseMuons     = selectedLayer1Muons.clone(src = 'trackMuons',
+looseMuons     = selectedPatMuons.clone(src = 'trackMuons',
                                            cut = '(trackIso+caloIso)/pt <  0.2'
                                            )
-looseElectrons = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons',
+looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                                cut = 'et > 15. & abs(eta) < 2.5 &'
                                                      'electronID(\"eidRobustLoose\") &'
                                                      '(trackIso+caloIso)/et <  0.2'
                                                )
 
 ## setup jet selection collection
-tightLeadingJets = selectedLayer1Jets.clone(src = 'goodJets',
+tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
                                             cut=''
                                             )
-tightBottomJets  = selectedLayer1Jets.clone(src = 'trackCountingHighPurBJets',
+tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
                                             cut=''
                                             )
 
@@ -66,22 +66,22 @@ semiLeptonicSelection = cms.Sequence(looseElectrons   *
 ## ---
 
 ## setup the lepton selection
-secondMuonVeto = countLayer1Muons.clone(src = 'looseMuons',
+secondMuonVeto = countPatMuons.clone(src = 'looseMuons',
                                         maxNumber = 1
                                         )
-muonSelection  = countLayer1Muons.clone(src = 'tightMuons',
+muonSelection  = countPatMuons.clone(src = 'tightMuons',
                                         minNumber = 1,
                                         maxNumber = 1
                                         )
-electronVeto   = countLayer1Electrons.clone(src = 'looseElectrons',
+electronVeto   = countPatElectrons.clone(src = 'looseElectrons',
                                             maxNumber = 0
                                             )
 
 ## setup jet selection collection
-leadingJetSelection = countLayer1Jets.clone(src = 'tightLeadingJets',
+leadingJetSelection = countPatJets.clone(src = 'tightLeadingJets',
                                             minNumber = 4
                                             )
-bottomJetSelection  = countLayer1Jets.clone(src = 'tightBottomJets',
+bottomJetSelection  = countPatJets.clone(src = 'tightBottomJets',
                                             minNumber = 1
                                             )
 

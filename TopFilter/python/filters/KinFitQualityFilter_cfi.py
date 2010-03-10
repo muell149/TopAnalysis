@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 filterKinFitQuality  = cms.EDFilter("KinFitQualityFilter",
     srcA             = cms.InputTag("ttFullHadEvent"),
-    srcB             = cms.InputTag("selectedLayer1Jets"),
+    srcB             = cms.InputTag("selectedPatJets"),
     whichFit         = cms.int32(0),
     maxChi2          = cms.double(999999.0),
     minChi2          = cms.double(0.0),

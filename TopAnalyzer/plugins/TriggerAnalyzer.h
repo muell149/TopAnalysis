@@ -17,7 +17,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/EDMException.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 /**
    \class   TriggerAnalyzer TriggerAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/TriggerAnalyzer.h"

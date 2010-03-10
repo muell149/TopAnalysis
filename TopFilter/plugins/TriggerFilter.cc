@@ -11,7 +11,7 @@ TriggerFilter::~TriggerFilter()
 }
 
 void
-TriggerFilter::beginJob(const EventSetup&)
+TriggerFilter::beginJob()
 {
     n_TrigPaths = hltPaths_L3_.size();     
 }

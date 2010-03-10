@@ -4,7 +4,7 @@ analyzeHypothesisKinFitMuon = cms.EDAnalyzer("HypothesisKinFitMuonAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("ttSemiLepEvent"),
     ## input collectionB                            
-    srcB = cms.InputTag("selectedLayer1Muons"),                                         
+    srcB = cms.InputTag("selectedPatMuons"),                                         
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

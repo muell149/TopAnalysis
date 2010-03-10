@@ -29,7 +29,7 @@ class FullLepHypothesesFilter : public edm::EDFilter {
   
  private:
   /// prints out a summary of the applied cuts if 'topFilter' is appended to message logger
-  virtual void beginJob(const edm::EventSetup&);
+  virtual void beginJob();
   /// filters events on validity, invariant dilepton mass and b-taggging 
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   /// gives a summary of how many events passed each cut if 'topFilter' is appended to message logger 

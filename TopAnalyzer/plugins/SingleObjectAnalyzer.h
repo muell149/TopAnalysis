@@ -16,7 +16,7 @@
 
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 /**
    \class   SingleObjectAnalyzer SingleObjectAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/SingleObjectAnalyzer.h"
@@ -61,7 +61,7 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
   
  private:
   /// everything which has to be done before the event loop  
-  virtual void beginJob(const edm::EventSetup& setup) ;
+  virtual void beginJob() ;
   /// everything which has to be done during the event loop 
   virtual void analyze(const edm::Event& event, const edm::EventSetup& setup);
   /// everything which has to be done after the event loop 
@@ -120,7 +120,7 @@ void SingleObjectAnalyzer<Collection, Analyze>::analyze(const edm::Event& event,
 
 /// everything which has to be done before the event loop  
 template <typename Collection, typename Analyze> 
-void SingleObjectAnalyzer<Collection, Analyze>::beginJob(const edm::EventSetup& setup)
+void SingleObjectAnalyzer<Collection, Analyze>::beginJob()
 {
   // check for the existence of the TFileService
   edm::Service<TFileService> fs;

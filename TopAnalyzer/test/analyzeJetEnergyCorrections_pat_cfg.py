@@ -81,15 +81,15 @@ process.load("TopAnalysis.TopAnalyzer.JetEnergyCorrectionsAnalyzer_cff")
 ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ## this will make all parts of this analysis that work with GenJets meaningless
 ## but it is needed since no GenJet collection was saved into the old PAT tuple
-process.ttSemiLepGenJetPartonMatch.jets   = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_raw .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_off .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_rel .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_abs .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_emf .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_had .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_ue  .genJets = "selectedLayer1Jets"
-process.analyzeJetEnergyGenMatch_part.genJets = "selectedLayer1Jets"
+process.ttSemiLepGenJetPartonMatch.jets   = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_raw .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_off .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_rel .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_abs .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_emf .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_had .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_ue  .genJets = "selectedPatJets"
+process.analyzeJetEnergyGenMatch_part.genJets = "selectedPatJets"
 ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ## printout for debugging

@@ -114,7 +114,7 @@ bool KinFitQualityFilter::filter(edm::Event& event, const edm::EventSetup& setup
   return pass;
 }
 
-void KinFitQualityFilter::beginJob(const edm::EventSetup& setup)
+void KinFitQualityFilter::beginJob()
 {
 }
 

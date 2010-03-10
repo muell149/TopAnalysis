@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   std::vector<double> binsPhi(0);
 
   // define worker class
-  FWLiteMuonResolutionAnalyzer muana("selectedLayer1Muons", "eventWeight", true, matchDR, binsPt, binsEta, binsPhi); 
+  FWLiteMuonResolutionAnalyzer muana("selectedPatMuons", "eventWeight", true, matchDR, binsPt, binsEta, binsPhi); 
   // configure
   muana.beginJob(cfgFile);
   // keep this! It's the event loop

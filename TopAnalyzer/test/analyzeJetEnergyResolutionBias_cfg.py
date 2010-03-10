@@ -28,7 +28,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
+process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
 
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 process.decaySubset.fillMode = "kME" # use the status 3 partons from the hard process (Matrix Element)

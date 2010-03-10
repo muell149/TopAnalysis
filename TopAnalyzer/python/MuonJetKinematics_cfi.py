@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 analyzeMuonJetKinematics = cms.EDAnalyzer("MuonJetKinematicsAnalyzer",
     ## input collectionA
-    srcA = cms.InputTag("selectedLayer1Muons"),
+    srcA = cms.InputTag("selectedPatMuons"),
     ## input collectionB
-    srcB = cms.InputTag("selectedLayer1Jets"),                                       
+    srcB = cms.InputTag("selectedPatJets"),                                       
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

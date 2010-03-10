@@ -4,7 +4,7 @@ analyzeHypothesisKinFitMET = cms.EDAnalyzer("HypothesisKinFitMETAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("ttSemiLepEvent"),
     ## input collectionB                            
-    srcB = cms.InputTag("layer1METs"),                                         
+    srcB = cms.InputTag("patMETs"),                                         
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

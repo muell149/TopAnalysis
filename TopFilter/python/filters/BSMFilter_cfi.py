@@ -13,7 +13,7 @@ filterMET = cms.EDFilter("PtEventFilter",
 )
 
 filterJetsnr = cms.EDFilter("PtEventFilter",
-    input  = cms.VInputTag(cms.InputTag("selectedLayer1Jets")),
+    input  = cms.VInputTag(cms.InputTag("selectedPatJets")),
     useEventWeight = cms.bool(True),
     weight = cms.InputTag("eventWeight"),    
     cuts   = cms.PSet(
@@ -25,5 +25,5 @@ filterJetsnr = cms.EDFilter("PtEventFilter",
 )
 
 filterDiMuonMass = cms.EDFilter("DiMuonMassFilter",
-                                  muons = cms.InputTag("selectedLayer1Muons")
+                                  muons = cms.InputTag("selectedPatMuons")
                                   )

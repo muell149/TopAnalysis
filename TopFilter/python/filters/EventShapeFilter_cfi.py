@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 filterEventShape = cms.EDFilter("EventShapeFilter",
-    src            = cms.InputTag("selectedLayer1Jets"),
+    src            = cms.InputTag("selectedPatJets"),
     maxIsotropy    = cms.double(1.0),
     minIsotropy    = cms.double(0.0),
     maxCircularity = cms.double(1.0),

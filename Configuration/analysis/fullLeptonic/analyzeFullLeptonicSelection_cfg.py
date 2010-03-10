@@ -95,7 +95,7 @@ process.tightElectrons = tightElectrons
 process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
 
 ## 1. leading jet before any cut
-process.jetKin_1st_selected = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets',
+process.jetKin_1st_selected = process.analyzeJetKinematics.clone (src = 'selectedPatJets',
                                                                   analyze = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'  ) )
                                                                   )
 ## 2. leading jet before any cut
@@ -146,7 +146,7 @@ process.monitorJetQuality = cms.Sequence(process.jetID_1st_reliable +
 process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
 
 ## 1. leading electron before any cut
-process.eleKin_1st_selected = process.analyzeElectronKinematics.clone(src = 'selectedLayer1Electrons',
+process.eleKin_1st_selected = process.analyzeElectronKinematics.clone(src = 'selectedPatElectrons',
                                                                       analyze = cms.PSet(index = cms.int32(0))
                                                                       )
 ## 1. leading electron after restriction in eta

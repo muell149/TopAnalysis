@@ -16,7 +16,7 @@
 
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 /**
    \class   DoubleObjectAnalyzer DoubleObjectAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/DoubleObjectAnalyzer.h"
@@ -62,7 +62,7 @@ class DoubleObjectAnalyzer : public edm::EDAnalyzer {
   
  private:
   /// everything which has to be done before the event loop  
-  virtual void beginJob(const edm::EventSetup& setup) ;
+  virtual void beginJob();
   /// everything which has to be done during the event loop 
   virtual void analyze(const edm::Event& event, const edm::EventSetup& setup);
   /// everything which has to be done after the event loop 
@@ -130,7 +130,7 @@ void DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::analyze(const edm:
 
 /// everything which has to be done before the event loop  
 template <typename CollectionA, typename CollectionB, typename Analyze> 
-void DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::beginJob(const edm::EventSetup& setup)
+void DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::beginJob()
 {
   // check for the existence of the TFileService
   edm::Service<TFileService> fs;

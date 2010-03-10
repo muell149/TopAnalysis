@@ -8,24 +8,24 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
 ## ---
 
 ## getting started
-idOnlyElectrons   = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+idOnlyElectrons   = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                   cut = 'electronID(\"eidRobustTight\") > 0.99'                                                
                                                   )
-centralElectrons  = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+centralElectrons  = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                   cut = 'abs(eta) < 2.4'
                                                   )
-highPtElectrons   = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+highPtElectrons   = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                   cut = 'abs(eta) < 2.4 & et > 20.'
                                                   )
 
 ## electron Id on top of kinematics
-tightElectrons    = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+tightElectrons    = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                   cut = 'abs(eta) < 2.4 & et > 20.' 
                                                   '& electronID(\"eidRobustTight\") > 0.99'                                                
                                                   )
 
 ## isolated electrons
-isolatedElectrons = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+isolatedElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                   cut = 'abs(eta) < 2.4 & et > 20.' 
                                                   '& electronID(\"eidRobustTight\") > 0.99'                                                
                                                   '& (trackIso+caloIso)/et <  0.1'

@@ -11,28 +11,28 @@ from TopAnalysis.TopFilter.sequences.jetSelection_cff import *
 ## ---
 
 ## jet to parton matching
-matchedLightQJets  = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+matchedLightQJets  = selectedPatJets.clone(src = 'selectedPatJets',
                                               cut = 'abs(partonFlavour()) < 5'
                                               )
-matchedBottomJets  = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+matchedBottomJets  = selectedPatJets.clone(src = 'selectedPatJets',
                                               cut = 'abs(partonFlavour()) = 5'
                                               )
-matchedCharmJets   = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+matchedCharmJets   = selectedPatJets.clone(src = 'selectedPatJets',
                                               cut = 'abs(partonFlavour()) = 4'
                                               )
-matchedUdsJets     = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+matchedUdsJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                               cut = 'abs(partonFlavour()) < 4'
                                               )
-tightMatchedLightQJets  = selectedLayer1Jets.clone(src = 'goodJets',
+tightMatchedLightQJets  = selectedPatJets.clone(src = 'goodJets',
                                               cut = 'abs(partonFlavour()) < 5'
                                               )
-tightMatchedBottomJets  = selectedLayer1Jets.clone(src = 'goodJets',
+tightMatchedBottomJets  = selectedPatJets.clone(src = 'goodJets',
                                               cut = 'abs(partonFlavour()) = 5'
                                               )
-tightMatchedCharmJets   = selectedLayer1Jets.clone(src = 'goodJets',
+tightMatchedCharmJets   = selectedPatJets.clone(src = 'goodJets',
                                               cut = 'abs(partonFlavour()) = 4'
                                               )
-tightMatchedUdsJets     = selectedLayer1Jets.clone(src = 'goodJets',
+tightMatchedUdsJets     = selectedPatJets.clone(src = 'goodJets',
                                               cut = 'abs(partonFlavour()) < 4'
                                               )
 
@@ -49,11 +49,11 @@ matchJetsToPartons = cms.Sequence(matchedLightQJets      +
                                   )
 
 ## muon matching to generator level
-matchedMuons         = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+matchedMuons         = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                  cut = 'genLepton.isNull = 0 &'
                                                        'abs(genLepton.pdgId) = 13 &'
                                                  )
-matchedIsolatedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+matchedIsolatedMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                  cut = 'genLepton.isNull = 0 &'
                                                        'abs(genLepton.pdgId) = 13 &'
                                                        'genLepton.mother.isNull = 0 &'

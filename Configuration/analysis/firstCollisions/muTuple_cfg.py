@@ -62,13 +62,13 @@ process.options = cms.untracked.PSet(
 
 ## select muons
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.goodMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+process.goodMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                               cut = 'combinedMuon.isNull = 0'
                                               )
 
 ## select events with good muons
 from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
-process.countMuons = countLayer1Muons.clone(src = 'goodMuons',
+process.countMuons = countPatMuons.clone(src = 'goodMuons',
                                             minNumber = 1
                                             )
 

@@ -9,7 +9,7 @@ execfile("/afs/naf.desy.de/user/g/goerner/semileptonic341/analyzeMuonDiffXSecBG_
 ## get JES-shifting module
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 # set input collection- needed while running on pat tuples
-process.scaledJetEnergy.inputJets = "selectedLayer1Jets"
+process.scaledJetEnergy.inputJets = "selectedPatJets"
 # JES -10%
 process.scaledJetEnergy.scaleFactor = 0.9
 
@@ -22,9 +22,9 @@ process.p1.replace(process.unshiftedJets,
                    process.shiftedJets)
 
 ## change input collection to JES-shifted collection 
-process.centralJets.src = "scaledJetEnergy:selectedLayer1Jets"
-process.reliableJets.src = "scaledJetEnergy:selectedLayer1Jets"
-process.goodJets.src = "scaledJetEnergy:selectedLayer1Jets"
+process.centralJets.src = "scaledJetEnergy:selectedPatJets"
+process.reliableJets.src = "scaledJetEnergy:selectedPatJets"
+process.goodJets.src = "scaledJetEnergy:selectedPatJets"
 
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXSecJES09_testBkg.root'

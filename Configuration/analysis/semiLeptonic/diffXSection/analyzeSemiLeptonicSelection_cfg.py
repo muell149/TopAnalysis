@@ -162,11 +162,11 @@ uds0L5  = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('had:uds')
 
 ## replace sisCone5 by antikt5
 if( useAntikt5 ):
-    process.goodJets.src = 'selectedLayer1JetsAK5'
+    process.goodJets.src = 'selectedPatJetsAK5'
     
 ## collect kinematics analyzers
   ## a) Muon Collection Kinematics
-process.unselectedMuonKinematics  = process.analyzeMuonKinematics.clone(src = 'selectedLayer1Muons'              )
+process.unselectedMuonKinematics  = process.analyzeMuonKinematics.clone(src = 'selectedPatMuons'              )
 process.combinedMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'combinedMuons'                    )
 process.triggerMuonKinematics     = process.analyzeMuonKinematics.clone(src = 'triggerMuons'                     )
 #process.isoMuonKinematics         = process.analyzeMuonKinematics.clone(src = 'isoMuons'                         )
@@ -178,20 +178,20 @@ process.tightMuonKinematics       = process.analyzeMuonKinematics.clone(src = 't
   ## b) Veto Collection Kinematics
 process.looseVetoMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'looseMuons',
                                                                             analyze = cms.PSet(index = cms.int32(-1)))
-process.unselectedVetoMuonKinematics  = process.analyzeMuonKinematics.clone(src = 'selectedLayer1Muons',
+process.unselectedVetoMuonKinematics  = process.analyzeMuonKinematics.clone(src = 'selectedPatMuons',
                                                                             analyze = cms.PSet(index = cms.int32(-1)))
 process.looseVetoElectronKinematics      = process.analyzeElectronKinematics.clone(src = 'looseElectrons',
                                                                             analyze = cms.PSet(index = cms.int32(0)))
-process.unselectedVetoElectronKinematics = process.analyzeElectronKinematics.clone(src = 'selectedLayer1Electrons',
+process.unselectedVetoElectronKinematics = process.analyzeElectronKinematics.clone(src = 'selectedPatElectrons',
                                                                             analyze = cms.PSet(index = cms.int32(0)))
 
   ## c) Jet Collection Kinematics before jet cuts
 
-process.unselectedLeadingJetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets'                 )
-process.unselectedLead_0_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds0 )
-process.unselectedLead_1_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds1 )
-process.unselectedLead_2_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds2 )
-process.unselectedLead_3_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds3 )
+process.unselectedLeadingJetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedPatJets'                 )
+process.unselectedLead_0_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds0 )
+process.unselectedLead_1_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds1 )
+process.unselectedLead_2_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds2 )
+process.unselectedLead_3_JetKinematicsBefore = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds3 )
 process.centralLeadingJetKinematicsBefore    = process.analyzeJetKinematics.clone (src = 'centralJets'                        )
 process.reliableLeadingJetKinematicsBefore   = process.analyzeJetKinematics.clone (src = 'reliableJets'                       )
 
@@ -207,11 +207,11 @@ process.tightBJet_1_JetKinematicsBefore = process.analyzeJetKinematics.clone (sr
 
   ## d) Jet Collection Kinematics after jet cuts
 
-process.unselectedLeadingJetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets'          )
-process.unselectedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds0 )
-process.unselectedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds1 )
-process.unselectedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds2 )
-process.unselectedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds3 )
+process.unselectedLeadingJetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets'          )
+process.unselectedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds0 )
+process.unselectedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds1 )
+process.unselectedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds2 )
+process.unselectedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds3 )
 process.centralLeadingJetKinematics    = process.analyzeJetKinematics.clone (src = 'centralJets'                 )
 process.reliableLeadingJetKinematics   = process.analyzeJetKinematics.clone (src = 'reliableJets'                )
 
@@ -294,7 +294,7 @@ process.monitorJetsKinematicsBefore = cms.Sequence(process.tightBottomJetKinemat
 ## collect quality analyzers for Muons and Jets
 
   ## a) Muon Collection Qualities performed before cuts
-process.unselectedMuonQuality  = process.analyzeMuonQuality.clone(src = 'selectedLayer1Muons'              )
+process.unselectedMuonQuality  = process.analyzeMuonQuality.clone(src = 'selectedPatMuons'              )
 process.combinedMuonQuality    = process.analyzeMuonQuality.clone(src = 'combinedMuons'                    )
 process.triggerMuonQuality     = process.analyzeMuonQuality.clone(src = 'triggerMuons'                     )
 #process.isoMuonQuality         = process.analyzeMuonQuality.clone(src = 'isoMuons'                         )
@@ -306,11 +306,11 @@ process.tightMuonQuality       = process.analyzeMuonQuality.clone(src = 'tightMu
   ## b) Veto Collection Qualities
 process.looseVetoMuonQuality          = process.analyzeMuonQuality.clone     (src = 'looseMuons',
                                                                               analyze =cms.PSet(index = cms.int32(-1))  )
-process.unselectedVetoMuonQuality     = process.analyzeMuonQuality.clone     (src = 'selectedLayer1Muons',
+process.unselectedVetoMuonQuality     = process.analyzeMuonQuality.clone     (src = 'selectedPatMuons',
                                                                               analyze =cms.PSet(index = cms.int32(-1))  )
 process.looseVetoElectronQuality      = process.analyzeElectronQuality.clone (src = 'looseElectrons',
                                                                               analyze =cms.PSet(index = cms.int32(0))  )
-process.unselectedVetoElectronQuality = process.analyzeElectronQuality.clone (src = 'selectedLayer1Electrons',
+process.unselectedVetoElectronQuality = process.analyzeElectronQuality.clone (src = 'selectedPatElectrons',
                                                                               analyze =cms.PSet(index = cms.int32(0))  )
   ## c) Jet Collection Qualities
 process.tightBottomJetQuality        = process.analyzeJetQuality.clone (src = 'tightBottomJets'                  )
@@ -359,14 +359,14 @@ process.monitorVetoCollections = cms.Sequence(process.unselectedVetoMuonQuality 
     
 ## collect muon-jet analyzer
 
-#process.unselectedMuonUnselectedJetKinematics   = process.analyzeMuonJetKinematics.clone(srcA = 'selectedLayer1Muons',
-#                                                                                         srcB = 'selectedLayer1Jets'  )
-#process.unselectedMuonGoodJetKinematics         = process.analyzeMuonJetKinematics.clone(srcA = 'selectedLayer1Muons',
+#process.unselectedMuonUnselectedJetKinematics   = process.analyzeMuonJetKinematics.clone(srcA = 'selectedPatMuons',
+#                                                                                         srcB = 'selectedPatJets'  )
+#process.unselectedMuonGoodJetKinematics         = process.analyzeMuonJetKinematics.clone(srcA = 'selectedPatMuons',
 #                                                                                         srcB = 'goodJets'            )
 process.tightMuonGoodJetKinematics              = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons',
                                                                                          srcB = 'goodJets'            )
 #process.tightMuonUnselectedJetKinematics        = process.analyzeMuonJetKinematics.clone(srcA = 'goodMuons',
-#                                                                                         srcB = 'selectedLayer1Jets'  )
+#                                                                                         srcB = 'selectedPatJets'  )
 process.tightMuonGoodJetKinematicsAfter         = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons',
                                                                                          srcB = 'goodJets'            )
 

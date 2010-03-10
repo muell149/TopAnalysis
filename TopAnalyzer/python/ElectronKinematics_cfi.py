@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 analyzeElectronKinematics = cms.EDAnalyzer("ElectronKinematicsAnalyzer",
     ## input collection                             
-    src = cms.InputTag("selectedLayer1Electrons"),
+    src = cms.InputTag("selectedPatElectrons"),
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

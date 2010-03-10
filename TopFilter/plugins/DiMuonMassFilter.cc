@@ -18,7 +18,7 @@ DiMuonMassFilter::~DiMuonMassFilter()
 
 /// sanity check
 void 
-DiMuonMassFilter::beginJob(const edm::EventSetup& setup)
+DiMuonMassFilter::beginJob()
 { 
   edm::LogError err("topFilter");
   if(zCut_.size()!=2)   err << "zCut has wrong size. Size has to be 2!\n";

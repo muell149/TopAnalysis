@@ -90,7 +90,7 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
   return true;
 }
 
-void FullLepHypothesesFilter::beginJob(const edm::EventSetup& setup)
+void FullLepHypothesesFilter::beginJob()
 { 
   // sanity check for zCut
   edm::LogError err("topFilter");

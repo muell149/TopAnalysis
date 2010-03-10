@@ -67,7 +67,7 @@ process.options = cms.untracked.PSet(
 
 ## select jets
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
-process.goodJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+process.goodJets = selectedPatJets.clone(src = 'selectedPatJets',
                                             cut =
                                             'abs(eta) < 5 & pt > 20. &'
                                             '0.01 < emEnergyFraction &'
@@ -76,7 +76,7 @@ process.goodJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
 
 ## select events with good jets
 from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
-process.countJets = countLayer1Jets.clone(src = 'goodJets',
+process.countJets = countPatJets.clone(src = 'goodJets',
                                           minNumber = 1
                                           )
 

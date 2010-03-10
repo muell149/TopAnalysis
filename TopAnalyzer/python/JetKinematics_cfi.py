@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 analyzeJetKinematics = cms.EDAnalyzer("JetKinematicsAnalyzer",
     ## input collection                             
-    src = cms.InputTag("selectedLayer1Jets"),
+    src = cms.InputTag("selectedPatJets"),
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

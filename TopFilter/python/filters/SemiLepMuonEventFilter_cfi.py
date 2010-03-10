@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 ## define basic event filter
 filterSemiLepMuonEvent = cms.EDFilter("SemiLepMuonEventFilter",
     weight  = cms.InputTag("eventWeight"),
-    leptons = cms.VInputTag(cms.InputTag("selectedLayer1Muons")),
-    jets    = cms.VInputTag(cms.InputTag("selectedLayer1Jets")),
+    leptons = cms.VInputTag(cms.InputTag("selectedPatMuons")),
+    jets    = cms.VInputTag(cms.InputTag("selectedPatJets")),
 
     ## selection switches                                      
     lepEta = cms.bool(True),
@@ -63,7 +63,7 @@ filterSemiLepMuonEvent = cms.EDFilter("SemiLepMuonEventFilter",
         max  = cms.vdouble(  )
     ),
     jetDistFilter = cms.PSet(
-        refs  = cms.InputTag("selectedLayer1Jets"),
+        refs  = cms.InputTag("selectedPatJets"),
         thresh= cms.vdouble( 0),
         mode  = cms.uint32( 0),
         name  = cms.string (''),

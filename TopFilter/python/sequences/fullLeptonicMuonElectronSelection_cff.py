@@ -23,11 +23,11 @@ tagJets      = trackCountingHighPurBJets
 
 
 ## at least one tag muons
-muonSelection  = countLayer1Muons.clone(src = 'tagMuons', minNumber = 1, maxNumber = 999)
+muonSelection  = countPatMuons.clone(src = 'tagMuons', minNumber = 1, maxNumber = 999)
 ## exact one very tight selected tag electron
-electronSelection = countLayer1Electrons.clone(src = 'tagElectrons', minNumber = 1, maxNumber = 1)
+electronSelection = countPatElectrons.clone(src = 'tagElectrons', minNumber = 1, maxNumber = 1)
 ## at least two very tight selected b jets
-jetSelection   = countLayer1Jets.clone(src = 'tagJets', minNumber = 2)
+jetSelection   = countPatJets.clone(src = 'tagJets', minNumber = 2)
 
 
 tagCollections = cms.Sequence(tagMuons     *

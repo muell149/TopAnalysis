@@ -36,10 +36,10 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## ---
 
 ## setup the jet selection collection
-tightLeadingJets = selectedLayer1Jets.clone(src = 'goodJets',
+tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
                                             cut = 'pt > 40'
                                             )
-tightBottomJets  = selectedLayer1Jets.clone(src = 'trackCountingHighPurBJets',
+tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
                                             cut = 'pt > 50'
                                             )
 
@@ -58,10 +58,10 @@ fullHadronicSelection = cms.Sequence(reliableJets *
 ## ---
 
 ## setup jet selection collection
-leadingJetSelection = countLayer1Jets.clone(src = 'tightLeadingJets',
+leadingJetSelection = countPatJets.clone(src = 'tightLeadingJets',
                                             minNumber = 6
                                             )
-bottomJetSelection  = countLayer1Jets.clone(src = 'tightBottomJets',
+bottomJetSelection  = countPatJets.clone(src = 'tightBottomJets',
                                             minNumber = 2
                                             )
 

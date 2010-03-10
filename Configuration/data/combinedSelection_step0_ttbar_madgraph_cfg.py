@@ -142,9 +142,9 @@ from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
 process.out.outputCommands += patExtraAodEventContent
 process.out.outputCommands += patEventContentTriggerMatch
-process.out.outputCommands += patEventContentNoLayer1Cleaning
-process.out.outputCommands += ["keep *_selectedLayer1Jets*_*_*",
-                               "keep *_layer1METs*_*_*"]
+process.out.outputCommands += patEventContentNoCleaning
+process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
+                               "keep *_patMETs*_*_*"]
 process.out.outputCommands += ["keep *_eventWeight_*_*"]
 # drop stuff which is not needed
 process.out.outputCommands += ["drop *_towerMaker_*_*"]

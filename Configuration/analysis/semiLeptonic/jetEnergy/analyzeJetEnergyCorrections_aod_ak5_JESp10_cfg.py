@@ -2,6 +2,6 @@ execfile("TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeJetEn
 
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cff")
 from TopAnalysis.TopUtils.JetEnergyScale_cff import *
-scaleAllLayer1JetsEnergy(process, 1.10)
+scalePatJetsEnergy(process, 1.10)
 
 process.TFileService.fileName = 'analyzeJetEnergyCorrections_ak5_JESp10.root'

@@ -8,13 +8,13 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 ## ---
 
 ## getting started
-centralJets  = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+centralJets  = selectedPatJets.clone(src = 'selectedPatJets',
                                         cut = 'abs(eta) < 2.4'
                                         )
-reliableJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+reliableJets = selectedPatJets.clone(src = 'selectedPatJets',
                                         cut = 'abs(eta) < 2.4 & pt > 30.'
                                         )
-goodJets     = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                         cut = 'abs(eta) < 2.4 & pt > 30. &'
                                               '0.05 < emEnergyFraction   & '
                                               '0.95 > emEnergyFraction'
@@ -29,22 +29,22 @@ selectGoodJets = cms.Sequence(centralJets *
 
                                
 ## check for different btag properties
-trackCountingHighPurBJets     = selectedLayer1Jets.clone(src = 'goodJets',
+trackCountingHighPurBJets     = selectedPatJets.clone(src = 'goodJets',
                                                          cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 3.0'
                                                          )
-trackCountingHighEffBJets     = selectedLayer1Jets.clone(src = 'goodJets',
+trackCountingHighEffBJets     = selectedPatJets.clone(src = 'goodJets',
                                                          cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.0'
                                                          )
-simpleSecondaryVertexBJets    = selectedLayer1Jets.clone(src = 'goodJets',
+simpleSecondaryVertexBJets    = selectedPatJets.clone(src = 'goodJets',
                                                          cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 3.0'
                                                          )
-simpleSecondaryVertexNegBJets = selectedLayer1Jets.clone(src = 'goodJets',
+simpleSecondaryVertexNegBJets = selectedPatJets.clone(src = 'goodJets',
                                                          cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
                                                          )
-combinedSecondaryVertexBJets  = selectedLayer1Jets.clone(src = 'goodJets',
+combinedSecondaryVertexBJets  = selectedPatJets.clone(src = 'goodJets',
                                                          cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.9'
                                                          )
-softMuonBJets                 = selectedLayer1Jets.clone(src = 'goodJets',
+softMuonBJets                 = selectedPatJets.clone(src = 'goodJets',
                                                          cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
                                                          )
 

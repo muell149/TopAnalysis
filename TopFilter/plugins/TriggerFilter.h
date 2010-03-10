@@ -35,7 +35,7 @@ class TriggerFilter : public EDFilter {
     
   private:
     /// initiate n_TrigPaths
-    virtual void beginJob(const EventSetup&);
+    virtual void beginJob();
     /// look which triggers have fired and compare to given set of triggers
     virtual bool filter(Event&, const EventSetup&);
     /// empty

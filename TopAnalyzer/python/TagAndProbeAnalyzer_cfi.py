@@ -2,11 +2,11 @@ import FWCore.ParameterSet.Config as cms
 
 tagAndProbeAnalyzer = cms.EDAnalyzer("TagAndProbeAnalyzer",
     ## input collection for jets                            
-    jets   = cms.InputTag("selectedLayer1Jets"),
+    jets   = cms.InputTag("selectedPatJets"),
     ## test collection                    
-    tests  = cms.InputTag("selectedLayer1Muons"),
+    tests  = cms.InputTag("selectedPatMuons"),
     ## probe collection                                     
-    probes = cms.InputTag("selectedLayer1Muons")                                     
+    probes = cms.InputTag("selectedPatMuons")                                     
 )
 
 

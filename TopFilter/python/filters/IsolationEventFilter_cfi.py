@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 ## define basic event filters
 filterMuonIso = cms.EDFilter("MuonIsolationEventFilter",
-    input  = cms.VInputTag('selectedLayer1Muons'),    
+    input  = cms.VInputTag('selectedPatMuons'),    
     useEventWeight = cms.bool(True),
     weight = cms.InputTag("eventWeight"), 
     cuts   = cms.PSet(

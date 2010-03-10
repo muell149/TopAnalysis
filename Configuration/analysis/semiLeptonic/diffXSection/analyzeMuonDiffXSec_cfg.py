@@ -137,14 +137,14 @@ uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'    )
 uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'    ) )
 
 ## Kinematic modules
-process.unselectedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds0 )
-process.unselectedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds1 )
-process.unselectedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds2 )
-process.unselectedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedLayer1Jets', analyze = uds3 )
-process.shiftedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds0 )
-process.shiftedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds1 )
-process.shiftedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds2 )
-process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedLayer1Jets', analyze = uds3 )
+process.unselectedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds0 )
+process.unselectedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds1 )
+process.unselectedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds2 )
+process.unselectedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds3 )
+process.shiftedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds0 )
+process.shiftedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds1 )
+process.shiftedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds2 )
+process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds3 )
 
 process.unshiftedJets = cms.Sequence(process.unselectedLead_0_JetKinematics+
                                      process.unselectedLead_1_JetKinematics+

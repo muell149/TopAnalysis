@@ -35,7 +35,7 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 
 ## configure conditions
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
+process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
 
 ## Magnetic field now needs to be in the high-level py
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -79,14 +79,14 @@ addJetCollection(process,cms.InputTag('antikt5PFJets'),'PF',
                  )
 
 ## sample type used for flavour dependend jet corrections
-process.jetCorrFactors.corrSample   = 'Summer09_7TeV'
-process.jetCorrFactors.sampleType   = 'ttbar'
-process.jetCorrFactorsPF.corrSample = 'Summer09_7TeV'
-process.jetCorrFactorsPF.sampleType = 'ttbar'
+process.patJetCorrFactors.corrSample   = 'Summer09_7TeV'
+process.patJetCorrFactors.sampleType   = 'ttbar'
+process.patJetCorrFactorsPF.corrSample = 'Summer09_7TeV'
+process.patJetCorrFactorsPF.sampleType = 'ttbar'
 
 ## embedding of jet constituents into the jets
-process.allLayer1Jets.embedCaloTowers = True
-process.allLayer1JetsPF.embedPFCandidates = True
+process.patJets.embedCaloTowers = True
+process.patJetsPF.embedPFCandidates = True
 
 #-------------------------------------------------
 # preselection paths (involved jet collections
@@ -94,14 +94,14 @@ process.allLayer1JetsPF.embedPFCandidates = True
 #-------------------------------------------------
 
 ## preselection for ak5 jets 
-process.selectedLayer1Jets.cut = 'abs(eta) < 3.0 & pt>20'
-process.countLayer1JetsAK5 = process.countLayer1Jets.clone(src = 'selectedLayer1Jets' , minNumber = 6)
-process.ak5Selection = cms.Path(process.countLayer1JetsAK5 )   
+process.selectedPatJets.cut = 'abs(eta) < 3.0 & pt>20'
+process.countPatJetsAK5 = process.countPatJets.clone(src = 'selectedPatJets' , minNumber = 6)
+process.ak5Selection = cms.Path(process.countPatJetsAK5 )   
 
 ## preselection for ak5 pf jets 
-process.selectedLayer1JetsPF.cut = 'abs(eta) < 3.0 & pt>20'
-process.countLayer1JetsAK5PF = process.countLayer1Jets.clone(src = 'selectedLayer1JetsPF' , minNumber = 6)
-process.ak5PfSelection = cms.Path(process.countLayer1JetsAK5PF )   
+process.selectedPatJetsPF.cut = 'abs(eta) < 3.0 & pt>20'
+process.countPatJetsAK5PF = process.countPatJets.clone(src = 'selectedPatJetsPF' , minNumber = 6)
+process.ak5PfSelection = cms.Path(process.countPatJetsAK5PF )   
 
 #-------------------------------------------------
 # process output; first the event selection is
@@ -133,7 +133,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 ## embedding of trigger information into the pat tuple
 process.jetTriggerMatchHLTJets = cms.EDFilter( "PATTriggerMatcherDRLessByR",
-                                 src     = cms.InputTag( "selectedLayer1Jets" ),
+                                 src     = cms.InputTag( "selectedPatJets" ),
                                  matched = cms.InputTag( "patTrigger" ),
                                  andOr          = cms.bool( False ),
                                  filterIdsEnum  = cms.vstring( 'TriggerJet' ),
@@ -147,7 +147,7 @@ process.jetTriggerMatchHLTJets = cms.EDFilter( "PATTriggerMatcherDRLessByR",
                                  resolveByMatchQuality = cms.bool( False )
                                  )
 
-process.pfJetTriggerMatchHLTJets = process.jetTriggerMatchHLTJets.clone(src = "selectedLayer1JetsPF")
+process.pfJetTriggerMatchHLTJets = process.jetTriggerMatchHLTJets.clone(src = "selectedPatJetsPF")
 
 from PhysicsTools.PatAlgos.tools.trigTools import *
 switchOnTrigger( process , 'selected')
@@ -167,12 +167,12 @@ process.patTriggerMatcher.remove( process.muonTriggerMatchNone)
 
 process.triggerMatchedSelectedLayer1Jets = cms.EDProducer("PATTriggerMatchJetEmbedder",
                                                           matches = cms.VInputTag("jetTriggerMatchHLTJets"),
-                                                          src = cms.InputTag("selectedLayer1Jets")
+                                                          src = cms.InputTag("selectedPatJets")
                                                           )
 
 process.triggerMatchedSelectedLayer1JetsPF = cms.EDProducer("PATTriggerMatchJetEmbedder",
                                                             matches = cms.VInputTag("pfJetTriggerMatchHLTJets"),
-                                                            src = cms.InputTag("selectedLayer1JetsPF")
+                                                            src = cms.InputTag("selectedPatJetsPF")
                                                             )
 
 process.patDefaultSequence += process.triggerMatchedSelectedLayer1Jets
@@ -195,9 +195,9 @@ removeCleaning(process)
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
 process.out.outputCommands += patExtraAodEventContent
-process.out.outputCommands += patEventContentNoLayer1Cleaning
-process.out.outputCommands += ["keep *_selectedLayer1Jets*_*_*",
-                               "keep *_layer1METs*_*_*"]
+process.out.outputCommands += patEventContentNoCleaning
+process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
+                               "keep *_patMETs*_*_*"]
 process.out.outputCommands += ["keep *_eventWeight_*_*"]
 process.out.outputCommands += ['keep *_triggerMatchedSelectedLayer1Jets_*_*']
 process.out.outputCommands += ['keep *_triggerMatchedSelectedLayer1Jets*_*_*']

@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
   setNiceStyle();
 
   // define worker class
-  FWLiteMuonQualityAnalyzer muana("selectedLayer1Muons", "eventWeight", true, -1); 
+  FWLiteMuonQualityAnalyzer muana("selectedPatMuons", "eventWeight", true, -1); 
   // configure
   muana.beginJob(cfgFile);
   // keep this! It's the event loop

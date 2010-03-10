@@ -47,19 +47,19 @@ process.leptonTrigger = hltHighLevel.clone(
 process.load("TopAnalysis.TopFilter.sequences.jetSelection_cff")
 ##setup the muon selection
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.combinedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+process.combinedMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                   cut = 'combinedMuon.isNull=0'
                                                   )
-process.isolatedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+process.isolatedMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                   cut = 'combinedMuon.isNull=0'
                                                         '& trackIso<1.'
                                                   )
 ##setup the electron selection
 from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
-process.selectedElecs = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+process.selectedElecs = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                       cut = 'electronID(\"eidRobustTight\") > 0.99'
                                                       )
-process.isolatedElecs = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
+process.isolatedElecs = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
                                                       cut = 'electronID(\"eidRobustTight\") > 0.99'
                                                             '& trackIso<1.'
                                                       )
@@ -74,9 +74,9 @@ process.p1 = cms.Path(process.goodJets      +
 
 ## jet count filter
 from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
-process.JetMult2 = countLayer1Jets.clone(src='goodJets', minNumber=2)
-process.JetMult3 = countLayer1Jets.clone(src='goodJets', minNumber=3)
-process.JetMult4 = countLayer1Jets.clone(src='goodJets', minNumber=4)
+process.JetMult2 = countPatJets.clone(src='goodJets', minNumber=2)
+process.JetMult3 = countPatJets.clone(src='goodJets', minNumber=3)
+process.JetMult4 = countPatJets.clone(src='goodJets', minNumber=4)
 
 ## muon kinematics
 from TopAnalysis.TopAnalyzer.MuonKinematics_cfi import *

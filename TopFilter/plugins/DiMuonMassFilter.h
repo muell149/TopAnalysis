@@ -29,7 +29,7 @@ class DiMuonMassFilter : public edm::EDFilter {
   
  private:
   /// sanity check 
-  virtual void beginJob(const edm::EventSetup&);
+  virtual void beginJob();
   /// event veto
   virtual bool filter(edm::Event& event, const edm::EventSetup& setup);
   

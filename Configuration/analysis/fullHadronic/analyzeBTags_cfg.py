@@ -115,7 +115,7 @@ process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
 
 ## replace sisCone5 by antikt5
 if( useAntikt5 ):
-    process.goodJets.src = 'selectedLayer1JetsAK5'
+    process.goodJets.src = 'selectedPatJetsAK5'
 
 ## bTag analyzers
 process.analyzeBTags = process.analyzeBTags.clone( src = 'tightLeadingJets' )

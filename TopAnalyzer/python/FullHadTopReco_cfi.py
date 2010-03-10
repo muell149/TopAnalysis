@@ -4,7 +4,7 @@ analyzeFullHadTopReco = cms.EDAnalyzer("FullHadTopRecoAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("ttFullHadEvent"),
     ## input collectionB                            
-    srcB = cms.InputTag("selectedLayer1Jets"),                                         
+    srcB = cms.InputTag("selectedPatJets"),                                         
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

@@ -54,16 +54,16 @@ process.p = cms.Path(
 ## Special Replacements
 
 ## sample type used for flavour dependend jet corrections
-process.jetCorrFactors.sampleType = 'ttbar'
-process.jetCorrFactorsIC5.sampleType = 'ttbar'
-process.jetCorrFactorsSC5.sampleType = 'ttbar'
+process.patJetCorrFactors.sampleType = 'ttbar'
+process.patJetCorrFactorsIC5.sampleType = 'ttbar'
+process.patJetCorrFactorsSC5.sampleType = 'ttbar'
 
 ## Define Event Contet
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.fileName = cms.untracked.string('PATtuple.root')
 process.out.outputCommands = patExtraAodEventContent
-process.out.outputCommands+= patEventContentNoLayer1Cleaning
-process.out.outputCommands+= ['keep *_selectedLayer1Jets*_*_*', 'keep *_layer1METs*_*_*']
+process.out.outputCommands+= patEventContentNoCleaning
+process.out.outputCommands+= ['keep *_selectedPatJets*_*_*', 'keep *_patMETs*_*_*']
 
 
 ## Maximal Number of Events

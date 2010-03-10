@@ -112,7 +112,7 @@ process.load("TopAnalysis.TopFilter.sequences.generatorMatching_cff")
 
 ## replace sisCone5 by antikt5
 if( useAntikt5 ):
-    process.goodJets.src = 'selectedLayer1JetsAK5'
+    process.goodJets.src = 'selectedPatJetsAK5'
 
 ## define ordered jets
 uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )

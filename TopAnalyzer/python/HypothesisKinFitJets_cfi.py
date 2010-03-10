@@ -4,7 +4,7 @@ analyzeHypothesisKinFitJets = cms.EDAnalyzer("HypothesisKinFitJetsAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("ttSemiLepEvent"),
     ## input collectionB                            
-    srcB = cms.InputTag("selectedLayer1Jets"),                                         
+    srcB = cms.InputTag("selectedPatJets"),                                         
     ## event weight
     weight = cms.InputTag("eventWeight"),
     ## use the weight or not                             

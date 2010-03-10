@@ -38,23 +38,23 @@ process.options = cms.untracked.PSet(
 #-------------------------------------------------
 
 ## muon selector
-from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import selectedLayer1Jets
+from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import selectedPatJets
 
 ## produce collection of well defined jets
-process.selectedJets = selectedLayer1Jets.clone(src = 'selectedLayer1Jets',
+process.selectedJets = selectedPatJets.clone(src = 'selectedPatJets',
                                                 cut = 'pt>30 & abs(eta)<3 & emEnergyFraction<0.95'
                                                 )
 
 ## muon selector
-from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import selectedLayer1Muons
+from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import selectedPatMuons
 
 ## as probe requirement choose standalonMuon 
-process.probeMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+process.probeMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                cut = 'standAloneMuon.isNull=0'
                                                )
 
 ## as test requirement choose combinedMuon 
-process.testMuons = selectedLayer1Muons.clone(src = 'probeMuons',
+process.testMuons = selectedPatMuons.clone(src = 'probeMuons',
                                               cut = 'combinedMuon.isNull=0'
                                               )
 
