@@ -19,7 +19,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    "/store/user/rwolf/ttbar/patTuple_PATv2_ttbar_madgraph_1.root"
+    "/store/user/henderle/samples/TTbar_mcatnlo_7TeV/PATtuple_1.root"
     )
 )
 
@@ -47,19 +47,28 @@ process.leptonTrigger = hltHighLevel.clone(
 process.load("TopAnalysis.TopFilter.sequences.jetSelection_cff")
 ##setup the muon selection
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.combinedMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
+process.combinedMuons = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
                                                   cut = 'combinedMuon.isNull=0'
                                                   )
-process.isolatedMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
+process.isoTrkMuons   = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
                                                   cut = 'combinedMuon.isNull=0'
                                                         '& trackIso<1.'
                                                   )
+process.isoCalMuons   = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                                  cut = 'combinedMuon.isNull=0'
+                                                        '& caloIso<1.'
+                                                  )
+process.isoRelMuons   = selectedLayer1Muons.clone(src = 'selectedLayer1Muons',
+                                                  cut = 'combinedMuon.isNull=0'
+                                                        '& (trackIso+caloIso)/pt < 0.1'
+                                                  )
+
 ##setup the electron selection
 from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
-process.selectedElecs = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
+process.selectedElecs = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
                                                       cut = 'electronID(\"eidRobustTight\") > 0.99'
                                                       )
-process.isolatedElecs = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
+process.isolatedElecs = selectedLayer1Electrons.clone(src = 'selectedLayer1Electrons', 
                                                       cut = 'electronID(\"eidRobustTight\") > 0.99'
                                                             '& trackIso<1.'
                                                       )
@@ -67,25 +76,33 @@ process.isolatedElecs = selectedPatElectrons.clone(src = 'selectedPatElectrons',
 
 process.p1 = cms.Path(process.goodJets      +
                       process.combinedMuons +
-                      process.isolatedMuons +
+                      process.isoTrkMuons   +
+                      process.isoCalMuons   +
+                      process.isoRelMuons   +
                       process.selectedElecs +
                       process.isolatedElecs
                       )
 
 ## jet count filter
 from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
-process.JetMult2 = countPatJets.clone(src='goodJets', minNumber=2)
-process.JetMult3 = countPatJets.clone(src='goodJets', minNumber=3)
-process.JetMult4 = countPatJets.clone(src='goodJets', minNumber=4)
+process.JetMult2 = countLayer1Jets.clone(src='goodJets', minNumber=2)
+process.JetMult3 = countLayer1Jets.clone(src='goodJets', minNumber=3)
+process.JetMult4 = countLayer1Jets.clone(src='goodJets', minNumber=4)
 
 ## muon kinematics
 from TopAnalysis.TopAnalyzer.MuonKinematics_cfi import *
-process.MuonKinemat2    = analyzeMuonKinematics.clone(src='combinedMuons')
-process.MuonKinemat3    = analyzeMuonKinematics.clone(src='combinedMuons')
-process.MuonKinemat4    = analyzeMuonKinematics.clone(src='combinedMuons')
-process.MuonKinemat2Iso = analyzeMuonKinematics.clone(src='isolatedMuons')
-process.MuonKinemat3Iso = analyzeMuonKinematics.clone(src='isolatedMuons')
-process.MuonKinemat4Iso = analyzeMuonKinematics.clone(src='isolatedMuons')
+process.MuonKinemat2       = analyzeMuonKinematics.clone(src='combinedMuons')
+process.MuonKinemat3       = analyzeMuonKinematics.clone(src='combinedMuons')
+process.MuonKinemat4       = analyzeMuonKinematics.clone(src='combinedMuons')
+process.MuonKinemat2IsoTrk = analyzeMuonKinematics.clone(src='isoTrkMuons'  )
+process.MuonKinemat3IsoTrk = analyzeMuonKinematics.clone(src='isoTrkMuons'  )
+process.MuonKinemat4IsoTrk = analyzeMuonKinematics.clone(src='isoTrkMuons'  )
+process.MuonKinemat2IsoCal = analyzeMuonKinematics.clone(src='isoCalMuons'  )
+process.MuonKinemat3IsoCal = analyzeMuonKinematics.clone(src='isoCalMuons'  )
+process.MuonKinemat4IsoCal = analyzeMuonKinematics.clone(src='isoCalMuons'  )
+process.MuonKinemat2IsoRel = analyzeMuonKinematics.clone(src='isoRelMuons'  )
+process.MuonKinemat3IsoRel = analyzeMuonKinematics.clone(src='isoRelMuons'  )
+process.MuonKinemat4IsoRel = analyzeMuonKinematics.clone(src='isoRelMuons'  )
 
 ## muon quality
 from TopAnalysis.TopAnalyzer.MuonQuality_cfi import *
@@ -114,34 +131,40 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.p2 = cms.Path(
-    process.leptonTrigger   +
-    process.JetMult2        +
-    process.MuonQuality2    +
-    process.MuonKinemat2    +
-    process.MuonKinemat2Iso +
-    process.ElecQuality2    +
-    process.MuonKinemat2    +
-    process.MuonKinemat2Iso
+    process.leptonTrigger      +
+    process.JetMult2           +
+    process.MuonQuality2       +
+    process.MuonKinemat2       +
+    process.MuonKinemat2IsoTrk +
+    process.MuonKinemat2IsoCal +
+    process.MuonKinemat2IsoRel +
+    process.ElecQuality2       +
+    process.ElecKinemat2       +
+    process.ElecKinemat2Iso
 )
 
 process.p3 = cms.Path(
-    process.leptonTrigger   +
-    process.JetMult3        +
-    process.MuonQuality3    +
-    process.MuonKinemat3    +
-    process.MuonKinemat3Iso +
-    process.ElecQuality3    +
-    process.ElecKinemat3    +
+    process.leptonTrigger      +
+    process.JetMult3           +
+    process.MuonQuality3       +
+    process.MuonKinemat3       +
+    process.MuonKinemat3IsoTrk +
+    process.MuonKinemat3IsoCal +
+    process.MuonKinemat3IsoRel +
+    process.ElecQuality3       +
+    process.ElecKinemat3       +
     process.ElecKinemat3Iso
 )
 
 process.p4 = cms.Path(
-    process.leptonTrigger   +
-    process.JetMult4        +
-    process.MuonQuality4    +
-    process.MuonKinemat4    +
-    process.MuonKinemat4Iso +
-    process.ElecQuality4    +
-    process.ElecKinemat4    +
+    process.leptonTrigger      +
+    process.JetMult4           +
+    process.MuonQuality4       +
+    process.MuonKinemat4       +
+    process.MuonKinemat4IsoTrk +
+    process.MuonKinemat4IsoCal +
+    process.MuonKinemat4IsoRel +
+    process.ElecQuality4       +
+    process.ElecKinemat4       +
     process.ElecKinemat4Iso
 )
