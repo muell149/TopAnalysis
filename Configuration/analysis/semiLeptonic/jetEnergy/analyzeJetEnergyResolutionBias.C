@@ -30,7 +30,7 @@ T cloneObjectFromFile(TFile* file, TString name)
       return (T) file->Get(name)->Clone(cloneName);
     }
   }
-  std::cout << "Already more 999999 clones from object with name " << obj->GetName() << std::endl
+  std::cout << "Already more than 999999 clones from object with name " << obj->GetName() << std::endl
 	    << "If this is really what you want, you have to increase this hard-coded limit in the macro." << std::endl;
   abort();
 }
@@ -230,10 +230,10 @@ void drawHLine(TH1 *thisHisto, Double_t y,
   f->Draw("L same");
 }
 
-int analyzeJetEnergyResolutionBias()
+int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBias.root")
 {
 
-  TFile* file = TFile::Open("analyzeJetEnergyResolutionBias.root");
+  TFile* file = TFile::Open(name);
   
   if(!file)
     abort();
@@ -348,7 +348,8 @@ int analyzeJetEnergyResolutionBias()
   TH1D means;
   TH1D sigmas;
 
-  TString outDir = "analyzeJetEnergyResolutionBias";
+  name.Resize(name.Index(".root"));
+  TString outDir = name;
   gSystem->mkdir(outDir);
 
   //
@@ -625,10 +626,16 @@ int analyzeJetEnergyResolutionBias()
       fitGauss1D(enResp[i][d], enRespPtCut[d], i+1, draw);
       canvasResp->cd(i+1);
       fitGauss1D(resp[i][d], respPtCut [d], i+1, draw);
+      name = outDir + "/resp_"; name += (i*10);
+      gPad->Print(name + ".eps");
       canvasMassW->cd(i+1);
       fitGauss1D(mW  [i][d], massWptCut[d], i+1, draw);
+      name = outDir + "/massW_"; name += (i*10);
+      gPad->Print(name + ".eps");
       canvasMassT->cd(i+1);
       fitGauss1D(mT  [i][d], massTptCut[d], i+1, draw);
+      name = outDir + "/massT_"; name += (i*10);
+      gPad->Print(name + ".eps");
     }
   }
 
@@ -1001,7 +1008,7 @@ int analyzeJetEnergyResolutionBias()
   return 0;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-  return analyzeJetEnergyResolutionBias();
+  return analyzeJetEnergyResolutionBias(argv[1]);
 }
