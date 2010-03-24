@@ -4,6 +4,7 @@
 <use name=FWCore/MessageLogger>
 <use name=FWCore/ServiceRegistry>
 <use name=CommonTools/UtilAlgos>
+<use name=PhysicsTools/PatUtils>
 <use name=PhysicsTools/CandUtils>
 <use name=DataFormats/JetReco>
 <use name=DataFormats/MuonReco>
