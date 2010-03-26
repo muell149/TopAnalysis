@@ -4,9 +4,7 @@
 /// default constructor
 DimuonAnalyzer::DimuonAnalyzer(const edm::ParameterSet& cfg):
   muons_      ( cfg.getParameter<edm::InputTag>        ( "muons"          ) ), 
-  useEvtWgt_  ( cfg.getParameter<bool>                 ( "useEventWeight" ) ),
-  isoBins_    ( cfg.getParameter<std::vector<double> > ( "isoBins"        ) )
-   
+  useEvtWgt_  ( cfg.getParameter<bool>                 ( "useEventWeight" ) )  
 {
 }
 
@@ -17,7 +15,7 @@ DimuonAnalyzer::~DimuonAnalyzer()
 
 /// everything which has to be done before the event loop: book fileservice and histograms
 void
-DimuonAnalyzer::beginJob(const edm::EventSetup&)
+DimuonAnalyzer::beginJob()
 {
   edm::Service<TFileService> fs;
   if( !fs ){
@@ -51,19 +49,7 @@ DimuonAnalyzer::beginJob(const edm::EventSetup&)
   // combined isolation efficiency
   combCount_   = fs->make<TH1F>( "combCount"  , "combCount"   ,100,  0.0,  5.0); 
   // quadratically added combined isolation
-  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  7.5);
-  
-  for(size_t i=0; i<isoBins_.size()-1; ++i){ 
-    TH1F* hist;
-    TString strRC = "dimassRC_";
-    strRC += i;
-    TString strWC = "dimassWC_"; 
-    strWC += i; 
-    hist = fs->make<TH1F>(strRC, strRC, 20, 5, 255);
-    dimassRCIsoBins_.push_back(hist);  
-    hist = fs->make<TH1F>(strWC, strWC, 20, 5, 255);
-    dimassWCIsoBins_.push_back(hist);        
-  }  
+  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  7.5);    
 }
 
 /// everything which has to be done during the event loop: analyze and fill histos
@@ -142,16 +128,6 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
     if(absTrackIso1<(0.5*i) && absCaloIso1<(0.5*i) && absTrackIso2<(0.5*i) && absCaloIso2<(0.5*i)){
       absCount_->SetBinContent(i,absCount_->GetBinContent(i)+1);
     }      
-  }
-  
-  // fill dilepmass histograms in bins of diCombIso
-  for(size_t i=0; i<isoBins_.size()-1; ++i){  
-    if(diCombIso>isoBins_[i] && diCombIso<isoBins_[i+1]){
-      if(!isWrongCharge) 
-        dimassRCIsoBins_[i] ->Fill(dilepMass, weight);
-      else
-        dimassWCIsoBins_[i] ->Fill(dilepMass, weight);	
-    }  
   }    
 }
 
