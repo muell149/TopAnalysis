@@ -33,7 +33,7 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   
  private:
   /// everything that has to be done before the event loop: books histograms
-  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void beginJob() ;
   /// everything that has to be done during the event loop: filling plots
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   /// everything that has to be done after the event loop: summarizes if wantSummary_ is true

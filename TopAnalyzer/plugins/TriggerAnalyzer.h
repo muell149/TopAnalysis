@@ -42,7 +42,7 @@ class TriggerAnalyzer : public EDAnalyzer {
     
   private:
     /// initiate histograms
-    virtual void beginJob(const EventSetup&);
+    virtual void beginJob();
     /// analyze triggers and fill histograms
     virtual void analyze(const Event&, const EventSetup&);
     /// empty

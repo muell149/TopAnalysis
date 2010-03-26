@@ -22,7 +22,7 @@ FullLepHypothesesAnalyzer::~FullLepHypothesesAnalyzer()
 
 /// everything that has to be done before the event loop: books histograms
 void 
-FullLepHypothesesAnalyzer::beginJob(const edm::EventSetup&)
+FullLepHypothesesAnalyzer::beginJob()
 {
   edm::Service<TFileService> fs;
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );

@@ -11,7 +11,7 @@ TriggerAnalyzer::~TriggerAnalyzer()
 }
 
 void
-TriggerAnalyzer::beginJob(const EventSetup&)
+TriggerAnalyzer::beginJob()
 {
     n_TrigPaths = hltPaths_L3_.size();
     Service<TFileService> fs;
