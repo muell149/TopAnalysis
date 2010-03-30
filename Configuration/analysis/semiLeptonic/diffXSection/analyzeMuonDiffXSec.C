@@ -622,6 +622,7 @@ void analyzeMuonDiffXSec()
 
   // draw canvas
   canv7->SetTitle("migration for pt ( #mu )");
+  canv7->SetGrid(1,1);
   ptPurity->SetTitle("");
   ptPurity->GetXaxis()->SetTitle("p_{t} ( #mu ) [GeV]");
   //  ptPurity->GetYaxis()->SetTitle("");
@@ -633,12 +634,24 @@ void analyzeMuonDiffXSec()
   ptPurity->SetStats(kFALSE);
   ptPurity->SetLineColor(kRed);
   ptPurity->SetLineWidth(3);
+  ptPurity->SetMarkerStyle(20);
+  ptPurity->SetMarkerSize(1.5);
+  ptPurity->SetMarkerColor(kRed);
   ptPurity->Draw("");
+  ptPurity->Draw("Psame");
   ptStability->SetLineColor(kBlue);
   ptStability->SetLineWidth(3);
+  ptStability->SetMarkerStyle(21);
+  ptStability->SetMarkerSize(1.5);
+  ptStability->SetMarkerColor(kBlue);
   ptStability->Draw("same");
+  ptStability->Draw("Psame");
   ptAcceptance->SetLineWidth(3);
+  ptAcceptance->SetMarkerStyle(22);
+  ptAcceptance->SetMarkerSize(1.5);
   ptAcceptance->Draw("same");
+  ptAcceptance->Draw("Psame");
+
   leg3->Draw("same");
 
   // ---
