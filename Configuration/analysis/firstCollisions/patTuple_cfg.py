@@ -15,20 +15,14 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.categories.append('topFilter')
 process.MessageLogger.cerr.topFilter = cms.untracked.PSet(
-    limit = cms.untracked.int32(-1)
+    limit = cms.untracked.int32(100)
 )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    ## files from Run 123801
-    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/10F05FA3-41E4-DE11-89C9-0030487D1BCC.root',
-    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/2E275957-49E4-DE11-B903-003048D37538.root',
-    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/30FECAA5-3CE4-DE11-9648-001617E30D52.root',
-    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/40953857-49E4-DE11-8C7B-000423D94990.root', ##!!!
-    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/AEC3C258-49E4-DE11-8512-003048D37514.root',
-    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/801/EAB34A72-3FE4-DE11-848C-001617C3B778.root'
+    '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/405/0878E54F-563B-DF11-8C50-0030487A3DE0.root'
     )
 )
 #process.source.firstRun = cms.untracked.uint32(123615)
@@ -48,7 +42,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('GR09_P_V7::All')
+process.GlobalTag.globaltag = cms.string('GR10_P_V2::All')
 
 #-------------------------------------------------
 # trigger configuration
@@ -57,9 +51,15 @@ process.GlobalTag.globaltag = cms.string('GR09_P_V7::All')
 process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
 process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
 process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) AND NOT (36 OR 37 OR 38 OR 39)')
+# Monster Event filter
+process.monsterFilter = cms.EDFilter("FilterOutScraping",
+                                     applyfilter = cms.untracked.bool(True),
+                                     debugOn     = cms.untracked.bool(False),
+                                     numtrack    = cms.untracked.uint32(10),
+                                     thresh      = cms.untracked.double(0.2)
+                                     )
 
-## select the "physics bits"
-process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41)')
 
 #-------------------------------------------------
 # pat configuration
@@ -69,71 +69,44 @@ process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41)'
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 ## use the correct jet energy corrections
-process.patJetCorrFactors.corrSample = "900GeV"
-#process.patJetCorrFactors.corrSample = "2360GeV"
+process.patJetCorrFactors.corrSample = "Summer09_7TeV_ReReco332"
 
 ## switch off MC matching
 from PhysicsTools.PatAlgos.tools.coreTools import *
-removeMCMatching(process, 'All')
-
-## add jet collections
-from PhysicsTools.PatAlgos.tools.jetTools import *
-
-#addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetIcone5'),
-#                 'JPTc',
-#                 doJTA        = True,
-#                 doBTagging   = True,
-#                 jetCorrLabel = ('IC5','JPT'),
-#                 doType1MET   = True,
-#                 doL1Counters = False,
-#                 genJetCollection = cms.InputTag("iterativeCone5GenJets")
-#                 )
-
-#addJetCollection(process,cms.InputTag('sisCone5CaloJets'),
-#                 'SC5',
-#                 doJTA        = True,
-#                 doBTagging   = True,
-#                 jetCorrLabel = ('SC5','Calo'),
-#                 doType1MET   = True,
-#                 doL1Counters = False,
-#                 genJetCollection=cms.InputTag("sisCone5GenJets")
-#                 )
+removeMCMatching(process, ['All'])
 
 #-------------------------------------------------
-# private Uni Hamburg analysis code
+# jet selection
 #-------------------------------------------------
 
-## add event weight information
-process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
-process.wght = cms.Path(process.eventWeight)   
+## select jets
+from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
+process.goodJets = selectedPatJets.clone(src = 'selectedPatJets',
+                                         cut =
+                                         'abs(eta) < 5 & pt > 20. &'
+                                         '0.01 < emEnergyFraction &'
+                                         '0.99 > emEnergyFraction'
+                                         )
 
-## basic event selection
-#process.load("TopAnalysis.TopFilter.sequences.semiLepMuonSelection_step0_cff")
-#process.semiLepMuonSelection = cms.Path(process.slmFilterFullMon )   
+## select events with good jets
+from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
+process.countJets = countPatJets.clone(src = 'goodJets',
+                                       minNumber = 2
+                                       )
 
-#process.load("TopAnalysis.TopFilter.sequences.fullLepElMuSelection_step0_cff")
-#process.fullLepElMuSelection = cms.Path(process.flemFilterFullMon)
-
-#process.load("TopAnalysis.TopFilter.sequences.fullLepMuonSelection_step0_cff")
-#process.fullLepMuonSelection = cms.Path(process.flmmFilterFullMon)
-
-## register TFileService
-#process.TFileService = cms.Service("TFileService",
-#    fileName = cms.string('commonTemplate.root')
-#)
+process.jetSelection = cms.Sequence(process.goodJets *
+                                    process.countJets)
 
 #-------------------------------------------------
-# process output:
-# - first the event selection is defined: only
-# those events that have passed the full
-# production path are selected and written to file
-# - for the event content, ALL objects
-# are dropped before the patTuple content is added
+# final path
 #-------------------------------------------------
 
 ## process path
 process.p1 = cms.Path(process.hltLevel1GTSeed *
-                      process.patDefaultSequence)
+                      process.monsterFilter *
+                      process.patDefaultSequence *
+                      process.jetSelection)
+
 
 ## define event selection
 process.EventSelection = cms.PSet(
@@ -147,8 +120,9 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_Run123909.root')
+    fileName = cms.untracked.string('patTuple_RunXYZ.root')
 )
+
 ## save pat output
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
@@ -157,9 +131,5 @@ process.out.outputCommands += patEventContentTriggerMatch
 process.out.outputCommands += patEventContentNoCleaning
 process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
                                "keep *_patMETs*_*_*"]
-## and products from our UserCode
-process.out.outputCommands += ["keep *_eventWeight_*_*"]
-## drop stuff which is not needed
-#process.out.outputCommands += ["drop *_towerMaker_*_*"]
 
 process.outpath = cms.EndPath(process.out)
