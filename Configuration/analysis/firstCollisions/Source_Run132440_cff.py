@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-## 
+## from /MinimumBias/Commissioning10-PromptReco-v7/RECO/
 ## 424 "multijet" events in 50 files dCache at DESY
 
 process.source.fileNames = [
