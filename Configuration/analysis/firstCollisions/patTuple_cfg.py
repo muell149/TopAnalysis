@@ -22,11 +22,11 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/405/0878E54F-563B-DF11-8C50-0030487A3DE0.root'
+        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/0AA7C390-0F3C-DF11-BD65-000423D998BA.root'
     )
 )
-#process.source.firstRun = cms.untracked.uint32(123615)
-#process.source.lastRun  = cms.untracked.uint32(123615)
+#process.source.firstRun = cms.untracked.uint32(132440)
+#process.source.lastRun  = cms.untracked.uint32(132440)
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
@@ -105,7 +105,8 @@ process.jetSelection = cms.Sequence(process.goodJets *
 process.p1 = cms.Path(process.hltLevel1GTSeed *
                       process.monsterFilter *
                       process.patDefaultSequence *
-                      process.jetSelection)
+                      process.jetSelection
+                      )
 
 
 ## define event selection
@@ -120,7 +121,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_RunXYZ.root')
+    fileName = cms.untracked.string('patTuple_Run132440.root')
 )
 
 ## save pat output
