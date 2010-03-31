@@ -23,7 +23,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 #
 
 ## muons in tracker range
-tightMuons = selectedPatMuons.clone(src = 'selectedLayer1Muons', 
+tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons', 
                                     cut = 'abs(eta) < 2.4'					        
 				   )
 ## muons reconstructed globally
@@ -84,7 +84,7 @@ isolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber 
 #
 
 ## hard jet selection
-hardJets = selectedPatJets.clone(src = 'selectedLayer1Jets', 
+hardJets = selectedPatJets.clone(src = 'selectedPatJets', 
                                  cut = 'pt > 40.' 
 			        )
 
