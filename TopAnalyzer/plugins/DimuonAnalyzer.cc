@@ -4,6 +4,7 @@
 /// default constructor
 DimuonAnalyzer::DimuonAnalyzer(const edm::ParameterSet& cfg):
   muons_      ( cfg.getParameter<edm::InputTag>        ( "muons"          ) ), 
+  massBins_   ( cfg.getParameter<std::vector<double> > ( "mass_bins"      ) ),  
   useEvtWgt_  ( cfg.getParameter<bool>                 ( "useEventWeight" ) )  
 {
 }
@@ -49,7 +50,10 @@ DimuonAnalyzer::beginJob()
   // combined isolation efficiency
   combCount_   = fs->make<TH1F>( "combCount"  , "combCount"   ,100,  0.0,  5.0); 
   // quadratically added combined isolation
-  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  7.5);    
+  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  7.5);  
+  
+  // counts number of entries in given bins of invariant mass
+  nEntries_ = fs->make<TH1F>( "nEntries", "nEntries" ,massBins_.size(), massBins_[0], massBins_[massBins_.size()-1]);      
 }
 
 /// everything which has to be done during the event loop: analyze and fill histos
@@ -67,6 +71,7 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
     evt.getByLabel("eventWeight", weightHandle); 
     weight = *weightHandle;
   }
+    
   // test if muon collection contains at least two muons
   if(muons->size()<2) return;
   
@@ -128,7 +133,26 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
     if(absTrackIso1<(0.5*i) && absCaloIso1<(0.5*i) && absTrackIso2<(0.5*i) && absCaloIso2<(0.5*i)){
       absCount_->SetBinContent(i,absCount_->GetBinContent(i)+1);
     }      
-  }    
+  }
+  
+  // fill nEntries_
+  for(int i=massBins_.size()-1; i>=0; --i){    
+    if(isWrongCharge) continue;
+    if(dilepMass > massBins_[i]){
+      nEntries_->SetBinContent(i+1,nEntries_->GetBinContent(i+1)+1.);
+      break;
+    }
+  }
+  
+//   std::cout << "++++++++++++++++++++++++++++" << std::endl;
+//   std::cout << "Run # = " << evt.id().run()   << std::endl;
+//   std::cout << "Evt # = " << evt.id().event() << std::endl;
+//   if(isWrongCharge){
+//     std::cout << "Like sign muon combination!" << std::endl;    
+//   }
+//   std::cout << "invariant mass = " << dilepMass << std::endl;
+//   std::cout << "++++++++++++++++++++++++++++" << std::endl;   
+      
 }
 
 /// everything which has to be done during the event loop: analyze and fill histos: empty

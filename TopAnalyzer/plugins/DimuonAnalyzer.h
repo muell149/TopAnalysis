@@ -46,6 +46,8 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
 
     /// input muon collection
     edm::InputTag muons_;
+    /// mass bins in which number of entries is counted 
+    std::vector<double> massBins_;
     /// input bool: use a event weight?     
     bool useEvtWgt_;
     /// define a PatMuonCollection as a vector of PatMuons      
@@ -68,6 +70,8 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     TH1F * combCount_;
     /// isolation efficiency for quadratically added combined isolation
     TH1F * diCombCount_; 
+    /// counts number of entries in given bins of invariant mass
+    TH1F * nEntries_;
 };
 
 #endif
