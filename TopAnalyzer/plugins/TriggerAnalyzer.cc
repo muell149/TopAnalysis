@@ -3,7 +3,7 @@
 TriggerAnalyzer::TriggerAnalyzer(const ParameterSet& cfg)
 {
   trigResults_ = cfg.getParameter<InputTag>       ("TriggerResults");
-  hltPaths_L3_ = cfg.getParameter<vector<string> >("hltPaths_L3"   );
+  hltPaths_    = cfg.getParameter<vector<string> >("hltPaths"      );
 }
 
 TriggerAnalyzer::~TriggerAnalyzer()
@@ -13,7 +13,7 @@ TriggerAnalyzer::~TriggerAnalyzer()
 void
 TriggerAnalyzer::beginJob()
 {
-    n_TrigPaths = hltPaths_L3_.size();
+    n_TrigPaths = hltPaths_.size();
     Service<TFileService> fs;
     if( !fs ){
       throw edm::Exception( edm::errors::Configuration,
@@ -24,7 +24,7 @@ TriggerAnalyzer::beginJob()
     FiredTrigs_->GetXaxis()->SetTitle( "Trigger Path" );
     FiredTrigs_->GetYaxis()->SetTitle( "N_{Fired}" );       
     for(int i=1; i<=n_TrigPaths; ++i){  
-      FiredTrigs_->GetXaxis()->SetBinLabel( i, hltPaths_L3_[i-1].c_str() );
+      FiredTrigs_->GetXaxis()->SetBinLabel( i, hltPaths_[i-1].c_str() );
     }  
     
     Passed_ = fs->make<TH1F>("Passed", "Triggered Events", 2, -0.5, 1.5);
@@ -37,8 +37,8 @@ TriggerAnalyzer::beginJob()
     Correlations_->GetXaxis()->SetTitle( "Trigger Path" );
     Correlations_->GetYaxis()->SetTitle( "Trigger Path" ); 
     for(int i=1; i<=n_TrigPaths; ++i){  
-      Correlations_->GetXaxis()->SetBinLabel( i, hltPaths_L3_[i-1].c_str() );
-      Correlations_->GetYaxis()->SetBinLabel( i, hltPaths_L3_[i-1].c_str() );
+      Correlations_->GetXaxis()->SetBinLabel( i, hltPaths_[i-1].c_str() );
+      Correlations_->GetYaxis()->SetBinLabel( i, hltPaths_[i-1].c_str() );
     }      
 }
 
@@ -60,14 +60,14 @@ TriggerAnalyzer::analyze(const Event& evt, const EventSetup&)
     //cout <<  trigName.triggerName(i_Trig) << endl;
     if(!trigResults.product()->accept(i_Trig)) continue;        
     for(int i = 0; i<n_TrigPaths; i++){
-      if(!(trigName.triggerName(i_Trig)== hltPaths_L3_[i])) continue; 	    	    	    	    
+      if(!(trigName.triggerName(i_Trig)== hltPaths_[i])) continue; 	    	    	    	    
       trigFired = true;
       FiredTrigs_->Fill(i);
       
      for(int j_Trig = 0; j_Trig<n_Triggers; ++j_Trig){    
        if(!trigResults.product()->accept(j_Trig)) continue;         
         for(int j = 0; j<n_TrigPaths; j++){
-	  if(!(trigName.triggerName(j_Trig)== hltPaths_L3_[j])) continue;
+	  if(!(trigName.triggerName(j_Trig)== hltPaths_[j])) continue;
 	  Correlations_->Fill(i,j);	      
         }
       }	
