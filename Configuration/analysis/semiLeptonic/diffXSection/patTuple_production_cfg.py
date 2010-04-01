@@ -14,35 +14,19 @@ run33xOn31xMC(process,
                jetIdTag = "antikt5"
               )
 
-## Add antikt and siscone jets
+## Add particle flow jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
-addJetID(process, "sisCone5CaloJets", "sc5")
-addJetCollection(process,cms.InputTag('sisCone5CaloJets'),
-                 'SC5',
-                 doJTA        = True,
-                 doBTagging   = True,
-                 jetCorrLabel = ('SC5','Calo'),
-                 doType1MET   = True,
-                 doL1Cleaning = False,                 
-                 doL1Counters = False,
-                 genJetCollection=cms.InputTag("sisCone5GenJets"),
-                 doJetID      = True,
-                 jetIdLabel   = "sc5"                 
-                 )
-
-addJetID(process, "iterativeCone5CaloJets", "ic5")
-addJetCollection(process,cms.InputTag('iterativeCone5CaloJets'),
-                 'IC5',
-                 doJTA        = True,
-                 doBTagging   = True,
-                 jetCorrLabel = ('IC5', 'Calo'),
-                 doType1MET   = True,
-                 doL1Cleaning = False,                 
-                 doL1Counters = False,
-                 genJetCollection=cms.InputTag("iterativeCone5GenJets"),
-                 doJetID      = True,
-                 jetIdLabel   = "ic5"
-                 )
+#addJetID(process, "antikt5PFJets", "pf")
+addJetCollection(process,cms.InputTag('antikt5PFJets'),'PF',
+              doJTA        = True,
+              doBTagging   = True,
+              jetCorrLabel = ('AK5', 'PF'),
+              doType1MET   = False,
+              doL1Cleaning = False,
+              doL1Counters = False,
+              genJetCollection=cms.InputTag("antikt5GenJets"),
+              doJetID      = False,
+              ) 
 
 ## Check the Event Content
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
@@ -55,8 +39,7 @@ process.p = cms.Path(
 
 ## sample type used for flavour dependend jet corrections
 process.patJetCorrFactors.sampleType = 'ttbar'
-process.patJetCorrFactorsIC5.sampleType = 'ttbar'
-process.patJetCorrFactorsSC5.sampleType = 'ttbar'
+process.patJetCorrFactorsPF.sampleType = 'ttbar'
 
 ## Define Event Contet
 from PhysicsTools.PatAlgos.patEventContent_cff import *
