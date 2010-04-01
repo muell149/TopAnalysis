@@ -90,7 +90,9 @@ process.goodJets = selectedPatJets.clone(src = 'selectedPatJets',
                                          cut =
                                          'abs(eta) < 5 & pt > 20. &'
                                          '0.01 < emEnergyFraction &'
-                                         '0.99 > emEnergyFraction'
+                                         '0.99 > emEnergyFraction &'
+                                         'jetID.fHPD < 0.98 &'
+                                         'jetID.n90Hits > 1'
                                          )
 
 ## select events with good jets
