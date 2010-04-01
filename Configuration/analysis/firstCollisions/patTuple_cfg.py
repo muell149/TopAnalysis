@@ -70,6 +70,8 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 ## use the correct jet energy corrections
 process.patJetCorrFactors.corrSample = "Summer09_7TeV_ReReco332"
+## choose sample type for flavor dependent JEC
+process.patJetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
 ## switch off MC matching
 from PhysicsTools.PatAlgos.tools.coreTools import *
