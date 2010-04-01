@@ -3,7 +3,7 @@
 TriggerFilter::TriggerFilter(const ParameterSet& cfg)
 {
   trigResults_ = cfg.getParameter<InputTag>       ("TriggerResults");
-  hltPaths_L3_ = cfg.getParameter<vector<string> >("hltPaths_L3"   );
+  hltPaths_    = cfg.getParameter<vector<string> >("hltPaths"      );
 }
 
 TriggerFilter::~TriggerFilter()
@@ -13,7 +13,7 @@ TriggerFilter::~TriggerFilter()
 void
 TriggerFilter::beginJob()
 {
-    n_TrigPaths = hltPaths_L3_.size();     
+    n_TrigPaths = hltPaths_.size();     
 }
 
 bool
@@ -33,7 +33,7 @@ TriggerFilter::filter(Event& evt, const EventSetup&)
   for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){    
     if(!trigResults.product()->accept(i_Trig)) continue;        
     for(int i = 0; i<n_TrigPaths; i++){
-      if(!(trigName.triggerName(i_Trig)== hltPaths_L3_[i])) continue; 	    	    	    	    
+      if(!(trigName.triggerName(i_Trig)== hltPaths_[i])) continue; 	    	    	    	    
       trigFired = true;     	        
     }      
   }  

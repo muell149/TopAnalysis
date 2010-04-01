@@ -44,7 +44,7 @@ class TriggerFilter : public EDFilter {
      /// triger result input collection	
     InputTag trigResults_;
     /// triggers to be studied given in config
-    vector<string> hltPaths_L3_;
+    vector<string> hltPaths_;
     /// number of trigger paths given in config
     int n_TrigPaths;      
 };
