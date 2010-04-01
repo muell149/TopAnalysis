@@ -40,7 +40,7 @@ class RunEventFilter : public EDFilter {
     
   private:
     /// parses the given run and event strings from config to uint numbers using the Parse* functions
-    virtual void beginJob(const EventSetup&);
+    virtual void beginJob();
     /// get event and run number and look if the event is selected in config
     virtual bool filter(Event&, const EventSetup&);
     /// empty

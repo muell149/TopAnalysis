@@ -16,7 +16,7 @@ RunEventFilter::~RunEventFilter()
 }
 
 void
-RunEventFilter::beginJob(const EventSetup&)
+RunEventFilter::beginJob()
 {  
   /// parse runlist to vector of ints
   vector<unsigned int> selected_runs = ParseRunString(runStr_);
@@ -38,7 +38,6 @@ RunEventFilter::beginJob(const EventSetup&)
     runStruct run;
     run.run = selected_runs[i];
     run.reject = false; //set default value 
-    cout << "push_back run # " << run.run << endl;
     runlist.push_back(run);    
   }
 
@@ -59,21 +58,6 @@ RunEventFilter::beginJob(const EventSetup&)
         }
       }
     }
-  } 
-  
-  // cout will be removed later
-  cout << "RUNLIST:" << endl;
-  cout << "selected runs and events: " << endl; 
-  for(size_t i=0;i<runlist.size();++i){
-    cout << "RUN: " << runlist[i].run << endl;
-    cout << "  evts:" << endl;
-    for(size_t j=0;j<runlist[i].evts.size();++j){
-      cout << "  " << runlist[i].evts[j] << endl;
-    }
-    cout << "  ranges:" << endl;
-    for(size_t j=0;j<runlist[i].evt_ranges.size();++j){
-      cout << "  from " << runlist[i].evt_ranges[j].first << " to " << runlist[i].evt_ranges[j].second << endl;
-    }    
   }            
 }
 
@@ -94,6 +78,7 @@ RunEventFilter::filter(Event& evt, const EventSetup&)
       // check if the event is in the event list for the run
       for(size_t j=0;j<runlist[i].evts.size();++j){
         if(runlist[i].evts[j]==event_number){
+	  std::cout << "accept event" << std::endl;
 	  evt_in_list = true;
 	}
       }
