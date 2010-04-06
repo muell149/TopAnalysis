@@ -42,21 +42,20 @@ void createPseudoData()
   smearing(*hists_[files_.size()], *pseudoData);
   
   // write output
-  TFile f("pseudoData7TeV50pb2.root", "recreate");  
-  pseudoData->Write();
+  TFile f("pseudoData7TeV50pb.root", "recreate");  
+  pseudoData->Write("pt");
   
 }
 
 
 void loadingFiles()
 {
-  // add all contributing sampe here
-  
-  files_.push_back(new TFile("./diffXSecFromSignal/fullMCStatistics/diffXSecSigMcAtNlo7TeV.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/fullMCStatistics/diffXSecBkgMcAtNlo7TeV.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/fullMCStatistics/diffXSecWjetsMadgraph7.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/fullMCStatistics/diffXSecZjetsMadgraph7.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/fullMCStatistics/diffXSecQCDPythia7TeV.root"  ) );
+  // add all contributing samples here
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"  ) );
 }
 
 void smearing(TH1F& src, TH1F& data)
@@ -83,8 +82,8 @@ void combineFiles(float luminosity)
   // actually done for 50 pb-1 @ 7TeV with full statistic
   
   lumiweight_.push_back( (0.0083/50)*luminosity );
-  lumiweight_.push_back( (0.0083/50)*luminosity );
   lumiweight_.push_back( (0.1231/50)*luminosity );
+  lumiweight_.push_back( (0.0083/50)*luminosity );
   lumiweight_.push_back( (0.1310/50)*luminosity );
   lumiweight_.push_back( (1.0286/50)*luminosity );
 
