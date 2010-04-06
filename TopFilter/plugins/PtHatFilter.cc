@@ -44,7 +44,7 @@ bool PtHatFilter::filter(edm::Event& event, const edm::EventSetup& setup)
   return pass;
 }
 
-void PtHatFilter::beginJob(const edm::EventSetup& setup)
+void PtHatFilter::beginJob()
 {
 }
 
