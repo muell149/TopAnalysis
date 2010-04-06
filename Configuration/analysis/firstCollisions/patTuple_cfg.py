@@ -57,7 +57,7 @@ process.monsterFilter = cms.EDFilter("FilterOutScraping",
                                      applyfilter = cms.untracked.bool(True),
                                      debugOn     = cms.untracked.bool(False),
                                      numtrack    = cms.untracked.uint32(10),
-                                     thresh      = cms.untracked.double(0.2)
+                                     thresh      = cms.untracked.double(0.25)
                                      )
 
 
@@ -76,6 +76,12 @@ process.patJetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 ## switch off MC matching
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeMCMatching(process, ['All'])
+
+## add muon and electron user isolation
+from PhysicsTools.PatAlgos.tools.electronTools import addElectronUserIsolation
+addElectronUserIsolation(process)
+from PhysicsTools.PatAlgos.tools.muonTools import addMuonUserIsolation
+addMuonUserIsolation(process)
 
 #-------------------------------------------------
 # jet selection
@@ -125,7 +131,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_Run132442.root')
+    fileName = cms.untracked.string('patTuple_Run132605.root')
 )
 
 ## save pat output

@@ -19,7 +19,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring()
 )
-execfile("TopAnalysis/Configuration/analysis/firstCollisions/Source_Run132442_cff.py")
+execfile("TopAnalysis/Configuration/analysis/firstCollisions/Source_Run132605_cff.py")
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -65,7 +65,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('semiLepMuonSelection_Run132442.root')
+    fileName = cms.untracked.string('semiLepMuonSelection_Run132605.root')
 )
 
 ## save pat output
