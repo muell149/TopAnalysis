@@ -9,8 +9,6 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
 from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## muon count filter
 from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
-## electron count filter
-from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
 ###########################################################################################
 #
@@ -55,7 +53,7 @@ hcalMipMuons = selectedPatMuons.clone(src = 'ecalMipMuons',
                                       cut = 'hcalIsoDeposit.candEnergy < 6'
 				     )					     					     			    
 ## isolation cut				      				      
-isolatedMuons = selectedPatMuons.clone(src = 'hcalMipMuons', 
+isolatedMuons = selectedPatMuons.clone(src = 'goodFitMuons', #src = 'hcalMipMuons', 
                                        cut = '(trackIso+caloIso)/pt < 0.25' 
 				      )				      
 
@@ -113,8 +111,8 @@ buildCollections = cms.Sequence(tightMuons *
 				goodTrackMuons *
 				goodD0Muons *
 				goodFitMuons *
-				ecalMipMuons *
-				hcalMipMuons *
+				#ecalMipMuons *
+				#hcalMipMuons *
 				isolatedMuons *
 				hardJets *
 				tightJets				
@@ -126,8 +124,8 @@ fullLeptonicMuonMuonSelection = cms.Sequence(tightMuonSelection *
 				             goodTrackMuonSelection *
 				             goodD0MuonSelection *
 				             goodFitMuonSelection *
-				             ecalMipMuonSelection *
-				             hcalMipMuonSelection *
+				             #ecalMipMuonSelection *
+				             #hcalMipMuonSelection *
 				             isolatedMuonSelection *
 				             hardJetSelection *
 				             tightJetSelection	
