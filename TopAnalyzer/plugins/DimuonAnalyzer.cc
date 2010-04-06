@@ -3,9 +3,10 @@
 
 /// default constructor
 DimuonAnalyzer::DimuonAnalyzer(const edm::ParameterSet& cfg):
-  muons_      ( cfg.getParameter<edm::InputTag>        ( "muons"          ) ), 
-  massBins_   ( cfg.getParameter<std::vector<double> > ( "mass_bins"      ) ),  
-  useEvtWgt_  ( cfg.getParameter<bool>                 ( "useEventWeight" ) )  
+  muons_        ( cfg.getParameter<edm::InputTag>        ( "muons"          ) ), 
+  massBins_     ( cfg.getParameter<std::vector<double> > ( "massBins"       ) ),  
+  useEvtWgt_    ( cfg.getParameter<bool>                 ( "useEventWeight" ) ),
+  correct2width_( cfg.getParameter<bool>                 ( "correctToWidth" ) ) 
 {
 }
 
@@ -159,6 +160,13 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
 void
 DimuonAnalyzer::endJob()
 {
+  // correct entries in dimuon mass histograms to bin width
+  if(!correct2width_) return;
+  
+  for(int i=1; i<=dimassRC_->GetNbinsX(); ++i){
+    dimassRC_->SetBinContent(i,dimassRC_->GetBinContent(i)/dimassRC_->GetBinWidth(i));
+    dimassWC_->SetBinContent(i,dimassWC_->GetBinContent(i)/dimassWC_->GetBinWidth(i));
+  }
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"

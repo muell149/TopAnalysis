@@ -50,6 +50,8 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     std::vector<double> massBins_;
     /// input bool: use a event weight?     
     bool useEvtWgt_;
+    /// input bool: correct histos to width of log bins?     
+    bool correct2width_;    
     /// define a PatMuonCollection as a vector of PatMuons      
     typedef std::vector<pat::Muon> PatMuonCollection;
     /// true if leading muons have same charge
