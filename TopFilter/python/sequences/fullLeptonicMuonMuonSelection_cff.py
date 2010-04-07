@@ -46,14 +46,14 @@ goodFitMuons = selectedPatMuons.clone(src = 'goodD0Muons',
 				     )						     
 ## mip signature ecal
 ecalMipMuons = selectedPatMuons.clone(src = 'goodFitMuons', 
-                                      cut = 'ecalIsoDeposit.candEnergy < 4'
+                                      cut = 'isolationR03.emVetoEt < 4'
 				     )					     					     
 ## mip signature hcal
 hcalMipMuons = selectedPatMuons.clone(src = 'ecalMipMuons', 
-                                      cut = 'hcalIsoDeposit.candEnergy < 6'
+                                      cut = 'isolationR03.hadVetoEt < 6'
 				     )					     					     			    
 ## isolation cut				      				      
-isolatedMuons = selectedPatMuons.clone(src = 'goodFitMuons', #src = 'hcalMipMuons', 
+isolatedMuons = selectedPatMuons.clone(src = 'hcalMipMuons', 
                                        cut = '(trackIso+caloIso)/pt < 0.25' 
 				      )				      
 
@@ -111,8 +111,8 @@ buildCollections = cms.Sequence(tightMuons *
 				goodTrackMuons *
 				goodD0Muons *
 				goodFitMuons *
-				#ecalMipMuons *
-				#hcalMipMuons *
+				ecalMipMuons *
+				hcalMipMuons *
 				isolatedMuons *
 				hardJets *
 				tightJets				
@@ -124,8 +124,8 @@ fullLeptonicMuonMuonSelection = cms.Sequence(tightMuonSelection *
 				             goodTrackMuonSelection *
 				             goodD0MuonSelection *
 				             goodFitMuonSelection *
-				             #ecalMipMuonSelection *
-				             #hcalMipMuonSelection *
+				             ecalMipMuonSelection *
+				             hcalMipMuonSelection *
 				             isolatedMuonSelection *
 				             hardJetSelection *
 				             tightJetSelection	
