@@ -19,7 +19,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring()
 )
-execfile("TopAnalysis/Configuration/analysis/firstCollisions/Source_Run132605_cff.py")
+execfile("TopAnalysis/Configuration/analysis/firstCollisions/Source_Run132656_cff.py")
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -44,13 +44,35 @@ process.goodJets.cut = ('abs(eta) < 5 & pt > 20. &'
                         'jetID.n90Hits > 1')
 process.leadingJetSelection.minNumber = 4
 
-process.p1 = cms.Path(#process.hltMu9                *
+process.p1 = cms.Path(process.hltMu9                *
                       process.semiLeptonicSelection *
-                      #process.muonSelection         *
-                      #process.secondMuonVeto        * 
+                      process.muonSelection         *
+                      process.secondMuonVeto        * 
                       process.electronVeto          *
-                      process.leadingJetSelection   #*
-                      #process.bottomJetSelection
+                      process.leadingJetSelection
+                      )
+
+process.p2 = cms.Path(process.semiLeptonicSelection *
+                      process.muonSelection         *
+                      process.secondMuonVeto        * 
+                      process.electronVeto          *
+                      process.leadingJetSelection
+                      )
+
+process.p3 = cms.Path(process.secondMuonVeto        * 
+                      process.electronVeto          *
+                      process.leadingJetSelection
+                      )
+
+process.p4 = cms.Path(process.electronVeto          *
+                      process.leadingJetSelection
+                      )
+
+process.p5 = cms.Path(process.leadingJetSelection
+                      )
+
+process.p6 = cms.Path(process.leadingJetSelection *
+                      process.bottomJetSelection
                       )
 
 ## define event selection
@@ -65,7 +87,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('semiLepMuonSelection_Run132605.root')
+    fileName = cms.untracked.string('semiLepMuonSelection_Run132654.root')
 )
 
 ## save pat output
