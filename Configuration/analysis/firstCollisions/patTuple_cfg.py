@@ -51,15 +51,20 @@ process.GlobalTag.globaltag = cms.string('GR10_P_V2::All')
 process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
 process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
 process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
-process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) AND NOT (36 OR 37 OR 38 OR 39)')
-# Monster Event filter
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) AND NOT (36 OR 37 OR 38 OR 39) AND NOT ((42 AND NOT 43) OR (43 AND NOT 42))')
+# monster event filter
 process.monsterFilter = cms.EDFilter("FilterOutScraping",
                                      applyfilter = cms.untracked.bool(True),
                                      debugOn     = cms.untracked.bool(False),
                                      numtrack    = cms.untracked.uint32(10),
                                      thresh      = cms.untracked.double(0.25)
                                      )
-
+# vertex filter
+process.vertexFilter = cms.EDFilter("VertexSelector",
+                                    src = cms.InputTag("offlinePrimaryVertices"),
+                                    cut = cms.string("!isFake && ndof > 4 && abs(z) <= 15 && position.Rho <= 2"),
+                                    filter = cms.bool(True),
+                                    )
 
 #-------------------------------------------------
 # pat configuration
@@ -114,6 +119,7 @@ process.jetSelection = cms.Sequence(process.goodJets *
 ## process path
 process.p1 = cms.Path(process.hltLevel1GTSeed *
                       process.monsterFilter *
+                      process.vertexFilter *
                       process.patDefaultSequence *
                       process.jetSelection
                       )
