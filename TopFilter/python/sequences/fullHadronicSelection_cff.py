@@ -37,11 +37,11 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 
 ## setup the jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
-                                            cut = 'pt > 40'
-                                            )
+                                         cut = 'pt > 40'
+                                         )
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                            cut = 'pt > 50'
-                                            )
+                                         cut = 'pt > 50'
+                                         )
 
 ## setting up the collections for the fully-hadronic
 ## event selection; on these collection monitoring
@@ -59,11 +59,11 @@ fullHadronicSelection = cms.Sequence(reliableJets *
 
 ## setup jet selection collection
 leadingJetSelection = countPatJets.clone(src = 'tightLeadingJets',
-                                            minNumber = 6
-                                            )
+                                         minNumber = 6
+                                         )
 bottomJetSelection  = countPatJets.clone(src = 'tightBottomJets',
-                                            minNumber = 2
-                                            )
+                                         minNumber = 2
+                                         )
 
 ## setting up the fully-hadronic event selection;
 ## on these collection monitoring can still be
@@ -170,7 +170,7 @@ eventShapes_0 = analyzeEventShapes.clone( src = 'goodJets' )
 
 ## monitor sequence for event shape analyzers
 monitorEventShapes_0 = cms.Sequence(eventShapes_0
-                                            )
+                                    )
 
 ## FULL HAD SPECIAL
 
@@ -179,7 +179,7 @@ fullHadSpecial_0 = analyzeFullHadSpecials.clone( src = 'goodJets' )
 
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_0 = cms.Sequence(fullHadSpecial_0
-                                                )
+                                        )
 
 ## GEN PARTICLE
 
@@ -188,7 +188,7 @@ genParticles_0 = analyzeGenParticles.clone()
 
 ## monitor sequence for genParticles
 monitorGenParticles_0 = cms.Sequence(genParticles_0
-                                             )
+                                     )
 
 ## FILTER STEP 1 (To be found in from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff as  fullHadronicEvents)
 
@@ -210,16 +210,16 @@ tightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets
 
 ## to be called with fullHadronicSelection
 monitorJetsKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  +
-                                               tightBJet_0_JetKinematics_1 +
-                                               tightBJet_1_JetKinematics_1 +
-                                               tightLeadingJetKinematics_1 +
-                                               tightLead_0_JetKinematics_1 +
-                                               tightLead_1_JetKinematics_1 +
-                                               tightLead_2_JetKinematics_1 +
-                                               tightLead_3_JetKinematics_1 +
-                                               tightLead_4_JetKinematics_1 +
-                                               tightLead_5_JetKinematics_1  
-                                               )
+                                       tightBJet_0_JetKinematics_1 +
+                                       tightBJet_1_JetKinematics_1 +
+                                       tightLeadingJetKinematics_1 +
+                                       tightLead_0_JetKinematics_1 +
+                                       tightLead_1_JetKinematics_1 +
+                                       tightLead_2_JetKinematics_1 +
+                                       tightLead_3_JetKinematics_1 +
+                                       tightLead_4_JetKinematics_1 +
+                                       tightLead_5_JetKinematics_1  
+                                       )
 
 ## EVENT SHAPES
 
@@ -228,7 +228,7 @@ eventShapes_1 = analyzeEventShapes.clone( src = 'tightLeadingJets' )
 
 ## monitor sequence for event shape analyzers
 monitorEventShapes_1 = cms.Sequence(eventShapes_1
-                                            )
+                                    )
 
 ## FULL HAD SPECIAL
 
@@ -237,7 +237,7 @@ fullHadSpecial_1 = analyzeFullHadSpecials.clone( src = 'tightLeadingJets' )
 
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_1 = cms.Sequence(fullHadSpecial_1
-                                                )
+                                        )
 
 ## KINFIT QUALITY
 
@@ -247,7 +247,7 @@ kinFitQuality_1 = analyzeKinFitQuality.clone( srcB = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
 monitorKinFitQuality_1 = cms.Sequence(kinFitQuality_1
-                                              )
+                                      )
 
 ## FULL HAD TOP RECO
 
@@ -256,7 +256,7 @@ fullHadTopReco_1 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
 
 ## monitor sequence for fully hadronice top reco analyzers
 monitorfullHadTopReco_1 = cms.Sequence(fullHadTopReco_1
-                                               )
+                                       )
 
 ## GEN PARTICLE
 
@@ -265,7 +265,7 @@ genParticles_1 = analyzeGenParticles.clone()
 
 ## monitor sequence for genParticles
 monitorGenParticles_1 = cms.Sequence(genParticles_1
-                                             )
+                                     )
 
 ## FILTER STEP 2
 
