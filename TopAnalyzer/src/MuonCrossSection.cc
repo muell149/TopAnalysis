@@ -1,6 +1,8 @@
 #include <Math/Boost.h>
 #include <Math/VectorUtil.h>
 #include "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 
 /// default constructor for generator level analysis in fw lite
 MuonCrossSection::MuonCrossSection()
@@ -143,24 +145,24 @@ MuonCrossSection::fill(const edm::View<pat::Muon>& muons, const double& weight)
 
     // transverse momentum of the muon
     hists_.find( "pt"   )->second->Fill( muon->et()  , weight );
-    // pseudorapidity of the muon
+     // pseudorapidity of the muon
     hists_.find( "eta"  )->second->Fill( muon->eta() , weight );
-    // azimuth angle of the muon
+     // azimuth angle of the muon
     hists_.find( "phi"  )->second->Fill( muon->phi() , weight );
-    //    std::cout << "reco filling ok" << std::endl;
+ 
 
     //-----------------------------------//
     //--filling for generator particles--//
     //-----------------------------------//
 
+    if(muon->genLepton()){
     // transverse momentum of the muon
     hists_.find( "ptGen"   )->second->Fill( muon->genLepton()->et()  , weight );
-    // pseudorapidity of the muon
+     // pseudorapidity of the muon
     hists_.find( "etaGen"  )->second->Fill( muon->genLepton()->eta() , weight );
-    // azimuth angle of the muon
+     // azimuth angle of the muon
     hists_.find( "phiGen"  )->second->Fill( muon->genLepton()->phi() , weight );
-    //    std::cout << "gen filling ok" << std::endl;
-
+ 
     //---------------------------------//
     //--filling for correlation plots--//
     //---------------------------------//
@@ -171,8 +173,11 @@ MuonCrossSection::fill(const edm::View<pat::Muon>& muons, const double& weight)
     corrs_.find("muonEta_" )->second->Fill( muon->genLepton()->eta(),  muon->eta()  , weight );
     // azimuth angle of the muon
     corrs_.find("muonPhi_" )->second->Fill( muon->genLepton()->phi(),  muon->phi()  , weight );
-    //    std::cout << "correlation filling ok" << std::endl;
-  
+    }
+    else{
+      edm::LogWarning ( "NoGenLepton" ) << "no associated GenLepton found";
+    } 
+    
     //----------------------------//
     //--charge dependent filling--//
     //----------------------------//
@@ -180,15 +185,14 @@ MuonCrossSection::fill(const edm::View<pat::Muon>& muons, const double& weight)
     // filling for negative charged muons
     if(muon->charge()<0){
     hists_.find("charge"  )->second->Fill( 1 , weight );
-
+ 
     // filling for reco particles
     // transverse momentum of the muon
     hists_.find( "ptMuMinus"   )->second->Fill( muon->et()  , weight );
-    // pseudorapidity of the muon
+     // pseudorapidity of the muon
     hists_.find( "etaMuMinus"  )->second->Fill( muon->eta() , weight );
-    // azimuth angle of the muon
+     // azimuth angle of the muon
     hists_.find( "phiMuMinus"  )->second->Fill( muon->phi() , weight );
-
     }
     // filling for positive charged muons
     if(muon->charge()>0){
@@ -201,9 +205,7 @@ MuonCrossSection::fill(const edm::View<pat::Muon>& muons, const double& weight)
     hists_.find( "etaMuPlus"  )->second->Fill( muon->eta() , weight );
     // azimuth angle of the muon
     hists_.find( "phiMuPlus"  )->second->Fill( muon->phi() , weight );
-
     }
-    //    std::cout << "charge stuff filling ok" << std::endl;
   }
 }
 
