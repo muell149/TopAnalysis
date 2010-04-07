@@ -1,5 +1,6 @@
 #include "TLorentzVector.h"
 #include "TopAnalysis/TopAnalyzer/plugins/DimuonAnalyzer.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 /// default constructor
 DimuonAnalyzer::DimuonAnalyzer(const edm::ParameterSet& cfg):
@@ -27,8 +28,8 @@ DimuonAnalyzer::beginJob()
 
   // define logarithmic bins for a histogram with 50 bins going from 10^0 to 10^2.4 =~ 250
   const int nbins = 50;
-  double logmin =  0.0;
-  double logmax =  2.4;
+  double logmin = -0.7;
+  double logmax =  3.0;
   double bins[nbins+1];
   for (int i = 0; i <= nbins; i++) {
     double log = logmin + (logmax-logmin)*i/nbins;
@@ -87,9 +88,8 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
      
   // wrong or right charge?
   isWrongCharge = false;
-  if(mu1.charge()*mu2.charge()>0.) isWrongCharge = true;
-     
-       
+  if(mu1.charge()*mu2.charge()>0.) isWrongCharge = true;    
+      
   // fill dimuon mass histograms:
   //right charge
   if(!isWrongCharge)  
