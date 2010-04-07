@@ -6,6 +6,7 @@
 #include <TH2F.h>
 #include <TH3F.h>
 #include <TLegend.h>
+#include <TMath.h>
 #include <TPaveText.h>
 #include <TROOT.h>
 #include <TStyle.h>
@@ -230,13 +231,28 @@ void drawHLine(TH1 *thisHisto, Double_t y,
   f->Draw("L same");
 }
 
-int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBias.root")
+double addQuadratic(double x, double y, double z=0.)
+{
+  return TMath::Sqrt(x*x+y*y+z*z);
+}
+
+int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResolutionBias.root",
+				   TString fileName2 = "")
 {
 
-  TFile* file = TFile::Open(name);
+  TFile* file1 = TFile::Open(fileName1);
   
-  if(!file)
+  if(!file1)
     abort();
+
+  unsigned nSystematicSets = 4;
+  TFile* file2;
+  if(fileName2 != "") {
+    file2 = TFile::Open(fileName2);
+    nSystematicSets = 5;
+    if(!file2)
+      abort();
+  }
 
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -258,17 +274,17 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   TH1F* theta;
   TH2F* energySmearVsGen;
 
-  TH1F* enResp[6][4];
+  TH1F* enResp[6][nSystematicSets];
+  TH1F* resp  [6][nSystematicSets];
+  TH1F* mW    [6][nSystematicSets];
+  TH1F* mT    [6][nSystematicSets];
 
-  TH1F* resp       [6][4];
   TH2F* respPtGen  [6][4];
   TH2F* respPtSmear[6][4];
 
-  TH1F* mW[6][4];
-  TH1F* mT[6][4];
-
   TH2F* mWPtGen  [6][4];
   TH2F* mWPtSmear[6][4];
+
   TH2F* mTPtGen  [6][4];
   TH2F* mTPtSmear[6][4];
 
@@ -284,16 +300,16 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
 		       "_m20",   // resolution 20% better
 		       "_p20"};  // resolution 20% worse
 
-  pt        = cloneObjectFromFile<TH1F*>(file, inDirBase + "/pt" );
-  ptSmeared = cloneObjectFromFile<TH1F*>(file, inDirBase + "/ptSmeared");
+  pt        = cloneObjectFromFile<TH1F*>(file1, inDirBase + "/pt" );
+  ptSmeared = cloneObjectFromFile<TH1F*>(file1, inDirBase + "/ptSmeared");
 
-  energy        = cloneObjectFromFile<TH1F*>(file, inDirBase + "/energy" );
-  energySmeared = cloneObjectFromFile<TH1F*>(file, inDirBase + "/energySmeared");
+  energy        = cloneObjectFromFile<TH1F*>(file1, inDirBase + "/energy" );
+  energySmeared = cloneObjectFromFile<TH1F*>(file1, inDirBase + "/energySmeared");
 
-  eta = cloneObjectFromFile<TH1F*>(file, inDirBase + "/eta");
-  theta = cloneObjectFromFile<TH1F*>(file, inDirBase + "/theta");
+  eta = cloneObjectFromFile<TH1F*>(file1, inDirBase + "/eta");
+  theta = cloneObjectFromFile<TH1F*>(file1, inDirBase + "/theta");
 
-  energySmearVsGen = cloneObjectFromFile<TH2F*>(file, inDirBase + "/energySmearVsGen");
+  energySmearVsGen = cloneObjectFromFile<TH2F*>(file1, inDirBase + "/energySmearVsGen");
 
   for(unsigned i = 0; i < 6; i++) {
 
@@ -302,63 +318,77 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
       TString inDir = inDirBase + dirExt[d];
 
       TString name = inDir + "/energySmearOverGen_"; name += (i*10);
-      enResp[i][d] = cloneObjectFromFile<TH1F*>(file, name);
+      enResp[i][d] = cloneObjectFromFile<TH1F*>(file1, name);
 
       name = inDir + "/resp_"; name += (i*10);
-      resp[i][d] = cloneObjectFromFile<TH1F*>(file, name);
+      resp[i][d] = cloneObjectFromFile<TH1F*>(file1, name);
 
       name = inDir + "/respPt_"; name += (i*10);
-      respPtGen[i][d] = cloneObjectFromFile<TH2F*>(file, name);
+      respPtGen[i][d] = cloneObjectFromFile<TH2F*>(file1, name);
       name = inDir + "/respPtSmear_"; name += (i*10);
-      respPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file, name);
+      respPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file1, name);
 
       if(inDir.Contains("_off")) {
 	name = inDir + "/massWzoom_"; name += (i*10);
-	mW[i][d] = cloneObjectFromFile<TH1F*>(file, name);
+	mW[i][d] = cloneObjectFromFile<TH1F*>(file1, name);
 	name = inDir + "/massTzoom_"; name += (i*10);
-	mT[i][d] = cloneObjectFromFile<TH1F*>(file, name);
+	mT[i][d] = cloneObjectFromFile<TH1F*>(file1, name);
       }
       else {
 	name = inDir + "/massW_"; name += (i*10);
-	mW[i][d] = cloneObjectFromFile<TH1F*>(file, name);
+	mW[i][d] = cloneObjectFromFile<TH1F*>(file1, name);
 	name = inDir + "/massT_"; name += (i*10);
-	mT[i][d] = cloneObjectFromFile<TH1F*>(file, name);
+	mT[i][d] = cloneObjectFromFile<TH1F*>(file1, name);
       }
 
       name = inDir + "/massWPt_"; name += (i*10);
-      mWPtGen[i][d] = cloneObjectFromFile<TH2F*>(file, name);
+      mWPtGen[i][d] = cloneObjectFromFile<TH2F*>(file1, name);
       name = inDir + "/massWPtSmear_"; name += (i*10);
-      mWPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file, name);
+      mWPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file1, name);
       name = inDir + "/massTPt_"; name += (i*10);
-      mTPtGen[i][d] = cloneObjectFromFile<TH2F*>(file, name);
+      mTPtGen[i][d] = cloneObjectFromFile<TH2F*>(file1, name);
       name = inDir + "/massTPtSmear_"; name += (i*10);
-      mTPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file, name);
+      mTPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file1, name);
 
     }
 
   }
 
-  massWPt1SmearPt2Smear = cloneObjectFromFile<TH3F*>(file, inDirBase + "/massWPt1SmearPt2Smear");
-  massWE1SmearE2Smear   = cloneObjectFromFile<TH3F*>(file, inDirBase + "/massWE1SmearE2Smear");
-  ptWPt1SmearPt2Smear   = cloneObjectFromFile<TH3F*>(file, inDirBase + "/ptWPt1SmearPt2Smear");
-  ptWE1SmearE2Smear     = cloneObjectFromFile<TH3F*>(file, inDirBase + "/ptWE1SmearE2Smear");
+  massWPt1SmearPt2Smear = cloneObjectFromFile<TH3F*>(file1, inDirBase + "/massWPt1SmearPt2Smear");
+  massWE1SmearE2Smear   = cloneObjectFromFile<TH3F*>(file1, inDirBase + "/massWE1SmearE2Smear");
+  ptWPt1SmearPt2Smear   = cloneObjectFromFile<TH3F*>(file1, inDirBase + "/ptWPt1SmearPt2Smear");
+  ptWE1SmearE2Smear     = cloneObjectFromFile<TH3F*>(file1, inDirBase + "/ptWE1SmearE2Smear");
 
-  file->Close();
+  file1->Close();
+
+  if(fileName2 != "") {
+    for(unsigned i = 0; i < 6; i++) {
+      TString name = inDirBase + "/energySmearOverGen_"; name += (i*10);
+      enResp[i][4] = cloneObjectFromFile<TH1F*>(file2, name);
+      name = inDirBase + "/resp_"; name += (i*10);
+      resp[i][4] = cloneObjectFromFile<TH1F*>(file2, name);
+      name = inDirBase + "/massW_"; name += (i*10);
+      mW[i][4] = cloneObjectFromFile<TH1F*>(file2, name);
+      name = inDirBase + "/massT_"; name += (i*10);
+      mT[i][4] = cloneObjectFromFile<TH1F*>(file2, name);
+    }
+    file2->Close();
+  }
   
   TH1D means;
   TH1D sigmas;
 
-  name.Resize(name.Index(".root"));
-  TString outDir = name;
+  fileName1.Resize(fileName1.Index(".root"));
+  TString outDir = fileName1;
   gSystem->mkdir(outDir);
 
   //
   // create canvases
   //
 
-  TCanvas* canvasBase = new TCanvas("canvasBase", "canvasBase", 900, 900);
-  TCanvas* canvasEnResp = new TCanvas("canvasEnResp", "canvasEnResp", 900, 900);
-  TCanvas* canvasResp = new TCanvas("canvasResp", "canvasResp", 900, 900);
+  TCanvas* canvasBase         = new TCanvas("canvasBase"        , "canvasBase"        , 900, 900);
+  TCanvas* canvasEnResp       = new TCanvas("canvasEnResp"      , "canvasEnResp"      , 900, 900);
+  TCanvas* canvasResp         = new TCanvas("canvasResp"        , "canvasResp"        , 900, 900);
   TCanvas* canvasRespPtGen    = new TCanvas("canvasRespPtGen"   , "canvasRespPtGen"   , 900, 900);
   TCanvas* canvasRespPtSmear  = new TCanvas("canvasRespPtSmear" , "canvasRespPtSmear" , 900, 900);
   TCanvas* canvasMassW        = new TCanvas("canvasMassW"       , "canvasMassW"       , 900, 900);
@@ -367,10 +397,10 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   TCanvas* canvasMassT        = new TCanvas("canvasMassT"       , "canvasMassT"       , 900, 900);
   TCanvas* canvasMassTPtGen   = new TCanvas("canvasMassTPtGen"  , "canvasMassTPtGen"  , 900, 900);
   TCanvas* canvasMassTPtSmear = new TCanvas("canvasMassTPtSmear", "canvasMassTPtSmear", 900, 900);
-  TCanvas* canvasW3D = new TCanvas("canvasMassW3D", "canvasMassW3D", 900, 900);
-  canvasBase->Divide(3,3);
-  canvasEnResp->Divide(3,3);
-  canvasResp->Divide(3,3);
+  TCanvas* canvasW3D          = new TCanvas("canvasMassW3D"     , "canvasMassW3D"     , 900, 900);
+  canvasBase        ->Divide(3,3);
+  canvasEnResp      ->Divide(3,3);
+  canvasResp        ->Divide(3,3);
   canvasRespPtGen   ->Divide(3,3);
   canvasRespPtSmear ->Divide(3,3);
   canvasMassW       ->Divide(3,3);
@@ -379,7 +409,7 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   canvasMassT       ->Divide(3,3);
   canvasMassTPtGen  ->Divide(3,3);
   canvasMassTPtSmear->Divide(3,3);
-  canvasW3D->Divide(3,3);
+  canvasW3D         ->Divide(3,3);
 
   //
   // configure histos and draw them on pads
@@ -605,11 +635,11 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   drawAndFitTwo2D(mTPtSmear[3], 3, 165., 180., "p_{T}^{smear} > 30 GeV",
 		  "p_{T}^{smear} (parton) [GeV]", "m_{qqb} [GeV]");
 
-  TH1F* enRespPtCut[4];
-  TH1F* respPtCut [4];
-  TH1F* massWptCut[4];
-  TH1F* massTptCut[4];
-  for(unsigned d = 0; d < 4; d++) {
+  TH1F* enRespPtCut[nSystematicSets];
+  TH1F* respPtCut  [nSystematicSets];
+  TH1F* massWptCut [nSystematicSets];
+  TH1F* massTptCut [nSystematicSets];
+  for(unsigned d = 0; d < nSystematicSets; d++) {
     TString name = "enRespPtCut_"; name += d;
     enRespPtCut [d] = new TH1F(name, name, 6, -5., 55.);
     name = "respPtCut_"; name += d;
@@ -626,16 +656,22 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
       fitGauss1D(enResp[i][d], enRespPtCut[d], i+1, draw);
       canvasResp->cd(i+1);
       fitGauss1D(resp[i][d], respPtCut [d], i+1, draw);
-      name = outDir + "/resp_"; name += (i*10);
-      gPad->Print(name + ".eps");
+      if(d==0) {
+	name = outDir + "/resp_"; name += (i*10);
+	gPad->Print(name + ".eps");
+      }
       canvasMassW->cd(i+1);
       fitGauss1D(mW  [i][d], massWptCut[d], i+1, draw);
-      name = outDir + "/massW_"; name += (i*10);
-      gPad->Print(name + ".eps");
+      if(d==0) {
+	name = outDir + "/massW_"; name += (i*10);
+	gPad->Print(name + ".eps");
+      }
       canvasMassT->cd(i+1);
       fitGauss1D(mT  [i][d], massTptCut[d], i+1, draw);
-      name = outDir + "/massT_"; name += (i*10);
-      gPad->Print(name + ".eps");
+      if(d==0) {
+	name = outDir + "/massT_"; name += (i*10);
+	gPad->Print(name + ".eps");
+      }
     }
   }
 
@@ -685,6 +721,8 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   respPtCut[1]->DrawCopy("hist");
   respPtCut[2]->DrawCopy("E3 same");
   respPtCut[3]->DrawCopy("E3 same");
+  //  respPtCut[4]->SetFillColor(kYellow);
+  //  respPtCut[4]->DrawCopy("E3 same");
   respPtCut[0]->DrawCopy("E3 same");
   respPtCut[0]->DrawCopy("E1 same");
   legend->Draw();
@@ -708,6 +746,8 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   massWptCut[1]->DrawCopy("hist");
   massWptCut[2]->DrawCopy("E3 same");
   massWptCut[3]->DrawCopy("E3 same");
+  //  massWptCut[4]->SetFillColor(kYellow);
+  //  massWptCut[4]->DrawCopy("E3 same");
   massWptCut[0]->DrawCopy("E3 same");
   massWptCut[0]->DrawCopy("E1 same");
   legend->Draw();
@@ -731,6 +771,8 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   massTptCut[1]->DrawCopy("hist");
   massTptCut[2]->DrawCopy("E3 same");
   massTptCut[3]->DrawCopy("E3 same");
+  //  massTptCut[4]->SetFillColor(kYellow);
+  //  massTptCut[4]->DrawCopy("E3 same");
   massTptCut[0]->DrawCopy("E3 same");
   massTptCut[0]->DrawCopy("E1 same");
   legend->Draw();
@@ -810,19 +852,19 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
     gPad->Print(epsName + ".eps");
   }
 
-  massWPt1SmearPt2Smear->FitSlicesZ();
-  TString tmpName = massWPt1SmearPt2Smear->GetName();
-  TH2D* w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
-  setAxisStyle(w3D);
-  w3D->SetStats(kFALSE);
-  w3D->SetTitle("m_{qq} [GeV]");
-  w3D->SetXTitle("p_{T,q}^{smear} [GeV]");
-  w3D->SetYTitle("p_{T, #bar{q}}^{smear} [GeV]");
-  canvasW3D->cd(1);
-  setPadStyle();
-  double contLevels[1] = {80.4};
-  w3D->SetContour(1, contLevels);
-  w3D->DrawCopy("cont1");
+//  massWPt1SmearPt2Smear->FitSlicesZ();
+//  TString tmpName = massWPt1SmearPt2Smear->GetName();
+//  TH2D* w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
+//  setAxisStyle(w3D);
+//  w3D->SetStats(kFALSE);
+//  w3D->SetTitle("m_{qq} [GeV]");
+//  w3D->SetXTitle("p_{T,q}^{smear} [GeV]");
+//  w3D->SetYTitle("p_{T, #bar{q}}^{smear} [GeV]");
+//  canvasW3D->cd(1);
+//  setPadStyle();
+//  double contLevels[1] = {80.4};
+//  w3D->SetContour(1, contLevels);
+//  w3D->DrawCopy("cont1");
 
   TH2* project3D = (TH2*) massWE1SmearE2Smear->Project3D("xy");
   project3D->Rebin2D(4, 4);
@@ -848,33 +890,33 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   fE1E2t120->DrawCopy("same");
   gPad->Print(outDir + "/massWE1SmearE2Smear.eps");
 
-  ptWPt1SmearPt2Smear->FitSlicesZ();
-  tmpName = ptWPt1SmearPt2Smear->GetName();
-  w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
-  setAxisStyle(w3D);
-  w3D->SetStats(kFALSE);
-  w3D->SetTitle("p_{T,qq} [GeV]");
-  w3D->SetXTitle("p_{T,q}^{smear} [GeV]");
-  w3D->SetYTitle("p_{T, #bar{q}}^{smear} [GeV]");
-  w3D->SetMinimum(60.);
-  w3D->SetMaximum(100.);
-  canvasW3D->cd(4);
-  setPadStyle();
-  w3D->DrawCopy("cont1");
-
-  ptWE1SmearE2Smear->FitSlicesZ();
-  tmpName = ptWE1SmearE2Smear->GetName();
-  w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
-  setAxisStyle(w3D);
-  w3D->SetStats(kFALSE);
-  w3D->SetTitle("p_{T,qq} [GeV]");
-  w3D->SetXTitle("E_{q}^{smear} [GeV]");
-  w3D->SetYTitle("E_{#bar{q}}^{smear} [GeV]");
-  w3D->SetMinimum(60.);
-  w3D->SetMaximum(100.);
-  canvasW3D->cd(5);
-  setPadStyle();
-  w3D->DrawCopy("cont1");
+//  ptWPt1SmearPt2Smear->FitSlicesZ();
+//  tmpName = ptWPt1SmearPt2Smear->GetName();
+//  w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
+//  setAxisStyle(w3D);
+//  w3D->SetStats(kFALSE);
+//  w3D->SetTitle("p_{T,qq} [GeV]");
+//  w3D->SetXTitle("p_{T,q}^{smear} [GeV]");
+//  w3D->SetYTitle("p_{T, #bar{q}}^{smear} [GeV]");
+//  w3D->SetMinimum(60.);
+//  w3D->SetMaximum(100.);
+//  canvasW3D->cd(4);
+//  setPadStyle();
+//  w3D->DrawCopy("cont1");
+//
+//  ptWE1SmearE2Smear->FitSlicesZ();
+//  tmpName = ptWE1SmearE2Smear->GetName();
+//  w3D = (TH2D*)gDirectory->Get(tmpName+"_1");
+//  setAxisStyle(w3D);
+//  w3D->SetStats(kFALSE);
+//  w3D->SetTitle("p_{T,qq} [GeV]");
+//  w3D->SetXTitle("E_{q}^{smear} [GeV]");
+//  w3D->SetYTitle("E_{#bar{q}}^{smear} [GeV]");
+//  w3D->SetMinimum(60.);
+//  w3D->SetMaximum(100.);
+//  canvasW3D->cd(5);
+//  setPadStyle();
+//  w3D->DrawCopy("cont1");
 
   //
   // produce one ps-file containing all canvases
@@ -898,13 +940,13 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
   // calculate and print exact bias with errors for a given pt cut value
   //
 
-  double diffEnResp[4];
-  double diffResp  [4];
-  double diffW     [4];
-  double diffT     [4];
-  double relDiffW  [4];
-  double relDiffT  [4];
-  for(unsigned i=0; i<4; i++) {
+  double diffEnResp[nSystematicSets];
+  double diffResp  [nSystematicSets];
+  double diffW     [nSystematicSets];
+  double diffT     [nSystematicSets];
+  double relDiffW  [nSystematicSets];
+  double relDiffT  [nSystematicSets];
+  for(unsigned i=0; i<nSystematicSets; i++) {
     diffEnResp[i] = (enRespPtCut[i]->GetBinContent(4) - enRespPtCut[1]->GetBinContent(4)) * 100;
     diffResp  [i] = (respPtCut  [i]->GetBinContent(4) - respPtCut  [1]->GetBinContent(4)) * 100;
     diffW     [i] = massWptCut [i]->GetBinContent(4) - massWptCut [1]->GetBinContent(4);
@@ -979,25 +1021,133 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
 	    << diffT[3] << " GeV, " << relDiffT[3] << " %)" << std::endl;
 
   std::cout << "-------------------------------------" << std::endl;
-  std::cout << std::setprecision(1) << std::fixed;
+  std::cout << std::setprecision(3) << std::fixed;
 
-  std::cout << "E response  --> "
-	    << diffEnResp[0] << " +" << diffEnResp[3] - diffEnResp[0] << diffEnResp[2] - diffEnResp[0] << " %"
-	    << std::endl;
+  // E response
 
-  std::cout << "Pt response --> "
-	    << diffResp[0] << " +" << diffResp[3] - diffResp[0] << diffResp[2] - diffResp[0] << " %"
-	    << std::endl;
+  double errStat    = enRespPtCut[0]->GetBinError(4)*100;
+  double errResUp   = diffEnResp[3] - diffEnResp[0];
+  double errResDown = diffEnResp[2] - diffEnResp[0];
+  double errSpect   = 0;
+  if(fileName2 != "")
+    errSpect = fabs(diffEnResp[4] - diffEnResp[0]);
 
-  std::cout << "W mass --> " << diffW[0] << " +" << diffW[3] - diffW[0] << diffW[2] - diffW[0] << " GeV"
-	    << std::endl;
-  std::cout << "       --> " << relDiffW[0] << " +" << relDiffW[3] - relDiffW[0] << relDiffW[2] - relDiffW[0] << " %"
-	    << std::endl;
+  std::cout << "E response  --> " << diffEnResp[0]
+	    << " +/-" << errStat << " (stat)"
+	    << " +" << errResUp << errResDown << " (res)";
+  if(fileName2 != "")
+    std::cout << " +/-" << errSpect  << " (spect)";
+  std::cout << " %" << std::endl;
 
-  std::cout << "T mass --> " << diffT[0] << " +" << diffT[3] - diffT[0] << diffT[2] - diffT[0] << " GeV"
-	    << std::endl;
-  std::cout << "       --> " << relDiffT[0] << " +" << relDiffT[3] - relDiffT[0] << relDiffT[2] - relDiffT[0] << " %"
-	    << std::endl;
+  std::cout << "              = " << diffEnResp[0]
+	    << " +" << addQuadratic(errStat, errResUp, errSpect)
+	    << " -" << addQuadratic(errStat, errResDown, errSpect)
+	    << " %" << std::endl;
+
+  // Pt response
+
+  errStat    = respPtCut[0]->GetBinError(4)*100;
+  errResUp   = diffResp[3] - diffResp[0];
+  errResDown = diffResp[2] - diffResp[0];
+  errSpect   = 0;
+  if(fileName2 != "")
+    errSpect = fabs(diffResp[4] - diffResp[0]);
+
+  std::cout << "Pt response --> " << diffResp[0]
+	    << " +/-" << errStat << " (stat)"
+	    << " +" << errResUp << errResDown << " (res)";
+  if(fileName2 != "")
+    std::cout << " +/-" << errSpect  << " (spect)";
+  std::cout << " %" << std::endl;
+
+  std::cout << "              = " << diffResp[0]
+	    << " +" << addQuadratic(errStat, errResUp, errSpect)
+	    << " -" << addQuadratic(errStat, errResDown, errSpect)
+	    << " %" << std::endl;
+
+  // W mass
+
+  errStat    = addQuadratic(massWptCut[0]->GetBinError(4), massWptCut[1]->GetBinError(4));
+  errResUp   = diffW[3] - diffW[0];
+  errResDown = diffW[2] - diffW[0];
+  errSpect   = 0;
+  if(fileName2 != "")
+    errSpect = fabs(diffW[4] - diffW[0]);
+
+  std::cout << "W mass      --> " << diffW[0]
+	    << " +/-" << errStat << " (stat)"
+	    << " +" << errResUp << errResDown << " (res)";
+  if(fileName2 != "")
+    std::cout << " +/-" << errSpect  << " (spect)";
+  std::cout << " GeV" << std::endl;
+
+  std::cout << "              = " << diffW[0]
+	    << " +" << addQuadratic(errStat, errResUp, errSpect)
+	    << " -" << addQuadratic(errStat, errResDown, errSpect)
+	    << " GeV" << std::endl;
+
+  errStat    = addQuadratic(massWptCut[0]->GetBinError(4)/massWptCut[0]->GetBinContent(4),
+			    massWptCut[1]->GetBinError(4)/massWptCut[1]->GetBinContent(4))
+    *massWptCut[0]->GetBinContent(4)/massWptCut[1]->GetBinContent(4)*100;
+  errResUp   = relDiffW[3] - relDiffW[0];
+  errResDown = relDiffW[2] - relDiffW[0];
+  errSpect   = 0;
+  if(fileName2 != "")
+    errSpect = fabs(relDiffW[4] - relDiffW[0]);
+
+  std::cout << "            --> " << relDiffW[0]
+	    << " +/-" << errStat << " (stat)"
+	    << " +" << errResUp << errResDown << " (res)";
+  if(fileName2 != "")
+    std::cout << " +/-" << errSpect  << " (spect)";
+  std::cout << " %" << std::endl;
+
+  std::cout << "              = " << relDiffW[0]
+	    << " +" << addQuadratic(errStat, errResUp, errSpect)
+	    << " -" << addQuadratic(errStat, errResDown, errSpect)
+	    << " %" << std::endl;
+
+  // T mass
+
+  errStat    = addQuadratic(massTptCut[0]->GetBinError(4), massTptCut[1]->GetBinError(4));
+  errResUp   = diffT[3] - diffT[0];
+  errResDown = diffT[2] - diffT[0];
+  errSpect   = 0;
+  if(fileName2 != "")
+    errSpect = fabs(diffT[4] - diffT[0]);
+
+  std::cout << "T mass      --> " << diffT[0]
+	    << " +/-" << errStat << " (stat)"
+	    << " +" << errResUp << errResDown << " (res)";
+  if(fileName2 != "")
+    std::cout << " +/-" << errSpect  << " (spect)";
+  std::cout << " GeV" << std::endl;
+
+  std::cout << "              = " << diffT[0]
+	    << " +" << addQuadratic(errStat, errResUp, errSpect)
+	    << " -" << addQuadratic(errStat, errResDown, errSpect)
+	    << " GeV" << std::endl;
+
+  errStat    = addQuadratic(massTptCut[0]->GetBinError(4)/massTptCut[0]->GetBinContent(4),
+			    massTptCut[1]->GetBinError(4)/massTptCut[1]->GetBinContent(4))
+    *massTptCut[0]->GetBinContent(4)/massTptCut[1]->GetBinContent(4)*100;
+  errResUp   = relDiffT[3] - relDiffT[0];
+  errResDown = relDiffT[2] - relDiffT[0];
+  errSpect   = 0;
+  if(fileName2 != "")
+    errSpect = fabs(relDiffT[4] - relDiffT[0]);
+
+  std::cout << "            --> " << relDiffT[0]
+	    << " +/-" << errStat << " (stat)"
+	    << " +" << errResUp << errResDown << " (res)";
+  if(fileName2 != "")
+    std::cout << " +/-" << errSpect  << " (spect)";
+  std::cout << " %" << std::endl;
+
+  std::cout << "              = " << relDiffT[0]
+	    << " +" << addQuadratic(errStat, errResUp, errSpect)
+	    << " -" << addQuadratic(errStat, errResDown, errSpect)
+	    << " %" << std::endl;
 
   std::cout << "==========================================================================" << std::endl;
 
@@ -1010,5 +1160,5 @@ int analyzeJetEnergyResolutionBias(TString name = "analyzeJetEnergyResolutionBia
 
 int main(int argc, char** argv)
 {
-  return analyzeJetEnergyResolutionBias(argv[1]);
+  return analyzeJetEnergyResolutionBias(argv[1], argv[2]);
 }
