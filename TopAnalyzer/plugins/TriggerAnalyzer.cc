@@ -22,13 +22,13 @@ TriggerAnalyzer::beginJob()
     
     FiredTrigs_ = fs->make<TH1F>("FiredTrigs", "Fired Triggers", n_TrigPaths, -0.5, n_TrigPaths-0.5);
     FiredTrigs_->GetXaxis()->SetTitle( "Trigger Path" );
-    FiredTrigs_->GetYaxis()->SetTitle( "N_{Fired}" );       
+    FiredTrigs_->GetYaxis()->SetTitle( "#epsilon" );       
     for(int i=1; i<=n_TrigPaths; ++i){  
       FiredTrigs_->GetXaxis()->SetBinLabel( i, hltPaths_[i-1].c_str() );
     }  
     
     Passed_ = fs->make<TH1F>("Passed", "Triggered Events", 2, -0.5, 1.5);
-    Passed_->GetYaxis()->SetTitle( "N" );       
+    Passed_->GetYaxis()->SetTitle( "#epsilon_{tot}" );       
     Passed_->GetXaxis()->SetBinLabel( 1, "failed");
     Passed_->GetXaxis()->SetBinLabel( 2, "passed");
     
@@ -39,12 +39,16 @@ TriggerAnalyzer::beginJob()
     for(int i=1; i<=n_TrigPaths; ++i){  
       Correlations_->GetXaxis()->SetBinLabel( i, hltPaths_[i-1].c_str() );
       Correlations_->GetYaxis()->SetBinLabel( i, hltPaths_[i-1].c_str() );
-    }      
+    } 
+        
+    n_evts=0;     
 }
 
 void
 TriggerAnalyzer::analyze(const Event& evt, const EventSetup&)
 {
+  n_evts++;
+
   Handle<TriggerResults> trigResults; 
   evt.getByLabel(trigResults_, trigResults); 
 
@@ -80,6 +84,29 @@ TriggerAnalyzer::analyze(const Event& evt, const EventSetup&)
 void
 TriggerAnalyzer::endJob()
 {
+  // normalize hists to number of evts
+  for(int i=1;i<=FiredTrigs_->GetNbinsX();++i){
+    FiredTrigs_->SetBinContent(i,FiredTrigs_->GetBinContent(i)/n_evts);
+    FiredTrigs_->SetBinError(i,binomialError(FiredTrigs_->GetBinContent(i), n_evts));
+  }
+  
+  for(int i=1;i<=Passed_->GetNbinsX();++i){
+    Passed_->SetBinContent(i,Passed_->GetBinContent(i)/n_evts);
+    Passed_->SetBinError(i,binomialError(Passed_->GetBinContent(i), n_evts));
+  }  
+  
+}
+
+double
+TriggerAnalyzer::binomialError(double numerator, double denominator)
+{      
+  if(numerator>denominator) return 999999.;
+  
+  double error;
+  error=sqrt((1-numerator/denominator)
+   *numerator/denominator/denominator);
+     
+  return error;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"

@@ -47,6 +47,8 @@ class TriggerAnalyzer : public EDAnalyzer {
     virtual void analyze(const Event&, const EventSetup&);
     /// empty
     virtual void endJob();
+    /// function to calculate binomial statistics error (needed for trigger efficiency hist)
+    double binomialError(double, double);
         
     /// triger result input collection	
     InputTag trigResults_;
@@ -55,9 +57,11 @@ class TriggerAnalyzer : public EDAnalyzer {
     
     /// number of trigger paths given in config
     int n_TrigPaths;
-    /// shows for each trigger how many evts have fired that trigger
+    /// number of processed evts
+    int n_evts;
+    /// shows for each trigger fraction of evts that have fired that trigger
     TH1F* FiredTrigs_; 
-    /// shows how many evts have passed one of the triggers
+    /// shows fraction evts that have passed one of the triggers
     TH1F* Passed_; 
     /// shows how many evts have fired two triggers
     TH2F* Correlations_;   
