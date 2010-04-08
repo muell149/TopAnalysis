@@ -39,9 +39,15 @@ DimuonAnalyzer::beginJob()
      histogram definitions
   **/ 
   // invariant muon muon mass for right charge  
-  dimassRC_    = fs->make<TH1F>( "dimassRC", "dimassRC", nbins, bins);
+  dimassRC_= fs->make<TH1F>( "dimassRC", "dimassRC", nbins, bins);
+  dimassRC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
+  dimassRC_->GetYaxis()->SetTitle("N / 1GeV");
+  
   // invariant muon muon mass for wrong charge   
-  dimassWC_    = fs->make<TH1F>( "dimassWC", "dimassWC", nbins, bins);
+  dimassWC_= fs->make<TH1F>( "dimassWC", "dimassWC", nbins, bins);
+  dimassWC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
+  dimassWC_->GetYaxis()->SetTitle("N / 1GeV");  
+  
   // correlation between invariant mass and absolute combined isolation        
   isoDimassCorrelation_ = fs->make<TH2F>( "isoDimassCorrelation", "isoDimassCorrelation", 10,   0.,   200., 10, 0., 1.);
   
