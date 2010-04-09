@@ -17,9 +17,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring()
+    fileNames = cms.untracked.vstring("/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132605.root")
 )
-execfile("TopAnalysis/Configuration/analysis/firstCollisions/Source_Run132656_cff.py")
+execfile("TopAnalysis/Configuration/analysis/firstCollisions/Source_GoodRuns_cff.py")
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -87,7 +87,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('semiLepMuonSelection_Run132654.root')
+    fileName = cms.untracked.string('semiLepMuonSelection_GoodRuns.root')
 )
 
 ## save pat output
