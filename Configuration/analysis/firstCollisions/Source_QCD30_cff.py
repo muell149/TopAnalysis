@@ -90,7 +90,7 @@ process.source.fileNames = [
     '/store/user/snaumann/qcd30/patTuple_qcd30_84.root',
     '/store/user/snaumann/qcd30/patTuple_qcd30_85.root',
     '/store/user/snaumann/qcd30/patTuple_qcd30_86.root',
-#    '/store/user/snaumann/qcd30/patTuple_qcd30_87.root',
+    '/store/user/snaumann/qcd30/patTuple_qcd30_87.root',
     '/store/user/snaumann/qcd30/patTuple_qcd30_88.root',
 #    '/store/user/snaumann/qcd30/patTuple_qcd30_89.root',
     '/store/user/snaumann/qcd30/patTuple_qcd30_90.root',
