@@ -14,5 +14,15 @@ process.source.fileNames = [
     # 1356 events from Run 132605
     "/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132605.root",
     # 25 events from Run 132606
-    "/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132606.root"
+    "/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132606.root",
+########################################################################
+## THE FOLLOWING RUNS LOOK GOOD ACCORDING TO THE RUN REGISTRY
+## BUT THEY ARE NOT YET BLESSED BY JETMET    
+########################################################################
+    # 317 events from Run 132654
+    "/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132654.root",
+    # 237 events from Run 132656
+    "/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132656.root",
+    # 637 events from Run 132716
+    "/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132716.root"
     ]

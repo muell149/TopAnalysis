@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 ## from /MinimumBias/Commissioning10-PromptReco-v8/RECO/
-## ??? "multijet" events in 101 files dCache at DESY
+## 1003 "multijet" events in 101 files dCache at DESY
 
 process.source.fileNames = [
     '/store/user/snaumann/firstCollisions_7TeV/patTuple_Run132716_1.root',
