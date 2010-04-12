@@ -27,7 +27,7 @@ process = cms.Process("Selection")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -38,17 +38,17 @@ process.source = cms.Source("PoolSource",
     # '/store/user/henderle/samples/Zjets_madgraph_10TeV/PATtuple_11.root'
     # '/store/user/henderle/samples/Wjets_madgraph_10TeV/PATtuple_1.root'
     # '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
-    # '/store/user/henderle/OctEx/Wmunu/PATtuple_1.root'
-    # '/store/user/henderle/OctEx/Zmumu/PATtuple_1.root'
-     '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root'
-    # '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_1.root','/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_10.root'
-    # '/store/user/snaumann/firstCollisions/muTuple_Run123596.root'
+    # '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root'
+    # '/store/user/henderle/OctEx/SD_Mu9/InclusiveMu15/PATtuple_1.root'
+      '/store/user/henderle/samples/InclusiveMu15_7TeV/PATtuple_100.root'
+    # '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_1.root'
+    # '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_10.root'
     )
  )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -157,9 +157,24 @@ process.shiftedJets = cms.Sequence(process.shiftedLead_0_JetKinematics+
                                    process.shiftedLead_2_JetKinematics+
                                    process.shiftedLead_3_JetKinematics
                                    )
+process.tightLeadingJetKinematics       = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
+process.tightLeadingJetKinematicsNjets1 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
+process.tightLeadingJetKinematicsNjets2 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
+process.tightLeadingJetKinematicsNjets3 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
+process.tightLeadingJetKinematicsNjets4 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
                                    
 ## set up distribution for cross section measurement
 process.analyzeTightMuonCrossSection = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
+process.analyzeTightMuonCrossSectionNjets1 = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
+process.analyzeTightMuonCrossSectionNjets2 = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
+process.analyzeTightMuonCrossSectionNjets3 = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
+
+## ---
+##    Set up selection steps for different jet multiplicities
+## ---
+process.leadingJetSelectionNjets1 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 1)
+process.leadingJetSelectionNjets2 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 2)
+process.leadingJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 3)
 
 ## ---
 ##    run the final sequence
@@ -171,19 +186,44 @@ process.p1 = cms.Path(
                       ## introduce some collections
                       process.semiLeptonicSelection               *
                       ## monitor jet Kinematics (to see JES effects)
-                      process.unshiftedJets                       *
+#                      process.unshiftedJets                       *
                       ## do the event selection for muon
                       process.muonSelection                       *
                       ## do event selection veto cuts
                       process.secondMuonVeto                      *
                       process.electronVeto                        *
+                      ## monitoring of jet kinematics before jetcuts
+                      process.tightLeadingJetKinematics           *
+                      ## Selection: N_jets = 1
+                      process.leadingJetSelectionNjets1           *
+                      ## plots for N_jets = 1
+                      process.analyzeTightMuonCrossSectionNjets1  *
+                      process.tightLeadingJetKinematicsNjets1     *                      
+                      ## Selection: N_jets = 2
+                      process.leadingJetSelectionNjets2           *
+                      ## plots for N_jets = 2
+                      process.analyzeTightMuonCrossSectionNjets2  *
+                      process.tightLeadingJetKinematicsNjets2     *
+                      ## Selection: N_jets = 3
+                      process.leadingJetSelectionNjets3           *
+                       ## plots for N_jets = 3
+                      process.analyzeTightMuonCrossSectionNjets3  *
+                      process.tightLeadingJetKinematicsNjets3     *
                       ## do event selection concerning jets
                       process.leadingJetSelection                 *
-                      ## cross section measurement
+                      ## cross section measurement 
                       process.analyzeTightMuonCrossSection        *
+                      ## monitoring of jet kinematics after jetcuts
+                      process.tightLeadingJetKinematicsNjets4        
                       ## btag
-                      process.bottomJetSelection                  
+#                      process.bottomJetSelection                  
                       )
+
+# replace label names when running on old (3_4_X) MC samples
+inputs = ['Electrons','Jets','Taus','Muons','Photons']
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+for input in inputs:
+    massSearchReplaceAnyInputTag(process.p1, 'selectedPat'+input, 'selectedLayer1'+input)
 
 
 ## Output Module Configuration
