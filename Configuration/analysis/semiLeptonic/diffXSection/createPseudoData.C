@@ -27,7 +27,7 @@ void createPseudoData(){
   // get the files
   loadingFiles(); 
   // definition of output file
-  TFile f("./pseudoData7TeV50pb.root", "recreate");
+  TFile f("./pseudoData7TeV5pb.root", "recreate");
   // list of plots you want to add and their directories within the input samples
   poisson("analyzeTightMuonCrossSection", "pt"        , f);
   poisson("analyzeTightMuonCrossSection", "eta"       , f);
@@ -38,6 +38,38 @@ void createPseudoData(){
   poisson("analyzeTightMuonCrossSection", "ptMuMinus" , f);
   poisson("analyzeTightMuonCrossSection", "etaMuMinus", f);
   poisson("analyzeTightMuonCrossSection", "phiMuMinus", f);
+  poisson("analyzeTightMuonCrossSection", "muonPt_"   , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "pt"        , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "eta"       , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "phi"       , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "ptMuPlus"  , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "etaMuPlus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "phiMuPlus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "ptMuMinus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "etaMuMinus", f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "phiMuMinus", f);
+  poisson("analyzeTightMuonCrossSectionNjets1", "muonPt_"   , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "pt"        , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "eta"       , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "phi"       , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "ptMuPlus"  , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "etaMuPlus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "phiMuPlus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "ptMuMinus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "etaMuMinus", f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "phiMuMinus", f);
+  poisson("analyzeTightMuonCrossSectionNjets2", "muonPt_"   , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "pt"        , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "eta"       , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "phi"       , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "ptMuPlus"  , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "etaMuPlus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "phiMuPlus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "ptMuMinus" , f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "etaMuMinus", f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "phiMuMinus", f);
+  poisson("analyzeTightMuonCrossSectionNjets3", "muonPt_"   , f);
+  // close rootfile
   f.Close();
 }
 
@@ -49,8 +81,8 @@ void poisson(TString directory, TString plot, TFile& outputfile)
   // define output plot
   TH1F* pseudoData=(TH1F*)hists_[0]->Clone(); pseudoData->Clear();
   // normalize to luminosity and add all samples
-  combineFiles(50.0);
-  // apply the poisson smearing COMMENT OUT IF YOU JUST WANT TO COMBINE PLOTS
+  combineFiles(5.0);
+  // apply the poisson smearing 
   smearing(*hists_[files_.size()], *pseudoData);
   // write output to directory
   if(outputfile.GetDirectory(directory)==0){
@@ -81,6 +113,7 @@ void smearing(TH1F& src, TH1F& data)
 {
   TRandom3 rnd(0);
  for(int ibin=0; ibin<=src.GetNbinsX(); ++ibin){
+   // CHANGE src.GetBinContent(ibin) TO 0. IF YOU JUST WANT TO COMBINE PLOTS
    unsigned int evts=rnd.Poisson(src.GetBinContent(ibin));
    data.SetBinContent(ibin, evts);
    data.SetBinError(ibin, sqrt(evts));
