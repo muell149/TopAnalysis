@@ -52,6 +52,9 @@ class SingleObjectJetTrigger : public edm::EDAnalyzer {
 
   /// calculate the trigger efficiency for QuadJet (or FiveJet) triggers based on single object trigger efficiency
   double triggerEfficiency(const edm::Handle<pat::JetCollection> jets, const bool fiveJet);
+
+  /// calculate distance to nearest jet
+  double minDR(const edm::Handle<pat::JetCollection> jets, const unsigned int iJet);
         
   /// trigger results input collection	
   edm::InputTag triggerResults_;
