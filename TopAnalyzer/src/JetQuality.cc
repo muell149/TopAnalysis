@@ -33,6 +33,10 @@ JetQuality::book()
   hists_["n90_"                 ] = new TH1F( "n90_"                   ,  "n90_"                 ,   50,   0.,   1. );
   // number of jet constituents carrying 60% of the jet energy
   hists_["n60_"                 ] = new TH1F( "n60_"                   ,  "n60_"                 ,   50,   0.,   1. );
+  // number of rec hits carrying 90% of the jet energy
+  hists_["n90Hits_"             ] = new TH1F( "n90Hits_"               ,  "n90Hits_"             ,   20,   0.,  20. );
+  // fraction of jet energy comming from the leading hybrid photo diode within the jet
+  hists_["fHPD_"                ] = new TH1F( "fHPD_"                  ,  "fHPD_"                ,   50,   0.,   1. );
   // btag track counting high efficiency
   hists_["btagTrkCntHighEff_"   ] = new TH1F( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
   // btag simple secondary vertex
@@ -87,6 +91,10 @@ JetQuality::book(edm::Service<TFileService>& fs)
   hists_["n90_"                 ] = fs->make<TH1F>( "n90_"                   ,  "n90_"                 ,   50,   0.,   1. );
   // number of jet constituents carrying 60% of the jet energy
   hists_["n60_"                 ] = fs->make<TH1F>( "n60_"                   ,  "n60_"                 ,   50,   0.,   1. );
+  // number of rec hits carrying 90% of the jet energy
+  hists_["n90Hits_"             ] = fs->make<TH1F>( "n90Hits_"               ,  "n90Hits_"             ,   20,   0.,  20. );
+  // fraction of jet energy comming from the leading hybrid photo diode within the jet
+  hists_["fHPD_"                ] = fs->make<TH1F>( "fHPD_"                  ,  "fHPD_"                ,   50,   0.,   1. );
   // btag track counting high efficiency
   hists_["btagTrkCntHighEff_"   ] = fs->make<TH1F>( "btagTrkCntHighEff_"     ,  "btagTrkCntHighEff_"   ,   80,   0.,  20. ); 
   // btag simple secondary vertex
@@ -148,6 +156,10 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       hists_.find( "n90_" )->second->Fill( jet->n90()/n100 , weight );
       // number of jet constituents carrying 60% of the jet energy
       hists_.find( "n60_" )->second->Fill( jet->n60()/n100 , weight );
+      // number of rec hits carrying 90% of the jet energy
+      hists_.find( "n90_" )->second->Fill( jet->jetID().n90Hits , weight );
+      // fraction of jet energy comming from the leading hybrid photo diode within the jet
+      hists_.find( "fHPD_" )->second->Fill( jet->jetID().fHPD , weight );
       // btag track counting high efficiency
       hists_.find( "btagTrkCntHighEff_"  )->second->Fill( jet->bDiscriminator("trackCountingHighEffBJetTags") , weight );
       // btag simple secondary vertex
