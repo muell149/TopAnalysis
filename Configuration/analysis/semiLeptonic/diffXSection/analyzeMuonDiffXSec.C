@@ -1,11 +1,10 @@
 
 // ---------description---------------------------------
 // -----------------------------------------------------
-// this Makro collects distrubutions for the Determination
-// of the differntial cross sectionsuch as eta, phi,
-// pt (all for muon), Correlation gen - reco, 
-// purity and stability from MuonDiffXSec class analyzer
-// and  plots d#sigma/dpt(#mu)/#sigma
+// this Makro determines the inclusive and differential, 
+// normalized cross section ( d#sigma/dpt(#mu)/#sigma )
+// for pt, eta and phi (of the muon). Additionally, it
+// distinguishes between the charge of the muon.
 // -----------------------------------------------------
 
 
@@ -20,11 +19,13 @@
 #include <TLegend.h>
 #include <TStyle.h>
 
-enum styles {kSig};
+enum styles {kSig, kPseudo, kBkg, kWjets, kZjets, kQCD, kLepJets};
 
 void canvasStyle(TCanvas& canv);
-void histogramStyle(TH1& hist, unsigned int style);
-void axesStyle(TH1& hist, const char* titleX, const char* titleY);
+void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
+void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
+// void histogramStyle(TH1& hist, unsigned int style);
+// void axesStyle(TH1& hist, const char* titleX, const char* titleY);
 
 void analyzeMuonDiffXSec()
 {
@@ -33,54 +34,58 @@ void analyzeMuonDiffXSec()
   // ---
   gROOT->cd();
   gROOT->SetStyle("Plain");
-  gStyle->SetPalette(1);
+  //  gStyle->SetPalette(1);
+  gStyle->SetErrorX(0); 
 
+  // ---
+  //    choose jet multiplicity you want to see
+  // ---
+  // "Njets1" / "Njets2" / "Njets3" / ""
+  TString jetMultiplicity ="";
 
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"      ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/pseudoData7TeV5pb.root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"     ) );
 
   // ---
   //    get histograms
   // ---
-  std::vector<TH1F*> eta_, phi_, pt_, etaGen_, phiGen_, ptGen_, etaMuPlus_, phiMuPlus_, ptMuPlus_ , etaMuMinus_, phiMuMinus_, ptMuMinus_;
-  std::vector<TH2F*> corrPt_, corrPhi_, corrEta_;
+  std::vector<TH1F*> eta_, phi_, pt_;
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    eta_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/eta"   ) );
-    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/pt"    ) );
-    phi_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/phi"   ) );
-    etaGen_.push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/etaGen") );
-    ptGen_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/ptGen" ) );
-    phiGen_.push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/phiGen") );
-    etaMuMinus_.push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/etaMuMinus") );
-    ptMuMinus_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/ptMuMinus" ) );
-    phiMuMinus_.push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/phiMuMinus") );
-    etaMuPlus_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/etaMuPlus" ) );
-    ptMuPlus_  .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/ptMuPlus"  ) );
-    phiMuPlus_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/phiMuPlus" ) );
-
-    corrEta_   .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonEta_"   ) );
-    corrPt_    .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPt_"    ) );
-    corrPhi_   .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPhi_"   ) );
+    eta_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection"+jetMultiplicity+"/eta" ) );
+    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection"+jetMultiplicity+"/pt"  ) );
+    phi_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection"+jetMultiplicity+"/phi" ) );
   }
 
-  // ---
-  // create Vector to store output statements
-  // ---
-  std::vector<TString> output_;
-  TString textHelper = "";
-  output_.push_back("MC@NLO 7 TeV");
+  // get total number of FILLED bins above cut value of 20 GeV from pt histo
+  int totalBinNumber = (pt_[kSig]->GetNbinsX())-1;
+  std::cout << "total bin number between 20 and 200 GeV: " << totalBinNumber << std::endl;
 
   // ---
   // define weights concerning luminosity
   // ---
   std::vector<double> lumiweight;
 
-  // for current 7TeV Mc@Nlo sample (shifted, unshifted and background)
-  lumiweight.push_back(0.0083);
+  // for current ttbar(lept.mu on gen level) 7TeV Mc@Nlo sample (full statistics, 5pb-1)
+  lumiweight.push_back(0.00083);
+  // pseudo data
+  lumiweight.push_back(1.0);
+  // for current ttbar(non lept.mu on gen level) 7TeV Mc@Nlo sample (full statistics, 5pb-1)
+  lumiweight.push_back(0.00083);
+  // for current W+jets 7TeV MADGRAPH sample (full statistics, 5pb-1)
+  lumiweight.push_back(0.01231);
+  // for current Z+jets 7TeV MADGRAPH sample (full statistics, 5pb-1)
+  lumiweight.push_back(0.01310);
+  // for current QCD 7TeV PYTHIA sample (full statistics, 5pb-1)
+  lumiweight.push_back(0.10286);
 
   // ---
   // do lumiweighting
@@ -90,36 +95,29 @@ void analyzeMuonDiffXSec()
     eta_[idx]->Scale(lumiweight[idx]);
     phi_[idx]->Scale(lumiweight[idx]);
     pt_ [idx]->Scale(lumiweight[idx]);
-    etaGen_[idx]->Scale(lumiweight[idx]);
-    phiGen_[idx]->Scale(lumiweight[idx]);
-    ptGen_ [idx]->Scale(lumiweight[idx]);
-    etaMuPlus_[idx]->Scale(lumiweight[idx]);
-    phiMuPlus_[idx]->Scale(lumiweight[idx]);
-    ptMuPlus_ [idx]->Scale(lumiweight[idx]);
-    etaMuMinus_[idx]->Scale(lumiweight[idx]);
-    phiMuMinus_[idx]->Scale(lumiweight[idx]);
-    ptMuMinus_ [idx]->Scale(lumiweight[idx]);
+  }
+ 
+  // ---  
+  //    combine MC to get isolated Lepton + jet MC (no QCD)
+  // --- 
+  pt_  .push_back((TH1F*)(pt_ [kSig]->Clone()));
+  eta_ .push_back((TH1F*)(eta_[kSig]->Clone()));
+  phi_ .push_back((TH1F*)(phi_[kSig]->Clone()));
+  for(int idx=kBkg; idx<=kZjets; idx++){
+    pt_[kLepJets]->Add(pt_[idx]);
+    eta_[kLepJets]->Add(eta_[idx]);
+    phi_[kLepJets]->Add(phi_[idx]);
   }
 
   // ---  
   //    clone plots with weighted event numbers
-  // ---
+  // ---  
+  std::vector<TH1F*> etaEventNumbers_, phiEventNumbers_, ptEventNumbers_;
   
-  std::vector<TH1F*> etaEventNumbers_, phiEventNumbers_, ptEventNumbers_, etaGenEventNumbers_, phiGenEventNumbers_, ptGenEventNumbers_, etaMuPlusEventNumbers_, phiMuPlusEventNumbers_, ptMuPlusEventNumbers_ , etaMuMinusEventNumbers_, phiMuMinusEventNumbers_, ptMuMinusEventNumbers_;
-  
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+  for(unsigned int idx=0; idx<=files_.size(); ++idx) {
     etaEventNumbers_.push_back( (TH1F*)(eta_[idx]->Clone()) );
     phiEventNumbers_.push_back( (TH1F*)(phi_[idx]->Clone()) );
     ptEventNumbers_.push_back ( (TH1F*)(pt_ [idx]->Clone()) );
-    etaGenEventNumbers_.push_back( (TH1F*)(etaGen_[idx]->Clone()) );
-    phiGenEventNumbers_.push_back( (TH1F*)(phiGen_[idx]->Clone()) );
-    ptGenEventNumbers_.push_back ( (TH1F*)(ptGen_ [idx]->Clone()) );
-    etaMuPlusEventNumbers_.push_back( (TH1F*)(etaMuPlus_[idx]->Clone()) );
-    phiMuPlusEventNumbers_.push_back(  (TH1F*)(phiMuPlus_[idx]->Clone()) );
-    ptMuPlusEventNumbers_.push_back (  (TH1F*)(ptMuPlus_ [idx]->Clone()) );
-    etaMuMinusEventNumbers_.push_back(  (TH1F*)(etaMuMinus_[idx]->Clone()) );
-    phiMuMinusEventNumbers_.push_back(  (TH1F*)(phiMuMinus_[idx]->Clone()) );
-    ptMuMinusEventNumbers_.push_back (  (TH1F*)(ptMuMinus_ [idx]->Clone()) );
   }
 
   // ---  
@@ -128,628 +126,301 @@ void analyzeMuonDiffXSec()
 
   std::vector<double> eventNumbersPt_, eventNumbersEta_, eventNumbersPhi_;
 
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    eventNumbersPt_.push_back ( lumiweight[idx]*(corrPt_ [idx]->GetEntries()) );
-    eventNumbersEta_.push_back( lumiweight[idx]*(corrEta_[idx]->GetEntries()) );
-    eventNumbersPhi_.push_back( lumiweight[idx]*(corrPhi_[idx]->GetEntries()) );
-
-    std::cout << "total weighted # of sig events in pt (file " << idx << "): " << eventNumbersPt_[idx] << std::endl;
-    textHelper = "total weighted # of sig events in pt (file ";
-    textHelper += idx;
-    textHelper += "): ";
-    textHelper += eventNumbersPt_[idx] ;
-    output_ .push_back(textHelper);
+  for(unsigned int idx=0; idx<=files_.size(); ++idx) {
+    eventNumbersPt_.push_back ( pt_ [idx]->Integral() );
+    eventNumbersEta_.push_back( eta_[idx]->Integral() );
+    eventNumbersPhi_.push_back( phi_[idx]->Integral() );
+    if(idx<files_.size()){
+    std::cout << "total weighted # of events in pt (file "  << idx << "): " << eventNumbersPt_[idx]  << std::endl;
+    std::cout << "total weighted # of events in eta (file " << idx << "): " << eventNumbersEta_[idx] << std::endl;
+    std::cout << "total weighted # of events in phi (file " << idx << "): " << eventNumbersPhi_[idx] << std::endl;
+    }
   }
 
   // ---
   //    do scaling with respect to inclusive cross section (taken from same histogram)
   // ---
   
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    pt_ [idx]->Scale(1/eventNumbersPt_[idx]);
-    ptGen_ [idx]->Scale(1/eventNumbersPt_[idx]);
-    ptMuPlus_ [idx]->Scale(1/eventNumbersPt_[idx]);
-    ptMuMinus_ [idx]->Scale(1/eventNumbersPt_[idx]);
-    
+  for(unsigned int idx=0; idx<=files_.size(); ++idx) {
+    pt_  [idx]->Scale(1/eventNumbersPt_ [idx]);
     eta_ [idx]->Scale(1/eventNumbersEta_[idx]);
-    etaGen_ [idx]->Scale(1/eventNumbersEta_[idx]);
-    etaMuPlus_ [idx]->Scale(1/eventNumbersEta_[idx]);
-    etaMuMinus_ [idx]->Scale(1/eventNumbersEta_[idx]);
-      
     phi_ [idx]->Scale(1/eventNumbersPhi_[idx]);
-    phiGen_ [idx]->Scale(1/eventNumbersPhi_[idx]);
-    phiMuPlus_ [idx]->Scale(1/eventNumbersPhi_[idx]);
-    phiMuMinus_ [idx]->Scale(1/eventNumbersPhi_[idx]);
   }
 
   // ---
   //    division by binwidth
   // ---
 
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+  for(unsigned int idx=0; idx<=files_.size(); ++idx) {
 
     for(int i=1; i<= pt_[idx]->GetNbinsX(); i++){
       pt_[idx]->SetBinContent(i,((double)(pt_[idx]->GetBinContent(i))/(double)(pt_[idx]->GetBinWidth(i)))  );
-      ptGen_[idx]->SetBinContent(i,((double)(ptGen_[idx]->GetBinContent(i))/(double)(ptGen_[idx]->GetBinWidth(i)))  );
-      ptMuPlus_[idx]->SetBinContent(i,((double)(ptMuPlus_[idx]->GetBinContent(i))/(double)(ptMuPlus_[idx]->GetBinWidth(i)))  );
-      ptMuMinus_[idx]->SetBinContent(i,((double)(ptMuMinus_[idx]->GetBinContent(i))/(double)(ptMuMinus_[idx]->GetBinWidth(i)))  );
     }
-    
     for(int i=1; i<= phi_[idx]->GetNbinsX(); i++){
       phi_[idx]->SetBinContent(i,((double)(phi_[idx]->GetBinContent(i))/(double)(phi_[idx]->GetBinWidth(i)))  );
-      phiGen_[idx]->SetBinContent(i,((double)(phiGen_[idx]->GetBinContent(i))/(double)(phiGen_[idx]->GetBinWidth(i)))  );
-      phiMuPlus_[idx]->SetBinContent(i,((double)(phiMuPlus_[idx]->GetBinContent(i))/(double)(phiMuPlus_[idx]->GetBinWidth(i)))  );
-      phiMuMinus_[idx]->SetBinContent(i,((double)(phiMuMinus_[idx]->GetBinContent(i))/(double)(phiMuMinus_[idx]->GetBinWidth(i)))  );
     }
-    
     for(int i=1; i<= eta_[idx]->GetNbinsX(); i++){
       eta_[idx]->SetBinContent(i,((double)(eta_[idx]->GetBinContent(i))/(double)(eta_[idx]->GetBinWidth(i)))  );
-      etaGen_[idx]->SetBinContent(i,((double)(etaGen_[idx]->GetBinContent(i))/(double)(etaGen_[idx]->GetBinWidth(i)))  );
-      etaMuPlus_[idx]->SetBinContent(i,((double)(etaMuPlus_[idx]->GetBinContent(i))/(double)(etaMuPlus_[idx]->GetBinWidth(i)))  );
-      etaMuMinus_[idx]->SetBinContent(i,((double)(etaMuMinus_[idx]->GetBinContent(i))/(double)(etaMuMinus_[idx]->GetBinWidth(i)))  );
     }
   }
 
   // ---
-  //    configure histograms
+  //    calculate statistical errors for differential xSec (pt plots only) via gaussian error calculus
   // ---
 
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    histogramStyle(*eta_ [idx], idx);
-    histogramStyle(*phi_ [idx], idx);
-    histogramStyle(*pt_  [idx], idx);
-    histogramStyle(*etaGen_ [idx], idx);
-    histogramStyle(*phiGen_ [idx], idx);
-    histogramStyle(*ptGen_  [idx], idx);
-    histogramStyle(*etaMuPlus_ [idx], idx);
-    histogramStyle(*phiMuPlus_ [idx], idx);
-    histogramStyle(*ptMuPlus_  [idx], idx);
-    histogramStyle(*etaMuMinus_ [idx], idx);
-    histogramStyle(*phiMuMinus_ [idx], idx);
-    histogramStyle(*ptMuMinus_  [idx], idx);
-    histogramStyle(*etaEventNumbers_ [idx], idx);
-    histogramStyle(*phiEventNumbers_ [idx], idx);
-    histogramStyle(*ptEventNumbers_  [idx], idx);
-    histogramStyle(*etaGenEventNumbers_ [idx], idx);
-    histogramStyle(*phiGenEventNumbers_ [idx], idx);
-    histogramStyle(*ptGenEventNumbers_  [idx], idx);
-    histogramStyle(*etaMuPlusEventNumbers_ [idx], idx);
-    histogramStyle(*phiMuPlusEventNumbers_ [idx], idx);
-    histogramStyle(*ptMuPlusEventNumbers_  [idx], idx);
-    histogramStyle(*etaMuMinusEventNumbers_ [idx], idx);
-    histogramStyle(*phiMuMinusEventNumbers_ [idx], idx);
-    histogramStyle(*ptMuMinusEventNumbers_ [idx], idx);
-  }
+  std::vector<double> ptDiffXPseudoError_;  
+  std::vector<double> ptDiffXSGError_;  
 
-  // ---
-  //    calculate stability and purity for pt(Signal) only
-  // ---
-
-  // get total number of FILLED bins above cut value of 20 GeV from pt histo
-  int totalBinNumber = (pt_[kSig]->GetNbinsX())-1;
-  std::cout << "total bin number between 20 and 200 GeV: " << totalBinNumber << std::endl;
-
-  // get binning values from pt histo
-  std::vector<int> binValue_;
-  for(int i=1; i<= totalBinNumber+2; i++){
-    // +2 for underflow bin and upper Edge of last bin
-    binValue_.push_back(pt_[kSig]->GetBinLowEdge(i));
-    std::cout << "lower edge bin " << i << " :" << binValue_[i-1] << std::endl;
-  }
-
-  // add overflow bin
-  binValue_.push_back(401);
-
-  // ---
-  //    a) calculate number of entries in each (gen,reco)-bin from correlation plot
-  // ---
-
-  // store event content in gen-reco correlation fields
-  std::vector< std::vector<int> > genRecoBins_;
-  std::vector<int> genRecoBins_helper_;
-  
-  for(unsigned int i=0; i<binValue_.size(); i++){
-    genRecoBins_helper_.push_back(0);
-  }
-  
-  for(unsigned int i=0; i<binValue_.size(); i++){
-    genRecoBins_.push_back(genRecoBins_helper_);
-  }
-
-  // k: adress gen-  pt bin (overflow bin included, no underflowbin because of cut)
-  // l: adress reco- pt bin (overflow bin included, no underflowbin because of cut)
-  // i,j: loop over k-genBin * l-recoBin- field 
-
-  for(unsigned int k=0; k<(binValue_.size()-1); k++){
-    for(unsigned int l=0; l<(binValue_.size()-1); l++){
-      int eventsInGenRecoBin=0;
-      for(int i=binValue_[k]+1; i<=binValue_[k+1]; i++){
-	for(int j=binValue_[l]+1; j<=binValue_[l+1]; j++){
-	  eventsInGenRecoBin += corrPt_[kSig]->GetBinContent(i,j);
-	}
-      }
-      (genRecoBins_[k])[l]=eventsInGenRecoBin;
-      std::cout << "content (gen,reco) = (" << k << "," << l << ") pt-Bin is " << eventsInGenRecoBin << std::endl;
-    }
-  }
-  
-  output_ .push_back("purity / stability (chosen binning, unshifted):");
-
-  // ---
-  //    b) calculate stability and purity for pt
-  // ---
-
-  std::vector<double> purity_, stability_;
-  // i: calculation for each bin i
-  for(int i=1; i<=totalBinNumber; i++){
-    double genTotalBinI = 0;
-    double recoTotalBinI = 0; 
-    // j: loop over row/column for whole gen/reco-bin
-    for(unsigned int j=0; j<genRecoBins_.size(); j++){
-      genTotalBinI  += (genRecoBins_[i])[j];
-      recoTotalBinI += (genRecoBins_[j])[i];      
-    }
-    purity_    .push_back( (double)((genRecoBins_[i])[i]) /  recoTotalBinI );
-    stability_ .push_back( (double)((genRecoBins_[i])[i]) /  genTotalBinI  );
-    textHelper =  "purity/stability for ";
-    textHelper += i;
-    textHelper += ". bin : ";
-    textHelper += purity_[i-1];
-    textHelper += "/";
-    textHelper += stability_[i-1];
-    output_ .push_back(textHelper);   
-  }
-
-  // ---
-  //    c) calculate acceptance = purity / stability
-  // ---
-  std::vector<double> acceptance_;
-
-    output_ .push_back("acceptance for chosen binning:");   
-
-  for(unsigned int i=0; i<purity_.size(); i++){
-    acceptance_.push_back(purity_[i] / stability_[i]);
-    std::cout << "acceptance for "<< i+1 << ". bin is " << acceptance_[i] << std::endl; 
-    textHelper = "acceptance for ";
-    textHelper += i+1;
-    textHelper += ". bin is ";
-    textHelper += acceptance_[i];
-    output_ .push_back(textHelper); 
-  }
-
-  // ---
-  //    d) create histograms with stability, purity 
-  //       and aceptance for pt in same binning as pt
-  // ---
-
-  // create array with binning values for histograms
-  Float_t BinningValuesPt[binValue_.size()];
-  for(unsigned int i=0; i<binValue_.size(); i++){
-    BinningValuesPt[i]= binValue_[i];
-    if(i==1){
-      BinningValuesPt[i]= binValue_[i]+1;   
-    }
-    if(i==binValue_.size()-1){
-      BinningValuesPt[i]= binValue_[i]-1;   
-    }
-  }
-
-  // purity
-  TH1F* ptPurity = new TH1F("ptPurity","ptPurity",binValue_.size()-2, BinningValuesPt);
-  ptPurity->SetBinContent( 1,0 );
-  for(unsigned int i=1; i<binValue_.size()-1; i++){
-    ptPurity->SetBinContent( i+1 ,purity_[i-1] );
-  }
-  
-  // stability
-  TH1F* ptStability = new TH1F("ptStability","ptStability",binValue_.size()-2, BinningValuesPt);
-  ptStability->SetBinContent( 1,0 );
-  for(unsigned int i=1; i<binValue_.size()-1; i++){
-    ptStability->SetBinContent( i+1 ,stability_[i-1] );
-  }
-
-  // acceptance
-  TH1F* ptAcceptance = new TH1F("ptAcceptance","ptAcceptance",binValue_.size()-2, BinningValuesPt);
-  ptAcceptance->SetBinContent( 1,0 );
-  for(unsigned int i=1; i<binValue_.size()-1; i++){
-    ptAcceptance->SetBinContent( i+1 ,acceptance_[i-1] );
-  }
-
-  // ---
-  //    calculate statistical error for differential xSec from signal sample via gaussian error calculus
-  // ---
-
-  std::vector<double> ptDiffXError_;
-
+  for(unsigned int idx=kSig; idx<=kPseudo; idx++){
   // i: calculation for each bin (starting with filled bin which is the 2nd)
-
-  for(int i =2; i<=totalBinNumber+1; i++){
-
-    // calculate shortcut expression needed in final formula
-    double errorHelperA=0;  
-    errorHelperA= ( (double)(pt_[kSig]->GetBinWidth(i)) * eventNumbersPt_[kSig] ); 
-
-    // final formula
-    ptDiffXError_.push_back(   sqrt(  ((double)(ptEventNumbers_ [kSig]->GetBinContent(i)) / errorHelperA / errorHelperA) * ( 1.0 - 2.0 * (double)(pt_[kSig]->GetBinWidth(i)) / errorHelperA + ( (double)(ptEventNumbers_ [kSig]->GetBinContent(i)) * (double)(pt_[kSig]->GetBinWidth(i)) * (double)(pt_[kSig]->GetBinWidth(i)) * (eventNumbersPt_[kSig])  / errorHelperA / errorHelperA) )  )   );
+    for(int i =2; i<=totalBinNumber+1; i++){
+      double result=0.;
+      // calculate shortcut expression needed in final formula
+      double errorHelperA=0;  
+      errorHelperA= ( (double)(pt_[idx]->GetBinWidth(i)) * eventNumbersPt_[idx] ); 
+      // final formula
+      result = sqrt(  ((double)(ptEventNumbers_ [idx]->GetBinContent(i)) / errorHelperA / errorHelperA) * ( 1.0 - 2.0 * (double)(pt_[idx]->GetBinWidth(i)) / errorHelperA + ( (double)(ptEventNumbers_ [idx]->GetBinContent(i)) * (double)(pt_[idx]->GetBinWidth(i)) * (double)(pt_[idx]->GetBinWidth(i)) * (eventNumbersPt_[idx])  / errorHelperA / errorHelperA) )  );      
+      if(idx==kSig){
+	ptDiffXSGError_.push_back(result);
+	  }
+      if(idx==kPseudo){
+	ptDiffXPseudoError_.push_back(result);
+	  }
+    }
   }
-
+  
   // ---
   //    print out # of events (weighted) for each bin (including overflow) with statistical errors
   // ---
 
+  std::cout << "-------pt distribution, signal only-------" << std::endl;
   for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
     std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kSig]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) ) << std::endl;
-    textHelper = "(weighted) # events pt-bin ";
-    textHelper += i ;
-    textHelper += ": ";
-    textHelper += ptEventNumbers_[kSig]->GetBinContent(i);
-    textHelper += " +/- " ;
-    textHelper += sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) );
-    output_ .push_back(textHelper);
+  }
+  std::cout << "-------pt distribution, pseudo data-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kPseudo]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kPseudo]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "-------pt distribution, ttbar other only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kBkg]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kBkg]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "-------pt distribution, W+jets only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kWjets]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kWjets]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "-------pt distribution, Z+jets only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kZjets]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kZjets]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "-------pt distribution, QCD only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kQCD]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kQCD]->GetBinContent(i)) ) << std::endl;
   }
 
   // ---
   //    print out diffXValue(pt) for each bin with statistical errors
   // ---
-
+  std::cout << "-------signal only-------" << std::endl;
   for(int i=2; i<= pt_[kSig]->GetNbinsX(); i++){
-    std::cout << "(d#sigma)/(dpt(muon) * #sigma) pt-bin "<< i << ": " <<  pt_[kSig]->GetBinContent(i) << " +/- " <<  ptDiffXError_[i-2] << std::endl;
-    textHelper = "(weighted) # events pt-bin ";
-    textHelper += i ;
-    textHelper += ": ";
-    textHelper += pt_[kSig]->GetBinContent(i);
-    textHelper += " +/- " ;
-    textHelper += ptDiffXError_[i-2];
-    output_ .push_back(textHelper);
+    std::cout << "(d#sigma)/(dpt(muon) * #sigma) pt-bin "<< i << ": " <<  pt_[kSig]->GetBinContent(i) << " +/- " <<  ptDiffXSGError_[i-2] << std::endl;
+  }
+  std::cout << "-------pseudo data-------" << std::endl;
+  for(int i=2; i<= pt_[kPseudo]->GetNbinsX(); i++){
+    std::cout << "(d#sigma)/(dpt(muon) * #sigma) pt-bin "<< i << ": " <<  pt_[kPseudo]->GetBinContent(i) << " +/- " <<  ptDiffXPseudoError_[i-2] << std::endl;
   }
 
   // ---
   //    create legends 
   // ---
 
-  // create a legend (in upper right corner) for Signal, #mu+/-
-  TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
+  // create a legend (in upper right corner) for all MC samples and pseudo data
+  TLegend *leg0 = new TLegend(0.21, 0.74, 0.95, 0.94);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("Top-Antitop (MC @ NLO 7TeV)");
-  leg0->AddEntry( pt_[kSig], "all semi-lep. ( #mu )"  , "PL");
-  leg0->AddEntry( ptMuMinus_[kSig], "only  #mu^{-} "  , "PL");
-  leg0->AddEntry( ptMuPlus_ [kSig], "only  #mu^{+} "  , "PL");
+  if(jetMultiplicity =="")jetMultiplicity="Njets4";
+  leg0->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+");
+  leg0->AddEntry( pt_[kSig]    , "ttbar MC@NLO semi-lep.( #mu )" , "PL");
+  leg0->AddEntry( pt_[kLepJets], "all lepton+jets MC"            , "PL");
+  leg0->AddEntry( pt_[kPseudo] , "pseudo data from all MC"       , "P" );
+  leg0->AddEntry( pt_[kPseudo] , "(ttbar + Wjets + Zjets + QCD)" , ""  );
 
-  // create output slide as two legends, each on one half of side
-  TLegend *leg1 = new TLegend(0.35, 0.0, 1.0, 1.0);
-  leg1->SetFillStyle(3001);
+  // create a legend (in upper right corner) for all MC samples and pseudo data
+  TLegend *leg1 = new TLegend(0.21, 0.66, 1.0, 0.95);
+  leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  for(unsigned int i= ((unsigned int)(((double)(output_.size()))/2.0)); i< output_.size(); i++){
-    leg1->AddEntry( pt_[kSig], output_[i]  , "" );;
-  }
-
-  TLegend *leg2 = new TLegend(-0.1, 0.0, 0.5, 1.0);
-  leg2->SetFillStyle(3001);
-  leg2->SetBorderSize(0);
-  for(unsigned int i=0; i< (unsigned int)(((double)(output_.size()))/2.0); i++){
-    leg2->AddEntry( pt_[kSig], output_[i]  , "" );;
-  }
-
-  // create a legend (migration effects)
-  TLegend *leg3 = new TLegend(0.38, 0.50, 0.98, 0.76);
-  leg3->SetFillStyle(0);
-  leg3->SetBorderSize(0);
-  leg3->SetHeader("migration effects");
-  leg3->AddEntry(  ptPurity    , "purity"     , "PL");
-  leg3->AddEntry(  ptStability , "stability"  , "PL");
-  leg3->AddEntry(  ptAcceptance, "correction" , "PL");
+  if(jetMultiplicity =="")jetMultiplicity="Njets4";
+  leg1->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+");
+  leg1->AddEntry( ptEventNumbers_[kSig], "ttbar MC@NLO semi-lep.( #mu )"    , "F");
+  leg1->AddEntry( ptEventNumbers_[kBkg]  , "ttbar other"        , "F");
+  leg1->AddEntry( ptEventNumbers_[kWjets], "W+jets MADGRAPH"    , "F");
+  leg1->AddEntry( ptEventNumbers_[kZjets], "Z+jets MADGRAPH"    , "F");
+  leg1->AddEntry( ptEventNumbers_[kQCD]  , "QCD PYHTIA"         , "F");
+  leg1->AddEntry( pt_[kPseudo], "pseudo data from all MC"       , "P");
+  leg1->AddEntry( pt_[kPseudo], "(ttbar + Wjets + Zjets + QCD)" , "" );
 
   // ---
-  //    do the printing for pt_ ( Signal, mu+/- )
+  //    create canvas 
   // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
+  std::vector<TCanvas*> MyCanvas;
 
-  // draw canvas
-  canv0->cd(0);
-  canv0->SetTitle("diffX pt distribution tight  #mu after Selection");
-  axesStyle(*pt_ [kSig], "p_{t} ( tight #mu ) [GeV]", "#frac{1}{#sigma} * #frac{d#sigma}{dp_{t}(#mu)}");
-  pt_ [kSig]->GetYaxis()->SetTitleSize  ( 0.04 );
-  pt_ [kSig]->GetYaxis()->SetTitleOffset( 2.0  );
-  pt_ [kSig]->SetMinimum(0.);
-  pt_ [kSig]->SetMaximum(1.5* pt_ [kSig]->GetMaximum() );
+  for(int idx=0; idx<=5; idx++){ 
+    char canvname[10];
+    sprintf(canvname,"canv%i",idx);    
+    MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
+    canvasStyle(*MyCanvas[idx]);
+  }
+
+  // ---
+  //    do the printing for pt_ ( Signal, lepton+jets, pseudo data )
+  // ---
+  MyCanvas[0]->cd(0);
+  MyCanvas[0]->SetTitle("ptDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  axesStyle(*pt_ [kSig], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}", 0., 0.05, 0.055, 1.5);
+  histogramStyle(*pt_ [kSig]    , kRed  , 1, 20, 0.1);
+  histogramStyle(*pt_ [kPseudo] , kBlack, 1, 22);
+  histogramStyle(*pt_ [kLepJets], kBlack, 1, 20, 0.1);
   pt_ [kSig]->SetBinError( 1, 0. );
   for(int i =2; i<= totalBinNumber+1; i++){
-    pt_ [kSig]->SetBinError(  i, ptDiffXError_[i-2]  );
+    pt_ [kSig]->SetBinError( i, ptDiffXSGError_[i-2] );
+    pt_ [kPseudo]->SetBinError( i, ptDiffXPseudoError_[i-2] );
   }
-  pt_ [kSig]->Draw(); 
-  ptMuMinus_ [kSig]->SetLineColor (kBlue);
-  ptMuMinus_ [kSig]->SetLineStyle(3);
-  ptMuMinus_ [kSig]->Draw("same");
-  ptMuPlus_  [kSig]->SetLineColor (kRed);
-  ptMuPlus_  [kSig]->SetLineStyle(2);
-  ptMuPlus_  [kSig]->Draw("same");
-  leg0             ->Draw("same");
+  pt_ [kSig    ]->Draw("HIST");
+  pt_ [kLepJets]->Draw("HIST same");
+  pt_ [kPseudo ]->Draw("Psame");
+  leg0          ->Draw("same");
 
   // ---
-  //    do the printing for eta_ ( Signal, mu+/- )
+  //    do the printing for eta_ ( Signal, lepton+jets, pseudo data )
   // ---
-  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
-
-  // draw canvas
-  canv1->cd(0);
-  canv1->SetTitle("diffX eta distribution tight  #mu after Selection");
-  axesStyle(*eta_ [kSig], "#eta ( tight #mu )", "#frac{1}{#sigma} * #frac{d#sigma}{dp_{t}(#mu)}");
-  eta_ [kSig]->GetYaxis()->SetTitleSize  ( 0.04 );
-  eta_ [kSig]->GetYaxis()->SetTitleOffset( 2.0  );
-  eta_ [kSig]->SetMinimum(0.);
-  eta_ [kSig]->SetMaximum(1.8* eta_ [kSig]->GetMaximum() );
-  eta_ [kSig]->Draw();
-  etaMuMinus_ [kSig]->SetLineColor (kBlue);
-  etaMuMinus_ [kSig]->SetLineStyle(3);
-  etaMuMinus_ [kSig]->Draw("same");
-  etaMuPlus_  [kSig]->SetLineColor (kRed);
-  etaMuPlus_  [kSig]->SetLineStyle(2);
-  etaMuPlus_  [kSig]->Draw("same");
-  leg0              ->Draw("same");
+  MyCanvas[1]->cd(0);
+  MyCanvas[1]->SetTitle("etaDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  axesStyle(*eta_ [kSig], "#eta ( #mu )", "#frac{1}{#sigma} #frac{d#sigma}{d#eta (#mu)}", 0., 0.65, 0.055, 1.5);
+  histogramStyle(*eta_[kSig    ], kRed  , 1, 20, 0.1);
+  histogramStyle(*eta_[kPseudo ], kBlack, 1, 22);
+  histogramStyle(*eta_[kLepJets], kBlack, 1, 20, 0.1);
+  eta_ [kSig    ]->Draw("HIST");
+  eta_ [kLepJets]->Draw("HIST same");
+  eta_ [kPseudo ]->Draw("Psame");
+  leg0           ->Draw("same");
 
   // ---
-  //    do the printing for phi_ ( Signal, mu+/- )
+  //    do the printing for phi_ ( Signal, lepton+jets, pseudo data )
   // ---
-  TCanvas* canv2 = new TCanvas("canv2", "canv2", 600, 600); canvasStyle(*canv2);
-
-  // draw canvas
-  canv2->cd(0);
-  canv2->SetTitle("diffX phi distribution tight  #mu after Selection");
-  axesStyle(*phi_ [kSig], "#phi ( tight #mu )", "#frac{1}{#sigma} * #frac{d#sigma}{dp_{t}(#mu)}");
-  phi_ [kSig]->GetYaxis()->SetTitleSize  ( 0.04 );
-  phi_ [kSig]->GetYaxis()->SetTitleOffset( 2.0  );
-  phi_ [kSig]->SetMinimum(0.);
-  phi_ [kSig]->SetMaximum(1.8* phi_ [kSig]->GetMaximum() );
-  phi_ [kSig]->Draw();
-  phiMuMinus_ [kSig]->SetLineColor (kBlue);
-  phiMuMinus_ [kSig]->SetLineStyle(3);
-  phiMuMinus_ [kSig]->Draw("same");
-  phiMuPlus_  [kSig]->SetLineColor (kRed);
-  phiMuPlus_  [kSig]->SetLineStyle(2);
-  phiMuPlus_  [kSig]->Draw("same");
-  leg0            ->Draw("same");
-
-  // ---
-  //    do the printing for corrPt_
-  // ---
-  TCanvas* canv3 = new TCanvas("canv3", "canv3", 600, 600); canvasStyle(*canv3);
-
-  // draw canvas
-  canv3->cd(0);
-  canv3->SetTitle("gen-reco correlation of p_{t} ( muon )");
-  corrPt_[kSig]->SetTitle("correlation of p_{t} ( muon )");
-  corrPt_[kSig]->GetXaxis()->SetTitle("p_{t} ( gen #mu ) [GeV]");
-  corrPt_[kSig]->GetXaxis()->SetTitleSize ( 0.05 );
-  corrPt_[kSig]->GetXaxis()->SetLabelColor(  1   );
-  corrPt_[kSig]->GetXaxis()->SetLabelFont ( 62   );
-  corrPt_[kSig]->GetXaxis()->SetLabelSize ( 0.04 );
-  corrPt_[kSig]->GetXaxis()->SetNdivisions(  505 );
-  corrPt_[kSig]->GetXaxis()->CenterTitle  ( true );
-
-  corrPt_[kSig]->GetYaxis()->SetTitle("p_{t} ( reco #mu ) [GeV]");
-  corrPt_[kSig]->GetYaxis()->SetTitleSize  ( 0.05 );
-  corrPt_[kSig]->GetYaxis()->SetTitleColor (    1 );
-  corrPt_[kSig]->GetYaxis()->SetTitleOffset(  1.1 );
-  corrPt_[kSig]->GetYaxis()->SetTitleFont  (   62 );
-  corrPt_[kSig]->GetYaxis()->SetLabelSize  ( 0.04 );
-  corrPt_[kSig]->GetYaxis()->SetLabelFont  (   62 );
-  corrPt_[kSig]->GetYaxis()->SetNdivisions (  505 );
-  corrPt_[kSig]->GetYaxis()->CenterTitle   ( true );
-
-  corrPt_[kSig]->SetStats(kFALSE);
-  corrPt_[kSig]->SetFillColor( kRed );
-  corrPt_[kSig]->Draw("colz");
-
-
-  // ---
-  //    do the printing for corrEta_
-  // ---
-  TCanvas* canv4 = new TCanvas("canv4", "canv4", 600, 600); canvasStyle(*canv4);
-
-  // draw canvas
-  canv4->cd(0);
-  canv4->SetTitle("gen-reco correlation of #eta ( muon )");
-  corrEta_[kSig]->SetTitle("correlation of #eta ( muon )");
-  corrEta_[kSig]->GetXaxis()->SetTitle("#eta ( gen #mu )");
-  corrEta_[kSig]->GetXaxis()->SetTitleSize ( 0.05 );
-  corrEta_[kSig]->GetXaxis()->SetLabelColor(  1   );
-  corrEta_[kSig]->GetXaxis()->SetLabelFont ( 62   );
-  corrEta_[kSig]->GetXaxis()->SetLabelSize ( 0.04 );
-  corrEta_[kSig]->GetXaxis()->SetNdivisions(  505 );
-  corrEta_[kSig]->GetXaxis()->CenterTitle  ( true );
-
-  corrEta_[kSig]->GetYaxis()->SetTitle("#eta ( reco #mu )");
-  corrEta_[kSig]->GetYaxis()->SetTitleSize  ( 0.05 );
-  corrEta_[kSig]->GetYaxis()->SetTitleColor (    1 );
-  corrEta_[kSig]->GetYaxis()->SetTitleOffset(  1.1 );
-  corrEta_[kSig]->GetYaxis()->SetTitleFont  (   62 );
-  corrEta_[kSig]->GetYaxis()->SetLabelSize  ( 0.04 );
-  corrEta_[kSig]->GetYaxis()->SetLabelFont  (   62 );
-  corrEta_[kSig]->GetYaxis()->SetNdivisions (  505 );
-  corrEta_[kSig]->GetYaxis()->CenterTitle   ( true );
-
-  corrEta_[kSig]->SetStats(kFALSE);
-  corrEta_[kSig]->SetFillColor( kRed );
-  corrEta_[kSig]->Draw("");
-
-  // ---
-  //    do the printing for corrPhi_
-  // ---
-  TCanvas* canv5 = new TCanvas("canv5", "canv5", 600, 600); canvasStyle(*canv5);
-
-  // draw canvas
-  canv5->cd(0);
-  canv5->SetTitle("gen-reco correlation of #phi ( muon )");
-  corrPhi_[kSig]->SetTitle("correlation of #phi ( muon )");
-  corrPhi_[kSig]->GetXaxis()->SetTitle("#phi ( gen #mu )");
-  corrPhi_[kSig]->GetXaxis()->SetTitleSize ( 0.05 );
-  corrPhi_[kSig]->GetXaxis()->SetLabelColor(  1   );
-  corrPhi_[kSig]->GetXaxis()->SetLabelFont ( 62   );
-  corrPhi_[kSig]->GetXaxis()->SetLabelSize ( 0.04 );
-  corrPhi_[kSig]->GetXaxis()->SetNdivisions(  505 );
-  corrPhi_[kSig]->GetXaxis()->CenterTitle  ( true );
-
-  corrPhi_[kSig]->GetYaxis()->SetTitle("#phi ( reco #mu )");
-  corrPhi_[kSig]->GetYaxis()->SetTitleSize  ( 0.05 );
-  corrPhi_[kSig]->GetYaxis()->SetTitleColor (    1 );
-  corrPhi_[kSig]->GetYaxis()->SetTitleOffset(  1.1 );
-  corrPhi_[kSig]->GetYaxis()->SetTitleFont  (   62 );
-  corrPhi_[kSig]->GetYaxis()->SetLabelSize  ( 0.04 );
-  corrPhi_[kSig]->GetYaxis()->SetLabelFont  (   62 );
-  corrPhi_[kSig]->GetYaxis()->SetNdivisions (  505 );
-  corrPhi_[kSig]->GetYaxis()->CenterTitle   ( true );
-
-  corrPhi_[kSig]->SetStats(kFALSE);
-  corrPhi_[kSig]->SetFillColor( kRed );
-  corrPhi_[kSig]->Draw("");
-
-  // ---
-  //    do the printing for the output text
-  // ---
-  TCanvas* canv6 = new TCanvas("canv6", "canv6", 600, 600); canvasStyle(*canv6);
-
-  // draw canvas
-  canv6->cd(0);
-  canv6->SetTitle("detail numbers");
-  leg1->Draw("");
-  leg2->Draw("same");
-
-  // ---
-  //    do the printing for ptPurity, ptStability and ptAcceptance
-  // ---
-  TCanvas* canv7 = new TCanvas("canv7", "canv7", 600, 600); canvasStyle(*canv7);
-
-  // draw canvas
-  canv7->SetTitle("migration for pt ( #mu )");
-  canv7->SetGrid(1,1);
-  ptPurity->SetTitle("");
-  ptPurity->GetXaxis()->SetTitle("p_{t} ( #mu ) [GeV]");
-  //  ptPurity->GetYaxis()->SetTitle("");
-  ptPurity->GetXaxis()->CenterTitle   ( true );
-  ptPurity->GetYaxis()->CenterTitle   ( true );
-  ptPurity->GetYaxis()->SetTitleOffset(  2.0 );
-  ptPurity->GetXaxis()->SetTitleSize  ( 0.05 );
-  ptPurity->GetYaxis()->SetTitleSize  ( 0.05 );
-  ptPurity->SetStats(kFALSE);
-  ptPurity->SetLineColor(kRed);
-  ptPurity->SetLineWidth(3);
-  ptPurity->SetMarkerStyle(20);
-  ptPurity->SetMarkerSize(1.5);
-  ptPurity->SetMarkerColor(kRed);
-  ptPurity->Draw("");
-  ptPurity->Draw("Psame");
-  ptStability->SetLineColor(kBlue);
-  ptStability->SetLineWidth(3);
-  ptStability->SetMarkerStyle(21);
-  ptStability->SetMarkerSize(1.5);
-  ptStability->SetMarkerColor(kBlue);
-  ptStability->Draw("same");
-  ptStability->Draw("Psame");
-  ptAcceptance->SetLineWidth(3);
-  ptAcceptance->SetMarkerStyle(22);
-  ptAcceptance->SetMarkerSize(1.5);
-  ptAcceptance->Draw("same");
-  ptAcceptance->Draw("Psame");
-
-  leg3->Draw("same");
+  MyCanvas[2]->cd(0);
+  MyCanvas[2]->SetTitle("phiDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  axesStyle(*phi_ [kSig], "#phi ( #mu )", "#frac{1}{#sigma} #frac{d#sigma}{d#phi (#mu)}", 0., 0.65, 0.055, 1.5);
+  histogramStyle(*phi_[kSig    ], kRed  , 1, 20, 0.1);
+  histogramStyle(*phi_[kPseudo ], kBlack, 1, 22);
+  histogramStyle(*phi_[kLepJets], kBlack, 1, 20, 0.1);
+  phi_ [kSig    ]->Draw("HIST");
+  phi_ [kLepJets]->Draw("HIST same");
+  phi_ [kPseudo ]->Draw("Psame");
+  leg0           ->Draw("same");
 
   // ---
   //    do the printing for ptEventNumbers_
   // ---
-  TCanvas* canv10 = new TCanvas("canv10", "canv10", 600, 600); canvasStyle(*canv10);
-
-  // draw canvas
-  canv10->cd(0);
-  canv10->SetTitle("pt distribution tight  #mu after Selection");
-  axesStyle(*ptEventNumbers_ [kSig], "p_{t} ( tight #mu ) [GeV]", "events");
-  ptEventNumbers_ [kSig]->SetMinimum(0.);
-  ptEventNumbers_ [kSig]->SetMaximum(1.2* ptEventNumbers_ [kSig]->GetMaximum() );
-  ptEventNumbers_ [kSig]->SetBinError( 1, 0. );
-  for(int i =2; i<= totalBinNumber+1; i++){
-    ptEventNumbers_ [kSig]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) )  );
+  MyCanvas[3]->cd(0);
+  MyCanvas[3]->SetTitle("ptInclusiveXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  // add different contribution for stack plots
+  ptEventNumbers_ [kBkg]  ->Add(ptEventNumbers_ [kSig]);   
+  ptEventNumbers_ [kWjets]->Add(ptEventNumbers_ [kBkg]);   
+  ptEventNumbers_ [kZjets]->Add(ptEventNumbers_ [kWjets]); 
+  ptEventNumbers_ [kQCD]  ->Add(ptEventNumbers_ [kZjets]);   
+  // plot style
+  axesStyle(*ptEventNumbers_ [kQCD], "p_{t} ( #mu ) [GeV]", "events", 0., 32., 0.06, 1.5); // 5pb: 32 / 100 / 700 / 3500  //  50pb: 20000 / 4000 / 800 / 230
+  histogramStyle(*ptEventNumbers_ [kSig]   , kRed  , 1, 20, 0.1, 1);
+  histogramStyle(*ptEventNumbers_ [kPseudo], kBlack, 1, 22);
+  histogramStyle(*ptEventNumbers_ [kBkg]   , kBlue , 1, 20, 0.1, 1);
+  histogramStyle(*ptEventNumbers_ [kWjets] , kGreen, 1, 20, 0.1, 1);
+  histogramStyle(*ptEventNumbers_ [kZjets] , 6     , 1, 20, 0.1, 1);
+  histogramStyle(*ptEventNumbers_ [kQCD]   , 14    , 1, 20, 0.1, 1);
+  // set error bars
+  for(unsigned int idx=kSig; idx<=kPseudo; idx++){
+    ptEventNumbers_ [idx]->SetBinError( 1, 0. );
+    for(int i =2; i<= totalBinNumber+1; i++){
+      ptEventNumbers_ [idx]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[idx]->GetBinContent(i)) )  );
+    }
   }
-  ptEventNumbers_       [kSig]->Draw();
-  ptMuPlusEventNumbers_ [kSig]->SetLineColor (kBlue);
-  ptMuPlusEventNumbers_ [kSig]->SetLineStyle(3);
-  ptMuPlusEventNumbers_ [kSig]->Draw("same");
-  ptMuMinusEventNumbers_[kSig]->SetLineColor (kRed);
-  ptMuMinusEventNumbers_[kSig]->SetLineStyle(2);
-  ptMuMinusEventNumbers_[kSig]->Draw("same");
-  leg0                        ->Draw("same");
+  // drawing
+  ptEventNumbers_[kQCD   ]->Draw("HIST");
+  ptEventNumbers_[kZjets ]->Draw("HIST same");
+  ptEventNumbers_[kWjets ]->Draw("HIST same");
+  ptEventNumbers_[kBkg   ]->Draw("HIST same");
+  ptEventNumbers_[kSig   ]->Draw("HIST same");
+  ptEventNumbers_[kPseudo]->Draw("Psame");
+  leg1                    ->Draw("same");
 
   // ---
   //    do the printing for etaEventNumbers_
   // ---
-  TCanvas* canv11 = new TCanvas("canv11", "canv11", 600, 600); canvasStyle(*canv11);
-
-  // draw canvas
-  canv11->cd(0);
-  canv11->SetTitle("eta distribution tight  #mu after Selection");
-  axesStyle(*etaEventNumbers_ [kSig], "#eta ( tight #mu )", "events");
-  etaEventNumbers_ [kSig]->SetMinimum(0.);
-  etaEventNumbers_ [kSig]->SetMaximum(1.8* etaEventNumbers_ [kSig]->GetMaximum() );
-  etaEventNumbers_ [kSig]->Draw();
-  etaMuPlusEventNumbers_ [kSig]->SetLineColor (kBlue);
-  etaMuPlusEventNumbers_ [kSig]->SetLineStyle(3);
-  etaMuPlusEventNumbers_ [kSig]->Draw("same");
-  etaMuMinusEventNumbers_[kSig]->SetLineColor (kRed);
-  etaMuMinusEventNumbers_[kSig]->SetLineStyle(2);
-  etaMuMinusEventNumbers_[kSig]->Draw("same");
-  leg0                         ->Draw("same");
+  MyCanvas[4]->cd(0);
+  MyCanvas[4]->SetTitle("etaInclusiveXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  // add different contribution for stack plots
+  etaEventNumbers_ [kBkg]  ->Add(etaEventNumbers_ [kSig]);   
+  etaEventNumbers_ [kWjets]->Add(etaEventNumbers_ [kBkg]);   
+  etaEventNumbers_ [kZjets]->Add(etaEventNumbers_ [kWjets]); 
+  etaEventNumbers_ [kQCD]  ->Add(etaEventNumbers_ [kZjets]); 
+  // plot style 
+  axesStyle(*etaEventNumbers_ [kQCD], "#eta ( #mu )", "events", 0., 35., 0.06, 1.5); // 5pb: 35 / 100 / 450 / 2200  //  50pb: 15000 / 3500 / 800 / 210
+  histogramStyle(*etaEventNumbers_ [kSig], kRed, 1, 20, 0.1, 1);
+  histogramStyle(*etaEventNumbers_ [kPseudo], kBlack, 1, 22);
+  histogramStyle(*etaEventNumbers_  [kBkg]   , kBlue , 1, 20, 0.1, 1);
+  histogramStyle(*etaEventNumbers_  [kWjets] , kGreen, 1, 20, 0.1, 1);
+  histogramStyle(*etaEventNumbers_  [kZjets] , 6     , 1, 20, 0.1, 1);
+  histogramStyle(*etaEventNumbers_  [kQCD]   , 14    , 1, 20, 0.1, 1);
+  // drawing
+  etaEventNumbers_[kQCD    ]->Draw("HIST");
+  etaEventNumbers_[kZjets  ]->Draw("HIST same");
+  etaEventNumbers_[kWjets  ]->Draw("HIST same");
+  etaEventNumbers_[kBkg    ]->Draw("HIST same");
+  etaEventNumbers_[kSig   ]->Draw("HIST same");
+  etaEventNumbers_[kPseudo]->Draw("Psame");
+  leg1                     ->Draw("same");
 
   // ---
   //    do the printing for phiEventNumbers_
   // ---
-  TCanvas* canv12 = new TCanvas("canv12", "canv12", 600, 600); canvasStyle(*canv12);
-
-  // draw canvas
-  canv12->cd(0);
-  canv12->SetTitle("phi distribution tight  #mu after Selection");
-  axesStyle(*phiEventNumbers_ [kSig], "#phi ( tight #mu )", "events");
-  phiEventNumbers_ [kSig]->SetMinimum(0.);
-  phiEventNumbers_ [kSig]->SetMaximum(1.8* phiEventNumbers_ [kSig]->GetMaximum() );
-  phiEventNumbers_ [kSig]->Draw();
-  phiMuPlusEventNumbers_ [kSig]->SetLineColor (kBlue);
-  phiMuPlusEventNumbers_ [kSig]->SetLineStyle(3);
-  phiMuPlusEventNumbers_ [kSig]->Draw("same");
-  phiMuMinusEventNumbers_[kSig]->SetLineColor (kRed);
-  phiMuMinusEventNumbers_[kSig]->SetLineStyle(2);
-  phiMuMinusEventNumbers_[kSig]->Draw("same");
-  leg0                         ->Draw("same");
+  MyCanvas[5]->cd(0);
+  MyCanvas[5]->SetTitle("phiInclusiveXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  // add different contribution for stack plots
+  phiEventNumbers_ [kBkg]  ->Add(phiEventNumbers_ [kSig]);   
+  phiEventNumbers_ [kWjets]->Add(phiEventNumbers_ [kBkg]);   
+  phiEventNumbers_ [kZjets]->Add(phiEventNumbers_ [kWjets]); 
+  phiEventNumbers_ [kQCD]  ->Add(phiEventNumbers_ [kZjets]);
+  // plot style
+  axesStyle(*phiEventNumbers_ [kQCD], "#phi ( #mu )", "events", 0., 22., 0.06, 1.5); // 5pb: 22 / 75 / 250 / 1400  //  50pb: 12000 / 2000 / 600 / 140
+  histogramStyle(*phiEventNumbers_ [kSig], kRed, 1, 20, 0.1, 1);
+  histogramStyle(*phiEventNumbers_ [kPseudo], kBlack, 1, 22);
+  histogramStyle(*phiEventNumbers_  [kBkg]   , kBlue , 1, 20, 0.1, 1);
+  histogramStyle(*phiEventNumbers_  [kWjets] , kGreen, 1, 20, 0.1, 1);
+  histogramStyle(*phiEventNumbers_  [kZjets] , 6     , 1, 20, 0.1, 1);
+  histogramStyle(*phiEventNumbers_  [kQCD]   , 14    , 1, 20, 0.1, 1);
+  // drawing
+  phiEventNumbers_[kQCD    ]->Draw("HIST");
+  phiEventNumbers_[kZjets  ]->Draw("HIST same");
+  phiEventNumbers_[kWjets  ]->Draw("HIST same");
+  phiEventNumbers_[kBkg    ]->Draw("HIST same");
+  phiEventNumbers_[kSig   ]->Draw("HIST same");
+  phiEventNumbers_[kPseudo]->Draw("Psame");
+  leg1                     ->Draw("same");
 
   // ---
   // saving
   // ---
   
   // ps
-//   canv10->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps(");
-//   canv11->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps" );
-//   canv12->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps" );
-//   canv0->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv1->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv2->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv3->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv4->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv5->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv6->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv7->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps"  );
-//   canv10->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps" );
-//   canv11->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps" );
-//   canv12->Print("./diffXSecFromSignal/plots/diffXStuffMcatnlo7TeV.ps)");
-
-//   // png
-//   canv0->Print("./diffXSecFromSignal/plots/ptDiffXSecMcatnlo7TeV.png"           );
-//   canv1->Print("./diffXSecFromSignal/plots/etaDiffXSecMcatnlo7TeV.png"          );
-//   canv2->Print("./diffXSecFromSignal/plots/phiDiffXSecMcatnlo7TeV.png"          );
-//   canv3->Print("./diffXSecFromSignal/plots/ptGenRecoCorrelationMcatnlo7TeV.png" );
-//   canv4->Print("./diffXSecFromSignal/plots/etaGenRecoCorrelationMcatnlo7TeV.png");
-//   canv5->Print("./diffXSecFromSignal/plots/phiGenRecoCorrelationMcatnlo7TeV.png");
-//   canv6->Print("./diffXSecFromSignal/plots/ptOutputMcatnlo7TeV.png"             );
-//   canv7->Print("./diffXSecFromSignal/plots/ptMigrationMcatnlo7TeV.png"          );
-//   canv10->Print("./diffXSecFromSignal/plots/ptInclusiveMcatnlo7TeV.png"         );
-//   canv11->Print("./diffXSecFromSignal/plots/etaInclusiveMcatnlo7TeV.png"        );
-//   canv12->Print("./diffXSecFromSignal/plots/phiInclusiveMcatnlo7TeV.png"        );
+  MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
+  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
+  }
+  MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
+  
+  // png
+  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+  }
 }
 
 void canvasStyle(TCanvas& canv) 
@@ -761,44 +432,27 @@ void canvasStyle(TCanvas& canv)
   canv.SetTopMargin   ( 0.05 );
 }
 
-void histogramStyle(TH1& hist, unsigned int style) 
+void histogramStyle(TH1& hist, int color, int lineStyle, int markerStyle, float markersize, int filled) 
 {
-  // pre-defined line style
-  std::vector<int> color;
-  color.push_back( kBlack ); 
-  color.push_back( kRed   ); 
-  color.push_back( kBlue  );
-  color.push_back( 14     );
-  color.push_back( 46     );
-  color.push_back( kRed   );
-  color.push_back( kBlue  );
-
- // pre-defined fill style
-  std::vector<int> fill;
-  fill.push_back( 1   ); 
-  fill.push_back( 1   ); 
-  fill.push_back( 1   );
-  fill.push_back( 2   );
-  fill.push_back( 2   );
-  fill.push_back( 2   );
-  fill.push_back( 2   );
-
-  // pre-defined marker style
-  std::vector<int> marker;
-  marker.push_back( 20);
-
-  // set line width  
   hist.SetLineWidth(3);
   hist.SetStats(kFALSE);
-  hist.SetLineColor  (color[style]);
-  hist.SetMarkerColor(color[style]);
-
+  hist.SetLineColor  (color);
+  hist.SetMarkerColor(color);  
+  hist.SetMarkerStyle(markerStyle);
+  hist.SetMarkerSize(markersize);
+  hist.SetLineStyle(lineStyle);
+  if(filled==1){
+  hist.SetFillStyle(1001);
+  hist.SetFillColor(color);
+  }
+  else{
+    hist.SetFillStyle(0);
+  }
 }
 
-void axesStyle(TH1& hist, const char* titleX, const char* titleY) 
+void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, float yMax, float yTitleSize, float yTitleOffset) 
 {
   hist.SetTitle("");
-
   hist.GetXaxis()->SetTitle(titleX);
   hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.06);
@@ -808,13 +462,14 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY)
   hist.GetXaxis()->SetLabelSize  ( 0.05);
   hist.GetXaxis()->SetLabelFont  (   62);
   hist.GetXaxis()->SetNdivisions (  505);
-  
   hist.GetYaxis()->SetTitle(titleY);
-  hist.GetYaxis()->SetTitleSize  ( 0.07);
+  hist.GetYaxis()->SetTitleSize  ( yTitleSize );
   hist.GetYaxis()->SetTitleColor (    1);
-  hist.GetYaxis()->SetTitleOffset(  1.2);
+  hist.GetYaxis()->SetTitleOffset(yTitleOffset);
   hist.GetYaxis()->SetTitleFont  (   62);
   hist.GetYaxis()->SetLabelSize  ( 0.04);
   hist.GetYaxis()->SetLabelFont  (   62);
   hist.GetYaxis()->CenterTitle   ( true);
+  if(yMin!=-123) hist.SetMinimum(yMin);
+  if(yMax!=-123) hist.SetMaximum(yMax);
 }
