@@ -192,8 +192,8 @@ int plotMultijetAnalysis(TString name1 = "analyzeMultijet_new.root",
   drawHistos(phiJet, "#phi", "phi", "jets", false);
 
   TString psName = outDir + "/catalog.ps";
-  canvas ->Print(psName + ")");
-  canvas2->Print(psName + "(");
+  canvas ->Print(psName + "(");
+  canvas2->Print(psName + ")");
 
   return 0;
 }
