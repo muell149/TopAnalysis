@@ -65,7 +65,7 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   }
   else goodHypo_->Fill(1., weight); // good hypothesis
 
-   if( !FullLepEvt->isHypoValid(hypoKey) ){
+  if( !FullLepEvt->isHypoValid(hypoKey) ){
      edm::LogInfo ( "NonValidHyp" ) << "Hypothesis not valid for this event";
      return;  // return if any of the hypotheses is not valid
    }
@@ -121,58 +121,59 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   // fill resolution histos for kinematic variables
   // with respect to the generator particles
   // -----------------------
-  if( FullLepEvt->genEvent()->isFullLeptonic() ) {   
-    const reco::Candidate* genTop    = FullLepEvt->genTop();
-    const reco::Candidate* genWplus  = FullLepEvt->genWPlus();
-    const reco::Candidate* genB      = FullLepEvt->genB();
-    const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
-    const reco::Candidate* genNu     = FullLepEvt->genNeutrino();
-  
-    const reco::Candidate* genTopBar = FullLepEvt->genTopBar();
-    const reco::Candidate* genWminus = FullLepEvt->genWMinus();
-    const reco::Candidate* genBBar   = FullLepEvt->genBBar();
-    const reco::Candidate* genLep    = FullLepEvt->genLepton();
-    const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
-    
-    if(genTop)    fillKinGenHistos(TopKinGen_,    *genTop,    weight);
-    if(genWplus)  fillKinGenHistos(WplusKinGen_,  *genWplus,  weight);
-    if(genB)      fillKinGenHistos(BKinGen_,      *genB,      weight);
-    if(genLepBar) fillKinGenHistos(LepBarKinGen_, *genLepBar, weight);
-    if(genNu)     fillKinGenHistos(NuKinGen_,     *genNu,     weight);   
-    
-    if(genTopBar) fillKinGenHistos(TopBarKinGen_, *genTopBar, weight);
-    if(genWminus) fillKinGenHistos(WminusKinGen_, *genWminus, weight);
-    if(genBBar)   fillKinGenHistos(BBarKinGen_,   *genBBar,   weight);
-    if(genLep)    fillKinGenHistos(LepKinGen_,    *genLep,    weight);
-    if(genNuBar)  fillKinGenHistos(NuBarKinGen_,  *genNuBar,  weight);      
+  if( !FullLepEvt->genEvent() ) return;
+  if( !FullLepEvt->genEvent()->isFullLeptonic() ) return;
 
-    if(!FullLepEvt->isWrongCharge()){
-      if(genTop)    fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
-      if(genWplus)  fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
-      if(genB)      fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
-      if(genLepBar) fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
-      if(genNu)     fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+  const reco::Candidate* genTop    = FullLepEvt->genTop();
+  const reco::Candidate* genWplus  = FullLepEvt->genWPlus();
+  const reco::Candidate* genB      = FullLepEvt->genB();
+  const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
+  const reco::Candidate* genNu     = FullLepEvt->genNeutrino();
 
-      if(genTopBar) fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
-      if(genWminus) fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
-      if(genBBar)   fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
-      if(genLep)    fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
-      if(genNuBar)  fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
-    }
-    else{ //should never be the case: right charge reconstructed as wrong charge
-      if(genTop)    fillWrongChargeKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
-      if(genWplus)  fillWrongChargeKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
-      if(genB)      fillWrongChargeKinResHistos(BKinRes_,      *B,     *genB,      weight);
-      if(genLepBar) fillWrongChargeKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
-      if(genNu)     fillWrongChargeKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+  const reco::Candidate* genTopBar = FullLepEvt->genTopBar();
+  const reco::Candidate* genWminus = FullLepEvt->genWMinus();
+  const reco::Candidate* genBBar   = FullLepEvt->genBBar();
+  const reco::Candidate* genLep    = FullLepEvt->genLepton();
+  const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
 
-      if(genTopBar) fillWrongChargeKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
-      if(genWminus) fillWrongChargeKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
-      if(genBBar)   fillWrongChargeKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
-      if(genLep)    fillWrongChargeKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
-      if(genNuBar)  fillWrongChargeKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight);   
-    }
-  }      
+  if(genTop)    fillKinGenHistos(TopKinGen_,    *genTop,    weight);
+  if(genWplus)  fillKinGenHistos(WplusKinGen_,  *genWplus,  weight);
+  if(genB)      fillKinGenHistos(BKinGen_,      *genB,      weight);
+  if(genLepBar) fillKinGenHistos(LepBarKinGen_, *genLepBar, weight);
+  if(genNu)     fillKinGenHistos(NuKinGen_,     *genNu,     weight);   
+
+  if(genTopBar) fillKinGenHistos(TopBarKinGen_, *genTopBar, weight);
+  if(genWminus) fillKinGenHistos(WminusKinGen_, *genWminus, weight);
+  if(genBBar)   fillKinGenHistos(BBarKinGen_,   *genBBar,   weight);
+  if(genLep)    fillKinGenHistos(LepKinGen_,    *genLep,    weight);
+  if(genNuBar)  fillKinGenHistos(NuBarKinGen_,  *genNuBar,  weight);      
+
+  if(!FullLepEvt->isWrongCharge()){
+    if(genTop)    fillKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+    if(genWplus)  fillKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+    if(genB)      fillKinResHistos(BKinRes_,      *B,     *genB,      weight);
+    if(genLepBar) fillKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+    if(genNu)     fillKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+
+    if(genTopBar) fillKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+    if(genWminus) fillKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+    if(genBBar)   fillKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+    if(genLep)    fillKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+    if(genNuBar)  fillKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight); 
+  }
+  else{ //should never be the case: right charge reconstructed as wrong charge
+    if(genTop)    fillWrongChargeKinResHistos(TopKinRes_,    *Top,   *genTop,    weight);
+    if(genWplus)  fillWrongChargeKinResHistos(WplusKinRes_,  *Wplus, *genWplus,  weight);
+    if(genB)      fillWrongChargeKinResHistos(BKinRes_,      *B,     *genB,      weight);
+    if(genLepBar) fillWrongChargeKinResHistos(LepBarKinRes_, *LepBar,*genLepBar, weight);
+    if(genNu)     fillWrongChargeKinResHistos(NuKinRes_,     *Nu,    *genNu,     weight);
+
+    if(genTopBar) fillWrongChargeKinResHistos(TopBarKinRes_, *TopBar,*genTopBar, weight);
+    if(genWminus) fillWrongChargeKinResHistos(WminusKinRes_, *Wminus,*genWminus, weight);
+    if(genBBar)   fillWrongChargeKinResHistos(BBarKinRes_,   *BBar,  *genBBar,   weight);
+    if(genLep)    fillWrongChargeKinResHistos(LepKinRes_,    *Lep,   *genLep,    weight);
+    if(genNuBar)  fillWrongChargeKinResHistos(NuBarKinRes_,  *NuBar, *genNuBar,  weight);   
+  }
 }
 
 /// everything that has to be done after the event loop: summarizes if wantSummary_ is true
