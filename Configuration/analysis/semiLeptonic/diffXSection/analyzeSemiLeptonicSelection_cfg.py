@@ -22,7 +22,7 @@ eventFilter  = 'all'
 
 useAntikt5   = True # False
 writeOutput  = False # True
-
+    
 # analyse muon quantities
 process = cms.Process("Selection")
 
@@ -47,7 +47,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -429,6 +429,12 @@ process.p1 = cms.Path(## do the gen event selection (decay channel) and the trig
                       ## btag
                       process.bottomJetSelection
                       )
+
+# replace label names when running on old MC samples
+inputs = ['Electrons','Jets','Taus','Muons','Photons']
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+for input in inputs:
+    massSearchReplaceAnyInputTag(process.p1, 'selectedPat'+input, 'selectedLayer1'+input)
 
 ## Output Module Configuration
 if(writeOutput):
