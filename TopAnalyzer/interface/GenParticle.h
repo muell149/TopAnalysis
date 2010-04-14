@@ -39,6 +39,9 @@ class GenParticle : public SingleObject< edm::View< reco::GenParticle > > {
   void fill(const edm::View<reco::GenParticle>& parts, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process(){};
+
+  /// genParticle status
+  int status_;
 };
 
 #endif

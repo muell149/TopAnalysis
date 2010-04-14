@@ -9,6 +9,11 @@ analyzeGenParticles = cms.EDAnalyzer("GenParticleAnalyzer",
     useWeight = cms.bool(False),
     ## analyzer specific configurables
     analyze   = cms.PSet(
-      ## non right now
+    ## choose the status of the genParticles to be listed
+    ## status =  1 : shower particles
+    ## status =  2 : 
+    ## status =  3 : ME (matrix element) level particles
+    ## status = -1 : take all
+    status = cms.int32(3)
     )
 )

@@ -6,7 +6,8 @@ GenParticle::GenParticle()
 }
 
 /// default constructor for full fw
-GenParticle::GenParticle(const edm::ParameterSet& cfg)
+GenParticle::GenParticle(const edm::ParameterSet& cfg) :
+  status_( cfg.getParameter<int>( "status" ) )
 {
 }
 
@@ -28,7 +29,18 @@ void
 GenParticle::fill(const edm::View<reco::GenParticle>& parts, const double& weight)
 {
   for(edm::View<reco::GenParticle>::const_iterator part=parts.begin(); part!=parts.end(); ++part){
-    if(part->pdgId()>=0) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
-    else                 hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
+    if( status_ == -1 ){
+      if(part->pdgId()>=0) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
+      else                 hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
+    }
+    else if( status_ == 1 || status_ == 2 || status_ == 3 ){
+      if( part->status() == status_ ){
+	if( part->pdgId() >= 0 ) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
+	else                     hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
+      }
+    }
+    else{
+      std::cout << "Error: genParticle status ( " << status_ << " ) unknown, please choose: 1,2,3 or -1 for all!" << std::endl;
+    }
   }
 }
