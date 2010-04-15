@@ -145,6 +145,10 @@ DEFINE_FWK_MODULE(BTagsAnalyzer);
 typedef SingleObjectAnalyzer<edm::View<reco::GenParticle>, GenParticle> GenParticleAnalyzer;
 DEFINE_FWK_MODULE(GenParticleAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/PtHat.h"
+typedef SingleObjectAnalyzer<GenEventInfoProduct, PtHat> PtHatAnalyzer;
+DEFINE_FWK_MODULE(PtHatAnalyzer);
+
 /**
     Define modules needed for the analysis of trigger
 
