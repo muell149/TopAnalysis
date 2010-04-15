@@ -16,10 +16,10 @@
 */
 
 namespace CrossSection{
- // binning for cross section histograms
- double muonPt[]  = {   0. ,    20. ,    40.,    65. ,   150.                 };
- double muonEta[] = {  -2.1,   -0.75,    0.0,    0.75,   2.1                  };
- double muonPhi[] = {  -3.0,   -2.0 ,   -1.0,    0.0 ,   1.0 ,   2.0 ,   3.0  };
+  // binning for cross section histograms
+  double muonPt[]  = {   0. ,    20. ,    35.,    50. ,   70. ,    95.,   200. };
+  double muonEta[] = {  -2.1,   -0.75,    0.0,    0.75,   2.1                  };
+  double muonPhi[] = {  -3.0,   -2.0 ,   -1.0,    0.0 ,   1.0 ,   2.0 ,   3.0  };
 }
 
 class MuonCrossSection : public SingleObject<const edm::View<pat::Muon> > {
