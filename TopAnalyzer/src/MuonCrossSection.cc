@@ -21,7 +21,7 @@ void MuonCrossSection::book()
       Muon Variables for Cross Section Measurement Reco Particles
   **/
   // muon pt
-  hists_["pt" ] = new TH1F( "pt",   "pt",   4, CrossSection::muonPt  );
+  hists_["pt" ] = new TH1F( "pt",   "pt",   6, CrossSection::muonPt  );
   // muon eta
   hists_["eta"] = new TH1F( "eta", "eta",   4, CrossSection::muonEta );
   // muon phi
@@ -31,7 +31,7 @@ void MuonCrossSection::book()
       Muon Variables for Cross Section Measurement Generator Particles
   **/
   // muon pt
-  hists_["ptGen" ] = new TH1F( "ptGen",   "ptGen",   4, CrossSection::muonPt  );
+  hists_["ptGen" ] = new TH1F( "ptGen",   "ptGen",   6, CrossSection::muonPt  );
   // muon eta
   hists_["etaGen"] = new TH1F( "etaGen", "etaGen",   4, CrossSection::muonEta );
   // muon phi
@@ -57,13 +57,13 @@ void MuonCrossSection::book()
       Charge dependent Muon Variables for Cross Section Measurement Reco Particles
   **/
   // positive charged muon pt
-  hists_["ptMuPlus"   ] = new TH1F( "ptMuPlus", "ptMuPlus"  ,   4, CrossSection::muonPt  );
+  hists_["ptMuPlus"   ] = new TH1F( "ptMuPlus", "ptMuPlus"  ,   6, CrossSection::muonPt  );
   // positive charged muon eta
   hists_["etaMuPlus"  ] = new TH1F( "etaMuPlus", "etaMuPlus",   4, CrossSection::muonEta );
   // positive charged muon phi
   hists_["phiMuPlus"  ] = new TH1F( "phiMuPlus", "phiMuPlus",   6, CrossSection::muonPhi );
   // negative charged muon pt
-  hists_["ptMuMinus"  ] = new TH1F( "ptMuMinus", "ptMuMinus"  ,   4, CrossSection::muonPt  );
+  hists_["ptMuMinus"  ] = new TH1F( "ptMuMinus", "ptMuMinus"  ,   6, CrossSection::muonPt  );
   // negative charged muon eta
   hists_["etaMuMinus" ] = new TH1F( "etaMuMinus", "etaMuMinus",   4, CrossSection::muonEta );
   // negative charged muon phi
@@ -78,7 +78,7 @@ void MuonCrossSection::book(edm::Service<TFileService>& fs)
       Muon Variables for Cross Section Measurement Reco Particles
   **/
   // muon pt
-  hists_["pt"  ] = fs->make<TH1F>( "pt"    ,  "pt",   4, CrossSection::muonPt  );
+  hists_["pt"  ] = fs->make<TH1F>( "pt"    ,  "pt",   6, CrossSection::muonPt  );
   // muon eta
   hists_["eta" ] = fs->make<TH1F>( "eta"   , "eta",   4, CrossSection::muonEta );
   // muon phi
@@ -88,7 +88,7 @@ void MuonCrossSection::book(edm::Service<TFileService>& fs)
       Muon Variables for Cross Section Measurement Generator Particles
   **/
   // muon pt
-  hists_["ptGen"  ] = fs->make<TH1F>( "ptGen"    ,  "ptGen",   4, CrossSection::muonPt  );
+  hists_["ptGen"  ] = fs->make<TH1F>( "ptGen"    ,  "ptGen",   6, CrossSection::muonPt  );
   // muon eta
   hists_["etaGen" ] = fs->make<TH1F>( "etaGen"   , "etaGen",   4, CrossSection::muonEta );
   // muon phi
@@ -115,13 +115,13 @@ void MuonCrossSection::book(edm::Service<TFileService>& fs)
       Charge dependent Muon Variables for Cross Section Measurement Reco Particles
   **/
   // positive charged muon pt
-  hists_["ptMuPlus"   ] = fs->make<TH1F>( "ptMuPlus", "ptMuPlus"  ,   4, CrossSection::muonPt   );
+  hists_["ptMuPlus"   ] = fs->make<TH1F>( "ptMuPlus", "ptMuPlus"  ,   6, CrossSection::muonPt   );
   // positive charged muon eta
   hists_["etaMuPlus"  ] = fs->make<TH1F>( "etaMuPlus", "etaMuPlus",   4, CrossSection::muonEta  );
   // positive charged muon phi
   hists_["phiMuPlus"  ] = fs->make<TH1F>( "phiMuPlus", "phiMuPlus",   6, CrossSection::muonPhi  );
   // negative charged muon pt
-  hists_["ptMuMinus"  ] = fs->make<TH1F>( "ptMuMinus", "ptMuMinus"  ,   4, CrossSection::muonPt  );
+  hists_["ptMuMinus"  ] = fs->make<TH1F>( "ptMuMinus", "ptMuMinus"  ,   6, CrossSection::muonPt  );
   // negative charged muon eta
   hists_["etaMuMinus" ] = fs->make<TH1F>( "etaMuMinus", "etaMuMinus",   4, CrossSection::muonEta );
   // negative charged muon phi
