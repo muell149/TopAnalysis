@@ -3,10 +3,6 @@ import FWCore.ParameterSet.Config as cms
 analyzeMuonResolution = cms.EDAnalyzer("MuonResolutionAnalyzer",
     ## input collection                             
     src = cms.InputTag("selectedPatMuons"),
-    ## event weight
-    weight = cms.InputTag("eventWeight"),
-    ## use the weight or not                             
-    useWeight = cms.bool(False),
     ## analyzer specific configurables
     analyze   = cms.PSet(
       matchDR = cms.double ( 0.1),
