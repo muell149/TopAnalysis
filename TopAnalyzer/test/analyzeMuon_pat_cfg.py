@@ -19,7 +19,7 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    "/store/user/rwolf/ttbar/patTuple_PATv2_ttbar_madgraph_1.root"
+    "/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root"
     )
 )
 
@@ -41,6 +41,11 @@ process.options = cms.untracked.PSet(
 process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
 process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
 process.load("TopAnalysis.TopAnalyzer.MuonResolution_cfi")
+
+## reconfigure for olf pat tuples
+process.analyzeMuonQuality.src = "selectedLayer1Muons"    
+process.analyzeMuonKinematics.src = "selectedLayer1Muons"
+process.analyzeMuonResolution.src = "selectedLayer1Muons"
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
