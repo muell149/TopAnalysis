@@ -35,7 +35,7 @@ class TopChannelSelector : public edm::EDFilter {
   
  private:
   /// read in which channels are going to be selected and print out
-  virtual void beginJob(const edm::EventSetup&);
+  virtual void beginJob();
   /// the real filtering procedure is implemendted in analyze(), wDecay() and tauDecay()
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   /// gives a summary how many events have been selected
@@ -306,7 +306,7 @@ int TopChannelSelector::tauDecay(){
   return 7;   
 }
 
-void TopChannelSelector::beginJob(const edm::EventSetup&) {
+void TopChannelSelector::beginJob() {
   // build vector of selected decay channel numbers
   if(SingleTopHadronic_){
     selectedChannels.push_back(1);  
