@@ -73,8 +73,6 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
   /// event weight
   edm::InputTag wgt_;
 
-  /// run with weights or not
-  bool useWgt_;
   /// common analzyer class
   Analyze* analyze_;
 };
@@ -82,10 +80,11 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
 /// default constructor
 template <typename Collection, typename Analyze> 
 SingleObjectAnalyzer<Collection, Analyze>::SingleObjectAnalyzer(const edm::ParameterSet& cfg) :
-  src_( cfg.getParameter<edm::InputTag>( "src"  ) ),
-  wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
-  useWgt_( cfg.getParameter<bool>( "useWeight" ) )
+  src_( cfg.getParameter<edm::InputTag>( "src"  ) )
 {
+  // weight is an optional parameter; if not present 
+  // in the module the used weight will be 1.
+  if(cfg.exists("weight" )) wgt_= cfg.getParameter<edm::InputTag>("weight" );
   // construct the common analyzer class with
   // corresponding parameter sets as input 
   cfg.exists("analyze") ? analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") ) : analyze_ = new Analyze( edm::ParameterSet() );
@@ -109,7 +108,7 @@ void SingleObjectAnalyzer<Collection, Analyze>::analyze(const edm::Event& event,
 
   // prepare the event weight
   double weight = 1;
-  if(useWgt_) {
+  if(!wgt_.label().empty()) {
     edm::Handle<double> wgt;
     event.getByLabel(wgt_, wgt);
     weight = *wgt;
