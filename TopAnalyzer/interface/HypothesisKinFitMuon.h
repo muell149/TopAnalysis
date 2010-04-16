@@ -40,6 +40,16 @@ class HypothesisKinFitMuon : public DoubleObject<TtSemiLeptonicEvent, const edm:
   void book(edm::Service<TFileService>& fileService);
   /// histogram filling interface for reconstruction level for access with fw or fwlite
   void fill(const TtSemiLeptonicEvent& tops, const edm::View<pat::Muon>& muons, const double& weight=1.);
+  /// histogram filling
+  void fill(const TtSemiLeptonicEvent& tops, const double& weight=1.){ 
+    std::string exception;
+    exception += "-----------------------------------------------------------------------------\n";
+    exception += "NOTE: You omitted the parameter _srcB_ in your configuration file, which is  \n";
+    exception += "      not optional in this case. The program will terminate here. Check what \n";
+    exception += "      parameters are expected in the definition of your module.              \n";
+    exception += "-----------------------------------------------------------------------------\n";
+    throw edm::Exception(edm::errors::Configuration, exception);
+  }
   /// everything which needs to be done after the event loop
   void process(){};
 
