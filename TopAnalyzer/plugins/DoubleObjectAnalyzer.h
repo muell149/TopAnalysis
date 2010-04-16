@@ -85,13 +85,16 @@ class DoubleObjectAnalyzer : public edm::EDAnalyzer {
 /// default constructor
 template <typename CollectionA, typename CollectionB, typename Analyze> 
 DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::DoubleObjectAnalyzer(const edm::ParameterSet& cfg) :
-  srcA_( cfg.getParameter<edm::InputTag>( "srcA"  ) ),
-  srcB_( cfg.getParameter<edm::InputTag>( "srcB"  ) ),
-  wgt_( cfg.getParameter<edm::InputTag>( "weight" ) ),
-  useWgt_( cfg.getParameter<bool>( "useWeight" ) )
+  srcA_( cfg.getParameter<edm::InputTag>( "srcA"  ) )
 {
-  // construct the common analyzer class with
-  // corresponding parameter sets as input 
+  // srcB is an optional parameter; if not present in the module
+  // definition an analyze function for srcA only will be called 
+  if(cfg.exists("srcB" )) srcB_= cfg.getParameter<edm::InputTag>("srcB" );
+  // weight is an optional parameter; if not present in the module
+  // the used weight will be 1.
+  if(cfg.exists("weight" )) wgt_= cfg.getParameter<edm::InputTag>("weight" );
+  // construct the common analyzer class with corresponding 
+  // parameter sets as input 
   cfg.exists("analyze") ? analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") ) : analyze_ = new Analyze( edm::ParameterSet() );
 }
 
@@ -115,17 +118,17 @@ void DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::analyze(const edm:
   // fetch the input collection for object 
   // type B from the event content
   edm::Handle<CollectionB> srcB; 
-  event.getByLabel(srcB_, srcB);
+  if(!srcB_.label().empty()) event.getByLabel(srcB_, srcB);
 
   // prepare the event weight
   double weight = 1;
-  if(useWgt_) {
+  if(!wgt_.label().empty()) {
     edm::Handle<double> wgt;
     event.getByLabel(wgt_, wgt);
     weight = *wgt;
   }
   // hand over to the common analyzer function
-  analyze_->fill(*srcA, *srcB, weight);
+  (!srcB_.label().empty()) ? analyze_->fill(*srcA, weight) : analyze_->fill(*srcA, *srcB, weight);
 }
 
 /// everything which has to be done before the event loop  
