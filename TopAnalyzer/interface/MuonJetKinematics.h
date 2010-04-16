@@ -1,6 +1,7 @@
 #ifndef MuonJetKinematics_h
 #define MuonJetKinematics_h
 
+#include "FWCore/Utilities/interface/EDMException.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
@@ -34,12 +35,22 @@ class MuonJetKinematics : public DoubleObject<const edm::View<pat::Muon>, const 
   **/
   /// histogramm booking for fwlite 
   void book();
-  /// histogramm booking for fwfull
+  /// histogramm booking for full fw
   void book(edm::Service<TFileService>& fileService);
-  /// histogram filling for fwlite and for fwfull
+  /// histogram filling
   void fill(const edm::View<pat::Muon>& muons, const edm::View<pat::Jet>& jets, const double& weight=1.);
+  /// histogram filling
+  void fill(const edm::View<pat::Muon>& muons, const double& weight=1.){ 
+    std::string exception;
+    exception += "-----------------------------------------------------------------------------\n";
+    exception += "NOTE: You omitted the parameter _srcB_ in your configuration file, which is  \n";
+    exception += "      not optional in this case. The program will terminate here. Check what \n";
+    exception += "      parameters are expected in the definition of your module.              \n";
+    exception += "-----------------------------------------------------------------------------\n";
+    throw edm::Exception(edm::errors::Configuration, exception);
+  }
   /// everything which needs to be done after the event loop
-    void process(){};
+  void process(){};
 
  private:
   /// there is no further steering parameters
