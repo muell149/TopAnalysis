@@ -11,16 +11,12 @@ typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonQuality> MuonQualityAnaly
 DEFINE_FWK_MODULE(MuonQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonKinematics> MuonKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, MuonKinematics> MuonKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonKinematicsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
 typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonResolution> MuonResolutionAnalyzer;
 DEFINE_FWK_MODULE(MuonResolutionAnalyzer);
-
-#include "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
-typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonCrossSection> MuonCrossSectionAnalyzer;
-DEFINE_FWK_MODULE(MuonCrossSectionAnalyzer);
 
 /**
     Define modules needed for the analysis of the jets
@@ -128,6 +124,11 @@ DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
 
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
+
+#include "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
+typedef DoubleObjectAnalyzer<edm::View<reco::Candidate>, edm::View<reco::GenParticle>, MuonCrossSection> MuonCrossSectionAnalyzer;
+DEFINE_FWK_MODULE(MuonCrossSectionAnalyzer);
+
 
 /**
     Define modules needed for the analysis of b-tags
