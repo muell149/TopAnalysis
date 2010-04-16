@@ -51,7 +51,7 @@ MuonKinematics::book(edm::Service<TFileService>& fs)
 
 /// histogram filling for fwlite and for full fw
 void
-MuonKinematics::fill(const std::vector<reco::GenParticle>& muons, const double& weight)
+MuonKinematics::fill(const edm::View<reco::Candidate>& muons, const double& weight)
 {
   /** 
       Fill Kinematic Variables
@@ -62,49 +62,19 @@ MuonKinematics::fill(const std::vector<reco::GenParticle>& muons, const double& 
   // where index_=-1 means 'fill all muons' and index_=n
   // n>=-1 means 'fill only n-th leading muon'
   int index=0;
-  for(std::vector<reco::GenParticle>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
+  for(edm::View<reco::Candidate>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     if( index_<0 || index_==index ){
       // energy of the muon
-      hists_.find("en"  )->second->Fill( muon->energy() , weight );
+      fill( "en" , muon->energy() , weight );
       // transverse momentum of the muon
-      hists_.find("pt"  )->second->Fill( muon->et() , weight );
+      fill( "pt" , muon->et()     , weight );
       // pseudorapidity eta of the muon
-      hists_.find("eta" )->second->Fill( muon->eta() , weight );
+      fill( "eta", muon->eta()    , weight );
       // azimuthal angle phi of the muon
-      hists_.find("phi" )->second->Fill( muon->phi() , weight );
+      fill( "phi", muon->phi()    , weight );
     }
   }
   // muon multiplicty is always filled the same way
   // independent from the choice of index_
-  hists_.find("n"  )->second->Fill( index , weight );
-}
-
-/// histogram filling for fwlite and for full fw
-void
-MuonKinematics::fill(const edm::View<pat::Muon>& muons, const double& weight)
-{
-  /** 
-      Fill Kinematic Variables
-  **/
-
-  // index for the leading, 2. leading, 3. leading muon
-  // to be compared with index_ from the module config
-  // where index_=-1 means 'fill all muons' and index_=n
-  // n>=-1 means 'fill only n-th leading muon'
-  int index=0;
-  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
-    if( index_<0 || index_==index ){
-      // energy of the muon
-      hists_.find( "en"  )->second->Fill( muon->energy() , weight );
-      // transverse momentum of the muon
-      hists_.find( "pt"  )->second->Fill( muon->et() , weight );
-      // pseudorapidity eta of the muon
-      hists_.find( "eta" )->second->Fill( muon->eta() , weight );
-      // azimuthal angle phi of the muon
-      hists_.find( "phi" )->second->Fill( muon->phi() , weight );
-    }
-  }
-  // muon multiplicty is always filled the same way
-  // independent from the choice of index_
-  hists_.find("n"  )->second->Fill( muons.size() , weight );
+  fill("n",  index , weight );
 }
