@@ -128,7 +128,7 @@ void DoubleObjectAnalyzer<CollectionA, CollectionB, Analyze>::analyze(const edm:
     weight = *wgt;
   }
   // hand over to the common analyzer function
-  (!srcB_.label().empty()) ? analyze_->fill(*srcA, weight) : analyze_->fill(*srcA, *srcB, weight);
+  (!srcB_.label().empty()) ? analyze_->fill(*srcA, *srcB, weight) : analyze_->fill(*srcA, weight);
 }
 
 /// everything which has to be done before the event loop  
