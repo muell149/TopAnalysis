@@ -23,7 +23,7 @@ class JetEnergyCorrectionsAnalyzer : public edm::EDAnalyzer {
   /// default destructor
   ~JetEnergyCorrectionsAnalyzer(){};
 
-  virtual void beginJob(const edm::EventSetup&);
+  virtual void beginJob();
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob();
   

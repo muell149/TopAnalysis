@@ -19,7 +19,7 @@ JetEnergyCorrectionsAnalyzer::JetEnergyCorrectionsAnalyzer(const edm::ParameterS
 }
 
 /// histogramm booking
-void JetEnergyCorrectionsAnalyzer::beginJob(const edm::EventSetup&)
+void JetEnergyCorrectionsAnalyzer::beginJob()
 {
   edm::Service<TFileService> fs;
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
