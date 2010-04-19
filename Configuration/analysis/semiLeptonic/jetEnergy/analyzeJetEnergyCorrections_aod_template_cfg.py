@@ -31,7 +31,6 @@ execfile("TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/Source_7TeV_
 ## define maximal number of events to loop over
 ## ----------------------
 ## 50/pb at  7 TeV :  8,250
-## 50/pb at 10 TeV : 20,750
 ## ----------------------
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
@@ -46,7 +45,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
+process.GlobalTag.globaltag = cms.string('START3X_V26::All')
 
 #-------------------------------------------------
 # event selection
@@ -65,6 +64,11 @@ process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 from TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff import disableCountFilter
 disableCountFilter(process.bottomJetSelection)
+process.goodJets.cut = ('abs(eta) < 2.4 & pt > 30. &'
+                        '0.01 < emEnergyFraction   &'
+                        'jetID.fHPD < 0.98         &'
+                        'jetID.n90Hits > 1'
+                        )
 
 #-------------------------------------------------
 # pat configuration
@@ -80,19 +84,10 @@ removeSpecificPATObjects(process,
 removeCleaning(process,
                outputInProcess=False)
 
-from PhysicsTools.PatAlgos.tools.jetTools import *
-switchJetCollection(process, 
-                    cms.InputTag('antikt5CaloJets'),   
-                    doJTA            = True,            
-                    doBTagging       = True,            
-                    jetCorrLabel     = ('AK5','Calo'),  
-                    doType1MET       = True,
-                    genJetCollection = cms.InputTag("antikt5GenJets"),
-                    doJetID          = False,
-                    jetIdLabel       = "antikt5"
-                    )
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run33xOnReRecoMC
+run33xOnReRecoMC(process)
 
-process.patJetCorrFactors.corrSample = 'Summer09_7TeV'
+process.patJetCorrFactors.corrSample = 'Summer09_7TeV_ReReco332'
 ## choose sample type for flavor dependent JEC
 process.patJetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
