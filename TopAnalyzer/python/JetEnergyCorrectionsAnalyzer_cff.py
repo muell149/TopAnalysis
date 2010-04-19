@@ -19,7 +19,7 @@ ttSemiLepJetPartonMatch.maxNJets   = -1
 ##########################################################################################
 
 ttSemiLepGenJetPartonMatch            = ttSemiLepJetPartonMatch.clone()
-ttSemiLepGenJetPartonMatch.jets       = "antikt5GenJets"
+ttSemiLepGenJetPartonMatch.jets       = "ak5GenJets"
 ttSemiLepGenJetPartonMatch.algorithm  = "unambiguousOnly"
 ttSemiLepGenJetPartonMatch.useMaxDist = True
 ttSemiLepGenJetPartonMatch.maxDist    = 0.5

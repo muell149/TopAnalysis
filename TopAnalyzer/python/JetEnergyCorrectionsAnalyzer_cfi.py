@@ -6,7 +6,7 @@ analyzeJetEnergyCorrections = cms.EDAnalyzer("JetEnergyCorrectionsAnalyzer",
     ## hypothesis key
     hypoKey        = cms.string("kGenMatch"),
     ## genJets plus matching to partons
-    genJets        = cms.InputTag("antikt5GenJets"),
+    genJets        = cms.InputTag("ak5GenJets"),
     genJetMatching = cms.InputTag("ttSemiLepGenJetPartonMatch")
 )
 
