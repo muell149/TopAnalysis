@@ -1,0 +1,57 @@
+####################################################################
+####################################################################
+##								  ##
+## General information on samples:				  ##
+##								  ##
+#########################  PrivateQCD.txt  #########################
+##								  ##
+## Generation: QCD, Pythia, 15 GeV < pt-hat < 99999 GeV		  ##
+##								  ##
+## GenJet filter: min 4 ak5GenJets with pt > 20 GeV and |eta| < 5 ##
+##								  ##
+## Number of files: 8987					  ##
+##								  ##
+## Event before selection: 1 Mio. x #files = 8.987E+9		  ##
+##								  ##
+## cross section: 8.762E+08 pb					  ##
+##								  ##
+## Int. luminosity: 10.25679068705774937 pb-1			  ##
+##								  ##
+##								  ##
+####################  PrivateQCD_noFilter.txt  #####################
+##								  ##
+## Generation: QCD, Pythia, 15 GeV < pt-hat < 99999 GeV		  ##
+##								  ##
+## Number of files: 1000					  ##
+##								  ##
+## Event before selection: 1 Mio. x #files = 1.000E+9		  ##
+##								  ##
+## cross section: 8.762E+08 pb					  ##
+##								  ##
+## Int. luminosity: 1.141291942478886099 pb-1			  ##
+##								  ##
+##								  ##
+###################  PrivateQCD_noSelection.txt  ###################
+##								  ##
+## Generation: QCD, Pythia, 15 GeV < pt-hat < 99999 GeV		  ##
+##								  ##
+## Number of files: 200						  ##
+##								  ##
+## Event before selection: 50 k x #files = 1.000E+7		  ##
+##								  ##
+## cross section: 8.762E+08 pb					  ##
+##								  ##
+## Int. luminosity: 0.01141291942478886099 pb-1			  ##
+##								  ##
+##								  ##
+####################################################################
+####################################################################
+#########################################################################
+#  broken files listed here                                             #
+# /store/user/eschliec/Private_QCD/MC_20100325-194801/patTuple_40.root  #
+# /store/user/eschliec/Private_QCD/MC_20100325-222300/patTuple_77.root  #
+# /store/user/eschliec/Private_QCD/MC_20100325-222553/patTuple_76.root  # 
+# /store/user/eschliec/Private_QCD/MC_20100326-104024/patTuple_1.root   #
+# /store/user/eschliec/Private_QCD/MC_20100326-201100/patTuple_165.root #
+# /store/user/eschliec/Private_QCD/MC_20100326-201100/patTuple_935.root #
+#########################################################################
