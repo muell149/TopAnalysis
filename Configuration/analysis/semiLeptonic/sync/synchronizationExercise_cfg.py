@@ -80,8 +80,9 @@ process.patJetCorrFactors.corrSample = "Summer09_7TeV_ReReco332"
 # muon selection
 #-------------------------------------------------
 
+process.load("TopQuarkAnalysis.TopObjectProducers.MuonImpactParameterSelector_cfi")
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.isolatedMuons010 = selectedPatMuons.clone(src = 'selectedPatMuons',
+process.isolatedMuons010 = selectedPatMuons.clone(src = 'impactParameterMuons',
                                                   cut =
                                                   'isGlobalMuon &'
                                                   'pt > 20. &'
@@ -90,8 +91,7 @@ process.isolatedMuons010 = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                   'innerTrack.numberOfValidHits >= 11 &'
                                                   'globalTrack.normalizedChi2 < 10.0 &'
                                                   'isolationR03.emVetoEt < 4 &'
-                                                  'isolationR03.hadVetoEt < 6 &'
-                                                  'abs(dB) < 0.02'
+                                                  'isolationR03.hadVetoEt < 6'
                                                  )
 process.isolatedMuons005 = selectedPatMuons.clone(src = 'isolatedMuons010',
                                                   cut = '(trackIso+caloIso)/pt < 0.05'
@@ -151,6 +151,7 @@ process.step7  = countPatJets.clone(src = 'goodJets', minNumber = 4)
 process.looseSelection = cms.Path(process.step1 *
                                   process.step2 *
                                   process.patDefaultSequence *
+                                  process.impactParameterMuons *
                                   process.isolatedMuons010 *
                                   process.step3b *
                                   process.vetoMuons *
@@ -166,6 +167,7 @@ process.looseSelection = cms.Path(process.step1 *
 process.tightSelection = cms.Path(process.step1 *
                                   process.step2 *
                                   process.patDefaultSequence *
+                                  process.impactParameterMuons *
                                   process.isolatedMuons010 *
                                   process.isolatedMuons005 *
                                   process.step3a *
