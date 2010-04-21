@@ -1,4 +1,3 @@
-
 // ---------description---------------------------------
 // -----------------------------------------------------
 // this Makro determines the inclusive and differential, 
@@ -7,10 +6,9 @@
 // distinguishes between the charge of the muon.
 // -----------------------------------------------------
 
-
 #include <vector>
+#include <map>
 #include <iostream>
-
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TROOT.h>
@@ -24,8 +22,8 @@ enum styles {kSig, kPseudo, kBkg, kWjets, kZjets, kQCD, kLepJets};
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
-// void histogramStyle(TH1& hist, unsigned int style);
-// void axesStyle(TH1& hist, const char* titleX, const char* titleY);
+void divideByBinwidth(std::vector<TH1F*> histoVector);
+double getMaximumDependingOnNjetsCut(TString plot, TString Njets);
 
 void analyzeMuonDiffXSec()
 {
@@ -40,8 +38,8 @@ void analyzeMuonDiffXSec()
   // ---
   //    choose jet multiplicity you want to see
   // ---
-  // "Njets1" / "Njets2" / "Njets3" / ""
-  TString jetMultiplicity ="";
+  // "Njets1" / "Njets2" / "Njets3" / "" means >= 4jets
+  TString jetMultiplicity ="Njets2";
 
   // ---
   //    open input files
@@ -231,6 +229,14 @@ void analyzeMuonDiffXSec()
   }
 
   // ---
+  //    divide plots with event numbers by binwidth to have natural form of spektrum
+  // ---  
+
+  divideByBinwidth(ptEventNumbers_ );
+  divideByBinwidth(etaEventNumbers_);
+  divideByBinwidth(phiEventNumbers_);
+
+  // ---
   //    create legends 
   // ---
 
@@ -276,7 +282,7 @@ void analyzeMuonDiffXSec()
   // ---
   MyCanvas[0]->cd(0);
   MyCanvas[0]->SetTitle("ptDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
-  axesStyle(*pt_ [kSig], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}", 0., 0.05, 0.055, 1.5);
+  axesStyle(*pt_ [kSig], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)} [GeV^{-1}]", 0., 0.05, 0.055, 1.5);
   histogramStyle(*pt_ [kSig]    , kRed  , 1, 20, 0.1);
   histogramStyle(*pt_ [kPseudo] , kBlack, 1, 22);
   histogramStyle(*pt_ [kLepJets], kBlack, 1, 20, 0.1);
@@ -309,7 +315,7 @@ void analyzeMuonDiffXSec()
   // ---
   MyCanvas[2]->cd(0);
   MyCanvas[2]->SetTitle("phiDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
-  axesStyle(*phi_ [kSig], "#phi ( #mu )", "#frac{1}{#sigma} #frac{d#sigma}{d#phi (#mu)}", 0., 0.65, 0.055, 1.5);
+  axesStyle(*phi_ [kSig], "#phi ( #mu )", "#frac{1}{#sigma} #frac{d#sigma}{d#phi (#mu)}} [rad^{-1}]", 0., 0.65, 0.055, 1.5);
   histogramStyle(*phi_[kSig    ], kRed  , 1, 20, 0.1);
   histogramStyle(*phi_[kPseudo ], kBlack, 1, 22);
   histogramStyle(*phi_[kLepJets], kBlack, 1, 20, 0.1);
@@ -329,7 +335,7 @@ void analyzeMuonDiffXSec()
   ptEventNumbers_ [kZjets]->Add(ptEventNumbers_ [kWjets]); 
   ptEventNumbers_ [kQCD]  ->Add(ptEventNumbers_ [kZjets]);   
   // plot style
-  axesStyle(*ptEventNumbers_ [kQCD], "p_{t} ( #mu ) [GeV]", "events", 0., 32., 0.06, 1.5); // 5pb: 32 / 100 / 700 / 3500  //  50pb: 20000 / 4000 / 800 / 230
+  axesStyle(*ptEventNumbers_ [kQCD], "p_{t} ( #mu ) [GeV]", "events / GeV", 0.,  getMaximumDependingOnNjetsCut("pt",jetMultiplicity), 0.06, 1.5); 
   histogramStyle(*ptEventNumbers_ [kSig]   , kRed  , 1, 20, 0.1, 1);
   histogramStyle(*ptEventNumbers_ [kPseudo], kBlack, 1, 22);
   histogramStyle(*ptEventNumbers_ [kBkg]   , kBlue , 1, 20, 0.1, 1);
@@ -340,7 +346,7 @@ void analyzeMuonDiffXSec()
   for(unsigned int idx=kSig; idx<=kPseudo; idx++){
     ptEventNumbers_ [idx]->SetBinError( 1, 0. );
     for(int i =2; i<= totalBinNumber+1; i++){
-      ptEventNumbers_ [idx]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[idx]->GetBinContent(i)) )  );
+      ptEventNumbers_ [idx]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[idx]->GetBinContent(i)) ) / sqrt( (double)(ptEventNumbers_[idx]->GetBinWidth(i)) )  );
     }
   }
   // drawing
@@ -363,7 +369,7 @@ void analyzeMuonDiffXSec()
   etaEventNumbers_ [kZjets]->Add(etaEventNumbers_ [kWjets]); 
   etaEventNumbers_ [kQCD]  ->Add(etaEventNumbers_ [kZjets]); 
   // plot style 
-  axesStyle(*etaEventNumbers_ [kQCD], "#eta ( #mu )", "events", 0., 35., 0.06, 1.5); // 5pb: 35 / 100 / 450 / 2200  //  50pb: 15000 / 3500 / 800 / 210
+  axesStyle(*etaEventNumbers_ [kQCD], "#eta ( #mu )", "events / binWidth", 0., getMaximumDependingOnNjetsCut("eta",jetMultiplicity), 0.06, 1.5); 
   histogramStyle(*etaEventNumbers_ [kSig], kRed, 1, 20, 0.1, 1);
   histogramStyle(*etaEventNumbers_ [kPseudo], kBlack, 1, 22);
   histogramStyle(*etaEventNumbers_  [kBkg]   , kBlue , 1, 20, 0.1, 1);
@@ -390,7 +396,7 @@ void analyzeMuonDiffXSec()
   phiEventNumbers_ [kZjets]->Add(phiEventNumbers_ [kWjets]); 
   phiEventNumbers_ [kQCD]  ->Add(phiEventNumbers_ [kZjets]);
   // plot style
-  axesStyle(*phiEventNumbers_ [kQCD], "#phi ( #mu )", "events", 0., 22., 0.06, 1.5); // 5pb: 22 / 75 / 250 / 1400  //  50pb: 12000 / 2000 / 600 / 140
+  axesStyle(*phiEventNumbers_ [kQCD], "#phi ( #mu )", "events / rad", 0.,  getMaximumDependingOnNjetsCut("phi",jetMultiplicity), 0.06, 1.5);
   histogramStyle(*phiEventNumbers_ [kSig], kRed, 1, 20, 0.1, 1);
   histogramStyle(*phiEventNumbers_ [kPseudo], kBlack, 1, 22);
   histogramStyle(*phiEventNumbers_  [kBkg]   , kBlue , 1, 20, 0.1, 1);
@@ -410,17 +416,17 @@ void analyzeMuonDiffXSec()
   // saving
   // ---
   
-  // ps
-  MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
-  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
-  }
-  MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
+//   // ps
+//   MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
+//   for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
+//   }
+//   MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
   
-  // png
-  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
-  }
+//   // png
+//   for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+//   }
 }
 
 void canvasStyle(TCanvas& canv) 
@@ -472,4 +478,36 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, fl
   hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
+}
+
+void divideByBinwidth(std::vector<TH1F*> histoVector)
+{
+  // loop over every sample of one histo
+  for(unsigned int idx=0; idx<histoVector.size(); idx++){
+    // loop over every bin    
+    for(int bini=1; bini<= histoVector[idx]->GetNbinsX(); bini++){
+      histoVector[idx]->SetBinContent(bini,((double)(histoVector[idx]->GetBinContent(bini))/(double)(histoVector[idx]->GetBinWidth(bini)))  );
+    }
+  } 
+}
+
+double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
+{
+  // create container for histo max values sortet by plot and Njet
+  std::map< TString, std::map <TString,double> > maxValues_;  
+  // create maximum values for pt, eta, phi ( for 5pb^-1)
+  maxValues_["pt" ]["Njets4"]= 1.5;   //  50pb: 20000 / 4000 / 800 / 230 divide by app.15 because of events / GeV
+  maxValues_["pt" ]["Njets3"]= 5.5;
+  maxValues_["pt" ]["Njets2"]= 32.;
+  maxValues_["pt" ]["Njets1"]= 235.;
+  maxValues_["eta"]["Njets4"]= 35.;   //  50pb: 15000 / 3500 / 800 / 210 divide by app.15 because of events / GeV
+  maxValues_["eta"]["Njets3"]= 120.;
+  maxValues_["eta"]["Njets2"]= 450.;
+  maxValues_["eta"]["Njets1"]= 2300.;
+  maxValues_["phi"]["Njets4"]= 24.;   //  50pb: 12000 / 2000 / 600 / 140 divide by app.15 because of events / GeV
+  maxValues_["phi"]["Njets3"]= 75.;
+  maxValues_["phi"]["Njets2"]= 250.;
+  maxValues_["phi"]["Njets1"]= 1400.;
+  // get maximum value
+  return maxValues_.find(plot)->second.find(Njets)->second;
 }
