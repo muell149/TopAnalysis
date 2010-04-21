@@ -4,7 +4,7 @@
 ## ---
 
 ## get the mother file
-execfile("/afs/naf.desy.de/user/g/goerner/semileptonic341/analyzeMuonDiffXSecAll_cfg.py")
+execfile("/afs/naf.desy.de/user/g/goerner/semileptonic356/analyzeMuonDiffXSecAll_cfg.py")
 
 ## get JES-shifting module
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
@@ -21,10 +21,18 @@ process.p1.replace(process.semiLeptonicSelection,
 process.p1.replace(process.unshiftedJets,
                    process.shiftedJets)
 
-## change input collection to JES-shifted collection 
-process.centralJets.src = "scaledJetEnergy:selectedPatJets"
-process.reliableJets.src = "scaledJetEnergy:selectedPatJets"
-process.goodJets.src = "scaledJetEnergy:selectedPatJets"
+## change input collection to JES-shifted collection
+## ATTENTION: this needs to be adapted when running on 3_5_X MC samples
+process.centralJets.src = "scaledJetEnergy:selectedLayer1Jets"
+process.reliableJets.src = "scaledJetEnergy:selectedLayer1Jets"
+process.goodJets.src = "scaledJetEnergy:selectedLayer1Jets"
 
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXSecJES09_testAll.root'
+
+# replace label names when running on old (3_4_X) MC samples
+inputs = ['Electrons','Jets','Taus','Muons','Photons']
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+for input in inputs:
+    massSearchReplaceAnyInputTag(process.p1, 'patMETs', 'layer1METs')    
+    massSearchReplaceAnyInputTag(process.p1, 'selectedPat'+input, 'selectedLayer1'+input)
