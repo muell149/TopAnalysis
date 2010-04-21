@@ -107,8 +107,10 @@ MuonCrossSection::fill(const edm::View<reco::Candidate>& muons, const double& we
   for(edm::View<reco::Candidate>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     if( index_<0 || index_==index ){
       // make sure charge is of abs value 1
-      int charge=muon->charge()/abs(muon->charge());
-
+      float charge=muon->charge();
+      if(muon->charge()!=0){
+	charge=(float)muon->charge()/(float)abs(muon->charge());
+      }
       // transverse momentum of the muon
       fill( "pt"    ,  muon->et()  , weight );
       // pseudorapidity of the muon
