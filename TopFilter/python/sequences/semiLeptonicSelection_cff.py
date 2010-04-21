@@ -26,24 +26,24 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
 ## setup the lepton selection collections
 tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
-                                           cut = '(trackIso+caloIso)/pt < 0.05'
-                                           )
-looseMuons     = selectedPatMuons.clone(src = 'trackMuons',
-                                           cut = '(trackIso+caloIso)/pt <  0.2'
-                                           )
+                                        cut = '(trackIso+caloIso)/pt < 0.05'
+                                        )
+looseMuons     = selectedPatMuons.clone(src = 'triggerMuons',
+                                        cut = '(trackIso+caloIso)/pt <  0.2'
+                                        )
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
-                                               cut = 'et > 15. & abs(eta) < 2.5 &'
-                                                     'electronID(\"eidRobustLoose\") &'
-                                                     '(trackIso+caloIso)/et <  0.2'
-                                               )
+                                            cut = 'et > 15. & abs(eta) < 2.5 &'
+                                            'electronID(\"eidRobustLoose\") &'
+                                            '(trackIso+caloIso)/et <  0.2'
+                                            )
 
 ## setup jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
-                                            cut=''
-                                            )
+                                         cut=''
+                                         )
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                            cut=''
-                                            )
+                                         cut=''
+                                         )
 
 ## setting up the collections for the semi-leptonic
 ## event selection; on these collection monitoring
@@ -67,23 +67,23 @@ semiLeptonicSelection = cms.Sequence(looseElectrons   *
 
 ## setup the lepton selection
 secondMuonVeto = countPatMuons.clone(src = 'looseMuons',
-                                        maxNumber = 1
-                                        )
+                                     maxNumber = 1
+                                     )
 muonSelection  = countPatMuons.clone(src = 'tightMuons',
-                                        minNumber = 1,
-                                        maxNumber = 1
-                                        )
+                                     minNumber = 1,
+                                     maxNumber = 1
+                                     )
 electronVeto   = countPatElectrons.clone(src = 'looseElectrons',
-                                            maxNumber = 0
-                                            )
+                                         maxNumber = 0
+                                         )
 
 ## setup jet selection collection
 leadingJetSelection = countPatJets.clone(src = 'tightLeadingJets',
-                                            minNumber = 4
-                                            )
+                                         minNumber = 4
+                                         )
 bottomJetSelection  = countPatJets.clone(src = 'tightBottomJets',
-                                            minNumber = 1
-                                            )
+                                         minNumber = 1
+                                         )
 
 ## setting up the semi-leptonic event selection;
 ## on these collection monitoring can still be
