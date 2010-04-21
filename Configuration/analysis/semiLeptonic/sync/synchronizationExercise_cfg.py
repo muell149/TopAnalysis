@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 # in the muon+jets channel
 #-------------------------------------------------
 
-process = cms.Process("SYNC")
+process = cms.Process("SYNC-ON-PAT")
 
 #-------------------------------------------------
 # process configuration
@@ -14,18 +14,19 @@ process = cms.Process("SYNC")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/GEN-SIM-RECO/MC_3XY_V25_preproduction-v1/0003/84F29E99-202C-DF11-810C-00237DA14F92.root'
+    '/store/user/snaumann/sync/patTuple_afterStep2_1.root'
+    #'/store/mc/Summer09/TTbar/GEN-SIM-RECO/MC_3XY_V25_preproduction-v1/0003/84F29E99-202C-DF11-810C-00237DA14F92.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -145,12 +146,18 @@ process.step6c = countPatJets.clone(src = 'goodJets', minNumber = 3)
 process.step7  = countPatJets.clone(src = 'goodJets', minNumber = 4)
 
 #-------------------------------------------------
+# dummy analyzer
+#-------------------------------------------------
+
+process.load("TopAnalysis.TopAnalyzer.EventBasicsAnalyzer_cfi")
+
+#-------------------------------------------------
 # final selection paths
 #-------------------------------------------------
 
 process.looseSelection = cms.Path(process.step1 *
                                   process.step2 *
-                                  process.patDefaultSequence *
+                                  #process.patDefaultSequence *
                                   process.impactParameterMuons *
                                   process.isolatedMuons010 *
                                   process.step3b *
@@ -166,11 +173,12 @@ process.looseSelection = cms.Path(process.step1 *
 
 process.tightSelection = cms.Path(process.step1 *
                                   process.step2 *
-                                  process.patDefaultSequence *
+                                  #process.patDefaultSequence *
                                   process.impactParameterMuons *
                                   process.isolatedMuons010 *
                                   process.isolatedMuons005 *
                                   process.step3a *
+                                  process.analyzeEventBasics *
                                   process.vetoMuons *
                                   process.step4 *
                                   process.vetoElectrons *
@@ -181,3 +189,46 @@ process.tightSelection = cms.Path(process.step1 *
                                   process.step6c *
                                   process.step7
                                   )
+
+#-------------------------------------------------
+# register TFileService
+#-------------------------------------------------
+
+process.TFileService = cms.Service("TFileService",
+    fileName = cms.string('synchronizationExercise.root')
+)
+
+#-------------------------------------------------
+# optional: write patTuple
+#-------------------------------------------------
+#
+#process.patTuple = cms.Path(process.step1 *
+#                            process.step2 *
+#                            process.patDefaultSequence
+#                            )
+#
+### define event selection
+#process.EventSelection = cms.PSet(
+#    SelectEvents = cms.untracked.PSet(
+#        SelectEvents = cms.vstring('patTuple')
+#    )
+#)
+#
+### configure output module
+#process.out = cms.OutputModule("PoolOutputModule",
+#    process.EventSelection,
+#    outputCommands = cms.untracked.vstring('drop *'),
+#    dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
+#    fileName = cms.untracked.string('patTuple_afterStep2.root')
+#)
+#
+### save pat output
+#from PhysicsTools.PatAlgos.patEventContent_cff import *
+#process.out.outputCommands += patTriggerEventContent
+#process.out.outputCommands += patExtraAodEventContent
+#process.out.outputCommands += patEventContentTriggerMatch
+#process.out.outputCommands += patEventContentNoCleaning
+#process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
+#                               "keep *_patMETs*_*_*"]
+#
+#process.outpath = cms.EndPath(process.out)
