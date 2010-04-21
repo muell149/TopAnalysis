@@ -1,4 +1,3 @@
-
 // ---------description-----------------------------------
 // -------------------------------------------------------
 // this Makro shows the effects of the JES ( +/- 10 % ) 
@@ -26,6 +25,8 @@ void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, int filled=0); 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 void drawcutline(double cutval, double maximum);
+void divideByBinwidth(std::vector<TH1F*> histoVector);
+void divideByBinwidth2(TH1F& plot);
 
 void analyzeMuonDiffXJES()
 {
@@ -40,22 +41,22 @@ void analyzeMuonDiffXJES()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVReduced.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVReduced.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVReduced.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVReduced.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVReduced.root"     ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVJES11.root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVJES11.root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVJES11.root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVJES11.root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVJES11.root"       ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVJES09.root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVJES09.root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVJES09.root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVJES09.root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVJES09.root"       ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/pseudoData7TeV50pb.root"               ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root"      ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root"      ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"          ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVJES11.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVJES11.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVJES11.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVJES11.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVJES11.root"     ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVJES09.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVJES09.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVJES09.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVJES09.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVJES09.root"     ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/pseudoData7TeV50pb.root"             ) );
 
   // ---
   //    get histograms
@@ -64,8 +65,8 @@ void analyzeMuonDiffXJES()
   std::vector<TH2F*> corrPt_;
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/pt"    ) );
-    corrPt_    .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPt_"    ) );
+    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/pt"      ) );
+    corrPt_.push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPt_" ) );
   }
 
   // ---
@@ -74,13 +75,13 @@ void analyzeMuonDiffXJES()
   std::vector<double> lumiweight;
   // MC@NLO signal / W+jets Madgraph / MC@NLO background / Z+jets Madgraph / QCD Pythia
 
-  // a) for reduced statistics:
-  lumiweight.push_back(0.0084);
-  lumiweight.push_back(0.1403);
-  lumiweight.push_back(0.0084);
-  lumiweight.push_back(0.1507);
+  // a) for full statistics:
+  lumiweight.push_back(0.0083);
+  lumiweight.push_back(0.1231);
+  lumiweight.push_back(0.0083);
+  lumiweight.push_back(0.1310);
   lumiweight.push_back(1.0286);
-  // b) for shifted BG samples (first +10%, then -10%) full statistics:
+  // b) for JES-shifted samples (first +10%, then -10%) full statistics:
   lumiweight.push_back(0.0083);
   lumiweight.push_back(0.1231);
   lumiweight.push_back(0.0083);
@@ -130,10 +131,11 @@ void analyzeMuonDiffXJES()
 
   std::vector<double> entriesPt_;
 
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+  for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
     entriesPt_.push_back ( lumiweight[idx]*(corrPt_ [idx]->GetEntries()) );
     std::cout << "total weighted # of events in pt (file " << idx << "): " << entriesPt_[idx] << std::endl;
   }
+  std::cout << "total # of events in pseudo data: " << pt_ [15]->Integral() << std::endl;
   
   // ---
   //    do scaling with respect to inclusive cross section (taken from same histogram) and division by binwidth
@@ -167,22 +169,20 @@ void analyzeMuonDiffXJES()
   }
 
   // b) scaling with respect to inclusive XSec
-  pt_[kSGBG]->Scale(  1/ ((double)(entriesPt_[kSig]+entriesPt_[kBkg]+entriesPt_[kQCD]+entriesPt_[kWjets]+entriesPt_[kZjets]))  );
+  pt_[kSGBG     ]->Scale(  1/ ((double)(entriesPt_[kSig]+entriesPt_[kBkg]+entriesPt_[kQCD]+entriesPt_[kWjets]+entriesPt_[kZjets]))  );
   pt_[kSGBGJES11]->Scale(  1/ ((double)(entriesPt_[kSigJES11]+entriesPt_[kBkgJES11]+entriesPt_[kQCDJES11]+entriesPt_[kWjetsJES11]+entriesPt_[kZjetsJES11]))  );
   pt_[kSGBGJES09]->Scale(  1/ ((double)(entriesPt_[kSigJES09]+entriesPt_[kBkgJES09]+entriesPt_[kQCDJES09]+entriesPt_[kWjetsJES09]+entriesPt_[kZjetsJES09]))  );
 
 
   // c) division by binwidth
   for(int i=1; i<= pt_[kSGBG]->GetNbinsX(); i++){
-    pt_[kSGBG]->SetBinContent(i,((double)(pt_[kSGBG]->GetBinContent(i))/(double)(pt_[kSGBG]->GetBinWidth(i)))  );
+    pt_[kSGBG     ]->SetBinContent(i,((double)(pt_[kSGBG]->GetBinContent(i))/(double)(pt_[kSGBG]->GetBinWidth(i)))  );
     pt_[kSGBGJES11]->SetBinContent(i,((double)(pt_[kSGBGJES11]->GetBinContent(i))/(double)(pt_[kSGBGJES11]->GetBinWidth(i)))  );
     pt_[kSGBGJES09]->SetBinContent(i,((double)(pt_[kSGBGJES09]->GetBinContent(i))/(double)(pt_[kSGBGJES09]->GetBinWidth(i)))  );
   }
 
  // clone histograms for drawing without error bars
   TH1F *ptEventNumbersSigNoErrors= (TH1F*)ptEventNumbers_[kSig]->Clone();
-  TH1F *ptkSGBGNoErrors= (TH1F*)(pt_[kSGBG]->Clone());
-  TH1F *ptSGBG =(TH1F*)(pt_[kSGBG]->Clone());
 
   // ---
   //    get and print some numbers
@@ -273,12 +273,6 @@ void analyzeMuonDiffXJES()
   }
 
   // ---
-  //     copy diffXpt for drawing without statistical errors
-  // ---
-
-  TH1F* ptDiffXNoErrors = (TH1F*)pt_[kSig]->Clone();
-
-  // ---
   //     event composition after cuts in rel. numbers (with respect to total bin entries)
   // ---
 
@@ -323,21 +317,21 @@ void analyzeMuonDiffXJES()
     THStack *compositionJES11=new THStack ("compositionJES11","");
     THStack *composition=new THStack ("composition","");
     THStack *compositionJES09=new THStack ("compositionJES09","");
-    histogramStyle(*ptEventNumbersSigNoErrors, kRed, 1, 22, 1);
-    histogramStyle(*ptEventNumbers_[kWjets], kGreen, 1, 20, 1);
-    histogramStyle(*ptEventNumbers_[kBkg  ], kBlue,  1, 23, 1);
-    histogramStyle(*ptEventNumbers_[kZjets], 6,      1, 21, 1);
-    histogramStyle(*ptEventNumbers_[kQCD  ], 14,     1, 29, 1); 
-    histogramStyle(* ptEventNumbers_[kSigJES11  ], kRed,   1, 22, 1);
-    histogramStyle(* ptEventNumbers_[kWjetsJES11], kGreen, 1, 20, 1);
-    histogramStyle(* ptEventNumbers_[kBkgJES11  ], kBlue,  1, 23, 1);
-    histogramStyle(* ptEventNumbers_[kZjetsJES11], 6,      1, 21, 1);
-    histogramStyle(* ptEventNumbers_[kQCDJES11  ], 14,     1, 29, 1); 
-    histogramStyle(* ptEventNumbers_[kSigJES09  ], kRed,   1, 22, 1);
-    histogramStyle(* ptEventNumbers_[kWjetsJES09], kGreen, 1, 20, 1);
-    histogramStyle(* ptEventNumbers_[kBkgJES09  ], kBlue,  1, 23, 1);
-    histogramStyle(* ptEventNumbers_[kZjetsJES09], 6,      1, 21, 1);
-    histogramStyle(* ptEventNumbers_[kQCDJES09  ], 14,     1, 29, 1);
+    histogramStyle(*ptEventNumbersSigNoErrors, kRed, 1, 22, 1001);
+    histogramStyle(*ptEventNumbers_[kWjets], kGreen, 1, 20, 1001);
+    histogramStyle(*ptEventNumbers_[kBkg  ], kBlue,  1, 23, 1001);
+    histogramStyle(*ptEventNumbers_[kZjets], 6,      1, 21, 1001);
+    histogramStyle(*ptEventNumbers_[kQCD  ], 14,     1, 29, 1001); 
+    histogramStyle(* ptEventNumbers_[kSigJES11  ], kRed,   1, 22, 1001);
+    histogramStyle(* ptEventNumbers_[kWjetsJES11], kGreen, 1, 20, 1001);
+    histogramStyle(* ptEventNumbers_[kBkgJES11  ], kBlue,  1, 23, 1001);
+    histogramStyle(* ptEventNumbers_[kZjetsJES11], 6,      1, 21, 1001);
+    histogramStyle(* ptEventNumbers_[kQCDJES11  ], 14,     1, 29, 1001); 
+    histogramStyle(* ptEventNumbers_[kSigJES09  ], kRed,   1, 22, 1001);
+    histogramStyle(* ptEventNumbers_[kWjetsJES09], kGreen, 1, 20, 1001);
+    histogramStyle(* ptEventNumbers_[kBkgJES09  ], kBlue,  1, 23, 1001);
+    histogramStyle(* ptEventNumbers_[kZjetsJES09], 6,      1, 21, 1001);
+    histogramStyle(* ptEventNumbers_[kQCDJES09  ], 14,     1, 29, 1001);
     composition->Add(ptEventNumbersSigNoErrors);
     for(int idx=kWjets; idx<=kQCD; idx++){
       composition->Add(ptEventNumbers_[idx] );
@@ -349,142 +343,140 @@ void analyzeMuonDiffXJES()
       compositionJES09->Add(ptEventNumbers_[idx] );
     }
     histogramStyle(* ptEventNumbersRel_[kSig  ], kRed,   1, 22, 0);
-    for(int idx=kWjets; idx<kQCDJES09; idx++){
-      histogramStyle(* ptEventNumbersRel_[idx], ptEventNumbers_[idx]->GetLineColor(), 1, ptEventNumbers_[idx]->GetMarkerStyle(), 0);  
+    for(int idx=kWjets; idx<=kQCD; idx++){
+      histogramStyle(* ptEventNumbersRel_[idx], ptEventNumbers_[idx]->GetLineColor(), 1, ptEventNumbers_[idx]->GetMarkerStyle(), 0);
     }
+    for(int idx=kSigJES11; idx<=kQCDJES11; idx++){
+      histogramStyle(* ptEventNumbersRel_[idx], ptEventNumbers_[idx]->GetLineColor(), 6, 9, 0);
+    }
+    for(int idx=kSigJES09; idx<=kQCDJES09; idx++){
+      histogramStyle(* ptEventNumbersRel_[idx], ptEventNumbers_[idx]->GetLineColor(), 7, 9, 0);
+    }
+        
+    // ---
+    //    divide plots with event numbers by binwidth to have natural form of spektrum
+    // ---      
+    divideByBinwidth(ptEventNumbers_ );
+    divideByBinwidth2(*ptEventNumbersSigNoErrors);
 
-  // ---
-  //    create legends 
-  // ---
-
-  // create a legend for Signal, JES +/- 10%
+    // ---
+    //    create legends 
+    // ---
+    
+    // create a legend for Signal, JES +/- 10%
     TLegend *leg3 = new TLegend(0.27, 0.70, 1.05, 0.93);
-  leg3->SetFillStyle(0);
-  leg3->SetBorderSize(0);
-  leg3->SetHeader("semi-#mu Top-Antitop (MC@NLO 7 TeV) & 50 pb^{-1}");
-  leg3->AddEntry( pt_[kSig]     , "unshifted"  , "PL");
-  leg3->AddEntry( pt_[kSigJES11], "JES +10 %"  , "PL");
-  leg3->AddEntry( pt_[kSigJES09], "JES -10 %"  , "PL");
+    leg3->SetFillStyle(0);
+    leg3->SetBorderSize(0);
+    leg3->SetHeader("semi-#mu Top-Antitop (MC@NLO 7 TeV) & 50 pb^{-1}");
+    leg3->AddEntry( pt_[kSig]     , "unshifted"  , "PL");
+    leg3->AddEntry( pt_[kSigJES11], "JES +10 %"  , "PL");
+    leg3->AddEntry( pt_[kSigJES09], "JES -10 %"  , "PL");
+    
+    // create a legend for stack plot with underground
+    TLegend *leg4 = new TLegend(0.40, 0.55, 1.05, 0.95);
+    leg4->SetFillStyle(0);
+    leg4->SetBorderSize(0);
+    leg4->SetHeader("50 pb^{-1} @ 7TeV MC samples");
+    leg4->AddEntry( ptEventNumbersSigNoErrors , "semi #mu ttbar Mc@Nlo", "F" );
+    leg4->AddEntry( ptEventNumbers_[kBkg]     , "other ttbar Mc@Nlo"   , "F" );
+    leg4->AddEntry( ptEventNumbers_[kQCD]     , "QCD Pythia"           , "F" );
+    leg4->AddEntry( ptEventNumbers_[kWjets]   , "Wjets Madgraph"       , "F" );
+    leg4->AddEntry( ptEventNumbers_[kZjets]   , "Zjets Madgraph"       , "F" );
+    leg4->AddEntry( ptEventNumbers_[kPseudo50], "pseudo data"          , "P");
+    
+    // create a legend for relative plot with underground
+    TLegend *leg0 = new TLegend(0.22, 0.70, 0.70, 0.95);
+    leg0->SetFillStyle(0);
+    leg0->SetBorderSize(0);
+    leg0->SetHeader("MC samples @ 7TeV");
+    leg0->AddEntry( ptEventNumbersRel_[kSig]       , "semi #mu ttbar Mc@Nlo", "PL");
+    leg0->AddEntry( ptEventNumbersRel_[kBkg]       , "other ttbar Mc@Nlo"   , "PL");
+    leg0->AddEntry( ptEventNumbersRel_[kQCD]       , "QCD Pythia"           , "PL");
+    leg0->AddEntry( ptEventNumbersRel_[kWjets]     , "Wjets Madgraph"       , "PL");
+    leg0->AddEntry( ptEventNumbersRel_[kZjets]     , "Zjets Madgraph"       , "PL");
+    
+    // create a legend for diffX pt(mu) (all left events after selektion, JES +/- 10%)
+    TLegend *leg6 = new TLegend(0.25, 0.64, 1.05, 0.92);
+    leg6->SetFillStyle(0);
+    leg6->SetBorderSize(0);
+    leg6->SetHeader("events after selection @ 7 TeV & 50 pb^{-1}");
+    leg6->AddEntry( pt_[kSGBG]     , "unshifted"  , "PL");
+    leg6->AddEntry( pt_[kSGBGJES11], "JES +10 %"  , "PL");
+    leg6->AddEntry( pt_[kSGBGJES09], "JES -10 %"  , "PL");
+ 
+    // create a legend for relative plot with underground
+    TLegend *leg1 = new TLegend(0.64, 0.70, 0.84, 0.95);
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("-10% JES");
+    leg1->SetMargin(0.5);
+    leg1->AddEntry( ptEventNumbersRel_[kSigJES09]       , " "   , "PL");
+    leg1->AddEntry( ptEventNumbersRel_[kBkgJES09]       , " "   , "PL");
+    leg1->AddEntry( ptEventNumbersRel_[kQCDJES09]       , " "   , "PL");
+    leg1->AddEntry( ptEventNumbersRel_[kWjetsJES09]     , " "   , "PL");
+    leg1->AddEntry( ptEventNumbersRel_[kZjetsJES09]     , " "   , "PL");
 
-  // create a legend for stack plot with underground
-  TLegend *leg4 = new TLegend(0.5, 0.64, 0.97, 0.89);
-  leg4->SetFillStyle(0);
-  leg4->SetBorderSize(0);
-  leg4->SetHeader("50 pb^{-1} @ 7TeV MC samples");
-  leg4->AddEntry( ptEventNumbersSigNoErrors , "semi #mu ttbar Mc@Nlo", "F" );
-  leg4->AddEntry( ptEventNumbers_[kBkg]     , "other ttbar Mc@Nlo"   , "F" );
-  leg4->AddEntry( ptEventNumbers_[kQCD]     , "QCD Pythia"           , "F" );
-  leg4->AddEntry( ptEventNumbers_[kWjets]   , "Wjets Madgraph"       , "F" );
-  leg4->AddEntry( ptEventNumbers_[kZjets]   , "Zjets Madgraph"       , "F" );
-  leg4->AddEntry( ptEventNumbers_[kPseudo50], "pseudo data"          , "P");
-
-  // create a legend for relative plot with underground
-  TLegend *leg0 = new TLegend(0.48, 0.69, 0.95, 0.94);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->SetHeader("MC samples @ 7TeV");
-  leg0->AddEntry( ptEventNumbersRel_[kSig]       , "semi #mu ttbar Mc@Nlo", "PL");
-  leg0->AddEntry( ptEventNumbersRel_[kBkg]       , "other ttbar Mc@Nlo"   , "PL");
-  leg0->AddEntry( ptEventNumbersRel_[kQCD]       , "QCD Pythia"           , "PL");
-  leg0->AddEntry( ptEventNumbersRel_[kWjets]     , "Wjets Madgraph"       , "PL");
-  leg0->AddEntry( ptEventNumbersRel_[kZjets]     , "Zjets Madgraph"       , "PL");
-
-  // create a legend for Signal, Signal + Background, pseudo data
-  TLegend *leg5 = new TLegend(0.21, 0.67, 0.92, 0.92);
-  leg5->SetFillStyle(0);
-  leg5->SetBorderSize(0);
-  leg5->SetHeader("50 pb^{-1} @ 7 TeV");
-  leg5->AddEntry( ptDiffXNoErrors, "signal only"        , "PL");
-  leg5->AddEntry( ptSGBG         , "signal + background", "PL");
-  leg5->AddEntry( pt_[kPseudo50] , "pseudo data"        , "P");
-
-  // create a legend for diffX pt(mu) (all left events after selektion, JES +/- 10%)
-  TLegend *leg6 = new TLegend(0.25, 0.64, 1.05, 0.92);
-  leg6->SetFillStyle(0);
-  leg6->SetBorderSize(0);
-  leg6->SetHeader("events after selection @ 7 TeV & 50 pb^{-1}");
-  leg6->AddEntry( pt_[kSGBG]     , "unshifted"  , "PL");
-  leg6->AddEntry( pt_[kSGBGJES11], "JES +10 %"  , "PL");
-  leg6->AddEntry( pt_[kSGBGJES09], "JES -10 %"  , "PL");
-
-  // create a legend for all left events after selektion, JES +/- 10%
-  TLegend *leg7 = new TLegend(0.20, 0.69, 0.93, 0.94);
-  leg7->SetFillStyle(0);
-  leg7->SetBorderSize(0);
-  leg7->SetHeader("events after selection @ 7 TeV & 50 pb^{-1}");
-  leg7->AddEntry( ptEventNumbers_[kSGBG]     , "unshifted"  , "PL");
-  leg7->AddEntry( ptEventNumbers_[kSGBGJES11], "JES +10 %"  , "PL");
-  leg7->AddEntry( ptEventNumbers_[kSGBGJES09], "JES -10 %"  , "PL");
-
-  std::vector<TCanvas*> MyCanvas;
-
-  for(int idx=0; idx<=10; idx++){ 
-    char canvname[10];
-    sprintf(canvname,"canv%i",idx);    
-    MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
-    canvasStyle(*MyCanvas[idx]);
-  }
-  
-  // ---
-  //    do the printing for pt_ ( normalized,DIFFerential xSec ttbar(muon) only with JES +/-10% )
-  // ---
-  MyCanvas[0]->cd(0);
-  MyCanvas[0]->SetTitle("ptDiffXSecSignalJESEffectMcatnlo7TeV");
-  axesStyle(*pt_ [kSig], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}", 0., 0.035, 0.04, 2.0);
-  histogramStyle(*pt_  [kSig]     , kBlack, 1);
-  histogramStyle(*pt_  [kSigJES11], kBlue,  2);
-  histogramStyle(*pt_  [kSigJES09], kRed,   2);
-  pt_ [kSig]->SetBinError( 1, 0. );
-  for(int i =2; i<= totalBinNumber+1; i++){
-    pt_ [kSig]->SetBinError(  i, ptDiffXError_[i-2]  );
-  }
-  pt_ [kSig]     ->Draw("");
-  pt_ [kSigJES11]->Draw("same");
-  pt_ [kSigJES09]->Draw("same");
-  leg3           ->Draw("same");
-
-  // ---
-  //    do the printing for pt_ ( normalized,DIFFerential xSec signal + background with JES +/-10% )
-  // ---
-  MyCanvas[1]->cd(0);
-  MyCanvas[1]->SetTitle("ptDiffXSecAllJESEffect7TeV");
-  axesStyle(*pt_ [kSGBG], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}", 0., 0.035, 0.04, 2.0);
-  histogramStyle(*pt_ [kSGBG]     , kBlack, 1);
-  histogramStyle(*pt_ [kSGBGJES11], kBlue,  2);
-  histogramStyle(*pt_ [kSGBGJES09], kRed ,  2);
-  for(int i =2; i<= totalBinNumber+1; i++){
-    pt_[kSGBG]->SetBinError( i, ptDiffXAllSamplesError_[i-2] );
-  }
-  pt_ [kSGBG]     ->Draw();
-  ptkSGBGNoErrors ->Draw("same");
-  pt_ [kSGBGJES11]->Draw("same");
-  pt_ [kSGBGJES09]->Draw("same");
-  leg6            ->Draw("same");
-
-
-  // ---
-  //    do the printing for pt_ ( normalized,DIFFerential xSec signal, signal + background and Pseudo Data )
-  // ---
-  MyCanvas[2]->cd(0);
-  MyCanvas[2]->SetTitle("ptDiffXSecForSGBGAndPseudoData7TeV");
-  histogramStyle(*pt_ [kPseudo50], kBlack, 1, 22);
-  histogramStyle(*ptSGBG, kBlue, 1, 20);
-  histogramStyle(*ptDiffXNoErrors, kRed, 1, 20);
-  axesStyle(*ptDiffXNoErrors, "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}", 0., 0.035, 0.04, 2.0);
-  for(int i =2; i<= totalBinNumber+1; i++){
-    pt_[kPseudo50]->SetBinError(  i, ptDiffXPseudoError_[i-2] );
-  }
-  ptDiffXNoErrors->Draw();
-  ptSGBG         ->Draw("same"); 
-  pt_ [kPseudo50]->Draw("psame");
-  leg5           ->Draw("same");
+    // create a legend for relative plot with underground
+    TLegend *leg2 = new TLegend(0.80, 0.70, 1.00, 0.95);
+    leg2->SetFillStyle(0);
+    leg2->SetBorderSize(0);
+    leg2->SetHeader("+10% JES");
+    leg2->SetMargin(0.5);
+    leg2->AddEntry( ptEventNumbersRel_[kSigJES11]       , " "   , "PL");
+    leg2->AddEntry( ptEventNumbersRel_[kBkgJES11]       , " "   , "PL");
+    leg2->AddEntry( ptEventNumbersRel_[kQCDJES11]       , " "   , "PL");
+    leg2->AddEntry( ptEventNumbersRel_[kWjetsJES11]     , " "   , "PL");
+    leg2->AddEntry( ptEventNumbersRel_[kZjetsJES11]     , " "   , "PL");
+   
+    std::vector<TCanvas*> MyCanvas;   
+    for(int idx=0; idx<=7; idx++){ 
+      char canvname[10];
+      sprintf(canvname,"canv%i",idx);    
+      MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
+      canvasStyle(*MyCanvas[idx]);
+    }
+    
+    // ---
+    //    do the printing for pt_ ( normalized,DIFFerential xSec ttbar(muon) only with JES +/-10% )
+    // ---
+    MyCanvas[0]->cd(0);
+    MyCanvas[0]->SetTitle("ptDiffXSecSignalJESEffectMcatnlo7TeV");
+    axesStyle(*pt_ [kSig], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}} [GeV^{-1}]", 0., 0.035, 0.04, 2.0);
+    histogramStyle(*pt_  [kSig]     , kBlack, 1);
+    histogramStyle(*pt_  [kSigJES11], kBlue,  2);
+    histogramStyle(*pt_  [kSigJES09], kRed,   2);
+    pt_ [kSig]->SetBinError( 1, 0. );
+    for(int i =2; i<= totalBinNumber+1; i++){
+      pt_ [kSig]->SetBinError(  i, ptDiffXError_[i-2]  );
+    }
+    pt_ [kSig]     ->Draw("");
+    pt_ [kSigJES11]->Draw("same");
+    pt_ [kSigJES09]->Draw("same");
+    leg3           ->Draw("same");
+    
+    // ---
+    //    do the printing for pt_ ( normalized,DIFFerential xSec signal + background with JES +/-10% )
+    // ---
+    MyCanvas[1]->cd(0);
+    MyCanvas[1]->SetTitle("ptDiffXSecAllJESEffect7TeV");
+    axesStyle(*pt_ [kSGBG], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)}} [GeV^{-1}]", 0., 0.035, 0.04, 2.0);
+    histogramStyle(*pt_ [kSGBG]     , kBlack, 1);
+    histogramStyle(*pt_ [kSGBGJES11], kBlue,  2);
+    histogramStyle(*pt_ [kSGBGJES09], kRed ,  2);
+    for(int i =2; i<= totalBinNumber+1; i++){
+      pt_[kSGBG]->SetBinError( i, ptDiffXAllSamplesError_[i-2] );
+    }
+    pt_ [kSGBG]     ->Draw();
+    pt_ [kSGBGJES11]->Draw("same");
+    pt_ [kSGBGJES09]->Draw("same");
+    leg6            ->Draw("same");
 
   // ---
   //    do the printing for ptEventNumbers_ ( eventNUMBERs/binwidth in pt(muon) for ttbar(muon) only with JES +/-10% )
   // ---
-  MyCanvas[3]->cd(0);
-  MyCanvas[3]->SetTitle("ptInclusiveSignalJESEffectMcatnlo7TeV");
-  axesStyle(*ptEventNumbers_ [kSig], "p_{t} ( #mu ) [GeV]", "events", 0., 130.);
+  MyCanvas[2]->cd(0);
+  MyCanvas[2]->SetTitle("ptInclusiveSignalJESEffectMcatnlo7TeV");
+  axesStyle(*ptEventNumbers_ [kSig], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., 10.);
   TH1F *ptEvtsJES11= (TH1F*)(ptEventNumbers_ [kSigJES11]->Clone());
   TH1F *ptEvtsJES09= (TH1F*)(ptEventNumbers_ [kSigJES09]->Clone());
   histogramStyle(*ptEventNumbers_ [kSig], kBlack, 1);
@@ -492,7 +484,7 @@ void analyzeMuonDiffXJES()
   histogramStyle(*ptEvtsJES09,            kRed  , 2, 20, 0);
   ptEventNumbers_ [kSig]->SetBinError( 1, 0. );
   for(int i =2; i<= totalBinNumber+1; i++){
-    ptEventNumbers_ [kSig]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) )  );
+    ptEventNumbers_ [kSig]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) ) / sqrt( (double)(ptEventNumbers_[kSig]->GetBinWidth(i)) )  );
   }
   ptEventNumbers_ [kSig]->Draw("");
   ptEvtsJES11->Draw("same");
@@ -502,14 +494,16 @@ void analyzeMuonDiffXJES()
   // ---
   //    do the printing for ptEventNumbers_ ( eventNUMBERs/binwidth in pt(muon) for signal + background with JES +/-10% )
   // ---
-  MyCanvas[4]->cd(0);
-  MyCanvas[4]->SetTitle("ptInclusiveAllJESEffect7TeV");
-  axesStyle(*ptEventNumbers_ [kSGBG], "p_{t} ( #mu ) [GeV]", "events", 0., 270.);
+  MyCanvas[3]->cd(0);
+  MyCanvas[3]->SetTitle("ptInclusiveAllJESEffect7TeV");
+  axesStyle(*ptEventNumbers_ [kSGBG], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., 20.);
   histogramStyle(*ptEventNumbers_ [kSGBG]     , kBlack, 1);
   histogramStyle(*ptEventNumbers_ [kSGBGJES11], kBlue,  2);
   histogramStyle(*ptEventNumbers_ [kSGBGJES09], kRed,   2);
-  ptEventNumbers_ [kSGBG]->Draw("e0");
-  ptEventNumbers_ [kSGBG]->Draw("same");
+  for(int i =2; i<= totalBinNumber+1; i++){
+    ptEventNumbers_ [kSGBG]->SetBinError(  i, sqrt( (double)(ptEventNumbers_[kSGBG]->GetBinContent(i)) ) / sqrt( (double)(ptEventNumbers_[kSGBG]->GetBinWidth(i)) )  );
+  }
+  ptEventNumbers_ [kSGBG]->Draw("");
   ptEventNumbers_ [kSGBGJES11]->Draw("same");
   ptEventNumbers_ [kSGBGJES09]->Draw("same");
   leg6                        ->Draw("same");
@@ -518,14 +512,14 @@ void analyzeMuonDiffXJES()
   //    do the printing for EventNumbers ( eventNUMBERs/binwidth in pt(muon) for signal + background and pseudo data as STACK plot )
   // ---
 
-  MyCanvas[5]->cd(0);
-  MyCanvas[5]->SetTitle("eventCompositionNoJES");
-  axesStyle(*ptEventNumbersSigNoErrors, "p_{t} ( #mu ) [GeV]", "events", -123., 170. );
+  MyCanvas[4]->cd(0);
+  MyCanvas[4]->SetTitle("eventCompositionNoJES");
+  axesStyle(*ptEventNumbersSigNoErrors, "p_{t} ( #mu ) [GeV]", "events / GeV", -123., 12. );
   histogramStyle(*ptEventNumbers_[kPseudo50], kBlack, 1, 22);
   ptEventNumbersSigNoErrors->Draw("AXIS");
   composition              ->Draw("same");
   for(int i =2; i<= totalBinNumber+1; i++){
-    ptEventNumbers_[kPseudo50]->SetBinError(  i, (int)sqrt((double)ptEventNumbers_[kPseudo50]->GetBinContent(i))  );
+    ptEventNumbers_[kPseudo50]->SetBinError(  i, (int)sqrt((double)ptEventNumbers_[kPseudo50]->GetBinContent(i)) / sqrt( (double)(ptEventNumbers_[kPseudo50]->GetBinWidth(i)) )  );
   }
   ptEventNumbers_[kPseudo50]->Draw("psame");
   leg4                      ->Draw("same");
@@ -533,8 +527,8 @@ void analyzeMuonDiffXJES()
   // ---
   //    do the printing for EventNumbers ( with JES+10%: eventNUMBERs/binwidth in pt(muon) for signal + background as STACK plot )
   // ---
-  MyCanvas[6]->cd(0);
-  MyCanvas[6]->SetTitle("eventCompositionJES11");
+  MyCanvas[5]->cd(0);
+  MyCanvas[5]->SetTitle("eventCompositionJES11");
   ptEventNumbersSigNoErrors->Draw("AXIS");
   compositionJES11         ->Draw("same");
   leg4                     ->Draw("same");
@@ -542,70 +536,43 @@ void analyzeMuonDiffXJES()
   // ---
   //    do the printing for EventNumbers ( with JES-10%: eventNUMBERs/binwidth in pt(muon) for signal + background as STACK plot )
   // ---
-  MyCanvas[7]->cd(0);
-  MyCanvas[7]->SetTitle("eventCompositionJES09");
+  MyCanvas[6]->cd(0);
+  MyCanvas[6]->SetTitle("eventCompositionJES09");
   ptEventNumbersSigNoErrors->Draw("AXIS");
   compositionJES09         ->Draw("same");
   leg4                     ->Draw("same");
 
-
   // ---
-  //    do the printing for EventNumbers ( eventNUMBERs/binwidth in pt(muon) for signal + background as REALTIVE plot )
+  //    do the printing for EventNumbers (  with and without JES: eventNUMBERs in pt(muon) for signal + background as REALTIVE plot )
   // ---
-  MyCanvas[8]->cd(0);
-  MyCanvas[8]->SetTitle("eventCompositionRelative");
-  MyCanvas[8]->SetGrid(1,1);
-  axesStyle(*ptEventNumbersRel_[kSig], "p_{t} ( #mu ) [GeV]", "fraction (events)", -123., 1.0);
-  ptEventNumbersRel_[kSig]->Draw("");
-  for(int idx=kSig; idx<=kQCD; idx++){
-    ptEventNumbersRel_[idx]->Draw("same");
-    ptEventNumbersRel_[idx]->Draw("Psame");
-    }
-  leg0          ->Draw("same");
-
-  // ---
-  //    do the printing for EventNumbers (  with JES+10%: eventNUMBERs/binwidth in pt(muon) for signal + background as REALTIVE plot )
-  // ---
-  MyCanvas[9]->cd(0);
-  MyCanvas[9]->SetTitle("eventCompositionRelativeJES11");
-  MyCanvas[9]->SetGrid(1,1);
-  axesStyle(*ptEventNumbersRel_[kSigJES11], "p_{t} ( #mu ) [GeV]", "fraction (events)", -123., 1.0);
-  ptEventNumbersRel_[kSigJES11]->Draw("");
-  for(int idx=kSigJES11; idx<=kQCDJES11; idx++){
-    ptEventNumbersRel_[idx]->Draw("same");
-    ptEventNumbersRel_[idx]->Draw("Psame");
-    }
-  leg0          ->Draw("same");
-
-  // ---
-  //    do the printing for EventNumbers (  with JES-10%: eventNUMBERs/binwidth in pt(muon) for signal + background as REALTIVE plot )
-  // ---
-  MyCanvas[10]->cd(0);
-  MyCanvas[10]->SetTitle("eventCompositionRelativeJES09");
-  MyCanvas[10]->SetGrid(1,1);
+  MyCanvas[7]->cd(0);
+  MyCanvas[7]->SetTitle("eventCompositionRelativeWithAndWithoutJES");
+  MyCanvas[7]->SetGrid(1,1);
   axesStyle(*ptEventNumbersRel_[kSigJES09], "p_{t} ( #mu ) [GeV]", "fraction (events)", -123., 1.0);
   ptEventNumbersRel_[kSigJES09]->Draw("");
-  for(int idx=kSigJES09; idx<=kQCDJES09; idx++){
+  for(int idx=kSig; idx<=kQCDJES09; idx++){
     ptEventNumbersRel_[idx]->Draw("same");
     ptEventNumbersRel_[idx]->Draw("Psame");
-    }
-  leg0          ->Draw("same");
+  }
+  leg0->Draw("same");
+  leg1->Draw("same");
+  leg2->Draw("same");
 
   // ---
   // saving
   // ---
   
-//   // ps
-//   MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffXJESandBGMcatnlo7TeV.ps("  );
-//   for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffXJESandBGMcatnlo7TeV.ps"  );   
-//   }
-//   MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffXJESandBGMcatnlo7TeV.ps)"  );
+  // ps
+  MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffXJESandBGMcatnlo7TeV.ps("  );
+  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffXJESandBGMcatnlo7TeV.ps"  );   
+  }
+  MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffXJESandBGMcatnlo7TeV.ps)"  );
   
-//   // png
-//   for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
-//   }
+  // png
+  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+  }
 }
 
 void canvasStyle(TCanvas& canv) 
@@ -626,8 +593,8 @@ void histogramStyle(TH1& hist, int color, int lineStyle, int markerStyle, int fi
   hist.SetMarkerStyle(markerStyle);
   hist.SetMarkerSize(1.5);
   hist.SetLineStyle(lineStyle);
-  if(filled==1){
-  hist.SetFillStyle(1001);
+  if(filled!=0){
+  hist.SetFillStyle(filled);
   hist.SetFillColor(color);
   }
   else{
@@ -665,4 +632,23 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, fl
   hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
+}
+
+void divideByBinwidth(std::vector<TH1F*> histoVector)
+{
+  // loop over every sample of one histo
+  for(unsigned int idx=0; idx<histoVector.size(); idx++){
+    // loop over every bin    
+    for(int bini=1; bini<= histoVector[idx]->GetNbinsX(); bini++){
+      histoVector[idx]->SetBinContent(bini,((double)(histoVector[idx]->GetBinContent(bini))/(double)(histoVector[idx]->GetBinWidth(bini)))  );
+    }
+  } 
+}
+
+void divideByBinwidth2(TH1F& plot)
+{
+  // loop over every bin    
+  for(int bini=1; bini<= plot.GetNbinsX(); bini++){
+    plot.SetBinContent(bini,((double)(plot.GetBinContent(bini))/(double)(plot.GetBinWidth(bini)))  );   
+  } 
 }
