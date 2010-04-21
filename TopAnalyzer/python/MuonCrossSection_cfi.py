@@ -36,9 +36,7 @@ analyzeCrossSectionMuonCorrelations = cms.EDAnalyzer("MuonCrossSectionAnalyzer",
     srcB = cms.InputTag("genParticles"),                                         
     ## special parameters
     analyze   = cms.PSet(
-      ## fill histograms for 1.,2.,3.,... leading
-      ## counting starts with 0=leading Muon! 
-      ## muon? -1 corresponds to 'all'
-      index = cms.int32(0)
+      ## index parameter has no effect when filling the correlation plots but is expected by the module
+      index = cms.int32(-1)
     )                                       
 )
