@@ -18,14 +18,12 @@ process.p1.replace(process.semiLeptonicSelection,
                    process.scaledJetEnergy * process.semiLeptonicSelection)
 
 ## change monitoring to shifted collection
-process.p1.replace(process.unshiftedJets,
-                   process.shiftedJets)
+process.monitorCuts+= process.shiftedJets
 
 ## change input collection to JES-shifted collection 
-## ATTENTION: this needs to be adapted when running on 3_5_X MC samples
-process.centralJets.src = "scaledJetEnergy:selectedLayer1Jets"
-process.reliableJets.src = "scaledJetEnergy:selectedLayer1Jets"
-process.goodJets.src = "scaledJetEnergy:selectedLayer1Jets"
+process.centralJets.src =  'scaledJetEnergy:selectedPatJets'
+process.reliableJets.src = 'scaledJetEnergy:selectedPatJets'
+process.goodJets.src =     'scaledJetEnergy:selectedPatJets'
 
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXSecJES09_testBkg.root'
@@ -36,3 +34,4 @@ from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 for input in inputs:
     massSearchReplaceAnyInputTag(process.p1, 'patMETs', 'layer1METs')    
     massSearchReplaceAnyInputTag(process.p1, 'selectedPat'+input, 'selectedLayer1'+input)
+    massSearchReplaceAnyInputTag(process.p1, 'scaledJetEnergy:selectedPatJets', 'scaledJetEnergy:selectedLayer1Jets')

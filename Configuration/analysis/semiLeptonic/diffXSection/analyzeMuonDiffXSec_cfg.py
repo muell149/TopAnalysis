@@ -38,8 +38,8 @@ process.source = cms.Source("PoolSource",
 
     # '/store/user/henderle/samples/Zjets_madgraph_10TeV/PATtuple_11.root'
     # '/store/user/henderle/samples/Wjets_madgraph_10TeV/PATtuple_1.root'
-      '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
-    # '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root'
+    # '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
+      '/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root'
     # '/store/user/henderle/OctEx/SD_Mu9/InclusiveMu15/PATtuple_1.root'
     # '/store/user/henderle/samples/InclusiveMu15_7TeV/PATtuple_100.root'
     # '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_1.root'
@@ -182,13 +182,17 @@ process.tightLeadingJetKinematicsNjets1 = process.analyzeJetKinematics.clone (sr
 process.tightLeadingJetKinematicsNjets2 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
 process.tightLeadingJetKinematicsNjets3 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
 process.tightLeadingJetKinematicsNjets4 = process.analyzeJetKinematics.clone (src = 'tightLeadingJets')
-                                   
-## set up distribution for cross section measurement
-process.analyzeTightMuonCrossSection       = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
-process.analyzeTightMuonCrossSectionNjets1 = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
-process.analyzeTightMuonCrossSectionNjets2 = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
-process.analyzeTightMuonCrossSectionNjets3 = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
-process.analyzeTightMuonCrossSectionBtag   = process.analyzeMuonCrossSection.clone(src = 'tightMuons')
+
+## ---                                   
+##    set up distribution for cross section measurement
+## ---
+
+## on reconstruction Niveau
+process.analyzeTightMuonCrossSectionRecNjets1 = process.analyzeCrossSectionRecMuon.clone(srcA = 'tightMuons')
+process.analyzeTightMuonCrossSectionRecNjets2 = process.analyzeCrossSectionRecMuon.clone(srcA = 'tightMuons')
+process.analyzeTightMuonCrossSectionRecNjets3 = process.analyzeCrossSectionRecMuon.clone(srcA = 'tightMuons')
+process.analyzeTightMuonCrossSectionRecNjets4 = process.analyzeCrossSectionRecMuon.clone(srcA = 'tightMuons')
+process.analyzeTightMuonCrossSectionRecBtag   = process.analyzeCrossSectionRecMuon.clone(srcA = 'tightMuons')
 
 ## ---
 ##    Set up selection steps for different jet multiplicities
@@ -212,15 +216,14 @@ process.looseVetoElectronKinematics = process.analyzeElectronKinematics.clone(sr
                                                                               analyze = cms.PSet(index = cms.int32(-1)))
 process.allUnselectedJetKinematics  = process.analyzeJetKinematics.clone (src = 'selectedPatJets',
                                                                           analyze = cms.PSet(index = cms.int32(-1),
-                                                                                             correctionLevel = cms.string('abs')))
+                                                                          correctionLevel = cms.string('abs')))
 process.allTightJetKinematics       = process.analyzeJetKinematics.clone(src = 'tightLeadingJets',
                                                                          analyze = cms.PSet(index = cms.int32(-1),
-                                                                                            correctionLevel = cms.string('abs')))
+                                                                         correctionLevel = cms.string('abs')))
 process.centralLead_3_JetKinematics = process.analyzeJetKinematics.clone  (src = 'centralJets', analyze = uds3 )
 process.allReliableJetQuality = process.analyzeJetQuality.clone (src = 'reliableJets',
                                                                  analyze = cms.PSet(index = cms.int32(-1) ,
-                                                                                    flavor = cms.string("uds")
-))
+                                                                 flavor = cms.string("uds")))
 
 process.monitorCuts = cms.Sequence( process.combinedMuonKinematics  +
                                     process.triggerMuonQuality      +
@@ -230,10 +233,11 @@ process.monitorCuts = cms.Sequence( process.combinedMuonKinematics  +
                                     process.tightMuonKinematics     +
                                     process.looseVetoMuonKinematics +                                    
                                     process.looseVetoElectronKinematics + 
-                                    process.allUnselectedJetKinematics +
+                                    process.allUnselectedJetKinematics  +
                                     process.allReliableJetQuality   +
                                     process.allTightJetKinematics   +
-                                    process.centralLead_3_JetKinematics
+                                    process.centralLead_3_JetKinematics +
+                                    process.unshiftedJets
                                     )
 ## ---
 ##    run the final sequence
@@ -241,47 +245,45 @@ process.monitorCuts = cms.Sequence( process.combinedMuonKinematics  +
 
 process.p1 = cms.Path(
                       ## do the gen event selection (decay channel) and the trigger selection (hltMu9)
-                      process.filterSequence                      *
+                      process.filterSequence                        *
                       ## introduce some collections
-                      process.semiLeptonicSelection               *
-                      reliableJets                                *
-                      centralJets                                 *
-                      combinedMuons                               *
+                      process.semiLeptonicSelection                 *
+                      reliableJets                                  *
+                      centralJets                                   *
+                      combinedMuons                                 *
                       ## monitor all cut quantities
-                      process.monitorCuts                         *
-                      ## monitor jet Kinematics (to see JES effects)
-#                      process.unshiftedJets                       *
+                      process.monitorCuts                           *
                       ## do the event selection for muon
-                      process.muonSelection                       *
+                      process.muonSelection                         *
                       ## do event selection veto cuts
-                      process.secondMuonVeto                      *
-                      process.electronVeto                        *
+                      process.secondMuonVeto                        *
+                      process.electronVeto                          *
                       ## monitoring of jet kinematics before jetcuts
-                      process.tightLeadingJetKinematics           *
+                      process.tightLeadingJetKinematics             *
                       ## Selection: N_jets = 1
-                      process.leadingJetSelectionNjets1           *
+                      process.leadingJetSelectionNjets1             *
                       ## plots for N_jets = 1
-                      process.analyzeTightMuonCrossSectionNjets1  *
-                      process.tightLeadingJetKinematicsNjets1     *                      
+                      process.analyzeTightMuonCrossSectionRecNjets1 *
+                      process.tightLeadingJetKinematicsNjets1       *                      
                       ## Selection: N_jets = 2
-                      process.leadingJetSelectionNjets2           *
+                      process.leadingJetSelectionNjets2             *
                       ## plots for N_jets = 2
-                      process.analyzeTightMuonCrossSectionNjets2  *
-                      process.tightLeadingJetKinematicsNjets2     *
-                      ## Selection: N_jets = 3
-                      process.leadingJetSelectionNjets3           *
+                      process.analyzeTightMuonCrossSectionRecNjets2 *
+                      process.tightLeadingJetKinematicsNjets2       *
+                      ## Selection: N_jets = 3 
+                      process.leadingJetSelectionNjets3             *
                        ## plots for N_jets = 3
-                      process.analyzeTightMuonCrossSectionNjets3  *
-                      process.tightLeadingJetKinematicsNjets3     *
+                      process.analyzeTightMuonCrossSectionRecNjets3 *
+                      process.tightLeadingJetKinematicsNjets3       *
                       ## do event selection concerning jets
-                      process.leadingJetSelection                 *
+                      process.leadingJetSelection                   *
                       ## cross section measurement 
-                      process.analyzeTightMuonCrossSection        *
+                      process.analyzeTightMuonCrossSectionRecNjets4 *
                       ## monitoring of jet kinematics after jetcuts
-                      process.tightLeadingJetKinematicsNjets4     *    
+                      process.tightLeadingJetKinematicsNjets4       *    
                       ## btag
-                      process.bottomJetSelection                  *
-                      process.analyzeTightMuonCrossSectionBtag
+                      process.bottomJetSelection                    *
+                      process.analyzeTightMuonCrossSectionRecBtag
                       )
 
 # replace label names when running on old (3_4_X) MC samples
