@@ -118,7 +118,6 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
 process.vetoElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                                    cut =
                                                    'et > 15. &'
-                                                   'abs(eta) < 2.4 &'
                                                    '(trackIso+caloIso)/et <  0.2'
                                                    )
 
@@ -168,7 +167,8 @@ process.looseSelection = cms.Path(process.step1 *
                                   process.goodJets *
                                   process.step6a *
                                   process.step6b *
-                                  process.step6c
+                                  process.step6c *
+                                  process.analyzeEventBasics                                  
                                   )
 
 process.tightSelection = cms.Path(process.step1 *
@@ -178,7 +178,6 @@ process.tightSelection = cms.Path(process.step1 *
                                   process.isolatedMuons010 *
                                   process.isolatedMuons005 *
                                   process.step3a *
-                                  process.analyzeEventBasics *
                                   process.vetoMuons *
                                   process.step4 *
                                   process.vetoElectrons *
