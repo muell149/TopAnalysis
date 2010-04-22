@@ -14,7 +14,7 @@ process = cms.Process("SYNC-ON-PAT")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 10000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -151,6 +151,20 @@ process.step7  = countPatJets.clone(src = 'goodJets', minNumber = 4)
 process.load("TopAnalysis.TopAnalyzer.EventBasicsAnalyzer_cfi")
 
 #-------------------------------------------------
+# TtSemiLeptonicEvent
+#-------------------------------------------------
+
+process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff")
+
+from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
+addTtSemiLepHypotheses(process, ["kMaxSumPtWMass"])
+removeTtSemiLepHypGenMatch(process)
+setForAllTtSemiLepHypotheses(process, "jets", "goodJets")
+setForAllTtSemiLepHypotheses(process, "maxNJets", -1)
+
+process.load("TopQuarkAnalysis.Examples.HypothesisAnalyzer_cfi")
+
+#-------------------------------------------------
 # final selection paths
 #-------------------------------------------------
 
@@ -168,7 +182,7 @@ process.looseSelection = cms.Path(process.step1 *
                                   process.step6a *
                                   process.step6b *
                                   process.step6c *
-                                  process.analyzeEventBasics                                  
+                                  process.analyzeEventBasics
                                   )
 
 process.tightSelection = cms.Path(process.step1 *
@@ -186,7 +200,9 @@ process.tightSelection = cms.Path(process.step1 *
                                   process.step6a *
                                   process.step6b *
                                   process.step6c *
-                                  process.step7
+                                  process.step7 *
+                                  process.makeTtSemiLepEvent *
+                                  process.analyzeHypothesis
                                   )
 
 #-------------------------------------------------
