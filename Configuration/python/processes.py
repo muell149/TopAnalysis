@@ -945,3 +945,96 @@ source['qcd09_pt470_HER7_pat'] = 'qcd09_pt470_HER7_pat_0,' + 'qcd09_pt470_HER7_p
 
 ## /mc/Summer09/QCD_Pt1400-herwig/GEN-SIM-RECO/MC_31X_V3_7TeV-v1
 #from TopAnalysis.Configuration.qcd09_pt1400_HER7_pat import *
+
+## /TTbarJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.ttbar10_madAOD import *
+evts  ['ttbar10_madAOD'] = 1483404       ## number of produced events
+xsec  ['ttbar10_madAOD'] =     165       ## LO in pb from Twiki
+eff   ['ttbar10_madAOD'] =     1.0       ## generator efficiency on gen level
+sizes ['ttbar10_madAOD'] = 'blocks'
+source['ttbar10_madAOD'] = 'ttbar10_madAOD_0,'  + 'ttbar10_madAOD_1,'  + 'ttbar10_madAOD_2,'
+source['ttbar10_madAOD']+= 'ttbar10_madAOD_3,'  + 'ttbar10_madAOD_4,'  + 'ttbar10_madAOD_5,'
+source['ttbar10_madAOD']+= 'ttbar10_madAOD_6,'  + 'ttbar10_madAOD_7,'  + 'ttbar10_madAOD_8,'
+source['ttbar10_madAOD']+= 'ttbar10_madAOD_9,'  + 'ttbar10_madAOD_10,' + 'ttbar10_madAOD_11,'
+source['ttbar10_madAOD']+= 'ttbar10_madAOD_12,' + 'ttbar10_madAOD_13,' + 'ttbar10_madAOD_14,'
+source['ttbar10_madAOD']+= 'ttbar10_madAOD_15,' + 'ttbar10_madAOD_16'
+
+## /ZJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.zjets10_madAOD import *
+evts  ['zjets10_madAOD'] = 1084921       ## number of produced events
+xsec  ['zjets10_madAOD'] =    3110       ## LO in pb from Twiki
+eff   ['zjets10_madAOD'] =     1.0       ## generator efficiency on gen level
+sizes ['zjets10_madAOD'] = 'blocks'
+source['zjets10_madAOD'] = 'zjets10_madAOD_0,' + 'zjets10_madAOD_1,' + 'zjets10_madAOD_2,'
+source['zjets10_madAOD']+= 'zjets10_madAOD_3,' + 'zjets10_madAOD_4,' + 'zjets10_madAOD_5,'
+source['zjets10_madAOD']+= 'zjets10_madAOD_6'
+
+## /WJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.wjets10_madAOD import *
+evts  ['wjets10_madAOD'] = 10068895       ## number of produced events
+xsec  ['wjets10_madAOD'] =    28000       ## LO in pb from Twiki
+eff   ['wjets10_madAOD'] =      1.0       ## generator efficiency on gen level
+sizes ['wjets10_madAOD'] = 'blocks'
+source['wjets10_madAOD'] = 'wjets10_madAOD_0,'  + 'wjets10_madAOD_1,'  + 'wjets10_madAOD_2,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_3,'  + 'wjets10_madAOD_4,'  + 'wjets10_madAOD_5,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_6,'  + 'wjets10_madAOD_7,'  + 'wjets10_madAOD_8,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_9,'  + 'wjets10_madAOD_10,' + 'wjets10_madAOD_11,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_12,' + 'wjets10_madAOD_13,' + 'wjets10_madAOD_14,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_15,' + 'wjets10_madAOD_16,' + 'wjets10_madAOD_17,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_18,' + 'wjets10_madAOD_19,' + 'wjets10_madAOD_20,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_21,' + 'wjets10_madAOD_22,' + 'wjets10_madAOD_23,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_24,' + 'wjets10_madAOD_25,' + 'wjets10_madAOD_26,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_27,' + 'wjets10_madAOD_28,' + 'wjets10_madAOD_29,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_30,' + 'wjets10_madAOD_31,' + 'wjets10_madAOD_32,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_33,' + 'wjets10_madAOD_34,' + 'wjets10_madAOD_35,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_36,' + 'wjets10_madAOD_37,' + 'wjets10_madAOD_38,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_39,' + 'wjets10_madAOD_40,' + 'wjets10_madAOD_41,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_42,' + 'wjets10_madAOD_43,' + 'wjets10_madAOD_44,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_45,' + 'wjets10_madAOD_46,' + 'wjets10_madAOD_47,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_48,' + 'wjets10_madAOD_49,' + 'wjets10_madAOD_50,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_51,' + 'wjets10_madAOD_52,' + 'wjets10_madAOD_53,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_54,' + 'wjets10_madAOD_55,' + 'wjets10_madAOD_56,'
+source['wjets10_madAOD']+= 'wjets10_madAOD_57'
+
+## /TTbar-mcatnlo/Spring10-START3X_V26_S09-v2/AODSIM
+from TopAnalysis.Configuration.ttbar10_nloAOD import *
+evts  ['ttbar10_nloAOD'] =  991694       ## number of produced events
+xsec  ['ttbar10_nloAOD'] =     165       ## LO in pb from Twiki
+eff   ['ttbar10_nloAOD'] =     1.0       ## generator efficiency on gen level
+sizes ['ttbar10_nloAOD'] = 'blocks'
+source['ttbar10_nloAOD'] = 'ttbar10_nloAOD_0,'  + 'ttbar10_nloAOD_1,'  + 'ttbar10_nloAOD_2,'
+source['ttbar10_nloAOD']+= 'ttbar10_nloAOD_3,'  + 'ttbar10_nloAOD_4,'  + 'ttbar10_nloAOD_5,'
+source['ttbar10_nloAOD']+= 'ttbar10_nloAOD_6,'  + 'ttbar10_nloAOD_7,'  + 'ttbar10_nloAOD_8,'
+source['ttbar10_nloAOD']+= 'ttbar10_nloAOD_9'
+
+## /InclusiveMu15/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.qcd10_pytAOD import *
+evts  ['qcd10_pytAOD'] =   4377187       ## number of produced events
+xsec  ['qcd10_pytAOD'] = 296900000       ## LO in pb from Twiki
+eff   ['qcd10_pytAOD'] =   0.00037       ## generator efficiency on gen level
+sizes ['qcd10_pytAOD'] = 'blocks'
+source['qcd10_pytAOD'] = 'qcd10_pytAOD_0,'  + 'qcd10_pytAOD_1,'  + 'qcd10_pytAOD_2,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_3,'  + 'qcd10_pytAOD_4,'  + 'qcd10_pytAOD_5,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_6,'  + 'qcd10_pytAOD_7,'  + 'qcd10_pytAOD_8,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_9'   + 'qcd10_pytAOD_10,' + 'qcd10_pytAOD_11,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_12,' + 'qcd10_pytAOD_13,' + 'qcd10_pytAOD_14,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_15,' + 'qcd10_pytAOD_16,' + 'qcd10_pytAOD_17,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_18,' + 'qcd10_pytAOD_19,' + 'qcd10_pytAOD_20,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_21,' + 'qcd10_pytAOD_22,' + 'qcd10_pytAOD_23,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_24,' + 'qcd10_pytAOD_25,' + 'qcd10_pytAOD_26,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_27,' + 'qcd10_pytAOD_28,' + 'qcd10_pytAOD_29,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_30,' + 'qcd10_pytAOD_31,' + 'qcd10_pytAOD_32,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_33,' + 'qcd10_pytAOD_34,' + 'qcd10_pytAOD_35,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_36,' + 'qcd10_pytAOD_37,' + 'qcd10_pytAOD_38,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_39,' + 'qcd10_pytAOD_40,' + 'qcd10_pytAOD_41,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_42,' + 'qcd10_pytAOD_43,' + 'qcd10_pytAOD_44,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_45,' + 'qcd10_pytAOD_46,' + 'qcd10_pytAOD_47,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_48,' + 'qcd10_pytAOD_49,' + 'qcd10_pytAOD_50,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_51,' + 'qcd10_pytAOD_52,' + 'qcd10_pytAOD_53,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_54,' + 'qcd10_pytAOD_55,' + 'qcd10_pytAOD_56,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_57,' + 'qcd10_pytAOD_58,' + 'qcd10_pytAOD_59,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_60,' + 'qcd10_pytAOD_61,' + 'qcd10_pytAOD_62,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_63,' + 'qcd10_pytAOD_64,' + 'qcd10_pytAOD_65,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_66,' + 'qcd10_pytAOD_67,' + 'qcd10_pytAOD_68,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_69,' + 'qcd10_pytAOD_70'
+
