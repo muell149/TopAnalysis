@@ -43,6 +43,10 @@ process.patMuons.isoDeposits = cms.PSet(
 process.patJets.embedCaloTowers = True
 process.patJetsAK5PF.embedPFCandidates = True
 
+## remove TagInfos from jets
+process.patJets.addTagInfos = False
+process.patJetsAK5PF.addTagInfos = False
+
 ## Check the Event Content
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
