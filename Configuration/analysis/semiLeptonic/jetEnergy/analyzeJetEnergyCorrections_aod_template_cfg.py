@@ -61,6 +61,7 @@ process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = False
 
 ## apply realistic event selection
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
+process.hltMu9.TriggerResultsTag = "TriggerResults::HLT8E29"
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 from TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff import disableCountFilter
 disableCountFilter(process.bottomJetSelection)
