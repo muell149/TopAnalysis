@@ -6,16 +6,6 @@ import FWCore.ParameterSet.Config as cms
 ##   needs genParticle and genJets as input!!!
 ## ---
 
-## ---
-##    eventfilter is to get a special ttbar decay channel from ttbarSample by genmatching
-##    decide whether to run on:
-# 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
-##    careful: genmatched selection- might cause problems for specific BG samples like qcd or data - use 'all' for them
-##    signal is semileptonic with mu
-##    background is ttbar other channels
-##    'all' does no selection
-## ---
-
 useAntikt5   = False # True
 ## in new CMSSW-Version(33 or higher) is AK5 standard as selected layer 1 jets, so use !!False!! for these samples to get no error concerning collection names
 writeOutput  = False # True
@@ -36,12 +26,15 @@ process.source = cms.Source("PoolSource",
 
     # '/store/user/henderle/samples/Zjets_madgraph_10TeV/PATtuple_11.root'
     # '/store/user/henderle/samples/Wjets_madgraph_10TeV/PATtuple_1.root'
-    # '/store/user/rwolf/ttbar09/patTuple_sig_0_ttbarx09.root'
     # '/store/user/henderle/OctEx/SD_Mu9/InclusiveMu15/PATtuple_1.root'
-    # '/store/user/henderle/samples/InclusiveMu15_7TeV/PATtuple_100.root'
-      '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0024/068F7867-2C88-DE11-B3C2-001F29C9A5AE.root'
     # '/store/user/henderle/samples/TTbar_madgraph_7TeV/PATtuple_1.root'
     # '/store/user/henderle/samples/TTbar_mcatnlo_7TeV/PATtuple_1.root'
+    # '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0024/068F7867-2C88-DE11-B3C2-001F29C9A5AE.root'
+      '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0005/0210B899-9C46-DF11-A10F-003048C69294.root'     
+    # '/store/mc/Spring10/TTbar-mcatnlo/AODSIM/START3X_V26_S09-v2/0048/0AFCE331-684A-DF11-A9D0-002618943810.root'
+    # '/store/mc/Spring10/InclusiveMu15/AODSIM/START3X_V26_S09-v1/0003/0092FE15-E844-DF11-AFCD-001A92811736.root'
+    # '/store/mc/Spring10/WJets-madgraph/AODSIM/START3X_V26_S09-v1/0000/0EA3694A-FC44-DF11-90A6-001D0967D5A3.root'
+    # '/store/mc/Spring10/ZJets-madgraph/AODSIM/START3X_V26_S09-v1/0013/00EFC4EA-3847-DF11-A194-003048D4DF80.root'
     )
  )
 
@@ -61,6 +54,9 @@ process.TFileService = cms.Service("TFileService",
 )
 
 ## including analysis tools
+## tool to create ak5GenJets
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff") 
 ## cross section module
 process.load("TopAnalysis.TopAnalyzer.MuonCrossSection_cfi")
 ## tool to select muons from gen Particles and save them as new collection
@@ -108,6 +104,8 @@ process.leadingJetSelectionNjets4 = process.leadingGenJetSelection.clone (src = 
 
 process.p1 = cms.Path(
                       ## introduce some collections
+                      process.genJetParticles                       * 
+                      process.ak5GenJets                            *
                       process.isolatedGenMuons                      *
                       process.semiLeptGenCollections                *
 #                      selectedGenMuonCollection                     *
