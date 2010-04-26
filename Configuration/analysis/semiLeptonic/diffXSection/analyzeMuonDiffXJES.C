@@ -62,12 +62,10 @@ void analyzeMuonDiffXJES()
   //    get histograms
   // ---
   std::vector<TH1F*> pt_;
-  std::vector<TH2F*> corrPt_;
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/pt"      ) );
-    corrPt_.push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPt_" ) );
-  }
+    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRecNjets4/pt"      ) );
+   }
 
   // ---
   //    define weights concerning luminosity for 50 pb-1 @ 7TeV
@@ -132,7 +130,7 @@ void analyzeMuonDiffXJES()
   std::vector<double> entriesPt_;
 
   for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
-    entriesPt_.push_back ( lumiweight[idx]*(corrPt_ [idx]->GetEntries()) );
+    entriesPt_.push_back ( pt_ [idx]->Integral() );
     std::cout << "total weighted # of events in pt (file " << idx << "): " << entriesPt_[idx] << std::endl;
   }
   std::cout << "total # of events in pseudo data: " << pt_ [15]->Integral() << std::endl;
