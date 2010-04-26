@@ -993,8 +993,7 @@ source['wjets10_madAOD']+= 'wjets10_madAOD_42,' + 'wjets10_madAOD_43,' + 'wjets1
 source['wjets10_madAOD']+= 'wjets10_madAOD_45,' + 'wjets10_madAOD_46,' + 'wjets10_madAOD_47,'
 source['wjets10_madAOD']+= 'wjets10_madAOD_48,' + 'wjets10_madAOD_49,' + 'wjets10_madAOD_50,'
 source['wjets10_madAOD']+= 'wjets10_madAOD_51,' + 'wjets10_madAOD_52,' + 'wjets10_madAOD_53,'
-source['wjets10_madAOD']+= 'wjets10_madAOD_54,' + 'wjets10_madAOD_55,' + 'wjets10_madAOD_56,'
-source['wjets10_madAOD']+= 'wjets10_madAOD_57'
+source['wjets10_madAOD']+= 'wjets10_madAOD_54,' + 'wjets10_madAOD_55,' + 'wjets10_madAOD_56'
 
 ## /TTbar-mcatnlo/Spring10-START3X_V26_S09-v2/AODSIM
 from TopAnalysis.Configuration.ttbar10_nloAOD import *
@@ -1007,6 +1006,14 @@ source['ttbar10_nloAOD']+= 'ttbar10_nloAOD_3,'  + 'ttbar10_nloAOD_4,'  + 'ttbar1
 source['ttbar10_nloAOD']+= 'ttbar10_nloAOD_6,'  + 'ttbar10_nloAOD_7,'  + 'ttbar10_nloAOD_8,'
 source['ttbar10_nloAOD']+= 'ttbar10_nloAOD_9'
 
+## /TTbar-mcatnlo/Spring10-START3X_V26_S09-v2/AODSIM
+from TopAnalysis.Configuration.ttbar10_nloPAT import *
+evts  ['ttbar10_nloPAT'] =  991694       ## number of produced events
+xsec  ['ttbar10_nloPAT'] =     165       ## LO in pb from Twiki
+eff   ['ttbar10_nloPAT'] =     1.0       ## generator efficiency on gen level
+sizes ['ttbar10_nloPAT'] = 'blocks'
+source['ttbar10_nloPAT'] = 'ttbar10_nloPAT_0,'  + 'ttbar10_nloPAT_1'
+
 ## /InclusiveMu15/Spring10-START3X_V26_S09-v1/AODSIM
 from TopAnalysis.Configuration.qcd10_pytAOD import *
 evts  ['qcd10_pytAOD'] =   4377187       ## number of produced events
@@ -1016,7 +1023,7 @@ sizes ['qcd10_pytAOD'] = 'blocks'
 source['qcd10_pytAOD'] = 'qcd10_pytAOD_0,'  + 'qcd10_pytAOD_1,'  + 'qcd10_pytAOD_2,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_3,'  + 'qcd10_pytAOD_4,'  + 'qcd10_pytAOD_5,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_6,'  + 'qcd10_pytAOD_7,'  + 'qcd10_pytAOD_8,'
-source['qcd10_pytAOD']+= 'qcd10_pytAOD_9'   + 'qcd10_pytAOD_10,' + 'qcd10_pytAOD_11,'
+source['qcd10_pytAOD']+= 'qcd10_pytAOD_9,'  + 'qcd10_pytAOD_10,' + 'qcd10_pytAOD_11,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_12,' + 'qcd10_pytAOD_13,' + 'qcd10_pytAOD_14,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_15,' + 'qcd10_pytAOD_16,' + 'qcd10_pytAOD_17,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_18,' + 'qcd10_pytAOD_19,' + 'qcd10_pytAOD_20,'
