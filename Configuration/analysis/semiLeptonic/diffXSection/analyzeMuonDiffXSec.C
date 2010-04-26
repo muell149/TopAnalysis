@@ -38,8 +38,8 @@ void analyzeMuonDiffXSec()
   // ---
   //    choose jet multiplicity you want to see
   // ---
-  // "Njets1" / "Njets2" / "Njets3" / "" means >= 4jets
-  TString jetMultiplicity ="Njets2";
+  // "Njets1" / "Njets2" / "Njets3" / "Njets4"
+  TString jetMultiplicity ="Njets4";
 
   // ---
   //    open input files
@@ -51,6 +51,7 @@ void analyzeMuonDiffXSec()
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"     ) );
+  // summer09Samples/summer09SamplesNjets3ptBins0704/
 
   // ---
   //    get histograms
@@ -58,9 +59,9 @@ void analyzeMuonDiffXSec()
   std::vector<TH1F*> eta_, phi_, pt_;
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    eta_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection"+jetMultiplicity+"/eta" ) );
-    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection"+jetMultiplicity+"/pt"  ) );
-    phi_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection"+jetMultiplicity+"/phi" ) );
+    eta_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/eta" ) );
+    pt_    .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/pt"  ) );
+    phi_   .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/phi" ) );
   }
 
   // get total number of FILLED bins above cut value of 20 GeV from pt histo
@@ -416,17 +417,17 @@ void analyzeMuonDiffXSec()
   // saving
   // ---
   
-//   // ps
-//   MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
-//   for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
-//   }
-//   MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
+  // ps
+  MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
+  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
+  }
+  MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
   
-//   // png
-//   for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
-//   }
+  // png
+  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+  }
 }
 
 void canvasStyle(TCanvas& canv) 
