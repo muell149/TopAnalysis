@@ -7,7 +7,9 @@ switchJetCollection(process,
                     doBTagging       = True,
                     jetCorrLabel     = ('SC5','Calo'),
                     doType1MET       = True,
-                    genJetCollection = cms.InputTag("sisCone5GenJets")
+                    genJetCollection = cms.InputTag("sisCone5GenJets"),
+                    doJetID          = True,
+                    jetIdLabel       = 'sc5'
                     )
 
 myGenJets = "sisCone5GenJets"
