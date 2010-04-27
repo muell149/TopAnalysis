@@ -959,6 +959,14 @@ source['ttbar10_madAOD']+= 'ttbar10_madAOD_9,'  + 'ttbar10_madAOD_10,' + 'ttbar1
 source['ttbar10_madAOD']+= 'ttbar10_madAOD_12,' + 'ttbar10_madAOD_13,' + 'ttbar10_madAOD_14,'
 source['ttbar10_madAOD']+= 'ttbar10_madAOD_15,' + 'ttbar10_madAOD_16'
 
+## /TTbarJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.ttbar10_madPAT import *
+evts  ['ttbar10_madPAT'] = 1483404       ## number of produced events
+xsec  ['ttbar10_madPAT'] =     165       ## LO in pb from Twiki
+eff   ['ttbar10_madPAT'] =     1.0       ## generator efficiency on gen level
+sizes ['ttbar10_madPAT'] = 'blocks'
+source['ttbar10_madPAT'] = 'ttbar10_madPAT_0,'  + 'ttbar10_madPAT_1,'  + 'ttbar10_madPAT_2'
+
 ## /ZJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
 from TopAnalysis.Configuration.zjets10_madAOD import *
 evts  ['zjets10_madAOD'] = 1084921       ## number of produced events
@@ -968,6 +976,14 @@ sizes ['zjets10_madAOD'] = 'blocks'
 source['zjets10_madAOD'] = 'zjets10_madAOD_0,' + 'zjets10_madAOD_1,' + 'zjets10_madAOD_2,'
 source['zjets10_madAOD']+= 'zjets10_madAOD_3,' + 'zjets10_madAOD_4,' + 'zjets10_madAOD_5,'
 source['zjets10_madAOD']+= 'zjets10_madAOD_6'
+
+## /ZJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.zjets10_madPAT import *
+evts  ['zjets10_madPAT'] = 1084921       ## number of produced events
+xsec  ['zjets10_madPAT'] =    3110       ## LO in pb from Twiki
+eff   ['zjets10_madPAT'] =     1.0       ## generator efficiency on gen level
+sizes ['zjets10_madPAT'] = 'blocks'
+source['zjets10_madPAT'] = 'zjets10_madPAT_0,' + 'zjets10_madPAT_1,' + 'zjets10_madPAT_2'
 
 ## /WJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
 from TopAnalysis.Configuration.wjets10_madAOD import *
