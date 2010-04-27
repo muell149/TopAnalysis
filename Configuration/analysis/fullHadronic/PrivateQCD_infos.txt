@@ -15,7 +15,7 @@
 ##								  ##
 ## cross section: 8.762E+08 pb					  ##
 ##								  ##
-## Int. luminosity: 15.95868523168226432 pb-1			  ##
+## Int. luminosity: 19.38141976717644373 pb-1			  ##
 ##								  ##
 ##								  ##
 ####################  PrivateQCD_noFilter.txt  #####################
