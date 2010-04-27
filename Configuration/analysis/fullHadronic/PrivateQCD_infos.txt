@@ -9,9 +9,9 @@
 ##								  ##
 ## GenJet filter: min 4 ak5GenJets with pt > 20 GeV and |eta| < 5 ##
 ##								  ##
-## Number of files: 13983					  ##
+## Number of files: 16982					  ##
 ##								  ##
-## Event before selection: 1 Mio. x #files = 1.3983E+10		  ##
+## Event before selection: 1 Mio. x #files = 1.6982E+10		  ##
 ##								  ##
 ## cross section: 8.762E+08 pb					  ##
 ##								  ##
