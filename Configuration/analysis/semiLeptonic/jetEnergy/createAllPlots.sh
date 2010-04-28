@@ -9,3 +9,6 @@ cp -r analyzeJetEnergyCorrections_ak5/ ~/latex/notes/JECTopValidation
 cp -r analyzeJetEnergyCorrections_ic5/ ~/latex/notes/JECTopValidation
 cp -r analyzeJetEnergyCorrections_kt4/ ~/latex/notes/JECTopValidation
 cp -r analyzeJetEnergyCorrections_sc5/ ~/latex/notes/JECTopValidation
+
+#TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeResolutionBias "analyzeJetEnergyResolutionBias.root" \
+#                                                                                "analyzeJetEnergyResolutionBias_mcatnlo.root"
