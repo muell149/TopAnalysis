@@ -46,8 +46,13 @@ class VertexAnalyzer : public EDAnalyzer {
     TH1I* isFake_;
     TH1D* posX_;
     TH1D* posY_;    
-    TH1D* posZ_;  
-    TH1I* nTracks_;      
+    TH1D* posZ_;
+    TH1D* posRho_;    
+    TH1D* posXerr_;
+    TH1D* posYerr_;    
+    TH1D* posZerr_;              
+    TH1I* nTracks_;
+    TH1I* nDof_;          
 };
 
 #endif
