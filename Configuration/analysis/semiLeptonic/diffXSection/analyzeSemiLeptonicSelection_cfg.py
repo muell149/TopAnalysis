@@ -20,7 +20,6 @@ import FWCore.ParameterSet.Config as cms
 eventFilter  = 'all'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 
-useAntikt5   = True # False
 writeOutput  = False # True
     
 # analyse muon quantities
@@ -160,16 +159,11 @@ bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('had:b'  )
 bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('had:b'  ) )
 uds0L5  = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('had:uds') )   
 
-## replace sisCone5 by antikt5
-if( useAntikt5 ):
-    process.goodJets.src = 'selectedPatJetsAK5'
-    
 ## collect kinematics analyzers
   ## a) Muon Collection Kinematics
 process.unselectedMuonKinematics  = process.analyzeMuonKinematics.clone(src = 'selectedPatMuons'              )
 process.combinedMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'combinedMuons'                    )
 process.triggerMuonKinematics     = process.analyzeMuonKinematics.clone(src = 'triggerMuons'                     )
-#process.isoMuonKinematics         = process.analyzeMuonKinematics.clone(src = 'isoMuons'                         )
 process.trackMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'trackMuons'                       )
 process.goodMuonKinematics        = process.analyzeMuonKinematics.clone(src = 'goodMuons'                        )
 process.goldenMuonKinematics      = process.analyzeMuonKinematics.clone(src = 'goldenMuons'                      )
@@ -227,7 +221,6 @@ process.tightBJet_1_JetKinematics = process.analyzeJetKinematics.clone (src = 't
 
   ## e) Muon and Jet Collection Kinematics for monitoring after all cuts
 process.tightMuonKinematicsAfter       = process.analyzeMuonKinematics.clone(src = 'tightMuons'                       )
-#process.isoMuonKinematicsAfter         = process.analyzeMuonKinematics.clone(src = 'isoMuons'                         )
 
 process.tightLeadingJetKinematicsAfter = process.analyzeJetKinematics.clone (src = 'tightLeadingJets'                 )
 process.tightLead_0_JetKinematicsAfter = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
@@ -240,12 +233,10 @@ process.tightBJet_0_JetKinematicsAfter = process.analyzeJetKinematics.clone (src
 process.tightBJet_1_JetKinematicsAfter = process.analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = uds1 )
 
 ## choosing the Kinematic-monitoring you want to use
-## to be called with semiLeptonicSelection
 process.monitorMuonKinematics = cms.Sequence(process.unselectedMuonKinematics +
                                              process.combinedMuonKinematics   +
                                              process.triggerMuonKinematics    +                         
                                              process.trackMuonKinematics      +
-                                             #process.isoMuonKinematics        +
                                              process.goodMuonKinematics       +
                                              process.goldenMuonKinematics     +
                                              process.tightMuonKinematics      
@@ -297,7 +288,6 @@ process.monitorJetsKinematicsBefore = cms.Sequence(process.tightBottomJetKinemat
 process.unselectedMuonQuality  = process.analyzeMuonQuality.clone(src = 'selectedPatMuons'              )
 process.combinedMuonQuality    = process.analyzeMuonQuality.clone(src = 'combinedMuons'                    )
 process.triggerMuonQuality     = process.analyzeMuonQuality.clone(src = 'triggerMuons'                     )
-#process.isoMuonQuality         = process.analyzeMuonQuality.clone(src = 'isoMuons'                         )
 process.trackMuonQuality       = process.analyzeMuonQuality.clone(src = 'trackMuons'                       )
 process.goodMuonQuality        = process.analyzeMuonQuality.clone(src = 'goodMuons'                        )
 process.goldenMuonQuality      = process.analyzeMuonQuality.clone(src = 'goldenMuons'                      )
@@ -320,7 +310,6 @@ process.tightMatchedBJetQuality      = process.analyzeJetQuality.clone (src = 't
 process.tightMatchedLightQJetQuality = process.analyzeJetQuality.clone (src = 'tightMatchedLightQJets'           )
 
   ## d) Muon Collection Qualities performed after cuts
-#process.isoMuonQualityAfter               = process.analyzeMuonQuality.clone(src = 'isoMuons'                         )
 process.tightMuonQualityAfter             = process.analyzeMuonQuality.clone(src = 'tightMuons'                       )
 process.tightLeadingJetQualityAfter       = process.analyzeJetQuality.clone (src = 'tightLeadingJets'                 )
 process.tightBottomJetQualityAfter        = process.analyzeJetQuality.clone (src = 'tightBottomJets'                  )
@@ -329,13 +318,11 @@ process.tightMatchedBJetQualityAfter      = process.analyzeJetQuality.clone (src
 process.tightMatchedLightQJetQualityAfter = process.analyzeJetQuality.clone (src = 'tightMatchedLightQJets'           )
 
 ## choosing the quality-monitoring you want to use
-## to be called with the *selectGoldenMuons* sequence
 process.monitorMuonQuality = cms.Sequence(process.unselectedMuonQuality +
                                           process.combinedMuonQuality   +
                                           process.triggerMuonQuality    +
                                           process.trackMuonQuality      +
                                           process.goodMuonQuality       +
-                                          #process.isoMuonQuality        +
                                           process.goldenMuonQuality     +
                                           process.tightMuonQuality
                                           )
@@ -359,14 +346,14 @@ process.monitorVetoCollections = cms.Sequence(process.unselectedVetoMuonQuality 
     
 ## collect muon-jet analyzer
 
-#process.unselectedMuonUnselectedJetKinematics   = process.analyzeMuonJetKinematics.clone(srcA = 'selectedPatMuons',
-#                                                                                         srcB = 'selectedPatJets'  )
-#process.unselectedMuonGoodJetKinematics         = process.analyzeMuonJetKinematics.clone(srcA = 'selectedPatMuons',
-#                                                                                         srcB = 'goodJets'            )
+process.unselectedMuonUnselectedJetKinematics   = process.analyzeMuonJetKinematics.clone(srcA = 'selectedPatMuons',
+                                                                                         srcB = 'selectedPatJets'  )
+process.unselectedMuonGoodJetKinematics         = process.analyzeMuonJetKinematics.clone(srcA = 'selectedPatMuons',
+                                                                                         srcB = 'goodJets'            )
 process.tightMuonGoodJetKinematics              = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons',
                                                                                          srcB = 'goodJets'            )
-#process.tightMuonUnselectedJetKinematics        = process.analyzeMuonJetKinematics.clone(srcA = 'goodMuons',
-#                                                                                         srcB = 'selectedPatJets'  )
+process.tightMuonUnselectedJetKinematics        = process.analyzeMuonJetKinematics.clone(srcA = 'goodMuons',
+                                                                                         srcB = 'selectedPatJets'  )
 process.tightMuonGoodJetKinematicsAfter         = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons',
                                                                                          srcB = 'goodJets'            )
 
