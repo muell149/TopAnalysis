@@ -1,3 +1,4 @@
+
 import FWCore.ParameterSet.Config as cms
 
 ## ---
@@ -6,8 +7,6 @@ import FWCore.ParameterSet.Config as cms
 ##   needs genParticle and genJets as input!!!
 ## ---
 
-useAntikt5   = False # True
-## in new CMSSW-Version(33 or higher) is AK5 standard as selected layer 1 jets, so use !!False!! for these samples to get no error concerning collection names
 writeOutput  = False # True
 
 # analyse muon quantities

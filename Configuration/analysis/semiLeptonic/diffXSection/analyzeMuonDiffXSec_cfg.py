@@ -1,3 +1,4 @@
+
 import FWCore.ParameterSet.Config as cms
 
 ## ---
@@ -18,8 +19,6 @@ import FWCore.ParameterSet.Config as cms
 eventFilter  = 'signal only'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 
-useAntikt5   = False # True
-## in new CMSSW-Version(33 or higher) is AK5 standard as selected layer 1 jets, so use !!False!! for these samples to get no error concerning collection names
 writeOutput  = False # True
 
 # analyse muon quantities
