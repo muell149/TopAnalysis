@@ -9,6 +9,7 @@
 #include "TH2.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -16,8 +17,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Utilities/interface/EDMException.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 
 /**
    \class   TriggerAnalyzer TriggerAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/TriggerAnalyzer.h"
@@ -52,19 +52,32 @@ class TriggerAnalyzer : public EDAnalyzer {
         
     /// triger result input collection	
     InputTag trigResults_;
+    /// muon input collection
+    InputTag muons_;    
     /// triggers to be studied given in config
     vector<string> hltPaths_;
+    /// for this trigger extra histos are plotted (pt and eta)
+    string mainTrigger_;
     
     /// number of trigger paths given in config
     int n_TrigPaths;
     /// number of processed evts
-    int n_evts;
+    double n_evts;
     /// shows for each trigger fraction of evts that have fired that trigger
-    TH1F* FiredTrigs_; 
+    TH1D* FiredTrigs_; 
     /// shows fraction evts that have passed one of the triggers
-    TH1F* Passed_; 
+    TH1D* Passed_; 
     /// shows how many evts have fired two triggers
-    TH2F* Correlations_;   
+    TH2D* Correlations_;   
+    /// pt dependent efficiency of main trigger
+    TH1D* PtDependence_;
+    /// eta dependent efficiency of main trigger
+    TH1D* EtaDependence_;  
+    /// pt distribution of muons (needed to normalize PtDependence_)
+    TH1D* Pt_;
+    /// eta distribution of muons (needed to normalize EtaDependence_)
+    TH1D* Eta_;        
+          
 };
 
 #endif

@@ -3,6 +3,9 @@ import FWCore.ParameterSet.Config as cms
 analyzeTrigger = cms.EDAnalyzer("TriggerAnalyzer",
 
     TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+    
+    muons          = cms.InputTag('selectedPatMuons'),	    
+    
     hltPaths       = cms.vstring('HLT_L1MuOpen',
 				 'HLT_L1MuOpen_NoBPTX',
 				 'HLT_L1Mu',
@@ -19,7 +22,9 @@ analyzeTrigger = cms.EDAnalyzer("TriggerAnalyzer",
 				 'HLT_Mu0_L1MuOpen',
 				 'HLT_Mu3_L1MuOpen',
 				 'HLT_Mu5_L1MuOpen'
-				)
+				),
+				
+    mainTrigger    = cms.string('HLT_Mu9')     			
 )
 
 
