@@ -57,9 +57,7 @@ isolatedMuons = selectedPatMuons.clone(src = 'hcalMipMuons',
                                        cut = '(trackIso+caloIso)/pt < 0.25' 
 				      )				      
 
-#
-# Count Filters
-#
+## Count Filters
 tightMuonSelection      = countPatMuons.clone(src = 'tightMuons',     minNumber = 2)
 globalMuonSelection     = countPatMuons.clone(src = 'globalMuons',    minNumber = 2)
 hardMuonSelection       = countPatMuons.clone(src = 'hardMuons',      minNumber = 2)
@@ -77,27 +75,45 @@ isolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber 
 #
 ###########################################################################################
 
-#
-# Build Collections
-#
 
 ## hard jet selection
-hardJets = selectedPatJets.clone(src = 'selectedPatJets', 
+goodJets = selectedPatJets.clone(src = 'selectedPatJets', 
+                                 cut = '0.05 < emEnergyFraction' 
+				       '& emEnergyFraction < 0.95' 
+			        )
+## hard jet selection
+hardJets = selectedPatJets.clone(src = 'goodJets', 
                                  cut = 'pt > 40.' 
 			        )
-
 ## thight jet selection				   
 tightJets = selectedPatJets.clone(src = 'hardJets', 
-                                  cut = 'abs(eta) < 2.3' 
-				        #'& 0.05 < emEnergyFraction' 
-					#'& emEnergyFraction < 0.95'
+                                  cut = 'abs(eta) < 2.3' 				        
 			         )
 				    				        
-#
-# Count Filters
-#
+## Count Filters
+goodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 2)
 hardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
 tightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
+
+
+###########################################################################################
+#
+# MET SELECTION
+#
+###########################################################################################
+
+## met selector
+highMETs = cms.EDFilter("PATMETSelector",
+    src = cms.InputTag("patMETs"),
+    cut = cms.string("et>30.")
+)
+
+## Count Filter
+metSelection = cms.EDFilter("PATCandViewCountFilter",
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(999999),
+    src = cms.InputTag("highMETs")
+)
 
 ###########################################################################################
 #
@@ -114,8 +130,10 @@ buildCollections = cms.Sequence(tightMuons *
 				ecalMipMuons *
 				hcalMipMuons *
 				isolatedMuons *
+				goodJets *
 				hardJets *
-				tightJets				
+				tightJets *
+				highMETs				
 			       )			       			       
 
 fullLeptonicMuonMuonSelection = cms.Sequence(tightMuonSelection *
@@ -127,6 +145,8 @@ fullLeptonicMuonMuonSelection = cms.Sequence(tightMuonSelection *
 				             ecalMipMuonSelection *
 				             hcalMipMuonSelection *
 				             isolatedMuonSelection *
+					     goodJetSelection *
 				             hardJetSelection *
-				             tightJetSelection	
+				             tightJetSelection *
+					     metSelection	
                                             )
