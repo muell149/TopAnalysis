@@ -151,6 +151,13 @@ typedef SingleObjectAnalyzer<GenEventInfoProduct, PtHat> PtHatAnalyzer;
 DEFINE_FWK_MODULE(PtHatAnalyzer);
 
 /**
+    Define module for MET analysis
+**/
+#include "TopAnalysis/TopAnalyzer/interface/METKinematics.h"
+typedef SingleObjectAnalyzer<edm::View<reco::MET>, METKinematics> METAnalyzer;
+DEFINE_FWK_MODULE(METAnalyzer);
+
+/**
     Define modules needed for the analysis of trigger
 
 
