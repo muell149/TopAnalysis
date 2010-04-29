@@ -779,6 +779,20 @@ source['wjets10_madAOD']+= 'wjets10_madAOD_48,' + 'wjets10_madAOD_49,' + 'wjets1
 source['wjets10_madAOD']+= 'wjets10_madAOD_51,' + 'wjets10_madAOD_52,' + 'wjets10_madAOD_53,'
 source['wjets10_madAOD']+= 'wjets10_madAOD_54,' + 'wjets10_madAOD_55,' + 'wjets10_madAOD_56'
 
+## /WJets-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.wjets10_madPAT import *
+evts  ['wjets10_madPAT'] = 10068895       ## number of produced events
+xsec  ['wjets10_madPAT'] =    28000       ## LO in pb from Twiki
+eff   ['wjets10_madPAT'] =      1.0       ## generator efficiency on gen level
+sizes ['wjets10_madPAT'] = 'blocks'
+source['wjets10_madPAT'] = 'wjets10_madPAT_0,'  + 'wjets10_madPAT_1,'  + 'wjets10_madPAT_2,'
+source['wjets10_madPAT']+= 'wjets10_madPAT_3,'  + 'wjets10_madPAT_4,'  + 'wjets10_madPAT_5,'
+source['wjets10_madPAT']+= 'wjets10_madPAT_6,'  + 'wjets10_madPAT_7,'  + 'wjets10_madPAT_8,'
+source['wjets10_madPAT']+= 'wjets10_madPAT_9,'  + 'wjets10_madPAT_10,' + 'wjets10_madPAT_11,'
+source['wjets10_madPAT']+= 'wjets10_madPAT_12,' + 'wjets10_madPAT_13,' + 'wjets10_madPAT_14,'
+source['wjets10_madPAT']+= 'wjets10_madPAT_15,' + 'wjets10_madPAT_16,' + 'wjets10_madPAT_17,'
+source['wjets10_madPAT']+= 'wjets10_madPAT_18,' + 'wjets10_madPAT_19,' + 'wjets10_madPAT_20'
+
 ## /TTbar-mcatnlo/Spring10-START3X_V26_S09-v2/AODSIM
 from TopAnalysis.Configuration.ttbar10_nloAOD import *
 evts  ['ttbar10_nloAOD'] =  991694       ## number of produced events
@@ -828,3 +842,13 @@ source['qcd10_pytAOD']+= 'qcd10_pytAOD_60,' + 'qcd10_pytAOD_61,' + 'qcd10_pytAOD
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_63,' + 'qcd10_pytAOD_64,' + 'qcd10_pytAOD_65,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_66,' + 'qcd10_pytAOD_67,' + 'qcd10_pytAOD_68,'
 source['qcd10_pytAOD']+= 'qcd10_pytAOD_69,' + 'qcd10_pytAOD_70'
+
+## /InclusiveMu15/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.qcd10_pytPAT import *
+evts  ['qcd10_pytPAT'] =   4377187       ## number of produced events
+xsec  ['qcd10_pytPAT'] = 296900000       ## LO in pb from Twiki
+eff   ['qcd10_pytPAT'] =   0.00037       ## generator efficiency on gen level
+sizes ['qcd10_pytPAT'] = 'blocks'
+source['qcd10_pytPAT'] = 'qcd10_pytPAT_0,'  + 'qcd10_pytPAT_1,'  + 'qcd10_pytPAT_2,'
+source['qcd10_pytPAT']+= 'qcd10_pytPAT_3,'  + 'qcd10_pytPAT_4,'  + 'qcd10_pytPAT_5,'
+source['qcd10_pytPAT']+= 'qcd10_pytPAT_6,'  + 'qcd10_pytPAT_7,'  + 'qcd10_pytPAT_8'
