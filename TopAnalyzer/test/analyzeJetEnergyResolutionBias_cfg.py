@@ -10,7 +10,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_7TeV_AODSIM-v1/0008/EEF99041-6C9E-DE11-9254-00163E11249A.root'
+    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0016/2CB76F28-9D47-DF11-959F-003048C693E4.root'
      )
 )
 
@@ -23,12 +23,6 @@ process.maxEvents = cms.untracked.PSet(
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(False)
 )
-
-## configure geometry & conditions
-process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
 
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 process.decaySubset.fillMode = "kME" # use the status 3 partons from the hard process (Matrix Element)
