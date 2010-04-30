@@ -12,7 +12,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 
 
 ## configure jet and Muon selections
-selectedGenJetCollection = selectedGenJets.clone(src = 'antikt5GenJets',
+selectedGenJetCollection = selectedGenJets.clone(src = 'ak5GenJets',
                                                  cut = 'abs(eta) < 2.4 & pt > 30.'
                                                  )
 
