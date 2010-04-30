@@ -35,11 +35,15 @@ void analyzeMuonDiffXSec()
   //  gStyle->SetPalette(1);
   gStyle->SetErrorX(0); 
 
-  // ---
-  //    choose jet multiplicity you want to see
-  // ---
-  // "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Btag"
-  TString jetMultiplicity ="Njets4";
+  //    choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Btag"
+  TString jetMultiplicity ="Btag";
+  // choose luminosity for scaling of event numbers and for legend as entry
+  int luminosity = 5;
+  TString lum = "5";
+  // choose whether you want to save every plot as png and all within one ps file
+  bool save = true;
+  // choose target directory for saving
+  TString saveTo = "./diffXSecFromSignal/plots/jetMultiplicityStudies/";
 
   // ---
   //    open input files
@@ -51,7 +55,6 @@ void analyzeMuonDiffXSec()
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"     ) );
-  // summer09Samples/summer09SamplesNjets3ptBins0704/
 
   // ---
   //    get histograms
@@ -74,17 +77,17 @@ void analyzeMuonDiffXSec()
   std::vector<double> lumiweight;
 
   // for current ttbar(lept.mu on gen level) 7TeV Mc@Nlo sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.00083);
+  lumiweight.push_back(0.00083/5.0*(double)luminosity);
   // pseudo data
   lumiweight.push_back(1.0);
   // for current ttbar(non lept.mu on gen level) 7TeV Mc@Nlo sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.00083);
+  lumiweight.push_back(0.00083/5.0*(double)luminosity);
   // for current W+jets 7TeV MADGRAPH sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.01231);
+  lumiweight.push_back(0.01231/5.0*(double)luminosity);
   // for current Z+jets 7TeV MADGRAPH sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.01310);
+  lumiweight.push_back(0.01310/5.0*(double)luminosity);
   // for current QCD 7TeV PYTHIA sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.10286);
+  lumiweight.push_back(0.10286/5.0*(double)luminosity);
 
   // ---
   // do lumiweighting
@@ -130,9 +133,6 @@ void analyzeMuonDiffXSec()
     eventNumbersEta_.push_back( eta_[idx]->Integral() );
     eventNumbersPhi_.push_back( phi_[idx]->Integral() );
     if(idx<files_.size()){
-      //    std::cout << "total weighted # of events in pt (file "  << idx << "): " << eventNumbersPt_[idx]  << std::endl;
-      //    std::cout << "total weighted # of events in eta (file " << idx << "): " << eventNumbersEta_[idx] << std::endl;
-      //    std::cout << "total weighted # of events in phi (file " << idx << "): " << eventNumbersPhi_[idx] << std::endl;
     }
   }
   std::cout << "S/B for top (" << jetMultiplicity << "):"  << (eventNumbersPt_[0]+eventNumbersPt_[2])/(eventNumbersPt_[3]+eventNumbersPt_[4]+eventNumbersPt_[5])  << std::endl;
@@ -263,7 +263,7 @@ void analyzeMuonDiffXSec()
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   if(jetMultiplicity =="Btag")btagJetcutInfo ="Njets>=4";
-  leg0->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+"+btagJetcutInfo);
+  leg0->SetHeader("MC (7TeV @ "+lum+"pb^{-1}) , full selection, "+jetMultiplicity+"+"+btagJetcutInfo);
   leg0->AddEntry( pt_[kSig]    , "ttbar MC@NLO semi-lep.( #mu )" , "PL");
   leg0->AddEntry( pt_[kLepJets], "all lepton+jets MC"            , "PL");
   leg0->AddEntry( pt_[kPseudo] , "pseudo data from all MC"       , "P" );
@@ -273,7 +273,7 @@ void analyzeMuonDiffXSec()
   TLegend *leg1 = new TLegend(0.21, 0.66, 1.0, 0.95);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg1->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+"+btagJetcutInfo);
+  leg1->SetHeader("MC (7TeV @ "+lum+"pb^{-1}) , full selection, "+jetMultiplicity+"+"+btagJetcutInfo);
   leg1->AddEntry( ptEventNumbers_[kSig], "ttbar MC@NLO semi-lep.( #mu )"    , "F");
   leg1->AddEntry( ptEventNumbers_[kBkg]  , "ttbar other"        , "F");
   leg1->AddEntry( ptEventNumbers_[kWjets], "W+jets MADGRAPH"    , "F");
@@ -298,7 +298,7 @@ void analyzeMuonDiffXSec()
   //    do the printing for pt_ ( Signal, lepton+jets, pseudo data )
   // ---
   MyCanvas[0]->cd(0);
-  MyCanvas[0]->SetTitle("ptDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  MyCanvas[0]->SetTitle("ptDiffNormXafterSelection"+jetMultiplicity+"Lum"+lum+"pb@7TeV");
   axesStyle(*pt_ [kSig], "p_{t} ( #mu ) [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{t}(#mu)} [GeV^{-1}]", 0., 0.05, 0.055, 1.5);
   histogramStyle(*pt_ [kSig]    , kRed  , 1, 20, 0.1);
   histogramStyle(*pt_ [kPseudo] , kBlack, 1, 22);
@@ -317,7 +317,7 @@ void analyzeMuonDiffXSec()
   //    do the printing for eta_ ( Signal, lepton+jets, pseudo data )
   // ---
   MyCanvas[1]->cd(0);
-  MyCanvas[1]->SetTitle("etaDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  MyCanvas[1]->SetTitle("etaDiffNormXafterSelection"+jetMultiplicity+"Lum"+lum+"pb@7TeV");
   axesStyle(*eta_ [kSig], "#eta ( #mu )", "#frac{1}{#sigma} #frac{d#sigma}{d#eta (#mu)}", 0., 0.65, 0.055, 1.5);
   histogramStyle(*eta_[kSig    ], kRed  , 1, 20, 0.1);
   histogramStyle(*eta_[kPseudo ], kBlack, 1, 22);
@@ -331,7 +331,7 @@ void analyzeMuonDiffXSec()
   //    do the printing for phi_ ( Signal, lepton+jets, pseudo data )
   // ---
   MyCanvas[2]->cd(0);
-  MyCanvas[2]->SetTitle("phiDiffNormXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  MyCanvas[2]->SetTitle("phiDiffNormXafterSelection"+jetMultiplicity+"Lum"+lum+"pb@7TeV");
   axesStyle(*phi_ [kSig], "#phi ( #mu )", "#frac{1}{#sigma} #frac{d#sigma}{d#phi (#mu)}} [rad^{-1}]", 0., 0.65, 0.055, 1.5);
   histogramStyle(*phi_[kSig    ], kRed  , 1, 20, 0.1);
   histogramStyle(*phi_[kPseudo ], kBlack, 1, 22);
@@ -345,7 +345,7 @@ void analyzeMuonDiffXSec()
   //    do the printing for ptEventNumbers_
   // ---
   MyCanvas[3]->cd(0);
-  MyCanvas[3]->SetTitle("ptInclusiveXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  MyCanvas[3]->SetTitle("ptInclusiveXafterSelection"+jetMultiplicity+"Lum"+lum+"pb@7TeV");
   // add different contribution for stack plots
   ptEventNumbers_ [kBkg]  ->Add(ptEventNumbers_ [kSig]);   
   ptEventNumbers_ [kWjets]->Add(ptEventNumbers_ [kBkg]);   
@@ -379,7 +379,7 @@ void analyzeMuonDiffXSec()
   //    do the printing for etaEventNumbers_
   // ---
   MyCanvas[4]->cd(0);
-  MyCanvas[4]->SetTitle("etaInclusiveXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  MyCanvas[4]->SetTitle("etaInclusiveXafterSelection"+jetMultiplicity+"Lum"+lum+"pb@7TeV");
   // add different contribution for stack plots
   etaEventNumbers_ [kBkg]  ->Add(etaEventNumbers_ [kSig]);   
   etaEventNumbers_ [kWjets]->Add(etaEventNumbers_ [kBkg]);   
@@ -406,7 +406,7 @@ void analyzeMuonDiffXSec()
   //    do the printing for phiEventNumbers_
   // ---
   MyCanvas[5]->cd(0);
-  MyCanvas[5]->SetTitle("phiInclusiveXafterSelection"+jetMultiplicity+"Lum5pb@7TeV");
+  MyCanvas[5]->SetTitle("phiInclusiveXafterSelection"+jetMultiplicity+"Lum"+lum+"pb@7TeV");
   // add different contribution for stack plots
   phiEventNumbers_ [kBkg]  ->Add(phiEventNumbers_ [kSig]);   
   phiEventNumbers_ [kWjets]->Add(phiEventNumbers_ [kBkg]);   
@@ -432,18 +432,19 @@ void analyzeMuonDiffXSec()
   // ---
   // saving
   // ---
+  if(save){   
+    // ps
+    MyCanvas[0]->Print(saveTo+"diffX7TeV"+lum+"pb"+jetMultiplicity+".ps(");
+    for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+      MyCanvas[idx]->Print(saveTo+"diffX7TeV"+lum+"pb"+jetMultiplicity+".ps");   
+    }
+    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"diffX7TeV"+lum+"pb"+jetMultiplicity+".ps)");
   
-//   // ps
-//   MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
-//   for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
-//   }
-//   MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
-  
-//   // png
-//   for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
-//   }
+    // png
+    for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png");      
+    }
+  }
 }
 
 void canvasStyle(TCanvas& canv) 
@@ -514,17 +515,17 @@ double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
   std::map< TString, std::map <TString,double> > maxValues_;  
   // create maximum values for pt, eta, phi ( for 5pb^-1)
   maxValues_["pt" ]["Btag"  ]= 1.5;
-  maxValues_["pt" ]["Njets4"]= 1.5;   //  50pb: 20000 / 4000 / 800 / 230 divide by app.15 because of events / GeV
+  maxValues_["pt" ]["Njets4"]= 1.5;   
   maxValues_["pt" ]["Njets3"]= 3.0;
   maxValues_["pt" ]["Njets2"]= 32.;
   maxValues_["pt" ]["Njets1"]= 235.;
   maxValues_["eta"]["Btag"  ]= 35.;
-  maxValues_["eta"]["Njets4"]= 35.;   //  50pb: 15000 / 3500 / 800 / 210 divide by app.15 because of events / GeV
+  maxValues_["eta"]["Njets4"]= 35.;   
   maxValues_["eta"]["Njets3"]= 120.;
   maxValues_["eta"]["Njets2"]= 450.;
   maxValues_["eta"]["Njets1"]= 2300.;
   maxValues_["phi"]["Btag"  ]= 24.;
-  maxValues_["phi"]["Njets4"]= 24.;   //  50pb: 12000 / 2000 / 600 / 140 divide by app.15 because of events / GeV
+  maxValues_["phi"]["Njets4"]= 24.;   
   maxValues_["phi"]["Njets3"]= 75.;
   maxValues_["phi"]["Njets2"]= 250.;
   maxValues_["phi"]["Njets1"]= 1400.;
