@@ -38,7 +38,7 @@ void analyzeMuonDiffXSec()
   // ---
   //    choose jet multiplicity you want to see
   // ---
-  // "Njets1" / "Njets2" / "Njets3" / "Njets4"
+  // "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Btag"
   TString jetMultiplicity ="Njets4";
 
   // ---
@@ -130,16 +130,61 @@ void analyzeMuonDiffXSec()
     eventNumbersEta_.push_back( eta_[idx]->Integral() );
     eventNumbersPhi_.push_back( phi_[idx]->Integral() );
     if(idx<files_.size()){
-    std::cout << "total weighted # of events in pt (file "  << idx << "): " << eventNumbersPt_[idx]  << std::endl;
-    std::cout << "total weighted # of events in eta (file " << idx << "): " << eventNumbersEta_[idx] << std::endl;
-    std::cout << "total weighted # of events in phi (file " << idx << "): " << eventNumbersPhi_[idx] << std::endl;
+      //    std::cout << "total weighted # of events in pt (file "  << idx << "): " << eventNumbersPt_[idx]  << std::endl;
+      //    std::cout << "total weighted # of events in eta (file " << idx << "): " << eventNumbersEta_[idx] << std::endl;
+      //    std::cout << "total weighted # of events in phi (file " << idx << "): " << eventNumbersPhi_[idx] << std::endl;
     }
   }
+  std::cout << "S/B for top (" << jetMultiplicity << "):"  << (eventNumbersPt_[0]+eventNumbersPt_[2])/(eventNumbersPt_[3]+eventNumbersPt_[4]+eventNumbersPt_[5])  << std::endl;
+ std::cout << "S/B for l+jet (" << jetMultiplicity << "):" << (eventNumbersPt_[0]+eventNumbersPt_[2]+eventNumbersPt_[3]+eventNumbersPt_[4])/(eventNumbersPt_[5])  << std::endl;
+
+  // ---
+  //    print out # of events (weighted) for each bin (including overflow) with statistical errors
+  // ---
+  std::cout << "-------------------------------------------------" << std::endl;
+  std::cout << "---------------event composition-----------------" << std::endl;
+  std::cout << "-------------------------------------------------" << std::endl;
+
+  std::cout << "-------pt distribution, ttbar signal only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kSig]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "total # events: " << eventNumbersPt_[kSig] << std::endl;
+
+  std::cout << "-------pt distribution, ttbar other only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kBkg]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kBkg]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "total # events: " << eventNumbersPt_[kBkg] << std::endl;
+
+  std::cout << "-------pt distribution, W+jets only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kWjets]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kWjets]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "total # events: " << eventNumbersPt_[kWjets] << std::endl;
+
+  std::cout << "-------pt distribution, Z+jets only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kZjets]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kZjets]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "total # events: " << eventNumbersPt_[kZjets] << std::endl;
+
+  std::cout << "-------pt distribution, QCD only-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kQCD]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kQCD]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "total # events: " << eventNumbersPt_[kQCD] << std::endl;
+
+  std::cout << "-------pt distribution, pseudo data-------" << std::endl;
+  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
+    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kPseudo]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kPseudo]->GetBinContent(i)) ) << std::endl;
+  }
+  std::cout << "total # events: " << eventNumbersPt_[kPseudo] << std::endl;
+  std::cout << "for comparism- total # of MC events: " << eventNumbersPt_[kSig]+eventNumbersPt_[kBkg]+eventNumbersPt_[kWjets]+eventNumbersPt_[kZjets]+eventNumbersPt_[kQCD] << std::endl;
 
   // ---
   //    do scaling with respect to inclusive cross section (taken from same histogram)
-  // ---
-  
+  // ---  
   for(unsigned int idx=0; idx<=files_.size(); ++idx) {
     pt_  [idx]->Scale(1/eventNumbersPt_ [idx]);
     eta_ [idx]->Scale(1/eventNumbersEta_[idx]);
@@ -189,35 +234,6 @@ void analyzeMuonDiffXSec()
   }
   
   // ---
-  //    print out # of events (weighted) for each bin (including overflow) with statistical errors
-  // ---
-
-  std::cout << "-------pt distribution, signal only-------" << std::endl;
-  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
-    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kSig]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kSig]->GetBinContent(i)) ) << std::endl;
-  }
-  std::cout << "-------pt distribution, pseudo data-------" << std::endl;
-  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
-    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kPseudo]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kPseudo]->GetBinContent(i)) ) << std::endl;
-  }
-  std::cout << "-------pt distribution, ttbar other only-------" << std::endl;
-  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
-    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kBkg]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kBkg]->GetBinContent(i)) ) << std::endl;
-  }
-  std::cout << "-------pt distribution, W+jets only-------" << std::endl;
-  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
-    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kWjets]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kWjets]->GetBinContent(i)) ) << std::endl;
-  }
-  std::cout << "-------pt distribution, Z+jets only-------" << std::endl;
-  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
-    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kZjets]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kZjets]->GetBinContent(i)) ) << std::endl;
-  }
-  std::cout << "-------pt distribution, QCD only-------" << std::endl;
-  for(int i=2; i<= pt_[kSig]->GetNbinsX()+1; i++){
-    std::cout << "(weighted) # events pt-bin "<< i << ": " <<  ptEventNumbers_[kQCD]->GetBinContent(i) << " +/- " << sqrt( (double)(ptEventNumbers_[kQCD]->GetBinContent(i)) ) << std::endl;
-  }
-
-  // ---
   //    print out diffXValue(pt) for each bin with statistical errors
   // ---
   std::cout << "-------signal only-------" << std::endl;
@@ -240,13 +256,14 @@ void analyzeMuonDiffXSec()
   // ---
   //    create legends 
   // ---
-
+  
+  TString btagJetcutInfo = "";
   // create a legend (in upper right corner) for all MC samples and pseudo data
   TLegend *leg0 = new TLegend(0.21, 0.74, 0.95, 0.94);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  if(jetMultiplicity =="")jetMultiplicity="Njets4";
-  leg0->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+");
+  if(jetMultiplicity =="Btag")btagJetcutInfo ="Njets>=4";
+  leg0->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+"+btagJetcutInfo);
   leg0->AddEntry( pt_[kSig]    , "ttbar MC@NLO semi-lep.( #mu )" , "PL");
   leg0->AddEntry( pt_[kLepJets], "all lepton+jets MC"            , "PL");
   leg0->AddEntry( pt_[kPseudo] , "pseudo data from all MC"       , "P" );
@@ -256,8 +273,7 @@ void analyzeMuonDiffXSec()
   TLegend *leg1 = new TLegend(0.21, 0.66, 1.0, 0.95);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  if(jetMultiplicity =="")jetMultiplicity="Njets4";
-  leg1->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+");
+  leg1->SetHeader("MC (7TeV @ 5pb^{-1}) , full selection, "+jetMultiplicity+"+"+btagJetcutInfo);
   leg1->AddEntry( ptEventNumbers_[kSig], "ttbar MC@NLO semi-lep.( #mu )"    , "F");
   leg1->AddEntry( ptEventNumbers_[kBkg]  , "ttbar other"        , "F");
   leg1->AddEntry( ptEventNumbers_[kWjets], "W+jets MADGRAPH"    , "F");
@@ -417,17 +433,17 @@ void analyzeMuonDiffXSec()
   // saving
   // ---
   
-  // ps
-  MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
-  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
-  }
-  MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
+//   // ps
+//   MyCanvas[0]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps("  );
+//   for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps"  );   
+//   }
+//   MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/diffX7TeV5pb"+jetMultiplicity+".ps)"  );
   
-  // png
-  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
-  }
+//   // png
+//   for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+//     MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+//   }
 }
 
 void canvasStyle(TCanvas& canv) 
@@ -497,14 +513,17 @@ double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
   // create container for histo max values sortet by plot and Njet
   std::map< TString, std::map <TString,double> > maxValues_;  
   // create maximum values for pt, eta, phi ( for 5pb^-1)
+  maxValues_["pt" ]["Btag"  ]= 1.5;
   maxValues_["pt" ]["Njets4"]= 1.5;   //  50pb: 20000 / 4000 / 800 / 230 divide by app.15 because of events / GeV
-  maxValues_["pt" ]["Njets3"]= 5.5;
+  maxValues_["pt" ]["Njets3"]= 3.0;
   maxValues_["pt" ]["Njets2"]= 32.;
   maxValues_["pt" ]["Njets1"]= 235.;
+  maxValues_["eta"]["Btag"  ]= 35.;
   maxValues_["eta"]["Njets4"]= 35.;   //  50pb: 15000 / 3500 / 800 / 210 divide by app.15 because of events / GeV
   maxValues_["eta"]["Njets3"]= 120.;
   maxValues_["eta"]["Njets2"]= 450.;
   maxValues_["eta"]["Njets1"]= 2300.;
+  maxValues_["phi"]["Btag"  ]= 24.;
   maxValues_["phi"]["Njets4"]= 24.;   //  50pb: 12000 / 2000 / 600 / 140 divide by app.15 because of events / GeV
   maxValues_["phi"]["Njets3"]= 75.;
   maxValues_["phi"]["Njets2"]= 250.;
