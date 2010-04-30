@@ -32,8 +32,7 @@ looseMuons     = selectedPatMuons.clone(src = 'triggerMuons',
                                         cut = '(trackIso+caloIso)/pt <  0.2'
                                         )
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
-                                            cut = 'et > 15. & abs(eta) < 2.5 &'
-                                            'electronID(\"eidRobustLoose\") &'
+                                            cut = 'et > 15. &'
                                             '(trackIso+caloIso)/et <  0.2'
                                             )
 
