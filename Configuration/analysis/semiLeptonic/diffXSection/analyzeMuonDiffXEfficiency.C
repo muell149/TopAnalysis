@@ -16,7 +16,7 @@
 #include <TLegend.h>
 #include <TStyle.h>
 
-enum styles {kttbarReco, kWjetsReco, kZjetsReco, kQCDReco, kttbarGen, kWjetsGen, kZjetsGen};
+enum styles {kttbarReco, kWjetsReco, kZjetsReco, kttbarGen, kWjetsGen, kZjetsGen};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
@@ -47,7 +47,6 @@ void analyzeMuonDiffXEfficiency()
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecRecoAllTtbarMcAtNlo7TeVsummer09.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root"               ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root"               ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"                   ) );
 
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecGenAllTtbarMcAtNlo7TeVspring10.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecGenWjetsMadgraph7TeVspring10.root"   ) );
@@ -58,7 +57,7 @@ void analyzeMuonDiffXEfficiency()
   // ---
   std::vector<TH1F*> eta_, phi_, pt_;
 
-  for(unsigned int idx=kttbarReco; idx<=kQCDReco; ++idx) {
+  for(unsigned int idx=kttbarReco; idx<=kZjetsReco; ++idx) {
     eta_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/eta" ) );
     pt_  .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/pt"  ) );
     phi_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/phi" ) );
@@ -82,8 +81,6 @@ void analyzeMuonDiffXEfficiency()
   lumiweight.push_back(0.13099599);
   // for current summer09 Z+jets 7TeV MADGRAPH sample (full statistics, 50pb-1)
   lumiweight.push_back(0.13099599);
-  // for current summer09 QCD 7TeV PYTHIA sample (full statistics, 50pb-1)
-  lumiweight.push_back(1.02855301);
 
   // for current spring10 ttbar(all) 7TeV Mc@Nlo sample (full statistics, 50pb-1)
   lumiweight.push_back(0.00831910);
@@ -110,7 +107,7 @@ void analyzeMuonDiffXEfficiency()
   TH1F *etaAllReco= (TH1F*)eta_[kttbarReco]->Clone(); 
   TH1F *phiAllReco= (TH1F*)phi_[kttbarReco]->Clone(); 
 
-  for(unsigned int idx=kttbarReco+1; idx<=kQCDReco; ++idx){
+  for(unsigned int idx=kttbarReco+1; idx<=kZjetsReco; ++idx){
     ptAllReco ->Add(pt_ [idx]);
     etaAllReco->Add(eta_[idx]);
     phiAllReco->Add(phi_[idx]);
@@ -138,12 +135,12 @@ void analyzeMuonDiffXEfficiency()
   //    calculate efficiency histos
   // ---
 
-  TH1F *ptEff = (TH1F*)ptAllGen ->Clone();
-  ptEff->Divide((TH1F*)ptAllReco ->Clone()); 
-  TH1F *etaEff = (TH1F*)etaAllGen ->Clone();
-  etaEff->Divide((TH1F*)etaAllReco ->Clone()); 
-  TH1F *phiEff = (TH1F*)phiAllGen ->Clone();
-  phiEff->Divide((TH1F*)phiAllReco ->Clone()); 
+  TH1F *ptEff = (TH1F*)ptAllReco  ->Clone();
+  ptEff->Divide((TH1F*)ptAllGen   ->Clone()); 
+  TH1F *etaEff = (TH1F*)etaAllReco->Clone();
+  etaEff->Divide((TH1F*)etaAllGen ->Clone()); 
+  TH1F *phiEff = (TH1F*)phiAllReco->Clone();
+  phiEff->Divide((TH1F*)phiAllGen ->Clone()); 
 
   // ---  
   //    print out numbers for efficiency
@@ -192,7 +189,7 @@ void analyzeMuonDiffXEfficiency()
   TLegend *leg0 = new TLegend(0.19, 0.72, 1.00, 0.94);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("MC (ttbar, W/Z+jets, QCD) "+jetMultiplicity3+"+");
+  leg0->SetHeader("MC (ttbar, W/Z+jets) "+jetMultiplicity3+"+");
   leg0->AddEntry( ptAllGen  , "gen, l+jets selection", "PL");
   leg0->AddEntry( ptAllReco , "reco, semilept. top selection"   , "PL");
 
@@ -200,21 +197,21 @@ void analyzeMuonDiffXEfficiency()
   TLegend *leg1 = new TLegend(0.21, 0.74, 0.95, 0.94);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg1->SetHeader("effiency (gen/reco) "+jetMultiplicity3+"+");
+  leg1->SetHeader("effiency (reco/gen) "+jetMultiplicity3+"+");
   leg1->AddEntry( ptEff  , "p_{t} (#mu)" , "PL");
 
   // create a legend (in upper right corner) for efficiency
   TLegend *leg2 = new TLegend(0.21, 0.74, 0.95, 0.94);
   leg2->SetFillStyle(0);
   leg2->SetBorderSize(0);
-  leg2->SetHeader("effiency (gen/reco) "+jetMultiplicity3+"+");
+  leg2->SetHeader("effiency (reco/gen) "+jetMultiplicity3+"+");
   leg2->AddEntry( etaEff , "#eta (#mu)"  , "PL");
 
   // create a legend (in upper right corner) for efficiency
   TLegend *leg3 = new TLegend(0.21, 0.74, 0.95, 0.94);
   leg3->SetFillStyle(0);
   leg3->SetBorderSize(0);
-  leg3->SetHeader("effiency (gen/reco) "+jetMultiplicity3+"+");
+  leg3->SetHeader("effiency (reco/gen) "+jetMultiplicity3+"+");
   leg3->AddEntry( phiEff , "#phi (#mu)"  , "PL");
 
   // create a legend (in upper right corner) for pt(mu)- gen plot
@@ -285,8 +282,7 @@ void analyzeMuonDiffXEfficiency()
   // ---
   MyCanvas[3]->cd(0);
   MyCanvas[3]->SetTitle("ptEfficiencyMCbased"+jetMultiplicity);
-  axesStyle(*ptEff, "( p_{t} ( #mu ) [GeV]" , "efficiency (reco / gen)", 0.,  4.); 
-  if(jetMultiplicity=="Btag") ptEff->SetMaximum(6.0);
+  axesStyle(*ptEff, "( p_{t} ( #mu ) [GeV]" , "#epsilon_{ l+jets}", 0.,  1.5); 
   histogramStyle(*ptEff , kRed  , 1, 20);
   ptEff ->Draw("");
   ptEff ->Draw("Psame");
@@ -297,8 +293,7 @@ void analyzeMuonDiffXEfficiency()
   // ---
   MyCanvas[4]->cd(0);
   MyCanvas[4]->SetTitle("etaEfficiencyMCbased"+jetMultiplicity);
-  axesStyle(*etaEff, "#eta ( #mu )" , "efficiency (reco / gen)", 0.,  3.); 
-  if(jetMultiplicity=="Btag") etaEff->SetMaximum(6.0);
+  axesStyle(*etaEff, "#eta ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.3); 
   histogramStyle(*etaEff, kRed, 1, 22);
   etaEff->Draw("");
   etaEff ->Draw("Psame");
@@ -309,8 +304,7 @@ void analyzeMuonDiffXEfficiency()
   // ---
   MyCanvas[5]->cd(0);
   MyCanvas[5]->SetTitle("phiEfficiencyMCbased"+jetMultiplicity);
-  axesStyle(*phiEff, "#phi ( #mu )" , "efficiency (reco / gen)", 0.,  3.); 
-  if(jetMultiplicity=="Btag") phiEff->SetMaximum(6.0);
+  axesStyle(*phiEff, "#phi ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.3); 
   histogramStyle(*phiEff, kRed, 1, 21);
   phiEff->Draw("");
   phiEff->Draw("Psame");
