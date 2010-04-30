@@ -2,6 +2,9 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
 TriggerAnalyzer::TriggerAnalyzer(const ParameterSet& cfg)
 {
   trigResults_ = cfg.getParameter<InputTag>       ("TriggerResults");
@@ -78,8 +81,7 @@ TriggerAnalyzer::analyze(const Event& evt, const EventSetup&)
   bool mainTrigFired = false;
   int n_Triggers = trigResults->size();
 
-  TriggerNames trigName;
-  trigName.init(*trigResults);
+  TriggerNames trigName = evt.triggerNames(*trigResults);
 
   for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){  
     //cout <<  trigName.triggerName(i_Trig) << endl;
