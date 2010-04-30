@@ -262,6 +262,8 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   gROOT->cd();
   gROOT->SetStyle("Plain");
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
   gStyle->SetTitleBorderSize(0);
   gStyle->SetTitleFontSize(.05);
   gStyle->SetTitleX(.4);
