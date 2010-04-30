@@ -5,6 +5,8 @@
 // various MC samples, weighting them concerning luminosity, 
 // adding them and applies a poisson smearing for every point
 // -----------------------------------------------------------
+// adaptions are necessary within areas marked via !!! ... !!! 
+// -----------------------------------------------------------
   
 #include <vector>
 #include <iostream>
@@ -24,13 +26,22 @@ std::vector<TH1F*> hists_;
 std::vector<TFile*> files_;
 
 void createPseudoData(){
+  // -------------------------
   // !!! choose luminosity !!!
+  // -------------------------
   int luminosity= 50;
   // get the files
   loadingFiles(); 
-  // definition of output file
+  // ---------------------------------------
+  // !!! definition of output file(name) !!!
+  // ---------------------------------------
   TFile f("./pseudoData7TeV"+(TString)luminosity+"pb.root", "recreate");
-  // list of plots you want to add and their directories within the input samples
+
+  // ---------------------------------------------------------
+  // !!! list of plots you want to combine !!!
+  // and their directories within the input samples
+  // example: poisson("MyPlotFolder", "MyPlot", luminosity, f)
+  // ---------------------------------------------------------
   poisson("analyzeTightMuonCrossSectionRecNjets1", "pt"      , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets1", "eta"     , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets1", "phi"     , luminosity, f);
@@ -67,21 +78,15 @@ void createPseudoData(){
   poisson("analyzeTightMuonCrossSectionRecNjets4", "ptMinus" , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets4", "etaMinus", luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets4", "phiMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag", "phiMinus", luminosity, f);
-  //  poisson("analyzeTightMuonCrossSectionRecNjets1", "muonPt_"   , luminosity, f);
-  //  poisson("analyzeTightMuonCrossSectionRecNjets2", "muonPt_"   , luminosity, f);
-  //  poisson("analyzeTightMuonCrossSectionRecNjets3", "muonPt_"   , luminosity, f);
-  //  poisson("analyzeTightMuonCrossSectionRecNjets4", "muonPt_"   , luminosity, f);
-  //  poisson("analyzeTightMuonCrossSectionRecBtag",   "muonPt_"   , luminosity, f);
-
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "pt"      , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "eta"     , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "phi"     , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "ptPlus"  , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "etaPlus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "phiPlus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "ptMinus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "etaMinus", luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecBtag"  , "phiMinus", luminosity, f);
   // close rootfile
   f.Close();
 }
@@ -107,7 +112,9 @@ void poisson(TString directory, TString plot, int lumi, TFile& outputfile)
 
 void loadingFiles()
 {
-  // add all contributing samples here
+  // -----------------------------------------
+  // !!! add all contributing samples here !!!
+  // -----------------------------------------
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root" ) );
   files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root"    ) );
@@ -125,8 +132,9 @@ void loadingHists(TString plot)
 void smearing(TH1F& src, TH1F& data)
 {
   TRandom3 rnd(0);
- for(int ibin=0; ibin<=src.GetNbinsX(); ++ibin){
-   // CHANGE src.GetBinContent(ibin) TO 0. IF YOU JUST WANT TO COMBINE PLOTS
+  for(int ibin=0; ibin<=src.GetNbinsX(); ++ibin){
+   // !!! IF YOU JUST WANT TO COMBINE PLOTS !!!
+   // CHANGE src.GetBinContent(ibin) TO 0.
    unsigned int evts=rnd.Poisson(src.GetBinContent(ibin));
    data.SetBinContent(ibin, evts);
    data.SetBinError(ibin, sqrt(evts));
@@ -135,7 +143,9 @@ void smearing(TH1F& src, TH1F& data)
 
 void combineFiles(double luminosity)
 {
-  // define weights concerning luminosity 
+  // --------------------------------------------
+  // !!! define weights concerning luminosity !!!
+  // --------------------------------------------
   // actually done for 50 pb-1 @ 7TeV with full statistic
   
   lumiweight_.push_back( (0.0083/50)*luminosity );
