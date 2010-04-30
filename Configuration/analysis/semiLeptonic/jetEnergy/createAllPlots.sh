@@ -1,14 +1,22 @@
 #!/bin/sh
 
-TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeCorrections "analyzeJetEnergyCorrections_ak5.root" "GenMatch"
-TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeCorrections "analyzeJetEnergyCorrections_ic5.root" "GenMatch"
-TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeCorrections "analyzeJetEnergyCorrections_kt4.root" "GenMatch"
-TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeCorrections "analyzeJetEnergyCorrections_sc5.root" "GenMatch"
+anaCor=TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeCorrections
+anaRes=TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeResolutionBias
 
-cp -r analyzeJetEnergyCorrections_ak5/ ~/latex/notes/JECTopValidation
-cp -r analyzeJetEnergyCorrections_ic5/ ~/latex/notes/JECTopValidation
-cp -r analyzeJetEnergyCorrections_kt4/ ~/latex/notes/JECTopValidation
-cp -r analyzeJetEnergyCorrections_sc5/ ~/latex/notes/JECTopValidation
+targetDir=~/latex/notes/JECTopValidation
 
-#TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/analyzeResolutionBias "analyzeJetEnergyResolutionBias.root" \
-#                                                                                "analyzeJetEnergyResolutionBias_mcatnlo.root"
+$anaCor "analyzeJetEnergyCorrections_ak5.root"         "GenMatch"
+$anaCor "analyzeJetEnergyCorrections_ak5_mcatnlo.root" "GenMatch"
+$anaCor "analyzeJetEnergyCorrections_ic5.root"         "GenMatch"
+$anaCor "analyzeJetEnergyCorrections_kt4.root"         "GenMatch"
+$anaCor "analyzeJetEnergyCorrections_sc5.root"         "GenMatch"
+
+cp -r analyzeJetEnergyCorrections_ak5/         $targetDir
+cp -r analyzeJetEnergyCorrections_ak5_mcatnlo/ $targetDir
+cp -r analyzeJetEnergyCorrections_ic5/         $targetDir
+cp -r analyzeJetEnergyCorrections_kt4/         $targetDir
+cp -r analyzeJetEnergyCorrections_sc5/         $targetDir
+
+#$anaRes "analyzeJetEnergyResolutionBias.root" "analyzeJetEnergyResolutionBias_mcatnlo.root"
+#
+#cp -r analyzeJetEnergyResolutionBias $targetDir
