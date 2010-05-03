@@ -11,22 +11,33 @@ from PhysicsTools.PatAlgos.tools.metTools import *
 ## Add PfMET to the event content
 addPfMET(process, 'PF')
 
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run33xOnReRecoMC
-run33xOnReRecoMC(process)
+from PhysicsTools.PatAlgos.tools.jetTools import *
+
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
+run36xOn35xInput(process)
 
 ## Add particle flow jets
-from PhysicsTools.PatAlgos.tools.jetTools import *
-#addJetID(process, "antikt5PFJets", "pf")
-addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
+addJetCollection35X(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJTA        = True,
                  doBTagging   = True,
                  jetCorrLabel = ('AK5', 'PF'),
                  doType1MET   = False,
-                 doL1Cleaning = False,
+                 doL1Cleaning = False,                 
                  doL1Counters = False,
-                 genJetCollection=cms.InputTag('ak5GenJets'),
-                 doJetID      = True,
-                 ) 
+                 genJetCollection=cms.InputTag("ak5GenJets"),
+                 doJetID      = True
+                 )
+
+#addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
+#                 doJTA        = True,
+#                 doBTagging   = True,
+#                 jetCorrLabel = ('AK5', 'PF'),
+#                 doType1MET   = False,
+#                 doL1Cleaning = False,
+#                 doL1Counters = False,
+#                 genJetCollection=cms.InputTag('ak5GenJets'),
+#                 doJetID      = True,
+#                 ) 
 
 # embed IsoDeposits
 process.patMuons.isoDeposits = cms.PSet(
@@ -50,13 +61,17 @@ process.patJetsAK5PF.addTagInfos = False
 ## Check the Event Content
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
+## Re-Create missing ak5GenJet collection
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
+
 process.p = cms.Path(
-    process.patDefaultSequence # + process.content
+    process.genJetParticles * process.ak5GenJets * process.patDefaultSequence # + process.content
 )
 
 ## Special Replacements
 
-process.patJetCorrFactors.corrSample = 'Summer09_7TeV_ReReco332'
+process.patJetCorrFactors.corrSample = 'Spring10'#'Summer09_7TeV_ReReco332'
 ## sample type used for flavour dependend jet corrections
 process.patJetCorrFactors.sampleType = 'ttbar'
 process.patJetCorrFactorsAK5PF.sampleType = 'ttbar'
