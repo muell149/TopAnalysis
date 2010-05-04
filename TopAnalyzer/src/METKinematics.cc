@@ -13,6 +13,9 @@ METKinematics::METKinematics(const edm::ParameterSet& cfg)
 /// histogramm booking for fwlite 
 void METKinematics::book()
 {
+  /** 
+      MET Variables
+  **/
   // et of missing Et
   hists_["metEt"   ] = new TH1F( "met.et"    , "met.et"    ,  400 ,  0.  , 400. );
   // px of missing Et
@@ -25,12 +28,26 @@ void METKinematics::book()
   hists_["metSig"  ] = new TH1F( "met.sig"   , "met.sig"   ,  100 ,  0.  , 25.  );
   // phi of missing Et events
   hists_["metPhi"  ] = new TH1F( "met.phi"   , "met.phi"   ,  70  , -3.5 , 3.5  );
+
+  /** 
+      correlation MET - Kinematic quantities
+  **/
+  // gen-rec level correlation muon pt
+  hists2D_["METpt_" ] = new TH2F( "METpt_"    , "METpt_"    ,  400,    0.,  400.,     400,   0.,  400.);
+  // gen-rec level correlation muon eta
+  hists2D_["METeta_"] = new TH2F( "METeta_"   , "METeta_"   ,  800,   -4.,    4.,     400,   0.,  400.);
+  // gen-rec level correlation muon phi
+  hists2D_["METphi_"] = new TH2F( "METphi_"   , "METphi_"   ,  628, -3.14,  3.14,     400,   0.,  400.);
+
 }
 
 
 /// histogramm booking for fwfull
 void METKinematics::book(edm::Service<TFileService>& fs)
 {
+  /** 
+      MET Variables
+  **/
   // et of missing Et
   hists_["metEt"   ] = fs->make<TH1F>("met.et"    , "met.et"    , 400 ,  0.   , 400. );
   // px of missing Et
@@ -43,6 +60,16 @@ void METKinematics::book(edm::Service<TFileService>& fs)
   hists_["metSig"  ] = fs->make<TH1F>("met.sig"   , "met.sig"   , 100 ,  0.   , 25.  ); 
   // phi of missing Et events
   hists_["metPhi"  ] = fs->make<TH1F>("met.phi"   , "met.phi"   , 70  , -3.5  , 3.5  );
+
+  /** 
+      correlation MET - Kinematic quantities
+  **/
+  // gen-rec level correlation muon pt
+  hists2D_["METpt_" ] = fs->make<TH2F>("METpt_"    , "METpt_"    ,  400,    0.,  400.,     400,   0.,  400.);
+  // gen-rec level correlation muon eta
+  hists2D_["METeta_"] = fs->make<TH2F>("METeta_"   , "METeta_"   ,  800,   -4.,    4.,     400,   0.,  400.);
+  // gen-rec level correlation muon phi
+  hists2D_["METphi_"] = fs->make<TH2F>("METphi_"   , "METphi_"   ,  628, -3.14,  3.14,     400,   0.,  400.);
 }
 
 /// histogram filling for fw lite and for fw full
@@ -59,11 +86,28 @@ METKinematics::fill(const edm::View<reco::MET>& met, const double& weight)
   hists_.find("metSumEt")->second->Fill( met.begin()->sumEt() , weight);
   // filling for significance of missing Et
   // MET Significance = MET / sqrt(SumET)
-  hists_.find("metSig"  )->second->Fill( met.begin()->mEtSig() , weight);
+  hists_.find("metSig"  )->second->Fill( met.begin()->mEtSig(), weight);
   // filling for phi of missing Et
   hists_.find("metPhi"  )->second->Fill( met.begin()->phi()   , weight);
-
 }
+
+/// histogram filling with fwlite or full framework
+void
+METKinematics::fill(const edm::View<reco::MET>& metCollection, const edm::View<reco::Candidate>& particleCollection, const double& weight)
+{
+  int index=0;
+  for(edm::View<reco::Candidate>::const_iterator part= particleCollection.begin(); part!= particleCollection.end(); ++part, ++index){
+    // transverse momentum of the muon
+    if(index==0 ){
+      hists2D_.find("METpt_"  )->second->Fill( part->pt()  ,  metCollection.begin()->et() , weight );
+      // pseudorapidity of the muon
+      hists2D_.find("METeta_" )->second->Fill( part->eta() ,  metCollection.begin()->et() , weight );
+      // azimuth angle of the muon
+      hists2D_.find("METphi_" )->second->Fill( part->phi() ,  metCollection.begin()->et() , weight );
+    }
+  }
+}
+
 
 void
 METKinematics::process() 

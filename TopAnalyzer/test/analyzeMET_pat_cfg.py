@@ -43,8 +43,10 @@ process.load("TopAnalysis.TopAnalyzer.METKinematics_cfi")
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeMETKinematics.root')
 )
-process.analyzePfMETKinematics  = process.analyzeMETKinematics.clone(src = 'patMETsPF')
-process.analyzePatMETKinematics = process.analyzeMETKinematics.clone(src = 'patMETs')
+process.analyzePfMETKinematics       = process.analyzeMETKinematics.clone  (srcA = 'patMETsPF' )
+process.analyzePatMETKinematics      = process.analyzeMETKinematics.clone  (srcA = 'patMETs'   )
+process.analyzePatMETMuonCorrelation = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB = 'selectedPatMuons' )
 
 process.p1 = cms.Path(process.analyzePatMETKinematics*
-                      process.analyzePfMETKinematics       )
+                      process.analyzePfMETKinematics *
+                      process.analyzePatMETMuonCorrelation )

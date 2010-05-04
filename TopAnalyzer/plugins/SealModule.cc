@@ -154,7 +154,7 @@ DEFINE_FWK_MODULE(PtHatAnalyzer);
     Define module for MET analysis
 **/
 #include "TopAnalysis/TopAnalyzer/interface/METKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<reco::MET>, METKinematics> METAnalyzer;
+typedef DoubleObjectAnalyzer<edm::View<reco::MET>, edm::View<reco::Candidate>, METKinematics> METAnalyzer;
 DEFINE_FWK_MODULE(METAnalyzer);
 
 /**
