@@ -28,6 +28,11 @@
     _eventWeight_  : event weight. This parameter is optional. It does not have to be present in the in
                      configuration of the module. If given all histograms will not be filled with the 
 		     weight 1. but with the weight as given by this parameter. 
+  
+    _index_        : this parameter is only needed when using this module with two Objet Classes (srcA AND srcB).
+                     It is the index of the srcB Object that is considered for the correlation plot. 0 means the 
+		     leading Object of this class and -1 all Objects.
+
 
 
 */
@@ -63,7 +68,8 @@ public:
   void fill(const std::string histName, double valueA, double weight) const { if(booked(hists_, histName)) hists_.find(histName)->second->Fill(valueA, weight); }
   /// fill 2-dimensional histogram if it had been booked before
   void fill(const std::string histName, double valueA, double valueB, double weight) const { if(booked(hists2D_, histName)) hists2D_.find(histName)->second->Fill(valueA, valueB, weight); }
-
+  /// index of srcB object to be plotted
+  int index_;
 };
 
 #endif

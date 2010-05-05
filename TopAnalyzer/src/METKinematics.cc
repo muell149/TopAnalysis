@@ -7,7 +7,9 @@ METKinematics::METKinematics()
 
 /// default constructor for fwfull
 METKinematics::METKinematics(const edm::ParameterSet& cfg)
-{ 
+{
+  if(cfg.exists("index")) index_ = cfg.getParameter<int>( "index" );
+
 }
 
 /// histogramm booking for fwlite 
@@ -96,9 +98,10 @@ void
 METKinematics::fill(const edm::View<reco::MET>& metCollection, const edm::View<reco::Candidate>& particleCollection, const double& weight)
 {
   int index=0;
+  //  int index_=0;
   for(edm::View<reco::Candidate>::const_iterator part= particleCollection.begin(); part!= particleCollection.end(); ++part, ++index){
     // transverse momentum of the muon
-    if(index==0 ){
+    if(index==index_ || index_<0){
       hists2D_.find("METpt_"  )->second->Fill( part->pt()  ,  metCollection.begin()->et() , weight );
       // pseudorapidity of the muon
       hists2D_.find("METeta_" )->second->Fill( part->eta() ,  metCollection.begin()->et() , weight );
@@ -106,6 +109,7 @@ METKinematics::fill(const edm::View<reco::MET>& metCollection, const edm::View<r
       hists2D_.find("METphi_" )->second->Fill( part->phi() ,  metCollection.begin()->et() , weight );
     }
   }
+  
 }
 
 
