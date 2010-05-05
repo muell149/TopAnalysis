@@ -5,6 +5,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 
 /**
    \class   MuonCrossSection MuonCrossSection.h "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
@@ -16,8 +17,8 @@
    to particles on reco or on generator level. In both cases the input needs to be fully preselected 
    to the sample and phasespace of consideration. No other selection steps then whether to choose a 
    leading/subleading or all muons with a collection are applied within the module. When supplied 
-   with two input collections (given by the parameteras _srcA_ and _srcB_ in the module configuration) 
-   2-dimensional correlaction plos will be filled to derive stability/purity plots from these. The 
+   with two input collections (given by the parameters _srcA_ and _srcB_ in the module configuration) 
+   2-dimensional correlation plots will be filled to derive stability/purity plots from these. The 
    parameter _srcB_ is optional and should be filled with the generator particle if given. The parame-
    ters of the module are: 
 
@@ -28,9 +29,9 @@
                      of type pat::Muon (reco).
 
     _srcB_         : second input collection. This parameter is optional. It does not have to be present 
-                     in the configuratiohj of the module. If given the 1-dimensional histograms for rhe 
+                     in the configuration of the module. If given the 1-dimensional histograms for the 
 		     muon kinematics will still be filled from the input collection given by parameter
-		     _srcA_ (expected to be of reo type). In addition 2-dimensional correlation histo-
+		     _srcA_ (expected to be of reco type). In addition 2-dimensional correlation histo-
 		     grams will be booked and filled to derive purity/stability from these histograms.
 
     _eventWeight_  : event weight. This parameter is optional. It does not have to be present in the in
@@ -39,7 +40,7 @@
 
     _index_        : index of the muon in consideration in for the measurement. If -1. all muons in the 
                      given collection will be filled. For leading and subleading muons this parameter 
-		     follows C++ conventuions. 
+		     follows C++ conventions. 
 
    The binning of the histograms is determined from the a set of arrays within the namespace _CrossSection_ 
    as given in the class definition. The class is derived from the DoubleObject<CollectionA, CollectionB> 
