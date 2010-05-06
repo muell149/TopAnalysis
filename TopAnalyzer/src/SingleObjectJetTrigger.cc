@@ -16,11 +16,12 @@ SingleObjectJetTrigger::SingleObjectJetTrigger(const edm::ParameterSet& cfg)
   patTrigger_        = cfg.getParameter<edm::InputTag>("patTrigger");
   jets_              = cfg.getParameter<edm::InputTag>("jets");
   triggerMatchedJets_= cfg.getParameter<edm::InputTag>("triggerMatchedJets");
+  width_             = cfg.getParameter<double>("width");
 }
 
-/// calculate the trigger efficiency for QuadJet (or FiveJet) triggers based on single object trigger efficiency
+/// calculate the trigger efficiency for QuadJet (or DiJet) triggers based on single object trigger efficiency
 double 
-SingleObjectJetTrigger::triggerEfficiency(const edm::Handle<pat::JetCollection> jets, const bool fiveJet)
+SingleObjectJetTrigger::triggerEfficiency(const edm::Handle<pat::JetCollection> jets, const bool diJet)
 {
   double effy_ = 1.; //   X0,       X1,       X2,       X3,       X4,       X5,       X6,       X7,       X8,       X9,
   double effies_[100] = { 0,        0,        0,        0,        0,        0,        0,        0,        0,        0,        // 0X
@@ -34,13 +35,136 @@ SingleObjectJetTrigger::triggerEfficiency(const edm::Handle<pat::JetCollection> 
 			  1,        0.999946, 1,        1,        1,        1,        1,        0.999875, 1,        1,	      // 8X
 			  0.999863, 1,        1,        1,        1,        1,        1,        1,        1,        1 };      // 9X
   int ptBin = 100;
+
+  double result_i = 0.;
+  bool result_i_set = false;
   
+  if(diJet){
+
+    for(unsigned int i = 0; i < jets->size(); ++i){
+    
+      ptBin = floor(jets->at(i).pt());
+      if(!result_i_set) { result_i_set = true; result_i = 1.; }
+      ptBin < 100 ? result_i *= ( 1. - effies_[ptBin] ) : result_i *= 0.;
+    }
+    effy_ -= result_i;
+
+    for(unsigned int i = 0; i < jets->size(); ++i){
+    
+      double p_i = 1.;
+      ptBin = floor(jets->at(i).pt());
+      if(ptBin < 100) p_i = effies_[ptBin];
+
+      double result_k = 0.;
+      bool result_k_set = false;
+      for(unsigned int k = 0; k < jets->size(); ++k){
+    
+	if(k != i){
+	  ptBin = floor(jets->at(k).pt());
+	  if(!result_k_set) { result_k_set = true; result_k = 1.; }
+	  ptBin < 100 ? result_k *= ( 1. - effies_[ptBin] ) : result_k *= 0.;
+	}
+      }
+      effy_ -= p_i * result_k;
+    }
+    
+    return effy_;
+  }
+
+  for(unsigned int i = 0; i < jets->size(); ++i){
+    
+    ptBin = floor(jets->at(i).pt());
+    if(!result_i_set) { result_i_set = true; result_i = 1.; }
+    ptBin < 100 ? result_i *= ( 1. - effies_[ptBin] ) : result_i *= 0.;
+  }
+  effy_ -= result_i;
+
+  for(unsigned int i = 0; i < jets->size(); ++i){
+    
+    double p_i = 1.;
+    ptBin = floor(jets->at(i).pt());
+    if(ptBin < 100) p_i = effies_[ptBin];
+
+    double result_k = 0.;
+    bool result_k_set = false;
+    for(unsigned int k = 0; k < jets->size(); ++k){
+    
+      if(k != i){
+	ptBin = floor(jets->at(k).pt());
+	if(!result_k_set) { result_k_set = true; result_k = 1.; }
+	ptBin < 100 ? result_k *= ( 1. - effies_[ptBin] ) : result_k *= 0.;
+      }
+    }
+    effy_ -= p_i * result_k;
+  }
+
+  for(int i = 0; i < (int)jets->size() - 1; ++i){
+    
+    double p_i = 1.;
+    ptBin = floor(jets->at(i).pt());
+    if(ptBin < 100) p_i = effies_[ptBin];
+
+    for(int k = i + 1; k < (int)jets->size(); ++k){
+    
+      double p_k = 1.;
+      ptBin = floor(jets->at(k).pt());
+      if(ptBin < 100) p_k = effies_[ptBin];
+      
+      double result_l = 0.;
+      bool result_l_set = false;
+      for(int l = 0; l < (int)jets->size(); ++l){
+	
+	if(l != i && l != k){
+	  ptBin = floor(jets->at(l).pt());
+	  if(!result_l_set) { result_l_set = true; result_l = 1.; }
+	  ptBin < 100 ? result_l *= ( 1. - effies_[ptBin] ) : result_l *= 0.;
+	}
+      }
+      effy_ -= p_i * p_k * result_l;
+    }
+  }
+
+  for(int i = 0; i < (int)jets->size() - 2; ++i){
+    
+    double p_i = 1.;
+    ptBin = floor(jets->at(i).pt());
+    if(ptBin < 100) p_i = effies_[ptBin];
+
+    for(int k = i + 1; k < (int)jets->size() - 1; ++k){
+    
+      double p_k = 1.;
+      ptBin = floor(jets->at(k).pt());
+      if(ptBin < 100) p_k = effies_[ptBin];
+      
+      for(int l = k + 1; l < (int)jets->size(); ++l){
+	
+	double p_l = 1.;
+	ptBin = floor(jets->at(l).pt());
+	if(ptBin < 100) p_l = effies_[ptBin];
+	
+	double result_m = 1.;
+	bool result_m_set = false;
+	for(int m = 0; m < (int)jets->size(); ++m){
+	  
+	  if(m != i && m != k && m != l){
+	    ptBin = floor(jets->at(m).pt());
+	    if(!result_m_set) { result_m_set = true; result_m = 1.; }
+	    ptBin < 100 ? result_m *= ( 1. - effies_[ptBin] ) : result_m *= 0.;
+	  }
+	}
+	effy_ -= p_i * p_k * p_l * result_m;
+      }
+    }
+  }
+
+  /*
   for(unsigned int idx = 0; idx <= 4; ++idx){
 
     if(!fiveJet && idx == 4) break;
     if(jets->size() > idx) ptBin = floor(jets->at(idx).pt()); // dirty little hack, probably needs a fix at some time
     ptBin > 99 ? effy_ *= 1. : effy_ *= effies_[ptBin];
   }
+  */
   /*
   effy_ *= 0.5*TMath::Erf((jets->at(0).pt()-29.9592)/2.64442961111111)+0.5;
   effy_ *= 0.5*TMath::Erf((jets->at(1).pt()-29.9592)/2.64442961111111)+0.5;
@@ -48,6 +172,163 @@ SingleObjectJetTrigger::triggerEfficiency(const edm::Handle<pat::JetCollection> 
   effy_ *= 0.5*TMath::Erf((jets->at(3).pt()-29.9592)/2.64442961111111)+0.5;
   if (fiveJet) effy_ *= 0.5*TMath::Erf((jets->at(4).pt()-29.9592)/2.64442961111111)+0.5;
   */
+  //std::cout << effy_ << std::endl;
+  return effy_;
+}
+
+/// calculate the trigger efficiency for QuadJet (or DiJet) triggers based on single object trigger efficiency with smeared trigger jet pt's
+double
+SingleObjectJetTrigger::triggerEfficiencySmear(const std::vector<double> jets, const bool diJet)
+{
+  double effy_ = 1.; //   X0,       X1,       X2,       X3,       X4,       X5,       X6,       X7,       X8,       X9,
+  double effies_[100] = { 0,        0,        0,        0,        0,        0,        0,        0,        0,        0,        // 0X
+			  0,        0,        0,        0,        0,        0,        0,        0,        0,        0,	      // 1X
+			  0.103389, 0.13367,  0.158888, 0.176171, 0.181272, 0.19171,  0.194168, 0.206794, 0.22368,  0.269992, // 2X
+			  0.609654, 0.768382, 0.837768, 0.903173, 0.957051, 0.980878, 0.985011, 0.988416, 0.989534, 0.991462, // 3X
+			  0.992501, 0.994188, 0.994625, 0.995198, 0.995896, 0.99635,  0.997574, 0.997853, 0.99841,  0.998711, // 4X
+			  0.99913,  0.999176, 0.999175, 0.999411, 0.999525, 0.999681, 0.99987,  0.999767, 0.999799, 0.999829, // 5X
+			  0.999792, 0.99993,  0.999892, 0.999964, 1,        0.999924, 1,        0.99996,  1,        1,	      // 6X
+			  1,        0.999957, 1,        0.999955, 0.999955, 1,        1,        0.999951, 1,        0.999948, // 7X
+			  1,        0.999946, 1,        1,        1,        1,        1,        0.999875, 1,        1,	      // 8X
+			  0.999863, 1,        1,        1,        1,        1,        1,        1,        1,        1 };      // 9X
+  int ptBin = 100;
+
+  double result_i = 0.;
+  bool result_i_set = false;
+
+  if(diJet){
+
+    for(unsigned int i = 0; i < jets.size(); ++i){
+    
+      ptBin = floor(jets.at(i));
+      if(!result_i_set) { result_i_set = true; result_i = 1.; }
+      ptBin < 100 ? result_i *= ( 1. - effies_[ptBin] ) : result_i *= 0.;
+    }
+    effy_ -= result_i;
+
+    for(unsigned int i = 0; i < jets.size(); ++i){
+    
+      double p_i = 1.;
+      ptBin = floor(jets.at(i));
+      if(ptBin < 100) p_i = effies_[ptBin];
+
+      double result_k = 0.;
+      bool result_k_set = false;
+      for(unsigned int k = 0; k < jets.size(); ++k){
+    
+	if(k != i){
+	  ptBin = floor(jets.at(k));
+	  if(!result_k_set) { result_k_set = true; result_k = 1.; }
+	  ptBin < 100 ? result_k *= ( 1. - effies_[ptBin] ) : result_k *= 0.;
+	}
+      }
+      effy_ -= p_i * result_k;
+    }
+    return effy_;
+  }
+
+  for(unsigned int i = 0; i < jets.size(); ++i){
+    
+    ptBin = floor(jets.at(i));
+    if(!result_i_set) { result_i_set = true; result_i = 1.; }
+    ptBin < 100 ? result_i *= ( 1. - effies_[ptBin] ) : result_i *= 0.;
+  }
+  effy_ -= result_i;
+
+  for(unsigned int i = 0; i < jets.size(); ++i){
+    
+    double p_i = 1.;
+    ptBin = floor(jets.at(i));
+    if(ptBin < 100) p_i = effies_[ptBin];
+
+    double result_k = 0.;
+    bool result_k_set = false;
+    for(unsigned int k = 0; k < jets.size(); ++k){
+    
+      if(k != i){
+	ptBin = floor(jets.at(k));
+	if(!result_k_set) { result_k_set = true; result_k = 1.; }
+	ptBin < 100 ? result_k *= ( 1. - effies_[ptBin] ) : result_k *= 0.;
+      }
+    }
+    effy_ -= p_i * result_k;
+  }
+
+  for(int i = 0; i < (int)jets.size() - 1; ++i){
+    
+    double p_i = 1.;
+    ptBin = floor(jets.at(i));
+    if(ptBin < 100) p_i = effies_[ptBin];
+
+    for(int k = i + 1; k < (int)jets.size(); ++k){
+    
+      double p_k = 1.;
+      ptBin = floor(jets.at(k));
+      if(ptBin < 100) p_k = effies_[ptBin];
+      
+      double result_l = 0.;
+      bool result_l_set = false;
+      for(int l = 0; l < (int)jets.size(); ++l){
+	
+	if(l != i && l != k){
+	  ptBin = floor(jets.at(l));
+	  if(!result_l_set) { result_l_set = true; result_l = 1.; }
+	  ptBin < 100 ? result_l *= ( 1. - effies_[ptBin] ) : result_l *= 0.;
+	}
+      }
+      effy_ -= p_i * p_k * result_l;
+    }
+  }
+
+  for(int i = 0; i < (int)jets.size() - 2; ++i){
+    
+    double p_i = 1.;
+    ptBin = floor(jets.at(i));
+    if(ptBin < 100) p_i = effies_[ptBin];
+
+    for(int k = i + 1; k < (int)jets.size() - 1; ++k){
+    
+      double p_k = 1.;
+      ptBin = floor(jets.at(k));
+      if(ptBin < 100) p_k = effies_[ptBin];
+      
+      for(int l = k + 1; l < (int)jets.size(); ++l){
+	
+	double p_l = 1.;
+	ptBin = floor(jets.at(l));
+	if(ptBin < 100) p_l = effies_[ptBin];
+	
+	double result_m = 1.;
+	bool result_m_set = false;
+	for(int m = 0; m < (int)jets.size(); ++m){
+	  
+	  if(m != i && m != k && m != l){
+	    ptBin = floor(jets.at(m));
+	    if(!result_m_set) { result_m_set = true; result_m = 1.; }
+	    ptBin < 100 ? result_m *= ( 1. - effies_[ptBin] ) : result_m *= 0.;
+	  }
+	}
+	effy_ -= p_i * p_k * p_l * result_m;
+      }
+    }
+  }
+
+  /*
+  for(unsigned int idx = 0; idx <= 4; ++idx){
+
+    if(!fiveJet && idx == 4) break;
+    if(jets.size() > idx) ptBin = floor(jets.at(idx)->pt()); // dirty little hack, probably needs a fix at some time
+    ptBin > 99 ? effy_ *= 1. : effy_ *= effies_[ptBin];
+  }
+  */
+  /*
+  effy_ *= 0.5*TMath::Erf((jets.at(0)->pt()-29.9592)/2.64442961111111)+0.5;
+  effy_ *= 0.5*TMath::Erf((jets.at(1)->pt()-29.9592)/2.64442961111111)+0.5;
+  effy_ *= 0.5*TMath::Erf((jets.at(2)->pt()-29.9592)/2.64442961111111)+0.5;
+  effy_ *= 0.5*TMath::Erf((jets.at(3)->pt()-29.9592)/2.64442961111111)+0.5;
+  if (fiveJet) effy_ *= 0.5*TMath::Erf((jets.at(4)->pt()-29.9592)/2.64442961111111)+0.5;
+  */
+  //std::cout << effy_ << std::endl;
   return effy_;
 }
 
@@ -147,11 +428,11 @@ SingleObjectJetTrigger::beginJob()
   // pt 6. jet
   hists_["pt6_effy"] = fs->make<TH1F>( "pt6_effy" , "pt6_effy" , 100,  0. , 100. );
   // Trigger vs. offline p_{T} (GeV)
-  //hists2D_["ptTrigOff" ] = fs->make<TH2F>( "ptTrigOff" , "Trigger vs. offline p_{T} (GeV)", 60,  0., 300., 60,  0., 300. );
+  hists2D_["ptTrigOff" ] = fs->make<TH2F>( "ptTrigOff" , "Trigger vs. offline p_{T} (GeV)", 60,  0., 300., 60,  0., 300. );
   // Trigger vs. offline eta
-  //hists2D_["etaTrigOff"] = fs->make<TH2F>( "etaTrigOff", "Trigger vs. offline #eta"       , 50, -2.5, 2.5, 50, -2.5, 2.5 );
+  hists2D_["etaTrigOff"] = fs->make<TH2F>( "etaTrigOff", "Trigger vs. offline #eta"       , 50, -2.5, 2.5, 50, -2.5, 2.5 );
   // Trigger vs. offline phi
-  //hists2D_["phiTrigOff"] = fs->make<TH2F>( "phiTrigOff", "Trigger vs. offline #phi"       , 64, -3.2, 3.2, 64, -3.2, 3.2 );
+  hists2D_["phiTrigOff"] = fs->make<TH2F>( "phiTrigOff", "Trigger vs. offline #phi"       , 64, -3.2, 3.2, 64, -3.2, 3.2 );
   // eta of 1. jet pt < 40 GeV, triggered pt > 40 GeV
   hists_["eta_1"] = fs->make<TH1F>( "eta_1" , "eta_1" , 100,  -5. , 5. );
   // eta of 2. jet pt < 40 GeV, triggered pt > 40 GeV
@@ -233,6 +514,35 @@ SingleObjectJetTrigger::beginJob()
 
 
   /**
+     pt distribution for triggered / untriggered events which pass the SOT
+  **/
+
+  // QuadJet30 pt distribution of 1. jet for triggered / untriggered events
+  hists_["QJ30_1_trig"] = fs->make<TH1F>( "QJ30_1_trig" , "QuadJet30_1_triggered" , 100,  0. , 100. );
+  hists_["QJ30_1_untrig"] = fs->make<TH1F>( "QJ30_1_untrig" , "QuadJet30_1_untriggered" , 100,  0. , 100. );
+  // QuadJet30 pt distribution of 2. jet for triggered / untriggered events
+  hists_["QJ30_2_trig"] = fs->make<TH1F>( "QJ30_2_trig" , "QuadJet30_2_triggered" , 100,  0. , 100. );
+  hists_["QJ30_2_untrig"] = fs->make<TH1F>( "QJ30_2_untrig" , "QuadJet30_2_untriggered" , 100,  0. , 100. );
+  // QuadJet30 pt distribution of 3. jet for triggered / untriggered events
+  hists_["QJ30_3_trig"] = fs->make<TH1F>( "QJ30_3_trig" , "QuadJet30_3_triggered" , 100,  0. , 100. );
+  hists_["QJ30_3_untrig"] = fs->make<TH1F>( "QJ30_3_untrig" , "QuadJet30_3_untriggered" , 100,  0. , 100. );
+  // QuadJet30 pt distribution of 4. jet for triggered / untriggered events
+  hists_["QJ30_4_trig"] = fs->make<TH1F>( "QJ30_4_trig" , "QuadJet30_5_triggered" , 100,  0. , 100. );
+  hists_["QJ30_4_untrig"] = fs->make<TH1F>( "QJ30_4_untrig" , "QuadJet30_4_untriggered" , 100,  0. , 100. );
+  // QuadJet40 pt distribution of 1. jet for triggered / untriggered events
+  hists_["QJ40_1_trig"] = fs->make<TH1F>( "QJ40_1_trig" , "QuadJet40_1_triggered" , 100,  0. , 100. );
+  hists_["QJ40_1_untrig"] = fs->make<TH1F>( "QJ40_1_untrig" , "QuadJet40_1_untriggered" , 100,  0. , 100. );
+  // QuadJet40 pt distribution of 2. jet for triggered / untriggered events
+  hists_["QJ40_2_trig"] = fs->make<TH1F>( "QJ40_2_trig" , "QuadJet40_2_triggered" , 100,  0. , 100. );
+  hists_["QJ40_2_untrig"] = fs->make<TH1F>( "QJ40_2_untrig" , "QuadJet40_2_untriggered" , 100,  0. , 100. );
+  // QuadJet40 pt distribution of 3. jet for triggered / untriggered events
+  hists_["QJ40_3_trig"] = fs->make<TH1F>( "QJ40_3_trig" , "QuadJet40_3_triggered" , 100,  0. , 100. );
+  hists_["QJ40_3_untrig"] = fs->make<TH1F>( "QJ40_3_untrig" , "QuadJet40_3_untriggered" , 100,  0. , 100. );
+  // QuadJet40 pt distribution of 4. jet for triggered / untriggered events
+  hists_["QJ40_4_trig"] = fs->make<TH1F>( "QJ40_4_trig" , "QuadJet40_5_triggered" , 100,  0. , 100. );
+  hists_["QJ40_4_untrig"] = fs->make<TH1F>( "QJ40_4_untrig" , "QuadJet40_4_untriggered" , 100,  0. , 100. );
+
+  /**
      Efficiencies vs. reco pt
   **/
 
@@ -268,6 +578,20 @@ SingleObjectJetTrigger::beginJob()
   hists_["QJ40_4"]   = fs->make<TH1F>( "QJ40_4"   , "QuadJet40_4"      , 100,  0. , 100. );
   hists_["QJ40_4_n"] = fs->make<TH1F>( "QJ40_4_n" , "QuadJet40_5_norm" , 100,  0. , 100. );
   hists_["QJ40_4_e"] = fs->make<TH1F>( "QJ40_4_e" , "QuadJet40_4_effy" , 100,  0. , 100. );
+
+  /**
+     imaginary new self defined DiJet40 trigger for testing purpose only
+  **/
+
+  // DiJet40 efficiency for 1. jet and normalization histogram
+  hists_["DJ40_1"]   = fs->make<TH1F>( "DJ40_1"   , "DiJet40_1"      , 100,  0. , 100. );
+  hists_["DJ40_1_n"] = fs->make<TH1F>( "DJ40_1_n" , "DiJet40_1_norm" , 100,  0. , 100. );
+  hists_["DJ40_1_e"] = fs->make<TH1F>( "DJ40_1_e" , "DiJet40_1_effy" , 100,  0. , 100. );
+  // DiJet40 efficiency for 2. jet and normalization histogram
+  hists_["DJ40_2"]   = fs->make<TH1F>( "DJ40_2"   , "DiJet40_2"      , 100,  0. , 100. );
+  hists_["DJ40_2_n"] = fs->make<TH1F>( "DJ40_2_n" , "DiJet40_2_norm" , 100,  0. , 100. );
+  hists_["DJ40_2_e"] = fs->make<TH1F>( "DJ40_2_e" , "DiJet40_2_effy" , 100,  0. , 100. );
+
   /*
   // QuadJet80303030 efficiency for 1. jet and normalization histogram
   hists_["QJ8333_1"]   = fs->make<TH1F>( "QJ8333_1"   , "QuadJet80303030_1"      , 100,  0. , 100. );
@@ -342,6 +666,20 @@ SingleObjectJetTrigger::beginJob()
   hists_["QJ40_trigger_4"]   = fs->make<TH1F>( "QJ40_trigger_4"   , "QuadJet40_trigger_4"      , 100,  0. , 100. );
   hists_["QJ40_trigger_4_n"] = fs->make<TH1F>( "QJ40_trigger_4_n" , "QuadJet40_trigger_5_norm" , 100,  0. , 100. );
   hists_["QJ40_trigger_4_e"] = fs->make<TH1F>( "QJ40_trigger_4_e" , "QuadJet40_trigger_4_effy" , 100,  0. , 100. );
+
+  /**
+     imaginary new self defined DiJet40 trigger for testing purpose only
+  **/
+
+  // DiJet40 efficiency for 1. jet and normalization histogram
+  hists_["DJ40_trigger_1"]   = fs->make<TH1F>( "DJ40_trigger_1"   , "DiJet40_trigger_1"      , 100,  0. , 100. );
+  hists_["DJ40_trigger_1_n"] = fs->make<TH1F>( "DJ40_trigger_1_n" , "DiJet40_trigger_1_norm" , 100,  0. , 100. );
+  hists_["DJ40_trigger_1_e"] = fs->make<TH1F>( "DJ40_trigger_1_e" , "DiJet40_trigger_1_effy" , 100,  0. , 100. );
+  // DiJet40 efficiency for 2. jet and normalization histogram
+  hists_["DJ40_trigger_2"]   = fs->make<TH1F>( "DJ40_trigger_2"   , "DiJet40_trigger_2"      , 100,  0. , 100. );
+  hists_["DJ40_trigger_2_n"] = fs->make<TH1F>( "DJ40_trigger_2_n" , "DiJet40_trigger_2_norm" , 100,  0. , 100. );
+  hists_["DJ40_trigger_2_e"] = fs->make<TH1F>( "DJ40_trigger_2_e" , "DiJet40_trigger_2_effy" , 100,  0. , 100. );
+
   /*
   // QuadJet80303030 efficiency for 1. jet and normalization histogram
   hists_["QJ8333_trigger_1"]   = fs->make<TH1F>( "QJ8333_trigger_1"   , "QuadJet80303030_trigger_1"      , 100,  0. , 100. );
@@ -380,7 +718,8 @@ SingleObjectJetTrigger::beginJob()
   hists_["FJ30_trigger_5_n"] = fs->make<TH1F>( "FJ30_trigger_5_n" , "FiveJet30_trigger_5_norm" , 100,  0. , 100. );
   hists_["FJ30_trigger_5_e"] = fs->make<TH1F>( "FJ30_trigger_5_e" , "FiveJet30_trigger_5_effy" , 100,  0. , 100. );
   */
- }
+  rnd.SetSeed(0);
+}
 
 /// analyze triggers and fill histograms
 void
@@ -404,6 +743,7 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 
     bool L1Triggered = false;
     bool HLTriggered = false;
+    bool singleJetTriggered = false;
     /*
     std::cout << "-------------" << std::endl;
     for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
@@ -413,9 +753,10 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
     */
     pat::TriggerFilterRefVector filters = triggerEvent->acceptedFilters();
     for(pat::TriggerFilterRefVector::const_iterator filter = filters.begin(); filter != filters.end(); ++filter){
+      if((*filter)->label() == "hlt1jet30") singleJetTriggered = true;
       if((*filter)->label() == "hlt4jet30") HLTriggered = true;
       if((*filter)->label() == "hltL1sQuadJet30") L1Triggered = true;
-    }
+   }
     
     //if(L1Triggered){
 
@@ -466,6 +807,9 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 	  double emf_ = (*jets)[iJet].emEnergyFraction();
 	  hists_.find("pt_match")->second->Fill( HLTriggerMatchedJet_pt );
 	  hists_.find("pt_trigger_match")->second->Fill( HLTriggerJet_pt );
+	  hists2D_.find("ptTrigOff")->second->Fill( HLTriggerMatchedJet_pt, HLTriggerJet_pt );
+	  hists2D_.find("etaTrigOff")->second->Fill( candBaseRef->eta(), HLTrigRef->eta() );
+	  hists2D_.find("phiTrigOff")->second->Fill( candBaseRef->phi(), HLTrigRef->phi() );
 	  if ( HLTriggerMatchedJet_pt <  30 ) {
 	    hists_.find("dR2Trig_l")->second->Fill( dR2Trig );
 	    hists_.find("nConst_l")->second->Fill( (*jets)[iJet].nConstituents() );
@@ -521,15 +865,53 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 	  }
 	}
       }
+      
+      if(singleJetTriggered){
+	
+	pat::TriggerObjectRefVector objects = triggerEvent->filterObjects("hlt1jet30");
+	std::vector<double> objects_pt;
+	
+	for(unsigned int i = 0; i < objects.size(); ++i){
+	  objects_pt.push_back(rnd.Gaus(objects[i]->pt(), width_));
+	}
+
+	if(objects.size() >= 2){
+	  if(objects[0]->pt() >= 40. && objects[1]->pt() >= 40.) {
+	    
+	    //effy = triggerEfficiency(jets, true);
+	    effy = triggerEfficiencySmear(objects_pt, true);
+	    
+	    if(jets->size() >= 1) {
+	      hists_.find("DJ40_1")->second->Fill(   objects_pt[0], effy );
+	      hists_.find("DJ40_1_n")->second->Fill( objects_pt[0] );
+	    }
+	    if(jets->size() >= 2) {
+	      hists_.find("DJ40_2")->second->Fill(   objects_pt[1], effy );
+	      hists_.find("DJ40_2_n")->second->Fill( objects_pt[1] );
+	    }
+	    
+	    hists_.find("DJ40_trigger_1")->second->Fill( objects[0]->pt(), effy ); hists_.find("DJ40_trigger_1_n")->second->Fill( objects[0]->pt() );
+	    hists_.find("DJ40_trigger_2")->second->Fill( objects[1]->pt(), effy ); hists_.find("DJ40_trigger_2_n")->second->Fill( objects[1]->pt() );
+	    
+	  }
+	}
+      }
+      
+      bool QJ40Triggered = false;
 
       if(HLTriggered){
 	
 	pat::TriggerObjectRefVector objects = triggerEvent->filterObjects("hlt4jet30");
+	std::vector<double> objects_pt;
+	
+	for(unsigned int i = 0; i < objects.size(); ++i){
+	  objects_pt.push_back(rnd.Gaus(objects[i]->pt(), width_));
+	}
 
-	hists_.find("n_trigger")->second->Fill( objects.size() );
+	hists_.find("n_trigger")->second->Fill( objects_pt.size() );
 	unsigned int HLTriggerJetCounter = 1;
-	for (size_t iTrigJet = 0; iTrigJet < objects.size(); ++iTrigJet, ++HLTriggerJetCounter) {
-	  double HLTriggerJet_pt = objects[iTrigJet]->pt();
+	for (size_t iTrigJet = 0; iTrigJet < objects_pt.size(); ++iTrigJet, ++HLTriggerJetCounter) {
+	  double HLTriggerJet_pt = objects_pt[iTrigJet];
 	  hists_.find("pt_trigger")->second->Fill( HLTriggerJet_pt );
 	  if(HLTriggerJetCounter == 1) { hists_.find("pt1_trigger")->second->Fill( HLTriggerJet_pt ); HLTriggerJet1_pt = HLTriggerJet_pt; }
 	  if(HLTriggerJetCounter == 2) { hists_.find("pt2_trigger")->second->Fill( HLTriggerJet_pt ); HLTriggerJet2_pt = HLTriggerJet_pt; }
@@ -541,12 +923,29 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 
 	if(objects[0]->pt() >= 30. && objects[1]->pt() >= 30. && objects[2]->pt() >= 30. && objects[3]->pt() >= 30.) {
 	  
-	  effy = triggerEfficiency(jets, false);
+	  //effy = triggerEfficiency(jets, false);
+	  effy = triggerEfficiencySmear(objects_pt, true);
 	  
-	  if(jets->size() >= 1) { hists_.find("QJ30_1")->second->Fill( jet1_pt, effy ); hists_.find("QJ30_1_n")->second->Fill( jet1_pt ); }
-	  if(jets->size() >= 2) { hists_.find("QJ30_2")->second->Fill( jet2_pt, effy );	hists_.find("QJ30_2_n")->second->Fill( jet2_pt ); }
-	  if(jets->size() >= 3) { hists_.find("QJ30_3")->second->Fill( jet3_pt, effy );	hists_.find("QJ30_3_n")->second->Fill( jet3_pt ); }
-	  if(jets->size() >= 4) { hists_.find("QJ30_4")->second->Fill( jet4_pt, effy );	hists_.find("QJ30_4_n")->second->Fill( jet4_pt ); }
+	  if(jets->size() >= 1) {
+	    hists_.find("QJ30_1")->second->Fill( objects_pt[0], effy );
+	    hists_.find("QJ30_1_n")->second->Fill( objects_pt[0] );
+	    hists_.find("QJ30_1_trig")->second->Fill( objects_pt[0] );
+	  }
+	  if(jets->size() >= 2) {
+	    hists_.find("QJ30_2")->second->Fill( objects_pt[1], effy );
+	    hists_.find("QJ30_2_n")->second->Fill( objects_pt[1] );
+	    hists_.find("QJ30_2_trig")->second->Fill( objects_pt[1] );
+	  }
+	  if(jets->size() >= 3) {
+	    hists_.find("QJ30_3")->second->Fill( objects_pt[2], effy );
+	    hists_.find("QJ30_3_n")->second->Fill( objects_pt[2] );
+	    hists_.find("QJ30_3_trig")->second->Fill( objects_pt[2] );
+	  }
+	  if(jets->size() >= 4) {
+	    hists_.find("QJ30_4")->second->Fill( objects_pt[3], effy );
+	    hists_.find("QJ30_4_n")->second->Fill( objects_pt[3] );
+	    hists_.find("QJ30_4_trig")->second->Fill( objects_pt[3] );
+	  }
 
 	  hists_.find("QJ30_trigger_1")->second->Fill( HLTriggerJet1_pt, effy ); hists_.find("QJ30_trigger_1_n")->second->Fill( HLTriggerJet1_pt );
 	  hists_.find("QJ30_trigger_2")->second->Fill( HLTriggerJet2_pt, effy ); hists_.find("QJ30_trigger_2_n")->second->Fill( HLTriggerJet2_pt );
@@ -566,10 +965,28 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 	    }
 	  */
 	  if(objects[0]->pt() >= 40. && objects[1]->pt() >= 40. && objects[2]->pt() >= 40. && objects[3]->pt() >= 40.) {
-	    if(jets->size() >= 1) { hists_.find("QJ40_1")->second->Fill( jet1_pt, effy ); hists_.find("QJ40_1_n")->second->Fill( jet1_pt ); }
-	    if(jets->size() >= 2) { hists_.find("QJ40_2")->second->Fill( jet2_pt, effy ); hists_.find("QJ40_2_n")->second->Fill( jet2_pt ); }
-	    if(jets->size() >= 3) { hists_.find("QJ40_3")->second->Fill( jet3_pt, effy ); hists_.find("QJ40_3_n")->second->Fill( jet3_pt ); }
-	    if(jets->size() >= 4) { hists_.find("QJ40_4")->second->Fill( jet4_pt, effy ); hists_.find("QJ40_4_n")->second->Fill( jet4_pt ); }
+
+	    QJ40Triggered = true;
+	    if(jets->size() >= 1) {
+	      hists_.find("QJ40_1")->second->Fill( objects_pt[0], effy );
+	      hists_.find("QJ40_1_n")->second->Fill( objects_pt[0] );
+	      hists_.find("QJ40_1_trig")->second->Fill( objects_pt[0] );
+	    }
+	    if(jets->size() >= 2) {
+	      hists_.find("QJ40_2")->second->Fill( objects_pt[1], effy );
+	      hists_.find("QJ40_2_n")->second->Fill( objects_pt[1] );
+	      hists_.find("QJ40_2_trig")->second->Fill( objects_pt[1] );
+	    }
+	    if(jets->size() >= 3) {
+	      hists_.find("QJ40_3")->second->Fill( objects_pt[2], effy );
+	      hists_.find("QJ40_3_n")->second->Fill( objects_pt[2] );
+	      hists_.find("QJ40_3_trig")->second->Fill( objects_pt[2] );
+	    }
+	    if(jets->size() >= 4) {
+	      hists_.find("QJ40_4")->second->Fill( objects_pt[3], effy );
+	      hists_.find("QJ40_4_n")->second->Fill( objects_pt[3] );
+	      hists_.find("QJ40_4_trig")->second->Fill( objects_pt[3] );
+	    }
 
 	    hists_.find("QJ40_trigger_1")->second->Fill( HLTriggerJet1_pt, effy ); hists_.find("QJ40_trigger_1_n")->second->Fill( HLTriggerJet1_pt );
 	    hists_.find("QJ40_trigger_2")->second->Fill( HLTriggerJet2_pt, effy ); hists_.find("QJ40_trigger_2_n")->second->Fill( HLTriggerJet2_pt );
@@ -646,8 +1063,37 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 	  */
 	}
       }
-    }
+      else if(!HLTriggered){
+
+	if(jets->size() >= 1) {
+	  hists_.find("QJ30_1_untrig")->second->Fill( jet1_pt );
+	}
+	if(jets->size() >= 2) {
+	  hists_.find("QJ30_2_untrig")->second->Fill( jet2_pt );
+	}
+	if(jets->size() >= 3) {
+	  hists_.find("QJ30_3_untrig")->second->Fill( jet3_pt );
+	}
+	if(jets->size() >= 4) {
+	  hists_.find("QJ30_4_untrig")->second->Fill( jet4_pt );
+	}
+	if(!QJ40Triggered){
+	  if(jets->size() >= 1) {
+	    hists_.find("QJ40_1_untrig")->second->Fill( jet1_pt );
+	  }
+	  if(jets->size() >= 2) {
+	    hists_.find("QJ40_2_untrig")->second->Fill( jet2_pt );
+	  }
+	  if(jets->size() >= 3) {
+	    hists_.find("QJ40_3_untrig")->second->Fill( jet3_pt );
+	  }
+	  if(jets->size() >= 4) {
+	    hists_.find("QJ40_4_untrig")->second->Fill( jet4_pt );
+	  }
+	}
+      }
   }
+}
 //}
 
 void
@@ -682,6 +1128,11 @@ SingleObjectJetTrigger::endJob()
   hists2Norm.push_back("QJ40_trigger_3");
   hists2Norm.push_back("QJ30_trigger_4");
   hists2Norm.push_back("QJ40_trigger_4");
+  hists2Norm.push_back("DJ40_1");
+  hists2Norm.push_back("DJ40_2");
+  hists2Norm.push_back("DJ40_trigger_1");
+  hists2Norm.push_back("DJ40_trigger_2");
+
   //hists2Norm.push_back("QJ8333_1");
   //hists2Norm.push_back("QJ8333_2");
   //hists2Norm.push_back("QJ8333_3");

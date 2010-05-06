@@ -8,6 +8,7 @@
 
 #include "TH1.h"
 #include "TH2.h"
+#include "TRandom3.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
@@ -50,8 +51,10 @@ class SingleObjectJetTrigger : public edm::EDAnalyzer {
   /// empty
   virtual void endJob();
 
-  /// calculate the trigger efficiency for QuadJet (or FiveJet) triggers based on single object trigger efficiency
-  double triggerEfficiency(const edm::Handle<pat::JetCollection> jets, const bool fiveJet);
+  /// calculate the trigger efficiency for QuadJet (or DiJet) triggers based on single object trigger efficiency
+  double triggerEfficiency(const edm::Handle<pat::JetCollection> jets, const bool diJet);
+  /// calculate the trigger efficiency for QuadJet (or DiJet) triggers based on single object trigger efficiency with smeared trigger jet pt's
+  double triggerEfficiencySmear(const std::vector<double> jets, const bool diJet);
 
   /// calculate distance to nearest jet
   double minDR(const edm::Handle<pat::JetCollection> jets, const unsigned int iJet);
@@ -70,6 +73,11 @@ class SingleObjectJetTrigger : public edm::EDAnalyzer {
   edm::InputTag triggerMatchedJets_;
   /// trigger to get analyzed
   edm::InputTag analyzedTrigger_;
+  /// width of gauss for smearing
+  double width_;
+
+  /// random numbers generator for smearing
+  TRandom3 rnd;
 
   /// container to keep all histogramms
   std::map<std::string, TH1*> hists_;

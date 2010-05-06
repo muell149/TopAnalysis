@@ -53,7 +53,8 @@ process.source = cms.Source("PoolSource",
     '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_22.root',
     '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_23.root',
     '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_24.root'
-    )
+    ),
+    skipEvents = cms.untracked.uint32(9160)
 )
 
 ## define maximal number of events to loop over
@@ -97,23 +98,34 @@ if(not eventFilter=='all'):
         raise NameError, "'"+eventFilter+"' is not a prober eventFilter name choose: 'all', 'signal only' or 'background only'"
     
     ## sequence with filter
-    process.patDefaultSequence = cms.Sequence(#process.patDefaultSequence *
-                                              process.makeGenEvt *
-                                              process.ttFullHadronicFilter
-                                              )
+    process.filterSequence = cms.Sequence(#process.patDefaultSequence *
+                                          process.makeGenEvt *
+                                          process.ttFullHadronicFilter
+                                          )
 else:
     ## sequence without filter
-    process.patDefaultSequence = cms.Sequence(#process.patDefaultSequence *
-                                              process.filterPtHat
-                                              )
+    process.filterSequence = cms.Sequence(#process.patDefaultSequence *
+                                          process.filterPtHat
+                                          )
+
+## sequence with filter
+process.patDefaultSequence = cms.Sequence(process.filterSequence
+                                          )
 
 ## jet selection for analysis
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 process.goodJets = selectedPatJets.clone(src = 'selectedLayer1Jets',
                                          cut = 'abs(eta) < 3.0 & pt > 20. &'
-                                               '0.05 < emEnergyFraction   & '
-                                               '0.95 > emEnergyFraction'
+                                               '0.01 < emEnergyFraction   &'
+                                               #'0.05 < emEnergyFraction   &'
+                                               #'0.95 > emEnergyFraction   &'
+                                               'jetID.n90Hits > 1 &'
+                                               'jetID.fHPD < 0.98'
                                          )
+
+process.simpleSecondaryVertexBJets = selectedPatJets.clone(src = 'goodJets',
+                                                           cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 2.02'
+                                                           )
 
 ## Output Module Configuration
 if(writeOutput):
@@ -140,24 +152,9 @@ process.jetTriggerMatchHLTJets = cms.EDFilter( "PATTriggerMatcherDRLessByPt",
                                                maxDPtRel = cms.double( 0.5 ),
                                                maxDeltaR = cms.double( 0.5 ),
                                                resolveAmbiguities    = cms.bool( True ),
-                                               resolveByMatchQuality = cms.bool( False )
+                                               resolveByMatchQuality = cms.bool( True )
+                                               #resolveByMatchQuality = cms.bool( False )
                                                )
-
-#process.jetTriggerMatchL1Jets = cms.EDFilter( "PATTriggerMatcherDRLessByPt",
-#                                              #src     = cms.InputTag( "selectedLayer1Jets" ),
-#                                              src     = cms.InputTag( "goodJets" ),
-#                                              matched = cms.InputTag( "patTrigger" ),
-#                                              andOr          = cms.bool( False ),
-#                                              filterIdsEnum  = cms.vstring( 'TriggerL1CenJet','TriggerL1ForJet','TriggerL1JetCounts' ),
-#                                              filterIds      = cms.vint32( 0 ),
-#                                              filterLabels   = cms.vstring( '*' ),
-#                                              pathNames      = cms.vstring( '*' ),
-#                                              collectionTags = cms.vstring( '*' ),
-#                                              maxDPtRel = cms.double( 0.5 ),
-#                                              maxDeltaR = cms.double( 0.5 ),
-#                                              resolveAmbiguities    = cms.bool( True ),
-#                                              resolveByMatchQuality = cms.bool( False )
-#                                              )
 
 #""" Enables trigger information in PAT  """
 ## add trigger modules to path
@@ -167,7 +164,7 @@ process.patDefaultSequence += process.patTriggerSequence
 ## configure pat trigger
 process.patTrigger.onlyStandAlone = False
 
-process.patTriggerEvent.patTriggerMatches = ['jetTriggerMatchHLTJets']#,'jetTriggerMatchL1Jets']
+process.patTriggerEvent.patTriggerMatches = ['jetTriggerMatchHLTJets']
 
 process.patTriggerMatcher += process.jetTriggerMatchHLTJets
 #process.patTriggerMatcher += process.jetTriggerMatchL1Jets
@@ -187,9 +184,10 @@ for input in inputs:
     massSearchReplaceAnyInputTag(process.patTriggerSequence, 'cleanPat'+input, 'selectedLayer1'+input)
         
 ## jet kinematics analyzer
-#process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
+process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
 ## high level trigger filter
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
+process.load("TopAnalysis.TopFilter.filters.NewTriggerTestFilter_cfi")
 ## high level jet trigger analyzer
 process.load("TopAnalysis.TopAnalyzer.SingleObjectJetTrigger_cfi")
 ## for the jet collections which should be used
@@ -198,9 +196,138 @@ process.load("TopAnalysis.TopAnalyzer.SingleObjectJetTrigger_cfi")
 #process.load("TopAnalysis.TopFilter.sequences.generatorMatching_cff")
 
 process.analyzeSingleObjectJetTrigger.jets = 'goodJets'
+process.analyzeSingleObjectJetTrigger.width = 10.
+
+## filter for full-hadronic 
+process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
+process.ttFullHadronicFilter = process.ttDecaySelection.clone()
+
+## define new trigger to be used
+process.hltQuadJet40 = process.filterTrigger.clone( whichTrigger = "QuadJet40" )
+
+## define new trigger to be used
+process.hltDiJet40 = process.filterTrigger.clone( whichTrigger = "DiJet40" )
+
+## define ordered jets
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs') )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs') )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs') )
+uds4    = cms.PSet(index = cms.int32(4), correctionLevel = cms.string('abs') )
+uds5    = cms.PSet(index = cms.int32(5), correctionLevel = cms.string('abs') )
+bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )
+bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs') )
+
+## Pre Trigger
+
+## collect kinematics analyzers
+process.tightBottomJetKinematics_0  = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' )
+process.tightLeadingJetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets')
+process.tightLead_0_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0 )
+process.tightLead_1_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1 )
+process.tightLead_2_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2 )
+process.tightLead_3_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3 )
+process.tightLead_4_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4 )
+process.tightLead_5_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
+process.tightBJet_0_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom0)
+process.tightBJet_1_JetKinematics_0 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom1)
+
+## to be called with fullHadronicSelection
+process.monitorJetsKinematics_0 = cms.Sequence(process.tightBottomJetKinematics_0  +
+                                               process.tightBJet_0_JetKinematics_0 +
+                                               process.tightBJet_1_JetKinematics_0 +
+                                               process.tightLeadingJetKinematics_0 +
+                                               process.tightLead_0_JetKinematics_0 +
+                                               process.tightLead_1_JetKinematics_0 +
+                                               process.tightLead_2_JetKinematics_0 +
+                                               process.tightLead_3_JetKinematics_0 +
+                                               process.tightLead_4_JetKinematics_0 +
+                                               process.tightLead_5_JetKinematics_0  
+                                               )
+
+## After Monitor Trigger
+
+## collect kinematics analyzers
+process.tightBottomJetKinematics_1  = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' )
+process.tightLeadingJetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets')
+process.tightLead_0_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0 )
+process.tightLead_1_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1 )
+process.tightLead_2_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2 )
+process.tightLead_3_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3 )
+process.tightLead_4_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4 )
+process.tightLead_5_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
+process.tightBJet_0_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom0)
+process.tightBJet_1_JetKinematics_1 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom1)
+
+## to be called with fullHadronicSelection
+process.monitorJetsKinematics_1 = cms.Sequence(process.tightBottomJetKinematics_1  +
+                                               process.tightBJet_0_JetKinematics_1 +
+                                               process.tightBJet_1_JetKinematics_1 +
+                                               process.tightLeadingJetKinematics_1 +
+                                               process.tightLead_0_JetKinematics_1 +
+                                               process.tightLead_1_JetKinematics_1 +
+                                               process.tightLead_2_JetKinematics_1 +
+                                               process.tightLead_3_JetKinematics_1 +
+                                               process.tightLead_4_JetKinematics_1 +
+                                               process.tightLead_5_JetKinematics_1  
+                                               )
+
+## After Trigger to test
+
+## collect kinematics analyzers
+process.tightBottomJetKinematics_2  = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' )
+process.tightLeadingJetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets')
+process.tightLead_0_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0 )
+process.tightLead_1_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1 )
+process.tightLead_2_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2 )
+process.tightLead_3_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3 )
+process.tightLead_4_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4 )
+process.tightLead_5_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
+process.tightBJet_0_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom0)
+process.tightBJet_1_JetKinematics_2 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom1)
+
+## to be called with fullHadronicSelection
+process.monitorJetsKinematics_2 = cms.Sequence(process.tightBottomJetKinematics_2  +
+                                               process.tightBJet_0_JetKinematics_2 +
+                                               process.tightBJet_1_JetKinematics_2 +
+                                               process.tightLeadingJetKinematics_2 +
+                                               process.tightLead_0_JetKinematics_2 +
+                                               process.tightLead_1_JetKinematics_2 +
+                                               process.tightLead_2_JetKinematics_2 +
+                                               process.tightLead_3_JetKinematics_2 +
+                                               process.tightLead_4_JetKinematics_2 +
+                                               process.tightLead_5_JetKinematics_2  
+                                               )
+
+## After Trigger to test
+
+## collect kinematics analyzers
+process.tightBottomJetKinematics_3  = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' )
+process.tightLeadingJetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets')
+process.tightLead_0_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0 )
+process.tightLead_1_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1 )
+process.tightLead_2_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2 )
+process.tightLead_3_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3 )
+process.tightLead_4_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4 )
+process.tightLead_5_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
+process.tightBJet_0_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom0)
+process.tightBJet_1_JetKinematics_3 = process.analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom1)
+
+## to be called with fullHadronicSelection
+process.monitorJetsKinematics_3 = cms.Sequence(process.tightBottomJetKinematics_3  +
+                                               process.tightBJet_0_JetKinematics_3 +
+                                               process.tightBJet_1_JetKinematics_3 +
+                                               process.tightLeadingJetKinematics_3 +
+                                               process.tightLead_0_JetKinematics_3 +
+                                               process.tightLead_1_JetKinematics_3 +
+                                               process.tightLead_2_JetKinematics_3 +
+                                               process.tightLead_3_JetKinematics_3 +
+                                               process.tightLead_4_JetKinematics_3 +
+                                               process.tightLead_5_JetKinematics_3  
+                                               )
 
 ## ---
-##    run the final sequence
+##    run the final sequence: single object trigger monitoring
 ## ---
 process.p1 = cms.Path(## do triggering
                       #process.hltMu9 *
@@ -213,6 +340,44 @@ process.p1 = cms.Path(## do triggering
                       ## analyze jet trigger
                       process.analyzeSingleObjectJetTrigger
                       )
+
+## ---
+##    run the final sequence: generator based trigger monitoring
+## ---
+process.p2 = cms.Path(## do the genEvent selection
+                      process.filterSequence            *
+                      ## create jet collections
+                      process.goodJets                  *
+                      process.simpleSecondaryVertexBJets*
+                      ## do the monitoring (pre-trigger)
+                      process.monitorJetsKinematics_0   *
+                      ## do the hlt triggering (monitor)
+                      process.hltQuadJet30              *
+                      ## do the monitoring (monitor-trigger)
+                      process.monitorJetsKinematics_1   *
+                      ## do the hlt triggering
+                      process.hltQuadJet40              *
+                      ## do the monitoring (post-trigger)
+                      process.monitorJetsKinematics_2
+                      )
+
+## ---
+##    run the final sequence: generator based trigger monitoring
+## ---
+process.p3 = cms.Path(## do the genEvent selection
+                      process.filterSequence            *
+                      ## create jet collections
+                      process.goodJets                  *
+                      process.simpleSecondaryVertexBJets*
+                      ## do the monitoring (pre-trigger)
+                      process.monitorJetsKinematics_0   *
+                      ## do the hlt triggering (monitor)
+                      process.hltDiJet40                *
+                      ## do the monitoring (monitor-trigger)
+                      process.monitorJetsKinematics_3
+                      )
+
+
 
 ## replace antikt5 calojets bei antikt5 particleflow jets
 ## not jet working because goodJets still have to be calo jets
