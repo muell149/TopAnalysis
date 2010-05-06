@@ -21,8 +21,8 @@
 enum styles {kSig};
 
 void canvasStyle(TCanvas& canv);
-void histogramStyle(TH1& hist, unsigned int style);
-void axesStyle(TH1& hist, const char* titleX, const char* titleY);
+void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
+void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 void histStyle2D(TH2& hist, const char* titleHisto="", const char* titleX="", const char* titleY="");
 
 void analyzeMuonDiffXMigration()
@@ -34,12 +34,22 @@ void analyzeMuonDiffXMigration()
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
 
+  // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Njets3Btag" / "Njets4Btag" 
+  TString jetMultiplicity ="Njets4";
+  // choose luminosity for scaling of event numbers and for legend as entry
+  int luminosity = 50;
+  TString lum = "50";
+  // choose whether you want to save every plot as png and all within one ps file
+  bool save = false;
+  // choose target directory for saving
+  TString saveTo = "./diffXSecFromSignal/plots/migration/";
 
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root") );
+  //  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root") );
+  files_.push_back(new TFile("./analyzeDiffXSec_testSig.root") );
 
   // ---
   //    get histograms
@@ -48,18 +58,11 @@ void analyzeMuonDiffXMigration()
   std::vector<TH2F*> corrPt_, corrPhi_, corrEta_;
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    pt_       .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSection/pt"       ) );
-    corrEta_  .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonEta_" ) );
-    corrPt_   .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPt_"  ) );
-    corrPhi_  .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSection/muonPhi_" ) );
+    pt_       .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/pt"   ) );
+    corrEta_  .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/eta_" ) );
+    corrPt_   .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/pt_"  ) );
+    corrPhi_  .push_back( (TH2F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/phi_" ) );
   }
-
-  // ---
-  //    create Vector to store output statements
-  // ---
-  std::vector<TString> output_;
-  TString textHelper = "";
-  output_.push_back("MC@NLO 7 TeV");
 
   // ---
   //    define weights concerning luminosity
@@ -67,7 +70,7 @@ void analyzeMuonDiffXMigration()
   std::vector<double> lumiweight;
 
   // for current ttbar 7TeV Mc@Nlo sample 
-  lumiweight.push_back(0.0083);
+  lumiweight.push_back(0.0083/50.0*(double)luminosity);
 
   // ---
   //    do lumiweighting
@@ -77,91 +80,50 @@ void analyzeMuonDiffXMigration()
     pt_ [idx]->Scale(lumiweight[idx]);
   }
   
-  // ---  
-  //    print out weighted event numbers for all files
-  // ---
-
-  std::vector<double> eventNumbersPt_, eventNumbersEta_, eventNumbersPhi_;
-
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    eventNumbersPt_.push_back ( lumiweight[idx]*(corrPt_ [idx]->GetEntries()) );
-    eventNumbersEta_.push_back( lumiweight[idx]*(corrEta_[idx]->GetEntries()) );
-    eventNumbersPhi_.push_back( lumiweight[idx]*(corrPhi_[idx]->GetEntries()) );
-
-    std::cout << "total weighted # of sig events in pt (file " << idx << "): " << eventNumbersPt_[idx] << std::endl;
-    textHelper = "total weighted # of sig events in pt (file ";
-    textHelper += idx;
-    textHelper += "): ";
-    textHelper += eventNumbersPt_[idx] ;
-    output_ .push_back(textHelper);
-  }
-
-  // ---
-  //    do scaling with respect to inclusive cross section (taken from same histogram)
-  // ---
-  
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    pt_ [idx]->Scale(1/eventNumbersPt_[idx]);
-  }
-
-  // ---
-  //    division by binwidth
-  // ---
-
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-
-    for(int i=1; i<= pt_[idx]->GetNbinsX(); i++){
-      pt_[idx]->SetBinContent(i,((double)(pt_[idx]->GetBinContent(i))/(double)(pt_[idx]->GetBinWidth(i)))  );
-    }
-  }
-  
-  // ---
-  //    configure histograms
-  // ---
-
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    histogramStyle(*pt_  [idx], idx);
-  }
-
-  // ---
-  //    calculate stability and purity for pt(Signal) only
-  // ---
+  std::cout << "-------------------" << std::endl; 
+  std::cout << " chosen binning is:" << std::endl;
+  std::cout << "-------------------" << std::endl; 
 
   // get total number of FILLED bins above cut value of 20 GeV from pt histo
-  int totalBinNumber = (pt_[kSig]->GetNbinsX())-1;
-  std::cout << "total bin number between 20 and 200 GeV: " << totalBinNumber << std::endl;
+  int totalBinNumber = (pt_[kSig]->GetNbinsX());
+  std::cout << "total bin number:" << totalBinNumber << std::endl;
 
   // get binning values from pt histo
   std::vector<int> binValue_;
-  for(int i=1; i<= totalBinNumber+2; i++){
-    // +2 for underflow bin and upper Edge of last bin
+  for(int i=1; i<= totalBinNumber+1; i++){
+    // +1 because of overflow bin
     binValue_.push_back(pt_[kSig]->GetBinLowEdge(i));
     std::cout << "lower edge bin " << i << " :" << binValue_[i-1] << std::endl;
   }
 
-  // add overflow bin
+  // add upper edge of overflow bin
   binValue_.push_back(401);
 
   // ---
   //    a) calculate number of entries in each (gen,reco)-bin from correlation plot
   // ---
 
-  // store event content in gen-reco correlation fields
+  // set up mechanism to store event content in gen-reco correlation fields
   std::vector< std::vector<int> > genRecoBins_;
-  std::vector<int> genRecoBins_helper_;
-  
+  std::vector<int> genRecoBins_helper_;  
   for(unsigned int i=0; i<binValue_.size(); i++){
     genRecoBins_helper_.push_back(0);
-  }
-  
+  }  
   for(unsigned int i=0; i<binValue_.size(); i++){
     genRecoBins_.push_back(genRecoBins_helper_);
   }
 
+  std::cout << "------------------------------------"  << std::endl; 
+  std::cout << " content in for each (gen,reco)-bin:"  << std::endl;
+  std::cout << "------------------------------------"  << std::endl;
+
+  // -------- calculation ----------
+  // -------------------------------
   // k: adress gen-  pt bin (overflow bin included, no underflowbin because of cut)
   // l: adress reco- pt bin (overflow bin included, no underflowbin because of cut)
+    // -1 because in binValue_ there are two entries for the overflow bin (lower and upper bin edge)
   // i,j: loop over k-genBin * l-recoBin- field 
-
+    // +1 because bin counting starts with 1, and vector binValue_ with 0
   for(unsigned int k=0; k<(binValue_.size()-1); k++){
     for(unsigned int l=0; l<(binValue_.size()-1); l++){
       int eventsInGenRecoBin=0;
@@ -171,11 +133,12 @@ void analyzeMuonDiffXMigration()
 	}
       }
       (genRecoBins_[k])[l]=eventsInGenRecoBin;
-      std::cout << "content (gen,reco) = (" << k << "," << l << ") pt-Bin is " << eventsInGenRecoBin << std::endl;
+      std::cout << "("<< k << "," << l << ") pt-Bin is " << eventsInGenRecoBin << std::endl;
     }
   }
-  
-  output_ .push_back("purity / stability (chosen binning, unshifted):");
+  std::cout << "------------------------------------"  << std::endl; 
+  std::cout << "purity / stability (chosen binning):"  << std::endl;
+  std::cout << "------------------------------------"  << std::endl; 
 
   // ---
   //    b) calculate stability and purity for pt
@@ -193,13 +156,7 @@ void analyzeMuonDiffXMigration()
     }
     purity_    .push_back( (double)((genRecoBins_[i])[i]) /  recoTotalBinI );
     stability_ .push_back( (double)((genRecoBins_[i])[i]) /  genTotalBinI  );
-    textHelper =  "purity/stability for ";
-    textHelper += i;
-    textHelper += ". bin : ";
-    textHelper += purity_[i-1];
-    textHelper += "/";
-    textHelper += stability_[i-1];
-    output_ .push_back(textHelper);   
+    std::cout << "for " << i << ". bin : " << purity_[i-1] << " / " << stability_[i-1]  << std::endl; ;
   }
 
   // ---
@@ -207,21 +164,14 @@ void analyzeMuonDiffXMigration()
   // ---
   std::vector<double> acceptance_;
 
-    output_ .push_back("acceptance for chosen binning:");   
-
   for(unsigned int i=0; i<purity_.size(); i++){
     acceptance_.push_back(purity_[i] / stability_[i]);
     std::cout << "acceptance for "<< i+1 << ". bin is " << acceptance_[i] << std::endl; 
-    textHelper = "acceptance for ";
-    textHelper += i+1;
-    textHelper += ". bin is ";
-    textHelper += acceptance_[i];
-    output_ .push_back(textHelper); 
   }
 
   // ---
   //    d) create histograms with stability, purity 
-  //       and aceptance for pt in same binning as pt
+  //       and aceptance for pt
   // ---
 
   // create array with binning values for histograms
@@ -258,110 +208,87 @@ void analyzeMuonDiffXMigration()
   }
 
   // ---
-  //    create legends 
+  //    create legend
   // ---
 
-  // create output slide as two legends, each on one half of side
-  TLegend *leg1 = new TLegend(0.35, 0.0, 1.0, 1.0);
-  leg1->SetFillStyle(3001);
-  leg1->SetBorderSize(0);
-  for(unsigned int i= ((unsigned int)(((double)(output_.size()))/2.0)); i< output_.size(); i++){
-    leg1->AddEntry( pt_[kSig], output_[i]  , "" );;
-  }
+  TLegend *leg0 = new TLegend(0.38, 0.50, 0.98, 0.76);
+  leg0->SetFillStyle(0);
+  leg0->SetBorderSize(0);
+  leg0->SetHeader("migration effects "+jetMultiplicity+"+ , "+lum+" pb^{-1}");
+  leg0->AddEntry(  ptPurity    , "purity"     , "PL");
+  leg0->AddEntry(  ptStability , "stability"  , "PL");
+  leg0->AddEntry(  ptAcceptance, "correction" , "PL");
 
-  TLegend *leg2 = new TLegend(-0.1, 0.0, 0.5, 1.0);
-  leg2->SetFillStyle(3001);
-  leg2->SetBorderSize(0);
-  for(unsigned int i=0; i< (unsigned int)(((double)(output_.size()))/2.0); i++){
-    leg2->AddEntry( pt_[kSig], output_[i]  , "" );;
-  }
+  // ---
+  //    create canvas 
+  // ---
+  std::vector<TCanvas*> MyCanvas;
 
-  // create a legend (migration effects)
-  TLegend *leg3 = new TLegend(0.38, 0.50, 0.98, 0.76);
-  leg3->SetFillStyle(0);
-  leg3->SetBorderSize(0);
-  leg3->SetHeader("migration effects");
-  leg3->AddEntry(  ptPurity    , "purity"     , "PL");
-  leg3->AddEntry(  ptStability , "stability"  , "PL");
-  leg3->AddEntry(  ptAcceptance, "correction" , "PL");
+  for(int idx=0; idx<=3; idx++){ 
+    char canvname[10];
+    sprintf(canvname,"canv%i",idx);    
+    MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
+    canvasStyle(*MyCanvas[idx]);
+  }
 
   // ---
   //    do the printing for ptPurity, ptStability and ptAcceptance
   // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
-
-  // draw canvas
-  canv0->SetTitle("migration for pt ( #mu )");
-  canv0->SetGrid(1,1);
-  ptPurity->SetTitle("");
-  ptPurity->GetXaxis()->SetTitle("p_{t} ( #mu ) [GeV]");
-  ptPurity->GetXaxis()->CenterTitle   ( true );
-  ptPurity->GetYaxis()->CenterTitle   ( true );
-  ptPurity->GetYaxis()->SetTitleOffset(  2.0 );
-  ptPurity->GetXaxis()->SetTitleSize  ( 0.05 );
-  ptPurity->GetYaxis()->SetTitleSize  ( 0.05 );
-  ptPurity->SetStats(kFALSE);
-  ptPurity->SetLineColor(kRed);
-  ptPurity->SetLineWidth(3);
-  ptPurity->SetMarkerStyle(20);
-  ptPurity->SetMarkerSize(1.5);
-  ptPurity->SetMarkerColor(kRed);
-  ptPurity->Draw("");
-  ptPurity->Draw("Psame");
-  ptStability->SetLineColor(kBlue);
-  ptStability->SetLineWidth(3);
-  ptStability->SetMarkerStyle(21);
-  ptStability->SetMarkerSize(1.5);
-  ptStability->SetMarkerColor(kBlue);
-  ptStability->Draw("same");
-  ptStability->Draw("Psame");
-  ptAcceptance->SetLineWidth(3);
-  ptAcceptance->SetMarkerStyle(22);
-  ptAcceptance->SetMarkerSize(1.5);
-  ptAcceptance->Draw("same");
+  MyCanvas[0]->cd(0);
+  MyCanvas[0]->SetTitle("migrationPtMu");
+  MyCanvas[0]->SetGrid(1,1);
+  axesStyle(*ptPurity, "p_{t} ( #mu ) [GeV]", "", 0, 1.2, 0.05, 2.0);
+  histogramStyle(*ptPurity    , kRed ,  1, 20, 1.5);
+  histogramStyle(*ptStability , kBlue,  1, 21, 1.5);
+  histogramStyle(*ptAcceptance, kBlack, 1, 22, 1.5);
+  ptPurity    ->Draw("");
+  ptPurity    ->Draw("Psame");
+  ptStability ->Draw("same" );
+  ptStability ->Draw("Psame");
+  ptAcceptance->Draw("same" );
   ptAcceptance->Draw("Psame");
-  leg3->Draw("same");
+  leg0        ->Draw("same" );
 
   // ---
   //    do the printing for corrPt_
   // ---
-  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
-  // draw canvas
-  canv1->cd(0);
-  canv1->SetTitle("gen-reco correlation of p_{t} ( muon )");
+  MyCanvas[1]->cd(0);
+  MyCanvas[1]->SetTitle("genRecoCorrelationPtMu");
   histStyle2D(*corrPt_[kSig], "gen-reco correlation of p_{t} ( muon )", "p_{t} ( gen #mu ) [GeV]", "p_{t} ( reco #mu ) [GeV]");
   corrPt_[kSig]->Draw("colz");
 
   // ---
   //    do the printing for corrEta_
   // ---
-  TCanvas* canv2 = new TCanvas("canv2", "canv2", 600, 600); canvasStyle(*canv2);
-  // draw canvas
-  canv2->cd(0);
-  canv2->SetTitle("gen-reco correlation of #eta ( muon )");
+  MyCanvas[2]->cd(0);
+  MyCanvas[2]->SetTitle("genRecoCorrelationEtaMu");
   histStyle2D(*corrEta_[kSig], "correlation of #eta ( muon )", "#eta ( gen #mu )", "#eta ( reco #mu )");
   corrEta_[kSig]->Draw("colz");
 
   // ---
   //    do the printing for corrPhi_
   // ---
-  TCanvas* canv3 = new TCanvas("canv3", "canv3", 600, 600); canvasStyle(*canv3);
-  // draw canvas
-  canv3->cd(0);
-  canv3->SetTitle("gen-reco correlation of #phi ( muon )");
+  MyCanvas[3]->cd(0);
+  MyCanvas[3]->SetTitle("genRecoCorrelationEtaMu");
   histStyle2D(*corrPhi_[kSig], "correlation of #phi ( muon )", "#phi ( gen #mu )", "#phi ( reco #mu )");
   corrPhi_[kSig]->Draw("colz");
 
   // ---
-  //    do the printing for the output text
+  // saving
   // ---
-  TCanvas* canv4 = new TCanvas("canv4", "canv4", 600, 600); canvasStyle(*canv4);
-  // draw canvas
-  canv4->cd(0);
-  canv4->SetTitle("detail numbers");
-  leg1->Draw("");
-  leg2->Draw("same");
-
+  if(save){   
+    // ps
+    MyCanvas[0]->Print(saveTo+"migration"+lum+"pb"+jetMultiplicity+".ps(");
+    for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+      MyCanvas[idx]->Print(saveTo+"migration"+lum+"pb"+jetMultiplicity+".ps");   
+    }
+    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"migration"+lum+"pb"+jetMultiplicity+".ps)");
+  
+    // png
+    for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png");      
+    }
+  }
 }
 
 void canvasStyle(TCanvas& canv) 
@@ -373,44 +300,27 @@ void canvasStyle(TCanvas& canv)
   canv.SetTopMargin   ( 0.05 );
 }
 
-void histogramStyle(TH1& hist, unsigned int style) 
+void histogramStyle(TH1& hist, int color, int lineStyle, int markerStyle, float markersize, int filled) 
 {
-  // pre-defined line style
-  std::vector<int> color;
-  color.push_back( kBlack ); 
-  color.push_back( kRed   ); 
-  color.push_back( kBlue  );
-  color.push_back( 14     );
-  color.push_back( 46     );
-  color.push_back( kRed   );
-  color.push_back( kBlue  );
-
- // pre-defined fill style
-  std::vector<int> fill;
-  fill.push_back( 1   ); 
-  fill.push_back( 1   ); 
-  fill.push_back( 1   );
-  fill.push_back( 2   );
-  fill.push_back( 2   );
-  fill.push_back( 2   );
-  fill.push_back( 2   );
-
-  // pre-defined marker style
-  std::vector<int> marker;
-  marker.push_back( 20);
-
-  // set line width  
   hist.SetLineWidth(3);
   hist.SetStats(kFALSE);
-  hist.SetLineColor  (color[style]);
-  hist.SetMarkerColor(color[style]);
-
+  hist.SetLineColor  (color);
+  hist.SetMarkerColor(color);  
+  hist.SetMarkerStyle(markerStyle);
+  hist.SetMarkerSize(markersize);
+  hist.SetLineStyle(lineStyle);
+  if(filled==1){
+  hist.SetFillStyle(1001);
+  hist.SetFillColor(color);
+  }
+  else{
+    hist.SetFillStyle(0);
+  }
 }
 
-void axesStyle(TH1& hist, const char* titleX, const char* titleY) 
+void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, float yMax, float yTitleSize, float yTitleOffset) 
 {
   hist.SetTitle("");
-
   hist.GetXaxis()->SetTitle(titleX);
   hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.06);
@@ -420,15 +330,16 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY)
   hist.GetXaxis()->SetLabelSize  ( 0.05);
   hist.GetXaxis()->SetLabelFont  (   62);
   hist.GetXaxis()->SetNdivisions (  505);
-  
   hist.GetYaxis()->SetTitle(titleY);
-  hist.GetYaxis()->SetTitleSize  ( 0.07);
+  hist.GetYaxis()->SetTitleSize  ( yTitleSize );
   hist.GetYaxis()->SetTitleColor (    1);
-  hist.GetYaxis()->SetTitleOffset(  1.2);
+  hist.GetYaxis()->SetTitleOffset(yTitleOffset);
   hist.GetYaxis()->SetTitleFont  (   62);
   hist.GetYaxis()->SetLabelSize  ( 0.04);
   hist.GetYaxis()->SetLabelFont  (   62);
   hist.GetYaxis()->CenterTitle   ( true);
+  if(yMin!=-123) hist.SetMinimum(yMin);
+  if(yMax!=-123) hist.SetMaximum(yMax);
 }
 
 void histStyle2D(TH2& hist, const char* titleHisto, const char* titleX, const char* titleY) 
