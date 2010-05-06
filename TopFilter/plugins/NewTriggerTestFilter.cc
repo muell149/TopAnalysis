@@ -27,8 +27,17 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
 
   edm::Handle<pat::TriggerEvent> triggerEvent;
   event.getByLabel("patTriggerEvent", triggerEvent);
+  /*
+  bool L1Triggered = false;
 
+  pat::TriggerFilterRefVector filters = triggerEvent->acceptedFilters();
+  for(pat::TriggerFilterRefVector::const_iterator filter = filters.begin(); filter != filters.end(); ++filter){
+    if((*filter)->label() == "hltL1sQuadJet30") L1Triggered = true;
+  }
+  */
   pat::TriggerObjectRefVector objects = triggerEvent->filterObjects("hlt4jet30");
+
+  //bool oldPass = false;
 
   if(whichTrigger_ == "QuadJet80303030"){
     if(objects[0]->pt() >= 80){
@@ -41,6 +50,7 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
 	if(objects[2]->pt() >= 40){
 	  if(objects[3]->pt() >= 40){
 	    pass = true;
+	    //oldPass = true;
 	  }
 	}
       }
@@ -53,6 +63,71 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
       }
     }
   }
+  else if(whichTrigger_ == "DiJet40"){
+    pat::TriggerFilterRefVector filters = triggerEvent->acceptedFilters();
+    for(pat::TriggerFilterRefVector::const_iterator filter = filters.begin(); filter != filters.end(); ++filter){
+      if((*filter)->label() == "hlt1jet30") {
+	objects = triggerEvent->filterObjects("hlt1jet30");
+	if(objects[0]->pt() >= 40){
+	  if(objects.size() >= 2){
+	    if(objects[1]->pt() >= 40){
+	      pass = true;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  /*
+  bool quadJet40Pass = false;
+  int triggerJetCounter = 0;
+
+  ////////////////////////////////////
+
+  if(L1Triggered){
+
+  ////////////////////////////////////
+
+  for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
+    if( obj->hasFilterId(85) ){
+      if( obj->pt() >= 40 && obj->collection() == "hltMCJetCorJetIcone5::HLT") {
+	++triggerJetCounter;
+	if( triggerJetCounter == 4 ){
+	  quadJet40Pass = true;
+	  if( whichTrigger_ == "QuadJet40" ){
+	    pass = true;
+	  }
+	  break;
+	}
+      }
+    }
+  }
+
+  ////////////////////////////////////
+
+  }
+
+  ////////////////////////////////////
+
+  if( quadJet40Pass && !oldPass ){
+    std::cout << "Passed     NEW but NOT OLD" << std::endl;
+    std::cout << "   Pt   ::   eta   ::  phi" << std::endl;
+    for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
+      if( obj->hasFilterId(85) ){
+	std::cout << obj->pt() << " :: " << obj->eta() << " :: " << obj->phi()  << " :: " << obj->collection() << std::endl;
+	//std::cout << obj->pdgId() << " :: " << obj->isJet()  << " :: " << obj->mass() << " :: " << obj->overlap(*triggerEvent->objects()->begin()) << std::endl;
+	//std::cout << obj->numberOfMothers() << " :: " << obj->numberOfDaughters() << " :: " << obj->collection() << std::endl;
+
+	for(std::vector< int >::const_iterator filt = obj->filterIds().begin(); filt != obj->filterIds().end(); ++filt){
+	  std::cout << *filt << std::endl;
+	}
+      }
+    }
+  }
+  if( !quadJet40Pass && oldPass ){
+    std::cout << "Passed NOT NEW but     OLD" << std::endl;
+  }
+  */
   /*
   if(pass){
     std::cout << "-------------------" << std::endl;
@@ -62,6 +137,7 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
     std::cout << "pt 4: " << objects[3]->pt() << std::endl;
   }
   */
+
   return pass;
 }
 
