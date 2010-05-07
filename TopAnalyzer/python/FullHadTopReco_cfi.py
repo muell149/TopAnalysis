@@ -8,7 +8,8 @@ analyzeFullHadTopReco = cms.EDAnalyzer("FullHadTopRecoAnalyzer",
     ## analyzer specific configurables
     analyze   = cms.PSet(
       ## choose hypo to be used for reco
-      hypo = cms.string("kKinFit")
+      hypo     = cms.string("kKinFit"),
+      bTagAlgo = cms.string("simpleSecondaryVertexBJetTags")
     )
 )
 

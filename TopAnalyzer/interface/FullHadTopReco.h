@@ -55,6 +55,8 @@ class FullHadTopReco : public DoubleObject<TtFullHadronicEvent, const edm::View<
  private:
   /// hypothesis chosen for reco
   std::string hypo_;
+  /// bTagAlgorithm to use
+  std::string bTagAlgo_;
 };
 
 #endif
