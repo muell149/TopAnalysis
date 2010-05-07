@@ -56,8 +56,13 @@ class KinFitImprover : public DoubleObject<TtFullHadronicEvent, const edm::View<
  private:
   /// function to find types of jet-combinations in KinFits
   int comboType();
+  /// variable from cfi.py / cfg.py to decide which combination to analyze
+  int comboType_;
   /// vector to store the jet indices
   std::vector<int> jetIndex;
+  /// store position in jetIndex vector with corresponding particle name
+  /// keep enum whichParticle and vector jetIndex (filled in KinFitImprover::fill()) synced !!!
+  enum whichParticle{LQ, LQBar, B, BBar, LP, LPBar, LQ_Gen, LQBar_Gen, B_Gen, BBar_Gen, LP_Gen, LPBar_Gen};
 };
 
 #endif
