@@ -852,3 +852,33 @@ sizes ['qcd10_pytPAT'] = 'blocks'
 source['qcd10_pytPAT'] = 'qcd10_pytPAT_0,'  + 'qcd10_pytPAT_1,'  + 'qcd10_pytPAT_2,'
 source['qcd10_pytPAT']+= 'qcd10_pytPAT_3,'  + 'qcd10_pytPAT_4,'  + 'qcd10_pytPAT_5,'
 source['qcd10_pytPAT']+= 'qcd10_pytPAT_6,'  + 'qcd10_pytPAT_7,'  + 'qcd10_pytPAT_8'
+
+## /SingleTop_sChannel-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.sTop10_sChannel_madAOD import *
+evts  ['sTop10_sChannel_madAOD'] =  412055       ## number of produced events
+xsec  ['sTop10_sChannel_madAOD'] =     4.6       ## LO in pb from Twiki
+eff   ['sTop10_sChannel_madAOD'] = 0.32442       ## generator efficiency on gen level
+sizes ['sTop10_sChannel_madAOD'] = 'blocks'
+source['sTop10_sChannel_madAOD'] = 'sTop10_sChannel_madAOD_0,' + 'sTop10_sChannel_madAOD_1,'
+source['sTop10_sChannel_madAOD']+= 'sTop10_sChannel_madAOD_2,' + 'sTop10_sChannel_madAOD_3,'
+source['sTop10_sChannel_madAOD']+= 'sTop10_sChannel_madAOD_4'
+
+## /SingleTop_tChannel-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.sTop10_tChannel_madAOD import *
+evts  ['sTop10_tChannel_madAOD'] =  528593       ## number of produced events
+xsec  ['sTop10_tChannel_madAOD'] =      63       ## LO in pb from Twiki
+eff   ['sTop10_tChannel_madAOD'] = 0.32442       ## generator efficiency on gen level
+sizes ['sTop10_tChannel_madAOD'] = 'blocks'
+source['sTop10_tChannel_madAOD'] = 'sTop10_tChannel_madAOD_0,' + 'sTop10_tChannel_madAOD_1,'
+source['sTop10_tChannel_madAOD']+= 'sTop10_tChannel_madAOD_2,' + 'sTop10_tChannel_madAOD_3,'
+source['sTop10_tChannel_madAOD']+= 'sTop10_tChannel_madAOD_4'
+
+## /SingleTop_tWChannel-madgraph/Spring10-START3X_V26_S09-v1/AODSIM
+from TopAnalysis.Configuration.sTop10_tWChannel_madAOD import *
+evts  ['sTop10_tWChannel_madAOD'] = 466437       ## number of produced events
+xsec  ['sTop10_tWChannel_madAOD'] =   10.6       ## LO in pb from Twiki
+eff   ['sTop10_tWChannel_madAOD'] =    1.0       ## generator efficiency on gen level
+sizes ['sTop10_tWChannel_madAOD'] = 'blocks'
+source['sTop10_tWChannel_madAOD'] = 'sTop10_tWChannel_madAOD_0,' + 'sTop10_tWChannel_madAOD_1,'
+source['sTop10_tWChannel_madAOD']+= 'sTop10_tWChannel_madAOD_2,' + 'sTop10_tWChannel_madAOD_3,'
+source['sTop10_tWChannel_madAOD']+= 'sTop10_tWChannel_madAOD_4,' + 'sTop10_tWChannel_madAOD_5'
