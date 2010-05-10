@@ -77,11 +77,11 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
  
   // make cut(s) on b-tag discriminator
   if(bDisc_.size()==1){
-    if(!(B.bDiscriminator(bAlgo_)>=bDisc_[0] || BBar.bDiscriminator(bAlgo_)>=bDisc_[0])) return false;
+    if(!(fabs(B.bDiscriminator(bAlgo_))>=bDisc_[0] || fabs(BBar.bDiscriminator(bAlgo_))>=bDisc_[0])) return false;
   }
   else if(bDisc_.size()==2){
     if((B.bDiscriminator(bAlgo_)<bDisc_[0] || BBar.bDiscriminator(bAlgo_)<bDisc_[1]) 
-      && (B.bDiscriminator(bAlgo_)<bDisc_[1] || BBar.bDiscriminator(bAlgo_)<bDisc_[0])) return false;
+      && (fabs(B.bDiscriminator(bAlgo_))<bDisc_[1] || fabs(BBar.bDiscriminator(bAlgo_))<bDisc_[0])) return false;
   } 
   
   ++afterCuts_;
