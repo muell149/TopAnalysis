@@ -19,14 +19,14 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/user/snaumann/sync/patTuple_afterStep2_1.root'
-    #'/store/mc/Summer09/TTbar/GEN-SIM-RECO/MC_3XY_V25_preproduction-v1/0003/84F29E99-202C-DF11-810C-00237DA14F92.root'
+    #'/store/user/snaumann/sync/patTuple_afterStep2_1.root'
+    '/store/mc/Summer09/TTbar/GEN-SIM-RECO/MC_3XY_V25_preproduction-v1/0003/84F29E99-202C-DF11-810C-00237DA14F92.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -74,16 +74,19 @@ removeSpecificPATObjects(process,
 removeCleaning(process,
                outputInProcess=False)
 
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
+
 ## use the correct jet energy corrections
-process.patJetCorrFactors.corrSample = "Summer09_7TeV_ReReco332"
+process.patJetCorrFactors.corrSample = "Spring10"
 
 #-------------------------------------------------
 # muon selection
 #-------------------------------------------------
 
-process.load("TopQuarkAnalysis.TopObjectProducers.MuonImpactParameterSelector_cfi")
+#process.load("TopQuarkAnalysis.TopObjectProducers.MuonImpactParameterSelector_cfi")
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.isolatedMuons010 = selectedPatMuons.clone(src = 'impactParameterMuons',
+process.isolatedMuons010 = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                   cut =
                                                   'isGlobalMuon &'
                                                   'pt > 20. &'
@@ -92,7 +95,8 @@ process.isolatedMuons010 = selectedPatMuons.clone(src = 'impactParameterMuons',
                                                   'innerTrack.numberOfValidHits >= 11 &'
                                                   'globalTrack.normalizedChi2 < 10.0 &'
                                                   'isolationR03.emVetoEt < 4 &'
-                                                  'isolationR03.hadVetoEt < 6'
+                                                  'isolationR03.hadVetoEt < 6 &'
+                                                  'abs(dB/edB) < 3'
                                                  )
 process.isolatedMuons005 = selectedPatMuons.clone(src = 'isolatedMuons010',
                                                   cut = '(trackIso+caloIso)/pt < 0.05'
@@ -162,7 +166,9 @@ removeTtSemiLepHypGenMatch(process)
 setForAllTtSemiLepHypotheses(process, "jets", "goodJets")
 setForAllTtSemiLepHypotheses(process, "maxNJets", -1)
 
-process.load("TopQuarkAnalysis.Examples.HypothesisAnalyzer_cfi")
+#process.load("TopQuarkAnalysis.Examples.HypothesisAnalyzer_cfi")
+
+#process.load("TopQuarkAnalysis.Examples.TopMuonAnalyzer_cfi")
 
 #-------------------------------------------------
 # final selection paths
@@ -170,10 +176,11 @@ process.load("TopQuarkAnalysis.Examples.HypothesisAnalyzer_cfi")
 
 process.looseSelection = cms.Path(process.step1 *
                                   process.step2 *
-                                  #process.patDefaultSequence *
-                                  process.impactParameterMuons *
+                                  process.patDefaultSequence *
+                                  #process.impactParameterMuons *
                                   process.isolatedMuons010 *
                                   process.step3b *
+                                  #process.analyzeMuon *
                                   process.vetoMuons *
                                   process.step4 *
                                   process.vetoElectrons *
@@ -181,14 +188,14 @@ process.looseSelection = cms.Path(process.step1 *
                                   process.goodJets *
                                   process.step6a *
                                   process.step6b *
-                                  process.step6c *
-                                  process.analyzeEventBasics
+                                  process.step6c #*
+                                  #process.analyzeEventBasics
                                   )
 
 process.tightSelection = cms.Path(process.step1 *
                                   process.step2 *
-                                  #process.patDefaultSequence *
-                                  process.impactParameterMuons *
+                                  process.patDefaultSequence *
+                                  #process.impactParameterMuons *
                                   process.isolatedMuons010 *
                                   process.isolatedMuons005 *
                                   process.step3a *
@@ -201,49 +208,49 @@ process.tightSelection = cms.Path(process.step1 *
                                   process.step6b *
                                   process.step6c *
                                   process.step7 *
-                                  process.makeTtSemiLepEvent *
-                                  process.analyzeHypothesis
+                                  process.makeTtSemiLepEvent #*
+                                  #process.analyzeHypothesis
                                   )
 
 #-------------------------------------------------
 # register TFileService
 #-------------------------------------------------
-
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('synchronizationExercise.root')
-)
+#
+#process.TFileService = cms.Service("TFileService",
+#    fileName = cms.string('synchronizationExercise.root')
+#)
 
 #-------------------------------------------------
 # optional: write patTuple
 #-------------------------------------------------
-#
-#process.patTuple = cms.Path(process.step1 *
-#                            process.step2 *
-#                            process.patDefaultSequence
-#                            )
-#
-### define event selection
-#process.EventSelection = cms.PSet(
-#    SelectEvents = cms.untracked.PSet(
-#        SelectEvents = cms.vstring('patTuple')
-#    )
-#)
-#
-### configure output module
-#process.out = cms.OutputModule("PoolOutputModule",
-#    process.EventSelection,
-#    outputCommands = cms.untracked.vstring('drop *'),
-#    dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-#    fileName = cms.untracked.string('patTuple_afterStep2.root')
-#)
-#
-### save pat output
-#from PhysicsTools.PatAlgos.patEventContent_cff import *
-#process.out.outputCommands += patTriggerEventContent
-#process.out.outputCommands += patExtraAodEventContent
-#process.out.outputCommands += patEventContentTriggerMatch
-#process.out.outputCommands += patEventContentNoCleaning
-#process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
-#                               "keep *_patMETs*_*_*"]
-#
-#process.outpath = cms.EndPath(process.out)
+
+process.patTuple = cms.Path(process.step1 *
+                            process.step2 *
+                            process.patDefaultSequence
+                            )
+
+## define event selection
+process.EventSelection = cms.PSet(
+    SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring('patTuple')
+    )
+)
+
+## configure output module
+process.out = cms.OutputModule("PoolOutputModule",
+    process.EventSelection,
+    outputCommands = cms.untracked.vstring('drop *'),
+    dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
+    fileName = cms.untracked.string('patTuple_v2_afterStep2.root')
+)
+
+## save pat output
+from PhysicsTools.PatAlgos.patEventContent_cff import *
+process.out.outputCommands += patTriggerEventContent
+process.out.outputCommands += patExtraAodEventContent
+process.out.outputCommands += patEventContentTriggerMatch
+process.out.outputCommands += patEventContentNoCleaning
+process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
+                               "keep *_patMETs*_*_*"]
+
+process.outpath = cms.EndPath(process.out)
