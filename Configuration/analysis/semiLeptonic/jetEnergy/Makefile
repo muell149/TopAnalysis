@@ -15,3 +15,9 @@ resolution: analyzeJetEnergyResolutionBias.o
 
 analyzeJetEnergyResolutionBias.o: analyzeJetEnergyResolutionBias.C
 	$(C) $(ROOTCFLAGS) -c analyzeJetEnergyResolutionBias.C
+
+comparison: compareSamples.o
+	$(L) $(ROOTLIBS) -o compareSamples compareSamples.o
+
+compareSamples.o: compareSamples.C
+	$(C) $(ROOTCFLAGS) -c compareSamples.C
