@@ -45,7 +45,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('START3X_V26::All')
+process.GlobalTag.globaltag = cms.string('START36_V7::All')
 
 #-------------------------------------------------
 # event selection
@@ -85,10 +85,18 @@ removeSpecificPATObjects(process,
 removeCleaning(process,
                outputInProcess=False)
 
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run33xOnReRecoMC
-run33xOnReRecoMC(process)
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
 
-process.patJetCorrFactors.corrSample = 'Summer09_7TeV_ReReco332'
+## add ak5GenJet
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.JetProducers.ak5GenJets_cfi")
+process.patDefaultSequence.replace(getattr(process,"patCandidates"),
+                                   process.genParticlesForJets
+                                   + getattr(process,"ak5GenJets")
+                                   + getattr(process,"patCandidates"))
+
+process.patJetCorrFactors.corrSample = 'Spring10'
 ## choose sample type for flavor dependent JEC
 process.patJetCorrFactors.sampleType = "ttbar" ## dijet or ttbar
 
