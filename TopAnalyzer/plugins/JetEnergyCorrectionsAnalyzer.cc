@@ -112,6 +112,8 @@ void JetEnergyCorrectionsAnalyzer::beginJob()
   hists_["ptJetB"  ] = fs->make<TH1F>("ptJetB"  , "ptJetB"  , 60, 0., 300.);
   hists_["ptJetG"  ] = fs->make<TH1F>("ptJetG"  , "ptJetG"  , 60, 0., 300.);
 
+  hists_["etaJetUDSC"] = fs->make<TH1F>("etaJetUDSC", "etaJetUDSC", 50, -2.5, 2.5);
+  hists_["etaJetB"   ] = fs->make<TH1F>("etaJetB"   , "etaJetB"   , 50, -2.5, 2.5);
 }
 
 /// histogram filling
@@ -307,14 +309,20 @@ JetEnergyCorrectionsAnalyzer::analyzeFlavorComposition(const reco::Candidate& je
 {
 
   // uds
-  if( abs(parton.pdgId()) >= 1 && abs(parton.pdgId()) <= 3 )
-    hists_.find("ptJetUDS")->second->Fill( jet.pt() );
+  if( abs(parton.pdgId()) >= 1 && abs(parton.pdgId()) <= 3 ) {
+    hists_.find("ptJetUDS"  )->second->Fill( jet.pt()  );
+    hists_.find("etaJetUDSC")->second->Fill( jet.eta() );
+  }
   // c
-  else if( abs(parton.pdgId()) == 4 )
-    hists_.find("ptJetC"  )->second->Fill( jet.pt() );
-  // b
-  else if( abs(parton.pdgId()) == 5 )
-    hists_.find("ptJetB"  )->second->Fill( jet.pt() );
+  else if( abs(parton.pdgId()) == 4 ) {
+    hists_.find("ptJetC"    )->second->Fill( jet.pt()  );
+    hists_.find("etaJetUDSC")->second->Fill( jet.eta() );
+  }
+  // b {
+  else if( abs(parton.pdgId()) == 5 ) {
+    hists_.find("ptJetB" )->second->Fill( jet.pt()  );
+    hists_.find("etaJetB")->second->Fill( jet.eta() );
+  }
   // gluon
   else if( abs(parton.pdgId()) == 21 )
     hists_.find("ptJetG"  )->second->Fill( jet.pt() );
