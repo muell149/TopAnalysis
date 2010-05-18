@@ -150,12 +150,17 @@ DEFINE_FWK_MODULE(GenParticleAnalyzer);
 typedef SingleObjectAnalyzer<GenEventInfoProduct, PtHat> PtHatAnalyzer;
 DEFINE_FWK_MODULE(PtHatAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/ChargeAsymmetry.h"
+typedef SingleObjectAnalyzer<edm::View<reco::GenParticle>, ChargeAsymmetry> ChargeAsymmetryAnalyzer;
+DEFINE_FWK_MODULE(ChargeAsymmetryAnalyzer);
+
 /**
     Define module for MET analysis
 **/
 #include "TopAnalysis/TopAnalyzer/interface/METKinematics.h"
 typedef DoubleObjectAnalyzer<edm::View<reco::MET>, edm::View<reco::Candidate>, METKinematics> METAnalyzer;
 DEFINE_FWK_MODULE(METAnalyzer);
+
 
 /**
     Define modules needed for the analysis of trigger
