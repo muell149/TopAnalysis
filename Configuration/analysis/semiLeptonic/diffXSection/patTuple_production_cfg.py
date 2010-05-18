@@ -1,5 +1,10 @@
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
+## configure message logger
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+
 ## PAT Standard Sequence
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
@@ -11,12 +16,15 @@ from PhysicsTools.PatAlgos.tools.metTools import *
 ## Add PfMET to the event content
 addPfMET(process, 'PF')
 
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run33xOnReRecoMC
-run33xOnReRecoMC(process)
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
+
+## Needed for redoing the ak5GenJets
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 ## Add particle flow jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
-#addJetID(process, "antikt5PFJets", "pf")
 addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJTA        = True,
                  doBTagging   = True,
@@ -47,16 +55,38 @@ process.patJetsAK5PF.embedPFCandidates = True
 process.patJets.addTagInfos = False
 process.patJetsAK5PF.addTagInfos = False
 
+## embedding of resolutions into the patObjects
+process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+process.patJets.addResolutions = True
+process.patJets.resolutions = cms.PSet(
+    default = cms.string("udscResolution"),
+    bjets = cms.string("bjetResolution"),
+    )
+process.patJetsAK5PF.addResolutions = True
+process.patJetsAK5PF.resolutions = cms.PSet(
+    default = cms.string("udscResolutionPF"),
+    bjets = cms.string("bjetResolutionPF"),
+    )
+process.patElectrons.addResolutions = True
+process.patElectrons.resolutions = cms.PSet( default = cms.string("elecResolution") )
+process.patMuons.addResolutions = True
+process.patMuons.resolutions = cms.PSet( default = cms.string("muonResolution") )
+process.patMETs.addResolutions = True
+process.patMETs.resolutions = cms.PSet( default = cms.string("metResolution") )
+process.patMETsPF.addResolutions = True
+process.patMETsPF.resolutions = cms.PSet( default = cms.string("metResolutionPF") )
+
 ## Check the Event Content
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 
-process.p = cms.Path(
-    process.patDefaultSequence # + process.content
+process.p = cms.Path(process.genJetParticles *
+                     process.ak5GenJets *
+                     process.patDefaultSequence
+                     # + process.content
 )
 
-## Special Replacements
-
-process.patJetCorrFactors.corrSample = 'Summer09_7TeV_ReReco332'
+## jet corrections
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 ## sample type used for flavour dependend jet corrections
 process.patJetCorrFactors.sampleType = 'ttbar'
 process.patJetCorrFactorsAK5PF.sampleType = 'ttbar'
@@ -74,6 +104,7 @@ process.maxEvents.input    = 1000
 
 ## Input Files for Testing
 process.source.fileNames   = ['/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0016/2CB76F28-9D47-DF11-959F-003048C693E4.root']
+process.source.skipEvents = cms.untracked.uint32(0)
 
 ## Options and Output Report
 process.options.wantSummary = False
