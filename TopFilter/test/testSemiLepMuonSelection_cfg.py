@@ -78,7 +78,7 @@ switchJetCollection(process,
                     jetIdLabel       = "antikt5"
                     )
 
-process.patJetCorrFactors.corrSample = 'Summer09_7TeV'
+process.patJetCorrFactors.corrSample = 'Spring10'
 process.patJetCorrFactors.sampleType = "ttbar"
 
 ## add muon user isolation
