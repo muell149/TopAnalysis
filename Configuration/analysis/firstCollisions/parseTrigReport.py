@@ -1,7 +1,7 @@
 #####
 ##### script, originally from Sal Rapp. (https://hypernews.cern.ch/HyperNews/CMS/get/swDevelopment/2276/1/2/1/1/1/1.html),
 ##### modified to parse different paths separately
-##### $Id: $
+##### $Id: parseTrigReport.py,v 1.1 2010/05/18 10:41:05 snaumann Exp $
 #####
 ##### usage: python TopAnalysis/Configuration/analysis/firstCollisions/parseTrigReport.py Run135175/res/CMSSW_*.stdout
 #####
@@ -17,13 +17,13 @@ p = re.compile(r'\W+')
 def parseTrigReport(path, modules):
     print 'Path: ' + path
     for s in modules:
-        foundPath = False
         nvisit = 0
         npass  = 0
         nfail  = 0
         nerror = 0
         for i in range(1,len(sys.argv) ) :
             infile = open(sys.argv[i], 'r')
+            foundPath = False
             for line in infile :
                 if( not foundPath ) :
                     if( line.find('TrigReport ---------- Modules in Path: ' + path) >= 0 ) :
