@@ -6,6 +6,7 @@
 <use name=CommonTools/UtilAlgos>
 <use name=PhysicsTools/PatUtils>
 <use name=PhysicsTools/CandUtils>
+<use name=PhysicsTools/KinFitter>
 <use name=DataFormats/JetReco>
 <use name=DataFormats/MuonReco>
 <use name=DataFormats/EgammaReco>
