@@ -511,22 +511,22 @@ FWConfiguration* fwConfig() {
   FWConfiguration topaa(2);
 {
   FWConfiguration topaaa(0);
-  topaaa.addValue("25");
+  topaaa.addValue("4");
   topaa.addKeyValue("x", topaaa);
 }
 {
   FWConfiguration topaaa(0);
-  topaaa.addValue("158");
+  topaaa.addValue("21");
   topaa.addKeyValue("y", topaaa);
 }
 {
   FWConfiguration topaaa(0);
-  topaaa.addValue("992");
+  topaaa.addValue("1272");
   topaa.addKeyValue("width", topaaa);
 }
 {
   FWConfiguration topaaa(0);
-  topaaa.addValue("719");
+  topaaa.addValue("940");
   topaa.addKeyValue("height", topaaa);
 }
 {
@@ -1334,6 +1334,15 @@ FWConfiguration* fwConfig() {
   topaaaa.addValue("phi");
   topaaaa.addValue("phi");
   topaaaa.addValue("3");
+  topaaaa.addValue("emf");
+  topaaaa.addValue("emEnergyFraction");
+  topaaaa.addValue("2");
+  topaaaa.addValue("n90Hits");
+  topaaaa.addValue("jetID.n90Hits");
+  topaaaa.addValue("1");
+  topaaaa.addValue("fHPD");
+  topaaaa.addValue("jetID.fHPD");
+  topaaaa.addValue("2");
   topaaa.addKeyValue("reco::Jet", topaaaa);
 }
 {
@@ -1390,6 +1399,9 @@ FWConfiguration* fwConfig() {
   topaaaa.addValue("charge");
   topaaaa.addValue("charge");
   topaaaa.addValue("0");
+  topaaaa.addValue("relIso");
+  topaaaa.addValue("(trackIso+caloIso)/pt");
+  topaaaa.addValue("2");
   topaaa.addKeyValue("reco::Muon", topaaaa);
 }
 {
@@ -1508,7 +1520,7 @@ FWConfiguration* fwConfig() {
   FWConfiguration topaaaa(1);
 {
   FWConfiguration topaaaaa(0);
-  topaaaaa.addValue("Photons");
+  topaaaaa.addValue("Jets");
   topaaaa.addKeyValue("collection", topaaaaa);
 }
 {
@@ -1892,7 +1904,7 @@ FWConfiguration* fwConfig() {
 }
 {
   FWConfiguration topaaaaa(0);
-  topaaaaa.addValue("156");
+  topaaaaa.addValue("177");
   topaaaa.addKeyValue("y", topaaaaa);
 }
 {
@@ -1940,7 +1952,7 @@ FWConfiguration* fwConfig() {
 }
 {
   FWConfiguration topaaaaa(0);
-  topaaaaa.addValue("494");
+  topaaaaa.addValue("515");
   topaaaa.addKeyValue("y", topaaaaa);
 }
 {
