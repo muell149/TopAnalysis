@@ -172,41 +172,45 @@ setForAllTtSemiLepHypotheses(process, "maxNJets", -1)
 # final selection paths
 #-------------------------------------------------
 
-process.looseSelection = cms.Path(process.step1 *
-                                  process.step2 *
-                                  process.patDefaultSequence *
-                                  process.isolatedMuons010 *
-                                  process.step3b *
-                                  #process.analyzeMuon *
-                                  process.vetoMuons *
-                                  process.step4 *
-                                  process.vetoElectrons *
-                                  process.step5 *
-                                  process.goodJets *
-                                  process.step6a *
-                                  process.step6b *
-                                  process.step6c #*
-                                  #process.analyzeEventBasics
-                                  )
+process.looseSequence = cms.Sequence(process.step1 *
+                                     process.step2 *
+                                     process.patDefaultSequence *
+                                     process.isolatedMuons010 *
+                                     process.step3b *
+                                     #process.analyzeMuon *
+                                     process.vetoMuons *
+                                     process.step4 *
+                                     process.vetoElectrons *
+                                     process.step5 *
+                                     process.goodJets *
+                                     process.step6a *
+                                     process.step6b *
+                                     process.step6c #*
+                                     #process.analyzeEventBasics
+                                     )
 
-process.tightSelection = cms.Path(process.step1 *
-                                  process.step2 *
-                                  process.patDefaultSequence *
-                                  process.isolatedMuons010 *
-                                  process.isolatedMuons005 *
-                                  process.step3a *
-                                  process.vetoMuons *
-                                  process.step4 *
-                                  process.vetoElectrons *
-                                  process.step5 *
-                                  process.goodJets *
-                                  process.step6a *
-                                  process.step6b *
-                                  process.step6c *
-                                  process.step7 #*
-                                  #process.makeTtSemiLepEvent *
-                                  #process.analyzeHypothesis
-                                  )
+process.tightSequence = cms.Sequence(process.step1 *
+                                     process.step2 *
+                                     process.patDefaultSequence *
+                                     process.isolatedMuons010 *
+                                     process.isolatedMuons005 *
+                                     process.step3a *
+                                     process.vetoMuons *
+                                     process.step4 *
+                                     process.vetoElectrons *
+                                     process.step5 *
+                                     process.goodJets *
+                                     process.step6a *
+                                     process.step6b *
+                                     process.step6c *
+                                     process.step7 #*
+                                     #process.makeTtSemiLepEvent *
+                                     #process.analyzeHypothesis
+                                     )
+
+process.looseSelection = cms.Path(process.looseSequence)
+
+process.tightSelection = cms.Path(process.tightSequence)
 
 ##-------------------------------------------------
 ## register TFileService
