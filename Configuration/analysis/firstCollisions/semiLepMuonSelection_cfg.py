@@ -19,14 +19,14 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/175/C88F2894-0D5C-DF11-AC7A-000423D9517C.root'
+    '/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/445/E87253DD-B55F-DF11-AEF2-0030487CD184.root'
     ),
 #    skipEvents = cms.untracked.uint32(6800)
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -68,9 +68,6 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## remove MC matching, photons, taus and cleaning from PAT default sequence
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeMCMatching(process, ['All'])
-removeSpecificPATObjects(process,
-                         ['Photons', 'Taus'],
-                         outputInProcess=False)
 removeCleaning(process,
                outputInProcess=False)
 
@@ -85,7 +82,6 @@ process.patJetCorrFactors.sampleType = "ttbar"
 # muon selection
 #-------------------------------------------------
 
-#process.load("TopQuarkAnalysis.TopObjectProducers.MuonImpactParameterSelector_cfi")
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
 process.isolatedMuons010 = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                   cut =
@@ -189,10 +185,21 @@ process.tightSelection = cms.Path(process.step1 *
 # write patTuple
 #-------------------------------------------------
 
+process.looseSelection_afterStep5 = cms.Path(process.step1 *
+                                             process.step2 *
+                                             process.patDefaultSequence *
+                                             process.isolatedMuons010 *
+                                             process.step3b *
+                                             process.vetoMuons *
+                                             process.step4 *
+                                             process.vetoElectrons *
+                                             process.step5
+                                             )
+
 ## define event selection
 process.EventSelection = cms.PSet(
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('looseSelection')
+        SelectEvents = cms.vstring('looseSelection_afterStep5')
     )
 )
 
@@ -201,7 +208,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-    fileName = cms.untracked.string('patTuple_semiLepMuon_looseSelection.root')
+    fileName = cms.untracked.string('patTuple_semiLepMuon_looseSelection_afterStep5.root')
 )
 
 ## save pat output
