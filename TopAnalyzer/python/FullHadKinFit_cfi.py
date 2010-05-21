@@ -9,5 +9,8 @@ analyzeFullHadKinFit = cms.EDAnalyzer("FullHadKinFit",
     ## strength of smearing
     smear = cms.double( 1.0 ),
     ## scale of resolution
-    resol = cms.double( 1.0 )
+    resol = cms.double( 1.0 ),
+    ## type of resolution to be used
+    #resolType = cms.string( "gaussian" )
+    resolType = cms.string( "" )
 )

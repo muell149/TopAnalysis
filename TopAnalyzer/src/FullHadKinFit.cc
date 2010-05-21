@@ -2,6 +2,9 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
+#include "CommonTools/Utils/interface/StringObjectFunction.h"
+#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+
 #include "PhysicsTools/KinFitter/interface/TFitConstraintM.h"
 #include "PhysicsTools/KinFitter/interface/TFitConstraintMGaus.h"
 #include "PhysicsTools/KinFitter/interface/TFitParticleEtEtaPhi.h"
@@ -14,6 +17,56 @@ FullHadKinFit::FullHadKinFit(const edm::ParameterSet& cfg) : rnd(0)
   smearOnly_ = cfg.getParameter<int>("smearOnly");
   smear_     = cfg.getParameter<double>("smear");
   resol_     = cfg.getParameter<double>("resol");
+  resolType_ = cfg.getParameter<std::string>("resolType");
+
+  if(resolType_ != "gaussian") {
+    if(cfg.exists("udscResolutions") && cfg.exists("bResolutions")){
+      std::vector<edm::ParameterSet> functionSets_ = cfg.getParameter <std::vector<edm::ParameterSet> >("udscResolutions");
+      for(std::vector<edm::ParameterSet>::const_iterator iSet = functionSets_.begin(); iSet != functionSets_.end(); ++iSet){
+	if(iSet->exists("bin")) binsUdsc_.push_back(iSet->getParameter<std::string>("bin"));
+	else if(functionSets_.size()==1) binsUdsc_.push_back("");
+	else throw cms::Exception("WrongConfig") << "Parameter 'bin' is needed if more than one PSet is specified!\n";
+      
+	funcEtUdsc_.push_back(iSet->getParameter<std::string>("et"));
+	funcEtaUdsc_.push_back(iSet->getParameter<std::string>("eta"));
+	funcPhiUdsc_.push_back(iSet->getParameter<std::string>("phi"));
+      }
+      functionSets_.clear();
+      functionSets_ = cfg.getParameter <std::vector<edm::ParameterSet> >("bResolutions");
+      for(std::vector<edm::ParameterSet>::const_iterator iSet = functionSets_.begin(); iSet != functionSets_.end(); ++iSet){
+	if(iSet->exists("bin")) binsB_.push_back(iSet->getParameter<std::string>("bin"));
+	else if(functionSets_.size()==1) binsB_.push_back("");
+	else throw cms::Exception("WrongConfig") << "Parameter 'bin' is needed if more than one PSet is specified!\n";
+      
+	funcEtB_.push_back(iSet->getParameter<std::string>("et"));
+	funcEtaB_.push_back(iSet->getParameter<std::string>("eta"));
+	funcPhiB_.push_back(iSet->getParameter<std::string>("phi"));
+      }
+    }
+    else if(cfg.exists("udscResolutions") || cfg.exists("bResolutions")){
+      if(cfg.exists("udscResolutions")) throw cms::Exception("WrongConfig") << "Parameter 'bResolutions' is needed if parameter 'udscResolutions' is defined!\n";
+      else                              throw cms::Exception("WrongConfig") << "Parameter 'udscResolutions' is needed if parameter 'bResolutions' is defined!\n";
+    }
+    else {
+      edm::LogWarning("Config") << "Parameters 'udscResolutions' and 'bResolutions' are not defined, taking standard resolutions\n";
+      binsUdsc_.push_back("1.4<=abs(eta)");
+      funcEtUdsc_.push_back("4.8^2 + (0.89^2)*et + (0.043^2)*(et)^2");
+      funcEtaUdsc_.push_back("1.773/((et)^2) + 0.034/et + 0.000356");
+      funcPhiUdsc_.push_back("2.908/((et)^2) + 0.021/et + 0.000259");
+      binsUdsc_.push_back("1.4>abs(eta)");
+      funcEtUdsc_.push_back("5.6^2 + (1.25^2)*et + (0.033^2)*(et)^2");
+      funcEtaUdsc_.push_back("1.215/((et)^2) + 0.037/et + 0.0007941");
+      funcPhiUdsc_.push_back("6.65/((et)^2) + 0.04/et + 0.0000849");
+      binsB_.push_back("1.4<=abs(eta)");
+      funcEtB_.push_back("4.8^2 + (0.89^2)*et + (0.043^2)*(et)^2");
+      funcEtaB_.push_back("1.773/((et)^2) + 0.034/et + 0.000356");
+      funcPhiB_.push_back("2.908/((et)^2) + 0.021/et + 0.000259");
+      binsB_.push_back("1.4>abs(eta)");
+      funcEtB_.push_back("5.6^2 + (1.25^2)*et + (0.033^2)*(et)^2");
+      funcEtaB_.push_back("1.215/((et)^2) + 0.037/et + 0.0007941");
+      funcPhiB_.push_back("6.65/((et)^2) + 0.04/et + 0.0000849");
+    }
+  }
 }
 
 /// do generator matching
@@ -72,7 +125,6 @@ FullHadKinFit::smear(std::vector< TLorentzVector >& vecs){
       //std::cout << "e:   " << vec->E()   << " +- " << 0.5 * sqrt( vec->E() )                           << " -> " << e   << std::endl;
       //if(pt > e) std::cout << "--==!! ERROR !!==--" << std::endl << "pt > e : " << pt << " > " << e << std::endl;
       vec->SetPtEtaPhiE( pt, eta, phi, e );
-      //vec->SetPtEtaPhiM( pt, eta, phi, m );
     }
   }
 }
@@ -152,64 +204,57 @@ FullHadKinFit::comboType(std::vector< unsigned int > combi)
 }
 
 /// definition of resolutions to be used in kinematic fit
-Double_t
-FullHadKinFit::ErrEt(Float_t Et, Float_t Eta) {
-  /*
-  Double_t InvPerr2, a, b, c;
-  if(fabs(Eta) < 1.4){
-    a = 5.6;
-    b = 1.25;
-    c = 0.033;
+std::vector<FullHadKinFit::KinFitResolutions>
+FullHadKinFit::getResolutions(const std::vector< TLorentzVector >* vecs, const std::string whichResolution)
+{
+  std::vector<KinFitResolutions> result;
+  for(std::vector< TLorentzVector >::const_iterator vec = vecs->begin(); vec != vecs->end(); ++vec){
+    KinFitResolutions resolu;
+    if(resolType_ == "gaussian"){
+      double et = vec->Et();
+      resolu.Et  = resol_ * 0.3 * sqrt( et );
+      resolu.Eta = resol_ * 0.5 * sqrt( et ) / et;
+      resolu.Phi = resol_ * 0.5 * sqrt( et ) / et;
+      result.push_back(resolu);
+    }
+    else{
+      int selectedBin=-1;
+      reco::LeafCandidate candidate;
+      if(whichResolution == "udsc"){
+	for(unsigned int i=0; i<binsUdsc_.size(); ++i){
+	  StringCutObjectSelector<reco::LeafCandidate> select_(binsUdsc_[i]);
+	  candidate = reco::LeafCandidate( 0, reco::LeafCandidate::LorentzVector(vec->Px(), vec->Py(), vec->Pz(), vec->E()) );
+	  if(select_(candidate)){
+	    selectedBin = i;
+	    break;
+	  }
+	}
+	if(selectedBin>=0){
+	  resolu.Et  = resol_ * StringObjectFunction<reco::LeafCandidate>(funcEtUdsc_ [selectedBin]).operator()(candidate);
+	  resolu.Eta = resol_ * StringObjectFunction<reco::LeafCandidate>(funcEtaUdsc_[selectedBin]).operator()(candidate);
+	  resolu.Phi = resol_ * StringObjectFunction<reco::LeafCandidate>(funcPhiUdsc_[selectedBin]).operator()(candidate);
+	}
+      }
+      else if(whichResolution == "b"){
+	for(unsigned int i=0; i<binsB_.size(); ++i){
+	  StringCutObjectSelector<reco::LeafCandidate> select_(binsB_[i]);
+	  candidate = reco::LeafCandidate( 0, reco::LeafCandidate::LorentzVector(vec->Px(), vec->Py(), vec->Pz(), vec->E()) );
+	  if(select_(candidate)){
+	    selectedBin = i;
+	    break;
+	  }
+	}
+	if(selectedBin>=0){
+	  resolu.Et  = resol_ * StringObjectFunction<reco::LeafCandidate>(funcEtB_ [selectedBin]).operator()(candidate);
+	  resolu.Eta = resol_ * StringObjectFunction<reco::LeafCandidate>(funcEtaB_[selectedBin]).operator()(candidate);
+	  resolu.Phi = resol_ * StringObjectFunction<reco::LeafCandidate>(funcPhiB_[selectedBin]).operator()(candidate);
+	}
+      }
+      else throw cms::Exception("WrongConfig") << "Only 'udsc' and 'b' are supported types in function FullHadKinFit::getResolutions()!\n";
+      result.push_back(resolu);
+    }
   }
-  else{
-    a = 4.8;
-    b = 0.89;
-    c = 0.043;
-  }
-  InvPerr2 = (a * a) + (b * b) * Et + (c * c) * Et * Et;
-  return 0.1 * InvPerr2;
- */ 
-  return resol_ * 0.3 * sqrt( Et );
-}
-
-Double_t
-FullHadKinFit::ErrEta(Float_t Et, Float_t Eta) {
-  /*
-  Double_t InvPerr2, a, b, c;
-  if(fabs(Eta) < 1.4){
-    a = 1.215;
-    b = 0.037;
-    c = 7.941 * 0.0001;
-  }
-  else{
-    a = 1.773;
-    b = 0.034;
-    c = 3.56 * 0.0001;
-  }
-  InvPerr2 = a/(Et * Et) + b/Et + c;
-  return 0.1 * InvPerr2;
-*/
-  return resol_ * 0.5 * sqrt( Et ) / Et;
-}
-
-Double_t
-FullHadKinFit::ErrPhi(Float_t Et, Float_t Eta) {
-  /*
-  Double_t InvPerr2, a, b, c;
-  if(fabs(Eta) < 1.4){
-    a = 6.65;
-    b = 0.04;
-    c = 8.49 * 0.00001;
-  }
-  else{
-    a = 2.908;
-    b = 0.021;
-    c = 2.59 * 0.0001;
-  }
-  InvPerr2 = a/(Et * Et) + b/Et + c;
-  return 0.1 * InvPerr2;
-  */
-  return resol_ * 0.5 * sqrt( Et ) / Et;
+  return result;
 }
 
 /// initiate histograms
@@ -277,38 +322,82 @@ FullHadKinFit::analyze(const edm::Event& event, const edm::EventSetup&)
       m4.Zero();
       m5.Zero();
 
+      std::vector<KinFitResolutions> resolutionsUdsc = getResolutions(&vecs, "udsc");
+
       //In this example the covariant matrix depends on the transverse energy and eta of the jets
-      m0(0,0) = ErrEt (vecs[0].Et(), vecs[0].Eta()); // et
-      m0(1,1) = ErrEta(vecs[0].Et(), vecs[0].Eta()); // eta
-      m0(2,2) = ErrPhi(vecs[0].Et(), vecs[0].Eta()); // phi
+      m0(0,0) = resolutionsUdsc[0].Et; // et
+      m0(1,1) = resolutionsUdsc[0].Eta; // eta
+      m0(2,2) = resolutionsUdsc[0].Phi; // phi
 
-      m1(0,0) = ErrEt (vecs[1].Et(), vecs[1].Eta()); // et
-      m1(1,1) = ErrEta(vecs[1].Et(), vecs[1].Eta()); // eta
-      m1(2,2) = ErrPhi(vecs[1].Et(), vecs[1].Eta()); // phi
+      m1(0,0) = resolutionsUdsc[1].Et; // et
+      m1(1,1) = resolutionsUdsc[1].Eta; // eta
+      m1(2,2) = resolutionsUdsc[1].Phi; // phi
 
-      m2(0,0) = ErrEt (vecs[2].Et(), vecs[2].Eta()); // et
-      m2(1,1) = ErrEta(vecs[2].Et(), vecs[2].Eta()); // eta
-      m2(2,2) = ErrPhi(vecs[2].Et(), vecs[2].Eta()); // phi
+      m2(0,0) = resolutionsUdsc[2].Et; // et
+      m2(1,1) = resolutionsUdsc[2].Eta; // eta
+      m2(2,2) = resolutionsUdsc[2].Phi; // phi
 
-      m3(0,0) = ErrEt (vecs[3].Et(), vecs[3].Eta()); // et
-      m3(1,1) = ErrEta(vecs[3].Et(), vecs[3].Eta()); // eta
-      m3(2,2) = ErrPhi(vecs[3].Et(), vecs[3].Eta()); // phi
+      m3(0,0) = resolutionsUdsc[3].Et; // et
+      m3(1,1) = resolutionsUdsc[3].Eta; // eta
+      m3(2,2) = resolutionsUdsc[3].Phi; // phi
 
-      m4(0,0) = ErrEt (vecs[4].Et(), vecs[4].Eta()); // et
-      m4(1,1) = ErrEta(vecs[4].Et(), vecs[4].Eta()); // eta
-      m4(2,2) = ErrPhi(vecs[4].Et(), vecs[4].Eta()); // phi
+      m4(0,0) = resolutionsUdsc[4].Et; // et
+      m4(1,1) = resolutionsUdsc[4].Eta; // eta
+      m4(2,2) = resolutionsUdsc[4].Phi; // phi
 
-      m5(0,0) = ErrEt (vecs[5].Et(), vecs[5].Eta()); // et
-      m5(1,1) = ErrEta(vecs[5].Et(), vecs[5].Eta()); // eta
-      m5(2,2) = ErrPhi(vecs[5].Et(), vecs[5].Eta()); // phi
+      m5(0,0) = resolutionsUdsc[5].Et; // et
+      m5(1,1) = resolutionsUdsc[5].Eta; // eta
+      m5(2,2) = resolutionsUdsc[5].Phi; // phi
 
-      std::vector< TMatrixD > mats;
-      mats.push_back( m0 );
-      mats.push_back( m1 );
-      mats.push_back( m2 );
-      mats.push_back( m3 );
-      mats.push_back( m4 );
-      mats.push_back( m5 );
+      std::vector< TMatrixD > matsUdsc;
+      matsUdsc.push_back( m0 );
+      matsUdsc.push_back( m1 );
+      matsUdsc.push_back( m2 );
+      matsUdsc.push_back( m3 );
+      matsUdsc.push_back( m4 );
+      matsUdsc.push_back( m5 );
+
+      m0.Zero();
+      m1.Zero();
+      m2.Zero();
+      m3.Zero();
+      m4.Zero();
+      m5.Zero();
+
+      std::vector<KinFitResolutions> resolutionsB = getResolutions(&vecs, "b");
+
+      //In this example the covariant matrix depends on the transverse energy and eta of the jets
+      m0(0,0) = resolutionsB[0].Et; // et
+      m0(1,1) = resolutionsB[0].Eta; // eta
+      m0(2,2) = resolutionsB[0].Phi; // phi
+
+      m1(0,0) = resolutionsB[1].Et; // et
+      m1(1,1) = resolutionsB[1].Eta; // eta
+      m1(2,2) = resolutionsB[1].Phi; // phi
+
+      m2(0,0) = resolutionsB[2].Et; // et
+      m2(1,1) = resolutionsB[2].Eta; // eta
+      m2(2,2) = resolutionsB[2].Phi; // phi
+
+      m3(0,0) = resolutionsB[3].Et; // et
+      m3(1,1) = resolutionsB[3].Eta; // eta
+      m3(2,2) = resolutionsB[3].Phi; // phi
+
+      m4(0,0) = resolutionsB[4].Et; // et
+      m4(1,1) = resolutionsB[4].Eta; // eta
+      m4(2,2) = resolutionsB[4].Phi; // phi
+
+      m5(0,0) = resolutionsB[5].Et; // et
+      m5(1,1) = resolutionsB[5].Eta; // eta
+      m5(2,2) = resolutionsB[5].Phi; // phi
+
+      std::vector< TMatrixD > matsB;
+      matsB.push_back( m0 );
+      matsB.push_back( m1 );
+      matsB.push_back( m2 );
+      matsB.push_back( m3 );
+      matsB.push_back( m4 );
+      matsB.push_back( m5 );
 
       std::vector< unsigned int > combi(6);
       combi[B]     = 0;
@@ -323,12 +412,12 @@ FullHadKinFit::analyze(const edm::Event& event, const edm::EventSetup&)
 	    combi[LP] < combi[LPBar] ||
 	    combi[B]  < combi[BBar]  ){
 
-	  TFitParticleEtEtaPhi *cand_b     = new TFitParticleEtEtaPhi( "cand_b"    , "cand_b"    , &vecs[combi[B]]    , &mats[combi[B]]     );
-	  TFitParticleEtEtaPhi *cand_bBar  = new TFitParticleEtEtaPhi( "cand_bBar" , "cand_bBar" , &vecs[combi[BBar]] , &mats[combi[BBar]]  );
-	  TFitParticleEtEtaPhi *cand_lQ    = new TFitParticleEtEtaPhi( "cand_lQ"   , "cand_lQ"   , &vecs[combi[LQ]]   , &mats[combi[LQ]]    );
-	  TFitParticleEtEtaPhi *cand_lQBar = new TFitParticleEtEtaPhi( "cand_lQBar", "cand_lQBar", &vecs[combi[LQBar]], &mats[combi[LQBar]] );
-	  TFitParticleEtEtaPhi *cand_lP    = new TFitParticleEtEtaPhi( "cand_lP"   , "cand_lP"   , &vecs[combi[LP]]   , &mats[combi[LP]]    );
-	  TFitParticleEtEtaPhi *cand_lPBar = new TFitParticleEtEtaPhi( "cand_lPBar", "cand_lPBar", &vecs[combi[LPBar]], &mats[combi[LPBar]] );
+	  TFitParticleEtEtaPhi *cand_b     = new TFitParticleEtEtaPhi( "cand_b"    , "cand_b"    , &vecs[combi[B]]    , &matsB[combi[B]]     );
+	  TFitParticleEtEtaPhi *cand_bBar  = new TFitParticleEtEtaPhi( "cand_bBar" , "cand_bBar" , &vecs[combi[BBar]] , &matsB[combi[BBar]]  );
+	  TFitParticleEtEtaPhi *cand_lQ    = new TFitParticleEtEtaPhi( "cand_lQ"   , "cand_lQ"   , &vecs[combi[LQ]]   , &matsUdsc[combi[LQ]]    );
+	  TFitParticleEtEtaPhi *cand_lQBar = new TFitParticleEtEtaPhi( "cand_lQBar", "cand_lQBar", &vecs[combi[LQBar]], &matsUdsc[combi[LQBar]] );
+	  TFitParticleEtEtaPhi *cand_lP    = new TFitParticleEtEtaPhi( "cand_lP"   , "cand_lP"   , &vecs[combi[LP]]   , &matsUdsc[combi[LP]]    );
+	  TFitParticleEtEtaPhi *cand_lPBar = new TFitParticleEtEtaPhi( "cand_lPBar", "cand_lPBar", &vecs[combi[LPBar]], &matsUdsc[combi[LPBar]] );
 
 	  //TFitConstraintM *mCons1 = new TFitConstraintM( "WMassConstraint1", "WMass-Constraint1", 0, 0 , 80.4 );
 	  TFitConstraintMGaus *mCons1 = new TFitConstraintMGaus( "WMassConstraint1", "WMass-Constraint1", 0, 0 , 80.4 , 2.141 );

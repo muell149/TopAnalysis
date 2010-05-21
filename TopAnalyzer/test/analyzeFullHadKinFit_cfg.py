@@ -11,7 +11,7 @@ process = cms.Process("Analysis")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -47,7 +47,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -66,10 +66,23 @@ process.TFileService = cms.Service("TFileService",
 
 ## get particle content of sample with IDs
 process.load("TopAnalysis.TopAnalyzer.FullHadKinFit_cfi")
+process.load("TopAnalysis.TopAnalyzer.stringResolutions_etEtaPhi_cff")
+
 process.analyzeFullHadKinFit_S1R1 = process.analyzeFullHadKinFit.clone()
+process.analyzeFullHadKinFit_S1R1.udscResolutions = process.udscResolutionPF.functions
+process.analyzeFullHadKinFit_S1R1.bResolutions = process.bjetResolutionPF.functions
+
 process.analyzeFullHadKinFit_S1R2 = process.analyzeFullHadKinFit.clone( resol = 2.0 )
+process.analyzeFullHadKinFit_S1R2.udscResolutions = process.udscResolutionPF.functions
+process.analyzeFullHadKinFit_S1R2.bResolutions = process.bjetResolutionPF.functions
+
 process.analyzeFullHadKinFit_S2R1 = process.analyzeFullHadKinFit.clone( smear = 2.0 )
+process.analyzeFullHadKinFit_S2R1.udscResolutions = process.udscResolutionPF.functions
+process.analyzeFullHadKinFit_S2R1.bResolutions = process.bjetResolutionPF.functions
+
 process.analyzeFullHadKinFit_S2R2 = process.analyzeFullHadKinFit.clone( smear = 2.0 , resol = 2.0 )
+process.analyzeFullHadKinFit_S2R2.udscResolutions = process.udscResolutionPF.functions
+process.analyzeFullHadKinFit_S2R2.bResolutions = process.bjetResolutionPF.functions
 
 
 ## ---

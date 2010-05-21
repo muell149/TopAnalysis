@@ -63,10 +63,15 @@ class FullHadKinFit : public edm::EDAnalyzer {
   /// function to find types of jet-combinations in KinFits (1 right, 2 branches right, but inner-branche particles mixup, 3 inter-branch mixup, 4 missing jet)
   int comboType( std::vector< unsigned int > combi );
 
+  /// stucture to store kinFit resolutions
+  struct KinFitResolutions {
+    Double_t Et;
+    Double_t Eta;
+    Double_t Phi;
+  };
+
   /// definition of resolutions to be used in kinematic fit
-  Double_t ErrEt(Float_t Et, Float_t Eta);
-  Double_t ErrEta(Float_t Et, Float_t Eta);
-  Double_t ErrPhi(Float_t Et, Float_t Eta);
+  std::vector<KinFitResolutions> getResolutions(const std::vector< TLorentzVector >* cand, const std::string whichResolution);
 
   /// input tag of src collection
   edm::InputTag src_;
@@ -74,6 +79,12 @@ class FullHadKinFit : public edm::EDAnalyzer {
   /// configuration of smearing strength and resolution
   double smear_;
   double resol_;
+  std::string resolType_;
+
+  /// vector of strings for the binning of the resolutions
+  std::vector<std::string> binsUdsc_, binsB_;
+  /// vectors for the resolution functions
+  std::vector<std::string> funcEtUdsc_, funcEtaUdsc_, funcPhiUdsc_, funcEtB_, funcEtaB_, funcPhiB_;
 
   /// configuration which jets should get smeared (set to -1 for all)
   int smearOnly_;
