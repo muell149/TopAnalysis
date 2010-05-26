@@ -71,8 +71,8 @@ removeMCMatching(process, ['All'])
 removeCleaning(process,
                outputInProcess=False)
 
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-run36xOn35xInput(process)
+#from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+#run36xOn35xInput(process)
 
 ## use the correct jet energy corrections
 process.patJetCorrFactors.corrSample = "Spring10"
