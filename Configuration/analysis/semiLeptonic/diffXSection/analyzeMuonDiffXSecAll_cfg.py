@@ -6,8 +6,11 @@
 ## get the mother file
 execfile("/afs/naf.desy.de/user/g/goerner/semileptonic356/analyzeMuonDiffXSec_cfg.py")
 
-## kick out gen level event filter
+## remove gen level event filter
 process.filterSequence = cms.Sequence(process.hltMu9)
+process.p3.remove(process.genFilterSequence)
+print "all gen level filters using ttbar decay subset are removed" 
+print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"
 
 ## reduce output (needed when running over QCD samples)
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
