@@ -154,6 +154,10 @@ DEFINE_FWK_MODULE(PtHatAnalyzer);
 typedef SingleObjectAnalyzer<edm::View<reco::GenParticle>, ChargeAsymmetry> ChargeAsymmetryAnalyzer;
 DEFINE_FWK_MODULE(ChargeAsymmetryAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/GenJetComposition.h"
+typedef SingleObjectAnalyzer<edm::View<reco::GenJet>, GenJetComposition> GenJetCompositionAnalyzer;
+DEFINE_FWK_MODULE(GenJetCompositionAnalyzer);
+
 /**
     Define module for MET analysis
 **/
