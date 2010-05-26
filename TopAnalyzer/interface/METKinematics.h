@@ -22,8 +22,10 @@
                      coult be patMETs or patMETsPF.
 
     _srcB_         : second input collection. This parameter is optional. It does not have to be present 
-                     in the configuration of the module. If it is present, only 2-dimensional correlation 
-		     histograms will be booked and filled.
+                     in the configuration of the module. If it is present, the 1-dimensional histograms for the 
+		     met kinematics will still be filled from the input collection given by parameter
+		     _srcA_ (expected to be of reco::MET type). In addition 2-dimensional correlation 
+		     histograms will be booked and filled to see MET(pt/eta/phi of object).
 
     _eventWeight_  : event weight. This parameter is optional. It does not have to be present in the in
                      configuration of the module. If given all histograms will not be filled with the 

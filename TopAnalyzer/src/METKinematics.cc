@@ -109,7 +109,8 @@ METKinematics::fill(const edm::View<reco::MET>& metCollection, const edm::View<r
       hists2D_.find("METphi_" )->second->Fill( part->phi() ,  metCollection.begin()->et() , weight );
     }
   }
-  
+  // fill 1-dimensional MET histograms from metCollection input
+  fill(metCollection, weight);
 }
 
 
