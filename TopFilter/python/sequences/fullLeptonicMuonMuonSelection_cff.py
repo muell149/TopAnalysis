@@ -38,7 +38,7 @@ goodTrackMuons = selectedPatMuons.clone(src = 'hardMuons',
 				       )	
 ## transverse impact parameter
 goodD0Muons = selectedPatMuons.clone(src = 'goodTrackMuons', 
-                                     cut = 'abs(track.d0) < 0.2'
+                                     cut = 'abs(dB) < 0.02'
 				    )	
 ## global fit
 goodFitMuons = selectedPatMuons.clone(src = 'goodD0Muons', 
