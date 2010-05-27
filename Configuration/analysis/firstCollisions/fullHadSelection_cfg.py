@@ -74,8 +74,6 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## remove MC matching, photons, taus and cleaning from PAT default sequence
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeMCMatching(process, ['All'])
-#removeCleaning(process,
-#               outputInProcess=False)
 
 ## Add particle flow jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
@@ -94,8 +92,8 @@ from PhysicsTools.PatAlgos.tools.metTools import *
 ## Add PfMET to the event content
 addPfMET(process, 'PF')
 
-#from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-#run36xOn35xInput(process)
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
 
 ## embedding of jet constituents into the jets
 process.patJets.embedCaloTowers = True
@@ -110,9 +108,6 @@ process.patJetCorrFactors.corrSample = "Spring10"
 process.patJetCorrFactors.sampleType = "ttbar"
 process.patJetCorrFactorsAK5PF.corrSample = "Spring10"
 process.patJetCorrFactorsAK5PF.sampleType = "ttbar"
-
-process.patDefaultSequence.remove(process.patJetPartonMatchAK5PF)
-process.patDefaultSequence.remove(process.patJetGenJetMatchAK5PF)
 
 ## load modules for fully hadronic analysis
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
