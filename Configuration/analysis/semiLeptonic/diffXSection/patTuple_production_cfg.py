@@ -8,9 +8,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 ## PAT Standard Sequence
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-from PhysicsTools.PatAlgos.tools.coreTools import *
+#from PhysicsTools.PatAlgos.tools.coreTools import *
 ## Remove Photons and Taus from the Event
-removeSpecificPATObjects(process, ['Photons','Taus'])
+#removeSpecificPATObjects(process, ['Photons','Taus'])
 
 from PhysicsTools.PatAlgos.tools.metTools import *
 ## Add PfMET to the event content
@@ -20,21 +20,21 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 run36xOn35xInput(process)
 
 ## Needed for redoing the ak5GenJets
-process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
 process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 ## Add particle flow jets
-from PhysicsTools.PatAlgos.tools.jetTools import *
-addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
-                 doJTA        = True,
-                 doBTagging   = True,
-                 jetCorrLabel = ('AK5', 'PF'),
-                 doType1MET   = False,
-                 doL1Cleaning = False,
-                 doL1Counters = False,
-                 genJetCollection=cms.InputTag('ak5GenJets'),
-                 doJetID      = True,
-                 ) 
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
+addJetCollection35X(process,cms.InputTag('ak5PFJets'),'AK5','PF',
+                    doJTA        = True,
+                    doBTagging   = True,
+                    jetCorrLabel = ('AK5', 'PF'),
+                    doType1MET   = False,
+                    doL1Cleaning = True,
+                    doL1Counters = False,
+                    genJetCollection=cms.InputTag('ak5GenJets'),
+                    doJetID      = True,
+                    ) 
 
 # embed IsoDeposits
 process.patMuons.isoDeposits = cms.PSet(
@@ -95,8 +95,8 @@ process.patJetCorrFactorsAK5PF.sampleType = 'ttbar'
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.fileName = cms.untracked.string('PATtuple.root')
 process.out.outputCommands = patExtraAodEventContent
-process.out.outputCommands+= patEventContentNoCleaning
-process.out.outputCommands+= ['drop *_towerMaker_*_*', 'keep *_ak5GenJets_*_*']
+process.out.outputCommands+= patEventContent
+process.out.outputCommands+= ['drop *_towerMaker_*_*', 'drop *_cleanPatHemispheres*_*_*', 'keep *_ak5GenJets_*_*']
 
 
 ## Maximal Number of Events
