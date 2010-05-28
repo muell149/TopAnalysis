@@ -37,18 +37,17 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 
 ## setup the jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
-                                         cut = 'pt > 40'
+                                         cut = 'abs(eta) < 2.4 & pt > 40'
                                          )
-tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                         cut = 'pt > 50'
+tightBottomJets  = selectedPatJets.clone(src = 'simpleSecondaryVertexBJets',
+                                         cut = 'abs(eta) < 2.4 & pt > 50'
                                          )
 
 ## setting up the collections for the fully-hadronic
 ## event selection; on these collection monitoring
 ## can still be performed
-fullHadronicSelection = cms.Sequence(reliableJets *
-                                     goodJets *
-                                     trackCountingHighPurBJets *
+fullHadronicSelection = cms.Sequence(goodJets *
+                                     simpleSecondaryVertexBJets *
                                      tightLeadingJets *
                                      tightBottomJets
                                      )
@@ -107,13 +106,16 @@ from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 from TopAnalysis.TopFilter.sequences.generatorMatching_cff import *
 ## kinFit producer
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
+
 #ttFullHadEvent.verbosity = 1
+
+## configuration of kinematic fit
 kinFitTtFullHadEventHypothesis.jets = 'tightLeadingJets'
 kinFitTtFullHadEventHypothesis.maxNComb = -1
-#kinFitTtFullHadEventHypothesis.bTags = 1
-#kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexBJetTags'
-#kinFitTtFullHadEventHypothesis.minBTagValueBJet = 0.9
-#kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.9
+kinFitTtFullHadEventHypothesis.bTags = 2
+kinFitTtFullHadEventHypothesis.bTagAlgo = 'simpleSecondaryVertexBJetTags'
+kinFitTtFullHadEventHypothesis.minBTagValueBJet = 2.02
+kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.4
 kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'had'
 
 ## kinfit analyzer
@@ -139,7 +141,7 @@ bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs') )
 ## JET KINEMATICS
 
 ## collect kinematics analyzers
-tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' )
+tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' )
 tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets')
 tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0 )
 tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1 )
@@ -147,8 +149,8 @@ tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', anal
 tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3 )
 tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4 )
 tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
-tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
-tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
+tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom0)
+tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'simpleSecondaryVertexBJets' , analyze = bottom1)
 
 ## to be called with fullHadronicSelection
 monitorJetsKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  +
@@ -255,7 +257,7 @@ monitorKinFitQuality_1 = cms.Sequence(kinFitQuality_1
 fullHadTopReco_1 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
 
 ## monitor sequence for fully hadronice top reco analyzers
-monitorfullHadTopReco_1 = cms.Sequence(fullHadTopReco_1
+monitorFullHadTopReco_1 = cms.Sequence(fullHadTopReco_1
                                        )
 
 ## GEN PARTICLE
@@ -293,16 +295,16 @@ tightBJet_1_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets
 
 ## to be called with fullHadronicSelection
 monitorJetsKinematics_2 = cms.Sequence(tightBottomJetKinematics_2  +
-                                               tightBJet_0_JetKinematics_2 +
-                                               tightBJet_1_JetKinematics_2 +
-                                               tightLeadingJetKinematics_2 +
-                                               tightLead_0_JetKinematics_2 +
-                                               tightLead_1_JetKinematics_2 +
-                                               tightLead_2_JetKinematics_2 +
-                                               tightLead_3_JetKinematics_2 +
-                                               tightLead_4_JetKinematics_2 +
-                                               tightLead_5_JetKinematics_2  
-                                               )
+                                       tightBJet_0_JetKinematics_2 +
+                                       tightBJet_1_JetKinematics_2 +
+                                       tightLeadingJetKinematics_2 +
+                                       tightLead_0_JetKinematics_2 +
+                                       tightLead_1_JetKinematics_2 +
+                                       tightLead_2_JetKinematics_2 +
+                                       tightLead_3_JetKinematics_2 +
+                                       tightLead_4_JetKinematics_2 +
+                                       tightLead_5_JetKinematics_2  
+                                       )
 
 ## EVENT SHAPES
 
@@ -311,7 +313,7 @@ eventShapes_2 = analyzeEventShapes.clone( src = 'tightLeadingJets' )
 
 ## monitor sequence for event shape analyzers
 monitorEventShapes_2 = cms.Sequence(eventShapes_2
-                                            )
+                                    )
 
 ## KINFIT QUALITY
 
@@ -321,7 +323,7 @@ kinFitQuality_2 = analyzeKinFitQuality.clone( srcB = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
 monitorKinFitQuality_2 = cms.Sequence(kinFitQuality_2
-                                              )
+                                      )
 
 ## FULL HAD TOP RECO
 
@@ -329,8 +331,8 @@ monitorKinFitQuality_2 = cms.Sequence(kinFitQuality_2
 fullHadTopReco_2 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
 
 ## monitor sequence for fully hadronice top reco analyzers
-monitorfullHadTopReco_2 = cms.Sequence(fullHadTopReco_2
-                                               )
+monitorFullHadTopReco_2 = cms.Sequence(fullHadTopReco_2
+                                       )
 
 ## FULL HAD SPECIAL
 
@@ -339,7 +341,7 @@ fullHadSpecial_2 = analyzeFullHadSpecials.clone( src = 'tightLeadingJets' )
 
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_2 = cms.Sequence(fullHadSpecial_2
-                                                )
+                                        )
 
 ## GEN PARTICLE
 
@@ -348,7 +350,7 @@ genParticles_2 = analyzeGenParticles.clone()
 
 ## monitor sequence for genParticles
 monitorGenParticles_2 = cms.Sequence(genParticles_2
-                                             )
+                                     )
 
 ## FILTER STEP 3
 
@@ -367,6 +369,7 @@ filterEventShapes = filterEventShape.clone (minC = 0.75)
 ##    run the final sequence
 ## ---
 analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
+                                            #hltQuadJet30          *
                                             hltHt200              *
                                             ## do the selections
                                             fullHadronicSelection *
@@ -385,7 +388,7 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             makeTtFullHadEvent      *
                                             monitorKinFitQuality_1  *
                                             monitorFullHadSpecials_1*
-                                            monitorfullHadTopReco_1 *
+                                            monitorFullHadTopReco_1 *
                                             monitorGenParticles_1   *
                                             ## do the 2. event selection
                                             filterKinFitQuality     *
@@ -393,6 +396,51 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             monitorEventShapes_2    *
                                             monitorKinFitQuality_2  *
                                             monitorFullHadSpecials_2*
-                                            monitorfullHadTopReco_2 *
+                                            monitorFullHadTopReco_2 *
                                             monitorGenParticles_2
                                             )
+
+## run on real data
+def runOnRealData(process):
+    print '++++++++++++++++++++++++++++++++++++++++++++'
+    print 'removing all elements from the sequence '
+    print '*analyseFullHadronicSelection* that rely '
+    print 'on generator information to run properly '
+    print '++++++++++++++++++++++++++++++++++++++++++++'
+    process.analyseFullHadronicSelection.remove(process.matchJetsToPartons)
+    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_0)
+    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_1)
+    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_2)
+
+## run on real data
+def removeMonitoringOfCutflow(process):
+    print '++++++++++++++++++++++++++++++++++++++++++++'
+    print 'removing all monitoring elements from the '
+    print 'sequence *analyseFullHadronicSelection* so'
+    print 'only a pure selection of events is done '
+    print '++++++++++++++++++++++++++++++++++++++++++++'
+    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_0)
+    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_1)
+    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_2)
+    process.analyseFullHadronicSelection.remove(process.monitorEventShapes_0)
+    process.analyseFullHadronicSelection.remove(process.monitorEventShapes_1)
+    process.analyseFullHadronicSelection.remove(process.monitorEventShapes_2)
+    process.analyseFullHadronicSelection.remove(process.monitorFullHadSpecials_0)
+    process.analyseFullHadronicSelection.remove(process.monitorFullHadSpecials_1)
+    process.analyseFullHadronicSelection.remove(process.monitorFullHadSpecials_2)
+    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_0)
+    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_1)
+    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_2)
+    process.analyseFullHadronicSelection.remove(process.monitorKinFitQuality_1)
+    process.analyseFullHadronicSelection.remove(process.monitorKinFitQuality_2)
+    process.analyseFullHadronicSelection.remove(process.monitorFullHadTopReco_1)
+    process.analyseFullHadronicSelection.remove(process.monitorFullHadTopReco_2)
+
+## remove default trigger
+def removeDefaultTrigger(process):
+    print '++++++++++++++++++++++++++++++++++++++++++++'
+    print 'removing the default HLT_Ht200 trigger from '
+    print 'standard fully hadronic event selection '
+    print '++++++++++++++++++++++++++++++++++++++++++++'
+    process.analyseFullHadronicSelection.remove(process.matchJetsToPartons)
+
