@@ -1,24 +1,24 @@
 import FWCore.ParameterSet.Config as cms
 
-#-------------------------------------------------
-# test cfg file for the selection of semileptonic
-# ttbar events with a muon in the final state
-#-------------------------------------------------
+#---------------------------------------------------
+# test cfg file for the selection of
+# fullhadronic ttbar events
+#---------------------------------------------------
 process = cms.Process("Selection")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
-#-------------------------------------------------
+#---------------------------------------------------
 # process configuration
-#-------------------------------------------------
+#---------------------------------------------------
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_7TeV_AODSIM-v1/0005/6CA57A3D-EB9C-DE11-B3DB-002481DE4A28.root'
+    '/store/mc/Spring10/TTbar-mcatnlo/AODSIM/START3X_V26_S09-v2/0048/F4F2E9FA-6C4A-DF11-AE26-002618FDA21D.root'
     ),
     skipEvents = cms.untracked.uint32(0)
 )
@@ -32,20 +32,15 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
 
-## register TFileService
-process.TFileService = cms.Service("TFileService",  
-            fileName = cms.string('analyzeFullHadronicSelection_test.root')
-)
-
 ## configure geometry & conditions
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('MC_3XY_V25::All')
+process.GlobalTag.globaltag = cms.string('START3X_V26::All')
 
-#-------------------------------------------------
+#---------------------------------------------------
 # event selection
-#-------------------------------------------------
+#---------------------------------------------------
 
 ## select events that were generated in the fully hadronic channel
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
@@ -58,6 +53,11 @@ process.ttFullHadronicFilter = process.ttDecaySelection.clone()
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
 
+## a little speed up as monitoring plots an gen matching are not needed here
+from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
+removeMonitoringOfCutflow(process)
+runOnRealData(process)
+
 ## do kinFit of events needed for selection cuts
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 
@@ -67,42 +67,51 @@ addTtFullHadHypotheses(process,
 
 removeTtFullHadHypGenMatch(process)
 
-#-------------------------------------------------
+#---------------------------------------------------
 # pat configuration
-#-------------------------------------------------
+#---------------------------------------------------
 
 ## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+## needed as data is 35X but processing is done in 36X
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
+
+## remove some elements from sequence, which are not needed here
 from PhysicsTools.PatAlgos.tools.coreTools import *
-removeSpecificPATObjects(process,
-                         ['Photons', 'Taus'],
-                         outputInProcess=False)
+## MC matching not needed for event selection (as this is not available in data)
+removeMCMatching(process)
+
+## remove unneeded objects from processing (speed up of whole sequence)
+removeAllPATObjectsBut(process,
+                       ['Jets'],
+                       outputInProcess=False)
+
+## cleaning not neede here
 removeCleaning(process,
                outputInProcess=False)
 
-from PhysicsTools.PatAlgos.tools.jetTools import *
-switchJetCollection(process, 
-                    cms.InputTag('antikt5CaloJets'),   
-                    doJTA            = True,            
-                    doBTagging       = True,            
-                    jetCorrLabel     = ('AK5','Calo'),  
-                    doType1MET       = True,
-                    genJetCollection = cms.InputTag("antikt5GenJets"),
-                    doJetID          = False,
-                    jetIdLabel       = "antikt5"
-                    )
-
+## setting JEC to desired values
 process.patJetCorrFactors.corrSample = 'Spring10'
-process.patJetCorrFactors.sampleType = "ttbar"
+process.patJetCorrFactors.sampleType = 'ttbar'
 
-#-------------------------------------------------
+#---------------------------------------------------
+# rebuilding of ak5GenJets (gone missing in ReReco)
+#---------------------------------------------------
+
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
+
+#---------------------------------------------------
 # the path
-#-------------------------------------------------
+#---------------------------------------------------
 
-process.p1 = cms.Path(process.makeGenEvt *
+process.p1 = cms.Path(process.hltHt200 *
+                      process.makeGenEvt *
                       process.ttFullHadronicFilter *
-                      process.hltHt200 *
+                      process.genJetParticles *
+                      process.ak5GenJets *
                       process.patDefaultSequence *
                       process.analyseFullHadronicSelection
                       )
