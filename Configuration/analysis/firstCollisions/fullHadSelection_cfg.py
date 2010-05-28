@@ -123,7 +123,7 @@ process.goodJetsAK5PF = process.selectedPatJets.clone(src = 'selectedPatJetsAK5P
                                                             'neutralHadronEnergyFraction < 1.0 &'
                                                             'chargedEmEnergyFraction < 1.0 &'
                                                             'neutralEmEnergyFraction < 1.0 &'
-                                                            'chargedMultiplicity > 0 &'
+                                                            'pfSpecific.mChargedHadronMultiplicity > 0 &'
                                                             'nConstituents > 0')
 
 process.simpleSecondaryVertexBJetsAK5PF = process.selectedPatJets.clone(src = 'goodJetsAK5PF',
@@ -210,7 +210,9 @@ process.ttFullHadHypKinFitTight = cms.EDProducer("TtFullHadHypKinFit",
                                                  match = cms.InputTag("kinFitTtFullHadEventHypothesisTight")
                                                  )
 
-process.ttFullHadEventTight = process.ttFullHadEvent.clone( hypotheses = ['ttFullHadHypKinFitTight'] )
+process.ttFullHadEventTight = process.ttFullHadEvent.clone( kinFit = cms.PSet(chi2 = cms.InputTag("kinFitTtFullHadEventHypothesisTight","Chi2"),
+                                                                              prob = cms.InputTag("kinFitTtFullHadEventHypothesisTight","Prob")),
+                                                            hypotheses = ['ttFullHadHypKinFitTight'] )
 
 process.filterKinFitQualityTight = process.filterKinFitQuality.clone( srcA = 'ttFullHadEventTight' )
 
@@ -235,7 +237,9 @@ process.ttFullHadHypKinFitAK5PFTight = cms.EDProducer("TtFullHadHypKinFit",
                                                       match = cms.InputTag("kinFitTtFullHadEventHypothesisAK5PFTight")
                                                       )
 
-process.ttFullHadEventAK5PFTight = process.ttFullHadEvent.clone( hypotheses = ['ttFullHadHypKinFitAK5PFTight'] )
+process.ttFullHadEventAK5PFTight = process.ttFullHadEvent.clone( kinFit = cms.PSet(chi2 = cms.InputTag("kinFitTtFullHadEventHypothesisAK5PFTight","Chi2"),
+                                                                                   prob = cms.InputTag("kinFitTtFullHadEventHypothesisAK5PFTight","Prob")),
+                                                                 hypotheses = ['ttFullHadHypKinFitAK5PFTight'] )
 
 process.filterKinFitQualityAK5PFTight = process.filterKinFitQuality.clone( srcA = 'ttFullHadEventAK5PFTight' )
 
@@ -260,7 +264,9 @@ process.ttFullHadHypKinFitAK5PF = cms.EDProducer("TtFullHadHypKinFit",
                                                  match = cms.InputTag("kinFitTtFullHadEventHypothesisAK5PF")
                                                  )
 
-process.ttFullHadEventAK5PF = process.ttFullHadEvent.clone( hypotheses = ['ttFullHadHypKinFitAK5PF'] )
+process.ttFullHadEventAK5PF = process.ttFullHadEvent.clone( kinFit = cms.PSet(chi2 = cms.InputTag("kinFitTtFullHadEventHypothesisAK5PF","Chi2"),
+                                                                              prob = cms.InputTag("kinFitTtFullHadEventHypothesisAK5PF","Prob")),
+                                                            hypotheses = ['ttFullHadHypKinFitAK5PF'] )
 
 process.filterKinFitQualityAK5PF = process.filterKinFitQuality.clone( srcA = 'ttFullHadEventAK5PF' )
 
