@@ -1,13 +1,12 @@
-
-// ---------description---------------------------------------
-// -----------------------------------------------------------
+// ---------description----------------------------------------
+// ------------------------------------------------------------
 // this Makro creates pseudo data by taking the same plot from 
 // various MC samples, weighting them concerning luminosity, 
 // adding them and applies a poisson smearing for every point
-// -----------------------------------------------------------
+// ------------------------------------------------------------
 // adaptions are necessary within areas marked via !!! ... !!! 
-// -----------------------------------------------------------
-  
+// ------------------------------------------------------------
+
 #include <vector>
 #include <iostream>
 #include <TH1F.h>
@@ -30,12 +29,14 @@ void createPseudoData(){
   // !!! choose luminosity !!!
   // -------------------------
   int luminosity= 50;
+  TString lum="50";
   // get the files
   loadingFiles(); 
+
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-  TFile f("./pseudoData7TeV"+(TString)luminosity+"pb.root", "recreate");
+    TFile f("./diffXSecFromSignal/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC/spring10PseudoData7TeV"+lum+"pb.root", "recreate");
 
   // ---------------------------------------------------------
   // !!! list of plots you want to combine !!!
@@ -51,6 +52,7 @@ void createPseudoData(){
   poisson("analyzeTightMuonCrossSectionRecNjets1", "ptMinus" , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets1", "etaMinus", luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets1", "phiMinus", luminosity, f);
+
   poisson("analyzeTightMuonCrossSectionRecNjets2", "pt"      , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets2", "eta"     , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets2", "phi"     , luminosity, f);
@@ -60,6 +62,7 @@ void createPseudoData(){
   poisson("analyzeTightMuonCrossSectionRecNjets2", "ptMinus" , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets2", "etaMinus", luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets2", "phiMinus", luminosity, f);
+
   poisson("analyzeTightMuonCrossSectionRecNjets3", "pt"      , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets3", "eta"     , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets3", "phi"     , luminosity, f);
@@ -69,6 +72,7 @@ void createPseudoData(){
   poisson("analyzeTightMuonCrossSectionRecNjets3", "ptMinus" , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets3", "etaMinus", luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets3", "phiMinus", luminosity, f);
+
   poisson("analyzeTightMuonCrossSectionRecNjets4", "pt"      , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets4", "eta"     , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets4", "phi"     , luminosity, f);
@@ -78,15 +82,27 @@ void createPseudoData(){
   poisson("analyzeTightMuonCrossSectionRecNjets4", "ptMinus" , luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets4", "etaMinus", luminosity, f);
   poisson("analyzeTightMuonCrossSectionRecNjets4", "phiMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecBtag"  , "phiMinus", luminosity, f);
+
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "pt"      , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "eta"     , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "phi"     , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "ptPlus"  , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "etaPlus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "phiPlus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "ptMinus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "etaMinus", luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "phiMinus", luminosity, f);
+
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "pt"      , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "eta"     , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "phi"     , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "ptPlus"  , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "etaPlus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "phiPlus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "ptMinus" , luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "etaMinus", luminosity, f);
+  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "phiMinus", luminosity, f);
+
   // close rootfile
   f.Close();
 }
@@ -115,11 +131,16 @@ void loadingFiles()
   // -----------------------------------------
   // !!! add all contributing samples here !!!
   // -----------------------------------------
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"     ) );
+
+  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
+
 }
 
 void loadingHists(TString plot)
@@ -146,13 +167,18 @@ void combineFiles(double luminosity)
   // --------------------------------------------
   // !!! define weights concerning luminosity !!!
   // --------------------------------------------
-  // actually done for 50 pb-1 @ 7TeV with full statistic
-  
-  lumiweight_.push_back( (0.0083/50)*luminosity );
-  lumiweight_.push_back( (0.1231/50)*luminosity );
-  lumiweight_.push_back( (0.0083/50)*luminosity );
-  lumiweight_.push_back( (0.1310/50)*luminosity );
-  lumiweight_.push_back( (1.0286/50)*luminosity );
+  // done for "luminosity" pb-1 @ 7TeV
+  std::vector<double> lumiweight;  
+  // 7 TeV Monte Carlo spring 10 samples
+  // -----------------------------------
+
+  lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight_.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight_.push_back(0.13904207/50.0*(double)luminosity);
+  lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight_.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight_.push_back(0.14332841/50.0*(double)luminosity);
+  lumiweight_.push_back(1.25483558/50.0*(double)luminosity);
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     hists_ [idx]->Scale(lumiweight_[idx]);
