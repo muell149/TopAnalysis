@@ -197,26 +197,32 @@ int compareSamples(TString fileName1, TString fileName2)
   canvas->cd(1);
   drawWithRatio(ptL[0], ptL[1], "p_{T,j} [GeV]");
   legend->Draw();
+  gPad->Print(outDir+"/ptL.eps");
 
   canvas->cd(2);
   drawWithRatio(ptB[0], ptB[1], "p_{T,b} [GeV]");
   legend->Draw();
+  gPad->Print(outDir+"/ptB.eps");
 
   canvas->cd(3);
   drawWithRatio(etaL[0], etaL[1], "#eta_{j}");
   legend->Draw();
+  gPad->Print(outDir+"/etaL.eps");
 
   canvas->cd(4);
   drawWithRatio(etaB[0], etaB[1], "#eta_{b}");
   legend->Draw();
+  gPad->Print(outDir+"/etaB.eps");
 
   canvas->cd(5);
   drawWithRatio(mW[0], mW[1], "m_{jj} [GeV]");
   legend->Draw();
+  gPad->Print(outDir+"/mW.eps");
 
   canvas->cd(6);
   drawWithRatio(mT[0], mT[1], "m_{jjb} [GeV]");
   legend->Draw();
+  gPad->Print(outDir+"/mT.eps");
 
   TString psName = outDir + "/catalog.ps";
   canvas->Print(psName);
