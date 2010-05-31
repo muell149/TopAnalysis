@@ -35,8 +35,8 @@ void analyzeMuonDiffXSec()
   //  gStyle->SetPalette(1);
   gStyle->SetErrorX(0); 
 
-  //    choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Btag"
-  TString jetMultiplicity ="Btag";
+  //    choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Njets4Btag" / "Njets3Btag"
+  TString jetMultiplicity ="Njets4";
   // choose luminosity for scaling of event numbers and for legend as entry
   int luminosity = 5;
   TString lum = "5";
@@ -49,12 +49,16 @@ void analyzeMuonDiffXSec()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/pseudoData7TeV5pb.root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"     ) );
+
+  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/spring10PseudoData7TeV"+lum+"pb.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
 
   // ---
   //    get histograms
@@ -76,29 +80,34 @@ void analyzeMuonDiffXSec()
   // ---
   std::vector<double> lumiweight;
 
-  // for current ttbar(lept.mu on gen level) 7TeV Mc@Nlo sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.00083/5.0*(double)luminosity);
+  // 7 TeV Monte Carlo spring 10 samples
+  // -----------------------------------
+  // for current ttbar(lept.mu on gen level) Mc@Nlo 
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+  // for current ttbar(lept.mu on gen level) Madgraph 
+  //  lumiweight.push_back(0.00556153/50.0*(double)luminosity);
   // pseudo data
   lumiweight.push_back(1.0);
-  // for current ttbar(non lept.mu on gen level) 7TeV Mc@Nlo sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.00083/5.0*(double)luminosity);
-  // for current W+jets 7TeV MADGRAPH sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.01231/5.0*(double)luminosity);
-  // for current Z+jets 7TeV MADGRAPH sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.01310/5.0*(double)luminosity);
-  // for current QCD 7TeV PYTHIA sample (full statistics, 5pb-1)
-  lumiweight.push_back(0.10286/5.0*(double)luminosity);
+  // for current ttbar(non lept.mu on gen level) Mc@Nlo
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+  // for current ttbar(non lept.mu on gen level) Madraph
+  //  lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  // for current W+jets MADGRAPH sample
+  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
+  // for current Z+jets MADGRAPH sample
+  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
+  // for current QCD PYTHIA sample
+  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
 
   // ---
   // do lumiweighting
   // ---
-
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     eta_[idx]->Scale(lumiweight[idx]);
     phi_[idx]->Scale(lumiweight[idx]);
     pt_ [idx]->Scale(lumiweight[idx]);
   }
- 
+
   // ---  
   //    combine MC to get isolated Lepton + jet MC (no QCD)
   // --- 
@@ -106,7 +115,7 @@ void analyzeMuonDiffXSec()
   eta_ .push_back((TH1F*)(eta_[kSig]->Clone()));
   phi_ .push_back((TH1F*)(phi_[kSig]->Clone()));
   for(int idx=kBkg; idx<=kZjets; idx++){
-    pt_[kLepJets]->Add(pt_[idx]);
+    pt_ [kLepJets]->Add(pt_ [idx]);
     eta_[kLepJets]->Add(eta_[idx]);
     phi_[kLepJets]->Add(phi_[idx]);
   }
@@ -514,17 +523,20 @@ double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
   // create container for histo max values sortet by plot and Njet
   std::map< TString, std::map <TString,double> > maxValues_;  
   // create maximum values for pt, eta, phi ( for 5pb^-1)
-  maxValues_["pt" ]["Btag"  ]= 1.5;
-  maxValues_["pt" ]["Njets4"]= 1.5;   
-  maxValues_["pt" ]["Njets3"]= 3.0;
+  maxValues_["pt" ]["Njets4Btag"]= 1.5;
+  maxValues_["pt" ]["Njets3Btag"]= 1.8;
+  maxValues_["pt" ]["Njets4"]= 1.2;   
+  maxValues_["pt" ]["Njets3"]= 5.5;
   maxValues_["pt" ]["Njets2"]= 32.;
   maxValues_["pt" ]["Njets1"]= 235.;
-  maxValues_["eta"]["Btag"  ]= 35.;
+  maxValues_["eta"]["Njets4Btag"]= 35.;
+  maxValues_["eta"]["Njets3Btag"]= 40.;
   maxValues_["eta"]["Njets4"]= 35.;   
   maxValues_["eta"]["Njets3"]= 120.;
   maxValues_["eta"]["Njets2"]= 450.;
   maxValues_["eta"]["Njets1"]= 2300.;
-  maxValues_["phi"]["Btag"  ]= 24.;
+  maxValues_["phi"]["Njets4Btag"]= 20.;
+  maxValues_["phi"]["Njets3Btag"]= 22.;
   maxValues_["phi"]["Njets4"]= 24.;   
   maxValues_["phi"]["Njets3"]= 75.;
   maxValues_["phi"]["Njets2"]= 250.;
