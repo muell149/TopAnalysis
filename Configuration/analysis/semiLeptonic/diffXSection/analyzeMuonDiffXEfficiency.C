@@ -16,7 +16,7 @@
 #include <TLegend.h>
 #include <TStyle.h>
 
-enum styles {kttbarReco, kWjetsReco, kZjetsReco, kttbarGen, kWjetsGen, kZjetsGen};
+enum styles {kttbarReco, kWjetsReco, kZjetsReco, kttbarGen, kWjetsGen};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
@@ -34,66 +34,64 @@ void analyzeMuonDiffXEfficiency()
   //  gStyle->SetPalette(1);
   gStyle->SetErrorX(0); 
 
-  // ---
-  //    choose jet multiplicity you want to see
-  // ---
-  // "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Btag"
-  TString jetMultiplicity ="Btag";
-
+  // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" 
+  TString jetMultiplicity ="Njets4";
+  // choose whether you want to save every plot as png and all within one ps file
+  bool save = true;
+  // choose target directory for saving
+  TString saveTo = "./diffXSecFromSignal/plots/JESstudies/";
+  // choose luminosity for scaling of event numbers and for legend as entry
+  int luminosity = 50;
+  TString lum = "50";
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecRecoAllTtbarMcAtNlo7TeVsummer09.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root"               ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root"               ) );
-
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecGenAllTtbarMcAtNlo7TeVspring10.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecGenWjetsMadgraph7TeVspring10.root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecGenZjetsMadgraph7TeVspring10.root"   ) );
+  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllTtbarMcAtNloSpring10.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"        ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"        ) );
 
   // ---
   //    get histograms
   // ---
   std::vector<TH1F*> eta_, phi_, pt_;
-
   for(unsigned int idx=kttbarReco; idx<=kZjetsReco; ++idx) {
     eta_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/eta" ) );
     pt_  .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/pt"  ) );
     phi_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+jetMultiplicity+"/phi" ) );
   }
-  TString jetMultiplicity2= jetMultiplicity;
-  if(jetMultiplicity=="Btag") jetMultiplicity2="Njets4";
-  for(unsigned int idx=kttbarGen; idx<=kZjetsGen; ++idx) {
-    eta_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionGen"+jetMultiplicity2+"/eta" ) );
-    pt_  .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionGen"+jetMultiplicity2+"/pt"  ) );
-    phi_ .push_back( (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionGen"+jetMultiplicity2+"/phi" ) );
+  // need -3 because plots are within the same rootfile
+  TString jetMultiplicity2=jetMultiplicity;
+  if(jetMultiplicity=="Njets4Btag") jetMultiplicity2="Njets4";
+  if(jetMultiplicity=="Njets3Btag") jetMultiplicity2="Njets3";
+  for(unsigned int idx=kttbarGen; idx<=kWjetsGen; ++idx) {
+    eta_ .push_back( (TH1F*)files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+jetMultiplicity2+"/eta" ) );
+    pt_  .push_back( (TH1F*)files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+jetMultiplicity2+"/pt"  ) );
+    phi_ .push_back( (TH1F*)files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+jetMultiplicity2+"/phi" ) );
   }
-  
+
   // ---
   // define weights concerning luminosity
   // ---
   std::vector<double> lumiweight;
 
   // for current summer09 ttbar(all) 7TeV Mc@Nlo sample (full statistics, 50pb-1)
-  lumiweight.push_back(0.00830435);
+  lumiweight.push_back(0.00830435/50.0*(double)luminosity);
   // for current summer09 W+jets 7TeV MADGRAPH sample (full statistics, 50pb-1)
-  lumiweight.push_back(0.13099599);
+  lumiweight.push_back(0.13099599/50.0*(double)luminosity);
   // for current summer09 Z+jets 7TeV MADGRAPH sample (full statistics, 50pb-1)
-  lumiweight.push_back(0.13099599);
-
-  // for current spring10 ttbar(all) 7TeV Mc@Nlo sample (full statistics, 50pb-1)
-  lumiweight.push_back(0.00831910);
-  // for current spring10 W+jets 7TeV MADGRAPH sample (full statistics, 50pb-1)
-  lumiweight.push_back(0.13904207);
-  // for current spring10 Z+jets 7TeV MADGRAPH sample (full statistics, 50pb-1)
-  lumiweight.push_back(0.14332841);
+  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
+  // for current summer09 ttbar(all) 7TeV Mc@Nlo sample (full statistics, 50pb-1)
+  lumiweight.push_back(0.00830435/50.0*(double)luminosity);
+  // for current summer09 W+jets 7TeV MADGRAPH sample (full statistics, 50pb-1)
+  lumiweight.push_back(0.13099599/50.0*(double)luminosity);
 
   // ---
   // do lumiweighting
   // ---
 
-  for(unsigned int idx=kttbarReco; idx<kZjetsGen; ++idx){
+  for(unsigned int idx=kttbarReco; idx<=kWjetsGen; ++idx){
     eta_[idx]->Scale(lumiweight[idx]);
     phi_[idx]->Scale(lumiweight[idx]);
     pt_ [idx]->Scale(lumiweight[idx]);
@@ -117,7 +115,7 @@ void analyzeMuonDiffXEfficiency()
   TH1F *etaAllGen= (TH1F*)eta_[kttbarGen]->Clone(); 
   TH1F *phiAllGen= (TH1F*)phi_[kttbarGen]->Clone(); 
 
-  for(unsigned int idx=kttbarGen+1; idx<=kZjetsGen; ++idx){
+  for(unsigned int idx=kttbarGen+1; idx<=kWjetsGen; ++idx){
     ptAllGen ->Add(pt_ [idx]);
     etaAllGen->Add(eta_[idx]);
     phiAllGen->Add(phi_[idx]);
@@ -184,44 +182,42 @@ void analyzeMuonDiffXEfficiency()
   // ---
 
   TString jetMultiplicity3=jetMultiplicity;
-  if(jetMultiplicity=="Btag")jetMultiplicity3=jetMultiplicity+", "+jetMultiplicity2;
   // create a legend (in upper right corner) for gen and reco
-  TLegend *leg0 = new TLegend(0.19, 0.72, 1.00, 0.94);
+  TLegend *leg0 = new TLegend(0.24, 0.72, 0.98, 0.93);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("MC (ttbar, W/Z+jets) "+jetMultiplicity3+"+");
-  leg0->AddEntry( ptAllGen  , "gen, l+jets selection", "PL");
-  leg0->AddEntry( ptAllReco , "reco, semilept. top selection"   , "PL");
+  leg0->SetHeader("MC (t#bar{t} MC@NLO, W/Z+jets Madgraph) "+lum+"pb^{-1} "+jetMultiplicity+"+");
+  leg0->AddEntry( ptAllGen  , "gen, #mu+jets selection, (t#bar{t} & W)"         , "PL");
+  leg0->AddEntry( ptAllReco , "reco, semilept.(#mu) selection (t#bar{t}, W & Z)", "PL");
 
   // create a legend (in upper right corner) for efficiency
-  TLegend *leg1 = new TLegend(0.21, 0.74, 0.95, 0.94);
+  TLegend *leg1 = new TLegend(0.24, 0.72, 1.00, 0.91);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg1->SetHeader("effiency (reco/gen) "+jetMultiplicity3+"+");
-  leg1->AddEntry( ptEff  , "p_{t} (#mu)" , "PL");
+  leg1->SetHeader("effiency (reco/gen) "+jetMultiplicity+"+");
+  leg1->AddEntry( ptEff  , "#epsilon ( p_{t} (#mu) )" , "PL");
 
   // create a legend (in upper right corner) for efficiency
-  TLegend *leg2 = new TLegend(0.21, 0.74, 0.95, 0.94);
+  TLegend *leg2 = new TLegend(0.24, 0.72, 1.00, 0.91);
   leg2->SetFillStyle(0);
   leg2->SetBorderSize(0);
-  leg2->SetHeader("effiency (reco/gen) "+jetMultiplicity3+"+");
-  leg2->AddEntry( etaEff , "#eta (#mu)"  , "PL");
+  leg2->SetHeader("effiency (reco/gen) "+jetMultiplicity+"+");
+  leg2->AddEntry( etaEff , "#epsilon ( #eta (#mu) )"  , "PL");
 
   // create a legend (in upper right corner) for efficiency
-  TLegend *leg3 = new TLegend(0.21, 0.74, 0.95, 0.94);
+  TLegend *leg3 = new TLegend(0.24, 0.72, 1.00, 0.91);
   leg3->SetFillStyle(0);
   leg3->SetBorderSize(0);
-  leg3->SetHeader("effiency (reco/gen) "+jetMultiplicity3+"+");
-  leg3->AddEntry( phiEff , "#phi (#mu)"  , "PL");
+  leg3->SetHeader("effiency (reco/gen) "+jetMultiplicity+"+");
+  leg3->AddEntry( phiEff , "#epsilon ( #phi (#mu) )"  , "PL");
 
   // create a legend (in upper right corner) for pt(mu)- gen plot
   TLegend *leg4 = new TLegend(0.41, 0.67, 0.99, 0.94);
   leg4->SetFillStyle(0);
   leg4->SetBorderSize(0);
-  leg4->SetHeader("gen l+jets MC ("+jetMultiplicity2+"+)");
+  leg4->SetHeader("gen: #mu+jets ("+lum+" pb^{-1}, "+jetMultiplicity2+"+)" );
   leg4->AddEntry( pt_[kttbarGen] , "ttbar (MC@NLO)"  , "F");
   leg4->AddEntry( pt_[kWjetsGen] , "Wjets (Madgraph)", "F");
-  leg4->AddEntry( pt_[kZjetsGen] , "Zjets (Madgraph)", "F");
 
   // ---
   //    create canvas 
@@ -281,6 +277,7 @@ void analyzeMuonDiffXEfficiency()
   //    do the printing for pt-effiency ( gen / reco )
   // ---
   MyCanvas[3]->cd(0);
+  MyCanvas[3]->SetGrid(1,1);
   MyCanvas[3]->SetTitle("ptEfficiencyMCbased"+jetMultiplicity);
   axesStyle(*ptEff, "( p_{t} ( #mu ) [GeV]" , "#epsilon_{ l+jets}", 0.,  1.5); 
   histogramStyle(*ptEff , kRed  , 1, 20);
@@ -292,8 +289,9 @@ void analyzeMuonDiffXEfficiency()
   //    do the printing for eta-effiency ( gen / reco )
   // ---
   MyCanvas[4]->cd(0);
+  MyCanvas[4]->SetGrid(1,1);
   MyCanvas[4]->SetTitle("etaEfficiencyMCbased"+jetMultiplicity);
-  axesStyle(*etaEff, "#eta ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.3); 
+  axesStyle(*etaEff, "#eta ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.5); 
   histogramStyle(*etaEff, kRed, 1, 22);
   etaEff->Draw("");
   etaEff ->Draw("Psame");
@@ -303,8 +301,9 @@ void analyzeMuonDiffXEfficiency()
   //    do the printing for phi-effiency ( gen / reco )
   // ---
   MyCanvas[5]->cd(0);
+  MyCanvas[5]->SetGrid(1,1);
   MyCanvas[5]->SetTitle("phiEfficiencyMCbased"+jetMultiplicity);
-  axesStyle(*phiEff, "#phi ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.3); 
+  axesStyle(*phiEff, "#phi ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.5); 
   histogramStyle(*phiEff, kRed, 1, 21);
   phiEff->Draw("");
   phiEff->Draw("Psame");
@@ -316,30 +315,28 @@ void analyzeMuonDiffXEfficiency()
   MyCanvas[6]->cd(0);
   MyCanvas[6]->SetTitle("ptGenComposition"+jetMultiplicity);
   pt_[kWjetsGen]->Add(pt_[kttbarGen]);
-  pt_[kZjetsGen]->Add(pt_[kWjetsGen]);
-  axesStyle(*pt_[kZjetsGen], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",jetMultiplicity), 0.06, 1.5); 
+  axesStyle(*pt_[kWjetsGen], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",jetMultiplicity), 0.06, 1.5); 
   histogramStyle(*pt_[kttbarGen], kRed  , 1, 20, 1.5, 1);
   histogramStyle(*pt_[kWjetsGen], kGreen, 1, 20, 1.5, 1);
-  histogramStyle(*pt_[kZjetsGen], 6     , 1, 20, 1.5, 1);
-  pt_[kZjetsGen]->Draw("");  
-  pt_[kWjetsGen]->Draw("same");
+  pt_[kWjetsGen]->Draw("");
   pt_[kttbarGen]->Draw("same");
   leg4  ->Draw("same");
 
   //  ---
   //  saving
   //  ---
+  if(save){  
+    // ps
+    MyCanvas[0]->Print(saveTo+"efficiency"+jetMultiplicity+".ps(");
+    for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+      MyCanvas[idx]->Print(saveTo+"efficiency"+jetMultiplicity+".ps"  );   
+    }
+    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"efficiency"+jetMultiplicity+".ps)"  );
   
-  // ps
-  MyCanvas[0]->Print("./diffXSecFromSignal/plots/efficiency"+jetMultiplicity+".ps("  );
-  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/efficiency"+jetMultiplicity+".ps"  );   
-  }
-  MyCanvas[MyCanvas.size()-1]->Print("./diffXSecFromSignal/plots/efficiency"+jetMultiplicity+".ps)"  );
-  
-  // png
-  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-    MyCanvas[idx]->Print("./diffXSecFromSignal/plots/"+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+    // png
+    for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+    }
   }
 }
 
@@ -410,19 +407,22 @@ double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
   // create container for histo max values sortet by plot and Njet
   std::map< TString, std::map <TString,double> > maxValues_;  
   // create maximum values for pt, eta, phi ( for 5pb^-1)
-  maxValues_["pt" ]["Btag"  ]= 24.; 
-  maxValues_["pt" ]["Njets4"]= 24.;  
-  maxValues_["pt" ]["Njets3"]= 65.;
+  maxValues_["pt" ]["Njets4Btag"]= 40.; 
+  maxValues_["pt" ]["Njets3Btag"]= 100.; 
+  maxValues_["pt" ]["Njets4"]= 40.;  
+  maxValues_["pt" ]["Njets3"]= 100.;
   maxValues_["pt" ]["Njets2"]= 320.;
   maxValues_["pt" ]["Njets1"]= 1800.;
-  maxValues_["eta"]["Btag"  ]= 400.;  
-  maxValues_["eta"]["Njets4"]= 400.;  
-  maxValues_["eta"]["Njets3"]= 1100.;
+  maxValues_["eta"]["Njets4Btag"]= 650.;  
+  maxValues_["eta"]["Njets3Btag"]= 1500.; 
+  maxValues_["eta"]["Njets4"]= 650.;  
+  maxValues_["eta"]["Njets3"]= 1500.;
   maxValues_["eta"]["Njets2"]= 4500.;
   maxValues_["eta"]["Njets1"]= 23000.;
-  maxValues_["phi"]["Btag"  ]= 260.; 
-  maxValues_["phi"]["Njets4"]= 260.;  
-  maxValues_["phi"]["Njets3"]= 700.;
+  maxValues_["phi"]["Njets4Btag"]= 400.;
+  maxValues_["phi"]["Njets3Btag"]= 1000.; 
+  maxValues_["phi"]["Njets4"]= 400.;  
+  maxValues_["phi"]["Njets3"]= 1000.;
   maxValues_["phi"]["Njets2"]= 2500.;
   maxValues_["phi"]["Njets1"]= 14000.;
   // get maximum value
