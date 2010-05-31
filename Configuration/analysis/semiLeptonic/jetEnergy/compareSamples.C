@@ -122,9 +122,11 @@ void normToUnitArea(TH1F* hist)
 
 void setDrawStyles(TH1F* hist1, TH1F* hist2)
 {
-  hist1->SetFillColor(kRed);
-  hist1->SetLineColor(kRed);
+  hist1->SetFillColor(kGray);
+  hist1->SetLineColor(kGray);
   hist2->SetLineColor(kBlue);
+  hist2->SetLineStyle(2);
+  hist2->SetLineWidth(2);
 }
 
 int compareSamples(TString fileName1, TString fileName2)
@@ -163,6 +165,10 @@ int compareSamples(TString fileName1, TString fileName2)
 
     file[i]->Close();
 
+    etaL[i]->Rebin(2);
+    etaB[i]->Rebin(2);
+    mT  [i]->Rebin(2);
+
     normToUnitArea(ptL [i]);
     normToUnitArea(ptB [i]);
     normToUnitArea(etaL[i]);
@@ -197,31 +203,37 @@ int compareSamples(TString fileName1, TString fileName2)
   canvas->cd(1);
   drawWithRatio(ptL[0], ptL[1], "p_{T,j} [GeV]");
   legend->Draw();
+  canvas->cd(1);
   gPad->Print(outDir+"/ptL.eps");
 
   canvas->cd(2);
   drawWithRatio(ptB[0], ptB[1], "p_{T,b} [GeV]");
   legend->Draw();
+  canvas->cd(2);
   gPad->Print(outDir+"/ptB.eps");
 
   canvas->cd(3);
   drawWithRatio(etaL[0], etaL[1], "#eta_{j}");
   legend->Draw();
+  canvas->cd(3);
   gPad->Print(outDir+"/etaL.eps");
 
   canvas->cd(4);
   drawWithRatio(etaB[0], etaB[1], "#eta_{b}");
   legend->Draw();
+  canvas->cd(4);
   gPad->Print(outDir+"/etaB.eps");
 
   canvas->cd(5);
   drawWithRatio(mW[0], mW[1], "m_{jj} [GeV]");
   legend->Draw();
+  canvas->cd(5);
   gPad->Print(outDir+"/mW.eps");
 
   canvas->cd(6);
   drawWithRatio(mT[0], mT[1], "m_{jjb} [GeV]");
   legend->Draw();
+  canvas->cd(6);
   gPad->Print(outDir+"/mT.eps");
 
   TString psName = outDir + "/catalog.ps";
