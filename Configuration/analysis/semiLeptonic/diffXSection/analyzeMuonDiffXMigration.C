@@ -16,9 +16,10 @@
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <TPaveLabel.h>
 #include <TStyle.h>
 
-enum styles {kSig};
+enum styles {kSig, kWjets};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
@@ -40,7 +41,7 @@ void analyzeMuonDiffXMigration()
   int luminosity = 50;
   TString lum = "50";
   // choose whether you want to save every plot as png and all within one ps file
-  bool save = false;
+  bool save = true;
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/migration/";
 
@@ -48,8 +49,10 @@ void analyzeMuonDiffXMigration()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  //  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root") );
-  files_.push_back(new TFile("./analyzeDiffXSec_testSig.root") );
+
+  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"   ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root" ) );
 
   // ---
   //    get histograms
@@ -70,7 +73,8 @@ void analyzeMuonDiffXMigration()
   std::vector<double> lumiweight;
 
   // for current ttbar 7TeV Mc@Nlo sample 
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
+  lumiweight.push_back(0.0083191 /50.0*(double)luminosity);
+  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
 
   // ---
   //    do lumiweighting
@@ -80,6 +84,18 @@ void analyzeMuonDiffXMigration()
     pt_ [idx]->Scale(lumiweight[idx]);
   }
   
+  // ---
+  //    combine the samples within first vector-entry
+  // --- 
+
+  for(unsigned int idx=kWjets; idx<files_.size(); ++idx) {
+    pt_      [kSig]->Add(pt_      [idx]);
+    corrPt_  [kSig]->Add(corrPt_  [idx]);
+    corrEta_ [kSig]->Add(corrEta_ [idx]);
+    corrPhi_ [kSig]->Add(corrPhi_ [idx]);
+  }
+
+
   std::cout << "-------------------" << std::endl; 
   std::cout << " chosen binning is:" << std::endl;
   std::cout << "-------------------" << std::endl; 
@@ -208,16 +224,20 @@ void analyzeMuonDiffXMigration()
   }
 
   // ---
-  //    create legend
+  //    create legend(s)
   // ---
 
-  TLegend *leg0 = new TLegend(0.38, 0.50, 0.98, 0.76);
+  TLegend    *leg0 = new TLegend   (0.31, 0.34, 1.0, 0.66);
+  TPaveLabel *leg1 = new TPaveLabel(0.16, 0.83, 1.0, 1.0, "migration t#bar{t} (semilept.#mu) & W+jets", "br NDC");
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("migration effects "+jetMultiplicity+"+ , "+lum+" pb^{-1}");
+  leg0->SetHeader("#mu-sel. & "+jetMultiplicity+"+ , "+lum+" pb^{-1}@7TeV");
   leg0->AddEntry(  ptPurity    , "purity"     , "PL");
   leg0->AddEntry(  ptStability , "stability"  , "PL");
   leg0->AddEntry(  ptAcceptance, "correction" , "PL");
+  leg1->SetFillStyle(0);
+  leg1->SetBorderSize(0);
+  leg1->SetTextSize(0.26);
 
   // ---
   //    create canvas 
@@ -248,13 +268,14 @@ void analyzeMuonDiffXMigration()
   ptAcceptance->Draw("same" );
   ptAcceptance->Draw("Psame");
   leg0        ->Draw("same" );
+  leg1        ->Draw("same" );
 
   // ---
   //    do the printing for corrPt_
   // ---
   MyCanvas[1]->cd(0);
   MyCanvas[1]->SetTitle("genRecoCorrelationPtMu");
-  histStyle2D(*corrPt_[kSig], "gen-reco correlation of p_{t} ( muon )", "p_{t} ( gen #mu ) [GeV]", "p_{t} ( reco #mu ) [GeV]");
+  histStyle2D(*corrPt_[kSig], "gen-reco correlation of p_{t} ( #mu )", "p_{t} ( gen #mu ) [GeV]", "p_{t} ( reco #mu ) [GeV]");
   corrPt_[kSig]->Draw("colz");
 
   // ---
@@ -262,7 +283,7 @@ void analyzeMuonDiffXMigration()
   // ---
   MyCanvas[2]->cd(0);
   MyCanvas[2]->SetTitle("genRecoCorrelationEtaMu");
-  histStyle2D(*corrEta_[kSig], "correlation of #eta ( muon )", "#eta ( gen #mu )", "#eta ( reco #mu )");
+  histStyle2D(*corrEta_[kSig], "gen-reco correlation of #eta ( #mu )", "#eta ( gen #mu )", "#eta ( reco #mu )");
   corrEta_[kSig]->Draw("colz");
 
   // ---
@@ -270,7 +291,7 @@ void analyzeMuonDiffXMigration()
   // ---
   MyCanvas[3]->cd(0);
   MyCanvas[3]->SetTitle("genRecoCorrelationEtaMu");
-  histStyle2D(*corrPhi_[kSig], "correlation of #phi ( muon )", "#phi ( gen #mu )", "#phi ( reco #mu )");
+  histStyle2D(*corrPhi_[kSig], "gen-reco correlation of #phi ( #mu )", "#phi ( gen #mu ) [rad]", "#phi ( reco #mu ) [rad]");
   corrPhi_[kSig]->Draw("colz");
 
   // ---
