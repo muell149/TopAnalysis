@@ -38,10 +38,10 @@ void analyzeMuonDiffXJES()
   gROOT->SetStyle("Plain");
   gStyle->SetErrorX(0); 
 
-  // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Btag"
-  TString jetMultiplicity ="Btag";
+  // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Njets4Btag" / "Njets3Btag"
+  TString jetMultiplicity ="Njets1";
   // choose whether you want to save every plot as png and all within one ps file
-  bool save = true;
+  bool save = false;
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/JESstudies/";
   // choose luminosity for scaling of event numbers and for legend as entry
@@ -52,22 +52,30 @@ void analyzeMuonDiffXJES()
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeV.root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeV.root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeV.root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeV.root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeV.root"          ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVJES11.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVJES11.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVJES11.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVJES11.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVJES11.root"     ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecSigMcAtNlo7TeVJES09.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecWjetsMadgraph7TeVJES09.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecBkgMcAtNlo7TeVJES09.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecZjetsMadgraph7TeVJES09.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/diffXSecQCDPythia7TeVJES09.root"     ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/pseudoData7TeV"+lum+"pb.root" ) );
+
+  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10JES11.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10JES11.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10JES11.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10JES11.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10JES11.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10JES11.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10JES11.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10JES09.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10JES09.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10JES09.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10JES09.root"    ) );
+//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10JES09.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10JES09.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10JES09.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/spring10PseudoData7TeV"+lum+"pb.root") );
 
   // ---
   //    get histograms
@@ -82,25 +90,34 @@ void analyzeMuonDiffXJES()
   //    define weights concerning luminosity for 50 pb-1 @ 7TeV
   // ---
   std::vector<double> lumiweight;
-  // MC@NLO signal / W+jets Madgraph / MC@NLO background / Z+jets Madgraph / QCD Pythia
+  // 7 TeV Monte Carlo spring 10 samples
+  // -----------------------------------
+  // MC@NLO signal / Madgraph signal / W+jets Madgraph / MC@NLO background / Madgraph background/ Z+jets Madgraph / QCD Pythia
 
-  // a) for full statistics:
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
-  lumiweight.push_back(0.1231/50.0*(double)luminosity);
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
-  lumiweight.push_back(0.1310/50.0*(double)luminosity);
-  lumiweight.push_back(1.0286/50.0*(double)luminosity);
+  // a) unshifted:
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
+  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
+
   // b) for JES-shifted samples (first +10%, then -10%) full statistics:
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
-  lumiweight.push_back(0.1231/50.0*(double)luminosity);
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
-  lumiweight.push_back(0.1310/50.0*(double)luminosity);
-  lumiweight.push_back(1.0286/50.0*(double)luminosity);
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
-  lumiweight.push_back(0.1231/50.0*(double)luminosity);
-  lumiweight.push_back(0.0083/50.0*(double)luminosity);
-  lumiweight.push_back(0.1310/50.0*(double)luminosity);
-  lumiweight.push_back(1.0286/50.0*(double)luminosity);
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
+  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
+  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
+//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
+  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
+  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
   // c) for pseudodata
   lumiweight.push_back(1.0);
 
@@ -673,19 +690,22 @@ double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
   std::map< TString, std::map <TString,double> > maxValues_;  
   // create maximum values for inclusive stacked pt plot, 
   // differential pt plot and iclusive pt for signal ( all 50pb^-1)
-  maxValues_["ptStack" ]["Btag"  ]= 8.;
+  maxValues_["ptStack" ]["Njets4Btag"]= 8.;
+  maxValues_["ptStack" ]["Njets3Btag"]= 8.;
   maxValues_["ptStack" ]["Njets4"]= 12;   
   maxValues_["ptStack" ]["Njets3"]= 50.;
   maxValues_["ptStack" ]["Njets2"]= 250.;
   maxValues_["ptStack" ]["Njets1"]= 1700.;
 
-  maxValues_["ptSignal" ]["Btag"  ]= 6.5;
+  maxValues_["ptSignal" ]["Njets4Btag"]= 6.5;
+  maxValues_["ptSignal" ]["Njets3Btag"]= 6.5;
   maxValues_["ptSignal" ]["Njets4"]= 10;   
   maxValues_["ptSignal" ]["Njets3"]= 15.;
   maxValues_["ptSignal" ]["Njets2"]= 20.;
   maxValues_["ptSignal" ]["Njets1"]= 20.;
 
-  maxValues_["ptDiff"   ]["Btag"  ]=0.035;
+  maxValues_["ptDiff"   ]["Njets4Btag"]=0.035;
+  maxValues_["ptDiff"   ]["Njets3Btag"]=0.035;
   maxValues_["ptDiff"   ]["Njets4"]=0.035;
   maxValues_["ptDiff"   ]["Njets3"]=0.055;
   maxValues_["ptDiff"   ]["Njets2"]=0.055;
