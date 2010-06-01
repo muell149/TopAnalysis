@@ -20,6 +20,23 @@ goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                            '0.95 > emEnergyFraction'
                                      )
 
+goodJetsCalo = selectedPatJets.clone(src = 'selectedPatJets',
+                                     cut = 'pt > 20. &'
+                                           '( (abs(eta) < 2.6 & 0.01 < emEnergyFraction) | (abs(eta) >= 2.6 & abs(eta) < 3.0) ) &'
+                                           'jetID.fHPD < 0.98 &'
+                                           'jetID.n90Hits > 1'
+                                     )
+
+goodJetsPF   = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
+                                     cut = 'pt > 20. &'
+                                           '( (abs(eta) >= 2.4 & abs(eta) < 3.0) | (abs(eta) < 2.4 & chargedHadronEnergyFraction > 0.0) ) &'
+                                           'neutralHadronEnergyFraction < 1.0 &'
+                                           'chargedEmEnergyFraction < 1.0 &'
+                                           'neutralEmEnergyFraction < 1.0 &'
+                                           'pfSpecific.mChargedHadronMultiplicity > 0 &'
+                                           'nConstituents > 0'
+                                      )
+
 ## a kinematically well defined jet with
 ## reliable calibration and a robust rej
 ## of photons, electrons and prompt pi0's
