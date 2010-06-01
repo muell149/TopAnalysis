@@ -92,8 +92,8 @@ from PhysicsTools.PatAlgos.tools.metTools import *
 ## Add PfMET to the event content
 addPfMET(process, 'PF')
 
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-run36xOn35xInput(process)
+#from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+#run36xOn35xInput(process)
 
 ## embedding of jet constituents into the jets
 process.patJets.embedCaloTowers = True
