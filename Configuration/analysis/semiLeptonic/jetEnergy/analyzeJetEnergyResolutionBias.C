@@ -130,7 +130,7 @@ void fitGauss2D(TH2F* hist, TH1D& means, TH1D& sigmas, bool simpleMeanInsteadOfF
     double bincontent = 0;
     for(int by = 1; by <= hist->GetNbinsY(); by++)
       bincontent += hist->GetBinContent(bx, by);
-    // remove x-bins that have less than 20 entries along y
+    // remove x-bins that have less than 40 entries along y
     // (this assumes weight=1 for all entries)
     if(bincontent<40) {
       means .SetBinContent(bx, 0.);
@@ -243,6 +243,12 @@ void drawWithRatio(TH1F* hist1, TH1F* hist2,
     hist1->Sumw2();
   if(!hist2->GetSumw2N())
     hist2->Sumw2();
+
+  hist1->SetFillColor(kGray);
+  hist1->SetLineColor(kGray);
+  hist2->SetLineColor(kBlue);
+  hist2->SetLineStyle(2);
+  hist2->SetLineWidth(2);
 
   setPadStyle();
   gPad->SetBottomMargin(0.45);
@@ -514,8 +520,6 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
 		 
   canvasBase->cd(1);
   gPad->SetLogy();
-  ptL     [0]->SetFillColor(kYellow);
-  ptLSmear[0]->SetFillColor(kBlue);
   drawWithRatio(ptLSmear[0], ptL[0], "p_{T} [GeV]", "partons");
   txtTitleUDSC->Draw();
   TPaveText* txtPtL = new TPaveText(0.25, 0.52, 0.63, 0.67, "NDC");
@@ -530,12 +534,11 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   legGenSmear->AddEntry(ptLSmear[0], "smear", "F");
   legGenSmear->AddEntry(ptL     [0], "gen"  , "F");
   legGenSmear->Draw();
+  canvasBase->cd(1);
   gPad->Print(outDir + "/ptL.eps");
 
   canvasBase->cd(2);
   gPad->SetLogy();
-  enL     [0]->SetFillColor(kYellow);
-  enLSmear[0]->SetFillColor(kBlue);
   drawWithRatio(enLSmear[0], enL[0], "E [GeV]", "partons");
   txtTitleUDSC->Draw();
   TPaveText* txtEnL = new TPaveText(0.25, 0.52, 0.63, 0.67, "NDC");
@@ -546,6 +549,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   txtEnL->AddText(tmpTxt);
   txtEnL->Draw();
   legGenSmear->Draw();
+  canvasBase->cd(2);
   gPad->Print(outDir + "/enL.eps");
 
   setAxisStyle(eta[0]);
@@ -555,14 +559,12 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   eta[0]->SetStats(kFALSE);
   canvasBase->cd(3);
   setPadStyle();
-  eta[0]->SetFillColor(kYellow);
+  eta[0]->SetFillColor(kGray);
   eta[0]->DrawCopy();
   gPad->Print(outDir + "/eta.eps");
 
   canvasBase->cd(4);
   gPad->SetLogy();
-  ptB     [0]->SetFillColor(kYellow);
-  ptBSmear[0]->SetFillColor(kBlue);
   drawWithRatio(ptBSmear[0], ptB[0], "p_{T} [GeV]", "partons");
   txtTitleB->Draw();
   TPaveText* txtPtB = new TPaveText(0.25, 0.52, 0.63, 0.67, "NDC");
@@ -573,12 +575,11 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   txtPtB->AddText(tmpTxt);
   txtPtB->Draw();
   legGenSmear->Draw();
+  canvasBase->cd(4);
   gPad->Print(outDir + "/ptB.eps");
 
   canvasBase->cd(5);
   gPad->SetLogy();
-  enB     [0]->SetFillColor(kYellow);
-  enBSmear[0]->SetFillColor(kBlue);
   drawWithRatio(enBSmear[0], enB[0], "E [GeV]", "partons");
   txtTitleB->Draw();
   TPaveText* txtEnB = new TPaveText(0.25, 0.52, 0.63, 0.67, "NDC");
@@ -589,6 +590,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   txtEnB->AddText(tmpTxt);
   txtEnB->Draw();
   legGenSmear->Draw();
+  canvasBase->cd(5);
   gPad->Print(outDir + "/enB.eps");
 
   fitGauss2D(enSmearVsGen, means, sigmas);
@@ -634,7 +636,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   theta[0]->SetTitle("");
   theta[0]->SetXTitle("#theta_{q #bar{q}}");
   theta[0]->SetYTitle("events");
-  theta[0]->SetFillColor(kYellow);
+  theta[0]->SetFillColor(kGray);
   canvasBase->cd(7);
   setPadStyle();
   theta[0]->DrawCopy();
@@ -688,13 +690,13 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
     mT[i][0]->SetYTitle("events");
     mT[i][0]->DrawCopy();
 
-    drawAndFitTwo2D(respLPtGen[i], i, .95, 1.75, "flavor: udsc, "+title,
+    drawAndFitTwo2D(respLPtGen[i], i, .95, 1.85, "flavor: udsc, "+title,
 		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespLPtGen);
 
     drawAndFitTwo2D(respLPtSmear[i], i, .81, 1.05, "flavor: udsc, "+title,
 		    "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespLPtSmear);
 
-    drawAndFitTwo2D(respBPtGen[i], i, .95, 1.75, "flavor: b, "+title,
+    drawAndFitTwo2D(respBPtGen[i], i, .95, 1.55, "flavor: b, "+title,
 		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespBPtGen);
 
     drawAndFitTwo2D(respBPtSmear[i], i, .81, 1.05, "flavor: b, "+title,
