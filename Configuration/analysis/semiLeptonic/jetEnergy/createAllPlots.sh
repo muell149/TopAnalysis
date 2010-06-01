@@ -31,12 +31,15 @@ if [[ $answer == "y" ]]
 
     if [[ $doPdf == "y" ]]
 	then
-	echo "Converting analyzeJetEnergyResolutionBias/*.eps to pdf..."
+	nFiles=`ls -l analyzeJetEnergyResolutionBias/*.eps | wc -l`
+	echo -n "Converting analyzeJetEnergyResolutionBias/*.eps ($nFiles files) to pdf... "
 	for file in `ls analyzeJetEnergyResolutionBias/*.eps`
 	  do
 	  epstopdf $file
 	  rm -f $file
+	  echo -n "."
 	done
+	echo " Done."
     fi
 
     if [[ $cpDir == "y" ]]
@@ -64,12 +67,15 @@ if [[ $answer == "y" ]]
 
     if [[ $doPdf == "y" ]]
 	then
-	echo "Converting compareJetEnergyCorrectionSamples/*.eps to pdf..."
+	nFiles=`ls -l compareJetEnergyCorrectionSamples/*.eps | wc -l`
+	echo -n "Converting compareJetEnergyCorrectionSamples/*.eps ($nFiles files) to pdf... "
 	for file in `ls compareJetEnergyCorrectionSamples/*.eps`
 	  do
 	  epstopdf $file
 	  rm -f $file
+	  echo -n "."
 	done
+	echo " Done."
     fi
 
     if [[ $cpDir == "y" ]]
@@ -100,12 +106,15 @@ if [[ $answer == "y" ]]
 
     if [[ $doPdf == "y" ]]
 	then
-	echo "Converting analyzeJetEnergyCorrections_*/*.eps to pdf..."
+	nFiles=`ls -l analyzeJetEnergyCorrections_*/*.eps | wc -l`
+	echo -n "Converting analyzeJetEnergyCorrections_*/*.eps ($nFiles files) to pdf... "
 	for file in `ls analyzeJetEnergyCorrections_*/*.eps`
 	  do
 	  epstopdf $file
 	  rm -f $file
+	  echo -n "."
 	done
+	echo " Done."
     fi
 
     if [[ $cpDir == "y" ]]
