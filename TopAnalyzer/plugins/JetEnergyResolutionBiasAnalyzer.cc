@@ -166,6 +166,12 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["massTPtSmearZoom_40"] = fs->make<TH2F>("massTPtSmearZoom_40", "massTPtSmearZoom_40", 13, binningLogPt, 200, 150., 200.);
   hists_["massTPtSmearZoom_50"] = fs->make<TH2F>("massTPtSmearZoom_50", "massTPtSmearZoom_50", 13, binningLogPt, 200, 150., 200.);
 
+  hists_["respLEta"] = fs->make<TH2F>("respLEta", "respLEta", 12, -2.4, 2.4, 201, 0., 2.);
+  hists_["respBEta"] = fs->make<TH2F>("respBEta", "respBEta", 12, -2.4, 2.4, 201, 0., 2.);
+  hists_["massWEta"] = fs->make<TH2F>("massWEta", "massWEta", 12, -2.4, 2.4, 140, 0., 140.);
+  hists_["massTEta"] = fs->make<TH2F>("massTEta", "massTEta", 12, -2.4, 2.4, 300, 0., 300.);
+  hists_["massTEtaZoom"] = fs->make<TH2F>("massTEtaZoom", "massTEtaZoom", 12, -2.4, 2.4, 200, 150., 200.);
+
   std::string name = "massWPt1SmearPt2Smear";
   hists3d_[name] = fs->make<TH3F>(name.c_str(), name.c_str(), 50, 0., 250., 50, 0., 250., 28, 0., 140.);
   name = "massWE1SmearE2Smear";
@@ -306,23 +312,31 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
 
     name = "massTPt_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( hadB->pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( hadP->pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( hadQ->pt(), vecT.M() );
 
     name = "massTPtSmear_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecB.Pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecT.M() );
 
     name = "massTPtZoom_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( hadB->pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( hadP->pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( hadQ->pt(), vecT.M() );
 
     name = "massTPtSmearZoom_"; name += ptcut;
     hists_.find((std::string)name)->second->Fill( vecB.Pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( vecP.Pt(), vecT.M() );
-    hists_.find((std::string)name)->second->Fill( vecQ.Pt(), vecT.M() );
+
+    // eta plots only for ptcut = 30 GeV
+
+    if(ptcut == 30) {
+      hists_.find("respLEta")->second->Fill( hadP->eta(), vecP.Pt() / hadP->pt() );
+      hists_.find("respLEta")->second->Fill( hadQ->eta(), vecQ.Pt() / hadQ->pt() );
+
+      hists_.find("respBEta")->second->Fill( hadB->eta(), vecB.Pt() / hadB->pt() );
+
+      hists_.find("massWEta")->second->Fill( hadP->eta(), vecW.M() );
+      hists_.find("massWEta")->second->Fill( hadQ->eta(), vecW.M() );
+
+      hists_.find("massTEta")->second->Fill( hadB->eta(), vecT.M() );
+
+      hists_.find("massTEtaZoom")->second->Fill( hadB->eta(), vecT.M() );
+    }
 
   }
 
