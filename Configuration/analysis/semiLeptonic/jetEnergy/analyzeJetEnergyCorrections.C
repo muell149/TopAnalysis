@@ -12,6 +12,8 @@
 #include <TSystem.h>
 
 #include <stdlib.h>
+#include <fstream>
+#include <iomanip>
 
 void setPadStyle()
 {
@@ -479,6 +481,13 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   TPaveText* txtMassT  = (TPaveText*) txtMassW->Clone();
   TPaveText* txtDeltaM = (TPaveText*) txtMassW->Clone();
 
+  ofstream outfile(baseName + "results.txt");
+
+  outfile << "-----------------------------------------" << std::endl
+	  << "level           mW-80.4          mT-172.5" << std::endl
+	  << "-----------------------------------------" << std::endl;
+  outfile << setiosflags(std::ios::fixed | std::ios::showpos);
+
   for(unsigned int i = 0; i < 8; i++) {
 
     if(i==1 || i==2 || i==4 || i==6)
@@ -502,13 +511,20 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     double mean_err = massW[i]->GetFunction("gaus")->GetParError (1);
     double relSigma = massW[i]->GetFunction("gaus")->GetParameter(2) / mean;
 
+    outfile << std::setw(5) << levels[i]
+	    << std::setw(7) << std::setprecision(1) << mean-80.4 << " GeV"
+	    << " (" << std::setw(3) << std::setprecision(0) << (mean/80.4-1)*100 << "%)";
+
     sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
     ttxt = txtMassW->AddText(levels[i] + tmpTxt);
     ttxt->SetTextColor(markerColor[i]);
-    
+  
     mean     = massT[i]->GetFunction("gaus")->GetParameter(1);
     mean_err = massT[i]->GetFunction("gaus")->GetParError (1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
+
+    outfile << std::setw(7) << std::setprecision(1) << mean-172.5-1 << " GeV"
+	    << " (" <<std::setw(3) << std::setprecision(0) << (mean/172.5-1)*100 << "%)" << std::endl;
 
     sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
     ttxt = txtMassT->AddText(levels[i] + tmpTxt);
@@ -523,6 +539,8 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     ttxt->SetTextColor(markerColor[i]);
 
   }
+
+  outfile.close();
 
   massW [0]->SetMaximum( 1.5*massW [0]->GetMaximum() );
   massT [0]->SetMaximum( 1.5*massT [0]->GetMaximum() );
