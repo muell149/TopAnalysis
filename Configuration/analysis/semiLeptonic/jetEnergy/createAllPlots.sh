@@ -25,6 +25,9 @@ if [[ $answer == "y" ]]
 
     cd $codeDir
     make resolution
+    if [ "$?" -ne "0" ]; then
+	exit $?
+    fi
     cd -
 
     $anaRes "analyzeJetEnergyResolutionBias.root" "analyzeJetEnergyResolutionBias_mcatnlo.root"
@@ -61,6 +64,9 @@ if [[ $answer == "y" ]]
 
     cd $codeDir
     make comparison
+    if [ "$?" -ne "0" ]; then
+	exit $?
+    fi
     cd -
 
     $compare "analyzeJetEnergyCorrections_ak5.root" "analyzeJetEnergyCorrections_ak5_mcatnlo.root"
@@ -97,6 +103,9 @@ if [[ $answer == "y" ]]
 
     cd $codeDir
     make corrections
+    if [ "$?" -ne "0" ]; then
+	exit $?
+    fi
     cd -
 
     $anaCor "analyzeJetEnergyCorrections_ak5.root"         "GenMatch"
