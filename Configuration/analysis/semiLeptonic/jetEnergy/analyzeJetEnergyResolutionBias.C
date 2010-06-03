@@ -173,13 +173,14 @@ void fitGauss2D(TH2F* hist, TH1D& means, TH1D& sigmas, bool simpleMeanInsteadOfF
 
 void drawAndFitTwo2D(TH2F** hists, const unsigned i,
 		     const double yMin, const double yMax, const TString title,
-		     const TString xTitle, const TString yTitle, TCanvas* canvas=0)
+		     const TString xTitle, const TString yTitle, TCanvas* canvas=0, bool logx=true)
 {
   if(canvas)
     canvas->cd(i+1);
 
   setPadStyle();
-  gPad->SetLogx();
+  if(logx)
+    gPad->SetLogx();
   int fillClr[4] = {kGray, kBlue, kGreen, kRed};
   for(int d = 3; d >= 0; d--) {
     TH1D means;
@@ -189,7 +190,7 @@ void drawAndFitTwo2D(TH2F** hists, const unsigned i,
       simpleMeanInsteadOfFit=true;
     fitGauss2D(hists[d], means, sigmas, simpleMeanInsteadOfFit);
 
-    if(!canvas)
+    if(!canvas && logx)
       means.GetXaxis()->SetRange(3., means.GetNbinsX());
     
     if(d==3) {
@@ -350,11 +351,17 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   TH2F* respBPtGen  [6][4];
   TH2F* respBPtSmear[6][4];
 
+  TH2F* respLEta[4];
+  TH2F* respBEta[4];
+
   TH2F* mWPtGen  [6][4];
   TH2F* mWPtSmear[6][4];
 
   TH2F* mTPtGen  [6][4];
   TH2F* mTPtSmear[6][4];
+
+  TH2F* mWEta[4];
+  TH2F* mTEta[4];
 
   TH3F* massWPt1SmearPt2Smear;
   TH3F* massWE1SmearE2Smear;
@@ -387,11 +394,11 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
 
   enSmearVsGen = cloneObjectFromFile<TH2F*>(file[0], inDirBase + "/enSmearVsGen");
 
-  for(unsigned i = 0; i < 6; i++) {
+  for(unsigned d = 0; d < 4; d++) {
 
-    for(unsigned d = 0; d < 4; d++) {
+    TString inDir = inDirBase + dirExt[d];
 
-      TString inDir = inDirBase + dirExt[d];
+    for(unsigned i = 0; i < 6; i++) {
 
       TString name = inDir + "/respL_"; name += (i*10);
       respL[i][d] = cloneObjectFromFile<TH1F*>(file[0], name);
@@ -438,6 +445,14 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
       mWPtSmear[i][d] = cloneObjectFromFile<TH2F*>(file[0], name);
 
     }
+
+    respLEta[d] = cloneObjectFromFile<TH2F*>(file[0], inDir + "/respLEta");
+    respBEta[d] = cloneObjectFromFile<TH2F*>(file[0], inDir + "/respBEta");
+    mWEta[d] = cloneObjectFromFile<TH2F*>(file[0], inDir + "/massWEta");
+    if(inDir.Contains("_off"))
+      mTEta[d] = cloneObjectFromFile<TH2F*>(file[0], inDir + "/massTEtaZoom");
+    else
+      mTEta[d] = cloneObjectFromFile<TH2F*>(file[0], inDir + "/massTEta");
 
   }
 
@@ -659,7 +674,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
     setAxisStyle(respL[i][0]);
     respL[i][0]->SetStats(kFALSE);
     respL[i][0]->SetTitle(title);
-    respL[i][0]->SetXTitle("p_{T}^{smear} / p_{T}^{gen} (parton)");
+    respL[i][0]->SetXTitle("p_{T}^{smear} / p_{T}^{gen}");
     respL[i][0]->SetYTitle("partons (udsc)");
     respL[i][0]->DrawCopy();
 
@@ -668,7 +683,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
     setAxisStyle(respB[i][0]);
     respB[i][0]->SetStats(kFALSE);
     respB[i][0]->SetTitle(title);
-    respB[i][0]->SetXTitle("p_{T}^{smear} / p_{T}^{gen} (parton)");
+    respB[i][0]->SetXTitle("p_{T}^{smear} / p_{T}^{gen}");
     respB[i][0]->SetYTitle("partons (b)");
     respB[i][0]->DrawCopy();
 
@@ -691,62 +706,78 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
     mT[i][0]->DrawCopy();
 
     drawAndFitTwo2D(respLPtGen[i], i, .95, 1.85, "flavor: udsc, "+title,
-		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespLPtGen);
+		    "p_{T}^{gen} [GeV]", "p_{T}^{smear} / p_{T}^{gen}", canvasRespLPtGen);
 
-    drawAndFitTwo2D(respLPtSmear[i], i, .81, 1.05, "flavor: udsc, "+title,
-		    "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespLPtSmear);
+    drawAndFitTwo2D(respLPtSmear[i], i, .80, 1.05, "flavor: udsc, "+title,
+		    "p_{T}^{smear} [GeV]", "p_{T}^{smear} / p_{T}^{gen}", canvasRespLPtSmear);
 
     drawAndFitTwo2D(respBPtGen[i], i, .95, 1.55, "flavor: b, "+title,
-		    "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespBPtGen);
+		    "p_{T}^{gen} [GeV]", "p_{T}^{smear} / p_{T}^{gen}", canvasRespBPtGen);
 
-    drawAndFitTwo2D(respBPtSmear[i], i, .81, 1.05, "flavor: b, "+title,
-		    "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)", canvasRespBPtSmear);
+    drawAndFitTwo2D(respBPtSmear[i], i, .80, 1.05, "flavor: b, "+title,
+		    "p_{T}^{smear} [GeV]", "p_{T}^{smear} / p_{T}^{gen}", canvasRespBPtSmear);
 
     drawAndFitTwo2D(mWPtGen[i], i, 77., 125., title,
-		    "p_{T}^{gen} (parton) [GeV]", "m_{qq} [GeV]", canvasMassWPtGen);
+		    "p_{T,q}^{gen} [GeV]", "m_{qq} [GeV]", canvasMassWPtGen);
 
     drawAndFitTwo2D(mWPtSmear[i], i, 73., 85., title,
-		    "p_{T}^{smear} (parton) [GeV]", "m_{qq} [GeV]", canvasMassWPtSmear);
+		    "p_{T,q}^{smear} [GeV]", "m_{qq} [GeV]", canvasMassWPtSmear);
 
-    drawAndFitTwo2D(mTPtGen[i], i, 168., 222., title,
-		    "p_{T}^{gen} (parton) [GeV]", "m_{qqb} [GeV]", canvasMassTPtGen);
+    drawAndFitTwo2D(mTPtGen[i], i, 168., 228., title,
+		    "p_{T,b}^{gen} [GeV]", "m_{qqb} [GeV]", canvasMassTPtGen);
 
-    drawAndFitTwo2D(mTPtSmear[i], i, 165., 181., title,
-		    "p_{T}^{smear} (parton) [GeV]", "m_{qqb} [GeV]", canvasMassTPtSmear);
+    drawAndFitTwo2D(mTPtSmear[i], i, 158., 182., title,
+		    "p_{T,b}^{smear} [GeV]", "m_{qqb} [GeV]", canvasMassTPtSmear);
 
   }
 
   canvasRespLPtGen->cd(7);
-  drawAndFitTwo2D(respLPtGen[3], 3, .94, 1.06, "flavor: udsc, p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)");
+  drawAndFitTwo2D(respLPtGen[3], 3, .93, 1.07, "flavor: udsc, p_{T}^{smear} > 30 GeV",
+		  "p_{T}^{gen} [GeV]", "p_{T}^{smear} / p_{T}^{gen}");
+
+  canvasRespLPtGen->cd(8);
+  drawAndFitTwo2D(respLEta, 3, .93, 1.07, "flavor: udsc, p_{T}^{smear} > 30 GeV",
+		  "#eta", "p_{T}^{smear} / p_{T}^{gen}", 0, false);
 
   canvasRespLPtSmear->cd(7);
-  drawAndFitTwo2D(respLPtSmear[3], 3, .94, 1.06, "flavor: udsc, p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)");
+  drawAndFitTwo2D(respLPtSmear[3], 3, .93, 1.07, "flavor: udsc, p_{T}^{smear} > 30 GeV",
+		  "p_{T}^{smear} [GeV]", "p_{T}^{smear} / p_{T}^{gen}");
 
   canvasRespBPtGen->cd(7);
-  drawAndFitTwo2D(respBPtGen[3], 3, .94, 1.06, "flavor: b, p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{gen} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)");
+  drawAndFitTwo2D(respBPtGen[3], 3, .93, 1.07, "flavor: b, p_{T}^{smear} > 30 GeV",
+		  "p_{T}^{gen} [GeV]", "p_{T}^{smear} / p_{T}^{gen}");
+
+  canvasRespBPtGen->cd(8);
+  drawAndFitTwo2D(respBEta, 3, .93, 1.07, "flavor: b, p_{T}^{smear} > 30 GeV",
+		  "#eta", "p_{T}^{smear} / p_{T}^{gen}", 0, false);
 
   canvasRespBPtSmear->cd(7);
-  drawAndFitTwo2D(respBPtSmear[3], 3, .94, 1.06, "flavor: b, p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{smear} (parton) [GeV]", "p_{T}^{smear} / p_{T}^{gen} (parton)");
+  drawAndFitTwo2D(respBPtSmear[3], 3, .93, 1.07, "flavor: b, p_{T}^{smear} > 30 GeV",
+		  "p_{T}^{smear} [GeV]", "p_{T}^{smear} / p_{T}^{gen}");
 
   canvasMassWPtGen->cd(7);
   drawAndFitTwo2D(mWPtGen[3], 3, 77., 84., "p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{gen} (parton) [GeV]", "m_{qq} [GeV]");
+		  "p_{T,q}^{gen} [GeV]", "m_{qq} [GeV]");
+
+  canvasMassWPtGen->cd(8);
+  drawAndFitTwo2D(mWEta, 3, 77., 84., "p_{T}^{smear} > 30 GeV",
+		  "#eta_{q}", "m_{qq} [GeV]", 0, false);
 
   canvasMassWPtSmear->cd(7);
   drawAndFitTwo2D(mWPtSmear[3], 3, 77., 84., "p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{smear} (parton) [GeV]", "m_{qq} [GeV]");
+		  "p_{T,q}^{smear} [GeV]", "m_{qq} [GeV]");
 
   canvasMassTPtGen->cd(7);
-  drawAndFitTwo2D(mTPtGen[3], 3, 165., 180., "p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{gen} (parton) [GeV]", "m_{qqb} [GeV]");
+  drawAndFitTwo2D(mTPtGen[3], 3, 164., 181., "p_{T}^{smear} > 30 GeV",
+		  "p_{T,b}^{gen} [GeV]", "m_{qqb} [GeV]");
+
+  canvasMassTPtGen->cd(8);
+  drawAndFitTwo2D(mTEta, 3, 164., 181., "p_{T}^{smear} > 30 GeV",
+		  "#eta_{b} [GeV]", "m_{qqb} [GeV]", 0, false);
 
   canvasMassTPtSmear->cd(7);
-  drawAndFitTwo2D(mTPtSmear[3], 3, 165., 180., "p_{T}^{smear} > 30 GeV",
-		  "p_{T}^{smear} (parton) [GeV]", "m_{qqb} [GeV]");
+  drawAndFitTwo2D(mTPtSmear[3], 3, 164., 181., "p_{T}^{smear} > 30 GeV",
+		  "p_{T,b}^{smear} [GeV]", "m_{qqb} [GeV]");
 
   TH1F* respLPtCut[nSystematicSets];
   TH1F* respBPtCut[nSystematicSets];
@@ -795,7 +826,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   respLPtCut[1]->SetStats(kFALSE);
   respLPtCut[1]->SetTitle("");
   respLPtCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
-  respLPtCut[1]->SetYTitle("p_{T}^{smear} / p_{T}^{gen} (partons)");
+  respLPtCut[1]->SetYTitle("p_{T}^{smear} / p_{T}^{gen}");
   respLPtCut[1]->SetMinimum(0.998);
   respLPtCut[1]->SetMaximum(1.038);
   respLPtCut[1]->SetLineColor(kBlue);
@@ -825,7 +856,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   respBPtCut[1]->SetStats(kFALSE);
   respBPtCut[1]->SetTitle("");
   respBPtCut[1]->SetXTitle("p_{T , cut}^{smear} [GeV]");
-  respBPtCut[1]->SetYTitle("p_{T}^{smear} / p_{T}^{gen} (partons)");
+  respBPtCut[1]->SetYTitle("p_{T}^{smear} / p_{T}^{gen}");
   respBPtCut[1]->SetMinimum(0.998);
   respBPtCut[1]->SetMaximum(1.038);
   respBPtCut[1]->SetLineColor(kBlue);
@@ -983,6 +1014,22 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
       epsName += (i*10);
     gPad->Print(epsName + ".eps");
   }
+
+  canvasRespLPtGen->cd(8);
+  legendLowerRight->Draw();
+  gPad->Print(outDir + "/respLEta_means_30_zoom.eps");
+
+  canvasRespBPtGen->cd(8);
+  legendLowerRight->Draw();
+  gPad->Print(outDir + "/respBEta_means_30_zoom.eps");
+
+  canvasMassWPtGen->cd(8);
+  legendLowerRight->Draw();
+  gPad->Print(outDir + "/massWEta_means_30_zoom.eps");
+
+  canvasMassTPtGen->cd(8);
+  legendLowerRight->Draw();
+  gPad->Print(outDir + "/massTEta_means_30_zoom.eps");
 
 //  massWPt1SmearPt2Smear->FitSlicesZ();
 //  TString tmpName = massWPt1SmearPt2Smear->GetName();
