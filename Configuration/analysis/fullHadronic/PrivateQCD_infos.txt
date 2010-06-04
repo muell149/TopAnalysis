@@ -9,13 +9,13 @@
 ##								  ##
 ## GenJet filter: min 4 ak5GenJets with pt > 20 GeV and |eta| < 5 ##
 ##								  ##
-## Number of files: 16982					  ##
+## Number of files: 36946					  ##
 ##								  ##
-## Event before selection: 1 Mio. x #files = 1.6982E+10		  ##
+## Event before selection: 1 Mio. x #files = 3.6946E+10		  ##
 ##								  ##
 ## cross section: 8.762E+08 pb					  ##
 ##								  ##
-## Int. luminosity: 19.38141976717644373 pb-1			  ##
+## Int. luminosity: 42.16617210682492582 pb-1			  ##
 ##								  ##
 ##								  ##
 ####################  PrivateQCD_noFilter.txt  #####################
