@@ -15,6 +15,8 @@
 #include <fstream>
 #include <iomanip>
 
+#include "cloneObjectFromFile.h"
+
 void setPadStyle()
 {
 
@@ -54,16 +56,17 @@ void cleverRebinning(TH1* hist)
 
 }
 
-void fitGauss(TH1* hist)
+void fitGauss(TH1* hist, bool draw = true)
 {
 
   cleverRebinning(hist);
-  TString fitOptions = "M0E";
+  TString fitOptions = "QME";
   // first iteration
-  hist->Fit("gaus", fitOptions);
+  hist->Fit("gaus", fitOptions+"0");
   // second iteration
   double mean  = hist->GetFunction("gaus")->GetParameter(1);
   double sigma = hist->GetFunction("gaus")->GetParameter(2);
+  if(!draw) fitOptions += "0";
   if(hist->GetEntries() / hist->GetNbinsX() > 10.)
     hist->Fit("gaus", fitOptions, "", mean-1.5*sigma, mean+1.5*sigma);
   else
@@ -296,6 +299,9 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   TH2F* deltaM_PtB [8];
   TH2F* deltaM_EtaB[8];
 
+  TH1D* respL[8];
+  TH1D* respB[8];
+
   TH2F* respLGenJetPtGenJet       [8];
   TH2F* respLGenJetPtGenJet_barrel[8];
   TH2F* respLGenJetEta            [8];
@@ -313,43 +319,43 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   for(unsigned int i = 0; i < 8; i++) {
     TString dirBase = "analyzeJetEnergy" + hypoClass + "_";
 
-    massW[i] = (TH1F*) file->Get(dirBase + dirs[i] + "/mW"  )->Clone();
-    massT[i] = (TH1F*) file->Get(dirBase + dirs[i] + "/mTop")->Clone();
+    massW[i] = cloneObjectFromFile<TH1F*>(file, dirBase + dirs[i] + "/mW");
+    massT[i] = cloneObjectFromFile<TH1F*>(file, dirBase + dirs[i] + "/mTop");
 
-    massW_Pt1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Pt1")->Clone();
-    massW_Pt2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Pt2")->Clone();
-    massW_PtW[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_PtW")->Clone();
+    massW_Pt1[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mW_Pt1");
+    massW_Pt2[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mW_Pt2");
+    massW_PtW[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mW_PtW");
 
-    massW_Eta1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Eta1")->Clone();
-    massW_Eta2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_Eta2")->Clone();
-    massW_EtaW[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mW_EtaW")->Clone();
+    massW_Eta1[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mW_Eta1");
+    massW_Eta2[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mW_Eta2");
+    massW_EtaW[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mW_EtaW");
 
-    massT_Pt1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Pt1"  )->Clone();
-    massT_Pt2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Pt2"  )->Clone();
-    massT_PtB[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_PtB"  )->Clone();
-    massT_PtT[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_PtTop")->Clone();
+    massT_Pt1[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_Pt1"  );
+    massT_Pt2[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_Pt2"  );
+    massT_PtB[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_PtB"  );
+    massT_PtT[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_PtTop");
 
-    massT_Eta1[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Eta1"  )->Clone();
-    massT_Eta2[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_Eta2"  )->Clone();
-    massT_EtaB[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_EtaB"  )->Clone();
-    massT_EtaT[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/mTop_EtaTop")->Clone();
+    massT_Eta1[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_Eta1"  );
+    massT_Eta2[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_Eta2"  );
+    massT_EtaB[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_EtaB"  );
+    massT_EtaT[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/mTop_EtaTop");
 
-    deltaM_PtB [i] = (TH2F*) file->Get(dirBase + dirs[i] + "/deltaM_PtB" )->Clone();
-    deltaM_EtaB[i] = (TH2F*) file->Get(dirBase + dirs[i] + "/deltaM_EtaB")->Clone();
+    deltaM_PtB [i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/deltaM_PtB" );
+    deltaM_EtaB[i] = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/deltaM_EtaB");
 
-    respLGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLGenJetPtGenJet"       )->Clone();
-    respLGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLGenJetPtGenJet_barrel")->Clone();
-    respLGenJetEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLGenJetEta"            )->Clone();
-    respLPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLPartonPtParton"       )->Clone();
-    respLPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLPartonPtParton_barrel")->Clone();
-    respLPartonEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseLPartonEta"            )->Clone();
+    respLGenJetPtGenJet       [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseLGenJetPtGenJet"       );
+    respLGenJetPtGenJet_barrel[i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseLGenJetPtGenJet_barrel");
+    respLGenJetEta            [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseLGenJetEta"            );
+    respLPartonPtParton       [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseLPartonPtParton"       );
+    respLPartonPtParton_barrel[i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseLPartonPtParton_barrel");
+    respLPartonEta            [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseLPartonEta"            );
 
-    respBGenJetPtGenJet       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBGenJetPtGenJet"       )->Clone();
-    respBGenJetPtGenJet_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBGenJetPtGenJet_barrel")->Clone();
-    respBGenJetEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBGenJetEta"            )->Clone();
-    respBPartonPtParton       [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBPartonPtParton"       )->Clone();
-    respBPartonPtParton_barrel[i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBPartonPtParton_barrel")->Clone();
-    respBPartonEta            [i]  = (TH2F*) file->Get(dirBase + dirs[i] + "/responseBPartonEta"            )->Clone();
+    respBGenJetPtGenJet       [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseBGenJetPtGenJet"       );
+    respBGenJetPtGenJet_barrel[i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseBGenJetPtGenJet_barrel");
+    respBGenJetEta            [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseBGenJetEta"            );
+    respBPartonPtParton       [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseBPartonPtParton"       );
+    respBPartonPtParton_barrel[i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseBPartonPtParton_barrel");
+    respBPartonEta            [i]  = cloneObjectFromFile<TH2F*>(file, dirBase + dirs[i] + "/responseBPartonEta"            );
   }
 
   file->Close();
@@ -433,24 +439,66 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   }
 
   for(unsigned int i = 0; i < 8; i++) {
-    TString name = "_"; name += i;
-    deltaM[i] = deltaM_EtaB[i]->ProjectionY(name);
+    TString histName = "deltaM_"; histName += i;
+    deltaM[i] = deltaM_EtaB[i]->ProjectionY(histName);
   }
+
+  for(unsigned int i = 0; i < 7; i++) {
+    TString histName = "respL_"; histName += i;
+    respL[i] = respLGenJetPtGenJet[i]->ProjectionY(histName);
+    histName = "respB_"; histName += i;
+    respB[i] = respBGenJetPtGenJet[i]->ProjectionY(histName);
+  }
+  respL[7] = respLPartonPtParton[7]->ProjectionY("respL_7");
+  respB[7] = respBPartonPtParton[7]->ProjectionY("respB_7");
 
   // create canvases
 
-  TCanvas* canvasMassW      = new TCanvas("canvasMassW"     , "W mass"                        , 900, 900);
-  TCanvas* canvasMassT      = new TCanvas("canvasMassT"     , "top mass"                      , 900, 900);
-  TCanvas* canvasMassW_2dim = new TCanvas("canvasMassW_2dim", "W mass (2 dim.)"               , 900, 900);
-  TCanvas* canvasMassT_2dim = new TCanvas("canvasMassT_2dim", "top mass (2 dim.)"             , 900, 900);
-  TCanvas* canvasRespL      = new TCanvas("canvasRespL"     , "response for light jets"       , 900, 900);
-  TCanvas* canvasRespB      = new TCanvas("canvasRespB"     , "response for b jets"           , 900, 900);
+  TCanvas* canvasMassW      = new TCanvas("canvasMassW"     , "W mass"                          , 900, 900);
+  TCanvas* canvasMassT      = new TCanvas("canvasMassT"     , "top mass"                        , 900, 900);
+  TCanvas* canvasMassW_2dim = new TCanvas("canvasMassW_2dim", "W mass (2 dim.)"                 , 900, 900);
+  TCanvas* canvasMassT_2dim = new TCanvas("canvasMassT_2dim", "top mass (2 dim.)"               , 900, 900);
+  TCanvas* canvasRespL      = new TCanvas("canvasRespL"     , "response for light jets"         , 900, 900);
+  TCanvas* canvasRespB      = new TCanvas("canvasRespB"     , "response for b jets"             , 900, 900);
+  TCanvas* canvasRespL_2dim = new TCanvas("canvasRespL_2dim", "response for light jets (2 dim.)", 900, 900);
+  TCanvas* canvasRespB_2dim = new TCanvas("canvasRespB_2dim", "response for b jets (2 dim.)"    , 900, 900);
   canvasMassW     ->Divide(3,3);
   canvasMassT     ->Divide(3,3);
   canvasMassW_2dim->Divide(3,3);
   canvasMassT_2dim->Divide(3,3);
   canvasRespL     ->Divide(3,3);
   canvasRespB     ->Divide(3,3);
+  canvasRespL_2dim->Divide(3,3);
+  canvasRespB_2dim->Divide(3,3);
+
+  ofstream outfile(baseName + "results.txt");
+  outfile << setiosflags(std::ios::fixed | std::ios::showpos);
+
+  outfile << "---------------------" << std::endl
+	  << "level   respL   respB" << std::endl
+	  << "---------------------" << std::endl;
+
+  for(unsigned int i = 0; i < 8; i++) {
+
+    canvasRespL->cd(i+1);
+    respL[i]->DrawCopy();
+    fitGauss(respL[i]);
+
+    canvasRespB->cd(i+1);
+    respB[i]->DrawCopy();
+    fitGauss(respB[i]);
+
+    if(i==1 || i==2 || i==4 || i==6)
+      continue;
+
+    double mean = respL[i]->GetFunction("gaus")->GetParameter(1);
+    outfile << std::setw(5) << levels[i]
+	    << std::setw(7) << std::setprecision(1) << (mean-1)*100 << "%";
+
+    mean = respB[i]->GetFunction("gaus")->GetParameter(1);
+    outfile << std::setw(7) << std::setprecision(1) << (mean-1)*100 << "%" << std::endl;
+
+  }
 
   for(unsigned int i = 0; i < 8; i++) {
     massW[i]->SetTitle("JEC level: " + levels[i]);
@@ -481,12 +529,9 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   TPaveText* txtMassT  = (TPaveText*) txtMassW->Clone();
   TPaveText* txtDeltaM = (TPaveText*) txtMassW->Clone();
 
-  ofstream outfile(baseName + "results.txt");
-
   outfile << "-----------------------------------------" << std::endl
 	  << "level           mW-80.4          mT-172.5" << std::endl
 	  << "-----------------------------------------" << std::endl;
-  outfile << setiosflags(std::ios::fixed | std::ios::showpos);
 
   for(unsigned int i = 0; i < 8; i++) {
 
@@ -523,7 +568,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     mean_err = massT[i]->GetFunction("gaus")->GetParError (1);
     relSigma = massT[i]->GetFunction("gaus")->GetParameter(2) / mean;
 
-    outfile << std::setw(7) << std::setprecision(1) << mean-172.5-1 << " GeV"
+    outfile << std::setw(7) << std::setprecision(1) << mean-172.5 << " GeV"
 	    << " (" <<std::setw(3) << std::setprecision(0) << (mean/172.5-1)*100 << "%)" << std::endl;
 
     sprintf(tmpTxt, ": #mu = %4.1f#pm%4.1f GeV; #sigma/#mu = %4.2f", mean, mean_err, relSigma);
@@ -669,30 +714,30 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     if(i!=7) {
 
-      canvasRespL->cd(1);
+      canvasRespL_2dim->cd(1);
       drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"));
     
-      canvasRespL->cd(2);
+      canvasRespL_2dim->cd(2);
       drawResponse(respLGenJetPtGenJet_barrel[i], i,
 		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","|#eta| < 1.3"));
 
-      canvasRespL->cd(3);
+      canvasRespL_2dim->cd(3);
       drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","p_{T} > 30 GeV"), false);
 
     }
     
     if(i!=7) {
 
-      canvasRespL->cd(4);
+      canvasRespL_2dim->cd(4);
       drawResponse(respLGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespL->cd(5);
+      canvasRespL_2dim->cd(5);
       drawResponse(respLGenJetPtGenJet_barrel[i], i,
 		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","|#eta| < 1.3"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespL->cd(6);
+      canvasRespL_2dim->cd(6);
       drawResponse(respLGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"udsc","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
@@ -700,15 +745,15 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     if(i==5 || i==7) {
 
-      canvasRespL->cd(7);
+      canvasRespL_2dim->cd(7);
       drawResponse(respLPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespL->cd(8);
+      canvasRespL_2dim->cd(8);
       drawResponse(respLPartonPtParton_barrel[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)",
 		   title(algo,"udsc","|#eta| < 1.3"), true, yMin_zoom, yMax_zoom);
 
-      canvasRespL->cd(9);
+      canvasRespL_2dim->cd(9);
       drawResponse(respLPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"udsc","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
@@ -718,30 +763,30 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     if(i!=7) {
 
-      canvasRespB->cd(1);
+      canvasRespB_2dim->cd(1);
       drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"));
     
-      canvasRespB->cd(2);
+      canvasRespB_2dim->cd(2);
       drawResponse(respBGenJetPtGenJet_barrel[i], i,
 		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","|#eta| < 1.3"));
 
-      canvasRespB->cd(3);
+      canvasRespB_2dim->cd(3);
       drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b","p_{T} > 30 GeV"), false);
 
     }
 
     if(i!=7) {
 
-      canvasRespB->cd(4);
+      canvasRespB_2dim->cd(4);
       drawResponse(respBGenJetPtGenJet[i], i, "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespB->cd(5);
+      canvasRespB_2dim->cd(5);
       drawResponse(respBGenJetPtGenJet_barrel[i], i,
 		   "p_{T} (had) [GeV]", "p_{T} (rec) / p_{T} (had)", title(algo,"b","|#eta| < 1.3"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespB->cd(6);
+      canvasRespB_2dim->cd(6);
       drawResponse(respBGenJetEta[i], i, "#eta (had)", "p_{T} (rec) / p_{T} (had)", title(algo,"b","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
@@ -749,16 +794,16 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
     if(i==5 || i==7) {
       
-      canvasRespB->cd(7);
+      canvasRespB_2dim->cd(7);
       drawResponse(respBPartonPtParton[i], i, "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespB->cd(8);
+      canvasRespB_2dim->cd(8);
       drawResponse(respBPartonPtParton_barrel[i], i,
 		   "p_{T} (parton) [GeV]", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","|#eta| < 1.3"),
 		   true, yMin_zoom, yMax_zoom);
 
-      canvasRespB->cd(9);
+      canvasRespB_2dim->cd(9);
       drawResponse(respBPartonEta[i], i, "#eta (parton)", "p_{T} (rec) / p_{T} (parton)", title(algo,"b","p_{T} > 30 GeV"),
 		   false, yMin_zoom, yMax_zoom);
 
@@ -827,7 +872,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
     suffix += i;
     suffix += ".eps";
 
-    canvasRespL->cd(i);
+    canvasRespL_2dim->cd(i);
     if(i <= 3)
       legend_035->Draw();
     else if(i <= 6)
@@ -836,7 +881,7 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
       legend_57->Draw();
     gPad->Print(baseName+"responseLight" + suffix);
 
-    canvasRespB->cd(i);
+    canvasRespB_2dim->cd(i);
     if(i <= 3)
       legend_035->Draw();
     else if(i <= 6)
@@ -851,12 +896,14 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
 
   TString psName = outDir + "/" + name + "_" + hypoClass + ".ps";
 
-  canvasMassW     ->Print(psName + "(");
+  canvasRespL     ->Print(psName + "(");
+  canvasRespL_2dim->Print(psName);
+  canvasRespB     ->Print(psName);
+  canvasRespB_2dim->Print(psName);
+  canvasMassW     ->Print(psName);
   canvasMassW_2dim->Print(psName);
   canvasMassT     ->Print(psName);
-  canvasMassT_2dim->Print(psName);
-  canvasRespL     ->Print(psName);
-  canvasRespB     ->Print(psName + ")");
+  canvasMassT_2dim->Print(psName + ")");
 
   // clean-up
 
@@ -865,7 +912,9 @@ int analyzeJetEnergyCorrections(TString name = "analyzeJetEnergyCorrections.root
   delete canvasMassT;
   delete canvasMassT_2dim;
   delete canvasRespL;
+  delete canvasRespL_2dim;
   delete canvasRespB;
+  delete canvasRespB_2dim;
 
   return 0;
 }
