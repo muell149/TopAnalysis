@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 # in the muon+jets channel
 #-------------------------------------------------
 
-process = cms.Process("SYNC")
+process = cms.Process("SYNC-ON-PAT")
 
 #-------------------------------------------------
 # process configuration
@@ -19,13 +19,14 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0011/40932C57-1247-DF11-8E83-0030487D5059.root'
+    '/store/user/snaumann/sync/patTuple_afterStep2_1_1.root'
+    #'/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0011/40932C57-1247-DF11-8E83-0030487D5059.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -99,9 +100,9 @@ process.isolatedMuons010 = cleanPatMuons.clone(preselection =
                                                'abs(dB) < 0.02'
                                                )
 process.isolatedMuons010.checkOverlaps = cms.PSet(
-    jets = cms.PSet(src       = cms.InputTag("patJets"),
+    jets = cms.PSet(src       = cms.InputTag("goodJets"),
                     algorithm = cms.string("byDeltaR"),
-                    preselection        = cms.string("pt > 30."),
+                    preselection        = cms.string(""),
                     deltaR              = cms.double(0.3),
                     checkRecoComponents = cms.bool(False),
                     pairCut             = cms.string(""),
@@ -185,7 +186,8 @@ setForAllTtSemiLepHypotheses(process, "maxNJets", -1)
 
 process.looseSequence = cms.Sequence(process.step1 *
                                      process.step2 *
-                                     process.patDefaultSequence *
+                                     #process.patDefaultSequence *
+                                     process.goodJets *
                                      process.isolatedMuons010 *
                                      process.step3b *
                                      #process.analyzeMuon *
@@ -193,7 +195,6 @@ process.looseSequence = cms.Sequence(process.step1 *
                                      process.step4 *
                                      process.vetoElectrons *
                                      process.step5 *
-                                     process.goodJets *
                                      process.step6a *
                                      process.step6b *
                                      process.step6c #*
@@ -202,7 +203,8 @@ process.looseSequence = cms.Sequence(process.step1 *
 
 process.tightSequence = cms.Sequence(process.step1 *
                                      process.step2 *
-                                     process.patDefaultSequence *
+                                     #process.patDefaultSequence *
+                                     process.goodJets *
                                      process.isolatedMuons010 *
                                      process.isolatedMuons005 *
                                      process.step3a *
@@ -210,7 +212,6 @@ process.tightSequence = cms.Sequence(process.step1 *
                                      process.step4 *
                                      process.vetoElectrons *
                                      process.step5 *
-                                     process.goodJets *
                                      process.step6a *
                                      process.step6b *
                                      process.step6c *
