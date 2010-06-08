@@ -37,7 +37,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('START36_V7::All')
+process.GlobalTag.globaltag = cms.string('START36_V9::All')
 
 #-------------------------------------------------
 # trigger
@@ -67,8 +67,9 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 ## remove MC matching, photons, taus and cleaning from PAT default sequence
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeMCMatching(process, ['All'])
+
 removeSpecificPATObjects(process,
-                         ['Photons', 'Taus'],
+                         ['Photons','Taus'],
                          outputInProcess=False)
 removeCleaning(process,
                outputInProcess=False)
@@ -83,29 +84,39 @@ process.patJetCorrFactors.corrSample = "Spring10"
 # muon selection
 #-------------------------------------------------
 
-from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.isolatedMuons010 = selectedPatMuons.clone(src = 'selectedPatMuons',
-                                                  cut =
-                                                  'isGlobalMuon &'
-                                                  'pt > 20. &'
-                                                  'abs(eta) < 2.1 &'
-                                                  '(trackIso+caloIso)/pt < 0.1 &'
-                                                  'innerTrack.numberOfValidHits >= 11 &'
-                                                  'globalTrack.normalizedChi2 < 10.0 &'
-                                                  'isolationR03.emVetoEt < 4 &'
-                                                  'isolationR03.hadVetoEt < 6 &'
-                                                  'abs(dB/edB) < 3'
-                                                 )
-process.isolatedMuons005 = selectedPatMuons.clone(src = 'isolatedMuons010',
-                                                  cut = '(trackIso+caloIso)/pt < 0.05'
-                                                  )
-process.vetoMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
-                                           cut =
-                                           'isGlobalMuon &'
-                                           'pt > 10. &'
-                                           'abs(eta) < 2.5 &'
-                                           '(trackIso+caloIso)/pt < 0.2'
-                                           )
+#calculate impact parameter w.r.t beam spot (instead of primary vertex)
+process.patMuons.usePV = False
+
+from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import *
+process.isolatedMuons010 = cleanPatMuons.clone(preselection =
+                                               'isGlobalMuon & isTrackerMuon &'
+                                               'pt > 20. &'
+                                               'abs(eta) < 2.1 &'
+                                               '(trackIso+caloIso)/pt < 0.1 &'
+                                               'innerTrack.numberOfValidHits > 10 &'
+                                               'globalTrack.normalizedChi2 < 10.0 &'
+                                               'globalTrack.hitPattern.numberOfValidMuonHits > 0 &'
+                                               'abs(dB) < 0.02'
+                                               )
+process.isolatedMuons010.checkOverlaps = cms.PSet(
+    jets = cms.PSet(src       = cms.InputTag("patJets"),
+                    algorithm = cms.string("byDeltaR"),
+                    preselection        = cms.string("pt > 30."),
+                    deltaR              = cms.double(0.3),
+                    checkRecoComponents = cms.bool(False),
+                    pairCut             = cms.string(""),
+                    requireNoOverlaps   = cms.bool(True),
+                    )
+    )
+process.isolatedMuons005 = cleanPatMuons.clone(src = 'isolatedMuons010',
+                                               preselection = '(trackIso+caloIso)/pt < 0.05'
+                                               )
+process.vetoMuons = cleanPatMuons.clone(preselection =
+                                        'isGlobalMuon &'
+                                        'pt > 10. &'
+                                        'abs(eta) < 2.5 &'
+                                        '(trackIso+caloIso)/pt < 0.2'
+                                        )
 
 from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 process.step3a = countPatMuons.clone(src = 'isolatedMuons005', minNumber = 1, maxNumber = 1)
@@ -120,7 +131,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
 process.vetoElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                                    cut =
                                                    'et > 15. &'
-                                                   '(trackIso+caloIso)/et <  0.2'
+                                                   '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
                                                    )
 
 from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
@@ -241,7 +252,7 @@ process.tightSelection = cms.Path(process.tightSequence)
 #    process.EventSelection,
 #    outputCommands = cms.untracked.vstring('drop *'),
 #    dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
-#    fileName = cms.untracked.string('patTuple_v2_afterStep2.root')
+#    fileName = cms.untracked.string('patTuple_afterStep2.root')
 #)
 #
 ### save pat output
