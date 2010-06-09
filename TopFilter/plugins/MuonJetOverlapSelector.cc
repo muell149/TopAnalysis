@@ -36,10 +36,10 @@ MuonJetOverlapSelector::produce(edm::Event& event, const edm::EventSetup& setup)
   std::auto_ptr<std::vector<pat::Muon> > outMuons(new std::vector<pat::Muon>);  
 
   for(std::vector<pat::Muon>::const_iterator muon=muons->begin(); muon!=muons->end(); ++muon){
-    double minDR = -1.;
+    double minDR = 1000.;
     for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
       double dR = deltaR<const pat::Muon, const pat::Jet>(*muon, *jet); 
-      if( minDR<0 || dR<minDR ){ minDR = dR; }
+      if( dR<minDR )minDR = dR;
     }
     if( pushElement(minDR) ){
       outMuons->push_back(*muon);
