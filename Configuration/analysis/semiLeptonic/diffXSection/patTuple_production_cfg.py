@@ -30,11 +30,14 @@ addJetCollection35X(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                     doBTagging   = True,
                     jetCorrLabel = ('AK5', 'PF'),
                     doType1MET   = False,
-                    doL1Cleaning = True,
+                    doL1Cleaning = False,
                     doL1Counters = False,
                     genJetCollection=cms.InputTag('ak5GenJets'),
                     doJetID      = True,
-                    ) 
+                    )
+
+# use BeamSpot (not PrimaryVertex) for IP calculation
+process.patMuons.usePV = False
 
 # embed IsoDeposits
 process.patMuons.isoDeposits = cms.PSet(
@@ -95,8 +98,8 @@ process.patJetCorrFactorsAK5PF.sampleType = 'ttbar'
 from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.fileName = cms.untracked.string('PATtuple.root')
 process.out.outputCommands = patExtraAodEventContent
-process.out.outputCommands+= patEventContent
-process.out.outputCommands+= ['drop *_towerMaker_*_*', 'drop *_cleanPatHemispheres*_*_*', 'keep *_ak5GenJets_*_*']
+process.out.outputCommands+= patEventContentNoCleaning
+process.out.outputCommands+= ['drop *_towerMaker_*_*', 'keep *_ak5GenJets_*_*']
 
 
 ## Maximal Number of Events
