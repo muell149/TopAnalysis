@@ -1,7 +1,7 @@
 #####
 ##### script, originally from Sal Rapp. (https://hypernews.cern.ch/HyperNews/CMS/get/swDevelopment/2276/1/2/1/1/1/1.html),
 ##### modified to parse different paths separately
-##### $Id: parseTrigReport.py,v 1.1 2010/05/18 10:41:05 snaumann Exp $
+##### $Id: parseTrigReport.py,v 1.2 2010/05/18 10:53:50 snaumann Exp $
 #####
 ##### usage: python TopAnalysis/Configuration/analysis/firstCollisions/parseTrigReport.py Run135175/res/CMSSW_*.stdout
 #####
@@ -44,5 +44,18 @@ modules = ['step1','step2','step3b','step4','step5','step6a','step6b','step6c']
 parseTrigReport(path, modules)
 
 path = 'tightSelection'
+modules = ['step1','step2','step3a','step4','step5','step6a','step6b','step6c','step7']
+parseTrigReport(path, modules)
+
+print "====================================================================================================="
+print "The following two paths are only used on ttbar MC samples, where the standard paths contain the ttbar"
+print "signal channel and the ttbarOther paths all the rest."
+print "====================================================================================================="
+
+path = 'looseSelection_ttbarOther'
+modules = ['step1','step2','step3b','step4','step5','step6a','step6b','step6c']
+parseTrigReport(path, modules)
+
+path = 'tightSelection_ttbarOther'
 modules = ['step1','step2','step3a','step4','step5','step6a','step6b','step6c','step7']
 parseTrigReport(path, modules)
