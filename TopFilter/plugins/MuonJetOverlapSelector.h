@@ -16,7 +16,7 @@
    \brief   Plugin to select the muons with or without overlap to the nearest jet
 
    The class selects muons with or without overlap with the nearest jet within a cone of 
-   given radius deltaR. It has the a muon collection and as jet collection as input. Note 
+   given radius deltaR. It has a muon collection and a jet collection as input. Note 
    that there is no selection for the choice of jets or muons within the analyzer. The
    parameter deltaR can be specified. The output is a std::vector<pat::Muon> which on the 
    choice of the user contains muons with overlap to the nearest jet or not.
