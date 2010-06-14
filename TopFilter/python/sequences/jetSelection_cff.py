@@ -16,8 +16,9 @@ reliableJets = selectedPatJets.clone(src = 'selectedPatJets',
                                      )
 goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                      cut = 'abs(eta) < 2.4 & pt > 30. &'
-                                           '0.05 < emEnergyFraction   & '
-                                           '0.95 > emEnergyFraction'
+                                           'emEnergyFraction >0.01    &'
+                                           'jetID.fHPD < 0.98         &'
+                                           'jetID.n90Hits > 1'
                                      )
 
 goodJetsCalo = selectedPatJets.clone(src = 'selectedPatJets',
@@ -37,6 +38,36 @@ goodJetsPF   = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
                                            'nConstituents > 0'
                                       )
 
+## N-1 collections
+noEtaJets      = selectedPatJets.clone(src = 'selectedPatJets',
+                                       cut = 'pt > 30.                  &'
+                                             '0.1 < emEnergyFraction    &'
+                                             'jetID.fHPD < 0.98         &'
+                                             'jetID.n90Hits > 1'
+                                       )
+noPtJets       = selectedPatJets.clone(src = 'selectedPatJets',
+                                       cut = 'abs(eta) < 2.4            &'
+                                             '0.1 < emEnergyFraction    &'
+                                             'jetID.fHPD < 0.98         &'
+                                             'jetID.n90Hits > 1'
+                                       )
+noEmJets       = selectedPatJets.clone(src = 'selectedPatJets',
+                                       cut = 'pt > 30. & abs(eta) < 2.4 &'
+                                             '0.1 < emEnergyFraction    &'
+                                             'jetID.fHPD < 0.98         &'
+                                             'jetID.n90Hits > 1'
+                                       )
+noN90HitsJets  = selectedPatJets.clone(src = 'selectedPatJets',
+                                       cut = 'pt > 30. & abs(eta) < 2.4 &'
+                                             '0.1 < emEnergyFraction    &'
+                                             'jetID.fHPD < 0.98          '                                      
+                                       )
+nofHPDJets     = selectedPatJets.clone(src = 'selectedPatJets',
+                                       cut = 'pt > 30. & abs(eta) < 2.4 &'
+                                             '0.1 < emEnergyFraction    &'
+                                             'jetID.n90Hits > 1'                                 
+                                       )
+
 ## a kinematically well defined jet with
 ## reliable calibration and a robust rej
 ## of photons, electrons and prompt pi0's
@@ -45,7 +76,15 @@ selectGoodJets = cms.Sequence(centralJets  *
                               goodJets
                               )
 
-                               
+## collect the N-1 collections
+selectNMinusOneJets = cms.Sequence(noEtaJets*
+                                   noPtJets*
+                                   noEmJets*
+                                   noN90HitsJets*
+                                   nofHPDJets
+                                   )
+
+
 ## check for different btag properties
 trackCountingHighPurBJets     = selectedPatJets.clone(src = 'goodJets',
                                                       cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 2.17'

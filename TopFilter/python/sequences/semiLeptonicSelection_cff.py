@@ -25,15 +25,13 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 ## ---
 
 ## setup the lepton selection collections
-tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
-                                        cut = '(trackIso+caloIso)/pt < 0.05'
-                                        )
+## for tight Muons see muonSelection_cff.py
 looseMuons     = selectedPatMuons.clone(src = 'triggerMuons',
                                         cut = '(trackIso+caloIso)/pt <  0.2'
                                         )
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
-                                            cut = 'et > 15. &'
-                                            '(trackIso+caloIso)/et <  0.2'
+                                            cut = 'et > 15. & abs(eta) < 2.5 &'
+                                            '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
                                             )
 
 ## setup jet selection collection
@@ -48,12 +46,18 @@ tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
 ## event selection; on these collection monitoring
 ## can still be performed
 semiLeptonicSelection = cms.Sequence(looseElectrons   *
+                                     standAloneMuons  *
+                                     vetoJets         *
+                                     dRMuons          *
+                                     combinedMuons    *
                                      triggerMuons     *
                                      trackMuons       *
                                      goodMuons        *
                                      goldenMuons      *
                                      looseMuons       *
                                      tightMuons       *
+                                     centralJets      *
+                                     reliableJets     *
                                      goodJets         *
                                      trackCountingHighPurBJets *
                                      tightLeadingJets *
