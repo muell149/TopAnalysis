@@ -322,6 +322,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   TH1F* theta[2];
 
   TH2F* enSmearVsGen;
+  TH2F* ptSmearVsGen;
 
   TH1F* respL[6][nSystematicSets];
   TH1F* respB[6][nSystematicSets];
@@ -375,6 +376,7 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   }
 
   enSmearVsGen = cloneObjectFromFile<TH2F*>(file[0], inDirBase + "/enSmearVsGen");
+  ptSmearVsGen = cloneObjectFromFile<TH2F*>(file[0], inDirBase + "/ptSmearVsGen");
 
   for(unsigned d = 0; d < 4; d++) {
 
@@ -645,6 +647,16 @@ int analyzeJetEnergyResolutionBias(TString fileName1 = "analyzeJetEnergyResoluti
   txtTheta->AddText(tmpTxt);
   txtTheta->Draw();
   gPad->Print(outDir + "/theta.eps");
+
+  setAxisStyle(ptSmearVsGen);
+  ptSmearVsGen->SetStats(kFALSE);
+  ptSmearVsGen->SetTitle("");
+  ptSmearVsGen->SetXTitle("p_{T}^{gen}");
+  ptSmearVsGen->SetYTitle("p_{T}^{smear}");
+  canvasBase->cd(9);
+  setPadStyle();
+  ptSmearVsGen->DrawCopy("box");
+  gPad->Print(outDir + "/ptSmearVsGen.eps");
 
   for(unsigned i = 0; i < 6; i++) {
     TString title = "p_{T}^{smear} > ";

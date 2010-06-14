@@ -13,6 +13,7 @@ process.source = cms.Source("PoolSource",
     '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0016/2CB76F28-9D47-DF11-959F-003048C693E4.root'
      )
 )
+execfile("TopAnalysis/Configuration/analysis/semiLeptonic/jetEnergy/Source_7TeV_cff.py")
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(

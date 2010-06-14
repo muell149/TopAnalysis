@@ -54,6 +54,9 @@ void JetEnergyResolutionBiasAnalyzer::beginJob()
   hists_["enSmearVsGen"] = fs->make<TH2F>("enSmearVsGen", "enSmearVsGen",
 					  50, 0., 250., 51, 0., 2.);
 
+  hists_["ptSmearVsGen"] = fs->make<TH2F>("ptSmearVsGen", "ptSmearVsGen",
+					  50, 0., 250., 50, 0., 250.);
+
   hists_["respL_0" ] = fs->make<TH1F>("respL_0" , "respL_0" , 201, 0., 2.);
   hists_["respL_10"] = fs->make<TH1F>("respL_10", "respL_10", 201, 0., 2.);
   hists_["respL_20"] = fs->make<TH1F>("respL_20", "respL_20", 201, 0., 2.);
@@ -239,6 +242,10 @@ JetEnergyResolutionBiasAnalyzer::analyze(const edm::Event& event, const edm::Eve
   hists_.find("enSmearVsGen")->second->Fill( hadB->energy(), vecB.Energy() / hadB->energy() );
   hists_.find("enSmearVsGen")->second->Fill( hadP->energy(), vecP.Energy() / hadP->energy() );
   hists_.find("enSmearVsGen")->second->Fill( hadQ->energy(), vecQ.Energy() / hadQ->energy() );
+
+  hists_.find("ptSmearVsGen")->second->Fill( hadB->pt(), vecB.Pt()  );
+  hists_.find("ptSmearVsGen")->second->Fill( hadP->pt(), vecP.Pt()  );
+  hists_.find("ptSmearVsGen")->second->Fill( hadQ->pt(), vecQ.Pt()  );
 
   TLorentzVector vecW = vecP + vecQ;
   TLorentzVector vecT = vecB + vecW;
