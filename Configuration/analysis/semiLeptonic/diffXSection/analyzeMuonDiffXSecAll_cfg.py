@@ -4,10 +4,11 @@
 ## ---
 
 ## get the mother file
-execfile("/afs/naf.desy.de/user/g/goerner/semileptonic356/analyzeMuonDiffXSec_cfg.py")
+execfile("/afs/naf.desy.de/user/g/goerner/semileptonic361/analyzeMuonDiffXSec_cfg.py")
 
 ## remove gen level event filter
-process.filterSequence = cms.Sequence(process.hltMu9)
+process.filterSequence  = cms.Sequence(process.hltMu9)
+process.filterSequenceb = cms.Sequence(process.hltMu9b)
 process.p3.remove(process.genFilterSequence)
 print "all gen level filters using ttbar decay subset are removed" 
 print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"

@@ -11,7 +11,7 @@ process = cms.Process("p1")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 #-------------------------------------------------
 # process configuration
@@ -21,7 +21,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    '/store/user/henderle/Spring10/WJets_MAD/PATtuple_1.root'
+    '/store/user/henderle/Spring10/WJets_MAD_new/PATtuple_100_1.root'
     )
 )
 
