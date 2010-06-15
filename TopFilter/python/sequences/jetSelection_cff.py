@@ -41,30 +41,29 @@ goodJetsPF   = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
 ## N-1 collections
 noEtaJets      = selectedPatJets.clone(src = 'selectedPatJets',
                                        cut = 'pt > 30.                  &'
-                                             '0.1 < emEnergyFraction    &'
+                                             '0.01 < emEnergyFraction   &'
                                              'jetID.fHPD < 0.98         &'
                                              'jetID.n90Hits > 1'
                                        )
 noPtJets       = selectedPatJets.clone(src = 'selectedPatJets',
                                        cut = 'abs(eta) < 2.4            &'
-                                             '0.1 < emEnergyFraction    &'
+                                             '0.01 < emEnergyFraction   &'
                                              'jetID.fHPD < 0.98         &'
                                              'jetID.n90Hits > 1'
                                        )
 noEmJets       = selectedPatJets.clone(src = 'selectedPatJets',
                                        cut = 'pt > 30. & abs(eta) < 2.4 &'
-                                             '0.1 < emEnergyFraction    &'
                                              'jetID.fHPD < 0.98         &'
                                              'jetID.n90Hits > 1'
                                        )
 noN90HitsJets  = selectedPatJets.clone(src = 'selectedPatJets',
                                        cut = 'pt > 30. & abs(eta) < 2.4 &'
-                                             '0.1 < emEnergyFraction    &'
+                                             '0.01 < emEnergyFraction   &'
                                              'jetID.fHPD < 0.98          '                                      
                                        )
 nofHPDJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                        cut = 'pt > 30. & abs(eta) < 2.4 &'
-                                             '0.1 < emEnergyFraction    &'
+                                             '0.01 < emEnergyFraction   &'
                                              'jetID.n90Hits > 1'                                 
                                        )
 
