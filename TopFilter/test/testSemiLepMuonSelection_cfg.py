@@ -18,7 +18,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_7TeV_AODSIM-v1/0008/EEF99041-6C9E-DE11-9254-00163E11249A.root'
+    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0016/2CB76F28-9D47-DF11-959F-003048C693E4.root'
     )
 )
 
@@ -66,24 +66,19 @@ removeSpecificPATObjects(process,
 removeCleaning(process,
                outputInProcess=False)
 
-from PhysicsTools.PatAlgos.tools.jetTools import *
-switchJetCollection(process, 
-                    cms.InputTag('antikt5CaloJets'),   
-                    doJTA            = True,            
-                    doBTagging       = True,            
-                    jetCorrLabel     = ('AK5','Calo'),  
-                    doType1MET       = True,
-                    genJetCollection = cms.InputTag("antikt5GenJets"),
-                    doJetID          = False,
-                    jetIdLabel       = "antikt5"
-                    )
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
+
+## add ak5GenJet
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.JetProducers.ak5GenJets_cfi")
+process.patDefaultSequence.replace(getattr(process,"patCandidates"),
+                                   process.genParticlesForJets
+                                   + getattr(process,"ak5GenJets")
+                                   + getattr(process,"patCandidates"))
 
 process.patJetCorrFactors.corrSample = 'Spring10'
 process.patJetCorrFactors.sampleType = "ttbar"
-
-## add muon user isolation
-from PhysicsTools.PatAlgos.tools.muonTools import addMuonUserIsolation
-addMuonUserIsolation(process)
 
 #-------------------------------------------------
 # the path
