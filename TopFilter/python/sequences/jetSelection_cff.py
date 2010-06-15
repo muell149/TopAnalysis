@@ -16,24 +16,16 @@ reliableJets = selectedPatJets.clone(src = 'selectedPatJets',
                                      )
 goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                      cut = 'abs(eta) < 2.4 & pt > 30. &'
-                                           'emEnergyFraction >0.01    &'
+                                           'emEnergyFraction > 0.01   &'
                                            'jetID.fHPD < 0.98         &'
                                            'jetID.n90Hits > 1'
                                      )
-
-goodJetsCalo = selectedPatJets.clone(src = 'selectedPatJets',
-                                     cut = 'pt > 20. &'
-                                           '( (abs(eta) < 2.6 & 0.01 < emEnergyFraction) | (abs(eta) >= 2.6 & abs(eta) < 3.0) ) &'
-                                           'jetID.fHPD < 0.98 &'
-                                           'jetID.n90Hits > 1'
-                                     )
-
 goodJetsPF   = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
-                                     cut = 'pt > 20. &'
-                                           '( (abs(eta) >= 2.4 & abs(eta) < 3.0) | (abs(eta) < 2.4 & chargedHadronEnergyFraction > 0.0) ) &'
-                                           'neutralHadronEnergyFraction < 1.0 &'
-                                           'chargedEmEnergyFraction < 1.0 &'
-                                           'neutralEmEnergyFraction < 1.0 &'
+                                     cut = 'abs(eta) < 2.4 & pt > 20.                 &'
+                                           'chargedHadronEnergyFraction > 0.0         &'
+                                           'neutralHadronEnergyFraction < 0.99        &'
+                                           'chargedEmEnergyFraction < 0.99            &'
+                                           'neutralEmEnergyFraction < 0.99            &'
                                            'pfSpecific.mChargedHadronMultiplicity > 0 &'
                                            'nConstituents > 0'
                                       )
