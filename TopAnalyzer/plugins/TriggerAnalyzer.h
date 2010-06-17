@@ -2,7 +2,6 @@
 #define TriggerAnalyzer_h
 
 #include <string>
-#include <cstring>
 #include <vector>
 
 #include "TH1.h"
@@ -13,9 +12,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-
 
 /**
    \class   TriggerAnalyzer TriggerAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/TriggerAnalyzer.h"
@@ -27,14 +23,11 @@
    have passed any trigger vs. the number of rejected events. 
 */
 
-using namespace std;
-using namespace edm;
-
-class TriggerAnalyzer : public EDAnalyzer {
+class TriggerAnalyzer : public edm::EDAnalyzer {
 
   public:
     /// default constructor
-    explicit TriggerAnalyzer(const ParameterSet&);
+    explicit TriggerAnalyzer(const edm::ParameterSet&);
     /// default destructor
     ~TriggerAnalyzer();
     
@@ -42,20 +35,20 @@ class TriggerAnalyzer : public EDAnalyzer {
     /// initiate histograms
     virtual void beginJob();
     /// analyze triggers and fill histograms
-    virtual void analyze(const Event&, const EventSetup&);
+    virtual void analyze(const edm::Event&, const edm::EventSetup&);
     /// empty
     virtual void endJob();
     /// function to calculate binomial statistics error (needed for trigger efficiency hist)
     double binomialError(double, double);
         
     /// triger result input collection	
-    InputTag trigResults_;
+    edm::InputTag trigResults_;
     /// muon input collection
-    InputTag muons_;    
+    edm::InputTag muons_;    
     /// triggers to be studied given in config
-    vector<string> hltPaths_;
+    std::vector<std::string> hltPaths_;
     /// for this trigger extra histos are plotted (pt and eta)
-    string mainTrigger_;
+    std::string mainTrigger_;
     
     /// number of trigger paths given in config
     int n_TrigPaths;

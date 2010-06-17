@@ -1,9 +1,13 @@
 #include "TopAnalysis/TopAnalyzer/plugins/TriggerAnalyzer.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+
+using namespace std;
+using namespace edm;
 
 TriggerAnalyzer::TriggerAnalyzer(const ParameterSet& cfg)
 {
@@ -115,7 +119,7 @@ TriggerAnalyzer::analyze(const Event& evt, const EventSetup&)
   /// makes only sense if there is only one muon
   if(muons->size()!=1) return;
   
-  pat::Muon mu = muons->front();
+  vector<pat::Muon>::const_reference mu = muons->at(0);
   
   Pt_->Fill(mu.pt());  
   if(mainTrigFired){
