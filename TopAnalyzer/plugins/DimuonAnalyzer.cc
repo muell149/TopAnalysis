@@ -48,18 +48,36 @@ DimuonAnalyzer::beginJob()
   dimassWC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
   dimassWC_->GetYaxis()->SetTitle("N / 1GeV");  
   
-  // correlation between invariant mass and absolute combined isolation        
-  isoDimassCorrelation_ = fs->make<TH2F>( "isoDimassCorrelation", "isoDimassCorrelation", 10,   0.,   200., 10, 0., 1.);
-  
+  // number of muons in collection
+  nMu_  = fs->make<TH1F>( "nMu" , "Number of Muons"  , 10, -0.5, 9.5);
+  nMu_->GetXaxis()->SetTitle("N_{#mu}");
+  nMu_->GetYaxis()->SetTitle("N_{evts}"); 
+    
+  // dr between leading muons
+  drMu_ = fs->make<TH1F>( "drMu", "#Delta r (#mu#mu)",100,   0., 10.); 
+  drMu_->GetXaxis()->SetTitle("#Delta r");
+  drMu_->GetYaxis()->SetTitle("N_{evts}"); 
+   
   // absolute isolation efficiency
-  absCount_    = fs->make<TH1F>( "absCount"   , "absCount"    ,100,  0.,  50.0); 
-  // relative isolation efficiency       
-  relCount_    = fs->make<TH1F>( "relCount"   , "relCount"    ,100,  0.,   5.0); 
-  // combined isolation efficiency
-  combCount_   = fs->make<TH1F>( "combCount"  , "combCount"   ,100,  0.0,  5.0); 
-  // quadratically added combined isolation
-  diCombCount_ = fs->make<TH1F>( "diCombCount", "diCombCount" ,100,  0.0,  7.5);  
+  absCount_    = fs->make<TH1F>( "absCount"   , "Absolute Isolation"        ,100,  0.,  50.0); 
+  absCount_->GetXaxis()->SetTitle("Iso Cut [GeV]");
+  absCount_->GetYaxis()->SetTitle("N_{evts,pass}");   
   
+  // relative isolation efficiency       
+  relCount_    = fs->make<TH1F>( "relCount"   , "Relative Isolation"        ,100,  0.,   5.0); 
+  relCount_->GetXaxis()->SetTitle("Iso Cut");
+  relCount_->GetYaxis()->SetTitle("N_{evts,pass}");   
+  
+  // combined isolation efficiency
+  combCount_   = fs->make<TH1F>( "combCount"  , "Combined Isolation"        ,100,  0.0,  5.0); 
+  combCount_->GetXaxis()->SetTitle("Iso Cut");
+  combCount_->GetYaxis()->SetTitle("N_{evts,pass}");   
+  
+  // quadratically added combined isolation
+  diCombCount_ = fs->make<TH1F>( "diCombCount", "Combined 2 Muon Isolation" ,100,  0.0,  7.5);  
+  diCombCount_->GetXaxis()->SetTitle("Iso Cut");
+  diCombCount_->GetYaxis()->SetTitle("N_{evts,pass}");
+    
   // counts number of entries in given bins of invariant mass
   nEntries_ = fs->make<TH1F>( "nEntries", "nEntries" ,massBins_.size(), massBins_[0], massBins_[massBins_.size()-1]);      
 }
@@ -79,6 +97,8 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
     evt.getByLabel("eventWeight", weightHandle); 
     weight = *weightHandle;
   }
+ 
+  nMu_->Fill(muons->size());
     
   // test if muon collection contains at least two muons
   if(muons->size()<2) return;
@@ -103,6 +123,9 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   // wrong charge
   else 
     dimassWC_  ->Fill( dilepMass, weight);    
+
+  // calculate distance between leading 2 muons and fill it in hist
+  drMu_->Fill(deltaR(mu1.eta(), mu1.phi() ,mu2.eta(), mu2.phi()));
      
   // get different isos  
   double absTrackIso1 = mu1.trackIso();
@@ -122,9 +145,6 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   
   double diCombIso = sqrt(combIso1*combIso1+combIso2*combIso2);
   
-  // fill dimass-isolation correlation hist  
-  isoDimassCorrelation_->Fill( dilepMass, combIso1, weight);  
-  isoDimassCorrelation_->Fill( dilepMass, combIso2, weight);
   
   // fill isolation efficiency hists    
   for(int i=1;i<=100;++i){

@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "TH1.h"
-#include "TH2.h"
 #include "TString.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -56,13 +55,15 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     typedef std::vector<pat::Muon> PatMuonCollection;
     /// true if leading muons have same charge
     bool isWrongCharge; 
-    /// plots for right-charge dimuon mass    
+    /// plot for right-charge dimuon mass    
     TH1F * dimassRC_;
-    /// plots for wrong-charge dimuon mass
+    /// plot for wrong-charge dimuon mass
     TH1F * dimassWC_;
-      
-    /// correlation between dimuon mass and isolation        
-    TH2F * isoDimassCorrelation_;   
+ 
+    /// number of muons    
+    TH1F * nMu_;
+    /// dr between leading muons
+    TH1F * drMu_;
     
     /// isolation efficiency for absolute cut
     TH1F * absCount_;
@@ -71,8 +72,9 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     /// isolation efficiency for combined cut
     TH1F * combCount_;
     /// isolation efficiency for quadratically added combined isolation
-    TH1F * diCombCount_; 
-    /// counts number of entries in given bins of invariant mass
+    TH1F * diCombCount_;
+     
+    /// counts number of entries in given bins of invariant mass (will be used for DY BG estiamtion)
     TH1F * nEntries_;
 };
 
