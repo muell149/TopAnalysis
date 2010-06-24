@@ -5,9 +5,12 @@ filterDiMuonMass = cms.EDAnalyzer("DiMuonMassFilter",
     ## sources
     muons = cms.InputTag("selectedPatMuons"),
     
+    ## determine if given mass window is to be 
+    ## selected (False) or vetoed (True)
+    isVeto = cms.bool(True),
+    
     ## cuts on muon muon mass
-    qcdCut = cms.double(20.),
-    zCut   = cms.vdouble(76.,106.)
+    Cut   = cms.vdouble(76.,106.)
 )
 
 

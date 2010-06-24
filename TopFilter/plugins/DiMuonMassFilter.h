@@ -1,9 +1,6 @@
 #ifndef DiMuonMassFilter_h  
 #define DiMuonMassFilter_h
 
-#include <memory>
-#include <iostream>
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -36,10 +33,10 @@ class DiMuonMassFilter : public edm::EDFilter {
  private:
   /// muon collection label
   edm::InputTag muons_;
-  /// veto cut on low mass resonances like J/Psi, default is 20GeV 
-  double qcdCut_;
-  /// veto cuts on Z-mass, default values are 80GeV, 105GeV
-  std::vector<double> zCut_;
+  /// true if cut window is vetoed, false if window is to be selected
+  bool isVeto_;
+  /// cut on Z-mass, default values are 76GeV, 106GeV
+  std::vector<double> Cut_;
   
 };  
 

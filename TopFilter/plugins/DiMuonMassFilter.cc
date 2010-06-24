@@ -1,13 +1,12 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TopAnalysis/TopFilter/plugins/DiMuonMassFilter.h"
-
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 /// default constructor 
 DiMuonMassFilter::DiMuonMassFilter(const edm::ParameterSet& cfg):
   muons_ (cfg.getParameter<edm::InputTag>(       "muons"  )),
-  qcdCut_(cfg.getParameter<double>(              "qcdCut" )),
-  zCut_  (cfg.getParameter<std::vector<double> >("zCut"   ))  
+  isVeto_(cfg.getParameter<bool>(                "isVeto" )),
+  Cut_   (cfg.getParameter<std::vector<double> >("Cut"    ))  
 {
 }
 
@@ -21,8 +20,8 @@ void
 DiMuonMassFilter::beginJob()
 { 
   edm::LogError err("topFilter");
-  if(zCut_.size()!=2)   err << "zCut has wrong size. Size has to be 2!\n";
-  if(zCut_[0]>zCut_[1]) err << "Lower zCut is higher than upper zCut. All events will be skipped!\n";
+  if(Cut_.size()!=2)  err << "Cut has wrong size. Size has to be 2!\n";
+  if(Cut_[0]>Cut_[1]) err << "Lower cut value is higher than upper one!\n";
 }
 
 /// event veto
@@ -33,13 +32,20 @@ DiMuonMassFilter::filter(edm::Event& event, const edm::EventSetup& setup)
   edm::Handle<std::vector<pat::Muon> > muons;
   event.getByLabel(muons_, muons);
   
-  bool pass=true;  
-  if( muons->size()>1 ){ 
-    reco::Particle::LorentzVector diMuon = (*muons)[0].p4() + (*muons)[1].p4();
-    double diMuonMass = sqrt( diMuon.Dot(diMuon) );
-    if( (diMuonMass>zCut_[0] && diMuonMass<=zCut_[1]) || diMuonMass < qcdCut_ ){ 
-      pass=false;
-    }    
-  }    
-  return pass;
+  // skip events with less than 2 muons
+  if(muons->size()<=1) return false;
+  
+  // reconstruct invariant mass of leading 2 muons
+  reco::Particle::LorentzVector diMuon = (*muons)[0].p4() + (*muons)[1].p4();
+  double diMuonMass = sqrt( diMuon.Dot(diMuon) );
+    
+  // check if events in mass window are to be selected or vetoed
+  if(isVeto_){
+    if(diMuonMass < Cut_[0] || diMuonMass > Cut_[1]) return true;
+    return false;
+  }  
+  else{ // no veto but selection of mass window
+    if(diMuonMass > Cut_[0] && diMuonMass < Cut_[1]) return true;
+    return false;  
+  }         
 }
