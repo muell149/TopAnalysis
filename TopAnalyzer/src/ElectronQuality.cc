@@ -95,7 +95,7 @@ ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& w
       // d0 significance of track (still to nominal IP)
       hists_.find("d0"  )            ->second->Fill( electron->gsfTrack()->d0(), weight );
       // relative isolation (tracker and calo combined)
-      hists_.find("relIso")          ->second->Fill( (electron->trackIso()+electron->caloIso())/electron->et() , weight );    
+      hists_.find("relIso")          ->second->Fill( (electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/electron->et(), weight );    
       // energy in ecal corrected on SC level
       hists_.find("ecalEn")          ->second->Fill( electron->ecalEnergy(), weight );
       // energy from super cluster attached to the candidate trajectory
