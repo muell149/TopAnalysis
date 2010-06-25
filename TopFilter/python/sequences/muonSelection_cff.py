@@ -30,28 +30,27 @@ standAloneMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
 combinedMuons   = selectedPatMuons.clone(src = 'selectedPatMuons',
                                          cut = 'combinedMuon.isNull = 0'
                                          )
+## select Muons with high pt
+highPtMuons    = selectedPatMuons.clone(src = 'combinedMuons',
+                                        cut = 'pt > 20.'
+                                        )
+
 ## check muon kinematics
-triggerMuons    = selectedPatMuons.clone(src = 'combinedMuons',
-                                         cut = 'abs(eta) < 2.5 & pt > 10.'
-                                         )
+kinematicMuons    = selectedPatMuons.clone(src = 'highPtMuons',
+                                           cut = 'abs(eta) < 2.1'
+                                           )
 
 ## check tracker related muon qualities: isGlobalMuonPromptTight? & Tracker Muon & impact parameter
-trackMuons = selectedPatMuons.clone(src = 'triggerMuons',
+trackMuons = selectedPatMuons.clone(src = 'kinematicMuons',
                                     cut = 'isTrackerMuon() =1 &'
                                           'innerTrack.numberOfValidHits >= 11 &'
                                           'globalTrack.normalizedChi2 < 10.0  &'
                                           'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
                                           'abs(dB)<0.02'
                                     )
-## restrict kinematic range
-goodMuons    = selectedPatMuons.clone(src = 'trackMuons',
-                                      cut = 'abs(eta) < 2.1 & pt > 20.'
-                                      )
-
-
 
 ## check for good isolation concerning surrounding jets (MIP-qualities)
-goldenMuons = checkJetOverlapMuons.clone(muons = "goodMuons",
+goldenMuons = checkJetOverlapMuons.clone(muons = "trackMuons",
                                          jets =  "vetoJets" ,
                                          deltaR  = cms.double(0.3),
                                          overlap = cms.bool(False)

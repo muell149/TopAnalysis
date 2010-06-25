@@ -26,8 +26,9 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
 ## setup the lepton selection collections
 ## for tight Muons see muonSelection_cff.py
-looseMuons     = selectedPatMuons.clone(src = 'triggerMuons',
-                                        cut = '(trackIso+caloIso)/pt <  0.2'
+looseMuons     = selectedPatMuons.clone(src = 'combinedMuons',
+                                        cut = 'abs(eta) < 2.5 & pt > 10.&'
+                                              '(trackIso+caloIso)/pt <  0.2'
                                         )
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                             cut = 'et > 15. & abs(eta) < 2.5 &'
@@ -50,9 +51,9 @@ semiLeptonicSelection = cms.Sequence(looseElectrons   *
                                      vetoJets         *
                                      dRMuons          *
                                      combinedMuons    *
-                                     triggerMuons     *
-                                     trackMuons       *
-                                     goodMuons        *
+                                     highPtMuons      *
+                                     kinematicMuons   *
+                                     trackMuons       *                                  
                                      goldenMuons      *
                                      looseMuons       *
                                      tightMuons       *
