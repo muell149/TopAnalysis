@@ -455,5 +455,6 @@ def runOnPF(process):
     print 'instead of caloJets: goodJets -> goodJetsPF'
     print '++++++++++++++++++++++++++++++++++++++++++++'
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
 
