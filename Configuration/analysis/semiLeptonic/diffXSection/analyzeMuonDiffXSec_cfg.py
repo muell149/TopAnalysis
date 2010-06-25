@@ -18,8 +18,8 @@ import FWCore.ParameterSet.Config as cms
 
 eventFilter  = 'signal only'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
-
-writeOutput  = False # True
+if(not globals().has_key('writeOutput')): 
+    writeOutput  = False # True
 
 # analyse muon quantities
 process = cms.Process("Selection")
@@ -35,8 +35,8 @@ process.source = cms.Source("PoolSource",
 
 ## add your favourite file here
     #'/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
-    #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_10_1.root'
-    '/store/user/henderle/Spring10/WJets_MAD/PATtuple_100_2.root'
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_10_1.root'
+    #'/store/user/henderle/Spring10/WJets_MAD/PATtuple_100_2.root'
     #'/store/user/henderle/Spring10/ZJets_MAD/PATtuple_10_2.root'
     #'/store/user/henderle/Spring10/'
     )
@@ -44,7 +44,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(200)
 )
 
 ## configure process options
@@ -97,6 +97,8 @@ process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
 process.load("TopAnalysis.TopAnalyzer.JetQuality_cfi")
 ## muon quality analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
+## electron quality analyzer
+process.load("TopAnalysis.TopAnalyzer.ElectronQuality_cfi")
 ## MET analyzer
 process.load("TopAnalysis.TopAnalyzer.METKinematics_cfi")
 ## electron kinematics analyzer
@@ -241,16 +243,16 @@ process.analyzeTightMuonCrossSectionGenNjets4 = process.analyzeCrossSectionGenMu
 ##    Set up selection steps for muon selection
 ## ---
 process.combinedMuonsSelection        = process.muonSelection.clone (src = 'combinedMuons'       , minNumber = 1, maxNumber = 99999999)
-process.triggerMuonsSelection         = process.muonSelection.clone (src = 'triggerMuons'        , minNumber = 1, maxNumber = 99999999)
+process.kinematicMuonsSelection       = process.muonSelection.clone (src = 'kinematicMuons'      , minNumber = 1, maxNumber = 99999999)
 process.trackMuonsSelection           = process.muonSelection.clone (src = 'trackMuons'          , minNumber = 1, maxNumber = 99999999)
-process.goodMuonsSelection            = process.muonSelection.clone (src = 'goodMuons'           , minNumber = 1, maxNumber = 99999999)
+process.highPtMuonsSelection          = process.muonSelection.clone (src = 'highPtMuons'         , minNumber = 1, maxNumber = 99999999)
 process.goldenMuonsSelection          = process.muonSelection.clone (src = 'goldenMuons'         , minNumber = 1, maxNumber = 99999999)
 process.tightMuonsSelection           = process.muonSelection.clone (src = 'tightMuons'          , minNumber = 1, maxNumber = 99999999)
 
 process.muonCuts = cms.Sequence(process.combinedMuonsSelection        +
-                                process.triggerMuonsSelection         +
+                                process.highPtMuonsSelection          +
+                                process.kinematicMuonsSelection       +
                                 process.trackMuonsSelection           +
-                                process.goodMuonsSelection            +
                                 process.goldenMuonsSelection          +
                                 process.tightMuonsSelection           +
                                 process.muonSelection
@@ -335,12 +337,16 @@ process.looseVetoElectronKinematics = process.analyzeElectronKinematics.clone(sr
                                                                               analyze = cms.PSet(index = cms.int32(-1)) )
 process.patVetoElectronKinematics = process.analyzeElectronKinematics.clone(src = 'selectedPatElectrons',
                                                                             analyze = cms.PSet(index = cms.int32(-1)) )
+process.patVetoElectronQuality = process.analyzeElectronQuality.clone(src = 'selectedPatElectrons',
+                                                                      analyze = cms.PSet(index = cms.int32(-1)) )
+
+
 ## muon cutflow
 process.combinedMuonKinematics = process.analyzeMuonKinematics.clone(src = 'combinedMuons')
-process.triggerMuonQuality     = process.analyzeMuonQuality.clone   (src = 'triggerMuons' )
-process.trackMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'trackMuons'   )
-process.goodMuonVetoJetsKinematics = process.analyzeMuonJetKinematics.clone(srcA = 'goodMuons',
-                                                                            srcB = 'vetoJets'  )
+process.highPtMuonKinematics   = process.analyzeMuonKinematics.clone(src = 'highPtMuons')
+process.kinematicMuonQuality   = process.analyzeMuonQuality.clone   (src = 'kinematicMuons')
+process.trackMuonVetoJetsKinematics = process.analyzeMuonJetKinematics.clone(srcA = 'trackMuons',
+                                                                             srcB = 'vetoJets'  )
 process.goldenMuonQuality      = process.analyzeMuonQuality.clone   (src = 'goldenMuons'  )
 process.tightMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'tightMuons'   )
 process.tightMuonQuality       = process.analyzeMuonQuality.clone   (src = 'tightMuons'   )
@@ -367,14 +373,14 @@ process.monitorNMinusOneMuonCuts = cms.Sequence(process.noDbMuonQuality         
                                                 process.noPtMuonKinematics         +
                                                 process.noDRMuonVetoJetsKinematics
                                                 )
-process.monitorMuonCutflow = cms.Sequence(process.combinedMuonKinematics     +
-                                          process.triggerMuonQuality         +
-                                          process.trackMuonKinematics        +
-                                          process.goodMuonVetoJetsKinematics +
-                                          process.goldenMuonQuality          +
-                                          process.tightMuonKinematics        +
-                                          process.tightMuonQuality           +
-                                          process.analyzePatMET              +
+process.monitorMuonCutflow = cms.Sequence(process.combinedMuonKinematics       +
+                                          process.highPtMuonKinematics         +
+                                          process.kinematicMuonQuality         +
+                                          process.trackMuonVetoJetsKinematics  +
+                                          process.goldenMuonQuality            +
+                                          process.tightMuonKinematics          +
+                                          process.tightMuonQuality             +
+                                          process.analyzePatMET                +
                                           process.analyzePfMET               
                                           )
 process.monitorNMinusOneJetCuts = cms.Sequence(process.noPtLead_0_JetKinematics  +
@@ -398,6 +404,7 @@ process.monitorJetCutflow = cms.Sequence(process.patJetKinematics            +
                                          )
 process.monitorVetoCuts = cms.Sequence(process.looseVetoMuonKinematics     +
                                        process.patVetoElectronKinematics   +
+                                       process.patVetoElectronQuality      +
                                        process.looseVetoElectronKinematics
                                        )
 process.monitorBtagCuts = cms.Sequence(process.tightJetQuality     +
@@ -534,15 +541,17 @@ elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
     print "choose runningOnData= data or MC, creating no gen-plots"
-
 ## Output Module Configuration
 if(writeOutput):
+    from PhysicsTools.PatAlgos.patEventContent_cff import *
     process.out = cms.OutputModule("PoolOutputModule",
-                                   fileName = cms.untracked.string('patTuple_selected.root'),
+                                   fileName = cms.untracked.string('patTuple_selectedNjets4.root'),
                                    # save only events passing the full path
                                    SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') ),
                                    #save output (comment to keep everything...)
-                                   #outputCommands = cms.untracked.vstring('drop *',) 
+                                   outputCommands = cms.untracked.vstring('drop *') 
                                    )
+    process.out.outputCommands += patEventContentNoCleaning
+    process.out.outputCommands += patExtraAodEventContent
     process.outpath = cms.EndPath(process.out)
     
