@@ -12,7 +12,7 @@ import FWCore.ParameterSet.Config as cms
 eventFilter  = 'signal only'
 
 ## NOT YET REIMPLEMENTED
-usePF       = False # False
+usePF       = True  # False
 writeOutput = False # True
 
 # analyse muon quantities
@@ -105,9 +105,11 @@ else:
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.filterPtHat)
 
-## full hadronic selection
+## fully hadronic selection
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
+from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 
+## do kinematic fit needed for fully hadronic selection
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 
 addTtFullHadHypotheses(process,
@@ -115,6 +117,10 @@ addTtFullHadHypotheses(process,
                        )
 
 removeTtFullHadHypGenMatch(process)
+
+## selection should be run on PFJets instead of caloJets
+if(usePF):
+    runOnPF(process)
 
 ## ---
 ##    run the final sequence
@@ -125,19 +131,10 @@ process.p1 = cms.Path(## do the genEvent selection
                       process.analyseFullHadronicSelection
                       )
 
-## replace antikt5 calojets bei antikt5 particleflow jets
-## not jet working because goodJets still have to be calo jets
-if( usePF ):
-    print "######################################"
-    print "## Using PFJets instead of CaloJets ##"
-    print "######################################"
-    print "##   Switching to an appropriate    ##"
-    print "##  jet collection for PF as input  ##"
-    print "######################################"
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.p1, 'goodJets', 'reliableJets')
-
-    process.reliableJets.src = 'selectedPatJetsPF'
+## custom replacing of arguments
+#from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+#massSearchReplaceAnyInputTag(process.p1, 'selectedPatJets', 'selectedLayer1Jets')
+#massSearchReplaceAnyInputTag(process.p1, 'selectedPatJetsAK5PF', 'selectedLayer1JetsPF')
 
 ## Output Module Configuration
 if(writeOutput):
