@@ -57,11 +57,20 @@ class FullHadKinFit : public edm::EDAnalyzer {
   /// do generator matching
   void genMatcher(const edm::View<reco::LeafCandidate>& src);
 
+  /// find ME level partons not belonging to top decay directly
+  int foundRadiation(const edm::View<reco::LeafCandidate>& src, std::vector<const reco::GenParticle*>& genParts);
+
+  /// function to do PseudoBTagging with no / one / two BTags
+  bool doPseudoBTagging(std::vector< unsigned int > combi);
+
   /// smear input vectors for kinematic fit
   void smear(std::vector< TLorentzVector >& vecs);
 
   /// function to find types of jet-combinations in KinFits (1 right, 2 branches right, but inner-branche particles mixup, 3 inter-branch mixup, 4 missing jet)
   int comboType( std::vector< unsigned int > combi );
+
+  /// function to do lower pt cut
+  bool cutPt(std::vector< TLorentzVector >& vecs, double ptCut);
 
   /// stucture to store kinFit resolutions
   struct KinFitResolutions {
@@ -69,6 +78,21 @@ class FullHadKinFit : public edm::EDAnalyzer {
     Double_t Eta;
     Double_t Phi;
   };
+
+  /// structure to store all relevant infos from a kinematic fit
+  struct KinFitResult {
+    std::vector< TLorentzVector > GenVecs;
+    std::vector< TLorentzVector > IniVecs;
+    std::vector< TLorentzVector > FitVecs;
+    double Chi2;
+    double NDF;
+    double Prob;
+    std::vector<unsigned int> JetCombi;
+    bool operator< (const KinFitResult& rhs) { return Chi2 < rhs.Chi2; };
+  };
+  
+  /// do the fitting
+  std::list< KinFitResult > fit(std::vector< TLorentzVector >& vecs);
 
   /// definition of resolutions to be used in kinematic fit
   std::vector<KinFitResolutions> getResolutions(const std::vector< TLorentzVector >* cand, const std::string whichResolution);
@@ -79,15 +103,37 @@ class FullHadKinFit : public edm::EDAnalyzer {
   /// configuration of smearing strength and resolution
   double smear_;
   double resol_;
+  std::string smearType_;
   std::string resolType_;
+
+  /// configuration which jets should get smeared (set to -1 for all)
+  int smearOnly_;
+
+  /// number of bTags to be used in kinematic fit
+  unsigned int bTags_;
+
+  /// only the right combination should be evalutated
+  bool onlyGenMatch_;
+
+  /// do plots for all combinations instead of only the best one
+  bool saveAllCombo_;
+
+  /// exchange lowest pt genParticle with one radiated particle (if more than 1 available exchange -> do it again)
+  bool exchangePart_;
+
+  /// use fitted event as input for another fit
+  bool fitAsFitInpt_;
+
+  /// only take those events, with no Non-Top-ME-genParticles
+  bool noRadiations_;
+
+  /// lower pt cut applied on all (pseudo) reco particles, genParticles
+  double recoPtCut_, genPtCut_;
 
   /// vector of strings for the binning of the resolutions
   std::vector<std::string> binsUdsc_, binsB_;
   /// vectors for the resolution functions
   std::vector<std::string> funcEtUdsc_, funcEtaUdsc_, funcPhiUdsc_, funcEtB_, funcEtaB_, funcPhiB_;
-
-  /// configuration which jets should get smeared (set to -1 for all)
-  int smearOnly_;
 
   /// vector to store the genParticles
   std::vector<const reco::GenParticle*> genParticles;
@@ -102,7 +148,6 @@ class FullHadKinFit : public edm::EDAnalyzer {
 
   /// container to keep all histogramms
   std::map<std::string, TH1*> hists_;
-  //std::map<std::string, TH2*> hists2D_;
 
   template<typename T> class F {
   public:
@@ -111,15 +156,10 @@ class FullHadKinFit : public edm::EDAnalyzer {
     }
   };
 
-  struct KinFitResult {
-    std::vector< TLorentzVector > GenVecs;
-    std::vector< TLorentzVector > IniVecs;
-    std::vector< TLorentzVector > FitVecs;
-    double Chi2;
-    double NDF;
-    double Prob;
-    std::vector<unsigned int> JetCombi;
-    bool operator< (const KinFitResult& rhs) { return Chi2 < rhs.Chi2; };
+  /// a functor for determination of negative Chi2 values in list of all KinFitResults
+  struct negativeChi2 
+  { 
+    bool operator() ( const KinFitResult & rhs ) { return (rhs.Chi2 < 0.); }
   };
 };
 
@@ -133,6 +173,7 @@ FullHadKinFit::dynCastVector(const edm::View<reco::LeafCandidate>& src)
   for(edm::View<reco::LeafCandidate>::const_iterator item = src.begin(); item != src.end(); ++item){
     const T* newItem = dynamic_cast<const T* >(&(*item));
     if(newItem) output.push_back( newItem );
+    //delete newItem;
   }
   return output;
 }
