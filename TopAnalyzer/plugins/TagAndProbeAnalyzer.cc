@@ -37,74 +37,26 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
   edm::Handle<edm::View<reco::Candidate> > jets;
   evt.getByLabel(jets_, jets);
   
-  /**
-     fill probe histograms and find closest test candidate
-  **/
-  double minDRProbeTest;
-  const reco::Candidate* testCandidate;
-  std::vector<double> minDRProbeTests; 
-  std::vector<const reco::Candidate*> testCandidates;
-  double probeMinDR=-1;
-  // loop probe collection
   for(edm::View<reco::Candidate>::const_iterator probe=probes->begin(); probe!=probes->end(); ++probe){
-    const pat::Muon* probeMuon = dynamic_cast<const pat::Muon*>(&*probe);
-    const edm::Ptr<reco::Candidate> baseCand = probeMuon->originalObjectRef();
-    std::cout << "RefToBase idx id = " << baseCand.key() << std::endl;
-    hists_.find("probePt" )->second->Fill( probe->pt () );
-    hists_.find("probeEta")->second->Fill( probe->eta() );
-    hists_.find("probePhi")->second->Fill( probe->phi() );
-    // find closest jet
-    for(edm::View<reco::Candidate>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
-      double dR = deltaR(jet->eta(), jet->phi(), probe->eta(), probe->phi());
-      if(probeMinDR<0 || dR<probeMinDR){
- 	probeMinDR=dR;
-      }
-    }
-    // find closest test candidate
-    minDRProbeTest=-1;
-    for(edm::View<reco::Candidate>::const_iterator test=tests->begin(); test!=tests->end(); ++test){
-      const pat::Muon* testMuon = dynamic_cast<const pat::Muon*>(&*test); 
-     std::cout << "RefToBase jdx id = " << testMuon->originalObjectRef().key() << std::endl;
-      if(testMuon->originalObjectRef()==baseCand){
-	std::cout << "here he is! ---> ";
-      }
-      double dR = deltaR(test->eta(), test->phi(), probe->eta(), probe->phi());
-      if(minDRProbeTest<0 || dR<minDRProbeTest){
- 	minDRProbeTest=dR;
- 	testCandidate=&(*test);
-	if(testMuon->originalObjectRef()==baseCand){
-	  std::cout << minDRProbeTest << std::endl;
-	}
-      }
-    }
-    testCandidates.push_back(testCandidate);
-    minDRProbeTests.push_back(minDRProbeTest);
-    std::cout << "And the closest in DR was :: " << minDRProbeTest << std::endl;
-  }
-  hists_.find("probeMult" )->second->Fill( jets->size() );
-  hists_.find("probeMinDR")->second->Fill( probeMinDR );
+    const pat::Muon* probeMuon = dynamic_cast<const pat::Muon*>(&*probe); 
+    hists_.find("probePt"   )->second->Fill( probe->pt () );
+    hists_.find("probeEta"  )->second->Fill( probe->eta() );
+    hists_.find("probePhi"  )->second->Fill( probe->phi() );
+    hists_.find("probeMult" )->second->Fill( jets->size() );
+    hists_.find("probeMinDR")->second->Fill( minDR(jets->begin(), jets->end(), probe) );
 
-  /**
-     fill test histograms
-  **/
-  double testMinDR=-1;
-  for(unsigned int idx=0; idx<testCandidates.size() && idx<minDRProbeTests.size(); ++idx){
-    if( minDRProbeTests[idx]>0 ){
-      hists_.find("minDR_" )->second->Fill( minDRProbeTests[idx] );
-      if( minDRProbeTests[idx]<0.1 ){
- 	hists_.find("testPt" )->second->Fill( testCandidates[idx]->pt () );
- 	hists_.find("testEta")->second->Fill( testCandidates[idx]->eta() );
- 	hists_.find("testPhi")->second->Fill( testCandidates[idx]->phi() );
- 	// find closest jet
- 	for(edm::View<reco::Candidate>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
- 	  double dR = deltaR(jet->eta(), jet->phi(), testCandidates[idx]->eta(), testCandidates[idx]->phi());
- 	  if(testMinDR<0 || dR<testMinDR){
- 	    testMinDR=dR;
- 	  }
- 	}
- 	hists_.find("testMult" )->second->Fill( jets->size() );
- 	hists_.find("testMinDR")->second->Fill( testMinDR );
-      }
+    for(edm::View<reco::Candidate>::const_iterator test=tests->begin(); test!=tests->end(); ++test){
+      const pat::Muon* testMuon = dynamic_cast<const pat::Muon*>(&*test);
+      if(testMuon->originalObjectRef()==probeMuon->originalObjectRef()){
+	hists_.find("testPt"   )->second->Fill( test->pt ()  );
+	hists_.find("testEta"  )->second->Fill( test->eta()  );
+	hists_.find("testPhi"  )->second->Fill( test->phi()  );
+	hists_.find("testMult" )->second->Fill( jets->size() );
+	hists_.find("testMinDR")->second->Fill(  minDR(jets->begin(), jets->end(), test) );  
+	// stop iterating once the 
+	// probe candidate is found
+	break;
+      } 
     }
   }
 }
@@ -119,27 +71,21 @@ TagAndProbeAnalyzer::beginJob()
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
-  /**
-     booking of tag and probe histograms
-  **/  
-  // probe histograms
+  /*
+    
+  booking of tag and probe histograms
+  
+  */  
   hists_["probePt"   ] = fs->make<TH1F>( "probePt"    , "probePt"    ,  50,   0.,  150. );
   hists_["probeEta"  ] = fs->make<TH1F>( "probeEta"   , "probeEta"   ,  50,  -5.,    5. );
   hists_["probePhi"  ] = fs->make<TH1F>( "probePhi"   , "probePhi"   ,  50,-3.14,  3.14 );
   hists_["probeMult" ] = fs->make<TH1F>( "probeMult"  , "probeMult"  ,  10,   0.,   10. );
   hists_["probeMinDR"] = fs->make<TH1F>( "probeMinDR" , "probeMinDR" ,  50,   0.,   10. );
-  // test histograms
   hists_["testPt"    ] = fs->make<TH1F>( "testPt"     , "testPt"     ,  50,   0.,  150. );
   hists_["testEta"   ] = fs->make<TH1F>( "testEta"    , "testEta"    ,  50,  -5.,    5. );
   hists_["testPhi"   ] = fs->make<TH1F>( "testPhi"    , "testPhi"    ,  50,-3.14,  3.14 );
   hists_["testMult"  ] = fs->make<TH1F>( "testMult"   , "testMult"   ,  10,   0.,   10. );
   hists_["testMinDR" ] = fs->make<TH1F>( "testMinDR"  , "testMinDR"  ,  50,   0.,   10. );
-
-  /**
-     booking of monitor histograms
-  **/
-  // distance between probe and closest test object
-  hists_["minDR_"    ] = fs->make<TH1F>( "minDR_"     , "minDR_"     ,  50,   0.,    5. );
 }
 
 /// ...

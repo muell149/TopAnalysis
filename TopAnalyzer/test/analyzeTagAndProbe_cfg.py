@@ -21,7 +21,8 @@ process.source = cms.Source("PoolSource",
     ## add your favourite file here
     ##"/store/user/rwolf/ttbar09/patTuple_all_0_ttbar09.root"
     ## for testing at cern
-    '/store/relval/CMSSW_3_3_0/RelValTTbar/GEN-SIM-RECO/STARTUP31X_V8-v1/0001/3291E09D-67B7-DE11-9ED6-003048678C9A.root'
+    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0005/0210B899-9C46-DF11-A10F-003048C69294.root'
+    ##'/store/relval/CMSSW_3_3_0/RelValTTbar/GEN-SIM-RECO/STARTUP31X_V8-v1/0001/3291E09D-67B7-DE11-9ED6-003048678C9A.root'
     )
 )
 
@@ -67,39 +68,42 @@ process.testMuons = selectedPatMuons.clone(src = 'probeMuons',
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 ## global tag for 33X
-process.GlobalTag.globaltag = cms.string('STARTUP31X_V1::All')
+## process.GlobalTag.globaltag = cms.string('STARTUP31X_V1::All')
 ## global tag for 34X
-## process.GlobalTag.globaltag = cms.string('STARTUP3XY_V9::All')
+process.GlobalTag.globaltag = cms.string('STARTUP3XY_V9::All')
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
 ## Standard PAT Configuration File
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 
-## association map
-process.load("TopAnalysis/TopUtils/python/TagAndProbeAssociator_cfi")
-process.testMap.src = "probeMuons"
-process.testMap.matched = "testMuons"
-
-
 ## analyze muons
-process.load("TopAnalysis/TopAnalyzer/python/TagAndProbeAnalyzer_cfi")
+process.load("TopAnalysis.TopAnalyzer.TagAndProbeAnalyzer_cfi")
 process.tagAndProbeAnalyzer.tests  = "testMuons"
 process.tagAndProbeAnalyzer.probes = "probeMuons"
+process.tagAndProbeAnalyzer.jets = "selectedJets"
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeTagAndProbe.root')
 )
 
+## Needed for redoing the ak5GenJets
+process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
+
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
+run36xOn35xInput(process)
+
 process.p1 = cms.Path(
+    process.genJetParticles *
+    process.ak5GenJets *
     ## apply tag selection
     process.patDefaultSequence *
     ## create probe and test collections
     process.selectedJets  *
     process.probeMuons    *
     process.testMuons     *
-    process.testMap       *
     ## analyze probe and test collections
     process.tagAndProbeAnalyzer
     )
