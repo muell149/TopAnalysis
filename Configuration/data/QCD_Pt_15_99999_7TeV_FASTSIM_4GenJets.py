@@ -28,12 +28,12 @@ randHelper = RandomNumberServiceHelper(process.RandomNumberGeneratorService)
 randHelper.populate()
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.168 $'),
-    annotation = cms.untracked.string('QCD_Pt_15_99999_7TeV_cfi.py nevts:1000'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
+    annotation = cms.untracked.string('QCD_Pt_15_99999_7TeV_cfi.py nevts:1000000'),
     name = cms.untracked.string('PyReleaseValidation')
 )
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.maxEvents = cms.untracked.PSet(
     input  = cms.untracked.int32(1000000)
     #output = cms.untracked.int32(50000)
@@ -43,236 +43,6 @@ process.options = cms.untracked.PSet(
 )
 # Input source
 process.source = cms.Source("EmptySource")
-
-# Output definition
-process.output = cms.OutputModule("PoolOutputModule",
-    outputCommands = process.AODSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('QCD_Pt_15_99999_7TeV_cfi_py_GEN_FASTSIM.root'),
-    dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('GEN-SIM-DIGI-RECO'),
-        filterName = cms.untracked.string('')
-    ),
-    SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('generation_step')
-    )
-)
-
-# AodOutput definition
-process.aodOutput = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring('drop *', 
-        'drop *', 
-        'keep *_castorreco_*_*', 
-        'keep *_CastorTowerReco_*_*', 
-        'keep *_CastorClusterRecoAntiKt07_*_*', 
-        'keep *_CastorJetEgammaRecoAntiKt07_*_*', 
-        'keep *_selectDigi_*_*', 
-        'keep EcalRecHitsSorted_reducedEcalRecHits*_*_*', 
-        'keep *_hybridSuperClusters_*_*', 
-        'keep recoSuperClusters_correctedHybridSuperClusters_*_*', 
-        'keep *_multi5x5BasicClusters_*_*', 
-        'keep recoSuperClusters_multi5x5SuperClusters_*_*', 
-        'keep recoSuperClusters_multi5x5SuperClustersWithPreshower_*_*', 
-        'keep recoSuperClusters_correctedMulti5x5SuperClustersWithPreshower_*_*', 
-        'keep recoPreshowerClusters_multi5x5SuperClustersWithPreshower_*_*', 
-        'keep recoPreshowerClusterShapes_multi5x5PreshowerClusterShape_*_*', 
-        'drop recoClusterShapes_*_*_*', 
-        'drop recoBasicClustersToOnerecoClusterShapesAssociation_*_*_*', 
-        'drop recoBasicClusters_multi5x5BasicClusters_multi5x5BarrelBasicClusters_*', 
-        'drop recoSuperClusters_multi5x5SuperClusters_multi5x5BarrelSuperClusters_*', 
-        'keep recoTracks_GsfGlobalElectronTest_*_*', 
-        'keep recoGsfTracks_electronGsfTracks_*_*', 
-        'keep recoTracks_generalTracks_*_*', 
-        'keep recoTracks_rsWithMaterialTracks_*_*', 
-        'keep recoTracks_ctfPixelLess_*_*', 
-        'keep *_dedxTruncated40_*_*', 
-        'keep *_dedxHarmonic2_*_*', 
-        'keep *_kt4CaloJets_*_*', 
-        'keep *_kt6CaloJets_*_*', 
-        'keep *_ak5CaloJets_*_*', 
-        'keep *_ak7CaloJets_*_*', 
-        'keep *_iterativeCone5CaloJets_*_*', 
-        'keep *_iterativeCone15CaloJets_*_*', 
-        'keep *_sisCone5CaloJets_*_*', 
-        'keep *_sisCone7CaloJets_*_*', 
-        'keep *_kt4PFJets_*_*', 
-        'keep *_kt6PFJets_*_*', 
-        'keep *_ak5PFJets_*_*', 
-        'keep *_ak7PFJets_*_*', 
-        'keep *_iterativeCone5PFJets_*_*', 
-        'keep *_sisCone5PFJets_*_*', 
-        'keep *_sisCone7PFJets_*_*', 
-        'keep *_JetPlusTrackZSPCorJetIcone5_*_*', 
-        'keep *_JetPlusTrackZSPCorJetSiscone5_*_*', 
-        'keep *_JetPlusTrackZSPCorJetAntiKt5_*_*', 
-        'keep *_ak5TrackJets_*_*', 
-        'keep *_kt4TrackJets_*_*', 
-        'keep recoRecoChargedRefCandidates_trackRefsForJets_*_*', 
-        'keep *_caloTowers_*_*', 
-        'keep *_towerMaker_*_*', 
-        'keep *_ic5JetTracksAssociatorAtVertex_*_*', 
-        'keep *_sisCone5JetTracksAssociatorAtVertex_*_*', 
-        'keep *_ak5JetTracksAssociatorAtVertex_*_*', 
-        'keep *_ak7JetTracksAssociatorAtVertex_*_*', 
-        'keep *_iterativeCone5JetExtender_*_*', 
-        'keep *_sisCone5JetExtender_*_*', 
-        'keep *_kt4JetExtender_*_*', 
-        'keep *_ak5JetExtender_*_*', 
-        'keep *_ak7JetExtender_*_*', 
-        'keep *_ak5JetID_*_*', 
-        'keep *_ak7JetID_*_*', 
-        'keep *_sc5JetID_*_*', 
-        'keep *_sc7JetID_*_*', 
-        'keep *_ic5JetID_*_*', 
-        'keep *_kt4JetID_*_*', 
-        'keep *_kt6JetID_*_*', 
-        'keep recoCaloMETs_*_*_*', 
-        'keep recoMETs_*_*_*', 
-        'keep recoPFMETs_*_*_*', 
-        'keep recoMuonMETCorrectionDataedmValueMap_*_*_*', 
-        'drop recoHcalNoiseRBXs_*_*_*', 
-        'keep HcalNoiseSummary_*_*_*', 
-        'keep *GlobalHaloData_*_*_*', 
-        'keep *BeamHaloSummary_*_*_*', 
-        'keep recoTracks_standAloneMuons_*_*', 
-        'keep recoTrackExtras_standAloneMuons_*_*', 
-        'keep TrackingRecHitsOwned_standAloneMuons_*_*', 
-        'keep recoTracks_globalMuons_*_*', 
-        'keep recoTrackExtras_globalMuons_*_*', 
-        'keep recoTracks_tevMuons_*_*', 
-        'keep recoTrackExtras_tevMuons_*_*', 
-        'keep recoTracksToOnerecoTracksAssociation_tevMuons_*_*', 
-        'keep recoTracks_generalTracks_*_*', 
-        'keep recoMuons_muons_*_*', 
-        'keep booledmValueMap_muid*_*_*', 
-        'keep recoMuonTimeExtraedmValueMap_muons_*_*', 
-        'keep recoCaloMuons_calomuons_*_*', 
-        'keep recoTracks_cosmicMuons_*_*', 
-        'keep recoTrackExtras_cosmicMuons_*_*', 
-        'keep TrackingRecHitsOwned_cosmicMuons_*_*', 
-        'keep recoTracks_globalCosmicMuons_*_*', 
-        'keep recoTrackExtras_globalCosmicMuons_*_*', 
-        'keep TrackingRecHitsOwned_globalCosmicMuons_*_*', 
-        'keep recoMuons_muonsFromCosmics_*_*', 
-        'keep recoTracks_cosmicMuons1Leg_*_*', 
-        'keep recoTrackExtras_cosmicMuons1Leg_*_*', 
-        'keep TrackingRecHitsOwned_cosmicMuons1Leg_*_*', 
-        'keep recoTracks_globalCosmicMuons1Leg_*_*', 
-        'keep recoTrackExtras_globalCosmicMuons1Leg_*_*', 
-        'keep TrackingRecHitsOwned_globalCosmicMuons1Leg_*_*', 
-        'keep recoMuons_muonsFromCosmics1Leg_*_*', 
-        'keep *_muIsoDepositTk_*_*', 
-        'keep *_muIsoDepositCalByAssociatorTowers_*_*', 
-        'keep *_muIsoDepositCalByAssociatorHits_*_*', 
-        'keep *_muIsoDepositJets_*_*', 
-        'keep *_impactParameterTagInfos_*_*', 
-        'keep *_trackCountingHighEffBJetTags_*_*', 
-        'keep *_trackCountingHighPurBJetTags_*_*', 
-        'keep *_jetProbabilityBJetTags_*_*', 
-        'keep *_jetBProbabilityBJetTags_*_*', 
-        'keep *_secondaryVertexTagInfos_*_*', 
-        'keep *_simpleSecondaryVertexBJetTags_*_*', 
-        'keep *_combinedSecondaryVertexBJetTags_*_*', 
-        'keep *_combinedSecondaryVertexMVABJetTags_*_*', 
-        'keep *_btagSoftElectrons_*_*', 
-        'keep *_softPFElectrons_*_*', 
-        'keep *_softElectronTagInfos_*_*', 
-        'keep *_softElectronBJetTags_*_*', 
-        'keep *_softElectronByIP3dBJetTags_*_*', 
-        'keep *_softElectronByPtBJetTags_*_*', 
-        'keep *_softMuonTagInfos_*_*', 
-        'keep *_softMuonBJetTags_*_*', 
-        'keep *_softMuonByIP3dBJetTags_*_*', 
-        'keep *_softMuonByPtBJetTags_*_*', 
-        'keep *_pfRecoTauTagInfoProducer_*_*', 
-        'keep *_fixedConePFTauProducer*_*_*', 
-        'keep *_fixedConePFTauDiscrimination*_*_*', 
-        'keep *_fixedConeHighEffPFTauProducer*_*_*', 
-        'keep *_fixedConeHighEffPFTauDiscrimination*_*_*', 
-        'keep *_shrinkingConePFTauProducer*_*_*', 
-        'keep *_shrinkingConePFTauDecayModeIndexProducer*_*_*', 
-        'keep *_shrinkingConePFTauDiscrimination*_*_*', 
-        'keep *_caloRecoTauTagInfoProducer_*_*', 
-        'keep recoCaloTaus_caloRecoTauProducer*_*_*', 
-        'keep *_caloRecoTauDiscrimination*_*_*', 
-        'keep  *_offlinePrimaryVertices_*_*', 
-        'keep  *_offlinePrimaryVerticesWithBS_*_*', 
-        'keep  *_offlinePrimaryVerticesFromCosmicTracks_*_*', 
-        'keep  *_nuclearInteractionMaker_*_*', 
-        'keep *_generalV0Candidates_*_*', 
-        'keep recoGsfElectronCores_gsfElectronCores_*_*', 
-        'keep recoGsfElectrons_gsfElectrons_*_*', 
-        'keep floatedmValueMap_eidRobustLoose_*_*', 
-        'keep floatedmValueMap_eidRobustTight_*_*', 
-        'keep floatedmValueMap_eidRobustHighEnergy_*_*', 
-        'keep floatedmValueMap_eidLoose_*_*', 
-        'keep floatedmValueMap_eidTight_*_*', 
-        'keep recoPhotonCores_photonCore_*_*', 
-        'keep recoPhotons_photons_*_*', 
-        'keep recoConversions_conversions_*_*', 
-        'drop *_conversions_uncleanedConversions_*', 
-        'keep recoConversions_trackerOnlyConversions_*_*', 
-        'keep recoTracks_ckfOutInTracksFromConversions_*_*', 
-        'keep recoTracks_ckfInOutTracksFromConversions_*_*', 
-        'keep *_PhotonIDProd_*_*', 
-        'keep *_hfRecoEcalCandidate_*_*', 
-        'keep *_hfEMClusters_*_*', 
-        'drop CaloTowersSorted_towerMakerPF_*_*', 
-        'drop *_pfElectronTranslator_*_*', 
-        'keep recoPFCandidates_*_*_*', 
-        'keep recoCaloClusters_pfElectronTranslator_*_*', 
-        'keep recoPreshowerClusters_pfElectronTranslator_*_*', 
-        'keep recoSuperClusters_pfElectronTranslator_*_*', 
-        'keep *_offlineBeamSpot_*_*', 
-        'keep L1GlobalTriggerReadoutRecord_gtDigis_*_*', 
-        'keep *_l1GtRecord_*_*', 
-        'keep *_l1GtTriggerMenuLite_*_*', 
-        'keep *_l1extraParticles_*_*', 
-        'keep LumiSummary_lumiProducer_*_*', 
-        'drop *_hlt*_*_*', 
-        'keep *_hltL1GtObjectMap_*_*', 
-        'keep edmTriggerResults_*_*_*', 
-        'keep triggerTriggerEvent_*_*_*', 
-        'keep *_MEtoEDMConverter_*_*', 
-        'keep L1AcceptBunchCrossings_*_*_*', 
-        'keep L1TriggerScalerss_*_*_*', 
-        'keep Level1TriggerScalerss_*_*_*', 
-        'keep LumiScalerss_*_*_*', 
-        'keep BeamSpotOnlines_*_*_*', 
-        'keep DcsStatuss_*_*_*', 
-        'keep *_logErrorHarvester_*_*', 
-        'keep LHERunInfoProduct_source_*_*', 
-        'keep LHEEventProduct_source_*_*', 
-        'keep GenRunInfoProduct_generator_*_*', 
-        'keep GenEventInfoProduct_generator_*_*', 
-        'keep *_genParticles_*_*', 
-        'keep *_allTrackMCMatch_*_*', 
-        'keep *_kt4GenJets_*_*', 
-        'keep *_kt6GenJets_*_*', 
-        'keep *_ak5GenJets_*_*', 
-        'keep *_ak7GenJets_*_*', 
-        'keep *_iterativeCone5GenJets_*_*', 
-        'keep *_sisCone5GenJets_*_*', 
-        'keep *_sisCone7GenJets_*_*', 
-        'keep *_genParticle_*_*', 
-        'keep recoGenMETs_*_*_*', 
-        'keep *_MEtoEDMConverter_*_*', 
-        'keep LHERunInfoProduct_source_*_*', 
-        'keep LHEEventProduct_source_*_*', 
-        'keep GenRunInfoProduct_generator_*_*', 
-        'keep GenEventInfoProduct_generator_*_*', 
-        'keep *_genParticles_*_*', 
-        'keep recoTracks_iterativeGSWithMaterialTracks_*_*', 
-        'keep recoMuons_paramMuons_*_*', 
-        'keep *_muParamGlobalIsoDepositCtfTk_*_*', 
-        'keep *_muParamGlobalIsoDepositCalByAssociatorTowers_*_*', 
-        'keep *_muParamGlobalIsoDepositCalByAssociatorHits_*_*', 
-        'keep *_muParamGlobalIsoDepositJets_*_*', 
-        'keep l1extraL1MuonParticles_l1ParamMuons_*_*'),
-    fileName = cms.untracked.string('QCD_Pt_15_99999_7TeV_cfi_py_GEN_FASTSIM_AOD.root'),
-    dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('AODSIM')
-    )
-)
 
 # Additional output definition
 
@@ -337,32 +107,135 @@ process.generator = cms.EDFilter("Pythia6GeneratorFilter",
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(cms.SequencePlaceholder("randomEngineStateProducer"))
-process.reconstruction = cms.Path(process.reconstructionWithFamos)
-process.out_step = cms.EndPath(process.output)
-process.out_stepAOD = cms.EndPath(process.aodOutput)
-
+#process.reconstruction = cms.Path(process.reconstructionWithFamos)
 
 # How to filter on generated jets:
 # 1) put the gen jet creation between fastsim and MC generator
 # 2) define some filters
 # 3) put it in front of all paths
 
-process.someGenJetSelector = cms.EDProducer("CandViewSelector",
+process.genJetSelector = cms.EDProducer("CandViewSelector",
                                         src = cms.InputTag("ak5GenJets"),
                                         cut = cms.string("pt > 20 & abs( eta ) < 5.0")
                                         )
-process.someGenJetFilter = cms.EDFilter("CandViewCountFilter",
-                                        src = cms.InputTag("someGenJetSelector"),
-                                        minNumber = cms.uint32(4)
-                                       )
+process.genJetFilter = cms.EDFilter("CandViewCountFilter",
+                                    src = cms.InputTag("genJetSelector"),
+                                    minNumber = cms.uint32(4)
+                                    )
 
-process.genJetFiltering = cms.Sequence(process.pgen * process.someGenJetSelector * process.someGenJetFilter)
+#process.pgen_fast = cms.Sequence(randomEngineStateProducer+VtxSmeared+genParticles+genParticlesForJets*ak5GenJets)
+process.genJetFiltering = cms.Sequence(process.pgen * process.genJetSelector * process.genJetFilter)
+
+## std sequence for pat
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+## process path
+process.pat = cms.Path(process.patDefaultSequence)
+
+#-------------------------------------------------
+# event weight configuration
+#-------------------------------------------------
+
+## add event weight information
+#process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
+#process.eventWeight.nevts= 1
+#process.eventWeight.xsec = 1.
+#process.eventWeight.eff  = 1.
+#process.eventWeight.lumi = 1.
+
+#process.wght = cms.Path(process.eventWeight)
+
+#-------------------------------------------------
+# configuration of additional jet collections
+#-------------------------------------------------
+
+from PhysicsTools.PatAlgos.tools.jetTools import *
+
+addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
+                 doJTA        = True,
+                 doBTagging   = True,
+                 jetCorrLabel = ('AK5', 'PF'),
+                 doType1MET   = False,
+                 doL1Cleaning = False,
+                 doL1Counters = False,
+                 genJetCollection=cms.InputTag("ak5GenJets"),
+                 doJetID      = False
+                 )
+
+## sample type used for flavour dependend jet corrections
+process.patJetCorrFactors.corrSample   = 'Summer09_7TeV'
+process.patJetCorrFactors.sampleType   = 'ttbar'
+process.patJetCorrFactorsAK5PF.corrSample = 'Summer09_7TeV'
+process.patJetCorrFactorsAK5PF.sampleType = 'ttbar'
+
+## embedding of jet constituents into the jets
+process.patJets.embedCaloTowers = True
+process.patJetsAK5PF.embedPFCandidates = True
+
+#-------------------------------------------------
+# preselection paths (involved jet collections
+# need to be known first)
+#-------------------------------------------------
+
+## preselection for ak5 jets 
+process.selectedPatJets.cut = 'abs(eta) < 3.0 & pt>20'
+process.countPatJetsAK5 = process.countPatJets.clone(src = 'selectedPatJets' , minNumber = 6)
+process.ak5Selection = cms.Path(process.countPatJetsAK5 )   
+
+## preselection for ak5 pf jets 
+process.selectedPatJetsAK5PF.cut = 'abs(eta) < 3.0 & pt>20'
+process.countPatJetsAK5PF = process.countPatJets.clone(src = 'selectedPatJetsAK5PF' , minNumber = 6)
+process.ak5PfSelection = cms.Path(process.countPatJetsAK5PF )   
+
+#-------------------------------------------------
+# process output; first the event selection is
+# defined: only those events that have passed the
+# full production path are selected and written
+# to file; the event content has been defined
+# above
+#-------------------------------------------------
+
+## define event selection
+process.EventSelection = cms.PSet(
+    SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring('ak5PfSelection', 'ak5Selection')
+    )
+)
+
+## configure output module
+process.out = cms.OutputModule("PoolOutputModule",
+    process.EventSelection,
+    outputCommands = cms.untracked.vstring('drop *'),
+    dropMetaDataForDroppedData = cms.untracked.bool(True),                                     
+    fileName = cms.untracked.string('patTuple.root')
+)
+
+## add selectedPatCandidates
+from PhysicsTools.PatAlgos.tools.coreTools import removeCleaning
+removeCleaning(process)
+## add PfMET
+from PhysicsTools.PatAlgos.tools.metTools import addPfMET
+addPfMET(process)
+
+# save PAT Layer 1 output
+from PhysicsTools.PatAlgos.patEventContent_cff import *
+process.out.outputCommands += patTriggerEventContent
+process.out.outputCommands += patExtraAodEventContent
+process.out.outputCommands += patEventContentNoCleaning
+process.out.outputCommands += ["keep *_selectedPatJets*_*_*",
+                               "keep *_patMETs*_*_*"]
+#process.out.outputCommands += ["keep *_eventWeight_*_*"]
+# drop stuff which is not needed
+process.out.outputCommands += ["drop *_towerMaker_*_*"]
+
+process.outpath = cms.EndPath(process.out)
+
 
 # Schedule definition
 process.schedule = cms.Schedule(process.generation_step)
 process.schedule.extend(process.HLTSchedule)
-process.schedule.extend([process.reconstruction,process.out_step,process.out_stepAOD])
+process.schedule.extend([process.ak5Selection,process.ak5PfSelection,process.outpath])#,process.out_step,process.out_stepAOD])process.EventSelection,
 # special treatment in case of production filter sequence  
 for path in process.paths: 
 #    getattr(process,path)._seq = process.generator*getattr(process,path)._seq
-    getattr(process,path)._seq = process.generator * process.genJetFiltering * getattr(process,path)._seq
+    getattr(process,path)._seq = process.generator * process.genJetFiltering * process.famosWithEverything * process.patDefaultSequence * getattr(process,path)._seq
