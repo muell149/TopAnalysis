@@ -19,9 +19,8 @@ DiMuonMassFilter::~DiMuonMassFilter()
 void 
 DiMuonMassFilter::beginJob()
 { 
-  edm::LogError err("topFilter");
-  if(Cut_.size()!=2)  err << "Cut has wrong size. Size has to be 2!\n";
-  if(Cut_[0]>Cut_[1]) err << "Lower cut value is higher than upper one!\n";
+  if(Cut_.size()!=2)  edm::LogError("topFilter") << "Cut has wrong size. Size has to be 2!\n";
+  if(Cut_[0]>Cut_[1]) edm::LogError("topFilter") << "Lower cut value is higher than upper one!\n";
 }
 
 /// event veto
