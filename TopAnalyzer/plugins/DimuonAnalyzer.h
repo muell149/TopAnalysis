@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "TH1.h"
+#include "TH1D.h"
 #include "TString.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -56,26 +56,26 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     /// true if leading muons have same charge
     bool isWrongCharge; 
     /// plot for right-charge dimuon mass    
-    TH1F * dimassRC_;
+    TH1D * dimassRC_;
     /// plot for wrong-charge dimuon mass
-    TH1F * dimassWC_;
+    TH1D * dimassWC_;
  
     /// number of muons    
-    TH1F * nMu_;
+    TH1D * nMu_;
     /// dr between leading muons
-    TH1F * drMu_;
+    TH1D * drMu_;
     
     /// isolation efficiency for absolute cut
-    TH1F * absCount_;
+    TH1D * absCount_;
     /// isolation efficiency for relative cut
-    TH1F * relCount_;
+    TH1D * relCount_;
     /// isolation efficiency for combined cut
-    TH1F * combCount_;
+    TH1D * combCount_;
     /// isolation efficiency for quadratically added combined isolation
-    TH1F * diCombCount_;
+    TH1D * diCombCount_;
      
     /// counts number of entries in given bins of invariant mass (will be used for DY BG estiamtion)
-    TH1F * nEntries_;
+    TH1D * nEntries_;
 };
 
 #endif

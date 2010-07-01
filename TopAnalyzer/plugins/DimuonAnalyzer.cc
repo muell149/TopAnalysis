@@ -39,47 +39,47 @@ DimuonAnalyzer::beginJob()
      histogram definitions
   **/ 
   // invariant muon muon mass for right charge  
-  dimassRC_= fs->make<TH1F>( "dimassRC", "dimassRC", nbins, bins);
+  dimassRC_= fs->make<TH1D>( "dimassRC", "dimassRC", nbins, bins);
   dimassRC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
   dimassRC_->GetYaxis()->SetTitle("N / 1GeV");
   
   // invariant muon muon mass for wrong charge   
-  dimassWC_= fs->make<TH1F>( "dimassWC", "dimassWC", nbins, bins);
+  dimassWC_= fs->make<TH1D>( "dimassWC", "dimassWC", nbins, bins);
   dimassWC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
   dimassWC_->GetYaxis()->SetTitle("N / 1GeV");  
   
   // number of muons in collection
-  nMu_  = fs->make<TH1F>( "nMu" , "Number of Muons"  , 10, -0.5, 9.5);
+  nMu_  = fs->make<TH1D>( "nMu" , "Number of Muons"  , 10, -0.5, 9.5);
   nMu_->GetXaxis()->SetTitle("N_{#mu}");
   nMu_->GetYaxis()->SetTitle("N_{evts}"); 
     
   // dr between leading muons
-  drMu_ = fs->make<TH1F>( "drMu", "#Delta r (#mu#mu)",100,   0., 10.); 
+  drMu_ = fs->make<TH1D>( "drMu", "#Delta r (#mu#mu)",100,   0., 10.); 
   drMu_->GetXaxis()->SetTitle("#Delta r");
   drMu_->GetYaxis()->SetTitle("N_{evts}"); 
    
   // absolute isolation efficiency
-  absCount_    = fs->make<TH1F>( "absCount"   , "Absolute Isolation"        ,100,  0.,  50.0); 
+  absCount_    = fs->make<TH1D>( "absCount"   , "Absolute Isolation"        ,100,  0.,  50.0); 
   absCount_->GetXaxis()->SetTitle("Iso Cut [GeV]");
   absCount_->GetYaxis()->SetTitle("N_{evts,pass}");   
   
   // relative isolation efficiency       
-  relCount_    = fs->make<TH1F>( "relCount"   , "Relative Isolation"        ,100,  0.,   5.0); 
+  relCount_    = fs->make<TH1D>( "relCount"   , "Relative Isolation"        ,100,  0.,   5.0); 
   relCount_->GetXaxis()->SetTitle("Iso Cut");
   relCount_->GetYaxis()->SetTitle("N_{evts,pass}");   
   
   // combined isolation efficiency
-  combCount_   = fs->make<TH1F>( "combCount"  , "Combined Isolation"        ,100,  0.0,  5.0); 
+  combCount_   = fs->make<TH1D>( "combCount"  , "Combined Isolation"        ,100,  0.0,  5.0); 
   combCount_->GetXaxis()->SetTitle("Iso Cut");
   combCount_->GetYaxis()->SetTitle("N_{evts,pass}");   
   
   // quadratically added combined isolation
-  diCombCount_ = fs->make<TH1F>( "diCombCount", "Combined 2 Muon Isolation" ,100,  0.0,  7.5);  
+  diCombCount_ = fs->make<TH1D>( "diCombCount", "Combined 2 Muon Isolation" ,100,  0.0,  7.5);  
   diCombCount_->GetXaxis()->SetTitle("Iso Cut");
   diCombCount_->GetYaxis()->SetTitle("N_{evts,pass}");
     
   // counts number of entries in given bins of invariant mass
-  nEntries_ = fs->make<TH1F>( "nEntries", "nEntries" ,massBins_.size(), massBins_[0], massBins_[massBins_.size()-1]);      
+  nEntries_ = fs->make<TH1D>( "nEntries", "nEntries" ,massBins_.size(), massBins_[0], massBins_[massBins_.size()-1]);      
 }
 
 /// everything which has to be done during the event loop: analyze and fill histos
