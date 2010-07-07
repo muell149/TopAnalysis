@@ -53,6 +53,8 @@ JetQuality::book()
   hists_["cef"] = new TH1F( "cef" , "cef" , 40, 0.,  1. );
   // multiplicity of charged hadrons
   hists_["nch"] = new TH1F( "nch" , "nch" , 50, 0., 50. );
+  // multiplicity of charged particles
+  hists_["ncp"] = new TH1F( "ncp" , "ncp" , 50, 0., 50. );
 
   /** 
       B Tags for Jets
@@ -148,6 +150,8 @@ JetQuality::book(edm::Service<TFileService>& fs)
   hists_["cef"] = fs->make<TH1F>( "cef" , "cef" , 40, 0.,  1. );
   // multiplicity of charged hadrons
   hists_["nch"] = fs->make<TH1F>( "nch" , "nch" , 50, 0., 50. );
+  // multiplicity of charged particles
+  hists_["ncp"] = fs->make<TH1F>( "ncp" , "ncp" , 50, 0., 50. );
 
   /** 
       B Tags for Jets
@@ -257,6 +261,8 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
 	hists_.find( "cef" )->second->Fill( jet->chargedEmEnergyFraction()               , weight );
 	// multiplicity of charged hadrons
 	hists_.find( "nch" )->second->Fill( jet->pfSpecific().mChargedHadronMultiplicity , weight );
+	// multiplicity of charged particles
+	hists_.find( "ncp" )->second->Fill( jet->chargedMultiplicity()                   , weight );
       }
 
       /** 
