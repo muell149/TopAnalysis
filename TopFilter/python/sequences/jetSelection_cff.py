@@ -21,12 +21,12 @@ goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                            'jetID.n90Hits > 1'
                                      )
 goodJetsPF   = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
-                                     cut = 'abs(eta) < 2.4 & pt > 20.                 &'
-                                           'chargedHadronEnergyFraction > 0.0         &'
-                                           'neutralHadronEnergyFraction < 0.99        &'
-                                           'chargedEmEnergyFraction < 0.99            &'
-                                           'neutralEmEnergyFraction < 0.99            &'
-                                           'pfSpecific.mChargedHadronMultiplicity > 0 &'
+                                     cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                           'chargedHadronEnergyFraction > 0.0  &'
+                                           'neutralHadronEnergyFraction < 0.99 &'
+                                           'chargedEmEnergyFraction < 0.99     &'
+                                           'neutralEmEnergyFraction < 0.99     &'
+                                           'chargedMultiplicity > 0            &'
                                            'nConstituents > 0'
                                       )
 
