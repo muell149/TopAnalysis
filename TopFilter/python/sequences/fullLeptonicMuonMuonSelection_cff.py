@@ -26,7 +26,7 @@ tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
 				   )
 ## muons reconstructed globally
 globalMuons = selectedPatMuons.clone(src = 'tightMuons', 
-                                     cut = 'combinedMuon.isNull = 0'					        
+                                     cut = 'combinedMuon.isGlobal'					        
 				    )
 ## pt cut
 hardMuons = selectedPatMuons.clone(src = 'globalMuons', 
@@ -54,7 +54,7 @@ hcalMipMuons = selectedPatMuons.clone(src = 'ecalMipMuons',
 				     )					     					     			    
 ## isolation cut				      				      
 isolatedMuons = selectedPatMuons.clone(src = 'hcalMipMuons', 
-                                       cut = '(trackIso+caloIso)/pt < 0.25' 
+                                       cut = '(trackIso+caloIso)/pt < 0.15' 
 				      )				      
 
 ## Count Filters
