@@ -27,30 +27,26 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_1.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_2.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_3.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_4.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_5.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_6.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_7.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_8.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_9.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_10.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_11.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_12.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_13.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_14.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_15.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_16.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_17.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_18.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_19.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_20.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_21.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_22.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_23.root',
-    '/store/user/eschliec/Summer09/7TeV/TTBar/MCatNLO/patTuple_24.root'
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_1_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_2_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_3_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_4_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_5_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_6_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_7_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_8_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_9_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_10_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_11_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_12_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_13_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_14_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_15_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_16_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_17_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_18_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_19_1.root',
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_20_1.root'
     )
 )
 
@@ -65,7 +61,7 @@ process.options = cms.untracked.PSet(
 )
 
 ## register TFileService
-process.TFileService = cms.Service("TFileService",  
+process.TFileService = cms.Service("TFileService",
             fileName = cms.string('analyzeFullHadronicSelection_all.root')
 )
 
@@ -116,7 +112,8 @@ addTtFullHadHypotheses(process,
                        ["kKinFit"]
                        )
 
-removeTtFullHadHypGenMatch(process)
+if(not eventFilter=='signal only'):
+    removeTtFullHadHypGenMatch(process)
 
 ## selection should be run on PFJets instead of caloJets
 if(usePF):
@@ -130,11 +127,6 @@ process.p1 = cms.Path(## do the genEvent selection
                       ## do the filtering
                       process.analyseFullHadronicSelection
                       )
-
-## custom replacing of arguments
-#from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-#massSearchReplaceAnyInputTag(process.p1, 'selectedPatJets', 'selectedLayer1Jets')
-#massSearchReplaceAnyInputTag(process.p1, 'selectedPatJetsAK5PF', 'selectedLayer1JetsPF')
 
 ## Output Module Configuration
 if(writeOutput):
