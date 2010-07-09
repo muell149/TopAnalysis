@@ -48,6 +48,8 @@ void KinFitQuality::book()
      KinFit Properties
   **/
 
+  // chi2prob of kinfit log plot
+  hists_["prob_log"] = new TH1F( "prob_log" , "prob_log" , 100, -100. , 0. );
   // chi2 of kinfit
   hists_["chi2"] = new TH1F( "chi2" , "chi2" ,  100, 0. , 1000. );
   // chi2prob of kinfit
@@ -206,6 +208,8 @@ void KinFitQuality::book(edm::Service<TFileService>& fs)
      KinFit Properties
   **/
 
+  // chi2prob of kinfit log plot
+  hists_["prob_log"] = fs->make<TH1F>( "prob_log" , "prob_log" ,  100, -100., 0. );
   // chi2 of kinfit
   hists_["chi2"] = fs->make<TH1F>( "chi2" , "chi2" ,  100, 0., 1000. );
   // chi2prob of kinfit
@@ -591,6 +595,8 @@ KinFitQuality::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>& 
     hists_.find("chi2")->second->Fill( tops.fitChi2() );
     // chi2prob of kinfit
     hists_.find("prob")->second->Fill( tops.fitProb() );
+    // chi2prob of kinfit log plot
+    if(tops.fitProb() > 0) hists_.find("prob_log")->second->Fill( log10(tops.fitProb()) );
 
     if(tops.numberOfAvailableHypos("kKinFit")>1){
 
