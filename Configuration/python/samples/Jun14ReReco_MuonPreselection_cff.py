@@ -13,7 +13,7 @@ import FWCore.ParameterSet.Config as cms
 #                                                                                                                                                   
 #  integrated HF lumi:                                                                                                                   
 #
-#    number of events: 
+#    number of events: 230763
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
@@ -74,16 +74,19 @@ source = cms.Source("PoolSource",
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_8_1.root',
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_9_1.root',
 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_10_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_11_0.root',
+	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_12_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_14_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_15_0.root',
+	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_16_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_18_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_19_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_20_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_24_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_25_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_26_0.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_28_0.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_28_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_30_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_31_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_6_3.root',
