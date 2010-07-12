@@ -76,7 +76,7 @@ source = cms.Source("PoolSource",
 
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_10_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_11_0.root',
-	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_12_2.root',
+	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_12_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_14_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_15_0.root',
 	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_16_1.root',
