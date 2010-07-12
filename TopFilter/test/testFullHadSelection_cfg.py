@@ -107,7 +107,7 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 # the path
 #---------------------------------------------------
 
-process.p1 = cms.Path(process.hltHt200 *
+process.p1 = cms.Path(process.hltQuadJet30 *
                       process.makeGenEvt *
                       process.ttFullHadronicFilter *
                       process.genJetParticles *
