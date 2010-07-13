@@ -15,16 +15,21 @@ writeOutput = True
 execfile("/afs/naf.desy.de/user/g/goerner/semileptonic361/analyzeMuonDiffXSec_cfg.py")
 
 ## reduce output
-process.MessageLogger.cerr.FwkReport.reportEvery = 10000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 ## change number of processed events
-process.maxEvents.input = 100
-
+process.maxEvents.input = -1
+process.source.skipEvents = cms.untracked.uint32(3779)
 ## change source -> data file
 dataFiles = cms.untracked.vstring()
 dataFiles.extend([
-'/store/data/Run2010A/JetMETTau/RECO/v2/000/136/088/50E30071-6C67-DF11-8831-000423D98930.root'
-])
+    '/store/data/Run2010A/Mu/RECO/v4/000/138/457/BC48D2D6-9B7F-DF11-8851-003048F024E0.root',
+    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/0AA0D8C2-7888-DF11-9EDB-0019B9F581C9.root',
+    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/0AA0D8C2-7888-DF11-9EDB-0019B9F581C9.root',
+    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/EEEEE7C8-7B88-DF11-9FFE-003048F024DC.root',
+    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/9443ED2B-7888-DF11-A556-000423D94908.root',
+    '/store/data/Run2010A/Mu/RECO/v4/000/139/458/1055D2F6-CB88-DF11-923E-001D09F29169.root'
+    ])
 
 process.source.fileNames = dataFiles
 
@@ -106,9 +111,23 @@ removeSpecificPATObjects(process,
 removeCleaning(process,
                outputInProcess=False)
 
+## use BeamSpot (not PrimaryVertex) for IP calculation
 process.patMuons.usePV = False
+
+## include particle flow MET
 from PhysicsTools.PatAlgos.tools.metTools import *
 addPfMET(process, 'PF')
+
+# embed IsoDeposits
+process.patMuons.isoDeposits = cms.PSet(
+    tracker = cms.InputTag("muIsoDepositTk"),
+    ecal    = cms.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
+    hcal    = cms.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
+    user    = cms.VInputTag(
+                            cms.InputTag("muIsoDepositCalByAssociatorTowers","ho"),
+                            cms.InputTag("muIsoDepositJets")
+                            ),
+    )
 
 ## use the correct jet energy corrections
 process.patJetCorrFactors.corrSample = "Spring10"
