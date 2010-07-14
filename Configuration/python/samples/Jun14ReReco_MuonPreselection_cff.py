@@ -100,17 +100,17 @@ source = cms.Source("PoolSource",
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_24_2.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_25_0.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_26_0.root',
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_27_x.root',	
+	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_27_2.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_28_2.root',
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_29_x.root',	
+	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_29_3.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_30_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_31_1.root',
 	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_1_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_2_1.root',
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_3_1.root',	
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_4_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_4_0.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_5_1.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_6_1.root'	   
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_6_0.root'	   
        )
 )
