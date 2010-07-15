@@ -26,7 +26,7 @@ tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
 				   )
 ## muons reconstructed globally
 globalMuons = selectedPatMuons.clone(src = 'tightMuons', 
-                                     cut = 'combinedMuon.isGlobal'					        
+                                     cut = 'isGlobalMuon'					        
 				    )
 ## pt cut
 hardMuons = selectedPatMuons.clone(src = 'globalMuons', 
