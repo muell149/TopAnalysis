@@ -38,7 +38,7 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('GR_R_36X_V10::All')
+process.GlobalTag.globaltag = cms.string('GR_R_36X_V11A::All')
 
 #-------------------------------------------------
 # event selection
@@ -56,8 +56,25 @@ process.vertex = cms.EDFilter("VertexSelector",
                               )
 
 #-------------------------------------------------
+# scraping filter
+#-------------------------------------------------
+
+# scraping filter
+process.noscraping = cms.EDFilter("FilterOutScraping",
+                                  applyfilter = cms.untracked.bool(True),
+                                  debugOn = cms.untracked.bool(False),
+                                  numtrack = cms.untracked.uint32(10),
+                                  thresh = cms.untracked.double(0.25)
+                                  )
+
+#-------------------------------------------------
 # trigger
 #-------------------------------------------------
+
+process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
+process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
+process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) AND NOT (36 OR 37 OR 38 OR 39)')
 
 ## high level trigger filter
 #from TopAnalysis.TopFilter.sequences.triggerFilter_cff import *
@@ -120,9 +137,9 @@ process.goodJets.cut = ('pt > 20. &'
 process.goodJetsAK5PF = process.selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
                                                       cut = 'pt > 20. &'
                                                             '( (abs(eta) >= 2.4 & abs(eta) < 3.0) | (abs(eta) < 2.4 & chargedHadronEnergyFraction > 0.0) ) &'
-                                                            'neutralHadronEnergyFraction < 1.0 &'
-                                                            'chargedEmEnergyFraction < 1.0 &'
-                                                            'neutralEmEnergyFraction < 1.0 &'
+                                                            'neutralHadronEnergyFraction < 0.99 &'
+                                                            'chargedEmEnergyFraction < 0.99 &'
+                                                            'neutralEmEnergyFraction < 0.99 &'
                                                             'pfSpecific.mChargedHadronMultiplicity > 0 &'
                                                             'nConstituents > 0')
 
@@ -180,8 +197,10 @@ addTtFullHadHypotheses(process,
 removeTtFullHadHypGenMatch(process)
 
 ## the parts of the process needed for all pathes
-process.prerequists = cms.Sequence(process.trigger *
-                                   process.vertex  *
+process.prerequists = cms.Sequence(process.hltLevel1GTSeed *
+                                   process.trigger         *
+                                   process.vertex          *
+                                   process.noscraping      *
                                    process.patDefaultSequence
                                    )
 
@@ -279,28 +298,28 @@ process.kinFittingAK5PF = cms.Sequence(process.kinFitTtFullHadEventHypothesisAK5
 ## pathes to be run for every event
 process.caloLoose = cms.Path(process.prerequists        *
                              process.goodJets           *
-                             process.goodJetSelection   *
-                             process.makeTtFullHadEvent *
-                             process.filterKinFitQuality
+                             process.goodJetSelection   #*
+                             #process.makeTtFullHadEvent *
+                             #process.filterKinFitQuality
                              )
 
-process.caloTight = cms.Path(process.prerequists           *
-                             process.fullHadronicSelection *
-                             process.fullHadronicEvents    *
-                             process.kinFittingTight
-                             )
+#process.caloTight = cms.Path(process.prerequists           *
+#                             process.fullHadronicSelection *
+#                             process.fullHadronicEvents    *
+#                             process.kinFittingTight
+#                             )
 
 process.pfLoose = cms.Path(process.prerequists           *
                            process.goodJetsAK5PF         *
-                           process.goodJetSelectionAK5PF *
-                           process.kinFittingAK5PF
+                           process.goodJetSelectionAK5PF #*
+                           #process.kinFittingAK5PF
                            )
 
-process.pfTight = cms.Path(process.prerequists                *
-                           process.fullHadronicSelectionAK5PF *
-                           process.fullHadronicEventsAK5PF    *
-                           process.kinFittingAK5PFTight
-                           )
+#process.pfTight = cms.Path(process.prerequists                *
+#                           process.fullHadronicSelectionAK5PF *
+#                           process.fullHadronicEventsAK5PF    *
+#                           process.kinFittingAK5PFTight
+#                           )
 
 ## define event selection
 process.EventSelection = cms.PSet(
@@ -322,6 +341,6 @@ from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
 process.out.outputCommands += patExtraAodEventContent
 process.out.outputCommands += patEventContentNoCleaning
-process.out.outputCommands += patEventContent
+#process.out.outputCommands += patEventContent
 
 process.outpath = cms.EndPath(process.out)
