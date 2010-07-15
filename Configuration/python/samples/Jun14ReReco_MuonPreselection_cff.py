@@ -4,6 +4,8 @@ import FWCore.ParameterSet.Config as cms
 #  
 #  NOT YET COMPLETE!!! SEE COMMENTED FILES!
 #
+#  Contains the Data of the Jun14th reprocessing and PromptReco_v4 data taken after that
+#
 #          global tag: GR_R_36X_V12::All
 # 
 #       input samples: /MinimumBias/Commissioning10-SD_Mu-Jun14thSkim_v1/RECO
@@ -22,9 +24,14 @@ import FWCore.ParameterSet.Config as cms
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
-#            cut flow: comes when sample is complete
+#            cut flow:                          before:                 after:
+# 			   primVtxFilter:       4404132                 4048656
+#			 beamScrapFilter:       4048656                 4048653
+#			 HBHENoiseFilter:       4048653                 4047685
 #
-#                                              
+# 			     oneHardMuon:       4047685                 384810
+# 			  twoGlobalMuons:       4047685                 45196
+#                                             
 ###########################################################################################
 
 source = cms.Source("PoolSource",
