@@ -2,115 +2,130 @@ import FWCore.ParameterSet.Config as cms
 
 ###########################################################################################
 #  
-#  NOT YET COMPLETE! ABOUT 25 - 30 NB6\^-1
+#  NOT YET COMPLETE!!! SEE COMMENTED FILES!
 #
 #          global tag: GR_R_36X_V12::All
 # 
-#       input samples: 
-#                       
+#       input samples: /MinimumBias/Commissioning10-SD_Mu-Jun14thSkim_v1/RECO
+#                      /Mu/Run2010A-Jun14thReReco_v1/RECO
+#                      /Mu/Run2010A-PromptReco-v4/RECO 
 #
-#           json file:
-#                                                                                                                                                   
-#  integrated HF lumi:                                                                                                                   
+#           json file: for Jun14th samples:
+#                      Cert_132440-137028_7TeV_June14thReReco_Collisions10_JSON_TopFiltered_July11th.txt
+#                      for PromptReco:
+#                      Cert_132440-139790_7TeV_StreamExpress_Collisions10_JSON_TopFiltered_July11th.txt 
+#															     
+#  integrated HF lumi: 57.079/nb (until now)                                                                                                                  
 #
-#    number of events: 230763
+#    number of events: 
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
-#            cut flow: 
+#            cut flow: comes when sample is complete
 #
 #                                              
 ###########################################################################################
 
 source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(	
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_1_1.root',	
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_2_1.root',	
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_3_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_4_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_5_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_6_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_7_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_8_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_9_0.root',    
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_10_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_11_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_12_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_13_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_14_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_15_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_16_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_17_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_18_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_19_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_20_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_21_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_22_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_23_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_24_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_25_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_26_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_27_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_28_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_29_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_30_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_31_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_32_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_33_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_34_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_35_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_36_0.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thSkim_37_0.root',
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_1_1.root',
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_2_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_3_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_4_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_5_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_6_1.root',
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_7_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_8_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_9_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_10_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_11_1.root',
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_12_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_13_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_14_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_15_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_16_1.root',
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_17_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_18_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_19_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_20_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_21_1.root',	
 	
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_1_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_2_3.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_3_2.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_4_2.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_5_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_6_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_7_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_8_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_9_1.root',
-        '/store/user/dammann/36X/Collisions10/Jun14thReReco_10_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_1_1.root',
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_2_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_3_1.root',	
+        #'/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_4_2.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_5_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_6_1.root',	
+        #'/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_7_2.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_8_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_9_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_10_1.root',		
 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_1_x.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_2_x.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_3_x.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_4_x.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_5_x.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_6_3.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_7_x.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_8_x.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_9_0.root',  
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_10_2.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_11_0.root',
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_12_x.root',
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_13_x.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_14_0.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_15_0.root',
-	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_16_1.root',
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_17_x.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_18_0.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_19_0.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_20_0.root',
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_21_x.root',	
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_22_x.root',	
-	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_23_x.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_24_2.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_25_0.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_26_0.root',
-	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_27_2.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_28_2.root',
-	'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_29_3.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_30_1.root',
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_31_1.root',
-	
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_1_1.root',	
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_2_1.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_3_1.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_4_0.root',	
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_5_1.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_6_0.root'	   
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_1_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_2_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_3_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_4_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_5_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_6_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_7_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_8_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_9_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_10_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_11_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_12_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_13_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_14_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_15_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_16_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_17_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_18_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_19_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_2_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_21_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_22_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_23_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_24_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_25_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_26_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_27_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_28_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_29_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_30_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_31_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_32_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_33_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_34_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_35_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_36_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_37_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_38_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_39_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_40_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_41_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_42_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_43_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_44_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_45_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_46_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_47_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_48_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_49_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_50_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_51_1.root',
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_52_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_53_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_54_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_55_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_56_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_57_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_58_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_59_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_60_1.root',	
+	#'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_61_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_62_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_63_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_64_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_65_1.root'	
        )
 )
