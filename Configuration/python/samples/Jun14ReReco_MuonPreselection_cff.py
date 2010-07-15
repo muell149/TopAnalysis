@@ -17,20 +17,20 @@ import FWCore.ParameterSet.Config as cms
 #                      for PromptReco:
 #                      Cert_132440-139790_7TeV_StreamExpress_Collisions10_JSON_TopFiltered_July11th.txt 
 #															     
-#  integrated HF lumi: 57.079/nb (until now)                                                                                                                  
+#  integrated HF lumi: 58.354/nb (until now)                                                                                                                  
 #
-#    number of events: 
+#    number of events: 403993
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
 #            cut flow:                          before:                 after:
 # 			   primVtxFilter:       4404132                 4048656
-#			 beamScrapFilter:       4048656                 4048653
-#			 HBHENoiseFilter:       4048653                 4047685
+#                        beamScrapFilter:       4048656                 4048653
+#                        HBHENoiseFilter:       4048653                 4047685
 #
-# 			     oneHardMuon:       4047685                 384810
-# 			  twoGlobalMuons:       4047685                 45196
+#                            oneHardMuon:       4047685                  384810
+#                         twoGlobalMuons:       4047685                   45196
 #                                             
 ###########################################################################################
 
@@ -69,7 +69,7 @@ source = cms.Source("PoolSource",
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_9_1.root',	
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_10_1.root',		
 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_1_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_1_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_2_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_3_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_4_1.root',	
