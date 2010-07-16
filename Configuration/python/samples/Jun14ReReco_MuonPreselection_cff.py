@@ -14,28 +14,32 @@ import FWCore.ParameterSet.Config as cms
 #
 #           json file: for Jun14th samples:
 #                      Cert_132440-137028_7TeV_June14thReReco_Collisions10_JSON_TopFiltered_July11th.txt
-#                      for PromptReco:
+#                      for PromptReco till run 139790:
 #                      Cert_132440-139790_7TeV_StreamExpress_Collisions10_JSON_TopFiltered_July11th.txt 
+#                      for PromptReco run 139791 - 140076:
+#                      subset of: Cert_132440-140076_7TeV_StreamExpress_Collisions10_JSON.txt
 #															     
-#  integrated HF lumi: 58.354/nb (until now)                                                                                                                  
+#  integrated HF lumi: 85.323/nb (until now)                                                                                                                  
 #
-#    number of events: 403993
+#    number of events: 570034
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
 #            cut flow:                          before:                 after:
-# 			   primVtxFilter:       4404132                 4048656
-#                        beamScrapFilter:       4048656                 4048653
-#                        HBHENoiseFilter:       4048653                 4047685
+#   			   primVtxFilter:       4868701                 4487076
+# 			 beamScrapFilter:       4487076                 4487071
+# 			 HBHENoiseFilter:       4487071                 4485948
 #
-#                            oneHardMuon:       4047685                  384810
-#                         twoGlobalMuons:       4047685                   45196
-#                                             
+#   			     oneHardMuon:       4485948                  538697
+#  			  twoGlobalMuons:       4485948                   53471
+#                                              
 ###########################################################################################
 
 source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(	
+    fileNames = cms.untracked.vstring(
+
+        ## Commissioning10 Jun14thSkim: 6.959/nb	
         '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_1_1.root',
         '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_2_1.root',	
         '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_3_1.root',	
@@ -58,6 +62,7 @@ source = cms.Source("PoolSource",
         '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_20_1.root',	
         '/store/user/dammann/36X/Collisions10/Jun14thSkim_naf_21_1.root',	
 	
+        ## Jun14thReReco: 3.460/nb
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_1_1.root',
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_2_1.root',	
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_3_1.root',	
@@ -69,6 +74,7 @@ source = cms.Source("PoolSource",
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_9_1.root',	
         '/store/user/dammann/36X/Collisions10/Jun14thReReco_naf_10_1.root',		
 
+        ## PromptReco till run 139790: 50.496/nb
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_1_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_2_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_3_1.root',	
@@ -115,12 +121,12 @@ source = cms.Source("PoolSource",
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_44_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_45_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_46_1.root',	
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_47_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_47_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_48_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_49_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_50_1.root',	
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_51_1.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_52_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_51_2.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_52_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_53_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_54_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_55_1.root',	
@@ -133,6 +139,24 @@ source = cms.Source("PoolSource",
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_62_1.root',	
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_63_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_64_1.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_65_1.root'	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4_naf_65_1.root',
+	
+	## PromptReco till run 140076: 24.407/nb
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_1_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_2_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_3_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_4_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_5_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_6_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_7_1.root',	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_8_1.root'#,	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_9_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_10_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_11_1.root',
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_12_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_13_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_14_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_15_1.root',	
+        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_16_1.root'		
        )
 )
