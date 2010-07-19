@@ -9,7 +9,7 @@
 using namespace std;
 using namespace edm;
 
-TriggerAnalyzer::TriggerAnalyzer(const ParameterSet& cfg)
+TriggerAnalyzer::TriggerAnalyzer(const edm::ParameterSet& cfg)
 {
   trigResults_ = cfg.getParameter<edm::InputTag>       ("TriggerResults");
   muons_       = cfg.getParameter<edm::InputTag>       ("muons"         );  
