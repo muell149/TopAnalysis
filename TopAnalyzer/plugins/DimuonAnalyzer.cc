@@ -26,7 +26,7 @@ DimuonAnalyzer::beginJob()
                           "TFile Service is not registered in cfg file" );
   }
 
-  // define logarithmic bins for a histogram with 50 bins going from 10^0 to 10^2.4 =~ 250
+  // define logarithmic bins for a histogram with 50 bins going from 10^-0.7 =~0.2 to 10^3 = 1000
   const int nbins = 50;
   double logmin = -0.7;
   double logmax =  3.0;
