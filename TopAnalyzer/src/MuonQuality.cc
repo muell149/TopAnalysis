@@ -80,6 +80,12 @@ MuonQuality::book()
   hists_["hclDRN_" ] = new TH1F( "hclDRN_"  ,  "hclDRN_"  ,   20,   0.,   1. );
   // <summerd crystal and tower energies above noise threshold> as a function of deltaR 
   hists_["calDR_"  ] = new TH1F( "calDR_"   ,  "calDR_"   ,   20,   0.,   1. );
+
+  /** 
+      uncorrelated variables for ABCD QCD estimation-method
+  **/
+  // impact parameter with respect to the beamspot vs. relative isolation
+  hists2D_["relIsoVsDb_"] = new TH2F( "relIsoVsDb_"   , "relIsoVsdB_"   ,  100, 0., 1.0,  1000, 0., 1.);
 }
 
 /// histogramm booking for full fw
@@ -151,36 +157,43 @@ MuonQuality::book(edm::Service<TFileService>& fs)
   hists_["hclDRN_" ] = fs->make<TH1F>( "hclDRN_"  ,  "hclDRN_"  ,   20,   0.,   1. );
   // <summed crystal and tower energies above noise threshold> as a function of deltaR (differential)
   hists_["calDR_"  ] = fs->make<TH1F>( "calDR_"   ,  "calDR_"   ,   20,   0.,   1. );
+
+  /** 
+      uncorrelated variables for ABCD QCD estimation-method
+  **/
+  // impact parameter with respect to the beamspot vs. relative isolation
+  hists2D_["relIsoVsDb_"] = fs->make<TH2F>( "relIsoVsDb_", "relIsoVsdB_",  100, 0., 1.0,  1000, 0., 1.);
 }
 
 /// histogram filling for fwlite and for full fw from reco objects
 void
 MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
-{
+{      
   int index=0;
   for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     // NOTE: against the common policy *not* to have any implicit selection cuts 
     // within analyzers these plots are restricted to global muons, as otherwise
     // some of the monitor histograms cannot be filled
     if( (index_<0 || index_==index) && muon->isGlobalMuon() ){
+
       /**
 	 Fill Selection Variables
       **/
       // number of valid hits in silicon tracker
-      hists_.find("nHit")->second->Fill( muon->track()->numberOfValidHits(), weight );    
+      hists_.find("nHit")->second->Fill( muon->track()->numberOfValidHits(), weight );  
       // normalized chi2 of global muon track fit
-      hists_.find("chi2")->second->Fill( muon->combinedMuon()->normalizedChi2(), weight );    
+      hists_.find("chi2")->second->Fill( muon->combinedMuon()->normalizedChi2(), weight ); 
       // d0 significance of track (still to nominal IP)
-      hists_.find("dB"  )->second->Fill( muon->dB(), weight );   
+      hists_.find("dB"  )->second->Fill( muon->dB(), weight );
       // dz significance of track in z-dimension
-      hists_.find("dz"  )->second->Fill( muon->track()->dz(), weight );  
+      hists_.find("dz"  )->second->Fill( muon->track()->dz(), weight );
       // energy in ecal attached to the candidate trajectory
-      hists_.find("ecalEn")->second->Fill( muon->ecalIsoDeposit()->candEnergy(), weight );    
+      hists_.find("ecalEn")->second->Fill( muon->ecalIsoDeposit()->candEnergy(), weight );
       // energy in hcal attached to the candidate trajectory
-      hists_.find("hcalEn")->second->Fill( muon->hcalIsoDeposit()->candEnergy(), weight );    
+      hists_.find("hcalEn")->second->Fill( muon->hcalIsoDeposit()->candEnergy(), weight );   
       // relative isolation (tracker and calo combined)
       hists_.find("relIso")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt() , weight );
-      
+ 
       /** 
 	  Fill Monitoring Variables
       **/
@@ -198,7 +211,7 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
       hists_.find("houtEn_" )->second->Fill( muon->calEnergy().ho , weight );
       // energy deposited in 3x3 tower shape around cerntral tower (recHits based)
       hists_.find("houtS9_" )->second->Fill( muon->calEnergy().hoS9 , weight );  
-      
+
       /** 
 	  Fill Isolation Monitoring Variables
       **/
@@ -213,11 +226,11 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
       hists_.find("hclIsoN_" )->second->Fill( muon->hcalIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
       // summed energy in ecal crystals and hcal towers above noise threshold in isolation cone (recHit based)
       hists_.find("calIso_"  )->second->Fill( muon->caloIso () , weight );
-      
+
       /** 
 	  Fill Energy & Object Flow Variables
       **/
-      // increment hitogram normalization
+      // increment histogram normalization
       norm_+=weight;
       // <number of tracks> as a function of deltaR (differential) 
       objectFlow( hists_.find("trkDRN_" )->second , muon->trackIsoDeposit() );
@@ -229,6 +242,12 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
       objectFlow( hists_.find("hclDRN_" )->second , muon->hcalIsoDeposit() );
       // <summerd crystal and tower energies above noise threshold> as a function of deltaR (differential)
       energyFlow( hists_.find("calDR_"  )->second , muon->ecalIsoDeposit(), muon->hcalIsoDeposit() );
+
+      /** 
+	  fill relIso vs. dB hitogram for ABCD QCD-estimation method
+      **/
+      // transverse momentum of the muon
+      hists2D_.find("relIsoVsDb_")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt(), muon->dB(), weight );
     }
   }
 }
@@ -237,7 +256,7 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
 void 
 MuonQuality::process()
 {
-  // fill normalization histogramwith the number of muons, 
+  // fill normalization histogram with the number of muons, 
   // that went into the eflow histograms (weighted); we 
   // need this workaround to be able to normalize even 
   // after the use of hadd, when running in batch mode...
