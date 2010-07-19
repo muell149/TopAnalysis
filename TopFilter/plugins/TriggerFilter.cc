@@ -5,7 +5,7 @@
 
 using namespace edm;
 
-TriggerFilter::TriggerFilter(const ParameterSet& cfg)
+TriggerFilter::TriggerFilter(const edm::ParameterSet& cfg)
 {
   trigResults_ = cfg.getParameter<edm::InputTag>       ("TriggerResults");
   hltPaths_    = cfg.getParameter<std::vector<string> >("hltPaths"      );

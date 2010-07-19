@@ -20,14 +20,11 @@
    This filter filters for triggers given in the config file. 
 */
 
-using namespace std;
-using namespace edm;
-
-class TriggerFilter : public EDFilter {
+class TriggerFilter : public edm::EDFilter {
 
   public:
     /// default constructor
-    explicit TriggerFilter(const ParameterSet&);
+    explicit TriggerFilter(const edm::ParameterSet&);
     /// default destructor
     ~TriggerFilter();
     
@@ -35,12 +32,12 @@ class TriggerFilter : public EDFilter {
     /// initiate n_TrigPaths
     virtual void beginJob();
     /// look which triggers have fired and compare to given set of triggers
-    virtual bool filter(Event&, const EventSetup&);
+    virtual bool filter(edm::Event&, const edm::EventSetup&);
     /// empty
     virtual void endJob();
         
      /// triger result input collection	
-    InputTag trigResults_;
+    edm::InputTag trigResults_;
     /// triggers to be studied given in config
     vector<string> hltPaths_;
     /// number of trigger paths given in config
