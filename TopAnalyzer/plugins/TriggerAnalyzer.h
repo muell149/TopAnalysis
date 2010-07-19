@@ -59,16 +59,7 @@ class TriggerAnalyzer : public edm::EDAnalyzer {
     /// shows fraction evts that have passed one of the triggers
     TH1D* Passed_; 
     /// shows how many evts have fired two triggers
-    TH2D* Correlations_;   
-    /// pt dependent efficiency of main trigger
-    TH1D* PtDependence_;
-    /// eta dependent efficiency of main trigger
-    TH1D* EtaDependence_;  
-    /// pt distribution of muons (needed to normalize PtDependence_)
-    TH1D* Pt_;
-    /// eta distribution of muons (needed to normalize EtaDependence_)
-    TH1D* Eta_;        
-          
+    TH2D* Correlations_;                   
 };
 
 #endif
