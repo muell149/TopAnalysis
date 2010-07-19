@@ -39,7 +39,7 @@ class TriggerFilter : public edm::EDFilter {
      /// triger result input collection	
     edm::InputTag trigResults_;
     /// triggers to be studied given in config
-    vector<string> hltPaths_;
+    std::vector<std::string> hltPaths_;
     /// number of trigger paths given in config
     int n_TrigPaths;      
 };

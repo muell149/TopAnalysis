@@ -8,7 +8,7 @@ using namespace edm;
 TriggerFilter::TriggerFilter(const edm::ParameterSet& cfg)
 {
   trigResults_ = cfg.getParameter<edm::InputTag>       ("TriggerResults");
-  hltPaths_    = cfg.getParameter<std::vector<string> >("hltPaths"      );
+  hltPaths_    = cfg.getParameter<std::vector<std::string> >("hltPaths"      );
 }
 
 TriggerFilter::~TriggerFilter()
