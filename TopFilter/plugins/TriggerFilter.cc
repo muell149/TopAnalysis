@@ -3,10 +3,12 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 
+using namespace edm;
+
 TriggerFilter::TriggerFilter(const ParameterSet& cfg)
 {
-  trigResults_ = cfg.getParameter<InputTag>       ("TriggerResults");
-  hltPaths_    = cfg.getParameter<vector<string> >("hltPaths"      );
+  trigResults_ = cfg.getParameter<edm::InputTag>       ("TriggerResults");
+  hltPaths_    = cfg.getParameter<std::vector<string> >("hltPaths"      );
 }
 
 TriggerFilter::~TriggerFilter()
@@ -20,7 +22,7 @@ TriggerFilter::beginJob()
 }
 
 bool
-TriggerFilter::filter(Event& evt, const EventSetup&)
+TriggerFilter::filter(edm::Event& evt, const edm::EventSetup&)
 {
   Handle<TriggerResults> trigResults; 
   evt.getByLabel(trigResults_, trigResults); 
