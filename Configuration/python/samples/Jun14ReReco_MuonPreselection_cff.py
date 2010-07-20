@@ -21,22 +21,22 @@ import FWCore.ParameterSet.Config as cms
 #                      for PromptReco run 140077 - 140339:
 #		       subset of: Cert_132440-140339_7TeV_StreamExpress_Collisions10_JSON.txt
 #															     
-#  integrated HF lumi: 98.860/nb (until now, ~180/nb when ready)                                                                                                                  
+#  integrated HF lumi: 160.087/nb (until now, ~180/nb when ready)                                                                                                                  
 #
-#    number of events: 655722
+#    number of events: 1007182 
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
 #            cut flow:                 
 #				  before:		  after:
-#	    primVtxFilter:	  5509313		  5114902
-#	  beamScrapFilter:	  5114902		  5114897
-#	  HBHENoiseFilter:	  5114897		  5113613
+#	    primVtxFilter:       6283732                 5834804
+#         beamScrapFilter:       5834804                 5834798
+#         HBHENoiseFilter:       5834798                 5833269
 #
-#	      oneHardMuon:	  5113613		   622643
-#	   twoGlobalMuons:	  5113613		    61834
-#  	 	   
+#             oneHardMuon:       5833269                  969376
+#          twoGlobalMuons:       5833269                   77372
+#      	 	   
 ###########################################################################################
 
 source = cms.Source("PoolSource",
@@ -157,48 +157,47 @@ source = cms.Source("PoolSource",
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_10_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_11_1.root',
         '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_12_1.root',	
-        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_13_1.root'#,	
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_13_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_14_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_15_1.root',	
         #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4a_naf_16_1.root'	
 	
-        ## PromptReco till run 140399: 0/nb 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_1_1.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_2_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_3_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_4_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_5_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_6_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_7_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_8_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_9_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_10_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_11_1.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_12_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_13_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_14_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_15_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_16_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_17_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_18_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_19_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_20_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_21_1.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_22_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_23_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_24_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_25_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_26_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_27_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_28_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_29_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_30_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_31_1.root',
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_32_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_33_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_34_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_35_1.root',	 
-        #'/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_36_1.root',	 
-		
+        ## PromptReco till run 140399: 61.226788/nb
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_1_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_2_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_3_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_4_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_5_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_6_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_7_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_8_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_9_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_10_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_11_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_12_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_13_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_14_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_15_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_16_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_17_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_18_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_19_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_20_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_21_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_22_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_23_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_24_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_25_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_26_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_27_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_28_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_29_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_30_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_31_1.root',
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_32_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_33_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_34_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_35_1.root',	 
+        '/store/user/dammann/36X/Collisions10/MuRun2010A_v4b_naf_36_1.root'	 
        )
 )
