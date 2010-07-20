@@ -78,7 +78,7 @@ selectNMinusOneJets = cms.Sequence(noEtaJets*
 
 ## check for different btag properties
 trackCountingHighPurBJets     = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 2.17'
+                                                      cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
                                                       )
 trackCountingHighEffBJets     = selectedPatJets.clone(src = 'goodJets',
                                                       cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.9'
