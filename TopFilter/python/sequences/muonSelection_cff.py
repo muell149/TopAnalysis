@@ -28,7 +28,8 @@ standAloneMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
                                          )
 ## check if Global Muon
 combinedMuons   = selectedPatMuons.clone(src = 'selectedPatMuons',
-                                         cut = 'combinedMuon.isNull = 0'
+                                         cut = 'isGlobalMuon &'
+                                               'isTrackerMuon() =1'
                                          )
 ## select Muons with high pt
 highPtMuons    = selectedPatMuons.clone(src = 'combinedMuons',
@@ -42,8 +43,7 @@ kinematicMuons    = selectedPatMuons.clone(src = 'highPtMuons',
 
 ## check tracker related muon qualities: isGlobalMuonPromptTight? & Tracker Muon & impact parameter
 trackMuons = selectedPatMuons.clone(src = 'kinematicMuons',
-                                    cut = 'isTrackerMuon() =1 &'
-                                          'innerTrack.numberOfValidHits >= 11 &'
+                                    cut = 'innerTrack.numberOfValidHits >= 11 &'
                                           'globalTrack.normalizedChi2 < 10.0  &'
                                           'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
                                           'abs(dB)<0.02'

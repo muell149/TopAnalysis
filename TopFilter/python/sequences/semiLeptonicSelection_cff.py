@@ -26,13 +26,14 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
 ## setup the lepton selection collections
 ## for tight Muons see muonSelection_cff.py
-looseMuons     = selectedPatMuons.clone(src = 'combinedMuons',
-                                        cut = 'abs(eta) < 2.5 & pt > 10.&'
+looseMuons     = selectedPatMuons.clone(src = 'selectedPatMuons',
+                                        cut = 'isGlobalMuon &'
+                                              'abs(eta) < 2.5 & pt > 10.&'
                                               '(trackIso+caloIso)/pt <  0.2'
                                         )
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                             cut = 'et > 15. & abs(eta) < 2.5 &'
-                                            '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
+                                                  '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
                                             )
 
 ## setup jet selection collection
