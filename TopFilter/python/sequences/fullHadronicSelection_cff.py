@@ -27,10 +27,10 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 
 ## setup the jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
-                                         cut = 'abs(eta) < 2.4 & pt > 40'
+                                         cut = 'abs(eta) < 2.4 & pt > 40.'
                                          )
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                         cut = 'abs(eta) < 2.4 & pt > 50'
+                                         cut = 'abs(eta) < 2.4 & pt > 50.'
                                          )
 
 ## setting up the collections for the fully-hadronic
@@ -58,6 +58,8 @@ from TopAnalysis.TopAnalyzer.JetKinematics_cfi import *
 from TopAnalysis.TopAnalyzer.EventShapes_cfi import *
 ## genParticle analyzer
 from TopAnalysis.TopAnalyzer.GenParticle_cfi import *
+## ptHat analyzer
+from TopAnalysis.TopAnalyzer.PtHat_cfi import *
 ## analyzer for special variables in full hadronic channel
 from TopAnalysis.TopAnalyzer.FullHadSpecial_cfi import *
 ## kinfit analyzer
@@ -75,6 +77,40 @@ from TopAnalysis.TopFilter.sequences.generatorMatching_cff import *
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 from TopAnalysis.TopAnalyzer.FullHadHypothesisAnalyzer_cff import *
 
+## create trigger selection for MC
+hltQuadJet15U = hltQuadJet30.clone( HLTPaths = ["HLT_QuadJet15U"],
+                                    TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI") )
+
+## ---
+##    FILTER STEP 0
+## ---
+
+## vertex filter
+vertex = cms.EDFilter("VertexSelector",
+                      src = cms.InputTag("offlinePrimaryVertices"),
+                      cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2"),
+                      filter = cms.bool(True),
+                      )
+
+## scraping filter
+noscraping = cms.EDFilter("FilterOutScraping",
+                          applyfilter = cms.untracked.bool(True),
+                          debugOn = cms.untracked.bool(False),
+                          numtrack = cms.untracked.uint32(10),
+                          thresh = cms.untracked.double(0.25)
+                          )
+
+## setup good jet selection collection
+goodJetSelection = countPatJets.clone(src = 'goodJets',
+                                      minNumber = 6
+                                      )
+
+filterStep0 = cms.Sequence(vertex *
+                           noscraping *
+                           goodJetSelection
+                           )
+
+
 ## to switch verbosity modes of the kinFit
 #ttFullHadEvent.verbosity = 1
 
@@ -83,8 +119,8 @@ kinFitTtFullHadEventHypothesis.maxNComb = -1
 
 kinFitTtFullHadEventHypothesis.bTags = 2
 kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighPurBJetTags'
-kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 2.17 #2.02
-kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 4.31 #3.4
+kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.93 #1.74
+kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41 #3.05
 
 #setForAllTtFullHadHypotheses(process, 'maxNJets', -1)
 kinFitTtFullHadEventHypothesis.maxNJets = -1
@@ -184,13 +220,18 @@ fullHadSpecial_0 = analyzeFullHadSpecials.clone( src = 'goodJets' )
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_0 = cms.Sequence( fullHadSpecial_0 )
 
-## GEN PARTICLE
+## GENERATOR INFORMATION
 
 ## collect analyzers for genParticles
 genParticles_0 = analyzeGenParticles.clone()
 
-## monitor sequence for genParticles
-monitorGenParticles_0 = cms.Sequence( genParticles_0 )
+## collect analyzers for ptHat
+ptHat_0 = analyzePtHat.clone()
+
+## monitor sequence for generator
+monitorGenerator_0 = cms.Sequence( genParticles_0 *
+                                   ptHat_0
+                                  )
 
 ## ---
 ##    FILTER STEP 1
@@ -275,13 +316,18 @@ fullHadSpecial_1 = analyzeFullHadSpecials.clone( src = 'tightLeadingJets' )
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_1 = cms.Sequence( fullHadSpecial_1 )
 
-## GEN PARTICLE
+## GENERATOR INFORMATION
 
 ## collect analyzers for genParticles
 genParticles_1 = analyzeGenParticles.clone()
 
-## monitor sequence for genParticles
-monitorGenParticles_1 = cms.Sequence( genParticles_1 )
+## collect analyzers for ptHat
+ptHat_1 = analyzePtHat.clone()
+
+## monitor sequence for generator
+monitorGenerator_1 = cms.Sequence( genParticles_1 *
+                                   ptHat_1
+                                  )
 
 ## ---
 ##    FILTER STEP 2
@@ -390,13 +436,18 @@ fullHadSpecial_2 = analyzeFullHadSpecials.clone( src = 'tightLeadingJets' )
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_2 = cms.Sequence( fullHadSpecial_2 )
 
-## GEN PARTICLE
+## GENERATOR INFORMATION
 
 ## collect analyzers for genParticles
 genParticles_2 = analyzeGenParticles.clone()
 
-## monitor sequence for genParticles
-monitorGenParticles_2 = cms.Sequence( genParticles_2 )
+## collect analyzers for ptHat
+ptHat_2 = analyzePtHat.clone()
+
+## monitor sequence for generator
+monitorGenerator_2 = cms.Sequence( genParticles_2 *
+                                   ptHat_2
+                                  )
 
 ## ---
 ##    FILTER STEP 3
@@ -504,13 +555,18 @@ fullHadSpecial_3 = analyzeFullHadSpecials.clone( src = 'tightLeadingJets' )
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_3 = cms.Sequence( fullHadSpecial_3 )
 
-## GEN PARTICLE
+## GENERATOR INFORMATION
 
 ## collect analyzers for genParticles
 genParticles_3 = analyzeGenParticles.clone()
 
-## monitor sequence for genParticles
-monitorGenParticles_3 = cms.Sequence( genParticles_3 )
+## collect analyzers for ptHat
+ptHat_3 = analyzePtHat.clone()
+
+## monitor sequence for generator
+monitorGenerator_3 = cms.Sequence( genParticles_3 *
+                                   ptHat_3
+                                  )
 
 ## ---
 ##    FILTER STEP 4 (not used)
@@ -531,25 +587,27 @@ filterEventShapes = filterEventShape.clone( minC = 0.75 )
 ##    run the final sequence
 ## ---
 analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
-                                            hltQuadJet30          *
-                                            #hltHt200              *
+                                            hltQuadJet15U         *
+                                            #hltQuadJet30         *
+                                            #hltHt200             *
                                             ## do the selections
                                             fullHadronicSelection *
                                             ## do the matching
                                             matchJetsToPartons    *
+                                            filterStep0           *
                                             ## do the monitoring
                                             monitorJetsKinematics_0  *
                                             monitorJetsQuality_0     *
                                             monitorEventShapes_0     *
                                             monitorFullHadSpecials_0 *
-                                            monitorGenParticles_0    *
+                                            monitorGenerator_0       *
                                             ## do the 1. event selection
                                             leadingJetSelection      *
                                             monitorJetsKinematics_1  *
                                             monitorJetsQuality_1     *
                                             monitorEventShapes_1     *
                                             monitorFullHadSpecials_1 *
-                                            monitorGenParticles_1    *
+                                            monitorGenerator_1       *
                                             ## do the 2. event selection
                                             bottomJetSelection       *
                                             makeTtFullHadEvent       *
@@ -558,7 +616,7 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             monitorJetsQuality_2     *
                                             monitorEventShapes_2     *
                                             monitorFullHadSpecials_2 *
-                                            monitorGenParticles_2    *
+                                            monitorGenerator_2       *
                                             ## do the 3. event selection
                                             filterKinFitQuality      *
                                             monitorKinFit_3          *
@@ -566,7 +624,7 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             monitorJetsQuality_3     *
                                             monitorEventShapes_3     *
                                             monitorFullHadSpecials_3 *
-                                            monitorGenParticles_3
+                                            monitorGenerator_3
                                             )
 
 ## ---
@@ -586,10 +644,12 @@ def runOnRealData(process):
     print 'on generator information to run properly '
     print '++++++++++++++++++++++++++++++++++++++++++++'
     process.analyseFullHadronicSelection.remove(process.matchJetsToPartons)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_0)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_1)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_2)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_3)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_0)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_1)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_2)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
 
 ## ---
 ##    remove modules that produce monitoring plots during the cutflow
@@ -616,10 +676,10 @@ def removeMonitoringOfCutflow(process):
     process.analyseFullHadronicSelection.remove(process.monitorFullHadSpecials_1)
     process.analyseFullHadronicSelection.remove(process.monitorFullHadSpecials_2)
     process.analyseFullHadronicSelection.remove(process.monitorFullHadSpecials_3)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_0)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_1)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_2)
-    process.analyseFullHadronicSelection.remove(process.monitorGenParticles_3)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_0)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_1)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_2)
+    process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
     process.analyseFullHadronicSelection.remove(process.monitorKinFit_2)
     process.analyseFullHadronicSelection.remove(process.monitorKinFit_3)
 
@@ -633,6 +693,7 @@ def removeDefaultTrigger(process):
     print '++++++++++++++++++++++++++++++++++++++++++++'
     process.analyseFullHadronicSelection.remove(process.hltHt200)
     process.analyseFullHadronicSelection.remove(process.hltQuadJet30)
+    process.analyseFullHadronicSelection.remove(process.hltQuadJet15U)
     
 ## ---
 ##    switch all necessary filters to run this sequence for background estimation
@@ -657,6 +718,9 @@ def runOnPF(process):
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
+    if(hasattr(process, 'residualCorrectedJets')):
+        process.residualCorrectedJets.jets    = 'selectedPatJetsAK5PF'
+        process.residualCorrectedJets.jetType = 'PF'
 
 ## ---
 ##    switch to simpleSecondaryVertex bTagger
@@ -664,8 +728,30 @@ def runOnPF(process):
 def switchToSSV(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.simpleSecondaryVertexBJets)
     process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'simpleSecondaryVertexBJetTags'
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 2.02 #2.17
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.4  #4.31
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.74
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.05
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'simpleSecondaryVertexBJets')
+
+## ---
+##    switch to combinedSecondaryVertex bTagger
+## ---
+def switchToCSV(process):
+    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexBJets)
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexBJetTags'
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.800 #self-made
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.925 #self-made
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexBJets')
+
+## ---
+##    switch to combinedSecondaryVertexMVA bTagger
+## ---
+def switchToCSVMVA(process):
+    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexMVABJets)
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexMVABJetTags'
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.575 #self-made
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.775 #self-made
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexMVABJets')
 
