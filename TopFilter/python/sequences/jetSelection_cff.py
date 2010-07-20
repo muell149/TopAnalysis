@@ -77,24 +77,27 @@ selectNMinusOneJets = cms.Sequence(noEtaJets*
 
 
 ## check for different btag properties
-trackCountingHighPurBJets     = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
-                                                      )
-trackCountingHighEffBJets     = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.9'
-                                                      )
-simpleSecondaryVertexBJets    = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 2.02'
-                                                      )
-simpleSecondaryVertexNegBJets = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
-                                                      )
-combinedSecondaryVertexBJets  = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.9'
-                                                      )
-softMuonBJets                 = selectedPatJets.clone(src = 'goodJets',
-                                                      cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
-                                                      )
+trackCountingHighPurBJets       = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
+                                                        )
+trackCountingHighEffBJets       = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
+                                                        )
+simpleSecondaryVertexBJets      = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 1.74'
+                                                        )
+simpleSecondaryVertexNegBJets   = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
+                                                        )
+combinedSecondaryVertexBJets    = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.8'
+                                                        )
+combinedSecondaryVertexMVABJets = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"combinedSecondaryVertexMVABJetTags\") > 0.575'
+                                                        )
+softMuonBJets                   = selectedPatJets.clone(src = 'goodJets',
+                                                        cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
+                                                        )
 
 ## a goodJet fullfilling different btag
 ## criteria
@@ -104,5 +107,6 @@ selectBTaggedJets = cms.Sequence(goodJets                      *
                                  simpleSecondaryVertexBJets    *
                                  simpleSecondaryVertexNegBJets *
                                  combinedSecondaryVertexBJets  *
+                                 combinedSecondaryVertexMVABJets  *
                                  softMuonBJets
                                  )
