@@ -650,6 +650,11 @@ def runOnRealData(process):
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
+    if(hasattr(process, 'goodJets')):
+        process.goodJets.src   = 'residualCorrectedJets'
+    if(hasattr(process, 'goodJetsPF')):
+        process.goodJetsPF.src = 'residualCorrectedJets'
+
 
 ## ---
 ##    remove modules that produce monitoring plots during the cutflow
