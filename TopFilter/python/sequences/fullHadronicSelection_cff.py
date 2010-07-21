@@ -650,9 +650,9 @@ def runOnRealData(process):
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
-    if(hasattr(process, 'goodJets')):
+    if(hasattr(process, 'goodJets') & hasattr(process, 'residualCorrectedJets')):
         process.goodJets.src   = 'residualCorrectedJets'
-    if(hasattr(process, 'goodJetsPF')):
+    if(hasattr(process, 'goodJetsPF') & hasattr(process, 'residualCorrectedJets')):
         process.goodJetsPF.src = 'residualCorrectedJets'
 
 
