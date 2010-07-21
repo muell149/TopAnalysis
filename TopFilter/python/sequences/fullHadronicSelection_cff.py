@@ -728,6 +728,17 @@ def runOnPF(process):
         process.residualCorrectedJets.jetType = 'PF'
 
 ## ---
+##    switch to trackCountingHighEfficiency bTagger
+## ---
+def switchToTCHE(process):
+    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.trackCountingHighEffBJets)
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'trackCountingHighEffBJetTags'
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.3
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 10.2
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'trackCountingHighEffBJets')
+
+## ---
 ##    switch to simpleSecondaryVertex bTagger
 ## ---
 def switchToSSV(process):
@@ -744,8 +755,8 @@ def switchToSSV(process):
 def switchToCSV(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexBJets)
     process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexBJetTags'
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.800 #self-made
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.925 #self-made
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.800 #self-derived
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.925 #self-derived
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexBJets')
 
@@ -755,8 +766,8 @@ def switchToCSV(process):
 def switchToCSVMVA(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexMVABJets)
     process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexMVABJetTags'
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.575 #self-made
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.775 #self-made
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.575 #self-derived
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.775 #self-derived
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexMVABJets')
 
