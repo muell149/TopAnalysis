@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.VarParsing as VarParsing
 
 ## ---
 ##    here we need a general description of what the config id good for and the
@@ -6,16 +7,19 @@ import FWCore.ParameterSet.Config as cms
 ##    modules...
 ## ---
 
-## ---
-##    decide whether to run on:  * all *, * signal only *, * background only *
-## ---
-eventFilter  = 'data'
+# setup 'standard' options
+options = VarParsing.VarParsing ('standard')
+## decide whether to run on:  * data *, * signal only *, * background only *, * qcd *
+options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
+## choose whether to use PF or not
+options.register('usePF'      ,     1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "use PF for processing")
+##  choose whether to write output to disk or not
+options.register('writeOutput',     0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "write events surviving all cuts to disk")
 
-## NOT YET REIMPLEMENTED
-usePF       = True # False
-writeOutput = False # True
+# get and parse the command line arguments
+options.parseArguments()
 
-# analyse muon quantities
+# analyze fully hadronic selection
 process = cms.Process("Selection")
 
 ## configure message logger
@@ -70,7 +74,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 ## ---
-##    decide whether to run on:  * all *, * signal only *, * background only * or * data *
+##    decide whether to run on:  * data *, * signal only *, * background only * or * qcd *
 ## ---
 
 ## std sequence to produce the ttGenEvt
@@ -88,7 +92,7 @@ process.filterPtHat = process.filterPtHat.clone()
 process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
 process.residualCorrectedJets = process.residualCorrectedJets.clone()
 
-if(eventFilter=='data'):
+if(options.eventFilter=='data'):
     ## adapt output filename
     process.TFileService.fileName = 'analyzeFullHadronicSelection_data.root'
     ## sequence with jet energy corrections specially suited for data
@@ -96,7 +100,7 @@ if(eventFilter=='data'):
                                           process.residualCorrectedJets
                                           )
     
-elif(eventFilter=='signal only'):
+elif(options.eventFilter=='signal only'):
     ## adapt output filename
     process.TFileService.fileName = 'analyzeFullHadronicSelection_sig.root'
     ## sequence with fullHad ttbar filter
@@ -105,7 +109,7 @@ elif(eventFilter=='signal only'):
                                           process.ttFullHadronicFilter
                                           )
 
-elif(eventFilter=='background only'):
+elif(options.eventFilter=='background only'):
     ## invert fullHad filter
     process.ttFullHadronicFilter.invert = True
     ## adapt output filename
@@ -116,14 +120,33 @@ elif(eventFilter=='background only'):
                                           process.ttFullHadronicFilter
                                           )
 
-elif(eventFilter=='all'):
+elif(options.eventFilter=='qcd'):
     ## adapt output filename
-    process.TFileService.fileName = 'analyzeFullHadronicSelection_all.root'
+    process.TFileService.fileName = 'analyzeFullHadronicSelection_qcd.root'
+
+    # setup any variables and default values for the ptHatFilter
+    options.register('maxPtHat', 999999., VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "maxPtHat to be processed")
+    options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "minPtHat to be processed")
+
+    # get and parse the command line arguments
+    options.parseArguments()
+    
+    if(options.maxPtHat<999999.):
+        ## ptHat filter
+        process.filterPtHat.minPtHat = options.minPtHat
+        print "included ptHatFilter with 'maxPtHat' =",
+        print process.filterPtHat.maxPtHat
+
+    if(options.minPtHat>0.):
+        process.filterPtHat.minPtHat = options.minPtHat
+        print "included ptHatFilter with 'minPtHat' =",
+        print process.filterPtHat.minPtHat
+
     ## sequence with ptHat filter
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.filterPtHat)
 else:
-    raise NameError, "'"+eventFilter+"' is not a prober eventFilter name choose: 'all', 'signal only', 'background only' or 'data'"
+    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'signal only', 'background only' or 'qcd'"
     
 ## fully hadronic selection
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
@@ -136,20 +159,22 @@ addTtFullHadHypotheses(process,
                        ["kKinFit"]
                        )
 
-if(not eventFilter=='signal only'):
+if(not options.eventFilter=='signal only'):
     removeTtFullHadHypGenMatch(process)
 
-## changing bTagger, possible are: SSV, CSV, CSVMVA
-## only SSV has a officialy blessed WP like the default
-#switchToSSV(process)
+## changing bTagger, possible are: TCHE, SSV, CSV, CSVMVA
+## only TCHE and SSV have a officialy blessed WP like the default (TCHP)
+switchToTCHE(process)
 
 ## selection should be run on PFJets instead of caloJets
-if(usePF):
+if(not options.usePF==0):
     runOnPF(process)
 
 ## if running on real data, do everything needed for this
-if(eventFilter=='data'):
+if(options.eventFilter=='data'):
     runOnRealData(process)
+    ## needed as in MC the process label is different -> trigger in data not found
+    removeDefaultTrigger(process)
 
 ## ---
 ##    run the final sequence
@@ -161,7 +186,7 @@ process.p1 = cms.Path(## do the genEvent selection
                       )
 
 ## Output Module Configuration
-if(writeOutput):
+if(options.writeOutput):
     process.out = cms.OutputModule("PoolOutputModule",
                                    fileName = cms.untracked.string('patTuple_selected.root'),
                                    # save only events passing the full path
