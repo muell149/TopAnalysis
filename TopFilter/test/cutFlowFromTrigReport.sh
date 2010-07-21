@@ -11,7 +11,8 @@ if [ $1 = "--help" ]
     echo "The file containig the TrigReport must be given as parameter to this script."
     echo "Example:"
     echo "[First] cmsRun TopAnalysis/TopFilter/test/testSemiLepMuonSelection_cfg.py > out.txt 2>> out.txt"
-    echo "[Then ] TopAnalysis/TopFilter/test/cutFlowFromTrigReport.sh out.txt"
+    echo "[Then ] TopAnalysis/TopFilter/test/cutFlowFromTrigReport.sh out.txt \
+                   > TopAnalysis/TopFilter/test/testSemiLepMuonSelection-reference.txt"
     exit 0
 fi
 
