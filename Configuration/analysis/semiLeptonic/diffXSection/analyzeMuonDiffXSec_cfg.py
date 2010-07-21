@@ -34,17 +34,16 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
 
 ## add your favourite file here
-    #'/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
-    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_10_1.root'
+    '/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
+    #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_10_1.root'
     #'/store/user/henderle/Spring10/WJets_MAD/PATtuple_100_2.root'
     #'/store/user/henderle/Spring10/ZJets_MAD/PATtuple_10_2.root'
-    #'/store/user/henderle/Spring10/'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(200)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -267,7 +266,7 @@ process.leadingJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'ti
 process.leadingJetSelectionNjets4 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 4)
 
 ## ---
-##    collect selections for path 2 (jetmultiplicity 3 && btag) with different names
+##    collect selections for path 2 (jetmultiplicity 3 && btag) and the output modules with different names
 ## ---
 process.ttSemiLeptonicFilterb = process.ttSemiLeptonicFilter.clone()
 process.hltMu9b = process.hltMu9.clone()
@@ -281,6 +280,9 @@ process.muonSelectionb  = process.muonSelection.clone()
 process.secondMuonVetob = process.secondMuonVeto.clone()
 process.electronVetob   = process.electronVeto.clone()
 process.PVSelectionb    = process.PVSelection.clone()
+process.leadingJetSelectionNjets1Pat = process.leadingJetSelectionNjets1.clone()
+process.leadingJetSelectionNjets2Pat = process.leadingJetSelectionNjets2.clone()
+process.leadingJetSelectionNjets3Pat = process.leadingJetSelectionNjets3.clone()
 
 ## ---
 ##    Set up selection steps for different (gen)-jet multiplicities
@@ -363,7 +365,8 @@ process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLea
 ## btag selection cuts
 process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
 process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
-
+## btag monitoring before jetcuts
+process.tightJetQualityBeforeJetCuts = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
 
 process.monitorNMinusOneMuonCuts = cms.Sequence(process.noDbMuonQuality            +
                                                 process.noChi2MuonQuality          +
@@ -441,25 +444,53 @@ process.jetMultiplicity4Btag = cms.Sequence(process.bottomJetSelection          
                                             process.analyzePfMETNjets4Btag                     +
                                             process.analyzePatMETNjets4Btag                    )
 
-# ## produce decaySubset
-# process.load("TopQuarkAnalysis.TopEventProducers.producers.TopDecaySubset_cfi") 
-# ## add message logger
-# process.load("FWCore.MessageLogger.MessageLogger_cfi")
-# #process.MessageLogger.categories.append(*'TopDecaySubset_printTarget'*)
-# process.MessageLogger.categories.append('TopDecaySubset_printSource')
-# process.MessageLogger.cerr.TopDecaySubset_printSource = cms.untracked.PSet(
-#    limit = cms.untracked.int32(10)
-# )
+## ---
+##    configure ABCD method for QCD estimation
+## ---
 
+## a) the muon collection for monitoring relIso vs dB
+## muon selector
+from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
+process.estimationMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
+                                                 cut = 'pt > 20. & abs(eta) < 2.1 &'
+                                                 'isGlobalMuon &'
+                                                 'isTrackerMuon() =1 &'                                            
+                                                 'innerTrack.numberOfValidHits >= 11 &'
+                                                 'globalTrack.normalizedChi2 < 10.0 &'
+                                                 'globalTrack.hitPattern.numberOfValidMuonHits>0'
+                                                 )
+## b) the different selection steps
+process.ttSemiLeptonicFilterABCD = process.ttSemiLeptonicFilter.clone()
+process.hltMu9ABCD = process.hltMu9.clone()
+process.filterSequenceABCD = cms.Sequence(process.makeGenEvt *
+                                          process.ttSemiLeptonicFilterABCD *
+                                          process.hltMu9ABCD
+                                          )
+process.PVSelectionABCD = process.PVSelection.clone()
+process.leadingJetSelectionNjets1ABCD = process.leadingJetSelectionNjets1.clone()
+process.leadingJetSelectionNjets2ABCD = process.leadingJetSelectionNjets2.clone()         
+process.leadingJetSelectionNjets3ABCD = process.leadingJetSelectionNjets3.clone()         
+process.leadingJetSelectionNjets4ABCD = process.leadingJetSelectionNjets4.clone()         
+process.muonSelectionABCD  = process.muonSelection.clone()                    
+process.secondMuonVetoABCD = process.secondMuonVeto.clone()                   
+process.electronVetoABCD   = process.electronVeto.clone()
+process.estimationMuonsSelection = process.muonSelection.clone (src = 'estimationMuons', minNumber = 1, maxNumber = 1)
+
+## c) the relIso vs dB monitoring plots
+process.estimationMuonsQualityNjets1 = process.analyzeMuonQuality.clone(src = 'estimationMuons',
+                                                                        analyze = cms.PSet(index = cms.int32(0)) )
+process.estimationMuonsQualityNjets2 = process.estimationMuonsQualityNjets1.clone()
+process.estimationMuonsQualityNjets3 = process.estimationMuonsQualityNjets1.clone()
+process.estimationMuonsQualityNjets4 = process.estimationMuonsQualityNjets1.clone()
 
 ## ---
 ##    run the final sequences
 ## ---
-
+              
 process.p1 = cms.Path(
-                      ## do the gen event selection (decay channel) and the trigger selection (hltMu9)
+                      ## gen event selection (decay channel) and the trigger selection (hltMu9)
                       process.filterSequence                        *
-                      ## do the PV event selection
+                      ## PV event selection
                       process.PVSelection                           *
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
@@ -477,6 +508,8 @@ process.p1 = cms.Path(
                       ## do event selection veto cuts
                       process.secondMuonVeto                        *
                       process.electronVeto                          *
+                      ## b-tag quantities before jetcut
+                      process.tightJetQualityBeforeJetCuts          *
                       ## monitor all jet cut quantities
                       process.monitorNMinusOneJetCuts               *
                       process.monitorJetCutflow                     *
@@ -496,9 +529,9 @@ process.p1 = cms.Path(
                       )
 ## Njets>=3 & btag
 process.p2 = cms.Path(
-                      ## do the gen event selection (decay channel) and the trigger selection (hltMu9)
+                      ## gen event selection (decay channel) and the trigger selection (hltMu9)
                       process.filterSequenceb                       *
-                      ## do the PV event selection
+                      ## PV event selection
                       process.PVSelectionb                          *
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
@@ -512,10 +545,42 @@ process.p2 = cms.Path(
                       ## N_jets >= 3 + btag >=1
                       process.jetMultiplicity3Btag
                       )
+
+## QCD estimation via ABCD
+process.p3 = cms.Path(
+    ## gen event selection (decay channel) and trigger selection (hltMu9)
+    process.filterSequenceABCD                    *        
+    ## introduce collections
+    process.semiLeptonicSelection                 *
+    process.estimationMuons                       *
+    ## PV event selection
+    process.PVSelectionABCD                       *
+    ## electron veto event selection cut
+    process.electronVetoABCD                      *
+    ## do the event selection for ==1 muon (without dB, relIso and dR cut)
+    process.estimationMuonsSelection              *
+    ## jetcut event selection + monitoring of dB and relIso variable
+    ## a) 1 jet
+    process.leadingJetSelectionNjets1ABCD         *
+    process.estimationMuonsQualityNjets1          *
+    ## a) 2 jet
+    process.leadingJetSelectionNjets2ABCD         *
+    process.estimationMuonsQualityNjets2          *
+    ## a) 3 jet
+    process.leadingJetSelectionNjets3ABCD         *
+    process.estimationMuonsQualityNjets3          *
+    ## a) 4 jet
+    process.leadingJetSelectionNjets4ABCD         *
+    process.estimationMuonsQualityNjets4          *
+    ## do the standard muon + 2nd muon veto event selection cuts
+    process.muonSelectionABCD                     *
+    process.secondMuonVetoABCD                    
+    )
+
 ## on generator niveau
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
-    process.p3 = cms.Path(
+    process.p4 = cms.Path(
         ## gen event selection: semileptonic (muon & tau->lepton)
         process.genFilterSequence                     *
         ## introduce some collections
@@ -523,7 +588,6 @@ if(runningOnData=="MC"):
         process.semiLeptGenCollections                *
         ## do the event selection for muon
         process.genMuonSelection                      *
-     #   process.decaySubset                           *
         ## for N_jets = 1+
         process.leadingGenJetSelectionNjets1          *
         process.analyzeTightMuonCrossSectionGenNjets1 *
@@ -541,6 +605,7 @@ elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
     print "choose runningOnData= data or MC, creating no gen-plots"
+
 ## Output Module Configuration
 if(writeOutput):
     from PhysicsTools.PatAlgos.patEventContent_cff import *

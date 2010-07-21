@@ -9,7 +9,8 @@ execfile("/afs/naf.desy.de/user/g/goerner/semileptonic361/analyzeMuonDiffXSec_cf
 ## remove gen level event filter
 process.filterSequence  = cms.Sequence(process.hltMu9)
 process.filterSequenceb = cms.Sequence(process.hltMu9b)
-process.p3.remove(process.genFilterSequence)
+process.filterSequenceABCD = cms.Sequence(process.hltMu9ABCD)
+process.p4.remove(process.genFilterSequence)
 print "all gen level filters using ttbar decay subset are removed" 
 print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"
 

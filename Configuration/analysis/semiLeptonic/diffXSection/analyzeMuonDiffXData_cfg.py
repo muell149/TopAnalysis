@@ -19,7 +19,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 ## change number of processed events
 process.maxEvents.input = -1
-process.source.skipEvents = cms.untracked.uint32(3779)
+process.source.skipEvents = cms.untracked.uint32(0)
 ## change source -> data file
 dataFiles = cms.untracked.vstring()
 dataFiles.extend([
@@ -60,7 +60,7 @@ process.GlobalTag.globaltag = cms.string('GR_R_36X_V12::All')
 ##                       process.secondMuonVetob                       *
 ##                       process.electronVetob                         *
 ##                       ## N_jets >= 1
-##                       process.leadingJetSelectionNjets1
+##                       process.leadingJetSelectionNjets1Pat
 ##                       )
 ## ## b) Njets>=2
 ## process.pat2 = cms.Path(
@@ -76,9 +76,9 @@ process.GlobalTag.globaltag = cms.string('GR_R_36X_V12::All')
 ##                       process.secondMuonVetob                       *
 ##                       process.electronVetob                         *
 ##                       ## N_jets >= 2
-##                       process.leadingJetSelectionNjets2
+##                       process.leadingJetSelectionNjets2Pat
 ##                       )
-## b) Njets>=3
+## c) Njets>=3
 process.pat3 = cms.Path(
                       ## do the trigger selection (hltMu9)
                       process.hltMu9b                               *
@@ -92,9 +92,9 @@ process.pat3 = cms.Path(
                       process.secondMuonVetob                       *
                       process.electronVetob                         *
                       ## N_jets >= 3
-                      process.leadingJetSelectionNjets3
+                      process.leadingJetSelectionNjets3Pat
                       )
-
+## d) for Njets>=3 use output of p1!
 process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('pat3') )
 process.out.fileName = cms.untracked.string('patTuple_selectedNjets3.root')
 
@@ -134,8 +134,9 @@ process.patJetCorrFactors.corrSample = "Spring10"
 process.patJetCorrFactors.sampleType = "ttbar"
 
 ## remove gen level event filter
-process.filterSequence  = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
-process.filterSequenceb = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
+process.filterSequence     = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
+process.filterSequenceb    = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
+process.filterSequenceABCD = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
 print "all gen level filters using ttbar decay subset are removed"
 print "added pat default sequence"
 
