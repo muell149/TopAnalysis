@@ -277,7 +277,7 @@ KinFitImprover::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
 
     hists_.find("fitQuality")->second->Fill( comboTypeValue + 0.5 );
 
-    if( comboType_ == comboTypeValue ){
+    if( comboType_ == comboTypeValue || comboType_ == 0 ){
       hists_.find("topMass"  )->second->Fill( top_mass_fit );
       hists_.find("allDRFit" )->second->Fill( dR1 );
       hists_.find("allDRFit" )->second->Fill( dR2 );
