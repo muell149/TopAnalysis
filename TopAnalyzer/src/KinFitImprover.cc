@@ -190,19 +190,19 @@ KinFitImprover::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
       }
     */
 
-    float dR1 = deltaR(tops.b("kKinFit")->phi(), tops.b("kKinFit")->eta(), tops.lightQ("kKinFit")->phi(), tops.lightQ("kKinFit")->eta());
-    float dR2 = deltaR(tops.b("kKinFit")->phi(), tops.b("kKinFit")->eta(), tops.lightQBar("kKinFit")->phi(), tops.lightQBar("kKinFit")->eta());
-    float dR3 = deltaR(tops.bBar("kKinFit")->phi(), tops.bBar("kKinFit")->eta(), tops.lightP("kKinFit")->phi(), tops.lightP("kKinFit")->eta());
-    float dR4 = deltaR(tops.bBar("kKinFit")->phi(), tops.bBar("kKinFit")->eta(), tops.lightPBar("kKinFit")->phi(), tops.lightPBar("kKinFit")->eta());
+    float dR1 = deltaR(tops.b("kKinFit")->eta(), tops.b("kKinFit")->phi(), tops.lightQ("kKinFit")->eta(), tops.lightQ("kKinFit")->phi());
+    float dR2 = deltaR(tops.b("kKinFit")->eta(), tops.b("kKinFit")->phi(), tops.lightQBar("kKinFit")->eta(), tops.lightQBar("kKinFit")->phi());
+    float dR3 = deltaR(tops.bBar("kKinFit")->eta(), tops.bBar("kKinFit")->phi(), tops.lightP("kKinFit")->eta(), tops.lightP("kKinFit")->phi());
+    float dR4 = deltaR(tops.bBar("kKinFit")->eta(), tops.bBar("kKinFit")->phi(), tops.lightPBar("kKinFit")->eta(), tops.lightPBar("kKinFit")->phi());
 
     float dR1Rec;
     float dR2Rec;
     float dR3Rec;
     float dR4Rec;
-    dR1Rec = deltaR(jets[jetIndex[B   ]].phi(), jets[jetIndex[B   ]].eta(), jets[jetIndex[LQ   ]].phi(), jets[jetIndex[LQ   ]].eta());
-    dR2Rec = deltaR(jets[jetIndex[B   ]].phi(), jets[jetIndex[B   ]].eta(), jets[jetIndex[LQBar]].phi(), jets[jetIndex[LQBar]].eta());
-    dR3Rec = deltaR(jets[jetIndex[BBar]].phi(), jets[jetIndex[BBar]].eta(), jets[jetIndex[LP   ]].phi(), jets[jetIndex[LP   ]].eta());
-    dR4Rec = deltaR(jets[jetIndex[BBar]].phi(), jets[jetIndex[BBar]].eta(), jets[jetIndex[LPBar]].phi(), jets[jetIndex[LPBar]].eta());
+    dR1Rec = deltaR(jets[jetIndex[B   ]].eta(), jets[jetIndex[B   ]].phi(), jets[jetIndex[LQ   ]].eta(), jets[jetIndex[LQ   ]].phi());
+    dR2Rec = deltaR(jets[jetIndex[B   ]].eta(), jets[jetIndex[B   ]].phi(), jets[jetIndex[LQBar]].eta(), jets[jetIndex[LQBar]].phi());
+    dR3Rec = deltaR(jets[jetIndex[BBar]].eta(), jets[jetIndex[BBar]].phi(), jets[jetIndex[LP   ]].eta(), jets[jetIndex[LP   ]].phi());
+    dR4Rec = deltaR(jets[jetIndex[BBar]].eta(), jets[jetIndex[BBar]].phi(), jets[jetIndex[LPBar]].eta(), jets[jetIndex[LPBar]].phi());
 
     std::vector<float> dRs;
     dRs.clear();

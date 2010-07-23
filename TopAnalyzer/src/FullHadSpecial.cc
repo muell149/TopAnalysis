@@ -530,14 +530,14 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
       unsigned int jetCounter2 = jetCounter + 1;
       for(edm::View<pat::Jet>::const_iterator jet2 = jet; (jet2 != jets.end() && jet2 != (--jets.end()) && jet2 != (--(--jets.end()))); ++jet2, ++jetCounter2){
 	++jet2;
-	dRs.push_back( std::make_pair( deltaR( jet->phi(), jet->eta(), jet2->phi(), jet2->eta() ), std::make_pair( jetCounter-1, jetCounter2-1 ) ) );
+	dRs.push_back( std::make_pair( deltaR( jet->eta(), jet->phi(), jet2->eta(), jet2->phi() ), std::make_pair( jetCounter-1, jetCounter2-1 ) ) );
 	
 	unsigned int jetCounter3 = jetCounter2 + 1;
 	for(edm::View<pat::Jet>::const_iterator jet3 = jet2; (jet3 != jets.end() && jet3 != (--jets.end()) && jet3 != (--(--jets.end())) && jet3 != (--(--(--jets.end())))); ++jet3, ++jetCounter3){
 	  ++jet3;
-	  double dR1 = deltaR( jet->phi() , jet->eta() , jet2->phi(), jet2->eta() );
-	  double dR2 = deltaR( jet->phi() , jet->eta() , jet3->phi(), jet3->eta() );
-	  double dR3 = deltaR( jet2->phi(), jet2->eta(), jet3->phi(), jet3->eta() );
+	  double dR1 = deltaR( jet->eta() , jet->phi() , jet2->eta(), jet2->phi() );
+	  double dR2 = deltaR( jet->eta() , jet->phi() , jet3->eta(), jet3->phi() );
+	  double dR3 = deltaR( jet2->eta(), jet2->phi(), jet3->eta(), jet3->phi() );
 	  dRs3Jets.push_back( std::make_pair( dR1+dR2+dR3, std::make_pair( std::make_pair( jetCounter-1, jetCounter2-1 ), jetCounter3-1 ) ) );
 	}
       }

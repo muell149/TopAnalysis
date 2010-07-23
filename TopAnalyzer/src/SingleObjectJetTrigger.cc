@@ -341,7 +341,7 @@ SingleObjectJetTrigger::minDR(const edm::Handle<pat::JetCollection> jets, const 
   double minDR = 9999.;
   for(unsigned int idx = 0; idx < jets->size(); ++idx){
     if ( idx == iJet ) continue;
-    if ( deltaR( (*jets)[idx].phi() , (*jets)[idx].eta() , jet_phi, jet_eta ) < minDR ) minDR = deltaR( (*jets)[idx].phi() , (*jets)[idx].eta() , jet_phi, jet_eta );
+    if ( deltaR( (*jets)[idx].eta() , (*jets)[idx].phi() , jet_eta, jet_phi ) < minDR ) minDR = deltaR( (*jets)[idx].eta() , (*jets)[idx].phi() , jet_eta, jet_phi );
   }
   return minDR;
 }
@@ -800,7 +800,7 @@ SingleObjectJetTrigger::analyze(const edm::Event& event, const edm::EventSetup&)
 	if ( HLTrigRef.isAvailable() ) {
 	  double HLTriggerMatchedJet_pt = candBaseRef->pt();
 	  double HLTriggerJet_pt = HLTrigRef->pt();
-	  double dR2Trig = deltaR( candBaseRef->phi() , candBaseRef->eta() , HLTrigRef->phi(), HLTrigRef->eta() );
+	  double dR2Trig = deltaR( candBaseRef->eta() , candBaseRef->phi() , HLTrigRef->eta(), HLTrigRef->phi() );
 	  double minDR_ = minDR(jets, iJet);
 	  double eta_ = (*jets)[iJet].eta();
 	  double phi_ = (*jets)[iJet].phi();
