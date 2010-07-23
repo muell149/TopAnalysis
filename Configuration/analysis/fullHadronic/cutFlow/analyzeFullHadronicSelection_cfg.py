@@ -146,8 +146,13 @@ elif(options.eventFilter=='qcd'):
     ## sequence with ptHat filter
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.filterPtHat)
+
+elif(options.eventFilter=='all'):
+    process.filterSequence = cms.Sequence(#process.patDefaultSequence *
+                                          process.filterPtHat)
+    
 else:
-    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'signal only', 'background only' or 'qcd'"
+    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'signal only', 'background only', 'qcd' or 'all'"
     
 ## fully hadronic selection
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
@@ -185,6 +190,9 @@ process.p1 = cms.Path(## do the genEvent selection
                       ## do the filtering
                       process.analyseFullHadronicSelection
                       )
+
+if(options.eventFilter=='all'):
+    process.p1.remove(process.filterSequence)
 
 ## Output Module Configuration
 if(options.writeOutput):
