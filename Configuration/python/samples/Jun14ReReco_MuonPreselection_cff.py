@@ -21,21 +21,21 @@ import FWCore.ParameterSet.Config as cms
 #                      for PromptReco v4:
 #                      Cert_132440-140399_7TeV_StreamExpress_Collisions10_JSON.txt
 #															     
-#  integrated HF lumi: 200.099615/nb (until now, ~254/nb when complete)                                                                                                                  
+#  integrated HF lumi: 212.8/nb (until now, ~253.6/nb when complete)                                                                                                                  
 #
-#    number of events: ~1.3M 
+#    number of events: 1295110
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
 #            cut flow:                 
 #			  before:		  after:
-#    primVtxFilter:	  7464622		  6960500
-#  beamScrapFilter:	  6960500		  6960491
-#  HBHENoiseFilter:	  6960491		  6958659
+#    primVtxFilter:       7671920                 7156371
+#  beamScrapFilter:       7156371                 7156362
+#  HBHENoiseFilter:       7156362                 7154451
 #
-#      oneHardMuon:	  6958659		  1216821
-#   twoGlobalMuons:	  6958659		    93987
+#      oneHardMuon:       7154451                 1284981
+#   twoGlobalMuons:       7154451                 97619
 #
 ###########################################################################################
 
@@ -101,7 +101,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Jun14thReReco_25.root'] );	
 
 
-## Jul16thReReco: 98.741945 (till now) 
+## Jul16thReReco: 110.701881 (till now) 
 
 readFiles.extend( [	        
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_1_1.root',
@@ -119,15 +119,15 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_13_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_14_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_15_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_16_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_16_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_17_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_18_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_19_1.root',		
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_20_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_21_1.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_22_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_23_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_24_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_23_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_24_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_25_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_26_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_27_1.root',	
@@ -147,12 +147,12 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_41_1.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_42_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_43_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_44_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_44_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_45_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_46_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_47_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_48_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_49_1.root',		
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_49_1.root',		
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_50_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_51_1.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_52_1.root',	
@@ -178,7 +178,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_72_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_73_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_74_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_75_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_75_4.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_76_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_77_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_78_1.root',	
@@ -187,11 +187,11 @@ readFiles.extend( [
         #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_81_1.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_82_1.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_83_1.root',	
-        #'/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_84_1.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_84_2.root',	
         '/store/user/dammann/36X/Collisions10/Jul20/Jul16thReReco_85_2.root'] );	
 
 
-## PromptReco_v4: 89.473988 (till now)
+## PromptReco_v4: 90.215801 (till now)
 
 readFiles.extend( [	
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_1_1.root',
@@ -266,7 +266,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_70_1.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_71_1.root',
         #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_72_1.root',
-        #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_73_1.root',
+        '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_73_2.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_74_1.root',
         #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_75_1.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_76_1.root',
@@ -333,7 +333,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_137_2.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_138_1.root',
         #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_139_1.root',
-        #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_140_1.root',
+        '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_140_2.root',
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_141_1.root',
         #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_142_1.root',
         #'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4aachen_143_1.root',
