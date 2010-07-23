@@ -1,4 +1,6 @@
 #include "TopAnalysis/TopAnalyzer/interface/JetQuality.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 /// default constructor for fw lite
 JetQuality::JetQuality(const int index, std::string flavor) : index_(index), flavor_(flavor)
@@ -82,6 +84,16 @@ JetQuality::book()
   hists_["btagSoftMuon_"        ] = new TH1F( "btagSoftMuon_"        , "btagSoftMuon_"         ,   10,     0.,    1. );
   hists_["btagSoftMuonByPt_"    ] = new TH1F( "btagSoftMuonByPt_"    , "btagSoftMuonByPt_"     ,   80,     0.,   20. );
   hists_["btagSoftMuonByIP3d_"  ] = new TH1F( "btagSoftMuonByIP3d_"  , "btagSoftMuonByIP3d_"   ,  160,  -100.,  100. );
+
+  /**
+     E-Flow in Jets
+  **/
+  // jets energy flow in R
+  hists_["eFlowR_"  ] = new TH2F( "eFlowR_"  , "eFlowR_"  ,  30 , -0.6 , 0.6 , 150, 0., 300. );
+  // jets energy flow in eta
+  hists_["eFlowEta_"] = new TH2F( "eFlowEta_", "eFlowEta_",  30 , -0.6 , 0.6 , 150, 0., 300. );
+  // jets energy flow in phi
+  hists_["eFlowPhi_"] = new TH2F( "eFlowPhi_", "eFlowPhi_",  30 , -0.6 , 0.6 , 150, 0., 300. );
 
   /** 
       JEC Monitoring Variables
@@ -179,6 +191,17 @@ JetQuality::book(edm::Service<TFileService>& fs)
   hists_["btagSoftMuon_"        ] = fs->make<TH1F>( "btagSoftMuon_"        , "btagSoftMuon_"         ,   50,     0.,    1. );
   hists_["btagSoftMuonByPt_"    ] = fs->make<TH1F>( "btagSoftMuonByPt_"    , "btagSoftMuonByPt_"     ,   80,     0.,   20. );
   hists_["btagSoftMuonByIP3d_"  ] = fs->make<TH1F>( "btagSoftMuonByIP3d_"  , "btagSoftMuonByIP3d_"   ,  160,  -100.,  100. );
+
+  /**
+     E-Flow in Jets
+  **/
+
+  // jets energy flow in R
+  hists2D_["eFlowR_"  ] = fs->make<TH2F>( "eFlowR_"  , "eFlowR_"  ,  30 ,  0.  , 0.6 , 100, 0., 1000. );
+  // jets energy flow in eta
+  hists2D_["eFlowEta_"] = fs->make<TH2F>( "eFlowEta_", "eFlowEta_",  30 , -0.6 , 0.6 , 100, 0., 1000. );
+  // jets energy flow in phi
+  hists2D_["eFlowPhi_"] = fs->make<TH2F>( "eFlowPhi_", "eFlowPhi_",  30 , -0.6 , 0.6 , 100, 0., 1000. );
 
   /** 
       JEC Monitoring Variables
@@ -292,6 +315,20 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       hists_.find( "btagSoftMuon_"        )->second->Fill( jet->bDiscriminator("softMuonBJetTags")                      , weight );
       hists_.find( "btagSoftMuonByPt_"    )->second->Fill( jet->bDiscriminator("softMuonByPtBJetTags")                  , weight );
       hists_.find( "btagSoftMuonByIP3d_"  )->second->Fill( jet->bDiscriminator("softMuonByIP3dBJetTags")                , weight );
+
+      /**
+	 E-Flow in Jets
+      **/
+      
+      std::vector<const reco::Candidate*> constituents = jet->getJetConstituentsQuick();
+      for(std::vector<const reco::Candidate*>::const_iterator con = constituents.begin(); con != constituents.end(); ++con){
+	// jets energy flow in R
+	hists2D_.find("eFlowR_"  )->second->Fill(deltaR((*con)->eta(), (*con)->phi(), jet->eta(), jet->phi()), jet->pt(), (*con)->energy()/jet->correctedJet("raw").energy());
+	// jets energy flow in eta
+	hists2D_.find("eFlowEta_")->second->Fill((*con)->eta() - jet->eta(), jet->pt(), (*con)->energy()/jet->correctedJet("raw").energy());
+	// jets energy flow in phi
+	hists2D_.find("eFlowPhi_")->second->Fill(deltaPhi((*con)->phi(), jet->phi()), jet->pt(), (*con)->energy()/jet->correctedJet("raw").energy());
+      }
 
       /** 
 	  Fill JEC Monitoring Variables
