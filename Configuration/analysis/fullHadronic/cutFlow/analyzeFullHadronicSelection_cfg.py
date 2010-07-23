@@ -13,8 +13,11 @@ options = VarParsing.VarParsing ('standard')
 options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 ## choose whether to use PF or not
 options.register('usePF'      ,     1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "use PF for processing")
-##  choose whether to write output to disk or not
+## choose whether to write output to disk or not
 options.register('writeOutput',     0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "write events surviving all cuts to disk")
+## setup the ptHatFilter in case 'eventFilter' is chosen to be qcd
+options.register('maxPtHat', 999999., VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "maxPtHat to be processed")
+options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "minPtHat to be processed")
 
 # get and parse the command line arguments
 options.parseArguments()
@@ -94,27 +97,21 @@ process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
 process.residualCorrectedJets = process.residualCorrectedJets.clone()
 
 if(options.eventFilter=='data'):
-    ## adapt output filename
-    process.TFileService.fileName = 'analyzeFullHadronicSelection_data.root'
     ## sequence with jet energy corrections specially suited for data
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.residualCorrectedJets
                                           )
     
-elif(options.eventFilter=='signal only'):
-    ## adapt output filename
-    process.TFileService.fileName = 'analyzeFullHadronicSelection_sig.root'
+elif(options.eventFilter=='sig'):
     ## sequence with fullHad ttbar filter
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.makeGenEvt *
                                           process.ttFullHadronicFilter
                                           )
 
-elif(options.eventFilter=='background only'):
+elif(options.eventFilter=='bkg'):
     ## invert fullHad filter
     process.ttFullHadronicFilter.invert = True
-    ## adapt output filename
-    process.TFileService.fileName = 'analyzeFullHadronicSelection_bkg.root'
     ## sequence with non-fullHad ttbar filter
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.makeGenEvt *
@@ -122,19 +119,9 @@ elif(options.eventFilter=='background only'):
                                           )
 
 elif(options.eventFilter=='qcd'):
-    ## adapt output filename
-    process.TFileService.fileName = 'analyzeFullHadronicSelection_qcd.root'
-
-    # setup any variables and default values for the ptHatFilter
-    options.register('maxPtHat', 999999., VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "maxPtHat to be processed")
-    options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "minPtHat to be processed")
-
-    # get and parse the command line arguments
-    options.parseArguments()
-    
     if(options.maxPtHat<999999.):
         ## ptHat filter
-        process.filterPtHat.minPtHat = options.minPtHat
+        process.filterPtHat.maxPtHat = options.maxPtHat
         print "included ptHatFilter with 'maxPtHat' =",
         print process.filterPtHat.maxPtHat
 
@@ -152,8 +139,11 @@ elif(options.eventFilter=='all'):
                                           process.filterPtHat)
     
 else:
-    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'signal only', 'background only', 'qcd' or 'all'"
-    
+    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'sig', 'bkg', 'qcd' or 'all'"
+
+## adapt output filename
+process.TFileService.fileName = 'analyzeFullHadronicSelection_'+options.eventFilter+'.root'
+
 ## fully hadronic selection
 process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
 from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
@@ -165,7 +155,7 @@ addTtFullHadHypotheses(process,
                        ["kKinFit"]
                        )
 
-if(not options.eventFilter=='signal only'):
+if(not options.eventFilter=='sig'):
     removeTtFullHadHypGenMatch(process)
 
 ## changing bTagger, possible are: TCHE, SSV, CSV, CSVMVA
