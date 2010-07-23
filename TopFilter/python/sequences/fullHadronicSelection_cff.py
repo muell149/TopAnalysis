@@ -25,12 +25,22 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ##    setup the collections for the fully-hadronic event selection
 ## ---
 
+## define tight cuts for jet kinematics
+tightJetCut  = 'abs(eta) < 2.4 & pt > 40.'
+bottomJetCut = 'abs(eta) < 2.4 & pt > 50.'
+
+## define tight JetIDs
+tightCaloJetID  = '& ((correctedJet(\"raw\").pt > 25. && jetID.fHPD < 0.95) || correctedJet(\"raw\").pt <= 25.) & '
+tightCaloJetID += '((abs(eta) > 1.0 && pt > 80. && emEnergyFraction < 1.0) || abs(eta) <= 1.0 || pt <= 80.)'
+tightPFJetID    = '& neutralHadronEnergyFraction < 0.9 & '
+tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
+
 ## setup the jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
-                                         cut = 'abs(eta) < 2.4 & pt > 40.'
+                                         cut = tightJetCut + tightCaloJetID
                                          )
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                         cut = 'abs(eta) < 2.4 & pt > 50.'
+                                         cut = bottomJetCut + tightCaloJetID
                                          )
 
 ## setting up the collections for the fully-hadronic
@@ -60,7 +70,7 @@ from TopAnalysis.TopAnalyzer.EventShapes_cfi import *
 from TopAnalysis.TopAnalyzer.GenParticle_cfi import *
 ## ptHat analyzer
 from TopAnalysis.TopAnalyzer.PtHat_cfi import *
-## analyzer for special variables in full hadronic channel
+## analyzer for special variables in fully hadronic channel
 from TopAnalysis.TopAnalyzer.FullHadSpecial_cfi import *
 ## kinfit analyzer
 from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
@@ -112,7 +122,7 @@ filterStep0 = cms.Sequence(vertex *
 
 
 ## to switch verbosity modes of the kinFit
-#ttFullHadEvent.verbosity = 1
+#ttFullHadEvent.verbosity = 3
 
 ## configuration of kinematic fit
 kinFitTtFullHadEventHypothesis.maxNComb = -1
@@ -721,6 +731,8 @@ def runOnPF(process):
     print 'instead of caloJets: goodJets -> goodJetsPF'
     print '++++++++++++++++++++++++++++++++++++++++++++'
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
+    process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
+    process.tightBottomJets.cut  = bottomJetCut + tightPFJetID
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
     if(hasattr(process, 'residualCorrectedJets')):
