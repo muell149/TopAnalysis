@@ -26,6 +26,7 @@ process = cms.Process("Selection")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.categories.append('TtFullHadronicEvent')
 
 ## define input
 process.source = cms.Source("PoolSource",
