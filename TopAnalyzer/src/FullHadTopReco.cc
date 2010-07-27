@@ -17,54 +17,15 @@ FullHadTopReco::FullHadTopReco(const edm::ParameterSet& cfg) :
 void FullHadTopReco::book()
 {
   /** 
-      Dustributions for reconstructed particles
+      Add needed histogramms from full fw list of histogramms
   **/
-
-  // b pt
-  hists_["bQuarkPt"      ] = new TH1F( "bQuarkPt"       , "bQuarkPt"       ,   50,  0. , 1000. );
-  // b eta
-  hists_["bQuarkEta"     ] = new TH1F( "bQuarkEta"      , "bQuarkEta"      ,   30, -3. , 3.    );
-  // b phi
-  hists_["bQuarkPhi"     ] = new TH1F( "bQuarkPhi"      , "bQuarkPhi"      ,   32, -3.2, 3.2   );
-  // b mass
-  hists_["bQuarkMass"    ] = new TH1F( "bQuarkMass"     , "bQuarkMass"     ,   50,  0. , 100.  );
-  // lightQuark pt
-  hists_["lightQuarkPt"  ] = new TH1F( "lightQuarkPt"   , "lightQuarkPt"   ,   50,  0. , 500.  );
-  // lightQuark eta
-  hists_["lightQuarkEta" ] = new TH1F( "lightQuarkEta"  , "lightQuarkEta"  ,   30, -3. , 3.    );
-  // lightQuark phi
-  hists_["lightQuarkPhi" ] = new TH1F( "lightQuarkPhi"  , "lightQuarkPhi"  ,   32, -3.2, 3.2   );
-  // lightQuark mass
-  hists_["lightQuarkMass"] = new TH1F( "lightQuarkMass" , "lightQuarkMass" ,   50,  0. , 100.  );
-  // top pt
-  hists_["topQuarkPt"    ] = new TH1F( "topQuarkPt"     , "topQuarkPt"     ,   50,  0. , 2500. );
-  // top eta
-  hists_["topQuarkEta"   ] = new TH1F( "topQuarkEta"    , "topQuarkEta"    ,   30, -3. , 3.    );
-  // top phi
-  hists_["topQuarkPhi"   ] = new TH1F( "topQuarkPhi"    , "topQuarkPhi"    ,   32, -3.2, 3.2   );
-  // top mass
-  hists_["topQuarkMass"  ] = new TH1F( "topQuarkMass"   , "topQuarkMass"   ,   50,  0. , 1000. );
-  // top mass of hypothesis
-  hists_["topQuarkMassHypo"] = new TH1F( "topQuarkMassHypo" , "topQuarkMassHypo" ,   50,  0. , 1000. );
-  /// mtop hypo vs. mtop reco
-  hists2D_["topMassHypoReco"] = new TH2F( "topMassHypoReco" , "topMassHypoReco" ,  300, 100.,  400. , 300, 100., 400. );
-  // W pt
-  hists_["wPt"           ] = new TH1F( "wPt"           , "wPt"             ,   50,  0. , 1000. );
-  // W eta
-  hists_["wEta"          ] = new TH1F( "wEta"          , "wEta"            ,   30, -3. , 3.    );
-  // W phi
-  hists_["wPhi"          ] = new TH1F( "wPhi"          , "wPhi"            ,   32, -3.2, 3.2   );
-  // W mass
-  hists_["wMass"         ] = new TH1F( "wMass"         , "wMass"           ,   30,  0. , 600.  );
-  // btag of b-jet with lower btag vs. di-jet-mass of corresponding w candidate
-  hists2D_["bTagVsMjjW"    ] = new TH2F( "bTagVsMjjW"    , "bTagVsMjjW"      ,  120, 74.4,  86.4, 50, 0. , 5.  );
 }
 
 /// histogramm booking for fw
 void FullHadTopReco::book(edm::Service<TFileService>& fs)
 {
   /** 
-      Pull Distributions (Relative to the Reco Input)
+      kinematic quantities of hypothesis particles
   **/
 
   // b pt
@@ -84,25 +45,25 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   // lightQuark mass
   hists_["lightQuarkMass"] = fs->make<TH1F>( "lightQuarkMass" , "lightQuarkMass" ,   50,  0. , 100.  );
   // top pt
-  hists_["topQuarkPt"    ] = fs->make<TH1F>( "topQuarkPt"     , "topQuarkPt"     ,   50,  0. , 2500. );
+  hists_["topQuarkPt"    ] = fs->make<TH1F>( "topQuarkPt"     , "topQuarkPt"     ,  100,  0. , 1000. );
   // top eta
   hists_["topQuarkEta"   ] = fs->make<TH1F>( "topQuarkEta"    , "topQuarkEta"    ,   30, -3. , 3.    );
   // top phi
   hists_["topQuarkPhi"   ] = fs->make<TH1F>( "topQuarkPhi"    , "topQuarkPhi"    ,   32, -3.2, 3.2   );
   // top mass
-  hists_["topQuarkMass"  ] = fs->make<TH1F>( "topQuarkMass"   , "topQuarkMass"   ,   50,  0. , 1000.  );
+  hists_["topQuarkMass"  ] = fs->make<TH1F>( "topQuarkMass"   , "topQuarkMass"   ,   500,  0. , 1000.  );
   // top mass of hypothesis
-  hists_["topQuarkMassHypo"] = fs->make<TH1F>( "topQuarkMassHypo" , "topQuarkMassHypo" ,   50,  0. , 1000.  );
+  hists_["topQuarkMassHypo"] = fs->make<TH1F>( "topQuarkMassHypo" , "topQuarkMassHypo" ,   500,  0. , 1000.  );
   /// mtop hypo vs. mtop reco
-  hists2D_["topMassHypoReco"] = fs->make<TH2F>( "topMassHypoReco" , "topMassHypoReco" ,  300, 100.,  400. , 300, 100., 400. );
+  hists2D_["topMassHypoReco"] = fs->make<TH2F>( "topMassHypoReco" , "topMassHypoReco" ,  150, 100.,  400. , 150, 100., 400. );
   // W pt
-  hists_["wPt"           ] = fs->make<TH1F>( "wPt"           , "wPt"             ,   50,  0. , 1000. );
+  hists_["wPt"           ] = fs->make<TH1F>( "wPt"           , "wPt"             ,  100,  0. , 1000. );
   // W eta
   hists_["wEta"          ] = fs->make<TH1F>( "wEta"          , "wEta"            ,   30, -3. , 3.    );
   // W phi
   hists_["wPhi"          ] = fs->make<TH1F>( "wPhi"          , "wPhi"            ,   32, -3.2, 3.2   );
   // W mass
-  hists_["wMass"         ] = fs->make<TH1F>( "wMass"         , "wMass"           ,   30,  0. , 600.  );
+  hists_["wMass"         ] = fs->make<TH1F>( "wMass"         , "wMass"           ,  300,  0. , 600.  );
   // btag of b-jet with lower btag vs. di-jet-mass of corresponding w candidate
   hists2D_["bTagVsMjjW"    ] = fs->make<TH2F>( "bTagVsMjjW"    , "bTagVsMjjW"      ,  120, 74.4,  86.4, 50, 0. , 5.  );
 }
