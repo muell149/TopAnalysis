@@ -9,6 +9,8 @@ GenParticle::GenParticle()
 GenParticle::GenParticle(const edm::ParameterSet& cfg) :
   status_( cfg.getParameter<int>( "status" ) )
 {
+  if(status_ > 3 || status_ < -1 || status_ == 0) 
+    throw cms::Exception("Configuration") << "Error: genParticle status ( " << status_ << " ) unknown, please choose: 1,2,3 or -1 for all!\n";
 }
 
 /// histogramm booking for fwlite 
@@ -38,9 +40,6 @@ GenParticle::fill(const edm::View<reco::GenParticle>& parts, const double& weigh
 	if( part->pdgId() >= 0 ) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
 	else                     hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
       }
-    }
-    else{
-      std::cout << "Error: genParticle status ( " << status_ << " ) unknown, please choose: 1,2,3 or -1 for all!" << std::endl;
     }
   }
 }
