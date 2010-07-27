@@ -21,7 +21,7 @@ class EventShapes : public SingleObject<const edm::View<reco::Candidate> > {
 
  public:
   /// default constructor for fw lite
-  explicit EventShapes(const std::string& correctionLevel);
+  explicit EventShapes();
   /// default constructor for full fw
   explicit EventShapes(const edm::ParameterSet& configFile);
   /// default destructor
@@ -43,16 +43,6 @@ class EventShapes : public SingleObject<const edm::View<reco::Candidate> > {
 
  private:
 
-  /// return the desired correction step from the configuration string,
-  /// which is expected to be of type 'step' or 'step:flavor'
-  const std::string correctionStep() const;
-  /// return the desired correction flavor from the configuration string,
-  /// which is expected to be of type 'step' or 'step:flavor'
-  const std::string correctionFlavor() const;
-
- private:
-  /// JES correction level
-  std::string correctionLevel_;
 };
 
 #endif

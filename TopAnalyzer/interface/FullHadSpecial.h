@@ -18,7 +18,7 @@ class FullHadSpecial : public SingleObject<const edm::View<pat::Jet> > {
 
  public:
   /// default constructor for fw lite
-  explicit FullHadSpecial(const std::string& correctionLevel);
+  explicit FullHadSpecial();
   /// default constructor for full fw
   explicit FullHadSpecial(const edm::ParameterSet& configFile);
   /// default destructor
@@ -40,16 +40,6 @@ class FullHadSpecial : public SingleObject<const edm::View<pat::Jet> > {
 
  private:
 
-  /// return the desired correction step from the configuration string,
-  /// which is expected to be of type 'step' or 'step:flavor'
-  const std::string correctionStep() const;
-  /// return the desired correction flavor from the configuration string,
-  /// which is expected to be of type 'step' or 'step:flavor'
-  const std::string correctionFlavor() const;
-
- private:
-  /// JES correction level
-  std::string correctionLevel_;
 };
 
 #endif

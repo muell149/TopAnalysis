@@ -2,13 +2,12 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 /// default constructor for fw lite
-FullHadSpecial::FullHadSpecial(const std::string& correctionLevel) : correctionLevel_(correctionLevel)
+FullHadSpecial::FullHadSpecial()
 {
 }
 
 /// default constructor for fwfull
-FullHadSpecial::FullHadSpecial(const edm::ParameterSet& cfg) :
-  correctionLevel_( cfg.getParameter<std::string>( "correctionLevel" ) )
+FullHadSpecial::FullHadSpecial(const edm::ParameterSet& cfg)
 {
 }
 
@@ -27,7 +26,7 @@ void
 FullHadSpecial::book(edm::Service<TFileService>& fs)
 {
   /// Ht, sum of Et of all jets
-  hists_["ht"      ] = fs->make<TH1F>( "ht"       , "ht"       ,   500 ,  0. ,  2500. );
+  hists_["ht"      ] = fs->make<TH1F>( "ht"       , "ht"       ,   250 ,  0. ,  2500. );
   /// real B-Quarks, -1 fake, 1 real
   hists_["realB"   ] = fs->make<TH1F>( "realB"    , "realB"    ,     2 , -1. ,     1. );
   /// real B-Quarks, -1 fake, 1 real
@@ -35,45 +34,45 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// real B-Quarks, -1 fake, 1 real
   hists_["realBSM" ] = fs->make<TH1F>( "realBSM"  , "realBSM"  ,     2 , -1. ,     1. );
   /// di-jet mass
-  hists_["mjj"     ] = fs->make<TH1F>( "mjj"      , "mjj"      ,   400 ,  0. ,  2000. );
+  hists_["mjj"     ] = fs->make<TH1F>( "mjj"      , "mjj"      ,   200 ,  0. ,  2000. );
   /// tri-jet mass
-  hists_["mjjj"    ] = fs->make<TH1F>( "mjjj"     , "mjjj"     ,   400 ,  0. ,  2000. );
+  hists_["mjjj"    ] = fs->make<TH1F>( "mjjj"     , "mjjj"     ,   200 ,  0. ,  2000. );
   /// uncorrected jet pt
   hists_["jetPtUn" ] = fs->make<TH1F>( "jetPtUn"  , "jetPtUn"  ,    50 ,  0. ,   500. );
   /// passing HLT_QuadJet30
   hists_["hltQuadPass"] = fs->make<TH1F>( "hltQuadPass" , "hltQuadPass" , 2 , -1. , 1.);
   /// pt of b1 vs. pt of b2
-  hists2D_["ptb1ptb2" ] = fs->make<TH2F>( "ptb1ptb2" , "ptb1ptb2" ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["ptb1ptb2" ] = fs->make<TH2F>( "ptb1ptb2" , "ptb1ptb2" ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 1 vs. pt of 2
-  hists2D_["pt1pt2"   ] = fs->make<TH2F>( "pt1pt2"   , "pt1pt2"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt1pt2"   ] = fs->make<TH2F>( "pt1pt2"   , "pt1pt2"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 1 vs. pt of 3
-  hists2D_["pt1pt3"   ] = fs->make<TH2F>( "pt1pt3"   , "pt1pt3"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt1pt3"   ] = fs->make<TH2F>( "pt1pt3"   , "pt1pt3"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 1 vs. pt of 4
-  hists2D_["pt1pt4"   ] = fs->make<TH2F>( "pt1pt4"   , "pt1pt4"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt1pt4"   ] = fs->make<TH2F>( "pt1pt4"   , "pt1pt4"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 1 vs. pt of 5
-  hists2D_["pt1pt5"   ] = fs->make<TH2F>( "pt1pt5"   , "pt1pt5"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt1pt5"   ] = fs->make<TH2F>( "pt1pt5"   , "pt1pt5"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 1 vs. pt of 6
-  hists2D_["pt1pt6"   ] = fs->make<TH2F>( "pt1pt6"   , "pt1pt6"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt1pt6"   ] = fs->make<TH2F>( "pt1pt6"   , "pt1pt6"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 2 vs. pt of 3
-  hists2D_["pt2pt3"   ] = fs->make<TH2F>( "pt2pt3"   , "pt2pt3"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt2pt3"   ] = fs->make<TH2F>( "pt2pt3"   , "pt2pt3"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 2 vs. pt of 4
-  hists2D_["pt2pt4"   ] = fs->make<TH2F>( "pt2pt4"   , "pt2pt4"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt2pt4"   ] = fs->make<TH2F>( "pt2pt4"   , "pt2pt4"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 2 vs. pt of 5
-  hists2D_["pt2pt5"   ] = fs->make<TH2F>( "pt2pt5"   , "pt2pt5"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt2pt5"   ] = fs->make<TH2F>( "pt2pt5"   , "pt2pt5"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 2 vs. pt of 6
-  hists2D_["pt2pt6"   ] = fs->make<TH2F>( "pt2pt6"   , "pt2pt6"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt2pt6"   ] = fs->make<TH2F>( "pt2pt6"   , "pt2pt6"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 3 vs. pt of 4
-  hists2D_["pt3pt4"   ] = fs->make<TH2F>( "pt3pt4"   , "pt3pt4"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt3pt4"   ] = fs->make<TH2F>( "pt3pt4"   , "pt3pt4"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 3 vs. pt of 5
-  hists2D_["pt3pt5"   ] = fs->make<TH2F>( "pt3pt5"   , "pt3pt5"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt3pt5"   ] = fs->make<TH2F>( "pt3pt5"   , "pt3pt5"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 3 vs. pt of 6
-  hists2D_["pt3pt6"   ] = fs->make<TH2F>( "pt3pt6"   , "pt3pt6"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt3pt6"   ] = fs->make<TH2F>( "pt3pt6"   , "pt3pt6"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 4 vs. pt of 5
-  hists2D_["pt4pt5"   ] = fs->make<TH2F>( "pt4pt5"   , "pt4pt5"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt4pt5"   ] = fs->make<TH2F>( "pt4pt5"   , "pt4pt5"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 4 vs. pt of 6
-  hists2D_["pt4pt6"   ] = fs->make<TH2F>( "pt4pt6"   , "pt4pt6"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt4pt6"   ] = fs->make<TH2F>( "pt4pt6"   , "pt4pt6"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of 5 vs. pt of 6
-  hists2D_["pt5pt6"   ] = fs->make<TH2F>( "pt5pt6"   , "pt5pt6"   ,   130 , 20. ,   150. , 130 , 20. , 150. );
+  hists2D_["pt5pt6"   ] = fs->make<TH2F>( "pt5pt6"   , "pt5pt6"   ,   65 , 20. ,   150. , 65 , 20. , 150. );
   /// pt of b1 - pt of b2
   hists_["ptb1-ptb2" ] = fs->make<TH1F>( "ptb1-ptb2" , "ptb1-ptb2" , 200 , 0. , 200. );
   /// pt of 1 - pt of 2
@@ -149,23 +148,23 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// phi-phi-moment
   hists_["phiphi"  ] = fs->make<TH1F>( "phiphi" , "phiphi" , 120 , 0. , 0.12 );
   /// eta-eta-moment vs. phi-phi-moment
-  hists2D_["etaetaphiphi"] = fs->make<TH2F>( "etaetaphiphi" , "etaetaphiphi" , 120 , 0. , 0.12 , 120 , 0. , 0.12 );
+  hists2D_["etaetaphiphi"] = fs->make<TH2F>( "etaetaphiphi" , "etaetaphiphi" , 60 , 0. , 0.12 , 60 , 0. , 0.12 );
   /// eta-eta-moment vs. eta-phi-moment
-  hists2D_["etaetaetaphi"] = fs->make<TH2F>( "etaetaetaphi" , "etaetaetaphi" , 120 , 0. , 0.12 , 100 , -0.05 , 0.05 );
+  hists2D_["etaetaetaphi"] = fs->make<TH2F>( "etaetaetaphi" , "etaetaetaphi" , 60 , 0. , 0.12 , 50 , -0.05 , 0.05 );
   /// eta-phi-moment vs. phi-phi-moment
-  hists2D_["etaphiphiphi"] = fs->make<TH2F>( "etaphiphiphi" , "etaphiphiphi" , 100 , -0.05 , 0.05 , 120 , 0. , 0.12 );
+  hists2D_["etaphiphiphi"] = fs->make<TH2F>( "etaphiphiphi" , "etaphiphiphi" , 50 , -0.05 , 0.05 , 60 , 0. , 0.12 );
   /// eta-eta-moment for b jets
-  hists_["etaeta_b"  ] = fs->make<TH1F>( "etaeta_b" , "etaeta_b" , 110 , 0. , 0.12 );
+  hists_["etaeta_b"  ] = fs->make<TH1F>( "etaeta_b" , "etaeta_b" , 120 , 0. , 0.12 );
   /// eta-phi-moment for b jets
   hists_["etaphi_b"  ] = fs->make<TH1F>( "etaphi_b" , "etaphi_b" , 100 , -0.05 , 0.05 );
   /// phi-phi-moment for b jets
   hists_["phiphi_b"  ] = fs->make<TH1F>( "phiphi_b" , "phiphi_b" , 120 , 0. , 0.12 );
   /// eta-eta-moment vs. phi-phi-moment for b jets
-  hists2D_["etaetaphiphi_b"] = fs->make<TH2F>( "etaetaphiphi_b" , "etaetaphiphi_b" , 120 , 0. , 0.12 , 120 , 0. , 0.12 );
+  hists2D_["etaetaphiphi_b"] = fs->make<TH2F>( "etaetaphiphi_b" , "etaetaphiphi_b" , 60 , 0. , 0.12 , 60 , 0. , 0.12 );
   /// eta-eta-moment vs. eta-phi-moment for b jets
-  hists2D_["etaetaetaphi_b"] = fs->make<TH2F>( "etaetaetaphi_b" , "etaetaetaphi_b" , 120 , 0. , 0.12 , 100 , -0.05 , 0.05 );
+  hists2D_["etaetaetaphi_b"] = fs->make<TH2F>( "etaetaetaphi_b" , "etaetaetaphi_b" , 60 , 0. , 0.12 , 50 , -0.05 , 0.05 );
   /// eta-phi-moment vs. phi-phi-moment for b jets
-  hists2D_["etaphiphiphi_b"] = fs->make<TH2F>( "etaphiphiphi_b" , "etaphiphiphi_b" , 100 , -0.05 , 0.05 , 120 , 0. , 0.12 );
+  hists2D_["etaphiphiphi_b"] = fs->make<TH2F>( "etaphiphiphi_b" , "etaphiphiphi_b" , 50 , -0.05 , 0.05 , 60 , 0. , 0.12 );
   /// eta-eta-moment for q jets
   hists_["etaeta_q"  ] = fs->make<TH1F>( "etaeta_q" , "etaeta_q" , 120 , 0. , 0.12 );
   /// eta-phi-moment for q jets
@@ -173,11 +172,11 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// phi-phi-moment for q jets
   hists_["phiphi_q"  ] = fs->make<TH1F>( "phiphi_q" , "phiphi_q" , 120 , 0. , 0.12 );
   /// eta-eta-moment vs. phi-phi-moment for q jets
-  hists2D_["etaetaphiphi_q"] = fs->make<TH2F>( "etaetaphiphi_q" , "etaetaphiphi_q" , 120 , 0. , 0.12 , 120 , 0. , 0.12 );
+  hists2D_["etaetaphiphi_q"] = fs->make<TH2F>( "etaetaphiphi_q" , "etaetaphiphi_q" , 60 , 0. , 0.12 , 60 , 0. , 0.12 );
   /// eta-eta-moment vs. eta-phi-moment for q jets
-  hists2D_["etaetaetaphi_q"] = fs->make<TH2F>( "etaetaetaphi_q" , "etaetaetaphi_q" , 120 , 0. , 0.12 , 100 , -0.05 , 0.05 );
+  hists2D_["etaetaetaphi_q"] = fs->make<TH2F>( "etaetaetaphi_q" , "etaetaetaphi_q" , 60 , 0. , 0.12 , 50 , -0.05 , 0.05 );
   /// eta-phi-moment vs. phi-phi-moment for q jets
-  hists2D_["etaphiphiphi_q"] = fs->make<TH2F>( "etaphiphiphi_q" , "etaphiphiphi_q" , 100 , -0.05 , 0.05 , 120 , 0. , 0.12 );
+  hists2D_["etaphiphiphi_q"] = fs->make<TH2F>( "etaphiphiphi_q" , "etaphiphiphi_q" , 50 , -0.05 , 0.05 , 60 , 0. , 0.12 );
   /// eta-eta-moment for g jets
   hists_["etaeta_g"  ] = fs->make<TH1F>( "etaeta_g" , "etaeta_g" , 120 , 0. , 0.12 );
   /// eta-phi-moment for g jets
@@ -185,13 +184,13 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// phi-phi-moment for g jets
   hists_["phiphi_g"  ] = fs->make<TH1F>( "phiphi_g" , "phiphi_g" , 120 , 0. , 0.12 );
   /// eta-eta-moment vs. phi-phi-moment for g jets
-  hists2D_["etaetaphiphi_g"] = fs->make<TH2F>( "etaetaphiphi_g" , "etaetaphiphi_g" , 120 , 0. , 0.12 , 120 , 0. , 0.12 );
+  hists2D_["etaetaphiphi_g"] = fs->make<TH2F>( "etaetaphiphi_g" , "etaetaphiphi_g" , 60 , 0. , 0.12 , 60 , 0. , 0.12 );
   /// eta-eta-moment vs. eta-phi-moment for g jets
-  hists2D_["etaetaetaphi_g"] = fs->make<TH2F>( "etaetaetaphi_g" , "etaetaetaphi_g" , 120 , 0. , 0.12 , 100 , -0.05 , 0.05 );
+  hists2D_["etaetaetaphi_g"] = fs->make<TH2F>( "etaetaetaphi_g" , "etaetaetaphi_g" , 60 , 0. , 0.12 , 50 , -0.05 , 0.05 );
   /// eta-phi-moment vs. phi-phi-moment for g jets
-  hists2D_["etaphiphiphi_g"] = fs->make<TH2F>( "etaphiphiphi_g" , "etaphiphiphi_g" , 100 , -0.05 , 0.05 , 120 , 0. , 0.12 );
+  hists2D_["etaphiphiphi_g"] = fs->make<TH2F>( "etaphiphiphi_g" , "etaphiphiphi_g" , 50 , -0.05 , 0.05 , 60 , 0. , 0.12 );
   /// sqrt s
-  hists_["sqrt_s"] = fs->make<TH1F>( "sqrt_s" , "sqrt_s" ,  500 , 0. , 2500. );
+  hists_["sqrt_s"] = fs->make<TH1F>( "sqrt_s" , "sqrt_s" ,  250 , 0. , 2500. );
   /// Ht3j, sum of Et of all jets starting from 3. jet
   hists_["ht3jet"] = fs->make<TH1F>( "ht3jet" , "ht3jet" ,  200 , 0. , 1000. );
   /// Et56, geometric mean of Et of 5. and 6. jet
@@ -251,19 +250,19 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// 2. min. dR of 2 jets in the event
   hists_["dRMin2"] = fs->make<TH1F>( "dRMin2" , "dRMin2" ,   60 , 0. , 6. );
   /// mass of min. dR of 2 jets in the event
-  hists_["dRMin1Mass"] = fs->make<TH1F>( "dRMin1Mass" , "dRMin1Mass" ,   400 , 0. , 800. );
+  hists_["dRMin1Mass"] = fs->make<TH1F>( "dRMin1Mass" , "dRMin1Mass" ,   200 , 0. , 800. );
   /// mass of 2. min. dR of 2 jets in the event
-  hists_["dRMin2Mass"] = fs->make<TH1F>( "dRMin2Mass" , "dRMin2Mass" ,   400 , 0. , 800. );
+  hists_["dRMin2Mass"] = fs->make<TH1F>( "dRMin2Mass" , "dRMin2Mass" ,   200 , 0. , 800. );
   /// min. sum dR of 3 jets in the event
   hists_["sumDR3JetMin1"] = fs->make<TH1F>( "sumDR3JetMin1" , "sumDR3JetMin1" ,   70 , 0. , 14. );
   /// 2. min. sum dR of 3 jets in the event
   hists_["sumDR3JetMin2"] = fs->make<TH1F>( "sumDR3JetMin2" , "sumDR3JetMin2" ,   70 , 0. , 14. );
   /// mass of min. sum dR of 3 jets in the event
-  hists_["sumDR3JetMin1Mass"] = fs->make<TH1F>( "sumDR3JetMin1Mass" , "sumDR3JetMin1Mass" ,   500 , 0. , 1000. );
+  hists_["sumDR3JetMin1Mass"] = fs->make<TH1F>( "sumDR3JetMin1Mass" , "sumDR3JetMin1Mass" ,   250 , 0. , 1000. );
   /// mass of 2. min. sum dR of 3 jets in the event
-  hists_["sumDR3JetMin2Mass"] = fs->make<TH1F>( "sumDR3JetMin2Mass" , "sumDR3JetMin2Mass" ,   500 , 0. , 1000. );
+  hists_["sumDR3JetMin2Mass"] = fs->make<TH1F>( "sumDR3JetMin2Mass" , "sumDR3JetMin2Mass" ,   250 , 0. , 1000. );
   /// M3 mass of first 3 jets in event
-  hists_["M3"] = fs->make<TH1F>( "M3" , "M3" ,   500 , 0. ,  1000. );
+  hists_["M3"] = fs->make<TH1F>( "M3" , "M3" ,   200 , 0. ,  1000. );
 }
 
 /// histogram filling for fwlite and for full fw
@@ -679,27 +678,4 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
       }
     }
   }
-}
-
-/// return the desired correction step from the configuration string, which is expected to be of type 'step' or 'step:flavor'
-const std::string FullHadSpecial::correctionStep() const
-{
-  std::string step;
-  if(correctionLevel_.find(":")!=std::string::npos){
-    step=correctionLevel_.substr(0,correctionLevel_.find(":"));
-  }
-  else{
-    step=correctionLevel_;
-  }
-  return step;
-}
-
-/// return the desired correction flavor from the configuration string, which is expected to be of type 'step' or 'step:flavor'
-const std::string FullHadSpecial::correctionFlavor() const
-{
-  std::string flavor;
-  if(correctionLevel_.find(":")!=std::string::npos){
-    flavor=correctionLevel_.substr(1+correctionLevel_.find(":"));
-  }
-  return flavor;
 }
