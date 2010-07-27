@@ -8,6 +8,7 @@ analyzeKinFitQuality = cms.EDAnalyzer("KinFitQualityAnalyzer",
     ## analyzer specific configurables
     analyze   = cms.PSet(
       ## no additional configurables needed in this case
+    numberOfHypos = cms.uint32( 1 )
     )    
 )
 

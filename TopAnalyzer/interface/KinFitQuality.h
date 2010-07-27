@@ -53,6 +53,8 @@ class KinFitQuality : public DoubleObject<TtFullHadronicEvent, const edm::View<p
   /// everything which needs to be done after the event loop
   void process(){};
 
+  unsigned int numberOfHypos_;
+
  private:
   /// nothing to be done here for the moment
 };
