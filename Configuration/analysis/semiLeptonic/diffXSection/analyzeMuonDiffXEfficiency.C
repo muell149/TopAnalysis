@@ -9,6 +9,8 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <fstream>
+
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TROOT.h>
@@ -16,6 +18,7 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TStyle.h>
+#include <TF1.h>
 
 enum styles {kttbarReco, kWjetsReco, kZjetsReco, kttbarGen, kWjetsGen};
 
@@ -24,9 +27,25 @@ void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyl
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 TH1F* divideByBinwidth(TH1F* histo);
 double getMaximumDependingOnNjetsCut(TString plot, TString Njets);
+TString jetLabel(TString input);
+template <class T>
+void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
+TString getTStringFromInt(int i);
 
-void analyzeMuonDiffXEfficiency()
+void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false)
 {
+  // ---
+  //    main function parameters
+  // ---
+  // save:       choose whether you want to save every plot as png and all within one ps file
+  // textoutput: choose whether you want to save the estimated number of QCD events for data 
+  //             in .txt file to share it with other parts of the Analysis
+  // luminosity: choose luminosity for scaling of event numbers 
+  //             lum is derived from this and used for legend as entry
+  TString lum = getTStringFromInt((int)luminosity);
+  // choose target directory for saving
+  TString saveTo = "./diffXSecFromSignal/plots/effiency/";
+
   // ---
   //    set root style 
   // ---
@@ -35,35 +54,22 @@ void analyzeMuonDiffXEfficiency()
   //  gStyle->SetPalette(1);
   gStyle->SetErrorX(0); 
 
-  // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" 
-  TString jetMultiplicity ="Njets4";
-  // choose whether you want to save every plot as png and all within one ps file
-  bool save = true;
-  // choose target directory for saving
-  TString saveTo = "./diffXSecFromSignal/plots/effiency/";
-  // choose luminosity for scaling of event numbers and for legend as entry
-  int luminosity = 50;
-  TString lum = "50";
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllTtbarMcAtNloSpring10.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"        ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"        ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllNloSpring10.root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root") );
 
   // ---
   //    get histograms
   // ---
   // create jet multiplicity indicator
   std::vector<TString> Njets_;
-  Njets_.push_back("Njets1");
-  Njets_.push_back("Njets2");
-  Njets_.push_back("Njets3");
-  Njets_.push_back("Njets4");
-  Njets_.push_back("Njets4Btag");
-  Njets_.push_back("Njets3Btag");
+  TString jets[ 6 ] = { "Njets1", "Njets2", "Njets3", "Njets4", "Njets4Btag", "Njets3Btag" };
+  Njets_.insert( Njets_.begin(), jets, jets + 6 );
   // create container for all histos
   std::map< TString, std::map <unsigned int, std::map <TString, TH1F*> > > histo_;
   // loop jet multiplicities
@@ -83,7 +89,7 @@ void analyzeMuonDiffXEfficiency()
     for(unsigned int idx=kttbarGen; idx<=kWjetsGen; ++idx) {
       histo_["eta"][idx][Njets_[mult]] = (TH1F*)(files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/eta")->Clone());
       histo_["pt" ][idx][Njets_[mult]] = (TH1F*)(files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/pt" )->Clone());
-      histo_["phi"][idx][Njets_[mult]] = (TH1F*)(files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/phi")->Clone());
+      histo_["phi"][idx][Njets_[mult]] = (TH1F*)(files_[idx-3]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/phi")->Clone()); 
     }
   }
 
@@ -105,142 +111,161 @@ void analyzeMuonDiffXEfficiency()
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.13904207/50.0*(double)luminosity);
 
-//   std::cout << "lumifactors:" << std::endl;
-//   for(int idx=kttbarReco; idx<=kWjetsGen; ++idx){
-//     std::cout << lumiweight[idx] << std::endl;
-//   }
-  std::cout << "" << std::endl;
-  std::cout << " before weighting: ttbar pt-(reco/gen) Njets4, bin3: " << histo_["pt" ][kttbarReco][Njets_[3]]->GetBinContent(3) << " / " << histo_["pt" ][kttbarGen][Njets_[3]]->GetBinContent(3) << std::endl;
-  std::cout << "" << std::endl;
+  // create variable indicator for easy handling of pt, eta and phi
+  std::vector<TString> variables_;
+  variables_.push_back("pt");
+  variables_.push_back("eta");
+  variables_.push_back("phi");
 
   // ---
   // do lumiweighting for reco and gen plots
   // ---
+  // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    // loop gen and reco samples
     for(int idx=kttbarReco; idx<=kWjetsGen; ++idx){
-      if(mult==3&&idx==kttbarGen){std::cout << histo_["pt"][kttbarGen][Njets_[mult]]->GetBinContent(3) << " * " << lumiweight[idx] << " = ";}
-      histo_["pt" ][idx][Njets_[mult]]->Scale(lumiweight[idx]);
-      histo_["eta"][idx][Njets_[mult]]->Scale(lumiweight[idx]);
-      histo_["phi"][idx][Njets_[mult]]->Scale(lumiweight[idx]);
-      if(mult==3&&idx==kttbarGen){std::cout << histo_["pt"][kttbarGen][Njets_[mult]]->GetBinContent(3) << std::endl;}
+      // loop pt, eta and phi
+      for(unsigned int var=0; var<variables_.size(); ++var){
+	histo_[variables_[var]][idx][Njets_[mult]]->Scale(lumiweight[idx]);
+      }
     }
   }
-  std::cout << "" << std::endl;
-  std::cout << " after weighting: ttbar pt-(reco/gen) Njets4, bin3: " << histo_["pt" ][kttbarReco][Njets_[3]]->GetBinContent(3) << " / " << histo_["pt" ][kttbarGen][Njets_[3]]->GetBinContent(3) << std::endl;
-  std::cout << "" << std::endl;
 
   // ---  
   //    combination of all MC for gen + reco
   // --- 
+  // create additional numerator as indicator for all MC gen/reco plots
   unsigned int allReco = 42;
   unsigned int allGen  = 42*42;
-  // create separate histos
+  // 1) create separate MC histos by cloning ttbar plots
+  // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    histo_["pt" ][allReco][Njets_[mult]] = (TH1F*)histo_["pt" ][kttbarReco][Njets_[mult]]->Clone(); 
-    histo_["eta"][allReco][Njets_[mult]] = (TH1F*)histo_["eta"][kttbarReco][Njets_[mult]]->Clone(); 
-    histo_["phi"][allReco][Njets_[mult]] = (TH1F*)histo_["phi"][kttbarReco][Njets_[mult]]->Clone();
-    histo_["pt" ][allGen ][Njets_[mult]] = (TH1F*)histo_["pt" ][kttbarGen ][Njets_[mult]]->Clone(); 
-    histo_["eta"][allGen ][Njets_[mult]] = (TH1F*)histo_["eta"][kttbarGen ][Njets_[mult]]->Clone(); 
-    histo_["phi"][allGen ][Njets_[mult]] = (TH1F*)histo_["phi"][kttbarGen ][Njets_[mult]]->Clone();
+    // loop pt, eta and phi
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      histo_[variables_[var]][allReco][Njets_[mult]] = (TH1F*)histo_[variables_[var]][kttbarReco][Njets_[mult]]->Clone(); 
+      histo_[variables_[var]][allGen ][Njets_[mult]] = (TH1F*)histo_[variables_[var]][kttbarGen ][Njets_[mult]]->Clone(); 
+    }
   }
 
-  // add all histos
+  // 2) add all other MC histos
+  // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    // reco    
-    for(unsigned int idx=kttbarReco+1; idx<=kZjetsReco; ++idx){
-      histo_["pt" ][allReco][Njets_[mult]]->Add( (TH1F*)histo_["pt" ][idx][Njets_[mult]]->Clone());
-      histo_["eta"][allReco][Njets_[mult]]->Add( (TH1F*)histo_["eta"][idx][Njets_[mult]]->Clone());
-      histo_["phi"][allReco][Njets_[mult]]->Add( (TH1F*)histo_["phi"][idx][Njets_[mult]]->Clone());
-    }
-    // gen
-    for(unsigned int idx=kttbarGen+1; idx<=kWjetsGen; ++idx){
-      histo_["pt" ][allGen][Njets_[mult]]->Add( (TH1F*)histo_["pt" ][idx][Njets_[mult]]->Clone());
-      histo_["eta"][allGen][Njets_[mult]]->Add( (TH1F*)histo_["eta"][idx][Njets_[mult]]->Clone());
-      histo_["phi"][allGen][Njets_[mult]]->Add( (TH1F*)histo_["phi"][idx][Njets_[mult]]->Clone());
+    // loop pt, eta and phi
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      // a) reco    
+      for(unsigned int idx=kttbarReco+1; idx<=kZjetsReco; ++idx){
+	histo_[variables_[var]][allReco][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone());
+      }
+      // b) gen
+      for(unsigned int idx=kttbarGen+1; idx<=kWjetsGen; ++idx){
+	histo_[variables_[var]][allGen][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone());
+      }
     }
   }
   
   // ---  
   //    print out #events (gen / reco) for all pt bins and jet multiplicities
   // ---
+  // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     std::cout << " # events (gen/reco) within pt(mu) (" << Njets_[mult] << "):" << std::endl;
+    // loop bins of pt histogram, start with 2nd!
     for(int idx =2; idx<=histo_["pt" ][allReco][Njets_[mult]]->GetNbinsX()+1; idx++){
       std::cout << "bin "  << idx << ": ( " << histo_["pt"][allGen][Njets_[mult]]->GetBinContent(idx) << " / " <<  histo_["pt"][allReco][Njets_[mult]]->GetBinContent(idx) << " )" << std::endl;
     }
   }
   
   // ---  
-  //    calculate efficiency histos
+  //    calculate efficiency histos via reco / gen
   // ---
+  // create additional numerator as indicator for efficiency plot
   unsigned int eff = 566;
+  // loop jet multiplicities  
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-  histo_["pt" ][eff][Njets_[mult]]= (TH1F*)histo_["pt" ][allReco][Njets_[mult]]->Clone();
-  histo_["pt" ][eff][Njets_[mult]]->Divide((TH1F*)histo_["pt" ][allGen ][Njets_[mult]]->Clone()); 
-  histo_["eta"][eff][Njets_[mult]]= (TH1F*)histo_["eta"][allReco][Njets_[mult]]->Clone();
-  histo_["eta"][eff][Njets_[mult]]->Divide((TH1F*)histo_["eta"][allGen ][Njets_[mult]]->Clone()); 
-  histo_["phi"][eff][Njets_[mult]]= (TH1F*)histo_["phi"][allReco][Njets_[mult]]->Clone();
-  histo_["phi"][eff][Njets_[mult]]->Divide((TH1F*)histo_["phi"][allGen ][Njets_[mult]]->Clone()); 
+    // loop pt, eta and phi
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      histo_[variables_[var]][eff][Njets_[mult]]= (TH1F*)histo_[variables_[var]][allReco][Njets_[mult]]->Clone();
+      histo_[variables_[var]][eff][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][allGen ][Njets_[mult]]->Clone()); 
+    }
   }
 
   // ---  
-  //    print out numbers for efficiency
+  //    print out calculated efficiencies
   // ---
-
+  // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    std::cout << " efficiency within pt(mu) (" << Njets_[mult] << "):" << std::endl;
-    for(int idx =2; idx<=histo_["pt"][eff][Njets_[mult]]->GetNbinsX()+1; idx++){
-      std::cout << "bin "  << idx << ": " << histo_["pt"][eff][Njets_[mult]]->GetBinContent(idx) << std::endl;
-    }
-    std::cout << " efficiency within eta(mu) (" << Njets_[mult] << "):" << std::endl;
-    for(int idx =2; idx<=histo_["eta"][eff][Njets_[mult]]->GetNbinsX()+1; idx++){
-      std::cout << "bin "  << idx << ": " << histo_["eta"][eff][Njets_[mult]]->GetBinContent(idx) << std::endl;
-    }
-    std::cout << " efficiency within phi(mu) (" << Njets_[mult] << "):" << std::endl;
-    for(int idx =2; idx<=histo_["phi"][eff][Njets_[mult]]->GetNbinsX()+1; idx++){
-      std::cout << "bin "  << idx << ": " << histo_["phi"][eff][Njets_[mult]]->GetBinContent(idx) << std::endl;
+    // loop pt, eta and phi
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      std::cout << " efficiency within "+variables_[var]+"(mu) (" << Njets_[mult] << "):" << std::endl;
+      // loop bins, start with 2nd for pt!
+      for(int idx =1; idx<=histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX(); idx++){
+	if(variables_[var]=="pt"&&idx==1) ++idx;
+	// print out effiencies, for pt with overflow bin, for phi with underflow and overflow bin
+	if(variables_[var]=="phi"&&idx==1) std::cout << "underflow bin "  << idx-1 << ": " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(0) << std::endl;
+	std::cout << "bin "  << idx << ": " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx) << std::endl;
+	if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX()) std::cout << "overflow bin "  << idx+1 << ": " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx+1) << std::endl;
+      }
     }
   }
 
+  // ---       
+  //    if textoutput==true: save l+jets pt/eta-efficiencies values for each bin within .txt-file
+  // ---  
+  if(textoutput){
+    // loop variables pt, eta, phi
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      // loop jet multiplicities
+      for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+	// loop bins
+	for(int idx =1; idx<=histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX(); idx++){
+	  if(mult==0&&idx==1) writeToFile("MC based l+jets correction factors for "+variables_[var]+"(#mu) in chosen binning:");
+	  if(idx==1)writeToFile("--- "+Njets_[mult]+" ---");
+	  // start with 2nd bin for pt!
+	  if(variables_[var]=="pt"&&idx==1) ++idx;
+	  // write effiencies to file, for pt with overflow bin, for phi with underflow and overflow bin
+	  if(variables_[var]=="phi"&&idx==1) writeToFile(histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(0));
+	  writeToFile(histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx));
+	  if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX()) writeToFile(histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx+1));
+	}
+      }
+    }
+  }
+  
   // ---
-  //    division by binwidth to have natural form of spektrum for all histos
+  //    division by binwidth to have natural form of spectrum for all histos
   // ---
+  // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    divideByBinwidth( histo_["pt" ][allGen ][Njets_[mult]]);
-    divideByBinwidth( histo_["eta"][allGen ][Njets_[mult]]); 
-    divideByBinwidth( histo_["phi"][allGen ][Njets_[mult]]);
-    divideByBinwidth( histo_["pt" ][allReco][Njets_[mult]]);
-    divideByBinwidth( histo_["eta"][allReco][Njets_[mult]]); 
-    divideByBinwidth( histo_["phi"][allReco][Njets_[mult]]);
-
-    for(unsigned int idx=kttbarReco; idx<=kWjetsGen; ++idx) {
-      divideByBinwidth( histo_["pt" ][idx][Njets_[mult]]);
-      divideByBinwidth( histo_["eta"][idx][Njets_[mult]]); 
-      divideByBinwidth( histo_["phi"][idx][Njets_[mult]]);
+    // loop variables
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      // a) for all MC (gen and reco)  
+      divideByBinwidth( histo_[variables_[var]][allGen ][Njets_[mult]]);
+      divideByBinwidth( histo_[variables_[var]][allReco][Njets_[mult]]);  
+      // b) for single MC plots (gen and reco)
+      for(unsigned int idx=kttbarReco; idx<=kWjetsGen; ++idx) {
+	divideByBinwidth( histo_[variables_[var]][idx][Njets_[mult]]);
+      }
     }
   }
 
   // ---
   //    set plot style for effiency plots
   // ---
+  // a) colors for different MC plots
   std::vector<int> color_;
-  color_ .push_back(kRed);
-  color_ .push_back(6);
-  color_ .push_back(kBlue);
-  color_ .push_back(kBlack);
-  color_ .push_back(kGreen);
-  color_ .push_back(14);
+  int colors[ 6 ] = { kRed, 6, kBlue, kBlack, kGreen, 14 };
+  color_.insert( color_.begin(), colors, colors + 6 );
+  // b) markers for different MC plots
   std::vector<int> marker_;
-  marker_ .push_back(20);
-  marker_ .push_back(21);
-  marker_ .push_back(23);
-  marker_ .push_back(22);
-  marker_ .push_back(29);
-  marker_ .push_back(29);
+  int markers[ 6 ] = { 20, 21, 23, 22, 29, 29};
+  marker_.insert( marker_.begin(), markers, markers + 6 );
+  // c) set style of MC plots
+  // loop jet multiplicities  
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    histogramStyle(*histo_["pt" ][eff][Njets_[mult]] , color_[mult]  , 1, marker_[mult]);
-    histogramStyle(*histo_["eta"][eff][Njets_[mult]] , color_[mult]  , 1, marker_[mult]);
-    histogramStyle(*histo_["phi"][eff][Njets_[mult]] , color_[mult]  , 1, marker_[mult]);
+     // loop variables
+    for(unsigned int var=0; var<variables_.size(); ++var){   
+      histogramStyle(*histo_[variables_[var]][eff][Njets_[mult]] , color_[mult]  , 1, marker_[mult]);
+    }
   }
 
   // ---
@@ -248,168 +273,210 @@ void analyzeMuonDiffXEfficiency()
   // ---
 
   // create a legend (in upper right corner) for gen and reco
-  TLegend *leg0 = new TLegend(0.24, 0.72, 0.98, 0.93);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->SetHeader("MC ("+lum+"pb^{-1}, "+jetMultiplicity+"+)");
-  leg0->AddEntry( histo_["pt"][allGen ][jetMultiplicity], "gen, #mu+jets selection, (t#bar{t} & W)"         , "PL");
-  leg0->AddEntry( histo_["pt"][allReco][jetMultiplicity], "reco, semilept.(#mu) selection (t#bar{t}, W & Z)", "PL");
-
-  // create a legend (in upper right corner) for efficiency (ptMu) - all jet multiplicities
-  //  TLegend *leg1 = new TLegend(0.22, 0.67, 1.00, 1.00);
-  TLegend *leg1 = new TLegend(0.46, 0.62, 1.00, 0.95);
+  std::vector<TLegend*> genRecoLegend_;
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    TLegend *legend = new TLegend(0.24, 0.72, 0.98, 0.93);
+    legend->SetFillStyle(0);
+    legend->SetBorderSize(0);
+    TString jetMultiplicity2=jetLabel(Njets_[mult]);
+    legend->SetHeader("MC ("+lum+"pb^{-1}, "+jetMultiplicity2+")");
+    legend->AddEntry( histo_["pt"][allGen ][Njets_[mult]], "gen, #mu+jets selection, (t#bar{t} & W)"         , "PL");
+    legend->AddEntry( histo_["pt"][allReco][Njets_[mult]], "reco, semilept.(#mu) selection (t#bar{t}, W & Z)", "PL");
+    genRecoLegend_.push_back( legend );
+  }
+ 
+  // create a legend containing all jet multiplicities part 1
+  TLegend *leg1 = new TLegend(0.15, 0.05, 0.99, 0.89);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  //  leg1->SetHeader("#epsilon(p_{t}(#mu)) for different jet multiplicities");
-  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    leg1->AddEntry( histo_["pt"][eff][Njets_[mult]], Njets_[mult]+"+" , "PL");
+  // N(jets) 1-3
+  for(unsigned int mult=0; mult<Njets_.size()-3; ++mult){
+    leg1->AddEntry( histo_["pt"][eff][Njets_[mult]], jetLabel(Njets_[mult]), "PL");
   }
-  // create a legend (in upper right corner) for efficiency (etaMu) - all jet multiplicities
-  TLegend *leg2 = new TLegend(0.46, 0.62, 1.00, 0.95);
+
+  // create a legend containing all jet multiplicities part 2
+  TLegend *leg2 = new TLegend(0.01, 0.01, 0.99, 0.99);
   leg2->SetFillStyle(0);
   leg2->SetBorderSize(0);
-  //  leg2->SetHeader("#epsilon(#eta(#mu)) for different jet multiplicities");
-  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    leg2->AddEntry( histo_["eta"][eff][Njets_[mult]], Njets_[mult]+"+" , "PL");
+  // N(jets) 4, 3+btag, 4+btag
+  for(unsigned int mult=Njets_.size()-3; mult<Njets_.size(); ++mult){
+    leg2->AddEntry( histo_["pt"][eff][Njets_[mult]], jetLabel(Njets_[mult]), "PL");
   }
-  // create a legend (in upper right corner) for efficiency (phiMu) - all jet multiplicities
-  TLegend *leg3 = new TLegend(0.46, 0.62, 1.00, 0.95);
-  leg3->SetFillStyle(0);
-  leg3->SetBorderSize(0);
-  //  leg3->SetHeader("#epsilon(#phi(#mu)) for different jet multiplicities");
-  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    leg3->AddEntry( histo_["phi"][eff][Njets_[mult]], Njets_[mult]+"+" , "PL");
-  }
-  // create a legend (in upper right corner) for pt(mu)- gen plot
-  TString jetMultiplicity2=jetMultiplicity;
-  if(jetMultiplicity=="Njets4Btag") jetMultiplicity2="Njets4";
-  if(jetMultiplicity=="Njets3Btag") jetMultiplicity2="Njets3";
-  TLegend *leg4 = new TLegend(0.41, 0.67, 0.99, 0.94);
-  leg4->SetFillStyle(0);
-  leg4->SetBorderSize(0);
-  leg4->SetHeader("gen: #mu+jets ("+lum+" pb^{-1}, "+jetMultiplicity2+"+)" );
-  leg4->AddEntry( histo_["pt"][kttbarGen][jetMultiplicity] , "ttbar (MC@NLO)"  , "F");
-  leg4->AddEntry( histo_["pt"][kWjetsGen][jetMultiplicity] , "Wjets (Madgraph)", "F");
 
+  // create a legend (in upper right corner) for pt(mu)- gen plot
+  std::vector<TLegend*> genLegend_;
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    TLegend *legend = new TLegend(0.41, 0.67, 0.99, 0.94);
+    legend->SetFillStyle(0);
+    legend->SetBorderSize(0);
+    TString jetMultiplicity2=jetLabel(Njets_[mult]);
+    legend->SetHeader("gen: #mu+jets ("+lum+" pb^{-1}, "+jetMultiplicity2+")" );
+    legend->AddEntry( histo_["pt"][kttbarGen][Njets_[mult]] , "ttbar (MC@NLO)"  , "F");
+    legend->AddEntry( histo_["pt"][kWjetsGen][Njets_[mult]] , "Wjets (Madgraph)", "F");
+    genLegend_.push_back(legend);
+  }
+  
   // ---
   //    create canvas 
   // ---
   std::vector<TCanvas*> MyCanvas;
-
-  for(int idx=0; idx<=6; idx++){ 
+  for(int idx=0; idx<=24; idx++){ 
     char canvname[10];
     sprintf(canvname,"canv%i",idx);    
     MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
     canvasStyle(*MyCanvas[idx]);
   }
+  // canvas for splitted jet multiplicity legends
+  MyCanvas.push_back( new TCanvas( "canv"+getTStringFromInt(MyCanvas.size()), "canv"+getTStringFromInt(MyCanvas.size()), 600, 200) );
+  canvasStyle(*MyCanvas[MyCanvas.size()-1]);
+  MyCanvas.push_back( new TCanvas( "canv"+getTStringFromInt(MyCanvas.size()), "canv"+getTStringFromInt(MyCanvas.size()), 600, 200) );
+  canvasStyle(*MyCanvas[MyCanvas.size()-1]);
+
+  // introduce counter for Canvas
+  int canvasNumber=0;
 
   // ---
-  //    do the printing for inclusive pt ( gen + reco )
+  //    do the printing for inclusive pt ( gen + reco ) (all jet multiplicities)
   // ---
-  MyCanvas[0]->cd(0);
-  MyCanvas[0]->SetTitle("ptMuGenAndReco"+jetMultiplicity+"Lum5pb@7TeV");
-  axesStyle(*histo_["pt"][allGen][jetMultiplicity], "p_{t} ( #mu ) [GeV]", "events / GeV", 0.,  getMaximumDependingOnNjetsCut("pt",jetMultiplicity), 0.06, 1.5); 
-  histogramStyle(*histo_["pt"][allGen ][jetMultiplicity] , kRed  , 1, 20);
-  histogramStyle(*histo_["pt"][allReco][jetMultiplicity] , kBlack, 1, 22);
-  histo_["pt"][allGen ][jetMultiplicity]->Draw("HIST");
-  histo_["pt"][allReco][jetMultiplicity]->Draw("HIST same");
-  histo_["pt"][allReco][jetMultiplicity]->Draw("Psame");
-  histo_["pt"][allGen ][jetMultiplicity]->Draw("Psame");
-  leg0->Draw("same");
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    MyCanvas[canvasNumber]->cd(0);
+    MyCanvas[canvasNumber]->SetTitle("ptMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
+    axesStyle(*histo_["pt"][allGen][Njets_[mult]], "p_{t} ( #mu ) [GeV]", "events / GeV", 0.,  getMaximumDependingOnNjetsCut("pt",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+    histogramStyle(*histo_["pt"][allGen ][Njets_[mult]] , kRed  , 1, 20);
+    histogramStyle(*histo_["pt"][allReco][Njets_[mult]] , kBlack, 1, 22);
+    histo_["pt"][allGen ][Njets_[mult]]->Draw("HIST");
+    histo_["pt"][allReco][Njets_[mult]]->Draw("HIST same");
+    histo_["pt"][allReco][Njets_[mult]]->Draw("Psame");
+    histo_["pt"][allGen ][Njets_[mult]]->Draw("Psame");
+    genRecoLegend_[mult]->Draw("same");
+    ++canvasNumber;
+  }
 
   // ---
   //    do the printing for inclusive eta ( gen + reco )
   // ---
-  MyCanvas[1]->cd(0);
-  MyCanvas[1]->SetTitle("etaMuGenAndReco"+jetMultiplicity+"Lum5pb@7TeV");
-  axesStyle(*histo_["eta" ][allGen][jetMultiplicity], "#eta ( #mu )", "events / binwidth", 0.,  getMaximumDependingOnNjetsCut("eta",jetMultiplicity), 0.06, 1.5); 
-  histogramStyle(*histo_["eta"][allGen ][jetMultiplicity] , kRed  , 1, 20);
-  histogramStyle(*histo_["eta"][allReco][jetMultiplicity] , kBlack, 1, 22);
-  histo_["eta"][allGen ][jetMultiplicity]->Draw("HIST");
-  histo_["eta"][allReco][jetMultiplicity]->Draw("HIST same");
-  histo_["eta"][allReco][jetMultiplicity]->Draw("Psame");
-  histo_["eta"][allGen ][jetMultiplicity]->Draw("Psame");
-  //  leg0->Draw("same");
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetTitle("etaMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
+  axesStyle(*histo_["eta" ][allGen][Njets_[mult]], "#eta ( #mu )", "events / binwidth", 0.,  getMaximumDependingOnNjetsCut("eta",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+  histogramStyle(*histo_["eta"][allGen ][Njets_[mult]] , kRed  , 1, 20);
+  histogramStyle(*histo_["eta"][allReco][Njets_[mult]] , kBlack, 1, 22);
+  histo_["eta"][allGen ][Njets_[mult]]->Draw("HIST");
+  histo_["eta"][allReco][Njets_[mult]]->Draw("HIST same");
+  histo_["eta"][allReco][Njets_[mult]]->Draw("Psame");
+  histo_["eta"][allGen ][Njets_[mult]]->Draw("Psame");
+  genRecoLegend_[mult]->Draw("same"); 
+  ++canvasNumber;
+  }
 
   // ---
   //    do the printing for inclusive phi ( gen + reco )
   // ---
-  MyCanvas[2]->cd(0);
-  MyCanvas[2]->SetTitle("phiMuGenAndReco"+jetMultiplicity+"Lum5pb@7TeV");
-  axesStyle(*histo_["phi"][allGen][jetMultiplicity], "#phi ( #mu )", "events / rad", 0.,  getMaximumDependingOnNjetsCut("phi",jetMultiplicity), 0.06, 1.5); 
-  histogramStyle(*histo_["phi"][allGen ][jetMultiplicity] , kRed  , 1, 20);
-  histogramStyle(*histo_["phi"][allReco][jetMultiplicity] , kBlack, 1, 22);
-  histo_["phi"][allGen ][jetMultiplicity]->Draw("HIST");
-  histo_["phi"][allReco][jetMultiplicity]->Draw("HIST same");
-  histo_["phi"][allReco][jetMultiplicity]->Draw("Psame");
-  histo_["phi"][allGen ][jetMultiplicity]->Draw("Psame");
-  //  leg0->Draw("same");
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetTitle("phiMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
+  axesStyle(*histo_["phi"][allGen][Njets_[mult]], "#phi ( #mu )", "events / rad", 0.,  getMaximumDependingOnNjetsCut("phi",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+  histogramStyle(*histo_["phi"][allGen ][Njets_[mult]] , kRed  , 1, 20);
+  histogramStyle(*histo_["phi"][allReco][Njets_[mult]] , kBlack, 1, 22);
+  histo_["phi"][allGen ][Njets_[mult]]->Draw("HIST");
+  histo_["phi"][allReco][Njets_[mult]]->Draw("HIST same");
+  histo_["phi"][allReco][Njets_[mult]]->Draw("Psame");
+  histo_["phi"][allGen ][Njets_[mult]]->Draw("Psame");
+  genRecoLegend_[mult]->Draw("same");
+  ++canvasNumber;
+  }
 
   // ---
   //    do the printing for pt-effiency ( gen / reco ) for all jet multiplicities
   // ---
-  MyCanvas[3]->cd(0);
-  MyCanvas[3]->SetGrid(1,1);
-  MyCanvas[3]->SetTitle("ptEfficiencyMCbasedAllJetMultiplicities");
-  axesStyle(*histo_["pt" ][eff][Njets_[0]], "p_{t} ( #mu ) [GeV]" , "#epsilon_{ l+jets}", 0.,  1.8); 
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetGrid(1,1);
+  MyCanvas[canvasNumber]->SetTitle("ptEfficiencyMCbasedAllJetMultiplicities");
+  axesStyle(*histo_["pt" ][eff][Njets_[0]], "p_{t} ( #mu ) [GeV]" , "#epsilon_{ l+jets}", 0.,  1.4); 
   histo_["pt"][eff][Njets_[0]] ->Draw("");
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
   histo_["pt"][eff][Njets_[mult]]->Draw("same");
   histo_["pt"][eff][Njets_[mult]]->Draw("Psame");
   }
-  leg1  ->Draw("same");
+  ++canvasNumber;
 
   // ---
   //    do the printing for eta-effiency ( gen / reco ) for all jet multiplicities
   // ---
-  MyCanvas[4]->cd(0);
-  MyCanvas[4]->SetGrid(1,1);
-  MyCanvas[4]->SetTitle("etaEfficiencyMCbasedAllJetMultiplicities");
-  axesStyle(*histo_["eta" ][eff][Njets_[0]], "#eta ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.8); 
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetGrid(1,1);
+  MyCanvas[canvasNumber]->SetTitle("etaEfficiencyMCbasedAllJetMultiplicities");
+  axesStyle(*histo_["eta" ][eff][Njets_[0]], "#eta ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.4); 
   histo_["eta"][eff][Njets_[0]]->Draw("");
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     histo_["eta"][eff][Njets_[mult]]->Draw("same");
     histo_["eta"][eff][Njets_[mult]]->Draw("Psame");
-  }
-  leg2  ->Draw("same");
+  }  
+  ++canvasNumber;
+
 
   // ---
   //    do the printing for phi-effiency ( gen / reco ) for all jet multiplicities
   // ---
-  MyCanvas[5]->cd(0);
-  MyCanvas[5]->SetGrid(1,1);
-  MyCanvas[5]->SetTitle("phiEfficiencyMCbasedAllJetMultiplicities");
-  axesStyle(*histo_["phi"][eff][Njets_[0]], "#phi ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.8); 
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetGrid(1,1);
+  MyCanvas[canvasNumber]->SetTitle("phiEfficiencyMCbasedAllJetMultiplicities");
+  axesStyle(*histo_["phi"][eff][Njets_[0]], "#phi ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.4); 
   histo_["phi"][eff][Njets_[0]]->Draw("");
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     histo_["phi"][eff][Njets_[mult]]->Draw("same");
     histo_["phi"][eff][Njets_[mult]]->Draw("Psame");
   }
-  leg3  ->Draw("same");
+  ++canvasNumber;
 
   // ---
   //    do the printing for pt-gen composition
   // ---
-  MyCanvas[6]->cd(0);
-  MyCanvas[6]->SetTitle("ptGenComposition"+jetMultiplicity);
-  histo_["pt"][kWjetsGen][jetMultiplicity]->Add(histo_["pt"][kttbarGen][jetMultiplicity]);
-  axesStyle(*histo_["pt"][kWjetsGen][jetMultiplicity], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",jetMultiplicity), 0.06, 1.5); 
-  histogramStyle(*histo_["pt"][kWjetsGen][jetMultiplicity], kGreen, 1, 20, 1.5, 1);
-  histogramStyle(*histo_["pt"][kttbarGen][jetMultiplicity], kRed  , 1, 20, 1.5, 1);
-  histo_["pt"][kWjetsGen][jetMultiplicity]->Draw("");
-  histo_["pt"][kttbarGen][jetMultiplicity]->Draw("same");
-  leg4  ->Draw("same");
+  // loop jet multiplicities 
+  // -2 : no btag on gen level
+  for(unsigned int mult=0; mult<Njets_.size()-2; ++mult){
+    MyCanvas[canvasNumber]->cd(0);
+    MyCanvas[canvasNumber]->SetTitle("ptGenComposition"+Njets_[mult]);
+    histo_["pt"][kWjetsGen][Njets_[mult]]->Add(histo_["pt"][kttbarGen][Njets_[mult]]);
+    axesStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+    histogramStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], kGreen, 1, 20, 1.5, 1);
+    histogramStyle(*histo_["pt"][kttbarGen][Njets_[mult]], kRed  , 1, 20, 1.5, 1);
+    histo_["pt"][kWjetsGen][Njets_[mult]]->Draw("");
+    histo_["pt"][kttbarGen][Njets_[mult]]->Draw("same");
+    genLegend_[mult]->Draw("same");
+    ++canvasNumber;
+  }
+  
+  // ---
+  //    do the printing for the splitted jet multiplicity legend part 1
+  // ---
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetTitle("legendPart1Effiency");
+  leg1->Draw("");
+  ++canvasNumber;
+  
+  // ---
+  //     do the printing for the splitted jet multiplicity legend part 2
+  // ---
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetTitle("legendPart2Effiency");
+  leg2->Draw("");
 
   //  ---
   //  saving
   //  ---
   if(save){  
     // ps
-    MyCanvas[0]->Print(saveTo+"efficiency"+jetMultiplicity+".ps(");
+    MyCanvas[0]->Print(saveTo+"efficiencyAllNjets.ps(");
     for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-      MyCanvas[idx]->Print(saveTo+"efficiency"+jetMultiplicity+".ps"  );   
+      MyCanvas[idx]->Print(saveTo+"efficiencyAllNjets.ps"  );   
     }
-    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"efficiency"+jetMultiplicity+".ps)"  );
+    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"efficiencyAllNjets.ps)"  );
   
     // png
     for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
@@ -485,24 +552,59 @@ double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
   // create container for histo max values sortet by plot and Njet
   std::map< TString, std::map <TString,double> > maxValues_;  
   // create maximum values for pt, eta, phi ( for 5pb^-1)
-  maxValues_["pt" ]["Njets4Btag"]= 40.; 
-  maxValues_["pt" ]["Njets3Btag"]= 100.; 
-  maxValues_["pt" ]["Njets4"]= 500.;  
-  maxValues_["pt" ]["Njets3"]= 1000.;
-  maxValues_["pt" ]["Njets2"]= 3200.;
-  maxValues_["pt" ]["Njets1"]= 18000.;
-  maxValues_["eta"]["Njets4Btag"]= 650.;  
-  maxValues_["eta"]["Njets3Btag"]= 1500.; 
-  maxValues_["eta"]["Njets4"]= 650.;  
-  maxValues_["eta"]["Njets3"]= 1500.;
-  maxValues_["eta"]["Njets2"]= 4500.;
-  maxValues_["eta"]["Njets1"]= 23000.;
-  maxValues_["phi"]["Njets4Btag"]= 400.;
-  maxValues_["phi"]["Njets3Btag"]= 1000.; 
-  maxValues_["phi"]["Njets4"]= 400.;  
-  maxValues_["phi"]["Njets3"]= 1000.;
-  maxValues_["phi"]["Njets2"]= 2500.;
-  maxValues_["phi"]["Njets1"]= 14000.;
+  maxValues_["pt" ]["Njets4Btag"]= 55.; 
+  maxValues_["pt" ]["Njets3Btag"]= 130.; 
+  maxValues_["pt" ]["Njets4"]= 55.;  
+  maxValues_["pt" ]["Njets3"]= 130.;
+  maxValues_["pt" ]["Njets2"]= 400.;
+  maxValues_["pt" ]["Njets1"]= 2200.;
+  maxValues_["eta"]["Njets4Btag"]= 60.;  
+  maxValues_["eta"]["Njets3Btag"]= 140.; 
+  maxValues_["eta"]["Njets4"]= 65.;  
+  maxValues_["eta"]["Njets3"]= 140.;
+  maxValues_["eta"]["Njets2"]= 450.;
+  maxValues_["eta"]["Njets1"]= 2300.;
+  maxValues_["phi"]["Njets4Btag"]= 40.;
+  maxValues_["phi"]["Njets3Btag"]= 80.; 
+  maxValues_["phi"]["Njets4"]= 35.;  
+  maxValues_["phi"]["Njets3"]= 80.;
+  maxValues_["phi"]["Njets2"]= 260.;
+  maxValues_["phi"]["Njets1"]= 1200.;
   // get maximum value
   return maxValues_.find(plot)->second.find(Njets)->second;
+}
+
+TString jetLabel(TString input)
+{
+  TString label="";
+  if(input=="Njets1") label="N(jets) #geq 1";
+  if(input=="Njets2") label="N(jets) #geq 2";
+  if(input=="Njets3") label="N(jets) #geq 3";
+  if(input=="Njets4") label="N(jets) #geq 4";
+  if(input=="Njets4Btag") label="N(jets) #geq 4, N(bTags) #geq 1";
+  if(input=="Njets3Btag") label="N(jets) #geq 3, N(bTags) #geq 1";
+  return label;
+}
+
+TString getTStringFromInt(int i){
+  char result[20];
+  sprintf(result, "%i", i);
+  return (TString)result;
+}
+
+template <class T>
+void writeToFile(T output, TString file, bool append){
+  // introduce function to write in file
+  // a) write into file
+  if(!append){
+    std::ofstream fout(file);
+    fout << output << std::endl;
+    fout.close();
+  }
+  // b) write to the end of the file  
+  if(append){
+    std::ofstream fapp(file, ios::app);
+    fapp << output << std::endl;;
+    fapp.close();
+  }
 }
