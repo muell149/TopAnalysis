@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include <TH1F.h>
 #include <TH2F.h>
@@ -16,8 +17,10 @@
 #include <TLine.h>
 #include <TStyle.h>
 #include <TPaveLabel.h>
+#include <TF1.h>
+#include <TMath.h>
 
-enum samples {kQCD, kWjets, kTtbar, kZjets, kAll, kData};
+enum samples {kQCD, kWjets, kTtbar, kZjets, kData, kAll};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, bool filled=0); 
@@ -29,52 +32,65 @@ double GetYAxisValue(TH2& hist, double bin);
 TString getTStringFromInt(int i);
 void drawLine(const double x1, const double x2, const double y1, const double y2);
 void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2);
+template <class T>
+void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
+void fitParabolaExtrapolate(TH1& hist, const double xmin=0., const double xmax=1., const int color=kBlack, const TString info="");
+void fitLinearExtrapolate(TH1& hist, const double xmin=0., const double xmax=1., const int color=kBlack, const TString info="");
+std::vector<double> fitExponentialExtrapolate(TH1& hist, const double xmin=0., const double xmax=1., const int color=kBlack, const TString info="");
+std::pair<double,double> exponentialFit(double x, const double a, const double sa, const double b, const double sb);
 
-void analyzeMuonDiffXABCDbkg()
+void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/diffXSecQCDPythiaSpring10.root")
 {
+  // ---
+  //    main function parameters
+  // ---
+  // save:       choose whether you want to save every plot as png and all within one ps file
+  // textoutput: choose whether you want to save the estimated number of QCD events for data 
+  //             in .txt file to share it with other parts of the Analysis
+  // luminosity: choose luminosity for scaling of event numbers 
+  //             lum is derived from this and used for legend as entry
+  TString lum = getTStringFromInt((int)luminosity);
+  // choose target directory for saving
+  TString saveTo = "./diffXSecFromSignal/plots/ABCD/";
+
   // ---
   //    set root style 
   // ---
   gROOT->cd();
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
-
-  // choose luminosity for scaling of event numbers and for legend as entry
-  int luminosity = 50;
-  TString lum = getTStringFromInt(luminosity);
-  // choose whether you want to save every plot as png and all within one ps file
-  bool save = true;
-  // choose target directory for saving
-  TString saveTo = "./diffXSecFromSignal/plots/ABCD/";
+  //  gStyle->SetErrorX(0);
 
   // ---
   //    get input files
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  //  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/QCDABCD.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/QCDABCDnoSelection.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/wjetsABCD.root") );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/ttbarABCD.root") );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/zjetsABCD.root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllNloSpring10.root"   ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root" ) );
+  files_.push_back(new TFile(dataFile                                                            ) );
 
   // ---
   //    get histograms
   // ---
   // create jet multiplicity indicator
   std::vector<TString> Njets_;
-  Njets_.push_back("Njets1");
-  Njets_.push_back("Njets2");
-  Njets_.push_back("Njets3");
-  Njets_.push_back("Njets4");
-  // create container for all histos
+  TString jets[ 4 ] = { "Njets1", "Njets2", "Njets3", "Njets4" };
+  Njets_.insert( Njets_.begin(), jets, jets + 4 );
+  // create container for histos
   std::map< TString, std::map <unsigned int, TH2F*> > relIsoVsDb_;
+  std::map< TString, std::map <unsigned int, TH1F*> >recoSelectionPt_;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     // loop all samples
-    for(unsigned int idx=kQCD; idx<=kZjets; ++idx) {
+    for(unsigned int idx=kQCD; idx<=kData; ++idx) {
+      // ABCD relIso-dB correlation plot
       relIsoVsDb_[Njets_[mult]][idx] = (TH2F*)(files_[idx]->Get("estimationMuonsQuality"+Njets_[mult]+"/relIsoVsDb_")->Clone());
-    }
+      // pt from full reco selection -> correction factor
+       recoSelectionPt_[Njets_[mult]][idx] =(TH1F*)(files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/pt")->Clone());
+     }
   }
 
   // ---
@@ -82,16 +98,16 @@ void analyzeMuonDiffXABCDbkg()
   // ---
   std::vector<double> lumiweight_;
   // a) for current QCD 7TeV PYTHIA sample 
-  lumiweight_.push_back(0.98351978/50.0*(double)luminosity);
+  lumiweight_.push_back(0.98351978/50.0*luminosity);
   // b) for current wjets 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.13904207/50.0*(double)luminosity);  
+  lumiweight_.push_back(0.13904207/50.0*luminosity);  
   // c) for current ttbar 7TeV MC@NLO sample 
-  lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
+  lumiweight_.push_back(0.00831910/50.0*luminosity);
   // d) for current zjets 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.14332841/50.0*(double)luminosity);
+  lumiweight_.push_back(0.14332841/50.0*luminosity);
 
   // ---
-  //    combine all MC samples
+  //    lumiweight and combine all MC samples
   // ---
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
@@ -99,17 +115,32 @@ void analyzeMuonDiffXABCDbkg()
     relIsoVsDb_[Njets_[mult]][kAll]->Scale(lumiweight_[kQCD]); 
     // loop all samples
     for(unsigned int idx=kWjets; idx<=kZjets; ++idx) {
+      // lumiweighting
+      relIsoVsDb_[Njets_[mult]][idx]->Scale(lumiweight_[idx]);
       relIsoVsDb_[Njets_[mult]][42] = (TH2F*)relIsoVsDb_[Njets_[mult]][idx]->Clone();
-      relIsoVsDb_[Njets_[mult]][42]->Scale(lumiweight_[idx]);
       relIsoVsDb_[Njets_[mult]][kAll]->Add(relIsoVsDb_[Njets_[mult]][42]);
     }
   }
 
   // ---
-  //    ABCD estimation for QCD only and from all events (weighted to 51 / pb) for all jet multiplicities
+  //    create canvas
+  // ---
+  std::vector<TCanvas*> MyCanvas;
+
+  for(int idx=0; idx<=21; idx++){ 
+    char canvname[10];
+    sprintf(canvname,"canv%i",idx);    
+    MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
+    canvasStyle(*MyCanvas[idx]);
+  }
+
+  // ---
+  //    configuration for ABCD calculation
   // ---
   // create container for estimation results
   std::map< TString, std::map <unsigned int, std::pair<double,double> > > ABCDresult_;
+  // create container for correction factor ABC->standard reco selection
+  std::vector<std::pair<double,double> > correctionFactor_;
   // dB    : 1000 bins from 0 to 1 -> 1 bin = 0.001 as upper edge
   // relIso: 100  bins from 0 to 1 -> 1 bin = 0.01  as upper edge
 
@@ -123,29 +154,117 @@ void analyzeMuonDiffXABCDbkg()
   int dBBinCDLow = 30;   // = 0.03
   int dBBinCDUp  = 100;  // = 0.1
 
-  // calculation
+  // ---
+  //    print out event composition after ABCD selection
+  // ---
+  std::cout << "" << std::endl;
+  std::cout << "output of ABCD estimation" << std::endl;
+  std::cout << "( scaled to luminosity: " << luminosity << " / pb )" << std::endl;
+  std::cout << "" << std::endl;
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    std::cout << "----------------" << std::endl;
+    std::cout << "N(jets) >= " << mult+1 << std::endl;
+    std::cout << "----------------" << std::endl;
+    // loop all samples
+    for(unsigned int idx=kQCD; idx<=kData; ++idx){
+      std::cout << "" << std::endl;
+      if(idx==kQCD)   std::cout << "QCD sample:"    << std::endl; 
+      if(idx==kWjets) std::cout << "W+jets sample:" << std::endl; 
+      if(idx==kTtbar) std::cout << "ttbar sample:"  << std::endl; 
+      if(idx==kZjets) std::cout << "Z+jets sample:" << std::endl;
+      if(idx==kData ) std::cout<< "-----" << std::endl << "Data: " << std::endl;
+      std::cout << "Region A: " << Entries(*relIsoVsDb_[Njets_[mult]][idx], relIsoBinACLow, relIsoBinACUp, dBBinABLow, dBBinABUp, "Region A", false) << std::endl;
+      std::cout << "Region B: " << Entries(*relIsoVsDb_[Njets_[mult]][idx], relIsoBinBDLow, relIsoBinBDUp, dBBinABLow, dBBinABUp, "Region B", false) << std::endl;
+      std::cout << "Region C: " << Entries(*relIsoVsDb_[Njets_[mult]][idx], relIsoBinACLow, relIsoBinACUp, dBBinCDLow, dBBinCDUp, "Region C", false) << std::endl;
+      std::cout << "Region D: " << Entries(*relIsoVsDb_[Njets_[mult]][idx], relIsoBinBDLow, relIsoBinBDUp, dBBinCDLow, dBBinCDUp, "Region D", false) << std::endl;
+      // print out correlation factor
+      std::cout << "correlation factor: " << relIsoVsDb_[Njets_[mult]][idx]->GetCorrelationFactor() << std::endl;
+      if(idx==kData ) std::cout<< "" << std::endl;
+      // calculate correction factor ABCD->Reco selection for all N(jets)
+      if(idx==kQCD){
+	double Nreco = (recoSelectionPt_[Njets_[mult]][idx]->GetEntries()) * (lumiweight_[idx]);
+	double Nabcd = Entries(*relIsoVsDb_[Njets_[mult]][idx], relIsoBinACLow, relIsoBinACUp, dBBinABLow, dBBinABUp, "Region A", false);
+	correctionFactor_.push_back(  make_pair (Nreco / Nabcd, sqrt((Nreco/(Nabcd*Nabcd))*(1.0+Nreco/Nabcd)) )  );
+      }
+    }
+  }
+
+  //---
+  //   draw, fit and extrapolate ABCD->default selection correction factor
+  //---
+  // weighting factor(N_jets) plot
+  TH1F *weight  = new TH1F("weight" , "weight" , 4, 0.5, 4.5);
+  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    weight->SetBinContent(mult+1, correctionFactor_ [mult].first );
+    weight->SetBinError  (mult+1, correctionFactor_ [mult].second);
+  }
+  // draw weighting factor(N_jets) in last Canvas
+  MyCanvas[MyCanvas.size()-1]->cd(0);
+  MyCanvas[MyCanvas.size()-1]->SetTitle("ABCDweigthingFactor");
+  axesStyle(*weight, "N(jets) #geq", "weight = #frac{N(QCD, reco selection)}{N(QCD, ABCD region A)}", 0.2, 1, 0.04, 1.9);
+  histogramStyle(*weight, kBlack, 1, 20, 1.25); 
+  weight->Draw("P");
+
+  // do a exponential fit exp(ax)+b and save a, b and their errors in vector exponentialFitParameters
+  std::vector<double> exponentialFitParameters = fitExponentialExtrapolate(*weight, 1., 3., weight->GetLineColor(), "ABCD->reco selection weighting factor");
+  enum exponentialFitResults {a, sa, b, sb};
+  // calculate weighting factors(Njets) from fit function and save them in weightValues_
+  std::map< TString, std::pair <double, double> > weightValues_;
+  for(int jetMultiplicity=1; jetMultiplicity<=4; ++jetMultiplicity){
+    weightValues_[Njets_[jetMultiplicity-1]] = exponentialFit((double)jetMultiplicity, exponentialFitParameters[a], exponentialFitParameters[sa], exponentialFitParameters[b], exponentialFitParameters[sb]);
+    if(jetMultiplicity==1) std::cout << "" << std::endl;
+    if(jetMultiplicity==1) std::cout << "results for ABCD-> default selection correction factor" << std::endl;
+    if(jetMultiplicity==1) std::cout << "( calculated, from fit function )" << std::endl;
+    std::cout << "N(jets) >= " << jetMultiplicity << ": ( " << correctionFactor_[jetMultiplicity-1].first << " +/- " << correctionFactor_[jetMultiplicity-1].second << " , " << weightValues_[Njets_[jetMultiplicity-1]].first << " +/- " << weightValues_[Njets_[jetMultiplicity-1]].second << " )" << std::endl;    
+  }
+
+  //---
+  //   do ABCD estimation
+  //---
   double regionA, regionB, regionC, regionD;
   double estimation = -1;
   double estimationError = -1;
-  for(unsigned int forWhich=kQCD; forWhich<=kAll; forWhich=forWhich+4){
-    if(forWhich==kQCD) std::cout << "" << std::endl << "calculation from QCD only:" << std::endl;
-    if(forWhich==kAll) std::cout << "" << std::endl << "calculation from all events ("+lum+" / pb):" << std::endl;
-    // loop jet multiplicities
+  std::cout << "" << std::endl;
+  std::cout << "ABCD estimation" << std::endl;
+  // for QCD only, all MC and data
+  for(unsigned int forWhich=kQCD; forWhich<=kAll; ++forWhich){
+    if(forWhich==kData) std::cout << "" << std::endl << "b) calculation for data:" << std::endl;
+    if(forWhich==kQCD)  std::cout << "" << std::endl << "a) calculation from QCD MC only:" << std::endl;
+    if(forWhich==kAll)  std::cout << "" << std::endl << "c) calculation from all MC events ("+lum+" / pb):" << std::endl;
+    // for all jet multiplicities
     for(unsigned int mult=0; mult<Njets_.size(); ++mult){
       std::cout << "" << std::endl;
       std::cout << "N(jets) >= " << mult+1 << std::endl;
+      // get entries of the 4 regions
       regionA=Entries(*relIsoVsDb_[Njets_[mult]][forWhich], relIsoBinACLow, relIsoBinACUp, dBBinABLow, dBBinABUp, "Region A");
       regionB=Entries(*relIsoVsDb_[Njets_[mult]][forWhich], relIsoBinBDLow, relIsoBinBDUp, dBBinABLow, dBBinABUp, "Region B");
       regionC=Entries(*relIsoVsDb_[Njets_[mult]][forWhich], relIsoBinACLow, relIsoBinACUp, dBBinCDLow, dBBinCDUp, "Region C");
       regionD=Entries(*relIsoVsDb_[Njets_[mult]][forWhich], relIsoBinBDLow, relIsoBinBDUp, dBBinCDLow, dBBinCDUp, "Region D");
-      // Do the estimate for region A from region B, C and D
+      // do the estimate for region A from region B, C and D
       estimation = regionB*regionC/regionD;
       estimationError = estimation*sqrt( 1/regionB + 1/regionC + 1/regionD );
       std::cout << "ABCD estimation for signal region A:" << estimation << "+/-" << estimationError << std::endl;
-      // save value and error of estimation
-      if(forWhich==kQCD)ABCDresult_[Njets_[mult]][forWhich] = make_pair(lumiweight_[kQCD]*estimation, estimationError/sqrt(lumiweight_[kQCD]));
-      else ABCDresult_[Njets_[mult]][forWhich] = make_pair(estimation, estimationError);
-    }
+      std::cout << "N(QCD) after default selection: " << recoSelectionPt_[Njets_[mult]][kQCD]->GetEntries()*lumiweight_[kQCD] << std::endl;
+      // use fitted correction parameter from above to scale estimation
+      std::cout << "(MC ABCD->reco correction factor used: " << weightValues_[Njets_[mult]].first << "+/-" << weightValues_[Njets_[mult]].second << " )" << std::endl;
+      double weightedEstimation = estimation*weightValues_[Njets_[mult]].first;
+      double weightedEstimationError = estimationError*weightValues_[Njets_[mult]].first;
+      std::cout << "weighted estimation:" << estimation*weightValues_[Njets_[mult]].first << "+/-" << estimationError*weightValues_[Njets_[mult]].first << std::endl;
+      // save value and error of estimation in ABCDresult_
+      // a) for QCD: apply lumi-scaling
+      if(forWhich==kQCD)ABCDresult_[Njets_[mult]][forWhich] = make_pair(lumiweight_[kQCD]*weightedEstimation, weightedEstimationError*sqrt(lumiweight_[kQCD]));
+      // b) for all MC and data: no scaling
+      if(forWhich==kAll||forWhich==kData) ABCDresult_[Njets_[mult]][forWhich] = make_pair(weightedEstimation, weightedEstimationError); 
+      // c) if textoutput==true: save numbers for data estimation within .txt-file
+      if(textoutput&&forWhich==kData){
+	TString info = "ABCD QCD estimation results for Njets>=1,2,3 and 4: ";
+	if(mult==0) writeToFile(info);
+	writeToFile(weightedEstimation);
+      }
+    } 
+    // jump from QCD to Data, skipping other MC samples
+    if(forWhich==kQCD) forWhich=forWhich+3;      
   }
 
   // ---
@@ -157,7 +276,7 @@ void analyzeMuonDiffXABCDbkg()
 
   // loop bins = multiplicity
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    MCTruth->SetBinContent(mult+1, lumiweight_[kQCD]*Entries(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACLow, relIsoBinACUp, dBBinABLow, dBBinABUp, "Region A", false));
+    MCTruth->SetBinContent(mult+1, lumiweight_[kQCD]*recoSelectionPt_[Njets_[mult]][kQCD]->GetEntries());
     FromQCD->SetBinContent(mult+1, ABCDresult_[Njets_[mult]][kQCD].first  );
     FromQCD->SetBinError  (mult+1, ABCDresult_[Njets_[mult]][kQCD].second );
     FromAll->SetBinContent(mult+1, ABCDresult_[Njets_[mult]][kAll].first  );
@@ -167,19 +286,13 @@ void analyzeMuonDiffXABCDbkg()
   // ---
   //    create legend(s)
   // ---
-  TLegend*leg0 = new TLegend   (0.51, 0.59, 0.96, 0.87);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->AddEntry( relIsoVsDb_["Njets1"][kQCD  ], "QCD (51 / pb)"      , "L");
-  leg0->AddEntry( relIsoVsDb_["Njets1"][kTtbar], "Ttbar (6010 / pb)"  , "L");
-  leg0->AddEntry( relIsoVsDb_["Njets1"][kWjets], "W+jets (360 / pb)", "L");
-  leg0->AddEntry( relIsoVsDb_["Njets1"][kZjets], "Z+jets (349 / pb)", "L");
-  TLegend*leg1 = new TLegend   (0.43, 0.62, 0.86, 0.92);
+  // for result plot
+  TLegend*leg1 = new TLegend   (0.46, 0.64, 0.89, 0.94);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
   leg1->SetHeader( "ABCD method ("+lum+" pb^{-1})");
-  leg1->AddEntry ( MCTruth, "MC truth","PL");
-  leg1->AddEntry ( FromQCD, "estimation (QCD only  )", "PL");
+  leg1->AddEntry ( MCTruth, "MC default selection truth","L");
+  leg1->AddEntry ( FromQCD, "estimation (QCD only)"  , "PL");
   leg1->AddEntry ( FromAll, "estimation (all events)", "PL");
   // create jet multiplicity label
   std::vector<TPaveLabel*> jetMultiplicity_;
@@ -190,66 +303,73 @@ void analyzeMuonDiffXABCDbkg()
     jet->SetTextSize(0.26);
     jetMultiplicity_.push_back((TPaveLabel*)jet->Clone());
   }
-
-  // ---
-  //    create canvas 
-  // ---
-  std::vector<TCanvas*> MyCanvas;
-
-  for(int idx=0; idx<=4; idx++){ 
-    char canvname[10];
-    sprintf(canvname,"canv%i",idx);    
-    MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
-    canvasStyle(*MyCanvas[idx]);
+  // create MC sample label
+  std::vector<TString> sample_;
+  TString samples[ 5 ] = { "QCD", "Wjets", "Ttbar", "Zjets", "Data" };
+  sample_.insert( sample_.begin(), samples, samples + 5 );
+  std::vector<TPaveLabel*> sampleLabel_;
+  for(unsigned int idx=kQCD; idx<=kData; ++idx) {
+    TString header = "";
+    if(idx==kData) header = ""+sample_[idx];
+    if(idx!=kData) header = ""+sample_[idx]+", ("+lum+" / pb)";
+    TPaveLabel *slabel = new TPaveLabel(0.52, 0.83, 0.97, 1.05, header);
+    slabel->SetFillStyle(0);
+    slabel->SetBorderSize(0);
+    slabel->SetTextSize(0.26);
+    sampleLabel_.push_back((TPaveLabel*)slabel->Clone());
   }
 
   // ---
   //    do the printing for relIsoVsDb 
   // ---
+  int index =0;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-    MyCanvas[mult]->cd(0);
-    MyCanvas[mult]->SetTitle("relIsoVsDb"+Njets_[mult]);
-    histStyle2D(*relIsoVsDb_[Njets_[mult]][kQCD  ], kBlack, 0.0, 1.0, 0.0, 0.1, "", "relIso (lead #mu)", "d_{B} [cm] (lead #mu)");
-    histStyle2D(*relIsoVsDb_[Njets_[mult]][kWjets], kGreen, 0.0, 1.0, 0.0, 0.1);
-    histStyle2D(*relIsoVsDb_[Njets_[mult]][kTtbar], kRed  , 0.0, 1.0, 0.0, 0.1);
-    histStyle2D(*relIsoVsDb_[Njets_[mult]][kZjets], 7     , 0.0, 1.0, 0.0, 0.1);
-    //  relIsoVsDb_[Njets_[mult]][kQCD]->Draw("colz");
-    relIsoVsDb_[Njets_[mult]][kQCD  ]->Draw("");
-    relIsoVsDb_[Njets_[mult]][kZjets]->Draw("same");
-    relIsoVsDb_[Njets_[mult]][kWjets]->Draw("same");
-    relIsoVsDb_[Njets_[mult]][kTtbar]->Draw("same");
-    relIsoVsDb_[Njets_[mult]][kQCD  ]->Draw("AXIS same");
-    // lines region A
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp ), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
-    // lines region B
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
-    // lines region C
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow));
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp ), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDUp));
-    // lines region D
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow));
-    drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDUp)); 
-    // Draw A,B,C,D
-    DrawLabel("A", 0.085, 0.125, 0.35 , 0.34 );
-    DrawLabel("B", 0.580, 0.120, 0.845, 0.335);
-    DrawLabel("C", 0.085, 0.362, 0.35 , 0.577);
-    DrawLabel("D", 0.580, 0.362, 0.845, 0.577);
-    leg0                             ->Draw("same");
-    jetMultiplicity_[mult]           ->Draw("same");
+    // loop samples 
+    for(unsigned int idx=kQCD; idx<=kData; ++idx) {
+      // set styling
+      histStyle2D(*relIsoVsDb_[Njets_[mult]][idx], kBlack, 0.0, 1.0, 0.0, 0.1, "", "relIso (lead #mu)", "d_{B} [cm] (lead #mu)");
+      // open canvas
+      MyCanvas[index]->cd(0);
+      MyCanvas[index]->SetTitle("relIsoVsDb"+Njets_[mult]+sample_[idx]);
+      ++index;
+      // draw plots and redraw axis
+      relIsoVsDb_[Njets_[mult]][idx]->Draw("box");
+      relIsoVsDb_[Njets_[mult]][idx]->Draw("AXIS same");
+      // draw legends 
+      sampleLabel_[idx]     ->Draw("same");
+      jetMultiplicity_[mult]->Draw("same");
+      // Draw ABCD regions
+      // lines region A
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp ), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
+      // lines region B
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinABUp));
+      // lines region C
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow));
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp ), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinACUp), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDUp));
+      // lines region D
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDUp ), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow));
+      drawLine(GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetXAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], relIsoBinBDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDLow), GetYAxisValue(*relIsoVsDb_[Njets_[mult]][kQCD], dBBinCDUp)); 
+      // A,B,C,D
+      DrawLabel("A", 0.085, 0.125, 0.35 , 0.34 );
+      DrawLabel("B", 0.580, 0.120, 0.845, 0.335);
+      DrawLabel("C", 0.085, 0.362, 0.35 , 0.577);
+      DrawLabel("D", 0.580, 0.362, 0.845, 0.577);
+    }
   }
 
   // ---
   //    do the printing for the ABCD estimation results
   // ---
-  MyCanvas[4]->cd(0);
-  MyCanvas[4]->SetTitle("ABCDestimationResults");
-  axesStyle(*MCTruth, "N(jets) #geq", "events", 0, 10000, 0.05, 1.4);
-  histogramStyle(*MCTruth, kBlack, 1, 20, 1.2); 
-  histogramStyle(*FromQCD, kBlue , 1, 20, 1.2); 
-  histogramStyle(*FromAll, kRed  , 1, 20, 1.2);
+  MyCanvas[index]->cd(0);
+  MyCanvas[index]->SetTitle("ABCDestimationResultsMC"+lum+"pb");
+  MyCanvas[index]->SetLogy();
+  axesStyle(*MCTruth, "N(jets) #geq", "events", 1, 300000/50*luminosity, 0.05, 1.4);
+  histogramStyle(*MCTruth, kBlack, 1, 10, 1.0); 
+  histogramStyle(*FromQCD, kBlue , 1, 22, 1.5); 
+  histogramStyle(*FromAll, kRed  , 1, 23, 1.5);
   MCTruth->Draw("");
   FromQCD->Draw("same");
   FromAll->Draw("same");
@@ -403,4 +523,92 @@ void DrawLabel(TString text, const double x1, const double y1, const double x2, 
   label->SetBorderSize(0);
   label->SetTextSize(0.26);
   label->Draw("same");
+}
+
+template <class T>
+void writeToFile(T output, TString file, bool append){
+  // introduce function to write in file
+  // a) write into file
+  if(!append){
+    std::ofstream fout(file);
+    fout << output << std::endl;
+    fout.close();
+  }
+  // b) write to the end of the file  
+  if(append){
+    std::ofstream fapp(file, ios::app);
+    fapp << output << std::endl;;
+    fapp.close();
+  }
+}
+
+void fitParabolaExtrapolate(TH1& hist, const double xmin, const double xmax, const int color, const TString info){
+  // print out info
+  std::cout << "" << std::endl;
+  std::cout << "parabola fit: a*x*x +b*x +c for " << info << std::endl;
+  std::cout << "-----------------------=----------------------------" << std::endl;
+  TF1* myPol = new TF1("myPol","[0]*x*x+[1]*x+[2]");
+  // do a*x^2+b fit for hist in range [xmin,xmax]
+  hist.Fit(myPol,"Q","same",xmin, xmax);
+  myPol->SetRange(hist.GetBinLowEdge(1),hist.GetBinLowEdge(hist.GetNbinsX()+1));
+  // edit color of fit and extrapolate to whole region of x
+  myPol->SetLineColor(color);
+  myPol->DrawClone("same");
+  std::cout << "a = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
+  std::cout << "b = " << myPol->GetParameter(1) << " +/- " << myPol->GetParError(1) << std::endl;
+  std::cout << "c = " << myPol->GetParameter(2) << " +/- " << myPol->GetParError(2) << std::endl;
+  std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
+  std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+}
+
+void fitLinearExtrapolate(TH1& hist, const double xmin, const double xmax, const int color, const TString info){
+  // print out info
+  std::cout << "" << std::endl;
+  std::cout << "linear fit: a*x +b for " << info << std::endl;
+  std::cout << "-----------------------=----------------------------" << std::endl;
+  TF1* myPol = new TF1("myPol","[0]*x+[1]");
+  // do a*x^2+b fit for hist in range [xmin,xmax]
+  hist.Fit(myPol,"Q","same",xmin, xmax);
+  myPol->SetRange(hist.GetBinLowEdge(1),hist.GetBinLowEdge(hist.GetNbinsX()+1));
+  // edit color of fit and extrapolate to whole region of x
+  myPol->SetLineColor(color);
+  myPol->DrawClone("same");
+  std::cout << "a = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
+  std::cout << "b = " << myPol->GetParameter(1) << " +/- " << myPol->GetParError(1) << std::endl;
+  std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
+  std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+}
+
+std::vector<double> fitExponentialExtrapolate(TH1& hist, const double xmin, const double xmax, const int color, const TString info){
+  // print out info
+  std::cout << "" << std::endl;
+  std::cout << "exponential fit: exp(a*x) +b for " << info << std::endl;
+  std::cout << "-----------------------=----------------------------" << std::endl;
+  TF1* myPol = new TF1("myPol","exp([0]*x)+[1]");
+  // do a*x^2+b fit for hist in range [xmin,xmax]
+  hist.Fit(myPol,"Q","same",xmin, xmax);
+  myPol->SetRange(hist.GetBinLowEdge(1),hist.GetBinLowEdge(hist.GetNbinsX()+1));
+  // edit color of fit and extrapolate to whole region of x
+  myPol->SetLineColor(color);
+  myPol->DrawClone("same");
+  std::cout << "a = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
+  std::cout << "b = " << myPol->GetParameter(1) << " +/- " << myPol->GetParError(1) << std::endl;
+  std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
+  std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+  std::vector<double> result_;
+  result_ .push_back(myPol->GetParameter(0));
+  result_ .push_back(myPol->GetParError(0));
+  result_ .push_back(myPol->GetParameter(1));
+  result_ .push_back(myPol->GetParError(1));
+  return result_;
+}
+
+std::pair<double,double> exponentialFit(double x, const double a, const double sa, const double b, const double sb){
+  // use parameters from function fitExponentialExtrapolate
+  // to calculate weight and error for all je multiplicities
+  double weight=0;
+  double weightError=0;
+  weight=exp(a*x)+b;
+  weightError=sqrt( (sa*x)*(sa*x)*exp(2*a*x) + sb*sb );
+  return make_pair(weight, weightError);
 }
