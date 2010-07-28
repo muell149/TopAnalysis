@@ -30,8 +30,8 @@ tightJetCut  = 'abs(eta) < 2.4 & pt > 40.'
 bottomJetCut = 'abs(eta) < 2.4 & pt > 50.'
 
 ## define tight JetIDs
-tightCaloJetID  = '& ((correctedJet(\"raw\").pt > 25. && jetID.fHPD < 0.95) || correctedJet(\"raw\").pt <= 25.) & '
-tightCaloJetID += '((abs(eta) > 1.0 && pt > 80. && emEnergyFraction < 1.0) || abs(eta) <= 1.0 || pt <= 80.)'
+tightCaloJetID  = '& (((corrFactor("raw") * pt) > 25. & jetID.fHPD < 0.95) | (corrFactor("raw") * pt) <= 25.) & '
+tightCaloJetID += '((abs(eta) > 1.0 & pt > 80. & emEnergyFraction < 1.0) | abs(eta) <= 1.0 | pt <= 80.)'
 tightPFJetID    = '& neutralHadronEnergyFraction < 0.9 & '
 tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
 
@@ -466,6 +466,9 @@ monitorGenerator_2 = cms.Sequence( genParticles_2 *
 ## kinfit quality filter
 from TopAnalysis.TopFilter.filters.KinFitQualityFilter_cfi import *
 filterKinFitQuality = filterKinFitQuality.clone( srcB = 'tightLeadingJets', minProb = 0.01 )
+## when TQAF is up-to-date in an official release the above filter can be exchanged with the one below
+#from TopQuarkAnalysis.TopEventProducers.producers.TtFullHadEvtFilter_cfi import *
+#filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') & fitProb > 0.01") )
 
 ## ---
 ##    MONITOR STEP 3
