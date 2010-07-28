@@ -15,11 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////  This Macro analyzes all cut variables:number of valid Trackerhits, chi^2, dB,    ////
 ////  energy deposit in ecal and hcal, pt and eta, relIso and the multiplicity of the  //// 
-////  final muon collection. This is done within ttbar(semilept.mu + others), w+jets,  ////
-////  z+jets and QCD-sample.                                                           ////
-////  In default configuration each plot is done before the corresponding cut is       ////
-////  applied. Event weights for a normalization concerning luminosity have to be      ////
-////  filled in by hand.                                                               ////
+////  final muon collection. All important jet quantities are also plotted. This is    ////
+////  done within ttbar(semilept.mu + others), w+jets, z+jets and QCD-sample.          ////
+////  Additionally data points can be filled in for comparism.                         //// 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 enum styles {kSignal, kBackground, kZjets, kWjets, kQCD, kData};
@@ -28,8 +26,11 @@ void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0, int fillStyle=1001); 
 void axesStyle(THStack& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.07, float yTitleOffset=1.2);
 void drawcutline(double cutval, double maximum);
+TPaveLabel* label(TString text="", double xmin=0.38, double ymin=0.79, double xmax=0.56, double ymax=1.0, double size=0.26);
+int roundToInt(double value);
+TString getTStringFromInt(int i);
 
-void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "golden" // "tight" // "loose" // "track" // "good" // "combined" // "unselected"
+void analyzeMuonCuts(TString plots = "cutflow")  // choose "cutflow" or "NminusOne" for the plots you want to see
 {
   // ---
   //    set root style 
@@ -43,10 +44,8 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   // choose whether you want to save (every plot as png and all within one ps file)
   bool save = true;
   // choose luminosity [nb] for scaling of event numbers and for legend as entry
-  double luminosity = 11.4 ;
-  TString lum = "11";
-  // choose "cutflow" or "NminusOne" for the plots you want to see
-  TString plots = "NminusOne";
+  double luminosity = 77.80;
+  TString lum = getTStringFromInt(roundToInt(luminosity));
   // choose whether you want to see shape normalized plots 
   bool shapeNormalized = false;
   // choose target directory for saving
@@ -66,8 +65,7 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
-  //  files_.push_back(new TFile("./diffXData2010.root"                                               ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/data/78nbData1107json/diffX78nbData2010.root"  ) );
 
   // ---
   // define weights concerning luminosity
@@ -90,7 +88,7 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   // for current W+jets MADGRAPH sample
   lumiweight.push_back(0.00000278*(double)luminosity);
   // for current QCD PYTHIA sample
-  lumiweight.push_back(0.00002510*(double)luminosity);
+  lumiweight.push_back(0.00001967*(double)luminosity);
   // for data
   lumiweight.push_back(1.0);
 
@@ -98,70 +96,50 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   //    get histograms
   // ---
   std::vector<TString> thoseCollections;
-  if(whichMuons != ""){
-    for(int i=0; i<6; i++){
-      thoseCollections.push_back(whichMuons);
-    }
+  // a) NminusOne
+  if(plots=="NminusOne"){
+    thoseCollections.push_back("noPt"     );
+    thoseCollections.push_back("noEta"    );
+    thoseCollections.push_back("noTrkHits");
+    thoseCollections.push_back("noChi2"   );
+    thoseCollections.push_back("noDb"     );   
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("noDR"     );
+    thoseCollections.push_back("noIso"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("noEta"    );
+    thoseCollections.push_back("noPt"     );
+    thoseCollections.push_back("noEm"     );
+    thoseCollections.push_back("nofHPD"   );
+    thoseCollections.push_back("noN90Hits");
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("bottom"   );
   }
-  else{
-    // NminusOne
-    if(plots=="NminusOne"){
-      thoseCollections.push_back("noPt"  );
-      thoseCollections.push_back("noEta" );
-      thoseCollections.push_back("noTrkHits");
-      thoseCollections.push_back("noChi2");
-      thoseCollections.push_back("noDb"  );   
-      thoseCollections.push_back("tight" );
-      thoseCollections.push_back("tight" );
-      thoseCollections.push_back("tight" );
-      thoseCollections.push_back("noDR"  );
-      thoseCollections.push_back("noIso" );
-      thoseCollections.push_back("tight" );
-    }
-    if(plots=="cutflow"){
-      // cutflow
-      thoseCollections.push_back("combined");
-      thoseCollections.push_back("combined"); //      thoseCollections.push_back("highPt");
-      thoseCollections.push_back("trigger" );
-      thoseCollections.push_back("trigger" );
-      thoseCollections.push_back("trigger" );   
-      thoseCollections.push_back("tight"   );
-      thoseCollections.push_back("tight"   );
-      thoseCollections.push_back("tight"   );
-      thoseCollections.push_back("good"    ); //      thoseCollections.push_back("track"   );
-      thoseCollections.push_back("golden"  );
-      thoseCollections.push_back("tight"   );
-    }
-  }
-  if(whichJets != ""){
-    for(int i=0; i<2; i++){
-      thoseCollections.push_back(whichJets);
-    }
-  }
-  else{
-    // NminusOne
-    if(plots=="NminusOne"){
-      thoseCollections.push_back("noEta");
-      thoseCollections.push_back("noPt");
-      thoseCollections.push_back("noEm");
-      thoseCollections.push_back("nofHPD");
-      thoseCollections.push_back("noN90Hits");
-      thoseCollections.push_back("tight");
-      thoseCollections.push_back("tight");
-      thoseCollections.push_back("bottom");
-    }
-    if(plots=="cutflow"){
-      // cutflow
-      thoseCollections.push_back("pat");
-      thoseCollections.push_back("central");
-      thoseCollections.push_back("reliable");
-      thoseCollections.push_back("reliable");
-      thoseCollections.push_back("reliable");
-      thoseCollections.push_back("tight");
-      thoseCollections.push_back("tight");
-      thoseCollections.push_back("bottom");
-    }
-  }
+   // b) cutflow
+  if(plots=="cutflow"){
+    thoseCollections.push_back("combined" );
+    thoseCollections.push_back("highPt"   );
+    thoseCollections.push_back("kinematic");
+    thoseCollections.push_back("kinematic");
+    thoseCollections.push_back("kinematic");   
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("track"    );
+    thoseCollections.push_back("golden"   );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("pat"      );
+    thoseCollections.push_back("central"  );
+    thoseCollections.push_back("reliable" );
+    thoseCollections.push_back("reliable" );
+    thoseCollections.push_back("reliable" );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("tight"    );
+    thoseCollections.push_back("bottom"   );
+  }  
 
   std::vector<TH1F*> pt_, eta_, nHit_, chi2_, d0_, dz_, ecalEn_, hcalEn_, dR_, relIso_, n_;
   std::vector<TH1F*> etaJets_, ptlead1Jet_, ptlead2Jet_, ptlead3Jet_, ptlead4Jet_, emf_ , fhpd_, n90hits_, nJets_;
@@ -180,7 +158,6 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
     dR_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[8]+"MuonVetoJetsKinematics/dist30_")->Clone() );
     relIso_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[9]+"MuonQuality/relIso")->Clone() );
     n_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[10]+"MuonKinematics/n" )->Clone() );
-
     // jet plots
     etaJets_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[11]+"JetKinematics/eta")->Clone() );
     ptlead1Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_0_JetKinematics/pt")->Clone() );
@@ -191,16 +168,13 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
     fhpd_      .push_back( (TH1F*)files_[idx]->Get(thoseCollections[14]+"JetQuality/fHPD_"   )->Clone() );
     n90hits_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[15]+"JetQuality/n90Hits_")->Clone() );
     nJets_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[16]+"JetKinematics/n")->Clone() );
-    if(idx!=kData){
-      bdiscr_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[17]+"JetQuality/btagTrkCntHighPurity")->Clone() );
-      nbJets_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[18]+"JetKinematics/n")->Clone() );
-
-    }
+    bdiscr_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[17]+"JetQuality/btagTrkCntHighPurity")->Clone() );
+    nbJets_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[18]+"JetKinematics/n")->Clone() );
     // veto collection plots
-    nVetoMu_.push_back ( (TH1F*)files_[idx]->Get("looseVetoMuonKinematics/n"    )->Clone() );
-    nVetoE_ .push_back ( (TH1F*)files_[idx]->Get("looseVetoElectronKinematics/n")->Clone() );
-    etVetoE_ .push_back( (TH1F*)files_[idx]->Get("patVetoElectronKinematics/et" )->Clone() );
-    etaVetoE_.push_back( (TH1F*)files_[idx]->Get("patVetoElectronKinematics/eta")->Clone() );
+    nVetoMu_.push_back    ( (TH1F*)files_[idx]->Get("looseVetoMuonKinematics/n"    )->Clone() );
+    nVetoE_ .push_back    ( (TH1F*)files_[idx]->Get("looseVetoElectronKinematics/n")->Clone() );
+    etVetoE_ .push_back   ( (TH1F*)files_[idx]->Get("patVetoElectronKinematics/et" )->Clone() );
+    etaVetoE_.push_back   ( (TH1F*)files_[idx]->Get("patVetoElectronKinematics/eta")->Clone() );
     relIsoVetoE_.push_back( (TH1F*)files_[idx]->Get("patVetoElectronQuality/relIso")->Clone() );
   }
 
@@ -271,13 +245,22 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
     }
   }
 
-  std::cout << "ttbar sig : " << n_[kSignal    ]->Integral() << std::endl;
-  std::cout << "ttbar bkg : " << n_[kBackground]->Integral() << std::endl;
-  std::cout << "QCD : "       << n_[kQCD       ]->Integral() << std::endl;
-  std::cout << "Z+jets : "    << n_[kZjets     ]->Integral() << std::endl;
-  std::cout << "W+jets : "    << n_[kWjets     ]->Integral() << std::endl;
-  std::cout << "data : "      << n_[kData      ]->Integral() << std::endl;
-
+  // ---
+  //    print out # events ( MC / Data)
+  // ---
+  // loop jet multiplicities
+  for(int mult=2; mult<=10; ++mult){
+   std::cout << "---------------------" << std::endl;
+    std::cout << "number of entries =="+getTStringFromInt(mult-1)+" jets" << std::endl;
+     std::cout << "ttbar sig : " << nJets_[kSignal    ]->GetBinContent(mult) << std::endl;
+    std::cout << "ttbar bkg : " << nJets_[kBackground]->GetBinContent(mult) << std::endl;
+    std::cout << "QCD : "       << nJets_[kQCD       ]->GetBinContent(mult) << std::endl;
+    std::cout << "Z+jets : "    << nJets_[kZjets     ]->GetBinContent(mult) << std::endl;
+    std::cout << "W+jets : "    << nJets_[kWjets     ]->GetBinContent(mult) << std::endl;
+    std::cout << "all MC: " << nJets_[kSignal]->GetBinContent(mult)+nJets_[kBackground]->GetBinContent(mult)+nJets_[kQCD]->GetBinContent(mult)+nJets_[kZjets]->GetBinContent(mult)+nJets_[kWjets]->GetBinContent(mult) << std::endl;
+    std::cout << "data : "      << nJets_[kData      ]->GetBinContent(mult) << std::endl<< std::endl;
+  }
+  
   // ---
   //    configure histogram style & create stack plots
   // ---
@@ -479,16 +462,10 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   leg23->SetHeader("patElectrons");
 
   // label indicating cutstep
-  TPaveLabel *cut0 = new TPaveLabel(0.73, 0.87, 0.9, 1.0, "(hltMu9 ev. sel.)", "br NDC");
-  cut0->SetFillStyle(0);
-  cut0->SetBorderSize(0);
-  cut0->SetTextSize(0.26);
-  TPaveLabel *cut1= (TPaveLabel*)(cut0->Clone());
-  TPaveLabel *cut2= (TPaveLabel*)(cut0->Clone()); 
-  TPaveLabel *cut3= (TPaveLabel*)(cut0->Clone());
-  cut1->SetLabel("(#mu ev. sel.)");
-  cut2->SetLabel("(#mu & veto ev. sel.)");
-  cut3->SetLabel("(#mu & veto & jet ev. sel.)");
+  TPaveLabel *cut0 = label("(hltMu9 ev. sel.)"          , 0.73, 0.87, 0.9, 1.0);
+  TPaveLabel *cut1 = label("(#mu ev. sel.)"             , 0.73, 0.87, 0.9, 1.0);
+  TPaveLabel *cut2 = label("(#mu & veto ev. sel.)"      , 0.73, 0.87, 0.9, 1.0);
+  TPaveLabel *cut3 = label("(#mu & veto & jet ev. sel.)", 0.73, 0.87, 0.9, 1.0);
 
   // ---
   //    create canvas 
@@ -543,7 +520,7 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   nHit        ->Draw("AXISsame");
   leg4        ->Draw("same");
   cut0        ->Draw("same");
-  drawcutline(10.5, 5* nHit->GetMaximum()/12.38*luminosity);
+  drawcutline(10.5, 3*nHit->GetMaximum()/12.38*luminosity);
 
   // ---
   //    do the printing for chi2_
@@ -659,7 +636,8 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   n->GetXaxis()->SetRangeUser(0.,3.);
   n_[kData]->Draw("EPsame");
   n        ->Draw("AXISsame");
-  leg12    ->Draw("same");
+  //  leg12    ->Draw("same");
+  label("muon selection")->Draw("same");
   cut0     ->Draw("same");
   drawcutline(0.5, 5*n->GetMaximum()/12.38*luminosity);
   drawcutline(1.5, 5*n->GetMaximum()/12.38*luminosity);
@@ -767,7 +745,8 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   nVetoMu->GetXaxis()->SetRangeUser(0.,3.);
   nVetoMu_[kData]->Draw("EPsame");
   nVetoMu        ->Draw("Axis same");
-  leg16          ->Draw("same");
+  //  leg16          ->Draw("same");
+  label("muon veto")->Draw("same");
   cut1           ->Draw("same");
   drawcutline(0.5, 5*nVetoMu->GetMaximum()/12.38*luminosity);
   drawcutline(1.5, 5*nVetoMu->GetMaximum()/12.38*luminosity);
@@ -784,7 +763,8 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   nVetoE->GetXaxis()->SetRangeUser(0.,3.);
   nVetoE_[kData]->Draw("EPsame");
   nVetoE        ->Draw("Axis same");
-  leg17         ->Draw("same");
+  //  leg17         ->Draw("same");
+  label("electron veto")->Draw("same");
   cut1          ->Draw("same");
   drawcutline(0.5, 5*nVetoE->GetMaximum()/12.38*luminosity);
 
@@ -828,7 +808,8 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   if(nJets->GetMinimum()/12.38*luminosity==0)nJets->SetMinimum(0.01);
   nJets_[kData]->Draw("EPsame");
   nJets        ->Draw("Axis same");
-  leg20        ->Draw("same");
+  //  leg20        ->Draw("same");
+  label("jet selection")->Draw("same");
   cut2         ->Draw("same");
   drawcutline(4.0, 5*nJets->GetMaximum()/12.38*luminosity);
 
@@ -845,7 +826,7 @@ void analyzeMuonCuts(TString whichMuons = "", TString whichJets = "")  //  "gold
   bdiscr        ->Draw("Axis same");
   leg21         ->Draw("same");
   cut3          ->Draw("same");
-  drawcutline(2.17, 5*bdiscr->GetMaximum()/12.38*luminosity);
+  drawcutline(1.93, 5*bdiscr->GetMaximum()/12.38*luminosity);
 
   // ---
   //    do the printing for nbJets_
@@ -979,4 +960,36 @@ void axesStyle(THStack& hist, const char* titleX, const char* titleY, float yMin
   hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
+}
+
+TPaveLabel* label(TString text, double xmin, double ymin, double xmax, double ymax, double size){
+  // label indicating cutstep
+  TPaveLabel *label = new TPaveLabel(xmin, ymin, xmax, ymax, text, "br NDC");
+  label->SetFillStyle(0);
+  label->SetBorderSize(0);
+  label->SetTextSize(size);
+  return label;
+}
+
+int roundToInt(double value){
+  int result=0;
+  // take care of negative numbers
+  if(value<0){
+    std::cout << "no negative numbers allowed in roundToInt" << std::endl;
+    return 0;
+  }
+  // get [value]
+  for(int x=0; value>x; ++x){
+    result=x;
+  }
+  // see if rest is > 0.5
+  //  value-result >=0.5 ? return result+1 : return result;
+  if((value-result) >=0.5) return (result+1);
+  return result;
+}
+
+TString getTStringFromInt(int i){
+  char result[20];
+  sprintf(result, "%i", i);
+  return (TString)result;
 }
