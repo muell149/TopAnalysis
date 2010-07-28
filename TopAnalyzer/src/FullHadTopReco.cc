@@ -55,7 +55,7 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   // top mass of hypothesis
   hists_["topQuarkMassHypo"] = fs->make<TH1F>( "topQuarkMassHypo" , "topQuarkMassHypo" ,   500,  0. , 1000.  );
   /// mtop hypo vs. mtop reco
-  hists2D_["topMassHypoReco"] = fs->make<TH2F>( "topMassHypoReco" , "topMassHypoReco" ,  150, 100.,  400. , 150, 100., 400. );
+  hists2D_["topMassHypoReco"] = fs->make<TH2F>( "topMassHypoReco" , "topMassHypoReco" ,  300, 100.,  400. , 300, 100., 400. );
   // W pt
   hists_["wPt"           ] = fs->make<TH1F>( "wPt"           , "wPt"             ,  100,  0. , 1000. );
   // W eta
