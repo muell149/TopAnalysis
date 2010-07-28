@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #include <TH1F.h>
 #include <TROOT.h>
@@ -30,23 +31,30 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-12
 void drawcutline(double cutval, double maximum);
 TH1F* calcutateR(TH1F& ptPlus, TH1F& ptMinus, TString label="", TString jetMultiplicity="");
 std::pair<double,double> calcutateTotalR(double ptPlus, double ptMinus, TString label="", TString jetMultiplicity="");
-string getStringFromInt(int i);
+TString getTStringFromInt(int i);
 double sumBinEntries(TH1F& histo, int excludeBin1=0, int excludeBin2=0, int excludeBin3=0);
 void fitQuadraticExtrapolate(TH1F& hist, double xmin, double xmax, int color, TString info);
+std::vector<std::pair<double,double> > fitLinear(TH1F& hist, double xmin, double xmax, int color, TString info);
+template <class T>
+void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 
-void chargeAsymmetrieCalculator()
-{
+void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false)
+{ 
+  // ---
+  //    main function parameters
+  // ---
+  // save:       choose whether you want to save every plot as png and all within one ps file
+  // textoutput: choose whether you want to save the estimated number of QCD events for data 
+  //             in .txt file to share it with other parts of the Analysis
+  // choose target directory for saving:
+  TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
+
   // ---
   //    set root style 
   // ---
   gROOT->cd();
   gROOT->SetStyle("Plain");
   gStyle->SetErrorX(0); 
-
-  // choose whether you want to save every plot as png and all within one ps file
-  bool save = false;
-  // choose target directory for saving
-  TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
 
   // ---
   //    open input files
@@ -64,7 +72,7 @@ void chargeAsymmetrieCalculator()
   for(int idx=0; idx<=4; ++idx) {
     if(idx==0) mult="";
     else {
-      mult = "Njets"+(TString)getStringFromInt(idx);
+      mult = "Njets"+getTStringFromInt(idx);
     }
     ptNMuMinus_ .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryMuons"+mult+"/ptMinus"     ) );
     ptNMuPlus_  .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryMuons"+mult+"/ptPlus"      ) );
@@ -85,20 +93,21 @@ void chargeAsymmetrieCalculator()
   std::map< TString, std::map <unsigned int,TH1F* > > Rpt_;
   // loop jet multiplicities
   for(int njets =0; njets<=4; njets++){
-    Rpt_["mu"  ][njets] = (TH1F*) calcutateR(*ptNMuPlus_[njets],  *ptNMuMinus_[njets],  "Muons from W and W->tau", "N(jets) >= "+(TString)getStringFromInt(njets));
-    Rpt_["Wmu" ][njets] = (TH1F*) calcutateR(*ptNWMuPlus_[njets], *ptNWMuMinus_[njets], "Muons from W", "N(jets) >= "+(TString)getStringFromInt(njets));
-    Rpt_["We"  ][njets] = (TH1F*) calcutateR(*ptNEPlus_[njets],   *ptNEMinus_[njets],   "Electrons from W", "N(jets) >= "+(TString)getStringFromInt(njets));
-    Rpt_["Wtau"][njets] = (TH1F*) calcutateR(*ptNTPlus_[njets],   *ptNTMinus_[njets],   "Taus from W", "N(jets) >= "+(TString)getStringFromInt(njets));
+    Rpt_["mu"  ][njets] = (TH1F*) calcutateR(*ptNMuPlus_[njets],  *ptNMuMinus_[njets],  "Muons from W and W->tau", "N(jets) >= "+getTStringFromInt(njets));
+    Rpt_["Wmu" ][njets] = (TH1F*) calcutateR(*ptNWMuPlus_[njets], *ptNWMuMinus_[njets], "Muons from W", "N(jets) >= "+getTStringFromInt(njets));
+    Rpt_["We"  ][njets] = (TH1F*) calcutateR(*ptNEPlus_[njets],   *ptNEMinus_[njets],   "Electrons from W", "N(jets) >= "+getTStringFromInt(njets));
+    Rpt_["Wtau"][njets] = (TH1F*) calcutateR(*ptNTPlus_[njets],   *ptNTMinus_[njets],   "Taus from W", "N(jets) >= "+getTStringFromInt(njets));
   }
+
   // b) inclusive R(ptlep>20GeV) for different jet multiplicities and leptons
   // ----------------------------------------------------------------------------------------------
   // Rpt_[lepton][jetMultiplicity] -> eg: Rpt_[Wmu][4].first/second = R/dR for muons with pt>20GeV from W after >= 4 jets cut
   std::map< TString, std::map <unsigned int, std::pair<double,double> > > Rinclusive_;
   for(int njets =0; njets<=4; njets++){
-    Rinclusive_["mu"  ][njets] = calcutateTotalR(sumBinEntries(*ptNMuPlus_[njets],1),  sumBinEntries(*ptNMuMinus_[njets],1),  "Muons from W and W->tau, pt>20GeV", "N(jets) >= "+(TString)getStringFromInt(njets));
-    Rinclusive_["Wmu" ][njets] = calcutateTotalR(sumBinEntries(*ptNWMuPlus_[njets],1), sumBinEntries(*ptNWMuMinus_[njets],1), "Muons from W, pt>20GeV", "N(jets) >= "+(TString)getStringFromInt(njets));
-    Rinclusive_["We"  ][njets] = calcutateTotalR(sumBinEntries(*ptNEPlus_[njets],1),   sumBinEntries(*ptNEMinus_[njets],1),   "Electrons from W, pt>20GeV", "N(jets) >= "+(TString)getStringFromInt(njets));
-    Rinclusive_["Wtau"][njets] = calcutateTotalR(sumBinEntries(*ptNTPlus_[njets],1),   sumBinEntries(*ptNTMinus_[njets],1),   "Taus from W, pt>20GeV", "N(jets) >= "+(TString)getStringFromInt(njets));
+    Rinclusive_["mu"  ][njets] = calcutateTotalR(sumBinEntries(*ptNMuPlus_[njets],1),  sumBinEntries(*ptNMuMinus_[njets],1),  "Muons from W and W->tau, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
+    Rinclusive_["Wmu" ][njets] = calcutateTotalR(sumBinEntries(*ptNWMuPlus_[njets],1), sumBinEntries(*ptNWMuMinus_[njets],1), "Muons from W, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
+    Rinclusive_["We"  ][njets] = calcutateTotalR(sumBinEntries(*ptNEPlus_[njets],1),   sumBinEntries(*ptNEMinus_[njets],1),   "Electrons from W, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
+    Rinclusive_["Wtau"][njets] = calcutateTotalR(sumBinEntries(*ptNTPlus_[njets],1),   sumBinEntries(*ptNTMinus_[njets],1),   "Taus from W, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
   }
 
   // c)  create R_inclusive[Njets] plot(s) from b)
@@ -119,7 +128,7 @@ void chargeAsymmetrieCalculator()
   TLegend *leg0 = new TLegend(0.25, 0.70, 1.0, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("inclusive R for p_{t} (#mu) > 20 GeV, |#eta| < 2.1?" );
+  leg0->SetHeader("inclusive R for p_{t} (#mu) > 20 GeV, |#eta| < 2.1" );
   leg0->AddEntry(RNjetsMu ,"W->#mu#nu & W->#tau#nu->#mu#nu#nu)+jets", "PL");
   leg0->AddEntry(RNjetsWMu,"W->#mu#nu", "PL");
 
@@ -184,12 +193,13 @@ void chargeAsymmetrieCalculator()
   // ---
   MyCanvas[0]->cd(0);
   MyCanvas[0]->SetTitle("inclusiveRNjets");
-  axesStyle(*RNjetsMu, "N_{jets} #geq", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 1, 1.5*RNjetsMu->GetMaximum(), 0.06, 1.5 );
+  axesStyle(*RNjetsMu, "N_{jets} #geq", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 1, 1.5*RNjetsMu->GetMaximum(), 0.06, 1.3 );
   histogramStyle(*RNjetsMu , kBlack,  1, 20, 1.0);
   histogramStyle(*RNjetsWMu, kRed  ,  1, 20, 1.0);
   RNjetsMu ->Draw("");
   RNjetsWMu->Draw("same");
-  leg0     ->Draw("same" );
+  std::vector<std::pair<double,double> > inclusiveRfit_ =fitLinear(*RNjetsMu, 1.0, 4.5, RNjetsMu->GetLineColor(), "R( N(jets) ), W->mu & W->tau->mu");
+  leg0     ->Draw("same");
 
   // ---
   //     do the printing for R(ptlep) with >= 0 jets for some leptons
@@ -249,6 +259,27 @@ void chargeAsymmetrieCalculator()
   leg3a        ->Draw("same");
   leg3b        ->Draw("same");
 
+  // ---
+  //     calculate fittet inclusive R for W->mu && W->tau->mu
+  // ---
+  // loop jet multiplicities
+  for(double njets =1; njets<=4; njets++){
+    double a= inclusiveRfit_[0].first;
+    double b= inclusiveRfit_[1].first;
+    double sa= inclusiveRfit_[0].second;
+    double sb= inclusiveRfit_[1].second;
+    double inclusiveRfit = a*(njets)+b;
+    double errorInclusiveRfit = sqrt( (njets*sa)*(njets*sa) + sb*sb );
+    // print out to shell
+    if(njets==1) std::cout << std::endl << "inclusive R (linear fit) for W->mu && W->tau->mu" << std::endl;
+    std::cout << "N(jets)>="+getTStringFromInt(njets) << ": R = " << inclusiveRfit << " +/- " << errorInclusiveRfit << std::endl;
+    // if textoutput==true: save fitted inclusive R values within .txt-file
+    if(textoutput==true){
+      if(njets==1) writeToFile("inclusive R (from linear fit) for gen W->mu and W->tau->mu for N(jets) >= 1 - 4:");
+      writeToFile(inclusiveRfit);
+    }
+  }
+  
   // ---
   // saving
   // ---  
@@ -414,7 +445,7 @@ std::pair<double,double> calcutateTotalR(double ptPlus, double ptMinus, TString 
   return output_;
 }
 
-string getStringFromInt(int i){
+TString getTStringFromInt(int i){
   char result[20];
   sprintf(result, "%i", i);
   return result;
@@ -439,12 +470,52 @@ void fitQuadraticExtrapolate(TH1F& hist, double xmin, double xmax, int color, TS
   TF1* myPol = new TF1("myPol","[0]+[1]*x*x");
   // do a*x^2+b fit for hist in range [xmin,xmax]
   hist.Fit(myPol,"Q","same",xmin, xmax);
-  myPol->SetRange(hist.GetBinLowEdge(1),hist.GetBinLowEdge(hist.GetNbinsX()+1));
   // edit color of fit and extrapolate to whole region of x
+  myPol->SetRange(hist.GetBinLowEdge(1),hist.GetBinLowEdge(hist.GetNbinsX()+1));
   myPol->SetLineColor(color);
   myPol->DrawClone("same");
   std::cout << "a = " << myPol->GetParameter(1) << " +/- " << myPol->GetParError(1) << std::endl;
   std::cout << "b = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
   std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
   std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+}
+
+std::vector<std::pair<double,double> > fitLinear(TH1F& hist, double xmin, double xmax, int color, TString info){
+  // print out info
+  std::cout << "" << std::endl;
+  std::cout << "linear fit: a*x +b for " << info << std::endl;
+  std::cout << "-----------------------=----------------" << std::endl;
+  TF1* myPol = new TF1("myPol","[0]+[1]*x");
+  // do a*x^2+b fit for hist in range [xmin,xmax]
+  hist.Fit(myPol,"Q","same",xmin, xmax);
+  // edit color of fit and extrapolate to whole region of x
+  //  myPol->SetRange(1.0, 4.5);
+  myPol->SetLineColor(color);
+  myPol->DrawClone("same");
+  std::cout << "a = " << myPol->GetParameter(1) << " +/- " << myPol->GetParError(1) << std::endl;
+  std::cout << "b = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
+  std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
+  std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+  // return a and b parameter of fit and their errors
+  std::vector<std::pair<double,double> > result_;
+  result_.push_back ( make_pair(myPol->GetParameter(1), myPol->GetParError(1)) );
+  result_.push_back ( make_pair(myPol->GetParameter(0), myPol->GetParError(0)) );
+  return result_;
+}
+
+template <class T>
+void writeToFile(T output, TString file, bool append){
+  // introduce function to write in file
+  // a) write into file
+  if(!append){
+    std::ofstream fout(file);
+    fout << output << std::endl;
+    fout.close();
+  }
+  // b) write to the end of the file  
+  if(append){
+    std::ofstream fapp(file, ios::app);
+    fapp << output << std::endl;;
+    fapp.close();
+  }
 }

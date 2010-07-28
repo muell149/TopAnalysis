@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include <TH1F.h>
 #include <TH2F.h>
@@ -21,19 +22,39 @@
 #include <THStack.h>
 #include <TLine.h>
 #include <TStyle.h>
+#include <TF1.h>
 
-enum styles {kWjets,kPseudo50};
+enum styles {kWjets, kPseudo50, kData};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 void drawcutline(double cutval, double maximum);
-std::pair<double,double> getChargeAsymmetrieParameter(int njets);
-string getStringFromInt(int i);
+std::pair<double,double> getChargeAsymmetrieParameter(int njets, bool loadR);
+TString getTStringFromInt(int i);
 double sumUpEntries(TH1F& histo);
+template <class T>
+void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
+double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
 
-void wjetsAsymmetrieEstimator()
+void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV50pb.root")
 {
+  // ---
+  //    main function parameters
+  // ---
+  // save:       choose whether you want to save every plot as png and all within one ps file
+  // textoutput: choose whether you want to save the estimated number of QCD events for data 
+  //             in .txt file to share it with other parts of the Analysis
+  // luminosity: choose luminosity for scaling of event numbers 
+  //             lum is derived from this and used for legend as entry
+  TString lum = getTStringFromInt((int)luminosity);
+  // choose target directory for saving
+  TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
+  // choose whether you want to load c.a. parameter from crossSection.txt file
+  // when writing into file, T is also taken from file
+  bool loadR = false;
+  if(textoutput) loadR=true;
+  
   // ---
   //    set root style 
   // ---
@@ -41,11 +62,6 @@ void wjetsAsymmetrieEstimator()
   gROOT->SetStyle("Plain");
   gStyle->SetErrorX(0); 
 
-  // choose whether you want to save every plot as png and all within one ps file
-  bool save = true;
-  // choose target directory for saving
-  TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
- 
   // ---
   //    open input files
   // ---
@@ -53,80 +69,125 @@ void wjetsAsymmetrieEstimator()
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"   ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/spring10PseudoData7TeV50pb.root" ) );
+  files_.push_back(new TFile(dataFile                                                              ) );
+
+  // create container for the different histos
+  std::map< TString, std::map <unsigned int, TH1F*> > ptMuPlus_, ptMuMinus_, pt_;
+  // example: ptMuPlus_[kWjets]["Njets1"]
+  // ------------------------------------
+  // create jet multiplicity indicator
+  std::vector<TString> Njets_;
+  TString jets[ 4 ] = { "Njets1", "Njets2", "Njets3", "Njets4" };
+  Njets_.insert( Njets_.begin(), jets, jets + 4 );
 
   // ---
   //    get histograms
   // ---
-  std::vector<TH1F*> ptMuPlusPseudoNjets_, ptMuMinusPseudoNjets_, ptWjetsNjets_, ptPseudoNjets_;
-  for(int idx=1; idx<=4; idx++){
-  // all Njets-histos for 50 pb-1 pseudo data
-    ptMuPlusPseudoNjets_ .push_back( (TH1F*)(files_[kPseudo50]->Get("analyzeTightMuonCrossSectionRecNjets"+(TString)getStringFromInt(idx)+"/ptPlus"  ) )->Clone() );
-    ptMuMinusPseudoNjets_.push_back( (TH1F*)(files_[kPseudo50]->Get("analyzeTightMuonCrossSectionRecNjets"+(TString)getStringFromInt(idx)+"/ptMinus" ) )->Clone() );
-  // all Njets-histos for W+jets
-    ptWjetsNjets_ .push_back( (TH1F*)(files_[kWjets]->Get("analyzeTightMuonCrossSectionRecNjets"+(TString)getStringFromInt(idx)+"/pt") )->Clone() );
-    ptPseudoNjets_.push_back(  (TH1F*)(ptMuPlusPseudoNjets_ [idx-1]->Clone()) );
-    ptPseudoNjets_[idx-1]->Add((TH1F*)(ptMuMinusPseudoNjets_[idx-1]->Clone()) );
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<4; ++mult){
+    // loop input files (W, all MC, data)
+    for(int idx=kWjets; idx<=kData; ++idx){
+      // pt(mu+/-)
+      ptMuPlus_ [Njets_[mult]][idx] = (TH1F*)(files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/ptPlus" ))->Clone();
+      ptMuMinus_[Njets_[mult]][idx] = (TH1F*)(files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/ptMinus"))->Clone();
+      // pt(all mu) as mu+ + mu-
+      pt_[Njets_[mult]][idx] = (TH1F*)ptMuPlus_ [Njets_[mult]][idx]->Clone();
+      pt_[Njets_[mult]][idx]->Add( (TH1F*)ptMuMinus_[Njets_[mult]][idx]->Clone() ); 
+    }
   }
-  
+    
   // ---
-  //    scale Wjets to luminosity
+  //    scale W+jets to luminosity
   // ---
   // spring10 7TeV W+jets MADGRAPH sample 
-  double lumiweight=0.13904207;
-  // 50 pb^{-1}
-  for(unsigned idx=1; idx<=4; idx++){
-    ptWjetsNjets_[idx-1]->Scale(lumiweight);
+  double lumiweight=0.13904207/50*luminosity;
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<4; ++mult){
+    ptMuPlus_ [Njets_[mult]][kWjets]->Scale(lumiweight);
+    ptMuMinus_[Njets_[mult]][kWjets]->Scale(lumiweight);
+    pt_       [Njets_[mult]][kWjets]->Scale(lumiweight);
   }
 
   // check weighting
   std::cout << "" << std::endl;
-  std::cout << "check weighting W+jets MC" << std::endl;
-  std::cout << "N(W) before weighting: " << ptWjetsNjets_[0]->GetEntries() << std::endl;
-  double weightedEntries = sumUpEntries(*ptWjetsNjets_[0]);
+  std::cout << "check weighting W+jets MC (Njets>=4)" << std::endl;
+  std::cout << "N(W) before weighting: " <<  pt_[Njets_[3]][kWjets]->GetEntries() << std::endl;
+  double weightedEntries = sumUpEntries(*pt_[Njets_[3]][kWjets]);
   std::cout << "N(W) after weighting: " << weightedEntries << std::endl;
-  std::cout << "ratio : " << weightedEntries/(double)(ptWjetsNjets_[0]->GetEntries()) << std::endl;
+  std::cout << "ratio : " << weightedEntries/(double)(pt_[Njets_[3]][kWjets]->GetEntries()) << std::endl;
   std::cout << "weight: " << lumiweight << std::endl;
 
-  // check pseudo data reading out
+  // check pseudo data read out
   std::cout << "" << std::endl;
-  std::cout << "check pseudo data N(jets)>=1" << std::endl;
-  std::cout << "N = "  << sumUpEntries(*ptPseudoNjets_[0]) << std::endl;
-  std::cout << "N+ = " << sumUpEntries(*ptMuPlusPseudoNjets_ [0]) << std::endl;
-  std::cout << "N- = " << sumUpEntries(*ptMuMinusPseudoNjets_[0]) << std::endl;
+  std::cout << "check pseudo data N(jets)>=4" << std::endl;
+  std::cout << "N = "  << sumUpEntries(*pt_       [Njets_[3]][kPseudo50]) << std::endl;
+  std::cout << "N+ = " << sumUpEntries(*ptMuPlus_ [Njets_[3]][kPseudo50]) << std::endl;
+  std::cout << "N- = " << sumUpEntries(*ptMuMinus_[Njets_[3]][kPseudo50]) << std::endl;
 
-  // print out necessary informations
-  std::cout << "w+jets estimation" << std::endl;
-  std::cout << "- R(pt(mu)>=20 GeV) from W+jets gen niveau" << std::endl;
-  std::cout << "- estimation from combined pseudo data reco files (wjets+zjets+qcd+ttbar)" << std::endl;
+  // print out important informations
+  std::cout << std::endl << "w+jets estimation details:" << std::endl;
+  std::cout << "- used R(pt(mu)>=20 GeV) from W->(mu && tau->mu)+jets gen niveau" << std::endl;
+  std::cout << "- R is expected to have no error" << std::endl;
+  std::cout << "- to test the method, the estimation is done from combined pseudo"  << std::endl;
+  std::cout << "  data reco files (wjets+zjets+qcd+ttbar)" << std::endl;
+  std::cout << "  and from W+jets sample only" << std::endl;
+  std::cout << "- additionally the estimation is done for real data" << std::endl<< std::endl;
 
   // ---
-  //    create histogram with W+jets-estimation from charge asymmetrie method and MC truth
+  //    Apply the charge asymmetry method
   // ---
-  TH1F *wjetsEstimation = new TH1F("wjetsEstimation" , "wjetsEstimation" , 4, 0.5, 4.5);
-  TH1F *wjetsTruth      = new TH1F("wjetsTruth"      , "wjetsTruth"      , 4, 0.5, 4.5);
-  TH1F *allPseudoEvents = new TH1F("allPseudoEvents" , "allPseudoEvents" , 4, 0.5, 4.5);
-  // loop jet multiplicities
-  for(int njets=1; njets<=wjetsEstimation->GetNbinsX(); njets++){
-    std::cout << ""                      << std::endl;
-    std::cout << "N(jets) >= " << njets << std::endl; 
-    std::cout << "---------------------" << std::endl;
-    double x = sumUpEntries(*ptMuPlusPseudoNjets_ [njets-1]);
-    double y = sumUpEntries(*ptMuMinusPseudoNjets_[njets-1]);
-    double R =getChargeAsymmetrieParameter(njets).first;
-    double dR=getChargeAsymmetrieParameter(njets).second;
-    // calculate entries for W+jets-estimation
-    wjetsEstimation->SetBinContent( njets, (x-y)*R );
-    // calculate error for W+jets-estimation via gaussian error calculus
-    wjetsEstimation->SetBinError( njets, sqrt( (x-y)*(x-y)*dR*dR + R*R*(x+y) )  );
-    std::cout << "N(mu+, pseudo data) = "  << x << std::endl;
-    std::cout << "N(mu-, pseudo data) = "  << y << std::endl;
-    std::cout << "R(Njets >=" << njets << ") = " << R << " +- " << dR << std::endl;
-    std::cout << "N(estimated W)= " << wjetsEstimation->GetBinContent(njets) << " +- " << wjetsEstimation->GetBinError(njets) << std::endl;
-    // calculate entries for W+jets MC truth
-    wjetsTruth->SetBinContent( njets, sumUpEntries(*ptWjetsNjets_[njets-1]) );
-    std::cout << "N(W, MC truth) = " << wjetsTruth->GetBinContent(njets) << std::endl;
-    allPseudoEvents->SetBinContent( njets, sumUpEntries(*ptPseudoNjets_[njets-1]) );
-    std::cout << "total # events: " << allPseudoEvents->GetBinContent(njets) << std::endl;
+  // create c.a. estimation, MC truth and all events [N(jets)] histos
+  TH1F *wjetsEstimationW   = new TH1F("wjetsEstimationW"   , "wjetsEstimationW"  , 4, 0.5, 4.5);
+  TH1F *wjetsEstimationAll = new TH1F("wjetsEstimationAll" , "wjetsEstimationAll", 4, 0.5, 4.5);
+  TH1F *wjetsTruth         = new TH1F("wjetsTruth"         , "wjetsTruth"        , 4, 0.5, 4.5);
+  TH1F *allPseudoEvents    = new TH1F("allPseudoEvents"    , "allPseudoEvents"   , 4, 0.5, 4.5);
+  // loop samples (W+jets, pseudo data, real data)
+  for(unsigned int idx=kWjets; idx<=kData; ++idx){
+    // print out info for c.a. estimation
+    if(idx==kWjets   )std::cout << std::endl << "a) estimation from W+jets MC only:"       << std::endl << std::endl;
+    if(idx==kPseudo50)std::cout << std::endl << "b) estimation from pseudo data (all MC):" << std::endl << std::endl;
+    if(idx==kData    )std::cout << std::endl << "c) estimation within data:"               << std::endl << std::endl;
+    // loop jet multiplicities
+    for(int njets=1; njets<=4; ++njets){
+      // a) charge asymmetry estimation
+      std::cout << "---------------------" << std::endl << std::endl;
+      std::cout << "N(jets) >= " << njets  << std::endl; 
+      std::cout << "" << std::endl;
+      double x = sumUpEntries(*ptMuPlus_ [Njets_[njets-1]][idx]);
+      double y = sumUpEntries(*ptMuMinus_[Njets_[njets-1]][idx]);
+      double R =getChargeAsymmetrieParameter(njets,loadR).first;
+      double dR=getChargeAsymmetrieParameter(njets,loadR).second;
+      // calculate entries for W+jets-estimation
+      double NW = (x-y)*R;
+      // calculate error for W+jets-estimation via gaussian error calculus
+      double NWError = R*sqrt(NW);
+      // print out results
+      std::cout << "N(mu+)= "  << x << std::endl;
+      std::cout << "N(mu-)= "  << y << std::endl;
+      std::cout << "R(Njets >=" << njets << ") = " << R << " +- " << dR << std::endl;
+      std::cout << "N(estimated W) = " << NW << " +- " << NWError << std::endl;
+      std::cout << "N(W, MC truth) = "   << sumUpEntries(*pt_[Njets_[njets-1]][kWjets]) << std::endl;   
+      std::cout << "total # of events: " << sumUpEntries(*pt_[Njets_[njets-1]][idx])    << std::endl;
+      // b) fill wjetsEstimationW histo
+      if(idx==kWjets){
+	wjetsEstimationW->SetBinContent( njets, NW);
+	wjetsEstimationW->SetBinError  ( njets, NWError);
+      }
+      // c) fill wjetsEstimationAll histo
+      if(idx==kPseudo50){
+	wjetsEstimationAll->SetBinContent( njets, NW);
+	wjetsEstimationAll->SetBinError  ( njets, NWError);
+      }
+      // d) fill wjetsTruth histo
+      if(idx==kWjets) wjetsTruth->SetBinContent( njets, sumUpEntries(*pt_[Njets_[njets-1]][kWjets]) );
+      // e) fill allPseudoEvents histo
+      if(idx==kPseudo50) allPseudoEvents->SetBinContent( njets, sumUpEntries(*pt_[Njets_[njets-1]][kPseudo50]) );
+      // f) if textoutput==true: save W+jets data estimation within .txt-file
+      if(textoutput==true&&idx==kData){
+	if(njets==1) writeToFile("estimated N(W) in Data using charge asymmetry method with R from above for N(jets) >= 1 - 4");
+	writeToFile((x-y)*R);
+      }
+    }
   }
 
   // ---
@@ -136,10 +197,11 @@ void wjetsAsymmetrieEstimator()
   TLegend *leg0 = new TLegend(0.30, 0.69, 0.92, 0.94);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("N_{W} @ 50pb^{-1} (7TeV)");
-  leg0->AddEntry( wjetsEstimation, "estimation from pseudo data", "P");
-  leg0->AddEntry( wjetsTruth     , "MC truth"                   , "L" );
-  leg0->AddEntry( allPseudoEvents, "total # events"             , "L" );
+  leg0->SetHeader("N_{W} @ "+lum+"pb^{-1} ( 7 TeV )");
+  leg0->AddEntry( wjetsTruth        , "MC truth"                     , "L" );
+  leg0->AddEntry( wjetsEstimationW  , "estimation from W+jets MC"    , "PL");
+  leg0->AddEntry( wjetsEstimationAll, "estimation from pseudo data (all MC)", "PL");
+  //  leg0->AddEntry( allPseudoEvents   , "total # pseudo events"               , "L" );
 
   // ---
   //    do the printing for N_W [Njets]
@@ -148,15 +210,17 @@ void wjetsAsymmetrieEstimator()
   // draw canvas
   canv0->cd(0);
   canv0->SetLogy(1);
-  canv0->SetTitle("wjetsCAEstimation50pb");
-  axesStyle(*wjetsTruth, "N_{jets} #geq", "N_{W}", 1., 10000000);
-  histogramStyle(*wjetsTruth     , kBlue , 1, 20, 0.5); 
-  histogramStyle(*wjetsEstimation, kRed  , 1, 22, 1.2);
-  histogramStyle(*allPseudoEvents, kBlack, 1, 20, 0.5); 
-  wjetsTruth     ->Draw("");
-  allPseudoEvents->Draw("same");
-  wjetsEstimation->Draw("esame");
-  leg0           ->Draw("same");
+  canv0->SetTitle("wjetsCAEstimation"+lum+"pb");
+  axesStyle(*wjetsTruth, "N_{jets} #geq", "N_{W}", 1., 10000000/50*luminosity);
+  histogramStyle(*wjetsTruth        , kGreen, 1, 20, 0.5); 
+  histogramStyle(*wjetsEstimationW  , kBlue , 1, 23, 1.8);
+  histogramStyle(*wjetsEstimationAll, kRed  , 1, 22, 1.8);
+  histogramStyle(*allPseudoEvents   , kBlack, 2, 20, 0.5); 
+  wjetsTruth        ->Draw("");
+  //  allPseudoEvents   ->Draw("same");
+  wjetsEstimationAll->Draw("esame");
+  wjetsEstimationW  ->Draw("esame");
+  leg0              ->Draw("same");
 
   // ---
   // saving
@@ -178,6 +242,12 @@ void canvasStyle(TCanvas& canv)
   canv.SetRightMargin ( 0.05 );
   canv.SetBottomMargin( 0.15 );
   canv.SetTopMargin   ( 0.05 );
+}
+
+TString getTStringFromInt(int i){
+  char result[20];
+  sprintf(result, "%i", i);
+  return (TString)result;
 }
 
 void histogramStyle(TH1& hist, int color, int lineStyle, int markerStyle, float markersize, int filled) 
@@ -230,20 +300,16 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, fl
   if(yMax!=-123) hist.SetMaximum(yMax);
 }
 
-std::pair<double,double> getChargeAsymmetrieParameter(int njets)
-{  
+std::pair<double,double> getChargeAsymmetrieParameter(int njets, bool loadR)
+{
+  // use R like it is written down here or load it from file
+  if( loadR) return make_pair( readLineFromFile(2+njets) , 0 );
   std::map< TString, std::map <unsigned int, std::pair<double,double> > > Rinclusive_;
-  Rinclusive_["mu"][1] = make_pair( 5.60626 , 0.0634405 );
-  Rinclusive_["mu"][2] = make_pair( 5.20138 , 0.129156  );
-  Rinclusive_["mu"][3] = make_pair( 4.55043 , 0.233407  );
-  Rinclusive_["mu"][4] = make_pair( 4.07162 , 0.410175  );
+  Rinclusive_["mu"][1] = make_pair( 5.6162  , 0);
+  Rinclusive_["mu"][2] = make_pair( 5.12635 , 0);
+  Rinclusive_["mu"][3] = make_pair( 4.6365  , 0);
+  Rinclusive_["mu"][4] = make_pair( 4.14665 , 0); 
   return Rinclusive_["mu"][njets];
-}
-
-string getStringFromInt(int i){
-  char result[20];
-  sprintf(result, "%i", i);
-  return result;
 }
 
 double sumUpEntries(TH1F& histo){
@@ -254,4 +320,42 @@ double sumUpEntries(TH1F& histo){
     entries+=histo.GetBinContent(idx);
   }
   return entries;
+}
+
+template <class T>
+void writeToFile(T output, TString file, bool append){
+  // introduce function to write in file
+  // a) write into file
+  if(!append){
+    std::ofstream fout(file);
+    fout << output << std::endl;
+    fout.close();
+  }
+  // b) write to the end of the file  
+  if(append){
+    std::ofstream fapp(file, ios::app);
+    fapp << output << std::endl;;
+    fapp.close();
+  }
+}
+
+double readLineFromFile(int line, TString file){
+  // introduce function to read a double value drom a specific line of a file
+  std::ifstream finDouble (file);
+  std::string readIn;
+  // check if file exists
+  if (!finDouble){
+    std::cout << "can not open file" << std::endl;
+    return -1;
+  }
+  // loop lines of the file
+  for(int l=1; !finDouble.eof(); ++l){
+    // save line content in readIn
+    getline(finDouble, readIn);
+    // convert your chosen line into double and return it
+    if(l==line) return atof(readIn.c_str()); 
+  }
+  // if line is not found
+  std::cout << "can not find line" << std::endl;
+  return -1.;  
 }
