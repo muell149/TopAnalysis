@@ -32,13 +32,11 @@ GenParticle::fill(const edm::View<reco::GenParticle>& parts, const double& weigh
 {
   for(edm::View<reco::GenParticle>::const_iterator part=parts.begin(); part!=parts.end(); ++part){
     if( status_ == -1 ){
-      if(part->pdgId()>=0) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
-      else                 hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
+      hists_.find("genParticles")->second->Fill( std::abs(part->pdgId()) , weight );
     }
     else if( status_ == 1 || status_ == 2 || status_ == 3 ){
       if( part->status() == status_ ){
-	if( part->pdgId() >= 0 ) hists_.find("genParticles")->second->Fill(  part->pdgId() , weight );
-	else                     hists_.find("genParticles")->second->Fill( -part->pdgId() , weight );
+	hists_.find("genParticles")->second->Fill( std::abs(part->pdgId()) , weight );
       }
     }
   }
