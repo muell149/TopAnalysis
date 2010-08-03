@@ -175,15 +175,15 @@ tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHi
 tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
 
 ## collect kinematics analyzers
-monitorJetsKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  +
-                                       tightBJet_0_JetKinematics_0 +
-                                       tightBJet_1_JetKinematics_0 +
-                                       tightLeadingJetKinematics_0 +
-                                       tightLead_0_JetKinematics_0 +
-                                       tightLead_1_JetKinematics_0 +
-                                       tightLead_2_JetKinematics_0 +
-                                       tightLead_3_JetKinematics_0 +
-                                       tightLead_4_JetKinematics_0 +
+monitorJetsKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  *
+                                       tightBJet_0_JetKinematics_0 *
+                                       tightBJet_1_JetKinematics_0 *
+                                       tightLeadingJetKinematics_0 *
+                                       tightLead_0_JetKinematics_0 *
+                                       tightLead_1_JetKinematics_0 *
+                                       tightLead_2_JetKinematics_0 *
+                                       tightLead_3_JetKinematics_0 *
+                                       tightLead_4_JetKinematics_0 *
                                        tightLead_5_JetKinematics_0  
                                        )
 
@@ -202,15 +202,15 @@ tightBJet_0_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurB
 tightBJet_1_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
 
 ## collect quality analyzers
-monitorJetsQuality_0 = cms.Sequence(tightBottomJetQuality_0  +
-                                    tightBJet_0_JetQuality_0 +
-                                    tightBJet_1_JetQuality_0 +
-                                    tightLeadingJetQuality_0 +
-                                    tightLead_0_JetQuality_0 +
-                                    tightLead_1_JetQuality_0 +
-                                    tightLead_2_JetQuality_0 +
-                                    tightLead_3_JetQuality_0 +
-                                    tightLead_4_JetQuality_0 +
+monitorJetsQuality_0 = cms.Sequence(tightBottomJetQuality_0  *
+                                    tightBJet_0_JetQuality_0 *
+                                    tightBJet_1_JetQuality_0 *
+                                    tightLeadingJetQuality_0 *
+                                    tightLead_0_JetQuality_0 *
+                                    tightLead_1_JetQuality_0 *
+                                    tightLead_2_JetQuality_0 *
+                                    tightLead_3_JetQuality_0 *
+                                    tightLead_4_JetQuality_0 *
                                     tightLead_5_JetQuality_0  
                                     )
 
@@ -271,15 +271,15 @@ tightBJet_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets
 tightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 
 ## collect kinematics analyzers
-monitorJetsKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  +
-                                       tightBJet_0_JetKinematics_1 +
-                                       tightBJet_1_JetKinematics_1 +
-                                       tightLeadingJetKinematics_1 +
-                                       tightLead_0_JetKinematics_1 +
-                                       tightLead_1_JetKinematics_1 +
-                                       tightLead_2_JetKinematics_1 +
-                                       tightLead_3_JetKinematics_1 +
-                                       tightLead_4_JetKinematics_1 +
+monitorJetsKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  *
+                                       tightBJet_0_JetKinematics_1 *
+                                       tightBJet_1_JetKinematics_1 *
+                                       tightLeadingJetKinematics_1 *
+                                       tightLead_0_JetKinematics_1 *
+                                       tightLead_1_JetKinematics_1 *
+                                       tightLead_2_JetKinematics_1 *
+                                       tightLead_3_JetKinematics_1 *
+                                       tightLead_4_JetKinematics_1 *
                                        tightLead_5_JetKinematics_1  
                                        )
 
@@ -298,15 +298,15 @@ tightBJet_0_JetQuality_1 = analyzeJetQuality.clone (src = 'tightBottomJets' , an
 tightBJet_1_JetQuality_1 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom1)
 
 ## collect quality analyzers
-monitorJetsQuality_1 = cms.Sequence(tightBottomJetQuality_1  +
-                                    tightBJet_0_JetQuality_1 +
-                                    tightBJet_1_JetQuality_1 +
-                                    tightLeadingJetQuality_1 +
-                                    tightLead_0_JetQuality_1 +
-                                    tightLead_1_JetQuality_1 +
-                                    tightLead_2_JetQuality_1 +
-                                    tightLead_3_JetQuality_1 +
-                                    tightLead_4_JetQuality_1 +
+monitorJetsQuality_1 = cms.Sequence(tightBottomJetQuality_1  *
+                                    tightBJet_0_JetQuality_1 *
+                                    tightBJet_1_JetQuality_1 *
+                                    tightLeadingJetQuality_1 *
+                                    tightLead_0_JetQuality_1 *
+                                    tightLead_1_JetQuality_1 *
+                                    tightLead_2_JetQuality_1 *
+                                    tightLead_3_JetQuality_1 *
+                                    tightLead_4_JetQuality_1 *
                                     tightLead_5_JetQuality_1  
                                     )
 
@@ -367,15 +367,15 @@ tightBJet_0_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets
 tightBJet_1_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 
 ## to be called with fullHadronicSelection
-monitorJetsKinematics_2 = cms.Sequence(tightBottomJetKinematics_2  +
-                                       tightBJet_0_JetKinematics_2 +
-                                       tightBJet_1_JetKinematics_2 +
-                                       tightLeadingJetKinematics_2 +
-                                       tightLead_0_JetKinematics_2 +
-                                       tightLead_1_JetKinematics_2 +
-                                       tightLead_2_JetKinematics_2 +
-                                       tightLead_3_JetKinematics_2 +
-                                       tightLead_4_JetKinematics_2 +
+monitorJetsKinematics_2 = cms.Sequence(tightBottomJetKinematics_2  *
+                                       tightBJet_0_JetKinematics_2 *
+                                       tightBJet_1_JetKinematics_2 *
+                                       tightLeadingJetKinematics_2 *
+                                       tightLead_0_JetKinematics_2 *
+                                       tightLead_1_JetKinematics_2 *
+                                       tightLead_2_JetKinematics_2 *
+                                       tightLead_3_JetKinematics_2 *
+                                       tightLead_4_JetKinematics_2 *
                                        tightLead_5_JetKinematics_2  
                                        )
 
@@ -394,15 +394,15 @@ tightBJet_0_JetQuality_2 = analyzeJetQuality.clone (src = 'tightBottomJets' , an
 tightBJet_1_JetQuality_2 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom1)
 
 ## collect quality analyzers
-monitorJetsQuality_2 = cms.Sequence(tightBottomJetQuality_2  +
-                                    tightBJet_0_JetQuality_2 +
-                                    tightBJet_1_JetQuality_2 +
-                                    tightLeadingJetQuality_2 +
-                                    tightLead_0_JetQuality_2 +
-                                    tightLead_1_JetQuality_2 +
-                                    tightLead_2_JetQuality_2 +
-                                    tightLead_3_JetQuality_2 +
-                                    tightLead_4_JetQuality_2 +
+monitorJetsQuality_2 = cms.Sequence(tightBottomJetQuality_2  *
+                                    tightBJet_0_JetQuality_2 *
+                                    tightBJet_1_JetQuality_2 *
+                                    tightLeadingJetQuality_2 *
+                                    tightLead_0_JetQuality_2 *
+                                    tightLead_1_JetQuality_2 *
+                                    tightLead_2_JetQuality_2 *
+                                    tightLead_3_JetQuality_2 *
+                                    tightLead_4_JetQuality_2 *
                                     tightLead_5_JetQuality_2  
                                     )
 
@@ -489,15 +489,15 @@ tightBJet_0_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightBottomJets
 tightBJet_1_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 
 ## to be called with fullHadronicSelection
-monitorJetsKinematics_3 = cms.Sequence(tightBottomJetKinematics_3  +
-                                       tightBJet_0_JetKinematics_3 +
-                                       tightBJet_1_JetKinematics_3 +
-                                       tightLeadingJetKinematics_3 +
-                                       tightLead_0_JetKinematics_3 +
-                                       tightLead_1_JetKinematics_3 +
-                                       tightLead_2_JetKinematics_3 +
-                                       tightLead_3_JetKinematics_3 +
-                                       tightLead_4_JetKinematics_3 +
+monitorJetsKinematics_3 = cms.Sequence(tightBottomJetKinematics_3  *
+                                       tightBJet_0_JetKinematics_3 *
+                                       tightBJet_1_JetKinematics_3 *
+                                       tightLeadingJetKinematics_3 *
+                                       tightLead_0_JetKinematics_3 *
+                                       tightLead_1_JetKinematics_3 *
+                                       tightLead_2_JetKinematics_3 *
+                                       tightLead_3_JetKinematics_3 *
+                                       tightLead_4_JetKinematics_3 *
                                        tightLead_5_JetKinematics_3  
                                        )
 
@@ -516,15 +516,15 @@ tightBJet_0_JetQuality_3 = analyzeJetQuality.clone (src = 'tightBottomJets' , an
 tightBJet_1_JetQuality_3 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom1)
 
 ## collect quality analyzers
-monitorJetsQuality_3 = cms.Sequence(tightBottomJetQuality_3  +
-                                    tightBJet_0_JetQuality_3 +
-                                    tightBJet_1_JetQuality_3 +
-                                    tightLeadingJetQuality_3 +
-                                    tightLead_0_JetQuality_3 +
-                                    tightLead_1_JetQuality_3 +
-                                    tightLead_2_JetQuality_3 +
-                                    tightLead_3_JetQuality_3 +
-                                    tightLead_4_JetQuality_3 +
+monitorJetsQuality_3 = cms.Sequence(tightBottomJetQuality_3  *
+                                    tightBJet_0_JetQuality_3 *
+                                    tightBJet_1_JetQuality_3 *
+                                    tightLeadingJetQuality_3 *
+                                    tightLead_0_JetQuality_3 *
+                                    tightLead_1_JetQuality_3 *
+                                    tightLead_2_JetQuality_3 *
+                                    tightLead_3_JetQuality_3 *
+                                    tightLead_4_JetQuality_3 *
                                     tightLead_5_JetQuality_3  
                                     )
 
@@ -736,6 +736,8 @@ def runOnPF(process):
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
     process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
     process.tightBottomJets.cut  = bottomJetCut + tightPFJetID
+    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'abs'
+    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'abs'
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
     if(hasattr(process, 'residualCorrectedJets')):
