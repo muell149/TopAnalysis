@@ -40,7 +40,7 @@ looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
                                          cut=''
                                          )
-tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
+tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
                                          cut=''
                                          )
 
