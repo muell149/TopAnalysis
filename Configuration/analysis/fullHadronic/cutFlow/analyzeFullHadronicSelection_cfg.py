@@ -9,7 +9,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
-## decide whether to run on:  * data *, * signal only *, * background only *, * qcd *
+## decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd * or * all *
 options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 ## choose whether to use PF or not
 options.register('usePF'      ,     1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "use PF for processing")
@@ -36,6 +36,9 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
     '/store/user/eschliec/Run2010A/patTuple_6jets.root',
+    '/store/user/eschliec/Run2010/patTuple_6jets_14x_1.root',
+    '/store/user/eschliec/Run2010/patTuple_6jets_14x_23.root',
+    '/store/user/eschliec/Run2010/patTuple_6jets_14x_4.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_1_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_2_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_3_1.root',
@@ -78,7 +81,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 ## ---
-##    decide whether to run on:  * data *, * signal only *, * background only * or * qcd *
+##    decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd * or * all *
 ## ---
 
 ## std sequence to produce the ttGenEvt
@@ -170,7 +173,7 @@ if(not options.usePF==0):
 if(options.eventFilter=='data'):
     runOnRealData(process)
     ## needed as in MC the process label is different -> trigger in data not found
-    removeDefaultTrigger(process)
+    #removeDefaultTrigger(process)
 
 ## ---
 ##    run the final sequence
@@ -190,6 +193,8 @@ if(options.writeOutput):
                                    fileName = cms.untracked.string('patTuple_selected.root'),
                                    # save only events passing the full path
                                    SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p1') ),
+                                   # drop meta data for dropped events
+                                   dropMetaData = cms.untracked.string('DROPPED'),
                                    # save output (comment to keep everything...)
                                    #outputCommands = cms.untracked.vstring('drop *',) 
                                    )
