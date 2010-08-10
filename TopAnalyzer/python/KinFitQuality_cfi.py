@@ -7,9 +7,9 @@ analyzeKinFitQuality = cms.EDAnalyzer("KinFitQualityAnalyzer",
     srcB = cms.InputTag("selectedPatJets"),                                         
     ## analyzer specific configurables
     analyze   = cms.PSet(
-      ## no additional configurables needed in this case
+    ## number of hypotheses for plot kinFit Chi2 and Prob
     numberOfHypos = cms.uint32( 1 )
-    )    
+    )
 )
 
 
