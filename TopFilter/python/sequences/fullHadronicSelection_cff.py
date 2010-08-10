@@ -62,6 +62,8 @@ from TopAnalysis.TopAnalyzer.JetQuality_cfi import *
 #from TopAnalysis.TopAnalyzer.MuonQuality_cfi import *
 ## jet kinematics analyzer
 from TopAnalysis.TopAnalyzer.JetKinematics_cfi import *
+## MET kinematics analyzer
+from TopAnalysis.TopAnalyzer.METKinematics_cfi import *
 ## muon kinematics analyzer
 #from TopAnalysis.TopAnalyzer.MuonKinematics_cfi import *
 ## event shape analyzer
@@ -75,6 +77,7 @@ from TopAnalysis.TopAnalyzer.FullHadSpecial_cfi import *
 ## kinfit analyzer
 from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
 from TopAnalysis.TopAnalyzer.KinFitImprover_cfi import *
+from TopAnalysis.TopAnalyzer.METKinFitAnalyzer_cfi import *
 ## analyzer for fully hadronic event reco
 from TopAnalysis.TopAnalyzer.FullHadTopReco_cfi import *
 ## high level trigger filter
@@ -173,19 +176,21 @@ tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', anal
 tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
 tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
+METKinematics_0 = analyzeMETKinematics.clone()
 
 ## collect kinematics analyzers
-monitorJetsKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  *
-                                       tightBJet_0_JetKinematics_0 *
-                                       tightBJet_1_JetKinematics_0 *
-                                       tightLeadingJetKinematics_0 *
-                                       tightLead_0_JetKinematics_0 *
-                                       tightLead_1_JetKinematics_0 *
-                                       tightLead_2_JetKinematics_0 *
-                                       tightLead_3_JetKinematics_0 *
-                                       tightLead_4_JetKinematics_0 *
-                                       tightLead_5_JetKinematics_0  
-                                       )
+monitorKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  *
+                                   tightBJet_0_JetKinematics_0 *
+                                   tightBJet_1_JetKinematics_0 *
+                                   tightLeadingJetKinematics_0 *
+                                   tightLead_0_JetKinematics_0 *
+                                   tightLead_1_JetKinematics_0 *
+                                   tightLead_2_JetKinematics_0 *
+                                   tightLead_3_JetKinematics_0 *
+                                   tightLead_4_JetKinematics_0 *
+                                   tightLead_5_JetKinematics_0 *
+                                   METKinematics_0
+                                   )
 
 ## JET QUALITY
 
@@ -269,19 +274,21 @@ tightLead_4_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJet
 tightLead_5_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5 )
 tightBJet_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
+METKinematics_1 = analyzeMETKinematics.clone()
 
 ## collect kinematics analyzers
-monitorJetsKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  *
-                                       tightBJet_0_JetKinematics_1 *
-                                       tightBJet_1_JetKinematics_1 *
-                                       tightLeadingJetKinematics_1 *
-                                       tightLead_0_JetKinematics_1 *
-                                       tightLead_1_JetKinematics_1 *
-                                       tightLead_2_JetKinematics_1 *
-                                       tightLead_3_JetKinematics_1 *
-                                       tightLead_4_JetKinematics_1 *
-                                       tightLead_5_JetKinematics_1  
-                                       )
+monitorKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  *
+                                   tightBJet_0_JetKinematics_1 *
+                                   tightBJet_1_JetKinematics_1 *
+                                   tightLeadingJetKinematics_1 *
+                                   tightLead_0_JetKinematics_1 *
+                                   tightLead_1_JetKinematics_1 *
+                                   tightLead_2_JetKinematics_1 *
+                                   tightLead_3_JetKinematics_1 *
+                                   tightLead_4_JetKinematics_1 *
+                                   tightLead_5_JetKinematics_1 *
+                                   METKinematics_1
+                                   )
 
 ## JET QUALITY
 
@@ -365,19 +372,21 @@ tightLead_4_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJet
 tightLead_5_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5 )
 tightBJet_0_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
+METKinematics_2 = analyzeMETKinematics.clone()
 
 ## to be called with fullHadronicSelection
-monitorJetsKinematics_2 = cms.Sequence(tightBottomJetKinematics_2  *
-                                       tightBJet_0_JetKinematics_2 *
-                                       tightBJet_1_JetKinematics_2 *
-                                       tightLeadingJetKinematics_2 *
-                                       tightLead_0_JetKinematics_2 *
-                                       tightLead_1_JetKinematics_2 *
-                                       tightLead_2_JetKinematics_2 *
-                                       tightLead_3_JetKinematics_2 *
-                                       tightLead_4_JetKinematics_2 *
-                                       tightLead_5_JetKinematics_2  
-                                       )
+monitorKinematics_2 = cms.Sequence(tightBottomJetKinematics_2  *
+                                   tightBJet_0_JetKinematics_2 *
+                                   tightBJet_1_JetKinematics_2 *
+                                   tightLeadingJetKinematics_2 *
+                                   tightLead_0_JetKinematics_2 *
+                                   tightLead_1_JetKinematics_2 *
+                                   tightLead_2_JetKinematics_2 *
+                                   tightLead_3_JetKinematics_2 *
+                                   tightLead_4_JetKinematics_2 *
+                                   tightLead_5_JetKinematics_2 *
+                                   METKinematics_2
+                                   )
 
 ## JET QUALITY
 
@@ -427,6 +436,7 @@ kinFitImprover4_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_2 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
+METKinFit_2 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
 monitorKinFit_2 = cms.Sequence( kinFitQuality_2   *
@@ -435,6 +445,7 @@ monitorKinFit_2 = cms.Sequence( kinFitQuality_2   *
                                 kinFitImprover2_2 *
                                 kinFitImprover3_2 *
                                 kinFitImprover4_2 *
+                                METKinFit_2       *
                                 fullHadTopReco_2
                                )
 
@@ -487,19 +498,21 @@ tightLead_4_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJet
 tightLead_5_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5 )
 tightBJet_0_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
+METKinematics_3 = analyzeMETKinematics.clone()
 
 ## to be called with fullHadronicSelection
-monitorJetsKinematics_3 = cms.Sequence(tightBottomJetKinematics_3  *
-                                       tightBJet_0_JetKinematics_3 *
-                                       tightBJet_1_JetKinematics_3 *
-                                       tightLeadingJetKinematics_3 *
-                                       tightLead_0_JetKinematics_3 *
-                                       tightLead_1_JetKinematics_3 *
-                                       tightLead_2_JetKinematics_3 *
-                                       tightLead_3_JetKinematics_3 *
-                                       tightLead_4_JetKinematics_3 *
-                                       tightLead_5_JetKinematics_3  
-                                       )
+monitorKinematics_3 = cms.Sequence(tightBottomJetKinematics_3  *
+                                   tightBJet_0_JetKinematics_3 *
+                                   tightBJet_1_JetKinematics_3 *
+                                   tightLeadingJetKinematics_3 *
+                                   tightLead_0_JetKinematics_3 *
+                                   tightLead_1_JetKinematics_3 *
+                                   tightLead_2_JetKinematics_3 *
+                                   tightLead_3_JetKinematics_3 *
+                                   tightLead_4_JetKinematics_3 *
+                                   tightLead_5_JetKinematics_3 *
+                                   METKinematics_3
+                                   )
 
 ## JET QUALITY
 
@@ -549,6 +562,7 @@ kinFitImprover4_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_3 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
+METKinFit_3 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
 monitorKinFit_3 = cms.Sequence( kinFitQuality_3  *
@@ -557,6 +571,7 @@ monitorKinFit_3 = cms.Sequence( kinFitQuality_3  *
                                 kinFitImprover2_3 *
                                 kinFitImprover3_3 *
                                 kinFitImprover4_3 *
+                                METKinFit_3       *
                                 fullHadTopReco_3
                                )
 
@@ -609,14 +624,14 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             matchJetsToPartons    *
                                             filterStep0           *
                                             ## do the monitoring
-                                            monitorJetsKinematics_0  *
+                                            monitorKinematics_0      *
                                             monitorJetsQuality_0     *
                                             monitorEventShapes_0     *
                                             monitorFullHadSpecials_0 *
                                             monitorGenerator_0       *
                                             ## do the 1. event selection
                                             leadingJetSelection      *
-                                            monitorJetsKinematics_1  *
+                                            monitorKinematics_1      *
                                             monitorJetsQuality_1     *
                                             monitorEventShapes_1     *
                                             monitorFullHadSpecials_1 *
@@ -625,7 +640,7 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             bottomJetSelection       *
                                             makeTtFullHadEvent       *
                                             monitorKinFit_2          *
-                                            monitorJetsKinematics_2  *
+                                            monitorKinematics_2      *
                                             monitorJetsQuality_2     *
                                             monitorEventShapes_2     *
                                             monitorFullHadSpecials_2 *
@@ -633,7 +648,7 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             ## do the 3. event selection
                                             filterKinFitQuality      *
                                             monitorKinFit_3          *
-                                            monitorJetsKinematics_3  *
+                                            monitorKinematics_3      *
                                             monitorJetsQuality_3     *
                                             monitorEventShapes_3     *
                                             monitorFullHadSpecials_3 *
@@ -661,6 +676,8 @@ def runOnRealData(process):
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_1)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_2)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
+    hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
     if(hasattr(process, 'goodJets') & hasattr(process, 'residualCorrectedJets')):
@@ -730,8 +747,9 @@ def runAsBackgroundEstimation(process):
 ## ---
 def runOnPF(process):
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    print 'switching all inputs in to run on PFJets'
-    print 'instead of caloJets: goodJets -> goodJetsPF'
+    print 'switching all inputs in to run on PFlow'
+    print 'goodJets -> goodJetsPF'
+    print 'patMETs  -> patMETsPF'
     print '++++++++++++++++++++++++++++++++++++++++++++'
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
     process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
@@ -740,6 +758,7 @@ def runOnPF(process):
     process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'abs'
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'patMETs' , 'patMETsPF')
     if(hasattr(process, 'residualCorrectedJets')):
         process.residualCorrectedJets.jets    = 'selectedPatJetsAK5PF'
         process.residualCorrectedJets.jetType = 'PF'
