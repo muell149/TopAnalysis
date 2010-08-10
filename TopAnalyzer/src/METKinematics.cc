@@ -19,27 +19,29 @@ void METKinematics::book()
       MET Variables
   **/
   // et of missing Et
-  hists_["metEt"   ] = new TH1F( "met.et"    , "met.et"    ,  400 ,  0.  , 400. );
+  hists_["metEt"   ] = new TH1F( "met.et"    , "met.et"    ,  400 ,  0.   , 400. );
   // px of missing Et
-  hists_["metPx"   ] = new TH1F( "met.px"    , "met.px"    ,  500 , -250., 250. );
+  hists_["metPx"   ] = new TH1F( "met.px"    , "met.px"    ,  500 , -250. , 250. );
   // py of missing Et
-  hists_["metPy"   ] = new TH1F( "met.py"    , "met.py"    ,  500 , -250., 250. );
+  hists_["metPy"   ] = new TH1F( "met.py"    , "met.py"    ,  500 , -250. , 250. );
   // scalar sum of transverse energy over all objects
-  hists_["metSumEt"] = new TH1F( "met.sumEt" , "met.sumEt" ,  1500,  0.  , 1500.);
+  hists_["metSumEt"] = new TH1F( "met.sumEt" , "met.sumEt" ,  1500,  0.   , 1500.);
   // significance of missing Et
-  hists_["metSig"  ] = new TH1F( "met.sig"   , "met.sig"   ,  100 ,  0.  , 25.  );
+  hists_["metSig"  ] = new TH1F( "met.sig"   , "met.sig"   ,  100 ,  0.   , 25.  );
   // phi of missing Et events
-  hists_["metPhi"  ] = new TH1F( "met.phi"   , "met.phi"   ,  70  , -3.5 , 3.5  );
+  hists_["metPhi"  ] = new TH1F( "met.phi"   , "met.phi"   ,  70  , -3.14 , 3.14  );
+  // missing Et vs. sumEt
+  hists2D_["metSumEt"] = new TH2F("metSumEt" , "metSumEt"  ,  1500,    0. ,  1500.,  400, 0.,  400.);
 
   /** 
       correlation MET - Kinematic quantities
   **/
   // gen-rec level correlation muon pt
-  hists2D_["METpt_" ] = new TH2F( "METpt_"    , "METpt_"    ,  400,    0.,  400.,     400,   0.,  400.);
+  hists2D_["METpt_" ] = new TH2F( "METpt_"   , "METpt_"    ,  400,     0. ,   400.,  400,  0.,  400.);
   // gen-rec level correlation muon eta
-  hists2D_["METeta_"] = new TH2F( "METeta_"   , "METeta_"   ,  800,   -4.,    4.,     400,   0.,  400.);
+  hists2D_["METeta_"] = new TH2F( "METeta_"  , "METeta_"   ,  800,    -4. ,     4.,  400,  0.,  400.);
   // gen-rec level correlation muon phi
-  hists2D_["METphi_"] = new TH2F( "METphi_"   , "METphi_"   ,  628, -3.14,  3.14,     400,   0.,  400.);
+  hists2D_["METphi_"] = new TH2F( "METphi_"  , "METphi_"   ,  628,  -3.14 ,   3.14,  400,  0.,  400.);
 
 }
 
@@ -51,27 +53,29 @@ void METKinematics::book(edm::Service<TFileService>& fs)
       MET Variables
   **/
   // et of missing Et
-  hists_["metEt"   ] = fs->make<TH1F>("met.et"    , "met.et"    , 400 ,  0.   , 400. );
+  hists_["metEt"   ] = fs->make<TH1F>("met.et"    , "met.et"    , 400 ,  0.    , 400. );
   // px of missing Et
-  hists_["metPx"   ] = fs->make<TH1F>("met.px"    , "met.px"    , 500 , -250. , 250. );
+  hists_["metPx"   ] = fs->make<TH1F>("met.px"    , "met.px"    , 500 , -250.  , 250. );
   // py of missing Et
-  hists_["metPy"   ] = fs->make<TH1F>("met.py"    , "met.py"    , 500 , -250. , 250. );
+  hists_["metPy"   ] = fs->make<TH1F>("met.py"    , "met.py"    , 500 , -250.  , 250. );
   // scalar sum of transverse energy over all objects
-  hists_["metSumEt"] = fs->make<TH1F>("met.sumEt" , "met.sumEt" , 1500,  0.   , 1500.); 
+  hists_["metSumEt"] = fs->make<TH1F>("met.sumEt" , "met.sumEt" , 1500,  0.    , 1500.); 
   // significance of missing Et
-  hists_["metSig"  ] = fs->make<TH1F>("met.sig"   , "met.sig"   , 100 ,  0.   , 25.  ); 
+  hists_["metSig"  ] = fs->make<TH1F>("met.sig"   , "met.sig"   , 100 ,  0.    , 25.  ); 
   // phi of missing Et events
-  hists_["metPhi"  ] = fs->make<TH1F>("met.phi"   , "met.phi"   , 70  , -3.5  , 3.5  );
+  hists_["metPhi"  ] = fs->make<TH1F>("met.phi"   , "met.phi"   , 70  , -3.14  , 3.14  );
+  // missing Et vs. sumEt
+  hists2D_["metSumEt"] = fs->make<TH2F>("metSumEt", "metSumEt"  , 1500,     0. , 1500.,  400,  0.,  400.);
 
   /** 
       correlation MET - Kinematic quantities
   **/
   // gen-rec level correlation muon pt
-  hists2D_["METpt_" ] = fs->make<TH2F>("METpt_"    , "METpt_"    ,  400,    0.,  400.,     400,   0.,  400.);
+  hists2D_["METpt_" ] = fs->make<TH2F>("METpt_"   , "METpt_"    ,  400,     0. ,  400.,  400,  0.,  400.);
   // gen-rec level correlation muon eta
-  hists2D_["METeta_"] = fs->make<TH2F>("METeta_"   , "METeta_"   ,  800,   -4.,    4.,     400,   0.,  400.);
+  hists2D_["METeta_"] = fs->make<TH2F>("METeta_"  , "METeta_"   ,  800,    -4. ,    4.,  400,  0.,  400.);
   // gen-rec level correlation muon phi
-  hists2D_["METphi_"] = fs->make<TH2F>("METphi_"   , "METphi_"   ,  628, -3.14,  3.14,     400,   0.,  400.);
+  hists2D_["METphi_"] = fs->make<TH2F>("METphi_"  , "METphi_"   ,  628,  -3.14 ,  3.14,  400,  0.,  400.);
 }
 
 /// histogram filling for fw lite and for fw full
@@ -79,18 +83,20 @@ void
 METKinematics::fill(const edm::View<reco::MET>& met, const double& weight)
 {
   // filling for et transversal missing Et
-  hists_.find("metEt"   )->second->Fill( met.begin()->et()    , weight);
+  hists_.find("metEt"   )->second->Fill( met.begin()->et()    , weight );
   // filling for px of missing Et
-  hists_.find("metPx"   )->second->Fill( met.begin()->px()    , weight);
+  hists_.find("metPx"   )->second->Fill( met.begin()->px()    , weight );
   // filling for py of missing Et
-  hists_.find("metPy"   )->second->Fill( met.begin()->py()    , weight);
+  hists_.find("metPy"   )->second->Fill( met.begin()->py()    , weight );
   // filling for scalar sum of transverse energy over all objects (sum of absolute values)
-  hists_.find("metSumEt")->second->Fill( met.begin()->sumEt() , weight);
+  hists_.find("metSumEt")->second->Fill( met.begin()->sumEt() , weight );
   // filling for significance of missing Et
   // MET Significance = MET / sqrt(SumET)
-  hists_.find("metSig"  )->second->Fill( met.begin()->mEtSig(), weight);
+  hists_.find("metSig"  )->second->Fill( met.begin()->mEtSig(), weight );
   // filling for phi of missing Et
-  hists_.find("metPhi"  )->second->Fill( met.begin()->phi()   , weight);
+  hists_.find("metPhi"  )->second->Fill( met.begin()->phi()   , weight );
+  // filling missing Et vs. sumEt
+  hists2D_.find("metSumEt")->second->Fill( met.begin()->sumEt(), met.begin()->et(), weight );
 }
 
 /// histogram filling with fwlite or full framework
