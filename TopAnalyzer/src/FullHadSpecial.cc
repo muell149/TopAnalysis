@@ -246,6 +246,14 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   hists_["dRMin1"] = fs->make<TH1F>( "dRMin1" , "dRMin1" ,   40 , 0. , 4. );
   /// 2. min. dR of 2 jets in the event
   hists_["dRMin2"] = fs->make<TH1F>( "dRMin2" , "dRMin2" ,   60 , 0. , 6. );
+  /// 3. min. dR of 2 jets in the event
+  hists_["dRMin3"] = fs->make<TH1F>( "dRMin3" , "dRMin3" ,   60 , 0. , 6. );
+  /// 4. min. dR of 2 jets in the event
+  hists_["dRMin4"] = fs->make<TH1F>( "dRMin4" , "dRMin4" ,   60 , 0. , 6. );
+  /// 5. min. dR of 2 jets in the event
+  hists_["dRMin5"] = fs->make<TH1F>( "dRMin5" , "dRMin5" ,   60 , 0. , 6. );
+  /// 6. min. dR of 2 jets in the event
+  hists_["dRMin6"] = fs->make<TH1F>( "dRMin6" , "dRMin6" ,   60 , 0. , 6. );
   /// mass of min. dR of 2 jets in the event
   hists_["dRMin1Mass"] = fs->make<TH1F>( "dRMin1Mass" , "dRMin1Mass" ,   200 , 0. , 800. );
   /// mass of 2. min. dR of 2 jets in the event
@@ -313,6 +321,10 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
 
   double dRMin1_        = -1;	   
   double dRMin2_        = -1;	   
+  double dRMin3_        = -1;	   
+  double dRMin4_        = -1;	   
+  double dRMin5_        = -1;	   
+  double dRMin6_        = -1;	   
   double sumDR3JetMin1_ = -1;	   
   double sumDR3JetMin2_ = -1;	   
 
@@ -532,30 +544,40 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
   dRs.sort();
   dRs3Jets.sort();
   
-    if(jets.size()>5){
-      dRMin1_ = dRs.begin()->first;
-      dRMin1Mass_ = (jets[dRs.begin()->second.first].p4()+jets[dRs.begin()->second.second].p4()).mass();
-      sumDR3JetMin1_ = dRs3Jets.begin()->first;
-      sumDR3JetMin1Mass_ = (jets[dRs3Jets.begin()->second.first.first].p4()+jets[dRs3Jets.begin()->second.first.second].p4()+jets[dRs3Jets.begin()->second.second].p4()).mass();
-      for(std::list< std::pair< double, std::pair< unsigned int, unsigned int > > >::const_iterator dR = ++dRs.begin(); dR != dRs.end(); ++dR){
-	if( (dR->second.first  != dRs.begin()->second.first) && (dR->second.first  != dRs.begin()->second.second) &&
-	    (dR->second.second != dRs.begin()->second.first) && (dR->second.second != dRs.begin()->second.second) ){
-	  dRMin2_ = dR->first;
-	  dRMin2Mass_ = (jets[dR->second.first].p4()+jets[dR->second.second].p4()).mass();
-	  break;
-	}
+  if(jets.size()>5){
+    dRMin1_ = dRs.begin()->first;
+    dRMin1Mass_ = (jets[dRs.begin()->second.first].p4()+jets[dRs.begin()->second.second].p4()).mass();
+    sumDR3JetMin1_ = dRs3Jets.begin()->first;
+    sumDR3JetMin1Mass_ = (jets[dRs3Jets.begin()->second.first.first].p4()+jets[dRs3Jets.begin()->second.first.second].p4()+jets[dRs3Jets.begin()->second.second].p4()).mass();
+
+    int dRCounter = 1;
+    for(std::list< std::pair< double, std::pair< unsigned int, unsigned int > > >::const_iterator dR = ++dRs.begin(); dR != dRs.end(); ++dR, ++dRCounter){
+
+      if( (dR->second.first  != dRs.begin()->second.first) && (dR->second.first  != dRs.begin()->second.second) &&
+	  (dR->second.second != dRs.begin()->second.first) && (dR->second.second != dRs.begin()->second.second) ){
+	//dRMin2_ = dR->first;
+	dRMin2Mass_ = (jets[dR->second.first].p4()+jets[dR->second.second].p4()).mass();
+	//break;
       }
 
-      for(std::list< std::pair< double, std::pair< std::pair< unsigned int, unsigned int >, unsigned int > > >::const_iterator dR = ++dRs3Jets.begin(); dR != dRs3Jets.end(); ++dR){
-	if( (dR->second.first.first  != dRs3Jets.begin()->second.first.first) && (dR->second.first.first  != dRs3Jets.begin()->second.first.second) &&
-	    (dR->second.first.second != dRs3Jets.begin()->second.first.first) && (dR->second.first.second != dRs3Jets.begin()->second.first.second) &&
-	    (dR->second.first.first  != dRs3Jets.begin()->second.second)      && (dR->second.first.second != dRs3Jets.begin()->second.second)       ){
-	  sumDR3JetMin2_ = dR->first;
-	  sumDR3JetMin2Mass_ = (jets[dR->second.first.first].p4()+jets[dR->second.first.second].p4()+jets[dR->second.second].p4()).mass();
-	  break;
-	}
+      if     (dRCounter==2) { dRMin2_ = dR->first; continue; }
+      else if(dRCounter==3) { dRMin3_ = dR->first; continue; }
+      else if(dRCounter==4) { dRMin4_ = dR->first; continue; }
+      else if(dRCounter==5) { dRMin5_ = dR->first; continue; }
+      else if(dRCounter==6) { dRMin6_ = dR->first; continue; }
+    }
+    
+    for(std::list< std::pair< double, std::pair< std::pair< unsigned int, unsigned int >, unsigned int > > >::const_iterator dR = ++dRs3Jets.begin(); dR != dRs3Jets.end(); ++dR){
+      if( (dR->second.first.first  != dRs3Jets.begin()->second.first.first) && (dR->second.first.first  != dRs3Jets.begin()->second.first.second) &&
+	  (dR->second.first.second != dRs3Jets.begin()->second.first.first) && (dR->second.first.second != dRs3Jets.begin()->second.first.second) &&
+	  (dR->second.first.first  != dRs3Jets.begin()->second.second)      && (dR->second.first.second != dRs3Jets.begin()->second.second)       ){
+	sumDR3JetMin2_ = dR->first;
+	sumDR3JetMin2Mass_ = (jets[dR->second.first.first].p4()+jets[dR->second.first.second].p4()+jets[dR->second.second].p4()).mass();
+	break;
       }
     }
+  }
+
   TCHP_Bjet_Discis.sort();
   SSV_Bjet_Discis.sort();
   CSV_Bjet_Discis.sort();
@@ -633,6 +655,10 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
   hists_.find("SM_Bjet6")->second->Fill(SM_Bjet6_);   
   hists_.find("dRMin1")->second->Fill(dRMin1_);       
   hists_.find("dRMin2")->second->Fill(dRMin2_);       
+  hists_.find("dRMin3")->second->Fill(dRMin3_);       
+  hists_.find("dRMin4")->second->Fill(dRMin4_);       
+  hists_.find("dRMin5")->second->Fill(dRMin5_);       
+  hists_.find("dRMin6")->second->Fill(dRMin6_);       
   hists_.find("sumDR3JetMin1")->second->Fill(sumDR3JetMin1_); 
   hists_.find("sumDR3JetMin2")->second->Fill(sumDR3JetMin2_); 
   hists_.find("dRMin1Mass")->second->Fill(dRMin1Mass_);        
