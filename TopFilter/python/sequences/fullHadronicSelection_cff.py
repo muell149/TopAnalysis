@@ -263,6 +263,10 @@ leadingJetSelection = countPatJets.clone( src = 'tightLeadingJets',
 
 ## JET KINEMATICS
 
+monitoredTightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
+                                                  cut = tightJetCut + tightCaloJetID
+                                                  )
+
 ## kinematics analyzers
 tightBottomJetKinematics_1  = analyzeJetKinematics.clone (src = 'tightBottomJets' )
 tightLeadingJetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets')
@@ -276,6 +280,10 @@ tightBJet_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets
 tightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 METKinematics_1 = analyzeMETKinematics.clone()
 
+monitoredTightBottomJetKinematics_1  = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' )
+monitoredTightBJet_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' , analyze = bottom0)
+monitoredTightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' , analyze = bottom1)
+
 ## collect kinematics analyzers
 monitorKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  *
                                    tightBJet_0_JetKinematics_1 *
@@ -287,7 +295,11 @@ monitorKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  *
                                    tightLead_3_JetKinematics_1 *
                                    tightLead_4_JetKinematics_1 *
                                    tightLead_5_JetKinematics_1 *
-                                   METKinematics_1
+                                   METKinematics_1             *
+                                   monitoredTightBottomJets    *
+                                   monitoredTightBottomJetKinematics_1  *
+                                   monitoredTightBJet_0_JetKinematics_1 *
+                                   monitoredTightBJet_1_JetKinematics_1 
                                    )
 
 ## JET QUALITY
@@ -695,10 +707,10 @@ def removeMonitoringOfCutflow(process):
     print 'sequence *analyseFullHadronicSelection* so'
     print 'only a pure selection of events is done '
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_0)
-    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_1)
-    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_2)
-    process.analyseFullHadronicSelection.remove(process.monitorJetsKinematics_3)
+    process.analyseFullHadronicSelection.remove(process.monitorKinematics_0)
+    process.analyseFullHadronicSelection.remove(process.monitorKinematics_1)
+    process.analyseFullHadronicSelection.remove(process.monitorKinematics_2)
+    process.analyseFullHadronicSelection.remove(process.monitorKinematics_3)
     process.analyseFullHadronicSelection.remove(process.monitorJetsQuality_0)
     process.analyseFullHadronicSelection.remove(process.monitorJetsQuality_1)
     process.analyseFullHadronicSelection.remove(process.monitorJetsQuality_2)
@@ -754,6 +766,7 @@ def runOnPF(process):
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
     process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
     process.tightBottomJets.cut  = bottomJetCut + tightPFJetID
+    process.monitoredTightBottomJets.cut = tightJetCut + tightPFJetID
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'abs'
     process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'abs'
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
