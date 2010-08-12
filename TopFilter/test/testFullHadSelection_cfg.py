@@ -57,6 +57,7 @@ process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
 from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 removeMonitoringOfCutflow(process)
 runOnRealData(process)
+hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI")
 
 ## do kinFit of events needed for selection cuts
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
