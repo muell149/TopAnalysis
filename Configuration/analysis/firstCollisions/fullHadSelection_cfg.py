@@ -1,4 +1,13 @@
 import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.VarParsing as VarParsing
+
+# setup 'standard' options
+options = VarParsing.VarParsing ('standard')
+## decide whether to run on:  * ReRecoA *, * ReRecoB *, * Prompt *
+options.register('globalTag', 'Prompt', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
+
+# get and parse the command line arguments
+options.parseArguments()
 
 #-------------------------------------------------
 # test cfg file for the selection of
@@ -35,9 +44,18 @@ process.options = cms.untracked.PSet(
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.GlobalTag.globaltag = cms.string('GR_R_36X_V12A::All')
-process.GlobalTag.globaltag = cms.string('GR_R_36X_V12B::All')
-#process.GlobalTag.globaltag = cms.string('GR10_P_V7::All')
+
+print "Set to run with GlobalTag:",
+if(options.globalTag=='Prompt'):
+    process.GlobalTag.globaltag = cms.string('GR10_P_V7::All')
+elif(options.globalTag=='ReRecoA'):
+    process.GlobalTag.globaltag = cms.string('GR_R_36X_V12A::All')
+elif(options.globalTag=='ReRecoB'):
+    process.GlobalTag.globaltag = cms.string('GR_R_36X_V12B::All')
+else:
+    print "Error occured, GlobalTag not definded properly, stopping program execution"
+    sys.exit(0)
+print process.GlobalTag.globaltag
 
 #-------------------------------------------------
 # vertex filter
@@ -46,7 +64,7 @@ process.GlobalTag.globaltag = cms.string('GR_R_36X_V12B::All')
 # vertex filter
 process.vertex = cms.EDFilter("VertexSelector",
                               src = cms.InputTag("offlinePrimaryVertices"),
-                              cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2"),
+                              cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2"),
                               filter = cms.bool(True),
                               )
 
