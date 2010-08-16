@@ -46,10 +46,11 @@ TrigReport     1    0        123        123          0          0 centralJets
 TrigReport     1    0        123        123          0          0 reliableJets
 TrigReport     1    0        123        123          0          0 goodJets
 TrigReport     1    0        123        123          0          0 trackCountingHighPurBJets
+TrigReport     1    0        123        123          0          0 trackCountingHighEffBJets
 TrigReport     1    0        123        123          0          0 tightLeadingJets
 TrigReport     1    0        123        123          0          0 tightBottomJets
 TrigReport     1    0        123         85         38          0 muonSelection
 TrigReport     1    0         85         84          1          0 secondMuonVeto
 TrigReport     1    0         84         82          2          0 electronVeto
 TrigReport     1    0         82         20         62          0 leadingJetSelection
-TrigReport     1    0         20         14          6          0 bottomJetSelection
+TrigReport     1    0         20         19          1          0 bottomJetSelection
