@@ -62,6 +62,7 @@ semiLeptonicSelection = cms.Sequence(looseElectrons   *
                                      reliableJets     *
                                      goodJets         *
                                      trackCountingHighPurBJets *
+                                     trackCountingHighEffBJets *
                                      tightLeadingJets *
                                      tightBottomJets
                                      )
