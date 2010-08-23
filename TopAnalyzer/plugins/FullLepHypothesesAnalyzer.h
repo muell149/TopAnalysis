@@ -1,8 +1,8 @@
 #ifndef FullLepHypothesesAnalyzer_h
 #define FullLepHypothesesAnalyzer_h
 
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -68,25 +68,25 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   void bookQualityHistos  (edm::Service<TFileService>&);
 
   /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
-  void fillKinHistos           (std::vector<TH1F*>&, 
+  void fillKinHistos           (std::vector<TH1D*>&, 
                                 const reco::Candidate&, 
 				const double&);
   /// fill histograms for reconstructed particles properties in events with equally charged leptons: Pt, E, Eta, Phi, m				
-  void fillWrongChargeKinHistos(std::vector<TH1F*>&, 
+  void fillWrongChargeKinHistos(std::vector<TH1D*>&, 
                                 const reco::Candidate&, 
                                 const double&);
   /// fill histograms for generated particles properties: Pt, E, Eta, Phi, m				
-  void fillKinGenHistos        (std::vector<TH1F*>&,  
+  void fillKinGenHistos        (std::vector<TH1D*>&,  
 				const reco::Candidate&, 
 				const double&);
   /// fill histograms for particle resolutions for right charge combinations								  
-  void fillKinResHistos        (std::vector<TH1F*>&, 
+  void fillKinResHistos        (std::vector<TH1D*>&, 
                                 const reco::Candidate&, 
 				const reco::Candidate&, 
 				const double&);
   /// fill histograms for particle resolutions for wrong charge combinations
   /// should be empty since the only entries are from right charge events that are reconstructed as wrong charge					
-  void fillWrongChargeKinResHistos(std::vector<TH1F*>&, 
+  void fillWrongChargeKinResHistos(std::vector<TH1D*>&, 
                                    const reco::Candidate&, 
 				   const reco::Candidate&, 
 				   const double&);	
@@ -96,113 +96,113 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
                                 const double&);
 
   /// histograms for top quark kinematics
-  std::vector<TH1F*> TopKin_;
+  std::vector<TH1D*> TopKin_;
   /// histograms for W^+ kinematics
-  std::vector<TH1F*> WplusKin_;
+  std::vector<TH1D*> WplusKin_;
   /// histograms for B kinematics
-  std::vector<TH1F*> BKin_;
+  std::vector<TH1D*> BKin_;
   /// histograms for l^+ kinematics
-  std::vector<TH1F*> LepBarKin_;
+  std::vector<TH1D*> LepBarKin_;
   /// histograms for neutrino kinematics
-  std::vector<TH1F*> NuKin_; 
+  std::vector<TH1D*> NuKin_; 
   /// histograms for anti-top quark kinematics 
-  std::vector<TH1F*> TopBarKin_;
+  std::vector<TH1D*> TopBarKin_;
   /// histograms for W^- quark kinematics
-  std::vector<TH1F*> WminusKin_;
+  std::vector<TH1D*> WminusKin_;
   /// histograms for anti-b kinematics
-  std::vector<TH1F*> BBarKin_;
+  std::vector<TH1D*> BBarKin_;
   /// histograms for l^- kinematics
-  std::vector<TH1F*> LepKin_;
+  std::vector<TH1D*> LepKin_;
   /// histograms for anti-neutrino kinematics
-  std::vector<TH1F*> NuBarKin_;
+  std::vector<TH1D*> NuBarKin_;
   
   /// histograms for generated top quark kinematics
-  std::vector<TH1F*> TopKinGen_;
+  std::vector<TH1D*> TopKinGen_;
   /// histograms for generated W^+ kinematics
-  std::vector<TH1F*> WplusKinGen_;
+  std::vector<TH1D*> WplusKinGen_;
   /// histograms for generated B kinematics
-  std::vector<TH1F*> BKinGen_;
+  std::vector<TH1D*> BKinGen_;
   /// histograms for generated l^+ kinematics
-  std::vector<TH1F*> LepBarKinGen_;
+  std::vector<TH1D*> LepBarKinGen_;
   /// histograms for generated neutrino kinematics
-  std::vector<TH1F*> NuKinGen_;  
+  std::vector<TH1D*> NuKinGen_;  
   /// histograms for generated anti-top quark kinematics 
-  std::vector<TH1F*> TopBarKinGen_;
+  std::vector<TH1D*> TopBarKinGen_;
   /// histograms for generated W^- quark kinematics
-  std::vector<TH1F*> WminusKinGen_;
+  std::vector<TH1D*> WminusKinGen_;
   /// histograms for generated anti-b kinematics
-  std::vector<TH1F*> BBarKinGen_;
+  std::vector<TH1D*> BBarKinGen_;
   /// histograms for generated l^- kinematics
-  std::vector<TH1F*> LepKinGen_;
+  std::vector<TH1D*> LepKinGen_;
   /// histograms for generated anti-neutrino kinematics
-  std::vector<TH1F*> NuBarKinGen_;  
+  std::vector<TH1D*> NuBarKinGen_;  
   
   /// histograms for top quark resolutions
-  std::vector<TH1F*> TopKinRes_;
+  std::vector<TH1D*> TopKinRes_;
   /// histograms for W^+ resolutions
-  std::vector<TH1F*> WplusKinRes_;
+  std::vector<TH1D*> WplusKinRes_;
   /// histograms for B resolutions
-  std::vector<TH1F*> BKinRes_;
+  std::vector<TH1D*> BKinRes_;
   /// histograms for l^+ resolutions
-  std::vector<TH1F*> LepBarKinRes_;
+  std::vector<TH1D*> LepBarKinRes_;
   /// histograms for neutrino resolutions
-  std::vector<TH1F*> NuKinRes_; 
+  std::vector<TH1D*> NuKinRes_; 
   /// histograms for anti-top quark resolutions 
-  std::vector<TH1F*> TopBarKinRes_;
+  std::vector<TH1D*> TopBarKinRes_;
   /// histograms for W^- quark resolutions
-  std::vector<TH1F*> WminusKinRes_;
+  std::vector<TH1D*> WminusKinRes_;
   /// histograms for anti-b resolutions
-  std::vector<TH1F*> BBarKinRes_;
+  std::vector<TH1D*> BBarKinRes_;
   /// histograms for l^- resolutions
-  std::vector<TH1F*> LepKinRes_;
+  std::vector<TH1D*> LepKinRes_;
   /// histograms for anti-neutrino resolutions
-  std::vector<TH1F*> NuBarKinRes_;
+  std::vector<TH1D*> NuBarKinRes_;
     
   /// histogram with two bins: 0 for invalid and 1 for valid (i.e. succesfully reconstructed) events 
-  TH1F* goodHypo_;
+  TH1D* goodHypo_;
   
   /// histogram only for genMatch hypothesis: sum of deltaR between reconstructed leptons and jets and
   /// corresponding generated objects
-  TH1F* genMatchSumDR_;
+  TH1D* genMatchSumDR_;
   /// histogram only for genMatch hypothesis: sum of delta pt between reconstructed leptons and jets and
   /// corresponding generated objects  
-  TH1F* genMatchSumPt_;
+  TH1D* genMatchSumPt_;
   
   /// histogram only for kinSolution hypothesis: weight from neutrino spectrum of best kinematic solution
-  TH1F* kinSolWeight_;
+  TH1D* kinSolWeight_;
   /// histogram only for kinSolution hypothesis: weight from neutrino spectrum of best kinematic solution
   /// for solutions with equally charged leptons
-  TH1F* kinSolWeightWrong_;  
+  TH1D* kinSolWeightWrong_;  
   /// histogram with two bins: 0 for right charge, 1 for wrong charge 
-  TH1F* wrongCharge_; 
+  TH1D* wrongCharge_; 
   
   /// histogram for index of bJet in jet collection used for the event reconstruction
-  TH1F* bJetIdcs_;
+  TH1D* bJetIdcs_;
   /// histogram for index of bBarJet in jet collection used for the event reconstruction
-  TH1F* bBarJetIdcs_; 
+  TH1D* bBarJetIdcs_; 
   /// histogram for index of the first electron in electron collection used for the event reconstruction 
-  TH1F* elec1Idcs_;
+  TH1D* elec1Idcs_;
   /// histogram for index of the second electron in electron collection used for the event reconstruction
-  TH1F* elec2Idcs_; 
+  TH1D* elec2Idcs_; 
   /// histogram for index of the first muon in muon collection used for the event reconstruction
-  TH1F* muon1Idcs_; 
+  TH1D* muon1Idcs_; 
   /// histogram for index of the first muon in muon collection used for the event reconstruction
-  TH1F* muon2Idcs_; 
+  TH1D* muon2Idcs_; 
   
   /// historgram for the mass difference between reconstructed top and anti-top.
   /// For kinSolution hypothesis it should give a sharp peak around zero since the assumption that both masses
   /// are equal is used as a boundary condition. Differences appear only from rounding errors
-  TH1F* deltaM_;
+  TH1D* deltaM_;
   
   /// histogram that shows the number of correctly identified jets in hypothesis: 0, 1 or 2
-  TH1F* jetIdCorrectnes_;
+  TH1D* jetIdCorrectnes_;
   /// histogram that shows how many of jets in reconstructed hypothesis are in deed b-Jets: 0, 1 or 2
-  TH1F* jetFlCorrectnes_;  
+  TH1D* jetFlCorrectnes_;  
   /// histogram that compares the indices of the muons and jets in both hypotheses.
   /// Does not include electrons yet but can be extended easily
-  TH2F* compare_;
+  TH2D* compare_;
   /// histogram that shows the two dimensional neutrino spectrum
-  TH2F* spectrum_;    
+  TH2D* spectrum_;    
 };
 
 #endif
