@@ -77,12 +77,7 @@ isolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber 
 
 
 ## hard jet selection
-goodJets = selectedPatJets.clone(src = 'selectedPatJets', 
-                                 cut = '0.05 < emEnergyFraction' 
-				       '& emEnergyFraction < 0.95' 
-			        )
-## hard jet selection
-hardJets = selectedPatJets.clone(src = 'goodJets', 
+hardJets = selectedPatJets.clone(src = 'selectedPatJetsAK5PF', 
                                  cut = 'pt > 40.' 
 			        )
 ## thight jet selection				   
@@ -91,7 +86,6 @@ tightJets = selectedPatJets.clone(src = 'hardJets',
 			         )
 				    				        
 ## Count Filters
-goodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 2)
 hardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
 tightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
 
@@ -104,7 +98,7 @@ tightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
 
 ## met selector
 highMETs = cms.EDFilter("PATMETSelector",
-    src = cms.InputTag("patMETs"),
+    src = cms.InputTag("patMETsPF"),
     cut = cms.string("et>30.")
 )
 
@@ -130,7 +124,6 @@ buildCollections = cms.Sequence(tightMuons *
 				ecalMipMuons *
 				hcalMipMuons *
 				isolatedMuons *
-				goodJets *
 				hardJets *
 				tightJets *
 				highMETs				
@@ -145,7 +138,6 @@ fullLeptonicMuonMuonSelection = cms.Sequence(tightMuonSelection *
 				             ecalMipMuonSelection *
 				             hcalMipMuonSelection *
 				             isolatedMuonSelection *
-					     goodJetSelection *
 				             hardJetSelection *
 				             tightJetSelection *
 					     metSelection	
