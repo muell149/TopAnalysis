@@ -513,7 +513,7 @@ source['sTop10_tWChannel_madPAT'] = 'sTop10_tWChannel_madPAT_0'
 ## /mc/Spring10/QCD_Pt15/GEN-SIM-RECO/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt15_pat import *
 evts  ['qcd10_pt15_pat'] = 1086      ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 6190500)
-xsec  ['qcd10_pt15_pat'] = 876200000 ## NLO in pb from configfile
+xsec  ['qcd10_pt15_pat'] = 876200000 ## LO in pb from configfile
 eff   ['qcd10_pt15_pat'] = 1.0       ## generator efficiency on gen level
 sizes ['qcd10_pt15_pat'] = 'blocks'
 source['qcd10_pt15_pat'] = 'qcd10_pt15_pat_0,' + 'qcd10_pt15_pat_1,' + 'qcd10_pt15_pat_2,' + 'qcd10_pt15_pat_3,' + 'qcd10_pt15_pat_4,'
@@ -522,7 +522,7 @@ source['qcd10_pt15_pat']+= 'qcd10_pt15_pat_5,' + 'qcd10_pt15_pat_6,' + 'qcd10_pt
 ## /mc/Spring10/QCD_Pt30/AODSIM/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt30_pat import *
 evts  ['qcd10_pt30_pat'] = 10481    ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 5269664)
-xsec  ['qcd10_pt30_pat'] = 60410000 ## NLO in pb from configfile
+xsec  ['qcd10_pt30_pat'] = 60410000 ## LO in pb from configfile
 eff   ['qcd10_pt30_pat'] = 1.0      ## generator efficiency on gen level
 sizes ['qcd10_pt30_pat'] = 'blocks'
 source['qcd10_pt30_pat'] = 'qcd10_pt30_pat_0,' + 'qcd10_pt30_pat_1,' + 'qcd10_pt30_pat_2,' + 'qcd10_pt30_pat_3,'
@@ -531,7 +531,7 @@ source['qcd10_pt30_pat']+= 'qcd10_pt30_pat_4,' + 'qcd10_pt30_pat_5,' + 'qcd10_pt
 ## /mc/Spring10/QCD_Pt80/AODSIM/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt80_pat import *
 evts  ['qcd10_pt80_pat'] = 100318  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 3221800)
-xsec  ['qcd10_pt80_pat'] = 923800  ## NLO in pb from configfile
+xsec  ['qcd10_pt80_pat'] = 923800  ## LO in pb from configfile
 eff   ['qcd10_pt80_pat'] = 1.0     ## generator efficiency on gen level
 sizes ['qcd10_pt80_pat'] = 'blocks'
 source['qcd10_pt80_pat'] = 'qcd10_pt80_pat_0,' + 'qcd10_pt80_pat_1,' + 'qcd10_pt80_pat_2,' + 'qcd10_pt80_pat_3'
@@ -539,7 +539,7 @@ source['qcd10_pt80_pat'] = 'qcd10_pt80_pat_0,' + 'qcd10_pt80_pat_1,' + 'qcd10_pt
 ## /mc/Spring10/QCD_Pt170/AODSIM/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt170_pat import *
 evts  ['qcd10_pt170_pat'] = 329132  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 3171950)
-xsec  ['qcd10_pt170_pat'] = 25470   ## NLO in pb from configfile
+xsec  ['qcd10_pt170_pat'] = 25470   ## LO in pb from configfile
 eff   ['qcd10_pt170_pat'] = 1.0     ## generator efficiency on gen level
 sizes ['qcd10_pt170_pat'] = 'blocks'
 source['qcd10_pt170_pat'] = 'qcd10_pt170_pat_0,' + 'qcd10_pt170_pat_1,' + 'qcd10_pt170_pat_2,' + 'qcd10_pt170_pat_3,' + 'qcd10_pt170_pat_4,'
@@ -548,7 +548,7 @@ source['qcd10_pt170_pat']+= 'qcd10_pt170_pat_5,' + 'qcd10_pt170_pat_6,' + 'qcd10
 ## /mc/Spring10/QCD_Pt300/AODSIM/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt300_pat import *
 evts  ['qcd10_pt300_pat'] = 541193 ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 3282665)
-xsec  ['qcd10_pt300_pat'] = 1256   ## NLO in pb from configfile
+xsec  ['qcd10_pt300_pat'] = 1256   ## LO in pb from configfile
 eff   ['qcd10_pt300_pat'] = 1.0    ## generator efficiency on gen level
 sizes ['qcd10_pt300_pat'] = 'blocks'
 source['qcd10_pt300_pat'] = 'qcd10_pt300_pat_0,' + 'qcd10_pt300_pat_1,' + 'qcd10_pt300_pat_2,' + 'qcd10_pt300_pat_3,' + 'qcd10_pt300_pat_4,'
@@ -557,7 +557,7 @@ source['qcd10_pt300_pat']+= 'qcd10_pt300_pat_5,' + 'qcd10_pt300_pat_6'
 ## /mc/Spring10/QCD_Pt470/AODSIM/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt470_pat import *
 evts  ['qcd10_pt470_pat'] = 430842  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 2159497)
-xsec  ['qcd10_pt470_pat'] = 87.98   ## NLO in pb from configfile
+xsec  ['qcd10_pt470_pat'] = 87.98   ## LO in pb from configfile
 eff   ['qcd10_pt470_pat'] = 1.0     ## generator efficiency on gen level
 sizes ['qcd10_pt470_pat'] = 'blocks'
 source['qcd10_pt470_pat'] = 'qcd10_pt470_pat_0,' + 'qcd10_pt470_pat_1,' + 'qcd10_pt470_pat_2,' + 'qcd10_pt470_pat_3,' + 'qcd10_pt470_pat_4'
@@ -565,7 +565,7 @@ source['qcd10_pt470_pat'] = 'qcd10_pt470_pat_0,' + 'qcd10_pt470_pat_1,' + 'qcd10
 ## /mc/Spring10/QCD_Pt800/AODSIM/START3X_V26_S09-v1
 from TopAnalysis.Configuration.qcd10_pt800_pat import *
 evts  ['qcd10_pt800_pat'] = 462765  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 2181700)
-xsec  ['qcd10_pt800_pat'] = 2.186   ## NLO in pb from configfile
+xsec  ['qcd10_pt800_pat'] = 2.186   ## LO in pb from configfile
 eff   ['qcd10_pt800_pat'] = 1.0     ## generator efficiency on gen level
 sizes ['qcd10_pt800_pat'] = 'blocks'
 source['qcd10_pt800_pat'] = 'qcd10_pt800_pat_0,' + 'qcd10_pt800_pat_1,' + 'qcd10_pt800_pat_2,' + 'qcd10_pt800_pat_3,'
@@ -618,3 +618,69 @@ eff   ['qcd10_pt1000_mad_pat'] = 1.0     ## generator efficiency on gen level
 sizes ['qcd10_pt1000_mad_pat'] = 'blocks'
 source['qcd10_pt1000_mad_pat'] = 'qcd10_pt1000_mad_pat_0,' + 'qcd10_pt1000_mad_pat_1,' + 'qcd10_pt1000_mad_pat_2,' + 'qcd10_pt1000_mad_pat_3,'
 source['qcd10_pt1000_mad_pat']+= 'qcd10_pt1000_mad_pat_4,' + 'qcd10_pt1000_mad_pat_5'
+
+## /mc/Spring10/QCD_Pt15-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt15_her_pat import *
+evts  ['qcd10_pt15_her_pat'] = 120       ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 1510649)
+xsec  ['qcd10_pt15_her_pat'] = 893300000 ## LO in pb from configfile
+eff   ['qcd10_pt15_her_pat'] = 1.0       ## generator efficiency on gen level
+sizes ['qcd10_pt15_her_pat'] = 'blocks'
+source['qcd10_pt15_her_pat'] = 'qcd10_pt15_her_pat_0,' + 'qcd10_pt15_her_pat_1,' + 'qcd10_pt15_her_pat_2'
+
+## /mc/Spring10/QCD_Pt30-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt30_her_pat import *
+evts  ['qcd10_pt30_her_pat'] = 1292     ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 1037467)
+xsec  ['qcd10_pt30_her_pat'] = 62290000 ## LO in pb from configfile
+eff   ['qcd10_pt30_her_pat'] = 1.0      ## generator efficiency on gen level
+sizes ['qcd10_pt30_her_pat'] = 'blocks'
+source['qcd10_pt30_her_pat'] = 'qcd10_pt30_her_pat_0,' + 'qcd10_pt30_her_pat_1'
+
+## /mc/Spring10/QCD_Pt80-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt80_her_pat import *
+evts  ['qcd10_pt80_her_pat'] = 25301  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 797413)
+xsec  ['qcd10_pt80_her_pat'] = 988700 ## LO in pb from configfile
+eff   ['qcd10_pt80_her_pat'] = 1.0    ## generator efficiency on gen level
+sizes ['qcd10_pt80_her_pat'] = 'blocks'
+source['qcd10_pt80_her_pat'] = 'qcd10_pt80_her_pat_0'
+
+## /mc/Spring10/QCD_Pt170-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt170_her_pat import *
+evts  ['qcd10_pt170_her_pat'] = 110065  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 895212)
+xsec  ['qcd10_pt170_her_pat'] = 28030   ## LO in pb from configfile
+eff   ['qcd10_pt170_her_pat'] = 1.0     ## generator efficiency on gen level
+sizes ['qcd10_pt170_her_pat'] = 'blocks'
+source['qcd10_pt170_her_pat'] = 'qcd10_pt170_her_pat_0,' + 'qcd10_pt170_her_pat_1,' + 'qcd10_pt170_her_pat_2'
+
+## /mc/Spring10/QCD_Pt300-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt300_her_pat import *
+evts  ['qcd10_pt300_her_pat'] = 151068 ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 730340)
+xsec  ['qcd10_pt300_her_pat'] = 1401   ## LO in pb from configfile
+eff   ['qcd10_pt300_her_pat'] = 1.0    ## generator efficiency on gen level
+sizes ['qcd10_pt300_her_pat'] = 'blocks'
+source['qcd10_pt300_her_pat'] = 'qcd10_pt300_her_pat_0,' + 'qcd10_pt300_her_pat_1,' + 'qcd10_pt300_her_pat_2,' + 'qcd10_pt300_her_pat_3,' + 'qcd10_pt300_her_pat_4,'
+source['qcd10_pt300_her_pat']+= 'qcd10_pt300_her_pat_5,' + 'qcd10_pt300_her_pat_6'
+
+## /mc/Spring10/QCD_Pt470-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt470_her_pat import *
+evts  ['qcd10_pt470_her_pat'] = 90612  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 360421)
+xsec  ['qcd10_pt470_her_pat'] = 98.10  ## LO in pb from configfile
+eff   ['qcd10_pt470_her_pat'] = 1.0    ## generator efficiency on gen level
+sizes ['qcd10_pt470_her_pat'] = 'blocks'
+source['qcd10_pt470_her_pat'] = 'qcd10_pt470_her_pat_0,' + 'qcd10_pt470_her_pat_1,' + 'qcd10_pt470_her_pat_2,' + 'qcd10_pt470_her_pat_3'
+
+## /mc/Spring10/QCD_Pt800-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt800_her_pat import *
+evts  ['qcd10_pt800_her_pat'] = 58869  ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 214651)
+xsec  ['qcd10_pt800_her_pat'] = 2.374  ## LO in pb from configfile
+eff   ['qcd10_pt800_her_pat'] = 1.0    ## generator efficiency on gen level
+sizes ['qcd10_pt800_her_pat'] = 'blocks'
+source['qcd10_pt800_her_pat'] = 'qcd10_pt800_her_pat_0,' + 'qcd10_pt800_her_pat_1,' + 'qcd10_pt800_her_pat_2,' + 'qcd10_pt800_her_pat_3'
+
+## /mc/Spring10/QCD_Pt1400-herwig/GEN-SIM-RECO/START3X_V26_S09-v1
+from TopAnalysis.Configuration.qcd10_pt1400_her_pat import *
+evts  ['qcd10_pt1400_her_pat'] = 27288    ## number of produced events (preselected min. 6 jets pt > 20 GeV, before 114280)
+xsec  ['qcd10_pt1400_her_pat'] = 0.01176  ## LO in pb from configfile
+eff   ['qcd10_pt1400_her_pat'] = 1.0      ## generator efficiency on gen level
+sizes ['qcd10_pt1400_her_pat'] = 'blocks'
+source['qcd10_pt1400_her_pat'] = 'qcd10_pt1400_her_pat_0'
+
