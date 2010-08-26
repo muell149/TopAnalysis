@@ -54,14 +54,14 @@ class QCDBgEstimator : public edm::EDAnalyzer {
     bool isWrongCharge; 
     
     /// histograms for the right charge dimuon mass in bins of di-combined isolation
-    std::vector<TH1F*> dimassRCIsoBinsLowMass_;
-    std::vector<TH1F*> dimassRCIsoBinsPeakMass_;    
-    std::vector<TH1F*> dimassRCIsoBinsHighMass_;    
+    std::vector<TH1D*> dimassRCIsoBinsLowMass_;
+    std::vector<TH1D*> dimassRCIsoBinsPeakMass_;    
+    std::vector<TH1D*> dimassRCIsoBinsHighMass_;    
     
     /// histograms for the wrong charge dimuon mass in bins of di-combined isolation
-    std::vector<TH1F*> dimassWCIsoBinsLowMass_;  
-    std::vector<TH1F*> dimassWCIsoBinsPeakMass_;    
-    std::vector<TH1F*> dimassWCIsoBinsHighMass_;     
+    std::vector<TH1D*> dimassWCIsoBinsLowMass_;  
+    std::vector<TH1D*> dimassWCIsoBinsPeakMass_;    
+    std::vector<TH1D*> dimassWCIsoBinsHighMass_;     
 };
 
 #endif
