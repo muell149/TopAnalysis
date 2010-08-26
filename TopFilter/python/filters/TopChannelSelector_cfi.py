@@ -30,9 +30,9 @@ selectChannel = cms.EDFilter("TopChannelSelector",
     # if a channel is selected which contains
     # a tau you can choose a specific further
     # tau decay
-    Tau_To_Hadron   = cms.bool(True), 
-    Tau_To_Electron = cms.bool(True),       
-    Tau_To_Muon     = cms.bool(True),
+    Tau_To_Hadron   = cms.bool(False), 
+    Tau_To_Electron = cms.bool(False),       
+    Tau_To_Muon     = cms.bool(False),
     
     # selection can be inverted
     invert_selection = cms.bool(False)   
