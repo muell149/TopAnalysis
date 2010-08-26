@@ -8,7 +8,7 @@ analyzeMuonPair = cms.EDAnalyzer("DimuonAnalyzer",
     # option to weight events
     useEventWeight = cms.bool(True),    
     # option to correct hist entries to log bin width
-    correctToWidth = cms.bool(True)     
+    correctToWidth = cms.bool(False)     
 )
 
 
