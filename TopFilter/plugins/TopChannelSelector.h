@@ -167,14 +167,10 @@ bool TopChannelSelector::analyze(edm::Event& evt, const edm::EventSetup& es) {
     }
   }
   
-  bool passed;
-  bool blocked;
+  bool passed = true;
+  bool blocked = false;
   
-  if (invert_==false){
-    blocked = false;
-    passed  = true;
-  }
-  else{
+  if(invert_){
     blocked = true;
     passed  = false;    
   }
