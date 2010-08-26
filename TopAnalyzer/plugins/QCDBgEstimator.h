@@ -44,23 +44,24 @@ class QCDBgEstimator : public edm::EDAnalyzer {
 
     /// input muon collection
     edm::InputTag muons_;
-    /// input bool: use a event weight?     
-    bool useEvtWgt_;
     /// combined isolation bins of both muons from config
     std::vector<double> isoBins_;
+    /// bins of the invariant dimuon mass
+    std::vector<double> massBins_;
     /// define a PatMuonCollection as a vector of PatMuons      
     typedef std::vector<pat::Muon> PatMuonCollection;
     /// true if leading muons have same charge
     bool isWrongCharge; 
     
     /// histograms for the right charge dimuon mass in bins of di-combined isolation
-    std::vector<TH1F*> dimassRCIsoBins_;
+    std::vector<TH1F*> dimassRCIsoBinsLowMass_;
+    std::vector<TH1F*> dimassRCIsoBinsPeakMass_;    
+    std::vector<TH1F*> dimassRCIsoBinsHighMass_;    
     
     /// histograms for the wrong charge dimuon mass in bins of di-combined isolation
-    std::vector<TH1F*> dimassWCIsoBins_;  
-    
-    /// histogram for the wrong charge normalization factor
-    TH1F* norm_;  
+    std::vector<TH1F*> dimassWCIsoBinsLowMass_;  
+    std::vector<TH1F*> dimassWCIsoBinsPeakMass_;    
+    std::vector<TH1F*> dimassWCIsoBinsHighMass_;     
 };
 
 #endif
