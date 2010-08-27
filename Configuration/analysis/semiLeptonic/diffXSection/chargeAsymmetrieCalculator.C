@@ -129,7 +129,7 @@ void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false)
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("inclusive R for p_{t} (#mu) > 20 GeV, |#eta| < 2.1" );
-  leg0->AddEntry(RNjetsMu ,"W->#mu#nu & W->#tau#nu->#mu#nu#nu)+jets", "PL");
+  leg0->AddEntry(RNjetsMu ,"W->#mu#nu & W->#tau#nu->#mu#nu#nu)", "PL");
   leg0->AddEntry(RNjetsWMu,"W->#mu#nu", "PL");
 
   // create a legend for asymmetry parameter from different leptons without jet selection
