@@ -38,8 +38,11 @@ void fitParabolaExtrapolate(TH1& hist, const double xmin=0., const double xmax=1
 void fitLinearExtrapolate(TH1& hist, const double xmin=0., const double xmax=1., const int color=kBlack, const TString info="");
 std::vector<double> fitExponentialExtrapolate(TH1& hist, const double xmin=0., const double xmax=1., const int color=kBlack, const TString info="");
 std::pair<double,double> exponentialFit(double x, const double a, const double sa, const double b, const double sb);
+std::vector<double> fitExponentialExtrapolate2(TH1& hist, const double xmin=0., const double xmax=1., const int color=kBlack, const TString info="");
+//std::pair<double,double> exponentialFit2(double x, const double a, const double sa, const double b, const double sb);
 
-void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/diffXSecQCDPythiaSpring10.root")
+
+void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/data/data1808json/analyzeDiffXData_840nb.root")
 {
   // ---
   //    main function parameters
@@ -98,13 +101,13 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   // ---
   std::vector<double> lumiweight_;
   // a) for current QCD 7TeV PYTHIA sample 
-  lumiweight_.push_back(0.98351978/50.0*luminosity);
+  lumiweight_.push_back(0.910264515/50.0*luminosity);
   // b) for current wjets 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.13904207/50.0*luminosity);  
+  lumiweight_.push_back(0.155498692/50.0*luminosity);  
   // c) for current ttbar 7TeV MC@NLO sample 
-  lumiweight_.push_back(0.00831910/50.0*luminosity);
+  lumiweight_.push_back(0.007940958/50.0*luminosity);
   // d) for current zjets 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.14332841/50.0*luminosity);
+  lumiweight_.push_back(0.140471057/50.0*luminosity);
 
   // ---
   //    lumiweight and combine all MC samples
@@ -127,7 +130,7 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   // ---
   std::vector<TCanvas*> MyCanvas;
 
-  for(int idx=0; idx<=21; idx++){ 
+  for(int idx=0; idx<=25; idx++){ 
     char canvname[10];
     sprintf(canvname,"canv%i",idx);    
     MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
@@ -243,7 +246,7 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
       regionD=Entries(*relIsoVsDb_[Njets_[mult]][forWhich], relIsoBinBDLow, relIsoBinBDUp, dBBinCDLow, dBBinCDUp, "Region D");
       // do the estimate for region A from region B, C and D
       estimation = regionB*regionC/regionD;
-      estimationError = estimation*sqrt( 1/regionB + 1/regionC + 1/regionD );
+      estimationError = estimation*sqrt( 1/sqrt(regionB) + 1/sqrt(regionC) + 1/sqrt(regionD) );
       std::cout << "ABCD estimation for signal region A:" << estimation << "+/-" << estimationError << std::endl;
       std::cout << "N(QCD) after default selection: " << recoSelectionPt_[Njets_[mult]][kQCD]->GetEntries()*lumiweight_[kQCD] << std::endl;
       // use fitted correction parameter from above to scale estimation
@@ -305,18 +308,18 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   }
   // create MC sample label
   std::vector<TString> sample_;
-  TString samples[ 5 ] = { "QCD", "Wjets", "Ttbar", "Zjets", "Data" };
-  sample_.insert( sample_.begin(), samples, samples + 5 );
+  TString samples[ 6 ] = { "QCD", "Wjets", "Ttbar", "Zjets", "Data", "allMC" };
+  sample_.insert( sample_.begin(), samples, samples + 6 );
   std::vector<TPaveLabel*> sampleLabel_;
-  for(unsigned int idx=kQCD; idx<=kData; ++idx) {
+  for(unsigned int idx=kQCD; idx<=kAll; ++idx){
     TString header = "";
     if(idx==kData) header = ""+sample_[idx];
     if(idx!=kData) header = ""+sample_[idx]+", ("+lum+" / pb)";
-    TPaveLabel *slabel = new TPaveLabel(0.52, 0.83, 0.97, 1.05, header);
+    TPaveLabel *slabel = new TPaveLabel(0.51, 0.83, 0.95, 1.0, header, "br NDC");
     slabel->SetFillStyle(0);
     slabel->SetBorderSize(0);
     slabel->SetTextSize(0.26);
-    sampleLabel_.push_back((TPaveLabel*)slabel->Clone());
+    sampleLabel_.push_back( (TPaveLabel*)(slabel->Clone()) );
   }
 
   // ---
@@ -326,7 +329,7 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     // loop samples 
-    for(unsigned int idx=kQCD; idx<=kData; ++idx) {
+    for(unsigned int idx=kQCD; idx<=kAll; ++idx) {
       // set styling
       histStyle2D(*relIsoVsDb_[Njets_[mult]][idx], kBlack, 0.0, 1.0, 0.0, 0.1, "", "relIso (lead #mu)", "d_{B} [cm] (lead #mu)");
       // open canvas
@@ -612,3 +615,37 @@ std::pair<double,double> exponentialFit(double x, const double a, const double s
   weightError=sqrt( (sa*x)*(sa*x)*exp(2*a*x) + sb*sb );
   return make_pair(weight, weightError);
 }
+
+
+std::vector<double> fitExponentialExtrapolate2(TH1& hist, const double xmin, const double xmax, const int color, const TString info){
+  // print out info
+  std::cout << "" << std::endl;
+  std::cout << "fit: p(1-p)^(n-1) for " << info << std::endl;
+  std::cout << "-----------------------=----------------------------" << std::endl;
+  TF1* myPol = new TF1("myPol","[0]*(1-[0])^(x-1)");
+  // do a*x^2+b fit for hist in range [xmin,xmax]
+  hist.Fit(myPol,"Q","same",xmin, xmax);
+  myPol->SetRange(hist.GetBinLowEdge(1),hist.GetBinLowEdge(hist.GetNbinsX()+1));
+  // edit color of fit and extrapolate to whole region of x
+  myPol->SetLineColor(color);
+  myPol->DrawClone("same");
+  std::cout << "p = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
+  std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
+  std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+  std::vector<double> result_;
+  result_ .push_back(myPol->GetParameter(0));
+  result_ .push_back(myPol->GetParError(0));
+  result_ .push_back(1);
+  result_ .push_back(0);
+  return result_;
+}
+
+// std::pair<double,double> exponentialFit2(double x, const double a, const double sa, const double b, const double sb){
+//   // use parameters from function fitExponentialExtrapolate
+//   // to calculate weight and error for all je multiplicities
+//   double weight=0;
+//   double weightError=0;
+//   weight=1-exp(a*x);
+//   weightError=0;
+//   return make_pair(weight, weightError);
+// }
