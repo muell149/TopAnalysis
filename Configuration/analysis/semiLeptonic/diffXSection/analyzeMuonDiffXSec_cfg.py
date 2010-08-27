@@ -43,7 +43,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(200)
 )
 
 ## configure process options
@@ -108,11 +108,15 @@ process.load("TopAnalysis.TopAnalyzer.MuonJetKinematics_cfi")
 ## ---
 ##    set up vertex filter
 ## ---
+## a) for MC
 process.PVSelection = cms.EDFilter("VertexSelector",
                                    src = cms.InputTag("offlinePrimaryVertices"),
                                    cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2"),
                                    filter = cms.bool(True),
                                    )
+if(runningOnData=="data"):
+    print "use looser PV selection |z| < 24"
+    process.PVSelection.cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
 
 ## ---
 ##    set up filter for different ttbar decay channels
@@ -173,8 +177,9 @@ process.ttSemiLeptonicFilterSemiTauMuon.restrictTauDecays = cms.PSet(
     oneProng   = cms.bool(False),
     threeProng = cms.bool(False)
     )
-process.genFilterSequence = cms.Sequence(  process.makeGenEvt
-                                         + process.ttSemiLeptonicFilterSemiTauMuon)
+process.genFilterSequence = cms.Sequence(process.makeGenEvt                      *
+                                         process.ttSemiLeptonicFilterSemiTauMuon *
+                                         process.ttSemiLeptonicFilter             )
 
 ## define ordered jets
 uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )
@@ -366,7 +371,8 @@ process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLea
 process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
 process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
 ## btag monitoring before jetcuts
-process.tightJetQualityBeforeJetCuts = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
+process.tightJetQualityBeforeJetCuts     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
+process.bottomJetKinematicsBeforeJetCuts = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
 
 process.monitorNMinusOneMuonCuts = cms.Sequence(process.noDbMuonQuality            +
                                                 process.noChi2MuonQuality          +
@@ -510,6 +516,7 @@ process.p1 = cms.Path(
                       process.electronVeto                          *
                       ## b-tag quantities before jetcut
                       process.tightJetQualityBeforeJetCuts          *
+                      process.bottomJetKinematicsBeforeJetCuts      *
                       ## monitor all jet cut quantities
                       process.monitorNMinusOneJetCuts               *
                       process.monitorJetCutflow                     *
@@ -555,7 +562,8 @@ process.p3 = cms.Path(
     process.estimationMuons                       *
     ## PV event selection
     process.PVSelectionABCD                       *
-    ## electron veto event selection cut
+    ## lepton veto event selection cut
+    process.secondMuonVetoABCD                    *
     process.electronVetoABCD                      *
     ## do the event selection for ==1 muon (without dB, relIso and dR cut)
     process.estimationMuonsSelection              *
@@ -572,9 +580,8 @@ process.p3 = cms.Path(
     ## a) 4 jet
     process.leadingJetSelectionNjets4ABCD         *
     process.estimationMuonsQualityNjets4          *
-    ## do the standard muon + 2nd muon veto event selection cuts
-    process.muonSelectionABCD                     *
-    process.secondMuonVetoABCD                    
+    ## do the standard muon selection
+    process.muonSelectionABCD                     
     )
 
 ## on generator niveau
