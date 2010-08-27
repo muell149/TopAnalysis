@@ -19,24 +19,24 @@ void loadingFiles();
 void loadingHists(TString plot);
 void combineFiles(double luminosity);
 void poisson(TString directory, TString plot, int lumi, TFile& outputfile);
+TString getTStringFromInt(int i);
 
 std::vector<float> lumiweight_;
 std::vector<TH1F*> hists_;
 std::vector<TFile*> files_;
 
-void createPseudoData(){
+void createPseudoData(double luminosity= 50.0){
   // -------------------------
   // !!! choose luminosity !!!
   // -------------------------
-  int luminosity= 50;
-  TString lum="50";
+  TString lum = getTStringFromInt((int)luminosity);
   // get the files
   loadingFiles(); 
 
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-    TFile f("./diffXSecFromSignal/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC/spring10PseudoData7TeV"+lum+"pb.root", "recreate");
+    TFile f("./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV"+lum+"pb.root", "recreate");
 
   // ---------------------------------------------------------
   // !!! list of plots you want to combine !!!
@@ -132,7 +132,7 @@ void loadingFiles()
   // !!! add all contributing samples here !!!
   // -----------------------------------------
 
-  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
+  TString whichSample = "/spring10Samples/spring10SelV2Sync";
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
 //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
@@ -153,12 +153,13 @@ void loadingHists(TString plot)
 void smearing(TH1F& src, TH1F& data)
 {
   TRandom3 rnd(0);
-  for(int ibin=0; ibin<=src.GetNbinsX(); ++ibin){
+  for(int ibin=0; ibin<=src.GetNbinsX()+1; ++ibin){
    // !!! IF YOU JUST WANT TO COMBINE PLOTS !!!
-   // CHANGE src.GetBinContent(ibin) TO 0.
-   unsigned int evts=rnd.Poisson(src.GetBinContent(ibin));
-   data.SetBinContent(ibin, evts);
-   data.SetBinError(ibin, sqrt(evts));
+   // CHANGE rnd.Poisson(src.GetBinContent(ibin)) TO src.GetBinContent(ibin)
+   // unsigned int evts=rnd.Poisson(src.GetBinContent(ibin));
+    int evts=src.GetBinContent(ibin);
+    data.SetBinContent(ibin, evts);
+    data.SetBinError(ibin, sqrt(evts));
  }
 }
 
@@ -178,7 +179,7 @@ void combineFiles(double luminosity)
   lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
 //   lumiweight_.push_back(0.00556153/50.0*(double)luminosity);
   lumiweight_.push_back(0.14332841/50.0*(double)luminosity);
-  lumiweight_.push_back(1.25483558/50.0*(double)luminosity);
+  lumiweight_.push_back(0.98351978/50.0*(double)luminosity);
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     hists_ [idx]->Scale(lumiweight_[idx]);
@@ -190,4 +191,10 @@ void combineFiles(double luminosity)
     hists_[files_.size()]->Add(hists_[idx]);
   }
 
+}
+
+TString getTStringFromInt(int i){
+  char result[20];
+  sprintf(result, "%i", i);
+  return (TString)result;
 }
