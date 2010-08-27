@@ -25,6 +25,7 @@ void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 void histStyle2D(TH2& hist, const char* titleHisto="", const char* titleX="", const char* titleY="");
+TString jetLabel(TString input);
 
 void analyzeMuonDiffXMigration()
 {
@@ -36,7 +37,7 @@ void analyzeMuonDiffXMigration()
   gStyle->SetPalette(1);
 
   // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Njets3Btag" / "Njets4Btag" 
-  TString jetMultiplicity ="Njets4";
+  TString jetMultiplicity ="Njets3";
   // choose luminosity for scaling of event numbers and for legend as entry
   int luminosity = 50;
   TString lum = "50";
@@ -50,8 +51,8 @@ void analyzeMuonDiffXMigration()
   // ---
   std::vector<TFile*> files_;
 
-  TString whichSample = "/spring10Samples/recoAndGenFromPATtuplesWithSummer09JEC";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"   ) );
+  TString whichSample = "/spring10Samples/spring10SelV2Sync";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllNloSpring10.root"   ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root" ) );
 
   // ---
@@ -73,8 +74,8 @@ void analyzeMuonDiffXMigration()
   std::vector<double> lumiweight;
 
   // for current ttbar 7TeV Mc@Nlo sample 
-  lumiweight.push_back(0.0083191 /50.0*(double)luminosity);
-  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
+  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
+  lumiweight.push_back(0.155498692/50.0*(double)luminosity);
 
   // ---
   //    do lumiweighting
@@ -228,10 +229,10 @@ void analyzeMuonDiffXMigration()
   // ---
 
   TLegend    *leg0 = new TLegend   (0.31, 0.34, 1.0, 0.66);
-  TPaveLabel *leg1 = new TPaveLabel(0.16, 0.83, 1.0, 1.0, "migration t#bar{t} (semilept.#mu) & W+jets", "br NDC");
+  TPaveLabel *leg1 = new TPaveLabel(0.16, 0.83, 1.0, 1.0, "migration t#bar{t} & W+jets", "br NDC");
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("#mu-sel. & "+jetMultiplicity+"+ , "+lum+" pb^{-1}@7TeV");
+  leg0->SetHeader("#mu-sel. & "+jetLabel(jetMultiplicity)+" , "+lum+" pb^{-1}@7TeV");
   leg0->AddEntry(  ptPurity    , "purity"     , "PL");
   leg0->AddEntry(  ptStability , "stability"  , "PL");
   leg0->AddEntry(  ptAcceptance, "correction" , "PL");
@@ -290,7 +291,7 @@ void analyzeMuonDiffXMigration()
   //    do the printing for corrPhi_
   // ---
   MyCanvas[3]->cd(0);
-  MyCanvas[3]->SetTitle("genRecoCorrelationEtaMu");
+  MyCanvas[3]->SetTitle("genRecoCorrelationPhiMu");
   histStyle2D(*corrPhi_[kSig], "gen-reco correlation of #phi ( #mu )", "#phi ( gen #mu ) [rad]", "#phi ( reco #mu ) [rad]");
   corrPhi_[kSig]->Draw("colz");
 
@@ -383,4 +384,16 @@ void histStyle2D(TH2& hist, const char* titleHisto, const char* titleX, const ch
   hist.GetYaxis()->SetNdivisions (  505 );
   hist.GetYaxis()->CenterTitle   ( true );
   hist.SetStats(kFALSE);
+}
+
+TString jetLabel(TString input)
+{
+  TString label="";
+  if(input=="Njets1") label="N(jets) #geq 1";
+  if(input=="Njets2") label="N(jets) #geq 2";
+  if(input=="Njets3") label="N(jets) #geq 3";
+  if(input=="Njets4") label="N(jets) #geq 4";
+  if(input=="Njets4Btag") label="N(jets) #geq 4, N(bTags) #geq 1";
+  if(input=="Njets3Btag") label="N(jets) #geq 3, N(bTags) #geq 1";
+  return label;
 }
