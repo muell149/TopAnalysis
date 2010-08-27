@@ -15,20 +15,16 @@ writeOutput = True
 execfile("/afs/naf.desy.de/user/g/goerner/semileptonic361/analyzeMuonDiffXSec_cfg.py")
 
 ## reduce output
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change number of processed events
-process.maxEvents.input = -1
+process.maxEvents.input = 200
 process.source.skipEvents = cms.untracked.uint32(0)
 ## change source -> data file
 dataFiles = cms.untracked.vstring()
 dataFiles.extend([
-    '/store/data/Run2010A/Mu/RECO/v4/000/138/457/BC48D2D6-9B7F-DF11-8851-003048F024E0.root',
-    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/0AA0D8C2-7888-DF11-9EDB-0019B9F581C9.root',
-    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/0AA0D8C2-7888-DF11-9EDB-0019B9F581C9.root',
-    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/EEEEE7C8-7B88-DF11-9FFE-003048F024DC.root',
-    '/store/data/Run2010A/Mu/RECO/v4/000/139/407/9443ED2B-7888-DF11-A556-000423D94908.root',
-    '/store/data/Run2010A/Mu/RECO/v4/000/139/458/1055D2F6-CB88-DF11-923E-001D09F29169.root'
+    ##'/store/data/Run2010A/Mu/RECO/v4/000/138/457/BC48D2D6-9B7F-DF11-8851-003048F024E0.root'
+    '/store/data/Run2010A/Mu/RECO/v4/000/140/124/84F485E8-668F-DF11-9F8E-003048F11114.root'
     ])
 
 process.source.fileNames = dataFiles
@@ -41,62 +37,38 @@ process.p2.remove(process.semiLeptGenCollections)
 
 ## add configure geometry & conditions
 process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string('GR_R_36X_V12::All')
+#process.GlobalTag.globaltag = cms.string('GR_R_36X_V11A::All')
 
 ## create tuples with events surviving the cuts
-## a) Njets>=1
-## process.pat1 = cms.Path(
-##                       ## do the trigger selection (hltMu9)
-##                       process.hltMu9b                               *
-##                       ## do the PV event selection
-##                       process.PVSelectionb                          *
-##                       ## introduce collections
-##                       process.semiLeptonicSelection                 *
-##                       ## do the event selection for muon
-##                       process.muonSelectionb                        *
-##                       ## do event selection veto cuts
-##                       process.secondMuonVetob                       *
-##                       process.electronVetob                         *
-##                       ## N_jets >= 1
-##                       process.leadingJetSelectionNjets1Pat
-##                       )
-## ## b) Njets>=2
-## process.pat2 = cms.Path(
-##                       ## do the trigger selection (hltMu9)
-##                       process.hltMu9b                               *
-##                       ## do the PV event selection
-##                       process.PVSelectionb                          *
-##                       ## introduce collections
-##                       process.semiLeptonicSelection                 *
-##                       ## do the event selection for muon
-##                       process.muonSelectionb                        *
-##                       ## do event selection veto cuts
-##                       process.secondMuonVetob                       *
-##                       process.electronVetob                         *
-##                       ## N_jets >= 2
-##                       process.leadingJetSelectionNjets2Pat
-##                       )
-## c) Njets>=3
-process.pat3 = cms.Path(
-                      ## do the trigger selection (hltMu9)
-                      process.hltMu9b                               *
-                      ## do the PV event selection
-                      process.PVSelectionb                          *
-                      ## introduce collections
-                      process.semiLeptonicSelection                 *
-                      ## do the event selection for muon
-                      process.muonSelectionb                        *
-                      ## do event selection veto cuts
-                      process.secondMuonVetob                       *
-                      process.electronVetob                         *
-                      ## N_jets >= 3
-                      process.leadingJetSelectionNjets3Pat
-                      )
-## d) for Njets>=3 use output of p1!
-process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('pat3') )
-process.out.fileName = cms.untracked.string('patTuple_selectedNjets3.root')
+## for Njets>=4
+process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') )
+process.out.fileName = cms.untracked.string('patTuple_selectedNjets4.root')
+
+## do cleaning steps
+## a) beam scrap filter
+#process.beamScrapFilter = cms.EDFilter("FilterOutScraping",
+#                                       applyfilter = cms.untracked.bool(True),
+#                                       debugOn     = cms.untracked.bool(False),
+#                                       numtrack    = cms.untracked.uint32(10),
+#                                       thresh      = cms.untracked.double(0.25)
+#                                       )
+# b) HBHE noise filter
+#process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
+# c) spike cleaning
+#process.load('EGamma.EGammaSkims.cleanReRecoSequence_cff')				      
+# d) get electrons corrected for EE misalignment
+#from RecoEgamma.EgammaTools.correctedElectronsProducer_cfi import *
+#process.load('RecoEgamma.ElectronIdentification.electronIdSequence_cff')
+
+#process.cleaningSteps = cms.Sequence(process.beamScrapFilter        *  
+#                                     process.HBHENoiseFilter        *
+#                                     process.cleanedEgammaSkimReco  *
+#                                     process.eIdSequence    
+#                                     )
 
 ## add pat default sequence
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -118,6 +90,10 @@ process.patMuons.usePV = False
 from PhysicsTools.PatAlgos.tools.metTools import *
 addPfMET(process, 'PF')
 
+## d) apply EE misalignment cleaning to electrons
+#process.load('RecoEgamma.ElectronIdentification.electronIdSequence_cff')
+#process.patElectrons.electronSource = "gsfElectrons::PAT"
+
 # embed IsoDeposits
 process.patMuons.isoDeposits = cms.PSet(
     tracker = cms.InputTag("muIsoDepositTk"),
@@ -133,10 +109,21 @@ process.patMuons.isoDeposits = cms.PSet(
 process.patJetCorrFactors.corrSample = "Spring10"
 process.patJetCorrFactors.sampleType = "ttbar"
 
-## remove gen level event filter
-process.filterSequence     = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
-process.filterSequenceb    = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
-process.filterSequenceABCD = cms.Sequence(process.hltMu9 * process.patDefaultSequence)
+## use residual jet corrections for data
+process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
+process.residualCorrectedJets = process.residualCorrectedJets.clone()
+#process.residualCorrectedJets.jets = 'selectedPatJets '
+#process.residualCorrectedJets.jetType = 'PF'
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+massSearchReplaceAnyInputTag(process.p1, 'selectedPatJets', 'residualCorrectedJets')
+massSearchReplaceAnyInputTag(process.p2, 'selectedPatJets', 'residualCorrectedJets')
+massSearchReplaceAnyInputTag(process.p3, 'selectedPatJets', 'residualCorrectedJets')
+print "residual jet corrections used!"
+
+## remove gen level event filter + add residual jet correction sequence
+process.filterSequence     = cms.Sequence(process.hltMu9     * process.patDefaultSequence * process.residualCorrectedJets)
+process.filterSequenceb    = cms.Sequence(process.hltMu9b    * process.patDefaultSequence * process.residualCorrectedJets)
+process.filterSequenceABCD = cms.Sequence(process.hltMu9ABCD * process.patDefaultSequence * process.residualCorrectedJets)
 print "all gen level filters using ttbar decay subset are removed"
 print "added pat default sequence"
 
