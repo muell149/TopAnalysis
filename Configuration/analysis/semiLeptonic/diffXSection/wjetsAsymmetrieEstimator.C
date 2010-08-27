@@ -24,7 +24,7 @@
 #include <TStyle.h>
 #include <TF1.h>
 
-enum styles {kWjets, kPseudo50, kData};
+enum styles {kWjets, kPseudo50, kData, kTtbar};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
@@ -51,7 +51,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
   // choose whether you want to load c.a. parameter from crossSection.txt file
-  // when writing into file, T is also taken from file
+  // when writing into file, R is also taken from file
   bool loadR = false;
   if(textoutput) loadR=true;
   
@@ -70,6 +70,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"   ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/spring10PseudoData7TeV50pb.root" ) );
   files_.push_back(new TFile(dataFile                                                              ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllNloSpring10.root"     ) );
 
   // create container for the different histos
   std::map< TString, std::map <unsigned int, TH1F*> > ptMuPlus_, ptMuMinus_, pt_;
@@ -86,7 +87,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
     // loop input files (W, all MC, data)
-    for(int idx=kWjets; idx<=kData; ++idx){
+    for(int idx=kWjets; idx<=kTtbar; ++idx){
       // pt(mu+/-)
       ptMuPlus_ [Njets_[mult]][idx] = (TH1F*)(files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/ptPlus" ))->Clone();
       ptMuMinus_[Njets_[mult]][idx] = (TH1F*)(files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/ptMinus"))->Clone();
@@ -99,13 +100,21 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // ---
   //    scale W+jets to luminosity
   // ---
-  // spring10 7TeV W+jets MADGRAPH sample 
-  double lumiweight=0.13904207/50*luminosity;
+  // a) spring10 7TeV W+jets MADGRAPH sample 
+  double lumiweight=0.155498692/50*luminosity;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
     ptMuPlus_ [Njets_[mult]][kWjets]->Scale(lumiweight);
     ptMuMinus_[Njets_[mult]][kWjets]->Scale(lumiweight);
     pt_       [Njets_[mult]][kWjets]->Scale(lumiweight);
+  }
+  // b) spring10 7TeV W+jets MADGRAPH sample
+  double lumiweight2=0.007940958/50*luminosity;
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<4; ++mult){
+    ptMuPlus_ [Njets_[mult]][kTtbar]->Scale(lumiweight2);
+    ptMuMinus_[Njets_[mult]][kTtbar]->Scale(lumiweight2);
+    pt_       [Njets_[mult]][kTtbar]->Scale(lumiweight2);
   }
 
   // check weighting
@@ -197,11 +206,29 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   TLegend *leg0 = new TLegend(0.30, 0.69, 0.92, 0.94);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("N_{W} @ "+lum+"pb^{-1} ( 7 TeV )");
+  leg0->SetHeader("N_{W} @ "+lum+" pb^{-1} ( 7 TeV )");
   leg0->AddEntry( wjetsTruth        , "MC truth"                     , "L" );
   leg0->AddEntry( wjetsEstimationW  , "estimation from W+jets MC"    , "PL");
   leg0->AddEntry( wjetsEstimationAll, "estimation from pseudo data (all MC)", "PL");
   //  leg0->AddEntry( allPseudoEvents   , "total # pseudo events"               , "L" );
+
+  // create a legend for mu, mu+ and mu- of Ttar
+  TLegend *leg1 = new TLegend(0.47, 0.68, 1.0, 0.93);
+  leg1->SetFillStyle(0);
+  leg1->SetBorderSize(0);
+  leg1->SetHeader("t#bar{t}: "+lum+" pb^{-1}, N(jets) #geq 1"   );
+  leg1->AddEntry( pt_       [Njets_[0]][kTtbar], "all #mu" , "L");
+  leg1->AddEntry( ptMuPlus_ [Njets_[0]][kTtbar], "#mu^{+}" , "L");
+  leg1->AddEntry( ptMuMinus_[Njets_[0]][kTtbar], "#mu^{-}" , "L");
+
+  // create a legend for mu, mu+ and mu- of Ttar
+  TLegend *leg2 = new TLegend(0.47, 0.68, 1.0, 0.93);
+  leg2->SetFillStyle(0);
+  leg2->SetBorderSize(0);
+  leg2->SetHeader("W+jets: "+lum+" pb^{-1}, N(jets) #geq 1"     );
+  leg2->AddEntry( pt_       [Njets_[0]][kWjets], "all #mu" , "L");
+  leg2->AddEntry( ptMuPlus_ [Njets_[0]][kWjets], "#mu^{+}" , "L");
+  leg2->AddEntry( ptMuMinus_[Njets_[0]][kWjets], "#mu^{-}" , "L");
 
   // ---
   //    do the printing for N_W [Njets]
@@ -223,14 +250,49 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   leg0              ->Draw("same");
 
   // ---
+  //    do the printing for mu, mu+ and mu- for Top and W+jets
+  // ---
+  // a ) Top
+  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
+  // draw canvas
+  canv1->cd(0);
+  canv1->SetTitle("TopNjets1MuonCharge"+lum+"pb");
+  axesStyle(*pt_[Njets_[0]][kTtbar], "N_{jets} #geq", "N_{W}", 0., 1.2*pt_[Njets_[0]][kTtbar]->GetMaximum());
+  histogramStyle(*ptMuPlus_ [Njets_[0]][kTtbar], kBlue , 2, 20, 0.5); 
+  histogramStyle(*ptMuMinus_[Njets_[0]][kTtbar], kRed  , 3, 20, 0.5); 
+  histogramStyle(*pt_       [Njets_[0]][kTtbar], kBlack, 1, 20, 0.5);
+  pt_       [Njets_[0]][kTtbar]->Draw("");
+  ptMuMinus_[Njets_[0]][kTtbar]->Draw("same");
+  ptMuPlus_ [Njets_[0]][kTtbar]->Draw("same");
+  leg1                         ->Draw("same");
+
+  // b ) W+jets
+  TCanvas* canv2 = new TCanvas("canv2", "canv2", 600, 600); canvasStyle(*canv2);
+  // draw canvas
+  canv2->cd(0);
+  canv2->SetTitle("WjetsNjets1MuonCharge"+lum+"pb");
+  axesStyle(*pt_[Njets_[0]][kWjets], "N_{jets} #geq", "N_{W}", 0., 1.2*pt_[Njets_[0]][kWjets]->GetMaximum());
+  histogramStyle(*ptMuPlus_ [Njets_[0]][kWjets], kBlue , 2, 20, 0.5); 
+  histogramStyle(*ptMuMinus_[Njets_[0]][kWjets], kRed  , 3, 20, 0.5); 
+  histogramStyle(*pt_       [Njets_[0]][kWjets], kBlack, 1, 20, 0.5);
+  pt_       [Njets_[0]][kWjets]->Draw("");
+  ptMuMinus_[Njets_[0]][kWjets]->Draw("same");
+  ptMuPlus_ [Njets_[0]][kWjets]->Draw("same");
+  leg2                         ->Draw("same");
+
+  // ---
   // saving
   // ---
 
   if(save){
     // ps
-    canv0->Print(saveTo+"chargeAsymmetrieEstimation.ps" );
+    canv0->Print(saveTo+"chargeAsymmetrieEstimation.ps(" );
+    canv1->Print(saveTo+"chargeAsymmetrieEstimation.ps"  );
+    canv2->Print(saveTo+"chargeAsymmetrieEstimation.ps)" );
     // png
     canv0->Print(saveTo+(TString)(canv0->GetTitle())+".png");
+    canv1->Print(saveTo+(TString)(canv1->GetTitle())+".png");
+    canv2->Print(saveTo+(TString)(canv2->GetTitle())+".png");
   }
 
 }
