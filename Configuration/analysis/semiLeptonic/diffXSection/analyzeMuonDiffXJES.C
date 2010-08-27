@@ -96,29 +96,29 @@ void analyzeMuonDiffXJES()
   // MC@NLO signal / Madgraph signal / W+jets Madgraph / MC@NLO background / Madgraph background/ Z+jets Madgraph / QCD Pythia
 
   // a) unshifted:
-  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
-  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
-  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
+  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
+//   lumiweight.push_back(0.005308736/50.0*(double)luminosity);
+  lumiweight.push_back(0.155498692/50.0*(double)luminosity);
+  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
+//   lumiweight.push_back(0.005308736/50.0*(double)luminosity);
+  lumiweight.push_back(0.140471057/50.0*(double)luminosity);
+  lumiweight.push_back(0.910264515/50.0*(double)luminosity);
 
-  // b) for JES-shifted samples (first +10%, then -10%) full statistics:
-  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
-  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
-  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
-  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight.push_back(0.13904207/50.0*(double)luminosity);
-  lumiweight.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight.push_back(0.14332841/50.0*(double)luminosity);
-  lumiweight.push_back(1.25483558/50.0*(double)luminosity);
+  // b) for JES-shifted samples (first +10%, then -10%)-> taken from above:
+  lumiweight.push_back(lumiweight[0]);
+//   lumiweight.push_back(lumiweight[0]);
+  lumiweight.push_back(lumiweight[1]);
+  lumiweight.push_back(lumiweight[2]);
+//   lumiweight.push_back(lumiweight[2]);
+  lumiweight.push_back(lumiweight[3]);
+  lumiweight.push_back(lumiweight[4]);
+  lumiweight.push_back(lumiweight[0]);
+//   lumiweight.push_back(lumiweight[0]);
+  lumiweight.push_back(lumiweight[1]);
+  lumiweight.push_back(lumiweight[2]);
+//   lumiweight.push_back(lumiweight[2]);
+  lumiweight.push_back(lumiweight[3]);
+  lumiweight.push_back(lumiweight[4]);
   // c) for pseudodata
   lumiweight.push_back(1.0);
 
