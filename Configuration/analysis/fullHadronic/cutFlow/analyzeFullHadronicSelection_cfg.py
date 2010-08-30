@@ -9,7 +9,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
-## decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd * or * all *
+## decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd *, * privA *, * privB * or * all *
 options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 ## choose whether to use PF or not
 options.register('usePF'      ,     1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "use PF for processing")
@@ -28,7 +28,7 @@ process = cms.Process("Selection")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.MessageLogger.categories.append('TtFullHadronicEvent')
 
 ## define input
@@ -36,9 +36,7 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
     '/store/user/eschliec/Run2010A/patTuple_6jets.root',
-    '/store/user/eschliec/Run2010/patTuple_6jets_14x_1.root',
-    '/store/user/eschliec/Run2010/patTuple_6jets_14x_23.root',
-    '/store/user/eschliec/Run2010/patTuple_6jets_14x_4.root',
+    '/store/user/eschliec/Run2010A/patTuple_6jets_06.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_1_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_2_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_3_1.root',
@@ -81,7 +79,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 ## ---
-##    decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd * or * all *
+##    decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd *, * privA *, * privB * or * all *
 ## ---
 
 ## std sequence to produce the ttGenEvt
@@ -121,7 +119,7 @@ elif(options.eventFilter=='bkg'):
                                           process.ttFullHadronicFilter
                                           )
 
-elif(options.eventFilter=='qcd'):
+elif(options.eventFilter=='qcd' or options.eventFilter=='privA' or options.eventFilter=='privB'):
     if(options.maxPtHat<999999.):
         ## ptHat filter
         process.filterPtHat.maxPtHat = options.maxPtHat
@@ -137,12 +135,35 @@ elif(options.eventFilter=='qcd'):
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.filterPtHat)
 
+    if(options.eventFilter=='privA' or options.eventFilter=='privB'):
+        ## deactivate duplicate check for private samples
+        ## as event numbers are used multiple times in there
+        process.source.duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
+        ## reduce output due to huge sample size
+        process.MessageLogger.cerr.FwkReport.reportEvery = 100000
+
+        #""" Enables trigger information in PAT  """
+        process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+        process.GlobalTag.globaltag = cms.string('MC_36Y_V10::All')
+        ## add trigger modules to path
+        process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
+        process.filterSequence *= process.patTriggerSequence
+        
+        ## trigger matching is not needed here -> removed
+        process.patTriggerEvent.patTriggerMatches = ['']
+        process.patTriggerSequence.remove(process.patTriggerMatcher)
+
+        if(options.eventFilter=='privA'):
+            process.patTrigger.processName = cms.string('PAT')
+            process.patTriggerEvent.processName = cms.string('PAT')
+
+        
 elif(options.eventFilter=='all'):
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.filterPtHat)
     
 else:
-    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'sig', 'bkg', 'qcd' or 'all'"
+    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'sig', 'bkg', 'qcd', 'privA', 'privB' or 'all'"
 
 ## adapt output filename
 process.TFileService.fileName = 'analyzeFullHadronicSelection_'+options.eventFilter+'.root'
@@ -166,7 +187,7 @@ if(not options.eventFilter=='sig'):
 switchToTCHE(process)
 
 ## selection should be run on PFJets instead of caloJets
-if(not options.usePF==0):
+if(not options.usePF==0): 
     runOnPF(process)
 
 ## if running on real data, do everything needed for this
@@ -174,6 +195,9 @@ if(options.eventFilter=='data'):
     runOnRealData(process)
     ## needed as in MC the process label is different -> trigger in data not found
     #removeDefaultTrigger(process)
+
+if(options.eventFilter=='privA' or options.eventFilter=='privB'):
+    process.hltQuadJet15U = process.filterTrigger.clone(whichTrigger = "QuadJet15U")
 
 ## ---
 ##    run the final sequence
