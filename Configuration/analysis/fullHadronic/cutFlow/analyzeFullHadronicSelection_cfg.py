@@ -18,6 +18,8 @@ options.register('writeOutput',     0 , VarParsing.VarParsing.multiplicity.singl
 ## setup the ptHatFilter in case 'eventFilter' is chosen to be qcd
 options.register('maxPtHat', 999999., VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "maxPtHat to be processed")
 options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "minPtHat to be processed")
+## choose whether to do a background estimation or a normal selection
+options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
 
 # get and parse the command line arguments
 options.parseArguments()
@@ -198,6 +200,10 @@ if(options.eventFilter=='data'):
 
 if(options.eventFilter=='privA' or options.eventFilter=='privB'):
     process.hltQuadJet15U = process.filterTrigger.clone(whichTrigger = "QuadJet15U")
+
+## do a background estimantion for QCD events
+if(not options.backgroundEstimation==0):
+    runAsBackgroundEstimation(process)
 
 ## ---
 ##    run the final sequence
