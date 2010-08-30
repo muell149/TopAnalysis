@@ -4,9 +4,10 @@
 #include "FWCore/Framework/interface/Event.h"
 
 NewTriggerTestFilter::NewTriggerTestFilter(const edm::ParameterSet& cfg):
-  whichTrigger_  ( cfg.getParameter<std::string>  ("whichTrigger"  ) ),
-  useEventWeight_( cfg.getParameter<bool>         ("useEventWeight") ),
-  weight_        ( cfg.getParameter<edm::InputTag>("weight"        ) ),
+  whichTrigger_   ( cfg.getParameter<std::string>  ("whichTrigger"   ) ),
+  useEventWeight_ ( cfg.getParameter<bool>         ("useEventWeight" ) ),
+  weight_         ( cfg.getParameter<edm::InputTag>("weight"         ) ),
+  patTriggerEvent_( cfg.getParameter<edm::InputTag>("patTriggerEvent") ),
   beforeCut_( 0 ), afterCut_( 0 ), beforeCutWeighted_( 0. ), afterCutWeighted_( 0. )
 {
 }
@@ -26,10 +27,10 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
   bool pass = false;
 
   edm::Handle<pat::TriggerEvent> triggerEvent;
-  event.getByLabel("patTriggerEvent", triggerEvent);
+  event.getByLabel(patTriggerEvent_, triggerEvent);
+  
+  bool L1Triggered = true;//false;
   /*
-  bool L1Triggered = false;
-
   pat::TriggerFilterRefVector filters = triggerEvent->acceptedFilters();
   for(pat::TriggerFilterRefVector::const_iterator filter = filters.begin(); filter != filters.end(); ++filter){
     if((*filter)->label() == "hltL1sQuadJet30") L1Triggered = true;
@@ -38,6 +39,9 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
   pat::TriggerObjectRefVector objects = triggerEvent->filterObjects("hlt4jet30");
 
   //bool oldPass = false;
+
+  bool quadJet40Pass = false;
+  int triggerJetCounter = 0;
 
   if(whichTrigger_ == "QuadJet80303030"){
     if(objects[0]->pt() >= 80){
@@ -78,37 +82,37 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
       }
     }
   }
-  /*
-  bool quadJet40Pass = false;
-  int triggerJetCounter = 0;
+  else if(whichTrigger_ == "QuadJet15U"){
 
   ////////////////////////////////////
 
-  if(L1Triggered){
+    if(L1Triggered){
 
   ////////////////////////////////////
 
-  for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
-    if( obj->hasFilterId(85) ){
-      if( obj->pt() >= 40 && obj->collection() == "hltMCJetCorJetIcone5::HLT") {
-	++triggerJetCounter;
-	if( triggerJetCounter == 4 ){
-	  quadJet40Pass = true;
-	  if( whichTrigger_ == "QuadJet40" ){
-	    pass = true;
+      for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
+	if( obj->hasFilterId(85) ){
+	  //std::cout << obj->collection() << std::endl;
+	  //if( obj->pt() >= 40 && obj->collection() == "hltMCJetCorJetIcone5::HLT") {
+	  if( obj->pt() >= 15 && obj->collection() == "hltIterativeCone5CaloJets::HLT") {
+	    ++triggerJetCounter;
+	    if( triggerJetCounter == 4 ){
+	      pass = true;
+	      break;
+	    }
 	  }
-	  break;
 	}
       }
+      
+  ////////////////////////////////////
+
     }
-  }
 
   ////////////////////////////////////
 
   }
 
-  ////////////////////////////////////
-
+  /*
   if( quadJet40Pass && !oldPass ){
     std::cout << "Passed     NEW but NOT OLD" << std::endl;
     std::cout << "   Pt   ::   eta   ::  phi" << std::endl;

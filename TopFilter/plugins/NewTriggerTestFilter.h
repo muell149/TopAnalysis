@@ -23,6 +23,7 @@ class NewTriggerTestFilter : public edm::EDFilter {
   std::string whichTrigger_;
   bool useEventWeight_;
   edm::InputTag weight_;
+  edm::InputTag patTriggerEvent_;
 
   unsigned int beforeCut_;
   unsigned int afterCut_;
