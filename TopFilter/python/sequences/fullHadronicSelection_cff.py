@@ -123,7 +123,6 @@ filterStep0 = cms.Sequence(vertex *
                            goodJetSelection
                            )
 
-
 ## to switch verbosity modes of the kinFit
 #ttFullHadEvent.verbosity = 3
 
@@ -132,8 +131,8 @@ kinFitTtFullHadEventHypothesis.maxNComb = -1
 
 kinFitTtFullHadEventHypothesis.bTags = 2
 kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighPurBJetTags'
-kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.93 #1.74
-kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41 #3.05
+kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.93
+kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41
 
 #setForAllTtFullHadHypotheses(process, 'maxNJets', -1)
 kinFitTtFullHadEventHypothesis.maxNJets = -1
@@ -363,9 +362,12 @@ monitorGenerator_1 = cms.Sequence( genParticles_1 *
 ## ---
 
 ## select events with at least 2 b jets
-bottomJetSelection  = countPatJets.clone( src = 'tightBottomJets',
-                                          minNumber = 2
-                                         )
+tightBottomJetSelection   = countPatJets.clone( src = 'tightBottomJets',
+                                                minNumber = 2
+                                                )
+
+bottomJetSelection = cms.Sequence(tightBottomJetSelection
+                                  )
 
 ## ---
 ##    MONITOR STEP 2
@@ -683,19 +685,26 @@ def runOnRealData(process):
     print '*analyseFullHadronicSelection* that rely '
     print 'on generator information to run properly '
     print '++++++++++++++++++++++++++++++++++++++++++++'
+    ## removal of generator based information
     process.analyseFullHadronicSelection.remove(process.matchJetsToPartons)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_0)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_1)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_2)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
-    hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
 
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
+    ## changes needed for analysis
+    hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+    vertex.cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
+
+    ## different detector response for jets than in simulation
     if(hasattr(process, 'goodJets') & hasattr(process, 'residualCorrectedJets')):
         process.goodJets.src   = 'residualCorrectedJets'
     if(hasattr(process, 'goodJetsPF') & hasattr(process, 'residualCorrectedJets')):
         process.goodJetsPF.src = 'residualCorrectedJets'
+
+    ## changes due to different reconstruction releases
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
 
 
 ## ---
@@ -750,8 +759,8 @@ def runAsBackgroundEstimation(process):
     print 'switching *analyseFullHadronicSelection* to'
     print 'background estimation'
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    process.bottomJetSelection.minNumber = 0
-    process.bottomJetSelection.maxNumber = 0
+    process.tightBottomJetSelection.minNumber = 0
+    process.tightBottomJetSelection.maxNumber = 0
     process.kinFitTtFullHadEventHypothesis.bTags = 0
 
 ## ---
