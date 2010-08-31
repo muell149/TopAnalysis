@@ -4,11 +4,9 @@ import FWCore.ParameterSet.Config as cms
 #                                                                     
 #              
 #                                                                     
-# Events after :     
-# Preselection :        --                                           
-# xsec(pb)  LO:                                                      
-# xsec(pb) NLO:         --                                               
-# eff         :        1.0                                                    
+# Events       :                                               
+# xsec(pb) NNLL:        165                                               
+# eff          :        1.0                                                    
 ######################################################################
 
 source = cms.Source("PoolSource",

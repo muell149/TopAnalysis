@@ -4,11 +4,9 @@ import FWCore.ParameterSet.Config as cms
 #                                                                     
 #  /Ztautau/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO             
 #                                                                     
-# Events after :     
-# Preselection :        --                                           
-# xsec(pb)  LO:       1300                                                
-# xsec(pb) NLO:         --                                               
-# eff         :        1.0                                                    
+# Events       :                                                    
+# xsec(pb) NNLO:      1495                                               
+# eff          :       1.0                                                    
 ######################################################################
 
 source = cms.Source("PoolSource",

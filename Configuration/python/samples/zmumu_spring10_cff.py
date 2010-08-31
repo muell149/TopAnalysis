@@ -4,18 +4,16 @@ import FWCore.ParameterSet.Config as cms
 #                                                                     
 #  /Zmumu/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO             
 #                                                                     
-# Events after :   2111268  
-# Preselection :        --                                           
-# xsec(pb)  LO:       1300                                                
-# xsec(pb) NLO:         --                                               
-# eff         :        1.0                                                    
+# Events       :                                                                                            
+# xsec(pb) NNLO:       1495                                               
+# eff          :        1.0                                                    
 ######################################################################
 
 source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(   
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_1_1.root',		
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_2_3.root',
-	#'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_3_1.root',
+	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_3_2.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_4_1.root',
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_5_2.root',		
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_6_1.root',
@@ -42,10 +40,10 @@ source = cms.Source("PoolSource",
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_27_1.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_28_1.root',	
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_29_2.root',
-        #'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_30_1.root',    
+        '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_30_3.root',    
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_31_1.root',		
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_32_1.root',
-	#'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_33_1.root',
+	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_33_4.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_34_2.root',
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_35_1.root',		
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_36_1.root',
@@ -58,7 +56,7 @@ source = cms.Source("PoolSource",
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_43_1.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_44_1.root',
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_45_2.root',		
-	#'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_46_1.root',
+	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_46_3.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_47_1.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_48_3.root',	
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_49_1.root',        
@@ -68,7 +66,7 @@ source = cms.Source("PoolSource",
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_53_1.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_54_1.root',
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_55_5.root',		
-	#'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_56_1.root',
+	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_56_6.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_57_1.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_58_1.root',	
         '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_59_1.root',
@@ -97,7 +95,7 @@ source = cms.Source("PoolSource",
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_82_2.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_83_1.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_84_4.root',
-        #'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_85_4.root',		
+        '/store/user/dammann/36X/Spring10/Zmumu/PATtuple_85_3.root',		
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_86_4.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_87_2.root',
 	'/store/user/dammann/36X/Spring10/Zmumu/PATtuple_88_3.root',	

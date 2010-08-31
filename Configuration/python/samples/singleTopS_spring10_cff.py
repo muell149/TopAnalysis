@@ -4,10 +4,8 @@ import FWCore.ParameterSet.Config as cms
 #                                                                     
 #               
 #                                                                     
-# Events after :     
-# Preselection :        --                                           
-# xsec(pb)  LO:                                                       
-# xsec(pb) NLO:         --                                               
+# Events      :                                                
+# xsec(pb) NLO:          4                                                
 # eff         :        1.0                                                    
 ######################################################################
 
