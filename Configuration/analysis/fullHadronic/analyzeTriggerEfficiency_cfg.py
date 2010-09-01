@@ -30,7 +30,6 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
-
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
@@ -114,7 +113,7 @@ elif(options.eventFilter=='bkg'):
                                           process.ttFullHadronicFilter
                                           )
 
-elif(options.eventFilter=='qcd' or options.eventFilter=='priv'):
+elif(options.eventFilter=='qcd' or options.eventFilter=='privA' or options.eventFilter=='privB'):
     if(options.maxPtHat<999999.):
         ## ptHat filter
         process.filterPtHat.maxPtHat = options.maxPtHat
@@ -126,14 +125,32 @@ elif(options.eventFilter=='qcd' or options.eventFilter=='priv'):
         print "included ptHatFilter with 'minPtHat' =",
         print process.filterPtHat.minPtHat
 
-    ## deactivate duplicate check for private samples
-    ## as event numbers are used multiple times in there
-    if(options.eventFilter=='priv'):
-        process.source.duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
-
     ## sequence with ptHat filter
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
                                           process.filterPtHat)
+    
+    if(options.eventFilter=='privA' or options.eventFilter=='privB'):
+        ## deactivate duplicate check for private samples
+        ## as event numbers are used multiple times in there
+        process.source.duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
+        ## reduce output due to huge sample size
+        process.MessageLogger.cerr.FwkReport.reportEvery = 100000
+
+        #""" Enables trigger information in PAT  """
+        process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+        process.GlobalTag.globaltag = cms.string('MC_36Y_V10::All')
+        ## add trigger modules to path
+        process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
+        process.filterSequence *= process.patTriggerSequence
+        
+        ## trigger matching is not needed here -> removed
+        process.patTriggerEvent.patTriggerMatches = ['']
+        process.patTriggerSequence.remove(process.patTriggerMatcher)
+
+        if(options.eventFilter=='privA'):
+            process.patTrigger.processName = cms.string('PAT')
+            process.patTriggerEvent.processName = cms.string('PAT')
+
 
 elif(options.eventFilter=='all'):
     process.filterSequence = cms.Sequence(#process.patDefaultSequence *
@@ -143,12 +160,13 @@ else:
     raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'sig', 'bkg', 'qcd' or 'all'"
 
 ## adapt output filename
-process.TFileService.fileName = 'analyzeFullHadronicSelection_'+options.eventFilter+'.root'
+process.TFileService.fileName = 'analyzeTriggerEfficiency_'+options.eventFilter+'.root'
 
 ## jet kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
 ## high level trigger filter
 process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
+process.load("TopAnalysis.TopFilter.filters.NewTriggerTestFilter_cfi")
 ## for the jet collections which should be used
 process.load("TopAnalysis.TopFilter.sequences.jetSelection_cff")
 ## generator matching
@@ -350,6 +368,8 @@ if(options.eventFilter=='data'):
     massSearchReplaceAnyInputTag(process.J50U_QJ15U, cms.InputTag("TriggerResults","","REDIGI"), cms.InputTag("TriggerResults","","HLT"))
     massSearchReplaceAnyInputTag(process.Mu9_QJ15U , cms.InputTag("TriggerResults","","REDIGI"), cms.InputTag("TriggerResults","","HLT"))
 
+if(options.eventFilter=='privA' or options.eventFilter=='privB'):
+    process.hltQuadJet15U = process.filterTrigger.clone(whichTrigger = "QuadJet15U")
 
 ## Output Module Configuration
 if(not options.writeOutput==0):
