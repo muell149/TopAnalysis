@@ -82,7 +82,8 @@ from TopAnalysis.TopAnalyzer.METKinFitAnalyzer_cfi import *
 from TopAnalysis.TopAnalyzer.FullHadTopReco_cfi import *
 ## high level trigger filter
 from TopAnalysis.TopFilter.sequences.triggerFilter_cff import *
-## semileptonic selection
+from TopAnalysis.TopFilter.filters.NewTriggerTestFilter_cfi import *
+## fully hadronic selection
 from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 ## generator matching
 from TopAnalysis.TopFilter.sequences.generatorMatching_cff import *
