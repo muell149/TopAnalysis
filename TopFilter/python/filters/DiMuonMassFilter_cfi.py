@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-filterDiMuonMass = cms.EDAnalyzer("DiMuonMassFilter",
+filterDiMuonMass = cms.EDFilter("DiMuonMassFilter",
 
     ## sources
     muons = cms.InputTag("selectedPatMuons"),

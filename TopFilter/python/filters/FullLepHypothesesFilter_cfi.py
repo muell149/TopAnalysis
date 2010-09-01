@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-filterFullLepHypothesis = cms.EDAnalyzer("FullLepHypothesesFilter",
+filterFullLepHypothesis = cms.EDFilter("FullLepHypothesesFilter",
     hypoKey = cms.InputTag("ttFullLepHypKinSolution","Key"),
     FullLepEvent = cms.InputTag("ttFullLepEvent"),
     weight = cms.InputTag("eventWeight"),
