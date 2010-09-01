@@ -10,6 +10,37 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## muon count filter
 from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 
+
+###########################################################################################
+#
+# CLEANING
+#
+###########################################################################################
+
+from PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff import *
+cleanPatMuons.finalCut = cms.string('isGlobalMuon' 
+                                    '& pt > 20.'  
+                                    '& abs(eta) < 2.5'
+				    '& track.numberOfValidHits > 10'
+				    '& abs(dB) < 0.02'
+				    '& combinedMuon.normalizedChi2 < 10.0'
+				    '& isolationR03.emVetoEt < 4'
+				    '& isolationR03.hadVetoEt < 6'
+				    '&(trackIso+caloIso)/pt < 0.15'
+				   )
+
+cleanPatElectrons.finalCut = cms.string('et > 20.'
+                                        '& abs(eta) < 2.5'
+					'& electronID("eidTight")'
+                                       )
+							  
+cleanPatJets.src = "selectedPatJetsAK5PF"
+cleanPatJets.checkOverlaps.muons.deltaR  = 0.4
+cleanPatJets.checkOverlaps.muons.requireNoOverlaps = True 
+cleanPatJets.checkOverlaps.electrons.deltaR  = 0.4
+cleanPatJets.checkOverlaps.electrons.requireNoOverlaps = True 
+
+
 ###########################################################################################
 #
 # MUON SELECTION
@@ -21,7 +52,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 #
 
 ## muons in tracker range
-tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons', 
+tightMuons = selectedPatMuons.clone(src = 'cleanPatMuons', 
                                     cut = 'abs(eta) < 2.4'					        
 				   )
 ## muons reconstructed globally
@@ -34,7 +65,7 @@ hardMuons = selectedPatMuons.clone(src = 'globalMuons',
 				  )				      
 ## n_hits
 goodTrackMuons = selectedPatMuons.clone(src = 'hardMuons', 
-                                        cut = 'track.numberOfValidHits >= 11' 
+                                        cut = 'track.numberOfValidHits > 10' 
 				       )	
 ## transverse impact parameter
 goodD0Muons = selectedPatMuons.clone(src = 'goodTrackMuons', 
@@ -77,8 +108,8 @@ isolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber 
 
 
 ## hard jet selection
-hardJets = selectedPatJets.clone(src = 'selectedPatJetsAK5PF', 
-                                 cut = 'pt > 40.' 
+hardJets = selectedPatJets.clone(src = 'cleanPatJets', 
+                                 cut = 'pt > 30.' 
 			        )
 ## thight jet selection				   
 tightJets = selectedPatJets.clone(src = 'hardJets', 
@@ -114,6 +145,8 @@ metSelection = cms.EDFilter("PATCandViewCountFilter",
 # SEQUENCES
 #
 ###########################################################################################
+
+applyCleaning = cms.Sequence(cleanPatCandidates)
 
 buildCollections = cms.Sequence(tightMuons *
                                 globalMuons *
