@@ -18,7 +18,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_7TeV_AODSIM-v1/0005/6CA57A3D-EB9C-DE11-B3DB-002481DE4A28.root'
+    '/store/mc/Spring10/TTbar/GEN-SIM-RECO/START3X_V26_S09-v1/0094/FEA115B1-AF4E-DF11-ACA5-0017A4770418.root'
     )
 )
 
@@ -40,33 +40,69 @@ process.GlobalTag.globaltag = cms.string('START38_V7::All')
 ## eventWeight
 process.load("TopAnalysis.TopUtils.EventWeightPlain_cfi")
 
-## std sequence for tqaf layer1
+
+#-------------------------------------------------
+# pat configuration
+#-------------------------------------------------
+
+## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+## use the correct jet energy corrections
+process.patJetCorrFactors.corrSample = "Spring10"
+
+## switch off MC matching
 from PhysicsTools.PatAlgos.tools.coreTools import *
-removeSpecificPATObjects(process,
-                         ['Photons', 'Taus'],
-                         outputInProcess=False)
-removeCleaning(process,
-               outputInProcess=False)
+removeMCMatching(process, ['All'])
 
+## run 361 on 35X
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
+run36xOn35xInput(process)
+
+## calculate d0 wrt the beam spot
+process.patMuons.usePV = False
+
+## Add PfMET to the event content
+from PhysicsTools.PatAlgos.tools.metTools import *
+addPfMET(process, 'PF')
+
+## Add particle flow jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
-switchJetCollection(process, 
-                    cms.InputTag('antikt5CaloJets'),   
-                    doJTA            = True,            
-                    doBTagging       = True,            
-                    jetCorrLabel     = ('AK5','Calo'),  
-                    doType1MET       = True,
-                    genJetCollection = cms.InputTag("antikt5GenJets"),
-                    doJetID          = False,
-                    jetIdLabel       = "antikt5"
-                    )
+## addJetID(process, "antikt5PFJets", "pf")
+addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
+                 doJTA        = True,
+                 doBTagging   = True,
+                 jetCorrLabel = ('AK5', 'PF'),
+                 doType1MET   = False,
+                 doL1Cleaning = False,
+                 doL1Counters = False,
+                 genJetCollection=cms.InputTag('ak5GenJets'),
+                 doJetID      = True,
+                ) 
 
-process.patJetCorrFactors.corrSample = 'Spring10'
-process.patJetCorrFactors.sampleType = "ttbar"
+## embed IsoDeposits
+process.patMuons.isoDeposits = cms.PSet(
+    tracker = cms.InputTag("muIsoDepositTk"),
+    ecal    = cms.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
+    hcal    = cms.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
+    user    = cms.VInputTag(
+                            cms.InputTag("muIsoDepositCalByAssociatorTowers","ho"),
+                            cms.InputTag("muIsoDepositJets")
+                           ),
+    )
 
-from PhysicsTools.PatAlgos.tools.muonTools import addMuonUserIsolation
-addMuonUserIsolation(process)
+## embedding of jet constituents into the jets
+process.patJets.embedCaloTowers = True
+process.patJetsAK5PF.embedPFCandidates = True
+
+## remove TagInfos from jets
+process.patJets.addTagInfos = False
+process.patJetsAK5PF.addTagInfos = False
+
+#process.pat = cms.Path(process.patDefaultSequence)
+
+
+
 
 ## test basic event selection
 process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi")
