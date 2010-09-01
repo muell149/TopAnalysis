@@ -40,7 +40,7 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
 
   //bool oldPass = false;
 
-  bool quadJet40Pass = false;
+  //bool quadJet40Pass = false;
   int triggerJetCounter = 0;
 
   if(whichTrigger_ == "QuadJet80303030"){
