@@ -32,8 +32,8 @@ bottomJetCut = 'abs(eta) < 2.4 & pt > 50.'
 ## define tight JetIDs
 tightCaloJetID  = '& (((corrFactor("raw") * pt) > 25. & jetID.fHPD < 0.95) | (corrFactor("raw") * pt) <= 25.) & '
 tightCaloJetID += '((abs(eta) > 1.0 & (corrFactor("raw") * pt) > 55. & emEnergyFraction < 1.0) | abs(eta) <= 1.0 | (corrFactor("raw") * pt) <= 55.)'
-tightPFJetID    = '& neutralHadronEnergyFraction < 0.9 & '
-tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
+tightPFJetID    = '& neutralHadronEnergyFraction/corrFactor("raw") < 0.9 & '
+tightPFJetID   += 'neutralEmEnergyFraction/corrFactor("raw") < 0.9'
 
 ## setup the jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
