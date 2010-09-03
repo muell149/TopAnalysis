@@ -29,7 +29,8 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
   edm::Handle<pat::TriggerEvent> triggerEvent;
   event.getByLabel(patTriggerEvent_, triggerEvent);
   
-  bool L1Triggered = true;//false;
+  bool L1Triggered = false;
+  bool HLTriggered = false;
   /*
   pat::TriggerFilterRefVector filters = triggerEvent->acceptedFilters();
   for(pat::TriggerFilterRefVector::const_iterator filter = filters.begin(); filter != filters.end(); ++filter){
@@ -40,8 +41,8 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
 
   //bool oldPass = false;
 
-  //bool quadJet40Pass = false;
-  int triggerJetCounter = 0;
+  int l1TriggerJetCounter = 0;
+  int hlTriggerJetCounter = 0;
 
   if(whichTrigger_ == "QuadJet80303030"){
     if(objects[0]->pt() >= 80){
@@ -84,32 +85,54 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
   }
   else if(whichTrigger_ == "QuadJet15U"){
 
-  ////////////////////////////////////
-
-    if(L1Triggered){
-
-  ////////////////////////////////////
-
-      for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
-	if( obj->hasFilterId(85) ){
-	  //std::cout << obj->collection() << std::endl;
-	  //if( obj->pt() >= 40 && obj->collection() == "hltMCJetCorJetIcone5::HLT") {
-	  if( obj->pt() >= 15 && obj->collection() == "hltIterativeCone5CaloJets::HLT") {
-	    ++triggerJetCounter;
-	    if( triggerJetCounter == 4 ){
-	      pass = true;
-	      break;
-	    }
+    for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
+      if( obj->hasFilterId(-84) || obj->hasFilterId(-85) ){
+	//std::cout << obj->collection() << " :: " << obj->eta() << std::endl;
+	if( obj->pt() >= 6 ){
+	  ++l1TriggerJetCounter;
+	  if( l1TriggerJetCounter == 4 ){
+	    L1Triggered = true;
+	    //std::cout << "4 jets on L1" << std::endl;
 	  }
 	}
       }
-      
-  ////////////////////////////////////
-
+      if( obj->hasFilterId(85) ){
+	//std::cout << obj->collection() << std::endl;
+	//if( obj->pt() >= 40 && obj->collection() == "hltMCJetCorJetIcone5::HLT") {
+	if( obj->pt() >= 15 && obj->collection() == "hltIterativeCone5CaloJets::HLT") {
+	  //std::cout << obj->pt() << " :: " << obj->eta() << std::endl;
+	  ++hlTriggerJetCounter;
+	  if( hlTriggerJetCounter == 4 ){
+	    HLTriggered = true;
+	    //std::cout << "4 jets on HL" << std::endl;
+	  }
+	}
+      }
+      if(L1Triggered && HLTriggered){
+	pass = true;
+	//std::cout << "trigger passed" << std::endl;
+	break;
+      }
     }
+  }
+  else if(whichTrigger_ == "Jet50U"){
 
-  ////////////////////////////////////
-
+    for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
+      if( obj->hasFilterId(-84) || obj->hasFilterId(-85) ){
+	if( obj->pt() >= 30 ){
+	  L1Triggered = true;
+	}
+      }
+      if( obj->hasFilterId(85) ){
+	if( obj->pt() >= 50 && obj->collection() == "hltIterativeCone5CaloJets::HLT") {
+	  HLTriggered = true;
+	}
+      }
+      if(L1Triggered && HLTriggered){
+	pass = true;
+	break;
+      }
+    }
   }
 
   /*
