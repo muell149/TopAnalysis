@@ -275,17 +275,17 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       **/
       if( jet->isPFJet() ){
 	// fraction of energy carried by neutral hadrons
-	hists_.find( "nhf" )->second->Fill( jet->neutralHadronEnergyFraction()           , weight );
+	hists_.find( "nhf" )->second->Fill( jet->neutralHadronEnergyFraction() / jet->corrFactor("raw") , weight );
 	// fraction of energy carried by neutral em (photons)
-	hists_.find( "nef" )->second->Fill( jet->neutralEmEnergyFraction()               , weight );
+	hists_.find( "nef" )->second->Fill( jet->neutralEmEnergyFraction()     / jet->corrFactor("raw") , weight );
 	// fraction of energy carried by charged hadrons
-	hists_.find( "chf" )->second->Fill( jet->chargedHadronEnergyFraction()           , weight );
+	hists_.find( "chf" )->second->Fill( jet->chargedHadronEnergyFraction() / jet->corrFactor("raw") , weight );
 	// fraction of energy carried by charged em (electrons)
-	hists_.find( "cef" )->second->Fill( jet->chargedEmEnergyFraction()               , weight );
+	hists_.find( "cef" )->second->Fill( jet->chargedEmEnergyFraction()     / jet->corrFactor("raw") , weight );
 	// multiplicity of charged hadrons
-	hists_.find( "nch" )->second->Fill( jet->pfSpecific().mChargedHadronMultiplicity , weight );
+	hists_.find( "nch" )->second->Fill( jet->pfSpecific().mChargedHadronMultiplicity                , weight );
 	// multiplicity of charged particles
-	hists_.find( "ncp" )->second->Fill( jet->chargedMultiplicity()                   , weight );
+	hists_.find( "ncp" )->second->Fill( jet->chargedMultiplicity()                                  , weight );
       }
 
       /** 
