@@ -22,9 +22,9 @@ JetKinematics::book()
   // jet multiplicty
   hists_["n"  ] = new TH1F( "n"   , "n"   ,  10 ,     0. ,    10. );
   // energy of the jet
-  hists_["en" ] = new TH1F( "en"  , "en"  ,  60 ,     0. ,   300. );
+  hists_["en" ] = new TH1F( "en"  , "en"  , 180 ,     0. ,   900. );
   // transverse momentum of the jet
-  hists_["pt" ] = new TH1F( "pt"  , "pt"  ,  30 ,     0. ,   150. );
+  hists_["pt" ] = new TH1F( "pt"  , "pt"  , 120 ,     0. ,   600. );
   // pseudorapidity eta of the jet
   hists_["eta"] = new TH1F( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the jet
@@ -41,9 +41,9 @@ JetKinematics::book(edm::Service<TFileService>& fs)
   // jet multiplicty
   hists_["n"  ] = fs->make<TH1F>( "n"   , "n"   ,  10 ,     0. ,    10. );
   // energy of the jet
-  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  ,  60 ,     0. ,   300. );
+  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  , 180 ,     0. ,   900. );
   // transverse momentum of the jet
-  hists_["pt" ] = fs->make<TH1F>( "pt"  , "pt"  ,  30 ,     0. ,   150. );
+  hists_["pt" ] = fs->make<TH1F>( "pt"  , "pt"  , 120 ,     0. ,   600. );
   // pseudorapidity eta of the jet
   hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the jet
