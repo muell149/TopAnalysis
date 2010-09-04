@@ -490,11 +490,11 @@ monitorGenerator_2 = cms.Sequence( genParticles_2 *
 ## ---
 
 ## kinfit quality filter
-from TopAnalysis.TopFilter.filters.KinFitQualityFilter_cfi import *
-filterKinFitQuality = filterKinFitQuality.clone( srcB = 'tightLeadingJets', minProb = 0.01 )
-## when TQAF is up-to-date in an official release the above filter can be exchanged with the one below
-#from TopQuarkAnalysis.TopEventProducers.producers.TtFullHadEvtFilter_cfi import *
-#filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') & fitProb > 0.01") )
+#### for back-ward compatibility with releases before CMSSW_3_8_X
+##from TopAnalysis.TopFilter.filters.KinFitQualityFilter_cfi import *
+##filterKinFitQuality = filterKinFitQuality.clone( srcB = 'tightLeadingJets', minProb = 0.01 )
+from TopQuarkAnalysis.TopEventProducers.producers.TtFullHadEvtFilter_cfi import *
+filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') & fitProb > 0.01") )
 
 ## ---
 ##    MONITOR STEP 3
