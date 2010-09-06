@@ -125,7 +125,7 @@ filterStep0 = cms.Sequence(vertex *
                            )
 
 ## to switch verbosity modes of the kinFit
-#ttFullHadEvent.verbosity = 3
+ttFullHadEvent.verbosity = 3
 
 ## configuration of kinematic fit
 kinFitTtFullHadEventHypothesis.maxNComb = -1
@@ -777,6 +777,9 @@ def runOnPF(process):
     process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
     process.tightBottomJets.cut  = bottomJetCut + tightPFJetID
     process.monitoredTightBottomJets.cut = tightJetCut + tightPFJetID
+    process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+    process.kinFitTtFullHadEventHypothesis.udscResolutions = process.udscResolutionPF.functions
+    process.kinFitTtFullHadEventHypothesis.bResolutions    = process.bjetResolutionPF.functions
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'abs'
     process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'abs'
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
