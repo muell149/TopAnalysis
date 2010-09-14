@@ -673,7 +673,6 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_78_3.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_79_3.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_80_2.root',
-	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_81_4.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_83_3.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_84_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_85_4.root',
