@@ -28,4 +28,4 @@ TrigReport     1    0         48          9         39          0 tightBottomJet
 TrigReport     1    0          9          9          0          0 kinFitTtFullHadEventHypothesis
 TrigReport     1    0          9          9          0          0 ttFullHadHypKinFit
 TrigReport     1    0          9          9          0          0 ttFullHadEvent
-TrigReport     1    0          9          2          7          0 filterKinFitQuality
+TrigReport     1    0          9          4          5          0 filterKinFitQuality
