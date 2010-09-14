@@ -28,21 +28,12 @@ import FWCore.ParameterSet.Config as cms
 #                        (subset of official Cert_132440-143336_7TeV_StreamExpress_Collisions10_JSON.txt)
 
 #															     
-#  integrated HF lumi: 1304.66/nb                                                                                                                 
+#  integrated HF lumi: 2193.93/nb                                                                                                                 
 #
-#    number of events: ~4.2M
+#    number of events: ~7.1M
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
-#
-#            cut flow:                 
-#			  before:		  after:
-#    primVtxFilter:       13988497                13050956
-#  beamScrapFilter:       13050956                13050946
-#  HBHENoiseFilter:       13050946                13046612
-#
-#      oneHardMuon:       13046612                 4046754
-#   twoGlobalMuons:       13046612                  282002
 #
 ############################################################################################
 
@@ -629,3 +620,144 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Aug25_49_1.root'] );
 	
 	
+## PromptReco_v4 till September 3: 882.310175 (till now) 
+
+readFiles.extend( [	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_2_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_3_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_4_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_5_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_6_3.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_7_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_8_3.root',	
+        '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_9_3.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_10_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_12_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_13_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_14_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_17_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_19_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_20_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_22_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_23_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_24_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_27_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_29_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_32_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_35_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_36_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_38_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_39_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_40_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_41_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_42_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_44_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_45_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_47_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_48_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_49_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_50_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_54_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_55_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_56_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_57_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_59_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_60_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_61_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_62_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_63_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_65_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_66_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_67_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_72_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_73_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_75_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_76_6.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_78_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_79_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_80_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_81_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_83_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_84_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_85_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_86_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_87_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_89_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_90_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_91_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_94_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_95_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_96_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_97_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_99_1.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_101_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_102_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_103_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_105_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_106_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_107_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_108_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_109_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_111_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_112_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_113_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_114_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_118_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_119_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_121_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_123_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_126_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_128_1.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_131_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_136_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_137_1.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_141_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_142_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_144_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_145_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_146_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_147_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_148_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_149_2.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_151_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_152_3.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_153_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_154_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_155_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_156_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_157_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_158_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_159_2.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_171_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_173_4.root'] );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
