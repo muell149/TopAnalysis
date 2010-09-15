@@ -1,3 +1,4 @@
+#include "TLorentzVector.h"
 #include "TopAnalysis/TopAnalyzer/plugins/FullLepHypothesesAnalyzer.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
@@ -91,6 +92,50 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   const reco::Candidate* Lep    = FullLepEvt->lepton(hypoKey);
   const reco::Candidate* NuBar  = FullLepEvt->neutrinoBar(hypoKey); 
   
+  // print run, ls and evt number as well as some kinematics
+  edm::LogInfo log( "FullLepKinematics" );
+  log << "Found Event\n";
+  log << "-------------------------------------------\n"; 
+  log << "      Run: " << evt.id().run()            << "\n";
+  log << "LumiBlock: " << evt.id().luminosityBlock()<< "\n";
+  log << "    Event: " << evt.id().event()          << "\n";	
+  log << "-------------------------------------------\n";  
+  log << " top mass: " << Top->mass()            << "\n";
+  log << " top pt  : " << Top->pt()              << "\n";
+  log << " top eta : " << Top->eta()             << "\n";  
+  log << " top phi : " << Top->phi()             << "\n";  
+  log << " tbar pt : " << TopBar->pt()           << "\n";
+  log << " tbar    : " << TopBar->eta()          << "\n";  
+  log << " tbar    : " << TopBar->phi()          << "\n"; 
+  log << "-------------------------------------------\n"; 	 
+  log << " lep+ eta: " << LepBar->eta()          << "\n";
+  log << " lep+ phi: " << LepBar->phi()          << "\n";
+  log << " lep+ pt : " << LepBar->pt()           << "\n";  
+  log << " lep- eta: " << Lep->eta()             << "\n";
+  log << " lep- phi: "  << Lep->phi()            << "\n";
+  log << " lep- pt : "  << Lep->pt()             << "\n";	   
+  log << "-------------------------------------------\n";  
+  
+  // calculate dimass    
+  TLorentzVector diLepLVector = TLorentzVector(Lep->px()+LepBar->px(), Lep->py()+LepBar->py(), 
+                                               Lep->pz()+LepBar->pz(), Lep->energy()+LepBar->energy());   
+  double dilepMass = (diLepLVector).M(); 
+  log << "dilepmass : "  << dilepMass            << "\n";      
+  log << "-------------------------------------------\n";       
+  log << "    b eta: " << B->eta()               << "\n";
+  log << "    b phi: " << B->phi()               << "\n";
+  log << "    b pt : " << B->pt()                << "\n";  
+  log << " bbar eta: " << BBar->eta()            << "\n";
+  log << " bbar phi: " << BBar->phi()            << "\n";
+  log << " bbar pt : " << BBar->pt()             << "\n";      
+  log << "-------------------------------------------\n"; 
+  
+      
+  // re-calculate MET from neutrino pt
+  double met = sqrt((Nu->momentum()+NuBar->momentum()).x()*(Nu->momentum()+NuBar->momentum()).x()
+               +(Nu->momentum()+NuBar->momentum()).y()*(Nu->momentum()+NuBar->momentum()).y());
+  log << " met : " << met << "\n";  
+       
   if(!FullLepEvt->isWrongCharge()){
     fillKinHistos(TopKin_,    *Top,    weight);
     fillKinHistos(WplusKin_,  *Wplus,  weight);

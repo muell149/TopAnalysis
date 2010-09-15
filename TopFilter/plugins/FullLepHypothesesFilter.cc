@@ -1,6 +1,5 @@
 #include "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
 #include "TLorentzVector.h"
-
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 FullLepHypothesesFilter::FullLepHypothesesFilter(const edm::ParameterSet& cfg):
@@ -83,6 +82,19 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
     if((B.bDiscriminator(bAlgo_)<bDisc_[0] || BBar.bDiscriminator(bAlgo_)<bDisc_[1]) 
       && (B.bDiscriminator(bAlgo_)<bDisc_[1] || BBar.bDiscriminator(bAlgo_)<bDisc_[0])) return false;
   } 
+  
+  edm::LogInfo log( "FullLepJets" );
+  log << "-------------------------------------------\n";
+  log << "   pt1 = " << B.pt()                   << "\n";
+  log << "  eta1 = " << B.eta()                  << "\n";
+  log << "  phi1 = " << B.phi()                  << "\n";
+  log << "b-tag1 = " << B.bDiscriminator(bAlgo_) << "\n";
+  
+  log << "   pt2 = " << BBar.pt()                << "\n";
+  log << "  eta2 = " << BBar.eta()               << "\n";
+  log << "  phi2 = " << BBar.phi()               << "\n";  
+  log << "b-tag2 = " << BBar.bDiscriminator(bAlgo_)<< "\n";
+  log << "-------------------------------------------\n";
   
   ++afterCuts_;
   afterCutsWeighted_ += weight;
