@@ -52,7 +52,7 @@ cleanPatJets.checkOverlaps.electrons.requireNoOverlaps = True
 #
 
 ## muons in tracker range
-tightMuons = selectedPatMuons.clone(src = 'cleanPatMuons', 
+tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons', 
                                     cut = 'abs(eta) < 2.4'					        
 				   )
 ## muons reconstructed globally
