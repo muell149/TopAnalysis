@@ -18,7 +18,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/mc/Spring10/TTbar/GEN-SIM-RECO/START3X_V26_S09-v1/0094/FEA115B1-AF4E-DF11-ACA5-0017A4770418.root'
+    '/store/mc/Spring10/TTbarJets-madgraph/AODSIM/START3X_V26_S09-v1/0016/2CB76F28-9D47-DF11-959F-003048C693E4.root'
     )
 )
 
