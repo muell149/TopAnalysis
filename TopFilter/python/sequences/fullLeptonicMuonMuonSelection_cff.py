@@ -18,7 +18,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 ###########################################################################################
 
 from PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff import *
-cleanPatMuons.finalCut = cms.string('isGlobalMuon' 
+cleanPatMuons.finalCut = cms.string('isGlobalMuon & isTrackerMuon' 
                                     '& pt > 20.'  
                                     '& abs(eta) < 2.5'
 				    '& track.numberOfValidHits > 10'
@@ -32,6 +32,7 @@ cleanPatMuons.finalCut = cms.string('isGlobalMuon'
 cleanPatElectrons.finalCut = cms.string('et > 20.'
                                         '& abs(eta) < 2.5'
 					'& electronID("eidTight")'
+					'&(trackIso+caloIso)/pt < 0.15'
                                        )
 							  
 cleanPatJets.src = "selectedPatJetsAK5PF"
@@ -106,9 +107,17 @@ isolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber 
 #
 ###########################################################################################
 
-
+## good jet selection
+goodJets = selectedPatJets.clone(src = 'cleanPatJets', 
+                                 cut = 'chargedHadronEnergyFraction > 0.0'
+                                       '& neutralHadronEnergyFraction/corrFactor("raw") < 1.0'
+                                       '& chargedEmEnergyFraction/corrFactor("raw")     < 1.0'
+                                       '& neutralEmEnergyFraction/corrFactor("raw")     < 1.0'
+                                       '& chargedMultiplicity > 0'
+                                       '& nConstituents > 1'
+                                )
 ## hard jet selection
-hardJets = selectedPatJets.clone(src = 'cleanPatJets', 
+hardJets = selectedPatJets.clone(src = 'goodJets', 
                                  cut = 'pt > 30.' 
 			        )
 ## thight jet selection				   
@@ -117,6 +126,7 @@ tightJets = selectedPatJets.clone(src = 'hardJets',
 			         )
 				    				        
 ## Count Filters
+goodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 2)
 hardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
 tightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
 
@@ -157,6 +167,7 @@ buildCollections = cms.Sequence(tightMuons *
 				ecalMipMuons *
 				hcalMipMuons *
 				isolatedMuons *
+				goodJets *
 				hardJets *
 				tightJets *
 				highMETs				
@@ -171,6 +182,7 @@ fullLeptonicMuonMuonSelection = cms.Sequence(tightMuonSelection *
 				             ecalMipMuonSelection *
 				             hcalMipMuonSelection *
 				             isolatedMuonSelection *
+					     goodJetSelection *
 				             hardJetSelection *
 				             tightJetSelection *
 					     metSelection	
