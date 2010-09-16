@@ -29,7 +29,7 @@ import FWCore.ParameterSet.Config as cms
 #                      Cert_143337-144114_7TeV_StreamExpress_Collisions10_JSON.txt 
 #                        (subset of official Cert_132440-144114_7TeV_StreamExpress_Collisions10_JSON.txt)
 #															     
-#  integrated HF lumi: 2692.60/nb                                                                                                                 
+#  integrated HF lumi: 2709.97/nb                                                                                                                 
 #
 #    number of events: ~8.7M
 #
@@ -621,7 +621,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Aug25_49_1.root'] );
 	
 	
-## PromptReco_v4 till September 3: 1380.977901 (till now) 
+## PromptReco_v4 till September 3: 1398.351234 (till now) 
 
 readFiles.extend( [	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_1_5.root',
@@ -785,8 +785,8 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_159_2.root',	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_160_5.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_161_6.root',	
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_162_6.root',	
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_163_6.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_162_7.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_163_6.root',	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_164_7.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_165_6.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep03_166_5.root',
