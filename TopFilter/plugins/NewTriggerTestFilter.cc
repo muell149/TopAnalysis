@@ -50,12 +50,14 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
     }
   }
   else if(whichTrigger_ == "QuadJet40"){
-    if(objects[0]->pt() >= 40){
-      if(objects[1]->pt() >= 40){
-	if(objects[2]->pt() >= 40){
-	  if(objects[3]->pt() >= 40){
-	    pass = true;
-	    //oldPass = true;
+    if(objects.size() >= 4){
+      if(objects[0]->pt() >= 40){
+	if(objects[1]->pt() >= 40){
+	  if(objects[2]->pt() >= 40){
+	    if(objects[3]->pt() >= 40){
+	      pass = true;
+	      //oldPass = true;
+	    }
 	  }
 	}
       }
