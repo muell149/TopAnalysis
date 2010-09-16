@@ -110,9 +110,9 @@ isolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber 
 ## good jet selection
 goodJets = selectedPatJets.clone(src = 'cleanPatJets', 
                                  cut = 'chargedHadronEnergyFraction > 0.0'
-                                       '& neutralHadronEnergyFraction/corrFactor("raw") < 1.0'
-                                       '& chargedEmEnergyFraction/corrFactor("raw")     < 1.0'
-                                       '& neutralEmEnergyFraction/corrFactor("raw")     < 1.0'
+                                       '& neutralHadronEnergyFraction < 1.0'
+                                       '& chargedEmEnergyFraction < 1.0'
+                                       '& neutralEmEnergyFraction < 1.0'
                                        '& chargedMultiplicity > 0'
                                        '& nConstituents > 1'
                                 )
