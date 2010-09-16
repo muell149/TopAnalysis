@@ -4,6 +4,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
+#include "TopQuarkAnalysis/TopKinFitter/interface/CovarianceMatrix.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtFullHadronicEvent.h"
 
 /**
@@ -28,7 +29,7 @@ class KinFitQuality : public DoubleObject<TtFullHadronicEvent, const edm::View<p
   /// default constructor for fw full
   explicit KinFitQuality(const edm::ParameterSet& configFile);
   /// default destructor
-  ~KinFitQuality(){};
+  ~KinFitQuality();
 
   /**
      The following functions have to be implemented for any class
@@ -53,10 +54,15 @@ class KinFitQuality : public DoubleObject<TtFullHadronicEvent, const edm::View<p
   /// everything which needs to be done after the event loop
   void process(){};
 
+ private:
+  /// number of hypotheses to be plotted (probability and chi2)
   unsigned int numberOfHypos_;
 
- private:
-  /// nothing to be done here for the moment
+  /// store the resolutions for the jets
+  std::vector<edm::ParameterSet> udscResolutions_, bResolutions_;
+
+  /// get object resolutions and put them into a matrix
+  CovarianceMatrix * covM;
 };
 
 #endif
