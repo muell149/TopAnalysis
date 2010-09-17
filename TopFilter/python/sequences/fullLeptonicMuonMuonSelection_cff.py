@@ -73,6 +73,7 @@ twoGoodTrackMuonSelection  = countPatMuons.clone(src = 'goodTrackMuons', minNumb
 twoMuHitMuonSelection      = countPatMuons.clone(src = 'muHitMuons',     minNumber = 2)
 twoGoodD0MuonSelection     = countPatMuons.clone(src = 'goodD0Muons',    minNumber = 2)
 twoGoodMuonSelection       = countPatMuons.clone(src = 'goodMuons',      minNumber = 2)
+
 twoIsolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber = 2)
 
 
