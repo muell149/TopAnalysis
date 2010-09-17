@@ -7,8 +7,9 @@
 /// default constructor
 FullLepHypothesesAnalyzer::FullLepHypothesesAnalyzer(const edm::ParameterSet& cfg):
   FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent"    )),
-  hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )),
+  hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"         )), 
   wgt_             (cfg.getParameter<edm::InputTag>("weight"          )),
+  useEvtWgt_       ( cfg.getParameter<bool>        ( "useEventWeight" )),   
   useWrongCharge_  (cfg.getParameter<bool>         ("alsoWrongCharge" )),
   wantSummary_     (cfg.getParameter<bool>         ("wantSummary"     ))
 {
@@ -46,9 +47,13 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   evt.getByLabel(hypoKey_, hypoKeyHandle);
   TtEvent::HypoClassKey& hypoKey = (TtEvent::HypoClassKey&) *hypoKeyHandle;
 
-  edm::Handle<double> wgt;
-  evt.getByLabel(wgt_, wgt);
-  double weight = *wgt;
+  // get weight when indicated, else weight is 1               
+  double weight = 1.;
+  if(useEvtWgt_){ 
+    edm::Handle<double> wgt;
+    evt.getByLabel(wgt_, wgt);
+    weight = *wgt;
+  }
 
   // -----------------------
   // check if hypothesis is valid in this event

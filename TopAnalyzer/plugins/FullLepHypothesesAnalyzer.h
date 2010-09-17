@@ -46,6 +46,8 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   /// event weight given in config 
   edm::InputTag wgt_;
   
+  /// input bool: use a event weight?     
+  bool useEvtWgt_;
   /// bool if also plots for wrong charge combinations  are filled
   bool useWrongCharge_;
   /// bool if summary is wanted after event loop
