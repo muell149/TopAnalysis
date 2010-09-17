@@ -5,14 +5,11 @@
 FullLepHypothesesFilter::FullLepHypothesesFilter(const edm::ParameterSet& cfg):
   hypoKey_    (cfg.getParameter<edm::InputTag>(       "hypoKey"        )),
   FullLepEvt_ (cfg.getParameter<edm::InputTag>(       "FullLepEvent"   )),
-  wgt_        (cfg.getParameter<edm::InputTag>(       "weight"         )),
   jets_       (cfg.getParameter<edm::InputTag>(       "jets"           )),  
   qcdCut_     (cfg.getParameter<double>(              "qcdCut"         )),
   zCut_       (cfg.getParameter<std::vector<double> >("zCut"           )),        
   bAlgo_      (cfg.getParameter<std::string >(        "bAlgorithm"     )),  
-  bDisc_      (cfg.getParameter<std::vector<double> >("bDiscriminator" )),     
-  beforeCuts_( 0 ), validCounter_( 0 ), betweenCuts_( 0 ), afterCuts_( 0 ), 
-  beforeCutsWeighted_( 0. ), validCounterWeighted_( 0. ), betweenCutsWeighted_( 0. ), afterCutsWeighted_( 0. )
+  bDisc_      (cfg.getParameter<std::vector<double> >("bDiscriminator" ))
 {
 }
 
@@ -24,16 +21,9 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
   edm::Handle<int> hypoKeyHandle;
   evt.getByLabel(hypoKey_, hypoKeyHandle);
   TtEvent::HypoClassKey& hypoKey = (TtEvent::HypoClassKey&) *hypoKeyHandle;
-
-  edm::Handle<double> wgt;
-  evt.getByLabel(wgt_, wgt);
-  double weight = *wgt;
-  
+ 
   edm::Handle<std::vector<pat::Jet> > jets; 
   evt.getByLabel(jets_, jets);   
-
-  ++beforeCuts_;
-  beforeCutsWeighted_ += weight;
 
   // -----------------------
   // check if hypothesis is valid in this event
@@ -48,9 +38,6 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
     edm::LogInfo ( "NonValidHyp" ) << "Hypothesis not valid for this event";
     return false; 
   }
- 
-  ++validCounter_;
-  validCounterWeighted_ += weight; 
   
   // get objects needed for this filter
   const reco::Candidate* LepBar = FullLepEvt->leptonBar(hypoKey);    
@@ -70,9 +57,6 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
   if(dilepMass < qcdCut_) return false;
   // cut to surpress Z
   if(dilepMass > zCut_[0] && dilepMass < zCut_[1]) return false;
- 
-  ++betweenCuts_;
-  betweenCutsWeighted_ += weight; 
  
   // make cut(s) on b-tag discriminator
   if(bDisc_.size()==1){
@@ -95,9 +79,6 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
   log << "  phi2 = " << BBar.phi()               << "\n";  
   log << "b-tag2 = " << BBar.bDiscriminator(bAlgo_)<< "\n";
   log << "-------------------------------------------\n";
-  
-  ++afterCuts_;
-  afterCutsWeighted_ += weight;
 
   return true;
 }
@@ -130,38 +111,5 @@ void FullLepHypothesesFilter::beginJob()
 
 void FullLepHypothesesFilter::endJob()
 {
-  edm::LogVerbatim log("topFilter");
 
-  if(beforeCuts_ != beforeCutsWeighted_) {
-    log << std::setw( 20 ) << std::left  << "ValidityFullLepHyp" << " : "
-	<< std::setw( 10 ) << std::right << validCounter_ << " (" 
-	<< std::setw( 10 ) << std::right << validCounterWeighted_  << ") out of "
-	<< std::setw( 10 ) << std::right << beforeCuts_<< " (" 
-	<< std::setw( 10 ) << std::right << beforeCutsWeighted_ << ")" << "\n";
-	
-    log << std::setw( 20 ) << std::left  << "DiLepMassFullLepHyp" << " : "
-	<< std::setw( 10 ) << std::right << betweenCuts_ << " (" 
-	<< std::setw( 10 ) << std::right << betweenCutsWeighted_  << ") out of "
-	<< std::setw( 10 ) << std::right << validCounter_<< " (" 
-	<< std::setw( 10 ) << std::right << validCounterWeighted_ << ")" << "\n";
-	
-    log << std::setw( 20 ) << std::left  << "bTagFullLepHyp" << " : "
-	<< std::setw( 10 ) << std::right << afterCuts_ << " (" 
-	<< std::setw( 10 ) << std::right << afterCutsWeighted_  << ") out of "
-	<< std::setw( 10 ) << std::right << betweenCuts_<< " (" 
-	<< std::setw( 10 ) << std::right << betweenCutsWeighted_ << ")" << "\n";		
-  }
-  else{
-    log << std::setw( 20 ) << std::left  << "ValidityFullLepHyp" << " : "
-	<< std::setw( 10 ) << std::right << validCounter_ << "  out of "
-	<< std::setw( 10 ) << std::right << beforeCuts_ << "\n";  
-	
-    log << std::setw( 20 ) << std::left  << "DiLepMassFullLepHyp" << " : "
-	<< std::setw( 10 ) << std::right << betweenCuts_ << "  out of "
-	<< std::setw( 10 ) << std::right << validCounter_ << "\n";
-	
-    log << std::setw( 20 ) << std::left  << "bTagFullLepHyp" << " : "
-	<< std::setw( 10 ) << std::right << afterCuts_ << "  out of "
-	<< std::setw( 10 ) << std::right << betweenCuts_ << "\n"; 	  	
-  }
 }

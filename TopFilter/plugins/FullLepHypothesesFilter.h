@@ -40,8 +40,6 @@ class FullLepHypothesesFilter : public edm::EDFilter {
   edm::InputTag hypoKey_;  
   /// input is the ttFullLepEvent 
   edm::InputTag FullLepEvt_;
-  /// event weight (needed for ouput summary)
-  edm::InputTag wgt_;
   /// needed for b-tagging cuts and has to be the same collection which has been used for event  reconstruction
   edm::InputTag jets_;
   
@@ -53,24 +51,6 @@ class FullLepHypothesesFilter : public edm::EDFilter {
   std::string bAlgo_;
   /// cut value(s) of the b-tagging discriminator, default is 1 (only one tag required with simpleSV)
   std::vector<double> bDisc_; 
-
-  /// event counter for events before cuts are applied
-  unsigned int beforeCuts_;
-  /// event counter for events with valid event solution
-  unsigned int validCounter_;  
-  /// event counter for events which pass the dilepton mass cut
-  unsigned int betweenCuts_;  
-  /// event counter for events after all cuts
-  unsigned int afterCuts_;
-  
-  /// event counter for weighted number of events before cuts are applied
-  double beforeCutsWeighted_;
-  /// event counter for weighted number of events with valid event solution
-  double validCounterWeighted_;  
-  /// event counter for weighted number of events which pass the dilepton mass cut
-  double betweenCutsWeighted_;
-  /// event counter for weighted number of events after all cuts
-  double afterCutsWeighted_;
 };
 
 #endif
