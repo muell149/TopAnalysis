@@ -13,9 +13,8 @@
 
    \brief   Filter on FullLeptonicEvent hypotheses cuts on invariant lepton lepton mass or b-tags can be applied
 
-   The class vetos events without valid solution for the event hypothesis. It also allows to veto on events where the 
-   invariant mass of the two leptons from the event solution lies between two values given in the config-file or with 
-   an invariant mass lower than a certain value. A cut on the b-tagging discriminator of one or both jets can be applied. 
+   The class vetos events without valid solution for the event hypothesis. 
+   A cut on the b-tagging discriminator of one or both jets can be applied. 
    The b-tagging algorithm as the cut(s) can be steered in the config-file
 */
 
@@ -42,11 +41,7 @@ class FullLepHypothesesFilter : public edm::EDFilter {
   edm::InputTag FullLepEvt_;
   /// needed for b-tagging cuts and has to be the same collection which has been used for event  reconstruction
   edm::InputTag jets_;
-  
-  /// veto cut on low mass resonances like J/Psi, default is 20GeV
-  double qcdCut_;
-  /// veto cuts on Z-mass, default values are (80GeV, 105GeV)
-  std::vector<double> zCut_;
+
   /// b-Tagging to be used, default is 'simpleSecondaryVertexBJetTags'  
   std::string bAlgo_;
   /// cut value(s) of the b-tagging discriminator, default is 1 (only one tag required with simpleSV)
