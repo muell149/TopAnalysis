@@ -3,11 +3,7 @@ import FWCore.ParameterSet.Config as cms
 filterFullLepHypothesis = cms.EDFilter("FullLepHypothesesFilter",
     hypoKey = cms.InputTag("ttFullLepHypKinSolution","Key"),
     FullLepEvent = cms.InputTag("ttFullLepEvent"),
-    jets = cms.InputTag("tightJets"),
-        
-    ## cuts on muon muon mass
-    qcdCut = cms.double(20.),
-    zCut   = cms.vdouble(76.,106.),
+    jets = cms.InputTag("hardJets"),
         
     ## b-tagging (if bDisc has two arguments both jets have 
     ## to pass the cuts, if only one number is given only one jet
