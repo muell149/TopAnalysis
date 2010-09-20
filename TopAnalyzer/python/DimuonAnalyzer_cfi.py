@@ -6,7 +6,7 @@ analyzeMuonPair = cms.EDAnalyzer("DimuonAnalyzer",
     # invariant mass bins in which n_entries is counted
     massBins = cms.vdouble(0.0, 20.0, 76.0, 106.0),     
     # option to weight events
-    useEventWeight = cms.bool(True),    
+    useEventWeight = cms.bool(False),    
     # option to correct hist entries to log bin width
     correctToWidth = cms.bool(False)     
 )
