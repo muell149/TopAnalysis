@@ -95,6 +95,18 @@ from TopAnalysis.TopAnalyzer.FullHadHypothesisAnalyzer_cff import *
 hltQuadJet15U = hltQuadJet30.clone( HLTPaths = ["HLT_QuadJet15U"],
                                     TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI") )
 
+## create personal QuadJet40 trigger
+
+## get trigger module to be added to the path
+from TopAnalysis.TopUtils.patTriggerEvent_cff import *
+
+## the QuadJet40 trigger itself
+hltQJ40 = filterTrigger.clone()
+
+hltQuadJet40 = cms.Sequence(patTriggerSequence *
+                            hltQJ40
+                            )
+
 ## ---
 ##    FILTER STEP 0
 ## ---
@@ -125,7 +137,7 @@ filterStep0 = cms.Sequence(vertex *
                            )
 
 ## to switch verbosity modes of the kinFit
-ttFullHadEvent.verbosity = 3
+#ttFullHadEvent.verbosity = 3
 
 ## configuration of kinematic fit
 kinFitTtFullHadEventHypothesis.maxNComb = -1
@@ -632,6 +644,7 @@ filterEventShapes = filterEventShape.clone( minC = 0.75 )
 analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             hltQuadJet15U         *
                                             #hltQuadJet30         *
+                                            #hltQuadJet40         *
                                             #hltHt200             *
                                             ## do the selections
                                             fullHadronicSelection *
@@ -707,6 +720,9 @@ def runOnRealData(process):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
 
+    ## to switch verbosity modes of the kinFit
+    process.ttFullHadEvent.verbosity = 3
+
 
 ## ---
 ##    remove modules that produce monitoring plots during the cutflow
@@ -774,20 +790,35 @@ def runOnPF(process):
     print 'patMETs  -> patMETsPF'
     print '++++++++++++++++++++++++++++++++++++++++++++'
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
+
+    ## exchange JetID cuts to PFJetID
     process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
     process.tightBottomJets.cut  = bottomJetCut + tightPFJetID
     process.monitoredTightBottomJets.cut = tightJetCut + tightPFJetID
+
+    ## exchange resolutions for PFJets
     process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
     process.kinFitTtFullHadEventHypothesis.udscResolutions = process.udscResolutionPF.functions
     process.kinFitTtFullHadEventHypothesis.bResolutions    = process.bjetResolutionPF.functions
+
+    process.kinFitQuality_2.analyze.udscResolutions        = process.udscResolutionPF.functions
+    process.kinFitQuality_2.analyze.bResolutions           = process.bjetResolutionPF.functions
+    process.kinFitQuality_3.analyze.udscResolutions        = process.udscResolutionPF.functions
+    process.kinFitQuality_3.analyze.bResolutions           = process.bjetResolutionPF.functions
+
+    ## run kinematic fit for PFJets with L2L3 correted jets, as no further corrections are available
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'abs'
     process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'abs'
+
+    ## replace jets and met with PFJets and PFMET
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'patMETs' , 'patMETsPF')
+
+    ## in case of real data, du residual JEC for PFJets
     if(hasattr(process, 'residualCorrectedJets')):
-        process.residualCorrectedJets.jets    = 'selectedPatJetsAK5PF'
-        process.residualCorrectedJets.jetType = 'PF'
+        process.residualCorrectedJets.jets        = 'selectedPatJetsAK5PF'
+        process.residualCorrectedJets.corrections = 'Spring10DataV2_L2L3Residual_AK5PF.txt'
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
