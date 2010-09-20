@@ -99,39 +99,78 @@ process.patJetsAK5PF.embedPFCandidates = True
 process.patJets.addTagInfos = False
 process.patJetsAK5PF.addTagInfos = False
 
-#process.pat = cms.Path(process.patDefaultSequence)
-
-
+## remove cleaning (is applied later)
+from PhysicsTools.PatAlgos.tools.coreTools import *
+removeCleaning(process,False)
 
 
 ## test basic event selection
-process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi")
+
+## filter trigger 
+process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi") 
+process.filterTrigger.hltPaths  = cms.vstring('HLT_Mu9')
+	  
+## filter for muon and jet kinematics, muon iso and quality				     
 process.load("TopAnalysis.TopFilter.sequences.fullLeptonicMuonMuonSelection_cff")
-process.load("TopAnalysis.TopFilter.filters.DiMuonMassFilter_cfi")
-process.filterDiMuonMass.muons = 'isolatedMuons'
+
+## filter for dimuon mass				     
+from TopAnalysis.TopFilter.filters.DiMuonMassFilter_cfi import * 
+process.filterDiMuonMassQCDveto       = filterDiMuonMass.clone()
+process.filterDiMuonMassQCDveto.muons = cms.InputTag("isolatedMuons")
+process.filterDiMuonMassQCDveto.Cut   = cms.vdouble(0.,12.)
+process.filterDiMuonMassZveto       = filterDiMuonMass.clone()
+process.filterDiMuonMassZveto.muons = cms.InputTag("isolatedMuons")
+process.filterDiMuonMassZveto.Cut   = cms.vdouble(76.,106.)
+
+## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+
+## std sequence to produce the ttFullLepEvent
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttFullLepEvtBuilder_cff")
-process.kinSolutionTtFullLepEventHypothesis.muons = cms.InputTag("isolatedMuons")
-process.kinSolutionTtFullLepEventHypothesis.jets = cms.InputTag("tightJets")
-process.kinSolutionTtFullLepEventHypothesis.jetCorrectionLevel = cms.string("part")
-process.ttFullLepHypKinSolution.muons = cms.InputTag("isolatedMuons")
-process.ttFullLepHypKinSolution.jets = cms.InputTag("tightJets")
-process.ttFullLepHypKinSolution.jetCorrectionLevel = cms.string("part")
-process.ttFullLepHypGenMatch.muons = cms.InputTag("isolatedMuons")
-process.ttFullLepHypGenMatch.jets = cms.InputTag("tightJets")
-process.ttFullLepHypGenMatch.jetCorrectionLevel = cms.string("part")
 
-process.load("TopAnalysis.TopFilter.filters.FullLepHypothesesFilter_cfi")
+from TopQuarkAnalysis.TopEventProducers.sequences.ttFullLepEvtBuilder_cff import *		      
+removeTtFullLepHypGenMatch(process)
+#
+setForAllTtFullLepHypotheses(process,"muons","isolatedMuons")
+setForAllTtFullLepHypotheses(process,"jets","hardJets")
+setForAllTtFullLepHypotheses(process,"mets","highMETs")
+setForAllTtFullLepHypotheses(process,"maxNJets",3)
+setForAllTtFullLepHypotheses(process,"jetCorrectionLevel","part")
+
+process.kinSolutionTtFullLepEventHypothesis.neutrino_parameters = cms.vdouble(30.641,
+                                                                              57.941,
+				                                              22.344,
+				                                              57.533,
+				                                              22.232
+								             )
+
+## filter reconstructed events
+from TopAnalysis.TopFilter.filters.FullLepHypothesesFilter_cfi import *
+process.filterHypoValidity = filterFullLepHypothesis.clone()
+process.filterHypoValidity.bAlgorithm      = cms.string("trackCountingHighEffBJetTags")
+process.filterHypoValidity.bDiscriminator  = cms.vdouble(0)
+process.filterHypoValidity.jets            = cms.InputTag("hardJets")
+
+process.filterBtag = filterFullLepHypothesis.clone()
+process.filterBtag.bAlgorithm      = cms.string("trackCountingHighEffBJetTags")
+process.filterBtag.bDiscriminator  = cms.vdouble(1.7)
+process.filterBtag.jets            = cms.InputTag("hardJets")
 
 
+process.p = cms.Path(process.patDefaultSequence *
+                     process.filterTrigger *
+		     process.requireOneGoodMuon *		     
+		     process.applyJetCleaning *
+		     process.buildJets *
+		     process.requireTwoGoodMuons *
+		     process.requireTwoIsolatedMuons *
+		     process.requireOneHardJet *
+		     process.filterDiMuonMassQCDveto *     		                                      		     
+		     process.filterDiMuonMassZveto *
+		     process.requireMET *
+		     process.requireTwoHardJets *      			    		     
+                     process.makeTtFullLepEvent *	     		     
+                     process.filterHypoValidity	*	     
+		     process.filterBtag
+                    )
 
-process.p1 = cms.Path(process.eventWeight *
-                      process.patDefaultSequence *
-                      process.filterTrigger *
-		      process.buildCollections *
-                      process.fullLeptonicMuonMuonSelection *
-		      process.filterDiMuonMass *
-		      process.makeGenEvt *
-                      process.makeTtFullLepEvent *
-		      process.filterFullLepHypothesis
-                     )
