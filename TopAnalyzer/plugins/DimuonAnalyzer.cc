@@ -38,15 +38,25 @@ DimuonAnalyzer::beginJob()
   /**
      histogram definitions
   **/ 
-  // invariant muon muon mass for right charge  
-  dimassRC_= fs->make<TH1D>( "dimassRC", "dimassRC", nbins, bins);
+  // invariant muon muon mass for right charge (log binning) 
+  dimassLogRC_= fs->make<TH1D>( "dimassLogRC", "dimassLogRC", nbins, bins);
+  dimassLogRC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
+  dimassLogRC_->GetYaxis()->SetTitle("N / 1GeV");
+  
+  // invariant muon muon mass for wrong charge (log binning)    
+  dimassLogWC_= fs->make<TH1D>( "dimassLogWC", "dimassLogWC", nbins, bins);
+  dimassLogWC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
+  dimassLogWC_->GetYaxis()->SetTitle("N / 1GeV");  
+  
+  // invariant muon muon mass for right charge
+  dimassRC_= fs->make<TH1D>( "dimassRC", "dimassRC", 150,10.,310);
   dimassRC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
-  dimassRC_->GetYaxis()->SetTitle("N / 1GeV");
+  dimassRC_->GetYaxis()->SetTitle("N / 2GeV");
   
   // invariant muon muon mass for wrong charge   
-  dimassWC_= fs->make<TH1D>( "dimassWC", "dimassWC", nbins, bins);
+  dimassWC_= fs->make<TH1D>( "dimassWC", "dimassWC", 150,10.,310);
   dimassWC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
-  dimassWC_->GetYaxis()->SetTitle("N / 1GeV");  
+  dimassWC_->GetYaxis()->SetTitle("N / 2GeV");  
   
   // number of muons in collection
   nMu_  = fs->make<TH1D>( "nMu" , "Number of Muons"  , 10, -0.5, 9.5);
@@ -118,12 +128,15 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
       
   // fill dimuon mass histograms:
   //right charge
-  if(!isWrongCharge)  
-    dimassRC_  ->Fill( dilepMass, weight);    
+  if(!isWrongCharge){  
+    dimassLogRC_->Fill( dilepMass, weight); 
+    dimassRC_   ->Fill( dilepMass, weight);
+  }     
   // wrong charge
-  else 
-    dimassWC_  ->Fill( dilepMass, weight);    
-
+  else{ 
+    dimassLogWC_->Fill( dilepMass, weight);    
+    dimassWC_   ->Fill( dilepMass, weight);  
+  }
   // calculate distance between leading 2 muons and fill it in hist
   drMu_->Fill(deltaR(mu1.eta(), mu1.phi() ,mu2.eta(), mu2.phi()));
      
@@ -189,9 +202,9 @@ DimuonAnalyzer::endJob()
   // correct entries in dimuon mass histograms to bin width
   if(!correct2width_) return;
   
-  for(int i=1; i<=dimassRC_->GetNbinsX(); ++i){
-    dimassRC_->SetBinContent(i,dimassRC_->GetBinContent(i)/dimassRC_->GetBinWidth(i));
-    dimassWC_->SetBinContent(i,dimassWC_->GetBinContent(i)/dimassWC_->GetBinWidth(i));
+  for(int i=1; i<=dimassLogRC_->GetNbinsX(); ++i){
+    dimassLogRC_->SetBinContent(i,dimassLogRC_->GetBinContent(i)/dimassLogRC_->GetBinWidth(i));
+    dimassLogWC_->SetBinContent(i,dimassLogWC_->GetBinContent(i)/dimassLogWC_->GetBinWidth(i));
   }
 }
 

@@ -55,6 +55,10 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     typedef std::vector<pat::Muon> PatMuonCollection;
     /// true if leading muons have same charge
     bool isWrongCharge; 
+    /// log binning plot for right-charge dimuon mass    
+    TH1D * dimassLogRC_;
+    /// log binning plot for wrong-charge dimuon mass
+    TH1D * dimassLogWC_;
     /// plot for right-charge dimuon mass    
     TH1D * dimassRC_;
     /// plot for wrong-charge dimuon mass
