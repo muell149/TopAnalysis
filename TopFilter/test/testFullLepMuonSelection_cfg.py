@@ -157,20 +157,20 @@ process.filterBtag.bDiscriminator  = cms.vdouble(1.7)
 process.filterBtag.jets            = cms.InputTag("hardJets")
 
 
-process.p = cms.Path(process.patDefaultSequence *
-                     process.filterTrigger *
-		     process.requireOneGoodMuon *		     
-		     process.applyJetCleaning *
-		     process.buildJets *
-		     process.requireTwoGoodMuons *
-		     process.requireTwoIsolatedMuons *
-		     process.requireOneHardJet *
-		     process.filterDiMuonMassQCDveto *     		                                      		     
-		     process.filterDiMuonMassZveto *
-		     process.requireMET *
-		     process.requireTwoHardJets *      			    		     
-                     process.makeTtFullLepEvent *	     		     
-                     process.filterHypoValidity	*	     
-		     process.filterBtag
-                    )
+process.p1 = cms.Path(process.patDefaultSequence *
+                      process.filterTrigger *
+		      process.requireOneGoodMuon *		     
+		      process.applyJetCleaning *
+		      process.buildJets *
+		      process.requireTwoGoodMuons *
+		      process.requireTwoIsolatedMuons *
+		      process.requireOneHardJet *
+		      process.filterDiMuonMassQCDveto *     		                                      		     
+		      process.filterDiMuonMassZveto *
+		      process.requireMET *
+		      process.requireTwoHardJets *      			    		     
+                      process.makeTtFullLepEvent *	     		     
+                      process.filterHypoValidity	*	     
+		      process.filterBtag
+                     )
 

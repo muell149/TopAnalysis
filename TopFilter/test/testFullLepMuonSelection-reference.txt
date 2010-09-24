@@ -1,4 +1,4 @@
-TrigReport ---------- Modules in Path: p ------------
+TrigReport ---------- Modules in Path: p1 ------------
 TrigReport  Trig Bit#    Visited     Passed     Failed      Error Name
 TrigReport     1    0       1881       1881          0          0 patElectrons
 TrigReport     1    0       1881       1881          0          0 patMuons
