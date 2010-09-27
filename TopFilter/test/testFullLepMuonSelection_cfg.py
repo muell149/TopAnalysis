@@ -114,11 +114,11 @@ process.filterTrigger.hltPaths  = cms.vstring('HLT_Mu9')
 process.load("TopAnalysis.TopFilter.sequences.fullLeptonicMuonMuonSelection_cff")
 
 ## filter for dimuon mass				     
-from TopAnalysis.TopFilter.filters.DiMuonMassFilter_cfi import * 
-process.filterDiMuonMassQCDveto       = filterDiMuonMass.clone()
+from TopAnalysis.TopFilter.filters.DiMuonFilter_cfi import * 
+process.filterDiMuonMassQCDveto       = filterMuonPair.clone()
 process.filterDiMuonMassQCDveto.muons = cms.InputTag("isolatedMuons")
 process.filterDiMuonMassQCDveto.Cut   = cms.vdouble(0.,12.)
-process.filterDiMuonMassZveto       = filterDiMuonMass.clone()
+process.filterDiMuonMassZveto       = filterMuonPair.clone()
 process.filterDiMuonMassZveto.muons = cms.InputTag("isolatedMuons")
 process.filterDiMuonMassZveto.Cut   = cms.vdouble(76.,106.)
 
