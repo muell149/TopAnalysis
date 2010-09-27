@@ -1,7 +1,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-#include "TopAnalysis/TopFilter/plugins/DiMuonMassFilter.h"
-DEFINE_FWK_MODULE(DiMuonMassFilter);
+#include "TopAnalysis/TopFilter/plugins/DiMuonFilter.h"
+DEFINE_FWK_MODULE(DiMuonFilter);
 
 #include "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
 DEFINE_FWK_MODULE(FullLepHypothesesFilter);
