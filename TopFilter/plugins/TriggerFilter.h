@@ -38,10 +38,14 @@ class TriggerFilter : public edm::EDFilter {
         
      /// triger result input collection	
     edm::InputTag trigResults_;
-    /// triggers to be studied given in config
+    /// triggers to be selected given in config
     std::vector<std::string> hltPaths_;
+    /// triggers which may not have fired
+    std::vector<std::string> vetoPaths_;    
     /// number of trigger paths given in config
-    int n_TrigPaths;      
+    int n_TrigPaths; 
+    /// number of forbidden trigger paths given in config
+    int n_VetoPaths;          
 };
 
 #endif
