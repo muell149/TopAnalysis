@@ -29,20 +29,20 @@ import FWCore.ParameterSet.Config as cms
 #                      Cert_143337-144114_7TeV_StreamExpress_Collisions10_JSON.txt 
 #                        (subset of official Cert_132440-144114_7TeV_StreamExpress_Collisions10_JSON.txt)
 #															     
-#  integrated HF lumi: 2950.85/nb                                                                                                                 
+#  integrated HF lumi: 2974.16/nb                                                                                                                 
 #
-#    number of events: 7574461
+#    number of events: 7639914
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
 #			  before:		  after:
-#    primVtxFilter:	  20238177		  18984770
-#  beamScrapFilter:	  18984770		  18984756
-#  HBHENoiseFilter:	  18984748		  18977108
+#    primVtxFilter:	  20326596		  19069495
+#  beamScrapFilter:	  19069495		  19069481
+#  HBHENoiseFilter:	  19069473		  19061791
 #
-#      oneHardMuon:	  18977108		   7233245
-#   twoGlobalMuons:	  18977108		    522781
+#      oneHardMuon:	  19061791		   7278807
+#   twoGlobalMuons:	  19061791		    526210
 #
 ############################################################################################
 
@@ -629,7 +629,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Aug25_49_1.root'] );
 	
 	
-# PromptReco_v4 till September 3: 1639.231453\nb (till now) 
+# PromptReco_v4 till September 3: 1662.538304\nb (till now) 
 
 readFiles.extend( [	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_1_1.root',
@@ -684,9 +684,9 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_50_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_51_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_52_1.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_53_1.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_53_4.root',	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_54_2.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_55_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_55_4.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_56_2.root',
 	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_57_1.root',
 	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_58_1.root',
@@ -720,8 +720,8 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_86_3.root',
 	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_87_1.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_88_2.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_89_1.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_90_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_89_4.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_90_4.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_91_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_92_1.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_93_2.root',
@@ -898,7 +898,7 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_260_1.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_261_1.root',	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_262_1.root',	
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_263_1.root',	
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_263_4.root',	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_264_1.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_265_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_266_1.root',
