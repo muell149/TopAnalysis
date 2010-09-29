@@ -41,9 +41,11 @@ class VertexAnalyzer : public EDAnalyzer {
     virtual void endJob();
         
      /// input vertex collection
-    InputTag vertices_;
+    InputTag vertices_;    
+     /// input muon collection
+    InputTag muons_;    
     
-    TH1I* isFake_;
+    TH1D* isFake_;
     TH1D* posX_;
     TH1D* posY_;    
     TH1D* posZ_;
@@ -51,8 +53,9 @@ class VertexAnalyzer : public EDAnalyzer {
     TH1D* posXerr_;
     TH1D* posYerr_;    
     TH1D* posZerr_;              
-    TH1I* nTracks_;
-    TH1I* nDof_;          
+    TH1D* nTracks_;
+    TH1D* nDof_; 
+    TH1D* dzMu_;         
 };
 
 #endif

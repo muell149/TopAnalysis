@@ -1,11 +1,13 @@
 #include "TopAnalysis/TopAnalyzer/plugins/VertexAnalyzer.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 
 VertexAnalyzer::VertexAnalyzer(const ParameterSet& cfg)
 {
-  vertices_ = cfg.getParameter<InputTag>("vertices");
+  vertices_ = cfg.getParameter<InputTag>("vertices"),
+  muons_    = cfg.getParameter<InputTag>("muons");
 }
 
 VertexAnalyzer::~VertexAnalyzer()
@@ -20,8 +22,8 @@ VertexAnalyzer::beginJob()
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" ); 
   }
-      
-  isFake_= fs->make<TH1I>( "isFake", "Is Fake Vertex", 2,-0.5,1.5);
+   
+  isFake_= fs->make<TH1D>( "isFake", "Is Fake Vertex", 2,-0.5,1.5);
   isFake_->GetXaxis()->SetBinLabel( 1, "false" );
   isFake_->GetXaxis()->SetBinLabel( 1, "true" );  
   isFake_->GetYaxis()->SetTitle("N");  
@@ -57,13 +59,17 @@ VertexAnalyzer::beginJob()
   posZerr_->GetYaxis()->SetTitle("N / 0.01cm"); 
 
   
-  nTracks_= fs->make<TH1I>( "nTracks", "Number of Tracks at Vertex", 200,0,200);
+  nTracks_= fs->make<TH1D>( "nTracks", "Number of Tracks at Vertex", 200,0,200);
   nTracks_->GetXaxis()->SetTitle("N_{tracks}");
   nTracks_->GetYaxis()->SetTitle("N");
   
-  nDof_= fs->make<TH1I>( "nDof", "N_{dof} at Vertex", 200,0,200);
+  nDof_= fs->make<TH1D>( "nDof", "N_{dof} at Vertex", 200,0,200);
   nDof_->GetXaxis()->SetTitle("N_{dof}");
-  nDof_->GetYaxis()->SetTitle("N");             
+  nDof_->GetYaxis()->SetTitle("N");  
+  
+  dzMu_= fs->make<TH1D>( "dzMu", "z-Distance #mu,Vrtx", 200,0,20);
+  dzMu_->GetXaxis()->SetTitle("#Delta z [cm]");
+  dzMu_->GetYaxis()->SetTitle("N");               
 }
 
 void
@@ -71,7 +77,7 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 {
   Handle<std::vector<reco::Vertex> > vertices; 
   evt.getByLabel(vertices_, vertices); 
-
+    
   reco::Vertex primaryVertex = vertices->front();
   
   isFake_->Fill(primaryVertex.isFake());
@@ -88,7 +94,14 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
   posZerr_->Fill(primaryVertex.zError()); 
   
   nTracks_->Fill(primaryVertex.tracksSize()); 
-  nDof_   ->Fill(primaryVertex.ndof());    
+  nDof_   ->Fill(primaryVertex.ndof());  
+  
+  Handle<std::vector<pat::Muon> > muons; 
+  evt.getByLabel(muons_, muons);     
+  
+  for(std::vector<pat::Muon>::const_iterator muon = muons->begin(); muon!= muons->end(); ++muon) {  
+    dzMu_->Fill(abs(muon->vz()-primaryVertex.z()));
+  } 
 }
 
 void
