@@ -370,6 +370,10 @@ process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLea
 ## btag selection cuts
 process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
 process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
+process.bottomJetKinematicsNjets1=process.bottomJetKinematics.clone()
+process.bottomJetKinematicsNjets2=process.bottomJetKinematics.clone()
+process.bottomJetKinematicsNjets3=process.bottomJetKinematics.clone()
+process.bottomJetKinematicsNjets4=process.bottomJetKinematics.clone()
 ## btag monitoring before jetcuts
 process.tightJetQualityBeforeJetCuts     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
 process.bottomJetKinematicsBeforeJetCuts = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
@@ -427,19 +431,23 @@ process.monitorBtagCuts = cms.Sequence(process.tightJetQuality     +
 process.jetMultiplicity1 = cms.Sequence(process.leadingJetSelectionNjets1             +
                                         process.analyzeTightMuonCrossSectionRecNjets1 +
                                         process.analyzePfMETNjets1                    +
-                                        process.analyzePatMETNjets1                   )
+                                        process.analyzePatMETNjets1                   +
+                                        process.bottomJetKinematicsNjets1             )
 process.jetMultiplicity2 = cms.Sequence(process.leadingJetSelectionNjets2             +
                                         process.analyzeTightMuonCrossSectionRecNjets2 +
                                         process.analyzePfMETNjets2                    +
-                                        process.analyzePatMETNjets2                   )
+                                        process.analyzePatMETNjets2                   +
+                                        process.bottomJetKinematicsNjets2             )
 process.jetMultiplicity3 = cms.Sequence(process.leadingJetSelectionNjets3             +
                                         process.analyzeTightMuonCrossSectionRecNjets3 +
                                         process.analyzePfMETNjets3                    +
-                                        process.analyzePatMETNjets3                   )
+                                        process.analyzePatMETNjets3                   +
+                                        process.bottomJetKinematicsNjets3             )
 process.jetMultiplicity4 = cms.Sequence(process.leadingJetSelectionNjets4             +
                                         process.analyzeTightMuonCrossSectionRecNjets4 +
                                         process.analyzePfMETNjets4                    +
-                                        process.analyzePatMETNjets4                   )
+                                        process.analyzePatMETNjets4                   +
+                                        process.bottomJetKinematicsNjets4             )
 process.jetMultiplicity3Btag = cms.Sequence(process.leadingJetSelectionNjets3b                 +
                                             process.bottomJetSelectionb                        +
                                             process.analyzeTightMuonCrossSectionRecNjets3Btag  +
