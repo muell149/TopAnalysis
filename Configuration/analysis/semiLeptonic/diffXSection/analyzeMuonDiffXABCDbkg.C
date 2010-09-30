@@ -42,7 +42,7 @@ std::vector<double> fitExponentialExtrapolate2(TH1& hist, const double xmin=0., 
 //std::pair<double,double> exponentialFit2(double x, const double a, const double sa, const double b, const double sb);
 
 
-void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/data/data1808json/analyzeDiffXData_840nb.root")
+void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root")
 {
   // ---
   //    main function parameters
@@ -300,7 +300,7 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   // create jet multiplicity label
   std::vector<TPaveLabel*> jetMultiplicity_;
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){ 
-    TPaveLabel *jet = new TPaveLabel(0.11, 0.83, 0.62, 1.05, "N(Jets) #geq "+getTStringFromInt(mult+1), "br NDC");
+    TPaveLabel *jet = new TPaveLabel(0.11, 0.80, 0.62, 1.02, "N(Jets) #geq "+getTStringFromInt(mult+1), "br NDC");
     jet->SetFillStyle(0);
     jet->SetBorderSize(0);
     jet->SetTextSize(0.26);
