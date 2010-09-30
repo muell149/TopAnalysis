@@ -7,8 +7,8 @@
 ## 2) inclusive top cross section measurement
 
 ## define processed data to be analyzed (output of data: ./analyzeMuonDiffXSec_cfg.py - MC: ./analyzeMuonDiffXSec_cfg.py)
-dataSample=\"./diffXSecFromSignal/data/data1808json/analyzeDiffXData_840nb_residualJC.root\"
-dataLuminosity=840
+dataSample=\"./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root\"
+dataLuminosity=2880
 echo
 echo doing the full l+jets analysis
 echo used data: $dataSample
@@ -58,7 +58,7 @@ root -l -q -b './analyzeMuonDiffXABCDbkg.C+(50., true, true, '$dataSample')' >> 
 rm ./diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt
 echo processing analyzeMuonDiffXEfficiency.C \(plots done for 5\/pb\)
 sleep 2
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true)' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 echo done
 ## b4) estimate N(W) via charge asymmetry method (MC - plots: 50 / pb)
 rm ./diffXSecFromSignal/plots/chargeAsymmetrie/wjetsEstimationNumbers.txt
@@ -67,18 +67,71 @@ sleep 2
 root -l -q -b './wjetsAsymmetrieEstimator.C+(50., true, true, '$dataSample')' >> './diffXSecFromSignal/plots/chargeAsymmetrie/wjetsEstimationNumbers.txt'
 echo done
 
-## c) do the final cross section calculation
-## create plots for the analyze analyzeMuonDiffXSec.C Makro 
-## and save all output within one single .txt file
-## example: analyzeMuonDiffXSec.C+(luminosity, savePlots, applyCorrections:.txtFile, pathOfDataFile.root)
+## c) systematic variations
+## do the whole analysis applying different systematic variations
+## and save all results in .txt file needed to calculate systematic errors
+## example: analyzeMuonDiffXSec.C+(luminosity, savePlots, applyCorrections:.txtFile, pathOfDataFile.root, useMG=false, JES="", lumiShift=1.0, EffScaleFactor=1.0, QCDVariation=1.0, finalPlots=false)
+echo processing systematic variations
+echo 1 as reference without variation
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, false)'
+echo 2 using Madgraph ttbar absorped via eff
+sleep 2
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, true, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false)'
+echo 3 JES shift up absorped via eff
+sleep 2
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "up")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "up", 1.0, 1.0, 1.0, 1.0, false)'
+echo 4 JES shift down absorped via eff
+sleep 2
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "down")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "down", 1.0, 1.0, 1.0, 1.0, false)'
+echo 5 Lumi shift up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, false)'
+echo 6 Lumi shift down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.89, 1.0, 1.0, 1.0, false)'
+echo 7 Eff shift up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.045, 1.0, 1.0, false)'
+echo 8 Eff shift down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 0.955, 1.0, 1.0, false)'
+echo 9 QCD estimation up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 2.0, 1.0, false)'
+echo 10 QCD estimation down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.0, 1.0, false)'
+echo 11 Wjets estimation up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.3, false)'
+echo 12 Wjets estimation down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.7, false)'
 
+## d) do the final cross section calculation
+## create final plots using the analyzeMuonDiffXSec.C Makro 
+## calculate systematic errors and save all output within one single .txt file
+## example: analyzeMuonDiffXSec.C+(luminosity, savePlots, applyCorrections:.txtFile, pathOfDataFile.root)
 echo processing analyzeMuonDiffXSec.C
 sleep 2
 date >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample')' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, false)' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
+## with logarithmic plots
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, true)' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
 echo
 
-## d) copy plot to local folder on AFS
+## e) monitor systematic shifts(JES, N(W), QCD(MC&ABCD) )
+rm ./diffXSecFromSignal/plots/systematicVariations/*.*
+echo monitor systematic shifts
+sleep 2
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample')'
+
+
+## f) copy plot to local folder on AFS
 echo starting to copy plots...
 ## i)   analysis
 scp -r ./diffXSecFromSignal/plots/earlyData/* mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
@@ -88,4 +141,6 @@ scp -r ./diffXSecFromSignal/plots/ABCD mgoerner@uhh-cms014.desy.de:/afs/desy.de/
 scp -r ./diffXSecFromSignal/plots/chargeAsymmetrie mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
 ## iv)  efficiency
 scp -r ./diffXSecFromSignal/plots/efficiency mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
+## v)  efficiency
+scp -r ./diffXSecFromSignal/plots/systematicVariations mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
 echo ...ready
