@@ -10,8 +10,10 @@ execfile("/afs/naf.desy.de/user/g/goerner/semileptonic361/analyzeMuonDiffXSecAll
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 massSearchReplaceAnyInputTag(process.p1, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets') 
 massSearchReplaceAnyInputTag(process.p2, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets')
+massSearchReplaceAnyInputTag(process.p3, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets')
 massSearchReplaceAnyInputTag(process.p1, 'patMETs'        , 'scaledJetEnergy:patMETs') 
 massSearchReplaceAnyInputTag(process.p2, 'patMETs'        , 'scaledJetEnergy:patMETs')
+massSearchReplaceAnyInputTag(process.p3, 'patMETs'        , 'scaledJetEnergy:patMETs')
 
 ## get JES-shifting module
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
@@ -26,6 +28,8 @@ process.scaledJetEnergy.scaleFactor = 1.1
 process.p1.replace(process.semiLeptonicSelection,
                    process.scaledJetEnergy * process.semiLeptonicSelection)
 process.p2.replace(process.semiLeptonicSelection,
+                   process.scaledJetEnergy * process.semiLeptonicSelection)
+process.p3.replace(process.semiLeptonicSelection,
                    process.scaledJetEnergy * process.semiLeptonicSelection)
 
 ## change monitoring to shifted collection
