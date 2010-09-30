@@ -38,7 +38,7 @@ std::vector<std::pair<double,double> > fitLinear(TH1F& hist, double xmin, double
 template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 
-void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false)
+void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false)
 { 
   // ---
   //    main function parameters
@@ -128,29 +128,29 @@ void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false)
   TLegend *leg0 = new TLegend(0.25, 0.70, 1.0, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("inclusive R for p_{t} (#mu) > 20 GeV, |#eta| < 2.1" );
-  leg0->AddEntry(RNjetsMu ,"W->#mu#nu & W->#tau#nu->#mu#nu#nu)", "PL");
-  leg0->AddEntry(RNjetsWMu,"W->#mu#nu", "PL");
+  leg0->SetHeader("inclusive R for p_{ t} (#mu) > 20 GeV, | #eta | < 2.1" );
+  leg0->AddEntry(RNjetsMu ,"W -> #mu#nu_{#mu} & W -> #tau#nu->#mu#nu_{#mu}#nu_{#tau}", "PL");
+  leg0->AddEntry(RNjetsWMu,"W -> #mu#nu_{#mu}"                                       , "PL");
 
   // create a legend for asymmetry parameter from different leptons without jet selection
   TLegend *leg1 = new TLegend(0.21, 0.65, 0.99, 0.89);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg1->SetHeader("R_{gen MC}: W+jets(MADGRAPH), 406 pb^{-1}");
-  leg1->AddEntry( Rpt_["mu"  ][0], "#mu from W & W->#tau", "P");
-  leg1->AddEntry( Rpt_["We"  ][0], "e from W"            , "P");
-  leg1->AddEntry( Rpt_["Wtau"][0], "#tau from W"         , "P");
-  leg1->AddEntry( Rpt_["Wmu" ][0], "#mu from W"          , "P");
+  leg1->SetHeader("R_{gen MC}: W+jets(MADGRAPH), 406 pb^ { -1}");
+  leg1->AddEntry( Rpt_["mu"  ][0], "#mu from W & W -> #tau", "P");
+  leg1->AddEntry( Rpt_["We"  ][0], "e from W"              , "P");
+  leg1->AddEntry( Rpt_["Wtau"][0], "#tau from W"           , "P");
+  leg1->AddEntry( Rpt_["Wmu" ][0], "#mu from W"            , "P");
 
   // create a legend for asymmetry parameter from different leptons for >= 1 jet selection
   TLegend *leg2 = new TLegend(0.21, 0.65, 0.99, 0.89);
   leg2->SetFillStyle(0);
   leg2->SetBorderSize(0);
-  leg2->SetHeader("R_{gen MC}: W+jets(MADGRAPH), 406 pb^{-1}");
-  leg2->AddEntry( Rpt_["mu"  ][1], "#mu from W & W->#tau", "P");
-  leg2->AddEntry( Rpt_["We"  ][1], "e from W"            , "P");
-  leg2->AddEntry( Rpt_["Wtau"][1], "#tau from W"         , "P");
-  leg2->AddEntry( Rpt_["Wmu" ][1], "#mu from W"          , "P");
+  leg2->SetHeader("R_{gen MC}: W+jets(MADGRAPH), 406 pb^ { -1}");
+  leg2->AddEntry( Rpt_["mu"  ][1], "#mu from W & W -> #tau", "P");
+  leg2->AddEntry( Rpt_["We"  ][1], "e from W"              , "P");
+  leg2->AddEntry( Rpt_["Wtau"][1], "#tau from W"           , "P");
+  leg2->AddEntry( Rpt_["Wmu" ][1], "#mu from W"            , "P");
 
   // R(ptmu) for all jet multiplicities for W->mu && W->tau->mu
   TLegend *leg3a = new TLegend(0.21, 0.73, 1.0, 0.93);
@@ -269,6 +269,7 @@ void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false)
     double sa= inclusiveRfit_[0].second;
     double sb= inclusiveRfit_[1].second;
     double inclusiveRfit = a*(njets)+b;
+    //inclusiveRfit = (a-2*sa)*(njets)+b;
     double errorInclusiveRfit = sqrt( (njets*sa)*(njets*sa) + sb*sb );
     // print out to shell
     if(njets==1) std::cout << std::endl << "inclusive R (linear fit) for W->mu && W->tau->mu" << std::endl;

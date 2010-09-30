@@ -257,7 +257,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // draw canvas
   canv1->cd(0);
   canv1->SetTitle("TopNjets1MuonCharge"+lum+"pb");
-  axesStyle(*pt_[Njets_[0]][kTtbar], "N_{jets} #geq", "N_{W}", 0., 1.2*pt_[Njets_[0]][kTtbar]->GetMaximum());
+  axesStyle(*pt_[Njets_[0]][kTtbar], "p_{t} (#mu)", "N_{t#bar{t}}", 0., 1.2*pt_[Njets_[0]][kTtbar]->GetMaximum(), 0.05, 1.3);
   histogramStyle(*ptMuPlus_ [Njets_[0]][kTtbar], kBlue , 2, 20, 0.5); 
   histogramStyle(*ptMuMinus_[Njets_[0]][kTtbar], kRed  , 3, 20, 0.5); 
   histogramStyle(*pt_       [Njets_[0]][kTtbar], kBlack, 1, 20, 0.5);
@@ -271,7 +271,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // draw canvas
   canv2->cd(0);
   canv2->SetTitle("WjetsNjets1MuonCharge"+lum+"pb");
-  axesStyle(*pt_[Njets_[0]][kWjets], "N_{jets} #geq", "N_{W}", 0., 1.2*pt_[Njets_[0]][kWjets]->GetMaximum());
+  axesStyle(*pt_[Njets_[0]][kWjets], "p_{t} (#mu)", "N_{W}", 0., 1.2*pt_[Njets_[0]][kWjets]->GetMaximum(), 0.05, 1.3);
   histogramStyle(*ptMuPlus_ [Njets_[0]][kWjets], kBlue , 2, 20, 0.5); 
   histogramStyle(*ptMuMinus_[Njets_[0]][kWjets], kRed  , 3, 20, 0.5); 
   histogramStyle(*pt_       [Njets_[0]][kWjets], kBlack, 1, 20, 0.5);

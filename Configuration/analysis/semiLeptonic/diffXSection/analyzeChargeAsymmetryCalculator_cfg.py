@@ -21,7 +21,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    '/store/user/henderle/Spring10/WJets_MAD_new/PATtuple_100_1.root'
+    '/store/user/henderle/Spring10/WJets_MAD/PATtuple_100_2.root'
     )
 )
 
