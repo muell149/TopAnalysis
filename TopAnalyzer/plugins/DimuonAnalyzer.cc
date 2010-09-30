@@ -49,25 +49,30 @@ DimuonAnalyzer::beginJob()
   dimassLogWC_->GetYaxis()->SetTitle("N / 1GeV");  
   
   // invariant muon muon mass for right charge
-  dimassRC_= fs->make<TH1D>( "dimassRC", "dimassRC", 150,10.,310);
+  dimassRC_= fs->make<TH1D>( "dimassRC", "Invariant #mu#mu mass, unlike charge", 150,10.,310);
   dimassRC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
   dimassRC_->GetYaxis()->SetTitle("N / 2GeV");
   
   // invariant muon muon mass for wrong charge   
-  dimassWC_= fs->make<TH1D>( "dimassWC", "dimassWC", 150,10.,310);
+  dimassWC_= fs->make<TH1D>( "dimassWC", "Invariant #mu#mu mass, same charge", 150,10.,310);
   dimassWC_->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
   dimassWC_->GetYaxis()->SetTitle("N / 2GeV");  
+
+  // dr between leading muons, unlike sign
+  drMuRC_ = fs->make<TH1D>( "drMuRC", "#Delta r (#mu#mu), unlike charge",100,   0., 10.); 
+  drMuRC_->GetXaxis()->SetTitle("#Delta r");
+  drMuRC_->GetYaxis()->SetTitle("N_{evts}"); 
+  
+  // dr between leading muons, like sign
+  drMuWC_ = fs->make<TH1D>( "drMuWC", "#Delta r (#mu#mu), same charge",100,   0., 10.); 
+  drMuWC_->GetXaxis()->SetTitle("#Delta r");
+  drMuWC_->GetYaxis()->SetTitle("N_{evts}");  
   
   // number of muons in collection
   nMu_  = fs->make<TH1D>( "nMu" , "Number of Muons"  , 10, -0.5, 9.5);
   nMu_->GetXaxis()->SetTitle("N_{#mu}");
   nMu_->GetYaxis()->SetTitle("N_{evts}"); 
-    
-  // dr between leading muons
-  drMu_ = fs->make<TH1D>( "drMu", "#Delta r (#mu#mu)",100,   0., 10.); 
-  drMu_->GetXaxis()->SetTitle("#Delta r");
-  drMu_->GetYaxis()->SetTitle("N_{evts}"); 
-   
+      
   // absolute isolation efficiency
   absCount_    = fs->make<TH1D>( "absCount"   , "Absolute Isolation"        ,100,  0.,  50.0); 
   absCount_->GetXaxis()->SetTitle("Iso Cut [GeV]");
@@ -131,14 +136,14 @@ DimuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   if(!isWrongCharge){  
     dimassLogRC_->Fill( dilepMass, weight); 
     dimassRC_   ->Fill( dilepMass, weight);
+    drMuRC_->Fill(deltaR(mu1.eta(), mu1.phi() ,mu2.eta(), mu2.phi())); 
   }     
   // wrong charge
   else{ 
     dimassLogWC_->Fill( dilepMass, weight);    
     dimassWC_   ->Fill( dilepMass, weight);  
+    drMuWC_->Fill(deltaR(mu1.eta(), mu1.phi() ,mu2.eta(), mu2.phi()));
   }
-  // calculate distance between leading 2 muons and fill it in hist
-  drMu_->Fill(deltaR(mu1.eta(), mu1.phi() ,mu2.eta(), mu2.phi()));
      
   // get different isos  
   double absTrackIso1 = mu1.trackIso();

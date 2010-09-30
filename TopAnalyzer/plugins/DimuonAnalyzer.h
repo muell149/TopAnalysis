@@ -63,11 +63,12 @@ class DimuonAnalyzer : public edm::EDAnalyzer {
     TH1D * dimassRC_;
     /// plot for wrong-charge dimuon mass
     TH1D * dimassWC_;
- 
+    /// dr between leading muons, unlike sign
+    TH1D * drMuRC_;
+    /// dr between leading muons, like sign
+    TH1D * drMuWC_; 
     /// number of muons    
     TH1D * nMu_;
-    /// dr between leading muons
-    TH1D * drMu_;
     
     /// isolation efficiency for absolute cut
     TH1D * absCount_;
