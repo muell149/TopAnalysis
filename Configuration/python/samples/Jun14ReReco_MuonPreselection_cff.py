@@ -1,8 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-###########################################################################################
-#  
-#  NOT YET COMPLETE!!! SEE COMMENTED FILES!
+########################################################################################### 
 #
 #  Contains the Data of the Jun14th reprocessing and PromptReco_v4 data taken after that
 #  (+ Jul16thReReco)    
@@ -29,20 +27,22 @@ import FWCore.ParameterSet.Config as cms
 #                      Cert_143337-144114_7TeV_StreamExpress_Collisions10_JSON.txt 
 #                        (subset of official Cert_132440-144114_7TeV_StreamExpress_Collisions10_JSON.txt)
 #															     
-#  integrated HF lumi: 2974.16/nb                                                                                                                 
+#  integrated HF lumi: 2991.59/nb                                                                                                                 
 #
-#    number of events: 7639914
+#    number of events: 7666127
 #
 #        preselection: general qualtity cuts (see below)  AND 
 #                      ( 1 global muon with pt > 5GeV  OR  2 global muons )
 #
 #			  before:		  after:
-#    primVtxFilter:	  20326596		  19069495
-#  beamScrapFilter:	  19069495		  19069481
-#  HBHENoiseFilter:	  19069473		  19061791
 #
-#      oneHardMuon:	  19061791		   7278807
-#   twoGlobalMuons:	  19061791		    526210
+#			  before:		  after:
+#    primVtxFilter:	  20394255		  19134452
+#  beamScrapFilter:	  19134452		  19134438
+#  HBHENoiseFilter:	  19134430		  19126713
+#
+#      oneHardMuon:	  19126713		   7313751
+#   twoGlobalMuons:	  19126713		    528807
 #
 ############################################################################################
 
@@ -629,7 +629,7 @@ readFiles.extend( [
         '/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Aug25_49_1.root'] );
 	
 	
-# PromptReco_v4 till September 3: 1662.538304\nb (till now) 
+# PromptReco_v4 till September 3: 1679.967663\nb 
 
 readFiles.extend( [	
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_1_1.root',
@@ -688,8 +688,8 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_54_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_55_4.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_56_2.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_57_1.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_58_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_57_5.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_58_5.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_59_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_60_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_61_1.root',
@@ -718,7 +718,7 @@ readFiles.extend( [
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_84_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_85_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_86_3.root',
-	#'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_87_1.root',
+	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_87_5.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_88_2.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_89_4.root',
 	'/store/user/dammann/36X/Collisions10/Jul20/Run2010A_PromptReco_v4_Sep11_90_4.root',
