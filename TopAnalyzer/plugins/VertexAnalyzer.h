@@ -1,7 +1,6 @@
 #ifndef VertexAnalyzer_h
 #define VertexAnalyzer_h
 
-#include <string>
 #include <vector>
 
 #include "TH1.h"
@@ -12,6 +11,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 /**
    \class   VertexAnalyzer VertexAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/VertexAnalyzer.h"
@@ -45,7 +45,10 @@ class VertexAnalyzer : public EDAnalyzer {
      /// input muon collection
     InputTag muons_;    
     
-    TH1D* isFake_;
+    typedef std::vector<reco::Vertex> VertexCollection; 
+    
+    TH1D* multi_;
+    TH1D* goodMulti_;
     TH1D* posX_;
     TH1D* posY_;    
     TH1D* posZ_;
@@ -54,7 +57,9 @@ class VertexAnalyzer : public EDAnalyzer {
     TH1D* posYerr_;    
     TH1D* posZerr_;              
     TH1D* nTracks_;
-    TH1D* nDof_; 
+    TH1D* nDof_;
+    TH1D* chi2_; 
+    TH1D* nchi2_; 
     TH1D* dzMu_;         
 };
 

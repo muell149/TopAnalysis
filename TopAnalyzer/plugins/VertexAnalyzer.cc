@@ -1,6 +1,5 @@
 #include "TopAnalysis/TopAnalyzer/plugins/VertexAnalyzer.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 
@@ -22,13 +21,16 @@ VertexAnalyzer::beginJob()
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" ); 
   }
-   
-  isFake_= fs->make<TH1D>( "isFake", "Is Fake Vertex", 2,-0.5,1.5);
-  isFake_->GetXaxis()->SetBinLabel( 1, "false" );
-  isFake_->GetXaxis()->SetBinLabel( 1, "true" );  
-  isFake_->GetYaxis()->SetTitle("N");  
-   
   
+  multi_= fs->make<TH1D>( "multi", "N of Vertices", 10,-0.5,9.5);
+  multi_->GetXaxis()->SetTitle("N_{vrtcs}");  
+  multi_->GetYaxis()->SetTitle("N");    
+   
+  goodMulti_= fs->make<TH1D>( "goodMulti", "N of good Vertices", 10,-0.5,9.5);
+  goodMulti_->GetXaxis()->SetTitle("N_{vrtcs}");  
+  goodMulti_->GetYaxis()->SetTitle("N"); 
+   
+    
   posX_= fs->make<TH1D>( "posX", "Vertex x-Position", 400,-2.,2.);
   posX_->GetXaxis()->SetTitle("x [cm]");
   posX_->GetYaxis()->SetTitle("N / 0.01cm");  
@@ -65,7 +67,15 @@ VertexAnalyzer::beginJob()
   
   nDof_= fs->make<TH1D>( "nDof", "N_{dof} at Vertex", 200,0,200);
   nDof_->GetXaxis()->SetTitle("N_{dof}");
-  nDof_->GetYaxis()->SetTitle("N");  
+  nDof_->GetYaxis()->SetTitle("N"); 
+  
+  chi2_= fs->make<TH1D>( "chi2", "#chi^2 of Vertices", 200,0,200);
+  chi2_->GetXaxis()->SetTitle("#chi^2");
+  chi2_->GetYaxis()->SetTitle("N"); 
+  
+  nchi2_= fs->make<TH1D>( "nchi2", "#chi^2/N_{dof} of Vertices", 200,0,20);
+  nchi2_->GetXaxis()->SetTitle("#chi^2/N_{dof}");
+  nchi2_->GetYaxis()->SetTitle("N");       
   
   dzMu_= fs->make<TH1D>( "dzMu", "z-Distance #mu,Vrtx", 200,0,20);
   dzMu_->GetXaxis()->SetTitle("#Delta z [cm]");
@@ -77,31 +87,60 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 {
   Handle<std::vector<reco::Vertex> > vertices; 
   evt.getByLabel(vertices_, vertices); 
+  
+  multi_->Fill(vertices->size());
+  
+  int i=0;
+  for(VertexCollection::const_iterator vrtx = vertices->begin(); vrtx!= vertices->end(); ++vrtx) { 
     
-  reco::Vertex primaryVertex = vertices->front();
+    bool isFake = vrtx->isFake();
+    int ndof    = vrtx->ndof();
+    int ntracks = vrtx->tracksSize(); 
+    double rho  = vrtx->position().rho();
+    double z    = vrtx->position().z();
+    double chi2 = vrtx->chi2();
+    double nchi2= chi2/ndof;
   
-  isFake_->Fill(primaryVertex.isFake());
-  
-  if(primaryVertex.isFake()) return;
-  
-  posX_  ->Fill(primaryVertex.x());
-  posY_  ->Fill(primaryVertex.y());  
-  posZ_  ->Fill(primaryVertex.z());  
-  posRho_->Fill(primaryVertex.position().rho());   
+    if(!isFake && ndof>4 && abs(z)<24 && rho<2){
+      i++;
+      
+      posX_  ->Fill(vrtx->x());
+      posY_  ->Fill(vrtx->y());  
+      posZ_  ->Fill(z);  
+      posRho_->Fill(rho);   
 
-  posXerr_->Fill(primaryVertex.xError());
-  posYerr_->Fill(primaryVertex.yError());  
-  posZerr_->Fill(primaryVertex.zError()); 
+      posXerr_->Fill(vrtx->xError());
+      posYerr_->Fill(vrtx->yError());  
+      posZerr_->Fill(vrtx->zError()); 
   
-  nTracks_->Fill(primaryVertex.tracksSize()); 
-  nDof_   ->Fill(primaryVertex.ndof());  
+      nTracks_->Fill(ntracks); 
+      nDof_   ->Fill(ndof);  
+      chi2_   ->Fill(chi2);
+      nchi2_  ->Fill(nchi2); 
+      
+      Handle<std::vector<pat::Muon> > muons; 
+      evt.getByLabel(muons_, muons);     
   
-  Handle<std::vector<pat::Muon> > muons; 
-  evt.getByLabel(muons_, muons);     
+      for(std::vector<pat::Muon>::const_iterator muon = muons->begin(); muon!= muons->end(); ++muon) {  
+        dzMu_->Fill(abs(muon->vz()-z));
+      }           
+    }
+    goodMulti_->Fill(i);    
+  }
   
-  for(std::vector<pat::Muon>::const_iterator muon = muons->begin(); muon!= muons->end(); ++muon) {  
-    dzMu_->Fill(abs(muon->vz()-primaryVertex.z()));
-  } 
+  
+  
+  
+  
+  
+ 
+  
+  
+  
+  
+  
+  
+  
 }
 
 void
