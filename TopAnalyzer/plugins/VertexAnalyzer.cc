@@ -5,8 +5,11 @@
 
 VertexAnalyzer::VertexAnalyzer(const ParameterSet& cfg)
 {
-  vertices_ = cfg.getParameter<InputTag>("vertices"),
-  muons_    = cfg.getParameter<InputTag>("muons");
+  vertices_ = cfg.getParameter<InputTag>    ("vertices"),
+  muons_    = cfg.getParameter<InputTag>    ("muons"   ),
+  ndof_     = cfg.getParameter<unsigned int>("ndof"    ),  
+  rho_      = cfg.getParameter<double>      ("rho"     ),  
+  z_        = cfg.getParameter<double>      ("z"       );    
 }
 
 VertexAnalyzer::~VertexAnalyzer()
@@ -94,14 +97,14 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
   for(VertexCollection::const_iterator vrtx = vertices->begin(); vrtx!= vertices->end(); ++vrtx) { 
     
     bool isFake = vrtx->isFake();
-    int ndof    = vrtx->ndof();
-    int ntracks = vrtx->tracksSize(); 
+    unsigned int ndof    = vrtx->ndof();
+    unsigned int ntracks = vrtx->tracksSize(); 
     double rho  = vrtx->position().rho();
     double z    = vrtx->position().z();
     double chi2 = vrtx->chi2();
     double nchi2= chi2/ndof;
   
-    if(!isFake && ndof>4 && abs(z)<24 && rho<2){
+    if(!isFake && ndof>ndof_ && abs(z)<z_ && rho<rho_){
       i++;
       
       posX_  ->Fill(vrtx->x());
@@ -127,20 +130,6 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
     }
     goodMulti_->Fill(i);    
   }
-  
-  
-  
-  
-  
-  
- 
-  
-  
-  
-  
-  
-  
-  
 }
 
 void

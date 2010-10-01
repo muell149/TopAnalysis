@@ -45,6 +45,13 @@ class VertexAnalyzer : public EDAnalyzer {
      /// input muon collection
     InputTag muons_;    
     
+    /// ndof criterium for good vrtx
+    unsigned int ndof_;
+    /// rho criterium for good vrtx
+    double rho_; 
+    /// z criterium for good vrtx
+    double z_;     
+    
     typedef std::vector<reco::Vertex> VertexCollection; 
     
     TH1D* multi_;
