@@ -88,6 +88,8 @@ TrigReport     1    0         21         15          6          0 twoGoodD0MuonS
 TrigReport     1    0         15         15          0          0 twoGoodMuonSelection
 TrigReport     1    0         15         15          0          0 isolatedMuons
 TrigReport     1    0         15          5         10          0 twoIsolatedMuonSelection
+TrigReport     1    0          5          5          0          0 isolatedTightMuons
+TrigReport     1    0          5          5          0          0 oneIsolatedTightMuonSelection
 TrigReport     1    0          5          5          0          0 oneTightJetSelection
 TrigReport     1    0          5          5          0          0 oneGoodJetSelection
 TrigReport     1    0          5          5          0          0 oneHardJetSelection
