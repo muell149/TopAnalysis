@@ -51,7 +51,12 @@ goodMuons = selectedPatMuons.clone(src = 'goodD0Muons',
 ## isolation cut				      				      
 isolatedMuons = selectedPatMuons.clone(src = 'goodMuons', 
                                        cut = '(trackIso+caloIso)/pt < 0.15' 
-				      )				      
+				      )	
+## this collection is needed to make sure that one muon is in trigger range				      				      
+isolatedTightMuons = selectedPatMuons.clone(src = 'isolatedMuons', 
+                                            cut = 'abs(eta) < 2.1' 
+				           )					      
+				      			      
 
 ## Count Filters with n >= 1 requirement for control plots
 oneTightMuonSelection      = countPatMuons.clone(src = 'tightMuons',     minNumber = 1)
@@ -72,8 +77,10 @@ twoGoodTrackMuonSelection  = countPatMuons.clone(src = 'goodTrackMuons', minNumb
 twoMuHitMuonSelection      = countPatMuons.clone(src = 'muHitMuons',     minNumber = 2)
 twoGoodD0MuonSelection     = countPatMuons.clone(src = 'goodD0Muons',    minNumber = 2)
 twoGoodMuonSelection       = countPatMuons.clone(src = 'goodMuons',      minNumber = 2)
-twoIsolatedMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber = 2)
 
+## Count Requirements for isolated muons
+twoIsolatedMuonSelection      = countPatMuons.clone(src = 'isolatedMuons',       minNumber = 2)
+oneIsolatedTightMuonSelection = countPatMuons.clone(src = 'isolatedTightMuons',  minNumber = 1)
 
 ###########################################################################################
 #
@@ -190,7 +197,10 @@ requireTwoGoodMuons = cms.Sequence(twoTightMuonSelection *
 				  )
 				    				    				   
 requireTwoIsolatedMuons = cms.Sequence(isolatedMuons *
-                                       twoIsolatedMuonSelection)	
+                                       twoIsolatedMuonSelection *
+				       isolatedTightMuons *
+				       oneIsolatedTightMuonSelection
+				      )	
 
 applyJetCleaning = cms.Sequence(cleanPatCandidates)
 
