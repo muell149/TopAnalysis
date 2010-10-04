@@ -128,8 +128,10 @@ echo
 rm ./diffXSecFromSignal/plots/systematicVariations/*.*
 echo monitor systematic shifts
 sleep 2
-root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample')'
-
+## 1) in linear scale 
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', false)'
+## 2) in logarithmic scale 
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', true)'
 
 ## f) copy plot to local folder on AFS
 echo starting to copy plots...
