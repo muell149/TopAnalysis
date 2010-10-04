@@ -30,7 +30,7 @@ int roundToInt(double value);
 TString getTStringFromInt(int i);
 double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
 
-void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false, TString dataFile="./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root")
+void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root", bool logartihmicPlots=false)
 {
 
   // ---
@@ -42,6 +42,9 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   TString lum  = getTStringFromInt(roundToInt(luminosity/1000));
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/systematicVariations/";
+  // logartihmicPlots: choose whether you want to see the plots with logarithmic axis
+  TString log = "";
+  if(logartihmicPlots) log = "Log";
 
   // ---
   //     parameters for systematic scaling
@@ -229,7 +232,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   // ---
   //    create legends 
   // ---
-  TLegend *JESleg = new TLegend(0.32, 0.41, 0.93, 0.83);
+  TLegend *JESleg = new TLegend(0.38, 0.64, 0.94, 0.93);
   JESleg->SetFillStyle(0);
   JESleg->SetBorderSize(0);
   JESleg->AddEntry( ptlead1Jet_[kStd    ], "MC"                        , "PL");
@@ -237,7 +240,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   JESleg->AddEntry( ptlead1Jet_[kJES09  ], "MC (- 10% JES)"            , "PL");
   JESleg->AddEntry( ptlead1Jet_[kData   ], "2010 data "+lum+" pb ^{-1}", "P" );
 
-  TLegend *Wjetsleg = new TLegend(0.38, 0.35, 0.92, 0.85);
+  TLegend *Wjetsleg = new TLegend(0.40, 0.56, 0.94, 0.96);
   Wjetsleg->SetFillStyle(0);
   Wjetsleg->SetBorderSize(0);
   Wjetsleg->AddEntry( ptlead1Jet_[kStd  ], "MC"                        , "PL");
@@ -245,7 +248,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   Wjetsleg->AddEntry( ptlead1Jet_[kWdown], "MC (- 30% Wjets)"          , "PL");
   Wjetsleg->AddEntry( ptlead1Jet_[kData ], "2010 data "+lum+" pb ^{-1}", "P" );
   
-  TLegend *QCDleg = new TLegend(0.32, 0.37, 0.92, 0.83);
+  TLegend *QCDleg = new TLegend(0.33, 0.62, 0.93, 0.95);
   QCDleg->SetFillStyle(0);
   QCDleg->SetBorderSize(0);
   QCDleg->AddEntry( relIso_[kStd    ], "MC"                        , "PL");
@@ -253,7 +256,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   QCDleg->AddEntry( relIso_[kQCDdown], "MC (- 100% QCD)"           , "PL");
   QCDleg->AddEntry( relIso_[kData   ], "2010 data "+lum+" pb ^{-1}", "P" );
 
-  TLegend *ABCDleg = new TLegend(0.39, 0.53, 0.95, 0.90);
+  TLegend *ABCDleg = new TLegend(0.31, 0.69, 0.96, 0.93);
   ABCDleg->SetFillStyle(0);
   ABCDleg->SetBorderSize(0);
   ABCDleg->AddEntry( yieldPt_[kStd    ], "MC + QCD(ABCD)"      , "PL");
@@ -277,12 +280,14 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the QCD variation
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("QCDvariationLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("QCDvariationLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*relIso_[kStd    ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*relIso_[kQCDup  ], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*relIso_[kQCDdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*relIso_[kData   ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*relIso_[kStd], "relIso ( lead #mu )" , "events", 0, 1.2*relIso_[kStd]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*relIso_[kStd], "relIso ( lead #mu )" , "events", 0, 1.2*relIso_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*relIso_[kStd], "relIso ( lead #mu )" , "events", 0.1, 250.*relIso_[kQCDup]->GetMaximum());
   relIso_[kStd         ]->Draw(""        );
   relIso_[kQCDup       ]->Draw("hist same"); 
   relIso_[kQCDdown     ]->Draw("hist same");
@@ -294,13 +299,15 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the W variation
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("WvariationLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("WvariationLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);  
   histogramStyle(*ptlead1Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kWup  ], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kWdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 0, 1.2*ptlead1Jet_[kStd]->GetMaximum());
-  ptlead1Jet_[kStd     ]->Draw(""        );
+  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 0, 1.2*ptlead1Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 1., 1000.*ptlead1Jet_[kWup]->GetMaximum());
+  ptlead1Jet_[kStd     ]->DrawClone(""    );
   ptlead1Jet_[kWup     ]->Draw("hist same"); 
   ptlead1Jet_[kWdown   ]->Draw("hist same");
   ptlead1Jet_[kData    ]->Draw("p e1 same");
@@ -311,13 +318,15 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the JES variations 1
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead1JetLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead1JetLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead1Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 0, 1.2*ptlead1Jet_[kStd]->GetMaximum());
-  ptlead1Jet_[kStd     ]->Draw(""   );
+  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 0, 1.2*ptlead1Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 1., 10.*ptlead1Jet_[kJES09]->GetMaximum());
+  ptlead1Jet_[kStd     ]->DrawClone(""   );
   ptlead1Jet_[kJES11   ]->Draw("same"); 
   ptlead1Jet_[kJES09   ]->Draw("same");
   ptlead1Jet_[kData    ]->Draw("p e1 same");
@@ -328,12 +337,14 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the JES variations 2
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead2JetLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead2JetLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead2Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*ptlead2Jet_[kStd], "p_{t} ( 2nd lead jet )" , "events", 0, 1.2*ptlead2Jet_[kStd]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t} ( 2nd lead jet )" , "events", 0, 1.2*ptlead2Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t} ( 2nd lead jet )" , "events", 0.1, 10*ptlead2Jet_[kJES09]->GetMaximum());
   ptlead2Jet_[kStd     ]->Draw(""   );
   ptlead2Jet_[kJES11   ]->Draw("same"); 
   ptlead2Jet_[kJES09   ]->Draw("same");
@@ -345,12 +356,14 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the JES variations 3
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead3JetLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead3JetLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead3Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*ptlead3Jet_[kStd], "p_{t} ( 3rd lead jet )" , "events", 0, 1.2*ptlead3Jet_[kStd]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t} ( 3rd lead jet )" , "events", 0, 1.2*ptlead3Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t} ( 3rd lead jet )" , "events", 0.1, 10*ptlead3Jet_[kJES09]->GetMaximum());
   ptlead3Jet_[kStd     ]->Draw(""   );
   ptlead3Jet_[kJES11   ]->Draw("same"); 
   ptlead3Jet_[kJES09   ]->Draw("same");
@@ -362,12 +375,14 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the JES variations 4
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead4JetLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead4JetLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead4Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*ptlead4Jet_[kStd], "p_{t} ( 4th lead jet )" , "events", 0, 1.2*ptlead4Jet_[kStd]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t} ( 4th lead jet )" , "events", 0, 1.2*ptlead4Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t} ( 4th lead jet )" , "events", 0.1, 10*ptlead4Jet_[kJES09]->GetMaximum());
   ptlead4Jet_[kStd     ]->Draw(""   );
   ptlead4Jet_[kJES11   ]->Draw("same"); 
   ptlead4Jet_[kJES09   ]->Draw("same");
@@ -379,12 +394,14 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   //    do the printing for the ABCD variation
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("ABCDvariationLumi"+lum+"nb");
+  MyCanvas[canvasNumber]->SetTitle("ABCDvariationLumi"+lum+"nb"+log);
+  if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*yieldPt_[kStd    ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*yieldPt_[kQCDup  ], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*yieldPt_[kQCDdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*yieldPt_[kData   ], kBlack, 1, 22, 1.8, 0);
-  axesStyle(*yieldPt_[kStd], "p_{t} ( lead #mu )" , "events", 0, 1.6*yieldPt_[kStd]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*yieldPt_[kStd], "p_{t} ( lead #mu )" , "events", 0, 1.6*yieldPt_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*yieldPt_[kStd], "p_{t} ( lead #mu )" , "events", 15., 10.*yieldPt_[kQCDup]->GetMaximum());
   yieldPt_[kStd         ]->Draw(""        );
   yieldPt_[kQCDup       ]->Draw("hist same"); 
   yieldPt_[kQCDdown     ]->Draw("hist same");
@@ -392,21 +409,16 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = false,
   ABCDleg                ->Draw("same");
   ++canvasNumber;
 
-
-
-
-
-
   // ---
   // saving
   // ---
   if(save){   
     // ps
-    MyCanvas[0]->Print(saveTo+"systematicShift"+lum+"nb.pdf(", "pdf");
+    MyCanvas[0]->Print(saveTo+"systematicShift"+lum+"nb"+log+".pdf(", "pdf");
     for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-      MyCanvas[idx]->Print(saveTo+"systematicShift"+lum+"nb.pdf", "pdf");   
+      MyCanvas[idx]->Print(saveTo+"systematicShift"+lum+"nb"+log+".pdf", "pdf");   
     }
-    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"systematicShift"+lum+"nb.pdf)", "pdf");
+    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"systematicShift"+lum+"nb"+log+".pdf)", "pdf");
     
     // png
     for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
