@@ -271,6 +271,47 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
   }
 
   // ---  
+  //    get QCD bkg from data driven (ABCD) method
+  // ---
+  // print out
+  std::vector<double> NQCD_;
+  std::cout << std::endl << "QCD estimation from ABCD method" << std::endl;
+  if(loadValues) std::cout << "(read in from .txt file)" << std::endl;
+  else std::cout << "(taken from hard coded numbers)" << std::endl;
+  std::cout << "---------------------------------" << std::endl;
+  // loop jet multiplicities (no btag)
+  for(unsigned int mult=0; mult<4; ++mult){
+    // a) get number
+    NQCD_ .push_back( getABCDNumbers(Njets_[mult], loadValues)*QCDVariation );
+    // b) get shape from QCD MC
+    // loop pt, eta and phi
+    for(unsigned int var=0; var<variables_.size(); ++var){
+      // get QCD MC
+      histo_[variables_[var]][kABCD][Njets_[mult]]= (TH1F*)histo_[variables_[var]][kQCD][Njets_[mult]]->Clone();
+      // get MC entries
+      double NMCQCD = histo_[variables_[var]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[var]][kQCD][Njets_[mult]]->GetNbinsX()+1);
+      // take care for division by 0
+      if(NMCQCD==0) NMCQCD=1;
+      // normalize to N(QCD) from ABCD method
+      histo_[variables_[var]][kABCD][Njets_[mult]]->Scale(NQCD_[mult]/NMCQCD);
+      // print out numbers
+      std::cout << std::endl << "shape from QCD MC (" << variables_[var] << "):";
+      // loop bins
+      for(int bin =1; bin<=histo_[variables_[var]][kSig][Njets_[mult]]->GetNbinsX(); ++bin){
+	// start with 2nd bin for pt!
+	if(variables_[var]=="pt"&&bin==1) ++bin;
+	// for phi: include underflow bin
+	if(variables_[var]=="phi"&& bin==1) std::cout << "underflow bin: " << histo_["phi"][kABCD][Njets_[mult]]->GetBinContent(0);
+	std::cout << "  bin " << bin << ": " << histo_[variables_[var]][kABCD][Njets_[mult]]->GetBinContent(bin);
+	// for pt and phi: include overflow bins
+	if((variables_[var]=="pt"||variables_[var]=="phi")&&bin==histo_[variables_[var]][kABCD][Njets_[mult]]->GetNbinsX()){
+	  std::cout << "  overflow bin: " << histo_[variables_[var]][kABCD][Njets_[mult]]->GetBinContent(bin+1);
+	}
+      }
+    }
+  }
+
+  // ---  
   //    get yield histos by dividing per binwidth and create stack plot
   // ---
   // create yield variable indicator to destinguish between hists divided by binwidth
@@ -285,6 +326,14 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
       for(unsigned int idx=kSig; idx<=kAllMC; ++idx) {
 	// divide this histo by binwidth
 	histo_[yield_[var]][idx][Njets_[mult]] = divideByBinwidth((TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone(), true);
+	// rescale QCD by data driven estimation
+	if(idx==kQCD){
+	  double NQCDEstimate = NQCD_[mult];
+	  double NQCDMC = histo_[variables_[var]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[var]][kQCD][Njets_[mult]]->GetNbinsX()+1);
+	  histo_[yield_[var]][kQCD][Njets_[mult]]->Scale(NQCDEstimate/NQCDMC);
+	  std::cout << std::endl << "ratio QCD ( estimation / MC prediction )" << std::endl;
+	  std::cout << jetLabel(Njets_[mult]) << " : " << NQCDEstimate/NQCDMC << std::endl;	
+	}
 	// for MC: add all former histos to get stack plot
 	if(idx!=kSig&&idx<kData) histo_[yield_[var]][idx][Njets_[mult]]->Add( (TH1F*)histo_[yield_[var]][idx-1][Njets_[mult]]->Clone() );
       }
@@ -328,47 +377,6 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
 	  std::cout << "  bin " << bin << ": " << setprecision(1) << fixed << 100*histo_[composition_[var]][idx][Njets_[mult]]->GetBinContent(bin) << "";
 	  if(bin==histo_[variables_[var]][kSig][Njets_[mult]]->GetNbinsX()) std::cout << std::endl;
 	} 
-      }
-    }
-  }
-
-  // ---  
-  //    get QCD bkg from ABCD method
-  // ---
-  // print out
-  std::vector<double> NQCD_;
-  std::cout << std::endl << "QCD estimation from ABCD method" << std::endl;
-  if(loadValues) std::cout << "(read in from .txt file)" << std::endl;
-  else std::cout << "(taken from hard coded numbers)" << std::endl;
-  std::cout << "---------------------------------" << std::endl;
-  // loop jet multiplicities (no btag)
-  for(unsigned int mult=0; mult<4; ++mult){
-    // a) get number
-    NQCD_ .push_back( getABCDNumbers(Njets_[mult], loadValues)*QCDVariation );
-    // b) get shape from QCD MC
-    // loop pt, eta and phi
-    for(unsigned int var=0; var<variables_.size(); ++var){
-      // get QCD MC
-      histo_[variables_[var]][kABCD][Njets_[mult]]= (TH1F*)histo_[variables_[var]][kQCD][Njets_[mult]]->Clone();
-      // get MC entries
-      double NMCQCD = histo_[variables_[var]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[var]][kQCD][Njets_[mult]]->GetNbinsX()+1);
-      // take care for division by 0
-      if(NMCQCD==0) NMCQCD=1;
-      // normalize to N(QCD) from ABCD method
-      histo_[variables_[var]][kABCD][Njets_[mult]]->Scale(NQCD_[mult]/NMCQCD);
-      // print out numbers
-      std::cout << std::endl << "shape from QCD MC (" << variables_[var] << "):";
-      // loop bins
-      for(int bin =1; bin<=histo_[variables_[var]][kSig][Njets_[mult]]->GetNbinsX(); ++bin){
-	// start with 2nd bin for pt!
-	if(variables_[var]=="pt"&&bin==1) ++bin;
-	// for phi: include underflow bin
-	if(variables_[var]=="phi"&& bin==1) std::cout << "underflow bin: " << histo_["phi"][kABCD][Njets_[mult]]->GetBinContent(0);
-	std::cout << "  bin " << bin << ": " << histo_[variables_[var]][kABCD][Njets_[mult]]->GetBinContent(bin);
-	// for pt and phi: include overflow bins
-	if((variables_[var]=="pt"||variables_[var]=="phi")&&bin==histo_[variables_[var]][kABCD][Njets_[mult]]->GetNbinsX()){
-	  std::cout << "  overflow bin: " << histo_[variables_[var]][kABCD][Njets_[mult]]->GetBinContent(bin+1);
-	}
       }
     }
   }
@@ -1192,10 +1200,11 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
 	    double min = 0.;
 	    double max = 2*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->GetMaximum();
 	    if(logartihmicPlots){
-	      min=0.1;
-	      max*=10.0;
-	      if(variables_[var]=="pt") max=0.5*max;
-	      if(variables_[var]=="pt") min=0.01*min;
+	      min=1.;
+	      max*=100.0;
+	      if(variables_[var]=="pt") max=0.1*max;
+	      if(variables_[var]=="pt") min=0.005*min;
+	      if(variables_[var]!="pt") max=max/(5*mult+1);
 	    }
 	    if((variables_[var]=="phi")||(variables_[var]=="eta")){
 	      axesStyle(*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], "#"+variables_[var]+" ( #mu )", "#frac{d#sigma}{d#"+variables_[var]+" (#mu)} [ pb / binwidth ]", min, max, 0.055, 1.5);
@@ -1326,6 +1335,13 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
     histogramStyle(*sigmaTopInclusiveDataBtag  , kRed  , 1 , 22, 1.8, 0);
     sigmaTopInclusiveMCReco->GetXaxis()->SetNdivisions (0);
     sigmaTopInclusiveMCReco    ->Draw("AXIS"); 
+    double theoryErrorUp  =23.2;
+    double theoryErrorDown=24.4;
+    // extrapolation: defined in e) extrapolation to whole phase space
+    TBox* box2 = new TBox(0.5, (double)sigmaTopInclusiveMCGen->GetBinContent(1)+theoryErrorUp/extrapolation, 2.5, (double)sigmaTopInclusiveMCGen->GetBinContent(1)-theoryErrorDown/extrapolation);
+    box2->SetFillColor(38);
+    box2->SetFillStyle(1001);
+    box2->Draw("same");
     //  sigmaTopInclusiveMCGen     ->Draw("phistsame");
     drawLine(0.5, sigmaTopInclusiveMCGen->GetBinContent(1), 2.5, sigmaTopInclusiveMCGen->GetBinContent(1), sigmaTopInclusiveMCGen->GetLineColor());
     sigmaTopInclusiveDataNoBtag->Draw("p e1 X0 same");
@@ -1337,6 +1353,7 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
     DrawLabel("#mu: p_{t}>20 GeV, | #eta |<2.1", 0.45, 0.25, 0.96, 0.43);
     DrawLabel("#geq 4 jets: p_{t}>30 GeV,"     , 0.45, 0.19, 0.94, 0.37);
     DrawLabel("| #eta |<2.4"                   , 0.57, 0.14, 0.92, 0.32);
+    sigmaTopInclusiveMCReco    ->Draw("AXIS same");
     ++canvasNumber;
 
     // c) top with & without b-tag extrapolated to whole phase space
@@ -1348,8 +1365,6 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
     histogramStyle(*sigmaTopExtrapolatedData2 , kBlack, 1 , 23, 1.8, 0);
     sigmaTopExtrapolatedTheory->GetXaxis()->SetNdivisions (0);
     sigmaTopExtrapolatedTheory  ->Draw("AXIS");
-    double theoryErrorUp  =23.2;
-    double theoryErrorDown=24.4;
     TBox* box = new TBox(0.0, (double)sigmaTopExtrapolatedTheory->GetBinContent(1)+theoryErrorUp, 2.0, (double)sigmaTopExtrapolatedTheory->GetBinContent(1)-theoryErrorDown);
     box->SetFillColor(38);
     box->SetFillStyle(1001);
