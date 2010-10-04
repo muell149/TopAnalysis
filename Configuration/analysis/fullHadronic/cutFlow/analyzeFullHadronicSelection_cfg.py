@@ -39,6 +39,8 @@ process.source = cms.Source("PoolSource",
     ## add your favourite file here
     '/store/user/eschliec/Run2010A/patTuple_6jets.root',
     '/store/user/eschliec/Run2010A/patTuple_6jets_06.root',
+    '/store/user/eschliec/Run2010A/patTuple_6jets_07.root',
+    '/store/user/eschliec/Run2010A/patTuple_6jets_0809.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_1_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_2_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_3_1.root',
