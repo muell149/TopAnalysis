@@ -457,16 +457,17 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   //    do the printing for eta_
   // ---
   MyCanvas[1]->cd(0);
-  MyCanvas[1]->SetLogy(1);
+  //  MyCanvas[1]->SetLogy(1);
   MyCanvas[1]->SetTitle("etaLeading"+thoseCollections[1]+"MuonsLum"+lum2+"nb@7TeV");
   eta        ->Draw("");
   eta_[kData]->Draw("EPsame");
   eta        ->Draw("AXISsame");
   //leg3       ->Draw("same");
   //cut0       ->Draw("same");
-  axesStyle(*eta, "#eta ( lead #mu )", "events", 0.1/840*luminosity, 0.1*eta->GetMaximum()*luminosity );
-  drawcutline(-2.1, 0.01* eta->GetMaximum()*luminosity);
-  drawcutline( 2.1, 0.01* eta->GetMaximum()*luminosity);
+  //  axesStyle(*eta, "#eta ( lead #mu )", "events", 0.1/840*luminosity, 0.1*eta->GetMaximum()*luminosity );
+  axesStyle(*eta, "#eta ( lead #mu )", "events", 0, 1.5*eta_[kData]->GetMaximum() );
+  drawcutline(-2.1, 1.2* eta_[kData]->GetMaximum());
+  drawcutline( 2.1, 1.2* eta_[kData]->GetMaximum());
 
   // ---
   //    do the printing for nHit_
@@ -601,16 +602,17 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   //    do the printing for etaJets_
   // ---
   MyCanvas[11]->cd(0);
-  MyCanvas[11]->SetLogy(1);
+  //  MyCanvas[11]->SetLogy(1);
   MyCanvas[11]->SetTitle("etaAll"+thoseCollections[11]+"JetsLum"+lum2+"nb@7TeV");
   etaJets        ->Draw();
-  axesStyle(*etaJets, "#eta (all jets)", "events", 1.0/840*luminosity, 0.1*etaJets->GetMaximum()*luminosity );
+  //  axesStyle(*etaJets, "#eta (all jets)", "events", 1.0/840*luminosity, 0.1*etaJets->GetMaximum()*luminosity );
+  axesStyle(*etaJets, "#eta (all jets)", "events", 0., 1.3*etaJets_[kData]->GetMaximum() );
   etaJets_[kData]->Draw("EPsame");
   etaJets        ->Draw("Axis same"); 
   //  leg13          ->Draw("same");
   //cut2           ->Draw("same");
-  drawcutline(-2.4, 0.01*etaJets->GetMaximum()*luminosity);
-  drawcutline( 2.4, 0.01*etaJets->GetMaximum()*luminosity);
+  drawcutline(-2.4, 1.2*etaJets_[kData]->GetMaximum());
+  drawcutline( 2.4, 1.2*etaJets_[kData]->GetMaximum());
 
   // ---
   //    do the printing for ptlead1Jet_
@@ -834,17 +836,18 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   //    do the printing for etaVetoE_
   // ---
   MyCanvas[27]->cd(0);
-  MyCanvas[27]->SetLogy(1);
+  //  MyCanvas[27]->SetLogy(1);
   MyCanvas[27]->SetTitle("etaPatVetoElectronsLum"+lum2+"nb@7TeV");
   etaVetoE    ->Draw();
-  axesStyle(*etaVetoE, "#eta ( e )", "events", 0.01/840*luminosity, 1.0*etaVetoE->GetMaximum()*luminosity );
-  if(etaVetoE->GetMinimum()/12.38*luminosity==0)etaVetoE->SetMinimum(0.01);
+  //  axesStyle(*etaVetoE, "#eta ( e )", "events", 0.01/840*luminosity, 1.0*etaVetoE->GetMaximum()*luminosity );
+  axesStyle(*etaVetoE, "#eta ( e )", "events", 0., 1.5*etaVetoE_[kData]->GetMaximum() );
+  //  if(etaVetoE->GetMinimum()/12.38*luminosity==0)etaVetoE->SetMinimum(0.01);
   etaVetoE_[kData]->Draw("EPsame");
   etaVetoE        ->Draw("Axis same");
   //  leg23           ->Draw("same");
   //cut1            ->Draw("same");
-  drawcutline( 2.5, 0.01*etaVetoE->GetMaximum()*luminosity); 
-  drawcutline(-2.5, 0.01*etaVetoE->GetMaximum()*luminosity);
+  drawcutline( 2.5, 1.3*etaVetoE_[kData]->GetMaximum()); 
+  drawcutline(-2.5, 1.3*etaVetoE_[kData]->GetMaximum());
 
   // ---
   // saving
