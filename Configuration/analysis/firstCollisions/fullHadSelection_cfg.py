@@ -3,8 +3,8 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
-## decide whether to run on:  * ReRecoA *, * ReRecoB *, * Prompt *
-options.register('globalTag', 'Prompt', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
+## decide whether to run on:  * ReRecoA *, * ReRecoB *, * Prompt *, * Sep17 *, * PromptV9 *
+options.register('globalTag', 'PromptV9', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 
 # get and parse the command line arguments
 options.parseArguments()
@@ -27,7 +27,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/data/Run2010A/JetMETTau/RECO/v4/000/140/124/02731F1A-728F-DF11-AD45-003048F024E0.root'
+    '/store/data/Run2010B/Jet/RECO/PromptReco-v2/000/146/436/0263EEFC-DEC6-DF11-8CB1-003048F118C6.root'
     )
 )
 
@@ -48,10 +48,14 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "Set to run with GlobalTag:",
 if(options.globalTag=='Prompt'):
     process.GlobalTag.globaltag = cms.string('GR10_P_V7::All')
+elif(options.globalTag=='PromptV9'):
+    process.GlobalTag.globaltag = cms.string('GR10_P_V9::All')
 elif(options.globalTag=='ReRecoA'):
     process.GlobalTag.globaltag = cms.string('GR_R_36X_V12A::All')
 elif(options.globalTag=='ReRecoB'):
     process.GlobalTag.globaltag = cms.string('GR_R_36X_V12B::All')
+elif(options.globalTag=='Sep17'):
+    process.GlobalTag.globaltag = cms.string('GR_R_38X_V13A::All')
 else:
     print "Error occured, GlobalTag not definded properly, stopping program execution"
     sys.exit(0)
@@ -86,7 +90,10 @@ process.noscraping = cms.EDFilter("FilterOutScraping",
 
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"])
+if(options.globalTag=='PromptV9'):
+    process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U","HLT_QuadJet20U"])
+else:
+    process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"])
 
 #-------------------------------------------------
 # pat configuration
@@ -136,14 +143,14 @@ process.patJetCorrFactorsAK5PF.sampleType = "ttbar"
 
 ## create jet collections need for the preselection
 process.goodJets = process.selectedPatJets.clone(src = 'selectedPatJets',
-                                                 cut = 'pt > 20. & abs(eta) < 2.4 &'
+                                                 cut = 'pt > 30. & abs(eta) < 2.4 &'
                                                        'emEnergyFraction > 0.01   &'
                                                        'jetID.fHPD < 0.98         &'
                                                        'jetID.n90Hits > 1'
                                                  )
 
 process.goodJetsAK5PF = process.selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
-                                                      cut = 'pt > 20. & abs(eta) < 2.4          &'
+                                                      cut = 'pt > 30. & abs(eta) < 2.4          &'
                                                             'chargedHadronEnergyFraction > 0.0  &'
                                                             'neutralHadronEnergyFraction < 0.99 &'
                                                             'chargedEmEnergyFraction < 0.99     &'
