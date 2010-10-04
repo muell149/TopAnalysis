@@ -68,9 +68,9 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   hists2D_["bTagVsMjjW"    ] = fs->make<TH2F>( "bTagVsMjjW"    , "bTagVsMjjW"      ,  120, 74.4,  86.4, 50, 0. , 5.  );
 
   // invariant ttbar mass
-  hists_["ttbarInvMass"    ] = fs->make<TH1F>( "ttbarInvMass"     , "ttbarInvMass"     ,  500,  0. , 1000. );
+  hists_["ttbarInvMass"    ] = fs->make<TH1F>( "ttbarInvMass"     , "ttbarInvMass"     ,  750,  0. , 1500. );
   // invariant ttbar mass of hypothesis
-  hists_["ttbarInvMassHypo"] = fs->make<TH1F>( "ttbarInvMassHypo" , "ttbarInvMassHypo" ,  500,  0. , 1000. );
+  hists_["ttbarInvMassHypo"] = fs->make<TH1F>( "ttbarInvMassHypo" , "ttbarInvMassHypo" ,  750,  0. , 1500. );
 }
 
 /// histogram filling interface for reconstruction level for access with fwlite or full framework
@@ -223,8 +223,8 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
     if( lightQ >= 0 && lightQ < (int)jets.size() && lightQBar >= 0 && lightQBar < (int)jets.size() && b    >= 0 && b    < (int)jets.size() &&
 	lightP >= 0 && lightP < (int)jets.size() && lightPBar >= 0 && lightPBar < (int)jets.size() && bBar >= 0 && bBar < (int)jets.size() ){
       // invariant ttbar mass of hypothesis
-      hists_.find("ttbarInvMassHypo")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4() + 
-						      jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass() );
+      hists_.find("ttbarInvMass")->second->Fill( (jets[lightQ].p4() + jets[lightQBar].p4() + jets[b].p4() + 
+						  jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).mass() );
     }
   }
 }
