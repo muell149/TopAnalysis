@@ -1,18 +1,4 @@
-#include <vector>
-#include <iostream>
-
-#include <TH1F.h>
-#include <TH2F.h>
-#include <THStack.h>
-#include <TROOT.h>
-#include <TFile.h>
-#include <TCanvas.h>
-#include <TLegend.h>
-#include <TLine.h>
-#include <TPaveLabel.h>
-#include <TStyle.h>
-#include <typeinfo>
-
+#include "styleHelper.h"
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////  This Macro analyzes all cut variables:number of valid Trackerhits, chi^2, dB,    ////
 ////  energy deposit in ecal and hcal, pt and eta, relIso and the multiplicity of the  //// 
@@ -21,10 +7,10 @@
 ////  Additionally data points can be filled in for comparism.                         //// 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-enum styles {kSignal, kBackground, kZjets, kWjets, kQCD, kData};
+//enum styles {kSignal, kBackground, kZjets, kWjets, kQCD, kData};
 
 void canvasStyle(TCanvas& canv);
-void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0, int fillStyle=1001); 
+
 template <class T>
 void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.07, float yTitleOffset=1.2);
 void drawcutline(double cutval, double maximum);
@@ -64,15 +50,16 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
-  //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
-  //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
-  files_.push_back(new TFile(dataFile                                                             ) );
-
+  for(int ienum = 0; ienum<6; ienum++){
+    if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
+    if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
+    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
+    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
+    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
+    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
+    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
+    if(ienum==kData) files_.push_back(new TFile(dataFile                                                             ) );
+  }
   // ---
   // define weights concerning luminosity
   // ---
@@ -226,12 +213,12 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   for(int mult=2; mult<=10; ++mult){
    std::cout << "---------------------" << std::endl;
     std::cout << "number of entries =="+getTStringFromInt(mult-1)+" jets" << std::endl;
-    std::cout << "ttbar sig : " << nJets_[kSignal    ]->GetBinContent(mult) << std::endl;
-    std::cout << "ttbar bkg : " << nJets_[kBackground]->GetBinContent(mult) << std::endl;
-    std::cout << "QCD : "       << nJets_[kQCD       ]->GetBinContent(mult) << std::endl;
-    std::cout << "Z+jets : "    << nJets_[kZjets     ]->GetBinContent(mult) << std::endl;
-    std::cout << "W+jets : "    << nJets_[kWjets     ]->GetBinContent(mult) << std::endl;
-    std::cout << "all MC: " << nJets_[kSignal]->GetBinContent(mult)+nJets_[kBackground]->GetBinContent(mult)+nJets_[kQCD]->GetBinContent(mult)+nJets_[kZjets]->GetBinContent(mult)+nJets_[kWjets]->GetBinContent(mult) << std::endl;
+    std::cout << "ttbar sig : " << nJets_[kSig  ]->GetBinContent(mult) << std::endl;
+    std::cout << "ttbar bkg : " << nJets_[kBkg  ]->GetBinContent(mult) << std::endl;
+    std::cout << "QCD : "       << nJets_[kQCD  ]->GetBinContent(mult) << std::endl;
+    std::cout << "Z+jets : "    << nJets_[kZjets]->GetBinContent(mult) << std::endl;
+    std::cout << "W+jets : "    << nJets_[kWjets]->GetBinContent(mult) << std::endl;
+    std::cout << "all MC: " << nJets_[kSig]->GetBinContent(mult)+nJets_[kBkg]->GetBinContent(mult)+nJets_[kQCD]->GetBinContent(mult)+nJets_[kZjets]->GetBinContent(mult)+nJets_[kWjets]->GetBinContent(mult) << std::endl;
     std::cout << "data : "      << nJets_[kData      ]->GetBinContent(mult) << std::endl<< std::endl;
   }
   
@@ -267,66 +254,34 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   THStack *etaVetoE   = new THStack("etaVetoE","");
 
   for(unsigned int idx=0; idx<=kData; ++idx) {
-    // define sample specific draw options
-    int color =0;
-    int fillstyle = 1001;
-    int filled =1;
-    double markerSize=1.0;
-    int markerStyle=20;
-    if(idx==kSignal){
-      color =kRed;
-      fillstyle = 3006;
-    }
-    if(idx==kBackground){
-      color =kBlue;
-      fillstyle = 3007;
-    }
-    if(idx==kWjets){
-      color =8;
-      fillstyle = 3004;
-    }
-    if(idx==kZjets){
-      color =6;
-      fillstyle = 3005;
-    }
-    if(idx==kQCD){
-      color =17;
-      fillstyle = 1001;
-    }
-    if(idx==kData){      
-      color = kBlack;
-      filled = 0;
-      markerSize=1.5;
-      markerStyle=22;
-    }
     // choose styling options
-    histogramStyle(*pt_     [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*eta_    [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*nHit_   [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*chi2_   [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*d0_     [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*dz_     [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*ecalEn_ [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*hcalEn_ [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*dR_     [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*relIso_ [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*n_      [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*etaJets_   [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*ptlead1Jet_[idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*ptlead2Jet_[idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*ptlead3Jet_[idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*ptlead4Jet_[idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*emf_       [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*fhpd_      [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*n90hits_   [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle); 
-    histogramStyle(*nJets_     [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*bdiscr_    [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*bdiscrPre_ [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*nbJets_    [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*nVetoMu_ [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*nVetoE_  [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*etVetoE_ [idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
-    histogramStyle(*etaVetoE_[idx], color, 1 ,markerStyle, markerSize, filled, fillstyle);
+    histogramStyle(*pt_     [idx], idx);
+    histogramStyle(*eta_    [idx], idx);
+    histogramStyle(*nHit_   [idx], idx);
+    histogramStyle(*chi2_   [idx], idx);
+    histogramStyle(*d0_     [idx], idx);
+    histogramStyle(*dz_     [idx], idx);
+    histogramStyle(*ecalEn_ [idx], idx);
+    histogramStyle(*hcalEn_ [idx], idx);
+    histogramStyle(*dR_     [idx], idx);
+    histogramStyle(*relIso_ [idx], idx);
+    histogramStyle(*n_      [idx], idx);
+    histogramStyle(*etaJets_   [idx], idx);
+    histogramStyle(*ptlead1Jet_[idx], idx);
+    histogramStyle(*ptlead2Jet_[idx], idx);
+    histogramStyle(*ptlead3Jet_[idx], idx);
+    histogramStyle(*ptlead4Jet_[idx], idx);
+    histogramStyle(*emf_       [idx], idx);
+    histogramStyle(*fhpd_      [idx], idx);
+    histogramStyle(*n90hits_   [idx], idx); 
+    histogramStyle(*nJets_     [idx], idx);
+    histogramStyle(*bdiscr_    [idx], idx);
+    histogramStyle(*bdiscrPre_ [idx], idx);
+    histogramStyle(*nbJets_    [idx], idx);
+    histogramStyle(*nVetoMu_ [idx], idx);
+    histogramStyle(*nVetoE_  [idx], idx);
+    histogramStyle(*etVetoE_ [idx], idx);
+    histogramStyle(*etaVetoE_[idx], idx);
     // create stack plots
     if(idx!=kData){
       pt    ->Add(pt_     [idx]);
@@ -366,12 +321,12 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   TLegend *leg0 = new TLegend(0.08, 0.19, 0.94, 0.88);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->AddEntry( nHit_  [kData      ] , "2010 data (7TeV), "+lum+" pb ^{ -1}", "PL");
-  leg0->AddEntry( nHit_  [kSignal    ] , "ttbar semilept.#mu MC@NLO", "F" ); 
-  leg0->AddEntry( nHit_  [kBackground] , "ttbar other MC@NLO"       , "F" );
-  leg0->AddEntry( nHit_  [kQCD       ] , "QCD PYTHIA"               , "F" );
-  leg0->AddEntry( nHit_  [kWjets     ] , "W+jets MADGRAPH"          , "F" );
-  leg0->AddEntry( nHit_  [kZjets     ] , "Z+jets MADGRAPH"          , "F" );
+  leg0->AddEntry( nHit_  [kData ] , "2010 data (7TeV), "+lum+" pb ^{ -1}"    , "PL");
+  leg0->AddEntry( nHit_  [kSig  ] , "t#bar{t} signal MC@NLO"                 , "F" ); 
+  leg0->AddEntry( nHit_  [kBkg  ] , "t#bar{t} other MC@NLO"                  , "F" );
+  leg0->AddEntry( nHit_  [kQCD  ] , "QCD PYTHIA"                             , "F" );
+  leg0->AddEntry( nHit_  [kWjets] , "W#rightarrowl#nu MADGRAPH"              , "F" );
+  leg0->AddEntry( nHit_  [kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-} MADGRAPH", "F" );
  
   // containig the used mu-collection
   TLegend *leg2 = new TLegend(0.228, 0.912, 0.7818, 0.997);
@@ -421,11 +376,11 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   leg17->SetHeader("looseElectrons");
   leg23->SetHeader("patElectrons");
 
-  // label indicating cutstep
-  TPaveLabel *cut0 = label("(hltMu9 ev. sel.)"          , 0.73, 0.87, 0.9, 1.0);
-  TPaveLabel *cut1 = label("(#mu ev. sel.)"             , 0.73, 0.87, 0.9, 1.0);
-  TPaveLabel *cut2 = label("(#mu & veto ev. sel.)"      , 0.73, 0.87, 0.9, 1.0);
-  TPaveLabel *cut3 = label("(#mu & veto & jet ev. sel.)", 0.73, 0.87, 0.9, 1.0);
+//   // label indicating cutstep
+//   TPaveLabel *cut0 = label("(hltMu9 ev. sel.)"          , 0.73, 0.87, 0.9, 1.0);
+//   TPaveLabel *cut1 = label("(#mu ev. sel.)"             , 0.73, 0.87, 0.9, 1.0);
+//   TPaveLabel *cut2 = label("(#mu & veto ev. sel.)"      , 0.73, 0.87, 0.9, 1.0);
+//   TPaveLabel *cut3 = label("(#mu & veto & jet ev. sel.)", 0.73, 0.87, 0.9, 1.0);
 
   // ---
   //    create canvas 
@@ -885,24 +840,6 @@ void canvasStyle(TCanvas& canv)
   canv.SetRightMargin ( 0.05);
   canv.SetBottomMargin( 0.15);
   canv.SetTopMargin   ( 0.05);
-}
-
-void histogramStyle(TH1& hist, int color, int lineStyle, int markerStyle, float markersize, int filled, int fillStyle) 
-{
-  hist.SetLineWidth(4);
-  hist.SetStats(kFALSE);
-  hist.SetLineColor  (color);
-  hist.SetMarkerColor(color);  
-  hist.SetMarkerStyle(markerStyle);
-  hist.SetMarkerSize(markersize);
-  hist.SetLineStyle(lineStyle);
-  if(filled==1){
-  hist.SetFillColor(color);
-  hist.SetFillStyle(fillStyle);
-  }
-  else{
-    hist.SetFillStyle(0);
-  }
 }
 
 template <class T>

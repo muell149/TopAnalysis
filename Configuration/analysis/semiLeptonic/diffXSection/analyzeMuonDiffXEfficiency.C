@@ -413,8 +413,8 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     legend->SetBorderSize(0);
     TString jetMultiplicity2=jetLabel(Njets_[mult]);
     legend->SetHeader("MC ("+lum+"pb ^{-1}, "+jetMultiplicity2+")");
-    legend->AddEntry( histo_["pt"][allGen ][Njets_[mult]], "gen, #mu+jets selection, (t #bar{t} & W)"         , "PL");
-    legend->AddEntry( histo_["pt"][allReco][Njets_[mult]], "reco, semilept.(#mu) selection (t #bar{t}, W & Z)", "PL");
+    legend->AddEntry( histo_["pt"][allGen ][Njets_[mult]], "gen, #mu+jets selection, (t#bar{t} & W)"         , "PL");
+    legend->AddEntry( histo_["pt"][allReco][Njets_[mult]], "reco, semilept.(#mu) selection (t#bar{t}, W & Z)", "PL");
     genRecoLegend_.push_back( legend );
   }
 
@@ -422,7 +422,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   TLegend *legendTop = new TLegend(0.24, 0.72, 0.98, 0.93);
   legendTop->SetFillStyle(0);
   legendTop->SetBorderSize(0);
-  legendTop->SetHeader("t #bar{t} (semilept. #mu) in phasespace:");
+  legendTop->SetHeader("t#bar{t} (signal) in phasespace:");
   legendTop->AddEntry(histo_["pt"][topEff][Njets_[3]], "N(jets) #geq 4"                 , "PL");
   legendTop->AddEntry(histo_["pt"][topEff][Njets_[4]], "N(jets) #geq 4, N(btags) #geq 1", "PL");
   
@@ -453,8 +453,8 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     legend->SetBorderSize(0);
     TString jetMultiplicity2=jetLabel(Njets_[mult]);
     legend->SetHeader("gen: #mu+jets ("+lum+" pb ^{-1}, "+jetMultiplicity2+")" );
-    legend->AddEntry( histo_["pt"][kttbarGen][Njets_[mult]] , "t #bar{t} (MC@NLO)", "F");
-    legend->AddEntry( histo_["pt"][kWjetsGen][Njets_[mult]] , "Wjets (Madgraph)"  , "F");
+    legend->AddEntry( histo_["pt"][kttbarGen][Njets_[mult]] , "t#bar{t} (MC@NLO)"            , "F");
+    legend->AddEntry( histo_["pt"][kWjetsGen][Njets_[mult]] , "W#rightarrowl#nu (Madgraph)"  , "F");
     genLegend_.push_back(legend);
   }
   

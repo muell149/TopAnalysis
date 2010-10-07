@@ -208,7 +208,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   leg0->SetBorderSize(0);
   leg0->SetHeader("N_{W} @ "+lum+" pb^{-1} ( 7 TeV )");
   leg0->AddEntry( wjetsTruth        , "MC truth"                     , "L" );
-  leg0->AddEntry( wjetsEstimationW  , "estimation from W+jets MC"    , "PL");
+  leg0->AddEntry( wjetsEstimationW  , "estimation from W#rightarrowl#nu MC" , "PL");
   leg0->AddEntry( wjetsEstimationAll, "estimation from pseudo data (all MC)", "PL");
   //  leg0->AddEntry( allPseudoEvents   , "total # pseudo events"               , "L" );
 

@@ -243,10 +243,10 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   TLegend *Wjetsleg = new TLegend(0.40, 0.56, 0.94, 0.96);
   Wjetsleg->SetFillStyle(0);
   Wjetsleg->SetBorderSize(0);
-  Wjetsleg->AddEntry( ptlead1Jet_[kStd  ], "MC"                        , "PL");
-  Wjetsleg->AddEntry( ptlead1Jet_[kWup  ], "MC (+ 30% Wjets)"          , "PL");
-  Wjetsleg->AddEntry( ptlead1Jet_[kWdown], "MC (- 30% Wjets)"          , "PL");
-  Wjetsleg->AddEntry( ptlead1Jet_[kData ], "2010 data "+lum+" pb ^{-1}", "P" );
+  Wjetsleg->AddEntry( ptlead1Jet_[kStd  ], "MC"                         , "PL");
+  Wjetsleg->AddEntry( ptlead1Jet_[kWup  ], "MC (+ 30% W#rightarrowl#nu)", "PL");
+  Wjetsleg->AddEntry( ptlead1Jet_[kWdown], "MC (- 30% W#rightarrowl#nu)", "PL");
+  Wjetsleg->AddEntry( ptlead1Jet_[kData ], "2010 data "+lum+" pb ^{-1}" , "P" );
   
   TLegend *QCDleg = new TLegend(0.33, 0.62, 0.93, 0.95);
   QCDleg->SetFillStyle(0);
