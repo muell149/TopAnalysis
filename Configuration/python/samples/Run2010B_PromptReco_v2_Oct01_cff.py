@@ -14,7 +14,8 @@ import FWCore.ParameterSet.Config as cms
 #
 #           json file: Cert_132440-146729_7TeV_StreamExpress_Collisions10_JSON.txt
 #															     
-#  integrated HF lumi: 1.005746585/pb                                                                                                                 
+#  integrated HF lumi: 1.021139870/pb   from official JSON 
+#                      1.005746585/pb   from crab -report                                                                                          
 #
 #    number of events: 828593
 #
