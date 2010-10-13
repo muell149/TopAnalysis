@@ -130,16 +130,29 @@ goodJets = selectedPatJets.clone(src = 'tightJets',
 hardJets = selectedPatJets.clone(src = 'goodJets', 
                                  cut = 'pt > 30.' 
 			        )
-								    				        
+				
+## b-jet selection (optional)
+bJetsTCHE = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("trackCountingHighEffBJetTags") > 1.7' 
+		                 )				 
+## OR
+bJetsSVHE = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("simpleSecondaryVertexHighEffBJetTags") > 1.74' 
+		                 )				 
+				 				 												    				        
 ## Count Filters with n >= 1 for control plots
 oneTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 1)
 oneGoodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 1)
 oneHardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 1)
+oneBJetTCHE           = countPatJets.clone(src = 'bJetsTCHE', minNumber = 1)
+oneBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 1)
 
 ## Count Filters with n >= 2 for control plots
 twoTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
 twoGoodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 2)
 twoHardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
+twoBJetTCHE           = countPatJets.clone(src = 'bJetsTCHE', minNumber = 2)
+twoBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 2)
 
 
 ###########################################################################################
@@ -221,4 +234,19 @@ requireTwoHardJets = cms.Sequence(twoTightJetSelection *
 			     
 requireMET = cms.Sequence(highMETs * 		    
 			  metSelection
-			 )			     
+			 )
+			 
+requireOneBtagTCHE = cms.Sequence(bJetsTCHE *
+                                 oneBJetTCHE
+				 )
+				 
+requireTwoBtagsTCHE = cms.Sequence(twoBJetTCHE)				 
+				 
+requireOneBtagSVHE = cms.Sequence(bJetsSVHE *
+                                 oneBJetSVHE
+				 )
+				 
+requireTwoBtagsSVHE = cms.Sequence(twoBJetSVHE)				 
+				 
+				 
+				 			 			     
