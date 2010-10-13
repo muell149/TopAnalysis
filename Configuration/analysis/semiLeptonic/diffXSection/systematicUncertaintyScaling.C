@@ -286,8 +286,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*relIso_[kQCDup  ], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*relIso_[kQCDdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*relIso_[kData   ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*relIso_[kStd], "relIso ( lead #mu )" , "events", 0, 1.2*relIso_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*relIso_[kStd], "relIso ( lead #mu )" , "events", 0.1, 250.*relIso_[kQCDup]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*relIso_[kStd], "relIso(#mu)" , "events", 0, 1.2*relIso_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*relIso_[kStd], "relIso(#mu)" , "events", 0.1, 250.*relIso_[kQCDup]->GetMaximum());
   relIso_[kStd         ]->Draw(""        );
   relIso_[kQCDup       ]->Draw("hist same"); 
   relIso_[kQCDdown     ]->Draw("hist same");
@@ -305,8 +305,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*ptlead1Jet_[kWup  ], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kWdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 0, 1.2*ptlead1Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 1., 1000.*ptlead1Jet_[kWup]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0, 1.1*ptlead1Jet_[kWup]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 1., 1000.*ptlead1Jet_[kWup]->GetMaximum());
   ptlead1Jet_[kStd     ]->DrawClone(""    );
   ptlead1Jet_[kWup     ]->Draw("hist same"); 
   ptlead1Jet_[kWdown   ]->Draw("hist same");
@@ -324,8 +324,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*ptlead1Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 0, 1.2*ptlead1Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t} ( lead jet )" , "events", 1., 10.*ptlead1Jet_[kJES09]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0, 1.1*ptlead1Jet_[kJES09]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 1., 10.*ptlead1Jet_[kJES09]->GetMaximum());
   ptlead1Jet_[kStd     ]->DrawClone(""   );
   ptlead1Jet_[kJES11   ]->Draw("same"); 
   ptlead1Jet_[kJES09   ]->Draw("same");
@@ -343,8 +343,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*ptlead2Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t} ( 2nd lead jet )" , "events", 0, 1.2*ptlead2Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t} ( 2nd lead jet )" , "events", 0.1, 10*ptlead2Jet_[kJES09]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0, 1.2*ptlead2Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0.1, 10*ptlead2Jet_[kJES09]->GetMaximum());
   ptlead2Jet_[kStd     ]->Draw(""   );
   ptlead2Jet_[kJES11   ]->Draw("same"); 
   ptlead2Jet_[kJES09   ]->Draw("same");
@@ -362,8 +362,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*ptlead3Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t} ( 3rd lead jet )" , "events", 0, 1.2*ptlead3Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t} ( 3rd lead jet )" , "events", 0.1, 10*ptlead3Jet_[kJES09]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0, 1.2*ptlead3Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0.1, 10*ptlead3Jet_[kJES09]->GetMaximum());
   ptlead3Jet_[kStd     ]->Draw(""   );
   ptlead3Jet_[kJES11   ]->Draw("same"); 
   ptlead3Jet_[kJES09   ]->Draw("same");
@@ -381,8 +381,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*ptlead4Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t} ( 4th lead jet )" , "events", 0, 1.2*ptlead4Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t} ( 4th lead jet )" , "events", 0.1, 10*ptlead4Jet_[kJES09]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0, 1.2*ptlead4Jet_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0.1, 10*ptlead4Jet_[kJES09]->GetMaximum());
   ptlead4Jet_[kStd     ]->Draw(""   );
   ptlead4Jet_[kJES11   ]->Draw("same"); 
   ptlead4Jet_[kJES09   ]->Draw("same");
@@ -400,8 +400,8 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   histogramStyle(*yieldPt_[kQCDup  ], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*yieldPt_[kQCDdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*yieldPt_[kData   ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*yieldPt_[kStd], "p_{t} ( lead #mu )" , "events", 0, 1.6*yieldPt_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*yieldPt_[kStd], "p_{t} ( lead #mu )" , "events", 15., 10.*yieldPt_[kQCDup]->GetMaximum());
+  if(!logartihmicPlots) axesStyle(*yieldPt_[kStd], "p_{t}(#mu)" , "events", 0, 1.6*yieldPt_[kStd]->GetMaximum());
+  if(logartihmicPlots) axesStyle(*yieldPt_[kStd], "p_{t}(#mu)" , "events", 15., 10.*yieldPt_[kQCDup]->GetMaximum());
   yieldPt_[kStd         ]->Draw(""        );
   yieldPt_[kQCDup       ]->Draw("hist same"); 
   yieldPt_[kQCDdown     ]->Draw("hist same");

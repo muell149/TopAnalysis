@@ -23,7 +23,7 @@
 enum styles {kttbarReco, kWjetsReco, kttbarGen, kWjetsGen};
 
 void canvasStyle(TCanvas& canv);
-void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.5, int filled=0); 
+void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.8, int filled=0); 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 TH1F* divideByBinwidth(TH1F* histo);
 double getMaximumDependingOnNjetsCut(TString plot, TString Njets);
@@ -418,13 +418,21 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     genRecoLegend_.push_back( legend );
   }
 
+  // create a legend (in upper right corner) for l+jets efficiencies
+  TLegend *legendLjets = new TLegend(0.24, 0.86, 0.98, 0.95);
+  legendLjets->SetFillStyle(0);
+  legendLjets->SetBorderSize(0);
+  legendLjets->SetTextSize(0.06);
+  legendLjets->SetHeader("t#bar{t} + W#rightarrowl#nu");
+
   // create a legend (in upper right corner) for top efficiencies
-  TLegend *legendTop = new TLegend(0.24, 0.72, 0.98, 0.93);
+  TLegend *legendTop = new TLegend(0.24, 0.86, 0.98, 0.95);
   legendTop->SetFillStyle(0);
   legendTop->SetBorderSize(0);
-  legendTop->SetHeader("t#bar{t} (signal) in phasespace:");
-  legendTop->AddEntry(histo_["pt"][topEff][Njets_[3]], "N(jets) #geq 4"                 , "PL");
-  legendTop->AddEntry(histo_["pt"][topEff][Njets_[4]], "N(jets) #geq 4, N(btags) #geq 1", "PL");
+  legendTop->SetTextSize(0.06);
+  legendTop->SetHeader("t#bar{t} signal");
+  //legendTop->AddEntry(histo_["pt"][topEff][Njets_[3]], "N(jets) #geq 4"                 , "PL");
+  //legendTop->AddEntry(histo_["pt"][topEff][Njets_[4]], "N(jets) #geq 4, N(btags) #geq 1", "PL");
   
   // create a legend containing all jet multiplicities part 1
   TLegend *leg1 = new TLegend(0.15, 0.05, 0.99, 0.89);
@@ -436,11 +444,11 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   }
 
   // create a legend containing all jet multiplicities part 2
-  TLegend *leg2 = new TLegend(0.01, 0.01, 0.99, 0.99);
+  TLegend *leg2 = new TLegend(0.01, 0.05, 0.99, 0.89);
   leg2->SetFillStyle(0);
   leg2->SetBorderSize(0);
   // N(jets) 4, 3+btag, 4+btag
-  for(unsigned int mult=Njets_.size()-3; mult<Njets_.size(); ++mult){
+  for(unsigned int mult=Njets_.size()-3; mult<Njets_.size()-1; ++mult){
     leg2->AddEntry( histo_["pt"][eff][Njets_[mult]], jetLabel(Njets_[mult]), "PL");
   }
 
@@ -484,7 +492,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     MyCanvas[canvasNumber]->cd(0);
     MyCanvas[canvasNumber]->SetTitle("ptMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
-    axesStyle(*histo_["pt"][allGen][Njets_[mult]], "p_{t} ( #mu ) [GeV]", "events / GeV", 0.,  getMaximumDependingOnNjetsCut("pt",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+    axesStyle(*histo_["pt"][allGen][Njets_[mult]], "p_{t}(#mu) [GeV]", "events / GeV", 0.,  getMaximumDependingOnNjetsCut("pt",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
     histogramStyle(*histo_["pt"][allGen ][Njets_[mult]] , kRed  , 1, 20);
     histogramStyle(*histo_["pt"][allReco][Njets_[mult]] , kBlack, 1, 22);
     histo_["pt"][allGen ][Njets_[mult]]->Draw("HIST");
@@ -502,7 +510,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetTitle("etaMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
-  axesStyle(*histo_["eta" ][allGen][Njets_[mult]], "#eta ( #mu )", "events / binwidth", 0.,  getMaximumDependingOnNjetsCut("eta",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+  axesStyle(*histo_["eta" ][allGen][Njets_[mult]], "#eta(#mu)", "events", 0.,  getMaximumDependingOnNjetsCut("eta",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
   histogramStyle(*histo_["eta"][allGen ][Njets_[mult]] , kRed  , 1, 20);
   histogramStyle(*histo_["eta"][allReco][Njets_[mult]] , kBlack, 1, 22);
   histo_["eta"][allGen ][Njets_[mult]]->Draw("HIST");
@@ -520,7 +528,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetTitle("phiMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
-  axesStyle(*histo_["phi"][allGen][Njets_[mult]], "#phi ( #mu )", "events / rad", 0.,  getMaximumDependingOnNjetsCut("phi",Njets_[mult])/8.0*luminosity, 0.06, 1.5); 
+  axesStyle(*histo_["phi"][allGen][Njets_[mult]], "#phi(#mu)", "events", 0.,  getMaximumDependingOnNjetsCut("phi",Njets_[mult])/8.0*luminosity, 0.06, 1.5); 
   histogramStyle(*histo_["phi"][allGen ][Njets_[mult]] , kRed  , 1, 20);
   histogramStyle(*histo_["phi"][allReco][Njets_[mult]] , kBlack, 1, 22);
   histo_["phi"][allGen ][Njets_[mult]]->Draw("HIST");
@@ -537,12 +545,13 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetGrid(1,1);
   MyCanvas[canvasNumber]->SetTitle("ptEfficiencyMCbasedAllJetMultiplicities");
-  axesStyle(*histo_["pt" ][eff][Njets_[0]], "p_{t} ( #mu ) [GeV]" , "#epsilon_{ l+jets}", 0.,  1.4); 
+  axesStyle(*histo_["pt" ][eff][Njets_[0]], "p_{t}(#mu) [GeV]" , "#epsilon_{ l+jets}", 0.,  1.); 
   histo_["pt"][eff][Njets_[0]] ->Draw("");
-  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
-  histo_["pt"][eff][Njets_[mult]]->Draw("same");
-  histo_["pt"][eff][Njets_[mult]]->Draw("Psame");
+  for(unsigned int mult=0; mult<Njets_.size()-1; ++mult){
+    histo_["pt"][eff][Njets_[mult]]->Draw("same");
+    histo_["pt"][eff][Njets_[mult]]->Draw("Psame");
   }
+  legendLjets->Draw("same");
   ++canvasNumber;
 
   // ---
@@ -551,9 +560,9 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetGrid(1,1);
   MyCanvas[canvasNumber]->SetTitle("ptEfficiencyTopMCbased");
-  axesStyle(*histo_["pt" ][topEff][Njets_[4]], "p_{t} ( #mu ) [GeV]" , "#epsilon_{ t#bar{t}}", 0.,  1.5);
-  histogramStyle(*histo_["pt"][topEff][Njets_[4]] , kBlue, 1, 29);
-  histogramStyle(*histo_["pt"][topEff][Njets_[3]] , kRed , 1, 22);
+  axesStyle(*histo_["pt" ][topEff][Njets_[4]], "p_{t}(#mu) [GeV]" , "#epsilon_{ t#bar{t}}", 0.,  1.);
+  histogramStyle(*histo_["pt"][topEff][Njets_[4]] , color_[4], 1, 29);
+  histogramStyle(*histo_["pt"][topEff][Njets_[3]] , color_[3], 1, 22);
   histo_["pt"][topEff][Njets_[4]]->Draw("");
   histo_["pt"][topEff][Njets_[4]]->Draw("Psame");
   histo_["pt"][topEff][Njets_[3]]->Draw("same" );
@@ -567,12 +576,13 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetGrid(1,1);
   MyCanvas[canvasNumber]->SetTitle("etaEfficiencyMCbasedAllJetMultiplicities");
-  axesStyle(*histo_["eta" ][eff][Njets_[0]], "#eta ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.4); 
+  axesStyle(*histo_["eta" ][eff][Njets_[0]], "#eta(#mu)" , "#epsilon_{ l+jets}", 0.,  1.); 
   histo_["eta"][eff][Njets_[0]]->Draw("");
-  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+  for(unsigned int mult=0; mult<Njets_.size()-1; ++mult){
     histo_["eta"][eff][Njets_[mult]]->Draw("same");
     histo_["eta"][eff][Njets_[mult]]->Draw("Psame");
   }
+  legendLjets->Draw("same");
   ++canvasNumber;
 
   // ---
@@ -581,9 +591,9 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetGrid(1,1);
   MyCanvas[canvasNumber]->SetTitle("etaEfficiencyTopMCbased");
-  axesStyle(*histo_["eta" ][topEff][Njets_[4]], "#eta ( #mu )" , "#epsilon_{ t#bar{t}}", 0.,  1.5); 
-  histogramStyle(*histo_["eta"][topEff][Njets_[4]], kBlue, 1, 29);
-  histogramStyle(*histo_["eta"][topEff][Njets_[3]], kRed , 1, 22);
+  axesStyle(*histo_["eta" ][topEff][Njets_[4]], "#eta(#mu)" , "#epsilon_{ t#bar{t}}", 0.,  1.); 
+  histogramStyle(*histo_["eta"][topEff][Njets_[4]], color_[4], 1, 29);
+  histogramStyle(*histo_["eta"][topEff][Njets_[3]], color_[3], 1, 22);
   histo_["eta"][topEff][Njets_[4]]->Draw("");
   histo_["eta"][topEff][Njets_[4]]->Draw("Psame");
   histo_["eta"][topEff][Njets_[3]]->Draw("same" );
@@ -597,9 +607,9 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetGrid(1,1);
   MyCanvas[canvasNumber]->SetTitle("phiEfficiencyMCbasedAllJetMultiplicities");
-  axesStyle(*histo_["phi"][eff][Njets_[0]], "#phi ( #mu )" , "#epsilon_{ l+jets}", 0.,  1.4); 
+  axesStyle(*histo_["phi"][eff][Njets_[0]], "#phi(#mu)" , "#epsilon_{ l+jets}", 0.,  1.); 
   histo_["phi"][eff][Njets_[0]]->Draw("");
-  for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+  for(unsigned int mult=0; mult<Njets_.size()-1; ++mult){
     histo_["phi"][eff][Njets_[mult]]->Draw("same");
     histo_["phi"][eff][Njets_[mult]]->Draw("Psame");
   }
@@ -614,7 +624,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     MyCanvas[canvasNumber]->cd(0);
     MyCanvas[canvasNumber]->SetTitle("ptGenComposition"+Njets_[mult]);
     histo_["pt"][kWjetsGen][Njets_[mult]]->Add(histo_["pt"][kttbarGen][Njets_[mult]]);
-    axesStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], "p_{t} ( #mu ) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",Njets_[mult])/8.0*luminosity, 0.06, 1.5); 
+    axesStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], "p_{t}(#mu) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",Njets_[mult])/8.0*luminosity, 0.06, 1.5); 
     histogramStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], kGreen, 1, 20, 1.5, 1);
     histogramStyle(*histo_["pt"][kttbarGen][Njets_[mult]], kRed  , 1, 20, 1.5, 1);
     histo_["pt"][kWjetsGen][Njets_[mult]]->Draw("");
