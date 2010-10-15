@@ -454,13 +454,11 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
   std::cout << "--- L+jets xSec ---" << std::endl;
   std::cout << "-------------------";
   // create l+jets variable indicators to destinguish between other plots
-  std::vector<TString> ljetsXSec_, ljetsXSecInclusive_, ljetsXSecDiff_;
+  std::vector<TString> ljetsXSec_, ljetsXSecDiff_;
   TString ljetsXSec[ 3 ] = { "pt l+jets diff norm XSec", "eta l+jets diff norm XSec", "phi l+jets diff norm XSec" };
   ljetsXSec_.insert( ljetsXSec_.begin(), ljetsXSec, ljetsXSec + 3 );
   TString ljetsXSecDiff[ 3 ] = { "pt l+jets diff XSec", "eta l+jets diff XSec", "phi l+jets diff XSec" };
   ljetsXSecDiff_.insert( ljetsXSecDiff_.begin(), ljetsXSecDiff, ljetsXSecDiff + 3 );
-  TString ljetsXSecInclusive[ 3 ] = { "pt l+jets inclusive XSec", "eta l+jets inclusive XSec", "phi l+jets inclusive XSec" };
-  ljetsXSecInclusive_.insert( ljetsXSecInclusive_.begin(), ljetsXSecInclusive, ljetsXSecInclusive + 3 );
   // loop samples - do l+jets diff. norm. xSec only for data and combined l+jets MC(W,Z,top)
   for(unsigned int idx=kData; idx<=kLepJets; ++idx){    
     if(idx==kData   ) std::cout << std::endl << std::endl << "a) from data" << std::endl;
@@ -475,8 +473,8 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
 	histo_[ljetsXSec_[var]][idx][Njets_[mult]] = (TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone();
 	// b1) substract QCD for data (not done for btag-selections)
 	if((idx==kData)&&(mult!=4)&&(mult!=5)) histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Add( histo_[variables_[var]][kABCD][Njets_[mult]], -1.0);
-	// b2) subtract Z+jets from MC prediction
-	histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Add( histo_[variables_[var]][kZjets][Njets_[mult]], -1.0);
+	// b2) subtract Z+jets from Data
+	if(idx==kData)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Add( histo_[variables_[var]][kZjets][Njets_[mult]], -1.0);
 	// c) apply efficiency corrections for each bin
 	// loop bins (including underflow and overflow)
 	for(int bin =0; bin<=histo_[variables_[var]][kData][Njets_[mult]]->GetNbinsX()+1; ++bin){
@@ -490,14 +488,24 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
 	// d) l+jets differential cross section (without normalization)
 	// i) clone (also for inclusive l+jets xSec)
 	histo_[ljetsXSecDiff_     [var]][idx][Njets_[mult]]= (TH1F*)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Clone();
-	histo_[ljetsXSecInclusive_[var]][idx][Njets_[mult]]= (TH1F*)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Clone();
 	// ii) divide by binwidth (and recalculate errors)
 	histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]=divideByBinwidth(histo_[ljetsXSecDiff[var]][idx][Njets_[mult]], true);
 	// iii) divide by luminosity
 	scaleByLumi(histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], luminosity*0.001);
 	// f) normalize to total cross section
-	double NAll = histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Integral(0, histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetNbinsX()+1);
-	histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Scale(1/NAll);
+	double NAll = histo_[variables_[var]][idx][Njets_[mult]]->Integral(0, histo_[variables_[var]][idx][Njets_[mult]]->GetNbinsX()+1);
+	double totalEff = 0.;
+	if((mult!=4)&&(mult!=5)){
+	  totalEff = ljetsInclusiveEff_[mult];
+	}
+	else{
+	  double totalGen = 0.;
+	  for(int iBin=0; iBin<=histo_[variables_[var]][idx][Njets_[mult]]->GetNbinsX()+1; ++iBin){
+	    if(efficiency_[variables_[var]][iBin][Njets_[mult]]!=0)totalGen+=histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(iBin)/efficiency_[variables_[var]][iBin][Njets_[mult]];
+	  }
+	  totalEff = NAll/totalGen;
+	}
+	histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Scale(totalEff/NAll);
 	// g) divide by binwidth
 	histo_[ljetsXSec_[var]][idx][Njets_[mult]] = divideByBinwidth(histo_[ljetsXSec_[var]][idx][Njets_[mult]], false);
 	// h) calculate error for each bin ( correlated error calculation as described in AN-10-090
@@ -517,22 +525,25 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
 	    // get data entries
 	    double NdataBin=histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin);
 	    // get QCD estimation from ABCD method only for selection without btag
-	    double NQCDBin=0;
+	    double NQCDBin=0.;
 	    if((mult!=4)&&(mult!=5)) NQCDBin =histo_[variables_[var]][kABCD][Njets_[mult]]->GetBinContent(bin);
 	    // calculate Ni   = (NdataBin-NQCDbin)/ebin corrected entries in bin
-	    double Ni= (NdataBin-NQCDBin)/eBin;
+	    double Ni= NdataBin-NQCDBin;
 	    // calculate Nges = sum_i(Ni) corrected total number of entries
 	    double Nges =NAll;
 	    // compare #events(total) in histo when applying efficiency corrections for each bin or global efficiency correction 
 	    //	  std::cout << "( " << NAll << " , " <<  histo_[variables_[var]][idx][Njets_[mult]]->Integral(0, histo_[variables_[var]][idx][Njets_[mult]]->GetNbinsX()+1)/ljetsInclusiveEff_[mult] << " )" << std::endl;
 	    // calculate two expressions needed in complete error
-	    double term1 = (Nges - Ni)*sqrt(NdataBin)/eBin;
+	    double term1 = (Nges - Ni)*sqrt(NdataBin);
 	    double term2 = 0;
 	    for(int bin2=binMin; bin2<=binMax; ++bin2){
-	      if(bin2!=bin) term2 += histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin2) / (efficiency_[variables_[var]][bin2][Njets_[mult]]*efficiency_[variables_[var]][bin2][Njets_[mult]]);
+	      if(bin2!=bin){
+		if((mult!=4)&&(mult!=5))term2 += histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin2)-histo_[variables_[var]][kABCD][Njets_[mult]]->GetBinContent(bin2);
+		else term2 += histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin2);
+	      }
 	    }
 	    // calculate complete error
-	    double diffNormError = 1 / ( Nges*Nges*binwidth );
+	    double diffNormError = totalEff / ( Nges*Nges*eBin*binwidth );
 	    diffNormError *= sqrt( term1*term1 + Ni*Ni*term2 );
 	    // apply calculated error to plot
 	    histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinError(bin, diffNormError);
@@ -982,6 +993,7 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
     // (i) l+jets
     TLegend *inclusiveCrossSectionLjetsLeg = new TLegend(0.39, 0.53, 0.96, 0.77);
     inclusiveCrossSectionLjetsLeg->SetFillStyle(0);
+    inclusiveCrossSectionLjetsLeg->SetFillColor(10);
     inclusiveCrossSectionLjetsLeg->SetBorderSize(0);
     inclusiveCrossSectionLjetsLeg->SetTextSize(0.05);
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveData    , "Data ("+lum+" pb ^{-1})" , "PL");
@@ -1389,7 +1401,7 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
       // set axis 
       double min = 0.;
       double maxValue = getMaxValue(*histo_["pt top"][kData][Njets_[mult]], "pt", true, "differentialTopPt"+Njets_[mult], 7);
-      double max = 1.1*maxValue;
+      double max = 1.5*maxValue;
       if(logartihmicPlots){
 	min=0.0001;
 	max=exp(1.5*(std::log(maxValue)-std::log(min))+std::log(min));
@@ -1403,7 +1415,7 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
       histo_["pt top" ][kGenSig][Njets_[3]]->Add(histo_["pt top" ][kGenBkg][Njets_[3]]);
       histogramStyle(*histo_["pt top" ][kGenSig][Njets_[3]], kSig);
       axesStyle(*histo_["pt top" ][kGenSig][Njets_[3]], "p_{t}(#mu) [GeV]", "#frac{d#sigma}{dp_{t} (#mu)} (t#bar{t}#rightarrow#mu + #geq 4 jets) [ pb / GeV ]", min, max, 0.05, 1.55);
-      histo_["pt top" ][kGenSig][Njets_[3]]->Draw("hist");
+      histo_["pt top" ][kGenSig][Njets_[3]]->DrawCopy("hist");
       histogramStyle(*histo_["pt top" ][kGenBkg][Njets_[3]],kBkg);
       histo_["pt top" ][kGenBkg][Njets_[3]]->Draw("hist same");
       histogramStyle(*histo_["pt top" ][kData  ][Njets_[mult]], kData);
@@ -1422,21 +1434,17 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
       // set axis 
       double min2 = 0.;
       double max2Value = getMaxValue(*histo_["eta top"][kData][Njets_[mult]], "eta", true, "differentialTopEta"+Njets_[mult], 7);
-      double max2 = 1.1*max2Value;
+      double max2 = 1.5*max2Value;
       if(logartihmicPlots){
 	min2=0.05;
 	max2=exp(1.5*(std::log(max2Value)-std::log(min2))+std::log(min2));
       }
-//       double max2 = 10.;
-//       if(logartihmicPlots){
-// 	min2=0.05;
-// 	max2=1500.0;
-//       }
+
       // Draw gen ttbar sig + bkg as stack and data as points on top
       histo_["eta top" ][kGenSig][Njets_[3]]->Add(histo_["eta top" ][kGenBkg][Njets_[3]]);
       histogramStyle(*histo_["eta top" ][kGenSig][Njets_[3]], kSig);  
       axesStyle(*histo_["eta top"][kGenSig][Njets_[3]], "#eta(#mu)", "#frac{d#sigma}{d#eta (#mu)} (t#bar{t}#rightarrow#mu + #geq 4 jets) [ pb ]", min2, max2, 0.05, 1.55);
-      histo_["eta top" ][kGenSig][Njets_[3]]->Draw("hist");
+      histo_["eta top" ][kGenSig][Njets_[3]]->DrawCopy("hist");
       histogramStyle(*histo_["eta top" ][kGenBkg][Njets_[3]], kBkg);
       histo_["eta top" ][kGenBkg][Njets_[3]]->Draw("hist same");
       histogramStyle(*histo_["eta top" ][kData  ][Njets_[mult]], kData);
