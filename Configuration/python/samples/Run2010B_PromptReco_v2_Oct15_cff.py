@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 #
 #          global tag: GR_R_38X_V13::All
 #
-#        dataset name: /Mu/dammann-Run2010B-PromptReco-HLT-PAT-f02e17f8210087bf691d3427b81ee1bd/USER
+#        dataset name: /Mu/dammann-Run2010B-PromptReco-HLT-Oct15-PAT-a639c5a95d465d5e98326e8c657f8aad/USER
 #             DBS URL: https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 # 
 #       input sample: /Mu/Run2010B-PromptReco_v2/AOD
