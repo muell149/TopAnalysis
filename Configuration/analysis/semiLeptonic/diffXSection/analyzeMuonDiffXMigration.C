@@ -37,7 +37,7 @@ void analyzeMuonDiffXMigration()
   gStyle->SetPalette(1);
 
   // choose jet multiplicity you want to see: "Njets1" / "Njets2" / "Njets3" / "Njets4" / "Njets3Btag" / "Njets4Btag" 
-  TString jetMultiplicity ="Njets3";
+  TString jetMultiplicity ="Njets1";
   // choose luminosity for scaling of event numbers and for legend as entry
   int luminosity = 50;
   TString lum = "50";
@@ -232,7 +232,7 @@ void analyzeMuonDiffXMigration()
   TPaveLabel *leg1 = new TPaveLabel(0.16, 0.83, 1.0, 1.0, "migration t#bar{t} & W+jets", "br NDC");
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("#mu-sel. & "+jetLabel(jetMultiplicity)+" , "+lum+" pb^{-1}@7TeV");
+  leg0->SetHeader("full selection, "+jetLabel(jetMultiplicity)+", "+lum+" pb^{-1}");
   leg0->AddEntry(  ptPurity    , "purity"     , "PL");
   leg0->AddEntry(  ptStability , "stability"  , "PL");
   leg0->AddEntry(  ptAcceptance, "correction" , "PL");
@@ -366,7 +366,7 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, fl
 
 void histStyle2D(TH2& hist, const char* titleHisto, const char* titleX, const char* titleY) 
 {
-  hist.SetTitle(titleHisto);
+  hist.SetTitle("");
   hist.GetXaxis()->SetTitle(titleX);
   hist.GetXaxis()->SetTitleSize ( 0.05 );
   hist.GetXaxis()->SetLabelColor(  1   );
