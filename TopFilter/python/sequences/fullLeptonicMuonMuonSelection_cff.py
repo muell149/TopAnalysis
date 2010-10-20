@@ -41,7 +41,7 @@ muHitMuons = selectedPatMuons.clone(src = 'goodTrackMuons',
                                     cut = 'globalTrack.hitPattern.numberOfValidMuonHits > 0' 
 				   )				       				       	
 ## transverse impact parameter
-goodD0Muons = selectedPatMuons.clone(src = 'goodTrackMuons', 
+goodD0Muons = selectedPatMuons.clone(src = 'muHitMuons', 
                                      cut = 'abs(dB) < 0.02'
 				    )	
 ## global fit
@@ -97,8 +97,7 @@ cleanPatElectrons.finalCut = cms.string('et > 20.'
 							  
 cleanPatJets.src = "selectedPatJetsAK5PF"
 
-cleanPatJets.checkOverlaps.muons.src  = 'goodMuons'
-cleanPatJets.checkOverlaps.muons.preselection = '(trackIso+caloIso)/pt < 0.15'
+cleanPatJets.checkOverlaps.muons.src  = 'isolatedMuons'
 cleanPatJets.checkOverlaps.muons.deltaR  = 0.4
 cleanPatJets.checkOverlaps.muons.requireNoOverlaps = True 
 
