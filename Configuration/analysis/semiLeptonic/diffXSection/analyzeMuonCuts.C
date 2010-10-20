@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFile="./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root", TString plots = "cutflow")
+void analyzeMuonCuts(double luminosity = 10927, bool save = false, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", TString plots = "cutflow")
 {
   // ---
   //    main function parameters
@@ -52,13 +52,13 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
   for(int ienum = 0; ienum<6; ienum++){
-    if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
-    if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
-    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
-    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
-    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
-    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
-    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
+    if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10.root"    ) );
+    if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10.root"    ) );
+    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloSpring10.root"    ) );
+    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloSpring10.root"    ) );
+    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10.root"  ) );
+    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10.root"  ) );
+    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10.root" ) );
     if(ienum==kData) files_.push_back(new TFile(dataFile                                                             ) );
   }
   // ---
@@ -69,12 +69,12 @@ void analyzeMuonCuts(double luminosity = 2880, bool save = false, TString dataFi
 
   // 7 TeV Monte Carlo spring 10 samples
   // -----------------------------------
-  // for current ttbar(lept.mu on gen level and other) Mc@Nlo 
-  lumiweight.push_back(0.000000159*(double)luminosity);
-  lumiweight.push_back(0.000000159*(double)luminosity);
   // for current ttbar(lept.mu on gen level and other) Madgraph 
-  //   lumiweight.push_back(0.000000106*(double)luminosity);
-  //   lumiweight.push_back(0.000000106*(double)luminosity);
+  lumiweight.push_back(0.000000106*(double)luminosity);
+  lumiweight.push_back(0.000000106*(double)luminosity);
+  // for current ttbar(lept.mu on gen level and other) Mc@Nlo 
+  //   lumiweight.push_back(0.000000159*(double)luminosity);
+  //   lumiweight.push_back(0.000000159*(double)luminosity);
   // for current Z+jets MADGRAPH sample
   lumiweight.push_back(0.000002809*(double)luminosity);
   // for current W+jets MADGRAPH sample
