@@ -41,7 +41,7 @@ void scaleByLumi(TH1F* histo, double lumi);
 void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, unsigned int color=kBlack);
 void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variabl);
 
-void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root", bool useMG=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true)
+void analyzeMuonDiffXSec(double luminosity = 10927, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", bool useMG=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true)
 { 
 
   // ---
@@ -54,8 +54,8 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
   TString QCDScale="QCDestimationStd";
   TString WjetsScale="WjetsEstimationStd";
   if(useMG      ) TopSample ="Mad";
-  if(JES=="up"  ) JESShift  ="JES11";
-  if(JES=="down") JESShift  ="JES09";
+  if(JES=="up"  ) JESShift  ="JES105";
+  if(JES=="down") JESShift  ="JES095";
   luminosity*=lumiShift;
   if(lumiShift>1.0) LuminosityVariation = "Up";
   if(lumiShift<1.0) LuminosityVariation = "Down";
@@ -110,11 +110,11 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
   for(int ienum = 0; ienum<6; ienum++){
-    if(ienum==kSig)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10"+JESShift+".root"   ) );
-    if(ienum==kBkg)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10"+JESShift+".root"   ) );
-    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10"+JESShift+".root" ) );
-    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10"+JESShift+".root" ) );
-    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10"+JESShift+".root") );
+    if(ienum==kSig)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+JESShift+".root"   ) );
+    if(ienum==kBkg)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+JESShift+".root"   ) );
+    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+JESShift+".root" ) );
+    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+JESShift+".root" ) );
+    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+JESShift+".root") );
     if(ienum==kData) files_.push_back(new TFile(dataFile                                                                        ) );
   }
 
@@ -169,7 +169,7 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
   // (2*ttbar MC@NLO, 2*ttbar MG, W+jets MG, Z+jets MG, QCD PYTHIA) 
   // -----------------------------------
   for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
-    if(!useMG && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000007940958/50.0*luminosity);
+    if(!useMG && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000005308736/50.0*luminosity);//0.000007940958/50.0*luminosity);
     if( useMG && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000005308736/50.0*luminosity);
     if(idx==kWjets)lumiweight_.push_back(0.000155498692/50.0*luminosity);
     if(idx==kZjets)lumiweight_.push_back(0.000140471057/50.0*luminosity);
@@ -818,7 +818,7 @@ void analyzeMuonDiffXSec(double luminosity = 2880, bool save = true, bool loadVa
 	double NW =NWestimate;
 	double Nmeasure = Nselected-NQCD-NZjets-NW;
 	// if c.a. method is not working: substract W+jets from MC reco
-	if(Nmeasure<=0||NW<0){
+	if(Nmeasure<=0||NW<0||1==1){
 	  if(Nmeasure<=0) std::cout << "N(W) from c.a. is larger than N(all events), take N(W) from MC gen";
 	  if(NW<0)        std::cout << "N(W) from c.a. is negative, take N(W) from MC gen";	
 	  double NWMC=histo_["pt"][kWjets][Njets_[mult]]->Integral( 0 , histo_["pt"][kGenW  ][Njets_[mult]]->GetNbinsX()+1 );
