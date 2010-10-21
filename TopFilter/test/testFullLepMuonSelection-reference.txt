@@ -75,8 +75,8 @@ TrigReport     1    0        316        316          0          0 cleanPatPhoton
 TrigReport     1    0        316        316          0          0 cleanPatTaus
 TrigReport     1    0        316        316          0          0 cleanPatJets
 TrigReport     1    0        316        316          0          0 cleanPatCandidateSummary
+TrigReport     1    0        316        316          0          0 goodIdJets
 TrigReport     1    0        316        316          0          0 tightJets
-TrigReport     1    0        316        316          0          0 goodJets
 TrigReport     1    0        316        316          0          0 hardJets
 TrigReport     1    0        316        147        169          0 twoTightMuonSelection
 TrigReport     1    0        147        143          4          0 twoTrackerMuonSelection
@@ -90,15 +90,15 @@ TrigReport     1    0         15         15          0          0 isolatedMuons
 TrigReport     1    0         15          5         10          0 twoIsolatedMuonSelection
 TrigReport     1    0          5          5          0          0 isolatedTightMuons
 TrigReport     1    0          5          5          0          0 oneIsolatedTightMuonSelection
+TrigReport     1    0          5          5          0          0 oneGoodIdJetSelection
 TrigReport     1    0          5          5          0          0 oneTightJetSelection
-TrigReport     1    0          5          5          0          0 oneGoodJetSelection
 TrigReport     1    0          5          5          0          0 oneHardJetSelection
 TrigReport     1    0          5          5          0          0 filterDiMuonMassQCDveto
 TrigReport     1    0          5          4          1          0 filterDiMuonMassZveto
 TrigReport     1    0          4          4          0          0 highMETs
 TrigReport     1    0          4          4          0          0 metSelection
+TrigReport     1    0          4          4          0          0 twoGoodIdJetSelection
 TrigReport     1    0          4          4          0          0 twoTightJetSelection
-TrigReport     1    0          4          4          0          0 twoGoodJetSelection
 TrigReport     1    0          4          1          3          0 twoHardJetSelection
 TrigReport     1    0          1          1          0          0 kinSolutionTtFullLepEventHypothesis
 TrigReport     1    0          1          1          0          0 ttFullLepHypKinSolution

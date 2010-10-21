@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 #-------------------------------------------------
-# test cfg file for tqaflayer1 & 2 production from
-# fullsim for semi-leptonic ttbar events 
+# test cfg file dimuon selection
+# this example uses PF jets
 #-------------------------------------------------
 process = cms.Process("Selection")
 
@@ -112,6 +112,8 @@ process.filterTrigger.hltPaths  = cms.vstring('HLT_Mu9')
 	  
 ## filter for muon and jet kinematics, muon iso and quality				     
 process.load("TopAnalysis.TopFilter.sequences.fullLeptonicMuonMuonSelection_cff")
+from TopAnalysis.TopFilter.sequences.fullLeptonicMuonMuonSelection_cff import switchJetType
+switchJetType("PF")
 
 ## filter for dimuon mass				     
 from TopAnalysis.TopFilter.filters.DiMuonFilter_cfi import * 
@@ -170,7 +172,7 @@ process.p1 = cms.Path(process.patDefaultSequence *
 		      process.requireMET *
 		      process.requireTwoHardJets *      			    		     
                       process.makeTtFullLepEvent *	     		     
-                      process.filterHypoValidity	*	     
+                      process.filterHypoValidity *	     
 		      process.filterBtag
                      )
 
