@@ -9,7 +9,6 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## muon count filter
 from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 
-
 ###########################################################################################
 #
 # MUON SELECTION
@@ -84,7 +83,7 @@ oneIsolatedTightMuonSelection = countPatMuons.clone(src = 'isolatedTightMuons', 
 
 ###########################################################################################
 #
-# JET COLLECTION CLEANING
+# JET SELECTION
 #
 ###########################################################################################
 
@@ -94,39 +93,30 @@ cleanPatElectrons.finalCut = cms.string('et > 20.'
 					'& electronID("eidTight")'
 					'&(trackIso+caloIso)/pt < 0.15'
                                        )
-							  
-cleanPatJets.src = "selectedPatJetsAK5PF"
+cleanPatJets.src = "selectedPatJets"
 
-cleanPatJets.checkOverlaps.muons.src  = 'isolatedMuons'
+cleanPatJets.checkOverlaps.muons.src  = 'goodMuons'
+cleanPatJets.checkOverlaps.muons.preselection = '(trackIso+caloIso)/pt < 0.15'
+
 cleanPatJets.checkOverlaps.muons.deltaR  = 0.4
 cleanPatJets.checkOverlaps.muons.requireNoOverlaps = True 
 
 cleanPatJets.checkOverlaps.electrons.deltaR  = 0.4
 cleanPatJets.checkOverlaps.electrons.requireNoOverlaps = True 
 
-
-###########################################################################################
-#
-# JET SELECTION
-#
-###########################################################################################
+## good id jet selection
+from TopAnalysis.TopFilter.filters.JetIdFunctorFilter_cfi import *
+goodIdJets.src     = cms.InputTag('cleanPatJets') 
+goodIdJets.jetType = cms.string('CALO')
+goodIdJets.version = cms.string('PURE09')
+goodIdJets.quality = cms.string('LOOSE')
 
 ## thight jet selection				   
-tightJets = selectedPatJets.clone(src = 'cleanPatJets', 
+tightJets = selectedPatJets.clone(src = 'goodIdJets', 
                                   cut = 'abs(eta) < 2.5' 				        
 			         )
-
-## good jet selection
-goodJets = selectedPatJets.clone(src = 'tightJets', 
-                                 cut = 'chargedHadronEnergyFraction > 0.0'
-                                       '& neutralHadronEnergyFraction < 1.0'
-                                       '& chargedEmEnergyFraction < 1.0'
-                                       '& neutralEmEnergyFraction < 1.0'
-                                       '& chargedMultiplicity > 0'
-                                       '& nConstituents > 1'
-                                )
 ## hard jet selection
-hardJets = selectedPatJets.clone(src = 'goodJets', 
+hardJets = selectedPatJets.clone(src = 'tightJets', 
                                  cut = 'pt > 30.' 
 			        )
 				
@@ -141,14 +131,14 @@ bJetsSVHE = selectedPatJets.clone(src = 'hardJets',
 				 				 												    				        
 ## Count Filters with n >= 1 for control plots
 oneTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 1)
-oneGoodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 1)
+oneGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',minNumber = 1)
 oneHardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 1)
 oneBJetTCHE           = countPatJets.clone(src = 'bJetsTCHE', minNumber = 1)
 oneBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 1)
 
 ## Count Filters with n >= 2 for control plots
 twoTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
-twoGoodJetSelection   = countPatJets.clone(src = 'goodJets',  minNumber = 2)
+twoGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',minNumber = 2)
 twoHardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
 twoBJetTCHE           = countPatJets.clone(src = 'bJetsTCHE', minNumber = 2)
 twoBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 2)
@@ -162,7 +152,7 @@ twoBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 2)
 
 ## met selector
 highMETs = cms.EDFilter("PATMETSelector",
-    src = cms.InputTag("patMETsPF"),
+    src = cms.InputTag("patMETs"),
     cut = cms.string("et>30.")
 )
 
@@ -216,18 +206,18 @@ requireTwoIsolatedMuons = cms.Sequence(isolatedMuons *
 
 applyJetCleaning = cms.Sequence(cleanPatCandidates)
 
-buildJets = cms.Sequence(tightJets *
-			 goodJets *
+buildJets = cms.Sequence(goodIdJets *
+			 tightJets *
 			 hardJets				
 			)	
 			
-requireOneHardJet = cms.Sequence(oneTightJetSelection *
-                                 oneGoodJetSelection *		    
+requireOneHardJet = cms.Sequence(oneGoodIdJetSelection *	
+                                 oneTightJetSelection *	    
 			         oneHardJetSelection
 			        )			
 
-requireTwoHardJets = cms.Sequence(twoTightJetSelection *
-                                  twoGoodJetSelection *		    
+requireTwoHardJets = cms.Sequence(twoGoodIdJetSelection *
+                                  twoTightJetSelection *		    
 			          twoHardJetSelection
 			         )
 			     
@@ -246,6 +236,35 @@ requireOneBtagSVHE = cms.Sequence(bJetsSVHE *
 				 )
 				 
 requireTwoBtagsSVHE = cms.Sequence(twoBJetSVHE)				 
-				 
-				 
+				 				 
 				 			 			     
+################################################################################
+#
+# HELPER FUNCTION
+#
+################################################################################
+
+def switchJetType(jt):
+	if jt == "JPT":
+		cleanPatJets.src   = cms.InputTag("selectedPatJetsAK5JPT")
+		goodIdJets.jets    = cms.InputTag("cleanPatJets")
+		goodIdJets.jetType = cms.string('JPT')
+		goodIdJets.version = cms.string('PURE09')
+		goodIdJets.quality = cms.string('LOOSE')
+		highMETs.src       = cms.InputTag("patMETsJPT")
+	elif jt == "PF":
+		cleanPatJets.src   = cms.InputTag("selectedPatJetsAK5PF")
+		goodIdJets.jets    = cms.InputTag("cleanPatJets")
+		goodIdJets.jetType = cms.string('PF')
+		goodIdJets.version = cms.string('FIRSTDATA')
+		goodIdJets.quality = cms.string('LOOSE')		
+		highMETs.src	 = cms.InputTag("patMETsPF")	
+	elif jt == "CALO":
+		cleanPatJets.src   = cms.InputTag("selectedPatJets")
+		goodIdJets.jets    = cms.InputTag("cleanPatJets")
+		goodIdJets.jetType = cms.string('CALO')
+		goodIdJets.version = cms.string('PURE09')
+		goodIdJets.quality = cms.string('LOOSE')		
+		highMETs.src     = cms.InputTag("patMETs")	
+	else:
+		print "WARNING: unknown jet type specified in selection sequence. Will use default."
