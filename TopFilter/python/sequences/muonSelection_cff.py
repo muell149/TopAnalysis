@@ -12,8 +12,10 @@ from TopAnalysis.TopFilter.filters.MuonJetOverlapSelector_cfi import *
 from TopAnalysis.TopFilter.sequences.jetSelection_cff import goodJets
 vetoJets = goodJets.clone()
 
+from TopAnalysis.TopFilter.sequences.MuonVertexDistanceSelector_cfi import *
+
 ## create helper collection with jet-distance filter only
-dRMuons = checkJetOverlapMuons.clone(muons = "selectedPatMuons",
+dRMuons = checkJetOverlapMuons.clone(muons = "vertexSelectedMuons",
                                      jets =  "vetoJets" ,
                                      deltaR  = cms.double(0.3),
                                      overlap = cms.bool(False)
@@ -29,7 +31,7 @@ standAloneMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
 ## check if Global Muon
 combinedMuons   = selectedPatMuons.clone(src = 'selectedPatMuons',
                                          cut = 'isGlobalMuon &'
-                                               'isTrackerMuon() =1'
+                                               'isTrackerMuon'
                                          )
 ## select Muons with high pt
 highPtMuons    = selectedPatMuons.clone(src = 'combinedMuons',
@@ -42,11 +44,16 @@ kinematicMuons    = selectedPatMuons.clone(src = 'highPtMuons',
                                            )
 
 ## check tracker related muon qualities: isGlobalMuonPromptTight? & Tracker Muon & impact parameter
-trackMuons = selectedPatMuons.clone(src = 'kinematicMuons',
-                                    cut = 'innerTrack.numberOfValidHits >= 11 &'
+trackMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons',
+                                    cut = 'isGlobalMuon & isTrackerMuon &'
+                                          'pt > 20. &'
+                                          'abs(eta) < 2.1 &'
+                                          'innerTrack.numberOfValidHits >= 11 &'
                                           'globalTrack.normalizedChi2 < 10.0  &'
                                           'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                          'abs(dB)<0.02'
+                                          'abs(dB)<0.02 &'
+                                          'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                          'numberOfMatches>1'
                                     )
 
 ## check for good isolation concerning surrounding jets (MIP-qualities)
@@ -62,7 +69,7 @@ tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
                                        )
 
 ## N-1 collections
-noDRMuons     = selectedPatMuons.clone(src = 'selectedPatMuons',
+noDRMuons     = selectedPatMuons.clone(src = 'vertexSelectedMuons',
                                        cut = 'pt > 20. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
@@ -70,7 +77,9 @@ noDRMuons     = selectedPatMuons.clone(src = 'selectedPatMuons',
                                              'innerTrack.numberOfValidHits >= 11 &'
                                              'globalTrack.normalizedChi2 < 10.0 &'
                                              'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                             'abs(dB)<0.02'
+                                             'abs(dB)<0.02 &'
+                                             'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                             'numberOfMatches>1'
                                        )
 
 noPtMuons     = selectedPatMuons.clone(src = 'dRMuons',
@@ -81,7 +90,9 @@ noPtMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                              'innerTrack.numberOfValidHits >= 11 &'
                                              'globalTrack.normalizedChi2 < 10.0 &'
                                              'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                             'abs(dB)<0.02'
+                                             'abs(dB)<0.02 &'
+                                             'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                             'numberOfMatches>1'
                                        )
 noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                         cut = 'pt > 20. &'
@@ -91,7 +102,9 @@ noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                               'innerTrack.numberOfValidHits >= 11 &'
                                               'globalTrack.normalizedChi2 < 10.0 &'
                                               'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                              'abs(dB)<0.02'
+                                              'abs(dB)<0.02 &'
+                                              'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                              'numberOfMatches>1'
                                        )
 
 noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
@@ -101,7 +114,9 @@ noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                               'innerTrack.numberOfValidHits >= 11 &'
                                               'globalTrack.normalizedChi2 < 10.0 &'
                                               'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                              'abs(dB)<0.02'
+                                              'abs(dB)<0.02 &'
+                                              'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                              'numberOfMatches>1'
                                         )
 noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                             cut = 'pt > 20. & abs(eta) < 2.1 &'
@@ -110,7 +125,9 @@ noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                                   '(trackIso+caloIso)/pt < 0.05 &'
                                                   'globalTrack.normalizedChi2 < 10.0 &'
                                                   'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                                  'abs(dB)<0.02'
+                                                  'abs(dB)<0.02 &'
+                                                  'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                                  'numberOfMatches>1'
                                             )
 noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
                                          cut = 'pt > 20. & abs(eta) < 2.1 &'
@@ -119,7 +136,9 @@ noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
                                                '(trackIso+caloIso)/pt < 0.05 &'
                                                'innerTrack.numberOfValidHits >= 11 &'
                                                'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                               'abs(dB)<0.02'
+                                               'abs(dB)<0.02 &'
+                                               'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                               'numberOfMatches>1'
                                          )
 noDbMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                        cut = 'pt > 20. & abs(eta) < 2.1 &'
@@ -128,7 +147,9 @@ noDbMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                              '(trackIso+caloIso)/pt < 0.05 &'
                                              'innerTrack.numberOfValidHits >= 11 &'
                                              'globalTrack.normalizedChi2 < 10.0 &'
-                                             'globalTrack.hitPattern.numberOfValidMuonHits>0 '                              
+                                             'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
+                                             'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                             'numberOfMatches>1'                              
                                        )
 
 ## N-1 Collections

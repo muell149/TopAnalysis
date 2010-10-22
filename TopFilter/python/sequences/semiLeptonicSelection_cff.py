@@ -47,7 +47,8 @@ tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
 ## setting up the collections for the semi-leptonic
 ## event selection; on these collection monitoring
 ## can still be performed
-semiLeptonicSelection = cms.Sequence(looseElectrons   *
+semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
+                                     looseElectrons   *
                                      standAloneMuons  *
                                      vetoJets         *
                                      dRMuons          *
