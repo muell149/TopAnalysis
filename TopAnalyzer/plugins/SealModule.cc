@@ -165,6 +165,10 @@ DEFINE_FWK_MODULE(GenJetCompositionAnalyzer);
 typedef DoubleObjectAnalyzer<edm::View<reco::MET>, edm::View<reco::Candidate>, METKinematics> METAnalyzer;
 DEFINE_FWK_MODULE(METAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/HTlepTemplate.h"
+typedef DoubleObjectAnalyzer<edm::View<reco::MET>, edm::View<pat::Muon>, HTlepTemplate> HTlepAnalyzer;
+DEFINE_FWK_MODULE(HTlepAnalyzer);
+
 
 /**
     Define modules needed for the analysis of trigger
