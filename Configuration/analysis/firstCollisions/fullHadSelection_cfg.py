@@ -4,7 +4,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
 ## decide whether to run on:  * ReRecoA *, * ReRecoB *, * Prompt *, * Sep17 *, * PromptV9 *
-options.register('globalTag', 'PromptV9', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
+options.register('globalTag', 'PromptV11', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 
 # get and parse the command line arguments
 options.parseArguments()
@@ -27,7 +27,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    '/store/data/Run2010B/Jet/RECO/PromptReco-v2/000/146/436/0263EEFC-DEC6-DF11-8CB1-003048F118C6.root'
+    #'/store/data/Run2010B/Jet/RECO/PromptReco-v2/000/146/436/0263EEFC-DEC6-DF11-8CB1-003048F118C6.root'
+    '/store/data/Run2010B/MultiJet/AOD/PromptReco-v2/000/148/058/207C5CA4-82DB-DF11-8A85-0030487CD716.root'
     )
 )
 
@@ -50,6 +51,8 @@ if(options.globalTag=='Prompt'):
     process.GlobalTag.globaltag = cms.string('GR10_P_V7::All')
 elif(options.globalTag=='PromptV9'):
     process.GlobalTag.globaltag = cms.string('GR10_P_V9::All')
+elif(options.globalTag=='PromptV11'):
+    process.GlobalTag.globaltag = cms.string('GR10_P_V11::All')
 elif(options.globalTag=='ReRecoA'):
     process.GlobalTag.globaltag = cms.string('GR_R_36X_V12A::All')
 elif(options.globalTag=='ReRecoB'):
@@ -90,8 +93,11 @@ process.noscraping = cms.EDFilter("FilterOutScraping",
 
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-if(options.globalTag=='PromptV9'):
-    process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U","HLT_QuadJet20U"])
+if(options.globalTag=='PromptV9' or options.globalTag=='PromptV11'):
+    process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"   ,"HLT_QuadJet20U"   ,"HLT_QuadJet25U"   ,
+                                                     "HLT_QuadJet15U_v2","HLT_QuadJet20U_v2","HLT_QuadJet25U_v2",
+                                                     "HLT_QuadJet15U_v3","HLT_QuadJet20U_v3","HLT_QuadJet25U_v3"],
+                                         throw = False)
 else:
     process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"])
 
