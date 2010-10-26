@@ -43,29 +43,39 @@ tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
                                          cut=''
                                          )
-
+tightLeadingPFJets = selectedPatJets.clone(src = 'goodJetsPF30',
+                                           cut=''
+                                           )
+tightBottomPFJets  = selectedPatJets.clone(src = 'goodJetsPF30',
+                                           cut='bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
+                                           )
 ## setting up the collections for the semi-leptonic
 ## event selection; on these collection monitoring
 ## can still be performed
 semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
-                                     looseElectrons   *
-                                     standAloneMuons  *
-                                     vetoJets         *
-                                     dRMuons          *
-                                     combinedMuons    *
-                                     highPtMuons      *
-                                     kinematicMuons   *
-                                     trackMuons       *                                  
-                                     goldenMuons      *
-                                     looseMuons       *
-                                     tightMuons       *
-                                     centralJets      *
-                                     reliableJets     *
-                                     goodJets         *
+                                     looseElectrons      *
+                                     standAloneMuons     *
+                                     vetoJets            *
+                                     dRMuons             *
+                                     combinedMuons       *
+                                     highPtMuons         *
+                                     kinematicMuons      *
+                                     trackMuons          *                                  
+                                     goldenMuons         *
+                                     looseMuons          *
+                                     tightMuons          *
+                                     centralJets         *
+                                     reliableJets        *
+                                     goodJets            *
                                      trackCountingHighPurBJets *
                                      trackCountingHighEffBJets *
-                                     tightLeadingJets *
-                                     tightBottomJets
+                                     tightLeadingJets    *
+                                     tightBottomJets     *
+                                     goodJetsPF20        *
+                                     goodJetsPF25        *
+                                     goodJetsPF30        *
+                                     tightLeadingPFJets  *
+                                     tightBottomPFJets
                                      )
 
 ## ---

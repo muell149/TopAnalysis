@@ -20,16 +20,22 @@ goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
                                            'jetID.fHPD < 0.98         &'
                                            'jetID.n90Hits > 1'
                                      )
-goodJetsPF   = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
+goodJetsPF20 = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
                                      cut = 'abs(eta) < 2.4 & pt > 20.          &'
                                            'chargedHadronEnergyFraction > 0.0  &'
                                            'neutralHadronEnergyFraction/corrFactor("raw") < 0.99 &'
                                            'chargedEmEnergyFraction/corrFactor("raw")     < 0.99 &'
                                            'neutralEmEnergyFraction/corrFactor("raw")     < 0.99 &'
                                            'chargedMultiplicity > 0            &'
-                                           'nConstituents > 0'
+                                           'nConstituents > 1'
                                       )
 
+goodJetsPF25 = selectedPatJets.clone(src = 'goodJetsPF20',
+                                     cut = 'pt > 25.'
+                                     )
+goodJetsPF30 = selectedPatJets.clone(src = 'goodJetsPF20',
+                                     cut = 'pt > 30.'
+                                     )
 ## N-1 collections
 noEtaJets      = selectedPatJets.clone(src = 'selectedPatJets',
                                        cut = 'pt > 30.                  &'
