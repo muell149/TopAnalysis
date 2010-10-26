@@ -41,15 +41,23 @@ TriggerFilter::filter(edm::Event& evt, const edm::EventSetup&)
     if(!trigResults.product()->accept(i_Trig)) continue;
     // look if one of the HLT paths from config is among the paths having fired            
     for(int i = 0; i<n_TrigPaths; i++){
-      if(!(trigName.triggerName(i_Trig)== hltPaths_[i])) continue; 	    	    	    	    
+      // check for wildcards
+      std::string path = hltPaths_[i].substr(0,hltPaths_[i].find('*'));       
+      std::string name = trigName.triggerName(i_Trig).substr(0,hltPaths_[i].find('*'));
+      
+      if(!(name==path)) continue;       	    	    	    	    
       pass = true;     	        
     } 
     // don't pass the event if veto trigger has fired
     for(int i = 0; i<n_VetoPaths; i++){
-      if(!(trigName.triggerName(i_Trig)== vetoPaths_[i])) continue; 	    	    	    	    
+      // check for wildcards
+      std::string path = vetoPaths_[i].substr(0,vetoPaths_[i].find('*'));       
+      std::string name = trigName.triggerName(i_Trig).substr(0,vetoPaths_[i].find('*'));
+      if(!(name== path)) continue; 	    	    	    	    
       pass = false;     	        
     }          
   }  
+  
   return pass;
 }
 
