@@ -91,6 +91,7 @@ GeneratorZFilter::filter(edm::Event& evt, const edm::EventSetup& es)
   // check if specific tau decays are selected
   bool specificTauDecaysSelected = false;
   if(tauDecays_.size()>0) specificTauDecaysSelected = true;  
+  bool isTauTau = false;
   bool isTauSelected = false;
     
   for(reco::GenParticleCollection::const_iterator iGenPart = genParticles->begin(); iGenPart != genParticles->end(); ++iGenPart){
@@ -110,6 +111,7 @@ GeneratorZFilter::filter(edm::Event& evt, const edm::EventSetup& es)
           lorVecMinus = daughter->p4();
           isRightDecay = true;
 	  if(specificTauDecaysSelected && daughter->pdgId() == 15){
+	    isTauTau = true;
 	    tauMinusDecay = tauDecay(daughter);
 	  }
         }
@@ -151,7 +153,7 @@ GeneratorZFilter::filter(edm::Event& evt, const edm::EventSetup& es)
     if(this->filterInterval(diLeptonMass, diLepMassIntervals_)) diLeptonMassFilter = true; 
   }  
   if(!decayModeFilter)return false;
-  if(specificTauDecaysSelected && !isTauSelected) return false;  
+  if(specificTauDecaysSelected && isTauTau && !isTauSelected) return false;  
   if(!diLeptonMassFilter)return false;
   
   // All filters fulfilled...
