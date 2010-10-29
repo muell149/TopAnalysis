@@ -63,6 +63,8 @@ class GeneratorTopFilter : public edm::EDFilter {
   edm::InputTag src_;
   /// how many events do you want to be selected?
   int nEvents_;
+  /// string to save channel short cut from config
+  std::vector<std::string> channels_;
   /// counter for number of events
   int nEvts; 
   /// counter for filtered events
@@ -126,7 +128,8 @@ class GeneratorTopFilter : public edm::EDFilter {
 
 GeneratorTopFilter::GeneratorTopFilter(const edm::ParameterSet& cfg) :
   src_              (cfg.getParameter<edm::InputTag>("src"       )),
-  nEvents_          (cfg.getParameter<int> ("n_events"           )),  
+  nEvents_          (cfg.getParameter<int> ("n_events"           )),
+  channels_         (cfg.getParameter<std::vector<std::string> >("channels")),    
   SingleTopHadronic_(cfg.getParameter<bool>("SingleTop_Hadronic" )),  
   SingleTopElectron_(cfg.getParameter<bool>("SingleTop_Electron" )),  
   SingleTopMuon_    (cfg.getParameter<bool>("SingleTop_Muon"     )),  
@@ -304,132 +307,197 @@ int GeneratorTopFilter::tauDecay(){
 }
 
 void GeneratorTopFilter::beginJob() {
-  // build vector of selected decay channel numbers
-  if(SingleTopHadronic_){
-    selectedChannels.push_back(1);  
-    selectedChannels.push_back(10);
-  }
   
-  if(SingleTopElectron_){
-    selectedChannels.push_back(2);  
-    selectedChannels.push_back(20);
-  }
-  
-  if(SingleTopMuon_){
-    selectedChannels.push_back(3);  
-    selectedChannels.push_back(30);
-  } 
-  
-  if(SingleTopTau_){
-    if(Tau2Had_){
-      selectedChannels.push_back( 4);  
-      selectedChannels.push_back(40);
+  // check if channel short cuts are given in config
+  if(channels_.size()>0){
+    for(size_t i=0;i<channels_.size();++i){
+      std::string chn = channels_[i];
+      if(chn == "ElectronElectron"){ 
+	selectedChannels.push_back(22);
+      }	 
+      else if(chn == "ElectronMuon"){ 
+	selectedChannels.push_back(23); 
+	selectedChannels.push_back(32); 	  
+      }
+      else if(chn == "MuonElectron"){ // this is not forseen but it is clear what is meant 
+	  selectedChannels.push_back(23); 
+	  selectedChannels.push_back(32); 	  
+      }	  
+      else if(chn == "MuonMuon"){ 
+	  selectedChannels.push_back(33); 
+      }
+      else if(chn == "ElectronElectronViaTau"){  
+	  selectedChannels.push_back(25); 
+	  selectedChannels.push_back(52); 
+	  selectedChannels.push_back(55);	  
+      }	  	  
+      else if(chn == "ElectronMuonViaTau"){ 
+	  selectedChannels.push_back(26); 
+	  selectedChannels.push_back(62); 
+	  selectedChannels.push_back(35); 
+	  selectedChannels.push_back(53); 
+	  selectedChannels.push_back(56); 
+	  selectedChannels.push_back(65); 	  
+      }	       
+      else if(chn == "MuonElectronViaTau"){ // this is not forseen but it is clear what is meant  
+	  selectedChannels.push_back(26); 
+	  selectedChannels.push_back(62); 
+	  selectedChannels.push_back(35); 
+	  selectedChannels.push_back(53); 
+	  selectedChannels.push_back(56); 
+	  selectedChannels.push_back(65); 	  
+      }  
+      else if(chn == "MuonMuonViaTau"){ 
+	  selectedChannels.push_back(36); 
+	  selectedChannels.push_back(63); 
+	  selectedChannels.push_back(66); 	  
+      }
+      else if(chn == "SingleElectron"){ 
+	  selectedChannels.push_back(12); 
+	  selectedChannels.push_back(21); 	  
+      }	  	  
+      else if(chn == "SingleMuon"){ 
+	  selectedChannels.push_back(13); 
+	  selectedChannels.push_back(31); 	  
+      }
+      else if(chn == "FullHadronic"){ 
+	  selectedChannels.push_back(11); 	  
+      }
+      else{
+	edm::LogError("GeneratorTopFilter") << "Unknown channel short cut in configuration: " << chn;
+	throw cms::Exception("Configuration Error");	  	      
+      }
     }
-    if(Tau2Elec_){      
-      selectedChannels.push_back( 5);  
-      selectedChannels.push_back(50); 
-    }
-    if(Tau2Muon_){                 
-      selectedChannels.push_back( 6);  
-      selectedChannels.push_back(60);
-    }       
   }
-  
-  if(TtbarHadronic_){
-    selectedChannels.push_back(11);
-  }
-  
-  if(TtbarSemiElec_){
-    selectedChannels.push_back(12); 
-    selectedChannels.push_back(21);
-  }
-  
-  if(TtbarSemiMuon_){
-    selectedChannels.push_back(13); 
-    selectedChannels.push_back(31);
-  } 
-  
-  if(TtbarSemiTau_){
-    if(Tau2Had_){  
-      selectedChannels.push_back(14); 
-      selectedChannels.push_back(41);
+
+  else{
+    // build vector of selected decay channel numbers
+    if(SingleTopHadronic_){
+      selectedChannels.push_back(1);  
+      selectedChannels.push_back(10);
     }
-    if(Tau2Elec_){     
-      selectedChannels.push_back(15); 
-      selectedChannels.push_back(51);  
+
+    if(SingleTopElectron_){
+      selectedChannels.push_back(2);  
+      selectedChannels.push_back(20);
     }
-    if(Tau2Muon_){        
-      selectedChannels.push_back(16); 
-      selectedChannels.push_back(61); 
-    }     
-  }
-  
-  if(TtbarElecElec_){
-    selectedChannels.push_back(22);
-  }
-  
-  if(TtbarMuonMuon_){
-    selectedChannels.push_back(33);
-  }
-  
-  if(TtbarTauTau_){
-    if(Tau2Had_){   
-      selectedChannels.push_back(44);
-    }
-    if(Tau2Elec_){     
-      selectedChannels.push_back(55); 
-    }
-    if(Tau2Muon_){         
-      selectedChannels.push_back(66);
-    }
-    if(Tau2Had_ && Tau2Elec_){           
-      selectedChannels.push_back(45);
-      selectedChannels.push_back(54);
+
+    if(SingleTopMuon_){
+      selectedChannels.push_back(3);  
+      selectedChannels.push_back(30);
     } 
-    if(Tau2Had_ && Tau2Muon_){   
-      selectedChannels.push_back(46);    
-      selectedChannels.push_back(64);
+
+    if(SingleTopTau_){
+      if(Tau2Had_){
+	selectedChannels.push_back( 4);  
+	selectedChannels.push_back(40);
+      }
+      if(Tau2Elec_){      
+	selectedChannels.push_back( 5);  
+	selectedChannels.push_back(50); 
+      }
+      if(Tau2Muon_){                 
+	selectedChannels.push_back( 6);  
+	selectedChannels.push_back(60);
+      }       
+    }
+
+    if(TtbarHadronic_){
+      selectedChannels.push_back(11);
+    }
+
+    if(TtbarSemiElec_){
+      selectedChannels.push_back(12); 
+      selectedChannels.push_back(21);
+    }
+
+    if(TtbarSemiMuon_){
+      selectedChannels.push_back(13); 
+      selectedChannels.push_back(31);
     } 
-    if(Tau2Elec_ && Tau2Muon_){          
-      selectedChannels.push_back(56);    
-      selectedChannels.push_back(65);
-    }          
+
+    if(TtbarSemiTau_){
+      if(Tau2Had_){  
+	selectedChannels.push_back(14); 
+	selectedChannels.push_back(41);
+      }
+      if(Tau2Elec_){     
+	selectedChannels.push_back(15); 
+	selectedChannels.push_back(51);  
+      }
+      if(Tau2Muon_){        
+	selectedChannels.push_back(16); 
+	selectedChannels.push_back(61); 
+      }     
+    }
+
+    if(TtbarElecElec_){
+      selectedChannels.push_back(22);
+    }
+
+    if(TtbarMuonMuon_){
+      selectedChannels.push_back(33);
+    }
+
+    if(TtbarTauTau_){
+      if(Tau2Had_){   
+	selectedChannels.push_back(44);
+      }
+      if(Tau2Elec_){     
+	selectedChannels.push_back(55); 
+      }
+      if(Tau2Muon_){         
+	selectedChannels.push_back(66);
+      }
+      if(Tau2Had_ && Tau2Elec_){           
+	selectedChannels.push_back(45);
+	selectedChannels.push_back(54);
+      } 
+      if(Tau2Had_ && Tau2Muon_){   
+	selectedChannels.push_back(46);    
+	selectedChannels.push_back(64);
+      } 
+      if(Tau2Elec_ && Tau2Muon_){          
+	selectedChannels.push_back(56);    
+	selectedChannels.push_back(65);
+      }          
+    }
+
+    if(TtbarElecMuon_){
+      selectedChannels.push_back(23); 
+      selectedChannels.push_back(32);
+    }
+
+    if(TtbarElecTau_){
+      if(Tau2Had_){  
+	selectedChannels.push_back(24); 
+	selectedChannels.push_back(42);
+      }
+      if(Tau2Elec_){     
+	selectedChannels.push_back(25); 
+	selectedChannels.push_back(52);  
+      }
+      if(Tau2Muon_){        
+	selectedChannels.push_back(26); 
+	selectedChannels.push_back(62); 
+      }    
+    }  
+
+    if(TtbarMuonTau_){
+      if(Tau2Had_){  
+	selectedChannels.push_back(34); 
+	selectedChannels.push_back(43);
+      }
+      if(Tau2Elec_){     
+	selectedChannels.push_back(35); 
+	selectedChannels.push_back(53);  
+      }
+      if(Tau2Muon_){        
+	selectedChannels.push_back(36); 
+	selectedChannels.push_back(63); 
+      }     
+    } 
   }
-  
-  if(TtbarElecMuon_){
-    selectedChannels.push_back(23); 
-    selectedChannels.push_back(32);
-  }
-  
-  if(TtbarElecTau_){
-    if(Tau2Had_){  
-      selectedChannels.push_back(24); 
-      selectedChannels.push_back(42);
-    }
-    if(Tau2Elec_){     
-      selectedChannels.push_back(25); 
-      selectedChannels.push_back(52);  
-    }
-    if(Tau2Muon_){        
-      selectedChannels.push_back(26); 
-      selectedChannels.push_back(62); 
-    }    
-  }  
-  
-  if(TtbarMuonTau_){
-    if(Tau2Had_){  
-      selectedChannels.push_back(34); 
-      selectedChannels.push_back(43);
-    }
-    if(Tau2Elec_){     
-      selectedChannels.push_back(35); 
-      selectedChannels.push_back(53);  
-    }
-    if(Tau2Muon_){        
-      selectedChannels.push_back(36); 
-      selectedChannels.push_back(63); 
-    }     
-  } 
   
   selChSize = selectedChannels.size();
   

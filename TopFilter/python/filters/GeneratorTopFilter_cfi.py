@@ -7,7 +7,21 @@ generatorTopFilter = cms.EDFilter("GeneratorTopFilter",
     #how many event do you want to select?
     n_events = cms.int32(-1),
     
-    #which channel do you want to select?
+    ## SHORT CUTS: 
+    # if not empty all the other boolean parameters
+    # will be ignored
+    channels = cms.vstring(),
+    # supported: MuonMuon
+    #            ElectronMuon
+    #            ElectronElectron
+    #            MuonMuonViaTau
+    #            ElectronMuonViaTau
+    #            ElectronElectronViaTau     
+    #            SingleMuon
+    #            SingleElectron  
+    #            FullHadronic  
+    
+    ## MANUAL CONFIGURATION
     SingleTop_Hadronic = cms.bool(False),
     SingleTop_Electron = cms.bool(False),
     SingleTop_Muon     = cms.bool(False),
@@ -35,5 +49,5 @@ generatorTopFilter = cms.EDFilter("GeneratorTopFilter",
     Tau_To_Muon     = cms.bool(False),
     
     # selection can be inverted
-    invert_selection = cms.bool(False)   
+    invert_selection = cms.bool(False)     
 )
