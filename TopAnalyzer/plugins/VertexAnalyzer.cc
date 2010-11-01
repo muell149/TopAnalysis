@@ -82,7 +82,12 @@ VertexAnalyzer::beginJob()
   
   dzMu_= fs->make<TH1D>( "dzMu", "z-Distance #mu,Vrtx", 200,0,20);
   dzMu_->GetXaxis()->SetTitle("#Delta z [cm]");
-  dzMu_->GetYaxis()->SetTitle("N");               
+  dzMu_->GetYaxis()->SetTitle("N");   
+  
+  position3D_= fs->make<TH3D>( "position3D", "Position of good Vertices", 1000,-50.,50.,100,-5.,5.,100,-5.,5.);
+  position3D_->GetXaxis()->SetTitle("z [cm]"); // this is NO typo!
+  position3D_->GetYaxis()->SetTitle("x [cm]");
+  position3D_->GetZaxis()->SetTitle("y [cm]");                 
 }
 
 void
@@ -120,6 +125,8 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
       nDof_   ->Fill(ndof);  
       chi2_   ->Fill(chi2);
       nchi2_  ->Fill(nchi2); 
+      
+      position3D_->Fill(vrtx->z(),vrtx->x(),vrtx->y()); // this is NO typo!
       
       Handle<std::vector<pat::Muon> > muons; 
       evt.getByLabel(muons_, muons);     

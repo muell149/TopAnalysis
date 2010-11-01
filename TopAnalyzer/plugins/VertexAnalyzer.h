@@ -3,7 +3,8 @@
 
 #include <vector>
 
-#include "TH1.h"
+#include "TH1D.h"
+#include "TH3D.h"
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -67,7 +68,9 @@ class VertexAnalyzer : public EDAnalyzer {
     TH1D* nDof_;
     TH1D* chi2_; 
     TH1D* nchi2_; 
-    TH1D* dzMu_;         
+    TH1D* dzMu_; 
+    
+    TH3D* position3D_;        
 };
 
 #endif
