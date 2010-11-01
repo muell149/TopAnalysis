@@ -49,8 +49,9 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     return;
   }
   
-  if( !FullLepEvt->isHypoValid(hypoKey) ){
+  if( !FullLepEvt->isHypoValid(hypoKey) ){  
     edm::LogInfo ( "NonValidHyp" ) << "Hypothesis not valid for this event";
+    TopKin_[4]->SetBinContent(TopKin_[4]->GetNbinsX(),TopKin_[4]->GetBinContent(TopKin_[4]->GetNbinsX())+1);
     return;  // return if any of the hypotheses is not valid
   }
  
