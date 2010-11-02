@@ -42,6 +42,29 @@ class TagAndProbeAnalyzer : public edm::EDAnalyzer {
 
   /// tag and probe histogram
   std::map<std::string, TH1F*> hists_;
+  /// counts number of events
+  double evtNum_;
+  /// variable (true) or fixed (false) bins
+  //bool varBins_;
+  /// variables for cut on pt and eta: pt cut is not applied on pt-histo, eta cut is not applied on eta-histo
+  /// both cuts are applied on all other histos 
+  double etaCut_;
+  double ptCut_;
+  /// nBins of histos
+  int nBinsPt_;
+  int nBinsEta_;
+  int nBinsPhi_;
+  int nBinsMult_;
+  int nBinsMinDR_;
+  int nBinsMuMult_;
+  /// in case of fixed bins: 1st vector entry=xlow, 2nd vector entry=xup (left and right edges of histo)
+  /// in case of variable bins: vector of low-edges for each bin
+  std::vector<double> binsPt_;
+  std::vector<double> binsEta_;
+  std::vector<double> binsPhi_;
+  std::vector<double> binsMult_;
+  std::vector<double> binsMinDR_;
+  std::vector<double> binsMuMult_;
 };
 
 inline
