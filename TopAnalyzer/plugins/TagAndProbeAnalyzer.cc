@@ -16,7 +16,7 @@ TagAndProbeAnalyzer::TagAndProbeAnalyzer(const edm::ParameterSet& cfg):
   tests_( cfg.getParameter<edm::InputTag>("tests") ),
   jets_( cfg.getParameter<edm::InputTag>("jets") ),
   ptCut_( cfg.getParameter<double>("ptCut") ),
-  etaCut_( cfg.getParameter<double>("etaCut"),
+  etaCut_( cfg.getParameter<double>("etaCut") ),
   //varBins_(cfg.getParameter<bool>("varBins")),
   nBinsPt_(cfg.getParameter<int>("nBinsPt")),
   nBinsEta_(cfg.getParameter<int>("nBinsEta")),
