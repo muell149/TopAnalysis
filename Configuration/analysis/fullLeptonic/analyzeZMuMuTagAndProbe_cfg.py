@@ -26,8 +26,8 @@ process.load("TopAnalysis.Configuration.samples.Spring10_ZJets_PATtuple_cff")
 #process.source.fileNames = ['/store/user/jlange/samples/Spring10/ZJets-madgraph/PATtuple_1_1_epo.root']
 ## data: load PAT MuonPreselection
 #process.load("TopAnalysis.Configuration.samples.Run2010A_Sep17ReReco_v2_Oct22_cff")
-#process.load("TopAnalysis.Configuration.samples.Run2010B_PromptReco_v2_Oct29_145000_147120_cff") #before hltMu9 prescaling
-#process.load("TopAnalysis.Configuration.samples.Run2010B_PromptReco_v2_Oct29_147120_148864_cff") #after hltMu9 prescaling
+#process.load("TopAnalysis.Configuration.samples.Run2010B_PromptReco_v2_Oct29_145000_147120_cff") ## before hltMu9 prescale
+#process.load("TopAnalysis.Configuration.samples.Run2010B_PromptReco_v2_Oct29_147120_148864_cff") ## after hltMu9 prescale
 
 ## register TFileService => define output file
 process.TFileService = cms.Service("TFileService",

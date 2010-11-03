@@ -9,7 +9,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 /**
-  \class   GeneratorTopFilter GeneratorTopFilter.h "TopAnalysis/TopFilter/plugins/TopChannel.h"
+  \class   GeneratorTopFilter GeneratorTopFilter.cc "TopAnalysis/TopFilter/plugins/GeneratorTopFilter.h"
 
   \brief   EDFilter to select ttbar or single top decays on generator level
  
