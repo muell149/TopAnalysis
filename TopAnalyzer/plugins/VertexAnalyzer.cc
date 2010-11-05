@@ -134,9 +134,9 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
       for(std::vector<pat::Muon>::const_iterator muon = muons->begin(); muon!= muons->end(); ++muon) {  
         dzMu_->Fill(abs(muon->vz()-z));
       }           
-    }
-    goodMulti_->Fill(i);    
+    }       
   }
+  goodMulti_->Fill(i);   
 }
 
 void
