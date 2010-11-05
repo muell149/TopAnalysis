@@ -30,6 +30,7 @@ void HTlepTemplate::book(edm::Service<TFileService>& fs)
   tree->Branch("HTlep", &HTlep, "HTlep/F");
   tree->Branch("relIso", &relIso, "relIso/F");
   tree->Branch("dB", &dB, "dB/F");
+  tree->Branch("MT", &MT, "MT/F");
 }
 
 /// histogram filling with fwlite or full framework
@@ -49,6 +50,7 @@ HTlepTemplate::fill(const edm::View<reco::MET>& met, const edm::View<pat::Muon>&
     HTlep = MET+lepET;
     relIso = (muon.begin()->trackIso()+muon.begin()->ecalIso()+muon.begin()->hcalIso())/muon.begin()->pt();
     dB = muon.begin()->dB();
+    MT = sqrt((MET+muon.begin()->et())*(MET+muon.begin()->et())-((met.begin()->px()+muon.begin()->px())*(met.begin()->px()+muon.begin()->px())+(met.begin()->py()+muon.begin()->py())*(met.begin()->py()+muon.begin()->py())));
 
     tree->Fill();
   }
