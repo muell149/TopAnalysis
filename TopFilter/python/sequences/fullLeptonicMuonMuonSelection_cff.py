@@ -16,46 +16,46 @@ from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
 ###########################################################################################
 
 ## muons in tracker range
-tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons', 
-                                    cut = 'abs(eta) < 2.5'					        
+tightMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
+                                    cut = 'abs(eta) < 2.4'
 				   )
 ## tracker muons
-trackerMuons = selectedPatMuons.clone(src = 'tightMuons', 
-                                      cut = 'isTrackerMuon'					        
-				     )				   				   
+trackerMuons = selectedPatMuons.clone(src = 'tightMuons',
+                                      cut = 'isTrackerMuon'
+				     )
 ## muons reconstructed globally
-globalMuons = selectedPatMuons.clone(src = 'trackerMuons', 
-                                     cut = 'isGlobalMuon'					        
+globalMuons = selectedPatMuons.clone(src = 'trackerMuons',
+                                     cut = 'isGlobalMuon'
 				    )
 ## pt cut
-hardMuons = selectedPatMuons.clone(src = 'globalMuons', 
-                                   cut = 'pt > 20.'					        
-				  )				      
+hardMuons = selectedPatMuons.clone(src = 'globalMuons',
+                                   cut = 'pt > 20.'
+				  )
 ## n_hits
-goodTrackMuons = selectedPatMuons.clone(src = 'hardMuons', 
-                                        cut = 'track.numberOfValidHits > 10' 
+goodTrackMuons = selectedPatMuons.clone(src = 'hardMuons',
+                                        cut = 'track.numberOfValidHits > 10'
 				       )
 ## at least one valid muon hit
-muHitMuons = selectedPatMuons.clone(src = 'goodTrackMuons', 
-                                    cut = 'globalTrack.hitPattern.numberOfValidMuonHits > 0' 
-				   )				       				       	
+muHitMuons = selectedPatMuons.clone(src = 'goodTrackMuons',
+                                    cut = 'globalTrack.hitPattern.numberOfValidMuonHits > 0'
+				   )
 ## transverse impact parameter
-goodD0Muons = selectedPatMuons.clone(src = 'muHitMuons', 
+goodD0Muons = selectedPatMuons.clone(src = 'muHitMuons',
                                      cut = 'abs(dB) < 0.02'
-				    )	
+				    )
 ## global fit
-goodMuons = selectedPatMuons.clone(src = 'goodD0Muons', 
+goodMuons = selectedPatMuons.clone(src = 'goodD0Muons',
                                    cut = 'combinedMuon.normalizedChi2 < 10.0'
-				  )						     				     					     			    
-## isolation cut				      				      
-isolatedMuons = selectedPatMuons.clone(src = 'goodMuons', 
-                                       cut = '(trackIso+caloIso)/pt < 0.15' 
-				      )	
-## this collection is needed to make sure that one muon is in trigger range				      				      
-isolatedTightMuons = selectedPatMuons.clone(src = 'isolatedMuons', 
-                                            cut = 'abs(eta) < 2.1' 
-				           )					      
-				      			      
+				  )
+## isolation cut
+isolatedMuons = selectedPatMuons.clone(src = 'goodMuons',
+                                       cut = '(trackIso+caloIso)/pt < 0.15'
+				      )
+## this collection is needed to make sure that one muon is in trigger range
+isolatedTightMuons = selectedPatMuons.clone(src = 'isolatedMuons',
+                                            cut = 'abs(eta) < 2.1'
+				           )
+
 
 ## Count Filters with n >= 1 requirement for control plots
 oneTightMuonSelection      = countPatMuons.clone(src = 'tightMuons',     minNumber = 1)
@@ -111,24 +111,24 @@ goodIdJets.jetType = cms.string('CALO')
 goodIdJets.version = cms.string('PURE09')
 goodIdJets.quality = cms.string('LOOSE')
 
-## thight jet selection				   
-tightJets = selectedPatJets.clone(src = 'goodIdJets', 
-                                  cut = 'abs(eta) < 2.5' 				        
+## thight jet selection
+tightJets = selectedPatJets.clone(src = 'goodIdJets',
+                                  cut = 'abs(eta) < 2.5'
 			         )
 ## hard jet selection
 hardJets = selectedPatJets.clone(src = 'tightJets', 
                                  cut = 'pt > 30.' 
 			        )
-				
+
 ## b-jet selection (optional)
 bJetsTCHE = selectedPatJets.clone(src = 'hardJets',
 		                  cut = 'bDiscriminator("trackCountingHighEffBJetTags") > 1.7' 
-		                 )				 
+		                 )
 ## OR
 bJetsSVHE = selectedPatJets.clone(src = 'hardJets',
 		                  cut = 'bDiscriminator("simpleSecondaryVertexHighEffBJetTags") > 1.74' 
-		                 )				 
-				 				 												    				        
+		                 )
+
 ## Count Filters with n >= 1 for control plots
 oneTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 1)
 oneGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',minNumber = 1)
@@ -169,7 +169,7 @@ metSelection = cms.EDFilter("PATCandViewCountFilter",
 # SEQUENCES
 #
 ###########################################################################################
-		       			       					    
+
 requireOneGoodMuon = cms.Sequence(tightMuons *
 				  oneTightMuonSelection *
 				  trackerMuons *
@@ -185,8 +185,8 @@ requireOneGoodMuon = cms.Sequence(tightMuons *
         			  goodD0Muons *
         			  oneGoodD0MuonSelection *
         			  goodMuons *
-        			  oneGoodMuonSelection  
-                                 )					    
+        			  oneGoodMuonSelection
+                                 )
 
 requireTwoGoodMuons = cms.Sequence(twoTightMuonSelection *
 				   twoTrackerMuonSelection *
@@ -197,47 +197,47 @@ requireTwoGoodMuons = cms.Sequence(twoTightMuonSelection *
         			   twoGoodD0MuonSelection *
         			   twoGoodMuonSelection 
 				  )
-				    				    				   
+
 requireTwoIsolatedMuons = cms.Sequence(isolatedMuons *
                                        twoIsolatedMuonSelection *
 				       isolatedTightMuons *
 				       oneIsolatedTightMuonSelection
-				      )	
+				      )
 
 applyJetCleaning = cms.Sequence(cleanPatCandidates)
 
 buildJets = cms.Sequence(goodIdJets *
 			 tightJets *
-			 hardJets				
-			)	
+			 hardJets
+			)
 			
 requireOneHardJet = cms.Sequence(oneGoodIdJetSelection *	
                                  oneTightJetSelection *	    
 			         oneHardJetSelection
-			        )			
+			        )
 
 requireTwoHardJets = cms.Sequence(twoGoodIdJetSelection *
-                                  twoTightJetSelection *		    
+                                  twoTightJetSelection *
 			          twoHardJetSelection
 			         )
 			     
-requireMET = cms.Sequence(highMETs * 		    
+requireMET = cms.Sequence(highMETs *
 			  metSelection
 			 )
 			 
 requireOneBtagTCHE = cms.Sequence(bJetsTCHE *
                                  oneBJetTCHE
 				 )
-				 
-requireTwoBtagsTCHE = cms.Sequence(twoBJetTCHE)				 
+
+requireTwoBtagsTCHE = cms.Sequence(twoBJetTCHE)
 				 
 requireOneBtagSVHE = cms.Sequence(bJetsSVHE *
                                  oneBJetSVHE
 				 )
-				 
-requireTwoBtagsSVHE = cms.Sequence(twoBJetSVHE)				 
-				 				 
-				 			 			     
+
+requireTwoBtagsSVHE = cms.Sequence(twoBJetSVHE)
+
+
 ################################################################################
 #
 # HELPER FUNCTION
@@ -257,14 +257,14 @@ def switchJetType(jt):
 		goodIdJets.jets    = cms.InputTag("cleanPatJets")
 		goodIdJets.jetType = cms.string('PF')
 		goodIdJets.version = cms.string('FIRSTDATA')
-		goodIdJets.quality = cms.string('LOOSE')		
-		highMETs.src	 = cms.InputTag("patMETsPF")	
+		goodIdJets.quality = cms.string('LOOSE')
+		highMETs.src	 = cms.InputTag("patMETsPF")
 	elif jt == "CALO":
 		cleanPatJets.src   = cms.InputTag("selectedPatJets")
 		goodIdJets.jets    = cms.InputTag("cleanPatJets")
 		goodIdJets.jetType = cms.string('CALO')
 		goodIdJets.version = cms.string('PURE09')
-		goodIdJets.quality = cms.string('LOOSE')		
-		highMETs.src     = cms.InputTag("patMETs")	
+		goodIdJets.quality = cms.string('LOOSE')
+		highMETs.src     = cms.InputTag("patMETs")
 	else:
 		print "WARNING: unknown jet type specified in selection sequence. Will use default."
