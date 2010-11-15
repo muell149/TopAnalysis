@@ -9,7 +9,12 @@ analyzeFullHadTopReco = cms.EDAnalyzer("FullHadTopRecoAnalyzer",
     analyze   = cms.PSet(
       ## choose hypo to be used for reco
       hypo     = cms.string("kKinFit"),
-      bTagAlgo = cms.string("simpleSecondaryVertexBJetTags")
+      ## choose b-tagging algorithm
+      bTagAlgo = cms.string("simpleSecondaryVertexBJetTags"),
+      ## top mass for respective plots
+      topMass  = cms.double(172.5),
+      ## window around top mass for respective plots
+      window   = cms.double(30.0)      
     )
 )
 

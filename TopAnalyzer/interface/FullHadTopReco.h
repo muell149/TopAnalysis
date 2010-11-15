@@ -1,6 +1,8 @@
 #ifndef FullHadTopReco_h
 #define FullHadTopReco_h
 
+#include "TTree.h"
+
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
@@ -57,6 +59,22 @@ class FullHadTopReco : public DoubleObject<TtFullHadronicEvent, const edm::View<
   std::string hypo_;
   /// bTagAlgorithm to use
   std::string bTagAlgo_;
+
+  /// top mass of hypo used for respective plots as central value
+  double topMass_;
+  /// width around top mass for respective plots
+  double window_;
+
+  /// TTree with data for easier analysis later on
+  TTree * tree;
+  float mTop;
+  float mTopBar;
+  float mTopHypo;
+  float mTopBarHypo;
+  float mTtbar;
+  float mTtbarHypo;
+  float ptTtbar;
+  float ptTtbarHypo;
 };
 
 #endif
