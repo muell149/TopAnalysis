@@ -94,7 +94,7 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
   }
   else if(whichTrigger_ == "QuadJet15U"){
 
-    for(pat::TriggerObjectRefVector::const_iterator obj = triggerEvent->objects->begin(); obj != triggerEvent->objects->end(); ++obj){
+    for(pat::TriggerObjectCollection::const_iterator obj = triggerEvent->objects()->begin(); obj != triggerEvent->objects()->end(); ++obj){
       if( (obj->hasFilterId(-84) || obj->hasFilterId(-85) || obj->hasFilterId(-86)) && obj->pt() >= 8 )      { ++l1TriggerJetCounter; }
       if( obj->hasFilterId(85) && obj->pt() >= 15 && obj->collection() == "hltIterativeCone5CaloJets::HLT" ) { ++hlTriggerJetCounter; }
     }
@@ -110,13 +110,13 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
     pat::TriggerObjectRefVector objects = triggerEvent->filterObjects("hltL1sQuadJet15U");
 
     for(pat::TriggerObjectRefVector::const_iterator obj = objects.begin(); obj != objects.end(); ++obj){
-      if( obj->pt() >= 8 ) ++l1TriggerJetCounter;
+      if( (*obj)->pt() >= 8 ) ++l1TriggerJetCounter;
     }
 
     objects = triggerEvent->filterObjects("hlt4jet15U");
 
     for(pat::TriggerObjectRefVector::const_iterator obj = objects.begin(); obj != objects.end(); ++obj){
-      if( obj->pt() >= 25 ) ++hlTriggerJetCounter;
+      if( (*obj)->pt() >= 25 ) ++hlTriggerJetCounter;
     }
 
     if( l1TriggerJetCounter >= 4 ){
