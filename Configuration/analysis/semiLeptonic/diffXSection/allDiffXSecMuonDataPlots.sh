@@ -77,15 +77,15 @@ sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, false)'
 echo 2 using Madgraph ttbar absorped via eff
 sleep 2
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, true, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false)'
 echo 3 JES shift up absorped via eff
 sleep 2
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "up")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "up")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "up", 1.0, 1.0, 1.0, 1.0, false)'
 echo 4 JES shift down absorped via eff
 sleep 2
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "down")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "down")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "down", 1.0, 1.0, 1.0, 1.0, false)'
 echo 5 Lumi shift up
 sleep 2
