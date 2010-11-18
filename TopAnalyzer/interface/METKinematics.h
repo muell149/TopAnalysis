@@ -70,6 +70,10 @@ public:
   void fill(const std::string histName, double valueA, double weight) const { if(booked(hists_, histName)) hists_.find(histName)->second->Fill(valueA, weight); }
   /// fill 2-dimensional histogram if it had been booked before
   void fill(const std::string histName, double valueA, double valueB, double weight) const { if(booked(hists2D_, histName)) hists2D_.find(histName)->second->Fill(valueA, valueB, weight); }
+
+  /// produce a TTree as output instead of histograms
+  bool useTree_;
+
   /// index of srcB object to be plotted
   int index_;
 };

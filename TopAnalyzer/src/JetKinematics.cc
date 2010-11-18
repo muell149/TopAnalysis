@@ -3,13 +3,16 @@
 /// default constructor for fw lite
 JetKinematics::JetKinematics(const int index, const std::string& correctionLevel) : index_(index), correctionLevel_(correctionLevel)
 {
+  tree = 0;
 }
 
 /// default constructor for fwfull
 JetKinematics::JetKinematics(const edm::ParameterSet& cfg) :
+  useTree_ ( cfg.getParameter<bool>( "useTree" ) ),
   index_( cfg.getParameter<int>( "index" ) ),
   correctionLevel_( cfg.getParameter<std::string>( "correctionLevel" ) )
 {
+  tree = 0;
 }
 
 /// histogramm booking for fwlite 
@@ -39,15 +42,21 @@ JetKinematics::book(edm::Service<TFileService>& fs)
       Kinematic Variables
   **/
   // jet multiplicty
-  hists_["n"  ] = fs->make<TH1F>( "n"   , "n"   ,  10 ,     0. ,    10. );
+  bookVariable( fs, "n"      ,  10,  0. , 10. , useTree_ );
+
+  // only produce a tree for the following collctions if they are only
+  // for one object and a tree should be written
+  bool singleObjectInTree = false;
+  if(index_ > -1 && useTree_) singleObjectInTree = true;
+
   // energy of the jet
-  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  , 180 ,     0. ,   900. );
+  bookVariable( fs, "en"  ,  180 ,  0.   , 900. , singleObjectInTree );
   // transverse momentum of the jet
-  hists_["pt" ] = fs->make<TH1F>( "pt"  , "pt"  , 120 ,     0. ,   600. );
+  bookVariable( fs, "pt"  ,  120 ,  0.   , 600. , singleObjectInTree );
   // pseudorapidity eta of the jet
-  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
+  bookVariable( fs, "eta" ,   70 , -3.5  ,  3.5 , singleObjectInTree );
   // azimuthal angle phi of the jet
-  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  70 ,  -3.14 ,   3.14 );
+  bookVariable( fs, "phi" ,   70 , -M_PI , M_PI , singleObjectInTree );
 }
 
 /// histogram filling for fwlite and for full fw
@@ -66,18 +75,21 @@ JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
   for(std::vector<reco::GenJet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
     if( index_<0 || index_==index ){
       // energy of the jet
-      hists_.find("en"  )->second->Fill( jet->energy() , weight );
+      fillValue( "en" , jet->energy() , weight );
       // transverse momentum of the jet
-      hists_.find("pt"  )->second->Fill( jet->pt() , weight );
+      fillValue( "pt" , jet->pt() , weight );
       // pseudorapidity eta of the jet
-      hists_.find("eta" )->second->Fill( jet->eta() , weight );
+      fillValue( "eta" , jet->eta() , weight );
       // azimuthal angle phi of the jet
-      hists_.find("phi" )->second->Fill( jet->phi() , weight );
+      fillValue( "phi" , jet->phi() , weight );
     }
   }
   // jet multiplicty is always filled the same way
   // independent from the choice of index_
-  hists_.find("n"  )->second->Fill( index , weight );
+  fillValue( "n" , index , weight );
+
+  // fill the tree, if any variable should be put in
+  if(treeVars_.size()) tree->Fill();
 }
 
 /// return the desired correction step from the configuration string, which is expected to be of type 'step' or 'step:flavor'
@@ -118,16 +130,19 @@ JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
   for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
     if( index_<0 || index_==index ){
       // energy of the jet
-      hists_.find( "en"  )->second->Fill( jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
+      fillValue( "en" , jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
       // transverse momentum of the jet
-      hists_.find( "pt"  )->second->Fill( jet->correctedJet(correctionStep(), correctionFlavor()).pt() , weight );
+      fillValue( "pt" , jet->correctedJet(correctionStep(), correctionFlavor()).pt() , weight );
       // pseudorapidity eta of the jet
-      hists_.find( "eta" )->second->Fill( jet->eta() , weight );
+      fillValue( "eta" , jet->eta() , weight );
       // azimuthal angle phi of the jet
-      hists_.find( "phi" )->second->Fill( jet->phi() , weight );
+      fillValue( "phi" , jet->phi() , weight );
     }
   }
   // jet multiplicty is always filled the same way
   // independent from the choice of index_
-  hists_.find("n"  )->second->Fill( jets.size() , weight );
+  fillValue( "n" , jets.size() , weight );
+
+  // fill the tree, if any variable should be put in
+  if(treeVars_.size()) tree->Fill();
 }

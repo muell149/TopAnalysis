@@ -55,6 +55,9 @@ class KinFitQuality : public DoubleObject<TtFullHadronicEvent, const edm::View<p
   void process(){};
 
  private:
+  /// produce a TTree as output instead of histograms
+  bool useTree_;
+
   /// number of hypotheses to be plotted (probability and chi2)
   unsigned int numberOfHypos_;
 

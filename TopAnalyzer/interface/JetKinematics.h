@@ -50,6 +50,8 @@ class JetKinematics : public SingleObject<const edm::View<pat::Jet> > {
   const std::string correctionFlavor() const;
 
  private:
+  /// produce a TTree as output instead of histograms
+  bool useTree_;
   /// index of jet to be plotted
   int index_;
   /// JES correction level

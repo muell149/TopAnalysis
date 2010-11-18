@@ -9,11 +9,13 @@ analyzeKinFitQuality = cms.EDAnalyzer("KinFitQualityAnalyzer",
     srcB = cms.InputTag("selectedPatJets"),                                         
     ## analyzer specific configurables
     analyze   = cms.PSet(
-    ## number of hypotheses for plot kinFit Chi2 and Prob
-    numberOfHypos = cms.uint32( 1 ),
-    ## resolutions used for the kinematic fit
-    udscResolutions = udscResolution.functions,
-    bResolutions    = bjetResolution.functions
+        ## choose TTree for output instead of histograms, if applicable
+        useTree  = cms.bool(False),
+        ## number of hypotheses for plot kinFit Chi2 and Prob
+        numberOfHypos = cms.uint32( 1 ),
+        ## resolutions used for the kinematic fit
+        udscResolutions = udscResolution.functions,
+        bResolutions    = bjetResolution.functions
     )
 )
 

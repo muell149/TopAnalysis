@@ -39,6 +39,8 @@ class JetQuality : public SingleObject<const edm::View<pat::Jet> > {
     void process(){};
 
  private:
+  /// produce a TTree as output instead of histograms
+  bool useTree_;
   /// index of jet to be plotted
   int index_;
   /// decide which flaor to be used for the L5 and L7 flavor dependend 

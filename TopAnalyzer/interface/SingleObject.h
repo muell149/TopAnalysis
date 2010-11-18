@@ -9,6 +9,7 @@
 
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TTree.h"
 #include "TFile.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -51,6 +52,14 @@ class SingleObject{
   virtual ~SingleObject(){};
   /// write histograms to file for fwlite
   void write(TFile& file, const char* directory);
+  /// book histograms or tree variables
+  void bookVariable(edm::Service<TFileService>& fs, const char * variable,
+		    unsigned int binsX, float lowX, float upX, unsigned int binsY, float lowY, float upY,
+		    bool useTree);
+  void bookVariable(edm::Service<TFileService>& fs, const char * variable, unsigned int binsX, float lowX, float upX, bool useTree);
+  /// fill values into map for histograms or tree
+  void fillValue(std::string variable, float value1, float value2, const double& weight);
+  void fillValue(std::string variable, float value1, const double& weight);
 
   /**
      The following functions have to be implemented for any class
@@ -77,8 +86,57 @@ class SingleObject{
   /// histogram container
   std::map<std::string, TH1*> hists_;
   std::map<std::string, TH2*> hists2D_;
+  std::map<std::string, float> treeVars_;
+  TTree * tree;
 };
 
+/// book histograms or tree variables
+template <typename Collection>
+  void SingleObject<Collection>::bookVariable(edm::Service<TFileService>& fs, const char * variable,
+					      unsigned int binsX, float lowX, float upX, unsigned int binsY, float lowY, float upY,
+					      bool useTree=false)
+{
+  if(useTree && !binsY){
+    //std::cout << "Adding *" << variable << "* to TTree" << std::endl;
+    if(!tree){
+      tree = fs->make<TTree>("TTree","TTree",0);
+      //treeVars_["weight"];
+      //tree->Branch("weight", &treeVars_["weight"], ("weight" + *"/F"));
+    }
+    treeVars_[variable];
+    tree->Branch(variable, &treeVars_[variable], (std::string(variable) + "/F").c_str());
+  }
+  else{
+    //std::cout << "Adding *" << variable << "* to Histograms" << std::endl;
+    if     (!binsY &&  !lowY && !upY )  hists_  [variable] = fs->make<TH1F>( variable, variable, binsX, lowX, upX );
+    else if( binsY && ( lowY ||  upY )) hists2D_[variable] = fs->make<TH2F>( variable, variable, binsX, lowX, upX, binsY, lowY, upY );
+  }
+}
+
+template <typename Collection>
+  void SingleObject<Collection>::bookVariable(edm::Service<TFileService>& fs, const char * variable,
+					      unsigned int binsX, float lowX, float upX, bool useTree=false)
+{
+  bookVariable( fs, variable, binsX, lowX, upX, 0, 0, 0, useTree);
+}
+
+/// fill values into map for histograms or tree
+template <typename Collection>
+  void SingleObject<Collection>::fillValue(std::string variable, float value1, float value2, const double& weight=1.)
+{
+  if(hists2D_.find(variable) != hists2D_.end()) hists2D_.find(variable)->second->Fill(value1, value2, weight);
+}
+
+template <typename Collection>
+  void SingleObject<Collection>::fillValue(std::string variable, float value, const double& weight=1.)
+{
+  if(treeVars_.find(variable) != treeVars_.end()){
+    treeVars_.find(variable)->second = value;
+  }
+  else{
+    hists_.find(variable)->second->Fill(value, weight);
+  }
+}
 
 /// writing histograms to file in fwlite
 template <typename Collection> 

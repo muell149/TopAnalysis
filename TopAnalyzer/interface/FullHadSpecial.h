@@ -39,6 +39,8 @@ class FullHadSpecial : public SingleObject<const edm::View<pat::Jet> > {
   void process() {};
 
  private:
+  /// produce a TTree as output instead of histograms
+  bool useTree_;
 
 };
 

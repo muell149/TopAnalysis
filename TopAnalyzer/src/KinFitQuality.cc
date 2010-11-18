@@ -6,16 +6,19 @@
 /// default constructor for fw lite
 KinFitQuality::KinFitQuality()
 {
-  covM=0;
+  covM = 0;
+  tree = 0;
 }
 
 /// default constructor for full fw
 KinFitQuality::KinFitQuality(const edm::ParameterSet& cfg) :
+  useTree_         ( cfg.getParameter<bool>                           ( "useTree"         ) ),
   numberOfHypos_   ( cfg.getParameter<unsigned int>                   ( "numberOfHypos"   ) ),
   udscResolutions_ ( cfg.getParameter<std::vector<edm::ParameterSet> >( "udscResolutions" ) ),
   bResolutions_    ( cfg.getParameter<std::vector<edm::ParameterSet> >( "bResolutions"    ) )
 {
-  covM=0;
+  covM = 0;
+  tree = 0;
 }
 
 /// default destructor
@@ -39,68 +42,66 @@ void KinFitQuality::book(edm::Service<TFileService>& fs)
       Pull Distributions (Relative to the Reco Input)
   **/
 
-  double pi = TMath::Pi();
-
   // b pt
-  hists_["bQuarkPt"     ] = fs->make<TH1F>( "bQuarkPt"      , "bQuarkPt"      ,   60, -2. , 1. );
+  bookVariable( fs, "bQuarkPt"      ,   60, -2. , 1. , false );
   // b eta
-  hists_["bQuarkEta"    ] = fs->make<TH1F>( "bQuarkEta"     , "bQuarkEta"     ,   60, -3. , 3. );
+  bookVariable( fs, "bQuarkEta"     ,   60, -3. , 3. , false );
   // b phi
-  hists_["bQuarkPhi"    ] = fs->make<TH1F>( "bQuarkPhi"     , "bQuarkPhi"     ,   60, -pi , pi );
+  bookVariable( fs, "bQuarkPhi"     ,   60, -M_PI , M_PI , false );
   // lightQuark pt
-  hists_["lightQuarkPt" ] = fs->make<TH1F>( "lightQuarkPt"  , "lightQuarkPt"  ,   60, -2. , 1. );
+  bookVariable( fs, "lightQuarkPt"  ,   60, -2. , 1. , false );
   // lightQuark b eta
-  hists_["lightQuarkEta"] = fs->make<TH1F>( "lightQuarkEta" , "lightQuarkEta" ,   60, -3. , 3. );
+  bookVariable( fs, "lightQuarkEta" ,   60, -3. , 3. , false );
   // lightQuark b phi
-  hists_["lightQuarkPhi"] = fs->make<TH1F>( "lightQuarkPhi" , "lightQuarkPhi" ,   60, -pi , pi );
+  bookVariable( fs, "lightQuarkPhi" ,   60, -M_PI , M_PI , false );
   // w pt
-  hists_["wPt"          ] = fs->make<TH1F>( "wPt"           , "wPt"           ,   60, -2. , 1. );
+  bookVariable( fs, "wPt"           ,   60, -2. , 1. , false );
   // w eta
-  hists_["wEta"         ] = fs->make<TH1F>( "wEta"          , "wEta"          ,   60, -3. , 3. );
+  bookVariable( fs, "wEta"          ,   60, -3. , 3. , false );
   // w phi
-  hists_["wPhi"         ] = fs->make<TH1F>( "wPhi"          , "wPhi"          ,   60, -pi , pi );
+  bookVariable( fs, "wPhi"          ,   60, -M_PI , M_PI , false );
   // topQuark pt
-  hists_["topQuarkPt"   ] = fs->make<TH1F>( "topQuarkPt"    , "topQuarkPt"    ,   60, -2. , 1. );
+  bookVariable( fs, "topQuarkPt"    ,   60, -2. , 1. , false );
   // topQuark eta
-  hists_["topQuarkEta"  ] = fs->make<TH1F>( "topQuarkEta"   , "topQuarkEta"   ,   60, -3. , 3. );
+  bookVariable( fs, "topQuarkEta"   ,   60, -3. , 3. , false );
   // topQuark phi
-  hists_["topQuarkPhi"  ] = fs->make<TH1F>( "topQuarkPhi"   , "topQuarkPhi"   ,   60, -pi , pi );
+  bookVariable( fs, "topQuarkPhi"   ,   60, -M_PI , M_PI , false );
 
   // b pt pull
-  hists_["bPullEt"     ] = fs->make<TH1F>( "bPullEt"      , "bPullEt"      ,  400, -10. , 10. );
+  bookVariable( fs, "bPullEt"      ,  400, -10. , 10. , false );
   // b eta pull
-  hists_["bPullEta"    ] = fs->make<TH1F>( "bPullEta"     , "bPullEta"     ,  200,  -5. ,  5. );
+  bookVariable( fs, "bPullEta"     ,  200,  -5. ,  5. , false );
   // b phi pull
-  hists_["bPullPhi"    ] = fs->make<TH1F>( "bPullPhi"     , "bPullPhi"     ,  200,  -5. ,  5. );
+  bookVariable( fs, "bPullPhi"     ,  200,  -5. ,  5. , false );
   // lightQuark pt pull
-  hists_["lightPullEt" ] = fs->make<TH1F>( "lightPullEt"  , "lightPullEt"  ,  200,  -5. ,  5. );
+  bookVariable( fs, "lightPullEt"  ,  200,  -5. ,  5. , false );
   // lightQuark eta pull
-  hists_["lightPullEta"] = fs->make<TH1F>( "lightPullEta" , "lightPullEta" ,  200,  -5. ,  5. );
+  bookVariable( fs, "lightPullEta" ,  200,  -5. ,  5. , false );
   // lightQuark phi pull
-  hists_["lightPullPhi"] = fs->make<TH1F>( "lightPullPhi" , "lightPullPhi" ,  200,  -5. ,  5. );
+  bookVariable( fs, "lightPullPhi" ,  200,  -5. ,  5. , false );
 
   /**
      KinFit Properties
   **/
 
   // chi2prob of kinfit log plot
-  hists_["prob_log"] = fs->make<TH1F>( "prob_log" , "prob_log" ,  100, -100., 0. );
+  bookVariable( fs, "prob_log" ,  100, -100., 0. , useTree_ );
   // chi2 of kinfit
-  hists_["chi2"] = fs->make<TH1F>( "chi2" , "chi2" ,  100, 0., 1000. );
+  bookVariable( fs, "chi2"     ,  100, 0., 1000. , useTree_ );
   // chi2prob of kinfit
-  hists_["prob"] = fs->make<TH1F>( "prob" , "prob" ,  100, 0.,    1. );
+  bookVariable( fs, "prob"     ,  100, 0.,    1. , useTree_ );
 
   for(unsigned int i = 1; i < numberOfHypos_; ++i){
 
     TString tName = "chi2_"; tName += i+1;
     std::string name = tName.Data();
     // chi2 of kinfit
-    hists_[name] = fs->make<TH1F>( tName.Data() , tName.Data() ,  100, 0., 1000. );
+    bookVariable( fs, name.c_str() ,  100, 0., 1000. , useTree_ );
 
     tName = "prob_"; tName += i+1;
     name = tName.Data();
     // chi2prob of kinfit
-    hists_[name] = fs->make<TH1F>( tName.Data() , tName.Data() ,  100, 0.,    1. );
+    bookVariable( fs, name.c_str() ,  100, 0.,    1. , useTree_ );
   }
 }
 
@@ -142,153 +143,153 @@ KinFitQuality::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>& 
     // make sure the b-jet index is in the range of the jet collection
     if( b >=0 && b < (int)jets.size() ){
       // b pt
-      hists_.find("bQuarkPt" )->second->Fill( (jets[b].pt() -tops.b("kKinFit")->pt())/jets[b].pt()  );
+      fillValue("bQuarkPt"  , (jets[b].pt() -tops.b("kKinFit")->pt())/jets[b].pt()  , weight);
       // b eta
-      hists_.find("bQuarkEta")->second->Fill( (jets[b].eta()-tops.b("kKinFit")->eta()) );
+      fillValue("bQuarkEta" , (jets[b].eta()-tops.b("kKinFit")->eta()) , weight);
       // b phi
-      hists_.find("bQuarkPhi")->second->Fill( deltaPhi(jets[b].phi(),tops.b("kKinFit")->phi()) );
+      fillValue("bQuarkPhi" , deltaPhi(jets[b].phi(),tops.b("kKinFit")->phi()) , weight);
 
       // b pt pull
-      hists_.find("bPullEt" )->second->Fill( (jets[b].et() -tops.b("kKinFit")->et())/covM->getResolution(jets[b], "et" , true) );
+      fillValue("bPullEt"  , (jets[b].et() -tops.b("kKinFit")->et())/covM->getResolution(jets[b], "et" , true) , weight);
       // b eta pull
-      hists_.find("bPullEta")->second->Fill( (jets[b].eta()-tops.b("kKinFit")->eta())/covM->getResolution(jets[b], "eta" , true) );
+      fillValue("bPullEta" , (jets[b].eta()-tops.b("kKinFit")->eta())/covM->getResolution(jets[b], "eta" , true) , weight);
       // b phi pull
-      hists_.find("bPullPhi")->second->Fill( deltaPhi(jets[b].phi(),tops.b("kKinFit")->phi())/covM->getResolution(jets[b], "phi" , true) );
+      fillValue("bPullPhi" , deltaPhi(jets[b].phi(),tops.b("kKinFit")->phi())/covM->getResolution(jets[b], "phi" , true) , weight);
     }
    // make sure the bBar-jet index is in the range of the jet collection
     if( bBar >= 0 && bBar< (int)jets.size() ){
       // bBar pt
-      hists_.find("bQuarkPt" )->second->Fill( (jets[bBar].pt() -tops.bBar("kKinFit")->pt())/jets[bBar].pt()  );
+      fillValue("bQuarkPt"  , (jets[bBar].pt() -tops.bBar("kKinFit")->pt())/jets[bBar].pt()  , weight);
       // bBar eta
-      hists_.find("bQuarkEta")->second->Fill( (jets[bBar].eta()-tops.bBar("kKinFit")->eta()) );
+      fillValue("bQuarkEta" , (jets[bBar].eta()-tops.bBar("kKinFit")->eta()) , weight);
       // bBar phi
-      hists_.find("bQuarkPhi")->second->Fill( deltaPhi(jets[bBar].phi(),tops.bBar("kKinFit")->phi()) );
+      fillValue("bQuarkPhi" , deltaPhi(jets[bBar].phi(),tops.bBar("kKinFit")->phi()) , weight);
 
       // bBar pt pull
-      hists_.find("bPullEt" )->second->Fill( (jets[bBar].pt() -tops.bBar("kKinFit")->pt())/covM->getResolution(jets[bBar], "et" , true) );
+      fillValue("bPullEt"  , (jets[bBar].pt() -tops.bBar("kKinFit")->pt())/covM->getResolution(jets[bBar], "et" , true) , weight);
       // bBar eta pull
-      hists_.find("bPullEta")->second->Fill( (jets[bBar].eta()-tops.bBar("kKinFit")->eta())/covM->getResolution(jets[bBar], "eta" , true) );
+      fillValue("bPullEta" , (jets[bBar].eta()-tops.bBar("kKinFit")->eta())/covM->getResolution(jets[bBar], "eta" , true) , weight);
       // bBar phi pull
-      hists_.find("bPullPhi")->second->Fill( deltaPhi(jets[bBar].phi(),tops.bBar("kKinFit")->phi())/covM->getResolution(jets[bBar], "phi" , true) );
+      fillValue("bPullPhi" , deltaPhi(jets[bBar].phi(),tops.bBar("kKinFit")->phi())/covM->getResolution(jets[bBar], "phi" , true) , weight);
     }
    // make sure the light quark index is in the range of the jet collection
     if( lightQ >= 0 && lightQ < (int)jets.size() ){
       // lightQuark pt
-      hists_.find("lightQuarkPt" )->second->Fill( (jets[lightQ].pt() -tops.lightQ("kKinFit")->pt())/jets[lightQ].pt()  );
+      fillValue("lightQuarkPt"  , (jets[lightQ].pt() -tops.lightQ("kKinFit")->pt())/jets[lightQ].pt()  , weight);
       // lightQuark eta
-      hists_.find("lightQuarkEta")->second->Fill( (jets[lightQ].eta()-tops.lightQ("kKinFit")->eta()) );
+      fillValue("lightQuarkEta" , (jets[lightQ].eta()-tops.lightQ("kKinFit")->eta()) , weight);
       // lightQuark phi
-      hists_.find("lightQuarkPhi")->second->Fill( deltaPhi(jets[lightQ].phi(),tops.lightQ("kKinFit")->phi()) );
+      fillValue("lightQuarkPhi" , deltaPhi(jets[lightQ].phi(),tops.lightQ("kKinFit")->phi()) , weight);
 
       // lightQuark pt pull
-      hists_.find("lightPullEt" )->second->Fill((jets[lightQ].pt() -tops.lightQ("kKinFit")->pt())/covM->getResolution(jets[lightQ], "et") );
+      fillValue("lightPullEt"  ,(jets[lightQ].pt() -tops.lightQ("kKinFit")->pt())/covM->getResolution(jets[lightQ], "et") , weight);
       // lightQuark eta pull
-      hists_.find("lightPullEta")->second->Fill((jets[lightQ].eta()-tops.lightQ("kKinFit")->eta())/covM->getResolution(jets[lightQ], "eta") );
+      fillValue("lightPullEta" ,(jets[lightQ].eta()-tops.lightQ("kKinFit")->eta())/covM->getResolution(jets[lightQ], "eta") , weight);
       // lightQuark phi pull
-      hists_.find("lightPullPhi")->second->Fill(deltaPhi(jets[lightQ].phi(),tops.lightQ("kKinFit")->phi())/covM->getResolution(jets[lightQ], "phi") );
+      fillValue("lightPullPhi" ,deltaPhi(jets[lightQ].phi(),tops.lightQ("kKinFit")->phi())/covM->getResolution(jets[lightQ], "phi") , weight);
     }
     // make sure the light quark bar index is in the range of the jet collection
     if( lightQBar >= 0 && lightQBar< (int)jets.size() ){
       // lightQuark pt
-      hists_.find("lightQuarkPt" )->second->Fill( (jets[lightQBar].pt() -tops.lightQBar("kKinFit")->pt())/jets[lightQBar].pt()  );
+      fillValue("lightQuarkPt"  , (jets[lightQBar].pt() -tops.lightQBar("kKinFit")->pt())/jets[lightQBar].pt()  , weight);
       // lightQuark eta
-      hists_.find("lightQuarkEta")->second->Fill( (jets[lightQBar].eta()-tops.lightQBar("kKinFit")->eta()) );
+      fillValue("lightQuarkEta" , (jets[lightQBar].eta()-tops.lightQBar("kKinFit")->eta()) , weight);
       // lightQuark phi
-      hists_.find("lightQuarkPhi")->second->Fill( deltaPhi(jets[lightQBar].phi(),tops.lightQBar("kKinFit")->phi()) );
+      fillValue("lightQuarkPhi" , deltaPhi(jets[lightQBar].phi(),tops.lightQBar("kKinFit")->phi()) , weight);
 
       // lightQuark pt pull
-      hists_.find("lightPullEt" )->second->Fill( (jets[lightQBar].pt() -tops.lightQBar("kKinFit")->pt())/covM->getResolution(jets[lightQBar], "et") );
+      fillValue("lightPullEt"  , (jets[lightQBar].pt() -tops.lightQBar("kKinFit")->pt())/covM->getResolution(jets[lightQBar], "et") , weight);
       // lightQuark eta pull
-      hists_.find("lightPullEta")->second->Fill( (jets[lightQBar].eta()-tops.lightQBar("kKinFit")->eta())/covM->getResolution(jets[lightQBar], "eta") );
+      fillValue("lightPullEta" , (jets[lightQBar].eta()-tops.lightQBar("kKinFit")->eta())/covM->getResolution(jets[lightQBar], "eta") , weight);
       // lightQuark phi pull
-      hists_.find("lightPullPhi")->second->Fill( deltaPhi(jets[lightQBar].phi(),tops.lightQBar("kKinFit")->phi())/covM->getResolution(jets[lightQBar], "phi") );
+      fillValue("lightPullPhi" , deltaPhi(jets[lightQBar].phi(),tops.lightQBar("kKinFit")->phi())/covM->getResolution(jets[lightQBar], "phi") , weight);
     }
     // make sure the light quark index is in the range of the jet collection
     if( lightP >= 0 && lightP < (int)jets.size() ){
       // lightQuark pt
-      hists_.find("lightQuarkPt" )->second->Fill( (jets[lightP].pt() -tops.lightP("kKinFit")->pt())/jets[lightP].pt()  );
+      fillValue("lightQuarkPt"  , (jets[lightP].pt() -tops.lightP("kKinFit")->pt())/jets[lightP].pt()  , weight);
       // lightQuark eta
-      hists_.find("lightQuarkEta")->second->Fill( (jets[lightP].eta()-tops.lightP("kKinFit")->eta()) );
+      fillValue("lightQuarkEta" , (jets[lightP].eta()-tops.lightP("kKinFit")->eta()) , weight);
       // lightQuark phi
-      hists_.find("lightQuarkPhi")->second->Fill( deltaPhi(jets[lightP].phi(),tops.lightP("kKinFit")->phi()) );
+      fillValue("lightQuarkPhi" , deltaPhi(jets[lightP].phi(),tops.lightP("kKinFit")->phi()) , weight);
 
       // lightQuark pt pull
-      hists_.find("lightPullEt" )->second->Fill((jets[lightP].pt() -tops.lightP("kKinFit")->pt())/covM->getResolution(jets[lightP], "et") );
+      fillValue("lightPullEt"  ,(jets[lightP].pt() -tops.lightP("kKinFit")->pt())/covM->getResolution(jets[lightP], "et") , weight);
       // lightQuark eta pull
-      hists_.find("lightPullEta")->second->Fill((jets[lightP].eta()-tops.lightP("kKinFit")->eta())/covM->getResolution(jets[lightP], "eta") );
+      fillValue("lightPullEta" ,(jets[lightP].eta()-tops.lightP("kKinFit")->eta())/covM->getResolution(jets[lightP], "eta") , weight);
       // lightQuark phi pull
-      hists_.find("lightPullPhi")->second->Fill(deltaPhi(jets[lightP].phi(),tops.lightP("kKinFit")->phi())/covM->getResolution(jets[lightP], "phi") );
+      fillValue("lightPullPhi" ,deltaPhi(jets[lightP].phi(),tops.lightP("kKinFit")->phi())/covM->getResolution(jets[lightP], "phi") , weight);
     }
     // make sure the light quark bar index is in the range of the jet collection
     if( lightPBar >= 0 && lightPBar < (int)jets.size() ){
       // lightQuark pt
-      hists_.find("lightQuarkPt"  )->second->Fill( (jets[lightPBar].pt() -tops.lightPBar("kKinFit")->pt())/jets[lightPBar].pt()  );
+      fillValue("lightQuarkPt"   , (jets[lightPBar].pt() -tops.lightPBar("kKinFit")->pt())/jets[lightPBar].pt()  , weight);
       // lightQuark eta
-      hists_.find("lightQuarkEta" )->second->Fill( (jets[lightPBar].eta()-tops.lightPBar("kKinFit")->eta()) );
+      fillValue("lightQuarkEta"  , (jets[lightPBar].eta()-tops.lightPBar("kKinFit")->eta()) , weight);
       // lightQuark phi
-      hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(jets[lightPBar].phi(),tops.lightPBar("kKinFit")->phi()) );
+      fillValue("lightQuarkPhi"  , deltaPhi(jets[lightPBar].phi(),tops.lightPBar("kKinFit")->phi()) , weight);
 
       // lightQuark pt
-      hists_.find("lightPullEt" )->second->Fill( (jets[lightPBar].pt() -tops.lightPBar("kKinFit")->pt())/covM->getResolution(jets[lightPBar], "et") );
+      fillValue("lightPullEt"  , (jets[lightPBar].pt() -tops.lightPBar("kKinFit")->pt())/covM->getResolution(jets[lightPBar], "et") , weight);
       // lightQuark eta
-      hists_.find("lightPullEta")->second->Fill( (jets[lightPBar].eta()-tops.lightPBar("kKinFit")->eta())/covM->getResolution(jets[lightPBar], "eta") );
+      fillValue("lightPullEta" , (jets[lightPBar].eta()-tops.lightPBar("kKinFit")->eta())/covM->getResolution(jets[lightPBar], "eta") , weight);
       // lightQuark phi
-      hists_.find("lightPullPhi")->second->Fill( deltaPhi(jets[lightPBar].phi(),tops.lightPBar("kKinFit")->phi())/covM->getResolution(jets[lightPBar], "phi") );
+      fillValue("lightPullPhi" , deltaPhi(jets[lightPBar].phi(),tops.lightPBar("kKinFit")->phi())/covM->getResolution(jets[lightPBar], "phi") , weight);
     }
     // make sure the light quarks of w+ indices are in the range of the jet collection
     if( lightQ >= 0 && lightQ < (int)jets.size() && lightQBar >= 0 && lightQBar < (int)jets.size() ){
       // w+ pt
-      hists_.find("wPt"  )->second->Fill( ((jets[lightQ].p4()+jets[lightQBar].p4()).pt() - (tops.lightQ("kKinFit")->p4()+tops.lightQBar("kKinFit")->p4()).pt()) /
-					   (jets[lightQ].p4()+jets[lightQBar].p4()).pt() );
+      fillValue("wPt"   , ((jets[lightQ].p4()+jets[lightQBar].p4()).pt() - (tops.lightQ("kKinFit")->p4()+tops.lightQBar("kKinFit")->p4()).pt()) /
+					   (jets[lightQ].p4()+jets[lightQBar].p4()).pt() , weight);
       // w+ eta
-      hists_.find("wEta" )->second->Fill( (jets[lightQ].p4()+jets[lightQBar].p4()).eta() - (tops.lightQ("kKinFit")->p4()+tops.lightQBar("kKinFit")->p4()).eta() );
+      fillValue("wEta"  , (jets[lightQ].p4()+jets[lightQBar].p4()).eta() - (tops.lightQ("kKinFit")->p4()+tops.lightQBar("kKinFit")->p4()).eta() , weight);
       // w+ phi
-      hists_.find("wPhi" )->second->Fill( deltaPhi((jets[lightQ].p4()+jets[lightQBar].p4()).phi(), (tops.lightQ("kKinFit")->p4()+tops.lightQBar("kKinFit")->p4()).phi()) );
+      fillValue("wPhi"  , deltaPhi((jets[lightQ].p4()+jets[lightQBar].p4()).phi(), (tops.lightQ("kKinFit")->p4()+tops.lightQBar("kKinFit")->p4()).phi()) , weight);
     }
     // make sure the light quarks of w- indices are in the range of the jet collection
     if( lightP >= 0 && lightP < (int)jets.size() && lightPBar >= 0 && lightPBar < (int)jets.size() ){
       // w+ pt
-      hists_.find("wPt" )->second->Fill( ((jets[lightP].p4()+jets[lightPBar].p4()).pt() - (tops.lightP("kKinFit")->p4()+tops.lightPBar("kKinFit")->p4()).pt()) /
-					 (jets[lightP].p4()+jets[lightPBar].p4()).pt());
+      fillValue("wPt"  , ((jets[lightP].p4()+jets[lightPBar].p4()).pt() - (tops.lightP("kKinFit")->p4()+tops.lightPBar("kKinFit")->p4()).pt()) /
+					 (jets[lightP].p4()+jets[lightPBar].p4()).pt(), weight);
       // w+ eta
-      hists_.find("wEta")->second->Fill( (jets[lightP].p4()+jets[lightPBar].p4()).eta() - (tops.lightP("kKinFit")->p4()+tops.lightPBar("kKinFit")->p4()).eta() );
+      fillValue("wEta" , (jets[lightP].p4()+jets[lightPBar].p4()).eta() - (tops.lightP("kKinFit")->p4()+tops.lightPBar("kKinFit")->p4()).eta() , weight);
       // w+ phi
-      hists_.find("wPhi" )->second->Fill( deltaPhi((jets[lightP].p4()+jets[lightPBar].p4()).phi(), (tops.lightP("kKinFit")->p4()+tops.lightPBar("kKinFit")->p4()).phi()) );
+      fillValue("wPhi"  , deltaPhi((jets[lightP].p4()+jets[lightPBar].p4()).phi(), (tops.lightP("kKinFit")->p4()+tops.lightPBar("kKinFit")->p4()).phi()) , weight);
     }
     // make sure the quarks of top quark indices are in the range of the jet collection
     if( lightQ >= 0 && lightQ < (int)jets.size() && lightQBar >= 0 && lightQBar < (int)jets.size() && b >=0 && b < (int)jets.size()  ){
       // top pt
-      hists_.find("topQuarkPt" )->second->Fill( ((jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).pt() - 
+      fillValue("topQuarkPt"  , ((jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).pt() - 
 						 (tops.lightQ("kKinFit")->p4() + tops.lightQBar("kKinFit")->p4() + tops.b("kKinFit")->p4()).pt()) /
-						(jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).pt());
+						(jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).pt(), weight);
       // top eta
-      hists_.find("topQuarkEta")->second->Fill( (jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).eta() - 
-						(tops.lightQ("kKinFit")->p4() + tops.lightQBar("kKinFit")->p4() + tops.b("kKinFit")->p4()).eta() );
+      fillValue("topQuarkEta" , (jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).eta() - 
+						(tops.lightQ("kKinFit")->p4() + tops.lightQBar("kKinFit")->p4() + tops.b("kKinFit")->p4()).eta() , weight);
       // top phi
-      hists_.find("topQuarkPhi")->second->Fill( deltaPhi((jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).phi(), 
-							 (tops.lightQ("kKinFit")->p4() + tops.lightQBar("kKinFit")->p4() + tops.b("kKinFit")->p4()).phi()) );
+      fillValue("topQuarkPhi" , deltaPhi((jets[lightQ].p4()+jets[lightQBar].p4()+jets[b].p4()).phi(), 
+							 (tops.lightQ("kKinFit")->p4() + tops.lightQBar("kKinFit")->p4() + tops.b("kKinFit")->p4()).phi()) , weight);
     }
     // make sure the quarks of topBar quark indices are in the range of the jet collection
     if( lightP >= 0 && lightP < (int)jets.size() && lightPBar >= 0 && lightPBar < (int)jets.size() && bBar >=0 && bBar < (int)jets.size()  ){
       // top pt
-      hists_.find("topQuarkPt" )->second->Fill( ((jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).pt() - 
+      fillValue("topQuarkPt"  , ((jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).pt() - 
 						 (tops.lightP("kKinFit")->p4() + tops.lightPBar("kKinFit")->p4() + tops.bBar("kKinFit")->p4()).pt()) /
-						(jets[lightP].p4()+jets[lightPBar].p4()+jets[bBar].p4()).pt() );
+						(jets[lightP].p4()+jets[lightPBar].p4()+jets[bBar].p4()).pt() , weight);
       // top eta
-      hists_.find("topQuarkEta")->second->Fill( (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).eta() - 
-						(tops.lightP("kKinFit")->p4() + tops.lightPBar("kKinFit")->p4() + tops.bBar("kKinFit")->p4()).eta() );
+      fillValue("topQuarkEta" , (jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).eta() - 
+						(tops.lightP("kKinFit")->p4() + tops.lightPBar("kKinFit")->p4() + tops.bBar("kKinFit")->p4()).eta() , weight);
       // top phi
-      hists_.find("topQuarkPhi")->second->Fill( deltaPhi((jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).phi(),
-							 (tops.lightP("kKinFit")->p4() + tops.lightPBar("kKinFit")->p4() + tops.bBar("kKinFit")->p4()).phi()) );
+      fillValue("topQuarkPhi" , deltaPhi((jets[lightP].p4() + jets[lightPBar].p4() + jets[bBar].p4()).phi(),
+							 (tops.lightP("kKinFit")->p4() + tops.lightPBar("kKinFit")->p4() + tops.bBar("kKinFit")->p4()).phi()) , weight);
     }
 
 
     // chi2 of kinfit
-    hists_.find("chi2")->second->Fill( tops.fitChi2() );
+    fillValue("chi2" , tops.fitChi2() , weight);
     // chi2prob of kinfit
-    hists_.find("prob")->second->Fill( tops.fitProb() );
+    fillValue("prob" , tops.fitProb() , weight);
     // chi2prob of kinfit log plot
-    if(tops.fitProb() > 0) hists_.find("prob_log")->second->Fill( log10(tops.fitProb()) );
+    if(tops.fitProb() > 0) fillValue("prob_log" , log10(tops.fitProb()) , weight);
 
     if(tops.numberOfAvailableHypos("kKinFit")>1){
 
@@ -298,15 +299,17 @@ KinFitQuality::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>& 
 	  TString tName = "chi2_"; tName += i+1;
 	  std::string name = tName.Data();
 	  // chi2 of kinfit
-	  hists_.find(name)->second->Fill( tops.fitChi2(i) );
+	  fillValue(name , tops.fitChi2(i) , weight);
   
 	  tName = "prob_"; tName += i+1;
 	  name = tName.Data();
 	  // chi2prob of kinfit
-	  hists_.find(name)->second->Fill( tops.fitProb(i) );
+	  fillValue(name , tops.fitProb(i) , weight);
 	}
       }
     }
+    // fill the tree, if any variable should be put in
+    if(treeVars_.size()) tree->Fill();
   }
 }
 

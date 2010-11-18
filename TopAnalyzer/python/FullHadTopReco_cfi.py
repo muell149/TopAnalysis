@@ -7,6 +7,8 @@ analyzeFullHadTopReco = cms.EDAnalyzer("FullHadTopRecoAnalyzer",
     srcB = cms.InputTag("selectedPatJets"),                                         
     ## analyzer specific configurables
     analyze   = cms.PSet(
+      ## choose TTree for output instead of histograms, if applicable
+      useTree  = cms.bool(False),
       ## choose hypo to be used for reco
       hypo     = cms.string("kKinFit"),
       ## choose b-tagging algorithm

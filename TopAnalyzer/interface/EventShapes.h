@@ -42,6 +42,8 @@ class EventShapes : public SingleObject<const edm::View<reco::Candidate> > {
   void process() {};
 
  private:
+  /// produce a TTree as output instead of histograms
+  bool useTree_;
 
 };
 
