@@ -84,7 +84,7 @@ from TopAnalysis.TopAnalyzer.FullHadTopReco_cfi import *
 from TopAnalysis.TopFilter.sequences.triggerFilter_cff import *
 from TopAnalysis.TopFilter.filters.NewTriggerTestFilter_cfi import *
 ## fully hadronic selection
-from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
+#from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 ## generator matching
 from TopAnalysis.TopFilter.sequences.generatorMatching_cff import *
 ## kinFit producer
@@ -106,6 +106,17 @@ hltQJ40 = filterTrigger.clone()
 hltQuadJet40 = cms.Sequence(patTriggerSequence *
                             hltQJ40
                             )
+
+## create personal QuadJet40 trigger
+
+## the QuadJet25U trigger itself
+hltQJ25U = filterTrigger.clone( whichTrigger="QuadJet25U" )
+
+patTrigger.processName = 'REDIGI'
+
+hltQuadJet25U = cms.Sequence(patTriggerSequence *
+                             hltQJ25U
+                             )
 
 ## ---
 ##    FILTER STEP 0
@@ -162,14 +173,14 @@ ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
 ## define ordered jets
-uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), flavor = cms.string("uds") )
-uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), flavor = cms.string("uds") )
-uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'), flavor = cms.string("uds") )
-uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'), flavor = cms.string("uds") )
-uds4    = cms.PSet(index = cms.int32(4), correctionLevel = cms.string('abs'), flavor = cms.string("uds") )
-uds5    = cms.PSet(index = cms.int32(5), correctionLevel = cms.string('abs'), flavor = cms.string("uds") )
-bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), flavor = cms.string("b")   )
-bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), flavor = cms.string("b")   )
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
+uds4    = cms.PSet(index = cms.int32(4), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
+uds5    = cms.PSet(index = cms.int32(5), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
+bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), flavor = cms.string("b")   , useTree = cms.bool(False) )
+bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), flavor = cms.string("b")   , useTree = cms.bool(False) )
 
 ## ---
 ##    MONITOR STEP 0
@@ -463,6 +474,7 @@ kinFitImprover4_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_2 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
+fullHadTopReco_2.analyze.bTagAlgo = 'trackCountingHighPurBJets' 
 METKinFit_2 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
@@ -589,6 +601,7 @@ kinFitImprover4_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_3 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
+fullHadTopReco_3.analyze.bTagAlgo = 'trackCountingHighPurBJets' 
 METKinFit_3 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
@@ -642,7 +655,8 @@ filterEventShapes = filterEventShape.clone( minC = 0.75 )
 ##    run the final sequence
 ## ---
 analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
-                                            hltQuadJet15U         *
+                                            #hltQuadJet15U        *
+                                            hltQuadJet25U        *
                                             #hltQuadJet30         *
                                             #hltQuadJet40         *
                                             #hltHt200             *
@@ -683,6 +697,19 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             monitorGenerator_3
                                             )
 
+
+## ---
+##    provide a function to use trees if available instead of histograms
+## ---
+def useTreesAsOutput(process):
+    from PhysicsTools.PatAlgos.tools.helpers import listModules
+    for mod in listModules(process.analyseFullHadronicSelection):
+        if(hasattr(mod, 'analyze')):
+            if(hasattr(mod.analyze, 'useTree')):
+                mod.analyze.useTree = True
+            if(hasattr(mod, 'useTree')):
+                mod.useTree = True
+
 ## ---
 ##    provide a function to disable parts of the selection
 ## ---
@@ -708,6 +735,7 @@ def runOnRealData(process):
 
     ## changes needed for analysis
     hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+    process.patTrigger.processName = 'HLT'
     vertex.cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
 
     ## different detector response for jets than in simulation
@@ -721,7 +749,7 @@ def runOnRealData(process):
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
 
     ## to switch verbosity modes of the kinFit
-    process.ttFullHadEvent.verbosity = 3
+    #process.ttFullHadEvent.verbosity = 3
 
 
 ## ---
@@ -792,8 +820,8 @@ def runOnPF(process):
     process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
 
     ## exchange JetID cuts to PFJetID
-    process.tightLeadingJets.cut =  tightJetCut + tightPFJetID
-    process.tightBottomJets.cut  = bottomJetCut + tightPFJetID
+    process.tightLeadingJets.cut = tightJetCut + tightPFJetID
+    process.tightBottomJets.cut  = tightJetCut + tightPFJetID
     process.monitoredTightBottomJets.cut = tightJetCut + tightPFJetID
 
     ## exchange resolutions for PFJets
@@ -830,6 +858,19 @@ def switchToTCHE(process):
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 10.2
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'trackCountingHighEffBJets')
+
+## ---
+##    switch to trackCountingHighEfficiency bTagger
+## ---
+def switchToTCHPTight(process):
+    #process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.trackCountingHighEffBJets)
+    process.trackCountingHighPurBJets.cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 3.41'
+
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'trackCountingHighPurBJetTags'
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.41
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41
+    #from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    #massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'trackCountingHighEffBJets')
 
 ## ---
 ##    switch to simpleSecondaryVertex bTagger
