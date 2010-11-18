@@ -658,7 +658,6 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             #hltQuadJet15U        *
                                             hltQuadJet25U        *
                                             #hltQuadJet30         *
-                                            #hltQuadJet40         *
                                             #hltHt200             *
                                             ## do the selections
                                             fullHadronicSelection *
@@ -795,6 +794,7 @@ def removeDefaultTrigger(process):
     process.analyseFullHadronicSelection.remove(process.hltHt200)
     process.analyseFullHadronicSelection.remove(process.hltQuadJet30)
     process.analyseFullHadronicSelection.remove(process.hltQuadJet15U)
+    process.analyseFullHadronicSelection.remove(process.hltQuadJet25U)
     
 ## ---
 ##    switch all necessary filters to run this sequence for background estimation
