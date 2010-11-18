@@ -1,9 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
+import sys
 
 ## ---
 ##    here we need a general description of what the config id good for and the
-##    switches mean. This should be in analogy of the Doxygen commentsin the
+##    switches mean. This should be in analogy of the Doxygen comments in the
 ##    modules...
 ## ---
 
@@ -22,7 +23,21 @@ options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singlet
 options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
 
 # get and parse the command line arguments
-options.parseArguments()
+#options.parseArguments()
+
+for args in sys.argv :
+    arg = args.split(',')
+    for val in arg:
+        val = val.split('=')
+        if(len(val)==2):
+            setattr(options,val[0], val[1])
+
+print "eventFilter: ", options.eventFilter
+print "usePF: ", options.usePF
+print "writeOutput: ", options.writeOutput
+print "maxPtHat: ", options.maxPtHat
+print "minPtHat: ", options.minPtHat
+print "backgroundEstimation: ", options.backgroundEstimation
 
 # analyze fully hadronic selection
 process = cms.Process("Selection")
@@ -30,17 +45,17 @@ process = cms.Process("Selection")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 10000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.categories.append('TtFullHadronicEvent')
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    '/store/user/eschliec/Run2010A/patTuple_6jets.root',
-    '/store/user/eschliec/Run2010A/patTuple_6jets_06.root',
-    '/store/user/eschliec/Run2010A/patTuple_6jets_07.root',
-    '/store/user/eschliec/Run2010A/patTuple_6jets_0809.root',
+    '/store/user/eschliec/Run2010B/patTuple_01.root',
+    '/store/user/eschliec/Run2010B/patTuple_02.root',
+    '/store/user/eschliec/Run2010B/patTuple_03.root',
+    '/store/user/eschliec/Run2010B/patTuple_04.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_1_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_2_1.root',
     #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_3_1.root',
@@ -186,9 +201,10 @@ addTtFullHadHypotheses(process,
 if(not options.eventFilter=='sig'):
     removeTtFullHadHypGenMatch(process)
 
-## changing bTagger, possible are: TCHE, SSV, CSV, CSVMVA
-## only TCHE and SSV have a officialy blessed WP like the default (TCHP)
+## changing bTagger, possible are: TCHE, TCHPTight, SSV, CSV, CSVMVA
+## only TCHE, TCHPTight and SSV have a officialy blessed WP like the default (TCHP)
 switchToTCHE(process)
+#switchToTCHPTight(process)
 
 ## selection should be run on PFJets instead of caloJets
 if(not options.usePF==0): 
@@ -197,8 +213,9 @@ if(not options.usePF==0):
 ## if running on real data, do everything needed for this
 if(options.eventFilter=='data'):
     runOnRealData(process)
-    ## needed as in MC the process label is different -> trigger in data not found
-    #removeDefaultTrigger(process)
+    ## needed because the patTriggerEvent is to chatty to be used and
+    ## data is already skimmed with trigger requirement
+    removeDefaultTrigger(process)
 
 if(options.eventFilter=='privA' or options.eventFilter=='privB'):
     process.hltQuadJet15U = process.filterTrigger.clone(whichTrigger = "QuadJet15U")
@@ -206,6 +223,14 @@ if(options.eventFilter=='privA' or options.eventFilter=='privB'):
 ## do a background estimantion for QCD events
 if(not options.backgroundEstimation==0):
     runAsBackgroundEstimation(process)
+
+
+##""" Enables trigger information in PAT  """
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+if(options.eventFilter=='data'):
+    process.GlobalTag.globaltag = cms.string('GR10_P_V11::All')
+else:
+    process.GlobalTag.globaltag = cms.string('START3X_V26::All')
 
 ## ---
 ##    run the final sequence
@@ -215,6 +240,8 @@ process.p1 = cms.Path(## do the genEvent selection
                       ## do the filtering
                       process.analyseFullHadronicSelection
                       )
+
+useTreesAsOutput(process)
 
 if(options.eventFilter=='all'):
     process.p1.remove(process.filterSequence)
