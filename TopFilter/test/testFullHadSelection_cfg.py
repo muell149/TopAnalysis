@@ -56,15 +56,18 @@ process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
 ## a little speed up as monitoring plots an gen matching are not needed here
 from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 removeMonitoringOfCutflow(process)
-runOnRealData(process)
-hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI")
+process.analyseFullHadronicSelection.remove(process.matchJetsToPartons)
+
+## switch to TCHE b-tagger of the default selection
+switchToTCHE(process)
+
+## switch to PF, as this is used in the default selection
+runOnPF(process)
 
 ## do kinFit of events needed for selection cuts
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 
-addTtFullHadHypotheses(process,
-                       ["kKinFit"]
-                       )
+addTtFullHadHypotheses(process, ["kKinFit"])
 
 removeTtFullHadHypGenMatch(process)
 
@@ -79,30 +82,43 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 run36xOn35xInput(process)
 
+## add jet collection needed for default analysis
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process,cms.InputTag('ak5PFJets'),
+                    doJTA        = True,
+                    doBTagging   = True,
+                    jetCorrLabel = ('AK5', 'PF'),
+                    doType1MET   = False,
+                    genJetCollection=None,
+                    doJetID      = True
+                    )
+
 ## remove some elements from sequence, which are not needed here
 from PhysicsTools.PatAlgos.tools.coreTools import *
 ## MC matching not needed for event selection (as this is not available in data)
 removeMCMatching(process)
 
 ## remove unneeded objects from processing (speed up of whole sequence)
-removeAllPATObjectsBut(process,
-                       ['Jets'],
-                       outputInProcess=False)
+removeAllPATObjectsBut(process, ['Jets'], outputInProcess=False)
 
 ## cleaning not neede here
-removeCleaning(process,
-               outputInProcess=False)
+removeCleaning(process, outputInProcess=False)
+
+## embedding of resolutions into the patObjects
+process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+process.patJets.addResolutions = True
+process.patJets.resolutions = cms.PSet(
+    default = cms.string("udscResolutionPF"),
+    bjets = cms.string("bjetResolutionPF"),
+    )
 
 ## setting JEC to desired values
 process.patJetCorrFactors.corrSample = 'Spring10'
 process.patJetCorrFactors.sampleType = 'ttbar'
 
-#---------------------------------------------------
-# rebuilding of ak5GenJets (gone missing in ReReco)
-#---------------------------------------------------
-
-process.load("RecoJets.Configuration.GenJetParticles_cff")
-process.load("RecoJets.Configuration.RecoGenJets_cff")
+## replace jets and met with PFJets and PFMET
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'selectedPatJetsAK5PF', 'selectedPatJets')
 
 #---------------------------------------------------
 # the path
@@ -111,8 +127,6 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 process.p1 = cms.Path(process.hltQuadJet15U *
                       process.makeGenEvt *
                       process.ttFullHadronicFilter *
-                      process.genJetParticles *
-                      process.ak5GenJets *
                       process.patDefaultSequence *
                       process.analyseFullHadronicSelection
                       )
