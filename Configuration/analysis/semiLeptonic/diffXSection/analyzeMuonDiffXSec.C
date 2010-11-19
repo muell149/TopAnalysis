@@ -647,16 +647,16 @@ void analyzeMuonDiffXSec(double luminosity = 10927, bool save = true, bool loadV
     histo_["pt top"  ][kData][Njets_[mult]]=(TH1F*)histo_["pt" ][kData][Njets_[mult]]->Clone();
     histo_["eta top" ][kData][Njets_[mult]]=(TH1F*)histo_["eta"][kData][Njets_[mult]]->Clone();
     // (ii) subtract BG from MC prediction
-    histo_["pt BG"   ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kWjets]["Njets4Btag"]->Clone();
+    histo_["pt BG"   ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kWjets][Njets_[mult]]->Clone();
     histo_["pt BG"   ][kData][Njets_[mult]]->Scale(WjetsVariation);
-    histo_["pt BG"   ][kData][Njets_[mult]]->Add((TH1F*)histo_["pt"][kZjets]["Njets4Btag"]->Clone());
-    histo_["ptBGQCD" ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kQCD  ]["Njets4Btag"]->Clone();
+    histo_["pt BG"   ][kData][Njets_[mult]]->Add((TH1F*)histo_["pt"][kZjets][Njets_[mult]]->Clone());
+    histo_["ptBGQCD" ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kQCD  ][Njets_[mult]]->Clone();
     histo_["ptBGQCD" ][kData][Njets_[mult]]->Scale(QCDVariation);
     histo_["pt BG"   ][kData][Njets_[mult]]->Add(histo_["ptBGQCD"][kData][Njets_[mult]]);
-    histo_["eta BG"  ][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kWjets]["Njets4Btag"]->Clone();
+    histo_["eta BG"  ][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kWjets][Njets_[mult]]->Clone();
     histo_["eta BG"  ][kData][Njets_[mult]]->Scale(WjetsVariation);
-    histo_["eta BG"  ][kData][Njets_[mult]]->Add((TH1F*)histo_["eta"][kZjets]["Njets4Btag"]->Clone());
-    histo_["etaBGQCD"][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kQCD  ]["Njets4Btag"]->Clone();
+    histo_["eta BG"  ][kData][Njets_[mult]]->Add((TH1F*)histo_["eta"][kZjets][Njets_[mult]]->Clone());
+    histo_["etaBGQCD"][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kQCD  ][Njets_[mult]]->Clone();
     histo_["etaBGQCD"][kData][Njets_[mult]]->Scale(QCDVariation);
     histo_["eta BG"  ][kData][Njets_[mult]]->Add(histo_["etaBGQCD"][kData][Njets_[mult]]);
     histo_["pt top"  ][kData][Njets_[mult]]->Add(histo_["pt BG"   ][kData][Njets_[mult]], -1);
