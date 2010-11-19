@@ -10,6 +10,7 @@
 
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TGraphErrors.h>
 #include <THStack.h>
 #include <TROOT.h>
 #include <TFile.h>
@@ -90,10 +91,7 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
   int lastBin=histo.GetNbinsX(); 
   if(variable=="pt" ) firstBin=2;
   //if(variable=="eta") lastBin=4;
-  //if(variable=="Njets"){
-  //  firstBin=1;
-  //  lastBin=4;
-  //}
+  if(variable=="Njets")lastBin=4;
   if(variable=="1") firstBin=lastBin=1;
   if(variable=="2") firstBin=lastBin=2;
   int binRange=lastBin-firstBin+2;
@@ -109,18 +107,18 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
     double statError = histo.GetBinError(bin);
     if(systematics){
       // load values for all variations                
-      double std     = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-      double lumiUp  = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
-      double lumiDown= readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
-      double MG      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-      double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCJES11LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCJES09LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double EffUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
-      double EffDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
-      double QCDUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
-      double QCDDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
-      double WUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
-      double WDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
+      double std     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
+      double lumiUp  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
+      double lumiDown= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
+      double MG      = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
+      double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJES11LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJES09LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      double EffUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
+      double EffDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
+      double QCDUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
+      double QCDDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
+      double WUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
+      double WDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
       // calculate and print out all systematic errors
       double JESError  = ( std::abs(JESUp-std ) + std::abs(JESDown-std ) ) / 2.0;
       double LumiError = ( std::abs(lumiUp-std) + std::abs(lumiDown-std) ) / 2.0;
