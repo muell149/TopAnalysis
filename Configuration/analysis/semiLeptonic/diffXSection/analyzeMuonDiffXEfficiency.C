@@ -32,7 +32,7 @@ template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 TString getTStringFromInt(int i);
 
-void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false, bool useMG=false, TString JES="")
+void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false, bool useNLO=false, TString JES="", TString jetType = "")
 {
   // ---
   //    main function parameters
@@ -51,13 +51,10 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // ---
   // to absorb systematic variations of JES and top MC
   // within efficiencies, the following parameters exist:
-  // bool useMG=true/false to use MADGRAPH / MC@NLO 
-  // TString JES=""/"up"/"down" for an JES-shift of 0/+10/-10 %
-  TString TopSample = "Nlo";
-  TString JESShift  = "";
-  if(useMG) TopSample = "Mad";
-  if(JES=="up"  ) JESShift = "JES11";
-  if(JES=="down") JESShift = "JES09";
+  // bool useNLO=true/false to use MC@NLO / MADGRAPH
+  // TString JES=""/"JES11"/"JES09" for an JES-shift of 0/+10/-10 %
+  TString TopSample = "Mad";
+  if(useNLO) TopSample = "Nlo";
 
   // ---
   //    set root style 
@@ -72,9 +69,9 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAll"+TopSample+"Spring10"+JESShift+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10"+JESShift+".root") );
-  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10"+JESShift+".root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAll"+TopSample+"Spring10"+JES+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+JES+jetType+".root") );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+JES+jetType+".root") );
 
   // ---
   //    get histograms
@@ -114,14 +111,14 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // for current spring10 7TeV Mc@Nlo sample (50pb-1)
   // a) Reco
   // ttbar(all) sample 
-  if(!useMG) lumiweight.push_back(0.007940958/50.0*(double)luminosity);
-  if(useMG)  lumiweight.push_back(0.005308736/50.0*(double)luminosity);
+  if(!useNLO) lumiweight.push_back(0.005308736/50.0*(double)luminosity);
+  if(useNLO)  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.155498692/50.0*(double)luminosity);
   // b) Gen
   // ttbar(all) sample 
-  if(!useMG) lumiweight.push_back(0.007940958/50.0*(double)luminosity);
-  if(useMG)  lumiweight.push_back(0.005308736/50.0*(double)luminosity);
+  if(!useNLO) lumiweight.push_back(0.005308736/50.0*(double)luminosity);
+  if(useNLO)  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.155498692/50.0*(double)luminosity);
 
@@ -295,8 +292,8 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // ---  
   // save within different .txt files for systematic variations
   TString MG = "";
-  if(useMG) MG="MG";
-  TString file ="crossSectionCalculation"+MG+JESShift+".txt";
+  if(useNLO) MG="NLO";
+  TString file ="crossSectionCalculation"+MG+JES+jetType+".txt";
   bool append=1;
   // save values
   if(textoutput){
@@ -308,7 +305,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
 	// loop bins
 	for(int idx =1; idx<=histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX(); idx++){
 	  // clear existing content of .txt for systematic shifts 
-	  if(((useMG)||(JES=="down")||(JES=="up"))&&var==0) append =0;
+	  if(((useNLO)||(JES!=""))&&var==0) append =0;
 	  else append =1; 
 	  if(mult==0&&idx==1) writeToFile("MC based l+jets correction factors for "+variables_[var]+"(#mu) in chosen binning:", file, append);
 	  if(idx==1)writeToFile("--- "+Njets_[mult]+" ---", file);
@@ -613,6 +610,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     histo_["phi"][eff][Njets_[mult]]->Draw("same");
     histo_["phi"][eff][Njets_[mult]]->Draw("Psame");
   }
+  legendLjets->Draw("same");
   ++canvasNumber;
 
   // ---
