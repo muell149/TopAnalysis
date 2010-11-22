@@ -89,31 +89,16 @@ sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 2 using MC@NLO ttbar absorped via eff
 sleep 2
-<<<<<<< allDiffXSecMuonDataPlots.sh
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "",'$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
-=======
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false)'
->>>>>>> 1.4
 echo 3 JES shift up absorped via eff
 sleep 2
-<<<<<<< allDiffXSecMuonDataPlots.sh
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, '$JESup','$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESup', 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
-=======
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "up")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "up", 1.0, 1.0, 1.0, 1.0, false)'
->>>>>>> 1.4
 echo 4 JES shift down absorped via eff
 sleep 2
-<<<<<<< allDiffXSecMuonDataPlots.sh
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, '$JESdown','$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESdown', 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
-=======
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "down")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "down", 1.0, 1.0, 1.0, 1.0, false)'
->>>>>>> 1.4
 echo 5 Lumi shift up
 sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
