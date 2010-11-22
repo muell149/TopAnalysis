@@ -38,7 +38,7 @@ std::vector<std::pair<double,double> > fitLinear(TH1F& hist, double xmin, double
 template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 
-void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false)
+void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false, TString jetType = "")
 { 
   // ---
   //    main function parameters
@@ -48,7 +48,7 @@ void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false)
   //             in .txt file to share it with other parts of the Analysis
   // choose target directory for saving:
   TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
-
+  TString file = "crossSectionCalculation"+jetType+".txt";
   // ---
   //    set root style 
   // ---
@@ -61,7 +61,7 @@ void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false)
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/chargeAsymmetryWjetsMadSpring10.root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonChargeAsymmetryWjetsMadSpring10"+jetType+".root") );
 
   // ---
   //    get histograms
@@ -276,8 +276,8 @@ void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false)
     std::cout << "N(jets)>="+getTStringFromInt(njets) << ": R = " << inclusiveRfit << " +/- " << errorInclusiveRfit << std::endl;
     // if textoutput==true: save fitted inclusive R values within .txt-file
     if(textoutput==true){
-      if(njets==1) writeToFile("inclusive R (from linear fit) for gen W->mu and W->tau->mu for N(jets) >= 1 - 4:");
-      writeToFile(inclusiveRfit);
+      if(njets==1) writeToFile("inclusive R (from linear fit) for gen W->mu and W->tau->mu for N(jets) >= 1 - 4:",file);
+      writeToFile(inclusiveRfit,file);
     }
   }
   
