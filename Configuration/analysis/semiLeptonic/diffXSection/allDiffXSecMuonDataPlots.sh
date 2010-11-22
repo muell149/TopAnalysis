@@ -7,8 +7,14 @@
 ## 2) inclusive top cross section measurement
 
 ## define processed data to be analyzed (output of data: ./analyzeMuonDiffXSec_cfg.py - MC: ./analyzeMuonDiffXSec_cfg.py)
-dataSample=\"./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root\"
-dataLuminosity=2880
+JESup=\"JES105\"
+JESdown=\"JES095\"
+jetTyp=\"PF\"
+#jetTyp=\"\"
+dataSample=\"./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root\"
+dataLuminosity=34716
+#21885
+#15078
 echo
 echo doing the full l+jets analysis
 echo used data: $dataSample
@@ -25,46 +31,52 @@ echo processing analyzeMuonCuts.C
 echo a\) create cutlow plots
 sleep 2
 date >> 'diffXSecFromSignal/plots/earlyData/cutMonitoring/cutflowNumbers.txt'
-root -l -q -b './analyzeMuonCuts.C+('$dataLuminosity', true, '$dataSample', "cutflow")' >> 'diffXSecFromSignal/plots/earlyData/cutMonitoring/cutflowNumbers.txt'
+root -l -q -b './analyzeMuonCuts.C+('$dataLuminosity', true, '$dataSample', "cutflow", '$jetTyp')' >> 'diffXSecFromSignal/plots/earlyData/cutMonitoring/cutflowNumbers.txt'
 echo b\) create N-1 plots
 sleep 2
 date >> 'diffXSecFromSignal/plots/earlyData/NminusOneDistributions/NminusOneNumbers.txt'
-root -l -q -b './analyzeMuonCuts.C+('$dataLuminosity', true, '$dataSample', "NminusOne")' >> 'diffXSecFromSignal/plots/earlyData/NminusOneDistributions/NminusOneNumbers.txt'
+root -l -q -b './analyzeMuonCuts.C+('$dataLuminosity', true, '$dataSample', "NminusOne", '$jetTyp')' >> 'diffXSecFromSignal/plots/earlyData/NminusOneDistributions/NminusOneNumbers.txt'
 echo analyzeMuonCuts.C ready
 
 ## b) do the bkg estimation and calculate MC effiencies 
 ##    -> all important numbers will be saved in crossSectionCalculation.txt
 ## example: makro.C+(luminosity, savePlots, writeInto:crossSectionCalculation.txt, pathOfDataFile.root)
-
+if [ $jetTyp = \"PF\" ]
+then
+rm ./crossSectionCalculationPF.txt
+date >> './crossSectionCalculationPF.txt'
+else
 rm ./crossSectionCalculation.txt
 date >> './crossSectionCalculation.txt'
+fi
+
 ## b0) create pseudo data (needed in some makros)
 echo create pseudo data for 50\/pb \(createPseudoData.C\)
 sleep 2
-root -l -q -b './createPseudoData.C+(50.)'
+root -l -q -b './createPseudoData.C+(50., '$jetTyp')'
 echo done
 ## b1) calculate R for charge asymmetry method
 rm ./diffXSecFromSignal/plots/chargeAsymmetrie/Rcalculation.txt
 echo processing chargeAsymmetrieCalculator.C
 sleep 2
-root -l -q -b './chargeAsymmetrieCalculator.C+(true, true)' >> './diffXSecFromSignal/plots/chargeAsymmetrie/Rcalculation.txt'
+root -l -q -b './chargeAsymmetrieCalculator.C+(true, true, '$jetTyp')' >> './diffXSecFromSignal/plots/chargeAsymmetrie/Rcalculation.txt'
 ## b2) estimate N(QCD) via ABCD (MC - plots: 50 / pb)
 rm ./diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt
 echo processing analyzeMuonDiffXABCDbkg.C \(plots done for 50\/pb\)
 sleep 2
 echo done
-root -l -q -b './analyzeMuonDiffXABCDbkg.C+(50., true, true, '$dataSample')' >> './diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt'
+root -l -q -b './analyzeMuonDiffXABCDbkg.C+(50., true, true, '$dataSample', '$jetTyp')' >> './diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt'
 ## b3) estimate MC based effiencies for l+jets correction (MC - plots: 5 / pb)
 rm ./diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt
 echo processing analyzeMuonDiffXEfficiency.C \(plots done for 5\/pb\)
 sleep 2
-root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., true, true, false, "", '$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 echo done
 ## b4) estimate N(W) via charge asymmetry method (MC - plots: 50 / pb)
 rm ./diffXSecFromSignal/plots/chargeAsymmetrie/wjetsEstimationNumbers.txt
 echo processing wjetsAsymmetrieEstimator.C \(plots done for 50\/pb\)
 sleep 2
-root -l -q -b './wjetsAsymmetrieEstimator.C+(50., true, true, '$dataSample')' >> './diffXSecFromSignal/plots/chargeAsymmetrie/wjetsEstimationNumbers.txt'
+root -l -q -b './wjetsAsymmetrieEstimator.C+(50., true, true, '$dataSample', '$jetTyp')' >> './diffXSecFromSignal/plots/chargeAsymmetrie/wjetsEstimationNumbers.txt'
 echo done
 
 ## c) systematic variations
@@ -74,43 +86,58 @@ echo done
 echo processing systematic variations
 echo 1 as reference without variation
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, false)'
-echo 2 using Madgraph ttbar absorped via eff
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
+echo 2 using MC@NLO ttbar absorped via eff
 sleep 2
+<<<<<<< allDiffXSecMuonDataPlots.sh
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "",'$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
+=======
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false)'
+>>>>>>> 1.4
 echo 3 JES shift up absorped via eff
 sleep 2
+<<<<<<< allDiffXSecMuonDataPlots.sh
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, '$JESup','$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESup', 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
+=======
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "up")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "up", 1.0, 1.0, 1.0, 1.0, false)'
+>>>>>>> 1.4
 echo 4 JES shift down absorped via eff
 sleep 2
+<<<<<<< allDiffXSecMuonDataPlots.sh
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, '$JESdown','$jetTyp')' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESdown', 1.0, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
+=======
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "down")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "down", 1.0, 1.0, 1.0, 1.0, false)'
+>>>>>>> 1.4
 echo 5 Lumi shift up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 6 Lumi shift down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.89, 1.0, 1.0, 1.0, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.89, 1.0, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 7 Eff shift up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.045, 1.0, 1.0, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.045, 1.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 8 Eff shift down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 0.955, 1.0, 1.0, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 0.955, 1.0, 1.0, false, true, '$jetTyp', '$JESup', '$JESdown')'
 echo 9 QCD estimation up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 2.0, 1.0, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 2.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 10 QCD estimation down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.0, 1.0, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.0, 1.0, false, true, '$jetTyp', '$JESup', '$JESdown')'
 echo 11 Wjets estimation up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.3, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.3, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 12 Wjets estimation down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.7, false)'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.7, false, true,'$jetTyp', '$JESup', '$JESdown')'
 
 ## d) do the final cross section calculation
 ## create final plots using the analyzeMuonDiffXSec.C Makro 
@@ -119,9 +146,9 @@ root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSam
 echo processing analyzeMuonDiffXSec.C
 sleep 2
 date >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, false)' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, false, '$jetTyp', '$JESup', '$JESdown')' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
 ## with logarithmic plots
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, true)' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, true, '$jetTyp', '$JESup', '$JESdown')' | tee -a 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
 echo
 
 ## e) monitor systematic shifts(JES, N(W), QCD(MC&ABCD) )
@@ -129,9 +156,9 @@ rm ./diffXSecFromSignal/plots/systematicVariations/*.*
 echo monitor systematic shifts
 sleep 2
 ## 1) in linear scale 
-root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', false)'
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', false, '$jetTyp', '$JESup', '$JESdown')'
 ## 2) in logarithmic scale 
-root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', true)'
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', true, '$jetTyp', '$JESup', '$JESdown')'
 
 ## f) copy plot to local folder on AFS
 echo starting to copy plots...
@@ -143,6 +170,6 @@ scp -r ./diffXSecFromSignal/plots/ABCD mgoerner@uhh-cms014.desy.de:/afs/desy.de/
 scp -r ./diffXSecFromSignal/plots/chargeAsymmetrie mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
 ## iv)  efficiency
 scp -r ./diffXSecFromSignal/plots/efficiency mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
-## v)  efficiency
+## v)   systematics
 scp -r ./diffXSecFromSignal/plots/systematicVariations mgoerner@uhh-cms014.desy.de:/afs/desy.de/user/m/mgoerner/private/note/pictures/
 echo ...ready
