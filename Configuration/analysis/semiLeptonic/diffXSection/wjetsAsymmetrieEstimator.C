@@ -37,7 +37,7 @@ template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
 
-void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV50pb.root")
+void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV50pb.root", TString jetType = "")
 {
   // ---
   //    main function parameters
@@ -54,7 +54,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // when writing into file, R is also taken from file
   bool loadR = false;
   if(textoutput) loadR=true;
-  
+  TString file = "crossSectionCalculation"+jetType+".txt";
   // ---
   //    set root style 
   // ---
@@ -67,10 +67,11 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"   ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root"   ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/spring10PseudoData7TeV50pb.root" ) );
   files_.push_back(new TFile(dataFile                                                              ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecAllNloSpring10.root"     ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllMadSpring10"+jetType+".root"     ) );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllNloSpring10.root"     ) );
 
   // create container for the different histos
   std::map< TString, std::map <unsigned int, TH1F*> > ptMuPlus_, ptMuMinus_, pt_;
@@ -108,8 +109,8 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
     ptMuMinus_[Njets_[mult]][kWjets]->Scale(lumiweight);
     pt_       [Njets_[mult]][kWjets]->Scale(lumiweight);
   }
-  // b) spring10 7TeV W+jets MADGRAPH sample
-  double lumiweight2=0.007940958/50*luminosity;
+  // b) spring10 7TeV TTbar MADGRAPH sample
+  double lumiweight2=0.005308736/50*luminosity;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
     ptMuPlus_ [Njets_[mult]][kTtbar]->Scale(lumiweight2);
@@ -193,8 +194,8 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
       if(idx==kPseudo50) allPseudoEvents->SetBinContent( njets, sumUpEntries(*pt_[Njets_[njets-1]][kPseudo50]) );
       // f) if textoutput==true: save W+jets data estimation within .txt-file
       if(textoutput==true&&idx==kData){
-	if(njets==1) writeToFile("estimated N(W) in Data using charge asymmetry method with R from above for N(jets) >= 1 - 4");
-	writeToFile((x-y)*R);
+	if(njets==1) writeToFile("estimated N(W) in Data using charge asymmetry method with R from above for N(jets) >= 1 - 4",file);
+	writeToFile((x-y)*R,file);
       }
     }
   }
