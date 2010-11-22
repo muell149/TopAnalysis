@@ -15,7 +15,7 @@
 #include <TRandom3.h>
 
 void smearing(TH1F& src, TH1F& data);
-void loadingFiles();
+void loadingFiles(TString jetType);
 void loadingHists(TString plot);
 void combineFiles(double luminosity);
 void poisson(TString directory, TString plot, int lumi, TFile& outputfile);
@@ -25,13 +25,13 @@ std::vector<float> lumiweight_;
 std::vector<TH1F*> hists_;
 std::vector<TFile*> files_;
 
-void createPseudoData(double luminosity= 50.0){
+void createPseudoData(double luminosity= 50.0, TString jetType = ""){
   // -------------------------
   // !!! choose luminosity !!!
   // -------------------------
   TString lum = getTStringFromInt((int)luminosity);
   // get the files
-  loadingFiles(); 
+  loadingFiles(jetType); 
 
   // ---------------------------------------
   // !!! definition of output file(name) !!!
@@ -126,20 +126,20 @@ void poisson(TString directory, TString plot, int lumi, TFile& outputfile)
   pseudoData->Write(plot);  
 }
 
-void loadingFiles()
+void loadingFiles(TString jetType)
 {
   // -----------------------------------------
   // !!! add all contributing samples here !!!
   // -----------------------------------------
 
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"    ) );
-//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigMadSpring10.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"    ) );
-//   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgMadSpring10.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root" ) );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root"  ) );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloSpring10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+jetType+".root" ) );
 
 }
 
@@ -173,13 +173,13 @@ void combineFiles(double luminosity)
   // 7 TeV Monte Carlo spring 10 samples
   // -----------------------------------
 
-  lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight_.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight_.push_back(0.13904207/50.0*(double)luminosity);
-  lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
-//   lumiweight_.push_back(0.00556153/50.0*(double)luminosity);
-  lumiweight_.push_back(0.14332841/50.0*(double)luminosity);
-  lumiweight_.push_back(0.98351978/50.0*(double)luminosity);
+  //lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
+  lumiweight_.push_back(0.005308736/50.0*(double)luminosity);
+  lumiweight_.push_back(0.155498692/50.0*(double)luminosity);
+  //lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
+  lumiweight_.push_back(0.005308736/50.0*(double)luminosity);
+  lumiweight_.push_back(0.140471057/50.0*(double)luminosity);
+  lumiweight_.push_back(0.910264515/50.0*(double)luminosity);
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     hists_ [idx]->Scale(lumiweight_[idx]);
