@@ -72,7 +72,7 @@ double readLineFromFile(int line, TString file="crossSectionCalculation.txt"){
   return -1.;  
 }
   
-double getMaxValue(TH1& histo, const TString variable = "", bool systematics = false, const TString plot = "", const int jetMultiplicity = 6){
+double getMaxValue(TH1& histo, const TString variable = "", bool systematics = false, const TString plot = "", const int jetMultiplicity = 6, TString up = "JES105", TString down = "JES095"){
   // ---
   //    determine the maximum value of bin content + combined error
   // ---
@@ -111,8 +111,8 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
       double lumiUp  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
       double lumiDown= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
       double MG      = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-      double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJES11LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJES09LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
       double EffUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
       double EffDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
       double QCDUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );

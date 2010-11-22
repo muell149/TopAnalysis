@@ -39,10 +39,10 @@ double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useN
 void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2);
 void scaleByLumi(TH1F* histo, double lumi);
 void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, unsigned int color=kBlack);
-void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variabl);
-double systematicError2(const TString plot, TH1& histo, int usedBin);
+void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES105", TString down = "JES095");
+double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES105", TString down = "JES095");
 
-void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "")
+void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "", TString up = "JES105", TString down = "JES095")
 { 
 
   // ---
@@ -1187,7 +1187,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
 	  if(idx==kLepJets) histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("HIST");
 	  if(idx==kData   ){
 	    histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("p X0 e1 same");
-	    if(finalPlots) systematicError("diffNormXSec"+variables_[var], mult, *histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var]);
+	    if(finalPlots) systematicError("diffNormXSec"+variables_[var], mult, *histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var], up, down);
 	  }
 	}
 	// draw jet multiplicity label
@@ -1262,7 +1262,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
 	  if(idx==kData   ){
 	    //lJetsXSecLegSmall->Draw("same");
 	    histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->Draw("p e1 X0 same");
-	    if(finalPlots) systematicError("differentialXSec"+variables_[var], mult, *histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], variables_[var]);
+	    if(finalPlots) systematicError("differentialXSec"+variables_[var], mult, *histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], variables_[var], up, down);
 	  }
 	}
 	// draw jet multiplicity label
@@ -1347,7 +1347,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     sigmaLjetsInclusiveMCGenSig  ->Draw("histsame" );
     sigmaLjetsInclusiveData      ->Draw("p e1 X0 same"); 
     sigmaLjetsInclusiveMCReco    ->Draw("AXIS same" );
-    if(finalPlots) systematicError("ljetsXSec", 6, *sigmaLjetsInclusiveData, "Njets");
+    if(finalPlots) systematicError("ljetsXSec", 6, *sigmaLjetsInclusiveData, "Njets", up, down);
     inclusiveCrossSectionLjetsLeg->Draw("same" );
     //DrawLabel("phase space:"                                , 0.33 , 0.55, 0.82 , 0.75);
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1.);
@@ -1383,8 +1383,8 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     //if(finalPlots) systematicError("topXSec" , 8, *sigmaTopInclusiveDataBtag  , "1");
     //if(finalPlots) systematicError("topXSec2", 8, *sigmaTopInclusiveDataNoBtag, "2");
     if(finalPlots){
-      sigmaTopInclusiveDataGraph.SetPointError(0, systematicError2("topXSec" , *sigmaTopInclusiveDataBtag  , 1), 0.);
-      sigmaTopInclusiveDataGraph.SetPointError(1, systematicError2("topXSec2", *sigmaTopInclusiveDataNoBtag, 2), 0.);
+      sigmaTopInclusiveDataGraph.SetPointError(0, systematicError2("topXSec" , *sigmaTopInclusiveDataBtag  , 1, up, down), 0.);
+      sigmaTopInclusiveDataGraph.SetPointError(1, systematicError2("topXSec2", *sigmaTopInclusiveDataNoBtag, 2, up, down), 0.);
     }
     sigmaTopInclusiveDataGraph.Draw("p e same");
     inclusiveCrossSectionTopLeg->Draw("same" );
@@ -1422,8 +1422,8 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     //if(finalPlots) systematicError("topXSecInclusive1", 8   , *sigmaTopExtrapolatedData , "1");
     //if(finalPlots) systematicError("topXSecInclusive2", 8   , *sigmaTopExtrapolatedData2, "2");
     if(finalPlots){
-      sigmaTopExtrapolatedDataGraph.SetPointError(0, systematicError2("topXSecInclusive1", *sigmaTopExtrapolatedData , 1), 0.);
-      sigmaTopExtrapolatedDataGraph.SetPointError(1, systematicError2("topXSecInclusive2", *sigmaTopExtrapolatedData2, 2), 0.);
+      sigmaTopExtrapolatedDataGraph.SetPointError(0, systematicError2("topXSecInclusive1", *sigmaTopExtrapolatedData , 1, up, down), 0.);
+      sigmaTopExtrapolatedDataGraph.SetPointError(1, systematicError2("topXSecInclusive2", *sigmaTopExtrapolatedData2, 2, up, down), 0.);
     }
     sigmaTopExtrapolatedDataGraph.Draw("p e same");
     inclusiveCrossSectionTopLeg2->Draw("same");
@@ -1464,7 +1464,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
       histo_["pt top" ][kGenBkg][Njets_[3]]->DrawCopy("hist same");
       histogramStyle(*histo_["pt top" ][kData  ][Njets_[mult]], kData);
       histo_["pt top" ][kData  ][Njets_[mult]]->DrawCopy("p e1  X0 same");
-      if(finalPlots) systematicError("differentialTopPt"+Njets_[mult], 7, *histo_["pt top" ][kData  ][Njets_[mult]], "pt");
+      if(finalPlots) systematicError("differentialTopPt"+Njets_[mult], 7, *histo_["pt top" ][kData  ][Njets_[mult]], "pt", up, down);
       histo_["pt top" ][kGenSig][Njets_[3]]->DrawCopy("axis same");
       //jetMultiplicity_[3]->Draw("same");
       if(mult==4) differentialTopLeg ->Draw("same");
@@ -1493,7 +1493,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
       histo_["eta top" ][kGenBkg][Njets_[3]]->Draw("hist same");
       histogramStyle(*histo_["eta top" ][kData  ][Njets_[mult]], kData);
       histo_["eta top" ][kData  ][Njets_[mult]]->Draw("p e1 X0 same");
-      if(finalPlots) systematicError("differentialTopEta"+Njets_[mult], 7, *histo_["eta top"][kData][Njets_[mult]], "eta");
+      if(finalPlots) systematicError("differentialTopEta"+Njets_[mult], 7, *histo_["eta top"][kData][Njets_[mult]], "eta", up, down);
       histo_["eta top" ][kGenSig][Njets_[3]   ]->Draw("axis same");
       //jetMultiplicity_[3]->Draw("same");
       if(mult==4) differentialTopLeg ->Draw("same");
@@ -1835,7 +1835,7 @@ void drawLine(const double xmin, const double ymin, const double xmax, const dou
   //if(finalPlots) systematicError("differentialTopEta"              , 7   , *..., "eta");
   //if(finalPlots) systematicError("differentialTopPt"               , 7   , *..., "pt" );
   
-void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable){
+void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up, TString down){
   // ---
   //    determine systematic errors using the output when doing systematic variations
   // ---
@@ -1883,8 +1883,8 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
     double lumiUp  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
     double lumiDown= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
     double MG      = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-    double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJES11LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-    double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJES09LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
     double EffUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
     double EffDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
     double QCDUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
@@ -1919,7 +1919,7 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
   sysHisto->Draw("p e X0 same");
 }
   
-double systematicError2(const TString plot, TH1& histo, int usedBin){
+double systematicError2(const TString plot, TH1& histo, int usedBin, TString up, TString down){
   // ---
   //    determine systematic errors using the output when doing systematic variations
   // ---
@@ -1936,8 +1936,8 @@ double systematicError2(const TString plot, TH1& histo, int usedBin){
   double lumiUp  = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
   double lumiDown= readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
   double MG      = readLineFromFile(2, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-  double JESUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCJES11LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-  double JESDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCJES09LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double JESUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double JESDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
   double EffUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
   double EffDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
   double QCDUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
