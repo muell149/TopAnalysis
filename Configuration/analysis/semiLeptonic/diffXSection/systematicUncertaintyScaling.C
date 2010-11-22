@@ -30,7 +30,7 @@ int roundToInt(double value);
 TString getTStringFromInt(int i);
 double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
 
-void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/analyzeDiffXData_2900nb_residualJC.root", bool logartihmicPlots=false)
+void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", bool logartihmicPlots=false, TString jetType = "", TString up = "JES105", TString down = "JES095")
 {
 
   // ---
@@ -45,7 +45,6 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   // logartihmicPlots: choose whether you want to see the plots with logarithmic axis
   TString log = "";
   if(logartihmicPlots) log = "Log";
-
   // ---
   //     parameters for systematic scaling
   // ---
@@ -68,25 +67,25 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10.root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10.root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10.root"       ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10.root"       ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10.root"      ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+jetType+".root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+jetType+".root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+jetType+".root"       ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root"       ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+jetType+".root"      ) );
 
   files_.push_back(new TFile(dataFile                                                                  ) );
 
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10JES09.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10JES09.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10JES09.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10JES09.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10JES09.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+down+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+down+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+down+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+down+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+down+jetType+".root" ) );
 
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecSigNloSpring10JES11.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecBkgNloSpring10JES11.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecZjetsMadSpring10JES11.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecWjetsMadSpring10JES11.root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/diffXSecQCDPythiaSpring10JES11.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+up+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+up+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+up+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+up+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+up+jetType+".root" ) );
 
   // ---
   //    get histograms
@@ -112,9 +111,9 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
 
   // 7 TeV Monte Carlo spring 10 samples
   // -----------------------------------
-  // for current ttbar(lept.mu on gen level and other) Mc@Nlo 
-  lumiweight_.push_back(0.000000159*(double)luminosity);
-  lumiweight_.push_back(0.000000159*(double)luminosity);
+  // for current ttbar(lept.mu on gen level and other) Madgraph 
+  lumiweight_.push_back(0.000000106*(double)luminosity);
+  lumiweight_.push_back(0.000000106*(double)luminosity);
   // for current Z+jets MADGRAPH sample
   lumiweight_.push_back(0.000002809*(double)luminosity);
   // for current W+jets MADGRAPH sample
@@ -280,7 +279,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the QCD variation
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("QCDvariationLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("QCDvariation"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*relIso_[kStd    ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*relIso_[kQCDup  ], kBlue , 1, 20, 0.5, 0);
@@ -299,7 +298,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the W variation
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("WvariationLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("Wvariation"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);  
   histogramStyle(*ptlead1Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kWup  ], kBlue , 1, 20, 0.5, 0);
@@ -318,7 +317,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the JES variations 1
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead1JetLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead1Jet"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead1Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
@@ -337,7 +336,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the JES variations 2
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead2JetLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead2Jet"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead2Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
@@ -356,7 +355,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the JES variations 3
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead3JetLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead3Jet"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead3Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
@@ -375,7 +374,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the JES variations 4
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("JESvariationLead4JetLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("JESvariationLead4Jet"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*ptlead4Jet_[kStd  ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
@@ -394,7 +393,7 @@ void systematicUncertaintyScaling(double luminosity = 2880.0, bool save = true, 
   //    do the printing for the ABCD variation
   // ---
   MyCanvas[canvasNumber]->cd(0);
-  MyCanvas[canvasNumber]->SetTitle("ABCDvariationLumi"+lum+"nb"+log);
+  MyCanvas[canvasNumber]->SetTitle("ABCDvariation"+log);
   if(logartihmicPlots)MyCanvas[canvasNumber]->SetLogy(1);
   histogramStyle(*yieldPt_[kStd    ], kBlack, 1, 20, 0.5, 0);
   histogramStyle(*yieldPt_[kQCDup  ], kBlue , 1, 20, 0.5, 0);
