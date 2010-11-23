@@ -4,7 +4,7 @@
 ## ---
 
 ## get the mother file
-execfile("/afs/naf.desy.de/user/g/goerner/semileptonic361/analyzeMuonDiffXSec_cfg.py")
+execfile("analyzeMuonDiffXSec_cfg.py")
 
 ## change gen level event filter to ttbarBG
 process.ttSemiLeptonicFilter.invert = True
