@@ -3,10 +3,10 @@
 #          dataset name: /QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/dammann-Fall10-PAT-adc6a4a08f017ca447d42e2ca3c502e8/USER
 #               DBS URL: https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 #            global tag: START38_V13::All
-#         mother sample: QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM
+#         mother sample: QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM
 #      number of events: 29504866
 #         cross section: 296600000
-#  generator efficiency: 0.00118
+#  generator efficiency: 0.0002855
 #
 ####################################################################################################################################
 
