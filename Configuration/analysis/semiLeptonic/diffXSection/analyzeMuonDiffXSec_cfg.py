@@ -16,6 +16,8 @@ import FWCore.ParameterSet.Config as cms
 ##    'all' does no selection
 ## ---
 
+jetType = 'particleFlow' # 'Calo'
+
 eventFilter  = 'signal only'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 if(not globals().has_key('writeOutput')): 
@@ -27,23 +29,19 @@ process = cms.Process("Selection")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define input
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(    
-
-## add your favourite file here
+                            fileNames = cms.untracked.vstring(    
+    ## add your favourite file here
     '/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
-    #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_10_1.root'
-    #'/store/user/henderle/Spring10/WJets_MAD/PATtuple_100_2.root'
-    #'/store/user/henderle/Spring10/ZJets_MAD/PATtuple_10_2.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(200)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -66,10 +64,9 @@ if(not globals().has_key('runningOnData')):
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 ## high level trigger filter
-process.load("TopAnalysis.TopFilter.sequences.triggerFilter_cff")
-if(runningOnData == "MC"  ): process.hltMu9.TriggerResultsTag = "TriggerResults::REDIGI"
-elif(runningOnData == "data"): print "" 
-else: print "invalid choice of runningOnData"
+from HLTrigger.HLTfilters.hltHighLevel_cfi import *
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI", HLTPaths = ["HLT_Mu9"])
+
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 ## generator matching
@@ -108,15 +105,12 @@ process.load("TopAnalysis.TopAnalyzer.MuonJetKinematics_cfi")
 ## ---
 ##    set up vertex filter
 ## ---
-## a) for MC
-process.PVSelection = cms.EDFilter("VertexSelector",
-                                   src = cms.InputTag("offlinePrimaryVertices"),
-                                   cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2"),
-                                   filter = cms.bool(True),
+process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
+                                   pvSrc   = cms.InputTag('offlinePrimaryVertices'),
+                                   minNdof = cms.double(4.0),
+                                   maxZ    = cms.double(24.0),
+                                   maxRho  = cms.double(2.0)
                                    )
-if(runningOnData=="data"):
-    print "use looser PV selection |z| < 24"
-    process.PVSelection.cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
 
 ## ---
 ##    set up filter for different ttbar decay channels
@@ -157,14 +151,14 @@ if(not eventFilter=='all'):
     else:
         raise NameError, "'"+eventFilter+"' is not a prober eventFilter name choose: 'all', 'signal only', 'background only', 'semileptonic electron only', 'dileptonic electron only', 'dileptonic muon only', 'fullhadronic', 'via single tau only', 'dileptonic via tau only' or 'dileptonic muon + electron only'"
     
-    ## sequence with filter for decay channel and trigger selection hltMu9
+    ## sequence with filter for decay channel and trigger selection hltFilter
     process.filterSequence = cms.Sequence(process.makeGenEvt *
                                           process.ttSemiLeptonicFilter *
-                                          process.hltMu9
+                                          process.hltFilter
                                           )
 else:
-    ## sequence without filter (only trigger selection hltMu9) - done when 'all' is chosen
-    process.filterSequence = cms.Sequence(process.hltMu9)
+    ## sequence without filter (only trigger selection hltFilter) - done when 'all' is chosen
+    process.filterSequence = cms.Sequence(process.hltFilter)
     
 ## ---
 ##    set up genFilter for semileptonic muons and taus, where taus are decaying into leptons
@@ -188,15 +182,28 @@ uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs') )
 uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs') )
 
 ## jet Kinematics to monitor JES shift
-process.patLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds0 )
-process.patLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds1 )
-process.patLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds2 )
-process.patLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds3 )
-process.shiftedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds0 )
-process.shiftedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds1 )
-process.shiftedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds2 )
-process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds3 )
+if(jetType=="particleFlow"):
+    process.patLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJetsAK5PF', analyze = uds0 )
+    process.patLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJetsAK5PF', analyze = uds1 )
+    process.patLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJetsAK5PF', analyze = uds2 )
+    process.patLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJetsAK5PF', analyze = uds3 )
+    process.shiftedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJetsAK5PF', analyze = uds0 )
+    process.shiftedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJetsAK5PF', analyze = uds1 )
+    process.shiftedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJetsAK5PF', analyze = uds2 )
+    process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJetsAK5PF', analyze = uds3 )
+elif(jetType=="Calo"):
+    process.patLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds0 )
+    process.patLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds1 )
+    process.patLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds2 )
+    process.patLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'selectedPatJets', analyze = uds3 )
+    process.shiftedLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds0 )
+    process.shiftedLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds1 )
+    process.shiftedLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds2 )
+    process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds3 )
+else:
+    print "unknown jetType"
 
+    
 process.unshiftedJets = cms.Sequence(process.patLead_0_JetKinematics+
                                      process.patLead_1_JetKinematics+
                                      process.patLead_2_JetKinematics+
@@ -274,10 +281,9 @@ process.leadingJetSelectionNjets4 = process.leadingJetSelection.clone (src = 'ti
 ##    collect selections for path 2 (jetmultiplicity 3 && btag) and the output modules with different names
 ## ---
 process.ttSemiLeptonicFilterb = process.ttSemiLeptonicFilter.clone()
-process.hltMu9b = process.hltMu9.clone()
 process.filterSequenceb = cms.Sequence(process.makeGenEvt *
                                        process.ttSemiLeptonicFilterb *
-                                       process.hltMu9b
+                                       process.hltFilter
                                        )
 process.bottomJetSelectionb        = process.bottomJetSelection.clone()
 process.leadingJetSelectionNjets3b = process.leadingJetSelectionNjets3.clone()
@@ -327,13 +333,14 @@ process.noIsoMuonQuality          = process.analyzeMuonQuality.clone   (src = 'n
 process.noEtaMuonKinematics       = process.analyzeMuonKinematics.clone(src = 'noEtaMuons'     )
 process.noPtMuonKinematics        = process.analyzeMuonKinematics.clone(src = 'noPtMuons'      )
 process.noDRMuonVetoJetsKinematics = process.analyzeMuonJetKinematics.clone(srcA = 'noDRMuons',
-                                                                            srcB = 'vetoJets'  )
+                                                                            srcB = 'goodJets'  )
 ## N-1 jet collections
 process.noEtaJetKinematics  = process.analyzeJetKinematics.clone(src = 'noEtaJets' )
 process.noPtJetKinematics   = process.analyzeJetKinematics.clone(src = 'noPtJets'  )
-process.noEmJetQuality      = process.analyzeJetQuality.clone(src = 'noEmJets'     )
-process.noN90HitsJetQuality = process.analyzeJetQuality.clone(src = 'noN90HitsJets')
-process.nofHPDJetQuality    = process.analyzeJetQuality.clone(src = 'nofHPDJets'   )
+if(jetType!="particleFlow"):
+    process.noEmJetQuality      = process.analyzeJetQuality.clone(src = 'noEmJets'     )
+    process.noN90HitsJetQuality = process.analyzeJetQuality.clone(src = 'noN90HitsJets')
+    process.nofHPDJetQuality    = process.analyzeJetQuality.clone(src = 'nofHPDJets'   )
 process.noPtLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds0 )
 process.noPtLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds1 )
 process.noPtLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds2 )
@@ -353,13 +360,18 @@ process.combinedMuonKinematics = process.analyzeMuonKinematics.clone(src = 'comb
 process.highPtMuonKinematics   = process.analyzeMuonKinematics.clone(src = 'highPtMuons')
 process.kinematicMuonQuality   = process.analyzeMuonQuality.clone   (src = 'kinematicMuons')
 process.trackMuonVetoJetsKinematics = process.analyzeMuonJetKinematics.clone(srcA = 'trackMuons',
-                                                                             srcB = 'vetoJets'  )
+                                                                             srcB = 'goodJets'  )
 process.goldenMuonQuality      = process.analyzeMuonQuality.clone   (src = 'goldenMuons'  )
 process.tightMuonKinematics    = process.analyzeMuonKinematics.clone(src = 'tightMuons'   )
 process.tightMuonQuality       = process.analyzeMuonQuality.clone   (src = 'tightMuons'   )
 
 ## jet cutflow
-process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJets')
+if(jetType=="particleFlow"):
+    process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJetsAK5PF')
+elif(jetType=="Calo"):
+    process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJets')
+else:
+    print "unknown jetType"
 process.centralLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds0 )
 process.centralLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds1 )
 process.centralLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds2 )
@@ -396,16 +408,27 @@ process.monitorMuonCutflow = cms.Sequence(process.combinedMuonKinematics       +
                                           process.analyzePatMET                +
                                           process.analyzePfMET               
                                           )
-process.monitorNMinusOneJetCuts = cms.Sequence(process.noPtLead_0_JetKinematics  +
-                                               process.noPtLead_1_JetKinematics  +
-                                               process.noPtLead_2_JetKinematics  +
-                                               process.noPtLead_3_JetKinematics  +
-                                               process.noEtaJetKinematics        +
-                                               process.noPtJetKinematics         +
-                                               process.noEmJetQuality            +
-                                               process.noN90HitsJetQuality       +
-                                               process.nofHPDJetQuality       
-                                               )
+if(jetType=="Calo"):
+    process.monitorNMinusOneJetCuts = cms.Sequence(process.noPtLead_0_JetKinematics  +
+                                                   process.noPtLead_1_JetKinematics  +
+                                                   process.noPtLead_2_JetKinematics  +
+                                                   process.noPtLead_3_JetKinematics  +
+                                                   process.noEtaJetKinematics        +
+                                                   process.noPtJetKinematics         +
+                                                   process.noEmJetQuality            +
+                                                   process.noN90HitsJetQuality       +
+                                                   process.nofHPDJetQuality       
+                                                   )
+elif(jetType=="particleFlow"):
+    process.monitorNMinusOneJetCuts = cms.Sequence(process.noPtLead_0_JetKinematics  +
+                                                   process.noPtLead_1_JetKinematics  +
+                                                   process.noPtLead_2_JetKinematics  +
+                                                   process.noPtLead_3_JetKinematics  +
+                                                   process.noEtaJetKinematics        +
+                                                   process.noPtJetKinematics
+                                                   )
+else:
+    print "unknown jetType"
 process.monitorJetCutflow = cms.Sequence(process.patJetKinematics            +
                                          process.centralLead_0_JetKinematics +
                                          process.centralLead_1_JetKinematics +
@@ -465,20 +488,21 @@ process.jetMultiplicity4Btag = cms.Sequence(process.bottomJetSelection          
 ## a) the muon collection for monitoring relIso vs dB
 ## muon selector
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.estimationMuons = selectedPatMuons.clone(src = 'selectedPatMuons',
+process.estimationMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons',
                                                  cut = 'pt > 20. & abs(eta) < 2.1 &'
                                                  'isGlobalMuon &'
                                                  'isTrackerMuon() =1 &'                                            
                                                  'innerTrack.numberOfValidHits >= 11 &'
                                                  'globalTrack.normalizedChi2 < 10.0 &'
-                                                 'globalTrack.hitPattern.numberOfValidMuonHits>0'
+                                                 'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
+                                                 'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                                 'numberOfMatches>1'
                                                  )
 ## b) the different selection steps
 process.ttSemiLeptonicFilterABCD = process.ttSemiLeptonicFilter.clone()
-process.hltMu9ABCD = process.hltMu9.clone()
 process.filterSequenceABCD = cms.Sequence(process.makeGenEvt *
                                           process.ttSemiLeptonicFilterABCD *
-                                          process.hltMu9ABCD
+                                          process.hltFilter
                                           )
 process.PVSelectionABCD = process.PVSelection.clone()
 process.leadingJetSelectionNjets1ABCD = process.leadingJetSelectionNjets1.clone()
@@ -502,7 +526,7 @@ process.estimationMuonsQualityNjets4 = process.estimationMuonsQualityNjets1.clon
 ## ---
               
 process.p1 = cms.Path(
-                      ## gen event selection (decay channel) and the trigger selection (hltMu9)
+                      ## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequence                        *
                       ## PV event selection
                       process.PVSelection                           *
@@ -544,7 +568,7 @@ process.p1 = cms.Path(
                       )
 ## Njets>=3 & btag
 process.p2 = cms.Path(
-                      ## gen event selection (decay channel) and the trigger selection (hltMu9)
+                      ## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequenceb                       *
                       ## PV event selection
                       process.PVSelectionb                          *
@@ -563,7 +587,7 @@ process.p2 = cms.Path(
 
 ## QCD estimation via ABCD
 process.p3 = cms.Path(
-    ## gen event selection (decay channel) and trigger selection (hltMu9)
+    ## gen event selection (decay channel) and trigger selection (hltFilter)
     process.filterSequenceABCD                    *        
     ## introduce collections
     process.semiLeptonicSelection                 *
@@ -635,3 +659,36 @@ if(writeOutput):
     process.out.outputCommands += patExtraAodEventContent
     process.outpath = cms.EndPath(process.out)
     
+if(jetType=="particleFlow"):
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.p1, 'tightLeadingJets', 'tightLeadingPFJets')
+    massSearchReplaceAnyInputTag(process.p2, 'tightLeadingJets', 'tightLeadingPFJets')
+    massSearchReplaceAnyInputTag(process.p3, 'tightLeadingJets', 'tightLeadingPFJets')
+
+    massSearchReplaceAnyInputTag(process.p1, 'tightBottomJets', 'tightBottomPFJets')
+    massSearchReplaceAnyInputTag(process.p2, 'tightBottomJets', 'tightBottomPFJets')
+    massSearchReplaceAnyInputTag(process.p3, 'tightBottomJets', 'tightBottomPFJets')
+
+    massSearchReplaceAnyInputTag(process.p1, 'goodJets', 'goodJetsPF30')
+    massSearchReplaceAnyInputTag(process.p2, 'goodJets', 'goodJetsPF30')
+    massSearchReplaceAnyInputTag(process.p3, 'goodJets', 'goodJetsPF30')
+
+    massSearchReplaceAnyInputTag(process.p1, 'centralJets', 'centralJetsPF30')
+    massSearchReplaceAnyInputTag(process.p2, 'centralJets', 'centralJetsPF30')
+    massSearchReplaceAnyInputTag(process.p3, 'centralJets', 'centralJetsPF30')
+
+    massSearchReplaceAnyInputTag(process.p1, 'reliableJets', 'reliableJetsPF30')
+    massSearchReplaceAnyInputTag(process.p2, 'reliableJets', 'reliableJetsPF30')
+    massSearchReplaceAnyInputTag(process.p3, 'reliableJets', 'reliableJetsPF30')
+
+    massSearchReplaceAnyInputTag(process.p1, 'noEtaJets', 'noEtaJetsPF30')
+    massSearchReplaceAnyInputTag(process.p2, 'noEtaJets', 'noEtaJetsPF30')
+    massSearchReplaceAnyInputTag(process.p3, 'noEtaJets', 'noEtaJetsPF30')
+
+    massSearchReplaceAnyInputTag(process.p1, 'noPtJets', 'noPtJetsPF')
+    massSearchReplaceAnyInputTag(process.p2, 'noPtJets', 'noPtJetsPF')
+    massSearchReplaceAnyInputTag(process.p3, 'noPtJets', 'noPtJetsPF')
+
+    massSearchReplaceAnyInputTag(process.p1, 'patMETs', 'patMETsPF')
+    massSearchReplaceAnyInputTag(process.p2, 'patMETs', 'patMETsPF')
+    massSearchReplaceAnyInputTag(process.p3, 'patMETs', 'patMETsPF')
