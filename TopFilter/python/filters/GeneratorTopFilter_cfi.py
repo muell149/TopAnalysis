@@ -9,7 +9,7 @@ generatorTopFilter = cms.EDFilter("GeneratorTopFilter",
     
     ## SHORT CUTS: 
     # if not empty all the other boolean parameters
-    # will be ignored
+    # will be ignored (except invert selection)
     channels = cms.vstring(),
     # supported: MuonMuon
     #            ElectronMuon
@@ -49,5 +49,5 @@ generatorTopFilter = cms.EDFilter("GeneratorTopFilter",
     Tau_To_Muon     = cms.bool(False),
     
     # selection can be inverted
-    invert_selection = cms.bool(False)     
+    invert_selection = cms.bool(False)   
 )
