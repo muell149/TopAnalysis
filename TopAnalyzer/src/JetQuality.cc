@@ -276,13 +276,13 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       **/
       if( jet->isPFJet() ){
 	// fraction of energy carried by neutral hadrons
-	fillValue( "nhf" , jet->neutralHadronEnergyFraction() / jet->corrFactor("raw") , weight );
+	fillValue( "nhf" , jet->neutralHadronEnergyFraction() / jet->jecFactor("Uncorrected") , weight );
 	// fraction of energy carried by neutral em (photons)
-	fillValue( "nef" , jet->neutralEmEnergyFraction()     / jet->corrFactor("raw") , weight );
+	fillValue( "nef" , jet->neutralEmEnergyFraction()     / jet->jecFactor("Uncorrected") , weight );
 	// fraction of energy carried by charged hadrons
-	fillValue( "chf" , jet->chargedHadronEnergyFraction() / jet->corrFactor("raw") , weight );
+	fillValue( "chf" , jet->chargedHadronEnergyFraction() / jet->jecFactor("Uncorrected") , weight );
 	// fraction of energy carried by charged em (electrons)
-	fillValue( "cef" , jet->chargedEmEnergyFraction()     / jet->corrFactor("raw") , weight );
+	fillValue( "cef" , jet->chargedEmEnergyFraction()     / jet->jecFactor("Uncorrected") , weight );
 	// multiplicity of charged hadrons
 	fillValue( "nch" , jet->pfSpecific().mChargedHadronMultiplicity                , weight );
 	// multiplicity of charged particles
@@ -336,26 +336,26 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       **/
       if( jet->genJet() ){
 	// jet pt raw
-	fillValue( "ptL0_"  , jet->genJet()->pt(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() , weight );
+	fillValue( "ptL0_"  , jet->genJet()->pt(),  jet->correctedJet("Uncorrected").pt()/jet->genJet()->pt() , weight );
 	// jet pt L2Relative
-	fillValue( "ptL2_"  , jet->genJet()->pt(),  jet->correctedJet("rel").pt()/jet->genJet()->pt() , weight );
+	fillValue( "ptL2_"  , jet->genJet()->pt(),  jet->correctedJet("L2Relative" ).pt()/jet->genJet()->pt() , weight );
 	// jet pt L3Absolute
-	fillValue( "ptL3_"  , jet->genJet()->pt(),  jet->correctedJet("abs").pt()/jet->genJet()->pt() , weight );
+	fillValue( "ptL3_"  , jet->genJet()->pt(),  jet->correctedJet("L3Absolute" ).pt()/jet->genJet()->pt() , weight );
 	// jet pt L5Hadron
-	fillValue( "ptL5_"  , jet->genJet()->pt(),  jet->correctedJet("had",  flavor_).pt()/jet->genJet()->pt() , weight );
+	fillValue( "ptL5_"  , jet->genJet()->pt(),  jet->correctedJet("L5Flavor", flavor_).pt()/jet->genJet()->pt() , weight );
 	// jet pt L7Parton
-	fillValue( "ptL7_"  , jet->genJet()->pt(),  jet->correctedJet("part", flavor_).pt()/jet->genJet()->pt() , weight );
+	fillValue( "ptL7_"  , jet->genJet()->pt(),  jet->correctedJet("L7Parton", flavor_).pt()/jet->genJet()->pt() , weight );
 	
 	// jet eta raw
-	fillValue( "etaL0_" , jet->genJet()->eta(),  jet->correctedJet("raw").pt()/jet->genJet()->pt() , weight );
+	fillValue( "etaL0_" , jet->genJet()->eta(),  jet->correctedJet("Uncorrected").pt()/jet->genJet()->pt() , weight );
 	// jet eta L2Relative
-	fillValue( "etaL2_" , jet->genJet()->eta(),  jet->correctedJet("rel").pt()/jet->genJet()->pt() , weight );
+	fillValue( "etaL2_" , jet->genJet()->eta(),  jet->correctedJet("L2Relative" ).pt()/jet->genJet()->pt() , weight );
 	// jet eta L3Absolute
-	fillValue( "etaL3_" , jet->genJet()->eta(),  jet->correctedJet("abs").pt()/jet->genJet()->pt() , weight );
+	fillValue( "etaL3_" , jet->genJet()->eta(),  jet->correctedJet("L3Absolute" ).pt()/jet->genJet()->pt() , weight );
 	// jet eta L5Hadron
-	fillValue( "etaL5_" , jet->genJet()->eta(),  jet->correctedJet("had",  flavor_).pt()/jet->genJet()->pt() , weight );
+	fillValue( "etaL5_" , jet->genJet()->eta(),  jet->correctedJet("L5Flavor", flavor_).pt()/jet->genJet()->pt() , weight );
 	// jet eta L7Parton
-	fillValue( "etaL7_" , jet->genJet()->eta(),  jet->correctedJet("part", flavor_).pt()/jet->genJet()->pt() , weight );
+	fillValue( "etaL7_" , jet->genJet()->eta(),  jet->correctedJet("L7Parton", flavor_).pt()/jet->genJet()->pt() , weight );
       }
     }
   }
