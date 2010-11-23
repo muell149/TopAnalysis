@@ -30,10 +30,10 @@ tightJetCut  = 'abs(eta) < 2.4 & pt > 40.'
 bottomJetCut = 'abs(eta) < 2.4 & pt > 50.'
 
 ## define tight JetIDs
-tightCaloJetID  = '& (((corrFactor("raw") * pt) > 25. & jetID.fHPD < 0.95) | (corrFactor("raw") * pt) <= 25.) & '
-tightCaloJetID += '((abs(eta) > 1.0 & (corrFactor("raw") * pt) > 55. & emEnergyFraction < 1.0) | abs(eta) <= 1.0 | (corrFactor("raw") * pt) <= 55.)'
-tightPFJetID    = '& neutralHadronEnergyFraction/corrFactor("raw") < 0.9 & '
-tightPFJetID   += 'neutralEmEnergyFraction/corrFactor("raw") < 0.9'
+tightCaloJetID  = '& (((jecFactor("Uncorrected") * pt) > 25. & jetID.fHPD < 0.95) | (jecFactor("Uncorrected") * pt) <= 25.) & '
+tightCaloJetID += '((abs(eta) > 1.0 & (jecFactor("Uncorrected") * pt) > 55. & emEnergyFraction < 1.0) | abs(eta) <= 1.0 | (jecFactor("Uncorrected") * pt) <= 55.)'
+tightPFJetID    = '& neutralHadronEnergyFraction < 0.9 & '
+tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
 
 ## setup the jet selection collection
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
@@ -103,7 +103,7 @@ from TopAnalysis.TopUtils.patTriggerEvent_cff import *
 ## the QuadJet40 trigger itself
 hltQJ40 = filterTrigger.clone()
 
-hltQuadJet40 = cms.Sequence(patTriggerSequence *
+hltQuadJet40 = cms.Sequence(patTriggerDefaultSequence *
                             hltQJ40
                             )
 
@@ -114,7 +114,7 @@ hltQJ25U = filterTrigger.clone( whichTrigger="QuadJet25U" )
 
 patTrigger.processName = 'REDIGI'
 
-hltQuadJet25U = cms.Sequence(patTriggerSequence *
+hltQuadJet25U = cms.Sequence(patTriggerDefaultSequence *
                              hltQJ25U
                              )
 
@@ -163,8 +163,8 @@ kinFitTtFullHadEventHypothesis.maxNJets = -1
 ttFullHadJetPartonMatch.maxNJets        = -1
 
 #setForAllTtFullHadHypotheses(process, 'jetCorrectionLevel', 'had')
-kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'had'
-ttFullHadHypGenMatch.jetCorrectionLevel           = 'had'
+kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Flavor'
+ttFullHadHypGenMatch.jetCorrectionLevel           = 'L5Flavor'
 
 #setForAllTtFullHadHypotheses(process, 'jets', 'tightLeadingJets')
 kinFitTtFullHadEventHypothesis.jets = 'tightLeadingJets'
@@ -173,14 +173,14 @@ ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
 ## define ordered jets
-uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
-uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
-uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
-uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
-uds4    = cms.PSet(index = cms.int32(4), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
-uds5    = cms.PSet(index = cms.int32(5), correctionLevel = cms.string('abs'), flavor = cms.string("uds") , useTree = cms.bool(False) )
-bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), flavor = cms.string("b")   , useTree = cms.bool(False) )
-bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), flavor = cms.string("b")   , useTree = cms.bool(False) )
+uds0   =cms.PSet(index=cms.int32(0), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds1   =cms.PSet(index=cms.int32(1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds2   =cms.PSet(index=cms.int32(2), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds3   =cms.PSet(index=cms.int32(3), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds4   =cms.PSet(index=cms.int32(4), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds5   =cms.PSet(index=cms.int32(5), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+bottom0=cms.PSet(index=cms.int32(0), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
+bottom1=cms.PSet(index=cms.int32(1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
 
 ## ---
 ##    MONITOR STEP 0
@@ -835,8 +835,8 @@ def runOnPF(process):
     process.kinFitQuality_3.analyze.bResolutions           = process.bjetResolutionPF.functions
 
     ## run kinematic fit for PFJets with L2L3 correted jets, as no further corrections are available
-    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'abs'
-    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'abs'
+    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
+    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
 
     ## replace jets and met with PFJets and PFMET
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
