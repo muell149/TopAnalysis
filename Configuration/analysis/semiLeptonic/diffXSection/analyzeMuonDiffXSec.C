@@ -1159,7 +1159,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
 	  if(idx==kQCD){
 	    if(logartihmicPlots){
 	      if(variables_[var]=="pt"){
-		min=0.008;
+		min=0.003*luminosity/1000.;
 		max=exp(1.15*(std::log(maxValue)-std::log(min))+std::log(min));
 	      }
 	      else{
@@ -1240,7 +1240,10 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
 	    histogramStyle(*histo_[ljetsXSec_[var]][idx][Njets_[mult]], kData, false);
 	  }
 	  // draw histos
-	  if(idx==kLepJets) histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("AXIS");
+	  if(idx==kLepJets){
+	    if(mult<4)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("AXIS");
+	    else histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("HIST");
+	  }
 	  if(idx==kData   ){
 	    histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("p X0 e1 same");
 	    if(finalPlots) systematicError("diffNormXSec"+variables_[var], mult, *histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var], up, down);

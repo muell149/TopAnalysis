@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 #include <TH1F.h>
 #include <TH2F.h>
@@ -30,7 +31,7 @@ int roundToInt(double value);
 TString getTStringFromInt(int i);
 double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
 
-void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", bool logartihmicPlots=false, TString jetType = "", TString up = "JES105", TString down = "JES095")
+void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", bool logartihmicPlots=false, TString jetType = "PF", TString up = "JES105", TString down = "JES095")
 {
 
   // ---
@@ -235,8 +236,10 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   JESleg->SetFillStyle(0);
   JESleg->SetBorderSize(0);
   JESleg->AddEntry( ptlead1Jet_[kStd    ], "MC"                        , "PL");
-  JESleg->AddEntry( ptlead1Jet_[kJES11  ], "MC (+ 10% JES)"            , "PL");
-  JESleg->AddEntry( ptlead1Jet_[kJES09  ], "MC (- 10% JES)"            , "PL");
+  if(up == "JES105")JESleg->AddEntry( ptlead1Jet_[kJES11], "MC (+ 5% JES)"  , "PL");
+  else JESleg->AddEntry( ptlead1Jet_[kJES11  ], "MC (+ 10% JES)"            , "PL");
+  if(down == "JES095")JESleg->AddEntry( ptlead1Jet_[kJES09], "MC (- 5% JES)", "PL");
+  else JESleg->AddEntry( ptlead1Jet_[kJES09  ], "MC (- 10% JES)"            , "PL");
   JESleg->AddEntry( ptlead1Jet_[kData   ], "2010 data "+lum+" pb ^{-1}", "P" );
 
   TLegend *Wjetsleg = new TLegend(0.40, 0.56, 0.94, 0.96);
@@ -305,8 +308,14 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   histogramStyle(*ptlead1Jet_[kWdown], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
   if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0, 1.1*ptlead1Jet_[kWup]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 1., 1000.*ptlead1Jet_[kWup]->GetMaximum());
-  ptlead1Jet_[kStd     ]->DrawClone(""    );
+  double min = 0.3*luminosity/1000.;
+  double max = ptlead1Jet_[kWup]->GetMaximum();
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", min, exp(1.4*(std::log(max)-std::log(min))+std::log(min)));
+  ptlead1Jet_[kStd     ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kJES11   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kJES09   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kData    ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kStd     ]->DrawClone("");
   ptlead1Jet_[kWup     ]->Draw("hist same"); 
   ptlead1Jet_[kWdown   ]->Draw("hist same");
   ptlead1Jet_[kData    ]->Draw("p e1 same");
@@ -324,8 +333,12 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   histogramStyle(*ptlead1Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
   if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0, 1.1*ptlead1Jet_[kJES09]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 1., 10.*ptlead1Jet_[kJES09]->GetMaximum());
-  ptlead1Jet_[kStd     ]->DrawClone(""   );
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0.3*luminosity/1000., 10.*ptlead1Jet_[kJES09]->GetMaximum());
+  ptlead1Jet_[kStd     ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kJES11   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kJES09   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kData    ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead1Jet_[kStd     ]->DrawClone("");
   ptlead1Jet_[kJES11   ]->Draw("same"); 
   ptlead1Jet_[kJES09   ]->Draw("same");
   ptlead1Jet_[kData    ]->Draw("p e1 same");
@@ -343,8 +356,12 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   histogramStyle(*ptlead2Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kData ], kBlack, 1, 22, 1.8, 0);
   if(!logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0, 1.2*ptlead2Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0.1, 10*ptlead2Jet_[kJES09]->GetMaximum());
-  ptlead2Jet_[kStd     ]->Draw(""   );
+  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0.03*luminosity/1000., 10*ptlead2Jet_[kJES09]->GetMaximum());
+  ptlead2Jet_[kStd     ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead2Jet_[kJES11   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead2Jet_[kJES09   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead2Jet_[kData    ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead2Jet_[kStd     ]->Draw("");
   ptlead2Jet_[kJES11   ]->Draw("same"); 
   ptlead2Jet_[kJES09   ]->Draw("same");
   ptlead2Jet_[kData    ]->Draw("p e1 same");
@@ -362,8 +379,12 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   histogramStyle(*ptlead3Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kData ], kBlack, 1, 22, 1.8, 0);
   if(!logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0, 1.2*ptlead3Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0.1, 10*ptlead3Jet_[kJES09]->GetMaximum());
-  ptlead3Jet_[kStd     ]->Draw(""   );
+  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0.003*luminosity/1000., 10*ptlead3Jet_[kJES09]->GetMaximum());
+  ptlead3Jet_[kStd     ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead3Jet_[kJES11   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead3Jet_[kJES09   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead3Jet_[kData    ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead3Jet_[kStd     ]->Draw("");
   ptlead3Jet_[kJES11   ]->Draw("same"); 
   ptlead3Jet_[kJES09   ]->Draw("same");
   ptlead3Jet_[kData    ]->Draw("p e1 same");
@@ -381,8 +402,12 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   histogramStyle(*ptlead4Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kData ], kBlack, 1, 22, 1.8, 0);
   if(!logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0, 1.2*ptlead4Jet_[kStd]->GetMaximum());
-  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0.1, 10*ptlead4Jet_[kJES09]->GetMaximum());
-  ptlead4Jet_[kStd     ]->Draw(""   );
+  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0.0003*luminosity/1000., 10*ptlead4Jet_[kJES09]->GetMaximum());
+  ptlead4Jet_[kStd     ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead4Jet_[kJES11   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead4Jet_[kJES09   ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead4Jet_[kData    ]->GetXaxis()->SetRangeUser(0.,200.);
+  ptlead4Jet_[kStd     ]->Draw("");
   ptlead4Jet_[kJES11   ]->Draw("same"); 
   ptlead4Jet_[kJES09   ]->Draw("same");
   ptlead4Jet_[kData    ]->Draw("p e1 same");

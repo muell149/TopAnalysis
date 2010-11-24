@@ -540,7 +540,7 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   // ---
   //    do the printing for dR_
   // ---
-  min = 0.1/840*luminosity;
+  min = 0.0025*luminosity/1000.;
   max = getMaxValue(*dR_[kData], "");
   MyCanvas[8]->cd(0);
   MyCanvas[8]->SetLogy(1);
@@ -763,7 +763,7 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   // ---
   //    do the printing for nJets_
   // ---
-  min = 0.1/840*luminosity;
+  min = 0.99;
   max = getMaxValue(*nJets_[kData], "");
   MyCanvas[21]->cd(0);
   MyCanvas[21]->SetLogy(1);
