@@ -113,10 +113,10 @@ sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 0.955, 1.0, 1.0, false, true, '$jetTyp', '$JESup', '$JESdown')'
 echo 9 QCD estimation up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 2.0, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.5, 1.0, false, true,'$jetTyp', '$JESup', '$JESdown')'
 echo 10 QCD estimation down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.0, 1.0, false, true, '$jetTyp', '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.5, 1.0, false, true, '$jetTyp', '$JESup', '$JESdown')'
 echo 11 Wjets estimation up
 sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.3, false, true,'$jetTyp', '$JESup', '$JESdown')'
