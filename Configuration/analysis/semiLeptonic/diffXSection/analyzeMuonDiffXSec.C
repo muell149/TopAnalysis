@@ -268,10 +268,10 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     // a) get number
     //NQCD_ .push_back( getABCDNumbers(Njets_[mult], loadValues, file)*QCDVariation );
 
-    if(Njets_[mult]=="Njets1") NQCD_.push_back(2.2*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets2") NQCD_.push_back(2.6*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets3") NQCD_.push_back(2.6*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets4") NQCD_.push_back(2.3*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets1") NQCD_.push_back(2.11*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets2") NQCD_.push_back(2.77*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets3") NQCD_.push_back(3.1* histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets4") NQCD_.push_back(3.57*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
 
     // b) get shape from QCD MC
     // loop pt, eta and phi
@@ -634,13 +634,15 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     histo_["pt BG"   ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kWjets][Njets_[mult]]->Clone();
     histo_["pt BG"   ][kData][Njets_[mult]]->Scale(WjetsVariation);
     histo_["pt BG"   ][kData][Njets_[mult]]->Add((TH1F*)histo_["pt"][kZjets][Njets_[mult]]->Clone());
-    histo_["ptBGQCD" ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kQCD  ][Njets_[mult]]->Clone();
+    if(mult==3) histo_["ptBGQCD" ][kData][Njets_[mult]] = (TH1F*)histo_["pt"][kABCD][Njets_[mult]]->Clone();
+    if(mult==4) histo_["ptBGQCD" ][kData][Njets_[mult]] = (TH1F*)histo_["pt"][kQCD ][Njets_[mult]]->Clone();
     histo_["ptBGQCD" ][kData][Njets_[mult]]->Scale(QCDVariation);
     histo_["pt BG"   ][kData][Njets_[mult]]->Add(histo_["ptBGQCD"][kData][Njets_[mult]]);
     histo_["eta BG"  ][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kWjets][Njets_[mult]]->Clone();
     histo_["eta BG"  ][kData][Njets_[mult]]->Scale(WjetsVariation);
     histo_["eta BG"  ][kData][Njets_[mult]]->Add((TH1F*)histo_["eta"][kZjets][Njets_[mult]]->Clone());
-    histo_["etaBGQCD"][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kQCD  ][Njets_[mult]]->Clone();
+    if(mult==3) histo_["etaBGQCD"][kData][Njets_[mult]] = (TH1F*)histo_["eta"][kABCD][Njets_[mult]]->Clone();
+    if(mult==4) histo_["etaBGQCD"][kData][Njets_[mult]] = (TH1F*)histo_["eta"][kQCD ][Njets_[mult]]->Clone();
     histo_["etaBGQCD"][kData][Njets_[mult]]->Scale(QCDVariation);
     histo_["eta BG"  ][kData][Njets_[mult]]->Add(histo_["etaBGQCD"][kData][Njets_[mult]]);
     histo_["pt top"  ][kData][Njets_[mult]]->Add(histo_["pt BG"   ][kData][Njets_[mult]], -1);
@@ -821,7 +823,8 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
 	// (i) events after selection 
 	double Nselected = histo_["pt"][idx   ][Njets_[mult]]->Integral( 0 , histo_["pt"][idx   ][Njets_[mult]]->GetNbinsX()+1 );
 	// (ii) substract QCD and Z+jets (from RECO MC)
-	double NQCD      = histo_["pt"][kQCD  ][Njets_[mult]]->Integral( 0 , histo_["pt"][kQCD  ][Njets_[mult]]->GetNbinsX()+1 );
+	double NQCD      = NQCD_[mult];
+	                 //histo_["pt"][kQCD  ][Njets_[mult]]->Integral( 0 , histo_["pt"][kQCD  ][Njets_[mult]]->GetNbinsX()+1 );
 	NQCD*=QCDVariation;
 	double NZjets    = histo_["pt"][kZjets][Njets_[mult]]->Integral( 0 , histo_["pt"][kZjets][Njets_[mult]]->GetNbinsX()+1 );
 	// (iii) W+jets estimation (from charge asymmetrie method) - need to scale with same efficiency!
