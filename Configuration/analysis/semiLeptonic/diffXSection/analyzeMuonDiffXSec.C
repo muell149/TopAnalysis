@@ -42,7 +42,7 @@ void drawLine(const double xmin, const double ymin, const double xmax, const dou
 void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES105", TString down = "JES095");
 double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES105", TString down = "JES095");
 
-void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "", TString up = "JES105", TString down = "JES095")
+void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=false, TString jetTyp = "PF", TString up = "JES105", TString down = "JES095")
 { 
 
   // ---
@@ -596,6 +596,59 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
       }
     }
   }
+
+  // ---
+  //    get gen W and ttbar diff norm XSec
+  // ---
+  std::vector<TString> ljetsXSecGen_;
+  TString ljetsXSecGen[ 3 ] = { "pt l+jets diff norm XSecgen", "eta l+jets diff norm XSecgen", "phi l+jets diff norm XSecgen" };
+  ljetsXSecGen_.insert( ljetsXSecGen_.begin(), ljetsXSecGen, ljetsXSecGen + 3 );
+  // a) clone plots from the (lumiscaled) ones
+  // loop kSig, kBkg. KW
+  for(unsigned int idx=kGenSig; idx<=kGenW; ++idx){
+    // loop jet multiplicities (no btag)
+    for(unsigned int mult=0; mult<4; ++mult){
+      // loop pt, eta, phi
+      for(unsigned int var=0; var<variables_.size(); ++var){
+	// a) clone plots from the (lumiscaled) ones
+	histo_[ljetsXSecGen_[var]][idx][Njets_[mult]] = (TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone();
+      }
+    }
+  }
+
+  // b) calculate contributions for diff.norm.XSec.
+  std::cout << "test diff norm XSec" << std::endl;
+  // loop kSig, kBkg. KW
+  for(unsigned int idx=kGenSig; idx<=kGenW; ++idx){
+    // loop jet multiplicities (no btag)
+    for(unsigned int mult=0; mult<4; ++mult){
+      // loop pt, eta, phi
+      for(unsigned int var=0; var<variables_.size(); ++var){
+	// i) get entries
+	double NttbarSig = histo_[variables_[var]][kGenSig][Njets_[mult]]->Integral(0, histo_[variables_[var]][kGenSig][Njets_[mult]]->GetNbinsX());
+	double NttbarBkg = histo_[variables_[var]][kGenBkg][Njets_[mult]]->Integral(0, histo_[variables_[var]][kGenBkg][Njets_[mult]]->GetNbinsX());
+	double NW        = histo_[variables_[var]][kGenW  ][Njets_[mult]]->Integral(0, histo_[variables_[var]][kGenW  ][Njets_[mult]]->GetNbinsX());
+	// ii) loop bins and calculate entries
+	int binMax=histo_[variables_[var]][idx][Njets_[mult]]->GetNbinsX();
+	int binMin=1;
+	if(variables_[var]=="pt" ) binMin=2;
+	if(variables_[var]=="phi") binMin=0;
+	if(variables_[var]!="eta") binMax+=1;
+	// loop bins
+	for(int bin =binMin; bin<=binMax; ++bin){
+	  // get entries in the bin
+	  double Ni      = histo_[ljetsXSecGen_[var]][idx][Njets_[mult]]->GetBinContent(bin);
+	  // get binwidth
+	  double binwidth=histo_[variables_[var]][idx][Njets_[mult]]->GetBinWidth(bin);
+	  // calculate dsigma_idx/(dx*sigma_tot) 
+	  double value = Ni / (binwidth*(NttbarSig+NttbarBkg+NW));
+	  histo_[ljetsXSecGen_[var]][idx][Njets_[mult]]->SetBinContent(bin, value);
+	  std::cout << "value ( sample:" << idx << ", " << variables_[var] << ", bin " << bin << "): " << value << std::endl;
+	}
+      }
+    }
+  }
+
 
   // k) create gen MC differential W and top XSec
   // create indicator
@@ -1187,11 +1240,29 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
 	    histogramStyle(*histo_[ljetsXSec_[var]][idx][Njets_[mult]], kData, false);
 	  }
 	  // draw histos
-	  if(idx==kLepJets) histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("HIST");
+	  if(idx==kLepJets) histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("AXIS");
 	  if(idx==kData   ){
 	    histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Draw("p X0 e1 same");
 	    if(finalPlots) systematicError("diffNormXSec"+variables_[var], mult, *histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var], up, down);
 	  }
+	}
+		// draw ttbar sig, bkg and W contribution as stack plot if no btag is applied
+	if(mult<4){
+	// a) create stack plots
+	histo_[ljetsXSecGen_[var]][kGenBkg][Njets_[mult]]->Add(histo_[ljetsXSecGen_[var]][kGenSig][Njets_[mult]]);
+	histo_[ljetsXSecGen_[var]][kGenW  ][Njets_[mult]]->Add(histo_[ljetsXSecGen_[var]][kGenBkg][Njets_[mult]]);	
+	// b) choose color style
+	histogramStyle(*histo_[ljetsXSecGen_[var]][kGenSig][Njets_[mult]], kSig);
+	histogramStyle(*histo_[ljetsXSecGen_[var]][kGenBkg][Njets_[mult]], kBkg);
+	histogramStyle(*histo_[ljetsXSecGen_[var]][kGenW  ][Njets_[mult]], kWjets);
+	// c) Draw
+	histo_[ljetsXSecGen_[var]][kGenW  ][Njets_[mult]]->Draw("same");
+	histo_[ljetsXSecGen_[var]][kGenBkg][Njets_[mult]]->Draw("same");
+	histo_[ljetsXSecGen_[var]][kGenSig][Njets_[mult]]->Draw("same");
+	// d) redraw data
+	//histo_[ljetsXSec_[var]][kLepJets][Njets_[mult]]->Draw("HIST");
+	histo_[ljetsXSec_[var]][kData][Njets_[mult]]->Draw("p X0 e1 same");
+	if(finalPlots) systematicError("diffNormXSec"+variables_[var], mult, *histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var]);
 	}
 	// draw jet multiplicity label
 	jetMultiplicity_[mult]->Draw("same");
