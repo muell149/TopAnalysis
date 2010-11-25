@@ -34,10 +34,10 @@ std::pair<double,double> getChargeAsymmetrieParameter(int njets, bool loadR);
 TString getTStringFromInt(int i);
 double sumUpEntries(TH1F& histo);
 template <class T>
-void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
-double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
+void writeToFile(T output, TString file="crossSectionCalculationPF.txt", bool append=1);
+double readLineFromFile(int line, TString file="crossSectionCalculationPF.txt");
 
-void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV50pb.root", TString jetType = "")
+void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool textoutput=true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", TString jetType = "PF")
 {
   // ---
   //    main function parameters
