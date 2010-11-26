@@ -268,10 +268,10 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     // a) get number
     //NQCD_ .push_back( getABCDNumbers(Njets_[mult], loadValues, file)*QCDVariation );
 
-    if(Njets_[mult]=="Njets1") NQCD_.push_back(QCDVariation*2.11*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets2") NQCD_.push_back(QCDVariation*2.77*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets3") NQCD_.push_back(QCDVariation*3.1* histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets4") NQCD_.push_back(QCDVariation*3.57*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets1") NQCD_.push_back(QCDVariation*2.1*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets2") NQCD_.push_back(QCDVariation*2.8*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets3") NQCD_.push_back(QCDVariation*3.4*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets4") NQCD_.push_back(QCDVariation*3.7*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
 
     // b) get shape from QCD MC
     // loop pt, eta and phi
@@ -1094,7 +1094,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     differentialTopLeg->SetFillStyle(0);
     differentialTopLeg->SetBorderSize(0);
     differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "Data ("+lum+" pb^{-1}), ", "PL");
-    differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , " #geq 1 b-tag"                       , ""  );
+    differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "with b tagging"                       , ""  );
     differentialTopLeg->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} signal"      , "F" );
     differentialTopLeg->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} other (#tau#rightarrow#mu)"              , "F" );
     // (2) method using W-estimation
@@ -1102,7 +1102,7 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     differentialTopLeg2->SetFillStyle(0);
     differentialTopLeg2->SetBorderSize(0);
     differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "Data ("+lum+" pb^{-1}), ", "PL");
-    differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , " W-estimation"                       , ""  );
+    differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "without b tagging"                       , ""  );
     differentialTopLeg2->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} signal"      , "F" );
     differentialTopLeg2->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} other (#tau#rightarrow#mu)"              , "F" );
     // i)  create legends for inclusive TOP cross section extrapolated to whole phase space
@@ -1472,8 +1472,8 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"     , 0.06, 0.73, 0.99, 0.93);
     DrawLabel("N(jets, p_{t}>30 GeV, |#eta|<2.4)#geq 4", 0.06, 0.66, 0.99, 0.86);
 
-    DrawLabel("W-estimation", 0.06, 0.27, 0.5, 0.47);
-    DrawLabel("b-tagging", 0.06, 0.16, 0.5, 0.36);
+    DrawLabel("pre-tagged", 0.06, 0.27, 0.5, 0.47);
+    DrawLabel("tagged", 0.06, 0.16, 0.5, 0.36);
     //DrawLabel("| #eta |<2.4"                   , 0.57, 0.14, 0.92, 0.32);
     sigmaTopInclusiveMCReco    ->Draw("AXIS same");
     ++canvasNumber;
@@ -1508,8 +1508,8 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
     sigmaTopExtrapolatedDataGraph.Draw("p e same");
     inclusiveCrossSectionTopLeg2->Draw("same");
 
-    DrawLabel("W-estimation", 0.06, 0.27, 0.5, 0.47);
-    DrawLabel("b-tagging", 0.06, 0.16, 0.5, 0.36);
+    DrawLabel("pre-tagged", 0.06, 0.27, 0.5, 0.47);
+    DrawLabel("tagged", 0.06, 0.16, 0.5, 0.36);
     sigmaTopExtrapolatedTheory  ->Draw("AXIS same");
     ++canvasNumber;
 
@@ -1651,7 +1651,7 @@ void canvasStyle(TCanvas& canv){
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, float yMax, float yTitleSize, float yTitleOffset, float xLabelSize){
   hist.SetTitle("");
   hist.GetXaxis()->SetTitle(titleX);
-  hist.GetXaxis()->CenterTitle();
+  //hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.05);
   hist.GetXaxis()->SetTitleColor (    1);
   hist.GetXaxis()->SetTitleOffset(  1.1);
@@ -1666,7 +1666,7 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin, fl
   hist.GetYaxis()->SetTitleFont  (   62);
   hist.GetYaxis()->SetLabelSize  ( 0.05);
   hist.GetYaxis()->SetLabelFont  (   62);
-  hist.GetYaxis()->CenterTitle   ( true);
+  //hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
 }
