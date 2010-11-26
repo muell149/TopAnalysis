@@ -2,16 +2,20 @@ import FWCore.ParameterSet.Config as cms
 
 analyzeMETKinematics = cms.EDAnalyzer("METAnalyzer",
     ## input collection                        
+<<<<<<< METKinematics_cfi.py
+    srcA= cms.InputTag("patMETsPF")
+=======
     srcA= cms.InputTag("patMETs"),
     analyze   = cms.PSet(
         ## choose TTree for output instead of histograms, if applicable
         useTree  = cms.bool(False)
     )
+>>>>>>> 1.4
 )
 
 analyzeMETCorrelations = cms.EDAnalyzer("METAnalyzer",
     ## input collections                        
-    srcA= cms.InputTag("patMETs"),
+    srcA= cms.InputTag("patMETsPF"),
     srcB= cms.InputTag("selectedPatMuons"),
     analyze   = cms.PSet(
         ## choose TTree for output instead of histograms, if applicable

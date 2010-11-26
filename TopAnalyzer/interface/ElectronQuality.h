@@ -1,6 +1,12 @@
 #ifndef ElectronQuality_h
 #define ElectronQuality_h
 
+#include <string>
+#include <vector>
+
+#include "TH1.h"
+#include "TH2.h"
+
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "TopAnalysis/TopAnalyzer/interface/SingleObject.h"
 

@@ -19,15 +19,15 @@ MuonKinematics::book()
       Kinematic Variables
   **/
   // muon multiplicty
-  hists_["n"  ] = new TH1F( "n"   , "n"   ,  10 ,  -0.5  ,   9.5 );
+  hists_["n"  ] = new TH1F( "n"   , "n"   ,  10 ,  -0.5  , 9.5  );
   // energy of the muon
-  hists_["en" ] = new TH1F( "en"  , "en"  ,  60 ,     0. , 300.  );
+  hists_["en" ] = new TH1F( "en"  , "en"  , 100 ,     0. , 500. );
   // transverse momentum of the muon
-  hists_["pt" ] = new TH1F( "pt"  , "pt"  ,  30 ,     0. , 150.  );
+  hists_["pt" ] = new TH1F( "pt"  , "pt"  , 100 ,     0. , 200. );
   // pseudorapidity eta of the muon
-  hists_["eta"] = new TH1F( "eta" , "eta" ,  70 ,  -3.5  ,   3.5 );
+  hists_["eta"] = new TH1F( "eta" , "eta" ,  50 ,    -5. ,   5. );
   // azimuthal angle phi of the muon
-  hists_["phi"] = new TH1F( "phi" , "phi" ,  70 ,  -3.14 ,   3.14);
+  hists_["phi"] = new TH1F( "phi" , "phi" ,  40 ,    -4. ,   4. );
 }
 
 /// histogramm booking for full fw
@@ -40,13 +40,13 @@ MuonKinematics::book(edm::Service<TFileService>& fs)
   // muon multiplicty
   hists_["n"  ] = fs->make<TH1F>( "n"   , "n"   ,  10 ,  -0.5  ,   9.5  );
   // energy of the muon
-  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  ,  60 ,     0. ,   300. );
+  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  , 100 ,     0. ,   500. );
   // transverse momentum of the muon
-  hists_["pt" ] = fs->make<TH1F>( "pt"  , "pt"  ,  30 ,     0. ,   150. );
+  hists_["pt" ] = fs->make<TH1F>( "pt"  , "pt"  , 100 ,     0. ,   200. );
   // pseudorapidity eta of the muon
-  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
+  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  50 ,    -5. ,     5. );
   // azimuthal angle phi of the muon
-  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  70 ,  -3.14 ,   3.14 );
+  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  40 ,    -4. ,     4. );
 }
 
 /// histogram filling for fwlite and for full fw

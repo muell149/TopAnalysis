@@ -1,5 +1,7 @@
 #include "TopAnalysis/TopAnalyzer/interface/ElectronQuality.h"
 
+using namespace std;
+
 /// default constructor for fw lite
 ElectronQuality::ElectronQuality(const int index) : norm_(0.), index_(index)
 { 
@@ -22,8 +24,8 @@ ElectronQuality::book()
   hists_["nHit"            ] = new TH1F( "nHit"             ,  "nHit"             ,   35,  -0.5,  34.5 );
   // normalized chi2 of global electron track fit
   hists_["chi2"            ] = new TH1F( "chi2"             ,  "chi2"             ,   30,   0. ,  15.  );
-  // d0 significance of track (still to nominal IP)
-  hists_["d0"              ] = new TH1F( "d0"               ,  "d0"               ,   90,   0. ,  0.3  );
+  // dB significance of track (dB gives the impact parameter wrt the beamline)
+  hists_["dB"              ] = new TH1F( "dB"               ,  "dB"               ,   90,   0. ,  0.3  );
   // energy in ecal corrected on SC level
   hists_["ecalEn"          ] = new TH1F( "ecalEn"           ,  "ecalEn"           ,   40,   0. ,  10.  );
   // energy from super cluster attached to the candidate trajectory
@@ -33,11 +35,15 @@ ElectronQuality::book()
   // relative isolation (tracker and calo combined)
   hists_["relIso"          ] = new TH1F( "relIso"           ,  "relIso"           ,   50,   0. ,  1.0  );
   // the supercluster eta - track eta position at calo extrapolated from innermost track state
-  hists_["deltaEtaIn"      ] = new TH1F( "deltaEtaIn"       ,  "deltaEtaIn"       ,   100,  0.,   0.1  );
+  hists_["deltaEtaIn"      ] = new TH1F( "deltaEtaIn"       ,  "deltaEtaIn"       ,   100,  0. ,  0.1  );
   // the seed cluster phi - track phi position at calo extrapolated from the innermost track state
-  hists_["deltaPhiIn"      ] = new TH1F( "deltaPhiIn"       ,  "deltaPhiIn"       ,   100,  0.,   0.3  );
+  hists_["deltaPhiIn"      ] = new TH1F( "deltaPhiIn"       ,  "deltaPhiIn"       ,   100,  0. ,  0.3  );
   // weighted cluster rms along eta and inside 5x5
-  hists_["sigmaIetaIeta"   ] = new TH1F( "sigmaIetaIeta"    ,  "sigmaIetaIeta"    ,   100,  0.,  0.3  );
+  hists_["sigmaIetaIeta"   ] = new TH1F( "sigmaIetaIeta"    ,  "sigmaIetaIeta"    ,   100,  0. ,  0.3  );
+  // electron Id
+  hists_["elecId"          ] = new TH1F( "elecId"           ,  "elecId"           ,   10, -0.5,   9.5  );
+  // electron Id
+  hists2D_["electronId"    ] = new TH2F( "electronId"       ,  "electronId"       ,   10, -0.5, 9.5 , 20, 0., 20 );
 
 }
 
@@ -53,8 +59,8 @@ ElectronQuality::book(edm::Service<TFileService>& fs)
   hists_["nHit"     ]        = fs->make<TH1F>( "nHit"              ,  "nHit"               ,   35,  -0.5, 34.5 );
   // normalized chi2 of global electron track fit
   hists_["chi2"     ]        = fs->make<TH1F>( "chi2"              ,  "chi2"               ,   30,   0.,  15.  );
-  // d0 significance of track (still to nominal IP)
-  hists_["d0"       ]        = fs->make<TH1F>( "d0"                ,  "d0"                 ,   90,   0.,  0.3  );
+  // dB significance of track (dB gives the impact parameter wrt the beamline)
+  hists_["dB"       ]        = fs->make<TH1F>( "dB"                ,  "dB"                 ,   90,   0.,  0.3  );
   // energy in ecal corrected on SC level
   hists_["ecalEn"   ]        = fs->make<TH1F>( "ecalEn"            ,  "ecalEn"             ,   40,   0.,  10.  );
   // energy from super cluster attached to the candidate trajectory
@@ -69,11 +75,11 @@ ElectronQuality::book(edm::Service<TFileService>& fs)
   hists_["deltaPhiIn"]       = fs->make<TH1F>( "deltaPhiIn"        ,  "deltaPhiIn"         ,   100,  0.,  0.3  );
   // weighted cluster rms along eta and inside 5x5
   hists_["sigmaIetaIeta"]    = fs->make<TH1F>( "sigmaIetaIeta"     ,  "sigmaIetaIeta"      ,   100,  0.,  0.3  );
-  // test
-  //  hists_["test"]             = fs->make<TH1F>( "test"              ,  "EnergySuperCluster-EnergyfromPat without correction" ,   50,  -0.5,  0.5  );
+  // electron Id
+  hists_["elecId"       ]    = fs->make<TH1F>( "elecId"            ,  "elecId"             ,   10, -0.5,  9.5  );
+  // electron Id
+  hists2D_["electronId" ]    = fs->make<TH2F>( "electronId"        ,  "electronId"         ,   10, -0.5, 9.5 , 20, 0., 20 );
 
-  // conserve the normalization information (for the use with hadd)
-  //  hists_["norm_"   ] = fs->make<TH1F>( "norm_"    ,  "norm_"    ,    1,   0.,   1. );
 }
 
 
@@ -82,6 +88,29 @@ ElectronQuality::book(edm::Service<TFileService>& fs)
 void
 ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& weight)
 {
+
+  vector<string> elecIds;
+
+  elecIds.push_back("eidLoose");
+  elecIds.push_back("eidRobustHighEnergy");
+  elecIds.push_back("eidRobustLoose");
+  elecIds.push_back("eidRobustTight");
+  elecIds.push_back("eidTight");
+
+//   elecIds.push_back("simpleEleId60cIso");
+//   elecIds.push_back("simpleEleId60relIso");
+//   elecIds.push_back("simpleEleId70cIso");
+//   elecIds.push_back("simpleEleId70relIso");
+//   elecIds.push_back("simpleEleId80cIso");
+//   elecIds.push_back("simpleEleId80relIso");
+//   elecIds.push_back("simpleEleId85cIso");
+//   elecIds.push_back("simpleEleId85relIso");
+//   elecIds.push_back("simpleEleId90cIso");
+//   elecIds.push_back("simpleEleId90relIso");
+//   elecIds.push_back("simpleEleId95cIso");
+
+  const int N_elecIds = elecIds.size();
+
   int index=0;
   for(edm::View<pat::Electron>::const_iterator electron=electrons.begin(); electron!=electrons.end(); ++electron, ++index){
       if( (index_<0 || index_==index) ){
@@ -92,8 +121,8 @@ ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& w
       hists_.find("nHit")            ->second->Fill( electron->gsfTrack()->numberOfValidHits(), weight ); 
       // normalized chi2 of global electron track fit
       hists_.find("chi2")            ->second->Fill( electron->gsfTrack()->normalizedChi2(), weight ); 
-      // d0 significance of track (still to nominal IP)
-      hists_.find("d0"  )            ->second->Fill( electron->gsfTrack()->d0(), weight );
+      // dB significance of track (dB gives the impact parameter wrt the beamline)
+      hists_.find("dB"  )            ->second->Fill( electron->dB(), weight );
       // relative isolation (tracker and calo combined)
       hists_.find("relIso")          ->second->Fill( (electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/electron->et(), weight );    
       // energy in ecal corrected on SC level
@@ -113,7 +142,23 @@ ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& w
       // the seed cluster phi - track phi position at calo extrapolated from the innermost track state
       hists_.find("deltaPhiIn")      ->second->Fill(  electron->deltaPhiSuperClusterTrackAtVtx(), weight );    
       // weighted cluster rms along eta and inside 5x5
-      hists_.find("sigmaIetaIeta") ->second->Fill(  electron->sigmaIetaIeta() , weight );   
+      hists_.find("sigmaIetaIeta") ->second->Fill(  electron->sigmaIetaIeta() , weight );
+
+      // electron Ids
+
+      hists_.find("elecId")->second->Fill(  electron->electronID( "eidRobustTight" ), weight );
+      //      hists_.find("elecId")->second->Fill(  electron->electronID( "simpleEleId90relIso" ), weight );
+
+      for( int i = 0; i < N_elecIds; i++ ) {
+
+	const string &label = elecIds[i];
+
+	hists2D_.find("electronId")->second->GetYaxis()->SetBinLabel( i+1, label.c_str() );
+	hists2D_.find("electronId")->second->Fill(  electron->electronID(  label.c_str() ), i, weight );
+
+	//	cout << "Electron ID (" << label.c_str() << ") : " << electron->electronID( label.c_str() ) << endl;
+
+      }
 
     }
   }
