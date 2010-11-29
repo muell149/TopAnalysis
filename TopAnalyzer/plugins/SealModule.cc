@@ -114,6 +114,11 @@ DEFINE_FWK_MODULE(KinFitQualityAnalyzer);
 typedef DoubleObjectAnalyzer<TtFullHadronicEvent, edm::View<pat::Jet>, KinFitImprover> KinFitImproveAnalyzer;
 DEFINE_FWK_MODULE(KinFitImproveAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/FullHadQCDEstimation.h"
+typedef SingleObjectAnalyzer<edm::View<pat::Jet>, FullHadQCDEstimation> FullHadQCDEstimationAnalyzer;
+DEFINE_FWK_MODULE(FullHadQCDEstimationAnalyzer);
+
+
 /**
     Define modules needed for the analysis of the top quarks
 **/
