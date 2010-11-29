@@ -1,6 +1,6 @@
 ####################################################################################################################################
 #  
-#          dataset name: /WWTo2L2Nu_TuneZ2_7TeV-pythia6/dammann-Fall10-PAT-v2-43e23e1dee19d970b0c8344e9053309f/USER
+#          dataset name: /WWTo2L2Nu_TuneZ2_7TeV-pythia6/dammann-Fall10-PAT-adc6a4a08f017ca447d42e2ca3c502e8/USER
 #               DBS URL: https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 #            global tag: START38_V13::All
 #         mother sample: /WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM
@@ -17,18 +17,21 @@ readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring() 
 source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
 readFiles.extend( [
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_9_1_iR7.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_8_1_Wh2.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_7_2_f2G.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_6_2_TgR.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_5_2_W1s.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_4_1_GvA.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_3_1_tRA.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_2_2_D0O.root',
-       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_1_1_3Rk.root' ] );
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_9_2_x5Z.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_8_1_HRh.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_7_1_PBt.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_6_2_mSq.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_5_1_QrH.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_4_1_POY.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_3_1_XXv.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_2_3_Nj9.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_1_1_Ym6.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_14_1_Qu8.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_13_2_0GF.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_12_2_I0w.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_11_2_ocj.root',
+       '/store/user/dammann/WWTo2L2Nu_TuneZ2_7TeV-pythia6/Fall10-PAT/adc6a4a08f017ca447d42e2ca3c502e8/mcpat_10_2_dsH.root' ] );
 
 
 secFiles.extend( [
                ] )
-
-

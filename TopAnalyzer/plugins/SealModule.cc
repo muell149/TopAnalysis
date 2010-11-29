@@ -177,9 +177,3 @@ DEFINE_FWK_MODULE(HTlepAnalyzer);
 #include "TopAnalysis/TopAnalyzer/interface/JetTrigger.h"
 DEFINE_FWK_MODULE(JetTriggerAnalyzer);
 **/
-
-#include "TopAnalysis/TopAnalyzer/interface/TopHLTDiMuon.h"
-DEFINE_FWK_MODULE(TopHLTDiMuon);
-
-#include "TopAnalysis/TopAnalyzer/interface/TopDiLepton.h"
-DEFINE_FWK_MODULE(TopDiLepton);

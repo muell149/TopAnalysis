@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 analyzeJetKinematics = cms.EDAnalyzer("JetKinematicsAnalyzer",
     ## input collection                             
-    src = cms.InputTag("goodJets"),
+    src = cms.InputTag("selectedPatJets"),
     ## special parameters for muon quality analysis
     analyze   = cms.PSet(
       ## choose TTree for output instead of histograms, if applicable

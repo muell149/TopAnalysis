@@ -46,20 +46,6 @@ goodD0Muons = selectedPatMuons.clone(src = 'muHitMuons',
 ## global fit
 goodMuons = selectedPatMuons.clone(src = 'goodD0Muons',
                                    cut = 'combinedMuon.normalizedChi2 < 10.0'
-<<<<<<< fullLeptonicMuonMuonSelection_cff.py
-				  )
-
-## isolation cut				      				      
-isolatedMuons = selectedPatMuons.clone(src = 'goodMuons', 
-                                       cut = '(trackIso+caloIso)/pt < 0.15' 
-				      )
-
-## this collection is needed to make sure that one muon is in trigger range
-isolatedTightMuons = selectedPatMuons.clone(src = 'isolatedMuons', 
-                                            cut = 'abs(eta) < 2.1' 
-				           )					      
-				      			      
-=======
 				  )
 ## isolation cut
 isolatedMuons = selectedPatMuons.clone(src = 'goodMuons',
@@ -70,7 +56,6 @@ isolatedTightMuons = selectedPatMuons.clone(src = 'isolatedMuons',
                                             cut = 'abs(eta) < 2.1'
 				           )
 
->>>>>>> 1.27
 
 ## Count Filters with n >= 1 requirement for control plots
 oneTightMuonSelection      = countPatMuons.clone(src = 'tightMuons',     minNumber = 1)

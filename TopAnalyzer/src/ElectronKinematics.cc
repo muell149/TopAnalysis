@@ -19,15 +19,15 @@ ElectronKinematics::book()
       Kinematic Variables
   **/
   // electron multiplicty
-  hists_["n"  ] = new TH1F( "n"   , "n"   ,  10 ,  -0.5 , 9.5  );
+  hists_["n"  ] = new TH1F( "n"   , "n"   ,  10 ,  -0.5  ,   9.5 );
   // energy of the electron
-  hists_["en" ] = new TH1F( "en"  , "en"  ,  100 ,  0.  , 500. );
+  hists_["en" ] = new TH1F( "en"  , "en"  ,  60 ,     0. , 300.  );
   // transverse momentum of the electron
-  hists_["et" ] = new TH1F( "et"  , "et"  ,  100 ,  0.  , 200. );
+  hists_["et" ] = new TH1F( "et"  , "et"  ,  30 ,     0. , 150.  );
   // pseudorapidity eta of the electron
-  hists_["eta"] = new TH1F( "eta" , "eta" ,  50 ,  -5.  ,   5. );
+  hists_["eta"] = new TH1F( "eta" , "eta" ,  35 ,  -3.5  ,   3.5 );
   // azimuthal angle phi of the electron
-  hists_["phi"] = new TH1F( "phi" , "phi" ,  40 ,  -4.  ,   4. );
+  hists_["phi"] = new TH1F( "phi" , "phi" ,  30 ,  -3.14 ,   3.14);
 }
 
 /// histogramm booking for full fw
@@ -38,15 +38,15 @@ ElectronKinematics::book(edm::Service<TFileService>& fs)
       Kinematic Variables
   **/
   // electron multiplicty
-  hists_["n"  ] = fs->make<TH1F>( "n"   , "n"   ,  10 ,  -0.5 , 9.5  );
+  hists_["n"  ] = fs->make<TH1F>( "n"   , "n"   ,  10 ,  -0.5  ,   9.5  );
   // energy of the electron
-  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  ,  100 ,  0.  , 500. );
+  hists_["en" ] = fs->make<TH1F>( "en"  , "en"  ,  60 ,     0. ,   300. );
   // transverse momentum of the electron
-  hists_["et" ] = fs->make<TH1F>( "et"  , "et"  ,  100 ,  0.  , 200. );
+  hists_["et" ] = fs->make<TH1F>( "et"  , "et"  ,  30 ,     0. ,   150. );
   // pseudorapidity eta of the electron
-  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  50 ,  -5.  ,   5. );
+  hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  35 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the electron
-  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  40 ,  -4.  ,   4. );
+  hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  30 ,  -3.14 ,   3.14 );
 }
 
 /// histogram filling for fwlite and for full fw

@@ -6,139 +6,60 @@
 
 #include "TH1.h"
 #include "TH2.h"
-#include "TH3.h"
 
-#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/Utilities/interface/EDMException.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/Math/interface/deltaPhi.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/Common/interface/Ref.h"
-#include "DataFormats/HLTReco/interface/TriggerObject.h"
-#include "DataFormats/HLTReco/interface/TriggerEvent.h"
-#include "DataFormats/HLTReco/interface/TriggerEventWithRefs.h"
-#include "DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h"
-#include "DataFormats/Candidate/interface/Particle.h"
-#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
-#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
-#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
-#include "DataFormats/RecoCandidate/interface/IsoDeposit.h"
-#include "DataFormats/RecoCandidate/interface/IsoDepositFwd.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/MuonReco/interface/MuonFwd.h" 
-#include "DataFormats/MuonReco/interface/MuonEnergy.h"
-#include "DataFormats/MuonReco/interface/MuonIsolation.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
+/**
+   \class   TriggerAnalyzer TriggerAnalyzer.h "TopAnalysis/TopAnalyzer/plugins/TriggerAnalyzer.h"
 
-#include "HLTrigger/HLTfilters/interface/HLTHighLevel.h"
+   \brief   EDAnalyzer for trigger rates
+
+   This analyzer takes a set of HLT triggers as input from the config file. For these triggers the 
+   trigger rate is filled into a histogram. An other hisogram shows the number of all events that 
+   have passed any trigger vs. the number of rejected events. 
+*/
 
 class TriggerAnalyzer : public edm::EDAnalyzer {
 
   public:
+    /// default constructor
     explicit TriggerAnalyzer(const edm::ParameterSet&);
+    /// default destructor
     ~TriggerAnalyzer();
-
+    
   private:
+    /// initiate histograms
     virtual void beginJob();
+    /// analyze triggers and fill histograms
     virtual void analyze(const edm::Event&, const edm::EventSetup&);
+    /// empty
     virtual void endJob();
-
-    edm::InputTag triggerResults_;
-    edm::InputTag triggerEvent_;
-    edm::InputTag triggerFilter_;
-    edm::InputTag vertex_;
-    edm::InputTag muons_;
-
+    /// function to calculate binomial statistics error (needed for trigger efficiency hist)
+    double binomialError(double, double);
+        
+    /// triger result input collection	
+    edm::InputTag trigResults_;
+    /// muon input collection
+    edm::InputTag muons_;    
+    /// triggers to be studied given in config
     std::vector<std::string> hltPaths_;
-    std::vector<std::string> hltPaths_sig_;
-    std::vector<std::string> hltPaths_trig_;
-
-    double vertex_X_cut_;
-    double vertex_Y_cut_;
-    double vertex_Z_cut_;
-
-    double muon_pT_cut_;
-    double muon_eta_cut_;
-    double muon_iso_cut_;
-
-    double MassWindow_up_;
-    double MassWindow_down_;
-
-    TH1F * NTracks;
-    TH1F * NMuons;
-    TH1F * NMuons_charge;
-    TH1F * NMuons_iso;
-    TH1F * PtMuons;
-    TH1F * PtMuons_LOGX;
-    TH1F * EtaMuons;
-    TH1F * PhiMuons;
-    TH1F * CombRelIso03;
-    TH2F * VxVy_muons;
-    TH1F * Vz_muons;
-    TH1F * PixelHits_muons;
-    TH1F * TrackerHits_muons;
-    TH3F * VxVyVz_PV;
-
-    TH1F * Trigs;
-    TH1F * TriggerEfficiencies;
-    TH1F * TriggerEfficiencies_sig;
-    TH1F * TriggerEfficiencies_trig;
-    TH2D * Correlations;
-
-    TH1F * MuonEfficiency_pT;
-    TH1F * MuonEfficiency_pT_sig;
-    TH1F * MuonEfficiency_pT_trig;
-
-    TH1F * MuonEfficiency_pT_LOGX;
-    TH1F * MuonEfficiency_pT_LOGX_sig;
-    TH1F * MuonEfficiency_pT_LOGX_trig;
-
-    TH1F * MuonEfficiency_eta;
-    TH1F * MuonEfficiency_eta_sig;
-    TH1F * MuonEfficiency_eta_trig;
-
-    TH1F * MuonEfficiency_phi;
-    TH1F * MuonEfficiency_phi_sig;
-    TH1F * MuonEfficiency_phi_trig;
-
-    TH2F * MuonEfficiency_eta_phi;
-    TH2F * MuonEfficiency_eta_phi_sig;
-    TH2F * MuonEfficiency_eta_phi_trig;
-
-    TH2F * MuonEfficiency_pT_eta;
-    TH2F * MuonEfficiency_pT_eta_sig;
-    TH2F * MuonEfficiency_pT_eta_trig;
-
-    TH1F * DiMuonMassRC;
-    TH1F * DiMuonMassWC;
-    TH1F * DiMuonMassRC_LOGX;
-    TH1F * DiMuonMassWC_LOGX;
-
-    TH1F * DeltaEtaMuonsRC;
-    TH1F * DeltaPhiMuonsRC;
-    TH1F * DeltaEtaMuonsWC;
-    TH1F * DeltaPhiMuonsWC;
-
-    TH1F * DeltaR_Trig;
-    TH1F * DeltaR_Reco;
-    TH1F * DeltaR_Match;
-    TH1F * Trigger_Match;
-
+    /// for this trigger extra histos are plotted (pt and eta)
+    std::string mainTrigger_;
+    
+    /// number of trigger paths given in config
+    int n_TrigPaths;
+    /// number of processed evts
+    double n_evts;
+    /// shows for each trigger fraction of evts that have fired that trigger
+    TH1D* FiredTrigs_; 
+    /// shows fraction evts that have passed one of the triggers
+    TH1D* Passed_; 
+    /// shows how many evts have fired two triggers
+    TH2D* Correlations_;                   
 };
 
 #endif
