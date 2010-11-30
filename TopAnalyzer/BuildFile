@@ -16,6 +16,7 @@
 <use name=DataFormats/Math>
 <use name=TopAnalysis/TopUtils>
 <use name=AnalysisDataFormats/TopObjects>
+<use name=TopQuarkAnalysis/TopKinFitter>
 
 <export>
   <use name=FWCore/Utilities>
