@@ -48,7 +48,7 @@ class FullHadQCDEstimation : public SingleObject<const edm::View<pat::Jet> > {
   std::vector<edm::ParameterSet> bResolutions_;
 
   /// kinematic fit interface
-  TtFullHadKinFitter::KinFit* kinFitter;
+  //TtFullHadKinFitter::KinFit* kinFitter;
 };
 
 #endif

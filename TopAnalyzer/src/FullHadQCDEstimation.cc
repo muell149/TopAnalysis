@@ -10,6 +10,7 @@ FullHadQCDEstimation::FullHadQCDEstimation()
 FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
   useTree_ ( cfg.getParameter<bool>( "useTree" ) )
 {
+  /*
   if(cfg.exists("udscResolutions") && cfg.exists("bResolutions")){
     udscResolutions_ = cfg.getParameter <std::vector<edm::ParameterSet> >("udscResolutions");
     bResolutions_    = cfg.getParameter <std::vector<edm::ParameterSet> >("bResolutions");
@@ -27,7 +28,7 @@ FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
 					     udscResolutions_, bResolutions_,
 					     "L3Absolute", -1, -1,
 					     500, 5e-5, 0.0001, 1, constraints_, 80.4, 173.);
-
+  */
   tree = 0;
 }
 
@@ -51,6 +52,13 @@ FullHadQCDEstimation::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "topQuarkMassHypoAll" ,  1000,  0. , 1000. , useTree_ );
 }
 
+double
+bTagWeight(const pat::Particle& bQuark, const pat::Particle& bBarQuark, TString algoWP)
+{
+  if(algoWP = "TCHEM") return (bQuark.pt()*2.444940e-04 + 2.849767e-02)*(bBarQuark.pt()*2.444940e-04 + 2.849767e-02);
+  return 0;
+}
+
 /// histogram filling for fwlite and for full fw
 void
 FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight)
@@ -58,7 +66,7 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
   /** 
       Fill Kinematic Variables
   **/
-
+  /*
   if(jets.size() >= 6){
 
     std::vector<pat::Jet> theJets;
@@ -76,14 +84,14 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
 	  myJets.push_back(*newJet);
 	}
 	std::list<TtFullHadKinFitter::KinFitResult> result = kinFitter->fit(myJets);
-	double bTagWeight = 0.233 * 0.233;
 	if(result.size() > 0) {
 	  //std::cout << result.size() << std::endl;
 	  for(std::list<TtFullHadKinFitter::KinFitResult>::const_iterator res = result.begin(); res != result.end(); ++res){
 	    if(res->Status == 0 ) {
+	      double b_Tag_Weight = bTagWeight(res->B, res->BBar, "TCHEM");
 	      //std::cout << "Fit successful! Tagged Jets: " << jet1-theJets.begin()+1 << ", " << jet2-theJets.begin()+1 << std::endl;
-	      fillValue( "topQuarkMassHypoAll" , (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()).mass() , bTagWeight * weight );
-	      if(res->Prob > 0.01) fillValue( "topQuarkMassHypo" , (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()).mass() , bTagWeight * weight );
+	      fillValue( "topQuarkMassHypoAll" , (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()).mass() , b_Tag_Weight * weight );
+	      if(res->Prob > 0.01) fillValue( "topQuarkMassHypo" , (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()).mass() , b_Tag_Weight * weight );
 	      break;
 	    }
 	  }
@@ -92,7 +100,7 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
       }
     }
   }
-
+  */
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
 }
