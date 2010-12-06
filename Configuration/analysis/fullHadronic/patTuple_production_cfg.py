@@ -3,7 +3,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
-## decide whether to run on:  * GR10_P_V11 *, * GR_R_38X_V13A *, * GR_R_38X_V14 *, * START38_V12 *
+## decide whether to run on:  * GR10_P_V11 *, * GR_R_38X_V13A *, * GR_R_38X_V15 *, * START38_V14 *
 options.register('globalTag', 'GR10_P_V11', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 
 # get and parse the command line arguments
@@ -13,7 +13,7 @@ options.parseArguments()
 # test cfg file for the selection of
 # fully hadronic ttbar events 
 #-------------------------------------------------
-process = cms.Process("PreSelection")
+process = cms.Process("PAT")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -26,8 +26,12 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define input
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(#'/store/data/Run2010B/Jet/RECO/PromptReco-v2/000/146/436/0263EEFC-DEC6-DF11-8CB1-003048F118C6.root'
-                                      '/store/data/Run2010B/MultiJet/AOD/PromptReco-v2/000/148/058/207C5CA4-82DB-DF11-8A85-0030487CD716.root'
+     fileNames = cms.untracked.vstring(#'/store/data/Run2010B/Jet/RECO/PromptReco-v2/000/146/436/0263EEFC-DEC6-DF11-8CB1-003048F118C6.root'
+    #'/store/data/Run2010B/MultiJet/AOD/PromptReco-v2/000/148/058/207C5CA4-82DB-DF11-8A85-0030487CD716.root'
+    #'/store/data/Run2010B/MultiJet/AOD/Nov4ReReco_v1/0111/0CE1C38F-C7ED-DF11-9A52-003048679076.root'
+    #'/store/mc/Fall10/QCD_TuneD6T_HT-500To1000_7TeV-madgraph/AODSIM/START38_V12-v1/0017/4A5B3187-DFDB-DF11-9F3E-00238BBD7590.root'
+    #'/store/mc/Fall10/QCD2Jets_Pt-120to280_TuneZ2_7TeV-alpgen/AODSIM/START38_V12-v1/0007/E48CD66B-15DD-DF11-BA58-00163E090301.root'
+    #'/store/mc/Fall10/QCD_Pt_800to1000_TuneZ2_7TeV_pythia6/GEN-SIM-RECO/START38_V12-v1/0002/F8455FD4-63D0-DF11-A481-00A0D1EE8E00.root'
     )
 )
 
@@ -50,10 +54,10 @@ if(options.globalTag=='GR10_P_V11'):
     process.GlobalTag.globaltag = cms.string('GR10_P_V11::All')
 elif(options.globalTag=='GR_R_38X_V13A'):
     process.GlobalTag.globaltag = cms.string('GR_R_38X_V13A::All')
-elif(options.globalTag=='GR_R_38X_V14'):
-    process.GlobalTag.globaltag = cms.string('GR_R_38X_V14::All')
-elif(options.globalTag=='START38_V12'):
-    process.GlobalTag.globaltag = cms.string('START38_V12::All')
+elif(options.globalTag=='GR_R_38X_V15'):
+    process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
+elif(options.globalTag=='START38_V14'):
+    process.GlobalTag.globaltag = cms.string('START38_V14::All')
 else:
     print "Error occured, GlobalTag not definded properly, stopping program execution"
     sys.exit(0)
@@ -70,7 +74,7 @@ process.vertex = cms.EDFilter("VertexSelector",
                               filter = cms.bool(True),
                               )
 
-if(options.globalTag=='START38_V12'):
+if(options.globalTag=='START38_V14'):
     process.vertex.cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2")
 
 #-------------------------------------------------
@@ -96,6 +100,10 @@ process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"   ,"HLT_QuadJe
                                                  "HLT_QuadJet15U_v3","HLT_QuadJet20U_v3","HLT_QuadJet25U_v3"],
                                      throw = False)
 
+## ATTENTION: some Fall10 samples are REDIGI and some are NOT
+if(options.globalTag=='START38_V14'):
+    process.trigger.TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI38X")
+
 #-------------------------------------------------
 # pat configuration
 #-------------------------------------------------
@@ -103,20 +111,27 @@ process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"   ,"HLT_QuadJe
 ## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+## configure output module
+process.out = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring('drop *'),
+    dropMetaData = cms.untracked.string('DROPPED'),
+    fileName = cms.untracked.string('patTuple_6jets.root')
+)
+
 ## remove MC matching, photons, taus and cleaning from PAT default sequence
 from PhysicsTools.PatAlgos.tools.coreTools import *
-if(not options.globalTag=='START38_V12'):
+if(not options.globalTag=='START38_V14'):
     removeMCMatching(process, ['All'])
 ## restrict needed input to AOD event content
 restrictInputToAOD(process)
 
 ## Add particle flow jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
-if(options.globalTag=='START38_V12'):
+if(options.globalTag=='START38_V14'):
     addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                      doJTA        = True,
                      doBTagging   = True,
-                     jetCorrLabel = ('AK5', 'PF'),
+                     jetCorrLabel = ('AK5PF', ['L2Relative', 'L3Absolute']),
                      doType1MET   = False,
                      doL1Cleaning = False,
                      doL1Counters = False,
@@ -127,7 +142,7 @@ else:
     addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                      doJTA        = True,
                      doBTagging   = True,
-                     jetCorrLabel = ('AK5', 'PF'),
+                     jetCorrLabel = ('AK5PF', ['L2Relative', 'L3Absolute']),
                      doType1MET   = False,
                      doL1Cleaning = False,
                      doL1Counters = False,
@@ -169,10 +184,8 @@ process.patMETsPF.addResolutions = True
 process.patMETsPF.resolutions = cms.PSet( default = cms.string("metResolutionPF") )
 
 ## use the correct jet energy corrections
-process.patJetCorrFactors.corrSample = "Spring10"
-process.patJetCorrFactors.sampleType = "ttbar"
-process.patJetCorrFactorsAK5PF.corrSample = "Spring10"
-process.patJetCorrFactorsAK5PF.sampleType = "ttbar"
+process.patJetCorrFactors.flavorType = "T"
+process.patJetCorrFactorsAK5PF.flavorType = "T"
 
 # embed IsoDeposits
 process.patMuons.isoDeposits = cms.PSet(
@@ -249,7 +262,6 @@ from PhysicsTools.PatAlgos.patEventContent_cff import *
 process.out.outputCommands += patTriggerEventContent
 process.out.outputCommands += patExtraAodEventContent
 process.out.outputCommands += patEventContentNoCleaning
-process.out.outputCommands += cms.untracked.vstring('drop *_*_*_PreSelection',
-                                                    'drop *_towerMaker_*_*')
+process.out.outputCommands += cms.untracked.vstring('drop *_towerMaker_*_*')
 
 process.outpath = cms.EndPath(process.out)
