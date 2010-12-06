@@ -15,7 +15,7 @@ analyzeJetKinematics = cms.EDAnalyzer("JetKinematicsAnalyzer",
       ## at SWGuidePATDataFormats#pat_JetCorrFactors;
       ## the expected form is of type 'step' or 'step:
       ## flavor'
-      correctionLevel = cms.string("abs")
+      correctionLevel = cms.string("L3Absolute")
     )                                       
 )
 

@@ -384,7 +384,7 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
     CSV_Bjet_Discis.push_back(  jet->bDiscriminator("combinedSecondaryVertexBJetTags") );
     //SM_Bjet_Discis.push_back(   jet->bDiscriminator("softMuonBJetTags")                );
 
-    fillValue("jetPtUn" , jet->correctedJet("raw").pt() , weight );
+    fillValue("jetPtUn" , jet->correctedJet("Uncorrected").pt() , weight );
 
     if(idx == 0){
       Jet1 = jet;
