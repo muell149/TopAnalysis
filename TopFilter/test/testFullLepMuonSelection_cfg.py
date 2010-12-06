@@ -103,6 +103,31 @@ process.patJetsAK5PF.addTagInfos = False
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeCleaning(process,False)
 
+## adding electron identification
+process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+
+process.patElectrons.addElectronID     = cms.bool( True )
+process.patElectrons.electronIDSources = cms.PSet( simpleEleId95relIso = cms.InputTag("simpleEleId95relIso"),
+                                                   simpleEleId90relIso = cms.InputTag("simpleEleId90relIso"),
+                                                   simpleEleId85relIso = cms.InputTag("simpleEleId85relIso"),
+                                                   simpleEleId80relIso = cms.InputTag("simpleEleId80relIso"),
+                                                   simpleEleId70relIso = cms.InputTag("simpleEleId70relIso"),
+                                                   simpleEleId60relIso = cms.InputTag("simpleEleId60relIso"),
+                                                   simpleEleId95cIso   = cms.InputTag("simpleEleId95cIso"),
+                                                   simpleEleId90cIso   = cms.InputTag("simpleEleId90cIso"),
+                                                   simpleEleId85cIso   = cms.InputTag("simpleEleId85cIso"),
+                                                   simpleEleId80cIso   = cms.InputTag("simpleEleId80cIso"),
+                                                   simpleEleId70cIso   = cms.InputTag("simpleEleId70cIso"),
+                                                   simpleEleId60cIso   = cms.InputTag("simpleEleId60cIso")
+                                                   )
+
+process.patElectronIDs = cms.Sequence( process.simpleEleIdSequence )
+
+process.makePatElectrons = cms.Sequence(process.patElectronIDs       *
+                                        process.patElectronIsolation *
+                                        process.electronMatch        *
+                                        process.patElectrons
+                                       )
 
 ## test basic event selection
 
