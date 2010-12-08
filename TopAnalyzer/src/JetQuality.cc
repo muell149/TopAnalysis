@@ -100,26 +100,30 @@ JetQuality::book()
       JEC Monitoring Variables
   **/
   // jet pt raw
-  hists_["ptL0_" ] = new TH2F( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
+  hists_["ptL0_"  ] = new TH2F( "ptL0_"  , "ptL0_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L2Relative
-  hists_["ptL2_" ] = new TH2F( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
+  hists_["ptL2_"  ] = new TH2F( "ptL2_"  , "ptL2_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L3Absolute
-  hists_["ptL3_" ] = new TH2F( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
+  hists_["ptL3_"  ] = new TH2F( "ptL3_"  , "ptL3_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
+  // jet pt L2L3Residual
+  hists_["ptL2L3_"] = new TH2F( "ptL2L3_", "ptL2L3_",  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L5Hadron
-  hists_["ptL5_" ] = new TH2F( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
+  hists_["ptL5_"  ] = new TH2F( "ptL5_"  , "ptL5_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
   // jet pt L7Parton
-  hists_["ptL7_" ] = new TH2F( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
+  hists_["ptL7_"  ] = new TH2F( "ptL7_"  , "ptL7_"  ,  30 ,     0. ,   150. , 150, 0., 3. );
 
   // jet eta raw
-  hists_["etaL0_"] = new TH2F( "etaL0_" , "etaL0_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
+  hists_["etaL0_"  ] = new TH2F( "etaL0_"  , "etaL0_"  ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L2Relative
-  hists_["etaL2_"] = new TH2F( "etaL2_" , "etaL2_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
+  hists_["etaL2_"  ] = new TH2F( "etaL2_"  , "etaL2_"  ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L3Absolute
-  hists_["etaL3_"] = new TH2F( "etaL3_" , "etaL3_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
+  hists_["etaL3_"  ] = new TH2F( "etaL3_"  , "etaL3_"  ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
+  // jet eta L2L3Residual
+  hists_["etaL2L3_"] = new TH2F( "etaL2L3_", "etaL2L3_",  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L5Hadron
-  hists_["etaL5_"] = new TH2F( "etaL5_" , "etaL5_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
+  hists_["etaL5_"  ] = new TH2F( "etaL5_"  , "etaL5_"  ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
   // jet eta L7Parton
-  hists_["etaL7_"] = new TH2F( "etaL7_" , "etaL7_" ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
+  hists_["etaL7_"  ] = new TH2F( "etaL7_"  , "etaL7_"  ,  70 ,   -3.5 ,    3.5 , 150, 0., 3. );
 }
 
 /// histogramm booking for full fw
@@ -276,17 +280,17 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       **/
       if( jet->isPFJet() ){
 	// fraction of energy carried by neutral hadrons
-	fillValue( "nhf" , jet->neutralHadronEnergyFraction() / jet->jecFactor("Uncorrected") , weight );
+	fillValue( "nhf" , jet->neutralHadronEnergyFraction()           , weight );
 	// fraction of energy carried by neutral em (photons)
-	fillValue( "nef" , jet->neutralEmEnergyFraction()     / jet->jecFactor("Uncorrected") , weight );
+	fillValue( "nef" , jet->neutralEmEnergyFraction()               , weight );
 	// fraction of energy carried by charged hadrons
-	fillValue( "chf" , jet->chargedHadronEnergyFraction() / jet->jecFactor("Uncorrected") , weight );
+	fillValue( "chf" , jet->chargedHadronEnergyFraction()           , weight );
 	// fraction of energy carried by charged em (electrons)
-	fillValue( "cef" , jet->chargedEmEnergyFraction()     / jet->jecFactor("Uncorrected") , weight );
+	fillValue( "cef" , jet->chargedEmEnergyFraction()               , weight );
 	// multiplicity of charged hadrons
-	fillValue( "nch" , jet->pfSpecific().mChargedHadronMultiplicity                , weight );
+	fillValue( "nch" , jet->pfSpecific().mChargedHadronMultiplicity , weight );
 	// multiplicity of charged particles
-	fillValue( "ncp" , jet->chargedMultiplicity()                                  , weight );
+	fillValue( "ncp" , jet->chargedMultiplicity()                   , weight );
       }
 
       /** 
@@ -324,38 +328,59 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       std::vector<const reco::Candidate*> constituents = jet->getJetConstituentsQuick();
       for(std::vector<const reco::Candidate*>::const_iterator con = constituents.begin(); con != constituents.end(); ++con){
 	// jets energy flow in R
-	fillValue("eFlowR_"  , deltaR((*con)->eta(), (*con)->phi(), jet->eta(), jet->phi()) , jet->pt() , (*con)->energy()/jet->correctedJet("raw").energy() );
+	fillValue("eFlowR_"  , deltaR((*con)->eta(), (*con)->phi(), jet->eta(), jet->phi()) , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
 	// jets energy flow in eta
-	fillValue("eFlowEta_", (*con)->eta() - jet->eta()                                   , jet->pt() , (*con)->energy()/jet->correctedJet("raw").energy() );
+	fillValue("eFlowEta_", (*con)->eta() - jet->eta()                                   , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
 	// jets energy flow in phi
-	fillValue("eFlowPhi_", deltaPhi((*con)->phi(), jet->phi())                          , jet->pt() , (*con)->energy()/jet->correctedJet("raw").energy() );
+	fillValue("eFlowPhi_", deltaPhi((*con)->phi(), jet->phi())                          , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
       }
 
       /** 
 	  Fill JEC Monitoring Variables
       **/
+
       if( jet->genJet() ){
-	// jet pt raw
-	fillValue( "ptL0_"  , jet->genJet()->pt(),  jet->correctedJet("Uncorrected").pt()/jet->genJet()->pt() , weight );
-	// jet pt L2Relative
-	fillValue( "ptL2_"  , jet->genJet()->pt(),  jet->correctedJet("L2Relative" ).pt()/jet->genJet()->pt() , weight );
-	// jet pt L3Absolute
-	fillValue( "ptL3_"  , jet->genJet()->pt(),  jet->correctedJet("L3Absolute" ).pt()/jet->genJet()->pt() , weight );
-	// jet pt L5Hadron
-	fillValue( "ptL5_"  , jet->genJet()->pt(),  jet->correctedJet("L5Flavor", flavor_).pt()/jet->genJet()->pt() , weight );
-	// jet pt L7Parton
-	fillValue( "ptL7_"  , jet->genJet()->pt(),  jet->correctedJet("L7Parton", flavor_).pt()/jet->genJet()->pt() , weight );
-	
-	// jet eta raw
-	fillValue( "etaL0_" , jet->genJet()->eta(),  jet->correctedJet("Uncorrected").pt()/jet->genJet()->pt() , weight );
-	// jet eta L2Relative
-	fillValue( "etaL2_" , jet->genJet()->eta(),  jet->correctedJet("L2Relative" ).pt()/jet->genJet()->pt() , weight );
-	// jet eta L3Absolute
-	fillValue( "etaL3_" , jet->genJet()->eta(),  jet->correctedJet("L3Absolute" ).pt()/jet->genJet()->pt() , weight );
-	// jet eta L5Hadron
-	fillValue( "etaL5_" , jet->genJet()->eta(),  jet->correctedJet("L5Flavor", flavor_).pt()/jet->genJet()->pt() , weight );
-	// jet eta L7Parton
-	fillValue( "etaL7_" , jet->genJet()->eta(),  jet->correctedJet("L7Parton", flavor_).pt()/jet->genJet()->pt() , weight );
+
+	std::vector< std::string > jecs = jet->availableJECLevels();
+
+	for(std::vector< std::string >::const_iterator jec = jecs.begin(); jec != jecs.end(); ++jec){
+	  if(*jec == "Uncorrected"){
+	    // jet pt raw
+	    fillValue( "ptL0_"  , jet->genJet()->pt(),  jet->correctedJet("Uncorrected").pt()/jet->genJet()->pt() , weight );
+	    // jet eta raw
+	    fillValue( "etaL0_" , jet->genJet()->eta(), jet->correctedJet("Uncorrected").pt()/jet->genJet()->pt() , weight );
+	  }
+	  if(*jec == "L2Relative"){
+	    // jet pt L2Relative
+	    fillValue( "ptL2_"  , jet->genJet()->pt(),  jet->correctedJet("L2Relative").pt()/jet->genJet()->pt() , weight );
+	    // jet eta L2Relative
+	    fillValue( "etaL2_" , jet->genJet()->eta(), jet->correctedJet("L2Relative").pt()/jet->genJet()->pt() , weight );
+	  }
+	  if(*jec == "L3Absolute"){
+	    // jet pt L3Absolute
+	    fillValue( "ptL3_"  , jet->genJet()->pt(),  jet->correctedJet("L3Absolute").pt()/jet->genJet()->pt() , weight );
+	    // jet eta L3Absolute
+	    fillValue( "etaL3_" , jet->genJet()->eta(), jet->correctedJet("L3Absolute").pt()/jet->genJet()->pt() , weight );
+	  }
+	  if(*jec == "L2L3Residual"){
+	    // jet pt L3Absolute
+	    fillValue( "ptL2L3_"  , jet->genJet()->pt(),  jet->correctedJet("L2L3Residual").pt()/jet->genJet()->pt() , weight );
+	    // jet eta L3Absolute
+	    fillValue( "etaL2L3_" , jet->genJet()->eta(), jet->correctedJet("L2L3Residual").pt()/jet->genJet()->pt() , weight );
+	  }
+	  if(*jec == "L5Flavor"){
+	    // jet pt L5Hadron
+	    fillValue( "ptL5_"  , jet->genJet()->pt(),  jet->correctedJet("L5Flavor", flavor_).pt()/jet->genJet()->pt() , weight );
+	    // jet eta L5Hadron
+	    fillValue( "etaL5_" , jet->genJet()->eta(), jet->correctedJet("L5Flavor", flavor_).pt()/jet->genJet()->pt() , weight );
+	  }
+	  if(*jec == "L7Parton"){
+	    // jet pt L7Parton
+	    fillValue( "ptL7_"  , jet->genJet()->pt(),  jet->correctedJet("L7Parton", flavor_).pt()/jet->genJet()->pt() , weight );
+	    // jet eta L7Parton
+	    fillValue( "etaL7_" , jet->genJet()->eta(), jet->correctedJet("L7Parton", flavor_).pt()/jet->genJet()->pt() , weight );
+	  }
+	}
       }
     }
   }
