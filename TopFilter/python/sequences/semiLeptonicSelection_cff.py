@@ -55,7 +55,19 @@ tightBottomPFJets  = selectedPatJets.clone(src = 'goodJetsPF30',
 semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
                                      looseElectrons      *
                                      standAloneMuons     *
-                                     vetoJets            *
+                                     centralJets         *
+                                     reliableJets        *
+                                     goodJets            *
+                                     noOverlapJetsPF     *
+                                     centralJetsPF       *
+                                     reliableJetsPF      *
+                                     goodJetsPF          *
+                                     centralJetsPF25     *
+                                     reliableJetsPF25    *
+                                     goodJetsPF25        *
+                                     centralJetsPF30     *
+                                     reliableJetsPF30    *
+                                     goodJetsPF30        *
                                      dRMuons             *
                                      combinedMuons       *
                                      highPtMuons         *
@@ -64,16 +76,10 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
                                      goldenMuons         *
                                      looseMuons          *
                                      tightMuons          *
-                                     centralJets         *
-                                     reliableJets        *
-                                     goodJets            *
                                      trackCountingHighPurBJets *
                                      trackCountingHighEffBJets *
                                      tightLeadingJets    *
                                      tightBottomJets     *
-                                     goodJetsPF20        *
-                                     goodJetsPF25        *
-                                     goodJetsPF30        *
                                      tightLeadingPFJets  *
                                      tightBottomPFJets
                                      )
