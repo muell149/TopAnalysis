@@ -131,8 +131,6 @@ selectGoodJets = cms.Sequence(noOverlapJetsPF  *
                               centralJets      *
                               reliableJets     *
                               goodJets         *
-                              centralJetsPF    *
-                              reliableJetsPF   *
                               goodJetsPF       *
                               centralJetsPF20  *
                               reliableJetsPF20 *

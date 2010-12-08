@@ -59,8 +59,6 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
                                      reliableJets        *
                                      goodJets            *
                                      noOverlapJetsPF     *
-                                     centralJetsPF       *
-                                     reliableJetsPF      *
                                      goodJetsPF          *
                                      centralJetsPF25     *
                                      reliableJetsPF25    *
