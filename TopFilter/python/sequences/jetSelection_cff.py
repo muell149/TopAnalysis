@@ -128,9 +128,21 @@ nofHPDJets     = selectedPatJets.clone(src = 'selectedPatJets',
 ## reliable calibration and a robust rej
 ## of photons, electrons and prompt pi0's
 selectGoodJets = cms.Sequence(noOverlapJetsPF  *
-                              centralJets  *
-                              reliableJets *
-                              goodJets
+                              centralJets      *
+                              reliableJets     *
+                              goodJets         *
+                              centralJetsPF    *
+                              reliableJetsPF   *
+                              goodJetsPF       *
+                              centralJetsPF20  *
+                              reliableJetsPF20 *
+                              goodJetsPF20     *
+                              centralJetsPF25  *
+                              reliableJetsPF25 *
+                              goodJetsPF25     *
+                              centralJetsPF30  *
+                              reliableJetsPF30 *
+                              goodJetsPF30
                               )
 
 ## collect the N-1 collections
