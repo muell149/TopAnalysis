@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", TString plots = "cutflow", TString jetTyp = "")
+void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", TString plots = "NminusOne", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -335,11 +335,11 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->AddEntry( nHit_  [kData ] , "Data ("+lum+" pb ^{-1})"    , "PL");
-  leg0->AddEntry( nHit_  [kSig  ] , "t#bar{t} signal MC@NLO"                 , "F" ); 
-  leg0->AddEntry( nHit_  [kBkg  ] , "t#bar{t} other MC@NLO"                  , "F" );
-  leg0->AddEntry( nHit_  [kQCD  ] , "QCD PYTHIA"                             , "F" );
-  leg0->AddEntry( nHit_  [kWjets] , "W#rightarrowl#nu MADGRAPH"              , "F" );
-  leg0->AddEntry( nHit_  [kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-} MADGRAPH", "F" );
+  leg0->AddEntry( nHit_  [kSig  ] , "t#bar{t} signal"                 , "F" ); 
+  leg0->AddEntry( nHit_  [kBkg  ] , "t#bar{t} other"                  , "F" );
+  leg0->AddEntry( nHit_  [kQCD  ] , "QCD"                             , "F" );
+  leg0->AddEntry( nHit_  [kWjets] , "W#rightarrowl#nu"              , "F" );
+  leg0->AddEntry( nHit_  [kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
  
   // containig the used mu-collection
   TLegend *leg2 = new TLegend(0.228, 0.912, 0.7818, 0.997);
@@ -610,15 +610,16 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   // ---
   //    do the printing for ptlead1Jet_
   // ---
-  min = 0.01/840*luminosity;
+  min = 0.01*luminosity/1000.;
   max = getMaxValue(*ptlead1Jet_[kData], "");
   MyCanvas[12]->cd(0);
   MyCanvas[12]->SetLogy(1);
   MyCanvas[12]->SetTitle("pt1stLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead1Jet        ->Draw(); 
-  axesStyle(*ptlead1Jet, "p_{t}(jet 1) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead1Jet_[kData]->GetXaxis()->SetRangeUser(0.,400.); 
+  axesStyle(*ptlead1Jet_[kData], "p_{t}(jet 1) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead1Jet_[kData]->Draw("EP");
+  ptlead1Jet        ->Draw("same"); 
   ptlead1Jet_[kData]->Draw("EPsame");
-  ptlead1Jet        ->Draw("Axis same");
   //  leg14             ->Draw("same");
   //cut2              ->Draw("same");
   if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
@@ -626,15 +627,16 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   // ---
   //    do the printing for ptlead2Jet_
   // ---
-  min = 0.01/840*luminosity;
+  min = 0.01*luminosity/1000.;
   max = getMaxValue(*ptlead2Jet_[kData], "");
   MyCanvas[13]->cd(0);
   MyCanvas[13]->SetLogy(1);
   MyCanvas[13]->SetTitle("pt2ndLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead2Jet        ->Draw();
-  axesStyle(*ptlead2Jet, "p_{t}(jet 2) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead2Jet_[kData]->GetXaxis()->SetRangeUser(0.,400.); 
+  axesStyle(*ptlead2Jet_[kData], "p_{t}(jet 2) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead2Jet_[kData]->Draw("EP");
+  ptlead2Jet        ->Draw("same");
   ptlead2Jet_[kData]->Draw("EPsame");
-  ptlead2Jet        ->Draw("Axis same");
   //  leg14             ->Draw("same");
   //cut2              ->Draw("same");
   if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
@@ -642,15 +644,16 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   // ---
   //    do the printing for ptlead3Jet_
   // ---
-  min = 0.01/840*luminosity;
+  min = 0.01*luminosity/1000.;
   max = getMaxValue(*ptlead3Jet_[kData], "");
   MyCanvas[14]->cd(0);
   MyCanvas[14]->SetLogy(1);
   MyCanvas[14]->SetTitle("pt3rdLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead3Jet        ->Draw();
-  axesStyle(*ptlead3Jet, "p_{t}(jet 3) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead3Jet_[kData]->GetXaxis()->SetRangeUser(0.,150.); 
+  axesStyle(*ptlead3Jet_[kData], "p_{t}(jet 3) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead3Jet_[kData]->Draw("EP");
+  ptlead3Jet        ->Draw("same");
   ptlead3Jet_[kData]->Draw("EPsame");
-  ptlead3Jet        ->Draw("Axis same");
   //  leg14             ->Draw("same");
   //cut2              ->Draw("same");
   if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
@@ -658,15 +661,16 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   // ---
   //    do the printing for ptlead4Jet_
   // ---
-  min = 0.01/840*luminosity;
+  min = 0.01*luminosity/1000.;
   max = getMaxValue(*ptlead4Jet_[kData], "");
   MyCanvas[15]->cd(0);
   MyCanvas[15]->SetLogy(1);
   MyCanvas[15]->SetTitle("pt4thLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead4Jet        ->Draw();
-  axesStyle(*ptlead4Jet, "p_{t}(jet 4) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead4Jet_[kData]->GetXaxis()->SetRangeUser(0.,150.);
+  axesStyle(*ptlead4Jet_[kData], "p_{t}(jet 4) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
+  ptlead4Jet_[kData]->Draw("EP");
+  ptlead4Jet        ->Draw("same"); 
   ptlead4Jet_[kData]->Draw("EPsame");
-  ptlead4Jet        ->Draw("Axis same");
   //  leg14             ->Draw("same");
   //cut2              ->Draw("same");
   if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
@@ -928,7 +932,7 @@ void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin, floa
 {
   hist.SetTitle("");
   hist.GetXaxis()->SetTitle(titleX);
-  hist.GetXaxis()->CenterTitle();
+  //hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.06);
   hist.GetXaxis()->SetTitleColor (    1);
   hist.GetXaxis()->SetTitleOffset(  1.0);
@@ -945,7 +949,7 @@ void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin, floa
   hist.GetYaxis()->SetTitleFont  (   62);
   hist.GetYaxis()->SetLabelSize  ( 0.04);
   hist.GetYaxis()->SetLabelFont  (   62);
-  hist.GetYaxis()->CenterTitle   ( true);
+  //hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
 }
