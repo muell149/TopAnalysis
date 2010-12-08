@@ -90,7 +90,7 @@ oneIsolatedTightMuonSelection = countPatMuons.clone(src = 'isolatedTightMuons', 
 from PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff import *
 cleanPatElectrons.finalCut = cms.string('et > 20.'
                                         '& abs(eta) < 2.5'
-					'& electronID("eidTight")'
+					'& electronID("simpleEleId90relIso") = 7'
 					'&(trackIso+caloIso)/pt < 0.15'
                                        )
 cleanPatJets.src = "selectedPatJets"
