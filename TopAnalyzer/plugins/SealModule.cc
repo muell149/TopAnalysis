@@ -78,6 +78,13 @@ DEFINE_FWK_MODULE(FullHadTopRecoAnalyzer);
 typedef DoubleObjectAnalyzer<edm::View<pat::Muon>, edm::View<pat::Jet>, MuonJetKinematics> MuonJetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 
+/**
+    Define modules needed for the analysis of muon vertex relations
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/MuonVertexKinematics.h"
+typedef DoubleObjectAnalyzer<edm::View<pat::Muon>, edm::View<reco::Vertex>, MuonVertexKinematics> MuonVertexKinematicsAnalyzer;
+DEFINE_FWK_MODULE(MuonVertexKinematicsAnalyzer);
 
 /**
     Define modules needed for the analysis of different event hypothesis
