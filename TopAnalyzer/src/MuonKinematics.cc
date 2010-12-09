@@ -26,6 +26,8 @@ MuonKinematics::book()
   hists_["pt" ] = new TH1F( "pt"  , "pt"  ,  30 ,     0. , 150.  );
   // pseudorapidity eta of the muon
   hists_["eta"] = new TH1F( "eta" , "eta" ,  70 ,  -3.5  ,   3.5 );
+  // rapidity y of the muon
+  hists_["y"  ] = new TH1F( "y"   , "y"  ,  70  ,  -3.5  ,   3.5 );
   // azimuthal angle phi of the muon
   hists_["phi"] = new TH1F( "phi" , "phi" ,  70 ,  -3.14 ,   3.14);
 }
@@ -45,6 +47,8 @@ MuonKinematics::book(edm::Service<TFileService>& fs)
   hists_["pt" ] = fs->make<TH1F>( "pt"  , "pt"  ,  30 ,     0. ,   150. );
   // pseudorapidity eta of the muon
   hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
+  // rapidity y of the muon
+  hists_["y"  ] = fs->make<TH1F>( "y"   , "y"   ,  70 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the muon
   hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  70 ,  -3.14 ,   3.14 );
 }
@@ -70,6 +74,8 @@ MuonKinematics::fill(const edm::View<reco::Candidate>& muons, const double& weig
       fill( "pt" , muon->et()     , weight );
       // pseudorapidity eta of the muon
       fill( "eta", muon->eta()    , weight );
+      // rapidity y of the muon
+      fill( "y"  , muon->rapidity(), weight );
       // azimuthal angle phi of the muon
       fill( "phi", muon->phi()    , weight );
     }
