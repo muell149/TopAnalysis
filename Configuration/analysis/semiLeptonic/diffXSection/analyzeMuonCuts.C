@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", TString plots = "NminusOne", TString jetTyp = "PF")
+void analyzeMuonCuts(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", TString plots = "cutflow", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -136,33 +136,44 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
 
   std::vector<TH1F*> pt_, eta_, nHit_, chi2_, d0_, dz_, ecalEn_, hcalEn_, dR_, relIso_, n_;
   std::vector<TH1F*> etaJets_, ptlead1Jet_, ptlead2Jet_, ptlead3Jet_, ptlead4Jet_, emf_ , fhpd_, n90hits_, nJets_;
+  std::vector<TH1F*> chf_, nhf_, cef_, nef_, cmult_, nConst_;
   std::vector<TH1F*> bdiscr_, bdiscrPre_, nbJets_;
   std::vector<TH1F*> nVetoMu_, nVetoE_, etVetoE_, etaVetoE_, relIsoVetoE_;
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     // muon plots
-    pt_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[0]+"MuonKinematics/pt" )->Clone() );
-    eta_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[1]+"MuonKinematics/eta")->Clone() );
-    nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseCollections[2]+"MuonQuality/nHit"  )->Clone() );
-    chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseCollections[3]+"MuonQuality/chi2"  )->Clone() );
-    d0_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[4]+"MuonQuality/dB"    )->Clone() );
-    dz_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[5]+"MuonQuality/dz"    )->Clone() );
-    ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[6]+"MuonQuality/ecalEn")->Clone() );
-    hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[7]+"MuonQuality/hcalEn")->Clone() );
+    pt_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[0]+"MuonKinematics/pt"             )->Clone() );
+    eta_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[1]+"MuonKinematics/eta"            )->Clone() );
+    nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseCollections[2]+"MuonQuality/nHit"              )->Clone() );
+    chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseCollections[3]+"MuonQuality/chi2"              )->Clone() );
+    d0_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[4]+"MuonQuality/dB"                )->Clone() );
+    dz_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[5]+"MuonQuality/dz"                )->Clone() );
+    ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[6]+"MuonQuality/ecalEn"            )->Clone() );
+    hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[7]+"MuonQuality/hcalEn"            )->Clone() );
     dR_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[8]+"MuonVetoJetsKinematics/dist30_")->Clone() );
-    relIso_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[9]+"MuonQuality/relIso")->Clone() );
-    n_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[10]+"MuonKinematics/n" )->Clone() );
+    relIso_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[9]+"MuonQuality/relIso"            )->Clone() );
+    n_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[10]+"MuonKinematics/n"             )->Clone() );
     // jet plots
+    // kinematics
     etaJets_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[11]+"JetKinematics/eta"      )->Clone() );
     ptlead1Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_0_JetKinematics/pt")->Clone() );
     ptlead2Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_1_JetKinematics/pt")->Clone() );
     ptlead3Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_2_JetKinematics/pt")->Clone() );
     ptlead4Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_3_JetKinematics/pt")->Clone() );
+    nJets_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[16]+"JetKinematics/n")->Clone() );
+    // jet ID
     if(jetTyp==""){
-      emf_       .push_back( (TH1F*)files_[idx]->Get(thoseCollections[13]+"JetQuality/emf"         )->Clone() );
-      fhpd_      .push_back( (TH1F*)files_[idx]->Get(thoseCollections[14]+"JetQuality/fHPD_"       )->Clone() );
-      n90hits_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[15]+"JetQuality/n90Hits_"    )->Clone() );
+      emf_       .push_back( (TH1F*)files_[idx]->Get(thoseCollections[13]+"JetQuality/emf"     )->Clone() );
+      fhpd_      .push_back( (TH1F*)files_[idx]->Get(thoseCollections[14]+"JetQuality/fHPD_"   )->Clone() );
+      n90hits_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[15]+"JetQuality/n90Hits_")->Clone() );
     }
-    nJets_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[16]+"JetKinematics/n"        )->Clone() );
+    if(jetTyp=="PF"){
+      chf_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/chf")->Clone() );
+      nhf_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/nhf")->Clone() );
+      cef_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/cef")->Clone() );
+      nef_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/nef")->Clone() );
+      cmult_ .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/ncp")->Clone() );
+      nConst_.push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/n_" )->Clone() );
+    }
     // btag plots
     bdiscr_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[17]+"JetQuality/btagTrkCntHighEff_"             )->Clone() );
     nbJets_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[18]+"JetKinematics/n"                           )->Clone() );
@@ -200,6 +211,14 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
       emf_       [idx]->Scale(lumiweight[idx]);
       fhpd_      [idx]->Scale(lumiweight[idx]);
       n90hits_   [idx]->Scale(lumiweight[idx]);
+    }
+    if(jetTyp=="PF"){
+      chf_   [idx]->Scale(lumiweight[idx]);
+      nhf_   [idx]->Scale(lumiweight[idx]);
+      cef_   [idx]->Scale(lumiweight[idx]);
+      nef_   [idx]->Scale(lumiweight[idx]);
+      cmult_ [idx]->Scale(lumiweight[idx]);
+      nConst_[idx]->Scale(lumiweight[idx]);
     }
     nJets_     [idx]->Scale(lumiweight[idx]);
     bdiscr_   [idx]->Scale(lumiweight[idx]);
@@ -259,6 +278,13 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   THStack *etVetoE    = new THStack("etVetoE" ,"");
   THStack *etaVetoE   = new THStack("etaVetoE","");
   THStack *relIsoVetoE= new THStack("relIsoVetoE","");
+  THStack *chf        = new THStack("chf"   ,"");
+  THStack *nhf        = new THStack("nhf"   ,"");
+  THStack *cef        = new THStack("cef"   ,"");
+  THStack *nef        = new THStack("nef"   ,"");
+  THStack *cmult      = new THStack("cmult" ,"");
+  THStack *nConst     = new THStack("nConst","");
+    
 
   for(unsigned int idx=0; idx<=kData; ++idx) {
     // choose styling options
@@ -282,6 +308,14 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
       histogramStyle(*emf_       [idx], idx);
       histogramStyle(*fhpd_      [idx], idx);
       histogramStyle(*n90hits_   [idx], idx);
+    }
+    if(jetTyp=="PF"){
+      histogramStyle(*chf_   [idx], idx);
+      histogramStyle(*nhf_   [idx], idx);
+      histogramStyle(*cef_   [idx], idx);
+      histogramStyle(*nef_   [idx], idx);
+      histogramStyle(*cmult_ [idx], idx);
+      histogramStyle(*nConst_[idx], idx);
     }
     histogramStyle(*nJets_     [idx], idx);
     histogramStyle(*bdiscr_    [idx], idx);
@@ -314,6 +348,14 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
 	emf       ->Add(emf_       [idx]);
 	fhpd      ->Add(fhpd_      [idx]);
 	n90hits   ->Add(n90hits_   [idx]);
+      }
+      if(jetTyp=="PF"){
+	chf   ->Add(chf_   [idx]);
+	nhf   ->Add(nhf_   [idx]);
+	cef   ->Add(cef_   [idx]);
+	nef   ->Add(nef_   [idx]);
+	cmult ->Add(cmult_ [idx]);
+	nConst->Add(nConst_[idx]);
       }
       nJets     ->Add(nJets_     [idx]);
       bdiscr    ->Add(bdiscr_    [idx]);
@@ -399,8 +441,9 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   //    create canvas 
   // ---
   std::vector<TCanvas*> MyCanvas;
-
-  for(int idx=0; idx<29; idx++){ 
+  int nCanvas = 29;
+  if(jetTyp=="PF") nCanvas+=3;
+  for(int idx=0; idx<nCanvas; idx++){ 
     char canvname[10];
     sprintf(canvname,"canv%i",idx);    
     MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
@@ -409,6 +452,7 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   bool cutLine = false;
   double min = 0.;
   double max = 0.;
+  std::cout << "1" << std::endl;
   // ---
   //    do the printing for pt_
   // ---
@@ -417,14 +461,16 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   MyCanvas[0]->cd(0);
   MyCanvas[0]->SetLogy(1);
   MyCanvas[0]->SetTitle("ptLeading"+thoseCollections[0]+"Muons@7TeV");
-  pt        ->Draw("");
+  pt_[kData]->GetXaxis()->SetRangeUser(20.,150.);
+  axesStyle(*pt_[kData], "p_{t}(#mu) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+  pt_[kData]->Draw("AXIS");
+  pt        ->Draw("same");
   pt_[kData]->Draw("EPsame");
-  pt        ->Draw("AXISsame");
-  axesStyle(*pt, "p_{t}(#mu) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+  pt_[kData]->Draw("AXISsame");
   //  leg2      ->Draw("same");
   //cut0      ->Draw("same");
   if(cutLine)drawcutline(20.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
+  std::cout << "2" << std::endl;
   // ---
   //    do the printing for eta_
   // ---
@@ -578,7 +624,7 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   MyCanvas[10]->SetLogy(1);
   MyCanvas[10]->SetTitle("multiplicity"+thoseCollections[10]+"Muons@7TeV");
   axesStyle(*n_[kData], "N_{#mu}(p_{t}>20GeV)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  n_[kData]->GetXaxis()->SetRangeUser(0.,3.);
+  n_[kData]->GetXaxis()->SetRangeUser(1.,3.);
   n_[kData]->Draw("AXIS"  );
   n        ->Draw("same"  );
   n_[kData]->Draw("EPsame");
@@ -692,6 +738,25 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
     //cut2       ->Draw("same");
     if(cutLine)drawcutline(0.01, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
   }
+
+  // ---
+  //    do the printing for chf_
+  // ---
+  if(jetTyp=="PF"){
+    min = 1;
+    max = getMaxValue(*chf_[kData], "");
+    MyCanvas[16]->cd(0);
+    MyCanvas[16]->SetLogy(1);
+    MyCanvas[16]->SetTitle("chfReliableJets@7TeV");
+    chf        ->Draw();
+    axesStyle(*chf, "E_{had charged} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    chf_[kData]->Draw("EPsame");
+    chf        ->Draw("Axis same");
+    //  leg15      ->Draw("same");
+    //cut2       ->Draw("same");
+    if(cutLine)drawcutline(0.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+  }
+
   // ---
   //    do the printing for nVetoMu_
   // ---
@@ -764,6 +829,41 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
     //cut2           ->Draw("same");
     if(cutLine)drawcutline(1.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
   }
+
+  if(jetTyp=="PF"){
+    // ---
+    //    do the printing for nhf_
+    // ---
+    min = 1;
+    max = getMaxValue(*nhf_[kData], "");
+    MyCanvas[19]->cd(0);
+    MyCanvas[19]->SetLogy(1);
+    MyCanvas[19]->SetTitle("nhfReliableJets@7TeV");
+    nhf        ->Draw();
+    axesStyle(*nhf, "E_{had neutral} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    nhf_[kData]->Draw("EPsame");
+    nhf        ->Draw("Axis same");
+    //  leg15      ->Draw("same");
+    //cut2       ->Draw("same");
+    if(cutLine)drawcutline(0.99, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+ 
+    // ---
+    //    do the printing for cef_
+    // ---
+    min = 1;
+    max = getMaxValue(*cef_[kData], "");
+    MyCanvas[20]->cd(0);
+    MyCanvas[20]->SetLogy(1);
+    MyCanvas[20]->SetTitle("cefReliableJets@7TeV");
+    cef        ->Draw();
+    axesStyle(*cef, "E_{em charged} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    cef_[kData]->Draw("EPsame");
+    cef        ->Draw("Axis same");
+    //  leg15      ->Draw("same");
+    //cut2       ->Draw("same");
+    if(cutLine)drawcutline(0.99, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+  }
+
   // ---
   //    do the printing for nJets_
   // ---
@@ -889,6 +989,57 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
   relIsoVetoE_[kData]->Draw("EPsame");
   relIsoVetoE        ->Draw("Axis same");
 
+  if(jetTyp=="PF"){
+    // ---
+    //    do the printing for nef_
+    // ---
+    min = 1;
+    max = getMaxValue(*nef_[kData], "");
+    MyCanvas[29]->cd(0);
+    MyCanvas[29]->SetLogy(1);
+    MyCanvas[29]->SetTitle("nefReliableJets@7TeV");
+    nef        ->Draw();
+    axesStyle(*nef, "E_{em neutral} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    nef_[kData]->Draw("EPsame");
+    nef        ->Draw("Axis same");
+    //  leg15      ->Draw("same");
+    //cut2       ->Draw("same");
+    if(cutLine)drawcutline(0.99, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+
+    // ---
+    //    do the printing for cmult_
+    // ---
+    min = 1;
+    max = getMaxValue(*cmult_[kData], "");
+    MyCanvas[30]->cd(0);
+    MyCanvas[30]->SetTitle("cmultReliableJets@7TeV");
+    MyCanvas[30]->SetLogy(1);
+    cmult        ->Draw();
+    axesStyle(*cmult, "N(charged particles)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    cmult_[kData]->Draw("EPsame");
+    cmult        ->Draw("Axis same");
+    //  leg15      ->Draw("same");
+    //cut2       ->Draw("same");
+    if(cutLine)drawcutline(0.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+
+    // ---
+    //    do the printing for nConst_
+    // ---
+    min = 1;
+    max = getMaxValue(*nConst_[kData], "");
+    MyCanvas[31]->cd(0);
+    MyCanvas[31]->SetTitle("nConstReliableJets@7TeV");
+    nConst        ->Draw();
+    axesStyle(*nConst, "N(jet constituents)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    nConst_[kData]->Draw("EPsame");
+    nConst        ->Draw("Axis same");
+    MyCanvas[31]->SetLogy(1);
+    //  leg15      ->Draw("same");
+    //cut2       ->Draw("same");
+    if(cutLine)drawcutline(1., exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+
+  }
+
   // ---
   // saving
   // ---
@@ -907,7 +1058,7 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = false, TString dataF
     }
   }
   
-}
+ }
 
 void drawcutline(double cutval, double maximum)
 {
