@@ -9,54 +9,9 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.source = cms.Source("PoolSource",
-    # ONLY INCLUDE THE FOLLOWING LINE WHERE YOU KNOW IT IS RIGHT !!!
-    duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
     fileNames = cms.untracked.vstring(
     ## add your favourite file here
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_960.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_961.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_962.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_963.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_964.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_965.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_966.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_967.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_968.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_969.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_97.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_970.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_971.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_972.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_973.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_974.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_975.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_976.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_977.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_978.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_979.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_98.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_980.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_981.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_982.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_983.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_984.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_985.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_986.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_987.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_988.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_989.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_99.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_990.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_991.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_992.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_993.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_994.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_995.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_996.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_997.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_998.root',
-    '/store/user/eschliec/Private_QCD/MC_20100514-193831/patTuple_999.root'
-    )
+   )
 )
 
 ## define maximal number of events to loop over
@@ -93,14 +48,14 @@ process.simpleSecondaryVertexBJets = process.selectedPatJets.clone(src = 'goodJe
                                                                    )
 
 ## define ordered jets
-uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )
-uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs') )
-uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs') )
-uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs') )
-uds4    = cms.PSet(index = cms.int32(4), correctionLevel = cms.string('abs') )
-uds5    = cms.PSet(index = cms.int32(5), correctionLevel = cms.string('abs') )
-bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )
-bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs') )
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+uds4    = cms.PSet(index = cms.int32(4), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+uds5    = cms.PSet(index = cms.int32(5), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+bottom0 = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
+bottom1 = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False))
 
 ## ---
 ##    MONITOR JET KINEMATICS

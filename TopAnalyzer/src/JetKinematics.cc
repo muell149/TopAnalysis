@@ -108,7 +108,7 @@ const std::string JetKinematics::correctionStep() const
 /// return the desired correction flavor from the configuration string, which is expected to be of type 'step' or 'step:flavor'
 const std::string JetKinematics::correctionFlavor() const
 {
-  std::string flavor;
+  std::string flavor = "none";
   if(correctionLevel_.find(":")!=std::string::npos){
     flavor=correctionLevel_.substr(1+correctionLevel_.find(":"));
   }
