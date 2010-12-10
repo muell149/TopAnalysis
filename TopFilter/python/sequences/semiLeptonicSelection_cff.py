@@ -59,6 +59,8 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
                                      reliableJets        *
                                      goodJets            *
                                      noOverlapJetsPF     *
+                                     centralJetsPF       *
+                                     reliableJetsPF      *
                                      goodJetsPF          *
                                      centralJetsPF25     *
                                      reliableJetsPF25    *
@@ -66,11 +68,12 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons *
                                      centralJetsPF30     *
                                      reliableJetsPF30    *
                                      goodJetsPF30        *
+                                     vetoJets            *
                                      dRMuons             *
                                      combinedMuons       *
                                      highPtMuons         *
                                      kinematicMuons      *
-                                     trackMuons          *                                  
+                                     trackMuons          *
                                      goldenMuons         *
                                      looseMuons          *
                                      tightMuons          *
@@ -122,3 +125,4 @@ semiLeptonicEvents = cms.Sequence(muonSelection       *
 def disableCountFilter(whichCountFilter):
     whichCountFilter.minNumber = 0
     whichCountFilter.maxNumber = 999999
+
