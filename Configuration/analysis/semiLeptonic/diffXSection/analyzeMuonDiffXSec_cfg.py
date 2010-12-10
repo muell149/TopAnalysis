@@ -35,13 +35,16 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    '/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
+    #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_9_1_CQ7.root'
+    #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_8_2_tNW.root'
+    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_19_1.root'
+    #'/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -101,6 +104,8 @@ process.load("TopAnalysis.TopAnalyzer.METKinematics_cfi")
 process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
 ## muon jet kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonJetKinematics_cfi")
+## muon vertex analyzer
+process.load("TopAnalysis.TopAnalyzer.MuonVertexKinematics_cfi")
 
 ## ---
 ##    set up vertex filter
@@ -176,10 +181,10 @@ process.genFilterSequence = cms.Sequence(process.makeGenEvt                     
                                          process.ttSemiLeptonicFilter             )
 
 ## define ordered jets
-uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs') )
-uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs') )
-uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs') )
-uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs') )
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
 
 ## jet Kinematics to monitor JES shift
 if(jetType=="particleFlow"):
@@ -354,11 +359,13 @@ process.patVetoElectronKinematics = process.analyzeElectronKinematics.clone(src 
 process.patVetoElectronQuality = process.analyzeElectronQuality.clone(src = 'selectedPatElectrons',
                                                                       analyze = cms.PSet(index = cms.int32(-1)) )
 
-
 ## muon cutflow
 process.combinedMuonKinematics = process.analyzeMuonKinematics.clone(src = 'combinedMuons')
 process.highPtMuonKinematics   = process.analyzeMuonKinematics.clone(src = 'highPtMuons')
 process.kinematicMuonQuality   = process.analyzeMuonQuality.clone   (src = 'kinematicMuons')
+process.kinematicMuonVertexKinematics  = process.analyzeMuonVertex.clone(srcA = 'kinematicMuons',
+                                                                         srcB = 'offlinePrimaryVertices',
+                                                                         analyze = cms.PSet(index = cms.int32(0)) )
 process.trackMuonVetoJetsKinematics = process.analyzeMuonJetKinematics.clone(srcA = 'trackMuons',
                                                                              srcB = 'goodJets'  )
 process.goldenMuonQuality      = process.analyzeMuonQuality.clone   (src = 'goldenMuons'  )
@@ -398,15 +405,16 @@ process.monitorNMinusOneMuonCuts = cms.Sequence(process.noDbMuonQuality         
                                                 process.noPtMuonKinematics         +
                                                 process.noDRMuonVetoJetsKinematics
                                                 )
-process.monitorMuonCutflow = cms.Sequence(process.combinedMuonKinematics       +
-                                          process.highPtMuonKinematics         +
-                                          process.kinematicMuonQuality         +
-                                          process.trackMuonVetoJetsKinematics  +
-                                          process.goldenMuonQuality            +
-                                          process.tightMuonKinematics          +
-                                          process.tightMuonQuality             +
-                                          process.analyzePatMET                +
-                                          process.analyzePfMET               
+process.monitorMuonCutflow = cms.Sequence(process.combinedMuonKinematics        +
+                                          process.highPtMuonKinematics          +
+                                          process.kinematicMuonQuality          +
+                                          process.kinematicMuonVertexKinematics +
+                                          process.trackMuonVetoJetsKinematics   +
+                                          process.goldenMuonQuality             +
+                                          process.tightMuonKinematics           +
+                                          process.tightMuonQuality              +
+                                          process.analyzePatMET                 +
+                                          process.analyzePfMET
                                           )
 if(jetType=="Calo"):
     process.monitorNMinusOneJetCuts = cms.Sequence(process.noPtLead_0_JetKinematics  +
