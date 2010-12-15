@@ -238,74 +238,75 @@ noNCHJetsPF30   = selectedPatJets.clone(src = 'noNCHJetsPF',
 ## reliable calibration and a robust rej
 ## of photons, electrons and prompt pi0's
 selectGoodJets = cms.Sequence(noOverlapJetsPF  *
-                             centralJets      *
-                             reliableJets     *
-                             goodJets         *
-                             centralJetsPF    *
-                             reliableJetsPF   *
-                             goodJetsPF       *
-                             centralJetsPF25  *
-                             reliableJetsPF25 *
-                             goodJetsPF25     *
-                             centralJetsPF30  *
-                             reliableJetsPF30 *
-                             goodJetsPF30
-                             )
+                              centralJets      *
+                              reliableJets     *
+                              goodJets         *
+                              goodJetsPF       *
+                              centralJetsPF    *
+                              reliableJetsPF   *
+                              goodJetsPF20     *
+                              centralJetsPF25  *
+                              reliableJetsPF25 *
+                              goodJetsPF25     *
+                              centralJetsPF30  *
+                              reliableJetsPF30 *
+                              goodJetsPF30
+                              )
 
 ## collect the N-1 collections
 selectNMinusOneJets = cms.Sequence(noEtaJets       *
-                                  noPtJets        *
-                                  noEmJets        *
-                                  noN90HitsJets   *
-                                  nofHPDJets      *
-                                  noEtaJetsPF     *
-                                  noPtJetsPF      *
-                                  noConstJetsPF   *
-                                  noCEFJetsPF     *
-                                  noNHFJetsPF     *
-                                  noNEFJetsPF     *
-                                  noCHFJetsPF     *
-                                  noNCHJetsPF     *
-                                  noEtaJetsPF25   *
-                                  noPtJetsPF25    *
-                                  noConstJetsPF25 *
-                                  noCEFJetsPF25   *
-                                  noNHFJetsPF25   *
-                                  noNEFJetsPF25   *
-                                  noCHFJetsPF25   *
-                                  noNCHJetsPF25   *
-                                  noEtaJetsPF30   *
-                                  noPtJetsPF30    *
-                                  noConstJetsPF30 *
-                                  noCEFJetsPF30   *
-                                  noNHFJetsPF30   *
-                                  noNEFJetsPF30   *
-                                  noCHFJetsPF30   *
-                                  noNCHJetsPF30
-                                  )
+                                   noPtJets        *
+                                   noEmJets        *
+                                   noN90HitsJets   *
+                                   nofHPDJets      *
+                                   noEtaJetsPF     *
+                                   noPtJetsPF      *
+                                   noConstJetsPF   *
+                                   noCEFJetsPF     *
+                                   noNHFJetsPF     *
+                                   noNEFJetsPF     *
+                                   noCHFJetsPF     *
+                                   noNCHJetsPF     *
+                                   noEtaJetsPF25   *
+                                   noPtJetsPF25    *
+                                   noConstJetsPF25 *
+                                   noCEFJetsPF25   *
+                                   noNHFJetsPF25   *
+                                   noNEFJetsPF25   *
+                                   noCHFJetsPF25   *
+                                   noNCHJetsPF25   *
+                                   noEtaJetsPF30   *
+                                   noPtJetsPF30    *
+                                   noConstJetsPF30 *
+                                   noCEFJetsPF30   *
+                                   noNHFJetsPF30   *
+                                   noNEFJetsPF30   *
+                                   noCHFJetsPF30   *
+                                   noNCHJetsPF30
+                                   )
 
 ## check for different btag properties
 trackCountingHighPurBJets       = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
-                                                       )
+                                                        cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
+                                                        )
 trackCountingHighEffBJets       = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
-                                                       )
+                                                        cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
+                                                        )
 simpleSecondaryVertexBJets      = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 1.74'
-                                                       )
+                                                        cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 1.74'
+                                                        )
 simpleSecondaryVertexNegBJets   = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
-                                                       )
+                                                        cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
+                                                        )
 combinedSecondaryVertexBJets    = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.8'
-                                                       )
+                                                        cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.75'
+                                                        )
 combinedSecondaryVertexMVABJets = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"combinedSecondaryVertexMVABJetTags\") > 0.575'
-                                                       )
+                                                        cut = 'bDiscriminator(\"combinedSecondaryVertexMVABJetTags\") > 0.4'
+                                                        )
 softMuonBJets                   = selectedPatJets.clone(src = 'goodJets',
-                                                       cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
-                                                       )
+                                                        cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
+                                                        )
 
 ## a goodJet fullfilling different btag
 ## criteria
