@@ -56,6 +56,9 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeCleaning(process)
 
+## remove tau and photon collection
+removeSpecificPATObjects(process, ['Taus', 'Photons'])
+
 ## use the correct jet energy corrections
 process.patJetCorrFactors.flavorType = "T"
 
@@ -96,9 +99,9 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
 process.patJetCorrFactors.levels.remove("L2L3Residual")
 
 ## embedding of jet constituents into the jets
-process.patJets.embedCaloTowers       = True
-process.patJetsAK5JPT.embedCaloTowers = True
-process.patJetsAK5PF.embedPFCandidates= True 
+process.patJets.embedCaloTowers       = False
+process.patJetsAK5JPT.embedCaloTowers = False
+process.patJetsAK5PF.embedPFCandidates= False
 
 ## remove TagInfos from jets
 process.patJets.addTagInfos       = False
