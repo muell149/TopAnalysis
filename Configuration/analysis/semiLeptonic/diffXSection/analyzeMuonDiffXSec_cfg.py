@@ -37,14 +37,15 @@ process.source = cms.Source("PoolSource",
     ## add your favourite file here
     #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_9_1_CQ7.root'
     #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_8_2_tNW.root'
-    '/store/user/henderle/Spring10/TTbar_NLO/PATtuple_19_1.root'
+    #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_19_1.root'
     #'/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
+    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_7_1_UxQ.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -68,7 +69,8 @@ if(not globals().has_key('runningOnData')):
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI", HLTPaths = ["HLT_Mu9"])
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
 
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
@@ -181,10 +183,10 @@ process.genFilterSequence = cms.Sequence(process.makeGenEvt                     
                                          process.ttSemiLeptonicFilter             )
 
 ## define ordered jets
-uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
-uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
-uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
-uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('abs'), useTree = cms.bool(False) )
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
 
 ## jet Kinematics to monitor JES shift
 if(jetType=="particleFlow"):
