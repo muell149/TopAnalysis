@@ -1,24 +1,5 @@
 TrigReport ---------- Modules in Path: p1 ------------
 TrigReport  Trig Bit#    Visited     Passed     Failed      Error Name
-TrigReport     1    0       1881       1881          0          0 simpleEleId95relIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId90relIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId85relIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId80relIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId70relIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId60relIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId95cIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId90cIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId85cIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId80cIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId70cIso
-TrigReport     1    0       1881       1881          0          0 simpleEleId60cIso
-TrigReport     1    0       1881       1881          0          0 eleIsoDepositTk
-TrigReport     1    0       1881       1881          0          0 eleIsoFromDepsTk
-TrigReport     1    0       1881       1881          0          0 eleIsoDepositEcalFromHits
-TrigReport     1    0       1881       1881          0          0 eleIsoFromDepsEcalFromHitsByCrystal
-TrigReport     1    0       1881       1881          0          0 eleIsoDepositHcalFromTowers
-TrigReport     1    0       1881       1881          0          0 eleIsoFromDepsHcalFromTowers
-TrigReport     1    0       1881       1881          0          0 electronMatch
 TrigReport     1    0       1881       1881          0          0 patElectrons
 TrigReport     1    0       1881       1881          0          0 patMuons
 TrigReport     1    0       1881       1881          0          0 pfPileUp
