@@ -88,12 +88,7 @@ oneIsolatedTightMuonSelection = countPatMuons.clone(src = 'isolatedTightMuons', 
 ###########################################################################################
 
 from PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff import *
-cleanPatElectrons.finalCut = cms.string('et > 20.'
-                                        '& abs(eta) < 2.5'
-					'& electronID("simpleEleId90relIso") = 7'
-					'&(trackIso+caloIso)/pt < 0.15'
-                                       )
-cleanPatJets.src = "selectedPatJets"
+cleanPatJets.src = cms.InputTag("selectedPatJetsAK5PF")
 
 cleanPatJets.checkOverlaps.muons.src  = 'goodMuons'
 cleanPatJets.checkOverlaps.muons.preselection = '(trackIso+caloIso)/pt < 0.15'
@@ -101,14 +96,11 @@ cleanPatJets.checkOverlaps.muons.preselection = '(trackIso+caloIso)/pt < 0.15'
 cleanPatJets.checkOverlaps.muons.deltaR  = 0.4
 cleanPatJets.checkOverlaps.muons.requireNoOverlaps = True 
 
-cleanPatJets.checkOverlaps.electrons.deltaR  = 0.4
-cleanPatJets.checkOverlaps.electrons.requireNoOverlaps = True 
-
 ## good id jet selection
 from TopAnalysis.TopFilter.filters.JetIdFunctorFilter_cfi import *
-goodIdJets.src     = cms.InputTag('cleanPatJets') 
-goodIdJets.jetType = cms.string('CALO')
-goodIdJets.version = cms.string('PURE09')
+goodIdJets.jets    = cms.InputTag("cleanPatJets")
+goodIdJets.jetType = cms.string('PF')
+goodIdJets.version = cms.string('FIRSTDATA')
 goodIdJets.quality = cms.string('LOOSE')
 
 ## thight jet selection
@@ -152,7 +144,7 @@ twoBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 2)
 
 ## met selector
 highMETs = cms.EDFilter("PATMETSelector",
-    src = cms.InputTag("patMETs"),
+    src = cms.InputTag("patMETsPF"),
     cut = cms.string("et>30.")
 )
 
