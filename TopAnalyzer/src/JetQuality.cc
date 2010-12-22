@@ -242,15 +242,14 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
   for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
     // NOTE: These histograms still need to be filled apropriately
     if( index_<0 || index_==index ){
-
       /** 
 	  Fill Calo and PF JetID Variables
       **/
 
       // number of jet constituents
       unsigned int n100 = 0;
-      if( jet->isCaloJet() ) n100 = jet->getCaloConstituents().size();	
-      else if( jet->isPFJet() ) n100 = jet->getPFConstituents().size();
+      if     ( jet->isCaloJet() ) n100 = jet->getCaloConstituents().size();
+      else if( jet->isPFJet()   ) n100 = jet->chargedMultiplicity()+jet->neutralMultiplicity();
       fillValue( "n_"   , n100 , weight );
 
       /** 
@@ -258,10 +257,9 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       **/
 
       // number of jet constituents carrying 90% of the jet energy
-      fillValue( "n90_" , jet->n90() , weight );
+      //      fillValue( "n90_" , jet->n90() , weight );
       // number of jet constituents carrying 60% of the jet energy
-      fillValue( "n60_" , jet->n60() , weight );
-
+      //      fillValue( "n60_" , jet->n60() , weight );
 
       /** 
 	  Fill Calo JetID Variables
@@ -324,16 +322,16 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       /**
 	 E-Flow in Jets
       **/
-      
-      std::vector<const reco::Candidate*> constituents = jet->getJetConstituentsQuick();
-      for(std::vector<const reco::Candidate*>::const_iterator con = constituents.begin(); con != constituents.end(); ++con){
-	// jets energy flow in R
-	fillValue("eFlowR_"  , deltaR((*con)->eta(), (*con)->phi(), jet->eta(), jet->phi()) , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
-	// jets energy flow in eta
-	fillValue("eFlowEta_", (*con)->eta() - jet->eta()                                   , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
-	// jets energy flow in phi
-	fillValue("eFlowPhi_", deltaPhi((*con)->phi(), jet->phi())                          , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
-      }
+
+//       std::vector<const reco::Candidate*> constituents = jet->getJetConstituentsQuick();
+//       for(std::vector<const reco::Candidate*>::const_iterator con = constituents.begin(); con != constituents.end(); ++con){
+// 	// jets energy flow in R
+// 	fillValue("eFlowR_"  , deltaR((*con)->eta(), (*con)->phi(), jet->eta(), jet->phi()) , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
+// 	// jets energy flow in eta
+// 	fillValue("eFlowEta_", (*con)->eta() - jet->eta()                                   , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
+// 	// jets energy flow in phi
+// 	fillValue("eFlowPhi_", deltaPhi((*con)->phi(), jet->phi())                          , jet->pt() , (*con)->energy()/jet->correctedJet("Uncorrected").energy() );
+//       }
 
       /** 
 	  Fill JEC Monitoring Variables
