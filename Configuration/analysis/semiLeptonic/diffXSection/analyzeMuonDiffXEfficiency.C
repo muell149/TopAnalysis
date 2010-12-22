@@ -46,6 +46,16 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/efficiency/";
   
+  //---
+  //   efficiency correction by scale factor (SF) from Tag&Probe
+  //---
+  // enter SF here (total product of SFs for ID/Iso and trigger efficiency)
+  // SF of Nov4ReReco wrt Fall10MC:
+  // SF(mu Trigger) = 0.969 +/- 0.002 (RunA and B combined -> think about splitting!!!)
+  // SF(muIDIso)    = 0.995 +/- 0.003
+  // systematic uncertainty approx. 2-3%
+  const double effSF = 0.964155;
+  
   // ---
   //    systematic variations
   // ---
@@ -190,6 +200,10 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   //    calculate efficiency histos via reco / gen
   // ---
   // create additional numerator as indicator for efficiency plots
+  //efficiency before SF correction
+  unsigned int effNoSF    = 565;
+  unsigned int topEffNoSF = 765;
+  //efficiency after SF correction
   unsigned int eff    = 566;
   unsigned int topEff = 766;
   // loop jet multiplicities  
@@ -197,11 +211,15 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     // loop pt, eta and phi
     for(unsigned int var=0; var<variables_.size(); ++var){
       // differential l+jets efficiencies
-      histo_[variables_[var]][eff][Njets_[mult]]=        (TH1F*)histo_[variables_[var]][allReco][Njets_[mult]]->Clone();
-      histo_[variables_[var]][eff][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][allGen ][Njets_[mult]]->Clone());
+      histo_[variables_[var]][effNoSF][Njets_[mult]]=        (TH1F*)histo_[variables_[var]][allReco][Njets_[mult]]->Clone();
+      histo_[variables_[var]][effNoSF][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][allGen ][Njets_[mult]]->Clone());
+      histo_[variables_[var]][eff][Njets_[mult]]    ->(TH1F*)histo_[variables_[var]][effNoSF][Njets_[mult]]->Clone();
+      histo_[variables_[var]][eff][Njets_[mult]]    ->Scale(effSF);
        // differential top efficiencies
-      histo_[variables_[var]][topEff][Njets_[mult]]=        (TH1F*)histo_[variables_[var]][kttbarReco][Njets_[mult]]->Clone();
-      histo_[variables_[var]][topEff][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][kttbarGen ][Njets_[mult]]->Clone());
+      histo_[variables_[var]][topEffNoSF][Njets_[mult]]=        (TH1F*)histo_[variables_[var]][kttbarReco][Njets_[mult]]->Clone();
+      histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][kttbarGen ][Njets_[mult]]->Clone());
+      histo_[variables_[var]][topEff][Njets_[mult]]    ->(TH1F*)histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Clone();
+      histo_[variables_[var]][topEff][Njets_[mult]]    ->Scale(effSF);
     }
   }
 
@@ -219,9 +237,18 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       for(int idx =1; idx<=histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX(); idx++){
 	if(variables_[var]=="pt"&&idx==1) ++idx;
 	// print out effiencies, for pt with overflow bin, for phi with underflow and overflow bin
-	if(variables_[var]=="phi"&&idx==1) std::cout << "underflow bin "  << idx-1 << ": " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(0) << std::endl;
-	std::cout << "bin "  << idx << ": " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx) << std::endl;
-	if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX()) std::cout << "overflow bin "  << idx+1 << ": " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx+1) << std::endl;
+	if(variables_[var]=="phi"&&idx==1) std::cout << "underflow bin "  << idx-1 << ": " << 
+	"noSF: " << histo_[variables_[var]][effNoSF][Njets_[mult]]->GetBinContent(0) <<
+	"; with SF: " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(0) <<
+	"; SF=" << effSF << std::endl;
+	std::cout << "bin "  << idx << ": " << 
+	"noSF: " << histo_[variables_[var]][effNoSF][Njets_[mult]]->GetBinContent(idx) <<
+	"; with SF: " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx) <<
+	"; SF=" << effSF << std::endl;
+	if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][eff][Njets_[mult]]->GetNbinsX()) std::cout << "overflow bin "  << idx+1 << ": " <<
+	"noSF: " << histo_[variables_[var]][effNoSF][Njets_[mult]]->GetBinContent(idx+1) <<
+	"; with SF: " << histo_[variables_[var]][eff][Njets_[mult]]->GetBinContent(idx+1) <<
+	"; SF=" << effSF << std::endl;
       }
     }
   }
@@ -243,9 +270,18 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       for(int idx =1; idx<=histo_[variables_[var]][topEff][Njets_[mult]]->GetNbinsX(); idx++){
 	if(variables_[var]=="pt"&&idx==1) ++idx;
 	// print out effiencies, for pt with overflow bin, for phi with underflow and overflow bin
-	if(variables_[var]=="phi"&&idx==1) std::cout << "underflow bin "  << idx-1 << ": " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(0) << std::endl;
-	std::cout << "bin "  << idx << ": " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(idx) << std::endl;
-	if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][topEff][Njets_[mult]]->GetNbinsX()) std::cout << "overflow bin "  << idx+1 << ": " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(idx+1) << std::endl;
+	if(variables_[var]=="phi"&&idx==1) std::cout << "underflow bin "  << idx-1 << ": " <<
+	"noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(0) <<
+	"; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(0) <<
+	"; SF=" << effSF << std::endl;
+	std::cout << "bin "  << idx << ": " << 
+	"noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(idx) <<
+	"; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(idx) <<
+	"; SF=" << effSF << std::endl;
+	if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][topEff][Njets_[mult]]->GetNbinsX()) std::cout << "overflow bin "  << idx+1 << ": " <<
+	"noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(idx+1) <<
+	"; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(idx+1) <<
+	"; SF=" << effSF << std::endl;
       }
     }
   }
@@ -253,8 +289,8 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // ---
   //    calculate inclusive efficiencies for all jet multiplicities (l+jets and top)
   // ---
-  std::cout << std::endl << "inclusive efficiencies (N_reco, N_gen, eff)" << std::endl << std::endl;
-  std::vector<double> topEff_, lepEff_;
+  std::cout << std::endl << "inclusive efficiencies (N_reco, N_gen, effNoSF, eff)" << std::endl << std::endl;
+  std::vector<double> topEffNoSF_, lepEffNoSF_, topEff_, lepEff_;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     // get entries
@@ -263,12 +299,18 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     double allLepGen  = histo_["pt"][allGen    ][Njets_[mult]]->Integral(0, histo_["pt"][allGen    ][Njets_[mult]]->GetNbinsX()+1);
     double allLepReco = histo_["pt"][allReco   ][Njets_[mult]]->Integral(0, histo_["pt"][allReco   ][Njets_[mult]]->GetNbinsX()+1); 
     // calculate efficiencies
-    topEff_.push_back( allTopReco / allTopGen );
-    lepEff_.push_back( allLepReco / allLepGen );
+    // before SF correction
+    topEffNoSF_.push_back( allTopReco / allTopGen );
+    lepEffNoSF_.push_back( allLepReco / allLepGen );
+    // after SF correction
+    topEff_.push_back( allTopReco / allTopGen * effSF );
+    lepEff_.push_back( allLepReco / allLepGen * effSF );
     // do printout
     std::cout << " --- " << Njets_[mult] << " ---" << std::endl;
-    std::cout << "a) l+jets: ( " << allLepReco << " , " << allLepGen << " , " << lepEff_[mult] << " )" << std::endl;
-    std::cout << "b) top:    ( " << allTopReco << " , " << allTopGen << " , " << topEff_[mult] << " )" << std::endl;
+    std::cout << "a) l+jets: ( " << allLepReco << " , " << allLepGen << " , " 
+              << lepEffNoSF_[mult] << " , " << lepEff_[mult] << " )" << std::endl;
+    std::cout << "b) top:    ( " << allTopReco << " , " << allTopGen << " , " 
+              << topEffNoSF_[mult] << " , " << topEff_[mult] << " )" << std::endl;
   }
 
   // ---
