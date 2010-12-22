@@ -64,7 +64,7 @@ MuonKinematics::fill(const edm::View<reco::Candidate>& muons, const double& weig
   // index for the leading, 2. leading, 3. leading muon
   // to be compared with index_ from the module config
   // where index_=-1 means 'fill all muons' and index_=n
-  // n>=-1 means 'fill only n-th leading muon'
+  // n>=-1 means 'fill only (n-1)-th leading muon'
   int index=0;
   for(edm::View<reco::Candidate>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     if( index_<0 || index_==index ){
