@@ -1,10 +1,10 @@
 ## ---
-##    this configfile does the same like analyzeMuonDiffXSec_cfg.py
+##    this configfile does the same like analyzeMuonDiffXSecCorrected_cfg.py
 ##    but for ttbar BG
 ## ---
 
 ## get the mother file
-execfile("analyzeMuonDiffXSec_cfg.py")
+execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 
 ## change gen level event filter to ttbarBG
 process.ttSemiLeptonicFilter.invert = True
@@ -13,4 +13,4 @@ process.ttSemiLeptonicFilterb.invert = True
 print "ttbar decay subset filter is inverted semileptonic muon decay" 
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXSec_testBkg.root'
+process.TFileService.fileName = 'analyzeDiffXSecCorr_testBkg.root'

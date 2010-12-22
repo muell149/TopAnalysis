@@ -1,10 +1,12 @@
 ## ---
-##    this configfile does the same like analyzeMuonDiffXSec_cfg.py
-##    but is done withot filtering on gen level
+##    this configfile does the same like analyzeMuonDiffXSecCorrected_cfg.py
+##    but is done without filtering on gen level
 ## ---
 
 ## get the mother file
-execfile("analyzeMuonDiffXSec_cfg.py")
+execfile("analyzeMuonDiffXSecCorrected_cfg.py")
+
+process.source.fileNames = ['/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root']
 
 ## remove gen level event filter
 process.filterSequence  = cms.Sequence(process.hltFilter)
@@ -18,4 +20,4 @@ print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelec
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXSec_testAll.root'
+process.TFileService.fileName = 'analyzeDiffXSecCorr_testAll.root'

@@ -16,9 +16,9 @@ import FWCore.ParameterSet.Config as cms
 ##    'all' does no selection
 ## ---
 
-jetType = 'particleFlow' # 'Calo'
+jetType =  'particleFlow' # 'Calo' 
 
-eventFilter  = 'signal only'
+eventFilter  = 'signal only' #'all'
 ## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 if(not globals().has_key('writeOutput')): 
     writeOutput  = False # True
@@ -35,17 +35,14 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_9_1_CQ7.root'
-    #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_8_2_tNW.root'
-    #'/store/user/henderle/Spring10/TTbar_NLO/PATtuple_19_1.root'
-    #'/store/user/henderle/Spring10/TTbar_MAD/PATtuple_10_1.root'
-    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_7_1_UxQ.root'
+    #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
+    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -61,6 +58,10 @@ process.TFileService = cms.Service("TFileService",
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = cms.string('START38_V14::All')
+
 
 ## ---
 ##    configure the cutflow scenario
