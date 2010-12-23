@@ -122,7 +122,7 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   // for current QCD PYTHIA sample
   //  lumiweight_.push_back(0.000002870*(double)luminosity);
   // spring10:
-  lumiweight.push_back(0.000018205*(double)luminosity);
+  lumiweight_.push_back(0.000018205*(double)luminosity);
   // for data
   lumiweight_.push_back(1.0);
   

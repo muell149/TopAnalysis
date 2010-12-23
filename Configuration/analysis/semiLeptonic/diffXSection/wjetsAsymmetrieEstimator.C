@@ -66,11 +66,11 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/spring10PseudoData7TeV50pb.root" ) );
-  files_.push_back(new TFile(dataFile                                                              ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllMadSpring10"+jetType+".root"     ) );
+  TString whichSample = "/analysisRootFiles";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root"      ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV50pb.root" ) );
+  files_.push_back(new TFile(dataFile                                                                                 ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllMadD6TFall10"+jetType+".root"        ) );
   //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllNloSpring10.root"     ) );
 
   // create container for the different histos
@@ -102,7 +102,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   //    scale W+jets to luminosity
   // ---
   // a) spring10 7TeV W+jets MADGRAPH sample 
-  double lumiweight=0.155498692/50*luminosity;
+  double lumiweight=0.105750913/50*luminosity;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
     ptMuPlus_ [Njets_[mult]][kWjets]->Scale(lumiweight);
@@ -110,7 +110,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
     pt_       [Njets_[mult]][kWjets]->Scale(lumiweight);
   }
   // b) spring10 7TeV TTbar MADGRAPH sample
-  double lumiweight2=0.005308736/50*luminosity;
+  double lumiweight2=0.006029022/50*luminosity;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
     ptMuPlus_ [Njets_[mult]][kTtbar]->Scale(lumiweight2);

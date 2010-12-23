@@ -182,7 +182,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     if(idx==kZjets)lumiweight_.push_back(0.000059912090/50.0*luminosity);
     //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
     // spring10:
-    if(idx==kQCD)lumiweight.push_back(0.000018205*(double)luminosity);
+    if(idx==kQCD)lumiweight_.push_back(0.000018205*(double)luminosity);
   }
  
   // ---
