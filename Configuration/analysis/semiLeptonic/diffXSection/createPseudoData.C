@@ -132,14 +132,14 @@ void loadingFiles(TString jetType)
   // !!! add all contributing samples here !!!
   // -----------------------------------------
 
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloSpring10.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+jetType+".root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root"  ) );
-  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloSpring10.root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+jetType+".root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+jetType+".root" ) );
+  TString whichSample = "/analysisRootFiles";
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloFall10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root"  ) );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloFall10.root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetType+".root" ) );
 
 }
 
@@ -174,12 +174,12 @@ void combineFiles(double luminosity)
   // -----------------------------------
 
   //lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
-  lumiweight_.push_back(0.005308736/50.0*(double)luminosity);
-  lumiweight_.push_back(0.155498692/50.0*(double)luminosity);
+  lumiweight_.push_back(0.006029022/50.0*(double)luminosity);
+  lumiweight_.push_back(0.105750913/50.0*(double)luminosity);
   //lumiweight_.push_back(0.00831910/50.0*(double)luminosity);
-  lumiweight_.push_back(0.005308736/50.0*(double)luminosity);
-  lumiweight_.push_back(0.140471057/50.0*(double)luminosity);
-  lumiweight_.push_back(0.910264515/50.0*(double)luminosity);
+  lumiweight_.push_back(0.006029022/50.0*(double)luminosity);
+  lumiweight_.push_back(0.059912090/50.0*(double)luminosity);
+  lumiweight_.push_back(0.143500567/50.0*(double)luminosity);
 
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
     hists_ [idx]->Scale(lumiweight_[idx]);

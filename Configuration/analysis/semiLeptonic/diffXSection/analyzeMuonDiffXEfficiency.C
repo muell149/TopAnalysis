@@ -32,7 +32,7 @@ template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 TString getTStringFromInt(int i);
 
-void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false, bool useNLO=false, TString JES="", TString jetType = "")
+void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false, bool useNLO=false, TString JES="", TString jetType = "PF")
 {
   // ---
   //    main function parameters
@@ -78,10 +78,10 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAll"+TopSample+"Spring10"+JES+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+JES+jetType+".root") );
-  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+JES+jetType+".root") );
+  TString whichSample = "/analysisRootFiles";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAll"+TopSample+"D6TFall10"+JES+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+JES+jetType+".root") );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadFall10"+JES+jetType+".root") );
 
   // ---
   //    get histograms
@@ -121,16 +121,16 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // for current spring10 7TeV Mc@Nlo sample (50pb-1)
   // a) Reco
   // ttbar(all) sample 
-  if(!useNLO) lumiweight.push_back(0.005308736/50.0*(double)luminosity);
-  if(useNLO)  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
+  if(!useNLO) lumiweight.push_back(0.006029022/50.0*(double)luminosity);
+  if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
-  lumiweight.push_back(0.155498692/50.0*(double)luminosity);
+  lumiweight.push_back(0.000105750913/50.0*(double)luminosity);
   // b) Gen
   // ttbar(all) sample 
-  if(!useNLO) lumiweight.push_back(0.005308736/50.0*(double)luminosity);
-  if(useNLO)  lumiweight.push_back(0.007940958/50.0*(double)luminosity);
+  if(!useNLO) lumiweight.push_back(0.006029022/50.0*(double)luminosity);
+  if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
-  lumiweight.push_back(0.155498692/50.0*(double)luminosity);
+  lumiweight.push_back(0.105750913/50.0*(double)luminosity);
 
   // create variable indicator for easy handling of pt, eta and phi
   std::vector<TString> variables_;
@@ -213,12 +213,12 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       // differential l+jets efficiencies
       histo_[variables_[var]][effNoSF][Njets_[mult]]=        (TH1F*)histo_[variables_[var]][allReco][Njets_[mult]]->Clone();
       histo_[variables_[var]][effNoSF][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][allGen ][Njets_[mult]]->Clone());
-      histo_[variables_[var]][eff][Njets_[mult]]    ->(TH1F*)histo_[variables_[var]][effNoSF][Njets_[mult]]->Clone();
+      histo_[variables_[var]][eff][Njets_[mult]]    = (TH1F*)histo_[variables_[var]][effNoSF][Njets_[mult]]->Clone();
       histo_[variables_[var]][eff][Njets_[mult]]    ->Scale(effSF);
        // differential top efficiencies
       histo_[variables_[var]][topEffNoSF][Njets_[mult]]=        (TH1F*)histo_[variables_[var]][kttbarReco][Njets_[mult]]->Clone();
       histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][kttbarGen ][Njets_[mult]]->Clone());
-      histo_[variables_[var]][topEff][Njets_[mult]]    ->(TH1F*)histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Clone();
+      histo_[variables_[var]][topEff][Njets_[mult]]    = (TH1F*)histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Clone();
       histo_[variables_[var]][topEff][Njets_[mult]]    ->Scale(effSF);
     }
   }

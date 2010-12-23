@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", TString plots = "cutflow", TString jetTyp = "PF")
+void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov51PF.root", TString plots = "cutflow", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -50,15 +50,15 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = true, TString dataFi
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
+  TString whichSample = "/analysisRootFiles";
   for(int ienum = 0; ienum<6; ienum++){
-    if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+jetTyp+".root"    ) );
-    if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+jetTyp+".root"    ) );
-    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloSpring10.root"    ) );
-    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloSpring10.root"    ) );
-    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+jetTyp+".root"  ) );
-    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetTyp+".root"  ) );
-    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+jetTyp+".root" ) );
+    if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+jetTyp+".root"    ) );
+    if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+jetTyp+".root"    ) );
+    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloFall10.root"    ) );
+    //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloFall10.root"    ) );
+    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+jetTyp+".root"  ) );
+    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetTyp+".root"  ) );
+    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetTyp+".root" ) );
     if(ienum==kData) files_.push_back(new TFile(dataFile                                                             ) );
   }
   // ---
@@ -67,19 +67,21 @@ void analyzeMuonCuts(double luminosity = 34716, bool save = true, TString dataFi
   std::vector<double> lumiweight;
   // add scaling factors here!
 
-  // 7 TeV Monte Carlo spring 10 samples
+  // 7 TeV Monte Carlo fall 10 samples
   // -----------------------------------
   // for current ttbar(lept.mu on gen level and other) Madgraph 
-  lumiweight.push_back(0.000000106*(double)luminosity);
-  lumiweight.push_back(0.000000106*(double)luminosity);
+  lumiweight.push_back(0.000000121*(double)luminosity);
+  lumiweight.push_back(0.000000121*(double)luminosity);
   // for current ttbar(lept.mu on gen level and other) Mc@Nlo 
   //   lumiweight.push_back(0.000000159*(double)luminosity);
   //   lumiweight.push_back(0.000000159*(double)luminosity);
   // for current Z+jets MADGRAPH sample
-  lumiweight.push_back(0.000002809*(double)luminosity);
+  lumiweight.push_back(0.000001198*(double)luminosity);
   // for current W+jets MADGRAPH sample
-  lumiweight.push_back(0.000003110*(double)luminosity);
+  lumiweight.push_back(0.000002115*(double)luminosity);
   // for current QCD PYTHIA sample
+  //lumiweight.push_back(0.000002870*(double)luminosity);
+  // spring10
   lumiweight.push_back(0.000018205*(double)luminosity);
   // for data
   lumiweight.push_back(1.0);
@@ -1083,7 +1085,7 @@ void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin, floa
 {
   hist.SetTitle("");
   hist.GetXaxis()->SetTitle(titleX);
-  //hist.GetXaxis()->CenterTitle();
+  hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.06);
   hist.GetXaxis()->SetTitleColor (    1);
   hist.GetXaxis()->SetTitleOffset(  1.0);
@@ -1100,7 +1102,7 @@ void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin, floa
   hist.GetYaxis()->SetTitleFont  (   62);
   hist.GetYaxis()->SetLabelSize  ( 0.04);
   hist.GetYaxis()->SetLabelFont  (   62);
-  //hist.GetYaxis()->CenterTitle   ( true);
+  hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
 }

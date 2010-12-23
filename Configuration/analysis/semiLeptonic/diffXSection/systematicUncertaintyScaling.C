@@ -31,7 +31,7 @@ int roundToInt(double value);
 TString getTStringFromInt(int i);
 double readLineFromFile(int line, TString file="crossSectionCalculation.txt");
 
-void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", bool logartihmicPlots=false, TString jetType = "PF", TString up = "JES105", TString down = "JES095")
+void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool logartihmicPlots=false, TString jetType = "PF", TString up = "JES105", TString down = "JES095")
 {
 
   // ---
@@ -67,26 +67,26 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+jetType+".root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+jetType+".root"         ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+jetType+".root"       ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root"       ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+jetType+".root"      ) );
+  TString whichSample = "/analysisRootFiles";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+jetType+".root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+jetType+".root"         ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+jetType+".root"       ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root"       ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetType+".root"      ) );
 
   files_.push_back(new TFile(dataFile                                                                  ) );
 
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+down+jetType+".root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+down+jetType+".root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+down+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+down+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+down+jetType+".root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+down+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+down+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+down+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+down+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+down+jetType+".root" ) );
 
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+up+jetType+".root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+up+jetType+".root"    ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+up+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+up+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+up+jetType+".root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+up+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+up+jetType+".root"    ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+up+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+up+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+up+jetType+".root" ) );
 
   // ---
   //    get histograms
@@ -113,14 +113,16 @@ void systematicUncertaintyScaling(double luminosity = 34716, bool save = true, T
   // 7 TeV Monte Carlo spring 10 samples
   // -----------------------------------
   // for current ttbar(lept.mu on gen level and other) Madgraph 
-  lumiweight_.push_back(0.000000106*(double)luminosity);
-  lumiweight_.push_back(0.000000106*(double)luminosity);
+  lumiweight_.push_back(0.000000121*(double)luminosity);
+  lumiweight_.push_back(0.000000121*(double)luminosity);
   // for current Z+jets MADGRAPH sample
-  lumiweight_.push_back(0.000002809*(double)luminosity);
+  lumiweight_.push_back(0.000001198*(double)luminosity);
   // for current W+jets MADGRAPH sample
-  lumiweight_.push_back(0.000003110*(double)luminosity);
+  lumiweight_.push_back(0.000002115*(double)luminosity);
   // for current QCD PYTHIA sample
-  lumiweight_.push_back(0.000018205*(double)luminosity);
+  //  lumiweight_.push_back(0.000002870*(double)luminosity);
+  // spring10:
+  lumiweight.push_back(0.000018205*(double)luminosity);
   // for data
   lumiweight_.push_back(1.0);
   

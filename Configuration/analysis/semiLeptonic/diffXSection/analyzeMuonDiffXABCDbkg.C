@@ -42,7 +42,7 @@ std::vector<double> fitExponentialExtrapolate2(TH1& hist, const double xmin=0., 
 //std::pair<double,double> exponentialFit2(double x, const double a, const double sa, const double b, const double sb);
 
 
-void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Oct15.root", TString jetType = "")
+void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool textoutput=false, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15.root", TString jetType = "PF")
 {
   // ---
   //    main function parameters
@@ -69,12 +69,12 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   //    get input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+jetType+".root") );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+jetType+".root" ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllMadSpring10"+jetType+".root"   ) );
-  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllNloSpring10.root"   ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+jetType+".root" ) );
+  TString whichSample = "/analysisRootFiles";
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetType+".root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllMadD6TFall10"+jetType+".root"   ) );
+  //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllNloFall10.root"   ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+jetType+".root" ) );
   files_.push_back(new TFile(dataFile                                                            ) );
 
   // ---
@@ -103,13 +103,13 @@ void analyzeMuonDiffXABCDbkg(double luminosity = 50, bool save = false, bool tex
   // ---
   std::vector<double> lumiweight_;
   // a) for current QCD 7TeV PYTHIA sample 
-  lumiweight_.push_back(0.910264515/50.0*luminosity);
+  lumiweight_.push_back(0.143500567/50.0*luminosity);
   // b) for current wjets 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.155498692/50.0*luminosity);  
+  lumiweight_.push_back(0.105750913/50.0*luminosity);  
   // c) for current ttbar 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.005308736/50.0*luminosity);
+  lumiweight_.push_back(0.006029022/50.0*luminosity);
   // d) for current zjets 7TeV MADGRAPH sample 
-  lumiweight_.push_back(0.140471057/50.0*luminosity);
+  lumiweight_.push_back(0.059912090/50.0*luminosity);
 
   // ---
   //    lumiweight and combine all MC samples

@@ -7,14 +7,12 @@
 ## 2) inclusive top cross section measurement
 
 ## define processed data to be analyzed (output of data: ./analyzeMuonDiffXSec_cfg.py - MC: ./analyzeMuonDiffXSec_cfg.py)
-JESup=\"JES105\"
-JESdown=\"JES095\"
+JESup=\"JES11\"
+JESdown=\"JES09\"
 jetType=PF
 #jetType=
-dataSample=\"./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5$jetType.root\"
-dataLuminosity=34716
-#21885
-#15078
+dataSample=\"./diffXSecFromSignal/data/DiffXSecData_Nov15$jetType.root\"
+dataLuminosity=36100
 echo
 echo doing the full l+jets analysis
 echo used data: $dataSample

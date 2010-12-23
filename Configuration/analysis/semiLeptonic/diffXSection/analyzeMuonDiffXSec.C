@@ -39,10 +39,10 @@ double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useN
 void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2);
 void scaleByLumi(TH1F* histo, double lumi);
 void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, unsigned int color=kBlack);
-void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES105", TString down = "JES095");
-double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES105", TString down = "JES095");
+void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES11", TString down = "JES09");
+double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES11", TString down = "JES09");
 
-void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=false, TString jetTyp = "PF", TString up = "JES105", TString down = "JES095")
+void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=false, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09")
 { 
 
   // ---
@@ -115,13 +115,13 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
+  TString whichSample = "/analysisRootFiles";
   for(int ienum = 0; ienum<6; ienum++){
-    if(ienum==kSig)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadSpring10"+JES+jetTyp+".root"   ) );
-    if(ienum==kBkg)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadSpring10"+JES+jetTyp+".root"   ) );
-    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadSpring10"+JES+jetTyp+".root" ) );
-    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadSpring10"+JES+jetTyp+".root" ) );
-    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaSpring10"+JES+jetTyp+".root") );
+    if(ienum==kSig)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+JES+jetTyp+".root"   ) );
+    if(ienum==kBkg)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+JES+jetTyp+".root"   ) );
+    if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+JES+jetTyp+".root" ) );
+    if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+JES+jetTyp+".root" ) );
+    if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+JES+jetTyp+".root") );
     if(ienum==kData) files_.push_back(new TFile(dataFile                                                                        ) );
   }
 
@@ -172,15 +172,17 @@ void analyzeMuonDiffXSec(double luminosity = 34716, bool save = true, bool loadV
   // define weights concerning luminosity
   // ---
   std::vector<double> lumiweight_;
-  // 7 TeV Monte Carlo spring 10 samples
+  // 7 TeV Monte Carlo fall 10 samples
   // (2*ttbar MC@NLO, 2*ttbar MG, W+jets MG, Z+jets MG, QCD PYTHIA) 
   // -----------------------------------
   for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
-    if(!useNLO && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000005308736/50.0*luminosity);
-    if( useNLO && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000007940958/50.0*luminosity);
-    if(idx==kWjets)lumiweight_.push_back(0.000155498692/50.0*luminosity);
-    if(idx==kZjets)lumiweight_.push_back(0.000140471057/50.0*luminosity);
-    if(idx==kQCD)lumiweight_.push_back(0.000910264515/50.0*luminosity);
+    if(!useNLO && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000006029022/50.0*luminosity);
+    if( useNLO && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000006755505/50.0*luminosity);
+    if(idx==kWjets)lumiweight_.push_back(0.000105750913/50.0*luminosity);
+    if(idx==kZjets)lumiweight_.push_back(0.000059912090/50.0*luminosity);
+    //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
+    // spring10:
+    if(idx==kQCD)lumiweight.push_back(0.000018205*(double)luminosity);
   }
  
   // ---
