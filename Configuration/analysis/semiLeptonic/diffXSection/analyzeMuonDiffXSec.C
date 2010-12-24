@@ -1156,7 +1156,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	// a) MC samples (loop)
 	for(int idx=kQCD; idx>=kSig; --idx){
 	  double min = 0.;
-	  double maxValue = getMaxValue(*histo_[yield_[var]][kData][Njets_[mult]], variables_[var]);
+	  double maxValue = getMaxValue(*histo_[yield_[var]][kData][Njets_[mult]], variables_[var], up, down);
 	  double maxQCD = histo_[yield_[var]][kQCD][Njets_[mult]]->GetMaximum();
 	  if(maxQCD>maxValue)maxValue=maxQCD;
 	  double max = 1.15*maxValue;
@@ -1220,7 +1220,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	    histogramStyle(*histo_[ljetsXSec_[var]][idx][Njets_[mult]], kLepJets, false);
 	    // set axis for plots
 	    double min = 0.;
-	    double maxValue = getMaxValue(*histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var], true, "diffNormXSec"+variables_[var], mult);
+	    double maxValue = getMaxValue(*histo_[ljetsXSec_[var]][kData][Njets_[mult]], variables_[var], true, "diffNormXSec"+variables_[var], mult, up, down);
 	    double max = 1.15*maxValue;
 	    if(variables_[var]!="pt" && mult < 3)max=1.3*maxValue;
 	    if(logartihmicPlots){
@@ -1300,7 +1300,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	    histogramStyle(*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], kLepJets);
 	    // set axis for plots
 	    double min = 0.;
-	    double maxValue = getMaxValue(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], variables_[var], true, "differentialXSec"+variables_[var], mult);
+	    double maxValue = getMaxValue(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], variables_[var], true, "differentialXSec"+variables_[var], mult, up, down);
 	    double max = 1.15*maxValue;
 	    if(logartihmicPlots){
 	      if(variables_[var]=="pt"){
@@ -1404,7 +1404,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     MyCanvas[canvasNumber] ->SetTitle("inclusiveCrossSectionLjets"+log);
     if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
     double min = 0.;
-    double maxValue = getMaxValue(*sigmaLjetsInclusiveData, "Njets", true, "ljetsXSec", 6);
+    double maxValue = getMaxValue(*sigmaLjetsInclusiveData, "Njets", true, "ljetsXSec", 6, up, down);
     double max = 1.1*maxValue;
     if(logartihmicPlots){
       min=5;
@@ -1526,7 +1526,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
       // set axis 
       double min = 0.;
-      double maxValue = getMaxValue(*histo_["pt top"][kData][Njets_[mult]], "pt", true, "differentialTopPt"+Njets_[mult], 7);
+      double maxValue = getMaxValue(*histo_["pt top"][kData][Njets_[mult]], "pt", true, "differentialTopPt"+Njets_[mult], 7, up, down);
       double max = 1.5*maxValue;
       if(logartihmicPlots){
 	min=0.0001;
@@ -1559,7 +1559,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
       // set axis 
       double min2 = 0.;
-      double max2Value = getMaxValue(*histo_["eta top"][kData][Njets_[mult]], "eta", true, "differentialTopEta"+Njets_[mult], 7);
+      double max2Value = getMaxValue(*histo_["eta top"][kData][Njets_[mult]], "eta", true, "differentialTopEta"+Njets_[mult], 7, up, down);
       double max2 = 1.5*max2Value;
       if(logartihmicPlots){
 	min2=0.05;
