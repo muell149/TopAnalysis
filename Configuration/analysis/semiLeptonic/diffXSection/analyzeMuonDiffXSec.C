@@ -270,10 +270,10 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     // a) get number
     //NQCD_ .push_back( getABCDNumbers(Njets_[mult], loadValues, file)*QCDVariation );
 
-    if(Njets_[mult]=="Njets1") NQCD_.push_back(QCDVariation*2.1*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets2") NQCD_.push_back(QCDVariation*2.8*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets3") NQCD_.push_back(QCDVariation*3.4*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
-    if(Njets_[mult]=="Njets4") NQCD_.push_back(QCDVariation*3.7*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets1") NQCD_.push_back(QCDVariation*1.95*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets2") NQCD_.push_back(QCDVariation*2.49*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets3") NQCD_.push_back(QCDVariation*2.6*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
+    if(Njets_[mult]=="Njets4") NQCD_.push_back(QCDVariation*2.8*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1));
 
     // b) get shape from QCD MC
     // loop pt, eta and phi
@@ -491,9 +491,11 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	for(int bin =0; bin<=histo_[variables_[var]][kData][Njets_[mult]]->GetNbinsX()+1; ++bin){
 	  // if efficiency is not 0 correct by division (reco=gen*eff)
 	  if(efficiency_[variables_[var]][bin][Njets_[mult]]!=0){
-	    histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinContent(bin, histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetBinContent(bin) / efficiency_[variables_[var]][bin][Njets_[mult]]);
+	    if(idx==kData)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinContent(bin, histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetBinContent(bin) / efficiency_[variables_[var]][bin][Njets_[mult]]);
+	    else histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinContent(bin, 0.964155*histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetBinContent(bin) / (efficiency_[variables_[var]][bin][Njets_[mult]]));
 	    // take care of error: N'=(N-NBG)/e -> sN'= sN/e
-	    histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinError(bin, sqrt( histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin) ) / efficiency_[variables_[var]][bin][Njets_[mult]]);
+	    if(idx==kData)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinError(bin, sqrt( histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin) ) / efficiency_[variables_[var]][bin][Njets_[mult]]);
+	    else histo_[ljetsXSec_[var]][idx][Njets_[mult]]->SetBinError(bin, sqrt( 0.964155*histo_[variables_[var]][idx][Njets_[mult]]->GetBinContent(bin) ) / (efficiency_[variables_[var]][bin][Njets_[mult]]));
 	  }
 	}
 	// d) l+jets differential cross section (without normalization)
@@ -1069,7 +1071,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     eventCompositionPart2->AddEntry( histo_["pt composition"][kZjets]["Njets1"], "Z/#gamma*#rightarrowl^{+}l^{-} MADGRAPH", "PL");
     // f) create legends for inclusive cross sections
     // (i) l+jets
-    TLegend *inclusiveCrossSectionLjetsLeg = new TLegend(0.35, 0.53, 0.96, 0.77);
+    TLegend *inclusiveCrossSectionLjetsLeg = new TLegend(0.4, 0.53, 0.96, 0.77);
     inclusiveCrossSectionLjetsLeg->SetFillStyle(0);
     inclusiveCrossSectionLjetsLeg->SetFillColor(10);
     inclusiveCrossSectionLjetsLeg->SetBorderSize(0);
@@ -1156,7 +1158,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	// a) MC samples (loop)
 	for(int idx=kQCD; idx>=kSig; --idx){
 	  double min = 0.;
-	  double maxValue = getMaxValue(*histo_[yield_[var]][kData][Njets_[mult]], variables_[var], up, down);
+	  double maxValue = getMaxValue(*histo_[yield_[var]][kData][Njets_[mult]], variables_[var]);
 	  double maxQCD = histo_[yield_[var]][kQCD][Njets_[mult]]->GetMaximum();
 	  if(maxQCD>maxValue)maxValue=maxQCD;
 	  double max = 1.15*maxValue;
