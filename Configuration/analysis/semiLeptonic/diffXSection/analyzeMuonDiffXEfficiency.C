@@ -124,7 +124,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   if(!useNLO) lumiweight.push_back(0.006029022/50.0*(double)luminosity);
   if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
-  lumiweight.push_back(0.000105750913/50.0*(double)luminosity);
+  lumiweight.push_back(0.105750913/50.0*(double)luminosity);
   // b) Gen
   // ttbar(all) sample 
   if(!useNLO) lumiweight.push_back(0.006029022/50.0*(double)luminosity);
