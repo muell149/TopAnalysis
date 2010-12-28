@@ -1,13 +1,13 @@
 ## ---
 ##    this configfile does the same like analyzeMuonDiffXSec_cfg.py
-##    but JER are scald up by 15% (JER variation down)
+##    but JER are scaled up by 20% (JER variation up)
 ## ---
 
 ## get the mother file
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 
-# JER +15%
-process.scaledJetEnergy.resolutionFactor = 1.15
+# JER +20%
+process.scaledJetEnergy.resolutionFactor = 1.20
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXSecJER15_testSig.root'
+process.TFileService.fileName = 'analyzeDiffXSecJERup_testSig.root'
