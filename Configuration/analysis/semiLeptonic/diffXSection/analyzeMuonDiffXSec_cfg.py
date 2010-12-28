@@ -1,4 +1,5 @@
 
+
 import FWCore.ParameterSet.Config as cms
 
 ## ---
@@ -36,13 +37,14 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
-    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
+    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
+    #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     )
 )
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
@@ -69,8 +71,9 @@ process.GlobalTag.globaltag = cms.string('START38_V14::All')
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 ## high level trigger filter
+#(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
 
 ## semileptonic selection
