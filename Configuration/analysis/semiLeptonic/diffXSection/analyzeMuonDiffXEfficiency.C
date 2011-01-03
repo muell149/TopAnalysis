@@ -327,7 +327,11 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   double NTop   = histo_["pt"][kttbarGen]["Njets4"]->Integral( 0 , histo_["pt"][kttbarGen]["Njets4"]->GetNbinsX()+1 ); 
   // (iv) get extrapolation factor from chosen to inclusive phase space
   double extrapolation = NTheory / NTop;
+  // (v) correct BR of MC sample
+  double BRcorrection = (0.108*9)*(0.676*1.5);
+  extrapolation= extrapolation / BRcorrection;
   std::cout << "extrapolation factor for top from chosen to inclusive phase space: " << extrapolation  << std::endl;
+  std::cout << "(BR correction applied)" << std::endl;
 
   // ---       
   //    if textoutput==true: save efficiencies within .txt-file
