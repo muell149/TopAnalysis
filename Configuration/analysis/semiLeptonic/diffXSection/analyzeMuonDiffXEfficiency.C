@@ -20,13 +20,12 @@
 #include <TStyle.h>
 #include <TF1.h>
 
-enum styles {kttbarReco, kWjetsReco, kttbarGen, kWjetsGen};
+enum styles {kttbarReco, kWjetsReco, kSTopSReco, kSTopTReco, kSTopTWReco, kttbarGen, kWjetsGen, kSTopSGen, kSTopTGen, kSTopTWGen};
 
 void canvasStyle(TCanvas& canv);
 void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyle=20, float markersize=1.8, int filled=0); 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 TH1F* divideByBinwidth(TH1F* histo);
-double getMaximumDependingOnNjetsCut(TString plot, TString Njets);
 TString jetLabel(TString input);
 template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
@@ -81,6 +80,9 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   TString whichSample = "/analysisRootFiles";
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAll"+TopSample+"D6TFall10"+JES+jetType+".root"  ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+JES+jetType+".root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopSchannelMadZ2Fall10"+JES+jetType+".root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTchannelMadZ2Fall10"+JES+jetType+".root") );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTWchannelMadZ2Fall10"+JES+jetType+".root") );
   //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadFall10"+JES+jetType+".root") );
 
   // ---
@@ -95,7 +97,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     // get reco plots
-    for(unsigned int idx=kttbarReco; idx<=kWjetsReco; ++idx) {
+    for(unsigned int idx=kttbarReco; idx<=kSTopTWReco; ++idx) {
       histo_["eta"][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/eta" );
       histo_["pt" ][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/pt"  );
       histo_["phi"][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/phi" );
@@ -108,10 +110,10 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     if(multgen==Njets_.size()-2) multgen=mult-1;
     if(multgen==Njets_.size()-1) multgen=mult-3;
     // -3 because plots are within the same rootfile
-    for(unsigned int idx=kttbarGen; idx<=kWjetsGen; ++idx) {
-      histo_["eta"][idx][Njets_[mult]] = (TH1F*)(files_[idx-2]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/eta")->Clone());
-      histo_["pt" ][idx][Njets_[mult]] = (TH1F*)(files_[idx-2]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/pt" )->Clone());
-      histo_["phi"][idx][Njets_[mult]] = (TH1F*)(files_[idx-2]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/phi")->Clone()); 
+    for(unsigned int idx=kttbarGen; idx<=kSTopTWGen; ++idx) {
+      histo_["eta"][idx][Njets_[mult]] = (TH1F*)(files_[idx-files_.size()]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/eta")->Clone());
+      histo_["pt" ][idx][Njets_[mult]] = (TH1F*)(files_[idx-files_.size()]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/pt" )->Clone());
+      histo_["phi"][idx][Njets_[mult]] = (TH1F*)(files_[idx-files_.size()]->Get("analyzeTightMuonCrossSectionGen"+Njets_[multgen]+"/phi")->Clone()); 
     }
   }
   // ---
@@ -125,12 +127,18 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.105750913/50.0*(double)luminosity);
+  lumiweight.push_back(0.000464677/50.0*(double)luminosity);
+  lumiweight.push_back(0.006672727/50.0*(double)luminosity);
+  lumiweight.push_back(0.001070791/50.0*(double)luminosity);
   // b) Gen
   // ttbar(all) sample 
   if(!useNLO) lumiweight.push_back(0.006029022/50.0*(double)luminosity);
   if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.105750913/50.0*(double)luminosity);
+  lumiweight.push_back(0.000464677/50.0*(double)luminosity);
+  lumiweight.push_back(0.006672727/50.0*(double)luminosity);
+  lumiweight.push_back(0.001070791/50.0*(double)luminosity);
 
   // create variable indicator for easy handling of pt, eta and phi
   std::vector<TString> variables_;
@@ -144,7 +152,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     // loop gen and reco samples
-    for(int idx=kttbarReco; idx<=kWjetsGen; ++idx){
+    for(int idx=kttbarReco; idx<=kSTopTWGen; ++idx){
       // loop pt, eta and phi
       for(unsigned int var=0; var<variables_.size(); ++var){
 	histo_[variables_[var]][idx][Njets_[mult]]->Scale(lumiweight[idx]);
@@ -174,11 +182,11 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     // loop pt, eta and phi
     for(unsigned int var=0; var<variables_.size(); ++var){
       // a) reco    
-      for(unsigned int idx=kttbarReco+1; idx<=kWjetsReco; ++idx){
+      for(unsigned int idx=kttbarReco+1; idx<=kSTopTWReco; ++idx){
 	histo_[variables_[var]][allReco][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone());
       }
       // b) gen
-      for(unsigned int idx=kttbarGen+1; idx<=kWjetsGen; ++idx){
+      for(unsigned int idx=kttbarGen+1; idx<=kSTopTWGen; ++idx){
 	histo_[variables_[var]][allGen][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][idx][Njets_[mult]]->Clone());
       }
     }
@@ -417,7 +425,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       divideByBinwidth( histo_[variables_[var]][allGen ][Njets_[mult]]);
       divideByBinwidth( histo_[variables_[var]][allReco][Njets_[mult]]);  
       // b) for single MC plots (gen and reco)
-      for(unsigned int idx=kttbarReco; idx<=kWjetsGen; ++idx) {
+      for(unsigned int idx=kttbarReco; idx<=kSTopTWGen; ++idx) {
 	divideByBinwidth( histo_[variables_[var]][idx][Njets_[mult]]);
       }
     }
@@ -535,7 +543,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
     MyCanvas[canvasNumber]->cd(0);
     MyCanvas[canvasNumber]->SetTitle("ptMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
-    axesStyle(*histo_["pt"][allGen][Njets_[mult]], "p_{t}(#mu) [GeV]", "events / GeV", 0.,  getMaximumDependingOnNjetsCut("pt",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+    axesStyle(*histo_["pt"][allGen][Njets_[mult]], "p_{t}(#mu) [GeV]", "events / GeV", 0., 1.5*histo_["pt"][allGen ][Njets_[mult]]->GetMaximum(), 0.06, 1.5); 
     histogramStyle(*histo_["pt"][allGen ][Njets_[mult]] , kRed  , 1, 20);
     histogramStyle(*histo_["pt"][allReco][Njets_[mult]] , kBlack, 1, 22);
     histo_["pt"][allGen ][Njets_[mult]]->Draw("HIST");
@@ -553,7 +561,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetTitle("etaMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
-  axesStyle(*histo_["eta" ][allGen][Njets_[mult]], "#eta(#mu)", "events", 0.,  getMaximumDependingOnNjetsCut("eta",Njets_[mult])/5.0*luminosity, 0.06, 1.5); 
+  axesStyle(*histo_["eta" ][allGen][Njets_[mult]], "#eta(#mu)", "events", 0., 1.5*histo_["eta"][allGen][Njets_[mult]]->GetMaximum(), 0.06, 1.5); 
   histogramStyle(*histo_["eta"][allGen ][Njets_[mult]] , kRed  , 1, 20);
   histogramStyle(*histo_["eta"][allReco][Njets_[mult]] , kBlack, 1, 22);
   histo_["eta"][allGen ][Njets_[mult]]->Draw("HIST");
@@ -571,7 +579,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
   MyCanvas[canvasNumber]->cd(0);
   MyCanvas[canvasNumber]->SetTitle("phiMuGenAndReco"+Njets_[mult]+"Lum5pb@7TeV");
-  axesStyle(*histo_["phi"][allGen][Njets_[mult]], "#phi(#mu)", "events", 0.,  getMaximumDependingOnNjetsCut("phi",Njets_[mult])/8.0*luminosity, 0.06, 1.5); 
+  axesStyle(*histo_["phi"][allGen][Njets_[mult]], "#phi(#mu)", "events", 0., 1.5*histo_["phi"][allGen][Njets_[mult]]->GetMaximum(), 0.06, 1.5); 
   histogramStyle(*histo_["phi"][allGen ][Njets_[mult]] , kRed  , 1, 20);
   histogramStyle(*histo_["phi"][allReco][Njets_[mult]] , kBlack, 1, 22);
   histo_["phi"][allGen ][Njets_[mult]]->Draw("HIST");
@@ -668,11 +676,16 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     MyCanvas[canvasNumber]->cd(0);
     MyCanvas[canvasNumber]->SetTitle("ptGenComposition"+Njets_[mult]);
     histo_["pt"][kWjetsGen][Njets_[mult]]->Add(histo_["pt"][kttbarGen][Njets_[mult]]);
-    axesStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], "p_{t}(#mu) [GeV]", "events / GeV", 0., getMaximumDependingOnNjetsCut("pt",Njets_[mult])/8.0*luminosity, 0.06, 1.5); 
-    histogramStyle(*histo_["pt"][kWjetsGen][Njets_[mult]], kGreen, 1, 20, 1.5, 1);
-    histogramStyle(*histo_["pt"][kttbarGen][Njets_[mult]], kRed  , 1, 20, 1.5, 1);
-    histo_["pt"][kWjetsGen][Njets_[mult]]->Draw("");
-    histo_["pt"][kttbarGen][Njets_[mult]]->Draw("same");
+    histo_["pt"][kSTopTWGen][Njets_[mult]]->Add(histo_["pt"][kWjetsGen][Njets_[mult]]);
+    histo_["pt"][kSTopTWGen][Njets_[mult]]->Add(histo_["pt"][kSTopTGen][Njets_[mult]]);
+    histo_["pt"][kSTopTWGen][Njets_[mult]]->Add(histo_["pt"][kSTopSGen][Njets_[mult]]);
+    axesStyle(*histo_["pt"][kSTopTWGen][Njets_[mult]], "p_{t}(#mu) [GeV]", "events / GeV", 0., 1.1*histo_["pt"][kSTopTWGen][Njets_[mult]]->GetMaximum(), 0.06, 1.5); 
+    histogramStyle(*histo_["pt"][kSTopTWGen][Njets_[mult]], kMagenta, 1, 20, 1.5, 1);
+    histogramStyle(*histo_["pt"][kWjetsGen ][Njets_[mult]], kGreen  , 1, 20, 1.5, 1);
+    histogramStyle(*histo_["pt"][kttbarGen ][Njets_[mult]], kRed    , 1, 20, 1.5, 1);
+    histo_["pt"][kSTopTWGen][Njets_[mult]]->Draw("");
+    histo_["pt"][kWjetsGen ][Njets_[mult]]->Draw("same");
+    histo_["pt"][kttbarGen ][Njets_[mult]]->Draw("same");
     genLegend_[mult]->Draw("same");
     ++canvasNumber;
   }
@@ -770,33 +783,6 @@ TH1F* divideByBinwidth(TH1F* histo)
     output->SetBinContent(bini,((double)(output->GetBinContent(bini))/(double)(output->GetBinWidth(bini)))  );   
   } 
   return output;
-}
-
-double getMaximumDependingOnNjetsCut(TString plot, TString Njets)
-{
-  // create container for histo max values sortet by plot and Njet
-  std::map< TString, std::map <TString,double> > maxValues_;  
-  // create maximum values for pt, eta, phi ( for 5pb^-1)
-  maxValues_["pt" ]["Njets4Btag"]= 55.; 
-  maxValues_["pt" ]["Njets3Btag"]= 130.; 
-  maxValues_["pt" ]["Njets4"]= 55.;  
-  maxValues_["pt" ]["Njets3"]= 130.;
-  maxValues_["pt" ]["Njets2"]= 400.;
-  maxValues_["pt" ]["Njets1"]= 2200.;
-  maxValues_["eta"]["Njets4Btag"]= 60.;  
-  maxValues_["eta"]["Njets3Btag"]= 140.; 
-  maxValues_["eta"]["Njets4"]= 65.;  
-  maxValues_["eta"]["Njets3"]= 140.;
-  maxValues_["eta"]["Njets2"]= 450.;
-  maxValues_["eta"]["Njets1"]= 2300.;
-  maxValues_["phi"]["Njets4Btag"]= 40.;
-  maxValues_["phi"]["Njets3Btag"]= 80.; 
-  maxValues_["phi"]["Njets4"]= 35.;  
-  maxValues_["phi"]["Njets3"]= 80.;
-  maxValues_["phi"]["Njets2"]= 260.;
-  maxValues_["phi"]["Njets1"]= 1200.;
-  // get maximum value
-  return maxValues_.find(plot)->second.find(Njets)->second;
 }
 
 TString jetLabel(TString input)
