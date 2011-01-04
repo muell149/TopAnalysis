@@ -23,9 +23,9 @@
 #include <TF1.h>
 #include <TBox.h>
 
-enum styles              {kSig,   kBkg,   kZjets,   kWjets,   kQCD,    kData,  kLepJets, kAllMC, kABCD, kGenSig, kGenBkg, kGenW};
-int color_      [ 11 ] = {kRed+1, kRed-7, kAzure-2, kGreen-3, kYellow, kBlack, kRed,     kBlack, kBlack};
-int markerStyle_[ 11 ] = {20,     22,     29,       23,       21,      20,     23,       23,     22,   };
+enum styles              {kSig,   kBkg,   kZjets,   kWjets,   kSTops  , kSTopt  , kSToptW , kQCD,    kData,  kLepJets, kAllMC, kABCD,  kSTop   , kGenSig, kGenBkg, kGenW, kGenSTop, kGenSTops, kGenSTopt, kGenSToptW};
+int color_      [ 14 ] = {kRed+1, kRed-7, kAzure-2, kGreen-3, kMagenta, kMagenta, kMagenta, kYellow, kBlack, kRed,     kBlack, kBlack, kMagenta, };
+int markerStyle_[ 14 ] = {20,     22,     29,       23,       27      , 27      , 27      , 21,      20,     23,       23,     22,     27      , };
 
 void histogramStyle(TH1& hist, int sampleTyp, bool filled=true) 
 {
