@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov51PF.root", TString plots = "cutflow", TString jetTyp = "PF")
+void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString plots = "cutflow", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -51,11 +51,14 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/analysisRootFiles";
-  for(int ienum = 0; ienum<6; ienum++){
+  for(int ienum = 0; ienum<9; ienum++){
     if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+jetTyp+".root"    ) );
     if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+jetTyp+".root"    ) );
     //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloFall10.root"    ) );
     //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgNloFall10.root"    ) );
+    if(ienum==kSToptW)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTWchannelMadZ2Fall10"+jetTyp+".root"   ) );
+    if(ienum==kSTops) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopSchannelMadZ2Fall10"+jetTyp+".root"   ) );
+    if(ienum==kSTopt) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTchannelMadZ2Fall10"+jetTyp+".root"   ) );
     if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+jetTyp+".root"  ) );
     if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetTyp+".root"  ) );
     if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetTyp+".root" ) );
@@ -64,173 +67,82 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
   // ---
   // define weights concerning luminosity
   // ---
-  std::vector<double> lumiweight;
+  std::vector<double> lumiweight_;
   // add scaling factors here!
 
   // 7 TeV Monte Carlo fall 10 samples
   // -----------------------------------
-  // for current ttbar(lept.mu on gen level and other) Madgraph 
-  lumiweight.push_back(0.000000121*(double)luminosity);
-  lumiweight.push_back(0.000000121*(double)luminosity);
-  // for current ttbar(lept.mu on gen level and other) Mc@Nlo 
-  //   lumiweight.push_back(0.000000159*(double)luminosity);
-  //   lumiweight.push_back(0.000000159*(double)luminosity);
-  // for current Z+jets MADGRAPH sample
-  lumiweight.push_back(0.000001198*(double)luminosity);
-  // for current W+jets MADGRAPH sample
-  lumiweight.push_back(0.000002115*(double)luminosity);
-  // for current QCD PYTHIA sample
-  //lumiweight.push_back(0.000002870*(double)luminosity);
-  // spring10
-  lumiweight.push_back(0.000018205*(double)luminosity);
-  // for data
-  lumiweight.push_back(1.0);
+  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    // for current ttbar(lept.mu on gen level and other) Madgraph 
+    if(idx==kSig || idx==kBkg)lumiweight_.push_back(0.000006029022/50.0*luminosity);
+    // for current W+jets MADGRAPH sample
+    if(idx==kWjets)lumiweight_.push_back(0.000105750913/50.0*luminosity);
+    // for current Z+jets MADGRAPH sample
+    if(idx==kZjets)lumiweight_.push_back(0.000059912090/50.0*luminosity);
+    // for current single top MADGRAPH Z2 samples
+    if(idx==kSTops)lumiweight_.push_back(0.000000464677/50.0*luminosity);
+    if(idx==kSTopt)lumiweight_.push_back(0.000006672727/50.0*luminosity);
+    if(idx==kSToptW)lumiweight_.push_back(0.000001070791/50.0*luminosity);
+    //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
+    // for current QCD PYTHIA sample
+    // fall10:
+    //if(idx==kQCD)lumiweight_.push_back(0.000002870*(double)luminosity);
+    // spring10:
+    if(idx==kQCD)lumiweight_.push_back(0.000018205*(double)luminosity);
+  }
 
   // ---
   //    get histograms
   // ---
-  std::vector<TString> thoseCollections;
-  // choose the collections to monitor
+
+  // choose the collections to monitor don't change order
+  std::vector<TString> thoseCollections_;
+  TString thoseCollectionsNminus1[34] = {"noPt", "noEta", "noTrkHits", "noChi2", "noDb", "tight", "tight", "tight", "noDR", "noIso", "tight", "noEta", "noPt", "noPt", "noPt", "noPt", "tight", "noEm", "nofHPD", "noN90Hits", "reliable", "reliable", "reliable", "reliable", "reliable", "reliable", "tight", "bottom", "tight", "loose", "loose", "pat", "pat", "pat"};
+  TString thoseCollectionsCutFlow[34] = {"combined", "highPt", "kinematic", "kinematic", "kinematic", "tight", "tight", "tight", "track", "golden", "tight", "pat", "central", "central", "central", "central", "tight", "reliable", "reliable", "reliable", "reliable", "reliable", "reliable", "reliable", "reliable", "reliable", "tight", "bottom", "tight", "loose", "loose", "pat", "pat", "pat"};
   // a) NminusOne
   if(plots=="NminusOne"){
-    thoseCollections.push_back("noPt"     );
-    thoseCollections.push_back("noEta"    );
-    thoseCollections.push_back("noTrkHits");
-    thoseCollections.push_back("noChi2"   );
-    thoseCollections.push_back("noDb"     );   
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("noDR"     );
-    thoseCollections.push_back("noIso"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("noEta"    );
-    thoseCollections.push_back("noPt"     );
-    thoseCollections.push_back("noEm"     );
-    thoseCollections.push_back("nofHPD"   );
-    thoseCollections.push_back("noN90Hits");
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("bottom"   );
+    thoseCollections_.insert( thoseCollections_.begin(), thoseCollectionsNminus1, thoseCollectionsNminus1 + 34 );
   }
-   // b) cutflow
+  // b) cutflow
   if(plots=="cutflow"){
-    thoseCollections.push_back("combined" );
-    thoseCollections.push_back("highPt"   );
-    thoseCollections.push_back("kinematic");
-    thoseCollections.push_back("kinematic");
-    thoseCollections.push_back("kinematic");   
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("track"    );
-    thoseCollections.push_back("golden"   );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("pat"      );
-    thoseCollections.push_back("central"  );
-    thoseCollections.push_back("reliable" );
-    thoseCollections.push_back("reliable" );
-    thoseCollections.push_back("reliable" );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("tight"    );
-    thoseCollections.push_back("bottom"   );
+    thoseCollections_.insert( thoseCollections_.begin(), thoseCollectionsCutFlow, thoseCollectionsCutFlow + 34 );
   }  
 
-  std::vector<TH1F*> pt_, eta_, nHit_, chi2_, d0_, dz_, ecalEn_, hcalEn_, dR_, relIso_, n_;
-  std::vector<TH1F*> etaJets_, ptlead1Jet_, ptlead2Jet_, ptlead3Jet_, ptlead4Jet_, emf_ , fhpd_, n90hits_, nJets_;
-  std::vector<TH1F*> chf_, nhf_, cef_, nef_, cmult_, nConst_;
-  std::vector<TH1F*> bdiscr_, bdiscrPre_, nbJets_;
-  std::vector<TH1F*> nVetoMu_, nVetoE_, etVetoE_, etaVetoE_, relIsoVetoE_;
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    // muon plots
-    pt_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[0]+"MuonKinematics/pt"             )->Clone() );
-    eta_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[1]+"MuonKinematics/eta"            )->Clone() );
-    nHit_  .push_back( (TH1F*)files_[idx]->Get(thoseCollections[2]+"MuonQuality/nHit"              )->Clone() );
-    chi2_  .push_back( (TH1F*)files_[idx]->Get(thoseCollections[3]+"MuonQuality/chi2"              )->Clone() );
-    d0_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[4]+"MuonQuality/dB"                )->Clone() );
-    dz_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[5]+"MuonQuality/dz"                )->Clone() );
-    ecalEn_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[6]+"MuonQuality/ecalEn"            )->Clone() );
-    hcalEn_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[7]+"MuonQuality/hcalEn"            )->Clone() );
-    dR_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[8]+"MuonVetoJetsKinematics/dist30_")->Clone() );
-    relIso_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[9]+"MuonQuality/relIso"            )->Clone() );
-    n_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[10]+"MuonKinematics/n"             )->Clone() );
-    // jet plots
-    // kinematics
-    etaJets_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[11]+"JetKinematics/eta"      )->Clone() );
-    ptlead1Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_0_JetKinematics/pt")->Clone() );
-    ptlead2Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_1_JetKinematics/pt")->Clone() );
-    ptlead3Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_2_JetKinematics/pt")->Clone() );
-    ptlead4Jet_.push_back( (TH1F*)files_[idx]->Get(thoseCollections[12]+"Lead_3_JetKinematics/pt")->Clone() );
-    nJets_     .push_back( (TH1F*)files_[idx]->Get(thoseCollections[16]+"JetKinematics/n")->Clone() );
-    // jet ID
-    if(jetTyp==""){
-      emf_       .push_back( (TH1F*)files_[idx]->Get(thoseCollections[13]+"JetQuality/emf"     )->Clone() );
-      fhpd_      .push_back( (TH1F*)files_[idx]->Get(thoseCollections[14]+"JetQuality/fHPD_"   )->Clone() );
-      n90hits_   .push_back( (TH1F*)files_[idx]->Get(thoseCollections[15]+"JetQuality/n90Hits_")->Clone() );
+  // create variable indicator  don't change order
+  std::vector<TString> variables_;
+  TString variables[ 34 ] = { "MuonKinematics/pt", "MuonKinematics/eta", "MuonQuality/nHit", "MuonQuality/chi2", "MuonQuality/dB", "MuonQuality/dz", "MuonQuality/ecalEn", "MuonQuality/hcalEn", "MuonVetoJetsKinematics/dist30_", "MuonQuality/relIso", "MuonKinematics/n", "JetKinematics/eta", "Lead_0_JetKinematics/pt", "Lead_1_JetKinematics/pt", "Lead_2_JetKinematics/pt", "Lead_3_JetKinematics/pt", "JetKinematics/n", "JetQuality/emf", "JetQuality/fhpd_", "JetQuality/n90hits_", "JetQuality/chf", "JetQuality/nhf", "JetQuality/cef", "JetQuality/nef", "JetQuality/ncp", "JetQuality/n_", "JetQuality/btagTrkCntHighEff_", "JetKinematics/n", "JetQualityBeforeJetCuts/btagTrkCntHighEff_", "VetoMuonKinematics/n", "VetoElectronKinematics/n", "VetoElectronKinematics/et", "VetoElectronKinematics/eta", "VetoElectronQuality/relIso" };
+  variables_.insert( variables_.begin(), variables, variables + 34 );
+  // create container for all histos
+  std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  // create container for stack histos
+  std::map< TString, THStack*> stack_;
+  // loop variables
+  for(unsigned int var=0; var<variables_.size(); ++var){
+    histo_[thoseCollections_[var]+variables_[var]][kSTop] = 0;
+    stack_[thoseCollections_[var]+variables_[var]] = new THStack( thoseCollections_[var]+variables_[var],"");
+    // loop samples
+    int STopCount = 0;
+    for(unsigned int idx=0; idx<files_.size(); ++idx) {
+      // a) reco
+      if((jetTyp=="PF" && (var>=17 && var<=19)) || (jetTyp=="" && (var>=20 && var<=25)))continue;
+      // allocate histograms
+      histo_[thoseCollections_[var]+variables_[var]][idx] = (TH1F*)files_[idx]->Get(thoseCollections_[var]+variables_[var]);
+      // histogram styles
+      histogramStyle(*histo_[thoseCollections_[var]+variables_[var]][idx], idx);
+      if(idx!=kData){
+	// normalize histograms to lumi
+	histo_[thoseCollections_[var]+variables_[var]][idx]->Scale(lumiweight_[idx]);
+	// combine single top histograms
+	if(idx==kSTops || idx==kSTopt || idx==kSToptW){
+	  STopCount++;
+	  if(!histo_[thoseCollections_[var]+variables_[var]][kSTop])histo_[thoseCollections_[var]+variables_[var]][kSTop] = (TH1F*)histo_[thoseCollections_[var]+variables_[var]][idx]->Clone();
+	  else histo_[thoseCollections_[var]+variables_[var]][kSTop]->Add(histo_[thoseCollections_[var]+variables_[var]][idx]);
+	  if(STopCount==3)stack_[thoseCollections_[var]+variables_[var]]->Add(histo_[thoseCollections_[var]+variables_[var]][kSTop]);
+	}
+	// create stacks
+	else stack_[thoseCollections_[var]+variables_[var]]->Add(histo_[thoseCollections_[var]+variables_[var]][idx]);
+      }
     }
-    if(jetTyp=="PF"){
-      chf_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/chf")->Clone() );
-      nhf_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/nhf")->Clone() );
-      cef_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/cef")->Clone() );
-      nef_   .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/nef")->Clone() );
-      cmult_ .push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/ncp")->Clone() );
-      nConst_.push_back( (TH1F*)files_[idx]->Get("reliableJetQuality/n_" )->Clone() );
-    }
-    // btag plots
-    bdiscr_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[17]+"JetQuality/btagTrkCntHighEff_"             )->Clone() );
-    nbJets_    .push_back( (TH1F*)files_[idx]->Get(thoseCollections[18]+"JetKinematics/n"                           )->Clone() );
-    bdiscrPre_ .push_back( (TH1F*)files_[idx]->Get(thoseCollections[17]+"JetQualityBeforeJetCuts/btagTrkCntHighEff_")->Clone() );
-    // veto collection plots
-    nVetoMu_.push_back    ( (TH1F*)files_[idx]->Get("looseVetoMuonKinematics/n"    )->Clone() );
-    nVetoE_ .push_back    ( (TH1F*)files_[idx]->Get("looseVetoElectronKinematics/n")->Clone() );
-    etVetoE_ .push_back   ( (TH1F*)files_[idx]->Get("patVetoElectronKinematics/et" )->Clone() );
-    etaVetoE_.push_back   ( (TH1F*)files_[idx]->Get("patVetoElectronKinematics/eta")->Clone() );
-    relIsoVetoE_.push_back( (TH1F*)files_[idx]->Get("patVetoElectronQuality/relIso")->Clone() );
-  }
-
-  // ---
-  // Normalization
-  // ---
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    pt_    [idx]->Scale(lumiweight[idx]);
-    eta_   [idx]->Scale(lumiweight[idx]);
-    nHit_  [idx]->Scale(lumiweight[idx]);
-    chi2_  [idx]->Scale(lumiweight[idx]);
-    d0_    [idx]->Scale(lumiweight[idx]);
-    dz_    [idx]->Rebin();
-    dz_    [idx]->Scale(lumiweight[idx]);
-    ecalEn_[idx]->Scale(lumiweight[idx]);
-    hcalEn_[idx]->Scale(lumiweight[idx]);
-    dR_    [idx]->Scale(lumiweight[idx]);
-    relIso_[idx]->Scale(lumiweight[idx]);
-    n_     [idx]->Scale(lumiweight[idx]);
-    etaJets_   [idx]->Scale(lumiweight[idx]);
-    ptlead1Jet_[idx]->Scale(lumiweight[idx]);
-    ptlead2Jet_[idx]->Scale(lumiweight[idx]);
-    ptlead3Jet_[idx]->Scale(lumiweight[idx]);
-    ptlead4Jet_[idx]->Scale(lumiweight[idx]);
-    if(jetTyp==""){
-      emf_       [idx]->Scale(lumiweight[idx]);
-      fhpd_      [idx]->Scale(lumiweight[idx]);
-      n90hits_   [idx]->Scale(lumiweight[idx]);
-    }
-    if(jetTyp=="PF"){
-      chf_   [idx]->Scale(lumiweight[idx]);
-      nhf_   [idx]->Scale(lumiweight[idx]);
-      cef_   [idx]->Scale(lumiweight[idx]);
-      nef_   [idx]->Scale(lumiweight[idx]);
-      cmult_ [idx]->Scale(lumiweight[idx]);
-      nConst_[idx]->Scale(lumiweight[idx]);
-    }
-    nJets_     [idx]->Scale(lumiweight[idx]);
-    bdiscr_   [idx]->Scale(lumiweight[idx]);
-    nbJets_   [idx]->Scale(lumiweight[idx]);
-    bdiscrPre_[idx]->Scale(lumiweight[idx]);
-    nVetoMu_ [idx]->Scale(lumiweight[idx]);
-    nVetoE_  [idx]->Scale(lumiweight[idx]);
-    etVetoE_ [idx]->Scale(lumiweight[idx]);
-    etaVetoE_[idx]->Scale(lumiweight[idx]);
-    relIsoVetoE_[idx]->Scale(lumiweight[idx]);
   }
 
   // ---
@@ -240,823 +152,108 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
   for(int mult=2; mult<=10; ++mult){
    std::cout << "---------------------" << std::endl;
     std::cout << "number of entries =="+getTStringFromInt(mult-1)+" jets" << std::endl;
-    std::cout << "ttbar sig : " << nJets_[kSig  ]->GetBinContent(mult) << std::endl;
-    std::cout << "ttbar bkg : " << nJets_[kBkg  ]->GetBinContent(mult) << std::endl;
-    std::cout << "QCD : "       << nJets_[kQCD  ]->GetBinContent(mult) << std::endl;
-    std::cout << "Z+jets : "    << nJets_[kZjets]->GetBinContent(mult) << std::endl;
-    std::cout << "W+jets : "    << nJets_[kWjets]->GetBinContent(mult) << std::endl;
-    std::cout << "all MC: " << nJets_[kSig]->GetBinContent(mult)+nJets_[kBkg]->GetBinContent(mult)+nJets_[kQCD]->GetBinContent(mult)+nJets_[kZjets]->GetBinContent(mult)+nJets_[kWjets]->GetBinContent(mult) << std::endl;
-    std::cout << "data : "      << nJets_[kData      ]->GetBinContent(mult) << std::endl<< std::endl;
-  }
-  
-  // ---
-  //    configure histogram style & create stack plots
-  // ---
-  THStack *pt         = new THStack("pt"    ,"");
-  THStack *eta        = new THStack("eta"   ,""); 
-  THStack *nHit       = new THStack("nHit"  ,""); 
-  THStack *chi2       = new THStack("chi2"  ,""); 
-  THStack *d0         = new THStack("d0"    ,""); 
-  THStack *dz         = new THStack("dz"    ,""); 
-  THStack *ecalEn     = new THStack("ecalEn",""); 
-  THStack *hcalEn     = new THStack("hcalEn",""); 
-  THStack *dR         = new THStack("dR"    ,""); 
-  THStack *relIso     = new THStack("relIso",""); 
-  THStack *n          = new THStack("n"     ,""); 
-  THStack *etaJets    = new THStack("etaJets"   ,"");
-  THStack *ptlead1Jet = new THStack("ptlead1Jet","");
-  THStack *ptlead2Jet = new THStack("ptlead2Jet","");
-  THStack *ptlead3Jet = new THStack("ptlead3Jet","");
-  THStack *ptlead4Jet = new THStack("ptlead4Jet","");
-  THStack *emf        = new THStack("emf"       ,"");
-  THStack *fhpd       = new THStack("fhpd"      ,"");
-  THStack *n90hits    = new THStack("n90hits"   ,"");
-  THStack *nJets      = new THStack("nJets"     ,"");
-  THStack *bdiscr     = new THStack("bdiscr"    ,"");
-  THStack *bdiscrPre  = new THStack("bdiscrPre" ,"");
-  THStack *nbJets     = new THStack("nbJets"    ,""); 
-  THStack *nVetoMu    = new THStack("nVetoMu" ,"");
-  THStack *nVetoE     = new THStack("nVetoE"  ,"");
-  THStack *etVetoE    = new THStack("etVetoE" ,"");
-  THStack *etaVetoE   = new THStack("etaVetoE","");
-  THStack *relIsoVetoE= new THStack("relIsoVetoE","");
-  THStack *chf        = new THStack("chf"   ,"");
-  THStack *nhf        = new THStack("nhf"   ,"");
-  THStack *cef        = new THStack("cef"   ,"");
-  THStack *nef        = new THStack("nef"   ,"");
-  THStack *cmult      = new THStack("cmult" ,"");
-  THStack *nConst     = new THStack("nConst","");
-    
-
-  for(unsigned int idx=0; idx<=kData; ++idx) {
-    // choose styling options
-    histogramStyle(*pt_     [idx], idx);
-    histogramStyle(*eta_    [idx], idx);
-    histogramStyle(*nHit_   [idx], idx);
-    histogramStyle(*chi2_   [idx], idx);
-    histogramStyle(*d0_     [idx], idx);
-    histogramStyle(*dz_     [idx], idx);
-    histogramStyle(*ecalEn_ [idx], idx);
-    histogramStyle(*hcalEn_ [idx], idx);
-    histogramStyle(*dR_     [idx], idx);
-    histogramStyle(*relIso_ [idx], idx);
-    histogramStyle(*n_      [idx], idx);
-    histogramStyle(*etaJets_   [idx], idx);
-    histogramStyle(*ptlead1Jet_[idx], idx);
-    histogramStyle(*ptlead2Jet_[idx], idx);
-    histogramStyle(*ptlead3Jet_[idx], idx);
-    histogramStyle(*ptlead4Jet_[idx], idx);
-    if(jetTyp==""){
-      histogramStyle(*emf_       [idx], idx);
-      histogramStyle(*fhpd_      [idx], idx);
-      histogramStyle(*n90hits_   [idx], idx);
-    }
-    if(jetTyp=="PF"){
-      histogramStyle(*chf_   [idx], idx);
-      histogramStyle(*nhf_   [idx], idx);
-      histogramStyle(*cef_   [idx], idx);
-      histogramStyle(*nef_   [idx], idx);
-      histogramStyle(*cmult_ [idx], idx);
-      histogramStyle(*nConst_[idx], idx);
-    }
-    histogramStyle(*nJets_     [idx], idx);
-    histogramStyle(*bdiscr_    [idx], idx);
-    histogramStyle(*bdiscrPre_ [idx], idx);
-    histogramStyle(*nbJets_    [idx], idx);
-    histogramStyle(*nVetoMu_ [idx], idx);
-    histogramStyle(*nVetoE_  [idx], idx);
-    histogramStyle(*etVetoE_ [idx], idx);
-    histogramStyle(*etaVetoE_[idx], idx);
-    histogramStyle(*relIsoVetoE_[idx], idx);
-    // create stack plots
-    if(idx!=kData){
-      pt    ->Add(pt_     [idx]);
-      eta   ->Add(eta_    [idx]);
-      nHit  ->Add(nHit_   [idx]);
-      chi2  ->Add(chi2_   [idx]);
-      d0    ->Add(d0_     [idx]);
-      dz    ->Add(dz_     [idx]);
-      ecalEn->Add(ecalEn_ [idx]);
-      hcalEn->Add(hcalEn_ [idx]);
-      dR    ->Add(dR_     [idx]);
-      relIso->Add(relIso_ [idx]);
-      n     ->Add(n_      [idx]);
-      etaJets   ->Add(etaJets_   [idx]);
-      ptlead1Jet->Add(ptlead1Jet_[idx]);
-      ptlead2Jet->Add(ptlead2Jet_[idx]);
-      ptlead3Jet->Add(ptlead3Jet_[idx]);
-      ptlead4Jet->Add(ptlead4Jet_[idx]);
-      if(jetTyp==""){
-	emf       ->Add(emf_       [idx]);
-	fhpd      ->Add(fhpd_      [idx]);
-	n90hits   ->Add(n90hits_   [idx]);
-      }
-      if(jetTyp=="PF"){
-	chf   ->Add(chf_   [idx]);
-	nhf   ->Add(nhf_   [idx]);
-	cef   ->Add(cef_   [idx]);
-	nef   ->Add(nef_   [idx]);
-	cmult ->Add(cmult_ [idx]);
-	nConst->Add(nConst_[idx]);
-      }
-      nJets     ->Add(nJets_     [idx]);
-      bdiscr    ->Add(bdiscr_    [idx]);
-      bdiscrPre ->Add(bdiscrPre_ [idx]);
-      nbJets    ->Add(nbJets_    [idx]);
-      nVetoMu ->Add(nVetoMu_ [idx]);
-      nVetoE  ->Add(nVetoE_  [idx]);
-      etVetoE ->Add(etVetoE_ [idx]);
-      etaVetoE->Add(etaVetoE_[idx]);
-      relIsoVetoE->Add(relIsoVetoE_[idx]);
-    }
+    std::cout << "ttbar sig : " << histo_["tightJetKinematics/n"][kSig  ]->GetBinContent(mult) << std::endl;
+    std::cout << "ttbar bkg : " << histo_["tightJetKinematics/n"][kBkg  ]->GetBinContent(mult) << std::endl;
+    std::cout << "QCD : "       << histo_["tightJetKinematics/n"][kQCD  ]->GetBinContent(mult) << std::endl;
+    std::cout << "Z+jets : "    << histo_["tightJetKinematics/n"][kZjets]->GetBinContent(mult) << std::endl;
+    std::cout << "W+jets : "    << histo_["tightJetKinematics/n"][kWjets]->GetBinContent(mult) << std::endl;
+    std::cout << "single top : "<< histo_["tightJetKinematics/n"][kSTop ]->GetBinContent(mult) << std::endl;
+    std::cout << "all MC: " << histo_["tightJetKinematics/n"][kSig]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kBkg]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kQCD]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kZjets]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kWjets]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kSTop]->GetBinContent(mult) << std::endl;
+    std::cout << "data : "      << histo_["tightJetKinematics/n"][kData      ]->GetBinContent(mult) << std::endl<< std::endl;
   }
 
   // ---
-  //    create legends
+  //    create legend
   // ---
   // samples: separate canvas
   TLegend *leg0 = new TLegend(0.08, 0.19, 0.94, 0.88);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->AddEntry( nHit_  [kData ] , "Data ("+lum+" pb ^{-1})"    , "PL");
-  leg0->AddEntry( nHit_  [kSig  ] , "t#bar{t} signal"                 , "F" ); 
-  leg0->AddEntry( nHit_  [kBkg  ] , "t#bar{t} other"                  , "F" );
-  leg0->AddEntry( nHit_  [kQCD  ] , "QCD"                             , "F" );
-  leg0->AddEntry( nHit_  [kWjets] , "W#rightarrowl#nu"              , "F" );
-  leg0->AddEntry( nHit_  [kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
- 
-  // containig the used mu-collection
-  TLegend *leg2 = new TLegend(0.228, 0.912, 0.7818, 0.997);
-  leg2->SetFillStyle(0);
-  leg2->SetBorderSize(0);
-  TLegend *leg3 = (TLegend*)(leg2->Clone());
-  TLegend *leg4 = (TLegend*)(leg2->Clone());
-  TLegend *leg5 = (TLegend*)(leg2->Clone());
-  TLegend *leg6 = (TLegend*)(leg2->Clone());
-  TLegend *leg7 = (TLegend*)(leg2->Clone());
-  TLegend *leg8 = (TLegend*)(leg2->Clone());
-  TLegend *leg9 = (TLegend*)(leg2->Clone());
-  TLegend *leg10= (TLegend*)(leg2->Clone());
-  TLegend *leg11= (TLegend*)(leg2->Clone());
-  TLegend *leg12= (TLegend*)(leg2->Clone());
-  TLegend *leg13= (TLegend*)(leg2->Clone());
-  TLegend *leg14= (TLegend*)(leg2->Clone());
-  TLegend *leg15= (TLegend*)(leg2->Clone());
-  TLegend *leg16= (TLegend*)(leg2->Clone());
-  TLegend *leg17= (TLegend*)(leg2->Clone());
-  TLegend *leg18= (TLegend*)(leg2->Clone());
-  TLegend *leg19= (TLegend*)(leg2->Clone());
-  TLegend *leg20= (TLegend*)(leg2->Clone());
-  TLegend *leg21= (TLegend*)(leg2->Clone());
-  TLegend *leg22= (TLegend*)(leg2->Clone());
-  TLegend *leg23= (TLegend*)(leg2->Clone());
-  leg2 ->SetHeader(""+thoseCollections[0]+" muons");
-  leg3 ->SetHeader(""+thoseCollections[1]+" muons");
-  leg4 ->SetHeader(""+thoseCollections[2]+" muons");
-  leg5 ->SetHeader(""+thoseCollections[3]+" muons");
-  leg6 ->SetHeader(""+thoseCollections[4]+" muons");
-  leg7 ->SetHeader(""+thoseCollections[5]+" muons");
-  leg8 ->SetHeader(""+thoseCollections[6]+" muons");
-  leg9 ->SetHeader(""+thoseCollections[7]+" muons");
-  leg10->SetHeader(""+thoseCollections[8]+" muons");
-  leg11->SetHeader(""+thoseCollections[9]+" muons");
-  leg12->SetHeader(""+thoseCollections[10]+" muons");
-  leg13->SetHeader(""+thoseCollections[11]+" jets");
-  leg14->SetHeader(""+thoseCollections[12]+" jets");
-  leg15->SetHeader(""+thoseCollections[13]+" jets");
-  leg18->SetHeader(""+thoseCollections[14]+" jets");
-  leg19->SetHeader(""+thoseCollections[15]+" jets");
-  leg20->SetHeader(thoseCollections[16]+" jets");
-  leg21->SetHeader(""+thoseCollections[17]+" jets");
-  leg22->SetHeader(thoseCollections[18]+" jets");
-  leg16->SetHeader("looseMuons");
-  leg17->SetHeader("looseElectrons");
-  leg23->SetHeader("patElectrons");
-
-//   // label indicating cutstep
-//   TPaveLabel *cut0 = label("(hltMu9 ev. sel.)"          , 0.73, 0.87, 0.9, 1.0);
-//   TPaveLabel *cut1 = label("(#mu ev. sel.)"             , 0.73, 0.87, 0.9, 1.0);
-//   TPaveLabel *cut2 = label("(#mu & veto ev. sel.)"      , 0.73, 0.87, 0.9, 1.0);
-//   TPaveLabel *cut3 = label("(#mu & veto & jet ev. sel.)", 0.73, 0.87, 0.9, 1.0);
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kData ] , "Data ("+lum+" pb ^{-1})"    , "PL");
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal"                 , "F" ); 
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kBkg  ] , "t#bar{t} other"                  , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kQCD  ] , "QCD"                             , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kWjets] , "W#rightarrowl#nu"              , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kSTop ] , "Single-Top", "F" );
 
   // ---
   //    create canvas 
   // ---
   std::vector<TCanvas*> MyCanvas;
-  int nCanvas = 29;
-  if(jetTyp=="PF") nCanvas+=3;
-  for(int idx=0; idx<nCanvas; idx++){ 
+  //int nCanvas = 34;
+  //if(jetTyp=="PF") nCanvas+=3;
+  for(int idx=0; idx<=variables_.size(); idx++){ 
     char canvname[10];
     sprintf(canvname,"canv%i",idx);    
     MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
     canvasStyle(*MyCanvas[idx]);
   }
-  bool cutLine = false;
-  double min = 0.;
-  double max = 0.;
-  std::cout << "1" << std::endl;
-  // ---
-  //    do the printing for pt_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*pt_[kData], "");
-  MyCanvas[0]->cd(0);
-  MyCanvas[0]->SetLogy(1);
-  MyCanvas[0]->SetTitle("ptLeading"+thoseCollections[0]+"Muons@7TeV");
-  pt_[kData]->GetXaxis()->SetRangeUser(20.,150.);
-  axesStyle(*pt_[kData], "p_{t}(#mu) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  pt_[kData]->Draw("AXIS");
-  pt        ->Draw("same");
-  pt_[kData]->Draw("EPsame");
-  pt_[kData]->Draw("AXISsame");
-  //  leg2      ->Draw("same");
-  //cut0      ->Draw("same");
-  if(cutLine)drawcutline(20.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-  std::cout << "2" << std::endl;
-  // ---
-  //    do the printing for eta_
-  // ---
-  max = getMaxValue(*eta_[kData], "");
-  MyCanvas[1]->cd(0);
-  //  MyCanvas[1]->SetLogy(1);
-  MyCanvas[1]->SetTitle("etaLeading"+thoseCollections[1]+"Muons@7TeV");
-  eta        ->Draw("");
-  eta_[kData]->Draw("EPsame");
-  eta        ->Draw("AXISsame");
-  //leg3       ->Draw("same");
-  //cut0       ->Draw("same");
-  //  axesStyle(*eta, "#eta ( lead #mu )", "events", 0.1/840*luminosity, 0.1*eta->GetMaximum()*luminosity );
-  axesStyle(*eta, "#eta(#mu)", "events", 0, 1.1*max );
-  if(cutLine)drawcutline(-2.1, 1.05*1.1*max);
-  if(cutLine)drawcutline( 2.1, 1.05*1.1*max);
 
   // ---
-  //    do the printing for nHit_
+  //    do the printing
   // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*nHit_[kData], "");
-  MyCanvas[2]->cd(0);
-  MyCanvas[2]->SetLogy(1);
-  MyCanvas[2]->SetTitle("trackerHitsLeading"+thoseCollections[2]+"Muons@7TeV");
-  nHit        ->Draw("");
-  axesStyle(*nHit, "N_{Hits trk}(#mu)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  nHit_[kData]->Draw("EPsame");
-  nHit        ->Draw("AXISsame");
-  //  leg4        ->Draw("same");
-  //cut0        ->Draw("same");
-  if(cutLine)drawcutline(10.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for chi2_
-  // ---
-  min = 0.001/840*luminosity;
-  max = getMaxValue(*chi2_[kData], "");
-  MyCanvas[3]->cd(0);
-  MyCanvas[3]->SetLogy(1);
-  MyCanvas[3]->SetTitle("chi2Leading"+thoseCollections[3]+"Muons@7TeV");
-  chi2        ->Draw("");
-  axesStyle(*chi2, "#chi^{2}(#mu)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  chi2_[kData]->Draw("EPsame");
-  chi2        ->Draw("AXISsame");
-  //  leg5        ->Draw("same");
-  //cut0        ->Draw("same");
-  if(cutLine)drawcutline(10., exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for d0_
-  // ---
-  min = 0.001/840*luminosity;
-  max = getMaxValue(*d0_[kData], "");
-  MyCanvas[4]->cd(0);
-  MyCanvas[4]->SetTitle("dBLeading"+thoseCollections[4]+"Muons@7TeV");
-  MyCanvas[4]->SetLogy(1);
-  axesStyle(*d0_[kData], "d_{B}(#mu) [cm]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  d0_[kData]->GetXaxis()->SetRangeUser(0.,0.2);
-  d0_[kData]->Draw("AXIS");
-  d0        ->Draw("same");
-  d0_[kData]->Draw("EPsame");
-  //  leg6      ->Draw("same");
-  //cut0      ->Draw("same");
-  d0_[kData]->Draw("AXIS same");
-  if(cutLine)drawcutline(0.02, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for dz_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*dz_[kData], "");
-  MyCanvas[5]->cd(0);
-  MyCanvas[5]->SetLogy(1);
-  MyCanvas[5]->SetTitle("dzLeading"+thoseCollections[5]+"Muons@7TeV");
-  axesStyle(*dz_[kData], "d_{z}(#mu)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  dz_[kData]->Draw("AXIS"  );
-  dz        ->Draw("same"  );
-  dz_[kData]->Draw("EPsame");
-  //  leg7      ->Draw("same");
-  //cut0      ->Draw("same");
-
-  // ---
-  //    do the printing for ecalEn_
-  // ---
-  min = 0.001/840*luminosity;
-  max = getMaxValue(*ecalEn_[kData], "");
-  MyCanvas[6]->cd(0);
-  MyCanvas[6]->SetLogy(1);
-  MyCanvas[6]->SetTitle("ecalEnLeading"+thoseCollections[6]+"Muons@7TeV");
-  ecalEn        ->Draw();
-  axesStyle(*ecalEn, "E_{Ecal}(#mu) [GeV]", "events" , min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  ecalEn_[kData]->Draw("EPsame");
-  ecalEn        ->Draw("AXISsame");
-  //  leg8          ->Draw("same");
-  //cut0          ->Draw("same");
-  
-  // ---
-  //    do the printing for hcalEn_
-  // ---
-  min = 0.01/840*luminosity;
-  max = getMaxValue(*hcalEn_[kData], "");
-  MyCanvas[7]->cd(0);
-  MyCanvas[7]->SetLogy(1);
-  MyCanvas[7]->SetTitle("hcalEnLeading"+thoseCollections[7]+"Muons@7TeV");
-  hcalEn        ->Draw();
-  axesStyle(*hcalEn, "E_{Hcal}(#mu) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  hcalEn_[kData]->Draw("EPsame");
-  hcalEn        ->Draw("AXISsame");
-  //  leg9          ->Draw("same");
-  //cut0          ->Draw("same");
-
-  // ---
-  //    do the printing for dR_
-  // ---
-  min = 0.0025*luminosity/1000.;
-  max = getMaxValue(*dR_[kData], "");
-  MyCanvas[8]->cd(0);
-  MyCanvas[8]->SetLogy(1);
-  MyCanvas[8]->SetTitle("distance"+thoseCollections[8]+"MuonsVetoJets@7TeV");
-  dR        ->Draw();
-  axesStyle(*dR, "#DeltaR(#mu - jet(p_{t}>30GeV))", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  dR_[kData]->Draw("EPsame");
-  dR        ->Draw("AXISsame");
-  //  leg10     ->Draw("same");
-  //cut0      ->Draw("same");
-  if(cutLine)drawcutline(0.3, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for relIso_
-  // ---
-  min = 0.01/840*luminosity;
-  max = getMaxValue(*relIso_[kData], "");
-  MyCanvas[9]->cd(0);
-  MyCanvas[9]->SetLogy(1);
-  MyCanvas[9]->SetTitle("relIsoLeading"+thoseCollections[9]+"Muons@7TeV");
-  relIso        ->Draw();
-  axesStyle(*relIso, "relIso(#mu)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  relIso_[kData]->Draw("EPsame");
-  relIso        ->Draw("AXISsame");
-  //  leg11         ->Draw("same");
-  //cut0          ->Draw("same");
-  if(cutLine)drawcutline(0.05, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for n_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*n_[kData], "");
-  MyCanvas[10]->cd(0);
-  MyCanvas[10]->SetLogy(1);
-  MyCanvas[10]->SetTitle("multiplicity"+thoseCollections[10]+"Muons@7TeV");
-  axesStyle(*n_[kData], "N_{#mu}(p_{t}>20GeV)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  n_[kData]->GetXaxis()->SetRangeUser(1.,3.);
-  n_[kData]->Draw("AXIS"  );
-  n        ->Draw("same"  );
-  n_[kData]->Draw("EPsame");
-  //  leg12    ->Draw("same");
-  //label("muon selection")->Draw("same");
-  //cut0     ->Draw("same");
-  n_[kData]->Draw("AXIS same");
-  if(cutLine)drawcutline(0.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-  if(cutLine)drawcutline(1.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for etaJets_
-  // ---
-  max = getMaxValue(*etaJets_[kData], "");
-  MyCanvas[11]->cd(0);
-  //  MyCanvas[11]->SetLogy(1);
-  MyCanvas[11]->SetTitle("etaAll"+thoseCollections[11]+"Jets@7TeV");
-  //  axesStyle(*etaJets, "#eta (all jets)", "events", 1.0/840*luminosity, 0.1*etaJets->GetMaximum()*luminosity );
-  axesStyle(*etaJets_[kData], "#eta(all jets)", "events", 0., 1.1*max );
-  etaJets_[kData]->Draw("AXIS");
-  etaJets        ->Draw("same"); 
-  etaJets_[kData]->Draw("EPsame");
-  //  leg13          ->Draw("same");
-  //cut2           ->Draw("same");
-  etaJets_[kData]->Draw("AXIS same");
-  if(cutLine)drawcutline(-2.4, 1.1*max);
-  if(cutLine)drawcutline( 2.4, 1.1*max);
-
-  // ---
-  //    do the printing for ptlead1Jet_
-  // ---
-  min = 0.01*luminosity/1000.;
-  max = getMaxValue(*ptlead1Jet_[kData], "");
-  MyCanvas[12]->cd(0);
-  MyCanvas[12]->SetLogy(1);
-  MyCanvas[12]->SetTitle("pt1stLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead1Jet_[kData]->GetXaxis()->SetRangeUser(0.,400.); 
-  axesStyle(*ptlead1Jet_[kData], "p_{t}(jet 1) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
-  ptlead1Jet_[kData]->Draw("EP");
-  ptlead1Jet        ->Draw("same"); 
-  ptlead1Jet_[kData]->Draw("EPsame");
-  //  leg14             ->Draw("same");
-  //cut2              ->Draw("same");
-  if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for ptlead2Jet_
-  // ---
-  min = 0.01*luminosity/1000.;
-  max = getMaxValue(*ptlead2Jet_[kData], "");
-  MyCanvas[13]->cd(0);
-  MyCanvas[13]->SetLogy(1);
-  MyCanvas[13]->SetTitle("pt2ndLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead2Jet_[kData]->GetXaxis()->SetRangeUser(0.,400.); 
-  axesStyle(*ptlead2Jet_[kData], "p_{t}(jet 2) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
-  ptlead2Jet_[kData]->Draw("EP");
-  ptlead2Jet        ->Draw("same");
-  ptlead2Jet_[kData]->Draw("EPsame");
-  //  leg14             ->Draw("same");
-  //cut2              ->Draw("same");
-  if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for ptlead3Jet_
-  // ---
-  min = 0.01*luminosity/1000.;
-  max = getMaxValue(*ptlead3Jet_[kData], "");
-  MyCanvas[14]->cd(0);
-  MyCanvas[14]->SetLogy(1);
-  MyCanvas[14]->SetTitle("pt3rdLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead3Jet_[kData]->GetXaxis()->SetRangeUser(0.,150.); 
-  axesStyle(*ptlead3Jet_[kData], "p_{t}(jet 3) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
-  ptlead3Jet_[kData]->Draw("EP");
-  ptlead3Jet        ->Draw("same");
-  ptlead3Jet_[kData]->Draw("EPsame");
-  //  leg14             ->Draw("same");
-  //cut2              ->Draw("same");
-  if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for ptlead4Jet_
-  // ---
-  min = 0.01*luminosity/1000.;
-  max = getMaxValue(*ptlead4Jet_[kData], "");
-  MyCanvas[15]->cd(0);
-  MyCanvas[15]->SetLogy(1);
-  MyCanvas[15]->SetTitle("pt4thLeading"+thoseCollections[12]+"Jet@7TeV");
-  ptlead4Jet_[kData]->GetXaxis()->SetRangeUser(0.,150.);
-  axesStyle(*ptlead4Jet_[kData], "p_{t}(jet 4) [GeV]", "events", min, exp(1.05*(std::log(max)-std::log(min))+std::log(min)) );
-  ptlead4Jet_[kData]->Draw("EP");
-  ptlead4Jet        ->Draw("same"); 
-  ptlead4Jet_[kData]->Draw("EPsame");
-  //  leg14             ->Draw("same");
-  //cut2              ->Draw("same");
-  if(cutLine)drawcutline(30.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for emf_
-  // ---
-  if(jetTyp==""){
-    min = 0.1/840*luminosity;
-    max = getMaxValue(*emf_[kData], "");
-    MyCanvas[16]->cd(0);
-    MyCanvas[16]->SetLogy(1);
-    MyCanvas[16]->SetTitle("electromagneticFraction"+thoseCollections[13]+"Jets@7TeV");
-    emf        ->Draw();
-    axesStyle(*emf, "em fraction", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    emf_[kData]->Draw("EPsame");
-    emf        ->Draw("Axis same");
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(0.01, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
+  std::vector<TString> plotNames_;// don't change order
+  TString plotNames[ 34 ] = { "ptLeading","etaLeading","trackerHitsLeading","chi2Leading","dBLeading","dzLeading","ecalEnLeading","hcalEnLeading","distance","relIsoLeading","multiplicity","etaAll","pt1stLeading","pt2ndLeading","pt3rdLeading","pt4thLeading","nJets","electromagneticFraction","fHPD","n90hits","chf","nhf","cef","nef","cmult","nConst","bdiscr","nbJets","bdiscrPre","multiplicity","multiplicity","pt","eta","relIso" };
+  plotNames_.insert( plotNames_.begin(), plotNames, plotNames + 34 );
+  std::vector<TString> axisTitle_;// don't change order
+  TString axisTitle[ 34 ] = { "p_{t}(#mu) [GeV]","#eta(#mu)","N_{Hits trk}(#mu)","#chi^{2}(#mu)","d_{B}(#mu) [cm]","d_{z}(#mu)","E_{Ecal}(#mu) [GeV]","E_{Hcal}(#mu) [GeV]","#DeltaR(#mu - jet(p_{t}>30GeV))","relIso(#mu)","N_{#mu}(p_{t}>20GeV)","#eta (all jets)","p_{t}(jet 1) [GeV]","p_{t}(jet 2) [GeV]","p_{t}(jet 3) [GeV]","p_{t}(jet 4) [GeV]","N_{jets}(p_{t}>30GeV)","em fraction","fHPD","n90Hits","E_{had charged} / E","E_{had neutral} / E","E_{em charged} / E","E_{em neutral} / E","N(charged particles)","N(jet constituents)","b-discr.(tche)","N_{b-jets}(tche-mWP)","b-discr.(tche)","N_{#mu}(p_{t}>10GeV)","N_{e}(p_{t}>15GeV)","E_{t}(e) [GeV]","#eta ( e )","relIso(e)" };
+  axisTitle_.insert( axisTitle_.begin(), axisTitle, axisTitle + 34 );
+  // loop variables
+  for(unsigned int var=0; var<variables_.size(); ++var){
+    double min = 0.;
+    double max = 0.;
+    if((jetTyp=="PF" && (var>=17 && var<=19)) || (jetTyp=="" && (var>=20 && var<=25)))continue;
+    MyCanvas[var]->cd(0);
+    if(!variables_[var].Contains("eta"))MyCanvas[var]->SetLogy(1);
+    if(MyCanvas[var]->GetLogy())min = 0.1/840*luminosity;
+    max = getMaxValue(*histo_[thoseCollections_[var]+variables_[var]][kData], "");
+    if(variables_[var].Contains("MuonVetoJets"))
+      MyCanvas[var]->SetTitle(plotNames_[var]+thoseCollections_[var]+"MuonsVetoJets@7TeV");
+    else if(variables_[var].Contains("Lead"))
+      MyCanvas[var]->SetTitle(plotNames_[var]+thoseCollections_[var]+"Jet@7TeV");
+    else if(variables_[var].Contains("VetoMuon"))MyCanvas[var]->SetTitle(plotNames_[var]+"LooseMuons@7TeV");
+    else if(variables_[var].Contains("VetoElectron")){
+      if(thoseCollections_[var]=="loose")MyCanvas[var]->SetTitle(plotNames_[var]+"LooseElectrons@7TeV");
+      else MyCanvas[var]->SetTitle(plotNames_[var]+"PatVetoElectrons@7TeV");
+    }
+    else if(variables_[var].Contains("Jet")){
+      if(thoseCollections_[var]=="reliable")MyCanvas[var]->SetTitle(plotNames_[var]+"ReliableJets@7TeV");
+      else MyCanvas[var]->SetTitle(plotNames_[var]+thoseCollections_[var]+"Jets@7TeV");
+    }
+    else if(variables_[var].Contains("Muon"))
+      MyCanvas[var]->SetTitle(plotNames_[var]+thoseCollections_[var]+"Muons@7TeV");
+    if(MyCanvas[var]->GetLogy())axesStyle(*histo_[thoseCollections_[var]+variables_[var]][kData], axisTitle[var], "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
+    else axesStyle(*histo_[thoseCollections_[var]+variables_[var]][kData], axisTitle[var], "events", min, 1.15*max );
+    if(variables_[var]=="MuonKinematics/pt")histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(20.,150.);
+    histo_[thoseCollections_[var]+variables_[var]][kData]->Draw("EP");
+    stack_[thoseCollections_[var]+variables_[var]]       ->Draw("same");
+    histo_[thoseCollections_[var]+variables_[var]][kData]->Draw("EPsame");
+    histo_[thoseCollections_[var]+variables_[var]][kData]->Draw("AXISsame");
   }
-
-  // ---
-  //    do the printing for chf_
-  // ---
-  if(jetTyp=="PF"){
-    min = 1;
-    max = getMaxValue(*chf_[kData], "");
-    MyCanvas[16]->cd(0);
-    MyCanvas[16]->SetLogy(1);
-    MyCanvas[16]->SetTitle("chfReliableJets@7TeV");
-    chf        ->Draw();
-    axesStyle(*chf, "E_{had charged} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    chf_[kData]->Draw("EPsame");
-    chf        ->Draw("Axis same");
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(0.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-  }
-
-  // ---
-  //    do the printing for nVetoMu_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*nVetoMu_[kData], "");
-  MyCanvas[17]->cd(0);
-  MyCanvas[17]->SetLogy(1);
-  MyCanvas[17]->SetTitle("multiplicityLooseMuons@7TeV");
-  axesStyle(*nVetoMu_[kData], "N_{#mu}(p_{t}>10GeV)", "events",  min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  nVetoMu_[kData]->GetXaxis()->SetRangeUser(0.,3.);
-  nVetoMu_[kData]->Draw("Axis");
-  nVetoMu        ->Draw("same");
-  nVetoMu_[kData]->Draw("EPsame");
-  //  leg16          ->Draw("same");
-  //label("muon veto")->Draw("same");
-  //cut1           ->Draw("same");
-  nVetoMu_[kData]->Draw("Axis same");
-  if(cutLine)drawcutline(0.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-  if(cutLine)drawcutline(1.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for nVetoE_
-  // ---
-  min = 0.01/840*luminosity;
-  max = getMaxValue(*nVetoE_[kData], "");
-  MyCanvas[18]->cd(0);
-  MyCanvas[18]->SetLogy(1);
-  MyCanvas[18]->SetTitle("multiplicityLooseElectrons@7TeV");
-  axesStyle(*nVetoE_[kData], "N_{e}(p_{t}>15GeV)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  nVetoE_[kData]->GetXaxis()->SetRangeUser(-0.5, 2.5);
-  nVetoE_[kData]->Draw("Axis");
-  nVetoE        ->Draw("same");
-  nVetoE_[kData]->Draw("EPsame");
-  //  leg17         ->Draw("same");
-  //label("electron veto")->Draw("same");
-  //cut1                  ->Draw("same");
-  nVetoE_[kData]->Draw("Axis same");
-  if(cutLine)drawcutline(0.5, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  if(jetTyp==""){
-    // ---
-    //    do the printing for fhpd_
-    // ---
-    min = 0.01/840*luminosity;
-    max = getMaxValue(*fhpd_[kData], "");
-    MyCanvas[19]->cd(0);
-    MyCanvas[19]->SetLogy(1);
-    MyCanvas[19]->SetTitle("fHPD"+thoseCollections[14]+"Jets@7TeV");
-    fhpd        ->Draw();
-    axesStyle(*fhpd, "fHPD", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    fhpd_[kData]->Draw("EPsame");
-    fhpd        ->Draw("Axis same");
-    //  leg18       ->Draw("same");
-    //cut2        ->Draw("same");
-    if(cutLine)drawcutline(0.98, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-    
-    // ---
-    //    do the printing for n90hits_
-    // ---
-    min = 0.01/840*luminosity;
-    max = getMaxValue(*n90hits_[kData], "");
-    MyCanvas[20]->cd(0);
-    MyCanvas[20]->SetLogy(1);
-    MyCanvas[20]->SetTitle("n90hits"+thoseCollections[15]+"Jets@7TeV");
-    n90hits        ->Draw();
-    axesStyle(*n90hits, "n90Hits", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    n90hits_[kData]->Draw("EPsame");
-    n90hits        ->Draw("Axis same");
-    //  leg19          ->Draw("same");
-    //cut2           ->Draw("same");
-    if(cutLine)drawcutline(1.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-  }
-
-  if(jetTyp=="PF"){
-    // ---
-    //    do the printing for nhf_
-    // ---
-    min = 1;
-    max = getMaxValue(*nhf_[kData], "");
-    MyCanvas[19]->cd(0);
-    MyCanvas[19]->SetLogy(1);
-    MyCanvas[19]->SetTitle("nhfReliableJets@7TeV");
-    nhf        ->Draw();
-    axesStyle(*nhf, "E_{had neutral} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    nhf_[kData]->Draw("EPsame");
-    nhf        ->Draw("Axis same");
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(0.99, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
- 
-    // ---
-    //    do the printing for cef_
-    // ---
-    min = 1;
-    max = getMaxValue(*cef_[kData], "");
-    MyCanvas[20]->cd(0);
-    MyCanvas[20]->SetLogy(1);
-    MyCanvas[20]->SetTitle("cefReliableJets@7TeV");
-    cef        ->Draw();
-    axesStyle(*cef, "E_{em charged} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    cef_[kData]->Draw("EPsame");
-    cef        ->Draw("Axis same");
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(0.99, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-  }
-
-  // ---
-  //    do the printing for nJets_
-  // ---
-  min = 0.99;
-  max = getMaxValue(*nJets_[kData], "");
-  MyCanvas[21]->cd(0);
-  MyCanvas[21]->SetLogy(1);
-  MyCanvas[21]->SetTitle("nJets"+thoseCollections[16]+"Jets@7TeV");
-  axesStyle(*nJets_[kData], "N_{jets}(p_{t}>30GeV)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  nJets_[kData]->GetXaxis()->CenterLabels();
-  nJets_[kData]->GetXaxis()->SetNdivisions(510);
-  nJets_[kData]->Draw("AXIS"  );
-  nJets        ->Draw("same"  );
-  nJets_[kData]->Draw("EPsame");
-  //  leg20        ->Draw("same");
-  //label("jet selection")->Draw("same");
-  //cut2         ->Draw("same");
-  nJets_[kData]->Draw("AXIS same");
-  if(cutLine)drawcutline(4.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for bdiscr_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*bdiscr_[kData], "");
-  MyCanvas[22]->cd(0);
-  MyCanvas[22]->SetLogy(1);
-  MyCanvas[22]->SetTitle("bdiscr"+thoseCollections[17]+"Jets@7TeV");
-  axesStyle(*bdiscr_[kData], "b-discr.(tche)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  bdiscr_[kData]->Draw("Axis");
-  bdiscr        ->Draw("same");
-  bdiscr_[kData]->Draw("EPsame");
-  //  leg21         ->Draw("same");
-  //cut3          ->Draw("same");
-  bdiscr_[kData]->Draw("Axis same");
-  if(cutLine)drawcutline(3.3, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for bdiscrPre_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*bdiscrPre_[kData], "");
-  MyCanvas[23]->cd(0);
-  MyCanvas[23]->SetLogy(1);
-  MyCanvas[23]->SetTitle("bdiscrPre"+thoseCollections[17]+"Jets@7TeV");
-  bdiscrPre        ->Draw();
-  axesStyle(*bdiscrPre, "b-discr.(tche)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  bdiscrPre_[kData]->Draw("EPsame");
-  bdiscrPre        ->Draw("Axis same");
-  //  leg21            ->Draw("same");
-  //cut0             ->Draw("same");
-  if(cutLine)drawcutline(3.3, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for nbJets_
-  // ---
-  min = 0.1/840*luminosity;
-  max = getMaxValue(*nbJets_[kData], "");
-  MyCanvas[24]->cd(0);
-  MyCanvas[24]->SetLogy(1);
-  MyCanvas[24]->SetTitle("nbJets"+thoseCollections[18]+"Jets@7TeV");
-  axesStyle(*nbJets_[kData], "N_{b-jets}(tche-mWP)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  nbJets_[kData]->GetXaxis()->SetRangeUser(0.,3.);
-  nbJets_[kData]->GetXaxis()->CenterLabels();
-  nbJets_[kData]->Draw("Axis");
-  nbJets        ->Draw("same");
-  nbJets_[kData]->Draw("EPsame");
-  //  leg22         ->Draw("same");
-  //cut3          ->Draw("same");
-  nbJets_[kData]->Draw("Axis same");
-  if(cutLine)drawcutline(1.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
 
   // ---
   //    do the printing for common event Selection legend
   // ---
-  MyCanvas[25]->cd(0);
-  MyCanvas[25]->SetTitle("legendEventSelection@7TeV");
+  MyCanvas[34]->cd(0);
+  MyCanvas[34]->SetTitle("legendEventSelection@7TeV");
   leg0->Draw("");
-
-  // ---
-  //    do the printing for etVetoE_
-  // ---
-  min = 0.01/840*luminosity;
-  max = getMaxValue(*etVetoE_[kData], "");
-  MyCanvas[26]->cd(0);
-  MyCanvas[26]->SetLogy(1);
-  MyCanvas[26]->SetTitle("ptPatVetoElectrons@7TeV");
-  etVetoE     ->Draw();
-  axesStyle(*etVetoE, "E_{t}(e) [GeV]", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-  etVetoE_[kData]->Draw("EPsame");
-  etVetoE        ->Draw("Axis same");
-  //cut1           ->Draw("same");
-  //  leg23          ->Draw("same");
-  if(cutLine)drawcutline(15., exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  // ---
-  //    do the printing for etaVetoE_
-  // ---
-  max = getMaxValue(*etaVetoE_[kData], "");
-  MyCanvas[27]->cd(0);
-  //  MyCanvas[27]->SetLogy(1);
-  MyCanvas[27]->SetTitle("etaPatVetoElectrons@7TeV");
-  etaVetoE    ->Draw();
-  //  axesStyle(*etaVetoE, "#eta ( e )", "events", 0.01/840*luminosity, 1.0*etaVetoE->GetMaximum()*luminosity );
-  axesStyle(*etaVetoE, "#eta(e)", "events", 0., 1.1*max );
-  //  if(etaVetoE->GetMinimum()/12.38*luminosity==0)etaVetoE->SetMinimum(0.01);
-  etaVetoE_[kData]->Draw("EPsame");
-  etaVetoE        ->Draw("Axis same");
-  //  leg23           ->Draw("same");
-  //cut1            ->Draw("same");
-  if(cutLine)drawcutline( 2.5, 1.1*max); 
-  if(cutLine)drawcutline(-2.5, 1.1*max);
-
-  // ---
-  //    do the printing for relIsoVetoE_
-  // ---
-  max = getMaxValue(*relIsoVetoE_[kData], "");
-  MyCanvas[28]->cd(0);
-  //  MyCanvas[28]->SetLogy(1);
-  MyCanvas[28]->SetTitle("relIsoPatVetoElectrons@7TeV");
-  relIsoVetoE    ->Draw();
-  axesStyle(*relIsoVetoE, "relIso(e)", "events", 0., 1.1*max );
-  relIsoVetoE_[kData]->Draw("EPsame");
-  relIsoVetoE        ->Draw("Axis same");
-
-  if(jetTyp=="PF"){
-    // ---
-    //    do the printing for nef_
-    // ---
-    min = 1;
-    max = getMaxValue(*nef_[kData], "");
-    MyCanvas[29]->cd(0);
-    MyCanvas[29]->SetLogy(1);
-    MyCanvas[29]->SetTitle("nefReliableJets@7TeV");
-    nef        ->Draw();
-    axesStyle(*nef, "E_{em neutral} / E", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    nef_[kData]->Draw("EPsame");
-    nef        ->Draw("Axis same");
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(0.99, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-    // ---
-    //    do the printing for cmult_
-    // ---
-    min = 1;
-    max = getMaxValue(*cmult_[kData], "");
-    MyCanvas[30]->cd(0);
-    MyCanvas[30]->SetTitle("cmultReliableJets@7TeV");
-    MyCanvas[30]->SetLogy(1);
-    cmult        ->Draw();
-    axesStyle(*cmult, "N(charged particles)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    cmult_[kData]->Draw("EPsame");
-    cmult        ->Draw("Axis same");
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(0.0, exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-    // ---
-    //    do the printing for nConst_
-    // ---
-    min = 1;
-    max = getMaxValue(*nConst_[kData], "");
-    MyCanvas[31]->cd(0);
-    MyCanvas[31]->SetTitle("nConstReliableJets@7TeV");
-    nConst        ->Draw();
-    axesStyle(*nConst, "N(jet constituents)", "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
-    nConst_[kData]->Draw("EPsame");
-    nConst        ->Draw("Axis same");
-    MyCanvas[31]->SetLogy(1);
-    //  leg15      ->Draw("same");
-    //cut2       ->Draw("same");
-    if(cutLine)drawcutline(1., exp(1.15*(std::log(max)-std::log(min))+std::log(min)));
-
-  }
 
   // ---
   // saving
   // ---
-
   if(save){
-    // ps
+    // pdf
     MyCanvas[0]->Print(saveTo+plots+"7TeV"+lum2+"nb.pdf(", "pdf");
-    for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-      MyCanvas[idx]->Print(saveTo+plots+"7TeV"+lum2+"nb.pdf", "pdf");
+    for(unsigned int var=1; var<MyCanvas.size()-1; var++){
+      if((jetTyp=="PF" && (var>=17 && var<=19)) || (jetTyp=="" && (var>=20 && var<=25)))continue;
+      MyCanvas[var]->Print(saveTo+plots+"7TeV"+lum2+"nb.pdf", "pdf");
     }
     MyCanvas[MyCanvas.size()-1]->Print(saveTo+plots+"7TeV"+lum2+"nb.pdf)", "pdf");
- 
     // png
-    for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png"); 
+    for(unsigned int var=0; var<MyCanvas.size(); var++){
+      if((jetTyp=="PF" && (var>=17 && var<=19)) || (jetTyp=="" && (var>=20 && var<=25)))continue;
+      MyCanvas[var]->Print(saveTo+(TString)(MyCanvas[var]->GetTitle())+".png"); 
     }
   }
   
@@ -1085,7 +282,7 @@ void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin, floa
 {
   hist.SetTitle("");
   hist.GetXaxis()->SetTitle(titleX);
-  hist.GetXaxis()->CenterTitle();
+  //hist.GetXaxis()->CenterTitle();
   hist.GetXaxis()->SetTitleSize  ( 0.06);
   hist.GetXaxis()->SetTitleColor (    1);
   hist.GetXaxis()->SetTitleOffset(  1.0);
@@ -1102,7 +299,7 @@ void axesStyle(T& hist, const char* titleX, const char* titleY, float yMin, floa
   hist.GetYaxis()->SetTitleFont  (   62);
   hist.GetYaxis()->SetLabelSize  ( 0.04);
   hist.GetYaxis()->SetLabelFont  (   62);
-  hist.GetYaxis()->CenterTitle   ( true);
+  //hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
 }
