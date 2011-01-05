@@ -53,7 +53,10 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // SF(mu Trigger) = 0.969 +/- 0.002 (RunA and B combined -> think about splitting!!!)
   // SF(muIDIso)    = 0.995 +/- 0.003
   // systematic uncertainty approx. 2-3%
-  const double effSF = 0.964155;
+  // -> total SF 0.964155
+  // ATTENTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // effSF must be set to 1 because it is already implemented in analyzeMuonDiffXSec.C at the moment
+  const double effSF = 1.;
   
   // ---
   //    systematic variations
