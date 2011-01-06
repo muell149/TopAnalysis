@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString plots = "cutflow", TString jetTyp = "PF")
+void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString plots = "NminusOne", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -199,14 +199,20 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
   std::vector<TString> axisTitle_;// don't change order
   TString axisTitle[ 34 ] = { "p_{t}(#mu) [GeV]","#eta(#mu)","N_{Hits trk}(#mu)","#chi^{2}(#mu)","d_{B}(#mu) [cm]","d_{z}(#mu)","E_{Ecal}(#mu) [GeV]","E_{Hcal}(#mu) [GeV]","#DeltaR(#mu - jet(p_{t}>30GeV))","relIso(#mu)","N_{#mu}(p_{t}>20GeV)","#eta (all jets)","p_{t}(jet 1) [GeV]","p_{t}(jet 2) [GeV]","p_{t}(jet 3) [GeV]","p_{t}(jet 4) [GeV]","N_{jets}(p_{t}>30GeV)","em fraction","fHPD","n90Hits","E_{had charged} / E","E_{had neutral} / E","E_{em charged} / E","E_{em neutral} / E","N(charged particles)","N(jet constituents)","b-discr.(tche)","N_{b-jets}(tche-mWP)","b-discr.(tche)","N_{#mu}(p_{t}>10GeV)","N_{e}(p_{t}>15GeV)","E_{t}(e) [GeV]","#eta ( e )","relIso(e)" };
   axisTitle_.insert( axisTitle_.begin(), axisTitle, axisTitle + 34 );
+  std::vector<double> min_; // don't change order
+  double minimum[ 34 ] = { 1,0,1,0.01,0.01,0.1,0.01,0.1,0.1,0.1,0.1,0,0.1,0.1,0.1,0.1,1,0.1/840*luminosity,0.01/840*luminosity,0.1/840*luminosity,1,0.1,0.1,1,1,1,1,1,1,1,1,0.1,0,1};
+  min_.insert( min_.begin(), minimum, minimum + 34 );
   // loop variables
   for(unsigned int var=0; var<variables_.size(); ++var){
-    double min = 0.;
-    double max = 0.;
+    // skip calo plots for PF jets
+    if((var==17)&&(jetTyp=="PF")) var+=3;
+    // skip PF plots for calo jets
+    if((var==20)&&(jetTyp!="PF")) var+=6;
+    double min = min_[var];
+    double max = getMaxValue(*histo_[thoseCollections_[var]+variables_[var]][kData], "");
     if((jetTyp=="PF" && (var>=17 && var<=19)) || (jetTyp=="" && (var>=20 && var<=25)))continue;
     MyCanvas[var]->cd(0);
     if(!variables_[var].Contains("eta"))MyCanvas[var]->SetLogy(1);
-    if(MyCanvas[var]->GetLogy())min = 0.1/840*luminosity;
     max = getMaxValue(*histo_[thoseCollections_[var]+variables_[var]][kData], "");
     if(variables_[var].Contains("MuonVetoJets"))
       MyCanvas[var]->SetTitle(plotNames_[var]+thoseCollections_[var]+"MuonsVetoJets@7TeV");
@@ -225,7 +231,16 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
       MyCanvas[var]->SetTitle(plotNames_[var]+thoseCollections_[var]+"Muons@7TeV");
     if(MyCanvas[var]->GetLogy())axesStyle(*histo_[thoseCollections_[var]+variables_[var]][kData], axisTitle[var], "events", min, exp(1.15*(std::log(max)-std::log(min))+std::log(min)) );
     else axesStyle(*histo_[thoseCollections_[var]+variables_[var]][kData], axisTitle[var], "events", min, 1.15*max );
+    // restrict axes (ptmu,nbjets,dB,nmuons,ptlead4jets)
     if(variables_[var]=="MuonKinematics/pt")histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(20.,150.);
+    if(var==27)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,3.  );
+    if(var==4 )histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,0.2 );
+    if(var==10)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(1.,3.  );
+    if((var==12)||(var==13))histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,400.);
+    if((var==14)||(var==15))histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,150.);
+    if(var==29)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,3. );
+    if(var==30)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(-0.5,2.5);
+
     histo_[thoseCollections_[var]+variables_[var]][kData]->Draw("EP");
     stack_[thoseCollections_[var]+variables_[var]]       ->Draw("same");
     histo_[thoseCollections_[var]+variables_[var]][kData]->Draw("EPsame");
