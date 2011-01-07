@@ -64,7 +64,16 @@ if(not globals().has_key('runningOnData')):
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string('START38_V14::All')
 
+## Needed for redoing the ak5GenJets
+process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
 
+if(runningOnData=="MC"):
+    process.p0 = cms.Path(## redo genjets without mu/nu from tau
+                          process.genJetParticles *
+                          process.ak5GenJets
+                          )
+    
 ## ---
 ##    configure the cutflow scenario
 ## ---
@@ -538,7 +547,7 @@ process.estimationMuonsQualityNjets4 = process.estimationMuonsQualityNjets1.clon
 ## ---
 ##    run the final sequences
 ## ---
-              
+
 process.p1 = cms.Path(
                       ## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequence                        *
@@ -601,59 +610,59 @@ process.p2 = cms.Path(
 
 ## QCD estimation via ABCD
 process.p3 = cms.Path(
-    ## gen event selection (decay channel) and trigger selection (hltFilter)
-    process.filterSequenceABCD                    *        
-    ## introduce collections
-    process.semiLeptonicSelection                 *
-    process.estimationMuons                       *
-    ## PV event selection
-    process.PVSelectionABCD                       *
-    ## lepton veto event selection cut
-    process.secondMuonVetoABCD                    *
-    process.electronVetoABCD                      *
-    ## do the event selection for ==1 muon (without dB, relIso and dR cut)
-    process.estimationMuonsSelection              *
-    ## jetcut event selection + monitoring of dB and relIso variable
-    ## a) 1 jet
-    process.leadingJetSelectionNjets1ABCD         *
-    process.estimationMuonsQualityNjets1          *
-    ## a) 2 jet
-    process.leadingJetSelectionNjets2ABCD         *
-    process.estimationMuonsQualityNjets2          *
-    ## a) 3 jet
-    process.leadingJetSelectionNjets3ABCD         *
-    process.estimationMuonsQualityNjets3          *
-    ## a) 4 jet
-    process.leadingJetSelectionNjets4ABCD         *
-    process.estimationMuonsQualityNjets4          *
-    ## do the standard muon selection
-    process.muonSelectionABCD                     
-    )
+                      ## gen event selection (decay channel) and trigger selection (hltFilter)
+                      process.filterSequenceABCD                    *        
+                      ## introduce collections
+                      process.semiLeptonicSelection                 *
+                      process.estimationMuons                       *
+                      ## PV event selection
+                      process.PVSelectionABCD                       *
+                      ## lepton veto event selection cut
+                      process.secondMuonVetoABCD                    *
+                      process.electronVetoABCD                      *
+                      ## do the event selection for ==1 muon (without dB, relIso and dR cut)
+                      process.estimationMuonsSelection              *
+                      ## jetcut event selection + monitoring of dB and relIso variable
+                      ## a) 1 jet
+                      process.leadingJetSelectionNjets1ABCD         *
+                      process.estimationMuonsQualityNjets1          *
+                      ## a) 2 jet
+                      process.leadingJetSelectionNjets2ABCD         *
+                      process.estimationMuonsQualityNjets2          *
+                      ## a) 3 jet
+                      process.leadingJetSelectionNjets3ABCD         *
+                      process.estimationMuonsQualityNjets3          *
+                      ## a) 4 jet
+                      process.leadingJetSelectionNjets4ABCD         *
+                      process.estimationMuonsQualityNjets4          *
+                      ## do the standard muon selection
+                      process.muonSelectionABCD                     
+                      )
 
 ## on generator niveau
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
     process.p4 = cms.Path(
-        ## gen event selection: semileptonic (muon & tau->lepton)
-        process.genFilterSequence                     *
-        ## introduce some collections
-        process.isolatedGenMuons                      *
-        process.semiLeptGenCollections                *
-        ## do the event selection for muon
-        process.genMuonSelection                      *
-        ## for N_jets = 1+
-        process.leadingGenJetSelectionNjets1          *
-        process.analyzeTightMuonCrossSectionGenNjets1 *
-        ## for N_jets = 2+
-        process.leadingGenJetSelectionNjets2          *
-        process.analyzeTightMuonCrossSectionGenNjets2 *
-        ## for N_jets = 3+
-        process.leadingGenJetSelectionNjets3          *
-        process.analyzeTightMuonCrossSectionGenNjets3 *
-        ##  for N_jets = 4+
-        process.leadingGenJetSelectionNjets4          *
-        process.analyzeTightMuonCrossSectionGenNjets4 
-        )
+                          ## gen event selection: semileptonic (muon & tau->lepton)
+                          process.genFilterSequence                     *
+                          ## introduce some collections
+                          process.isolatedGenMuons                      *
+                          process.semiLeptGenCollections                *
+                          ## do the event selection for muon
+                          process.genMuonSelection                      *
+                          ## for N_jets = 1+
+                          process.leadingGenJetSelectionNjets1          *
+                          process.analyzeTightMuonCrossSectionGenNjets1 *
+                          ## for N_jets = 2+
+                          process.leadingGenJetSelectionNjets2          *
+                          process.analyzeTightMuonCrossSectionGenNjets2 *
+                          ## for N_jets = 3+
+                          process.leadingGenJetSelectionNjets3          *
+                          process.analyzeTightMuonCrossSectionGenNjets3 *
+                          ##  for N_jets = 4+
+                          process.leadingGenJetSelectionNjets4          *
+                          process.analyzeTightMuonCrossSectionGenNjets4 
+                          )
 elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
