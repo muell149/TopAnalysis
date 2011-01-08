@@ -7,7 +7,8 @@
 execfile("analyzeMuonDiffXSecBG_cfg.py")
 
 # JES down
-process.scaledJetEnergy.scaleType = "jes:down"
+process.scaledJetEnergy.scaleType   = "top:down"
+process.scaledJetEnergy.scaleFactor = 0.947
 if(jetType=="particleFlow"):
     process.scaledJetEnergy.payload = "AK5PF"
 elif(jetType=="Calo"):
