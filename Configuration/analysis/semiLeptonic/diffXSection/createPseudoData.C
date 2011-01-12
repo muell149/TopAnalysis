@@ -13,6 +13,8 @@
 #include <TROOT.h>
 #include <TFile.h>
 #include <TRandom3.h>
+#include <TKey.h>
+#include <TDirectory.h>
 
 void smearing(TH1F& src, TH1F& data);
 void loadingFiles(TString jetType);
@@ -21,11 +23,10 @@ void combineFiles(double luminosity);
 void poisson(TString directory, TString plot, int lumi, TFile& outputfile);
 TString getTStringFromInt(int i);
 
-std::vector<float> lumiweight_;
 std::vector<TH1F*> hists_;
 std::vector<TFile*> files_;
 
-void createPseudoData(double luminosity= 50.0, TString jetType = ""){
+void createPseudoData(double luminosity= 50.0, TString jetType = "PF"){
   // -------------------------
   // !!! choose luminosity !!!
   // -------------------------
@@ -36,75 +37,44 @@ void createPseudoData(double luminosity= 50.0, TString jetType = ""){
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-    TFile f("./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV"+lum+"pb.root", "recreate");
-
+  TFile f("./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV"+lum+"pb.root", "recreate");
   // ---------------------------------------------------------
   // !!! list of plots you want to combine !!!
   // and their directories within the input samples
-  // example: poisson("MyPlotFolder", "MyPlot", luminosity, f)
+  // example: addAndWeight("MyPlotFolder", "MyPlot", luminosity, f)
   // ---------------------------------------------------------
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets1", "phiMinus", luminosity, f);
+  TString folder ="";
+  TString plot = "";
+  // go to file
+  files_[0]->cd();
+  // loop objects in file
+  TIter fileIterator(gDirectory->GetListOfKeys());
+  TKey *fileKey;
+  while( fileKey = (TKey*)fileIterator() ) {
+    TObject *fileObject = fileKey->ReadObj(); 
+    // check if object is a directory
+    if(fileObject->InheritsFrom("TDirectory")){
+      folder = (TString)fileObject->GetName();
+      std::cout << std::endl << " - folder: " << folder << std::endl << "   plots: ";
+      // go to directory
+      ((TDirectory*)fileObject)->cd();
+      // loop objects in directory
+      TIter folderIterator(gDirectory->GetListOfKeys());
+      TKey *folderKey;
+      while( folderKey = (TKey*)folderIterator() ) {
+	TObject *folderObject = folderKey->ReadObj(); 
+	// check if object is a TH1 or TH2
+	if( (folderObject->InheritsFrom("TH1")) || (folderObject->InheritsFrom("TH2"))){
+	  plot = folderObject->GetName();
+	  poisson(folder, plot, luminosity, f);
+	}
+      }
+    }
+  }
+  files_[0]->Close();
 
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets2", "phiMinus", luminosity, f);
-
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3", "phiMinus", luminosity, f);
-
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4", "phiMinus", luminosity, f);
-
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets4Btag", "phiMinus", luminosity, f);
-
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "pt"      , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "eta"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "phi"     , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "ptPlus"  , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "etaPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "phiPlus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "ptMinus" , luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "etaMinus", luminosity, f);
-  poisson("analyzeTightMuonCrossSectionRecNjets3Btag", "phiMinus", luminosity, f);
-
-  // close rootfile
-  f.Close();
+// close rootfile
+f.Close();
 }
 
 void poisson(TString directory, TString plot, int lumi, TFile& outputfile)
@@ -123,7 +93,8 @@ void poisson(TString directory, TString plot, int lumi, TFile& outputfile)
     outputfile.mkdir(directory);
     outputfile.cd(directory);
   }
-  pseudoData->Write(plot);  
+  pseudoData->Write(plot);
+  std::cout << " " << plot;
 }
 
 void loadingFiles(TString jetType)
@@ -133,6 +104,7 @@ void loadingFiles(TString jetType)
   // -----------------------------------------
 
   TString whichSample = "/analysisRootFiles";
+  files_.clear();
   //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloFall10.root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+jetType+".root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root"  ) );
@@ -169,7 +141,7 @@ void combineFiles(double luminosity)
   // !!! define weights concerning luminosity !!!
   // --------------------------------------------
   // done for "luminosity" pb-1 @ 7TeV
-  std::vector<double> lumiweight;  
+  std::vector<double> lumiweight_;  
   // 7 TeV Monte Carlo spring 10 samples
   // -----------------------------------
 
