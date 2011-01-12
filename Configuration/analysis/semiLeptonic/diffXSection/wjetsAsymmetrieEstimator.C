@@ -37,7 +37,7 @@ template <class T>
 void writeToFile(T output, TString file="crossSectionCalculationPF.txt", bool append=1);
 double readLineFromFile(int line, TString file="crossSectionCalculationPF.txt");
 
-void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool textoutput=true, TString dataFile="./diffXSecFromSignal/data/data0309/DiffXSecData_Nov5PF.root", TString jetType = "PF")
+void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool textoutput=true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString jetType = "PF")
 {
   // ---
   //    main function parameters
@@ -101,7 +101,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   // ---
   //    scale W+jets to luminosity
   // ---
-  // a) spring10 7TeV W+jets MADGRAPH sample 
+  // a) fall10 7TeV W+jets MADGRAPH D6T sample 
   double lumiweight=0.105750913/50*luminosity;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
@@ -109,7 +109,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
     ptMuMinus_[Njets_[mult]][kWjets]->Scale(lumiweight);
     pt_       [Njets_[mult]][kWjets]->Scale(lumiweight);
   }
-  // b) spring10 7TeV TTbar MADGRAPH sample
+  // b) fall10 7TeV TTbar MADGRAPH D6T sample
   double lumiweight2=0.006029022/50*luminosity;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<4; ++mult){
@@ -151,6 +151,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   TH1F *wjetsEstimationAll = new TH1F("wjetsEstimationAll" , "wjetsEstimationAll", 4, 0.5, 4.5);
   TH1F *wjetsTruth         = new TH1F("wjetsTruth"         , "wjetsTruth"        , 4, 0.5, 4.5);
   TH1F *allPseudoEvents    = new TH1F("allPseudoEvents"    , "allPseudoEvents"   , 4, 0.5, 4.5);
+  TH1F *wjetsData          = new TH1F("wjetsData"          , "wjetsData"         , 4, 0.5, 4.5);
   // loop samples (W+jets, pseudo data, real data)
   for(unsigned int idx=kWjets; idx<=kData; ++idx){
     // print out info for c.a. estimation
@@ -176,7 +177,9 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
       std::cout << "N(mu-)= "  << y << std::endl;
       std::cout << "R(Njets >=" << njets << ") = " << R << " +- " << dR << std::endl;
       std::cout << "N(estimated W) = " << NW << " +- " << NWError << std::endl;
-      std::cout << "N(W, MC truth) = "   << sumUpEntries(*pt_[Njets_[njets-1]][kWjets]) << std::endl;   
+      std::cout << "N(W, MC truth) = "   << sumUpEntries(*pt_[Njets_[njets-1]][kWjets]) << std::endl;
+      double ratio = NW/sumUpEntries(*pt_[Njets_[njets-1]][kWjets]);
+      if(idx==kData) std::cout << "ratio NWest/NWMC = " << ratio << std::endl;
       std::cout << "total # of events: " << sumUpEntries(*pt_[Njets_[njets-1]][idx])    << std::endl;
       // b) fill wjetsEstimationW histo
       if(idx==kWjets){
@@ -191,11 +194,13 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
       // d) fill wjetsTruth histo
       if(idx==kWjets) wjetsTruth->SetBinContent( njets, sumUpEntries(*pt_[Njets_[njets-1]][kWjets]) );
       // e) fill allPseudoEvents histo
-      if(idx==kPseudo50) allPseudoEvents->SetBinContent( njets, sumUpEntries(*pt_[Njets_[njets-1]][kPseudo50]) );
-      // f) if textoutput==true: save W+jets data estimation within .txt-file
+      if(idx==kPseudo50) allPseudoEvents->SetBinContent( njets, ratio );
+      // f) fill data estimation histo
+      if(idx==kData) wjetsData->SetBinContent( njets, sumUpEntries(*pt_[Njets_[njets-1]][kPseudo50]) );
+      // g) if textoutput==true: save W+jets data estimation within .txt-file
       if(textoutput==true&&idx==kData){
 	if(njets==1) writeToFile("estimated N(W) in Data using charge asymmetry method with R from above for N(jets) >= 1 - 4",file);
-	writeToFile((x-y)*R,file);
+	writeToFile((x-y)*R,file); 
       }
     }
   }
@@ -208,7 +213,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 50, bool save = false, bool te
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("N_{W} @ "+lum+" pb^{-1} ( 7 TeV )");
-  leg0->AddEntry( wjetsTruth        , "MC truth"                     , "L" );
+  leg0->AddEntry( wjetsTruth        , "MC truth"                            , "L" );
   leg0->AddEntry( wjetsEstimationW  , "estimation from W#rightarrowl#nu MC" , "PL");
   leg0->AddEntry( wjetsEstimationAll, "estimation from pseudo data (all MC)", "PL");
   //  leg0->AddEntry( allPseudoEvents   , "total # pseudo events"               , "L" );
@@ -368,10 +373,10 @@ std::pair<double,double> getChargeAsymmetrieParameter(int njets, bool loadR)
   // use R like it is written down here or load it from file
   if( loadR) return make_pair( readLineFromFile(2+njets) , 0 );
   std::map< TString, std::map <unsigned int, std::pair<double,double> > > Rinclusive_;
-  Rinclusive_["mu"][1] = make_pair( 5.6162  , 0);
-  Rinclusive_["mu"][2] = make_pair( 5.12635 , 0);
-  Rinclusive_["mu"][3] = make_pair( 4.6365  , 0);
-  Rinclusive_["mu"][4] = make_pair( 4.14665 , 0); 
+  Rinclusive_["mu"][1] = make_pair( 5.83643 , 0);
+  Rinclusive_["mu"][2] = make_pair( 5.43496 , 0);
+  Rinclusive_["mu"][3] = make_pair( 5.03349 , 0);
+  Rinclusive_["mu"][4] = make_pair( 4.63202 , 0); 
   return Rinclusive_["mu"][njets];
 }
 

@@ -38,7 +38,7 @@ std::vector<std::pair<double,double> > fitLinear(TH1F& hist, double xmin, double
 template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 
-void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false, TString jetType = "")
+void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false, TString jetType = "PF")
 { 
   // ---
   //    main function parameters
@@ -55,133 +55,89 @@ void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false, TString
   gROOT->cd();
   gROOT->SetStyle("Plain");
   gStyle->SetErrorX(0); 
+  gStyle->SetEndErrorSize (8);
 
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/spring10Samples/spring10SelV2Sync";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonChargeAsymmetryWjetsMadSpring10"+jetType+".root") );
+  TString whichSample = "/analysisRootFiles";
+  files_.push_back( new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root") );
+  //files_.push_back( new TFile("/afs/naf.desy.de/user/h/henderle/public/muonDiffXSecWjetsMadSpring10PF.root") );
 
   // ---
   //    get histograms
   // ---
-  // get e, mu, tau and mu+tau->mu histos for all jet multiplicities 
-  std::vector<TH1F*> ptNMuPlus_, ptNMuMinus_, ptNEPlus_, ptNEMinus_, ptNTPlus_, ptNTMinus_, ptNWMuPlus_, ptNWMuMinus_;  
-  TString mult="";
-  for(int idx=0; idx<=4; ++idx) {
-    if(idx==0) mult="";
-    else {
-      mult = "Njets"+getTStringFromInt(idx);
-    }
-    ptNMuMinus_ .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryMuons"+mult+"/ptMinus"     ) );
-    ptNMuPlus_  .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryMuons"+mult+"/ptPlus"      ) );
-    ptNEMinus_  .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryWElectrons"+mult+"/ptMinus" ) );
-    ptNEPlus_   .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryWElectrons"+mult+"/ptPlus"  ) );
-    ptNTMinus_  .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryWTaus"+mult+"/ptMinus"      ) );
-    ptNTPlus_   .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryWTaus"+mult+"/ptPlus"       ) ); 
-    ptNWMuMinus_.push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryWMuons"+mult+"/ptMinus"     ) );
-    ptNWMuPlus_ .push_back( (TH1F*)files_[0]->Get("analyzeChargeAsymmetryWMuons"+mult+"/ptPlus"      ) );
+  // create jet multiplicity indicator
+  std::vector<TString> Njets_;
+  TString jets[ 4 ] = { "Njets1", "Njets2", "Njets3", "Njets4" };
+  Njets_.insert( Njets_.begin(), jets, jets + 4 );
+  // mu+/- reco histos for all jet multiplicities 
+  std::vector<TH1F*> ptNMuPlus_, ptNMuMinus_;
+  for(int mult=0; mult<=3; ++mult) {
+    ptNMuMinus_ .push_back( (TH1F*)files_[0]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/ptMinus") );
+    ptNMuPlus_  .push_back( (TH1F*)files_[0]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/ptPlus" ) );
   }
  
   // --- 
-  //    calculate charge asymmetry parameters R and errors
+  //    calculate charge asymmetry parameter R and errors
   // ---
   // a) R(ptmu) for different jet multiplicities and leptons
   // ----------------------------------------------------------------------------------------------
   // Rpt_[lepton][jetMultiplicity] -> eg: Rpt_[Wmu][4] = R(pt) for muons from W after >= 4 jets cut
   std::map< TString, std::map <unsigned int,TH1F* > > Rpt_;
   // loop jet multiplicities
-  for(int njets =0; njets<=4; njets++){
-    Rpt_["mu"  ][njets] = (TH1F*) calcutateR(*ptNMuPlus_[njets],  *ptNMuMinus_[njets],  "Muons from W and W->tau", "N(jets) >= "+getTStringFromInt(njets));
-    Rpt_["Wmu" ][njets] = (TH1F*) calcutateR(*ptNWMuPlus_[njets], *ptNWMuMinus_[njets], "Muons from W", "N(jets) >= "+getTStringFromInt(njets));
-    Rpt_["We"  ][njets] = (TH1F*) calcutateR(*ptNEPlus_[njets],   *ptNEMinus_[njets],   "Electrons from W", "N(jets) >= "+getTStringFromInt(njets));
-    Rpt_["Wtau"][njets] = (TH1F*) calcutateR(*ptNTPlus_[njets],   *ptNTMinus_[njets],   "Taus from W", "N(jets) >= "+getTStringFromInt(njets));
+  for(int njets =1; njets<=4; njets++){
+    Rpt_["mu"][njets] = (TH1F*) calcutateR(*ptNMuPlus_[njets-1], *ptNMuMinus_[njets-1],  "Muons", "N(jets) >= "+getTStringFromInt(njets));
   }
 
-  // b) inclusive R(ptlep>20GeV) for different jet multiplicities and leptons
+  // b) inclusive R(ptmu>20GeV) for different jet multiplicities and leptons
   // ----------------------------------------------------------------------------------------------
-  // Rpt_[lepton][jetMultiplicity] -> eg: Rpt_[Wmu][4].first/second = R/dR for muons with pt>20GeV from W after >= 4 jets cut
+  // Rpt_[lepton][jetMultiplicity] -> eg: Rpt_[Wmu][4].first/second = R/dR for muons from events with >= 4 jets cut
   std::map< TString, std::map <unsigned int, std::pair<double,double> > > Rinclusive_;
-  for(int njets =0; njets<=4; njets++){
-    Rinclusive_["mu"  ][njets] = calcutateTotalR(sumBinEntries(*ptNMuPlus_[njets],1),  sumBinEntries(*ptNMuMinus_[njets],1),  "Muons from W and W->tau, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
-    Rinclusive_["Wmu" ][njets] = calcutateTotalR(sumBinEntries(*ptNWMuPlus_[njets],1), sumBinEntries(*ptNWMuMinus_[njets],1), "Muons from W, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
-    Rinclusive_["We"  ][njets] = calcutateTotalR(sumBinEntries(*ptNEPlus_[njets],1),   sumBinEntries(*ptNEMinus_[njets],1),   "Electrons from W, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
-    Rinclusive_["Wtau"][njets] = calcutateTotalR(sumBinEntries(*ptNTPlus_[njets],1),   sumBinEntries(*ptNTMinus_[njets],1),   "Taus from W, pt>20GeV", "N(jets) >= "+getTStringFromInt(njets));
+  for(int njets =1; njets<=4; njets++){
+    Rinclusive_["mu"][njets] = calcutateTotalR(sumBinEntries(*ptNMuPlus_[njets-1],1),  sumBinEntries(*ptNMuMinus_[njets-1],1),  "Muons", "N(jets) >= "+getTStringFromInt(njets));
   }
 
-  // c)  create R_inclusive[Njets] plot(s) from b)
-  TH1F* RNjetsMu  = new TH1F("RNjetsMu" , "RNjetsMu" , 5, -0.5, 4.5);
-  TH1F* RNjetsWMu = new TH1F("RNjetsWMu", "RNjetsWMu", 5, -0.5, 4.5);
-  for(int bin=1; bin<= ptNMuPlus_[1]->GetNbinsX()+1; bin++){
+  // c)  create R_inclusive[Njets] plot from b)
+  TH1F* RNjetsMu  = new TH1F("RNjetsMu" , "RNjetsMu" , 4, 0.5, 4.5);
+  for(int bin=1; bin<= 4; bin++){
     // -1 because 1st bin = 0 jets bin
-    RNjetsMu->SetBinContent(bin,  Rinclusive_["mu"][bin-1].first);
-    RNjetsMu->SetBinError  (bin,  Rinclusive_["mu"][bin-1].second);
-    RNjetsWMu->SetBinContent(bin,  Rinclusive_["Wmu"][bin-1].first);
-    RNjetsWMu->SetBinError  (bin,  Rinclusive_["Wmu"][bin-1].second);
+    RNjetsMu->SetBinContent(bin,  Rinclusive_["mu"][bin].first);
+    RNjetsMu->SetBinError  (bin,  Rinclusive_["mu"][bin].second);
   }
 
   // ---
   //    create legends 
   // ---
   // create a legend for R_inclusive[Njets] for some leptons
-  TLegend *leg0 = new TLegend(0.25, 0.70, 1.0, 0.9);
+  TLegend *leg0 = new TLegend(0.25, 0.77, 1.0, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("inclusive R for p_{ t} (#mu) > 20 GeV, | #eta | < 2.1" );
-  leg0->AddEntry(RNjetsMu ,"W -> #mu#nu_{#mu} & W -> #tau#nu->#mu#nu_{#mu}#nu_{#tau}", "PL");
-  leg0->AddEntry(RNjetsWMu,"W -> #mu#nu_{#mu}"                                       , "PL");
+  leg0->SetHeader("inclusive R" );
+  leg0->AddEntry(RNjetsMu ,"W#rightarrow#mu#nu+Jets", "PL");
 
-  // create a legend for asymmetry parameter from different leptons without jet selection
-  TLegend *leg1 = new TLegend(0.21, 0.65, 0.99, 0.89);
-  leg1->SetFillStyle(0);
-  leg1->SetBorderSize(0);
-  leg1->SetHeader("R_{gen MC}: W+jets(MADGRAPH), 406 pb^ { -1}");
-  leg1->AddEntry( Rpt_["mu"  ][0], "#mu from W & W -> #tau", "P");
-  leg1->AddEntry( Rpt_["We"  ][0], "e from W"              , "P");
-  leg1->AddEntry( Rpt_["Wtau"][0], "#tau from W"           , "P");
-  leg1->AddEntry( Rpt_["Wmu" ][0], "#mu from W"            , "P");
+  // R(ptmu) for all jet multiplicities part1
+  TLegend *leg1a = new TLegend(0.21, 0.71, 0.85, 0.94);
+  leg1a->SetFillStyle(0);
+  leg1a->SetBorderSize(0);
+  leg1a->SetHeader("  R(W#rightarrow#mu#nu+Jets)");
+  leg1a->AddEntry( Rpt_["mu"][1], "N(jets)#geq1", "P");
+  leg1a->AddEntry( Rpt_["mu"][2], "N(jets)#geq2", "P");
 
-  // create a legend for asymmetry parameter from different leptons for >= 1 jet selection
-  TLegend *leg2 = new TLegend(0.21, 0.65, 0.99, 0.89);
-  leg2->SetFillStyle(0);
-  leg2->SetBorderSize(0);
-  leg2->SetHeader("R_{gen MC}: W+jets(MADGRAPH), 406 pb^ { -1}");
-  leg2->AddEntry( Rpt_["mu"  ][1], "#mu from W & W -> #tau", "P");
-  leg2->AddEntry( Rpt_["We"  ][1], "e from W"              , "P");
-  leg2->AddEntry( Rpt_["Wtau"][1], "#tau from W"           , "P");
-  leg2->AddEntry( Rpt_["Wmu" ][1], "#mu from W"            , "P");
-
-  // R(ptmu) for all jet multiplicities for W->mu && W->tau->mu
-  TLegend *leg3a = new TLegend(0.21, 0.73, 1.0, 0.93);
-  leg3a->SetFillStyle(0);
-  leg3a->SetBorderSize(0);
-  leg3a->SetHeader("R_{gen MC} W->mu & W->tau->mu");
-  leg3a->AddEntry( Rpt_["mu"][0], "N(jets)#geq0", "P");
-  leg3a->AddEntry( Rpt_["mu"][1], "N(jets)#geq1", "P");
-
-  // R(ptmu) for all jet multiplicities for W->mu && W->tau->mu
-  TLegend *leg3b = new TLegend(0.61, 0.68, 0.88, 0.87);
-  leg3b->SetFillStyle(0);
-  leg3b->SetBorderSize(0);
-  leg3b->AddEntry( Rpt_["mu"][2], "N(jets)#geq2", "P");
-  leg3b->AddEntry( Rpt_["mu"][3], "N(jets)#geq3", "P");
-  leg3b->AddEntry( Rpt_["mu"][4], "N(jets)#geq4", "P");
-
-   // label indicating used jetcut
-  TPaveLabel *jet0 = new TPaveLabel(0.76, 0.86, 0.96, 1.0, "no jetcut", "br NDC");
-  jet0->SetFillStyle(0);
-  jet0->SetBorderSize(0);
-  jet0->SetTextSize(0.26);
-  TPaveLabel *jet1= (TPaveLabel*)(jet0->Clone());
-  jet1->SetLabel("N(jets) #geq 1");
+  // R(ptmu) for all jet multiplicities part2
+  TLegend *leg1b = new TLegend(0.62, 0.70, 0.96, 0.86);
+  leg1b->SetFillStyle(0);
+  leg1b->SetBorderSize(0);
+  leg1b->AddEntry( Rpt_["mu"][3], "N(jets)#geq3", "P");
+  leg1b->AddEntry( Rpt_["mu"][4], "N(jets)#geq4", "P");
 
   // ---
   //    create canvas 
   // ---
   std::vector<TCanvas*> MyCanvas;
 
-  for(int idx=0; idx<=3; idx++){ 
+  for(int idx=0; idx<=1; idx++){ 
     char canvname[10];
     sprintf(canvname,"canv%i",idx);    
     MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
@@ -189,78 +145,40 @@ void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false, TString
   }
 
   // ---
-  //    do the printing for R_inclusive[Njets] for some leptons
+  //    do the printing for R_inclusive[Njets]
   // ---
   MyCanvas[0]->cd(0);
   MyCanvas[0]->SetTitle("inclusiveRNjets");
-  axesStyle(*RNjetsMu, "N_{jets} #geq", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 1, 1.5*RNjetsMu->GetMaximum(), 0.06, 1.3 );
-  histogramStyle(*RNjetsMu , kBlack,  1, 20, 1.0);
-  histogramStyle(*RNjetsWMu, kRed  ,  1, 20, 1.0);
-  RNjetsMu ->Draw("");
-  RNjetsWMu->Draw("same");
+  axesStyle(*RNjetsMu, "N_{jets} #geq", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 2.5, 8, 0.06, 1.3 );
+  histogramStyle(*RNjetsMu , kBlack,  1, 22, 1.5);
+  RNjetsMu ->Draw("e1");
   std::vector<std::pair<double,double> > inclusiveRfit_ =fitLinear(*RNjetsMu, 1.0, 4.5, RNjetsMu->GetLineColor(), "R( N(jets) ), W->mu & W->tau->mu");
   leg0     ->Draw("same");
 
   // ---
-  //     do the printing for R(ptlep) with >= 0 jets for some leptons
+  //     do the printing for R(ptmu) for different N(jets)
   // ---
   MyCanvas[1]->cd(0);
-  MyCanvas[1]->SetTitle("RptMuNjets0");
-  axesStyle(*Rpt_["mu"][0], "p_{t} ( gen lep ) [GeV]", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 0, 70, 0.05, 1.5);  
-  histogramStyle(*Rpt_["mu"  ][0], kBlack, 1, 20, 1.0);
-  histogramStyle(*Rpt_["Wmu" ][0], kRed  , 1, 20, 1.0);
-  histogramStyle(*Rpt_["We"  ][0], kBlue , 1, 20, 1.0);
-  histogramStyle(*Rpt_["Wtau"][0], kGreen, 1, 20, 1.0);
-  Rpt_["mu"  ][0]->DrawClone("");
-  Rpt_["Wmu" ][0]->DrawClone("same");
-  Rpt_["We"  ][0]->DrawClone("same");
-  Rpt_["Wtau"][0]->DrawClone("same");
-  leg1           ->DrawClone("same");
-  jet0           ->DrawClone("same");
-
-  // ---
-  //     do the printing for R(ptlep) with >= 1 jets for some leptons
-  // ---
-  MyCanvas[2]->cd(0);
-  MyCanvas[2]->SetTitle("RptMuNjets1");
-  axesStyle(*Rpt_["mu"][1], "p_{t} ( gen lep ) [GeV]", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 0, 70, 0.05, 1.5);  
-  histogramStyle(*Rpt_["mu"  ][1], kBlack, 1, 20, 1.0);
-  histogramStyle(*Rpt_["Wmu" ][1], kRed  , 1, 20, 1.0);
-  histogramStyle(*Rpt_["We"  ][1], kBlue , 1, 20, 1.0);
-  histogramStyle(*Rpt_["Wtau"][1], kGreen, 1, 20, 1.0);
-  Rpt_["mu"  ][1]->DrawClone("");
-  Rpt_["Wmu" ][1]->DrawClone("same");
-  Rpt_["We"  ][1]->DrawClone("same");
-  Rpt_["Wtau"][1]->DrawClone("same");
-  leg2           ->DrawClone("same");
-  jet1           ->DrawClone("same");
-
-  // ---
-  //     do the printing for R(ptlep) with >= 1 jets for some leptons
-  // ---
-  MyCanvas[3]->cd(0);
-  MyCanvas[3]->SetTitle("RptMuAllNjetsMuAndTauMu");
-  axesStyle(*Rpt_["mu"][4], "p_{t} ( gen lep ) [GeV]", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 0, 70, 0.05, 1.5);  
-  histogramStyle(*Rpt_["mu"][0], kBlack, 1, 20, 1.0);
-  histogramStyle(*Rpt_["mu"][1], kRed  , 1, 20, 1.0);
-  histogramStyle(*Rpt_["mu"][2], kBlue , 1, 20, 1.0);
-  histogramStyle(*Rpt_["mu"][3], kGreen, 1, 20, 1.0);
-  histogramStyle(*Rpt_["mu"][4], 50    , 1, 20, 1.0);
-  Rpt_["mu"][4]->Draw("");
-  Rpt_["mu"][3]->Draw("same");
-  Rpt_["mu"][2]->Draw("same");
-  Rpt_["mu"][1]->Draw("same");
-  Rpt_["mu"][0]->Draw("same");
+  MyCanvas[1]->SetTitle("RptMuAllNjetsMu");
+  axesStyle(*Rpt_["mu"][4], "p_{t} ( reco #mu ) [GeV]", "R = #frac{N_{W^{+}} + N_{W^{-}}}{N_{W^{+}} - N_{W^{-}}}", 0, 30, 0.05, 1.5);  
+  histogramStyle(*Rpt_["mu"][1], kRed    , 1, 29, 2.0);
+  histogramStyle(*Rpt_["mu"][2], kGreen-3, 1, 20, 1.5);
+  histogramStyle(*Rpt_["mu"][3], kBlue   , 1, 23, 1.5);
+  histogramStyle(*Rpt_["mu"][4], kMagenta, 1, 22, 1.5);
+  Rpt_["mu"][4]->GetXaxis()->SetRangeUser(0,94);
+  Rpt_["mu"][4]->Draw("e1");
+  Rpt_["mu"][3]->Draw("e1same");
+  Rpt_["mu"][2]->Draw("e1same");
+  Rpt_["mu"][1]->Draw("e1same");
   fitQuadraticExtrapolate(*Rpt_["mu"][4], 20., 100., Rpt_["mu"][4]->GetLineColor(), "R_inclusive, N(jets)>=4");
   fitQuadraticExtrapolate(*Rpt_["mu"][3], 20., 100., Rpt_["mu"][3]->GetLineColor(), "R_inclusive, N(jets)>=3");
   fitQuadraticExtrapolate(*Rpt_["mu"][2], 20., 100., Rpt_["mu"][2]->GetLineColor(), "R_inclusive, N(jets)>=2");
   fitQuadraticExtrapolate(*Rpt_["mu"][1], 20., 100., Rpt_["mu"][1]->GetLineColor(), "R_inclusive, N(jets)>=1");
-  fitQuadraticExtrapolate(*Rpt_["mu"][0], 20., 100., Rpt_["mu"][0]->GetLineColor(), "R_inclusive, N(jets)>=0");
-  leg3a        ->Draw("same");
-  leg3b        ->Draw("same");
+  leg1a        ->Draw("same");
+  leg1b        ->Draw("same");
 
   // ---
-  //     calculate fittet inclusive R for W->mu && W->tau->mu
+  //     calculate fittet inclusive R for W->mu
   // ---
   // loop jet multiplicities
   for(double njets =1; njets<=4; njets++){
@@ -272,7 +190,7 @@ void chargeAsymmetrieCalculator(bool save = true, bool textoutput=false, TString
     //inclusiveRfit = (a-2*sa)*(njets)+b;
     double errorInclusiveRfit = sqrt( (njets*sa)*(njets*sa) + sb*sb );
     // print out to shell
-    if(njets==1) std::cout << std::endl << "inclusive R (linear fit) for W->mu && W->tau->mu" << std::endl;
+    if(njets==1) std::cout << std::endl << "inclusive R (linear fit) for W->mu" << std::endl;
     std::cout << "N(jets)>="+getTStringFromInt(njets) << ": R = " << inclusiveRfit << " +/- " << errorInclusiveRfit << std::endl;
     // if textoutput==true: save fitted inclusive R values within .txt-file
     if(textoutput==true){
@@ -380,6 +298,7 @@ TH1F* calcutateR(TH1F& ptPlus, TH1F& ptMinus, TString label, TString jetMultipli
   for(int i=1; i<= ptPlus.GetNbinsX()+1; i++){
     ptP = (double)(ptPlus .GetBinContent(i));
     ptM = (double)(ptMinus.GetBinContent(i));
+    std::cout << "bin " << i << "mu+ / mu- = " << ptP << " / " << ptM << std::endl;
     if(ptP!=0 && ptM!=0){
       x = ptM / ptP;
       double parameter = (1.0 + x) / (1.0 -x);
