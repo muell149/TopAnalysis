@@ -80,13 +80,13 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+down+jetType+".root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+down+jetType+".root"  ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+down+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+down+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetType+".root"       ) );
 
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+up+jetType+".root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+up+jetType+".root"    ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+up+jetType+".root"  ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+up+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+up+jetType+".root"  ) );
+  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetType+".root"     ) );
 
   // ---
   //    get histograms
@@ -137,6 +137,14 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     ptlead3Jet_[idx]->Scale(lumiweight_[index]);
     ptlead4Jet_[idx]->Scale(lumiweight_[index]); 
     yieldPt_   [idx]->Scale(lumiweight_[index]); 
+    // scale QCD with weights from MET-fit
+    if((idx==kQCD)||(idx==kQCDJES09)||(idx==kQCDJES11)){
+      ptlead1Jet_[idx]->Scale(1.6);
+      ptlead2Jet_[idx]->Scale(1.9);
+      ptlead3Jet_[idx]->Scale(2.1);
+      ptlead4Jet_[idx]->Scale(1.8);
+      yieldPt_   [idx]->Scale(1.6); 
+    }
     // create combined MC plots
     if((idx==kSig)||(idx==kSigJES09)||(idx==kSigJES11)){
       relIso_    .push_back( (TH1F*)(relIso_    [idx]->Clone()) );
@@ -330,8 +338,8 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   histogramStyle(*ptlead1Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead1Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0, 1.1*ptlead1Jet_[kData]->GetBinContent(7));
-  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0.3*luminosity/1000., 10*ptlead1Jet_[kData]->GetBinContent(7));
+  if(!logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0, 1.1*ptlead1Jet_[kJES11]->GetBinContent(7));
+  if(logartihmicPlots) axesStyle(*ptlead1Jet_[kStd], "p_{t}(jet 1)" , "events", 0.3*luminosity/1000., 10*ptlead1Jet_[kJES11]->GetBinContent(7));
   ptlead1Jet_[kStd     ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead1Jet_[kJES11   ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead1Jet_[kJES09   ]->GetXaxis()->SetRangeUser(30.,200.);
@@ -353,8 +361,8 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   histogramStyle(*ptlead2Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead2Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0, 1.2*ptlead2Jet_[kData]->GetBinContent(7));
-  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0.03*luminosity/1000., 10*ptlead2Jet_[kData]->GetBinContent(7));
+  if(!logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0, 1.2*ptlead2Jet_[kJES11]->GetBinContent(7));
+  if(logartihmicPlots) axesStyle(*ptlead2Jet_[kStd], "p_{t}(jet 2)" , "events", 0.03*luminosity/1000., 10*ptlead2Jet_[kJES11]->GetBinContent(7));
   ptlead2Jet_[kStd     ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead2Jet_[kJES11   ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead2Jet_[kJES09   ]->GetXaxis()->SetRangeUser(30.,200.);
@@ -376,8 +384,8 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   histogramStyle(*ptlead3Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead3Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0, 1.2*ptlead3Jet_[kData]->GetBinContent(7));
-  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0.003*luminosity/1000., 10*ptlead3Jet_[kData]->GetBinContent(7));
+  if(!logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0, 1.2*ptlead3Jet_[kJES11]->GetBinContent(7));
+  if(logartihmicPlots) axesStyle(*ptlead3Jet_[kStd], "p_{t}(jet 3)" , "events", 0.003*luminosity/1000., 10*ptlead3Jet_[kJES11]->GetBinContent(7));
   ptlead3Jet_[kStd     ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead3Jet_[kJES11   ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead3Jet_[kJES09   ]->GetXaxis()->SetRangeUser(30.,200.);
@@ -399,8 +407,8 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   histogramStyle(*ptlead4Jet_[kJES11], kBlue , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kJES09], kRed  , 1, 20, 0.5, 0);
   histogramStyle(*ptlead4Jet_[kData ], kBlack, 1, 22, 1.8, 0);
-  if(!logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0, 1.2*ptlead4Jet_[kData]->GetBinContent(7));
-  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0.0003*luminosity/1000., 10*ptlead4Jet_[kData]->GetBinContent(7));
+  if(!logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0, 1.2*ptlead4Jet_[kJES11]->GetBinContent(7));
+  if(logartihmicPlots) axesStyle(*ptlead4Jet_[kStd], "p_{t}(jet 4)" , "events", 0.0003*luminosity/1000., 10*ptlead4Jet_[kJES11]->GetBinContent(7));
   ptlead4Jet_[kStd     ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead4Jet_[kJES11   ]->GetXaxis()->SetRangeUser(30.,200.);
   ptlead4Jet_[kJES09   ]->GetXaxis()->SetRangeUser(30.,200.);
