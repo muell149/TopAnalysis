@@ -33,16 +33,16 @@ TString jetLabel(TString input);
 TString samples(int sampleEnum);
 TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true);
 double getABCDNumbers( TString njets, bool loadValues, TString file);
-double getMCEffiencies(TString variable, int bin, int njets, bool loadValues, bool useNLO=false, TString JES="", TString jetTyp = "");
+double getMCEffiencies(TString variable, int bin, int njets, bool loadValues, bool useNLO=false, TString JES="", TString jetTyp = "", double scaleFactor = 0.01, TString putSysOn="");
 TString sampleLabel(unsigned int sample);
-double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useNLO=false, TString JES="", TString jetTyp = "", double scaleFactor = 0.01);
-void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2);
+double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useNLO=false, TString JES="", TString jetTyp = "", double scaleFactor = 0.01, TString putSysOn="");
+void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, double textSize = 0.26);
 void scaleByLumi(TH1F* histo, double lumi);
 void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, unsigned int color=kBlack);
 void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES11", TString down = "JES09");
 double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES11", TString down = "JES09");
 
-void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=false, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", double scaleFactor = 0.964155)
+void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
 { 
 
   // ---
@@ -116,16 +116,28 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/analysisRootFiles";
-  for(int ienum = 0; ienum<9; ienum++){
-    if(ienum==kSig)   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+JES+jetTyp+".root"   ) );
-    if(ienum==kBkg)   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+JES+jetTyp+".root"   ) );
-    if(ienum==kSToptW)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTWchannelMadZ2Fall10"+JES+jetTyp+".root"   ) );
-    if(ienum==kSTops) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopSchannelMadZ2Fall10"+JES+jetTyp+".root"   ) );
-    if(ienum==kSTopt) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTchannelMadZ2Fall10"+JES+jetTyp+".root"   ) );
-    if(ienum==kWjets) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+JES+jetTyp+".root" ) );
-    if(ienum==kZjets) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+JES+jetTyp+".root" ) );
-    if(ienum==kQCD)   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+JES+jetTyp+".root") );
-    if(ienum==kData)  files_.push_back(new TFile(dataFile                                                                        ) );
+  TString fileName;
+  for(int ienum = 0; ienum<10; ienum++){
+    fileName = "./diffXSecFromSignal"+whichSample+"/muonDiffXSec";
+    if(ienum==kSig)   fileName += "SigMadD6TFall10";
+    if(ienum==kBkg)   fileName += "BkgMadD6TFall10";
+    if(ienum==kSToptW)fileName += "SingleTopTWchannelMadZ2Fall10";
+    if(ienum==kSTops) fileName += "SingleTopSchannelMadZ2Fall10";
+    if(ienum==kSTopt) fileName += "SingleTopTchannelMadZ2Fall10";
+    if(ienum==kWjets) fileName += "WjetsMadD6TFall10";
+    if(ienum==kZjets) fileName += "ZjetsMadD6TFall10";
+    if(ienum==kDiBos) fileName += "VVPytia6Z2Fall10";
+    if(ienum==kQCD)   fileName += "QCDPythiaZ2Fall10";
+    if(ienum!=kQCD &&
+       (putSysOn=="" || 
+	(putSysOn=="Vonly" && (ienum==kWjets || ienum==kZjets)) || 
+	(putSysOn=="TTonly" && (ienum==kSig || ienum==kBkg)) || 
+	(putSysOn=="VandTT" && (ienum==kWjets || ienum==kZjets || ienum==kSig || ienum==kBkg))))
+      fileName += JES;
+    fileName += jetTyp+".root";
+    if(ienum==kData)  fileName = dataFile;
+
+    files_.push_back(new TFile(fileName));
   }
 
   // ---
@@ -186,9 +198,10 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     if( useNLO && (idx==kSig || idx==kBkg))lumiweight_.push_back(0.000006755505/50.0*luminosity);
     if(idx==kWjets)lumiweight_.push_back(0.000105750913/50.0*luminosity);
     if(idx==kZjets)lumiweight_.push_back(0.000059912090/50.0*luminosity);
+    if(idx==kDiBos)lumiweight_.push_back(0.001/50.0*luminosity);
     if(idx==kSTops)lumiweight_.push_back(0.324*0.000000464677/50.0*luminosity);
     if(idx==kSTopt)lumiweight_.push_back(0.324*0.000006672727/50.0*luminosity);
-    if(idx==kSToptW)lumiweight_.push_back(0.324*0.000001070791/50.0*luminosity);
+    if(idx==kSToptW)lumiweight_.push_back(0.000001070791/50.0*luminosity);
     // fall10:
     if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
     // spring10:
@@ -232,6 +245,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       histo_[variables_[var]][kAllMC][Njets_[mult]] = (TH1F*)histo_[variables_[var]][kLepJets][Njets_[mult]]->Clone();
       histo_[variables_[var]][kAllMC][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][kQCD][Njets_[mult]]->Clone() );
       histo_[variables_[var]][kAllMC][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][kZjets][Njets_[mult]]->Clone() );
+      histo_[variables_[var]][kAllMC][Njets_[mult]]->Add( (TH1F*)histo_[variables_[var]][kDiBos][Njets_[mult]]->Clone() );
     }
   }
 
@@ -396,7 +410,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	    double Nsample = histo_[composition_[var]][idx][Njets_[mult]]->GetBinContent(bin);
 	    // get entries from all sample-> loop sample again
 	    double NAll    = 0;
-	    for(unsigned int sample=kSig; sample<kData; ++sample){
+	    for(unsigned int sample=0; sample<kData; ++sample){
 	      NAll+=((TH1F*)histo_[variables_[var]][sample][Njets_[mult]]->Clone())->GetBinContent(bin);
 	    }
 	    // calculate relative event composition for this bin and this sample, fill to histo and print out
@@ -433,11 +447,11 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	// start with 2nd bin for pt!
 	if(variables_[var]=="pt"&&bin==1) ++bin;
 	// get underflow bin for phi
-	if(variables_[var]=="phi"&&bin==1) efficiency_[variables_[var]][0][Njets_[mult]] = getMCEffiencies(variables_[var], 0, mult, loadValues, useNLO, JES, jetTyp)*EffScaleFactor;
-	efficiency_[variables_[var]][bin][Njets_[mult]] = getMCEffiencies(variables_[var], bin, mult, loadValues, useNLO, JES, jetTyp)*EffScaleFactor;
+	if(variables_[var]=="phi"&&bin==1) efficiency_[variables_[var]][0][Njets_[mult]] = getMCEffiencies(variables_[var], 0, mult, loadValues, useNLO, JES, jetTyp, scaleFactor, putSysOn)*EffScaleFactor;
+	efficiency_[variables_[var]][bin][Njets_[mult]] = getMCEffiencies(variables_[var], bin, mult, loadValues, useNLO, JES, jetTyp, scaleFactor, putSysOn)*EffScaleFactor;
 	// get overflow bin for pt and phi
 	if((variables_[var]=="pt"||variables_[var]=="phi")&&bin==histo_[variables_[var]][kSig][Njets_[mult]]->GetNbinsX()){
-	  efficiency_[variables_[var]][bin+1][Njets_[mult]] = getMCEffiencies(variables_[var], bin+1, mult, loadValues, useNLO, JES, jetTyp)*EffScaleFactor;
+	  efficiency_[variables_[var]][bin+1][Njets_[mult]] = getMCEffiencies(variables_[var], bin+1, mult, loadValues, useNLO, JES, jetTyp, scaleFactor, putSysOn)*EffScaleFactor;
 	}
       }
     }
@@ -448,15 +462,15 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   std::vector<double> ljetsInclusiveEff_;
   // loop jet multiplicities (no btag)
   for(int mult=0; mult<4; ++mult){
-    ljetsInclusiveEff_. push_back( getInclusiveMCEff("lep", mult+1, loadValues, useNLO, JES, jetTyp, 0.964155)*EffScaleFactor );
+    ljetsInclusiveEff_. push_back( getInclusiveMCEff("lep", mult+1, loadValues, useNLO, JES, jetTyp, scaleFactor, putSysOn)*EffScaleFactor );
   }
   // c) eff. for top inclusive cross section 
   // N(jets)>=4 corresponds to 4
   // N(jets)>=4 && N(BTags)>=1 corresponds to 5
   std::cout<< std::endl << std::endl << "c1) inclusive top with b-tag";
-  double effNjets4Btag = getInclusiveMCEff("top", 5, loadValues, useNLO, JES, jetTyp, 0.964155)*EffScaleFactor;
+  double effNjets4Btag = getInclusiveMCEff("top", 5, loadValues, useNLO, JES, jetTyp, scaleFactor, putSysOn)*EffScaleFactor;
   std::cout<< std::endl << std::endl << "c2) inclusive top without b-tag";
-  double effNjets4     = getInclusiveMCEff("top", 4, loadValues, useNLO, JES, jetTyp, 0.964155)*EffScaleFactor;
+  double effNjets4     = getInclusiveMCEff("top", 4, loadValues, useNLO, JES, jetTyp, scaleFactor, putSysOn)*EffScaleFactor;
 
   // d) eff. for differenial top cross sections >=4 jets and btag
   int systematic=0;
@@ -521,6 +535,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	if((idx==kData)&&(mult<4)) histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Add( histo_[variables_[var]][kABCD][Njets_[mult]], -1.0);
 	// b2) subtract Z+jets from Data
 	if(idx==kData)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Add( histo_[variables_[var]][kZjets][Njets_[mult]], -1.0);
+	// b3) subtract DiBoson from Data
+	if(idx==kData)histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Add( histo_[variables_[var]][kDiBos][Njets_[mult]], -1.0);
 	double NAll = histo_[ljetsXSec_[var]][idx][Njets_[mult]]->Integral(0, histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetNbinsX()+1);
 	// c) apply efficiency corrections for each bin
 	// loop bins (including underflow and overflow)
@@ -607,9 +623,9 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	    if(bin==1){
 	      if(variables_[var]=="pt") ++bin;
 	      if(mult==0) append=false;
-	      writeToFile(ljetsXSec_[var]+Njets_[mult], "systematicVariations/diffNormXSec"+variables_[var]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", append);
+	      writeToFile(ljetsXSec_[var]+Njets_[mult], "systematicVariations/diffNormXSec"+variables_[var]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", append);
 	    }
-	    writeToFile(histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetBinContent(bin), "systematicVariations/diffNormXSec"+variables_[var]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	    writeToFile(histo_[ljetsXSec_[var]][idx][Njets_[mult]]->GetBinContent(bin), "systematicVariations/diffNormXSec"+variables_[var]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 	  }
 	}
 	// j) print out values for l+jet diff. xSec (all bins)
@@ -626,9 +642,9 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	    bool append =true;
 	    if(bin==1||((variables_[var]=="pt")&&(bin==2))){
 	      if(mult==0) append=false;
-	      writeToFile(ljetsXSecDiff_[var]+Njets_[mult], "systematicVariations/differentialXSec"+variables_[var]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", append);
+	      writeToFile(ljetsXSecDiff_[var]+Njets_[mult], "systematicVariations/differentialXSec"+variables_[var]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", append);
 	    }
-	    writeToFile(histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->GetBinContent(bin), "systematicVariations/differentialXSec"+variables_[var]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	    writeToFile(histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->GetBinContent(bin), "systematicVariations/differentialXSec"+variables_[var]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 	  }
 	}
       }
@@ -700,17 +716,17 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       // divide by binwidth
       histo_[ljetsGen_[var]][kGenSig ][Njets_[mult]] = divideByBinwidth((TH1F*)histo_[variables_[var]][kGenSig ][Njets_[mult]]->Clone(), true);
       histo_[ljetsGen_[var]][kGenBkg ][Njets_[mult]] = divideByBinwidth((TH1F*)histo_[variables_[var]][kGenBkg ][Njets_[mult]]->Clone(), true);
-      histo_[ljetsGen_[var]][kGenW   ][Njets_[mult]] = divideByBinwidth((TH1F*)histo_[variables_[var]][kGenW   ][Njets_[mult]]->Clone(), true);
       histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]] = divideByBinwidth((TH1F*)histo_[variables_[var]][kGenSTop][Njets_[mult]]->Clone(), true);
+      histo_[ljetsGen_[var]][kGenW   ][Njets_[mult]] = divideByBinwidth((TH1F*)histo_[variables_[var]][kGenW   ][Njets_[mult]]->Clone(), true);
       // divide by luminosity
       scaleByLumi(histo_[ljetsGen_[var]][kGenSig ][Njets_[mult]], luminosity*0.001);
       scaleByLumi(histo_[ljetsGen_[var]][kGenBkg ][Njets_[mult]], luminosity*0.001);
       scaleByLumi(histo_[ljetsGen_[var]][kGenW   ][Njets_[mult]], luminosity*0.001);
       scaleByLumi(histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]], luminosity*0.001);
       // create stack-plot: ttbar signal, ttbar other, W+jets
-      histo_[ljetsGen_[var]][kGenBkg ][Njets_[mult]]->Add( histo_[ljetsGen_[var]][kGenSig][Njets_[mult]] );
-      histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]]->Add( histo_[ljetsGen_[var]][kGenW  ][Njets_[mult]] );
-      histo_[ljetsGen_[var]][kGenW   ][Njets_[mult]]->Add( histo_[ljetsGen_[var]][kGenBkg][Njets_[mult]] );
+      histo_[ljetsGen_[var]][kGenBkg ][Njets_[mult]]->Add( histo_[ljetsGen_[var]][kGenSig ][Njets_[mult]] );
+      histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]]->Add( histo_[ljetsGen_[var]][kGenBkg ][Njets_[mult]] );
+      histo_[ljetsGen_[var]][kGenW   ][Njets_[mult]]->Add( histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]] );
     }
   }
 
@@ -728,6 +744,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     histo_["pt BG"   ][kData][Njets_[mult]] =    (TH1F*)histo_["pt"][kWjets][Njets_[mult]]->Clone();
     histo_["pt BG"   ][kData][Njets_[mult]]->Scale(WjetsVariation);
     histo_["pt BG"   ][kData][Njets_[mult]]->Add((TH1F*)histo_["pt"][kZjets][Njets_[mult]]->Clone());
+    histo_["pt BG"   ][kData][Njets_[mult]]->Add((TH1F*)histo_["pt"][kDiBos][Njets_[mult]]->Clone());
     histo_["pt BG"   ][kData][Njets_[mult]]->Add((TH1F*)histo_["pt"][kSTop ][Njets_[mult]]->Clone());
     if(mult==3) histo_["ptBGQCD" ][kData][Njets_[mult]] = (TH1F*)histo_["pt"][kABCD][Njets_[mult]]->Clone();
     if(mult==4){
@@ -738,6 +755,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     histo_["eta BG"  ][kData][Njets_[mult]] =    (TH1F*)histo_["eta"][kWjets][Njets_[mult]]->Clone();
     histo_["eta BG"  ][kData][Njets_[mult]]->Scale(WjetsVariation);
     histo_["eta BG"  ][kData][Njets_[mult]]->Add((TH1F*)histo_["eta"][kZjets][Njets_[mult]]->Clone());
+    histo_["eta BG"  ][kData][Njets_[mult]]->Add((TH1F*)histo_["eta"][kDiBos][Njets_[mult]]->Clone());
     histo_["eta BG"  ][kData][Njets_[mult]]->Add((TH1F*)histo_["eta"][kSTop ][Njets_[mult]]->Clone());
     if(mult==3) histo_["etaBGQCD"][kData][Njets_[mult]] = (TH1F*)histo_["eta"][kABCD][Njets_[mult]]->Clone();
     if(mult==4){
@@ -794,9 +812,9 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	  std::cout << " +/- " << histo_["pt top" ][idx][Njets_[mult2]]->GetBinError(bin) << std::endl;
 	  // save top differential(pt) xSec results for systematic variations and determination of systematic errors
 	  if(idx==kData){
-	    if(bin==2) writeToFile("top diffXSec "+Njets_[mult2], "systematicVariations/differentialTopPt"+Njets_[mult2]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
+	    if(bin==2) writeToFile("top diffXSec "+Njets_[mult2], "systematicVariations/differentialTopPt"+Njets_[mult2]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
 	    double value = histo_["pt top" ][kData][Njets_[mult2]]->GetBinContent(bin);
-	    writeToFile(value, "systematicVariations/differentialTopPt"+Njets_[mult2]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	    writeToFile(value, "systematicVariations/differentialTopPt"+Njets_[mult2]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 	  }
 	}
       }
@@ -815,9 +833,9 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	  std::cout << " +/- " << histo_["eta top" ][idx][Njets_[mult2]]->GetBinError(bin) << std::endl;
 	  // save top differential(eta) xSec results for systematic variations and determination of systematic errors
 	  if(idx==kData){
-	    if(bin==1) writeToFile("top diffXSec "+Njets_[mult2], "systematicVariations/differentialTopEta"+Njets_[mult2]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
+	    if(bin==1) writeToFile("top diffXSec "+Njets_[mult2], "systematicVariations/differentialTopEta"+Njets_[mult2]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
 	    double value = histo_["eta top"][kData][Njets_[mult2]]->GetBinContent(bin);
-	    writeToFile(value, "systematicVariations/differentialTopEta"+Njets_[mult2]+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	    writeToFile(value, "systematicVariations/differentialTopEta"+Njets_[mult2]+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 	  }
 	}
       }
@@ -853,11 +871,12 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	// (i) events after selection ( data / l+jets-MC )
 	double Nselected = histo_["pt"][idx   ][Njets_[mult]]->Integral( 0 , histo_["pt"][idx   ][Njets_[mult]]->GetNbinsX()+1 );
 	double NZjets    = histo_["pt"][kZjets][Njets_[mult]]->Integral( 0 , histo_["pt"][kZjets][Njets_[mult]]->GetNbinsX()+1 );
+	double NDiBoson  = histo_["pt"][kDiBos][Njets_[mult]]->Integral( 0 , histo_["pt"][kDiBos][Njets_[mult]]->GetNbinsX()+1 );
         // (ii) QCD estimation (from ABCD) for data
 	double NQCD=0;
         if(idx==kData) NQCD=NQCD_[mult];
         // (iii) calculate cross section (include MC-efficiency and luminosity)
-	double Nmeasure = Nselected-NQCD-NZjets;
+	double Nmeasure = Nselected-NQCD-NZjets-NDiBoson;
         double sigma = Nmeasure/(ljetsInclusiveEff_[mult]*luminosity*0.001);
 	double dsigma = sqrt(Nselected)/(ljetsInclusiveEff_[mult]*luminosity*0.001);
 	std::cout << "l+jets:" << setprecision(3) << fixed << sigma << " +/- " << dsigma << " pb" << std::endl;
@@ -868,8 +887,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	  // save l+jet xSec results for systematic variations and determination of systematic errors
 	  bool append =true;
 	  if(mult==0) append=false;
-	  writeToFile("l+jets cross section (phase space) "+Njets_[mult], "systematicVariations/ljetsXSec"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", append);
-	  writeToFile(sigma, "systematicVariations/ljetsXSec"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	  writeToFile("l+jets cross section (phase space) "+Njets_[mult], "systematicVariations/ljetsXSec"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", append);
+	  writeToFile(sigma, "systematicVariations/ljetsXSec"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 	}
 	if(idx==kLepJets){
 	  sigmaLjetsInclusiveMCReco->SetBinContent(mult+1, sigma );
@@ -891,6 +910,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	  double NBG  = histo_["pt"][kWjets]["Njets4Btag"]->Integral( 0 , histo_["pt"][kWjets]["Njets4Btag"]->GetNbinsX()+1 )*WjetsVariation;
 	  NBG        += histo_["pt"][kSTop ]["Njets4Btag"]->Integral( 0 , histo_["pt"][kSTop ]["Njets4Btag"]->GetNbinsX()+1 );
 	  NBG        += histo_["pt"][kZjets]["Njets4Btag"]->Integral( 0 , histo_["pt"][kZjets]["Njets4Btag"]->GetNbinsX()+1 );
+	  NBG        += histo_["pt"][kDiBos]["Njets4Btag"]->Integral( 0 , histo_["pt"][kDiBos]["Njets4Btag"]->GetNbinsX()+1 );
 	  NBG        += histo_["pt"][kQCD  ]["Njets4Btag"]->Integral( 0 , histo_["pt"][kQCD  ]["Njets4Btag"]->GetNbinsX()+1 )*QCDVariation;
 	  Nmeasure = Nselected-NBG;
 	}
@@ -909,8 +929,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	  sigmaTopInclusiveDataGraph.SetPoint(0, sigma, 1.);
 	  sigmaTopInclusiveDataGraph.SetPointError(0, dsigma, 0.);
 	  // save top xSec (phase space) results for systematic variations and determination of systematic errors
-	  writeToFile("top cross section (phase space) N(jets)>=4 & N(Btags)>=1", "systematicVariations/topXSec"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
-	  writeToFile(sigma, "systematicVariations/topXSec"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	  writeToFile("top cross section (phase space) N(jets)>=4 & N(Btags)>=1", "systematicVariations/topXSec"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
+	  writeToFile(sigma, "systematicVariations/topXSec"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 	}
 	if(idx==kLepJets){
 	  sigmaTopInclusiveMCReco->SetBinContent(1, sigma );
@@ -924,21 +944,22 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       if(mult==3&&idx==kData){
 	// (i) events after selection 
 	double Nselected = histo_["pt"][idx   ][Njets_[mult]]->Integral( 0 , histo_["pt"][idx   ][Njets_[mult]]->GetNbinsX()+1 );
-	// (ii) substract QCD and Z+jets and single Top (from RECO MC)
+	// (ii) substract QCD and Z+jets and single Top and DiBoson (from RECO MC)
 	double NQCD      = NQCD_[mult];
 	                 //histo_["pt"][kQCD  ][Njets_[mult]]->Integral( 0 , histo_["pt"][kQCD  ][Njets_[mult]]->GetNbinsX()+1 );
 	double NZjets    = histo_["pt"][kZjets][Njets_[mult]]->Integral( 0 , histo_["pt"][kZjets][Njets_[mult]]->GetNbinsX()+1 );
+	double NDiBoson  = histo_["pt"][kDiBos][Njets_[mult]]->Integral( 0 , histo_["pt"][kDiBos][Njets_[mult]]->GetNbinsX()+1 );
 	double NSTop     = histo_["pt"][kSTop ][Njets_[mult]]->Integral( 0 , histo_["pt"][kSTop ][Njets_[mult]]->GetNbinsX()+1 );
 	// (iii) W+jets estimation (from charge asymmetrie method) - need to scale with same efficiency!
 	double NW =NWestimate;
-	double Nmeasure = Nselected-NQCD-NZjets-NW;
+	double Nmeasure = Nselected-NQCD-NZjets-NW-NDiBoson;
 	// if c.a. method is not working: substract W+jets from MC reco
 	if(Nmeasure<=0||NW<0||1==1){
 	  if(Nmeasure<=0) std::cout << "N(W) from c.a. is larger than N(all events), take N(W) from MC gen";
 	  if(NW<0)        std::cout << "N(W) from c.a. is negative, take N(W) from MC gen";	
 	  double NWMC=histo_["pt"][kWjets][Njets_[mult]]->Integral( 0 , histo_["pt"][kGenW  ][Njets_[mult]]->GetNbinsX()+1 );
 	  NWMC*=WjetsVariation;
-	  Nmeasure=Nselected-NQCD-NZjets-NWMC-NSTop;
+	  Nmeasure=Nselected-NQCD-NZjets-NWMC-NSTop-NDiBoson;
 	}
 	// (iv) calculate cross section 
 	double sigma  = Nmeasure/(0.001*luminosity*effNjets4);
@@ -950,8 +971,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	sigmaTopInclusiveDataGraph.SetPoint(1, sigma, 2.);
 	sigmaTopInclusiveDataGraph.SetPointError(1, dsigma, 0.);
 	// save top xSec (phase space) results for systematic variations and determination of systematic errors
-	writeToFile("top cross section (phase space) N(jets)>=4 & W-estimation", "systematicVariations/topXSec2"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
-	writeToFile(sigma, "systematicVariations/topXSec2"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+	writeToFile("top cross section (phase space) N(jets)>=4 & W-estimation", "systematicVariations/topXSec2"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
+	writeToFile(sigma, "systematicVariations/topXSec2"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
       }
     }
   }
@@ -1028,10 +1049,10 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   std::cout << "data (no btag ): "  << setprecision(1) << fixed << sigmaData2;
   std::cout << " +/- " << setprecision(1) << fixed << errorSigmaData2 << " pb" << std::endl;
   // (viii) save top xSec (inclusive) results for systematic variations and determination of systematic errors
-  writeToFile("top cross section (inclusive) N(jets)>=4 & N(Btags)>=1", "systematicVariations/topXSecInclusive1"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
-  writeToFile(sigmaData,  "systematicVariations/topXSecInclusive1"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
-  writeToFile("top cross section (inclusive) N(jets)>=4 & W-estimation", "systematicVariations/topXSecInclusive2"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
-  writeToFile(sigmaData2, "systematicVariations/topXSecInclusive2"+TopSample+"TopMC"+JES+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+  writeToFile("top cross section (inclusive) N(jets)>=4 & N(Btags)>=1", "systematicVariations/topXSecInclusive1"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
+  writeToFile(sigmaData,  "systematicVariations/topXSecInclusive1"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
+  writeToFile("top cross section (inclusive) N(jets)>=4 & W-estimation", "systematicVariations/topXSecInclusive2"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 0);
+  writeToFile(sigmaData2, "systematicVariations/topXSecInclusive2"+TopSample+"TopMC"+JES+putSysOn+"Lumi"+LuminosityVariation+EffScale+QCDScale+WjetsScale+".txt", 1);
 
   if(createPlots){
     // ---
@@ -1065,6 +1086,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     yieldLeg->AddEntry( histo_["pt yield"][kZjets ]["Njets1"], "Z/#gamma*#rightarrowl^{+}l^{-} MADGRAPH", "F" );
     yieldLeg->AddEntry( histo_["pt yield"][kBkg   ]["Njets1"], "t#bar{t} other MADGRAPH"                , "F" );
     yieldLeg->AddEntry( histo_["pt yield"][kSig   ]["Njets1"], "t#bar{t} signal MADGRAPH"               , "F" );
+    yieldLeg->AddEntry( histo_["pt yield"][kDiBos ]["Njets1"], "VV PYTHIA"               , "F" );
     // c) create legend for l+jets differential cross sections - extra canvas
     TLegend *lJetsXSecLeg = new TLegend(0.01, 0.30, 0.90, 0.92);
     lJetsXSecLeg->SetFillStyle(0);
@@ -1072,8 +1094,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     lJetsXSecLeg->AddEntry(histo_[ljetsXSecDiff_[0]][kData][Njets_[0]], "Data ("+lum+" pb^{-1})", "PL");
     lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenW   ][Njets_[0]],    "W#rightarrowl#nu"                   , "F" );
     lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenSTop][Njets_[0]],    "Single-Top"                         , "F" );
-    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} other (#tau#rightarrow#mu)", "F" );
-    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} signal"                    , "F" );
+    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} (#tau#rightarrow#mu)", "F" );
+    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} (#mu prompt)"                    , "F" );
     // c)2) create legend for l+jets differential cross sections - small
     TLegend *lJetsXSecLegSmall = new TLegend(0.43, 0.7, 0.93, 0.94);
     lJetsXSecLegSmall->SetFillStyle(0);
@@ -1081,19 +1103,19 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     lJetsXSecLegSmall->AddEntry(histo_[ljetsXSecDiff_[0]][kData][Njets_[0]], "Data ("+lum+" pb^{-1})", "PL");
     lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenW   ][Njets_[0]],    "W#rightarrowl#nu"                   , "F" );
     lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenSTop][Njets_[0]],    "Single-Top"                         , "F" );
-    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} other (#tau#rightarrow#mu)", "F" );
-    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} signal"                    , "F" );
+    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} (#tau#rightarrow#mu)", "F" );
+    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} (#mu prompt)"                    , "F" );
     // c)3) create legend for l+jets differential cross sections - split part1
     TLegend *lJetsXSecLegPart1 = new TLegend(0.15, 0.04, 0.83, 0.96);
     lJetsXSecLegPart1->SetFillStyle(0);
     lJetsXSecLegPart1->SetBorderSize(0);
     lJetsXSecLegPart1->AddEntry(histo_[ljetsXSecDiff_[0]][kData][Njets_[0]], "Data ("+lum+" pb^{-1})", "PL");
-    lJetsXSecLegPart1->AddEntry(histo_[ljetsGen_[0]][kGenSig][Njets_[0]],    "t#bar{t} signal"       , "F" );
+    lJetsXSecLegPart1->AddEntry(histo_[ljetsGen_[0]][kGenSig][Njets_[0]],    "t#bar{t} (#mu prompt)"       , "F" );
     // c)4) create legend for l+jets differential cross sections - split part2
     TLegend *lJetsXSecLegPart2 = new TLegend(0.15, 0.04, 0.83, 0.96);
     lJetsXSecLegPart2->SetFillStyle(0);
     lJetsXSecLegPart2->SetBorderSize(0);
-    lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} other (#tau#rightarrow#mu)", "F" );
+    lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} (#tau#rightarrow#mu)", "F" );
     lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenW   ][Njets_[0]],    "W#rightarrowl#nu"                   , "F" );
     lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenSTop][Njets_[0]],    "Single-Top"                         , "F" );
     // d) create legend for l+jets differential Normalized cross sections - extra canvas
@@ -1120,8 +1142,9 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     eventCompositionPart2->AddEntry( histo_["pt composition"][kQCD  ]["Njets1"], "QCD Pythia"                             , "PL");
     eventCompositionPart2->AddEntry( histo_["pt composition"][kWjets]["Njets1"], "W#rightarrowl#nu MADGRAPH"              , "PL");
     eventCompositionPart2->AddEntry( histo_["pt composition"][kZjets]["Njets1"], "Z/#gamma*#rightarrowl^{+}l^{-} MADGRAPH", "PL");
+    eventCompositionPart2->AddEntry( histo_["pt composition"][kDiBos]["Njets1"], "VV PYTHIA", "PL");
     // f) create legends for inclusive cross sections
-    // (i) l+jets
+    // (ia) l+jets
     TLegend *inclusiveCrossSectionLjetsLeg = new TLegend(0.5, 0.55, 0.96, 0.79);
     inclusiveCrossSectionLjetsLeg->SetFillStyle(0);
     inclusiveCrossSectionLjetsLeg->SetFillColor(10);
@@ -1130,9 +1153,21 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveData    , "Data ("+lum+" pb^{-1})" , "PL");
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGen   , "W#rightarrowl#nu"                    ,  "F");
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenTop, "Single-Top"                          ,  "F");
-    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} other (#tau#rightarrow#mu)" ,  "F");
-    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} signal"                     ,  "F");
+    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} (#tau#rightarrow#mu)" ,  "F");
+    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} (#mu prompt)"                     ,  "F");
     //  inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCReco, "l+jets reco MC + corrections", "L" );
+    // (ib) l+jets
+    TLegend *inclusiveCrossSectionLjetsLeg2 = new TLegend(0.5, 0.63, 0.96, 0.8);
+    inclusiveCrossSectionLjetsLeg2->SetFillStyle(0);
+    inclusiveCrossSectionLjetsLeg2->SetFillColor(10);
+    inclusiveCrossSectionLjetsLeg2->SetBorderSize(0);
+    inclusiveCrossSectionLjetsLeg2->SetTextSize(0.05);
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveData    , "Data ("+lum+" pb^{-1})" , "PL");
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGen   , "W#rightarrowl#nu"                    ,  "F");
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenTop, "Single-Top"                          ,  "F");
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} (#tau#rightarrow#mu)" ,  "F");
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} (#mu prompt)"                     ,  "F");
+    //  inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCReco, "l+jets reco MC + corrections", "L" );
     // (ii) top
     TLegend *inclusiveCrossSectionTopLeg =  new TLegend(0.2, 0.54, 0.94, 0.66);
     inclusiveCrossSectionTopLeg->SetFillStyle (1001);
@@ -1151,16 +1186,16 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     differentialTopLeg->SetBorderSize(0);
     differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "Data ("+lum+" pb^{-1}), ", "PL");
     differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "with b tagging"                     , ""  );
-    differentialTopLeg->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} signal"                    , "F" );
-    differentialTopLeg->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} other (#tau#rightarrow#mu)", "F" );
+    differentialTopLeg->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} (#mu prompt)"                    , "F" );
+    differentialTopLeg->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} (#tau#rightarrow#mu)", "F" );
     // (2) method using W-estimation
     TLegend *differentialTopLeg2 = new TLegend(0.43, 0.7, 0.93, 0.94);
     differentialTopLeg2->SetFillStyle(0);
     differentialTopLeg2->SetBorderSize(0);
     differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "Data ("+lum+" pb^{-1}), ", "PL");
     differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "without b tagging"                  , ""  );
-    differentialTopLeg2->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} signal"                    , "F" );
-    differentialTopLeg2->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} other (#tau#rightarrow#mu)", "F" );
+    differentialTopLeg2->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} (#mu prompt)"                    , "F" );
+    differentialTopLeg2->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} (#tau#rightarrow#mu)", "F" );
     // i)  create legends for inclusive TOP cross section extrapolated to whole phase space
     TLegend *inclusiveCrossSectionTopLeg2 =  new TLegend(0.07, 0.5, 0.94, 0.85);
     inclusiveCrossSectionTopLeg2->SetFillStyle (1001);
@@ -1177,7 +1212,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     // ---
     std::vector<TCanvas*> MyCanvas;
     // a) canvas for yield and diff norm xsec (also legends) and event composition
-    for(int idx=0; idx<=81; idx++){ 
+    for(int idx=0; idx<=82; idx++){ 
       char canvname[10];
       sprintf(canvname,"canv%i",idx);    
       MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
@@ -1209,7 +1244,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
 	bool sTopCount=true;
 	// a) MC samples (loop)
-	for(int idx=kQCD; idx>=kSig; --idx){
+	for(int idx=kQCD; idx>=0; --idx){
 	  double min = 0.;
 	  double maxValue = getMaxValue(*histo_[yield_[var]][kData][Njets_[mult]], variables_[var]);
 	  double maxQCD = histo_[yield_[var]][kQCD][Njets_[mult]]->GetMaximum();
@@ -1390,10 +1425,10 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	    histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->Draw("HIST");
 	    if(mult<4){
 	      int mult2=mult;
-	      histogramStyle(*histo_[ljetsGen_[var]][kGenSTop][Njets_[mult2]], kSTops);
-	      histo_[ljetsGen_[var]][kGenSTop][Njets_[mult2]]->Draw("Hist same");
 	      histogramStyle(*histo_[ljetsGen_[var]][kGenW][Njets_[mult2]], kWjets);
 	      histo_[ljetsGen_[var]][kGenW][Njets_[mult2]]->Draw("Hist same");
+	      histogramStyle(*histo_[ljetsGen_[var]][kGenSTop][Njets_[mult2]], kSTops);
+	      histo_[ljetsGen_[var]][kGenSTop][Njets_[mult2]]->Draw("Hist same");
 	      histogramStyle(*histo_[ljetsGen_[var]][kGenBkg][Njets_[mult2]], kBkg);
 	      histo_[ljetsGen_[var]][kGenBkg][Njets_[mult2]]->Draw("Hist same");
 	      histogramStyle(*histo_[ljetsGen_[var]][kGenSig][Njets_[mult2]], kSig);
@@ -1429,11 +1464,11 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	MyCanvas[canvasNumber]->SetTitle(variables_[var]+"RelativeEventComposition"+Njets_[mult]);
 	MyCanvas[canvasNumber]->SetGrid(1,1);
 	// loop samples
-	for(int idx=kSig; idx<=kQCD; ++idx){
+	for(int idx=0; idx<=kQCD; ++idx){
 	  if(histo_[composition_[var]][idx][Njets_[mult]]){
 	    histogramStyle(*histo_[composition_[var]][idx][Njets_[mult]], idx, false); 
 	    // axis style
-	    if(idx==kSig){
+	    if(idx==0){
 	      if(variables_[var]=="phi"||variables_[var]=="eta"){
 		axesStyle(*histo_[composition_[var]][idx][Njets_[mult]], "#"+variables_[var]+"(#mu)", "rel. event composition", 0., 1.);
 	      }
@@ -1442,7 +1477,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	      }	  
 	    }
 	    // draw histos
-	    if(idx==kSig){
+	    if(idx==0){
 	      histo_[composition_[var]][idx][Njets_[mult]]->Draw("hist" );
 	      histo_[composition_[var]][idx][Njets_[mult]]->Draw("p same");
 	    }
@@ -1462,7 +1497,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     // ---
     //    do the printing for the inclusive cross sections
     // ---
-    // a) l+jets
+    // a1) l+jets
     MyCanvas[canvasNumber] ->cd(0);
     MyCanvas[canvasNumber] ->SetTitle("inclusiveCrossSectionLjets"+log);
     if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
@@ -1473,18 +1508,18 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       min=5;
       max=exp(1.5*(std::log(maxValue)-std::log(min))+std::log(min));
     }
-    axesStyle(*sigmaLjetsInclusiveMCReco, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, max, 0.05, 1.2, 0.075);
-    sigmaLjetsInclusiveMCReco->GetXaxis()->SetNdivisions(510);
+    axesStyle(*sigmaLjetsInclusiveData, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, max, 0.05, 1.2, 0.075);
+    sigmaLjetsInclusiveData->GetXaxis()->SetNdivisions(510);
     histogramStyle(*sigmaLjetsInclusiveMCReco, kData);
     histogramStyle(*sigmaLjetsInclusiveMCGen, kWjets);
     histogramStyle(*sigmaLjetsInclusiveData, kData);
-    for(int iBin = 1; iBin<=sigmaLjetsInclusiveMCReco->GetNbinsX(); ++iBin)
+    for(int iBin = 1; iBin<=sigmaLjetsInclusiveData->GetNbinsX(); ++iBin)
       {
 	char binLabel[6];
 	sprintf(binLabel,"#geq%i",iBin);
-	sigmaLjetsInclusiveMCReco->GetXaxis()->SetBinLabel(iBin, binLabel);
+	sigmaLjetsInclusiveData->GetXaxis()->SetBinLabel(iBin, binLabel);
       }
-    sigmaLjetsInclusiveMCReco    ->Draw("AXIS" );
+    sigmaLjetsInclusiveData    ->Draw("AXIS" );
     sigmaLjetsInclusiveMCGen     ->DrawClone("histsame" );
     histogramStyle(*sigmaLjetsInclusiveMCGenTop, kSTop);
     sigmaLjetsInclusiveMCGenTop  ->Draw("histsame" );
@@ -1493,12 +1528,37 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     histogramStyle(*sigmaLjetsInclusiveMCGenSig, kSig);
     sigmaLjetsInclusiveMCGenSig  ->Draw("histsame" );
     sigmaLjetsInclusiveData      ->Draw("p e1 X0 same"); 
-    sigmaLjetsInclusiveMCReco    ->Draw("AXIS same" );
+    sigmaLjetsInclusiveData    ->Draw("AXIS same" );
     if(finalPlots) systematicError("ljetsXSec", 6, *sigmaLjetsInclusiveData, "Njets", up, down);
     inclusiveCrossSectionLjetsLeg->Draw("same" );
     //DrawLabel("phase space:"                                , 0.33 , 0.55, 0.82 , 0.75);
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1.);
     DrawLabel("p_{t}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93);
+    ++canvasNumber;
+
+    // a2) l+jets with ratio
+    MyCanvas[canvasNumber] ->cd(0);
+    MyCanvas[canvasNumber] ->SetTitle("inclusiveCrossSectionLjetsRatio"+log);
+    if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
+    MyCanvas[canvasNumber]->Size(600,800);
+    TH1F *sigmaLjetsInclusiveDataMod = (TH1F*)sigmaLjetsInclusiveData->Clone();
+    axesStyle(*sigmaLjetsInclusiveDataMod, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    sigmaLjetsInclusiveDataMod    ->Draw("AXIS" );
+    sigmaLjetsInclusiveMCGen     ->DrawClone("histsame" );
+    histogramStyle(*sigmaLjetsInclusiveMCGenTop, kSTop);
+    sigmaLjetsInclusiveMCGenTop  ->Draw("histsame" );
+    histogramStyle(*sigmaLjetsInclusiveMCGenBkg, kBkg);
+    sigmaLjetsInclusiveMCGenBkg  ->Draw("histsame" );
+    histogramStyle(*sigmaLjetsInclusiveMCGenSig, kSig);
+    sigmaLjetsInclusiveMCGenSig  ->Draw("histsame" );
+    sigmaLjetsInclusiveDataMod      ->Draw("p e1 X0 same"); 
+    sigmaLjetsInclusiveDataMod    ->Draw("AXIS same" );
+    if(finalPlots) systematicError("ljetsXSec", 6, *sigmaLjetsInclusiveDataMod, "Njets", up, down);
+    inclusiveCrossSectionLjetsLeg2->Draw("same" );
+    //DrawLabel("phase space:"                                , 0.33 , 0.55, 0.82 , 0.75);
+    DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1., 0.195);
+    DrawLabel("p_{t}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
+    ratio_smal(sigmaLjetsInclusiveDataMod,sigmaLjetsInclusiveMCGen,1.49,0.51);
     ++canvasNumber;
 
     // b) top with & without Btag in phase space
@@ -1794,6 +1854,7 @@ TString samples(int sampleEnum){
   if(sampleEnum==kBkg  ) output ="b) ttbar background";
   if(sampleEnum==kWjets) output ="c) W+jets";
   if(sampleEnum==kZjets) output ="d) Z+jets";
+  if(sampleEnum==kDiBos) output ="d) DiBoson";
   if(sampleEnum==kQCD  ) output ="e) QCD";
   if(sampleEnum==kData ) output ="f) Data";
   if(sampleEnum==kSToptW)output ="g) single top tW";
@@ -1834,7 +1895,7 @@ double getABCDNumbers( TString njets, bool loadValues, TString file){
   return result;
 }
 
-double getMCEffiencies(TString variable, int bin, int njets, bool loadValues, bool useNLO, TString JES, TString jetTyp)
+double getMCEffiencies(TString variable, int bin, int njets, bool loadValues, bool useNLO, TString JES, TString jetTyp, double scaleFactor, TString putSysOn)
 {
   // get MC based effiencies for differential plots -> differntial (normalized) cross section
   // if loaded from file: be sure the lines are the wright ones!
@@ -1847,6 +1908,7 @@ double getMCEffiencies(TString variable, int bin, int njets, bool loadValues, bo
   TString file ="crossSectionCalculation";
   if(useNLO      ) file+="NLO";
   file+=JES;
+  file+=putSysOn;
   file+=jetTyp;
   file+=".txt";
 
@@ -1879,7 +1941,7 @@ double getMCEffiencies(TString variable, int bin, int njets, bool loadValues, bo
   }
   
   std::cout << "  bin " << bin << ": " << setprecision(3) << fixed << result;
-  return result;
+  return scaleFactor*result;
 }
 
 TString sampleLabel(unsigned int sample){
@@ -1891,6 +1953,7 @@ TString sampleLabel(unsigned int sample){
   if(sample==kSTopt  ) result="single top t";
   if(sample==kWjets  ) result="W+jets";
   if(sample==kZjets  ) result="Z+jets";
+  if(sample==kDiBos  ) result="DiBoson";
   if(sample==kQCD    ) result="QCD";
   if(sample==kData   ) result="data";
   if(sample==kLepJets) result="all l+jets MC";
@@ -1899,7 +1962,7 @@ TString sampleLabel(unsigned int sample){
   return result;
 }
 
-double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useNLO, TString JES, TString jetTyp, double scaleFactor){
+double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useNLO, TString JES, TString jetTyp, double scaleFactor, TString putSysOn){
   // get MC based effiencies for inclusive plots -> cross sections
   // if loaded from file: be sure the lines are the wright ones!
   double result =-1;  
@@ -1916,6 +1979,7 @@ double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useN
   TString file ="crossSectionCalculation";
   if(useNLO      ) file+="NLO";
   file+=JES;
+  file+=putSysOn;
   file+=jetTyp;
   file+=".txt";
 
@@ -1945,11 +2009,11 @@ double getInclusiveMCEff(TString topORlep, int njets, bool loadValues, bool useN
   return scaleFactor*result;
 }
 
-void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2){
+void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, double textSize){
   TPaveLabel *label = new TPaveLabel(x1, y1, x2, y2, text, "br NDC");
   label->SetFillStyle(0);
   label->SetBorderSize(0);
-  label->SetTextSize(0.26);
+  label->SetTextSize(textSize);
   label->SetTextAlign(12);
   label->Draw("same");
 }
@@ -2032,20 +2096,29 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
     if((variable=="Njets")&&(bin>firstBin)) ++count;
     std::cout << std::endl << "bin " << bin << " (line " << line+count << " in file ./systematicVariations/"+plot+"...)" << std::endl;
     // load values for all variations                
-    double std     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-    double lumiUp  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
-    double lumiDown= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
-    double MG      = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-    double JESUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-    double JESDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-    double JERUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERupLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-    double JERDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERdownLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-    double EffUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
-    double EffDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
-    double QCDUp   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
-    double QCDDown = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
-    double WUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
-    double WDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
+    double std        = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
+    double lumiUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
+    double lumiDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
+    double MG         = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
+    double JESUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double JESDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double JERUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERupLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double JERDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERdownLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double EffUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
+    double EffDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
+    double QCDUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
+    double QCDDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
+    double WUp        = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
+    double WDown      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
+    double PileUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCPileUpLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double ScaleUpV   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleUpVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double ScaleUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double ScaleDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double ScaleDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double MatchUpV   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double MatchUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double MatchDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+    double MatchDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
     // calculate and print out all systematic errors
     double JESError  = ( std::abs(JESUp-std ) + std::abs(JESDown-std ) ) / 2.0;
     std::cout << "JES: +/- " << setprecision(3) << fixed << "(|"<< JESUp << " - " << std << "|+|"<< JESDown << " - " << std << "|) / 2 = "<< JESError << " = " << 100*JESError/std << "%" << std::endl;
@@ -2061,8 +2134,22 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
     std::cout << "QCDestimation: +/- " << setprecision(3) << fixed << "(|"<< QCDUp << " - " << std << "|+|"<< QCDDown << " - " << std << "|) / 2 = " << QCDError << " = " << 100*QCDError/std << "%" << std::endl;
     double WError=   ( std::abs(WUp-std ) + std::abs(WDown-std ) ) / 2.0;
     std::cout << "Westimation: +/- " << setprecision(3) << fixed << "(|"<< WUp << " - " << std << "|+|"<< WDown << " - " << std << "|) / 2 = " << WError << " = " << 100*WError/std << "%" << std::endl;
+    double PileUpError =  std::abs(PileUp-std);
+    std::cout << "PileUp: +/- " << setprecision(3) << fixed << "|" << PileUp << "-" << std << "| = " << PileUpError << " = " << 100*PileUpError/std << "%" << std::endl;
+    double ScaleVError=   ( std::abs(ScaleUpV-std ) + std::abs(ScaleDownV-std ) ) / 2.0;
+    std::cout << "Scale W/Z: +/- " << setprecision(3) << fixed << "(|"<< ScaleUpV << " - " << std << "|+|"<< ScaleDownV << " - " << std << "|) / 2 = " << ScaleVError << " = " << 100*ScaleVError/std << "%" << std::endl;
+    double ScaleTError=   ( std::abs(ScaleUpT-std ) + std::abs(ScaleDownT-std ) ) / 2.0;
+    std::cout << "Scale Top: +/- " << setprecision(3) << fixed << "(|"<< ScaleUpT << " - " << std << "|+|"<< ScaleDownT << " - " << std << "|) / 2 = " << ScaleTError << " = " << 100*ScaleTError/std << "%" << std::endl;
+    double ScaleError= std::sqrt( ScaleVError*ScaleVError + ScaleTError*ScaleTError );
+    std::cout << "Scale: +/- " << setprecision(3) << fixed << "sqrt("<< ScaleVError << "^2 + "<< ScaleTError << "^2) = " << ScaleError << " = " << 100*ScaleError/std << "%" << std::endl;
+    double MatchVError=   ( std::abs(MatchUpV-std ) + std::abs(MatchDownV-std ) ) / 2.0;
+    std::cout << "Match W/Z: +/- " << setprecision(3) << fixed << "(|"<< MatchUpV << " - " << std << "|+|"<< MatchDownV << " - " << std << "|) / 2 = " << MatchVError << " = " << 100*MatchVError/std << "%" << std::endl;
+    double MatchTError=   ( std::abs(MatchUpT-std ) + std::abs(MatchDownT-std ) ) / 2.0;
+    std::cout << "Match Top: +/- " << setprecision(3) << fixed << "(|"<< MatchUpT << " - " << std << "|+|"<< MatchDownT << " - " << std << "|) / 2 = " << MatchTError << " = " << 100*MatchTError/std << "%" << std::endl;
+    double MatchError= std::sqrt( MatchVError*MatchVError + MatchTError*MatchTError );
+    std::cout << "Match: +/- " << setprecision(3) << fixed << "sqrt("<< MatchVError << "^2 + "<< MatchTError << "^2) = " << MatchError << " = " << 100*MatchError/std << "%" << std::endl;
     // calculate the combined systematic error
-    sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError);
+    sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError);
     //sysError=sqrt(JESError*JESError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError);
     std::cout << "total systematic error: +/- " << setprecision(3) << fixed << sysError << " = " << 100*sysError/std << "%" << std::endl;
     // combine systematic and statistic error and Draw combined error
@@ -2089,20 +2176,29 @@ double systematicError2(const TString plot, TH1& histo, int usedBin, TString up,
   std::cout << "bin range: ( " << usedBin << " , " << usedBin << " )" << std::endl;
   std::cout << std::endl << "bin " << usedBin << " (line " << 2 << " in file ./systematicVariations/"+plot+"...)" << std::endl;
   // load values for all variations                
-  double std     = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-  double lumiUp  = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
-  double lumiDown= readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
-  double MG      = readLineFromFile(2, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-  double JESUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-  double JESDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-  double JERUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCJERupLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-  double JERDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCJERdownLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-  double EffUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
-  double EffDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
-  double QCDUp   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
-  double QCDDown = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
-  double WUp     = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
-  double WDown   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
+  double std        = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
+  double lumiUp     = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
+  double lumiDown   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
+  double MG         = readLineFromFile(2, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
+  double JESUp      = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double JESDown    = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double JERUp      = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCJERupLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double JERDown    = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCJERdownLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double EffUp      = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
+  double EffDown    = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
+  double QCDUp      = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
+  double QCDDown    = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
+  double WUp        = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
+  double WDown      = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
+  double PileUp     = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCPileUpLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double ScaleUpV   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCScaleUpVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double ScaleUpT   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCScaleUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double ScaleDownV = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCScaleDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double ScaleDownT = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCScaleDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double MatchUpV   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCMatchUpVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double MatchUpT   = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCMatchUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double MatchDownV = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCMatchDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+  double MatchDownT = readLineFromFile(2, "./systematicVariations/"+plot+"MadTopMCMatchDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
   // calculate and print out all systematic errors
   double JESError  = ( std::abs(JESUp-std ) + std::abs(JESDown-std ) ) / 2.0;
   std::cout << "JES: +/- " << setprecision(3) << fixed << "(|"<< JESUp << " - " << std << "|+|"<< JESDown << " - " << std << "|) / 2 = "<< JESError << " = " << 100*JESError/std << "%" << std::endl;
@@ -2118,8 +2214,22 @@ double systematicError2(const TString plot, TH1& histo, int usedBin, TString up,
   std::cout << "QCDestimation: +/- " << setprecision(3) << fixed << "(|"<< QCDUp << " - " << std << "|+|"<< QCDDown << " - " << std << "|) / 2 = " << QCDError << " = " << 100*QCDError/std << "%" << std::endl;
   double WError=   ( std::abs(WUp-std ) + std::abs(WDown-std ) ) / 2.0;
   std::cout << "Westimation: +/- " << setprecision(3) << fixed << "(|"<< WUp << " - " << std << "|+|"<< WDown << " - " << std << "|) / 2 = " << WError << " = " << 100*WError/std << "%" << std::endl;
+  double PileUpError =  std::abs(PileUp-std);
+  std::cout << "PileUp: +/- " << setprecision(3) << fixed << "|" << PileUp << "-" << std << "| = " << PileUpError << " = " << 100*PileUpError/std << "%" << std::endl;
+  double ScaleVError=   ( std::abs(ScaleUpV-std ) + std::abs(ScaleDownV-std ) ) / 2.0;
+  std::cout << "(Scale W/Z: +/- " << setprecision(3) << fixed << "(|"<< ScaleUpV << " - " << std << "|+|"<< ScaleDownV << " - " << std << "|) / 2 = " << ScaleVError << " = " << 100*ScaleVError/std << "%)" << std::endl;
+  double ScaleTError=   ( std::abs(ScaleUpT-std ) + std::abs(ScaleDownT-std ) ) / 2.0;
+  std::cout << "(Scale Top: +/- " << setprecision(3) << fixed << "(|"<< ScaleUpT << " - " << std << "|+|"<< ScaleDownT << " - " << std << "|) / 2 = " << ScaleTError << " = " << 100*ScaleTError/std << "%)" << std::endl;
+  double ScaleError= std::sqrt( ScaleVError*ScaleVError + ScaleTError*ScaleTError );
+  std::cout << "Scale: +/- " << setprecision(3) << fixed << "sqrt("<< ScaleVError << "^2 + "<< ScaleTError << "^2) = " << ScaleError << " = " << 100*ScaleError/std << "%" << std::endl;
+  double MatchVError=   ( std::abs(MatchUpV-std ) + std::abs(MatchDownV-std ) ) / 2.0;
+  std::cout << "(Match W/Z: +/- " << setprecision(3) << fixed << "(|"<< MatchUpV << " - " << std << "|+|"<< MatchDownV << " - " << std << "|) / 2 = " << MatchVError << " = " << 100*MatchVError/std << "%)" << std::endl;
+  double MatchTError=   ( std::abs(MatchUpT-std ) + std::abs(MatchDownT-std ) ) / 2.0;
+  std::cout << "(Match Top: +/- " << setprecision(3) << fixed << "(|"<< MatchUpT << " - " << std << "|+|"<< MatchDownT << " - " << std << "|) / 2 = " << MatchTError << " = " << 100*MatchTError/std << "%)" << std::endl;
+  double MatchError= std::sqrt( MatchVError*MatchVError + MatchTError*MatchTError );
+  std::cout << "Match: +/- " << setprecision(3) << fixed << "sqrt("<< MatchVError << "^2 + "<< MatchTError << "^2) = " << MatchError << " = " << 100*MatchError/std << "%" << std::endl;
   // calculate the combined systematic error
-  double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError);
+  double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError);
   //sysError=sqrt(JESError*JESError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError);
   std::cout << "total systematic error: +/- " << setprecision(3) << fixed << sysError << " = " << 100*sysError/std << "%" << std::endl;
   // combine systematic and statistic error and Draw combined error
