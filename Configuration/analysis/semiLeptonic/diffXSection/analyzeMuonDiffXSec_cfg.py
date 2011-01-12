@@ -81,9 +81,12 @@ if(runningOnData=="MC"):
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 ## high level trigger filter
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
+# for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
+
 
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
@@ -93,6 +96,11 @@ process.load("TopAnalysis.TopFilter.sequences.generatorMatching_cff")
 process.load("TopAnalysis.TopFilter.sequences.muonSelection_cff")
 ## jet selection
 process.load("TopAnalysis.TopFilter.sequences.jetSelection_cff")
+## redefine veto jets to be sure it is also replaced when running on PF
+from TopAnalysis.TopFilter.sequences.jetSelection_cff import goodJets
+process.vetoJets.src="goodJets"
+process.vetoJets.cut=''
+
 ## tool to select muons from gen Particles and save them as new collection
 process.load("TopAnalysis.TopUtils.GenCandSelector_cfi")
 ## generator level based collections and semileptonic selection (muon and jets)
