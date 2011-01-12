@@ -31,7 +31,7 @@ template <class T>
 void writeToFile(T output, TString file="crossSectionCalculation.txt", bool append=1);
 TString getTStringFromInt(int i);
 
-void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false, bool useNLO=false, TString JES="", TString jetType = "PF")
+void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool textoutput=false, bool useNLO=false, TString JES="", TString jetType = "PF", TString putSysOn = "")
 {
   // ---
   //    main function parameters
@@ -81,11 +81,21 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/analysisRootFiles";
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAll"+TopSample+"D6TFall10"+JES+jetType+".root"  ) );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+JES+jetType+".root") );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopSchannelMadZ2Fall10"+JES+jetType+".root") );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTchannelMadZ2Fall10"+JES+jetType+".root") );
-  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTWchannelMadZ2Fall10"+JES+jetType+".root") );
+  TString fileName;
+  for(int ienum = 0; ienum<5; ienum++){
+    fileName = "./diffXSecFromSignal"+whichSample+"/muonDiffXSec";
+    if(ienum==kttbarReco) fileName += "All"+TopSample+"D6TFall10";
+    if(ienum==kWjetsReco) fileName += "WjetsMadD6TFall10";
+    if(ienum==kSTopSReco) fileName += "SingleTopSchannelMadZ2Fall10";
+    if(ienum==kSTopTReco) fileName += "SingleTopTchannelMadZ2Fall10";
+    if(ienum==kSTopTWReco)fileName += "SingleTopTWchannelMadZ2Fall10";
+    if(putSysOn=="" || 
+       (putSysOn=="Vonly" && ienum==kWjetsReco) || 
+       (putSysOn=="TTonly" && ienum==kttbarReco))
+      fileName += JES;
+    fileName += jetType+".root";
+    files_.push_back(new TFile(fileName));
+  }
   //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadFall10"+JES+jetType+".root") );
 
   // ---
@@ -130,8 +140,8 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.105750913/50.0*(double)luminosity);
-  lumiweight.push_back(0.000464677/50.0*(double)luminosity);
-  lumiweight.push_back(0.006672727/50.0*(double)luminosity);
+  lumiweight.push_back(0.324*0.000464677/50.0*(double)luminosity);
+  lumiweight.push_back(0.324*0.006672727/50.0*(double)luminosity);
   lumiweight.push_back(0.001070791/50.0*(double)luminosity);
   // b) Gen
   // ttbar(all) sample 
@@ -139,8 +149,8 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   if(useNLO)  lumiweight.push_back(0.006755505/50.0*(double)luminosity);
   // W+jets MADGRAPH sample
   lumiweight.push_back(0.105750913/50.0*(double)luminosity);
-  lumiweight.push_back(0.000464677/50.0*(double)luminosity);
-  lumiweight.push_back(0.006672727/50.0*(double)luminosity);
+  lumiweight.push_back(0.324*0.000464677/50.0*(double)luminosity);
+  lumiweight.push_back(0.324*0.006672727/50.0*(double)luminosity);
   lumiweight.push_back(0.001070791/50.0*(double)luminosity);
 
   // create variable indicator for easy handling of pt, eta and phi
@@ -350,7 +360,7 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // save within different .txt files for systematic variations
   TString MG = "";
   if(useNLO) MG="NLO";
-  TString file ="crossSectionCalculation"+MG+JES+jetType+".txt";
+  TString file ="crossSectionCalculation"+MG+JES+putSysOn+jetType+".txt";
   bool append=1;
   // save values
   if(textoutput){
