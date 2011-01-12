@@ -51,7 +51,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
   // ---
   std::vector<TFile*> files_;
   TString whichSample = "/analysisRootFiles";
-  for(int ienum = 0; ienum<9; ienum++){
+  for(int ienum = 0; ienum<10; ienum++){
     if(ienum==kSig)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigMadD6TFall10"+jetTyp+".root"    ) );
     if(ienum==kBkg)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecBkgMadD6TFall10"+jetTyp+".root"    ) );
     //   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSigNloFall10.root"    ) );
@@ -61,6 +61,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
     if(ienum==kSTopt) files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecSingleTopTchannelMadZ2Fall10"+jetTyp+".root"   ) );
     if(ienum==kZjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecZjetsMadD6TFall10"+jetTyp+".root"  ) );
     if(ienum==kWjets)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetTyp+".root"  ) );
+    if(ienum==kDiBos)files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecVVPytia6Z2Fall10"+jetTyp+".root"  ) );
     if(ienum==kQCD)  files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecQCDPythiaZ2Fall10"+jetTyp+".root" ) );
     if(ienum==kData) files_.push_back(new TFile(dataFile                                                             ) );
   }
@@ -79,9 +80,11 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
     if(idx==kWjets)lumiweight_.push_back(0.000105750913/50.0*luminosity);
     // for current Z+jets MADGRAPH sample
     if(idx==kZjets)lumiweight_.push_back(0.000059912090/50.0*luminosity);
+    // for current DiBoson PYTHIA sample
+    if(idx==kDiBos)lumiweight_.push_back(0.001/50.0*luminosity);
     // for current single top MADGRAPH Z2 samples
-    if(idx==kSTops)lumiweight_.push_back(0.000000464677/50.0*luminosity);
-    if(idx==kSTopt)lumiweight_.push_back(0.000006672727/50.0*luminosity);
+    if(idx==kSTops)lumiweight_.push_back(0.324*0.000000464677/50.0*luminosity);
+    if(idx==kSTopt)lumiweight_.push_back(0.324*0.000006672727/50.0*luminosity);
     if(idx==kSToptW)lumiweight_.push_back(0.000001070791/50.0*luminosity);
     //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
     // for current QCD PYTHIA sample
@@ -157,8 +160,9 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
     std::cout << "QCD : "       << histo_["tightJetKinematics/n"][kQCD  ]->GetBinContent(mult) << std::endl;
     std::cout << "Z+jets : "    << histo_["tightJetKinematics/n"][kZjets]->GetBinContent(mult) << std::endl;
     std::cout << "W+jets : "    << histo_["tightJetKinematics/n"][kWjets]->GetBinContent(mult) << std::endl;
+    std::cout << "DiBoson : "   << histo_["tightJetKinematics/n"][kDiBos]->GetBinContent(mult) << std::endl;
     std::cout << "single top : "<< histo_["tightJetKinematics/n"][kSTop ]->GetBinContent(mult) << std::endl;
-    std::cout << "all MC: " << histo_["tightJetKinematics/n"][kSig]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kBkg]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kQCD]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kZjets]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kWjets]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kSTop]->GetBinContent(mult) << std::endl;
+    std::cout << "all MC: " << histo_["tightJetKinematics/n"][kSig]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kBkg]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kQCD]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kZjets]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kWjets]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kSTop]->GetBinContent(mult)+histo_["tightJetKinematics/n"][kDiBos]->GetBinContent(mult) << std::endl;
     std::cout << "data : "      << histo_["tightJetKinematics/n"][kData      ]->GetBinContent(mult) << std::endl<< std::endl;
   }
 
@@ -170,12 +174,13 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->AddEntry( histo_["tightJetKinematics/n"][kData ] , "Data ("+lum+" pb ^{-1})"    , "PL");
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal"                 , "F" ); 
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kBkg  ] , "t#bar{t} other"                  , "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kQCD  ] , "QCD"                             , "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kWjets] , "W#rightarrowl#nu"              , "F" );
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kSTop ] , "Single-Top", "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kBkg  ] , "t#bar{t} other"                  , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal"                 , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kDiBos] , "VV"                 , "F" );
 
   // ---
   //    create canvas 
