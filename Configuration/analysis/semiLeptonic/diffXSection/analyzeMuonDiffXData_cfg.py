@@ -15,7 +15,7 @@ writeOutput = False
 execfile("analyzeMuonDiffXSec_cfg.py")
 
 ## choose data set
-process.load("TopAnalysis/Configuration/samples/Run2010A_Sep17ReReco_v2_Oct22_cff")
+process.load("TopAnalysis/Configuration/samples/Run2010A_Nov4ReReco_PAT_v3_cff")
 
 ## high level trigger filter
 process.hltFilter.TriggerResultsTag = "TriggerResults::HLT"
