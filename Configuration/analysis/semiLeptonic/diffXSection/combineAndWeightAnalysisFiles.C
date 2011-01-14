@@ -33,77 +33,77 @@ void combineAndWeightAnalysisFiles(){
   // ---------------------------------------
   std::vector<TString> name_; 
   // W systematics
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWjetsMadD6TFall10PileUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWjetsMadD6TFall10MatchUpPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWjetsMadD6TFall10MatchDownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWjetsMadD6TFall10ScaleUpPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWjetsMadD6TFall10ScaleDownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10PileUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10MatchUpPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10MatchDownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10ScaleUpPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10ScaleDownPF");
   // ttbar systematics
   // a) Sig
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10ISRFSRdownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10ISRFSRupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10MatchDownPF" );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10MatchUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10PileUpPF"    );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10ScaleDownPF" );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSigMadD6TFall10ScaleUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ISRFSRdownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ISRFSRupPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10MatchDownPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10MatchUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10PileUpPF"    );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ScaleDownPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ScaleUpPF"   );
   // b) Bkg
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10ISRFSRdownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10ISRFSRupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10MatchDownPF" );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10MatchUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10PileUpPF"    );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10ScaleDownPF" );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecBkgMadD6TFall10ScaleUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ISRFSRdownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ISRFSRupPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10MatchDownPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10MatchUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10PileUpPF"    );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ScaleDownPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ScaleUpPF"   );
   // c) All
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10ISRFSRdownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10ISRFSRupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10MatchDownPF" );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10MatchUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10PileUpPF"    );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10ScaleDownPF" );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecAllMadD6TFall10ScaleUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ISRFSRdownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ISRFSRupPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10MatchDownPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10MatchUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10PileUpPF"    );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ScaleDownPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ScaleUpPF"   );
   // DY systematics
-  name_.push_back("diffXSecFromSignal/analysisRootFilesGenJetTauBug/muonDiffXSecZjetsMadD6TFall10MatchDownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesGenJetTauBug/muonDiffXSecZjetsMadD6TFall10MatchUpPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesGenJetTauBug/muonDiffXSecZjetsMadD6TFall10ScaleDownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesGenJetTauBug/muonDiffXSecZjetsMadD6TFall10ScaleUpPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesGenJetTauBug/muonDiffXSecZjetsMadD6TFall10PileUpPF"   );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10MatchDownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10MatchUpPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10ScaleDownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10ScaleUpPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10PileUpPF"   );
   // single top PU
   // a) s-channel
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSingleTopSchannelMadZ2Fall10PileUpPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSingleTopSchannelMadZ2Fall10PileUpPF");
   // a) t-channel
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSingleTopTchannelMadZ2Fall10PileUpPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSingleTopTchannelMadZ2Fall10PileUpPF");
   // a) tw-channel
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecSingleTopTWchannelMadZ2Fall10PileUpPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSingleTopTWchannelMadZ2Fall10PileUpPF");
   // VV sample -> scale to 50 / pb
   // WZ
   // a) std
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWZPytia6Z2Fall10PF"       );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10PF"       );
   // b) systematics	   
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWZPytia6Z2Fall10JES09PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWZPytia6Z2Fall10JES11PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWZPytia6Z2Fall10JERdownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWZPytia6Z2Fall10JERupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWZPytia6Z2Fall10PileUpPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JES09PF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JES11PF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JERdownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JERupPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10PileUpPF" );
   // WW	
   // a) std
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWWPytia6Z2Fall10PF"       );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10PF"       );
   // b) systematics	   
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWWPytia6Z2Fall10JES09PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWWPytia6Z2Fall10JES11PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWWPytia6Z2Fall10JERdownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWWPytia6Z2Fall10JERupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecWWPytia6Z2Fall10PileUpPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JES09PF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JES11PF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JERdownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JERupPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10PileUpPF" );
   // ZZ		
   // a) std
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecZZPytia6Z2Fall10PF"       );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10PF"       );
   // b) systematics	   
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecZZPytia6Z2Fall10JES09PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecZZPytia6Z2Fall10JES11PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecZZPytia6Z2Fall10JERdownPF");
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecZZPytia6Z2Fall10JERupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesNoGenJetTauBug/muonDiffXSecZZPytia6Z2Fall10PileUpPF" );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JES09PF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JES11PF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JERdownPF");
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JERupPF"  );
+  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10PileUpPF" );
 
   std::vector<double> scalingFactor_;
   // W+jets
@@ -208,36 +208,34 @@ void singleFile(TString name, double scalingFactor){
   // ---------------------------------------------------------
   TString folder ="";
   TString plot = "";
-  // loop files
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    // go to file
-    files_[idx]->cd();
-    // loop objects in file
-    TIter fileIterator(gDirectory->GetListOfKeys());
-    TKey *fileKey;
-    while( fileKey = (TKey*)fileIterator() ) {
-      TObject *fileObject = fileKey->ReadObj(); 
-      // check if object is a directory
-      if(fileObject->InheritsFrom("TDirectory")){
-	folder = (TString)fileObject->GetName();
-	std::cout << std::endl << " - folder: " << folder << std::endl << "   plots: ";
-	// go to directory
-	((TDirectory*)fileObject)->cd();
-	// loop objects in directory
-	TIter folderIterator(gDirectory->GetListOfKeys());
-	TKey *folderKey;
-	while( folderKey = (TKey*)folderIterator() ) {
-	  TObject *folderObject = folderKey->ReadObj(); 
-	  // check if object is a TH1 or TH2
-	  if( (folderObject->InheritsFrom("TH1")) || (folderObject->InheritsFrom("TH2"))){
-	    plot = folderObject->GetName();
-	    addAndWeight(folder, plot, f, scalingFactor);
-	  }
+  // go to file
+  files_[0]->cd();
+  // loop objects in file
+  TIter fileIterator(gDirectory->GetListOfKeys());
+  TKey *fileKey;
+  while( fileKey = (TKey*)fileIterator() ) {
+    TObject *fileObject = fileKey->ReadObj(); 
+    // check if object is a directory
+    if(fileObject->InheritsFrom("TDirectory")){
+      folder = (TString)fileObject->GetName();
+      std::cout << std::endl << " - folder: " << folder << std::endl << "   plots: ";
+      // go to directory
+      ((TDirectory*)fileObject)->cd();
+      // loop objects in directory
+      TIter folderIterator(gDirectory->GetListOfKeys());
+      TKey *folderKey;
+      while( folderKey = (TKey*)folderIterator() ) {
+	TObject *folderObject = folderKey->ReadObj(); 
+	// check if object is a TH1 or TH2
+	if( (folderObject->InheritsFrom("TH1")) || (folderObject->InheritsFrom("TH2"))){
+	  plot = folderObject->GetName();
+	  addAndWeight(folder, plot, f, scalingFactor);
 	}
       }
     }
-    files_[idx]->Close();
   }
+  files_[0]->Close();
+  
 
   f.Close();
 }
