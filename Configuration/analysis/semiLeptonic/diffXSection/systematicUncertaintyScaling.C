@@ -113,14 +113,14 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   // 7 TeV Monte Carlo spring 10 samples
   // -----------------------------------
   // for current ttbar(lept.mu on gen level and other) Madgraph 
-  lumiweight_.push_back(0.000000121*(double)luminosity);
-  lumiweight_.push_back(0.000000121*(double)luminosity);
+  lumiweight_.push_back(0.000006029022/50.0*(double)luminosity);
+  lumiweight_.push_back(0.000006029022/50.0*(double)luminosity);
   // for current Z+jets MADGRAPH sample
-  lumiweight_.push_back(0.000001198*(double)luminosity);
+  lumiweight_.push_back(0.000059912090/50.0*(double)luminosity);
   // for current W+jets MADGRAPH sample
-  lumiweight_.push_back(0.000002115*(double)luminosity);
+  lumiweight_.push_back(0.000105750913/50.0*(double)luminosity);
   // for current QCD PYTHIA sample
-  lumiweight_.push_back(0.000002870*(double)luminosity);
+  lumiweight_.push_back(0.000143500567/50.0*(double)luminosity);
     // for data
   lumiweight_.push_back(1.0);
   
@@ -140,8 +140,8 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     // scale QCD with weights from MET-fit
     if((idx==kQCD)||(idx==kQCDJES09)||(idx==kQCDJES11)){
       ptlead1Jet_[idx]->Scale(1.6);
-      ptlead2Jet_[idx]->Scale(1.9);
-      ptlead3Jet_[idx]->Scale(2.1);
+      ptlead2Jet_[idx]->Scale(2.0);
+      ptlead3Jet_[idx]->Scale(2.2);
       ptlead4Jet_[idx]->Scale(1.8);
       yieldPt_   [idx]->Scale(1.6); 
     }
@@ -163,7 +163,9 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
       ptlead2Jet_[combined]->Add( (TH1F*)(ptlead2Jet_[idx]->Clone()) );
       ptlead3Jet_[combined]->Add( (TH1F*)(ptlead3Jet_[idx]->Clone()) );
       ptlead4Jet_[combined]->Add( (TH1F*)(ptlead4Jet_[idx]->Clone()) );
-      if((idx!=kQCD)&&(idx!=kQCDJES09)&&(idx!=kQCDJES11)) yieldPt_[combined]->Add( (TH1F*)(yieldPt_[idx]->Clone()) );
+      yieldPt_   [combined]->Add( (TH1F*)(yieldPt_   [idx]->Clone()) );
+      // yield ohne QCD
+      //if((idx!=kQCD)&&(idx!=kQCDJES09)&&(idx!=kQCDJES11)) 
     }
   }
 
@@ -175,7 +177,7 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     ptlead2Jet_.push_back( (TH1F*)(ptlead2Jet_[kStd]->Clone()) );
     ptlead3Jet_.push_back( (TH1F*)(ptlead3Jet_[kStd]->Clone()) );
     ptlead4Jet_.push_back( (TH1F*)(ptlead4Jet_[kStd]->Clone()) );
-    yieldPt_   .push_back( (TH1F*)(yieldPt_   [kStd]->Clone()) );
+    if((idx==kQCDup)||(idx==kQCDdown)) yieldPt_   .push_back( (TH1F*)(yieldPt_   [kStd]->Clone()) );
   }
   // b) QCD/W+jets MC shift
   for(unsigned int idx=kQCDup; idx<=kWdown; ++idx){
@@ -197,6 +199,7 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     ptlead2Jet_[idx]->Add( (TH1F*)(ptlead2Jet_[subract]->Clone()), -1 );
     ptlead3Jet_[idx]->Add( (TH1F*)(ptlead3Jet_[subract]->Clone()), -1 );
     ptlead4Jet_[idx]->Add( (TH1F*)(ptlead4Jet_[subract]->Clone()), -1 );
+    if((idx==kQCDup)||(idx==kQCDdown)) yieldPt_   [idx]->Add( (TH1F*)(yieldPt_   [subract]->Clone()), -1 );
     // add shifted QCD/W+jets
     TH1F* help1 = ((TH1F*)relIso_    [subract]->Clone());
     help1->Scale(1+scale);
@@ -207,35 +210,20 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     TH1F* help4 = ((TH1F*)ptlead3Jet_[subract]->Clone());
     help4->Scale(1+scale);
     TH1F* help5 = ((TH1F*)ptlead4Jet_[subract]->Clone());
-    help5->Scale(1+scale);
+    help5->Scale(1+scale);   
     relIso_    [idx]->Add( help1 );
     ptlead1Jet_[idx]->Add( help2 );
     ptlead2Jet_[idx]->Add( help3 );
     ptlead3Jet_[idx]->Add( help4 );
-    ptlead4Jet_[idx]->Add( help5 );
-    //   std::cout << "file " << idx << ", modify: " << subract;
-    //    std::cout << " with factor: " << scale << std::endl;
+    ptlead4Jet_[idx]->Add( help5 );   
+    if((idx==kQCDup)||(idx==kQCDdown)){
+      TH1F* help6 = ((TH1F*)yieldPt_   [subract]->Clone());
+      help6->Scale(1+scale);
+      yieldPt_[idx]->Add( help6 );
+    } 
+    // std::cout << "file " << idx << ", modify: " << subract;
+    // std::cout << " with factor: " << scale << std::endl;
   }
-
-  // c) QCD ABCD estimation shift
-  // (i)  get estimation from MET fit method
-  double HTLepScaleQCDNjets1 = 1.6;
-  // (ii) add (shifted) QCD spectrum
-  TH1F* QCD     = (TH1F*)yieldPt_[kQCD]->Clone();
-  TH1F* QCDup   = (TH1F*)yieldPt_[kQCD]->Clone();
-  TH1F* QCDdown = (TH1F*)yieldPt_[kQCD]->Clone();
-  QCD    ->Scale( HTLepScaleQCDNjets1 );
-  QCDup  ->Scale( HTLepScaleQCDNjets1*(1.+qcdScale) );
-  QCDdown->Scale( HTLepScaleQCDNjets1*(1.-qcdScale) );
-  yieldPt_[kStd    ]->Add( QCD     );
-  yieldPt_[kQCDup  ]->Add( QCDup   );
-  yieldPt_[kQCDdown]->Add( QCDdown );
-
-  // check composition
-  //  for(unsigned int idx=kSig; idx<=kWdown; ++idx){
-    //    std::cout << "file " << idx << ", bin 1 pt lead jet: ";
-    //    std::cout << ptlead1Jet_[idx]->GetBinContent(1) << std::endl;
-  //  }
 
   // ---
   //    create legends 
