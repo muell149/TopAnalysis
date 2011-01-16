@@ -118,10 +118,10 @@ sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.5, 1.0, false, true, "'$jetType'", '$JESup', '$JESdown')'
 echo 13 Wjets estimation up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.4, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 2.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 14 Wjets estimation down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.6, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 15 Pile up
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "PileUp","'$jetType'")'
@@ -158,6 +158,14 @@ echo 23 TTbar match down
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "MatchDown","'$jetType'", "TTonly")'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchDown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+echo 24 TTbar larger ISR/FSR
+sleep 2
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ISRFSRup","'$jetType'", "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ISRFSRup", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+echo 25 TTbar smaller ISR/FSR
+sleep 2
+root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ISRFSRdown","'$jetType'", "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ISRFSRdown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
 
 ## d) do the final cross section calculation
 ## create final plots using the analyzeMuonDiffXSec.C Makro 
