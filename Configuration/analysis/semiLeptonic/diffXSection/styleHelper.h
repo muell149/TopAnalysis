@@ -134,6 +134,8 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
       double MatchUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
       double MatchDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
       double MatchDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      double ISRFSRUpT  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCISRFSRupTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      double ISRFSRDownT= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCISRFSRdownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
       // calculate and print out all systematic errors
       double JESError  = ( std::abs(JESUp-std ) + std::abs(JESDown-std ) ) / 2.0;
       double JERError  = ( std::abs(JERUp-std ) + std::abs(JERDown-std ) ) / 2.0;
@@ -149,8 +151,9 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
       double MatchVError=   ( std::abs(MatchUpV-std ) + std::abs(MatchDownV-std ) ) / 2.0;
       double MatchTError=   ( std::abs(MatchUpT-std ) + std::abs(MatchDownT-std ) ) / 2.0;
       double MatchError= std::sqrt( MatchVError*MatchVError + MatchTError*MatchTError );
+      double ISRFSRError=   ( std::abs(ISRFSRUpT-std ) + std::abs(ISRFSRDownT-std ) ) / 2.0;
       // calculate the combined systematic error
-      double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError);
+      double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
       // combine systematic and statistic error, add bin content and compare with other bins
       double combinedError = sqrt(statError*statError+sysError*sysError);
       value = histo.GetBinContent(bin)+combinedError;
@@ -249,6 +252,15 @@ void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min)
   hist1->GetXaxis()->SetTitleSize(0);
   ratio->DrawClone("pe1 X0");
   ratio2->DrawClone("pe X0 same");
+
+  //TF1* fitFunction = new TF1("fitFunction","[0]*TMath::Power([1],x)");
+  //TF1* fitFunction = new TF1("fitFunction","pol1");
+  //fitFunction->SetParameter(0,1);
+  //fitFunction->SetParameter(1,1);
+  //fitFunction->SetRange(1,3);
+  //ratio2->Fit("fitFunction","QR0");
+  //fitFunction->SetRange(1,4);
+  //fitFunction->Draw("same");
 /*   error1->SetFillColor(kYellow-9); */
 /*   error1->SetLineWidth(0); */
 /*   error1->SetLineColor(0); */
