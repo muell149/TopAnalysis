@@ -89,9 +89,9 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
     //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
     // for current QCD PYTHIA sample
     // fall10:
-    //if(idx==kQCD)lumiweight_.push_back(0.000002870*(double)luminosity);
+    if(idx==kQCD)lumiweight_.push_back(0.000002870*(double)luminosity);
     // spring10:
-    if(idx==kQCD)lumiweight_.push_back(0.000018205*(double)luminosity);
+    //if(idx==kQCD)lumiweight_.push_back(0.000018205*(double)luminosity);
   }
 
   // ---
