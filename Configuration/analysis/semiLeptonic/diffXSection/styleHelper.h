@@ -110,32 +110,38 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
     double value = 0.;
     double statError = histo.GetBinError(bin);
     if(systematics){
-      // load values for all variations                
-      double std        = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-      double lumiUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdQCDestimationStdWjetsEstimationStd.txt"      );
-      double lumiDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdQCDestimationStdWjetsEstimationStd.txt"    );
-      double MG         = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt" );
-      double JESUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double JESDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double JERUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERupLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double JERDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERdownLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double EffUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpQCDestimationStdWjetsEstimationStd.txt"  );
-      double EffDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownQCDestimationStdWjetsEstimationStd.txt");
-      double QCDUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUpWjetsEstimationStd.txt"  );
-      double QCDDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDownWjetsEstimationStd.txt");
-      double WUp        = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationUp.txt"  );
-      double WDown      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationStdWjetsEstimationDown.txt");
-      double PileUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCPileUpLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double ScaleUpV   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleUpVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double ScaleUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double ScaleDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double ScaleDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double MatchUpV   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double MatchUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double MatchDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownVonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double MatchDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double ISRFSRUpT  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCISRFSRupTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
-      double ISRFSRDownT= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCISRFSRdownTTonlyLumiNominalEffStdQCDestimationStdWjetsEstimationStd.txt");
+      // load values for all variations
+      double std        = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdSampleWeightStd.txt" );
+      double lumiUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiUpEffStdSampleWeightStd.txt"      );
+      double lumiDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiDownEffStdSampleWeightStd.txt"    );
+      double MG         = readLineFromFile(line+count, "./systematicVariations/"+plot+"NloTopMCLumiNominalEffStdSampleWeightStd.txt" );
+      double JESUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+up+"LumiNominalEffStdSampleWeightStd.txt");
+      double JESDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMC"+down+"LumiNominalEffStdSampleWeightStd.txt");
+      double JERUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERupLumiNominalEffStdSampleWeightStd.txt");
+      double JERDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCJERdownLumiNominalEffStdSampleWeightStd.txt");
+      double EffUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffUpSampleWeightStd.txt"  );
+      double EffDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffDownSampleWeightStd.txt");
+      double QCDUp      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationUp.txt"  );
+      double QCDDown    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdQCDestimationDown.txt");
+      double WUp        = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdWjetsEstimationUp.txt"  );
+      double WDown      = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdWjetsEstimationDown.txt");
+      double PileUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCPileUpLumiNominalEffStdSampleWeightStd.txt");
+      double ScaleUpV   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleUpVonlyLumiNominalEffStdSampleWeightStd.txt");
+      double ScaleUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleUpTTonlyLumiNominalEffStdSampleWeightStd.txt");
+      double ScaleDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleDownVonlyLumiNominalEffStdSampleWeightStd.txt");
+      double ScaleDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCScaleDownTTonlyLumiNominalEffStdSampleWeightStd.txt");
+      double MatchUpV   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpVonlyLumiNominalEffStdSampleWeightStd.txt");
+      double MatchUpT   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchUpTTonlyLumiNominalEffStdSampleWeightStd.txt");
+      double MatchDownV = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownVonlyLumiNominalEffStdSampleWeightStd.txt");
+      double MatchDownT = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCMatchDownTTonlyLumiNominalEffStdSampleWeightStd.txt");
+      double ISRFSRUpT  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCISRFSRupTTonlyLumiNominalEffStdSampleWeightStd.txt");
+      double ISRFSRDownT= readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCISRFSRdownTTonlyLumiNominalEffStdSampleWeightStd.txt");
+      double sTopUp     = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdsTopEstimationUp.txt"  );
+      double sTopDown   = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdsTopEstimationDown.txt");
+      double DiBosUp    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdDiBosEstimationUp.txt"  );
+      double DiBosDown  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdDiBosEstimationDown.txt");
+      double ZjetsUp    = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdZjetsEstimationUp.txt"  );
+      double ZjetsDown  = readLineFromFile(line+count, "./systematicVariations/"+plot+"MadTopMCLumiNominalEffStdZjetsEstimationDown.txt");
       // calculate and print out all systematic errors
       double JESError  = ( std::abs(JESUp-std ) + std::abs(JESDown-std ) ) / 2.0;
       double JERError  = ( std::abs(JERUp-std ) + std::abs(JERDown-std ) ) / 2.0;
@@ -144,6 +150,9 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
       double TopMCError= std::abs(MG-std);
       double QCDError=   ( std::abs(QCDUp-std ) + std::abs(QCDDown-std ) ) / 2.0;
       double WError=   ( std::abs(WUp-std ) + std::abs(WDown-std ) ) / 2.0;
+      double sTopError=   ( std::abs(sTopUp-std ) + std::abs(sTopDown-std ) ) / 2.0;
+      double DiBosError=   ( std::abs(DiBosUp-std ) + std::abs(DiBosDown-std ) ) / 2.0;
+      double ZjetsError=   ( std::abs(ZjetsUp-std ) + std::abs(ZjetsDown-std ) ) / 2.0;
       double PileUpError =  std::abs(PileUp-std);
       double ScaleVError=   ( std::abs(ScaleUpV-std ) + std::abs(ScaleDownV-std ) ) / 2.0;
       double ScaleTError=   ( std::abs(ScaleUpT-std ) + std::abs(ScaleDownT-std ) ) / 2.0;
@@ -153,7 +162,7 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
       double MatchError= std::sqrt( MatchVError*MatchVError + MatchTError*MatchTError );
       double ISRFSRError=   ( std::abs(ISRFSRUpT-std ) + std::abs(ISRFSRDownT-std ) ) / 2.0;
       // calculate the combined systematic error
-      double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
+      double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+sTopError*sTopError+DiBosError*DiBosError+ZjetsError*ZjetsError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
       // combine systematic and statistic error, add bin content and compare with other bins
       double combinedError = sqrt(statError*statError+sysError*sysError);
       value = histo.GetBinContent(bin)+combinedError;
@@ -167,7 +176,7 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
 double canvAsym = 4./3.;
 double ratioSize = 0.36;
 
-void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min)
+void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min,std::vector<double> statErr)
 {
   Int_t logx = gPad->GetLogx();
   Double_t left = gPad->GetLeftMargin();
@@ -179,29 +188,18 @@ void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min)
   //  Double_t xmax = hist1->GetXmax();
   //  cout << hist1->GetName() <<  "  xmin " << xmin << endl;
 
-
-  double statError[4] = {6.052,2.944,1.468,0.852};
-  double globalError[4] = {190.627,47.099,11.415,3.929};
-
-
   TH1F* ratio = (TH1F*)hist1->Clone();
   ratio->Divide(hist1,hist2, 1.0, 1.0);
   TH1F* ratio2 = (TH1F*)ratio->Clone();
 
   for(int i=1; i<=hist1->GetNbinsX(); i++)
     {
-      ratio->SetBinError(i,statError[i-1]/hist2->GetBinContent(i));
+      ratio->SetBinError(i,statErr[i-1]/hist2->GetBinContent(i));
     }
   for(int i=1; i<=hist1->GetNbinsX(); i++)
-    {
-      ratio2->SetBinError(i,globalError[i-1]/hist2->GetBinContent(i));
-    }
-/*   TH1F* error1 = (TH1F*)hist1->Clone(); */
-/*   TH1F* error2 = (TH1F*)hist1->Clone(); */
-/*   for(int i=1; i<=hist1->GetNbinsX(); i++){ */
-/*     error1->SetBinContent(i,1+sqrt(hist1->GetBinError(i)*hist1->GetBinError(i)+hist2->GetBinError(i)*hist2->GetBinError(i))/hist1->GetBinContent(i)); */
-/*     error2->SetBinContent(i,1-sqrt(hist1->GetBinError(i)*hist1->GetBinError(i)+hist2->GetBinError(i)*hist2->GetBinError(i))/hist1->GetBinContent(i)); */
-/*   } */
+   {
+     ratio2->SetBinError(i,hist1->GetBinError(i)/hist2->GetBinContent(i));
+   }
 
   //gPad->SetTopMargin(0.06);
   gPad->SetBottomMargin(ratioSize);
@@ -250,7 +248,13 @@ void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min)
   ratio->GetYaxis()->SetTickLength(0.03);
   hist1->GetXaxis()->SetLabelSize(0);
   hist1->GetXaxis()->SetTitleSize(0);
+  ratio->SetMarkerSize(0.1);
   ratio->DrawClone("pe1 X0");
+  ratio->SetMarkerSize(1.8);
+  ratio->DrawClone("pe1 X0 same");
+  ratio2->SetMarkerSize(0.1);
+  ratio2->DrawClone("pe X0 same");
+  ratio2->SetMarkerSize(1.8);
   ratio2->DrawClone("pe X0 same");
 
   //TF1* fitFunction = new TF1("fitFunction","[0]*TMath::Power([1],x)");
