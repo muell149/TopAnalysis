@@ -77,96 +77,113 @@ echo done
 echo processing systematic variations
 echo 1 as reference without variation
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 2 using MC@NLO ttbar absorped via eff
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "","'$jetType'")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 3 JES shift up absorped via eff
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, '$JESup',"'$jetType'")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESup', 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESup', 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 4 JES shift down absorped via eff
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, '$JESdown',"'$jetType'")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESdown', 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, '$JESdown', 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 5 JER shift up absorped via eff
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "JERup","'$jetType'")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "JERup", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "JERup", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 6 JER shift down absorped via eff
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "JERdown","'$jetType'")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "JERdown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "JERdown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 7 Lumi shift up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 8 Lumi shift down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.89, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.89, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 9 Eff shift up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.03, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.03, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 10 Eff shift down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 0.97, 1.0, 1.0, false, true, "'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 0.97, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 11 QCD estimation up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.5, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.5, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 12 QCD estimation down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.5, 1.0, false, true, "'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 0.5, 1.0, 1.0, 1.0, 1.0, false, true, "'$jetType'", '$JESup', '$JESdown')'
 echo 13 Wjets estimation up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 2.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 14 Wjets estimation down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 15 Pile up
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "PileUp","'$jetType'")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "PileUp", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "PileUp", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 16 Vjets scale up
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ScaleUp","'$jetType'", "Vonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleUp", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleUp", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
 echo 17 Vjets scale down
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ScaleDown","'$jetType'", "Vonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleDown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleDown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
 echo 18 TTbar scale up
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ScaleUp","'$jetType'", "TTonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleUp", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleUp", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
 echo 19 TTbar scale down
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ScaleDown","'$jetType'", "TTonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleDown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ScaleDown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
 echo 20 Vjets match up
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "MatchUp","'$jetType'", "Vonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchUp", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchUp", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
 echo 21 Vjets match down
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "MatchDown","'$jetType'", "Vonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchDown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchDown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "Vonly")'
 echo 22 TTbar match up
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "MatchUp","'$jetType'", "TTonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchUp", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchUp", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
 echo 23 TTbar match down
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "MatchDown","'$jetType'", "TTonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchDown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "MatchDown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
 echo 24 TTbar larger ISR/FSR
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ISRFSRup","'$jetType'", "TTonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ISRFSRup", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ISRFSRup", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
 echo 25 TTbar smaller ISR/FSR
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "ISRFSRdown","'$jetType'", "TTonly")'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ISRFSRdown", 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
-
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "ISRFSRdown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown', "TTonly")'
+echo 26 single top estimation up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.3, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+echo 27 single top estimation down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 0.7, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+echo 28 DiBoson estimation up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.3, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+echo 29 DiBoson estimation down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 0.7, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+echo 30 Z+jets estimation up
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.3, false, true,"'$jetType'", '$JESup', '$JESdown')'
+echo 31 Z+jets estimation down
+sleep 2
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.7, false, true,"'$jetType'", '$JESup', '$JESdown')'
 ## d) do the final cross section calculation
 ## create final plots using the analyzeMuonDiffXSec.C Makro 
 ## calculate systematic errors and save all output within one single .txt file
@@ -174,9 +191,9 @@ root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSam
 echo processing analyzeMuonDiffXSec.C
 sleep 2
 date >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, false, "'$jetType'", '$JESup', '$JESdown')' >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, true, false, "'$jetType'", '$JESup', '$JESdown')' >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
 ## with logarithmic plots
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, true, true, "'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, true, true, "'$jetType'", '$JESup', '$JESdown')'
 echo
 
 ## e) monitor systematic shifts(JES, N(W), QCD(MC&ABCD) )
