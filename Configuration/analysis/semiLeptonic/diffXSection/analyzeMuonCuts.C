@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString plots = "NminusOne", TString jetTyp = "PF")
+void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString plots = "NminusOne", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -88,10 +88,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
     if(idx==kSToptW)lumiweight_.push_back(0.000001070791/50.0*luminosity);
     //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
     // for current QCD PYTHIA sample
-    // fall10:
     if(idx==kQCD)lumiweight_.push_back(0.000002870*(double)luminosity);
-    // spring10:
-    //if(idx==kQCD)lumiweight_.push_back(0.000018205*(double)luminosity);
   }
 
   // ---
@@ -147,7 +144,28 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = true, TString dataFi
       }
     }
   }
-
+  // loop MC sample
+  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    if(idx!=kData){
+      // get histo
+      histo_["eventsAfterLeptonVeto"   ][idx] = (TH1F*)files_[idx]->Get("bottomJetKinematicsBeforeJetCuts/n");
+      histo_["eventsAfterMuonSelection"][idx] = (TH1F*)files_[idx]->Get("tightMuonKinematics/n"             );
+      // weight histo
+      histo_["eventsAfterLeptonVeto"   ][idx]->Scale(lumiweight_[idx]);
+      histo_["eventsAfterMuonSelection"][idx]->Scale(lumiweight_[idx]);
+      // add all samples
+      if(idx>0){
+	histo_["eventsAfterLeptonVeto"   ][0]->Add(histo_["eventsAfterLeptonVeto"   ][idx]);
+	histo_["eventsAfterMuonSelection"][0]->Add(histo_["eventsAfterMuonSelection"][idx]);
+      }
+    }
+  }
+  // get number of events
+  double NLepton = histo_["eventsAfterLeptonVeto"   ][0]->Integral(0,histo_["eventsAfterLeptonVeto"][0]->GetNbinsX()+1);
+  double NMuon   = histo_["eventsAfterMuonSelection"][0]->GetBinContent(1);
+  std::cout << std::endl << "N(all MC after muon selection) = " << NMuon   << std::endl;
+  std::cout << std::endl << "N(all MC after lepton Veto) = "    << NLepton << std::endl << std::endl;
+  
   // ---
   //    print out # events ( MC / Data)
   // ---
