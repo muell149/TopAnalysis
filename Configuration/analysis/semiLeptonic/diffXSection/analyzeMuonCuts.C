@@ -207,14 +207,14 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
   TLegend *leg0 = new TLegend(0.08, 0.19, 0.94, 0.88);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kData ] , "Data ("+lum+" pb ^{-1})"    , "PL");
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kQCD  ] , "QCD"                             , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kData ] , "Data ("+lum+" pb ^{-1})"       , "PL");
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kQCD  ] , "QCD"                           , "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kWjets] , "W#rightarrowl#nu"              , "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kSTop ] , "Single-Top", "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kBkg  ] , "t#bar{t} other"                  , "F" );
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal"                 , "F" );
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kDiBos] , "VV"                 , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kBkg  ] , "t#bar{t} other"                , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal (#mu prompt)"  , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kDiBos] , "VV"                            , "F" );
 
   // ---
   //    create canvas 
