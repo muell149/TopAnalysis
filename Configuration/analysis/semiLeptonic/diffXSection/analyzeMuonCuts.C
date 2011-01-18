@@ -86,7 +86,6 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
     if(idx==kSTops)lumiweight_.push_back(0.324*0.000000464677/50.0*luminosity);
     if(idx==kSTopt)lumiweight_.push_back(0.324*0.000006672727/50.0*luminosity);
     if(idx==kSToptW)lumiweight_.push_back(0.000001070791/50.0*luminosity);
-    //    if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*luminosity);
     // for current QCD PYTHIA sample
     if(idx==kQCD)lumiweight_.push_back(0.000002870*(double)luminosity);
   }
@@ -144,32 +143,49 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
       }
     }
   }
-  // loop MC sample
+
+  // get number of events after muon selection and lepton veto
+  // loop sample
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    // get histo
+    histo_["eventsAfterLeptonVeto"   ][idx] = (TH1F*)files_[idx]->Get("bottomJetKinematicsBeforeJetCuts/n");
+    histo_["eventsAfterMuonSelection"][idx] = (TH1F*)files_[idx]->Get("tightMuonKinematics/n"             );
+    // weight histo
     if(idx!=kData){
-      // get histo
-      histo_["eventsAfterLeptonVeto"   ][idx] = (TH1F*)files_[idx]->Get("bottomJetKinematicsBeforeJetCuts/n");
-      histo_["eventsAfterMuonSelection"][idx] = (TH1F*)files_[idx]->Get("tightMuonKinematics/n"             );
-      // weight histo
       histo_["eventsAfterLeptonVeto"   ][idx]->Scale(lumiweight_[idx]);
-      histo_["eventsAfterMuonSelection"][idx]->Scale(lumiweight_[idx]);
-      // add all samples
-      if(idx>0){
-	histo_["eventsAfterLeptonVeto"   ][0]->Add(histo_["eventsAfterLeptonVeto"   ][idx]);
-	histo_["eventsAfterMuonSelection"][0]->Add(histo_["eventsAfterMuonSelection"][idx]);
-      }
+      //      histo_["eventsAfterMuonSelection"][idx]->Scale(lumiweight_[idx]); 
+      // -> already done above!!!!
     }
   }
-  // get number of events
-  double NLepton = histo_["eventsAfterLeptonVeto"   ][0]->Integral(0,histo_["eventsAfterLeptonVeto"][0]->GetNbinsX()+1);
-  double NMuon   = histo_["eventsAfterMuonSelection"][0]->GetBinContent(1);
-  std::cout << std::endl << "N(all MC after muon selection) = " << NMuon   << std::endl;
-  std::cout << std::endl << "N(all MC after lepton Veto) = "    << NLepton << std::endl << std::endl;
-  
+
   // ---
   //    print out # events ( MC / Data)
   // ---
-  // loop jet multiplicities
+  // a) after muon selection
+  std::cout << "---------------------" << std::endl;
+  std::cout << "number of entries == 1 muon" << std::endl;
+  std::cout << "ttbar sig : " << histo_["eventsAfterMuonSelection"][kSig  ]->GetBinContent(2) << std::endl;
+  std::cout << "ttbar bkg : " << histo_["eventsAfterMuonSelection"][kBkg  ]->GetBinContent(2) << std::endl;
+  std::cout << "QCD : "       << histo_["eventsAfterMuonSelection"][kQCD  ]->GetBinContent(2) << std::endl;
+  std::cout << "Z+jets : "    << histo_["eventsAfterMuonSelection"][kZjets]->GetBinContent(2) << std::endl;
+  std::cout << "W+jets : "    << histo_["eventsAfterMuonSelection"][kWjets]->GetBinContent(2) << std::endl;
+  std::cout << "DiBoson : "   << histo_["eventsAfterMuonSelection"][kDiBos]->GetBinContent(2) << std::endl;
+  std::cout << "single top : "<< (histo_["eventsAfterMuonSelection"][kSTops]->GetBinContent(2))+(histo_["eventsAfterMuonSelection"][kSTopt]->GetBinContent(2))+(histo_["eventsAfterMuonSelection"][kSToptW]->GetBinContent(2)) << std::endl;
+  std::cout << "all MC: " << histo_["eventsAfterMuonSelection"][kSig]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kBkg]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kQCD]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kZjets]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kWjets]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kDiBos]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kSTops]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kSTopt]->GetBinContent(2)+histo_["eventsAfterMuonSelection"][kSToptW]->GetBinContent(2) << std::endl;
+  std::cout << "data : "      << histo_["eventsAfterMuonSelection"][kData ]->GetBinContent(2) << std::endl<< std::endl;
+  // b) after lepton veto
+  std::cout << "---------------------" << std::endl;
+  std::cout << "number of entries after lepton veto" << std::endl;
+  std::cout << "ttbar sig : " << histo_["eventsAfterLeptonVeto"][kSig  ]->Integral(0,histo_["eventsAfterLeptonVeto"][kSig]->GetNbinsX()+1) << std::endl;
+  std::cout << "ttbar bkg : " << histo_["eventsAfterLeptonVeto"][kBkg  ]->Integral(0,histo_["eventsAfterLeptonVeto"][kBkg]->GetNbinsX()+1) << std::endl;
+  std::cout << "QCD : "       << histo_["eventsAfterLeptonVeto"][kQCD  ]->Integral(0,histo_["eventsAfterLeptonVeto"][kQCD]->GetNbinsX()+1) << std::endl;
+  std::cout << "Z+jets : "    << histo_["eventsAfterLeptonVeto"][kZjets]->Integral(0,histo_["eventsAfterLeptonVeto"][kZjets]->GetNbinsX()+1) << std::endl;
+  std::cout << "W+jets : "    << histo_["eventsAfterLeptonVeto"][kWjets]->Integral(0,histo_["eventsAfterLeptonVeto"][kWjets]->GetNbinsX()+1) << std::endl;
+  std::cout << "DiBoson : "   << histo_["eventsAfterLeptonVeto"][kDiBos]->Integral(0,histo_["eventsAfterLeptonVeto"][kDiBos]->GetNbinsX()+1) << std::endl;
+  std::cout << "single top : "<< (histo_["eventsAfterLeptonVeto"][kSTops]->Integral(0,histo_["eventsAfterLeptonVeto"][kSTops]->GetNbinsX()+1))+(histo_["eventsAfterLeptonVeto"][kSTopt]->Integral(0,histo_["eventsAfterLeptonVeto"][kSTopt]->GetNbinsX()+1))+(histo_["eventsAfterLeptonVeto"][kSToptW]->Integral(0,histo_["eventsAfterLeptonVeto"][kSToptW]->GetNbinsX()+1)) << std::endl;
+  std::cout << "all MC: " << histo_["eventsAfterLeptonVeto"][kSig]->Integral(0,histo_["eventsAfterLeptonVeto"][kSig]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kBkg]->Integral(0,histo_["eventsAfterLeptonVeto"][kBkg]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kQCD]->Integral(0,histo_["eventsAfterLeptonVeto"][kQCD]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kZjets]->Integral(0,histo_["eventsAfterLeptonVeto"][kZjets]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kWjets]->Integral(0,histo_["eventsAfterLeptonVeto"][kWjets]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kDiBos]->Integral(0,histo_["eventsAfterLeptonVeto"][kDiBos]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kSTops]->Integral(0,histo_["eventsAfterLeptonVeto"][kSTops]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kSTopt]->Integral(0,histo_["eventsAfterLeptonVeto"][kSTopt]->GetNbinsX()+1)+histo_["eventsAfterLeptonVeto"][kSToptW]->Integral(0,histo_["eventsAfterLeptonVeto"][kSToptW]->GetNbinsX()+1) << std::endl;
+  std::cout << "data : "      << histo_["eventsAfterLeptonVeto"][kData ]->Integral(0,histo_["eventsAfterLeptonVeto"][kData]->GetNbinsX()+1) << std::endl<< std::endl;
+  // c) jet multiplicities
   for(int mult=2; mult<=10; ++mult){
    std::cout << "---------------------" << std::endl;
     std::cout << "number of entries =="+getTStringFromInt(mult-1)+" jets" << std::endl;
@@ -206,7 +222,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
   std::vector<TCanvas*> MyCanvas;
   //int nCanvas = 34;
   //if(jetTyp=="PF") nCanvas+=3;
-  for(int idx=0; idx<=variables_.size(); idx++){ 
+  for(unsigned int idx=0; idx<=variables_.size(); idx++){ 
     char canvname[10];
     sprintf(canvname,"canv%i",idx);    
     MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
