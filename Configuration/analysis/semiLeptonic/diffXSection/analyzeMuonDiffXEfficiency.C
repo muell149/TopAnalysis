@@ -69,6 +69,19 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   if(useNLO) TopSample = "Nlo";
 
   // ---
+  //    correct BR of MC sample
+  // ---
+  // (a) correction for semileptonic events
+  double BRcorrectionSemileptonic = 0.985608;
+  // (b) effective correction for all ttbar events left after muon selection, lepton veto and >=4 jets
+  double BRcorrectionAll = 0.98323995;
+  // note: 
+  // Ngen = ttbar-> mu or ttbar->tau->mu: use correction (a)
+  // Nreco = ttbar all after selection: use correction (b)
+  // eff = Nreco/Ngen: use correction (b)/(a)
+  // extrapolationfactor = Ntheory/Ngen: use correction 1/(a)
+
+  // ---
   //    set root style 
   // ---
   gROOT->cd();
@@ -241,6 +254,12 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Divide((TH1F*)histo_[variables_[var]][kttbarGen ][Njets_[mult]]->Clone());
       histo_[variables_[var]][topEff][Njets_[mult]]    = (TH1F*)histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Clone();
       histo_[variables_[var]][topEff][Njets_[mult]]    ->Scale(effSF);
+      // correct BR of MC sample (for top with >=4 jets tagged and untagged)    
+      if( (Njets_[mult]=="Njets4") || (Njets_[mult]=="Njets4Btag") ){
+	double BRcorr= BRcorrectionAll/BRcorrectionSemileptonic;
+	histo_[variables_[var]][topEff    ][Njets_[mult]]->Scale(BRcorr);
+	histo_[variables_[var]][topEffNoSF][Njets_[mult]]->Scale(BRcorr);
+      }
     }
   }
 
@@ -292,13 +311,17 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
 	if(variables_[var]=="pt"&&idx==1) ++idx;
 	// print out effiencies, for pt with overflow bin, for phi with underflow and overflow bin
 	if(variables_[var]=="phi"&&idx==1) std::cout << "underflow bin "  << idx-1 << ": " <<
-	"noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(0) <<
-	"; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(0) <<
-	"; SF=" << effSF << std::endl;
+	  "noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(0) <<
+	  "; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(0) <<
+	  "; SF=" << effSF;
+	if( (Njets_[mult]=="Njets4") || (Njets_[mult]=="Njets4Btag") ) std::cout << "; BR correction: " << BRcorrectionAll/BRcorrectionSemileptonic;
+	std::cout << std::endl;
 	std::cout << "bin "  << idx << ": " << 
 	"noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(idx) <<
 	"; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(idx) <<
-	"; SF=" << effSF << std::endl;
+	 "; SF=" << effSF;
+	if( (Njets_[mult]=="Njets4") || (Njets_[mult]=="Njets4Btag") ) std::cout << "; BR correction: " << BRcorrectionAll/BRcorrectionSemileptonic;
+	std::cout << std::endl;
 	if((variables_[var]=="pt"||variables_[var]=="phi")&&idx==histo_[variables_[var]][topEff][Njets_[mult]]->GetNbinsX()) std::cout << "overflow bin "  << idx+1 << ": " <<
 	"noSF: " << histo_[variables_[var]][topEffNoSF][Njets_[mult]]->GetBinContent(idx+1) <<
 	"; with SF: " << histo_[variables_[var]][topEff][Njets_[mult]]->GetBinContent(idx+1) <<
@@ -314,6 +337,11 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   std::vector<double> topEffNoSF_, lepEffNoSF_, topEff_, lepEff_;
   // loop jet multiplicities
   for(unsigned int mult=0; mult<Njets_.size(); ++mult){
+    double BRcorr=1.0;
+    // correct BR of MC sample (for top with >=4 jets tagged and untagged)    
+    if( (Njets_[mult]=="Njets4") || Njets_[mult]==("Njets4Btag") ){
+      BRcorr= BRcorrectionAll/BRcorrectionSemileptonic;
+    }
     // get entries
     double allTopGen  = histo_["pt"][kttbarGen ][Njets_[mult]]->Integral(0, histo_["pt"][kttbarGen ][Njets_[mult]]->GetNbinsX()+1);
     double allTopReco = histo_["pt"][kttbarReco][Njets_[mult]]->Integral(0, histo_["pt"][kttbarReco][Njets_[mult]]->GetNbinsX()+1);
@@ -321,23 +349,25 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
     double allLepReco = histo_["pt"][allReco   ][Njets_[mult]]->Integral(0, histo_["pt"][allReco   ][Njets_[mult]]->GetNbinsX()+1); 
     // calculate efficiencies
     // before SF correction
-    topEffNoSF_.push_back( allTopReco / allTopGen );
+    topEffNoSF_.push_back( (allTopReco / allTopGen) * BRcorr );
     lepEffNoSF_.push_back( allLepReco / allLepGen );
     // after SF correction
-    topEff_.push_back( allTopReco / allTopGen * effSF );
+    topEff_.push_back( (allTopReco / allTopGen) * BRcorr * effSF );
     lepEff_.push_back( allLepReco / allLepGen * effSF );
     // do printout
     std::cout << " --- " << Njets_[mult] << " ---" << std::endl;
     std::cout << "a) l+jets: ( " << allLepReco << " , " << allLepGen << " , " 
               << lepEffNoSF_[mult] << " , " << lepEff_[mult] << " )" << std::endl;
     std::cout << "b) top:    ( " << allTopReco << " , " << allTopGen << " , " 
-              << topEffNoSF_[mult] << " , " << topEff_[mult] << " )" << std::endl;
+              << topEffNoSF_[mult] << " , " << topEff_[mult];
+    if( (Njets_[mult]=="Njets4") || (Njets_[mult]=="Njets4Btag") ) std::cout << " , BR correction: " << BRcorrectionAll/BRcorrectionSemileptonic;
+    std::cout <<" )" << std::endl;
   }
 
   // ---
   //    calculate and print extrapolation factor for top from chosen to total phase space
   // ---
-  // extrapolation = N(ttbar MC gen >=3 jets) / N(ttbar theory)
+  // extrapolation = N(ttbar MC gen >=4 jets) / N(ttbar theory)
   // N(ttbar theory) depends on the cross section which MUST be the same like it is 
   // used in the calculation of the lumiweight to cancel out in extrapolation factor
   // (i) set theory cross section
@@ -347,12 +377,9 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
   // (iii) calculate number of top events in chosen phase space (gen level)
   double NTop   = histo_["pt"][kttbarGen]["Njets4"]->Integral( 0 , histo_["pt"][kttbarGen]["Njets4"]->GetNbinsX()+1 ); 
   // (iv) get extrapolation factor from chosen to inclusive phase space
-  double extrapolation = NTheory / NTop;
-  // (v) correct BR of MC sample
-  double BRcorrection = (0.108*9)*(0.676*1.5);
-  extrapolation= extrapolation / BRcorrection;
+  double extrapolation = NTheory / (NTop*BRcorrectionSemileptonic);
   std::cout << "extrapolation factor for top from chosen to inclusive phase space: " << extrapolation  << std::endl;
-  std::cout << "(BR correction applied)" << std::endl;
+  std::cout << "(BR correction applied: " << BRcorrectionSemileptonic << ")" << std::endl;
 
   // ---       
   //    if textoutput==true: save efficiencies within .txt-file
@@ -398,11 +425,6 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       writeToFile(topEff_[mult], file);	
     }    
 
-
-
-
-
- 
     // d) save efficiencies for differential top correction 
     // (>=4 jets / and + >=1 btag)-> differtential top cross section
     // in two ways: with(4) and without btag(3)
