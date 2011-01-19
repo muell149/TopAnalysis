@@ -231,6 +231,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
 	// scale MC samples to same luminosity
 	histo_[variables_[var]][idx][Njets_[mult]]->Scale(EffScaleFactor*scaleFactor*lumiweight_[idx]);
+	if((idx==kSig || idx==kBkg) && (mult==3 || mult==4))
+	  histo_[variables_[var]][idx][Njets_[mult]]->Scale(0.98323995);
       }
       // scaling for gen-plots
       if(mult<4){
@@ -243,6 +245,10 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	histo_[variables_[var]][kGenSTop  ][Njets_[mult]] = (TH1F*)(histo_[variables_[var]][kGenSTops][Njets_[mult]]->Clone());
 	histo_[variables_[var]][kGenSTop  ][Njets_[mult]]->Add((TH1F*)(histo_[variables_[var]][kGenSTopt][Njets_[mult]]->Clone()));
 	histo_[variables_[var]][kGenSTop  ][Njets_[mult]]->Add((TH1F*)(histo_[variables_[var]][kGenSToptW][Njets_[mult]]->Clone()));
+	if(mult==3){
+	  histo_[variables_[var]][kGenSig   ][Njets_[mult]]->Scale(0.985608);
+	  histo_[variables_[var]][kGenBkg   ][Njets_[mult]]->Scale(0.985608);
+	}
       }
       // create combined single top
       histo_[variables_[var]][kSTop][Njets_[mult]]   =   (TH1F*)histo_[variables_[var]][kSTops][Njets_[mult]]->Clone();
@@ -314,7 +320,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   std::cout << "---------------------------------" << std::endl;
   // loop jet multiplicities (no btag)
   for(unsigned int mult=0; mult<4; ++mult){
-    //std::cout<<"QCDscaletest: "<<templateFit((TH1F*)files_[kData]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kQCD]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kWjets]->Get("analyzePfMET"+Njets_[mult]+"/metEt"))<<std::endl;
+    //if(finalPlots)std::cout<<std::endl<<"QCDscaletest: "<<templateFit((TH1F*)files_[kData]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kData]->Get("analyzePfMET"+Njets_[mult]+"AntiRel/metEt"), (TH1F*)files_[kQCD]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kWjets]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kZjets]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kSig]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kBkg]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kSTops]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kSTopt]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), (TH1F*)files_[kSToptW]->Get("analyzePfMET"+Njets_[mult]+"/metEt"), Njets_[mult])<<std::endl;
     // a) get number
     // divide by scaleFactor here as QCD scale factors are with respect to the unscaled QCD MC
     if(Njets_[mult]=="Njets1") 
@@ -1160,7 +1166,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     yieldLeg->AddEntry( histo_["pt yield"][kSToptW]["Njets1"], "Single-Top"                    , "F" );
     yieldLeg->AddEntry( histo_["pt yield"][kZjets ]["Njets1"], "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
     yieldLeg->AddEntry( histo_["pt yield"][kBkg   ]["Njets1"], "t#bar{t} other"                , "F" );
-    yieldLeg->AddEntry( histo_["pt yield"][kSig   ]["Njets1"], "t#bar{t} signal (#mu prompt)"  , "F" );
+    yieldLeg->AddEntry( histo_["pt yield"][kSig   ]["Njets1"], "t#bar{t} signal ( #mu prompt )"  , "F" );
     yieldLeg->AddEntry( histo_["pt yield"][kDiBos ]["Njets1"], "VV"               , "F" );
     // c) create legend for l+jets differential cross sections - extra canvas
     TLegend *lJetsXSecLeg = new TLegend(0.01, 0.30, 0.90, 0.92);
@@ -1169,8 +1175,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     lJetsXSecLeg->AddEntry(histo_[ljetsXSecDiff_[0]][kData][Njets_[0]], "Data ("+lum+" pb^{-1})", "PL");
     lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenW   ][Njets_[0]],    "W#rightarrowl#nu"                   , "F" );
     lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenSTop][Njets_[0]],    "Single-Top"                         , "F" );
-    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} (#tau#rightarrow#mu)", "F" );
-    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} (#mu prompt)"                    , "F" );
+    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} ( #tau#rightarrow#mu )", "F" );
+    lJetsXSecLeg->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} ( #mu prompt )"                    , "F" );
     // c)2) create legend for l+jets differential cross sections - small
     TLegend *lJetsXSecLegSmall = new TLegend(0.43, 0.7, 0.93, 0.94);
     lJetsXSecLegSmall->SetFillStyle(0);
@@ -1178,19 +1184,19 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     lJetsXSecLegSmall->AddEntry(histo_[ljetsXSecDiff_[0]][kData][Njets_[0]], "Data ("+lum+" pb^{-1})", "PL");
     lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenW   ][Njets_[0]],    "W#rightarrowl#nu"                   , "F" );
     lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenSTop][Njets_[0]],    "Single-Top"                         , "F" );
-    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} (#tau#rightarrow#mu)", "F" );
-    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} (#mu prompt)"                    , "F" );
+    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} ( #tau#rightarrow#mu )", "F" );
+    lJetsXSecLegSmall->AddEntry(histo_[ljetsGen_[0]][kGenSig ][Njets_[0]],    "t#bar{t} ( #mu prompt )"                    , "F" );
     // c)3) create legend for l+jets differential cross sections - split part1
     TLegend *lJetsXSecLegPart1 = new TLegend(0.15, 0.04, 0.83, 0.96);
     lJetsXSecLegPart1->SetFillStyle(0);
     lJetsXSecLegPart1->SetBorderSize(0);
     lJetsXSecLegPart1->AddEntry(histo_[ljetsXSecDiff_[0]][kData][Njets_[0]], "Data ("+lum+" pb^{-1})", "PL");
-    lJetsXSecLegPart1->AddEntry(histo_[ljetsGen_[0]][kGenSig][Njets_[0]],    "t#bar{t} (#mu prompt)"       , "F" );
+    lJetsXSecLegPart1->AddEntry(histo_[ljetsGen_[0]][kGenSig][Njets_[0]],    "t#bar{t} ( #mu prompt )"       , "F" );
     // c)4) create legend for l+jets differential cross sections - split part2
     TLegend *lJetsXSecLegPart2 = new TLegend(0.15, 0.04, 0.83, 0.96);
     lJetsXSecLegPart2->SetFillStyle(0);
     lJetsXSecLegPart2->SetBorderSize(0);
-    lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} (#tau#rightarrow#mu)", "F" );
+    lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenBkg ][Njets_[0]],    "t#bar{t} ( #tau#rightarrow#mu )", "F" );
     lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenW   ][Njets_[0]],    "W#rightarrowl#nu"                   , "F" );
     lJetsXSecLegPart2->AddEntry(histo_[ljetsGen_[0]][kGenSTop][Njets_[0]],    "Single-Top"                         , "F" );
     // d) create legend for l+jets differential Normalized cross sections - extra canvas
@@ -1207,7 +1213,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     eventCompositionPart1->SetFillStyle(0);
     eventCompositionPart1->SetBorderSize(0);
     eventCompositionPart1->SetHeader("signal composition:");
-    eventCompositionPart1->AddEntry( histo_["pt composition"][kSig   ]["Njets1"], "t#bar{t} signal (#mu prompt)", "PL");
+    eventCompositionPart1->AddEntry( histo_["pt composition"][kSig   ]["Njets1"], "t#bar{t} signal ( #mu prompt )", "PL");
     eventCompositionPart1->AddEntry( histo_["pt composition"][kBkg   ]["Njets1"], "t#bar{t} other" , "PL");
     eventCompositionPart1->AddEntry( histo_["pt composition"][kSToptW]["Njets1"], "Single-Top"     , "PL");
     // part 2) 
@@ -1228,8 +1234,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveData    , "Data ("+lum+" pb^{-1})" , "PL");
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGen   , "W#rightarrowl#nu"                    ,  "F");
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenTop, "Single-Top"                          ,  "F");
-    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} (#tau#rightarrow#mu)" ,  "F");
-    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} (#mu prompt)"                     ,  "F");
+    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} ( #tau#rightarrow#mu )" ,  "F");
+    inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} ( #mu prompt )"                     ,  "F");
     //  inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveMCReco, "l+jets reco MC + corrections", "L" );
     // (ib) l+jets
     TLegend *inclusiveCrossSectionLjetsLeg2 = new TLegend(0.5, 0.63, 0.96, 0.8);
@@ -1240,8 +1246,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveData    , "Data ("+lum+" pb^{-1})" , "PL");
     inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGen   , "W#rightarrowl#nu"                    ,  "F");
     inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenTop, "Single-Top"                          ,  "F");
-    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} (#tau#rightarrow#mu)" ,  "F");
-    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} (#mu prompt)"                     ,  "F");
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenBkg, "t#bar{t} ( #tau#rightarrow#mu )" ,  "F");
+    inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCGenSig, "t#bar{t} ( #mu prompt )"                     ,  "F");
     //  inclusiveCrossSectionLjetsLeg2->AddEntry( sigmaLjetsInclusiveMCReco, "l+jets reco MC + corrections", "L" );
     // (ii) top
     TLegend *inclusiveCrossSectionTopLeg =  new TLegend(0.2, 0.54, 0.94, 0.66);
@@ -1261,16 +1267,16 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     differentialTopLeg->SetBorderSize(0);
     differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "Data ("+lum+" pb^{-1}), ", "PL");
     differentialTopLeg->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "with b tagging"                     , ""  );
-    differentialTopLeg->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} (#mu prompt)"                    , "F" );
-    differentialTopLeg->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} (#tau#rightarrow#mu)", "F" );
+    differentialTopLeg->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} ( #mu prompt )"                    , "F" );
+    differentialTopLeg->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} ( #tau#rightarrow#mu )", "F" );
     // (2) method using W-estimation
     TLegend *differentialTopLeg2 = new TLegend(0.43, 0.7, 0.93, 0.94);
     differentialTopLeg2->SetFillStyle(0);
     differentialTopLeg2->SetBorderSize(0);
     differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "Data ("+lum+" pb^{-1}), ", "PL");
     differentialTopLeg2->AddEntry( histo_["pt top"][kData  ][Njets_[4]]  , "without b tagging"                  , ""  );
-    differentialTopLeg2->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} (#mu prompt)"                    , "F" );
-    differentialTopLeg2->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} (#tau#rightarrow#mu)", "F" );
+    differentialTopLeg2->AddEntry( histo_["pt top"][kGenSig][Njets_[3]]  , "t#bar{t} ( #mu prompt )"                    , "F" );
+    differentialTopLeg2->AddEntry( histo_["pt top"][kGenBkg][Njets_[3]]  , "t#bar{t} ( #tau#rightarrow#mu )", "F" );
     // i)  create legends for inclusive TOP cross section extrapolated to whole phase space
     TLegend *inclusiveCrossSectionTopLeg2 =  new TLegend(0.07, 0.5, 0.94, 0.85);
     inclusiveCrossSectionTopLeg2->SetFillStyle (1001);
@@ -1618,6 +1624,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     MyCanvas[canvasNumber]->Size(600,800);
     TH1F *sigmaLjetsInclusiveDataMod = (TH1F*)sigmaLjetsInclusiveData->Clone();
     axesStyle(*sigmaLjetsInclusiveDataMod, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    sigmaLjetsInclusiveDataMod->GetXaxis()->SetTitleSize(0);
     sigmaLjetsInclusiveDataMod    ->DrawClone("AXIS" );
     sigmaLjetsInclusiveMCGen     ->DrawClone("histsame" );
     histogramStyle(*sigmaLjetsInclusiveMCGenTop, kSTop);
@@ -1639,7 +1646,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1., 0.195);
     DrawLabel("p_{t}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
     TH1F* sigmaLjetsInclusiveDataModSys = systematicHisto("ljetsXSec", 6, *sigmaLjetsInclusiveDataMod, "Njets", up, down);
-    ratio_smal(sigmaLjetsInclusiveDataModSys,sigmaLjetsInclusiveMCGen,1.49,0.51,statErrMod);
+    axesStyle(*sigmaLjetsInclusiveDataModSys, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    ratio_smal(sigmaLjetsInclusiveDataModSys,sigmaLjetsInclusiveMCGen,1.59,0.41,statErrMod);
     ++canvasNumber;
 
     // a3) l+jets exclusive bins with ratio
@@ -1670,6 +1678,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 						   sigmaLjetsInclusiveMCGenSig->GetBinError(iBin+1)*sigmaLjetsInclusiveMCGenSig->GetBinError(iBin+1));
     }
     axesStyle(*sigmaLjetsInclusiveDataExcl, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    sigmaLjetsInclusiveDataExcl->GetXaxis()->SetTitleSize(0);
     for(int iBin = 1; iBin<=sigmaLjetsInclusiveData->GetNbinsX(); ++iBin)
       {
 	char binLabel[6];
@@ -1693,7 +1702,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1., 0.195);
     DrawLabel("p_{t}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
     TH1F* sigmaLjetsInclusiveDataExclSys = systematicHisto("ljetsXSecExcl", 6, *sigmaLjetsInclusiveDataExcl, "Njets", up, down);
-    ratio_smal(sigmaLjetsInclusiveDataExclSys,sigmaLjetsInclusiveMCGenExcl,1.49,0.51,statErrExcl);
+    axesStyle(*sigmaLjetsInclusiveDataExclSys, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    ratio_smal(sigmaLjetsInclusiveDataExclSys,sigmaLjetsInclusiveMCGenExcl,1.59,0.41,statErrExcl);
     ++canvasNumber;
 
     //// a4) W+jets exclusive bins with ratio
