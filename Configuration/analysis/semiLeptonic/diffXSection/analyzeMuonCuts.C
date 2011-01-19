@@ -213,7 +213,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
   leg0->AddEntry( histo_["tightJetKinematics/n"][kSTop ] , "Single-Top", "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kZjets] , "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kBkg  ] , "t#bar{t} other"                , "F" );
-  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal (#mu prompt)"  , "F" );
+  leg0->AddEntry( histo_["tightJetKinematics/n"][kSig  ] , "t#bar{t} signal ( #mu prompt )"  , "F" );
   leg0->AddEntry( histo_["tightJetKinematics/n"][kDiBos] , "VV"                            , "F" );
 
   // ---
