@@ -51,7 +51,7 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   
   if( !FullLepEvt->isHypoValid(hypoKey) ){  
     edm::LogInfo ( "NonValidHyp" ) << "Hypothesis not valid for this event";
-    TopKin_[4]->SetBinContent(TopKin_[4]->GetNbinsX(),TopKin_[4]->GetBinContent(TopKin_[4]->GetNbinsX())+1);
+    TopKin_[4]->SetBinContent(1,TopKin_[4]->GetBinContent(1)+1);
     return;  // return if any of the hypotheses is not valid
   }
  
@@ -150,7 +150,7 @@ FullLepKinAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
   TopKin_.push_back( fs->make<TH1D>(ns.name("TopEnergy"), "E (t) [GeV]"    , 50,  0. , 500. ) );  
   TopKin_.push_back( fs->make<TH1D>(ns.name("TopEta"   ), "#eta (t)"       , 34, -3.4,   3.4) );
   TopKin_.push_back( fs->make<TH1D>(ns.name("TopPhi"   ), "#phi (t)"       , 34, -3.4,   3.4) );
-  TopKin_.push_back( fs->make<TH1D>(ns.name("TopMass"  ), "M (top) [GeV]"  , 40,  0. , 400. ) );
+  TopKin_.push_back( fs->make<TH1D>(ns.name("TopMass"  ), "M (top) [GeV]"  , 50, -50. , 450. ) );
 
   WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusPt"    ), "p_{t} (W^{+}) [GeV]", 50,  0. , 500. ) );
   WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusEnergy"), "E (W^{+}) [GeV]"    , 50,  0. , 500. ) );
