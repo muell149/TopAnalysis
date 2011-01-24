@@ -74,7 +74,7 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
 ## MC Matching and Embedding ------------------
 ## select only muons from desired decay from genParticles (comment out other processes!!!)
 from TopAnalysis.TopUtils.GenCandSelector_cfi import isolatedGenMuons
-process.genMuonsMuMCMatching = isolatedGenMuons.clone(
+process.genMuonsFromSpecificDecay = isolatedGenMuons.clone(
     # Z-DECAY
     target = cms.PSet( pdgId = cms.vstring("13", "-13"), status = cms.int32(3) ), #daughter: mu
     ancestor = cms.PSet( pdgId = cms.vstring("23") )      # mother: Z boson
@@ -85,14 +85,14 @@ process.genMuonsMuMCMatching = isolatedGenMuons.clone(
     #target = cms.PSet( pdgId = cms.vstring("13", "-13"), status = cms.int32(3) ), #daughter: mu
     #ancestor = cms.PSet( pdgId = cms.vstring("6:24", "-6:-24") )      # mother: W boson from t decay
 )
-process.muonNewMCMatching = process.muonMatch.clone(
+process.newMuonMatch = process.muonMatch.clone(
      #src = 'muons',
-     matched = 'genMuonsMuMCMatching',
+     matched = 'genMuonsFromSpecificDecay',
      mcStatus = [3]
 )
-process.patDefaultSequence.replace(process.muonMatch, process.muonNewMCMatching)
+process.patDefaultSequence.replace(process.muonMatch, process.newMuonMatch)
 process.patMuons.genParticleMatch = cms.VInputTag(
-    cms.InputTag("muonNewMCMatching")
+    cms.InputTag("newMuonMatch")
 )
 
 ## embedding of jet constituents into the jets
@@ -160,7 +160,7 @@ process.patMETsPF.resolutions = cms.PSet( default = cms.string("metResolutionPF"
 #                                        process.patElectrons
 #                                       )
 
-process.p = cms.Path(process.muonNewMCMatching  *
+process.p = cms.Path(process.genMuonsFromSpecificDecay  *
                      process.patDefaultSequence)
 
 ## configure output module
