@@ -22,19 +22,19 @@ void METKinematics::book()
       MET Variables
   **/
   // et of missing Et
-  hists_["metEt"   ] = new TH1F( "met.et"    , "met.et"    ,  400 ,  0.   , 400. );
+  hists_["metEt"   ] = new TH1F( "metEt"    , "metEt"    ,  400 ,  0.   , 400. );
   // px of missing Et
-  hists_["metPx"   ] = new TH1F( "met.px"    , "met.px"    ,  500 , -250. , 250. );
+  hists_["metPx"   ] = new TH1F( "metPx"    , "metPx"    ,  500 , -250. , 250. );
   // py of missing Et
-  hists_["metPy"   ] = new TH1F( "met.py"    , "met.py"    ,  500 , -250. , 250. );
+  hists_["metPy"   ] = new TH1F( "metPy"    , "metPy"    ,  500 , -250. , 250. );
   // scalar sum of transverse energy over all objects
-  hists_["metSumEt"] = new TH1F( "met.sumEt" , "met.sumEt" ,  1500,  0.   , 1500.);
+  hists_["metSumEt"] = new TH1F( "metSumEt" , "metSumEt" ,  1500,  0.   , 1500.);
   // significance of missing Et
-  hists_["metSig"  ] = new TH1F( "met.sig"   , "met.sig"   ,  100 ,  0.   , 25.  );
+  hists_["metSig"  ] = new TH1F( "metSig"   , "metSig"   ,  100 ,  0.   , 25.  );
   // phi of missing Et events
-  hists_["metPhi"  ] = new TH1F( "met.phi"   , "met.phi"   ,  70  , -M_PI , M_PI  );
+  hists_["metPhi"  ] = new TH1F( "metPhi"   , "metPhi"   ,  70  , -M_PI , M_PI  );
   // missing Et vs. sumEt
-  hists2D_["metSumEt"] = new TH2F("metSumEt" , "metSumEt"  ,  1500,    0. ,  1500.,  400, 0.,  400.);
+  hists2D_["metVsSumEt"] = new TH2F("metVsSumEt" , "metVsSumEt"  ,  1500,    0. ,  1500.,  400, 0.,  400.);
 
   /** 
       correlation MET - Kinematic quantities
@@ -68,7 +68,7 @@ void METKinematics::book(edm::Service<TFileService>& fs)
   // phi of missing Et events
   bookVariable( fs, "metPhi"  , 70  , -M_PI  , M_PI  , useTree_ );
   // missing Et vs. sumEt
-  if(!useTree_) bookVariable( fs, "metSumEt", 1500, 0. , 1500., 400, 0., 400. );
+  if(!useTree_) bookVariable( fs, "metVsSumEt", 1500, 0. , 1500., 400, 0., 400. );
 
   /** 
       correlation MET - Kinematic quantities
@@ -99,7 +99,7 @@ METKinematics::fill(const edm::View<reco::MET>& met, const double& weight)
   // filling for phi of missing Et
   fillValue("metPhi"  , met.begin()->phi()   , weight );
   // filling missing Et vs. sumEt
-  if(!useTree_) fillValue("metSumEt", met.begin()->sumEt(), met.begin()->et(), weight );
+  if(!useTree_) fillValue("metVsSumEt", met.begin()->sumEt(), met.begin()->et(), weight );
 
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
