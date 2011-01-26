@@ -3,18 +3,15 @@
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "TopAnalysis/TopAnalyzer/interface/SingleObject.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "PhysicsTools/CandUtils/interface/EventShapeVariables.h"
 
 /**
    \class   EventShapes EventShapes.h "TopAnalysis/TopAnalyzer/interface/EventShapes.h"
 
    \brief   Derived class to analyze the event shapes on reconstruction and generator level
 
-   The structure keeps histograms for event shapes only(!). These histograms can be 
-   filled from edm::View<pat::Jet>'s or from std::vector<reco::GenParticles>'s. The class is
-   derived from the SingleObject<Collection> interface, which makes it usable in fwfull  or 
-   fwlite. 
+   The structure keeps histograms for event shapes. These histograms can be filled from
+   edm::View<reco::Candidate>'s. The class is derived from the SingleObject<Collection>
+   interface, which makes it usable in fwfull or fwlite. 
 */
 
 class EventShapes : public SingleObject<const edm::View<reco::Candidate> > {
