@@ -1,5 +1,8 @@
 #include "TopAnalysis/TopAnalyzer/interface/EventShapes.h"
 
+#include "PhysicsTools/CandUtils/interface/Thrust.h"
+#include "PhysicsTools/CandUtils/interface/EventShapeVariables.h"
+
 /// default constructor for fw lite
 EventShapes::EventShapes()
 {
@@ -59,6 +62,24 @@ EventShapes::book(edm::Service<TFileService>& fs)
   /// and measures the 4-jet structure of the event (D vanishes for a planar event)
   bookVariable( fs, "D" ,  100,  0. , 1. , useTree_ );
 
+  /// The thrust axis is the vector T which maximises the following expression:
+  ///
+  ///       sum_i=1...N ( | T . p_i | )
+  ///  t = --------------------------------- 
+  ///      sum_i=1...N ( (p_i . _p_i)^(1/2) )
+  /// 
+  /// where p_i, i=1...N are the particle momentum vectors.
+  /// 
+  /// The thrust value is the maximum value of t.
+  /// The thrust axis has a two-fold ambiguity due to taking the absolute value of the dot product.
+  /// This computation returns by convention a thurst axis with a positive component along the 
+  /// z-direction is positive. 
+  /// The thrust measure the alignment of a collection of particles along a common axis.
+  /// The lower the thrust, the more spherical the event is.
+  /// The higher the thrust, the more jet-like the event is.
+  bookVariable( fs, "thrust" ,  50,  0.5 , 1.0 , useTree_ );
+
+
   /** 
       Correlations of Event Shape Variables
   **/
@@ -83,11 +104,11 @@ EventShapes::book(edm::Service<TFileService>& fs)
 
 }
 
-std::vector<math::XYZVector> makeVecForEventShape(edm::View<reco::Candidate> jets, double scale = 1.) {
+std::vector<math::XYZVector> makeVecForEventShape(edm::View<reco::Candidate> jets) {
   std::vector<math::XYZVector> p;
   unsigned int i=1;
   for (edm::View<reco::Candidate>::const_iterator jet = jets.begin(); jet != jets.end(); jet++) {
-    math::XYZVector Vjet(jet->px() * scale, jet->py() * scale, jet->pz() * scale);
+    math::XYZVector Vjet(jet->px(), jet->py(), jet->pz());
     p.push_back(Vjet);
     ++i;
     if(i==6) break;
@@ -113,6 +134,9 @@ EventShapes::fill(const edm::View<reco::Candidate>& jets, const double& weight)
   double C_           = eventshape.C();
   double D_           = eventshape.D();
 
+  Thrust thrustAlgo(jets.begin(), jets.end());
+  double thrust_ = thrustAlgo.thrust();
+
   /** 
       Fill Event Shape Variables
   **/
@@ -129,6 +153,8 @@ EventShapes::fill(const edm::View<reco::Candidate>& jets, const double& weight)
   fillValue("C"          , C_          , weight);
   // D of event
   fillValue("D"          , D_          , weight);
+  // thrust of event
+  fillValue("thrust"     , thrust_     , weight);
 
   if(!useTree_){
     fillValue("iso_cir" , isotropy_    , circularity_ , weight);
