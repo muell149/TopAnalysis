@@ -23,7 +23,7 @@ JetKinematics::book()
       Kinematic Variables
   **/
   // jet multiplicty
-  hists_["n"  ] = new TH1F( "n"   , "n"   ,  10 ,     0. ,    10. );
+  hists_["n"  ] = new TH1F( "n"   , "n"   ,  20 ,     0. ,    20. );
   // energy of the jet
   hists_["en" ] = new TH1F( "en"  , "en"  , 180 ,     0. ,   900. );
   // transverse momentum of the jet
@@ -42,7 +42,7 @@ JetKinematics::book(edm::Service<TFileService>& fs)
       Kinematic Variables
   **/
   // jet multiplicty
-  bookVariable( fs, "n"      ,  10,  0. , 10. , useTree_ );
+  bookVariable( fs, "n"      ,  20,  0. , 20. , useTree_ );
 
   // only produce a tree for the following collctions if they are only
   // for one object and a tree should be written
