@@ -91,32 +91,39 @@ from TopAnalysis.TopFilter.sequences.generatorMatching_cff import *
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 from TopAnalysis.TopAnalyzer.FullHadHypothesisAnalyzer_cff import *
 
-## create trigger selection for MC
-hltQuadJet15U = hltQuadJet30.clone( HLTPaths = ["HLT_QuadJet15U"],
-                                    TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI") )
+## ---
+##    TRIGGER DEFINITION
+## ---
 
-## create personal QuadJet40 trigger
-
+### create trigger selection for MC
+#trigger = hltQuadJet30.clone( HLTPaths = ["HLT_QuadJet15U"],
+#                              TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI") )
+#
+### create personal QuadJet40 trigger
+#
 ## get trigger module to be added to the path
 from TopAnalysis.TopUtils.patTriggerEvent_cff import *
-
-## the QuadJet40 trigger itself
-hltQJ40 = filterTrigger.clone()
-
-hltQuadJet40 = cms.Sequence(patTriggerDefaultSequence *
-                            hltQJ40
-                            )
-
-## create personal QuadJet40 trigger
+#
+### the QuadJet40 trigger itself
+#hltQJ40 = filterTrigger.clone()
+#
+#trigger = cms.Sequence(patTriggerDefaultSequence *
+#                       hltQJ40
+#                       )
+#
+## create personal QuadJet25U trigger
 
 ## the QuadJet25U trigger itself
 hltQJ25U = filterTrigger.clone( whichTrigger="QuadJet25U" )
 
-patTrigger.processName = 'REDIGI'
+trigger = cms.Sequence(patTriggerDefaultSequence *
+                       hltQJ25U
+                       )
 
-hltQuadJet25U = cms.Sequence(patTriggerDefaultSequence *
-                             hltQJ25U
-                             )
+### high level trigger filter
+#from HLTrigger.HLTfilters.hltHighLevel_cfi import *
+#trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet25U", "HLT_QuadJet25U_v2", "HLT_QuadJet25U_v3"],
+#                             throw = False)
 
 ## ---
 ##    FILTER STEP 0
@@ -125,7 +132,7 @@ hltQuadJet25U = cms.Sequence(patTriggerDefaultSequence *
 ## vertex filter
 vertex = cms.EDFilter("VertexSelector",
                       src = cms.InputTag("offlinePrimaryVertices"),
-                      cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2"),
+                      cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2"),
                       filter = cms.bool(True),
                       )
 
@@ -173,14 +180,16 @@ ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
 ## define ordered jets
-uds0   =cms.PSet(index=cms.int32(0), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
-uds1   =cms.PSet(index=cms.int32(1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
-uds2   =cms.PSet(index=cms.int32(2), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
-uds3   =cms.PSet(index=cms.int32(3), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
-uds4   =cms.PSet(index=cms.int32(4), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
-uds5   =cms.PSet(index=cms.int32(5), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
-bottom0=cms.PSet(index=cms.int32(0), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
-bottom1=cms.PSet(index=cms.int32(1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
+udsall =cms.PSet(index=cms.int32(-1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds0   =cms.PSet(index=cms.int32(0) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds1   =cms.PSet(index=cms.int32(1) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds2   =cms.PSet(index=cms.int32(2) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds3   =cms.PSet(index=cms.int32(3) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds4   =cms.PSet(index=cms.int32(4) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+uds5   =cms.PSet(index=cms.int32(5) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
+ball   =cms.PSet(index=cms.int32(-1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
+bottom0=cms.PSet(index=cms.int32(0) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
+bottom1=cms.PSet(index=cms.int32(1) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("bottom"), useTree=cms.bool(False))
 
 ## ---
 ##    MONITOR STEP 0
@@ -189,14 +198,14 @@ bottom1=cms.PSet(index=cms.int32(1), correctionLevel=cms.string('L3Absolute'), f
 ## JET KINEMATICS
 
 ## kinematics analyzers
-tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' )
-tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets')
-tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0 )
-tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1 )
-tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2 )
-tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3 )
-tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4 )
-tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5 )
+tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets', analyze = ball)
+tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = udsall )
+tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0   )
+tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1   )
+tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2   )
+tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3   )
+tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4   )
+tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5   )
 tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
 METKinematics_0 = analyzeMETKinematics.clone()
@@ -218,14 +227,14 @@ monitorKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  *
 ## JET QUALITY
 
 ## quality analyzers
-tightBottomJetQuality_0  = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' )
-tightLeadingJetQuality_0 = analyzeJetQuality.clone (src = 'goodJets')
-tightLead_0_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds0 )
-tightLead_1_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds1 )
-tightLead_2_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds2 )
-tightLead_3_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds3 )
-tightLead_4_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds4 )
-tightLead_5_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds5 )
+tightBottomJetQuality_0  = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets', analyze = ball)
+tightLeadingJetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = udsall )
+tightLead_0_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds0   )
+tightLead_1_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds1   )
+tightLead_2_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds2   )
+tightLead_3_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds3   )
+tightLead_4_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds4   )
+tightLead_5_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds5   )
 tightBJet_0_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
 tightBJet_1_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
 
@@ -291,19 +300,19 @@ monitoredTightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJe
                                                   )
 
 ## kinematics analyzers
-tightBottomJetKinematics_1  = analyzeJetKinematics.clone (src = 'tightBottomJets' )
-tightLeadingJetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets')
-tightLead_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
-tightLead_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1 )
-tightLead_2_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2 )
-tightLead_3_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3 )
-tightLead_4_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds4 )
-tightLead_5_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5 )
+tightBottomJetKinematics_1  = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = ball   )
+tightLeadingJetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = udsall )
+tightLead_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0   )
+tightLead_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1   )
+tightLead_2_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2   )
+tightLead_3_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3   )
+tightLead_4_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds4   )
+tightLead_5_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5   )
 tightBJet_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 METKinematics_1 = analyzeMETKinematics.clone()
 
-monitoredTightBottomJetKinematics_1  = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' )
+monitoredTightBottomJetKinematics_1  = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' , analyze = ball   )
 monitoredTightBJet_0_JetKinematics_1 = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' , analyze = bottom0)
 monitoredTightBJet_1_JetKinematics_1 = analyzeJetKinematics.clone (src = 'monitoredTightBottomJets' , analyze = bottom1)
 
@@ -328,14 +337,14 @@ monitorKinematics_1 = cms.Sequence(tightBottomJetKinematics_1  *
 ## JET QUALITY
 
 ## quality analyzers
-tightBottomJetQuality_1  = analyzeJetQuality.clone (src = 'tightBottomJets' )
-tightLeadingJetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets')
-tightLead_0_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds0 )
-tightLead_1_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds1 )
-tightLead_2_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds2 )
-tightLead_3_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds3 )
-tightLead_4_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds4 )
-tightLead_5_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds5 )
+tightBottomJetQuality_1  = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = ball   )
+tightLeadingJetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = udsall )
+tightLead_0_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds0   )
+tightLead_1_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds1   )
+tightLead_2_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds2   )
+tightLead_3_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds3   )
+tightLead_4_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds4   )
+tightLead_5_JetQuality_1 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds5   )
 tightBJet_0_JetQuality_1 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetQuality_1 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom1)
 
@@ -385,12 +394,23 @@ monitorGenerator_1 = cms.Sequence( genParticles_1 *
 ##    FILTER STEP 2
 ## ---
 
-## select events with at least 2 b jets
-tightBottomJetSelection   = countPatJets.clone( src = 'tightBottomJets',
-                                                minNumber = 2
-                                                )
+## select events with at least 1 b jets
+tightBottomJetSelection_v1   = countPatJets.clone( src = 'tightBottomJets',
+                                                   minNumber = 1
+                                                 )
 
-bottomJetSelection = cms.Sequence(tightBottomJetSelection
+tightBottomJetKinematics_2_v1  = analyzeJetKinematics.clone (src = 'tightBottomJets' )
+tightLeadingJetKinematics_2_v1 = analyzeJetKinematics.clone (src = 'tightLeadingJets')
+
+## select events with at least 2 b jets
+tightBottomJetSelection_v2   = countPatJets.clone( src = 'tightBottomJets',
+                                                   minNumber = 2
+                                                 )
+
+bottomJetSelection = cms.Sequence(tightBottomJetSelection_v1     *
+                                  tightBottomJetKinematics_2_v1  *
+                                  tightLeadingJetKinematics_2_v1 *
+                                  tightBottomJetSelection_v2
                                   )
 
 ## ---
@@ -400,14 +420,14 @@ bottomJetSelection = cms.Sequence(tightBottomJetSelection
 ## JET KINEMATICS
 
 ## collect kinematics analyzers
-tightBottomJetKinematics_2  = analyzeJetKinematics.clone (src = 'tightBottomJets' )
-tightLeadingJetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets')
-tightLead_0_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
-tightLead_1_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1 )
-tightLead_2_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2 )
-tightLead_3_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3 )
-tightLead_4_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds4 )
-tightLead_5_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5 )
+tightBottomJetKinematics_2  = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = ball   )
+tightLeadingJetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = udsall )
+tightLead_0_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0   )
+tightLead_1_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1   )
+tightLead_2_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2   )
+tightLead_3_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3   )
+tightLead_4_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds4   )
+tightLead_5_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5   )
 tightBJet_0_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_2 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 METKinematics_2 = analyzeMETKinematics.clone()
@@ -429,14 +449,14 @@ monitorKinematics_2 = cms.Sequence(tightBottomJetKinematics_2  *
 ## JET QUALITY
 
 ## quality analyzers
-tightBottomJetQuality_2  = analyzeJetQuality.clone (src = 'tightBottomJets' )
-tightLeadingJetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets')
-tightLead_0_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds0 )
-tightLead_1_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds1 )
-tightLead_2_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds2 )
-tightLead_3_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds3 )
-tightLead_4_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds4 )
-tightLead_5_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds5 )
+tightBottomJetQuality_2  = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = ball   )
+tightLeadingJetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = udsall )
+tightLead_0_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds0   )
+tightLead_1_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds1   )
+tightLead_2_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds2   )
+tightLead_3_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds3   )
+tightLead_4_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds4   )
+tightLead_5_JetQuality_2 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds5   )
 tightBJet_0_JetQuality_2 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetQuality_2 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom1)
 
@@ -527,14 +547,14 @@ filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid(
 ## JET KINEMATICS
 
 ## collect kinematics analyzers
-tightBottomJetKinematics_3  = analyzeJetKinematics.clone (src = 'tightBottomJets' )
-tightLeadingJetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets')
-tightLead_0_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
-tightLead_1_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1 )
-tightLead_2_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2 )
-tightLead_3_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3 )
-tightLead_4_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds4 )
-tightLead_5_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5 )
+tightBottomJetKinematics_3  = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = ball   )
+tightLeadingJetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = udsall )
+tightLead_0_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0   )
+tightLead_1_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1   )
+tightLead_2_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2   )
+tightLead_3_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3   )
+tightLead_4_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds4   )
+tightLead_5_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds5   )
 tightBJet_0_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_3 = analyzeJetKinematics.clone (src = 'tightBottomJets' , analyze = bottom1)
 METKinematics_3 = analyzeMETKinematics.clone()
@@ -556,14 +576,14 @@ monitorKinematics_3 = cms.Sequence(tightBottomJetKinematics_3  *
 ## JET QUALITY
 
 ## quality analyzers
-tightBottomJetQuality_3  = analyzeJetQuality.clone (src = 'tightBottomJets' )
-tightLeadingJetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets')
-tightLead_0_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds0 )
-tightLead_1_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds1 )
-tightLead_2_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds2 )
-tightLead_3_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds3 )
-tightLead_4_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds4 )
-tightLead_5_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds5 )
+tightBottomJetQuality_3  = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = ball   )
+tightLeadingJetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = udsall )
+tightLead_0_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds0   )
+tightLead_1_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds1   )
+tightLead_2_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds2   )
+tightLead_3_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds3   )
+tightLead_4_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds4   )
+tightLead_5_JetQuality_3 = analyzeJetQuality.clone (src = 'tightLeadingJets', analyze = uds5   )
 tightBJet_0_JetQuality_3 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom0)
 tightBJet_1_JetQuality_3 = analyzeJetQuality.clone (src = 'tightBottomJets' , analyze = bottom1)
 
@@ -655,10 +675,7 @@ filterEventShapes = filterEventShape.clone( minC = 0.75 )
 ##    run the final sequence
 ## ---
 analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
-                                            #hltQuadJet15U        *
-                                            hltQuadJet25U        *
-                                            #hltQuadJet30         *
-                                            #hltHt200             *
+                                            trigger               *
                                             ## do the selections
                                             fullHadronicSelection *
                                             ## do the matching
@@ -732,20 +749,36 @@ def runOnRealData(process):
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_2)
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
 
+    ## switch to residual jet energy correction for data
+    if(hasattr(process, 'goodJetsPF')):
+        process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
+        process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+
+    udsall.correctionLevel  = 'L2L3Residual'
+    uds0.correctionLevel    = 'L2L3Residual'
+    uds1.correctionLevel    = 'L2L3Residual'
+    uds2.correctionLevel    = 'L2L3Residual'
+    uds3.correctionLevel    = 'L2L3Residual'
+    uds4.correctionLevel    = 'L2L3Residual'
+    uds5.correctionLevel    = 'L2L3Residual'
+    ball.correctionLevel    = 'L2L3Residual'
+    bottom0.correctionLevel = 'L2L3Residual'
+    bottom1.correctionLevel = 'L2L3Residual'
+
     ## changes needed for analysis
-    hltQuadJet15U.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-    process.patTrigger.processName = 'HLT'
-    vertex.cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
+    #trigger.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+    #process.patTrigger.processName = 'HLT'
+    #vertex.cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
 
     ## different detector response for jets than in simulation
-    if(hasattr(process, 'goodJets') & hasattr(process, 'residualCorrectedJets')):
-        process.goodJets.src   = 'residualCorrectedJets'
-    if(hasattr(process, 'goodJetsPF') & hasattr(process, 'residualCorrectedJets')):
-        process.goodJetsPF.src = 'residualCorrectedJets'
+    #if(hasattr(process, 'goodJets') & hasattr(process, 'residualCorrectedJets')):
+    #    process.goodJets.src   = 'residualCorrectedJets'
+    #if(hasattr(process, 'goodJetsPF') & hasattr(process, 'residualCorrectedJets')):
+    #    process.goodJetsPF.src = 'residualCorrectedJets'
 
     ## changes due to different reconstruction releases
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
+    #from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    #massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'simpleSecondaryVertexBJetTags', 'simpleSecondaryVertexHighEffBJetTags')
 
     ## to switch verbosity modes of the kinFit
     #process.ttFullHadEvent.verbosity = 3
@@ -782,6 +815,8 @@ def removeMonitoringOfCutflow(process):
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
     process.analyseFullHadronicSelection.remove(process.monitorKinFit_2)
     process.analyseFullHadronicSelection.remove(process.monitorKinFit_3)
+    process.analyseFullHadronicSelection.remove(tightBottomJetKinematics_2_v1)
+    process.analyseFullHadronicSelection.remove(tightLeadingJetKinematics_2_v1)
 
 ## ---
 ##    remove default trigger
@@ -791,10 +826,7 @@ def removeDefaultTrigger(process):
     print 'removing the default trigger from '
     print 'standard fully hadronic event selection '
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    process.analyseFullHadronicSelection.remove(process.hltHt200)
-    process.analyseFullHadronicSelection.remove(process.hltQuadJet30)
-    process.analyseFullHadronicSelection.remove(process.hltQuadJet15U)
-    process.analyseFullHadronicSelection.remove(process.hltQuadJet25U)
+    process.analyseFullHadronicSelection.remove(process.trigger)
     
 ## ---
 ##    switch all necessary filters to run this sequence for background estimation
@@ -804,8 +836,10 @@ def runAsBackgroundEstimation(process):
     print 'switching *analyseFullHadronicSelection* to'
     print 'background estimation'
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    process.tightBottomJetSelection.minNumber = 0
-    process.tightBottomJetSelection.maxNumber = 0
+    process.tightBottomJetSelection_v1.minNumber = 0
+    process.tightBottomJetSelection_v1.maxNumber = 0
+    process.tightBottomJetSelection_v2.minNumber = 0
+    process.tightBottomJetSelection_v2.maxNumber = 0
     process.kinFitTtFullHadEventHypothesis.bTags = 0
 
 ## ---
@@ -843,10 +877,15 @@ def runOnPF(process):
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'patMETs' , 'patMETsPF')
 
-    ## in case of real data, du residual JEC for PFJets
-    if(hasattr(process, 'residualCorrectedJets')):
-        process.residualCorrectedJets.jets        = 'selectedPatJetsAK5PF'
-        process.residualCorrectedJets.corrections = 'Spring10DataV2_L2L3Residual_AK5PF.txt'
+    ## in case of real data, do residual JEC for PFJets
+    #if(hasattr(process, 'residualCorrectedJets')):
+    #    process.residualCorrectedJets.jets        = 'selectedPatJetsAK5PF'
+    #    process.residualCorrectedJets.corrections = 'Spring10DataV2_L2L3Residual_AK5PF.txt'
+
+    # in case of mc, smear the energy resolution additionally
+    if(hasattr(process, 'scaledJetEnergy')):
+        process.scaledJetEnergy.inputJets = "selectedPatJetsAK5PF"
+        process.scaledJetEnergy.inputMETs = "patMETsPF"
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
@@ -889,8 +928,8 @@ def switchToSSV(process):
 def switchToCSV(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexBJets)
     process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexBJetTags'
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.800 #self-derived
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.925 #self-derived
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.750
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.921
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexBJets')
 
@@ -900,8 +939,14 @@ def switchToCSV(process):
 def switchToCSVMVA(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexMVABJets)
     process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexMVABJetTags'
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.575 #self-derived
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.775 #self-derived
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.4 #self-derived
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.8 #self-derived
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexMVABJets')
+
+## ---
+##    increase resolutions of kinematic fit
+## ---
+def increaseKinFitResolution(process, factor):
+    process.kinFitTtFullHadEventHypothesis.resolutionSmearFactor = factor
 
