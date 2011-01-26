@@ -1,13 +1,21 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
+import sys
 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
 ## decide whether to run on:  * GR10_P_V11 *, * GR_R_38X_V13A *, * GR_R_38X_V15 *, * START38_V14 *
-options.register('globalTag', 'GR10_P_V11', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
+options.register('globalTag', 'GR_R_38X_V15', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "globalTag used for reco")
+options.register('triggerResults', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "triggerResults to be used")
 
 # get and parse the command line arguments
-options.parseArguments()
+#options.parseArguments()
+for args in sys.argv :
+    arg = args.split(',')
+    for val in arg:
+        val = val.split('=')
+        if(len(val)==2):
+            setattr(options,val[0], val[1])
 
 #-------------------------------------------------
 # test cfg file for the selection of
@@ -32,7 +40,11 @@ process.source = cms.Source("PoolSource",
     #'/store/mc/Fall10/QCD_TuneD6T_HT-500To1000_7TeV-madgraph/AODSIM/START38_V12-v1/0017/4A5B3187-DFDB-DF11-9F3E-00238BBD7590.root'
     #'/store/mc/Fall10/QCD2Jets_Pt-120to280_TuneZ2_7TeV-alpgen/AODSIM/START38_V12-v1/0007/E48CD66B-15DD-DF11-BA58-00163E090301.root'
     #'/store/mc/Fall10/QCD_Pt_800to1000_TuneZ2_7TeV_pythia6/GEN-SIM-RECO/START38_V12-v1/0002/F8455FD4-63D0-DF11-A481-00A0D1EE8E00.root'
-    )
+    #'file:/scratch/hh/current/cms/user/eschliec/9617BE8C-0705-E011-AF39-0023AEFDEE68.root'
+    #'file:/scratch/hh/current/cms/user/eschliec/24181247-D503-E011-A78C-001E4F3D88BC.root'
+    ),
+    #eventsToProcess = cms.untracked.VEventRange('1:16760009')
+    #eventsToProcess = cms.untracked.VEventRange('1:16760009')
 )
 
 process.maxEvents = cms.untracked.PSet(
@@ -49,19 +61,9 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
-print "Set to run with GlobalTag:",
-if(options.globalTag=='GR10_P_V11'):
-    process.GlobalTag.globaltag = cms.string('GR10_P_V11::All')
-elif(options.globalTag=='GR_R_38X_V13A'):
-    process.GlobalTag.globaltag = cms.string('GR_R_38X_V13A::All')
-elif(options.globalTag=='GR_R_38X_V15'):
-    process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
-elif(options.globalTag=='START38_V14'):
-    process.GlobalTag.globaltag = cms.string('START38_V14::All')
-else:
-    print "Error occured, GlobalTag not definded properly, stopping program execution"
-    sys.exit(0)
-print process.GlobalTag.globaltag
+## set global tag used for the reco of the events
+process.GlobalTag.globaltag = cms.string(options.globalTag + '::All')
+print "Set to run with GlobalTag:", process.GlobalTag.globaltag
 
 #-------------------------------------------------
 # vertex filter
@@ -73,9 +75,6 @@ process.vertex = cms.EDFilter("VertexSelector",
                               cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2"),
                               filter = cms.bool(True),
                               )
-
-if(options.globalTag=='START38_V14'):
-    process.vertex.cut = cms.string("!isFake && ndof > 4 && abs(z) < 15 && position.Rho < 2")
 
 #-------------------------------------------------
 # scraping filter
@@ -100,9 +99,9 @@ process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"   ,"HLT_QuadJe
                                                  "HLT_QuadJet15U_v3","HLT_QuadJet20U_v3","HLT_QuadJet25U_v3"],
                                      throw = False)
 
-## ATTENTION: some Fall10 samples are REDIGI and some are NOT
-if(options.globalTag=='START38_V14'):
-    process.trigger.TriggerResultsTag = cms.InputTag("TriggerResults","","REDIGI38X")
+## ATTENTION: some Fall10 samples are REDIGI38X, some are REDIGI38XPU and some are HLT
+process.trigger.TriggerResultsTag = cms.InputTag("TriggerResults","",options.triggerResults)
+print "Set to run with:", process.trigger.TriggerResultsTag
 
 #-------------------------------------------------
 # pat configuration
@@ -127,6 +126,7 @@ restrictInputToAOD(process)
 
 ## Add particle flow jets
 from PhysicsTools.PatAlgos.tools.jetTools import *
+
 if(options.globalTag=='START38_V14'):
     addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                      doJTA        = True,
@@ -138,11 +138,13 @@ if(options.globalTag=='START38_V14'):
                      genJetCollection=cms.InputTag('ak5GenJets'),
                      doJetID      = True,
                      )
+    process.patJetCorrFactors.levels.remove('L2L3Residual')
+
 else:
     addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                      doJTA        = True,
                      doBTagging   = True,
-                     jetCorrLabel = ('AK5PF', ['L2Relative', 'L3Absolute']),
+                     jetCorrLabel = ('AK5PF', ['L2Relative', 'L3Absolute', 'L2L3Residual']),
                      doType1MET   = False,
                      doL1Cleaning = False,
                      doL1Counters = False,
@@ -204,11 +206,11 @@ process.patMuons.isoDeposits = cms.PSet(
 
 ## create jet collections need for the preselection
 process.goodJets = process.selectedPatJets.clone(src = 'selectedPatJets',
-                                                 cut = 'pt > 40. & abs(eta) < 2.4'
+                                                 cut = 'pt > 20. & abs(eta) < 2.4'
                                                  )
 
 process.goodJetsAK5PF = process.selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
-                                                      cut = 'pt > 40. & abs(eta) < 2.4'
+                                                      cut = 'pt > 20. & abs(eta) < 2.4'
                                                       )
 
 ## setup good jet selection collection
