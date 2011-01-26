@@ -109,11 +109,17 @@ bool NewTriggerTestFilter::filter(edm::Event& event, const edm::EventSetup& setu
 
     pat::TriggerObjectRefVector objects = triggerEvent->filterObjects("hltL1sQuadJet15U");
 
+    if(objects.size() == 0) objects = triggerEvent->filterObjects("hltL1sL1QuadJet6U");
+    if(objects.size() == 0) objects = triggerEvent->filterObjects("hltL1sL1QuadJet8U");
+
     for(pat::TriggerObjectRefVector::const_iterator obj = objects.begin(); obj != objects.end(); ++obj){
       if( (*obj)->pt() >= 8 ) ++l1TriggerJetCounter;
     }
 
     objects = triggerEvent->filterObjects("hlt4jet15U");
+
+    if(objects.size() == 0) objects = triggerEvent->filterObjects("hlt4jet20U");
+    if(objects.size() == 0) objects = triggerEvent->filterObjects("hlt4jet25U");
 
     for(pat::TriggerObjectRefVector::const_iterator obj = objects.begin(); obj != objects.end(); ++obj){
       if( (*obj)->pt() >= 25 ) ++hlTriggerJetCounter;
