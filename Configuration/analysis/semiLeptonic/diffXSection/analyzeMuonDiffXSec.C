@@ -1589,7 +1589,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       min=1.95;
       max=exp(1.55*(std::log(maxValue)-std::log(min))+std::log(min));
     }
-    axesStyle(*sigmaLjetsInclusiveData, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, max, 0.05, 1.2, 0.075);
+    axesStyle(*sigmaLjetsInclusiveData, "N_{jets}(p_{t}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, max, 0.05, 1.2, 0.075);
     sigmaLjetsInclusiveData->GetXaxis()->SetNdivisions(510);
     histogramStyle(*sigmaLjetsInclusiveMCReco, kData);
     histogramStyle(*sigmaLjetsInclusiveMCGen, kWjets);
@@ -1623,7 +1623,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
     MyCanvas[canvasNumber]->Size(600,800);
     TH1F *sigmaLjetsInclusiveDataMod = (TH1F*)sigmaLjetsInclusiveData->Clone();
-    axesStyle(*sigmaLjetsInclusiveDataMod, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    axesStyle(*sigmaLjetsInclusiveDataMod, "N_{jets}(p_{t}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
     sigmaLjetsInclusiveDataMod->GetXaxis()->SetTitleSize(0);
     sigmaLjetsInclusiveDataMod    ->DrawClone("AXIS" );
     sigmaLjetsInclusiveMCGen     ->DrawClone("histsame" );
@@ -1646,7 +1646,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1., 0.195);
     DrawLabel("p_{t}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
     TH1F* sigmaLjetsInclusiveDataModSys = systematicHisto("ljetsXSec", 6, *sigmaLjetsInclusiveDataMod, "Njets", up, down);
-    axesStyle(*sigmaLjetsInclusiveDataModSys, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    axesStyle(*sigmaLjetsInclusiveDataModSys, "N_{jets}(p_{t}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
     ratio_smal(sigmaLjetsInclusiveDataModSys,sigmaLjetsInclusiveMCGen,1.59,0.41,statErrMod);
     ++canvasNumber;
 
@@ -1677,7 +1677,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       sigmaLjetsInclusiveMCGenSigExcl->SetBinError(iBin,sigmaLjetsInclusiveMCGenSig->GetBinError(iBin)*sigmaLjetsInclusiveMCGenSig->GetBinError(iBin)+
 						   sigmaLjetsInclusiveMCGenSig->GetBinError(iBin+1)*sigmaLjetsInclusiveMCGenSig->GetBinError(iBin+1));
     }
-    axesStyle(*sigmaLjetsInclusiveDataExcl, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    axesStyle(*sigmaLjetsInclusiveDataExcl, "N_{jets}(p_{t}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
     sigmaLjetsInclusiveDataExcl->GetXaxis()->SetTitleSize(0);
     for(int iBin = 1; iBin<=sigmaLjetsInclusiveData->GetNbinsX(); ++iBin)
       {
@@ -1702,7 +1702,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1., 0.195);
     DrawLabel("p_{t}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
     TH1F* sigmaLjetsInclusiveDataExclSys = systematicHisto("ljetsXSecExcl", 6, *sigmaLjetsInclusiveDataExcl, "Njets", up, down);
-    axesStyle(*sigmaLjetsInclusiveDataExclSys, "N_{jets}(p_{t}>30GeV)", "#sigma ( l+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
+    axesStyle(*sigmaLjetsInclusiveDataExclSys, "N_{jets}(p_{t}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.2, 0.075);
     ratio_smal(sigmaLjetsInclusiveDataExclSys,sigmaLjetsInclusiveMCGenExcl,1.59,0.41,statErrExcl);
     ++canvasNumber;
 
@@ -1769,7 +1769,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     inclusiveCrossSectionTopLeg->Draw("same" );
     DrawLabel("t#bar{t} cross section"                 , 0.06, 0.80, 0.99, 1.00);
     DrawLabel("p_{t}(#mu)>20 GeV, |#eta(#mu)|<2.1"     , 0.06, 0.73, 0.99, 0.93);
-    DrawLabel("N(jets, p_{t}>30 GeV, |#eta|<2.4)#geq 4", 0.06, 0.66, 0.99, 0.86);
+    DrawLabel("N_{jets}(p_{t}>30 GeV, |#eta|<2.4)#geq 4", 0.06, 0.66, 0.99, 0.86);
 
     DrawLabel("pre-tagged", 0.06, 0.27, 0.5, 0.47);
     DrawLabel("tagged", 0.06, 0.16, 0.5, 0.36);
@@ -2011,12 +2011,12 @@ TString getTStringFromInt(int i){
 
 TString jetLabel(TString input){
   TString label="";
-  if(input=="Njets1") label="N(jets) #geq 1";
-  if(input=="Njets2") label="N(jets) #geq 2";
-  if(input=="Njets3") label="N(jets) #geq 3";
-  if(input=="Njets4") label="N(jets) #geq 4";
-  if(input=="Njets4Btag") label="N(jets) #geq 4, N(bTags) #geq 1";
-  if(input=="Njets3Btag") label="N(jets) #geq 3, N(bTags) #geq 1";
+  if(input=="Njets1") label="N_{jets} #geq 1";
+  if(input=="Njets2") label="N_{jets} #geq 2";
+  if(input=="Njets3") label="N_{jets} #geq 3";
+  if(input=="Njets4") label="N_{jets} #geq 4";
+  if(input=="Njets4Btag") label="N_{jets} #geq 4, N_{bTags} #geq 1";
+  if(input=="Njets3Btag") label="N_{jets} #geq 3, N_{bTags} #geq 1";
   return label;
 }
 
