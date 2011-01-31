@@ -99,7 +99,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
   }
     
   // ---
-  //    scale W+jets to luminosity
+  //    scale MC prediction to data luminosity
   // ---
   // a) fall10 7TeV W+jets MADGRAPH D6T sample 
   double lumiweight=0.105750913/50*luminosity;
@@ -116,6 +116,14 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
     ptMuPlus_ [Njets_[mult]][kTtbar]->Scale(lumiweight2);
     ptMuMinus_[Njets_[mult]][kTtbar]->Scale(lumiweight2);
     pt_       [Njets_[mult]][kTtbar]->Scale(lumiweight2);
+  }
+  // c) for pseudo data
+  double lumiweight3=luminosity/50.0;
+  // loop jet multiplicities
+  for(unsigned int mult=0; mult<4; ++mult){
+    ptMuPlus_ [Njets_[mult]][kPseudo50]->Scale(lumiweight3);
+    ptMuMinus_[Njets_[mult]][kPseudo50]->Scale(lumiweight3);
+    pt_       [Njets_[mult]][kPseudo50]->Scale(lumiweight3);
   }
 
   // check weighting
@@ -178,9 +186,10 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
       std::cout << "R(Njets >=" << njets << ") = " << R << " +- " << dR << std::endl;
       std::cout << "N(estimated W) = " << NW << " +- " << NWError << std::endl;
       std::cout << "N(W, MC truth) = "   << sumUpEntries(*pt_[Njets_[njets-1]][kWjets]) << std::endl;
-      double ratio = NW/sumUpEntries(*pt_[Njets_[njets-1]][kWjets]);
-      if(idx==kData) std::cout << "ratio NWest/NWMC = " << ratio << std::endl;
-      std::cout << "total # of events: " << sumUpEntries(*pt_[Njets_[njets-1]][idx])    << std::endl;
+      double ratio = NW/(sumUpEntries(*pt_[Njets_[njets-1]][kWjets]));
+      double ratioError = NWError/(sumUpEntries(*pt_[Njets_[njets-1]][kWjets]));
+      std::cout << "ratio NWest/NWMC = " << ratio << " +/- " << ratioError << std::endl;
+      std::cout << "total # of events: " << sumUpEntries(*pt_[Njets_[njets-1]][idx]) << std::endl;
       // b) fill wjetsEstimationW histo
       if(idx==kWjets){
 	wjetsEstimationW->SetBinContent( njets, NW);
@@ -373,10 +382,10 @@ std::pair<double,double> getChargeAsymmetrieParameter(int njets, bool loadR)
   // use R like it is written down here or load it from file
   if( loadR) return make_pair( readLineFromFile(2+njets) , 0 );
   std::map< TString, std::map <unsigned int, std::pair<double,double> > > Rinclusive_;
-  Rinclusive_["mu"][1] = make_pair( 5.83643 , 0);
-  Rinclusive_["mu"][2] = make_pair( 5.43496 , 0);
-  Rinclusive_["mu"][3] = make_pair( 5.03349 , 0);
-  Rinclusive_["mu"][4] = make_pair( 4.63202 , 0); 
+  Rinclusive_["mu"][1] = make_pair( 5.61353 , 0);
+  Rinclusive_["mu"][2] = make_pair( 5.32653 , 0);
+  Rinclusive_["mu"][3] = make_pair( 5.03952 , 0);
+  Rinclusive_["mu"][4] = make_pair( 4.75252 , 0); 
   return Rinclusive_["mu"][njets];
 }
 
