@@ -11,17 +11,13 @@ from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 if(jetType=="particleFlow"):
     massSearchReplaceAnyInputTag(process.p1, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF') 
     massSearchReplaceAnyInputTag(process.p2, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF')
-    massSearchReplaceAnyInputTag(process.p3, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF')
     massSearchReplaceAnyInputTag(process.p1, 'patMETsPF'           , 'scaledJetEnergy:patMETsPF') 
     massSearchReplaceAnyInputTag(process.p2, 'patMETsPF'           , 'scaledJetEnergy:patMETsPF')
-    massSearchReplaceAnyInputTag(process.p3, 'patMETsPF'           , 'scaledJetEnergy:patMETsPF')
 elif(jetType=="Calo"):
     massSearchReplaceAnyInputTag(process.p1, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets') 
     massSearchReplaceAnyInputTag(process.p2, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets')
-    massSearchReplaceAnyInputTag(process.p3, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets')
     massSearchReplaceAnyInputTag(process.p1, 'patMETs'        , 'scaledJetEnergy:patMETs') 
     massSearchReplaceAnyInputTag(process.p2, 'patMETs'        , 'scaledJetEnergy:patMETs')
-    massSearchReplaceAnyInputTag(process.p3, 'patMETs'        , 'scaledJetEnergy:patMETs')
 else:
     print "unknown jetType"
 
@@ -44,8 +40,6 @@ process.scaledJetEnergy.resolutionFactor = 1.1
 process.p1.replace(process.semiLeptonicSelection,
                    process.scaledJetEnergy * process.semiLeptonicSelection)
 process.p2.replace(process.semiLeptonicSelection,
-                   process.scaledJetEnergy * process.semiLeptonicSelection)
-process.p3.replace(process.semiLeptonicSelection,
                    process.scaledJetEnergy * process.semiLeptonicSelection)
 
 ## change monitoring to shifted collection

@@ -334,17 +334,7 @@ process.leadingGenJetSelectionNjets4 = process.leadingGenJetSelection.clone (src
 ## ---
 ##    configure MET analyzer
 ## ---
-
-process.analyzePfMET  = process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-process.analyzePatMET = process.analyzeMETCorrelations.clone(srcA = 'patMETs'  , srcB='tightMuons')
-                                    
-process.analyzePfMETNjets1    = process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-process.analyzePfMETNjets2    = process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-process.analyzePfMETNjets3    = process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-process.analyzePfMETNjets3Btag= process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-process.analyzePfMETNjets4    = process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-process.analyzePfMETNjets4Btag= process.analyzeMETCorrelations.clone(srcA = 'patMETsPF', srcB='tightMuons')
-
+process.analyzePatMET          = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzePatMETNjets1    = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzePatMETNjets2    = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzePatMETNjets3    = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
@@ -436,8 +426,7 @@ process.monitorMuonCutflow = cms.Sequence(process.combinedMuonKinematics        
                                           process.goldenMuonQuality             +
                                           process.tightMuonKinematics           +
                                           process.tightMuonQuality              +
-                                          process.analyzePatMET                 +
-                                          process.analyzePfMET
+                                          process.analyzePatMET
                                           )
 if(jetType=="Calo"):
     process.monitorNMinusOneJetCuts = cms.Sequence(process.noPtLead_0_JetKinematics  +
@@ -484,73 +473,27 @@ process.monitorBtagCuts = cms.Sequence(process.tightJetQuality     +
 ## ---
 process.jetMultiplicity1 = cms.Sequence(process.leadingJetSelectionNjets1             +
                                         process.analyzeTightMuonCrossSectionRecNjets1 +
-                                        process.analyzePfMETNjets1                    +
                                         process.analyzePatMETNjets1                   +
                                         process.bottomJetKinematicsNjets1             )
 process.jetMultiplicity2 = cms.Sequence(process.leadingJetSelectionNjets2             +
                                         process.analyzeTightMuonCrossSectionRecNjets2 +
-                                        process.analyzePfMETNjets2                    +
                                         process.analyzePatMETNjets2                   +
                                         process.bottomJetKinematicsNjets2             )
 process.jetMultiplicity3 = cms.Sequence(process.leadingJetSelectionNjets3             +
                                         process.analyzeTightMuonCrossSectionRecNjets3 +
-                                        process.analyzePfMETNjets3                    +
                                         process.analyzePatMETNjets3                   +
                                         process.bottomJetKinematicsNjets3             )
 process.jetMultiplicity4 = cms.Sequence(process.leadingJetSelectionNjets4             +
                                         process.analyzeTightMuonCrossSectionRecNjets4 +
-                                        process.analyzePfMETNjets4                    +
                                         process.analyzePatMETNjets4                   +
                                         process.bottomJetKinematicsNjets4             )
 process.jetMultiplicity3Btag = cms.Sequence(process.leadingJetSelectionNjets3b                 +
                                             process.bottomJetSelectionb                        +
                                             process.analyzeTightMuonCrossSectionRecNjets3Btag  +
-                                            process.analyzePfMETNjets3Btag                     +
                                             process.analyzePatMETNjets3Btag                    )
 process.jetMultiplicity4Btag = cms.Sequence(process.bottomJetSelection                         +
                                             process.analyzeTightMuonCrossSectionRecNjets4Btag  +
-                                            process.analyzePfMETNjets4Btag                     +
                                             process.analyzePatMETNjets4Btag                    )
-
-## ---
-##    configure ABCD method for QCD estimation
-## ---
-
-## a) the muon collection for monitoring relIso vs dB
-## muon selector
-from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
-process.estimationMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons',
-                                                 cut = 'pt > 20. & abs(eta) < 2.1 &'
-                                                 'isGlobalMuon &'
-                                                 'isTrackerMuon() =1 &'                                            
-                                                 'innerTrack.numberOfValidHits >= 11 &'
-                                                 'globalTrack.normalizedChi2 < 10.0 &'
-                                                 'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                                 'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-                                                 'numberOfMatches>1'
-                                                 )
-## b) the different selection steps
-process.ttSemiLeptonicFilterABCD = process.ttSemiLeptonicFilter.clone()
-process.filterSequenceABCD = cms.Sequence(process.makeGenEvt *
-                                          process.ttSemiLeptonicFilterABCD *
-                                          process.hltFilter
-                                          )
-process.PVSelectionABCD = process.PVSelection.clone()
-process.leadingJetSelectionNjets1ABCD = process.leadingJetSelectionNjets1.clone()
-process.leadingJetSelectionNjets2ABCD = process.leadingJetSelectionNjets2.clone()         
-process.leadingJetSelectionNjets3ABCD = process.leadingJetSelectionNjets3.clone()         
-process.leadingJetSelectionNjets4ABCD = process.leadingJetSelectionNjets4.clone()         
-process.muonSelectionABCD  = process.muonSelection.clone()                    
-process.secondMuonVetoABCD = process.secondMuonVeto.clone()                   
-process.electronVetoABCD   = process.electronVeto.clone()
-process.estimationMuonsSelection = process.muonSelection.clone (src = 'estimationMuons', minNumber = 1, maxNumber = 1)
-
-## c) the relIso vs dB monitoring plots
-process.estimationMuonsQualityNjets1 = process.analyzeMuonQuality.clone(src = 'estimationMuons',
-                                                                        analyze = cms.PSet(index = cms.int32(0)) )
-process.estimationMuonsQualityNjets2 = process.estimationMuonsQualityNjets1.clone()
-process.estimationMuonsQualityNjets3 = process.estimationMuonsQualityNjets1.clone()
-process.estimationMuonsQualityNjets4 = process.estimationMuonsQualityNjets1.clone()
 
 ## ---
 ##    run the final sequences
@@ -616,60 +559,33 @@ process.p2 = cms.Path(
                       process.jetMultiplicity3Btag
                       )
 
-## QCD estimation via ABCD
-process.p3 = cms.Path(
-                      ## gen event selection (decay channel) and trigger selection (hltFilter)
-                      process.filterSequenceABCD                    *        
-                      ## introduce collections
-                      process.semiLeptonicSelection                 *
-                      process.estimationMuons                       *
-                      ## PV event selection
-                      process.PVSelectionABCD                       *
-                      ## lepton veto event selection cut
-                      process.secondMuonVetoABCD                    *
-                      process.electronVetoABCD                      *
-                      ## do the event selection for ==1 muon (without dB, relIso and dR cut)
-                      process.estimationMuonsSelection              *
-                      ## jetcut event selection + monitoring of dB and relIso variable
-                      ## a) 1 jet
-                      process.leadingJetSelectionNjets1ABCD         *
-                      process.estimationMuonsQualityNjets1          *
-                      ## a) 2 jet
-                      process.leadingJetSelectionNjets2ABCD         *
-                      process.estimationMuonsQualityNjets2          *
-                      ## a) 3 jet
-                      process.leadingJetSelectionNjets3ABCD         *
-                      process.estimationMuonsQualityNjets3          *
-                      ## a) 4 jet
-                      process.leadingJetSelectionNjets4ABCD         *
-                      process.estimationMuonsQualityNjets4          *
-                      ## do the standard muon selection
-                      process.muonSelectionABCD                     
-                      )
-
 ## on generator niveau
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
+    process.s4 = cms.Sequence(
+                              ## introduce some collections
+                              process.isolatedGenMuons                      *
+                              process.semiLeptGenCollections                *
+                              ## do the event selection for muon
+                              process.genMuonSelection                      *
+                              ## for N_jets = 1+
+                              process.leadingGenJetSelectionNjets1          *
+                              process.analyzeTightMuonCrossSectionGenNjets1 *
+                              ## for N_jets = 2+
+                              process.leadingGenJetSelectionNjets2          *
+                              process.analyzeTightMuonCrossSectionGenNjets2 *
+                              ## for N_jets = 3+
+                              process.leadingGenJetSelectionNjets3          *
+                              process.analyzeTightMuonCrossSectionGenNjets3 *
+                              ##  for N_jets = 4+
+                              process.leadingGenJetSelectionNjets4          *
+                              process.analyzeTightMuonCrossSectionGenNjets4 
+                              )
     process.p4 = cms.Path(
                           ## gen event selection: semileptonic (muon & tau->lepton)
-                          process.genFilterSequence                     *
-                          ## introduce some collections
-                          process.isolatedGenMuons                      *
-                          process.semiLeptGenCollections                *
-                          ## do the event selection for muon
-                          process.genMuonSelection                      *
-                          ## for N_jets = 1+
-                          process.leadingGenJetSelectionNjets1          *
-                          process.analyzeTightMuonCrossSectionGenNjets1 *
-                          ## for N_jets = 2+
-                          process.leadingGenJetSelectionNjets2          *
-                          process.analyzeTightMuonCrossSectionGenNjets2 *
-                          ## for N_jets = 3+
-                          process.leadingGenJetSelectionNjets3          *
-                          process.analyzeTightMuonCrossSectionGenNjets3 *
-                          ##  for N_jets = 4+
-                          process.leadingGenJetSelectionNjets4          *
-                          process.analyzeTightMuonCrossSectionGenNjets4 
+                          process.genFilterSequence *
+                          ## sequence with gen selection and histograms
+                          process.s4
                           )
 elif(runningOnData=="data"):
     print "running on data, no gen-plots"
@@ -694,32 +610,24 @@ if(jetType=="particleFlow"):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.p1, 'tightLeadingJets', 'tightLeadingPFJets')
     massSearchReplaceAnyInputTag(process.p2, 'tightLeadingJets', 'tightLeadingPFJets')
-    massSearchReplaceAnyInputTag(process.p3, 'tightLeadingJets', 'tightLeadingPFJets')
 
     massSearchReplaceAnyInputTag(process.p1, 'tightBottomJets', 'tightBottomPFJets')
     massSearchReplaceAnyInputTag(process.p2, 'tightBottomJets', 'tightBottomPFJets')
-    massSearchReplaceAnyInputTag(process.p3, 'tightBottomJets', 'tightBottomPFJets')
 
     massSearchReplaceAnyInputTag(process.p1, 'goodJets', 'goodJetsPF30')
     massSearchReplaceAnyInputTag(process.p2, 'goodJets', 'goodJetsPF30')
-    massSearchReplaceAnyInputTag(process.p3, 'goodJets', 'goodJetsPF30')
 
     massSearchReplaceAnyInputTag(process.p1, 'centralJets', 'centralJetsPF30')
     massSearchReplaceAnyInputTag(process.p2, 'centralJets', 'centralJetsPF30')
-    massSearchReplaceAnyInputTag(process.p3, 'centralJets', 'centralJetsPF30')
 
     massSearchReplaceAnyInputTag(process.p1, 'reliableJets', 'reliableJetsPF30')
     massSearchReplaceAnyInputTag(process.p2, 'reliableJets', 'reliableJetsPF30')
-    massSearchReplaceAnyInputTag(process.p3, 'reliableJets', 'reliableJetsPF30')
 
     massSearchReplaceAnyInputTag(process.p1, 'noEtaJets', 'noEtaJetsPF30')
     massSearchReplaceAnyInputTag(process.p2, 'noEtaJets', 'noEtaJetsPF30')
-    massSearchReplaceAnyInputTag(process.p3, 'noEtaJets', 'noEtaJetsPF30')
 
     massSearchReplaceAnyInputTag(process.p1, 'noPtJets', 'noPtJetsPF')
     massSearchReplaceAnyInputTag(process.p2, 'noPtJets', 'noPtJetsPF')
-    massSearchReplaceAnyInputTag(process.p3, 'noPtJets', 'noPtJetsPF')
 
     massSearchReplaceAnyInputTag(process.p1, 'patMETs', 'patMETsPF')
     massSearchReplaceAnyInputTag(process.p2, 'patMETs', 'patMETsPF')
-    massSearchReplaceAnyInputTag(process.p3, 'patMETs', 'patMETsPF')

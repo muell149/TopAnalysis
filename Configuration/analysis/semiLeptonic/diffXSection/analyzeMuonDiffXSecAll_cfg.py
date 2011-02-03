@@ -11,7 +11,6 @@ process.source.fileNames = ['/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgra
 ## remove gen level event filter
 process.filterSequence  = cms.Sequence(process.hltFilter)
 process.filterSequenceb = cms.Sequence(process.hltFilter)
-process.filterSequenceABCD = cms.Sequence(process.hltFilter)
 process.p4.remove(process.genFilterSequence)
 print "all gen level filters using ttbar decay subset are removed" 
 print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"
