@@ -82,8 +82,8 @@ JetQuality::book()
   hists_["btagSoftElecByPt_"    ] = new TH1F( "btagSoftElecByPt_"    , "btagSoftElecByPt_"     ,   80,     0.,   20. );
   hists_["btagSoftElecByIP3d_"  ] = new TH1F( "btagSoftElecByIP3d_"  , "btagSoftElecByIP3d_"   ,   80,   -40.,  110. );
   // btag soft muon taggers
-  hists_["btagSoftMuon_"        ] = new TH1F( "btagSoftMuon_"        , "btagSoftMuon_"         ,   10,     0.,    1. );
-  hists_["btagSoftMuonByPt_"    ] = new TH1F( "btagSoftMuonByPt_"    , "btagSoftMuonByPt_"     ,   80,     0.,   20. );
+  hists_["btagSoftMuon_"        ] = new TH1F( "btagSoftMuon_"        , "btagSoftMuon_"         ,   50,     0.,    1. );
+  hists_["btagSoftMuonByPt_"    ] = new TH1F( "btagSoftMuonByPt_"    , "btagSoftMuonByPt_"     ,  100,     0.,   10. );
   hists_["btagSoftMuonByIP3d_"  ] = new TH1F( "btagSoftMuonByIP3d_"  , "btagSoftMuonByIP3d_"   ,  160,  -100.,  100. );
 
   /**
@@ -194,7 +194,7 @@ JetQuality::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "btagSoftElecByIP3d_"   ,   80,   -40.,  110. , false );
   // btag soft muon taggers
   bookVariable( fs, "btagSoftMuon_"         ,   50,     0.,    1. , false );
-  bookVariable( fs, "btagSoftMuonByPt_"     ,   80,     0.,   20. , false );
+  bookVariable( fs, "btagSoftMuonByPt_"     ,  100,     0.,   10. , false );
   bookVariable( fs, "btagSoftMuonByIP3d_"   ,  160,  -100.,  100. , false );
 
   /**
