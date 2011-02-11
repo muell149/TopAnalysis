@@ -52,11 +52,19 @@ echo processing chargeAsymmetrieCalculator.C
 sleep 2
 root -l -q -b './chargeAsymmetrieCalculator.C+(true, true, "'$jetType'")' >> './diffXSecFromSignal/plots/chargeAsymmetrie/Rcalculation.txt'
 ## b2) estimate N(QCD) via ABCD (MC - plots: 50 / pb)
-rm ./diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt
-echo processing analyzeMuonDiffXABCDbkg.C \(plots done for 50\/pb\)
-sleep 2
-echo done
-root -l -q -b './analyzeMuonDiffXABCDbkg.C+(50., true, true, '$dataSample', "'$jetType'")' >> './diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt'
+#rm ./diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt
+#echo processing analyzeMuonDiffXABCDbkg.C \(plots done for 50\/pb\)
+#root -l -q -b './analyzeMuonDiffXABCDbkg.C+(50., true, true, '$dataSample', "'$jetType'")' >> './diffXSecFromSignal/plots/ABCD/ABCDnumbers.txt'
+#sleep 2
+#echo done
+
+#fill 5 dummy lines instead of ABCD values
+date >> './crossSectionCalculationPF.txt'
+date >> './crossSectionCalculationPF.txt'
+date >> './crossSectionCalculationPF.txt'
+date >> './crossSectionCalculationPF.txt'
+date >> './crossSectionCalculationPF.txt'
+
 ## b3) estimate MC based effiencies for l+jets correction (MC - plots: 5 / pb)
 rm ./diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt
 echo processing analyzeMuonDiffXEfficiency.C \(plots done for 5\/pb\)
@@ -188,7 +196,7 @@ root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSam
 ## create final plots using the analyzeMuonDiffXSec.C Makro 
 ## calculate systematic errors and save all output within one single .txt file
 ## example: analyzeMuonDiffXSec.C+(luminosity, savePlots, applyCorrections:.txtFile, pathOfDataFile.root)
-echo processing analyzeMuonDiffXSec.C
+echo final processing of analyzeMuonDiffXSec.C
 sleep 2
 date >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, true, false, "'$jetType'", '$JESup', '$JESdown')' >> 'diffXSecFromSignal/plots/earlyData/crossSection/diffXSecNumbers.txt'
