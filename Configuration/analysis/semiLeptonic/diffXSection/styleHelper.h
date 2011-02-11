@@ -61,7 +61,7 @@ double readLineFromFile(int line, TString file="crossSectionCalculation.txt"){
   std::string readIn;
   // check if file exists
   if (!finDouble){
-    std::cout << "can not open file" << std::endl;
+    std::cout << "can not open file " << file << std::endl;
     return -1;
   }
   // loop lines of the file
