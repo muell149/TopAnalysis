@@ -1,5 +1,3 @@
-
-
 import FWCore.ParameterSet.Config as cms
 
 ## ---
@@ -8,29 +6,56 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 
 ## ---
-##    eventfilter is to get a special ttbar decay channel from ttbarSample by genmatching
-##    decide whether to run on:
-# 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
-##    careful: genmatched selection- might cause problems for specific BG samples like qcd or data - use 'all' for them
-##    signal is semileptonic with mu
-##    background is ttbar other channels
-##    'all' does no selection
+##    options
 ## ---
 
-jetType =  'particleFlow' # 'Calo' 
+## choose jet collection and corresponding MET
+jetType =  'particleFlow' # 'Calo'
 
-eventFilter  = 'signal only' #'all'
-## choose between # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
+# switch to run on data and remove all gen plots (type 'MC' or 'data')
+if(not globals().has_key('runningOnData')): 
+    runningOnData = "MC"
+
+## run kinematic fit?
+applyKinFit = False # True
+if(applyKinFit==True):
+    print "kinFit and top reconstruction is applied - attention: slows down!!!"
+if(applyKinFit==False):
+    print "kinFit and top reconstruction not applied"
+    
+## choose whether you want a pat tuple as output
 if(not globals().has_key('writeOutput')): 
     writeOutput  = False # True
+    
+## remove all ttbar specific gen level filter - used by other _cfg based on this file
+if(not globals().has_key('removeGenTtbar')):
+    removeGenTtbar = False 
+if(removeGenTtbar==True):
+    print "all gen level filters using ttbar decay subset are removed" 
+    if(runningOnData=="MC"):
+        print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"
 
-# analyse muon quantities
+## implement anti b-tagging path
+if(not globals().has_key('implement0TagPath')):
+    implement0TagPath = False
+if(implement0TagPath==True):
+    print "path with ==0 btagged jets included" 
+if(implement0TagPath==False):
+    print "path with ==0 btagged jets excluded"
+    
+## eventfilter is to select a special ttbar decay channel from ttbarSample by genmatching (ttbar MC only, other MC: choose 'all')
+if(not globals().has_key('eventFilter')):
+    eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
+if(runningOnData=="MC"):
+    print 'chosen ttbar filter:' , eventFilter
+
+# analyze muon quantities
 process = cms.Process("Selection")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 10000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -57,10 +82,6 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('analyzeDiffXSec_test.root')
 )
 
-# switch to run on data and remove all gen plots (type 'MC' or 'data')
-if(not globals().has_key('runningOnData')): 
-    runningOnData = "MC"
-
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string('START38_V14::All')
 
@@ -83,8 +104,8 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
 
 
@@ -184,10 +205,10 @@ if(not eventFilter=='all'):
                                           process.ttSemiLeptonicFilter *
                                           process.hltFilter
                                           )
-else:
-    ## sequence without filter (only trigger selection hltFilter) - done when 'all' is chosen
+## sequence without filter (only trigger selection hltFilter) - done when 'all' is chosen, removeGenTtbar=True or runningOnData = "data"
+if(eventFilter=='all') or (removeGenTtbar==True) or (runningOnData=="data"):
     process.filterSequence = cms.Sequence(process.hltFilter)
-    
+     
 ## ---
 ##    set up genFilter for semileptonic muons and taus, where taus are decaying into leptons
 ## ---
@@ -230,19 +251,6 @@ elif(jetType=="Calo"):
     process.shiftedLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'scaledJetEnergy:selectedPatJets', analyze = uds3 )
 else:
     print "unknown jetType"
-
-    
-process.unshiftedJets = cms.Sequence(process.patLead_0_JetKinematics+
-                                     process.patLead_1_JetKinematics+
-                                     process.patLead_2_JetKinematics+
-                                     process.patLead_3_JetKinematics
-                                     )
-
-process.shiftedJets = cms.Sequence(process.shiftedLead_0_JetKinematics+
-                                   process.shiftedLead_1_JetKinematics+
-                                   process.shiftedLead_2_JetKinematics+
-                                   process.shiftedLead_3_JetKinematics
-                                   )
 
 ## ---                                   
 ##    set up distribution for cross section measurement
@@ -304,24 +312,6 @@ process.leadingJetSelectionNjets1 = process.leadingJetSelection.clone (src = 'ti
 process.leadingJetSelectionNjets2 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 2)
 process.leadingJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 3)
 process.leadingJetSelectionNjets4 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 4)
-
-## ---
-##    collect selections for path 2 (jetmultiplicity 3 && btag) and the output modules with different names
-## ---
-process.ttSemiLeptonicFilterb = process.ttSemiLeptonicFilter.clone()
-process.filterSequenceb = cms.Sequence(process.makeGenEvt *
-                                       process.ttSemiLeptonicFilterb *
-                                       process.hltFilter
-                                       )
-process.bottomJetSelectionb        = process.bottomJetSelection.clone()
-process.leadingJetSelectionNjets3b = process.leadingJetSelectionNjets3.clone()
-process.muonSelectionb  = process.muonSelection.clone()
-process.secondMuonVetob = process.secondMuonVeto.clone()
-process.electronVetob   = process.electronVeto.clone()
-process.PVSelectionb    = process.PVSelection.clone()
-process.leadingJetSelectionNjets1Pat = process.leadingJetSelectionNjets1.clone()
-process.leadingJetSelectionNjets2Pat = process.leadingJetSelectionNjets2.clone()
-process.leadingJetSelectionNjets3Pat = process.leadingJetSelectionNjets3.clone()
 
 ## ---
 ##    Set up selection steps for different (gen)-jet multiplicities
@@ -487,8 +477,8 @@ process.jetMultiplicity4 = cms.Sequence(process.leadingJetSelectionNjets4       
                                         process.analyzeTightMuonCrossSectionRecNjets4 +
                                         process.analyzePatMETNjets4                   +
                                         process.bottomJetKinematicsNjets4             )
-process.jetMultiplicity3Btag = cms.Sequence(process.leadingJetSelectionNjets3b                 +
-                                            process.bottomJetSelectionb                        +
+process.jetMultiplicity3Btag = cms.Sequence(process.leadingJetSelectionNjets3                  +
+                                            process.bottomJetSelection                         +
                                             process.analyzeTightMuonCrossSectionRecNjets3Btag  +
                                             process.analyzePatMETNjets3Btag                    )
 process.jetMultiplicity4Btag = cms.Sequence(process.bottomJetSelection                         +
@@ -496,9 +486,161 @@ process.jetMultiplicity4Btag = cms.Sequence(process.bottomJetSelection          
                                             process.analyzePatMETNjets4Btag                    )
 
 ## ---
-##    run the final sequences
+##    anti b-tag analysis
+## ---
+## descriminator monitoring
+process.tightJetQualityBeforeAnyCuts = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
+## monitoring jet kinematics
+process.noPtLead_0_JetKinematicsNoBtagNjets0 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds0 )
+process.noPtLead_1_JetKinematicsNoBtagNjets0 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds1 )
+process.noPtLead_2_JetKinematicsNoBtagNjets0 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds2 )
+process.noPtLead_3_JetKinematicsNoBtagNjets0 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds3 )
+process.noPtLead_0_JetKinematicsNoBtagNjets4 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds0 )
+process.noPtLead_1_JetKinematicsNoBtagNjets4 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds1 )
+process.noPtLead_2_JetKinematicsNoBtagNjets4 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds2 )
+process.noPtLead_3_JetKinematicsNoBtagNjets4 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds3 )
+## 0 b-jets selection
+process.antiBottomJetSelection = process.bottomJetSelection.clone(src = 'tightBottomJets', minNumber = 0, maxNumber = 0)
+## analysis for each jet multiplicity
+process.noBjetNjets1 = process.analyzeTightMuonCrossSectionRecNjets1.clone()
+process.noBjetNjets2 = process.analyzeTightMuonCrossSectionRecNjets2.clone()
+process.noBjetNjets3 = process.analyzeTightMuonCrossSectionRecNjets3.clone()
+process.noBjetNjets4 = process.analyzeTightMuonCrossSectionRecNjets4.clone()
+
+
+## collect sequences
+process.antiBjetSelection = cms.Sequence(process.tightJetQualityBeforeAnyCuts +
+                                         process.antiBottomJetSelection
+                                         )
+process.jetKinematicsAntiBNjets0 = cms.Sequence(process.noPtLead_0_JetKinematicsNoBtagNjets0 +
+                                                process.noPtLead_1_JetKinematicsNoBtagNjets0 +
+                                                process.noPtLead_2_JetKinematicsNoBtagNjets0 +
+                                                process.noPtLead_3_JetKinematicsNoBtagNjets0 
+                                                )
+process.jetKinematicsAntiBNjets4 = cms.Sequence(process.noPtLead_0_JetKinematicsNoBtagNjets4 +
+                                                process.noPtLead_1_JetKinematicsNoBtagNjets4 +
+                                                process.noPtLead_2_JetKinematicsNoBtagNjets4 +
+                                                process.noPtLead_3_JetKinematicsNoBtagNjets4    
+                                                )
+process.jetMultiplicity1AntiB = cms.Sequence(process.leadingJetSelectionNjets1 +                                
+                                             process.noBjetNjets1
+                                             )
+process.jetMultiplicity2AntiB = cms.Sequence(process.leadingJetSelectionNjets2 +                                
+                                             process.noBjetNjets2
+                                             )
+process.jetMultiplicity3AntiB = cms.Sequence(process.leadingJetSelectionNjets3 +                                
+                                             process.noBjetNjets3
+                                             )
+process.jetMultiplicity4AntiB = cms.Sequence(process.leadingJetSelectionNjets4 +                                
+                                             process.noBjetNjets4
+                                             )
+
+## ---
+##    configure Kinematic fit
 ## ---
 
+## produce top reconstructed event
+process.load('TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff')
+## process.ttSemiLepJetPartonMatch.verbosity = 1
+process.kinFitTtSemiLepEventHypothesis.leps = 'tightMuons'
+process.kinFitTtSemiLepEventHypothesis.jets = 'tightLeadingJets'
+process.kinFitTtSemiLepEventHypothesis.mets = 'patMETs'
+
+# maximum number of jets to be considered in the jet combinatorics
+# (has to be >= 4, can be set to -1 if you want to take all)
+process.kinFitTtSemiLepEventHypothesis.maxNJets = 4
+
+# maximum number of jet combinations finally written into the event, starting from the "best"
+# (has to be >= 1, can be set to -1 if you want to take all)
+process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
+
+# set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+
+# consider b-tagging in event reconstruction
+process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
+
+# TCHE discr.values 7TeV: 1.7, 3.3, 10.2
+process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = 1.7
+process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 10.2
+process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
+
+## choose which hypotheses to produce
+from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
+addTtSemiLepHypotheses(process,['kKinFit'])
+if(eventFilter=='signal only') and (runningOnData=="MC"):
+    if(applyKinFit==True):
+        print 'kinfit: processing ttbar SG MC - build genmatch'
+else:
+    removeTtSemiLepHypGenMatch(process)
+    if(applyKinFit==True):
+        print 'kinfit: processing bkg or data - genmatch removed'
+     
+## define PSets for kinfit output analyzer
+recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), matchForStabilityAndPurity=cms.bool(False) )
+recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(False) )
+recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(True ) )
+
+## analyze top quark reconstruction
+process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
+# a1) as reconstructed from kinFit after reco selection
+process.analyzeTopRecoKinematicsKinFit        = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
+# a2) as reconstructed from kinFit after reco selection including match to gen objects
+process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched )
+# b) as reconstructed from genmatched objects after reco selection
+process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
+# c) as reconstructed from generator objects after gen selection
+process.analyzeTopGenLevelKinematics          = process.analyzeTopGenKinematics.clone()
+
+## analyze Kin Fit reconstruction for single objects
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
+process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(src = cms.InputTag("ttSemiLepEvent"), analyze   = cms.PSet(hypoKey = cms.string("kKinFit") )  )
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
+process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"         )
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
+process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingJets")
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
+process.analyzeHypoKinFitMuon = process.analyzeHypothesisKinFitMuon.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"      )
+
+## collect analyzers
+## dummy to avoid empty sequences
+process.dummy = process.hltFilter.clone()
+## common
+process.analyzeKinFitObjectReconstruction = cms.Sequence(process.analyzeHypoKinFit     +
+                                                         process.analyzeHypoKinFitMET  +
+                                                         process.analyzeHypoKinFitJets +
+                                                         process.analyzeHypoKinFitMuon
+                                                         )
+## take care about signal and MC/data
+if(runningOnData=="MC") and (eventFilter=='signal only'):
+   process.topGenPlots = cms.Sequence(process.analyzeTopGenLevelKinematics)
+   process.kinFitPlots = cms.Sequence(process.analyzeTopRecoKinematicsKinFit        +
+                                      process.analyzeTopRecoKinematicsKinFitMatched +
+                                      process.analyzeTopRecoKinematicsGenMatch      +
+                                      process.analyzeKinFitObjectReconstruction
+                                      )
+elif(runningOnData=="MC") and (not eventFilter=='signal only'):
+    process.topGenPlots = cms.Sequence(process.dummy)
+    process.kinFitPlots = cms.Sequence(process.analyzeTopRecoKinematicsKinFit)
+elif(runningOnData=="data"):
+    process.kinFitPlots = cms.Sequence(process.analyzeTopRecoKinematicsKinFit)
+else:
+    print "can not configure KinFit modules. wrong parameter configuration"
+
+## check if kinFit should be included in main path
+if(runningOnData=="MC") and (applyKinFit==True):
+    process.kinFit = cms.Sequence(process.makeTtSemiLepEvent+
+                                  process.kinFitPlots                       
+                                  )
+    process.kinFitGen = cms.Sequence(process.topGenPlots)
+else:
+    process.kinFit    = cms.Sequence(process.dummy)
+    process.kinFitGen = cms.Sequence(process.dummy)
+
+## ---
+##    run the final sequences
+## ---
+## standard sequence for cross section analyis and detailed cut monitoring
 process.p1 = cms.Path(
                       ## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequence                        *
@@ -517,7 +659,7 @@ process.p1 = cms.Path(
                       process.muonCuts                              *
                       ## monitor veto collection
                       process.monitorVetoCuts                       *
-                      ## do event selection veto cuts
+                      ## veto on additional leptons
                       process.secondMuonVeto                        *
                       process.electronVeto                          *
                       ## b-tag quantities before jetcut
@@ -538,28 +680,68 @@ process.p1 = cms.Path(
                       ## monitor btag cut quantities
                       process.monitorBtagCuts                       *
                       ## N_jets >= 4 + btag >=1                      
-                      process.jetMultiplicity4Btag
+                      process.jetMultiplicity4Btag                  *
+                      ## apply kinematic fit
+                      process.kinFit
                       )
+if(applyKinFit==False):
+    process.p1.remove(process.dummy)
+if(runningOnData=="data"):
+    process.p1.remove(process.isolatedGenMuons)
+    process.p1.remove(process.semiLeptGenCollections)
+    process.p1.remove(process.dummy)
+    
 ## Njets>=3 & btag
 process.p2 = cms.Path(
                       ## gen event selection (decay channel) and the trigger selection (hltFilter)
-                      process.filterSequenceb                       *
+                      process.filterSequence                        *
                       ## PV event selection
-                      process.PVSelectionb                          *
+                      process.PVSelection                           *
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
                       process.isolatedGenMuons                      *
                       process.semiLeptGenCollections                *
                       ## do the event selection for muon
-                      process.muonSelectionb                        *
+                      process.muonSelection                         *
                       ## do event selection veto cuts
-                      process.secondMuonVetob                       *
-                      process.electronVetob                         *
+                      process.secondMuonVeto                        *
+                      process.electronVeto                          *
                       ## N_jets >= 3 + btag >=1
                       process.jetMultiplicity3Btag
                       )
-
-## on generator niveau
+if(runningOnData=="data"):
+    process.p2.remove(process.isolatedGenMuons)
+    process.p2.remove(process.semiLeptGenCollections)
+## anti-btag-selection to get W+jets estimation
+if(implement0TagPath==True):
+    process.p3 = cms.Path(
+                          ## gen event selection (decay channel) and the trigger selection (hltFilter)
+                          process.filterSequence                        *
+                          ## PV event selection
+                          process.PVSelection                           *
+                          ## introduce some collections
+                          process.semiLeptonicSelection                 *
+                          process.semiLeptGenCollections                *
+                          ## anti b-jet selection
+                          process.antiBjetSelection                     *
+                          ## do the event selection for muon
+                          process.muonSelection                         *
+                          ## veto on additional leptons
+                          process.secondMuonVeto                        *
+                          process.electronVeto                          *
+                          ## monitor jet kinematics before jet cuts
+                          process.jetKinematicsAntiBNjets0              *
+                          ## do std analyis for each jet multiplicity
+                          process.jetMultiplicity1AntiB                 *
+                          process.jetMultiplicity2AntiB                 *
+                          process.jetMultiplicity3AntiB                 *
+                          process.jetMultiplicity4AntiB                 *
+                          ## monitor jet kinematics after jet cuts
+                          process.jetKinematicsAntiBNjets4              
+                          )
+if(runningOnData=="data"):
+    process.p3.remove(process.semiLeptGenCollections)
+## std analysis with generator objects as input for efficiency determination
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
     process.s4 = cms.Sequence(
@@ -579,7 +761,9 @@ if(runningOnData=="MC"):
                               process.analyzeTightMuonCrossSectionGenNjets3 *
                               ##  for N_jets = 4+
                               process.leadingGenJetSelectionNjets4          *
-                              process.analyzeTightMuonCrossSectionGenNjets4 
+                              process.analyzeTightMuonCrossSectionGenNjets4 *
+                              ## investigate top reconstruction
+                              process.kinFitGen
                               )
     process.p4 = cms.Path(
                           ## gen event selection: semileptonic (muon & tau->lepton)
@@ -587,6 +771,10 @@ if(runningOnData=="MC"):
                           ## sequence with gen selection and histograms
                           process.s4
                           )
+    ## delete gen filter
+    if(removeGenTtbar==True):    
+        process.p4.remove(process.genFilterSequence)
+        
 elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
@@ -608,26 +796,16 @@ if(writeOutput):
     
 if(jetType=="particleFlow"):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.p1, 'tightLeadingJets', 'tightLeadingPFJets')
-    massSearchReplaceAnyInputTag(process.p2, 'tightLeadingJets', 'tightLeadingPFJets')
-
-    massSearchReplaceAnyInputTag(process.p1, 'tightBottomJets', 'tightBottomPFJets')
-    massSearchReplaceAnyInputTag(process.p2, 'tightBottomJets', 'tightBottomPFJets')
-
-    massSearchReplaceAnyInputTag(process.p1, 'goodJets', 'goodJetsPF30')
-    massSearchReplaceAnyInputTag(process.p2, 'goodJets', 'goodJetsPF30')
-
-    massSearchReplaceAnyInputTag(process.p1, 'centralJets', 'centralJetsPF30')
-    massSearchReplaceAnyInputTag(process.p2, 'centralJets', 'centralJetsPF30')
-
-    massSearchReplaceAnyInputTag(process.p1, 'reliableJets', 'reliableJetsPF30')
-    massSearchReplaceAnyInputTag(process.p2, 'reliableJets', 'reliableJetsPF30')
-
-    massSearchReplaceAnyInputTag(process.p1, 'noEtaJets', 'noEtaJetsPF30')
-    massSearchReplaceAnyInputTag(process.p2, 'noEtaJets', 'noEtaJetsPF30')
-
-    massSearchReplaceAnyInputTag(process.p1, 'noPtJets', 'noPtJetsPF')
-    massSearchReplaceAnyInputTag(process.p2, 'noPtJets', 'noPtJetsPF')
-
-    massSearchReplaceAnyInputTag(process.p1, 'patMETs', 'patMETsPF')
-    massSearchReplaceAnyInputTag(process.p2, 'patMETs', 'patMETsPF')
+    if(implement0TagPath==True):
+        pathlist = [process.p1, process.p2, process.p3]
+    else:
+        pathlist = [process.p1, process.p2]
+    for path in pathlist:  
+        massSearchReplaceAnyInputTag(path, 'tightLeadingJets', 'tightLeadingPFJets')
+        massSearchReplaceAnyInputTag(path, 'tightBottomJets' , 'tightBottomPFJets')
+        massSearchReplaceAnyInputTag(path, 'goodJets'        , 'goodJetsPF30')
+        massSearchReplaceAnyInputTag(path, 'centralJets'     , 'centralJetsPF30')
+        massSearchReplaceAnyInputTag(path, 'reliableJets'    , 'reliableJetsPF30')
+        massSearchReplaceAnyInputTag(path, 'noEtaJets'       , 'noEtaJetsPF30')
+        massSearchReplaceAnyInputTag(path, 'noPtJets'        , 'noPtJetsPF')
+        massSearchReplaceAnyInputTag(path, 'patMETs'         , 'patMETsPF')
