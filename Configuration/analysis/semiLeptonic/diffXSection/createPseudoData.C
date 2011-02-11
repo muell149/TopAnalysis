@@ -22,6 +22,7 @@ void loadingHists(TString plot);
 void combineFiles(double luminosity);
 void poisson(TString directory, TString plot, int lumi, TFile& outputfile);
 TString getTStringFromInt(int i);
+bool checkExistence(TString folder);
 
 std::vector<TH1F*> hists_;
 std::vector<TFile*> files_;
@@ -50,38 +51,41 @@ void createPseudoData(double luminosity= 50.0, TString jetType = "PF"){
   // loop objects in file
   TIter fileIterator(gDirectory->GetListOfKeys());
   TKey *fileKey;
-  while( fileKey = (TKey*)fileIterator() ) {
+  while( fileKey = (TKey*)fileIterator() ){
     TObject *fileObject = fileKey->ReadObj(); 
     // check if object is a directory
     if(fileObject->InheritsFrom("TDirectory")){
       folder = (TString)fileObject->GetName();
-      std::cout << std::endl << " - folder: " << folder << std::endl << "   plots: ";
+      std::cout << std::endl << " - folder: " << folder;
       // go to directory
       ((TDirectory*)fileObject)->cd();
       // loop objects in directory
       TIter folderIterator(gDirectory->GetListOfKeys());
       TKey *folderKey;
-      while( folderKey = (TKey*)folderIterator() ) {
-	TObject *folderObject = folderKey->ReadObj(); 
-	// check if object is a TH1 or TH2
-	if( (folderObject->InheritsFrom("TH1")) || (folderObject->InheritsFrom("TH2"))){
-	  plot = folderObject->GetName();
-	  poisson(folder, plot, luminosity, f);
+      // check if folder exists in all files
+      if(checkExistence(folder)){
+	folderKey = (TKey*)folderIterator();
+	while( folderKey = (TKey*)folderIterator() ) {
+	  TObject *folderObject = folderKey->ReadObj(); 
+	  // check if object is a TH1 or TH2
+	  if( (folderObject->InheritsFrom("TH1")) ){
+	    plot = folderObject->GetName();
+	    poisson(folder, plot, luminosity, f);
+	  }
 	}
       }
     }
   }
-  files_[0]->Close();
-
-// close rootfile
-f.Close();
+  files_[0]->Close(); 
+  // close rootfile
+  f.Close();
 }
 
 void poisson(TString directory, TString plot, int lumi, TFile& outputfile)
 {
   // get the histograms, erase existing at the beginning
   hists_.clear();
-  loadingHists(directory+"/"+plot);  
+  loadingHists(directory+"/"+plot);
   // define output plot
   TH1F* pseudoData=(TH1F*)hists_[0]->Clone(); pseudoData->Clear();
   // normalize to luminosity and add all samples
@@ -96,6 +100,7 @@ void poisson(TString directory, TString plot, int lumi, TFile& outputfile)
   pseudoData->Write(plot);
   std::cout << " " << plot;
 }
+
 
 void loadingFiles(TString jetType)
 {
@@ -122,6 +127,19 @@ void loadingHists(TString plot)
   }
 }
 
+bool checkExistence(TString folder)
+{
+  bool value = true;
+  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    if(files_[idx]->GetDirectory(folder)==0){
+      value = false;
+    }
+  }
+  if(value) std::cout << " (exists in all files)" << std::endl << "   plots: ";
+  else  std::cout << " (NOT existing in all files - not added!)";
+  return value;
+}
+
 void smearing(TH1F& src, TH1F& data)
 {
   TRandom3 rnd(0);
@@ -132,7 +150,7 @@ void smearing(TH1F& src, TH1F& data)
     int evts=src.GetBinContent(ibin);
     data.SetBinContent(ibin, evts);
     data.SetBinError(ibin, sqrt(evts));
- }
+  }
 }
 
 void combineFiles(double luminosity)
