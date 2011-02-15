@@ -13,15 +13,14 @@ process = cms.Process("PAT")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define input
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/data/Run2010A/Mu/AOD/Nov4ReReco_v1/0000/1AF324B9-74EB-DF11-B7F8-78E7D164BFC8.root',
-	'/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0001/003545B1-76EA-DF11-BC95-485B39800BF3.root'
-    ),
-    skipEvents = cms.untracked.uint32(111350)
+    #'/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0001/003545B1-76EA-DF11-BC95-485B39800BF3.root'
+    )#,
+#    skipEvents = cms.untracked.uint32(0)
 
 )
 
@@ -132,7 +131,7 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                 )
 
 ## add L1 offset corrections to MC Calo Jets
-process.patJetCorrFactors.levels+=["L1Offset", "L2Residual", "L3Absolute", "L2L3Residual"]
+process.patJetCorrFactors.levels=['L1Offset', 'L2Relative','L3Absolute', 'L2L3Residual']
 
 ## remove L1 offset corrections
 #process.patJetCorrFactors.levels.remove("L1Offset")
@@ -263,7 +262,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('rerecoDataL1.root')
+    fileName = cms.untracked.string('RerecoDataL1.root')
 )
 
 ## save pat output
