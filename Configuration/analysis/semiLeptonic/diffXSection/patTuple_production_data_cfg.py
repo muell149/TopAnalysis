@@ -111,7 +111,7 @@ from PhysicsTools.PatAlgos.tools.jetTools import *
 addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),'AK5', 'JPT',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5JPT', ['L2Relative','L3Absolute', 'L2L3Residual', 'L1Offset']),
+                 jetCorrLabel = ('AK5JPT', ['L1Offset', 'L2Relative','L3Absolute', 'L2L3Residual']),
                  doType1MET   = False,
                  doL1Cleaning = False,
                  doL1Counters = False,                 
@@ -123,7 +123,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),'AK5', 'JP
 addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5PF', ['L2Relative','L3Absolute', 'L2L3Residual', 'L1Offset']),
+                 jetCorrLabel = ('AK5PF', ['L1Offset, ''L2Relative','L3Absolute', 'L2L3Residual']),
                  doType1MET   = False,
                  doL1Cleaning = False,
                  doL1Counters = False,
@@ -132,7 +132,7 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                 )
 
 ## add L1 offset corrections to MC Calo Jets
-process.patJetCorrFactors.levels+=["L1Offset"]
+process.patJetCorrFactors.levels+=["L1Offset", "L2Residual", "L3Absolute", "L2L3Residual"]
 
 ## remove L1 offset corrections
 #process.patJetCorrFactors.levels.remove("L1Offset")
