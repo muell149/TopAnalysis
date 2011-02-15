@@ -6,22 +6,25 @@
 // for x = pt, eta and phi (of the muon) for all events
 // (dominated by W+jets) decaying into l+jets. In the 2nd
 // case after event selection the QCD bkg estimated via
-// ABCD method is substracted and l+jets MC based efficiency
-// corrections were applied (inclusive 1, 2, 3 and 4 jet bin). 
-// For the inclusive top cross section, two methods are 
-// applied: a) take the numbers from above and correct for
-// W+jets background estimated via charge asymmetry method
+// MET template fit method is substracted and l+jets MC 
+// based efficiency corrections were applied (inclusive 1, 
+// 2, 3 and 4 jet bin). For the inclusive top cross section, 
+// two methods are applied: a) take the numbers from above 
+// and correct for W+jets background scaled by the following
+// data driven estimate using the l+jets measurement:
+// N(W)_dataDriven = N(W)_sim * ratio sigma(W+Z)_data / sigma(W+Z)_sim
 // b) requiring >= 4 jets, and at least 1 additional btag 
 // and apply MC based top efficiency corrections
 // this file can be used for probing the following systematic 
-// variations: JES, Luminosity, topMC (MC@NLO /MADGRAPH),
-// MC-efficiencies. For each varation aboves results are 
-// saved within single .txt file. These are used then for
-// the determination of systematic errors.
+// variations: JES, JER, Luminosity, MCTune (D6T/Z2), scaleup/down
+// and matching up/down for V+jets or top; scale up of N(BG) for
+// sTop / Diboson / Z+jets / QCD; SF for MC-efficiencies,. 
+// For each varation aboves results are saved within single 
+// .txt file in ./systematicVariations. These are then used for
+// the determination of the combined systematic errors.
 // -----------------------------------------------------
 
 #include "styleHelper.h"
-//#include "analyzeMuonDiffXTemplateFit.h"
 
 void canvasStyle(TCanvas& canv);
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2, float xLabelSize = 0.06);
@@ -46,7 +49,6 @@ double systematicError2(const TString plot, TH1& histo, int usedBin, TString up 
 
 void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, double sTopVariation=1.0, double DiBosVariation=1.0, double ZjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
 { 
-
   // ---
   //    define settings for systematic variations
   // ---
@@ -54,10 +56,6 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   TString LuminosityVariation="Nominal";
   TString EffScale = "EffStd";
   TString SampleScale="SampleWeightStd";
-//   TString QCDScale="QCDestimationStd";
-//   TString WjetsScale="WjetsEstimationStd";
-//   TString sTopScale="sTopEstimationStd";
-//   TString DiBosScale="DiBosEstimationStd";
   if(useNLO      ) TopSample ="Nlo";
   luminosity*=lumiShift;
   if(lumiShift>1.0) LuminosityVariation = "Up";
@@ -91,28 +89,44 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   // save       : choose whether you want to save every plot as png and all within one ps file
   // loadValues : choose whether you want to load effiency corrections 
   //              and bkg estimation from crossSection.txt file
+  // jetTyp     : use "" for calo and "PF" for particle flow -> needs the corresponding rootfiles!
   // luminosity : choose luminosity [pb] for scaling of event numbers 
   //              lum is derived from this and used for legend as entry
-  //TString lum  = getTStringFromDouble(luminosity/1000);
   TString lum = getTStringFromInt(roundToInt(luminosity/1000));
   TString lum2 = getTStringFromInt(roundToInt(luminosity));
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/earlyData/crossSection/";
-  // useNLO      : if true, MC@NLO instead of MAGRAPH sample is used as reco input
-  // JES        : choose "", "up", or "down" to use the corresponding MC samples with shifted JES
+  // useNLO     : if true, MC@NLO instead of MAGRAPH sample is used as reco input
+  //              ATTENTION: in the meantime this changed: if true, the Z2 is used, otherwise the D6T tune
+  // dataFile   : choose the data .root file
+  // JES        : to use the corresponding MC samples with systematic variation:
+  //              choose "", "JES09", "JES11", "JERup", "JERdown", "PileUp", "ScaleDown", "ScaleUp", "MatchUp", "MatchDown", "ISRFSRup", "ISRFSRdown"
+  // up         : "JES11" name of JES variation up in the .root file
+  // down       : "JES09" name of JES variation down in the .root file
+  // putSysOn: "", "Vonly", "TTonly", "VandTT" - choose which samples should be shifted by the systematic variation, e.g. variation of matching scale for ttbar only ("TTonly") or Z and W at once ("Vonly")
   // lumiShift  : quantify the scaling factor for the uncertainty of the luminosity
-  // EffScaleFactor: quantify the scaling factor for the uncertainty of all determined efficiencies
-  // QCDVariation  : quantify the scaling factor for the uncertainty of the QCD estimation
-  // finalPlots : if true, systematic errors are derived, needs all systematic variations done
-  //              before, cause values are read in from created .txt files
-  // createPlots: choose if you want plots as output beside the numbers
+  // QCDVariation: quantify the systematic variation for the uncertainty of the estimated number of QCD events (MET fit)
+  // WjetsVariation: quantify the systematic variation for the uncertainty of the estimated number of W+jets events
+  //                 Attention: not used anymore, because of data driven estimate from >=2 jets bin in mu+jets
+  // sTopVariation: quantify the systematic variation for the uncertainty of the number of single top events from simulation
+  // DiBosVariation: quantify the systematic variation for the uncertainty of the number of diboson events from simulation
+  // ZjetsVariation: quantify the systematic variation for the uncertainty of the number of Z+jets events from simulation
+  // scaleFactor: scale factor for muon efficiencies as determined from the Z->mumu T&P method
+  // EffScaleFactor: variation of the T&P scaling factor for the uncertainty of all determined efficiencies
   // logartihmicPlots: choose whether you want to see the plots with logarithmic axis
   TString log = "";
   if(logartihmicPlots) log = "Log";
-  // finalPlots: choose if all systematic variations have been done and the corresponding results
-  // are available as .txt file. Then systematic errors are automatically calculated and drawn.
+  // createPlots: choose if you want plots as output beside the numbers
   double createPlots=false;
+  // finalPlots: choose if all systematic variations have been done and the corresponding results are available as .txt
+  // file in ./systematicVariations/. Then systematic errors are automatically calculated and drawn.
   if(finalPlots) createPlots=true;
+  // finalPlots : if true, systematic errors are derived, needs all systematic variations done
+  //              before, cause values are read in from created .txt files in ./systematicVariations/which must exist!
+  // BR corrections (ttbar MC)
+  double RSemi = 0.985608;
+  double RBGUntagged = 0.98323995;
+  double RBGTagged = 0.98320847;    
 
   // ---
   //    set root style 
@@ -214,10 +228,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     if(idx==kSTops)lumiweight_.push_back(sTopVariation*0.324*0.000000464677/50.0*luminosity);
     if(idx==kSTopt)lumiweight_.push_back(sTopVariation*0.324*0.000006672727/50.0*luminosity);
     if(idx==kSToptW)lumiweight_.push_back(sTopVariation*0.000001070791/50.0*luminosity);
-    // fall10:
     if(idx==kQCD  )lumiweight_.push_back(0.000143500567/50.0*(luminosity/lumiShift));
-    // spring10:
-    //if(idx==kQCD)lumiweight_.push_back(0.000018205*(double)luminosity);
   }
  
   // ---
@@ -231,9 +242,11 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
       for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
 	// scale MC samples to same luminosity
 	histo_[variables_[var]][idx][Njets_[mult]]->Scale(EffScaleFactor*scaleFactor*lumiweight_[idx]);
-	if((idx==kSig || idx==kBkg) && (mult==3 || mult==4))
-	  histo_[variables_[var]][idx][Njets_[mult]]->Scale(0.98323995);
-      }
+	// apply BR corrections (ttbar)
+	if((idx==kSig) && (mult==3 || mult==4)) histo_[variables_[var]][idx][Njets_[mult]]->Scale(RSemi);
+	if((idx==kBkg) && (mult==3)) histo_[variables_[var]][idx][Njets_[mult]]->Scale(RBGUntagged);
+	if((idx==kBkg) && (mult==4)) histo_[variables_[var]][idx][Njets_[mult]]->Scale(RBGTagged);
+	  }
       // scaling for gen-plots
       if(mult<4){
 	histo_[variables_[var]][kGenSig   ][Njets_[mult]]->Scale(lumiweight_[kSig]);
@@ -245,9 +258,10 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	histo_[variables_[var]][kGenSTop  ][Njets_[mult]] = (TH1F*)(histo_[variables_[var]][kGenSTops][Njets_[mult]]->Clone());
 	histo_[variables_[var]][kGenSTop  ][Njets_[mult]]->Add((TH1F*)(histo_[variables_[var]][kGenSTopt][Njets_[mult]]->Clone()));
 	histo_[variables_[var]][kGenSTop  ][Njets_[mult]]->Add((TH1F*)(histo_[variables_[var]][kGenSToptW][Njets_[mult]]->Clone()));
+	// apply BR corrections (ttbar)
 	if(mult==3){
-	  histo_[variables_[var]][kGenSig   ][Njets_[mult]]->Scale(0.985608);
-	  histo_[variables_[var]][kGenBkg   ][Njets_[mult]]->Scale(0.985608);
+	  histo_[variables_[var]][kGenSig   ][Njets_[mult]]->Scale(RSemi);
+	  histo_[variables_[var]][kGenBkg   ][Njets_[mult]]->Scale(RSemi);
 	}
       }
       // create combined single top
