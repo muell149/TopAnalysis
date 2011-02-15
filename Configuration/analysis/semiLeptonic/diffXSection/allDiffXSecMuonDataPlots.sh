@@ -81,12 +81,12 @@ echo done
 ## c) systematic variations
 ## do the whole analysis applying different systematic variations
 ## and save all results in .txt file needed to calculate systematic errors
-## example: analyzeMuonDiffXSec.C+(luminosity, savePlots, applyCorrections:.txtFile, pathOfDataFile.root, useMG=false, JES="", lumiShift=1.0, EffScaleFactor=1.0, QCDVariation=1.0, finalPlots=false)
+## example: analyzeMuonDiffXSec.C+(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, double sTopVariation=1.0, double DiBosVariation=1.0, double ZjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
 echo processing systematic variations
 echo 1 as reference without variation
 sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
-echo 2 using MC@NLO ttbar absorped via eff
+echo 2 using Z2 ttbar absorped via eff
 sleep 2
 root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, true, "","'$jetType'")' >> './diffXSecFromSignal/plots/efficiency/efficiencyNumbers.txt'
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', true, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
