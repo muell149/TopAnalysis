@@ -80,7 +80,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('rerecoData.root')
+    fileName = cms.untracked.string('DataNov4RerecoL1included.root')
 )
 
 ## remove cleaning as it is not used
@@ -262,7 +262,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('RerecoDataL1.root')
+    fileName = cms.untracked.string('DataNov4RerecoL1included.root')
 )
 
 ## save pat output
