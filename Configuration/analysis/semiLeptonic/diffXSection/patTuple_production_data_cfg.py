@@ -20,7 +20,7 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     #'/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0001/003545B1-76EA-DF11-BC95-485B39800BF3.root'
     )#,
-#    skipEvents = cms.untracked.uint32(0)
+                            #skipEvents = cms.untracked.uint32(0)
 
 )
 
@@ -122,7 +122,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),'AK5', 'JP
 addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5PF', ['L1Offset, ''L2Relative','L3Absolute', 'L2L3Residual']),
+                 jetCorrLabel = ('AK5PF', ['L1Offset', 'L2Relative','L3Absolute', 'L2L3Residual']),
                  doType1MET   = False,
                  doL1Cleaning = False,
                  doL1Counters = False,
