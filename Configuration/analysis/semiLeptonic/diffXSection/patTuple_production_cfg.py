@@ -42,11 +42,14 @@ process.GlobalTag.globaltag = cms.string('START38_V14::All')
 # pat configuration
 #----------------------------------------------------------------------------
 
+## include L1OffsetCorrections
+process.load("PhysicsTools.PatAlgos.patTestJEC_cfi")
+
 ## configure output module
 process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('fall10MC.root')
+    fileName = cms.untracked.string('fall10MCL1incl.root')
 )
 
 ## std sequence for pat
@@ -75,7 +78,7 @@ from PhysicsTools.PatAlgos.tools.jetTools import *
 addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),'AK5', 'JPT',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5JPT', ['L2Relative','L3Absolute']),
+                 jetCorrLabel = ('AK5JPT', ['L1Offset', 'L2Relative', 'L3Absolute']),
                  doType1MET   = False,
                  doL1Cleaning = False,
                  doL1Counters = False,                 
@@ -87,7 +90,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),'AK5', 'JP
 addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5PF', ['L2Relative','L3Absolute']),
+                 jetCorrLabel = ('AK5PF', ['L1Offset', 'L2Relative','L3Absolute']),
                  doType1MET   = False,
                  doL1Cleaning = False,
                  doL1Counters = False,
@@ -95,8 +98,8 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJetID      = True
                 ) 		 		
 
-## remove L2L3 residual corrections from MC Calo Jets
-process.patJetCorrFactors.levels.remove("L2L3Residual")
+## remove L2L3 residual corrections from MC Calo Jets and add L1 offset corrections
+process.patJetCorrFactors.levels=['L1Offset', 'L2Relative', 'L3Absolute']
 
 ## embedding of jet constituents into the jets
 process.patJets.embedCaloTowers       = False
