@@ -81,8 +81,8 @@ void combineAndWeightAnalysisFiles(){
   // a) std
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10PF"       );
   // b) systematics	   
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JES09PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JES11PF"  );
+  name_.push_back("L1Corr/muonDiffXSecWZPytia6Z2Fall10JES09PF"  );
+  name_.push_back("L1Corr/muonDiffXSecWZPytia6Z2Fall10JES11PF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JERdownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JERupPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10PileUpPF" );
@@ -90,8 +90,8 @@ void combineAndWeightAnalysisFiles(){
   // a) std
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10PF"       );
   // b) systematics	   
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JES09PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JES11PF"  );
+  name_.push_back("L1Corr/muonDiffXSecWWPytia6Z2Fall10JES09PF"  );
+  name_.push_back("L1Corr/muonDiffXSecWWPytia6Z2Fall10JES11PF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JERdownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JERupPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10PileUpPF" );
@@ -99,8 +99,8 @@ void combineAndWeightAnalysisFiles(){
   // a) std
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10PF"       );
   // b) systematics	   
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JES09PF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JES11PF"  );
+  name_.push_back("L1Corr/muonDiffXSecZZPytia6Z2Fall10JES09PF"  );
+  name_.push_back("L1Corr/muonDiffXSecZZPytia6Z2Fall10JES11PF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JERdownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JERupPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10PileUpPF" );
@@ -198,8 +198,8 @@ void singleFile(TString name, double scalingFactor){
   //  std::cout << "separator: " << separator << std::endl;
   //  std::cout << "file: " << file << std::endl;
 
-  TFile f("./diffXSecFromSignal/analysisRootFiles/"+file+".root", "recreate");
-  std::cout << "output file: " << "./diffXSecFromSignal/analysisRootFiles/"+file+".root" << std::endl;
+  TFile f("./diffXSecFromSignal/analysisRootFilesL1Corr/"+file+".root", "recreate");
+  std::cout << "output file: " << "./diffXSecFromSignal/analysisRootFilesL1Corr/"+file+".root" << std::endl;
   std::cout << "scaling factor: " << setprecision(9) << fixed << scalingFactor;
   // ---------------------------------------------------------
   // !!! list of plots you want to combine !!!
@@ -213,7 +213,7 @@ void singleFile(TString name, double scalingFactor){
   // loop objects in file
   TIter fileIterator(gDirectory->GetListOfKeys());
   TKey *fileKey;
-  while( fileKey = (TKey*)fileIterator() ) {
+  while( (fileKey = (TKey*)fileIterator()) ) {
     TObject *fileObject = fileKey->ReadObj(); 
     // check if object is a directory
     if(fileObject->InheritsFrom("TDirectory")){
@@ -224,7 +224,7 @@ void singleFile(TString name, double scalingFactor){
       // loop objects in directory
       TIter folderIterator(gDirectory->GetListOfKeys());
       TKey *folderKey;
-      while( folderKey = (TKey*)folderIterator() ) {
+      while( (folderKey = (TKey*)folderIterator()) ) {
 	TObject *folderObject = folderKey->ReadObj(); 
 	// check if object is a TH1 or TH2
 	if( (folderObject->InheritsFrom("TH1")) || (folderObject->InheritsFrom("TH2"))){

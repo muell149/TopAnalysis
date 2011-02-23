@@ -51,7 +51,7 @@ void createPseudoData(double luminosity= 50.0, TString jetType = "PF"){
   // loop objects in file
   TIter fileIterator(gDirectory->GetListOfKeys());
   TKey *fileKey;
-  while( fileKey = (TKey*)fileIterator() ){
+  while( (fileKey = (TKey*)fileIterator()) ){
     TObject *fileObject = fileKey->ReadObj(); 
     // check if object is a directory
     if(fileObject->InheritsFrom("TDirectory")){
@@ -65,7 +65,7 @@ void createPseudoData(double luminosity= 50.0, TString jetType = "PF"){
       // check if folder exists in all files
       if(checkExistence(folder)){
 	folderKey = (TKey*)folderIterator();
-	while( folderKey = (TKey*)folderIterator() ) {
+	while( (folderKey = (TKey*)folderIterator()) ) {
 	  TObject *folderObject = folderKey->ReadObj(); 
 	  // check if object is a TH1 or TH2
 	  if( (folderObject->InheritsFrom("TH1")) ){
