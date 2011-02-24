@@ -1,5 +1,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+
+
 #include "TopAnalysis/TopFilter/plugins/DiMuonFilter.h"
 DEFINE_FWK_MODULE(DiMuonFilter);
 
@@ -21,3 +23,11 @@ DEFINE_FWK_MODULE(SemiLeptonicTopJetSelector);
 #include "TopAnalysis/TopFilter/plugins/SemiLeptonicTopMuonSelector.h"
 DEFINE_FWK_MODULE(SemiLeptonicTopMuonSelector);
 
+#include "TopAnalysis/TopFilter/plugins/VertexFilter.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+typedef VertexFilter<pat::Electron> ElectronVertexFilter;
+DEFINE_FWK_MODULE(ElectronVertexFilter);
+
+#include "DataFormats/PatCandidates/interface/Muon.h"
+typedef VertexFilter<pat::Muon> MuonVertexFilter;
+DEFINE_FWK_MODULE(MuonVertexFilter);
