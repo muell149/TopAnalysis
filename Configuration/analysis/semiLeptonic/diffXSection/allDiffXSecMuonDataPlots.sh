@@ -11,7 +11,7 @@ JESup=\"JES11\"
 JESdown=\"JES09\"
 jetType=PF
 #jetType=
-dataSample=\"./diffXSecFromSignal/data/DiffXSecData_Nov15$jetType.root\"
+dataSample=\"./diffXSecFromSignal/data/DiffXSecData_L1Off$jetType.root\"
 dataLuminosity=36100
 echo
 echo doing the full l+jets analysis
