@@ -1,3 +1,4 @@
+
 ## ---
 ##    this configfile does the same like analyzeMuonDiffXSec_cfg.py
 ##    but for data - therefore all gen-plots are thrown out 
@@ -38,7 +39,7 @@ if(writeOutput):
     process.out.fileName = cms.untracked.string('patTuple_selectedNjets4.root')
 
 ## use L2L3Residual correction in analyzers
-uds0.correctionLevel.replace(uds0.correctionLevel, 'L3Absolute', 'L2L3Residual')
+#uds0.correctionLevel.replace(uds0.correctionLevel, 'L3Absolute', 'L2L3Residual')
 #PyUnicode_Replace(uds0, 'L3Absolute', 'L2L3Residual', -1)
 
 ## change output name 
