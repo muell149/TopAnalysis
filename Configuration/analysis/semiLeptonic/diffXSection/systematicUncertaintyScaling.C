@@ -139,11 +139,11 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     yieldPt_   [idx]->Scale(lumiweight_[index]); 
     // scale QCD with weights from MET-fit
     if((idx==kQCD)||(idx==kQCDJES09)||(idx==kQCDJES11)){
-      ptlead1Jet_[idx]->Scale(1.6);
-      ptlead2Jet_[idx]->Scale(2.0);
-      ptlead3Jet_[idx]->Scale(2.2);
+      ptlead1Jet_[idx]->Scale(1.5);
+      ptlead2Jet_[idx]->Scale(1.9);
+      ptlead3Jet_[idx]->Scale(2.0);
       ptlead4Jet_[idx]->Scale(1.8);
-      yieldPt_   [idx]->Scale(1.6); 
+      yieldPt_   [idx]->Scale(1.5); 
     }
     // create combined MC plots
     if((idx==kSig)||(idx==kSigJES09)||(idx==kSigJES11)){
@@ -154,7 +154,7 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
       ptlead4Jet_.push_back( (TH1F*)(ptlead4Jet_[idx]->Clone()) );
       yieldPt_   .push_back( (TH1F*)(yieldPt_   [idx]->Clone()) );
     }
-    if(idx!=kData){
+    else if(idx!=kData){
       unsigned int combined = kStd;
       if((kSigJES09<=idx)&&(idx<=kQCDJES09)) combined=kJES09;
       if((kSigJES11<=idx)&&(idx<=kQCDJES11)) combined=kJES11;
