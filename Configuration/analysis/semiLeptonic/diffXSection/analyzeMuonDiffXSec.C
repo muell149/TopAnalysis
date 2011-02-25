@@ -1068,7 +1068,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     double NTopSig = histo_["pt"][kGenSig ][Njets_[mult]]->Integral( 0 , histo_["pt"][kGenSig ][Njets_[mult]]->GetNbinsX()+1 ); 
     double NTopBkg = histo_["pt"][kGenBkg ][Njets_[mult]]->Integral( 0 , histo_["pt"][kGenBkg ][Njets_[mult]]->GetNbinsX()+1 ); 
     double NWjets  = histo_["pt"][kGenW   ][Njets_[mult]]->Integral( 0 , histo_["pt"][kGenW   ][Njets_[mult]]->GetNbinsX()+1 );
-    NWjets*=VjetsSF;
+    //NWjets*=VjetsSF;
     double NSTop   = histo_["pt"][kGenSTop][Njets_[mult]]->Integral( 0 , histo_["pt"][kGenSTop][Njets_[mult]]->GetNbinsX()+1 );
     double NLjets = NSTop + NWjets + NTopSig + NTopBkg;
     double NTopAll = NSTop + NTopSig + NTopBkg;
@@ -1812,14 +1812,15 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
     MyCanvas[canvasNumber]->Size(600,800);
     TH1F *sigmaLjetsInclusiveDataMod2 = (TH1F*)sigmaLjetsInclusiveData->Clone();
+    TH1F *sigmaLjetsInclusiveMCGenBkgPaper = (TH1F*)sigmaLjetsInclusiveMCGenBkg->Clone();
     axesStyle(*sigmaLjetsInclusiveDataMod2, "N_{jets}(p_{T}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.6, 0.075);
     sigmaLjetsInclusiveDataMod2->GetXaxis()->SetTitleSize(0);
     sigmaLjetsInclusiveDataMod2    ->DrawClone("AXIS" );
     sigmaLjetsInclusiveMCGen     ->DrawClone("histsame" );
     histogramStyle(*sigmaLjetsInclusiveMCGenTop, kSTop);
     sigmaLjetsInclusiveMCGenTop  ->DrawClone("histsame" );
-    histogramStyle(*sigmaLjetsInclusiveMCGenBkg, kSig);
-    sigmaLjetsInclusiveMCGenBkg  ->DrawClone("histsame" );
+    histogramStyle(*sigmaLjetsInclusiveMCGenBkgPaper, kSig);
+    sigmaLjetsInclusiveMCGenBkgPaper  ->DrawClone("histsame" );
     sigmaLjetsInclusiveDataMod2      ->DrawClone("p e1 X0 same"); 
     sigmaLjetsInclusiveDataMod2    ->DrawClone("AXIS same" );
     if(finalPlots) systematicError("ljetsXSec", 6, *sigmaLjetsInclusiveDataMod2, "Njets", up, down);
@@ -1837,6 +1838,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
     MyCanvas[canvasNumber]->Size(600,800);
     TH1F *sigmaLjetsInclusiveDataExcl2 = (TH1F*)sigmaLjetsInclusiveData->Clone();
+    TH1F *sigmaLjetsInclusiveMCGenBkgExclPaper = (TH1F*)sigmaLjetsInclusiveMCGenBkgExcl->Clone();
     for(int iBin=1; iBin<4; iBin++){
       sigmaLjetsInclusiveDataExcl2->SetBinContent(iBin,sigmaLjetsInclusiveData->GetBinContent(iBin)-sigmaLjetsInclusiveData->GetBinContent(iBin+1));
       sigmaLjetsInclusiveDataExcl2->SetBinError(iBin,sigmaLjetsInclusiveData->GetBinError(iBin)*sigmaLjetsInclusiveData->GetBinError(iBin)+
@@ -1855,8 +1857,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     sigmaLjetsInclusiveMCGenExcl     ->DrawClone("histsame" );
     histogramStyle(*sigmaLjetsInclusiveMCGenTopExcl, kSTop);
     sigmaLjetsInclusiveMCGenTopExcl  ->DrawClone("histsame" );
-    histogramStyle(*sigmaLjetsInclusiveMCGenBkgExcl, kSig);
-    sigmaLjetsInclusiveMCGenBkgExcl  ->DrawClone("histsame" );
+    histogramStyle(*sigmaLjetsInclusiveMCGenBkgExclPaper, kSig);
+    sigmaLjetsInclusiveMCGenBkgExclPaper  ->DrawClone("histsame" );
     sigmaLjetsInclusiveDataExcl2      ->DrawClone("p e1 X0 same"); 
     sigmaLjetsInclusiveDataExcl2      ->DrawClone("AXIS same" );
     if(finalPlots) systematicError("ljetsXSecExcl", 6, *sigmaLjetsInclusiveDataExcl2, "Njets", up, down);
