@@ -1,108 +1,93 @@
-#include <vector>
-#include <iostream>
+#include "KinFitPlots.h"
 
-#include <TH1F.h>
-#include <TH2F.h>
-#include <TROOT.h>
-#include <TFile.h>
-#include <TCanvas.h>
-#include <TLegend.h>
-
-enum styles {kAll, kSignal};
-
-void canvasStyle(TCanvas& canv);
-void histogramStyle(TH1& hist, unsigned int style);
-void axesStyle(TH1& hist, const char* titleX, const char* titleY);
-
-
-void analyzeHypothesisKinFit()
+void analyzeHypothesisKinFit(double luminosity = 36100, bool save = false, TString dataFile= "./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root")
 {
-  // ---
-  //    set root style 
-  // ---
-  //gROOT->cd();
-  //gROOT->SetStyle("Plain");
-
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  files_.push_back(new TFile("./rootfiles/analyzeHypothesisKinFit_all.root") );
-  files_.push_back(new TFile("./rootfiles/analyzeHypothesisKinFit_sig.root") );
+  TString whichSample = "/analysisRootFiles";
+  TString fileName;
+  for(int ienum = 0; ienum<10; ienum++){
+    fileName = "./diffXSecFromSignal"+whichSample+"/muonDiffXSec";
+    if(ienum==kSig)   fileName += "SigMadD6TFall10";
+    if(ienum==kBkg)   fileName += "BkgMadD6TFall10";
+    if(ienum==kSToptW)fileName += "SingleTopTWchannelMadZ2Fall10";
+    if(ienum==kSTops) fileName += "SingleTopSchannelMadZ2Fall10";
+    if(ienum==kSTopt) fileName += "SingleTopTchannelMadZ2Fall10";
+    if(ienum==kWjets) fileName += "WjetsMadD6TFall10";
+    if(ienum==kZjets) fileName += "ZjetsMadD6TFall10";
+    if(ienum==kDiBos) fileName += "VVPytia6Z2Fall10";
+    if(ienum==kQCD)   fileName += "QCDPythiaZ2Fall10";
+    fileName += "PF.root";
+    if(ienum==kData)  fileName = dataFile;
+    files_.push_back(new TFile(fileName));
+  }
 
   // ---
   //    get histograms
   // ---
-  std::vector<TH2F*> jetHypo_;
+  // create container for all histos
+  std::map< TString, std::map <unsigend int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigend int, TH2F*> > histo2_;
+  // example: histo_["plotName"][sampleNr]
+  // get histos
   for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    jetHypo_.push_back( (TH2F*)files_[idx]->Get("analyzeHypothesisKinFit/mapGenMatch_"     ) );
-  }
-
-  std::vector<TH1F*> prob_, chi2_, hadBQuark_, lepBQuark_, lightQuark_;
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    prob_      .push_back( (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/prob"      ) );
-    chi2_      .push_back( (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/chi2"      ) );
-    hadBQuark_ .push_back( (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/hadBQuark" ) );
-    lepBQuark_ .push_back( (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/lepBQuark" ) );
-    lightQuark_.push_back( (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/lightQuark") );
-  }
-
-  // ---
-  //    close input files
-  // ---
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    //files_[idx]->Close();
+    if((idx==kSig)&&(idx==kBkg)&&(idx==kData)){
+      histo_["prob"      ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/prob"      );
+      histo_["chi2"      ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/chi2"      );
+      histo_["hadBQuark" ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/hadBQuark" );
+      histo_["lepBQuark" ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/lepBQuark" );
+      histo_["lightQuark"][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/lightQuark");
+    }
+    if(idx==kSig) histo2_["lightQuark"][idx] = (TH2F*)files_[idx]->Get("analyzeHypothesisKinFit/mapGenMatch_");
   }
   
   // ---
+  //    lumiweighting for luminosity, add all MC for combined MC (l+jets and with QCD)
+  // ---
+  // loop samples
+  for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
+    // scale MC samples to same luminosity
+    histo_[variables_[var]][idx][Njets_[mult]]->Scale(EffScaleFactor*scaleFactor*lumiweight_[idx]);
+    if((idx==kSig || idx==kBkg) && (mult==3 || mult==4))
+      histo_[variables_[var]][idx][Njets_[mult]]->Scale(0.98323995);
+  }
+
+
+
+  // ---
   //    configure histograms
   // ---
-
-  // kAll
-  histogramStyle( *prob_      [kAll   ] , kAll    );
-  histogramStyle( *chi2_      [kAll   ] , kAll    );
-  histogramStyle( *hadBQuark_ [kAll   ] , kAll    );
-  histogramStyle( *lepBQuark_ [kAll   ] , kAll    );
-  histogramStyle( *lightQuark_[kAll   ] , kAll    );
-
-  // kSignal
-  histogramStyle( *prob_      [kSignal] , kSignal );
-  histogramStyle( *chi2_      [kSignal] , kSignal );
-  histogramStyle( *hadBQuark_ [kSignal] , kSignal );
-  histogramStyle( *lepBQuark_ [kSignal] , kSignal );
-  histogramStyle( *lightQuark_[kSignal] , kSignal );
-
+  for(unsigned int idx=0; idx<files_.size(); ++idx) {
+    histogramStyle( *histo_["prob"      ][idx], idx );
+    histogramStyle( *histo_["chi2"      ][idx], idx );
+    histogramStyle( *histo_["hadBQuark" ][idx], idx );
+    histogramStyle( *histo_["lepBQuark" ][idx], idx );
+    histogramStyle( *histo_["lightQuark"][idx], idx );
+  }
 
   // create a legend (in upper right corner)
   TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("Kin. Fit (after selection)");
-  leg0->AddEntry( prob_[kAll       ] , "all events"    , "PL" );
-  leg0->AddEntry( prob_[kSignal    ] , "signal events" , "FL" );
-
-  // create a legend (in upper center)
-  TLegend *leg1 = new TLegend(0.35, 0.65, 1.05, 0.9);
-  leg1->SetFillStyle(0);
-  leg1->SetBorderSize(0);
-  leg1->SetHeader("Kin. Fit (after selection)");
-  leg1->AddEntry( prob_[kAll       ] , "all events"    , "PL" );
-  leg1->AddEntry( prob_[kSignal    ] , "signal events" , "FL" );
+  leg0->AddEntry( histo_["prob"][kSig], "t#bar{t} (#mu prompt)", "PL" );
+  leg0->AddEntry( histo_["prob"][kBkg], "t#bar{t} other"       , "PL" );
 
   // ---
-  //    do the printing for prob_
+  //    do the printing for histo_["prob"]
   // ---
   TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
   
   // draw canvas
   canv0->cd(0);
   canv0->SetLogy(1);
-  axesStyle(*prob_[kAll], "Fit Probability", "events");
-  //prob_[kAll       ]->SetMinimum(1.);
-  prob_[kAll       ]->SetMaximum( 2.5* prob_[kAll]->GetMaximum() );
-  prob_[kAll       ]->Draw();
-  prob_[kSignal    ]->Draw("same");
-  //prob_[kAll       ]->Draw("esame");
+  axesStyle(*histo_["prob"][kSig], "Fit Probability", "events");
+  histo_["prob"][kSig]->SetMinimum(0.);
+  histo_["prob"][kSig]->SetMaximum( 2.5* histo_["prob"][kBkg]->GetMaximum() );
+  histo_["prob"][kSig]->Draw();
+  histo_["prob"][kBkg]->Draw("same");
   leg0->Draw("same");
 
   // ---

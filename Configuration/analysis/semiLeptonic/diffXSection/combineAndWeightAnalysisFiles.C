@@ -33,7 +33,7 @@ void combineAndWeightAnalysisFiles(){
   // ---------------------------------------
   std::vector<TString> name_; 
   // W systematics
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10PileUpPF"   );
+  name_.push_back("L1CorrPU/muonDiffXSecWjetsMadD6TFall10PileUpPF"   );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10MatchUpPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10MatchDownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWjetsMadD6TFall10ScaleUpPF"  );
@@ -44,7 +44,7 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ISRFSRupPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10MatchDownPF" );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10MatchUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10PileUpPF"    );
+  name_.push_back("L1CorrPU/muonDiffXSecSigMadD6TFall10PileUpPF"    );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ScaleDownPF" );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSigMadD6TFall10ScaleUpPF"   );
   // b) Bkg
@@ -52,7 +52,7 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ISRFSRupPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10MatchDownPF" );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10MatchUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10PileUpPF"    );
+  name_.push_back("L1CorrPU/muonDiffXSecBkgMadD6TFall10PileUpPF"    );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ScaleDownPF" );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecBkgMadD6TFall10ScaleUpPF"   );
   // c) All
@@ -60,7 +60,7 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ISRFSRupPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10MatchDownPF" );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10MatchUpPF"   );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10PileUpPF"    );
+  name_.push_back("L1CorrPU/muonDiffXSecAllMadD6TFall10PileUpPF"    );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ScaleDownPF" );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecAllMadD6TFall10ScaleUpPF"   );
   // DY systematics
@@ -68,14 +68,14 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10MatchUpPF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10ScaleDownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10ScaleUpPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZjetsMadD6TFall10PileUpPF"   );
+  name_.push_back("L1CorrPU/muonDiffXSecZjetsMadD6TFall10PileUpPF"   );
   // single top PU
   // a) s-channel
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSingleTopSchannelMadZ2Fall10PileUpPF");
+  name_.push_back("L1CorrPU/muonDiffXSecSingleTopSchannelMadZ2Fall10PileUpPF");
   // a) t-channel
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSingleTopTchannelMadZ2Fall10PileUpPF");
+  name_.push_back("L1CorrPU/muonDiffXSecSingleTopTchannelMadZ2Fall10PileUpPF");
   // a) tw-channel
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecSingleTopTWchannelMadZ2Fall10PileUpPF");
+  name_.push_back("L1CorrPU/muonDiffXSecSingleTopTWchannelMadZ2Fall10PileUpPF");
   // VV sample -> scale to 50 / pb
   // WZ
   // a) std
@@ -85,7 +85,7 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("L1Corr/muonDiffXSecWZPytia6Z2Fall10JES11PF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JERdownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10JERupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWZPytia6Z2Fall10PileUpPF" );
+  name_.push_back("L1CorrPU/muonDiffXSecWZPytia6Z2Fall10PileUpPF" );
   // WW	
   // a) std
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10PF"       );
@@ -94,7 +94,7 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("L1Corr/muonDiffXSecWWPytia6Z2Fall10JES11PF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JERdownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10JERupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecWWPytia6Z2Fall10PileUpPF" );
+  name_.push_back("L1CorrPU/muonDiffXSecWWPytia6Z2Fall10PileUpPF" );
   // ZZ		
   // a) std
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10PF"       );
@@ -103,7 +103,7 @@ void combineAndWeightAnalysisFiles(){
   name_.push_back("L1Corr/muonDiffXSecZZPytia6Z2Fall10JES11PF"  );
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JERdownPF");
   name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10JERupPF"  );
-  name_.push_back("diffXSecFromSignal/analysisRootFilesPFVetoJets/muonDiffXSecZZPytia6Z2Fall10PileUpPF" );
+  name_.push_back("L1CorrPU/muonDiffXSecZZPytia6Z2Fall10PileUpPF" );
 
   std::vector<double> scalingFactor_;
   // W+jets
@@ -198,8 +198,9 @@ void singleFile(TString name, double scalingFactor){
   //  std::cout << "separator: " << separator << std::endl;
   //  std::cout << "file: " << file << std::endl;
 
-  TFile f("./diffXSecFromSignal/analysisRootFilesL1Corr/"+file+".root", "recreate");
-  std::cout << "output file: " << "./diffXSecFromSignal/analysisRootFilesL1Corr/"+file+".root" << std::endl;
+  TString outputfile="./diffXSecFromSignal/analysisRootFilesL1CorrPU/"+file+".root";
+  TFile f(outputfile, "recreate");
+  std::cout << "output file: " << outputfile << std::endl;
   std::cout << "scaling factor: " << setprecision(9) << fixed << scalingFactor;
   // ---------------------------------------------------------
   // !!! list of plots you want to combine !!!

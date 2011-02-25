@@ -128,6 +128,17 @@ void analyzeMuonDiffXEfficiency(double luminosity = 5, bool save = false, bool t
       histo_["pt" ][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/pt"  );
       histo_["phi"][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("analyzeTightMuonCrossSectionRec"+Njets_[mult]+"/phi" );
     }
+
+//     // 0 btag-> btageff=normal eff in same jetbin
+//     // needed to keep wright number of lines in crossSection.txt
+//     unsigned int multReco= mult;
+//     if(mult>(Njets_.size()-3)) multReco-=2;
+//     for(unsigned int idx=kttbarReco; idx<=kSTopTWReco; ++idx) {
+//       histo_["eta"][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("noBjet"+Njets_[multReco]+"/eta" );
+//       histo_["pt" ][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("noBjet"+Njets_[multReco]+"/pt"  );
+//       histo_["phi"][idx][Njets_[mult]] = (TH1F*)files_[idx]->Get("noBjet"+Njets_[multReco]+"/phi" );
+//     }
+
     // get gen plots
     unsigned int multgen = mult;
     // take into account that there are no btag - gen plots

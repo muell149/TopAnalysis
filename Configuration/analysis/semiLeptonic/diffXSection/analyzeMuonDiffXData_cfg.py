@@ -37,5 +37,9 @@ if(writeOutput):
     process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') )
     process.out.fileName = cms.untracked.string('patTuple_selectedNjets4.root')
 
+## use L2L3Residual correction in analyzers
+uds0.correctionLevel.replace(uds0.correctionLevel, 'L3Absolute', 'L2L3Residual')
+#PyUnicode_Replace(uds0, 'L3Absolute', 'L2L3Residual', -1)
+
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXData_A.root'

@@ -7,6 +7,9 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include <TH1F.h>
 #include <TH2F.h>
@@ -23,7 +26,7 @@
 #include <TF1.h>
 #include <TBox.h>
 
-enum styles              {kDiBos, kSig,   kBkg,   kZjets,   kSTops  , kSTopt  , kSToptW , kWjets,   kQCD,    kData,  kLepJets, kAllMC, kSTop   , kABCD,  kGenSig, kGenBkg, kGenW, kGenSTop, kGenSTops, kGenSTopt, kGenSToptW};
+enum styles              {kDiBos, kSig,   kBkg,   kZjets,   kSTops  , kSTopt  , kSToptW , kWjets,   kQCD,    kData,  kLepJets, kAllMC, kSTop   , kMETQCD,  kGenSig, kGenBkg, kGenW, kGenSTop, kGenSTops, kGenSTopt, kGenSToptW};
 int color_      [ 14 ] = {10,     kRed+1, kRed-7, kAzure-2, kMagenta, kMagenta, kMagenta, kGreen-3, kYellow, kBlack, kRed,     kBlack, kMagenta, kBlack, };
 int markerStyle_[ 14 ] = {28,     20,     22,     29,       27      , 27      , 27      , 23,       21,      20,     23,       23,     27      , 22,     };
 
