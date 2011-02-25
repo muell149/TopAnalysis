@@ -47,7 +47,7 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
 TH1F* systematicHisto(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES11", TString down = "JES09");
 double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES11", TString down = "JES09");
 
-void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, double sTopVariation=1.0, double DiBosVariation=1.0, double ZjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
+void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_L1OffPF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, double sTopVariation=1.0, double DiBosVariation=1.0, double ZjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
 { 
   // ---
   //    define settings for systematic variations
@@ -338,11 +338,11 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     // a) get number
     // divide by scaleFactor here as QCD scale factors are with respect to the unscaled QCD MC
     if(Njets_[mult]=="Njets1") 
-      NQCD_.push_back(QCDVariation*1.6*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
+      NQCD_.push_back(QCDVariation*1.5*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
     if(Njets_[mult]=="Njets2") 
-      NQCD_.push_back(QCDVariation*2.0*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
+      NQCD_.push_back(QCDVariation*1.9*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
     if(Njets_[mult]=="Njets3") 
-      NQCD_.push_back(QCDVariation*2.2*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
+      NQCD_.push_back(QCDVariation*2.0*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
     if(Njets_[mult]=="Njets4") 
       NQCD_.push_back(QCDVariation*1.8*histo_[variables_[0]][kQCD][Njets_[mult]]->Integral(0, histo_[variables_[0]][kQCD][Njets_[mult]]->GetNbinsX()+1)/(EffScaleFactor*scaleFactor));
     // b) get shape from QCD MC
@@ -1251,7 +1251,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     inclusiveCrossSectionLjetsLeg->SetTextSize(0.05);
     inclusiveCrossSectionLjetsLeg->AddEntry( sigmaLjetsInclusiveData    , "Data ("+lum+" pb^{-1})" , "PL");
     inclusiveCrossSectionLjetsLeg->AddEntry( EWKhisto                   , "EWK-10-012", "PL");
-    inclusiveCrossSectionLjetsLeg->AddEntry( EWKhisto                   , "#tau and PU corr.", "");
+    inclusiveCrossSectionLjetsLeg->AddEntry( EWKhisto                   , "#tau correction", "");
     char VScaleChar[5];
     sprintf(VScaleChar,"%1.2f#upoint",VjetsSF);
     TString VScale=VScaleChar;
@@ -1628,7 +1628,8 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     newBkg->Add(newW,1.);
     //newW->Scale(1.14);done already before
     double EWKcontent[4] = {764,135,21.1,2.79};
-    double EWKPUcorr[4] = {1.08,1.13,1.21,1.31};
+    //double EWKPUcorr[4] = {1.08,1.13,1.21,1.31};
+    double EWKPUcorr[4] = {1.,1.,1.,1.};//1. with L1Offset
     double EWKerror[4] = {5,4,1.6,0.6};
     for(int iBin = 1; iBin<=sigmaLjetsInclusiveData->GetNbinsX(); ++iBin)
       {
@@ -2449,14 +2450,16 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
     double ISRFSRError=   ( std::abs(ISRFSRUpT-std ) + std::abs(ISRFSRDownT-std ) ) / 2.0;
     std::cout << "ISR/FSR Top: +/- " << setprecision(3) << fixed << "(|"<< ISRFSRUpT << " - " << std << "|+|"<< ISRFSRDownT << " - " << std << "|) / 2 = " << ISRFSRError << " = " << 100*ISRFSRError/std << "%" << std::endl;
     // calculate the combined systematic error
-    sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+sTopError*sTopError+DiBosError*DiBosError+ZjetsError*ZjetsError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
+    sysError=sqrt(JESError*JESError+JERError*JERError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+sTopError*sTopError+DiBosError*DiBosError+ZjetsError*ZjetsError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
     //sysError=sqrt(JESError*JESError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError);
     std::cout << "total systematic error: +/- " << setprecision(3) << fixed << sysError << " = " << 100*sysError/std << "%" << std::endl;
+    std::cout << "total lumi error: +/- " << setprecision(3) << fixed << LumiError << " = " << 100*LumiError/std << "%" << std::endl;
     // combine systematic and statistic error and Draw combined error
     double statError = sysHisto->GetBinError(bin);
-    double combinedError = sqrt(statError*statError+sysError*sysError);
+    double combinedError = sqrt(statError*statError+sysError*sysError+LumiError*LumiError);
     std::cout << "combined error: sqrt( " << setprecision(3) << fixed << statError;
-    std::cout << "^2 + "<< setprecision(3) << fixed << sysError << "^2 ) = ";
+    std::cout << "^2 + "<< setprecision(3) << fixed << sysError;
+    std::cout << "^2 + "<< setprecision(3) << fixed << LumiError << "^2 ) = ";
     std::cout << setprecision(3) << fixed << combinedError << " = " << 100*combinedError/std << "%" << std::endl;
     sysHisto->SetBinError(bin, combinedError);
   }
@@ -2642,14 +2645,16 @@ double systematicError2(const TString plot, TH1& histo, int usedBin, TString up,
   double ISRFSRError=   ( std::abs(ISRFSRUpT-std ) + std::abs(ISRFSRDownT-std ) ) / 2.0;
   std::cout << "(ISR/FSR Top: +/- " << setprecision(3) << fixed << "(|"<< ISRFSRUpT << " - " << std << "|+|"<< ISRFSRDownT << " - " << std << "|) / 2 = " << ISRFSRError << " = " << 100*ISRFSRError/std << "%)" << std::endl;
   // calculate the combined systematic error
-  double sysError=sqrt(JESError*JESError+JERError*JERError+LumiError*LumiError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+sTopError*sTopError+DiBosError*DiBosError+ZjetsError*ZjetsError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
+  double sysError=sqrt(JESError*JESError+JERError*JERError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError+sTopError*sTopError+DiBosError*DiBosError+ZjetsError*ZjetsError+PileUpError*PileUpError+ScaleError*ScaleError+MatchError*MatchError+ISRFSRError*ISRFSRError);
   //sysError=sqrt(JESError*JESError+TopMCError*TopMCError+EffError*EffError+QCDError*QCDError+WError*WError);
   std::cout << "total systematic error: +/- " << setprecision(3) << fixed << sysError << " = " << 100*sysError/std << "%" << std::endl;
+  std::cout << "total lumi error: +/- " << setprecision(3) << fixed << LumiError << " = " << 100*LumiError/std << "%" << std::endl;
   // combine systematic and statistic error and Draw combined error
   double statError = histo.GetBinError(usedBin);
-  double combinedError = sqrt(statError*statError+sysError*sysError);
+  double combinedError = sqrt(statError*statError+sysError*sysError+LumiError*LumiError);
   std::cout << "combined error: sqrt( " << setprecision(3) << fixed << statError;
-  std::cout << "^2 + "<< setprecision(3) << fixed << sysError << "^2 ) = ";
+  std::cout << "^2 + "<< setprecision(3) << fixed << sysError;
+  std::cout << "^2 + "<< setprecision(3) << fixed << LumiError << "^2 ) = ";
   std::cout << setprecision(3) << fixed << combinedError << " = " << 100*combinedError/std << "%" << std::endl;
   return combinedError;
 }
