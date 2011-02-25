@@ -36,23 +36,23 @@ enum sample {kData, kWjets, kStopS, kStopT, kStopTW, kZjets, kQCD, kTTbar};
 
 Double_t fitTemplate(Double_t *x, Double_t *par, TH1F* hist);
 Double_t fitFunction(Double_t *x, Double_t *par);
-std::vector<double> templateFit(Int_t jetNumber = 1, TString qcdTyp = "Data", Double_t zFix = 1., double ttbarFix = 1., TString JES = "", TString particleFlow = "Pf", TString lowerBound = "0.5", TString upperBound = "1.0", TString diffVar = "lepET", TString lowerBinEdge = "20", TString upperBinEdge = "35");
+std::vector<double> templateFit2(Int_t jetNumber = 1, TString qcdTyp = "Data", Double_t zFix = 1., double ttbarFix = 1., TString JES = "", TString particleFlow = "Pf", TString lowerBound = "0.5", TString upperBound = "1.0", TString diffVar = "lepET", TString lowerBinEdge = "20", TString upperBinEdge = "35");
 
-void templateFitSyst()
+void templateFit()
 {
   for(int i=1; i<=4; i++){
-    std::vector<double> std = templateFit(i);
-    double TtErr = (TMath::Abs(templateFit(i,"Data",1.,0.)[0]-std[0])+TMath::Abs(templateFit(i,"Data",1.,2.)[0]-std[0]))/2;
-    double RelIsoErr = (TMath::Abs(templateFit(i,"Data",1.,1.,"","Pf","0.3","0.5")[0]-std[0])+TMath::Abs(templateFit(i,"Data",1.,1.,"","Pf","1.0","2.0")[0]-std[0]))/2;
-    double ShapeErr = TMath::Abs(templateFit(i,"mc")[0]-templateFit(i,"mcAnti")[0]);
-    double JES = (TMath::Abs(templateFit(i,"Data",1.,1.,"JESup")[0]-std[0])+TMath::Abs(templateFit(i,"Data",1.,1.,"JESdown")[0]-std[0]))/2;
-    //double Zerr = (TMath::Abs(templateFit(i,"Data",0.7,1.)[0]-std[0])+TMath::Abs(templateFit(i,"Data",1.3,1.)[0]-std[0]))/2;//not needed, Z error in Xsec is enough
+    std::vector<double> std = templateFit2(i);
+    double TtErr = (TMath::Abs(templateFit2(i,"Data",1.,0.)[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.,2.)[0]-std[0]))/2;
+    double RelIsoErr = (TMath::Abs(templateFit2(i,"Data",1.,1.,"","Pf","0.3","0.5")[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.,1.,"","Pf","1.0","2.0")[0]-std[0]))/2;
+    double ShapeErr = TMath::Abs(templateFit2(i,"mc")[0]-templateFit2(i,"mcAnti")[0]);
+    double JES = (TMath::Abs(templateFit2(i,"Data",1.,1.,"JESup")[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.,1.,"JESdown")[0]-std[0]))/2;
+    //double Zerr = (TMath::Abs(templateFit2(i,"Data",0.7,1.)[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.3,1.)[0]-std[0]))/2;//not needed, Z error in Xsec is enough
     double syst = sqrt(TtErr*TtErr+RelIsoErr*RelIsoErr+ShapeErr*ShapeErr);
     cout<<setprecision(3)<<std[0]<<"+-"<<setprecision(2)<<std[1]<<"(stat)+-"<<syst<<"(syst) ["<<TtErr<<"(TT)+-"<<ShapeErr<<"(Shape)+-"<<RelIsoErr<<"(RelIso)+-"<<JES<<"(JES)]"<<endl;
   }
 }
 
-std::vector<double> templateFit(Int_t jetNumber, TString qcdTyp, Double_t zFix, double ttbarFix, TString JES, TString particleFlow, TString lowerBound, TString upperBound, TString diffVar, TString lowerBinEdge, TString upperBinEdge)
+std::vector<double> templateFit2(Int_t jetNumber, TString qcdTyp, Double_t zFix, double ttbarFix, TString JES, TString particleFlow, TString lowerBound, TString upperBound, TString diffVar, TString lowerBinEdge, TString upperBinEdge)
 {
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
