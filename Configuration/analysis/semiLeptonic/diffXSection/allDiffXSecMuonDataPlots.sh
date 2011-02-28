@@ -1,5 +1,8 @@
 #!/bin/sh
 
+## start the timer
+START=$(date +%s)
+
 ## to be called from TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/
 
 ## use this file to do the whole analysis for:
@@ -78,6 +81,8 @@ sleep 2
 root -l -q -b './wjetsAsymmetrieEstimator.C+(50., true, true, '$dataSample', "'$jetType'")' >> './diffXSecFromSignal/plots/chargeAsymmetrie/wjetsEstimationNumbers.txt'
 echo done
 
+## timer before systematic variations
+BEFORESYS=$(date +%s)
 ## c) systematic variations
 ## do the whole analysis applying different systematic variations
 ## and save all results in .txt file needed to calculate systematic errors
@@ -192,7 +197,19 @@ root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSam
 echo 31 Z+jets estimation down
 sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.7, false, true,"'$jetType'", '$JESup', '$JESdown')'
-## d) do the final cross section calculation
+
+## d) monitor systematic shifts(JES, N(W), QCD(MC&ABCD) )
+rm ./diffXSecFromSignal/plots/systematicVariations/*.*
+echo monitor systematic shifts
+sleep 2
+## 1) in linear scale 
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', false, "'$jetType'", '$JESup', '$JESdown')'
+## 2) in logarithmic scale 
+root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', true, "'$jetType'", '$JESup', '$JESdown')'
+## timer after systematic variations
+AFTERSYS=$(date +%s)
+
+## e) do the final cross section calculation
 ## create final plots using the analyzeMuonDiffXSec.C Makro 
 ## calculate systematic errors and save all output within one single .txt file
 ## example: analyzeMuonDiffXSec.C+(luminosity, savePlots, applyCorrections:.txtFile, pathOfDataFile.root)
@@ -204,14 +221,11 @@ root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSam
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, true, true, "'$jetType'", '$JESup', '$JESdown')'
 echo
 
-## e) monitor systematic shifts(JES, N(W), QCD(MC&ABCD) )
-rm ./diffXSecFromSignal/plots/systematicVariations/*.*
-echo monitor systematic shifts
-sleep 2
-## 1) in linear scale 
-root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', false, "'$jetType'", '$JESup', '$JESdown')'
-## 2) in logarithmic scale 
-root -l -q -b './systematicUncertaintyScaling.C+('$dataLuminosity', true, '$dataSample', true, "'$jetType'", '$JESup', '$JESdown')'
+## stop the timer and echo time
+END=$(date +%s)
+DIFF=$(( $END - $START ))
+SYS=$(( $AFTERSYS - $BEFORESYS ))
+echo "time: $DIFF seconds ($SYS seconds due to systematic variations)"
 
 ## f) copy plot to local folder on AFS
 echo starting to copy plots...
