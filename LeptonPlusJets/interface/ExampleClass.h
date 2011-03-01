@@ -3,7 +3,10 @@
 class ExampleClass : public BaseMacro {
 
  public:
-  void finalPlot();
+  //
+  ExampleClass(const edm::ParameterSet& cfg) : BaseMacro(cfg) {};
+  //
+  void plot();
   
   
  private:

@@ -7,6 +7,6 @@
 <use   name="TopAnalysis/TopUtils"/>
 
 <export>
-   <lib name=TopAnalysisLeptonPlusJets>
-   <use name=root>
+   <lib name="TopAnalysisLeptonPlusJets"/>
+   <use name="root"/>
 </export>

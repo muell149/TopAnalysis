@@ -9,11 +9,16 @@ int main(int argc, char* argv[])
     std::cout << "Usage : " << argv[0] << " [parameters.py]" << std::endl;
     return 0;
   }
-  // Get the python configuration
-  const edm::ParameterSet& params = *(edm::readPSetsFrom(argv[1]));
+  else{
+    std::cout << "+ +++" << std::endl;
+    std::cout << "+ reading input file from " << argv[1] << std::endl; 
+    std::cout << "+ +++" << std::endl;
+  }
+  if( !edm::readPSetsFrom(argv[1])->existsAs<edm::ParameterSet>("plot") ){
+    std::cout << " ERROR: ParametersSet 'plot' is missing in your configuration file" << std::endl; exit(0);
+  }
   
-  //BaseMacro myClass(readoutConfig());
-  //fwliteParameters.getParameter<edm::ParameterSet>("ExampleMacro"));
-  //myClass.finalPlot();
+  ExampleClass myClass(edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("plot"));
+  myClass.plot();
   return 1;
 }
