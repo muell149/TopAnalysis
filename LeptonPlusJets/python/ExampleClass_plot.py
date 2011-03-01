@@ -25,5 +25,5 @@ inputs = cms.VPSet(
     ),
 ),
 ## histograms of interest
-hists = cms.vstring('centralJetKinematics/pt','centralJetKinematics/eta'),
+hists = cms.vstring('centralJetKinematics/pt','centralJetKinematics/eta', 'test/myHist'),
 )
