@@ -1,6 +1,7 @@
 #ifndef EventBasicsAnalyzer_h
 #define EventBasicsAnalyzer_h
 
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
 /**

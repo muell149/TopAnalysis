@@ -1,6 +1,7 @@
 #ifndef JetEnergyCorrectionsAnalyzer_h
 #define JetEnergyCorrectionsAnalyzer_h
 
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
 #include "TH1F.h"

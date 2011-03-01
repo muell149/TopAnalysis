@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "DataFormats/FWLite/interface/Event.h"
 #include "DataFormats/FWLite/interface/Handle.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
