@@ -3,9 +3,9 @@
 class ExampleClass : public BaseMacro {
 
  public:
-  void getFinalPlot();
+  void finalPlot();
   
   
  private:
 
-}
+};

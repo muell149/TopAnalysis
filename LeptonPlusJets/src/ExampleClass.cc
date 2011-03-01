@@ -1,5 +1,6 @@
 #include "TopAnalysis/LeptonPlusJets/interface/ExampleClass.h"
 
+void
 ExampleClass::finalPlot()
 {
   TCanvas* canv = new TCanvas("canv", "examples plot", 600, 600);
@@ -10,8 +11,7 @@ ExampleClass::finalPlot()
   */
 
   //for(int i=0;....){
-  hist_[0]->Draw();
-  hist_[1]->Draw("same");
+  hists_["pt"][0]->Draw();
   // draw my legend or my label
-  save(*canv, "exampleFile.root")
+  save(*canv, "exampleFile.root");
 }
