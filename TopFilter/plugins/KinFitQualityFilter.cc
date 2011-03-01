@@ -1,7 +1,7 @@
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "TopAnalysis/TopFilter/plugins/KinFitQualityFilter.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtFullHadEvtPartons.h"
-
-#include "FWCore/Framework/interface/Event.h"
 
 KinFitQualityFilter::KinFitQualityFilter(const edm::ParameterSet& cfg):
   srcA_            ( cfg.getParameter<edm::InputTag>("srcA"            ) ),

@@ -12,7 +12,7 @@ Both limits are included in the valid range. If a limit is 0 it is not tested.*/
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Thu Dec 16 16:13:22 CET 2010
-// $Id$
+// $Id: RunRangeFilter.cc,v 1.1 2011/02/28 12:16:50 blutz Exp $
 //
 //
 
@@ -21,12 +21,12 @@ Both limits are included in the valid range. If a limit is 0 it is not tested.*/
 #include <memory>
 
 // user include files
-#include "FWCore/Framework/interface/Frameworkfwd.h"
+//#include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
+#include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 //
@@ -89,11 +89,15 @@ RunRangeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 
-  RunNumber_t runNumber = iEvent.getRun().id().run();
+  std::cout << "This filter is currently blid --> PLEASE FIX THIS TO WORK WITH CMSSW_3_11_X <--" << std::endl;
+  /*
+    PLEASE FIX THIS TO WORK WITH CMSSW_3_11_X 
 
-  if (_minRunNumber > 0 && runNumber < _minRunNumber ) return false;
-  if (_maxRunNumber > 0 && runNumber > _maxRunNumber ) return false;
-
+    RunNumber_t runNumber = iEvent.getRun().id().run();
+    
+    if (_minRunNumber > 0 && runNumber < _minRunNumber ) return false;
+    if (_maxRunNumber > 0 && runNumber > _maxRunNumber ) return false;
+  */
   return true;
 }
 

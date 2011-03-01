@@ -1,9 +1,7 @@
 #include "TopAnalysis/TopFilter/plugins/EventShapeFilter.h"
 
 #include "FWCore/Framework/interface/Event.h"
-//#include "FWCore/MessageLogger/interface/MessageLogger.h"
-
-//#include <Math/VectorUtil.h>
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 EventShapeFilter::EventShapeFilter(const edm::ParameterSet& cfg):
   src_           ( cfg.getParameter<edm::InputTag>("src"            ) ),

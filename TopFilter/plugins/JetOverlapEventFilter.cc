@@ -1,9 +1,9 @@
-#include "TopAnalysis/TopFilter/plugins/JetOverlapEventFilter.h"
+#include <Math/VectorUtil.h>
 
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-
-#include <Math/VectorUtil.h>
+#include "TopAnalysis/TopFilter/plugins/JetOverlapEventFilter.h"
 
 JetOverlapEventFilter::JetOverlapEventFilter(const edm::ParameterSet& cfg):
   src_           ( cfg.getParameter<edm::InputTag>("src"            ) ),

@@ -2,8 +2,9 @@
 #define PtHatFilter_h
 
 #include <TString.h>
-
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 class PtHatFilter : public edm::EDFilter {
 
