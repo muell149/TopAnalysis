@@ -1,255 +1,310 @@
-#include "KinFitPlots.h"
+#include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 36100, bool save = false, TString dataFile= "./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root")
+void analyzeHypothesisKinFit(double luminosity = 36100, bool save = false, TString dataFile= "./diffXSecFromSignal/data/oldDataNoL1/DiffXSecData_Nov15PF.root")
 {
+    // luminosity
+    TString lumi = getTStringFromInt(roundToInt((0.001*luminosity), false));
+    // save all plots into the following folder
+    TString saveTo = "./diffXSecFromSignal/plots/kinFit/";
+    // detailed output for debugging
+    bool outPutForDebugging=true;
+    
   // ---
   //    open input files
   // ---
   std::vector<TFile*> files_;
-  TString whichSample = "/analysisRootFiles";
+  TString whichSample = "/analysisRootFilesWithKinFit";
   TString fileName;
-  for(int ienum = 0; ienum<10; ienum++){
-    fileName = "./diffXSecFromSignal"+whichSample+"/muonDiffXSec";
-    if(ienum==kSig)   fileName += "SigMadD6TFall10";
-    if(ienum==kBkg)   fileName += "BkgMadD6TFall10";
-    if(ienum==kSToptW)fileName += "SingleTopTWchannelMadZ2Fall10";
-    if(ienum==kSTops) fileName += "SingleTopSchannelMadZ2Fall10";
-    if(ienum==kSTopt) fileName += "SingleTopTchannelMadZ2Fall10";
-    if(ienum==kWjets) fileName += "WjetsMadD6TFall10";
-    if(ienum==kZjets) fileName += "ZjetsMadD6TFall10";
-    if(ienum==kDiBos) fileName += "VVPytia6Z2Fall10";
-    if(ienum==kQCD)   fileName += "QCDPythiaZ2Fall10";
-    fileName += "PF.root";
-    if(ienum==kData)  fileName = dataFile;
-    files_.push_back(new TFile(fileName));
+  for(int ienum = kSig; ienum<=kSToptW; ienum++){
+    if((ienum!=kSTop)&&(ienum!=kWW)&&(ienum!=kWZ)&&(ienum!=kZZ)){
+      fileName = "./diffXSecFromSignal"+whichSample+"/muonDiffXSec";
+      if(ienum==kSig)   fileName += "SigMadD6TFall10";
+      if(ienum==kBkg)   fileName += "BkgMadD6TFall10";
+      if(ienum==kWjets) fileName += "WjetsMadD6TFall10";
+      if(ienum==kZjets) fileName += "ZjetsMadD6TFall10";
+      if(ienum==kDiBos) fileName += "VVPytia6Z2Fall10";
+      if(ienum==kQCD)   fileName += "QCDPythiaZ2Fall10";
+      if(ienum==kSToptW)fileName += "SingleTopTWchannelMadZ2Fall10";
+      if(ienum==kSTops) fileName += "SingleTopSchannelMadZ2Fall10";
+      if(ienum==kSTopt) fileName += "SingleTopTchannelMadZ2Fall10";
+      fileName += "PF.root";
+      if(ienum==kData)  fileName = dataFile;
+      files_.push_back(new TFile(fileName));
+    }
   }
 
   // ---
   //    get histograms
   // ---
-  // create container for all histos
-  std::map< TString, std::map <unsigend int, TH1F*> > histo_;
-  std::map< TString, std::map <unsigend int, TH2F*> > histo2_;
+  // a) setup structure
+  // create container for all histos (1D&2D)
+  std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
   // example: histo_["plotName"][sampleNr]
-  // get histos
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    if((idx==kSig)&&(idx==kBkg)&&(idx==kData)){
-      histo_["prob"      ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/prob"      );
-      histo_["chi2"      ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/chi2"      );
-      histo_["hadBQuark" ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/hadBQuark" );
-      histo_["lepBQuark" ][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/lepBQuark" );
-      histo_["lightQuark"][idx] = (TH1F*)files_[idx]->Get("analyzeHypothesisKinFit/lightQuark");
+  // set plot names - same as in .root files (for 1D and 2D)
+  TString plots1D[ 5 ] = { "analyzeHypoKinFit/prob"     , "analyzeHypoKinFit/chi2"      , "analyzeHypoKinFit/hadBQuark",
+			   "analyzeHypoKinFit/lepBQuark", "analyzeHypoKinFit/lightQuark" };
+  TString plots2D[ 1 ] = { "analyzeHypoKinFit/mapKinFit_" };
+  // collect all plot names in vector (first 1D, then 2D), count #1D plots
+  std::vector<TString> plots_;
+  plots_.insert( plots_.begin(), plots1D, plots1D + 5 );
+  unsigned int N1Dplots = plots_.size();
+  plots_.insert( plots_.end(), plots2D, plots2D + 1 );
+
+  // b) get histos from files
+  // needs: plots_, histo_, histo2_, N1Dplots
+  int Nplots=0;
+  // loop plots
+  for(unsigned int plot=0; plot<plots_.size(); ++plot){    
+    // loop sample
+    for(unsigned int idx=kSig; idx<=kSToptW; ++idx) {
+      if(idx==kSig){
+	// create plot container
+	TH1* targetPlot;
+	//	if(plot>=N1Dplots) (TH2F*)targetPlot;
+	files_[idx]->GetObject(plots_[plot], targetPlot);
+	// Check if plot exits
+	if(targetPlot){
+	  // save plot in corresponding map
+	  if(plot<N1Dplots ) histo_ [plots_[plot]][idx] = (TH1F*)files_[idx]->Get(plots_[plot]);
+	  if(plot>=N1Dplots) histo2_[plots_[plot]][idx] = (TH2F*)files_[idx]->Get(plots_[plot]);
+	  // count every 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
+	  if(plot>=N1Dplots) Nplots++;
+	}
+	else std::cout << "can not find plot "+plots_[plot] << " in file "+(TString)(files_[idx]->GetName()) << std::endl;
+      }
     }
-    if(idx==kSig) histo2_["lightQuark"][idx] = (TH2F*)files_[idx]->Get("analyzeHypothesisKinFit/mapGenMatch_");
+    // count every type of 1D plots (neglect #samples here as they well be drawn into the same canvas)
+    if((plot<N1Dplots)&&(histo_.count(plots_[plot])>0)) Nplots++;
   }
   
   // ---
-  //    lumiweighting for luminosity, add all MC for combined MC (l+jets and with QCD)
+  //    lumiweighting for choosen luminosity
   // ---
+  // needs: plots_, histo_, histo2_, N1Dplots
   // loop samples
-  for(unsigned int idx=0; idx<files_.size()-1; ++idx) {
-    // scale MC samples to same luminosity
-    histo_[variables_[var]][idx][Njets_[mult]]->Scale(EffScaleFactor*scaleFactor*lumiweight_[idx]);
-    if((idx==kSig || idx==kBkg) && (mult==3 || mult==4))
-      histo_[variables_[var]][idx][Njets_[mult]]->Scale(0.98323995);
+  for(unsigned int idx=kSig; idx<=kSToptW; ++idx) {
+    // loop plots 
+    for(unsigned int plot=0; plot<plots_.size(); ++plot){
+      // a) 1D
+      // check if plot exists
+      if((plot<N1Dplots)&&(histo_.count(plots_[plot])>0)&&(histo_[plots_[plot]].count(idx)>0)){
+	if(outPutForDebugging) std::cout << std::endl << "plot: "+plots_[plot] << " for sample " << sampleLabel(idx) << ":" << std::endl;
+	if(outPutForDebugging) std::cout << "#events before weighting: " << histo_[plots_[plot]][idx]->Integral(0, histo_[plots_[plot]][idx]->GetNbinsX()+1) << std::endl;
+	// scale MC samples to same luminosity
+	double weight = lumiweight(idx, 0.001*luminosity);
+	histo_[plots_[plot]][idx]->Scale(weight);
+	if(outPutForDebugging) std::cout << "weight: " << weight << std::endl;
+	if(outPutForDebugging) std::cout << "#events after weighting: " << histo_[plots_[plot]][idx]->Integral(0, histo_[plots_[plot]][idx]->GetNbinsX()+1) << std::endl;
+	// apply eff. SF for MC
+	if(idx!=kData) histo_[plots_[plot]][idx]->Scale(effSFAB);
+      }
+      // b) 2D
+      // check if plot exists
+      if((plot>=N1Dplots)&&(histo2_.count(plots_[plot])>0)&&(histo2_[plots_[plot]].count(idx)>0)){
+	if(outPutForDebugging) std::cout << std::endl << "plot: "+plots_[plot] << " for sample " << sampleLabel(idx) << ":" << std::endl;
+	if(outPutForDebugging) std::cout << "#events before weighting: " << histo2_[plots_[plot]][idx]->Integral(0, histo2_[plots_[plot]][idx]->GetNbinsX()+1, 0, histo2_[plots_[plot]][idx]->GetNbinsY()+1) << std::endl;
+	// scale MC samples to same luminosity
+	double weight = lumiweight(idx, 0.001*luminosity);
+	histo2_[plots_[plot]][idx]->Scale(weight);
+	if(outPutForDebugging) std::cout << "weight: " << weight << std::endl;
+	if(outPutForDebugging) std::cout << "#events after weighting: " << histo2_[plots_[plot]][idx]->Integral(0, histo2_[plots_[plot]][idx]->GetNbinsX()+1, 0, histo2_[plots_[plot]][idx]->GetNbinsY()+1) << std::endl;
+	// apply eff. SF for MC
+	if(idx!=kData) histo2_[plots_[plot]][idx]->Scale(effSFAB);
+      }
+    }
   }
 
+  // ---
+  //    add single top and DiBoson 
+  // ---
+  // needs: plots_, histo_, histo2_, N1Dplots
+  // loop plots 
+  for(unsigned int plot=0; plot<plots_.size(); ++plot){
+    // a) 1D
+    if((plot<N1Dplots)){
+      // a.1) single Top
+      if((histo_[plots_[plot]].count(kSTops)>0)&&(histo_[plots_[plot]].count(kSTopt)>0)&&(histo_[plots_[plot]].count(kSToptW)>0)){
+	histo_[plots_[plot]][kSTop]  =   (TH1F*)histo_[plots_[plot]][kSTops ]->Clone();
+	histo_[plots_[plot]][kSTop]->Add((TH1F*)histo_[plots_[plot]][kSTopt ]->Clone());
+	histo_[plots_[plot]][kSTop]->Add((TH1F*)histo_[plots_[plot]][kSToptW]->Clone());
+      }
+      // a.2) DiBoson
+      if((histo_[plots_[plot]].count(kWW)>0)&&(histo_[plots_[plot]].count(kWZ)>0)&&(histo_[plots_[plot]].count(kZZ)>0)){
+	histo_[plots_[plot]][kDiBos]  =   (TH1F*)histo_[plots_[plot]][kWW]->Clone();
+	histo_[plots_[plot]][kDiBos]->Add((TH1F*)histo_[plots_[plot]][kWZ]->Clone());
+	histo_[plots_[plot]][kDiBos]->Add((TH1F*)histo_[plots_[plot]][kZZ]->Clone());
+      }
+    }
+    // b) 2D
+    if((plot>=N1Dplots)){
+      // b.1) single Top
+      if((histo2_[plots_[plot]].count(kSTops)>0)&&(histo2_[plots_[plot]].count(kSTopt)>0)&&(histo2_[plots_[plot]].count(kSToptW)>0)){
+	histo2_[plots_[plot]][kSTop]  =   (TH2F*)histo2_[plots_[plot]][kSTops ]->Clone();
+	histo2_[plots_[plot]][kSTop]->Add((TH2F*)histo2_[plots_[plot]][kSTopt ]->Clone());
+	histo2_[plots_[plot]][kSTop]->Add((TH2F*)histo2_[plots_[plot]][kSToptW]->Clone());
+      }
+      // b.2) DiBoson
+      if((histo2_[plots_[plot]].count(kWW)>0)&&(histo2_[plots_[plot]].count(kWZ)>0)&&(histo2_[plots_[plot]].count(kZZ)>0)){
+	histo2_[plots_[plot]][kDiBos]  =   (TH2F*)histo2_[plots_[plot]][kWW]->Clone();
+	histo2_[plots_[plot]][kDiBos]->Add((TH2F*)histo2_[plots_[plot]][kWZ]->Clone());
+	histo2_[plots_[plot]][kDiBos]->Add((TH2F*)histo2_[plots_[plot]][kZZ]->Clone());
+      }
+    }
+  }
 
+  // ---
+  //    change 1D plots into stack plots
+  // ---
+  // needs: plots_, histo_, N1Dplots
+  // loop plots 
+  for(unsigned int plot=0; plot<plots_.size(); ++plot){
+    // loop samples backwards
+    for(int idx=kDiBos; idx>=kSig; --idx){
+      // check if plot exists
+      if((plot<N1Dplots)&&(histo_.count(plots_[plot])>0)&&(histo_[plots_[plot]].count(idx)>0)){
+	// check if previous plot also exists
+	if(histo_[plots_[plot]].count(idx+1)>0){
+	  histo_[plots_[plot]][idx]->Add((TH1F*)histo_[plots_[plot]][idx+1]->Clone());
+	    if(outPutForDebugging) std::cout << "add "+plots_[plot] << " plot for " << sampleLabel(idx) << " and " << sampleLabel(idx+1) << std::endl;
+	    if(outPutForDebugging) std::cout << "this new stacked plot contains now " <<  histo_[plots_[plot]][idx]->Integral(0, histo_[plots_[plot]][idx]->GetNbinsX()+1) << " events" << std::endl;
+	}
+      }
+    }
+  }
+  if(outPutForDebugging)  std::cout << std::endl;
 
   // ---
   //    configure histograms
   // ---
-  for(unsigned int idx=0; idx<files_.size(); ++idx) {
-    histogramStyle( *histo_["prob"      ][idx], idx );
-    histogramStyle( *histo_["chi2"      ][idx], idx );
-    histogramStyle( *histo_["hadBQuark" ][idx], idx );
-    histogramStyle( *histo_["lepBQuark" ][idx], idx );
-    histogramStyle( *histo_["lightQuark"][idx], idx );
+  // needs: plots_, histo_, histo2_, N1Dplots, xAxisLabel_
+  // set x axis label
+  TString xAxisLabel[ 6 ] = { "probability (best fit hypothesis)", "#chi^{2} (best fit hypothesis)", "i(genMatch - kinFit), hadronic b-quark", "i (genMatch - kinFit), leptonic b-quark", "i(genMatch - kinFit), light quarks", "jet hypothesis vs. generator truth" };
+  std::vector<TString> xAxisLabel_;
+  xAxisLabel_.insert( xAxisLabel_.begin(), xAxisLabel, xAxisLabel + 6 );
+  if(outPutForDebugging){
+    std::cout << "x Axis labels: " << std::endl;
+    // loop plots
+    for(unsigned int plot=0; plot<plots_.size(); ++plot){
+      std::cout << xAxisLabel_[plot] << " ";
+    }
+    std::cout << std::endl;
+  }
+  // loop samples
+  for(unsigned int idx=kSig; idx<=kData; ++idx){
+    // loop plots
+    for(unsigned int plot=0; plot<plots_.size(); ++plot){
+      // a) 1D
+      if((plot<N1Dplots)&&(histo_.count(plots_[plot])>0)&&(histo_[plots_[plot]].count(idx)>0)) histogramStyle( *histo_[plots_[plot]][idx], idx, true );
+      // b) 2D
+      if((plot>=N1Dplots)&&(histo2_.count(plots_[plot])>0)&&(histo2_[plots_[plot]].count(idx)>0)) histStyle2D( *histo2_[plots_[plot]][idx], sampleLabel(idx), xAxisLabel_[plot], "");
+    }
   }
 
-  // create a legend (in upper right corner)
-  TLegend *leg0 = new TLegend(0.45, 0.65, 1.05, 0.9);
+  // ---
+  //    create one legend for all 1D histos
+  // ---
+  int Nlegends=0;  
+  TLegend *leg0 = new TLegend(0.05, 0.15, 1.05, 0.9);
+  ++Nlegends;
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("Kin. Fit (after selection)");
-  leg0->AddEntry( histo_["prob"][kSig], "t#bar{t} (#mu prompt)", "PL" );
-  leg0->AddEntry( histo_["prob"][kBkg], "t#bar{t} other"       , "PL" );
-
-  // ---
-  //    do the printing for histo_["prob"]
-  // ---
-  TCanvas* canv0 = new TCanvas("canv0", "canv0", 600, 600); canvasStyle(*canv0);
-  
-  // draw canvas
-  canv0->cd(0);
-  canv0->SetLogy(1);
-  axesStyle(*histo_["prob"][kSig], "Fit Probability", "events");
-  histo_["prob"][kSig]->SetMinimum(0.);
-  histo_["prob"][kSig]->SetMaximum( 2.5* histo_["prob"][kBkg]->GetMaximum() );
-  histo_["prob"][kSig]->Draw();
-  histo_["prob"][kBkg]->Draw("same");
-  leg0->Draw("same");
-
-  // ---
-  //    do the printing for chi2_
-  // ---
-  TCanvas* canv1 = new TCanvas("canv1", "canv1", 600, 600); canvasStyle(*canv1);
-
-  // draw canvas
-  canv1->cd(0);
-  canv1->SetLogy(1);
-  axesStyle(*chi2_ [kAll], "#chi^{2}/ndof", "events");
-  chi2_ [kAll       ]->SetMaximum( 2.5* chi2_ [kAll]->GetMaximum() );
-  chi2_ [kAll       ]->Draw();
-  chi2_ [kSignal    ]->Draw("same");
-  //chi2_ [kAll       ]->Draw("same");
-  leg0->Draw("same");
-
-  // ---
-  //    do the printing for hadBQuark_
-  // ---
-  TCanvas* canv2 = new TCanvas("canv2", "canv2", 600, 600); canvasStyle(*canv2);
-
-  // draw canvas
-  canv2->cd(0);
-  //canv2->SetLogy(1);
-  axesStyle(*hadBQuark_ [kAll], "#Delta Index(genMatch, KinFit)_{hadB}", "events");
-  //hadBQuark_ [kAll       ]->SetMinimum(1.);
-  hadBQuark_ [kAll       ]->SetMaximum( 1.7* hadBQuark_ [kAll]->GetMaximum() );
-  hadBQuark_ [kAll       ]->Draw();
-  hadBQuark_ [kSignal    ]->Draw("same");
-  //hadBQuark_ [kAll       ]->Draw("same");
-  leg0->Draw("same");
-
-  // ---
-  //    do the printing for lepBQuark_
-  // ---
-  TCanvas* canv3 = new TCanvas("canv3", "canv3", 600, 600); canvasStyle(*canv3);
-
-  // draw canvas
-  canv3->cd(0);
-  //canv3->SetLogy(1);
-  axesStyle(*lepBQuark_[kAll], "#Delta Index(genMatch, KinFit)_{lepB}", "events");
-  //lepBQuark_[kAll       ]->SetMinimum(1.);
-  lepBQuark_[kAll       ]->SetMaximum( 1.7* lepBQuark_[kAll]->GetMaximum() );
-  lepBQuark_[kAll       ]->Draw();
-  lepBQuark_[kSignal    ]->Draw("same");
-  //lepBQuark_[kAll       ]->Draw("same");
-  leg1->Draw("same");
-
-  // ---
-  //    do the printing for lightQuark_
-  // ---
-  TCanvas* canv4 = new TCanvas("canv4", "canv4", 600, 600); canvasStyle(*canv4);
-
-  // draw canvas
-  canv4->cd(0);
-  //canv4->SetLogy(1);
-  axesStyle(*lightQuark_[kAll], "#Delta Index(genMatch, KinFit)_{lightQ}", "events");
-  //lightQuark_[kAll       ]->SetMinimum( 1.);
-  lightQuark_[kAll       ]->SetMaximum( 1.7* lightQuark_[kAll]->GetMaximum() );
-  lightQuark_[kAll       ]->Draw();
-  lightQuark_[kSignal    ]->Draw("same");
-  //lightQuark_[kAll       ]->Draw("same");
-  leg1->Draw("same");
-
-  // ---
-  //    do the printing for lightQuakr_
-  // ---
-  TCanvas* canv5 = new TCanvas("canv5", "canv5", 600, 600); canvasStyle(*canv5);
-
-  // draw canvas
-  canv5->cd(0);
-  //canv4->SetLogy(1);
-  jetHypo_[kAll]->SetTitle("");
-  jetHypo_[kAll]->GetXaxis( )->SetTitle();
-  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 1, "lightQ"     );
-  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 2, "lightQBar"  );
-  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 3, "hadronicB" );
-  jetHypo_[kAll]->GetXaxis( )->SetBinLabel( 4, "leptonicB" );
-  jetHypo_[kAll]->GetXaxis( )->SetLabelColor(      1   );
-  jetHypo_[kAll]->GetXaxis( )->SetLabelFont (     62   );
-  jetHypo_[kAll]->GetXaxis( )->SetLabelSize (   0.06   );
-  jetHypo_[kAll]->GetXaxis()->SetTickLength (     0.   );
-  jetHypo_[kAll]->SetLabelOffset            (   .02    );
-  jetHypo_[kAll]->LabelsOption              ( "u", "X" );
-
-  jetHypo_[kAll]->GetYaxis( )->SetTitle( "Index in Jet Collection" );
-  jetHypo_[kAll]->GetYaxis()->SetTitleSize  ( 0.07);
-  jetHypo_[kAll]->GetYaxis()->SetTitleColor (    1);
-  jetHypo_[kAll]->GetYaxis()->SetTitleOffset(  0.7);
-  jetHypo_[kAll]->GetYaxis()->SetTitleFont  (   62);
-  jetHypo_[kAll]->GetYaxis()->SetLabelSize  ( 0.04);
-  jetHypo_[kAll]->GetYaxis()->SetLabelFont  (   62);
-  jetHypo_[kAll]->GetYaxis()->SetNdivisions (  505);
-
-  jetHypo_[kAll]->SetStats(kFALSE);
-  jetHypo_[kAll]->SetFillColor( kRed );
-  jetHypo_[kAll]->Draw("box");
-  //leg1->Draw("same");
-}
-
-void canvasStyle(TCanvas& canv) 
-{
-  canv.SetFillStyle   ( 4000);
-  canv.SetLeftMargin  ( 0.20);
-  canv.SetRightMargin ( 0.05);
-  canv.SetBottomMargin( 0.15);
-  canv.SetTopMargin   ( 0.05);
-}
-
-void histogramStyle(TH1& hist, unsigned int style) 
-{
-  // pre-defined line style
-  std::vector<int> color;
-  color.push_back( kBlack); 
-  color.push_back( kBlue ); 
-  color.push_back( kRed  );
-
-  // pre-defined fill style
-  std::vector<int> fill;
-  fill.push_back(   1); 
-  fill.push_back(3004); 
-  fill.push_back(3005);
-
-  // pre-defined marker style
-  std::vector<int> marker;
-  marker.push_back( 20);
-
-  // set line width
-  style==kAll ? hist.SetLineWidth(6) : hist.SetLineWidth(3);
-
-  hist.SetStats(kFALSE);
-  hist.SetLineColor  (color[style]);
-  hist.SetFillColor  (color[style]);
-  hist.SetMarkerColor(color[style]);
-  hist.SetFillStyle  (fill [style]);
-
-  if(style==kAll){
-    hist.SetMarkerStyle(marker[style]);
-    hist.SetMarkerSize(1.4);
+  // fill in contributing sample
+  // loop samples
+  for(unsigned int idx=kSig; idx<=kData; ++idx){
+    // check if sampe exists in at least one plot
+    bool exit=false;
+    // loop plots
+    for(unsigned int plot=0; plot<plots_.size(); ++plot){
+      // if found: add entry to legend
+      if((histo_.count(plots_[plot])>0)&&(histo_[plots_[plot]].count(idx)>0)&&(!exit)){
+	if(idx==kData) leg0->AddEntry(histo_[plots_[plot]][idx], sampleLabel(idx)+", "+lumi+" pb^{-1}", "PL");
+	else leg0->AddEntry(histo_[plots_[plot]][idx], sampleLabel(idx), "F");
+	exit=true;
+      }
+    }
   }
-}
 
-void axesStyle(TH1& hist, const char* titleX, const char* titleY) 
-{
-  hist.SetTitle("");
+  // ---
+  //    create canvas
+  // ---
+  std::vector<TCanvas*> MyCanvas;
+    if(outPutForDebugging) std::cout << std::endl << "#plots: 1D +2D = " << plots_.size() << " ( " << N1Dplots << " + " << plots_.size()-N1Dplots << " )" << std::endl;
+    if(outPutForDebugging) std::cout << std::endl << "#Canvas: " << Nplots << std::endl;
+  // a) create canvas for all plots + legends
+  for(int idx=0; idx<Nplots+Nlegends; idx++){
+    char canvname[10];
+    sprintf(canvname,"canv%i",idx);    
+    MyCanvas.push_back( new TCanvas( canvname, canvname, 600, 600) );
+    canvasStyle(*MyCanvas[idx]);
+  }
 
-  hist.GetXaxis()->SetTitle(titleX);
-  hist.GetXaxis()->CenterTitle();
-  hist.GetXaxis()->SetTitleSize  ( 0.06);
-  hist.GetXaxis()->SetTitleColor (    1);
-  hist.GetXaxis()->SetTitleOffset(  0.8);
-  hist.GetXaxis()->SetTitleFont  (   62);
-  hist.GetXaxis()->SetLabelSize  ( 0.05);
-  hist.GetXaxis()->SetLabelFont  (   62);
-  hist.GetXaxis()->SetNdivisions (  505);
-  
-  hist.GetYaxis()->SetTitle(titleY);
-  hist.GetYaxis()->SetTitleSize  ( 0.07);
-  hist.GetYaxis()->SetTitleColor (    1);
-  hist.GetYaxis()->SetTitleOffset(  1.2);
-  hist.GetYaxis()->SetTitleFont  (   62);
-  hist.GetYaxis()->SetLabelSize  ( 0.04);
-  hist.GetYaxis()->SetLabelFont  (   62);
+  // ---
+  //    do the printing
+  // ---
+  // a) for plots
+  int canvasNumber=0;
+  // loop plots
+  for(unsigned int plot=0; plot<plots_.size(); ++plot){
+    bool first=true;
+    // open canvas and set titel corresponding to plotname in .root file
+    MyCanvas[canvasNumber]->cd(0);
+    MyCanvas[canvasNumber]->SetTitle(getNameAfterSlash(plots_[plot]));
+    // loop samples
+    for(unsigned int idx=kSig; idx<=kData; ++idx){
+      // a1) for 1D plots (existing)
+      if(plot<N1Dplots){
+	// check if plot is existing
+	if((histo_.count(plots_[plot])>0)&&(histo_[plots_[plot]].count(idx)>0)){
+	  if(outPutForDebugging) std::cout << "plotting " << plots_[plot] << " from sample " << sampleLabel(idx) << " to canvas " << canvasNumber << " ( " << MyCanvas[canvasNumber]->GetTitle() << " )" << std::endl;
+	  // axes style and drawing for first plot
+	  if(first){
+	    axesStyle(*histo_[plots_[plot]][idx], xAxisLabel_[plot], "events", 0, 1.2*histo_[plots_[plot]][idx]->GetMaximum());
+	    histo_[plots_[plot]][idx]->Draw("");
+	    histo_[plots_[plot]][42] = (TH1F*)(histo_[plots_[plot]][idx]->Clone());
+	  }
+	  // draw other plots into same canvas
+	  else histo_[plots_[plot]][idx]->Draw("same");
+	  first=false;
+	}
+	// redraw axis at the end
+	if((histo_.count(plots_[plot])>0)&&(idx==kData)) histo_[plots_[plot]][42]->Draw("axis same");
+      }
+      // a2) for 2D plots
+      if((plot>=N1Dplots)&&(histo2_.count(plots_[plot])>0)&&(histo2_[plots_[plot]].count(idx)>0)){
+	// new Canvas for every plot
+	MyCanvas[canvasNumber]->cd(0);
+	MyCanvas[canvasNumber]->SetTitle(getNameAfterSlash(plots_[plot])+getTStringFromInt(idx));
+	if(outPutForDebugging) std::cout << "plotting " << plots_[plot] << " from sample " << sampleLabel(idx) << " to canvas " << canvasNumber  << " ( " << MyCanvas[canvasNumber]->GetTitle() << " )"  << std::endl;
+	++canvasNumber;
+	// draw histo
+	histo2_[plots_[plot]][idx]->Draw("BOX");
+      }
+    }
+    // for 1D hists: next canvas
+    if((plot<N1Dplots)&&(histo_.count(plots_[plot])>0)) ++canvasNumber;
+  }
+  // b) for legends
+  MyCanvas[canvasNumber]->cd(0);
+  MyCanvas[canvasNumber]->SetTitle("legendHypoKinFit");
+  leg0->Draw("");
+  ++canvasNumber;
+
+  // ---
+  // saving
+  // ---
+  if(save){
+    // save all plots in one pdf
+    MyCanvas[0]->Print(saveTo+"kinFit"+lumi+"Hypothesis.pdf(", "pdf");
+    for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+      MyCanvas[idx]->Print(saveTo+"kinFit"+lumi+"Hypothesis.pdf", "pdf");   
+    }
+    MyCanvas[MyCanvas.size()-1]->Print(saveTo+"kinFit"+lumi+"Hypothesis.pdf)", "pdf");
+    // save every plot as png
+    for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png");      
+    }
+  }
+
 }
