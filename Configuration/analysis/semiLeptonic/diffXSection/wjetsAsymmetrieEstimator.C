@@ -42,7 +42,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
   // ---
   //    main function parameters
   // ---
-  // save:       choose whether you want to save every plot as png and all within one ps file
+  // save:       choose whether you want to save every plot as eps and all within one ps file
   // textoutput: choose whether you want to save the estimated number of QCD events for data 
   //             in .txt file to share it with other parts of the Analysis
   // luminosity: choose luminosity for scaling of event numbers 
@@ -304,10 +304,10 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
     canv0->Print(saveTo+"chargeAsymmetrieEstimation.ps(" );
     canv1->Print(saveTo+"chargeAsymmetrieEstimation.ps"  );
     canv2->Print(saveTo+"chargeAsymmetrieEstimation.ps)" );
-    // png
-    canv0->Print(saveTo+(TString)(canv0->GetTitle())+".png");
-    canv1->Print(saveTo+(TString)(canv1->GetTitle())+".png");
-    canv2->Print(saveTo+(TString)(canv2->GetTitle())+".png");
+    // eps
+    canv0->Print(saveTo+(TString)(canv0->GetTitle())+".eps");
+    canv1->Print(saveTo+(TString)(canv1->GetTitle())+".eps");
+    canv2->Print(saveTo+(TString)(canv2->GetTitle())+".eps");
   }
 
 }

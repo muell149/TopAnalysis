@@ -86,7 +86,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
   // ---
   //    main function parameters
   // ---
-  // save       : choose whether you want to save every plot as png and all within one ps file
+  // save       : choose whether you want to save every plot as eps and all within one pdf file
   // loadValues : choose whether you want to load effiency corrections 
   //              and bkg estimation from crossSection.txt file
   // jetTyp     : use "" for calo and "PF" for particle flow -> needs the corresponding rootfiles!
@@ -2116,16 +2116,16 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     // saving
     // ---
     if(save){   
-      // ps
+      // pdf
       MyCanvas[0]->Print(saveTo+"diffX7TeV"+lum2+"nbAllJetMultiplicities"+log+".pdf(", "pdf");
       for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
 	MyCanvas[idx]->Print(saveTo+"diffX7TeV"+lum2+"nbAllJetMultiplicities"+log+".pdf", "pdf");   
       }
       MyCanvas[MyCanvas.size()-1]->Print(saveTo+"diffX7TeV"+lum2+"nbAllJetMultiplicities"+log+".pdf)", "pdf");
     
-      // png
+      // eps
       for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-	MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png");      
+	MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".eps");      
       }
     }
   }

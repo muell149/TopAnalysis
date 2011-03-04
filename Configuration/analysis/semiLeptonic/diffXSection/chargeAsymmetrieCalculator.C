@@ -43,7 +43,7 @@ void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false, TStrin
   // ---
   //    main function parameters
   // ---
-  // save:       choose whether you want to save every plot as png and all within one ps file
+  // save:       choose whether you want to save every plot as eps and all within one ps file
   // textoutput: choose whether you want to save the estimated number of QCD events for data 
   //             in .txt file to share it with other parts of the Analysis
   // choose target directory for saving:
@@ -210,9 +210,9 @@ void chargeAsymmetrieCalculator(bool save = false, bool textoutput=false, TStrin
     }
     MyCanvas[MyCanvas.size()-1]->Print(saveTo+"chargeAsymmetrieParameter.ps)"  );
   
-    // png
+    // eps
     for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png"  );      
+      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".eps"  );      
     }
   }
 }

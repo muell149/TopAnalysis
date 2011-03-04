@@ -24,7 +24,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
   // ---
   //    main function parameters
   // ---
-  // save:       choose whether you want to save every plot as png and all within one ps file
+  // save:       choose whether you want to save every plot as eps and all within one ps file
   // textoutput: choose whether you want to save the estimated number of QCD events for data 
   //             in .txt file to share it with other parts of the Analysis
   // luminosity: choose luminosity for scaling of event numbers 
@@ -304,10 +304,10 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
       MyCanvas[var]->Print(saveTo+plots+"7TeV"+lum2+"nb.pdf", "pdf");
     }
     MyCanvas[MyCanvas.size()-1]->Print(saveTo+plots+"7TeV"+lum2+"nb.pdf)", "pdf");
-    // png
+    // eps
     for(unsigned int var=0; var<MyCanvas.size(); var++){
       if((jetTyp=="PF" && (var>=17 && var<=19)) || (jetTyp=="" && (var>=20 && var<=25)))continue;
-      MyCanvas[var]->Print(saveTo+(TString)(MyCanvas[var]->GetTitle())+".png"); 
+      MyCanvas[var]->Print(saveTo+(TString)(MyCanvas[var]->GetTitle())+".eps"); 
     }
   }
   

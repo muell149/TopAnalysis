@@ -37,7 +37,7 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
   // ---
   //    main function parameters
   // ---
-  // save:       choose whether you want to save every plot as png and all within one ps file
+  // save:       choose whether you want to save every plot as eps and all within one ps file
   // luminosity: choose luminosity for scaling of event numbers 
   //             lum.lum2 is derived from this and used for legend as entry
   TString lum  = getTStringFromInt(roundToInt(luminosity/1000));
@@ -438,9 +438,9 @@ void systematicUncertaintyScaling(double luminosity = 36100, bool save = true, T
     }
     MyCanvas[MyCanvas.size()-1]->Print(saveTo+"systematicShift"+lum+"nb"+log+".pdf)", "pdf");
     
-    // png
+    // eps
     for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".png");      
+      MyCanvas[idx]->Print(saveTo+(TString)(MyCanvas[idx]->GetTitle())+".eps");      
     }
   }
 }
