@@ -54,7 +54,7 @@ TriggerFilter::filter(edm::Event& evt, const edm::EventSetup&)
       std::string path = vetoPaths_[i].substr(0,vetoPaths_[i].find('*'));       
       std::string name = trigName.triggerName(i_Trig).substr(0,vetoPaths_[i].find('*'));
       if(!(name== path)) continue; 	    	    	    	    
-      pass = false;     	        
+      return false;    	        
     }          
   }  
   
