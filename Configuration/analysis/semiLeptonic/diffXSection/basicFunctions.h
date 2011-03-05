@@ -541,7 +541,7 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   if(sys==sysJESUp  ) fileName += "JESup";
   if(sys==sysJESDown) fileName += "JESdown";
   // JER
-  if(sys==sysJERUp  ) fileName += "JESup";
+  if(sys==sysJERUp  ) fileName += "JERup";
   if(sys==sysJERDown) fileName += "JERdown";
   // Pile Up
   if(sys==sysPileUp) fileName += "PileUp";
@@ -618,6 +618,7 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
 {
   // this function searches for every plot listed in "plotList_" in all files listed in "files_",
   // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
+  // empty plots will be neglected
   // modified quantities: "histo_", "histo2_", "Nplots"
   // used functions: sampleLabel
   // used enumerators: samples
@@ -628,25 +629,32 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){    
     // loop samples
-    for(unsigned int sample=kSig; sample<=kSToptW; ++sample) {
+    for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
       // check if file exists
+      // give warning if file does not exist
+      if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this plots" << std::endl;
       if(files_.count(sample)>0){
 	// create plot container
 	TH1* targetPlot;
 	files_[sample]->GetObject(plotList_[plot], targetPlot);
 	// Check if plot exits
-	if(targetPlot){
-	  // save plot in corresponding map
-	  if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
-	  if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotList_[plot]));
-	  // count every existing 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
-	  if(plot>=N1Dplots) Nplots++;
-	}
 	// give warning if plot does not exist
 	if((!targetPlot)&&(verbose>0)) std::cout << "can not find plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " - continue and neglect this plot" << std::endl;
+	if(targetPlot){
+	  // check if plot is empty
+	  bool emptyPlot=false;
+	  if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
+	  if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
+	  if(emptyPlot) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
+	  if(!emptyPlot){
+	    // save plot in corresponding map
+	    if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
+	    if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotList_[plot]));
+	    // count every existing 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
+	    if(plot>=N1Dplots) Nplots++;
+	  }
+	}
       }
-      // give warning if file does not exist
-      if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this plots" << std::endl;
     }
     // count every existing type of 1D plots (neglect #samples here as they well be drawn into the same canvas)
     if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)) Nplots++;
@@ -699,12 +707,12 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
   }
 }
 
-void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1)
+void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1, bool reCreate=0)
 {
   // this function creates plots for all diboson and all single 
   // top samples combined if the combined SingleTop and DiBoson 
   // samples do not exist as .root file. 
-  // every plot in "plotList_" existing in each of the three 
+  // Every plot in "plotList_" existing in each of the three 
   // sTop/ diBoson files will be combined and saved in the histo_ 
   // and histo2_ maps
   // NOTE: all plots from the samples are considered to be weighted 
@@ -714,74 +722,65 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
   // used enumerators: samples
   // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
+  // "reCreate": choose if you want to create the combined plot from the 
+  // single plots if it alredy exists. Careful: the old one will be deleted
 
+  if(verbose>0) std::cout << std::endl;
   // loop plots 
-  std::cout << std::endl;
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    // a) 1D
-    if((plot<N1Dplots)){
-      // a.1) single Top
-      // check that combined plot does not exist
-      if(histo_[plotList_[plot]].count(kSTops)==0){
-	// check that single plots exist
-	if((histo_[plotList_[plot]].count(kSTops)>0)&&(histo_[plotList_[plot]].count(kSTopt)>0)&&(histo_[plotList_[plot]].count(kSToptW)>0)){
-	  histo_[plotList_[plot]][kSTop]  =   (TH1F*)histo_[plotList_[plot]][kSTops ]->Clone();
-	  histo_[plotList_[plot]][kSTop]->Add((TH1F*)histo_[plotList_[plot]][kSTopt ]->Clone());
-	  histo_[plotList_[plot]][kSTop]->Add((TH1F*)histo_[plotList_[plot]][kSToptW]->Clone());
-	  // print out information 
-	  if(verbose>0) std::cout << "will add single Top Files" << std::endl;
-	}	
-	else if(verbose>0) std::cout << "plot " << plotList_[plot] << " does not exit in all single Top files" << std::endl;
+    // loop STop and DiBoson
+    for(unsigned int sample=kSTop; sample<=kDiBos; ++sample){
+      // mark first plot found
+      bool first=1;
+      // check that combined plot does not already exist
+      // if existing and reCreate==1, it will be overwritten
+      bool combinedplotExists=false;
+      if((plot<N1Dplots )&&(histo_ [plotList_[plot]].count(sample)>0)) combinedplotExists=true;
+      if((plot>=N1Dplots)&&(histo2_[plotList_[plot]].count(sample)>0)) combinedplotExists=true;
+      if(reCreate==1) combinedplotExists=false;
+      if((combinedplotExists==true)&&(verbose>0)){
+	std::cout << "combined plot " << plotList_[plot];
+	std::cout << " for sample " << sampleLabel(sample);
+	std::cout << " already exists, will keep this one" << std::endl;
       }
-      else if(verbose>1) std::cout << "combined plot " << plotList_[plot] << " for single Top already exists" << std::endl;
-      // a.2) DiBoson
-      // check that combined plot does not exist
-      if(histo_[plotList_[plot]].count(kDiBos)==0){
-	// check that single plots exist
-	if((histo_[plotList_[plot]].count(kWW)>0)&&(histo_[plotList_[plot]].count(kWZ)>0)&&(histo_[plotList_[plot]].count(kZZ)>0)){
-	  histo_[plotList_[plot]][kDiBos]  =   (TH1F*)histo_[plotList_[plot]][kWW]->Clone();
-	  histo_[plotList_[plot]][kDiBos]->Add((TH1F*)histo_[plotList_[plot]][kWZ]->Clone());
-	  histo_[plotList_[plot]][kDiBos]->Add((TH1F*)histo_[plotList_[plot]][kZZ]->Clone());
-	  // print out information 
-	  if(verbose>0) std::cout << "will add DiBoson Files" << std::endl;
+      if(!combinedplotExists){
+	// loop all three subchannels
+	unsigned int firstSubChannel=kSTops;
+	if(sample==kDiBos) firstSubChannel=kWW;
+	for(unsigned int subSample=firstSubChannel; subSample<=firstSubChannel+2; ++subSample){
+	  // check if plot exists for the subchannel
+	  bool subPlotExists=false;
+	  if((plot<N1Dplots )&&(histo_ [plotList_[plot]].count(subSample)>0)) subPlotExists=true;
+	  if((plot>=N1Dplots)&&(histo2_[plotList_[plot]].count(subSample)>0)) subPlotExists=true;
+	  if((subPlotExists==false)&&(verbose>0)){
+	    std::cout << "plot " << plotList_[plot];
+	    std::cout << " does not exist for subSample ";
+	    std::cout << sampleLabel(subSample) << std::endl;
+	  }
+	  if(subPlotExists){
+	    // add histo
+	    // a) 1D 
+	    if(plot<N1Dplots){
+	      if(first ) histo_[plotList_[plot]][sample]   =  (TH1F*)histo_[plotList_[plot]][subSample]->Clone();
+	      if(!first) histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][subSample]->Clone());
+	    }
+	    // b) 2D
+	    if(plot>=N1Dplots){
+	      if(first ) histo_[plotList_[plot]][sample]   =  (TH1F*)histo_[plotList_[plot]][subSample]->Clone();
+	      if(!first) histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][subSample]->Clone());
+	    }
+	    // indicate that already one plot is found
+	    first=0;
+	    // print out information 
+	    if(verbose>0){
+	      std::cout << "will add " << plotList_[plot];
+	      std::cout << " from " << sampleLabel(subSample) << std::endl;
+	    }
+	  }
 	}
-	else if(verbose>0) std::cout << "plot " << plotList_[plot] << " does not exit in all DiBoson files" << std::endl;
       }
-      else if(verbose>1) std::cout << "combined plot " << plotList_[plot] << " for Diboson already exists" << std::endl;
-    }
-    // b) 2D
-    if((plot>=N1Dplots)){
-      // b.1) single Top
-      // check that combined plot does not exist
-      if(histo_[plotList_[plot]].count(kSTops)==0){
-	// check that single plots exist
-	if((histo2_[plotList_[plot]].count(kSTops)>0)&&(histo2_[plotList_[plot]].count(kSTopt)>0)&&(histo2_[plotList_[plot]].count(kSToptW)>0)){
-	  histo2_[plotList_[plot]][kSTop]  =   (TH2F*)histo2_[plotList_[plot]][kSTops ]->Clone();
-	  histo2_[plotList_[plot]][kSTop]->Add((TH2F*)histo2_[plotList_[plot]][kSTopt ]->Clone());
-	  histo2_[plotList_[plot]][kSTop]->Add((TH2F*)histo2_[plotList_[plot]][kSToptW]->Clone());
-	  // print out information 
-	  if(verbose>0) std::cout << "will add single Top Files" << std::endl;
-	}
-	else if(verbose>0) std::cout << "plot " << plotList_[plot] << " does not exit in all single Top files" << std::endl;
-      }
-      else if(verbose>1) std::cout << "combined plot " << plotList_[plot] << " for single Top already exists" << std::endl;
-      // b.2) DiBoson
-      // check that combined plot does not exist
-      if(histo_[plotList_[plot]].count(kDiBos)==0){
-	// check that single plots exist
-	if((histo2_[plotList_[plot]].count(kWW)>0)&&(histo2_[plotList_[plot]].count(kWZ)>0)&&(histo2_[plotList_[plot]].count(kZZ)>0)){
-	  histo2_[plotList_[plot]][kDiBos]  =   (TH2F*)histo2_[plotList_[plot]][kWW]->Clone();
-	  histo2_[plotList_[plot]][kDiBos]->Add((TH2F*)histo2_[plotList_[plot]][kWZ]->Clone());
-	  histo2_[plotList_[plot]][kDiBos]->Add((TH2F*)histo2_[plotList_[plot]][kZZ]->Clone());
-	  // print out information 
-	  if(verbose>0) std::cout << "will add DiBoson Files" << std::endl;
-	}
-	else if(verbose>0) std::cout << "plot " << plotList_[plot] << " does not exit in all DiBoson files" << std::endl;
-      }
-      else if(verbose>1) std::cout << "combined plot " << plotList_[plot] << " for Diboson already exists" << std::endl;
     }
   }
-  std::cout << std::endl;
 }
 		       
 void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const unsigned int verbose=1)
