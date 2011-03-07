@@ -63,6 +63,7 @@ void analyzeHypothesisKinFit(double luminosity = 35900, bool save = true, int sy
 			 "analyzeHypoKinFit/lepBQuark"               , 
 			 "analyzeHypoKinFit/lightQuark"              , 
 			 "analyzeHypoKinFit/delChi2"                 ,
+			 "analyzeHypoKinFit/wrongAssign"             ,
 			 // pull distributions
 			 "analyzeHypoKinFit/hadBQuarkPt"             ,
 			 "analyzeHypoKinFit/hadBQuarkEta"            ,
@@ -193,7 +194,7 @@ void analyzeHypothesisKinFit(double luminosity = 35900, bool save = true, int sy
                             "jet hyothesis generator truth/jet hypothesis fit"  ,
 			    // b) reconstructed Top quantities
                             "p_{t}(t) matched/p_{t}(t) reco"                    ,
-                            "#phi(t) matched/#phi(t) reco"                      ,
+			    "#phi(t) matched/#phi(t) reco"                      ,
                             "y(t) matched/y(t) reco"                            ,
 			    "angle(t,W) matched/angle (top,W ) reco"            ,
                             // c) reconstructed ttbar quantities
@@ -202,9 +203,16 @@ void analyzeHypothesisKinFit(double luminosity = 35900, bool save = true, int sy
                             "y(t#bar{t}) matched/y(t#bar{t}) reco"              ,
                             "H_{T}(t#bar{t}) matched/H_{T}(t#bar{t}) reco"      ,
                             "#Sigmay(t#bar{t}) matched/ reco"                   ,
-                            "#phi(leptonic t)-#phi(hadronic t) matched/#phi(leptonic t)-#phi(hadronic t) Kinfit"    ,
+                            "#phi(leptonic t)-#phi(hadronic t) matched/#phi(leptonic t)-#phi(hadronic t) Kinfit",
                             "y(leptonic t)-y(hadronic t) matched/y(leptonic t)-y(hadronic t) Kinfit"                
                            };
+  // count # plots
+  unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
+  unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
+  // check if all axis labels exist
+  if(N1Dplots != sizeof(axisLabel1D)/sizeof(TString)) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
+  if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
+  if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
 
   // ---
   //    open our standard analysis files
@@ -218,9 +226,6 @@ void analyzeHypothesisKinFit(double luminosity = 35900, bool save = true, int sy
   std::vector<TString> plotList_;
   plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
   plotList_.insert( plotList_.end()  , plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
-  // count #1D plots
-  unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
-  unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -263,9 +268,6 @@ void analyzeHypothesisKinFit(double luminosity = 35900, bool save = true, int sy
   // ---
   //    configure histograms
   // ---
-  // check if all axis labels exist
-  if(N1Dplots != sizeof(axisLabel1D)/sizeof(TString)) std::cout << "ERROR: some 1D axis label are missing" << std::endl;
-  if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D axis label are missing" << std::endl;
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
   axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
