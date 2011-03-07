@@ -30,29 +30,30 @@ TH1F* HTlep_qcd;
 TH1F* HTlep_qcdAnti;
 TH1F* HTlep_qcdFit;
 THStack* HTlep_fitHisto;
+THStack* HTlep_fitHisto2;
 TH1F* HTlep_qcdDirty;
 
 enum sample {kData, kWjets, kStopS, kStopT, kStopTW, kZjets, kQCD, kTTbar};
 
 Double_t fitTemplate(Double_t *x, Double_t *par, TH1F* hist);
 Double_t fitFunction(Double_t *x, Double_t *par);
-std::vector<double> templateFit2(Int_t jetNumber = 1, TString qcdTyp = "Data", Double_t zFix = 1., double ttbarFix = 1., TString JES = "", TString particleFlow = "Pf", TString lowerBound = "0.5", TString upperBound = "1.0", TString diffVar = "lepET", TString lowerBinEdge = "20", TString upperBinEdge = "35");
+std::vector<double> templateFit2(Int_t jetNumber = 1, bool print = true, TString qcdTyp = "Data", Double_t zFix = 1., double ttbarFix = 1., TString JES = "", TString particleFlow = "Pf", TString lowerBound = "0.5", TString upperBound = "1.0", TString diffVar = "lepET", TString lowerBinEdge = "20", TString upperBinEdge = "35");
 
 void templateFit()
 {
   for(int i=1; i<=4; i++){
     std::vector<double> std = templateFit2(i);
-    double TtErr = (TMath::Abs(templateFit2(i,"Data",1.,0.)[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.,2.)[0]-std[0]))/2;
-    double RelIsoErr = (TMath::Abs(templateFit2(i,"Data",1.,1.,"","Pf","0.3","0.5")[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.,1.,"","Pf","1.0","2.0")[0]-std[0]))/2;
-    double ShapeErr = TMath::Abs(templateFit2(i,"mc")[0]-templateFit2(i,"mcAnti")[0]);
-    double JES = (TMath::Abs(templateFit2(i,"Data",1.,1.,"JESup")[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.,1.,"JESdown")[0]-std[0]))/2;
-    //double Zerr = (TMath::Abs(templateFit2(i,"Data",0.7,1.)[0]-std[0])+TMath::Abs(templateFit2(i,"Data",1.3,1.)[0]-std[0]))/2;//not needed, Z error in Xsec is enough
+    double TtErr = (TMath::Abs(templateFit2(i,false,"Data",1.,0.)[0]-std[0])+TMath::Abs(templateFit2(i,false,"Data",1.,2.)[0]-std[0]))/2;
+    double RelIsoErr = (TMath::Abs(templateFit2(i,false,"Data",1.,1.,"","Pf","0.3","0.5")[0]-std[0])+TMath::Abs(templateFit2(i,false,"Data",1.,1.,"","Pf","1.0","2.0")[0]-std[0]))/2;
+    double ShapeErr = TMath::Abs(templateFit2(i,false,"mc")[0]-templateFit2(i,false,"mcAnti")[0]);
+    double JES = (TMath::Abs(templateFit2(i,false,"Data",1.,1.,"JESup")[0]-std[0])+TMath::Abs(templateFit2(i,false,"Data",1.,1.,"JESdown")[0]-std[0]))/2;
+    //double Zerr = (TMath::Abs(templateFit2(i,false,"Data",0.7,1.)[0]-std[0])+TMath::Abs(templateFit2(i,false,"Data",1.3,1.)[0]-std[0]))/2;//not needed, Z error in Xsec is enough
     double syst = sqrt(TtErr*TtErr+RelIsoErr*RelIsoErr+ShapeErr*ShapeErr);
     cout<<setprecision(3)<<std[0]<<"+-"<<setprecision(2)<<std[1]<<"(stat)+-"<<syst<<"(syst) ["<<TtErr<<"(TT)+-"<<ShapeErr<<"(Shape)+-"<<RelIsoErr<<"(RelIso)+-"<<JES<<"(JES)]"<<endl;
   }
 }
 
-std::vector<double> templateFit2(Int_t jetNumber, TString qcdTyp, Double_t zFix, double ttbarFix, TString JES, TString particleFlow, TString lowerBound, TString upperBound, TString diffVar, TString lowerBinEdge, TString upperBinEdge)
+std::vector<double> templateFit2(Int_t jetNumber, bool print, TString qcdTyp, Double_t zFix, double ttbarFix, TString JES, TString particleFlow, TString lowerBound, TString upperBound, TString diffVar, TString lowerBinEdge, TString upperBinEdge)
 {
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
@@ -127,7 +128,8 @@ std::vector<double> templateFit2(Int_t jetNumber, TString qcdTyp, Double_t zFix,
   HTlep_qcdAnti = new TH1F("HTlep_qcdAnti","HTlep_qcdAnti",numberOfBins+100,lowerFitEdge,upperFitEdge+100*binWidth);
   HTlep_qcdFit = new TH1F("HTlep_qcdFit","HTlep_qcdFit",numberOfBins+100,lowerFitEdge,upperFitEdge+100*binWidth);
   HTlep_ttbar = new TH1F("HTlep_ttbar","HTlep_ttbar",numberOfBins+100,lowerFitEdge,upperFitEdge+100*binWidth);
-  HTlep_fitHisto = new THStack("HTlep_fitHisto","test stacked histograms");
+  HTlep_fitHisto = new THStack("HTlep_fitHisto","stacked histograms");
+  HTlep_fitHisto2 = new THStack("HTlep_fitHisto2","stacked histograms");
 
   //ptBins -> 20., 35., 50., 70., 95., 200.
   //etaBins -> -2.1, -0.75, 0.0, 0.75, 2.1
@@ -160,25 +162,17 @@ std::vector<double> templateFit2(Int_t jetNumber, TString qcdTyp, Double_t zFix,
   else std::cout<<"zonk"<<std::endl;
   tree[kTTbar]->Draw(templateVar+">>HTlep_ttbar","relIso<0.05 && "+diffVar+">"+lowerBinEdge+" && "+diffVar+"<"+upperBinEdge+"","0");
 
-  int smooth = 0;
   HTlep->SetMarkerStyle(20);
   HTlep_antiRelIso->Scale((lumi*0.143500567/50.0)*HTlep_qcd->Integral()/HTlep_antiRelIso->Integral());
-  HTlep_antiRelIso->Smooth(smooth);
   HTlep_stopS->Scale(lumi*0.324*0.000464677/50.0);
   HTlep_stopT->Scale(lumi*0.324*0.006672727/50.0);
   HTlep_stopTW->Scale(lumi*0.001070791/50.0);
   HTlep_wjets->Scale(lumi*0.105750913/50.0);
-  HTlep_wjets->Smooth(smooth);
   HTlep_zjets->Scale(lumi*0.05991209/50.0);
-  HTlep_zjets->Smooth(smooth);
   HTlep_ttbar->Scale(lumi*0.006029022/50.0);
-  HTlep_ttbar->Smooth(smooth);
   HTlep_qcdAnti->Scale((lumi*0.143500567/50.0)*HTlep_qcd->Integral()/HTlep_qcdAnti->Integral());
-  HTlep_qcdAnti->Smooth(smooth);
   HTlep_qcdFit->Scale((lumi*0.143500567/50.0)*HTlep_qcd->Integral()/HTlep_qcdFit->Integral());
-  HTlep_qcdFit->Smooth(smooth);
   HTlep_qcd->Scale(lumi*0.143500567/50.0);
-  HTlep_qcd->Smooth(smooth);
 
   HTlep_stop = (TH1F*)HTlep_stopS->Clone();
   HTlep_stop->Add((TH1F*)HTlep_stopT->Clone());
@@ -197,6 +191,91 @@ std::vector<double> templateFit2(Int_t jetNumber, TString qcdTyp, Double_t zFix,
   if(ttbarFix>=0)mixFunction->FixParameter(kTTbar-1,ttbarFix);
 
   HTlep->Fit(mixFunction,"0LQR");
+
+  if(print){
+    HTlep->SetTitle("");
+    HTlep->GetXaxis()->SetTitle("MET [GeV]");
+    HTlep->GetYaxis()->SetTitle("Events");
+    HTlep->GetXaxis()->SetLabelSize(0.06);
+    HTlep->GetYaxis()->SetLabelSize(0.06);
+    HTlep->GetXaxis()->SetTitleSize(0.06);
+    HTlep->GetYaxis()->SetTitleSize(0.06);
+    HTlep->GetYaxis()->SetTitleOffset(1.2);
+    
+    HTlep_ttbar->SetFillColor(kRed+1);
+    HTlep_zjets->SetFillColor(kAzure-2);
+    HTlep_stop->SetFillColor(kMagenta);
+    HTlep_wjets->SetFillColor(kGreen-3);
+    HTlep_qcdFit->SetFillColor(kYellow);
+
+    HTlep_fitHisto->Add(HTlep_ttbar);
+    HTlep_fitHisto->Add(HTlep_zjets);
+    HTlep_fitHisto->Add(HTlep_stop);
+    HTlep_fitHisto->Add(HTlep_wjets);
+    HTlep_fitHisto->Add(HTlep_qcdFit);
+
+    HTlep->SetMaximum((HTlep->GetMaximum()+sqrt(HTlep->GetMaximum()))*1.2);
+    HTlep->GetXaxis()->SetRangeUser(lowerFitEdge,upperFitEdge);
+    HTlep->DrawClone("e1 X0");
+    HTlep_fitHisto->Draw("same");
+    HTlep->DrawClone("e1 X0 same");
+    
+    TPaveLabel *label = new TPaveLabel(0.16, 0.85, 0.97, 0.95, "36 pb^{-1} at #sqrt{s} = 7 TeV", "br NDC");
+    label->SetFillStyle(0);
+    label->SetBorderSize(0);
+    label->SetTextSize(0.45);
+    label->SetTextAlign(13);
+    label->Draw("same");
+    
+    TPaveLabel *label1 = new TPaveLabel(0.16, 0.79, 0.97, 0.89, "#mu+jets, N_{jets}#geq "+numberOfJets, "br NDC");
+    label1->SetFillStyle(0);
+    label1->SetBorderSize(0);
+    label1->SetTextSize(0.45);
+    label1->SetTextAlign(13);
+    label1->Draw("same");
+
+    TLegend *leg = new TLegend(0.56, 0.6, 0.97, 0.95);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetTextSize(0.06);
+    //leg->SetTextAlign(13);
+    leg->AddEntry( HTlep,  "Data", "PL" );
+    if(qcdTyp=="Data")leg->AddEntry( HTlep_qcdFit, "QCD (Data)", "F" );
+    else leg->AddEntry( HTlep_qcdFit, "QCD", "F" );
+    leg->AddEntry( HTlep_wjets, "W#rightarrowl#nu", "F" );
+    leg->AddEntry( HTlep_stop, "Single-Top", "F" );
+    leg->AddEntry( HTlep_zjets, "Z/#gamma*#rightarrowl^{+}l^{-}", "F" );
+    leg->AddEntry( HTlep_ttbar, "t#bar{t}", "F" );
+    if(jetNumber == 1)leg->Draw("same");
+
+    canv1->Print("MET"+numberOfJets+"JetsBefore.eps");
+    
+    HTlep_antiRelIso->Scale(mixFunction->GetParameter(kQCD-1));
+    HTlep_stop->Scale(mixFunction->GetParameter(kTTbar-1));
+    HTlep_wjets->Scale(mixFunction->GetParameter(kWjets-1));
+    HTlep_ttbar->Scale(mixFunction->GetParameter(kTTbar-1));
+    HTlep_zjets->Scale(mixFunction->GetParameter(kZjets-1)*mixFunction->GetParameter(kWjets-1));
+    HTlep_qcd->Scale(mixFunction->GetParameter(kQCD-1));
+    HTlep_qcdAnti->Scale(mixFunction->GetParameter(kQCD-1));
+    HTlep_qcdFit->Scale(mixFunction->GetParameter(kQCD-1));
+
+    HTlep_fitHisto2->Add(HTlep_ttbar);
+    HTlep_fitHisto2->Add(HTlep_zjets);
+    HTlep_fitHisto2->Add(HTlep_stop);
+    HTlep_fitHisto2->Add(HTlep_wjets);
+    HTlep_fitHisto2->Add(HTlep_qcdFit);
+
+    HTlep->DrawClone("e1 X0");
+    HTlep_fitHisto2->Draw("same");
+    HTlep->DrawClone("e1 X0 same");
+    label->Draw("same");
+    label1->Draw("same");
+    if(jetNumber == 1)leg->Draw("same");
+
+    canv1->Print("MET"+numberOfJets+"JetsAfter.eps");
+
+  }
+
   std::vector<double> QCDscale;
   QCDscale.push_back(mixFunction->GetParameter(kQCD-1));
   QCDscale.push_back(mixFunction->GetParError(kQCD-1));
@@ -217,6 +296,7 @@ std::vector<double> templateFit2(Int_t jetNumber, TString qcdTyp, Double_t zFix,
   delete HTlep_qcdFit;
   delete HTlep_ttbar;     
   delete HTlep_fitHisto;
+  delete HTlep_fitHisto2;
   delete canv1;
   for(UInt_t i = 0; i < whichSample.size(); i++){
     delete files_[i];
