@@ -53,6 +53,10 @@ void KinFitImprover::book(edm::Service<TFileService>& fs)
   hists_["allDRFit" ] = fs->make<TH1F>( "allDRFit"  , "allDRFit"  ,  100 , 0. ,   10. );
   // all deltaR between b quark and corresponding light quarks (reco)
   hists_["allDRRec" ] = fs->make<TH1F>( "allDRRec"  , "allDRRec"  ,  100 , 0. ,   10. );
+  // sum of all deltaR between b quark and corresponding light quarks (fit)
+  hists_["sumAllDRFit" ] = fs->make<TH1F>( "sumAllDRFit"  , "sumAllDRFit"  ,  300 , 0. ,   30. );
+  // sum of all deltaR between b quark and corresponding light quarks (reco)
+  hists_["sumAllDRRec" ] = fs->make<TH1F>( "sumAllDRRec"  , "sumAllDRRec"  ,  300 , 0. ,   30. );
   // all deltaR between b quark and corresponding light quarks (fit)
   hists2D_["allDRFitRec"] = fs->make<TH2F>( "allDRFitRec" , "allDRFitRec" , 100 , 0. , 10. , 100 , 0. , 10. );
   // energy of process
@@ -76,6 +80,8 @@ void KinFitImprover::book(edm::Service<TFileService>& fs)
   // top mass fit vs. rec of final system
   hists2D_["mass_fit_rec"] = fs->make<TH2F>( "mass_fit_rec" , "mass_fit_rec" , 100 , 0. , 1000. , 100 , 0. , 1000. );
 
+  // w pt in cases where jets are missing
+  hists_["wPtMissingJets"] = fs->make<TH1F>( "wPtMissingJets" , "wPtMissingJets" , 30 , 0. , 300. );
 }
 
 /// function to find types of jet-combinations in KinFits (1 right, 2 branches right, but inner-branche particles mixup, 3 inter-branch mixup, 4 missing jet)
@@ -278,21 +284,23 @@ KinFitImprover::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
     hists_.find("fitQuality")->second->Fill( comboTypeValue + 0.5 );
 
     if( comboType_ == comboTypeValue || comboType_ == 0 ){
-      hists_.find("topMass"  )->second->Fill( top_mass_fit );
-      hists_.find("allDRFit" )->second->Fill( dR1 );
-      hists_.find("allDRFit" )->second->Fill( dR2 );
-      hists_.find("allDRFit" )->second->Fill( dR3 );
-      hists_.find("allDRFit" )->second->Fill( dR4 );
-      hists_.find("minDRFit" )->second->Fill( dRs.front() );
-      hists_.find("maxDRFit" )->second->Fill( dRs.back() );
+      hists_.find("topMass"      )->second->Fill( top_mass_fit );
+      hists_.find("allDRFit"     )->second->Fill( dR1 );
+      hists_.find("allDRFit"     )->second->Fill( dR2 );
+      hists_.find("allDRFit"     )->second->Fill( dR3 );
+      hists_.find("allDRFit"     )->second->Fill( dR4 );
+      hists_.find("sumAllDRFit"  )->second->Fill( dR1 + dR2 + dR3 + dR4 );
+      hists_.find("minDRFit"     )->second->Fill( dRs.front() );
+      hists_.find("maxDRFit"     )->second->Fill( dRs.back() );
       hists2D_.find("minMaxDRFit")->second->Fill( dRs.back() , dRs.front() );
 	
-      hists_.find("allDRRec" )->second->Fill( dR1Rec );
-      hists_.find("allDRRec" )->second->Fill( dR2Rec );
-      hists_.find("allDRRec" )->second->Fill( dR3Rec );
-      hists_.find("allDRRec" )->second->Fill( dR4Rec );
-      hists_.find("minDRRec" )->second->Fill( dRecs.front() );
-      hists_.find("maxDRRec" )->second->Fill( dRecs.back() );
+      hists_.find("allDRRec"     )->second->Fill( dR1Rec );
+      hists_.find("allDRRec"     )->second->Fill( dR2Rec );
+      hists_.find("allDRRec"     )->second->Fill( dR3Rec );
+      hists_.find("allDRRec"     )->second->Fill( dR4Rec );
+      hists_.find("sumAllDRRec"  )->second->Fill( dR1Rec + dR2Rec + dR3Rec + dR4Rec );
+      hists_.find("minDRRec"     )->second->Fill( dRecs.front() );
+      hists_.find("maxDRRec"     )->second->Fill( dRecs.back() );
       hists2D_.find("minMaxDRRec")->second->Fill( dRecs.back() , dRecs.front() );
       hists2D_.find("minDRFitRec")->second->Fill( dRecs.front() , dRs.front() );
       hists2D_.find("maxDRFitRec")->second->Fill( dRecs.back() , dRs.back() );
@@ -301,21 +309,27 @@ KinFitImprover::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
       hists2D_.find("allDRFitRec")->second->Fill( dR3Rec , dR3 );
       hists2D_.find("allDRFitRec")->second->Fill( dR4Rec , dR4 );
 
-      hists_.find("sqrt_s_fit"  )->second->Fill( sqrt_s_fit );
-      hists_.find("sqrt_s_rec"  )->second->Fill( sqrt_s_rec );
-      hists_.find("pt_final_fit")->second->Fill( pt_final_fit );
-      hists_.find("pt_final_rec")->second->Fill( pt_final_rec );
-      hists2D_.find("pt_final")->second->Fill( pt_final_fit, pt_final_rec );
-      hists2D_.find("pt_mass_fit")->second->Fill( top_pt_fit, top_mass_fit );
-      hists2D_.find("pt_mass_fit")->second->Fill( topBar_pt_fit, topBar_mass_fit );
-      hists2D_.find("pt_mass_rec")->second->Fill( top_pt_rec, top_mass_rec );
-      hists2D_.find("pt_mass_rec")->second->Fill( topBar_pt_rec, topBar_mass_rec );
+      hists_.find("sqrt_s_fit"    )->second->Fill( sqrt_s_fit );
+      hists_.find("sqrt_s_rec"    )->second->Fill( sqrt_s_rec );
+      hists_.find("pt_final_fit"  )->second->Fill( pt_final_fit );
+      hists_.find("pt_final_rec"  )->second->Fill( pt_final_rec );
+      hists2D_.find("pt_final"    )->second->Fill( pt_final_fit, pt_final_rec );
+      hists2D_.find("pt_mass_fit" )->second->Fill( top_pt_fit, top_mass_fit );
+      hists2D_.find("pt_mass_fit" )->second->Fill( topBar_pt_fit, topBar_mass_fit );
+      hists2D_.find("pt_mass_rec" )->second->Fill( top_pt_rec, top_mass_rec );
+      hists2D_.find("pt_mass_rec" )->second->Fill( topBar_pt_rec, topBar_mass_rec );
       hists2D_.find("mass_fit_rec")->second->Fill( top_mass_fit, top_mass_rec );
       hists2D_.find("mass_fit_rec")->second->Fill( topBar_mass_fit, topBar_mass_rec );
 
       hists_.find("prob")->second->Fill( tops.fitProb() );
       hists_.find("chi2")->second->Fill( tops.fitChi2() );
     }
+
+    if(comboTypeValue == 4){
+      if(tops.wPlus() ) hists_.find("wPtMissingJets")->second->Fill( tops.wPlus() ->pt() );
+      if(tops.wMinus()) hists_.find("wPtMissingJets")->second->Fill( tops.wMinus()->pt() );
+    }
+
     dRs.clear();
     dRecs.clear();
   }
