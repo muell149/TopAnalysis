@@ -153,6 +153,31 @@ FullHadSpecial::book(edm::Service<TFileService>& fs)
   /// phi-phi-moment
   bookVariable( fs, "phiphi" , 120 ,  0.   , 0.12 , false );
 
+  /// sum eta-eta-moments
+  bookVariable( fs, "sumEtaEta"    , 250 , 0. , 0.5 , useTree_ );
+  /// sum phi-phi-moments
+  bookVariable( fs, "sumPhiPhi"    , 250 , 0. , 0.5 , useTree_ );
+  /// sum abs(eta-phi-moments)
+  bookVariable( fs, "sumAbsEtaPhi" , 250 , 0. , 0.5 , useTree_ );
+
+  /// sum eta-eta-moments + phi-phi-moments
+  bookVariable( fs, "sumEtaEtaPhiPhi"       , 500 , 0. , 1.0 , useTree_ );
+  /// sum eta-eta-moments + phi-phi-moments + abs(eta-phi-moments)
+  bookVariable( fs, "sumEtaEtaEtaPhiPhiPhi" , 750 , 0. , 1.5 , useTree_ );
+
+  /// sum eta-eta-moments normalized to number of jets
+  bookVariable( fs, "sumEtaEta_norm"    , 120 , 0. , 0.12 , useTree_ );
+  /// sum phi-phi-moments normalized to number of jets
+  bookVariable( fs, "sumPhiPhi_norm"    , 120 , 0. , 0.12 , useTree_ );
+  /// sum abs(eta-phi-moments) normalized to number of jets
+  bookVariable( fs, "sumAbsEtaPhi_norm" , 100 , 0. , 0.05 , useTree_ );
+
+  /// sum eta-eta-moments + phi-phi-moments normalized to number of jets
+  bookVariable( fs, "sumEtaEtaPhiPhi_norm"       , 250 , 0. , 0.25 , useTree_ );
+  /// sum eta-eta-moments + phi-phi-moments + abs(eta-phi-moments) normalized to number of jets
+  bookVariable( fs, "sumEtaEtaEtaPhiPhiPhi_norm" , 300 , 0. , 0.30 , useTree_ );
+
+
   if(!useTree_){
     /// eta-eta-moment vs. phi-phi-moment
     bookVariable( fs, "etaetaphiphi" ,  120 ,  0.   , 0.12 , 120 ,  0.   , 0.12 );
@@ -314,6 +339,10 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
   double ht3jet_ = 0;
   double M3_ = -1.;
 
+  double sumEtaEta    = 0.;
+  double sumPhiPhi    = 0.;
+  double sumAbsEtaPhi = 0.;
+
   int bJetCounter = 0;
   edm::View<pat::Jet>::const_iterator bJet1;
   edm::View<pat::Jet>::const_iterator Jet1;
@@ -462,10 +491,13 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
       fillValue("et56" , sqrt(Jet5->et()*Jet6->et()), weight );
     }
 
-
     fillValue("etaeta" , jet->etaetaMoment() , weight );
     fillValue("etaphi" , jet->etaphiMoment() , weight );
     fillValue("phiphi" , jet->phiphiMoment() , weight );
+
+    sumEtaEta    += jet->etaetaMoment();
+    sumPhiPhi    += jet->phiphiMoment();
+    sumAbsEtaPhi += std::abs(jet->etaphiMoment());
 
     if(!useTree_) {
       fillValue("etaetaphiphi" , jet->etaetaMoment() , jet->phiphiMoment() , weight );
@@ -575,6 +607,24 @@ FullHadSpecial::fill(const edm::View<pat::Jet>& jets, const double& weight)
   fillValue("ht" , ht_ , weight );
   fillValue("ht3jet" , ht3jet_ , weight );
   fillValue("centrality" , ht_/h_ , weight );
+
+  fillValue("sumEtaEta"    , sumEtaEta    , weight );
+  fillValue("sumPhiPhi"    , sumPhiPhi    , weight );
+  fillValue("sumAbsEtaPhi" , sumAbsEtaPhi , weight );
+
+  fillValue("sumEtaEtaPhiPhi"      , sumEtaEta                + sumPhiPhi , weight );
+  fillValue("sumEtaEtaEtaPhiPhiPhi", sumEtaEta + sumAbsEtaPhi + sumPhiPhi , weight );
+
+  sumEtaEta   /=jets.size();
+  sumPhiPhi   /=jets.size();
+  sumAbsEtaPhi/=jets.size();
+
+  fillValue("sumEtaEta_norm"    , sumEtaEta    , weight );
+  fillValue("sumPhiPhi_norm"    , sumPhiPhi    , weight );
+  fillValue("sumAbsEtaPhi_norm" , sumAbsEtaPhi , weight );
+
+  fillValue("sumEtaEtaPhiPhi_norm"      , sumEtaEta                + sumPhiPhi , weight );
+  fillValue("sumEtaEtaEtaPhiPhiPhi_norm", sumEtaEta + sumAbsEtaPhi + sumPhiPhi , weight );
 
   dRs.sort();
   dRs3Jets.sort();
