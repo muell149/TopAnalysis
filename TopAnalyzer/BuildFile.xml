@@ -17,6 +17,7 @@
 <use   name="TopAnalysis/TopUtils"/>
 <use   name="AnalysisDataFormats/TopObjects"/>
 <use   name="TopQuarkAnalysis/TopKinFitter"/>
+<use   name="lhapdf"/>
 <export>
   <lib   name="1"/>
 </export>
