@@ -10,17 +10,23 @@ import sys
 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
-## decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd *, * allRedigi *, * allRedigiPU * or * all *
+## decide whether to run on:  * data *, * sig *, * sigPU *, * bkg *, * bkgPU *, * qcd *, * allRedigi *, * allRedigiPU * or * all *
 options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 ## choose whether to use PF or not
-options.register('usePF'      ,     1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "use PF for processing")
-## set the resolution smear factor for MC and resolution fractor for kinematic fit
-options.register('resFactor'  ,   1.1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "resolution factor for MC")
+options.register('usePF'      ,  1   , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int  , "use PF for processing")
+## set the jet energy scale factor for MC
+options.register('jesFactor'  ,  1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "jet energy scale factor for MC")
+## set the jet energy resolution smear factor for MC
+options.register('jetEResol'  ,  1.1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "jet energy resol factor for MC")
+## set the resolution fractor for the kinematic fit
+options.register('fitResol'   ,  1.1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "kinFit resolution factor")
 ## choose whether to write output to disk or not
-options.register('writeOutput',     0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int   , "write events surviving all cuts to disk")
+options.register('writeOutput',    0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int  , "write events surviving all cuts to disk")
 ## setup the ptHatFilter in case 'eventFilter' is chosen to be qcd
 options.register('maxPtHat', 999999., VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "maxPtHat to be processed")
 options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "minPtHat to be processed")
+## include PDF uncertainty histograms / tree
+options.register('pdfUn'   , 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include hists/tree for pdf uncertainty")
 ## choose whether to do a background estimation or a normal selection
 options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
 ## do PATification on the fly, not depending on pre-made PAT tuples anymore
@@ -36,14 +42,17 @@ for args in sys.argv :
         if(len(val)==2):
             setattr(options,val[0], val[1])
 
-print "eventFilter: ", options.eventFilter
-print "usePF: ", options.usePF
-print "resFactor: ", options.resFactor
-print "writeOutput: ", options.writeOutput
-print "maxPtHat: ", options.maxPtHat
-print "minPtHat: ", options.minPtHat
-print "backgroundEstimation: ", options.backgroundEstimation
-print "patify: ", options.patify
+print "eventFilter . . . . :", options.eventFilter
+print "usePF . . . . . . . :", options.usePF
+print "jesFactor . . . . . :", options.jesFactor
+print "jetEResol . . . . . :", options.jetEResol
+print "fitResol  . . . . . :", options.fitResol
+print "writeOutput . . . . :", options.writeOutput
+print "maxPtHat  . . . . . :", options.maxPtHat
+print "minPtHat  . . . . . :", options.minPtHat
+print "pdfUncertainty  . . :", options.pdfUn
+print "backgroundEstimation:", options.backgroundEstimation
+print "patify  . . . . . . :", options.patify
 
 # analyze fully hadronic selection
 processName = "Selection"
@@ -84,7 +93,7 @@ process.source = cms.Source("PoolSource",
     #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_7_3_pul.root',
     #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_8_2_w31.root',
     #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_9_2_9dW.root',
-    '/store/user/eschliec/MultiJet/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_14_1_68T.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_14_1_68T.root',
     ),
     ## just a code example how to skip lumi blocks or whole runs
     #lumisToSkip = cms.untracked.VLuminosityBlockRange('135445:0-135445:max',
@@ -121,10 +130,6 @@ if(options.eventFilter=='data'):
 else:
     process.GlobalTag.globaltag = cms.string('START38_V14::All')
 
-## ---
-##    decide whether to run on:  * data *, * signal only (sig) *, * background only (bkg) *, * qcd *, * privA *, * privB * or * all *
-## ---
-
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
@@ -140,12 +145,19 @@ process.filterPtHat = process.filterPtHat.clone()
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJets"),
                                                          inputMETs            = cms.InputTag("patMETs"),
-                                                         scaleFactor          = cms.double(1.0),
+                                                         payload              = cms.string("AK5Calo"),
+                                                         scaleFactor          = cms.double(options.jesFactor),
                                                          scaleType            = cms.string("abs"), #abs or rel
                                                          jetPTThresholdForMET = cms.double(20.),
                                                          jetEMLimitForMET     = cms.double(0.9),
-                                                         resolutionFactor     = cms.double(options.resFactor)
+                                                         resolutionFactor     = cms.double(options.jetEResol)
                                                        )
+## set set energy scaling factors
+if(options.jesFactor > 1.0):
+    process.scaledJetEnergy.scaleType = "top:up"
+
+if(options.jesFactor < 1.0):
+    process.scaledJetEnergy.scaleType = "top:down"
 
 ## residual jet corrector for data
 process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
@@ -156,14 +168,14 @@ if(options.eventFilter=='data'):
     process.filterSequence = cms.Sequence(process.residualCorrectedJets
                                           )
     
-elif(options.eventFilter=='sig'):
+elif(options.eventFilter=='sig' or options.eventFilter=='sigPU'):
     ## sequence with fullHad ttbar filter
     process.filterSequence = cms.Sequence(process.makeGenEvt *
                                           process.ttFullHadronicFilter *
                                           process.scaledJetEnergy
                                           )
 
-elif(options.eventFilter=='bkg'):
+elif(options.eventFilter=='bkg' or options.eventFilter=='bkgPU'):
     ## invert fullHad filter
     process.ttFullHadronicFilter.invert = True
     ## sequence with non-fullHad ttbar filter
@@ -208,14 +220,17 @@ addTtFullHadHypotheses(process,
                        ["kKinFit"]
                        )
 
-if(not options.eventFilter=='sig'):
+if( (not options.eventFilter=='sig') and (not options.eventFilter=='sigPU') ):
     removeTtFullHadHypGenMatch(process)
+
+if( options.pdfUn==0 ):
+    removePDFUncertainties(process)
 
 ## changing bTagger, possible are: TCHE, TCHPTight, SSV, CSV, CSVMVA
 ## only TCHE, TCHPTight, SSV and CSV have a officialy blessed WP like the default (TCHP)
-#switchToTCHE(process)
+switchToTCHE(process)
 #switchToCSV(process)
-switchToTCHPTight(process)
+#switchToTCHPTight(process)
 
 ## selection should be run on PFJets instead of caloJets
 if(not options.usePF==0): 
@@ -233,7 +248,7 @@ if(not options.backgroundEstimation==0):
     runAsBackgroundEstimation(process)
 
 ## increase the resolution of the kinematic fit
-increaseKinFitResolution(process, options.resFactor)
+increaseKinFitResolution(process, options.fitResol)
 
 ## ---
 ##    run the final sequence
@@ -378,7 +393,8 @@ if(options.eventFilter=='allRedigi'):
     #process.trigger.TriggerResultsTag   = cms.InputTag("TriggerResults","","REDIGI38X")
     process.patTrigger.processName      = 'REDIGI38X'
     process.patTriggerEvent.processName = 'REDIGI38X'
-elif(options.eventFilter=='allRedigiPU'):
+
+elif(options.eventFilter=='allRedigiPU' or options.eventFilter=='sigPU' or options.eventFilter=='bkgPU'):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, cms.InputTag("TriggerResults","","HLT"), cms.InputTag("TriggerResults","","REDIGI38XPU"))
     #process.trigger.TriggerResultsTag   = cms.InputTag("TriggerResults","","REDIGI38XPU")

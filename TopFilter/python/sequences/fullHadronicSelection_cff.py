@@ -26,7 +26,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## ---
 
 ## define tight cuts for jet kinematics
-tightJetCut  = 'abs(eta) < 2.4 & pt > 40.'
+tightJetCut  = 'abs(eta) < 2.4 & pt > 30.'
 bottomJetCut = 'abs(eta) < 2.4 & pt > 50.'
 
 ## define tight JetIDs
@@ -83,13 +83,13 @@ from TopAnalysis.TopAnalyzer.FullHadTopReco_cfi import *
 ## high level trigger filter
 from TopAnalysis.TopFilter.sequences.triggerFilter_cff import *
 from TopAnalysis.TopFilter.filters.NewTriggerTestFilter_cfi import *
-## fully hadronic selection
-#from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 ## generator matching
 from TopAnalysis.TopFilter.sequences.generatorMatching_cff import *
 ## kinFit producer
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 from TopAnalysis.TopAnalyzer.FullHadHypothesisAnalyzer_cff import *
+## PDF uncertainties
+from TopAnalysis.TopAnalyzer.PDFUncertainty_cfi import *
 
 ## ---
 ##    TRIGGER DEFINITION
@@ -195,17 +195,21 @@ bottom1=cms.PSet(index=cms.int32(1) , correctionLevel=cms.string('L3Absolute'), 
 ##    MONITOR STEP 0
 ## ---
 
+## PDF WEIGHTS for PDF uncertainties
+
+PDFUncertainty_0 = analyzePDFUncertainty.clone()
+
 ## JET KINEMATICS
 
 ## kinematics analyzers
 tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets', analyze = ball)
-tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = udsall )
-tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0   )
-tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1   )
-tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2   )
-tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3   )
-tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4   )
-tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5   )
+tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = udsall)
+tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0  )
+tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1  )
+tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2  )
+tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3  )
+tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4  )
+tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5  )
 tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
 tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
 METKinematics_0 = analyzeMETKinematics.clone()
@@ -228,13 +232,13 @@ monitorKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  *
 
 ## quality analyzers
 tightBottomJetQuality_0  = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets', analyze = ball)
-tightLeadingJetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = udsall )
-tightLead_0_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds0   )
-tightLead_1_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds1   )
-tightLead_2_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds2   )
-tightLead_3_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds3   )
-tightLead_4_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds4   )
-tightLead_5_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds5   )
+tightLeadingJetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = udsall)
+tightLead_0_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds0  )
+tightLead_1_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds1  )
+tightLead_2_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds2  )
+tightLead_3_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds3  )
+tightLead_4_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds4  )
+tightLead_5_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds5  )
 tightBJet_0_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
 tightBJet_1_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
 
@@ -494,7 +498,7 @@ kinFitImprover4_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_2 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
-fullHadTopReco_2.analyze.bTagAlgo = 'trackCountingHighPurBJets' 
+fullHadTopReco_2.analyze.bTagAlgo = 'trackCountingHighPurBJetTags' 
 METKinFit_2 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
@@ -621,7 +625,7 @@ kinFitImprover4_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_3 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
-fullHadTopReco_3.analyze.bTagAlgo = 'trackCountingHighPurBJets' 
+fullHadTopReco_3.analyze.bTagAlgo = 'trackCountingHighPurBJetTags' 
 METKinFit_3 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
@@ -671,10 +675,16 @@ filterEventShapes = filterEventShape.clone( minC = 0.75 )
 ## To be added in time
 
 
+
+## PDF WEIGHTS for PDF uncertainties
+
+PDFUncertainty_3 = analyzePDFUncertainty.clone()
+
 ## ---
 ##    run the final sequence
 ## ---
-analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
+analyseFullHadronicSelection = cms.Sequence(PDFUncertainty_0      *
+                                            ## do the hlt triggering
                                             trigger               *
                                             ## do the selections
                                             fullHadronicSelection *
@@ -710,7 +720,8 @@ analyseFullHadronicSelection = cms.Sequence(## do the hlt triggering
                                             monitorJetsQuality_3     *
                                             monitorEventShapes_3     *
                                             monitorFullHadSpecials_3 *
-                                            monitorGenerator_3
+                                            monitorGenerator_3       *
+                                            PDFUncertainty_3
                                             )
 
 
@@ -886,13 +897,16 @@ def runOnPF(process):
     if(hasattr(process, 'scaledJetEnergy')):
         process.scaledJetEnergy.inputJets = "selectedPatJetsAK5PF"
         process.scaledJetEnergy.inputMETs = "patMETsPF"
+        process.scaledJetEnergy.payload   = "AK5PF"
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
 def switchToTCHE(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.trackCountingHighEffBJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'trackCountingHighEffBJetTags'
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighEffBJetTags'
+    process.fullHadTopReco_2.analyze.bTagAlgo       = 'trackCountingHighEffBJetTags' 
+    process.fullHadTopReco_3.analyze.bTagAlgo       = 'trackCountingHighEffBJetTags' 
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.3
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 10.2
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -905,7 +919,9 @@ def switchToTCHPTight(process):
     #process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.trackCountingHighEffBJets)
     process.trackCountingHighPurBJets.cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 3.41'
 
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'trackCountingHighPurBJetTags'
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighPurBJetTags'
+    process.fullHadTopReco_2.analyze.bTagAlgo       = 'trackCountingHighPurBJetTags' 
+    process.fullHadTopReco_3.analyze.bTagAlgo       = 'trackCountingHighPurBJetTags' 
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.41
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41
     #from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -916,7 +932,9 @@ def switchToTCHPTight(process):
 ## ---
 def switchToSSV(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.simpleSecondaryVertexBJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'simpleSecondaryVertexBJetTags'
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'simpleSecondaryVertexBJetTags'
+    process.fullHadTopReco_2.analyze.bTagAlgo       = 'simpleSecondaryVertexBJetTags' 
+    process.fullHadTopReco_3.analyze.bTagAlgo       = 'simpleSecondaryVertexBJetTags' 
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.74
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.05
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -927,7 +945,9 @@ def switchToSSV(process):
 ## ---
 def switchToCSV(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexBJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexBJetTags'
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexBJetTags'
+    process.fullHadTopReco_2.analyze.bTagAlgo       = 'combinedSecondaryVertexBJetTags' 
+    process.fullHadTopReco_3.analyze.bTagAlgo       = 'combinedSecondaryVertexBJetTags' 
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.750
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.921
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -938,7 +958,9 @@ def switchToCSV(process):
 ## ---
 def switchToCSVMVA(process):
     process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexMVABJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = 'combinedSecondaryVertexMVABJetTags'
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexMVABJetTags'
+    process.fullHadTopReco_2.analyze.bTagAlgo       = 'combinedSecondaryVertexMVABJetTags' 
+    process.fullHadTopReco_3.analyze.bTagAlgo       = 'combinedSecondaryVertexMVABJetTags' 
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.4 #self-derived
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.8 #self-derived
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -949,4 +971,11 @@ def switchToCSVMVA(process):
 ## ---
 def increaseKinFitResolution(process, factor):
     process.kinFitTtFullHadEventHypothesis.resolutionSmearFactor = factor
+
+## ---
+##    remove PDF uncertainty histograms / trees
+## ---
+def removePDFUncertainties(process):
+    process.analyseFullHadronicSelection.remove(process.PDFUncertainty_0)
+    process.analyseFullHadronicSelection.remove(process.PDFUncertainty_3)
 
