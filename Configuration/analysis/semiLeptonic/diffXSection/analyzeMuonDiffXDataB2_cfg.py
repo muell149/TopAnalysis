@@ -9,17 +9,21 @@
 ## this definitions before the
 ## execution of the mother file
 runningOnData = "data"
-eventFilter ='all'
-writeOutput = False
-applyKinFit = True
+eventFilter='all'
 removeGenTtbar=True
+## output
+writeOutput = False
+## extend functionality
+applyKinFit = True
 implement0TagPath = True
+## use L2L3Residual correction in analyzers
+corrLevel="L2L3Residual"
 
 ## get the mother file
 execfile("analyzeMuonDiffXSec_cfg.py")
 
 ## choose data set
-process.load("TopAnalysis/Configuration/samples/Run2010B2_Nov4ReReco_PAT_v4_cff")
+process.load("TopAnalysis/Configuration/samples/Run2010B2_Nov4ReReco_PAT_v5_L1Included_cff")
 ## high level trigger filter: hltMu15 (HLT_Mu9 prescaled
 process.hltFilter.TriggerResultsTag = "TriggerResults::HLT"
 process.hltFilter.HLTPaths = ["HLT_Mu15_v1"]
@@ -37,7 +41,7 @@ process.source.skipEvents = cms.untracked.uint32(0)
 ## for Njets>=4
 if(writeOutput):
     process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') )
-    process.out.fileName = cms.untracked.string('patTuple_selectedNjets4B2.root')
+    process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag1_RunB2.root')
 
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXData_B2.root'

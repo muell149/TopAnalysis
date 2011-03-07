@@ -10,14 +10,21 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 
 ## choose jet collection and corresponding MET
-jetType =  'particleFlow' # 'Calo'
+if(not globals().has_key('jetType')):
+    jetType =  'particleFlow' # 'Calo'
 
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
 
+# choose jet correction level shown in plots
+# L3Absolute for MC, L2L3Residual for data
+if(not globals().has_key('corrLevel')):
+    corrLevel='L3Absolute'
+print "used corr.Level in jetKinematics: "+corrLevel
+
 ## run kinematic fit?
-applyKinFit = False # True
+applyKinFit = True # False
 if(applyKinFit==True):
     print "kinFit and top reconstruction is applied - attention: slows down!!!"
 if(applyKinFit==False):
@@ -104,9 +111,9 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
 
 
 ## semileptonic selection
@@ -225,10 +232,11 @@ process.genFilterSequence = cms.Sequence(process.makeGenEvt                     
                                          process.ttSemiLeptonicFilter             )
 
 ## define ordered jets
-uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
-uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
-uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
-uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string('L3Absolute'), useTree = cms.bool(False) )
+uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+udsAll  = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 
 ## jet Kinematics to monitor JES shift
 if(jetType=="particleFlow"):
@@ -343,8 +351,8 @@ process.noPtMuonKinematics        = process.analyzeMuonKinematics.clone(src = 'n
 process.noDRMuonVetoJetsKinematics = process.analyzeMuonJetKinematics.clone(srcA = 'noDRMuons',
                                                                             srcB = 'goodJets'  )
 ## N-1 jet collections
-process.noEtaJetKinematics  = process.analyzeJetKinematics.clone(src = 'noEtaJets' )
-process.noPtJetKinematics   = process.analyzeJetKinematics.clone(src = 'noPtJets'  )
+process.noEtaJetKinematics  = process.analyzeJetKinematics.clone(src = 'noEtaJets', analyze = udsAll )
+process.noPtJetKinematics   = process.analyzeJetKinematics.clone(src = 'noPtJets' , analyze = udsAll )
 if(jetType!="particleFlow"):
     process.noEmJetQuality      = process.analyzeJetQuality.clone(src = 'noEmJets'     )
     process.noN90HitsJetQuality = process.analyzeJetQuality.clone(src = 'noN90HitsJets')
@@ -377,28 +385,28 @@ process.tightMuonQuality       = process.analyzeMuonQuality.clone   (src = 'tigh
 
 ## jet cutflow
 if(jetType=="particleFlow"):
-    process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJetsAK5PF')
+    process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJetsAK5PF', analyze = udsAll)
 elif(jetType=="Calo"):
-    process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJets')
+    process.patJetKinematics = process.analyzeJetKinematics.clone(src = 'selectedPatJets', analyze = udsAll)
 else:
     print "unknown jetType"
 process.centralLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds0 )
 process.centralLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds1 )
 process.centralLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds2 )
 process.centralLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'centralJets', analyze = uds3 )
-process.centralJetKinematics = process.analyzeJetKinematics.clone(src = 'centralJets'    )
+process.centralJetKinematics = process.analyzeJetKinematics.clone(src = 'centralJets', analyze = udsAll)
 process.reliableJetQuality   = process.analyzeJetQuality.clone   (src = 'reliableJets'   )
-process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLeadingJets')
+process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLeadingJets', analyze = udsAll)
 ## btag selection cuts
 process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
-process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
+process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomJets', analyze = udsAll)
 process.bottomJetKinematicsNjets1=process.bottomJetKinematics.clone()
 process.bottomJetKinematicsNjets2=process.bottomJetKinematics.clone()
 process.bottomJetKinematicsNjets3=process.bottomJetKinematics.clone()
 process.bottomJetKinematicsNjets4=process.bottomJetKinematics.clone()
 ## btag monitoring before jetcuts
 process.tightJetQualityBeforeJetCuts     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
-process.bottomJetKinematicsBeforeJetCuts = process.analyzeJetKinematics.clone(src = 'tightBottomJets' )
+process.bottomJetKinematicsBeforeJetCuts = process.analyzeJetKinematics.clone(src = 'tightBottomJets', analyze = udsAll)
 
 process.monitorNMinusOneMuonCuts = cms.Sequence(process.noDbMuonQuality            +
                                                 process.noChi2MuonQuality          +
