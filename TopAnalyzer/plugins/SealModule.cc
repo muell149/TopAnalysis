@@ -170,6 +170,10 @@ DEFINE_FWK_MODULE(ChargeAsymmetryAnalyzer);
 typedef SingleObjectAnalyzer<edm::View<reco::GenJet>, GenJetComposition> GenJetCompositionAnalyzer;
 DEFINE_FWK_MODULE(GenJetCompositionAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/interface/PDFUncertainty.h"
+typedef SingleObjectAnalyzer<GenEventInfoProduct, PDFUncertainty> PDFUncertaintyAnalyzer;
+DEFINE_FWK_MODULE(PDFUncertaintyAnalyzer);
+
 /**
     Define module for MET analysis
 **/
