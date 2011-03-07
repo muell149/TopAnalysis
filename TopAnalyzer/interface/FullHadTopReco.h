@@ -52,6 +52,15 @@ class FullHadTopReco : public DoubleObject<TtFullHadronicEvent, const edm::View<
   /// everything which needs to be done after the event loop
   void process(){};
 
+  // calculating theta* of W boson
+  static double thetaStar(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > wBoson,
+			  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > lightQ,
+			  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > lightQBar);
+
+  // calculating angle of W boson in top rest frame to top direction of flight
+  static double topWAngle(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > topQuark,
+			  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > wBoson);
+
  private:
   /// produce a TTree as output instead of histograms
   bool useTree_;
