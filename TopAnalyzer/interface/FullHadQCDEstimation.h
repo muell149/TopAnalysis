@@ -43,12 +43,14 @@ class FullHadQCDEstimation : public SingleObject<const edm::View<pat::Jet> > {
  private:
   /// produce a TTree as output instead of histograms
   bool useTree_;
+  /// b-tagging algo and working point to be emulated
+  std::string bTagAlgoWP_;
   /// store resolutions for the kinematic fit
   std::vector<edm::ParameterSet> udscResolutions_;
   std::vector<edm::ParameterSet> bResolutions_;
 
   /// kinematic fit interface
-  //TtFullHadKinFitter::KinFit* kinFitter;
+  TtFullHadKinFitter::KinFit* kinFitter;
 };
 
 #endif

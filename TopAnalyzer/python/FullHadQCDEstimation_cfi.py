@@ -10,7 +10,12 @@ analyzeFullHadQCDEstimation = cms.EDAnalyzer("FullHadQCDEstimationAnalyzer",
     ## fully hadronic ttbar events
     analyze   = cms.PSet(
       ## choose TTree for output instead of histograms, if applicable
-      useTree  = cms.bool(False),
+      useTree    = cms.bool(False),
+      ## choose b-tagging algorithm and working point to be used
+      ## available are the following so far:
+      ## 1. TCHEM (TCHE algo @ medium WP)
+      ## 2. TCHPT (TCHP algo @ tight WP)
+      bTagAlgoWP = cms.string("TCHEM"),
       # ------------------------------------------------
       # resolutions used for the kinematic fit
       # ------------------------------------------------
