@@ -63,6 +63,7 @@ class DoubleObject{
 		    unsigned int binsX, float lowX, float upX, unsigned int binsY, float lowY, float upY,
 		    bool useTree);
   void bookVariable(edm::Service<TFileService>& fs, const char * variable, unsigned int binsX, float lowX, float upX, bool useTree);
+  void bookVariable(edm::Service<TFileService>& fs, const char * variable);
   /// fill values into map for histograms or tree
   void fillValue(std::string variable, float value1, float value2, const double& weight);
   void fillValue(std::string variable, float value1, const double& weight);
@@ -102,9 +103,9 @@ template <typename CollectionA, typename CollectionB>
   if(useTree && !binsY){
     //std::cout << "Adding *" << variable << "* to TTree" << std::endl;
     if(!tree){
-      tree = fs->make<TTree>("TTree","TTree",0);
-      //treeVars_["weight"];
-      //tree->Branch("weight", &treeVars_["weight"], ("weight" + *"/F"));
+      tree = fs->make<TTree>("tree","tree",0);
+      treeVars_["weight"];
+      tree->Branch("weight", &treeVars_["weight"], (std::string("weight") + "/F").c_str());
     }
     treeVars_[variable];
     tree->Branch(variable, &treeVars_[variable], (std::string(variable) + "/F").c_str());
@@ -123,6 +124,12 @@ template <typename CollectionA, typename CollectionB>
   bookVariable( fs, variable, binsX, lowX, upX, 0, 0, 0, useTree);
 }
 
+template <typename CollectionA, typename CollectionB>
+  void DoubleObject<CollectionA, CollectionB>::bookVariable(edm::Service<TFileService>& fs, const char * variable)
+{
+  bookVariable( fs, variable, 0, 0, 0, 0, 0, 0, true);
+}
+
 /// fill values into map for histograms or tree
 template <typename CollectionA, typename CollectionB>
   void DoubleObject<CollectionA, CollectionB>::fillValue(std::string variable, float value1, float value2, const double& weight=1.)
@@ -135,8 +142,9 @@ template <typename CollectionA, typename CollectionB>
 {
   if(treeVars_.find(variable) != treeVars_.end()){
     treeVars_.find(variable)->second = value;
+    treeVars_.find("weight")->second = weight;
   }
-  else{
+  if(hists_.find(variable) != hists_.end()){
     hists_.find(variable)->second->Fill(value, weight);
   }
 }
