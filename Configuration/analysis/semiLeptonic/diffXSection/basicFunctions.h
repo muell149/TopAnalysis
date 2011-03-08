@@ -36,7 +36,8 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 			  /* 8:*/sysTopScaleDown, /* 9:*/sysVBosonScaleUp, /*10:*/sysVBosonScaleDown, /*11:*/sysTopMatchUp, 
 			  /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup , 
 			  /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
-			  /*20:*/sysQCDup       , /*21:*/sysQCDdown };
+			  /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
+			  /*24:*/sysDiBosUp     , /*25:*/sysDiBosDown};
 
 double effSFAB(int sys=sysNo)
 {
@@ -608,8 +609,10 @@ std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder
     if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation);
     if(sample==kData) fileName = dataFile; 
     // if file exists - save in map
-    TFile* file = new (TFile)(fileName);
-    if(!(file->IsZombie())) files_[sample]= file;
+    if((fileName!="no")&&(fileName!="")){ 
+      TFile* file = new (TFile)(fileName);
+      if(!(file->IsZombie())) files_[sample]= file;
+    }
   }
   return files_;
 }
@@ -632,10 +635,12 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
     for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
       // check if file exists
       // give warning if file does not exist
-      if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this plots" << std::endl;
+      if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this sample" << std::endl;
       if(files_.count(sample)>0){
 	// create plot container
 	TH1* targetPlot;
+	std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
+	std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
 	files_[sample]->GetObject(plotList_[plot], targetPlot);
 	// Check if plot exits
 	// give warning if plot does not exist
