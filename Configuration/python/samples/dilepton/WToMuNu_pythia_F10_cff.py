@@ -17,18 +17,13 @@ readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring() 
 source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
 readFiles.extend( [
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_10_1_Eq5.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_11_1_uBt.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_1_1_vn3.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_12_1_diV.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_2_1_OUD.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_3_1_a5J.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_4_1_dZM.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_5_1_jLB.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_6_1_yR7.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_7_1_LdM.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_8_1_fl1.root',
-        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_9_1_tVB.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_1_2_uVn.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_2_1_dYe.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_3_2_duy.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_4_2_EuP.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_5_1_tbb.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_6_1_YcT.root',
+        '/store/user/wbehrenh/WToMuNu_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_7_1_5rD.root',
 
 ] );
 

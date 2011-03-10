@@ -17,11 +17,10 @@ readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring() 
 source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
 readFiles.extend( [
-        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_1_1_IsJ.root',
-        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_2_1_a2w.root',
-        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_3_1_5eh.root',
-        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_4_1_nzO.root',
-        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Fall10-PAT-dilepton/0e884a0df8f72902043010e3e3276b73/reduced_5_1_FNN.root',
+        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_1_1_DUk.root',
+        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_2_1_iPv.root',
+        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_3_1_DnF.root',
+        '/store/user/wbehrenh/DYToMuMu_M-10To20_TuneZ2_7TeV-pythia6/Dilepton/434c2dc7404169951255c872ffa24f4a/reduced_4_2_2OB.root',
 
 ] );
 
