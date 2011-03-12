@@ -84,7 +84,7 @@ void TopKinematics::book()
   // Top mass
   hists_["topMass"    ] = new TH1F( "topMass"     , "topMass"   , 400,  100.,  300.            );
   // angle between b jets
-  hists_["bbbarAngle" ] = new TH1F(  "bbbarAngle" , "bbbarAngle", 314,  0.  ,  3.14            );
+  hists_["bbbarAngle" ] = new TH1F(  "bbbarAngle" , "bbbarAngle", 315,  0.  ,  3.15            );
 
   /** 
       Correlation Plots
@@ -112,7 +112,7 @@ void TopKinematics::book()
   // gen-rec level correlation ttbar sumY
   corrs_["ttbarSumY_"  ] = new TH2F( "ttbarSumY_"  , "ttbarSumY_"   , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation angle between b jets
-  corrs_["bbbarAngle"  ] = new TH2F( "bbbarAngle"  , "bbbarAngle"   ,  314,    0.,  3.14,     314,   0.,  3.14);
+  corrs_["bbbarAngle"  ] = new TH2F( "bbbarAngle"  , "bbbarAngle"   ,  315,    0.,  3.15,     315,   0.,  3.15);
 
 }
 
@@ -179,7 +179,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // Top mass
   hists_["topMass"    ] = fs->make<TH1F>( "topMass"     , "topMass"    ,  400,  100.,  300.            );
   // angle between b jets
-  hists_["bbbarAngle" ] = fs->make<TH1F>( "bbbarAngle"  , "bbbarAngle" ,  314,  0.  ,  3.14            );
+  hists_["bbbarAngle" ] = fs->make<TH1F>( "bbbarAngle"  , "bbbarAngle" ,  315,  0.  ,  3.15            );
 
   /** 
       Correlation Plots
@@ -207,7 +207,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // gen-rec level correlation ttbar sumY
   corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation angle between b jets
-  corrs_["bbbarAngle_"] = fs->make<TH2F>( "bbbarAngle_" , "bbbarAngle_",  314,    0.,  3.14,     314,   0.,  3.14);
+  corrs_["bbbarAngle_"] = fs->make<TH2F>( "bbbarAngle_" , "bbbarAngle_",  315,    0.,  3.15,     315,   0.,  3.15);
 
 }
 
