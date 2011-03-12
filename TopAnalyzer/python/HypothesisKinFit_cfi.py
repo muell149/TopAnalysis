@@ -6,8 +6,10 @@ analyzeHypothesisKinFit = cms.EDAnalyzer("HypothesisKinFitAnalyzer",
     ## analyzer specific configurables
     analyze   = cms.PSet(
       ## hypothesis key on reco level
-      hypoKey = cms.string("kKinFit")
-    )    
+      hypoKey = cms.string("kKinFit"),
+      ## choose if you want to have a tree
+      wantTree = cms.bool(False)
+    )
 )
 
 
