@@ -71,6 +71,7 @@ process.source = cms.Source("PoolSource",
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
+    #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     )
 )
 
@@ -111,8 +112,8 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
 
 
@@ -570,10 +571,10 @@ process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
 
 # TCHE discr.values 7TeV: 1.7, 3.3, 10.2
 process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = 1.7
-process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 10.2
+process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 3.3
 process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 
-## choose which hypotheses to produce
+# add hypothesis
 from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
 addTtSemiLepHypotheses(process,['kKinFit'])
 if(eventFilter=='signal only') and (runningOnData=="MC"):
@@ -583,13 +584,27 @@ else:
     removeTtSemiLepHypGenMatch(process)
     if(applyKinFit==True):
         print 'kinfit: processing bkg or data - genmatch removed'
+
+# keep only events with unambigues parton matches
+# (no other partons exist in dR=0.3 cone) 
+# attention: improves purity but reduces efficiency
+if(eventFilter=='signal only') and (runningOnData=="MC"):
+    process.ttSemiLepJetPartonMatch.algorithm = "unambiguousOnly"
+    
+## ---
+##    configure KinFit Analyzers
+## ---
      
-## define PSets for kinfit output analyzer
+## define PSets for top reconstruction analyzer
+## 1) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch)
 recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), matchForStabilityAndPurity=cms.bool(False) )
+## 2) event hypothesis built of objects as defined above
 recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(False) )
+## 3) event hypothesis built of objects as defined above including for every 1D histogram
+## only events where the reconstructed and matched object are within the same bin
 recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(True ) )
 
-## analyze top quark reconstruction
+## configure top reconstruction analyzers
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
 # a1) as reconstructed from kinFit after reco selection
 process.analyzeTopRecoKinematicsKinFit        = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
@@ -600,47 +615,47 @@ process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.
 # c) as reconstructed from generator objects after gen selection
 process.analyzeTopGenLevelKinematics          = process.analyzeTopGenKinematics.clone()
 
-## analyze Kin Fit reconstruction for single objects
+## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
-process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(src = cms.InputTag("ttSemiLepEvent"), analyze   = cms.PSet(hypoKey = cms.string("kKinFit") )  )
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
-process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"         )
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
-process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingJets")
-process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
-process.analyzeHypoKinFitMuon = process.analyzeHypothesisKinFitMuon.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"      )
+hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"), wantTree = cms.bool(True))
+process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(src = cms.InputTag("ttSemiLepEvent"), analyze = hypoKinFit)
+#process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
+#process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"         )
+#process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
+#process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingJets")
+#process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
+#process.analyzeHypoKinFitMuon = process.analyzeHypothesisKinFitMuon.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"      )
 
-## collect analyzers
+## ---
+##    collect KinFit Analyzers depending on sample processed
+## ---
 ## dummy to avoid empty sequences
 process.dummy = process.hltFilter.clone()
-## common
-process.analyzeKinFitObjectReconstruction = cms.Sequence(process.analyzeHypoKinFit     +
-                                                         process.analyzeHypoKinFitMET  +
-                                                         process.analyzeHypoKinFitJets +
-                                                         process.analyzeHypoKinFitMuon
-                                                         )
-## take care about signal and MC/data
-if(runningOnData=="MC") and (eventFilter=='signal only'):
-   process.topGenPlots = cms.Sequence(process.analyzeTopGenLevelKinematics)
-   process.kinFitPlots = cms.Sequence(process.analyzeTopRecoKinematicsKinFit        +
-                                      process.analyzeTopRecoKinematicsKinFitMatched +
-                                      process.analyzeTopRecoKinematicsGenMatch      +
-                                      process.analyzeKinFitObjectReconstruction
-                                      )
-elif(runningOnData=="MC") and (not eventFilter=='signal only'):
-    process.topGenPlots = cms.Sequence(process.dummy)
-    process.kinFitPlots = cms.Sequence(process.analyzeTopRecoKinematicsKinFit)
-elif(runningOnData=="data"):
-    process.kinFitPlots = cms.Sequence(process.analyzeTopRecoKinematicsKinFit)
-else:
-    print "can not configure KinFit modules. wrong parameter configuration"
-
 ## check if kinFit should be included in main path
-if(runningOnData=="MC") and (applyKinFit==True):
-    process.kinFit = cms.Sequence(process.makeTtSemiLepEvent+
-                                  process.kinFitPlots                       
-                                  )
-    process.kinFitGen = cms.Sequence(process.topGenPlots)
+if(applyKinFit==True):
+    ## case 1: MC sample
+    if(runningOnData=="MC"):
+        ## case 1a): ttbar semileptonic mu-signal
+        if(eventFilter=='signal only'):
+            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
+                                             process.analyzeTopRecoKinematicsKinFit        +
+                                             process.analyzeTopRecoKinematicsKinFitMatched +
+                                             process.analyzeTopRecoKinematicsGenMatch      +
+                                             process.analyzeHypoKinFit                      
+                                             )
+            process.kinFitGen = cms.Sequence(process.analyzeTopGenLevelKinematics)
+        ## case 1b): other MC
+        else:
+            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
+                                             process.analyzeTopRecoKinematicsKinFit)
+            process.kinFitGen = cms.Sequence(process.dummy)
+    ## case 2: data sample
+    elif(runningOnData=="data"):
+        process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
+                                         process.analyzeTopRecoKinematicsKinFit)
+        process.kinFitGen = cms.Sequence(process.dummy)
+    else:
+         print "choose runningOnData= data or MC"
 else:
     process.kinFit    = cms.Sequence(process.dummy)
     process.kinFitGen = cms.Sequence(process.dummy)
@@ -692,12 +707,11 @@ process.p1 = cms.Path(
                       ## apply kinematic fit
                       process.kinFit
                       )
-if(applyKinFit==False):
+if(applyKinFit==False or eventFilter!="signal only"):
     process.p1.remove(process.dummy)
 if(runningOnData=="data"):
     process.p1.remove(process.isolatedGenMuons)
     process.p1.remove(process.semiLeptGenCollections)
-    process.p1.remove(process.dummy)
     
 ## Njets>=3 & btag
 process.p2 = cms.Path(
@@ -782,7 +796,10 @@ if(runningOnData=="MC"):
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p4.remove(process.genFilterSequence)
-        
+    ## delete dummy sequence
+    if(applyKinFit==False or eventFilter!="signal only"):        
+        process.p4.remove(process.dummy)
+    
 elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
