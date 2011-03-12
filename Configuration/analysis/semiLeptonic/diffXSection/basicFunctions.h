@@ -630,39 +630,60 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
 
   // loop plots
-  for(unsigned int plot=0; plot<plotList_.size(); ++plot){    
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){  
+    // check if plot exists in any sample
+    bool existsInAnySample=false;
     // loop samples
     for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
-      // check if file exists
-      // give warning if file does not exist
-      if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this sample" << std::endl;
-      if(files_.count(sample)>0){
+      // check existence of sample
+      if(files_.count(sample)!=0){ 
 	// create plot container
 	TH1* targetPlot;
-	std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
-	std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
 	files_[sample]->GetObject(plotList_[plot], targetPlot);
-	// Check if plot exits
-	// give warning if plot does not exist
-	if((!targetPlot)&&(verbose>0)) std::cout << "can not find plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " - continue and neglect this plot" << std::endl;
-	if(targetPlot){
-	  // check if plot is empty
-	  bool emptyPlot=false;
-	  if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
-	  if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
-	  if(emptyPlot) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
-	  if(!emptyPlot){
-	    // save plot in corresponding map
-	    if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
-	    if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotList_[plot]));
-	    // count every existing 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
-	    if(plot>=N1Dplots) Nplots++;
+	// Check existence of plot
+	if(targetPlot) existsInAnySample=true;
+      }
+    }
+    // end program and draw error if plot does not exist at all
+    if(!existsInAnySample){
+      std::cout << "ERROR: plot "+plotList_[plot]+" does not exist in any file!" << std::endl;
+      exit(1);
+    }
+    else{
+      // otherwise: get plots from sample
+      // loop samples
+      for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
+	// check if file exists
+	// give warning if file does not exist
+	if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this sample" << std::endl;
+	if(files_.count(sample)>0){
+	  // create plot container
+	  TH1* targetPlot;
+	  std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
+	  std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
+	  files_[sample]->GetObject(plotList_[plot], targetPlot);
+	  // Check if plot exits
+	  // give warning if plot does not exist
+	  if((!targetPlot)&&(verbose>0)) std::cout << "can not find plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " - continue and neglect this plot" << std::endl;
+	  if(targetPlot){
+	    // check if plot is empty
+	    bool emptyPlot=false;
+	    if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
+	    if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
+	    if(emptyPlot) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
+	    if(!emptyPlot){
+	      // save plot in corresponding map
+	      if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
+	      if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotList_[plot]));
+	      // count every existing 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
+	      if(plot>=N1Dplots) Nplots++;
+	    }
 	  }
 	}
       }
+      // count every existing type of 1D plots (neglect #samples here as they well be drawn into the same canvas)
+      if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)) Nplots++;
     }
-    // count every existing type of 1D plots (neglect #samples here as they well be drawn into the same canvas)
-    if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)) Nplots++;
   }
 }
 
