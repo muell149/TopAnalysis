@@ -383,15 +383,15 @@ HypothesisKinFit::delObjectIndex(const TtSemiLeptonicEvent& tops, const int& ind
 {
   // a) calculate differences for indeces of reconstructed and genmatched quarks light quarks
   // name convention: "del"+genmatchQuark+recoQuark
-  int delLightQQ       = abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   )-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQ   ));
-  int delLightQBarQBar = abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQBar));
-  int delLightQQBar    = abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   )-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQBar));
-  int delLightQBarQ    = abs(objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQ   ));
+  int delLightQQ       = objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   )-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQ   );
+  int delLightQBarQBar = objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQBar);
+  int delLightQQBar    = objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQ   )-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQBar);
+  int delLightQBarQ    = objectIndex(tops, "kGenMatch", TtSemiLepEvtPartons::LightQBar)-objectIndex(tops, myHypoKey, TtSemiLepEvtPartons::LightQ   );
   // b) test if q and qbar are swopped in Hypothesis	    
   // because kinfit can not destinguish between them
   // implementation: ask if index for q or qbar is closer to q gen truth 
   bool switchRecoQQBar=true;
-  if(std::min(delLightQQ, delLightQBarQBar) < std::min(delLightQQBar, delLightQBarQ)) switchRecoQQBar=false;
+  if(std::min(abs(delLightQQ), abs(delLightQBarQBar)) < std::min(abs(delLightQQBar), abs(delLightQBarQ))) switchRecoQQBar=false;
   // c) return index difference
   // light q
   if     (index==TtSemiLepEvtPartons::LightQ   ) return switchRecoQQBar ? delLightQQBar : delLightQQ;
