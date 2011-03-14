@@ -19,7 +19,7 @@ int roundToInt(double value, bool roundDown=false);
 TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d);
 
-void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString plots = "NminusOne", TString jetTyp = "PF")
+void analyzeMuonCuts(double luminosity = 35900, bool save = false, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_L1OffPF.root", TString plots = "NminusOne", TString jetTyp = "PF")
 {
   // ---
   //    main function parameters
@@ -277,6 +277,7 @@ void analyzeMuonCuts(double luminosity = 36100, bool save = false, TString dataF
     if(var==10)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(1.,3.  );
     if((var==12)||(var==13))histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,400.);
     if((var==14)||(var==15))histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,150.);
+    if(var==16)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0,9);
     if(var==29)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(0.,3. );
     if(var==30)histo_[thoseCollections_[var]+variables_[var]][kData]->GetXaxis()->SetRangeUser(-0.5,2.5);
 
