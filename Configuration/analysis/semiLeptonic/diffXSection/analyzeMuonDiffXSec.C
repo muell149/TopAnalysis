@@ -47,11 +47,12 @@ void systematicError(const TString plot, const int jetMultiplicity, TH1& histo, 
 TH1F* systematicHisto(const TString plot, const int jetMultiplicity, TH1& histo, const TString variable, TString up = "JES11", TString down = "JES09");
 double systematicError2(const TString plot, TH1& histo, int usedBin, TString up = "JES11", TString down = "JES09");
 
-void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_L1OffPF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, double sTopVariation=1.0, double DiBosVariation=1.0, double ZjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
+void analyzeMuonDiffXSec(double luminosity = 35900, bool save = true, bool loadValues = true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_L1OffPF.root", bool useNLO=false, TString JES="", double lumiShift=1.0, double EffScaleFactor=1.0, double QCDVariation=1.0, double WjetsVariation=1.0, double sTopVariation=1.0, double DiBosVariation=1.0, double ZjetsVariation=1.0, bool finalPlots=true, bool logartihmicPlots=true, TString jetTyp = "PF", TString up = "JES11", TString down = "JES09", TString putSysOn = "", double scaleFactor = 0.964155)
 { 
   // ---
   //    define settings for systematic variations
   // ---
+  bool someMoreRatios = false;
   TString TopSample = "Mad";
   TString LuminosityVariation="Nominal";
   TString EffScale = "EffStd";
@@ -1547,68 +1548,88 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
 	// adress canvas with correct name
 	MyCanvas[canvasNumber]->cd(0);
 	MyCanvas[canvasNumber]->SetTitle(variables_[var]+"DiffXSec"+Njets_[mult]+log);
+	if(someMoreRatios)MyCanvas[canvasNumber]->Size(600,800);
 	if(logartihmicPlots) MyCanvas[canvasNumber]->SetLogy(1);
-	// loop samples
-	for(int idx=kLepJets; idx>=kData; --idx){
-	  // set style for histos
-	  // a) for MC
-	  if(idx==kLepJets){
-	    histogramStyle(*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], kLepJets);
-	    // set axis for plots
-	    double min = 0.;
-	    double maxValue = getMaxValue(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], variables_[var], true, "differentialXSec"+variables_[var], mult, up, down);
-	    double max = 1.15*maxValue;
-	    if(logartihmicPlots){
-	      if(variables_[var]=="pt"){
-		min=0.005;
-		max=exp(1.15*(std::log(maxValue)-std::log(min))+std::log(min));
-	      }
-	      else{
-		min=0.5;
-		max=exp(1.3*(std::log(maxValue)-std::log(min))+std::log(min));
-	      }
-	      //if(variables_[var]=="pt") max=0.1*max;
-	      //if(variables_[var]!="pt") max=max/(5*mult+1);
-	    }
-	    if((variables_[var]=="phi")||(variables_[var]=="eta")){
-	      axesStyle(*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], "#"+variables_[var]+"(#mu)", "#frac{d#sigma}{d#"+variables_[var]+" (#mu)} [ pb ]", min, max, 0.055, 1.5);
-	    }
-	    if(variables_[var]=="pt") {
-	      axesStyle(*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], "p_{T}(#mu) [GeV]", "#frac{d#sigma}{dp_{T} (#mu)} [ pb / GeV ]", min, max, 0.055, 1.5);
-	    }
+	// set style for histos
+	// a) for MC
+	histogramStyle(*histo_[ljetsXSecDiff_[var]][kLepJets][Njets_[mult]], kLepJets);
+	// set axis for plots
+	double min = 0.;
+	double maxValue = getMaxValue(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], variables_[var], true, "differentialXSec"+variables_[var], mult, up, down);
+	double max = 1.4*maxValue;
+	if(logartihmicPlots){
+	  if(variables_[var]=="pt"){
+	    min=0.005;
+	    max=exp(1.15*(std::log(maxValue)-std::log(min))+std::log(min));
 	  }
-	  // b) for data
-	  if(idx==kData){
-	    histogramStyle(*histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], kData);
+	  else{
+	    min=0.5;
+	    max=exp(1.4*(std::log(maxValue)-std::log(min))+std::log(min));
 	  }
-	  // draw histos
-	  // a) MC
-	  if(idx==kLepJets){
-	    histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->Draw("HIST");
-	    if(mult<4){
-	      int mult2=mult;
-	      histogramStyle(*histo_[ljetsGen_[var]][kGenW][Njets_[mult2]], kWjets);
-	      histo_[ljetsGen_[var]][kGenW][Njets_[mult2]]->Draw("Hist same");
-	      histogramStyle(*histo_[ljetsGen_[var]][kGenSTop][Njets_[mult2]], kSTops);
-	      histo_[ljetsGen_[var]][kGenSTop][Njets_[mult2]]->Draw("Hist same");
-	      histogramStyle(*histo_[ljetsGen_[var]][kGenBkg][Njets_[mult2]], kBkg);
-	      histo_[ljetsGen_[var]][kGenBkg][Njets_[mult2]]->Draw("Hist same");
-	      histogramStyle(*histo_[ljetsGen_[var]][kGenSig][Njets_[mult2]], kSig);
-	      histo_[ljetsGen_[var]][kGenSig][Njets_[mult2]]->Draw("Hist same");
-	    }
-	    //	  if(mult==4) draw scaled MC-reco with Btag;
-	  }
-	  // b) data
-	  if(idx==kData   ){
-	    //lJetsXSecLegSmall->Draw("same");
-	    histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]]->Draw("p e1 X0 same");
-	    if(finalPlots) systematicError("differentialXSec"+variables_[var], mult, *histo_[ljetsXSecDiff_[var]][idx][Njets_[mult]], variables_[var], up, down);
-	  }
+	  //if(variables_[var]=="pt") max=0.1*max;
+	  //if(variables_[var]!="pt") max=max/(5*mult+1);
 	}
+	if((variables_[var]=="phi")||(variables_[var]=="eta")){
+	  axesStyle(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], "#"+variables_[var]+"(#mu)", "#frac{d#sigma}{d#"+variables_[var]+" (#mu)} [ pb ]", min, max, 0.05, 1.5, 0.05);
+	}
+	if(variables_[var]=="pt") {
+	  axesStyle(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], "p_{T}(#mu) [GeV]", "#frac{d#sigma}{dp_{T} (#mu)} [ pb / GeV ]", min, max, 0.05, 1.5, 0.05);
+	}
+	// b) for data
+	histogramStyle(*histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], kData);
+
+	// draw histos
+	// axis
+	if(someMoreRatios)histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->GetXaxis()->SetLabelSize(0.005);
+	if(someMoreRatios)histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->GetXaxis()->CenterLabels();
+	histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->DrawClone("axis");
+	// a) MC
+	histo_[ljetsXSecDiff_[var]][kLepJets][Njets_[mult]]->Draw("HIST same");
+	if(mult<4){
+	  histogramStyle(*histo_[ljetsGen_[var]][kGenW][Njets_[mult]], kWjets);
+
+	  //histo_[ljetsGen_[var]][kGenW][Njets_[mult]]->Add(histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]],-1.);
+	  //histo_[ljetsGen_[var]][kGenW][Njets_[mult]]->Scale(VjetsSF);
+	  //histo_[ljetsGen_[var]][kGenW][Njets_[mult]]->Add(histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]],1.);
+
+	  histo_[ljetsGen_[var]][kGenW][Njets_[mult]]->Draw("Hist same");
+	  histogramStyle(*histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]], kSTops);
+	  histo_[ljetsGen_[var]][kGenSTop][Njets_[mult]]->Draw("Hist same");
+	  histogramStyle(*histo_[ljetsGen_[var]][kGenBkg][Njets_[mult]], kBkg);
+	  histo_[ljetsGen_[var]][kGenBkg][Njets_[mult]]->Draw("Hist same");
+	  if(someMoreRatios)histo_[ljetsGen_[var]][kGenSig][Njets_[mult]]=(TH1F*)histo_[ljetsGen_[var]][kGenBkg][Njets_[mult]]->Clone();
+	  histogramStyle(*histo_[ljetsGen_[var]][kGenSig][Njets_[mult]], kSig);
+	  histo_[ljetsGen_[var]][kGenSig][Njets_[mult]]->Draw("Hist same");
+	}
+	// if(mult>=4) draw scaled MC-reco with Btag (without stack);
+	// b) data
+	//lJetsXSecLegSmall->Draw("same");
+	histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->Draw("p e1 X0 same");
+	if(finalPlots) systematicError("differentialXSec"+variables_[var], mult, *histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], variables_[var], up, down);
+
 	// draw jet multiplicity label
-	jetMultiplicity_[mult]->Draw("same");
+	if(someMoreRatios){
+	  DrawLabel(lum+" pb^{-1} at  #sqrt{s} = 7 TeV", 0.2, 0.83, 0.99 , 1.03, 0.15);
+	  TString jetMult = getTStringFromInt(mult+1);
+	  DrawLabel("#mu+jets, N_{jets}#geq "+jetMult, 0.2, 0.79, 0.99, 0.99, 0.15);
+	  inclusiveCrossSectionLjetsLeg3->Draw("same");
+	}
+	else
+	  jetMultiplicity_[mult]->Draw("same");
 	// redraw axis
-	histo_[ljetsXSecDiff_[var]][kLepJets][Njets_[mult]]->Draw("AXIS same");
+	histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->DrawClone("AXIS same");
+	histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->GetXaxis()->SetLabelSize(0.05);
+	histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->GetXaxis()->CenterLabels(false);
+	// draw small ratio below the plot
+	if(mult<4 && someMoreRatios){
+	  std::vector<double> statErr;
+	  for(int iBin=1; iBin<=histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->GetNbinsX(); iBin++)
+	    {
+	      statErr.push_back(histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]]->GetBinError(iBin));
+	    }
+	  TH1F* testHisto = systematicHisto("differentialXSec"+variables_[var], mult, *histo_[ljetsXSecDiff_[var]][kData][Njets_[mult]], variables_[var], up, down);
+	  ratio_small(testHisto,histo_[ljetsGen_[var]][kGenW][Njets_[mult]],1.59,0.41,statErr);
+	}
 	// move to next canvas
 	++canvasNumber;      
       }
@@ -1748,7 +1769,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel("p_{T}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
     TH1F* sigmaLjetsInclusiveDataModSys = systematicHisto("ljetsXSec", 6, *sigmaLjetsInclusiveDataMod, "Njets", up, down);
     axesStyle(*sigmaLjetsInclusiveDataModSys, "N_{jets}(p_{T}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.6, 0.075);
-    ratio_smal(sigmaLjetsInclusiveDataModSys,sigmaLjetsInclusiveMCGen,1.59,0.41,statErrMod);
+    ratio_small(sigmaLjetsInclusiveDataModSys,sigmaLjetsInclusiveMCGen,1.59,0.41,statErrMod);
     ++canvasNumber;
 
     // a3) l+jets exclusive bins with ratio
@@ -1803,7 +1824,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel("p_{T}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
     TH1F* sigmaLjetsInclusiveDataExclSys = systematicHisto("ljetsXSecExcl", 6, *sigmaLjetsInclusiveDataExcl, "Njets", up, down);
     axesStyle(*sigmaLjetsInclusiveDataExclSys, "N_{jets}(p_{T}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.6, 0.075);
-    ratio_smal(sigmaLjetsInclusiveDataExclSys,sigmaLjetsInclusiveMCGenExcl,1.59,0.41,statErrExcl);
+    ratio_small(sigmaLjetsInclusiveDataExclSys,sigmaLjetsInclusiveMCGenExcl,1.59,0.41,statErrExcl);
     ++canvasNumber;
 
     // a4) l+jets with ratio paper style
@@ -1829,7 +1850,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel(lum+" pb^{-1} at  #sqrt{s} = 7 TeV", 0.2, 0.79, 0.99, 0.99, 0.15);
     TH1F* sigmaLjetsInclusiveDataModSys2 = systematicHisto("ljetsXSec", 6, *sigmaLjetsInclusiveDataMod2, "Njets", up, down);
     axesStyle(*sigmaLjetsInclusiveDataModSys2, "N_{jets}(p_{T}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.6, 0.075);
-    ratio_smal(sigmaLjetsInclusiveDataModSys2,sigmaLjetsInclusiveMCGen,1.59,0.41,statErrMod);
+    ratio_small(sigmaLjetsInclusiveDataModSys2,sigmaLjetsInclusiveMCGen,1.59,0.41,statErrMod);
     ++canvasNumber;
 
     // a5) l+jets exclusive bins with ratio paper style
@@ -1867,7 +1888,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     DrawLabel(lum+" pb^{-1} at  #sqrt{s} = 7 TeV", 0.2, 0.79, 0.99, 0.99, 0.15);
     TH1F* sigmaLjetsInclusiveDataExclSys2 = systematicHisto("ljetsXSecExcl", 6, *sigmaLjetsInclusiveDataExcl, "Njets", up, down);
     axesStyle(*sigmaLjetsInclusiveDataExclSys2, "N_{jets}(p_{T}>30GeV)", "#sigma ( #mu+jets ) [ pb ]", min, 1.33*max, 0.05, 1.6, 0.075);
-    ratio_smal(sigmaLjetsInclusiveDataExclSys2,sigmaLjetsInclusiveMCGenExcl,1.59,0.41,statErrExcl);
+    ratio_small(sigmaLjetsInclusiveDataExclSys2,sigmaLjetsInclusiveMCGenExcl,1.59,0.41,statErrExcl);
     ++canvasNumber;
 
     //// a6) W+jets exclusive bins with ratio
@@ -1894,7 +1915,7 @@ void analyzeMuonDiffXSec(double luminosity = 36100, bool save = true, bool loadV
     ////DrawLabel("phase space:"                                , 0.33 , 0.55, 0.82 , 0.75);
     //DrawLabel("p_{T}(#mu)>20 GeV, |#eta(#mu)|<2.1"  , 0.25, 0.8, 0.99 , 1., 0.195);
     //DrawLabel("p_{T}(jets)>30 GeV, |#eta(jets)|<2.4", 0.25, 0.73, 0.99, 0.93, 0.195);
-    //ratio_smal(sigmaLjetsInclusiveDataWjetsExcl,sigmaLjetsInclusiveMCGenWjetsExcl,3.69,0.31);
+    //ratio_small(sigmaLjetsInclusiveDataWjetsExcl,sigmaLjetsInclusiveMCGenWjetsExcl,3.69,0.31);
     //++canvasNumber;
 
     // b) top with & without Btag in phase space
