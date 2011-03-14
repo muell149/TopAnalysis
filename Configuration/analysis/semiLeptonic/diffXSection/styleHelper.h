@@ -179,7 +179,7 @@ double getMaxValue(TH1& histo, const TString variable = "", bool systematics = f
 double canvAsym = 4./3.;
 double ratioSize = 0.36;
 
-void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min,std::vector<double> statErr)
+void ratio_small(TH1* hist1,TH1* hist2,Double_t max,Double_t min,std::vector<double> statErr)
 {
   Int_t logx = gPad->GetLogx();
   Double_t left = gPad->GetLeftMargin();
@@ -237,7 +237,7 @@ void ratio_smal(TH1* hist1,TH1* hist2,Double_t max,Double_t min,std::vector<doub
 
   ratio->SetStats(kFALSE);
 //   ratio->GetXaxis()->SetTitle(x_Axis);
-  ratio->GetXaxis()->SetTitleSize(hist1->GetXaxis()->GetTitleSize()*scaleFactor);
+  ratio->GetXaxis()->SetTitleSize(hist1->GetYaxis()->GetTitleSize()*scaleFactor);
   ratio->GetXaxis()->SetTitleOffset(hist1->GetXaxis()->GetTitleOffset());
   ratio->GetXaxis()->SetLabelSize(hist1->GetXaxis()->GetLabelSize()*scaleFactor);
   ratio->GetYaxis()->CenterTitle();
