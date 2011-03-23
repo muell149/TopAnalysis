@@ -48,8 +48,8 @@ class TagAndProbeAnalyzer : public edm::EDAnalyzer {
   //bool varBins_;
   /// variables for cut on pt and eta: pt cut is not applied on pt-histo, eta cut is not applied on eta-histo
   /// both cuts are applied on all other histos 
-  double etaCut_;
   double ptCut_;
+  double etaCut_;
   /// nBins of histos
   int nBinsPt_;
   int nBinsEta_;
