@@ -70,14 +70,17 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
   void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, double HTrec, double HTgen, const double& weight=1.);
   /// helper function for determining stability and purity
-  void match(TH1* hist, const double& genValue, const double& recValue, const double& weight);
+  void match(const std::string& histo, const double& genValue, const double& recValue, const double& weight);
 
  private:
   /// class key of hypothesis
   std::string hypoKey_;
+  /// bool to decide whether to use a ttree 
+  bool useTree_;
   /// apply matching for stability and purity or not
   bool matchForStabilityAndPurity_;
-
+  /// choose whether you want to destinguish between top/antitop instead of leptonic/hadronic top
+  bool ttbarInsteadOfLepHadTop_;
   /// histogram container for correlation plots
   std::map<std::string, TH2*> corrs_;
 };

@@ -2,22 +2,32 @@
 #include <Math/VectorUtil.h>
 #include <Math/Boost.h>
 #include "TopAnalysis/TopAnalyzer/interface/TopKinematics.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 /// default constructor for generator level analysis in fw lite
 TopKinematics::TopKinematics() : hypoKey_(""), matchForStabilityAndPurity_(false) 
 {
+  tree = 0;
+  useTree_=false;
+  ttbarInsteadOfLepHadTop_ = false;
 }
 
 /// default constructor for reco level analysis in fw lite
-TopKinematics::TopKinematics(const std::string& hypoKey, const bool& matchForStabilityAndPurity) : hypoKey_(hypoKey), matchForStabilityAndPurity_(matchForStabilityAndPurity) 
+TopKinematics::TopKinematics(const std::string& hypoKey, const bool& matchForStabilityAndPurity) : hypoKey_(hypoKey), matchForStabilityAndPurity_(matchForStabilityAndPurity)
 {
+  tree = 0;
+  useTree_=false;
+  ttbarInsteadOfLepHadTop_ = false;
 }
 
 /// default constructor for full fw
 TopKinematics::TopKinematics(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
-  matchForStabilityAndPurity_( cfg.getParameter<bool>("matchForStabilityAndPurity") )
+  useTree_( cfg.getParameter<bool>       ("useTree") ),
+  matchForStabilityAndPurity_( cfg.getParameter<bool>("matchForStabilityAndPurity") ),
+  ttbarInsteadOfLepHadTop_   ( cfg.getParameter<bool>("ttbarInsteadOfLepHadTop"   ) )
 {
+  tree = 0;
 }
 
 /// histogramm booking for fwlite 
@@ -28,7 +38,7 @@ void TopKinematics::book()
       KinFit Monitoring Variables
   **/
   // fit probability of the best fit hypothesis
-  hists_["prob"       ] = new TH1F( "prob"       , "prob"       ,   100,    0.,    1.           );
+  hists_["prob"       ] = new TH1F( "prob"       , "prob"       ,   1000,   0.,    1.           );
   // chi2 of the best fit hypothesis
   hists_["chi2"       ] = new TH1F( "chi2"       , "chi2"       ,   100,    0.,   10.           );
   // delta chi2 between best and second best fit hyothesis
@@ -66,25 +76,29 @@ void TopKinematics::book()
      Top Variables for Cross Checks
   **/
   // pt of the hadronically decaying top candidate
-  hists_["topPtHad_"  ] = new TH1F( "topPtHad_"  , "topPtHad_"  ,  9 , CrossSection::topPt     );
+  hists_["topPtHad"  ] = new TH1F( "topPtHad"  , "topPtHad"  ,  9 , CrossSection::topPt     );
   // y  of the hadronically decaying top candidate
-  hists_["topYHad_"   ] = new TH1F( "topYHad_"   , "topYHad_"   , 10 , CrossSection::topY      );
+  hists_["topYHad"   ] = new TH1F( "topYHad"   , "topYHad"   , 10 , CrossSection::topY      );
   // y  of the hadronically decaying top candidate
-  hists_["topPhiHad_" ] = new TH1F( "topPhiHad_" , "topPhiHad_" ,  6 , CrossSection::topPhi    );
+  hists_["topPhiHad" ] = new TH1F( "topPhiHad" , "topPhiHad" ,  6 , CrossSection::topPhi    );
   // pt of the leptonically decaying top candidate
-  hists_["topPtLep_"  ] = new TH1F( "topPtLep_"  , "topPtLep_"  ,  9 , CrossSection::topPt     );
+  hists_["topPtLep"  ] = new TH1F( "topPtLep"  , "topPtLep"  ,  9 , CrossSection::topPt     );
   // y  of the leptonically decaying top candidate
-  hists_["topYLep_"   ] = new TH1F( "topYLep_"   , "topYLep_"   , 10 , CrossSection::topY      );
+  hists_["topYLep"   ] = new TH1F( "topYLep"   , "topYLep"   , 10 , CrossSection::topY      );
   // y  of the leptonically decaying top candidate
-  hists_["topPhiLep_" ] = new TH1F( "topPhiLep_" , "topPhiLep_" ,  6 , CrossSection::topPhi    );
+  hists_["topPhiLep" ] = new TH1F( "topPhiLep" , "topPhiLep" ,  6 , CrossSection::topPhi    );
   // hadronic Top mass
-  hists_["hadTopMass" ] = new TH1F( "hadTopMass"  , "hadTopMass", 400,  100.,  300.            );
+  hists_["hadTopMass"] = new TH1F( "hadTopMass", "hadTopMass", 400,  100.,  300.            );
   // leptonic Top mass
-  hists_["lepTopMass" ] = new TH1F( "lepTopMass"  , "lepTopMass", 400,  100.,  300.            );
+  hists_["lepTopMass"] = new TH1F( "lepTopMass", "lepTopMass", 400,  100.,  300.            );
   // Top mass
-  hists_["topMass"    ] = new TH1F( "topMass"     , "topMass"   , 400,  100.,  300.            );
+  hists_["topMass"   ] = new TH1F( "topMass"   , "topMass"   , 400,  100.,  300.            );
   // angle between b jets
-  hists_["bbbarAngle" ] = new TH1F(  "bbbarAngle" , "bbbarAngle", 315,  0.  ,  3.15            );
+  hists_["bbbarAngle"] = new TH1F( "bbbarAngle", "bbbarAngle", 315,  0.  ,  3.15            );
+  // angle between the leptonically decaying top candidate and the corresponding W
+  hists_["topWAngleLep"] = new TH1F( "topWAngleLep", "topWAngleLep",   6, CrossSection::topWAngle  );
+  // angle between the hadronically decaying top candidate and the corresponding W
+  hists_["topWAngleHad"] = new TH1F( "topWAngleHad", "topWAngleHad",   6, CrossSection::topWAngle  );
 
   /** 
       Correlation Plots
@@ -113,7 +127,8 @@ void TopKinematics::book()
   corrs_["ttbarSumY_"  ] = new TH2F( "ttbarSumY_"  , "ttbarSumY_"   , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation angle between b jets
   corrs_["bbbarAngle"  ] = new TH2F( "bbbarAngle"  , "bbbarAngle"   ,  315,    0.,  3.15,     315,   0.,  3.15);
-
+  // gen-rec level correlation for lepton charge
+  corrs_["lepCharge_"  ] = new TH2F( "lepCharge_"  , "lepCharge_"   ,    3,  -1.5,   1.5,       3, -1.5,   1.5);
 }
 
 /// histogramm booking for fw
@@ -123,7 +138,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
       KinFit Monitoring Variables
   **/
   // fit probability of the best fit hypothesis
-  hists_["prob"       ] = fs->make<TH1F>( "prob"        , "prob"        , 100,    0.,    1. );
+  hists_["prob"       ] = fs->make<TH1F>( "prob"        , "prob"        , 1000,   0.,    1. );
   // chi2 of the best fit hypothesis
   hists_["chi2"       ] = fs->make<TH1F>( "chi2"        , "chi2"        , 100,    0.,   10. );
   // delta chi2 between best and second best fit hyothesis
@@ -161,25 +176,29 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
      Top Variables for Cross Checks
   **/
   // pt of the hadronically decaying top candidate
-  hists_["topPtHad_"  ] = fs->make<TH1F>( "topPtHad_"   , "topPtHad_"  ,   9 , CrossSection::topPt     );
+  hists_["topPtHad"  ] = fs->make<TH1F>( "topPtHad"   , "topPtHad"  ,   9 , CrossSection::topPt     );
   // y  of the hadronically decaying top candidate
-  hists_["topYHad_"   ] = fs->make<TH1F>( "topYHad_"    , "topYHad_"   ,  10 , CrossSection::topY      );
+  hists_["topYHad"   ] = fs->make<TH1F>( "topYHad"    , "topYHad"   ,  10 , CrossSection::topY      );
   // y  of the hadronically decaying top candidate
-  hists_["topPhiHad_" ] = fs->make<TH1F>( "topPhiHad_"  , "topPhiHad_" ,   6 , CrossSection::topPhi    );
+  hists_["topPhiHad" ] = fs->make<TH1F>( "topPhiHad"  , "topPhiHad" ,   6 , CrossSection::topPhi    );
   // pt of the leptonically decaying top candidate
-  hists_["topPtLep_"  ] = fs->make<TH1F>( "topPtLep_"   , "topPtLep_"  ,   9 , CrossSection::topPt     );
+  hists_["topPtLep"  ] = fs->make<TH1F>( "topPtLep"   , "topPtLep"  ,   9 , CrossSection::topPt     );
   // y  of the leptonically decaying top candidate
-  hists_["topYLep_"   ] = fs->make<TH1F>( "topYLep_"    , "topYLep_"   ,  10 , CrossSection::topY      );
+  hists_["topYLep"   ] = fs->make<TH1F>( "topYLep"    , "topYLep"   ,  10 , CrossSection::topY      );
   // y  of the leptonically decaying top candidate
-  hists_["topPhiLep_" ] = fs->make<TH1F>( "topPhiLep_"  , "topPhiLep_" ,   6 , CrossSection::topPhi    );
+  hists_["topPhiLep" ] = fs->make<TH1F>( "topPhiLep"  , "topPhiLep" ,   6 , CrossSection::topPhi    );
   // hadronic Top mass of the hadronically decaying top candidate
-  hists_["hadTopMass" ] = fs->make<TH1F>( "hadTopMass"  , "hadTopMass" ,  400,  100.,  300.            );
+  hists_["hadTopMass"] = fs->make<TH1F>( "hadTopMass" , "hadTopMass",  400,  100.,  300.            );
   // leptonic Top mass of the leptonically decaying top candidate
-  hists_["lepTopMass" ] = fs->make<TH1F>( "lepTopMass"  , "lepTopMass" ,  400,  100.,  300.            );
+  hists_["lepTopMass"] = fs->make<TH1F>( "lepTopMass" , "lepTopMass",  400,  100.,  300.            );
   // Top mass
-  hists_["topMass"    ] = fs->make<TH1F>( "topMass"     , "topMass"    ,  400,  100.,  300.            );
+  hists_["topMass"   ] = fs->make<TH1F>( "topMass"    , "topMass"   ,  400,  100.,  300.            );
   // angle between b jets
-  hists_["bbbarAngle" ] = fs->make<TH1F>( "bbbarAngle"  , "bbbarAngle" ,  315,  0.  ,  3.15            );
+  hists_["bbbarAngle"] = fs->make<TH1F>( "bbbarAngle" , "bbbarAngle",  315,  0.  ,  3.15            );
+  // angle between the leptonically decaying top candidate and the corresponding W
+  hists_["topWAngleLep"] = fs->make<TH1F>( "topWAngleLep", "topWAngleLep",   6, CrossSection::topWAngle  );
+  // angle between the hfs->make<TH1F> decaying top candidate and the corresponding W
+  hists_["topWAngleHad"] = fs->make<TH1F>( "topWAngleHad", "topWAngleHad",   6, CrossSection::topWAngle  );
 
   /** 
       Correlation Plots
@@ -208,7 +227,41 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation angle between b jets
   corrs_["bbbarAngle_"] = fs->make<TH2F>( "bbbarAngle_" , "bbbarAngle_",  315,    0.,  3.15,     315,   0.,  3.15);
+  // gen-rec level correlation for lepton charge
+  corrs_["lepCharge_" ] = fs->make<TH2F>( "lepCharge_"  , "lepCharge_" ,    3,  -1.5,   1.5,       3, -1.5,   1.5);
 
+  // book ttree entries
+  if(useTree_){
+    // Kinfit performance
+    bookVariable(fs, "prob"   );
+    bookVariable(fs, "chi2"   );
+    bookVariable(fs, "delChi2");
+    // ttbar quantities
+    bookVariable(fs, "ttbarPt"    );
+    bookVariable(fs, "ttbarY"     );
+    bookVariable(fs, "ttbarPhi"   );
+    bookVariable(fs, "ttbarMass"  );
+    bookVariable(fs, "ttbarDelPhi");
+    bookVariable(fs, "ttbarDelY"  );
+    bookVariable(fs, "ttbarSumY"  );
+    bookVariable(fs, "ttbarHT"    );
+    // hadronic top quantities
+    bookVariable(fs, "topPtHad"  );
+    bookVariable(fs, "topYHad"   );
+    bookVariable(fs, "topPhiHad" );
+    bookVariable(fs, "hadTopMass");
+    bookVariable(fs, "topWAngleHad");
+    // leptonic top quantities
+    bookVariable(fs, "topPtLep"  );
+    bookVariable(fs, "topYLep"   );  
+    bookVariable(fs, "topPhiLep" );
+    bookVariable(fs, "lepTopMass");
+    bookVariable(fs, "topWAngleLep");
+    // others
+    bookVariable(fs, "bbbarAngle");  
+    bookVariable(fs, "lepCharge"); 
+
+  }
 }
 
 
@@ -219,23 +272,40 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
   // make sure to have a ttbar pair belonging to the semi-leptonic decay channel with 
   // a muon in the final state and neglect events where top decay is not via Vtb
   if( tops.isSemiLeptonic(WDecay::kMuon) && tops.leptonicDecayB() && tops.hadronicDecayB() ){
+    // define leptonic/hadronic or positive/negative charged objects (B,W,t)
+    bool switchLepAndHadTop = false;
+    // if ttbarInsteadOfLepHadTop_ == true:
+    // lepTop = Top     (positive charge)
+    // lepTop = AntiTop (negative charge)
+    if((ttbarInsteadOfLepHadTop_==true)&&(((reco::LeafCandidate*)(tops.singleLepton()))->charge()<0)){
+      switchLepAndHadTop=true;
+    }
+    const reco::GenParticle *lepTop= switchLepAndHadTop ? tops.hadronicDecayTop() : tops.leptonicDecayTop();
+    const reco::GenParticle *hadTop= switchLepAndHadTop ? tops.leptonicDecayTop() : tops.hadronicDecayTop();
+    const reco::GenParticle *lepW  = switchLepAndHadTop ? tops.hadronicDecayW  () : tops.leptonicDecayW();
+    const reco::GenParticle *hadW  = switchLepAndHadTop ? tops.leptonicDecayW  () : tops.hadronicDecayW();
+    const reco::GenParticle *lepB  = switchLepAndHadTop ? tops.hadronicDecayB  () : tops.leptonicDecayB(); 
+    const reco::GenParticle *hadB  = switchLepAndHadTop ? tops.leptonicDecayB  () : tops.hadronicDecayB();
     // define generated scalar sum of all jet pts
-    double HT = tops.leptonicDecayB    ()->pt() + tops.hadronicDecayB       ()->pt();
-    HT +=       tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
+    double HT = lepB->pt() + hadB->pt()+tops.hadronicDecayQuark()->pt()+tops.hadronicDecayQuarkBar()->pt();
     // fill all 1D histos
-    fill(tops.leptonicDecayTop(), tops.hadronicDecayTop(), tops.leptonicDecayW(), tops.hadronicDecayW(), HT, weight);
+    fill(lepTop, hadTop, lepW, hadW, HT, weight);
     // define ttbar four momentum vector
-    reco::Particle::LorentzVector genttbar = tops.hadronicDecayTop()->p4()+tops.leptonicDecayTop()->p4();
+    reco::Particle::LorentzVector genttbar = lepTop->p4()+hadTop->p4();
     // define boost to ttbar system
     ROOT::Math::Boost CoMBoostGenTtbar(genttbar.BoostToCM());
     // get b and bbar four momentum
-    reco::Particle::LorentzVector genLeptonicDecayBBoosted = tops.leptonicDecayB()->p4();
-    reco::Particle::LorentzVector genHadronicDecayBBoosted = tops.hadronicDecayB()->p4();
+    reco::Particle::LorentzVector genLeptonicDecayBBoosted = lepB->p4();
+    reco::Particle::LorentzVector genHadronicDecayBBoosted = hadB->p4();
     // apply boost to ttbar system
     genLeptonicDecayBBoosted = CoMBoostGenTtbar(genLeptonicDecayBBoosted);
     genHadronicDecayBBoosted = CoMBoostGenTtbar(genHadronicDecayBBoosted);
     // fill 1D b-bbar angle plot
-    hists_.find("bbbarAngle")->second->Fill(ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), weight);
+    fillValue( "bbbarAngle", ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), weight );
+    // save lepton charge
+    fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton()))->charge(), weight );
+    // fill the tree, if any variable should be put in
+    if(treeVars_.size()) tree->Fill();
   }
 }
 
@@ -245,41 +315,58 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
   // make sure to have a valid hypothesis on reconstruction level.
   if( tops.isHypoValid(hypoKey_) ){
+    // define leptonic/hadronic or positive/negative charged objects (B,W,t)
+    bool switchLepAndHadTop = false;
+    // if ttbarInsteadOfLepHadTop_ == true:
+    // lepTop = Top     (positive charge)
+    // lepTop = AntiTop (negative charge)
+    if((ttbarInsteadOfLepHadTop_==true)&&(((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge()<0)){
+      switchLepAndHadTop=true;
+    }
+    const reco::Candidate *lepTopRec= switchLepAndHadTop ? tops.hadronicDecayTop(hypoKey_) : tops.leptonicDecayTop(hypoKey_);
+    const reco::Candidate *hadTopRec= switchLepAndHadTop ? tops.leptonicDecayTop(hypoKey_) : tops.hadronicDecayTop(hypoKey_);
+    const reco::Candidate *lepWRec  = switchLepAndHadTop ? tops.hadronicDecayW  (hypoKey_) : tops.leptonicDecayW  (hypoKey_);
+    const reco::Candidate *hadWRec  = switchLepAndHadTop ? tops.leptonicDecayW  (hypoKey_) : tops.hadronicDecayW  (hypoKey_);
+    const reco::Candidate *lepBRec  = switchLepAndHadTop ? tops.hadronicDecayB  (hypoKey_) : tops.leptonicDecayB  (hypoKey_); 
+    const reco::Candidate *hadBRec  = switchLepAndHadTop ? tops.leptonicDecayB  (hypoKey_) : tops.hadronicDecayB  (hypoKey_);
+
     // define reconstructed scalar sum of all jet pts
-    double HTrec = tops.leptonicDecayB    (hypoKey_)->pt() + tops.hadronicDecayB       (hypoKey_)->pt();
-    HTrec+=        tops.hadronicDecayQuark(hypoKey_)->pt() + tops.hadronicDecayQuarkBar(hypoKey_)->pt();
+    double HTrec = lepBRec->pt() + hadBRec->pt() + tops.hadronicDecayQuark(hypoKey_)->pt() + tops.hadronicDecayQuarkBar(hypoKey_)->pt();
     // if the kinFit hypothesis is valid, fill KinFit quantities 
     if(hypoKey_=="kKinFit"){
       // fit probability of the best fit hypothesis
-      hists_.find("prob")->second->Fill( tops.fitProb(), weight );
+      fillValue( "prob", tops.fitProb(), weight );
       // chi2 of the best fit hypothesis
-      hists_.find("chi2")->second->Fill( tops.fitChi2(), weight );      
+      fillValue( "chi2", tops.fitChi2(), weight );
       // make sure that a second best fit hypothesis exists to be able to fill these plots
       if( tops.fitChi2(1) >= 0 ){
 	// delta chi2 between best and second best fit hyothesis
-	hists_.find("delChi2")->second->Fill( tops.fitChi2(1)-tops.fitChi2(0), weight);
+	fillValue( "delChi2", tops.fitChi2(1)-tops.fitChi2(0), weight );
       }
     }
     // check if matchForStabilityAndPurity_ is true and a generated ttbar semileptonic #mu event exists
     // neglect events where top decay is not via Vtb
-    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && tops.leptonicDecayB() && tops.hadronicDecayB() && matchForStabilityAndPurity_ ){
-      //std::cout << "doing 1D plots for gen&&rec events only and filling 2D correlation plots" << std::endl;
+    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && lepBRec && hadBRec && matchForStabilityAndPurity_ ){
+      const reco::GenParticle *lepTopGen= switchLepAndHadTop ? tops.hadronicDecayTop() : tops.leptonicDecayTop();
+      const reco::GenParticle *hadTopGen= switchLepAndHadTop ? tops.leptonicDecayTop() : tops.hadronicDecayTop();
+      const reco::GenParticle *lepWGen  = switchLepAndHadTop ? tops.hadronicDecayW  () : tops.leptonicDecayW  ();
+      const reco::GenParticle *hadWGen  = switchLepAndHadTop ? tops.leptonicDecayW  () : tops.hadronicDecayW  ();
+      const reco::GenParticle *lepBGen  = switchLepAndHadTop ? tops.hadronicDecayB  () : tops.leptonicDecayB  (); 
+      const reco::GenParticle *hadBGen  = switchLepAndHadTop ? tops.leptonicDecayB  () : tops.hadronicDecayB  ();
       // define generated scalar sum of all jet pts
-      double HTgen = tops.leptonicDecayB()->pt() + tops.hadronicDecayB()->pt();
-      HTgen+= tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
+      double HTgen = lepBGen->pt() + hadBGen->pt() + tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
+
       /**
          fill 1D histos and N(gen&&rec)-histo for the determination of stability and purity
       **/
-      fill(tops.leptonicDecayTop(hypoKey_), tops.leptonicDecayTop(), tops.hadronicDecayTop(hypoKey_), tops.hadronicDecayTop(), 
-	   tops.leptonicDecayW  (hypoKey_), tops.leptonicDecayW  (), tops.hadronicDecayW  (hypoKey_), tops.hadronicDecayW  (), 
-	   HTrec, HTgen, weight);
+      fill(lepTopRec, lepTopGen, hadTopRec, hadTopGen, lepWRec, lepWGen, hadWRec, hadWGen, HTrec, HTgen, weight);
 
       /**
 	 fill 2D histos (rec versus gen level correlation plots)
       **/
       // create combined ttbar lorentz vector
-      reco::Particle::LorentzVector genTtbar = tops.hadronicDecayTop(        )->p4()+tops.leptonicDecayTop(        )->p4();
-      reco::Particle::LorentzVector recTtbar = tops.hadronicDecayTop(hypoKey_)->p4()+tops.leptonicDecayTop(hypoKey_)->p4();
+      reco::Particle::LorentzVector genTtbar = hadTopGen->p4()+lepTopGen->p4();
+      reco::Particle::LorentzVector recTtbar = hadTopRec->p4()+lepTopRec->p4();
  
       // fill pt correlation plot for ttbar pair
       corrs_.find("ttbarPt_"  )->second->Fill( genTtbar.pt()      , recTtbar.pt()       , weight );
@@ -291,56 +378,57 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("ttbarHT_"  )->second->Fill( HTgen              , HTrec               , weight ); 
 
       // fill pt correlation plot for hadronic top candidate
-      corrs_.find("topPt_")->second->Fill( tops.hadronicDecayTop()->pt(), tops.hadronicDecayTop(hypoKey_)->pt(), weight );
+      corrs_.find("topPt_")->second->Fill( hadTopGen->pt(), hadTopRec->pt(), weight );
       // fill pt correlation plot for leptonic top candidate
-      corrs_.find("topPt_")->second->Fill( tops.leptonicDecayTop()->pt(), tops.leptonicDecayTop(hypoKey_)->pt(), weight );
+      corrs_.find("topPt_")->second->Fill( lepTopGen->pt(), lepTopRec->pt(), weight );
 
       // fill y correlation plot for hadronic top candidate
-      corrs_.find("topY_")->second->Fill( tops.hadronicDecayTop()->rapidity(), tops.hadronicDecayTop(hypoKey_)->rapidity(), weight );
+      corrs_.find("topY_")->second->Fill( hadTopGen->rapidity(), hadTopRec->rapidity(), weight );
       // fill y correlation plot for leptonic top candidate
-      corrs_.find("topY_")->second->Fill( tops.leptonicDecayTop()->rapidity(), tops.leptonicDecayTop(hypoKey_)->rapidity(), weight );
+      corrs_.find("topY_")->second->Fill( lepTopGen->rapidity(), lepTopRec->rapidity(), weight );
 
       // fill phi correlation plot for hadronic top candidate
-      corrs_.find("topPhi_"   )->second->Fill( tops.hadronicDecayTop()->phi(), tops.hadronicDecayTop(hypoKey_)->phi(), weight );
+      corrs_.find("topPhi_"   )->second->Fill( hadTopGen->phi(), hadTopRec->phi(), weight );
       // fill phi correlation plot for leptonic top candidate							     
-      corrs_.find("topPhi_"   )->second->Fill( tops.leptonicDecayTop()->phi(), tops.leptonicDecayTop(hypoKey_)->phi(), weight );
+      corrs_.find("topPhi_"   )->second->Fill( lepTopGen->phi(), lepTopRec->phi(), weight );
 
        // fill deltaPhi correlation plot for ttbar pair
-      corrs_.find("ttbarDelPhi_")->second->Fill(deltaPhi(tops.leptonicDecayTop(        )->phi(), tops.hadronicDecayTop(        )->phi()),
-   				                deltaPhi(tops.leptonicDecayTop(hypoKey_)->phi(), tops.hadronicDecayTop(hypoKey_)->phi()),
-						weight );
+      corrs_.find("ttbarDelPhi_")->second->Fill(deltaPhi(lepTopGen->phi(), hadTopGen->phi()), 
+						deltaPhi(lepTopRec->phi(), hadTopRec->phi()), weight );
       // fill deltaY correlation plot for ttbar
-      corrs_.find("ttbarDelY_"  )->second->Fill(tops.leptonicDecayTop(        )->rapidity()-tops.hadronicDecayTop(        )->rapidity(), 
-						tops.leptonicDecayTop(hypoKey_)->rapidity()-tops.hadronicDecayTop(hypoKey_)->rapidity(), 
-						weight );
+      corrs_.find("ttbarDelY_"  )->second->Fill(lepTopGen->rapidity()-hadTopGen->rapidity(), 
+						lepTopRec->rapidity()-hadTopRec->rapidity(), weight);
       // fill sumY correlation plot for ttbar pair
-      corrs_.find("ttbarSumY_"  )->second->Fill( tops.leptonicDecayTop(        )->rapidity()+tops.hadronicDecayTop(        )->rapidity(),
-						 tops.leptonicDecayTop(hypoKey_)->rapidity()+tops.hadronicDecayTop(hypoKey_)->rapidity(),
-						 weight );
-
+      corrs_.find("ttbarSumY_"  )->second->Fill(lepTopGen->rapidity()+hadTopGen->rapidity(),
+						lepTopRec->rapidity()+hadTopRec->rapidity(),
+						weight );
+      // fill charge correlation plot for lepton
+      corrs_.find("lepCharge_" )->second->Fill( ((reco::LeafCandidate*)(tops.singleLepton(        )))->charge(), 
+						((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge(), weight);
+    
       /**
 	 fill  fill 2D histos (angle correlation plots)
       **/
       // create boost into reconstructed/generated top quarks/ttbar system
-      ROOT::Math::Boost CoMBoostRecHadTop(tops.hadronicDecayTop(hypoKey_)->p4().BoostToCM());
-      ROOT::Math::Boost CoMBoostGenHadTop(tops.hadronicDecayTop(        )->p4().BoostToCM());
-      ROOT::Math::Boost CoMBoostRecLepTop(tops.leptonicDecayTop(hypoKey_)->p4().BoostToCM());
-      ROOT::Math::Boost CoMBoostGenLepTop(tops.leptonicDecayTop(        )->p4().BoostToCM());
-      ROOT::Math::Boost CoMBoostRecTtbar (recTtbar                             .BoostToCM());
-      ROOT::Math::Boost CoMBoostGenTtbar (genTtbar                             .BoostToCM());
+      ROOT::Math::Boost CoMBoostRecHadTop(hadTopRec->p4().BoostToCM());
+      ROOT::Math::Boost CoMBoostGenHadTop(hadTopGen->p4().BoostToCM());
+      ROOT::Math::Boost CoMBoostRecLepTop(lepTopRec->p4().BoostToCM());
+      ROOT::Math::Boost CoMBoostGenLepTop(lepTopGen->p4().BoostToCM());
+      ROOT::Math::Boost CoMBoostRecTtbar (recTtbar       .BoostToCM());
+      ROOT::Math::Boost CoMBoostGenTtbar (genTtbar       .BoostToCM());
       // get lorentz vectors of W and Top without boost
-      reco::Particle::LorentzVector recHadronicDecayWBoosted   = tops.hadronicDecayW  (hypoKey_)->p4();
-      reco::Particle::LorentzVector genHadronicDecayWBoosted   = tops.hadronicDecayW  (        )->p4();
-      reco::Particle::LorentzVector recLeptonicDecayWBoosted   = tops.leptonicDecayW  (hypoKey_)->p4();
-      reco::Particle::LorentzVector genLeptonicDecayWBoosted   = tops.leptonicDecayW  (        )->p4();
-      reco::Particle::LorentzVector recHadronicDecayTopBoosted = tops.hadronicDecayTop(hypoKey_)->p4();
-      reco::Particle::LorentzVector genHadronicDecayTopBoosted = tops.hadronicDecayTop(        )->p4();
-      reco::Particle::LorentzVector recLeptonicDecayTopBoosted = tops.leptonicDecayTop(hypoKey_)->p4();
-      reco::Particle::LorentzVector genLeptonicDecayTopBoosted = tops.leptonicDecayTop(        )->p4();
-      reco::Particle::LorentzVector genLeptonicDecayBBoosted   = tops.leptonicDecayB  (        )->p4();
-      reco::Particle::LorentzVector recLeptonicDecayBBoosted   = tops.leptonicDecayB  (hypoKey_)->p4();
-      reco::Particle::LorentzVector genHadronicDecayBBoosted   = tops.hadronicDecayB  (        )->p4();
-      reco::Particle::LorentzVector recHadronicDecayBBoosted   = tops.hadronicDecayB  (hypoKey_)->p4();
+      reco::Particle::LorentzVector recHadronicDecayWBoosted   = hadWRec  ->p4();
+      reco::Particle::LorentzVector genHadronicDecayWBoosted   = hadWGen  ->p4();
+      reco::Particle::LorentzVector recLeptonicDecayWBoosted   = lepWRec  ->p4();
+      reco::Particle::LorentzVector genLeptonicDecayWBoosted   = lepWGen  ->p4();
+      reco::Particle::LorentzVector recHadronicDecayTopBoosted = hadTopRec->p4();
+      reco::Particle::LorentzVector genHadronicDecayTopBoosted = hadTopGen->p4();
+      reco::Particle::LorentzVector recLeptonicDecayTopBoosted = lepTopRec->p4();
+      reco::Particle::LorentzVector genLeptonicDecayTopBoosted = lepTopGen->p4();
+      reco::Particle::LorentzVector genLeptonicDecayBBoosted   = lepBGen  ->p4();
+      reco::Particle::LorentzVector recLeptonicDecayBBoosted   = lepBRec  ->p4();
+      reco::Particle::LorentzVector genHadronicDecayBBoosted   = hadBGen  ->p4();
+      reco::Particle::LorentzVector recHadronicDecayBBoosted   = hadBRec  ->p4();
 
       // recalculate Lorent vectors using boosts defined above
       // boost W into top rest frame and and top and b-quarks into the ttbar rest frame
@@ -369,29 +457,32 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("bbbarAngle_")->second->Fill( ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
 						ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
 						weight);
-      // fill 1D b-bbar angle plot
-      match( hists_.find("bbbarAngle")->second, ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
-	                                        ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
-	                                        weight);
+      // fill correlation plot for angle between b-jets
+      match( "bbbarAngle", ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
+	                   ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
+	                   weight);
     }
     // if matchForStabilityAndPurity_ is false or no generated ttbar semileptonic #mu event exists
     else{
-      //std::cout << "doing 1D plots for all events" << std::endl;
       // fill only 1D histos
-      fill(tops.leptonicDecayTop(hypoKey_), tops.hadronicDecayTop(hypoKey_), tops.leptonicDecayW(hypoKey_), tops.hadronicDecayW(hypoKey_), HTrec, weight);
+      fill(lepTopRec, hadTopRec, lepWRec, hadWRec, HTrec, weight);
       // define ttbar four momentum vector
-      reco::Particle::LorentzVector recttbar = tops.hadronicDecayTop(hypoKey_)->p4()+tops.leptonicDecayTop(hypoKey_)->p4();
+      reco::Particle::LorentzVector recttbar = hadTopRec->p4()+lepTopRec->p4();
       // define boost to ttbar system
       ROOT::Math::Boost CoMBoostRecTtbar(recttbar.BoostToCM());
       // get b and bbar four momentum
-      reco::Particle::LorentzVector recLeptonicDecayBBoosted = tops.leptonicDecayB(hypoKey_)->p4();
-      reco::Particle::LorentzVector recHadronicDecayBBoosted = tops.hadronicDecayB(hypoKey_)->p4();
+      reco::Particle::LorentzVector recLeptonicDecayBBoosted = lepBRec->p4();
+      reco::Particle::LorentzVector recHadronicDecayBBoosted = hadBRec->p4();
       // apply boost to ttbar system
       recLeptonicDecayBBoosted = CoMBoostRecTtbar(recLeptonicDecayBBoosted);
       recHadronicDecayBBoosted = CoMBoostRecTtbar(recHadronicDecayBBoosted);
       // fill 1D b-bbar angle plot
-      hists_.find("bbbarAngle")->second->Fill(ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted), weight);
+      fillValue( "bbbarAngle", ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted), weight );
     }
+    // save lepton charge
+    fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge(), weight );
+    // fill the tree, if any variable should be put in
+    if(treeVars_.size()) tree->Fill();
   }
 }
 
@@ -426,62 +517,79 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   /** 
       Fill Top Variables for Cross Section Measurement
   **/
+
+  // ---
+  //    top variables (as no branch is created, they exist only as plot)
+  // ---
   // fill top pt for leptonicTop candidate in combined histogram
-  hists_.find("topPt"      )->second->Fill( leptonicTop->p4().pt ()      , weight );
-  // fill top pt for leptonicTop candidate in separate histogram
-  hists_.find("topPtLep_"  )->second->Fill( leptonicTop->p4().pt ()      , weight );
-  // fill top y for leptonicTop candidate in combined histogram
-  hists_.find("topY"       )->second->Fill( leptonicTop->p4().Rapidity() , weight );
-  // fill top y for leptonicTop candidate in separate histogram
-  hists_.find("topYLep_"   )->second->Fill( leptonicTop->p4().Rapidity() , weight );
-  // fill top phi for leptonicTop candidate in combined histogram
-  hists_.find("topPhi"     )->second->Fill( leptonicTop->p4().phi()      , weight );
-  // fill top phi for leptonicTop candidate in separate histogram
-  hists_.find("topPhiLep_" )->second->Fill( leptonicTop->p4().phi()      , weight );
-  // fill leptonic Top mass in separate histogram
-  hists_.find("lepTopMass" )->second->Fill( leptonicTop->mass()          , weight );
-  // fill leptonic Top mass in combined histogram
-  hists_.find("topMass"    )->second->Fill( leptonicTop->mass()          , weight );
-  // fill angle between top and the corresponding W in top rest frame for leptonicTop candidate in combined histogram
-  hists_.find("topWAngle"  )->second->Fill( ROOT::Math::VectorUtil::Angle(LeptonicDecayTopBoosted, LeptonicDecayWBoosted), weight );
-
+  fillValue( "topPt", leptonicTop->p4().pt()     , weight );
   // fill top pt for hadronicTop candidate in combined histogram
-  hists_.find("topPt"      )->second->Fill( hadronicTop->p4().pt ()      , weight );
-  // fill top pt for hadronicTop candidate in separate histogram
-  hists_.find("topPtHad_"  )->second->Fill( hadronicTop->p4().pt ()      , weight );
+  fillValue( "topPt", hadronicTop->p4().pt()     , weight );
+  // fill top y for leptonicTop candidate in combined histogram
+  fillValue( "topY", leptonicTop->p4().Rapidity(), weight );
   // fill top y for hadronicTop candidate in combined histogram
-  hists_.find("topY"       )->second->Fill( hadronicTop->p4().Rapidity() , weight );
-  // fill top y for hadronicTop candidate in separate histogram
-  hists_.find("topYHad_"   )->second->Fill( hadronicTop->p4().Rapidity() , weight );
+  fillValue( "topY", hadronicTop->p4().Rapidity(), weight );
+  // fill top phi for leptonicTop candidate in combined histogram
+  fillValue( "topPhi", leptonicTop->p4().phi()   , weight );
   // fill top phi for hadronicTop candidate in combined histogram
-  hists_.find("topPhi"     )->second->Fill( hadronicTop->p4().phi()      , weight );
-  // fill top phi for hadronicTop candidate in separate histogram
-  hists_.find("topPhiHad_" )->second->Fill( hadronicTop->p4().phi()      , weight );
-  // fill hadronic Top mass in separate histogram
-  hists_.find("hadTopMass" )->second->Fill( hadronicTop->mass()          , weight );
+  fillValue( "topPhi", hadronicTop->p4().phi()   , weight );
+  // fill leptonic Top mass in combined histogram
+  fillValue( "topMass", leptonicTop->mass()      , weight );
   // fill hadronic Top mass in combined histogram
-  hists_.find("topMass"    )->second->Fill( hadronicTop->mass()          , weight );
+  fillValue( "topMass", hadronicTop->mass()      , weight );
+  // fill angle between top and the corresponding W in top rest frame for leptonicTop candidate in combined histogram
+  fillValue( "topWAngle", ROOT::Math::VectorUtil::Angle(LeptonicDecayTopBoosted, LeptonicDecayWBoosted), weight );
   // fill angle between top and the corresponding W in top rest frame for hadronicTop candidate in combined histogram
-  hists_.find("topWAngle"  )->second->Fill( ROOT::Math::VectorUtil::Angle(HadronicDecayTopBoosted, HadronicDecayWBoosted), weight );
+  fillValue( "topWAngle", ROOT::Math::VectorUtil::Angle(HadronicDecayTopBoosted, HadronicDecayWBoosted), weight );
 
+  // ---
+  //    top variables for leptonic top
+  // ---
+  // fill top pt for leptonicTop candidate in separate histogram
+  fillValue( "topPtLep", leptonicTop->p4().pt()     , weight );
+  // fill top y for leptonicTop candidate in separate histogram
+  fillValue( "topYLep", leptonicTop->p4().Rapidity(), weight );
+  // fill top phi for leptonicTop candidate in separate histogram
+  fillValue( "topPhiLep", leptonicTop->p4().phi()   , weight );
+  // fill leptonic Top mass in separate histogram
+  fillValue( "lepTopMass", leptonicTop->mass()      , weight );
+  // fill angle between top and the corresponding W in top rest frame for leptonicTop candidate in separate histogram
+  fillValue( "topWAngleLep", ROOT::Math::VectorUtil::Angle(LeptonicDecayTopBoosted, LeptonicDecayWBoosted), weight );
+
+  // ---
+  //    top variables for hadronic top
+  // ---
+  // fill top pt for hadronicTop candidate in separate histogram
+  fillValue( "topPtHad", hadronicTop->p4().pt(), weight );
+  // fill top y for hadronicTop candidate in separate histogram
+  fillValue( "topYHad", hadronicTop->p4().Rapidity(), weight );
+  // fill top phi for hadronicTop candidate in separate histogram
+  fillValue( "topPhiHad", hadronicTop->p4().phi(), weight );
+  // fill hadronic Top mass in separate histogram
+  fillValue( "hadTopMass", hadronicTop->mass(), weight );
+  // fill angle between top and the corresponding W in top rest frame for hadronicTop candidate in separate histogram
+  fillValue( "topWAngleHad", ROOT::Math::VectorUtil::Angle(HadronicDecayTopBoosted, HadronicDecayWBoosted), weight );
+
+
+  // ---
+  //    ttbar variables
+  // ---
   // fill ttbar pt
-  hists_.find("ttbarPt"    )->second->Fill( ttBar.pt  ()          , weight );
+  fillValue( "ttbarPt", ttBar.pt(), weight );
   // fill ttbar y
-  hists_.find("ttbarY"     )->second->Fill( ttBar.Rapidity()      , weight );
+  fillValue( "ttbarY", ttBar.Rapidity(), weight );
   // fill ttbar phi
-  hists_.find("ttbarPhi"   )->second->Fill( ttBar.phi ()          , weight );
+  fillValue( "ttbarPhi", ttBar.phi(), weight );
   // fill ttbar invariant mass
-  hists_.find("ttbarMass"  )->second->Fill( ttBar.mass()          , weight );
-
+  fillValue( "ttbarMass", ttBar.mass(), weight );
   // fill deltaPhi between both top quarks 
-  hists_.find("ttbarDelPhi")->second->Fill( deltaPhi(leptonicTop->phi(), hadronicTop->phi()) , weight );
+  fillValue( "ttbarDelPhi", deltaPhi(leptonicTop->phi(), hadronicTop->phi()), weight );
   // fill deltaY between both top quarks 
-  hists_.find("ttbarDelY"  )->second->Fill( leptonicTop->rapidity()-hadronicTop->rapidity()  , weight );
-
+  fillValue( "ttbarDelY", leptonicTop->rapidity()-hadronicTop->rapidity(), weight );
   // fill sum of y of both top quarks 
-  hists_.find("ttbarSumY"  )->second->Fill( leptonicTop->rapidity()+hadronicTop->rapidity()  , weight );
+  fillValue( "ttbarSumY", leptonicTop->rapidity()+hadronicTop->rapidity(), weight );
   // fill HT of the 4 jets assigned to the ttbar decay
-  hists_.find("ttbarHT"    )->second->Fill( HT  , weight );
+  fillValue( "ttbarHT", HT, weight );
 }
 
 /// histogram filling for 1D histos using only events with existing genmatch
@@ -530,74 +638,80 @@ TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate
   **/
 
   // fill top pt for topA candidate in combined histogram
-  match( hists_.find("topPt"      )->second , leptonicTopRec->p4().pt ()      , leptonicTopGen->p4().pt ()      , weight );
+  match( "topPt"       , leptonicTopRec->p4().pt ()     , leptonicTopGen->p4().pt ()      , weight );
   // fill top pt for topA candidate in separate histogram
-  match( hists_.find("topPtLep_"  )->second , leptonicTopRec->p4().pt ()      , leptonicTopGen->p4().pt ()      , weight );
+  match( "topPtLep"    , leptonicTopRec->p4().pt ()      , leptonicTopGen->p4().pt ()     , weight );
   // fill top y for topA candidate in combined histogram
-  match( hists_.find("topY"       )->second , leptonicTopRec->p4().Rapidity() , leptonicTopGen->p4().Rapidity() , weight );
+  match( "topY"        , leptonicTopRec->p4().Rapidity(), leptonicTopGen->p4().Rapidity() , weight );
   // fill top y for topA candidate in separate histogram
-  match( hists_.find("topYLep_"   )->second , leptonicTopRec->p4().Rapidity() , leptonicTopGen->p4().Rapidity() , weight );
+  match( "topYLep"     , leptonicTopRec->p4().Rapidity() , leptonicTopGen->p4().Rapidity(), weight );
   // fill top phi for topA candidate in combined histogram
-  match( hists_.find("topPhi"     )->second , leptonicTopRec->p4().phi()      , leptonicTopGen->p4().phi()      , weight );
+  match( "topPhi"      , leptonicTopRec->p4().phi()     , leptonicTopGen->p4().phi()      , weight );
   // fill top phi for topA candidate in separate histogram
-  match( hists_.find("topPhiLep_" )->second , leptonicTopRec->p4().phi()      , leptonicTopGen->p4().phi()      , weight );
+  match( "topPhiLep"   , leptonicTopRec->p4().phi()      , leptonicTopGen->p4().phi()     , weight );
   // fill leptonic Top mass for topB candidate in seperate histogram
-  match( hists_.find("lepTopMass" )->second , leptonicTopRec->mass()          , leptonicTopGen->mass()          , weight );
+  match( "lepTopMass"  , leptonicTopRec->mass()         , leptonicTopGen->mass()          , weight );
   // fill leptonic Top mass for topB candidate in combined histogram
-  match( hists_.find("topMass"    )->second , leptonicTopRec->mass()          , leptonicTopGen->mass()          , weight );
+  match( "topMass"     , leptonicTopRec->mass()         , leptonicTopGen->mass()          , weight );
   // fill angle between top and the corresponding W in top rest frame for topA candidate in combined histogram
-  match( hists_.find("topWAngle"  )->second , ROOT::Math::VectorUtil::Angle(recLeptonicDecayTopBoosted, recLeptonicDecayWBoosted), 
-	                                      ROOT::Math::VectorUtil::Angle(genLeptonicDecayTopBoosted, genLeptonicDecayWBoosted), 
-	                                      weight );
-
+  match( "topWAngle"   , ROOT::Math::VectorUtil::Angle(recLeptonicDecayTopBoosted, recLeptonicDecayWBoosted), 
+	                 ROOT::Math::VectorUtil::Angle(genLeptonicDecayTopBoosted, genLeptonicDecayWBoosted), 
+	                 weight );
+  //match( "topWAngleLep", ROOT::Math::VectorUtil::Angle(recLeptonicDecayTopBoosted, recLeptonicDecayWBoosted), 
+  //	                 ROOT::Math::VectorUtil::Angle(genLeptonicDecayTopBoosted, genLeptonicDecayWBoosted), 
+  //	                 weight );
   // fill top pt for topB candidate in combined histogram
-  match( hists_.find("topPt"      )->second , hadronicTopRec->p4().pt ()      , hadronicTopGen->p4().pt ()      , weight );
+  match( "topPt"       , hadronicTopRec->p4().pt ()      , hadronicTopGen->p4().pt ()      , weight );
   // fill top pt for topB candidate in separate histogram
-  match( hists_.find("topPtHad_"  )->second , hadronicTopRec->p4().pt ()      , hadronicTopGen->p4().pt ()      , weight );
+  match( "topPtHad"    , hadronicTopRec->p4().pt ()      , hadronicTopGen->p4().pt ()      , weight );
   // fill top y for topB candidate in combined histogram
-  match( hists_.find("topY"       )->second , hadronicTopRec->p4().Rapidity() , hadronicTopGen->p4().Rapidity() , weight );
+  match( "topY"        , hadronicTopRec->p4().Rapidity() , hadronicTopGen->p4().Rapidity() , weight );
   // fill top y for topB candidate in separate histogram
-  match( hists_.find("topYHad_"   )->second , hadronicTopRec->p4().Rapidity() , hadronicTopGen->p4().Rapidity() , weight );
+  match( "topYHad"     , hadronicTopRec->p4().Rapidity() , hadronicTopGen->p4().Rapidity() , weight );
   // fill top phi for topB candidate in combined histogram
-  match( hists_.find("topPhi"     )->second , hadronicTopRec->p4().phi()      , hadronicTopGen->p4().phi()      , weight );
+  match( "topPhi"      , hadronicTopRec->p4().phi()      , hadronicTopGen->p4().phi()      , weight );
   // fill top phi for topB candidate in separate histogram
-  match( hists_.find("topPhiHad_" )->second , hadronicTopRec->p4().phi()      , hadronicTopGen->p4().phi()      , weight );
+  match( "topPhiHad"   , hadronicTopRec->p4().phi()      , hadronicTopGen->p4().phi()      , weight );
   // fill hadronic Top mass for topB candidate in seperate histogram
-  match( hists_.find("hadTopMass" )->second , hadronicTopRec->mass()          , hadronicTopGen->mass()          , weight );
+  match( "hadTopMass"  , hadronicTopRec->mass()          , hadronicTopGen->mass()          , weight );
   // fill hadronic Top mass for topB candidate in combined histogram
-  match( hists_.find("topMass"    )->second , hadronicTopRec->mass()          , hadronicTopGen->mass()          , weight );
+  match( "topMass"     , hadronicTopRec->mass()          , hadronicTopGen->mass()          , weight );
   // fill angle between top and the corresponding Win top rest frame for topB candidate in combined histogram
-  match( hists_.find("topWAngle"  )->second , ROOT::Math::VectorUtil::Angle(recHadronicDecayTopBoosted, recHadronicDecayWBoosted), 
-                                              ROOT::Math::VectorUtil::Angle(genHadronicDecayTopBoosted, genHadronicDecayWBoosted), 
-                                              weight );
-
+  match( "topWAngle"   , ROOT::Math::VectorUtil::Angle(recHadronicDecayTopBoosted, recHadronicDecayWBoosted), 
+                         ROOT::Math::VectorUtil::Angle(genHadronicDecayTopBoosted, genHadronicDecayWBoosted), 
+                         weight );
+  // fill angle between top and the corresponding Win top rest frame for topB candidate in combined histogram
+  //  match( "topWAngleHad", ROOT::Math::VectorUtil::Angle(recHadronicDecayTopBoosted, recHadronicDecayWBoosted), 
+  //                      ROOT::Math::VectorUtil::Angle(genHadronicDecayTopBoosted, genHadronicDecayWBoosted), 
+  //                      weight );
   // fill ttbar pt
-  match( hists_.find("ttbarPt"    )->second , recTtBar.pt  ()          , genTtBar.pt  ()          , weight );
+  match( "ttbarPt"     , recTtBar.pt  ()          , genTtBar.pt  ()          , weight );
   // fill ttbar y
-  match( hists_.find("ttbarY"     )->second , recTtBar.Rapidity ()     , genTtBar.Rapidity ()     , weight );
+  match( "ttbarY"      , recTtBar.Rapidity ()     , genTtBar.Rapidity ()     , weight );
   // fill ttbar phi
-  match( hists_.find("ttbarPhi"   )->second , recTtBar.phi ()          , genTtBar.phi ()          , weight );
+  match( "ttbarPhi"    , recTtBar.phi ()          , genTtBar.phi ()          , weight );
   // fill ttbar invariant mass
-  match( hists_.find("ttbarMass"  )->second , recTtBar.mass()          , genTtBar.mass()          , weight );
+  match( "ttbarMass"   , recTtBar.mass()          , genTtBar.mass()          , weight );
 
   // fill deltaPhi between both top quarks 
-  match( hists_.find("ttbarDelPhi")->second , deltaPhi(leptonicTopRec->phi(), hadronicTopRec->phi()), 
+  match( "ttbarDelPhi" , deltaPhi(leptonicTopRec->phi(), hadronicTopRec->phi()), 
 	                                      deltaPhi(leptonicTopGen->phi(), hadronicTopGen->phi()), weight );
   // fill deltaY between both top quarks 
-  match( hists_.find("ttbarDelY"  )->second , leptonicTopRec->rapidity()-hadronicTopRec->rapidity() , 
+  match( "ttbarDelY"   , leptonicTopRec->rapidity()-hadronicTopRec->rapidity() , 
                                               leptonicTopGen->rapidity()-hadronicTopGen->rapidity() , weight );
 
   // fill sum of y of both top quarks 
-  match( hists_.find("ttbarSumY"  )->second , leptonicTopRec->rapidity()+hadronicTopRec->rapidity() , 
+  match( "ttbarSumY"   , leptonicTopRec->rapidity()+hadronicTopRec->rapidity() , 
 	                                      leptonicTopGen->rapidity()+hadronicTopGen->rapidity() , weight );
   // fill HT of the 4 jets assigned to the ttbar decay
-  match( hists_.find("ttbarHT"    )->second , HTrec , HTgen , weight );
+  match( "ttbarHT"     , HTrec , HTgen , weight );
 }
 
 /// helper function to provid N(gen&&rec)-histo for the determination of stability and purity
 void 
-TopKinematics::match(TH1* hist, const double& recValue, const double& genValue, const double& weight)
+TopKinematics::match(const std::string& histo, const double& recValue, const double& genValue, const double& weight)
 {
+  TH1* hist = hists_.find(histo)->second;
   // loop the bins of histogram 'hist'; note that the first bin
   // starts with '1' and not with '0'
   for(int bin=1; bin<=hist->GetNbinsX(); ++bin){
@@ -606,7 +720,7 @@ TopKinematics::match(TH1* hist, const double& recValue, const double& genValue, 
     double upperEdge = hist->GetBinLowEdge(bin)+hist->GetBinWidth(bin);
     // only fill the histogram when the genValue & recValue fall into the same bin ('<=' for upper edge)
     if( (lowerEdge<genValue && genValue<=upperEdge) && (lowerEdge<recValue && recValue<=upperEdge) ){
-      hist->Fill(recValue, weight);
+      fillValue( histo, recValue, weight );
       break;
     }
   }
