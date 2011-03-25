@@ -9,7 +9,7 @@ process = cms.Process("TopQuark")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-#process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 50
 ## configure process options
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
@@ -33,11 +33,8 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
-
-## configure process options
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(False)
-)
+## skip events
+process.source.skipEvents = cms.untracked.uint32(10000)
 
 #-------------------------------------------------
 # top analysis
@@ -73,12 +70,12 @@ from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import
 addTtSemiLepHypotheses(process,['kKinFit'])
 ## process.ttSemiLepJetPartonMatch.verbosity = 1
 process.kinFitTtSemiLepEventHypothesis.leps = 'selectedPatMuons' #'tightMuons'
-process.kinFitTtSemiLepEventHypothesis.jets = 'selectedPatJetsAK5PF'#'tightLeadingPFJets'
+process.kinFitTtSemiLepEventHypothesis.jets = 'tightLeadingPFJets'#'selectedPatJetsAK5PF'
 process.kinFitTtSemiLepEventHypothesis.mets = 'patMETsPF'
 
 # maximum number of jets to be considered in the jet combinatorics
 # (has to be >= 4, can be set to -1 if you want to take all)
-process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
+process.kinFitTtSemiLepEventHypothesis.maxNJets = 4
 
 # maximum number of jet combinations finally written into the event, starting from the "best"
 # (has to be >= 1, can be set to -1 if you want to take all)
@@ -102,32 +99,37 @@ process.ttSemiLepJetPartonMatch.algorithm = "unambiguousOnly"
 
 ## configure module you would like to test
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
-hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"), wantTree = cms.bool(True))
+hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
+                      wantTree = cms.bool(True),
+                      maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeHypothesisKinFitModule = process.analyzeHypothesisKinFit.clone(analyze=hypoKinFit)
 
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
 
-## ## define PSets for top reconstruction analyzer
-## ## 1) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch)
-## recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), matchForStabilityAndPurity=cms.bool(False) )
-## ## 2) event hypothesis built of objects as defined above
-## recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(False) )
-## ## 3) event hypothesis built of objects as defined above including for every 1D histogram
-## ## only events where the reconstructed and matched object are within the same bin
-## recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(True ) )
-
 ## ## configure top reconstruction analyzers
-## process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
-## # a1) as reconstructed from kinFit after reco selection
-## process.analyzeTopRecoKinematicsKinFit        = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
-## # a2) as reconstructed from kinFit after reco selection including match to gen objects
-## process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched )
-## # b) as reconstructed from genmatched objects after reco selection
-## process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
-## # c) as reconstructed from generator objects after gen selection
-## process.analyzeTopGenLevelKinematics          = process.analyzeTopGenKinematics.clone()
+process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
+
+## define PSets for top reconstruction analyzer
+## 1) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch)
+recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True) )
+## 2) event hypothesis built of objects as defined above
+recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True) )
+## 3) event hypothesis built of objects as defined above including for every 1D histogram
+## only events where the reconstructed and matched object are within the same bin
+recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(True ), ttbarInsteadOfLepHadTop = cms.bool(True) )
+## 4) event hypothesis built with generator truth informations
+genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True) )
+
+# a1) as reconstructed from kinFit after reco selection
+process.analyzeTopRecoKinematicsKinFit        = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
+# a2) as reconstructed from kinFit after reco selection including match to gen objects
+process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched )
+# b) as reconstructed from genmatched objects after reco selection
+process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
+# c) as reconstructed from generator objects after gen selection
+process.analyzeTopGenLevelKinematics          = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
@@ -141,14 +143,14 @@ process.p1 = cms.Path(## ttbar semilept. mu only
                       process.semiLeptonicSelection  *
                       process.makeTtSemiLepEvent     *
                       ## event selection
-                      process.muonSelection          *
-                      process.jetSelection           *
+#                      process.muonSelection          *
+#                      process.jetSelection           *
                       ## KinFit monitoring modules
-                      process.analyzeHypothesisKinFitModule  #       *
-#                      process.analyzeTopRecoKinematicsKinFit        *
-#                      process.analyzeTopRecoKinematicsGenMatch      *
-#                      process.analyzeTopGenLevelKinematics          *
-#                       process.analyzeTopRecoKinematicsKinFitMatched                       
+                      process.analyzeHypothesisKinFitModule         *
+                      process.analyzeTopRecoKinematicsKinFit        *
+                      process.analyzeTopRecoKinematicsGenMatch      *
+                      process.analyzeTopGenLevelKinematics          *
+                      process.analyzeTopRecoKinematicsKinFitMatched                       
 #                      process.analyzeHypothesisKinFitMET *
 #                      process.analyzeHypothesisKinFitJets *
 #                      process.analyzeHypothesisKinFitMuon

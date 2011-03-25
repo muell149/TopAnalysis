@@ -56,6 +56,8 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
   std::string hypoKey_;
   /// bool to enable or disable ttree output
   bool wantTree;
+  /// number of jets considered in Kinematic fit (needed for the classification of permutations)
+  int maxNJets;
   /// histogram container for correlation plots
   std::map<std::string, TH2*> corrs_;
   /// all avriables used to fill the tree
@@ -178,6 +180,7 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
   float ttBarDelPhi_fit;
   float ttBarDelY_fit;
   float ttBarSumY_fit;
+  int assignment;
 };
 
 #endif

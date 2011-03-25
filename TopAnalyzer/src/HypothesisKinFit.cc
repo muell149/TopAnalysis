@@ -13,7 +13,8 @@ HypothesisKinFit::HypothesisKinFit()
 /// default constructor for full fw
 HypothesisKinFit::HypothesisKinFit(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
-  wantTree( cfg.getParameter<bool>("wantTree") )
+  wantTree( cfg.getParameter<bool>("wantTree") ),
+  maxNJets( cfg.getParameter<int> ("maxNJets") )
 {
 }
 
@@ -39,6 +40,8 @@ void HypothesisKinFit::book()
   hists_["lightQuark" ] = new TH1F( "lightQuark" , "lightQuark" ,     9,  -4.5,   4.5 );
   // number of quarks differing in the index between genMatch and the other hypothesis
   hists_["wrongAssign"] = new TH1F( "wrongAssign", "wrongAssign",     5,  -0.5,   4.5 );
+  // wrong reconstructed quarks 
+  hists_["qAssignment"] = new TH1F( "qAssignment", "qAssignment",     9,  -0.5,   8.5 );
 
   /**
      Pull Distributions muon, neutrino, jets (relative to the MC Truth)
@@ -157,6 +160,8 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
   hists_["lightQuark" ] = fs->make<TH1F>( "lightQuark" , "lightQuark" ,     9,  -4.5,   4.5 );
   // number of quarks differing in the index between genMatch and the other hypothesis
   hists_["wrongAssign"] = fs->make<TH1F>( "wrongAssign", "wrongAssign",     5,  -0.5,   4.5 );
+  // wrong reconstructed quarks 
+  hists_["qAssignment"] = fs->make<TH1F>( "qAssignment", "qAssignment",     9,  -0.5,   8.5 );
 
   /**
      Pull Distributions (Relative to the MC Truth)
@@ -374,6 +379,7 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
     tree->Branch("ttBarDelPhi_fit",  &ttBarDelPhi_fit,  "ttBarDelPhi_fit");
     tree->Branch("ttBarDelY_fit",    &ttBarDelY_fit,    "ttBarDelY_fit");
     tree->Branch("ttBarSumY_fit",    &ttBarSumY_fit,    "ttBarSumY_fit");
+    tree->Branch("permutation",      &assignment,       "permutation/I");
   }
 }
 
@@ -440,6 +446,9 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     hadBIndexGen      = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB     ];
     lightQIndexGen    = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ   ];
     lightQBarIndexGen = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar];
+    //std::cout << "blep/bhad/q/qbar" << std::endl;
+    //std::cout << lepBIndexGen << "/" << hadBIndexGen << "/" << lightQIndexGen << "/" << lightQBarIndexGen << " (gen)" << std::endl;
+    //std::cout << lepBIndex << "/" << hadBIndex << "/" << lightQIndex << "/" << lightQBarIndex << " (reco)" << std::endl;
     // difference of hadBQuark index between genMatch and kinFit
     hadBIndexDiff = delObjectIndex(tops, TtSemiLepEvtPartons::HadB, hypoKey_);
     if(tops.isHypoValid("kKinFit"))hadBIndexDiffKinFit = delObjectIndex(tops, TtSemiLepEvtPartons::HadB, "kKinFit");
@@ -495,6 +504,76 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       hists_.find("TopMass9thchi2")->second->Fill( TopMass9thchi2 );
       hists_.find("TopMass10thchi2")->second->Fill( TopMass10thchi2 );
     }
+    // calculate permutation
+    assignment=-1;
+    // 0: nothing wrong
+    if((lepBIndex==lepBIndexGen)&&(hadBIndex==hadBIndexGen)&&
+       (((lightQIndex==lightQIndexGen   )&&(lightQBarIndex==lightQBarIndexGen))||
+	((lightQIndex==lightQBarIndexGen)&&(lightQBarIndex==lightQIndexGen   )))) assignment=0;
+    else{
+      // 1: b quarks switched
+      if((lepBIndex==hadBIndexGen)&&(hadBIndex==lepBIndexGen)) assignment=1;
+      // 2: leptonic b and light quark switched
+      if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&
+	 (((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen)))) assignment=2;
+      // 3: hadronic b and light quark switched
+      if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&
+	 (((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen)))) assignment=3;
+      // 4: light quark->leptonic b & leptonic b->hadronic b & hadronic b-> light quark
+      if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&(hadBIndex==lepBIndexGen)&&
+	 ((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen))) assignment=4;
+      // 5: light quark->hadronic b & hadronic b->leptonic b & leptonic b-> light quark
+      if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&(lepBIndex==hadBIndexGen)&&
+	 ((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen))) assignment=5;
+      // 6: hadronic/leptonic b-> light quarks &  light quarks->hadronic/leptonic b
+      if(((hadBIndex     ==lightQIndexGen)||(hadBIndex     ==lightQBarIndexGen))&&
+	 ((lepBIndex     ==lightQIndexGen)||(lepBIndex     ==lightQBarIndexGen))&&
+	 ((lightQIndex   ==lepBIndexGen  )||(lightQIndex   ==hadBIndexGen     ))&&
+	 ((lightQBarIndex==lepBIndexGen  )||(lightQBarIndex==hadBIndexGen     ))) assignment=6;
+      // make sure that a relevant jet is missing
+      std::vector<int> genJets_, recoJets_;
+      // list of genJets
+      genJets_ .push_back(lepBIndexGen     );
+      genJets_ .push_back(hadBIndexGen     );
+      genJets_ .push_back(lightQIndexGen   );
+      genJets_ .push_back(lightQBarIndexGen);
+      std::sort( genJets_.begin(), genJets_.end());
+      // list of recoJets
+      recoJets_.push_back(lepBIndex);
+      recoJets_.push_back(hadBIndex);
+      recoJets_.push_back(lightQIndex);
+      recoJets_.push_back(lightQBarIndex);
+      std::sort( recoJets_.begin(), recoJets_.end());
+      // compare recoJets and genJets
+      for(unsigned int i=0; i<recoJets_.size(); ++i){
+	if( recoJets_[i]!=genJets_[i] ){ 
+	  if(maxNJets<4){
+	    std::cout << "ERROR: number of conidered jets can not be smaller than 4" << std::endl;
+	    exit(1);
+	  }
+	  // 7: jet is missing
+	  if( genJets_.back()>maxNJets-1 ) assignment=7;
+	  // 8: wrong jet chosen (only valid if kinFitTtSemiLepEventHypothesis.maxNJets>4)
+	  // e.g. took the wrong 4 out of 5 jets 
+	  else assignment=8;
+	  break;
+	}
+      }
+    }
+    // fill permutation histogram
+    hists_.find("qAssignment")->second->Fill(assignment);
+    // set labels (assignment=0 corresponds to bin 1)
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(1, "ok"      );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(2, "bb"      );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(3, "blepq"   );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(4, "bhadq"   );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(5, "bbqlep"  );    
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(6, "bbqhad"  );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(7, "bbqq"    );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(8, "jmis"    );
+    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(9, "wrongj"  );
+    //std::cout << "assignment: " << ((assignment==-1) ? "-1" : hists_.find("qAssignment")->second->GetXaxis()->GetBinLabel(assignment+1)) << std::endl;
+
     // object kinematics 
     // a) for gen objects
     lepBpt_gen =       tops.leptonicDecayB()->pt();
