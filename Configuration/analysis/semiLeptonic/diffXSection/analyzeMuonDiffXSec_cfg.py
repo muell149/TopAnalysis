@@ -24,7 +24,8 @@ if(not globals().has_key('corrLevel')):
 print "used corr.Level in jetKinematics: "+corrLevel
 
 ## run kinematic fit?
-applyKinFit = True # False
+if(not globals().has_key('corrLevel')):
+   applyKinFit = True # False
 if(applyKinFit==True):
     print "kinFit and top reconstruction is applied - attention: slows down!!!"
 if(applyKinFit==False):
