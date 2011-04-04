@@ -96,9 +96,11 @@ void TopKinematics::book()
   // angle between b jets
   hists_["bbbarAngle"] = new TH1F( "bbbarAngle", "bbbarAngle", 315,  0.  ,  3.15            );
   // angle between the leptonically decaying top candidate and the corresponding W
-  hists_["topWAngleLep"] = new TH1F( "topWAngleLep", "topWAngleLep",   6, CrossSection::topWAngle  );
+  hists_["topWAngleLep" ] = new TH1F( "topWAngleLep", "topWAngleLep",   6, CrossSection::topWAngle  );
   // angle between the hadronically decaying top candidate and the corresponding W
-  hists_["topWAngleHad"] = new TH1F( "topWAngleHad", "topWAngleHad",   6, CrossSection::topWAngle  );
+  hists_["topWAngleHad" ] = new TH1F( "topWAngleHad", "topWAngleHad",   6, CrossSection::topWAngle  );
+  // angle between the leptonically decaying top candidate and the neutrino
+  hists_["MuonNeutrinoAngle"] = new TH1F( "MuonNeutrinoAngle", "MuonNeutrinoAngle", 315,  0.  ,  3.15  );
 
   /** 
       Correlation Plots
@@ -129,6 +131,8 @@ void TopKinematics::book()
   corrs_["bbbarAngle"  ] = new TH2F( "bbbarAngle"  , "bbbarAngle"   ,  315,    0.,  3.15,     315,   0.,  3.15);
   // gen-rec level correlation for lepton charge
   corrs_["lepCharge_"  ] = new TH2F( "lepCharge_"  , "lepCharge_"   ,    3,  -1.5,   1.5,       3, -1.5,   1.5);
+  // gen-rec level correlation for angle between the leptonically decaying top candidate and the neutrino
+  corrs_["MuonNeutrinoAngle_"] = new TH2F( "MuonNeutrinoAngle_", "MuonNeutrinoAngle_", 315,  0.  ,  3.15,   315,  0.  ,  3.15);
 }
 
 /// histogramm booking for fw
@@ -199,6 +203,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["topWAngleLep"] = fs->make<TH1F>( "topWAngleLep", "topWAngleLep",   6, CrossSection::topWAngle  );
   // angle between the hfs->make<TH1F> decaying top candidate and the corresponding W
   hists_["topWAngleHad"] = fs->make<TH1F>( "topWAngleHad", "topWAngleHad",   6, CrossSection::topWAngle  );
+  // angle between the leptonically decaying top candidate and the neutrino
+  hists_["MuonNeutrinoAngle"] = fs->make<TH1F>( "MuonNeutrinoAngle", "MuonNeutrinoAngle", 315,  0.  ,  3.15  );
 
   /** 
       Correlation Plots
@@ -229,6 +235,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   corrs_["bbbarAngle_"] = fs->make<TH2F>( "bbbarAngle_" , "bbbarAngle_",  315,    0.,  3.15,     315,   0.,  3.15);
   // gen-rec level correlation for lepton charge
   corrs_["lepCharge_" ] = fs->make<TH2F>( "lepCharge_"  , "lepCharge_" ,    3,  -1.5,   1.5,       3, -1.5,   1.5);
+  // gen-rec level correlation for angle between the leptonically decaying top candidate and the neutrino
+  corrs_["MuonNeutrinoAngle_"] = fs->make<TH2F>( "MuonNeutrinoAngle_", "MuonNeutrinoAngle_", 315,  0.  ,  3.15,   315,  0.  ,  3.15);
 
   // book ttree entries
   if(useTree_){
@@ -260,7 +268,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     // others
     bookVariable(fs, "bbbarAngle");  
     bookVariable(fs, "lepCharge"); 
-
+    bookVariable(fs, "MuonNeutrinoAngle");
   }
 }
 
@@ -294,7 +302,7 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     reco::Particle::LorentzVector genttbar = lepTop->p4()+hadTop->p4();
     // define boost to ttbar system
     ROOT::Math::Boost CoMBoostGenTtbar(genttbar.BoostToCM());
-    // get b and bbar four momentum
+    // get b, bbar four momentum
     reco::Particle::LorentzVector genLeptonicDecayBBoosted = lepB->p4();
     reco::Particle::LorentzVector genHadronicDecayBBoosted = hadB->p4();
     // apply boost to ttbar system
@@ -302,6 +310,10 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     genHadronicDecayBBoosted = CoMBoostGenTtbar(genHadronicDecayBBoosted);
     // fill 1D b-bbar angle plot
     fillValue( "bbbarAngle", ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), weight );
+    // fill 1D muon - neutrino angle plot
+    reco::Particle::LorentzVector genMuonBoosted     = CoMBoostGenTtbar(tops.singleLepton  ()->p4());
+    reco::Particle::LorentzVector genNeutrinoBoosted = CoMBoostGenTtbar(tops.singleNeutrino()->p4());
+    fillValue("MuonNeutrinoAngle",  ROOT::Math::VectorUtil::Angle(genMuonBoosted, genNeutrinoBoosted), weight);
     // save lepton charge
     fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton()))->charge(), weight );
     // fill the tree, if any variable should be put in
@@ -457,10 +469,23 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       corrs_.find("bbbarAngle_")->second->Fill( ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
 						ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
 						weight);
-      // fill correlation plot for angle between b-jets
+      // fill correlation plot for muon - neutrino angle plot
+      reco::Particle::LorentzVector genMuonBoosted     = CoMBoostGenTtbar(tops.singleLepton  ()->p4());
+      reco::Particle::LorentzVector genNeutrinoBoosted = CoMBoostGenTtbar(tops.singleNeutrino()->p4());
+      reco::Particle::LorentzVector recMuonBoosted     = CoMBoostRecTtbar(tops.singleLepton  (hypoKey_)->p4());
+      reco::Particle::LorentzVector recNeutrinoBoosted = CoMBoostRecTtbar(tops.singleNeutrino(hypoKey_)->p4());
+      corrs_.find("MuonNeutrinoAngle_") ->second->Fill(ROOT::Math::VectorUtil::Angle(genMuonBoosted, genNeutrinoBoosted), 
+						   ROOT::Math::VectorUtil::Angle(recMuonBoosted, recNeutrinoBoosted),
+						   weight);
+      // fill 1D plot for angle between b-jets for purity and stability calculation
       match( "bbbarAngle", ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
 	                   ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
 	                   weight);
+      // fill 1D plot for muon - neutrino angle plot for purity and stability calculation
+      match("MuonNeutrinoAngle", ROOT::Math::VectorUtil::Angle(recMuonBoosted, recNeutrinoBoosted), 
+	                     ROOT::Math::VectorUtil::Angle(genMuonBoosted, genNeutrinoBoosted),
+	                     weight);
+
     }
     // if matchForStabilityAndPurity_ is false or no generated ttbar semileptonic #mu event exists
     else{
@@ -478,6 +503,10 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       recHadronicDecayBBoosted = CoMBoostRecTtbar(recHadronicDecayBBoosted);
       // fill 1D b-bbar angle plot
       fillValue( "bbbarAngle", ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted), weight );
+      // fill 1D plot for muon - neutrino angle plot
+      reco::Particle::LorentzVector recMuonBoosted     = CoMBoostRecTtbar(tops.singleLepton  (hypoKey_)->p4());
+      reco::Particle::LorentzVector recNeutrinoBoosted = CoMBoostRecTtbar(tops.singleNeutrino(hypoKey_)->p4());
+      fillValue( "MuonNeutrinoAngle", ROOT::Math::VectorUtil::Angle(recMuonBoosted, recNeutrinoBoosted), weight );
     }
     // save lepton charge
     fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge(), weight );
