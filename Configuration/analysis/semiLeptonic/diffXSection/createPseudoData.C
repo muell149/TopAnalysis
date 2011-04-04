@@ -29,11 +29,11 @@ void createPseudoData(double luminosity= 35.9){
   // -------------------------
   // !!! choose luminosity !!!
   // -------------------------
-  TString lum = getTStringFromInt((int)luminosity);
+  TString lum = getTStringFromInt(roundToInt(luminosity));
   // -----------------------------------------
   // !!! add all contributing samples here !!!
   // -----------------------------------------
-  TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
+  TString inputFolder = "./diffXSecFromSignal/analysisRootFiles";
   // save all default top analysis samples in files_
   files_ = getStdTopAnalysisFiles(inputFolder, sysNo, "no");
   // remove single Top (combined), DiBoson (combined) and data
@@ -179,7 +179,7 @@ void createPseudoData(double luminosity= 35.9){
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-  TString outputfile="./diffXSecFromSignal/analysisRootFilesWithKinFit/Fall10PseudoData7TeV"+lum+"pb.root";
+  TString outputfile="./diffXSecFromSignal/analysisRootFiles/Fall10PseudoData7TeV"+lum+"pb.root";
   TFile* out = new TFile(outputfile, "recreate");
   if(verbose>0) std::cout << std::endl << "outputfile: " << outputfile << std::endl;
   poisson(histo_, plotList_, *out, luminosity, verbose, smear);

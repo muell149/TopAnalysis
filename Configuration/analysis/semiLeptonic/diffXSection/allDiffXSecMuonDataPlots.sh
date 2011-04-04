@@ -9,12 +9,24 @@ START=$(date +%s)
 ## 1) l+jets cross section measurement [Njets]
 ## 2) inclusive top cross section measurement
 
+## HOW TO USE THIS SHELL SCRIPT
+## a) set up folder structure 
+## mkdir systematicVariations
+## mkdir diffXSecFromSignal
+## mkdir diffXSecFromSignal/plots/earlyData
+## mkdir diffXSecFromSignal/plots/earlyData/NminusOneDistributions/
+## mkdir diffXSecFromSignal/plots/earlyData/crossSection/
+## mkdir diffXSecFromSignal/plots/earlyData/cutMonitoring/ 
+## b) copy Analysis root files
+## scp -r username@uhh-cms03.desy.de:/afs/desy.de/user/m/mgoerner/public/analysisRootFilesWithKinFit ./diffXSecFromSignal
+## scp -r username@uhh-cms03.desy.de:/afs/desy.de/user/m/mgoerner/public/analysisRootFiles ./diffXSecFromSignal
+## c) find final plots in d-f
+
 ## define processed data to be analyzed (output of data: ./analyzeMuonDiffXSec_cfg.py - MC: ./analyzeMuonDiffXSec_cfg.py)
 JESup=\"JES11\"
 JESdown=\"JES09\"
 jetType=PF
-#jetType=
-dataSample=\"./diffXSecFromSignal/data/DiffXSecData_L1Off$jetType.root\"
+dataSample=\"./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
 dataLuminosity=36100
 echo
 echo doing the full l+jets analysis
@@ -39,7 +51,7 @@ date >> 'diffXSecFromSignal/plots/earlyData/NminusOneDistributions/NminusOneNumb
 root -l -q -b './analyzeMuonCuts.C+('$dataLuminosity', true, '$dataSample', "NminusOne", "'$jetType'")' >> 'diffXSecFromSignal/plots/earlyData/NminusOneDistributions/NminusOneNumbers.txt'
 echo analyzeMuonCuts.C ready
 
-## b) do the bkg estimation and calculate MC effiencies 
+## b) do the bkg estimation and calculate MC efficiencies 
 ##    -> all important numbers will be saved in crossSectionCalculation.txt
 ## example: makro.C+(luminosity, savePlots, writeInto:crossSectionCalculation.txt, pathOfDataFile.root)
 rm ./crossSectionCalculation$jetType.txt
@@ -47,7 +59,7 @@ date >> './crossSectionCalculation'$jetType'.txt'
 ## b0) create pseudo data (needed in some makros)
 echo create pseudo data for 50\/pb \(createPseudoData.C\)
 sleep 2
-root -l -q -b './createPseudoData.C+(50., "'$jetType'")'
+root -l -q -b './createPseudoData.C+(50.)'
 echo done
 ## b1) calculate R for charge asymmetry method
 rm ./diffXSecFromSignal/plots/chargeAsymmetrie/Rcalculation.txt
