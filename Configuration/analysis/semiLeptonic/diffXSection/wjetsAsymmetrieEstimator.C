@@ -31,11 +31,12 @@ void histogramStyle(TH1& hist, int color=kBlack, int lineStyle=1, int markerStyl
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float yTitleSize=0.05, float yTitleOffset=1.2);
 void drawcutline(double cutval, double maximum);
 std::pair<double,double> getChargeAsymmetrieParameter(int njets, bool loadR);
-TString getTStringFromInt(int i);
 double sumUpEntries(TH1F& histo);
 template <class T>
 void writeToFile(T output, TString file="crossSectionCalculationPF.txt", bool append=1);
 double readLineFromFile(int line, TString file="crossSectionCalculationPF.txt");
+int roundToInt(double value, bool roundDown=0);
+TString getTStringFromInt(int i);
 
 void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool textoutput=true, TString dataFile="./diffXSecFromSignal/data/DiffXSecData_Nov15PF.root", TString jetType = "PF")
 {
@@ -47,7 +48,7 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
   //             in .txt file to share it with other parts of the Analysis
   // luminosity: choose luminosity for scaling of event numbers 
   //             lum is derived from this and used for legend as entry
-  TString lum = getTStringFromInt((int)luminosity);
+  TString lum = getTStringFromInt(roundToInt(luminosity));
   // choose target directory for saving
   TString saveTo = "./diffXSecFromSignal/plots/chargeAsymmetrie/";
   // choose whether you want to load c.a. parameter from crossSection.txt file
@@ -68,7 +69,8 @@ void wjetsAsymmetrieEstimator(double luminosity = 36.1, bool save = false, bool 
   std::vector<TFile*> files_;
   TString whichSample = "/analysisRootFiles";
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecWjetsMadD6TFall10"+jetType+".root"      ) );
-  files_.push_back(new TFile("./diffXSecFromSignal/spring10Samples/spring10SelV2Sync/spring10PseudoData7TeV50pb.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/analysisRootFiles/Fall10PseudoData7TeV"+getTStringFromInt((int)luminosity)+"pb.root" ) );
+  files_.push_back(new TFile("./diffXSecFromSignal/analysisRootFiles/Fall10PseudoData7TeV"+lum+"pb.root"    ) );
   files_.push_back(new TFile(dataFile                                                                                 ) );
   files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllMadD6TFall10"+jetType+".root"        ) );
   //files_.push_back(new TFile("./diffXSecFromSignal"+whichSample+"/muonDiffXSecAllNloSpring10.root"     ) );
@@ -321,12 +323,6 @@ void canvasStyle(TCanvas& canv)
   canv.SetTopMargin   ( 0.05 );
 }
 
-TString getTStringFromInt(int i){
-  char result[20];
-  sprintf(result, "%i", i);
-  return (TString)result;
-}
-
 void histogramStyle(TH1& hist, int color, int lineStyle, int markerStyle, float markersize, int filled) 
 {
   hist.SetLineWidth(3);
@@ -435,4 +431,42 @@ double readLineFromFile(int line, TString file){
   // if line is not found
   std::cout << "can not find line" << std::endl;
   return -1.;  
+}
+
+int roundToInt(double value, bool roundDown)
+{
+  // function to round an double "value" 
+  // to an int and return this one
+  // modified quantities: NONE
+  // used functions: NONE
+  // used enumerators: NONE
+  // "roundDown": choose if you always want to round down
+
+  // create output
+  int outputInt=0;
+  // take care of negative numbers
+  if(value<0){
+    std::cout << "no negative numbers allowed in roundToInt" << std::endl;
+    return 0;
+  }
+  // get number before the digit
+  for(int x=0; value>x; ++x){
+    outputInt=x;
+  }
+  // see if the number behind the digit is > 0.5
+  if((roundDown==false)&&(value-outputInt) >=0.5) return (outputInt+1);
+  // return result
+  return outputInt;
+}
+
+TString getTStringFromInt(int i)
+{
+  // function to convert an int "i" to 
+  // a TString and return this one
+  // modified quantities: NONE
+  // used functions: NONE
+  // used enumerators: NONE
+  char result[20];
+  sprintf(result, "%i", i);
+  return (TString)result;
 }
