@@ -24,7 +24,7 @@ if(not globals().has_key('corrLevel')):
 print "used corr.Level in jetKinematics: "+corrLevel
 
 ## run kinematic fit?
-if(not globals().has_key('corrLevel')):
+if(not globals().has_key('applyKinFit')):
    applyKinFit = True # False
 if(applyKinFit==True):
     print "kinFit and top reconstruction is applied - attention: slows down!!!"
@@ -70,7 +70,7 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
+    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     )
@@ -113,8 +113,8 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
 
 
@@ -595,31 +595,34 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## ---
 ##    configure KinFit Analyzers
 ## ---
-     
-## define PSets for top reconstruction analyzer
-## 1) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch)
-recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), matchForStabilityAndPurity=cms.bool(False) )
-## 2) event hypothesis built of objects as defined above
-recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(False) )
-## 3) event hypothesis built of objects as defined above including for every 1D histogram
-## only events where the reconstructed and matched object are within the same bin
-recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), matchForStabilityAndPurity=cms.bool(True ) )
 
-## configure top reconstruction analyzers
+## ## configure top reconstruction analyzers & define PSets
+## a) for top reconstruction analyzer
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
-# a1) as reconstructed from kinFit after reco selection
-process.analyzeTopRecoKinematicsKinFit        = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
-# a2) as reconstructed from kinFit after reco selection including match to gen objects
+## 1) event hypothesis kinFit after reco selection
+recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False) )
+process.analyzeTopRecoKinematicsKinFit = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
+## 2) event hypothesis with top quantities filled for top/antitop instead of leptonic/hadronic top
+recoKinFitTopAntitop = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True) )
+process.analyzeTopRecoKinematicsKinFitTopAntitop = process.analyzeTopRecKinematics.clone(analyze=recoKinFitTopAntitop)
+## 3) event hypothesis kinFit after reco selection including match to gen objects
+## 1D histograms include only events where the reconstructed and matched object are within the same bin
+recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(True ), ttbarInsteadOfLepHadTop = cms.bool(False) )
 process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched )
-# b) as reconstructed from genmatched objects after reco selection
+## 4) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch) after reco selection
+recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False) )
 process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
-# c) as reconstructed from generator objects after gen selection
-process.analyzeTopGenLevelKinematics          = process.analyzeTopGenKinematics.clone()
+## 5) event hypothesis built with generator truth informations
+## as reconstructed from generator objects after gen selection
+genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False) )
+process.analyzeTopGenLevelKinematics = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 
 ## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
-hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"), wantTree = cms.bool(True))
-process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(src = cms.InputTag("ttSemiLepEvent"), analyze = hypoKinFit)
+hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
+                      wantTree = cms.bool(True),
+                      maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
+process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKinFit)
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
 #process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"         )
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
@@ -640,6 +643,7 @@ if(applyKinFit==True):
         if(eventFilter=='signal only'):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
                                              process.analyzeTopRecoKinematicsKinFit        +
+                                             process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFitMatched +
                                              process.analyzeTopRecoKinematicsGenMatch      +
                                              process.analyzeHypoKinFit                      
@@ -647,8 +651,10 @@ if(applyKinFit==True):
             process.kinFitGen = cms.Sequence(process.analyzeTopGenLevelKinematics)
         ## case 1b): other MC
         else:
-            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
-                                             process.analyzeTopRecoKinematicsKinFit)
+            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                             process.analyzeTopRecoKinematicsKinFitTopAntitop+
+                                             process.analyzeTopRecoKinematicsKinFit
+                                             )
             process.kinFitGen = cms.Sequence(process.dummy)
     ## case 2: data sample
     elif(runningOnData=="data"):
