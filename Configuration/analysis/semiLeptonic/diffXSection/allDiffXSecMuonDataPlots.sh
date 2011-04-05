@@ -31,7 +31,7 @@ JESup=\"JES11\"
 JESdown=\"JES09\"
 jetType=PF
 dataSample=\"./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
-dataLuminosity=36100
+dataLuminosity=35900
 echo
 echo doing the full l+jets analysis
 echo used data: $dataSample
@@ -129,10 +129,10 @@ root -l -q -b './analyzeMuonDiffXEfficiency.C+(5., false, true, false, "JERdown"
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "JERdown", 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 7 Lumi shift up
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.11, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.04, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 8 Lumi shift down
 sleep 2
-root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.89, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
+root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 0.96, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
 echo 9 Eff shift up
 sleep 2
 root -l -q -b './analyzeMuonDiffXSec.C+('$dataLuminosity', true, true, '$dataSample', false, "", 1.0, 1.03, 1.0, 1.0, 1.0, 1.0, 1.0, false, true,"'$jetType'", '$JESup', '$JESdown')'
