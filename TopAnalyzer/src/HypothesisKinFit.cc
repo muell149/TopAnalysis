@@ -41,7 +41,18 @@ void HypothesisKinFit::book()
   // number of quarks differing in the index between genMatch and the other hypothesis
   hists_["wrongAssign"] = new TH1F( "wrongAssign", "wrongAssign",     5,  -0.5,   4.5 );
   // wrong reconstructed quarks 
-  hists_["qAssignment"] = new TH1F( "qAssignment", "qAssignment",     9,  -0.5,   8.5 );
+  hists_["qAssignment"] = new TH1F( "qAssignment", "qAssignment",     10, -0.5,   9.5 );
+  // set labels (assignment=0 corresponds to bin 1)
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(1, "ok"      );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(2, "bb"      );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(3, "blepq"   );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(4, "bhadq"   );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(5, "bbqlep"  );    
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(6, "bbqhad"  );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(7, "bbqq"    );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(8, "jmis"    );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(9, "wrongj"  );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(10,"nomatch" );
 
   /**
      Pull Distributions muon, neutrino, jets (relative to the MC Truth)
@@ -161,7 +172,18 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
   // number of quarks differing in the index between genMatch and the other hypothesis
   hists_["wrongAssign"] = fs->make<TH1F>( "wrongAssign", "wrongAssign",     5,  -0.5,   4.5 );
   // wrong reconstructed quarks 
-  hists_["qAssignment"] = fs->make<TH1F>( "qAssignment", "qAssignment",     9,  -0.5,   8.5 );
+  hists_["qAssignment"] = fs->make<TH1F>( "qAssignment", "qAssignment",     10, -0.5,   9.5 );
+  // set labels (assignment=0 corresponds to bin 1)
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(1, "ok"      );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(2, "bb"      );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(3, "blepq"   );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(4, "bhadq"   );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(5, "bbqlep"  );    
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(6, "bbqhad"  );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(7, "bbqq"    );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(8, "jmis"    );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(9, "wrongj"  );
+  hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(10,"nomatch" );
 
   /**
      Pull Distributions (Relative to the MC Truth)
@@ -418,6 +440,10 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   /**
      Fill the Monitoring Variables
   **/
+  // count cases where no matching exists
+  if( tops.isHypoValid(hypoKey_)&& !tops.isHypoValid("kGenMatch")){
+    hists_.find("qAssignment")->second->Fill(9);
+  }
   // make sure to have a valid hypothesis on reconstruction level
   // and an existing genmatch
   if( tops.isHypoValid(hypoKey_)&& tops.isHypoValid("kGenMatch")){
@@ -562,16 +588,6 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     }
     // fill permutation histogram
     hists_.find("qAssignment")->second->Fill(assignment);
-    // set labels (assignment=0 corresponds to bin 1)
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(1, "ok"      );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(2, "bb"      );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(3, "blepq"   );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(4, "bhadq"   );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(5, "bbqlep"  );    
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(6, "bbqhad"  );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(7, "bbqq"    );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(8, "jmis"    );
-    hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(9, "wrongj"  );
     //std::cout << "assignment: " << ((assignment==-1) ? "-1" : hists_.find("qAssignment")->second->GetXaxis()->GetBinLabel(assignment+1)) << std::endl;
 
     // object kinematics 
