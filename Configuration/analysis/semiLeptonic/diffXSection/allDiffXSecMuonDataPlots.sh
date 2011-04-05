@@ -13,6 +13,10 @@ START=$(date +%s)
 ## a) set up folder structure 
 ## mkdir systematicVariations
 ## mkdir diffXSecFromSignal
+## mkdir diffXSecFromSignal/plots/
+## mkdir diffXSecFromSignal/plots/chargeAsymmetrie
+## mkdir diffXSecFromSignal/plots/efficiency
+## mkdir diffXSecFromSignal/plots/systematicVariations
 ## mkdir diffXSecFromSignal/plots/earlyData
 ## mkdir diffXSecFromSignal/plots/earlyData/NminusOneDistributions/
 ## mkdir diffXSecFromSignal/plots/earlyData/crossSection/
@@ -20,7 +24,7 @@ START=$(date +%s)
 ## b) copy Analysis root files
 ## scp -r username@uhh-cms03.desy.de:/afs/desy.de/user/m/mgoerner/public/analysisRootFilesWithKinFit ./diffXSecFromSignal
 ## scp -r username@uhh-cms03.desy.de:/afs/desy.de/user/m/mgoerner/public/analysisRootFiles ./diffXSecFromSignal
-## c) find final plots in d-f
+## c) find final plots in d-f after running the analysis via ./allDiffXSecMuonDataPlots.sh
 
 ## define processed data to be analyzed (output of data: ./analyzeMuonDiffXSec_cfg.py - MC: ./analyzeMuonDiffXSec_cfg.py)
 JESup=\"JES11\"
@@ -55,7 +59,7 @@ echo analyzeMuonCuts.C ready
 ##    -> all important numbers will be saved in crossSectionCalculation.txt
 ## example: makro.C+(luminosity, savePlots, writeInto:crossSectionCalculation.txt, pathOfDataFile.root)
 rm ./crossSectionCalculation$jetType.txt
-date >> './crossSectionCalculation'$jetType'.txt'
+date > './crossSectionCalculation'$jetType'.txt'
 ## b0) create pseudo data (needed in some makros)
 echo create pseudo data for 50\/pb \(createPseudoData.C\)
 sleep 2
