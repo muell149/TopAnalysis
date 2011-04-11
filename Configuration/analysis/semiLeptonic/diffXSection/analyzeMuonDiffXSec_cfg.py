@@ -70,7 +70,7 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
-    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
+    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     )
@@ -558,7 +558,7 @@ process.kinFitTtSemiLepEventHypothesis.mets = 'patMETs'
 
 # maximum number of jets to be considered in the jet combinatorics
 # (has to be >= 4, can be set to -1 if you want to take all)
-process.kinFitTtSemiLepEventHypothesis.maxNJets = 4
+process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 
 # maximum number of jet combinations finally written into the event, starting from the "best"
 # (has to be >= 1, can be set to -1 if you want to take all)
@@ -590,7 +590,13 @@ else:
 # (no other partons exist in dR=0.3 cone) 
 # attention: improves purity but reduces efficiency
 if(eventFilter=='signal only') and (runningOnData=="MC"):
-    process.ttSemiLepJetPartonMatch.algorithm = "unambiguousOnly"
+    #process.ttSemiLepJetPartonMatch.algorithm = "unambiguousOnly"
+    process.ttSemiLepJetPartonMatch.algorithm = "totalMinDist"
+    process.ttSemiLepJetPartonMatch.useMaxDist = True
+    # set number of jets considered in jet-parton matching
+    process.ttSemiLepJetPartonMatch.maxNJets=-1
+    # choose jet collection considered in jet-parton matching
+    process.ttSemiLepJetPartonMatch.jets='tightLeadingJets'
     
 ## ---
 ##    configure KinFit Analyzers
@@ -659,7 +665,8 @@ if(applyKinFit==True):
     ## case 2: data sample
     elif(runningOnData=="data"):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
-                                         process.analyzeTopRecoKinematicsKinFit)
+                                         process.analyzeTopRecoKinematicsKinFit        +
+                                         process.analyzeTopRecoKinematicsKinFitTopAntitop)
         process.kinFitGen = cms.Sequence(process.dummy)
     else:
          print "choose runningOnData= data or MC"
