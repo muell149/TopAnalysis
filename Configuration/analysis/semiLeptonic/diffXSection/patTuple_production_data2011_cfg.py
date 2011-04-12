@@ -19,6 +19,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     #'/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0001/003545B1-76EA-DF11-BC95-485B39800BF3.root'
+    '/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/161/008/060E396A-CA55-E011-B50D-001D09F25479.root'
     )#,
                             #skipEvents = cms.untracked.uint32(0)
 
@@ -183,28 +184,27 @@ process.patMETsPF.resolutions = cms.PSet( default = cms.string("metResolutionPF"
 ## adding electron identification
 #process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
-process.patElectrons.addElectronID     = cms.bool( True )
-#process.patElectrons.electronIDSources = cms.PSet( simpleEleId95relIso = cms.InputTag("simpleEleId95relIso"),
-                                                   #simpleEleId90relIso = cms.InputTag("simpleEleId90relIso"),
-                                                   #simpleEleId85relIso = cms.InputTag("simpleEleId85relIso"),
-                                                   #simpleEleId80relIso = cms.InputTag("simpleEleId80relIso"),
-                                                   #simpleEleId70relIso = cms.InputTag("simpleEleId70relIso"),
-                                                   #simpleEleId60relIso = cms.InputTag("simpleEleId60relIso"),
-                                                   #simpleEleId95cIso   = cms.InputTag("simpleEleId95cIso"),
-                                                   #simpleEleId90cIso   = cms.InputTag("simpleEleId90cIso"),
-                                                   #simpleEleId85cIso   = cms.InputTag("simpleEleId85cIso"),
-                                                   #simpleEleId80cIso   = cms.InputTag("simpleEleId80cIso"),
-                                                   #simpleEleId70cIso   = cms.InputTag("simpleEleId70cIso"),
-                                                   #simpleEleId60cIso   = cms.InputTag("simpleEleId60cIso")
-                                                   #)
+process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
-#process.patElectronIDs = cms.Sequence( process.simpleEleIdSequence )
-
-process.makePatElectrons = cms.Sequence(#process.patElectronIDs       *
-                                        process.patElectronIsolation *
-#                                        process.electronMatch        *
-                                        process.patElectrons
-                                        )
+process.patElectrons.electronIDSources = cms.PSet(
+    eidTight = cms.InputTag("eidTight"),
+    eidLoose = cms.InputTag("eidLoose"),
+    eidRobustTight = cms.InputTag("eidRobustTight"),
+    eidRobustHighEnergy = cms.InputTag("eidRobustHighEnergy"),
+    eidRobustLoose = cms.InputTag("eidRobustLoose"),
+    simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
+    simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
+    simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
+    simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
+    simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
+    simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
+    simpleEleId95cIso= cms.InputTag("simpleEleId95cIso"),
+    simpleEleId90cIso= cms.InputTag("simpleEleId90cIso"),
+    simpleEleId85cIso= cms.InputTag("simpleEleId85cIso"),
+    simpleEleId80cIso= cms.InputTag("simpleEleId80cIso"),
+    simpleEleId70cIso= cms.InputTag("simpleEleId70cIso"),
+    simpleEleId60cIso= cms.InputTag("simpleEleId60cIso"))
+process.patDefaultSequence.replace(process.patElectrons,process.simpleEleIdSequence+process.patElectronIsolation+process.patElectrons)
 
 #process.p = cms.Path(process.patDefaultSequence)
 
