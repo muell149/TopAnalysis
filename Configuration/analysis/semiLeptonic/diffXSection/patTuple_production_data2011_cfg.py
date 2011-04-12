@@ -19,7 +19,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     #'/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0001/003545B1-76EA-DF11-BC95-485B39800BF3.root'
-    '/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/161/008/060E396A-CA55-E011-B50D-001D09F25479.root'
+    #'/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/161/008/060E396A-CA55-E011-B50D-001D09F25479.root'
+    '/store/data/Run2011A/MuHad/AOD/PromptReco-v1/000/161/312/F4AB26F0-1858-E011-B86A-0030487CD7B4.root'
     )#,
                             #skipEvents = cms.untracked.uint32(0)
 
@@ -72,9 +73,6 @@ process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
 # pat configuration
 #----------------------------------------------------------------------------
 
-## include L1OffsetCorrections
-#process.load("PhysicsTools.PatAlgos.patTestJEC_cfi")
-
 ## std sequence for pat
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
@@ -82,7 +80,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('Data2011_StreamExpress160433-161312.root')
+    fileName = cms.untracked.string('Data2011_StreamExpress160404-161312.root')
 )
 
 ## remove cleaning as it is not used
@@ -132,7 +130,7 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                  doJetID      = True
                 )
 
-## add L1 offset corrections to MC Calo Jets
+## add L1 offset corrections to Calo Jets
 process.patJetCorrFactors.levels=['L1Offset', 'L2Relative','L3Absolute', 'L2L3Residual']
 
 ## remove L1 offset corrections
@@ -181,9 +179,8 @@ process.patMETs.resolutions = cms.PSet( default = cms.string("metResolution") )
 process.patMETsPF.addResolutions = True
 process.patMETsPF.resolutions = cms.PSet( default = cms.string("metResolutionPF") )     
 
-## adding electron identification
-#process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-
+## add electron identification
+## (needs cvs co -r V00-04-00 ElectroWeakAnalysis/WENu)
 process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
 process.patElectrons.electronIDSources = cms.PSet(
@@ -206,24 +203,32 @@ process.patElectrons.electronIDSources = cms.PSet(
     simpleEleId60cIso= cms.InputTag("simpleEleId60cIso"))
 process.patDefaultSequence.replace(process.patElectrons,process.simpleEleIdSequence+process.patElectronIsolation+process.patElectrons)
 
-#process.p = cms.Path(process.patDefaultSequence)
-
 #----------------------------------------------------------------------------
 # trigger preselection: 
 # HLT_Mu15_v2 for Run2011 (March)
 #----------------------------------------------------------------------------
-from TopAnalysis.TopFilter.filters.TriggerFilter_cfi import filterTrigger
-process.filterHltMu15          = filterTrigger.clone()
-process.filterHltMu15.hltPaths = cms.vstring('HLT_Mu15_v2')
+#from TopAnalysis.TopFilter.filters.TriggerFilter_cfi import filterTrigger
+#process.filterHltMu15          = filterTrigger.clone()
+#process.filterHltMu15.hltPaths = cms.vstring('HLT_Mu15_v2')
+
+## high level trigger filter (non existing Triggers are ignored)
+process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+process.filterHlt = process.hltHighLevel.clone(HLTPaths = [
+    #2010 trigger
+    'HLT_Mu15_v2',
+    #2011 1E33 trigger
+    'HLT_Mu17_TriCentralJet30', 'HLT_Mu17_CentralJet30', 'HLT_Mu17_CentralDiJet30',
+    #2011 1E33-2E33 trigger
+    'HLT_IsoMu17_DiCentralJet30', 'HLT_IsoMu17_CentralJet30'],throw = False)
 					   
 #----------------------------------------------------------------------------
 # selection paths
 #----------------------------------------------------------------------------
 		    
 
-process.hltMu15Path = cms.Path(process.filterHltMu15 *                               
-			       process.beamScrapFilter *
-			       process.HBHENoiseFilter *
+process.hltPath = cms.Path(process.filterHlt           *                               
+			       process.beamScrapFilter     *
+			       process.HBHENoiseFilter     *
 			       process.primaryVertexFilter *
 		               process.patDefaultSequence
 		              )			      	     		    		    
@@ -231,9 +236,7 @@ process.hltMu15Path = cms.Path(process.filterHltMu15 *
 ## define event selection
 process.EventSelection = cms.PSet(
     SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring(
-                                   'hltMu15Path'
-                                  )
+        SelectEvents = cms.vstring('hltPath')
     )
 )
 
@@ -243,7 +246,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('Data2011_StreamExpress160433-161312.root')
+    fileName = cms.untracked.string('Data2011_PrompReco160404-161312.root')
 )
 
 ## save pat output
