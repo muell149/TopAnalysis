@@ -217,9 +217,9 @@ process.filterHlt = process.hltHighLevel.clone(HLTPaths = [
     #2010 trigger
     'HLT_Mu15_v2',
     #2011 1E33 trigger
-    'HLT_Mu17_TriCentralJet30', 'HLT_Mu17_CentralJet30', 'HLT_Mu17_CentralDiJet30',
+    'HLT_Mu17_TriCentralJet30_v1', 'HLT_Mu17_CentralJet30_v1', 'HLT_Mu17_DiCentralJet30_v1',
     #2011 1E33-2E33 trigger
-    'HLT_IsoMu17_DiCentralJet30', 'HLT_IsoMu17_CentralJet30'],throw = False)
+    'HLT_IsoMu17_DiCentralJet30_v1', 'HLT_IsoMu17_CentralJet30_v1'],throw = False)
 					   
 #----------------------------------------------------------------------------
 # selection paths
