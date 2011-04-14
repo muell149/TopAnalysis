@@ -24,8 +24,14 @@ if(not globals().has_key('corrLevel')):
 print "used corr.Level in jetKinematics: "+corrLevel
 
 ## run kinematic fit?
+## ATTENTION: until the new parameter jetResolutionSmearFactor
+## is implemented in a higher version of the TKinFitter package you
+## need to check out the head:
+## cvs co -r V06-07-04 TopQuarkAnalysis
+## cvs up -A TopQuarkAnalysis
+
 if(not globals().has_key('applyKinFit')):
-   applyKinFit = True # False
+   applyKinFit = True#  False
 if(applyKinFit==True):
     print "kinFit and top reconstruction is applied - attention: slows down!!!"
 if(applyKinFit==False):
@@ -70,7 +76,7 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
+    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     )
@@ -78,7 +84,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
 )
 
 ## configure process options
@@ -574,6 +580,10 @@ process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
 process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = 1.7
 process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 3.3
 process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
+
+# use larger JER in KinFit as it is obtained from data
+if(runningOnData=="data") and (applyKinFit==True):
+    process.kinFitTtSemiLepEventHypothesis.jetResolutionSmearFactor = 1.1
 
 # add hypothesis
 from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *

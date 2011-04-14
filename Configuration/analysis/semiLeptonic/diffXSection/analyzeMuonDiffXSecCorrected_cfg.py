@@ -36,6 +36,8 @@ else:
 
 # JER +10%
 process.scaledJetEnergy.resolutionFactor = 1.1
+if(applyKinFit==True):
+    process.kinFitTtSemiLepEventHypothesis.jetResolutionSmearFactor = 1.1
 
 ## include module to create JES-shifted collection
 for path in pathlist:
