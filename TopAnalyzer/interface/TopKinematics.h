@@ -71,6 +71,22 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, double HTrec, double HTgen, const double& weight=1.);
   /// helper function for determining stability and purity
   void match(const std::string& histo, const double& genValue, const double& recValue, const double& weight);
+  ///  helper functions to fill 1D angle histos
+  void fillAngles(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& hadB    ,
+		  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& q       ,
+		  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& qbar    ,
+		  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepB    ,
+		  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& muon    ,
+		  const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
+		  const double& weight=1.);
+  ///  helper functions to fill event shape variables
+  void fillEventShapes(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& hadB    ,
+		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& q       ,
+		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& qbar    ,
+		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepB    ,
+		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& muon    ,
+		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
+		       const double& weight, const bool useMu, const bool useNu);
 
  private:
   /// class key of hypothesis
@@ -81,6 +97,8 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   bool matchForStabilityAndPurity_;
   /// choose whether you want to destinguish between top/antitop instead of leptonic/hadronic top
   bool ttbarInsteadOfLepHadTop_;
+  /// number of jets considered in Kinematic fit (needed for the classification of permutations)
+  int maxNJets;
   /// histogram container for correlation plots
   std::map<std::string, TH2*> corrs_;
 };
