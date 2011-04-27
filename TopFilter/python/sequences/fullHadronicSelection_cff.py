@@ -970,7 +970,7 @@ def switchToCSVMVA(process):
 ##    increase resolutions of kinematic fit
 ## ---
 def increaseKinFitResolution(process, factor):
-    process.kinFitTtFullHadEventHypothesis.resolutionSmearFactor = factor
+    process.kinFitTtFullHadEventHypothesis.energyResolutionSmearFactor = factor
 
 ## ---
 ##    remove PDF uncertainty histograms / trees
