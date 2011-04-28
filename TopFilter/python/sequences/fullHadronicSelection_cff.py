@@ -179,6 +179,10 @@ ttFullHadJetPartonMatch.jets        = 'tightLeadingJets'
 ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
+## configure genMatch
+ttFullHadJetPartonMatch.useMaxDist = True
+ttFullHadJetPartonMatch.algorithm  = 'totalMinDist' #'unambigousOnly'
+
 ## define ordered jets
 udsall =cms.PSet(index=cms.int32(-1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
 uds0   =cms.PSet(index=cms.int32(0) , correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
@@ -826,8 +830,12 @@ def removeMonitoringOfCutflow(process):
     process.analyseFullHadronicSelection.remove(process.monitorGenerator_3)
     process.analyseFullHadronicSelection.remove(process.monitorKinFit_2)
     process.analyseFullHadronicSelection.remove(process.monitorKinFit_3)
-    process.analyseFullHadronicSelection.remove(tightBottomJetKinematics_2_v1)
-    process.analyseFullHadronicSelection.remove(tightLeadingJetKinematics_2_v1)
+
+    process.analyseFullHadronicSelection.remove(process.tightBottomJetKinematics_2_v1)
+    process.analyseFullHadronicSelection.remove(process.tightLeadingJetKinematics_2_v1)
+
+    process.analyseFullHadronicSelection.remove(process.PDFUncertainty_0)
+    process.analyseFullHadronicSelection.remove(process.PDFUncertainty_3)
 
 ## ---
 ##    remove default trigger
@@ -900,71 +908,56 @@ def runOnPF(process):
         process.scaledJetEnergy.payload   = "AK5PF"
 
 ## ---
+##    modify bTagging discriminator for bTaggers
+## ---
+def modifyBTagDiscs(process, algo, newMinDisc, newMaxDisc):
+
+    getattr(process, algo + "BJets").cut = 'bDiscriminator("' + algo + 'BJetTags") > ' + str(newMinDisc)
+    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, getattr(process, algo + "BJets"))
+
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo = algo + 'BJetTags'
+    process.fullHadTopReco_2.analyze.bTagAlgo       = algo + 'BJetTags' 
+    process.fullHadTopReco_3.analyze.bTagAlgo       = algo + 'BJetTags' 
+
+    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = newMinDisc
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = newMaxDisc
+
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', algo + 'BJets')
+
+def modifyBTagDisc(process, algo, newDisc):
+
+    modifyBTagDiscs(process, algo, newDisc, process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet.value() * newDisc / process.kinFitTtFullHadEventHypothesis.minBTagValueBJet.value())
+
+## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
 def switchToTCHE(process):
-    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.trackCountingHighEffBJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighEffBJetTags'
-    process.fullHadTopReco_2.analyze.bTagAlgo       = 'trackCountingHighEffBJetTags' 
-    process.fullHadTopReco_3.analyze.bTagAlgo       = 'trackCountingHighEffBJetTags' 
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.3
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 10.2
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'trackCountingHighEffBJets')
+    modifyBTagDiscs(process, 'trackCountingHighEff', 3.3, 10.2)
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
 def switchToTCHPTight(process):
-    #process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.trackCountingHighEffBJets)
-    process.trackCountingHighPurBJets.cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 3.41'
-
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighPurBJetTags'
-    process.fullHadTopReco_2.analyze.bTagAlgo       = 'trackCountingHighPurBJetTags' 
-    process.fullHadTopReco_3.analyze.bTagAlgo       = 'trackCountingHighPurBJetTags' 
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.41
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41
-    #from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    #massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'trackCountingHighEffBJets')
+    modifyBTagDiscs(process, 'trackCountingHighPur', 3.41, 3.41)
 
 ## ---
 ##    switch to simpleSecondaryVertex bTagger
 ## ---
 def switchToSSV(process):
-    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.simpleSecondaryVertexBJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'simpleSecondaryVertexBJetTags'
-    process.fullHadTopReco_2.analyze.bTagAlgo       = 'simpleSecondaryVertexBJetTags' 
-    process.fullHadTopReco_3.analyze.bTagAlgo       = 'simpleSecondaryVertexBJetTags' 
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.74
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.05
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'simpleSecondaryVertexBJets')
+    modifyBTagDiscs(process, 'simpleSecondaryVertex', 1.74, 3.05)
 
 ## ---
 ##    switch to combinedSecondaryVertex bTagger
 ## ---
 def switchToCSV(process):
-    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexBJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexBJetTags'
-    process.fullHadTopReco_2.analyze.bTagAlgo       = 'combinedSecondaryVertexBJetTags' 
-    process.fullHadTopReco_3.analyze.bTagAlgo       = 'combinedSecondaryVertexBJetTags' 
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.750
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.921
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexBJets')
+    modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.75, 0.921)
 
 ## ---
 ##    switch to combinedSecondaryVertexMVA bTagger
 ## ---
 def switchToCSVMVA(process):
-    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, process.combinedSecondaryVertexMVABJets)
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo = 'combinedSecondaryVertexMVABJetTags'
-    process.fullHadTopReco_2.analyze.bTagAlgo       = 'combinedSecondaryVertexMVABJetTags' 
-    process.fullHadTopReco_3.analyze.bTagAlgo       = 'combinedSecondaryVertexMVABJetTags' 
-    process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 0.4 #self-derived
-    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 0.8 #self-derived
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', 'combinedSecondaryVertexMVABJets')
+    modifyBTagDiscs(process, 'combinedSecondaryVertexMVA', 0.75, 0.921) # self-derived WORKING POINTS
 
 ## ---
 ##    increase resolutions of kinematic fit
@@ -978,4 +971,11 @@ def increaseKinFitResolution(process, factor):
 def removePDFUncertainties(process):
     process.analyseFullHadronicSelection.remove(process.PDFUncertainty_0)
     process.analyseFullHadronicSelection.remove(process.PDFUncertainty_3)
+
+## ---
+##    switch to b' search mode (pp -> b'b' -> (bZ) (bZ)
+## ---
+def bPrimeSearchMode(process):
+    process.kinFitTtFullHadEventHypothesis.mW = 91.2
+    process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = process.kinFitTtFullHadEventHypothesis.minBTagValueBJet
 
