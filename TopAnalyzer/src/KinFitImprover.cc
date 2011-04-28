@@ -30,7 +30,13 @@ void KinFitImprover::book(edm::Service<TFileService>& fs)
   **/
 
   // show comboTypes of fits
-  hists_["fitQuality"] = fs->make<TH1F>( "fitQuality" , "fitQuality" , 4 , 1. , 5. );
+  hists_["fitQuality"] = fs->make<TH1F>( "fitQuality" , "fitQuality" , 5 , 1. , 6. );
+  // set labels (assignment=0 corresponds to bin 1)
+  hists_.find("fitQuality")->second->GetXaxis()->SetBinLabel(1, "ok"       );
+  hists_.find("fitQuality")->second->GetXaxis()->SetBinLabel(2, "in-branch");
+  hists_.find("fitQuality")->second->GetXaxis()->SetBinLabel(3, "x-branch" );
+  hists_.find("fitQuality")->second->GetXaxis()->SetBinLabel(4, "jet mis"  );
+  hists_.find("fitQuality")->second->GetXaxis()->SetBinLabel(5, "no match" );
   // top mass of fit
   hists_["topMass"  ] = fs->make<TH1F>( "topMass"   , "topMass"   ,  100 , 0. , 1000. );
   // min deltaR between b quark and corresponding light quarks (fit)
@@ -281,6 +287,10 @@ KinFitImprover::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
       comboTypeValue = comboType();
     }
 
+    if( !tops.isHypoValid("kGenMatch") ){
+      comboTypeValue = 5;
+    }
+
     hists_.find("fitQuality")->second->Fill( comboTypeValue + 0.5 );
 
     if( comboType_ == comboTypeValue || comboType_ == 0 ){
@@ -325,7 +335,7 @@ KinFitImprover::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
       hists_.find("chi2")->second->Fill( tops.fitChi2() );
     }
 
-    if(comboTypeValue == 4){
+    if( comboType_ == comboTypeValue && comboTypeValue == 4 ){
       if(tops.wPlus() ) hists_.find("wPtMissingJets")->second->Fill( tops.wPlus() ->pt() );
       if(tops.wMinus()) hists_.find("wPtMissingJets")->second->Fill( tops.wMinus()->pt() );
     }
