@@ -18,6 +18,9 @@
 <use   name="AnalysisDataFormats/TopObjects"/>
 <use   name="TopQuarkAnalysis/TopKinFitter"/>
 <use   name="lhapdf"/>
+<use   name="RecoBTag/Records"/>
+<use   name="RecoBTag/PerformanceDB"/>
+<use   name="CondFormats/PhysicsToolsObjects"/>
 <export>
   <lib   name="1"/>
 </export>
