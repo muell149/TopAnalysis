@@ -31,6 +31,8 @@ options.register('pdfUn'   , 0 , VarParsing.VarParsing.multiplicity.singleton, V
 options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
 ## do PATification on the fly, not depending on pre-made PAT tuples anymore
 options.register('patify', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "run PAT on the fly")
+## change b-tagging discriminator for b-tagging uncertainty measurement
+options.register('bTag', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "bTag uncertainty")
 
 # get and parse the command line arguments
 #options.parseArguments()
@@ -53,6 +55,7 @@ print "minPtHat  . . . . . :", options.minPtHat
 print "pdfUncertainty  . . :", options.pdfUn
 print "backgroundEstimation:", options.backgroundEstimation
 print "patify  . . . . . . :", options.patify
+print "bTag  . . . . . . . :", options.bTag
 
 # analyze fully hadronic selection
 processName = "Selection"
@@ -71,29 +74,35 @@ process.MessageLogger.cerr.default.limit = 0
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_10_1_WVq.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_11_1_KHs.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_12_1_3wB.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_13_1_uUW.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_14_1_M3c.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_14_2_SgJ.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_15_1_96C.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_16_1_oqr.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_17_1_ubf.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_18_1_HdM.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_19_1_CQa.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_1_1_IBt.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_20_1_hTV.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_21_1_eDR.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_22_1_30C.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_23_1_53b.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_24_1_L28.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_25_1_c9c.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_26_1_VWf.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_2_1_arG.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_3_1_xQc.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_4_1_tCL.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_5_1_Qtp.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_6_1_6Aa.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_7_1_hCe.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_8_1_o49.root', 
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_9_1_TIv.root', 
     #'/store/user/henderle/TTJets_TuneZ2_7TeV-madgraph-tauola/PAT_FALL10HH/d11bd92e226f3f64b5cff39b069a59bb/fall10MC_2_1_Jua.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_29_1_3PR.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_10_3_1VS.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_11_2_74L.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_12_2_eAR.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_1_2_CQV.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_13_2_Cos.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_14_2_Jxb.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_15_2_Nud.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_16_2_qwK.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_17_2_n6R.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_18_2_hJK.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_19_2_Nkj.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_20_2_FC9.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_2_2_yml.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_3_2_1am.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_4_2_Jlv.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_5_2_I2g.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_6_2_RLB.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_7_3_pul.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_8_2_w31.root',
-    #'/store/user/eschliec/JetMETTau/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_9_2_9dW.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets/43119039b9fcde150ae447ded48bf16e/patTuple_6jets_14_1_68T.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_16_1_oqr.root',
     ),
     ## just a code example how to skip lumi blocks or whole runs
     #lumisToSkip = cms.untracked.VLuminosityBlockRange('135445:0-135445:max',
@@ -231,6 +240,13 @@ if( options.pdfUn==0 ):
 switchToTCHE(process)
 #switchToCSV(process)
 #switchToTCHPTight(process)
+
+## modify b-tagging discriminator to estimate b-tagging efficiency and mis-tag uncertainty
+if(not options.eventFilter=='data'):
+    if(options.bTag < 0):
+        modifyBTagDiscs(process, 'trackCountingHighEff', 2.84,  9.28)
+    elif(options.bTag > 0):
+        modifyBTagDiscs(process, 'trackCountingHighEff', 3.90, 11.36)
 
 ## selection should be run on PFJets instead of caloJets
 if(not options.usePF==0): 
@@ -374,6 +390,9 @@ if(not options.patify==0):
                           process.analyseFullHadronicSelection)
 
 #useTreesAsOutput(process)
+
+## search for b' -> Zb instead of top quark pairs
+#bPrimeSearchMode(process)
 
 if(options.eventFilter=='data'):
     process.p1.remove(process.filterSequence)
