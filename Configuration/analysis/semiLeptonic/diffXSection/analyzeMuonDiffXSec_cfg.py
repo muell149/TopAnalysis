@@ -785,8 +785,8 @@ if(implement0TagPath==True):
                           ## monitor jet kinematics after jet cuts
                           process.jetKinematicsAntiBNjets4              
                           )
-if(runningOnData=="data"):
-    process.p3.remove(process.semiLeptGenCollections)
+    if(runningOnData=="data"):
+        process.p3.remove(process.semiLeptGenCollections)
 ## std analysis with generator objects as input for efficiency determination
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
