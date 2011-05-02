@@ -32,6 +32,14 @@ JetQuality::book()
   hists_["n90_"] = new TH1F( "n90_" , "n90_" , 50, 0., 50. );
   // number of jet constituents carrying 60% of the jet energy
   hists_["n60_"] = new TH1F( "n60_" , "n60_" , 50, 0., 50. );
+  // charge of the jet
+  hists_["charge"] = new TH1F( "charge" , "charge" , 220, -1.1, 1.1 );
+  // eta-eta moment of the jet
+  hists_["etaeta"] = new TH1F( "etaeta" , "etaeta" , 120, 0., 0.12 );
+  // eta-phi moment of the jet
+  hists_["etaphi"] = new TH1F( "etaphi" , "etaphi" , 100, -0.05, 0.05 );
+  // phi-phi moment of the jet
+  hists_["phiphi"] = new TH1F( "phiphi" , "phiphi" , 120, 0., 0.12 );
 
   /** 
       Calo JetID Variables
@@ -143,6 +151,14 @@ JetQuality::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "n90_" , 50, 0., 50. , false );
   // number of jet constituents carrying 60% of the jet energy
   bookVariable( fs, "n60_" , 50, 0., 50. , false );
+  // charge of the jet
+  bookVariable( fs, "charge" , 220, -1.1, 1.1 , false );
+  // eta-eta moment of the jet
+  bookVariable( fs, "etaeta" , 120, 0., 0.12 , false );
+  // eta-phi moment of the jet
+  bookVariable( fs, "etaphi" , 100, -0.05, 0.05 , false );
+  // phi-phi moment of the jet
+  bookVariable( fs, "phiphi" , 120, 0., 0.12 , false );
 
   /** 
       Calo JetID Variables
@@ -256,11 +272,24 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
 	  Fill Other Calo and PF Jet Variables
       **/
 
-      // number of jet constituents carrying 90% of the jet energy
-      //      fillValue( "n90_" , jet->n90() , weight );
-      // number of jet constituents carrying 60% of the jet energy
-      //      fillValue( "n60_" , jet->n60() , weight );
-
+    // charge of the jet
+      fillValue( "charge" , jet->jetCharge()    , weight );
+      if(jet->nConstituents() > 0){
+      	if( jet->daughterPtr(0).productGetter()->getIt(jet->daughterPtr(0).id()) != 0 ){
+	  // number of jet constituents carrying 90% of the jet energy
+	  fillValue( "n90_" , jet->n90() , weight );
+	  // number of jet constituents carrying 60% of the jet energy
+	  fillValue( "n60_" , jet->n60() , weight );
+      
+	  // eta-eta moment of the jet
+      	  fillValue( "etaeta" , jet->etaetaMoment() , weight );
+      	  // eta-phi moment of the jet
+      	  fillValue( "etaphi" , jet->etaphiMoment() , weight );
+      	  // phi-phi moment of the jet
+      	  fillValue( "phiphi" , jet->phiphiMoment() , weight );
+      	}
+      }
+      
       /** 
 	  Fill Calo JetID Variables
       **/
