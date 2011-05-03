@@ -5,9 +5,10 @@
 /// default constructor 
 DiMuonFilter::DiMuonFilter(const edm::ParameterSet& cfg):
   muons_    (cfg.getParameter<edm::InputTag>(       "muons"  )),
-  isVeto_   (cfg.getParameter<bool>(                "isVeto" )),
+  fltrChrg_ (cfg.getParameter<int> (       "filterCharge"    )),
+  fltrMass_ (cfg.getParameter<bool> (       "filterMass"    )),
   Cut_      (cfg.getParameter<std::vector<double> >("Cut"    )),
-  fltrChrg_ (cfg.getParameter<int> (       "filterCharge"    ))  
+  isVeto_   (cfg.getParameter<bool>(                "isVeto" ))
 {
 }
 
@@ -35,21 +36,53 @@ DiMuonFilter::filter(edm::Event& event, const edm::EventSetup& setup)
   // skip events with less than 2 muons
   if(muons->size()<=1) return false;
   
-  // filter on like or unlike sign if configured
-  if(fltrChrg_<0 && (*muons)[0].charge()*(*muons)[1].charge()>0)      return false;
-  else if(fltrChrg_>0 && (*muons)[0].charge()*(*muons)[1].charge()<0) return false;
-  
-  // reconstruct invariant mass of leading 2 muons
-  reco::Particle::LorentzVector diMuon = (*muons)[0].p4() + (*muons)[1].p4();
-  double diMuonMass = sqrt( diMuon.Dot(diMuon) );
-    
-  // check if events in mass window are to be selected or vetoed
+  bool Return=false;
+
+  bool OSign=false;
+  bool SSign=false;
+  bool OSignMass=false;
+  bool SSignMass=false;
+
+  // loop over all muon pairs
+  for(int i=0; i< (int)muons->size(); ++i){
+    for(int j=0; j<i; ++j){
+   
+      // check if like or unlike sign	  
+      if((*muons)[i].charge()*(*muons)[j].charge()<0) OSign=true;
+      else SSign=true;
+      // reconstruct invariant mass of 2 muons
+      reco::Particle::LorentzVector diMuon = (*muons)[i].p4() + (*muons)[j].p4();
+      double diMuonMass = sqrt( diMuon.Dot(diMuon) );
+      if(diMuonMass > Cut_[0] && diMuonMass < Cut_[1]){
+	if (OSign == true) OSignMass=true;
+	else SSignMass=true;
+      }
+    }
+  }
+
+  // filter on unlike or like  sign if configured
+  if(fltrChrg_<0 && OSign==true){
+    // filter on mass window if configured
+    if(fltrMass_ && OSignMass==false) Return=false;
+    else Return=true;
+  }
+  if(fltrChrg_>0 && SSign==true){
+    // filter on mass window if configured
+    if(fltrMass_ && SSignMass==false) Return=false;
+    else Return=true;
+  }
+  // filter on mass window if configured
+  else if(fltrChrg_==0){
+    if(fltrMass_ && (OSignMass==true ||SSignMass==true )) Return=true;
+    else Return=false;
+  }
+  // invert selection
   if(isVeto_){
-    if(diMuonMass < Cut_[0] || diMuonMass > Cut_[1]) return true;
-    return false;
-  }  
-  else{ // no veto but selection of mass window
-    if(diMuonMass > Cut_[0] && diMuonMass < Cut_[1]) return true;
-    return false;  
-  }         
+    if (Return==false) Return=true;
+    else Return=false;
+  }
+  
+  return Return;
 }
+
+
