@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
+#include <math.h>
 
 #include <TH1F.h>
 #include <TH2F.h>
@@ -317,15 +318,21 @@ TH1F* divideByBinwidth(TH1F* histo, bool calculateError=1)
   TH1F* outputHisto = (TH1F*)histo->Clone();
   // loop bins, excluding underflow and overflow
   for(int i=1; i<= histo->GetNbinsX(); i++){
-    // recalculate error
-    double error = (double)(histo->GetBinError(i)) / (double)(histo->GetBinWidth(i));
-    // recalculate bin content
-    outputHisto->SetBinContent(i, ( (double)(histo->GetBinContent(i))/(double)(histo->GetBinWidth(i)) )  );
-    if(calculateError) outputHisto->SetBinError(i, error);
+    double binwidth=(double)(histo->GetBinWidth(i));
+    // take care of bins width width 0
+    // (these could not be filled and 
+    // exist because of technical reasons only)
+    if(binwidth!=0){
+      // recalculate error
+      double error = (double)(histo->GetBinError(i)) / binwidth;
+      // recalculate bin content
+      outputHisto->SetBinContent(i, ( (double)(histo->GetBinContent(i)) / binwidth) );
+      if(calculateError) outputHisto->SetBinError(i, error);
+    }
   }
   // return result
   return outputHisto;
- }
+}
 
 void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, double textSize)
 {
@@ -832,5 +839,225 @@ void createStackPlot(const std::vector<TString> plotList_, std::map< TString, st
     }
   }
 }
+
+double modulo(const double a, const double b)
+{
+  // this function calculates a modulo b 
+  // where a and b are double
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none
+  // "a": diviend
+  // "b": divisor
+
+  double rest=a-b;
+  if(rest<0){
+    std::cout << "can not compute " << a << " modulo " << b << std::endl;
+    std::cout << "because " << a << " < " << b << std::endl;
+    exit(1);
+  }
+  for(double n=1; rest>0; n++){
+    rest=a-n*b;
+    if(rest<0){
+      rest = a-(n-1.)*b;
+      break;
+    }
+  }
+  return rest;
+}
+
+void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const unsigned int verbose=2)
+{
+  // this function rebins an histogram using a variable binning
+  // modified quantities: "histoUnbinned"
+  // ATTENTION: histoUnbinned needs to have an initial equidistant binning
+  // used functions: modulo
+  // used enumerators: none
+  // "histoUnbinned": plot to be binned
+  // "binlowerEdges": vector containing all lower bin edges starting at xaxis.min, ending with xaxis.max
+  // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
+
+  unsigned int NinitialBins=histoUnbinned.GetNbinsX();
+  double xMin=histoUnbinned.GetBinLowEdge(1);
+  double xMax=histoUnbinned.GetBinLowEdge(NinitialBins+1);
+  if(verbose>1){
+    std::cout << "plot: "  << histoUnbinned.GetName() << std::endl;
+    std::cout << "min: " << xMin << std::endl;
+    std::cout << "max: " << xMax << std::endl;
+  }
+  // check if chosen binning is valid
+  // 1) N(bins)
+  if(NinitialBins<=binlowerEdges_.size()){
+    std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
+    std::cout << "N(chosen bins) < N(initial bins)!" << std::endl;
+    exit(1);
+  }
+  // 2) coarseness of chosen binning
+  //  double initialBinWidth=(xMax-xMin)/(double)NinitialBins;
+  double initialBinWidth = histoUnbinned.GetBinWidth(1);
+  if(verbose>1) std::cout << "initial binwidth: " << initialBinWidth << std::endl;
+  if(binlowerEdges_.size()>1){
+    for(unsigned int finalBin=1; finalBin<binlowerEdges_.size()-1; ++finalBin){
+      double finalBinWidth=binlowerEdges_[finalBin]-binlowerEdges_[finalBin-1];
+      if(verbose>1){
+	std::cout << "bin #" << finalBin << ": " << finalBinWidth << " modulo ";
+	std::cout << initialBinWidth << " = " << modulo(finalBinWidth, initialBinWidth) << std::endl;
+      }
+      if(modulo(finalBinWidth, initialBinWidth)!=0){
+	std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
+	std::cout << "the ininital binning is to coarse for the chosen binning!" << std::endl;
+	std::cout << "attention: probably error in modulo function," << std::endl;
+	std::cout << "bin #" << finalBin << "of the choosen binning has";
+	std::cout << "finalBinWidth modulo initialBinWidth of " << modulo(finalBinWidth,initialBinWidth) << std::endl;
+	exit(1);
+      }
+    }
+  }
+  // fill vector entries in array
+  // because TH1F constructer needs an array
+  unsigned int arraySize=42;
+  double * binLowerEdgeArray = new double[arraySize];
+  if(binlowerEdges_.size()>arraySize){
+    std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
+    std::cout << "the function reBinTH1F can deal with at most " << arraySize << " bins" << std::endl;
+    exit(1);
+  }
+  for(unsigned int arrayEntry=0; arrayEntry<arraySize; ++arrayEntry){
+    if(arrayEntry<binlowerEdges_.size()){
+      binLowerEdgeArray[arrayEntry]=binlowerEdges_[arrayEntry];
+        if(verbose>1) std::cout << "array entry #" << arrayEntry << ": " << binLowerEdgeArray[arrayEntry] << " ";
+    }
+    else binLowerEdgeArray[arrayEntry]=binlowerEdges_[binlowerEdges_.size()-1];
+  }
+  if(verbose>1) std::cout << std::endl;
+  // TH1F* histoBinned = new TH1F( histoUnbinned.GetName(), histoUnbinned.GetTitle(), arraySize-1, binLowerEdgeArray);
+  if(verbose>1) std::cout << "N(bins) before rebinning: " << histoUnbinned.GetNbinsX() << std::endl;
+  histoUnbinned = *(TH1F*)histoUnbinned.Rebin(arraySize-1, histoUnbinned.GetName(), binLowerEdgeArray);
+  if(verbose>1){
+    std::cout << "N(bins) after rebinning: " << histoUnbinned.GetNbinsX() << " (should be " << arraySize-1 << ")" << std::endl;
+    std::cout << "from which only " << binlowerEdges_.size() << " bins are used" << std::endl;
+    std::cout << "the rest will be ignored and exists only for technical reasons" << std::endl;
+  }
+  delete binLowerEdgeArray;
+}
+
+bool plotExists(std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
+{
+  // this function checks the existence of an specific 
+  // entry "histo_[plotName][sample]" in the map "histo_"
+  // that contains all 1D plots
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none
+
+  bool result=false;
+  if((histo_.count(plotName)>0)&&(histo_[plotName].count(sample)>0)){
+    result=true;
+  }
+  return result;
+}
+
+void equalReBinTH1(const int reBinFactor, std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
+{
+  // this uses an equal rebinning (factor "reBinFactor") 
+  // for an specific entry "histo_[plotName][sample]" 
+  // in the map "histo_" that contains all 1D plots
+  // modified quantities: histo_[plotName][sample]
+  // used functions: plotExists
+  // used enumerators: none
+
+  if(plotExists(histo_, plotName, sample)){
+    (histo_[plotName][sample])->Rebin(reBinFactor);
+  }
+
+}
+
+
+std::map<TString, std::vector<double> > makeVariableBinning()
+{
+  // this function creates a map with the hard coded 
+  // bin values for variable binning
+  // NOTE: it is important to quote the overflow bin 
+  // of the initial binning as last bin here!!!
+  // otherwise dividing per binwidth function 
+  // might later give nan and histo wouldn't be drawn
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none
+
+  std::map<TString, std::vector<double> > result;
+  std::vector<double> bins_;
+
+  // m(ttbar)
+  double mTtbarMassBins[]={0, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500};
+  bins_.insert( bins_.begin(), mTtbarMassBins, mTtbarMassBins + sizeof(mTtbarMassBins)/sizeof(double) );
+  result["analyzeTopRecoKinematicsKinFit/ttbarMass"]=bins_;
+  result["analyzeTopGenLevelKinematics/ttbarMass"  ]=bins_;
+  bins_.clear();
+  // pt(top)
+  double ptTopBins[]={0, 65, 120, 180, 270, 400., 800.};
+  bins_.insert( bins_.begin(), ptTopBins, ptTopBins + sizeof(ptTopBins)/sizeof(double) );
+  result["analyzeTopRecoKinematicsKinFit/topPt"]=bins_;
+  result["analyzeTopGenLevelKinematics/topPt"  ]=bins_;
+  bins_.clear();
+  return result;
+
+}
+
+template <class T>
+unsigned int positionInVector(std::vector<T> vec_, T object)
+{  
+  // this function returns the position
+  // of element object in vector vec_
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none
+
+  // loop vector elements
+  for(unsigned int element=0; element<vec_.size(); ++element)
+    {
+      // ask for requested element
+      if(vec_[element]==object){
+	return element;
+      }
+    }
+  // return -1 if requested element is not found
+  std::cout << "requested element " << object << " is not found in  vector" << std::endl;
+  return -1;
+}
+
+void DivideYieldByEfficiencyAndLumi(TH1F* yield, TH1F* efficiency, double luminosity, bool includeEffError)
+{
+  // this function divides yield by efficiency
+  // and calculates the correct error in each bin based
+  // on gaussian error propagation
+  // modified quantities: yield
+  // used functions: none
+  // used enumerators: none
+
+  // check if #bins are the same
+  if(yield->GetNbinsX()!=efficiency->GetNbinsX()){
+    std::cout << "#bins in yield and efficiency plots are not the same!" << std::endl;
+    exit(1);
+  }
+  // loop all bins
+  for(int bin=1; bin<=yield->GetNbinsX(); ++bin){
+    double content  = yield     ->GetBinContent(bin);
+    double eff      = efficiency->GetBinContent(bin);
+    double binwidth = yield     ->GetBinWidth  (bin);
+    double events   = binwidth*content;
+    // value (events/binwidth/eff/lumi)
+    double xSec = content/(eff*luminosity);
+    // error 
+    double effError=efficiency->GetBinError(bin);
+    if(!includeEffError) effError=0;
+    double xSecError = 1/(binwidth*luminosity)*sqrt( ((events)/(eff*eff)) + ((events*effError)/(eff*eff))* ((events*effError)/(eff*eff)) );
+    // set value and error
+    yield->SetBinContent(bin, xSec     );
+    yield->SetBinError  (bin, xSecError);
+  }
+}
+
+
 
 #endif
