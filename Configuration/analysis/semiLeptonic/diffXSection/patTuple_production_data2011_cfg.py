@@ -41,7 +41,7 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('GR_E_V14::All')
-process.GlobalTag.globaltag = cms.string('GR_R_311_V2::All')
+process.GlobalTag.globaltag = cms.string('GR_R_311_V3::All')
 
 #----------------------------------------------------------------------------
 # beam scrap filter
@@ -80,7 +80,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('Data2011_StreamExpress160404-161312.root')
+    fileName = cms.untracked.string('Data2011_StreamExpress160404-163369.root')
 )
 
 ## remove cleaning as it is not used
@@ -214,12 +214,22 @@ process.patDefaultSequence.replace(process.patElectrons,process.simpleEleIdSeque
 ## high level trigger filter (non existing Triggers are ignored)
 process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
 process.filterHlt = process.hltHighLevel.clone(HLTPaths = [
-    #2010 trigger
-    'HLT_Mu15_v2',
-    #2011 1E33 trigger
+    #2010 trigger (different versions with "or" to be somewhat immune to changes)
+    'HLT_Mu15_v2', 'HLT_Mu15_v3', 'HLT_Mu15_v4', 'HLT_Mu15_v5',
+    #2011 1E33 trigger (different versions with "or" to be somewhat immune to changes)
     'HLT_Mu17_TriCentralJet30_v1', 'HLT_Mu17_CentralJet30_v1', 'HLT_Mu17_DiCentralJet30_v1',
-    #2011 1E33-2E33 trigger
-    'HLT_IsoMu17_DiCentralJet30_v1', 'HLT_IsoMu17_CentralJet30_v1'],throw = False)
+    'HLT_Mu17_TriCentralJet30_v2', 'HLT_Mu17_CentralJet30_v2', 'HLT_Mu17_DiCentralJet30_v2',
+    'HLT_Mu17_TriCentralJet30_v3', 'HLT_Mu17_CentralJet30_v3', 'HLT_Mu17_DiCentralJet30_v3',
+    'HLT_Mu17_TriCentralJet30_v4', 'HLT_Mu17_CentralJet30_v4', 'HLT_Mu17_DiCentralJet30_v4',
+    'HLT_Mu17_TriCentralJet30_v5', 'HLT_Mu17_CentralJet30_v5', 'HLT_Mu17_DiCentralJet30_v5',
+    #2011 1E33-2E33 trigger (different versions with "or" to be somewhat immune to changes)
+    'HLT_IsoMu17_DiCentralJet30_v1', 'HLT_IsoMu17_CentralJet30_v1', 'HLT_Mu17_CentralJet40_BTagIP_v1', 'HLT_IsoMu17_CentralJet40_BTagIP_v1',
+    'HLT_IsoMu17_DiCentralJet30_v2', 'HLT_IsoMu17_CentralJet30_v2', 'HLT_Mu17_CentralJet40_BTagIP_v2', 'HLT_IsoMu17_CentralJet40_BTagIP_v2',
+    'HLT_IsoMu17_DiCentralJet30_v3', 'HLT_IsoMu17_CentralJet30_v3', 'HLT_Mu17_CentralJet40_BTagIP_v3', 'HLT_IsoMu17_CentralJet40_BTagIP_v3',
+    'HLT_IsoMu17_DiCentralJet30_v4', 'HLT_IsoMu17_CentralJet30_v4', 'HLT_Mu17_CentralJet40_BTagIP_v4', 'HLT_IsoMu17_CentralJet40_BTagIP_v4',
+    'HLT_IsoMu17_DiCentralJet30_v5', 'HLT_IsoMu17_CentralJet30_v5', 'HLT_Mu17_CentralJet40_BTagIP_v5', 'HLT_IsoMu17_CentralJet40_BTagIP_v5',
+    #2011 HT trigger requested by Niklas (different versions with "or" to be somewhat immune to changes)
+    'HLT_Mu8_HT200_v1', 'HLT_Mu8_HT200_v2', 'HLT_Mu8_HT200_v3', 'HLT_Mu8_HT200_v4', 'HLT_Mu8_HT200_v5'],throw = False)
 					   
 #----------------------------------------------------------------------------
 # selection paths
@@ -246,7 +256,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('Data2011_PrompReco160404-161312.root')
+    fileName = cms.untracked.string('Data2011_PromptReco160404-163369.root')
 )
 
 ## save pat output
