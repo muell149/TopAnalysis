@@ -21,5 +21,3 @@ filterElecPair = cms.EDFilter("DiElectronFilter",
     isVeto = cms.bool(False)
                               
 )
-
-

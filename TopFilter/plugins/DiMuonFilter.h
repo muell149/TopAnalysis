@@ -9,8 +9,11 @@
 /**
    \class   DiMuonFilter DiMuonFilter.h "TopAnalysis/TopFilter/plugins/DiMuonFilter.h"
 
-   \brief   Plugin to veto/select events with two muons that give a certain invariant mass like Z, J/Psi, ... or/and
-            that have same charge/opposite charge. 
+   \brief   Plugin to veto events with two muons which give a certain invariant mass like Z, J/Psi, ...
+
+   The class vetos events where the invariant mass of the two leading muons lies between two values given in the
+   config-file or with an invariant mass lower than a certain value. Note that there is no selection of the muons 
+   within the event filer. 
 */
 
 class DiMuonFilter : public edm::EDFilter {
@@ -30,15 +33,12 @@ class DiMuonFilter : public edm::EDFilter {
  private:
   /// muon collection label
   edm::InputTag muons_;
-  /// filter on unlike or like sign
-  int fltrChrg_;
-  /// filter on mass window
-  bool fltrMass_;
+  /// true if cut window is vetoed, false if window is to be selected
+  bool isVeto_;
   /// cut on Z-mass, default values are 76GeV, 106GeV
   std::vector<double> Cut_;
-  /// inverts selection
-  bool isVeto_;
-
+  /// filter on unlike sign
+  int fltrChrg_;  
 };  
 
 #endif  
