@@ -75,8 +75,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
+    #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
-    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root'
+    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     )
@@ -84,8 +85,10 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
+process.source.skipEvents = cms.untracked.uint32(0)
+
 
 ## configure process options
 process.options = cms.untracked.PSet(
@@ -119,9 +122,9 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"])
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"])
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"])
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"], throw=false)
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"], throw=false)
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=false)
 
 
 ## semileptonic selection
@@ -517,6 +520,8 @@ process.noPtLead_2_JetKinematicsNoBtagNjets4 = process.analyzeJetKinematics.clon
 process.noPtLead_3_JetKinematicsNoBtagNjets4 = process.analyzeJetKinematics.clone (src = 'noPtJets', analyze = uds3 )
 ## 0 b-jets selection
 process.antiBottomJetSelection = process.bottomJetSelection.clone(src = 'tightBottomJets', minNumber = 0, maxNumber = 0)
+process.looseBottomJets = process.trackCountingHighEffBJets.clone(cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.7')
+process.looseBottomJetSelection = process.bottomJetSelection.clone(src = 'looseBottomJets', minNumber = 2, maxNumber = 99999)
 ## analysis for each jet multiplicity
 process.noBjetNjets1 = process.analyzeTightMuonCrossSectionRecNjets1.clone()
 process.noBjetNjets2 = process.analyzeTightMuonCrossSectionRecNjets2.clone()
@@ -583,7 +588,7 @@ process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 
 # use larger JER in KinFit as it is obtained from data
 if(runningOnData=="data") and (applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetResolutionSmearFactor = 1.1
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
 
 # add hypothesis
 from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
@@ -616,21 +621,31 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## a) for top reconstruction analyzer
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
 ## 1) event hypothesis kinFit after reco selection
-recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False) )
-process.analyzeTopRecoKinematicsKinFit = process.analyzeTopRecKinematics.clone(analyze=recoKinFit  )
+recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True),
+                             matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
+process.analyzeTopRecoKinematicsKinFit = process.analyzeTopRecKinematics.clone(analyze=recoKinFit)
 ## 2) event hypothesis with top quantities filled for top/antitop instead of leptonic/hadronic top
-recoKinFitTopAntitop = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True) )
+recoKinFitTopAntitop = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True),
+                                matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True),
+                                maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsKinFitTopAntitop = process.analyzeTopRecKinematics.clone(analyze=recoKinFitTopAntitop)
 ## 3) event hypothesis kinFit after reco selection including match to gen objects
 ## 1D histograms include only events where the reconstructed and matched object are within the same bin
-recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(True ), ttbarInsteadOfLepHadTop = cms.bool(False) )
-process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched )
+recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True),
+                             matchForStabilityAndPurity=cms.bool(True ), ttbarInsteadOfLepHadTop = cms.bool(False),
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
+process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched)
 ## 4) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch) after reco selection
-recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False) )
+recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), useTree=cms.bool(True),
+                             matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
 ## 5) event hypothesis built with generator truth informations
 ## as reconstructed from generator objects after gen selection
-genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), useTree=cms.bool(True), matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False) )
+genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), useTree=cms.bool(True),
+                             matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopGenLevelKinematics = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 
 ## configure Kin Fit performance analyzers
@@ -657,7 +672,9 @@ if(applyKinFit==True):
     if(runningOnData=="MC"):
         ## case 1a): ttbar semileptonic mu-signal
         if(eventFilter=='signal only'):
-            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
+            process.kinFit    = cms.Sequence(process.looseBottomJets                       +
+                                             process.looseBottomJetSelection               +
+                                             process.makeTtSemiLepEvent                    +
                                              process.analyzeTopRecoKinematicsKinFit        +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFitMatched +
@@ -667,14 +684,18 @@ if(applyKinFit==True):
             process.kinFitGen = cms.Sequence(process.analyzeTopGenLevelKinematics)
         ## case 1b): other MC
         else:
-            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+            process.kinFit    = cms.Sequence(process.looseBottomJets                         +
+                                             process.looseBottomJetSelection                 +
+                                             process.makeTtSemiLepEvent                      +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFit
                                              )
             process.kinFitGen = cms.Sequence(process.dummy)
     ## case 2: data sample
     elif(runningOnData=="data"):
-        process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                    +
+        process.kinFit    = cms.Sequence(process.looseBottomJets                       +
+                                         process.looseBottomJetSelection               +
+                                         process.makeTtSemiLepEvent                    +
                                          process.analyzeTopRecoKinematicsKinFit        +
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop)
         process.kinFitGen = cms.Sequence(process.dummy)
