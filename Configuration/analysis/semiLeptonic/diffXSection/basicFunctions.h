@@ -20,6 +20,7 @@
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <TKey.h>
 
 #include <TLine.h>
 #include <TPaveLabel.h>
@@ -237,7 +238,7 @@ void writeToFile(T output, TString file, bool append)
   }
  }
 
-int roundToInt(double value, bool roundDown=0)
+int roundToInt(double value, bool roundDown=false)
 {
   // function to round an double "value" 
   // to an int and return this one
@@ -304,7 +305,7 @@ TString sampleLabel(unsigned int sample)
   return MCprocess;
 }
 
-TH1F* divideByBinwidth(TH1F* histo, bool calculateError=1)
+TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
 {
   // function divides the #entries in every bin of the input plot "histo" 
   // by its binwidth and returns the result
@@ -476,7 +477,7 @@ TString getStringEntry(const TString inputTString, unsigned int entry=42, const 
   // used enumerators: NONE
   char *path, *element;
   // enable output for debugging
-  bool verbose=0;
+  bool verbose=true;
   // save inputstring in char* path
   string inputString=(std::string)inputTString;
   path = new char [inputString.size()+1];
@@ -740,7 +741,7 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
   }
 }
 
-void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1, bool reCreate=0)
+void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1, bool reCreate=false)
 {
   // this function creates plots for all diboson and all single 
   // top samples combined if the combined SingleTop and DiBoson 
@@ -764,7 +765,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
     // loop STop and DiBoson
     for(unsigned int sample=kSTop; sample<=kDiBos; ++sample){
       // mark first plot found
-      bool first=1;
+      bool first=true;
       // check that combined plot does not already exist
       // if existing and reCreate==1, it will be overwritten
       bool combinedplotExists=false;
@@ -991,8 +992,8 @@ std::map<TString, std::vector<double> > makeVariableBinning()
   // m(ttbar)
   double mTtbarMassBins[]={0, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500};
   bins_.insert( bins_.begin(), mTtbarMassBins, mTtbarMassBins + sizeof(mTtbarMassBins)/sizeof(double) );
-  result["analyzeTopRecoKinematicsKinFit/ttbarMass"]=bins_;
-  result["analyzeTopGenLevelKinematics/ttbarMass"  ]=bins_;
+  //  result["analyzeTopRecoKinematicsKinFit/ttbarMass"]=bins_;
+  //  result["analyzeTopGenLevelKinematics/ttbarMass"  ]=bins_;
   bins_.clear();
   // pt(top)
   double ptTopBins[]={0, 65, 120, 180, 270, 400., 800.};
@@ -1059,5 +1060,68 @@ void DivideYieldByEfficiencyAndLumi(TH1F* yield, TH1F* efficiency, double lumino
 }
 
 
+template <class T>
+void saveToRootFile(TString outputFile, T object, bool overwrite=false, unsigned int verbose=1)
+{
+  // this function saves objects of class T
+  // (such as TH1) in an output rootfile with name outputFile
+  // modified quantities: outputFile
+  // used functions: none
+  // used enumerators: none
+
+  bool saveObject=true;
+  // check if file exist
+  TFile* file = TFile::Open(outputFile, "UPDATE");
+  // if not exist: create
+  if(!file){
+    if(verbose>1) std::cout << "file " << outputFile << " does not exist, will be created" << std::endl;
+    file = new TFile(outputFile, "RECREATE");
+  }
+  // check if file is broken
+  if(file->IsZombie()){
+    std:: cout << "file " << outputFile << " is broken" << std::endl;
+    // if broken: don't save object
+    saveObject=false;
+  }
+  else{
+    // if not broken: open file
+    file->cd();
+    // if you don't want to overwrite, check if object exists
+    int count=-1;
+    if(!overwrite){
+      TString saveObjectName=(TString)object->GetTitle();
+      if(verbose>1) std::cout << "searching for object " << saveObjectName << std::endl;
+      // loop all objects in file
+      TList * list = gDirectory->GetListOfKeys();
+      while( list->At( count+1 ) != list->Last()){
+	++count;
+	TObject *folderObject = list->At(count);
+	TString folderObjectName = (TString)folderObject->GetName();
+	if(verbose>1) std::cout << "candidate #" << count+1 << ": " << folderObjectName << std::endl;
+	// check if object you want to save is already existing
+	// by comparing the names
+	if(folderObjectName==saveObjectName){
+	  if(verbose>1){
+	    std::cout << "already exists in file " << outputFile << std::endl;
+	    std::cout << "will keep the old one!" << std::endl << std::endl;
+	  }
+	  saveObject=false;
+	  break;
+	}
+      }
+    }
+  }
+  // save object
+  if(saveObject){
+    if(verbose>0){
+      std::cout << "saving object " << (TString)object->GetTitle();
+      std::cout << " to file " << outputFile << std::endl << std::endl;
+    }
+    // overwrite existing
+    object->Write(object->GetTitle(), TObject::kOverwrite);
+  }
+  // close file
+  file->Close();
+}
 
 #endif
