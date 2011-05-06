@@ -1,8 +1,8 @@
 
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int systematicVariation=sysNo, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
-//TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_PromptReco160404-163369.root")
+void analyzeHypothesisKinFit(double luminosity = 38.35, bool save = true, int systematicVariation=sysNo, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
+TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_PromptReco160404-163369.root")
 {
   //  ---
   //     name conventions
@@ -322,7 +322,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
 // 			     "circularity gen truth/events/0/10",
 // 			     "isotropy gen truth/events/0/10"   ,
 			     // reconstructed ttbar quantities	                            
-                             "m(t#bar{t}) Kinfit/events/0/20"                        ,
+                             "m(t#bar{t}) Kinfit/events/0/60"                        ,
                              "p_{t}(t#bar{t}) Kinfit/events/0/10"                    ,
                              "y(t#bar{t}) Kinfit/events/0/2"                         ,
                              "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) Kinfit/events/0/20",
@@ -335,18 +335,18 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
                             // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
                             "i_{lead jet} gen truth/i_{lead jet} hypothesis fit",
 			    // b) reconstructed Top quantities
-                            "p_{t}(t) matched/p_{t}(t) reco"                    ,
-			    "#phi(t) matched/#phi(t) reco"                      ,
-                            "y(t) matched/y(t) reco"                            ,
-			    "angle(b,#bar{b}) matched (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
+                            "p_{t}(t) gen/p_{t}(t) reco"                    ,
+			    "#phi(t) gen/#phi(t) reco"                      ,
+                            "y(t) gen/y(t) reco"                            ,
+			    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
                             // c) reconstructed ttbar quantities
-                            "m(t#bar{t}) matched/m(t#bar{t}) reco"              ,
-                            "p_{t}(t#bar{t}) matched/p_{t}(t#bar{t}) reco"      ,
-                            "y(t#bar{t}) matched/y(t#bar{t}) reco"              ,
-                            "H_{T}(t#bar{t}) matched/H_{T}(t#bar{t}) reco"      ,
-                            "#Sigmay(t#bar{t}) matched/#Sigmay(t#bar{t}) reco"  ,
-                            "#phi(leptonic t)-#phi(hadronic t) matched/#phi(leptonic t)-#phi(hadronic t) Kinfit",
-                            "y(leptonic t)-y(hadronic t) matched/y(leptonic t)-y(hadronic t) Kinfit"            
+                            "m(t#bar{t}) gen/m(t#bar{t}) reco"              ,
+                            "p_{t}(t#bar{t}) gen/p_{t}(t#bar{t}) reco"      ,
+                            "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
+                            "H_{T}(t#bar{t}) gen/H_{T}(t#bar{t}) reco"      ,
+                            "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
+                            "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
+                            "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
                            };
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
@@ -662,7 +662,8 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
 	    std::cout << " to canvas " << canvasNumber << " ( ";
 	    std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
 	  }
-	  
+	  // for efficiency plots: draw grid
+	  if(getStringEntry(plotList_[plot], 1)=="efficiency") plotCanvas_[canvasNumber]->SetGrid(1,1);
 	  // for histos with variable binning:
 	  if(binning_.count("analyzeTopRecoKinematicsKinFit/"+getStringEntry(plotList_[plot], 2))>0){
 	    // get variable binning
@@ -704,6 +705,12 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
 	    if(max>3) max = (double)roundToInt(max);
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
+	    // restrict x axis for different plots
+	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
+	    if(getStringEntry(plotList_[plot], 2)=="topY"   ||
+	       getStringEntry(plotList_[plot], 2)=="topYHad"||getStringEntry(plotList_[plot], 2)=="topYLep"){
+	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
+	    }
 	    // draw efficiency plots as line
 	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
 	    // others as histo (stack)
@@ -761,5 +768,12 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   // ---
   // saving
   // ---
-  if(save) saveCanvas(plotCanvas_, outputFolder, pdfName);
+  if(save){
+    // pdf and eps
+    saveCanvas(plotCanvas_, outputFolder, pdfName);
+    // root file
+    for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
+      saveToRootFile("diffXSecTopSemiMu.root", plotCanvas_[idx], true, verbose);
+    }
+  }
 }
