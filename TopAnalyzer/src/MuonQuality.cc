@@ -32,7 +32,13 @@ MuonQuality::book()
   hists_["hcalEn"   ] = new TH1F( "hcalEn"  ,  "hcalEn"   ,   40,     0. ,  10.  );
   // relative isolation (tracker and calo combined)
   hists_["relIso"   ] = new TH1F( "relIso"  ,  "relIso"   ,   50,     0. ,  1.0  );
-
+  // is GlobalMuonPromptTight?
+  hists_["isGlobalMuonPromptTight"] = new TH1F("isGlobalMuonPromptTight","isGlobalMuonPromptTight"  ,   2,     0. ,  2.  ); 
+  // is TrackerMuon?
+  hists_["isTrackerMuon"          ] = new TH1F("isTrackerMuon"          ,  "isTrackerMuon"          ,   2,     0. ,  2.  ); 
+  // number of matches
+  hists_["matches"                ] = new TH1F("matches"                ,  "matches"                ,  10,     0. , 10.  );
+  
   /** 
       Monitoring Variables
   **/
@@ -109,6 +115,13 @@ MuonQuality::book(edm::Service<TFileService>& fs)
   hists_["hcalEn"   ] = fs->make<TH1F>( "hcalEn"  ,  "hcalEn"   ,   40,    0.,  10.  );
   // relative isolation (tracker and calo combined)
   hists_["relIso"   ] = fs->make<TH1F>( "relIso"  ,  "relIso"   ,   50,    0.,  1.0  );
+  // is GlobalMuonPromptTight?
+  hists_["isGlobalMuonPromptTight"] = fs->make<TH1F>("isGlobalMuonPromptTight" , "isGlobalMuonPromptTight" ,   2,     0. ,  2.  ); 
+  // is TrackerMuon?
+  hists_["isTrackerMuon"          ] = fs->make<TH1F>("isTrackerMuon"           , "isTrackerMuon"           ,   2,     0. ,  2.  ); 
+  // number of matches
+  hists_["matches"                ] = fs->make<TH1F>("matches"                 , "matches"                 ,  10,     0. ,  10. );
+ 
 
   /** 
       Monitoring Variables
@@ -193,7 +206,13 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
       hists_.find("hcalEn")->second->Fill( muon->hcalIsoDeposit()->candEnergy(), weight );   
       // relative isolation (tracker and calo combined)
       hists_.find("relIso")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt() , weight );
- 
+      // is GlobalMuonPromptTight?
+      hists_.find("isGlobalMuonPromptTight")->second->Fill(muon->isGood("GlobalMuonPromptTight") , weight );
+      // is TrackerMuon?
+      hists_.find("isTrackerMuon")->second->Fill(muon->isGood("AllTrackerMuons") , weight );
+      // number of matches
+      hists_.find("matches")->second->Fill(muon->numberOfMatches() , weight );
+       
       /** 
 	  Fill Monitoring Variables
       **/
