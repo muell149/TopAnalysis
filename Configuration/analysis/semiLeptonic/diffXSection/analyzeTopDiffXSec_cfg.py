@@ -270,10 +270,10 @@ process.muonCuts = cms.Sequence(process.combinedMuonsSelection        +
 ## ---
 ##    Set up selection steps for different jet multiplicities
 ## ---
-process.leadingJetSelectionNjets1 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 1)
-process.leadingJetSelectionNjets2 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 2)
-process.leadingJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 3)
-process.leadingJetSelectionNjets4 = process.leadingJetSelection.clone (src = 'tightLeadingJets', minNumber = 4)
+process.leadingJetSelectionNjets1 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 1)
+process.leadingJetSelectionNjets2 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 2)
+process.leadingJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 3)
+process.leadingJetSelectionNjets4 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 4)
 process.jetCuts = cms.Sequence(process.leadingJetSelectionNjets1 +
                                process.leadingJetSelectionNjets2 +
                                process.leadingJetSelectionNjets3 +
@@ -298,7 +298,7 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
 ## ---
 ##    Set up selection for b-jet multiplicity
 ## ---
-process.btagging = process.bottomJetSelection.clone(src = 'tightBottomJets', minNumber = 2, maxNumber = 99999)
+process.btagging = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
 
 ## kinematic contributions
 ## muon
@@ -308,13 +308,13 @@ process.tightMuonKinematicsTagged = process.tightMuonKinematics.clone();
 process.tightMuonQualityTagged    = process.tightMuonQuality.clone();
 
 ## jets
-process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds0 )
-process.tightLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds1 )
-process.tightLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds2 )
-process.tightLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingJets', analyze = uds3 )
-process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLeadingJets', analyze = udsAll)
-process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingJets')
-process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomJets', analyze = udsAll)
+process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds0 )
+process.tightLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds1 )
+process.tightLead_2_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds2 )
+process.tightLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds3 )
+process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
+process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
+process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomPFJets', analyze = udsAll)
 
 process.tightLead_0_JetKinematicsTagged = process.tightLead_0_JetKinematics.clone()
 process.tightLead_1_JetKinematicsTagged = process.tightLead_1_JetKinematics.clone()
@@ -358,7 +358,7 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
 process.load('TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff')
 ## process.ttSemiLepJetPartonMatch.verbosity = 1
 process.kinFitTtSemiLepEventHypothesis.leps = 'tightMuons'
-process.kinFitTtSemiLepEventHypothesis.jets = 'tightLeadingJets'
+process.kinFitTtSemiLepEventHypothesis.jets = 'tightLeadingPFJets'
 process.kinFitTtSemiLepEventHypothesis.mets = 'patMETs'
 
 # maximum number of jets to be considered in the jet combinatorics
@@ -405,7 +405,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
     ## set number of jets considered in jet-parton matching
     process.ttSemiLepJetPartonMatch.maxNJets=-1
     ## choose jet collection considered in jet-parton matching
-    process.ttSemiLepJetPartonMatch.jets='tightLeadingJets'
+    process.ttSemiLepJetPartonMatch.jets='tightLeadingPFJets'
     
 ## ---
 ##    configure KinFit Analyzers
@@ -415,34 +415,26 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
-process.filterGenKinFit   = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('None')"     ) )
 
 ## ## configure top reconstruction analyzers & define PSets
 ## a) for top reconstruction analyzer
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
-## 1) event hypothesis kinFit after reco selection
+## 1)  plots built from event hypothesis kinFit after reco selection
 recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsKinFit = process.analyzeTopRecKinematics.clone(analyze=recoKinFit)
-## 2) event hypothesis with top quantities filled for top/antitop instead of leptonic/hadronic top
+## 2)  same as 1) but for top/antitop instead of leptonic/hadronic top
 recoKinFitTopAntitop = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True),
                                 matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True),
                                 maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsKinFitTopAntitop = process.analyzeTopRecKinematics.clone(analyze=recoKinFitTopAntitop)
-## 3) event hypothesis kinFit after reco selection including match to gen objects
-## 1D histograms include only events where the reconstructed and matched object are within the same bin
-recoKinFitMatched = cms.PSet(hypoKey=cms.string('kKinFit'  ), useTree=cms.bool(True),
-                             matchForStabilityAndPurity=cms.bool(True ), ttbarInsteadOfLepHadTop = cms.bool(False),
-                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
-process.analyzeTopRecoKinematicsKinFitMatched = process.analyzeTopRecKinematics.clone(analyze=recoKinFitMatched)
-## 4) event hypothesis built of objects from genmatch to partons (ttSemiLepJetPartonMatch) after reco selection
+## 3)  plots built from event hypothesis of objects from genmatch to partons (ttSemiLepJetPartonMatch) after reco selection
 recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
-## 5) event hypothesis built with generator truth informations
-## as reconstructed from generator objects after gen selection
+## 4) plots built parton level objects after gen selection
 genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
@@ -457,7 +449,7 @@ process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKi
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
 #process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"         )
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
-#process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingJets")
+#process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets")
 #process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
 #process.analyzeHypoKinFitMuon = process.analyzeHypothesisKinFitMuon.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"      )
 
@@ -475,14 +467,12 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
-                                             process.analyzeTopRecoKinematicsKinFitMatched   +
                                              process.analyzeTopRecoKinematicsGenMatch        +
                                              process.analyzeHypoKinFit                       +
                                              process.filterRecoKinFit                        +
                                              process.filterMatchKinFit
                                              )
-            process.kinFitGen = cms.Sequence(process.analyzeTopGenLevelKinematics+
-                                             process.filterGenKinFit
+            process.kinFitGen = cms.Sequence(process.analyzeTopGenLevelKinematics
                                              )
         ## case 1b): other MC
         else:
@@ -590,7 +580,7 @@ if(writeOutput):
     process.outpath = cms.EndPath(process.out)
 if(jetType=="particleFlow"):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    pathlist = [process.p2]
+    pathlist = [process.p1]
     for path in pathlist:  
         massSearchReplaceAnyInputTag(path, 'tightLeadingJets', 'tightLeadingPFJets')
         massSearchReplaceAnyInputTag(path, 'tightBottomJets' , 'tightBottomPFJets')
