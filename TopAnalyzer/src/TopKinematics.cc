@@ -491,7 +491,7 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     bool switchLepAndHadTop = false;
     // if ttbarInsteadOfLepHadTop_ == true:
     // lepTop = Top     (positive charge)
-    // lepTop = AntiTop (negative charge)
+    // hadTop = AntiTop (negative charge)
     if((ttbarInsteadOfLepHadTop_==true)&&(((reco::LeafCandidate*)(tops.singleLepton()))->charge()<0)){
       switchLepAndHadTop=true;
     }
@@ -555,9 +555,11 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	fillValue( "delChi2", tops.fitChi2(1)-tops.fitChi2(0), weight );
       }
     }
-    // check if matchForStabilityAndPurity_ is true and a generated ttbar semileptonic #mu event exists
+    // create indicator if plots are already filled
+    bool oneDplotsFilled=false;
+    // check if a generated ttbar semileptonic #mu event exists
     // neglect events where top decay is not via Vtb
-    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && lepBRec && hadBRec && matchForStabilityAndPurity_ ){
+    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && lepBRec && hadBRec ){
       const reco::GenParticle *lepTopGen= switchLepAndHadTop ? tops.hadronicDecayTop() : tops.leptonicDecayTop();
       const reco::GenParticle *hadTopGen= switchLepAndHadTop ? tops.leptonicDecayTop() : tops.hadronicDecayTop();
       const reco::GenParticle *lepWGen  = switchLepAndHadTop ? tops.hadronicDecayW  () : tops.leptonicDecayW  ();
@@ -566,12 +568,14 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       const reco::GenParticle *hadBGen  = switchLepAndHadTop ? tops.leptonicDecayB  () : tops.hadronicDecayB  ();
       // define generated scalar sum of all jet pts
       double HTgen = lepBGen->pt() + hadBGen->pt() + tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
-
       /**
          fill 1D histos and N(gen&&rec)-histo for the determination of stability and purity
+	 if matchForStabilityAndPurity_ is true
       **/
-      fill(lepTopRec, lepTopGen, hadTopRec, hadTopGen, lepWRec, lepWGen, hadWRec, hadWGen, HTrec, HTgen, weight);
-
+      if( matchForStabilityAndPurity_ ){
+	fill(lepTopRec, lepTopGen, hadTopRec, hadTopGen, lepWRec, lepWGen, hadWRec, hadWGen, HTrec, HTgen, weight);
+	oneDplotsFilled=true;
+      }
       /**
 	 fill 2D histos (rec versus gen level correlation plots)
       **/
@@ -669,18 +673,18 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 						   ROOT::Math::VectorUtil::Angle(recMuonBoosted, recNeutrinoBoosted),
 						   weight);
       // fill 1D plot for angle between b-jets for purity and stability calculation
-      match( "bbbarAngle", ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
-	                   ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
-	                   weight);
+      if( matchForStabilityAndPurity_ ) match( "bbbarAngle", ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
+					       ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
+					       weight);
       // fill 1D plot for muon - neutrino angle plot for purity and stability calculation
-      match("MuonNeutrinoAngle", ROOT::Math::VectorUtil::Angle(recMuonBoosted, recNeutrinoBoosted), 
-	                     ROOT::Math::VectorUtil::Angle(genMuonBoosted, genNeutrinoBoosted),
-	                     weight);
+      if( matchForStabilityAndPurity_ ) match("MuonNeutrinoAngle", ROOT::Math::VectorUtil::Angle(recMuonBoosted, recNeutrinoBoosted), 
+					      ROOT::Math::VectorUtil::Angle(genMuonBoosted, genNeutrinoBoosted),
+					      weight);
 
     }
-    // if matchForStabilityAndPurity_ is false or no generated ttbar semileptonic #mu event exists
-    else{
-      // fill only 1D histos
+    // if matchForStabilityAndPurity_=false: 1D plots for all events with valid hypothesis
+    if( !oneDplotsFilled ){  
+      // fill kinematic 1D histos
       fill(lepTopRec, hadTopRec, lepWRec, hadWRec, HTrec, weight);
       // fill angle histos
       fillAngles(tops.hadronicDecayB       (hypoKey_)->p4(), tops.hadronicDecayQuark(hypoKey_)->p4(), 
@@ -692,83 +696,83 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 		      tops.hadronicDecayQuarkBar(hypoKey_)->p4(), tops.leptonicDecayB    (hypoKey_)->p4(), 
 		      tops.singleLepton         (hypoKey_)->p4(), tops.singleNeutrino    (hypoKey_)->p4(),
 		      weight, false, false);
-      // ---
-      //    check quark assignment
-      // ---
-      // no parton match exists
-      if(tops.isHypoValid("kKinFit")&&(!tops.isHypoValid("kGenMatch"))){
-	fillValue("qAssignment", 9., weight);
-      }
-      // parton match exists
-      if(tops.isHypoValid("kKinFit")&& tops.isHypoValid("kGenMatch")){
-	// indices for all quarks from Kinfit Hypothesis and genmatch
-	int lepBIndex         = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LepB     ];
-	int hadBIndex         = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::HadB     ];
-	int lightQIndex       = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LightQ   ];
-	int lightQBarIndex    = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LightQBar];
-	int lepBIndexGen      = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LepB     ];
-	int hadBIndexGen      = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB     ];
-	int lightQIndexGen    = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ   ];
-	int lightQBarIndexGen = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar];
-	// calculate permutation
-	double assignment=-1;
-	// 0: nothing wrong
-	if((lepBIndex==lepBIndexGen)&&(hadBIndex==hadBIndexGen)&&
-	   (((lightQIndex==lightQIndexGen   )&&(lightQBarIndex==lightQBarIndexGen))||
-	    ((lightQIndex==lightQBarIndexGen)&&(lightQBarIndex==lightQIndexGen   )))) assignment=0;
-	else{
-	  // 1: b quarks switched
-	  if((lepBIndex==hadBIndexGen)&&(hadBIndex==lepBIndexGen)) assignment=1;
-	  // 2: leptonic b and light quark switched
-	  if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&
-	     (((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen)))) assignment=2;
-	  // 3: hadronic b and light quark switched/
-	  if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&
-	     (((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen)))) assignment=3;
-	  // 4: light quark->leptonic b & leptonic b->hadronic b & hadronic b-> light quark
-	  if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&(hadBIndex==lepBIndexGen)&&
-	     ((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen))) assignment=4;
-	  // 5: light quark->hadronic b & hadronic b->leptonic b & leptonic b-> light quark
-	  if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&(lepBIndex==hadBIndexGen)&&
-	     ((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen))) assignment=5;
-	  // 6: hadronic/leptonic b-> light quarks &  light quarks->hadronic/leptonic b
-	  if(((hadBIndex     ==lightQIndexGen)||(hadBIndex     ==lightQBarIndexGen))&&
-	     ((lepBIndex     ==lightQIndexGen)||(lepBIndex     ==lightQBarIndexGen))&&
-	     ((lightQIndex   ==lepBIndexGen  )||(lightQIndex   ==hadBIndexGen     ))&&
-	     ((lightQBarIndex==lepBIndexGen  )||(lightQBarIndex==hadBIndexGen     ))) assignment=6;
-	  // make sure that no relevant jet is missing
-	  std::vector<int> genJets_, recoJets_;
-	  // list of genJets
-	  genJets_ .push_back(lepBIndexGen     );
-	  genJets_ .push_back(hadBIndexGen     );
-	  genJets_ .push_back(lightQIndexGen   );
-	  genJets_ .push_back(lightQBarIndexGen);
-	  std::sort( genJets_.begin(), genJets_.end());
-	  // list of recoJets
-	  recoJets_.push_back(lepBIndex);
-	  recoJets_.push_back(hadBIndex);
-	  recoJets_.push_back(lightQIndex);
-	  recoJets_.push_back(lightQBarIndex);
-	  std::sort( recoJets_.begin(), recoJets_.end());
-	  // compare recoJets and genJets
-	  for(unsigned int i=0; i<recoJets_.size(); ++i){
-	    if( recoJets_[i]!=genJets_[i] ){ 
-	      if(maxNJets<4){
-		std::cout << "ERROR: number of conidered jets can not be smaller than 4" << std::endl;
-		exit(1);
-	      }
-	      // 7: jet is missing
-	      if( genJets_.back()>maxNJets-1 ) assignment=7;
-	      // 8: wrong jet chosen (only valid if kinFitTtSemiLepEventHypothesis.maxNJets>4)
-	      // e.g. took the wrong 4 out of 5 jets 
-	      else assignment=8;
-	      break;
+    }
+    // ---
+    //    check quark assignment
+    // ---
+    // no parton jet parton match exists
+    if(tops.isHypoValid("kKinFit")&&(!tops.isHypoValid("kGenMatch"))){
+      fillValue("qAssignment", 9., weight);
+    }
+    // if jet parton match exists:
+    if(tops.isHypoValid("kKinFit")&& tops.isHypoValid("kGenMatch")){
+      // indices for all quarks from Kinfit Hypothesis and genmatch
+      int lepBIndex         = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LepB     ];
+      int hadBIndex         = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::HadB     ];
+      int lightQIndex       = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LightQ   ];
+      int lightQBarIndex    = tops.jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LightQBar];
+      int lepBIndexGen      = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LepB     ];
+      int hadBIndexGen      = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB     ];
+      int lightQIndexGen    = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ   ];
+      int lightQBarIndexGen = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar];
+      // calculate permutation
+      double assignment=-1;
+      // 0: nothing wrong
+      if((lepBIndex==lepBIndexGen)&&(hadBIndex==hadBIndexGen)&&
+	 (((lightQIndex==lightQIndexGen   )&&(lightQBarIndex==lightQBarIndexGen))||
+	  ((lightQIndex==lightQBarIndexGen)&&(lightQBarIndex==lightQIndexGen   )))) assignment=0;
+      else{
+	// 1: b quarks switched
+	if((lepBIndex==hadBIndexGen)&&(hadBIndex==lepBIndexGen)) assignment=1;
+	// 2: leptonic b and light quark switched
+	if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&
+	   (((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen)))) assignment=2;
+	// 3: hadronic b and light quark switched/
+	if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&
+	   (((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen)))) assignment=3;
+	// 4: light quark->leptonic b & leptonic b->hadronic b & hadronic b-> light quark
+	if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&(hadBIndex==lepBIndexGen)&&
+	   ((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen))) assignment=4;
+	// 5: light quark->hadronic b & hadronic b->leptonic b & leptonic b-> light quark
+	if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&(lepBIndex==hadBIndexGen)&&
+	   ((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen))) assignment=5;
+	// 6: hadronic/leptonic b-> light quarks &  light quarks->hadronic/leptonic b
+	if(((hadBIndex     ==lightQIndexGen)||(hadBIndex     ==lightQBarIndexGen))&&
+	   ((lepBIndex     ==lightQIndexGen)||(lepBIndex     ==lightQBarIndexGen))&&
+	   ((lightQIndex   ==lepBIndexGen  )||(lightQIndex   ==hadBIndexGen     ))&&
+	   ((lightQBarIndex==lepBIndexGen  )||(lightQBarIndex==hadBIndexGen     ))) assignment=6;
+	// make sure that no relevant jet is missing
+	std::vector<int> genJets_, recoJets_;
+	// list of genJets
+	genJets_ .push_back(lepBIndexGen     );
+	genJets_ .push_back(hadBIndexGen     );
+	genJets_ .push_back(lightQIndexGen   );
+	genJets_ .push_back(lightQBarIndexGen);
+	std::sort( genJets_.begin(), genJets_.end());
+	// list of recoJets
+	recoJets_.push_back(lepBIndex);
+	recoJets_.push_back(hadBIndex);
+	recoJets_.push_back(lightQIndex);
+	recoJets_.push_back(lightQBarIndex);
+	std::sort( recoJets_.begin(), recoJets_.end());
+	// compare recoJets and genJets
+	for(unsigned int i=0; i<recoJets_.size(); ++i){
+	  if( recoJets_[i]!=genJets_[i] ){ 
+	    if(maxNJets<4){
+	      std::cout << "ERROR: number of conidered jets can not be smaller than 4" << std::endl;
+	      exit(1);
 	    }
+	    // 7: jet is missing
+	    if( genJets_.back()>maxNJets-1 ) assignment=7;
+	    // 8: wrong jet chosen (only valid if kinFitTtSemiLepEventHypothesis.maxNJets>4)
+	    // e.g. took the wrong 4 out of 5 jets 
+	    else assignment=8;
+	    break;
 	  }
 	}
-	// fill permutation histogram
-	fillValue("qAssignment", assignment, weight);
       }
+      // fill permutation histogram
+      fillValue("qAssignment", assignment, weight);
     }
     // save lepton charge
     fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge(), weight );
@@ -777,7 +781,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   }
 }
 
-/// histogram filling for 1D histos (no genmatch)
+/// histogram filling for kinematic 1D histos
 void
 TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, 
 		    const reco::Candidate* leptonicW  , const reco::Candidate* hadronicW, 
@@ -876,7 +880,8 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   fillValue( "ttbarHT", HT, weight );
 }
 
-/// histogram filling for 1D histos using only events with existing genmatch
+/// histogram filling for kinematic 1D histos using only events with Ngen&&Nreco 
+/// in the same bin wrt the binning defined above
 void 
 TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, 
 		    const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, 
@@ -964,19 +969,19 @@ TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate
 
   // fill deltaPhi between both top quarks 
   match( "ttbarDelPhi" , deltaPhi(leptonicTopRec->phi(), hadronicTopRec->phi()), 
-	                                      deltaPhi(leptonicTopGen->phi(), hadronicTopGen->phi()), weight );
+	                 deltaPhi(leptonicTopGen->phi(), hadronicTopGen->phi()), weight );
   // fill deltaY between both top quarks 
   match( "ttbarDelY"   , leptonicTopRec->rapidity()-hadronicTopRec->rapidity() , 
-                                              leptonicTopGen->rapidity()-hadronicTopGen->rapidity() , weight );
+                         leptonicTopGen->rapidity()-hadronicTopGen->rapidity() , weight );
 
   // fill sum of y of both top quarks 
   match( "ttbarSumY"   , leptonicTopRec->rapidity()+hadronicTopRec->rapidity() , 
-	                                      leptonicTopGen->rapidity()+hadronicTopGen->rapidity() , weight );
+	                 leptonicTopGen->rapidity()+hadronicTopGen->rapidity() , weight );
   // fill HT of the 4 jets assigned to the ttbar decay
   match( "ttbarHT"     , HTrec , HTgen , weight );
 }
 
-/// helper function to provid N(gen&&rec)-histo for the determination of stability and purity
+/// helper function to provid gen&&rec-histo for the determination of stability and purity
 void 
 TopKinematics::match(const std::string& histo, const double& recValue, const double& genValue, const double& weight)
 {
