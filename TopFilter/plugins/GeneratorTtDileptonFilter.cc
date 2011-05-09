@@ -11,7 +11,7 @@
 /**
   \class   GeneratorTtDileptonFilter GeneratorTtDileptonFilter.cc "TopAnalysis/TopFilter/plugins/GeneratorTtDileptonFilter.cc"
 
-  \brief   EDFilter to make cuts on generator level particles in TtBarDecaySubset           
+  \brief   EDFilter to make cuts on generator level particles in dileptonic ttbar events. Should be used in path behind GeneratorTopFilter         
 */
 
 using namespace std;
@@ -38,13 +38,16 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
   double bEta_;
   double met_;
   double invLepLepMass_;   
-  std::vector<double> zVeto_;    
+  std::vector<double> zVeto_; 
+  
+  // mehtod to get lepton from tau
+  const reco::Candidate* getTauDaughter(const reco::Candidate*);   
 };
 
 
 GeneratorTtDileptonFilter::GeneratorTtDileptonFilter(const edm::ParameterSet& cfg) :
   lepPt_          (cfg.getParameter<double>( "leptonPt"	           )),
-  lepEta_	  (cfg.getParameter<double>( "leptonEta"	   )),
+  lepEta_	  (cfg.getParameter<double>( "leptonEta"	   )), 
   bPt_ 	          (cfg.getParameter<double>( "bPt"	           )),
   bEta_	          (cfg.getParameter<double>( "bEta"	           )),
   met_ 	          (cfg.getParameter<double>( "met"	           )),
@@ -71,7 +74,7 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
   const reco::Candidate* lepton = 0;
   const reco::Candidate* leptonBar = 0; 
   const reco::Candidate* nu = 0;
-  const reco::Candidate* nuBar = 0;     
+  const reco::Candidate* nuBar = 0;         
 
   // reconstruct ttbar decay chain
   for(reco::GenParticleCollection::const_iterator cand = genParticles->begin(); cand!=genParticles->end(); ++cand) {
@@ -90,13 +93,16 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
       }       
     }
     if(wPlus!=0){
-      for(size_t i=0; i<wPlus->numberOfDaughters(); ++i){        
+      for(size_t i=0; i<wPlus->numberOfDaughters(); ++i){     
         if(wPlus->daughter(i)->pdgId()==-11 || wPlus->daughter(i)->pdgId()==-13){
 	  leptonBar = wPlus->daughter(i);
 	}
-        else if(wPlus->daughter(i)->pdgId()==12 || wPlus->daughter(i)->pdgId()==14){
+        else if(wPlus->daughter(i)->pdgId()==-15){
+          leptonBar = getTauDaughter(wPlus->daughter(i));
+	}
+        else if(wPlus->daughter(i)->pdgId()==12 || wPlus->daughter(i)->pdgId()==14 || wPlus->daughter(i)->pdgId()==16){
 	  nu = wPlus->daughter(i);
-	}	
+	}
       }      
     }    
     
@@ -116,13 +122,16 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
         if(wMinus->daughter(i)->pdgId()==11 || wMinus->daughter(i)->pdgId()==13){
 	  lepton = wMinus->daughter(i);
 	}
-        else if(wMinus->daughter(i)->pdgId()==-12 || wMinus->daughter(i)->pdgId()==-14){
+        else if(wMinus->daughter(i)->pdgId()==15){
+          lepton = getTauDaughter(wMinus->daughter(i));
+	}	
+        else if(wMinus->daughter(i)->pdgId()==-12 || wMinus->daughter(i)->pdgId()==-14 || wMinus->daughter(i)->pdgId()==-16){
 	  nuBar = wMinus->daughter(i);
 	}	
       }      
     }   
   }
-  
+     
   // test for dileptons
   if(bQuark==0){
     std::cout << "bQuark not found" << std::endl;
@@ -152,7 +161,6 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
   // apply cuts
   if(lepton ->pt()<lepPt_        || leptonBar->pt()<lepPt_        ) return false;
   if(fabs(lepton->eta())>lepEta_ || fabs(leptonBar->eta())>lepEta_) return false;
-
   if(bQuark ->pt()<bPt_        || bQuark->pt()<bPt_        )    return false;
   if(fabs(bQuark->eta())>bEta_ || fabs(bBarQuark->eta())>bEta_) return false;
 
@@ -182,6 +190,19 @@ void GeneratorTtDileptonFilter::beginJob()
 void GeneratorTtDileptonFilter::endJob() 
 {  
 }
+
+
+const reco::Candidate* 
+GeneratorTtDileptonFilter::getTauDaughter(const reco::Candidate* tau)
+{
+  for(size_t i=0; i<tau->numberOfDaughters(); ++i){
+    if(fabs(tau->daughter(i)->pdgId())==11 || fabs(tau->daughter(i)->pdgId())==13) return tau->daughter(i);
+    else if(fabs(tau->daughter(i)->pdgId())==15) return getTauDaughter(tau->daughter(i));
+  }
+  //return orgiginal tau if nothing found
+  std::cout << "NOTFALL LEPTON" << std::endl;  
+  return tau;
+} 
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(GeneratorTtDileptonFilter);
