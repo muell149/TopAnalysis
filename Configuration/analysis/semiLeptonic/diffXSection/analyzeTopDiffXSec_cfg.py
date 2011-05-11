@@ -52,10 +52,10 @@ if(removeGenTtbar==True):
 ## implement anti b-tagging path
 if(not globals().has_key('implement0TagPath')):
     implement0TagPath = False
-if(implement0TagPath==True):
-    print "path with ==0 btagged jets included" 
-if(implement0TagPath==False):
-    print "path with ==0 btagged jets excluded"
+#if(implement0TagPath==True):
+#    print "path with ==0 btagged jets included" 
+#if(implement0TagPath==False):
+#    print "path with ==0 btagged jets excluded"
     
 ## eventfilter is to select a special ttbar decay channel from ttbarSample by genmatching (ttbar MC only, other MC: choose 'all')
 if(not globals().has_key('eventFilter')):
@@ -434,11 +434,14 @@ recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), useTree=cms.bool(T
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
-## 4) plots built parton level objects after gen selection
+## 4) plots built from parton level objects
+## a)  after phase space selection
 genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
-process.analyzeTopGenLevelKinematics = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
+process.analyzeTopPartonLevelKinematics = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
+## b) without phase space selection
+process.analyzeTopPartonLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 
 ## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
@@ -472,31 +475,33 @@ if(applyKinFit==True):
                                              process.filterRecoKinFit                        +
                                              process.filterMatchKinFit
                                              )
-            process.kinFitGen = cms.Sequence(process.analyzeTopGenLevelKinematics
-                                             )
+            process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics          )
+            process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace)
+            
         ## case 1b): other MC
         else:
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFit          +
-                                             process.filterRecoKinFit                        +
-                                             process.filterMatchKinFit
+                                             process.filterRecoKinFit                        
                                              )
-            process.kinFitGen = cms.Sequence(process.dummy)
+            process.kinFitGen           = cms.Sequence(process.dummy)
+            process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
     ## case 2: data sample
     elif(runningOnData=="data"):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                          process.analyzeTopRecoKinematicsKinFit          +
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop+
-                                         process.filterRecoKinFit                        +
-                                         process.filterMatchKinFit
+                                         process.filterRecoKinFit                        
                                          )
-        process.kinFitGen = cms.Sequence(process.dummy)
+        process.kinFitGen           = cms.Sequence(process.dummy)
+        process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
     else:
          print "choose runningOnData= data or MC"
 else:
-    process.kinFit    = cms.Sequence(process.dummy)
-    process.kinFitGen = cms.Sequence(process.dummy)
+    process.kinFit              = cms.Sequence(process.dummy)
+    process.kinFitGen           = cms.Sequence(process.dummy)
+    process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
 
 ## ---
 ##    run the final sequences
@@ -533,11 +538,30 @@ if(runningOnData=="data"):
 
 ## needed to be consistant with analyzeMuonDiffXSec_cfg.py
 process.p2 = cms.Path(process.dummy)
-process.p3 = cms.Path(process.dummy)
- 
+
 ## std analysis with generator objects as input for efficiency determination
+## no phase space cuts
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
+    process.s3 = cms.Sequence(
+                              ## gen event selection: semileptonic (muon & tau->lepton)
+                              ## tau->Mu if eventFilter=='background only' and
+                              ## process.ttSemiLeptonicFilter.invert = True
+                              process.genFilterSequence                     *
+                              ## introduce some collections
+                              process.isolatedGenMuons                      *
+                              process.semiLeptGenCollections                *
+                              ## investigate top reconstruction
+                              process.kinFitGen
+                              )
+else:
+    process.s3 = cms.Sequence(process.dummy)
+process.p3 = cms.Path(process.s3)
+        
+## std analysis with generator objects as input for efficiency determination
+## phase space cuts for muon and jets
+if(runningOnData=="MC"):
+
     process.s4 = cms.Sequence(
                               ## introduce some collections
                               process.isolatedGenMuons                      *
@@ -547,11 +571,13 @@ if(runningOnData=="MC"):
                               ## jet selection
                               process.genJetCuts                            *
                               ## investigate top reconstruction
-                              process.kinFitGen
+                              process.kinFitGenPhaseSpace
                               )
     process.p4 = cms.Path(
                           ## gen event selection: semileptonic (muon & tau->lepton)
-                          process.genFilterSequence *
+                          ## tau->Mu if eventFilter=='background only' and
+                          ## process.ttSemiLeptonicFilter.invert = True
+                          process.genFilterSequence                      *
                           ## sequence with gen selection and histograms
                           process.s4
                           )
@@ -583,11 +609,11 @@ if(jetType=="particleFlow"):
     pathlist = [process.p1]
     for path in pathlist:  
         massSearchReplaceAnyInputTag(path, 'tightLeadingJets', 'tightLeadingPFJets')
-        massSearchReplaceAnyInputTag(path, 'tightBottomJets' , 'tightBottomPFJets')
-        massSearchReplaceAnyInputTag(path, 'goodJets'        , 'goodJetsPF30')
-        massSearchReplaceAnyInputTag(path, 'centralJets'     , 'centralJetsPF30')
-        massSearchReplaceAnyInputTag(path, 'reliableJets'    , 'reliableJetsPF30')
-        massSearchReplaceAnyInputTag(path, 'noEtaJets'       , 'noEtaJetsPF30')
-        massSearchReplaceAnyInputTag(path, 'noPtJets'        , 'noPtJetsPF')
-        massSearchReplaceAnyInputTag(path, 'patMETs'         , 'patMETsPF')
+        massSearchReplaceAnyInputTag(path, 'tightBottomJets' , 'tightBottomPFJets' )
+        massSearchReplaceAnyInputTag(path, 'goodJets'        , 'goodJetsPF30'      )
+        massSearchReplaceAnyInputTag(path, 'centralJets'     , 'centralJetsPF30'   )
+        massSearchReplaceAnyInputTag(path, 'reliableJets'    , 'reliableJetsPF30'  )
+        massSearchReplaceAnyInputTag(path, 'noEtaJets'       , 'noEtaJetsPF30'     )
+        massSearchReplaceAnyInputTag(path, 'noPtJets'        , 'noPtJetsPF'        )
+        massSearchReplaceAnyInputTag(path, 'patMETs'         , 'patMETsPF'         )
 
