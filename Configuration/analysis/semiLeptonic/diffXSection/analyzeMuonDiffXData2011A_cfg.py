@@ -14,8 +14,8 @@ removeGenTtbar=True
 ## output
 writeOutput = False
 ## extend functionality
-applyKinFit = True
-implement0TagPath = True
+applyKinFit = True#False
+implement0TagPath = True#False
 ## use L2L3Residual correction in analyzers
 corrLevel="L2L3Residual"
 
@@ -23,10 +23,10 @@ corrLevel="L2L3Residual"
 execfile("analyzeMuonDiffXSec_cfg.py")
 
 ## choose data set
-process.load("TopAnalysis/Configuration/samples/Run2011A_MuHadPromptReco_160404_to_161312_v1_cff")
+process.load("TopAnalysis/Configuration/samples/Run2011A_MuHadPromptReco_160404_to_163369_v2_cff")
 ## high level trigger filter
 process.hltFilter.TriggerResultsTag = "TriggerResults::HLT"
-process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v1"]
+process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
 #process.hltFilter.HLTPaths = ["HLT_Mu15_v2"]
 # Lumi range (exclude range of unprescaled HLT_Mu9)
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('147120:1-999999:1')
@@ -45,4 +45,4 @@ if(writeOutput):
     process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag1_Run2011.root')
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXData2011A_PromptReco160404-161312.root'
+process.TFileService.fileName = 'analyzeDiffXData2011A_PromptReco160404-163369.root'
