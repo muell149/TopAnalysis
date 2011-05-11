@@ -989,18 +989,38 @@ std::map<TString, std::vector<double> > makeVariableBinning()
   std::map<TString, std::vector<double> > result;
   std::vector<double> bins_;
 
-  // m(ttbar)
-  double mTtbarMassBins[]={0, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500};
-  bins_.insert( bins_.begin(), mTtbarMassBins, mTtbarMassBins + sizeof(mTtbarMassBins)/sizeof(double) );
-  //  result["analyzeTopRecoKinematicsKinFit/ttbarMass"]=bins_;
-  //  result["analyzeTopGenLevelKinematics/ttbarMass"  ]=bins_;
-  bins_.clear();
+  
   // pt(top)
-  double ptTopBins[]={0, 65, 120, 180, 270, 400., 800.};
-  bins_.insert( bins_.begin(), ptTopBins, ptTopBins + sizeof(ptTopBins)/sizeof(double) );
+  double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
+  bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
   result["analyzeTopRecoKinematicsKinFit/topPt"]=bins_;
   result["analyzeTopGenLevelKinematics/topPt"  ]=bins_;
   bins_.clear();
+  // y(top)
+  double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
+  bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
+  result["analyzeTopRecoKinematicsKinFit/topY"]=bins_;
+  result["analyzeTopGenLevelKinematics/topY"  ]=bins_;
+  bins_.clear();
+  // pt(ttbar)
+  double ttbarPtBins[]={0., 20., 60., 110., 200., 300.};
+  bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
+  result["analyzeTopRecoKinematicsKinFit/ttbarPt"]=bins_;
+  result["analyzeTopGenLevelKinematics/ttbarPt"  ]=bins_;
+  bins_.clear();
+  // y(ttbar)
+  double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
+  bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
+  result["analyzeTopRecoKinematicsKinFit/ttbarY"]=bins_;
+  result["analyzeTopGenLevelKinematics/ttbarY"  ]=bins_;
+  bins_.clear();
+  // m(ttbar)
+  double ttbarMassBins[]={0., 400., 500., 630., 900., 1200.};
+  bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
+  result["analyzeTopRecoKinematicsKinFit/ttbarMass"]=bins_;
+  result["analyzeTopGenLevelKinematics/ttbarMass"  ]=bins_;
+  bins_.clear();
+  
   return result;
 
 }
