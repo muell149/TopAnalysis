@@ -55,17 +55,17 @@ void TopKinematics::book()
   // top y (at the moment both top candidates are filled in one histogram)
   hists_["topY"       ] = new TH1F( "topY"       , "topY"       ,  100, -5. ,    5.);
   // top phi (at the moment both top candidates are filled in one histogram)
-  hists_["topPhi"     ] = new TH1F( "topPhi"     , "topPhi"     ,  630, -pi ,  pi  );
+  hists_["topPhi"     ] = new TH1F( "topPhi"     , "topPhi"     ,  628, -pi ,  pi  );
   // ttbar pair pt
   hists_["ttbarPt"    ] = new TH1F( "ttbarPt"    , "ttbarPt"    ,  300,  0. ,  300.);
   // ttbar pair 
   hists_["ttbarY"     ] = new TH1F( "ttbarY"     , "ttbarY"     ,  100, -5. ,    5.);
   // ttbar pair phi
-  hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"   , "ttbarPhi"   ,  630, -pi ,  pi  );
+  hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"   , "ttbarPhi"   ,  628, -pi ,  pi  );
   // ttbar pair invariant mass
   hists_["ttbarMass"  ] = new TH1F( "ttbarMass"  , "ttbarMass"  , 1200,  0. , 1200 );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi"] = new TH1F( "ttbarDelPhi", "ttbarDelPhi",  630, -pi , pi   );
+  hists_["ttbarDelPhi"] = new TH1F( "ttbarDelPhi", "ttbarDelPhi",  628, -pi , pi   );
   // deltaY between both top quarks
   hists_["ttbarDelY"  ] = new TH1F( "ttbarDelY"  , "ttbarDelY"  ,  100, -5. ,    5.);
   // sum of y of both top quarks
@@ -81,13 +81,13 @@ void TopKinematics::book()
   // y  of the hadronically decaying top candidate
   hists_["topYHad"   ] = new TH1F( "topYHad"   , "topYHad"   ,  100, -5. ,    5.);
   // y  of the hadronically decaying top candidate
-  hists_["topPhiHad" ] = new TH1F( "topPhiHad" , "topPhiHad" ,  630, -pi ,  pi  );
+  hists_["topPhiHad" ] = new TH1F( "topPhiHad" , "topPhiHad" ,  628, -pi ,  pi  );
   // pt of the leptonically decaying top candidate
   hists_["topPtLep"  ] = new TH1F( "topPtLep"  , "topPtLep"  ,  800,  0. ,  800.);
   // y  of the leptonically decaying top candidate
   hists_["topYLep"   ] = new TH1F( "topYLep"   , "topYLep"   ,  100, -5. ,    5.);
   // y  of the leptonically decaying top candidate
-  hists_["topPhiLep" ] = new TH1F( "topPhiLep" , "topPhiLep" ,  630, -pi ,  pi  );
+  hists_["topPhiLep" ] = new TH1F( "topPhiLep" , "topPhiLep" ,  628, -pi ,  pi  );
   // hadronic Top mass
   hists_["hadTopMass"] = new TH1F( "hadTopMass", "hadTopMass", 1000,  0.,  1000.);
   // leptonic Top mass								
@@ -200,19 +200,19 @@ void TopKinematics::book()
       Correlation Plots
   **/
   // gen-rec level correlation top pt
-  corrs_["topPt_"      ] = new TH2F( "topPt_"      , "topPt_"       , 400 ,    0.,  400.,     400,   0.,  400.);
+  corrs_["topPt_"      ] = new TH2F( "topPt_"      , "topPt_"       , 800 ,    0.,  800.,     800,   0.,  800.);
   // gen-rec level correlation top y
-  corrs_["topY_"       ] = new TH2F( "topY_"       , "topY_"        , 800 ,   -4.,    4.,     800,  -4.,    4.);
+  corrs_["topY_"       ] = new TH2F( "topY_"       , "topY_"        ,1000 ,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation top phi
   corrs_["topPhi_"     ] = new TH2F( "topPhi_"     , "topPhi_"      , 628 , -3.14,  3.14,     628,-3.14,  3.14);
   // gen-rec level correlation ttbar pt
-  corrs_["ttbarPt_"    ] = new TH2F( "ttbarPt_"    , "ttbarPt_"     , 200 ,    0.,  200.,     200,   0.,  200.);
+  corrs_["ttbarPt_"    ] = new TH2F( "ttbarPt_"    , "ttbarPt_"     , 300 ,    0.,  300.,     300,   0.,  300.);
   // gen-rec level correlation ttbar y
   corrs_["ttbarY_"     ] = new TH2F( "ttbarY_"     , "ttbarY_"      , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation ttbar mass
-  corrs_["ttbarMass_"  ] = new TH2F( "ttbarMass_"  , "ttbarMass_"   , 700 ,  300., 1000.,     700, 300., 1000.);
+  corrs_["ttbarMass_"  ] = new TH2F( "ttbarMass_"  , "ttbarMass_"   , 1200 ,   0., 1200.,     1200,  0., 1200.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
-  corrs_["ttbarHT_"    ] = new TH2F( "ttbarHT_"    , "ttbarHT_"     , 1000,    0., 1000.,    1000,   0., 1000.);
+  corrs_["ttbarHT_"    ] = new TH2F( "ttbarHT_"    , "ttbarHT_"     , 1500,    0., 1500.,    1500,   0., 1500.);
   // gen-rec level correlation ttbar deltaPhi
   corrs_["ttbarDelPhi_"] = new TH2F( "ttbarDelPhi_", "ttbarDelPhi_" , 628 , -3.14,  3.14,     628,-3.14,  3.14);
   // gen-rec level correlation ttbar deltaY
@@ -248,17 +248,17 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // top y (at the moment both top candidates are filled in one histogram)
   hists_["topY"       ] = fs->make<TH1F>( "topY"       , "topY"       ,  100, -5. ,    5.);
   // top phi (at the moment both top candidates are filled in one histogram)
-  hists_["topPhi"     ] = fs->make<TH1F>( "topPhi"     , "topPhi"     ,  630, -pi ,  pi  );
+  hists_["topPhi"     ] = fs->make<TH1F>( "topPhi"     , "topPhi"     ,  628, -pi ,  pi  );
   // ttbar pair pt
   hists_["ttbarPt"    ] = fs->make<TH1F>( "ttbarPt"    , "ttbarPt"    ,  300,  0. ,  300.);
   // ttbar pair 
   hists_["ttbarY"     ] = fs->make<TH1F>( "ttbarY"     , "ttbarY"     ,  100, -5. ,    5.);
   // ttbar pair phi
-  hists_["ttbarPhi"   ] = fs->make<TH1F>( "ttbarPhi"   , "ttbarPhi"   ,  630, -pi ,  pi  );
+  hists_["ttbarPhi"   ] = fs->make<TH1F>( "ttbarPhi"   , "ttbarPhi"   ,  628, -pi ,  pi  );
   // ttbar pair invariant mass
   hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"  , "ttbarMass"  , 1200,  0. , 1200 );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  630, -pi , pi   );
+  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  620, -pi , pi   );
   // deltaY between both top quarks
   hists_["ttbarDelY"  ] = fs->make<TH1F>( "ttbarDelY"  , "ttbarDelY"  ,  100, -5. ,    5.);
   // sum of y of both top quarks
@@ -274,13 +274,13 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // y  of the hadronically decaying top candidate
   hists_["topYHad"   ] = fs->make<TH1F>( "topYHad"   , "topYHad"   ,  100, -5. ,    5.);
   // y  of the hadronically decaying top candidate
-  hists_["topPhiHad" ] = fs->make<TH1F>( "topPhiHad" , "topPhiHad" ,  630, -pi ,  pi  );
+  hists_["topPhiHad" ] = fs->make<TH1F>( "topPhiHad" , "topPhiHad" ,  628, -pi ,  pi  );
   // pt of the leptonically decaying top candidate
   hists_["topPtLep"  ] = fs->make<TH1F>( "topPtLep"  , "topPtLep"  ,  800,  0. ,  800.);
   // y  of the leptonically decaying top candidate
   hists_["topYLep"   ] = fs->make<TH1F>( "topYLep"   , "topYLep"   ,  100, -5. ,    5.);
   // y  of the leptonically decaying top candidate
-  hists_["topPhiLep" ] = fs->make<TH1F>( "topPhiLep" , "topPhiLep" ,  630, -pi ,  pi  );
+  hists_["topPhiLep" ] = fs->make<TH1F>( "topPhiLep" , "topPhiLep" ,  628, -pi ,  pi  );
   // hadronic Top mass
   hists_["hadTopMass"] = fs->make<TH1F>( "hadTopMass", "hadTopMass", 1000,  0.,  1000.);
   // leptonic Top mass								
@@ -392,19 +392,19 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
       Correlation Plots
   **/
   // gen-rec level correlation top pt
-  corrs_["topPt_"     ] = fs->make<TH2F>( "topPt_"      , "topPt_"     ,  400,    0.,  400.,     400,   0.,  400.);
+  corrs_["topPt_"     ] = fs->make<TH2F>( "topPt_"      , "topPt_"     ,  800,    0.,  800.,     800,   0.,  800.);
   // gen-rec level correlation top y
-  corrs_["topY_"      ] = fs->make<TH2F>( "topY_"       , "topY_"      ,  800,   -4.,    4.,     800,  -4.,    4.);
+  corrs_["topY_"      ] = fs->make<TH2F>( "topY_"       , "topY_"      ,  1000,  -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation top phi
   corrs_["topPhi_"    ] = fs->make<TH2F>( "topPhi_"     , "topPhi_"    ,  628,   -pi,   pi ,     628, -pi ,   pi );
   // gen-rec level correlation ttbar pt
-  corrs_["ttbarPt_"   ] = fs->make<TH2F>( "ttbarPt_"    , "ttbarPt_"   ,  200,    0.,  200.,     200,   0.,  200.);
+  corrs_["ttbarPt_"   ] = fs->make<TH2F>( "ttbarPt_"    , "ttbarPt_"   ,  300,    0.,  300.,     300,   0.,  300.);
   // gen-rec level correlation ttbar y
   corrs_["ttbarY_"    ] = fs->make<TH2F>( "ttbarY_"     , "ttbarY_"    , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation ttbar mass
-  corrs_["ttbarMass_" ] = fs->make<TH2F>( "ttbarMass_"  , "ttbarMass_" ,  700,  300., 1000.,     700, 300., 1000.);
+  corrs_["ttbarMass_" ] = fs->make<TH2F>( "ttbarMass_"  , "ttbarMass_" , 1200,    0., 1200.,    1200,   0., 1200.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
-  corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   , 1000,    0., 1000.,    1000,   0., 1000.);
+  corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   , 1500,    0., 1500.,    1500,   0., 1500.);
   // gen-rec level correlation ttbar deltaPhi
   corrs_["ttbarDelPhi_"]= fs->make<TH2F>( "ttbarDelPhi_", "ttbarDelPhi_", 628,   -pi,   pi ,     628,  -pi,   pi );
   // gen-rec level correlation ttbar deltaY
