@@ -258,7 +258,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // ttbar pair invariant mass
   hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"  , "ttbarMass"  , 1200,  0. , 1200 );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  620, -pi , pi   );
+  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  628, -pi , pi   );
   // deltaY between both top quarks
   hists_["ttbarDelY"  ] = fs->make<TH1F>( "ttbarDelY"  , "ttbarDelY"  ,  100, -5. ,    5.);
   // sum of y of both top quarks
