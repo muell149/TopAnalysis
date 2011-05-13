@@ -31,16 +31,8 @@ class FullLepPurityAnalyzer : public edm::EDAnalyzer {
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   /// everything that has to be done after the event loop: calculate purity/stability from counters
   virtual void endJob();
-  // initiate a vector of counters with 0
-  void initiateCounter(const std::vector<double>&, std::vector<int>&, std::vector<int>&, std::vector<int>&);
   /// count events with a given quantity generated AND reconstructed inside a certain bin
-  void countRecGen(const double&, const double&, std::vector<double>&, std::vector<int>&);
-  /// count events with a given quantity generated inside a certain bin
-  void countGen(const double&, std::vector<double>&, std::vector<int>&); 
-  // count events with a given quantity reconstructed inside a certain bin
-  void countRec(const double&, std::vector<double>&, std::vector<int>&);
-  /// evaluates purity and stability from counters and fill hists
-  void evaluate(TH1D&, std::vector<int>&, std::vector<int>& );
+  void countRecGen(const double&, const double&, TH1D&);
 
   /// input given in config has to be TtFullLeptonicEvent
   edm::InputTag FullLepEvt_;
@@ -90,219 +82,133 @@ class FullLepPurityAnalyzer : public edm::EDAnalyzer {
   std::vector<double> TtBarMassBins_;
   
   // RecGenCounter for objects generated and reconstructed in bin
-  std::vector<int> lepEtaRecGenCounters_;      
-  std::vector<int> lepRapidityRecGenCounters_; 
-  std::vector<int> lepPhiRecGenCounters_;      
-  std::vector<int> lepPtRecGenCounters_;       
+  TH1D* lepEtaRecGenCounters_;      
+  TH1D* lepRapidityRecGenCounters_; 
+  TH1D* lepPhiRecGenCounters_;      
+  TH1D* lepPtRecGenCounters_;       
   
-  std::vector<int> lepBarEtaRecGenCounters_;	  
-  std::vector<int> lepBarRapidityRecGenCounters_; 
-  std::vector<int> lepBarPhiRecGenCounters_;	  
-  std::vector<int> lepBarPtRecGenCounters_;	   
+  TH1D* lepBarEtaRecGenCounters_;	  
+  TH1D* lepBarRapidityRecGenCounters_; 
+  TH1D* lepBarPhiRecGenCounters_;	  
+  TH1D* lepBarPtRecGenCounters_;	   
 
-  std::vector<int> lepPairEtaRecGenCounters_;    
-  std::vector<int> lepPairRapidityRecGenCounters_;
-  std::vector<int> lepPairPhiRecGenCounters_;    
-  std::vector<int> lepPairPtRecGenCounters_;     
-  std::vector<int> lepPairMassRecGenCounters_; 
+  TH1D* lepPairEtaRecGenCounters_;    
+  TH1D* lepPairRapidityRecGenCounters_;
+  TH1D* lepPairPhiRecGenCounters_;    
+  TH1D* lepPairPtRecGenCounters_;     
+  TH1D* lepPairMassRecGenCounters_; 
   
-  std::vector<int> bEtaRecGenCounters_;      
-  std::vector<int> bRapidityRecGenCounters_; 
-  std::vector<int> bPhiRecGenCounters_;      
-  std::vector<int> bPtRecGenCounters_;       
+  TH1D* bEtaRecGenCounters_;      
+  TH1D* bRapidityRecGenCounters_; 
+  TH1D* bPhiRecGenCounters_;      
+  TH1D* bPtRecGenCounters_;       
   
-  std::vector<int> bBarEtaRecGenCounters_;     
-  std::vector<int> bBarRapidityRecGenCounters_; 
-  std::vector<int> bBarPhiRecGenCounters_;     
-  std::vector<int> bBarPtRecGenCounters_;      
+  TH1D* bBarEtaRecGenCounters_;     
+  TH1D* bBarRapidityRecGenCounters_; 
+  TH1D* bBarPhiRecGenCounters_;     
+  TH1D* bBarPtRecGenCounters_;      
   
-  std::vector<int> topEtaRecGenCounters_;     
-  std::vector<int> topRapidityRecGenCounters_; 
-  std::vector<int> topPhiRecGenCounters_;     
-  std::vector<int> topPtRecGenCounters_;      
+  TH1D* topEtaRecGenCounters_;     
+  TH1D* topRapidityRecGenCounters_; 
+  TH1D* topPhiRecGenCounters_;     
+  TH1D* topPtRecGenCounters_;      
   
-  std::vector<int> topBarEtaRecGenCounters_;	  
-  std::vector<int> topBarRapidityRecGenCounters_; 
-  std::vector<int> topBarPhiRecGenCounters_;	  
-  std::vector<int> topBarPtRecGenCounters_;	 
+  TH1D* topBarEtaRecGenCounters_;	  
+  TH1D* topBarRapidityRecGenCounters_; 
+  TH1D* topBarPhiRecGenCounters_;	  
+  TH1D* topBarPtRecGenCounters_;	 
   
-  std::vector<int> TtBarEtaRecGenCounters_;    
-  std::vector<int> TtBarRapidityRecGenCounters_;
-  std::vector<int> TtBarPhiRecGenCounters_;    
-  std::vector<int> TtBarPtRecGenCounters_;     
-  std::vector<int> TtBarMassRecGenCounters_;  
+  TH1D* TtBarEtaRecGenCounters_;    
+  TH1D* TtBarRapidityRecGenCounters_;
+  TH1D* TtBarPhiRecGenCounters_;    
+  TH1D* TtBarPtRecGenCounters_;     
+  TH1D* TtBarMassRecGenCounters_;  
   
   // RecCounter for objects reconstructed in bin
-  std::vector<int> lepEtaRecCounters_;         
-  std::vector<int> lepRapidityRecCounters_; 
-  std::vector<int> lepPhiRecCounters_;         
-  std::vector<int> lepPtRecCounters_;	       
+  TH1D* lepEtaRecCounters_;         
+  TH1D* lepRapidityRecCounters_; 
+  TH1D* lepPhiRecCounters_;         
+  TH1D* lepPtRecCounters_;	       
   
-  std::vector<int> lepBarEtaRecCounters_;      
-  std::vector<int> lepBarRapidityRecCounters_; 
-  std::vector<int> lepBarPhiRecCounters_;      
-  std::vector<int> lepBarPtRecCounters_;	 	
+  TH1D* lepBarEtaRecCounters_;      
+  TH1D* lepBarRapidityRecCounters_; 
+  TH1D* lepBarPhiRecCounters_;      
+  TH1D* lepBarPtRecCounters_;	 	
 
-  std::vector<int> lepPairEtaRecCounters_;       
-  std::vector<int> lepPairRapidityRecCounters_;
-  std::vector<int> lepPairPhiRecCounters_;       
-  std::vector<int> lepPairPtRecCounters_;        
-  std::vector<int> lepPairMassRecCounters_; 
+  TH1D* lepPairEtaRecCounters_;       
+  TH1D* lepPairRapidityRecCounters_;
+  TH1D* lepPairPhiRecCounters_;       
+  TH1D* lepPairPtRecCounters_;        
+  TH1D* lepPairMassRecCounters_; 
   
-  std::vector<int> bEtaRecCounters_;	  
-  std::vector<int> bRapidityRecCounters_; 
-  std::vector<int> bPhiRecCounters_;	  
-  std::vector<int> bPtRecCounters_;	  
+  TH1D* bEtaRecCounters_;	  
+  TH1D* bRapidityRecCounters_; 
+  TH1D* bPhiRecCounters_;	  
+  TH1D* bPtRecCounters_;	  
   
-  std::vector<int> bBarEtaRecCounters_;        
-  std::vector<int> bBarRapidityRecCounters_; 
-  std::vector<int> bBarPhiRecCounters_;        
-  std::vector<int> bBarPtRecCounters_;         
+  TH1D* bBarEtaRecCounters_;        
+  TH1D* bBarRapidityRecCounters_; 
+  TH1D* bBarPhiRecCounters_;        
+  TH1D* bBarPtRecCounters_;         
   
-  std::vector<int> topEtaRecCounters_;        
-  std::vector<int> topRapidityRecCounters_; 
-  std::vector<int> topPhiRecCounters_;        
-  std::vector<int> topPtRecCounters_;	      
+  TH1D* topEtaRecCounters_;        
+  TH1D* topRapidityRecCounters_; 
+  TH1D* topPhiRecCounters_;        
+  TH1D* topPtRecCounters_;	      
   
-  std::vector<int> topBarEtaRecCounters_;      
-  std::vector<int> topBarRapidityRecCounters_; 
-  std::vector<int> topBarPhiRecCounters_;      
-  std::vector<int> topBarPtRecCounters_;	 
+  TH1D* topBarEtaRecCounters_;      
+  TH1D* topBarRapidityRecCounters_; 
+  TH1D* topBarPhiRecCounters_;      
+  TH1D* topBarPtRecCounters_;	 
   
-  std::vector<int> TtBarEtaRecCounters_;       
-  std::vector<int> TtBarRapidityRecCounters_;
-  std::vector<int> TtBarPhiRecCounters_;       
-  std::vector<int> TtBarPtRecCounters_;        
-  std::vector<int> TtBarMassRecCounters_;    
+  TH1D* TtBarEtaRecCounters_;       
+  TH1D* TtBarRapidityRecCounters_;
+  TH1D* TtBarPhiRecCounters_;       
+  TH1D* TtBarPtRecCounters_;        
+  TH1D* TtBarMassRecCounters_;    
   
   // GenCounter for objects generated in bin
-  std::vector<int> lepEtaGenCounters_;         
-  std::vector<int> lepRapidityGenCounters_; 
-  std::vector<int> lepPhiGenCounters_;         
-  std::vector<int> lepPtGenCounters_;	       
+  TH1D* lepEtaGenCounters_;         
+  TH1D* lepRapidityGenCounters_; 
+  TH1D* lepPhiGenCounters_;         
+  TH1D* lepPtGenCounters_;	       
   
-  std::vector<int> lepBarEtaGenCounters_;      
-  std::vector<int> lepBarRapidityGenCounters_; 
-  std::vector<int> lepBarPhiGenCounters_;      
-  std::vector<int> lepBarPtGenCounters_;	 	
+  TH1D* lepBarEtaGenCounters_;      
+  TH1D* lepBarRapidityGenCounters_; 
+  TH1D* lepBarPhiGenCounters_;      
+  TH1D* lepBarPtGenCounters_;	 	
 
-  std::vector<int> lepPairEtaGenCounters_;       
-  std::vector<int> lepPairRapidityGenCounters_;
-  std::vector<int> lepPairPhiGenCounters_;       
-  std::vector<int> lepPairPtGenCounters_;        
-  std::vector<int> lepPairMassGenCounters_;
+  TH1D* lepPairEtaGenCounters_;       
+  TH1D* lepPairRapidityGenCounters_;
+  TH1D* lepPairPhiGenCounters_;       
+  TH1D* lepPairPtGenCounters_;        
+  TH1D* lepPairMassGenCounters_;
   
-  std::vector<int> bEtaGenCounters_;	  
-  std::vector<int> bRapidityGenCounters_; 
-  std::vector<int> bPhiGenCounters_;	  
-  std::vector<int> bPtGenCounters_;	  
+  TH1D* bEtaGenCounters_;	  
+  TH1D* bRapidityGenCounters_; 
+  TH1D* bPhiGenCounters_;	  
+  TH1D* bPtGenCounters_;	  
   
-  std::vector<int> bBarEtaGenCounters_;        
-  std::vector<int> bBarRapidityGenCounters_; 
-  std::vector<int> bBarPhiGenCounters_;        
-  std::vector<int> bBarPtGenCounters_;         
+  TH1D* bBarEtaGenCounters_;        
+  TH1D* bBarRapidityGenCounters_; 
+  TH1D* bBarPhiGenCounters_;        
+  TH1D* bBarPtGenCounters_;         
   
-  std::vector<int> topEtaGenCounters_;        
-  std::vector<int> topRapidityGenCounters_; 
-  std::vector<int> topPhiGenCounters_;        
-  std::vector<int> topPtGenCounters_;	      
+  TH1D* topEtaGenCounters_;        
+  TH1D* topRapidityGenCounters_; 
+  TH1D* topPhiGenCounters_;        
+  TH1D* topPtGenCounters_;	      
   
-  std::vector<int> topBarEtaGenCounters_;      
-  std::vector<int> topBarRapidityGenCounters_; 
-  std::vector<int> topBarPhiGenCounters_;      
-  std::vector<int> topBarPtGenCounters_;	 
+  TH1D* topBarEtaGenCounters_;      
+  TH1D* topBarRapidityGenCounters_; 
+  TH1D* topBarPhiGenCounters_;      
+  TH1D* topBarPtGenCounters_;	 
   
-  std::vector<int> TtBarEtaGenCounters_;       
-  std::vector<int> TtBarRapidityGenCounters_;
-  std::vector<int> TtBarPhiGenCounters_;       
-  std::vector<int> TtBarPtGenCounters_;        
-  std::vector<int> TtBarMassGenCounters_;
-  
-  // purity hists
-  TH1D* lepEtaPurity_;	  
-  TH1D* lepRapidityPurity_; 
-  TH1D* lepPhiPurity_;	  
-  TH1D* lepPtPurity_;	  
-  
-  TH1D* lepBarEtaPurity_;      
-  TH1D* lepBarRapidityPurity_; 
-  TH1D* lepBarPhiPurity_;      
-  TH1D* lepBarPtPurity_;	      
-
-  TH1D* lepPairEtaPurity_;	  
-  TH1D* lepPairRapidityPurity_;
-  TH1D* lepPairPhiPurity_;	  
-  TH1D* lepPairPtPurity_;	  
-  TH1D* lepPairMassPurity_; 
-  
-  TH1D* bEtaPurity_;      
-  TH1D* bRapidityPurity_; 
-  TH1D* bPhiPurity_;      
-  TH1D* bPtPurity_;       
-  
-  TH1D* bBarEtaPurity_;	  
-  TH1D* bBarRapidityPurity_; 
-  TH1D* bBarPhiPurity_;	  
-  TH1D* bBarPtPurity_;	  
-  
-  TH1D* topEtaPurity_;	 
-  TH1D* topRapidityPurity_; 
-  TH1D* topPhiPurity_;	 
-  TH1D* topPtPurity_;	 
-  
-  TH1D* topBarEtaPurity_;      
-  TH1D* topBarRapidityPurity_; 
-  TH1D* topBarPhiPurity_;      
-  TH1D* topBarPtPurity_;	    
-  
-  TH1D* TtBarEtaPurity_;	  
-  TH1D* TtBarRapidityPurity_;
-  TH1D* TtBarPhiPurity_;	  
-  TH1D* TtBarPtPurity_;	  
-  TH1D* TtBarMassPurity_;  
-  
-  // stability hists
-  TH1D* lepEtaStability_;	  
-  TH1D* lepRapidityStability_; 
-  TH1D* lepPhiStability_;	  
-  TH1D* lepPtStability_;	  
-  
-  TH1D* lepBarEtaStability_;      
-  TH1D* lepBarRapidityStability_; 
-  TH1D* lepBarPhiStability_;      
-  TH1D* lepBarPtStability_;	    
-  
-  TH1D* lepPairEtaStability_;      
-  TH1D* lepPairRapidityStability_; 
-  TH1D* lepPairPhiStability_;
-  TH1D* lepPairPtStability_;        
-  TH1D* lepPairMassStability_;     
-  
-  TH1D* bEtaStability_;      
-  TH1D* bRapidityStability_; 
-  TH1D* bPhiStability_;      
-  TH1D* bPtStability_;       
-  
-  TH1D* bBarEtaStability_;	  
-  TH1D* bBarRapidityStability_; 
-  TH1D* bBarPhiStability_;	  
-  TH1D* bBarPtStability_;	  
-  
-  TH1D* topEtaStability_;	 
-  TH1D* topRapidityStability_; 
-  TH1D* topPhiStability_;	 
-  TH1D* topPtStability_;	 
-  
-  TH1D* topBarEtaStability_;      
-  TH1D* topBarRapidityStability_; 
-  TH1D* topBarPhiStability_;      
-  TH1D* topBarPtStability_;	    
-  
-  TH1D* TtBarEtaStability_;	  
-  TH1D* TtBarRapidityStability_;
-  TH1D* TtBarPhiStability_;	  
-  TH1D* TtBarPtStability_;	  
-  TH1D* TtBarMassStability_;           
+  TH1D* TtBarEtaGenCounters_;       
+  TH1D* TtBarRapidityGenCounters_;
+  TH1D* TtBarPhiGenCounters_;       
+  TH1D* TtBarPtGenCounters_;        
+  TH1D* TtBarMassGenCounters_;
 };
 
 #endif
