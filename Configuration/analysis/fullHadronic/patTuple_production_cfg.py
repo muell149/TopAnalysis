@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 import sys
-
+ 
 # setup 'standard' options
 options = VarParsing.VarParsing ('standard')
 ## decide whether to run on:  * GR10_P_V11 *, * GR_R_38X_V13A *, * GR_R_38X_V15 *, * START38_V14 *
@@ -94,9 +94,13 @@ process.noscraping = cms.EDFilter("FilterOutScraping",
 
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"   ,"HLT_QuadJet20U"   ,"HLT_QuadJet25U"   ,
-                                                 "HLT_QuadJet15U_v2","HLT_QuadJet20U_v2","HLT_QuadJet25U_v2",
-                                                 "HLT_QuadJet15U_v3","HLT_QuadJet20U_v3","HLT_QuadJet25U_v3"],
+#process.trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet15U"   ,"HLT_QuadJet20U"   ,"HLT_QuadJet25U"   ,
+#                                                 "HLT_QuadJet15U_v2","HLT_QuadJet20U_v2","HLT_QuadJet25U_v2",
+#                                                 "HLT_QuadJet15U_v3","HLT_QuadJet20U_v3","HLT_QuadJet25U_v3"],
+#                                     throw = False)
+
+process.trigger = hltHighLevel.clone(HLTPaths = ['HLT_QuadJet50_BTagIP'   , 'HLT_QuadJet50_Jet40'   , 'HLT_QuadJet60'   , 'HLT_QuadJet70',
+                                                 'HLT_QuadJet50_BTagIP_v*', 'HLT_QuadJet50_Jet40_v*', 'HLT_QuadJet60_v*', 'HLT_QuadJet70_v*'],
                                      throw = False)
 
 ## ATTENTION: some Fall10 samples are REDIGI38X, some are REDIGI38XPU and some are HLT
@@ -131,7 +135,7 @@ if(options.globalTag=='START38_V14'):
     addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                      doJTA        = True,
                      doBTagging   = True,
-                     jetCorrLabel = ('AK5PF', ['L2Relative', 'L3Absolute']),
+                     jetCorrLabel = ('AK5PF', ['L1Offset', 'L2Relative', 'L3Absolute']),
                      doType1MET   = False,
                      doL1Cleaning = False,
                      doL1Counters = False,
@@ -144,13 +148,14 @@ else:
     addJetCollection(process,cms.InputTag('ak5PFJets'),'AK5','PF',
                      doJTA        = True,
                      doBTagging   = True,
-                     jetCorrLabel = ('AK5PF', ['L2Relative', 'L3Absolute', 'L2L3Residual']),
+                     jetCorrLabel = ('AK5PF', ['L1Offset', 'L2Relative', 'L3Absolute', 'L2L3Residual']),
                      doType1MET   = False,
                      doL1Cleaning = False,
                      doL1Counters = False,
                      genJetCollection=None,
                      doJetID      = True,
                      )
+    process.patJetCorrFactors.levels = ['L1Offset', 'L2Relative', 'L3Absolute', 'L2L3Residual', 'L5Flavor', 'L7Parton']
 
 from PhysicsTools.PatAlgos.tools.metTools import *
 ## Add PfMET to the event content
