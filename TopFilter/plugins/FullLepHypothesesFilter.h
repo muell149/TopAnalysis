@@ -38,10 +38,11 @@ class FullLepHypothesesFilter : public edm::EDFilter {
   /// choose in config file which hypothesis type you want to be filtered
   edm::InputTag hypoKey_;  
   /// input is the ttFullLepEvent 
-  edm::InputTag FullLepEvt_;
+  edm::InputTag FullLepEvt_;  
+  /// cut value for event probability weight
+  double weightCut_;  
   /// needed for b-tagging cuts and has to be the same collection which has been used for event  reconstruction
   edm::InputTag jets_;
-
   /// b-Tagging to be used, default is 'simpleSecondaryVertexBJetTags'  
   std::string bAlgo_;
   /// cut value(s) of the b-tagging discriminator, default is 1 (only one tag required with simpleSV)

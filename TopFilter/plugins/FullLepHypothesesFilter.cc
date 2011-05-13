@@ -6,6 +6,7 @@
 FullLepHypothesesFilter::FullLepHypothesesFilter(const edm::ParameterSet& cfg):
   hypoKey_    (cfg.getParameter<edm::InputTag>(       "hypoKey"        )),
   FullLepEvt_ (cfg.getParameter<edm::InputTag>(       "FullLepEvent"   )),
+  weightCut_  (cfg.getParameter<double>(              "weightCut"      )),
   jets_       (cfg.getParameter<edm::InputTag>(       "jets"           )),         
   bAlgo_      (cfg.getParameter<std::string >(        "bAlgorithm"     )),  
   bDisc_      (cfg.getParameter<std::vector<double> >("bDiscriminator" ))
@@ -37,6 +38,14 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
     edm::LogInfo ( "NonValidHyp" ) << "Hypothesis not valid for this event";
     return false; 
   }
+  
+  // cut on probability weight of solution
+  if(FullLepEvt->solWeight()<weightCut_){
+    return false;
+  }
+  
+  // if no b-tag algo is given
+  if(std::strcmp(bAlgo_.c_str(),"")==0) return true;
   
   int bJetIdx    = FullLepEvt->jetLeptonCombination(hypoKey)[0];
   int bBarJetIdx = FullLepEvt->jetLeptonCombination(hypoKey)[1];  

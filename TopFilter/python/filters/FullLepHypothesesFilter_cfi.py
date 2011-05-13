@@ -3,6 +3,10 @@ import FWCore.ParameterSet.Config as cms
 filterFullLepHypothesis = cms.EDFilter("FullLepHypothesesFilter",
     hypoKey = cms.InputTag("ttFullLepHypKinSolution","Key"),
     FullLepEvent = cms.InputTag("ttFullLepEvent"),
+    
+    ## cut on the probability weight of the solutions
+    weightCut = cms.double(0),
+    
     jets = cms.InputTag("hardJets"),
         
     ## b-tagging (if bDisc has two arguments both jets have 
