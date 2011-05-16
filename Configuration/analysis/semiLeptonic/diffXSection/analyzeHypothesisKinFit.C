@@ -1,8 +1,7 @@
-
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 38.35, bool save = true, int systematicVariation=sysNo, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
-TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_PromptReco160404-163369.root")
+void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int systematicVariation=sysNo, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
+			     //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_PromptReco160404-163369.root")
 {
   //  ---
   //     name conventions
@@ -10,7 +9,6 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
   // a) enumerator sample convention (as defined in basicFunctions.h)
      /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
   // kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW 
-
   // b) file name convention (implemented in basicFunctions.h)
   // "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
   // sampleName = "Sig", "Bkg", Wjets", "Zjets", "WW", "WZ", "ZZ", "VV", "SingleTopSchannel", 
@@ -33,8 +31,8 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
      20:sysQCDup         21:sysQCDdown
   */
-  // save: save plots?
   // data file: relative path of .root file
+  // save: save plots?
   // luminosity: [/pb]
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));
   // b) options to be configured only once
@@ -42,15 +40,17 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
   TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
+  // save all plots within a root file named:
+  TString outputFileName="diffXSecTopSemiMu.root";
   // choose name of the output .pdf file
   TString pdfName="kinFitpbHypothesis"+lumi+"pb";
   // set detail level of output 
   // 0: no output, 1: std output 2: output for debugging
-  unsigned int verbose=2;
+  unsigned int verbose=0;
   // c) set root style
   gROOT->cd();
   gROOT->SetStyle("Plain");
-  gStyle->SetEndErrorSize (8);
+  gStyle->SetEndErrorSize(8);
   gStyle->SetPalette(1);
   //  gStyle->SetErrorX(0); 
 
@@ -68,6 +68,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 			 "analyzeHypoKinFit/lightQuark"              , 
 			 "analyzeHypoKinFit/wrongAssign"             ,
 			 "analyzeHypoKinFit/qAssignment"             ,
+			 "analyzeHypoKinFit/PartonJetDRall"          ,
 			 // pull distributions
  			 "analyzeHypoKinFit/hadBQuarkPt"             ,
  			 "analyzeHypoKinFit/hadBQuarkEta"            ,
@@ -133,47 +134,40 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 			 "analyzeTopRecoKinematicsKinFit/circularity",
 			 "analyzeTopRecoKinematicsKinFit/isotropy"   ,
 			 // generated top quantities
-                         "analyzeTopGenLevelKinematics/topMass"      , 
-                         "analyzeTopGenLevelKinematics/topPt"        ,                         
-                         "analyzeTopGenLevelKinematics/topPhi"       ,
-                         "analyzeTopGenLevelKinematics/topY"         ,
-                         "analyzeTopGenLevelKinematics/topPtHad"     ,
-                         "analyzeTopGenLevelKinematics/topPhiHad"    ,
-                         "analyzeTopGenLevelKinematics/topYHad"      ,
-                         "analyzeTopGenLevelKinematics/topPtLep"     ,
-                         "analyzeTopGenLevelKinematics/topPhiLep"    ,
-                         "analyzeTopGenLevelKinematics/topYLep"      ,
+                         "analyzeTopPartonLevelKinematics/topMass"      , 
+                         "analyzeTopPartonLevelKinematics/topPt"        ,                         
+                         "analyzeTopPartonLevelKinematics/topPhi"       ,
+                         "analyzeTopPartonLevelKinematics/topY"         ,
+                         "analyzeTopPartonLevelKinematics/topPtHad"     ,
+                         "analyzeTopPartonLevelKinematics/topPhiHad"    ,
+                         "analyzeTopPartonLevelKinematics/topYHad"      ,
+                         "analyzeTopPartonLevelKinematics/topPtLep"     ,
+                         "analyzeTopPartonLevelKinematics/topPhiLep"    ,
+                         "analyzeTopPartonLevelKinematics/topYLep"      ,
 			 // generated angular distributions
-			 "analyzeTopGenLevelKinematics/bbbarAngle"   ,
-			 "analyzeTopGenLevelKinematics/bbbarAngleTtRF",
-                         "analyzeTopGenLevelKinematics/WWAngle"     ,
-                         "analyzeTopGenLevelKinematics/topWAngleLep",
-                         "analyzeTopGenLevelKinematics/topWAngleHad",
-                         "analyzeTopGenLevelKinematics/topBAngleLep",
-                         "analyzeTopGenLevelKinematics/topBAngleHad",
-                         "analyzeTopGenLevelKinematics/bWAngleLep"  ,
-                         "analyzeTopGenLevelKinematics/bWAngleHad"  ,
-                         "analyzeTopGenLevelKinematics/qqbarAngle"  ,
-                         "analyzeTopGenLevelKinematics/qBlepAngle"  ,
-                         "analyzeTopGenLevelKinematics/qBhadAngle"  ,
-			 "analyzeTopGenLevelKinematics/lepBlepAngle",
-			 "analyzeTopGenLevelKinematics/lepBlepAngleTtRF",
-			 "analyzeTopGenLevelKinematics/lepBhadAngle",
-			 "analyzeTopGenLevelKinematics/lepQAngle"   ,
-			 "analyzeTopGenLevelKinematics/MuonNeutrinoAngle",
-			 "analyzeTopGenLevelKinematics/lepBNeutrinoAngle",
-			 "analyzeTopGenLevelKinematics/hadBNeutrinoAngle",
-			 "analyzeTopGenLevelKinematics/qNeutrinoAngle"   ,
-			 "analyzeTopGenLevelKinematics/lepWDir"     ,
-			 "analyzeTopGenLevelKinematics/qWDir"       ,
-			 "analyzeTopGenLevelKinematics/nuWDir"      ,
-			 // generated event shape variables
-// 			 "analyzeTopGenLevelKinematics/aplanarity" ,
-// 			 "analyzeTopGenLevelKinematics/sphericity" ,
-// 			 "analyzeTopGenLevelKinematics/C"          ,
-// 			 "analyzeTopGenLevelKinematics/D"          ,
-// 			 "analyzeTopGenLevelKinematics/circularity",
-// 			 "analyzeTopGenLevelKinematics/isotropy"   ,
+			 "analyzeTopPartonLevelKinematics/bbbarAngle"   ,
+			 "analyzeTopPartonLevelKinematics/bbbarAngleTtRF",
+                         "analyzeTopPartonLevelKinematics/WWAngle"     ,
+                         "analyzeTopPartonLevelKinematics/topWAngleLep",
+                         "analyzeTopPartonLevelKinematics/topWAngleHad",
+                         "analyzeTopPartonLevelKinematics/topBAngleLep",
+                         "analyzeTopPartonLevelKinematics/topBAngleHad",
+                         "analyzeTopPartonLevelKinematics/bWAngleLep"  ,
+                         "analyzeTopPartonLevelKinematics/bWAngleHad"  ,
+                         "analyzeTopPartonLevelKinematics/qqbarAngle"  ,
+                         "analyzeTopPartonLevelKinematics/qBlepAngle"  ,
+                         "analyzeTopPartonLevelKinematics/qBhadAngle"  ,
+			 "analyzeTopPartonLevelKinematics/lepBlepAngle",
+			 "analyzeTopPartonLevelKinematics/lepBlepAngleTtRF",
+			 "analyzeTopPartonLevelKinematics/lepBhadAngle",
+			 "analyzeTopPartonLevelKinematics/lepQAngle"   ,
+			 "analyzeTopPartonLevelKinematics/MuonNeutrinoAngle",
+			 "analyzeTopPartonLevelKinematics/lepBNeutrinoAngle",
+			 "analyzeTopPartonLevelKinematics/hadBNeutrinoAngle",
+			 "analyzeTopPartonLevelKinematics/qNeutrinoAngle"   ,
+			 "analyzeTopPartonLevelKinematics/lepWDir"     ,
+			 "analyzeTopPartonLevelKinematics/qWDir"       ,
+			 "analyzeTopPartonLevelKinematics/nuWDir"      ,
 			 // reconstructed ttbar quantities
                          "analyzeTopRecoKinematicsKinFit/ttbarMass"  ,
                          "analyzeTopRecoKinematicsKinFit/ttbarPt"    ,
@@ -181,24 +175,32 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
                          "analyzeTopRecoKinematicsKinFit/ttbarHT"    ,
                          "analyzeTopRecoKinematicsKinFit/ttbarSumY"  ,
 			 "analyzeTopRecoKinematicsKinFit/ttbarDelPhi",
-			 "analyzeTopRecoKinematicsKinFit/ttbarDelY"  
+			 "analyzeTopRecoKinematicsKinFit/ttbarDelY"  ,
+			 // generated ttbar quantities
+                         "analyzeTopPartonLevelKinematics/ttbarMass"  ,
+                         "analyzeTopPartonLevelKinematics/ttbarPt"    ,
+                         "analyzeTopPartonLevelKinematics/ttbarY"     ,
+                         "analyzeTopPartonLevelKinematics/ttbarHT"    ,
+                         "analyzeTopPartonLevelKinematics/ttbarSumY"  ,
+			 "analyzeTopPartonLevelKinematics/ttbarDelPhi",
+			 "analyzeTopPartonLevelKinematics/ttbarDelY"  
                        };
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
                          // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
                          "analyzeHypoKinFit/mapKinFit_"                      ,
 			 // b) reconstructed Top quantities
-			 "analyzeTopRecoKinematicsKinFitMatched/topPt_"      ,
-			 "analyzeTopRecoKinematicsKinFitMatched/topPhi_"     ,
-			 "analyzeTopRecoKinematicsKinFitMatched/topY_"       ,
-                         "analyzeTopRecoKinematicsKinFitMatched/bbbarAngle_" ,
+			 "analyzeTopRecoKinematicsKinFit/topPt_"      ,
+			 "analyzeTopRecoKinematicsKinFit/topPhi_"     ,
+			 "analyzeTopRecoKinematicsKinFit/topY_"       ,
+                         "analyzeTopRecoKinematicsKinFit/bbbarAngle_" ,
                          // c) reconstructed ttbar quantities
-			 "analyzeTopRecoKinematicsKinFitMatched/ttbarMass_"  ,
-                         "analyzeTopRecoKinematicsKinFitMatched/ttbarPt_"    ,
-                         "analyzeTopRecoKinematicsKinFitMatched/ttbarY_"     ,
-                         "analyzeTopRecoKinematicsKinFitMatched/ttbarHT_"    ,
-                         "analyzeTopRecoKinematicsKinFitMatched/ttbarSumY_"  ,
-			 "analyzeTopRecoKinematicsKinFitMatched/ttbarDelPhi_",
-			 "analyzeTopRecoKinematicsKinFitMatched/ttbarDelY_"  
+			 "analyzeTopRecoKinematicsKinFit/ttbarMass_"  ,
+                         "analyzeTopRecoKinematicsKinFit/ttbarPt_"    ,
+                         "analyzeTopRecoKinematicsKinFit/ttbarY_"     ,
+                         "analyzeTopRecoKinematicsKinFit/ttbarHT_"    ,
+                         "analyzeTopRecoKinematicsKinFit/ttbarSumY_"  ,
+			 "analyzeTopRecoKinematicsKinFit/ttbarDelPhi_",
+			 "analyzeTopRecoKinematicsKinFit/ttbarDelY_"  
                        };
 
   // b) list plot axes style
@@ -215,6 +217,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 			     "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
 			     "N(wrong assigned jets)/events/0/1"                                 , 
 			     "permutation/events/0/1"                                            ,
+			     "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"                        ,
 			     // pull distributions
  			     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
  			     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
@@ -238,16 +241,16 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
  			     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
  			     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
 			     // reconstructed top quantities
-                             "m_{t} Kinfit [GeV]/events/0/10"     ,
-                             "p_{t}(t) Kinfit [GeV]/events/0/1"   ,//20"  ,
-                             "#phi(t) Kinfit/events/0/30"         ,
-                             "y(t) Kinfit/events/0/5"             ,
+                             "m_{t} Kinfit [GeV]/top quarks/0/10"     ,
+                             "p_{t}(t) Kinfit [GeV]/top quarks/0/1"   ,//20"
+                             "#phi(t) Kinfit/top quarks/0/4"         ,
+                             "y(t) Kinfit/top quarks/0/1"             ,//5"
                              "p_{t}(hadronic t) Kinfit [GeV]/events/0/20",                         
-                             "#phi(hadronic t) Kinfit/events/0/30",
+                             "#phi(hadronic t) Kinfit/events/0/4",
                              "y(hadronic t) Kinfit/events/0/5"    ,
                              "p_{t}(leptonic t) Kinfit [GeV]/events/0/20",                         
-                             "#phi(leptonic t) Kinfit/events/0/30",
-                             "y(leptonic t) Kinfit/events/0/5"    ,
+                             "#phi(leptonic t) Kinfit/events/0/4",
+                             "y(leptonic t) Kinfit/events/0/5"   ,
 			     //  reconstructed angular distributions
 			     "#angle(b,#bar{b}) Kinfit (detector rest frame)/events/0/21",
 			     "#angle(b,#bar{b}) Kinfit (t#bar{t} rest frame)/events/0/21",
@@ -280,60 +283,68 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 			     "circularity Kinfit/events/0/10",
 			     "isotropy Kinfit/events/0/10"   ,
 			     // generated top quantities
-                             "m_{t} gen truth [GeV]/events/0/10"      ,
-                             "p_{t}(t) gen truth/events/0/1"          ,//20"  ,
-                             "#phi(t) gen truth/events/0/30"          ,
-                             "y(t) gen truth/events/0/5"              ,
-                             "p_{t}(hadronic t) gen truth/events/0/20",                         
-                             "#phi(hadronic t) gen truth/events/0/30" ,
-                             "y(hadronic t) gen truth/events/0/5"     ,
-                             "p_{t}(leptonic t) gen truth/events/0/20",                         
-                             "#phi(leptonic t) gen truth/events/0/30" ,
-                             "y(leptonic t) gen truth/events/0/5"     ,
+                             "m_{t} parton truth [GeV]/events/0/10"      ,
+                             "p_{t}(t) parton truth/events/0/1"          ,//20"
+                             "#phi(t) parton truth/events/0/4"          ,
+                             "y(t) parton truth/events/0/1"              ,//5"
+                             "p_{t}(hadronic t) parton truth/events/0/20",                         
+                             "#phi(hadronic t) parton truth/events/0/4" ,
+                             "y(hadronic t) parton truth/events/0/5"     ,
+                             "p_{t}(leptonic t) parton truth/events/0/20",                         
+                             "#phi(leptonic t) parton truth/events/0/4" ,
+                             "y(leptonic t) parton truth/events/0/5"     ,
 			     // generated angular distributions
-			     "#angle(b,#bar{b}) gen truth (detector rest frame)/events/0/21",
-			     "#angle(b,#bar{b}) gen truth (t#bar{t} rest frame)/events/0/21",
-                             "#angle(W,W) gen truth (t#bar{t} RF)/events/0/21"              ,
-                             "#angle(lep.t,W) gen truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(had.t,W) gen truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(lep.t,b) gen truth (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(had.t,b) gen truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(lep.b,W) gen truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(had.b,W) gen truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,#bar{q}) gen truth (top rest frame)/events/0/21"     ,
-                             "#angle(q,lep.b) gen truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,had.b) gen truth (top rest frame)/events/0/21"       ,
-			     "#angle(#mu,lep.b) gen truth (top rest frame)/events/0/21"     , 
-			     "#angle(#mu,lep.b) gen truth (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#mu,lep.b) gen truth (top rest frame)/events/0/21"     ,
-			     "#angle(#mu,q) gen truth (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,#nu) gen truth (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(#nu,lep.b) gen truth (top rest frame)/events/0/21"     ,
-			     "#angle(#nu,had.b) gen truth (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#nu,q) gen truth (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,W) gen truth (#mu:W RF, W:Det RF)/events/0/21"     ,
-			     "#angle(q,W) gen truth (q:W RF, W:Det RF)/events/0/21"         ,
-			     "#angle(#nu,W) gen truth (#nu:W RF, W:Det RF)/events/0/21"     ,
+			     "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
+			     "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
+                             "#angle(W,W) parton truth (t#bar{t} RF)/events/0/21"              ,
+                             "#angle(lep.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
+                             "#angle(had.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
+                             "#angle(lep.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+			     "#angle(had.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(lep.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(had.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(q,#bar{q}) parton truth (top rest frame)/events/0/21"     ,
+                             "#angle(q,lep.b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(q,had.b) parton truth (top rest frame)/events/0/21"       ,
+			     "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     , 
+			     "#angle(#mu,lep.b) parton truth (t#bar{t} rest frame)/events/0/21",
+			     "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     ,
+			     "#angle(#mu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
+			     "#angle(#mu,#nu) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+			     "#angle(#nu,lep.b) parton truth (top rest frame)/events/0/21"     ,
+			     "#angle(#nu,had.b) parton truth (t#bar{t} rest frame)/events/0/21",
+			     "#angle(#nu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
+			     "#angle(#mu,W) parton truth (#mu:W RF, W:Det RF)/events/0/21"     ,
+			     "#angle(q,W) parton truth (q:W RF, W:Det RF)/events/0/21"         ,
+			     "#angle(#nu,W) parton truth (#nu:W RF, W:Det RF)/events/0/21"     ,
 // 			     // generated event shape variables
-// 			     "aplanarity gen truth/events/0/4"  ,
-// 			     "sphericity gen truth/events/0/10" ,
-// 			     "C gen truth/events/0/10"          ,
-// 			     "D gen truth/events/0/4"           ,
-// 			     "circularity gen truth/events/0/10",
-// 			     "isotropy gen truth/events/0/10"   ,
+// 			     "aplanarity parton truth/events/0/4"  ,
+// 			     "sphericity parton truth/events/0/10" ,
+// 			     "C parton truth/events/0/10"          ,
+// 			     "D parton truth/events/0/4"           ,
+// 			     "circularity parton truth/events/0/10",
+// 			     "isotropy parton truth/events/0/10"   ,
 			     // reconstructed ttbar quantities	                            
-                             "m(t#bar{t}) Kinfit/events/0/60"                        ,
-                             "p_{t}(t#bar{t}) Kinfit/events/0/10"                    ,
-                             "y(t#bar{t}) Kinfit/events/0/2"                         ,
+                             "m(t#bar{t}) Kinfit/events/0/1"                         ,//60"
+                             "p_{t}(t#bar{t}) Kinfit/events/0/1"                     ,//10"
+                             "y(t#bar{t}) Kinfit/events/0/1"                         ,//2
                              "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) Kinfit/events/0/20",
                              "y(t)+y(#bar{t}) Kinfit/events/0/10"                    ,
                              "#phi(leptonic t)-#phi(hadronic t) Kinfit/events/0/10"  ,                
-                             "y(leptonic t)-y(hadronic t) Kinfit/events/0/4"           
+                             "y(leptonic t)-y(hadronic t) Kinfit/events/0/4"         ,  
+			     // generated ttbar quantities	                            
+                             "m(t#bar{t}) parton truth/events/0/1"                         ,//60"
+                             "p_{t}(t#bar{t}) parton truth/events/0/1"                     ,//10"
+                             "y(t#bar{t}) parton truth/events/0/1"                         ,//2
+                             "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) parton truth/events/0/20",
+                             "y(t)+y(#bar{t}) parton truth/events/0/10"                    ,
+                             "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/10"  ,                
+                             "y(leptonic t)-y(hadronic t) parton truth/events/0/4" 
                            };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
                             // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-                            "i_{lead jet} gen truth/i_{lead jet} hypothesis fit",
+                            "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
 			    // b) reconstructed Top quantities
                             "p_{t}(t) gen/p_{t}(t) reco"                    ,
 			    "#phi(t) gen/#phi(t) reco"                      ,
@@ -422,7 +433,12 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
       // a) 1D
-      if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)) histogramStyle( *histo_[plotList_[plot]][sample], sample, true );
+      if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){ 
+	// default
+	histogramStyle( *histo_[plotList_[plot]][sample], sample, true );
+	// special configurations
+	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall")histo_[plotList_[plot]][sample]->SetNdivisions(816);
+      }
       // b) 2D
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
     }
@@ -442,13 +458,14 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
       if((plot<N1Dplots)&&(plotExists(histo_, plotName, sample))){
 	// equidistant binning
 	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
-	if(reBinFactor>1){
+	if(reBinFactor>1&&binning_.count(plotName)==0){
 	  equalReBinTH1(reBinFactor, histo_, plotName, sample);
 	}
 	// variable binning
 	else{
-	  if(binning_.count(plotName)>0){
-	    reBinTH1F(*histo_[plotName][sample], binning_[plotName], 2);
+	  // check existence of e.g. binning_["topPt"]
+	  if(binning_.count(getStringEntry(plotName, 2))>0){
+	    reBinTH1F(*histo_[plotName][sample], binning_[getStringEntry(plotName, 2)], verbose);
 	    if(verbose>1){
 	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){
 		std::cout << "bin " << i << ": " << histo_[plotName][sample]->GetBinContent(i) << " / ";
@@ -456,7 +473,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 	      }
 	    }
 	    // divide by binwidth
-	    histo_[plotName][sample] = divideByBinwidth(histo_[plotName][sample], 1);
+	    histo_[plotName][sample] = divideByBinwidth(histo_[plotName][sample], 2);
 	    if(verbose>1){
 	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){
 		std::cout << "bin " << i << "= " << histo_[plotName][sample]->GetBinContent(i) << std::endl;
@@ -481,96 +498,108 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
   // ---
   // count # of efficiency histos
   unsigned int NMCeff=0;
-  // pt(top)
-  TString variable="topPt";
-  TString efficiency="efficiency/"+variable;
-  // check if gen and reco plots are available
-  if(plotExists(histo_, "analyzeTopGenLevelKinematics/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, kSig)){
-    //    std::cout << "found gen and reco" << std::endl;
-    // get reco plot
-    histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
-    // divide by gen plot
-    histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopGenLevelKinematics/"+variable][kSig]->Clone()));
+  // create list of variables you would like to create the efficiency / cross section for
+  std::vector<TString> xSecVariables_, xSecLabel_;
+  TString xSecVariables[] ={"topPt"          , "topY"           , "ttbarPt"            , "ttbarMass"      , "ttbarY"              };
+  TString xSecLabel    [] ={"p_{t}(top)/GeV" , "y(top)/binwidth", "p_{t}(t#bar{t})/GeV", "m(t#bar{t})/GeV", "y(t#bar{t})/binwidth"};
+  xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
+  xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
+  // loop all variables
+  for(unsigned int number=0; number<xSecVariables_.size(); ++number){
+    TString variable=xSecVariables_[number];
+    TString efficiency="efficiency/"+variable;
+    // check if gen and reco plots are available
+    if(plotExists(histo_, "analyzeTopPartonLevelKinematics/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, kSig)){
+      //    std::cout << "found gen and reco" << std::endl;
+      // get reco plot
+      histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
+      // divide by gen plot
+      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->Clone()));
 
-    // std::cout << "gen(bin1): "  <<  histo_["analyzeTopGenLevelKinematics/"+variable  ][kSig]->GetBinContent(1) << std::endl;
-    // std::cout << "reco(bin1): " <<  histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->GetBinContent(1) << std::endl;
-    // std::cout << "eff(bin1): "  <<  histo_[efficiency][kSig]->GetBinContent(1) << std::endl;
+      // std::cout << "gen(bin1): "  <<  histo_["analyzeTopPartonLevelKinematics/"+variable  ][kSig]->GetBinContent(1) << std::endl;
+      // std::cout << "reco(bin1): " <<  histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->GetBinContent(1) << std::endl;
+      // std::cout << "eff(bin1): "  <<  histo_[efficiency][kSig]->GetBinContent(1) << std::endl;
 
-    // add plot to list of plots
-    plotList_.push_back(efficiency);
-    // add axis configuration
-    unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
-    TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"MC efficiency/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-    // set binomial errors
-    if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
-    for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
-      double eff=histo_[efficiency][kSig]->GetBinContent(bin); 
-      double N=histo_["analyzeTopGenLevelKinematics/"+variable][kSig]->GetBinContent(bin);
-      double width=histo_["analyzeTopGenLevelKinematics/"+variable][kSig]->GetBinWidth(bin);
-      N*=width;
-      N/=(effSFAB(sysNo)*lumiweight(kSig, luminosity));
-      if(verbose>1){
-	std::cout << "bin " << bin << ": " << eff << ", " << N << ", " << width;
-	std::cout << ", " <<  sqrt(eff*(1.-eff)/N) << std::endl;
+      // add plot to list of plots
+      plotList_.push_back(efficiency);
+      // add axis configuration
+      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
+      TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      // set binomial errors
+      if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
+      for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
+	double eff=histo_[efficiency][kSig]->GetBinContent(bin); 
+	double N=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinContent(bin);
+	double width=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinWidth(bin);
+	N*=width;
+	N/=(effSFAB(sysNo)*lumiweight(kSig, luminosity));
+	if(verbose>1){
+	  std::cout << "bin " << bin << ": " << eff << ", " << N << ", " << width;
+	  std::cout << ", " <<  sqrt(eff*(1.-eff)/N) << std::endl;
+	}
+	histo_[efficiency][kSig]->SetBinError(bin, sqrt(eff*(1.-eff)/N));
+	// set error to 0 for bins with width 0 or 0 entries
+	if(N==0) histo_[efficiency][kSig]->SetBinError(bin, 0);
       }
-      histo_[efficiency][kSig]->SetBinError(bin, sqrt(eff*(1.-eff)/N));
-      // set error to 0 for bins with width 0 or 0 entries
-      if(N==0) histo_[efficiency][kSig]->SetBinError(bin, 0);
+      // change histo style
+      histogramStyle(*histo_[efficiency][kSig], kSig, false, 0.6);
+      ++NMCeff;
     }
-    // change histo style
-    histogramStyle(*histo_[efficiency][kSig], kSig, false);
-    ++NMCeff;
   }
   // ---
   //    cross section (phase space) determination
   // ---
   // count # of cross section histos
   unsigned int NXSec=0;
-  // pt(top)
-  TString variable2="topPt";
-  TString label="p_{t}(top)";
-  TString xSec ="xSec/"+variable2;
-  bool calculateXSec=true;
-  // loop samples 
-  for(unsigned int sample=kSig; sample<=kData; ++sample){
-  // check if reco MC plot and data event yield plots are available
-    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable2, sample)){
+  // loop all variables
+  for(unsigned int number=0; number<xSecVariables_.size(); ++number){
+    TString variable=xSecVariables_[number];
+    TString label =getStringEntry(xSecLabel_[number],1);
+    TString label2=getStringEntry(xSecLabel_[number],2);
+    TString xSec ="xSec/"+variable;
+    bool calculateXSec=true;
+    // loop samples 
+    for(unsigned int sample=kSig; sample<=kData; ++sample){
+      // check if reco MC plot and data event yield plots are available
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, sample)){
+	calculateXSec=false;
+      }
+    }
+    // check if efficiency plot is available
+    if(!plotExists(histo_, "efficiency/"+variable, kSig)){
       calculateXSec=false;
     }
-  }
-  // check if efficiency plot is available
-  if(!plotExists(histo_, "efficiency/"+variable2, kSig)){
-    calculateXSec=false;
-  }
-  if(calculateXSec){
-    // a) differential XSec from data
-    // get data plot
-    histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kData]->Clone());
-    // subtract BG(MC)
-    histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kBkg  ]->Clone()), -1);
-    histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kZjets]->Clone()), -1);
-    histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kWjets]->Clone()), -1);
-    histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kSTop ]->Clone()), -1);
-    histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kDiBos]->Clone()), -1);
-    // apply efficiency correction
-    DivideYieldByEfficiencyAndLumi(histo_[xSec][kData], ((TH1F*)(histo_["efficiency/"+variable][kSig])), luminosity, 0);
+    if(calculateXSec){
+      // a) differential XSec from data
+      // get data plot
+      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->Clone());
+      // subtract BG(MC)
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kBkg  ]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kWjets]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSTop ]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kDiBos]->Clone()), -1);
+      // apply efficiency correction
+      DivideYieldByEfficiencyAndLumi(histo_[xSec][kData], ((TH1F*)(histo_["efficiency/"+variable][kSig])), luminosity, 0);
 
-    // b) differential XSec from Signal(MC prediction)
-    histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable2][kSig]->Clone());
-    DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
-    // add plot to list of plots
-    plotList_.push_back(xSec);
-    // add axis configuration
-    unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable2);
-    TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [pb^{-1}] (phase space)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-    // configure xSec plot histo style
-    histogramStyle(*histo_[xSec][kData], kData, false);
-    histogramStyle(*histo_[xSec][kSig ], kSig , true );
-    ++NXSec;
+      // b) differential XSec from Signal(MC prediction)
+      histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
+      DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
+      // add plot to list of plots
+      plotList_.push_back(xSec);
+      // add axis configuration
+      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
+      TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ (pb#times"+label2+")^{-1} ] (inclusive)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      // configure xSec plot histo style
+      histogramStyle(*histo_[xSec][kData], kData, false);
+      histogramStyle(*histo_[xSec][kSig ], kSig , true );
+      ++NXSec;
+      // save TH1F for data in extra folder
+      saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose, "xSecDataTH1FAllSystematics/"+sysLabel(systematicVariation));
+    }
   }
-
   // ---
   //    create one legend for all 1D histos
   // ---
@@ -589,7 +618,9 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
       // if found: add entry to legend
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)&&(!exit)){
-	if(sample==kData) leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample)+", "+lumi+" pb^{-1}", "PL");
+	bool TwoThousandElevenData=false;
+	if(luminosity>36.0) TwoThousandElevenData=true;
+	if(sample==kData) leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
 	else leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample), "F");
 	exit=true;
       }
@@ -615,7 +646,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
   //    create canvas
   // ---
   std::vector<TCanvas*> plotCanvas_;
-  int NCanvas = Nplots+Nlegends;
+  //  int NCanvas = Nplots+Nlegends;
   // a) create canvas for all plots + legends
   //  for(int sample=0; sample<NCanvas; sample++){
   for(unsigned int sample=0; sample<N1Dplots+N2Dplots+NMCeff+NXSec+Nlegends; sample++){
@@ -644,16 +675,12 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     bool first=true;
     // open canvas and set titel corresponding to plotname in .root file
-    std::cout << "canvas #" << plot+1 << std::endl;
     plotCanvas_[canvasNumber]->cd(0);
-    std::cout << "openend" << std::endl;
     plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
-    std::cout << "title set" << std::endl;
     // loop samples
     for(unsigned int sample=kSig; sample<=kData; ++sample){
       // a1) for 1D event yields, efficiency and cross section plots (existing)
       if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
-	std::cout << "1D plot" << std::endl;
 	// check if plot is existing
 	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
 	  if(verbose>0){
@@ -686,11 +713,10 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 	    // if data file exists
 	    if(histo_[plotList_[plot]].count(kData)>0){
 	      // and has larger maximum
-	      std:: cout << "label: " << getStringEntry(plotList_[plot], 1) << std::endl;
 	      if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
 		// take this maximum
 		max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
-		std:: cout << "take max from data! " << std::endl;
+		if(verbose>1) std:: cout << "take max from data! " << std::endl;
 	      }
 	    }
 	    double min = 0;
@@ -704,15 +730,18 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
 	    // axis style
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
+	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
+	    if(getStringEntry(plotList_[plot], 1)=="xSec") histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset( 1.5 );
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
 	    if(getStringEntry(plotList_[plot], 2)=="topY"   ||
 	       getStringEntry(plotList_[plot], 2)=="topYHad"||getStringEntry(plotList_[plot], 2)=="topYLep"){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
+	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-5,5);
+	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 	    // draw efficiency plots as line
-	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
+	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e1");
 	    // others as histo (stack)
 	    else histo_[plotList_[plot]][sample]->Draw("hist");
 	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
@@ -720,10 +749,10 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
 	  // draw other plots into same canvas
 	  else{ 
 	    // draw data as points
-	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e X0 same");
+	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e1 X0 same");
 	    else{
 	      // draw efficiencies as points
-	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
+	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e1 same");
 	      // draw others as histo (stack)
 	      else histo_[plotList_[plot]][sample]->Draw("hist same");
 	    }
@@ -772,8 +801,21 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffX
     // pdf and eps
     saveCanvas(plotCanvas_, outputFolder, pdfName);
     // root file
+    std::cout << "will create outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
-      saveToRootFile("diffXSecTopSemiMu.root", plotCanvas_[idx], true, verbose);
+      // get correct folder
+      TString title=(plotCanvas_[idx])->GetTitle();
+      TString outputfolder="";
+      TString possibleFolderNames[6]={"efficiency", "analyzeTopRecoKinematicsKinFit", "xSec", "analyzeTopRecoKinematicsKinFitMatched", "analyzeTopPartonLevelKinematics", "analyzeHypoKinFit"};
+      for(unsigned int name=0; name<sizeof(possibleFolderNames)/sizeof(TString); ++name){
+	// add another subfoder indicating the systematic variation
+	if(title.Contains(possibleFolderNames[name])){ 
+	  outputfolder=possibleFolderNames[name]+"/"+sysLabel(systematicVariation);
+	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name],""));
+	  
+	}
+      }
+      saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose,outputfolder);
     }
   }
 }
