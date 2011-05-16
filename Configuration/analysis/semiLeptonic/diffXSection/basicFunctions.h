@@ -66,7 +66,7 @@ double effSFAB(int sys=sysNo)
 // BR correction for ttbar->lnuqq'bb'
 double BRcorrectionSemileptonic = 0.985608;
 
-void histogramStyle(TH1& hist, int sampleTyp, bool filled=true) 
+void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.8) 
 {
   // this function configures the style of a TH1 histogram "hist"
   // using "sampleTyp" to identify the corresponding sample from
@@ -93,7 +93,7 @@ void histogramStyle(TH1& hist, int sampleTyp, bool filled=true)
       hist.SetMarkerColor(kGray);
     }
     hist.SetMarkerStyle(marker_[sampleTyp]);
-    hist.SetMarkerSize(1.8);
+    hist.SetMarkerSize(markersize);
     hist.SetFillStyle(0);
   }
   else{
@@ -276,7 +276,7 @@ TString getTStringFromInt(int i)
   return (TString)result;
 }
 
-TString sampleLabel(unsigned int sample)
+TString sampleLabel(unsigned int sample, bool TwoThousandEleven=false)
 {
   // this function returns the name of the entered MC process
   // corresponding to the enumerator entry "sample" as defined in samples
@@ -300,7 +300,8 @@ TString sampleLabel(unsigned int sample)
   if(sample==kWZ     ) MCprocess="WZ";
   if(sample==kZZ     ) MCprocess="ZZ";
   if(sample==kQCD    ) MCprocess="QCD";
-  if(sample==kData   ) MCprocess="2010 data";
+  if(sample==kData&&!TwoThousandEleven) MCprocess="2010 data";
+  if(sample==kData&& TwoThousandEleven) MCprocess="2011 data";
   // return result
   return MCprocess;
 }
@@ -477,7 +478,7 @@ TString getStringEntry(const TString inputTString, unsigned int entry=42, const 
   // used enumerators: NONE
   char *path, *element;
   // enable output for debugging
-  bool verbose=true;
+  bool verbose=false;
   // save inputstring in char* path
   string inputString=(std::string)inputTString;
   path = new char [inputString.size()+1];
@@ -667,8 +668,10 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
 	if(files_.count(sample)>0){
 	  // create plot container
 	  TH1* targetPlot;
-	  std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
-	  std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
+	  if(verbose>0){ 
+	    std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
+	    std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
+	  }
 	  files_[sample]->GetObject(plotList_[plot], targetPlot);
 	  // Check if plot exits
 	  // give warning if plot does not exist
@@ -678,7 +681,7 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
 	    bool emptyPlot=false;
 	    if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
 	    if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
-	    if(emptyPlot) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
+	    if(emptyPlot && verbose>0) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
 	    if(!emptyPlot){
 	      // save plot in corresponding map
 	      if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
@@ -841,33 +844,39 @@ void createStackPlot(const std::vector<TString> plotList_, std::map< TString, st
   }
 }
 
-double modulo(const double a, const double b)
+float modulo(const float a, const float b)
 {
   // this function calculates a modulo b 
-  // where a and b are double
+  // where a and b are float
   // modified quantities: none
   // used functions: none
   // used enumerators: none
   // "a": diviend
   // "b": divisor
-
-  double rest=a-b;
+  
+  // round a and b to the 3rd decimal place
+  // this should prevent errors due to rounding effects
+  float astar=ceil(a*1000.-0.5)/1000.;
+  float bstar=ceil(b*1000.-0.5)/1000.;
+  //  std::cout << std::endl << astar << " modulo ";
+  //  std::cout << bstar << std::endl;
+  float rest=astar-bstar;
   if(rest<0){
-    std::cout << "can not compute " << a << " modulo " << b << std::endl;
-    std::cout << "because " << a << " < " << b << std::endl;
+    std::cout << "can not compute " << astar << " modulo " << bstar << std::endl;
+    std::cout << "because " << astar << " < " << bstar << std::endl;
     exit(1);
   }
-  for(double n=1; rest>0; n++){
-    rest=a-n*b;
+  for(float n=1; rest>0; n++){
+    rest=astar-n*bstar;
     if(rest<0){
-      rest = a-(n-1.)*b;
+      rest = astar-(n-1.)*bstar;
       break;
     }
   }
   return rest;
 }
 
-void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const unsigned int verbose=2)
+void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const unsigned int verbose=0)
 {
   // this function rebins an histogram using a variable binning
   // modified quantities: "histoUnbinned"
@@ -885,6 +894,7 @@ void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, c
     std::cout << "plot: "  << histoUnbinned.GetName() << std::endl;
     std::cout << "min: " << xMin << std::endl;
     std::cout << "max: " << xMax << std::endl;
+    std::cout << "N(initial bins): " << NinitialBins << std::endl;
   }
   // check if chosen binning is valid
   // 1) N(bins)
@@ -895,20 +905,23 @@ void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, c
   }
   // 2) coarseness of chosen binning
   //  double initialBinWidth=(xMax-xMin)/(double)NinitialBins;
-  double initialBinWidth = histoUnbinned.GetBinWidth(1);
+  double initialBinWidth = (double)(roundToInt(10000.*histoUnbinned.GetBinWidth(1)))/10000.;
+
   if(verbose>1) std::cout << "initial binwidth: " << initialBinWidth << std::endl;
   if(binlowerEdges_.size()>1){
     for(unsigned int finalBin=1; finalBin<binlowerEdges_.size()-1; ++finalBin){
       double finalBinWidth=binlowerEdges_[finalBin]-binlowerEdges_[finalBin-1];
       if(verbose>1){
-	std::cout << "bin #" << finalBin << ": " << finalBinWidth << " modulo ";
-	std::cout << initialBinWidth << " = " << modulo(finalBinWidth, initialBinWidth) << std::endl;
+	std::cout << "bin #" << finalBin << ": ";
+	std::cout << std::setprecision(20) << std::fixed << finalBinWidth << " modulo ";
+	std::cout << std::setprecision(20) << std::fixed << initialBinWidth;
+	std::cout << " = " << modulo(finalBinWidth, initialBinWidth) << std::endl;
       }
       if(modulo(finalBinWidth, initialBinWidth)!=0){
 	std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
 	std::cout << "the ininital binning is to coarse for the chosen binning!" << std::endl;
 	std::cout << "attention: probably error in modulo function," << std::endl;
-	std::cout << "bin #" << finalBin << "of the choosen binning has";
+	std::cout << "bin #" << finalBin << " of the choosen binning has ";
 	std::cout << "finalBinWidth modulo initialBinWidth of " << modulo(finalBinWidth,initialBinWidth) << std::endl;
 	exit(1);
       }
@@ -993,32 +1006,32 @@ std::map<TString, std::vector<double> > makeVariableBinning()
   // pt(top)
   double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
   bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
-  result["analyzeTopRecoKinematicsKinFit/topPt"]=bins_;
-  result["analyzeTopGenLevelKinematics/topPt"  ]=bins_;
+  result["topPt"]=bins_;
+  //  result["analyzeTopPartonLevelKinematics/topPt"  ]=bins_;
   bins_.clear();
   // y(top)
   double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
   bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
-  result["analyzeTopRecoKinematicsKinFit/topY"]=bins_;
-  result["analyzeTopGenLevelKinematics/topY"  ]=bins_;
+  result["topY"]=bins_;
+  //  result["analyzeTopPartonLevelKinematics/topY"  ]=bins_;
   bins_.clear();
   // pt(ttbar)
   double ttbarPtBins[]={0., 20., 60., 110., 200., 300.};
   bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
-  result["analyzeTopRecoKinematicsKinFit/ttbarPt"]=bins_;
-  result["analyzeTopGenLevelKinematics/ttbarPt"  ]=bins_;
+  result["ttbarPt"]=bins_;
+  //  result["analyzeTopPartonLevelKinematics/ttbarPt"  ]=bins_;
   bins_.clear();
   // y(ttbar)
   double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
   bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
-  result["analyzeTopRecoKinematicsKinFit/ttbarY"]=bins_;
-  result["analyzeTopGenLevelKinematics/ttbarY"  ]=bins_;
+  result["ttbarY"]=bins_;
+  //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
   bins_.clear();
   // m(ttbar)
   double ttbarMassBins[]={0., 400., 500., 630., 900., 1200.};
   bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
-  result["analyzeTopRecoKinematicsKinFit/ttbarMass"]=bins_;
-  result["analyzeTopGenLevelKinematics/ttbarMass"  ]=bins_;
+  result["ttbarMass"]=bins_;
+  //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
   bins_.clear();
   
   return result;
@@ -1073,15 +1086,19 @@ void DivideYieldByEfficiencyAndLumi(TH1F* yield, TH1F* efficiency, double lumino
     double effError=efficiency->GetBinError(bin);
     if(!includeEffError) effError=0;
     double xSecError = 1/(binwidth*luminosity)*sqrt( ((events)/(eff*eff)) + ((events*effError)/(eff*eff))* ((events*effError)/(eff*eff)) );
+    // check if efficiency is 0
+    if(eff==0){
+      xSec=0;
+      xSecError=0;
+    }
     // set value and error
     yield->SetBinContent(bin, xSec     );
     yield->SetBinError  (bin, xSecError);
   }
 }
 
-
 template <class T>
-void saveToRootFile(TString outputFile, T object, bool overwrite=false, unsigned int verbose=1)
+void saveToRootFile(const TString& outputFile, const T& object, const bool& overwrite=false, const unsigned int& verbose=1, const TString& folder="")
 {
   // this function saves objects of class T
   // (such as TH1) in an output rootfile with name outputFile
@@ -1106,6 +1123,23 @@ void saveToRootFile(TString outputFile, T object, bool overwrite=false, unsigned
   else{
     // if not broken: open file
     file->cd();
+    // create folder if it does not exist
+    if(folder!=""){
+      if(verbose>1) std::cout << "check existence of directory " << folder << std::endl;
+      // see how many subfolders are within folder
+      unsigned int Nfolders=folder.CountChar(*"/")+1;
+      if(verbose>1) std::cout << "these are " << Nfolders << " subdirectories" << std::endl;
+      // loop subdirectories
+      for(unsigned int subfolderNumber=1; subfolderNumber<=Nfolders; ++subfolderNumber){
+	TString subfolder= getStringEntry(folder, subfolderNumber, "/");
+	if(gDirectory->GetDirectory(subfolder)==0){
+	  if(verbose>1) std::cout << "subfolder " << subfolder  << " not existing - will create it" << std::endl;
+	  gDirectory->mkdir(subfolder);
+	}
+	// go to directory
+	gDirectory->cd(subfolder);
+      }
+    }
     // if you don't want to overwrite, check if object exists
     int count=-1;
     if(!overwrite){
@@ -1135,13 +1169,60 @@ void saveToRootFile(TString outputFile, T object, bool overwrite=false, unsigned
   if(saveObject){
     if(verbose>0){
       std::cout << "saving object " << (TString)object->GetTitle();
-      std::cout << " to file " << outputFile << std::endl << std::endl;
+      std::cout << " to file " << outputFile;
+      if(folder!="") std::cout << " ( folder " << folder << " )";
+      std::cout << std::endl << std::endl;
     }
     // overwrite existing
     object->Write(object->GetTitle(), TObject::kOverwrite);
   }
   // close file
   file->Close();
+}
+
+TString sysLabel(unsigned int sys)
+{
+  // this function returns a TString that corresponds 
+  // to the systematic variation "sys" of the enumerator "systematicVariation"
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none (label correspond to systematicVariation)
+
+  TString systematicVariationlabel="";
+  if(sys==0 )systematicVariationlabel="sysNo";
+  if(sys==1 )systematicVariationlabel="sysLumiUp";
+  if(sys==2 )systematicVariationlabel="sysLumiDown";
+  if(sys==3 )systematicVariationlabel="sysJESUp";
+  if(sys==4 )systematicVariationlabel="sysJESDown";
+  if(sys==5 )systematicVariationlabel="sysJERUp";
+  if(sys==6 )systematicVariationlabel="sysJERDown";
+  if(sys==7 )systematicVariationlabel="sysTopScaleUp";
+  if(sys==8 )systematicVariationlabel="sysTopScaleDown";
+  if(sys==9 )systematicVariationlabel="sysVBosonScaleUp";
+  if(sys==10)systematicVariationlabel="sysVBosonScaleDown";
+  if(sys==11)systematicVariationlabel="sysTopMatchUp";
+  if(sys==12)systematicVariationlabel="sysTopMatchDown";
+  if(sys==13)systematicVariationlabel="sysVBosonMatchUp";
+  if(sys==14)systematicVariationlabel="sysVBosonMatchDown";
+  if(sys==15)systematicVariationlabel="sysMuEffSFup";
+  if(sys==16)systematicVariationlabel="sysMuEffSFdown";
+  if(sys==17)systematicVariationlabel="sysISRFSRup";
+  if(sys==18)systematicVariationlabel="sysISRFSRdown";
+  if(sys==19)systematicVariationlabel="sysPileUp";
+  if(sys==20)systematicVariationlabel="sysQCDup";
+  if(sys==21)systematicVariationlabel="sysQCDdown";
+  if(sys==22)systematicVariationlabel="sysSTopUp";
+  if(sys==23)systematicVariationlabel="sysSTopDown";
+  if(sys==24)systematicVariationlabel="sysDiBosUp";
+  if(sys==25)systematicVariationlabel="sysDiBosDown";
+  // check if valid input was chosen
+  if(systematicVariationlabel==""){
+    std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
+    std::cout << "max syst. variation: 20" << std::endl;
+    std::cout << "max syst. variation: " << sys << std::endl;
+    exit(1);
+  }
+  return systematicVariationlabel;
 }
 
 #endif
