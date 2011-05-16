@@ -1,10 +1,13 @@
-#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFit.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "TopQuarkAnalysis/TopObjectResolutions/interface/MET.h"
 #include "TopQuarkAnalysis/TopObjectResolutions/interface/Jet.h"
 #include "TopQuarkAnalysis/TopObjectResolutions/interface/Muon.h"
 #include "TopQuarkAnalysis/TopObjectResolutions/interface/Electron.h"
+#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFit.h"
+#include "TopAnalysis/TopAnalyzer/interface/TopAngles.h"
+#include "DataFormats/Math/interface/deltaR.h"
+
 /// default constructor for fw lite
 HypothesisKinFit::HypothesisKinFit()
 {
@@ -53,6 +56,13 @@ void HypothesisKinFit::book()
   hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(8, "jmis"    );
   hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(9, "wrongj"  );
   hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(10,"nomatch" );
+  // distance in dR of parton and nearest jet
+  hists_["PartonJetDRall"] = new TH1F( "PartonJetDRall", "PartonJetDRall", 600,  0.,  6. );
+  // distance in dR of parton and nearest jet
+  // a) for all events
+  hists_["PartonJetDRall"    ] = new TH1F( "PartonJetDRall"    , "PartonJetDRall"    , 600,  0.,  6. );
+  // b) for correct assignments only
+  hists_["PartonJetDRcorrect"] = new TH1F( "PartonJetDRcorrect", "PartonJetDRcorrect", 600,  0.,  6. );
 
   /**
      Pull Distributions muon, neutrino, jets (relative to the MC Truth)
@@ -184,6 +194,11 @@ void HypothesisKinFit::book(edm::Service<TFileService>& fs)
   hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(8, "jmis"    );
   hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(9, "wrongj"  );
   hists_.find("qAssignment")->second->GetXaxis()->SetBinLabel(10,"nomatch" );
+  // distance in dR of parton and nearest jet
+  // a) for all events
+  hists_["PartonJetDRall"    ] = fs->make<TH1F>( "PartonJetDRall"    , "PartonJetDRall"    , 600,  0.,  6. );
+  // b) for correct assignments only
+  hists_["PartonJetDRcorrect"] = fs->make<TH1F>( "PartonJetDRcorrect", "PartonJetDRcorrect", 600,  0.,  6. );
 
   /**
      Pull Distributions (Relative to the MC Truth)
@@ -440,6 +455,47 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   /**
      Fill the Monitoring Variables
   **/
+  // make sure to have a valid hypothesis on reconstruction level
+  // and an existing generated event
+  double distLepB=-1;
+  double distHadB=-1;
+  double distQ   =-1;
+  double distQBar=-1;
+  double distQ2   =-1;
+  double distQBar2=-1;
+  if( tops.isHypoValid(hypoKey_)&&tops.genEvent().isAvailable()&&tops.genEvent()->isSemiLeptonic(WDecay::kMuon)&&
+      tops.hadronicDecayB()&&tops.leptonicDecayB() ){
+    // distance in dR of parton and assigned jet
+    // reco jets KinFit
+    reco::Particle::LorentzVector lepBRec = tops.hadronicDecayB       (hypoKey_)->p4(); 
+    reco::Particle::LorentzVector hadBRec = tops.leptonicDecayB       (hypoKey_)->p4();
+    reco::Particle::LorentzVector QRec    = tops.hadronicDecayQuark   (hypoKey_)->p4(); 
+    reco::Particle::LorentzVector QbarRec = tops.hadronicDecayQuarkBar(hypoKey_)->p4();
+    // generated partons
+    reco::Particle::LorentzVector lepBGen = tops.hadronicDecayB       (        )->p4(); 
+    reco::Particle::LorentzVector hadBGen = tops.leptonicDecayB       (        )->p4();
+    reco::Particle::LorentzVector QGen    = tops.hadronicDecayQuark   (        )->p4(); 
+    reco::Particle::LorentzVector QbarGen = tops.hadronicDecayQuarkBar(        )->p4();
+    // calculate dR
+    distLepB = deltaR(lepBRec.eta(), lepBRec.phi(), lepBGen.eta(), lepBGen.phi());
+    distHadB = deltaR(hadBRec.eta(), hadBRec.phi(), hadBGen.eta(), hadBGen.phi());
+    distQ    = deltaR(QRec   .eta(), QRec   .phi(), QGen   .eta(), QGen   .phi());
+    distQBar = deltaR(QbarRec.eta(), QbarRec.phi(), QbarGen.eta(), QbarGen.phi());
+    distQ2    = deltaR(QRec   .eta(), QRec   .phi(), QbarGen.eta(),QbarGen.phi());
+    distQBar2 = deltaR(QbarRec.eta(), QbarRec.phi(), QGen.eta()   ,QGen.phi());
+    // fill histogram for all permutations
+    hists_.find("PartonJetDRall")->second->Fill( distLepB, weight );
+    hists_.find("PartonJetDRall")->second->Fill( distHadB, weight );
+    // take into account that q and qbar are unsdistinguishable 
+    if(distQ2+distQBar2<distQ+distQBar){
+      hists_.find("PartonJetDRall")->second->Fill( distQ2   , weight );
+      hists_.find("PartonJetDRall")->second->Fill( distQBar2, weight );
+    }
+    else{
+      hists_.find("PartonJetDRall")->second->Fill( distQ   , weight );
+      hists_.find("PartonJetDRall")->second->Fill( distQBar, weight );
+    }
+  }
   // count cases where no matching exists
   if( tops.isHypoValid(hypoKey_)&& !tops.isHypoValid("kGenMatch")){
     hists_.find("qAssignment")->second->Fill(9);
@@ -574,7 +630,7 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       for(unsigned int i=0; i<recoJets_.size(); ++i){
 	if( recoJets_[i]!=genJets_[i] ){ 
 	  if(maxNJets<4){
-	    std::cout << "ERROR: number of conidered jets can not be smaller than 4" << std::endl;
+	    std::cout << "ERROR: number of considered jets can not be smaller than 4" << std::endl;
 	    exit(1);
 	  }
 	  // 7: jet is missing
@@ -588,6 +644,21 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     }
     // fill permutation histogram
     hists_.find("qAssignment")->second->Fill(assignment);
+    // fill dR histogram for correct permutation permutation
+    if(assignment==0){
+      hists_.find("PartonJetDRcorrect")->second->Fill( distLepB, weight );
+      hists_.find("PartonJetDRcorrect")->second->Fill( distHadB, weight );
+      // take into account that q and qbar are unsdistinguishable
+      if(distQ2+distQBar2<distQ+distQBar){
+	hists_.find("PartonJetDRall")->second->Fill( distQ2   , weight );
+	hists_.find("PartonJetDRall")->second->Fill( distQBar2, weight );
+      }
+      else{
+	hists_.find("PartonJetDRall")->second->Fill( distQ   , weight );
+	hists_.find("PartonJetDRall")->second->Fill( distQBar, weight );
+      }
+    }
+    
     //std::cout << "assignment: " << ((assignment==-1) ? "-1" : hists_.find("qAssignment")->second->GetXaxis()->GetBinLabel(assignment+1)) << std::endl;
 
     // object kinematics 
