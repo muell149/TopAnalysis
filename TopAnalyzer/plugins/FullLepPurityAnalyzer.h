@@ -63,7 +63,13 @@ class FullLepPurityAnalyzer : public edm::EDAnalyzer {
   std::vector<double> bBarEtaBins_;	  
   std::vector<double> bBarRapidityBins_; 
   std::vector<double> bBarPhiBins_;	  
-  std::vector<double> bBarPtBins_;	  
+  std::vector<double> bBarPtBins_;
+  
+  std::vector<double> jetPairEtaBins_;	  
+  std::vector<double> jetPairRapidityBins_;
+  std::vector<double> jetPairPhiBins_;	  
+  std::vector<double> jetPairPtBins_;	      
+  std::vector<double> jetPairMassBins_;  	  
   
   std::vector<double> topEtaBins_;	 
   std::vector<double> topRapidityBins_; 
@@ -107,6 +113,12 @@ class FullLepPurityAnalyzer : public edm::EDAnalyzer {
   TH1D* bBarRapidityRecGenCounters_; 
   TH1D* bBarPhiRecGenCounters_;     
   TH1D* bBarPtRecGenCounters_;      
+
+  TH1D* jetPairEtaRecGenCounters_;    
+  TH1D* jetPairRapidityRecGenCounters_;
+  TH1D* jetPairPhiRecGenCounters_;    
+  TH1D* jetPairPtRecGenCounters_;     
+  TH1D* jetPairMassRecGenCounters_; 
   
   TH1D* topEtaRecGenCounters_;     
   TH1D* topRapidityRecGenCounters_; 
@@ -149,7 +161,13 @@ class FullLepPurityAnalyzer : public edm::EDAnalyzer {
   TH1D* bBarEtaRecCounters_;        
   TH1D* bBarRapidityRecCounters_; 
   TH1D* bBarPhiRecCounters_;        
-  TH1D* bBarPtRecCounters_;         
+  TH1D* bBarPtRecCounters_;
+  
+  TH1D* jetPairEtaRecCounters_;       
+  TH1D* jetPairRapidityRecCounters_;
+  TH1D* jetPairPhiRecCounters_;       
+  TH1D* jetPairPtRecCounters_;        
+  TH1D* jetPairMassRecCounters_;           
   
   TH1D* topEtaRecCounters_;        
   TH1D* topRapidityRecCounters_; 
@@ -193,6 +211,12 @@ class FullLepPurityAnalyzer : public edm::EDAnalyzer {
   TH1D* bBarRapidityGenCounters_; 
   TH1D* bBarPhiGenCounters_;        
   TH1D* bBarPtGenCounters_;         
+
+  TH1D* jetPairEtaGenCounters_;       
+  TH1D* jetPairRapidityGenCounters_;
+  TH1D* jetPairPhiGenCounters_;       
+  TH1D* jetPairPtGenCounters_;        
+  TH1D* jetPairMassGenCounters_;
   
   TH1D* topEtaGenCounters_;        
   TH1D* topRapidityGenCounters_; 

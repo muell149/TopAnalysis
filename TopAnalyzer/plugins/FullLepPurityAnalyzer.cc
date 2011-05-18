@@ -34,7 +34,13 @@ FullLepPurityAnalyzer::FullLepPurityAnalyzer(const edm::ParameterSet& cfg):
   bBarEtaBins_      ( cfg.getParameter<std::vector<double> >( "bBarEtaBins"      ) ),
   bBarRapidityBins_ ( cfg.getParameter<std::vector<double> >( "bBarRapidityBins" ) ),  
   bBarPhiBins_      ( cfg.getParameter<std::vector<double> >( "bBarPhiBins"      ) ),  
-  bBarPtBins_       ( cfg.getParameter<std::vector<double> >( "bBarPtBins"       ) ),     
+  bBarPtBins_       ( cfg.getParameter<std::vector<double> >( "bBarPtBins"       ) ),
+  
+  jetPairEtaBins_      ( cfg.getParameter<std::vector<double> >( "jetPairEtaBins"      ) ),
+  jetPairRapidityBins_ ( cfg.getParameter<std::vector<double> >( "jetPairRapidityBins" ) ),
+  jetPairPhiBins_      ( cfg.getParameter<std::vector<double> >( "jetPairPhiBins"      ) ),
+  jetPairPtBins_       ( cfg.getParameter<std::vector<double> >( "jetPairPtBins"       ) ),
+  jetPairMassBins_     ( cfg.getParameter<std::vector<double> >( "jetPairMassBins"     ) ),        
   
   topEtaBins_      ( cfg.getParameter<std::vector<double> >( "topEtaBins"      ) ),
   topRapidityBins_ ( cfg.getParameter<std::vector<double> >( "topRapidityBins" ) ),  
@@ -94,6 +100,12 @@ FullLepPurityAnalyzer::beginJob()
   bBarRapidityRecGenCounters_  = fs->make<TH1D>(nsRecGen.name( "bBarRapidity" ), "y(#bar{b})",     bBarRapidityBins_.size()-1, &bBarRapidityBins_.front() );
   bBarPhiRecGenCounters_       = fs->make<TH1D>(nsRecGen.name( "bBarPhi" ),      "#phi(#bar{b})",  bBarPhiBins_.size()-1,      &bBarPhiBins_.front()      );
   bBarPtRecGenCounters_        = fs->make<TH1D>(nsRecGen.name( "bBarPt" ),       "p_{T}(#bar{b})", bBarPtBins_.size()-1,       &bBarPtBins_.front()       );  
+  
+  jetPairEtaRecGenCounters_       = fs->make<TH1D>(nsRecGen.name( "jetPairEta" ),      "#eta(jj)",  jetPairEtaBins_.size()-1,      &jetPairEtaBins_.front()      );
+  jetPairRapidityRecGenCounters_  = fs->make<TH1D>(nsRecGen.name( "jetPairRapidity" ), "y(jj)",     jetPairRapidityBins_.size()-1, &jetPairRapidityBins_.front() );
+  jetPairPhiRecGenCounters_       = fs->make<TH1D>(nsRecGen.name( "jetPairPhi" ),      "#phi(jj)",  jetPairPhiBins_.size()-1,      &jetPairPhiBins_.front()      );
+  jetPairPtRecGenCounters_        = fs->make<TH1D>(nsRecGen.name( "jetPairPt" ),       "p_{T}(jj)", jetPairPtBins_.size()-1,       &jetPairPtBins_.front()       );  
+  jetPairMassRecGenCounters_      = fs->make<TH1D>(nsRecGen.name( "jetPairMass" ),     "M(jj)",     jetPairMassBins_.size()-1,     &jetPairMassBins_.front()     );   
 
   topEtaRecGenCounters_       = fs->make<TH1D>(nsRecGen.name( "topEta" ),      "#eta(t)",  topEtaBins_.size()-1,      &topEtaBins_.front()      );
   topRapidityRecGenCounters_  = fs->make<TH1D>(nsRecGen.name( "topRapidity" ), "y(t)",     topRapidityBins_.size()-1, &topRapidityBins_.front() );
@@ -137,7 +149,13 @@ FullLepPurityAnalyzer::beginJob()
   bBarEtaRecCounters_       = fs->make<TH1D>(nsRec.name( "bBarEta" ),      "#eta(#bar{b})",  bBarEtaBins_.size()-1,      &bBarEtaBins_.front()      );
   bBarRapidityRecCounters_  = fs->make<TH1D>(nsRec.name( "bBarRapidity" ), "y(#bar{b})",     bBarRapidityBins_.size()-1, &bBarRapidityBins_.front() );
   bBarPhiRecCounters_       = fs->make<TH1D>(nsRec.name( "bBarPhi" ),      "#phi(#bar{b})",  bBarPhiBins_.size()-1,      &bBarPhiBins_.front()      );
-  bBarPtRecCounters_        = fs->make<TH1D>(nsRec.name( "bBarPt" ),       "p_{T}(#bar{b})", bBarPtBins_.size()-1,       &bBarPtBins_.front()       );  
+  bBarPtRecCounters_        = fs->make<TH1D>(nsRec.name( "bBarPt" ),       "p_{T}(#bar{b})", bBarPtBins_.size()-1,       &bBarPtBins_.front()       );
+  
+  jetPairEtaRecCounters_       = fs->make<TH1D>(nsRec.name( "jetPairEta" ),      "#eta(jj)",  jetPairEtaBins_.size()-1,      &jetPairEtaBins_.front()      );
+  jetPairRapidityRecCounters_  = fs->make<TH1D>(nsRec.name( "jetPairRapidity" ), "y(jj)",     jetPairRapidityBins_.size()-1, &jetPairRapidityBins_.front() );
+  jetPairPhiRecCounters_       = fs->make<TH1D>(nsRec.name( "jetPairPhi" ),      "#phi(jj)",  jetPairPhiBins_.size()-1,      &jetPairPhiBins_.front()      );
+  jetPairPtRecCounters_        = fs->make<TH1D>(nsRec.name( "jetPairPt" ),       "p_{T}(jj)", jetPairPtBins_.size()-1,       &jetPairPtBins_.front()       );  
+  jetPairMassRecCounters_      = fs->make<TH1D>(nsRec.name( "jetPairMass" ),     "M(jj)",     jetPairMassBins_.size()-1,     &jetPairMassBins_.front()     );    
 
   topEtaRecCounters_       = fs->make<TH1D>(nsRec.name( "topEta" ),      "#eta(t)",  topEtaBins_.size()-1,      &topEtaBins_.front()      );
   topRapidityRecCounters_  = fs->make<TH1D>(nsRec.name( "topRapidity" ), "y(t)",     topRapidityBins_.size()-1, &topRapidityBins_.front() );
@@ -181,7 +199,13 @@ FullLepPurityAnalyzer::beginJob()
   bBarEtaGenCounters_       = fs->make<TH1D>(nsGen.name( "bBarEta" ),      "#eta(#bar{b})",  bBarEtaBins_.size()-1,      &bBarEtaBins_.front()      );
   bBarRapidityGenCounters_  = fs->make<TH1D>(nsGen.name( "bBarRapidity" ), "y(#bar{b})",     bBarRapidityBins_.size()-1, &bBarRapidityBins_.front() );
   bBarPhiGenCounters_       = fs->make<TH1D>(nsGen.name( "bBarPhi" ),      "#phi(#bar{b})",  bBarPhiBins_.size()-1,      &bBarPhiBins_.front()      );
-  bBarPtGenCounters_        = fs->make<TH1D>(nsGen.name( "bBarPt" ),       "p_{T}(#bar{b})", bBarPtBins_.size()-1,       &bBarPtBins_.front()       );  
+  bBarPtGenCounters_        = fs->make<TH1D>(nsGen.name( "bBarPt" ),       "p_{T}(#bar{b})", bBarPtBins_.size()-1,       &bBarPtBins_.front()       );
+  
+  jetPairEtaGenCounters_       = fs->make<TH1D>(nsGen.name( "jetPairEta" ),      "#eta(jj)",  jetPairEtaBins_.size()-1,      &jetPairEtaBins_.front()      );
+  jetPairRapidityGenCounters_  = fs->make<TH1D>(nsGen.name( "jetPairRapidity" ), "y(jj)",     jetPairRapidityBins_.size()-1, &jetPairRapidityBins_.front() );
+  jetPairPhiGenCounters_       = fs->make<TH1D>(nsGen.name( "jetPairPhi" ),      "#phi(jj)",  jetPairPhiBins_.size()-1,      &jetPairPhiBins_.front()      );
+  jetPairPtGenCounters_        = fs->make<TH1D>(nsGen.name( "jetPairPt" ),       "p_{T}(jj)", jetPairPtBins_.size()-1,       &jetPairPtBins_.front()       );  
+  jetPairMassGenCounters_      = fs->make<TH1D>(nsGen.name( "jetPairMass" ),     "M(jj)",     jetPairMassBins_.size()-1,     &jetPairMassBins_.front()     );    
 
   topEtaGenCounters_       = fs->make<TH1D>(nsGen.name( "topEta" ),      "#eta(t)",  topEtaBins_.size()-1,      &topEtaBins_.front()      );
   topRapidityGenCounters_  = fs->make<TH1D>(nsGen.name( "topRapidity" ), "y(t)",     topRapidityBins_.size()-1, &topRapidityBins_.front() );
@@ -253,6 +277,12 @@ FullLepPurityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& set
   lepPair->addDaughter(*lepBar);  
   addFourMomenta.set(*lepPair);
   
+  // combined jet pair object 
+  reco::CompositeCandidate* jetPair = new reco::CompositeCandidate();
+  jetPair->addDaughter(*b);
+  jetPair->addDaughter(*bBar);  
+  addFourMomenta.set(*jetPair);  
+  
   const reco::Candidate* genTop    = FullLepEvt->genTop();
   const reco::Candidate* genB      = FullLepEvt->genB();
   const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
@@ -271,6 +301,12 @@ FullLepPurityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& set
   genLepPair->addDaughter(*genLep);
   genLepPair->addDaughter(*genLepBar);
   addFourMomenta.set(*genLepPair);
+  
+  // combined jet pair object 
+  reco::CompositeCandidate* genJetPair = new reco::CompositeCandidate();
+  genJetPair->addDaughter(*genB);
+  genJetPair->addDaughter(*genBBar);
+  addFourMomenta.set(*genJetPair);  
 
   // count events where given quantity is generated AND reconstructed inside a certain bin
   countRecGen(lep->eta(),      genLep->eta(),	   *lepEtaRecGenCounters_      );
@@ -298,6 +334,12 @@ FullLepPurityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& set
   countRecGen(bBar->rapidity(), genBBar->rapidity(), *bBarRapidityRecGenCounters_ );
   countRecGen(bBar->phi(),	genBBar->phi(),      *bBarPhiRecGenCounters_	  );
   countRecGen(bBar->pt(),	genBBar->pt(),       *bBarPtRecGenCounters_	  );
+  
+  countRecGen(jetPair->eta(),      genJetPair->eta(),      *jetPairEtaRecGenCounters_	   );
+  countRecGen(jetPair->rapidity(), genJetPair->rapidity(), *jetPairRapidityRecGenCounters_ );
+  countRecGen(jetPair->phi(),      genJetPair->phi(),      *jetPairPhiRecGenCounters_	   );
+  countRecGen(jetPair->pt(),       genJetPair->pt(),       *jetPairPtRecGenCounters_	   );  
+  countRecGen(jetPair->mass(),     genJetPair->mass(),     *jetPairMassRecGenCounters_     );	  
   
   countRecGen(top->eta(),      genTop->eta(),	   *topEtaRecGenCounters_      );
   countRecGen(top->rapidity(), genTop->rapidity(), *topRapidityRecGenCounters_ );
@@ -343,6 +385,12 @@ FullLepPurityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& set
   bBarPhiRecCounters_     ->Fill(bBar->phi()     );
   bBarPtRecCounters_      ->Fill(bBar->pt()      );
   
+  jetPairEtaRecCounters_     ->Fill(jetPair->eta()     );
+  jetPairRapidityRecCounters_->Fill(jetPair->rapidity());
+  jetPairPhiRecCounters_     ->Fill(jetPair->phi()     );
+  jetPairPtRecCounters_      ->Fill(jetPair->pt()      ); 
+  jetPairMassRecCounters_    ->Fill(jetPair->mass()    );    
+    
   topEtaRecCounters_     ->Fill(top->eta()     );
   topRapidityRecCounters_->Fill(top->rapidity());
   topPhiRecCounters_     ->Fill(top->phi()     );
@@ -386,6 +434,12 @@ FullLepPurityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& set
   bBarRapidityGenCounters_->Fill(genBBar->rapidity());
   bBarPhiGenCounters_     ->Fill(genBBar->phi()     );
   bBarPtGenCounters_      ->Fill(genBBar->pt()      );
+  
+  jetPairEtaGenCounters_     ->Fill(genJetPair->eta()     );
+  jetPairRapidityGenCounters_->Fill(genJetPair->rapidity());
+  jetPairPhiGenCounters_     ->Fill(genJetPair->phi()     );
+  jetPairPtGenCounters_      ->Fill(genJetPair->pt()      ); 
+  jetPairMassGenCounters_    ->Fill(genJetPair->mass()    );     
   
   topEtaGenCounters_     ->Fill(genTop->eta()     );
   topRapidityGenCounters_->Fill(genTop->rapidity());
