@@ -38,10 +38,15 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   // b) options to be configured only once
   // get the .root files from the following folder:
   TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
+  // see if its 2010 or 2011 data from luminosity
+  TString dataSample="";
+  if(luminosity<36) dataSample="2010";
+  if(luminosity>36) dataSample="2011";
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
+  if(dataSample!="") outputFolder+=dataSample+"/";
   // save all plots within a root file named:
-  TString outputFileName="diffXSecTopSemiMu.root";
+  TString outputFileName="diffXSecTopSemiMu"+dataSample+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitpbHypothesis"+lumi+"pb";
   // set detail level of output 
@@ -573,7 +578,8 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
     if(calculateXSec){
       // a) differential XSec from data
       // get data plot
-      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->Clone());
+      TString name=TString(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetName())+"kData";
+      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->Clone(name));
       // subtract BG(MC)
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kBkg  ]->Clone()), -1);
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets]->Clone()), -1);
@@ -597,7 +603,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
       histogramStyle(*histo_[xSec][kSig ], kSig , true );
       ++NXSec;
       // save TH1F for data in extra folder
-      saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose, "xSecDataTH1FAllSystematics/"+sysLabel(systematicVariation));
+      //saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose, "xSecDataTH1FAllSystematics/"+sysLabel(systematicVariation));
     }
   }
   // ---
@@ -790,7 +796,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   }
   // b) for legends
   plotCanvas_[canvasNumber]->cd(0);
-  plotCanvas_[canvasNumber]->SetTitle("legendHypoKinFit");
+  plotCanvas_[canvasNumber]->SetTitle("legend");
   leg0->Draw("");
   ++canvasNumber;
 
@@ -798,21 +804,34 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   // saving
   // ---
   if(save){
-    // pdf and eps
-    saveCanvas(plotCanvas_, outputFolder, pdfName);
-    // root file
+    // a) as pdf
+    saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
+    // b) as eps
+    for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
+      TString saveToFolder=outputFolder;
+      TString title=(plotCanvas_[idx])->GetTitle();
+      if(title.Contains("efficiency"                           )) saveToFolder+="effAndAcc/";
+      if(title.Contains("analyzeTopPartonLevelKinematics"      )) saveToFolder+="partonLevel/";
+      if(title.Contains("analyzeHypoKinFit"                    )) saveToFolder+="kinFitPerformance/";
+      if(title.Contains("xSec"                                 )) saveToFolder+="xSec/";
+
+      if(title.Contains("analyzeTopRecoKinematicsKinFit"       )) saveToFolder+="recoYield/";
+      if(title.Contains("0")                                    ) saveToFolder=outputFolder+"genRecoCorrPlots/";
+
+      plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps");      
+    }
+    // c) root file
     std::cout << "will create outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
       // get correct folder
       TString title=(plotCanvas_[idx])->GetTitle();
       TString outputfolder="";
-      TString possibleFolderNames[6]={"efficiency", "analyzeTopRecoKinematicsKinFit", "xSec", "analyzeTopRecoKinematicsKinFitMatched", "analyzeTopPartonLevelKinematics", "analyzeHypoKinFit"};
+      TString possibleFolderNames[5]={"efficiency", "analyzeTopRecoKinematicsKinFit", "xSec", "analyzeTopPartonLevelKinematics", "analyzeHypoKinFit"};
       for(unsigned int name=0; name<sizeof(possibleFolderNames)/sizeof(TString); ++name){
 	// add another subfoder indicating the systematic variation
 	if(title.Contains(possibleFolderNames[name])){ 
 	  outputfolder=possibleFolderNames[name]+"/"+sysLabel(systematicVariation);
 	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name],""));
-	  
 	}
       }
       saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose,outputfolder);
