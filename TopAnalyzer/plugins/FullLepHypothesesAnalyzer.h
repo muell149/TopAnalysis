@@ -204,7 +204,19 @@ class FullLepHypothesesAnalyzer : public edm::EDAnalyzer {
   /// Does not include electrons yet but can be extended easily
   TH2D* compare_;
   /// histogram that shows the two dimensional neutrino spectrum
-  TH2D* spectrum_;    
+  TH2D* spectrum_;
+  /// histogram to compare the generated neutrino momenta to the reconstructed ones
+  TH2D* genRecoNuComparison_; 
+  /// histogram to compare the generated antineutrino momenta to the reconstructed ones
+  TH2D* genRecoNuBarComparison_; 
+  /// histogram to compare the generated neutrino momenta to the reconstructed ones
+  TH2D* genRecoNuPx_; 
+  /// histogram to compare the generated antineutrino momenta to the reconstructed ones
+  TH2D* genRecoNuBarPx_;
+  /// histogram to compare the generated neutrino momenta to the reconstructed ones  
+  TH2D* genRecoNuPy_; 
+  /// histogram to compare the generated antineutrino momenta to the reconstructed ones
+  TH2D* genRecoNuBarPy_;           
 };
 
 #endif

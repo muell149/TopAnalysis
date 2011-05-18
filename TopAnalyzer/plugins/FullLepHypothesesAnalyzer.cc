@@ -33,6 +33,15 @@ FullLepHypothesesAnalyzer::beginJob()
   bookKinGenHistos   (fs);  
   bookKinResHistos   (fs);
   bookQualityHistos  (fs);
+   
+  NameScheme ns("correlation"); 
+      
+  genRecoNuComparison_    = fs->make<TH2D>(ns.name("genRecoNuComparison"   ), "Nu Pt",    100, 0., 250., 100, 0., 250.);  
+  genRecoNuBarComparison_ = fs->make<TH2D>(ns.name("genRecoNuBarComparison"), "NuBar Pt", 100, 0., 250., 100, 0., 250.); 
+  genRecoNuPx_    = fs->make<TH2D>(ns.name("genRecoNuPx"   ), "Nu Px",    100, -100., 100., 100, -100., 100.);  
+  genRecoNuBarPx_ = fs->make<TH2D>(ns.name("genRecoNuBarPx"), "NuBar Px", 100, -100., 100., 100, -100., 100.);  
+  genRecoNuPy_    = fs->make<TH2D>(ns.name("genRecoNuPy"   ), "Nu Py",    100, -100., 100., 100, -100., 100.);  
+  genRecoNuBarPy_ = fs->make<TH2D>(ns.name("genRecoNuBarPy"), "NuBar Py", 100, -100., 100., 100, -100., 100.);      
 }
 
 /// everything that has to be done during the event loop: filling plots
@@ -185,6 +194,16 @@ FullLepHypothesesAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&
   const reco::Candidate* genBBar   = FullLepEvt->genBBar();
   const reco::Candidate* genLep    = FullLepEvt->genLepton();
   const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
+
+
+  genRecoNuComparison_   ->Fill(Nu->pt(),   genNu->pt());
+  genRecoNuBarComparison_->Fill(NuBar->pt(),genNuBar->pt());  
+  genRecoNuPx_           ->Fill(Nu->px(),   genNu->px());
+  genRecoNuBarPx_        ->Fill(NuBar->px(),genNuBar->px());  
+  genRecoNuPy_           ->Fill(Nu->py(),   genNu->py());
+  genRecoNuBarPy_        ->Fill(NuBar->py(),genNuBar->py());   
+
+
 
   if(genTop)    fillKinGenHistos(TopKinGen_,    *genTop,    weight);
   if(genWplus)  fillKinGenHistos(WplusKinGen_,  *genWplus,  weight);
@@ -505,7 +524,7 @@ FullLepHypothesesAnalyzer::bookKinResHistos(edm::Service<TFileService>& fs)
   NuBarKinRes_.push_back( fs->make<TH1D>(ns.name("NuBarEnRes"  ), "E_{rec}-E_{gen}/E_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) );  
   NuBarKinRes_.push_back( fs->make<TH1D>(ns.name("NuBarEtaRes" ), "#eta_{rec}-#eta_{gen}/#eta_{gen} (#bar{#nu})", 40, -1.0, 1.0 ) );
   NuBarKinRes_.push_back( fs->make<TH1D>(ns.name("NuBarPhiRes" ), "#phi_{rec}-#phi_{gen}/#phi_{gen} (#bar{#nu})", 40, -1.0, 1.0 ) );
-  NuBarKinRes_.push_back( fs->make<TH1D>(ns.name("NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) );  
+  NuBarKinRes_.push_back( fs->make<TH1D>(ns.name("NuBarMassRes"), "M_{rec}-M_{gen}/M_{gen} (#bar{#nu})",          40, -1.0, 1.0 ) ); 
   
   // push back the same histograms for wrong charge event solutions if demanded
   if(useWrongCharge_){
@@ -598,9 +617,9 @@ FullLepHypothesesAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs)
   
   jetIdCorrectnes_  = fs->make<TH1D>(ns.name("jetIdCorrectnes" ), "Correctnes of Jet Id",     3, -0.5, 2.5);  
   jetFlCorrectnes_  = fs->make<TH1D>(ns.name("jetFlCorrectnes" ), "Correctnes of Jet Flavor", 3, -0.5, 2.5); 
-    
-  compare_  = fs->make<TH2D>(ns.name("compare"   ), "Indices", 15, -0.5, 14.5, 15, -0.5, 14.5);
-  spectrum_ = fs->make<TH2D>(ns.name("spectrum"  ), "Nu spectrum", 50, 0., 250., 50, 0., 250.);       
+
+  compare_                = fs->make<TH2D>(ns.name("compare"               ), "Indices",        15, -0.5, 14.5, 15, -0.5, 14.5);
+  spectrum_               = fs->make<TH2D>(ns.name("spectrum"              ), "Nu spectrum",    50, 0., 250., 50, 0., 250.);       
 }
 
 /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
@@ -633,7 +652,7 @@ FullLepHypothesesAnalyzer::fillKinGenHistos(std::vector<TH1D*>& histos, const re
   histos[1]->Fill( candidate.energy(), weight );  
   histos[2]->Fill( candidate.eta()   , weight );
   histos[3]->Fill( candidate.phi()   , weight );
-  histos[4]->Fill( candidate.mass()  , weight );
+  histos[4]->Fill( candidate.mass()  , weight );  
 }
 
 /// fill histograms for particle resolutions for right charge combinations
@@ -645,7 +664,7 @@ FullLepHypothesesAnalyzer::fillKinResHistos(std::vector<TH1D*>& histos, const re
   histos[1]->Fill( (candidate.energy()-genCandidate.energy())/genCandidate.energy(), weight );  
   histos[2]->Fill( (candidate.eta()   -genCandidate.eta()   )/genCandidate.eta()   , weight );
   histos[3]->Fill( (candidate.phi()   -genCandidate.phi()   )/genCandidate.phi()   , weight );
-  histos[4]->Fill( (candidate.mass()  -genCandidate.mass()  )/genCandidate.mass()  , weight );
+  histos[4]->Fill( (candidate.mass()  -genCandidate.mass()  )/genCandidate.mass()  , weight );  
 }
 
 /// fill histograms for particle resolutions for wrong charge combinations
@@ -689,7 +708,7 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
     wrongCharge_ ->Fill( FullLepEvt.isWrongCharge() , weight ); 
   } 
   
-  // indices Hist (for muon muon only) 
+  // indices Hist
   const TtEvent::HypoClassKey genKey = TtEvent::HypoClassKey(3);
   const TtEvent::HypoClassKey kinKey = TtEvent::HypoClassKey(6);
    
@@ -699,7 +718,7 @@ FullLepHypothesesAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepE
     compare_->Fill(FullLepEvt.jetLeptonCombination(genKey)[4]+ 8, FullLepEvt.jetLeptonCombination(kinKey)[4]+ 8);
     compare_->Fill(FullLepEvt.jetLeptonCombination(genKey)[5]+12, FullLepEvt.jetLeptonCombination(kinKey)[5]+12);  
     
-    // are both b-jets identifierd right or only one or none of them?
+    // are both b-jets identified right or only one or none of them?
     if(FullLepEvt.jetLeptonCombination(kinKey)[0] == FullLepEvt.jetLeptonCombination(genKey)[0] &&
      FullLepEvt.jetLeptonCombination(kinKey)[1] == FullLepEvt.jetLeptonCombination(genKey)[1]){
       jetIdCorrectnes_->SetBinContent(1,jetIdCorrectnes_->GetBinContent(1)+weight);

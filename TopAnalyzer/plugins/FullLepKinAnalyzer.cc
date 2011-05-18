@@ -1,14 +1,12 @@
 #include "TLorentzVector.h"
 #include "TopAnalysis/TopAnalyzer/plugins/FullLepKinAnalyzer.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
-#include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
+//#include "AnalysisDataFormats/TopObjects/interface/TtEventPartons.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/Common/interface/View.h"
-
+//#include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
-
 
 /// default constructor
 FullLepKinAnalyzer::FullLepKinAnalyzer(const edm::ParameterSet& cfg):
@@ -40,7 +38,6 @@ FullLepKinAnalyzer::beginJob()
 void
 FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-
   edm::Handle<TtFullLeptonicEvent> FullLepEvt;
   evt.getByLabel(FullLepEvt_, FullLepEvt);
 
@@ -110,11 +107,16 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   addFourMomenta.set(*TtBar);
   
   // combined lepton pair object 
-  reco::CompositeCandidate* LepLepBar = new reco::CompositeCandidate();
-  LepLepBar->addDaughter(*Lep);
-  LepLepBar->addDaughter(*LepBar);  
-  addFourMomenta.set(*LepLepBar);
-
+  reco::CompositeCandidate* LepPair = new reco::CompositeCandidate();
+  LepPair->addDaughter(*Lep);
+  LepPair->addDaughter(*LepBar);
+  addFourMomenta.set(*LepPair);
+  
+  // dijet pair object 
+  reco::CompositeCandidate* JetPair = new reco::CompositeCandidate();
+  JetPair->addDaughter(*B);
+  JetPair->addDaughter(*BBar); 
+  addFourMomenta.set(*JetPair); 
 
   fillKinHistos(TopKin_,    *Top    );
   fillKinHistos(WplusKin_,  *Wplus  );
@@ -128,15 +130,17 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   fillKinHistos(LepKin_,    *Lep    );
   fillKinHistos(NuBarKin_,  *NuBar  );
   
-  fillKinHistos(TtBarKin_,     *TtBar     );
-  fillKinHistos(LepLepBarKin_, *LepLepBar );  
+  fillKinHistos(TtBarKin_,     *TtBar );
+  fillKinHistos(LepPairKin_, *LepPair );
+  fillKinHistos(JetPairKin_, *JetPair );
     
   // -----------------------
   // fill generator and pull histos for kinematic variables
   // -----------------------
   if( !FullLepEvt->genEvent() || !FullLepEvt->genEvent()->isFullLeptonic()){
     delete TtBar;
-    delete LepLepBar;
+    delete LepPair;
+    delete JetPair;
     return;  
   }
   
@@ -159,10 +163,16 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   addFourMomenta.set(*genTtBar);
   
   // combined lepton pair object 
-  reco::CompositeCandidate* genLepLepBar = new reco::CompositeCandidate();
-  genLepLepBar->addDaughter(*genLep);
-  genLepLepBar->addDaughter(*genLepBar);
-  addFourMomenta.set(*genLepLepBar); 
+  reco::CompositeCandidate* genLepPair = new reco::CompositeCandidate();
+  genLepPair->addDaughter(*genLep);
+  genLepPair->addDaughter(*genLepBar);
+  addFourMomenta.set(*genLepPair);
+  
+  // combined lepton pair object 
+  reco::CompositeCandidate* genJetPair = new reco::CompositeCandidate();
+  genJetPair->addDaughter(*genB);
+  genJetPair->addDaughter(*genBBar);
+  addFourMomenta.set(*genJetPair);
 
   // gen particle distributions
   fillKinHistos(TopGen_,    *genTop    );
@@ -177,32 +187,48 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   fillKinHistos(LepGen_,    *genLep    );
   fillKinHistos(NuBarGen_,  *genNuBar  );
   
-  fillKinHistos(TtBarGen_,     *genTtBar     );
-  fillKinHistos(LepLepBarGen_, *genLepLepBar );  
+  fillKinHistos(TtBarGen_,   *genTtBar   );
+  fillKinHistos(LepPairGen_, *genLepPair );
+  fillKinHistos(JetPairGen_, *genJetPair );    
   
   // pull distributions
-  fillPullHistos(TopPull_,    *Top,     *genTop    );
-  fillPullHistos(WplusPull_,  *Wplus,   *genWplus  );
-  fillPullHistos(BPull_,      *B,       *genB	   );
-  fillPullHistos(LepBarPull_, *LepBar,  *genLepBar );
-  fillPullHistos(NuPull_,     *Nu,      *genNu     );
+  fillPullHistos(TopPull_,    *TopPull2D_,    *Top,	*genTop  );
+  fillPullHistos(WplusPull_,  *WplusPull2D_,  *Wplus,	*genWplus  );
+  fillPullHistos(BPull_,      *BPull2D_,      *B,	*genB	 );
+  fillPullHistos(LepBarPull_, *LepBarPull2D_, *LepBar,  *genLepBar );
+  fillPullHistos(NuPull_,     *NuPull2D_,     *Nu,	*genNu   );
 
-  fillPullHistos(TopBarPull_, *TopBar,  *genTopBar );
-  fillPullHistos(WminusPull_, *Wminus,  *genWminus );
-  fillPullHistos(BBarPull_,   *BBar,    *genBBar   );
-  fillPullHistos(LepPull_,    *Lep,     *genLep    );
-  fillPullHistos(NuBarPull_,  *NuBar,   *genNuBar  ); 
+  fillPullHistos(TopBarPull_, *TopBarPull2D_, *TopBar,  *genTopBar );
+  fillPullHistos(WminusPull_, *WminusPull2D_, *Wminus,  *genWminus );
+  fillPullHistos(BBarPull_,   *BBarPull2D_,   *BBar,	*genBBar );
+  fillPullHistos(LepPull_,    *LepPull2D_,    *Lep,	*genLep  );
+  fillPullHistos(NuBarPull_,  *NuBarPull2D_,  *NuBar,	*genNuBar  ); 
   
-  fillPullHistos(TtBarPull_,     *TtBar,     *genTtBar     );
-  fillPullHistos(LepLepBarPull_, *LepLepBar, *genLepLepBar );
+  fillPullHistos(TtBarPull_,   *TtBarPull2D_,	*TtBar,   *genTtBar   );
+  fillPullHistos(LepPairPull_, *LepPairPull2D_, *LepPair, *genLepPair );
+  fillPullHistos(JetPairPull_, *JetPairPull2D_, *JetPair, *genJetPair );  
   
   delete TtBar;
-  delete LepLepBar;
+  delete LepPair;
   delete genTtBar;
-  delete genLepLepBar;       
+  delete genLepPair;
+  delete genJetPair;  
+  
+  // indices Hist
+  const TtEvent::HypoClassKey genKey = TtEvent::HypoClassKey(3);
+  const TtEvent::HypoClassKey kinKey = TtEvent::HypoClassKey(6);
+   
+  if(FullLepEvt->isHypoValid(genKey) && FullLepEvt->isHypoValid(kinKey)){
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[0]   , FullLepEvt->jetLeptonCombination(kinKey)[0]   );
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[1]+ 4, FullLepEvt->jetLeptonCombination(kinKey)[1]+ 4);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[2]+ 8, FullLepEvt->jetLeptonCombination(kinKey)[2]+ 8);    
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[3]+12, FullLepEvt->jetLeptonCombination(kinKey)[3]+12);    
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[4]+16, FullLepEvt->jetLeptonCombination(kinKey)[4]+16);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[5]+20, FullLepEvt->jetLeptonCombination(kinKey)[5]+20);
+  }      
 }
 
-/// everything that has to be done after the event loop: summarizes if wantSummary_ is true
+/// everything that has to be done after the event loop
 void
 FullLepKinAnalyzer::endJob() 
 {
@@ -292,12 +318,19 @@ FullLepKinAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
   TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"   ), "#phi (t#bar{t})"       , 34, -3.4,   3.4) );
   TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarMass"  ), "M (t#bar{t}) [GeV]"    ,100,  0. ,2000. ) );
   
-  LepLepBarKin_.push_back( fs->make<TH1D>(ns.name("LepLepBarPt"    ), "p_{t} (l^{+}l^{-}) [GeV]", 50,  0. , 500. ) );
-  LepLepBarKin_.push_back( fs->make<TH1D>(ns.name("LepLepBarEnergy"), "E (l^{+}l^{-}) [GeV]"    , 50,  0. , 500. ) );
-  LepLepBarKin_.push_back( fs->make<TH1D>(ns.name("LepLepBarEta"   ), "#eta (l^{+}l^{-})"       , 34, -3.4,   3.4) );
-  LepLepBarKin_.push_back( fs->make<TH1D>(ns.name("LepLepBarRap"   ), "rapidity (l^{+}l^{-})"   , 34, -3.4,   3.4) );  
-  LepLepBarKin_.push_back( fs->make<TH1D>(ns.name("LepLepBarPhi"   ), "#phi (l^{+}l^{-})"       , 34, -3.4,   3.4) );
-  LepLepBarKin_.push_back( fs->make<TH1D>(ns.name("LepLepBarMass"  ), "M (l^{+}l^{-}) [GeV]"    , 30,  0. , 600. ) );   
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPt"    ), "p_{t} (l^{+}l^{-}) [GeV]", 50,  0. , 500. ) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairEnergy"), "E (l^{+}l^{-}) [GeV]"    , 50,  0. , 500. ) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairEta"   ), "#eta (l^{+}l^{-})"       , 34, -3.4,   3.4) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairRap"   ), "rapidity (l^{+}l^{-})"   , 34, -3.4,   3.4) );  
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPhi"   ), "#phi (l^{+}l^{-})"       , 34, -3.4,   3.4) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairMass"  ), "M (l^{+}l^{-}) [GeV]"    , 30,  0. , 600. ) );  
+  
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairPt"    ), "p_{t} (jj) [GeV]", 50,  0. , 500. ) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairEnergy"), "E (jj) [GeV]"    , 50,  0. , 500. ) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairEta"   ), "#eta (jj)"       , 34, -3.4,   3.4) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairRap"   ), "rapidity (jj)"   , 34, -3.4,   3.4) );  
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairPhi"   ), "#phi (jj)"       , 34, -3.4,   3.4) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairMass"  ), "M (jj) [GeV]"    , 30,  0. , 600. ) );     
 }
 
 
@@ -386,12 +419,19 @@ FullLepKinAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"   ), "#phi (t#bar{t})"       , 34, -3.4,   3.4) );
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarMass"  ), "M (t#bar{t}) [GeV]"    ,100,  0. ,2000. ) );
   
-  LepLepBarGen_.push_back( fs->make<TH1D>(ns.name("LepLepBarPt"    ), "p_{t} (l^{+}l^{-}) [GeV]", 50,  0. , 500. ) );
-  LepLepBarGen_.push_back( fs->make<TH1D>(ns.name("LepLepBarEnergy"), "E (l^{+}l^{-}) [GeV]"    , 50,  0. , 500. ) );
-  LepLepBarGen_.push_back( fs->make<TH1D>(ns.name("LepLepBarEta"   ), "#eta (l^{+}l^{-})"       , 34, -3.4,   3.4) );
-  LepLepBarGen_.push_back( fs->make<TH1D>(ns.name("LepLepBarRap"   ), "rapidity (l^{+}l^{-})"   , 34, -3.4,   3.4) );  
-  LepLepBarGen_.push_back( fs->make<TH1D>(ns.name("LepLepBarPhi"   ), "#phi (l^{+}l^{-})"       , 34, -3.4,   3.4) );
-  LepLepBarGen_.push_back( fs->make<TH1D>(ns.name("LepLepBarMass"  ), "M (l^{+}l^{-}) [GeV]"    , 30,  0. , 600. ) );     
+  LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairPt"    ), "p_{t} (l^{+}l^{-}) [GeV]", 50,  0. , 500. ) );
+  LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairEnergy"), "E (l^{+}l^{-}) [GeV]"    , 50,  0. , 500. ) );
+  LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairEta"   ), "#eta (l^{+}l^{-})"       , 34, -3.4,   3.4) );
+  LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairRap"   ), "rapidity (l^{+}l^{-})"   , 34, -3.4,   3.4) );  
+  LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairPhi"   ), "#phi (l^{+}l^{-})"       , 34, -3.4,   3.4) );
+  LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairMass"  ), "M (l^{+}l^{-}) [GeV]"    , 30,  0. , 600. ) ); 
+  
+  JetPairGen_.push_back( fs->make<TH1D>(ns.name("JetPairPt"    ), "p_{t} (jj) [GeV]", 50,  0. , 500. ) );
+  JetPairGen_.push_back( fs->make<TH1D>(ns.name("JetPairEnergy"), "E (jj) [GeV]"    , 50,  0. , 500. ) );
+  JetPairGen_.push_back( fs->make<TH1D>(ns.name("JetPairEta"   ), "#eta (jj)"       , 34, -3.4,   3.4) );
+  JetPairGen_.push_back( fs->make<TH1D>(ns.name("JetPairRap"   ), "rapidity (jj)"   , 34, -3.4,   3.4) );  
+  JetPairGen_.push_back( fs->make<TH1D>(ns.name("JetPairPhi"   ), "#phi (jj)"       , 34, -3.4,   3.4) );
+  JetPairGen_.push_back( fs->make<TH1D>(ns.name("JetPairMass"  ), "M (jj) [GeV]"    , 30,  0. , 600. ) );       
 }
 
 
@@ -480,12 +520,37 @@ FullLepKinAnalyzer::bookPullHistos(edm::Service<TFileService>& fs)
   TtBarPull_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"   ), "#phi (t#bar{t})"       , 100,  -1 , 1. ) );
   TtBarPull_.push_back( fs->make<TH1D>(ns.name("TtBarMass"  ), "M (t#bar{t}) [GeV]"    , 100,  -1 , 1. ) );
   
-  LepLepBarPull_.push_back( fs->make<TH1D>(ns.name("LepLepBarPt"    ), "p_{t} (l^{+}l^{-}) [GeV]", 100,  -1 , 1. ) );
-  LepLepBarPull_.push_back( fs->make<TH1D>(ns.name("LepLepBarEnergy"), "E (l^{+}l^{-}) [GeV]"    , 100,  -1 , 1. ) );
-  LepLepBarPull_.push_back( fs->make<TH1D>(ns.name("LepLepBarEta"   ), "#eta (l^{+}l^{-})"       , 100,  -1 , 1. ) );
-  LepLepBarPull_.push_back( fs->make<TH1D>(ns.name("LepLepBarRap"   ), "rapidity (l^{+}l^{-})"   , 100,  -1 , 1. ) );  
-  LepLepBarPull_.push_back( fs->make<TH1D>(ns.name("LepLepBarPhi"   ), "#phi (l^{+}l^{-})"       , 100,  -1 , 1. ) );
-  LepLepBarPull_.push_back( fs->make<TH1D>(ns.name("LepLepBarMass"  ), "M (l^{+}l^{-}) [GeV]"    , 100,  -1 , 1. ) );	 
+  LepPairPull_.push_back( fs->make<TH1D>(ns.name("LepPairPt"    ), "p_{t} (l^{+}l^{-}) [GeV]", 100,  -1 , 1. ) );
+  LepPairPull_.push_back( fs->make<TH1D>(ns.name("LepPairEnergy"), "E (l^{+}l^{-}) [GeV]"    , 100,  -1 , 1. ) );
+  LepPairPull_.push_back( fs->make<TH1D>(ns.name("LepPairEta"   ), "#eta (l^{+}l^{-})"       , 100,  -1 , 1. ) );
+  LepPairPull_.push_back( fs->make<TH1D>(ns.name("LepPairRap"   ), "rapidity (l^{+}l^{-})"   , 100,  -1 , 1. ) );  
+  LepPairPull_.push_back( fs->make<TH1D>(ns.name("LepPairPhi"   ), "#phi (l^{+}l^{-})"       , 100,  -1 , 1. ) );
+  LepPairPull_.push_back( fs->make<TH1D>(ns.name("LepPairMass"  ), "M (l^{+}l^{-}) [GeV]"    , 100,  -1 , 1. ) );
+  
+  JetPairPull_.push_back( fs->make<TH1D>(ns.name("JetPairPt"    ), "p_{t} (jj) [GeV]", 100,  -1 , 1. ) );
+  JetPairPull_.push_back( fs->make<TH1D>(ns.name("JetPairEnergy"), "E (jj) [GeV]"    , 100,  -1 , 1. ) );
+  JetPairPull_.push_back( fs->make<TH1D>(ns.name("JetPairEta"   ), "#eta (jj)"       , 100,  -1 , 1. ) );
+  JetPairPull_.push_back( fs->make<TH1D>(ns.name("JetPairRap"   ), "rapidity (jj)"   , 100,  -1 , 1. ) );  
+  JetPairPull_.push_back( fs->make<TH1D>(ns.name("JetPairPhi"   ), "#phi (jj)"       , 100,  -1 , 1. ) );
+  JetPairPull_.push_back( fs->make<TH1D>(ns.name("JetPairMass"  ), "M (jj) [GeV]"    , 100,  -1 , 1. ) );  
+  
+  
+  TopPull2D_     = fs->make<TH2D>(ns.name("TopPull2D"),    "TopPull2D",     50, -1, 1, 50, -1, 1);
+  WplusPull2D_   = fs->make<TH2D>(ns.name("WplusPull2D"),  "WplusPull2D",   50, -1, 1, 50, -1, 1);
+  BPull2D_       = fs->make<TH2D>(ns.name("BPull2D"),      "BPull2D",       50, -1, 1, 50, -1, 1);
+  LepBarPull2D_  = fs->make<TH2D>(ns.name("LepBarPull2D"), "LepBarPull2D",  50, -1, 1, 50, -1, 1);
+  NuPull2D_      = fs->make<TH2D>(ns.name("NuPull2D"),     "NuPull2D",      50, -1, 1, 50, -1, 1);
+    
+  TopBarPull2D_  = fs->make<TH2D>(ns.name("TopBarPull2D"), "TopBarPull2D", 50, -1, 1, 50, -1, 1);
+  WminusPull2D_  = fs->make<TH2D>(ns.name("WminusPull2D"), "WminusPull2D", 50, -1, 1, 50, -1, 1);
+  BBarPull2D_    = fs->make<TH2D>(ns.name("BBarPull2D"),   "BBarPull2D",   50, -1, 1, 50, -1, 1);
+  LepPull2D_     = fs->make<TH2D>(ns.name("LepPull2D"),    "LepPull2D",    50, -1, 1, 50, -1, 1);
+  NuBarPull2D_   = fs->make<TH2D>(ns.name("NuBarPull2D"),  "NuBarPull2D",  50, -1, 1, 50, -1, 1);
+   
+  TtBarPull2D_     = fs->make<TH2D>(ns.name("TtBarPull2D"),     "TtBarPull2D", 50, -1, 1, 50, -1, 1);  
+  LepPairPull2D_ = fs->make<TH2D>(ns.name("LepPairPull2D"), "LepPairPull2D",   50, -1, 1, 50, -1, 1);
+  JetPairPull2D_ = fs->make<TH2D>(ns.name("JetPairPull2D"), "JetPairPull2D",   50, -1, 1, 50, -1, 1);    
+  	 
 }
 
 
@@ -500,7 +565,20 @@ FullLepKinAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs)
   bBarJetIdcs_         = fs->make<TH1D>(ns.name("bBarJetIdcs"        ), "bbar jet indices used for hypo"   , 4, -0.5, 3.5);
   deltaM_              = fs->make<TH1D>(ns.name("deltaM"             ), "M_{top}-M{#bar{t}}",               50, -25., 25.);
   kinTCHEcorrelation_  = fs->make<TH2D>(ns.name("kinTCHEcorrelation" ), "mass reco vs. TCHE",        3, -0.5, 2.5, 2, -0.5, 1.5);
-  kinSSVHEcorrelation_ = fs->make<TH2D>(ns.name("kinSSVHEcorrelation"), "mass reco vs. TCHE",        3, -0.5, 2.5, 2, -0.5, 1.5);   
+  kinSSVHEcorrelation_ = fs->make<TH2D>(ns.name("kinSSVHEcorrelation"), "mass reco vs. TCHE",        3, -0.5, 2.5, 2, -0.5, 1.5); 
+  compare_             = fs->make<TH2D>(ns.name("compare"            ), "Indices",                  24, -1.5,22.5,24, -1.5,22.5);
+  
+  for(int i=1; i<=24;++i){
+    char label[2];
+    int j = i%4-2;
+
+    std::ostringstream oss;
+    oss << j;
+    strcpy(label, oss.str().c_str());
+
+    compare_->GetXaxis()->SetBinLabel(i,label);
+    compare_->GetYaxis()->SetBinLabel(i,label);
+  }    
 }
 
 
@@ -519,14 +597,16 @@ FullLepKinAnalyzer::fillKinHistos(std::vector<TH1D*>& histos, const reco::Candid
 
 /// fill histograms for particle pulls in events with oppositely charged leptons: Pt, E, Eta, Phi, m
 void
-FullLepKinAnalyzer::fillPullHistos(std::vector<TH1D*>& histos, const reco::Candidate& candidate,  const reco::Candidate& gencandidate)
+FullLepKinAnalyzer::fillPullHistos(std::vector<TH1D*>& histos, TH2D& hist2D, const reco::Candidate& candidate,  const reco::Candidate& gencandidate)
 {
   histos[0]->Fill( ( candidate.pt()      - gencandidate.pt() )       / gencandidate.pt()      );
   histos[1]->Fill( ( candidate.energy()  - gencandidate.energy() )   / gencandidate.energy()  );  
   histos[2]->Fill( ( candidate.eta()     - gencandidate.eta() )      / gencandidate.eta()     );
   histos[3]->Fill( ( candidate.rapidity()- gencandidate.rapidity() ) / gencandidate.rapidity());  
   histos[4]->Fill( ( candidate.phi()     - gencandidate.phi() )      / gencandidate.phi()     );
-  histos[5]->Fill( ( candidate.mass()    - gencandidate.mass() )     / gencandidate.mass()    );  
+  histos[5]->Fill( ( candidate.mass()    - gencandidate.mass() )     / gencandidate.mass()    );
+  
+  hist2D.Fill((candidate.eta()-gencandidate.eta())/gencandidate.eta(),(candidate.phi()-gencandidate.phi())/gencandidate.phi());   
 }
 
 
