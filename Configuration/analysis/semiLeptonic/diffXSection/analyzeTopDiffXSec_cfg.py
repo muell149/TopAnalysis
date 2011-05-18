@@ -77,6 +77,7 @@ process.source = cms.Source("PoolSource",
     ## add your favourite file here
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
+    #'/store/user/cakir/MuHad/PAT_Data2011_MuHadv1_GJSON/d006f2bc492c2b853732556b211d6e87/Data2011_GJSON_10_1_vcC.root'
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
@@ -543,21 +544,26 @@ process.p2 = cms.Path(process.dummy)
 ## no phase space cuts
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
-    process.s3 = cms.Sequence(
-                              ## gen event selection: semileptonic (muon & tau->lepton)
-                              ## tau->Mu if eventFilter=='background only' and
-                              ## process.ttSemiLeptonicFilter.invert = True
-                              process.genFilterSequence                     *
-                              ## introduce some collections
-                              process.isolatedGenMuons                      *
-                              process.semiLeptGenCollections                *
-                              ## investigate top reconstruction
-                              process.kinFitGen
-                              )
+    process.p3 = cms.Path(
+                          ## gen event selection: semileptonic (muon & tau->lepton)
+                          ## tau->Mu if eventFilter=='background only' and
+                          ## process.ttSemiLeptonicFilter.invert = True
+                          process.genFilterSequence                     *
+                          ## introduce some collections
+                          process.isolatedGenMuons                      *
+                          process.semiLeptGenCollections                *
+                          ## investigate top reconstruction
+                          process.kinFitGen
+                          )
+    ## delete gen filter
+    if(removeGenTtbar==True):    
+        process.p3.remove(process.genFilterSequence)
+    ## delete dummy sequence
+    if(applyKinFit==False or eventFilter!="signal only"):
+        process.p3.remove(process.dummy)
 else:
-    process.s3 = cms.Sequence(process.dummy)
-process.p3 = cms.Path(process.s3)
-        
+    process.p3 = cms.Path(process.dummy)
+    
 ## std analysis with generator objects as input for efficiency determination
 ## phase space cuts for muon and jets
 if(runningOnData=="MC"):
