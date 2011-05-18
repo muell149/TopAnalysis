@@ -21,6 +21,7 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TKey.h>
+#include <TGraphAsymmErrors.h>
 
 #include <TLine.h>
 #include <TPaveLabel.h>
@@ -28,6 +29,7 @@
 #include <typeinfo>
 #include <TF1.h>
 #include <TBox.h>
+#include <TGaxis.h>
 
                  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
 enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
@@ -578,7 +580,7 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   return fileName;
 }
 
-void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName)
+void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true )
 {
   // introduce function that saves every single canvas in 
   // MyCanvas as ./outputFolder/CanvasTitle.eps and in addition 
@@ -588,14 +590,18 @@ void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder
   // used enumerators: NONE
 
   // a) save all plots in one pdf
-  MyCanvas[0]->Print(outputFolder+pdfName+".pdf(", "pdf");
-  for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-    MyCanvas[idx]->Print(outputFolder+pdfName+".pdf", "pdf");   
+  if(savePdf){
+    MyCanvas[0]->Print(outputFolder+pdfName+".pdf(", "pdf");
+    for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
+      MyCanvas[idx]->Print(outputFolder+pdfName+".pdf", "pdf");   
+    }
+    MyCanvas[MyCanvas.size()-1]->Print(outputFolder+pdfName+".pdf)", "pdf");
   }
-  MyCanvas[MyCanvas.size()-1]->Print(outputFolder+pdfName+".pdf)", "pdf");
   // b) save every plot as pdf with title as name
-  for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-    MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".eps");      
+  if(saveEps){
+    for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+      MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".eps");      
+    }
   }
 }
 
@@ -1136,6 +1142,7 @@ void saveToRootFile(const TString& outputFile, const T& object, const bool& over
 	  if(verbose>1) std::cout << "subfolder " << subfolder  << " not existing - will create it" << std::endl;
 	  gDirectory->mkdir(subfolder);
 	}
+	else if(verbose>1) std::cout << "subfolder " << subfolder  << " is already existing" << std::endl;
 	// go to directory
 	gDirectory->cd(subfolder);
       }
