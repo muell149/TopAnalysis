@@ -71,28 +71,30 @@ JetQuality::book()
       B Tags for Jets
   **/
   // btag track counting high purity
-  hists_["btagTrkCntHighPurity" ] = new TH1F( "btagTrkCntHighPurity" ,  "btagTrkCntHighPurity" ,   80,     0.,   20. );
+  hists_["btagTrkCntHighPurity"    ] = new TH1F( "btagTrkCntHighPurity"     ,  "btagTrkCntHighPurity"     ,   80,     0.,   20. );
   // btag track counting high efficiency
-  hists_["btagTrkCntHighEff_"   ] = new TH1F( "btagTrkCntHighEff_"   ,  "btagTrkCntHighEff_"   ,   80,     0.,   20. ); 
-  // btag simple secondary vertex
-  hists_["btagSimpleSecVtx_"    ] = new TH1F( "btagSimpleSecVtx_"    ,  "btagSimpleSecVtx_"    ,   80,    -5.,   15. ); 
+  hists_["btagTrkCntHighEff_"      ] = new TH1F( "btagTrkCntHighEff_"       ,  "btagTrkCntHighEff_"       ,   80,     0.,   20. ); 
+  // btag simple secondary vertex high efficiency
+  hists_["btagSimpleSecVtxHighEff_"] = new TH1F( "btagSimpleSecVtxHighEff_" ,  "btagSimpleSecVtxHighEff_" ,   80,    -5.,   15. ); 
+  // btag simple secondary vertex high purity
+  hists_["btagSimpleSecVtxHighPur_"] = new TH1F( "btagSimpleSecVtxHighPur_" ,  "btagSimpleSecVtxHighPur_" ,   80,    -5.,   15. ); 
   // btag simple secondary vertex (neg bjet tags)
-  hists_["btagSimpleSecVtxNeg_" ] = new TH1F( "btagSimpleSecVtxNeg_" ,  "btagSimpleSecVtxNeg_" ,   80, -1005., -985. ); 
+  hists_["btagSimpleSecVtxNeg_"    ] = new TH1F( "btagSimpleSecVtxNeg_"     ,  "btagSimpleSecVtxNeg_"     ,   80, -1005., -985. ); 
   // btag combined secondary vertex
-  hists_["btagCombSecVtx_"      ] = new TH1F( "btagCombSecVtx_"      , "btagCombSecVtx_"       ,   80,    -2.,    2. );
+  hists_["btagCombSecVtx_"         ] = new TH1F( "btagCombSecVtx_"          , "btagCombSecVtx_"           ,   80,    -2.,    2. );
   // btag combined secondary vertex using MVA
-  hists_["btagCombSecVtxMVA_"   ] = new TH1F( "btagCombSecVtxMVA_"   , "btagCombSecVtxMVA_"    ,   80,    -2.,    2. );
+  hists_["btagCombSecVtxMVA_"      ] = new TH1F( "btagCombSecVtxMVA_"       , "btagCombSecVtxMVA_"        ,   80,    -2.,    2. );
   // btag b jet b probability (newer algo than the following)
-  hists_["btagJetBProbability_" ] = new TH1F( "btagJetBProbability_" , "btagJetBProbability_"  ,   80,     0.,   11. );
+  hists_["btagJetBProbability_"    ] = new TH1F( "btagJetBProbability_"     , "btagJetBProbability_"      ,   80,     0.,   11. );
   // btag b jet probability
-  hists_["btagJetProbability_"  ] = new TH1F( "btagJetProbability_"  , "btagJetProbability_"   ,   80,     0.,    4. );
+  hists_["btagJetProbability_"     ] = new TH1F( "btagJetProbability_"      , "btagJetProbability_"       ,   80,     0.,    4. );
   // btag soft electron taggers (not implemented for PFJets)
-  hists_["btagSoftElecByPt_"    ] = new TH1F( "btagSoftElecByPt_"    , "btagSoftElecByPt_"     ,   80,     0.,   20. );
-  hists_["btagSoftElecByIP3d_"  ] = new TH1F( "btagSoftElecByIP3d_"  , "btagSoftElecByIP3d_"   ,   80,   -40.,  110. );
+  hists_["btagSoftElecByPt_"       ] = new TH1F( "btagSoftElecByPt_"        , "btagSoftElecByPt_"         ,   80,     0.,   20. );
+  hists_["btagSoftElecByIP3d_"     ] = new TH1F( "btagSoftElecByIP3d_"      , "btagSoftElecByIP3d_"       ,   80,   -40.,  110. );
   // btag soft muon taggers
-  hists_["btagSoftMuon_"        ] = new TH1F( "btagSoftMuon_"        , "btagSoftMuon_"         ,   50,     0.,    1. );
-  hists_["btagSoftMuonByPt_"    ] = new TH1F( "btagSoftMuonByPt_"    , "btagSoftMuonByPt_"     ,  100,     0.,   10. );
-  hists_["btagSoftMuonByIP3d_"  ] = new TH1F( "btagSoftMuonByIP3d_"  , "btagSoftMuonByIP3d_"   ,  160,  -100.,  100. );
+  hists_["btagSoftMuon_"           ] = new TH1F( "btagSoftMuon_"            , "btagSoftMuon_"             ,   50,     0.,    1. );
+  hists_["btagSoftMuonByPt_"       ] = new TH1F( "btagSoftMuonByPt_"        , "btagSoftMuonByPt_"         ,  100,     0.,   10. );
+  hists_["btagSoftMuonByIP3d_"     ] = new TH1F( "btagSoftMuonByIP3d_"      , "btagSoftMuonByIP3d_"       ,  160,  -100.,  100. );
 
   /**
      E-Flow in Jets
@@ -190,28 +192,30 @@ JetQuality::book(edm::Service<TFileService>& fs)
       B Tags for Jets
   **/
   // btag track counting high purity
-  bookVariable( fs, "btagTrkCntHighPurity"  ,   80,     0.,   20. , false );
+  bookVariable( fs, "btagTrkCntHighPurity"     ,   80,     0.,   20. , false );
   // btag track counting high efficiency
-  bookVariable( fs, "btagTrkCntHighEff_"    ,   80,     0.,   20. , false ); 
-  // btag simple secondary vertex
-  bookVariable( fs, "btagSimpleSecVtx_"     ,   80,    -5.,   15. , false ); 
+  bookVariable( fs, "btagTrkCntHighEff_"       ,   80,     0.,   20. , false ); 
+  // btag simple secondary vertex high efficiency
+  bookVariable( fs, "btagSimpleSecVtxHighEff_" ,   80,    -5.,   15. , false ); 
+  // btag simple secondary vertex high purity
+  bookVariable( fs, "btagSimpleSecVtxHighPur_" ,   80,    -5.,   15. , false ); 
   // btag simple secondary vertex (neg bjet tags)
-  bookVariable( fs, "btagSimpleSecVtxNeg_"  ,   80, -1005., -985. , false ); 
+  bookVariable( fs, "btagSimpleSecVtxNeg_"     ,   80, -1005., -985. , false ); 
   // btag combined secondary vertex
-  bookVariable( fs, "btagCombSecVtx_"       ,   88,    -1.1,   1.1 , false );
+  bookVariable( fs, "btagCombSecVtx_"          ,   88,    -1.1,   1.1 , false );
   // btag combined secondary vertex using MVA
-  bookVariable( fs, "btagCombSecVtxMVA_"    ,   88,    -1.1,   1.1 , false );
+  bookVariable( fs, "btagCombSecVtxMVA_"       ,   88,    -1.1,   1.1 , false );
   // btag b jet b probability (newer algo than the following)
-  bookVariable( fs, "btagJetBProbability_"  ,   80,     0.,   11. , false );
+  bookVariable( fs, "btagJetBProbability_"     ,   80,     0.,   11. , false );
   // btag b jet probability
-  bookVariable( fs, "btagJetProbability_"   ,   80,     0.,    4. , false );
+  bookVariable( fs, "btagJetProbability_"      ,   80,     0.,    4. , false );
   // btag soft electron taggers (not implemented for PFJets)
-  bookVariable( fs, "btagSoftElecByPt_"     ,   80,     0.,   20. , false );
-  bookVariable( fs, "btagSoftElecByIP3d_"   ,   80,   -40.,  110. , false );
+  bookVariable( fs, "btagSoftElecByPt_"        ,   80,     0.,   20. , false );
+  bookVariable( fs, "btagSoftElecByIP3d_"      ,   80,   -40.,  110. , false );
   // btag soft muon taggers
-  bookVariable( fs, "btagSoftMuon_"         ,   50,     0.,    1. , false );
-  bookVariable( fs, "btagSoftMuonByPt_"     ,  100,     0.,   10. , false );
-  bookVariable( fs, "btagSoftMuonByIP3d_"   ,  160,  -100.,  100. , false );
+  bookVariable( fs, "btagSoftMuon_"            ,   50,     0.,    1. , false );
+  bookVariable( fs, "btagSoftMuonByPt_"        ,  100,     0.,   10. , false );
+  bookVariable( fs, "btagSoftMuonByIP3d_"      ,  160,  -100.,  100. , false );
 
   /**
      E-Flow in Jets
@@ -272,7 +276,7 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
 	  Fill Other Calo and PF Jet Variables
       **/
 
-    // charge of the jet
+      // charge of the jet
       fillValue( "charge" , jet->jetCharge()    , weight );
       if(jet->nConstituents() > 0){
       	if( jet->daughterPtr(0).productGetter()->getIt(jet->daughterPtr(0).id()) != 0 ){
@@ -324,29 +328,30 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
 	  Fill B Tags for Jets
       **/
       // btag track counting high purity
-      fillValue( "btagTrkCntHighPurity" , jet->bDiscriminator("trackCountingHighPurBJetTags")          , weight );
+      fillValue( "btagTrkCntHighPurity"     , jet->bDiscriminator("trackCountingHighPurBJetTags")         , weight );
       // btag track counting high efficiency
-      fillValue( "btagTrkCntHighEff_"   , jet->bDiscriminator("trackCountingHighEffBJetTags")          , weight );
-      // btag simple secondary vertex
-      fillValue( "btagSimpleSecVtx_"    , jet->bDiscriminator("simpleSecondaryVertexBJetTags")         , weight );
+      fillValue( "btagTrkCntHighEff_"       , jet->bDiscriminator("trackCountingHighEffBJetTags")         , weight );
+      // btag simple secondary vertex high efficiency
+      fillValue( "btagSimpleSecVtxHighEff_" , jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags") , weight );
+      // btag simple secondary vertex high purity
+      fillValue( "btagSimpleSecVtxHighPur_" , jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags") , weight );
       // btag simple secondary vertex (neg bjet tags) makes no sense yet, value is -1000 for every jet regardless of the btagging
-      fillValue( "btagSimpleSecVtxNeg_" , jet->bDiscriminator("simpleSecondaryVertexNegativeBJetTags") , weight );
-
+      fillValue( "btagSimpleSecVtxNeg_"     , jet->bDiscriminator("simpleSecondaryVertexNegativeBJetTags") , weight );
       // btag combined secondary vertex
-      fillValue( "btagCombSecVtx_"      , jet->bDiscriminator("combinedSecondaryVertexBJetTags")       , weight );
+      fillValue( "btagCombSecVtx_"          , jet->bDiscriminator("combinedSecondaryVertexBJetTags")       , weight );
       // btag combined secondary vertex using MVA
-      fillValue( "btagCombSecVtxMVA_"   , jet->bDiscriminator("combinedSecondaryVertexMVABJetTags")    , weight );
+      fillValue( "btagCombSecVtxMVA_"       , jet->bDiscriminator("combinedSecondaryVertexMVABJetTags")    , weight );
       // btag b jet b probability (newer algo than the following)
-      fillValue( "btagJetBProbability_" , jet->bDiscriminator("jetBProbabilityBJetTags")               , weight );
+      fillValue( "btagJetBProbability_"     , jet->bDiscriminator("jetBProbabilityBJetTags")               , weight );
       // btag b jet probability
-      fillValue( "btagJetProbability_"  , jet->bDiscriminator("jetProbabilityBJetTags")                , weight );
+      fillValue( "btagJetProbability_"      , jet->bDiscriminator("jetProbabilityBJetTags")                , weight );
       // btag soft electron taggers (not implemented for PFJets)
-      fillValue( "btagSoftElecByPt_"    , jet->bDiscriminator("softElectronByPtBJetTags")              , weight );
-      fillValue( "btagSoftElecByIP3d_"  , jet->bDiscriminator("softElectronByIP3dBJetTags")            , weight );
+      fillValue( "btagSoftElecByPt_"        , jet->bDiscriminator("softElectronByPtBJetTags")              , weight );
+      fillValue( "btagSoftElecByIP3d_"      , jet->bDiscriminator("softElectronByIP3dBJetTags")            , weight );
       // btag soft muon taggers
-      fillValue( "btagSoftMuon_"        , jet->bDiscriminator("softMuonBJetTags")                      , weight );
-      fillValue( "btagSoftMuonByPt_"    , jet->bDiscriminator("softMuonByPtBJetTags")                  , weight );
-      fillValue( "btagSoftMuonByIP3d_"  , jet->bDiscriminator("softMuonByIP3dBJetTags")                , weight );
+      fillValue( "btagSoftMuon_"            , jet->bDiscriminator("softMuonBJetTags")                      , weight );
+      fillValue( "btagSoftMuonByPt_"        , jet->bDiscriminator("softMuonByPtBJetTags")                  , weight );
+      fillValue( "btagSoftMuonByIP3d_"      , jet->bDiscriminator("softMuonByIP3dBJetTags")                , weight );
 
       /**
 	 E-Flow in Jets
