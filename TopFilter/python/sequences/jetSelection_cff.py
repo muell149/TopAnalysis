@@ -286,37 +286,41 @@ selectNMinusOneJets = cms.Sequence(noEtaJets       *
                                    )
 
 ## check for different btag properties
-trackCountingHighPurBJets       = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
-                                                        )
-trackCountingHighEffBJets       = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
-                                                        )
-simpleSecondaryVertexBJets      = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"simpleSecondaryVertexBJetTags\") > 1.74'
-                                                        )
-simpleSecondaryVertexNegBJets   = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
-                                                        )
-combinedSecondaryVertexBJets    = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.75'
-                                                        )
-combinedSecondaryVertexMVABJets = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"combinedSecondaryVertexMVABJetTags\") > 0.4'
-                                                        )
-softMuonBJets                   = selectedPatJets.clone(src = 'goodJets',
-                                                        cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
-                                                        )
+trackCountingHighPurBJets         = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"trackCountingHighPurBJetTags\") > 1.93'
+                                                          )
+trackCountingHighEffBJets         = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
+                                                          )
+simpleSecondaryVertexHighEffBJets = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"simpleSecondaryVertexHighEffBJetTags\") > 1.74'
+                                                          )
+simpleSecondaryVertexHighPurBJets = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"simpleSecondaryVertexHighPurBJetTags\") > 2.0'
+                                                          )
+simpleSecondaryVertexNegBJets     = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"simpleSecondaryVertexNegativeBJetTags\") > 3.0'
+                                                          )
+combinedSecondaryVertexBJets      = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"combinedSecondaryVertexBJetTags\") > 0.75'
+                                                          )
+combinedSecondaryVertexMVABJets   = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"combinedSecondaryVertexMVABJetTags\") > 0.4'
+                                                          )
+softMuonBJets                     = selectedPatJets.clone(src = 'goodJets',
+                                                          cut = 'bDiscriminator(\"softMuonBJetTags\") > 0.3'
+                                                          )
 
 ## a goodJet fullfilling different btag
 ## criteria
-selectBTaggedJets = cms.Sequence(goodJets                      *
-                                trackCountingHighPurBJets     *
-                                trackCountingHighEffBJets     *
-                                simpleSecondaryVertexBJets    *
-                                simpleSecondaryVertexNegBJets *
-                                combinedSecondaryVertexBJets  *
-                                combinedSecondaryVertexMVABJets  *
+selectBTaggedJets = cms.Sequence(goodJets                         *
+                                trackCountingHighPurBJets         *
+                                trackCountingHighEffBJets         *
+                                simpleSecondaryVertexHighEffBJets *
+                                simpleSecondaryVertexHighPurBJets *
+                                simpleSecondaryVertexNegBJets     *
+                                combinedSecondaryVertexBJets      *
+                                combinedSecondaryVertexMVABJets   *
                                 softMuonBJets
                                 )
 
