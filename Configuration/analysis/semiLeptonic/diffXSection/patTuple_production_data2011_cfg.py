@@ -42,6 +42,44 @@ process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('GR_E_V14::All')
 process.GlobalTag.globaltag = cms.string('GR_R_311_V3::All')
+  
+## use new JEC set obtained with Fall 10 MC
+## ATTENTION!!! Now new GLobal Tag available, which includes these JEC
+## However, for the May 13 JSON PAT tuples, the following recipe was used.
+## This is now commented because it will be obsolete for the next round of PAT tuple production
+## recipe at https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2010
+## needs sqlite file:
+## cvs co -d JEC UserCode/KKousour/data/Jec10V3.db
+## move Jec10V3.db to src/TopAnalysis/Configuration/data
+
+#process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#process.jec = cms.ESSource("PoolDBESSource",
+      #DBParameters = cms.PSet(
+        #messageLevel = cms.untracked.int32(0)
+        #),
+      #timetype = cms.string('runnumber'),
+      #toGet = cms.VPSet(
+      #cms.PSet(
+            #record = cms.string('JetCorrectionsRecord'),
+            #tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5PF'),
+            #label  = cms.untracked.string('AK5PF')
+            #),
+      #cms.PSet(
+            #record = cms.string('JetCorrectionsRecord'),
+            #tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5Calo'),
+            #label  = cms.untracked.string('AK5Calo')
+            #),
+      #cms.PSet(
+            #record = cms.string('JetCorrectionsRecord'),
+            #tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5JPT'),
+            #label  = cms.untracked.string('AK5JPT')
+            #)
+      #),
+      ### here you add as many jet types as you need (AK5Calo, AK5JPT, AK7PF, AK7Calo, KT4PF, KT4Calo, KT6PF, KT6Calo)
+      #connect = cms.string('sqlite_file:src/TopAnalysis/Configuration/data/Jec10V3.db')
+#)
+#process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
+
 
 #----------------------------------------------------------------------------
 # beam scrap filter
@@ -80,7 +118,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('Data2011_StreamExpress160404-163369.root')
+    fileName = cms.untracked.string('Data2011_PromptReco.root')
 )
 
 ## remove cleaning as it is not used
@@ -214,15 +252,15 @@ process.patDefaultSequence.replace(process.patElectrons,process.simpleEleIdSeque
 ## high level trigger filter (non existing Triggers are ignored)
 process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
 process.filterHlt = process.hltHighLevel.clone(HLTPaths = [
-    #2010 trigger ('v*' to be immune to version changes)
-    'HLT_Mu15_v*',
+    #2010 and other single muon triggers ('v*' to be immune to version changes)
+    'HLT_Mu15_v*', 'HLT_Mu20_v*', 'HLT_Mu24_v*', 'HLT_IsoMu17_v*',
     #2011 1E33 trigger ('v*' to be immune to version changes)
     'HLT_Mu17_TriCentralJet30_v*', 'HLT_Mu17_CentralJet30_v*', 'HLT_Mu17_DiCentralJet30_v*',
     #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
     'HLT_IsoMu17_DiCentralJet30_v*', 'HLT_IsoMu17_CentralJet30_v*',
     'HLT_Mu17_CentralJet40_BTagIP_v*', 'HLT_IsoMu17_CentralJet40_BTagIP_v*',
     #2011 HT trigger requested by Niklas ('v*' to be immune to version changes)
-    'HLT_Mu8_HT200_v*'],throw = False)
+    'HLT_Mu5_HT*', 'HLT_Mu8_HT200_v*'],throw = False)
 					   
 #----------------------------------------------------------------------------
 # selection paths
@@ -249,7 +287,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     process.EventSelection,
     outputCommands = cms.untracked.vstring('drop *'),
     dropMetaData = cms.untracked.string("DROPPED"),                                     
-    fileName = cms.untracked.string('Data2011_PromptReco160404-163369.root')
+    fileName = cms.untracked.string('Data2011_PromptReco.root')
 )
 
 ## save pat output
