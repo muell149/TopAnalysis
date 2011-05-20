@@ -4,7 +4,8 @@
 ## ---
 
 ## get the mother file
-execfile("analyzeMuonDiffXSec_cfg.py")
+#execfile("analyzeMuonDiffXSec_cfg.py")
+execfile("analyzeTopDiffXSec_cfg.py")
 
 ## change input collections to JER-shifted collections
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
@@ -37,7 +38,7 @@ else:
 # JER +10%
 process.scaledJetEnergy.resolutionFactor = 1.1
 if(applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetResolutionSmearFactor = 1.1
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
 
 ## include module to create JES-shifted collection
 for path in pathlist:
