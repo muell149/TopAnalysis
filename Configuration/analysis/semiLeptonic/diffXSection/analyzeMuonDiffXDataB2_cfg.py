@@ -20,7 +20,7 @@ implement0TagPath = True
 corrLevel="L2L3Residual"
 
 ## get the mother file
-execfile("analyzeMuonDiffXSec_cfg.py")
+execfile("analyzeTopDiffXSec_cfg.py")
 
 ## choose data set
 process.load("TopAnalysis/Configuration/samples/Run2010B2_Nov4ReReco_PAT_v5_L1Included_cff")
