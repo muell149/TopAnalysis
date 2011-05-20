@@ -530,7 +530,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
       // add axis configuration
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       // set binomial errors
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
@@ -597,7 +597,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
       // add axis configuration
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ (pb#times"+label2+")^{-1} ] (inclusive)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ pb#times("+label2+")^{-1} ] (inclusive t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , true );
@@ -821,7 +821,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
       plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps");      
     }
     // c) root file
-    std::cout << "will create outputfile named " << outputFileName << std::endl;
+    std::cout << "will save all plots in outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
       // get correct folder
       TString title=(plotCanvas_[idx])->GetTitle();
