@@ -5,7 +5,9 @@
 //
 /**\class TriggerObjectFilter TriggerObjectFilter.cc TopAnalysis/TriggerObjectFilter/src/TriggerObjectFilter.cc
 
-Description: Make additional E_t and/or p_t cut on trigger objects on a certain path
+Description: Make additional E_t and/or p_t cut on trigger objects on a certain path.
+             To account for possibly different version numbers of a trigger, all possible versions
+             can be passed in a string to hltPaths, e.g. hltPaths = ["HLT_Mu15", "HLT_Mu15_v1", ...]
 
 Implementation:
 In case an error occures while retrieving the trigger object, the event fails the selection. TO-DO: Throw exception instead.
@@ -13,7 +15,7 @@ In case an error occures while retrieving the trigger object, the event fails th
 //
 // Original Author:  Benjamin Lutz,,,DESY
 //         Created:  Fri Dec 17 16:33:59 CET 2010
-// $Id$
+// $Id: TriggerObjectFilter.cc,v 1.1 2011/02/09 11:43:30 maldayam Exp $
 //
 //
 
@@ -55,9 +57,11 @@ private:
   // ----------member data ---------------------------
   edm::InputTag triggerEvent_;
   std::string path_;
+  std::vector<std::string> paths_;
   unsigned int nMin_;
   double ptMin_;
   double etMin_;
+
 
 };
 
@@ -78,10 +82,18 @@ TriggerObjectFilter::TriggerObjectFilter(const edm::ParameterSet& iConfig)
 
   triggerEvent_ = iConfig.getParameter<edm::InputTag>("trigger_event");
   path_         = iConfig.getParameter<std::string>("hltPath");
+  paths_        = iConfig.getParameter<std::vector<std::string> >("hltPaths");
 
   nMin_         = iConfig.getParameter<unsigned int>("nMin");
   ptMin_        = iConfig.getParameter<double>("ptMin");
   etMin_        = iConfig.getParameter<double>("etMin");
+  
+  // if trigger path is only given as a normal string (hltPath, path_), it is converted to the vector hltPaths (paths_)
+  // if trigger path is given as string vector hltPaths (paths_), the normal string (hltPath, path_) is ignored
+  if( paths_.size()==0 ) paths_.push_back(path_);
+  
+  std::cout<<"Considered trigger path(s):"<<std::endl;
+  for(unsigned int i=0; i<paths_.size(); i++) std::cout<<paths_[i]<<std::endl;
 
 }
 
@@ -104,6 +116,7 @@ bool
 TriggerObjectFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
+
   edm::Handle<pat::TriggerEvent> triggerEvent;
   iEvent.getByLabel(triggerEvent_, triggerEvent);
 
@@ -114,12 +127,17 @@ TriggerObjectFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   const pat::TriggerPath* hltPath = 0;
 
   for(pat::TriggerPathCollection::const_iterator trp = triggerPaths->begin(); trp!= triggerPaths->end(); ++trp) {
-    if(trp->name()==path_){
+    for(unsigned int iPath=0; iPath < paths_.size(); iPath++){
+      if(trp->name()==paths_[iPath]){
       hltPath = &(*trp);
       // fail if trigger has not fired, is offline or has an error
       if(!hltPath->wasRun() || !hltPath->wasAccept() || hltPath->wasError()) return false;
+      }
     }
   }
+  
+  if(hltPath!=0){
+    //std::cout<<"hltPath "<< hltPath->name() <<" found"<<std::endl;
 
   int L3filterIdx = hltPath->filterIndices().back();
   const pat::TriggerFilter* L3filter = &triggerFilters->at(L3filterIdx);
@@ -132,6 +150,8 @@ TriggerObjectFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if ( triggerObjects->at(L3objectKeys[i]).et() >= etMin_ &&  triggerObjects->at(L3objectKeys[i]).pt() >= ptMin_ ) ++counter;
 
   if (counter >= nMin_) return true;
+  }
+  else std::cout<<"hltPaths not found"<<std::endl;
 
   return false;
 }
