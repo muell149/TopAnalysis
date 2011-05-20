@@ -9,6 +9,26 @@ import FWCore.ParameterSet.Config as cms
 ##    options
 ## ---
 
+## allow crab to choose trigger filter for every job individually
+import FWCore.ParameterSet.VarParsing as VarParsing
+import sys
+options = VarParsing.VarParsing ('standard')
+# create object triggerTag with default value HLT of type singleton and string
+options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
+# define the syntax you need to enter in the cfg file:
+# search for arguments entered after cmsRun
+if( hasattr(sys, "argv") ):
+    # split arguments by comma - seperating different variables
+    for args in sys.argv :
+        arg = args.split(',')
+        # split further by = to separate variable name and value
+        for val in arg:
+            val = val.split('=')
+            # set variable var to value val (supposed crab syntax: var=val)
+            if(len(val)==2):
+                setattr(options,val[0], val[1])
+print "used trigger path: TriggerResults::"+options.triggerTag
+
 ## choose jet collection and corresponding MET
 if(not globals().has_key('jetType')):
     jetType =  'particleFlow' # 'Calo'
@@ -21,7 +41,7 @@ if(not globals().has_key('runningOnData')):
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
     corrLevel='L3Absolute'
-print "used corr.Level in jetKinematics: "+corrLevel
+print "used JEC level in jetKinematics: "+corrLevel
 
 ## run kinematic fit?
 ## ATTENTION: until the new parameter jetResolutionSmearFactor
@@ -79,6 +99,7 @@ process.source = cms.Source("PoolSource",
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
     #'/store/user/cakir/MuHad/PAT_Data2011_MuHadv1_GJSON/d006f2bc492c2b853732556b211d6e87/Data2011_GJSON_10_1_vcC.root'
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root'
+    #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_21_1_JdU.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     )
@@ -123,7 +144,8 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"], throw=False)
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu9"], throw=False)
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
 
@@ -179,7 +201,6 @@ process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
                                    maxZ    = cms.double(24.0),
                                    maxRho  = cms.double(2.0)
                                    )
-
 ## ---
 ##    set up filter for different ttbar decay channels
 ## ---
@@ -281,7 +302,14 @@ process.jetCuts = cms.Sequence(process.leadingJetSelectionNjets1 +
                                process.leadingJetSelectionNjets4 
                                )
 
-
+## ---
+##    Set up low level selection steps (sligthly above trigger) for monitoring
+## ---
+from TopAnalysis.TopFilter.sequences.jetSelection_cff import selectedPatJets
+process.looseCentralJets = selectedPatJets.clone(src = 'selectedPatJetsAK5PF', cut = 'abs(eta) < 2.5 & pt > 30.')
+process.looseJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'looseCentralJets', minNumber = 3)
+process.looseCuts = cms.Sequence(process.looseCentralJets*process.kinematicMuonsSelection+process.looseJetSelectionNjets3)
+                               
 ## ---
 ##    Set up selection steps for different (gen)-jet multiplicities
 ## ---
@@ -307,6 +335,10 @@ process.tightMuonKinematics = process.analyzeMuonKinematics.clone (src = 'tightM
 process.tightMuonQuality    = process.analyzeMuonQuality.clone    (src = 'tightMuons')
 process.tightMuonKinematicsTagged = process.tightMuonKinematics.clone();
 process.tightMuonQualityTagged    = process.tightMuonQuality.clone();
+process.kinematicMuonQualityPreSel = process.analyzeMuonQuality.clone    (src = 'kinematicMuons')
+process.goldenMuonQualityPreSel    = process.analyzeMuonQuality.clone    (src = 'goldenMuons'   )
+process.tightMuonKinematicsPreSel  = process.analyzeMuonKinematics.clone (src = 'tightMuons'    )
+process.tightMuonQualityPreSel     = process.analyzeMuonQuality.clone    (src = 'tightMuons'    )
 
 ## jets
 process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds0 )
@@ -316,6 +348,8 @@ process.tightLead_3_JetKinematics = process.analyzeJetKinematics.clone (src = 't
 process.tightJetKinematics  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomPFJets', analyze = udsAll)
+process.tightJetKinematicsPreSel = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
+process.tightJetQualityPreSel    = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 
 process.tightLead_0_JetKinematicsTagged = process.tightLead_0_JetKinematics.clone()
 process.tightLead_1_JetKinematicsTagged = process.tightLead_1_JetKinematics.clone()
@@ -324,6 +358,13 @@ process.tightLead_3_JetKinematicsTagged = process.tightLead_3_JetKinematics.clon
 process.tightJetKinematicsTagged  = process.tightJetKinematics.clone()
 process.tightJetQualityTagged     = process.tightJetQuality.clone()
 process.bottomJetKinematicsTagged = process.bottomJetKinematics.clone()
+process.bottomLead_0_JetKinematicsTagged = process.analyzeJetKinematics.clone (src = 'tightBottomPFJets', analyze = uds0 )
+process.bottomLead_1_JetKinematicsTagged = process.analyzeJetKinematics.clone (src = 'tightBottomPFJets', analyze = uds1 )
+
+## muon&jets
+process.tightMuontightJetsKinematics       = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons', srcB = 'tightLeadingPFJets')
+process.tightMuontightJetsKinematicsTagged = process.tightMuontightJetsKinematics.clone()
+process.trackMuontightJetsKinematicsPreSel = process.analyzeMuonJetKinematics.clone(srcA = 'trackMuons', srcB = 'vetoJets')
 
 ## MET
 process.analyzeMETMuon = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
@@ -339,7 +380,8 @@ process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinemati
                                                        process.tightJetKinematics        +
                                                        process.tightJetQuality           +
                                                        process.bottomJetKinematics       +
-                                                       process.analyzeMETMuon            )
+                                                       process.analyzeMETMuon            +
+                                                       process.tightMuontightJetsKinematics)
 
 process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematicsTagged       +
                                                       process.tightMuonQualityTagged          +
@@ -350,7 +392,18 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.tightJetKinematicsTagged        +
                                                       process.tightJetQualityTagged           +
                                                       process.bottomJetKinematicsTagged       +
-                                                      process.analyzeMETMuonTagged            )
+                                                      process.analyzeMETMuonTagged            +
+                                                      process.tightMuontightJetsKinematicsTagged+
+                                                      process.bottomLead_0_JetKinematicsTagged  +
+                                                      process.bottomLead_1_JetKinematicsTagged)
+process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSel +
+                                       process.kinematicMuonQualityPreSel         +
+                                       process.goldenMuonQualityPreSel            +
+                                       process.tightMuonKinematicsPreSel          +
+                                       process.tightMuonQualityPreSel             +
+                                       process.tightJetKinematicsPreSel           +
+                                       process.tightJetQualityPreSel              )
+
 ## ---
 ##    configure Kinematic fit
 ## ---
@@ -374,11 +427,12 @@ process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
 
 # consider b-tagging in event reconstruction
-process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
+#process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
+process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "simpleSecondaryVertexHighEffBJetTags"
 
 # TCHE discr.values 7TeV: 1.7, 3.3, 10.2
-process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = 3.3
-process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 3.3
+process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = 1.74
+process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 1.74
 process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 
 # use larger JER in KinFit as it is obtained from data
@@ -537,8 +591,18 @@ if(runningOnData=="data"):
     process.p1.remove(process.isolatedGenMuons)
     process.p1.remove(process.semiLeptGenCollections)
 
-## needed to be consistant with analyzeMuonDiffXSec_cfg.py
-process.p2 = cms.Path(process.dummy)
+## loose selection and monitoring of some basic distributions
+process.p2 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
+                      process.filterSequence                        *
+                      ## PV event selection
+                      process.PVSelection                           *
+                      ## introduce some collections
+                      process.semiLeptonicSelection                 *
+                      ## loose selection (slightly above mu17TriCentralJet30 Trigger)
+                      process.looseCuts                             *
+                      ## basic monitoring
+                      process.basicMonitoring
+                      )
 
 ## std analysis with generator objects as input for efficiency determination
 ## no phase space cuts
@@ -610,8 +674,14 @@ if(writeOutput):
     process.out.outputCommands += patEventContentNoCleaning
     process.out.outputCommands += patExtraAodEventContent
     process.outpath = cms.EndPath(process.out)
+## switch to SSV btagging
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+massSearchReplaceAnyInputTag(process.p1, 'tightBottomPFJets', 'simpleSecondaryVertexHighEffBJets')
+process.simpleSecondaryVertexHighEffBJets.src="goodJetsPF30"
+process.p1.replace(process.semiLeptonicSelection, process.semiLeptonicSelection*process.simpleSecondaryVertexHighEffBJets)
+
+## switch to PF objects
 if(jetType=="particleFlow"):
-    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     pathlist = [process.p1]
     for path in pathlist:  
         massSearchReplaceAnyInputTag(path, 'tightLeadingJets', 'tightLeadingPFJets')
@@ -622,4 +692,3 @@ if(jetType=="particleFlow"):
         massSearchReplaceAnyInputTag(path, 'noEtaJets'       , 'noEtaJetsPF30'     )
         massSearchReplaceAnyInputTag(path, 'noPtJets'        , 'noPtJetsPF'        )
         massSearchReplaceAnyInputTag(path, 'patMETs'         , 'patMETsPF'         )
-
