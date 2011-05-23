@@ -160,7 +160,7 @@ MuonAnalyzer::beginJob()
   jet_dist_->GetXaxis()->SetTitle("#Delta r");
   jet_dist_->GetYaxis()->SetTitle("N");       
      
-  nhits_= fs->make<TH1D>( "nhits", "N_{Hits} of Muon Track", 31,-0.5 , 30.5 ); 
+  nhits_= fs->make<TH1D>( "nhits", "N_{Hits} of Muon Track", 51,-0.5 , 50.5 ); 
   nhits_->GetXaxis()->SetTitle("N_{hits}");
   nhits_->GetYaxis()->SetTitle("N");  
       
@@ -168,7 +168,7 @@ MuonAnalyzer::beginJob()
   n_pixhits_->GetXaxis()->SetTitle("N_{hits,PIX}");
   n_pixhits_->GetYaxis()->SetTitle("N");    
   
-  n_trackerhits_= fs->make<TH1D>( "n_trackerhits", "N_{Hits} in SiSTRIP", 31,-0.5 , 30.5 ); 
+  n_trackerhits_= fs->make<TH1D>( "n_trackerhits", "N_{Hits} in SiSTRIP", 51,-0.5 , 50.5 ); 
   n_trackerhits_->GetXaxis()->SetTitle("N_{hits,SiSTRIP}");
   n_trackerhits_->GetYaxis()->SetTitle("N");     
   
@@ -176,7 +176,7 @@ MuonAnalyzer::beginJob()
   n_mustations_->GetXaxis()->SetTitle("N_{#mu-Stat}");
   n_mustations_->GetYaxis()->SetTitle("N");
   
-  n_validmuhits_= fs->make<TH1D>( "n_validmuhits", "N_{val #mu-hits} in global Fit", 31,-0.5 , 30.5 ); 
+  n_validmuhits_= fs->make<TH1D>( "n_validmuhits", "N_{val #mu-hits} in global Fit", 51,-0.5 , 50.5 ); 
   n_validmuhits_->GetXaxis()->SetTitle("N_{val #mu-hits}");
   n_validmuhits_->GetYaxis()->SetTitle("N");          
      
