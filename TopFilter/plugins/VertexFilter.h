@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "TH1.h"
-
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -47,6 +45,8 @@ private:
   InputTag vertices_;
   /// input input collection
   InputTag src_;
+  /// only take into account first n_leps leptons from input collection
+  unsigned int nleps_;
 
   /// ndof criterium for good vrtx
   unsigned int ndof_;
@@ -65,12 +65,13 @@ private:
 template <typename Collection>
 VertexFilter<Collection>::VertexFilter(const ParameterSet& cfg)
 {
-  vertices_  = cfg.getParameter<InputTag>("vertices");
-  src_       = cfg.getParameter<InputTag>("src");
-  ndof_      = cfg.getParameter<unsigned int>("ndof");
-  rho_       = cfg.getParameter<double>("rho"       );
-  z_         = cfg.getParameter<double>("z"         );
-  zdist_     = cfg.getParameter<double>("z_dist"    );
+  vertices_  = cfg.getParameter<InputTag>("vertices"  );
+  src_       = cfg.getParameter<InputTag>("src"       );
+  nleps_     = cfg.getParameter<unsigned int>("n_leps");
+  ndof_      = cfg.getParameter<unsigned int>("ndof"  );
+  rho_       = cfg.getParameter<double>("rho"         );
+  z_         = cfg.getParameter<double>("z"           );
+  zdist_     = cfg.getParameter<double>("z_dist"      );
 
   if (cfg.existsAs<InputTag>("muons")) {
     edm::LogWarning("VertexFilter") << " VertexFilter is templetized, now. Please use src instead of muons as InputTag in your python file!" << std::endl;
@@ -112,8 +113,12 @@ VertexFilter<Collection>::filter(Event& evt, const EventSetup&)
   for(VertexCollection::const_iterator vrtx = vertices->begin(); vrtx!= vertices->end(); ++vrtx) {
 
     if(!(vrtx->isFake()) && vrtx->ndof()>ndof_ && fabs(vrtx->position().z())<z_ && vrtx->position().rho()<rho_){
-
+      unsigned int i=0;
       for(typename std::vector<Collection>::const_iterator object = inputCollection->begin(); object != inputCollection->end(); ++object) {
+        ++i;
+	if(i>nleps_)
+	  break;
+	  
         if(fabs(object->vz()-vrtx->position().z())>zdist_){
           pass = false;
           break;
