@@ -39,6 +39,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// everything that has to be done after the event loop: summarizes if wantSummary_ is true
   virtual void endJob();
 
+  /// book and fill additional plots with gen information?
+  bool isSignalMC_;
   /// input given in config has to be TtFullLeptonicEvent
   edm::InputTag FullLepEvt_;
   /// keyword for hypothesis from config: ttFullLepHypKinSolution:Key or ttFullLepHypGenMatch:Key
@@ -50,20 +52,25 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// book histograms for reconstructed particles properties: Pt, E, Eta, Phi, m
   void bookKinHistos      (edm::Service<TFileService>&);
   /// book histograms for generated particles properties: Pt, E, Eta, Phi, m
-  void bookGenHistos      (edm::Service<TFileService>&);  
+  void bookGenHistos      (edm::Service<TFileService>&); 
   /// book histograms for pulls of particle properties: Pt, E, Eta, Phi, m
-  void bookPullHistos     (edm::Service<TFileService>&);    
+  void bookPullHistos     (edm::Service<TFileService>&);
+  /// book histograms for 2D distributions of particle properties: Pt, E, Eta, Phi, m
+  void book2DHistos(edm::Service<TFileService>&);  
   /// book histograms for kin hypothesis specific histos
   void bookQualityHistos  (edm::Service<TFileService>&);
   /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
-  void fillKinHistos           (std::vector<TH1D*>&, 
+  void fillKinHistos           (std::vector<TH1D*>&,
                                 const reco::Candidate&);
   /// fill histograms for pulls of particle properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
   void fillPullHistos           (std::vector<TH1D*>&,
                                  TH2D& hist2D, 
                                  const reco::Candidate&,
 				 const reco::Candidate&);								
-				
+  /// fill histograms for 2D distributions of particle properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
+  void fill2DHistos           (std::vector<TH2D*>&,
+                               const reco::Candidate&,
+			       const reco::Candidate&);				
   /// book histograms for kin hypothesis specific histos							
   void fillQualityHistos       (const TtFullLeptonicEvent&,
                                 const TtEvent::HypoClassKey&);
@@ -123,6 +130,7 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for generated jet pair kinematics
   std::vector<TH1D*> JetPairGen_;    
 
+
   /// histograms for pull distributions
   std::vector<TH1D*> TopPull_;
   /// histograms for  pull of W^+ kinematics
@@ -149,6 +157,34 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   std::vector<TH1D*> LepPairPull_;
   /// histograms for  pull of jet pair kinematics
   std::vector<TH1D*> JetPairPull_;    
+
+
+  /// histograms for 2D distributions
+  std::vector<TH2D*> Top2D_;
+  /// histograms for 2D distributions of W^+ kinematics
+  std::vector<TH2D*> Wplus2D_;
+  /// histograms for  2D distributions of B kinematics
+  std::vector<TH2D*> B2D_;
+  /// histograms for  2D distributions of l^+ kinematics
+  std::vector<TH2D*> LepBar2D_;
+  /// histograms for 2D distributions of neutrino kinematics
+  std::vector<TH2D*> Nu2D_; 
+  /// histograms for  2D distributions of anti-top quark kinematics 
+  std::vector<TH2D*> TopBar2D_;
+  /// histograms for  2D distributions of W^- quark kinematics
+  std::vector<TH2D*> Wminus2D_;
+  /// histograms for  2D distributions of anti-b kinematics
+  std::vector<TH2D*> BBar2D_;
+  /// histograms for  2D distributions of l^- kinematics
+  std::vector<TH2D*> Lep2D_;
+  /// histograms for  2D distributions of anti-neutrino kinematics
+  std::vector<TH2D*> NuBar2D_;
+  /// histograms for  2D distributions of top pair kinematics
+  std::vector<TH2D*> TtBar2D_;
+  /// histograms for  2D distributions of lepton pair kinematics
+  std::vector<TH2D*> LepPair2D_;
+  /// histograms for  2D distributions of jet pair kinematics
+  std::vector<TH2D*> JetPair2D_;
 
 
   /// 2 dimensional eta-phi pulls
