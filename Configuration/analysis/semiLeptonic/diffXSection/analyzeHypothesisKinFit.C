@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int systematicVariation=sysNo, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
-			     //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_PromptReco160404-163369.root")
+void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
+			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
 {
   //  ---
   //     name conventions
@@ -29,8 +29,13 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
      8:sysTopScaleDown    9:sysVBosonScaleUp  10:sysVBosonScaleDown  11:sysTopMatchUp 
      12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
-     20:sysQCDup         21:sysQCDdown
+     20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
+     24:sysBtagUp        25:sysBtagDown       26:sysDiBosUp          27:sysDiBosDown
   */
+  if(systematicVariation==sysLumiUp  ) luminosity*=1.04;
+  if(systematicVariation==sysLumiDown) luminosity*=0.96;
+  // verbose: set detail level of output 
+  // 0: no output, 1: std output 2: output for debugging
   // data file: relative path of .root file
   // save: save plots?
   // luminosity: [/pb]
@@ -49,9 +54,6 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   TString outputFileName="diffXSecTopSemiMu"+dataSample+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitpbHypothesis"+lumi+"pb";
-  // set detail level of output 
-  // 0: no output, 1: std output 2: output for debugging
-  unsigned int verbose=0;
   // c) set root style
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -335,7 +337,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
                              "y(t#bar{t}) Kinfit/events/0/1"                         ,//2
                              "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) Kinfit/events/0/20",
                              "y(t)+y(#bar{t}) Kinfit/events/0/10"                    ,
-                             "#phi(leptonic t)-#phi(hadronic t) Kinfit/events/0/10"  ,                
+                             "#phi(leptonic t)-#phi(hadronic t) Kinfit/events/0/4"  ,                
                              "y(leptonic t)-y(hadronic t) Kinfit/events/0/4"         ,  
 			     // generated ttbar quantities	                            
                              "m(t#bar{t}) parton truth/events/0/1"                         ,//60"
@@ -343,7 +345,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
                              "y(t#bar{t}) parton truth/events/0/1"                         ,//2
                              "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) parton truth/events/0/20",
                              "y(t)+y(#bar{t}) parton truth/events/0/10"                    ,
-                             "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/10"  ,                
+                             "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"  ,                
                              "y(leptonic t)-y(hadronic t) parton truth/events/0/4" 
                            };
   // 2D: "x-axis title"/"y-axis title"
@@ -371,6 +373,8 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   if(N1Dplots != sizeof(axisLabel1D)/sizeof(TString)) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
   if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
   if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
+  // run automatically in batch mode if there are many canvas
+  if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
   // ---
   //    open our standard analysis files
@@ -538,7 +542,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
 	double N=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinContent(bin);
 	double width=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinWidth(bin);
 	N*=width;
-	N/=(effSFAB(sysNo)*lumiweight(kSig, luminosity));
+	N/=(effSFAB(sysNo)*lumiweight(kSig, luminosity, systematicVariation));
 	if(verbose>1){
 	  std::cout << "bin " << bin << ": " << eff << ", " << N << ", " << width;
 	  std::cout << ", " <<  sqrt(eff*(1.-eff)/N) << std::endl;
@@ -553,7 +557,7 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
     }
   }
   // ---
-  //    cross section (phase space) determination
+  //    cross section (whole phase space) determination
   // ---
   // count # of cross section histos
   unsigned int NXSec=0;
@@ -597,10 +601,19 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
       // add axis configuration
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ pb#times("+label2+")^{-1} ] (inclusive t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (inclusive t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , true );
+      // restrict axis
+      if(variable=="topPt"){ 
+	histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
+	histo_[xSec][kSig ]->GetXaxis()->SetRange(1,5);
+      }
+      if(variable=="topY"){ 
+	histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
+	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
+      }
       ++NXSec;
       // save TH1F for data in extra folder
       //saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose, "xSecDataTH1FAllSystematics/"+sysLabel(systematicVariation));
@@ -740,8 +753,8 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
 	    if(getStringEntry(plotList_[plot], 1)=="xSec") histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset( 1.5 );
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	    if(getStringEntry(plotList_[plot], 2)=="topY"   ||
-	       getStringEntry(plotList_[plot], 2)=="topYHad"||getStringEntry(plotList_[plot], 2)=="topYLep"){
+	    if(getStringEntry(plotList_[plot], 1)!="xSec"   &&(getStringEntry(plotList_[plot], 2)=="topY"   ||
+	       getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
 	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-5,5);
@@ -804,24 +817,27 @@ void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int sys
   // saving
   // ---
   if(save){
-    // a) as pdf
-    saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
-    // b) as eps
-    for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
-      TString saveToFolder=outputFolder;
-      TString title=(plotCanvas_[idx])->GetTitle();
-      if(title.Contains("efficiency"                           )) saveToFolder+="effAndAcc/";
-      if(title.Contains("analyzeTopPartonLevelKinematics"      )) saveToFolder+="partonLevel/";
-      if(title.Contains("analyzeHypoKinFit"                    )) saveToFolder+="kinFitPerformance/";
-      if(title.Contains("xSec"                                 )) saveToFolder+="xSec/";
-
-      if(title.Contains("analyzeTopRecoKinematicsKinFit"       )) saveToFolder+="recoYield/";
-      if(title.Contains("0")                                    ) saveToFolder=outputFolder+"genRecoCorrPlots/";
-
-      plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps");      
+    // pdf and eps only for standard analysis without variation
+    if(systematicVariation==sysNo){
+      if(verbose==0) gErrorIgnoreLevel=kWarning;
+      // a) as pdf
+      saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
+      // b) as eps
+      for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
+	TString saveToFolder=outputFolder;
+	TString title=(plotCanvas_[idx])->GetTitle();
+	if(title.Contains("efficiency"                     )) saveToFolder+="effAndAcc/";
+	if(title.Contains("analyzeTopPartonLevelKinematics")) saveToFolder+="partonLevel/";
+	if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
+	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
+							   
+	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
+	if(title.Contains("0")                                    ) saveToFolder=outputFolder+"genRecoCorrPlots/";
+	plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps");      
+      }
     }
     // c) root file
-    std::cout << "will save all plots in outputfile named " << outputFileName << std::endl;
+    if(verbose>0) std::cout << "will save all plots in outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
       // get correct folder
       TString title=(plotCanvas_[idx])->GetTitle();
