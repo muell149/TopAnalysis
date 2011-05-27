@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(){
+void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, unsigned int verbose=0){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -15,11 +15,8 @@ void combineTopDiffXSecUncertainties(){
   // ---
   // set detail level of output 
   // 0: no output, 1: std output 2: output for debugging
-  unsigned int verbose=0;
-  // enable saving
-  bool save=true;
-  // see if its 2010 or 2011 data
-  TString dataSample="2010";
+  // save: enable saving
+  // dataSample: see if its "2010" or "2011" data
   // target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
@@ -28,7 +25,7 @@ void combineTopDiffXSecUncertainties(){
   TString xSecFolder = "xSec";
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
-  if(dataSample!="") outputFolder+=dataSample+"/";
+  if(dataSample!="") outputFolder+=dataSample;
   // define some rootstyle options
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -113,8 +110,6 @@ void combineTopDiffXSecUncertainties(){
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       if(verbose>0) std::cout << std::endl << "variable: " << xSecVariables_[i] << std::endl;
-      double totalSystematicErrorUp  =0;
-      double totalSystematicErrorDown=0;
       // check if any plot of the chosen variable has been found
       if(calculateError_.count(xSecVariables_[i])>0&&calculateError_[xSecVariables_[i]][sysNo]==true){
 	// define object to save asymmetric errors
@@ -124,6 +119,8 @@ void combineTopDiffXSecUncertainties(){
 	TH1F* noSysPlot=(TH1F*)histo_[xSecVariables_[i]][sysNo]->Clone();
 	// loop bins
 	for(int bin=1; bin<=noSysPlot->GetNbinsX(); ++bin){
+	  double totalSystematicErrorUp  =0;
+	  double totalSystematicErrorDown=0;
 	  double stdBinXSecValue=histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
 	  // jump to bin without vanishing bin content
 	  while(stdBinXSecValue==0&&bin<Nbins){
@@ -182,7 +179,7 @@ void combineTopDiffXSecUncertainties(){
 	      }
 	      // for last systematic 
 	      if(sys==sysDiBosDown){
-		// got to root directory keep plot when closing rootfile
+		// go to root directory keep plot when closing rootfile
 		gROOT->cd();
 		// finally save relative uncertainties in map relativeUncertainties_
 		relativeUncertainties_[xSecVariables_[i]][bin]=(TH1F*)relSysPlot->Clone();
@@ -224,7 +221,7 @@ void combineTopDiffXSecUncertainties(){
 		combinedErrors->SetPoint(bin, histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin), histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin));
 		combinedErrors->SetPointError(bin, 0,0, combinedErrorDownBinVar, combinedErrorUpBinVar);
 		// define style for relative error plots
-		histogramStyle(*relativeUncertainties_[xSecVariables_[i]][bin], kData, false, 2.0); 
+		histogramStyle(*relativeUncertainties_[xSecVariables_[i]][bin], kSig, true, 2.0, kBlack); 
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->LabelsOption("v");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetLabelSize(0.05);
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(errMax);
@@ -276,12 +273,36 @@ void combineTopDiffXSecUncertainties(){
 	      // draw plot into canvas
 	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");
 	      // draw axis also on the right side of canvas
-	      TGaxis *axis = new TGaxis(30,errMin,30,errMax,errMin,errMax,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
+	      int xPosition=32;
+	      TGaxis *axis = new TGaxis(xPosition,errMin,xPosition,errMax,errMin,errMax,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
 	      axis->Draw("same");
 	      // redraw to have statistical error as +/-
 	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
 	      relUnCertaintyCopy->SetBinContent(sysDiBosDown+1, (-1.)*(relUnCertaintyCopy->GetBinContent(sysDiBosDown+1)));
-	      relUnCertaintyCopy->Draw("hist same");
+	      relUnCertaintyCopy->DrawClone("hist same");
+	      // draw every systematic variation with different color
+	      int colourCounter=1;
+	      unsigned int colour=kBlack;
+	      for(unsigned int sys=1; sys<=(unsigned int)relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX(); ++sys, ++colourCounter){
+		if(sys==sysPileUp  ) ++colourCounter;
+		if(colourCounter==5) colourCounter=1;
+		if(colourCounter==1||colourCounter==2) colour=kBlack;
+		if(colourCounter==3||colourCounter==4) colour=kRed;
+		relUnCertaintyCopy->Scale(0.);
+		relUnCertaintyCopy->SetBinContent(sys, relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(sys));
+		if(sys<=sysDiBosDown){
+		  relUnCertaintyCopy->SetFillColor(colour);
+		  relUnCertaintyCopy->DrawCopy("hist same");
+		}
+		if(sys>=sysDiBosDown+2&&sys<=sysDiBosDown+3){
+		  relUnCertaintyCopy->SetFillColor(kOrange);
+		  relUnCertaintyCopy->DrawCopy("hist same");
+		}
+		if(sys>=sysDiBosDown+4){
+		  relUnCertaintyCopy->SetFillColor(kBlue);
+		  relUnCertaintyCopy->DrawCopy("hist same");
+		}
+	      }
 	      // save canvas to file
 	      if(save) saveToRootFile( outputFile, relUnCertaintyCanvas, true, verbose, "relativeUncertainties/"+xSecVariables_[i]);
 	      // save canvas as eps
@@ -309,8 +330,11 @@ void combineTopDiffXSecUncertainties(){
 	    // save Canvas
 	    // a) within rootFile
 	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
+	    int initialIgnoreLevel=gErrorIgnoreLevel;
+	    if(verbose==0) gErrorIgnoreLevel=kWarning;
 	    // b) as eps
 	    if(save) canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".eps");
+	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	}
       }
