@@ -95,6 +95,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
+    #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
     #'/store/user/cakir/MuHad/PAT_Data2011_MuHadv1_GJSON/d006f2bc492c2b853732556b211d6e87/Data2011_GJSON_10_1_vcC.root'
@@ -143,12 +144,13 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 ## high level trigger filter
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
+# for all spring11 MC use REDIGI311X
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
-
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI311X", HLTPaths = ["HLT_Mu9"], throw=False)
 
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
@@ -411,9 +413,21 @@ process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSe
 ## produce top reconstructed event
 process.load('TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff')
 ## process.ttSemiLepJetPartonMatch.verbosity = 1
+
+## choose collections
+## in fitting procedure
 process.kinFitTtSemiLepEventHypothesis.leps = 'tightMuons'
 process.kinFitTtSemiLepEventHypothesis.jets = 'tightLeadingPFJets'
-process.kinFitTtSemiLepEventHypothesis.mets = 'patMETs'
+process.kinFitTtSemiLepEventHypothesis.mets = 'patMETsPF'
+## in genmatch
+process.ttSemiLepHypGenMatch.jets = 'tightLeadingPFJets'
+process.ttSemiLepHypGenMatch.leps = 'tightMuons'
+process.ttSemiLepHypGenMatch.mets = 'patMETsPF'
+process.ttSemiLepHypGenMatch.jetCorrectionLevel=corrLevel
+## in event hypothesis used for 
+process.ttSemiLepHypKinFit.jets = 'tightLeadingPFJets'
+process.ttSemiLepHypKinFit.leps = 'tightMuons'
+process.ttSemiLepHypKinFit.mets = 'patMETsPF'
 
 # maximum number of jets to be considered in the jet combinatorics
 # (has to be >= 4, can be set to -1 if you want to take all)
@@ -682,7 +696,7 @@ process.p1.replace(process.semiLeptonicSelection, process.semiLeptonicSelection*
 
 ## switch to PF objects
 if(jetType=="particleFlow"):
-    pathlist = [process.p1]
+    pathlist = [process.p1, process.p2, process.p3, process.p4]
     for path in pathlist:  
         massSearchReplaceAnyInputTag(path, 'tightLeadingJets', 'tightLeadingPFJets')
         massSearchReplaceAnyInputTag(path, 'tightBottomJets' , 'tightBottomPFJets' )
@@ -692,3 +706,8 @@ if(jetType=="particleFlow"):
         massSearchReplaceAnyInputTag(path, 'noEtaJets'       , 'noEtaJetsPF30'     )
         massSearchReplaceAnyInputTag(path, 'noPtJets'        , 'noPtJetsPF'        )
         massSearchReplaceAnyInputTag(path, 'patMETs'         , 'patMETsPF'         )
+        path.remove(process.centralJets)
+        path.remove(process.reliableJets)
+        path.remove(process.goodJets)
+        path.remove(process.tightLeadingJets)
+        path.remove(process.tightBottomJets)
