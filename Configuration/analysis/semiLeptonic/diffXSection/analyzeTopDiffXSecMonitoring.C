@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
+void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
 {
   //  ---
   //     name conventions
@@ -8,7 +8,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
   // a) enumerator sample convention (as defined in basicFunctions.h)
      /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
   // kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW 
-
   // b) file name convention (implemented in basicFunctions.h)
   // "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
   // sampleName = "Sig", "Bkg", Wjets", "Zjets", "WW", "WZ", "ZZ", "VV", "SingleTopSchannel", 
@@ -21,9 +20,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
   //     options
   //  ---
   // a) options directly entered when calling function
-  // save: save plots?
   // luminosity: [/pb]
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));
+  // save: save plots?
+  // verbose: set detail level of output 
+  // 0: no output, 1: std output 2: output for debugging
   // b) options to be configured only once
   // get the .root files from the following folder:
   TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
@@ -40,17 +41,15 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
   // choose name of the output .pdf file
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
-     0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
-     4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
-     8:sysTopScaleDown    9:sysVBosonScaleUp  10:sysVBosonScaleDown  11:sysTopMatchUp 
-     12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
-     16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
-     20:sysQCDup         21:sysQCDdown
+     0: sysNo             1: sysLumiUp          2: sysLumiDown          3: sysJESUp      
+     4: sysJESDown        5: sysJERUp           6: sysJERDown           7: sysTopScaleUp 
+     8: sysTopScaleDown   9: sysVBosonScaleUp   10: sysVBosonScaleDown  11: sysTopMatchUp 
+     12: sysTopMatchDown  13: sysVBosonMatchUp  14: sysVBosonMatchDown  15: sysMuEffSFup  
+     16: sysMuEffSFdown   17: sysISRFSRup       18: sysISRFSRdown       19: sysPileUp    
+     20: sysQCDup         21: sysQCDdown        22: sysSTopUp           23: sysSTopDown  
+     24: sysBtagUp        25: sysBtagDown       26: sysDiBosUp          27: sysDiBosDown
   */
   int systematicVariation=sysNo;
-  // set detail level of output 
-  // 0: no output, 1: std output 2: output for debugging
-  unsigned int verbose=0;
   // c) set root style
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -62,9 +61,25 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
   //     choose plots
   //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
-  TString plots1D[ ] = { // (II) before btagging
+  TString plots1D[ ] = { // (I) preselection
                          // (i) muon monitoring
-                         /*"tightMuonKinematics/n" ,
+                         "kinematicMuonQualityPreSel/nHit"   ,
+                         "kinematicMuonQualityPreSel/chi2"   ,
+                         "kinematicMuonQualityPreSel/dB"     ,
+                         "kinematicMuonQualityPreSel/dz"     ,
+                         "kinematicMuonQualityPreSel/matches",  
+                         "trackMuontightJetsKinematicsPreSel/dist30_",
+			 "goldenMuonQualityPreSel/relIso"    , 
+			 "tightMuonKinematicsPreSel/n"       ,
+                         // (ii) jet monitoring
+                         "tightJetKinematicsPreSel/n"  ,
+                         "tightJetKinematicsPreSel/en" ,
+			 "tightJetKinematicsPreSel/pt" ,
+			 "tightJetKinematicsPreSel/eta",
+			 "tightJetKinematicsPreSel/phi",
+                         // (II) before btagging
+                         // (i) muon monitoring
+                         "tightMuonKinematics/n" ,
                          "tightMuonKinematics/en" ,
                          "tightMuonKinematics/pt" ,
                          "tightMuonKinematics/eta",
@@ -110,7 +125,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
                          // (iii) btag monitoring
                          "tightJetQuality/btagTrkCntHighPurity",
                          "tightJetQuality/btagTrkCntHighEff_"  ,
-                         "tightJetQuality/btagSimpleSecVtx_"   ,
+                         "tightJetQuality/btagSimpleSecVtxHighEff_",
+                         "tightJetQuality/btagSimpleSecVtxHighPur_",
                          "tightJetQuality/btagCombSecVtx_",
                          "tightJetQuality/btagCombSecVtxMVA_",
                          "tightJetQuality/btagJetBProbability_",
@@ -138,7 +154,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
 			 "tightLead_2_JetKinematicsTagged/pt" ,
 			 "tightLead_2_JetKinematicsTagged/eta",
 			 "tightLead_3_JetKinematicsTagged/pt" ,
-			 "tightLead_3_JetKinematicsTagged/eta",*/
+			 "tightLead_3_JetKinematicsTagged/eta",
                          // (iv) MET monitoring
                          "analyzeMETMuonTagged/metEt"   ,
                          "analyzeMETMuonTagged/metSumEt",
@@ -150,9 +166,25 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
   // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
   // log = 0 or 1 for linear or logarithmic axis 
 
-  TString axisLabel1D[ ] = { // (II) before btagging
+  TString axisLabel1D[ ] = { // (I) preselection
                              // (i) muon monitoring
-                             /*"N_{#mu}/events/0/1"   ,
+                             "N_{hits}(inner tracker #mu)/events/0/1"          ,
+                             "#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
+                             "d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
+                             "d_{z} (#mu(pt,#eta))/events/0/10",
+                             "N_{matched #mu segments}(#mu(pt,#eta))/events/0/1",
+                             "#DeltaR(jet(pt,#eta,ID), #mu(pt, #eta, track criteria))/events/0/1",
+			     "relIso(#mu(no isolation))/events/0/1",
+                             "N_{#mu}/events/0/1",
+                             // (ii) jet monitoring
+                             "N_{jets}/events/0/1",
+                             "E(jets)/jets/1/1",
+			     "p_{t}(jets)/jets/1/1",
+			     "#eta(jets)/jets/0/5",
+			     "#phi(jets)/jets/0/10",
+			     // (II) before btagging
+                             // (i) muon monitoring
+                             "N_{#mu}/events/0/1"   ,
                              "E(#mu)/events/0/2"    ,
                              "p_{t}(#mu)/events/0/1",
 		             "#eta(#mu)/events/0/5" ,
@@ -164,7 +196,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
                              "d_{z} (#mu)/events/0/10"               ,
                              "E_{Ecal} (#mu)/events/1/1",
                              "E_{Hcal} (#mu)/events/1/1",
-                             "relIso/events/0/1",
+                             "relIso(#mu)/events/0/1",
                              "N_{matched #mu segments}(#mu)/events/0/1",
                              // (ii) jet monitoring
                              "N_{jets}/events/0/1",
@@ -196,17 +228,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
 			     "#eta(lead 4^{th} jet)/events/0/5",
 			     "#phi(lead 4^{th} jet)/events/0/10",
                              // (iii) btag monitoring
-                             "b-discr.(TCHP)/events/0/10"       ,
-                             "b-discr.(TCHE)/events/0/10"	,
-                             "b-discr.(SSV)/events/0/10"	,
-                             "b-discr.(CSV)/events/0/10"	,
-                             "b-discr.(CSVMVA)/events/0/10"	,
-			     "b-discr.(JetBProb)/events/0/10"	,
-			     "b-discr.(JetProb)/events/0/10"	,
-			     "b-discr.(soft#mu)/events/0/10"	,
-			     "b-discr.(soft#muPt)/events/0/10"  ,                  
-			     "b-discr.(soft#muIP3d)/events/0/10",
-			     "N_{b-jets}(TCHE)/events/0/1"      ,
+                             "b-discr.(TCHP)/jets/0/2"        ,
+                             "b-discr.(TCHE)/jets/0/2"	,
+                             "b-discr.(SSV HEff)/jets/0/2"	,
+			     "b-discr.(SSV HPur)/jets/0/2"	,
+                             "b-discr.(CSV)/jets/0/8"	,
+                             "b-discr.(CSVMVA)/jets/0/8"	,
+			     "b-discr.(JetBProb)/jets/0/10"	,
+			     "b-discr.(JetProb)/jets/0/10"	,
+			     "b-discr.(soft#mu)/jets/0/10"	,
+			     "b-discr.(soft#muPt)/jets/0/10"  ,                  
+			     "b-discr.(soft#muIP3d)/jets/0/10",
+			     "N_{b-jets}(SSVHE)/events/0/1"      ,
 			     // (iv) MET monitoring 
 			     "#slash{E}_{T}/events/0/10",
 			     "#SigmaE_{T}/events/0/20"  ,
@@ -226,12 +259,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
 			     "p_{t}(lead 3^{rd} jet)/events/1/5",
 			     "#eta(lead 3^{rd} jet)/events/0/5" ,
 			     "p_{t}(lead 4^{th} jet)/events/1/5",
-			     "#eta(lead 4^{th} jet)/events/0/5" ,*/
+			     "#eta(lead 4^{th} jet)/events/0/5" ,
 			     // (iv) MET monitoring 
 			     "#slash{E}_{T}/events/0/20",
 			     "#SigmaE_{T}/events/0/30"  ,
-
-
                            };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {
@@ -454,11 +485,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
 	    }
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
+	    if(plotList_[plot].Contains("btagSimpleSecVtx"))max*=0.8;
 	    // restrict x axis for special plots
 	    if(getStringEntry(plotList_[plot], 2)=="nHit"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(10,30 );
 	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10  );
 	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
-	    if(getStringEntry(plotList_[plot], 2)=="relIso") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.06);
+	    if(plotList_[plot].Contains("tightMuonQuality/relIso")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.06);
 	    if(plotList_[plot].Contains("tightJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,9);
 	    if(plotList_[plot].Contains("_JetKinematics/en")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
 	    if(plotList_[plot].Contains("_JetKinematics/pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
@@ -466,7 +498,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
 	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("bottomJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
 	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,350);
-
+	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);
 
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max, 0.05, 1.5, 0.05);
@@ -494,7 +526,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
 	      DrawLabel(label, 0.73, 0.9, 0.95, 0.95);
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0)){
-		//drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, verbose);
+		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, verbose);
 	      }
 	    }
 	  }
@@ -543,9 +575,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 35.9, bool save = true, TS
   // ---
   if(save){
     // pdf and eps
+    if(verbose==0) gErrorIgnoreLevel=kWarning;
     saveCanvas(plotCanvas_, outputFolder, pdfName);
     // root file
-    std::cout << "will save into outputfile named " << outputFileName << std::endl;
+    if(verbose>0) std::cout << "will save into outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
       saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose, "monitoring");
     }
