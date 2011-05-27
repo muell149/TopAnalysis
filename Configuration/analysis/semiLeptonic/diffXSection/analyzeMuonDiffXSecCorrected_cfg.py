@@ -9,10 +9,7 @@ execfile("analyzeTopDiffXSec_cfg.py")
 
 ## change input collections to JER-shifted collections
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-if(implement0TagPath==True):
-    pathlist = [process.p1, process.p2, process.p3]
-else:
-    pathlist = [process.p1, process.p2]
+pathlist = [process.p1, process.p2, process.p3, process.p4]
 for path in pathlist:
     if(jetType=="particleFlow"):
         massSearchReplaceAnyInputTag(path, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF')
@@ -42,8 +39,8 @@ if(applyKinFit==True):
 
 ## include module to create JES-shifted collection
 for path in pathlist:
-    path.replace(process.semiLeptonicSelection,
-                 process.scaledJetEnergy * process.semiLeptonicSelection)
+    path.replace(process.PVSelection,
+                 process.PVSelection * process.scaledJetEnergy)
 
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXSecCorr_testSig.root'
