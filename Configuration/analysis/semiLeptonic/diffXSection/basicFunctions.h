@@ -30,6 +30,7 @@
 #include <TF1.h>
 #include <TBox.h>
 #include <TGaxis.h>
+#include <TError.h>
 
                  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
 enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
@@ -41,7 +42,54 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 			  /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup , 
 			  /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
 			  /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
-			  /*24:*/sysDiBosUp     , /*25:*/sysDiBosDown};
+			  /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysDiBosUp        , /*27:*/sysDiBosDown};
+
+TString sysLabel(unsigned int sys)
+{
+  // this function returns a TString that corresponds 
+  // to the systematic variation "sys" of the enumerator "systematicVariation"
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none (label correspond to systematicVariation)
+
+  TString systematicVariationlabel="";
+  if(sys==0 )systematicVariationlabel="sysNo";
+  if(sys==1 )systematicVariationlabel="sysLumiUp";
+  if(sys==2 )systematicVariationlabel="sysLumiDown";
+  if(sys==3 )systematicVariationlabel="sysJESUp";
+  if(sys==4 )systematicVariationlabel="sysJESDown";
+  if(sys==5 )systematicVariationlabel="sysJERUp";
+  if(sys==6 )systematicVariationlabel="sysJERDown";
+  if(sys==7 )systematicVariationlabel="sysTopScaleUp";
+  if(sys==8 )systematicVariationlabel="sysTopScaleDown";
+  if(sys==9 )systematicVariationlabel="sysVBosonScaleUp";
+  if(sys==10)systematicVariationlabel="sysVBosonScaleDown";
+  if(sys==11)systematicVariationlabel="sysTopMatchUp";
+  if(sys==12)systematicVariationlabel="sysTopMatchDown";
+  if(sys==13)systematicVariationlabel="sysVBosonMatchUp";
+  if(sys==14)systematicVariationlabel="sysVBosonMatchDown";
+  if(sys==15)systematicVariationlabel="sysMuEffSFup";
+  if(sys==16)systematicVariationlabel="sysMuEffSFdown";
+  if(sys==17)systematicVariationlabel="sysISRFSRup";
+  if(sys==18)systematicVariationlabel="sysISRFSRdown";
+  if(sys==19)systematicVariationlabel="sysPileUp";
+  if(sys==20)systematicVariationlabel="sysQCDup";
+  if(sys==21)systematicVariationlabel="sysQCDdown";
+  if(sys==22)systematicVariationlabel="sysSTopUp";
+  if(sys==23)systematicVariationlabel="sysSTopDown";
+  if(sys==24)systematicVariationlabel="btagEffUp";
+  if(sys==25)systematicVariationlabel="btagEffDown";
+  if(sys==26)systematicVariationlabel="sysDiBosUp";
+  if(sys==27)systematicVariationlabel="sysDiBosDown";
+  // check if valid input was chosen
+  if(systematicVariationlabel==""){
+    std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
+    std::cout << "max syst. variation: 20" << std::endl;
+    std::cout << "max syst. variation: " << sys << std::endl;
+    exit(1);
+  }
+  return systematicVariationlabel;
+}
 
 double effSFAB(int sys=sysNo)
 {
@@ -68,7 +116,7 @@ double effSFAB(int sys=sysNo)
 // BR correction for ttbar->lnuqq'bb'
 double BRcorrectionSemileptonic = 0.985608;
 
-void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.8) 
+void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.8, unsigned int color=0) 
 {
   // this function configures the style of a TH1 histogram "hist"
   // using "sampleTyp" to identify the corresponding sample from
@@ -103,6 +151,11 @@ void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersiz
     hist.SetFillColor(color_[sampleTyp]);
     hist.SetFillStyle(1001);
   }
+  if(color!=0){
+    hist.SetLineColor(color);
+    hist.SetFillColor(color);
+  }
+
 }
 
 void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY) 
@@ -375,7 +428,7 @@ void scaleByFactor(TH1F*& histo, const double scaleValue)
   }
 }
 
-double lumiweight(unsigned int sample, double luminosity)
+double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
 {
   // this function derives the lumiweight for every standard MC 
   // sample "sample" based on the theoretical cross section, the 
@@ -384,7 +437,7 @@ double lumiweight(unsigned int sample, double luminosity)
   // NOTE: enter luminosity IN / pb!!!!
   // modified quantities: NONE
   // used functions: BRcorrectionSemileptonic
-  // used enumerators: samples
+  // used enumerators: samples, systematicVariation
 
   // a) check if input is valid
   // sample existing?
@@ -407,21 +460,42 @@ double lumiweight(unsigned int sample, double luminosity)
   if((sample==kSig)||(sample==kBkg)){
     crossSection=157.5;
     Nevents     =1306182.;
+    // systematic samples:
+    if(kSys==sysTopScaleUp  ) Nevents=1153236;
+    if(kSys==sysTopScaleDown) Nevents=1098971;
+    if(kSys==sysTopMatchUp  ) Nevents=1036492;
+    if(kSys==sysTopMatchDown) Nevents=938005;
+    if(kSys==sysISRFSRup    ) Nevents=1394010;
+    if(kSys==sysISRFSRdown  ) Nevents=1221664;
+    if(kSys==sysPileUp      ) Nevents=1281237;
   }
   // W->lnu+jets MADGRAPH D6T Fall10
   if(sample==kWjets){
     crossSection=31314.;
     Nevents     =14805546.;
+    // systematic samples:
+    if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
+    if(kSys==sysVBosonScaleDown) Nevents=4842219;
+    if(kSys==sysVBosonMatchUp  ) Nevents=10370368;
+    if(kSys==sysVBosonMatchDown) Nevents=2706986;
+    if(kSys==sysPileUp         ) Nevents=14766396;
   }
   // DY->ll+jets MADGRAPH D6T Fall10
   if(sample==kZjets){
     crossSection=3048.;
     Nevents     =2543727.;
+    // systematic samples:
+    if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
+    if(kSys==sysVBosonScaleDown) Nevents=1436150;
+    if(kSys==sysVBosonMatchUp  ) Nevents=1667367;
+    if(kSys==sysVBosonMatchDown) Nevents=1662884;
+    if(kSys==sysPileUp         ) Nevents=2539858;
   }
   // QCD PYTHIA6 Z2 Fall10 
   if(sample==kQCD){
     crossSection=296600000.*0.00028550; // generator crossSection * prefilter efficiency
     Nevents     =29504866.;
+    // if(kSys==sysPileUp) Nevents=8063288; // PU not completely patified
   }
   // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10 
   if(sample==kSTop){
@@ -431,14 +505,20 @@ double lumiweight(unsigned int sample, double luminosity)
   if(sample==kSTops){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =494967.;
+    // systematic samples:
+    if(kSys==sysPileUp)Nevents=494967;
   }
   if(sample==kSTopt){
     crossSection=64.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =484060.;
+    // systematic samples:
+    if(kSys==sysPileUp)Nevents=484060;
   }
   if(sample==kSToptW){
     crossSection=10.6;
     Nevents     =494961.;
+    // systematic samples:
+    if(kSys==sysPileUp)Nevents=494961;
   }
   // DiBoson (added diboson,WW,WZ,ZZ) PYTHIA6 Z2 Fall10
   if(sample==kDiBos){
@@ -448,14 +528,20 @@ double lumiweight(unsigned int sample, double luminosity)
   if(sample==kWW){
     crossSection=43.0;
     Nevents     =2061760;
+    // systematic samples:
+    if(kSys==sysPileUp)Nevents=2061760;
   }
   if(sample==kWZ){
     crossSection=18.2;
     Nevents     =2194752;
+    // systematic samples:
+    if(kSys==sysPileUp)Nevents=2185664;
   }
   if(sample==kZZ){
     crossSection=5.9;
     Nevents     =2113368;
+    // systematic samples:
+    if(kSys==sysPileUp)Nevents=2113368;
   }
   // Data 
   if(sample==kData){
@@ -464,8 +550,21 @@ double lumiweight(unsigned int sample, double luminosity)
   }
   // d) calculate weight
   weight = luminosity / ( Nevents / crossSection );
-  // for ttbar->lnu: BR correction
+  // e) systematic effects
+  // e1) for ttbar->lnu: BR correction
   if(sample==kSig) weight *= BRcorrectionSemileptonic;
+  // e2) systematic higher/lower BG
+  double scale=0;
+  // (i) more/less DiBoson
+  if(sample==kWW||sample==kWZ||sample==kZZ) scale=0.3;
+  // (ii) more/less QCD
+  if(sample==kQCD) scale=0.5;
+  // (iii) more/less single top
+  if(sample==kSTops||sample==kSTopt||sample==kSToptW) scale=0.3;
+  // lower BG rate
+  if(sysLabel(kSys).Contains("down")||sysLabel(kSys).Contains("Down")) weight*=(1-scale);
+  // higher BG rate
+  if(sysLabel(kSys).Contains("up"  )||sysLabel(kSys).Contains("Up"  )) weight*=(1+scale);
   // return result
   return weight;
 }
@@ -547,8 +646,6 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   if(sample==kSTopt )fileName += "SingleTopTchannelMadZ2Fall10";
   if(sample==kSTop  )fileName += "SingleTopMadD6TFall10";
   // take care of systematic variations
-  // at the moment: no variation for QCD
-  if(sample!=kQCD){
   // JES
   if(sys==sysJESUp  ) fileName += "JESup";
   if(sys==sysJESDown) fileName += "JESdown";
@@ -556,7 +653,8 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   if(sys==sysJERUp  ) fileName += "JERup";
   if(sys==sysJERDown) fileName += "JERdown";
   // Pile Up
-  if(sys==sysPileUp) fileName += "PileUp";
+  // at the moment: no variation for QCD
+  if(sys==sysPileUp&&sample!=kQCD) fileName += "PileUp";
   // larger ISR/FSR (top only)
   if((sys==sysISRFSRup  )&&((sample==kSig)||(sample==kBkg))) fileName += "ISRFSRup";
   if((sys==sysISRFSRdown)&&((sample==kSig)||(sample==kBkg))) fileName += "ISRFSRdown";
@@ -574,7 +672,6 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   // b) V+jets
   if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) fileName+="MatchUp";
   if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) fileName+="MatchDown";
-  }
   fileName+="PF.root";
   // return output
   return fileName;
@@ -726,7 +823,7 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
 	if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample) << ":" << std::endl;
 	if(verbose>1) std::cout << "#events before weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
 	// scale MC samples to same luminosity
-	double weight = lumiweight(sample, luminosity);
+	double weight = lumiweight(sample, luminosity, systematicVariation);
 	histo_[plotList_[plot]][sample]->Scale(weight);
 	if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	if(verbose>1) std::cout << "#events after weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
@@ -739,7 +836,7 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
 	if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample) << ":" << std::endl;
 	if(verbose>1) std::cout << "#events before weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
 	// scale MC samples to same luminosity
-	double weight = lumiweight(sample, luminosity);
+	double weight = lumiweight(sample, luminosity, systematicVariation);
 	histo2_[plotList_[plot]][sample]->Scale(weight);
 	if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	if(verbose>1) std::cout << "#events after weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
@@ -857,7 +954,7 @@ float modulo(const float a, const float b)
   // modified quantities: none
   // used functions: none
   // used enumerators: none
-  // "a": diviend
+  // "a": dividend
   // "b": divisor
   
   // round a and b to the 3rd decimal place
@@ -1185,51 +1282,6 @@ void saveToRootFile(const TString& outputFile, const T& object, const bool& over
   }
   // close file
   file->Close();
-}
-
-TString sysLabel(unsigned int sys)
-{
-  // this function returns a TString that corresponds 
-  // to the systematic variation "sys" of the enumerator "systematicVariation"
-  // modified quantities: none
-  // used functions: none
-  // used enumerators: none (label correspond to systematicVariation)
-
-  TString systematicVariationlabel="";
-  if(sys==0 )systematicVariationlabel="sysNo";
-  if(sys==1 )systematicVariationlabel="sysLumiUp";
-  if(sys==2 )systematicVariationlabel="sysLumiDown";
-  if(sys==3 )systematicVariationlabel="sysJESUp";
-  if(sys==4 )systematicVariationlabel="sysJESDown";
-  if(sys==5 )systematicVariationlabel="sysJERUp";
-  if(sys==6 )systematicVariationlabel="sysJERDown";
-  if(sys==7 )systematicVariationlabel="sysTopScaleUp";
-  if(sys==8 )systematicVariationlabel="sysTopScaleDown";
-  if(sys==9 )systematicVariationlabel="sysVBosonScaleUp";
-  if(sys==10)systematicVariationlabel="sysVBosonScaleDown";
-  if(sys==11)systematicVariationlabel="sysTopMatchUp";
-  if(sys==12)systematicVariationlabel="sysTopMatchDown";
-  if(sys==13)systematicVariationlabel="sysVBosonMatchUp";
-  if(sys==14)systematicVariationlabel="sysVBosonMatchDown";
-  if(sys==15)systematicVariationlabel="sysMuEffSFup";
-  if(sys==16)systematicVariationlabel="sysMuEffSFdown";
-  if(sys==17)systematicVariationlabel="sysISRFSRup";
-  if(sys==18)systematicVariationlabel="sysISRFSRdown";
-  if(sys==19)systematicVariationlabel="sysPileUp";
-  if(sys==20)systematicVariationlabel="sysQCDup";
-  if(sys==21)systematicVariationlabel="sysQCDdown";
-  if(sys==22)systematicVariationlabel="sysSTopUp";
-  if(sys==23)systematicVariationlabel="sysSTopDown";
-  if(sys==24)systematicVariationlabel="sysDiBosUp";
-  if(sys==25)systematicVariationlabel="sysDiBosDown";
-  // check if valid input was chosen
-  if(systematicVariationlabel==""){
-    std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
-    std::cout << "max syst. variation: 20" << std::endl;
-    std::cout << "max syst. variation: " << sys << std::endl;
-    exit(1);
-  }
-  return systematicVariationlabel;
 }
 
 void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, unsigned int verbose=0, const std::vector<double> err_=std::vector<double>(0))
