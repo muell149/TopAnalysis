@@ -113,27 +113,71 @@ hardJets = selectedPatJets.clone(src = 'tightJets',
 			        )
 
 ## b-jet selection (optional)
-bJetsTCHE = selectedPatJets.clone(src = 'hardJets',
+bJetsTCHEL = selectedPatJets.clone(src = 'hardJets',
 		                  cut = 'bDiscriminator("trackCountingHighEffBJetTags") > 1.7' 
 		                 )
-## OR
-bJetsSVHE = selectedPatJets.clone(src = 'hardJets',
+				 
+bJetsTCHEM = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("trackCountingHighEffBJetTags") > 3.3' 
+		                 )				 
+				 
+bJetsTCHET = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("trackCountingHighEffBJetTags") > 10.2' 
+		                 )				 
+				 
+bJetsTCHPL = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("trackCountingHighPurBJetTags") > 1.19' 
+		                 )
+				 
+bJetsTCHPM = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("trackCountingHighPurBJetTags") > 1.93' 
+		                 )				 
+				 
+bJetsTCHPT = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("trackCountingHighPurBJetTags") > 3.41' 
+		                 )				 				 
+				 
+bJetsSSVHEM = selectedPatJets.clone(src = 'hardJets',
 		                  cut = 'bDiscriminator("simpleSecondaryVertexHighEffBJetTags") > 1.74' 
 		                 )
-
+				 
+bJetsSSVHET = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("simpleSecondaryVertexHighEffBJetTags") > 3.05' 
+		                 )
+				 
+bJetsSSVHPM = selectedPatJets.clone(src = 'hardJets',
+		                  cut = 'bDiscriminator("simpleSecondaryVertexHighPurBJetTags") > 2.00' 
+		                 )				 
+				 
+				 				 
 ## Count Filters with n >= 1 for control plots
-oneTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 1)
-oneGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',minNumber = 1)
-oneHardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 1)
-oneBJetTCHE           = countPatJets.clone(src = 'bJetsTCHE', minNumber = 1)
-oneBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 1)
+oneTightJetSelection  = countPatJets.clone(src = 'tightJets',   minNumber = 1)
+oneGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',  minNumber = 1)
+oneHardJetSelection   = countPatJets.clone(src = 'hardJets',    minNumber = 1)
+oneBJetTCHEL          = countPatJets.clone(src = 'bJetsTCHEL',  minNumber = 1)
+oneBJetTCHEM          = countPatJets.clone(src = 'bJetsTCHEM',  minNumber = 1)
+oneBJetTCHET          = countPatJets.clone(src = 'bJetsTCHET',  minNumber = 1)
+oneBJetTCHPL          = countPatJets.clone(src = 'bJetsTCHPL',  minNumber = 1)
+oneBJetTCHPM          = countPatJets.clone(src = 'bJetsTCHPM',  minNumber = 1)
+oneBJetTCHPT          = countPatJets.clone(src = 'bJetsTCHPT',  minNumber = 1)
+oneBJetSSVHEM         = countPatJets.clone(src = 'bJetsSSVHEM', minNumber = 1)
+oneBJetSSVHET         = countPatJets.clone(src = 'bJetsSSVHET', minNumber = 1)
+oneBJetSSVHPM         = countPatJets.clone(src = 'bJetsSSVHPM', minNumber = 1)
+
 
 ## Count Filters with n >= 2 for control plots
-twoTightJetSelection  = countPatJets.clone(src = 'tightJets', minNumber = 2)
-twoGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',minNumber = 2)
-twoHardJetSelection   = countPatJets.clone(src = 'hardJets',  minNumber = 2)
-twoBJetTCHE           = countPatJets.clone(src = 'bJetsTCHE', minNumber = 2)
-twoBJetSVHE           = countPatJets.clone(src = 'bJetsSVHE', minNumber = 2)
+twoTightJetSelection  = countPatJets.clone(src = 'tightJets',   minNumber = 2)
+twoGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',  minNumber = 2)
+twoHardJetSelection   = countPatJets.clone(src = 'hardJets',    minNumber = 2)
+oneBJetTCHEL          = countPatJets.clone(src = 'bJetsTCHEL',  minNumber = 2)
+oneBJetTCHEM          = countPatJets.clone(src = 'bJetsTCHEM',  minNumber = 2)
+oneBJetTCHET          = countPatJets.clone(src = 'bJetsTCHET',  minNumber = 2)
+oneBJetTCHPL          = countPatJets.clone(src = 'bJetsTCHPL',  minNumber = 2)
+oneBJetTCHPM          = countPatJets.clone(src = 'bJetsTCHPM',  minNumber = 2)
+oneBJetTCHPT          = countPatJets.clone(src = 'bJetsTCHPT',  minNumber = 2)
+oneBJetSSVHEM         = countPatJets.clone(src = 'bJetsSSVHEM', minNumber = 2)
+oneBJetSSVHET         = countPatJets.clone(src = 'bJetsSSVHET', minNumber = 2)
+oneBJetSSVHPM         = countPatJets.clone(src = 'bJetsSSVHPM', minNumber = 2)
 
 
 ###########################################################################################
@@ -217,17 +261,61 @@ requireMET = cms.Sequence(highMETs *
 			  metSelection
 			 )
 			 
-requireOneBtagTCHE = cms.Sequence(bJetsTCHE *
-                                 oneBJetTCHE
-				 )
+requireOneBtagTCHEL = cms.Sequence(bJetsTCHEL *
+                                  oneBJetTCHEL
+				  )
+				  
+requireOneBtagTCHEM = cms.Sequence(bJetsTCHEM *
+                                  oneBJetTCHEM
+				  )				  
+				  
+requireOneBtagTCHET = cms.Sequence(bJetsTCHET *
+                                  oneBJetTCHET
+				  )				  
+				  
+requireOneBtagTCHPL = cms.Sequence(bJetsTCHPL *
+                                  oneBJetTCHPL
+				  )
+				  
+requireOneBtagTCHPM = cms.Sequence(bJetsTCHPM *
+                                  oneBJetTCHPM
+				  )				  
+				  
+requireOneBtagTCHPT = cms.Sequence(bJetsTCHPT *
+                                  oneBJetTCHPT
+				  )				  
+				  
+requireOneBtagSSVHEM = cms.Sequence(bJetsSSVHEM *
+                                    oneBJetSSVHEM
+				   )
+				   
+requireOneBtagSSVHET = cms.Sequence(bJetsSSVHET *
+                                    oneBJetSSVHET
+				   )
+				   				   				  
+requireOneBtagSSVHPM = cms.Sequence(bJetsSSVHPM *
+                                    oneBJetSSVHPM
+				   )				  
 
-requireTwoBtagsTCHE = cms.Sequence(twoBJetTCHE)
-				 
-requireOneBtagSVHE = cms.Sequence(bJetsSVHE *
-                                 oneBJetSVHE
-				 )
+requireTwoBtagTCHEL  = cms.Sequence(twoBJetTCHEL)
+				  
+requireTwoBtagTCHEM  = cms.Sequence(twoBJetTCHEM)				  
+				  
+requireTwoBtagTCHET  = cms.Sequence(twoBJetTCHET)				  
+				  
+requireTwoBtagTCHPL  = cms.Sequence(twoBJetTCHPL)
+				  
+requireTwoBtagTCHPM  = cms.Sequence(twoBJetTCHPM)				  
+				  
+requireTwoBtagTCHPT  = cms.Sequence(twoBJetTCHPT)				  
+				  
+requireTwoBtagSSVHEM = cms.Sequence(twoBJetSSVHEM)
+				   
+requireTwoBtagSSVHET = cms.Sequence(twoBJetSSVHET)
+				   				   				  
+requireTwoBtagSSVHPM = cms.Sequence(twoBJetSSVHPM)
 
-requireTwoBtagsSVHE = cms.Sequence(twoBJetSVHE)
+
 
 
 ################################################################################
