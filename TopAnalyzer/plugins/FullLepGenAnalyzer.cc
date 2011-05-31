@@ -167,7 +167,7 @@ void
 FullLepGenAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
 {
 
-  NameScheme ns("Gen");
+  NameScheme ns("gen");
 
   TopGen_.push_back( fs->make<TH1D>(ns.name("TopPt"	 ), "p_{t} (t) [GeV]",100,  0. , 500. ) );  
   TopGen_.push_back( fs->make<TH1D>(ns.name("TopEta"	 ), "#eta (t)"       ,100, -5.0,   5.0) );
