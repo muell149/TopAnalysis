@@ -169,15 +169,15 @@ oneBJetSSVHPM         = countPatJets.clone(src = 'bJetsSSVHPM', minNumber = 1)
 twoTightJetSelection  = countPatJets.clone(src = 'tightJets',   minNumber = 2)
 twoGoodIdJetSelection = countPatJets.clone(src = 'goodIdJets',  minNumber = 2)
 twoHardJetSelection   = countPatJets.clone(src = 'hardJets',    minNumber = 2)
-oneBJetTCHEL          = countPatJets.clone(src = 'bJetsTCHEL',  minNumber = 2)
-oneBJetTCHEM          = countPatJets.clone(src = 'bJetsTCHEM',  minNumber = 2)
-oneBJetTCHET          = countPatJets.clone(src = 'bJetsTCHET',  minNumber = 2)
-oneBJetTCHPL          = countPatJets.clone(src = 'bJetsTCHPL',  minNumber = 2)
-oneBJetTCHPM          = countPatJets.clone(src = 'bJetsTCHPM',  minNumber = 2)
-oneBJetTCHPT          = countPatJets.clone(src = 'bJetsTCHPT',  minNumber = 2)
-oneBJetSSVHEM         = countPatJets.clone(src = 'bJetsSSVHEM', minNumber = 2)
-oneBJetSSVHET         = countPatJets.clone(src = 'bJetsSSVHET', minNumber = 2)
-oneBJetSSVHPM         = countPatJets.clone(src = 'bJetsSSVHPM', minNumber = 2)
+twoBJetTCHEL          = countPatJets.clone(src = 'bJetsTCHEL',  minNumber = 2)
+twoBJetTCHEM          = countPatJets.clone(src = 'bJetsTCHEM',  minNumber = 2)
+twoBJetTCHET          = countPatJets.clone(src = 'bJetsTCHET',  minNumber = 2)
+twoBJetTCHPL          = countPatJets.clone(src = 'bJetsTCHPL',  minNumber = 2)
+twoBJetTCHPM          = countPatJets.clone(src = 'bJetsTCHPM',  minNumber = 2)
+twoBJetTCHPT          = countPatJets.clone(src = 'bJetsTCHPT',  minNumber = 2)
+twoBJetSSVHEM         = countPatJets.clone(src = 'bJetsSSVHEM', minNumber = 2)
+twoBJetSSVHET         = countPatJets.clone(src = 'bJetsSSVHET', minNumber = 2)
+twoBJetSSVHPM         = countPatJets.clone(src = 'bJetsSSVHPM', minNumber = 2)
 
 
 ###########################################################################################
@@ -297,23 +297,23 @@ requireOneBtagSSVHPM = cms.Sequence(bJetsSSVHPM *
                                     oneBJetSSVHPM
 				   )				  
 
-requireTwoBtagTCHEL  = cms.Sequence(twoBJetTCHEL)
+requireTwoBtagsTCHEL  = cms.Sequence(twoBJetTCHEL)
 				  
-requireTwoBtagTCHEM  = cms.Sequence(twoBJetTCHEM)				  
+requireTwoBtagsTCHEM  = cms.Sequence(twoBJetTCHEM)				 
 				  
-requireTwoBtagTCHET  = cms.Sequence(twoBJetTCHET)				  
+requireTwoBtagsTCHET  = cms.Sequence(twoBJetTCHET)				 
 				  
-requireTwoBtagTCHPL  = cms.Sequence(twoBJetTCHPL)
+requireTwoBtagsTCHPL  = cms.Sequence(twoBJetTCHPL)
 				  
-requireTwoBtagTCHPM  = cms.Sequence(twoBJetTCHPM)				  
+requireTwoBtagsTCHPM  = cms.Sequence(twoBJetTCHPM)				 
 				  
-requireTwoBtagTCHPT  = cms.Sequence(twoBJetTCHPT)				  
+requireTwoBtagsTCHPT  = cms.Sequence(twoBJetTCHPT)				 
 				  
-requireTwoBtagSSVHEM = cms.Sequence(twoBJetSSVHEM)
+requireTwoBtagsSSVHEM = cms.Sequence(twoBJetSSVHEM)
 				   
-requireTwoBtagSSVHET = cms.Sequence(twoBJetSSVHET)
-				   				   				  
-requireTwoBtagSSVHPM = cms.Sequence(twoBJetSSVHPM)
+requireTwoBtagsSSVHET = cms.Sequence(twoBJetSSVHET)
+				   	        						 
+requireTwoBtagsSSVHPM = cms.Sequence(twoBJetSSVHPM)
 
 
 
