@@ -38,10 +38,18 @@ class JetAnalyzer : public edm::EDAnalyzer {
   TH1D* nConst_;
   
   TH1D* bDiscTCHE_;  
-  TH1D* bDiscSVHE_;    
-  TH1D* tagMultiTCHEloose_;
-  TH1D* tagMultiTCHEmedium_;  
-  TH1D* tagMultiSVHEloose_;    
+  TH1D* bDiscTCHP_;     
+  TH1D* bDiscSSVHP_;
+  TH1D* bDiscSSVHE_;     
+  TH1D* multiTCHEL_;
+  TH1D* multiTCHEM_;  
+  TH1D* multiTCHET_;
+  TH1D* multiTCHPL_;
+  TH1D* multiTCHPM_;  
+  TH1D* multiTCHPT_;    
+  TH1D* multiSSVHEM_;
+  TH1D* multiSSVHET_;
+  TH1D* multiSSVHPM_;          
 };
 
 #endif

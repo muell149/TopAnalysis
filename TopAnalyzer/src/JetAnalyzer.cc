@@ -24,23 +24,44 @@ JetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   multi_->Fill(jets->size());
 
   int i=0;
-  int ntagsTCHEloose  =0;
-  int ntagsTCHEmedium =0;
-  int ntagsSVHEloose  =0;
-
-  double TCHEcutLoose  = 1.70;
-  double TCHEcutMedium = 3.40;
-  double SVHEcutLoose  = 1.74;
+  
+  int ntagsTCHEL  =0;
+  int ntagsTCHEM  =0;
+  int ntagsTCHET  =0;   
+  int ntagsTCHPL  =0;
+  int ntagsTCHPM  =0;
+  int ntagsTCHPT  =0;    
+  int ntagsSSVHEM =0;
+  int ntagsSSVHET =0;  
+  int ntagsSSVHPM =0;
+  
+  double TCHELcut  =  1.70;
+  double TCHEMcut  =  3.40;
+  double TCHETcut  = 10.20;
+  double TCHPLcut  =  1.19;
+  double TCHPMcut  =  1.93;
+  double TCHPTcut  =  3.41;	
+  double SSVHEMcut =  1.74;
+  double SSVHETcut =  3.05; 
+  double SSVHPMcut =  2.00; //not finaly defined
 
   for(edm::View<pat::Jet>::const_iterator jet = jets->begin();jet != jets->end(); ++jet) {
 
-    double TCHEdiscr = jet->bDiscriminator("trackCountingHighEffBJetTags");
-    double SVHEdiscr = jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+    double TCHEdiscr  = jet->bDiscriminator("trackCountingHighEffBJetTags");
+    double TCHPdiscr  = jet->bDiscriminator("trackCountingHighPurBJetTags");    
+    double SSVHEdiscr = jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");  
+    double SSVHPdiscr = jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");          
 
-    if(TCHEdiscr>TCHEcutLoose ) ntagsTCHEloose++;
-    if(TCHEdiscr>TCHEcutMedium) ntagsTCHEmedium++;
-    if(SVHEdiscr>SVHEcutLoose ) ntagsSVHEloose++;
-
+    if(TCHEdiscr >TCHELcut ) ntagsTCHEL++;
+    if(TCHEdiscr >TCHEMcut ) ntagsTCHEM++;
+    if(TCHEdiscr >TCHETcut ) ntagsTCHET++;
+    if(TCHPdiscr >TCHPLcut ) ntagsTCHPL++;
+    if(TCHPdiscr >TCHPMcut ) ntagsTCHPM++;
+    if(TCHPdiscr >TCHPTcut ) ntagsTCHPT++;    
+    if(SSVHEdiscr>SSVHEMcut) ntagsSSVHEM++;
+    if(SSVHEdiscr>SSVHETcut) ntagsSSVHET++;
+    if(SSVHPdiscr>SSVHPMcut) ntagsSSVHPM++;
+    
     // only take the jets from the selected range
     if(i<fromTo_[0]) continue;
     if(i>fromTo_[1]) continue;
@@ -59,12 +80,20 @@ JetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
       nConst_             ->Fill(jet->nConstituents());
     }
 
-    bDiscTCHE_->Fill(TCHEdiscr);
-    bDiscSVHE_->Fill(SVHEdiscr);
-  }
-  tagMultiTCHEloose_ ->Fill(ntagsTCHEloose );
-  tagMultiTCHEmedium_->Fill(ntagsTCHEmedium);
-  tagMultiSVHEloose_ ->Fill(ntagsSVHEloose );
+    bDiscTCHE_ ->Fill(TCHEdiscr );
+    bDiscTCHP_ ->Fill(TCHPdiscr );
+    bDiscSSVHE_->Fill(SSVHEdiscr);
+    bDiscSSVHP_->Fill(SSVHPdiscr);
+  }  
+  multiTCHEL_ ->Fill(ntagsTCHEL);
+  multiTCHEM_ ->Fill(ntagsTCHEM);
+  multiTCHET_ ->Fill(ntagsTCHET);  
+  multiTCHPL_ ->Fill(ntagsTCHPL);
+  multiTCHPM_ ->Fill(ntagsTCHPM);
+  multiTCHPT_ ->Fill(ntagsTCHPT);   
+  multiSSVHEM_->Fill(ntagsSSVHEM);
+  multiSSVHET_->Fill(ntagsSSVHET); 
+  multiSSVHPM_->Fill(ntagsSSVHPM);   
 }
 
 
@@ -122,22 +151,54 @@ JetAnalyzer::beginJob()
   bDiscTCHE_= fs->make<TH1D>( "bDiscTCHE", "TCHE Discriminator" , 300, -10., 50.);
   bDiscTCHE_->GetXaxis()->SetTitle("discriminator");
   bDiscTCHE_->GetYaxis()->SetTitle("N");
+  
+  bDiscTCHP_= fs->make<TH1D>( "bDiscTCHP", "TCHP Discriminator" , 300, -10., 50.);
+  bDiscTCHP_->GetXaxis()->SetTitle("discriminator");
+  bDiscTCHP_->GetYaxis()->SetTitle("N");  
 
-  bDiscSVHE_= fs->make<TH1D>( "bDiscSVHE", "TCHE Discriminator" , 110, -1.,  10.);
-  bDiscSVHE_->GetXaxis()->SetTitle("discriminator");
-  bDiscSVHE_->GetYaxis()->SetTitle("N");
+  bDiscSSVHE_= fs->make<TH1D>( "bDiscSSVHE", "SSVHE Discriminator" , 110, -1.,  10.);
+  bDiscSSVHE_->GetXaxis()->SetTitle("discriminator");
+  bDiscSSVHE_->GetYaxis()->SetTitle("N");
+  
+  bDiscSSVHP_= fs->make<TH1D>( "bDiscSSVHP", "SSVHP Discriminator" , 110, -1.,  10.);
+  bDiscSSVHP_->GetXaxis()->SetTitle("discriminator");
+  bDiscSSVHP_->GetYaxis()->SetTitle("N");  
 
-  tagMultiTCHEloose_= fs->make<TH1D>( "tagMultiTCHEloose" , "N_{b-tags} TCHE loose",  10, -0.5, 9.5);
-  tagMultiTCHEloose_->GetXaxis()->SetTitle("N_{jets,tagged}");
-  tagMultiTCHEloose_->GetYaxis()->SetTitle("N_{evts}");
+  multiTCHEL_= fs->make<TH1D>( "multiTCHEL" , "N_{b-tags} TCHEL",  10, -0.5, 9.5);
+  multiTCHEL_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiTCHEL_->GetYaxis()->SetTitle("N_{evts}");
 
-  tagMultiTCHEmedium_= fs->make<TH1D>( "tagMultiTCHEmedium" , "N_{b-tags} TCHE medium",  10, -0.5, 9.5);
-  tagMultiTCHEmedium_->GetXaxis()->SetTitle("N_{jets,tagged}");
-  tagMultiTCHEmedium_->GetYaxis()->SetTitle("N_{evts}");
+  multiTCHEM_= fs->make<TH1D>( "multiTCHEM" , "N_{b-tags} TCHEM",  10, -0.5, 9.5);
+  multiTCHEM_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiTCHEM_->GetYaxis()->SetTitle("N_{evts}");
+  
+  multiTCHET_= fs->make<TH1D>( "multiTCHET" , "N_{b-tags} TCHET",  10, -0.5, 9.5);
+  multiTCHET_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiTCHET_->GetYaxis()->SetTitle("N_{evts}"); 
+  
+  multiTCHPL_= fs->make<TH1D>( "multiTCHPL" , "N_{b-tags} TCHPL",  10, -0.5, 9.5);
+  multiTCHPL_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiTCHPL_->GetYaxis()->SetTitle("N_{evts}");
 
-  tagMultiSVHEloose_= fs->make<TH1D>( "tagMultiSVHEloose" , "N_{b-tags} SVHE loose",  10, -0.5, 9.5);
-  tagMultiSVHEloose_->GetXaxis()->SetTitle("N_{jets,tagged}");
-  tagMultiSVHEloose_->GetYaxis()->SetTitle("N_{evts}");
+  multiTCHPM_= fs->make<TH1D>( "multiTCHPM" , "N_{b-tags} TCHPM",  10, -0.5, 9.5);
+  multiTCHPM_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiTCHPM_->GetYaxis()->SetTitle("N_{evts}");
+  
+  multiTCHPT_= fs->make<TH1D>( "multiTCHPT" , "N_{b-tags} TCHPT",  10, -0.5, 9.5);
+  multiTCHPT_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiTCHPT_->GetYaxis()->SetTitle("N_{evts}");   
+   
+  multiSSVHEM_= fs->make<TH1D>( "multiSSVHEM" , "N_{b-tags} SSVHEM",  10, -0.5, 9.5);
+  multiSSVHEM_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiSSVHEM_->GetYaxis()->SetTitle("N_{evts}");
+  
+  multiSSVHET_= fs->make<TH1D>( "multiSSVHET" , "N_{b-tags} SSVHET",  10, -0.5, 9.5);
+  multiSSVHET_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiSSVHET_->GetYaxis()->SetTitle("N_{evts}"); 
+  
+  multiSSVHPM_= fs->make<TH1D>( "multiSSVHPM" , "N_{b-tags} SSVHPM",  10, -0.5, 9.5);
+  multiSSVHPM_->GetXaxis()->SetTitle("N_{jets,tagged}");
+  multiSSVHPM_->GetYaxis()->SetTitle("N_{evts}");   
 }
 
 
