@@ -25,11 +25,11 @@ VertexAnalyzer::beginJob()
                           "TFile Service is not registered in cfg file" ); 
   }
   
-  multi_= fs->make<TH1D>( "multi", "N of Vertices", 10,-0.5,9.5);
+  multi_= fs->make<TH1D>( "multi", "N of Vertices", 30,-0.5,29.5);
   multi_->GetXaxis()->SetTitle("N_{vrtcs}");  
   multi_->GetYaxis()->SetTitle("N");    
    
-  goodMulti_= fs->make<TH1D>( "goodMulti", "N of good Vertices", 10,-0.5,9.5);
+  goodMulti_= fs->make<TH1D>( "goodMulti", "N of good Vertices", 30,-0.5,29.5);
   goodMulti_->GetXaxis()->SetTitle("N_{vrtcs}");  
   goodMulti_->GetYaxis()->SetTitle("N"); 
    
