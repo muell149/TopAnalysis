@@ -8,6 +8,9 @@ DEFINE_FWK_MODULE(DiMuonFilter);
 #include "TopAnalysis/TopFilter/plugins/DiElectronFilter.h"
 DEFINE_FWK_MODULE(DiElectronFilter);
 
+#include "TopAnalysis/TopFilter/plugins/DiLeptonFilter.h"
+DEFINE_FWK_MODULE(DiLeptonFilter);
+
 #include "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
 DEFINE_FWK_MODULE(FullLepHypothesesFilter);
 
