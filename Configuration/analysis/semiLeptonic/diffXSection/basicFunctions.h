@@ -44,6 +44,7 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 			  /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
 			  /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysDiBosUp        , /*27:*/sysDiBosDown};
 
+bool newSpring11MC=true;
 TString sysLabel(unsigned int sys)
 {
   // this function returns a TString that corresponds 
@@ -104,6 +105,7 @@ double effSFAB(int sys=sysNo)
 
   // combined single muon SF Run A+B from tag and probe
   double result = 0.964155;
+  if(newSpring11MC) result = 0.9581;
   // errors for the derived SF
   double errorUp   = 0.03*result;
   double errorDown = 0.03*result;
@@ -439,6 +441,8 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   // used functions: BRcorrectionSemileptonic
   // used enumerators: samples, systematicVariation
 
+  // function internal detail level of text output
+  unsigned int verbose=0;
   // a) check if input is valid
   // sample existing?
   if(sample>kSToptW){
@@ -460,6 +464,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if((sample==kSig)||(sample==kBkg)){
     crossSection=157.5;
     Nevents     =1306182.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     = 1286491;
     // systematic samples:
     if(kSys==sysTopScaleUp  ) Nevents=1153236;
     if(kSys==sysTopScaleDown) Nevents=1098971;
@@ -473,6 +478,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kWjets){
     crossSection=31314.;
     Nevents     =14805546.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     =14722996;
     // systematic samples:
     if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
     if(kSys==sysVBosonScaleDown) Nevents=4842219;
@@ -484,6 +490,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kZjets){
     crossSection=3048.;
     Nevents     =2543727.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     =2543706;
     // systematic samples:
     if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
     if(kSys==sysVBosonScaleDown) Nevents=1436150;
@@ -495,6 +502,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kQCD){
     crossSection=296600000.*0.00028550; // generator crossSection * prefilter efficiency
     Nevents     =29504866.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     =29434562;
     // if(kSys==sysPileUp) Nevents=8063288; // PU not completely patified
   }
   // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10 
@@ -505,18 +513,21 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kSTops){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =494967.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     = 494967; 
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494967;
   }
   if(sample==kSTopt){
     crossSection=64.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =484060.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     = 484060;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=484060;
   }
   if(sample==kSToptW){
     crossSection=10.6;
     Nevents     =494961.;
+    if(kSys==sysNo&&newSpring11MC) Nevents     =489417;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494961;
   }
@@ -550,22 +561,47 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   }
   // d) calculate weight
   weight = luminosity / ( Nevents / crossSection );
+  if(verbose>0){
+    std::cout << "sample: " << sampleLabel(sample) << std::endl;
+    std::cout << "systematic var.: " << sysLabel(kSys) << std::endl;
+  }
+  double weight2=weight;
+  if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
   // e) systematic effects
   // e1) for ttbar->lnu: BR correction
   if(sample==kSig) weight *= BRcorrectionSemileptonic;
   // e2) systematic higher/lower BG
   double scale=0;
   // (i) more/less DiBoson
-  if(sample==kWW||sample==kWZ||sample==kZZ) scale=0.3;
+  if(sample==kWW||sample==kWZ||sample==kZZ||sample==kDiBos){ 
+    scale=0.3;
+    if(kSys==sysDiBosUp  ) weight*=(1.0+scale);
+    if(kSys==sysDiBosDown) weight*=(1.0-scale);
+  }
   // (ii) more/less QCD
-  if(sample==kQCD) scale=0.5;
+  if(sample==kQCD){
+    scale=0.5;
+    if(kSys==sysQCDup  ) weight*=(1.0+scale);
+    if(kSys==sysQCDdown) weight*=(1.0-scale);
+  }
   // (iii) more/less single top
-  if(sample==kSTops||sample==kSTopt||sample==kSToptW) scale=0.3;
-  // lower BG rate
-  if(sysLabel(kSys).Contains("down")||sysLabel(kSys).Contains("Down")) weight*=(1-scale);
-  // higher BG rate
-  if(sysLabel(kSys).Contains("up"  )||sysLabel(kSys).Contains("Up"  )) weight*=(1+scale);
+  if(sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
+    scale=0.3;
+    if(kSys==sysSTopUp  ) weight*=(1.0+scale);
+    if(kSys==sysSTopDown) weight*=(1.0-scale); 
+  }
+  if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl; 
   // return result
+  if(verbose>0){
+    std::cout << "weight";
+    if(verbose>1){
+      if(weight!=weight2) std::cout << "(scaled)";
+      if(weight==weight2) std::cout << "(not scaled)"; 
+    }      
+    std::cout << ": " << weight << std::endl;
+    if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
+    if(weight!=weight2&&sample==kSig) std::cout << "(BR correction applied)" << std::endl;
+  }  
   return weight;
 }
 
@@ -632,19 +668,23 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   // name of data file is given directly in the .C file
   if(sample==kData) return ""; 
   // standard MC filenames
-  if(sample==kSig   )fileName += "SigMadD6TFall10";
-  if(sample==kBkg   )fileName += "BkgMadD6TFall10";
-  if(sample==kWjets )fileName += "WjetsMadD6TFall10";
-  if(sample==kZjets )fileName += "ZjetsMadD6TFall10";
-  if(sample==kWW    )fileName += "WWPytia6Z2Fall10";
-  if(sample==kWZ    )fileName += "WZPytia6Z2Fall10";
-  if(sample==kZZ    )fileName += "ZZPytia6Z2Fall10";
-  if(sample==kDiBos )fileName += "VVPytia6Z2Fall10";
-  if(sample==kQCD   )fileName += "QCDPythiaZ2Fall10";
-  if(sample==kSToptW)fileName += "SingleTopTWchannelMadZ2Fall10";
-  if(sample==kSTops )fileName += "SingleTopSchannelMadZ2Fall10";
-  if(sample==kSTopt )fileName += "SingleTopTchannelMadZ2Fall10";
-  if(sample==kSTop  )fileName += "SingleTopMadD6TFall10";
+  if(sample==kSig   )fileName += "SigMadD6T";
+  if(sample==kBkg   )fileName += "BkgMadD6T";
+  if(sample==kWjets )fileName += "WjetsMadD6T";
+  if(sample==kZjets )fileName += "ZjetsMadD6T";
+  if(sample==kWW    )fileName += "WWPytia6Z2";
+  if(sample==kWZ    )fileName += "WZPytia6Z2";
+  if(sample==kZZ    )fileName += "ZZPytia6Z2";
+  if(sample==kDiBos )fileName += "VVPytia6Z2";
+  if(sample==kQCD   )fileName += "QCDPythiaZ2";
+  if(sample==kSToptW)fileName += "SingleTopTWchannelMadZ2";
+  if(sample==kSTops )fileName += "SingleTopSchannelMadZ2";
+  if(sample==kSTopt )fileName += "SingleTopTchannelMadZ2";
+  if(sample==kSTop  )fileName += "SingleTopMadD6T";
+  // label for MC production cycle
+  // note: we have no Diboson spring11 MC up to now
+  if(newSpring11MC&&sample!=kWW&&sample!=kWZ&&sample!=kZZ) fileName += "Spring11";
+  else fileName += "Fall10"  ;
   // take care of systematic variations
   // JES
   if(sys==sysJESUp  ) fileName += "JESup";
@@ -785,6 +825,8 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
 	    if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
 	    if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
 	    if(emptyPlot && verbose>0) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
+	    // to avoid problems with samples where no event is passing the selection we will drop this requirement by now
+	    emptyPlot=false;
 	    if(!emptyPlot){
 	      // save plot in corresponding map
 	      if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
@@ -870,6 +912,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     // loop STop and DiBoson
     for(unsigned int sample=kSTop; sample<=kDiBos; ++sample){
+      if(verbose>1) std::cout << "plot " << plotList_[plot] << ": " << std::endl;
       // mark first plot found
       bool first=true;
       // check that combined plot does not already exist
@@ -906,8 +949,8 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
 	    }
 	    // b) 2D
 	    if(plot>=N1Dplots){
-	      if(first ) histo_[plotList_[plot]][sample]   =  (TH1F*)histo_[plotList_[plot]][subSample]->Clone();
-	      if(!first) histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][subSample]->Clone());
+	      if(first ) histo2_[plotList_[plot]][sample]   =  (TH2F*)histo2_[plotList_[plot]][subSample]->Clone();
+	      if(!first) histo2_[plotList_[plot]][sample]->Add((TH2F*)histo2_[plotList_[plot]][subSample]->Clone());
 	    }
 	    // indicate that already one plot is found
 	    first=0;
