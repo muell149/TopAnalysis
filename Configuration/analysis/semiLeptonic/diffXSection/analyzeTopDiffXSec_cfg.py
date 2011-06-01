@@ -645,7 +645,6 @@ else:
 ## std analysis with generator objects as input for efficiency determination
 ## phase space cuts for muon and jets
 if(runningOnData=="MC"):
-
     process.s4 = cms.Sequence(
                               ## introduce some collections
                               process.isolatedGenMuons                      *
@@ -672,6 +671,7 @@ if(runningOnData=="MC"):
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p4.remove(process.dummy)
 elif(runningOnData=="data"):
+    process.p4 = cms.Path(process.dummy)
     print "running on data, no gen-plots"
 else:
     print "choose runningOnData= data or MC, creating no gen-plots"
