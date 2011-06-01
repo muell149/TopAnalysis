@@ -32,12 +32,14 @@
 ## configure settings ##
 ########################
 ## lumi [/pb]
-dataLuminosity=188
+## has to fit to current dataset
+dataLuminosity=191.0
 ## dataset: 2010 or 2011
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
 dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
 dataLabel=2011
-if [ dataLuminosity -le 36 ]
+dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
+if [ $dataLuminosity2 -le 3600 ]
 then
     dataLabel=2010
 fi
@@ -49,13 +51,14 @@ verbose=0
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
-maxSys=27
+maxSys=0
+#maxSys=27
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
 ## delete all (old) existing .eps and .pdf plots?
 ## clean = true / false
-clean=false
+clean=true
 
 #####################
 ## prepare running ##
@@ -77,7 +80,7 @@ if [ $fast = false ]
 fi
 
 ## delete existing root file
-echo "A delete existing rootfile ./diffXSecTopSemiMu$dataLabel.root"
+echo "part A: delete existing rootfile ./diffXSecTopSemiMu$dataLabel.root"
 if [ $fast = false ]
     then
     sleep 3
@@ -88,7 +91,7 @@ rm ./diffXSecTopSemiMu$dataLabel.root
 if [ $clean = true ]
     then
     rm ./diffXSecFromSignal/plots/kinFit/$dataLabel/*/*.*
-    echo "A2 delete existing plots within diffXSecFromSignal/plots/kinFit/$dataLabel/*/*.*"
+    echo "part A2 delete existing plots within diffXSecFromSignal/plots/kinFit/$dataLabel/*/*.*"
     if [ $fast = false ]
 	then
 	sleep 1
@@ -100,7 +103,7 @@ fi
 ########################
 BEFOREB=$(date +%s)
 echo
-echo "B process cut monitoring macro"
+echo "part B: process cut monitoring macro"
 if [ $fast = false ]
     then
     sleep 3
@@ -112,7 +115,7 @@ root -l -q -b './analyzeTopDiffXSecMonitoring.C+('$dataLuminosity', '$save', '$v
 #####################################
 BEFOREC=$(date +%s)
 echo
-echo "C process migration macro to validate binning"
+echo "part C: process migration macro to validate binning"
 if [ $fast = false ]
     then
     sleep 3
@@ -124,7 +127,7 @@ fi
 #########################################
 BEFORED=$(date +%s)
 echo
-echo "D process cross section calculation macro for all systematics"
+echo "part D: process cross section calculation macro for all systematics"
 echo "INFO: missing files must not be problematic"
 echo "      either all WZ, WW and ZZ or the combined VV sample are necessary"
 echo "      same is true for the single top samples (s, t, tW)"
@@ -169,7 +172,7 @@ AFTERSYS=$(date +%s)
 ###########################################
 BEFOREE=$(date +%s)
 echo
-echo "E process cross section calculation for all systematics"
+echo "part E: calculate systematic errors and draw final cross section"
 if [ $fast = false ]
     then
     sleep 3
@@ -184,10 +187,14 @@ echo "all analysis steps finished!"
 ## stop the timer and echo time
 END=$(date +%s)
 TIME=$(( $END - $START ))
-SYS=$(( $AFTERSYS - $BEFORESYS ))
-echo "time needed: $TIME seconds ($SYS seconds due to systematic variations)"
-echo "part A: $(( $BEFOREB - $START  ))"
-echo "part B: $(( $BEFOREC - $BEFOREB))"
-echo "part C: $(( $BEFORED - $BEFOREC))"
-echo "part D: $(( $BEFOREE - $BEFORED))"
-echo "part E: $(( $END     - $BEFOREE))"
+echo "time needed: $TIME seconds"
+if [ $maxSys -ge 1 ]
+    then
+    SYS=$(( $AFTERSYS - $BEFORESYS ))
+    echo "($SYS seconds due to systematic variations)"
+fi
+echo "part A: $(( $BEFOREB - $START  )) seconds (clean up  )"
+echo "part B: $(( $BEFOREC - $BEFOREB)) seconds (monitoring)"
+echo "part C: $(( $BEFORED - $BEFOREC)) seconds (migration)"
+echo "part D: $(( $BEFOREE - $BEFORED)) seconds (xSec, $maxSys systematic variations considered)"
+echo "part E: $(( $END     - $BEFOREE)) seconds (errors and final xSec)"
