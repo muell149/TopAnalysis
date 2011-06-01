@@ -261,83 +261,83 @@ FullLepKinAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
 
   NameScheme ns("kin");
 
-  TopKin_.push_back( fs->make<TH1D>(ns.name("TopPt"    ), "p_{t} (t) [GeV]",100,  0. , 500. ) );
-  TopKin_.push_back( fs->make<TH1D>(ns.name("TopEta"   ), "#eta (t)"       ,100, -5.0,   5.0) );
-  TopKin_.push_back( fs->make<TH1D>(ns.name("TopRap"   ), "rapidity (t)"   ,100, -5.0,   5.0) ); 
-  TopKin_.push_back( fs->make<TH1D>(ns.name("TopPhi"   ), "#phi (t)"       , 62, -3.1,   3.1) );
-  TopKin_.push_back( fs->make<TH1D>(ns.name("TopMass"  ), "M (top) [GeV]"  ,100,-50. , 450. ) );
+  TopKin_.push_back( fs->make<TH1D>(ns.name("TopPt"      ), "p_{t} (t) [GeV]",100,  0. , 500. ) );
+  TopKin_.push_back( fs->make<TH1D>(ns.name("TopEta"     ), "#eta (t)"       ,100, -5.0,   5.0) );
+  TopKin_.push_back( fs->make<TH1D>(ns.name("TopRapidity"), "rapidity (t)"   ,100, -5.0,   5.0) ); 
+  TopKin_.push_back( fs->make<TH1D>(ns.name("TopPhi"     ), "#phi (t)"       , 62, -3.1,   3.1) );
+  TopKin_.push_back( fs->make<TH1D>(ns.name("TopMass"    ), "M (top) [GeV]"  ,100,-50. , 450. ) );
 
-  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusPt"    ), "p_{t} (W^{+}) [GeV]",100,  0. , 500. ) );
-  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusEta"   ), "#eta (W^{+})"       ,100, -5.0,   5.0) );
-  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusRap"   ), "rapidity (W^{+})"   ,100, -5.0,   5.0) );  
-  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusPhi"   ), "#phi (W^{+})"       , 62, -3.1,   3.1) );
-  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusMass"  ), "M (W^{+}) [GeV]"    ,100,  0. , 500. ) );
+  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusPt"      ), "p_{t} (W^{+}) [GeV]",100,  0. , 500. ) );
+  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusEta"     ), "#eta (W^{+})"       ,100, -5.0,   5.0) );
+  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusRapidity"), "rapidity (W^{+})"   ,100, -5.0,   5.0) );  
+  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusPhi"     ), "#phi (W^{+})"       , 62, -3.1,   3.1) );
+  WplusKin_.push_back( fs->make<TH1D>(ns.name("WplusMass"    ), "M (W^{+}) [GeV]"    ,100,  0. , 500. ) );
 
-  BKin_.push_back( fs->make<TH1D>(ns.name("BPt"    ), "p_{t} (b) [GeV]",100,  0. , 500. ) );
-  BKin_.push_back( fs->make<TH1D>(ns.name("BEta"   ), "#eta (b)"       ,100, -5.0,   5.0) );
-  BKin_.push_back( fs->make<TH1D>(ns.name("BRap"   ), "rapidity (b)"   ,100, -5.0,   5.0) );  
-  BKin_.push_back( fs->make<TH1D>(ns.name("BPhi"   ), "#phi (b)"       , 62, -3.1,   3.1) );
-  BKin_.push_back( fs->make<TH1D>(ns.name("BMass"  ), "M (b) [GeV]"    ,100,  0. , 500. ) );
+  BKin_.push_back( fs->make<TH1D>(ns.name("BPt"      ), "p_{t} (b) [GeV]",100,  0. , 500. ) );
+  BKin_.push_back( fs->make<TH1D>(ns.name("BEta"     ), "#eta (b)"       ,100, -5.0,   5.0) );
+  BKin_.push_back( fs->make<TH1D>(ns.name("BRapidity"), "rapidity (b)"   ,100, -5.0,   5.0) );  
+  BKin_.push_back( fs->make<TH1D>(ns.name("BPhi"     ), "#phi (b)"       , 62, -3.1,   3.1) );
+  BKin_.push_back( fs->make<TH1D>(ns.name("BMass"    ), "M (b) [GeV]"    ,100,  0. , 500. ) );
     
-  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarPt"    ), "p_{t} (l^{+}) [GeV]",100,  0. , 500. ) );
-  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarEta"   ), "#eta (l^{+})"       ,100, -5.0,   5.0) );
-  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarRap"   ), "rapidity (l^{+})"   ,100, -5.0,   5.0) ); 
-  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarPhi"   ), "#phi (l^{+})"       , 62, -3.1,   3.1) );
-  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarMass"  ), "M (l^{+}) [GeV]"    ,100,  0. , 500. ) ); 
+  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarPt"      ), "p_{t} (l^{+}) [GeV]",100,  0. , 500. ) );
+  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarEta"     ), "#eta (l^{+})"       ,100, -5.0,   5.0) );
+  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarRapidity"), "rapidity (l^{+})"   ,100, -5.0,   5.0) ); 
+  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarPhi"     ), "#phi (l^{+})"       , 62, -3.1,   3.1) );
+  LepBarKin_.push_back( fs->make<TH1D>(ns.name("LepBarMass"    ), "M (l^{+}) [GeV]"    ,100,  0. , 500. ) ); 
 
-  NuKin_.push_back( fs->make<TH1D>(ns.name("NuPt"    ), "p_{t} (#nu^{-}) [GeV]",100,  0. , 500. ) );
-  NuKin_.push_back( fs->make<TH1D>(ns.name("NuEta"   ), "#eta (#nu^{-})"       ,100, -5.0,   5.0) );
-  NuKin_.push_back( fs->make<TH1D>(ns.name("NuRap"   ), "rapidity (#nu^{-})"   ,100, -5.0,   5.0) );  
-  NuKin_.push_back( fs->make<TH1D>(ns.name("NuPhi"   ), "#phi (#nu^{-})"       , 62, -3.1,   3.1) );
-  NuKin_.push_back( fs->make<TH1D>(ns.name("NuMass"  ), "M (#nu^{-}) [GeV]"    ,100,  0. , 500. ) );
+  NuKin_.push_back( fs->make<TH1D>(ns.name("NuPt"      ), "p_{t} (#nu^{-}) [GeV]",100,  0. , 500. ) );
+  NuKin_.push_back( fs->make<TH1D>(ns.name("NuEta"     ), "#eta (#nu^{-})"       ,100, -5.0,   5.0) );
+  NuKin_.push_back( fs->make<TH1D>(ns.name("NuRapidity"), "rapidity (#nu^{-})"   ,100, -5.0,   5.0) );  
+  NuKin_.push_back( fs->make<TH1D>(ns.name("NuPhi"     ), "#phi (#nu^{-})"       , 62, -3.1,   3.1) );
+  NuKin_.push_back( fs->make<TH1D>(ns.name("NuMass"    ), "M (#nu^{-}) [GeV]"    ,100,  0. , 500. ) );
 
-  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarPt"    ), "p_{t} (#bar{t}) [GeV]",100,  0. , 500. ) );
-  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarEta"   ), "#eta (#bar{t})"       ,100, -5.0,   5.0) );
-  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarRap"   ), "rapidity (#bar{t})"   ,100, -5.0,   5.0) );
-  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarPhi"   ), "#phi (#bar{t})"       , 62, -3.1,   3.1) );
-  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarMass"  ), "M (#bar{t}) [GeV]"    ,100,  0. , 500. ) );
+  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarPt"      ), "p_{t} (#bar{t}) [GeV]",100,  0. , 500. ) );
+  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarEta"     ), "#eta (#bar{t})"       ,100, -5.0,   5.0) );
+  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarRapidity"), "rapidity (#bar{t})"   ,100, -5.0,   5.0) );
+  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarPhi"     ), "#phi (#bar{t})"       , 62, -3.1,   3.1) );
+  TopBarKin_.push_back( fs->make<TH1D>(ns.name("TopBarMass"    ), "M (#bar{t}) [GeV]"    ,100,  0. , 500. ) );
 
-  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusPt"    ), "p_{t} (W^{-}) [GeV]",100,  0. , 500. ) );
-  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusEta"   ), "#eta (W^{-})"       ,100, -5.0,   5.0) );
-  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusRap"   ), "rapidity (W^{-})"   ,100, -5.0,   5.0) );  
-  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusPhi"   ), "#phi (W^{-})"       , 62, -3.1,   3.1) );
-  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusMass"  ), "M (W^{-}) [GeV]"    ,100,  0. , 500. ) );
+  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusPt"      ), "p_{t} (W^{-}) [GeV]",100,  0. , 500. ) );
+  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusEta"     ), "#eta (W^{-})"       ,100, -5.0,   5.0) );
+  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusRapidity"), "rapidity (W^{-})"   ,100, -5.0,   5.0) );  
+  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusPhi"     ), "#phi (W^{-})"       , 62, -3.1,   3.1) );
+  WminusKin_.push_back( fs->make<TH1D>(ns.name("WminusMass"    ), "M (W^{-}) [GeV]"    ,100,  0. , 500. ) );
 
-  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarPt"    ), "p_{t} (#bar{b}) [GeV]",100,  0. , 500. ) );
-  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarEta"   ), "#eta (#bar{b})"       ,100, -5.0,   5.0) );
-  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarRap"   ), "rapidity (#bar{b})"   ,100, -5.0,   5.0) );
-  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarPhi"   ), "#phi (#bar{b})"       , 62, -3.1,   3.1) );
-  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarMass"  ), "M (#bar{b}) [GeV]"    ,100,  0. , 500. ) ); 
+  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarPt"      ), "p_{t} (#bar{b}) [GeV]",100,  0. , 500. ) );
+  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarEta"     ), "#eta (#bar{b})"       ,100, -5.0,   5.0) );
+  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarRapidity"), "rapidity (#bar{b})"   ,100, -5.0,   5.0) );
+  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarPhi"     ), "#phi (#bar{b})"       , 62, -3.1,   3.1) );
+  BBarKin_.push_back( fs->make<TH1D>(ns.name("BBarMass"    ), "M (#bar{b}) [GeV]"    ,100,  0. , 500. ) ); 
   
-  LepKin_.push_back( fs->make<TH1D>(ns.name("LepPt"    ), "p_{t} (l^{-}) [GeV]",100,  0. , 500. ) );
-  LepKin_.push_back( fs->make<TH1D>(ns.name("LepEta"   ), "#eta (l^{-})"       ,100, -5.0,   5.0) );
-  LepKin_.push_back( fs->make<TH1D>(ns.name("LepRap"   ), "rapidity (l^{-})"   ,100, -5.0,   5.0) );
-  LepKin_.push_back( fs->make<TH1D>(ns.name("LepPhi"   ), "#phi (l^{-})"       , 62, -3.1,   3.1) );
-  LepKin_.push_back( fs->make<TH1D>(ns.name("LepMass"  ), "M (l^{-}) [GeV]"    ,100,  0. , 500. ) );
+  LepKin_.push_back( fs->make<TH1D>(ns.name("LepPt"      ), "p_{t} (l^{-}) [GeV]",100,  0. , 500. ) );
+  LepKin_.push_back( fs->make<TH1D>(ns.name("LepEta"     ), "#eta (l^{-})"       ,100, -5.0,   5.0) );
+  LepKin_.push_back( fs->make<TH1D>(ns.name("LepRapidity" ), "rapidity (l^{-})"   ,100, -5.0,   5.0) );
+  LepKin_.push_back( fs->make<TH1D>(ns.name("LepPhi"     ), "#phi (l^{-})"       , 62, -3.1,   3.1) );
+  LepKin_.push_back( fs->make<TH1D>(ns.name("LepMass"    ), "M (l^{-}) [GeV]"    ,100,  0. , 500. ) );
   
-  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarPt"    ), "p_{t} (#bar{#nu}^{-}) [GeV]",100,  0. , 500. ) );
-  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarEta"   ), "#eta (#bar{#nu}^{-})"       ,100, -5.0,   5.0) );
-  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarRap"   ), "rapidity (#bar{#nu}^{-})"   ,100, -5.0,   5.0) );
-  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarPhi"   ), "#phi (#bar{#nu}^{-})"       , 62, -3.1,   3.1) );
-  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarMass"  ), "M (#bar{#nu}^{-}) [GeV]"    ,100,  0. , 500. ) );
+  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarPt"      ), "p_{t} (#bar{#nu}^{-}) [GeV]",100,  0. , 500. ) );
+  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarEta"     ), "#eta (#bar{#nu}^{-})"       ,100, -5.0,   5.0) );
+  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarRapidity"), "rapidity (#bar{#nu}^{-})"   ,100, -5.0,   5.0) );
+  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarPhi"     ), "#phi (#bar{#nu}^{-})"       , 62, -3.1,   3.1) );
+  NuBarKin_.push_back( fs->make<TH1D>(ns.name("NuBarMass"    ), "M (#bar{#nu}^{-}) [GeV]"    ,100,  0. , 500. ) );
   
-  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarPt"    ), "p_{t} (t#bar{t}) [GeV]",100,  0. , 500. ) );
-  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarEta"   ), "#eta (t#bar{t})"       ,100, -5.0,   5.0) );
-  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarRap"   ), "rapidity (t#bar{t})"   ,100, -5.0,   5.0) );
-  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"   ), "#phi (t#bar{t})"       , 62, -3.1,   3.1) );
-  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarMass"  ), "M (t#bar{t}) [GeV]"    ,100,  0. ,1000. ) );
+  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarPt"      ), "p_{t} (t#bar{t}) [GeV]",100,  0. , 500. ) );
+  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarEta"     ), "#eta (t#bar{t})"       ,100, -5.0,   5.0) );
+  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarRapidity"), "rapidity (t#bar{t})"   ,100, -5.0,   5.0) );
+  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"     ), "#phi (t#bar{t})"       , 62, -3.1,   3.1) );
+  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarMass"    ), "M (t#bar{t}) [GeV]"    ,100,  0. ,1000. ) );
   
-  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPt"    ), "p_{t} (l^{+}l^{-}) [GeV]",100,  0. , 500. ) );
-  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairEta"   ), "#eta (l^{+}l^{-})"       ,100, -5.0,   5.0) );
-  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairRap"   ), "rapidity (l^{+}l^{-})"   ,100, -5.0,   5.0) );
-  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPhi"   ), "#phi (l^{+}l^{-})"       , 62, -3.1,   3.1) );
-  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairMass"  ), "M (l^{+}l^{-}) [GeV]"    ,200,  0. , 400. ) );  
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPt"      ), "p_{t} (l^{+}l^{-}) [GeV]",100,  0. , 500. ) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairEta"     ), "#eta (l^{+}l^{-})"       ,100, -5.0,   5.0) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairRapidity"), "rapidity (l^{+}l^{-})"   ,100, -5.0,   5.0) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPhi"     ), "#phi (l^{+}l^{-})"       , 62, -3.1,   3.1) );
+  LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairMass"    ), "M (l^{+}l^{-}) [GeV]"    ,200,  0. , 400. ) );  
   
-  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairPt"    ), "p_{t} (jj) [GeV]",100,  0. , 500. ) );
-  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairEta"   ), "#eta (jj)"       ,100, -5.0,   5.0) );
-  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairRap"   ), "rapidity (jj)"   ,100, -5.0,   5.0) );
-  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairPhi"   ), "#phi (jj)"       , 62, -3.1,   3.1) );
-  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairMass"  ), "M (jj) [GeV]"    ,100,  0. , 500. ) );    
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairPt"      ), "p_{t} (jj) [GeV]",100,  0. , 500. ) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairEta"     ), "#eta (jj)"       ,100, -5.0,   5.0) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairRapidity"), "rapidity (jj)"   ,100, -5.0,   5.0) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairPhi"     ), "#phi (jj)"       , 62, -3.1,   3.1) );
+  JetPairKin_.push_back( fs->make<TH1D>(ns.name("JetPairMass"    ), "M (jj) [GeV]"    ,100,  0. , 500. ) );    
 }
 
 
