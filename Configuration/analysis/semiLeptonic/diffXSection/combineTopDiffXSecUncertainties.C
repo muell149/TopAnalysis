@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, unsigned int verbose=0){
+void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=false, unsigned int verbose=0){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -41,7 +41,7 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, 
   TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
-  double errMax=100.;
+  double errMax=40.;
   double errMin=-1*errMax;
   // create plot container
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -165,6 +165,8 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, 
 		  if(verbose>0) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
 		  sysDiff=sysBinXSecValue-stdBinXSecValue;
+		  // set btagging error to 0 as long as it is not there
+		  //if(sys==sysBtagDown||sys==sysBtagUp) sysDiff=0;
 		  // asymmetric errors
 		  if(sysDiff>0) totalSystematicErrorUp  +=sysDiff*sysDiff;
 		  if(sysDiff<0) totalSystematicErrorDown+=sysDiff*sysDiff;
@@ -226,6 +228,14 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, 
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetLabelSize(0.05);
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(errMax);
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(errMin);
+		double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
+		double histMin = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMinimumBin());
+		if(histMax>errMax||histMin<errMin){
+		  double newRange=histMax;
+		  if(fabs(histMax)<fabs(histMin)) newRange=-1*histMin;
+		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(1.2*newRange);
+		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(-1.2*newRange);
+		}
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetStats(kFALSE);
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("rel. uncertainty (%)");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitleOffset(1.2);
@@ -274,7 +284,17 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, 
 	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");
 	      // draw axis also on the right side of canvas
 	      int xPosition=32;
-	      TGaxis *axis = new TGaxis(xPosition,errMin,xPosition,errMax,errMin,errMax,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
+	      double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
+	      double histMin = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMinimumBin());
+	      double max = errMax;
+	      double min = errMin;
+	      if(histMax>errMax||histMin<errMin){
+		  double newRange=1.2*histMax;
+		  if(fabs(histMax)<fabs(histMin)) newRange=-1.2*histMin;
+		  max=newRange;
+		  min=-1*newRange;
+	      }
+	      TGaxis *axis = new TGaxis(xPosition,-1*max,xPosition,max,min,max,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
 	      axis->Draw("same");
 	      // redraw to have statistical error as +/-
 	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
@@ -306,7 +326,10 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, 
 	      // save canvas to file
 	      if(save) saveToRootFile( outputFile, relUnCertaintyCanvas, true, verbose, "relativeUncertainties/"+xSecVariables_[i]);
 	      // save canvas as eps
+	      int initialIgnoreLevel=gErrorIgnoreLevel;
+	      if(verbose==0) gErrorIgnoreLevel=kWarning;
 	      if(save) relUnCertaintyCanvas->Print(outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin)+".eps");
+	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      // delete canvas
 	      delete relUnCertaintyCanvas;
 	      delete relUnCertaintyCopy;
@@ -328,10 +351,10 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=true, 
 	    canvas->SetTitle(xSecVariables_[i]);
 	    canvas->SetName (xSecVariables_[i]);	  
 	    // save Canvas
-	    // a) within rootFile
-	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
+	    // a) within rootFile
+	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
 	    // b) as eps
 	    if(save) canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".eps");
 	    gErrorIgnoreLevel=initialIgnoreLevel;
