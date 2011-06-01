@@ -45,8 +45,8 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
   TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
   // see if its 2010 or 2011 data from luminosity
   TString dataSample="";
-  if(luminosity<36) dataSample="2010";
-  if(luminosity>36) dataSample="2011";
+  if(luminosity<50) dataSample="2010";
+  if(luminosity>50) dataSample="2011";
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
   if(dataSample!="") outputFolder+=dataSample+"/";
@@ -194,7 +194,7 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
                        };
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
                          // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-                         "analyzeHypoKinFit/mapKinFit_"                      ,
+                         "analyzeHypoKinFit/mapKinFit_"               ,
 			 // b) reconstructed Top quantities
 			 "analyzeTopRecoKinematicsKinFit/topPt_"      ,
 			 "analyzeTopRecoKinematicsKinFit/topPhi_"     ,
@@ -375,7 +375,7 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
   if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
-
+  
   // ---
   //    open our standard analysis files
   // ---
@@ -541,8 +541,8 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
 	double eff=histo_[efficiency][kSig]->GetBinContent(bin); 
 	double N=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinContent(bin);
 	double width=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinWidth(bin);
-	N*=width;
-	N/=(effSFAB(sysNo)*lumiweight(kSig, luminosity, systematicVariation));
+	N*=width*effSFAB(systematicVariation);
+	N/=(lumiweight(kSig, luminosity, systematicVariation));
 	if(verbose>1){
 	  std::cout << "bin " << bin << ": " << eff << ", " << N << ", " << width;
 	  std::cout << ", " <<  sqrt(eff*(1.-eff)/N) << std::endl;
@@ -668,7 +668,7 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
   //  int NCanvas = Nplots+Nlegends;
   // a) create canvas for all plots + legends
   //  for(int sample=0; sample<NCanvas; sample++){
-  for(unsigned int sample=0; sample<N1Dplots+N2Dplots+NMCeff+NXSec+Nlegends; sample++){
+  for(unsigned int sample=0; sample<Nplots+NMCeff+NXSec+Nlegends; sample++){
     char canvname[10];
     sprintf(canvname,"canv%i",sample);    
     plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
@@ -750,14 +750,14 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
 	    if(max>3) max = (double)roundToInt(max);
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
-	    if(getStringEntry(plotList_[plot], 1)=="xSec") histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset( 1.5 );
+	    if(getStringEntry(plotList_[plot], 1)=="xSec") histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset( 1.6 );
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
 	    if(getStringEntry(plotList_[plot], 1)!="xSec"   &&(getStringEntry(plotList_[plot], 2)=="topY"   ||
 	       getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
-	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-5,5);
+	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-4,4);
 	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 	    // draw efficiency plots as line
 	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e1");
@@ -850,7 +850,8 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
 	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name],""));
 	}
       }
-      saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose,outputfolder);
+      // save only canvas from selected subfolders or legends
+      if(outputfolder!=""||title.Contains("legend")) saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose,outputfolder);
     }
   }
 }
