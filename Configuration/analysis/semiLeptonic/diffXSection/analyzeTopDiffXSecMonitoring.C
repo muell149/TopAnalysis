@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
+void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
 {
   //  ---
   //     name conventions
@@ -144,6 +144,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, 
                          "tightMuonKinematicsTagged/eta",
                          "tightMuonKinematicsTagged/phi",
                          // (ii) jet monitoring
+			 "tightJetKinematicsTagged/n"  ,
 			 "tightJetKinematicsTagged/pt" ,
 			 "tightJetKinematicsTagged/eta",
 			 "tightJetKinematicsTagged/phi",
@@ -199,7 +200,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, 
                              "relIso(#mu)/events/0/1",
                              "N_{matched #mu segments}(#mu)/events/0/1",
                              // (ii) jet monitoring
-                             "N_{jets}/events/0/1",
+                             "N_{jets}/events/1/1",
                              "E(jets)/jets/1/1",
 			     "p_{t}(jets)/jets/1/1",
 			     "#eta(jets)/jets/0/5",
@@ -230,7 +231,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, 
                              // (iii) btag monitoring
                              "b-discr.(TCHP)/jets/0/2"        ,
                              "b-discr.(TCHE)/jets/0/2"	,
-                             "b-discr.(SSV HEff)/jets/0/2"	,
+                             "b-discr.(SSV HEff)/jets/1/2"	,
 			     "b-discr.(SSV HPur)/jets/0/2"	,
                              "b-discr.(CSV)/jets/0/8"	,
                              "b-discr.(CSVMVA)/jets/0/8"	,
@@ -249,6 +250,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, 
 		             "#eta(#mu)/events/0/10",
 		             "#phi(#mu)/events/0/10",
                              // (ii) jet monitoring
+                             "N_{jets}/events/1/1",
 			     "p_{t}(jets)/jets/1/2",
 			     "#eta(jets)/jets/0/5" ,
 			     "#phi(jets)/jets/0/10",
@@ -274,6 +276,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, 
   if(N1Dplots != sizeof(axisLabel1D)/sizeof(TString)) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
   if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
   if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
+  // run automatically in batch mode if there are many canvas
+  if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
   // ---
   //    open our standard analysis files
@@ -491,7 +495,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 188.0, bool save = false, 
 	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10  );
 	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
 	    if(plotList_[plot].Contains("tightMuonQuality/relIso")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.06);
-	    if(plotList_[plot].Contains("tightJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,9);
+	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,9);
 	    if(plotList_[plot].Contains("_JetKinematics/en")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
 	    if(plotList_[plot].Contains("_JetKinematics/pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("analyzeMETMuon/metSumEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(200,1400);
