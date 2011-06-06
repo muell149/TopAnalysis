@@ -1,7 +1,7 @@
 #ifndef MCPileUp_cc_
 #define MCPileUp_cc_
 
-#include "Test/MCPileUp/interface/MCPileUp.h"
+#include "TopAnalysis/TopAnalyzer/interface/MCPileUp.h"
 
 // =============================
 //  constructors and destructor
