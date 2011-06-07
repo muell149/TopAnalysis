@@ -74,6 +74,8 @@ process.MessageLogger.cerr.default.limit = 0
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    
     ## add your favourite file here
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A/ee5cb7ab48564d27d74a7d213abfe11d/patTuple_6jets_9_1_lwd.root',
+    '/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_95_1_N3b.root',
     #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_10_1_WVq.root',
     #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_11_1_KHs.root',
     #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_12_1_3wB.root',
@@ -152,9 +154,9 @@ process.filterPtHat = process.filterPtHat.clone()
 
 ## additional jet energy smearing for MC
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
-process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJets"),
-                                                         inputMETs            = cms.InputTag("patMETs"),
-                                                         payload              = cms.string("AK5Calo"),
+process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJetsAK5PF"),
+                                                         inputMETs            = cms.InputTag("patMETsPF"),
+                                                         payload              = cms.string("AK5PF"),
                                                          scaleFactor          = cms.double(options.jesFactor),
                                                          scaleType            = cms.string("abs"), #abs or rel
                                                          jetPTThresholdForMET = cms.double(20.),
@@ -213,7 +215,7 @@ elif(options.eventFilter=='all' or options.eventFilter=='allRedigi' or options.e
     process.filterSequence = cms.Sequence(process.scaledJetEnergy)
     
 else:
-    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'sig', 'bkg', 'qcd', 'privA', 'privB' or 'all'"
+    raise NameError, "'"+options.eventFilter+"' is not a proper eventFilter name choose: 'data', 'sig', 'bkg', 'qcd', 'privA', 'privB' or 'all'"
 
 ## adapt output filename
 process.TFileService.fileName = 'analyzeFullHadronicSelection_'+options.eventFilter+'.root'
@@ -237,9 +239,9 @@ if( options.pdfUn==0 ):
 
 ## changing bTagger, possible are: TCHE, TCHPTight, SSV, CSV, CSVMVA
 ## only TCHE, TCHPTight, SSV and CSV have a officialy blessed WP like the default (TCHP)
-switchToTCHE(process)
-#switchToCSV(process)
-#switchToTCHPTight(process)
+#switchToTCHELoose(process)
+#switchToSSV(process)
+#switchToTCHP(process)
 
 ## modify b-tagging discriminator to estimate b-tagging efficiency and mis-tag uncertainty
 if(not options.eventFilter=='data'):
@@ -249,12 +251,12 @@ if(not options.eventFilter=='data'):
         modifyBTagDiscs(process, 'trackCountingHighEff', 3.90, 11.36)
 
 ## selection should be run on PFJets instead of caloJets
-if(not options.usePF==0): 
-    runOnPF(process)
+if(options.usePF==0): 
+    runOnCalo(process)
 
 ## if running on real data, do everything needed for this
 if(options.eventFilter=='data'):
-    runOnRealData(process)
+    runOnData(process)
     ## needed because the patTriggerEvent is to chatty to be used and
     ## data is already skimmed with trigger requirement
     #removeDefaultTrigger(process)
