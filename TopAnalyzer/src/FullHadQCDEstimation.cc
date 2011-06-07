@@ -1,16 +1,18 @@
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include "TopAnalysis/TopAnalyzer/interface/FullHadQCDEstimation.h"
 #include "TopAnalysis/TopAnalyzer/interface/FullHadTopReco.h"
 
-/// default constructor for fw lite
-FullHadQCDEstimation::FullHadQCDEstimation()
-{
-  tree = 0;
-}
-
-/// default constructor for fwfull
+/// default constructor
 FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
-  useTree_   ( cfg.getParameter<bool>( "useTree" ) ),
-  bTagAlgoWP_( cfg.getParameter<std::string>( "bTagAlgoWP" ) )
+  JetSrc_            (cfg.getParameter<edm::InputTag>("JetSrc")),
+  MultiJetMVADiscSrc_(cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc")),
+  useTree_           ( cfg.getParameter<bool>( "useTree" ) ),
+  bTagAlgoWP_        ( cfg.getParameter<std::string>( "bTagAlgoWP" ) )
 {
   
   if(cfg.exists("udscResolutions") && cfg.exists("bResolutions")){
@@ -40,16 +42,14 @@ FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
   tree = 0;
 }
 
-/// histogramm booking for fwlite 
+/// histogramm booking
 void
-FullHadQCDEstimation::book()
+FullHadQCDEstimation::beginJob()
 {
-}
+  // define TFileService which takes care of writing contents to root file
+  edm::Service<TFileService> fs;
+  if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
 
-/// histogramm booking for full fw
-void
-FullHadQCDEstimation::book(edm::Service<TFileService>& fs)
-{
   /** 
       Kinematic Variables
   **/
@@ -60,8 +60,16 @@ FullHadQCDEstimation::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "jet1_eta" );
   bookVariable( fs, "jet2_eta" );
   
+  // properties of kinematic fit for the tree
+  bookVariable( fs, "topMass" );
+  bookVariable( fs, "prob" );
+  bookVariable( fs, "chi2" );
+  bookVariable( fs, "ttbarPt" );
+  bookVariable( fs, "ttbarMass" );
+  bookVariable( fs, "multiJetMVADisc" );
+
   // top mass of kinematic fit  using pt parametrisation
-  bookVariable( fs, "topQuarkMassHypo" );
+  //bookVariable( fs, "topQuarkMassHypo" );
   bookVariable( fs, "topQuarkMassHypo_pt"    , 1000,  0. , 1000. , useTree_ );
   bookVariable( fs, "topQuarkMassHypoAll_pt" , 1000,  0. , 1000. , useTree_ );
 
@@ -74,13 +82,13 @@ FullHadQCDEstimation::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "topQuarkMassHypoAll_no" , 1000,  0. , 1000. , useTree_ );
 
   // invariant ttbar mass
-  bookVariable( fs, "ttbarInvMassHypo" );
+  //bookVariable( fs, "ttbarInvMassHypo" );
   bookVariable( fs, "ttbarInvMassHypo_pt"  , 750,  0. , 1500. , useTree_ );
   bookVariable( fs, "ttbarInvMassHypo_eta" , 750,  0. , 1500. , useTree_ );
   bookVariable( fs, "ttbarInvMassHypo_no"  , 750,  0. , 1500. , useTree_ );
 
   // pt of ttbar system of hypothesis
-  bookVariable( fs, "ttbarPtHypo" );
+  //bookVariable( fs, "ttbarPtHypo" );
   bookVariable( fs, "ttbarPtHypo_pt"  , 750, 0. , 1500. , useTree_ );
   bookVariable( fs, "ttbarPtHypo_eta" , 750, 0. , 1500. , useTree_ );
   bookVariable( fs, "ttbarPtHypo_no"  , 750, 0. , 1500. , useTree_ );
@@ -204,12 +212,23 @@ bTagWeight(std::vector<pat::Jet>::const_iterator& bQuark, std::vector<pat::Jet>:
 
 /// histogram filling for fwlite and for full fw
 void
-FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight)
+FullHadQCDEstimation::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 {
+  
+  edm::Handle<edm::View< pat::Jet > > jets_h;
+  event.getByLabel(JetSrc_, jets_h);
+
+  edm::Handle<double> multiJetMVADisc_h;
+  event.getByLabel(MultiJetMVADiscSrc_, multiJetMVADisc_h);
+  
+  edm::View<pat::Jet> jets = *jets_h;
+
   /** 
       Fill Kinematic Variables
   **/
   
+  double weight = 1.;
+
   if(jets.size() >= 6){
 
     std::vector<pat::Jet> theJets;
@@ -233,7 +252,7 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
 	if(result.size() > 0) {
 	  //std::cout << result.size() << std::endl;
 	  for(std::list<TtFullHadKinFitter::KinFitResult>::const_iterator res = result.begin(); res != result.end(); ++res){
-	    fillValue( "fitExitCode" , res->Status , 1. );
+	    fillValue( "fitExitCode" , (double)res->Status , 1. );
 	    if(res->Status == 0) {
 	      double b_Tag_Weight = bTagWeight(jet1, jet2, bTagAlgoWP_);
 	      double b_Tag_Weight_eta = bTagWeight(jet1, jet2, bTagAlgoWP_, true);
@@ -247,27 +266,37 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
 	      fillValue( "topQuarkMassHypoAll_no"  , topMass ,                    weight );
 
 	      // probability of kinematic fit
-	      double prob     = res->Prob;
-	      double prob_log = log10(prob);
+	      double prob = res->Prob;
 	      fillValue( "prob_eta" , prob , b_Tag_Weight_eta * weight );
 	      fillValue( "prob_pt"  , prob , b_Tag_Weight     * weight );
 	      fillValue( "prob_no"  , prob ,                    weight );
 	      if(res->Prob > 0) {
+		double prob_log = log10(prob);
 		fillValue( "prob_log_eta" , prob_log , b_Tag_Weight_eta * weight );
 		fillValue( "prob_log_pt"  , prob_log , b_Tag_Weight     * weight );
 		fillValue( "prob_log_no"  , prob_log ,                    weight );
 	      }
 
+	      // save jet pt and eta for possible later parametrization
+	      fillValue( "jet1_pt"  , jet1->pt()  );
+	      fillValue( "jet2_pt"  , jet2->pt()  );
+	      fillValue( "jet1_eta" , jet1->eta() );
+	      fillValue( "jet2_eta" , jet2->eta() );
+
+	      double multiJetMVADisc = multiJetMVADisc_h.isValid() ? *multiJetMVADisc_h : -10.;
+	      double invTTBarMass = (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()+res->BBar.p4()+res->LightP.p4()+res->LightPBar.p4()).mass();
+	      double ttbarPt      = (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()+res->BBar.p4()+res->LightP.p4()+res->LightPBar.p4()).pt();
+	      // properties of kinematic fit for the tree
+	      fillValue( "topMass"        , topMass      );
+	      fillValue( "prob"           , prob         );
+	      fillValue( "chi2"           , res->Chi2    );
+	      fillValue( "ttbarPt"        , ttbarPt      );
+	      fillValue( "ttbarMass"      , invTTBarMass );
+	      fillValue( "multiJetMVADisc", multiJetMVADisc );
+	      
 	      if(res->Prob > 0.01) {
-
-		// save jet pt and eta for possible later parametrization
-		fillValue( "jet1_pt"  , jet1->pt()  );
-		fillValue( "jet2_pt"  , jet2->pt()  );
-		fillValue( "jet1_eta" , jet1->eta() );
-		fillValue( "jet2_eta" , jet2->eta() );
-
 		// kinfitted mass of top quark
-		fillValue( "topQuarkMassHypo"     , topMass , b_Tag_Weight_eta * weight );
+		//fillValue( "topQuarkMassHypo"     , topMass , b_Tag_Weight_eta * weight );
 		fillValue( "topQuarkMassHypo_eta" , topMass , b_Tag_Weight_eta * weight );
 		fillValue( "topQuarkMassHypo_pt"  , topMass , b_Tag_Weight     * weight );
 		fillValue( "topQuarkMassHypo_no"  , topMass ,                    weight );
@@ -275,15 +304,13 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
 		// after other two histograms as its weight needs to be filled last (will be done automatically)
 
 		// invariant mass of ttbar system
-		double invTTBarMass = (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()+res->BBar.p4()+res->LightP.p4()+res->LightPBar.p4()).mass();
-		fillValue( "ttbarInvMassHypo"     , invTTBarMass , b_Tag_Weight_eta * weight );
+		//fillValue( "ttbarInvMassHypo"     , invTTBarMass , b_Tag_Weight_eta * weight );
 		fillValue( "ttbarInvMassHypo_eta" , invTTBarMass , b_Tag_Weight_eta * weight );
 		fillValue( "ttbarInvMassHypo_pt"  , invTTBarMass , b_Tag_Weight     * weight );
 		fillValue( "ttbarInvMassHypo_no"  , invTTBarMass ,                    weight );
 
 		// pt of ttbar system
-		double ttbarPt = (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()+res->BBar.p4()+res->LightP.p4()+res->LightPBar.p4()).pt();
-		fillValue( "ttbarPtHypo"     , ttbarPt , b_Tag_Weight_eta * weight );
+		//fillValue( "ttbarPtHypo"     , ttbarPt , b_Tag_Weight_eta * weight );
 		fillValue( "ttbarPtHypo_eta" , ttbarPt , b_Tag_Weight_eta * weight );
 		fillValue( "ttbarPtHypo_pt"  , ttbarPt , b_Tag_Weight     * weight );
 		fillValue( "ttbarPtHypo_no"  , ttbarPt ,                    weight );
@@ -327,11 +354,9 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
 		fillValue("topWAngleHypo_pt" , topBarWAngle, b_Tag_Weight     * weight);
 		fillValue("topWAngleHypo_no" , topWAngle   ,                    weight);
 		fillValue("topWAngleHypo_no" , topBarWAngle,                    weight);
-
-		// fill the tree, if any variable should be put in
-		if(treeVars_.size()) tree->Fill();
-
  	      }
+	      // fill the tree, if any variable should be put in
+	      if(treeVars_.size()) tree->Fill();
 
 	      break;
 	    }
@@ -392,3 +417,12 @@ FullHadQCDEstimation::fill(const edm::View<pat::Jet>& jets, const double& weight
   // fill the tree, if any variable should be put in
   //if(treeVars_.size()) tree->Fill();
 }
+
+void
+FullHadQCDEstimation::endJob()
+{
+}
+
+#include "FWCore/Framework/interface/MakerMacros.h"
+DEFINE_FWK_MODULE( FullHadQCDEstimation );
+
