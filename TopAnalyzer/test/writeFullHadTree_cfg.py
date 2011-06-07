@@ -22,21 +22,26 @@ options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singlet
 ## include PDF uncertainty histograms / tree
 options.register('pdfUn'   , 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include hists/tree for pdf uncertainty")
 ## choose whether to do a background estimation or a normal selection
-#options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
+options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
 ## do PATification on the fly, not depending on pre-made PAT tuples anymore
 #options.register('patify', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "run PAT on the fly")
 ## include b-tag efficiency and mis-tag rate in FullHadTreeWriter's TTree
 options.register('bTagPara', 1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include bTagEff and mis-tag rate")
 ## change b-tagging discriminator for b-tagging uncertainty measurement
 options.register('bTag', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "bTag uncertainty")
+## do mva selection instead of old style selection
+options.register('mvaSelection', 1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "mva selection")
+## weight of events (should be used only for MC samples)
+options.register('mcWeight', 1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "MC sample event weight")
 
 # get and parse the command line arguments
-for args in sys.argv :
-    arg = args.split(',')
-    for val in arg:
-        val = val.split('=')
-        if(len(val)==2):
-            setattr(options,val[0], val[1])
+if( hasattr(sys, "argv") ):
+    for args in sys.argv :
+        arg = args.split(',')
+        for val in arg:
+            val = val.split('=')
+            if(len(val)==2):
+                setattr(options,val[0], val[1])
 
 print "eventFilter . . . . :", options.eventFilter
 print "usePF . . . . . . . :", options.usePF
@@ -47,10 +52,12 @@ print "writeOutput . . . . :", options.writeOutput
 print "maxPtHat  . . . . . :", options.maxPtHat
 print "minPtHat  . . . . . :", options.minPtHat
 print "pdfUncertainty  . . :", options.pdfUn
-#print "backgroundEstimation:", options.backgroundEstimation
+print "backgroundEstimation:", options.backgroundEstimation
 #print "patify  . . . . . . :", options.patify
 print "bTagParametersOn  . :", options.bTagPara
 print "bTag  . . . . . . . :", options.bTag
+print "mvaSelection  . . . :", options.mvaSelection
+print "mcWeight  . . . . . :", options.mcWeight
 
 ## use the FullHadTreeWriter to produce a TTree with the desired information
 processName = "FullHadTreeWriter"
@@ -71,7 +78,17 @@ process.source = cms.Source("PoolSource",
     #'file:/tmp/eschliec/tmp.root',
     #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_16_1_oqr.root',
     #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_19_1_CQa.root',
-    '/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_109_1_7a5.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_108_1_ZON.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_107_1_nAe.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_106_1_7M1.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_105_1_pMh.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_104_1_c2K.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_103_1_cx9.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_102_1_Xse.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_101_1_syQ.root',
+    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_100_1_AV3.root',
+    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root',
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_15_1_5ob.root',
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_12_1_Bay.root',
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_18_1_WVA.root',
@@ -115,7 +132,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if(options.eventFilter=='data'):
     process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
 else:
-    process.GlobalTag.globaltag = cms.string('START38_V14::All')
+    #process.GlobalTag.globaltag = cms.string('START38_V14::All')
+    process.GlobalTag.globaltag = cms.string('START41_V0::All')
 
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
@@ -130,9 +148,9 @@ process.filterPtHat = process.filterPtHat.clone()
 
 ## additional jet energy smearing for MC
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
-process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJets"),
-                                                         inputMETs            = cms.InputTag("patMETs"),
-                                                         payload              = cms.string("AK5Calo"),
+process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJetsAK5PF"),
+                                                         inputMETs            = cms.InputTag("patMETsPF"),
+                                                         payload              = cms.string("AK5PF"),
                                                          scaleFactor          = cms.double(options.jesFactor),
                                                          scaleType            = cms.string("abs"), #abs or rel
                                                          jetPTThresholdForMET = cms.double(20.),
@@ -191,11 +209,18 @@ elif(options.eventFilter=='all' or options.eventFilter=='allRedigi' or options.e
     process.filterSequence = cms.Sequence(process.scaledJetEnergy)
     
 else:
-    raise NameError, "'"+options.eventFilter+"' is not a prober eventFilter name choose: 'data', 'sig', 'bkg', 'qcd', 'privA', 'privB' or 'all'"
+    raise NameError, "'"+options.eventFilter+"' is not a proper eventFilter!"
+
+# adapt output filename
+process.TFileService.fileName = 'writeFullHadTree_'+options.eventFilter+'.root'
 
 ## fully hadronic selection
-process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
-from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
+if(options.mvaSelection==0):
+    process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
+    from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
+else:
+    process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelectionMVA_cff")
+    from TopAnalysis.TopFilter.sequences.fullHadronicSelectionMVA_cff import *
 
 ## do kinematic fit needed for fully hadronic selection
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
@@ -208,28 +233,31 @@ if( (not options.eventFilter=='sig') and (not options.eventFilter=='sigPU') ):
     removeTtFullHadHypGenMatch(process)
 
 ## changing bTagger, possible are: TCHE, TCHPTight, SSV, CSV, CSVMVA
-## only TCHE, TCHPTight, SSV and CSV have a officialy blessed WP like the default (TCHP)
-switchToTCHE(process)
-#switchToCSV(process)
+## only TCHELoose, TCHE, TCHP, TCHPTight, SSVHE, SSVHPTight and CSV have a officialy blessed WP
+#switchToTCHELoose(process)
+#switchToTCHP(process)
 #switchToTCHPTight(process)
+switchToSSVHE(process)
+#switchToSSVHPTight(process)
+#switchToCSV(process)
 
 ## modify b-tagging discriminator to estimate b-tagging efficiency and mis-tag uncertainty
 if(not options.eventFilter=='data'):
     if(options.bTag < 0):
-        modifyBTagDiscs(process, 'trackCountingHighEff', 2.17,  9.73)
+        modifyBTagDiscs(process, 'trackCountingHighEff', 2.84,  9.28)
     elif(options.bTag > 0):
-        modifyBTagDiscs(process, 'trackCountingHighEff', 4.71, 12.46)
+        modifyBTagDiscs(process, 'trackCountingHighEff', 3.90, 11.36)
 
 ## selection should be run on PFJets instead of caloJets
-if(not options.usePF==0): 
-    runOnPF(process)
+if(options.usePF==0): 
+    runOnCalo(process)
 
 ## if running on real data, do everything needed for this
 if(options.eventFilter=='data'):
-    runOnRealData(process)
+    runOnData(process)
     ## needed because the patTriggerEvent is to chatty to be used and
     ## data is already skimmed with trigger requirement
-    #removeDefaultTrigger(process)
+    removeTrigger(process)
 
 ## increase the resolution of the kinematic fit
 increaseKinFitResolution(process, options.fitResol)
@@ -242,6 +270,12 @@ process.load("TopAnalysis.TopAnalyzer.FullHadTreeWriter_cfi")
 
 ## switch tree writer to appropriate jet source
 process.FullHadTreeWriter = process.writeFullHadTree.clone(JetSrc = "tightLeadingJets")
+
+## set correct MC weight
+process.FullHadTreeWriter.MCweight = options.mcWeight
+
+process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
+process.eventWeightPU = process.eventWeightPU.clone()
 
 ## switch bTagEff and mis-tag rate for FullHadTreeWriter
 if( options.bTagPara==0 ):
@@ -265,14 +299,36 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1101")
 process.p1 = cms.Path(## do the genEvent selection
                       process.filterSequence *
                       ## do the filtering
-                      process.analyseFullHadronicSelection *
+                      process.createJetCollections *
+                      process.leadingJetSelection  *
+                      process.eventWeightPU        *
+                      process.makeTtFullHadEvent   *
                       ## write the tree
                       process.FullHadTreeWriter
                       )
 
-process.p1.remove(process.tightBottomJetSelection_v1)
-process.p1.remove(process.tightBottomJetSelection_v2)
-process.p1.remove(process.filterKinFitQuality)
+if(not options.mvaSelection==0):
+    process.p1.replace(process.leadingJetSelection,process.leadingJetSelection*process.mvaDisc)
+    process.p1.remove(process.trackCountingHighEffBJets)
+    process.p1.remove(process.tightBottomJets)
+
+if(not options.backgroundEstimation==0):
+    runAsBackgroundEstimation(process)
+    process.p1.remove(process.makeTtFullHadEvent)
+    process.p1.remove(process.FullHadTreeWriter)
+    if(not options.eventFilter=='data'):
+        process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
+    if(options.usePF==1):
+        #print getattr(process, process.tightBottomJets.src.getModuleLabel()).src
+        getattr(process, process.tightBottomJets.src.getModuleLabel()).src = cms.InputTag("goodJetsPF")
+                 
+    process.p1 += cms.Sequence(getattr(process, process.tightBottomJets.src.getModuleLabel()) *
+                               process.tightBottomJets                                        *
+                               process.tightBottomJetSelection                                *
+                               process.analyzeFullHadQCDEstimation
+                               )
+
+    process.TFileService.fileName = 'QCDEstimation_'+options.eventFilter+'.root'
 
 if( options.pdfUn==2 and (options.eventFilter=='sig' or options.eventFilter=='bkg') ):
     print "Writing TTree for all", options.eventFilter, "events, no further selection done!"
