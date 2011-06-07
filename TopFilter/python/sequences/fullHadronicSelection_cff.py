@@ -36,21 +36,22 @@ tightPFJetID    = '& neutralHadronEnergyFraction < 0.9 & '
 tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
 
 ## setup the jet selection collection
-tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
-                                         cut = tightJetCut + tightCaloJetID
+tightLeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
+                                         cut = tightJetCut + tightPFJetID
                                          )
-tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                         cut = bottomJetCut + tightCaloJetID
+trackCountingHighEffBJets.src = 'goodJetsPF'
+tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
+                                         cut = tightJetCut + tightPFJetID
                                          )
 
 ## setting up the collections for the fully-hadronic
 ## event selection; on these collection monitoring
 ## can still be performed
-fullHadronicSelection = cms.Sequence(goodJets *
-                                     trackCountingHighPurBJets *
-                                     tightLeadingJets *
-                                     tightBottomJets
-                                     )
+createJetCollections = cms.Sequence(goodJetsPF *
+                                    trackCountingHighEffBJets *
+                                    tightLeadingJets *
+                                    tightBottomJets
+                                    )
 
 ## ---
 ##    configure the cutflow scenario
@@ -145,7 +146,7 @@ noscraping = cms.EDFilter("FilterOutScraping",
                           )
 
 ## setup good jet selection collection
-goodJetSelection = countPatJets.clone(src = 'goodJets',
+goodJetSelection = countPatJets.clone(src = 'goodJetsPF',
                                       minNumber = 6
                                       )
 
@@ -161,17 +162,17 @@ filterStep0 = cms.Sequence(vertex *
 kinFitTtFullHadEventHypothesis.maxNComb = -1
 
 kinFitTtFullHadEventHypothesis.bTags = 2
-kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighPurBJetTags'
-kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 1.93
-kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 3.41
+kinFitTtFullHadEventHypothesis.bTagAlgo = 'trackCountingHighEffBJetTags'
+kinFitTtFullHadEventHypothesis.minBTagValueBJet    = 3.3
+kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = 10.2
 
 #setForAllTtFullHadHypotheses(process, 'maxNJets', -1)
 kinFitTtFullHadEventHypothesis.maxNJets = -1
 ttFullHadJetPartonMatch.maxNJets        = -1
 
 #setForAllTtFullHadHypotheses(process, 'jetCorrectionLevel', 'had')
-kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Flavor'
-ttFullHadHypGenMatch.jetCorrectionLevel           = 'L5Flavor'
+kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
+ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
 
 #setForAllTtFullHadHypotheses(process, 'jets', 'tightLeadingJets')
 kinFitTtFullHadEventHypothesis.jets = 'tightLeadingJets'
@@ -206,16 +207,16 @@ PDFUncertainty_0 = analyzePDFUncertainty.clone()
 ## JET KINEMATICS
 
 ## kinematics analyzers
-tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets', analyze = ball)
-tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = udsall)
-tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds0  )
-tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds1  )
-tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds2  )
-tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds3  )
-tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds4  )
-tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJets', analyze = uds5  )
-tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
-tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
+tightBottomJetKinematics_0  = analyzeJetKinematics.clone (src = 'trackCountingHighEffBJets', analyze = ball)
+tightLeadingJetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = udsall)
+tightLead_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = uds0  )
+tightLead_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = uds1  )
+tightLead_2_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = uds2  )
+tightLead_3_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = uds3  )
+tightLead_4_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = uds4  )
+tightLead_5_JetKinematics_0 = analyzeJetKinematics.clone (src = 'goodJetsPF', analyze = uds5  )
+tightBJet_0_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighEffBJets' , analyze = bottom0)
+tightBJet_1_JetKinematics_0 = analyzeJetKinematics.clone (src = 'trackCountingHighEffBJets' , analyze = bottom1)
 METKinematics_0 = analyzeMETKinematics.clone()
 
 ## collect kinematics analyzers
@@ -235,16 +236,16 @@ monitorKinematics_0 = cms.Sequence(tightBottomJetKinematics_0  *
 ## JET QUALITY
 
 ## quality analyzers
-tightBottomJetQuality_0  = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets', analyze = ball)
-tightLeadingJetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = udsall)
-tightLead_0_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds0  )
-tightLead_1_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds1  )
-tightLead_2_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds2  )
-tightLead_3_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds3  )
-tightLead_4_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds4  )
-tightLead_5_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJets', analyze = uds5  )
-tightBJet_0_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom0)
-tightBJet_1_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighPurBJets' , analyze = bottom1)
+tightBottomJetQuality_0  = analyzeJetQuality.clone (src = 'trackCountingHighEffBJets', analyze = ball)
+tightLeadingJetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = udsall)
+tightLead_0_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = uds0  )
+tightLead_1_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = uds1  )
+tightLead_2_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = uds2  )
+tightLead_3_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = uds3  )
+tightLead_4_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = uds4  )
+tightLead_5_JetQuality_0 = analyzeJetQuality.clone (src = 'goodJetsPF', analyze = uds5  )
+tightBJet_0_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighEffBJets' , analyze = bottom0)
+tightBJet_1_JetQuality_0 = analyzeJetQuality.clone (src = 'trackCountingHighEffBJets' , analyze = bottom1)
 
 ## collect quality analyzers
 monitorJetsQuality_0 = cms.Sequence(tightBottomJetQuality_0  *
@@ -262,7 +263,7 @@ monitorJetsQuality_0 = cms.Sequence(tightBottomJetQuality_0  *
 ## EVENT SHAPES
 
 ## collect event shape analyzers
-eventShapes_0 = analyzeEventShapes.clone( src = 'goodJets' )
+eventShapes_0 = analyzeEventShapes.clone( src = 'goodJetsPF' )
 
 ## monitor sequence for event shape analyzers
 monitorEventShapes_0 = cms.Sequence( eventShapes_0 )
@@ -270,7 +271,7 @@ monitorEventShapes_0 = cms.Sequence( eventShapes_0 )
 ## FULL HAD SPECIAL
 
 ## collect analyzers specially for full hadronic analysis
-fullHadSpecial_0 = analyzeFullHadSpecials.clone( src = 'goodJets' )
+fullHadSpecial_0 = analyzeFullHadSpecials.clone( src = 'goodJetsPF' )
 
 ## monitor sequence for specially for full hadronic analyzers
 monitorFullHadSpecials_0 = cms.Sequence( fullHadSpecial_0 )
@@ -303,8 +304,8 @@ leadingJetSelection = countPatJets.clone( src = 'tightLeadingJets',
 
 ## JET KINEMATICS
 
-monitoredTightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighPurBJets',
-                                                  cut = tightJetCut + tightCaloJetID
+monitoredTightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
+                                                  cut = tightJetCut + tightPFJetID
                                                   )
 
 ## kinematics analyzers
@@ -502,7 +503,7 @@ kinFitImprover4_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_2 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
-fullHadTopReco_2.analyze.bTagAlgo = 'trackCountingHighPurBJetTags' 
+fullHadTopReco_2.analyze.bTagAlgo = 'trackCountingHighEffBJetTags' 
 METKinFit_2 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
@@ -629,7 +630,7 @@ kinFitImprover4_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , ana
 
 ## collect fully hadronic top reco analyzers
 fullHadTopReco_3 = analyzeFullHadTopReco.clone( srcB = 'tightLeadingJets' )
-fullHadTopReco_3.analyze.bTagAlgo = 'trackCountingHighPurBJetTags' 
+fullHadTopReco_3.analyze.bTagAlgo = 'trackCountingHighEffBJetTags' 
 METKinFit_3 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
@@ -691,9 +692,9 @@ analyseFullHadronicSelection = cms.Sequence(PDFUncertainty_0      *
                                             ## do the hlt triggering
                                             trigger               *
                                             ## do the selections
-                                            fullHadronicSelection *
+                                            createJetCollections  *
                                             ## do the matching
-                                            matchJetsToPartons    *
+                                            #matchJetsToPartons    *
                                             filterStep0           *
                                             ## do the monitoring
                                             monitorKinematics_0      *
@@ -751,7 +752,7 @@ def disableCountFilter(whichCountFilter):
 ## ---
 ##    run on real data
 ## ---
-def runOnRealData(process):
+def runOnData(process):
     print '++++++++++++++++++++++++++++++++++++++++++++'
     print 'removing all elements from the sequence '
     print '*analyseFullHadronicSelection* that rely '
@@ -840,7 +841,7 @@ def removeMonitoringOfCutflow(process):
 ## ---
 ##    remove default trigger
 ## ---
-def removeDefaultTrigger(process):
+def removeTrigger(process):
     print '++++++++++++++++++++++++++++++++++++++++++++'
     print 'removing the default trigger from '
     print 'standard fully hadronic event selection '
@@ -862,22 +863,22 @@ def runAsBackgroundEstimation(process):
     process.kinFitTtFullHadEventHypothesis.bTags = 0
 
 ## ---
-##    run analysis on PFJets instead of caloJets
+##    run analysis on CaloJets & MET instead of PFJets & PFMet
 ## ---
-def runOnPF(process):
+def runOnCalo(process):
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    print 'switching all inputs in to run on PFlow'
-    print 'goodJets -> goodJetsPF'
-    print 'patMETs  -> patMETsPF'
+    print 'switching all inputs in to run on Calo'
+    print 'goodJetsPF -> goodJets'
+    print 'patMETsPF  -> patMETs'
     print '++++++++++++++++++++++++++++++++++++++++++++'
-    process.analyseFullHadronicSelection.replace(process.goodJets, process.goodJetsPF)
+    process.analyseFullHadronicSelection.replace(process.goodJetsPF, process.goodJets)
 
-    ## exchange JetID cuts to PFJetID
-    process.tightLeadingJets.cut = tightJetCut + tightPFJetID
-    process.tightBottomJets.cut  = tightJetCut + tightPFJetID
-    process.monitoredTightBottomJets.cut = tightJetCut + tightPFJetID
+    ## exchange PFJetID cuts to JetID
+    process.tightLeadingJets.cut = tightJetCut + tightCaloJetID
+    process.tightBottomJets.cut  = tightJetCut + tightCaloJetID
+    process.monitoredTightBottomJets.cut = tightJetCut + tightCaloJetID
 
-    ## exchange resolutions for PFJets
+    ## exchange resolutions for CaloJets
     process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
     process.kinFitTtFullHadEventHypothesis.udscResolutions = process.udscResolutionPF.functions
     process.kinFitTtFullHadEventHypothesis.bResolutions    = process.bjetResolutionPF.functions
@@ -887,25 +888,20 @@ def runOnPF(process):
     process.kinFitQuality_3.analyze.udscResolutions        = process.udscResolutionPF.functions
     process.kinFitQuality_3.analyze.bResolutions           = process.bjetResolutionPF.functions
 
-    ## run kinematic fit for PFJets with L2L3 correted jets, as no further corrections are available
-    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
-    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
+    ## run kinematic fit for CaloJets with L1L2L3L5 correted jets
+    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Hadron'
+    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L5Hadron'
 
-    ## replace jets and met with PFJets and PFMET
+    ## replace PFJets and PFMET with CaloJets and CaloMET
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJets', 'goodJetsPF')
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'patMETs' , 'patMETsPF')
-
-    ## in case of real data, do residual JEC for PFJets
-    #if(hasattr(process, 'residualCorrectedJets')):
-    #    process.residualCorrectedJets.jets        = 'selectedPatJetsAK5PF'
-    #    process.residualCorrectedJets.corrections = 'Spring10DataV2_L2L3Residual_AK5PF.txt'
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'goodJetsPF', 'goodJets')
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'patMETsPF' , 'patMETs')
 
     # in case of mc, smear the energy resolution additionally
     if(hasattr(process, 'scaledJetEnergy')):
-        process.scaledJetEnergy.inputJets = "selectedPatJetsAK5PF"
-        process.scaledJetEnergy.inputMETs = "patMETsPF"
-        process.scaledJetEnergy.payload   = "AK5PF"
+        process.scaledJetEnergy.inputJets = "selectedPatJets"
+        process.scaledJetEnergy.inputMETs = "patMETs"
+        process.scaledJetEnergy.payload   = "AK5Calo"
 
 ## ---
 ##    modify bTagging discriminator for bTaggers
@@ -913,7 +909,7 @@ def runOnPF(process):
 def modifyBTagDiscs(process, algo, newMinDisc, newMaxDisc):
 
     getattr(process, algo + "BJets").cut = 'bDiscriminator("' + algo + 'BJetTags") > ' + str(newMinDisc)
-    process.analyseFullHadronicSelection.replace(process.trackCountingHighPurBJets, getattr(process, algo + "BJets"))
+    process.analyseFullHadronicSelection.replace(process.trackCountingHighEffBJets, getattr(process, algo + "BJets"))
 
     process.kinFitTtFullHadEventHypothesis.bTagAlgo = algo + 'BJetTags'
     process.fullHadTopReco_2.analyze.bTagAlgo       = algo + 'BJetTags' 
@@ -923,7 +919,7 @@ def modifyBTagDiscs(process, algo, newMinDisc, newMaxDisc):
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = newMaxDisc
 
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighPurBJets', algo + 'BJets')
+    massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighEffBJets', algo + 'BJets')
 
 def modifyBTagDisc(process, algo, newDisc):
 
@@ -932,20 +928,20 @@ def modifyBTagDisc(process, algo, newDisc):
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
-def switchToTCHE(process):
-    modifyBTagDiscs(process, 'trackCountingHighEff', 3.3, 10.2)
+def switchToTCHELoose(process):
+    modifyBTagDiscs(process, 'trackCountingHighEff', 1.9, 3.3)
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
-def switchToTCHPTight(process):
-    modifyBTagDiscs(process, 'trackCountingHighPur', 3.41, 3.41)
+def switchToTCHP(process):
+    modifyBTagDiscs(process, 'trackCountingHighPur', 1.93, 3.41)
 
 ## ---
 ##    switch to simpleSecondaryVertex bTagger
 ## ---
 def switchToSSV(process):
-    modifyBTagDiscs(process, 'simpleSecondaryVertex', 1.74, 3.05)
+    modifyBTagDiscs(process, 'simpleSecondaryVertexHighEff', 1.74, 3.05)
 
 ## ---
 ##    switch to combinedSecondaryVertex bTagger
