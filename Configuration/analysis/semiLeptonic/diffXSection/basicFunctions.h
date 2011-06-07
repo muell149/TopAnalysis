@@ -24,6 +24,7 @@
 #include <TGraphAsymmErrors.h>
 
 #include <TLine.h>
+#include <TBox.h>
 #include <TPaveLabel.h>
 #include <TStyle.h>
 #include <typeinfo>
@@ -295,6 +296,20 @@ void writeToFile(T output, TString file, bool append)
   }
  }
 
+void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=3.0, const unsigned int lineStyle=1)
+{
+  // this function draws a line withe the chosen coordinates, 
+  // color and width into the active canvas
+  // modified quantities: NONE
+  // used functions: NONE
+  // used enumerators: NONE
+  TLine *line = new TLine();
+  line->SetLineWidth(lineWidth);
+  line->SetLineStyle(lineStyle);
+  line->SetLineColor(color);
+  line->DrawLine(xmin, ymin, xmax, ymax);
+}
+
 int roundToInt(double value, bool roundDown=false)
 {
   // function to round an double "value" 
@@ -464,7 +479,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if((sample==kSig)||(sample==kBkg)){
     crossSection=157.5;
     Nevents     =1306182.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     = 1286491;
+    if(newSpring11MC) Nevents     = 1286491;
     // systematic samples:
     if(kSys==sysTopScaleUp  ) Nevents=1153236;
     if(kSys==sysTopScaleDown) Nevents=1098971;
@@ -478,7 +493,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kWjets){
     crossSection=31314.;
     Nevents     =14805546.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     =14722996;
+    if(newSpring11MC) Nevents     =14722996;
     // systematic samples:
     if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
     if(kSys==sysVBosonScaleDown) Nevents=4842219;
@@ -490,7 +505,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kZjets){
     crossSection=3048.;
     Nevents     =2543727.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     =2543706;
+    if(newSpring11MC) Nevents     =2543706;
     // systematic samples:
     if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
     if(kSys==sysVBosonScaleDown) Nevents=1436150;
@@ -502,7 +517,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kQCD){
     crossSection=296600000.*0.00028550; // generator crossSection * prefilter efficiency
     Nevents     =29504866.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     =29434562;
+    if(newSpring11MC) Nevents     =29434562;
     // if(kSys==sysPileUp) Nevents=8063288; // PU not completely patified
   }
   // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10 
@@ -513,21 +528,21 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   if(sample==kSTops){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =494967.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     = 494967; 
+    if(newSpring11MC) Nevents     = 494967; 
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494967;
   }
   if(sample==kSTopt){
     crossSection=64.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =484060.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     = 484060;
+    if(newSpring11MC) Nevents     = 484060;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=484060;
   }
   if(sample==kSToptW){
     crossSection=10.6;
     Nevents     =494961.;
-    if(kSys==sysNo&&newSpring11MC) Nevents     =489417;
+    if(newSpring11MC) Nevents     =489417;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494961;
   }
