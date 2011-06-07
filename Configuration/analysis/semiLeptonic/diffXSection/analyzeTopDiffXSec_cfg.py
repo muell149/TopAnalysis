@@ -33,6 +33,11 @@ print "used trigger path: TriggerResults::"+options.triggerTag
 if(not globals().has_key('jetType')):
     jetType =  'particleFlow' # 'Calo'
 
+## choose the semileptonic decay channel (electron or muon)
+if(not globals().has_key('decayChannel')):
+    decayChannel =  'muon' # 'electron'
+    print "used lepton decay channel: "+decayChannel
+
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
@@ -146,12 +151,12 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 # for all spring11 MC use REDIGI311X
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu9"], throw=False)
+rocess.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI311X", HLTPaths = ["HLT_Mu9"], throw=False)
-
+    
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 ## generator matching
@@ -209,6 +214,10 @@ process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
 process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
+# take care of electron channel
+if(decayChannel=='electron'):
+    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = False
+    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = True
 if(not eventFilter=='all'):
     ## adapt output filename
     if(eventFilter=='signal only'):
@@ -368,6 +377,13 @@ process.tightMuontightJetsKinematics       = process.analyzeMuonJetKinematics.cl
 process.tightMuontightJetsKinematicsTagged = process.tightMuontightJetsKinematics.clone()
 process.trackMuontightJetsKinematicsPreSel = process.analyzeMuonJetKinematics.clone(srcA = 'trackMuons', srcB = 'vetoJets')
 
+## electrons
+process.tightElectronKinematics  = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
+process.tightElectronQuality     = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
+process.tightElectronKinematicsTagged  = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
+process.tightElectronQualityTagged     = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
+
+
 ## MET
 process.analyzeMETMuon = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzeMETMuonTagged = process.analyzeMETMuon.clone()
@@ -385,6 +401,7 @@ process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinemati
                                                        process.analyzeMETMuon            +
                                                        process.tightMuontightJetsKinematics)
 
+
 process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematicsTagged       +
                                                       process.tightMuonQualityTagged          +
                                                       process.tightLead_0_JetKinematicsTagged +
@@ -398,6 +415,7 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.tightMuontightJetsKinematicsTagged+
                                                       process.bottomLead_0_JetKinematicsTagged  +
                                                       process.bottomLead_1_JetKinematicsTagged)
+    
 process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSel +
                                        process.kinematicMuonQualityPreSel         +
                                        process.goldenMuonQualityPreSel            +
@@ -405,7 +423,7 @@ process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSe
                                        process.tightMuonQualityPreSel             +
                                        process.tightJetKinematicsPreSel           +
                                        process.tightJetQualityPreSel              )
-
+    
 ## ---
 ##    configure Kinematic fit
 ## ---
@@ -413,6 +431,20 @@ process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSe
 ## produce top reconstructed event
 process.load('TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff')
 ## process.ttSemiLepJetPartonMatch.verbosity = 1
+
+# add hypothesis
+from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
+addTtSemiLepHypotheses(process,['kKinFit'])
+if(decayChannel=='electron'):
+    useElectronsForAllTtSemiLepHypotheses(process,'goodElectronsEJ')
+if(eventFilter=='signal only') and (runningOnData=="MC"):
+    if(applyKinFit==True):
+        print 'kinfit: processing ttbar SG MC - build genmatch'
+else:
+    removeTtSemiLepHypGenMatch(process)
+    if(applyKinFit==True):
+        print 'kinfit: processing bkg or data - genmatch removed'
+
 
 ## choose collections
 ## in fitting procedure
@@ -452,17 +484,6 @@ process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 # use larger JER in KinFit as it is obtained from data
 if(runningOnData=="data") and (applyKinFit==True):
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
-
-# add hypothesis
-from TopQuarkAnalysis.TopEventProducers.sequences.ttSemiLepEvtBuilder_cff import *
-addTtSemiLepHypotheses(process,['kKinFit'])
-if(eventFilter=='signal only') and (runningOnData=="MC"):
-    if(applyKinFit==True):
-        print 'kinfit: processing ttbar SG MC - build genmatch'
-else:
-    removeTtSemiLepHypGenMatch(process)
-    if(applyKinFit==True):
-        print 'kinfit: processing bkg or data - genmatch removed'
 
 ## keep only events with unambigues parton matches
 ## (no other partons exist in dR=0.3 cone) 
@@ -515,6 +536,7 @@ process.analyzeTopPartonLevelKinematicsPhaseSpace = process.analyzeTopGenKinemat
 ## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
 hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
+                      lepton  = cms.string(decayChannel),
                       wantTree = cms.bool(True),
                       maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKinFit)
@@ -628,7 +650,7 @@ if(runningOnData=="MC"):
                           ## process.ttSemiLeptonicFilter.invert = True
                           process.genFilterSequence                     *
                           ## introduce some collections
-                          process.isolatedGenMuons                      *
+                          process.isolatedGenLeptons                    *
                           process.semiLeptGenCollections                *
                           ## investigate top reconstruction
                           process.kinFitGen
@@ -647,7 +669,7 @@ else:
 if(runningOnData=="MC"):
     process.s4 = cms.Sequence(
                               ## introduce some collections
-                              process.isolatedGenMuons                      *
+                              process.isolatedGenLeptons                    *
                               process.semiLeptGenCollections                *
                               ## muon selection
                               process.genMuonSelection                      *
@@ -711,3 +733,75 @@ if(jetType=="particleFlow"):
         path.remove(process.goodJets)
         path.remove(process.tightLeadingJets)
         path.remove(process.tightBottomJets)
+
+
+## switch to from muon to electron collections
+if(decayChannel=="electron"):
+    # adpat trigger
+    process.hltFilter.HLTPaths=["HLT_Ele17*"]
+    # adapt gen filter
+    process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.electron = True
+    process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.muon= False
+    ## lepton-jet veto
+    from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
+    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
+    process.noOverlapJetsPFelec = cleanPatJets.clone(
+        src = cms.InputTag("selectedPatJetsAK5PF"),
+        preselection = cms.string(''),
+        checkOverlaps = cms.PSet(
+          electrons = cms.PSet(
+            src       = cms.InputTag("tightElectronsEJ"),
+            algorithm = cms.string("byDeltaR"),
+            preselection        = cms.string(''),
+            deltaR              = cms.double(0.3),
+            checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
+            pairCut             = cms.string(""),
+            requireNoOverlaps   = cms.bool(True), # overlaps don't cause the jet to be discared
+            )
+          ),
+        finalCut = cms.string(''),
+        )
+    process.goodJetsPF20.src  ='noOverlapJetsPFelec'
+    process.centralJetsPF.src ='noOverlapJetsPFelec'
+    process.reliableJetsPF.src='noOverlapJetsPFelec'
+    process.noEtaJetsPF.src   ='noOverlapJetsPFelec'
+    process.noPtJetsPF.src    ='noOverlapJetsPFelec'
+    process.noConstJetsPF.src ='noOverlapJetsPFelec'
+    process.noCEFJetsPF.src   ='noOverlapJetsPFelec'
+    process.noNHFJetsPF.src   ='noOverlapJetsPFelec'
+    process.noNEFJetsPF .src  ='noOverlapJetsPFelec'
+    process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
+    process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
+    # gen selection
+    process.p4.replace(process.genMuonSelection, process.genElectronSelection)
+    pathlist = [process.p1, process.p2, process.p3, process.p4]
+    for path in pathlist:
+        # replace jet lepton veto
+        path.replace(process.noOverlapJetsPF, process.noOverlapJetsPFelec)
+        # replace muon selection
+        path.remove(process.muonCuts)
+        path.remove(process.secondMuonVeto)
+        path.replace( process.electronVeto, process.electronSelection)
+        # remove muon monitoring
+        path.remove(process.tightMuontightJetsKinematics)
+        path.remove(process.tightMuonKinematics)
+        path.remove(process.tightMuonQuality)
+        path.remove(process.tightMuontightJetsKinematicsTagged)
+        path.remove(process.tightMuonKinematicsTagged         )
+        path.remove(process.tightMuonQualityTagged            )
+        path.remove(process.trackMuontightJetsKinematicsPreSel)
+        path.remove(process.kinematicMuonQualityPreSel        )
+        path.remove(process.goldenMuonQualityPreSel           )
+        path.remove(process.tightMuonKinematicsPreSel         )
+        path.remove(process.tightMuonQualityPreSel            )
+        # add electron monitoring
+        path.replace(process.tightLead_0_JetKinematics      , process.tightElectronKinematics * process.tightElectronQuality * process.tightLead_0_JetKinematics)
+        path.replace(process.tightLead_0_JetKinematicsTagged, process.tightElectronKinematicsTagged * process.tightElectronQualityTagged  * process.tightLead_0_JetKinematicsTagged)
+        # remove loose muon trigger based selection for muHad trigger
+        path.remove(process.looseCentralJets)
+        path.remove(process.kinematicMuonsSelection)
+        path.remove(process.looseJetSelectionNjets3)
+        # replace muon by electron in (remaining) kinfit analyzers
+        massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
+
+        
