@@ -19,26 +19,40 @@ ElectronQuality::book()
       Selection Variables
   **/
   // number of valid hits in silicon tracker   
-  hists_["nHit"            ] = new TH1F( "nHit"             ,  "nHit"             ,   35,  -0.5,  34.5 );
+  hists_["nHit"             ] = new TH1F( "nHit"             ,  "nHit"             ,   35,  -0.5,  34.5 );
   // normalized chi2 of global electron track fit
-  hists_["chi2"            ] = new TH1F( "chi2"             ,  "chi2"             ,   30,   0. ,  15.  );
+  hists_["chi2"             ] = new TH1F( "chi2"             ,  "chi2"             ,   30,   0. ,  15.  );
   // d0 significance of track (still to nominal IP)
-  hists_["d0"              ] = new TH1F( "d0"               ,  "d0"               ,   90,   0. ,  0.3  );
+  hists_["d0"               ] = new TH1F( "d0"               ,  "d0"               ,   90,   0. ,  0.3  );
   // energy in ecal corrected on SC level
-  hists_["ecalEn"          ] = new TH1F( "ecalEn"           ,  "ecalEn"           ,   40,   0. ,  10.  );
+  hists_["ecalEn"           ] = new TH1F( "ecalEn"           ,  "ecalEn"           ,   40,   0. ,  10.  );
   // energy from super cluster attached to the candidate trajectory
-  hists_["ecalEnCluster"   ] = new TH1F( "ecalEnCluster"    ,  "ecalEnCluster"    ,   50,   0. ,  50.  );
+  hists_["ecalEnCluster"    ] = new TH1F( "ecalEnCluster"    ,  "ecalEnCluster"    ,   50,   0. ,  50.  );
   // energy in hcal attached to the candidate trajectory
-  hists_["hcalEnOverEcalEn"] = new TH1F( "hcalEnOverEcalEn" ,  "hcalEnOverEcalEn" ,   100,  0. ,  1.0  );
+  hists_["hcalEnOverEcalEn" ] = new TH1F( "hcalEnOverEcalEn" ,  "hcalEnOverEcalEn" ,   100,  0. ,  1.0  );
   // relative isolation (tracker and calo combined)
-  hists_["relIso"          ] = new TH1F( "relIso"           ,  "relIso"           ,   50,   0. ,  1.0  );
+  hists_["relIso"           ] = new TH1F( "relIso"           ,  "relIso"           ,   50,   0. ,  1.0  );
   // the supercluster eta - track eta position at calo extrapolated from innermost track state
-  hists_["deltaEtaIn"      ] = new TH1F( "deltaEtaIn"       ,  "deltaEtaIn"       ,   100,  0.,   0.1  );
+  hists_["deltaEtaIn"       ] = new TH1F( "deltaEtaIn"       ,  "deltaEtaIn"       ,   100,  0. ,  0.1  );
   // the seed cluster phi - track phi position at calo extrapolated from the innermost track state
-  hists_["deltaPhiIn"      ] = new TH1F( "deltaPhiIn"       ,  "deltaPhiIn"       ,   100,  0.,   0.3  );
+  hists_["deltaPhiIn"       ] = new TH1F( "deltaPhiIn"       ,  "deltaPhiIn"       ,   100,  0. ,  0.3  );
   // weighted cluster rms along eta and inside 5x5
-  hists_["sigmaIetaIeta"   ] = new TH1F( "sigmaIetaIeta"    ,  "sigmaIetaIeta"    ,   100,  0.,  0.3  );
-
+  hists_["sigmaIetaIeta"    ] = new TH1F( "sigmaIetaIeta"    ,  "sigmaIetaIeta"    ,   100,  0. ,  0.3  );
+  // lines below added for electron + jets reference selection 2010/2011
+  // eta of supercluster
+  hists_["etaSC"            ] = new TH1F( "etaSC"            ,  "etaSC"            ,    35, -3.5,  3.5  );
+  // dB
+  hists_["dB"               ] = new TH1F( "dB"               ,  "dB"               ,   200,  0. ,  1.   );
+  // electron ID 
+  hists_["simpleEleId70cIso"] = new TH1F( "simpleEleId70cIso",  "simpleEleId70cIso",    10,  0. ,   10. ); 
+  // electron ID
+  hists_["simpleEleId95cIso"] = new TH1F( "simpleEleId95cIso",  "simpleEleId95cIso",    10,  0. ,   10. ); 
+  // nHitsInner
+  hists_["nHitsInner"       ] = new TH1F( "nHitsInner"       ,  "nHitsInner"       ,    35, -0.5,  34.5 );
+  // convDcot
+  hists_["convDcot"         ] = new TH1F( "convDcot"         ,  "convDcot"         ,   200,  0. ,    1. );
+  // convDist
+  hists_["convDist"         ] = new TH1F( "convDist"         ,  "convDist"         ,   200,  0. ,    1. );
 }
 
 
@@ -74,6 +88,22 @@ ElectronQuality::book(edm::Service<TFileService>& fs)
 
   // conserve the normalization information (for the use with hadd)
   //  hists_["norm_"   ] = fs->make<TH1F>( "norm_"    ,  "norm_"    ,    1,   0.,   1. );
+
+  // eta of supercluster
+  hists_["etaSC"            ] = fs->make<TH1F>( "etaSC"            ,  "etaSC"            ,    35, -3.5,  3.5  );
+  // dB
+  hists_["dB"               ] = fs->make<TH1F>( "dB"               ,  "dB"               ,   200,  0. ,  1.   );
+  // electron ID 
+  hists_["simpleEleId70cIso"] = fs->make<TH1F>( "simpleEleId70cIso",  "simpleEleId70cIso",    10,  0. ,   10. ); 
+  // electron ID
+  hists_["simpleEleId95cIso"] = fs->make<TH1F>( "simpleEleId95cIso",  "simpleEleId95cIso",    10,  0. ,   10. ); 
+  // nHitsInner
+  hists_["nHitsInner"       ] = fs->make<TH1F>( "nHitsInner"       ,  "nHitsInner"       ,    35, -0.5,  34.5 );
+  // convDcot
+  hists_["convDcot"         ] = fs->make<TH1F>( "convDcot"         ,  "convDcot"         ,   200,  0. ,    1. );
+  // convDist
+  hists_["convDist"         ] = fs->make<TH1F>( "convDist"         ,  "convDist"         ,   200,  0. ,    1. );
+
 }
 
 
@@ -115,6 +145,19 @@ ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& w
       // weighted cluster rms along eta and inside 5x5
       hists_.find("sigmaIetaIeta") ->second->Fill(  electron->sigmaIetaIeta() , weight );   
 
+      hists_.find("etaSC")->second->Fill( electron->superCluster()->eta() , weight );  
+      // dB
+      hists_.find("dB")->second->Fill( electron->dB() , weight ) ;
+      // electron ID 
+      hists_.find("simpleEleId70cIso")->second->Fill( electron->electronID("simpleEleId70cIso") , weight ) ;
+      // electron ID
+      hists_.find("simpleEleId95cIso")->second->Fill( electron->electronID("simpleEleId95cIso") , weight ) ;
+      // nHitsInner
+      hists_.find("nHitsInner")->second->Fill( electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits() , weight ) ;
+      // convDcot
+      hists_.find("convDcot")->second->Fill( electron->convDcot() , weight ) ;   
+      // convDist
+      hists_.find("convDist")->second->Fill( electron->convDist() , weight ) ;
     }
   }
 }
