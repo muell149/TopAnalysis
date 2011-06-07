@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=false, unsigned int verbose=0){
+void combineTopDiffXSecUncertainties(double luminosity=191.0, bool save=true, unsigned int verbose=0){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -17,6 +17,8 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=false,
   // 0: no output, 1: std output 2: output for debugging
   // save: enable saving
   // dataSample: see if its "2010" or "2011" data
+  TString dataSample="2011";
+  if(luminosity<50.) dataSample="2010";
   // target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
@@ -38,7 +40,7 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=false,
   // NOTE: these must be identical to those defined in 
   // xSecVariables_ in analyzeHypothesisKinFit.C
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "inclusive"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.;
@@ -345,11 +347,98 @@ void combineTopDiffXSecUncertainties(TString dataSample="2011", bool save=false,
 	  // which also opens the file
 	  file->Close();
 	  if(canvas){
-	    // Draw errors into Canvas
-	    canvas->cd();
-	    totalErrors_[xSecVariables_[i]]->Draw("p same");
-	    canvas->SetTitle(xSecVariables_[i]);
-	    canvas->SetName (xSecVariables_[i]);	  
+	    // for inclusive xSecs
+	    if(xSecVariables_[i].Contains("inclusive")){
+	      TCanvas* canvas2 = new TCanvas(xSecVariables_[i], xSecVariables_[i], 600, 600);
+	      canvasStyle(*canvas2);
+	      canvas2->SetLeftMargin(0.05);
+	      canvas2->cd();
+	      canvas2->SetTitle(xSecVariables_[i]);
+	      canvas2->SetGrid(1,0);
+	      // draw xSec 
+	      int NxSecBins=3000;
+	      double xSecMax=300.0;
+	      double xSecMin=0.;
+	      TH1F* finalInclusiveXSec = new TH1F( "finalInclusive", "finalInclusive", NxSecBins, xSecMin, xSecMax);
+	      // x axis as xSec[pb] indicator
+	      int xSecBin=roundToInt(histo_["inclusive"][sysNo]->GetBinContent(1)*((double)NxSecBins)/xSecMax)+1;
+	      finalInclusiveXSec->SetBinContent(xSecBin, 1);
+	      finalInclusiveXSec->SetBinError(xSecBin, 0);
+	      histogramStyle(*finalInclusiveXSec, kData , false, 2.5);
+	      axesStyle(*finalInclusiveXSec, "#sigma(t#bar{t}#rightarrowX) [pb]", " ", 0, 4);
+	      finalInclusiveXSec->GetYaxis()->SetNdivisions(0);
+	      finalInclusiveXSec->GetXaxis()->SetNdivisions(510);
+	      finalInclusiveXSec->GetYaxis()->SetTitleSize(0.0);
+	      finalInclusiveXSec->Draw("axis");
+	      // draw Theory expectation     
+	      double theoryXSecNLL=165;
+	      double theoryXSecNLO=157.5;
+	      double theoryErrorNLOUp  =23.2;
+	      double theoryErrorNLODown=24.4;
+	      double theoryErrorNLLUp  =sqrt(5*5+9*9);
+	      double theoryErrorNLLDown=sqrt(9*9+9*9);
+	      TBox* TheoryError = new TBox(theoryXSecNLO-theoryErrorNLODown, 0.1, theoryXSecNLO+theoryErrorNLOUp, 3.9);
+	      TBox* TheoryError2= new TBox(theoryXSecNLL-theoryErrorNLLDown, 0.2 ,theoryXSecNLL+theoryErrorNLLUp, 3.8);
+	      TheoryError->SetFillColor(kGray);
+	      TheoryError2->SetFillColor(kGray+1);
+	      TheoryError->Draw ("same");
+	      TheoryError2->Draw("same");
+	      // our Analysis result
+	      double xSecError=histo_["inclusive"][sysNo]->GetBinError(1);
+	      double xSecValue=histo_["inclusive"][sysNo]->GetBinContent(1);
+	      double totalErrorUp  = totalErrors_[xSecVariables_[i]]->GetErrorYhigh(1);
+	      double totalErrorDown= totalErrors_[xSecVariables_[i]]->GetErrorYlow(1);
+// 	      if(verbose>0){
+// 		std::cout << "xSec: "        << xSecValue << std::endl;
+// 		std::cout << "stat. error: +/-" << xSecError << std::endl;
+// 		std::cout << "tot. error up  : " << totalErrorUp   << std::endl;	      
+// 		std::cout << "tot. error down: " << totalErrorDown << std::endl;
+// 	      }
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"] = new TGraphAsymmErrors(1);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetLineWidth(3);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetMarkerSize(2.2);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetMarkerStyle(20);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetMarkerColor(kRed);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetLineColor  (kRed);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetPoint(0, xSecValue, 1);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetPointError(0, totalErrorDown, totalErrorUp, 0, 0);
+	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->Draw("p same");
+	      drawLine(xSecValue-xSecError, 0.99, xSecValue+xSecError, 0.99, kRed, 7, 1);
+	      // 2010 CMS result
+	      double cmsxSecValue=158.;
+	      double cmsErrorUp  =sqrt(10.*10.+6.*6.+15.*15.);
+	      double cmsErrorDown=sqrt(10.*10.+6.*6.+15.*15.);
+	      double cmsStatError=10;
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"] = new TGraphAsymmErrors(1);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetLineWidth(3);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetMarkerSize(2.2);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetMarkerStyle(22);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetMarkerColor(kRed);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetLineColor  (kRed);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetPoint(0, cmsxSecValue, 3);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->SetPointError(0, cmsErrorDown, cmsErrorUp, 0, 0);
+	      totalErrors_[xSecVariables_[i]+"CMSinclusive"]->Draw("p same");
+	      drawLine(cmsxSecValue-cmsStatError, 2.99, cmsxSecValue+cmsStatError, 2.99, kRed, 7, 1);
+	      finalInclusiveXSec->Draw("axis same");
+	      // label 
+	      DrawLabel("CMS 2010 combined"     , 0.06, 0.7 , 0.5 , 0.8 , 0.4);
+	      DrawLabel("(TOP-11-001)"          , 0.06, 0.65, 0.5 , 0.75, 0.4);
+	      DrawLabel("2010 data, 36 pb^{-1}" , 0.62, 0.7 , 0.95, 0.8 , 0.4);
+	      TString AN="AN-10-090";
+	      if(luminosity>50) AN="AN-10-091";
+	      DrawLabel(AN                      , 0.06, 0.3 , 0.5 , 0.4 , 0.4);
+	      DrawLabel(dataSample+" data, "+getTStringFromInt((int)luminosity)+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.4);
+
+	      canvas=(TCanvas*)canvas2->Clone();
+	    }
+	    // for differential xSecs
+	    else{
+	      canvas->cd();
+	      canvas->SetTitle(xSecVariables_[i]);
+	      // Draw errors into Canvas
+	      totalErrors_[xSecVariables_[i]]->Draw("p same");
+	      canvas->SetName (xSecVariables_[i]);
+	    }
 	    // save Canvas
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;

@@ -35,7 +35,7 @@
 ## has to fit to current dataset
 dataLuminosity=191.0
 ## dataset: 2010 or 2011
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
+$dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
 dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
@@ -51,8 +51,8 @@ verbose=0
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
-maxSys=0
-#maxSys=27
+#maxSys=0
+maxSys=27
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -177,7 +177,7 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './combineTopDiffXSecUncertainties.C+("'$dataLabel'", '$save', '$verbose')'
+root -l -q -b './combineTopDiffXSecUncertainties.C+('$dataLuminosity', '$save', '$verbose')'
 echo "all analysis steps finished!"
 
 

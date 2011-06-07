@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
+void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
 			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
 {
   //  ---
@@ -142,7 +142,8 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
 			 "analyzeTopRecoKinematicsKinFit/isotropy"   ,
 			 // generated top quantities
                          "analyzeTopPartonLevelKinematics/topMass"      , 
-                         "analyzeTopPartonLevelKinematics/topPt"        ,                         
+                         "analyzeTopPartonLevelKinematics/topPt"        ,    
+			 "analyzeTopPartonLevelKinematicsPhaseSpace/topPt", 
                          "analyzeTopPartonLevelKinematics/topPhi"       ,
                          "analyzeTopPartonLevelKinematics/topY"         ,
                          "analyzeTopPartonLevelKinematics/topPtHad"     ,
@@ -292,13 +293,14 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
 			     // generated top quantities
                              "m_{t} parton truth [GeV]/events/0/10"      ,
                              "p_{t}(t) parton truth/events/0/1"          ,//20"
-                             "#phi(t) parton truth/events/0/4"          ,
+			     "p_{t}(t) parton truth Phase Space/events/0/1",//20"
+                             "#phi(t) parton truth/events/0/4"           ,
                              "y(t) parton truth/events/0/1"              ,//5"
                              "p_{t}(hadronic t) parton truth/events/0/20",                         
-                             "#phi(hadronic t) parton truth/events/0/4" ,
+                             "#phi(hadronic t) parton truth/events/0/4"  ,
                              "y(hadronic t) parton truth/events/0/5"     ,
                              "p_{t}(leptonic t) parton truth/events/0/20",                         
-                             "#phi(leptonic t) parton truth/events/0/4" ,
+                             "#phi(leptonic t) parton truth/events/0/4"  ,
                              "y(leptonic t) parton truth/events/0/5"     ,
 			     // generated angular distributions
 			     "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
@@ -416,6 +418,19 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
   // reCreate: reCreate combined plots if they are already existing
   bool reCreate=true;
   AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate);
+
+  // ---
+  //    copy event yields for total xSec calculation
+  // ---
+  TH1F* dataYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kData ]->Clone());
+  TH1F* SigYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kSig  ]->Clone());
+  TH1F* BkgYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kBkg  ]->Clone());
+  TH1F* STopYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kSTop ]->Clone());
+  TH1F* WjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kWjets]->Clone());
+  TH1F* ZjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kZjets]->Clone());
+  TH1F* DiBosYield=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kDiBos]->Clone());
+  TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics/topPt"          ][kSig]->Clone());
+  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace/topPt"][kSig]->Clone());
 
   // ---
   //    configure histograms
@@ -557,7 +572,7 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
     }
   }
   // ---
-  //    cross section (whole phase space) determination
+  //    differential cross section (whole phase space) determination
   // ---
   // count # of cross section histos
   unsigned int NXSec=0;
@@ -619,6 +634,64 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
       //saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose, "xSecDataTH1FAllSystematics/"+sysLabel(systematicVariation));
     }
   }
+
+  // ---
+  //    total inclusive cross section (ttbar->X) determination
+  // ---
+  ++NXSec;
+  // get event yields
+  // careful: plot contains leptonic and hadronic top -> *0.5
+  double Ndata= 0.5 * dataYield->Integral(0, dataYield ->GetNbinsX()+1);
+  double NSig = 0.5 * SigYield ->Integral(0, SigYield  ->GetNbinsX()+1);
+  double NBG = 0.5 * BkgYield  ->Integral(0, BkgYield  ->GetNbinsX()+1);
+  NBG+= 0.5 * ZjetYield ->Integral(0, ZjetYield ->GetNbinsX()+1);
+  NBG+= 0.5 * WjetYield ->Integral(0, WjetYield ->GetNbinsX()+1);
+  NBG+= 0.5 * STopYield ->Integral(0, STopYield ->GetNbinsX()+1);
+  NBG+= 0.5 * DiBosYield->Integral(0, DiBosYield->GetNbinsX()+1);
+  // efficiency calculation
+  double NGenPhaseSpace=0.5 * GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
+  double eff=NSig/NGenPhaseSpace;
+  // acceptance
+  double NGen          =0.5 * GenInclusive ->Integral(0, GenInclusive ->GetNbinsX()+1);
+  double effA=NSig/NGen;
+  double A= effA/eff;
+  // branching ratio
+  // careful: the xSec here needs to be 
+  // consistent with the one in lumiweight()
+  double BR=NGen/(157.5*luminosity);
+  //  double BR2=12.0/81.0;
+  // calculate xSec
+  double xSec= ( Ndata-NBG ) / ( eff*A*luminosity*BR );
+  double sigmaxSec = sqrt( Ndata ) / ( eff*A*luminosity*BR );
+  // text output
+  if(verbose>0&&systematicVariation==sysNo){ 
+    std::cout << std::endl;
+    std::cout << "systematic variation:" << sysLabel(systematicVariation) << std::endl;
+    std::cout << "lumi[pb]:" << luminosity << std::endl;
+    std::cout << "N(Data):" << Ndata << std::endl;
+    std::cout << "N(BG): "  << NBG   << std::endl;
+    std::cout << "eff: "    << eff   << std::endl;
+    std::cout << "A: "      << A     << std::endl;
+    std::cout << "BR MC: "  << BR    << std::endl;
+    std::cout << "total inclusive cross section[pb]: ";
+    std::cout << xSec << " +/- " << sigmaxSec << "(stat.)" << std::endl;
+  }
+  // create histo
+  TString inclName = "xSec/inclusive";
+  histo_[inclName][kData] = new TH1F( "inclusivekData", "inclusivekData", 1, 0., 1.0);
+  histo_[inclName][kData]->SetBinContent(1, xSec     );
+  histo_[inclName][kData]->SetBinError  (1, sigmaxSec);
+  // add plot to list of all plots
+  plotList_.push_back(inclName);
+  // configure xSec plot histo style
+  histogramStyle(*histo_[inclName][kData], kData, false);
+  axisLabel_.push_back(" /#sigma(t#bar{t}#rightarrowX)[pb]/0/1");
+  // theory xSec
+  histo_[inclName][kSig]=(TH1F*)histo_[inclName][kData]->Clone("xSec/inclusiveTheory");
+  histo_[inclName][kSig]->SetBinContent(1, 157.5);
+  histo_[inclName][kSig]->SetBinError  (1, 0);
+  histogramStyle(*histo_[inclName][kSig ], kSig , false);
+  
   // ---
   //    create one legend for all 1D histos
   // ---
@@ -638,7 +711,7 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
       // if found: add entry to legend
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)&&(!exit)){
 	bool TwoThousandElevenData=false;
-	if(luminosity>36.0) TwoThousandElevenData=true;
+	if(luminosity>50.0) TwoThousandElevenData=true;
 	if(sample==kData) leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
 	else leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample), "F");
 	exit=true;
@@ -832,8 +905,10 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
 	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
 							   
 	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
-	if(title.Contains("0")                                    ) saveToFolder=outputFolder+"genRecoCorrPlots/";
-	plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps");      
+	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
+	if(!title.Contains("canv")){
+	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps"); 
+	}
       }
     }
     // c) root file
@@ -854,4 +929,7 @@ void analyzeHypothesisKinFit(double luminosity = 188.0, bool save = true, int sy
       if(outputfolder!=""||title.Contains("legend")) saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose,outputfolder);
     }
   }
+
+  // delete pointer
+  delete leg0;
 }
