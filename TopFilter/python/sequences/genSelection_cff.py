@@ -5,14 +5,20 @@ from TopAnalysis.TopUtils.GenCandSelector_cfi import *
 
 ## gen jet selector
 from TopAnalysis.TopUtils.CommonGenJetSelector_cfi import *
-## gen muon selector
+## gen muon/electron selector
 from TopAnalysis.TopUtils.CommonGenParticleSelector_cfi import *
 
 ## jet count filter
 from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## muon count filter
 from PhysicsTools.PatAlgos.selectionLayer1.muonCountFilter_cfi import *
+## electron count filter
+from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 
+# define generic name for isolated gen leptons
+isolatedGenLeptons  = cms.Sequence( isolatedGenMuons *
+                                    isolatedGenElectrons 
+                                  )
 
 ## set up simple (gen) lepton collections coming directly from W without cuts
 simpleGenWMuons     = isolatedGenMuons.clone(src="genParticles",
@@ -33,7 +39,7 @@ selectedGenWMuons     = selectedGenParticles.clone(src = 'simpleGenWMuons',
                                                    cut = 'abs(eta) < 2.1 & pt > 20.')
 
 selectedGenWElectrons = selectedGenParticles.clone(src = 'simpleGenWElectrons',
-                                                   cut = 'abs(eta) < 2.1 & pt > 20.')
+                                                   cut = 'abs(eta) < 2.1 & pt > 30.')
 
 selectedGenWTaus      = selectedGenParticles.clone(src = 'simpleGenWTaus',
                                                    cut = 'abs(eta) < 2.1 & pt > 20.')
@@ -45,7 +51,11 @@ selectedGenJetCollection  = selectedGenJets.clone(src = 'ak5GenJets',
 selectedGenMuonCollection = selectedGenParticles.clone(src = 'isolatedGenMuons',
                                                        cut = 'abs(eta) < 2.1 & pt > 20.')
 
-semiLeptGenCollections = cms.Sequence(selectedGenMuonCollection  *
+selectedGenElectronCollection = selectedGenParticles.clone(src = 'isolatedGenElectrons',
+                                                       cut = 'abs(eta) < 2.1 & pt > 30.')
+
+semiLeptGenCollections = cms.Sequence(selectedGenMuonCollection     *
+				      selectedGenElectronCollection *
                                       selectedGenJetCollection
                                       )
 
@@ -68,6 +78,12 @@ genMuonSelection  = countPatMuons.clone(src = 'selectedGenMuonCollection',
                                         minNumber = 1,
                                         maxNumber = 1
                                         )
+
+## set up the electron selection
+genElectronSelection = countPatElectrons.clone( src = 'selectedGenElectronCollection',
+                                                minNumber = 1,
+                                                maxNumber = 1
+                                              )
 
 ## set up the jet selection 
 leadingGenJetSelection = countPatJets.clone(src = 'selectedGenJetCollection',
