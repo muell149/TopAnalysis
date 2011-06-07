@@ -20,6 +20,9 @@ DEFINE_FWK_MODULE(MuonJetOverlapSelector);
 #include "TopAnalysis/TopFilter/plugins/JetOverlapEventFilter.h"
 DEFINE_FWK_MODULE(JetOverlapEventFilter);
 
+#include "TopAnalysis/TopFilter/plugins/SecondElectronFilter.h"
+DEFINE_FWK_MODULE(SecondElectronFilter);
+
 #include "TopAnalysis/TopFilter/plugins/SemiLeptonicTopJetSelector.h"
 DEFINE_FWK_MODULE(SemiLeptonicTopJetSelector);
 
