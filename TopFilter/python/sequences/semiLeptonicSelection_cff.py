@@ -59,6 +59,8 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
                                      vertexSelectedElectrons   *  
                                      looseElectrons            * 
                                      standAloneMuons           *
+                                     looseElectronsEJ          *   
+                                     tightElectronsEJ          *
                                      centralJets               *
                                      reliableJets              *
                                      goodJets                  *
@@ -82,8 +84,6 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
                                      goldenMuons               *
                                      looseMuons                *
                                      tightMuons                *
-                                     looseElectronsEJ          *   
-                                     tightElectronsEJ          *
                                      unconvTightElectronsEJ    *
                                      goodElectronsEJ           *
                                      trackCountingHighPurBJets *
