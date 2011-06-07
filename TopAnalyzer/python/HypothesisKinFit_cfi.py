@@ -7,6 +7,8 @@ analyzeHypothesisKinFit = cms.EDAnalyzer("HypothesisKinFitAnalyzer",
     analyze   = cms.PSet(
       ## hypothesis key on reco level
       hypoKey = cms.string("kKinFit"),
+      ## lepton flavour in semileptonic event: muon (default) or electron
+      lepton = cms.string("muon"),
       ## choose if you want to have a tree
       wantTree = cms.bool(False),
       ## number of jets considered in Kinematic fit

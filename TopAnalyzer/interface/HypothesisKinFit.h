@@ -54,6 +54,8 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
  private:
   /// class key of hypothesis
   std::string hypoKey_;
+  /// lepton flavour in semileptonic event: muon (default) or electron
+  std::string lepton_;
   /// bool to enable or disable ttree output
   bool wantTree;
   /// number of jets considered in Kinematic fit (needed for the classification of permutations)

@@ -16,9 +16,12 @@ HypothesisKinFit::HypothesisKinFit()
 /// default constructor for full fw
 HypothesisKinFit::HypothesisKinFit(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
+  lepton_ ( cfg.getParameter<std::string>("lepton") ),
   wantTree( cfg.getParameter<bool>("wantTree") ),
   maxNJets( cfg.getParameter<int> ("maxNJets") )
 {
+  /// check if input is correct
+  if (lepton_.compare("muon")!=0 && lepton_.compare("electron")!=0) throw edm::Exception( edm::errors::Configuration, "lepton specified incorrectly; has to be either 'muon' or 'electron'" ) ;
 }
 
 /// histogramm booking for fwlite
@@ -463,7 +466,8 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double distQBar=-1;
   double distQ2   =-1;
   double distQBar2=-1;
-  if( tops.isHypoValid(hypoKey_)&&tops.genEvent().isAvailable()&&tops.genEvent()->isSemiLeptonic(WDecay::kMuon)&&
+  if( tops.isHypoValid(hypoKey_)&&tops.genEvent().isAvailable()&&
+      ((tops.genEvent()->isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")==0) || (tops.genEvent()->isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0))&&
       tops.hadronicDecayB()&&tops.leptonicDecayB() ){
     // distance in dR of parton and assigned jet
     // reco jets KinFit
@@ -777,10 +781,12 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
        Fill the Pull Distributions for the reconstructed object(mu/nu/jets) kinematics (Relative to the MC Truth)
     **/
     // check existence and ttbar decay mode
-    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) ){
-      res::HelperJet  jetRes;
-      res::HelperMuon muonRes;
-      res::HelperMET  metRes;
+    if( tops.genEvent().isAvailable() && ((tops.genEvent()->isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")    ==0) || 
+                                          (tops.genEvent()->isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0)) ) {
+      res::HelperJet      jetRes;
+      res::HelperMuon     muonRes;
+      res::HelperElectron elecRes;
+      res::HelperMET      metRes;
       // hadronic b-quark from top 
       if( tops.hadronicDecayB() && tops.hadronicDecayB(hypoKey_) ){
 	double hadBPt  = tops.hadronicDecayB()->pt();
@@ -826,7 +832,7 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	hists_.find("lightQuarkPhi" )->second->Fill( deltaPhi(tops.hadronicDecayQuarkBar()->phi(), tops.hadronicDecayQuarkBar(hypoKey_)->phi())/jetRes.phi(lightQBarPt, lightQBarEta, res::HelperJet::kUds) );
       }
       // muon
-      if( tops.singleLepton() && tops.singleLepton(hypoKey_) ){
+      if( tops.singleLepton() && tops.singleLepton(hypoKey_) && lepton_.compare("muon")==0 ){
 	double muPt  = tops.singleLepton()->pt();
 	double muEta = tops.singleLepton()->eta();
 	// lepton pt
@@ -835,6 +841,17 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	hists_.find("leptonEta"     )->second->Fill( (muEta-tops.singleLepton(hypoKey_)->eta())/muonRes.eta(muPt, muEta) );
 	// lepton phi
 	hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton(hypoKey_)->phi())/muonRes.phi(muPt, muEta) );
+      }
+      // electron
+      if( tops.singleLepton() && tops.singleLepton(hypoKey_) && lepton_.compare("electron")==0 ){
+	double elPt  = tops.singleLepton()->pt();
+	double elEta = tops.singleLepton()->eta();
+	// lepton pt
+	hists_.find("leptonPt"      )->second->Fill( (elPt -tops.singleLepton(hypoKey_)->pt()) /elecRes.et (elPt, elEta) );
+	// lepton eta
+	hists_.find("leptonEta"     )->second->Fill( (elEta-tops.singleLepton(hypoKey_)->eta())/elecRes.eta(elPt, elEta) );
+	// lepton phi
+	hists_.find("leptonPhi"     )->second->Fill( deltaPhi(tops.singleLepton()->phi(), tops.singleLepton(hypoKey_)->phi())/elecRes.phi(elPt, elEta) );
       }
       // neurino
       if( tops.singleNeutrino() && tops.singleNeutrino(hypoKey_) ){
