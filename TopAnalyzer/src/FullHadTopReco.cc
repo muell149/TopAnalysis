@@ -1,3 +1,4 @@
+#include "TopAnalysis/TopAnalyzer/interface/TopAngles.h"
 #include "TopAnalysis/TopAnalyzer/interface/FullHadTopReco.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtFullHadEvtPartons.h"
 
@@ -176,6 +177,37 @@ void FullHadTopReco::book(edm::Service<TFileService>& fs)
   // angle between top quark and W boson from hypothesis
   bookVariable( fs, "topWAngleHypo", 315, 0. , M_PI , false );
 
+  // book angles off ttbar system
+  bookVariable( fs, "ttDetFrame"                          , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bbDetFrame"                          , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bbTtbarFrame"                        , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "WWTtbarFrame"                        , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "tBBranch1TtbarFrame"                 , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "tBBranch2TtbarFrame"                 , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bWBranch1TtbarFrame"                 , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bWBranch2TtbarFrame"                 , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "tWBranch1TopInTtbarFrameWInTopFrame" , 315, 0. , M_PI , useTree_ );	
+  bookVariable( fs, "tWBranch2TopInTtbarFrameWInTopFrame" , 315, 0. , M_PI , useTree_ );	
+  bookVariable( fs, "qQbarTopFrame"                       , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "qQbarDetFrame"                       , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "pPbarTopFrame"                       , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "pQbarTtbarFrame"                     , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "pQTtbarFrame"                        , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "pbarQbarTtbarFrame"                  , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "pbarQTtbarFrame"                     , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad1QTopFrame"                      , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad1QbarTopFrame"                   , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad1PTtbarFrame"                    , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad1PbarTtbarFrame"                 , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad2QTtbarFrame"                    , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad2QbarTtbarFrame"                 , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad2PTopFrame"                      , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "bhad2PbarTopFrame"                   , 315, 0. , M_PI , useTree_ );			
+  bookVariable( fs, "qInW1FrameW1InDetFrame"              , 315, 0. , M_PI , useTree_ );		
+  bookVariable( fs, "qbarInW1FrameW1InDetFrame"           , 315, 0. , M_PI , useTree_ );		
+  bookVariable( fs, "pInW2FrameW2InDetFrame"              , 315, 0. , M_PI , useTree_ ); 		
+  bookVariable( fs, "pbarInW2FrameW2InDetFrame"           , 315, 0. , M_PI , useTree_ );
+
 }
 
 // calculating theta* of W boson
@@ -275,6 +307,40 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
       fillValue("ttbarPtHypo_topMass", (tops.top(hypo_)->p4() + tops.topBar(hypo_)->p4()).pt(), weight);
     }
     
+    // calculate angles from the 4 momentum vectors
+    TopAngles angles = TopAngles::TopAngles(tops.b   (hypo_)->p4(), tops.lightQ(hypo_)->p4(), tops.lightQBar(hypo_)->p4(),
+					    tops.bBar(hypo_)->p4(), tops.lightP(hypo_)->p4(), tops.lightPBar(hypo_)->p4());
+
+    fillValue( "ttDetFrame"                         , angles.ttDetFrame()                          , weight );			
+    fillValue( "bbDetFrame"                         , angles.bbDetFrame()                          , weight );			
+    fillValue( "bbTtbarFrame"                       , angles.bbTtbarFrame()                        , weight );			
+    fillValue( "WWTtbarFrame"                       , angles.WWTtbarFrame()                        , weight );			
+    fillValue( "tBBranch1TtbarFrame"                , angles.tBBranch1TtbarFrame()                 , weight );			
+    fillValue( "tBBranch2TtbarFrame"                , angles.tBBranch2TtbarFrame()                 , weight );			
+    fillValue( "bWBranch1TtbarFrame"                , angles.bWBranch1TtbarFrame()                 , weight );			
+    fillValue( "bWBranch2TtbarFrame"                , angles.bWBranch2TtbarFrame()                 , weight );			
+    fillValue( "tWBranch1TopInTtbarFrameWInTopFrame", angles.tWBranch1TopInTtbarFrameWInTopFrame() , weight );	
+    fillValue( "tWBranch2TopInTtbarFrameWInTopFrame", angles.tWBranch2TopInTtbarFrameWInTopFrame() , weight );	
+    fillValue( "qQbarTopFrame"                      , angles.qQbarTopFrame()                       , weight );			
+    fillValue( "qQbarDetFrame"                      , angles.qQbarDetFrame()                       , weight );			
+    fillValue( "pPbarTopFrame"                      , angles.pPbarTopFrame()                       , weight );			
+    fillValue( "pQbarTtbarFrame"                    , angles.pQbarTtbarFrame()                     , weight );			
+    fillValue( "pQTtbarFrame"                       , angles.pQTtbarFrame()                        , weight );			
+    fillValue( "pbarQbarTtbarFrame"                 , angles.pbarQbarTtbarFrame()                  , weight );			
+    fillValue( "pbarQTtbarFrame"                    , angles.pbarQTtbarFrame()                     , weight );			
+    fillValue( "bhad1QTopFrame"                     , angles.bhad1QTopFrame()                      , weight );			
+    fillValue( "bhad1QbarTopFrame"                  , angles.bhad1QbarTopFrame()                   , weight );			
+    fillValue( "bhad1PTtbarFrame"                   , angles.bhad1PTtbarFrame()                    , weight );			
+    fillValue( "bhad1PbarTtbarFrame"                , angles.bhad1PbarTtbarFrame()                 , weight );			
+    fillValue( "bhad2QTtbarFrame"                   , angles.bhad2QTtbarFrame()                    , weight );			
+    fillValue( "bhad2QbarTtbarFrame"                , angles.bhad2QbarTtbarFrame()                 , weight );			
+    fillValue( "bhad2PTopFrame"                     , angles.bhad2PTopFrame()                      , weight );			
+    fillValue( "bhad2PbarTopFrame"                  , angles.bhad2PbarTopFrame()                   , weight );			
+    fillValue( "qInW1FrameW1InDetFrame"             , angles.qInW1FrameW1InDetFrame()              , weight );		
+    fillValue( "qbarInW1FrameW1InDetFrame"          , angles.qbarInW1FrameW1InDetFrame()           , weight );		
+    fillValue( "pInW2FrameW2InDetFrame"             , angles.pInW2FrameW2InDetFrame()              , weight ); 		
+    fillValue( "pbarInW2FrameW2InDetFrame"          , angles.pbarInW2FrameW2InDetFrame()           , weight );                
+
     // theta* of W boson of hypothesis
     double thetaStarPlus  = thetaStar(tops.wPlus (hypo_)->p4(), tops.lightQ(hypo_)->p4(), tops.lightQBar(hypo_)->p4());
     double thetaStarMinus = thetaStar(tops.wMinus(hypo_)->p4(), tops.lightP(hypo_)->p4(), tops.lightPBar(hypo_)->p4());
