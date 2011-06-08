@@ -620,7 +620,7 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   edm::Handle<double> multiJetMVADisc_h;
   event.getByLabel(MultiJetMVADiscSrc_, multiJetMVADisc_h);
   
-  edm::Handle<PileupSummaryInfo> PU_h;
+  edm::Handle<std::vector<PileupSummaryInfo> > PU_h;
   event.getByLabel(PUSrc_, PU_h);
   
   edm::Handle<std::vector<reco::Vertex> > vertecies_h;
@@ -1010,7 +1010,16 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   
   multiJetMVADisc = multiJetMVADisc_h.isValid() ? *multiJetMVADisc_h : -10.;
 
-  nPU = PU_h.isValid() ? PU_h->getPU_NumInteractions() : -1;
+  nPU = -1;
+
+  if(PU_h.isValid()){
+    for(std::vector<PileupSummaryInfo>::const_iterator iterPU = PU_h->begin(); iterPU != PU_h->end(); ++iterPU){  // vector size is 3
+      if(iterPU->getBunchCrossing()==0){ // -1: previous BX, 0: current BX,  1: next BX
+	nPU = iterPU->getPU_NumInteractions();
+	break;
+      }
+    }
+  }
 
   nVertex = vertecies_h.isValid() ? vertecies_h->size() : -1;
 

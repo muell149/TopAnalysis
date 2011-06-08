@@ -14,7 +14,7 @@ writeFullHadTree = cms.EDAnalyzer("FullHadTreeWriter",
    ## primary vertex info
    VertexSrc = cms.InputTag("goodOfflinePrimaryVertices"),
    ## weight from PU reweighting
-   PUWeightSrc = cms.InputTag("eventWeightPU"),
+   PUweightSrc = cms.InputTag("eventWeightPU"),
    ## weight of MC sample
    MCweight = cms.double(1.),
    ## information on b-tagging
