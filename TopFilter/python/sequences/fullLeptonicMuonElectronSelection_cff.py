@@ -52,14 +52,23 @@ cleanPatJets.checkOverlaps.muons.deltaR = 0.4
 cleanPatJets.checkOverlaps.muons.requireNoOverlaps = True
 
 cleanPatJets.checkOverlaps.electrons.src = 'cleanPatElectrons'
-cleanPatJets.checkOverlaps.electrons.preselection = cms.string( 'abs(eta) < 2.5'
-                                                                '& pt > 20.'
+cleanPatJets.checkOverlaps.electrons.preselection = cms.string( 'abs(eta) < 2.5 '
+                                                                '& pt > 20. '
                                                                 '& superCluster.energy > 15.'
                                                                 '& abs(dB) < 0.04'
-                                                                '& ( (electronID(\"simpleEleId90cIso\") = 5.)'
-                                                                '|   (electronID(\"simpleEleId90cIso\") = 7.) )'
-                                                                '& ( ( (superCluster.eta > 1.479) & (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et < 0.15)'
-                                                                '|   ( (superCluster.eta < 1.479) & (dr03TkSumPt()+max(0.,dr03EcalRecHitSumEt()-1.)+dr03HcalTowerSumEt())/et < 0.15 ) )'
+                                                                '& test_bit(electronID("simpleEleId90cIso"), 0) ' #id
+                                                                #'& test_bit(electronID(\"simpleEleId90cIso\"), 2) ' #cr
+                                                                
+                                                                #3x Conversion Rejection
+                                                                ' & abs(convDcot) > 0.02 '
+                                                                ' & abs(convDist) > 0.02 '
+                                                                ' & gsfTrack.trackerExpectedHitsInner.numberOfLostHits < 2 '
+
+                                                                #'& ( (electronID(\"simpleEleId90cIso\") = 5.)'
+                                                                #'|   (electronID(\"simpleEleId90cIso\") = 7.) )'
+                                                                '& ( ( (abs(superCluster.eta) > 1.479) & (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et < 0.15)'
+                                                                '   |( (abs(superCluster.eta) < 1.479) & (dr03TkSumPt()+max(0.,dr03EcalRecHitSumEt()-1.)+dr03HcalTowerSumEt())/et < 0.15 )'
+                                                                '  )'
                                                                 )
 
 cleanPatJets.checkOverlaps.electrons.deltaR = 0.4
@@ -132,10 +141,11 @@ onlyOneMuonSelection   = countPatMuons.clone(src = 'isolatedMuons',  minNumber =
 
 # Select I.D. only  -->  ( 1 || 3 || 5 || 7 )
 goodIdElectrons = selectedPatElectrons.clone( src = 'cleanPatElectrons',
-                                              cut = '(electronID(\"simpleEleId90cIso\")   = 1.)'
-                                                    '| (electronID(\"simpleEleId90cIso\") = 3.)'
-                                                    '| (electronID(\"simpleEleId90cIso\") = 5.)'
-                                                    '| (electronID(\"simpleEleId90cIso\") = 7.)'
+                                              cut = 'test_bit(electronID("simpleEleId90cIso"), 0)'
+                                              #cut = '(electronID(\"simpleEleId90cIso\")   = 1.)'
+                                                    #'| (electronID(\"simpleEleId90cIso\") = 3.)'
+                                                    #'| (electronID(\"simpleEleId90cIso\") = 5.)'
+                                                    #'| (electronID(\"simpleEleId90cIso\") = 7.)'
                                               )
 
 #goodIdElectrons = selectedPatElectrons.clone( src = 'cleanPatElectrons',
@@ -177,8 +187,8 @@ goodD0Electrons = selectedPatElectrons.clone( src = 'goodSCElectrons',
                                               )
 
 isolatedElectrons = selectedPatElectrons.clone( src = 'goodD0Electrons',
-                                                cut = '(   (superCluster.eta > 1.479) & (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et < 0.15 )'
-                                                      '| ( (superCluster.eta < 1.479) & (dr03TkSumPt()+max(0.,dr03EcalRecHitSumEt()-1.)+dr03HcalTowerSumEt())/et < 0.15 )'
+                                                cut = '(   (abs(superCluster.eta) > 1.479) & (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et < 0.15 )'
+                                                      '| ( (abs(superCluster.eta) < 1.479) & (dr03TkSumPt()+max(0.,dr03EcalRecHitSumEt()-1.)+dr03HcalTowerSumEt())/et < 0.15 )'
                                                 )
 
 ## exact one very tight selected tag electron
@@ -232,9 +242,9 @@ hardJets = selectedPatJets.clone( src = 'tightJets',
                                   )
 
 ## check for different btag properties
-trackCountingHighEffBJets = selectedPatJets.clone( src = 'hardJets',
+trackCountingHighEffBJetsLoose = selectedPatJets.clone( src = 'hardJets',
                                                    cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.7'
-                                                   #cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
+                                                   #cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3' medium wp
                                                    )
 
 simpleSecondaryVertexBJets = selectedPatJets.clone( src = 'hardJets',
@@ -246,8 +256,8 @@ goodIdJetPFSelection  = countPatJets.clone(src = 'goodIdJets',               min
 tightJetSelection     = countPatJets.clone(src = 'tightJets',                  minNumber = 1)
 oneHardJetPFSelection = countPatJets.clone(src = 'hardJets',                   minNumber = 1)
 twoHardJetPFSelection = countPatJets.clone(src = 'hardJets',                   minNumber = 2)
-bJetTCHSelection      = countPatJets.clone(src = 'trackCountingHighEffBJets',  minNumber = 1)
-twobJetTCHSelection   = countPatJets.clone(src = 'trackCountingHighEffBJets',  minNumber = 2)
+bJetTCHSelection      = countPatJets.clone(src = 'trackCountingHighEffBJetsLoose',  minNumber = 1)
+twobJetTCHSelection   = countPatJets.clone(src = 'trackCountingHighEffBJetsLoose',  minNumber = 2)
 bJetSSVSelection      = countPatJets.clone(src = 'simpleSecondaryVertexBJets', minNumber = 1)
 
 #-------------------------------------------------
@@ -286,27 +296,36 @@ oneHardMuonSelection = cms.Sequence( trackerMuons *
                                      hardMuonSelection
                                      )
 
-oneIsolatedMuonSelection = cms.Sequence( goodTrackMuons *
-                                         goodTrackMuonSelection *
-                                         goodD0Muons *
-                                         goodD0MuonSelection *
-                                         goodFitMuons *
-                                         goodFitMuonSelection *
+requireOneMuonAllCutsButIso = cms.Sequence(
+        oneHardMuonSelection *
+        goodTrackMuons *
+        goodTrackMuonSelection *
+        goodD0Muons *
+        goodD0MuonSelection *
+        goodFitMuons *
+        goodFitMuonSelection
+)
+
+oneIsolatedMuonSelection = cms.Sequence( 
                                          isolatedMuons *
                                          isolatedMuonSelection
                                          )
 
-oneIsolatedElectronSelection = cms.Sequence( goodIdElectronSelection *
-                                             goodCRElectrons *
-                                             goodCRElectronSelection *
-                                             centralElectrons *
-                                             centralElectronSelection *
-                                             highPtElectrons *
-                                             highPtElectronSelection *
-                                             goodSCElectrons *
-                                             goodSCElectronSelection *
-                                             goodD0Electrons *
-                                             goodD0ElectronSelection *
+requireOneElectronAllCutsButIso = cms.Sequence(
+    goodIdElectronSelection *
+    goodCRElectrons *
+    goodCRElectronSelection *
+    centralElectrons *
+    centralElectronSelection *
+    highPtElectrons *
+    highPtElectronSelection *
+    goodSCElectrons *
+    goodSCElectronSelection *
+    goodD0Electrons *
+    goodD0ElectronSelection
+)
+
+oneIsolatedElectronSelection = cms.Sequence(
                                              isolatedElectrons *
                                              isolatedElectronSelection
                                              )
@@ -315,12 +334,12 @@ leptonVetoSelection = cms.Sequence( onlyOneMuonSelection *
                                     onlyOneElectronSelection
                                     )
 
-onePFJetSelection = cms.Sequence( goodIdJetPFSelection *
+buildJets = cms.Sequence( goodIdJetPFSelection *
                                   tightJets *
                                   tightJetSelection *
-                                  hardJets *
-                                  oneHardJetPFSelection
-                                  )
+                                  hardJets)
+                                  
+onePFJetSelection = cms.Sequence(oneHardJetPFSelection)
 
 twoPFJetSelection = cms.Sequence( twoHardJetPFSelection )
 
@@ -328,7 +347,7 @@ pfMETSelection    = cms.Sequence( highMETs *
                                   metSelection
                                   )
 
-bTagSelection     = cms.Sequence( trackCountingHighEffBJets *
+bTagSelection     = cms.Sequence( trackCountingHighEffBJetsLoose *
                                   bJetTCHSelection
                                   #twobJetTCHSelection
                                   #simpleSecondaryVertexBJets *
