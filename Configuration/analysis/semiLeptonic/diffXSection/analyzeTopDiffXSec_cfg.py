@@ -42,6 +42,22 @@ if(not globals().has_key('decayChannel')):
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
 
+## enable/ disable PU event reweighting
+if(not globals().has_key('PUreweigthing')):
+    PUreweigthing =  False # False
+    # take care of data
+    if (not runningOnData == "MC"):
+        PUreweigthing = False
+print "apply PU reweighting?: ",PUreweigthing
+
+## enable/ disable btag SF event reweighting
+if(not globals().has_key('BtagReweigthing')):
+    BtagReweigthing =  False # False
+    # take care of data
+    if (not runningOnData == "MC"):
+        BtagReweigthing = False
+print "apply Btag reweighting?: ",BtagReweigthing
+
 # choose jet correction level shown in plots
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
@@ -88,8 +104,8 @@ if(not globals().has_key('eventFilter')):
 if(runningOnData=="MC"):
     print 'chosen ttbar filter:' , eventFilter
 
-# analyze muon quantities
-process = cms.Process("Selection")
+# differetial xSec Analysis
+process = cms.Process("topDifferentialXSec")
 
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -424,7 +440,12 @@ process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSe
                                        process.tightMuonQualityPreSel             +
                                        process.tightJetKinematicsPreSel           +
                                        process.tightJetQualityPreSel              )
-    
+
+process.monitorElectronKinematicsBeforeBtagging = cms.Sequence(process.tightElectronKinematics+
+                                                               process.tightElectronQuality   )
+process.monitorElectronKinematicsAfterBtagging  = cms.Sequence(process.tightElectronKinematicsTagged+
+                                                               process.tightElectronQualityTagged   )
+
 ## ---
 ##    configure Kinematic fit
 ## ---
@@ -595,6 +616,66 @@ else:
     process.kinFitGen           = cms.Sequence(process.dummy)
     process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
 
+        
+## ---
+##    MC PU reweighting
+## ---
+process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
+process.eventWeightPU.MCSampleFile = cms.string("../../../../TopUtils/data/MC_PUDist.root"         )
+process.eventWeightPU.DataFile     = cms.string("../../../../TopUtils/data/Data_PUDist_110527.root")
+PUweight=cms.InputTag("eventWeightPU")
+
+## ---
+##    MC B-tag reweighting
+## ---
+process.load("TopAnalysis.TopUtils.BTagSFEventWeight_cfi")
+process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
+process.bTagSFEventWeight.bTagAlgo=cms.string("SSVHEM")
+process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown possible;
+process.bTagSFEventWeight.filename= cms.string("../../../../Configuration/data/analyzeBTagEfficiency.root")
+process.bTagSFEventWeight.verbose=cms.int32(1)
+BtagWeight=cms.InputTag("bTagSFEventWeight")
+
+## ---
+##    collect all eventweights
+## ---
+process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
+weightlist=cms.VInputTag()
+if(PUreweigthing):
+    weightlist.append(PUweight)
+if(BtagReweigthing):
+    weightlist.append(BtagWeight)
+process.eventWeightMultiplier.eventWeightTags = weightlist
+process.eventWeightMultiplier.verbose=cms.int32(1)
+
+# use weight in single and double object analyzer modules
+# a) PU reweight
+modulelist= process.analyzers_().keys()
+if(runningOnData=="MC" and PUreweigthing):
+    # in all modules
+    print "all modules will use the PU event weights"
+    for module in modulelist:
+        getattr(process,module).weight=cms.InputTag("eventWeightPU")
+        
+# b) Btag reweight
+if(runningOnData=="MC" and BtagReweigthing):
+    # only in the modules after btagging
+    print
+    print "the following modules will use additionally the btag event weights:"
+    btagModules1 = process.monitorKinematicsAfterBtagging.moduleNames()
+    print btagModules1
+    for module1 in btagModules1:
+        getattr(process,module1).weight=cms.InputTag("eventWeightMultiplier")
+    btagModules2 = process.kinFit.moduleNames()
+    print btagModules2
+    for module2 in btagModules2:
+        getattr(process,module2).weight=cms.InputTag("eventWeightMultiplier")
+    btagModules3 = process.monitorElectronKinematicsAfterBtagging.moduleNames()
+    print btagModules3
+    for module3 in btagModules3:
+        getattr(process,module3).weight=cms.InputTag("eventWeightMultiplier")
+    print
+    
 ## ---
 ##    run the final sequences
 ## ---
@@ -606,6 +687,8 @@ process.p1 = cms.Path(
                       process.PVSelection                           *
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
+                      ## create PU event weights
+                      process.makeWeightsPU                         *
                       ## muon selection
                       process.muonCuts                              *
                       ## veto on additional leptons
@@ -617,6 +700,10 @@ process.p1 = cms.Path(
                       process.monitorKinematicsBeforeBtagging       *
                       ## b-tagging
                       process.btagging                              *
+                      ## create PU event weights
+                      process.bTagSFEventWeight                     *
+                      ## create combined weight
+                      process.eventWeightMultiplier                 *
                       ## monitor kinematics after b-tagging
                       process.monitorKinematicsAfterBtagging        *
                       ## apply kinematic fit
@@ -635,6 +722,8 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.PVSelection                           *
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
+                      ## create PU event weights
+                      process.makeWeightsPU                         *
                       ## loose selection (slightly above mu17TriCentralJet30 Trigger)
                       process.looseCuts                             *
                       ## basic monitoring
@@ -653,6 +742,8 @@ if(runningOnData=="MC"):
                           ## introduce some collections
                           process.isolatedGenLeptons                    *
                           process.semiLeptGenCollections                *
+                          ## create PU event weights
+                          process.makeWeightsPU                         *
                           ## investigate top reconstruction
                           process.kinFitGen
                           )
@@ -672,6 +763,8 @@ if(runningOnData=="MC"):
                               ## introduce some collections
                               process.isolatedGenLeptons                    *
                               process.semiLeptGenCollections                *
+                              ## create PU event weights
+                              process.makeWeightsPU                         *
                               ## muon selection
                               process.genMuonSelection                      *
                               ## jet selection
@@ -740,6 +833,7 @@ if(jetType=="particleFlow"):
 if(decayChannel=="electron"):
     # adpat trigger
     process.hltFilter.HLTPaths=["HLT_Ele17*"]
+    process.dummy.HLTPaths=["HLT_Ele17*"]
     # adapt gen filter
     process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.electron = True
     process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.muon= False
@@ -805,4 +899,22 @@ if(decayChannel=="electron"):
         # replace muon by electron in (remaining) kinfit analyzers
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
 
-        
+## possibly remove event reweighting
+allpaths  = process.paths_().keys()
+# Pile up
+if(not PUreweigthing or runningOnData=="data"):
+    print "PU event weight removed"
+    for path in allpaths:
+        getattr(process,path).remove( process.eventWeightPU )
+# Btag scale factor
+if(not BtagReweigthing or runningOnData=="data"):
+    print "btag event weight removed"
+    for path in allpaths:
+        getattr(process,path).remove( process.bTagSFEventWeight )
+# combined scale factor
+if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing) ):
+    print "no event weights are used at all!"
+    for path in allpaths:
+        getattr(process,path).remove( process.eventWeightMultiplier )
+
+
