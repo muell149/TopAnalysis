@@ -33,6 +33,12 @@ print "used trigger path: TriggerResults::"+options.triggerTag
 if(not globals().has_key('jetType')):
     jetType =  'particleFlow' # 'Calo'
 
+## run PF2PAT?
+## only possible for special pat tuples!!!
+if(not globals().has_key('pfToPAT')):
+    pfToPAT =  False #True 
+print "run PF2PAT?: ",pfToPAT," won't work if the file does not contain the necessary information!"
+
 ## choose the semileptonic decay channel (electron or muon)
 if(not globals().has_key('decayChannel')):
     decayChannel =  'muon' # 'electron'
@@ -116,6 +122,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
+    #/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v1/0dae6bcdda7c5ccfbbc9faffcd2374d5/patTuple_9_3_Igf.root'
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
@@ -146,7 +153,11 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#global tag:
+# a) 4_1:
 process.GlobalTag.globaltag = cms.string('START38_V14::All')
+# b) 4_2:
+#process.GlobalTag.globaltag = cms.string('START42_V12::All')
 
 ## Needed for redoing the ak5GenJets
 process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
@@ -173,7 +184,8 @@ process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+op
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI311X", HLTPaths = ["HLT_Mu9"], throw=False)
-    
+#process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
+ 
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 ## generator matching
@@ -355,7 +367,7 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
 ## ---
 ##    Set up selection for b-jet multiplicity
 ## ---
-process.btagging = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
+process.btagSelection = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
 
 ## kinematic contributions
 ## muon
@@ -675,7 +687,10 @@ if(runningOnData=="MC" and BtagReweigthing):
     for module3 in btagModules3:
         getattr(process,module3).weight=cms.InputTag("eventWeightMultiplier")
     print
-    
+
+
+process.semiLeptonicSelection.remove(process.trackMuons)
+
 ## ---
 ##    run the final sequences
 ## ---
@@ -699,7 +714,7 @@ process.p1 = cms.Path(
                       ## monitor kinematics before b-tagging
                       process.monitorKinematicsBeforeBtagging       *
                       ## b-tagging
-                      process.btagging                              *
+                      process.btagSelection                              *
                       ## create PU event weights
                       process.bTagSFEventWeight                     *
                       ## create combined weight
@@ -828,7 +843,6 @@ if(jetType=="particleFlow"):
         path.remove(process.tightLeadingJets)
         path.remove(process.tightBottomJets)
 
-
 ## switch to from muon to electron collections
 if(decayChannel=="electron"):
     # adpat trigger
@@ -899,21 +913,32 @@ if(decayChannel=="electron"):
         # replace muon by electron in (remaining) kinfit analyzers
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
 
+# switch to PF2PAT
+if(pfToPAT):
+    from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import *
+    process.load("Configuration.StandardSequences.Geometry_cff")
+    process.load("Configuration.StandardSequences.MagneticField_cff")
+    allpaths  = process.paths_().keys()
+    prependPF2PATSequence(process, allpaths, 'AK5PF')
+    # remove electron collections as long as id does not exist in the tuples
+    for path in allpaths:
+        #getattr(process,path).remove( process.looseElectronsEJ )
+        #getattr(process,path).remove( process.tightElectronsEJ )
+        #getattr(process,path).remove( process.unconvTightElectronsEJ )
+        #getattr(process,path).remove( process.goodElectronsEJ )
+        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETsAK5PF')
+        
 ## possibly remove event reweighting
-allpaths  = process.paths_().keys()
 # Pile up
 if(not PUreweigthing or runningOnData=="data"):
-    print "PU event weight removed"
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightPU )
 # Btag scale factor
 if(not BtagReweigthing or runningOnData=="data"):
-    print "btag event weight removed"
     for path in allpaths:
         getattr(process,path).remove( process.bTagSFEventWeight )
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing) ):
-    print "no event weights are used at all!"
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightMultiplier )
 
