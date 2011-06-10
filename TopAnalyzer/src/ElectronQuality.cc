@@ -40,19 +40,19 @@ ElectronQuality::book()
   hists_["sigmaIetaIeta"    ] = new TH1F( "sigmaIetaIeta"    ,  "sigmaIetaIeta"    ,   100,  0. ,  0.3  );
   // lines below added for electron + jets reference selection 2010/2011
   // eta of supercluster
-  hists_["etaSC"            ] = new TH1F( "etaSC"            ,  "etaSC"            ,    35, -3.5,  3.5  );
+  hists_["etaSC"            ] = new TH1F( "etaSC"            ,  "etaSC"            ,   700, -3.5,  3.5  );
   // dB
-  hists_["dB"               ] = new TH1F( "dB"               ,  "dB"               ,   200,  0. ,  1.   );
+  hists_["dB"               ] = new TH1F( "dB"               ,  "dB"               ,   100,  0. ,  0.1  );
   // electron ID 
-  hists_["simpleEleId70cIso"] = new TH1F( "simpleEleId70cIso",  "simpleEleId70cIso",    10,  0. ,   10. ); 
+  hists_["simpleEleId70cIso"] = new TH1F( "simpleEleId70cIso",  "simpleEleId70cIso",    10, -0.5,  9.5  ); 
   // electron ID
-  hists_["simpleEleId95cIso"] = new TH1F( "simpleEleId95cIso",  "simpleEleId95cIso",    10,  0. ,   10. ); 
+  hists_["simpleEleId95cIso"] = new TH1F( "simpleEleId95cIso",  "simpleEleId95cIso",    10, -0.5,  9.5  ); 
   // nHitsInner
-  hists_["nHitsInner"       ] = new TH1F( "nHitsInner"       ,  "nHitsInner"       ,    35, -0.5,  34.5 );
+  hists_["nHitsInner"       ] = new TH1F( "nHitsInner"       ,  "nHitsInner"       ,    35, -0.5, 34.5  );
   // convDcot
-  hists_["convDcot"         ] = new TH1F( "convDcot"         ,  "convDcot"         ,   200,  0. ,    1. );
+  hists_["convDcot"         ] = new TH1F( "convDcot"         ,  "convDcot"         ,   200,  0. ,  1.   );
   // convDist
-  hists_["convDist"         ] = new TH1F( "convDist"         ,  "convDist"         ,   200,  0. ,    1. );
+  hists_["convDist"         ] = new TH1F( "convDist"         ,  "convDist"         ,   200,  0. ,  1.   );
 }
 
 
@@ -90,13 +90,13 @@ ElectronQuality::book(edm::Service<TFileService>& fs)
   //  hists_["norm_"   ] = fs->make<TH1F>( "norm_"    ,  "norm_"    ,    1,   0.,   1. );
 
   // eta of supercluster
-  hists_["etaSC"            ] = fs->make<TH1F>( "etaSC"            ,  "etaSC"            ,    35, -3.5,  3.5  );
+  hists_["etaSC"            ] = fs->make<TH1F>( "etaSC"            ,  "etaSC"            ,   700, -3.5,  3.5  );
   // dB
-  hists_["dB"               ] = fs->make<TH1F>( "dB"               ,  "dB"               ,   200,  0. ,  1.   );
+  hists_["dB"               ] = fs->make<TH1F>( "dB"               ,  "dB"               ,   100,  0. ,   0.1 );
   // electron ID 
-  hists_["simpleEleId70cIso"] = fs->make<TH1F>( "simpleEleId70cIso",  "simpleEleId70cIso",    10,  0. ,   10. ); 
+  hists_["simpleEleId70cIso"] = fs->make<TH1F>( "simpleEleId70cIso",  "simpleEleId70cIso",    10, -0.5,   9.5 ); 
   // electron ID
-  hists_["simpleEleId95cIso"] = fs->make<TH1F>( "simpleEleId95cIso",  "simpleEleId95cIso",    10,  0. ,   10. ); 
+  hists_["simpleEleId95cIso"] = fs->make<TH1F>( "simpleEleId95cIso",  "simpleEleId95cIso",    10, -0.5 ,  9.5 ); 
   // nHitsInner
   hists_["nHitsInner"       ] = fs->make<TH1F>( "nHitsInner"       ,  "nHitsInner"       ,    35, -0.5,  34.5 );
   // convDcot
