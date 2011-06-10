@@ -39,7 +39,7 @@ selectedGenWMuons     = selectedGenParticles.clone(src = 'simpleGenWMuons',
                                                    cut = 'abs(eta) < 2.1 & pt > 20.')
 
 selectedGenWElectrons = selectedGenParticles.clone(src = 'simpleGenWElectrons',
-                                                   cut = 'abs(eta) < 2.1 & pt > 30.')
+                                                   cut = 'abs(eta) < 2.5 & pt > 30.')
 
 selectedGenWTaus      = selectedGenParticles.clone(src = 'simpleGenWTaus',
                                                    cut = 'abs(eta) < 2.1 & pt > 20.')
@@ -52,7 +52,7 @@ selectedGenMuonCollection = selectedGenParticles.clone(src = 'isolatedGenMuons',
                                                        cut = 'abs(eta) < 2.1 & pt > 20.')
 
 selectedGenElectronCollection = selectedGenParticles.clone(src = 'isolatedGenElectrons',
-                                                       cut = 'abs(eta) < 2.1 & pt > 30.')
+                                                       cut = 'abs(eta) < 2.5 & pt > 30.')
 
 semiLeptGenCollections = cms.Sequence(selectedGenMuonCollection     *
 				      selectedGenElectronCollection *
