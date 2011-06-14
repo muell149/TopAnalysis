@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=191.0, bool save=true, unsigned int verbose=0){
+void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, unsigned int verbose=0){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -330,7 +330,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191.0, bool save=true, un
 	      // save canvas as eps
 	      int initialIgnoreLevel=gErrorIgnoreLevel;
 	      if(verbose==0) gErrorIgnoreLevel=kWarning;
-	      if(save) relUnCertaintyCanvas->Print(outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin)+".eps");
+	      if(save){
+		relUnCertaintyCanvas->Print(outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin)+".eps");
+		relUnCertaintyCanvas->Print(outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin)+".png");
+	      }
 	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      // delete canvas
 	      delete relUnCertaintyCanvas;
@@ -427,7 +430,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191.0, bool save=true, un
 	      TString AN="AN-10-090";
 	      if(luminosity>50) AN="AN-10-091";
 	      DrawLabel(AN                      , 0.06, 0.3 , 0.5 , 0.4 , 0.4);
-	      DrawLabel(dataSample+" data, "+getTStringFromInt((int)luminosity)+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.4);
+	      DrawLabel(dataSample+" data, "+getTStringFromInt(roundToInt(luminosity))+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.4);
 
 	      canvas=(TCanvas*)canvas2->Clone();
 	    }
@@ -444,8 +447,11 @@ void combineTopDiffXSecUncertainties(double luminosity=191.0, bool save=true, un
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
 	    // a) within rootFile
 	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
-	    // b) as eps
-	    if(save) canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".eps");
+	    // b) as eps and png
+	    if(save){
+	      canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".eps");
+	      canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".png");
+	    }
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	}

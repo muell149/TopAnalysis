@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
-			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
+void analyzeHypothesisKinFit(double luminosity = 35.9, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root")
+//TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
 {
   //  ---
   //     name conventions
@@ -658,13 +658,13 @@ void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int sy
   // branching ratio
   // careful: the xSec here needs to be 
   // consistent with the one in lumiweight()
-  double BR=NGen/(157.5*luminosity);
+  double BR=NGen*1.0/(157.5*luminosity);
   //  double BR2=12.0/81.0;
   // calculate xSec
   double xSec= ( Ndata-NBG ) / ( eff*A*luminosity*BR );
   double sigmaxSec = sqrt( Ndata ) / ( eff*A*luminosity*BR );
   // text output
-  if(verbose>0&&systematicVariation==sysNo){ 
+  //  if(verbose>0){ 
     std::cout << std::endl;
     std::cout << "systematic variation:" << sysLabel(systematicVariation) << std::endl;
     std::cout << "lumi[pb]:" << luminosity << std::endl;
@@ -675,7 +675,7 @@ void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int sy
     std::cout << "BR MC: "  << BR    << std::endl;
     std::cout << "total inclusive cross section[pb]: ";
     std::cout << xSec << " +/- " << sigmaxSec << "(stat.)" << std::endl;
-  }
+    //  }
   // create histo
   TString inclName = "xSec/inclusive";
   histo_[inclName][kData] = new TH1F( "inclusivekData", "inclusivekData", 1, 0., 1.0);
@@ -895,7 +895,7 @@ void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int sy
       if(verbose==0) gErrorIgnoreLevel=kWarning;
       // a) as pdf
       saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
-      // b) as eps
+      // b) as eps and png
       for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
 	TString saveToFolder=outputFolder;
 	TString title=(plotCanvas_[idx])->GetTitle();
@@ -908,6 +908,7 @@ void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int sy
 	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
 	if(!title.Contains("canv")){
 	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps"); 
+	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".png");
 	}
       }
     }

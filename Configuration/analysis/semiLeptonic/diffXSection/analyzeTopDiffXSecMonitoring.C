@@ -578,9 +578,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // saving
   // ---
   if(save){
-    // pdf and eps
+    // pdf, eps and png
     if(verbose==0) gErrorIgnoreLevel=kWarning;
-    saveCanvas(plotCanvas_, outputFolder, pdfName);
+    saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
+    for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
+      TString title=(TString)(plotCanvas_[idx])->GetTitle();
+      if(!title.Contains("canv")){
+	plotCanvas_[idx]->Print(outputFolder+title+".eps"); 
+	plotCanvas_[idx]->Print(outputFolder+title+".png");
+      }
+    }
     // root file
     if(verbose>0) std::cout << "will save into outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
