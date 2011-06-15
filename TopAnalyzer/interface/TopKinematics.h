@@ -38,7 +38,7 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   /// default constructor for generator level analysis in fw lite
   explicit TopKinematics();
   /// default constructor for reco level analysis in fw lite
-  explicit TopKinematics(const std::string& hypoKey, const bool& matchForStabilityAndPurity);
+  explicit TopKinematics(const std::string& hypoKey, const std::string& lepton, const bool& matchForStabilityAndPurity);
   /// default constructor for fwfull
   explicit TopKinematics(const edm::ParameterSet& configFile);
   /// default destructor
@@ -91,6 +91,8 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
  private:
   /// class key of hypothesis
   std::string hypoKey_;
+  /// lepton flavour in semileptonic event: muon (default) or electron
+  std::string lepton_;
   /// bool to decide whether to use a ttree 
   bool useTree_;
   /// apply matching for stability and purity or not

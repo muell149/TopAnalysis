@@ -7,6 +7,8 @@ analyzeTopGenKinematics = cms.EDAnalyzer("TopKinematicsGenAnalyzer",
     analyze   = cms.PSet(
       ## hypothesis key on reco level
       hypoKey = cms.string("None"),
+      ## lepton flavour in semileptonic event: muon (default) or electron
+      lepton = cms.string("muon"),
       ## draw 1D plots only for events with rec&&gen in the same bin for stability&purity determination?
       matchForStabilityAndPurity = cms.bool(False),
       ## choose whether to save the variables in a ttree
@@ -26,6 +28,8 @@ analyzeTopRecKinematics = cms.EDAnalyzer("TopKinematicsRecAnalyzer",
     analyze   = cms.PSet(
       ## hypothesis key on reco level
       hypoKey = cms.string("kGenMatch"),
+      ## lepton flavour in semileptonic event: muon (default) or electron
+      lepton = cms.string("muon"),
       ## draw 1D plots only for events with rec&&gen in the same bin for stability&purity determination?
       matchForStabilityAndPurity = cms.bool(False),
       ## choose whether to save the variables in a ttree

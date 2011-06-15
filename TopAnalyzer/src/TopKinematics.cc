@@ -7,30 +7,40 @@
 
 
 /// default constructor for generator level analysis in fw lite
-TopKinematics::TopKinematics() : hypoKey_(""), matchForStabilityAndPurity_(false) 
+TopKinematics::TopKinematics() : hypoKey_(""), lepton_("muon"), matchForStabilityAndPurity_(false) 
 {
   tree = 0;
   useTree_=false;
   ttbarInsteadOfLepHadTop_ = false;
+
+  /// check if input is correct
+  if (lepton_.compare("muon")!=0 && lepton_.compare("electron")!=0) throw edm::Exception( edm::errors::Configuration, "lepton specified incorrectly; has to be either 'muon' or 'electron'" ) ;
 }
 
 /// default constructor for reco level analysis in fw lite
-TopKinematics::TopKinematics(const std::string& hypoKey, const bool& matchForStabilityAndPurity) : hypoKey_(hypoKey), matchForStabilityAndPurity_(matchForStabilityAndPurity)
+TopKinematics::TopKinematics(const std::string& hypoKey, const std::string& lepton, const bool& matchForStabilityAndPurity) : hypoKey_(hypoKey), lepton_(lepton), matchForStabilityAndPurity_(matchForStabilityAndPurity)
 {
   tree = 0;
   useTree_=false;
   ttbarInsteadOfLepHadTop_ = false;
+
+  /// check if input is correct
+  if (lepton_.compare("muon")!=0 && lepton_.compare("electron")!=0) throw edm::Exception( edm::errors::Configuration, "lepton specified incorrectly; has to be either 'muon' or 'electron'" ) ;
 }
 
 /// default constructor for full fw
 TopKinematics::TopKinematics(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
+  lepton_ ( cfg.getParameter<std::string>("lepton")  ),
   useTree_( cfg.getParameter<bool>       ("useTree") ),
   matchForStabilityAndPurity_( cfg.getParameter<bool>("matchForStabilityAndPurity") ),
   ttbarInsteadOfLepHadTop_   ( cfg.getParameter<bool>("ttbarInsteadOfLepHadTop"   ) ),
   maxNJets( cfg.getParameter<int> ("maxNJets") )
 {
   tree = 0;
+  /// check if input is correct
+  if (lepton_.compare("muon")!=0 && lepton_.compare("electron")!=0) throw edm::Exception( edm::errors::Configuration, "lepton specified incorrectly; has to be either 'muon' or 'electron'" ) ;
+
 }
 
 /// histogramm booking for fwlite 
@@ -486,7 +496,10 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
 {
   // make sure to have a ttbar pair belonging to the semi-leptonic decay channel with 
   // a muon in the final state and neglect events where top decay is not via Vtb
-  if( tops.isSemiLeptonic(WDecay::kMuon) && tops.leptonicDecayB() && tops.hadronicDecayB() ){
+  if( ( (tops.isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")    ==0) || 
+        (tops.isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0)  ) 
+      && tops.leptonicDecayB() 
+      && tops.hadronicDecayB() ){
     // define leptonic/hadronic or positive/negative charged objects (B,W,t)
     bool switchLepAndHadTop = false;
     // if ttbarInsteadOfLepHadTop_ == true:
@@ -559,7 +572,10 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     bool oneDplotsFilled=false;
     // check if a generated ttbar semileptonic #mu event exists
     // neglect events where top decay is not via Vtb
-    if( tops.genEvent().isAvailable() && tops.genEvent()->isSemiLeptonic(WDecay::kMuon) && lepBRec && hadBRec ){
+    if( tops.genEvent().isAvailable() && 
+        ( (tops.genEvent()->isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")    ==0) || 
+          (tops.genEvent()->isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0) ) &&
+        lepBRec && hadBRec ){
       const reco::GenParticle *lepTopGen= switchLepAndHadTop ? tops.hadronicDecayTop() : tops.leptonicDecayTop();
       const reco::GenParticle *hadTopGen= switchLepAndHadTop ? tops.leptonicDecayTop() : tops.hadronicDecayTop();
       const reco::GenParticle *lepWGen  = switchLepAndHadTop ? tops.hadronicDecayW  () : tops.leptonicDecayW  ();
