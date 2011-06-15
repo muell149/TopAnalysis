@@ -93,6 +93,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                          "tightMuonQuality/hcalEn" ,
                          "tightMuonQuality/relIso" ,
                          "tightMuonQuality/matches",  			 
+                         // (ib) electron monitoring
+                         "tightElectronKinematics/n" ,
+                         "tightElectronKinematics/en" ,
+                         "tightElectronKinematics/et" ,
+                         "tightElectronKinematics/eta",
+                         "tightElectronKinematics/phi",
+                         "tightElectronQuality/etaSC"  ,
+                         "tightElectronQuality/dB"     ,
+                         "tightElectronQuality/simpleEleId70cIso", 
+                         "tightElectronQuality/nHitsInner",
+                         "tightElectronQuality/convDcot" ,
+                         "tightElectronQuality/convDist" ,
+                         "tightElectronQuality/relIso" ,
                          // (ii) jet monitoring
                          "tightJetKinematics/n"  ,
                          "tightJetKinematics/en" ,
@@ -143,6 +156,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                          "tightMuonKinematicsTagged/pt" ,
                          "tightMuonKinematicsTagged/eta",
                          "tightMuonKinematicsTagged/phi",
+			 // (ib) electron monitoring
+                         "tightElectronKinematicsTagged/et" ,
+                         "tightElectronKinematicsTagged/eta",
+                         "tightElectronKinematicsTagged/phi",
                          // (ii) jet monitoring
 			 "tightJetKinematicsTagged/n"  ,
 			 "tightJetKinematicsTagged/pt" ,
@@ -199,6 +216,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                              "E_{Hcal} (#mu)/events/1/1",
                              "relIso(#mu)/events/0/1",
                              "N_{matched #mu segments}(#mu)/events/0/1",
+                             // (ib) electron monitoring
+                             "N_{e}/events/0/1" ,
+                             "E(e)/events/0/2",
+                             "E_{t}(e)/events/0/1" ,
+                             "#eta(e)/events/0/5",
+                             "#phi(e)/events/0/5",
+                             "#eta(S.C.)/events/0/1"  ,
+                             "d_{xy} (e wrt. beamspot)/events/0/1"     ,
+                             "simpleEleId70cIso/events/0/1", 
+                             "nHitsInner(conv)/events/0/1",
+                             "convCot/events/0/5",
+                             "convDist/events/0/5" ,
+                             "relIso(e)/events/0/5" ,
                              // (ii) jet monitoring
                              "N_{jets}/events/1/1",
                              "E(jets)/jets/1/1",
@@ -249,6 +279,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                              "p_{t}(#mu)/events/0/2",
 		             "#eta(#mu)/events/0/10",
 		             "#phi(#mu)/events/0/10",
+			     // (ib) electron monitoring
+                             "E_{t}(e)/events/0/2",
+		             "#eta(e)/events/0/1",
+		             "#phi(e)/events/0/1",
                              // (ii) jet monitoring
                              "N_{jets}/events/1/1",
 			     "p_{t}(jets)/jets/1/2",
