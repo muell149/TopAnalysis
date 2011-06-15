@@ -24,6 +24,8 @@ class FWLiteSingleObjectAnalyzer : public FWLiteLooper {
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, int value);
   /// default contstructor for reco top type derived classes 
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const bool& matchForStabilityAndPurity);
+  /// default contstructor for reco top type derived classes 
+  explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const std::string& lepton, const bool& matchForStabilityAndPurity);
   /// default contstructor for resolution type derived classes 
   explicit FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, double matchDR, std::vector<double>& binsPt, std::vector<double>& binsEta, std::vector<double>& binsPhi);
   /// default destructor
@@ -79,6 +81,17 @@ template <typename Collection, typename Analyze>
 {
   // construct the common analyzer class
   analyze_ = new Analyze(hypoClass, matchForStabilityAndPurity);
+}
+
+/// default contstructor for reco top type derived classes 
+template <typename Collection, typename Analyze> 
+  FWLiteSingleObjectAnalyzer<Collection, Analyze>::FWLiteSingleObjectAnalyzer(const char* src, const char* wgt, bool useWgt, const std::string& hypoClass, const std::string& lepton, const bool& matchForStabilityAndPurity) : 
+  src_ ( src ),
+  wgt_ ( wgt ),
+  useWgt_ ( useWgt )
+{
+  // construct the common analyzer class
+  analyze_ = new Analyze(hypoClass, lepton, matchForStabilityAndPurity);
 }
 
 /// default contstructor for resolution type derived classes 

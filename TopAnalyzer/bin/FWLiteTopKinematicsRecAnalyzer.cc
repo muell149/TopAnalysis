@@ -22,7 +22,8 @@ int main(int argc, char* argv[])
 
   // define worker class
   std::string hypoKey("kGenMatch");
-  FWLiteTopKinematicsRecAnalyzer topana("ttSemiLepEvent", "eventWeight", true, hypoKey, false); 
+  std::string lepton("muon") ;
+  FWLiteTopKinematicsRecAnalyzer topana("ttSemiLepEvent", "eventWeight", true, hypoKey, lepton, false); 
   // configure
   topana.beginJob(cfgFile);
   // keep this! It's the event loop
