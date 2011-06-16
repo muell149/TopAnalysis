@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root")
+void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root", const std::string decayChannel = "unset")
 {
   //  ---
   //     name conventions
@@ -316,7 +316,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // ---
   //    open our standard analysis files
   // ---
-  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile);
+  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
   
   // ---
   //    loading histos
@@ -334,7 +334,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // save all histos from plotList_ that exist in files_ into 
   // histo_ and histo2_ and count total # of plots as Nplots
   if(verbose>0) std::cout << std::endl;
-  getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose);
+  getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel );
 
   // ---
   //    lumiweighting for choosen luminosity
@@ -342,7 +342,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation);
+  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
 
   // ---
   //    add single top channels and DiBoson contributions
@@ -352,7 +352,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // will be combined and saved in the histo_ and histo2_ map
   // reCreate: reCreate combined plots if they are already existing
   bool reCreate=true;
-  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate);
+  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
 
   // ---
   //    configure histograms
@@ -386,7 +386,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall")histo_[plotList_[plot]][sample]->SetNdivisions(816);
       }
       // b) 2D
-      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
+      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
     }
   }
 
@@ -434,12 +434,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 	bool TwoThousandElevenData=false;
 	if(luminosity>36.0) TwoThousandElevenData=true;
 	if(sample==kData){
-	  leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
-	  leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
+	  leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
+	  leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
 	}
 	else{
-	  leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample), "F");
-	  leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample), "F");
+	  leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	  leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
 	}
 	exit=true;
       }
@@ -466,7 +466,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // loop plots -> all 1D plots will become stacked plots
   if(verbose>1) std::cout << std::endl;
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    createStackPlot(plotList_, histo_, plot, N1Dplots, verbose);
+    createStackPlot(plotList_, histo_, plot, N1Dplots, verbose, decayChannel);
   }
   if(verbose>1) std::cout << std::endl;
 
@@ -489,7 +489,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
 	  if(verbose>0){
 	    std::cout << "plotting " << plotList_[plot];
-	    std::cout << " from sample " << sampleLabel(sample);
+	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
 	    std::cout << " to canvas " << canvasNumber << " ( ";
 	    std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
 	  }
@@ -578,7 +578,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 	plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample)); 
 	if(verbose>1){
 	  std::cout << "plotting " << plotList_[plot];
-	  std::cout << " from sample " << sampleLabel(sample);
+	  std::cout << " from sample " << sampleLabel(sample,decayChannel);
 	  std::cout << " to canvas " << canvasNumber  << " ( ";
 	  std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )"  << std::endl;
 	}

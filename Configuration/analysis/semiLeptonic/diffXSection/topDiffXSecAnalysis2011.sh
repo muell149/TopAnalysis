@@ -31,12 +31,15 @@
 ########################
 ## configure settings ##
 ########################
+# lepton flavour in semi leptonic decay
+decayChannel=\"muon\" # or \"electron\"
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=191.0
 ## dataset: 2010 or 2011
-$dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
 dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011_ElectronHad_160404-161312.root\"
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
 if [ $dataLuminosity2 -le 3600 ]
@@ -47,12 +50,12 @@ fi
 save=true
 ## detail level of output 
 ## 0: no output, 1: std output 2: output for debugging
-verbose=0
+verbose=0 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
-#maxSys=0
-maxSys=27
+maxSys=0
+#maxSys=27
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -108,7 +111,7 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './analyzeTopDiffXSecMonitoring.C+('$dataLuminosity', '$save', '$verbose', '$dataSample')'
+root -l -q -b './analyzeTopDiffXSecMonitoring.C+('$dataLuminosity', '$save', '$verbose', '$dataSample', '$decayChannel')'
 
 #####################################
 ## run migration macro for binning ##
@@ -163,7 +166,7 @@ do
       BEFORESYS=$(date +%s)
   fi
 ## run macro
-  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample')'
+  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
 done
 AFTERSYS=$(date +%s)
 

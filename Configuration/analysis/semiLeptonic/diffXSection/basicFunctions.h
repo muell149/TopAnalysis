@@ -93,7 +93,7 @@ TString sysLabel(unsigned int sys)
   return systematicVariationlabel;
 }
 
-double effSFAB(int sys=sysNo)
+double effSFAB(int sys=sysNo, std::string decayChannel="unset")
 {
   // this function returns the muon eff SF 
   // as derived from Z->mumu tag and probe method
@@ -105,8 +105,14 @@ double effSFAB(int sys=sysNo)
   // SF is returned
 
   // combined single muon SF Run A+B from tag and probe
-  double result = 0.964155;
-  if(newSpring11MC) result = 0.9581;
+  double result = -1.;
+  if (decayChannel.compare("muon")==0) {
+    result = 0.964155;
+    if(newSpring11MC) result = 0.9581;
+  } else if (decayChannel.compare("electron")==0) {
+    result = 1.0;                   // TO BE DERIVED
+    if(newSpring11MC) result = 1.0; // TO BE DERIVED
+  }
   // errors for the derived SF
   double errorUp   = 0.03*result;
   double errorDown = 0.03*result;
@@ -348,7 +354,7 @@ TString getTStringFromInt(int i)
   return (TString)result;
 }
 
-TString sampleLabel(unsigned int sample, bool TwoThousandEleven=false)
+TString sampleLabel(unsigned int sample, const std::string decayChannel, bool TwoThousandEleven=false)
 {
   // this function returns the name of the entered MC process
   // corresponding to the enumerator entry "sample" as defined in samples
@@ -359,7 +365,8 @@ TString sampleLabel(unsigned int sample, bool TwoThousandEleven=false)
   // create output
   TString MCprocess;
   // list all MC process/sample names
-  if(sample==kSig    ) MCprocess="t#bar{t} (#mu prompt)";
+  if(sample==kSig && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt)";
+  if(sample==kSig && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt)";
   if(sample==kBkg    ) MCprocess="t#bar{t} other";
   if(sample==kSTop   ) MCprocess="single top";
   if(sample==kSToptW ) MCprocess="single top tW";
@@ -445,7 +452,7 @@ void scaleByFactor(TH1F*& histo, const double scaleValue)
   }
 }
 
-double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
+double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, const std::string decayChannel)
 {
   // this function derives the lumiweight for every standard MC 
   // sample "sample" based on the theoretical cross section, the 
@@ -467,6 +474,11 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
   // valid luminosity entered?
   if(luminosity<=0){
     std::cout << "ERROR: chosen luminosity for lumiweight calculation is <= 0, no scaling will be done" << std::endl;
+    return 1.;
+  }
+  // valid decayChannel entered?
+  if(!(decayChannel.compare("muon")==0 || decayChannel.compare("electron")==0)){
+    std::cout << "ERROR: chosen decaychannel does not correspond to electron or muon, no scaling will be done" << std::endl;
     return 1.;
   }
   // b) define in/output for weight calculation
@@ -575,11 +587,14 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys)
     Nevents     =luminosity; // of 1.0 as data needs no weight
   }
   // d) calculate weight
+
   weight = luminosity / ( Nevents / crossSection );
   if(verbose>0){
-    std::cout << "sample: " << sampleLabel(sample) << std::endl;
+    std::cout << "sample: " << sampleLabel(sample,decayChannel) << std::endl;
     std::cout << "systematic var.: " << sysLabel(kSys) << std::endl;
   }
+  // GOSSIE FIXME WRONG diboson and QCD samples, now scaled to zero on purpose 
+  if (decayChannel.compare("electron")==0) { if(sample==kWW || sample==kWZ || sample==kZZ || sample==kQCD) { weight = 0. ; } }
   double weight2=weight;
   if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
   // e) systematic effects
@@ -670,7 +685,7 @@ TString getStringEntry(const TString inputTString, unsigned int entry=42, const 
   return result_[entry-1];
 }
 
-TString TopFilename(unsigned int sample, unsigned int sys)
+TString TopFilename(unsigned int sample, unsigned int sys, const std::string decayChannel)
 {
   // this function contains the basic convention for the MC 
   // .root files and returns the correct names for choosen sample "sample" 
@@ -679,7 +694,9 @@ TString TopFilename(unsigned int sample, unsigned int sys)
   // used functions: NONE
   // used enumerators: samples, systematicVariation 
 
-  TString fileName ="muonDiffXSec";
+  TString fileName = "decayChannel_undefined" ;
+  if (decayChannel.compare("muon")    ==0) fileName ="muonDiffXSec";
+  if (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
   // name of data file is given directly in the .C file
   if(sample==kData) return ""; 
   // standard MC filenames
@@ -757,7 +774,7 @@ void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder
   }
 }
 
-std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder, const unsigned int systematicVariation, const TString dataFile)
+std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder, const unsigned int systematicVariation, const TString dataFile, const std::string decayChannel)
 {
   // this function returns a map containing all existing .root in "inputFolder"
   // corresponding to the choosen systematic variation "systematicVariation"
@@ -773,7 +790,7 @@ std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder
   // loop samples
   for(int sample = kSig; sample<=kSToptW; sample++){
     TString fileName;
-    if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation);
+    if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
     if(sample==kData) fileName = dataFile; 
     // if file exists - save in map
     if((fileName!="no")&&(fileName!="")){ 
@@ -784,7 +801,7 @@ std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder
   return files_;
 }
 
-void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const unsigned int verbose=0)
+void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const unsigned int verbose=0, const std::string decayChannel = "unset" )
 {
   // this function searches for every plot listed in "plotList_" in all files listed in "files_",
   // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -822,7 +839,7 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
       for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
 	// check if file exists
 	// give warning if file does not exist
-	if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample) << " does not exist- continue and neglect this sample" << std::endl;
+	if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample,decayChannel) << " does not exist- continue and neglect this sample" << std::endl;
 	if(files_.count(sample)>0){
 	  // create plot container
 	  TH1* targetPlot;
@@ -858,7 +875,7 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
   }
 }
 
-void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const unsigned int verbose=1, const int systematicVariation=sysNo)
+void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const unsigned int verbose=1, const int systematicVariation=sysNo, const std::string decayChannel = "unset")
 {
   // this function scales every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
@@ -877,34 +894,34 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
       // a) 1D
       // check if 1D plot exists
       if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample) << ":" << std::endl;
+	if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample,decayChannel) << ":" << std::endl;
 	if(verbose>1) std::cout << "#events before weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
 	// scale MC samples to same luminosity
-	double weight = lumiweight(sample, luminosity, systematicVariation);
+	double weight = lumiweight(sample, luminosity, systematicVariation, decayChannel);
 	histo_[plotList_[plot]][sample]->Scale(weight);
 	if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	if(verbose>1) std::cout << "#events after weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
 	// apply eff. SF for MC
-	if(sample!=kData) histo_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation));
+	if(sample!=kData) histo_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation,decayChannel));
       }
       // b) 2D
       // check if 2D plot exists
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
-	if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample) << ":" << std::endl;
+	if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample,decayChannel) << ":" << std::endl;
 	if(verbose>1) std::cout << "#events before weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
 	// scale MC samples to same luminosity
-	double weight = lumiweight(sample, luminosity, systematicVariation);
+	double weight = lumiweight(sample, luminosity, systematicVariation, decayChannel);
 	histo2_[plotList_[plot]][sample]->Scale(weight);
 	if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	if(verbose>1) std::cout << "#events after weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
 	// apply eff. SF for MC
-	if(sample!=kData) histo2_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation));
+	if(sample!=kData) histo2_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation,decayChannel));
       }
     }
   }
 }
 
-void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1, bool reCreate=false)
+void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1, bool reCreate=false, const std::string decayChannel = "unset")
 {
   // this function creates plots for all diboson and all single 
   // top samples combined if the combined SingleTop and DiBoson 
@@ -938,7 +955,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
       if(reCreate==1) combinedplotExists=false;
       if((combinedplotExists==true)&&(verbose>0)){
 	std::cout << "combined plot " << plotList_[plot];
-	std::cout << " for sample " << sampleLabel(sample);
+	std::cout << " for sample " << sampleLabel(sample,decayChannel);
 	std::cout << " already exists, will keep this one" << std::endl;
       }
       if(!combinedplotExists){
@@ -953,7 +970,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
 	  if((subPlotExists==false)&&(verbose>0)){
 	    std::cout << "plot " << plotList_[plot];
 	    std::cout << " does not exist for subSample ";
-	    std::cout << sampleLabel(subSample) << std::endl;
+	    std::cout << sampleLabel(subSample,decayChannel) << std::endl;
 	  }
 	  if(subPlotExists){
 	    // add histo
@@ -972,7 +989,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
 	    // print out information 
 	    if(verbose>0){
 	      std::cout << "will add " << plotList_[plot];
-	      std::cout << " from " << sampleLabel(subSample) << std::endl;
+	      std::cout << " from " << sampleLabel(subSample,decayChannel) << std::endl;
 	    }
 	  }
 	}
@@ -981,7 +998,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
   }
 }
 		       
-void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const unsigned int verbose=1)
+void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const unsigned int verbose=1, const std::string decayChannel="muon")
 {
   // this function will transform the histogram "plotList_"["plot"] 
   // within "histo_" into stacked plots. 
@@ -998,7 +1015,7 @@ void createStackPlot(const std::vector<TString> plotList_, std::map< TString, st
       // check if previous plot also exists
       if(histo_[plotList_[plot]].count(sample+1)>0){
 	histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][sample+1]->Clone());
-	if(verbose>1) std::cout << "add "+plotList_[plot] << " plot for " << sampleLabel(sample) << " and " << sampleLabel(sample+1) << std::endl;
+	if(verbose>1) std::cout << "add "+plotList_[plot] << " plot for " << sampleLabel(sample,decayChannel) << " and " << sampleLabel(sample+1,decayChannel) << std::endl;
 	if(verbose>1) std::cout << "this new stacked plot contains now " <<  histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << " events" << std::endl;
       }
     }
