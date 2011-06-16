@@ -887,6 +887,7 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   prob    = -1.;
   chi2    = -1.;
   topMass = -1.;
+  ttMass  = -1.;
   comboTypeValue = 0;
 
   ptAsy    = -100.;
