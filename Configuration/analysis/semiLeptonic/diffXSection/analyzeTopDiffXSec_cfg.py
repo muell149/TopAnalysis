@@ -132,6 +132,7 @@ process.source = cms.Source("PoolSource",
     #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_21_1_JdU.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
+    #'/store/user/tpearson/TTJets_TuneD6T_7TeV-madgraph-tauola/SQWaT_PAT_416_fix/4a4fa1fac2c79aed96827b3552d647f0/SQWaT_PF2ATtuple_416_PFFastJet_9_1_aEu.root'
     )
 )
 
@@ -593,11 +594,11 @@ if(applyKinFit==True):
         ## case 1a): ttbar semileptonic mu-signal
         if(eventFilter=='signal only'):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                             process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
                                              process.analyzeHypoKinFit                       +
-                                             process.filterRecoKinFit                        +
                                              process.filterMatchKinFit
                                              )
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics          )
@@ -606,18 +607,18 @@ if(applyKinFit==True):
         ## case 1b): other MC
         else:
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                             process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
-                                             process.analyzeTopRecoKinematicsKinFit          +
-                                             process.filterRecoKinFit                        
+                                             process.analyzeTopRecoKinematicsKinFit          
                                              )
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
     ## case 2: data sample
     elif(runningOnData=="data"):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                         process.filterRecoKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFit          +
-                                         process.analyzeTopRecoKinematicsKinFitTopAntitop+
-                                         process.filterRecoKinFit                        
+                                         process.analyzeTopRecoKinematicsKinFitTopAntitop
                                          )
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -690,7 +691,7 @@ if(runningOnData=="MC" and BtagReweigthing):
 
 
 # this does not work for electrons
-if (decayChannel=="muon"):
+if (decayChannel=="electron"):
   process.semiLeptonicSelection.remove(process.trackMuons)
 
 ## ---
