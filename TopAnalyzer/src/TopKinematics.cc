@@ -486,6 +486,27 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "isotropy"         ); 
     bookVariable(fs, "C"                );
     bookVariable(fs, "D"                ); 
+    // parton truth value
+    // ttbar quantities
+    bookVariable(fs, "ttbarPtPartonTruth"    );
+    bookVariable(fs, "ttbarYPartonTruth"     );
+    bookVariable(fs, "ttbarPhiPartonTruth"   );
+    bookVariable(fs, "ttbarMassPartonTruth"  );
+    bookVariable(fs, "ttbarDelPhiPartonTruth");
+    bookVariable(fs, "ttbarDelYPartonTruth"  );
+    bookVariable(fs, "ttbarSumYPartonTruth"  );
+    bookVariable(fs, "ttbarHTPartonTruth"    );
+    // hadronic top quantities
+    bookVariable(fs, "topPtHadPartonTruth"  );
+    bookVariable(fs, "topYHadPartonTruth"   );
+    bookVariable(fs, "topPhiHadPartonTruth" );
+    bookVariable(fs, "hadTopMassPartonTruth");
+    // leptonic top quantities
+    bookVariable(fs, "topPtLepPartonTruth"  );
+    bookVariable(fs, "topYLepPartonTruth"   );  
+    bookVariable(fs, "topPhiLepPartonTruth" );
+    bookVariable(fs, "lepTopMassPartonTruth");
+
   }
 }
 
@@ -537,6 +558,29 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
 void
 TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
+  double charge    =-10;
+  double assignment=-10;
+  double genTtbarPt       =-10;
+  double genTtbarRapidity =-10;
+  double genTtbarPhi      =-10;
+  double genTtbarMass     =-10;
+  double genDeltaPhi      =-10;
+  double genDeltaRapidity =-10;
+  double sumRapidity      =-10;
+  double HTgen            =-10;
+  double hadTopGenPt      =-10;
+  double hadTopGenRapidity=-10;
+  double hadTopGenPhi     =-10;
+  double hadTopGenMass    =-10;
+  double lepTopGenPt      =-10;
+  double lepTopGenRapidity=-10;  
+  double lepTopGenPhi     =-10;
+  double lepTopGenMass    =-10;
+  double HTrec            =-10;
+  double prob             =-10;
+  double chi2             =-10;
+  double delChi2          =-10;
+
   // make sure to have a valid hypothesis on reconstruction level.
   if( tops.isHypoValid(hypoKey_) ){
     // define leptonic/hadronic or positive/negative charged objects (B,W,t)
@@ -555,17 +599,17 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     const reco::Candidate *hadBRec  = switchLepAndHadTop ? tops.leptonicDecayB  (hypoKey_) : tops.hadronicDecayB  (hypoKey_);
 
     // define reconstructed scalar sum of all jet pts
-    double HTrec = lepBRec->pt() + hadBRec->pt() + tops.hadronicDecayQuark(hypoKey_)->pt() + tops.hadronicDecayQuarkBar(hypoKey_)->pt();
+    HTrec = lepBRec->pt() + hadBRec->pt() + tops.hadronicDecayQuark(hypoKey_)->pt() + tops.hadronicDecayQuarkBar(hypoKey_)->pt();
     // if the kinFit hypothesis is valid, fill KinFit quantities 
     if(hypoKey_=="kKinFit"){
       // fit probability of the best fit hypothesis
-      fillValue( "prob", tops.fitProb(), weight );
+      prob=tops.fitProb();
       // chi2 of the best fit hypothesis
-      fillValue( "chi2", tops.fitChi2(), weight );
+      chi2= tops.fitChi2();
       // make sure that a second best fit hypothesis exists to be able to fill these plots
       if( tops.fitChi2(1) >= 0 ){
 	// delta chi2 between best and second best fit hyothesis
-	fillValue( "delChi2", tops.fitChi2(1)-tops.fitChi2(0), weight );
+	delChi2=tops.fitChi2(1)-tops.fitChi2(0);
       }
     }
     // create indicator if plots are already filled
@@ -583,7 +627,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       const reco::GenParticle *lepBGen  = switchLepAndHadTop ? tops.hadronicDecayB  () : tops.leptonicDecayB  (); 
       const reco::GenParticle *hadBGen  = switchLepAndHadTop ? tops.leptonicDecayB  () : tops.hadronicDecayB  ();
       // define generated scalar sum of all jet pts
-      double HTgen = lepBGen->pt() + hadBGen->pt() + tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
+      HTgen = lepBGen->pt() + hadBGen->pt() + tops.hadronicDecayQuark()->pt() + tops.hadronicDecayQuarkBar()->pt();
       /**
          fill 1D histos and N(gen&&rec)-histo for the determination of stability and purity
 	 if matchForStabilityAndPurity_ is true
@@ -599,6 +643,25 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       reco::Particle::LorentzVector genTtbar = hadTopGen->p4()+lepTopGen->p4();
       reco::Particle::LorentzVector recTtbar = hadTopRec->p4()+lepTopRec->p4();
  
+      /**
+         fill parton level truth tree
+      **/
+      genTtbarPt       = genTtbar.pt();
+      genTtbarRapidity = genTtbar.Rapidity();
+      genTtbarPhi      = genTtbar.phi();
+      genTtbarMass     = genTtbar.mass();
+      genDeltaPhi      = deltaPhi(lepTopGen->phi(), hadTopGen->phi());
+      genDeltaRapidity = lepTopGen->rapidity()-hadTopGen->rapidity();
+      sumRapidity      = lepTopGen->rapidity()+hadTopGen->rapidity();
+      hadTopGenPt      = hadTopGen->pt();
+      hadTopGenRapidity= hadTopGen->rapidity();
+      hadTopGenPhi     = hadTopGen->phi();
+      hadTopGenMass    = hadTopGen->mass();
+      lepTopGenPt      = lepTopGen->pt();
+      lepTopGenRapidity= lepTopGen->rapidity();
+      lepTopGenPhi     = lepTopGen->phi();
+      lepTopGenMass    = lepTopGen->mass();
+
       // fill pt correlation plot for ttbar pair
       corrs_.find("ttbarPt_"  )->second->Fill( genTtbar.pt()      , recTtbar.pt()       , weight );
       // fill y correlation plot for ttbar pair
@@ -718,7 +781,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // ---
     // no parton jet parton match exists
     if(tops.isHypoValid("kKinFit")&&(!tops.isHypoValid("kGenMatch"))){
-      fillValue("qAssignment", 9., weight);
+      assignment= 9.;
     }
     // if jet parton match exists:
     if(tops.isHypoValid("kKinFit")&& tops.isHypoValid("kGenMatch")){
@@ -732,7 +795,6 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       int lightQIndexGen    = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ   ];
       int lightQBarIndexGen = tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar];
       // calculate permutation
-      double assignment=-1;
       // 0: nothing wrong
       if((lepBIndex==lepBIndexGen)&&(hadBIndex==hadBIndexGen)&&
 	 (((lightQIndex==lightQIndexGen   )&&(lightQBarIndex==lightQBarIndexGen))||
@@ -778,23 +840,48 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	      std::cout << "ERROR: number of conidered jets can not be smaller than 4" << std::endl;
 	      exit(1);
 	    }
+
+
 	    // 7: jet is missing
 	    if( genJets_.back()>maxNJets-1 ) assignment=7;
 	    // 8: wrong jet chosen (only valid if kinFitTtSemiLepEventHypothesis.maxNJets>4)
 	    // e.g. took the wrong 4 out of 5 jets 
-	    else assignment=8;
+	    else{
+	      if(assignment==-10) assignment=8;
+	    }
 	    break;
 	  }
 	}
       }
-      // fill permutation histogram
-      fillValue("qAssignment", assignment, weight);
     }
     // save lepton charge
-    fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge(), weight );
+    charge= ((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge();
     // fill the tree, if any variable should be put in
     if(treeVars_.size()) tree->Fill();
   }
+  // fill trees and histos
+  fillValue( "prob"       , prob      , weight);
+  fillValue( "chi2"       , chi2      , weight);
+  fillValue( "delChi2"    , delChi2   , weight);
+  fillValue( "qAssignment", assignment, weight);
+  fillValue( "lepCharge"  , charge    , weight);
+  fillValue( "ttbarPtPartonTruth"    , genTtbarPt      , weight );
+  fillValue( "ttbarYPartonTruth"     , genTtbarRapidity, weight );
+  fillValue( "ttbarPhiPartonTruth"   , genTtbarPhi     , weight );
+  fillValue( "ttbarMassPartonTruth"  , genTtbarMass    , weight );
+  fillValue( "ttbarDelPhiPartonTruth", genDeltaPhi     , weight );
+  fillValue( "ttbarDelYPartonTruth"  , genDeltaRapidity, weight );
+  fillValue( "ttbarSumYPartonTruth"  , sumRapidity     , weight );
+  fillValue( "ttbarHTPartonTruth"    , HTgen           , weight );
+  fillValue( "topPtHadPartonTruth"   , hadTopGenPt      , weight );
+  fillValue( "topYHadPartonTruth"    , hadTopGenRapidity, weight );
+  fillValue( "topPhiHadPartonTruth"  , hadTopGenPhi     , weight );
+  fillValue( "hadTopMassPartonTruth" , hadTopGenMass    , weight );
+  fillValue( "topPtLepPartonTruth"   , lepTopGenPt      , weight );
+  fillValue( "topYLepPartonTruth"    , lepTopGenRapidity, weight );  
+  fillValue( "topPhiLepPartonTruth"  , lepTopGenPhi     , weight );
+  fillValue( "lepTopMassPartonTruth" , lepTopGenMass    , weight );
+
 }
 
 /// histogram filling for kinematic 1D histos
