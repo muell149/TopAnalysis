@@ -13,7 +13,7 @@
 
    \brief   Plugin to fill histograms for the determination of tag and probe efficiencies
 
-   Add some more detailed documentation here...
+   Can be used for muons or electrons
 */
 
 class TagAndProbeAnalyzer : public edm::EDAnalyzer {
@@ -55,16 +55,18 @@ class TagAndProbeAnalyzer : public edm::EDAnalyzer {
   int nBinsEta_;
   int nBinsPhi_;
   int nBinsMult_;
+  int nBinsRelIso_;
   int nBinsMinDR_;
-  int nBinsMuMult_;
+  int nBinsLepMult_;
   /// in case of fixed bins: 1st vector entry=xlow, 2nd vector entry=xup (left and right edges of histo)
   /// in case of variable bins: vector of low-edges for each bin
   std::vector<double> binsPt_;
   std::vector<double> binsEta_;
   std::vector<double> binsPhi_;
   std::vector<double> binsMult_;
+  std::vector<double> binsRelIso_;
   std::vector<double> binsMinDR_;
-  std::vector<double> binsMuMult_;
+  std::vector<double> binsLepMult_;
 };
 
 inline

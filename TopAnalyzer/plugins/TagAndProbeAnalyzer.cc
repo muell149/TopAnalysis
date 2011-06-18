@@ -9,6 +9,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "TopAnalysis/TopAnalyzer/plugins/TagAndProbeAnalyzer.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+
 
 /// default constructor
 TagAndProbeAnalyzer::TagAndProbeAnalyzer(const edm::ParameterSet& cfg):
@@ -22,14 +24,16 @@ TagAndProbeAnalyzer::TagAndProbeAnalyzer(const edm::ParameterSet& cfg):
   nBinsEta_(cfg.getParameter<int>("nBinsEta")),
   nBinsPhi_(cfg.getParameter<int>("nBinsPhi")),
   nBinsMult_(cfg.getParameter<int>("nBinsMult")),
+  nBinsRelIso_(cfg.getParameter<int>("nBinsRelIso")),
   nBinsMinDR_(cfg.getParameter<int>("nBinsMinDR")),
-  nBinsMuMult_(cfg.getParameter<int>("nBinsMuMult")),
+  nBinsLepMult_(cfg.getParameter<int>("nBinsLepMult")),
   binsPt_(cfg.getParameter<std::vector<double> >("binsPt")),
   binsEta_(cfg.getParameter<std::vector<double> >("binsEta")),
   binsPhi_(cfg.getParameter<std::vector<double> >("binsPhi")),
   binsMult_(cfg.getParameter<std::vector<double> >("binsMult")),
+  binsRelIso_(cfg.getParameter<std::vector<double> >("binsRelIso")),
   binsMinDR_(cfg.getParameter<std::vector<double> >("binsMinDR")),
-  binsMuMult_(cfg.getParameter<std::vector<double> >("binsMuMult"))
+  binsLepMult_(cfg.getParameter<std::vector<double> >("binsLepMult"))
 {
 //  std::cout << "I'm in the contructor now!!!"  << std::endl;
 //  std::cout << "tests  value is : " << tests_  << std::endl;
@@ -60,36 +64,70 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
 
   //std::cout << "probes size: " << probes->size() << std::endl;
   //std::cout << "tests  size: " << tests ->size() << std::endl;
-  hists_.find("probeMuMult")->second->Fill(probes->size());
-  hists_.find("testMuMult")->second->Fill(tests->size() );
+  hists_.find("probeLepMult")->second->Fill(probes->size());
+  hists_.find("testLepMult")->second->Fill(tests->size() );
 
   for(edm::View<reco::Candidate>::const_iterator probe=probes->begin(); probe!=probes->end(); ++probe){
-    const pat::Muon* probeMuon = dynamic_cast<const pat::Muon*>(&*probe);
+    const pat::Muon*     probeMuon = dynamic_cast<const pat::Muon*>(&*probe);
+    const pat::Electron* probeElec = dynamic_cast<const pat::Electron*>(&*probe);
+    //     if(probeMuon) std::cout<<"probeMuon identified"<<std::endl;
+    //     else std::cout<<"NO probeMuon identified"<<std::endl;
+    //     if(probeElec) std::cout<<"probeElec identified"<<std::endl;
+    //     else std::cout<<"NO probeElec identified"<<std::endl;
+    double relIso = -1.;
+    if(probeMuon) relIso = (probeMuon->trackIso() + probeMuon->caloIso()) / probeMuon->pt();
+    if(probeElec) relIso = (probeElec->dr03TkSumPt() + probeElec->dr03EcalRecHitSumEt()
+	  + probeElec->dr03HcalTowerSumEt() ) / probeElec->et();
+
     if(fabs(probe->eta())<etaCut_) hists_.find("probePt"   )->second->Fill( probe->pt () );
     if(probe->pt()>ptCut_)         hists_.find("probeEta"  )->second->Fill( probe->eta() );
     if(probe->pt()>ptCut_ && fabs(probe->eta())<etaCut_) {
                                    hists_.find("probePhi"  )->second->Fill( probe->phi() );
                                    hists_.find("probeMult" )->second->Fill( jets->size() );
+				   hists_.find("probeRelIso" )->second->Fill( relIso );
                                    hists_.find("probeMinDR")->second->Fill( minDR(jets->begin(), jets->end(), probe) );
                                    hists_.find("probeControl"   )->second->Fill(1);
     }
 
+//     for(edm::View<reco::Candidate>::const_iterator test=tests->begin(); test!=tests->end(); ++test){
+//       const pat::Muon*     testMuon = dynamic_cast<const pat::Muon*>(&*test);
+//       const pat::Electron* testElec = dynamic_cast<const pat::Electron*>(&*test);
+//       if(testMuon->originalObjectRef()==probeMuon->originalObjectRef()){
+// 	if(fabs(test->eta())<etaCut_) hists_.find("testPt"   )->second->Fill( test->pt ()  );
+// 	if(test->pt()>ptCut_)         hists_.find("testEta"  )->second->Fill( test->eta()  );
+// 	if(test->pt()>ptCut_ && fabs(test->eta())<etaCut_) {
+//                                        hists_.find("testPhi"  )->second->Fill( test->phi()  );
+// 	                               hists_.find("testMult" )->second->Fill( jets->size() );
+// 				       hists_.find("testRelIso" )->second->Fill( (testMuon->trackIso()+testMuon->caloIso())/testMuon->pt() );
+// 	                               hists_.find("testMinDR")->second->Fill(  minDR(jets->begin(), jets->end(), test) );
+// 	                               hists_.find("testControl"   )->second->Fill(1);
+//          }
+// 	// stop iterating once the probe candidate is found
+// 	break;
+//       } 
+//     }
+  }
+  
     for(edm::View<reco::Candidate>::const_iterator test=tests->begin(); test!=tests->end(); ++test){
-      const pat::Muon* testMuon = dynamic_cast<const pat::Muon*>(&*test);
-      if(testMuon->originalObjectRef()==probeMuon->originalObjectRef()){
+      const pat::Muon*     testMuon = dynamic_cast<const pat::Muon*>(&*test);
+      const pat::Electron* testElec = dynamic_cast<const pat::Electron*>(&*test);
+      double relIso = -1.;
+      if(testMuon) relIso = (testMuon->trackIso() + testMuon->caloIso()) / testMuon->pt();
+      if(testElec) relIso = (testElec->dr03TkSumPt() + testElec->dr03EcalRecHitSumEt()
+	    + testElec->dr03HcalTowerSumEt() ) / testElec->et();
+      
 	if(fabs(test->eta())<etaCut_) hists_.find("testPt"   )->second->Fill( test->pt ()  );
 	if(test->pt()>ptCut_)         hists_.find("testEta"  )->second->Fill( test->eta()  );
 	if(test->pt()>ptCut_ && fabs(test->eta())<etaCut_) {
                                        hists_.find("testPhi"  )->second->Fill( test->phi()  );
 	                               hists_.find("testMult" )->second->Fill( jets->size() );
+				       hists_.find("testRelIso" )->second->Fill( relIso );
 	                               hists_.find("testMinDR")->second->Fill(  minDR(jets->begin(), jets->end(), test) );
 	                               hists_.find("testControl"   )->second->Fill(1);
-         }
-	// stop iterating once the probe candidate is found
-	break;
-      } 
+         } 
     }
-  }
+  
+  
   
   // calculate efficiency histos by test/probe, including binomial errors
   hists_.find("effControl"   )->second->Divide(hists_.find("testControl")->second, hists_.find("probeControl")->second,1,1,"B");
@@ -97,8 +135,9 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
   hists_.find("effEta"  )->second->Divide(hists_.find("testEta")->second, hists_.find("probeEta")->second,1,1,"B");
   hists_.find("effPhi"  )->second->Divide(hists_.find("testPhi")->second, hists_.find("probePhi")->second,1,1,"B");
   hists_.find("effMult" )->second->Divide(hists_.find("testMult")->second, hists_.find("probeMult" )->second,1,1,"B");
+  hists_.find("effRelIso" )->second->Divide(hists_.find("testRelIso")->second, hists_.find("probeRelIso" )->second,1,1,"B");
   hists_.find("effMinDR")->second->Divide(hists_.find("testMinDR")->second, hists_.find("probeMinDR" )->second,1,1,"B");
-  hists_.find("effMuMult" )->second->Divide(hists_.find("testMuMult")->second, hists_.find("probeMuMult" )->second,1,1,"B");
+  hists_.find("effLepMult" )->second->Divide(hists_.find("testLepMult")->second, hists_.find("probeLepMult" )->second,1,1,"B");
 }
 
 /// ...
@@ -178,6 +217,21 @@ TagAndProbeAnalyzer::beginJob()
   hists_["effMult"      ] = fs->make<TH1F>( "effMult"      , "effMult"      ,  nBinsMult_,    binsMult_.at(0), binsMult_.at(1) );
  }
  else std::cout<<"Unable to book Mult histogram. Bins not well-defined."<<std::endl;
+ /// RelIso (jet multiplicity)
+ /// variable binning
+ if(nBinsRelIso_==-1) {
+   hists_["probeRelIso"    ] = fs->make<TH1F>( "probeRelIso"    , "probeRelIso"    ,  binsRelIso_.size()-1,     &binsRelIso_[0] );
+   hists_["testRelIso"     ] = fs->make<TH1F>( "testRelIso"     , "testRelIso"     ,  binsRelIso_.size()-1,     &binsRelIso_[0] );
+   hists_["effRelIso"      ] = fs->make<TH1F>( "effRelIso"      , "effRelIso"      ,  binsRelIso_.size()-1,     &binsRelIso_[0] );
+  
+ }
+ /// fixed binning
+ else if (nBinsRelIso_>0 && binsRelIso_.size()==2) {
+   hists_["probeRelIso"    ] = fs->make<TH1F>( "probeRelIso"    , "probeRelIso"    ,  nBinsRelIso_,    binsRelIso_.at(0), binsRelIso_.at(1) );
+   hists_["testRelIso"     ] = fs->make<TH1F>( "testRelIso"     , "testRelIso"     ,  nBinsRelIso_,    binsRelIso_.at(0), binsRelIso_.at(1) );
+   hists_["effRelIso"      ] = fs->make<TH1F>( "effRelIso"      , "effRelIso"      ,  nBinsRelIso_,    binsRelIso_.at(0), binsRelIso_.at(1) );
+ }
+ else std::cout<<"Unable to book RelIso histogram. Bins not well-defined."<<std::endl;
  /// MinDR
  /// variable binning
  if(nBinsMinDR_==-1) {
@@ -192,29 +246,30 @@ TagAndProbeAnalyzer::beginJob()
   hists_["effMinDR"      ] = fs->make<TH1F>( "effMinDR"      , "effMinDR"      ,  nBinsMinDR_,    binsMinDR_.at(0), binsMinDR_.at(1) );
  }
  else std::cout<<"Unable to book MinDR histogram. Bins not well-defined."<<std::endl;
- /// MuMult
+ /// LepMult
  /// variable binning
- if(nBinsMuMult_==-1) {
-  hists_["probeMuMult"    ] = fs->make<TH1F>( "probeMuMult"    , "probeMuMult"    ,  binsMuMult_.size()-1,     &binsMuMult_[0] );
-  hists_["testMuMult"     ] = fs->make<TH1F>( "testMuMult"     , "testMuMult"     ,  binsMuMult_.size()-1,     &binsMuMult_[0] );
-  hists_["effMuMult"      ] = fs->make<TH1F>( "effMuMult"      , "effMuMult"      ,  binsMuMult_.size()-1,     &binsMuMult_[0] );
+ if(nBinsLepMult_==-1) {
+  hists_["probeLepMult"    ] = fs->make<TH1F>( "probeLepMult"    , "probeLepMult"    ,  binsLepMult_.size()-1,     &binsLepMult_[0] );
+  hists_["testLepMult"     ] = fs->make<TH1F>( "testLepMult"     , "testLepMult"     ,  binsLepMult_.size()-1,     &binsLepMult_[0] );
+  hists_["effLepMult"      ] = fs->make<TH1F>( "effLepMult"      , "effLepMult"      ,  binsLepMult_.size()-1,     &binsLepMult_[0] );
  }
  /// fixed binning
- else if (nBinsMuMult_>0 && binsMuMult_.size()==2) {
-  hists_["probeMuMult"    ] = fs->make<TH1F>( "probeMuMult"    , "probeMuMult"    ,  nBinsMuMult_,    binsMuMult_.at(0), binsMuMult_.at(1) );
-  hists_["testMuMult"     ] = fs->make<TH1F>( "testMuMult"     , "testMuMult"     ,  nBinsMuMult_,    binsMuMult_.at(0), binsMuMult_.at(1) );
-  hists_["effMuMult"      ] = fs->make<TH1F>( "effMuMult"      , "effMuMult"      ,  nBinsMuMult_,    binsMuMult_.at(0), binsMuMult_.at(1) );
+ else if (nBinsLepMult_>0 && binsLepMult_.size()==2) {
+  hists_["probeLepMult"    ] = fs->make<TH1F>( "probeLepMult"    , "probeLepMult"    ,  nBinsLepMult_,    binsLepMult_.at(0), binsLepMult_.at(1) );
+  hists_["testLepMult"     ] = fs->make<TH1F>( "testLepMult"     , "testLepMult"     ,  nBinsLepMult_,    binsLepMult_.at(0), binsLepMult_.at(1) );
+  hists_["effLepMult"      ] = fs->make<TH1F>( "effLepMult"      , "effLepMult"      ,  nBinsLepMult_,    binsLepMult_.at(0), binsLepMult_.at(1) );
  }
- else std::cout<<"Unable to book MuMult histogram. Bins not well-defined."<<std::endl;
+ else std::cout<<"Unable to book LepMult histogram. Bins not well-defined."<<std::endl;
 
 // set errors
   hists_["testControl"]->Sumw2(); hists_["probeControl"]->Sumw2(); hists_["effControl"]->Sumw2(); 
   hists_["testPt"]->Sumw2(); hists_["probePt"]->Sumw2(); hists_["effPt"]->Sumw2(); 
   hists_["testEta"]->Sumw2(); hists_["probeEta"]->Sumw2(); hists_["effEta"]->Sumw2(); 
   hists_["testPhi"]->Sumw2(); hists_["probePhi"]->Sumw2(); hists_["effPhi"]->Sumw2(); 
-  hists_["testMult"]->Sumw2(); hists_["probeMult"]->Sumw2(); hists_["effMult"]->Sumw2(); 
+  hists_["testMult"]->Sumw2(); hists_["probeMult"]->Sumw2(); hists_["effMult"]->Sumw2();
+  hists_["testRelIso"]->Sumw2(); hists_["probeRelIso"]->Sumw2(); hists_["effRelIso"]->Sumw2();  
   hists_["testMinDR"]->Sumw2(); hists_["probeMinDR"]->Sumw2(); hists_["effMinDR"]->Sumw2(); 
-  hists_["testMuMult"]->Sumw2(); hists_["probeMuMult"]->Sumw2(); hists_["effMuMult"]->Sumw2(); 
+  hists_["testLepMult"]->Sumw2(); hists_["probeLepMult"]->Sumw2(); hists_["effLepMult"]->Sumw2(); 
   std::cout<<"evtNum="<<evtNum_<<"after Sumw2"<<std::endl;
 
 

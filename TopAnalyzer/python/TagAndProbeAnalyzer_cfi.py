@@ -18,9 +18,10 @@ tagAndProbeAnalyzer = cms.EDAnalyzer("TagAndProbeAnalyzer", # -> TagAndProbeAnal
     nBinsEta    = cms.int32(-1),
     nBinsPhi    = cms.int32(10),
     nBinsMult   = cms.int32(10),
+    nBinsRelIso   = cms.int32(20),
     #nBinsMinDR  = cms.int32(25),
     nBinsMinDR  = cms.int32(-1),
-    nBinsMuMult = cms.int32(10),
+    nBinsLepMult = cms.int32(10),
     ## in case of fixed bins: 1st vector entry=xlow, 2nd vector entry=xup (left and right edges of histo)
     ## in case of variable bins: vector of low-edges for each bin (including overflow), i.e. nBins+1 entries
     #binsPt     = cms.vdouble(  0.  , 150.  ),
@@ -29,10 +30,11 @@ tagAndProbeAnalyzer = cms.EDAnalyzer("TagAndProbeAnalyzer", # -> TagAndProbeAnal
     binsEta    = cms.vdouble( -3.,-2.55,-2.1,-1.65,-1.2,-0.9,-0.45,0.,0.45,0.9,1.2,1.65,2.1,2.55,3. ),
     binsPhi    = cms.vdouble( -3.14,   3.14),
     binsMult   = cms.vdouble(  0.  ,  10.  ),
+    binsRelIso = cms.vdouble(  0.  ,  0.2  ),
     #binsMinDR  = cms.vdouble(  0.  ,  10.  ),
     #binsMinDR  = cms.vdouble(  0.,0.3,0.7,1.,1.5,2.,2.5,3.,4.,5.,6. ),
     binsMinDR  = cms.vdouble( 0.,0.3,0.7,1.,1.5,2.,2.5,3.,4.,5.,6. ),
-    binsMuMult = cms.vdouble(  0.  ,  10.  )
+    binsLepMult = cms.vdouble(  0.  ,  10.  )
 )
 
 
