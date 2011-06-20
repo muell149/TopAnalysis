@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, unsigned int verbose=0){
+void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, unsigned int verbose=0, TString decayChannel="muon"){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -427,8 +427,10 @@ void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, uns
 	      DrawLabel("CMS 2010 combined"     , 0.06, 0.7 , 0.5 , 0.8 , 0.4);
 	      DrawLabel("(TOP-11-001)"          , 0.06, 0.65, 0.5 , 0.75, 0.4);
 	      DrawLabel("2010 data, 36 pb^{-1}" , 0.62, 0.7 , 0.95, 0.8 , 0.4);
-	      TString AN="AN-10-090";
-	      if(luminosity>50) AN="AN-10-091";
+	      TString channelLabel="unknown";
+	      if(decayChannel.Contains("mu")) channelLabel="#mu";
+	      if(decayChannel.Contains("el")) channelLabel="e";
+	      TString AN="TOP-11-013, "+channelLabel+" channel";
 	      DrawLabel(AN                      , 0.06, 0.3 , 0.5 , 0.4 , 0.4);
 	      DrawLabel(dataSample+" data, "+getTStringFromInt(roundToInt(luminosity))+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.4);
 
