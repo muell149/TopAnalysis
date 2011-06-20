@@ -51,6 +51,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     ++i;
     pt_      ->Fill(electron->pt());
     eta_     ->Fill(electron->eta());
+    phi_->Fill(electron->phi()); /////
 
     // supercluster_energy_->Fill(electron->superCluster().energy() );
     // hcaloverecal_->Fill(electron->hcalOverEcal() );
@@ -59,13 +60,19 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     // eoverp_->Fill(electron->eSuperClusterOverp() );
 
 
-    if(electron->isEE()){
+    //if(electron->isEE()){
+    if( electron->superCluster()->eta() > 1.479 ){
       iso_combEE_->Fill(
+                        ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
+     iso_combEE2_->Fill(
                         ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
     }
 
-    if(electron->isEB()){
+    //if(electron->isEB()){
+    if( electron->superCluster()->eta() < 1.479 ){
       iso_combEB_->Fill(
+                        ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
+      iso_combEB2_->Fill(
                         ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
     }
 
@@ -80,6 +87,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     }
     jet_dist_->Fill(minDr);
 
+    d0_   ->Fill(electron->gsfTrack()->d0()); /////
 
     deltaphi_->Fill(electron->deltaPhiSuperClusterTrackAtVtx());
     deltaeta_->Fill(electron->deltaEtaSuperClusterTrackAtVtx());
@@ -124,6 +132,10 @@ ElectronAnalyzer::beginJob()
   eta_->GetXaxis()->SetTitle("#eta_{el}");
   eta_->GetYaxis()->SetTitle("Electrons");
 
+  phi_ = fs->make<TH1D>("phi", "Muon Phi", 48, -TMath::Pi(), TMath::Pi());
+  phi_->GetXaxis()->SetTitle("#phi_{#mu}");
+  phi_->GetYaxis()->SetTitle("N per 7.5 degree");
+
   supercluster_energy_= fs->make<TH1D>("supercluster_energy", "Electron supercluster Energy", 300, 0., 300.);
   supercluster_energy_->GetXaxis()->SetTitle("E supercluster [GeV]");
   supercluster_energy_->GetYaxis()->SetTitle("Electrons");
@@ -140,13 +152,27 @@ ElectronAnalyzer::beginJob()
   eoverp_->GetXaxis()->SetTitle("E/P");
   eoverp_->GetYaxis()->SetTitle("Electrons");
 
-  iso_combEE_= fs->make<TH1D>("iso_combEE", "Electron Combined Isolation in Endcaps", 200, 0.,  1.);
+  //iso_combEE_= fs->make<TH1D>("iso_combEE", "Electron Combined Isolation in Endcaps", 200, 0.,  1.);
+  iso_combEE_= fs->make<TH1D>("iso_combEE", "Electron Combined Isolation in Endcaps", 300, 0.,  15.);
   iso_combEE_->GetXaxis()->SetTitle("I_{combEE}");
   iso_combEE_->GetYaxis()->SetTitle("Electrons");
 
-  iso_combEB_= fs->make<TH1D>("iso_combEB", "Electron Combined Isolation in Barrel", 200, 0.,  1.);
+  iso_combEE2_= fs->make<TH1D>("iso_combEE2", "Electron Combined Isolation in Endcaps", 200, 0.,  2.);
+  iso_combEE2_->GetXaxis()->SetTitle("I_{combEE}");
+  iso_combEE2_->GetYaxis()->SetTitle("Electrons");
+
+  //iso_combEB_= fs->make<TH1D>("iso_combEB", "Electron Combined Isolation in Barrel", 200, 0.,  1.);
+  iso_combEB_= fs->make<TH1D>("iso_combEB", "Electron Combined Isolation in Barrel", 300, 0.,  15.);
   iso_combEB_->GetXaxis()->SetTitle("I_{combEB}");
   iso_combEB_->GetYaxis()->SetTitle("Electrons");
+
+  iso_combEB2_= fs->make<TH1D>("iso_combEB2", "Electron Combined Isolation in Barrel", 200, 0.,  2.);
+  iso_combEB2_->GetXaxis()->SetTitle("I_{combEB}");
+  iso_combEB2_->GetYaxis()->SetTitle("Electrons");
+
+  d0_= fs->make<TH1D>( "d0", "D0 of Inner Track", 100, 0., 10.);
+  d0_->GetXaxis()->SetTitle("d0 [cm]");
+  d0_->GetYaxis()->SetTitle("N");  
 
   dB_= fs->make<TH1D>( "dB", "DB of Electron Track", 100, 0., 0.5);
   dB_->GetXaxis()->SetTitle("dB [cm]");

@@ -89,9 +89,9 @@ void DiLeptonAnalyzer::beginJob() {
   Muon_CombRelIso03 = fs->make<TH1F>("Muon_CombRelIso03", "Muon CombRelIso03",     50,  0.,  1.);
   Elec_CombRelIso03 = fs->make<TH1F>("Elec_CombRelIso03", "Electron CombRelIso03", 50,  0.,  1.);
 
-  const int nbins = 50;
+  const int nbins = 100;
 
-  double logmin = 0.;
+  double logmin = 1.;
   double logmax = 3.;  // 10^(3.)=1000
 
   float bins[nbins+1];
@@ -101,12 +101,12 @@ void DiLeptonAnalyzer::beginJob() {
     bins[i] = std::pow(10.0, log);
   }
 
-  DimassRC_MM = fs->make<TH1F>("DimassRC_MM", "Dilepton mass (mu mu) RC", 50, 0., 200.);
-  DimassRC_EE = fs->make<TH1F>("DimassRC_EE", "Dilepton mass (e e)   RC", 50, 0., 200.);
-  DimassRC_ME = fs->make<TH1F>("DimassRC_ME", "Dilepton mass (mu e)  RC", 50, 0., 200.);
-  DimassWC_MM = fs->make<TH1F>("DimassWC_MM", "Dilepton mass (mu mu) WC", 50, 0., 200.);
-  DimassWC_EE = fs->make<TH1F>("DimassWC_EE", "Dilepton mass (e e)   WC", 50, 0., 200.);
-  DimassWC_ME = fs->make<TH1F>("DimassWC_ME", "Dilepton mass (mu e)  WC", 50, 0., 200.);
+  DimassRC_MM = fs->make<TH1F>("DimassRC_MM", "Dilepton mass (mu mu) RC", 150, 0., 300.);
+  DimassRC_EE = fs->make<TH1F>("DimassRC_EE", "Dilepton mass (e e)   RC", 150, 0., 300.);
+  DimassRC_ME = fs->make<TH1F>("DimassRC_ME", "Dilepton mass (mu e)  RC", 150, 0., 300.);
+  DimassWC_MM = fs->make<TH1F>("DimassWC_MM", "Dilepton mass (mu mu) WC", 150, 0., 300.);
+  DimassWC_EE = fs->make<TH1F>("DimassWC_EE", "Dilepton mass (e e)   WC", 150, 0., 300.);
+  DimassWC_ME = fs->make<TH1F>("DimassWC_ME", "Dilepton mass (mu e)  WC", 150, 0., 300.);
 
   DimassRC_LOGX_MM = fs->make<TH1F>("DimassRC_LOGX_MM", "Dilepton mass (mu mu) RC", nbins, &bins[0]);
   DimassRC_LOGX_EE = fs->make<TH1F>("DimassRC_LOGX_EE", "Dilepton mass (e e)   RC", nbins, &bins[0]);

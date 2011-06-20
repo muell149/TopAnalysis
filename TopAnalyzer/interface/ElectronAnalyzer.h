@@ -37,14 +37,18 @@ private:
   TH1D* multi_;
   TH1D* pt_;
   TH1D* eta_;
+  TH1D* phi_;
   TH1D* supercluster_energy_;
   TH1D* hcaloverecal_;
   TH1D* fbrem_;
   TH1D* eoverp_;
   TH1D* iso_combEE_;
   TH1D* iso_combEB_;
+  TH1D* iso_combEE2_;
+  TH1D* iso_combEB2_;
   TH1D* jet_dist_;
   TH1D* dB_;
+  TH1D* d0_;
   TH1D* deltaphi_;
   TH1D* deltaeta_;
   TH1D* sigmaietaieta_;
