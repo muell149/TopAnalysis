@@ -180,7 +180,7 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './combineTopDiffXSecUncertainties.C+('$dataLuminosity', '$save', '$verbose')'
+root -l -q -b './combineTopDiffXSecUncertainties.C+('$dataLuminosity', '$save', '$verbose', '$decayChannel')'
 echo "all analysis steps finished!"
 
 
