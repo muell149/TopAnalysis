@@ -74,8 +74,7 @@ print "used JEC level in jetKinematics: "+corrLevel
 ## ATTENTION: until the new parameter jetResolutionSmearFactor
 ## is implemented in a higher version of the TKinFitter package you
 ## need to check out the head:
-## cvs co -r V06-07-04 TopQuarkAnalysis
-## cvs up -A TopQuarkAnalysis
+## cvs co TopQuarkAnalysis/TopKinFitter
 
 if(not globals().has_key('applyKinFit')):
    applyKinFit = True#  False
