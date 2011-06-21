@@ -36,7 +36,7 @@ if(not globals().has_key('jetType')):
 ## run PF2PAT?
 ## only possible for special pat tuples!!!
 if(not globals().has_key('pfToPAT')):
-    pfToPAT =  False #True 
+    pfToPAT = False #True
 print "run PF2PAT?: ",pfToPAT," won't work if the file does not contain the necessary information!"
 
 ## choose the semileptonic decay channel (electron or muon)
@@ -121,7 +121,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
-    #/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v1/0dae6bcdda7c5ccfbbc9faffcd2374d5/patTuple_9_3_Igf.root'
+    #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_9_5_7MZ.root'
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
@@ -163,7 +163,7 @@ process.GlobalTag.globaltag = cms.string('START38_V14::All')
 process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
 process.load("RecoJets.Configuration.RecoGenJets_cff")
 
-if(runningOnData=="MC"):
+if(runningOnData=="MC"&&pfToPAT==False):
     process.p0 = cms.Path(## redo genjets without mu/nu from tau
                           process.genJetParticles *
                           process.ak5GenJets
@@ -179,13 +179,13 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 # for all spring11 MC use REDIGI311X
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu9"], throw=False)
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu9"], throw=False)
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = ["HLT_Mu9"], throw=False)
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu15_v*"], throw=False)
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu15_v*"], throw=False)
+#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = [""], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI311X", HLTPaths = ["HLT_Mu9"], throw=False)
-#process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
- 
+process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
+
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
 ## generator matching
@@ -808,19 +808,6 @@ elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
     print "choose runningOnData= data or MC, creating no gen-plots"
-## Output Module Configuration
-if(writeOutput):
-    from PhysicsTools.PatAlgos.patEventContent_cff import *
-    process.out = cms.OutputModule("PoolOutputModule",
-                                   fileName = cms.untracked.string('patTuple_selectedNjets4.root'),
-                                   # save only events passing the full path
-                                   SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') ),
-                                   #save output (comment to keep everything...)
-                                   outputCommands = cms.untracked.vstring('drop *') 
-                                   )
-    process.out.outputCommands += patEventContentNoCleaning
-    process.out.outputCommands += patExtraAodEventContent
-    process.outpath = cms.EndPath(process.out)
 ## switch to SSV btagging
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 massSearchReplaceAnyInputTag(process.p1, 'tightBottomPFJets', 'simpleSecondaryVertexHighEffBJets')
@@ -917,19 +904,53 @@ if(decayChannel=="electron"):
 
 # switch to PF2PAT
 if(pfToPAT):
-    from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import *
+    from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
     process.load("Configuration.StandardSequences.Geometry_cff")
     process.load("Configuration.StandardSequences.MagneticField_cff")
     allpaths  = process.paths_().keys()
-    prependPF2PATSequence(process, allpaths, 'AK5PF')
+    options = {
+        'runOnMC': True,
+        'runOnOLDcfg': True,
+        'runOnAOD': False,
+        'switchOffEmbedding': True,
+        'addResolutions': True,
+        'runOnOLDcfg': False,
+        'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
+        'cutsElec': 'et > 20. & abs(eta) < 2.5',
+        'electronIDs': 'CiC',
+        'pfIsoConeMuon': 0.3,
+        'pfIsoConeElec': 0.3,
+        'pfIsoValMuon': 0.2,
+        'pfIsoValElec': 0.2,
+        'skipIfNoPFMuon': False,
+        'skipIfNoPFElec': False
+        }
+    if(runningOnData=="data"):
+        options['runOnMC']=False
+    prependPF2PATSequence(process, allpaths, options)
     # remove electron collections as long as id does not exist in the tuples
     for path in allpaths:
         #getattr(process,path).remove( process.looseElectronsEJ )
         #getattr(process,path).remove( process.tightElectronsEJ )
         #getattr(process,path).remove( process.unconvTightElectronsEJ )
         #getattr(process,path).remove( process.goodElectronsEJ )
-        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETsAK5PF')
-        
+        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
+        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')
+
+## Output Module Configuration
+if(writeOutput):
+    from PhysicsTools.PatAlgos.patEventContent_cff import *
+    process.out = cms.OutputModule("PoolOutputModule",
+                                   fileName = cms.untracked.string('patTuple_selectedNjets4.root'),
+                                   # save only events passing the full path
+                                   SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') ),
+                                   #save output (comment to keep everything...)
+                                   outputCommands = cms.untracked.vstring('drop *') 
+                                   )
+    process.out.outputCommands += patEventContentNoCleaning
+    process.out.outputCommands += patExtraAodEventContent
+    process.outpath = cms.EndPath(process.out)
+
 ## possibly remove event reweighting
 # Pile up
 if(not PUreweigthing or runningOnData=="data"):
