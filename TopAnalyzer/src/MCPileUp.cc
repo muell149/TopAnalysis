@@ -34,7 +34,11 @@ void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)
    { 
-     histo_NPUEvents->Fill(iterPU->getPU_NumInteractions());
+     if (iterPU->getBunchCrossing()==0) // -1: previous BX, 0: current BX,  1: next BX
+     {
+       histo_NPUEvents->Fill(iterPU->getPU_NumInteractions());
+       break;
+     }
    }
 }
 
