@@ -57,6 +57,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   void bookPullHistos     (edm::Service<TFileService>&);
   /// book histograms for 2D distributions of particle properties: Pt, E, Eta, Phi, m
   void book2DHistos(edm::Service<TFileService>&);  
+  /// book histograms for 2D correlations between reconstructed quantities
+  void bookRecCorrelHistos(edm::Service<TFileService>&);   
   /// book histograms for kin hypothesis specific histos
   void bookQualityHistos  (edm::Service<TFileService>&);
   /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
@@ -70,7 +72,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// fill histograms for 2D distributions of particle properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
   void fill2DHistos           (std::vector<TH2D*>&,
                                const reco::Candidate&,
-			       const reco::Candidate&);				
+			       const reco::Candidate&);
+       		       				
   /// book histograms for kin hypothesis specific histos							
   void fillQualityHistos       (const TtFullLeptonicEvent&,
                                 const TtEvent::HypoClassKey&);
@@ -226,12 +229,54 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// For kinSolution hypothesis it should give a sharp peak around zero since the assumption that both masses
   /// are equal is used as a boundary condition. Differences appear only from rounding errors
   TH1D* deltaM_;
-  /// correlation between event reco and b-tagging TCHE
-  TH2D* kinTCHEcorrelation_;
-  /// correlation between event reco and b-tagging SSVHE
-  TH2D* kinSSVHEcorrelation_;
+  /// correlation between event reco and b-tagging TCHEL
+  TH2D* kinTCHELcorrelation_;
+  /// correlation between event reco and b-tagging TCHEM
+  TH2D* kinTCHEMcorrelation_;  
+  /// correlation between event reco and b-tagging SSVHEM
+  TH2D* kinSSVHEMcorrelation_;
   /// compares indices of objects in gen and kin hypotheses
-  TH2D* compare_;      
+  TH2D* compare_;
+  
+  /// correlation histograms for different reconstructed quantities
+  TH2D* diLeptonMassVsLeptonPt_;
+  TH2D* diLeptonMassVsLeptonEta_;
+  TH2D* diLeptonMassVsDiLeptonPt_;
+  TH2D* diLeptonMassVsTopPt_;
+  TH2D* diLeptonMassVsTopRapidity_;
+  TH2D* diLeptonMassVsTtBarPt_;
+  TH2D* diLeptonMassVsTtBarRapidity_;
+  TH2D* diLeptonMassVsTtBarMass_;
+  
+  TH2D* nBtagsTCHELVsLeptonPt_;
+  TH2D* nBtagsTCHELVsLeptonEta_;
+  TH2D* nBtagsTCHELVsDiLeptonPt_;
+  TH2D* nBtagsTCHELVsDiLeptonMass_;
+  TH2D* nBtagsTCHELVsTopPt_;
+  TH2D* nBtagsTCHELVsTopRapidity_;
+  TH2D* nBtagsTCHELVsTtBarPt_;
+  TH2D* nBtagsTCHELVsTtBarRapidity_;
+  TH2D* nBtagsTCHELVsTtBarMass_;
+  
+  TH2D* nBtagsTCHEMVsLeptonPt_;
+  TH2D* nBtagsTCHEMVsLeptonEta_;
+  TH2D* nBtagsTCHEMVsDiLeptonPt_;
+  TH2D* nBtagsTCHEMVsDiLeptonMass_;
+  TH2D* nBtagsTCHEMVsTopPt_;
+  TH2D* nBtagsTCHEMVsTopRapidity_; 
+  TH2D* nBtagsTCHEMVsTtBarPt_;
+  TH2D* nBtagsTCHEMVsTtBarRapidity_;
+  TH2D* nBtagsTCHEMVsTtBarMass_;
+  
+  TH2D* nBtagsSSVHEMVsLeptonPt_;
+  TH2D* nBtagsSSVHEMVsLeptonEta_;
+  TH2D* nBtagsSSVHEMVsDiLeptonPt_;
+  TH2D* nBtagsSSVHEMVsDiLeptonMass_;
+  TH2D* nBtagsSSVHEMVsTopPt_;
+  TH2D* nBtagsSSVHEMVsTopRapidity_;
+  TH2D* nBtagsSSVHEMVsTtBarPt_;
+  TH2D* nBtagsSSVHEMVsTtBarRapidity_;
+  TH2D* nBtagsSSVHEMVsTtBarMass_;              
 };
 
 #endif
