@@ -8,6 +8,8 @@ execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 
 # JER +20%
 process.scaledJetEnergy.resolutionFactor = 1.20
+if(applyKinFit==True):
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.20
 
 ## change output name 
 process.TFileService.fileName = 'analyzeDiffXSecJERup_testSig.root'
