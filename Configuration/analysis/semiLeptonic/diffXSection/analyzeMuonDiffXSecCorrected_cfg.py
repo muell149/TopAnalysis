@@ -7,16 +7,19 @@
 #execfile("analyzeMuonDiffXSec_cfg.py")
 execfile("analyzeTopDiffXSec_cfg.py")
 
-## change input collections to JER-shifted collections
+## change input collections to JER-shifted collections (for reco paths only)
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-pathlist = [process.p1, process.p2, process.p3, process.p4]
+pathlist = [process.p1, process.p2]
 for path in pathlist:
     if(jetType=="particleFlow"):
         massSearchReplaceAnyInputTag(path, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF')
-        massSearchReplaceAnyInputTag(path, 'patMETsPF'           , 'scaledJetEnergy:patMETsPF')
+        massSearchReplaceAnyInputTag(path, 'patMETsPF'           , 'scaledJetEnergy:patMETsPF'           )
     elif(jetType=="Calo"):
         massSearchReplaceAnyInputTag(path, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets') 
-        massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs') 
+        massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs'        )
+    if(pfToPAT==True):
+        massSearchReplaceAnyInputTag(path, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets')
+        massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs'        )
     else:
         print "unknown jetType"
 
@@ -31,6 +34,9 @@ elif(jetType=="Calo"):
     process.scaledJetEnergy.inputMETs = "patMETs"
 else:
     print "unknown jetType"
+if(pfToPAT==True):
+    process.scaledJetEnergy.inputJets = "selectedPatJets"
+    process.scaledJetEnergy.inputMETs = "patMETs"
 
 # JER +10%
 process.scaledJetEnergy.resolutionFactor = 1.1
