@@ -36,12 +36,12 @@ if(not globals().has_key('jetType')):
 ## run PF2PAT?
 ## only possible for special pat tuples!!!
 if(not globals().has_key('pfToPAT')):
-    pfToPAT = False #True
+    pfToPAT = True #False
 print "run PF2PAT?: ",pfToPAT," won't work if the file does not contain the necessary information!"
 
 ## choose the semileptonic decay channel (electron or muon)
 if(not globals().has_key('decayChannel')):
-    decayChannel =  'muon' # 'electron'
+    decayChannel = 'muon' # 'electron'
     print "used lepton decay channel: "+decayChannel
 
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
@@ -68,6 +68,10 @@ print "apply Btag reweighting?: ",BtagReweigthing
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
     corrLevel='L3Absolute'
+# no residual corrections in new samples
+if(pfToPAT == True):
+    corrLevel='L3Absolute'    
+## define input
 print "used JEC level in jetKinematics: "+corrLevel
 
 ## run kinematic fit?
@@ -121,7 +125,15 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(    
     ## add your favourite file here
+    #'/store/data/Run2011A/ElectronHad/AOD/PromptReco-v4/000/165/093/2C186C6C-C27F-E011-A1C7-001617E30F58.root'
+    #'/store/data/Run2011A/MuHad/AOD/PromptReco-v4/000/165/205/0C569F2A-D382-E011-B122-00304879FBB2.root' 
+    #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
+    #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/1204EE92-F397-E011-99E8-003048679012.root' 
+    #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_25_5_kOf.root',
+    #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_24_5_2Mt.root'
+    #'/store/data/Run2011A/MuHad/AOD/May10ReReco-v1/0005/FC809CA7-0C7D-E011-AE04-003048678B1C.root' 
     #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_9_5_7MZ.root'
+    
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
@@ -153,17 +165,23 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
 #global tag:
 # a) 4_1:
-process.GlobalTag.globaltag = cms.string('START38_V14::All')
+#process.GlobalTag.globaltag = cms.string('START38_V14::All')
 # b) 4_2:
-#process.GlobalTag.globaltag = cms.string('START42_V12::All')
+from Configuration.PyReleaseValidation.autoCond import autoCond
+if(runningOnData=="MC"):
+    process.GlobalTag.globaltag = cms.string('START42_V12::All')
+    #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
+else:
+    process.GlobalTag.globaltag = cms.string( autoCond[ 'com10' ] )
 
 ## Needed for redoing the ak5GenJets
-process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
-process.load("RecoJets.Configuration.RecoGenJets_cff")
-
-if(runningOnData=="MC"&&pfToPAT==False):
+if(runningOnData=="MC" and pfToPAT==False):
+    process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
+    process.load("RecoJets.Configuration.RecoGenJets_cff")  
     process.p0 = cms.Path(## redo genjets without mu/nu from tau
                           process.genJetParticles *
                           process.ak5GenJets
@@ -688,11 +706,6 @@ if(runningOnData=="MC" and BtagReweigthing):
         getattr(process,module3).weight=cms.InputTag("eventWeightMultiplier")
     print
 
-
-# this does not work for electrons
-if (decayChannel=="electron"):
-  process.semiLeptonicSelection.remove(process.trackMuons)
-
 ## ---
 ##    run the final sequences
 ## ---
@@ -905,19 +918,18 @@ if(decayChannel=="electron"):
 # switch to PF2PAT
 if(pfToPAT):
     from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
-    process.load("Configuration.StandardSequences.Geometry_cff")
-    process.load("Configuration.StandardSequences.MagneticField_cff")
     allpaths  = process.paths_().keys()
+    recoPaths=['p1','p2']
+    # define general options
     options = {
         'runOnMC': True,
-        'runOnOLDcfg': True,
-        'runOnAOD': False,
-        'switchOffEmbedding': True,
+        'runOnAOD': True,
+        'switchOffEmbedding': False,
         'addResolutions': True,
-        'runOnOLDcfg': False,
+        'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
-        'cutsElec': 'et > 20. & abs(eta) < 2.5',
-        'electronIDs': 'CiC',
+        'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'electronIDs': ['CiC','classical'],
         'pfIsoConeMuon': 0.3,
         'pfIsoConeElec': 0.3,
         'pfIsoValMuon': 0.2,
@@ -925,18 +937,30 @@ if(pfToPAT):
         'skipIfNoPFMuon': False,
         'skipIfNoPFElec': False
         }
+    # adaptions when running on data
     if(runningOnData=="data"):
         options['runOnMC']=False
-    prependPF2PATSequence(process, allpaths, options)
+    if(decayChannel=="electron"):
+    # take into account different electron vetos in mu and e channel
+        options['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
+    # skip events (and jet calculation) if no lepton is found
+    # only done in data, as in MC you need the events for parton truth plots
+        options['skipIfNoPFElec']=True 
+    elif(decayChannel=="muon"):
+        options['skipIfNoPFMuon']=True
+    prependPF2PATSequence(process, recoPaths, options)
     # remove electron collections as long as id does not exist in the tuples
-    for path in allpaths:
+    for path in recoPaths:
         #getattr(process,path).remove( process.looseElectronsEJ )
         #getattr(process,path).remove( process.tightElectronsEJ )
         #getattr(process,path).remove( process.unconvTightElectronsEJ )
         #getattr(process,path).remove( process.goodElectronsEJ )
+        # replace object consistently with names from PF2PAT
         massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
-        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')
-
+        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
+        # run trigger at the beginning to save a lot of time
+        getattr(process,path).insert(0,process.hltFilter)
+    
 ## Output Module Configuration
 if(writeOutput):
     from PhysicsTools.PatAlgos.patEventContent_cff import *
