@@ -51,12 +51,12 @@ looseElectronsEJ       = selectedPatElectrons.clone( src = 'selectedPatElectrons
 ## intermediate collection
 tightElectronsEJ       = selectedPatElectrons.clone( src = 'vertexSelectedElectrons',                                      # | PV.z() - elec.vertex().z() | < 1.0 (need to be created)
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'                                            # NB: needs "process.selectedPatElectrons.usePV = false" for PAT tuple production
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'            # NB: 0 is the 'index of the bit', ie. the first bit has index 0!!! (so this tests 0x1)
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1'
                                                    ) 
 
 ## intermediate collection
@@ -75,12 +75,12 @@ goodElectronsEJ        = selectedPatElectrons.clone( src = 'unconvTightElectrons
 ##
 noEtTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = #'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -88,12 +88,12 @@ noEtTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noEtaTightElectronsEJ  = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           #'abs(eta) <  2.1  &'
+                                                           #'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -101,12 +101,12 @@ noEtaTightElectronsEJ  = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noSCTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            #'( abs(superCluster.eta) < 1.4442   |'
                                                            #'  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -114,12 +114,12 @@ noSCTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 nodBTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            #'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -127,12 +127,12 @@ nodBTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noIDTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            #'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -140,12 +140,12 @@ noIDTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noIsoTightElectronsEJ  = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2'
+                                                           #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -153,12 +153,12 @@ noIsoTightElectronsEJ  = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noHitsTightElectronsEJ = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            #'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0' 
                                                            'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -166,12 +166,12 @@ noHitsTightElectronsEJ = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noDcotTightElectronsEJ = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            #'abs(convDcot) > 0.02 &'
                                                            'abs(convDist) > 0.02' 
@@ -179,12 +179,12 @@ noDcotTightElectronsEJ = selectedPatElectrons.clone( src = 'vertexSelectedElectr
 
 noDistTightElectronsEJ = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.1  &'
+                                                           'abs(eta) <  2.5  &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'
                                                            'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
-                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2 &'
+                                                           '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.1 &'
                                                            'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
                                                            'abs(convDcot) > 0.02'
                                                            #'abs(convDist) > 0.02' 
