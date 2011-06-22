@@ -65,7 +65,9 @@ goldenMuons = checkJetOverlapMuons.clone(muons = "trackMuons",
 
 ## check muon isolation (combined relative) -> final Muon Collection
 tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
-                                       cut = '(trackIso+caloIso)/pt < 0.05 '
+                                        cut = '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15'
+                                              #'(trackIso+caloIso)/pt < 0.05 '
+                                             
                                        )
 
 ## N-1 collections
@@ -73,7 +75,8 @@ noDRMuons     = selectedPatMuons.clone(src = 'vertexSelectedMuons',
                                        cut = 'pt > 20. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
-                                             '(trackIso+caloIso)/pt < 0.05 &'
+                                             '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15&'
+                                             #'(trackIso+caloIso)/pt < 0.05 &'
                                              'innerTrack.numberOfValidHits >= 11 &'
                                              'globalTrack.normalizedChi2 < 10.0 &'
                                              'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
@@ -87,6 +90,7 @@ noPtMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
                                              '(trackIso+caloIso)/pt < 0.05 &'
+                                             #'(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15&'
                                              'innerTrack.numberOfValidHits >= 11 &'
                                              'globalTrack.normalizedChi2 < 10.0 &'
                                              'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
@@ -99,6 +103,7 @@ noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                               'combinedMuon.isNull = 0 &'
                                               'isTrackerMuon() =1 &'
                                               '(trackIso+caloIso)/pt < 0.05 &'
+                                              #'(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15&'
                                               'innerTrack.numberOfValidHits >= 11 &'
                                               'globalTrack.normalizedChi2 < 10.0 &'
                                               'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
@@ -122,7 +127,8 @@ noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                             cut = 'pt > 20. & abs(eta) < 2.1 &'
                                                   'combinedMuon.isNull = 0 &'
                                                   'isTrackerMuon() =1 &'
-                                                  '(trackIso+caloIso)/pt < 0.05 &'
+                                                  #'(trackIso+caloIso)/pt < 0.05 &'
+                                                  '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15&'
                                                   'globalTrack.normalizedChi2 < 10.0 &'
                                                   'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
                                                   'abs(dB)<0.02 &'
@@ -133,7 +139,8 @@ noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
                                          cut = 'pt > 20. & abs(eta) < 2.1 &'
                                                'combinedMuon.isNull = 0 &'
                                                'isTrackerMuon() =1 &'
-                                               '(trackIso+caloIso)/pt < 0.05 &'
+                                               #'(trackIso+caloIso)/pt < 0.05 &'
+                                               '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15&'
                                                'innerTrack.numberOfValidHits >= 11 &'
                                                'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
                                                'abs(dB)<0.02 &'
@@ -144,7 +151,8 @@ noDbMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                        cut = 'pt > 20. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
-                                             '(trackIso+caloIso)/pt < 0.05 &'
+                                             #'(trackIso+caloIso)/pt < 0.05 &'
+                                             '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.15&'
                                              'innerTrack.numberOfValidHits >= 11 &'
                                              'globalTrack.normalizedChi2 < 10.0 &'
                                              'globalTrack.hitPattern.numberOfValidMuonHits>0 &'

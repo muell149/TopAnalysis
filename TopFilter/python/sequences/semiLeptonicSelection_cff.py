@@ -31,12 +31,15 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 looseMuons     = selectedPatMuons.clone(src = 'selectedPatMuons',
                                         cut = 'isGlobalMuon &'
                                               'abs(eta) < 2.5 & pt > 10.&'
-                                              '(trackIso+caloIso)/pt <  0.2'
+                                              '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.2'
+                                              #'(trackIso+caloIso)/pt <  0.2'
+                                              
                                         )
 ## NB: defintions also in electronSelection_cff.py
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                             cut = 'et > 15. & abs(eta) < 2.5 &'
-                                                  '(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
+                                                  #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
+                                                  '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.2'
                                            )
 
 ## setup jet selection collection
