@@ -47,6 +47,10 @@ if(not globals().has_key('decayChannel')):
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
+    
+## choose JSON file for data
+if(not globals().has_key('jsonFile')):
+    jsonFile =  ''
 
 ## enable/ disable PU event reweighting
 if(not globals().has_key('PUreweigthing')):
@@ -186,6 +190,21 @@ if(runningOnData=="MC" and pfToPAT==False):
                           process.genJetParticles *
                           process.ak5GenJets
                           )
+
+## load JSON file for data
+if(runningOnData=="data"):
+    if(jsonFile!=""):
+        import PhysicsTools.PythonAnalysis.LumiList as LumiList
+        import FWCore.ParameterSet.Types as CfgTypes
+	print "The following JSON file is used in the cfg file: ", jsonFile
+	myLumis = LumiList.LumiList(filename = jsonFile).getCMSSWString().split(',')
+	process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+	process.source.lumisToProcess.extend(myLumis)
+	## ATTENTION!!! At the moment myLumis are filled in the separate data_cfg files again
+	## as otherwise overwritten by load("data_cff")
+    else:
+        print "No JSON file specified in cfg file (but possibly via CRAB)."
+    
     
 ## ---
 ##    configure the cutflow scenario
