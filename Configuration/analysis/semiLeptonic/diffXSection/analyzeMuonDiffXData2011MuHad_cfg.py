@@ -16,6 +16,13 @@ writeOutput = False
 ## extend functionality
 applyKinFit = True
 implement0TagPath = True
+## use correct lepton
+decayChannel = 'muon'
+## use PF2PAT
+pfToPAT = True
+## no event reweighting for data!
+BtagReweigthing = False
+PUreweigthing = False
 ## use L2L3Residual correction in analyzers
 corrLevel="L2L3Residual"
 
@@ -23,27 +30,32 @@ corrLevel="L2L3Residual"
 execfile("analyzeTopDiffXSec_cfg.py")
 
 ## choose data set
-process.load("TopAnalysis/Configuration/samples/Run2011A_MuHadPromptRecoV1and2combined_JsonMay13_newJEC_cff")
+#process.load("TopAnalysis/Configuration/samples/Run2011A_MuHadPromptRecoV4_AOD_June21_cff")
+process.load("TopAnalysis/Configuration/samples/Run2011A_SingleMuPromptRecoV4_AOD_June21_cff")
 
-##TopAnalysis/Configuration/samples/Run2011A_MuHadPromptReco_160404_to_163369_v2_cff"
-## high level trigger filter: hltMu15 (HLT_Mu9 prescaled
+## choose unprescaled trigger
 process.hltFilter.TriggerResultsTag = "TriggerResults::HLT"
-process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v1", "HLT_Mu17_TriCentralJet30_v2", "HLT_Mu17_TriCentralJet30_v3","HLT_Mu17_TriCentralJet30_v4", "HLT_Mu17_TriCentralJet30_v5", "HLT_Mu17_TriCentralJet30_v6", "HLT_Mu17_TriCentralJet30_v7", "HLT_Mu17_TriCentralJet30_v8" ]
-# Lumi range (exclude range of unprescaled HLT_Mu9)
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('147120:1-999999:1')
+process.hltFilter.HLTPaths = ["HLT_IsoMu17_v*"]
+#process.hltFilter.HLTPaths = ["HLT_IsoMu17_TriCentralJet30_v*"]
+
+# Lumi range
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('160404:1-999999:1')
+
+## global tag
+process.GlobalTag.globaltag = cms.string('GR_R_42_V13::All')
 
 ## reduce output
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change number of processed events
-process.maxEvents.input = -1
+process.maxEvents.input = 5000
 process.source.skipEvents = cms.untracked.uint32(0)
 
 ## create tuples with events surviving the cuts
 ## for Njets>=4
 if(writeOutput):
     process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') )
-    process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag2_Run2011.root')
+    process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag2_Run2011PromptReco.root')
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXData2011_StreamExpress160433-161312.root'
+process.TFileService.fileName = 'analyzeDiffXData2011_MuonHad_160404_166861.root'

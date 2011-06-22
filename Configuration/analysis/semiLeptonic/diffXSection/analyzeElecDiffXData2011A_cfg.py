@@ -1,6 +1,6 @@
 ## ---
 ##    this configfile does the same like analyzeTopDiffXSec_cfg.py
-##    but for data - therefore all gen-plots are thrown out
+##    but for electrons & data - therefore all gen-plots are thrown out
 ## ---
 
 ## switch to reco plots only
@@ -17,7 +17,7 @@ writeOutput = False
 applyKinFit = True
 implement0TagPath = True
 ## use correct leptons
-decayChannel = 'muon'
+decayChannel = 'electron'
 ## use PF2PAT
 pfToPAT = True
 ## no event reweighting for data!
@@ -34,12 +34,12 @@ execfile("analyzeTopDiffXSec_cfg.py")
 
 ## choose unprescaled trigger
 process.hltFilter.TriggerResultsTag = "TriggerResults::HLT"
-process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
-## Lumi range
+process.hltFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
+## Lumi range 
 process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('163869:1-160404:1')
 
-# global tag
-#process.GlobalTag.globaltag = cms.string( autoCond[ 'com10' ] )
+## global tag
+#process.GlobalTag.globaltag = cms.string(autoCond['startup'])
 process.GlobalTag.globaltag = cms.string('GR_R_42_V13::All')
 
 ## reduce output
@@ -53,7 +53,7 @@ process.source.skipEvents = cms.untracked.uint32(0)
 ## for Njets>=4
 if(writeOutput):
     process.out.SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p1') )
-    process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag1_Run2011AReReco.root')
+    process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag2_Run2011AReReco.root')
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXData2011A_Muon_163869_160404.root'
+process.TFileService.fileName = 'analyzeDiffXData2011A_Electron_163869_160404.root'
