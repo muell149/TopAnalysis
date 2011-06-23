@@ -252,57 +252,57 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
  			     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
  			     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
 			     // reconstructed top quantities
-                             "m_{t} Kinfit [GeV]/top quarks/0/10"     ,
-                             "p_{t}(t) Kinfit [GeV]/top quarks/0/1"   ,//20"
-                             "#phi(t) Kinfit/top quarks/0/4"         ,
-                             "y(t) Kinfit/top quarks/0/1"             ,//5"
-                             "p_{t}(hadronic t) Kinfit [GeV]/events/0/20",                         
-                             "#phi(hadronic t) Kinfit/events/0/4",
-                             "y(hadronic t) Kinfit/events/0/5"    ,
-                             "p_{t}(leptonic t) Kinfit [GeV]/events/0/20",                         
-                             "#phi(leptonic t) Kinfit/events/0/4",
-                             "y(leptonic t) Kinfit/events/0/5"   ,
+                             "m^{t} [GeV]/top quarks/0/10"     ,
+                             "p_{T}^{t} [GeV]/top quarks/0/1"   ,//20"
+                             "#phi^{t}/top quarks/0/4"         ,
+                             "y^{t}/top quarks/0/1"             ,//5"
+                             "p_{T}(hadronic t) [GeV]/events/0/20",                         
+                             "#phi(hadronic t)/events/0/4",
+                             "y(hadronic t)/events/0/5"    ,
+                             "p_{T}(leptonic t) [GeV]/events/0/20",                         
+                             "#phi(leptonic t)/events/0/4",
+                             "y(leptonic t)/events/0/5"   ,
 			     //  reconstructed angular distributions
-			     "#angle(b,#bar{b}) Kinfit (detector rest frame)/events/0/21",
-			     "#angle(b,#bar{b}) Kinfit (t#bar{t} rest frame)/events/0/21",
-                             "#angle(W,W) Kinfit (t#bar{t} RF)/events/0/21"              ,
-                             "#angle(lep.t,W) Kinfit (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(had.t,W) Kinfit (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(lep.t,b) Kinfit (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(had.t,b) Kinfit (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(lep.b,W) Kinfit (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(had.b,W) Kinfit (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,#bar{q}) Kinfit (top rest frame)/events/0/21"     ,
-                             "#angle(q,lep.b) Kinfit (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,had.b) Kinfit (top rest frame)/events/0/21"       ,
-			     "#angle(#mu,lep.b) Kinfit (top rest frame)/events/0/21"     , 
-			     "#angle(#mu,lep.b) Kinfit (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#mu,lep.b) Kinfit (top rest frame)/events/0/21"     ,
-			     "#angle(#mu,q) Kinfit (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,#nu) Kinfit (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(#nu,lep.b) Kinfit (top rest frame)/events/0/21"     ,
-			     "#angle(#nu,had.b) Kinfit (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#nu,q) Kinfit (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,lep.W) Kinfit (#mu:W RF, W:Det RF)/events/0/21" ,
-			     "#angle(#nu,lep.W) Kinfit (#nu:W RF, W:Det RF)/events/0/21" ,
-			     "#angle(q,had.W) Kinfit (q:W RF, W:Det RF)/events/0/21"     ,
+			     "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
+			     "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
+                             "#angle(W,W) (t#bar{t} RF)/events/0/21"              ,
+                             "#angle(lep.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
+                             "#angle(had.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
+                             "#angle(lep.t,b) (t#bar{t} rest frame)/events/0/21"  ,
+			     "#angle(had.t,b) (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(lep.b,W) (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(had.b,W) (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(q,#bar{q}) (top rest frame)/events/0/21"     ,
+                             "#angle(q,lep.b) (t#bar{t} rest frame)/events/0/21"  ,
+                             "#angle(q,had.b) (top rest frame)/events/0/21"       ,
+			     "#angle(#mu,lep.b) (top rest frame)/events/0/21"     , 
+			     "#angle(#mu,lep.b) (t#bar{t} rest frame)/events/0/21",
+			     "#angle(#mu,lep.b) (top rest frame)/events/0/21"     ,
+			     "#angle(#mu,q) (t#bar{t} rest frame)/events/0/21"    ,
+			     "#angle(#mu,#nu) (t#bar{t} rest frame)/events/0/21"  ,
+			     "#angle(#nu,lep.b) (top rest frame)/events/0/21"     ,
+			     "#angle(#nu,had.b) (t#bar{t} rest frame)/events/0/21",
+			     "#angle(#nu,q) (t#bar{t} rest frame)/events/0/21"    ,
+			     "#angle(#mu,lep.W) (#mu:W RF, W:Det RF)/events/0/21" ,
+			     "#angle(#nu,lep.W) (#nu:W RF, W:Det RF)/events/0/21" ,
+			     "#angle(q,had.W) (q:W RF, W:Det RF)/events/0/21"     ,
 			     // reconstructed event shape variables
-			     "aplanarity Kinfit/events/0/2"  ,
-			     "sphericity Kinfit/events/0/10" ,
-			     "C Kinfit/events/0/10"          ,
-			     "D Kinfit/events/0/4"           ,
-			     "circularity Kinfit/events/0/10",
-			     "isotropy Kinfit/events/0/10"   ,
+			     "aplanarity/events/0/2"  ,
+			     "sphericity/events/0/10" ,
+			     "C/events/0/10"          ,
+			     "D/events/0/4"           ,
+			     "circularity/events/0/10",
+			     "isotropy/events/0/10"   ,
 			     // generated top quantities
-                             "m_{t} parton truth [GeV]/events/0/10"      ,
-                             "p_{t}(t) parton truth/events/0/1"          ,//20"
-			     "p_{t}(t) parton truth Phase Space/events/0/1",//20"
+                             "m^{t} parton truth [GeV]/events/0/10"      ,
+                             "p_{T}^{t} parton truth/events/0/1"          ,//20"
+			     "p_{T}^{t} parton truth Phase Space/events/0/1",//20"
                              "#phi(t) parton truth/events/0/4"           ,
-                             "y(t) parton truth/events/0/1"              ,//5"
-                             "p_{t}(hadronic t) parton truth/events/0/20",                         
+                             "y^{t} parton truth/events/0/1"              ,//5"
+                             "p_{T}(hadronic t) parton truth/events/0/20",                         
                              "#phi(hadronic t) parton truth/events/0/4"  ,
                              "y(hadronic t) parton truth/events/0/5"     ,
-                             "p_{t}(leptonic t) parton truth/events/0/20",                         
+                             "p_{T}(leptonic t) parton truth/events/0/20",                         
                              "#phi(leptonic t) parton truth/events/0/4"  ,
                              "y(leptonic t) parton truth/events/0/5"     ,
 			     // generated angular distributions
@@ -337,34 +337,34 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 // 			     "circularity parton truth/events/0/10",
 // 			     "isotropy parton truth/events/0/10"   ,
 			     // reconstructed ttbar quantities	                            
-                             "m(t#bar{t}) Kinfit/events/0/1"                         ,//60"
-                             "p_{t}(t#bar{t}) Kinfit/events/0/1"                     ,//10"
-                             "y(t#bar{t}) Kinfit/events/0/1"                         ,//2
-                             "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) Kinfit/events/0/20",
-                             "y(t)+y(#bar{t}) Kinfit/events/0/10"                    ,
-                             "#phi(leptonic t)-#phi(hadronic t) Kinfit/events/0/4"  ,                
-                             "y(leptonic t)-y(hadronic t) Kinfit/events/0/4"         ,  
+                             "m^{t#bar{t}}/events/0/1"                         ,//60"
+                             "p_{T}^{t#bar{t}}/events/0/1"                     ,//10"
+                             "y^{t#bar{t}}/events/0/1"                         ,//2
+                             "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets))/events/0/20",
+                             "y^{t}+y^{#bar{t}}/events/0/10"                   ,
+                             "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
+                             "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
 			     // generated ttbar quantities	                            
-                             "m(t#bar{t}) parton truth/events/0/1"                         ,//60"
-                             "p_{t}(t#bar{t}) parton truth/events/0/1"                     ,//10"
-                             "y(t#bar{t}) parton truth/events/0/1"                         ,//2
-                             "H_{T}(t#bar{t})=#Sigma(p_{T}(jets)) parton truth/events/0/20",
-                             "y(t)+y(#bar{t}) parton truth/events/0/10"                    ,
+                             "m^{t#bar{t}} parton truth/events/0/1"                         ,//60"
+                             "p_{T}^{t#bar{t}} parton truth/events/0/1"                     ,//10"
+                             "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
+                             "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets)) parton truth/events/0/20",
+                             "y^{t}+y^{#bar{t}} parton truth/events/0/10"                    ,
                              "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"  ,                
                              "y(leptonic t)-y(hadronic t) parton truth/events/0/4" 
                            };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
-                            // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
+                            // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
                             "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
 			    // b) reconstructed Top quantities
-                            "p_{t}(t) gen/p_{t}(t) reco"                    ,
-			    "#phi(t) gen/#phi(t) reco"                      ,
-                            "y(t) gen/y(t) reco"                            ,
+                            "p_{T}^{t} gen/p_{T}^{t} reco"                    ,
+			    "#phi^{t} gen/#phi^{t} reco"                      ,
+                            "y^{t} gen/y^{t} reco"                            ,
 			    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
                             // c) reconstructed ttbar quantities
                             "m(t#bar{t}) gen/m(t#bar{t}) reco"              ,
-                            "p_{t}(t#bar{t}) gen/p_{t}(t#bar{t}) reco"      ,
+                            "p_{T}(t#bar{t}) gen/p_{T}(t#bar{t}) reco"      ,
                             "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
                             "H_{T}(t#bar{t}) gen/H_{T}(t#bar{t}) reco"      ,
                             "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
@@ -529,7 +529,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
   TString xSecVariables[] ={"topPt"          , "topY"           , "ttbarPt"            , "ttbarMass"      , "ttbarY"              };
-  TString xSecLabel    [] ={"p_{t}(top)/GeV" , "y(top)/binwidth", "p_{t}(t#bar{t})/GeV", "m(t#bar{t})/GeV", "y(t#bar{t})/binwidth"};
+  TString xSecLabel    [] ={"p_{T}^{t}/GeV" , "y^{t}/binwidth", "p_{T}^{t#bar{t}}/GeV", "m^{t#bar{t}}/GeV", "y^{t#bar{t}}/binwidth"};
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
   // loop all variables
@@ -800,7 +800,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 
 	// check calculation for one example bin
 	TString testVar = "ttbarPt";
-	int testBin=1;
+	int testBin=0;
 	double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
 	if(verbose>0&&xSecBin!=0&&xSecBinFromDiffAndIncl!=0&&variable==testVar&&bin==testBin){
 	  std::cout << std::endl << "differential normalized xSec ";
@@ -831,7 +831,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrowX)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{1}{"+label2+"} ] (t#bar{t}#rightarrowX)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);
     histogramStyle(*histo_[xSec][kSig ], kSig , false);

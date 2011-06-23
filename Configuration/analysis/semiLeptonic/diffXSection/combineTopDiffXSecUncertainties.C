@@ -32,7 +32,8 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   gROOT->cd();
   gROOT->SetStyle("Plain");
   gStyle->SetEndErrorSize(8);
-  
+  TGaxis::SetMaxDigits(2);
+
   // ---
   //    basic printout and variable definitions
   // ---
@@ -442,6 +443,11 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	    else{
 	      canvas->cd();
 	      canvas->SetTitle(xSecVariables_[i]);
+	      // unset exp xaxis
+	      totalErrors_[xSecVariables_[i]]->GetXaxis()->SetNoExponent(true);
+	      double max=totalErrors_[xSecVariables_[i]]->GetMaximum();
+	      max*=1.3;
+	      if(max>1&&max<100) totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(true);
 	      // Draw errors into Canvas
 	      totalErrors_[xSecVariables_[i]]->Draw("p same");
 	      canvas->SetName (xSecVariables_[i]);
