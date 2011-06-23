@@ -2,7 +2,7 @@
 
 void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root"
 TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root"
-, std::string decayChannel = "muon" )
+, std::string decayChannel = "unset" )
 
 {
   //  ---
@@ -437,7 +437,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace/topPt"][kSig]->Clone());
 
   // ---
-  //    configure histograms
+  //    configure histogras
   // ---
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
@@ -624,7 +624,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
-      histogramStyle(*histo_[xSec][kSig ], kSig , true );
+      histogramStyle(*histo_[xSec][kSig ], kSig , false );
       // restrict axis
       if(variable=="topPt"){ 
 	histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
@@ -716,7 +716,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   histogramStyle(*histo_[inclName][kSig ], kSig , false);
   
   // ---
-  //    differential normalized cross section (whole phase space) determination
+  //    differential normlized cross section (whole phase space) determination
   // ---
   // loop all variables
   for(unsigned int number=0; number<xSecVariables_.size(); ++number){
@@ -786,21 +786,23 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	xSecBinError/= (Ntot*Ntot);
 	xSecBinError*= (effA/effABin) * (1/binwidth);
 	// check for ambiguities
-	if(!(xSecBin==0||xSecBin!=0)){
-	  if(verbose>0){ 
+	if(!isfinite(xSecBin)||isnan(xSecBin)){
+	  if(verbose>1){ 
 	    std::cout << "bin " << bin << " in ";
 	    std::cout << "analyzeTopRecoKinematicsKinFit/"+variable;
 	    std::cout << "gives no valid cross section!" << std::endl;
 	    std::cout << "!will set this bin to 0!" << std::endl;
 	  }
-	  xSecBin=0;
+	  xSecBin=0;	  // redraw axis at the end
+
 	  xSecBinError=0;
 	}
+
 	// check calculation for one example bin
-	TString testVar = "topPt";
-	int testBin=0;
+	TString testVar = "ttbarPt";
+	int testBin=1;
 	double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
-	if(verbose>1&&xSecBin!=0&&xSecBinFromDiffAndIncl!=0&&variable==testVar&&bin==testBin){
+	if(verbose>0&&xSecBin!=0&&xSecBinFromDiffAndIncl!=0&&variable==testVar&&bin==testBin){
 	  std::cout << std::endl << "differential normalized xSec ";
 	  std::cout << variable+" bin " << bin << ":" << std::endl;
 	  std::cout << "binwidth: " << std::setprecision(3) << std::fixed << binwidth << std::endl;
@@ -816,6 +818,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	// apply cross section and error to plot
 	histo_[xSec][kData]->SetBinContent(bin, xSecBin     );
 	histo_[xSec][kData]->SetBinError  (bin, xSecBinError);
+	//saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
       }
     }
     // b) differential normalized XSec from Signal(MC prediction)
@@ -831,7 +834,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrowX)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);
-    histogramStyle(*histo_[xSec][kSig ], kSig , true );
+    histogramStyle(*histo_[xSec][kSig ], kSig , false);
     // restrict axis
     if(variable=="topPt"){ 
       histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
@@ -843,6 +846,16 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     }
     ++NXSec;
   }
+//   std::cout << std::endl;
+//   for(int bin=1; bin<=histo_["xSecNorm/ttbarPt"][kData]->GetNbinsX()+1; ++bin){
+//     double value =histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin);
+//     std::cout << "bin " << bin << ": " << value << std::endl;
+//     if(!isfinite(value)||isnan(value)){
+//       histo_["xSecNorm/ttbarPt"][kData]->SetBinContent(bin,0.);
+//       std::cout << "bin " << bin << ": " << histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin)<< std::endl;
+      
+//     }	
+//   }
 
   // ---
   //    create one legend for all 1D histos
@@ -909,7 +922,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
   }
   if(verbose>2) std::cout << std::endl;
-
+  
   // ---
   //    do the printing
   // ---
@@ -976,10 +989,11 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	    if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset( 1.6 );
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	    if(getStringEntry(plotList_[plot], 1)!="xSec"   &&(getStringEntry(plotList_[plot], 2)=="topY"   ||
+	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
 	       getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
@@ -994,7 +1008,9 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	  // draw other plots into same canvas
 	  else{ 
 	    // draw data as points
-	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e1 X0 same");
+	    if(sample==kData){ 
+	      histo_[plotList_[plot]][sample]->Draw("p e1 X0 same");
+	    }
 	    else{
 	      // draw efficiencies as points
 	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e1 same");
@@ -1008,8 +1024,12 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	  // draw CMS label for xSecs
 	  TString plotType=getStringEntry(plotList_[plot], 1);
 	  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	    DrawLabel("CMS preliminary"  , 0.2, 0.83, 0.99 , 1.03, 0.15);
-	    DrawLabel(lumi+" pb^{-1} at  #sqrt{s} = 7 TeV", 0.2, 0.79, 0.99, 0.99, 0.15);
+	    TString channelLabel="";
+	    if(decayChannel=="muon"    ) channelLabel="#mu+jets";
+	    if(decayChannel=="electron") channelLabel="e+jets";
+	    DrawLabel("CMS preliminary"                   , 0.25, 0.83, 0.99, 1.03, 0.2);
+	    DrawLabel(lumi+" pb^{-1} at  #sqrt{s} = 7 TeV", 0.25, 0.79, 0.99, 0.99, 0.2);
+	    DrawLabel( channelLabel                       , 0.25, 0.75, 0.99, 0.95, 0.2);
 	  }
 	}
       }
