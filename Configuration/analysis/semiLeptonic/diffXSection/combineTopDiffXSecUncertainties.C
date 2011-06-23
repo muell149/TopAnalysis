@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, unsigned int verbose=0, TString decayChannel="muon"){
+void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=0, TString decayChannel="muon"){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -40,7 +40,7 @@ void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, uns
   // NOTE: these must be identical to those defined in 
   // xSecVariables_ in analyzeHypothesisKinFit.C
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "inclusive"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "inclusive"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.;
@@ -88,9 +88,11 @@ void combineTopDiffXSecUncertainties(double luminosity=35.9, bool save=true, uns
 	TCanvas* canvas = (TCanvas*)file->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]);
 	if(canvas){
 	  // get data plot for all systematics
-	  TH1F* plot= (TH1F*)canvas->GetPrimitive(xSecVariables_[i]+"kData");
+	  TString plotName = xSecVariables_[i];
+	  plotName.ReplaceAll("Norm","");
+	  TH1F* plot= (TH1F*)canvas->GetPrimitive(plotName+"kData");
 	  if(plot){ 
-	    if(verbose>1) std::cout << "plot "+xSecVariables_[i]+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
+	    if(verbose>1) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
 	    // got to root directory keep plot when closing rootfile
 	    gROOT->cd();
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
