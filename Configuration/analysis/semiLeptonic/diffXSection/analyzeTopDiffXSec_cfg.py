@@ -48,6 +48,11 @@ if(not globals().has_key('decayChannel')):
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
     
+# specify sample name (e.g. ttbar) -> switches runOnAOD
+if(not globals().has_key('sample')): 
+    sample = ""
+print "Chosen sample to run over: ", sample
+    
 ## choose JSON file for data
 if(not globals().has_key('jsonFile')):
     jsonFile =  ''
@@ -959,6 +964,8 @@ if(pfToPAT):
     # adaptions when running on data
     if(runningOnData=="data"):
         options['runOnMC']=False
+    elif(sample=="ttbar"):
+        options['runOnAOD']=False
     if(decayChannel=="electron"):
     # take into account different electron vetos in mu and e channel
         options['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
