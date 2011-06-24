@@ -4,5 +4,6 @@ filterTrigger = cms.EDFilter("TriggerFilter",
 
     TriggerResults = cms.InputTag('TriggerResults','','HLT'),
     hltPaths       = cms.vstring('HLT_Mu9'),
-    vetoPaths      = cms.vstring()
+    vetoPaths      = cms.vstring(),
+    printTriggers  = cms.untracked.bool(False)
 )

@@ -15,37 +15,40 @@
 /**
    \class   TriggerFilter TriggerFilter.h "TopAnalysis/TopFilter/plugins/TriggerFilter.h"
 
-   \brief   EDFilter for trigger 
+   \brief   EDFilter for trigger
 
-   This filter filters for triggers given in the config file. 
+   This filter filters for triggers given in the config file.
 */
 
 class TriggerFilter : public edm::EDFilter {
 
-  public:
+public:
     /// default constructor
     explicit TriggerFilter(const edm::ParameterSet&);
     /// default destructor
     ~TriggerFilter();
-    
-  private:
+
+private:
     /// initiate n_TrigPaths
     virtual void beginJob();
     /// look which triggers have fired and compare to given set of triggers
     virtual bool filter(edm::Event&, const edm::EventSetup&);
     /// empty
     virtual void endJob();
-        
-     /// triger result input collection	
+
+    /// triger result input collection
     edm::InputTag trigResults_;
     /// triggers to be selected given in config
     std::vector<std::string> hltPaths_;
     /// triggers which may not have fired
-    std::vector<std::string> vetoPaths_;    
+    std::vector<std::string> vetoPaths_;
     /// number of trigger paths given in config
-    int n_TrigPaths; 
+    int n_TrigPaths;
     /// number of forbidden trigger paths given in config
-    int n_VetoPaths;          
+    int n_VetoPaths;
+    /// print list of available triggers including fired/not fired info
+    bool printTriggers_;
+
 };
 
 #endif
