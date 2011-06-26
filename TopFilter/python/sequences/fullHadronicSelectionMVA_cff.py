@@ -122,19 +122,29 @@ from TopAnalysis.TopUtils.patTriggerEvent_cff import *
 #                       hltQJ40
 #                       )
 #
-## create personal QuadJet25U trigger
-
-## the QuadJet25U trigger itself
-hltQJ25U = filterTrigger.clone( whichTrigger="QuadJet25U" )
-
-trigger = cms.Sequence(patTriggerDefaultSequence *
-                       hltQJ25U
-                       )
-
+### create personal QuadJet25U trigger
+#
+### the QuadJet25U trigger itself
+#hltQJ25U = filterTrigger.clone( whichTrigger="QuadJet25U" )
+#
+#trigger = cms.Sequence(patTriggerDefaultSequence *
+#                       hltQJ25U
+#                       )
+#
 ### high level trigger filter
 #from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 #trigger = hltHighLevel.clone(HLTPaths = ["HLT_QuadJet25U", "HLT_QuadJet25U_v2", "HLT_QuadJet25U_v3"],
 #                             throw = False)
+
+## high level trigger filter
+from HLTrigger.HLTfilters.hltHighLevel_cfi import *
+trigger = hltHighLevel.clone(HLTPaths = [#2010 trigger ('v*' to be immune to version changes)
+                                         'HLT_QuadJet15U_v*', 'HLT_QuadJet20U_v*','HLT_QuadJet25U_v*',
+                                         #2011 1E33 trigger ('v*' to be immune to version changes)
+                                         'HLT_QuadJet50_Jet40_v*',
+                                         #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
+                                         'HLT_QuadJet50_Jet40_Jet30_v*'],
+                             throw = False)
 
 ## ---
 ##    FILTER STEP 0
@@ -539,21 +549,37 @@ def runOnData(process):
     for suf in listOfMonitoringSuffixes:
         process.analyseFullHadronicSelection.remove(getattr(process,'monitorGenerator'+suf))
 
-    ## switch to residual jet energy correction for data
-    if(hasattr(process, 'goodJetsPF')):
-        process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
-        process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+    print "  ||||||||||||||||||||||||||||||||||||||||||||||||||||  "
+    print "--++++++++++++++++++++++++++++++++++++++++++++++++++++--"
+    print "--+++##############################################+++--"
+    print "--+++####################      ####################+++--"
+    print "--+++#################            #################+++--"
+    print "--+++###############                ###############+++--"
+    print "--+++#############    L2L3Residual    #############+++--"
+    print "--+++###########          NOT           ###########+++--"
+    print "--+++#############      APPLIED       #############+++--"
+    print "--+++###############                ###############+++--"
+    print "--+++#################            #################+++--"
+    print "--+++####################      ####################+++--"
+    print "--+++##############################################+++--"
+    print "--++++++++++++++++++++++++++++++++++++++++++++++++++++--"
+    print "  ||||||||||||||||||||||||||||||||||||||||||||||||||||  "
 
-    udsall.correctionLevel  = 'L2L3Residual'
-    uds0.correctionLevel    = 'L2L3Residual'
-    uds1.correctionLevel    = 'L2L3Residual'
-    uds2.correctionLevel    = 'L2L3Residual'
-    uds3.correctionLevel    = 'L2L3Residual'
-    uds4.correctionLevel    = 'L2L3Residual'
-    uds5.correctionLevel    = 'L2L3Residual'
-    ball.correctionLevel    = 'L2L3Residual'
-    bottom0.correctionLevel = 'L2L3Residual'
-    bottom1.correctionLevel = 'L2L3Residual'
+    ## switch to residual jet energy correction for data
+    #if(hasattr(process, 'goodJetsPF')):
+    #    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
+    #    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+    #
+    #udsall.correctionLevel  = 'L2L3Residual'
+    #uds0.correctionLevel    = 'L2L3Residual'
+    #uds1.correctionLevel    = 'L2L3Residual'
+    #uds2.correctionLevel    = 'L2L3Residual'
+    #uds3.correctionLevel    = 'L2L3Residual'
+    #uds4.correctionLevel    = 'L2L3Residual'
+    #uds5.correctionLevel    = 'L2L3Residual'
+    #ball.correctionLevel    = 'L2L3Residual'
+    #bottom0.correctionLevel = 'L2L3Residual'
+    #bottom1.correctionLevel = 'L2L3Residual'
 
     ## changes needed for analysis
     #trigger.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
@@ -692,31 +718,37 @@ def modifyBTagDisc(process, algo, newDisc):
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
-def switchToTCHELoose(process):
+def switchToTCHEL(process):
     modifyBTagDiscs(process, 'trackCountingHighEff', 1.9, 3.3)
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
-def switchToTCHP(process):
+def switchToTCHEM(process):
+    modifyBTagDiscs(process, 'trackCountingHighEff', 3.3, 10.2)
+
+## ---
+##    switch to trackCountingHighEfficiency bTagger
+## ---
+def switchToTCHPM(process):
     modifyBTagDiscs(process, 'trackCountingHighPur', 1.93, 3.41)
 
 ## ---
 ##    switch to trackCountingHighEfficiency bTagger
 ## ---
-def switchToTCHPTight(process):
+def switchToTCHPT(process):
     modifyBTagDiscs(process, 'trackCountingHighPur', 3.41, 3.41)
 
 ## ---
 ##    switch to simpleSecondaryVertexHighEff bTagger
 ## ---
-def switchToSSVHE(process):
+def switchToSSVHEM(process):
     modifyBTagDiscs(process, 'simpleSecondaryVertexHighEff', 1.74, 3.05)
 
 ## ---
 ##    switch to simpleSecondaryVertexHighPur bTagger
 ## ---
-def switchToSSVHPTight(process):
+def switchToSSVHPT(process):
     modifyBTagDiscs(process, 'simpleSecondaryVertexHighPur', 2.00, 2.00)
 
 ## ---

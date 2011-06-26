@@ -7,7 +7,7 @@ options = VarParsing.VarParsing ('standard')
 ## decide whether to run on:  * data *, * sig *, * sigPU *, * bkg *, * bkgPU *, * qcd *, * allRedigi *, * allRedigiPU * or * all *
 options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "kind of data to be processed")
 ## choose whether to use PF or not
-options.register('usePF'      ,  1   , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int  , "use PF for processing")
+options.register('usePF'      , True , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool , "use PF for processing")
 ## set the jet energy scale factor for MC
 options.register('jesFactor'  ,  1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "jet energy scale factor for MC")
 ## set the jet energy resolution smear factor for MC
@@ -22,17 +22,21 @@ options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singlet
 ## include PDF uncertainty histograms / tree
 options.register('pdfUn'   , 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include hists/tree for pdf uncertainty")
 ## choose whether to do a background estimation or a normal selection
-options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "do a background estimation")
-## do PATification on the fly, not depending on pre-made PAT tuples anymore
-#options.register('patify', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "run PAT on the fly")
+options.register('backgroundEstimation', False , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "do a background estimation")
+## run directly on AOD, do everything on the fly
+options.register('runOnAOD', False , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "run on AOD, do everything on the fly")
 ## include b-tag efficiency and mis-tag rate in FullHadTreeWriter's TTree
 options.register('bTagPara', 1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include bTagEff and mis-tag rate")
 ## change b-tagging discriminator for b-tagging uncertainty measurement
 options.register('bTag', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "bTag uncertainty")
+## which b-tag algo and WP should be used
+options.register('bTagAlgoWP', 'SSVHEM', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which b-tag algo and WP should be used")
 ## do mva selection instead of old style selection
-options.register('mvaSelection', 1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "mva selection")
+options.register('mvaSelection', True , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "mva selection")
 ## weight of events (should be used only for MC samples)
 options.register('mcWeight', 1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "MC sample event weight")
+## which PU scenario for PU reweighting
+options.register('PUscenario', '11_165542', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
 
 # get and parse the command line arguments
 if( hasattr(sys, "argv") ):
@@ -53,15 +57,16 @@ print "maxPtHat  . . . . . :", options.maxPtHat
 print "minPtHat  . . . . . :", options.minPtHat
 print "pdfUncertainty  . . :", options.pdfUn
 print "backgroundEstimation:", options.backgroundEstimation
-#print "patify  . . . . . . :", options.patify
+print "runOnAOD  . . . . . :", options.runOnAOD
 print "bTagParametersOn  . :", options.bTagPara
 print "bTag  . . . . . . . :", options.bTag
+print "bTagAlgoWP  . . . . :", options.bTagAlgoWP
 print "mvaSelection  . . . :", options.mvaSelection
 print "mcWeight  . . . . . :", options.mcWeight
+print "PUscenario  . . . . :", options.PUscenario
 
 ## use the FullHadTreeWriter to produce a TTree with the desired information
-processName = "FullHadTreeWriter"
-process = cms.Process(processName)
+process = cms.Process("FullHadTreeWriter")
 
 ## configure message logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -69,44 +74,20 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # use only when PATTrigger is needed on data to suppress useless error messages
-process.MessageLogger.cerr.default.limit = 0
+#process.MessageLogger.cerr.default.limit = 0
 
 ## define input
 process.source = cms.Source("PoolSource",
     ## add your favourite file here
     fileNames = cms.untracked.vstring(
+    #'file:patTuple.root',
     #'file:/tmp/eschliec/tmp.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_16_1_oqr.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets/00b550d1515f7d6868b450d1e5dca901/patTuple_6jets_19_1_CQa.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_109_1_7a5.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_108_1_ZON.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_107_1_nAe.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_106_1_7M1.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_105_1_pMh.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_104_1_c2K.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_103_1_cx9.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_102_1_Xse.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_101_1_syQ.root',
-    #'/store/user/eschliec/MultiJet/PAT_6Jets_Run2011A_NEW/59f72ca2d7ebcb651fa71d8988ae9cd5/patTuple_6jets_100_1_AV3.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_15_1_5ob.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_12_1_Bay.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_18_1_WVA.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_11_1_yZl.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_17_1_dZv.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_10_1_6nQ.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_13_1_Csv.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_16_1_IWI.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_4_1_KIn.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_8_1_qD9.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_6_1_Kur.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_3_1_4da.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_9_1_WVh.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_2_1_I75.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_7_1_UxQ.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_1_1_qGb.root',
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_5_1_wzx.root',
-    )
+    '/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_131_1_MfV.root',
+    '/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_182_1_CNE.root',
+    #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_9_1_LMr.root',
+    #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_8_1_OjE.root',
+    ),
+                            skipEvents = cms.untracked.uint32(0)
 )
 
 ## define maximal number of events to loop over
@@ -130,10 +111,12 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(options.eventFilter=='data'):
-    process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
+    #process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
+    process.GlobalTag.globaltag = cms.string('GR_R_42_V14::All')
 else:
     #process.GlobalTag.globaltag = cms.string('START38_V14::All')
-    process.GlobalTag.globaltag = cms.string('START41_V0::All')
+    #process.GlobalTag.globaltag = cms.string('START41_V0::All')
+    process.GlobalTag.globaltag = cms.string('START42_V12::All')
 
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
@@ -150,7 +133,7 @@ process.filterPtHat = process.filterPtHat.clone()
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJetsAK5PF"),
                                                          inputMETs            = cms.InputTag("patMETsPF"),
-                                                         payload              = cms.string("AK5PF"),
+                                                         payload              = cms.string("AK5PFchs"),
                                                          scaleFactor          = cms.double(options.jesFactor),
                                                          scaleType            = cms.string("abs"), #abs or rel
                                                          jetPTThresholdForMET = cms.double(20.),
@@ -212,15 +195,15 @@ else:
     raise NameError, "'"+options.eventFilter+"' is not a proper eventFilter!"
 
 # adapt output filename
-process.TFileService.fileName = 'writeFullHadTree_'+options.eventFilter+'.root'
+process.TFileService.fileName = 'writeFullHadTree_test_'+options.eventFilter+'.root'
 
 ## fully hadronic selection
-if(options.mvaSelection==0):
-    process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
-    from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
-else:
+if options.mvaSelection:
     process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelectionMVA_cff")
     from TopAnalysis.TopFilter.sequences.fullHadronicSelectionMVA_cff import *
+else:
+    process.load("TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff")
+    from TopAnalysis.TopFilter.sequences.fullHadronicSelection_cff import *
 
 ## do kinematic fit needed for fully hadronic selection
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
@@ -232,14 +215,27 @@ addTtFullHadHypotheses(process,
 if( (not options.eventFilter=='sig') and (not options.eventFilter=='sigPU') ):
     removeTtFullHadHypGenMatch(process)
 
-## changing bTagger, possible are: TCHE, TCHPTight, SSV, CSV, CSVMVA
-## only TCHELoose, TCHE, TCHP, TCHPTight, SSVHE, SSVHPTight and CSV have a officialy blessed WP
-#switchToTCHELoose(process)
-#switchToTCHP(process)
-#switchToTCHPTight(process)
-switchToSSVHE(process)
-#switchToSSVHPTight(process)
-#switchToCSV(process)
+## changing bTagger, possible are: TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT, CSV, CSVMVA
+## only TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT and CSV have a officialy blessed WP
+if options.bTagAlgoWP == "TCHEM" :
+    switchToTCHEM(process)
+elif options.bTagAlgoWP == "TCHEL" :
+    switchToTCHEL(process)
+elif options.bTagAlgoWP == "TCHPM" :
+    switchToTCHPM(process)
+elif options.bTagAlgoWP == "TCHPT" :
+    switchToTCHPT(process)
+elif options.bTagAlgoWP == "SSVHEM" :
+    switchToSSVHEM(process)
+elif options.bTagAlgoWP == "SSVHPT" :
+    switchToSSVHPT(process)
+elif options.bTagAlgoWP == "CSV" :
+    switchToCSV(process)
+elif options.bTagAlgoWP == "CSVMVA" :
+    switchToCSVMVA(process)
+else :
+    exit('bTagAlgoWP * ' + options.bTagAlgoWP + " * NOT SUPPORTED, STOP PROCESSING")
+    
 
 ## modify b-tagging discriminator to estimate b-tagging efficiency and mis-tag uncertainty
 if(not options.eventFilter=='data'):
@@ -249,7 +245,7 @@ if(not options.eventFilter=='data'):
         modifyBTagDiscs(process, 'trackCountingHighEff', 3.90, 11.36)
 
 ## selection should be run on PFJets instead of caloJets
-if(options.usePF==0): 
+if not options.usePF: 
     runOnCalo(process)
 
 ## if running on real data, do everything needed for this
@@ -257,7 +253,7 @@ if(options.eventFilter=='data'):
     runOnData(process)
     ## needed because the patTriggerEvent is to chatty to be used and
     ## data is already skimmed with trigger requirement
-    removeTrigger(process)
+    #removeTrigger(process)
 
 ## increase the resolution of the kinematic fit
 increaseKinFitResolution(process, options.fitResol)
@@ -276,6 +272,16 @@ process.FullHadTreeWriter.MCweight = options.mcWeight
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 process.eventWeightPU = process.eventWeightPU.clone()
+if options.PUscenario == '11_165542':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_110527.root"
+elif options.PUscenario == '11_166502':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166502_7TeV_PromptReco_Collisions11.root"
+elif options.PUscenario == '11_May10':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11.root"
+elif options.PUscenario == '10_Apr21':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_136033-149442_7TeV_Apr21ReReco_Collisions10.root"
+elif not options.eventFilter == 'data':
+    exit('PU SCENARIO * ' + options.PUscenario + " * NOT SUPPORTED, STOP PROCESSING")
 
 ## switch bTagEff and mis-tag rate for FullHadTreeWriter
 if( options.bTagPara==0 ):
@@ -307,19 +313,27 @@ process.p1 = cms.Path(## do the genEvent selection
                       process.FullHadTreeWriter
                       )
 
-if(not options.mvaSelection==0):
+if options.mvaSelection:
     process.p1.replace(process.leadingJetSelection,process.leadingJetSelection*process.mvaDisc)
     process.p1.remove(process.trackCountingHighEffBJets)
     process.p1.remove(process.tightBottomJets)
 
-if(not options.backgroundEstimation==0):
+if options.backgroundEstimation:
     runAsBackgroundEstimation(process)
     process.p1.remove(process.makeTtFullHadEvent)
     process.p1.remove(process.FullHadTreeWriter)
-    if(not options.eventFilter=='data'):
-        process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
-    if(options.usePF==1):
-        #print getattr(process, process.tightBottomJets.src.getModuleLabel()).src
+    #if(not options.eventFilter=='data'):
+    process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
+    print "#################################################"
+    print "#################################################"
+    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
+    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
+    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
+    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
+    print "#################################################"
+    print "#################################################"
+
+    if options.usePF:
         getattr(process, process.tightBottomJets.src.getModuleLabel()).src = cms.InputTag("goodJetsPF")
                  
     process.p1 += cms.Sequence(getattr(process, process.tightBottomJets.src.getModuleLabel()) *
@@ -330,30 +344,58 @@ if(not options.backgroundEstimation==0):
 
     process.TFileService.fileName = 'QCDEstimation_'+options.eventFilter+'.root'
 
-if( options.pdfUn==2 and (options.eventFilter=='sig' or options.eventFilter=='bkg') ):
+if(options.pdfUn==2 and (options.eventFilter=='sig' or options.eventFilter=='bkg')):
     print "Writing TTree for all", options.eventFilter, "events, no further selection done!"
     process.p1.remove(process.analyseFullHadronicSelection)
 
-if(options.eventFilter=='data'):
+if options.eventFilter=='data':
     process.p1.remove(process.filterSequence)
-
-if(not options.eventFilter=='data'):
+    process.p1.remove(process.eventWeightPU)
+else:
     # different energy resolution of jets in simulation
     if(hasattr(process, 'goodJets') & hasattr(process, 'scaledJetEnergy')):
-        process.goodJets.src   = cms.InputTag('scaledJetEnergy', 'selectedPatJets', processName)
+        process.goodJets.src   = cms.InputTag('scaledJetEnergy', 'selectedPatJets', process.name_())
     if(hasattr(process, 'goodJetsPF') & hasattr(process, 'scaledJetEnergy')):
-        process.goodJetsPF.src = cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', processName)
+        process.goodJetsPF.src = cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', process.name_())
+
+
+## prepend the sequence needed to run on the NEW PAT tuples
+from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
+pf2patOptions = {'runOnOLDcfg': True}
+pf2patOptions['electronIDs'] = ''
+if options.eventFilter=='data':
+    pf2patOptions['runOnMC'] = False
+if options.runOnAOD:
+    pf2patOptions['runOnAOD'] = True
+prependPF2PATSequence(process, options = pf2patOptions)
+
+## adaptions (re-aranging of modules) to speed up processing
+pathnames = process.paths_().keys()
+for pathname in pathnames:
+    ## move the ttGenEvent filter to the beginning of the sequence
+    if options.eventFilter=='sig' or options.eventFilter=='bkg' or options.eventFilter=='sigPU' or options.eventFilter=='bkgPU':
+        getattr(process, pathname).remove(process.ttFullHadronicFilter)
+        getattr(process, pathname).insert(0,process.ttFullHadronicFilter)
+        getattr(process, pathname).remove(process.genEvt)
+        getattr(process, pathname).insert(0,process.genEvt)
+        getattr(process, pathname).remove(process.decaySubset)
+        getattr(process, pathname).insert(0,process.decaySubset)
+        getattr(process, pathname).remove(process.initSubset)
+        getattr(process, pathname).insert(0,process.initSubset)
+    ## move the trigger to the beginning of the sequence
+    getattr(process, pathname).remove(process.trigger)
+    getattr(process, pathname).insert(0,process.trigger)
 
 
 ## ATTENTION: some Fall10 samples are REDIGI and some are NOT
-if(options.eventFilter=='allRedigi'):
+if options.eventFilter=='allRedigi':
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, cms.InputTag("TriggerResults","","HLT"), cms.InputTag("TriggerResults","","REDIGI38X"))
     #process.trigger.TriggerResultsTag   = cms.InputTag("TriggerResults","","REDIGI38X")
     process.patTrigger.processName      = 'REDIGI38X'
     process.patTriggerEvent.processName = 'REDIGI38X'
 
-elif(options.eventFilter=='allRedigiPU' or options.eventFilter=='sigPU' or options.eventFilter=='bkgPU'):
+elif options.eventFilter=='allRedigiPU' or options.eventFilter=='sigPU' or options.eventFilter=='bkgPU':
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, cms.InputTag("TriggerResults","","HLT"), cms.InputTag("TriggerResults","","REDIGI38XPU"))
     #process.trigger.TriggerResultsTag   = cms.InputTag("TriggerResults","","REDIGI38XPU")
