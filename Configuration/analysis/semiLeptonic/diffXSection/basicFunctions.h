@@ -1206,7 +1206,7 @@ std::map<TString, std::vector<double> > makeVariableBinning()
   //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
   bins_.clear();
   // m(ttbar)
-  double ttbarMassBins[]={0., 400., 500., 630., 900., 1200.};
+  double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
   bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
   result["ttbarMass"]=bins_;
   //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
