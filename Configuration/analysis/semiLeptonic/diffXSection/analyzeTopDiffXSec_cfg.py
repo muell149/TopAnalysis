@@ -245,6 +245,10 @@ process.vetoJets.cut=''
 process.load("TopAnalysis.TopUtils.GenCandSelector_cfi")
 ## generator level based collections and semileptonic selection (muon and jets)
 process.load("TopAnalysis.TopFilter.sequences.genSelection_cff")
+## generator filter based on direct cuts on lepton and parton pt and eta
+## at ttGenEventLevel
+from TopAnalysis.TopFilter.filters.SemiLeptonicGenPhaseSpaceFilter_cfi import filterSemiLeptonicGenPhaseSpace
+process.filterGenPhaseSpace = filterSemiLeptonicGenPhaseSpace.clone(src = "genEvt")
 
 ## ---
 ## including analysis tools
@@ -820,9 +824,11 @@ if(runningOnData=="MC"):
                               ## create PU event weights
                               process.makeWeightsPU                         *
                               ## muon selection
-                              process.genMuonSelection                      *
+                              #process.genMuonSelection                      *
                               ## jet selection
-                              process.genJetCuts                            *
+                              #process.genJetCuts                            *
+			      ## new phase space cuts on the basis of genTtbarEvent
+			      process.filterGenPhaseSpace                   *
                               ## investigate top reconstruction
                               process.kinFitGenPhaseSpace
                               )
@@ -837,6 +843,7 @@ if(runningOnData=="MC"):
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p4.remove(process.genFilterSequence)
+	process.p4.remove(process.filterGenPhaseSpace)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p4.remove(process.dummy)
@@ -908,7 +915,7 @@ if(decayChannel=="electron"):
     process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
     # gen selection
-    process.p4.replace(process.genMuonSelection, process.genElectronSelection)
+    #process.p4.replace(process.genMuonSelection, process.genElectronSelection)
     pathlist = [process.p1, process.p2, process.p3, process.p4]
     for path in pathlist:
         # replace jet lepton veto
