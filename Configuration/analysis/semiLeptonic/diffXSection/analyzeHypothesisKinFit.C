@@ -56,13 +56,17 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   TString outputFileName="diffXSecTopSemiMu"+dataSample+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitpbHypothesis"+lumi+"pb";
+  // choose if xSec are extrapolated to whole phase space
+  bool extrapolate=true;
+  TString PS="";
+  if(!extrapolate)PS="PhaseSpace";
   // c) set root style
   gROOT->cd();
   gROOT->SetStyle("Plain");
   gStyle->SetEndErrorSize(8);
   gStyle->SetPalette(1);
   TGaxis::SetMaxDigits(2);
-  // gStyle->SetErrorX(0); 
+  // gStyle->SetErrorX(0);
 
   //  ---
   //     choose plots
@@ -145,10 +149,10 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 			 "analyzeTopRecoKinematicsKinFit/isotropy"   ,
 			 // generated top quantities
                          "analyzeTopPartonLevelKinematics/topMass"      , 
-                         "analyzeTopPartonLevelKinematics/topPt"        ,    
+			 "analyzeTopPartonLevelKinematics/topPt"        ,    
 			 "analyzeTopPartonLevelKinematicsPhaseSpace/topPt", 
                          "analyzeTopPartonLevelKinematics/topPhi"       ,
-                         "analyzeTopPartonLevelKinematics/topY"         ,
+                         "analyzeTopPartonLevelKinematics"+PS+"/topY",
                          "analyzeTopPartonLevelKinematics/topPtHad"     ,
                          "analyzeTopPartonLevelKinematics/topPhiHad"    ,
                          "analyzeTopPartonLevelKinematics/topYHad"      ,
@@ -188,9 +192,9 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 			 "analyzeTopRecoKinematicsKinFit/ttbarDelPhi",
 			 "analyzeTopRecoKinematicsKinFit/ttbarDelY"  ,
 			 // generated ttbar quantities
-                         "analyzeTopPartonLevelKinematics/ttbarMass"  ,
-                         "analyzeTopPartonLevelKinematics/ttbarPt"    ,
-                         "analyzeTopPartonLevelKinematics/ttbarY"     ,
+                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarMass"  ,
+                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarPt"    ,
+                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarY"     ,
                          "analyzeTopPartonLevelKinematics/ttbarHT"    ,
                          "analyzeTopPartonLevelKinematics/ttbarSumY"  ,
 			 "analyzeTopPartonLevelKinematics/ttbarDelPhi",
@@ -537,12 +541,12 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     TString variable=xSecVariables_[number];
     TString efficiency="efficiency/"+variable;
     // check if gen and reco plots are available
-    if(plotExists(histo_, "analyzeTopPartonLevelKinematics/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, kSig)){
+    if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, kSig)){
       //    std::cout << "found gen and reco" << std::endl;
       // get reco plot
       histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
       // divide by gen plot
-      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->Clone()));
+      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]->Clone()));
 
       // std::cout << "gen(bin1): "  <<  histo_["analyzeTopPartonLevelKinematics/"+variable  ][kSig]->GetBinContent(1) << std::endl;
       // std::cout << "reco(bin1): " <<  histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->GetBinContent(1) << std::endl;
@@ -558,8 +562,8 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
 	double eff=histo_[efficiency][kSig]->GetBinContent(bin); 
-	double N=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinContent(bin);
-	double width=histo_["analyzeTopPartonLevelKinematics/"+variable][kSig]->GetBinWidth(bin);
+	double N=histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]->GetBinContent(bin);
+	double width=histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]->GetBinWidth(bin);
 	N*=width*effSFAB(systematicVariation,decayChannel);
 	N/=(lumiweight(kSig, luminosity, systematicVariation, decayChannel));
 	if(verbose>1){
@@ -662,13 +666,13 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     std::cout << std::endl;
     std::cout << "events expected from MC: " << NAllMC << std::endl;
     std::cout << "expected event composition:"   << std::endl;
-    std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << NSig   /NAllMC << std::endl;
-    std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << NBGtop /NAllMC << std::endl;
-    std::cout << "single top:" << std::setprecision(4) << std::fixed << NBGsTop/NAllMC << std::endl;
-    std::cout << "W+jets    :" << std::setprecision(4) << std::fixed << NBGW   /NAllMC << std::endl;
-    std::cout << "QCD       :" << std::setprecision(4) << std::fixed << NBGQCD /NAllMC << std::endl;
-    std::cout << "Z+jets    :" << std::setprecision(4) << std::fixed << NBGZ   /NAllMC << std::endl;
-    std::cout << "Diboson   :" << std::setprecision(4) << std::fixed << NBGVV  /NAllMC << std::endl;
+    std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << NSig   / NAllMC << std::endl;
+    std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << NBGtop / NAllMC << std::endl;
+    std::cout << "single top:" << std::setprecision(4) << std::fixed << NBGsTop/ NAllMC << std::endl;
+    std::cout << "W+jets    :" << std::setprecision(4) << std::fixed << NBGW   / NAllMC << std::endl;
+    std::cout << "QCD       :" << std::setprecision(4) << std::fixed << NBGQCD / NAllMC << std::endl;
+    std::cout << "Z+jets    :" << std::setprecision(4) << std::fixed << NBGZ   / NAllMC << std::endl;
+    std::cout << "Diboson   :" << std::setprecision(4) << std::fixed << NBGVV  / NAllMC << std::endl;
   }
   // efficiency calculation
   double NGenPhaseSpace=0.5 * GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
@@ -716,7 +720,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   histogramStyle(*histo_[inclName][kSig ], kSig , false);
   
   // ---
-  //    differential normlized cross section (whole phase space) determination
+  //    differential normalized cross section (whole phase space) determination
   // ---
   // loop all variables
   for(unsigned int number=0; number<xSecVariables_.size(); ++number){
@@ -741,6 +745,18 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
       // get data plot
       TString name=TString(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetName())+"kData";
       histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->Clone(name));
+      // total number of data events for this variable
+      double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData],verbose-1);
+      // total number of BG events for this variable
+      double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kBkg],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kWjets],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSTop ],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kDiBos],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kQCD  ],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets],verbose-1);
+      // inclusive efficiency (* A) for this variable
+      double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable ][kSig]);
+      effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]);
       // loop bins
       for(int bin =1; bin<=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1; ++bin){
 	// for inclusive values of xSecResult, effA, BR, Ndata and NBG 
@@ -763,12 +779,12 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	NBGBin*=binwidth;
 	// calculate Ni = number of signal only events in bin from data
 	double Ni= NdataBin-NBGBin;
-	// calculate Ntot = sum_i(Ni) number of signal only events from data
-	double Ntot =Ndata-NBG;
+	// calculate Ntot = sum_i(Ni) number of signal only events from data for this variable
+	double Ntot =NdataVariable-NBGVariable;
 	// get eff*A in bin
 	double effABin=(histo_["efficiency/"+variable][kSig])->GetBinContent(bin);
 	// calculate cross section for this bin
-	double xSecBin = (Ni/Ntot) * (effA/effABin) * (1/binwidth);
+	double xSecBin = (Ni/Ntot) * (effIncl/effABin) * (1/binwidth);
 	// calculate complete error
 	double Nierror=sqrt(NdataBin); // the error of NBG is treated as systematic variation
 	double sumErrorNjSquare = 0; // sum(j,i!=j) [ errorNj*errorNj ]
@@ -784,7 +800,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	// calculate complete error
 	double xSecBinError = sqrt( ((Ntot - Ni)*(Ntot - Ni)*Nierror*Nierror) + (Ni*Ni*sumErrorNjSquare) );
 	xSecBinError/= (Ntot*Ntot);
-	xSecBinError*= (effA/effABin) * (1/binwidth);
+	xSecBinError*= (effIncl/effABin) * (1/binwidth);
 	// check for ambiguities
 	if(!isfinite(xSecBin)||isnan(xSecBin)){
 	  if(verbose>1){ 
@@ -800,7 +816,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 
 	// check calculation for one example bin
 	TString testVar = "ttbarPt";
-	int testBin=0;
+	int testBin=1;
 	double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
 	if(verbose>0&&xSecBin!=0&&xSecBinFromDiffAndIncl!=0&&variable==testVar&&bin==testBin){
 	  std::cout << std::endl << "differential normalized xSec ";
@@ -820,18 +836,21 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	histo_[xSec][kData]->SetBinError  (bin, xSecBinError);
 	//saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
       }
+      std::cout << getInclusiveXSec(histo_[xSec][kData],2) << std::endl;
     }
     // b) differential normalized XSec from Signal(MC prediction)
     histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
     DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
-    histo_[xSec][kSig]->Scale(1/(157.5*BR)); // BR correction was not applied to differential xSec
+    double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig], verbose-1);
+    histo_[xSec][kSig]->Scale(1/(XSecInclTheoPS));
+    std::cout << getInclusiveXSec(histo_[xSec][kSig],2) << std::endl;
     // add plot to list of plots
     plotList_.push_back(xSec);
     // add axis configuration
     unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{1}{"+label2+"} ] (t#bar{t}#rightarrowX)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{1}{"+label2+"} ] (t#bar{t}#rightarrow"+(TString)decayChannel+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);
     histogramStyle(*histo_[xSec][kSig ], kSig , false);
