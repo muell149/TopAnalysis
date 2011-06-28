@@ -4,6 +4,7 @@
 ## ---
 
 sample="ttbar"
+decayChannel = 'electron'
 
 ## get the mother file
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
@@ -11,11 +12,13 @@ execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 ## choose data set
 process.load("TopAnalysis/Configuration/samples/TTJets_madgraph_Summer11_cff")
 
+process.hltFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
+
 ## reduce output
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change number of processed events
-process.maxEvents.input = 10
+process.maxEvents.input = 5000
 
 ## change output name 
-process.TFileService.fileName = 'analyzeMuonDiffXSecCorr_testSig.root'
+process.TFileService.fileName = 'analyzeElecDiffXSecCorr_testSig.root'
