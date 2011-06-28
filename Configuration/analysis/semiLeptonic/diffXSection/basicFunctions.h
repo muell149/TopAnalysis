@@ -46,6 +46,8 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 			  /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysDiBosUp        , /*27:*/sysDiBosDown};
 
 bool newSpring11MC=true;
+bool newSummer11MC=false;
+
 TString sysLabel(unsigned int sys)
 {
   // this function returns a TString that corresponds 
@@ -108,10 +110,12 @@ double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   double result = -1.;
   if (decayChannel.compare("muon")==0) {
     result = 0.964155;
-    if(newSpring11MC) result = 0.9581;
-  } else if (decayChannel.compare("electron")==0) {
+    if(newSpring11MC||newSummer11MC) result = 0.9581;// TO BE DERIVED
+  } 
+  else if (decayChannel.compare("electron")==0) {
     result = 1.0;                   // TO BE DERIVED
     if(newSpring11MC) result = 1.0; // TO BE DERIVED
+    if(newSummer11MC) result = 1.0; // TO BE DERIVED
   }
   // errors for the derived SF
   double errorUp   = 0.03*result;
@@ -492,6 +496,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     crossSection=157.5;
     Nevents     =1306182.;
     if(newSpring11MC) Nevents     = 1286491;
+    if(newSummer11MC) Nevents     = 3701947;
     // systematic samples:
     if(kSys==sysTopScaleUp  ) Nevents=1153236;
     if(kSys==sysTopScaleDown) Nevents=1098971;
@@ -595,6 +600,8 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
   }
   // GOSSIE FIXME WRONG diboson and QCD samples, now scaled to zero on purpose 
   if (decayChannel.compare("electron")==0) { if(sample==kWW || sample==kWZ || sample==kZZ || sample==kQCD) { weight = 0. ; } }
+  // MARTIN FIXME WRONG missing non ttbar sample scaled to zero on purpose 
+  if(newSummer11MC&&(sample!=kSig)&&(sample!=kBkg)&&(sample!=kData)) weight = 0.;
   double weight2=weight;
   if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
   // e) systematic effects
@@ -695,8 +702,8 @@ TString TopFilename(unsigned int sample, unsigned int sys, const std::string dec
   // used enumerators: samples, systematicVariation 
 
   TString fileName = "decayChannel_undefined" ;
-  if (decayChannel.compare("muon")    ==0) fileName ="muonDiffXSec";
-  if (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
+  if (decayChannel.compare("electron")==0&&((sample==kSig)||(sample==kBkg))) fileName ="elecDiffXSec";
+  else fileName ="muonDiffXSec";
   // name of data file is given directly in the .C file
   if(sample==kData) return ""; 
   // standard MC filenames
@@ -715,7 +722,8 @@ TString TopFilename(unsigned int sample, unsigned int sys, const std::string dec
   if(sample==kSTop  )fileName += "SingleTopMadD6T";
   // label for MC production cycle
   // note: we have no Diboson spring11 MC up to now
-  if(newSpring11MC&&sample!=kWW&&sample!=kWZ&&sample!=kZZ) fileName += "Spring11";
+  if(!newSummer11MC&&newSpring11MC&&sample!=kWW&&sample!=kWZ&&sample!=kZZ) fileName += "Spring11";
+  else if(newSummer11MC&&(sample==kSig||sample==kBkg)) fileName += "Summer11";
   else fileName += "Fall10"  ;
   // take care of systematic variations
   // JES
@@ -1483,7 +1491,17 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
   f2->Draw("L same");
 }
 
-
-
+double getInclusiveXSec(TH1* hist, int verbose=0)
+{
+  double value=0;
+  if(verbose>0) std::cout << "histo: " << hist->GetTitle() << std::endl;
+  for(int bin=0; bin<=hist->GetNbinsX()+1; ++bin){
+    double thisBin=hist->GetBinWidth(bin)*hist->GetBinContent(bin);
+    value+=thisBin;
+    if(verbose>1) std::cout << "xSec bin" << bin << ": " << thisBin << std::endl;
+  }
+  if(verbose>0) std::cout << "integrated xSec: " << value << std::endl;
+  return value;
+}
 
 #endif
