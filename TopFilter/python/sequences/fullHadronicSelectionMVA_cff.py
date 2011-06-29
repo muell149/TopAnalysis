@@ -151,6 +151,7 @@ from TopAnalysis.TopUtils.patTriggerEvent_cff import *
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 trigger = hltHighLevel.clone(HLTPaths = [#2010 trigger ('v*' to be immune to version changes)
+                                         'HLT_QuadJet15U'   , 'HLT_QuadJet20U'   ,'HLT_QuadJet25U'   ,
                                          'HLT_QuadJet15U_v*', 'HLT_QuadJet20U_v*','HLT_QuadJet25U_v*',
                                          #2011 1E33 trigger ('v*' to be immune to version changes)
                                          'HLT_QuadJet50_Jet40_v*',
