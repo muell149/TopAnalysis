@@ -28,7 +28,9 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## define tight cuts for jet kinematics
 tight4JetCut  = 'pt > 60. & abs(eta) < 2.4'
 tight5JetCut  = 'pt > 50. & abs(eta) < 2.4'
-tight6JetCut  = 'pt > 30. & abs(eta) < 2.4'
+#tight6JetCut  = 'pt > 30. & abs(eta) < 2.4'
+tight6JetCut  = 'pt > 40. & abs(eta) < 2.4'
+tightJetCut   = 'pt > 30. & abs(eta) < 2.4'
 
 ## define tight JetIDs
 tightCaloJetID  = '& (((jecFactor("Uncorrected") * pt) > 25. & jetID.fHPD < 0.95) | (jecFactor("Uncorrected") * pt) <= 25.) & '
@@ -38,18 +40,27 @@ tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
 
 ## setup the jet selection collection
 tight4LeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tight4JetCut + tightPFJetID
+                                          cut = tight4JetCut # + tightPFJetID
                                           )
 tight5LeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tight5JetCut + tightPFJetID
+                                          cut = tight5JetCut # + tightPFJetID
+                                          )
+#tightLeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
+#                                          cut = tight6JetCut # + tightPFJetID
+#                                          )
+tight6LeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
+                                          cut = tight6JetCut # + tightPFJetID
                                           )
 tightLeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tight6JetCut + tightPFJetID
+                                          cut = tightJetCut # + tightPFJetID
                                           )
 
 trackCountingHighEffBJets.src = 'goodJetsPF'
+#tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
+#                                         cut = tight6JetCut # + tightPFJetID
+#                                         )
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
-                                         cut = tight6JetCut + tightPFJetID
+                                         cut = tightJetCut # + tightPFJetID
                                          )
 
 ## setting up the collections for the fully-hadronic
@@ -59,6 +70,7 @@ createJetCollections = cms.Sequence(goodJetsPF *
                                     trackCountingHighEffBJets *
                                     tight4LeadingJets *
                                     tight5LeadingJets *
+                                    tight6LeadingJets *
                                     tightLeadingJets *
                                     tightBottomJets
                                     )
@@ -150,30 +162,30 @@ trigger = hltHighLevel.clone(HLTPaths = [#2010 trigger ('v*' to be immune to ver
 ##    FILTER STEP 0
 ## ---
 
-## vertex filter
-vertex = cms.EDFilter("VertexSelector",
-                      src = cms.InputTag("offlinePrimaryVertices"),
-                      cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2"),
-                      filter = cms.bool(True),
-                      )
-
-## scraping filter
-noscraping = cms.EDFilter("FilterOutScraping",
-                          applyfilter = cms.untracked.bool(True),
-                          debugOn = cms.untracked.bool(False),
-                          numtrack = cms.untracked.uint32(10),
-                          thresh = cms.untracked.double(0.25)
-                          )
-
-## setup good jet selection collection
-goodJetSelection = countPatJets.clone(src = 'goodJetsPF',
-                                      minNumber = 6
-                                      )
-
-filterStep0 = cms.Sequence(vertex *
-                           noscraping *
-                           goodJetSelection
-                           )
+### vertex filter
+#vertex = cms.EDFilter("VertexSelector",
+#                      src = cms.InputTag("offlinePrimaryVertices"),
+#                      cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2"),
+#                      filter = cms.bool(True),
+#                      )
+#
+### scraping filter
+#noscraping = cms.EDFilter("FilterOutScraping",
+#                          applyfilter = cms.untracked.bool(True),
+#                          debugOn = cms.untracked.bool(False),
+#                          numtrack = cms.untracked.uint32(10),
+#                          thresh = cms.untracked.double(0.25)
+#                          )
+#
+### setup good jet selection collection
+#goodJetSelection = countPatJets.clone(src = 'goodJetsPF',
+#                                      minNumber = 6
+#                                      )
+#
+#filterStep0 = cms.Sequence(vertex *
+#                           noscraping *
+#                           goodJetSelection
+#                           )
 
 ## to switch verbosity modes of the kinFit
 #ttFullHadEvent.verbosity = 3
@@ -379,11 +391,11 @@ analyseFullHadronicSelection = cms.Sequence(PDFUncertainty_0     *
                                             ## do the hlt triggering
                                             trigger              *
                                             ## create the jet collections
-                                            createJetCollections *
+                                            createJetCollections #*
                                             ## do the matching
                                             #matchJetsToPartons   *
                                             ## filter step 0
-                                            filterStep0
+                                            #filterStep0
                                             )
 
 createMonitoringSequence("_0", 'goodJetsPF', 'trackCountingHighEffBJets')
@@ -404,7 +416,10 @@ leading5JetSelection = countPatJets.clone(src = 'tight5LeadingJets',
                                           )
 
 ## select all events with at least 6 jets
-leading6JetSelection = countPatJets.clone(src = 'tightLeadingJets',
+#leading6JetSelection = countPatJets.clone(src = 'tightLeadingJets',
+#                                          minNumber = 6
+#                                          )
+leading6JetSelection = countPatJets.clone(src = 'tight6LeadingJets',
                                           minNumber = 6
                                           )
 
@@ -482,8 +497,8 @@ createMonitoringSequence("_3", 'tightLeadingJets', 'tightBottomJets', 1)
 
 ## kinfit quality filter
 from TopQuarkAnalysis.TopEventProducers.producers.TtFullHadEvtFilter_cfi import *
-#filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')") ) # & fitProb > 0.01") )
-filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') & fitChi2 < 30.0") )
+filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') & fitProb > 0.01") )
+#filterKinFitQuality = ttFullHadEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') & fitChi2 < 30.0") )
 
 analyseFullHadronicSelection += filterKinFitQuality
 
@@ -657,10 +672,13 @@ def runOnCalo(process):
     process.analyseFullHadronicSelection.replace(process.goodJetsPF, process.goodJets)
 
     ## exchange PFJetID cuts to JetID
-    process.tight4LeadingJets.cut = tight4JetCut + tightCaloJetID
-    process.tight5LeadingJets.cut = tight5JetCut + tightCaloJetID
-    process.tightLeadingJets.cut  = tight6JetCut + tightCaloJetID
-    process.tightBottomJets.cut   = tight6JetCut + tightCaloJetID
+    process.tight4LeadingJets.cut = tight4JetCut # + tightCaloJetID
+    process.tight5LeadingJets.cut = tight5JetCut # + tightCaloJetID
+    #process.tightLeadingJets.cut  = tight6JetCut # + tightCaloJetID
+    process.tight6LeadingJets.cut = tight6JetCut # + tightCaloJetID
+    process.tightLeadingJets.cut  = tightJetCut # + tightCaloJetID
+    #process.tightBottomJets.cut   = tight6JetCut # + tightCaloJetID
+    process.tightBottomJets.cut   = tightJetCut  # + tightCaloJetID
 
     ## exchange resolutions for CaloJets
     process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
