@@ -7,7 +7,8 @@
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 
 # JER +20%
-process.scaledJetEnergy.resolutionFactor = 1.20
+process.scaledJetEnergy.resolutionFactors   = cms.vdouble(1.2,   1.25,   1.30  )
+process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,1.5,1.5,2.0,2.0,-1)
 if(applyKinFit==True):
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.20
 

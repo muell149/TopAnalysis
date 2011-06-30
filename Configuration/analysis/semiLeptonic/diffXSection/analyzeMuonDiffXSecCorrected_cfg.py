@@ -39,7 +39,9 @@ if(pfToPAT==True):
     process.scaledJetEnergy.inputMETs = "patMETs"
 
 # JER +10%
-process.scaledJetEnergy.resolutionFactor = 1.1
+process.scaledJetEnergy.resolutionFactors = cms.vdouble(1.1)
+process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,-1.)
+
 if(applyKinFit==True):
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
 
