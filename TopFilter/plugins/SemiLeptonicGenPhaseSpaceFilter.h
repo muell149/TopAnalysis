@@ -9,7 +9,10 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
-/// This filter cuts on the pt and eta of the ttbar decay products using the TtGenEvent.
+/// This filter cuts on the kinematics of the ttbar event on gen level using the TtGenEvent:
+/// 1) pt and eta of the ttbar decay products
+/// 2) pt and Y of the tops
+/// 3) pt and Y of the ttbar system
 
 
 class SemiLeptonicGenPhaseSpaceFilter : public edm::EDFilter {
@@ -28,13 +31,21 @@ class SemiLeptonicGenPhaseSpaceFilter : public edm::EDFilter {
  private:
   
   edm::InputTag src_;
+  /// cut values
   double leptonMinPt_;
   double leptonMaxEta_; 
   double partonMinPt_;
-  double partonMaxEta_; 
-  bool   addHistos_;
-  /// histogram container for histos
-  std::map<std::string, TH1F*> hists_;
+  double partonMaxEta_;
+  double topMinPt_;
+  double topMaxPt_;      
+  double topMaxY_;       
+  double ttbarMinPt_;    
+  double ttbarMaxPt_;    
+  double ttbarMaxY_;     
+  /// decision on which level cuts are made
+  bool decayLevelCuts_;
+  bool topLevelCuts_;  
+  bool ttbarLevelCuts_;
 
 };
 
