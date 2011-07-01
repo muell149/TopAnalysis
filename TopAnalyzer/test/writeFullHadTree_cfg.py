@@ -378,6 +378,10 @@ else:
 ## prepend the sequence needed to run on the NEW PAT tuples
 from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
 pf2patOptions = {'runOnOLDcfg': True}
+pf2patOptions['pfIsoConeMuon'] = 0.4
+pf2patOptions['pfIsoConeElec'] = 0.4
+pf2patOptions['pfIsoValMuon'] = 0.2
+pf2patOptions['pfIsoValElec'] = 0.2
 pf2patOptions['electronIDs'] = ''
 if options.eventFilter=='data':
     pf2patOptions['runOnMC'] = False
