@@ -10,8 +10,8 @@ options.register('eventFilter', 'data', VarParsing.VarParsing.multiplicity.singl
 options.register('usePF'      , True , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool , "use PF for processing")
 ## set the jet energy scale factor for MC
 options.register('jesFactor'  ,  1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "jet energy scale factor for MC")
-## set the jet energy resolution smear factor for MC
-options.register('jetEResol'  ,  1.1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "jet energy resol factor for MC")
+## set the jet energy resolution smear factors for MC (-1,0,+1) (down,default,up)
+options.register('jetEResol', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "jet energy resol smear for MC")
 ## set the resolution fractor for the kinematic fit
 options.register('fitResol'   ,  1.1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "kinFit resolution factor")
 ## choose whether to write output to disk or not
@@ -28,7 +28,7 @@ options.register('runOnAOD', False , VarParsing.VarParsing.multiplicity.singleto
 ## include b-tag efficiency and mis-tag rate in FullHadTreeWriter's TTree
 options.register('bTagPara', 1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include bTagEff and mis-tag rate")
 ## change b-tagging discriminator for b-tagging uncertainty measurement
-options.register('bTag', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "bTag uncertainty")
+#options.register('bTag', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "bTag uncertainty")
 ## which b-tag algo and WP should be used
 options.register('bTagAlgoWP', 'SSVHEM', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which b-tag algo and WP should be used")
 ## do mva selection instead of old style selection
@@ -36,18 +36,18 @@ options.register('mvaSelection', True , VarParsing.VarParsing.multiplicity.singl
 ## weight of events (should be used only for MC samples)
 options.register('mcWeight', 1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "MC sample event weight")
 ## which PU scenario for PU reweighting
-options.register('PUscenario', '11_May10', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
+options.register('PUscenario', '11_166861', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
 ## trigger results tag
 options.register('triggerTag', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "tag of trigger Results")
 
 # get and parse the command line arguments
-if( hasattr(sys, "argv") ):
+if hasattr(sys, "argv") :
     for args in sys.argv :
         arg = args.split(',')
         for val in arg:
             val = val.split('=')
-            if(len(val)==2):
-                setattr(options,val[0], val[1])
+            if len(val)==2 :
+                setattr(options, val[0], val[1])
 
 print "eventFilter . . . . :", options.eventFilter
 print "usePF . . . . . . . :", options.usePF
@@ -61,7 +61,7 @@ print "pdfUncertainty  . . :", options.pdfUn
 print "backgroundEstimation:", options.backgroundEstimation
 print "runOnAOD  . . . . . :", options.runOnAOD
 print "bTagParametersOn  . :", options.bTagPara
-print "bTag  . . . . . . . :", options.bTag
+#print "bTag  . . . . . . . :", options.bTag
 print "bTagAlgoWP  . . . . :", options.bTagAlgoWP
 print "mvaSelection  . . . :", options.mvaSelection
 print "mcWeight  . . . . . :", options.mcWeight
@@ -85,8 +85,6 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     #'file:patTuple.root',
     #'file:/tmp/eschliec/tmp.root',
-    #'file:~/scripts/current/TTBar_D6T_Fall10/209699B6-98E3-DF11-B5EC-00221981BAAB.root',
-    #'file:~/scripts/current/TTBar_D6T_Spring11/D85737FB-CA59-E011-8C08-00A0D1EE9238.root',
     #'/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_131_1_MfV.root',
     #'/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_182_1_CNE.root',
     #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_9_1_LMr.root',
@@ -122,9 +120,9 @@ else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         process.GlobalTag.globaltag = cms.string('START42_V12::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
-        #process.GlobalTag.globaltag = cms.string('START38_V14::All')
-        process.GlobalTag.globaltag = cms.string('START41_V0::All')
-    
+        process.GlobalTag.globaltag = cms.string('START38_V14::All')
+        #process.GlobalTag.globaltag = cms.string('START41_V0::All')
+
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
@@ -137,6 +135,15 @@ process.load("TopAnalysis.TopFilter.filters.PtHatFilter_cfi")
 process.filterPtHat = process.filterPtHat.clone()
 
 ## additional jet energy smearing for MC
+if options.jetEResol == 0:
+    resolutions = [1.1, 1.1, 1.1]
+elif options.jetEResol == 1:
+    resolutions = [1.2, 1.25, 1.3]
+elif options.jetEResol == -1:
+    resolutions = [1.0, 0.95, 0.9]
+else:
+    exit('jetEResol: ' + str(options.jetEResol) + ' not supported choose -1/0/+1')
+
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJetsAK5PF"),
                                                          inputMETs            = cms.InputTag("patMETsPF"),
@@ -145,8 +152,10 @@ process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = 
                                                          scaleType            = cms.string("abs"), #abs or rel
                                                          jetPTThresholdForMET = cms.double(20.),
                                                          jetEMLimitForMET     = cms.double(0.9),
-                                                         resolutionFactor     = cms.double(options.jetEResol)
+                                                         resolutionFactors    = cms.vdouble(resolutions),
+                                                         resolutionEtaRanges  = cms.vdouble(0.0,1.5,1.5,2.0,2.0,-1.)
                                                        )
+
 ## set set energy scaling factors
 if(options.jesFactor > 1.0):
     process.scaledJetEnergy.scaleType = "top:up"
@@ -245,11 +254,11 @@ else :
     
 
 ## modify b-tagging discriminator to estimate b-tagging efficiency and mis-tag uncertainty
-if not options.eventFilter=='data' :
-    if(options.bTag < 0):
-        modifyBTagDiscs(process, 'trackCountingHighEff', 2.84,  9.28)
-    elif(options.bTag > 0):
-        modifyBTagDiscs(process, 'trackCountingHighEff', 3.90, 11.36)
+#if(not options.eventFilter=='data'):
+#    if(options.bTag < 0):
+#        modifyBTagDiscs(process, 'trackCountingHighEff', 2.84,  9.28)
+#    elif(options.bTag > 0):
+#        modifyBTagDiscs(process, 'trackCountingHighEff', 3.90, 11.36)
 
 ## selection should be run on PFJets instead of caloJets
 if not options.usePF: 
@@ -279,8 +288,8 @@ process.FullHadTreeWriter.MCweight = options.mcWeight
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 process.eventWeightPU = process.eventWeightPU.clone()
-if options.PUscenario == '11_165542':
-    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_110527.root"
+if options.PUscenario == '11_166861':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166861_7TeV_PromptReco_Collisions11.root"
 elif options.PUscenario == '11_166502':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166502_7TeV_PromptReco_Collisions11.root"
 elif options.PUscenario == '11_May10':
