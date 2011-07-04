@@ -191,6 +191,30 @@ void TopKinematics::book()
 
 
   /** 
+      ttbar final state object distributions
+  **/
+  // leptonPt
+  hists_["lepPt"      ] = new TH1F( "lepPt"      , "lepPt"      ,  1200,  0. ,  1200.);
+  // leptonEta
+  hists_["lepEta"     ] = new TH1F( "lepEta"     , "lepEta"     ,  100,  -5. ,  5.   );
+  // neutrinoPt
+  hists_["neutrinoPt" ] = new TH1F( "neutrinoPt" , "neutrinoPt" ,  1200,  0. ,  1200.);
+  // neutrinoEta
+  hists_["neutrinoEta"] = new TH1F( "neutrinoEta", "neutrinoEta",  100,  -5. ,  5.   );
+  // light-quarks Pt
+  hists_["lightqPt"   ] = new TH1F( "lightqPt"   , "lightqPt"   ,  1200,  0. ,  1200.);
+  // light-quarks Eta
+  hists_["lightqEta"  ] = new TH1F( "lightqEta"  , "lightqEta"  ,  100,  -5. ,  5.   );
+  // b-quarks Pt
+  hists_["bqPt"       ] = new TH1F( "bqPt"       , "bqPt"       ,  1200,  0. ,  1200.);
+  // b-quarks Eta
+  hists_["bqEta"      ] = new TH1F( "bqEta"      , "bqEta"      ,  100,  -5. ,  5.   );
+  // leading quark Pt
+  hists_["leadqPt"    ] = new TH1F( "leadqPt"    , "leadqPt"    ,  1200,  0. ,  1200.);
+  // leading quark Eta
+  hists_["leadqEta"   ] = new TH1F( "leadqEta"   , "leadqEta"   ,  100,  -5. ,  5.   );
+ 
+  /** 
       wrong reconstructed quarks
   **/
   hists_["qAssignment"] = new TH1F( "qAssignment", "qAssignment",     10, -0.5,   9.5 );
@@ -383,6 +407,30 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["isotropy"    ] = fs->make<TH1F> ("isotropy"   , "isotropy"   , 100,  0. , 1. ); 
 
   /** 
+      ttbar final state object distributions
+  **/
+  // leptonPt
+  hists_["lepPt"      ] = fs->make<TH1F> ( "lepPt"      , "lepPt"      ,  1200,  0. ,  1200.);
+  // leptonEta		     
+  hists_["lepEta"     ] = fs->make<TH1F> ( "lepEta"     , "lepEta"     ,  100,  -5. ,  5.   );
+  // neutrinoPt		
+  hists_["neutrinoPt" ] = fs->make<TH1F> ( "neutrinoPt" , "neutrinoPt" ,  1200,  0. ,  1200.);
+  // neutrinoEta	
+  hists_["neutrinoEta"] = fs->make<TH1F> ( "neutrinoEta", "neutrinoEta",  100,  -5. ,  5.   );
+  // light-quarks Pt	
+  hists_["lightqPt"   ] = fs->make<TH1F> ( "lightqPt"   , "lightqPt"   ,  1200,  0. ,  1200.);
+  // light-quarks Eta	
+  hists_["lightqEta"  ] = fs->make<TH1F> ( "lightqEta"  , "lightqEta"  ,  100,  -5. ,  5.   );
+  // b-quarks Pt	
+  hists_["bqPt"       ] = fs->make<TH1F> ( "bqPt"       , "bqPt"       ,  1200,  0. ,  1200.);
+  // b-quarks Eta	
+  hists_["bqEta"      ] = fs->make<TH1F> ( "bqEta"      , "bqEta"      ,  100,  -5. ,  5.   );
+  // leading quark Pt	
+  hists_["leadqPt"    ] = fs->make<TH1F> ( "leadqPt"    , "leadqPt"    ,  1200,  0. ,  1200.);
+  // leading quark Eta	
+  hists_["leadqEta"   ] = fs->make<TH1F> ( "leadqEta"   , "leadqEta"   ,  100,  -5. ,  5.   );
+
+  /** 
       wrong reconstructed quarks
   **/
   hists_["qAssignment"] = fs->make<TH1F>( "qAssignment", "qAssignment",     10, -0.5,   9.5 );
@@ -486,6 +534,21 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "isotropy"         ); 
     bookVariable(fs, "C"                );
     bookVariable(fs, "D"                ); 
+    // final state objects
+    bookVariable(fs, "lepPt"       );
+    bookVariable(fs, "lepEta"      );
+    bookVariable(fs, "neutrinoPt"  );
+    bookVariable(fs, "neutrinoEta" );
+    bookVariable(fs, "lightQPt"    );
+    bookVariable(fs, "lightQbarPt" );
+    bookVariable(fs, "lepBPt"      );
+    bookVariable(fs, "hadBPt"      );  
+    bookVariable(fs, "lightQEta"   );
+    bookVariable(fs, "lightQbarEta");
+    bookVariable(fs, "lepBEta"     );
+    bookVariable(fs, "hadBEta"     );
+    bookVariable(fs, "leadqPt"     );  
+    bookVariable(fs, "leadqEta"    );
     // parton truth value
     // ttbar quantities
     bookVariable(fs, "ttbarPtPartonTruth"    );
@@ -506,7 +569,6 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "topYLepPartonTruth"   );  
     bookVariable(fs, "topPhiLepPartonTruth" );
     bookVariable(fs, "lepTopMassPartonTruth");
-
   }
 }
 
@@ -515,6 +577,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
 void
 TopKinematics::fill(const TtGenEvent& tops, const double& weight)
 {
+  if(useTree_) initializeTrees(-9999, weight);
   // make sure to have a ttbar pair belonging to the semi-leptonic decay channel with 
   // a muon in the final state and neglect events where top decay is not via Vtb
   if( ( (tops.isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")    ==0) || 
@@ -547,6 +610,12 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     fillAngles(tops.hadronicDecayB()->p4(), tops.hadronicDecayQuark()->p4(), tops.hadronicDecayQuarkBar()->p4(),
 	       tops.leptonicDecayB()->p4(), tops.singleLepton()      ->p4(), tops.singleNeutrino()       ->p4(),
 	       weight);
+    // ---
+    //    fill  final state objects histo
+    // ---
+    fillFinalStateObjects(tops.hadronicDecayB()->p4(), tops.hadronicDecayQuark()->p4(), tops.hadronicDecayQuarkBar()->p4(),
+			  tops.leptonicDecayB()->p4(), tops.singleLepton()      ->p4(), tops.singleNeutrino()       ->p4(),
+			  weight);
     // save lepton charge
     fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton()))->charge(), weight );
     // fill the tree, if any variable exists to put in
@@ -558,29 +627,29 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
 void
 TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
-  double charge    =-10;
-  double assignment=-10;
-  double genTtbarPt       =-10;
-  double genTtbarRapidity =-10;
-  double genTtbarPhi      =-10;
-  double genTtbarMass     =-10;
-  double genDeltaPhi      =-10;
-  double genDeltaRapidity =-10;
-  double sumRapidity      =-10;
-  double HTgen            =-10;
-  double hadTopGenPt      =-10;
-  double hadTopGenRapidity=-10;
-  double hadTopGenPhi     =-10;
-  double hadTopGenMass    =-10;
-  double lepTopGenPt      =-10;
-  double lepTopGenRapidity=-10;  
-  double lepTopGenPhi     =-10;
-  double lepTopGenMass    =-10;
-  double HTrec            =-10;
-  double prob             =-10;
-  double chi2             =-10;
-  double delChi2          =-10;
-
+  double charge           =-9999;
+  double assignment       =-9999;
+  double genTtbarPt       =-9999;
+  double genTtbarRapidity =-9999;
+  double genTtbarPhi      =-9999;
+  double genTtbarMass     =-9999;
+  double genDeltaPhi      =-9999;
+  double genDeltaRapidity =-9999;
+  double sumRapidity      =-9999;
+  double HTgen            =-9999;
+  double hadTopGenPt      =-9999;
+  double hadTopGenRapidity=-9999;
+  double hadTopGenPhi     =-9999;
+  double hadTopGenMass    =-9999;
+  double lepTopGenPt      =-9999;
+  double lepTopGenRapidity=-9999;  
+  double lepTopGenPhi     =-9999;
+  double lepTopGenMass    =-9999;
+  double HTrec            =-9999;
+  double prob             =-9999;
+  double chi2             =-9999;
+  double delChi2          =-9999;
+  if(useTree_) initializeTrees(-9999, weight);
   // make sure to have a valid hypothesis on reconstruction level.
   if( tops.isHypoValid(hypoKey_) ){
     // define leptonic/hadronic or positive/negative charged objects (B,W,t)
@@ -775,6 +844,11 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 		      tops.hadronicDecayQuarkBar(hypoKey_)->p4(), tops.leptonicDecayB    (hypoKey_)->p4(), 
 		      tops.singleLepton         (hypoKey_)->p4(), tops.singleNeutrino    (hypoKey_)->p4(),
 		      weight, false, false);
+      // fill final state objects
+      fillFinalStateObjects(tops.hadronicDecayB       (hypoKey_)->p4(), tops.hadronicDecayQuark(hypoKey_)->p4(), 
+			    tops.hadronicDecayQuarkBar(hypoKey_)->p4(), tops.leptonicDecayB    (hypoKey_)->p4(), 
+			    tops.singleLepton         (hypoKey_)->p4(), tops.singleNeutrino    (hypoKey_)->p4(),
+			    weight);
     }
     // ---
     //    check quark assignment
@@ -856,8 +930,6 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     }
     // save lepton charge
     charge= ((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge();
-    // fill the tree, if any variable should be put in
-    if(treeVars_.size()) tree->Fill();
   }
   // fill trees and histos
   fillValue( "prob"       , prob      , weight);
@@ -881,7 +953,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "topYLepPartonTruth"    , lepTopGenRapidity, weight );  
   fillValue( "topPhiLepPartonTruth"  , lepTopGenPhi     , weight );
   fillValue( "lepTopMassPartonTruth" , lepTopGenMass    , weight );
-
+  // fill the tree, if any variable should be put in
+  if(treeVars_.size()) tree->Fill();
 }
 
 /// histogram filling for kinematic 1D histos
@@ -1244,4 +1317,63 @@ TopKinematics::fillEventShapes(const ROOT::Math::LorentzVector<ROOT::Math::PxPyP
   // isotropy of event:
   // the return value is 1 for spherical events and 0 for events linear in r-phi
   fillValue("isotropy"   , isotropy_   , weight);
+}
+
+///  helper functions to fill final state objects
+void
+TopKinematics::fillFinalStateObjects(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& hadB    ,
+				     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& q       ,
+				     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& qbar    ,
+				     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepB    ,
+				     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepton  ,
+				     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
+				     const double& weight)
+{
+  // ---
+  //    fill ttbar final state object distributions
+  // ---  
+
+  // a) fill trees+histos for lepton and neutrino
+  // leptonPt
+  fillValue("lepPt"      , lepton.Pt()    , weight);
+  // leptonEta				  
+  fillValue("lepEta"     , lepton.Eta()	  , weight);
+  // neutrinoPt				  
+  fillValue("neutrinoPt" , neutrino.Pt()  , weight);
+  // neutrinoEta			  
+  fillValue("neutrinoEta", neutrino.Eta() , weight);
+  // b) fill histos for quarks: sepearte only b/light quarks
+  // light-quarks Pt		  
+  fillValue("lightqPt"   , q.Pt()	  , weight);
+  fillValue("lightqPt"   , qbar.Pt()	  , weight);
+  // light-quarks Eta			  
+  fillValue("lightqEta"  , q.Eta()	  , weight);
+  fillValue("lightqEta"  , qbar.Eta()	  , weight);
+  // b-quarks Pt			  
+  fillValue("bqPt"       , lepB.Pt()	  , weight);
+  fillValue("bqPt"       , hadB.Pt()	  , weight);
+  // b-quarks Eta			  
+  fillValue("bqEta"      , lepB.Eta()	  , weight);
+  fillValue("bqEta"      , hadB.Eta()     , weight);
+  
+  // fill trees for (light/b)x(quark/antiquark)
+  fillValue("lightQPt"    , q.Pt()    , weight);
+  fillValue("lightQbarPt" , qbar.Pt() , weight);
+  fillValue("lepBPt"      , lepB.Pt() , weight);
+  fillValue("hadBPt"      , hadB.Pt() , weight);  
+  fillValue("lightQEta"   , q.Eta()   , weight);
+  fillValue("lightQbarEta", qbar.Eta(), weight);
+  fillValue("lepBEta"     , lepB.Eta(), weight);
+  fillValue("hadBEta"     , hadB.Eta(), weight);
+
+  // find leading jet
+  ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadq=hadB;
+  if(lepB.Pt()>leadq.Pt()) leadq=lepB;
+  if(q   .Pt()>leadq.Pt()) leadq=q   ;
+  if(qbar.Pt()>leadq.Pt()) leadq=qbar;
+  // leading quark Pt
+  fillValue("leadqPt" , leadq.Pt()  , weight);
+  // leading quark Eta
+  fillValue("leadqEta", leadq.Eta() , weight);
+
 }

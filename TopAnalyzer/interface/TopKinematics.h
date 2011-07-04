@@ -87,7 +87,15 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
 		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& muon    ,
 		       const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
 		       const double& weight, const bool useMu, const bool useNu);
-
+  ///  helper functions to fill final state objects
+  void fillFinalStateObjects(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& hadB    ,
+			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& q       ,
+			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& qbar    ,
+			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepB    ,
+			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepton  ,
+			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
+			     const double& weight);
+  
  private:
   /// class key of hypothesis
   std::string hypoKey_;
