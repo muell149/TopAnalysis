@@ -69,12 +69,13 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
 	  }
 	  // adapt plot style
 	  double max = plotTheo->GetMaximum();
+	  max*=1.5;
 	  plotTheo->GetXaxis()->SetNoExponent(true);
 	  if(max>1&&max<100) plotTheo->GetYaxis()->SetNoExponent(true);
 	  TString yTitle=plotTheo->GetYaxis()->GetTitle();
-	  std::cout << yTitle  << std::endl;
+	  if(verbose>1)std::cout << "original title: " << yTitle  << std::endl;
 	  yTitle.ReplaceAll("muon"," l = e,#mu");
-	  std::cout << yTitle  << std::endl;
+	  if(verbose>1)std::cout << "new title: " << yTitle  << std::endl;
 	  plotTheo->GetYaxis()->SetTitle(yTitle);
 	  // create Canvas
 	  TCanvas* combicanvas = new TCanvas("combicanvas", "combicanvas", 600, 600);

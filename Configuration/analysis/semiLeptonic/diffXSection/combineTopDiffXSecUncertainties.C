@@ -13,7 +13,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // ---
   //    parameter Configuration
   // ---
-  // set detail level of output 
+  // set detail level of ouStput 
   // 0: no output, 1: std output 2: output for debugging
   // save: enable saving
   // dataSample: see if its "2010" or "2011" data
@@ -22,7 +22,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
-  TString outputFile="diffXSecTopSemiMu"+dataSample+".root";
+  TString outputFile="diffXSecTopSemi";
+  if(decayChannel=="muon"    ) outputFile+="Mu";
+  if(decayChannel=="electron") outputFile+="Elec";
+  outputFile+=dataSample+".root";
   // define folder where XSec plots are stored
   TString xSecFolder = "xSec";
   // save all plots into the following folder
