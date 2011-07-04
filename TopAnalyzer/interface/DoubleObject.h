@@ -67,6 +67,7 @@ class DoubleObject{
   /// fill values into map for histograms or tree
   void fillValue(std::string variable, float value1, float value2, const double& weight);
   void fillValue(std::string variable, float value1, const double& weight);
+  void initializeTrees(float value, const double& weight);
 
   /**
      The following functions have to be implemented for any class
@@ -159,6 +160,17 @@ void DoubleObject<CollectionA, CollectionB>::write(TFile& file, const char* dire
   }
   for(std::map<std::string, TH2*>::const_iterator hist = hists2D_.begin(); hist !=hists2D_.end(); ++hist){
     hist->second->Write( );
+  }
+}
+
+/// initialize all branches with default value (can be called in all events)
+template <typename CollectionA, typename CollectionB> 
+void DoubleObject<CollectionA, CollectionB>::initializeTrees(float value, const double& weight=1.)
+{
+  // loop all branches in the tree
+  for(std::map<std::string, float>::iterator treeEntry=treeVars_.begin(); treeEntry!=treeVars_.end(); ++treeEntry){
+    if(treeEntry->first!="weight") treeEntry->second = value;
+    else treeEntry->second = weight;
   }
 }
 
