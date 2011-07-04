@@ -53,11 +53,14 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
   if(dataSample!="") outputFolder+=dataSample+"/";
   // save all plots within a root file named:
-  TString outputFileName="diffXSecTopSemiMu"+dataSample+".root";
+  TString outputFileName="diffXSecTopSemi";
+  if(decayChannel=="muon"    ) outputFileName+="Mu";
+  if(decayChannel=="electron") outputFileName+="Elec";
+  outputFileName+=dataSample+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitpbHypothesis"+lumi+"pb";
   // choose if xSec are extrapolated to whole phase space
-  bool extrapolate=true;
+  bool extrapolate=false;
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
   // c) set root style
@@ -755,8 +758,8 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
       NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kQCD  ],verbose-1);
       NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets],verbose-1);
       // inclusive efficiency (* A) for this variable
-      double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable ][kSig]);
-      effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]);
+      double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable ][kSig],verbose-1);
+      effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig],verbose-1);
       // loop bins
       for(int bin =1; bin<=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1; ++bin){
 	// for inclusive values of xSecResult, effA, BR, Ndata and NBG 
@@ -816,7 +819,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 
 	// check calculation for one example bin
 	TString testVar = "ttbarPt";
-	int testBin=1;
+	int testBin=0;
 	double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
 	if(verbose>0&&xSecBin!=0&&xSecBinFromDiffAndIncl!=0&&variable==testVar&&bin==testBin){
 	  std::cout << std::endl << "differential normalized xSec ";
@@ -836,14 +839,14 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	histo_[xSec][kData]->SetBinError  (bin, xSecBinError);
 	//saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
       }
-      std::cout << getInclusiveXSec(histo_[xSec][kData],2) << std::endl;
+      if(verbose>1) std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
     }
     // b) differential normalized XSec from Signal(MC prediction)
     histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
     DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
     double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig], verbose-1);
     histo_[xSec][kSig]->Scale(1/(XSecInclTheoPS));
-    std::cout << getInclusiveXSec(histo_[xSec][kSig],2) << std::endl;
+    if(verbose>1) std::cout << getInclusiveXSec(histo_[xSec][kSig],verbose-1) << std::endl;
     // add plot to list of plots
     plotList_.push_back(xSec);
     // add axis configuration
@@ -1132,3 +1135,4 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   // delete pointer
   delete leg0;
 }
+
