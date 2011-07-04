@@ -9,13 +9,19 @@ import FWCore.ParameterSet.Config as cms
 ##    options
 ## ---
 
-## allow crab to choose trigger filter for every job individually
+## introduce interface with crab file
+## allows to choose registered parameter for every job individually
 import FWCore.ParameterSet.VarParsing as VarParsing
 import sys
 options = VarParsing.VarParsing ('standard')
+
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
-# define the syntax you need to enter in the cfg file:
+# create sample label with default value data 
+options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
+
+# define the syntax for parsing
+# you need to enter in the cfg file:
 # search for arguments entered after cmsRun
 if( hasattr(sys, "argv") ):
     # split arguments by comma - seperating different variables
@@ -24,9 +30,10 @@ if( hasattr(sys, "argv") ):
         # split further by = to separate variable name and value
         for val in arg:
             val = val.split('=')
-            # set variable var to value val (supposed crab syntax: var=val)
+            # set variable var to value val (expected crab syntax: var=val)
             if(len(val)==2):
                 setattr(options,val[0], val[1])
+
 print "used trigger path: TriggerResults::"+options.triggerTag
 
 ## choose jet collection and corresponding MET
@@ -48,11 +55,11 @@ if(not globals().has_key('decayChannel')):
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
     
-# specify sample name (e.g. ttbar) -> switches runOnAOD
-if(not globals().has_key('sample')): 
-    sample = ""
-print "Chosen sample to run over: ", sample
-    
+# print chosen sample (e.g. ttbar)
+# value is known from external parsing
+# if set, switches runOnAOD in PF2PAT to true
+print "Chosen sample to run over: ", options.sample
+
 ## choose JSON file for data
 if(not globals().has_key('jsonFile')):
     jsonFile =  ''
@@ -138,24 +145,46 @@ process.source = cms.Source("PoolSource",
     #'/store/data/Run2011A/MuHad/AOD/PromptReco-v4/000/165/205/0C569F2A-D382-E011-B122-00304879FBB2.root' 
     #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
     #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/1204EE92-F397-E011-99E8-003048679012.root' 
-    #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_25_5_kOf.root',
-    #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_24_5_2Mt.root'
     #'/store/data/Run2011A/MuHad/AOD/May10ReReco-v1/0005/FC809CA7-0C7D-E011-AE04-003048678B1C.root' 
-    #'/store/user/eschliec/TT_TuneZ2_7TeV-pythia6-tauola/PATWithPF_v4/9941cea2bc9e8278ba9adea48fa29a20/patTuple_9_5_7MZ.root'
-    
+
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
+
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
     #'/store/user/wbehrenh/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_2_k5G.root'
-    #'/store/user/cakir/MuHad/PAT_Data2011_MuHadv1_GJSON/d006f2bc492c2b853732556b211d6e87/Data2011_GJSON_10_1_vcC.root'
     #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root'
     #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_21_1_JdU.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
-    #'/store/user/tpearson/TTJets_TuneD6T_7TeV-madgraph-tauola/SQWaT_PAT_416_fix/4a4fa1fac2c79aed96827b3552d647f0/SQWaT_PF2ATtuple_416_PFFastJet_9_1_aEu.root'
     )
 )
 
+## automatically load the correct (AOD) .root file list for each MC sample
+if(not options.sample=="none"):
+    if(options.sample=="ttbar"):        
+        process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
+        print "running on files from TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="wjets"):        
+        process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
+    if(options.sample=="zjets"):        
+        process.load("TopAnalysis/Configuration/dylljetsM50_MadgraphZ2_Summer11_AOD_cff")
+    if(options.sample=="singleTopS"):        
+        process.load("TopAnalysis/Configuration/stops_PythiaPowhegZ2_Summer11_AOD_cff")
+    if(options.sample=="singleTopT"):        
+        process.load("TopAnalysis/Configuration/stopt_PythiaPowhegZ2_Summer11_AOD_cff")
+    if(options.sample=="singleTopTw"):        
+        process.load("TopAnalysis/Configuration/stoptw_PythiaPowhegZ2_Summer11_AOD_cff")
+    if(options.sample=="qcd"):
+        if(decayChannel=='muon'):
+            process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
+    if(options.sample=="WW"):        
+        process.load("TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff")
+    if(options.sample=="WZ"):        
+        process.load("TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff")
+    if(options.sample=="ZZ"):        
+        process.load("TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff")
+
+        
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -952,7 +981,7 @@ if(pfToPAT):
     allpaths  = process.paths_().keys()
     recoPaths=['p1','p2']
     # define general options
-    options = {
+    PFoptions = {
         'runOnMC': True,
         'runOnAOD': True,
         'switchOffEmbedding': False,
@@ -970,18 +999,18 @@ if(pfToPAT):
         }
     # adaptions when running on data
     if(runningOnData=="data"):
-        options['runOnMC']=False
-    elif(sample=="ttbar"):
-        options['runOnAOD']=False
+        PFoptions['runOnMC']=False
+    #    elif(options.sample=="ttbar"):
+    #        PFoptions['runOnAOD']=False
     if(decayChannel=="electron"):
     # take into account different electron vetos in mu and e channel
-        options['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
+        PFoptions['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
     # skip events (and jet calculation) if no lepton is found
     # only done in data, as in MC you need the events for parton truth plots
-        options['skipIfNoPFElec']=True 
+        PFoptions['skipIfNoPFElec']=True 
     elif(decayChannel=="muon"):
-        options['skipIfNoPFMuon']=True
-    prependPF2PATSequence(process, recoPaths, options)
+        PFoptions['skipIfNoPFMuon']=True
+    prependPF2PATSequence(process, recoPaths, PFoptions)
     # remove electron collections as long as id does not exist in the tuples
     for path in recoPaths:
         #getattr(process,path).remove( process.looseElectronsEJ )
@@ -992,7 +1021,7 @@ if(pfToPAT):
         massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
         massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
         # run trigger at the beginning to save a lot of time
-        getattr(process,path).insert(0,process.hltFilter)
+        #getattr(process,path).insert(0,process.hltFilter)
     
 ## Output Module Configuration
 if(writeOutput):
