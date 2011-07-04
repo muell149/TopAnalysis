@@ -35,10 +35,13 @@
 decayChannel=\"muon\" # or \"electron\"
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=191.0
+dataLuminosity=204
 ## dataset: 2010 or 2011
+#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
+dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
+#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
-dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011_ElectronHad_160404-161312.root\"
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
@@ -54,8 +57,8 @@ verbose=0
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
+#maxSys=0
 maxSys=0
-#maxSys=27
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -83,12 +86,17 @@ if [ $fast = false ]
 fi
 
 ## delete existing root file
-echo "part A: delete existing rootfile ./diffXSecTopSemiMu$dataLabel.root"
+Lep="Mu"
+if [ $decayChannel = "electron" ]
+    then
+    Lep="Elec"
+fi
+echo "part A: delete existing rootfile ./diffXSecTopSemi$Lep$dataLabel.root"
 if [ $fast = false ]
     then
     sleep 3
 fi
-rm ./diffXSecTopSemiMu$dataLabel.root
+rm ./diffXSecTopSemi$Lep$dataLabel.root
 
 ## delete existing plots
 if [ $clean = true ]
@@ -166,7 +174,7 @@ do
       BEFORESYS=$(date +%s)
   fi
 ## run macro
-  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', 1, '$dataSample', '$decayChannel')'
 done
 AFTERSYS=$(date +%s)
 
