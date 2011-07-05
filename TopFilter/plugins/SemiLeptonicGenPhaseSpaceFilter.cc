@@ -14,10 +14,10 @@ SemiLeptonicGenPhaseSpaceFilter::SemiLeptonicGenPhaseSpaceFilter(const edm::Para
   partonMaxEta_  ( cfg.getParameter<double       >("partonMaxEta") ),
   topMinPt_      ( cfg.getParameter<double       >("topMinPt") ),
   topMaxPt_      ( cfg.getParameter<double       >("topMaxPt") ),
-  topMaxY_       ( cfg.getParameter<double       >("topMaxEta") ),
+  topMaxY_       ( cfg.getParameter<double       >("topMaxY") ),
   ttbarMinPt_    ( cfg.getParameter<double       >("ttbarMinPt") ),
   ttbarMaxPt_    ( cfg.getParameter<double       >("ttbarMaxPt") ),
-  ttbarMaxY_     ( cfg.getParameter<double       >("ttbarMaxEta") ),
+  ttbarMaxY_     ( cfg.getParameter<double       >("ttbarMaxY") ),
   decayLevelCuts_( cfg.getParameter<bool         >("decayLevelCuts") ),
   topLevelCuts_  ( cfg.getParameter<bool         >("topLevelCuts") ),
   ttbarLevelCuts_( cfg.getParameter<bool         >("ttbarLevelCuts") )
