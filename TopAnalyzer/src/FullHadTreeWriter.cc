@@ -8,6 +8,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 //#include "DataFormats/Candidate/interface/Candidate.h"
 //#include "DataFormats/Candidate/interface/LeafCandidate.h"
@@ -620,7 +621,7 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   edm::Handle<double> multiJetMVADisc_h;
   event.getByLabel(MultiJetMVADiscSrc_, multiJetMVADisc_h);
   
-  edm::Handle<std::vector<PileupSummaryInfo> > PU_h;
+  edm::Handle<edm::View<PileupSummaryInfo> > PU_h;
   event.getByLabel(PUSrc_, PU_h);
   
   edm::Handle<std::vector<reco::Vertex> > vertecies_h;
@@ -1014,7 +1015,7 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   nPU = -1;
 
   if(PU_h.isValid()){
-    for(std::vector<PileupSummaryInfo>::const_iterator iterPU = PU_h->begin(); iterPU != PU_h->end(); ++iterPU){  // vector size is 3
+    for(edm::View<PileupSummaryInfo>::const_iterator iterPU = PU_h->begin(); iterPU != PU_h->end(); ++iterPU){  // vector size is 3
       if(iterPU->getBunchCrossing()==0){ // -1: previous BX, 0: current BX,  1: next BX
 	nPU = iterPU->getPU_NumInteractions();
 	break;
