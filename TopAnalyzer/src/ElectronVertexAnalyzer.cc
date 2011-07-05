@@ -2,6 +2,7 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
+#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
 
 
 
@@ -13,6 +14,7 @@ ElectronVertexAnalyzer::ElectronVertexAnalyzer(const ParameterSet& cfg)
   ndof_     = cfg.getParameter<unsigned int>("ndof"     );
   rho_      = cfg.getParameter<double>      ("rho"      );
   z_        = cfg.getParameter<double>      ("z"        );
+  weight_   = cfg.getParameter<InputTag>("weight");
 }
 
 ElectronVertexAnalyzer::~ElectronVertexAnalyzer()
@@ -100,10 +102,11 @@ ElectronVertexAnalyzer::beginJob()
 void
 ElectronVertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 {
+  double weight = getPUEventWeight(evt, weight_);
   Handle<std::vector<reco::Vertex> > vertices;
   evt.getByLabel(vertices_, vertices);
 
-  multi_->Fill(vertices->size());
+  multi_->Fill(vertices->size(), weight);
 
   int i=0;
   for(VertexCollection::const_iterator vrtx = vertices->begin(); vrtx!= vertices->end(); ++vrtx) {
@@ -119,21 +122,21 @@ ElectronVertexAnalyzer::analyze(const Event& evt, const EventSetup&)
     if(!isFake && ndof>ndof_ && fabs(z)<z_ && rho<rho_){
       i++;
 
-      posX_  ->Fill(vrtx->x());
-      posY_  ->Fill(vrtx->y());
-      posZ_  ->Fill(z);
-      posRho_->Fill(rho);
+      posX_  ->Fill(vrtx->x(), weight);
+      posY_  ->Fill(vrtx->y(), weight);
+      posZ_  ->Fill(z, weight);
+      posRho_->Fill(rho, weight);
 
-      posXerr_->Fill(vrtx->xError());
-      posYerr_->Fill(vrtx->yError());
-      posZerr_->Fill(vrtx->zError());
+      posXerr_->Fill(vrtx->xError(), weight);
+      posYerr_->Fill(vrtx->yError(), weight);
+      posZerr_->Fill(vrtx->zError(), weight);
 
-      nTracks_->Fill(ntracks);
-      nDof_   ->Fill(ndof);
-      chi2_   ->Fill(chi2);
-      nchi2_  ->Fill(nchi2);
+      nTracks_->Fill(ntracks, weight);
+      nDof_   ->Fill(ndof, weight);
+      chi2_   ->Fill(chi2, weight);
+      nchi2_  ->Fill(nchi2, weight);
 
-      position3D_->Fill(vrtx->z(),vrtx->x(),vrtx->y()); // this is NO typo!
+      position3D_->Fill(vrtx->z(),vrtx->x(),vrtx->y(), weight); // this is NO typo!
 
       Handle<std::vector<pat::Electron> > electrons;
       evt.getByLabel(electrons_, electrons);
@@ -143,7 +146,7 @@ ElectronVertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 
 
       for(std::vector<pat::Electron>::const_iterator electron = electrons->begin(); electron!= electrons->end(); ++electron) {
-        dzEl_->Fill(fabs(electron->vz()-z));
+        dzEl_->Fill(fabs(electron->vz()-z), weight);
 
         // TO BE FIXED
         double ip=-999.;
@@ -153,12 +156,12 @@ ElectronVertexAnalyzer::analyze(const Event& evt, const EventSetup&)
           ip = fabs(electron->gsfTrack()->dxy(bspotPosition));
         }  else
           ip = fabs(electron->gsfTrack()->dxy());
-        dxyEl_->Fill(ip);
+        dxyEl_->Fill(ip, weight);
       }
 
     }
   }
-  goodMulti_->Fill(i);
+  goodMulti_->Fill(i, weight);
 }
 
 void

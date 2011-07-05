@@ -75,6 +75,8 @@ class ElectronVertexAnalyzer : public EDAnalyzer {
     TH1D* dxyEl_;
     
     TH3D* position3D_;        
+InputTag weight_;
+
 };
 
 #endif

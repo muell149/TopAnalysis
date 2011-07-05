@@ -1,5 +1,5 @@
 #ifndef FullLepGenAnalyzer_h
-#define FullLepGenAnalyzer_h 
+#define FullLepGenAnalyzer_h
 
 #include "TH1D.h"
 
@@ -15,7 +15,7 @@
 /**
   \class   FullLepGenAnalyzer FullLepGenAnalyzer.cc "TopAnalysis/TopAnalyzer/plugins/FullLepGenAnalyzer.cc"
 
-  \brief   EDAnalyzer for full leptonic events        
+  \brief   EDAnalyzer for full leptonic events
 */
 
 using namespace std;
@@ -26,7 +26,7 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   explicit FullLepGenAnalyzer(const edm::ParameterSet&);
   /// default destructor
   ~FullLepGenAnalyzer();
-  
+
  private:
   /// read in which channels are going to be selected and print out
   virtual void beginJob();
@@ -34,11 +34,10 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   /// gives a summary how many events have been selected
   virtual void endJob();
-  /// book histograms for generated particles properties: Pt, E, Eta, Phi, m  
-  void bookGenHistos(edm::Service<TFileService>&);  
+  /// book histograms for generated particles properties: Pt, E, Eta, Phi, m
+  void bookGenHistos(edm::Service<TFileService>&);
   /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
-  void fillGenHistos(std::vector<TH1D*>&, 
-                     const reco::Candidate&);
+  void fillGenHistos(std::vector<TH1D*>&, const reco::Candidate&, double weight);
 
     /// histograms for generated top quark kinematics
   std::vector<TH1D*> TopGen_;
@@ -49,8 +48,8 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   /// histograms for generated l^+ kinematics
   std::vector<TH1D*> LepBarGen_;
   /// histograms for generated neutrino kinematics
-  std::vector<TH1D*> NuGen_; 
-  /// histograms for generated anti-top quark kinematics 
+  std::vector<TH1D*> NuGen_;
+  /// histograms for generated anti-top quark kinematics
   std::vector<TH1D*> TopBarGen_;
   /// histograms for generated W^- quark kinematics
   std::vector<TH1D*> WminusGen_;
@@ -59,13 +58,14 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   /// histograms for generated l^- kinematics
   std::vector<TH1D*> LepGen_;
   /// histograms for generated anti-neutrino kinematics
-  std::vector<TH1D*> NuBarGen_;  
+  std::vector<TH1D*> NuBarGen_;
   /// histograms for generated top pair kinematics
   std::vector<TH1D*> TtBarGen_;
   /// histograms for generated lepton pair kinematics
   std::vector<TH1D*> LepPairGen_;
   /// histograms for generated jet pair kinematics
   std::vector<TH1D*> JetPairGen_;
+    edm::InputTag weight_;
 };
 
 #endif

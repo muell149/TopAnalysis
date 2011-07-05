@@ -1,4 +1,4 @@
-
+#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
@@ -29,6 +29,7 @@ DiLeptonAnalyzer::DiLeptonAnalyzer( const edm::ParameterSet& ps ) {
 
   MassWindow_up_   = ps.getParameter<double>("MassWindow_up");
   MassWindow_down_ = ps.getParameter<double>("MassWindow_down");
+  weight_          = ps.getParameter<edm::InputTag>("weight");
 
   if( fileOutput_ ) {
     const char *fileName = outputFile_.c_str();
@@ -92,7 +93,7 @@ void DiLeptonAnalyzer::beginJob() {
   const int nbins = 100;
 
   double logmin = 1.;
-  double logmax = 3.;  // 10^(3.)=1000
+  double logmax = log(7000)/log(10);  // 100 bins from 1 GeV to 7 TeV
 
   float bins[nbins+1];
 
@@ -141,8 +142,8 @@ void DiLeptonAnalyzer::beginRun(const edm::Run& r, const edm::EventSetup& contex
 
 }
 
-
 void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& context) {
+    double weight = getPUEventWeight(evt, weight_);
 
   // ------------------------
   //  Global Event Variables
@@ -208,7 +209,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
     //    double ndof      = primaryVertex.ndof();
     bool fake        = primaryVertex.isFake();
 
-    Ntracks->Fill(numberTracks);
+    Ntracks->Fill(numberTracks, weight);
 
     if( !fake && numberTracks > 3 ) {
 
@@ -239,14 +240,14 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
   if( !muons.failedToGet() ) {
 
-    Nmuons->Fill( muons->size() );
+    Nmuons->Fill( muons->size(), weight);
 
     for(muon = muons->begin(); muon!= muons->end(); ++muon) {
 
       float  N_muons = muons->size();
       float  Q_muon  = muon->charge();
 
-      Nmuons_charge->Fill(N_muons*Q_muon);
+      Nmuons_charge->Fill(N_muons*Q_muon, weight);
 
       double track_X = 100.;
       double track_Y = 100.;
@@ -260,8 +261,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	track_Y = track->vy();
 	track_Z = track->vz();
 
-	VxVy_muons->Fill(track_X, track_Y);
-	Vz_muons->Fill(track_Z);
+	VxVy_muons->Fill(track_X, track_Y, weight);
+	Vz_muons->Fill(track_Z, weight);
 
       }
 
@@ -285,7 +286,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	}
 
-	D_R_muon_jet->Fill(min_dR_muon_jets);
+	D_R_muon_jet->Fill(min_dR_muon_jets, weight);
 
       }
 
@@ -298,7 +299,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
       if ( muon->pt() != 0. )
 	muonCombRelIso = ( muIso03.emEt + muIso03.hadEt + muIso03.hoEt + muIso03.sumPt ) / muon->pt();
 
-      Muon_CombRelIso03->Fill( muonCombRelIso );
+      Muon_CombRelIso03->Fill( muonCombRelIso, weight );
 
       if( muonCombRelIso < muon_iso_cut_ ) {
 
@@ -309,7 +310,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
     }
 
-    Nmuons_iso->Fill(N_iso_mu);
+    Nmuons_iso->Fill(N_iso_mu, weight);
 
   }
 
@@ -337,14 +338,14 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
   if( !elecs.failedToGet() ) {
 
-    Nelecs->Fill( elecs->size() );
+    Nelecs->Fill( elecs->size(), weight );
 
     for(elec = elecs->begin(); elec!= elecs->end(); ++elec) {
 
       float N_elecs = elecs->size();
       float Q_elec  = elec->charge();
 
-      Nelecs_charge->Fill(N_elecs*Q_elec);
+      Nelecs_charge->Fill(N_elecs*Q_elec, weight);
 
       double track_X = 100.;
       double track_Y = 100.;
@@ -374,7 +375,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	}
 
-	D_R_elec_jet->Fill(min_dR_elec_jets);
+	D_R_elec_jet->Fill(min_dR_elec_jets, weight);
 
       }
 
@@ -390,7 +391,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	}
 
-	D_R_elec_muon->Fill(min_dR_elec_muons);
+	D_R_elec_muon->Fill(min_dR_elec_muons, weight);
 
       }
 
@@ -407,7 +408,7 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	elecCombRelIso = ( elec->dr03TkSumPt() + elec->dr03EcalRecHitSumEt() + elec->dr03HcalTowerSumEt() ) / elec->et();
 
 
-      Elec_CombRelIso03->Fill( elecCombRelIso );
+      Elec_CombRelIso03->Fill( elecCombRelIso, weight );
 
       if( elecCombRelIso < elec_iso_cut_ ) {
 
@@ -418,11 +419,11 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
     }
 
-    Nelecs_iso->Fill(N_iso_el);
+    Nelecs_iso->Fill(N_iso_el, weight);
 
   }
 
-  Events_iso->Fill(N_iso_mu, N_iso_el);
+  Events_iso->Fill(N_iso_mu, N_iso_el, weight);
 
   N_iso_lep = N_iso_el + N_iso_mu;
 
@@ -467,12 +468,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
  	  if( mu1.charge()*mu2.charge() < 0. ) {
 
-	    DimassRC_MM->Fill(      DilepMass );
-	    DimassRC_LOGX_MM->Fill( DilepMass );
+	    DimassRC_MM->Fill(      DilepMass, weight );
+	    DimassRC_LOGX_MM->Fill( DilepMass, weight );
 
 	    if( DilepMass > 12. ) {
 
-	      Events_RC->Fill(1.);
+	      Events_RC->Fill(1., weight);
 
 	      if( fileOutput_ ) {
 
@@ -506,8 +507,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	    if( DilepMass > MassWindow_down_ && DilepMass < MassWindow_up_ ) {
 
-	      D_eta_muonsRC->Fill(mu1.eta()-mu2.eta());
-	      D_phi_muonsRC->Fill(deltaPhi(mu1.phi(),mu2.phi()));
+	      D_eta_muonsRC->Fill(mu1.eta()-mu2.eta(), weight);
+	      D_phi_muonsRC->Fill(deltaPhi(mu1.phi(),mu2.phi()), weight);
 
 	    }
 
@@ -517,12 +518,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	  if( mu1.charge()*mu2.charge() > 0. ) {
 
-	    DimassWC_MM->Fill(      DilepMass );
-	    DimassWC_LOGX_MM->Fill( DilepMass );
+	    DimassWC_MM->Fill(      DilepMass, weight );
+	    DimassWC_LOGX_MM->Fill( DilepMass, weight );
 
 	    if( DilepMass > 12. ) {
 
-	      Events_WC->Fill(1.);
+	      Events_WC->Fill(1., weight);
 
 	      if( fileOutput_ ) {
 
@@ -540,8 +541,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	    if( DilepMass > MassWindow_down_ && DilepMass < MassWindow_up_ ) {
 
-	      D_eta_muonsWC->Fill(mu1.eta()-mu2.eta());
-	      D_phi_muonsWC->Fill(deltaPhi(mu1.phi(),mu2.phi()));
+	      D_eta_muonsWC->Fill(mu1.eta()-mu2.eta(), weight);
+	      D_phi_muonsWC->Fill(deltaPhi(mu1.phi(),mu2.phi()), weight);
 
 	    }
 
@@ -584,12 +585,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	  if( mu1.charge()*el1.charge() < 0. ) {
 
-	    DimassRC_ME->Fill(      DilepMass );
-	    DimassRC_LOGX_ME->Fill( DilepMass );
+	    DimassRC_ME->Fill(      DilepMass, weight );
+	    DimassRC_LOGX_ME->Fill( DilepMass, weight );
 
 	    if( DilepMass > 12. ) {
 
-	      Events_RC->Fill(2.);
+	      Events_RC->Fill(2., weight);
 
 	      if( fileOutput_ ) {
 
@@ -631,8 +632,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	    if( DilepMass > MassWindow_down_ && DilepMass < MassWindow_up_ ) {
 
-	      D_eta_leptsRC->Fill(mu1.eta()-el1.eta());
-	      D_phi_leptsRC->Fill(deltaPhi(mu1.phi(),el1.phi()));
+	      D_eta_leptsRC->Fill(mu1.eta()-el1.eta(), weight);
+	      D_phi_leptsRC->Fill(deltaPhi(mu1.phi(),el1.phi()), weight);
 
 	    }
 
@@ -642,12 +643,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	  if( mu1.charge()*el1.charge() > 0. ) {
 
-	    DimassWC_ME->Fill(      DilepMass );
-	    DimassWC_LOGX_ME->Fill( DilepMass );
+	    DimassWC_ME->Fill(      DilepMass, weight );
+	    DimassWC_LOGX_ME->Fill( DilepMass, weight );
 
 	    if( DilepMass > 12. ) {
 
-	      Events_WC->Fill(2.);
+	      Events_WC->Fill(2., weight);
 
 	      if( fileOutput_ ) {
 
@@ -665,8 +666,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	    if( DilepMass > MassWindow_down_ && DilepMass < MassWindow_up_ ) {
 
-	      D_eta_leptsWC->Fill(mu1.eta()-el1.eta());
-	      D_phi_leptsWC->Fill(deltaPhi(mu1.phi(),el1.phi()));
+	      D_eta_leptsWC->Fill(mu1.eta()-el1.eta(), weight);
+	      D_phi_leptsWC->Fill(deltaPhi(mu1.phi(),el1.phi()), weight);
 
 	    }
 
@@ -710,12 +711,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	  if( el1.charge()*el2.charge() < 0. ) {
 
-	    DimassRC_EE->Fill(      DilepMass );
-	    DimassRC_LOGX_EE->Fill( DilepMass );
+	    DimassRC_EE->Fill(      DilepMass, weight );
+	    DimassRC_LOGX_EE->Fill( DilepMass, weight );
 
 	    if( DilepMass > 12. ) {
 
-	      Events_RC->Fill(3.);
+	      Events_RC->Fill(3., weight);
 
 	      if( fileOutput_ ) {
 
@@ -749,8 +750,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	    if( DilepMass > MassWindow_down_ && DilepMass < MassWindow_up_ ) {
 
-	      D_eta_elecsRC->Fill(el1.eta()-el2.eta());
-	      D_phi_elecsRC->Fill(deltaPhi(el1.phi(),el2.phi()));
+	      D_eta_elecsRC->Fill(el1.eta()-el2.eta(), weight);
+	      D_phi_elecsRC->Fill(deltaPhi(el1.phi(),el2.phi()), weight);
 
 	    }
 
@@ -760,12 +761,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	  if( el1.charge()*el2.charge() > 0. ) {
 
-	    DimassWC_EE->Fill(      DilepMass );
-	    DimassWC_LOGX_EE->Fill( DilepMass );
+	    DimassWC_EE->Fill(      DilepMass, weight );
+	    DimassWC_LOGX_EE->Fill( DilepMass, weight );
 
 	    if( DilepMass > 12. ) {
 
-	      Events_WC->Fill(3.);
+	      Events_WC->Fill(3., weight);
 
 	      if( fileOutput_ ) {
 
@@ -783,8 +784,8 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	    if( DilepMass > MassWindow_down_ && DilepMass < MassWindow_up_ ) {
 
-	      D_eta_elecsWC->Fill(el1.eta()-el2.eta());
-	      D_phi_elecsWC->Fill(deltaPhi(el1.phi(),el2.phi()));
+	      D_eta_elecsWC->Fill(el1.eta()-el2.eta(), weight);
+	      D_phi_elecsWC->Fill(deltaPhi(el1.phi(),el2.phi()), weight);
 
 	    }
 

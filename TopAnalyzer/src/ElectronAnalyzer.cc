@@ -7,15 +7,16 @@
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-
+#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 
 ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& cfg):
   electrons_  ( cfg.getParameter<edm::InputTag>     ( "electrons"    ) ),
   jets_       ( cfg.getParameter<edm::InputTag>     ( "jets"     ) ),
   verbosity_  ( cfg.getParameter<bool>              ( "verbosity") ),
-  fromTo_     ( cfg.getParameter<std::vector<int> > ( "from_to"  ) )
-
+  fromTo_     ( cfg.getParameter<std::vector<int> > ( "from_to"  ) ),
+  weight_     ( cfg.getParameter<edm::InputTag>("weight"))
 {
+
 }
 
 ElectronAnalyzer::~ElectronAnalyzer()
@@ -25,6 +26,7 @@ ElectronAnalyzer::~ElectronAnalyzer()
 void
 ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
+  double weight = getPUEventWeight(evt, weight_);
   if(verbosity_){
     std::cout << "-------------------------------------------" << std::endl;
     std::cout << "      Run: " << evt.id().run()              << std::endl;
@@ -39,7 +41,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   edm::Handle<PatJetCollection> jets;
   evt.getByLabel(jets_, jets);
 
-  multi_->Fill(electrons->size());
+  multi_->Fill(electrons->size(), weight);
 
   int i=0;
   for(PatElectronCollection::const_iterator electron = electrons->begin(); electron!= electrons->end(); ++electron) {
@@ -49,52 +51,56 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     if(i>fromTo_[1]) break;
 
     ++i;
-    pt_      ->Fill(electron->pt());
-    eta_     ->Fill(electron->eta());
-    phi_->Fill(electron->phi()); /////
+    pt_      ->Fill(electron->pt(), weight);
+    eta_     ->Fill(electron->eta(), weight);
+    phi_->Fill(electron->phi(), weight); /////
 
-    // supercluster_energy_->Fill(electron->superCluster().energy() );
-    // hcaloverecal_->Fill(electron->hcalOverEcal() );
-    hcaloverecal_->Fill(electron->hadronicOverEm() );
-    fbrem_->Fill(electron->fbrem() );
-    // eoverp_->Fill(electron->eSuperClusterOverp() );
+    // supercluster_energy_->Fill(electron->superCluster().energy() , weight);
+    // hcaloverecal_->Fill(electron->hcalOverEcal() , weight);
+    hcaloverecal_->Fill(electron->hadronicOverEm(), weight);
+    fbrem_->Fill(electron->fbrem(), weight);
+    // eoverp_->Fill(electron->eSuperClusterOverp() , weight);
 
 
     //if(electron->isEE()){
     if( electron->superCluster()->eta() > 1.479 ){
       iso_combEE_->Fill(
-                        ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
+                        ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
+                        weight);
      iso_combEE2_->Fill(
-                        ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
+                        ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
+                        weight);
     }
 
     //if(electron->isEB()){
     if( electron->superCluster()->eta() < 1.479 ){
       iso_combEB_->Fill(
-                        ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
+                        ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
+                        weight);
       iso_combEB2_->Fill(
-                        ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt()))  );
+                        ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
+                        weight);
     }
 
-    dB_->Fill(electron->dB());
+    dB_->Fill(electron->dB(), weight);
 
-    nlost_->Fill(electron->gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() );
+    nlost_->Fill(electron->gsfTrack()->trackerExpectedHitsInner().numberOfLostHits(), weight);
 
     double minDr = 999.;
     for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) {
       double dr = deltaR<const pat::Electron, const pat::Jet>(*electron, *jet);
       if(dr<minDr) minDr = dr;
     }
-    jet_dist_->Fill(minDr);
+    jet_dist_->Fill(minDr, weight);
 
-    d0_   ->Fill(electron->gsfTrack()->d0()); /////
+    d0_   ->Fill(electron->gsfTrack()->d0(), weight); /////
 
-    deltaphi_->Fill(electron->deltaPhiSuperClusterTrackAtVtx());
-    deltaeta_->Fill(electron->deltaEtaSuperClusterTrackAtVtx());
-    sigmaietaieta_->Fill(electron->sigmaIetaIeta());
+    deltaphi_->Fill(electron->deltaPhiSuperClusterTrackAtVtx(), weight);
+    deltaeta_->Fill(electron->deltaEtaSuperClusterTrackAtVtx(), weight);
+    sigmaietaieta_->Fill(electron->sigmaIetaIeta(), weight);
 
     double mapID= electron->electronID("simpleEleId90cIso");
-    electronmap_->Fill(mapID);
+    electronmap_->Fill(mapID, weight);
 
     if(verbosity_){
       std::cout << "-------------------------------------------" << std::endl;
@@ -172,7 +178,7 @@ ElectronAnalyzer::beginJob()
 
   d0_= fs->make<TH1D>( "d0", "D0 of Inner Track", 100, 0., 10.);
   d0_->GetXaxis()->SetTitle("d0 [cm]");
-  d0_->GetYaxis()->SetTitle("N");  
+  d0_->GetYaxis()->SetTitle("N");
 
   dB_= fs->make<TH1D>( "dB", "DB of Electron Track", 100, 0., 0.5);
   dB_->GetXaxis()->SetTitle("dB [cm]");

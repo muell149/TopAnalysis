@@ -23,7 +23,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/MuonReco/interface/MuonFwd.h" 
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/MuonEnergy.h"
 #include "DataFormats/MuonReco/interface/MuonIsolation.h"
 #include "DataFormats/EgammaCandidates/interface/Electron.h"
@@ -131,6 +131,7 @@ class DiLeptonAnalyzer : public edm::EDAnalyzer {
     TH1F * D_eta_elecsWC;
     TH1F * D_phi_elecsRC;
     TH1F * D_phi_elecsWC;
+    edm::InputTag weight_;
 
 };
 

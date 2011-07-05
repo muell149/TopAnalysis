@@ -1,8 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
 analyzeMET = cms.EDAnalyzer("MetAnalyzer",
-    
-    # Source   
-    METs = cms.InputTag("patMETsPF")
+
+    # Source
+    METs = cms.InputTag("patMETsPF"),
+    weight = cms.InputTag('eventWeightPU')
 )
 

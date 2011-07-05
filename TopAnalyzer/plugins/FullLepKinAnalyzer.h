@@ -30,7 +30,7 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   explicit FullLepKinAnalyzer(const edm::ParameterSet&);
   /// default destructor
   ~FullLepKinAnalyzer();
-  
+
  private:
   /// everything that has to be done before the event loop: books histograms
   virtual void beginJob() ;
@@ -47,36 +47,44 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   edm::InputTag hypoKey_;
   /// inputJetCollection
   edm::InputTag jets_;
-  
-  
+
+
   /// book histograms for reconstructed particles properties: Pt, E, Eta, Phi, m
   void bookKinHistos      (edm::Service<TFileService>&);
   /// book histograms for generated particles properties: Pt, E, Eta, Phi, m
-  void bookGenHistos      (edm::Service<TFileService>&); 
+  void bookGenHistos      (edm::Service<TFileService>&);
   /// book histograms for pulls of particle properties: Pt, E, Eta, Phi, m
   void bookPullHistos     (edm::Service<TFileService>&);
   /// book histograms for 2D distributions of particle properties: Pt, E, Eta, Phi, m
-  void book2DHistos(edm::Service<TFileService>&);  
+  void book2DHistos(edm::Service<TFileService>&);
   /// book histograms for 2D correlations between reconstructed quantities
-  void bookRecCorrelHistos(edm::Service<TFileService>&);   
+  void bookRecCorrelHistos(edm::Service<TFileService>&);
   /// book histograms for kin hypothesis specific histos
   void bookQualityHistos  (edm::Service<TFileService>&);
   /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
   void fillKinHistos           (std::vector<TH1D*>&,
-                                const reco::Candidate&);
+                                const reco::Candidate&,
+                                double
+                               );
   /// fill histograms for pulls of particle properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
   void fillPullHistos           (std::vector<TH1D*>&,
-                                 TH2D& hist2D, 
+                                 TH2D& hist2D,
                                  const reco::Candidate&,
-				 const reco::Candidate&);								
+				 const reco::Candidate&,
+                                 double
+                                );
   /// fill histograms for 2D distributions of particle properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
   void fill2DHistos           (std::vector<TH2D*>&,
                                const reco::Candidate&,
-			       const reco::Candidate&);
-       		       				
-  /// book histograms for kin hypothesis specific histos							
+			       const reco::Candidate&,
+                               double
+                              );
+
+  /// book histograms for kin hypothesis specific histos
   void fillQualityHistos       (const TtFullLeptonicEvent&,
-                                const TtEvent::HypoClassKey&);
+                                const TtEvent::HypoClassKey&,
+                                double
+                               );
 
   /// histograms for top quark kinematics
   std::vector<TH1D*> TopKin_;
@@ -87,8 +95,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for l^+ kinematics
   std::vector<TH1D*> LepBarKin_;
   /// histograms for neutrino kinematics
-  std::vector<TH1D*> NuKin_; 
-  /// histograms for anti-top quark kinematics 
+  std::vector<TH1D*> NuKin_;
+  /// histograms for anti-top quark kinematics
   std::vector<TH1D*> TopBarKin_;
   /// histograms for W^- quark kinematics
   std::vector<TH1D*> WminusKin_;
@@ -99,13 +107,13 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for anti-neutrino kinematics
   std::vector<TH1D*> NuBarKin_;
   /// histograms for top pair kinematics
-  std::vector<TH1D*> TtBarKin_;  
+  std::vector<TH1D*> TtBarKin_;
   /// histograms for dilepton kinematics
   std::vector<TH1D*> LepPairKin_;
   /// histograms for dijet kinematics
-  std::vector<TH1D*> JetPairKin_;  
-  
-  
+  std::vector<TH1D*> JetPairKin_;
+
+
   /// histograms for generated top quark kinematics
   std::vector<TH1D*> TopGen_;
   /// histograms for generated W^+ kinematics
@@ -115,8 +123,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for generated l^+ kinematics
   std::vector<TH1D*> LepBarGen_;
   /// histograms for generated neutrino kinematics
-  std::vector<TH1D*> NuGen_; 
-  /// histograms for generated anti-top quark kinematics 
+  std::vector<TH1D*> NuGen_;
+  /// histograms for generated anti-top quark kinematics
   std::vector<TH1D*> TopBarGen_;
   /// histograms for generated W^- quark kinematics
   std::vector<TH1D*> WminusGen_;
@@ -125,13 +133,13 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for generated l^- kinematics
   std::vector<TH1D*> LepGen_;
   /// histograms for generated anti-neutrino kinematics
-  std::vector<TH1D*> NuBarGen_;  
+  std::vector<TH1D*> NuBarGen_;
   /// histograms for generated top pair kinematics
   std::vector<TH1D*> TtBarGen_;
   /// histograms for generated lepton pair kinematics
   std::vector<TH1D*> LepPairGen_;
   /// histograms for generated jet pair kinematics
-  std::vector<TH1D*> JetPairGen_;    
+  std::vector<TH1D*> JetPairGen_;
 
 
   /// histograms for pull distributions
@@ -143,8 +151,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for  pull of l^+ kinematics
   std::vector<TH1D*> LepBarPull_;
   /// histograms for  of neutrino kinematics
-  std::vector<TH1D*> NuPull_; 
-  /// histograms for  pull of anti-top quark kinematics 
+  std::vector<TH1D*> NuPull_;
+  /// histograms for  pull of anti-top quark kinematics
   std::vector<TH1D*> TopBarPull_;
   /// histograms for  pull of W^- quark kinematics
   std::vector<TH1D*> WminusPull_;
@@ -159,7 +167,7 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for  pull of lepton pair kinematics
   std::vector<TH1D*> LepPairPull_;
   /// histograms for  pull of jet pair kinematics
-  std::vector<TH1D*> JetPairPull_;    
+  std::vector<TH1D*> JetPairPull_;
 
 
   /// histograms for 2D distributions
@@ -171,8 +179,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histograms for  2D distributions of l^+ kinematics
   std::vector<TH2D*> LepBar2D_;
   /// histograms for 2D distributions of neutrino kinematics
-  std::vector<TH2D*> Nu2D_; 
-  /// histograms for  2D distributions of anti-top quark kinematics 
+  std::vector<TH2D*> Nu2D_;
+  /// histograms for  2D distributions of anti-top quark kinematics
   std::vector<TH2D*> TopBar2D_;
   /// histograms for  2D distributions of W^- quark kinematics
   std::vector<TH2D*> Wminus2D_;
@@ -199,8 +207,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histogram for  pull of l^+ kinematics
   TH2D* LepBarPull2D_;
   /// histograms for  of neutrino kinematics
-  TH2D* NuPull2D_; 
-  /// histogram for  pull of anti-top quark kinematics 
+  TH2D* NuPull2D_;
+  /// histogram for  pull of anti-top quark kinematics
   TH2D* TopBarPull2D_;
   /// histogram for  pull of W^- quark kinematics
   TH2D* WminusPull2D_;
@@ -213,18 +221,18 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// histogram for  pull of top pair kinematics
   TH2D* TtBarPull2D_;
   /// histogram for  pull of lepton pair kinematics
-  TH2D* LepPairPull2D_; 
+  TH2D* LepPairPull2D_;
   /// histogram for  pull of jet pair kinematics
-  TH2D* JetPairPull2D_;   
+  TH2D* JetPairPull2D_;
 
 
   /// histogram only for kinSolution hypothesis: weight from neutrino spectrum of best kinematic solution
-  TH1D* kinSolWeight_;  
+  TH1D* kinSolWeight_;
   /// histogram for index of bJet in jet collection used for the event reconstruction
   TH1D* bJetIdcs_;
   /// histogram for index of bBarJet in jet collection used for the event reconstruction
-  TH1D* bBarJetIdcs_; 
-  
+  TH1D* bBarJetIdcs_;
+
   /// histogram for the mass difference between reconstructed top and anti-top.
   /// For kinSolution hypothesis it should give a sharp peak around zero since the assumption that both masses
   /// are equal is used as a boundary condition. Differences appear only from rounding errors
@@ -232,12 +240,12 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// correlation between event reco and b-tagging TCHEL
   TH2D* kinTCHELcorrelation_;
   /// correlation between event reco and b-tagging TCHEM
-  TH2D* kinTCHEMcorrelation_;  
+  TH2D* kinTCHEMcorrelation_;
   /// correlation between event reco and b-tagging SSVHEM
   TH2D* kinSSVHEMcorrelation_;
   /// compares indices of objects in gen and kin hypotheses
   TH2D* compare_;
-  
+
   /// correlation histograms for different reconstructed quantities
   TH2D* diLeptonMassVsLeptonPt_;
   TH2D* diLeptonMassVsLeptonEta_;
@@ -247,7 +255,7 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* diLeptonMassVsTtBarPt_;
   TH2D* diLeptonMassVsTtBarRapidity_;
   TH2D* diLeptonMassVsTtBarMass_;
-  
+
   TH2D* nBtagsTCHELVsLeptonPt_;
   TH2D* nBtagsTCHELVsLeptonEta_;
   TH2D* nBtagsTCHELVsDiLeptonPt_;
@@ -257,17 +265,17 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* nBtagsTCHELVsTtBarPt_;
   TH2D* nBtagsTCHELVsTtBarRapidity_;
   TH2D* nBtagsTCHELVsTtBarMass_;
-  
+
   TH2D* nBtagsTCHEMVsLeptonPt_;
   TH2D* nBtagsTCHEMVsLeptonEta_;
   TH2D* nBtagsTCHEMVsDiLeptonPt_;
   TH2D* nBtagsTCHEMVsDiLeptonMass_;
   TH2D* nBtagsTCHEMVsTopPt_;
-  TH2D* nBtagsTCHEMVsTopRapidity_; 
+  TH2D* nBtagsTCHEMVsTopRapidity_;
   TH2D* nBtagsTCHEMVsTtBarPt_;
   TH2D* nBtagsTCHEMVsTtBarRapidity_;
   TH2D* nBtagsTCHEMVsTtBarMass_;
-  
+
   TH2D* nBtagsSSVHEMVsLeptonPt_;
   TH2D* nBtagsSSVHEMVsLeptonEta_;
   TH2D* nBtagsSSVHEMVsDiLeptonPt_;
@@ -276,7 +284,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* nBtagsSSVHEMVsTopRapidity_;
   TH2D* nBtagsSSVHEMVsTtBarPt_;
   TH2D* nBtagsSSVHEMVsTtBarRapidity_;
-  TH2D* nBtagsSSVHEMVsTtBarMass_;              
+  TH2D* nBtagsSSVHEMVsTtBarMass_;
+  edm::InputTag weight_;
 };
 
 #endif

@@ -2,10 +2,12 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
+#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
 
 
 MetAnalyzer::MetAnalyzer(const edm::ParameterSet& cfg):
-  METs_ ( cfg.getParameter<edm::InputTag>( "METs" ) )
+  METs_ ( cfg.getParameter<edm::InputTag>( "METs" ) ),
+  weight_ ( cfg.getParameter<edm::InputTag>("weight"))
 {
 }
 
@@ -16,12 +18,13 @@ MetAnalyzer::~MetAnalyzer()
 void
 MetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
+  double weight = getPUEventWeight(evt, weight_);
   edm::Handle<PatMETCollection> METs;
   evt.getByLabel(METs_, METs);
 
   for(PatMETCollection::const_iterator met = METs->begin(); met!= METs->end(); ++met) {
-    et_ ->Fill(met->et());
-    phi_->Fill(met->phi());
+    et_ ->Fill(met->et(), weight);
+    phi_->Fill(met->phi(), weight);
   }
 }
 

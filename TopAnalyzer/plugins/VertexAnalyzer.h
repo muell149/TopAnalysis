@@ -71,6 +71,8 @@ class VertexAnalyzer : public EDAnalyzer {
     TH1D* dzMu_; 
     
     TH3D* position3D_;        
+InputTag weight_;
+
 };
 
 #endif

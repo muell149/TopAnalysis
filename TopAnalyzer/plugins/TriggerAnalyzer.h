@@ -60,6 +60,8 @@ class TriggerAnalyzer : public edm::EDAnalyzer {
     TH1D* Passed_; 
     /// shows how many evts have fired two triggers
     TH2D* Correlations_;                   
+edm::InputTag weight_;
+
 };
 
 #endif

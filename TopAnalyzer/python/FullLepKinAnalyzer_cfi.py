@@ -4,7 +4,8 @@ analyzeFullLepKinematics = cms.EDAnalyzer("FullLepKinAnalyzer",
     isSignalMC   = cms.bool(False),
     hypoKey      = cms.InputTag("ttFullLepHypKinSolution","Key"),
     FullLepEvent = cms.InputTag("ttFullLepEvent"),
-    jets         = cms.InputTag("hardJets")
+    jets         = cms.InputTag("hardJets"),
+    weight = cms.InputTag('eventWeightPU')
 )
 
 

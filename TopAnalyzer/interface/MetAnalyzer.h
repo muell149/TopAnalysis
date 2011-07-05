@@ -14,7 +14,7 @@ class MetAnalyzer : public edm::EDAnalyzer {
 
   explicit MetAnalyzer(const edm::ParameterSet&);
   ~MetAnalyzer();
-  
+
  private:
 
   virtual void beginJob() ;
@@ -22,11 +22,13 @@ class MetAnalyzer : public edm::EDAnalyzer {
   virtual void endJob();
 
   edm::InputTag METs_;
-  
-  typedef std::vector<pat::MET> PatMETCollection; 
+
+  typedef std::vector<pat::MET> PatMETCollection;
 
   TH1D* et_;
-  TH1D* phi_;  
+  TH1D* phi_;
+  edm::InputTag weight_;
+
 };
 
 #endif
