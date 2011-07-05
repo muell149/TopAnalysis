@@ -10,10 +10,11 @@
 
 /// default constructor
 FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
-  JetSrc_            (cfg.getParameter<edm::InputTag>("JetSrc")),
-  MultiJetMVADiscSrc_(cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc")),
+  JetSrc_            ( cfg.getParameter<edm::InputTag>("JetSrc") ),
+  MultiJetMVADiscSrc_( cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc") ),
   useTree_           ( cfg.getParameter<bool>( "useTree" ) ),
-  bTagAlgoWP_        ( cfg.getParameter<std::string>( "bTagAlgoWP" ) )
+  bTagAlgoWP_        ( cfg.getParameter<std::string>( "bTagAlgoWP" ) ),
+  MCweight_          ( cfg.getParameter<double>("MCweight") )
 {
   
   if(cfg.exists("udscResolutions") && cfg.exists("bResolutions")){
@@ -61,6 +62,10 @@ FullHadQCDEstimation::beginJob()
   bookVariable( fs, "jet1_eta" );
   bookVariable( fs, "jet2_eta" );
   
+  // event weight needed for QCD samples
+  bookVariable( fs, "MCweight" );
+  fillValue( "MCweight" , MCweight_ );
+
   // properties of kinematic fit for the tree
   bookVariable( fs, "topMass" );
   bookVariable( fs, "prob" );

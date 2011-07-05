@@ -78,6 +78,9 @@ class FullHadQCDEstimation : public edm::EDAnalyzer {
   std::vector<edm::ParameterSet> udscResolutions_;
   std::vector<edm::ParameterSet> bResolutions_;
 
+  /// weight of MC sample
+  double MCweight_;
+
   /// kinematic fit interface
   TtFullHadKinFitter::KinFit* kinFitter;
 

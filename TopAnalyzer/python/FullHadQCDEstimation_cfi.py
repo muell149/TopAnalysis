@@ -10,6 +10,9 @@ analyzeFullHadQCDEstimation = cms.EDAnalyzer("FullHadQCDEstimation",
     ## src of multijet mva discriminator
     MultiJetMVADiscSrc = cms.InputTag("mvaDisc","DiscSel"),
 
+    ## weight of mc sample
+    MCweight = cms.double(1.0),
+
     ## special parameters for 
     ## QCD background estimation for
     ## fully hadronic ttbar events
