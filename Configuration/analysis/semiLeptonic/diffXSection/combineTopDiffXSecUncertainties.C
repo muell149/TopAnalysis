@@ -19,12 +19,12 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
   if(luminosity<50.) dataSample="2010";
-  // choose if you want to apapt uncertainties from 
+  // adpatOldUncertainties: choose if you want to apapt 
+  // uncertainties from 
   // the 2010 mu+jets analysis if they are not available 
   // for 2011 analysis, NOTE: these uncertainties 
   // must exist in ./diffXSecTopSemiMu2010.root
-  bool adpatOldUncertainties=true;
-  // target rootfile
+  // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
   TString outputFile="diffXSecTopSemi";
