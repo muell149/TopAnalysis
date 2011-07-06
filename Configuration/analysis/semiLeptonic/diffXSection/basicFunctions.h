@@ -1655,6 +1655,13 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
 
 double getInclusiveXSec(TH1* hist, int verbose=0)
 {
+  // this function integrates a given 
+  // histogramm 'hist' by summing up the product 
+  // of binwidth and bincontent for all bins.
+  // NOTE: binwidth==0 is treated as binwidth==1
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none 
   double value=0;
   if(verbose>0) std::cout << "histo: " << hist->GetTitle() << std::endl;
   for(int bin=0; bin<=hist->GetNbinsX()+1; ++bin){
@@ -1666,6 +1673,32 @@ double getInclusiveXSec(TH1* hist, int verbose=0)
   }
   if(verbose>0) std::cout << "integrated xSec: " << value << std::endl;
   return value;
+}
+
+
+void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=2)
+{
+  // this function shifts all unset points 
+  // (at x,y=0,0 with error 0,0) 
+  // out of sight to 0, -1000
+  // modified quantities: none
+  // used functions: none
+  // used enumerators: none 
+  std::cout << "entered" <<std::endl;
+  if(verbose>1) std::cout << "checking " << hist->GetName() << " for empty bins" << std::endl;
+  // loop points
+  for(int bin=0; bin<=hist->GetN()-1; ++bin){
+    // search for unset points
+    if( hist->GetX()[bin]==0 &&
+	hist->GetY()[bin]==0 &&
+	hist->GetErrorXhigh(bin)==0 &&
+	hist->GetErrorXlow (bin)==0 &&
+	hist->GetErrorYhigh(bin)==0 &&
+	hist->GetErrorYlow (bin)==0 ){
+      hist->SetPoint(bin, 0, -1000);
+      if(verbose>1) std::cout << "bin #" << bin << " set to 0,-1000" << std::endl;
+    }
+  }
 }
 
 #endif
