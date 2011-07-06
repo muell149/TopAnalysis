@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=0, TString decayChannel="muon"){
+void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=0, TString decayChannel="muon", bool adpatOldUncertainties=false){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -19,6 +19,11 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
   if(luminosity<50.) dataSample="2010";
+  // choose if you want to apapt uncertainties from 
+  // the 2010 mu+jets analysis if they are not available 
+  // for 2011 analysis, NOTE: these uncertainties 
+  // must exist in ./diffXSecTopSemiMu2010.root
+  bool adpatOldUncertainties=true;
   // target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
@@ -76,6 +81,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   //    open rootfile
   // ---
   TFile* file = TFile::Open(outputFile, "UPDATE");
+  // open mu+jets 2010 analysis file
+  TFile* oldAnalysisfile;
+  if(adpatOldUncertainties) oldAnalysisfile = TFile::Open("diffXSecTopSemiMu2010.root", "READ");
+  if(verbose>1) std::cout << "opened diffXSecTopSemiMu2010.root" << std::endl;
   // check if file exist
   if(file&&!file->IsZombie()){
     if(verbose>0) std::cout << "target file found!" << std::endl;
@@ -103,8 +112,49 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	    calculateError_[xSecVariables_[i]][sys]=true;
 	  }
 	  if(!plot&&verbose>1){ 
-	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
-	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
+	      std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
+	      std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
+	  }
+	}
+	if(adpatOldUncertainties&&!canvas&&sys!=sysNo){
+	  if(verbose>1) std::cout << "use 2010 uncertainties for variation " << sysLabel(sys)+", "+xSecVariables_[i] << std::endl;
+	  // adapt 2010 UNCERTAINTIES
+	  // if systematic variation does not exist for 2011 data (indicated by luminosity), 
+	  // take the binwise relative uncertainty from 2010 mu+jets analysis (no PF2PAT)
+	  // and save relative shifted plot for 2011 result
+	  if(luminosity>40.0){
+	    if(verbose>1) std::cout << "luminosity>40/pb" << std::endl;
+	    // copy std analysis plot to scale bins later with relative uncertainties 
+	    TH1F* currentShiftedCrossSectionPlot=(TH1F*)(histo_[xSecVariables_[i]][sysNo]->Clone());
+	    if(verbose>1) std::cout << "std analysis file for this variation copied" << std::endl;
+	    // loop all bins of current 2011 analysis histogram without variations
+	    for(int bin=1; bin<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){
+	      //ensure to have non-empty bins
+	      if(histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin)>0){
+		if(verbose>1) std::cout << "bin " << bin << std::endl;
+		// get plot with relative uncertainties for given quantity and bin
+		TCanvas* oldCanvas = (TCanvas*)oldAnalysisfile->Get("relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
+		if(verbose>1) std::cout << "got canvas" << std::endl;
+		TH1F* plot= (TH1F*)oldCanvas->GetPrimitive("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
+		if(plot){ 
+		  if(verbose>1) std::cout << "got plot" << std::endl;
+		  double relSysErrorBin = plot->GetBinContent(sys);
+		  if(verbose>1) std::cout << "bin rel uncertainty: " << relSysErrorBin << std::endl;
+		  // apply binwise SF for the relative uncertainty 
+		  // from 2010 mu+jets analysis to the copy of the 
+		  // std 2011 analysis plot
+		  double binSFForSystUncertainty=(1.0+relSysErrorBin/100.);
+		  if(verbose>1) std::cout << "binSF: " << binSFForSystUncertainty << std::endl;
+		  currentShiftedCrossSectionPlot->SetBinContent(bin, binSFForSystUncertainty*currentShiftedCrossSectionPlot->GetBinContent(bin));
+		  currentShiftedCrossSectionPlot->SetBinError  (bin, binSFForSystUncertainty*currentShiftedCrossSectionPlot->GetBinError(bin)  );
+		  if(verbose>1) std::cout << "scaled xSec: " << currentShiftedCrossSectionPlot->GetBinContent(bin) << std::endl;
+		  histo_[xSecVariables_[i]][sys]=(TH1F*)(currentShiftedCrossSectionPlot->Clone());
+		  // enable error calculation
+		  if(!calculateError_[xSecVariables_[i]].count(sys)>0) calculateError_[xSecVariables_[i]][sys]=true;
+		}
+	      }
+	    }
+	    if(verbose>1) std::cout << "scaled xSec first bin: " << histo_[xSecVariables_[i]][sys]->GetBinContent(1) << std::endl;
 	  }
 	}
 	if(!canvas&&verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found!" << std::endl;
@@ -251,6 +301,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 		combinedErrors->SetLineWidth(histo_[xSecVariables_[i]][sysNo]->GetLineWidth());
 		combinedErrors->SetLineColor(histo_[xSecVariables_[i]][sysNo]->GetLineColor());
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
+		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]]);
 	      }
 	    }
 	    delete relSysPlot;
@@ -472,6 +523,8 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
     }
   }
   else std::cout << std::endl << "ERROR:target file does not exist or is broken!" << std::endl;
-  // close file
+  // close files
   file->Close();
+  if(adpatOldUncertainties) oldAnalysisfile->Close();
+
 }
