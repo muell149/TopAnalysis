@@ -272,7 +272,7 @@ bJetSSVSelection      = countPatJets.clone(src = 'simpleSecondaryVertexBJets', m
 ## met selector
 highMETs = cms.EDFilter( "PATMETSelector",
                          src = cms.InputTag("patMETs"),
-                         cut = cms.string("et > 0.")
+                         cut = cms.string("et > 30.")
                          )
 
 ## Count Filter
