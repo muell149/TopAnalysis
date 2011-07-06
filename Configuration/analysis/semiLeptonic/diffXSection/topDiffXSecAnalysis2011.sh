@@ -35,12 +35,12 @@
 decayChannel=\"muon\" # or \"electron\"
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=204
+dataLuminosity=35.9
 ## dataset: 2010 or 2011
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
-dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
+#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
+dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011_ElectronHad_160404-161312.root\"
 dataLabel=2011
@@ -65,6 +65,11 @@ fast=true
 ## delete all (old) existing .eps and .pdf plots?
 ## clean = true / false
 clean=true
+## use errors from 2010 mu+jets analysis
+## if error for 2011 analysis is not available
+## NOTE: the rootfile ./diffXSecTopSemiMu2010.root
+## must be available and contain the uncertainties 
+oldErrors=true
 
 #####################
 ## prepare running ##
@@ -174,7 +179,7 @@ do
       BEFORESYS=$(date +%s)
   fi
 ## run macro
-  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', 1, '$dataSample', '$decayChannel')'
+  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
 done
 AFTERSYS=$(date +%s)
 
@@ -188,7 +193,7 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './combineTopDiffXSecUncertainties.C+('$dataLuminosity', '$save', '$verbose', '$decayChannel')'
+root -l -q -b './combineTopDiffXSecUncertainties.C+('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$oldErrors')'
 echo "all analysis steps finished!"
 
 
