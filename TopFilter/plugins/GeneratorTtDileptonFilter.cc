@@ -203,7 +203,7 @@ GeneratorTtDileptonFilter::getTauDaughter(const reco::Candidate* tau)
     else if(fabs(tau->daughter(i)->pdgId())==15) return getTauDaughter(tau->daughter(i));
   }
   //return orgiginal tau if nothing found
-  std::cout << "NOTFALL LEPTON" << std::endl;
+  edm::LogWarning ( "No Tau Daughter" ) << "neither electron nor muon daughter found.";  
   return tau;
 }
 
