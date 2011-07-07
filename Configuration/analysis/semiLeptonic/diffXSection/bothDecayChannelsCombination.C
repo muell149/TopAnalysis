@@ -2,6 +2,10 @@
 
 void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigned int verbose=2){
 
+
+  // ---
+  //    Setup
+  // ---
   // set root style
   gROOT->cd();
   gROOT->SetStyle("Plain");
@@ -10,7 +14,7 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
   TGaxis::SetMaxDigits(2);
   // decay channels
   enum channel {kMuon, kElectron};
-  // define folder where XSec plots are stored
+  // define folders where XSec plots are stored
   TString xSecFolder = "xSec";
   // get right file by luminosity
   TString dataSample="";
@@ -26,23 +30,33 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
   std::vector<TString> xSecVariables_;
   TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
+  // create plot container for combined e+#mu plots
+  std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigned int, TCanvas*> > canvas_;
+  // ---
+  //    Combination for all kinematic variables x systematic variations available
+  // ---
   // loop systematic variations
   for(unsigned int sys=sysNo; sys<=sysDiBosDown; ++sys){
     TString subfolder=sysLabel(sys);
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       // get canvas
-      TCanvas* canvasMu = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
-      TCanvas* canvasEl = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
+      TCanvas* canvasMu   = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
+      TCanvas* canvasTheo = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
+      TCanvas* canvasEl   = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
       if(canvasMu&&canvasEl){
 	// get data plots for all systematics
 	TString plotName = xSecVariables_[i];
 	plotName.ReplaceAll("Norm","");
-	TH1F* plotMu= (TH1F*)canvasMu->GetPrimitive(plotName+"kData");
-	TH1F* plotTheo=(TH1F*)canvasMu->GetPrimitive(plotName);
-	TH1F* plotEl= (TH1F*)canvasEl->GetPrimitive(plotName+"kData");
+	TH1F* plotMu   = (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
+	TH1F* plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotName        );
+	TH1F* plotEl   = (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
 	if(plotMu&&plotEl){ 
-	  if(verbose>1) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for both channels found!" << std::endl;
+	  if(verbose>1){
+	    std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i];
+	    std::cout << " for both channels found!" << std::endl;
+	  }
 	  // combine the results
 	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
 	  plotCombination->Scale(0.);
@@ -84,14 +98,19 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
 	  combicanvas->cd(0);
 	  plotTheo->Draw("hist");
 	  plotCombination->Draw("e same");
-	  // save the final plot
+	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
+	  // save combined e+mu plot for systematic error calculation afterwards
+	  canvas_[xSecVariables_[i]][sys]=(TCanvas*)(combicanvas->Clone());
+	  canvas_[xSecVariables_[i]][sys]->SetTitle(xSecVariables_[i]);
+	  canvas_[xSecVariables_[i]][sys]->SetName(xSecVariables_[i]);
 	  if(save){
-	    combicanvas->Print("./diffXSecFromSignal/plots/kinFit/"+dataSample+"/combinedXSec/xSec"+xSecVariables_[i]+".eps"); 
-	    combicanvas->Print("./diffXSecFromSignal/plots/kinFit/"+dataSample+"/combinedXSec/xSec"+xSecVariables_[i]+".png");
+	    combicanvas->Print("./diffXSecFromSignal/plots/kinFit/"+dataSample+"/combinedXSec/xSec"+xSecVariables_[i]+sysLabel(sysNo)+".eps"); 
+	    combicanvas->Print("./diffXSecFromSignal/plots/kinFit/"+dataSample+"/combinedXSec/xSec"+xSecVariables_[i]+sysLabel(sysNo)+".png");
 	  }
 	  // close Canvas
 	  combicanvas->Close();
 	  //delete combicanvas;
+	  delete combicanvas;
 	}
 	if(!(plotMu||plotEl)&&verbose>1){ 
 	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
@@ -105,4 +124,17 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
       if(!(canvasMu||canvasEl)&&verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in either one or both decay channels!" << std::endl;
     }
   }
+  // ---
+  //    save combined #mu+e plots to an .root file
+  // ---
+  // loop variables
+  for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+    // loop systematic variations
+    for(unsigned int sys=sysNo; sys<=sysDiBosDown; ++sys){
+      if(histo_[xSecVariables_[i]][sys]){
+	saveToRootFile("diffXSecTopSemiLep.root", canvas_[xSecVariables_[i]][sys], true, verbose,"xSec/"+sysLabel(sys));
+      }
+    }
+  }
 }
+
