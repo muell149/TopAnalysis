@@ -40,27 +40,27 @@ tightPFJetID   += 'neutralEmEnergyFraction < 0.9'
 
 ## setup the jet selection collection
 tight4LeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tight4JetCut # + tightPFJetID
+                                          cut = tight4JetCut #+ tightPFJetID
                                           )
 tight5LeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tight5JetCut # + tightPFJetID
+                                          cut = tight5JetCut #+ tightPFJetID
                                           )
 #tightLeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-#                                          cut = tight6JetCut # + tightPFJetID
+#                                          cut = tight6JetCut #+ tightPFJetID
 #                                          )
 tight6LeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tight6JetCut # + tightPFJetID
+                                          cut = tight6JetCut #+ tightPFJetID
                                           )
 tightLeadingJets = selectedPatJets.clone(src = 'goodJetsPF',
-                                          cut = tightJetCut # + tightPFJetID
+                                          cut = tightJetCut #+ tightPFJetID
                                           )
 
 trackCountingHighEffBJets.src = 'goodJetsPF'
 #tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
-#                                         cut = tight6JetCut # + tightPFJetID
+#                                         cut = tight6JetCut #+ tightPFJetID
 #                                         )
 tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
-                                         cut = tightJetCut # + tightPFJetID
+                                         cut = tightJetCut #+ tightPFJetID
                                          )
 
 ## setting up the collections for the fully-hadronic
@@ -213,10 +213,13 @@ ttFullHadJetPartonMatch.jets        = 'tightLeadingJets'
 ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
-## exchange resolutions for CaloJets
-from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
-kinFitTtFullHadEventHypothesis.udscResolutions = udscResolutionPF.functions
-kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolutionPF.functions
+## exchange resolutions for jets
+#from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
+#kinFitTtFullHadEventHypothesis.udscResolutions = udscResolutionPF.functions
+#kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolutionPF.functions
+from TopAnalysis.TopUtils.stringResolutions_etEtaPhi_cff import *
+kinFitTtFullHadEventHypothesis.udscResolutions = udscResolution.functions
+kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolution.functions
 
 ## configure genMatch
 ttFullHadJetPartonMatch.useMaxDist = True
@@ -350,8 +353,10 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
         globals()['kinFitImprover3' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(3) ) )
         globals()['kinFitImprover4' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(4) ) )
 
-        globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolutionPF.functions
-        globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolutionPF.functions
+        #globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolutionPF.functions
+        #globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolutionPF.functions
+        globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolution.functions
+        globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolution.functions
 
         ## collect fully hadronic top reco analyzers
         globals()['fullHadTopReco' + suffix] = analyzeFullHadTopReco.clone(srcB = jetSrc)
@@ -565,37 +570,21 @@ def runOnData(process):
     for suf in listOfMonitoringSuffixes:
         process.analyseFullHadronicSelection.remove(getattr(process,'monitorGenerator'+suf))
 
-    print "  ||||||||||||||||||||||||||||||||||||||||||||||||||||  "
-    print "--++++++++++++++++++++++++++++++++++++++++++++++++++++--"
-    print "--+++##############################################+++--"
-    print "--+++####################      ####################+++--"
-    print "--+++#################            #################+++--"
-    print "--+++###############                ###############+++--"
-    print "--+++#############    L2L3Residual    #############+++--"
-    print "--+++###########          NOT           ###########+++--"
-    print "--+++#############      APPLIED       #############+++--"
-    print "--+++###############                ###############+++--"
-    print "--+++#################            #################+++--"
-    print "--+++####################      ####################+++--"
-    print "--+++##############################################+++--"
-    print "--++++++++++++++++++++++++++++++++++++++++++++++++++++--"
-    print "  ||||||||||||||||||||||||||||||||||||||||||||||||||||  "
-
     ## switch to residual jet energy correction for data
     #if(hasattr(process, 'goodJetsPF')):
-    #    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
-    #    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
-    #
-    #udsall.correctionLevel  = 'L2L3Residual'
-    #uds0.correctionLevel    = 'L2L3Residual'
-    #uds1.correctionLevel    = 'L2L3Residual'
-    #uds2.correctionLevel    = 'L2L3Residual'
-    #uds3.correctionLevel    = 'L2L3Residual'
-    #uds4.correctionLevel    = 'L2L3Residual'
-    #uds5.correctionLevel    = 'L2L3Residual'
-    #ball.correctionLevel    = 'L2L3Residual'
-    #bottom0.correctionLevel = 'L2L3Residual'
-    #bottom1.correctionLevel = 'L2L3Residual'
+    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
+    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+    
+    udsall.correctionLevel  = 'L2L3Residual'
+    uds0.correctionLevel    = 'L2L3Residual'
+    uds1.correctionLevel    = 'L2L3Residual'
+    uds2.correctionLevel    = 'L2L3Residual'
+    uds3.correctionLevel    = 'L2L3Residual'
+    uds4.correctionLevel    = 'L2L3Residual'
+    uds5.correctionLevel    = 'L2L3Residual'
+    ball.correctionLevel    = 'L2L3Residual'
+    bottom0.correctionLevel = 'L2L3Residual'
+    bottom1.correctionLevel = 'L2L3Residual'
 
     ## changes needed for analysis
     #trigger.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
@@ -656,9 +645,11 @@ def runAsBackgroundEstimation(process):
     process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30"
     #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30clean"
 
-    process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
-    process.analyzeFullHadQCDEstimation.udscResolutions = udscResolutionPF.functions
-    process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolutionPF.functions
+    #process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+    #process.analyzeFullHadQCDEstimation.udscResolutions = udscResolutionPF.functions
+    #process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolutionPF.functions
+    process.analyzeFullHadQCDEstimation.udscResolutions = udscResolution.functions
+    process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolution.functions
 
         
 ## ---
@@ -673,13 +664,13 @@ def runOnCalo(process):
     process.analyseFullHadronicSelection.replace(process.goodJetsPF, process.goodJets)
 
     ## exchange PFJetID cuts to JetID
-    process.tight4LeadingJets.cut = tight4JetCut # + tightCaloJetID
-    process.tight5LeadingJets.cut = tight5JetCut # + tightCaloJetID
-    #process.tightLeadingJets.cut  = tight6JetCut # + tightCaloJetID
-    process.tight6LeadingJets.cut = tight6JetCut # + tightCaloJetID
-    process.tightLeadingJets.cut  = tightJetCut # + tightCaloJetID
-    #process.tightBottomJets.cut   = tight6JetCut # + tightCaloJetID
-    process.tightBottomJets.cut   = tightJetCut  # + tightCaloJetID
+    process.tight4LeadingJets.cut = tight4JetCut #+ tightCaloJetID
+    process.tight5LeadingJets.cut = tight5JetCut #+ tightCaloJetID
+    #process.tightLeadingJets.cut  = tight6JetCut #+ tightCaloJetID
+    process.tight6LeadingJets.cut = tight6JetCut #+ tightCaloJetID
+    process.tightLeadingJets.cut  = tightJetCut #+ tightCaloJetID
+    #process.tightBottomJets.cut   = tight6JetCut #+ tightCaloJetID
+    process.tightBottomJets.cut   = tightJetCut  #+ tightCaloJetID
 
     ## exchange resolutions for CaloJets
     process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
@@ -691,7 +682,7 @@ def runOnCalo(process):
             getattr(process, 'kinFitQuality'+suf).analyze.udscResolutions = process.udscResolution.functions
             getattr(process, 'kinFitQuality'+suf).analyze.bResolutions    = process.bjetResolution.functions
 
-    ## run kinematic fit for CaloJets with L1L2L3L5 correted jets
+    ## run kinematic fit for CaloJets with L1L2L3(Res)L5 correted jets
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Hadron'
     process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L5Hadron'
 
@@ -702,8 +693,8 @@ def runOnCalo(process):
 
     ## give correct resolutions for background estimation if done
     if(hasattr(process, 'analyzeFullHadQCDEstimation')):
-        process.analyzeFullHadQCDEstimation.analyze.udscResolutions = udscResolution.functions
-        process.analyzeFullHadQCDEstimation.analyze.bResolutions    = bjetResolution.functions
+        process.analyzeFullHadQCDEstimation.analyze.udscResolutions = process.udscResolution.functions
+        process.analyzeFullHadQCDEstimation.analyze.bResolutions    = process.bjetResolution.functions
 
     ## in case of mc, smear the energy resolution additionally
     if(hasattr(process, 'scaledJetEnergy')):
