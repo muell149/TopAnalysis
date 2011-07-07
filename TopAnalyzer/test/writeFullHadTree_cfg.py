@@ -115,13 +115,16 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(options.eventFilter=='data'):
     #process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
-    process.GlobalTag.globaltag = cms.string('GR_R_42_V14::All')
+    #process.GlobalTag.globaltag = cms.string('GR_R_42_V14::All')
+    #process.GlobalTag.globaltag = cms.string('FT_R_42_V18A::All')
+    process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
 else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
-        process.GlobalTag.globaltag = cms.string('START42_V12::All')
+        #process.GlobalTag.globaltag = cms.string('START42_V12::All')
+        process.GlobalTag.globaltag = cms.string('START42_V13::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
-        process.GlobalTag.globaltag = cms.string('START38_V14::All')
-        #process.GlobalTag.globaltag = cms.string('START41_V0::All')
+        #process.GlobalTag.globaltag = cms.string('START38_V14::All')
+        process.GlobalTag.globaltag = cms.string('START41_V0::All')
 
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
@@ -142,7 +145,7 @@ elif options.jetEResol == 1:
 elif options.jetEResol == -1:
     resolutions = [1.0, 0.95, 0.9]
 else:
-    exit('jetEResol: ' + str(options.jetEResol) + ' not supported choose -1/0/+1')
+    exit('jetEResol: ' + str(options.jetEResol) + ' not supported, choose -1/0/+1')
 
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJetsAK5PF"),
@@ -157,11 +160,13 @@ process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = 
                                                        )
 
 ## set set energy scaling factors
-if(options.jesFactor > 1.0):
-    process.scaledJetEnergy.scaleType = "top:up"
+if options.jesFactor > 1.0 :
+    #process.scaledJetEnergy.scaleType = "top:up"
+    process.scaledJetEnergy.scaleType = "jes:up"
 
-if(options.jesFactor < 1.0):
-    process.scaledJetEnergy.scaleType = "top:down"
+if options.jesFactor < 1.0 :
+    #process.scaledJetEnergy.scaleType = "top:down"
+    process.scaledJetEnergy.scaleType = "jes:down"
 
 ## residual jet corrector for data
 process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
@@ -338,16 +343,9 @@ if options.backgroundEstimation:
     runAsBackgroundEstimation(process)
     process.p1.remove(process.makeTtFullHadEvent)
     process.p1.remove(process.FullHadTreeWriter)
-    #if(not options.eventFilter=='data'):
-    process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
-    print "#################################################"
-    print "#################################################"
-    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
-    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
-    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
-    print "## QCDEstimation DONE WITHOUT L2L3Residual JEC ##"
-    print "#################################################"
-    print "#################################################"
+    if not options.eventFilter=='data' :
+        process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
+        process.analyzeFullHadQCDEstimation.MCweight = options.mcWeight
 
     if options.usePF:
         getattr(process, process.tightBottomJets.src.getModuleLabel()).src = cms.InputTag("goodJetsPF")
@@ -378,8 +376,8 @@ else:
 ## prepend the sequence needed to run on the NEW PAT tuples
 from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
 pf2patOptions = {'runOnOLDcfg': True}
-pf2patOptions['pfIsoConeMuon'] = 0.4
-pf2patOptions['pfIsoConeElec'] = 0.4
+pf2patOptions['pfIsoConeMuon'] = 0.3
+pf2patOptions['pfIsoConeElec'] = 0.3
 pf2patOptions['pfIsoValMuon'] = 0.2
 pf2patOptions['pfIsoValElec'] = 0.2
 pf2patOptions['electronIDs'] = ''
@@ -393,7 +391,7 @@ prependPF2PATSequence(process, options = pf2patOptions)
 pathnames = process.paths_().keys()
 for pathname in pathnames:
     ## move the ttGenEvent filter to the beginning of the sequence
-    if options.eventFilter=='sig' or options.eventFilter=='bkg' or options.eventFilter=='sigPU' or options.eventFilter=='bkgPU':
+    if options.eventFilter=='sig' or options.eventFilter=='bkg' :
         getattr(process, pathname).remove(process.ttFullHadronicFilter)
         getattr(process, pathname).insert(0,process.ttFullHadronicFilter)
         getattr(process, pathname).remove(process.genEvt)
