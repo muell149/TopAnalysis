@@ -34,8 +34,10 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
      20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
      24:sysBtagUp        25:sysBtagDown       26:sysDiBosUp          27:sysDiBosDown
   */
-  if(systematicVariation==sysLumiUp  ) luminosity*=1.04;
-  if(systematicVariation==sysLumiDown) luminosity*=0.96;
+  if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.04;
+  else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
+  if(luminosity>40.&&systematicVariation==sysLumiUp  ) luminosity*=1.06;
+  else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.94;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
@@ -508,7 +510,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	      }
 	    }
 	    // divide by binwidth
-	    histo_[plotName][sample] = divideByBinwidth(histo_[plotName][sample], 2);
+	    histo_[plotName][sample] = divideByBinwidth(histo_[plotName][sample], verbose-1);
 	    if(verbose>1){
 	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){
 		std::cout << "bin " << i << "= " << histo_[plotName][sample]->GetBinContent(i) << std::endl;
