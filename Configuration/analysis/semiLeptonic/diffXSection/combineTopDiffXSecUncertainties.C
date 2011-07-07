@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=0, TString decayChannel="muon", bool adpatOldUncertainties=true){
+void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=2, TString decayChannel="none", bool adpatOldUncertainties=false){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -24,13 +24,16 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // the 2010 mu+jets analysis if they are not available 
   // for 2011 analysis, NOTE: these uncertainties 
   // must exist in ./diffXSecTopSemiMu2010.root
+  // create container to save relative shifted plots
+  std::map< TString, std::map <unsigned int, TCanvas*> > adoptedUncertaintyPlot_;
   // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
   TString outputFile="diffXSecTopSemi";
-  if(decayChannel=="muon"    ) outputFile+="Mu";
-  if(decayChannel=="electron") outputFile+="Elec";
-  outputFile+=dataSample+".root";
+  if(decayChannel=="muon"    ) outputFile+="Mu"+dataSample;
+  if(decayChannel=="electron") outputFile+="Elec"+dataSample;
+  if(decayChannel=="combined") outputFile+="Lep";
+  outputFile+=".root";
   // define folder where XSec plots are stored
   TString xSecFolder = "xSec";
   // save all plots into the following folder
@@ -81,10 +84,13 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   //    open rootfile
   // ---
   TFile* file = TFile::Open(outputFile, "UPDATE");
+  if(verbose>1) std::cout << "opened file "+outputFile << std::endl;
   // open mu+jets 2010 analysis file
   TFile* oldAnalysisfile=0;
-  if(adpatOldUncertainties) oldAnalysisfile = TFile::Open("diffXSecTopSemiMu2010.root", "READ");
-  if(verbose>1) std::cout << "opened diffXSecTopSemiMu2010.root" << std::endl;
+  if(adpatOldUncertainties){ 
+    oldAnalysisfile = TFile::Open("diffXSecTopSemiMu2010.root", "READ");
+    if(verbose>1) std::cout << "opened old file diffXSecTopSemiMu2010.root" << std::endl;
+  }
   // check if file exist
   if(file&&!file->IsZombie()){
     if(verbose>0) std::cout << "target file found!" << std::endl;
@@ -125,7 +131,9 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	  if(luminosity>40.0){
 	    if(verbose>1) std::cout << "luminosity>40/pb" << std::endl;
 	    // copy std analysis plot to scale bins later with relative uncertainties 
-	    TH1F* currentShiftedCrossSectionPlot=(TH1F*)(histo_[xSecVariables_[i]][sysNo]->Clone());
+	    TString plotName = xSecVariables_[i];
+	    plotName.ReplaceAll("Norm","");
+	    TH1F* currentShiftedCrossSectionPlot=(TH1F*)(histo_[xSecVariables_[i]][sysNo]->Clone(plotName+"kData"));
 	    if(verbose>1) std::cout << "std analysis file for this variation copied" << std::endl;
 	    // loop all bins of current 2011 analysis histogram without variations
 	    for(int bin=1; bin<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){
@@ -149,6 +157,16 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 		  currentShiftedCrossSectionPlot->SetBinError  (bin, binSFForSystUncertainty*currentShiftedCrossSectionPlot->GetBinError(bin)  );
 		  if(verbose>1) std::cout << "scaled xSec: " << currentShiftedCrossSectionPlot->GetBinContent(bin) << std::endl;
 		  histo_[xSecVariables_[i]][sys]=(TH1F*)(currentShiftedCrossSectionPlot->Clone());
+		  // save plot in canvas 
+		  TCanvas* currentUncertainty = new TCanvas( xSecVariables_[i], xSecVariables_[i], 600, 600);
+		  canvasStyle(*currentUncertainty);
+		  currentUncertainty->cd();
+		  currentShiftedCrossSectionPlot->Draw("");
+		  // draw label to indicate that sys error is adapted from 2010 mu+jets
+		  DrawLabel("!adopted from 2010 #mu+jets!", 0.2, 0.7, 0.7, 0.8, 0.4);
+		  // 
+		  adoptedUncertaintyPlot_[xSecVariables_[i]][sys]=(TCanvas*)(currentUncertainty->Clone());
+		  delete currentUncertainty;
 		  // enable error calculation
 		  if(!calculateError_[xSecVariables_[i]].count(sys)>0) calculateError_[xSecVariables_[i]][sys]=true;
 		}
@@ -388,8 +406,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	      int initialIgnoreLevel=gErrorIgnoreLevel;
 	      if(verbose==0) gErrorIgnoreLevel=kWarning;
 	      if(save){
-		relUnCertaintyCanvas->Print(outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin)+".eps");
-		relUnCertaintyCanvas->Print(outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin)+".png");
+		TString saveName=outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin);
+		if(decayChannel=="combined") saveName+="Combined";
+		relUnCertaintyCanvas->Print(saveName+".eps");
+		relUnCertaintyCanvas->Print(saveName+".png");
 	      }
 	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      // delete canvas
@@ -513,8 +533,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
 	    // b) as eps and png
 	    if(save){
-	      canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".eps");
-	      canvas->Print(outputFolder+"/xSec/finalXSec"+xSecVariables_[i]+".png");
+	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
+	      if(decayChannel=="combined") saveName+="Combined";
+	      canvas->Print(saveName+".eps");
+	      canvas->Print(saveName+".png");
 	    }
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
@@ -526,5 +548,16 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // close files
   file->Close();
   if(adpatOldUncertainties) oldAnalysisfile->Close();
-
+  // save relative uncertainty shifted canvas to file
+  if(adpatOldUncertainties&&save){ 
+    // loop variables
+    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+      // loop systematic variations
+      for(unsigned int sys=sysNo+1; sys<=sysDiBosDown; ++sys){
+	if(adoptedUncertaintyPlot_[xSecVariables_[i]][sys]){
+	  saveToRootFile(outputFile, adoptedUncertaintyPlot_[xSecVariables_[i]][sys], false, 0,"xSec/"+sysLabel(sys));
+	}
+      }
+    }
+  }
 }
