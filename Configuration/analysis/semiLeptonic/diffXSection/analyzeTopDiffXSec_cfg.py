@@ -66,7 +66,7 @@ if(not globals().has_key('jsonFile')):
 
 ## enable/ disable PU event reweighting
 if(not globals().has_key('PUreweigthing')):
-    PUreweigthing =  False # False
+    PUreweigthing =  True # False
     # take care of data
     if (not runningOnData == "MC"):
         PUreweigthing = False
@@ -74,7 +74,7 @@ print "apply PU reweighting?: ",PUreweigthing
 
 ## enable/ disable btag SF event reweighting
 if(not globals().has_key('BtagReweigthing')):
-    BtagReweigthing =  False # False
+    BtagReweigthing =  True # False
     # take care of data
     if (not runningOnData == "MC"):
         BtagReweigthing = False
@@ -708,8 +708,8 @@ else:
 ##    MC PU reweighting
 ## ---
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU.MCSampleFile = cms.string("../../../../TopUtils/data/MC_PUDist.root"         )
-process.eventWeightPU.DataFile     = cms.string("../../../../TopUtils/data/Data_PUDist_110527.root")
+process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_TTbar.root"   )
+process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-166861_7TeV_PromptReco_Collisions11.root")
 PUweight=cms.InputTag("eventWeightPU")
 
 ## ---
@@ -733,7 +733,7 @@ if(PUreweigthing):
 if(BtagReweigthing):
     weightlist.append(BtagWeight)
 process.eventWeightMultiplier.eventWeightTags = weightlist
-process.eventWeightMultiplier.verbose=cms.int32(1)
+process.eventWeightMultiplier.verbose=cms.int32(0)
 
 # use weight in single and double object analyzer modules
 # a) PU reweight
