@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=0, TString decayChannel="muon", bool adpatOldUncertainties=false){
+void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=0, TString decayChannel="muon", bool adpatOldUncertainties=true){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -82,7 +82,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   // ---
   TFile* file = TFile::Open(outputFile, "UPDATE");
   // open mu+jets 2010 analysis file
-  TFile* oldAnalysisfile;
+  TFile* oldAnalysisfile=0;
   if(adpatOldUncertainties) oldAnalysisfile = TFile::Open("diffXSecTopSemiMu2010.root", "READ");
   if(verbose>1) std::cout << "opened diffXSecTopSemiMu2010.root" << std::endl;
   // check if file exist
@@ -301,7 +301,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 		combinedErrors->SetLineWidth(histo_[xSecVariables_[i]][sysNo]->GetLineWidth());
 		combinedErrors->SetLineColor(histo_[xSecVariables_[i]][sysNo]->GetLineColor());
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
-		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]]);
+		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]], verbose);
 	      }
 	    }
 	    delete relSysPlot;
