@@ -35,14 +35,14 @@
 decayChannel=\"muon\" # or \"electron\"
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=35.9
+dataLuminosity=191.
 ## dataset: 2010 or 2011
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
-dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011_ElectronHad_160404-161312.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
+dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSec2011Data191pPromptReco1305Json.root\"
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
 if [ $dataLuminosity2 -le 3600 ]
@@ -82,7 +82,10 @@ clear
 echo
 echo "doing the full differential top xSec analysis"
 echo "used data: $dataSample"
+echo "decay channel: $decayChannel"
 echo "luminosity: $dataLuminosity"
+echo "considered systematics: $maxSys"
+echo "take missing systematics relative from 2010 mu+jets analysis? $oldErrors" 
 echo "save plots?: $save"
 echo
 if [ $fast = false ]
@@ -91,17 +94,28 @@ if [ $fast = false ]
 fi
 
 ## delete existing root file
-Lep="Mu"
-if [ $decayChannel = "electron" ]
-    then
-    Lep="Elec"
-fi
-echo "part A: delete existing rootfile ./diffXSecTopSemi$Lep$dataLabel.root"
+echo "part A: delete existing rootfile"
 if [ $fast = false ]
     then
     sleep 3
 fi
-rm ./diffXSecTopSemi$Lep$dataLabel.root
+if [ $clean = true ]
+    then
+    echo "will be done for: "
+    if [ $decayChannel == \"electron\" ]
+	then
+	echo "./diffXSecTopSemiElec$dataLabel.root"
+	rm ./diffXSecTopSemiElec$dataLabel.root
+    else
+	if [ $decayChannel == \"muon\" ]
+	    then
+	    echo "./diffXSecTopSemiMu$dataLabel.root"
+	    rm ./diffXSecTopSemiMu$dataLabel.root
+	else
+	    echo "none" 
+	fi
+    fi 
+fi
 
 ## delete existing plots
 if [ $clean = true ]
