@@ -54,6 +54,9 @@ private:
   TH1D* sigmaietaieta_;
   TH1D* electronmap_;
   TH1D* nlost_;
+  TH1D* convDcot_;
+  TH1D* convDist_;
+
     edm::InputTag weight_;
 
 };

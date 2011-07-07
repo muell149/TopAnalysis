@@ -55,7 +55,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     eta_     ->Fill(electron->eta(), weight);
     phi_->Fill(electron->phi(), weight); /////
 
-    // supercluster_energy_->Fill(electron->superCluster().energy() , weight);
+    supercluster_energy_->Fill(electron->superCluster()->energy() , weight);
     // hcaloverecal_->Fill(electron->hcalOverEcal() , weight);
     hcaloverecal_->Fill(electron->hadronicOverEm(), weight);
     fbrem_->Fill(electron->fbrem(), weight);
@@ -63,7 +63,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
 
     //if(electron->isEE()){
-    if( electron->superCluster()->eta() > 1.479 ){
+    if( fabs(electron->superCluster()->eta()) > 1.479 ){
       iso_combEE_->Fill(
                         ((electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
                         weight);
@@ -73,7 +73,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     }
 
     //if(electron->isEB()){
-    if( electron->superCluster()->eta() < 1.479 ){
+    if( fabs(electron->superCluster()->eta()) < 1.479 ){
       iso_combEB_->Fill(
                         ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
                         weight);
@@ -101,6 +101,9 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
     double mapID= electron->electronID("simpleEleId90cIso");
     electronmap_->Fill(mapID, weight);
+
+    convDcot_->Fill(electron->convDcot(), weight);
+    convDist_->Fill(electron->convDist(), weight); 
 
     if(verbosity_){
       std::cout << "-------------------------------------------" << std::endl;
@@ -180,7 +183,8 @@ ElectronAnalyzer::beginJob()
   d0_->GetXaxis()->SetTitle("d0 [cm]");
   d0_->GetYaxis()->SetTitle("N");
 
-  dB_= fs->make<TH1D>( "dB", "DB of Electron Track", 100, 0., 0.5);
+  //dB_= fs->make<TH1D>( "dB", "DB of Electron Track", 100, 0., 0.5);
+  dB_= fs->make<TH1D>( "dB", "DB of Electron Track", 100, 0., 10.);
   dB_->GetXaxis()->SetTitle("dB [cm]");
   dB_->GetYaxis()->SetTitle("Electrons");
 
@@ -208,7 +212,14 @@ ElectronAnalyzer::beginJob()
   nlost_->GetXaxis()->SetTitle("Nlost");
   nlost_->GetYaxis()->SetTitle("Electrons");
 
+  convDcot_ = fs->make<TH1D>( "convDcot","convDcot", 200, 0., 1.);
+  convDcot_->GetXaxis()->SetTitle("convDcot");
+  convDcot_->GetYaxis()->SetTitle("Electrons");
 
+  convDist_ = fs->make<TH1D>( "convDist","convDist", 200, 0., 1.);
+  convDist_->GetXaxis()->SetTitle("convDist");
+  convDist_->GetYaxis()->SetTitle("Electrons");
+  
 
 
 
