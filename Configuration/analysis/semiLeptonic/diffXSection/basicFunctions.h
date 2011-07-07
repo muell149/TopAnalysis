@@ -629,7 +629,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
   // used enumerators: samples, systematicVariation
 
   // function internal detail level of text output
-  unsigned int verbose=0;
+  int verbose=0;
   // a) check if input is valid
   // sample existing?
   if(sample>kSToptW){
@@ -863,7 +863,7 @@ TString TopFilename(unsigned int sample, unsigned int sys, const std::string dec
   // used enumerators: samples, systematicVariation 
 
   TString fileName = "decayChannel_undefined" ;
-  if (decayChannel.compare("electron")==0&&((sample==kSig)||(sample==kBkg))) fileName ="elecDiffXSec";
+  if (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
   else fileName ="muonDiffXSec";
   // name of data file is given directly in the .C file
   if(sample==kData) return ""; 
@@ -970,7 +970,7 @@ std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder
   return files_;
 }
 
-void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const unsigned int verbose=0, const std::string decayChannel = "unset" )
+void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset" )
 {
   // this function searches for every plot listed in "plotList_" in all files listed in "files_",
   // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -1044,7 +1044,7 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
   }
 }
 
-void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const unsigned int verbose=1, const int systematicVariation=sysNo, const std::string decayChannel = "unset")
+void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const int verbose=1, const int systematicVariation=sysNo, const std::string decayChannel = "unset")
 {
   // this function scales every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
@@ -1090,7 +1090,7 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
   }
 }
 
-void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const unsigned int verbose=1, bool reCreate=false, const std::string decayChannel = "unset")
+void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const int verbose=1, bool reCreate=false, const std::string decayChannel = "unset")
 {
   // this function creates plots for all diboson and all single 
   // top samples combined if the combined SingleTop and DiBoson 
@@ -1167,7 +1167,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
   }
 }
 		       
-void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const unsigned int verbose=1, const std::string decayChannel="muon")
+void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const int verbose=1, const std::string decayChannel="muon")
 {
   // this function will transform the histogram "plotList_"["plot"] 
   // within "histo_" into stacked plots. 
@@ -1223,7 +1223,7 @@ float modulo(const float a, const float b)
   return rest;
 }
 
-void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const unsigned int verbose=0)
+void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const int verbose=0)
 {
   // this function rebins an histogram using a variable binning
   // modified quantities: "histoUnbinned"
@@ -1446,7 +1446,7 @@ void DivideYieldByEfficiencyAndLumi(TH1F* yield, TH1F* efficiency, double lumino
 }
 
 template <class T>
-void saveToRootFile(const TString& outputFile, const T& object, const bool& overwrite=false, const unsigned int& verbose=1, const TString& folder="")
+void saveToRootFile(const TString& outputFile, const T& object, const bool& overwrite=false, const int& verbose=1, const TString& folder="")
 {
   // this function saves objects of class T
   // (such as TH1) in an output rootfile with name outputFile
@@ -1529,7 +1529,7 @@ void saveToRootFile(const TString& outputFile, const T& object, const bool& over
   file->Close();
 }
 
-void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, unsigned int verbose=0, const std::vector<double> err_=std::vector<double>(0))
+void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, int verbose=0, const std::vector<double> err_=std::vector<double>(0))
 {
   // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
   // the range of the ratio is 'ratioMin' to 'ratioMax'
@@ -1676,7 +1676,7 @@ double getInclusiveXSec(TH1* hist, int verbose=0)
 }
 
 
-void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=2)
+void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=0)
 {
   // this function shifts all unset points 
   // (at x,y=0,0 with error 0,0) 
@@ -1684,7 +1684,6 @@ void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=2)
   // modified quantities: none
   // used functions: none
   // used enumerators: none 
-  std::cout << "entered" <<std::endl;
   if(verbose>1) std::cout << "checking " << hist->GetName() << " for empty bins" << std::endl;
   // loop points
   for(int bin=0; bin<=hist->GetN()-1; ++bin){
