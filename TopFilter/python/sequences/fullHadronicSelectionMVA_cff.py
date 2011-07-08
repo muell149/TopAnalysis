@@ -214,12 +214,12 @@ ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
 ## exchange resolutions for jets
-#from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
-#kinFitTtFullHadEventHypothesis.udscResolutions = udscResolutionPF.functions
-#kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolutionPF.functions
-from TopAnalysis.TopUtils.stringResolutions_etEtaPhi_cff import *
-kinFitTtFullHadEventHypothesis.udscResolutions = udscResolution.functions
-kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolution.functions
+from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
+kinFitTtFullHadEventHypothesis.udscResolutions = udscResolutionPF.functions
+kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolutionPF.functions
+#from TopAnalysis.TopUtils.stringResolutions_etEtaPhi_cff import *
+#kinFitTtFullHadEventHypothesis.udscResolutions = udscResolution.functions
+#kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolution.functions
 
 ## configure genMatch
 ttFullHadJetPartonMatch.useMaxDist = True
