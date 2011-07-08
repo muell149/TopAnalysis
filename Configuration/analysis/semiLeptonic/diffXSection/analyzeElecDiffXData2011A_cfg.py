@@ -54,7 +54,7 @@ else:
 
 ## global tag
 #process.GlobalTag.globaltag = cms.string(autoCond['startup'])
-process.GlobalTag.globaltag = cms.string('GR_R_42_V13::All')
+#process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
 
 ## reduce output
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
