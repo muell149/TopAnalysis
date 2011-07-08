@@ -10,6 +10,7 @@
 
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 //#include "DataFormats/Candidate/interface/Candidate.h"
 //#include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtFullHadEvtPartons.h"
@@ -19,6 +20,7 @@
 /// default constructor
 FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   JetSrc_            (cfg.getParameter<edm::InputTag>("JetSrc")),
+  METSrc_            (cfg.getParameter<edm::InputTag>("METSrc")),
   FitSrc_            (cfg.getParameter<edm::InputTag>("FitSrc")),
   MultiJetMVADiscSrc_(cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc")),
   GenSrc_            (cfg.getParameter<edm::InputTag>("GenSrc")),
@@ -65,6 +67,13 @@ FullHadTreeWriter::beginJob()
   PUweight = -10.;
   tree->Branch("MCweight", &MCweight, "MCweight/D");
   tree->Branch("PUweight", &PUweight, "PUweight/D");
+
+  /// MET
+
+  // 4-vector of MET
+  MET = new TClonesArray("TLorentzVector", 1);
+  tree->Branch("MET", &MET, 32000, -1);
+  MET->BypassStreamer();
 
   /// jets
 
@@ -609,6 +618,9 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   luminosityBlockNumber = aux.luminosityBlock();
   eventNumber           = aux.event();
 
+  edm::Handle<edm::View< pat::MET > > MET_h;
+  event.getByLabel(METSrc_, MET_h);
+  
   edm::Handle<edm::View< pat::Jet > > jets_h;
   event.getByLabel(JetSrc_, jets_h);
   
@@ -633,6 +645,14 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   PUweight = PUWeightSrc_h.isValid() ? *PUWeightSrc_h : -100.;
 
   edm::ESHandle<BtagPerformance> bTagPerf_h;
+
+  if(MET_h.isValid()){
+    MET->Clear();
+    for(edm::View< pat::MET >::const_iterator met = MET_h->begin(); met != MET_h->end(); ++met){
+      new((*MET)[0]) TLorentzVector(met->px(), met->py(), met->pz(), met->energy());
+      break;
+    }
+  }
 
   if(jets_h.isValid()){
     Njet = (int)jets_h->size();
@@ -1153,6 +1173,7 @@ FullHadTreeWriter::endJob()
   delete[] sinThetaStar;
 
   jets->Delete();
+  MET->Delete();
   fitVecs->Delete();
 }
 

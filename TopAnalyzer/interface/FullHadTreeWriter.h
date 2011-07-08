@@ -51,7 +51,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   int comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h);
 
   /// src's for the different infos
-  edm::InputTag JetSrc_, FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
+  edm::InputTag JetSrc_, METSrc_, FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
 
   /// MC weight
   double MCweight_;
@@ -185,7 +185,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   double x1, x2;
   
   // TClonesArray(TLorentzVectors)
-  TClonesArray * jets, * fitVecs;
+  TClonesArray * jets, * MET, * fitVecs;
 
 };
 

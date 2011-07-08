@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 writeFullHadTree = cms.EDAnalyzer("FullHadTreeWriter",
    ## jets
    JetSrc = cms.InputTag('selectedPatJets'),
+   ## MET
+   METSrc = cms.InputTag('patMETs'),
    ## kinematic fit result
    FitSrc = cms.InputTag("ttFullHadEvent"),
    ## GenEventInfoProduct for PDF uncertainties
