@@ -33,7 +33,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   if(luminosity<36) dataSample="2010";
   if(luminosity>36) dataSample="2011";
   // save all plots into the following folder
-  TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
+  TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample+"/";
   outputFolder+="monitoring/";
   // save all plots within a root file named:
