@@ -5,26 +5,38 @@
 ## HOW TO USE THIS SHELL SCRIPT
 ## note: has to be called from .../TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection
 ## a) set up the folder structure:
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/monitoring
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/partonLevel
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/recoYield
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/uncertainties
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/xSec
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/binning
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/effAndAcc
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/genRecoCorrPlots
-## mkdir -p diffXSecFromSignal/plots/kinFit/2010/kinFitPerformance
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/monitoring
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/partonLevel
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/recoYield
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/uncertainties
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/xSec
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/binning
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/effAndAcc
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/genRecoCorrPlots
-## mkdir -p diffXSecFromSignal/plots/kinFit/2011/kinFitPerformance
+## mkdir -p diffXSecFromSignal/plots/muon/2010/monitoring
+## mkdir -p diffXSecFromSignal/plots/muon/2010/partonLevel
+## mkdir -p diffXSecFromSignal/plots/muon/2010/recoYield
+## mkdir -p diffXSecFromSignal/plots/muon/2010/uncertainties
+## mkdir -p diffXSecFromSignal/plots/muon/2010/xSec
+## mkdir -p diffXSecFromSignal/plots/muon/2010/binning
+## mkdir -p diffXSecFromSignal/plots/muon/2010/effAndAcc
+## mkdir -p diffXSecFromSignal/plots/muon/2010/genRecoCorrPlots
+## mkdir -p diffXSecFromSignal/plots/muon/2010/kinFitPerformance
+## mkdir -p diffXSecFromSignal/plots/muon/2011/monitoring
+## mkdir -p diffXSecFromSignal/plots/muon/2011/partonLevel
+## mkdir -p diffXSecFromSignal/plots/muon/2011/recoYield
+## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertainties
+## mkdir -p diffXSecFromSignal/plots/muon/2011/xSec
+## mkdir -p diffXSecFromSignal/plots/muon/2011/binning
+## mkdir -p diffXSecFromSignal/plots/muon/2011/effAndAcc
+## mkdir -p diffXSecFromSignal/plots/muon/2011/genRecoCorrPlots
+## mkdir -p diffXSecFromSignal/plots/muon/2011/kinFitPerformance
+## mkdir -p diffXSecFromSignal/plots/electron/2011/monitoring
+## mkdir -p diffXSecFromSignal/plots/electron/2011/partonLevel
+## mkdir -p diffXSecFromSignal/plots/electron/2011/recoYield
+## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertainties
+## mkdir -p diffXSecFromSignal/plots/electron/2011/xSec
+## mkdir -p diffXSecFromSignal/plots/electron/2011/binning
+## mkdir -p diffXSecFromSignal/plots/electron/2011/effAndAcc
+## mkdir -p diffXSecFromSignal/plots/electron/2011/genRecoCorrPlots
+## mkdir -p diffXSecFromSignal/plots/electron/2011/kinFitPerformance
+## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
+## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertainties
+
 ## b) copy root files needed for the Analysis
-## scp -r username@uhh-cms03.desy.de:/afs/desy.de/user/m/mgoerner/public/analysisRootFilesWithKinFit ./diffXSecFromSignal
+## scp -r /scratch/hh/current/cms/user/mgoerner/analysisRootFilesWithKinFit ./diffXSecFromSignal
 ## c) when using the shell script for the very first time, do "chmod a+x topDiffXSecAnalysis2011.sh
 ## find final plots in ./diffXSecFromSignal/plots/ after running the analysis via ./topDiffXSecAnalysis2011.sh
 
@@ -32,21 +44,22 @@
 ## configure settings ##
 ########################
 # lepton flavour in semi leptonic decay
-decayChannel=\"muon\" # or \"electron\"
+# choose \"muon\" or \"electron\" or \"combined\"
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=191.
+dataLuminosity=191.0
 ## dataset: 2010 or 2011
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
-dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSec2011Data191pPromptReco1305Json.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
+dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSec2011Data191pPromptReco1305Json.root\"
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
 if [ $dataLuminosity2 -le 3600 ]
-then
+    then
     dataLabel=2010
 fi
 ## save all plots? (.eps and .root)
@@ -58,7 +71,7 @@ verbose=0
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
 #maxSys=0
-maxSys=0
+maxSys=2
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -70,6 +83,33 @@ clean=true
 ## NOTE: the rootfile ./diffXSecTopSemiMu2010.root
 ## must be available and contain the uncertainties 
 oldErrors=true
+# disabled for 2010 mu+jets
+if [ $dataLuminosity2 -le 3600 ]
+    then
+    if [ $decayChannel == \"muon\" ]
+	then
+	oldErrors=false
+	maxSys=27
+    fi
+fi
+# disabled for combined cross section
+if [ $decayChannel == \"combined\" ]
+    then
+    oldErrors=false
+fi
+## automatic definition of used MC sets
+## 2010: fall10 MC
+if [ $dataLuminosity2 -le 3600 ]
+    then
+    sed -i s/newSpring11MC=true/newSpring11MC=false/g ./basicFunctions.h
+    sed -i s/newSummer11MC=true/newSummer11MC=false/g ./basicFunctions.h
+fi
+## 2011: spring11MC
+if [ $dataLuminosity2 -ge 3601 ]
+    then
+    sed -i s/newSpring11MC=false/newSpring11MC=true/g ./basicFunctions.h
+    sed -i s/newSummer11MC=true/newSummer11MC=false/g ./basicFunctions.h
+fi
 
 #####################
 ## prepare running ##
@@ -79,15 +119,27 @@ START=$(date +%s)
 
 ## print out configuration
 clear
-echo
-echo "doing the full differential top xSec analysis"
-echo "used data: $dataSample"
-echo "decay channel: $decayChannel"
-echo "luminosity: $dataLuminosity"
-echo "considered systematics: $maxSys"
-echo "take missing systematics relative from 2010 mu+jets analysis? $oldErrors" 
-echo "save plots?: $save"
-echo
+if [$decayChannel == \"combined\"]
+    then
+    echo
+    echo "combining the electron and muon channel"
+    echo "NOTE: requires the files"
+    echo "diffXSecTopSemiMu2011.root and diffXSecTopSemiElec2011.root"
+    echo "get them by running the e/mu channel first"
+    echo
+else
+    echo
+    echo "doing the full differential top xSec analysis"
+    echo "used data: $dataSample"
+    echo "decay channel: $decayChannel"
+    echo "luminosity: $dataLuminosity"
+    echo "considered systematics: $maxSys"
+    echo "take missing systematics relative from 2010 mu+jets analysis? $oldErrors" 
+    echo "save plots?: $save"
+    grep newSpring11MC= ./basicFunctions.h
+    grep newSummer11MC= ./basicFunctions.h
+    echo
+fi
 if [ $fast = false ]
     then
     sleep 5
@@ -112,7 +164,12 @@ if [ $clean = true ]
 	    echo "./diffXSecTopSemiMu$dataLabel.root"
 	    rm ./diffXSecTopSemiMu$dataLabel.root
 	else
-	    echo "none" 
+	    if [ $decayChannel == \"combination\" ]
+		then
+		echo "./diffXSecTopSemiLep.root"
+		rm ./diffXSecTopSemiLep.root
+		echo "none" 
+	    fi
 	fi
     fi 
 fi
@@ -120,8 +177,19 @@ fi
 ## delete existing plots
 if [ $clean = true ]
     then
-    rm ./diffXSecFromSignal/plots/kinFit/$dataLabel/*/*.*
-    echo "part A2 delete existing plots within diffXSecFromSignal/plots/kinFit/$dataLabel/*/*.*"
+    echo "part A2 delete existing plots within diffXSecFromSignal/plots/$decayChannel/$dataLabel/*/*.*"
+    if [ $decayChannel == \"muon\" ]
+	then
+	rm ./diffXSecFromSignal/plots/muon/$dataLabel/*/*.*
+    fi
+    if [ $decayChannel == \"electron\" ]
+	then
+	rm ./diffXSecFromSignal/plots/electron/$dataLabel/*/*.*
+    fi
+    if [ $decayChannel == \"combined\" ]
+	then
+	rm ./diffXSecFromSignal/plots/combined/$dataLabel/*/*.*
+    fi
     if [ $fast = false ]
 	then
 	sleep 1
@@ -138,7 +206,10 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './analyzeTopDiffXSecMonitoring.C+('$dataLuminosity', '$save', '$verbose', '$dataSample', '$decayChannel')'
+if [ $decayChannel != \"combined\" ]
+    then
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C+('$dataLuminosity', '$save', '$verbose', '$dataSample', '$decayChannel')'
+fi
 
 #####################################
 ## run migration macro for binning ##
@@ -150,14 +221,20 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-#root -l -q -b './findBinning.C+()'
+if [ $decayChannel != \"combined\" ]
+    then
+    echo "not integrated yet in the automatic workflow"
+    #root -l -q -b './findBinning.C+()'
+else
+    echo "will be ignored, only done for decayChannel=muon/electron"
+fi
 
 #########################################
 ## run efficiency& cross section macro ##
 #########################################
 BEFORED=$(date +%s)
 echo
-echo "part D: process cross section calculation macro for all systematics"
+echo "part D1: process cross section calculation macro for all systematics"
 echo "INFO: missing files must not be problematic"
 echo "      either all WZ, WW and ZZ or the combined VV sample are necessary"
 echo "      same is true for the single top samples (s, t, tW)"
@@ -192,9 +269,34 @@ do
       then
       BEFORESYS=$(date +%s)
   fi
-## run macro
-  root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+  if [ $decayChannel != \"combined\" ]
+      then
+      ## run macro
+      root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+  else
+      echo "will be ignored, only done for decayChannel=muon/electron"
+  fi
 done
+
+#######################################
+## combine electron and muon channel ##
+#######################################
+echo
+echo "part D2: combine electron and muon channel"
+if [ $fast = false ]
+    then
+    sleep 2
+fi
+if [ $decayChannel == \"combined\" ]
+    then
+    echo "cross sections for all systematic variations"
+    echo "and all decay channels"
+    echo
+    root -l -q -b './bothDecayChannelsCombination.C+('$dataLuminosity', '$save', '$verbose')'
+else
+    echo "will be ignored, only done for decayChannel=combined"
+fi
+echo
 AFTERSYS=$(date +%s)
 
 ###########################################
