@@ -32,12 +32,15 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   TString outputFile="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFile+="Mu"+dataSample;
   if(decayChannel=="electron") outputFile+="Elec"+dataSample;
-  if(decayChannel=="combined") outputFile+="Lep";
+  if(decayChannel=="combined"){
+    outputFile+="Lep";
+    adpatOldUncertainties=false;
+  }
   outputFile+=".root";
   // define folder where XSec plots are stored
   TString xSecFolder = "xSec";
   // save all plots into the following folder
-  TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
+  TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
   // define some rootstyle options
   gROOT->cd();

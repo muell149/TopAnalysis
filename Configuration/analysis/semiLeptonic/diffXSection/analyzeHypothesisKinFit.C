@@ -52,7 +52,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   if(luminosity<50) dataSample="2010";
   if(luminosity>50) dataSample="2011";
   // save all plots into the following folder
-  TString outputFolder = "./diffXSecFromSignal/plots/kinFit/";
+  TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample+"/";
   // save all plots within a root file named:
   TString outputFileName="diffXSecTopSemi";
