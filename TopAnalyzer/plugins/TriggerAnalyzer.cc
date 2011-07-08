@@ -5,7 +5,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
+#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 
 using namespace std;
 using namespace edm;

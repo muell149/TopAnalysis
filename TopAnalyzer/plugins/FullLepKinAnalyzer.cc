@@ -5,7 +5,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
-#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
+#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 
 /// default constructor
 FullLepKinAnalyzer::FullLepKinAnalyzer(const edm::ParameterSet& cfg):
