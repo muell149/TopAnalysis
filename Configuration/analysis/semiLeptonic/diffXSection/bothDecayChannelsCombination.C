@@ -2,7 +2,6 @@
 
 void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigned int verbose=2){
 
-
   // ---
   //    Setup
   // ---
@@ -103,9 +102,12 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
 	  canvas_[xSecVariables_[i]][sys]=(TCanvas*)(combicanvas->Clone());
 	  canvas_[xSecVariables_[i]][sys]->SetTitle(xSecVariables_[i]);
 	  canvas_[xSecVariables_[i]][sys]->SetName(xSecVariables_[i]);
-	  if(save){
-	    combicanvas->Print("./diffXSecFromSignal/plots/kinFit/"+dataSample+"/combinedXSec/xSec"+xSecVariables_[i]+sysLabel(sysNo)+".eps"); 
-	    combicanvas->Print("./diffXSecFromSignal/plots/kinFit/"+dataSample+"/combinedXSec/xSec"+xSecVariables_[i]+sysLabel(sysNo)+".png");
+	  if(save&&sys==sysNo){
+	    int initialIgnoreLevel=gErrorIgnoreLevel;
+	    if(verbose==0) gErrorIgnoreLevel=kWarning;
+	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+".eps"); 
+	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+".png");
+	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	  // close Canvas
 	  combicanvas->Close();
