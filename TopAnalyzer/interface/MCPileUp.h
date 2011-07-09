@@ -11,6 +11,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "DataFormats/Common/interface/View.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 
@@ -48,7 +49,8 @@ class MCPileUp : public edm::EDAnalyzer {
       // ----------member data --------------------------- 
 
   TH1F* histo_NPUEvents;
- 
+  TH1F* histo_NPUEvents3BX;
+
   edm::InputTag inTag_PUSource;
 };
 

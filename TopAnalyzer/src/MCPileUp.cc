@@ -21,31 +21,41 @@ void MCPileUp::beginJob()
   histo_NPUEvents -> GetXaxis() -> SetTitle("Number of PU Events");
   histo_NPUEvents -> GetYaxis() -> SetTitle("Frequency");
   histo_NPUEvents -> SetFillColor(2);
+
+  histo_NPUEvents3BX = new TH1F("pileup3BX","pileup3BX",71,-0.5,70.5);
+  histo_NPUEvents3BX -> SetTitle("");
+  histo_NPUEvents3BX -> GetXaxis() -> SetTitle("Number of PU Events (Average over 3 BXs)");
+  histo_NPUEvents3BX -> GetYaxis() -> SetTitle("Frequency");
+  histo_NPUEvents3BX -> SetFillColor(2);
 }
 
 void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   using namespace edm;
-
-   Handle<std::vector<PileupSummaryInfo> > pPUInfo;
+  edm::Handle<edm::View<PileupSummaryInfo> > pPUInfo;
    iEvent.getByLabel(inTag_PUSource, pPUInfo);
 
-   std::vector<PileupSummaryInfo>::const_iterator iterPU;
+   edm::View<PileupSummaryInfo>::const_iterator iterPU;
+
+   float sum_nvtx = 0;
 
    for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)
    { 
+     sum_nvtx += iterPU->getPU_NumInteractions();
+
      if (iterPU->getBunchCrossing()==0) // -1: previous BX, 0: current BX,  1: next BX
      {
        histo_NPUEvents->Fill(iterPU->getPU_NumInteractions());
-       break;
      }
    }
+
+   histo_NPUEvents3BX->Fill(sum_nvtx/3.0);
 }
 
 void MCPileUp::endJob()
 {
   TFile *outfile = new TFile("MC_PUDist.root","RECREATE");
-  histo_NPUEvents -> Write();
+  histo_NPUEvents    -> Write();
+  histo_NPUEvents3BX -> Write();
   outfile->Close();
 }
 
