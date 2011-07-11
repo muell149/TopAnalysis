@@ -1,4 +1,5 @@
 #include "TLorentzVector.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "TopAnalysis/TopAnalyzer/plugins/FullLepKinAnalyzer.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -34,9 +35,9 @@ FullLepKinAnalyzer::beginJob()
   bookQualityHistos  (fs);
   bookRecCorrelHistos(fs);
   if(isSignalMC_){
-    bookGenHistos      (fs);
-    bookPullHistos     (fs);
-    book2DHistos       (fs);
+    bookGenHistos (fs);
+    bookPullHistos(fs);
+    book2DHistos  (fs);
   }
 }
 
@@ -91,7 +92,16 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   // -----------------------
   // fill histos related to quality of the TtFullLeptonicEvent
   // -----------------------
+  bJetIdcs_   ->Fill(FullLepEvt->jetLeptonCombination(hypoKey)[0], weight );
+  bBarJetIdcs_->Fill(FullLepEvt->jetLeptonCombination(hypoKey)[1], weight );   
+  
+  if( hypoKey==6 ) {
+    deltaM_->Fill(FullLepEvt->top(hypoKey)->mass()-FullLepEvt->topBar(hypoKey)->mass(), weight); 
+    kinSolWeight_->Fill( FullLepEvt->solWeight(), weight );
+  }
+
   fillQualityHistos(*FullLepEvt, hypoKey, weight);
+
 
   // -----------------------
   // fill histos for basic kinematic variables
@@ -140,7 +150,7 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   fillKinHistos(LepKin_,    *Lep,    weight);
   fillKinHistos(NuBarKin_,  *NuBar,  weight);
 
-  fillKinHistos(TtBarKin_,   *TtBar, weight);
+  fillKinHistos(TtBarKin_,   *TtBar,   weight);
   fillKinHistos(LepPairKin_, *LepPair, weight);
   fillKinHistos(JetPairKin_, *JetPair, weight);
 
@@ -198,6 +208,32 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   nBtagsSSVHEMVsTtBarPt_      ->Fill(nSSVHEM, TtBar->pt(), weight);
   nBtagsSSVHEMVsTtBarRapidity_->Fill(nSSVHEM, TtBar->rapidity(), weight);
   nBtagsSSVHEMVsTtBarMass_    ->Fill(nSSVHEM, TtBar->mass(), weight);
+
+  // combine masses of leptons and jets
+  reco::CompositeCandidate* LepBarB = new reco::CompositeCandidate();
+  LepBarB->addDaughter(*LepBar);
+  LepBarB->addDaughter(*B);
+  addFourMomenta.set(*LepBarB);
+  LepBarBMass_->Fill(LepBarB->mass(), weight);
+
+  reco::CompositeCandidate* LepB = new reco::CompositeCandidate();
+  LepB->addDaughter(*Lep);
+  LepB->addDaughter(*B);
+  addFourMomenta.set(*LepB);
+  LepBMass_->Fill(LepB->mass(), weight);
+
+  reco::CompositeCandidate* LepBBar = new reco::CompositeCandidate();
+  LepBBar->addDaughter(*Lep);
+  LepBBar->addDaughter(*BBar);
+  addFourMomenta.set(*LepBBar);
+  LepBBarMass_->Fill(LepBBar->mass(), weight);
+
+  reco::CompositeCandidate* LepBarBBar = new reco::CompositeCandidate();
+  LepBarBBar->addDaughter(*LepBar);
+  LepBarBBar->addDaughter(*BBar);
+  addFourMomenta.set(*LepBarBBar);
+  LepBarBBarMass_->Fill(LepBarBBar->mass(), weight);
+
 
   // -----------------------
   // fill generator and pull histos for kinematic variables
@@ -289,6 +325,17 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   fill2DHistos(TtBar2D_,   *TtBar,   *genTtBar,   weight);
   fill2DHistos(LepPair2D_, *LepPair, *genLepPair, weight);
   fill2DHistos(JetPair2D_, *JetPair, *genJetPair, weight);
+
+
+  int nMatchedBjets = 0;
+  if(isRealBJet(*B,*genB,*genBBar)) 
+    nMatchedBjets++;    
+  if(isRealBJet(*BBar,*genB,*genBBar)) 
+    nMatchedBjets++;
+
+  nMatchVsNtagsTCHEL_ ->Fill(nTCHEL, nMatchedBjets, weight); 
+  nMatchVsNtagsTCHEM_ ->Fill(nTCHEM, nMatchedBjets, weight); 
+  nMatchVsNtagsSSVHEM_->Fill(nSSVHEM,nMatchedBjets, weight);
 
   delete TtBar;
   delete LepPair;
@@ -388,7 +435,7 @@ FullLepKinAnalyzer::bookKinHistos(edm::Service<TFileService>& fs)
   TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarEta"     ), "#eta (t#bar{t})"       ,100, -5.0,   5.0) );
   TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarRapidity"), "rapidity (t#bar{t})"   ,100, -5.0,   5.0) );
   TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"     ), "#phi (t#bar{t})"       , 62, -3.1,   3.1) );
-  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarMass"    ), "M (t#bar{t}) [GeV]"    ,100,  0. ,1000. ) );
+  TtBarKin_.push_back( fs->make<TH1D>(ns.name("TtBarMass"    ), "M (t#bar{t}) [GeV]"    ,200,  0. ,2000. ) );
 
   LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairPt"      ), "p_{t} (l^{+}l^{-}) [GeV]",100,  0. , 500. ) );
   LepPairKin_.push_back( fs->make<TH1D>(ns.name("LepPairEta"     ), "#eta (l^{+}l^{-})"       ,100, -5.0,   5.0) );
@@ -683,44 +730,48 @@ FullLepKinAnalyzer::bookRecCorrelHistos(edm::Service<TFileService>& fs)
 {
 
   NameScheme ns("correlation");
-  diLeptonMassVsLeptonPt_     = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonPt"),     "", 200,  0. , 400. , 100,  0. , 500. );
+  diLeptonMassVsLeptonPt_     = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonPt"),     "", 200,  0. , 400. , 250,  0. , 500. );
   diLeptonMassVsLeptonEta_    = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonEta"),    "", 200,  0. , 400. , 100, -5.0,   5.0);
-  diLeptonMassVsDiLeptonPt_   = fs->make<TH2D>(ns.name("diLeptonMassVsDiLeptonPt"),   "", 200,  0. , 400. , 100,  0. , 500. );
-  diLeptonMassVsTopPt_        = fs->make<TH2D>(ns.name("diLeptonMassVsTopPt"),        "", 200,  0. , 400. , 100,  0. , 500. );
+  diLeptonMassVsDiLeptonPt_   = fs->make<TH2D>(ns.name("diLeptonMassVsDiLeptonPt"),   "", 200,  0. , 400. , 250,  0. , 500. );
+  diLeptonMassVsTopPt_        = fs->make<TH2D>(ns.name("diLeptonMassVsTopPt"),        "", 200,  0. , 400. , 250,  0. , 500. );
   diLeptonMassVsTopRapidity_  = fs->make<TH2D>(ns.name("diLeptonMassVsTopRapidity"),  "", 200,  0. , 400. , 100, -5.0,   5.0);
-  diLeptonMassVsTtBarPt_      = fs->make<TH2D>(ns.name("diLeptonMassVsTtBarPt"),      "", 200,  0. , 400. , 100,  0. , 500. );
+  diLeptonMassVsTtBarPt_      = fs->make<TH2D>(ns.name("diLeptonMassVsTtBarPt"),      "", 200,  0. , 400. , 250,  0. , 500. );     
   diLeptonMassVsTtBarRapidity_= fs->make<TH2D>(ns.name("diLeptonMassVsTtBarRapidity"),"", 200,  0. , 400. , 100, -5.0,   5.0);
-  diLeptonMassVsTtBarMass_    = fs->make<TH2D>(ns.name("diLeptonMassVsTtBarMass"),    "", 200,  0. , 400. , 100,  0. ,1000. );
+  diLeptonMassVsTtBarMass_    = fs->make<TH2D>(ns.name("diLeptonMassVsTtBarMass"),    "", 200,  0. , 400. , 500,  0. ,1000. );
 
-  nBtagsTCHELVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonPt"),       "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsTCHELVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonPt"),       "", 5, -0.5, 4.5 , 250,  0. , 500. );
   nBtagsTCHELVsLeptonEta_    = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonEta"),      "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsTCHELVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonPt"),     "", 5, -0.5, 4.5 , 100,  0. , 500. );
-  nBtagsTCHELVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonMass"),   "", 5, -0.5, 4.5 , 100,  0. , 500. );
-  nBtagsTCHELVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsTCHELVsTopPt"),          "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsTCHELVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonPt"),     "", 5, -0.5, 4.5 , 250,  0. , 500. );
+  nBtagsTCHELVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonMass"),   "", 5, -0.5, 4.5 , 250,  0. , 500. );
+  nBtagsTCHELVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsTCHELVsTopPt"),          "", 5, -0.5, 4.5 , 250,  0. , 500. );
   nBtagsTCHELVsTopRapidity_  = fs->make<TH2D>(ns.name("nBtagsTCHELVsTopRapidity"),    "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsTCHELVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarPt"),        "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsTCHELVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarPt"),        "", 5, -0.5, 4.5 , 250,  0. , 500. );   
   nBtagsTCHELVsTtBarRapidity_= fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarRapidity"),  "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsTCHELVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarMass"),      "", 5, -0.5, 4.5 , 100,  0. ,1000. );
+  nBtagsTCHELVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarMass"),      "", 5, -0.5, 4.5 , 500,  0. ,1000. );
 
-  nBtagsTCHEMVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonPt"),       "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsTCHEMVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonPt"),       "", 5, -0.5, 4.5 , 250,  0. , 500. );
   nBtagsTCHEMVsLeptonEta_    = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonEta"),      "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsTCHEMVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHEMVsDiLeptonPt"),     "", 5, -0.5, 4.5 , 100,  0. , 500. );
-  nBtagsTCHEMVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsTCHEMVsDiLeptonMass"),   "", 5, -0.5, 4.5 , 100,  0. , 500. );
-  nBtagsTCHEMVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTopPt"),          "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsTCHEMVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHEMVsDiLeptonPt"),     "", 5, -0.5, 4.5 , 250,  0. , 500. );
+  nBtagsTCHEMVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsTCHEMVsDiLeptonMass"),   "", 5, -0.5, 4.5 , 250,  0. , 500. );
+  nBtagsTCHEMVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTopPt"),          "", 5, -0.5, 4.5 , 250,  0. , 500. );
   nBtagsTCHEMVsTopRapidity_  = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTopRapidity"),    "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsTCHEMVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarPt"),        "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsTCHEMVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarPt"),        "", 5, -0.5, 4.5 , 250,  0. , 500. );	
   nBtagsTCHEMVsTtBarRapidity_= fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarRapidity"),  "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsTCHEMVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarMass"),      "", 5, -0.5, 4.5 , 100,  0. ,1000. );
+  nBtagsTCHEMVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarMass"),      "", 5, -0.5, 4.5 , 500,  0. ,1000. );
 
-  nBtagsSSVHEMVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonPt"),     "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsSSVHEMVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonPt"),     "", 5, -0.5, 4.5 , 250,  0. , 500. );
   nBtagsSSVHEMVsLeptonEta_    = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonEta"),    "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsSSVHEMVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsDiLeptonPt"),   "", 5, -0.5, 4.5 , 100,  0. , 500. );
-  nBtagsSSVHEMVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsDiLeptonMass"), "", 5, -0.5, 4.5 , 100,  0. , 500. );
-  nBtagsSSVHEMVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTopPt"),        "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsSSVHEMVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsDiLeptonPt"),   "", 5, -0.5, 4.5 , 250,  0. , 500. );
+  nBtagsSSVHEMVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsDiLeptonMass"), "", 5, -0.5, 4.5 , 250,  0. , 500. );
+  nBtagsSSVHEMVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTopPt"),        "", 5, -0.5, 4.5 , 250,  0. , 500. );
   nBtagsSSVHEMVsTopRapidity_  = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTopRapidity"),  "", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsSSVHEMVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarPt"),      "", 5, -0.5, 4.5 , 100,  0. , 500. );
+  nBtagsSSVHEMVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarPt"),      "", 5, -0.5, 4.5 , 250,  0. , 500. );  
   nBtagsSSVHEMVsTtBarRapidity_= fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarRapidity"),"", 5, -0.5, 4.5 , 100, -5.0,   5.0);
-  nBtagsSSVHEMVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarMass"),    "", 5, -0.5, 4.5 , 100,  0. ,1000. );
+  nBtagsSSVHEMVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarMass"),    "", 5, -0.5, 4.5 , 500,  0. ,1000. );
+  
+  nMatchVsNtagsTCHEL_ = fs->make<TH2D>(ns.name("nMatchVsNtagsTCHEL" ),"", 5, -0.5, 4.5, 3, -0.5, 2.5);  
+  nMatchVsNtagsTCHEM_ = fs->make<TH2D>(ns.name("nMatchVsNtagsTCHEM" ),"", 5, -0.5, 4.5, 3, -0.5, 2.5);   
+  nMatchVsNtagsSSVHEM_= fs->make<TH2D>(ns.name("nMatchVsNtagsSSVHEM"),"", 5, -0.5, 4.5, 3, -0.5, 2.5);   
 }
 
 
@@ -730,10 +781,15 @@ FullLepKinAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs)
 {
   NameScheme ns("qual");
 
-  kinSolWeight_        = fs->make<TH1D>(ns.name("kinSolWeight"        ), "Weight of kin solution",           50,  0. , 1. );
-  bJetIdcs_            = fs->make<TH1D>(ns.name("bJetIdcs"            ), "b jet indices used for hypo"      , 4, -0.5, 3.5);
-  bBarJetIdcs_         = fs->make<TH1D>(ns.name("bBarJetIdcs"         ), "bbar jet indices used for hypo"   , 4, -0.5, 3.5);
-  deltaM_              = fs->make<TH1D>(ns.name("deltaM"              ), "M_{top}-M{#bar{t}}",               50, -25., 25.);
+  kinSolWeight_        = fs->make<TH1D>(ns.name("kinSolWeight"        ), "Weight of kin solution",           50,  0. , 1. ); 
+  bJetIdcs_            = fs->make<TH1D>(ns.name("bJetIdcs"            ), "b jet indices used for hypo",       4, -0.5, 3.5);
+  bBarJetIdcs_         = fs->make<TH1D>(ns.name("bBarJetIdcs"         ), "bbar jet indices used for hypo",    4, -0.5, 3.5);
+  deltaM_              = fs->make<TH1D>(ns.name("deltaM"              ), "M_{top}",		             50, -25., 25.);
+  LepBarBMass_         = fs->make<TH1D>(ns.name("LepBarBMass"	      ), "M_{l^{+},b}",		            250,   0.,250.);  
+  LepBMass_            = fs->make<TH1D>(ns.name("LepBMass"	      ), "M_{l^{-},b}",		            250,   0.,250.);  
+  LepBBarMass_         = fs->make<TH1D>(ns.name("LepBBarMass"	      ), "M_{l^{-},#bar{b}}",	            250,   0.,250.);  
+  LepBarBBarMass_      = fs->make<TH1D>(ns.name("LepBarBBarMass"      ), "M_{l^{+},#bar{b}}",	            250,   0.,250.);  
+
   kinTCHELcorrelation_ = fs->make<TH2D>(ns.name("kinTCHELcorrelation" ), "mass reco vs. TCHEL",        3, -0.5, 2.5, 2, -0.5, 1.5);
   kinTCHEMcorrelation_ = fs->make<TH2D>(ns.name("kinTCHEMcorrelation" ), "mass reco vs. TCHEM",        3, -0.5, 2.5, 2, -0.5, 1.5);
   kinSSVHEMcorrelation_= fs->make<TH2D>(ns.name("kinSSVHEMcorrelation"), "mass reco vs. TCHEM",        3, -0.5, 2.5, 2, -0.5, 1.5);
@@ -805,6 +861,20 @@ FullLepKinAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, con
     kinSolWeight_->Fill( FullLepEvt.solWeight(), weight);
   }
 }
+
+
+bool 
+FullLepKinAnalyzer::isRealBJet(const reco::Candidate& jet, const reco::Candidate& genB, const reco::Candidate& genBBar)
+{
+  double dist1 = deltaR(jet.eta(), jet.phi(), genB.eta(),    genB.phi()   );
+  double dist2 = deltaR(jet.eta(), jet.phi(), genBBar.eta(), genBBar.phi());
+
+  if(dist1 < .2 || dist2 < .2){  
+    return true;
+  }
+  return false;
+}
+
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( FullLepKinAnalyzer );

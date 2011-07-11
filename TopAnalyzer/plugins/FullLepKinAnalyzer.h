@@ -39,15 +39,6 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// everything that has to be done after the event loop: summarizes if wantSummary_ is true
   virtual void endJob();
 
-  /// book and fill additional plots with gen information?
-  bool isSignalMC_;
-  /// input given in config has to be TtFullLeptonicEvent
-  edm::InputTag FullLepEvt_;
-  /// keyword for hypothesis from config: ttFullLepHypKinSolution:Key or ttFullLepHypGenMatch:Key
-  edm::InputTag hypoKey_;
-  /// inputJetCollection
-  edm::InputTag jets_;
-
 
   /// book histograms for reconstructed particles properties: Pt, E, Eta, Phi, m
   void bookKinHistos      (edm::Service<TFileService>&);
@@ -80,11 +71,27 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
                                double
                               );
 
-  /// book histograms for kin hypothesis specific histos
+  /// fill histograms for kin hypothesis specific histos
   void fillQualityHistos       (const TtFullLeptonicEvent&,
                                 const TtEvent::HypoClassKey&,
                                 double
                                );
+
+  bool isRealBJet(const reco::Candidate&,
+                  const reco::Candidate&,
+		  const reco::Candidate&
+                 );
+
+  /// book and fill additional plots with gen information?
+  bool isSignalMC_;
+  /// input given in config has to be TtFullLeptonicEvent
+  edm::InputTag FullLepEvt_;
+  /// keyword for hypothesis from config: ttFullLepHypKinSolution:Key or ttFullLepHypGenMatch:Key
+  edm::InputTag hypoKey_;
+  /// inputJetCollection
+  edm::InputTag jets_;
+  /// pile-up weight
+  edm::InputTag weight_;
 
   /// histograms for top quark kinematics
   std::vector<TH1D*> TopKin_;
@@ -237,6 +244,14 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// For kinSolution hypothesis it should give a sharp peak around zero since the assumption that both masses
   /// are equal is used as a boundary condition. Differences appear only from rounding errors
   TH1D* deltaM_;
+  /// invariant mass of anti-lepton and b-jet
+  TH1D* LepBarBMass_;
+  /// invariant mass of lepton and b-jet  
+  TH1D* LepBMass_;
+  /// invariant mass of lepton and bbar-jet
+  TH1D* LepBBarMass_;
+  /// invariant mass of anti-lepton and bbar-jet  
+  TH1D* LepBarBBarMass_;  
   /// correlation between event reco and b-tagging TCHEL
   TH2D* kinTCHELcorrelation_;
   /// correlation between event reco and b-tagging TCHEM
@@ -285,7 +300,11 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* nBtagsSSVHEMVsTtBarPt_;
   TH2D* nBtagsSSVHEMVsTtBarRapidity_;
   TH2D* nBtagsSSVHEMVsTtBarMass_;
-  edm::InputTag weight_;
+  
+  /// number of btags vs number of jets matched to b quarks
+  TH2D* nMatchVsNtagsTCHEL_;
+  TH2D* nMatchVsNtagsTCHEM_;
+  TH2D* nMatchVsNtagsSSVHEM_;  
 };
 
 #endif

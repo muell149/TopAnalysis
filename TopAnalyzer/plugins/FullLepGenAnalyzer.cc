@@ -4,12 +4,14 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 
 FullLepGenAnalyzer::FullLepGenAnalyzer(const edm::ParameterSet& cfg)
 {
       weight_  = cfg.getParameter<edm::InputTag>("weight");
-
 }
+
 
 
 FullLepGenAnalyzer::~FullLepGenAnalyzer()
@@ -62,16 +64,18 @@ void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& e
       }
     }
     if(genWplus!=0){
-      for(size_t i=0; i<genWplus->numberOfDaughters(); ++i){
-        if(genWplus->daughter(i)->pdgId()==-11 || genWplus->daughter(i)->pdgId()==-13 || genWplus->daughter(i)->pdgId()==-15){
+      for(size_t i=0; i<genWplus->numberOfDaughters(); ++i){     
+        if(genWplus->daughter(i)->pdgId()==-11 || genWplus->daughter(i)->pdgId()==-13){
 	  genLepBar = genWplus->daughter(i);
+	}
+        else if(genWplus->daughter(i)->pdgId()==-15){
+          genLepBar = getTauDaughter(genWplus->daughter(i));
 	}
         else if(genWplus->daughter(i)->pdgId()==12 || genWplus->daughter(i)->pdgId()==14 || genWplus->daughter(i)->pdgId()==16){
 	  genNu = genWplus->daughter(i);
 	}
-      }
-    }
-
+      }      
+    }      
     if(cand->pdgId()==-6){
       genTopBar = &(*cand);
       for(size_t i=0; i<genTopBar->numberOfDaughters(); ++i){
@@ -84,17 +88,20 @@ void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& e
       }
     }
     if(genWminus!=0){
-      for(size_t i=0; i<genWminus->numberOfDaughters(); ++i){
-        if(genWminus->daughter(i)->pdgId()==11 || genWminus->daughter(i)->pdgId()==13 || genWminus->daughter(i)->pdgId()==15){
+      for(size_t i=0; i<genWminus->numberOfDaughters(); ++i){        
+        if(genWminus->daughter(i)->pdgId()==11 || genWminus->daughter(i)->pdgId()==13){
 	  genLep = genWminus->daughter(i);
+	}
+        else if(genWminus->daughter(i)->pdgId()==15){
+          genLep = getTauDaughter(genWminus->daughter(i));
 	}
         else if(genWminus->daughter(i)->pdgId()==-12 || genWminus->daughter(i)->pdgId()==-14 || genWminus->daughter(i)->pdgId()==-16){
 	  genNuBar = genWminus->daughter(i);
-	}
-      }
-    }
+	}	
+      }      
+    }         
   }
-
+  
   // test for dileptons
   if(genB==0){
     std::cout << "bQuark not found" << std::endl;
@@ -269,6 +276,20 @@ FullLepGenAnalyzer::fillGenHistos(std::vector<TH1D*>& histos, const reco::Candid
   histos[3]->Fill( candidate.phi(), weight     );
   histos[4]->Fill( candidate.mass(), weight    );
 }
+
+
+
+const reco::Candidate* 
+FullLepGenAnalyzer::getTauDaughter(const reco::Candidate* tau)
+{
+  for(size_t i=0; i<tau->numberOfDaughters(); ++i){
+    if(fabs(tau->daughter(i)->pdgId())==11 || fabs(tau->daughter(i)->pdgId())==13) return tau->daughter(i);
+    else if(fabs(tau->daughter(i)->pdgId())==15) return getTauDaughter(tau->daughter(i));
+  }
+  //return orgiginal tau if nothing found
+  edm::LogWarning ( "No Tau Daughter" ) << "neither electron nor muon daughter found.";
+  return tau;
+} 
 
 
 #include "FWCore/Framework/interface/MakerMacros.h"

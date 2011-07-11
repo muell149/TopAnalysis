@@ -38,6 +38,10 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   void bookGenHistos(edm::Service<TFileService>&);
   /// fill histograms for reconstructed particles properties in events with oppositely charged leptons: Pt, E, Eta, Phi, m
   void fillGenHistos(std::vector<TH1D*>&, const reco::Candidate&, double weight);
+  /// returns electron/muon daughter of tau lepton		     
+  const reco::Candidate* getTauDaughter(const reco::Candidate*);	     
+  /// pile-up weight
+  edm::InputTag weight_;
 
     /// histograms for generated top quark kinematics
   std::vector<TH1D*> TopGen_;
@@ -65,7 +69,7 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   std::vector<TH1D*> LepPairGen_;
   /// histograms for generated jet pair kinematics
   std::vector<TH1D*> JetPairGen_;
-    edm::InputTag weight_;
+
 };
 
 #endif
