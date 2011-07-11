@@ -19,6 +19,20 @@ goodIdJets.jetType = cms.string('PF')
 goodIdJets.version = cms.string('FIRSTDATA')
 goodIdJets.quality = cms.string('LOOSE')
 
+#goodIdJetsPF = selectedPatJets.clone( src = 'selectedPatJets',
+#                                     cut = '( (  (abs(eta) > 2.4)'
+#                                           '   & (neutralHadronEnergyFraction < 0.99)'
+#                                           '   & (neutralEmEnergyFraction     < 0.99)'
+#                                           '   & (nConstituents > 1) )'
+#                                           '| (  (abs(eta) < 2.4)'
+#                                           '   & (neutralHadronEnergyFraction < 0.99)'
+#                                           '   & (neutralEmEnergyFraction     < 0.99)'
+#                                           '   & (nConstituents > 1)'
+#                                           '   & (chargedEmEnergyFraction     < 0.99)'
+#                                           '   & (chargedHadronEnergyFraction > 0.)'
+#                                           '   & (chargedMultiplicity > 0) ) )'
+#                                     )
+
 hardJets = selectedPatJets.clone(src = 'goodIdJets', cut = 'pt > 30. & abs(eta) < 2.5')
 
 ## check for different btag properties
