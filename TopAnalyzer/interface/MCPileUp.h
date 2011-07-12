@@ -15,6 +15,9 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include <TROOT.h>
 #include <TObject.h>
 #include <TStyle.h>
@@ -29,27 +32,20 @@
 #include <TTree.h>
 
 class MCPileUp : public edm::EDAnalyzer {
+
    public:
       explicit MCPileUp(const edm::ParameterSet&);
       ~MCPileUp();
-
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
 
    private:
       virtual void beginJob() ;
       virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob() ;
 
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-
       // ----------member data --------------------------- 
 
-  TH1F* histo_NPUEvents;
-  TH1F* histo_NPUEvents3BX;
+      TH1F* histoNPUEvents;
+      TH1F* histoNPUEvents3BX;
 
   edm::InputTag inTag_PUSource;
 };

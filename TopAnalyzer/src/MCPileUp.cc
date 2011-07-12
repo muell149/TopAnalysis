@@ -14,20 +14,26 @@ MCPileUp::MCPileUp(const edm::ParameterSet& iConfig)
 
 MCPileUp::~MCPileUp(){}
 
+// =============================
+
 void MCPileUp::beginJob()
 {
-  histo_NPUEvents = new TH1F("pileup","pileup",71,-0.5,70.5);
-  histo_NPUEvents -> SetTitle("");
-  histo_NPUEvents -> GetXaxis() -> SetTitle("Number of PU Events");
-  histo_NPUEvents -> GetYaxis() -> SetTitle("Frequency");
-  histo_NPUEvents -> SetFillColor(2);
+  edm::Service<TFileService> fs;
 
-  histo_NPUEvents3BX = new TH1F("pileup3BX","pileup3BX",71,-0.5,70.5);
-  histo_NPUEvents3BX -> SetTitle("");
-  histo_NPUEvents3BX -> GetXaxis() -> SetTitle("Number of PU Events (Average over 3 BXs)");
-  histo_NPUEvents3BX -> GetYaxis() -> SetTitle("Frequency");
-  histo_NPUEvents3BX -> SetFillColor(2);
+  histoNPUEvents = fs->make<TH1F>("pileup","Number of PU Events",71,-0.5,70.5);
+  histoNPUEvents -> SetTitle("");
+  histoNPUEvents -> GetXaxis() -> SetTitle("Number of PU Events");
+  histoNPUEvents -> GetYaxis() -> SetTitle("Frequency");
+  histoNPUEvents -> SetFillColor(2);
+
+  histoNPUEvents3BX = fs->make<TH1F>("pileup3BX","Number of PU Events (Average over 3 BXs)",71,-0.5,70.5);
+  histoNPUEvents3BX -> SetTitle("");
+  histoNPUEvents3BX -> GetXaxis() -> SetTitle("Number of PU Events (Average over 3 BXs)");
+  histoNPUEvents3BX -> GetYaxis() -> SetTitle("Frequency");
+  histoNPUEvents3BX -> SetFillColor(2);
 }
+
+// =============================
 
 void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
@@ -44,38 +50,17 @@ void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      if (iterPU->getBunchCrossing()==0) // -1: previous BX, 0: current BX,  1: next BX
      {
-       histo_NPUEvents->Fill(iterPU->getPU_NumInteractions());
+       histoNPUEvents->Fill(iterPU->getPU_NumInteractions());
      }
    }
 
-   histo_NPUEvents3BX->Fill(sum_nvtx/3.0);
+   histoNPUEvents3BX->Fill(sum_nvtx/3.0);
 }
 
-void MCPileUp::endJob()
-{
-  TFile *outfile = new TFile("MC_PUDist.root","RECREATE");
-  histo_NPUEvents    -> Write();
-  histo_NPUEvents3BX -> Write();
-  outfile->Close();
-}
+// =============================
 
-void MCPileUp::beginRun(edm::Run const&, edm::EventSetup const&) {}
+void MCPileUp::endJob(){}
 
-void MCPileUp::endRun(edm::Run const&, edm::EventSetup const&) {}
-
-void MCPileUp::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {}
-
-void MCPileUp::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {}
-
-void MCPileUp::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
-  edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
-}
-
-//define this as a plug-in
 DEFINE_FWK_MODULE(MCPileUp);
 
 #endif
