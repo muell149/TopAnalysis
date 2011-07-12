@@ -167,6 +167,28 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   diLeptonMassVsTtBarRapidity_->Fill(LepPair->mass(), TtBar->rapidity(), weight);
   diLeptonMassVsTtBarMass_    ->Fill(LepPair->mass(), TtBar->mass(), weight);
 
+  // count again the number of b-jets this time only looking at the two jets used in the event reconstruction
+  nTCHEL  = 0;
+  nTCHEM  = 0;
+  nSSVHEM = 0;
+
+  std::vector<pat::Jet>::const_reference jet1 = jets->at(FullLepEvt->jetLeptonCombination(hypoKey)[0]);
+  std::vector<pat::Jet>::const_reference jet2 = jets->at(FullLepEvt->jetLeptonCombination(hypoKey)[1]);	
+  
+  if(jet1.bDiscriminator("trackCountingHighEffBJetTags")>1.7)
+    nTCHEL++;
+  if(jet1.bDiscriminator("trackCountingHighEffBJetTags")>3.3)
+    nTCHEM++;    
+  if(jet1.bDiscriminator("simpleSecondaryVertexHighEffBJetTags")>1.74)
+    nSSVHEM++;     
+    
+  if(jet2.bDiscriminator("trackCountingHighEffBJetTags")>1.7)
+    nTCHEL++;
+  if(jet2.bDiscriminator("trackCountingHighEffBJetTags")>3.3)
+    nTCHEM++;    
+  if(jet2.bDiscriminator("simpleSecondaryVertexHighEffBJetTags")>1.74)
+    nSSVHEM++;
+
   nBtagsTCHELVsLeptonPt_     ->Fill(nTCHEL, Lep->pt(), weight);
   nBtagsTCHELVsLeptonPt_     ->Fill(nTCHEL, LepBar->pt(), weight);
   nBtagsTCHELVsLeptonEta_    ->Fill(nTCHEL, Lep->eta(), weight);
