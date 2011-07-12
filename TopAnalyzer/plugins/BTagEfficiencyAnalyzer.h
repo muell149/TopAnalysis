@@ -1,4 +1,5 @@
 #include "TH1.h"
+#include "TH2.h"
 #include <string>
 
 #include "FWCore/Framework/interface/Event.h"
@@ -39,9 +40,13 @@ class BTagEfficiencyAnalyzer : public edm::EDAnalyzer {
   edm::InputTag jets_;
   std::string bTagAlgo_;
   double bTagDiscrCut_;
-  std::vector<double> binsPt_;
-  std::vector<double> binsEta_;
+  std::vector<double> binsPtB_;
+  std::vector<double> binsEtaB_;
+  std::vector<double> binsPtL_;
+  std::vector<double> binsEtaL_;
 
-  /// tag and probe histogram
+  /// b tag eff. histogram
   std::map<std::string, TH1F*> hists_;
+  /// b tag eff. histogram
+  std::map<std::string, TH2F*> hists2D_;
 };
