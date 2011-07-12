@@ -8,6 +8,13 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("analyzeBtagEfficiency")
 
+## run PF2PAT?
+## only possible for special pat tuples!!!
+if(not globals().has_key('pfToPAT')):
+    pfToPAT = True #False
+print "run PF2PAT?: ",pfToPAT,"(won't work if the file does not contain the necessary information!)"
+
+
 ## define input
 #process.source = cms.Source("PoolSource",
                             #fileNames = cms.untracked.vstring(    
@@ -15,7 +22,7 @@ process = cms.Process("analyzeBtagEfficiency")
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
     #)
 #)
-process.load("TopAnalysis.Configuration.samples.Spring11_TTJets_D6T_madgraph_F10_cff")
+process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
 
 ## register TFileService => define output file
 process.TFileService = cms.Service("TFileService",
@@ -25,7 +32,7 @@ process.TFileService = cms.Service("TFileService",
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
@@ -36,6 +43,13 @@ process.maxEvents = cms.untracked.PSet(
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+
+from Configuration.PyReleaseValidation.autoCond import autoCond
+process.GlobalTag.globaltag = cms.string('START42_V13::All')
 
 ##-----------------------------------------------------------------------
 ## semileptonic selection
@@ -79,3 +93,50 @@ process.p1.remove(process.reliableJets)
 process.p1.remove(process.goodJets)
 process.p1.remove(process.tightLeadingJets)
 process.p1.remove(process.tightBottomJets)
+
+
+# switch to PF2PAT
+if(pfToPAT):
+    from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
+    allpaths  = process.paths_().keys()
+    recoPaths=['p1']
+    # define general options
+    PFoptions = {
+        'runOnMC': True,
+        'runOnAOD': True,
+        'switchOffEmbedding': False,
+        'addResolutions': True,
+        'runOnOLDcfg': True,
+        'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
+        'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'electronIDs': ['CiC','classical'],
+        'pfIsoConeMuon': 0.4,
+        'pfIsoConeElec': 0.4,
+        'pfIsoValMuon': 0.2,
+        'pfIsoValElec': 0.2,
+        'skipIfNoPFMuon': True,
+        'skipIfNoPFElec': False
+        }
+    # adaptions when running on data
+    #if(runningOnData=="data"):
+        #PFoptions['runOnMC']=False
+    ##    elif(options.sample=="ttbar"):
+    ##        PFoptions['runOnAOD']=False
+    #if(decayChannel=="electron"):
+    ## take into account different electron vetos in mu and e channel
+        #PFoptions['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
+    ## skip events (and jet calculation) if no lepton is found
+    ## only done in data, as in MC you need the events for parton truth plots
+        #PFoptions['skipIfNoPFElec']=True 
+    #elif(decayChannel=="muon"):
+        #PFoptions['skipIfNoPFMuon']=True
+    prependPF2PATSequence(process, recoPaths, PFoptions)
+    # remove electron collections as long as id does not exist in the tuples
+    for path in recoPaths:
+        #getattr(process,path).remove( process.looseElectronsEJ )
+        #getattr(process,path).remove( process.tightElectronsEJ )
+        #getattr(process,path).remove( process.unconvTightElectronsEJ )
+        #getattr(process,path).remove( process.goodElectronsEJ )
+        # replace object consistently with names from PF2PAT
+        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
+        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')
