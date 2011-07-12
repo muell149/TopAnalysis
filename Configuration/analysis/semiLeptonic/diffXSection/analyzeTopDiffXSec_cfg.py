@@ -19,6 +19,8 @@ options = VarParsing.VarParsing ('standard')
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
 # create sample label with default value data 
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
+# create lepton channel label 
+options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -44,12 +46,13 @@ if(not globals().has_key('jetType')):
 ## only possible for special pat tuples!!!
 if(not globals().has_key('pfToPAT')):
     pfToPAT = True #False
-print "run PF2PAT?: ",pfToPAT," won't work if the file does not contain the necessary information!"
+print "run PF2PAT?: ",pfToPAT,"(won't work if the file does not contain the necessary information!)"
 
 ## choose the semileptonic decay channel (electron or muon)
-if(not globals().has_key('decayChannel')):
+decayChannel=options.lepton
+if(decayChannel=='unset'):
     decayChannel = 'muon' # 'electron'
-    print "used lepton decay channel: "+decayChannel
+print "used lepton decay channel: "+decayChannel
 
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
@@ -84,9 +87,6 @@ print "apply Btag reweighting?: ",BtagReweigthing
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
     corrLevel='L3Absolute'
-# no residual corrections in new samples
-if(pfToPAT == True):
-    corrLevel='L3Absolute'    
 ## define input
 print "used JEC level in jetKinematics: "+corrLevel
 
@@ -163,27 +163,63 @@ process.source = cms.Source("PoolSource",
 if(not options.sample=="none"):
     if(options.sample=="ttbar"):        
         process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
-        print "running on files from TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
+        print "analysed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
+        print "analysed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="zjets"):        
         process.load("TopAnalysis/Configuration/dylljetsM50_MadgraphZ2_Summer11_AOD_cff")
+        print "analysed sample: TopAnalysis/Configuration/python/dylljetsM50_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopS"):        
-        process.load("TopAnalysis/Configuration/stops_PythiaPowhegZ2_Summer11_AOD_cff")
+        process.load("TopAnalysis/Configuration/singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analysed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopS"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analysed sample: singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopT"):        
-        process.load("TopAnalysis/Configuration/stopt_PythiaPowhegZ2_Summer11_AOD_cff")
+        process.load("TopAnalysis/Configuration/singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analysed sample: singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopT"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analysed sample: singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopTw"):        
-        process.load("TopAnalysis/Configuration/stoptw_PythiaPowhegZ2_Summer11_AOD_cff")
-    if(options.sample=="qcd"):
-        if(decayChannel=='muon'):
+        process.load("TopAnalysis/Configuration/singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analysed sample: singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopTw"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analysed sample: singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(decayChannel=='muon'):
+        if(options.sample=="qcd"):
             process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdmu15enriched_Pythia6_Summer11_AOD_cff.py"
+    if(decayChannel=='electron'):
+        if(options.sample=="qcdEM1"):
+            process.load("TopAnalysis/Configuration/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff.py"
+        if(options.sample=="qcdEM2"):
+            process.load("TopAnalysis/Configuration/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff.py"
+        if(options.sample=="qcdEM3"):
+            process.load("TopAnalysis/Configuration/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff.py"
+        if(options.sample=="qcdBCE1"):
+            process.load("TopAnalysis/Configuration/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff.py"
+        if(options.sample=="qcdBCE2"):
+            process.load("TopAnalysis/Configuration/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff.py"
+        if(options.sample=="qcdBCE3"):
+            process.load("TopAnalysis/Configuration/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff")
+            print "analysed sample: TopAnalysis/Configuration/python/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff.py"
     if(options.sample=="WW"):        
         process.load("TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff")
+        print "analysed sample: TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff.py"
     if(options.sample=="WZ"):        
         process.load("TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff")
+        print "analysed sample: TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff.py"
     if(options.sample=="ZZ"):        
         process.load("TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff")
-
+        print "analysed sample: TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff.py"
         
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
@@ -211,19 +247,19 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # b) 4_2:
 from Configuration.PyReleaseValidation.autoCond import autoCond
 if(runningOnData=="MC"):
-    process.GlobalTag.globaltag = cms.string('START42_V12::All')
+    process.GlobalTag.globaltag = cms.string('START42_V13::All')
     #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 else:
-    process.GlobalTag.globaltag = cms.string( autoCond[ 'com10' ] )
+    process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
 
 ## Needed for redoing the ak5GenJets
-if(runningOnData=="MC" and pfToPAT==False):
-    process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
-    process.load("RecoJets.Configuration.RecoGenJets_cff")  
-    process.p0 = cms.Path(## redo genjets without mu/nu from tau
-                          process.genJetParticles *
-                          process.ak5GenJets
-                          )
+#if(runningOnData=="MC" and pfToPAT==False):
+#    process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
+#    process.load("RecoJets.Configuration.RecoGenJets_cff")  
+#    process.p0 = cms.Path(## redo genjets without mu/nu from tau
+#                          process.genJetParticles *
+#                          process.ak5GenJets
+#                          )
 
 ## load JSON file for data
 if(runningOnData=="data"):
@@ -245,17 +281,18 @@ if(runningOnData=="data"):
 ## ---
 ## std sequence to produce the ttGenEvt
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+
 ## high level trigger filter
 #(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 # for all spring11 MC use REDIGI311X
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_Mu15_v*"], throw=False)
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_IsoMu17_v*"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu15_v*"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = [""], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI311X", HLTPaths = ["HLT_Mu9"], throw=False)
-process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
+#process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
 
 ## semileptonic selection
 process.load("TopAnalysis.TopFilter.sequences.semiLeptonicSelection_cff")
@@ -703,14 +740,55 @@ else:
     process.kinFitGen           = cms.Sequence(process.dummy)
     process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
 
-        
 ## ---
 ##    MC PU reweighting
 ## ---
+
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_TTbar.root"   )
-process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-166861_7TeV_PromptReco_Collisions11.root")
-PUweight=cms.InputTag("eventWeightPU")
+process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist.root")
+if(options.sample=="ttbar"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
+if(options.sample=="wjets"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root")
+if(options.sample=="zjets"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root")
+#if(options.sample=="singleTopS"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="singleAntiTopS"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="singleTopT"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="singleAntiTopT"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="singleTopTw"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="singleAntiTopTw"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+if(decayChannel=='muon'):
+    if(options.sample=="qcd"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6.root")
+if(decayChannel=='electron'):
+    if(options.sample=="qcdEM1"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20to30_EMEnriched_TuneZ2_7TeV_pythia6.root")
+    if(options.sample=="qcdEM2"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_EMEnriched_TuneZ2_7TeV_pythia.root ")
+    if(options.sample=="qcdEM3"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_EMEnriched_TuneZ2_7TeV_pythia6.root")
+    if(options.sample=="qcdBCE1"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20to30_BCtoE_TuneZ2_7TeV_pythia6.root")
+    if(options.sample=="qcdBCE2"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_BCtoE_TuneZ2_7TeV_pythia6.root")
+    if(options.sample=="qcdBCE3"):
+        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia.root")
+#if(options.sample=="WW"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="WZ"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#if(options.sample=="ZZ"):
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+    
+process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
+PUweight=cms.InputTag("eventWeightPU","eventWeightPU")
 
 ## ---
 ##    MC B-tag reweighting
@@ -742,7 +820,7 @@ if(runningOnData=="MC" and PUreweigthing):
     # in all modules
     print "all modules will use the PU event weights"
     for module in modulelist:
-        getattr(process,module).weight=cms.InputTag("eventWeightPU")
+        getattr(process,module).weight=cms.InputTag("eventWeightPU","eventWeightPU")
         
 # b) Btag reweight
 if(runningOnData=="MC" and BtagReweigthing):
@@ -1021,8 +1099,11 @@ if(pfToPAT):
         massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
         massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
         # run trigger at the beginning to save a lot of time
-        #getattr(process,path).insert(0,process.hltFilter)
-    
+        getattr(process,path).insert(0,process.hltFilter)
+
+## change decay subset to parton level (ME)
+#process.decaySubset.fillMode = cms.string("kME")
+
 ## Output Module Configuration
 if(writeOutput):
     from PhysicsTools.PatAlgos.patEventContent_cff import *
