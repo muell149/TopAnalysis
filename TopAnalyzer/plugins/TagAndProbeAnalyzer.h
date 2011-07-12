@@ -67,6 +67,8 @@ class TagAndProbeAnalyzer : public edm::EDAnalyzer {
   std::vector<double> binsRelIso_;
   std::vector<double> binsMinDR_;
   std::vector<double> binsLepMult_;
+  /// switch between detector based and PF relIso
+  bool pfRelIso_;
 };
 
 inline

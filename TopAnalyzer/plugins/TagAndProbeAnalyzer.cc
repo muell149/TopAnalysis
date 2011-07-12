@@ -33,7 +33,8 @@ TagAndProbeAnalyzer::TagAndProbeAnalyzer(const edm::ParameterSet& cfg):
   binsMult_(cfg.getParameter<std::vector<double> >("binsMult")),
   binsRelIso_(cfg.getParameter<std::vector<double> >("binsRelIso")),
   binsMinDR_(cfg.getParameter<std::vector<double> >("binsMinDR")),
-  binsLepMult_(cfg.getParameter<std::vector<double> >("binsLepMult"))
+  binsLepMult_(cfg.getParameter<std::vector<double> >("binsLepMult")),
+  pfRelIso_( cfg.getParameter<bool>("pfRelIso") )
 {
 //  std::cout << "I'm in the contructor now!!!"  << std::endl;
 //  std::cout << "tests  value is : " << tests_  << std::endl;
@@ -75,9 +76,17 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
     //     if(probeElec) std::cout<<"probeElec identified"<<std::endl;
     //     else std::cout<<"NO probeElec identified"<<std::endl;
     double relIso = -1.;
-    if(probeMuon) relIso = (probeMuon->trackIso() + probeMuon->caloIso()) / probeMuon->pt();
-    if(probeElec) relIso = (probeElec->dr03TkSumPt() + probeElec->dr03EcalRecHitSumEt()
-	  + probeElec->dr03HcalTowerSumEt() ) / probeElec->et();
+    if(probeMuon){
+        if(pfRelIso_) relIso = (probeMuon->chargedHadronIso() + probeMuon->neutralHadronIso() + 
+                                probeMuon->photonIso()) / probeMuon->pt();
+        else          relIso = (probeMuon->trackIso() + probeMuon->caloIso()) / probeMuon->pt();
+    }
+    if(probeElec){
+        if(pfRelIso_) relIso = (probeElec->chargedHadronIso() + probeElec->neutralHadronIso() + 
+	                        probeElec->photonIso()) / probeElec->pt();
+        else	      relIso = (probeElec->dr03TkSumPt() + probeElec->dr03EcalRecHitSumEt()
+	                       + probeElec->dr03HcalTowerSumEt() ) / probeElec->et();
+    }
 
     if(fabs(probe->eta())<etaCut_) hists_.find("probePt"   )->second->Fill( probe->pt () );
     if(probe->pt()>ptCut_)         hists_.find("probeEta"  )->second->Fill( probe->eta() );
@@ -112,10 +121,17 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
       const pat::Muon*     testMuon = dynamic_cast<const pat::Muon*>(&*test);
       const pat::Electron* testElec = dynamic_cast<const pat::Electron*>(&*test);
       double relIso = -1.;
-      if(testMuon) relIso = (testMuon->trackIso() + testMuon->caloIso()) / testMuon->pt();
-      if(testElec) relIso = (testElec->dr03TkSumPt() + testElec->dr03EcalRecHitSumEt()
-	    + testElec->dr03HcalTowerSumEt() ) / testElec->et();
-      
+      if(testMuon){
+	if(pfRelIso_) relIso = (testMuon->chargedHadronIso() + testMuon->neutralHadronIso() + 
+	                        testMuon->photonIso()) / testMuon->pt();
+	else          relIso = (testMuon->trackIso() + testMuon->caloIso()) / testMuon->pt();
+      }
+      if(testElec){
+	if(pfRelIso_) relIso = (testElec->chargedHadronIso() + testElec->neutralHadronIso() + 
+	                        testElec->photonIso()) / testElec->pt();
+	else	      relIso = (testElec->dr03TkSumPt() + testElec->dr03EcalRecHitSumEt()
+	                        + testElec->dr03HcalTowerSumEt() ) / testElec->et();
+      }
 	if(fabs(test->eta())<etaCut_) hists_.find("testPt"   )->second->Fill( test->pt ()  );
 	if(test->pt()>ptCut_)         hists_.find("testEta"  )->second->Fill( test->eta()  );
 	if(test->pt()>ptCut_ && fabs(test->eta())<etaCut_) {

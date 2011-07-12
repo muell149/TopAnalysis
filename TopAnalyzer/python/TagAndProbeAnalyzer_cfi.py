@@ -34,7 +34,8 @@ tagAndProbeAnalyzer = cms.EDAnalyzer("TagAndProbeAnalyzer", # -> TagAndProbeAnal
     #binsMinDR  = cms.vdouble(  0.  ,  10.  ),
     #binsMinDR  = cms.vdouble(  0.,0.3,0.7,1.,1.5,2.,2.5,3.,4.,5.,6. ),
     binsMinDR  = cms.vdouble( 0.,0.3,0.7,1.,1.5,2.,2.5,3.,4.,5.,6. ),
-    binsLepMult = cms.vdouble(  0.  ,  10.  )
+    binsLepMult = cms.vdouble(  0.  ,  10.  ),
+    pfRelIso = cms.bool(True)
 )
 
 
