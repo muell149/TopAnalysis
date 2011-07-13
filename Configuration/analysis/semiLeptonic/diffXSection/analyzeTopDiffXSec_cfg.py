@@ -17,7 +17,9 @@ options = VarParsing.VarParsing ('standard')
 
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
-# create sample label with default value data 
+# create sample label with default value data
+# for summer11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, WW, WZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel)
+# still missing: ZZ, singleTopS
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
 options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
@@ -171,63 +173,63 @@ process.source = cms.Source("PoolSource",
 if(not options.sample=="none"):
     if(options.sample=="ttbar"):        
         process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
-        print "analysed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
-        print "analysed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="zjets"):        
         process.load("TopAnalysis/Configuration/dylljetsM50_MadgraphZ2_Summer11_AOD_cff")
-        print "analysed sample: TopAnalysis/Configuration/python/dylljetsM50_MadgraphZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: TopAnalysis/Configuration/python/dylljetsM50_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopS"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analysed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopS"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analysed sample: singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopT"):        
         process.load("TopAnalysis/Configuration/singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analysed sample: singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopT"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analysed sample: singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopTw"):        
         process.load("TopAnalysis/Configuration/singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analysed sample: singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopTw"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analysed sample: singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        print "analyzed sample: singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
             process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdmu15enriched_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdmu15enriched_Pythia6_Summer11_AOD_cff.py"
     if(decayChannel=='electron'):
         if(options.sample=="qcdEM1"):
             process.load("TopAnalysis/Configuration/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff.py"
         if(options.sample=="qcdEM2"):
             process.load("TopAnalysis/Configuration/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff.py"
         if(options.sample=="qcdEM3"):
             process.load("TopAnalysis/Configuration/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff.py"
         if(options.sample=="qcdBCE1"):
             process.load("TopAnalysis/Configuration/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff.py"
         if(options.sample=="qcdBCE2"):
             process.load("TopAnalysis/Configuration/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff.py"
         if(options.sample=="qcdBCE3"):
             process.load("TopAnalysis/Configuration/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff")
-            print "analysed sample: TopAnalysis/Configuration/python/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff.py"
+            print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff.py"
     if(options.sample=="WW"):        
         process.load("TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff")
-        print "analysed sample: TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff.py"
+        print "analyzed sample: TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff.py"
     if(options.sample=="WZ"):        
         process.load("TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff")
-        print "analysed sample: TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff.py"
+        print "analyzed sample: TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff.py"
     if(options.sample=="ZZ"):        
         process.load("TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff")
-        print "analysed sample: TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff.py"
+        print "analyzed sample: TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff.py"
         
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
@@ -761,17 +763,17 @@ if(options.sample=="wjets"):
 if(options.sample=="zjets"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root")
 #if(options.sample=="singleTopS"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
-#if(options.sample=="singleAntiTopS"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
-#if(options.sample=="singleTopT"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
-#if(options.sample=="singleAntiTopT"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
-#if(options.sample=="singleTopTw"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
-#if(options.sample=="singleAntiTopTw"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_s_channel_7TeV_powheg_tauola.root")
+if(options.sample=="singleAntiTopS"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_s_channel_7TeV_powheg_tauola.root")
+if(options.sample=="singleTopT"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_t_channel_7TeV_powheg_tauola.root")
+if(options.sample=="singleAntiTopT"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_t_channel_7TeV_powheg_tauola.root")
+if(options.sample=="singleTopTw"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
+if(options.sample=="singleAntiTopTw"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
 if(decayChannel=='muon'):
     if(options.sample=="qcd"):
         process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6.root")
@@ -788,10 +790,10 @@ if(decayChannel=='electron'):
         process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_BCtoE_TuneZ2_7TeV_pythia6.root")
     if(options.sample=="qcdBCE3"):
         process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia.root")
-#if(options.sample=="WW"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
-#if(options.sample=="WZ"):
-#    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
+if(options.sample=="WW"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WW_TuneZ2_7TeV_pythia6_tauola.root")
+if(options.sample=="WZ"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WZ_TuneZ2_7TeV_pythia6_tauola.root")
 #if(options.sample=="ZZ"):
 #    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/")
     
@@ -915,7 +917,7 @@ process.p1 = cms.Path(
                       ## monitor kinematics before b-tagging
                       process.monitorKinematicsBeforeBtagging       *
                       ## b-tagging
-                      process.btagSelection                              *
+                      process.btagSelection                         *
                       ## create PU event weights
                       process.bTagSFEventWeight                     *
                       ## create combined weight
