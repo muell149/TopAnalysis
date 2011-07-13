@@ -279,7 +279,7 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       // charge of the jet
       fillValue( "charge" , jet->jetCharge()    , weight );
       if(jet->nConstituents() > 0){
-      	if( jet->daughterPtr(0).productGetter()->getIt(jet->daughterPtr(0).id()) != 0 ){
+      	//if( jet->daughterPtr(0).productGetter()->getIt(jet->daughterPtr(0).id()) != 0 ){
 	  // number of jet constituents carrying 90% of the jet energy
 	  fillValue( "n90_" , jet->n90() , weight );
 	  // number of jet constituents carrying 60% of the jet energy
@@ -291,7 +291,7 @@ JetQuality::fill(const edm::View<pat::Jet>& jets, const double& weight)
       	  fillValue( "etaphi" , jet->etaphiMoment() , weight );
       	  // phi-phi moment of the jet
       	  fillValue( "phiphi" , jet->phiphiMoment() , weight );
-      	}
+	  //}
       }
       
       /** 
