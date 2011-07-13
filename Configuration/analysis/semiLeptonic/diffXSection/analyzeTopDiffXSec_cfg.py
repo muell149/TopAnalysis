@@ -803,6 +803,10 @@ PUweight=cms.InputTag("eventWeightPU","eventWeightPU")
 ## ---
 ##    MC B-tag reweighting
 ## ---
+## load BTV database
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+
 process.load("TopAnalysis.TopUtils.BTagSFEventWeight_cfi")
 process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
 process.bTagSFEventWeight.bTagAlgo=cms.string("SSVHEM")
@@ -852,8 +856,8 @@ if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     # in all modules
     if(PUreweigthing):
         print "all modules will use the PU event weights"
-    if(effSFReweigthing):
-        print "all modules will use the eff SF event weights"
+    if(effSFReweigthing and decayChannel=="muon"):
+        print "all Reco modules will use the eff SF event weights"
     for module in modulelist:
         getattr(process,module).weight=cms.InputTag("eventWeightForRecoAnalyzers")
         
