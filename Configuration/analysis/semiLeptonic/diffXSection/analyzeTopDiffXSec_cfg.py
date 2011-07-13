@@ -83,6 +83,14 @@ if(not globals().has_key('BtagReweigthing')):
         BtagReweigthing = False
 print "apply Btag reweighting?: ",BtagReweigthing
 
+## enable/ disable efficiency SF event reweighting
+if(not globals().has_key('effSFReweigthing')):
+    effSFReweigthing =  True # False
+    # take care of data
+    if (not runningOnData == "MC"):
+        effSFReweigthing = False
+print "apply effSF reweighting?: ",effSFReweigthing
+
 # choose jet correction level shown in plots
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
@@ -802,25 +810,50 @@ process.bTagSFEventWeight.verbose=cms.int32(1)
 BtagWeight=cms.InputTag("bTagSFEventWeight")
 
 ## ---
+##    MC eff SF reweighting
+## ---
+process.load("TopAnalysis.TopUtils.EffSFMuonEventWeight_cfi")
+process.effSFMuonEventWeight.particles=cms.InputTag("tightMuons")
+process.effSFMuonEventWeight.sysVar   = cms.string("") ## EffSFUp, EffSFDown possible;
+process.effSFMuonEventWeight.filename= cms.string("../../../../Configuration/data/efficiencyIsoMu17Combined_tapTrigger_SF_Eta.root")
+process.effSFMuonEventWeight.verbose=cms.int32(0)
+process.effSFMuonEventWeight.additionalFactor=1
+EffSFWeight=cms.InputTag("effSFMuonEventWeight")
+
+## ---
 ##    collect all eventweights
 ## ---
 process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
-weightlist=cms.VInputTag()
-if(PUreweigthing):
-    weightlist.append(PUweight)
-if(BtagReweigthing):
-    weightlist.append(BtagWeight)
-process.eventWeightMultiplier.eventWeightTags = weightlist
 process.eventWeightMultiplier.verbose=cms.int32(0)
+## make clone for PU + effSF
+process.eventWeightForRecoAnalyzers = process.eventWeightMultiplier.clone();
+## create weightlists
+weightlistForRecoAnalyzer=cms.VInputTag()
+weightlistBtag           =cms.VInputTag()
+if(PUreweigthing):
+    weightlistForRecoAnalyzer.append(PUweight)
+    weightlistBtag.append(PUweight)
+if(effSFReweigthing and decayChannel=="muon"):
+    weightlistForRecoAnalyzer.append(EffSFWeight)
+    weightlistBtag.append(EffSFWeight)
+if(BtagReweigthing):
+    weightlistBtag.append(BtagWeight)
+    
+process.eventWeightForRecoAnalyzers.eventWeightTags = weightlistForRecoAnalyzer
+process.eventWeightMultiplier.eventWeightTags   = weightlistBtag
+
 
 # use weight in single and double object analyzer modules
-# a) PU reweight
+# a) Reco (PU + EffSF) reweight
 modulelist= process.analyzers_().keys()
-if(runningOnData=="MC" and PUreweigthing):
+if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     # in all modules
-    print "all modules will use the PU event weights"
+    if(PUreweigthing):
+        print "all modules will use the PU event weights"
+    if(effSFReweigthing):
+        print "all modules will use the eff SF event weights"
     for module in modulelist:
-        getattr(process,module).weight=cms.InputTag("eventWeightPU","eventWeightPU")
+        getattr(process,module).weight=cms.InputTag("eventWeightForRecoAnalyzers")
         
 # b) Btag reweight
 if(runningOnData=="MC" and BtagReweigthing):
@@ -840,6 +873,20 @@ if(runningOnData=="MC" and BtagReweigthing):
     for module3 in btagModules3:
         getattr(process,module3).weight=cms.InputTag("eventWeightMultiplier")
     print
+    
+# c) gen reweight
+if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
+    # only in gen modules
+    print
+    print "the following gen modules will only use the PU reweighting:"
+    genModules1 = process.kinFitGen.moduleNames()
+    print genModules1
+    for module1 in genModules1:
+        getattr(process,module1).weight=PUweight
+    genModules2 = process.kinFitGenPhaseSpace.moduleNames()
+    print genModules2
+    for module2 in genModules2:
+        getattr(process,module2).weight=PUweight
 
 ## ---
 ##    run the final sequences
@@ -854,6 +901,10 @@ process.p1 = cms.Path(
                       process.semiLeptonicSelection                 *
                       ## create PU event weights
                       process.makeWeightsPU                         *
+		      ## create effSF eventWeight
+		      process.effSFMuonEventWeight                  *
+		      ## multiply event weights
+		      process.eventWeightForRecoAnalyzers               *
                       ## muon selection
                       process.muonCuts                              *
                       ## veto on additional leptons
@@ -889,6 +940,10 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.semiLeptonicSelection                 *
                       ## create PU event weights
                       process.makeWeightsPU                         *
+		      ## create effSF eventWeight
+		      process.effSFMuonEventWeight                  *
+		      ## multiply event weights
+		      process.eventWeightForRecoAnalyzers               *
                       ## loose selection (slightly above mu17TriCentralJet30 Trigger)
                       process.looseCuts                             *
                       ## basic monitoring
@@ -1031,6 +1086,8 @@ if(decayChannel=="electron"):
         path.remove(process.muonCuts)
         path.remove(process.secondMuonVeto)
         path.replace( process.electronVeto, process.electronSelection)
+	## remove effSF for muons
+        path.remove(process.effSFMuonEventWeight)
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
@@ -1126,12 +1183,23 @@ if(not PUreweigthing or runningOnData=="data"):
       allpaths  = process.paths_().keys()
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightPU )
+# Eff SF
+if(not effSFReweigthing or runningOnData=="data"):
+    # define allpaths if not done yet
+    if(not pfToPAT):
+      allpaths  = process.paths_().keys()
+    for path in allpaths:
+        getattr(process,path).remove( process.effSFMuonEventWeight )
 # Btag scale factor
 if(not BtagReweigthing or runningOnData=="data"):
     for path in allpaths:
         getattr(process,path).remove( process.bTagSFEventWeight )
 # combined scale factor
-if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing) ):
+if(runningOnData=="data" or (not PUreweigthing and not effSFReweigthing) ):
+    for path in allpaths:
+        getattr(process,path).remove( process.eventWeightForRecoAnalyzers )
+# combined scale factor
+if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing and not effSFReweigthing) ):
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightMultiplier )
 
