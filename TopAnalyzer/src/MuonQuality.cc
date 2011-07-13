@@ -193,83 +193,83 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
 	 Fill Selection Variables
       **/
       // number of valid hits in silicon tracker
-//       hists_.find("nHit")->second->Fill( muon->track()->numberOfValidHits(), weight );  
-//       // normalized chi2 of global muon track fit
-//       hists_.find("chi2")->second->Fill( muon->combinedMuon()->normalizedChi2(), weight ); 
-//       // d0 significance of track (still to nominal IP)
-//       hists_.find("dB"  )->second->Fill( muon->dB(), weight );
-//       // dz significance of track in z-dimension
-//       hists_.find("dz"  )->second->Fill( muon->track()->dz(), weight );
-//       // energy in ecal attached to the candidate trajectory
-//       hists_.find("ecalEn")->second->Fill( muon->ecalIsoDeposit()->candEnergy(), weight );
-//       // energy in hcal attached to the candidate trajectory
-//       hists_.find("hcalEn")->second->Fill( muon->hcalIsoDeposit()->candEnergy(), weight );   
-//       // relative isolation (tracker and calo combined)
-//       
-//       // is GlobalMuonPromptTight?
-//       hists_.find("isGlobalMuonPromptTight")->second->Fill(muon->isGood("GlobalMuonPromptTight") , weight );
-//       // is TrackerMuon?
-//       hists_.find("isTrackerMuon")->second->Fill(muon->isGood("AllTrackerMuons") , weight );
-//       // number of matcheshists_.find("relIso")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt() , weight );
-//       hists_.find("matches")->second->Fill(muon->numberOfMatches() , weight );
-         /// PF relIso
-         hists_.find("relIso")->second->Fill( (muon->chargedHadronIso() + muon->neutralHadronIso() + 
-	                                       muon->photonIso()) / muon->pt() , weight );
-//        
-//       /** 
-// 	  Fill Monitoring Variables
-//       **/
-//       // compatibility of the energy deposits in the calorimeter with the muon hypothesis
-//       hists_.find("calCmp_" )->second->Fill( muon->caloCompatibility() , weight );
-//       // energy deposited in crossed ecal crystals (recHist based)
-//       hists_.find("ecalEn_" )->second->Fill( muon->calEnergy().em , weight );
-//       // energy deposited in 3x3 crystal shape around cerntral crystal (recHits based)    
-//       hists_.find("ecalS9_" )->second->Fill( muon->calEnergy().emS9 , weight );  
-//       // energy deposited in crossed hcal towers (recHits based)
-//       hists_.find("hcalEn_" )->second->Fill( muon->calEnergy().had , weight );
-//       // energy deposited in 3x3 tower shape around cerntral tower (recHits based)
-//       hists_.find("hcalS9_" )->second->Fill( muon->calEnergy().hadS9 , weight );  
-//       // energy deposited in crossed hcal outer towers (recHits based)
-//       hists_.find("houtEn_" )->second->Fill( muon->calEnergy().ho , weight );
-//       // energy deposited in 3x3 tower shape around cerntral tower (recHits based)
-//       hists_.find("houtS9_" )->second->Fill( muon->calEnergy().hoS9 , weight );  
-// 
-//       /** 
-// 	  Fill Isolation Monitoring Variables
-//       **/
-//       static const double STANDARD_CONE_SIZE = 0.3;
-//       // number of tracks in isolation cone
-//       hists_.find("trkIsoN_" )->second->Fill( muon->trackIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
-//       // summed track pt in isolation cone
-//       hists_.find("trkIso_"  )->second->Fill( muon->trackIso() , weight );
-//       // number of ecal crystals above noise threshold in isolation cone
-//       hists_.find("eclIsoN_" )->second->Fill( muon->ecalIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
-//       // number of hcal towers above noise threshold in isolation cone
-//       hists_.find("hclIsoN_" )->second->Fill( muon->hcalIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
-//       // summed energy in ecal crystals and hcal towers above noise threshold in isolation cone (recHit based)
-//       hists_.find("calIso_"  )->second->Fill( muon->caloIso () , weight );
-// 
-//       /** 
-// 	  Fill Energy & Object Flow Variables
-//       **/
-//       // increment histogram normalization
-//       norm_+=weight;
-//       // <number of tracks> as a function of deltaR (differential) 
-//       objectFlow( hists_.find("trkDRN_" )->second , muon->trackIsoDeposit() );
-//       // <summerd pt of tracks> as a function of deltaR (differential)
-//       energyFlow( hists_.find("trkDR_"  )->second , muon->trackIsoDeposit() );
-//       // <number of ecal crystals above noise threshold> as a function of deltaR (differential)
-//       objectFlow( hists_.find("eclDRN_" )->second , muon->ecalIsoDeposit() );
-//       // <number of hcal towers above noise threshold> as a function of deltaR (differential)
-//       objectFlow( hists_.find("hclDRN_" )->second , muon->hcalIsoDeposit() );
-//       // <summerd crystal and tower energies above noise threshold> as a function of deltaR (differential)
-//       energyFlow( hists_.find("calDR_"  )->second , muon->ecalIsoDeposit(), muon->hcalIsoDeposit() );
-// 
-//       /** 
-// 	  fill relIso vs. dB hitogram for ABCD QCD-estimation method
-//       **/
-//       // transverse momentum of the muon
-//       hists2D_.find("relIsoVsDb_")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt(), muon->dB(), weight );
+      hists_.find("nHit")->second->Fill( muon->track()->numberOfValidHits(), weight );  
+      // normalized chi2 of global muon track fit
+      hists_.find("chi2")->second->Fill( muon->combinedMuon()->normalizedChi2(), weight ); 
+      // d0 significance of track (still to nominal IP)
+      hists_.find("dB"  )->second->Fill( muon->dB(), weight );
+      // dz significance of track in z-dimension
+      hists_.find("dz"  )->second->Fill( muon->track()->dz(), weight );
+      // energy in ecal attached to the candidate trajectory
+      //hists_.find("ecalEn")->second->Fill( muon->ecalIsoDeposit()->candEnergy(), weight );
+      // energy in hcal attached to the candidate trajectory
+      //hists_.find("hcalEn")->second->Fill( muon->hcalIsoDeposit()->candEnergy(), weight );   
+      // relative isolation (tracker and calo combined)
+      //hists_.find("relIso")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt() , weight );
+      // PF relIso
+      hists_.find("relIso")->second->Fill( (muon->chargedHadronIso() + muon->neutralHadronIso() + 
+					    muon->photonIso()) / muon->pt() , weight );
+      // is GlobalMuonPromptTight?
+      hists_.find("isGlobalMuonPromptTight")->second->Fill(muon->isGood("GlobalMuonPromptTight") , weight );
+      // is TrackerMuon?
+      hists_.find("isTrackerMuon")->second->Fill(muon->isGood("AllTrackerMuons") , weight );
+      // number of matches
+      hists_.find("matches")->second->Fill(muon->numberOfMatches() , weight );
+       
+      /** 
+	  Fill Monitoring Variables
+      **/
+      // compatibility of the energy deposits in the calorimeter with the muon hypothesis
+      //hists_.find("calCmp_" )->second->Fill( muon->caloCompatibility() , weight );
+      // energy deposited in crossed ecal crystals (recHist based)
+      //hists_.find("ecalEn_" )->second->Fill( muon->calEnergy().em , weight );
+      // energy deposited in 3x3 crystal shape around cerntral crystal (recHits based)    
+      //hists_.find("ecalS9_" )->second->Fill( muon->calEnergy().emS9 , weight );  
+      // energy deposited in crossed hcal towers (recHits based)
+      //hists_.find("hcalEn_" )->second->Fill( muon->calEnergy().had , weight );
+      // energy deposited in 3x3 tower shape around cerntral tower (recHits based)
+      //hists_.find("hcalS9_" )->second->Fill( muon->calEnergy().hadS9 , weight );  
+      // energy deposited in crossed hcal outer towers (recHits based)
+      //hists_.find("houtEn_" )->second->Fill( muon->calEnergy().ho , weight );
+      // energy deposited in 3x3 tower shape around cerntral tower (recHits based)
+      //hists_.find("houtS9_" )->second->Fill( muon->calEnergy().hoS9 , weight );  
+
+      /** 
+	  Fill Isolation Monitoring Variables
+      **/
+      //static const double STANDARD_CONE_SIZE = 0.3;
+      // number of tracks in isolation cone
+      //hists_.find("trkIsoN_" )->second->Fill( muon->trackIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
+      // summed track pt in isolation cone
+      //hists_.find("trkIso_"  )->second->Fill( muon->trackIso() , weight );
+      // number of ecal crystals above noise threshold in isolation cone
+      //hists_.find("eclIsoN_" )->second->Fill( muon->ecalIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
+      // number of hcal towers above noise threshold in isolation cone
+      //hists_.find("hclIsoN_" )->second->Fill( muon->hcalIsoDeposit()->countWithin( STANDARD_CONE_SIZE ) , weight );
+      // summed energy in ecal crystals and hcal towers above noise threshold in isolation cone (recHit based)
+      //hists_.find("calIso_"  )->second->Fill( muon->caloIso () , weight );
+
+      /** 
+	  Fill Energy & Object Flow Variables
+      **/
+      // increment histogram normalization
+      norm_+=weight;
+      // <number of tracks> as a function of deltaR (differential) 
+      //objectFlow( hists_.find("trkDRN_" )->second , muon->trackIsoDeposit() );
+      // <summerd pt of tracks> as a function of deltaR (differential)
+      //energyFlow( hists_.find("trkDR_"  )->second , muon->trackIsoDeposit() );
+      // <number of ecal crystals above noise threshold> as a function of deltaR (differential)
+      //objectFlow( hists_.find("eclDRN_" )->second , muon->ecalIsoDeposit() );
+      // <number of hcal towers above noise threshold> as a function of deltaR (differential)
+      //objectFlow( hists_.find("hclDRN_" )->second , muon->hcalIsoDeposit() );
+      // <summerd crystal and tower energies above noise threshold> as a function of deltaR (differential)
+      //energyFlow( hists_.find("calDR_"  )->second , muon->ecalIsoDeposit(), muon->hcalIsoDeposit() );
+
+      /** 
+	  fill relIso vs. dB hitogram for ABCD QCD-estimation method
+      **/
+      // transverse momentum of the muon
+      //hists2D_.find("relIsoVsDb_")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt(), muon->dB(), weight );
     }
   }
 }
