@@ -259,6 +259,27 @@ void TopKinematics::book()
   corrs_["lepCharge_"  ] = new TH2F( "lepCharge_"  , "lepCharge_"   ,    3,  -1.5,   1.5,       3, -1.5,   1.5);
   // gen-rec level correlation for angle between the leptonically decaying top candidate and the neutrino
   corrs_["MuonNeutrinoAngle_"] = new TH2F( "MuonNeutrinoAngle_", "MuonNeutrinoAngle_", 315,  0.  ,  3.15,   315,  0.  ,  3.15);
+  // gen-rec level correlation for leptonPt
+  corrs_["lepPt_"      ] = new TH2F( "lepPt_"      , "lepPt_"      ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for leptonEta
+  corrs_["lepEta_"     ] = new TH2F( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for neutrinoPt
+  corrs_["neutrinoPt_" ] = new TH2F( "neutrinoPt_" , "neutrinoPt_" ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for neutrinoEta
+  corrs_["neutrinoEta_"] = new TH2F( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for light-quarks Pt
+  corrs_["lightqPt_"   ] = new TH2F( "lightqPt_"   , "lightqPt_"   ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for light-quarks Eta
+  corrs_["lightqEta_"  ] = new TH2F( "lightqEta_"  , "lightqEta_"  ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for b-quarks Pt
+  corrs_["bqPt_"       ] = new TH2F( "bqPt_"       , "bqPt_"       ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for b-quarks Eta
+  corrs_["bqEta_"      ] = new TH2F( "bqEta_"      , "bqEta_"      ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for leading quark Pt
+  corrs_["leadqPt_"    ] = new TH2F( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for leading quark Eta
+  corrs_["leadqEta_"   ] = new TH2F( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+
 }
 
 /// histogramm booking for fw
@@ -475,6 +496,27 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   corrs_["lepCharge_" ] = fs->make<TH2F>( "lepCharge_"  , "lepCharge_" ,    3,  -1.5,   1.5,       3, -1.5,   1.5);
   // gen-rec level correlation for angle between the leptonically decaying top candidate and the neutrino
   corrs_["MuonNeutrinoAngle_"] = fs->make<TH2F>( "MuonNeutrinoAngle_", "MuonNeutrinoAngle_", 315,  0. ,  pi,   315,  0. ,  pi);
+  // gen-rec level correlation for leptonPt
+  corrs_["lepPt_"      ] = fs->make<TH2F>( "lepPt_"      , "lepPt_"      ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for leptonEta
+  corrs_["lepEta_"     ] = fs->make<TH2F>( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for neutrinoPt
+  corrs_["neutrinoPt_" ] = fs->make<TH2F>( "neutrinoPt_" , "neutrinoPt_" ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for neutrinoEta
+  corrs_["neutrinoEta_"] = fs->make<TH2F>( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for light-quarks Pt
+  corrs_["lightqPt_"   ] = fs->make<TH2F>( "lightqPt_"   , "lightqPt_"   ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for light-quarks Eta
+  corrs_["lightqEta_"  ] = fs->make<TH2F>( "lightqEta_"  , "lightqEta_"  ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for b-quarks Pt
+  corrs_["bqPt_"       ] = fs->make<TH2F>( "bqPt_"       , "bqPt_"       ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for b-quarks Eta
+  corrs_["bqEta_"      ] = fs->make<TH2F>( "bqEta_"      , "bqEta_"      ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+  // gen-rec level correlation for leading quark Pt
+  corrs_["leadqPt_"    ] = fs->make<TH2F>( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  // gen-rec level correlation for leading quark Eta
+  corrs_["leadqEta_"   ] = fs->make<TH2F>( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+
 
   // book ttree entries
   if(useTree_){
@@ -594,10 +636,15 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     }
     const reco::GenParticle *lepTop= switchLepAndHadTop ? tops.hadronicDecayTop() : tops.leptonicDecayTop();
     const reco::GenParticle *hadTop= switchLepAndHadTop ? tops.leptonicDecayTop() : tops.hadronicDecayTop();
-    const reco::GenParticle *lepW  = switchLepAndHadTop ? tops.hadronicDecayW  () : tops.leptonicDecayW();
-    const reco::GenParticle *hadW  = switchLepAndHadTop ? tops.leptonicDecayW  () : tops.hadronicDecayW();
-    const reco::GenParticle *lepB  = switchLepAndHadTop ? tops.hadronicDecayB  () : tops.leptonicDecayB(); 
-    const reco::GenParticle *hadB  = switchLepAndHadTop ? tops.leptonicDecayB  () : tops.hadronicDecayB();
+    const reco::GenParticle *lepW  = switchLepAndHadTop ? tops.hadronicDecayW  () : tops.leptonicDecayW  ();
+    const reco::GenParticle *hadW  = switchLepAndHadTop ? tops.leptonicDecayW  () : tops.hadronicDecayW  ();
+    const reco::GenParticle *lepB  = switchLepAndHadTop ? tops.hadronicDecayB  () : tops.leptonicDecayB  (); 
+    const reco::GenParticle *hadB  = switchLepAndHadTop ? tops.leptonicDecayB  () : tops.hadronicDecayB  ();
+    //std::cout << "hadronic b-quark: " << hadB->status() << std::endl;
+    //std::cout << "leptonic b-quark:" << lepB->status() << std::endl;
+    //std::cout << "light quark1:" << hadB->status() << std::endl;
+    //std::cout << "light quark2:" << hadB->status() << std::endl;
+
     // define generated scalar sum of all jet pts
     double HT = lepB->pt() + hadB->pt()+tops.hadronicDecayQuark()->pt()+tops.hadronicDecayQuarkBar()->pt();
     // ---
@@ -768,7 +815,58 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       // fill charge correlation plot for lepton
       corrs_.find("lepCharge_" )->second->Fill( ((reco::LeafCandidate*)(tops.singleLepton(        )))->charge(), 
 						((reco::LeafCandidate*)(tops.singleLepton(hypoKey_)))->charge(), weight);
-    
+      // ---
+      //    fill correlation for ttbar final state object distributions
+      // ---  
+      // gen-rec level correlation for leptonPt
+      corrs_.find("lepPt_"      )->second->Fill(tops.singleLepton()->pt()   , tops.singleLepton(hypoKey_)->pt()   , weight); 
+      // gen-rec level correlation for leptonEta
+      corrs_.find("lepEta_"     )->second->Fill(tops.singleLepton()->eta()  , tops.singleLepton(hypoKey_)->eta()  , weight); 
+      // gen-rec level correlation for neutrinoPt
+      corrs_.find("neutrinoPt_" )->second->Fill(tops.singleNeutrino()->pt() , tops.singleNeutrino(hypoKey_)->pt() , weight); 
+      // gen-rec level correlation for neutrinoEta
+      corrs_.find("neutrinoEta_")->second->Fill(tops.singleNeutrino()->eta(), tops.singleNeutrino(hypoKey_)->eta(), weight); 
+      // find q/qbar gen-reco association (closest in pt)
+      bool switchLightQuarks=false;
+      if((std::abs(tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt())+std::abs(tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt()))>(std::abs(tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt())+std::abs(tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt()))){
+	switchLightQuarks=true;
+      }
+      const reco::GenParticle *QGen   =tops.hadronicDecayQuark   ();
+      const reco::GenParticle *QbarGen=tops.hadronicDecayQuarkBar();
+      const reco::Candidate *QReco   =(switchLightQuarks ? tops.hadronicDecayQuarkBar(hypoKey_) : tops.hadronicDecayQuark   (hypoKey_));
+      const reco::Candidate *QbarReco=(switchLightQuarks ? tops.hadronicDecayQuark   (hypoKey_) : tops.hadronicDecayQuarkBar(hypoKey_));
+      // gen-rec level correlation for light-quarks Pt
+      corrs_.find("lightqPt_" )->second->Fill(QGen   ->pt(), QReco   ->pt(), weight);
+      corrs_.find("lightqPt_" )->second->Fill(QbarGen->pt(), QbarReco->pt(), weight);
+      // gen-rec level correlation for light-quarks Eta
+      corrs_.find("lightqEta_")->second->Fill(QGen   ->eta(), QReco   ->eta(), weight);
+      corrs_.find("lightqEta_")->second->Fill(QbarGen->eta(), QbarReco->eta(), weight);
+      // gen-rec level correlation for b-quarks Pt
+      corrs_.find("bqPt_"     )->second->Fill(tops.hadronicDecayB()->pt() , tops.hadronicDecayB(hypoKey_)->pt() , weight);
+      corrs_.find("bqPt_"     )->second->Fill(tops.leptonicDecayB()->pt() , tops.leptonicDecayB(hypoKey_)->pt() , weight);
+      // gen-rec level correlation for b-quarks Eta
+      corrs_.find("bqEta_"    )->second->Fill(tops.hadronicDecayB()->eta(), tops.hadronicDecayB(hypoKey_)->eta(), weight);
+      corrs_.find("bqEta_"    )->second->Fill(tops.leptonicDecayB()->eta(), tops.leptonicDecayB(hypoKey_)->eta(), weight);
+      // find leading jet
+      ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadqGen=tops.hadronicDecayB(        )->p4();
+      ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadqRec=tops.hadronicDecayB(hypoKey_)->p4();
+      if(leadqGen.Pt()<(tops.leptonicDecayB()->pt())){
+	leadqGen=tops.leptonicDecayB(        )->p4();
+	leadqRec=tops.leptonicDecayB(hypoKey_)->p4();
+      }
+      if(leadqGen.Pt()<(tops.hadronicDecayQuarkBar()->pt())){
+	leadqGen=tops.hadronicDecayQuarkBar(        )->p4();
+	leadqRec=tops.hadronicDecayQuarkBar(hypoKey_)->p4();
+      }
+      if(leadqGen.Pt()<(tops.hadronicDecayQuark()->pt())){
+	leadqGen=tops.hadronicDecayQuark(        )->p4();
+	leadqRec=tops.hadronicDecayQuark(hypoKey_)->p4();
+      }
+      // gen-rec level correlation for leading quark Pt
+      corrs_.find("leadqPt_"    )->second->Fill(leadqGen.Pt() , leadqRec.Pt() , weight);
+      // gen-rec level correlation for leading quark Eta
+      corrs_.find("leadqEta_"   )->second->Fill(leadqGen.Eta(), leadqRec.Eta(), weight);
+
       /**
 	 fill 2D histos (angle correlation plots)
       **/
