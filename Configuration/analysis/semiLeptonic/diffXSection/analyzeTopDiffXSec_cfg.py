@@ -1047,8 +1047,8 @@ if(jetType=="particleFlow"):
 ## switch to from muon to electron collections
 if(decayChannel=="electron"):
     # adpat trigger
-    process.hltFilter.HLTPaths=["HLT_Ele17*"]
-    process.dummy.HLTPaths=["HLT_Ele17*"]
+    process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
+    process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
     # adapt gen filter
     process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.electron = True
     process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.muon= False
