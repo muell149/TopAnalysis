@@ -162,11 +162,11 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
 
   // apply cuts
   if(lepton ->pt()<lepPt_        || leptonBar->pt()<lepPt_        ) return false;
-  if(fabs(lepton->eta()) > centralLeptonEta_ && fabs(leptonBar->eta()) > centralLeptonEta_) return false;
   if(fabs(lepton->eta())>lepEta_ || fabs(leptonBar->eta())>lepEta_) return false;
-  if(bQuark ->pt()<bPt_        || bQuark->pt()<bPt_        )    return false;
-  if(fabs(bQuark->eta())>bEta_ || fabs(bBarQuark->eta())>bEta_) return false;
-
+  if(bQuark ->pt()<bPt_          || bBarQuark->pt()<bPt_        )  return false;
+  if(fabs(bQuark->eta())>bEta_   || fabs(bBarQuark->eta())>bEta_) return false;
+  if(fabs(lepton->eta()) > centralLeptonEta_ && fabs(leptonBar->eta()) > centralLeptonEta_) return false;  
+  
   // calculate generated MET from neutrinos
   double x = (nu->momentum()+nuBar->momentum()).x();
   double y = (nu->momentum()+nuBar->momentum()).y();
