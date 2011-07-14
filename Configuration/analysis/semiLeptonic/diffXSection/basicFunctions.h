@@ -46,8 +46,7 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 			  /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysDiBosUp        , /*27:*/sysDiBosDown};
 
 bool newSpring11MC=true;
-bool newSummer11MC=false;
-
+bool newSummer11MC=true;
 
 #include "TStyle.h"
 
@@ -652,120 +651,172 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
   double weight =0;
 
   // c) fill #events in sample and cross sections (in / pb)
-  // 2*ttbar MADGRAPH D6T Fall10
+  // 2*ttbar MADGRAPH
   if((sample==kSig)||(sample==kBkg)){
-    crossSection=157.5;
+    crossSection=158.; // combined 2010 CMS XSec
+    // D6T Fall10
     Nevents     =1306182.;
-    if(newSpring11MC) Nevents     = 1286491;
-    if(newSummer11MC) Nevents     = 3701947;
-    // systematic samples:
-    if(kSys==sysTopScaleUp  ) Nevents=1153236;
-    if(kSys==sysTopScaleDown) Nevents=1098971;
-    if(kSys==sysTopMatchUp  ) Nevents=1036492;
-    if(kSys==sysTopMatchDown) Nevents=938005;
-    if(kSys==sysISRFSRup    ) Nevents=1394010;
-    if(kSys==sysISRFSRdown  ) Nevents=1221664;
-    if(kSys==sysPileUp      ) Nevents=1281237;
+    // D6T Spring11
+    if(newSpring11MC) Nevents=1286491;
+    // Z2 Summer11	     
+    if(newSummer11MC) Nevents=3701947;
+    // Fall10 systematic samples:
+    if(!newSummer11MC&&!newSpring11MC){
+      if(kSys==sysTopScaleUp  ) Nevents=1153236;
+      if(kSys==sysTopScaleDown) Nevents=1098971;
+      if(kSys==sysTopMatchUp  ) Nevents=1036492;
+      if(kSys==sysTopMatchDown) Nevents=938005;
+      if(kSys==sysISRFSRup    ) Nevents=1394010;
+      if(kSys==sysISRFSRdown  ) Nevents=1221664;
+      if(kSys==sysPileUp      ) Nevents=1281237;
+    }
   }
-  // W->lnu+jets MADGRAPH D6T Fall10
-  if(sample==kWjets){
+  // W->lnu+jets MADGRAPH 
+  else if(sample==kWjets){
     crossSection=31314.;
+    // D6T Fall10
     Nevents     =14805546.;
-    if(newSpring11MC) Nevents     =14722996;
-    // systematic samples:
-    if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
-    if(kSys==sysVBosonScaleDown) Nevents=4842219;
-    if(kSys==sysVBosonMatchUp  ) Nevents=10370368;
-    if(kSys==sysVBosonMatchDown) Nevents=2706986;
-    if(kSys==sysPileUp         ) Nevents=14766396;
+    // D6T Spring11
+    if(newSpring11MC) Nevents=14722996;
+    // Z2 Summer11	     
+    if(newSummer11MC) Nevents=56789563;
+    // Fall10 systematic samples:
+    if(!newSummer11MC&&!newSpring11MC){
+      if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
+      if(kSys==sysVBosonScaleDown) Nevents=4842219;
+      if(kSys==sysVBosonMatchUp  ) Nevents=10370368;
+      if(kSys==sysVBosonMatchDown) Nevents=2706986;
+      if(kSys==sysPileUp         ) Nevents=14766396;
+    }
   }
-  // DY->ll+jets MADGRAPH D6T Fall10
-  if(sample==kZjets){
+  // DY->ll+jets MADGRAPH
+  else if(sample==kZjets){
     crossSection=3048.;
+    // D6T Fall10
     Nevents     =2543727.;
-    if(newSpring11MC) Nevents     =2543706;
-    // systematic samples:
-    if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
-    if(kSys==sysVBosonScaleDown) Nevents=1436150;
-    if(kSys==sysVBosonMatchUp  ) Nevents=1667367;
-    if(kSys==sysVBosonMatchDown) Nevents=1662884;
-    if(kSys==sysPileUp         ) Nevents=2539858;
+    // D6T Spring11
+    if(newSpring11MC) Nevents=2543706;
+    // Z2 Summer11	     
+    if(newSummer11MC) Nevents=35101516;
+    // Fall10 systematic samples:
+    if(!newSummer11MC&&!newSpring11MC){
+      if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
+      if(kSys==sysVBosonScaleDown) Nevents=1436150;
+      if(kSys==sysVBosonMatchUp  ) Nevents=1667367;
+      if(kSys==sysVBosonMatchDown) Nevents=1662884;
+      if(kSys==sysPileUp         ) Nevents=2539858;
+    }
   }
-  // QCD PYTHIA6 Z2 Fall10 
-  if(sample==kQCD){
+  // QCD Mu enriched PYTHIA6
+  else if(sample==kQCD&&!decayChannel.compare("muon")==0){
+    // Z2 Fall10
     crossSection=296600000.*0.00028550; // generator crossSection * prefilter efficiency
     Nevents     =29504866.;
-    if(newSpring11MC) Nevents     =29434562;
-    // if(kSys==sysPileUp) Nevents=8063288; // PU not completely patified
+    // Z2 Spring11
+    if(newSpring11MC) Nevents=29434562;
+    // Z2 Summer11
+    if(newSummer11MC){
+    crossSection=296600000.*0.0002855; // generator crossSection * prefilter efficiency
+    Nevents     =20416038.;      
+    }
   }
+  // QCD e+jets channel combined
+  else if(sample==kQCD&&!decayChannel.compare("electron")==0){
+    // Z2 Fall10/Spring11: no samples yet!
+    crossSection=1; // generator crossSection * prefilter efficiency
+    Nevents     =0.;
+    // Z2 Summer11: already added in combineMCsamples.C
+    // with cross section as weight, 
+    // lumi normalization is done here
+    if(newSummer11MC){
+    Nevents     =1.;      
+    }
+  }
+  // Fall10/Spring11 singleTop MADGRAPH Z2 samples
   // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10 
-  if(sample==kSTop){
+  else if(sample==kSTop&&!newSummer11MC&&!newSpring11MC){
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as kSTop is already weighted
   }
-  if(sample==kSTops){
+  else if(sample==kSTops&&!newSummer11MC&&!newSpring11MC){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =494967.;
-    if(newSpring11MC) Nevents     = 494967; 
+    if(newSpring11MC) Nevents =494967; 
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494967;
   }
-  if(sample==kSTopt){
+  else if(sample==kSTopt&&!newSummer11MC&&!newSpring11MC){
     crossSection=64.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =484060.;
-    if(newSpring11MC) Nevents     = 484060;
+    if(newSpring11MC) Nevents =484060;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=484060;
   }
-  if(sample==kSToptW){
+  else if(sample==kSToptW&&!newSummer11MC&&!newSpring11MC){
     crossSection=10.6;
     Nevents     =494961.;
-    if(newSpring11MC) Nevents     =489417;
+    if(newSpring11MC) Nevents =489417;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494961;
   }
-  // DiBoson (added diboson,WW,WZ,ZZ) PYTHIA6 Z2 Fall10
-  if(sample==kDiBos){
+  // DiBoson PYTHIA6 Z2
+  // (added diboson,WW,WZ,ZZ)
+  else if(sample==kDiBos){
+    // Fall10 Z2
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as kDiBos is already weighted
+    // Summer11 Z2: already added in combineMCsamples.C
+    // with cross section as weight, 
+    // lumi normalization is done here
+    if(newSummer11MC) Nevents=1; 
   }
-  if(sample==kWW){
+  else if(sample==kWW){
     crossSection=43.0;
+    // Fall10 Z2
     Nevents     =2061760;
+    // Summer11 Z2
+    if(newSummer11MC) Nevents=4225916;
     // systematic samples:
-    if(kSys==sysPileUp)Nevents=2061760;
+    if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2061760;
   }
-  if(sample==kWZ){
+  else if(sample==kWZ){
     crossSection=18.2;
+    // Fall10 Z2
     Nevents     =2194752;
+    // Summer11 Z2
+    if(newSummer11MC) Nevents=4265243;
     // systematic samples:
-    if(kSys==sysPileUp)Nevents=2185664;
+    if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2185664;
   }
-  if(sample==kZZ){
+  else if(sample==kZZ){
     crossSection=5.9;
+    // Fall10 Z2
     Nevents     =2113368;
+    // Summer11 Z2
+    //if(newSummer11MC) Nevents=; FIXME: this sample will come soon
     // systematic samples:
-    if(kSys==sysPileUp)Nevents=2113368;
+    if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2113368;
   }
   // Data 
-  if(sample==kData){
+  else if(sample==kData){
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as data needs no weight
   }
+  // unknown input
+  else{
+    std::cout << "ERROR: unknown configuration sample=" << sample;
+    std::cout << ", decayChannel=" << decayChannel << std::endl;
+    exit(0);
+  }
   // d) calculate weight
-
   weight = luminosity / ( Nevents / crossSection );
   if(verbose>0){
     std::cout << "sample: " << sampleLabel(sample,decayChannel) << std::endl;
     std::cout << "systematic var.: " << sysLabel(kSys) << std::endl;
   }
-  // GOSSIE FIXME WRONG diboson and QCD samples, now scaled to zero on purpose 
-  if (decayChannel.compare("electron")==0) { if(sample==kWW || sample==kWZ || sample==kZZ || sample==kQCD) { weight = 0. ; } }
-  // MARTIN FIXME WRONG missing non ttbar sample scaled to zero on purpose 
-  if(newSummer11MC&&(sample!=kSig)&&(sample!=kBkg)&&(sample!=kData)) weight = 0.;
+  // e) systematic shifts
   double weight2=weight;
   if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
-  // e) systematic effects
   // e1) for ttbar->lnu: BR correction
   if(sample==kSig) weight *= BRcorrectionSemileptonic;
   // e2) systematic higher/lower BG
@@ -789,17 +840,18 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     if(kSys==sysSTopDown) weight*=(1.0-scale); 
   }
   if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl; 
-  // return result
+  // printout for systematic variation
   if(verbose>0){
     std::cout << "weight";
     if(verbose>1){
       if(weight!=weight2) std::cout << "(scaled)";
       if(weight==weight2) std::cout << "(not scaled)"; 
-    }      
+    }
     std::cout << ": " << weight << std::endl;
     if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
     if(weight!=weight2&&sample==kSig) std::cout << "(BR correction applied)" << std::endl;
-  }  
+  } 
+  // return result
   return weight;
 }
 
@@ -884,7 +936,7 @@ TString TopFilename(unsigned int sample, unsigned int sys, const std::string dec
   // label for MC production cycle
   // note: we have no Diboson spring11 MC up to now
   if(!newSummer11MC&&newSpring11MC&&sample!=kWW&&sample!=kWZ&&sample!=kZZ) fileName += "Spring11";
-  else if(newSummer11MC&&(sample==kSig||sample==kBkg)) fileName += "Summer11";
+  else if(newSummer11MC) fileName += "Summer11";
   else fileName += "Fall10"  ;
   // take care of systematic variations
   // JES
