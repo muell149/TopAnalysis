@@ -270,7 +270,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* diLeptonMassVsTtBarPt_;
   TH2D* diLeptonMassVsTtBarRapidity_;
   TH2D* diLeptonMassVsTtBarMass_;
-
+  
+  // correlation between number of tagged jets and relevant quantities for differential cross sections
   TH2D* nBtagsTCHELVsLeptonPt_;
   TH2D* nBtagsTCHELVsLeptonEta_;
   TH2D* nBtagsTCHELVsDiLeptonPt_;
@@ -300,11 +301,22 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* nBtagsSSVHEMVsTtBarPt_;
   TH2D* nBtagsSSVHEMVsTtBarRapidity_;
   TH2D* nBtagsSSVHEMVsTtBarMass_;
+    
+  // correlation between number of matched jets and relevant quantities for differential cross sections
+  TH2D* nMatchesVsLeptonPt_;
+  TH2D* nMatchesVsLeptonEta_;
+  TH2D* nMatchesVsDiLeptonPt_;
+  TH2D* nMatchesVsDiLeptonMass_;
+  TH2D* nMatchesVsTopPt_;
+  TH2D* nMatchesVsTopRapidity_;
+  TH2D* nMatchesVsTtBarPt_;
+  TH2D* nMatchesVsTtBarRapidity_;
+  TH2D* nMatchesVsTtBarMass_; 
   
   /// number of btags vs number of jets matched to b quarks
   TH2D* nMatchVsNtagsTCHEL_;
   TH2D* nMatchVsNtagsTCHEM_;
-  TH2D* nMatchVsNtagsSSVHEM_;  
+  TH2D* nMatchVsNtagsSSVHEM_; 
 };
 
 #endif
