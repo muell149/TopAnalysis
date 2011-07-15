@@ -708,7 +708,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     }
   }
   // QCD Mu enriched PYTHIA6
-  else if(sample==kQCD&&!decayChannel.compare("muon")==0){
+  else if(sample==kQCD&&decayChannel.compare("muon")==0){
     // Z2 Fall10
     crossSection=296600000.*0.00028550; // generator crossSection * prefilter efficiency
     Nevents     =29504866.;
@@ -721,22 +721,24 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     }
   }
   // QCD e+jets channel combined
-  else if(sample==kQCD&&!decayChannel.compare("electron")==0){
+  else if(sample==kQCD&&decayChannel.compare("electron")==0){
     // Z2 Fall10/Spring11: no samples yet!
     crossSection=1; // generator crossSection * prefilter efficiency
     Nevents     =0.;
     // Z2 Summer11: already added in combineMCsamples.C
     // with cross section as weight, 
     // lumi normalization is done here
-    if(newSummer11MC){
-    Nevents     =1.;      
-    }
+    if(newSummer11MC) Nevents     =1.;
   }
   // Fall10/Spring11 singleTop MADGRAPH Z2 samples
   // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10 
-  else if(sample==kSTop&&!newSummer11MC&&!newSpring11MC){
+  else if(sample==kSTop){
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as kSTop is already weighted
+    // Summer11 Z2: already added in combineMCsamples.C
+    // with cross section as weight, 
+    // lumi normalization is done here
+    if(newSummer11MC) Nevents=1;
   }
   else if(sample==kSTops&&!newSummer11MC&&!newSpring11MC){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
@@ -932,7 +934,7 @@ TString TopFilename(unsigned int sample, unsigned int sys, const std::string dec
   if(sample==kSToptW)fileName += "SingleTopTWchannelMadZ2";
   if(sample==kSTops )fileName += "SingleTopSchannelMadZ2";
   if(sample==kSTopt )fileName += "SingleTopTchannelMadZ2";
-  if(sample==kSTop  )fileName += "SingleTopMadD6T";
+  if(sample==kSTop  )fileName += "SingleTopMadZ2";
   // label for MC production cycle
   // note: we have no Diboson spring11 MC up to now
   if(!newSummer11MC&&newSpring11MC&&sample!=kWW&&sample!=kWZ&&sample!=kZZ) fileName += "Spring11";
