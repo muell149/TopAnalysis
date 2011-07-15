@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, unsigned int verbose=0, TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root", const std::string decayChannel = "unset")
+void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, unsigned int verbose=2, TString dataFile= "diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root", const std::string decayChannel = "electron")
 {
   //  ---
   //     name conventions
@@ -65,15 +65,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
   TString plots1D[ ] = { // (I) preselection
-                         // (i) muon monitoring
-                         "kinematicMuonQualityPreSel/nHit"   ,
-                         "kinematicMuonQualityPreSel/chi2"   ,
-                         "kinematicMuonQualityPreSel/dB"     ,
-                         "kinematicMuonQualityPreSel/dz"     ,
-                         "kinematicMuonQualityPreSel/matches",  
-                         "trackMuontightJetsKinematicsPreSel/dist30_",
-			 "goldenMuonQualityPreSel/relIso"    , 
-			 "tightMuonKinematicsPreSel/n"       ,
                          // (ii) jet monitoring
                          "tightJetKinematicsPreSel/n"  ,
                          "tightJetKinematicsPreSel/en" ,
@@ -81,21 +72,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 			 "tightJetKinematicsPreSel/eta",
 			 "tightJetKinematicsPreSel/phi",
                          // (II) before btagging
-                         // (i) muon monitoring
-                         "tightMuonKinematics/n" ,
-                         "tightMuonKinematics/en" ,
-                         "tightMuonKinematics/pt" ,
-                         "tightMuonKinematics/eta",
-                         "tightMuonKinematics/y"  ,
-                         "tightMuonKinematics/phi",
-                         "tightMuonQuality/nHit"   ,
-                         "tightMuonQuality/chi2"   ,
-                         "tightMuonQuality/dB"     ,
-                         "tightMuonQuality/dz"     ,
-                         "tightMuonQuality/ecalEn" ,
-                         "tightMuonQuality/hcalEn" ,
-                         "tightMuonQuality/relIso" ,
-                         "tightMuonQuality/matches",  			 
                          // (ii) jet monitoring
                          "tightJetKinematics/n"  ,
                          "tightJetKinematics/en" ,
@@ -142,10 +118,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                          "analyzeMETMuon/metEt"   ,
                          "analyzeMETMuon/metSumEt",
 			 // (III) after btagging 
-                         // (i) muon monitoring
-                         "tightMuonKinematicsTagged/pt" ,
-                         "tightMuonKinematicsTagged/eta",
-                         "tightMuonKinematicsTagged/phi",
                          // (ii) jet monitoring
 			 "tightJetKinematicsTagged/n"  ,
 			 "tightJetKinematicsTagged/pt" ,
@@ -162,6 +134,38 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                          // (iv) MET monitoring
                          "analyzeMETMuonTagged/metEt"   ,
                          "analyzeMETMuonTagged/metSumEt"
+                       };
+ TString plots1Dmu[ ] = { // (I) preselection
+                          // (i) muon monitoring
+                         "kinematicMuonQualityPreSel/nHit"   ,
+                         "kinematicMuonQualityPreSel/chi2"   ,
+                         "kinematicMuonQualityPreSel/dB"     ,
+                         "kinematicMuonQualityPreSel/dz"     ,
+                         "kinematicMuonQualityPreSel/matches",  
+                         "trackMuontightJetsKinematicsPreSel/dist30_",
+			 "goldenMuonQualityPreSel/relIso"    , 
+			 "tightMuonKinematicsPreSel/n"       ,
+                         // (II) before btagging
+                         // (i) muon monitoring
+                         "tightMuonKinematics/n" ,
+                         "tightMuonKinematics/en" ,
+                         "tightMuonKinematics/pt" ,
+                         "tightMuonKinematics/eta",
+                         "tightMuonKinematics/y"  ,
+                         "tightMuonKinematics/phi",
+                         "tightMuonQuality/nHit"   ,
+                         "tightMuonQuality/chi2"   ,
+                         "tightMuonQuality/dB"     ,
+                         "tightMuonQuality/dz"     ,
+                         "tightMuonQuality/ecalEn" ,
+                         "tightMuonQuality/hcalEn" ,
+                         "tightMuonQuality/relIso" ,
+                         "tightMuonQuality/matches",  			 
+			 // (III) after btagging 
+                         // (i) muon monitoring
+                         "tightMuonKinematicsTagged/pt" ,
+                         "tightMuonKinematicsTagged/eta",
+                         "tightMuonKinematicsTagged/phi"
                        };
 
   TString plots1De[ ] = { 
@@ -195,15 +199,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // log = 0 or 1 for linear or logarithmic axis 
 
   TString axisLabel1D[ ] = { // (I) preselection
-                             // (i) muon monitoring
-                             "N_{hits}(inner tracker #mu)/events/0/1"          ,
-                             "#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
-                             "d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
-                             "d_{z} (#mu(pt,#eta))/events/0/10",
-                             "N_{matched #mu segments}(#mu(pt,#eta))/events/0/1",
-                             "#DeltaR(jet(pt,#eta,ID), #mu(pt, #eta, track criteria))/events/0/1",
-			     "relIso(#mu(no isolation))/events/0/1",
-                             "N_{#mu}/events/0/1",
                              // (ii) jet monitoring
                              "N_{jets}/events/0/1",
                              "E(jets)/jets/1/1",
@@ -211,21 +206,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 			     "#eta(jets)/jets/0/5",
 			     "#phi(jets)/jets/0/10",
 			     // (II) before btagging
-                             // (i) muon monitoring
-                             "N_{#mu}/events/0/1"   ,
-                             "E(#mu)/events/0/2"    ,
-                             "p_{t}(#mu)/events/0/1",
-		             "#eta(#mu)/events/0/5" ,
-                             "y(#mu)/events/0/5"    ,	
-		             "#phi(#mu)/events/0/5" ,
-                             "N_{hits}(inner tracker #mu)/events/0/1"          ,
-                             "#chi^{2} (global trackfit #mu)/events/1/1",
-                             "d_{xy} (#mu wrt. beamspot)/events/0/1" ,
-                             "d_{z} (#mu)/events/0/10"               ,
-                             "E_{Ecal} (#mu)/events/1/1",
-                             "E_{Hcal} (#mu)/events/1/1",
-                             "relIso(#mu)/events/0/1",
-                             "N_{matched #mu segments}(#mu)/events/0/1",
                              // (ii) jet monitoring
                              "N_{jets}/events/1/1",
                              "E(jets)/jets/1/1",
@@ -272,10 +252,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 			     "#slash{E}_{T}/events/0/10",
 			     "#SigmaE_{T}/events/0/50"  ,
 			     // (III) after btagging 
-			     // (i) muon monitoring
-                             "p_{t}(#mu)/events/0/2",
-		             "#eta(#mu)/events/0/10",
-		             "#phi(#mu)/events/0/10",
                              // (ii) jet monitoring
                              "N_{jets}/events/1/1",
 			     "p_{t}(jets)/jets/1/2",
@@ -291,10 +267,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 			     "#eta(lead 4^{th} jet)/events/0/5" ,
 			     // (iv) MET monitoring 
 			     "#slash{E}_{T}/events/0/20",
-			     "#SigmaE_{T}/events/0/30"  ,
+			     "#SigmaE_{T}/events/0/30"  
                            };
   TString axisLabel1De[ ] = {
-                            // (ib) electron monitoring
+                             // (ib) electron monitoring
                              "N_{e}/events/0/1" ,
                              "E(e)/events/0/2",
                              "E_{t}(e)/events/0/1" ,
@@ -310,7 +286,40 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
 			     // (ib) electron monitoring
                              "E_{t}(e)/events/0/2",
 		             "#eta(e)/events/0/1",
-		             "#phi(e)/events/0/1",
+		             "#phi(e)/events/0/1"
+                           };
+  
+ TString axisLabel1Dmu[ ] = {// (I) preselection
+                             // (i) muon monitoring
+                             "N_{hits}(inner tracker #mu)/events/0/1"          ,
+                             "#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
+                             "d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
+                             "d_{z} (#mu(pt,#eta))/events/0/10",
+                             "N_{matched #mu segments}(#mu(pt,#eta))/events/0/1",
+                             "#DeltaR(jet(pt,#eta,ID), #mu(pt, #eta, track criteria))/events/0/1",
+			     "relIso(#mu(no isolation))/events/0/1",
+                             "N_{#mu}/events/0/1",
+			     // (II) before btagging
+                             // (i) muon monitoring
+                             "N_{#mu}/events/0/1"   ,
+                             "E(#mu)/events/0/2"    ,
+                             "p_{t}(#mu)/events/0/1",
+		             "#eta(#mu)/events/0/5" ,
+                             "y(#mu)/events/0/5"    ,	
+		             "#phi(#mu)/events/0/5" ,
+                             "N_{hits}(inner tracker #mu)/events/0/1"          ,
+                             "#chi^{2} (global trackfit #mu)/events/1/1",
+                             "d_{xy} (#mu wrt. beamspot)/events/0/1" ,
+                             "d_{z} (#mu)/events/0/10"               ,
+                             "E_{Ecal} (#mu)/events/1/1",
+                             "E_{Hcal} (#mu)/events/1/1",
+                             "relIso(#mu)/events/0/1",
+                             "N_{matched #mu segments}(#mu)/events/0/1",
+			     // (III) after btagging 
+			     // (i) muon monitoring
+                             "p_{t}(#mu)/events/0/2",
+		             "#eta(#mu)/events/0/10",
+		             "#phi(#mu)/events/0/10",
                            };
 
   // 2D: "x-axis title"/"y-axis title"
@@ -318,11 +327,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
                            };
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
-  if(decayChannel=="electron") N1Dplots+=(sizeof(plots1De)/sizeof(TString));
+  if(decayChannel=="electron") N1Dplots+=(sizeof(plots1De )/sizeof(TString));
+  if(decayChannel=="muon"    ) N1Dplots+=(sizeof(plots1Dmu)/sizeof(TString));
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
   // check if all axis labels exist
   unsigned int Naxislabels=sizeof(axisLabel1D)/sizeof(TString);
-  if(decayChannel=="electron") Naxislabels+=(sizeof(axisLabel1De)/sizeof(TString));
+  if(decayChannel=="electron") Naxislabels+=(sizeof(axisLabel1De )/sizeof(TString));
+  if(decayChannel=="muon"    ) Naxislabels+=(sizeof(axisLabel1Dmu)/sizeof(TString));
   if(N1Dplots != Naxislabels) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
   if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
   if((N1Dplots != Naxislabels)||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
@@ -340,7 +351,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // collect all plot names in vector (first 1D, then 2D)
   std::vector<TString> plotList_;
   plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
-  if(decayChannel=="electron") plotList_.insert( plotList_.end(), plots1De, plots1De + sizeof(plots1De)/sizeof(TString) );
+  if(decayChannel=="electron") plotList_.insert( plotList_.end(), plots1De , plots1De  + sizeof(plots1De )/sizeof(TString) );
+  if(decayChannel=="muon"    ) plotList_.insert( plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString) );
   plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
 
 
@@ -379,7 +391,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 191.0, bool save = true, u
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
   axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
- if(decayChannel=="electron") axisLabel_.insert( axisLabel_.end(), axisLabel1De,  axisLabel1De+ sizeof(axisLabel1De)/sizeof(TString) );
+  if(decayChannel=="electron") axisLabel_.insert( axisLabel_.end(), axisLabel1De , axisLabel1De +sizeof(axisLabel1De )/sizeof(TString) );
+  if(decayChannel=="muon"    ) axisLabel_.insert( axisLabel_.end(), axisLabel1Dmu, axisLabel1Dmu+sizeof(axisLabel1Dmu)/sizeof(TString) );
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
   if(verbose>1){
     std::cout << "(plot, x Axis label , y Axis label , log scale?, rebinning factor):" << std::endl;
