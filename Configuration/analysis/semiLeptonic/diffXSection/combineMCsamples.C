@@ -16,7 +16,7 @@ using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, float > >& files, TFile *target, int verbose);
 double subSampleLumiweight(TString sample, TString decayChannel, int verbose);
 
-void combineMCsamples(TString whichFiles = "singleTop", TString decayChannel="electron", int verbose=0) {
+void combineMCsamples(TString whichFiles = "QCD", TString decayChannel="electron", int verbose=1) {
 
   std::vector< std::pair< TFile*, float > > files_;
   if(verbose>0){
@@ -196,27 +196,27 @@ double subSampleLumiweight(TString sample, TString decayChannel, int verbose)
   }
   // single top weights
   else if(sample=="santiTopS"){
-    crossSection=1.49;
+    crossSection=1.44;
     Nevents     =137980;
   }
   else if(sample=="stopS"){
-    crossSection=2.72;
+    crossSection=3.19;
     Nevents     =1; //FIXME: this sample has to come
   }
   else if(sample=="santiTopT"){
-    crossSection=22.0;
+    crossSection=22.65;
     Nevents     =1944826;
   }
   else if(sample=="stopT"){
-    crossSection=42.6;
+    crossSection=41.92;
     Nevents     =3900171;
   }
   else if(sample=="santiTopTW"){
-    crossSection=5.3;
+    crossSection=7.87;
     Nevents     =809984;
   }
   else if(sample=="stopTW"){
-    crossSection=5.3;
+    crossSection=7.87;
     Nevents     =814390;
   }
   // diboson weights
@@ -238,7 +238,7 @@ double subSampleLumiweight(TString sample, TString decayChannel, int verbose)
   }
   // d) calculate weight for 1/pb 
   weight = 1 / ( Nevents / crossSection );
-  if(verbose>1){
+  if(verbose>0){
     std::cout << "sample: "        << sample       << std::endl;
     std::cout << "decay channel: " << decayChannel << std::endl;
     std::cout << "weight: "        << weight       << std::endl;
