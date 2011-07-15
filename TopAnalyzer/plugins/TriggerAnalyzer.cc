@@ -15,7 +15,6 @@ TriggerAnalyzer::TriggerAnalyzer(const edm::ParameterSet& cfg)
   trigResults_ = cfg.getParameter<edm::InputTag>       ("TriggerResults");
   muons_       = cfg.getParameter<edm::InputTag>       ("muons"         );
   hltPaths_    = cfg.getParameter<vector<string> >("hltPaths"      );
-  mainTrigger_ = cfg.getParameter<string>         ("mainTrigger"   );
   weight_      = cfg.getParameter<edm::InputTag>("weight");
 
 }
@@ -71,7 +70,6 @@ TriggerAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
   if(trigResults.failedToGet()) return;
 
   bool trigFired = false;
-  bool mainTrigFired = false;
   int n_Triggers = trigResults->size();
 
   TriggerNames trigName = evt.triggerNames(*trigResults);
@@ -80,10 +78,6 @@ TriggerAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
     //cout <<  trigName.triggerName(i_Trig) << endl;
 
     // check if main trigger has fired
-    if(trigName.triggerName(i_Trig)==mainTrigger_ && trigResults.product()->accept(i_Trig)){
-      mainTrigFired=true;
-    }
-
     if(!trigResults.product()->accept(i_Trig)) continue;
     for(int i = 0; i<n_TrigPaths; i++){
       if(!(trigName.triggerName(i_Trig)==hltPaths_[i])) continue;

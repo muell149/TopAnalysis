@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from PU_Eventweight_cfi import *
 
 analyzeTrigger = cms.EDAnalyzer("TriggerAnalyzer",
 
@@ -6,24 +7,23 @@ analyzeTrigger = cms.EDAnalyzer("TriggerAnalyzer",
 
     muons          = cms.InputTag('selectedPatMuons'),
 
-    hltPaths       = cms.vstring('HLT_L1MuOpen',
-				 'HLT_L1MuOpen_NoBPTX',
-				 'HLT_L1Mu',
-				 'HLT_L1Mu20',
-				 'HLT_L2Mu9',
-				 'HLT_L2Mu11',
-				 'HLT_IsoMu3',
-				 'HLT_Mu3',
-				 'HLT_Mu5',
-				 'HLT_Mu9',
-				 'HLT_L1DoubleMuOpen',
-				 'HLT_DoubleMu0',
-				 'HLT_DoubleMu3',
-				 'HLT_Mu0_L1MuOpen',
-				 'HLT_Mu3_L1MuOpen',
-				 'HLT_Mu5_L1MuOpen'
-				),
+    hltPaths      = cms.vstring(
+        'HLT_DoubleMu6_v1',
+        'HLT_DoubleMu7_v1',
+        'HLT_Mu13_Mu8_v1', #only prompt reco >204/pb, not in MC
+        'HLT_Mu17_Mu8_v1', #only prompt reco >204/pb, not in MC
+        'HLT_Mu8_Ele17_CaloIdL_v1',
+        'HLT_Mu8_Ele17_CaloIdL_v2', #v2 in MC, not in rereco
+        'HLT_Mu17_Ele8_CaloIdL_v1',
+        'HLT_Mu17_Ele8_CaloIdL_v2',
+        'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1',
+        'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2',
+        'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1',
+        'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2',
+        'HLT_IsoMu17_v5',
+        'HLT_IsoMu24_v1',
+        'HLT_IsoMu30_v1',
+    ),
 
-    mainTrigger    = cms.string('HLT_Mu9'),
-    weight = cms.InputTag('eventWeightPU')
+    weight = eventWeightInputTag
 )

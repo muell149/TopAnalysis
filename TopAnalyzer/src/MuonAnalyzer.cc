@@ -4,7 +4,7 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "TMath.h"
-#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
+#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 
 MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& cfg):
   muons_      ( cfg.getParameter<edm::InputTag>     ( "muons"    ) ),
@@ -61,12 +61,17 @@ MuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
     n_mustations_->Fill(muon->numberOfMatches(), weight);
 
-    double minDr = 999.;
-    for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) {
-      double dr = reco::deltaR<const pat::Muon, const pat::Jet>(*muon, *jet);
-      if(dr<minDr) minDr = dr;
+    if (jets.failedToGet()) {
+        //if we don't have jets, make entry in last bin
+        jet_dist_->Fill(jet_dist_->GetBinLowEdge(jet_dist_->GetNbinsX()), weight);
+    } else {
+        double minDr = 999.;
+        for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) {
+            double dr = reco::deltaR<const pat::Muon, const pat::Jet>(*muon, *jet);
+            if(dr<minDr) minDr = dr;
+        }
+        jet_dist_->Fill(minDr, weight);
     }
-    jet_dist_->Fill(minDr, weight);
 
     d0_   ->Fill(muon->track()->d0(), weight);
 

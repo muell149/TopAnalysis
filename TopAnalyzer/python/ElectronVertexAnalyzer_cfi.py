@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from PU_Eventweight_cfi import *
 
 analyzeElectronPrimaryVertex = cms.EDAnalyzer("ElectronVertexAnalyzer",
 
@@ -9,6 +10,6 @@ analyzeElectronPrimaryVertex = cms.EDAnalyzer("ElectronVertexAnalyzer",
     ndof = cms.uint32(4),
     rho  = cms.double(2),
     z    = cms.double(24),
-    weight = cms.InputTag('eventWeightPU')
+    weight = eventWeightInputTag
 
 )
