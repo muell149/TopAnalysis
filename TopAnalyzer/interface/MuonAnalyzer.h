@@ -41,6 +41,7 @@ class MuonAnalyzer : public edm::EDAnalyzer {
   TH1D* dep_hcal_;
   TH1D* iso_comb_;
   TH1D* iso_comb2_;
+  TH1D* pfIso_;
   TH1D* jet_dist_;
   TH1D* nhits_;
   TH1D* n_pixhits_;

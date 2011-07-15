@@ -58,6 +58,7 @@ private:
   TH1D* convDist_;
 
     edm::InputTag weight_;
+    TH1D* pfIso_;
 
 };
 

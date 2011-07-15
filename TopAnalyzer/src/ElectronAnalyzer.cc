@@ -81,6 +81,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
                         ((electron->dr03TkSumPt()+TMath::Max(0.,electron->dr03EcalRecHitSumEt()-1.)+electron->dr03HcalTowerSumEt())/TMath::Max(20.,electron->pt())),
                         weight);
     }
+    pfIso_->Fill((electron->chargedHadronIso()+electron->neutralHadronIso()+electron->photonIso()) / electron->pt());
 
     dB_->Fill(electron->dB(), weight);
 
@@ -88,7 +89,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
     double minDr = 999.;
     for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) {
-      double dr = deltaR<const pat::Electron, const pat::Jet>(*electron, *jet);
+      double dr = reco::deltaR<const pat::Electron, const pat::Jet>(*electron, *jet);
       if(dr<minDr) minDr = dr;
     }
     jet_dist_->Fill(minDr, weight);
@@ -103,7 +104,7 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     electronmap_->Fill(mapID, weight);
 
     convDcot_->Fill(electron->convDcot(), weight);
-    convDist_->Fill(electron->convDist(), weight); 
+    convDist_->Fill(electron->convDist(), weight);
 
     if(verbosity_){
       std::cout << "-------------------------------------------" << std::endl;
@@ -179,6 +180,10 @@ ElectronAnalyzer::beginJob()
   iso_combEB2_->GetXaxis()->SetTitle("I_{combEB}");
   iso_combEB2_->GetYaxis()->SetTitle("Electrons");
 
+  pfIso_= fs->make<TH1D>("pf_iso", "Particle Flow Isolation", 200, 0.,  0.5);
+  pfIso_->GetXaxis()->SetTitle("I_{PF}");
+  pfIso_->GetYaxis()->SetTitle("N");
+
   d0_= fs->make<TH1D>( "d0", "D0 of Inner Track", 100, 0., 10.);
   d0_->GetXaxis()->SetTitle("d0 [cm]");
   d0_->GetYaxis()->SetTitle("N");
@@ -219,9 +224,6 @@ ElectronAnalyzer::beginJob()
   convDist_ = fs->make<TH1D>( "convDist","convDist", 200, 0., 1.);
   convDist_->GetXaxis()->SetTitle("convDist");
   convDist_->GetYaxis()->SetTitle("Electrons");
-  
-
-
 
 }
 

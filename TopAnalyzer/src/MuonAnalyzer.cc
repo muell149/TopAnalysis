@@ -56,6 +56,7 @@ MuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
     iso_comb_ ->Fill((muon->trackIso()+muon->caloIso())/muon->pt(), weight);
     iso_comb2_->Fill((muon->trackIso()+muon->caloIso())/muon->pt(), weight);
+    pfIso_->Fill((muon->chargedHadronIso()+muon->neutralHadronIso()+muon->photonIso()) / muon->pt());
 
     dB_->Fill(muon->dB(), weight);
 
@@ -163,6 +164,10 @@ MuonAnalyzer::beginJob()
   iso_comb2_->GetXaxis()->SetTitle("I_{comb}");
   iso_comb2_->GetYaxis()->SetTitle("N");
 
+  pfIso_= fs->make<TH1D>("pf_iso", "Particle Flow Isolation", 200, 0.,  0.5);
+  pfIso_->GetXaxis()->SetTitle("I_{PF}");
+  pfIso_->GetYaxis()->SetTitle("N");
+
   jet_dist_= fs->make<TH1D>("jet_dist", "Distance to closest Jet", 100, 0.,  10.);
   jet_dist_->GetXaxis()->SetTitle("#Delta r");
   jet_dist_->GetYaxis()->SetTitle("N");
@@ -191,11 +196,11 @@ MuonAnalyzer::beginJob()
   chi_norm_->GetXaxis()->SetTitle("#chi^{2}/n_{dof}");
   chi_norm_->GetYaxis()->SetTitle("N");
 
-  d0_= fs->make<TH1D>( "d0", "D0 of Inner Track", 100, 0., 10.);
+  d0_= fs->make<TH1D>( "d0", "D0 of Inner Track", 100, 0., 2.);
   d0_->GetXaxis()->SetTitle("d0 [cm]");
   d0_->GetYaxis()->SetTitle("N");
 
-  dB_= fs->make<TH1D>( "dB", "DB of Muon Track", 100, 0., 10.);
+  dB_= fs->make<TH1D>( "dB", "DB of Muon Track", 100, 0., 1.);
   dB_->GetXaxis()->SetTitle("dB [cm]");
   dB_->GetYaxis()->SetTitle("N");
 
