@@ -45,17 +45,17 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"electron\" 
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=191.0
+dataLuminosity=204
 ## dataset: 2010 or 2011
-#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
+dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
-dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSec2011Data191pPromptReco1305Json.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSec2011Data191pPromptReco1305Json.root\"
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
 if [ $dataLuminosity2 -le 3600 ]
@@ -66,12 +66,12 @@ fi
 save=true
 ## detail level of output 
 ## 0: no output, 1: std output 2: output for debugging
-verbose=0 
+verbose=0
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
 #maxSys=0
-maxSys=2
+maxSys=0
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -104,11 +104,11 @@ if [ $dataLuminosity2 -le 3600 ]
     sed -i s/newSpring11MC=true/newSpring11MC=false/g ./basicFunctions.h
     sed -i s/newSummer11MC=true/newSummer11MC=false/g ./basicFunctions.h
 fi
-## 2011: spring11MC
+## 2011: summer11MC
 if [ $dataLuminosity2 -ge 3601 ]
     then
     sed -i s/newSpring11MC=false/newSpring11MC=true/g ./basicFunctions.h
-    sed -i s/newSummer11MC=true/newSummer11MC=false/g ./basicFunctions.h
+    sed -i s/newSummer11MC=true/newSummer11MC=true/g ./basicFunctions.h
 fi
 
 #####################
@@ -119,7 +119,7 @@ START=$(date +%s)
 
 ## print out configuration
 clear
-if [$decayChannel == \"combined\"]
+if [ $decayChannel == \"combined\" ]
     then
     echo
     echo "combining the electron and muon channel"
