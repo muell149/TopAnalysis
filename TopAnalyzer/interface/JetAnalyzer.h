@@ -29,6 +29,7 @@ class JetAnalyzer : public edm::EDAnalyzer {
   TH1D* pt_;
   TH1D* et_;
   TH1D* eta_;
+  TH1D* ht_;
 
   TH1D* chargedHadronFrac_;
   TH1D* neutralHadronFrac_;

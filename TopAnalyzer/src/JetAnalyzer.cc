@@ -4,7 +4,7 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
+#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 
 JetAnalyzer::JetAnalyzer(const edm::ParameterSet& cfg):
   jets_   ( cfg.getParameter<edm::InputTag>    ( "jets"        ) ),
@@ -48,6 +48,8 @@ JetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   double SSVHETcut =  3.05;
   double SSVHPMcut =  2.00; //not finaly defined
 
+  double ht = 0;
+
   for(edm::View<pat::Jet>::const_iterator jet = jets->begin();jet != jets->end(); ++jet) {
 
     double TCHEdiscr  = jet->bDiscriminator("trackCountingHighEffBJetTags");
@@ -73,6 +75,7 @@ JetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     pt_      ->Fill(jet->pt(), weight);
     et_      ->Fill(jet->et(), weight);
     eta_     ->Fill(jet->eta(), weight);
+    ht += jet->et();
 
     if(!jet->isCaloJet()){
       chargedHadronFrac_  ->Fill(jet->chargedHadronEnergyFraction(), weight);
@@ -88,6 +91,7 @@ JetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     bDiscSSVHE_->Fill(SSVHEdiscr, weight);
     bDiscSSVHP_->Fill(SSVHPdiscr, weight);
   }
+  ht_->Fill(ht, weight);
   multiTCHEL_ ->Fill(ntagsTCHEL, weight);
   multiTCHEM_ ->Fill(ntagsTCHEM, weight);
   multiTCHET_ ->Fill(ntagsTCHET, weight);
@@ -125,6 +129,9 @@ JetAnalyzer::beginJob()
   eta_->GetXaxis()->SetTitle("#eta_{jet}");
   eta_->GetYaxis()->SetTitle("N");
 
+  ht_ = fs->make<TH1D>("ht", "Sum of Jet ets", 200, 0. , 1000.);
+  ht_->GetXaxis()->SetTitle("H_{t, all jets}");
+  ht_->GetYaxis()->SetTitle("N");
 
   chargedHadronFrac_= fs->make<TH1D>( "chargedHadronFrac", "Charged Hadron Fraction", 100, 0., 1.);
   chargedHadronFrac_->GetXaxis()->SetTitle("charged hdr frac");
