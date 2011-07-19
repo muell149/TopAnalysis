@@ -43,9 +43,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
   // define some rootstyle options
-  gROOT->cd();
-  gROOT->SetStyle("Plain");
-  gStyle->SetEndErrorSize(8);
+
+  gROOT->Reset();
+  setHHStyle();
+  
   TGaxis::SetMaxDigits(2);
 
   // ---
@@ -162,7 +163,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 		  histo_[xSecVariables_[i]][sys]=(TH1F*)(currentShiftedCrossSectionPlot->Clone());
 		  // save plot in canvas 
 		  TCanvas* currentUncertainty = new TCanvas( xSecVariables_[i], xSecVariables_[i], 600, 600);
-		  canvasStyle(*currentUncertainty);
+		  //canvasStyle(*currentUncertainty);
 		  currentUncertainty->cd();
 		  currentShiftedCrossSectionPlot->Draw("");
 		  // draw label to indicate that sys error is adapted from 2010 mu+jets
@@ -353,7 +354,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	    if(relativeUncertainties_.count(xSecVariables_[i])>0&&relativeUncertainties_[xSecVariables_[i]].count(bin)>0){
 	      // create canvas for plot
 	      TCanvas* relUnCertaintyCanvas = new TCanvas(relativeUncertainties_[xSecVariables_[i]][bin]->GetName() ,relativeUncertainties_[xSecVariables_[i]][bin]->GetTitle(), 600, 600);
-	      canvasStyle(*relUnCertaintyCanvas);
+	      //canvasStyle(*relUnCertaintyCanvas);
 	      relUnCertaintyCanvas->SetBottomMargin(0.30);
 	      relUnCertaintyCanvas->SetLeftMargin(0.10);
 	      relUnCertaintyCanvas->SetRightMargin(0.10);
@@ -433,11 +434,11 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	    // for inclusive xSecs
 	    if(xSecVariables_[i].Contains("inclusive")){
 	      TCanvas* canvas2 = new TCanvas(xSecVariables_[i], xSecVariables_[i], 600, 600);
-	      canvasStyle(*canvas2);
+	      //canvasStyle(*canvas2);
 	      canvas2->SetLeftMargin(0.05);
 	      canvas2->cd();
 	      canvas2->SetTitle(xSecVariables_[i]);
-	      canvas2->SetGrid(1,0);
+	      //canvas2->SetGrid(1,0);
 	      // draw xSec 
 	      int NxSecBins=3000;
 	      double xSecMax=300.0;

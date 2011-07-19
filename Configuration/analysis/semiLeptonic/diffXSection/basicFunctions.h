@@ -227,15 +227,11 @@ double readLineFromFile(int line, TString file="crossSectionCalculation.txt")
   return -1.;  
 }
 
-void canvasStyle(TCanvas& canv)
+//void canvasStyle(TCanvas& canv) re-definition of header to avoid warnings when compiling, must be changed once function body is not empty anymore 
+void canvasStyle()
 {
-  // this function does the standard style 
-  // configuration for the TCanvas "canv"
-  // modified quantities: canv
-  // used functions: NONE
-  // used enumerators: NONE
-
   // function is not called anymore - just kept if indiviudal configurations might be required
+  // could be considered to be deleted
   
 }
 

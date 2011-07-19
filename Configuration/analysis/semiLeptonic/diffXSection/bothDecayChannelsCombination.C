@@ -6,11 +6,12 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
   //    Setup
   // ---
   // set root style
-  gROOT->cd();
-  gROOT->SetStyle("Plain");
-  gStyle->SetEndErrorSize(8);
-  gStyle->SetPalette(1);
+  
+  gROOT->Reset();
+  setHHStyle();
+
   TGaxis::SetMaxDigits(2);
+
   // decay channels
   enum channel {kMuon, kElectron};
   // define folders where XSec plots are stored
@@ -92,7 +93,7 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
 	  plotTheo->GetYaxis()->SetTitle(yTitle);
 	  // create Canvas
 	  TCanvas* combicanvas = new TCanvas("combicanvas", "combicanvas", 600, 600);
-	  canvasStyle(*combicanvas);
+	  //canvasStyle(*combicanvas);
 	  // plot into canvas
 	  combicanvas->cd(0);
 	  plotTheo->Draw("hist");

@@ -1,8 +1,7 @@
 #include "basicFunctions.h"
 
 void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root"
-TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root"
-, std::string decayChannel = "unset" )
+TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root", std::string decayChannel = "muon") // unset" )
 
 {
   //  ---
@@ -65,13 +64,13 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   bool extrapolate=false;
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
+
   // c) set root style
-  gROOT->cd();
-  gROOT->SetStyle("Plain");
-  gStyle->SetEndErrorSize(8);
-  gStyle->SetPalette(1);
+
+  gROOT->Reset();
+  setHHStyle();
+
   TGaxis::SetMaxDigits(2);
-  // gStyle->SetErrorX(0);
 
   //  ---
   //     choose plots
@@ -934,7 +933,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     char canvname[10];
     sprintf(canvname,"canv%i",sample);    
     plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
-    canvasStyle(*plotCanvas_[sample]);
+    //canvasStyle(*plotCanvas_[sample]);
   }
 
   // ---

@@ -54,11 +54,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, 
   */
   int systematicVariation=sysNo;
   // c) set root style
-  gROOT->cd();
-  gROOT->SetStyle("Plain");
-  gStyle->SetEndErrorSize(8);
-  gStyle->SetPalette(1);
-  //  gStyle->SetErrorX(0); 
+
+  gROOT->Reset();
+  setHHStyle();
 
   //  ---
   //     choose plots
