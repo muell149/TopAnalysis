@@ -26,12 +26,16 @@
 #include <TLine.h>
 #include <TBox.h>
 #include <TPaveLabel.h>
+#include <TPaveText.h>
+#include <TLatex.h>
 #include <TStyle.h>
 #include <typeinfo>
 #include <TF1.h>
 #include <TBox.h>
 #include <TGaxis.h>
 #include <TError.h>
+
+#include <HHStyle.h>
 
                  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
 enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
@@ -48,8 +52,6 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 bool newSpring11MC=true;
 bool newSummer11MC=true;
 
-#include "TStyle.h"
-
 // tdrGrid: Turns the grid lines on (true) or off (false)
 
 // void tdrGrid(bool gridOn) {
@@ -61,149 +63,6 @@ bool newSummer11MC=true;
 
 void fixOverlay() {
   gPad->RedrawAxis();
-}
-
-void setTDRStyle() {
-  TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
-
-// For the canvas:
-  tdrStyle->SetCanvasBorderMode(0);
-  tdrStyle->SetCanvasColor(kWhite);
-  tdrStyle->SetCanvasDefH(600); //Height of canvas
-  tdrStyle->SetCanvasDefW(600); //Width of canvas
-  tdrStyle->SetCanvasDefX(0);   //POsition on screen
-  tdrStyle->SetCanvasDefY(0);
-
-// For the Pad:
-  tdrStyle->SetPadBorderMode(0);
-  // tdrStyle->SetPadBorderSize(Width_t size = 1);
-  tdrStyle->SetPadColor(kWhite);
-  tdrStyle->SetPadGridX(false);
-  tdrStyle->SetPadGridY(false);
-  tdrStyle->SetGridColor(0);
-  tdrStyle->SetGridStyle(3);
-  tdrStyle->SetGridWidth(1);
-
-// For the frame:
-  tdrStyle->SetFrameBorderMode(0);
-  tdrStyle->SetFrameBorderSize(1);
-  tdrStyle->SetFrameFillColor(0);
-  tdrStyle->SetFrameFillStyle(0);
-  tdrStyle->SetFrameLineColor(1);
-  tdrStyle->SetFrameLineStyle(1);
-  tdrStyle->SetFrameLineWidth(1);
-
-// For the histo:
-  // tdrStyle->SetHistFillColor(1);
-  // tdrStyle->SetHistFillStyle(0);
-  tdrStyle->SetHistLineColor(1);
-  tdrStyle->SetHistLineStyle(0);
-  tdrStyle->SetHistLineWidth(1);
-  // tdrStyle->SetLegoInnerR(Float_t rad = 0.5);
-  // tdrStyle->SetNumberContours(Int_t number = 20);
-
-  tdrStyle->SetEndErrorSize(2);
-  // tdrStyle->SetErrorMarker(20);
-  tdrStyle->SetErrorX(0.);
-  
-  tdrStyle->SetMarkerStyle(20);
-
-//For the fit/function:
-  tdrStyle->SetOptFit(1);
-  tdrStyle->SetFitFormat("5.4g");
-  tdrStyle->SetFuncColor(2);
-  tdrStyle->SetFuncStyle(1);
-  tdrStyle->SetFuncWidth(1);
-
-//For the date:
-  tdrStyle->SetOptDate(0);
-  // tdrStyle->SetDateX(Float_t x = 0.01);
-  // tdrStyle->SetDateY(Float_t y = 0.01);
-
-// For the statistics box:
-  tdrStyle->SetOptFile(0);
-  tdrStyle->SetOptStat(0); // To display the mean and RMS:   SetOptStat("mr");
-  tdrStyle->SetStatColor(kWhite);
-  tdrStyle->SetStatFont(42);
-  tdrStyle->SetStatFontSize(0.025);
-  tdrStyle->SetStatTextColor(1);
-  tdrStyle->SetStatFormat("6.4g");
-  tdrStyle->SetStatBorderSize(1);
-  tdrStyle->SetStatH(0.1);
-  tdrStyle->SetStatW(0.15);
-  // tdrStyle->SetStatStyle(Style_t style = 1001);
-  // tdrStyle->SetStatX(Float_t x = 0);
-  // tdrStyle->SetStatY(Float_t y = 0);
-
-// Margins:
-  tdrStyle->SetPadTopMargin(0.05);
-  tdrStyle->SetPadBottomMargin(0.13);
-  tdrStyle->SetPadLeftMargin(0.16);
-  tdrStyle->SetPadRightMargin(0.02);
-
-// For the Global title:
-
-  tdrStyle->SetOptTitle(0);
-  tdrStyle->SetTitleFont(42);
-  tdrStyle->SetTitleColor(1);
-  tdrStyle->SetTitleTextColor(1);
-  tdrStyle->SetTitleFillColor(10);
-  tdrStyle->SetTitleFontSize(0.05);
-  // tdrStyle->SetTitleH(0); // Set the height of the title box
-  // tdrStyle->SetTitleW(0); // Set the width of the title box
-  // tdrStyle->SetTitleX(0); // Set the position of the title box
-  // tdrStyle->SetTitleY(0.985); // Set the position of the title box
-  // tdrStyle->SetTitleStyle(Style_t style = 1001);
-  // tdrStyle->SetTitleBorderSize(2);
-
-// For the axis titles:
-
-  tdrStyle->SetTitleColor(1, "XYZ");
-  tdrStyle->SetTitleFont(42, "XYZ");
-  tdrStyle->SetTitleSize(0.06, "XYZ");
-  // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
-  // tdrStyle->SetTitleYSize(Float_t size = 0.02);
-  tdrStyle->SetTitleXOffset(0.9);
-  tdrStyle->SetTitleYOffset(1.25);
-  // tdrStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
-
-// For the axis labels:
-
-  tdrStyle->SetLabelColor(1, "XYZ");
-  tdrStyle->SetLabelFont(42, "XYZ");
-  tdrStyle->SetLabelOffset(0.007, "XYZ");
-  tdrStyle->SetLabelSize(0.05, "XYZ");
-
-// For the axis:
-
-  tdrStyle->SetAxisColor(1, "XYZ");
-  tdrStyle->SetStripDecimals(kTRUE);
-  tdrStyle->SetTickLength(0.03, "XYZ");
-  tdrStyle->SetNdivisions(510, "XYZ");
-  tdrStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
-  tdrStyle->SetPadTickY(1);
-
-// Change for log plots:
-  tdrStyle->SetOptLogx(0);
-  tdrStyle->SetOptLogy(0);
-  tdrStyle->SetOptLogz(0);
-
-// Postscript options:
-  tdrStyle->SetPaperSize(20.,20.);
-  // tdrStyle->SetLineScalePS(Float_t scale = 3);
-  // tdrStyle->SetLineStyleString(Int_t i, const char* text);
-  // tdrStyle->SetHeaderPS(const char* header);
-  // tdrStyle->SetTitlePS(const char* pstitle);
-
-  // tdrStyle->SetBarOffset(Float_t baroff = 0.5);
-  // tdrStyle->SetBarWidth(Float_t barwidth = 0.5);
-  // tdrStyle->SetPaintTextFormat(const char* format = "g");
-  // tdrStyle->SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
-  // tdrStyle->SetTimeOffset(Double_t toffset);
-  // tdrStyle->SetHistMinimumZero(kTRUE);
-
-  tdrStyle->cd();
-
 }
 
 TString sysLabel(unsigned int sys)
@@ -299,10 +158,8 @@ void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersiz
   // "filled": = 0: line only, =1: area under plot filled
 
   hist.SetStats(kFALSE);
-  hist.SetLineWidth(1);
-  hist.SetLineStyle(1);
   if(sampleTyp==kData || !filled){
-    if(!filled)hist.SetLineWidth(3);
+    if(!filled)hist.SetLineWidth(3); 
     hist.SetLineColor(color_[sampleTyp]);
     hist.SetMarkerColor(color_[sampleTyp]);
     if(sampleTyp==kQCD){
@@ -318,16 +175,12 @@ void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersiz
     hist.SetFillStyle(0);
   }
   else{
-    hist.SetLineColor(kBlack);
     hist.SetFillColor(color_[sampleTyp]);
-    hist.SetFillStyle(1001);
   }
   if(color!=0){
     hist.SetLineColor(color);
     hist.SetFillColor(color);
   }
-  setTDRStyle();
-
 }
 
 void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY) 
@@ -342,21 +195,7 @@ void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, cons
 
   hist.SetTitle(titleHisto);
   if(titleX!="") hist.GetXaxis()->SetTitle(titleX);
-  hist.GetXaxis()->SetTitleSize ( 0.05 );
-  hist.GetXaxis()->SetLabelColor(  1   );
-  hist.GetXaxis()->SetLabelFont ( 62   );
-  hist.GetXaxis()->SetLabelSize ( 0.04 );
-  hist.GetXaxis()->SetNdivisions(  505 );
-  hist.GetXaxis()->CenterTitle  ( true );
   if(titleY!="") hist.GetYaxis()->SetTitle(titleY);
-  hist.GetYaxis()->SetTitleSize  ( 0.05 );
-  hist.GetYaxis()->SetTitleColor (    1 );
-  hist.GetYaxis()->SetTitleOffset(  1.1 );
-  hist.GetYaxis()->SetTitleFont  (   62 );
-  hist.GetYaxis()->SetLabelSize  ( 0.04 );
-  hist.GetYaxis()->SetLabelFont  (   62 );
-  hist.GetYaxis()->SetNdivisions (  505 );
-  hist.GetYaxis()->CenterTitle   ( true );
   hist.SetStats(kFALSE);
 }
 
@@ -396,15 +235,11 @@ void canvasStyle(TCanvas& canv)
   // used functions: NONE
   // used enumerators: NONE
 
-  canv.SetFillStyle   ( 4000 );
-  canv.SetLeftMargin  ( 0.20 );
-  canv.SetRightMargin ( 0.05 );
-  canv.SetBottomMargin( 0.15 );
-  canv.SetTopMargin   ( 0.05 );
-  setTDRStyle();
+  // function is not called anymore - just kept if indiviudal configurations might be required
+  
 }
 
-void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123, float titleSize=0.05, float yTitleOffset=1.2, float labelSize = 0.05)
+void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123)
 {
   // this function configures the axis style of a TH1 histogram "hist"
   // modified quantities: hist
@@ -414,31 +249,12 @@ void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-12
   // "titleY": title of the y-axis
   // "yMin": minimum of the y axis
   // "yMax": maximum of the y axis
-  // "yTitleSize": caption size of the y axis title
-  // "yTitleOffset": offste of the y axis title
-  // "xLabelSize": caption size of the y axis label
 
   hist.SetTitle("");
   hist.GetXaxis()->SetTitle(titleX);
-  //hist.GetXaxis()->CenterTitle();
-  hist.GetXaxis()->SetTitleSize  (titleSize);
-  hist.GetXaxis()->SetTitleColor (1);
-  hist.GetXaxis()->SetTitleOffset(1.1);
-  hist.GetXaxis()->SetTitleFont  (62);
-  hist.GetXaxis()->SetLabelSize  (labelSize);
-  hist.GetXaxis()->SetLabelFont  (62);
-  hist.GetXaxis()->SetNdivisions (505);
   hist.GetYaxis()->SetTitle(titleY);
-  hist.GetYaxis()->SetTitleSize  (titleSize);
-  hist.GetYaxis()->SetTitleColor (1);
-  hist.GetYaxis()->SetTitleOffset(yTitleOffset);
-  hist.GetYaxis()->SetTitleFont  (62);
-  hist.GetYaxis()->SetLabelSize  (labelSize);
-  hist.GetYaxis()->SetLabelFont  (62);
-  //hist.GetYaxis()->CenterTitle   ( true);
   if(yMin!=-123) hist.SetMinimum(yMin);
   if(yMax!=-123) hist.SetMaximum(yMax);
-  setTDRStyle();
 }
 
 template <class T>
@@ -579,7 +395,32 @@ TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
   return outputHisto;
 }
 
-void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, double textSize=0)
+void DrawCMSLabels(bool cmsprelim=true, double luminosity=1.1, double textSize=0.04)
+{
+  TPaveText *label = new TPaveText();
+
+  label -> SetX1NDC(gStyle->GetPadLeftMargin());
+  label -> SetY1NDC(1.0-gStyle->GetPadTopMargin());
+  label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
+  label -> SetY2NDC(1.0);
+
+  if (cmsprelim)
+  {
+    label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity));
+  }
+  else
+  {
+    label -> AddText(Form("%2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity));
+  }
+
+  label->SetFillStyle(0);
+  label->SetBorderSize(0);
+  if(textSize!=0) label->SetTextSize(textSize);
+  label->SetTextAlign(32);
+  label->Draw("same"); 
+}
+
+void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, double textSize=0.04)
 {
   // function to directly draw a label into the active canvas
   // the coordinates of the window are: "x1", "y1", "x2", "y2"
@@ -588,7 +429,8 @@ void DrawLabel(TString text, const double x1, const double y1, const double x2, 
   // used functions: NONE
   // used enumerators: NONE
 
-  TPaveLabel *label = new TPaveLabel(x1, y1, x2, y2, text, "br NDC");
+  TPaveText *label = new TPaveText(x1, y1, x2, y2, "br NDC");
+  label->AddText(text);
   label->SetFillStyle(0);
   label->SetBorderSize(0);
   if(textSize!=0) label->SetTextSize(textSize);
@@ -1630,7 +1472,7 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
   Double_t right = gPad->GetRightMargin();
   // y:x size ratio for canvas
   double canvAsym = 4./3.;
-  // ratio size of pat with plot and pat with ratio
+  // ratio size of pad with plot and pad with ratio
   double ratioSize = 0.36;
   // change old pad
   gPad->SetBottomMargin(ratioSize);
