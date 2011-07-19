@@ -167,7 +167,7 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 		  currentUncertainty->cd();
 		  currentShiftedCrossSectionPlot->Draw("");
 		  // draw label to indicate that sys error is adapted from 2010 mu+jets
-		  DrawLabel("!adopted from 2010 #mu+jets!", 0.2, 0.7, 0.7, 0.8, 0.4);
+		  DrawLabel("!adopted from 2010 #mu+jets!", 0.2, 0.7, 0.7, 0.8, 0.07);
 		  // 
 		  adoptedUncertaintyPlot_[xSecVariables_[i]][sys]=(TCanvas*)(currentUncertainty->Clone());
 		  delete currentUncertainty;
@@ -505,15 +505,15 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	      drawLine(cmsxSecValue-cmsStatError, 2.99, cmsxSecValue+cmsStatError, 2.99, kRed, 7, 1);
 	      finalInclusiveXSec->Draw("axis same");
 	      // label 
-	      DrawLabel("CMS 2010 combined"     , 0.06, 0.7 , 0.5 , 0.8 , 0.4);
-	      DrawLabel("(TOP-11-001)"          , 0.06, 0.65, 0.5 , 0.75, 0.4);
-	      DrawLabel("2010 data, 36 pb^{-1}" , 0.62, 0.7 , 0.95, 0.8 , 0.4);
+	      DrawLabel("CMS 2010 combined"     , 0.06, 0.7 , 0.5 , 0.8 , 0.04);
+	      DrawLabel("(TOP-11-001)"          , 0.06, 0.65, 0.5 , 0.75, 0.04);
+	      DrawLabel("2010 data, 36 pb^{-1}" , 0.62, 0.7 , 0.95, 0.8 , 0.04);
 	      TString channelLabel="unknown";
 	      if(decayChannel.Contains("mu")) channelLabel="#mu";
 	      if(decayChannel.Contains("el")) channelLabel="e";
 	      TString AN="TOP-11-013, "+channelLabel+" channel";
-	      DrawLabel(AN                      , 0.06, 0.3 , 0.5 , 0.4 , 0.4);
-	      DrawLabel(dataSample+" data, "+getTStringFromInt(roundToInt(luminosity))+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.4);
+	      DrawLabel(AN                      , 0.06, 0.3 , 0.5 , 0.4 , 0.04);
+	      DrawLabel(dataSample+" data, "+getTStringFromInt(roundToInt(luminosity))+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.04);
 
 	      canvas=(TCanvas*)canvas2->Clone();
 	    }

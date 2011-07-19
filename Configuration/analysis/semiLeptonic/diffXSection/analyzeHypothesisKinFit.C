@@ -1,8 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 191.0, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root"
-TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root", std::string decayChannel = "muon") // unset" )
-
+void analyzeHypothesisKinFit(double luminosity = 1090.0, bool save = false, int systematicVariation=sysNo, unsigned int verbose=1,
+			     //TString dataFile= "./diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+			     TString dataFile= "./diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_167913_1fb.root", 
+std::string decayChannel = "muon" )
 {
   //  ---
   //     name conventions
@@ -196,13 +197,19 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 			 "analyzeTopRecoKinematicsKinFit/ttbarDelPhi",
 			 "analyzeTopRecoKinematicsKinFit/ttbarDelY"  ,
 			 // generated ttbar quantities
-                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarMass"  ,
-                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarPt"    ,
-                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarY"     ,
+                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarMass",
+                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarPt"  ,
+                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarY"   ,
                          "analyzeTopPartonLevelKinematics/ttbarHT"    ,
                          "analyzeTopPartonLevelKinematics/ttbarSumY"  ,
 			 "analyzeTopPartonLevelKinematics/ttbarDelPhi",
-			 "analyzeTopPartonLevelKinematics/ttbarDelY"  
+			 "analyzeTopPartonLevelKinematics/ttbarDelY"  ,
+			 // reconstructed lepton quantities
+			 "analyzeTopRecoKinematicsKinFit/lepPt" ,
+			 "analyzeTopRecoKinematicsKinFit/lepEta",
+			 // generated lepton quantities
+			 "analyzeTopPartonLevelKinematics"+PS+"/lepPt" ,
+			 "analyzeTopPartonLevelKinematics"+PS+"/lepEta"
                        };
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
                          // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
@@ -357,10 +364,16 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
                              "p_{T}^{t#bar{t}} parton truth/events/0/1"                     ,//10"
                              "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
                              "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets)) parton truth/events/0/20",
-                             "y^{t}+y^{#bar{t}} parton truth/events/0/10"                    ,
-                             "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"  ,                
-                             "y(leptonic t)-y(hadronic t) parton truth/events/0/4" 
-                           };
+                             "y^{t}+y^{#bar{t}} parton truth/events/0/10"                   ,
+                             "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
+                             "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
+			     // reconstructed lepton quantities
+			     "p_{T}^{#mu}/events/0/10",
+			     "#eta^{#mu}/events/0/10" ,
+			     // generated lepton quantities
+			     "p_{T}^{#mu} parton truth/events/0/10",
+			     "#eta^{#mu} parton truth/events/0/10"
+                             };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
                             // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
@@ -451,10 +464,11 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   std::vector<TString> axisLabel_;
   axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
-  if(verbose>1){
-    std::cout << "(plot, x Axis label , y Axis label , log scale?, rebinning factor):" << std::endl;
-    // loop plots
-    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+  // loop plots
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    if(decayChannel=="muon"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "e");
+    if(verbose>1){
+      std::cout << "(plot, x Axis label , y Axis label , log scale?, rebinning factor):" << std::endl;
       std::cout << plotList_[plot] << ": " << getStringEntry(axisLabel_[plot],1);
       std::cout << " , " << getStringEntry(axisLabel_[plot], 2);
       if(plot<N1Dplots){
@@ -584,7 +598,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     }
   }
   // ---
-  //    differential cross section (whole phase space) determination
+  //    differential cross section (extrapolated or PS) determination
   // ---
   // count # of cross section histos
   unsigned int NXSec=0;
@@ -688,7 +702,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   // branching ratio
   // careful: the xSec here needs to be 
   // consistent with the one in lumiweight()
-  BR=NGen*1.0/(157.5*luminosity);
+  BR=NGen*1.0/(158*luminosity);
   //  double BR2=12.0/81.0;
   // calculate xSec
   xSecResult= ( Ndata-NBG ) / ( eff*A*luminosity*BR );
@@ -703,7 +717,9 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
     std::cout << "eff: "    << eff   << std::endl;
     std::cout << "A: "      << A     << std::endl;
     std::cout << "BR MC: "  << BR    << std::endl;
-    std::cout << "total inclusive cross section[pb]: ";
+    std::cout << "inclusive cross section";
+    if(extrapolate) std::cout << " (extrapolated)";
+    std::cout << " [pb]: ";
     std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
     std::cout << std::endl;
   }
@@ -724,7 +740,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
   histogramStyle(*histo_[inclName][kSig ], kSig , false);
   
   // ---
-  //    differential normalized cross section (whole phase space) determination
+  //    differential normalized cross section (phase space) determination
   // ---
   // loop all variables
   for(unsigned int number=0; number<xSecVariables_.size(); ++number){
@@ -762,7 +778,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
       double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable ][kSig],verbose-1);
       effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig],verbose-1);
       // loop bins
-      for(int bin =1; bin<=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1; ++bin){
+      for(int bin =0; bin<=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1; ++bin){
 	// for inclusive values of xSecResult, effA, BR, Ndata and NBG 
 	// which are used in the calculation are taken from section
 	// "total inclusive cross section (ttbar->X) determination" above
@@ -813,41 +829,59 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	    std::cout << "gives no valid cross section!" << std::endl;
 	    std::cout << "!will set this bin to 0!" << std::endl;
 	  }
-	  xSecBin=0;	  // redraw axis at the end
-
+	  xSecBin=0;	 
 	  xSecBinError=0;
 	}
-
+	// set underflow/overflow to 0
+	// because of infinite binwidth
+	if(bin==0||bin==histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1){
+	  xSecBinError=0;
+	  xSecBin=0;
+	}
 	// check calculation for one example bin
 	TString testVar = "ttbarPt";
+	TString testVar2 = "ttbarMass";
 	int testBin=0;
-	double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
-	if(verbose>0&&xSecBin!=0&&xSecBinFromDiffAndIncl!=0&&variable==testVar&&bin==testBin){
+	if(verbose>0&&xSecBin!=0&&(variable==testVar||variable==testVar2)&&bin==testBin){
 	  std::cout << std::endl << "differential normalized xSec ";
 	  std::cout << variable+" bin " << bin << ":" << std::endl;
 	  std::cout << "binwidth: " << std::setprecision(3) << std::fixed << binwidth << std::endl;
-	  std::cout << "Ndata: " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
-	  std::cout << "NBG: " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
-	  std::cout << "eff*A: " << std::setprecision(3) << std::fixed << effABin << std::endl;
-	  std::cout << "detailed calculation: ";
-	  std::cout << std::setprecision(3) << std::fixed << xSecBin << std::endl;
-	  std::cout << "from diff and incl. xSec: ";
-	  std::cout << std::setprecision(3) << std::fixed << xSecBinFromDiffAndIncl << std::endl;
-	  std::cout << "ratio: " << xSecBin/xSecBinFromDiffAndIncl << std::endl;
+	  std::cout << "Ndata(bin): " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
+	  std::cout << "NBG(bin): " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
+	  std::cout << "eff*A(bin): " << std::setprecision(3) << std::fixed << effABin << std::endl;
+	  std::cout << "Ndata(incl): " << std::setprecision(3) << std::fixed << NdataVariable << std::endl;
+	  std::cout << "NBG(incl): " << std::setprecision(3) << std::fixed << NBGVariable << std::endl;
+	  std::cout << "eff*A(incl): " << std::setprecision(3) << std::fixed << effIncl << std::endl;
+	  std::cout << "result: " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
+	  if(extrapolate){
+	    double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
+	    std::cout << "from diff and incl. xSec: ";
+	    std::cout << std::setprecision(3) << std::fixed << xSecBinFromDiffAndIncl << std::endl;
+	    std::cout << "ratio: " << xSecBin/xSecBinFromDiffAndIncl << std::endl;
+	  }
 	}
 	// apply cross section and error to plot
 	histo_[xSec][kData]->SetBinContent(bin, xSecBin     );
 	histo_[xSec][kData]->SetBinError  (bin, xSecBinError);
 	//saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
       }
-      if(verbose>1) std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
+    }
+   if(verbose>1){
+      std::cout << "integral diff.norm.data distribution (" << variable << "): ";
+      std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
     }
     // b) differential normalized XSec from Signal(MC prediction)
     histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
     DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
     double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig], verbose-1);
+    // exclude underflow and overflow bins because they are negligible and treated wrong
+    XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
+    XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
     histo_[xSec][kSig]->Scale(1/(XSecInclTheoPS));
-    if(verbose>1) std::cout << getInclusiveXSec(histo_[xSec][kSig],verbose-1) << std::endl;
+    if(verbose>1){
+      std::cout << "integral diff.norm.MC distribution (" << variable << "): ";
+      std::cout << getInclusiveXSec(histo_[xSec][kSig],verbose-1) << std::endl;
+    }
     // add plot to list of plots
     plotList_.push_back(xSec);
     // add axis configuration
@@ -1020,6 +1054,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	       getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
+	    if(getStringEntry(plotList_[plot], 2)=="lepPt" ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,200);
 	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
 	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 	    // draw efficiency plots as line
@@ -1050,7 +1085,7 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	    if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
 	    else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
 	    else DrawDecayChLabel("e/#mu + Jets Combined");
-	    DrawCMSLabel(true,lumi);
+	    DrawCMSLabels(true,luminosity/1000);
 	  }
 	}
       }

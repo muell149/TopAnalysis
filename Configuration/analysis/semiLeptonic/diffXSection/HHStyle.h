@@ -8,7 +8,7 @@
 //  Change log: 
 //  (1) Added standard configuration for text
 //  (2) Made fontstyle global variable
-//  (3) Unified fontsize for title and sxis
+//  (3) Unified fontsize for title and axis
 //
 // ========================================================
 
@@ -147,10 +147,10 @@ void setHHStyle()
 
   HHStyle->SetTitleColor(1, "XYZ");
   HHStyle->SetTitleFont(fontstyle, "XYZ");
-  HHStyle->SetTitleSize(0.05, "XYZ");
+  HHStyle->SetTitleSize(0.04, "XYZ");
   // HHStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
   // HHStyle->SetTitleYSize(Float_t size = 0.02);
-  HHStyle->SetTitleXOffset(0.9);
+  HHStyle->SetTitleXOffset(1.2);
   HHStyle->SetTitleYOffset(1.25);
   // HHStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
 
@@ -161,7 +161,7 @@ void setHHStyle()
   HHStyle->SetLabelColor(1, "XYZ");
   HHStyle->SetLabelFont(fontstyle, "XYZ");
   HHStyle->SetLabelOffset(0.007, "XYZ");
-  HHStyle->SetLabelSize(0.05, "XYZ");
+  HHStyle->SetLabelSize(0.04, "XYZ");
 
   // ==============
   //  Axis

@@ -52,19 +52,6 @@ enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:
 bool newSpring11MC=true;
 bool newSummer11MC=true;
 
-// tdrGrid: Turns the grid lines on (true) or off (false)
-
-// void tdrGrid(bool gridOn) {
-//   tdrStyle->SetPadGridX(gridOn);
-//   tdrStyle->SetPadGridY(gridOn);
-// }
-
-// fixOverlay: Redraws the axis
-
-void fixOverlay() {
-  gPad->RedrawAxis();
-}
-
 TString sysLabel(unsigned int sys)
 {
   // this function returns a TString that corresponds 
@@ -232,7 +219,6 @@ void canvasStyle()
 {
   // function is not called anymore - just kept if indiviudal configurations might be required
   // could be considered to be deleted
-  
 }
 
 void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123)
@@ -438,7 +424,7 @@ void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0
   label->Draw("same"); 
 }
 
-void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, double textSize=0.04)
+void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering=12, double textSize=0.04)
 {
   // function to directly draw a label into the active canvas
   // the coordinates of the window are: "x1", "y1", "x2", "y2"
@@ -452,7 +438,7 @@ void DrawLabel(TString text, const double x1, const double y1, const double x2, 
   label->SetFillStyle(0);
   label->SetBorderSize(0);
   if(textSize!=0) label->SetTextSize(textSize);
-  label->SetTextAlign(12);
+  label->SetTextAlign(centering);
   label->Draw("same");
 }
 
@@ -557,7 +543,9 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     // D6T Spring11
     if(newSpring11MC) Nevents=2543706;
     // Z2 Summer11	     
-    if(newSummer11MC) Nevents=35101516;
+    if(newSummer11MC){
+      Nevents=35101516;
+    }
     // Fall10 systematic samples:
     if(!newSummer11MC&&!newSpring11MC){
       if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
@@ -600,21 +588,21 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     // lumi normalization is done here
     if(newSummer11MC) Nevents=1;
   }
-  else if(sample==kSTops&&!newSummer11MC&&!newSpring11MC){
+  else if(sample==kSTops&&!newSummer11MC){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =494967.;
     if(newSpring11MC) Nevents =494967; 
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494967;
   }
-  else if(sample==kSTopt&&!newSummer11MC&&!newSpring11MC){
+  else if(sample==kSTopt&&!newSummer11MC){
     crossSection=64.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =484060.;
     if(newSpring11MC) Nevents =484060;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=484060;
   }
-  else if(sample==kSToptW&&!newSummer11MC&&!newSpring11MC){
+  else if(sample==kSToptW&&!newSummer11MC){
     crossSection=10.6;
     Nevents     =494961.;
     if(newSpring11MC) Nevents =489417;
@@ -1557,13 +1545,14 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
   TF1 *f = new TF1("f", height, xmin, xmax);
   f->SetLineStyle(1);
   f->SetLineWidth(1);
-  //  f->SetLineColor(lcolor);
+  f->SetLineColor(kBlack);
   f->Draw("L same");
   // b) at upper end of ratio pad
   TString height2 = ""; height2 += ratioMax;
   TF1 *f2 = new TF1("f2", height2, xmin, xmax);
   f2->SetLineStyle(1);
   f2->SetLineWidth(1);
+  f2->SetLineColor(kBlack);
   f2->Draw("L same");
 }
 

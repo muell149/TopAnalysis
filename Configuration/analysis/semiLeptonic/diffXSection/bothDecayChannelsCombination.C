@@ -98,6 +98,7 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
 	  combicanvas->cd(0);
 	  plotTheo->Draw("hist");
 	  plotCombination->Draw("e same");
+	  DrawCMSLabels();
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  // save combined e+mu plot for systematic error calculation afterwards
 	  canvas_[xSecVariables_[i]][sys]=(TCanvas*)(combicanvas->Clone());
