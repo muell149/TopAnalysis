@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, unsigned int verbose=2, TString dataFile= "diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root", const std::string decayChannel = "electron")
+void analyzeTopDiffXSecMonitoring(void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, unsigned int verbose=2, TString dataFile= "diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root", const std::string decayChannel = "electron")
 {
   //  ---
   //     name conventions
@@ -27,7 +27,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, 
   // 0: no output, 1: std output 2: output for debugging
   // b) options to be configured only once
   // get the .root files from the following folder:
-  TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
+  TString inputFolder = "./diffXSecFromSignal/summer11Samples"; //analysisRootFilesWithKinFit";
   // see if its 2010 or 2011 data from luminosity
   TString dataSample="";
   if(luminosity<36) dataSample="2010";
@@ -488,7 +488,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, 
     char canvname[10];
     sprintf(canvname,"canv%i",sample);    
     plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
-    canvasStyle(*plotCanvas_[sample]);
+    //canvasStyle(*plotCanvas_[sample]);
   }
 
   // ---
@@ -570,7 +570,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, 
 	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);
 
 	    // axis style
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max, 0.05, 1.5, 0.05);
+	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
 	    // draw histos (as stack)
 	    histo_[plotList_[plot]][sample]->Draw("hist");
 	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
@@ -589,13 +589,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 204.0, bool save = false, 
 	    histo_[plotList_[plot]][42]->Draw("axis same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection
-	      TString label = "pretagged";
-	      if(plotList_[plot].Contains("Tagged")) label = "tagged";
-	      if(plotList_[plot].Contains("PreSel")) label = "preselected";
-	      DrawLabel(label, 0.73, 0.9, 0.95, 0.95);
+	      TString label = "Pre-Tagged";
+	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
+	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
+	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.15, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
+  			       1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),        1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength()       );
+	       // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
+	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
+	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
+	      else DrawDecayChLabel("e/#mu + Jets Combined"); 
+	      DrawCMSLabels(true,luminosity); // set first parameter to false once "CMS Preliminary" is not required anymore
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0)){
-		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, verbose);
+		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, verbose);	       
 	      }
 	    }
 	  }

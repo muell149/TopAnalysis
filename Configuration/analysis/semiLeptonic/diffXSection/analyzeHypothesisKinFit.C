@@ -1047,12 +1047,10 @@ TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec
 	  // draw CMS label for xSecs
 	  TString plotType=getStringEntry(plotList_[plot], 1);
 	  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	    TString channelLabel="";
-	    if(decayChannel=="muon"    ) channelLabel="#mu+jets";
-	    if(decayChannel=="electron") channelLabel="e+jets";
-	    DrawLabel("CMS preliminary"                   , 0.25, 0.83, 0.99, 1.03, 0.2);
-	    DrawLabel(lumi+" pb^{-1} at  #sqrt{s} = 7 TeV", 0.25, 0.79, 0.99, 0.99, 0.2);
-	    DrawLabel( channelLabel                       , 0.25, 0.75, 0.99, 0.95, 0.2);
+	    if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
+	    else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+	    else DrawDecayChLabel("e/#mu + Jets Combined");
+	    DrawCMSLabel(true,lumi);
 	  }
 	}
       }
