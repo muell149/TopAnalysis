@@ -185,7 +185,7 @@ void setHHStyle()
   
   HHStyle->SetTextAlign(11);
   HHStyle->SetTextAngle(0);
-  HHStyle->SetTextAttributes();
+  // HHStyle->SetTextAttributes();
   HHStyle->SetTextColor(1);
   HHStyle->SetTextFont(fontstyle);
   HHStyle->SetTextSize(0.05);
@@ -195,7 +195,7 @@ void setHHStyle()
   // ==============
 
   HHStyle->SetEndErrorSize(8);
-  HHStyle->SetErrorX(0); 
+  //HHStyle->SetErrorX(0); 
 
   // =====================
   //  Postscript options:
