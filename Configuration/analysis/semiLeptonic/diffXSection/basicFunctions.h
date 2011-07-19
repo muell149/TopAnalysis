@@ -391,8 +391,30 @@ TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
   return outputHisto;
 }
 
-void DrawCMSLabels(bool cmsprelim=true, double luminosity=1.1, double textSize=0.04)
+void DrawDecayChLabel(TString decaychannel="", double textSize=0.04)
 {
+  // Draw label for Decay Channel in upper left corner of plot
+
+  TPaveText *decch = new TPaveText();
+
+  decch -> AddText(decaychannel);
+
+  decch -> SetX1NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength()        );
+  decch -> SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 );
+  decch -> SetX2NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.15 );
+  decch -> SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength()        );
+
+  decch -> SetFillStyle(0);
+  decch -> SetBorderSize(0);
+  if(textSize!=0) decch->SetTextSize(textSize);
+  decch -> SetTextAlign(12);
+  decch -> Draw("same"); 
+}
+
+void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04)
+{
+  // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
+  
   TPaveText *label = new TPaveText();
 
   label -> SetX1NDC(gStyle->GetPadLeftMargin());
