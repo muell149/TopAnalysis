@@ -37,6 +37,10 @@
 
 #include "HHStyle.h"
 
+#ifdef DILEPTON_MACRO
+namespace semileptonic {
+#endif
+
                  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
 enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
 int color_ [] = {kRed+1, kRed-7, kAzure-2, kGreen-3, kYellow, kMagenta, 10    , kBlack, 10 , 10 , 10 , kMagenta, kMagenta, kMagenta};
@@ -410,7 +414,7 @@ void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0
 
   if (cmsprelim)
   {
-    label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity));
+    label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
   }
   else
   {
@@ -1602,5 +1606,9 @@ void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=0)
     }
   }
 }
+
+#ifdef DILEPTON_MACRO
+}
+#endif
 
 #endif
