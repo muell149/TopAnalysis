@@ -41,10 +41,10 @@
 enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
 int color_ [] = {kRed+1, kRed-7, kAzure-2, kGreen-3, kYellow, kMagenta, 10    , kBlack, 10 , 10 , 10 , kMagenta, kMagenta, kMagenta};
 int marker_[] = {20    , 22    , 29      , 23      , 21     , 27      , 28    , 20    , 28 , 28 , 28 , 27      , 27      , 27      };
-enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:*/sysLumiDown       , /* 3:*/sysJESUp     , 
-			  /* 4:*/sysJESDown     , /* 5:*/sysJERUp        , /* 6:*/sysJERDown        , /* 7:*/sysTopScaleUp, 
-			  /* 8:*/sysTopScaleDown, /* 9:*/sysVBosonScaleUp, /*10:*/sysVBosonScaleDown, /*11:*/sysTopMatchUp, 
-			  /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup , 
+enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:*/sysLumiDown       , /* 3:*/sysJESUp     ,
+			  /* 4:*/sysJESDown     , /* 5:*/sysJERUp        , /* 6:*/sysJERDown        , /* 7:*/sysTopScaleUp,
+			  /* 8:*/sysTopScaleDown, /* 9:*/sysVBosonScaleUp, /*10:*/sysVBosonScaleDown, /*11:*/sysTopMatchUp,
+			  /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup ,
 			  /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
 			  /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
 			  /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysDiBosUp        , /*27:*/sysDiBosDown};
@@ -54,7 +54,7 @@ bool newSummer11MC=true;
 
 TString sysLabel(unsigned int sys)
 {
-  // this function returns a TString that corresponds 
+  // this function returns a TString that corresponds
   // to the systematic variation "sys" of the enumerator "systematicVariation"
   // modified quantities: none
   // used functions: none
@@ -101,7 +101,7 @@ TString sysLabel(unsigned int sys)
 
 double effSFAB(int sys=sysNo, std::string decayChannel="unset")
 {
-  // this function returns the muon eff SF 
+  // this function returns the muon eff SF
   // as derived from Z->mumu tag and probe method
   // modified quantities: NONE
   // used functions: NONE
@@ -115,7 +115,7 @@ double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   if (decayChannel.compare("muon")==0) {
     result = 0.964155;
     if(newSpring11MC||newSummer11MC) result = 0.9581;// TO BE DERIVED
-  } 
+  }
   else if (decayChannel.compare("electron")==0) {
     result = 1.0;                   // TO BE DERIVED
     if(newSpring11MC) result = 1.0; // TO BE DERIVED
@@ -133,7 +133,7 @@ double effSFAB(int sys=sysNo, std::string decayChannel="unset")
 // BR correction for ttbar->lnuqq'bb'
 double BRcorrectionSemileptonic = 0.985608;
 
-void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.8, unsigned int color=0) 
+void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.8, unsigned int color=0)
 {
   // this function configures the style of a TH1 histogram "hist"
   // using "sampleTyp" to identify the corresponding sample from
@@ -146,7 +146,7 @@ void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersiz
 
   hist.SetStats(kFALSE);
   if(sampleTyp==kData || !filled){
-    if(!filled)hist.SetLineWidth(3); 
+    if(!filled)hist.SetLineWidth(3);
     hist.SetLineColor(color_[sampleTyp]);
     hist.SetMarkerColor(color_[sampleTyp]);
     if(sampleTyp==kQCD){
@@ -170,7 +170,7 @@ void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersiz
   }
 }
 
-void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY) 
+void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY)
 {
   // this function configures the style of a TH2 histogram "hist"
   // modified quantities: hist
@@ -188,7 +188,7 @@ void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, cons
 
 double readLineFromFile(int line, TString file="crossSectionCalculation.txt")
 {
-  // this function to reads and returns a double value 
+  // this function to reads and returns a double value
   // from a specific line "line" of the .txt-like file "file"
   // modified quantities: NONE
   // used functions: NONE
@@ -207,14 +207,14 @@ double readLineFromFile(int line, TString file="crossSectionCalculation.txt")
     // save line content in readIn
     getline(finDouble, readIn);
     // convert your chosen line into double and return it
-    if(l==line) return atof(readIn.c_str()); 
+    if(l==line) return atof(readIn.c_str());
   }
   // if line is not found
   std::cout << "can not find line" << line << std::endl;
-  return -1.;  
+  return -1.;
 }
 
-//void canvasStyle(TCanvas& canv) re-definition of header to avoid warnings when compiling, must be changed once function body is not empty anymore 
+//void canvasStyle(TCanvas& canv) re-definition of header to avoid warnings when compiling, must be changed once function body is not empty anymore
 void canvasStyle()
 {
   // function is not called anymore - just kept if indiviudal configurations might be required
@@ -248,7 +248,7 @@ void writeToFile(T output, TString file, bool append)
   // modified quantities: file
   // used functions: NONE
   // used enumerators: NONE
-  // "append": if false, "file" will be recreated and 
+  // "append": if false, "file" will be recreated and
   // the existing "file" will be deleted
 
   // a) write into file
@@ -257,7 +257,7 @@ void writeToFile(T output, TString file, bool append)
     fout << output << std::endl;
     fout.close();
   }
-  // b) add output to the end of the file  
+  // b) add output to the end of the file
   if(append){
     std::ofstream fapp(file, ios::app);
     fapp << output << std::endl;;
@@ -267,7 +267,7 @@ void writeToFile(T output, TString file, bool append)
 
 void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=3.0, const unsigned int lineStyle=1)
 {
-  // this function draws a line withe the chosen coordinates, 
+  // this function draws a line withe the chosen coordinates,
   // color and width into the active canvas
   // modified quantities: NONE
   // used functions: NONE
@@ -281,7 +281,7 @@ void drawLine(const double xmin, const double ymin, const double xmax, const dou
 
 int roundToInt(double value, bool roundDown=false)
 {
-  // function to round an double "value" 
+  // function to round an double "value"
   // to an int and return this one
   // modified quantities: NONE
   // used functions: NONE
@@ -307,7 +307,7 @@ int roundToInt(double value, bool roundDown=false)
 
 TString getTStringFromInt(int i)
 {
-  // function to convert an int "i" to 
+  // function to convert an int "i" to
   // a TString and return this one
   // modified quantities: NONE
   // used functions: NONE
@@ -350,7 +350,7 @@ TString sampleLabel(unsigned int sample, const std::string decayChannel, bool Tw
 
 TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
 {
-  // function divides the #entries in every bin of the input plot "histo" 
+  // function divides the #entries in every bin of the input plot "histo"
   // by its binwidth and returns the result
   // the errors are recalculated if "calculateError"=1 is choosen
   // careful: not done for underflow/overflow
@@ -364,7 +364,7 @@ TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
   for(int i=1; i<= histo->GetNbinsX(); i++){
     double binwidth=(double)(histo->GetBinWidth(i));
     // take care of bins width width 0
-    // (these could not be filled and 
+    // (these could not be filled and
     // exist because of technical reasons only)
     if(binwidth==0)binwidth=1;
     // recalculate error
@@ -394,13 +394,13 @@ void DrawDecayChLabel(TString decaychannel="", double textSize=0.04)
   decch -> SetBorderSize(0);
   if(textSize!=0) decch->SetTextSize(textSize);
   decch -> SetTextAlign(12);
-  decch -> Draw("same"); 
+  decch -> Draw("same");
 }
 
 void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04)
 {
   // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
-  
+
   TPaveText *label = new TPaveText();
 
   label -> SetX1NDC(gStyle->GetPadLeftMargin());
@@ -421,7 +421,7 @@ void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0
   label->SetBorderSize(0);
   if(textSize!=0) label->SetTextSize(textSize);
   label->SetTextAlign(32);
-  label->Draw("same"); 
+  label->Draw("same");
 }
 
 void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering=12, double textSize=0.04)
@@ -444,8 +444,8 @@ void DrawLabel(TString text, const double x1, const double y1, const double x2, 
 
 void scaleByFactor(TH1F*& histo, const double scaleValue)
 {
-  // function to scale the TH1F plot "histo" and its errors 
-  // by an entered "scaleValue" correctly for each bin 
+  // function to scale the TH1F plot "histo" and its errors
+  // by an entered "scaleValue" correctly for each bin
   // N'=N/L, sN'=sN/L
   // modified quantities: histo
   // used functions: NONE
@@ -464,8 +464,8 @@ void scaleByFactor(TH1F*& histo, const double scaleValue)
 
 double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, const std::string decayChannel)
 {
-  // this function derives the lumiweight for every standard MC 
-  // sample "sample" based on the theoretical cross section, the 
+  // this function derives the lumiweight for every standard MC
+  // sample "sample" based on the theoretical cross section, the
   // number of generated events and the chosen "luminosity"
   // Furthermore, the BR correction is considered for ttbar signal
   // NOTE: enter luminosity IN / pb!!!!
@@ -504,7 +504,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     Nevents     =1306182.;
     // D6T Spring11
     if(newSpring11MC) Nevents=1286491;
-    // Z2 Summer11	     
+    // Z2 Summer11
     if(newSummer11MC) Nevents=3701947;
     // Fall10 systematic samples:
     if(!newSummer11MC&&!newSpring11MC){
@@ -517,14 +517,14 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
       if(kSys==sysPileUp      ) Nevents=1281237;
     }
   }
-  // W->lnu+jets MADGRAPH 
+  // W->lnu+jets MADGRAPH
   else if(sample==kWjets){
     crossSection=31314.;
     // D6T Fall10
     Nevents     =14805546.;
     // D6T Spring11
     if(newSpring11MC) Nevents=14722996;
-    // Z2 Summer11	     
+    // Z2 Summer11
     if(newSummer11MC) Nevents=56789563;
     // Fall10 systematic samples:
     if(!newSummer11MC&&!newSpring11MC){
@@ -542,7 +542,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     Nevents     =2543727.;
     // D6T Spring11
     if(newSpring11MC) Nevents=2543706;
-    // Z2 Summer11	     
+    // Z2 Summer11
     if(newSummer11MC){
       Nevents=35101516;
     }
@@ -565,7 +565,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     // Z2 Summer11
     if(newSummer11MC){
     crossSection=296600000.*0.0002855; // generator crossSection * prefilter efficiency
-    Nevents     =20416038.;      
+    Nevents     =20416038.;
     }
   }
   // QCD e+jets channel combined
@@ -574,24 +574,24 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     crossSection=1; // generator crossSection * prefilter efficiency
     Nevents     =0.;
     // Z2 Summer11: already added in combineMCsamples.C
-    // with cross section as weight, 
+    // with cross section as weight,
     // lumi normalization is done here
     if(newSummer11MC) Nevents     =1.;
   }
   // Fall10/Spring11 singleTop MADGRAPH Z2 samples
-  // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10 
+  // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10
   else if(sample==kSTop){
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as kSTop is already weighted
     // Summer11 Z2: already added in combineMCsamples.C
-    // with cross section as weight, 
+    // with cross section as weight,
     // lumi normalization is done here
     if(newSummer11MC) Nevents=1;
   }
   else if(sample==kSTops&&!newSummer11MC){
     crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
     Nevents     =494967.;
-    if(newSpring11MC) Nevents =494967; 
+    if(newSpring11MC) Nevents =494967;
     // systematic samples:
     if(kSys==sysPileUp)Nevents=494967;
   }
@@ -616,9 +616,9 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as kDiBos is already weighted
     // Summer11 Z2: already added in combineMCsamples.C
-    // with cross section as weight, 
+    // with cross section as weight,
     // lumi normalization is done here
-    if(newSummer11MC) Nevents=1; 
+    if(newSummer11MC) Nevents=1;
   }
   else if(sample==kWW){
     crossSection=43.0;
@@ -647,7 +647,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
     // systematic samples:
     if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2113368;
   }
-  // Data 
+  // Data
   else if(sample==kData){
     crossSection=1.;         // this leads to a weight
     Nevents     =luminosity; // of 1.0 as data needs no weight
@@ -672,7 +672,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
   // e2) systematic higher/lower BG
   double scale=0;
   // (i) more/less DiBoson
-  if(sample==kWW||sample==kWZ||sample==kZZ||sample==kDiBos){ 
+  if(sample==kWW||sample==kWZ||sample==kZZ||sample==kDiBos){
     scale=0.3;
     if(kSys==sysDiBosUp  ) weight*=(1.0+scale);
     if(kSys==sysDiBosDown) weight*=(1.0-scale);
@@ -687,27 +687,27 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
   if(sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
     scale=0.3;
     if(kSys==sysSTopUp  ) weight*=(1.0+scale);
-    if(kSys==sysSTopDown) weight*=(1.0-scale); 
+    if(kSys==sysSTopDown) weight*=(1.0-scale);
   }
-  if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl; 
+  if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
   // printout for systematic variation
   if(verbose>0){
     std::cout << "weight";
     if(verbose>1){
       if(weight!=weight2) std::cout << "(scaled)";
-      if(weight==weight2) std::cout << "(not scaled)"; 
+      if(weight==weight2) std::cout << "(not scaled)";
     }
     std::cout << ": " << weight << std::endl;
     if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
     if(weight!=weight2&&sample==kSig) std::cout << "(BR correction applied)" << std::endl;
-  } 
+  }
   // return result
   return weight;
 }
 
 TString getStringEntry(const TString inputTString, unsigned int entry=42, const TString seperateBy="/")
-{ 
-  // this function devides "inputTString" using "seperateBy" 
+{
+  // this function devides "inputTString" using "seperateBy"
   // as seperator and returns the "entry"-th element
   // 42: default, means last element after seperator
   // modified quantities: NONE
@@ -757,18 +757,18 @@ TString getStringEntry(const TString inputTString, unsigned int entry=42, const 
 
 TString TopFilename(unsigned int sample, unsigned int sys, const std::string decayChannel)
 {
-  // this function contains the basic convention for the MC 
-  // .root files and returns the correct names for choosen sample "sample" 
+  // this function contains the basic convention for the MC
+  // .root files and returns the correct names for choosen sample "sample"
   // and systematic variation "sys"
   // modified quantities: NONE
   // used functions: NONE
-  // used enumerators: samples, systematicVariation 
+  // used enumerators: samples, systematicVariation
 
   TString fileName = "decayChannel_undefined" ;
   if (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
   else fileName ="muonDiffXSec";
   // name of data file is given directly in the .C file
-  if(sample==kData) return ""; 
+  if(sample==kData) return "";
   // standard MC filenames
   if(sample==kSig   )fileName += "SigMadD6T";
   if(sample==kBkg   )fileName += "BkgMadD6T";
@@ -822,8 +822,8 @@ TString TopFilename(unsigned int sample, unsigned int sys, const std::string dec
 
 void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true )
 {
-  // introduce function that saves every single canvas in 
-  // MyCanvas as ./outputFolder/CanvasTitle.eps and in addition 
+  // introduce function that saves every single canvas in
+  // MyCanvas as ./outputFolder/CanvasTitle.eps and in addition
   // all in one rootFile: ./outputFolder/pdfName.pdf
   // modified quantities: NONE
   // used functions: NONE
@@ -833,14 +833,14 @@ void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder
   if(savePdf){
     MyCanvas[0]->Print(outputFolder+pdfName+".pdf(", "pdf");
     for(unsigned int idx=1; idx<MyCanvas.size()-1; idx++){
-      MyCanvas[idx]->Print(outputFolder+pdfName+".pdf", "pdf");   
+      MyCanvas[idx]->Print(outputFolder+pdfName+".pdf", "pdf");
     }
     MyCanvas[MyCanvas.size()-1]->Print(outputFolder+pdfName+".pdf)", "pdf");
   }
   // b) save every plot as pdf with title as name
   if(saveEps){
     for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
-      MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".eps");      
+      MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".eps");
     }
   }
 }
@@ -849,8 +849,8 @@ std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder
 {
   // this function returns a map containing all existing .root in "inputFolder"
   // corresponding to the choosen systematic variation "systematicVariation"
-  // and the data file "dataFile" for which the direct path/name.root is needed 
-  // The MC .root file names correspond to the standard names as defined in the 
+  // and the data file "dataFile" for which the direct path/name.root is needed
+  // The MC .root file names correspond to the standard names as defined in the
   // function TopFilename
   // modified quantities: NONE
   // used functions: TopFilename
@@ -862,9 +862,9 @@ std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder
   for(int sample = kSig; sample<=kSToptW; sample++){
     TString fileName;
     if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
-    if(sample==kData) fileName = dataFile; 
+    if(sample==kData) fileName = dataFile;
     // if file exists - save in map
-    if((fileName!="no")&&(fileName!="")){ 
+    if((fileName!="no")&&(fileName!="")){
       TFile* file = new (TFile)(fileName);
       if(!(file->IsZombie())) files_[sample]= file;
     }
@@ -885,13 +885,13 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
 
   // loop plots
-  for(unsigned int plot=0; plot<plotList_.size(); ++plot){  
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     // check if plot exists in any sample
     bool existsInAnySample=false;
     // loop samples
     for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
       // check existence of sample
-      if(files_.count(sample)!=0){ 
+      if(files_.count(sample)!=0){
 	// create plot container
 	TH1* targetPlot;
 	files_[sample]->GetObject(plotList_[plot], targetPlot);
@@ -914,7 +914,7 @@ void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TStri
 	if(files_.count(sample)>0){
 	  // create plot container
 	  TH1* targetPlot;
-	  if(verbose>0){ 
+	  if(verbose>0){
 	    std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
 	    std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
 	  }
@@ -951,7 +951,7 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
   // this function scales every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // modified quantities: "histo_", "histo2_"
-  // used functions: sampleLabel, effSFAB 
+  // used functions: sampleLabel, effSFAB
   // used enumerators: samples
   // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
@@ -960,7 +960,7 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
 
   // loop samples
   for(unsigned int sample=kSig; sample<=kSToptW; ++sample) {
-    // loop plots 
+    // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
       // a) 1D
       // check if 1D plot exists
@@ -994,24 +994,24 @@ void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString,
 
 void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const int verbose=1, bool reCreate=false, const std::string decayChannel = "unset")
 {
-  // this function creates plots for all diboson and all single 
-  // top samples combined if the combined SingleTop and DiBoson 
-  // samples do not exist as .root file. 
-  // Every plot in "plotList_" existing in each of the three 
-  // sTop/ diBoson files will be combined and saved in the histo_ 
+  // this function creates plots for all diboson and all single
+  // top samples combined if the combined SingleTop and DiBoson
+  // samples do not exist as .root file.
+  // Every plot in "plotList_" existing in each of the three
+  // sTop/ diBoson files will be combined and saved in the histo_
   // and histo2_ maps
-  // NOTE: all plots from the samples are considered to be weighted 
-  // to the same luminosity before 
+  // NOTE: all plots from the samples are considered to be weighted
+  // to the same luminosity before
   // modified quantities: "histo_", "histo2_"
   // used functions: sampleLabel
   // used enumerators: samples
   // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
-  // "reCreate": choose if you want to create the combined plot from the 
+  // "reCreate": choose if you want to create the combined plot from the
   // single plots if it alredy exists. Careful: the old one will be deleted
 
   if(verbose>0) std::cout << std::endl;
-  // loop plots 
+  // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     // loop STop and DiBoson
     for(unsigned int sample=kSTop; sample<=kDiBos; ++sample){
@@ -1045,7 +1045,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
 	  }
 	  if(subPlotExists){
 	    // add histo
-	    // a) 1D 
+	    // a) 1D
 	    if(plot<N1Dplots){
 	      if(first ) histo_[plotList_[plot]][sample]   =  (TH1F*)histo_[plotList_[plot]][subSample]->Clone();
 	      if(!first) histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][subSample]->Clone());
@@ -1057,7 +1057,7 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
 	    }
 	    // indicate that already one plot is found
 	    first=0;
-	    // print out information 
+	    // print out information
 	    if(verbose>0){
 	      std::cout << "will add " << plotList_[plot];
 	      std::cout << " from " << sampleLabel(subSample,decayChannel) << std::endl;
@@ -1068,11 +1068,11 @@ void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TSt
     }
   }
 }
-		       
+
 void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const int verbose=1, const std::string decayChannel="muon")
 {
-  // this function will transform the histogram "plotList_"["plot"] 
-  // within "histo_" into stacked plots. 
+  // this function will transform the histogram "plotList_"["plot"]
+  // within "histo_" into stacked plots.
   // modified quantities: "histo_"
   // used functions: sampleLabel
   // used enumerators: samples
@@ -1095,14 +1095,14 @@ void createStackPlot(const std::vector<TString> plotList_, std::map< TString, st
 
 float modulo(const float a, const float b)
 {
-  // this function calculates a modulo b 
+  // this function calculates a modulo b
   // where a and b are float
   // modified quantities: none
   // used functions: none
   // used enumerators: none
   // "a": dividend
   // "b": divisor
-  
+
   // round a and b to the 3rd decimal place
   // this should prevent errors due to rounding effects
   float astar=ceil(a*1000.-0.5)/1000.;
@@ -1206,7 +1206,7 @@ void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, c
 
 bool plotExists(std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
 {
-  // this function checks the existence of an specific 
+  // this function checks the existence of an specific
   // entry "histo_[plotName][sample]" in the map "histo_"
   // that contains all 1D plots
   // modified quantities: none
@@ -1222,8 +1222,8 @@ bool plotExists(std::map< TString, std::map <unsigned int, TH1F*> > histo_, cons
 
 void equalReBinTH1(const int reBinFactor, std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
 {
-  // this uses an equal rebinning (factor "reBinFactor") 
-  // for an specific entry "histo_[plotName][sample]" 
+  // this uses an equal rebinning (factor "reBinFactor")
+  // for an specific entry "histo_[plotName][sample]"
   // in the map "histo_" that contains all 1D plots
   // modified quantities: histo_[plotName][sample]
   // used functions: plotExists
@@ -1238,11 +1238,11 @@ void equalReBinTH1(const int reBinFactor, std::map< TString, std::map <unsigned 
 
 std::map<TString, std::vector<double> > makeVariableBinning()
 {
-  // this function creates a map with the hard coded 
+  // this function creates a map with the hard coded
   // bin values for variable binning
-  // NOTE: it is important to quote the overflow bin 
+  // NOTE: it is important to quote the overflow bin
   // of the initial binning as last bin here!!!
-  // otherwise dividing per binwidth function 
+  // otherwise dividing per binwidth function
   // might later give nan and histo wouldn't be drawn
   // modified quantities: none
   // used functions: none
@@ -1251,7 +1251,7 @@ std::map<TString, std::vector<double> > makeVariableBinning()
   std::map<TString, std::vector<double> > result;
   std::vector<double> bins_;
 
-  
+
   // pt(top)
   double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
   bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
@@ -1282,14 +1282,14 @@ std::map<TString, std::vector<double> > makeVariableBinning()
   result["ttbarMass"]=bins_;
   //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
   bins_.clear();
-  
+
   return result;
 
 }
 
 template <class T>
 unsigned int positionInVector(std::vector<T> vec_, T object)
-{  
+{
   // this function returns the position
   // of element object in vector vec_
   // modified quantities: none
@@ -1332,7 +1332,7 @@ void DivideYieldByEfficiencyAndLumi(TH1F* yield, TH1F* efficiency, double lumino
     double events   = binwidth*content;
     // value (events/binwidth/eff/lumi)
     double xSec = content/(eff*luminosity);
-    // error 
+    // error
     double effError=efficiency->GetBinError(bin);
     if(!includeEffError) effError=0;
     double xSecError = 1/(binwidth*luminosity)*sqrt( ((events)/(eff*eff)) + ((events*effError)/(eff*eff))* ((events*effError)/(eff*eff)) );
@@ -1443,7 +1443,7 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
   // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
   // modified quantities: none
   // used functions: none
-  // used enumerators: none 
+  // used enumerators: none
 
   // check that histos have the same binning
   if(histNumerator->GetNbinsX()!=histDenominator->GetNbinsX()){
@@ -1454,7 +1454,7 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
     std::cout << "building ratio plot of " << histNumerator->GetName();
     std::cout << " and " << histDenominator->GetName() << std::endl;
   }
-  // create ratio 
+  // create ratio
   TH1F* ratio = (TH1F*)histNumerator->Clone();
   ratio->Divide(histDenominator);
   // calculate error for ratio
@@ -1558,13 +1558,13 @@ void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& r
 
 double getInclusiveXSec(TH1* hist, int verbose=0)
 {
-  // this function integrates a given 
-  // histogramm 'hist' by summing up the product 
+  // this function integrates a given
+  // histogramm 'hist' by summing up the product
   // of binwidth and bincontent for all bins.
   // NOTE: binwidth==0 is treated as binwidth==1
   // modified quantities: none
   // used functions: none
-  // used enumerators: none 
+  // used enumerators: none
   double value=0;
   if(verbose>0) std::cout << "histo: " << hist->GetTitle() << std::endl;
   for(int bin=0; bin<=hist->GetNbinsX()+1; ++bin){
@@ -1581,12 +1581,12 @@ double getInclusiveXSec(TH1* hist, int verbose=0)
 
 void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=0)
 {
-  // this function shifts all unset points 
-  // (at x,y=0,0 with error 0,0) 
+  // this function shifts all unset points
+  // (at x,y=0,0 with error 0,0)
   // out of sight to 0, -1000
   // modified quantities: none
   // used functions: none
-  // used enumerators: none 
+  // used enumerators: none
   if(verbose>1) std::cout << "checking " << hist->GetName() << " for empty bins" << std::endl;
   // loop points
   for(int bin=0; bin<=hist->GetN()-1; ++bin){
