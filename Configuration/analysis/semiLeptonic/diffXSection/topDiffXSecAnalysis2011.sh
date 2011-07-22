@@ -45,12 +45,14 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"electron\" 
+decayChannel=\"muon\" 
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=204
+dataLuminosity=1090
 ## dataset: 2010 or 2011
-dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
+dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
+#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
+#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
@@ -71,7 +73,7 @@ verbose=0
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
 #maxSys=0
-maxSys=0
+maxSys=2
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -208,7 +210,7 @@ if [ $fast = false ]
 fi
 if [ $decayChannel != \"combined\" ]
     then
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C+('$dataLuminosity', '$save', '$verbose', '$dataSample', '$decayChannel')'
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$dataSample', '$decayChannel')'
 fi
 
 #####################################
@@ -224,7 +226,7 @@ fi
 if [ $decayChannel != \"combined\" ]
     then
     echo "not integrated yet in the automatic workflow"
-    #root -l -q -b './findBinning.C+()'
+    #root -l -q -b './findBinning.C++()'
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
 fi
@@ -272,7 +274,7 @@ do
   if [ $decayChannel != \"combined\" ]
       then
       ## run macro
-      root -l -q -b './analyzeHypothesisKinFit.C+('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
   else
       echo "will be ignored, only done for decayChannel=muon/electron"
   fi
@@ -292,7 +294,7 @@ if [ $decayChannel == \"combined\" ]
     echo "cross sections for all systematic variations"
     echo "and all decay channels"
     echo
-    root -l -q -b './bothDecayChannelsCombination.C+('$dataLuminosity', '$save', '$verbose')'
+    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose')'
 else
     echo "will be ignored, only done for decayChannel=combined"
 fi
@@ -309,7 +311,7 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './combineTopDiffXSecUncertainties.C+('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$oldErrors')'
+root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$oldErrors')'
 echo "all analysis steps finished!"
 
 
