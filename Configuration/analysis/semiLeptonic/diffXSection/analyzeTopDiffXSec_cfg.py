@@ -6,6 +6,11 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 
 ## ---
+##    example to run this cfg file
+## ---
+# cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,eventsToProcess=5000
+
+## ---
 ##    options
 ## ---
 
@@ -22,7 +27,11 @@ options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleto
 # still missing: ZZ, singleTopS
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
-options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
+options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen decay channel")
+# create variable to indicate number of processed events
+# -42 means nothing is changed wrt number typed below
+options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int, "events to process")
+
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -236,7 +245,8 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
 process.source.skipEvents = cms.untracked.uint32(0)
-
+if(not options.eventsToProcess==-42):
+    process.maxEvents.input=options.eventsToProcess
 
 ## configure process options
 process.options = cms.untracked.PSet(
@@ -458,11 +468,6 @@ process.leadingJetSelectionNjets1 = process.leadingJetSelection.clone (src = 'ti
 process.leadingJetSelectionNjets2 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 2)
 process.leadingJetSelectionNjets3 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 3)
 process.leadingJetSelectionNjets4 = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 4)
-process.jetCuts = cms.Sequence(process.leadingJetSelectionNjets1 +
-                               process.leadingJetSelectionNjets2 +
-                               process.leadingJetSelectionNjets3 +
-                               process.leadingJetSelectionNjets4 
-                               )
 
 ## ---
 ##    Set up low level selection steps (sligthly above trigger) for monitoring
@@ -502,6 +507,13 @@ process.goldenMuonQualityPreSel    = process.analyzeMuonQuality.clone    (src = 
 process.tightMuonKinematicsPreSel  = process.analyzeMuonKinematics.clone (src = 'tightMuons'    )
 process.tightMuonQualityPreSel     = process.analyzeMuonQuality.clone    (src = 'tightMuons'    )
 
+process.tightMuonKinematicsNjets1 = process.tightMuonKinematics.clone() 
+process.tightMuonQualityNjets1    = process.tightMuonQuality.clone   ()    
+process.tightMuonKinematicsNjets2 = process.tightMuonKinematics.clone() 
+process.tightMuonQualityNjets2    = process.tightMuonQuality.clone   ()
+process.tightMuonKinematicsNjets3 = process.tightMuonKinematics.clone() 
+process.tightMuonQualityNjets3    = process.tightMuonQuality.clone   ()
+
 ## jets
 process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds0 )
 process.tightLead_1_JetKinematics = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds1 )
@@ -512,6 +524,13 @@ process.tightJetQuality     = process.analyzeJetQuality.clone   (src = 'tightLea
 process.bottomJetKinematics = process.analyzeJetKinematics.clone(src = 'tightBottomPFJets', analyze = udsAll)
 process.tightJetKinematicsPreSel = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQualityPreSel    = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
+
+process.tightJetKinematicsNjets1=process.tightJetKinematics.clone()
+process.tightJetQualityNjets1   =process.tightJetQuality   .clone()
+process.tightJetKinematicsNjets2=process.tightJetKinematics.clone()
+process.tightJetQualityNjets2   =process.tightJetQuality   .clone()
+process.tightJetKinematicsNjets3=process.tightJetKinematics.clone()
+process.tightJetQualityNjets3   =process.tightJetQuality   .clone()
 
 process.tightLead_0_JetKinematicsTagged = process.tightLead_0_JetKinematics.clone()
 process.tightLead_1_JetKinematicsTagged = process.tightLead_1_JetKinematics.clone()
@@ -534,12 +553,55 @@ process.tightElectronQuality     = process.analyzeElectronQuality.clone   ( src 
 process.tightElectronKinematicsTagged  = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
 process.tightElectronQualityTagged     = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
 
+process.tightElectronKinematicsNjets1  = process.tightElectronKinematics.clone()
+process.tightElectronQualityNjets1     = process.tightElectronQuality   .clone()
+process.tightElectronKinematicsNjets2  = process.tightElectronKinematics.clone()
+process.tightElectronQualityNjets2     = process.tightElectronQuality   .clone()
+process.tightElectronKinematicsNjets3  = process.tightElectronKinematics.clone()
+process.tightElectronQualityNjets3     = process.tightElectronQuality   .clone()
 
 ## MET
 process.analyzeMETMuon = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzeMETMuonTagged = process.analyzeMETMuon.clone()
 
 ## collect kinematics
+process.monitorKinematicsNjets1 = cms.Sequence(process.tightJetKinematicsNjets1  +
+                                               process.tightJetQualityNjets1
+                                               )
+
+process.monitorKinematicsNjets2 = cms.Sequence(process.tightJetKinematicsNjets2  +
+                                               process.tightJetQualityNjets2
+                                               )
+
+process.monitorKinematicsNjets3 = cms.Sequence(process.tightJetKinematicsNjets3  +
+                                               process.tightJetQualityNjets3
+                                               )
+
+
+if(decayChannel =='muon'):
+    process.monitorKinematicsNjets1 += cms.Sequence(process.tightMuonKinematicsNjets1 +
+                                                    process.tightMuonQualityNjets1    
+                                                    )
+    process.monitorKinematicsNjets2 += cms.Sequence(process.tightMuonKinematicsNjets2 +
+                                                    process.tightMuonQualityNjets2    
+                                                    )
+    process.monitorKinematicsNjets3 += cms.Sequence(process.tightMuonKinematicsNjets3 +
+                                                    process.tightMuonQualityNjets3    
+                                                    )
+elif(decayChannel =='electron'):
+    process.monitorKinematicsNjets1 += cms.Sequence(process.tightElectronKinematicsNjets1 +
+                                                    process.tightElectronQualityNjets1    
+                                                    )
+    process.monitorKinematicsNjets2 += cms.Sequence(process.tightElectronKinematicsNjets2 +
+                                                    process.tightElectronQualityNjets2    
+                                                    )
+    process.monitorKinematicsNjets3 += cms.Sequence(process.tightElectronKinematicsNjets3 +
+                                                    process.tightElectronQualityNjets3    
+                                                    )
+
+    
+    
+    
 process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinematics       +
                                                        process.tightMuonQuality          +
                                                        process.tightLead_0_JetKinematics +
@@ -579,6 +641,16 @@ process.monitorElectronKinematicsBeforeBtagging = cms.Sequence(process.tightElec
                                                                process.tightElectronQuality   )
 process.monitorElectronKinematicsAfterBtagging  = cms.Sequence(process.tightElectronKinematicsTagged+
                                                                process.tightElectronQualityTagged   )
+
+# combined jet selection+monitoring
+process.jetSelection = cms.Sequence(process.leadingJetSelectionNjets1 +
+                                    process.monitorKinematicsNjets1   +
+                                    process.leadingJetSelectionNjets2 +
+                                    process.monitorKinematicsNjets2   +
+                                    process.leadingJetSelectionNjets3 +
+                                    process.monitorKinematicsNjets3   +
+                                    process.leadingJetSelectionNjets4 
+                                    )
 
 ## ---
 ##    configure Kinematic fit
@@ -910,14 +982,14 @@ process.p1 = cms.Path(
 		      ## create effSF eventWeight
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
-		      process.eventWeightForRecoAnalyzers               *
+		      process.eventWeightForRecoAnalyzers           *
                       ## muon selection
                       process.muonCuts                              *
                       ## veto on additional leptons
                       process.secondMuonVeto                        *
                       process.electronVeto                          *
-                      ## jet selection
-                      process.jetCuts                               *
+                      ## jet selection and monitoring
+                      process.jetSelection                          *
                       ## monitor kinematics before b-tagging
                       process.monitorKinematicsBeforeBtagging       *
                       ## b-tagging
@@ -1130,27 +1202,38 @@ if(pfToPAT):
         'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
         'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
         'electronIDs': ['CiC','classical'],
         'pfIsoConeMuon': 0.4,
         'pfIsoConeElec': 0.4,
         'pfIsoValMuon': 0.2,
         'pfIsoValElec': 0.2,
         'skipIfNoPFMuon': False,
-        'skipIfNoPFElec': False
+        'skipIfNoPFElec': False,
+        'addNoCutPFMuon': False,
+        'addNoCutPFElec': False,
+        'noMuonTopProjection': False,
+        'noElecTopProjection': False,
+        'analyzersBeforeMuonIso':cms.Sequence(),
+        'analyzersBeforeElecIso':cms.Sequence()
         }
     # adaptions when running on data
     if(runningOnData=="data"):
         PFoptions['runOnMC']=False
-    #    elif(options.sample=="ttbar"):
-    #        PFoptions['runOnAOD']=False
     if(decayChannel=="electron"):
     # take into account different electron vetos in mu and e channel
         PFoptions['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
     # skip events (and jet calculation) if no lepton is found
     # only done in data, as in MC you need the events for parton truth plots
-        PFoptions['skipIfNoPFElec']=True 
+        PFoptions['skipIfNoPFElec']=True
+    # collection without cuts is added
+        PFoptions['addNoCutPFElec']=True
+    # project no other leptons than the selected ones
+        #PFoptions['noMuonTopProjection']=True
     elif(decayChannel=="muon"):
         PFoptions['skipIfNoPFMuon']=True
+        PFoptions['addNoCutPFMuon']=True
+        #PFoptions['noElecTopProjection']=True
     prependPF2PATSequence(process, recoPaths, PFoptions)
     # remove electron collections as long as id does not exist in the tuples
     for path in recoPaths:
