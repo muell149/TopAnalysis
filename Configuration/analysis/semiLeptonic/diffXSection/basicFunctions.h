@@ -118,7 +118,8 @@ double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   double result = -1.;
   if (decayChannel.compare("muon")==0) {
     result = 0.964155;
-    if(newSpring11MC||newSummer11MC) result = 0.9581;// TO BE DERIVED
+    if(newSpring11MC) result = 0.9581;// TO BE DERIVED
+    if(newSummer11MC) result = 0.9946
   }
   else if (decayChannel.compare("electron")==0) {
     result = 1.0;                   // TO BE DERIVED
@@ -396,7 +397,7 @@ void DrawDecayChLabel(TString decaychannel="", double textSize=0.04)
 
   decch -> SetFillStyle(0);
   decch -> SetBorderSize(0);
-  if(textSize!=0) decch->SetTextSize(textSize);
+  //if(textSize!=0) decch->SetTextSize(textSize);
   decch -> SetTextAlign(12);
   decch -> Draw("same");
 }
@@ -411,6 +412,7 @@ void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0
   label -> SetY1NDC(1.0-gStyle->GetPadTopMargin());
   label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
   label -> SetY2NDC(1.0);
+  label -> SetTextFont(42);
 
   if (cmsprelim)
   {
@@ -654,6 +656,7 @@ double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, con
   // Data
   else if(sample==kData){
     crossSection=1.;         // this leads to a weight
+
     Nevents     =luminosity; // of 1.0 as data needs no weight
   }
   // unknown input
