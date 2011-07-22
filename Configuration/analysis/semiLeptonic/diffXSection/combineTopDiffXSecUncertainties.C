@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsigned int verbose=2, TString decayChannel="none", bool adpatOldUncertainties=false){
+void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, unsigned int verbose=0, TString decayChannel="muon", bool adpatOldUncertainties=true){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -44,10 +44,10 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
   if(dataSample!="") outputFolder+=dataSample;
   // define some rootstyle options
 
-  gROOT->Reset();
-  setHHStyle();
-  
+  gROOT->SetStyle("Plain");
   TGaxis::SetMaxDigits(2);
+  gStyle->SetEndErrorSize(8);
+  gStyle->SetErrorX(0);
 
   // ---
   //    basic printout and variable definitions
@@ -412,8 +412,8 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	      if(save){
 		TString saveName=outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin);
 		if(decayChannel=="combined") saveName+="Combined";
-		relUnCertaintyCanvas->Print(saveName+".eps");
-		relUnCertaintyCanvas->Print(saveName+".png");
+		  relUnCertaintyCanvas->Print(saveName+".eps");
+		  relUnCertaintyCanvas->Print(saveName+".png");
 	      }
 	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      // delete canvas
@@ -537,6 +537,8 @@ void combineTopDiffXSecUncertainties(double luminosity=191, bool save=true, unsi
 	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
 	    // b) as eps and png
 	    if(save){
+	      canvas->SetBottomMargin(0.15);
+	      canvas->SetLeftMargin(0.17);
 	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
 	      if(decayChannel=="combined") saveName+="Combined";
 	      canvas->Print(saveName+".eps");
