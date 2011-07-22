@@ -586,8 +586,8 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec
 	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);
 
 	    // axis style
-	    histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	    if(max<1000) histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	    if(max<1000) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
 	    // draw histos (as stack)
 	    histo_[plotList_[plot]][sample]->Draw("hist");
@@ -607,17 +607,17 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec
 	    histo_[plotList_[plot]][42]->Draw("axis same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection
-	      TString label = "Pre-Tagged";
-	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
-	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
+	      TString label = "pre-tagged";
+	      if(plotList_[plot].Contains("Tagged")) label = "tagged";
+	      if(plotList_[plot].Contains("PreSel")) label = "pre-selected";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 			1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 32       );
 	       // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
-	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
-	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
-	      else DrawDecayChLabel("e/#mu + Jets Combined");
+	      if (decayChannel=="muon") DrawDecayChLabel("#mu + jets");
+	      else if (decayChannel=="electron") DrawDecayChLabel("e + jets");
+	      else DrawDecayChLabel("e/#mu + jets Combined");
 	      // set first parameter to false once "CMS Preliminary" is not required anymore
-	      DrawCMSLabels(true,luminosity/1000); 
+	      DrawCMSLabels(true,luminosity); 
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0)){
 		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, verbose);	       
