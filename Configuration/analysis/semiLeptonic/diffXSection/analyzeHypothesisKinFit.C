@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
 void analyzeHypothesisKinFit(double luminosity = 1090.0, bool save = false, int systematicVariation=sysNo, unsigned int verbose=1,
-			     //TString dataFile= "./diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-			     TString dataFile= "./diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_167913_1fb.root", 
+			     //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 std::string decayChannel = "muon" )
 {
   //  ---
@@ -684,13 +684,26 @@ std::string decayChannel = "muon" )
     std::cout << std::endl;
     std::cout << "events expected from MC: " << NAllMC << std::endl;
     std::cout << "expected event composition:"   << std::endl;
-    std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << NSig   / NAllMC << std::endl;
-    std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << NBGtop / NAllMC << std::endl;
-    std::cout << "single top:" << std::setprecision(4) << std::fixed << NBGsTop/ NAllMC << std::endl;
-    std::cout << "W+jets    :" << std::setprecision(4) << std::fixed << NBGW   / NAllMC << std::endl;
-    std::cout << "QCD       :" << std::setprecision(4) << std::fixed << NBGQCD / NAllMC << std::endl;
-    std::cout << "Z+jets    :" << std::setprecision(4) << std::fixed << NBGZ   / NAllMC << std::endl;
-    std::cout << "Diboson   :" << std::setprecision(4) << std::fixed << NBGVV  / NAllMC << std::endl;
+    std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << NSig   / NAllMC;
+    std::cout << " (" << lumiweight(kSig, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NSig/lumiweight(kSig, luminosity, systematicVariation, decayChannel) << "=" << NSig    << ") " << std::endl;
+    std::cout << " (" << "mean event SF: " << NSig/(lumiweight(kSig, luminosity, systematicVariation, decayChannel)*(0.5*SigYield->GetEntries())) << ")" << std::endl;
+    std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << NBGtop / NAllMC; 
+    std::cout << " (" << lumiweight(kBkg, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NBGtop/lumiweight(kBkg, luminosity, systematicVariation, decayChannel) << "=" << NBGtop << ") " << std::endl;
+    std::cout << "single top:" << std::setprecision(4) << std::fixed << NBGsTop/ NAllMC; 
+    std::cout << " (" << NBGsTop << ") " << std::endl;
+    std::cout << "W+jets    :" << std::setprecision(4) << std::fixed << NBGW   / NAllMC; 
+    std::cout << " (" << lumiweight(kWjets, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NBGW/lumiweight(kWjets, luminosity, systematicVariation, decayChannel) << "=" << NBGW << ") " << std::endl;
+    std::cout << "QCD       :" << std::setprecision(4) << std::fixed << NBGQCD / NAllMC; 
+    std::cout << " (" << lumiweight(kQCD, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NBGQCD/lumiweight(kQCD, luminosity, systematicVariation, decayChannel) << "=" << NBGQCD << ") " << std::endl;
+    std::cout << "Z+jets    :" << std::setprecision(4) << std::fixed << NBGZ   / NAllMC;
+    std::cout << " (" << lumiweight(kZjets, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NBGZ/lumiweight(kZjets, luminosity, systematicVariation, decayChannel) << "=" << NBGZ << ") " << std::endl;
+    std::cout << "Diboson   :" << std::setprecision(4) << std::fixed << NBGVV  / NAllMC; 
+    std::cout << " (" << NBGVV << ") " << std::endl;
   }
   // efficiency calculation
   double NGenPhaseSpace=0.5 * GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
@@ -1082,10 +1095,9 @@ std::string decayChannel = "muon" )
 	  // draw CMS label for xSecs
 	  TString plotType=getStringEntry(plotList_[plot], 1);
 	  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	    if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
-	    else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-	    else DrawDecayChLabel("e/#mu + Jets Combined");
-	    DrawCMSLabels(true,luminosity/1000);
+	    if (decayChannel=="muon") DrawDecayChLabel("#mu + jets");
+	    else if(decayChannel=="electron") DrawDecayChLabel("e + jets");
+	    DrawCMSLabels(true,luminosity);
 	  }
 	}
       }
