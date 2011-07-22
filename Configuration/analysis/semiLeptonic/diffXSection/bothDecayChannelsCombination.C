@@ -1,16 +1,19 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigned int verbose=2){
+void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsigned int verbose=0){
 
   // ---
   //    Setup
   // ---
   // set root style
   
-  gROOT->Reset();
-  setHHStyle();
+  //  gROOT->Reset();
+  //  setHHStyle();
 
+  gROOT->SetStyle("Plain");
   TGaxis::SetMaxDigits(2);
+  gStyle->SetEndErrorSize(8);
+  gStyle->SetErrorX(0);
 
   // decay channels
   enum channel {kMuon, kElectron};
@@ -96,9 +99,12 @@ void bothDecayChannelsCombination(double luminosity=191, bool save=true, unsigne
 	  //canvasStyle(*combicanvas);
 	  // plot into canvas
 	  combicanvas->cd(0);
+	  combicanvas->SetBottomMargin(0.15);
+	  combicanvas->SetLeftMargin(0.17);
 	  plotTheo->Draw("hist");
 	  plotCombination->Draw("e same");
-	  DrawCMSLabels();
+	  DrawCMSLabels(true,luminosity);
+	  DrawDecayChLabel("e/#mu + jets combined");
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  // save combined e+mu plot for systematic error calculation afterwards
 	  canvas_[xSecVariables_[i]][sys]=(TCanvas*)(combicanvas->Clone());
