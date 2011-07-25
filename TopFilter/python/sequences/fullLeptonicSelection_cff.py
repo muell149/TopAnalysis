@@ -33,7 +33,7 @@ goodIdJets.quality = cms.string('LOOSE')
 #                                           '   & (chargedMultiplicity > 0) ) )'
 #                                     )
 
-hardJets = selectedPatJets.clone(src = 'goodIdJets', cut = 'pt > 30. & abs(eta) < 2.5')
+hardJets = selectedPatJets.clone(src = 'goodIdJets', cut = 'pt > 30. & abs(eta) < 2.4')
 
 ## check for different btag properties
 trackCountingHighEffBJetsLoose = selectedPatJets.clone( src = 'hardJets',
