@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, unsigned int verbose=0, 
-TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
-//TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_166861_1fb.root"
-, const std::string decayChannel = "electron")
+void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = false, int verbose=0, 
+//TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
+TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
+, const std::string decayChannel = "muon")
 {
 
   //  ---
@@ -438,6 +438,51 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec
   }
 
   // ---
+  //    event composition
+  // ---
+  std::map< TString, std::map <unsigned int, double> > events_;
+  // a) get event numbers
+  std::vector<TString> selection_;
+  selection_.push_back("tightJetKinematics/n"      );
+  selection_.push_back("tightJetKinematicsTagged/n");
+  unsigned int MCBG=42;
+  events_[selection_[0]][MCBG]=0;
+  events_[selection_[1]][MCBG]=0;
+  // loop pretagged/tagged
+  for(unsigned int step=0; step<=1; ++step){
+    // loop samples
+    for(unsigned int sample=kSig; sample<=kData; ++sample){
+      // save number
+      events_[selection_[step]][sample]=histo_[selection_[step]][sample]->Integral(0,histo_[selection_[step]][sample]->GetNbinsX()+1);
+      // add non ttbar MC
+      if(sample>kSig&&sample<kData) events_[selection_[step]][MCBG]+=events_[selection_[step]][sample];
+    }
+  }
+  // b) print composition
+  if(verbose>=0){
+    // loop pretagged/tagged
+    for(unsigned int step=0; step<=1; ++step){    
+      // print label
+      std::cout << "event composition";
+      if(step==0)  std::cout << " (pre-tagged)" << std::endl;
+      if(step==1)  std::cout << " (tagged)" << std::endl;
+      // all MC events
+      double NAllMC=events_[selection_[step]][kSig]+events_[selection_[step]][MCBG];
+      // print yield and composition
+      std::cout << "events observed in data: " << events_[selection_[step]][kData] << std::endl;
+      std::cout << "events expected from MC: " << NAllMC << std::endl;
+      std::cout << "expected event composition:"   << std::endl; 
+      std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
+      std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
+      std::cout << "W+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl;
+      std::cout << "Z+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
+      std::cout << "QCD:  "      << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
+      std::cout << "single top:" << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
+      std::cout << "diboson:"    << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
+    }
+  }
+
+  // ---
   //    rebinning 1D histograms
   // ---
   // loop samples
@@ -516,7 +561,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec
     createStackPlot(plotList_, histo_, plot, N1Dplots, verbose, decayChannel);
   }
   if(verbose>1) std::cout << std::endl;
-
+ 
   // ---
   //    do the printing
   // ---
