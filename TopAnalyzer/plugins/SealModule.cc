@@ -46,7 +46,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronQuality> Electron
 DEFINE_FWK_MODULE(ElectronQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/ElectronKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronKinematics> ElectronKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, ElectronKinematics> ElectronKinematicsAnalyzer;
 DEFINE_FWK_MODULE(ElectronKinematicsAnalyzer);
 
 /**
@@ -180,6 +180,15 @@ DEFINE_FWK_MODULE(METAnalyzer);
 typedef DoubleObjectAnalyzer<edm::View<reco::MET>, edm::View<pat::Muon>, HTlepTemplate> HTlepAnalyzer;
 DEFINE_FWK_MODULE(HTlepAnalyzer);
 
+/**
+   Define modules for PU analysis
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/MCPileUp.h"
+DEFINE_FWK_MODULE(MCPileUp);
+
+#include "TopAnalysis/TopAnalyzer/interface/PUControlDistributionsAnalyzer.h"
+DEFINE_FWK_MODULE(PUControlDistributionsAnalyzer);
 
 /**
     Define modules needed for the analysis of trigger
