@@ -15,6 +15,10 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
   gStyle->SetEndErrorSize(8);
   gStyle->SetErrorX(0);
 
+  // choose if xSec are extrapolated to whole phase space
+  bool extrapolate=false;
+  TString PS="";
+  if(!extrapolate)PS="PhaseSpace";
   // decay channels
   enum channel {kMuon, kElectron};
   // define folders where XSec plots are stored
@@ -102,6 +106,24 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  combicanvas->SetBottomMargin(0.15);
 	  combicanvas->SetLeftMargin(0.17);
 	  plotTheo->Draw("hist");
+	  // get unbinned Madgraph theory curve
+	  // add muon and electron channel to
+	  // minimize statistical fluctuations
+	  TH1F* unbinnedTheory = getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "muon"));
+	  unbinnedTheory->Add(getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "electron")));
+	  // normalize to unsit area fordiff. norm. plots
+	  if(xSecVariables_[i].Contains("Norm")){
+	    unbinnedTheory->Rebin(10);
+	    unbinnedTheory->Scale(1.0/(unbinnedTheory->Integral(1,unbinnedTheory->GetNbinsX()+1)));
+	    unbinnedTheory->Scale(0.1);
+	  }
+	  // take into account that e and mu channel were added 
+	  else{
+	    unbinnedTheory->Scale(0.5);
+	  }
+	  histogramStyle(*unbinnedTheory, kSig, false);
+	  unbinnedTheory->Smooth(5);
+	  unbinnedTheory->Draw("c same");
 	  plotCombination->Draw("e same");
 	  DrawCMSLabels(true,luminosity);
 	  DrawDecayChLabel("e/#mu + jets combined");
