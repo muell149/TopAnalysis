@@ -23,15 +23,17 @@ JetKinematics::book()
       Kinematic Variables
   **/
   // jet multiplicty
-  hists_["n"  ] = new TH1F( "n"   , "n"   ,  20 ,     0. ,    20. );
-  // energy of the jet
-  hists_["en" ] = new TH1F( "en"  , "en"  , 180 ,     0. ,   900. );
-  // transverse momentum of the jet
-  hists_["pt" ] = new TH1F( "pt"  , "pt"  , 120 ,     0. ,   600. );
-  // pseudorapidity eta of the jet
-  hists_["eta"] = new TH1F( "eta" , "eta" ,  70 ,   -3.5 ,    3.5 );
-  // azimuthal angle phi of the jet
-  hists_["phi"] = new TH1F( "phi" , "phi" ,  70 ,  -3.14 ,   3.14 );
+  hists_["n"  ] = new TH1F( "n"   , "n"   ,   20 ,     0. ,    20. );
+  // energy of the jet			    
+  hists_["en" ] = new TH1F( "en"  , "en"  ,  180 ,     0. ,   900. );
+  // transverse momentum of the jet	    
+  hists_["pt" ] = new TH1F( "pt"  , "pt"  ,  120 ,     0. ,   600. );
+  // pseudorapidity eta of the jet	    
+  hists_["eta"] = new TH1F( "eta" , "eta" ,   70 ,   -3.5 ,    3.5 );
+  // azimuthal angle phi of the jet	    
+  hists_["phi"] = new TH1F( "phi" , "phi" ,   70 ,  -3.14 ,   3.14 );
+  // scalar sum	of jet et			    
+  hists_["ht" ] = new TH1F( "ht"  , "ht"  , 2000 ,     0. ,  2000. );
 }
 
 /// histogramm booking for full fw
@@ -57,6 +59,8 @@ JetKinematics::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "eta" ,   70 , -3.5  ,  3.5 , singleObjectInTree );
   // azimuthal angle phi of the jet
   bookVariable( fs, "phi" ,   70 , -M_PI , M_PI , singleObjectInTree );
+  // scalar sum	of jet et
+  bookVariable( fs, "ht"  , 2000 ,  0.   , 2000., singleObjectInTree );
 }
 
 /// histogram filling for fwlite and for full fw
@@ -72,7 +76,10 @@ JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
   // where index_=-1 means 'fill all jets' and index_=n
   // n>=-1 means 'fill only n-th leading jet'
   int index=0;
+  double HT=0.;
   for(std::vector<reco::GenJet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
+    // calculate scalar sum of jet et
+    HT+=jet->et();
     if( index_<0 || index_==index ){
       // energy of the jet
       fillValue( "en" , jet->energy() , weight );
@@ -84,6 +91,8 @@ JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
       fillValue( "phi" , jet->phi() , weight );
     }
   }
+  // scalar sum of jet et filled at least
+  fillValue( "ht" , HT , weight );
   // jet multiplicty is always filled the same way
   // independent from the choice of index_
   fillValue( "n" , index , weight );
@@ -127,7 +136,10 @@ JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
   // where index_=-1 means 'fill all jets' and index_=n
   // n>=-1 means 'fill only n-th leading jet'
   int index=0;
+  double HT=0.;
   for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
+    // calculate scalar sum of jet et
+    HT+=jet->correctedJet(correctionStep(), correctionFlavor()).et();
     if( index_<0 || index_==index ){
       // energy of the jet
       fillValue( "en" , jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
@@ -139,6 +151,8 @@ JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
       fillValue( "phi" , jet->phi() , weight );
     }
   }
+  // scalar sum of jet et filled at least
+  fillValue( "ht" , HT , weight );
   // jet multiplicty is always filled the same way
   // independent from the choice of index_
   fillValue( "n" , jets.size() , weight );
