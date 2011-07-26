@@ -1,16 +1,24 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = false, int verbose=0, 
-//TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
-TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
-, const std::string decayChannel = "muon")
+void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, unsigned int verbose=0, 
+				  TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
+				  //TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_166861_1fb.root"
+				  , const std::string decayChannel = "electron")
 {
-
+  // set root style
+	
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  TGaxis::SetMaxDigits(2);
+  myStyle.cd();
+  gROOT->SetStyle("HHStyle");
+  gROOT->ForceStyle();
+		
   //  ---
   //     name conventions
   //  ---
   // a) enumerator sample convention (as defined in basicFunctions.h)
-     /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
+  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
   // kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW 
   // b) file name convention (implemented in basicFunctions.h)
   // "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
@@ -19,7 +27,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   // GeneratorName= "Mad", "Pythia6"
   // GeneratorTune= "Z2", "D6T"
   // MCProductionCycle= "Fall10"
-
+	
   //  ---
   //     options
   //  ---
@@ -57,288 +65,284 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
      24: sysBtagUp        25: sysBtagDown       26: sysDiBosUp          27: sysDiBosDown
   */
   int systematicVariation=sysNo;
-  // c) set root style
-  gROOT->Reset();
-  setHHStyle();
-  TGaxis::SetMaxDigits(2);
 
   //  ---
   //     choose plots
   //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
   TString plots1D[ ] = { // (I) preselection
-                         // (ii) jet monitoring
-                         //"tightJetKinematicsPreSel/n"  ,
-                         //"tightJetKinematicsPreSel/en" ,
-			 //"tightJetKinematicsPreSel/pt" ,
-			 //"tightJetKinematicsPreSel/eta",
-			 //"tightJetKinematicsPreSel/phi",
-                         // (II) before btagging
-                         // (ii) jet monitoring
-                         "tightJetKinematics/n"  ,
-                         "tightJetKinematics/en" ,
-			 "tightJetKinematics/pt" ,
-			 "tightJetKinematics/eta",
-			 "tightJetKinematics/phi",
-                         "tightJetQuality/n_"    ,
-                         "tightJetQuality/charge",
-                         "tightJetQuality/nhf"   ,
-                         "tightJetQuality/nef"   ,
-                         "tightJetQuality/chf"   ,
-                         "tightJetQuality/cef"   ,
-                         "tightJetQuality/ncp"   ,
-                         "tightLead_0_JetKinematics/en" ,
-			 "tightLead_0_JetKinematics/pt" ,
-			 "tightLead_0_JetKinematics/eta",
-			 "tightLead_0_JetKinematics/phi",
-                         "tightLead_1_JetKinematics/en" ,
-			 "tightLead_1_JetKinematics/pt" ,
-			 "tightLead_1_JetKinematics/eta",
-			 "tightLead_1_JetKinematics/phi",
-                         "tightLead_2_JetKinematics/en" ,
-			 "tightLead_2_JetKinematics/pt" ,
-			 "tightLead_2_JetKinematics/eta",
-			 "tightLead_2_JetKinematics/phi",
-                         "tightLead_3_JetKinematics/en" ,
-			 "tightLead_3_JetKinematics/pt" ,
-			 "tightLead_3_JetKinematics/eta",
-			 "tightLead_3_JetKinematics/phi",
-                         // (iii) btag monitoring
-                         "tightJetQuality/btagTrkCntHighPurity",
-                         "tightJetQuality/btagTrkCntHighEff_"  ,
-                         "tightJetQuality/btagSimpleSecVtxHighEff_",
-                         "tightJetQuality/btagSimpleSecVtxHighPur_",
-                         "tightJetQuality/btagCombSecVtx_",
-                         "tightJetQuality/btagCombSecVtxMVA_",
-                         "tightJetQuality/btagJetBProbability_",
-                         "tightJetQuality/btagJetProbability_",
-                         "tightJetQuality/btagSoftMuon_",
-                         "tightJetQuality/btagSoftMuonByPt_",
-                         "tightJetQuality/btagSoftMuonByIP3d_",
-                         "bottomJetKinematics/n",
-                         // (iv) MET monitoring
-                         "analyzeMETMuon/metEt"   ,
-                         "analyzeMETMuon/metSumEt",
-			 // (III) after btagging 
-                         // (ii) jet monitoring
-			 "tightJetKinematicsTagged/n"  ,
-			 "tightJetKinematicsTagged/pt" ,
-			 "tightJetKinematicsTagged/eta",
-			 "tightJetKinematicsTagged/phi",
-			 "tightLead_0_JetKinematicsTagged/pt" ,
-			 "tightLead_0_JetKinematicsTagged/eta",
-			 "tightLead_1_JetKinematicsTagged/pt" ,
-			 "tightLead_1_JetKinematicsTagged/eta",
-			 "tightLead_2_JetKinematicsTagged/pt" ,
-			 "tightLead_2_JetKinematicsTagged/eta",
-			 "tightLead_3_JetKinematicsTagged/pt" ,
-			 "tightLead_3_JetKinematicsTagged/eta",
-			 "bottomLead_0_JetKinematicsTagged/pt",
-			 "bottomLead_1_JetKinematicsTagged/pt",
-			 "bottomLead_0_JetKinematicsTagged/eta",
-			 "bottomLead_1_JetKinematicsTagged/eta",
-                         // (iv) MET monitoring
-                         "analyzeMETMuonTagged/metEt"   ,
-                         "analyzeMETMuonTagged/metSumEt"
-                       };
- TString plots1Dmu[ ] = { // (I) preselection
-                          // (i) muon monitoring
-                         //"kinematicMuonQualityPreSel/nHit"   ,
-                         //"kinematicMuonQualityPreSel/chi2"   ,
-                         //"kinematicMuonQualityPreSel/dB"     ,
-                         //"kinematicMuonQualityPreSel/dz"     ,
-                         //"kinematicMuonQualityPreSel/matches",  
-                         //"trackMuontightJetsKinematicsPreSel/dist30_",
-			 //"goldenMuonQualityPreSel/relIso"    , 
-			 //"tightMuonKinematicsPreSel/n"       ,
-                         // (II) before btagging
-                         // (i) muon monitoring
-                         "tightMuonKinematics/n" ,
-                         "tightMuonKinematics/en" ,
-                         "tightMuonKinematics/pt" ,
-                         "tightMuonKinematics/eta",
-                         "tightMuonKinematics/y"  ,
-                         "tightMuonKinematics/phi",
-                         "tightMuonQuality/nHit"   ,
-                         "tightMuonQuality/chi2"   ,
-                         "tightMuonQuality/dB"     ,
-                         "tightMuonQuality/dz"     ,
-                         "tightMuonQuality/ecalEn" ,
-                         "tightMuonQuality/hcalEn" ,
-                         "tightMuonQuality/relIso" ,
-                         "tightMuonQuality/matches",  			 
-			 // (III) after btagging 
-                         // (i) muon monitoring
-			 "tightMuonQualityTagged/relIso" ,
-                         "tightMuonKinematicsTagged/pt" ,
-                         "tightMuonKinematicsTagged/eta",
-                         "tightMuonKinematicsTagged/phi"
-                       };
-
+    // (ii) jet monitoring
+    //"tightJetKinematicsPreSel/n"  ,
+    //"tightJetKinematicsPreSel/en" ,
+    //"tightJetKinematicsPreSel/pt" ,
+    //"tightJetKinematicsPreSel/eta",
+    //"tightJetKinematicsPreSel/phi",
+    // (II) before btagging
+    // (ii) jet monitoring
+    "tightJetKinematics/n"  ,
+    "tightJetKinematics/en" ,
+    "tightJetKinematics/pt" ,
+    "tightJetKinematics/eta",
+    "tightJetKinematics/phi",
+    "tightJetQuality/n_"    ,
+    "tightJetQuality/charge",
+    "tightJetQuality/nhf"   ,
+    "tightJetQuality/nef"   ,
+    "tightJetQuality/chf"   ,
+    "tightJetQuality/cef"   ,
+    "tightJetQuality/ncp"   ,
+    "tightLead_0_JetKinematics/en" ,
+    "tightLead_0_JetKinematics/pt" ,
+    "tightLead_0_JetKinematics/eta",
+    "tightLead_0_JetKinematics/phi",
+    "tightLead_1_JetKinematics/en" ,
+    "tightLead_1_JetKinematics/pt" ,
+    "tightLead_1_JetKinematics/eta",
+    "tightLead_1_JetKinematics/phi",
+    "tightLead_2_JetKinematics/en" ,
+    "tightLead_2_JetKinematics/pt" ,
+    "tightLead_2_JetKinematics/eta",
+    "tightLead_2_JetKinematics/phi",
+    "tightLead_3_JetKinematics/en" ,
+    "tightLead_3_JetKinematics/pt" ,
+    "tightLead_3_JetKinematics/eta",
+    "tightLead_3_JetKinematics/phi",
+    // (iii) btag monitoring
+    "tightJetQuality/btagTrkCntHighPurity",
+    "tightJetQuality/btagTrkCntHighEff_"  ,
+    "tightJetQuality/btagSimpleSecVtxHighEff_",
+    "tightJetQuality/btagSimpleSecVtxHighPur_",
+    "tightJetQuality/btagCombSecVtx_",
+    "tightJetQuality/btagCombSecVtxMVA_",
+    "tightJetQuality/btagJetBProbability_",
+    "tightJetQuality/btagJetProbability_",
+    "tightJetQuality/btagSoftMuon_",
+    "tightJetQuality/btagSoftMuonByPt_",
+    "tightJetQuality/btagSoftMuonByIP3d_",
+    "bottomJetKinematics/n",
+    // (iv) MET monitoring
+    "analyzeMETMuon/metEt"   ,
+    "analyzeMETMuon/metSumEt",
+    // (III) after btagging 
+    // (ii) jet monitoring
+    "tightJetKinematicsTagged/n"  ,
+    "tightJetKinematicsTagged/pt" ,
+    "tightJetKinematicsTagged/eta",
+    "tightJetKinematicsTagged/phi",
+    "tightLead_0_JetKinematicsTagged/pt" ,
+    "tightLead_0_JetKinematicsTagged/eta",
+    "tightLead_1_JetKinematicsTagged/pt" ,
+    "tightLead_1_JetKinematicsTagged/eta",
+    "tightLead_2_JetKinematicsTagged/pt" ,
+    "tightLead_2_JetKinematicsTagged/eta",
+    "tightLead_3_JetKinematicsTagged/pt" ,
+    "tightLead_3_JetKinematicsTagged/eta",
+    "bottomLead_0_JetKinematicsTagged/pt",
+    "bottomLead_1_JetKinematicsTagged/pt",
+    "bottomLead_0_JetKinematicsTagged/eta",
+    "bottomLead_1_JetKinematicsTagged/eta",
+    // (iv) MET monitoring
+    "analyzeMETMuonTagged/metEt"   ,
+    "analyzeMETMuonTagged/metSumEt"
+  };
+  TString plots1Dmu[ ] = { // (I) preselection
+    // (i) muon monitoring
+    //"kinematicMuonQualityPreSel/nHit"   ,
+    //"kinematicMuonQualityPreSel/chi2"   ,
+    //"kinematicMuonQualityPreSel/dB"     ,
+    //"kinematicMuonQualityPreSel/dz"     ,
+    //"kinematicMuonQualityPreSel/matches",  
+    //"trackMuontightJetsKinematicsPreSel/dist30_",
+    //"goldenMuonQualityPreSel/relIso"    , 
+    //"tightMuonKinematicsPreSel/n"       ,
+    // (II) before btagging
+    // (i) muon monitoring
+    "tightMuonKinematics/n" ,
+    "tightMuonKinematics/en" ,
+    "tightMuonKinematics/pt" ,
+    "tightMuonKinematics/eta",
+    "tightMuonKinematics/y"  ,
+    "tightMuonKinematics/phi",
+    "tightMuonQuality/nHit"   ,
+    "tightMuonQuality/chi2"   ,
+    "tightMuonQuality/dB"     ,
+    "tightMuonQuality/dz"     ,
+    "tightMuonQuality/ecalEn" ,
+    "tightMuonQuality/hcalEn" ,
+    "tightMuonQuality/relIso" ,
+    "tightMuonQuality/matches",  			 
+    // (III) after btagging 
+    // (i) muon monitoring
+    "tightMuonQualityTagged/relIso" ,
+    "tightMuonKinematicsTagged/pt" ,
+    "tightMuonKinematicsTagged/eta",
+    "tightMuonKinematicsTagged/phi"
+  };
+	
   TString plots1De[ ] = { 
-                         // (ib) electron monitoring
-                         "tightElectronKinematics/n" ,
-                         "tightElectronKinematics/en" ,
-                         "tightElectronKinematics/et" ,
-                         "tightElectronKinematics/eta",
-                         "tightElectronKinematics/phi",
-                         "tightElectronQuality/etaSC"  ,
-                         "tightElectronQuality/dB"     ,
-                         "tightElectronQuality/simpleEleId70cIso", 
-                         "tightElectronQuality/nHitsInner",
-                         "tightElectronQuality/convDcot" ,
-                         "tightElectronQuality/convDist" ,
-                         "tightElectronQuality/relIso"   ,
-			 // (ib) electron monitoring
-			 "tightElectronQualityTagged/relIso",
-                         "tightElectronKinematicsTagged/et" ,
-                         "tightElectronKinematicsTagged/eta",
-                         "tightElectronKinematicsTagged/phi"
-                       };
-
+    // (ib) electron monitoring
+    "tightElectronKinematics/n" ,
+    "tightElectronKinematics/en" ,
+    "tightElectronKinematics/et" ,
+    "tightElectronKinematics/eta",
+    "tightElectronKinematics/phi",
+    "tightElectronQuality/etaSC"  ,
+    "tightElectronQuality/dB"     ,
+    "tightElectronQuality/simpleEleId70cIso", 
+    "tightElectronQuality/nHitsInner",
+    "tightElectronQuality/convDcot" ,
+    "tightElectronQuality/convDist" ,
+    "tightElectronQuality/relIso"   ,
+    // (ib) electron monitoring
+    "tightElectronQualityTagged/relIso",
+    "tightElectronKinematicsTagged/et" ,
+    "tightElectronKinematicsTagged/eta",
+    "tightElectronKinematicsTagged/phi"
+  };
+	
   TString plots2D[ ] = { 
-                       };
-
-
-
-
+  };
+	
+	
+	
+	
   // b) list plot axes style
   // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
   // log = 0 or 1 for linear or logarithmic axis 
-
+	
   TString axisLabel1D[ ] = { // (I) preselection
-                             // (ii) jet monitoring
-                             //"N_{jets}/events/0/1",
-                             //"E(jets)/jets/1/1",
-			     //"p_{t}(jets)/jets/1/1",
-			     //"#eta(jets)/jets/0/5",
-			     //"#phi(jets)/jets/0/10",
-			     // (II) before btagging
-                             // (ii) jet monitoring
-                             "N_{jets}/events/1/1",
-                             "E(jets)/jets/1/1",
-			     "p_{t}(jets)/jets/1/1",
-			     "#eta(jets)/jets/0/5",
-			     "#phi(jets)/jets/0/10",
-                             "N(jet constituents)/jets/0/10",
-                             "jet charge/jets/0/10"         ,
-                             "neutral hadron fraction (jets)/jets/1/1"         ,
-                             "neutral electromagnetic fraction (jets)/jets/0/2",
-			     "charged hadron fraction (jets)/jets/0/1"         ,
-                             "charged electromagnetic fraction (jets)/jets/1/1",
-                             "N_{charged particles} (jets)/jets/0/2"           ,
-                             "E(lead 1^{st} jet)/events/1/2",
-			     "p_{t}(lead 1^{st} jet)/events/1/5",
-			     "#eta(lead 1^{st} jet)/events/0/5",
-			     "#phi(lead 1^{st} jet)/events/0/10",
-                             "E(lead 2^{nd} jet)/events/1/2",
-			     "p_{t}(lead 2^{nd} jet)/events/1/5",
-			     "#eta(lead 2^{nd} jet)/events/0/5",
-			     "#phi(lead 2^{nd} jet)/events/0/10",
-                             "E(lead 3^{rd} jet)/events/1/2",
-			     "p_{t}(lead 3^{rd} jet)/events/1/5",
-			     "#eta(lead 3^{rd} jet)/events/0/5",
-			     "#phi(lead 3^{rd} jet)/events/0/10",
-                             "E(lead 4^{th} jet)/events/1/2",
-			     "p_{t}(lead 4^{th} jet)/events/1/5",
-			     "#eta(lead 4^{th} jet)/events/0/5",
-			     "#phi(lead 4^{th} jet)/events/0/10",
-                             // (iii) btag monitoring
-                             "b-discr.(TCHP)/jets/0/2"        ,
-                             "b-discr.(TCHE)/jets/0/2"	,
-                             "b-discr.(SSV HEff)/jets/1/2"	,
-			     "b-discr.(SSV HPur)/jets/0/2"	,
-                             "b-discr.(CSV)/jets/0/8"	,
-                             "b-discr.(CSVMVA)/jets/0/8"	,
-			     "b-discr.(JetBProb)/jets/0/10"	,
-			     "b-discr.(JetProb)/jets/0/10"	,
-			     "b-discr.(soft#mu)/jets/0/10"	,
-			     "b-discr.(soft#muPt)/jets/0/10"  ,                  
-			     "b-discr.(soft#muIP3d)/jets/0/10",
-			     "N_{b-jets}(SSVHE)/events/0/1"      ,
-			     // (iv) MET monitoring 
-			     "#slash{E}_{T}/events/0/10",
-			     "#SigmaE_{T}/events/0/50"  ,
-			     // (III) after btagging 
-                             // (ii) jet monitoring
-                             "N_{jets}/events/1/1",
-			     "p_{t}(jets)/jets/1/2",
-			     "#eta(jets)/jets/0/5" ,
-			     "#phi(jets)/jets/0/10",
-			     "p_{t}(lead 1^{st} jet)/events/1/5",
-			     "#eta(lead 1^{st} jet)/events/0/5" ,
-			     "p_{t}(lead 2^{nd} jet)/events/1/5",
-			     "#eta(lead 2^{nd} jet)/events/0/5" ,
-			     "p_{t}(lead 3^{rd} jet)/events/1/5",
-			     "#eta(lead 3^{rd} jet)/events/0/5" ,
-			     "p_{t}(lead 4^{th} jet)/events/1/5",
-			     "#eta(lead 4^{th} jet)/events/0/5" ,
-			     "p_{t}(lead 1^{st} b-tagged jet)/events/1/5",
-			     "p_{t}(lead 2^{nd} b-tagged jet)/events/1/5",
-			     "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
-			     "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
-			     // (iv) MET monitoring 
-			     "#slash{E}_{T}/events/0/20",
-			     "#SigmaE_{T}/events/0/30"  
-                           };
+    // (ii) jet monitoring
+    //"N_{jets}/events/0/1",
+    //"E(jets)/jets/1/1",
+    //"p_{t}(jets)/jets/1/1",
+    //"#eta(jets)/jets/0/5",
+    //"#phi(jets)/jets/0/10",
+    // (II) before btagging
+    // (ii) jet monitoring
+    "N_{jets}/events/1/1",
+    "E(jets)/jets/1/1",
+    "p_{t}(jets)/jets/1/1",
+    "#eta(jets)/jets/0/5",
+    "#phi(jets)/jets/0/10",
+    "N(jet constituents)/jets/0/10",
+    "jet charge/jets/0/10"         ,
+    "neutral hadron fraction (jets)/jets/1/1"         ,
+    "neutral electromagnetic fraction (jets)/jets/0/2",
+    "charged hadron fraction (jets)/jets/0/1"         ,
+    "charged electromagnetic fraction (jets)/jets/1/1",
+    "N_{charged particles} (jets)/jets/0/2"           ,
+    "E(lead 1^{st} jet)/events/1/2",
+    "p_{t}(lead 1^{st} jet)/events/1/5",
+    "#eta(lead 1^{st} jet)/events/0/5",
+    "#phi(lead 1^{st} jet)/events/0/10",
+    "E(lead 2^{nd} jet)/events/1/2",
+    "p_{t}(lead 2^{nd} jet)/events/1/5",
+    "#eta(lead 2^{nd} jet)/events/0/5",
+    "#phi(lead 2^{nd} jet)/events/0/10",
+    "E(lead 3^{rd} jet)/events/1/2",
+    "p_{t}(lead 3^{rd} jet)/events/1/5",
+    "#eta(lead 3^{rd} jet)/events/0/5",
+    "#phi(lead 3^{rd} jet)/events/0/10",
+    "E(lead 4^{th} jet)/events/1/2",
+    "p_{t}(lead 4^{th} jet)/events/1/5",
+    "#eta(lead 4^{th} jet)/events/0/5",
+    "#phi(lead 4^{th} jet)/events/0/10",
+    // (iii) btag monitoring
+    "b-discr.(TCHP)/jets/0/2"        ,
+    "b-discr.(TCHE)/jets/0/2"	,
+    "b-discr.(SSV HEff)/jets/1/2"	,
+    "b-discr.(SSV HPur)/jets/0/2"	,
+    "b-discr.(CSV)/jets/0/8"	,
+    "b-discr.(CSVMVA)/jets/0/8"	,
+    "b-discr.(JetBProb)/jets/0/10"	,
+    "b-discr.(JetProb)/jets/0/10"	,
+    "b-discr.(soft#mu)/jets/0/10"	,
+    "b-discr.(soft#muPt)/jets/0/10"  ,                  
+    "b-discr.(soft#muIP3d)/jets/0/10",
+    "N_{b-jets}(SSVHE)/events/0/1"      ,
+    // (iv) MET monitoring 
+    "#slash{E}_{T}/events/0/10",
+    "#SigmaE_{T}/events/0/50"  ,
+    // (III) after btagging 
+    // (ii) jet monitoring
+    "N_{jets}/events/1/1",
+    "p_{t}(jets)/jets/1/2",
+    "#eta(jets)/jets/0/5" ,
+    "#phi(jets)/jets/0/10",
+    "p_{t}(lead 1^{st} jet)/events/1/5",
+    "#eta(lead 1^{st} jet)/events/0/5" ,
+    "p_{t}(lead 2^{nd} jet)/events/1/5",
+    "#eta(lead 2^{nd} jet)/events/0/5" ,
+    "p_{t}(lead 3^{rd} jet)/events/1/5",
+    "#eta(lead 3^{rd} jet)/events/0/5" ,
+    "p_{t}(lead 4^{th} jet)/events/1/5",
+    "#eta(lead 4^{th} jet)/events/0/5" ,
+    "p_{t}(lead 1^{st} b-tagged jet)/events/1/5",
+    "p_{t}(lead 2^{nd} b-tagged jet)/events/1/5",
+    "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
+    "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
+    // (iv) MET monitoring 
+    "#slash{E}_{T}/events/0/20",
+    "#SigmaE_{T}/events/0/30"  
+  };
   TString axisLabel1De[ ] = {
-                             // (ib) electron monitoring
-                             "N_{e}/events/0/1" ,
-                             "E(e)/events/0/2",
-                             "E_{t}(e)/events/0/1" ,
-                             "#eta(e)/events/0/5",
-                             "#phi(e)/events/0/5",
-                             "#eta(S.C.)/events/0/1"  ,
-                             "d_{xy} (e wrt. beamspot)/events/0/1",
-                             "simpleEleId70cIso/events/0/1", 
-                             "nHitsInner(conv)/events/0/1",
-                             "convCot/events/0/5",
-                             "convDist/events/0/5" ,
-                             "PF relIso(e)/events/0/1" ,
-			     // (ib) electron monitoring
-			     "PF relIso(e)/events/0/1" ,
-                             "E_{t}(e)/events/0/2",
-		             "#eta(e)/events/0/1",
-		             "#phi(e)/events/0/1"
-                           };
-  
- TString axisLabel1Dmu[ ] = {// (I) preselection
-                             // (i) muon monitoring
-                             //"N_{hits}(inner tracker #mu)/events/0/1"          ,
-                             //"#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
-                             //"d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
-                             //"d_{z} (#mu(pt,#eta))/events/0/10",
-                             //"N_{matched #mu segments}(#mu(pt,#eta))/events/0/1",
-                             //"#DeltaR(jet(pt,#eta,ID), #mu(pt, #eta, track criteria))/events/0/1",
-			     //"relIso(#mu(no isolation))/events/0/1",
-                             //"N_{#mu}/events/0/1",
-			     // (II) before btagging
-                             // (i) muon monitoring
-                             "N_{#mu}/events/0/1"   ,
-                             "E(#mu)/events/0/2"    ,
-                             "p_{t}(#mu)/events/0/1",
-		             "#eta(#mu)/events/0/5" ,
-                             "y(#mu)/events/0/5"    ,	
-		             "#phi(#mu)/events/0/5" ,
-                             "N_{hits}(inner tracker #mu)/events/0/1"          ,
-                             "#chi^{2} (global trackfit #mu)/events/1/1",
-                             "d_{xy} (#mu wrt. beamspot)/events/0/1" ,
-                             "d_{z} (#mu)/events/0/10"               ,
-                             "E_{Ecal} (#mu)/events/1/1",
-                             "E_{Hcal} (#mu)/events/1/1",
-                             "PF relIso(#mu)/events/0/1",
-                             "N_{matched #mu segments}(#mu)/events/0/1",
-			     // (III) after btagging 
-			     // (i) muon monitoring
-			     "PF relIso(#mu)/events/0/1",
-                             "p_{t}(#mu)/events/0/2",
-		             "#eta(#mu)/events/0/10",
-		             "#phi(#mu)/events/0/10",
-                           };
-
+    // (ib) electron monitoring
+    "N_{e}/events/0/1" ,
+    "E(e)/events/0/2",
+    "E_{t}(e)/events/0/1" ,
+    "#eta(e)/events/0/5",
+    "#phi(e)/events/0/5",
+    "#eta(S.C.)/events/0/1"  ,
+    "d_{xy} (e wrt. beamspot)/events/0/1",
+    "simpleEleId70cIso/events/0/1", 
+    "nHitsInner(conv)/events/0/1",
+    "convCot/events/0/5",
+    "convDist/events/0/5" ,
+    "PF relIso(e)/events/0/1" ,
+    // (ib) electron monitoring
+    "PF relIso(e)/events/0/1" ,
+    "E_{t}(e)/events/0/2",
+    "#eta(e)/events/0/1",
+    "#phi(e)/events/0/1"
+  };
+	
+  TString axisLabel1Dmu[ ] = {// (I) preselection
+    // (i) muon monitoring
+    //"N_{hits}(inner tracker #mu)/events/0/1"          ,
+    //"#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
+    //"d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
+    //"d_{z} (#mu(pt,#eta))/events/0/10",
+    //"N_{matched #mu segments}(#mu(pt,#eta))/events/0/1",
+    //"#DeltaR(jet(pt,#eta,ID), #mu(pt, #eta, track criteria))/events/0/1",
+    //"relIso(#mu(no isolation))/events/0/1",
+    //"N_{#mu}/events/0/1",
+    // (II) before btagging
+    // (i) muon monitoring
+    "N_{#mu}/events/0/1"   ,
+    "E(#mu)/events/0/2"    ,
+    "p_{t}(#mu)/events/0/1",
+    "#eta(#mu)/events/0/5" ,
+    "y(#mu)/events/0/5"    ,	
+    "#phi(#mu)/events/0/5" ,
+    "N_{hits}(inner tracker #mu)/events/0/1"          ,
+    "#chi^{2} (global trackfit #mu)/events/1/1",
+    "d_{xy} (#mu wrt. beamspot)/events/0/1" ,
+    "d_{z} (#mu)/events/0/10"               ,
+    "E_{Ecal} (#mu)/events/1/1",
+    "E_{Hcal} (#mu)/events/1/1",
+    "PF relIso(#mu)/events/0/1",
+    "N_{matched #mu segments}(#mu)/events/0/1",
+    // (III) after btagging 
+    // (i) muon monitoring
+    "PF relIso(#mu)/events/0/1",
+    "p_{t}(#mu)/events/0/2",
+    "#eta(#mu)/events/0/10",
+    "#phi(#mu)/events/0/10",
+  };
+	
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {
-                           };
+  };
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
   if(decayChannel=="electron") N1Dplots+=(sizeof(plots1De )/sizeof(TString));
@@ -353,12 +357,12 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   if((N1Dplots != Naxislabels)||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
-
+	
   // ---
   //    open our standard analysis files
   // ---
   std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
-  
+	
   // ---
   //    loading histos
   // ---
@@ -368,8 +372,8 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   if(decayChannel=="electron") plotList_.insert( plotList_.end(), plots1De , plots1De  + sizeof(plots1De )/sizeof(TString) );
   if(decayChannel=="muon"    ) plotList_.insert( plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString) );
   plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
-
-
+	
+	
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -380,7 +384,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   // histo_ and histo2_ and count total # of plots as Nplots
   if(verbose>0) std::cout << std::endl;
   getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel );
-
+	
   // ---
   //    lumiweighting for choosen luminosity
   // ---
@@ -388,7 +392,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
   scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
-
+	
   // ---
   //    add single top channels and DiBoson contributions
   // ---
@@ -398,7 +402,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   // reCreate: reCreate combined plots if they are already existing
   bool reCreate=true;
   AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
-
+	
   // ---
   //    configure histograms
   // ---
@@ -428,7 +432,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
       // a) 1D
       if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){ 
 	// default
-	histogramStyle( *histo_[plotList_[plot]][sample], sample, true );
+	histogramStyle( *histo_[plotList_[plot]][sample], sample, true);
 	// special configurations
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall")histo_[plotList_[plot]][sample]->SetNdivisions(816);
       }
@@ -436,52 +440,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
     }
   }
-
-  // ---
-  //    event composition
-  // ---
-  std::map< TString, std::map <unsigned int, double> > events_;
-  // a) get event numbers
-  std::vector<TString> selection_;
-  selection_.push_back("tightJetKinematics/n"      );
-  selection_.push_back("tightJetKinematicsTagged/n");
-  unsigned int MCBG=42;
-  events_[selection_[0]][MCBG]=0;
-  events_[selection_[1]][MCBG]=0;
-  // loop pretagged/tagged
-  for(unsigned int step=0; step<=1; ++step){
-    // loop samples
-    for(unsigned int sample=kSig; sample<=kData; ++sample){
-      // save number
-      events_[selection_[step]][sample]=histo_[selection_[step]][sample]->Integral(0,histo_[selection_[step]][sample]->GetNbinsX()+1);
-      // add non ttbar MC
-      if(sample>kSig&&sample<kData) events_[selection_[step]][MCBG]+=events_[selection_[step]][sample];
-    }
-  }
-  // b) print composition
-  if(verbose>=0){
-    // loop pretagged/tagged
-    for(unsigned int step=0; step<=1; ++step){    
-      // print label
-      std::cout << "event composition";
-      if(step==0)  std::cout << " (pre-tagged)" << std::endl;
-      if(step==1)  std::cout << " (tagged)" << std::endl;
-      // all MC events
-      double NAllMC=events_[selection_[step]][kSig]+events_[selection_[step]][MCBG];
-      // print yield and composition
-      std::cout << "events observed in data: " << events_[selection_[step]][kData] << std::endl;
-      std::cout << "events expected from MC: " << NAllMC << std::endl;
-      std::cout << "expected event composition:"   << std::endl; 
-      std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
-      std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
-      std::cout << "W+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl;
-      std::cout << "Z+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
-      std::cout << "QCD:  "      << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
-      std::cout << "single top:" << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
-      std::cout << "diboson:"    << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
-    }
-  }
-
+	
   // ---
   //    rebinning 1D histograms
   // ---
@@ -500,7 +459,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
       }
     }
   }
-
+	
   // ---
   //    create legends
   // ---
@@ -537,7 +496,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
       }
     }
   }
-
+	
   // ---
   //    create canvas
   // ---
@@ -551,7 +510,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
     plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
     //canvasStyle(*plotCanvas_[sample]);
   }
-
+	
   // ---
   //    change 1D plots into stack plots
   // ---
@@ -561,7 +520,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
     createStackPlot(plotList_, histo_, plot, N1Dplots, verbose, decayChannel);
   }
   if(verbose>1) std::cout << std::endl;
- 
+	
   // ---
   //    do the printing
   // ---
@@ -629,10 +588,11 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
 	    if(plotList_[plot].Contains("bottomJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
 	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,350);
 	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);
-
+						
 	    // axis style
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
-	    if(max<1000) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	    if(max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
 	    // draw histos (as stack)
 	    histo_[plotList_[plot]][sample]->Draw("hist");
@@ -653,11 +613,11 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection
 	      TString label = "pre-tagged";
-	      if(plotList_[plot].Contains("Tagged")) label = "tagged";
-	      if(plotList_[plot].Contains("PreSel")) label = "pre-selected";
+	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
+	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 			1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 32       );
-	       // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
+	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
 	      if (decayChannel=="muon") DrawDecayChLabel("#mu + jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + jets");
 	      else DrawDecayChLabel("e/#mu + jets Combined");
@@ -665,7 +625,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
 	      DrawCMSLabels(true,luminosity); 
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0)){
-		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, verbose);	       
+		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, myStyle, verbose);	       
 	      }
 	    }
 	  }
@@ -690,7 +650,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
 	double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
 	char correlation[20];
 	sprintf(correlation, "%f", d);
-        TString corr = (TString)correlation;
+	TString corr = (TString)correlation;
 	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
       }
     }
@@ -708,7 +668,7 @@ TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon
   plotCanvas_[canvasNumber]->SetTitle("legendMonitoringAfterBtagging");
   leg1->Draw("");
   ++canvasNumber;
-
+	
   // ---
   // saving
   // ---
