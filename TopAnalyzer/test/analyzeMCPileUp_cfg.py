@@ -1,15 +1,24 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("Demo")
+process = cms.Process("USER")
+
+# ================
+#  Message Logger
+# ================
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
-
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 50000
 
+# ==========================
+#  Configuration of Process
+# ==========================
+
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+
 process.TFileService = cms.Service("TFileService", fileName = cms.string("MC_PUDist.root") )
 
-# source files
+#### Input Files
 
 #process.load("TopAnalysis.Configuration.samples.Spring11_WJets_PATtuple_cff")
 
@@ -24,12 +33,16 @@ process.load("TopAnalysis.Configuration.samples.Summer11_TTJets_TuneZ2_7TeV_madg
 #process.load("TopAnalysis.Configuration.samples.Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia_cff")
 #process.load("TopAnalysis.Configuration.samples.Summer11_QCD_Pt_80to170_EMEnriched_TuneZ2_7TeV_pythia6_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
-
 #process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
 
-process.MCPUDistribution = cms.EDAnalyzer('MCPileUp',                                     
-                                          PUSource    = cms.InputTag("addPileupInfo"),
-                                          )
+#### Number of Events
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+
+#### Load default configuration
+
+process.load("TopAnalysis.TopAnalyzer.MCPileUp_cfi")
+
+#### Define path
 
 process.p = cms.Path(process.MCPUDistribution)

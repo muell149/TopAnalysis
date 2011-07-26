@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("TEST")
+process = cms.Process("USER")
 
 # ================
 #  Message Logger
@@ -28,12 +28,10 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring("file
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
-process.PUControlDistributions = cms.EDAnalyzer('PUControlDistributionsAnalyzer',                                     
-                                                PUSource                = cms.InputTag("addPileupInfo"),
-                                                PVertexSource           = cms.InputTag("offlinePrimaryVertices"),
-                                                PUEventWeightSource     = cms.InputTag("eventWeightPU","eventWeightPU"),
-                                                PUEventWeightUpSource   = cms.InputTag("eventWeightPU","eventWeightPUUp"),
-                                                PUEventWeightDownSource = cms.InputTag("eventWeightPU","eventWeightPUDown")                                                
-                                                )
+#### Load default configuration
+
+process.load("TopAnalysis.TopAnalyzer.PUControlDistributions_cfi")
+
+#### Define path
 
 process.p = cms.Path(process.PUControlDistributions)
