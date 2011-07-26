@@ -119,7 +119,7 @@ double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   if (decayChannel.compare("muon")==0) {
     result = 0.964155;
     if(newSpring11MC) result = 0.9581;// TO BE DERIVED
-    if(newSummer11MC) result = 0.9946
+    if(newSummer11MC) result = 0.9946;
   }
   else if (decayChannel.compare("electron")==0) {
     result = 1.0;                   // TO BE DERIVED
@@ -1609,6 +1609,34 @@ void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=0)
     }
   }
 }
+
+ TH1F* getTheoryPrediction(TString plotName="", TString fileName="")
+{
+
+  // check if input is valid
+  if(plotName==""||fileName==""){
+    std::cout << "ERROR: no plotName or filename chosen in function getTheoryPrediction" << std::endl;
+    exit(0);
+  }
+  // load file
+  TFile* file = new (TFile)(fileName);
+  // check if file is valid
+  if(file->IsZombie()){
+    std::cout << "ERROR: input file " << fileName << " in function getTheoryPrediction is zombie" << std::endl;
+    exit(0);
+  }
+  // get plot
+  TH1* targetPlot;
+  file->GetObject(plotName, targetPlot);
+  // check if plot exists
+  if(!targetPlot){
+    std::cout << "ERROR in function getTheoryPrediction: plot " << plotName;
+    std::cout << " does not exist in file " << fileName << std::endl;    
+    exit(0);
+  }
+  return (TH1F*)targetPlot;
+}
+
 
 #ifdef DILEPTON_MACRO
 }
