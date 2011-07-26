@@ -9,7 +9,13 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
      20:sysQCDup         21:sysQCDdown
   */
-
+  
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  TGaxis::SetMaxDigits(2);
+  myStyle.cd();
+  gROOT->SetStyle("HHStyle");
+  
   // ---
   //    parameter Configuration
   // ---
@@ -42,13 +48,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
-  // define some rootstyle options
-
-  gROOT->SetStyle("Plain");
-  TGaxis::SetMaxDigits(2);
-  gStyle->SetEndErrorSize(8);
-  gStyle->SetErrorX(0);
-
+  
   // ---
   //    basic printout and variable definitions
   // ---
@@ -83,7 +83,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
   }
   if(verbose>0) std::cout << "target folder containing cross section plots: " << xSecFolder << std::endl;
   if(verbose>0&&save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
-
+  
   // ---
   //    open rootfile
   // ---
@@ -122,8 +122,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	    calculateError_[xSecVariables_[i]][sys]=true;
 	  }
 	  if(!plot&&verbose>1){ 
-	      std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
-	      std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
+	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
+	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
 	}
 	if(adpatOldUncertainties&&!canvas&&sys!=sysNo){
@@ -335,7 +335,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
     // needed to be able to use the saveToRootFile function 
     // which also opens the file
     file->Close();
-
+    
     // ---
     //    part C:draw plot with combined systematic+statistic error
     //           in new cross section plot
@@ -358,7 +358,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      relUnCertaintyCanvas->SetBottomMargin(0.30);
 	      relUnCertaintyCanvas->SetLeftMargin(0.10);
 	      relUnCertaintyCanvas->SetRightMargin(0.10);
-	      relUnCertaintyCanvas->SetTopMargin   (0.07);
+	      relUnCertaintyCanvas->SetTopMargin(0.07);
 	      relUnCertaintyCanvas->cd(0);
 	      relUnCertaintyCanvas->SetGrid(1,1);
 	      // draw plot into canvas
@@ -370,12 +370,15 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      double max = errMax;
 	      double min = errMin;
 	      if(histMax>errMax||histMin<errMin){
-		  double newRange=1.2*histMax;
-		  if(fabs(histMax)<fabs(histMin)) newRange=-1.2*histMin;
-		  max=newRange;
-		  min=-1*newRange;
+		double newRange=1.2*histMax;
+		if(fabs(histMax)<fabs(histMin)) newRange=-1.2*histMin;
+		max=newRange;
+		min=-1*newRange;
 	      }
 	      TGaxis *axis = new TGaxis(xPosition,-1*max,xPosition,max,min,max,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
+	      axis->SetLabelSize(myStyle.GetLabelSize());
+	      axis->SetLabelFont(myStyle.GetLabelFont());
+	      axis->SetLabelOffset(myStyle.GetLabelOffset());
 	      axis->Draw("same");
 	      // redraw to have statistical error as +/-
 	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
@@ -412,8 +415,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      if(save){
 		TString saveName=outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin);
 		if(decayChannel=="combined") saveName+="Combined";
-		  relUnCertaintyCanvas->Print(saveName+".eps");
-		  relUnCertaintyCanvas->Print(saveName+".png");
+		relUnCertaintyCanvas->Print(saveName+".eps");
+		relUnCertaintyCanvas->Print(saveName+".png");
 	      }
 	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      // delete canvas
@@ -448,11 +451,12 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      int xSecBin=roundToInt(histo_["inclusive"][sysNo]->GetBinContent(1)*((double)NxSecBins)/xSecMax)+1;
 	      finalInclusiveXSec->SetBinContent(xSecBin, 1);
 	      finalInclusiveXSec->SetBinError(xSecBin, 0);
-	      histogramStyle(*finalInclusiveXSec, kData , false, 2.5);
+	      histogramStyle(*finalInclusiveXSec, kData , false);
 	      axesStyle(*finalInclusiveXSec, "#sigma(t#bar{t}#rightarrowX) [pb]", " ", 0, 4);
 	      finalInclusiveXSec->GetYaxis()->SetNdivisions(0);
 	      finalInclusiveXSec->GetXaxis()->SetNdivisions(510);
-	      finalInclusiveXSec->GetYaxis()->SetTitleSize(0.0);
+	      finalInclusiveXSec->GetXaxis()->SetNoExponent(true);
+	      finalInclusiveXSec->GetYaxis()->SetTitleSize(0.0);							
 	      finalInclusiveXSec->Draw("axis");
 	      // draw Theory expectation     
 	      double theoryXSecNLL=165;
@@ -472,12 +476,12 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      double xSecValue=histo_["inclusive"][sysNo]->GetBinContent(1);
 	      double totalErrorUp  = totalErrors_[xSecVariables_[i]]->GetErrorYhigh(1);
 	      double totalErrorDown= totalErrors_[xSecVariables_[i]]->GetErrorYlow(1);
-// 	      if(verbose>0){
-// 		std::cout << "xSec: "        << xSecValue << std::endl;
-// 		std::cout << "stat. error: +/-" << xSecError << std::endl;
-// 		std::cout << "tot. error up  : " << totalErrorUp   << std::endl;	      
-// 		std::cout << "tot. error down: " << totalErrorDown << std::endl;
-// 	      }
+	      // 	      if(verbose>0){
+	      // 		std::cout << "xSec: "        << xSecValue << std::endl;
+	      // 		std::cout << "stat. error: +/-" << xSecError << std::endl;
+	      // 		std::cout << "tot. error up  : " << totalErrorUp   << std::endl;	      
+	      // 		std::cout << "tot. error down: " << totalErrorDown << std::endl;
+	      // 	      }
 	      totalErrors_[xSecVariables_[i]+"ANinclusive"] = new TGraphAsymmErrors(1);
 	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetLineWidth(3);
 	      totalErrors_[xSecVariables_[i]+"ANinclusive"]->SetMarkerSize(2.2);
@@ -505,16 +509,15 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      drawLine(cmsxSecValue-cmsStatError, 2.99, cmsxSecValue+cmsStatError, 2.99, kRed, 7, 1);
 	      finalInclusiveXSec->Draw("axis same");
 	      // label 
-	      DrawLabel("CMS 2010 combined"     , 0.06, 0.7 , 0.5 , 0.8 , 0.04);
-	      DrawLabel("(TOP-11-001)"          , 0.06, 0.65, 0.5 , 0.75, 0.04);
-	      DrawLabel("2010 data, 36 pb^{-1}" , 0.62, 0.7 , 0.95, 0.8 , 0.04);
+	      DrawLabel("CMS 2010 combined"     , 0.07, 0.70, 0.4, 0.75); 
+	      DrawLabel("2010 data, 36 pb^{-1}" , 0.07, 0.65, 0.4, 0.70);
+	      DrawLabel("(TOP-11-001)"          , 0.07, 0.60, 0.4, 0.65);
 	      TString channelLabel="unknown";
-	      if(decayChannel.Contains("mu")) channelLabel="#mu";
-	      if(decayChannel.Contains("el")) channelLabel="e";
-	      TString AN="TOP-11-013, "+channelLabel+" channel";
-	      DrawLabel(AN                      , 0.06, 0.3 , 0.5 , 0.4 , 0.04);
-	      DrawLabel(dataSample+" data, "+getTStringFromInt(roundToInt(luminosity))+" pb^{-1}", 0.62, 0.3 , 0.95, 0.4 , 0.04);
-
+	      TString dataLabel=Form(dataSample+" data, %2.1f fb^{-1}",luminosity/1000);
+	      if(decayChannel.Contains("mu")) channelLabel="#mu + Jets";
+	      if(decayChannel.Contains("el")) channelLabel="e + Jets";
+	      DrawLabel(channelLabel, 0.07, 0.30, 0.4, 0.35);
+	      DrawLabel(dataLabel,    0.07, 0.25, 0.4, 0.30);
 	      canvas=(TCanvas*)canvas2->Clone();
 	    }
 	    // for differential xSecs
@@ -525,7 +528,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      totalErrors_[xSecVariables_[i]]->GetXaxis()->SetNoExponent(true);
 	      double max=totalErrors_[xSecVariables_[i]]->GetMaximum();
 	      max*=1.3;
-	      if(max>1&&max<100) totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(true);
+	      if(max>1&&max<100) totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(false);
+	      else totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(true);
 	      // Draw errors into Canvas
 	      totalErrors_[xSecVariables_[i]]->Draw("p same");
 	      canvas->SetName (xSecVariables_[i]);
@@ -537,8 +541,6 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
 	    // b) as eps and png
 	    if(save){
-	      canvas->SetBottomMargin(0.15);
-	      canvas->SetLeftMargin(0.17);
 	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
 	      if(decayChannel=="combined") saveName+="Combined";
 	      canvas->Print(saveName+".eps");
