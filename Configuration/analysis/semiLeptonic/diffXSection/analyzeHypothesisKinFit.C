@@ -3,13 +3,23 @@
 void analyzeHypothesisKinFit(double luminosity = 1090.0, bool save = false, int systematicVariation=sysNo, unsigned int verbose=1,
 			     //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
-std::string decayChannel = "muon" )
+			     std::string decayChannel = "muon" )
 {
+  // c) set root style
+  // set root style
+  
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  TGaxis::SetMaxDigits(2);
+  myStyle.cd();
+  gROOT->SetStyle("HHStyle");
+  gROOT->ForceStyle();	
+  
   //  ---
   //     name conventions
   //  ---
   // a) enumerator sample convention (as defined in basicFunctions.h)
-     /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
+  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
   // kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW 
   // b) file name convention (implemented in basicFunctions.h)
   // "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
@@ -20,7 +30,7 @@ std::string decayChannel = "muon" )
   // MCProductionCycle= "Fall10"
   // systematicVariation= "JESup", "JESdown", "JERup", "JERdown", "PileUp", "ScaleUp", 
   //                      "ScaleDown", "MatchUp", "MatchDown"
-
+  
   //  ---
   //     options
   //  ---
@@ -66,332 +76,327 @@ std::string decayChannel = "muon" )
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
 
-  // c) set root style
 
-  gROOT->Reset();
-  setHHStyle();
-
-  TGaxis::SetMaxDigits(2);
 
   //  ---
   //     choose plots
   //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
   TString plots1D[ ] = { // general fit performance
-                         "analyzeTopRecoKinematicsKinFit/prob"       , 
-			 "analyzeTopRecoKinematicsKinFit/chi2"       , 
-			 "analyzeTopRecoKinematicsKinFit/delChi2"    ,
-			 // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-			 "analyzeHypoKinFit/hadBQuark"               , 
-			 "analyzeHypoKinFit/lepBQuark"               , 
-			 "analyzeHypoKinFit/lightQuark"              , 
-			 "analyzeHypoKinFit/wrongAssign"             ,
-			 "analyzeTopRecoKinematicsKinFit/qAssignment",
-			 "analyzeHypoKinFit/PartonJetDRall"          ,
-			 // pull distributions
- 			 "analyzeHypoKinFit/hadBQuarkPt"             ,
- 			 "analyzeHypoKinFit/hadBQuarkEta"            ,
- 			 "analyzeHypoKinFit/hadBQuarkPhi"            ,
- 			 "analyzeHypoKinFit/lepBQuarkPt"             ,
- 			 "analyzeHypoKinFit/lepBQuarkEta"            ,
- 			 "analyzeHypoKinFit/lepBQuarkPhi"            ,
- 			 "analyzeHypoKinFit/lightQuarkPt"            ,
- 			 "analyzeHypoKinFit/lightQuarkEta"           ,
- 			 "analyzeHypoKinFit/lightQuarkPhi"           ,
- 			 "analyzeHypoKinFit/leptonPt"                ,
- 			 "analyzeHypoKinFit/leptonEta"               ,
- 			 "analyzeHypoKinFit/leptonPhi"               ,
- 			 "analyzeHypoKinFit/neutrinoPt"              ,
- 			 "analyzeHypoKinFit/neutrinoEta"             ,
- 			 "analyzeHypoKinFit/neutrinoPhi"             ,
- 			 "analyzeHypoKinFit/lepWPt"                  ,
- 			 "analyzeHypoKinFit/lepWEta"                 ,
- 			 "analyzeHypoKinFit/lepWPhi"                 ,
- 			 "analyzeHypoKinFit/hadWPt"                  ,
- 			 "analyzeHypoKinFit/hadWEta"                 ,
- 			 "analyzeHypoKinFit/hadWPhi"                 ,
-			 // reconstructed top quantities
-                         "analyzeTopRecoKinematicsKinFit/topMass"    ,
-                         "analyzeTopRecoKinematicsKinFit/topPt"      ,                         
-                         "analyzeTopRecoKinematicsKinFit/topPhi"     ,
-                         "analyzeTopRecoKinematicsKinFit/topY"       ,
-                         "analyzeTopRecoKinematicsKinFit/topPtHad"   ,
-                         "analyzeTopRecoKinematicsKinFit/topPhiHad"  ,
-                         "analyzeTopRecoKinematicsKinFit/topYHad"    ,
-                         "analyzeTopRecoKinematicsKinFit/topPtLep"   ,
-                         "analyzeTopRecoKinematicsKinFit/topPhiLep"  ,
-                         "analyzeTopRecoKinematicsKinFit/topYLep"    ,
-			 // reconstructed angular distributions
-                         "analyzeTopRecoKinematicsKinFit/bbbarAngle"  ,
-                         "analyzeTopRecoKinematicsKinFit/bbbarAngleTtRF",
-                         "analyzeTopRecoKinematicsKinFit/WWAngle"     ,
-                         "analyzeTopRecoKinematicsKinFit/topWAngleLep",
-                         "analyzeTopRecoKinematicsKinFit/topWAngleHad",
-                         "analyzeTopRecoKinematicsKinFit/topBAngleLep",
-                         "analyzeTopRecoKinematicsKinFit/topBAngleHad",
-                         "analyzeTopRecoKinematicsKinFit/bWAngleLep"  ,
-                         "analyzeTopRecoKinematicsKinFit/bWAngleHad"  ,
-                         "analyzeTopRecoKinematicsKinFit/qqbarAngle"  ,
-                         "analyzeTopRecoKinematicsKinFit/qBlepAngle"  ,
-                         "analyzeTopRecoKinematicsKinFit/qBhadAngle"  ,
-			 "analyzeTopRecoKinematicsKinFit/lepBlepAngle",
-			 "analyzeTopRecoKinematicsKinFit/lepBlepAngleTtRF",
-			 "analyzeTopRecoKinematicsKinFit/lepBhadAngle",
-			 "analyzeTopRecoKinematicsKinFit/lepQAngle"   ,
-			 "analyzeTopRecoKinematicsKinFit/MuonNeutrinoAngle",
-			 "analyzeTopRecoKinematicsKinFit/lepBNeutrinoAngle",
-			 "analyzeTopRecoKinematicsKinFit/hadBNeutrinoAngle",
-			 "analyzeTopRecoKinematicsKinFit/qNeutrinoAngle"   ,
-			 "analyzeTopRecoKinematicsKinFit/lepWDir"     ,
-			 "analyzeTopRecoKinematicsKinFit/nuWDir"      ,
-			 "analyzeTopRecoKinematicsKinFit/qWDir"       ,
-			 // reconstructed event shape variables
-			 "analyzeTopRecoKinematicsKinFit/aplanarity" ,
-			 "analyzeTopRecoKinematicsKinFit/sphericity" ,
-			 "analyzeTopRecoKinematicsKinFit/C"          ,
-			 "analyzeTopRecoKinematicsKinFit/D"          ,
-			 "analyzeTopRecoKinematicsKinFit/circularity",
-			 "analyzeTopRecoKinematicsKinFit/isotropy"   ,
-			 // generated top quantities
-                         "analyzeTopPartonLevelKinematics/topMass"      , 
-			 "analyzeTopPartonLevelKinematics/topPt"        ,    
-			 "analyzeTopPartonLevelKinematicsPhaseSpace/topPt", 
-                         "analyzeTopPartonLevelKinematics/topPhi"       ,
-                         "analyzeTopPartonLevelKinematics"+PS+"/topY",
-                         "analyzeTopPartonLevelKinematics/topPtHad"     ,
-                         "analyzeTopPartonLevelKinematics/topPhiHad"    ,
-                         "analyzeTopPartonLevelKinematics/topYHad"      ,
-                         "analyzeTopPartonLevelKinematics/topPtLep"     ,
-                         "analyzeTopPartonLevelKinematics/topPhiLep"    ,
-                         "analyzeTopPartonLevelKinematics/topYLep"      ,
-			 // generated angular distributions
-			 "analyzeTopPartonLevelKinematics/bbbarAngle"   ,
-			 "analyzeTopPartonLevelKinematics/bbbarAngleTtRF",
-                         "analyzeTopPartonLevelKinematics/WWAngle"     ,
-                         "analyzeTopPartonLevelKinematics/topWAngleLep",
-                         "analyzeTopPartonLevelKinematics/topWAngleHad",
-                         "analyzeTopPartonLevelKinematics/topBAngleLep",
-                         "analyzeTopPartonLevelKinematics/topBAngleHad",
-                         "analyzeTopPartonLevelKinematics/bWAngleLep"  ,
-                         "analyzeTopPartonLevelKinematics/bWAngleHad"  ,
-                         "analyzeTopPartonLevelKinematics/qqbarAngle"  ,
-                         "analyzeTopPartonLevelKinematics/qBlepAngle"  ,
-                         "analyzeTopPartonLevelKinematics/qBhadAngle"  ,
-			 "analyzeTopPartonLevelKinematics/lepBlepAngle",
-			 "analyzeTopPartonLevelKinematics/lepBlepAngleTtRF",
-			 "analyzeTopPartonLevelKinematics/lepBhadAngle",
-			 "analyzeTopPartonLevelKinematics/lepQAngle"   ,
-			 "analyzeTopPartonLevelKinematics/MuonNeutrinoAngle",
-			 "analyzeTopPartonLevelKinematics/lepBNeutrinoAngle",
-			 "analyzeTopPartonLevelKinematics/hadBNeutrinoAngle",
-			 "analyzeTopPartonLevelKinematics/qNeutrinoAngle"   ,
-			 "analyzeTopPartonLevelKinematics/lepWDir"     ,
-			 "analyzeTopPartonLevelKinematics/qWDir"       ,
-			 "analyzeTopPartonLevelKinematics/nuWDir"      ,
-			 // reconstructed ttbar quantities
-                         "analyzeTopRecoKinematicsKinFit/ttbarMass"  ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarPt"    ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarY"     ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarHT"    ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarSumY"  ,
-			 "analyzeTopRecoKinematicsKinFit/ttbarDelPhi",
-			 "analyzeTopRecoKinematicsKinFit/ttbarDelY"  ,
-			 // generated ttbar quantities
-                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarMass",
-                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarPt"  ,
-                         "analyzeTopPartonLevelKinematics"+PS+"/ttbarY"   ,
-                         "analyzeTopPartonLevelKinematics/ttbarHT"    ,
-                         "analyzeTopPartonLevelKinematics/ttbarSumY"  ,
-			 "analyzeTopPartonLevelKinematics/ttbarDelPhi",
-			 "analyzeTopPartonLevelKinematics/ttbarDelY"  ,
-			 // reconstructed lepton quantities
-			 "analyzeTopRecoKinematicsKinFit/lepPt" ,
-			 "analyzeTopRecoKinematicsKinFit/lepEta",
-			 // generated lepton quantities
-			 "analyzeTopPartonLevelKinematics"+PS+"/lepPt" ,
-			 "analyzeTopPartonLevelKinematics"+PS+"/lepEta"
-                       };
+    "analyzeTopRecoKinematicsKinFit/prob"       , 
+    "analyzeTopRecoKinematicsKinFit/chi2"       , 
+    "analyzeTopRecoKinematicsKinFit/delChi2"    ,
+    // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
+    "analyzeHypoKinFit/hadBQuark"               , 
+    "analyzeHypoKinFit/lepBQuark"               , 
+    "analyzeHypoKinFit/lightQuark"              , 
+    "analyzeHypoKinFit/wrongAssign"             ,
+    "analyzeTopRecoKinematicsKinFit/qAssignment",
+    "analyzeHypoKinFit/PartonJetDRall"          ,
+    // pull distributions
+    "analyzeHypoKinFit/hadBQuarkPt"             ,
+    "analyzeHypoKinFit/hadBQuarkEta"            ,
+    "analyzeHypoKinFit/hadBQuarkPhi"            ,
+    "analyzeHypoKinFit/lepBQuarkPt"             ,
+    "analyzeHypoKinFit/lepBQuarkEta"            ,
+    "analyzeHypoKinFit/lepBQuarkPhi"            ,
+    "analyzeHypoKinFit/lightQuarkPt"            ,
+    "analyzeHypoKinFit/lightQuarkEta"           ,
+    "analyzeHypoKinFit/lightQuarkPhi"           ,
+    "analyzeHypoKinFit/leptonPt"                ,
+    "analyzeHypoKinFit/leptonEta"               ,
+    "analyzeHypoKinFit/leptonPhi"               ,
+    "analyzeHypoKinFit/neutrinoPt"              ,
+    "analyzeHypoKinFit/neutrinoEta"             ,
+    "analyzeHypoKinFit/neutrinoPhi"             ,
+    "analyzeHypoKinFit/lepWPt"                  ,
+    "analyzeHypoKinFit/lepWEta"                 ,
+    "analyzeHypoKinFit/lepWPhi"                 ,
+    "analyzeHypoKinFit/hadWPt"                  ,
+    "analyzeHypoKinFit/hadWEta"                 ,
+    "analyzeHypoKinFit/hadWPhi"                 ,
+    // reconstructed top quantities
+    "analyzeTopRecoKinematicsKinFit/topMass"    ,
+    "analyzeTopRecoKinematicsKinFit/topPt"      ,                         
+    "analyzeTopRecoKinematicsKinFit/topPhi"     ,
+    "analyzeTopRecoKinematicsKinFit/topY"       ,
+    "analyzeTopRecoKinematicsKinFit/topPtHad"   ,
+    "analyzeTopRecoKinematicsKinFit/topPhiHad"  ,
+    "analyzeTopRecoKinematicsKinFit/topYHad"    ,
+    "analyzeTopRecoKinematicsKinFit/topPtLep"   ,
+    "analyzeTopRecoKinematicsKinFit/topPhiLep"  ,
+    "analyzeTopRecoKinematicsKinFit/topYLep"    ,
+    // reconstructed angular distributions
+    "analyzeTopRecoKinematicsKinFit/bbbarAngle"  ,
+    "analyzeTopRecoKinematicsKinFit/bbbarAngleTtRF",
+    "analyzeTopRecoKinematicsKinFit/WWAngle"     ,
+    "analyzeTopRecoKinematicsKinFit/topWAngleLep",
+    "analyzeTopRecoKinematicsKinFit/topWAngleHad",
+    "analyzeTopRecoKinematicsKinFit/topBAngleLep",
+    "analyzeTopRecoKinematicsKinFit/topBAngleHad",
+    "analyzeTopRecoKinematicsKinFit/bWAngleLep"  ,
+    "analyzeTopRecoKinematicsKinFit/bWAngleHad"  ,
+    "analyzeTopRecoKinematicsKinFit/qqbarAngle"  ,
+    "analyzeTopRecoKinematicsKinFit/qBlepAngle"  ,
+    "analyzeTopRecoKinematicsKinFit/qBhadAngle"  ,
+    "analyzeTopRecoKinematicsKinFit/lepBlepAngle",
+    "analyzeTopRecoKinematicsKinFit/lepBlepAngleTtRF",
+    "analyzeTopRecoKinematicsKinFit/lepBhadAngle",
+    "analyzeTopRecoKinematicsKinFit/lepQAngle"   ,
+    "analyzeTopRecoKinematicsKinFit/MuonNeutrinoAngle",
+    "analyzeTopRecoKinematicsKinFit/lepBNeutrinoAngle",
+    "analyzeTopRecoKinematicsKinFit/hadBNeutrinoAngle",
+    "analyzeTopRecoKinematicsKinFit/qNeutrinoAngle"   ,
+    "analyzeTopRecoKinematicsKinFit/lepWDir"     ,
+    "analyzeTopRecoKinematicsKinFit/nuWDir"      ,
+    "analyzeTopRecoKinematicsKinFit/qWDir"       ,
+    // reconstructed event shape variables
+    "analyzeTopRecoKinematicsKinFit/aplanarity" ,
+    "analyzeTopRecoKinematicsKinFit/sphericity" ,
+    "analyzeTopRecoKinematicsKinFit/C"          ,
+    "analyzeTopRecoKinematicsKinFit/D"          ,
+    "analyzeTopRecoKinematicsKinFit/circularity",
+    "analyzeTopRecoKinematicsKinFit/isotropy"   ,
+    // generated top quantities
+    "analyzeTopPartonLevelKinematics/topMass"      , 
+    "analyzeTopPartonLevelKinematics/topPt"        ,    
+    "analyzeTopPartonLevelKinematicsPhaseSpace/topPt", 
+    "analyzeTopPartonLevelKinematics/topPhi"       ,
+    "analyzeTopPartonLevelKinematics"+PS+"/topY",
+    "analyzeTopPartonLevelKinematics/topPtHad"     ,
+    "analyzeTopPartonLevelKinematics/topPhiHad"    ,
+    "analyzeTopPartonLevelKinematics/topYHad"      ,
+    "analyzeTopPartonLevelKinematics/topPtLep"     ,
+    "analyzeTopPartonLevelKinematics/topPhiLep"    ,
+    "analyzeTopPartonLevelKinematics/topYLep"      ,
+    // generated angular distributions
+    "analyzeTopPartonLevelKinematics/bbbarAngle"   ,
+    "analyzeTopPartonLevelKinematics/bbbarAngleTtRF",
+    "analyzeTopPartonLevelKinematics/WWAngle"     ,
+    "analyzeTopPartonLevelKinematics/topWAngleLep",
+    "analyzeTopPartonLevelKinematics/topWAngleHad",
+    "analyzeTopPartonLevelKinematics/topBAngleLep",
+    "analyzeTopPartonLevelKinematics/topBAngleHad",
+    "analyzeTopPartonLevelKinematics/bWAngleLep"  ,
+    "analyzeTopPartonLevelKinematics/bWAngleHad"  ,
+    "analyzeTopPartonLevelKinematics/qqbarAngle"  ,
+    "analyzeTopPartonLevelKinematics/qBlepAngle"  ,
+    "analyzeTopPartonLevelKinematics/qBhadAngle"  ,
+    "analyzeTopPartonLevelKinematics/lepBlepAngle",
+    "analyzeTopPartonLevelKinematics/lepBlepAngleTtRF",
+    "analyzeTopPartonLevelKinematics/lepBhadAngle",
+    "analyzeTopPartonLevelKinematics/lepQAngle"   ,
+    "analyzeTopPartonLevelKinematics/MuonNeutrinoAngle",
+    "analyzeTopPartonLevelKinematics/lepBNeutrinoAngle",
+    "analyzeTopPartonLevelKinematics/hadBNeutrinoAngle",
+    "analyzeTopPartonLevelKinematics/qNeutrinoAngle"   ,
+    "analyzeTopPartonLevelKinematics/lepWDir"     ,
+    "analyzeTopPartonLevelKinematics/qWDir"       ,
+    "analyzeTopPartonLevelKinematics/nuWDir"      ,
+    // reconstructed ttbar quantities
+    "analyzeTopRecoKinematicsKinFit/ttbarMass"  ,
+    "analyzeTopRecoKinematicsKinFit/ttbarPt"    ,
+    "analyzeTopRecoKinematicsKinFit/ttbarY"     ,
+    "analyzeTopRecoKinematicsKinFit/ttbarHT"    ,
+    "analyzeTopRecoKinematicsKinFit/ttbarSumY"  ,
+    "analyzeTopRecoKinematicsKinFit/ttbarDelPhi",
+    "analyzeTopRecoKinematicsKinFit/ttbarDelY"  ,
+    // generated ttbar quantities
+    "analyzeTopPartonLevelKinematics"+PS+"/ttbarMass",
+    "analyzeTopPartonLevelKinematics"+PS+"/ttbarPt"  ,
+    "analyzeTopPartonLevelKinematics"+PS+"/ttbarY"   ,
+    "analyzeTopPartonLevelKinematics/ttbarHT"    ,
+    "analyzeTopPartonLevelKinematics/ttbarSumY"  ,
+    "analyzeTopPartonLevelKinematics/ttbarDelPhi",
+    "analyzeTopPartonLevelKinematics/ttbarDelY"  ,
+    // reconstructed lepton quantities
+    "analyzeTopRecoKinematicsKinFit/lepPt" ,
+    "analyzeTopRecoKinematicsKinFit/lepEta",
+    // generated lepton quantities
+    "analyzeTopPartonLevelKinematics"+PS+"/lepPt" ,
+    "analyzeTopPartonLevelKinematics"+PS+"/lepEta"
+  };
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
-                         // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-                         "analyzeHypoKinFit/mapKinFit_"               ,
-			 // b) reconstructed Top quantities
-			 "analyzeTopRecoKinematicsKinFit/topPt_"      ,
-			 "analyzeTopRecoKinematicsKinFit/topPhi_"     ,
-			 "analyzeTopRecoKinematicsKinFit/topY_"       ,
-                         "analyzeTopRecoKinematicsKinFit/bbbarAngle_" ,
-                         // c) reconstructed ttbar quantities
-			 "analyzeTopRecoKinematicsKinFit/ttbarMass_"  ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarPt_"    ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarY_"     ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarHT_"    ,
-                         "analyzeTopRecoKinematicsKinFit/ttbarSumY_"  ,
-			 "analyzeTopRecoKinematicsKinFit/ttbarDelPhi_",
-			 "analyzeTopRecoKinematicsKinFit/ttbarDelY_"  
-                       };
+    // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
+    "analyzeHypoKinFit/mapKinFit_"               ,
+    // b) reconstructed Top quantities
+    "analyzeTopRecoKinematicsKinFit/topPt_"      ,
+    "analyzeTopRecoKinematicsKinFit/topPhi_"     ,
+    "analyzeTopRecoKinematicsKinFit/topY_"       ,
+    "analyzeTopRecoKinematicsKinFit/bbbarAngle_" ,
+    // c) reconstructed ttbar quantities
+    "analyzeTopRecoKinematicsKinFit/ttbarMass_"  ,
+    "analyzeTopRecoKinematicsKinFit/ttbarPt_"    ,
+    "analyzeTopRecoKinematicsKinFit/ttbarY_"     ,
+    "analyzeTopRecoKinematicsKinFit/ttbarHT_"    ,
+    "analyzeTopRecoKinematicsKinFit/ttbarSumY_"  ,
+    "analyzeTopRecoKinematicsKinFit/ttbarDelPhi_",
+    "analyzeTopRecoKinematicsKinFit/ttbarDelY_"  
+  };
 
   // b) list plot axes style
   // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
   // log = 0 or 1 for linear or logarithmic axis 
 
   TString axisLabel1D[ ] = { // general fit performance
-                             "probability (best fit hypothesis)/events/1/25"                   , 
-			     "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
-			     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
-			     // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-			     "#Deltai_{lead jet}(genMatch - kinFit), hadronic b-quark/events/0/1", 
-			     "#Deltai_{lead jet}(genMatch - kinFit), leptonic b-quark/events/0/1", 
-			     "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
-			     "N(wrong assigned jets)/events/0/1"                                 , 
-			     "permutation/events/0/1"                                            ,
-			     "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"                        ,
-			     // pull distributions
- 			     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
- 			     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
- 			     "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (hadronic b-quark)/events/0/1" ,
- 			     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (leptonic b-quark)/events/0/1"  ,
- 			     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (leptonic b-quark)/events/0/1" ,
- 			     "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (leptonic b-quark)/events/0/1" ,
- 			     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (light quark)/events/0/1"       ,
- 			     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (light quark)/events/0/1"      ,
- 			     "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (light quark)/events/0/1"      ,
- 			     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (lepton)/events/0/1"            ,
- 			     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (lepton)/events/0/1"           ,
- 			     "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (lepton)/events/0/1"           ,
- 			     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (neutrino)/events/0/1"          ,
- 			     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (neutrino)/events/0/1"         ,
- 			     "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (neutrino)/events/0/1"         ,
- 			     "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (leptonic W)/events/0/1"          ,
- 			     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (leptonic W)/events/0/1"       ,
- 			     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (leptonic W)/events/0/1"       ,
- 			     "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (hadronic W)/events/0/1"          ,
- 			     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
- 			     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
-			     // reconstructed top quantities
-                             "m^{t} [GeV]/top quarks/0/10"     ,
-                             "p_{T}^{t} [GeV]/top quarks/0/1"   ,//20"
-                             "#phi^{t}/top quarks/0/4"         ,
-                             "y^{t}/top quarks/0/1"             ,//5"
-                             "p_{T}(hadronic t) [GeV]/events/0/20",                         
-                             "#phi(hadronic t)/events/0/4",
-                             "y(hadronic t)/events/0/5"    ,
-                             "p_{T}(leptonic t) [GeV]/events/0/20",                         
-                             "#phi(leptonic t)/events/0/4",
-                             "y(leptonic t)/events/0/5"   ,
-			     //  reconstructed angular distributions
-			     "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
-			     "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
-                             "#angle(W,W) (t#bar{t} RF)/events/0/21"              ,
-                             "#angle(lep.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(had.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(lep.t,b) (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(had.t,b) (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(lep.b,W) (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(had.b,W) (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,#bar{q}) (top rest frame)/events/0/21"     ,
-                             "#angle(q,lep.b) (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,had.b) (top rest frame)/events/0/21"       ,
-			     "#angle(#mu,lep.b) (top rest frame)/events/0/21"     , 
-			     "#angle(#mu,lep.b) (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#mu,lep.b) (top rest frame)/events/0/21"     ,
-			     "#angle(#mu,q) (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,#nu) (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(#nu,lep.b) (top rest frame)/events/0/21"     ,
-			     "#angle(#nu,had.b) (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#nu,q) (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,lep.W) (#mu:W RF, W:Det RF)/events/0/21" ,
-			     "#angle(#nu,lep.W) (#nu:W RF, W:Det RF)/events/0/21" ,
-			     "#angle(q,had.W) (q:W RF, W:Det RF)/events/0/21"     ,
-			     // reconstructed event shape variables
-			     "aplanarity/events/0/2"  ,
-			     "sphericity/events/0/10" ,
-			     "C/events/0/10"          ,
-			     "D/events/0/4"           ,
-			     "circularity/events/0/10",
-			     "isotropy/events/0/10"   ,
-			     // generated top quantities
-                             "m^{t} parton truth [GeV]/events/0/10"      ,
-                             "p_{T}^{t} parton truth/events/0/1"          ,//20"
-			     "p_{T}^{t} parton truth Phase Space/events/0/1",//20"
-                             "#phi(t) parton truth/events/0/4"           ,
-                             "y^{t} parton truth/events/0/1"              ,//5"
-                             "p_{T}(hadronic t) parton truth/events/0/20",                         
-                             "#phi(hadronic t) parton truth/events/0/4"  ,
-                             "y(hadronic t) parton truth/events/0/5"     ,
-                             "p_{T}(leptonic t) parton truth/events/0/20",                         
-                             "#phi(leptonic t) parton truth/events/0/4"  ,
-                             "y(leptonic t) parton truth/events/0/5"     ,
-			     // generated angular distributions
-			     "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
-			     "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
-                             "#angle(W,W) parton truth (t#bar{t} RF)/events/0/21"              ,
-                             "#angle(lep.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(had.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-                             "#angle(lep.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(had.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(lep.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(had.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,#bar{q}) parton truth (top rest frame)/events/0/21"     ,
-                             "#angle(q,lep.b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-                             "#angle(q,had.b) parton truth (top rest frame)/events/0/21"       ,
-			     "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     , 
-			     "#angle(#mu,lep.b) parton truth (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     ,
-			     "#angle(#mu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,#nu) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-			     "#angle(#nu,lep.b) parton truth (top rest frame)/events/0/21"     ,
-			     "#angle(#nu,had.b) parton truth (t#bar{t} rest frame)/events/0/21",
-			     "#angle(#nu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
-			     "#angle(#mu,W) parton truth (#mu:W RF, W:Det RF)/events/0/21"     ,
-			     "#angle(q,W) parton truth (q:W RF, W:Det RF)/events/0/21"         ,
-			     "#angle(#nu,W) parton truth (#nu:W RF, W:Det RF)/events/0/21"     ,
-// 			     // generated event shape variables
-// 			     "aplanarity parton truth/events/0/4"  ,
-// 			     "sphericity parton truth/events/0/10" ,
-// 			     "C parton truth/events/0/10"          ,
-// 			     "D parton truth/events/0/4"           ,
-// 			     "circularity parton truth/events/0/10",
-// 			     "isotropy parton truth/events/0/10"   ,
-			     // reconstructed ttbar quantities	                            
-                             "m^{t#bar{t}}/events/0/1"                         ,//60"
-                             "p_{T}^{t#bar{t}}/events/0/1"                     ,//10"
-                             "y^{t#bar{t}}/events/0/1"                         ,//2
-                             "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets))/events/0/20",
-                             "y^{t}+y^{#bar{t}}/events/0/10"                   ,
-                             "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
-                             "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
-			     // generated ttbar quantities	                            
-                             "m^{t#bar{t}} parton truth/events/0/1"                         ,//60"
-                             "p_{T}^{t#bar{t}} parton truth/events/0/1"                     ,//10"
-                             "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
-                             "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets)) parton truth/events/0/20",
-                             "y^{t}+y^{#bar{t}} parton truth/events/0/10"                   ,
-                             "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
-                             "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
-			     // reconstructed lepton quantities
-			     "p_{T}^{#mu}/events/0/10",
-			     "#eta^{#mu}/events/0/10" ,
-			     // generated lepton quantities
-			     "p_{T}^{#mu} parton truth/events/0/10",
-			     "#eta^{#mu} parton truth/events/0/10"
-                             };
+    "probability (best fit hypothesis)/events/1/25"                   , 
+    "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
+    "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
+    // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
+    "#Deltai_{lead jet}(genMatch - kinFit), hadronic b-quark/events/0/1", 
+    "#Deltai_{lead jet}(genMatch - kinFit), leptonic b-quark/events/0/1", 
+    "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
+    "N(wrong assigned jets)/events/0/1"                                 , 
+    "permutation/events/0/1"                                            ,
+    "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"                        ,
+    // pull distributions
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (hadronic b-quark)/events/0/1" ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (leptonic b-quark)/events/0/1"  ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (leptonic b-quark)/events/0/1" ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (leptonic b-quark)/events/0/1" ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (light quark)/events/0/1"       ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (light quark)/events/0/1"      ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (light quark)/events/0/1"      ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (lepton)/events/0/1"            ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (lepton)/events/0/1"           ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (lepton)/events/0/1"           ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (neutrino)/events/0/1"          ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (neutrino)/events/0/1"         ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (neutrino)/events/0/1"         ,
+    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (leptonic W)/events/0/1"          ,
+    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (leptonic W)/events/0/1"       ,
+    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (leptonic W)/events/0/1"       ,
+    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (hadronic W)/events/0/1"          ,
+    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
+    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
+    // reconstructed top quantities
+    "m^{t} [GeV]/top quarks/0/10"     ,
+    "p_{T}^{t} [GeV]/top quarks/0/1"   ,//20"
+    "#phi^{t}/top quarks/0/4"         ,
+    "y^{t}/top quarks/0/1"             ,//5"
+    "p_{T}(hadronic t) [GeV]/events/0/20",                         
+    "#phi(hadronic t)/events/0/4",
+    "y(hadronic t)/events/0/5"    ,
+    "p_{T}(leptonic t) [GeV]/events/0/20",                         
+    "#phi(leptonic t)/events/0/4",
+    "y(leptonic t)/events/0/5"   ,
+    //  reconstructed angular distributions
+    "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
+    "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
+    "#angle(W,W) (t#bar{t} RF)/events/0/21"              ,
+    "#angle(lep.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(had.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(lep.t,b) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.t,b) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(lep.b,W) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.b,W) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,#bar{q}) (top rest frame)/events/0/21"     ,
+    "#angle(q,lep.b) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,had.b) (top rest frame)/events/0/21"       ,
+    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     , 
+    "#angle(#mu,lep.b) (t#bar{t} rest frame)/events/0/21",
+    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     ,
+    "#angle(#mu,q) (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,#nu) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(#nu,lep.b) (top rest frame)/events/0/21"     ,
+    "#angle(#nu,had.b) (t#bar{t} rest frame)/events/0/21",
+    "#angle(#nu,q) (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,lep.W) (#mu:W RF, W:Det RF)/events/0/21" ,
+    "#angle(#nu,lep.W) (#nu:W RF, W:Det RF)/events/0/21" ,
+    "#angle(q,had.W) (q:W RF, W:Det RF)/events/0/21"     ,
+    // reconstructed event shape variables
+    "aplanarity/events/0/2"  ,
+    "sphericity/events/0/10" ,
+    "C/events/0/10"          ,
+    "D/events/0/4"           ,
+    "circularity/events/0/10",
+    "isotropy/events/0/10"   ,
+    // generated top quantities
+    "m^{t} parton truth [GeV]/events/0/10"      ,
+    "p_{T}^{t} parton truth/events/0/1"          ,//20"
+    "p_{T}^{t} parton truth Phase Space/events/0/1",//20"
+    "#phi(t) parton truth/events/0/4"           ,
+    "y^{t} parton truth/events/0/1"              ,//5"
+    "p_{T}(hadronic t) parton truth/events/0/20",                         
+    "#phi(hadronic t) parton truth/events/0/4"  ,
+    "y(hadronic t) parton truth/events/0/5"     ,
+    "p_{T}(leptonic t) parton truth/events/0/20",                         
+    "#phi(leptonic t) parton truth/events/0/4"  ,
+    "y(leptonic t) parton truth/events/0/5"     ,
+    // generated angular distributions
+    "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
+    "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
+    "#angle(W,W) parton truth (t#bar{t} RF)/events/0/21"              ,
+    "#angle(lep.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(had.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(lep.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(lep.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,#bar{q}) parton truth (top rest frame)/events/0/21"     ,
+    "#angle(q,lep.b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,had.b) parton truth (top rest frame)/events/0/21"       ,
+    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     , 
+    "#angle(#mu,lep.b) parton truth (t#bar{t} rest frame)/events/0/21",
+    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     ,
+    "#angle(#mu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,#nu) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(#nu,lep.b) parton truth (top rest frame)/events/0/21"     ,
+    "#angle(#nu,had.b) parton truth (t#bar{t} rest frame)/events/0/21",
+    "#angle(#nu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,W) parton truth (#mu:W RF, W:Det RF)/events/0/21"     ,
+    "#angle(q,W) parton truth (q:W RF, W:Det RF)/events/0/21"         ,
+    "#angle(#nu,W) parton truth (#nu:W RF, W:Det RF)/events/0/21"     ,
+    // 			     // generated event shape variables
+    // 			     "aplanarity parton truth/events/0/4"  ,
+    // 			     "sphericity parton truth/events/0/10" ,
+    // 			     "C parton truth/events/0/10"          ,
+    // 			     "D parton truth/events/0/4"           ,
+    // 			     "circularity parton truth/events/0/10",
+    // 			     "isotropy parton truth/events/0/10"   ,
+    // reconstructed ttbar quantities	                            
+    "m^{t#bar{t}}/events/0/1"                         ,//60"
+    "p_{T}^{t#bar{t}}/events/0/1"                     ,//10"
+    "y^{t#bar{t}}/events/0/1"                         ,//2
+    "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets))/events/0/20",
+    "y^{t}+y^{#bar{t}}/events/0/10"                   ,
+    "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
+    "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
+    // generated ttbar quantities	                            
+    "m^{t#bar{t}} parton truth/events/0/1"                         ,//60"
+    "p_{T}^{t#bar{t}} parton truth/events/0/1"                     ,//10"
+    "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
+    "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets)) parton truth/events/0/20",
+    "y^{t}+y^{#bar{t}} parton truth/events/0/10"                   ,
+    "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
+    "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
+    // reconstructed lepton quantities
+    "p_{T}^{#mu}/events/0/10",
+    "#eta^{#mu}/events/0/10" ,
+    // generated lepton quantities
+    "p_{T}^{#mu} parton truth/events/0/10",
+    "#eta^{#mu} parton truth/events/0/10"
+  };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
-                            // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
-                            "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
-			    // b) reconstructed Top quantities
-                            "p_{T}^{t} gen/p_{T}^{t} reco"                    ,
-			    "#phi^{t} gen/#phi^{t} reco"                      ,
-                            "y^{t} gen/y^{t} reco"                            ,
-			    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
-                            // c) reconstructed ttbar quantities
-                            "m(t#bar{t}) gen/m(t#bar{t}) reco"              ,
-                            "p_{T}(t#bar{t}) gen/p_{T}(t#bar{t}) reco"      ,
-                            "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
-                            "H_{T}(t#bar{t}) gen/H_{T}(t#bar{t}) reco"      ,
-                            "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
-                            "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
-                            "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
-                           };
+    // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
+    "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
+    // b) reconstructed Top quantities
+    "p_{T}^{t} gen/p_{T}^{t} reco"                    ,
+    "#phi^{t} gen/#phi^{t} reco"                      ,
+    "y^{t} gen/y^{t} reco"                            ,
+    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
+    // c) reconstructed ttbar quantities
+    "m(t#bar{t}) gen/m(t#bar{t}) reco"              ,
+    "p_{T}(t#bar{t}) gen/p_{T}(t#bar{t}) reco"      ,
+    "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
+    "H_{T}(t#bar{t}) gen/H_{T}(t#bar{t}) reco"      ,
+    "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
+    "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
+    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
+  };
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
@@ -401,12 +406,12 @@ std::string decayChannel = "muon" )
   if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
-  
+
   // ---
   //    open our standard analysis files
   // ---
   std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
-  
+
   // ---
   //    loading histos
   // ---
@@ -485,7 +490,7 @@ std::string decayChannel = "muon" )
       // a) 1D
       if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){ 
 	// default
-	histogramStyle( *histo_[plotList_[plot]][sample], sample, true );
+	histogramStyle( *histo_[plotList_[plot]][sample], sample, true);
 	// special configurations
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall")histo_[plotList_[plot]][sample]->SetNdivisions(816);
       }
@@ -751,7 +756,7 @@ std::string decayChannel = "muon" )
   histo_[inclName][kSig]->SetBinContent(1, 157.5);
   histo_[inclName][kSig]->SetBinError  (1, 0);
   histogramStyle(*histo_[inclName][kSig ], kSig , false);
-  
+
   // ---
   //    differential normalized cross section (phase space) determination
   // ---
@@ -879,7 +884,7 @@ std::string decayChannel = "muon" )
 	//saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
       }
     }
-   if(verbose>1){
+    if(verbose>1){
       std::cout << "integral diff.norm.data distribution (" << variable << "): ";
       std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
     }
@@ -916,16 +921,16 @@ std::string decayChannel = "muon" )
     }
     ++NXSec;
   }
-//   std::cout << std::endl;
-//   for(int bin=1; bin<=histo_["xSecNorm/ttbarPt"][kData]->GetNbinsX()+1; ++bin){
-//     double value =histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin);
-//     std::cout << "bin " << bin << ": " << value << std::endl;
-//     if(!isfinite(value)||isnan(value)){
-//       histo_["xSecNorm/ttbarPt"][kData]->SetBinContent(bin,0.);
-//       std::cout << "bin " << bin << ": " << histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin)<< std::endl;
-      
-//     }	
-//   }
+  //   std::cout << std::endl;
+  //   for(int bin=1; bin<=histo_["xSecNorm/ttbarPt"][kData]->GetNbinsX()+1; ++bin){
+  //     double value =histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin);
+  //     std::cout << "bin " << bin << ": " << value << std::endl;
+  //     if(!isfinite(value)||isnan(value)){
+  //       histo_["xSecNorm/ttbarPt"][kData]->SetBinContent(bin,0.);
+  //       std::cout << "bin " << bin << ": " << histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin)<< std::endl;
+
+  //     }	
+  //   }
 
   // ---
   //    create one legend for all 1D histos
@@ -992,7 +997,7 @@ std::string decayChannel = "muon" )
     createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
   }
   if(verbose>2) std::cout << std::endl;
-  
+
   // ---
   //    do the printing
   // ---
@@ -1060,11 +1065,12 @@ std::string decayChannel = "muon" )
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	    if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset( 1.6 );
+	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
+	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
 	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
-	       getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
+						     getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
 	    if(getStringEntry(plotList_[plot], 2)=="lepPt" ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,200);
@@ -1095,8 +1101,8 @@ std::string decayChannel = "muon" )
 	  // draw CMS label for xSecs
 	  TString plotType=getStringEntry(plotList_[plot], 1);
 	  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	    if (decayChannel=="muon") DrawDecayChLabel("#mu + jets");
-	    else if(decayChannel=="electron") DrawDecayChLabel("e + jets");
+	    if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
+	    else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
 	    DrawCMSLabels(true,luminosity);
 	  }
 	}
@@ -1105,7 +1111,7 @@ std::string decayChannel = "muon" )
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
 	// new Canvas for every plot
 	plotCanvas_[canvasNumber]->cd(0);
-	plotCanvas_[canvasNumber]->SetRightMargin ( 0.15 );
+	plotCanvas_[canvasNumber]->SetRightMargin(myStyle.GetPadRightMargin());
 	plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample)); 
 	if(verbose>1){
 	  std::cout << "plotting " << plotList_[plot];
@@ -1120,7 +1126,7 @@ std::string decayChannel = "muon" )
 	double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
 	char correlation[20];
 	sprintf(correlation, "%f", d);
-        TString corr = (TString)correlation;
+	TString corr = (TString)correlation;
 	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
       }
     }
@@ -1150,7 +1156,7 @@ std::string decayChannel = "muon" )
 	if(title.Contains("analyzeTopPartonLevelKinematics")) saveToFolder+="partonLevel/";
 	if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
 	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
-							   
+
 	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
 	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
 	if(!title.Contains("canv")){
@@ -1177,7 +1183,7 @@ std::string decayChannel = "muon" )
       if(outputfolder!=""||title.Contains("legend")) saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose-1,outputfolder);
     }
   }
-
+  
   // delete pointer
   delete leg0;
 }
