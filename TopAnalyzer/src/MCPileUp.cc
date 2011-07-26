@@ -61,6 +61,4 @@ void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 void MCPileUp::endJob(){}
 
-DEFINE_FWK_MODULE(MCPileUp);
-
 #endif
