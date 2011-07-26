@@ -70,7 +70,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, un
   //     choose plots
   //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
-  TString plots1D[ ] = { // (I) preselection
+
+  TString plots1D[ ] = { 
+    // (I) preselection
     // (ii) jet monitoring
     //"tightJetKinematicsPreSel/n"  ,
     //"tightJetKinematicsPreSel/en" ,
@@ -145,7 +147,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, un
     "analyzeMETMuonTagged/metEt"   ,
     "analyzeMETMuonTagged/metSumEt"
   };
-  TString plots1Dmu[ ] = { // (I) preselection
+
+  TString plots1Dmu[ ] = { 
+    // (I) preselection
     // (i) muon monitoring
     //"kinematicMuonQualityPreSel/nHit"   ,
     //"kinematicMuonQualityPreSel/chi2"   ,
@@ -201,16 +205,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, un
   };
 	
   TString plots2D[ ] = { 
-  };
-	
-	
-	
+  };	
 	
   // b) list plot axes style
   // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
   // log = 0 or 1 for linear or logarithmic axis 
 	
-  TString axisLabel1D[ ] = { // (I) preselection
+  TString axisLabel1D[ ] = { 
+    // (I) preselection
     // (ii) jet monitoring
     //"N_{jets}/events/0/1",
     //"E(jets)/jets/1/1",
@@ -285,6 +287,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, un
     "#slash{E}_{T}/events/0/20",
     "#SigmaE_{T}/events/0/30"  
   };
+
   TString axisLabel1De[ ] = {
     // (ib) electron monitoring
     "N_{e}/events/0/1" ,
@@ -306,7 +309,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, un
     "#phi(e)/events/0/1"
   };
 	
-  TString axisLabel1Dmu[ ] = {// (I) preselection
+  TString axisLabel1Dmu[ ] = {
+    // (I) preselection
     // (i) muon monitoring
     //"N_{hits}(inner tracker #mu)/events/0/1"          ,
     //"#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
@@ -438,6 +442,51 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, un
       }
       // b) 2D
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
+    }
+  }
+
+  // ---
+  //    event composition
+  // ---
+  std::map< TString, std::map <unsigned int, double> > events_;
+  // a) get event numbers
+  std::vector<TString> selection_;
+  selection_.push_back("tightJetKinematics/n"      );
+  selection_.push_back("tightJetKinematicsTagged/n");
+  unsigned int MCBG=42;
+  events_[selection_[0]][MCBG]=0;
+  events_[selection_[1]][MCBG]=0;
+  // loop pretagged/tagged
+  for(unsigned int step=0; step<=1; ++step){
+    // loop samples
+    for(unsigned int sample=kSig; sample<=kData; ++sample){
+      // save number
+      events_[selection_[step]][sample]=histo_[selection_[step]][sample]->Integral(0,histo_[selection_[step]][sample]->GetNbinsX()+1);
+      // add non ttbar MC
+      if(sample>kSig&&sample<kData) events_[selection_[step]][MCBG]+=events_[selection_[step]][sample];
+    }
+  }
+  // b) print composition
+  if(verbose>=0){
+    // loop pretagged/tagged
+    for(unsigned int step=0; step<=1; ++step){    
+      // print label
+      std::cout << "event composition";
+      if(step==0)  std::cout << " (pre-tagged)" << std::endl;
+      if(step==1)  std::cout << " (tagged)" << std::endl;
+      // all MC events
+      double NAllMC=events_[selection_[step]][kSig]+events_[selection_[step]][MCBG];
+      // print yield and composition
+      std::cout << "events observed in data: " << events_[selection_[step]][kData] << std::endl;
+      std::cout << "events expected from MC: " << NAllMC << std::endl;
+      std::cout << "expected event composition:"   << std::endl; 
+      std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
+      std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
+      std::cout << "W+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl;
+      std::cout << "Z+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
+      std::cout << "QCD:  "      << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
+      std::cout << "single top:" << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
+      std::cout << "diboson:"    << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
     }
   }
 	
