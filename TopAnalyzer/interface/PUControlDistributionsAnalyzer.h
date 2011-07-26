@@ -24,7 +24,7 @@
 #include <TObject.h>
 #include <TFile.h>
 #include <TH1.h>
-
+#include <TH2.h>
 
 class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
 
@@ -48,10 +48,12 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       TH1F* histoNPVertexReweighted; 
       TH1F* histoNPVertexReweightedScaleUp;
       TH1F* histoNPVertexReweightedScaleDown;
-      
+
       TH1F* histoEventWeights;
       TH1F* histoEventWeightsUp;
-      TH1F* histoEventWeightsDown;
+      TH1F* histoEventWeightsDown;   
+
+      TH2F* histoNPUvsNPVertex;
 
       edm::InputTag inTag_PUSource;
       edm::InputTag inTag_PUEventWeightSource;

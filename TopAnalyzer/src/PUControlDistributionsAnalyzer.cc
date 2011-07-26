@@ -96,6 +96,13 @@ void PUControlDistributionsAnalyzer::beginJob()
   histoEventWeightsDown -> GetYaxis() -> SetTitle("Frequency");
   histoEventWeightsDown -> SetFillColor(2);
 
+  // Histograms for correlations between PU events and number of vertices
+
+  histoNPUvsNPVertex           = fs->make<TH2F>("pileup_vs_npvertex","Number of PU Events (Unweighted) versus Number of Primary Vertices (Unweighted)",71,-0.5,70.5,71,-0.5,70.5);
+  histoNPUvsNPVertex -> SetTitle("");
+  histoNPUvsNPVertex -> GetXaxis() -> SetTitle("Number of PU Events (Unweighted)");
+  histoNPUvsNPVertex -> GetYaxis() -> SetTitle("Number of Primary Vertices (Unweighted)");
+  histoNPUvsNPVertex -> SetFillColor(2);  
 }
 
 // =============================
@@ -135,7 +142,9 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
       
       histoEventWeights     -> Fill((*pPUEventWeight));
       histoEventWeightsUp   -> Fill((*pPUEventWeightUp));
-      histoEventWeightsDown -> Fill((*pPUEventWeightDown));
+      histoEventWeightsDown -> Fill((*pPUEventWeightDown)); 
+
+      histoNPUvsNPVertex           -> Fill(iterPU->getPU_NumInteractions(),pPVertex->size());
     }
   }
 }
@@ -143,7 +152,5 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
 // =============================
 
 void PUControlDistributionsAnalyzer::endJob(){}
-
-DEFINE_FWK_MODULE(PUControlDistributionsAnalyzer);
 
 #endif
