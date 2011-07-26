@@ -1,19 +1,17 @@
 #include "basicFunctions.h"
 
 void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsigned int verbose=0){
-
+	
   // ---
   //    Setup
   // ---
   // set root style
-  
-  //  gROOT->Reset();
-  //  setHHStyle();
-
-  gROOT->SetStyle("Plain");
+	
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  myStyle.cd();
   TGaxis::SetMaxDigits(2);
-  gStyle->SetEndErrorSize(8);
-  gStyle->SetErrorX(0);
+  gROOT->SetStyle("HHStyle");
 
   // choose if xSec are extrapolated to whole phase space
   bool extrapolate=false;
@@ -66,7 +64,7 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  }
 	  // combine the results
 	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
-	  plotCombination->Scale(0.);
+	  plotCombination->Scale(0.0);
 	  // loop bins
 	  for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
 	    // consider only non-empty bins
@@ -93,6 +91,7 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  max*=1.5;
 	  plotTheo->GetXaxis()->SetNoExponent(true);
 	  if(max>1&&max<100) plotTheo->GetYaxis()->SetNoExponent(true);
+	  else plotTheo->GetYaxis()->SetNoExponent(false);
 	  TString yTitle=plotTheo->GetYaxis()->GetTitle();
 	  if(verbose>1)std::cout << "original title: " << yTitle  << std::endl;
 	  yTitle.ReplaceAll("muon"," l = e,#mu");
@@ -103,8 +102,9 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  //canvasStyle(*combicanvas);
 	  // plot into canvas
 	  combicanvas->cd(0);
-	  combicanvas->SetBottomMargin(0.15);
-	  combicanvas->SetLeftMargin(0.17);
+	  combicanvas->SetBottomMargin(myStyle.GetPadBottomMargin());
+	  combicanvas->SetLeftMargin(myStyle.GetPadLeftMargin());
+	  gStyle->SetEndErrorSize(8);
 	  plotTheo->Draw("hist");
 	  // get unbinned Madgraph theory curve
 	  // add muon and electron channel to
@@ -124,9 +124,9 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  histogramStyle(*unbinnedTheory, kSig, false);
 	  unbinnedTheory->Smooth(5);
 	  unbinnedTheory->Draw("c same");
-	  plotCombination->Draw("e same");
+	  plotCombination->Draw("e1 same");
 	  DrawCMSLabels(true,luminosity);
-	  DrawDecayChLabel("e/#mu + jets combined");
+	  DrawDecayChLabel("e/#mu + Jets Combined");
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  // save combined e+mu plot for systematic error calculation afterwards
 	  canvas_[xSecVariables_[i]][sys]=(TCanvas*)(combicanvas->Clone());
@@ -145,12 +145,12 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  delete combicanvas;
 	}
 	if(!(plotMu||plotEl)&&verbose>1){ 
-	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
-	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i];
-	    std::cout << " for decay channel ";
-	    if(!plotMu) std::cout << "muon";
-	    if(!plotEl) std::cout << " electron";
-	    std::cout << std::endl;
+	  std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
+	  std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i];
+	  std::cout << " for decay channel ";
+	  if(!plotMu) std::cout << "muon";
+	  if(!plotEl) std::cout << " electron";
+	  std::cout << std::endl;
 	}
       }
       if(!(canvasMu||canvasEl)&&verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in either one or both decay channels!" << std::endl;
