@@ -10,13 +10,12 @@
 
    \brief   Derived class to analyze the kinematics of electrons on reconstruction and generator level
 
-   The structure keeps histograms for the kinematics of electrons only(!). These histograms can be 
-   filled from edm::View<pat::Electron>'s or from std::vector<reco::GenParticles>'s. The class 
-   is derived from the SingleObject<Collection> interface, which makes it usable in fwfull  or 
-   fwlite. 
+   The structure keeps histograms for the kinematics of electrons. These histograms can be 
+   filled from edm::View<reco::Candidate>'s. The class is derived from the SingleObject<Collection> 
+   interface, which makes it usable in fwfull or fwlite. 
 */
 
-class ElectronKinematics : public SingleObject<const edm::View<pat::Electron> > {
+class ElectronKinematics : public SingleObject<const edm::View<reco::Candidate> > {
 
  public:
   /// default constructor for fw lite
@@ -34,10 +33,8 @@ class ElectronKinematics : public SingleObject<const edm::View<pat::Electron> > 
   void book();
   /// histogramm booking for fwfull
   void book(edm::Service<TFileService>& fileService);
-  /// histogram filling for fwlite and for fwfull from reco objects
-  void fill(const edm::View<pat::Electron>& electrons, const double& weight=1.);
-  /// histogram filling for fwlite and for fwfull from generator objects
-  void fill(const std::vector<reco::GenParticle>& electrons, const double& weight=1.);
+  /// histogram filling for fwlite and for fwfull from generator and reco objects
+  void fill(const edm::View<reco::Candidate>& electrons, const double& weight=1.0);
   /// everything which needs to be done after the event loop
   void process() {};
 
