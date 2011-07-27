@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, unsigned int verbose=0, 
+void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, int verbose=0, 
 				  TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
 				  //TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_166861_1fb.root"
 				  , const std::string decayChannel = "electron")
