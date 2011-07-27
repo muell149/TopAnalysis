@@ -111,19 +111,82 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	  // minimize statistical fluctuations
 	  TH1F* unbinnedTheory = getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "muon"));
 	  unbinnedTheory->Add(getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "electron")));
-	  // normalize to unsit area fordiff. norm. plots
+	  // get MC@NLO curve
+	  TString plotName2="";
+	  if     (plotName=="topPt"    ) plotName2="hVisTopPt";
+	  else if(plotName=="topY"     ) plotName2="hVisTopY";
+	  else if(plotName=="ttbarPt"  ) plotName2="hVisTTbarPt";
+	  else if(plotName=="ttbarY"   ) plotName2="hVisTTbarY";
+	  else if(plotName=="ttbarMass") plotName2="hVisTTbarM";
+	  else{ 
+	    std::cout << "no valid name for input variable ";
+	    std::cout << plotName << " for MC@Nlo chosen" << std::endl;
+	    exit(0);
+	  }
+	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction("MCatNLO/"+plotName2,"./diffXSecFromSignal/analysisRootFilesWithKinFit/ttbarNtupleCteq6m.root");
+	  TH1F* unbinnedTheory2 = (TH1F*)unbinnedTheory->Clone();
+	  TH1F* unbinnedTheoryMCAtNLO2 = (TH1F*)unbinnedTheoryMCAtNLO->Clone();
+	  // normalize to unsit area for diff. norm. plots
 	  if(xSecVariables_[i].Contains("Norm")){
-	    unbinnedTheory->Rebin(10);
-	    unbinnedTheory->Scale(1.0/(unbinnedTheory->Integral(1,unbinnedTheory->GetNbinsX()+1)));
-	    unbinnedTheory->Scale(0.1);
+	    if(!xSecVariables_[i].Contains("Y")&&!xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Rebin(10);
+	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->Integral(0,unbinnedTheory->GetNbinsX()+1)));
+	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->GetBinWidth(1)));
+	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->Integral(0,unbinnedTheory2->GetNbinsX()+1)));
+	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->GetBinWidth(1)));
+	    if(xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Rebin(25);
+	    else if(xSecVariables_[i].Contains("ttbarPt"))unbinnedTheoryMCAtNLO->Rebin(5);
+	    else unbinnedTheoryMCAtNLO->Rebin(10);
+	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->Integral(0,unbinnedTheoryMCAtNLO->GetNbinsX()+1)));
+	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->GetBinWidth(1)));
+	    unbinnedTheoryMCAtNLO2->Scale(1.0/(unbinnedTheoryMCAtNLO2->Integral(0,unbinnedTheoryMCAtNLO2->GetNbinsX()+1)));
+	    unbinnedTheoryMCAtNLO2->Scale(1.0/(unbinnedTheoryMCAtNLO2->GetBinWidth(1)));
 	  }
 	  // take into account that e and mu channel were added 
 	  else{
 	    unbinnedTheory->Scale(0.5);
+	    unbinnedTheory->Scale(lumiweight(kSig, luminosity, 0, "muon"));
+	    unbinnedTheory->Scale(1/luminosity);
+	    unbinnedTheory->Scale(1.0/(unbinnedTheory->GetBinWidth(1)));
+	    unbinnedTheory2->Scale(0.5);
+	    unbinnedTheory2->Scale(lumiweight(kSig, luminosity, 0, "muon"));
+	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->GetBinWidth(1)));
+	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->GetBinWidth(1)));
+	    // cross section / Ngen
+	    unbinnedTheoryMCAtNLO->Scale(158./10000);
+	    unbinnedTheoryMCAtNLO2->Scale(1.0/(unbinnedTheoryMCAtNLO2->GetBinWidth(1)));
+	    // cross section / Ngen
+	    unbinnedTheoryMCAtNLO2->Scale(158./10000);
+
 	  }
-	  histogramStyle(*unbinnedTheory, kSig, false);
-	  unbinnedTheory->Smooth(5);
-	  unbinnedTheory->Draw("c same");
+	  histogramStyle(*unbinnedTheory , kSig  , false);
+	  histogramStyle(*unbinnedTheory2, kSig  , false);
+	  histogramStyle(*unbinnedTheoryMCAtNLO , kZjets, false);
+	  histogramStyle(*unbinnedTheoryMCAtNLO2, kZjets, false);
+	  if(xSecVariables_[i].Contains("Y"      )) unbinnedTheory->Smooth(2);
+	  else if(xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Smooth(10);
+	  else unbinnedTheory->Smooth(10);
+	  if(!xSecVariables_[i].Contains("Y"      )) unbinnedTheoryMCAtNLO->Smooth(10);
+	  else unbinnedTheoryMCAtNLO->Smooth(3);
+	  if(xSecVariables_[i].Contains("Norm")){
+	    //unbinnedTheoryMCAtNLO2->Draw("c same");
+	    //unbinnedTheory2->Draw("same");
+	    unbinnedTheoryMCAtNLO->Draw("c hist same");
+	    unbinnedTheory       ->Draw("c same"     );
+	    TLegend *leg = new TLegend();
+	    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
+	    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.1);
+	    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
+	    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
+	    leg->SetTextFont(42);
+	    leg->SetTextSize(0.04);
+	    leg->SetFillStyle(0);
+	    leg->SetBorderSize(0);
+	    leg->SetTextAlign(32);
+	    //leg->SetHeader("");
+	    leg->AddEntry(unbinnedTheory       , "MadGraph", "L");
+	    leg->AddEntry(unbinnedTheoryMCAtNLO, "MC@NLO"  , "L");
+	    leg->Draw("same");
+	  }
 	  plotCombination->Draw("e1 same");
 	  DrawCMSLabels(true,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
