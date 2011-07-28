@@ -653,6 +653,16 @@ process.jetSelection = cms.Sequence(process.leadingJetSelectionNjets1 +
                                     )
 
 ## ---
+##    PU reweighting monitoring
+## ---
+process.load("TopAnalysis.TopAnalyzer.PUControlDistributions_cfi")
+process.PUControlDistributions.PUSource                = cms.InputTag("addPileupInfo")
+process.PUControlDistributions.PVertexSource           = cms.InputTag("goodOfflinePrimaryVertices")
+process.PUControlDistributions.PUEventWeightSource     = cms.InputTag("eventWeightPU","eventWeightPU"    )
+process.PUControlDistributions.PUEventWeightUpSource   = cms.InputTag("eventWeightPU","eventWeightPUUp"  )
+process.PUControlDistributions.PUEventWeightDownSource = cms.InputTag("eventWeightPU","eventWeightPUDown")
+
+## ---
 ##    configure Kinematic fit
 ## ---
 
@@ -871,7 +881,7 @@ if(options.sample=="WZ"):
     
 process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
 PUweight=cms.InputTag("eventWeightPU","eventWeightPU")
-
+                                                
 ## ---
 ##    MC B-tag reweighting
 ## ---
@@ -983,6 +993,8 @@ process.p1 = cms.Path(
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
 		      process.eventWeightForRecoAnalyzers           *
+                      ## monitoring of PU reweighting and PV
+                      process.PUControlDistributions                *
                       ## muon selection
                       process.muonCuts                              *
                       ## veto on additional leptons
@@ -1021,7 +1033,9 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
 		      ## create effSF eventWeight
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
-		      process.eventWeightForRecoAnalyzers               *
+		      process.eventWeightForRecoAnalyzers           *
+                      ## monitoring of PU reweighting and PV
+                      process.PUControlDistributions                *
                       ## loose selection (slightly above mu17TriCentralJet30 Trigger)
                       process.looseCuts                             *
                       ## basic monitoring
@@ -1272,6 +1286,11 @@ if(not PUreweigthing or runningOnData=="data"):
       allpaths  = process.paths_().keys()
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightPU )
+    # remove PU monitoring
+    if(not PUreweigthing):
+        recoPaths=['p1','p2']
+        for path in recoPaths:
+            getattr(process,path).remove( process.PUControlDistributions )
 # Eff SF
 if(not effSFReweigthing or runningOnData=="data"):
     # define allpaths if not done yet
@@ -1286,7 +1305,7 @@ if(not BtagReweigthing or runningOnData=="data"):
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not effSFReweigthing) ):
     for path in allpaths:
-        getattr(process,path).remove( process.eventWeightForRecoAnalyzers )
+        getattr(process,path).remove( process.eventWeightForReconalyzers )
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing and not effSFReweigthing) ):
     for path in allpaths:
