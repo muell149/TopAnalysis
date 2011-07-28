@@ -45,7 +45,7 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"muon\" 
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1090
@@ -84,7 +84,7 @@ clean=true
 ## if error for 2011 analysis is not available
 ## NOTE: the rootfile ./diffXSecTopSemiMu2010.root
 ## must be available and contain the uncertainties 
-oldErrors=true
+oldErrors=false
 # disabled for 2010 mu+jets
 if [ $dataLuminosity2 -le 3600 ]
     then
@@ -311,7 +311,19 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$oldErrors')'
+
+if [ -f commands.cint ];
+then
+    rm commands.cint
+fi
+cat >> commands.cint << EOF
+.L combineTopDiffXSecUncertainties.C++
+.L BCC.C++
+.L combineTopDiffXSecUncertainties_C.so
+.L BCC_C.so
+combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $oldErrors)
+EOF
+root < commands.cint
 echo "all analysis steps finished!"
 
 
