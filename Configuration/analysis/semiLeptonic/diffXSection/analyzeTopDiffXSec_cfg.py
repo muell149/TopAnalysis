@@ -1229,7 +1229,7 @@ if(pfToPAT):
         'noMuonTopProjection': False,
         'noElecTopProjection': False,
         'analyzersBeforeMuonIso':cms.Sequence(),
-        'analyzersBeforeElecIso':cms.Sequence()
+        'excludeElectronsFromWsFromGenJets': True
         }
     # adaptions when running on data
     if(runningOnData=="data"):
@@ -1287,10 +1287,9 @@ if(not PUreweigthing or runningOnData=="data"):
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightPU )
     # remove PU monitoring
-    if(not PUreweigthing):
-        recoPaths=['p1','p2']
-        for path in recoPaths:
-            getattr(process,path).remove( process.PUControlDistributions )
+    recoPaths=['p1','p2']
+    for path in recoPaths:
+        getattr(process,path).remove( process.PUControlDistributions )
 # Eff SF
 if(not effSFReweigthing or runningOnData=="data"):
     # define allpaths if not done yet
