@@ -45,7 +45,7 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"muon\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1090
@@ -311,21 +311,19 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-
 if [ -f commands.cint ];
 then
     rm commands.cint
 fi
 cat >> commands.cint << EOF
-.L combineTopDiffXSecUncertainties.C++
 .L BCC.C++
-.L combineTopDiffXSecUncertainties_C.so
 .L BCC_C.so
+.L combineTopDiffXSecUncertainties.C++
+.L combineTopDiffXSecUncertainties_C.so
 combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $oldErrors)
 EOF
-root < commands.cint
+root -l -b < commands.cint
 echo "all analysis steps finished!"
-
 
 ################################
 ## after running the analysis ##
