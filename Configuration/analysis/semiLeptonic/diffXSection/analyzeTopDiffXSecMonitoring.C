@@ -2,7 +2,7 @@
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, int verbose=0, 
 				  TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
-				  //TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_166861_1fb.root"
+				  //TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
 				  , const std::string decayChannel = "electron")
 {
   // set root style
@@ -82,10 +82,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     // (II) before btagging
     // (ii) jet monitoring
     "tightJetKinematics/n"  ,
+    "tightJetKinematicsNjets1/n",
     "tightJetKinematics/en" ,
     "tightJetKinematics/pt" ,
     "tightJetKinematics/eta",
     "tightJetKinematics/phi",
+    "tightJetKinematics/ht",
     "tightJetQuality/n_"    ,
     "tightJetQuality/charge",
     "tightJetQuality/nhf"   ,
@@ -131,6 +133,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "tightJetKinematicsTagged/pt" ,
     "tightJetKinematicsTagged/eta",
     "tightJetKinematicsTagged/phi",
+    "tightJetKinematicsTagged/ht",
     "tightLead_0_JetKinematicsTagged/pt" ,
     "tightLead_0_JetKinematicsTagged/eta",
     "tightLead_1_JetKinematicsTagged/pt" ,
@@ -222,10 +225,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     // (II) before btagging
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
+    "N_{jets}/events/1/1",
     "E(jets)/jets/1/1",
     "p_{t}(jets)/jets/1/1",
     "#eta(jets)/jets/0/5",
     "#phi(jets)/jets/0/10",
+    "H_{T}/events/0/50",
     "N(jet constituents)/jets/0/10",
     "jet charge/jets/0/10"         ,
     "neutral hadron fraction (jets)/jets/1/1"         ,
@@ -271,6 +276,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "p_{t}(jets)/jets/1/2",
     "#eta(jets)/jets/0/5" ,
     "#phi(jets)/jets/0/10",
+    "H_{T}/events/0/100",
     "p_{t}(lead 1^{st} jet)/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5" ,
     "p_{t}(lead 2^{nd} jet)/events/1/5",
@@ -629,7 +635,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
 	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10  );
 	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
 	    if(plotList_[plot].Contains("relIso")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.15);
-	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,9);
+	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,10);
+	    if(plotList_[plot].Contains("tightJetKinematicsNjets1/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(1,10);
 	    if(plotList_[plot].Contains("_JetKinematics/en")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
 	    if(plotList_[plot].Contains("_JetKinematics/pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("analyzeMETMuon/metSumEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(200,1400);
@@ -662,8 +669,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection
 	      TString label = "pre-tagged";
-	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
-	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
+	      if(plotList_[plot].Contains("Tagged")) label = "tagged";
+	      if(plotList_[plot].Contains("PreSel")) label = "pre-selected";
+	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 jet";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 			1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 32       );
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
