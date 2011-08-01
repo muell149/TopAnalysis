@@ -1,6 +1,7 @@
 #include "basicFunctions.h"
+#include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, unsigned int verbose=0, TString decayChannel="muon", bool adpatOldUncertainties=true){
+void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool adpatOldUncertainties=true){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -15,7 +16,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
   TGaxis::SetMaxDigits(2);
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
-  
+
   // ---
   //    parameter Configuration
   // ---
@@ -69,6 +70,19 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
   std::map<TString, std::map<unsigned int, bool> > calculateError_;
   // create container for combined Errors
   std::map<TString, TGraphAsymmErrors*> totalErrors_;
+  // setup for bin center corrected values
+  gSystem->Load("BCC_C.so");
+  bool mergeLepAndHadTop=true;
+  std::vector<TString> xSecVariableBranchNames_;
+  for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+    if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
+      if(xSecVariables_[i].Contains("top")){
+	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
+	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
+      }
+      else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
+    }
+  }
   // parameter printout
   if(verbose>0) std::cout << std::endl << "executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl << std::endl;
   if(verbose>0) std::cout << "target file: " << outputFile << std::endl;
@@ -83,7 +97,36 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
   }
   if(verbose>0) std::cout << "target folder containing cross section plots: " << xSecFolder << std::endl;
   if(verbose>0&&save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
-  
+  // loading bin center corrections
+  std::cout << "loading bin center corrections" << std::endl;
+  BCC b("./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "muon"),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
+  b.runBCCCalculation();
+  std::map<TString, std::vector<double> > correctedCenters_ = b.getMapWithCorrectedCentersInX();
+  std::map<TString, std::vector<double> > corrCenterErrors_ = b.getMapWithCenterErrorsInX();
+ // output results
+  if(verbose>1){
+    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 !=  correctedCenters_.end(); iter1++ )
+      {
+      std::cout << iter1->first << ": ";
+      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)
+	{
+	  std::cout << (*iter2) << " ";
+	}
+      std::cout << std::endl;
+    }
+    
+    for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ )
+      {
+	std::cout << iter1->first << ": ";
+	
+	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)
+	  {
+	    std::cout << (*iter2) << " ";
+	  }
+	std::cout << std::endl;
+      }
+  }
+
   // ---
   //    open rootfile
   // ---
@@ -300,8 +343,16 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+5, -100*combinedErrorDownBinVar/stdBinXSecValue);
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+5, "total Down");
 		// set combined errors for final xSec plot
-		combinedErrors->SetPoint(bin, histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin), histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin));
-		combinedErrors->SetPointError(bin, 0,0, combinedErrorDownBinVar, combinedErrorUpBinVar);
+		double pointXValue = histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
+		double pointXError = 0;
+		if(decayChannel=="combined"&&xSecVariables_[i]!="inclusive"){
+		  TString plotName=xSecVariables_[i];
+		  plotName.ReplaceAll("Norm","");
+		  pointXValue = correctedCenters_[plotName].at(bin-1);
+		  pointXError = corrCenterErrors_[plotName].at(bin-1);
+		}
+		combinedErrors->SetPoint(bin, pointXValue, histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin));
+		combinedErrors->SetPointError(bin, pointXError, pointXError, combinedErrorDownBinVar, combinedErrorUpBinVar);
 		// define style for relative error plots
 		histogramStyle(*relativeUncertainties_[xSecVariables_[i]][bin], kSig, true, 2.0, kBlack); 
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->LabelsOption("v");
@@ -530,6 +581,34 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      max*=1.3;
 	      if(max>1&&max<100) totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(false);
 	      else totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(true);
+	      // for combined cross sections:
+	      // change TH1F witch statistical errors into 
+	      // TGraphAsymmErrors with bin center corrections
+	      if(decayChannel=="combined"&&xSecVariables_[i]!="inclusive"){
+		TString plotName = xSecVariables_[i];
+		std::cout << "shifted stat value for: variable " << plotName << std::endl;
+		plotName.ReplaceAll("Norm","");
+		// get data plot
+		TH1F* dataStat = (TH1F*)canvas->GetPrimitive(plotName+"kData");
+		// convert to TGraphAsymmErrors
+		TGraphAsymmErrors* statErrors= new TGraphAsymmErrors(dataStat->GetNbinsX());
+		statErrors->SetLineWidth(totalErrors_[xSecVariables_[i]]->GetLineWidth());
+		statErrors->SetLineColor(totalErrors_[xSecVariables_[i]]->GetLineColor());
+		for(int bin=1; bin<=dataStat->GetNbinsX(); ++bin){
+		  if(dataStat->GetBinWidth(bin)!=0){
+		    double pointXValue = correctedCenters_[plotName].at(bin-1);
+		    double pointXError = corrCenterErrors_[plotName].at(bin-1);
+		    double pointYError = dataStat->GetBinError(bin);
+		    statErrors->SetPoint(bin, pointXValue, dataStat->GetBinContent(bin));
+		    statErrors->SetPointError(bin, pointXError, pointXError, pointYError, pointYError);
+		  }
+		}
+		whipEmptyBinsAway(statErrors, verbose);
+		// print new object
+		statErrors->Draw("p same");
+		// delete (old) TH1F plot from canvas
+		canvas->GetListOfPrimitives()->Remove(canvas->GetPrimitive(plotName+"kData"));
+	      }
 	      // Draw errors into Canvas
 	      totalErrors_[xSecVariables_[i]]->Draw("p same");
 	      canvas->SetName (xSecVariables_[i]);
@@ -547,6 +626,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      canvas->Print(saveName+".png");
 	    }
 	    gErrorIgnoreLevel=initialIgnoreLevel;
+	    //delete statErrors;
 	  }
 	}
       }
