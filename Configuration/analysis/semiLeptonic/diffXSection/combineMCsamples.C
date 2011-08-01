@@ -16,8 +16,9 @@ using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, float > >& files, TFile *target, int verbose);
 double subSampleLumiweight(TString sample, TString decayChannel, int verbose);
 
-void combineMCsamples(TString whichFiles = "QCD", TString decayChannel="electron", int verbose=1) {
-
+void combineMCsamples(TString whichFiles = "singleTop", TString decayChannel="muon", int verbose=1) {
+  // whichFiles: "singleTop", diBoson, or QCD (only electron)
+  // decayChannel: "muon" or "electron"
   std::vector< std::pair< TFile*, float > > files_;
   if(verbose>0){
     std::cout << "chosen decay channel: " << decayChannel << std::endl;
@@ -33,8 +34,8 @@ void combineMCsamples(TString whichFiles = "QCD", TString decayChannel="electron
   // ---
   // single top files
   if(whichFiles == "singleTop"){
-    // files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleTopSchannelMadZ2Summer11PF.root"), // not ready yet!
-    //                           subSampleLumiweight("stopS", decayChannel, verbose)));                          // not ready yet!
+    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleTopSchannelMadZ2Summer11PF.root"),
+			       subSampleLumiweight("stopS", decayChannel, verbose)));                         
     files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleAntiTopSchannelMadZ2Summer11PF.root" ), 
 			       subSampleLumiweight("santiTopS" , decayChannel, verbose)));
     files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleTopTchannelMadZ2Summer11PF.root"     ), 
@@ -53,8 +54,8 @@ void combineMCsamples(TString whichFiles = "QCD", TString decayChannel="electron
 			       subSampleLumiweight("WW", decayChannel, verbose)));
     files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecWZPytia6Z2Summer11PF.root"), 
 			       subSampleLumiweight("WZ", decayChannel, verbose)));
-    //files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecZZPytia6Z2Summer11PF.root"), // not ready yet!
-    //			         subSampleLumiweight("ZZ", decayChannel, verbose)));                // not ready yet!
+    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecZZPytia6Z2Summer11PF.root"),
+			       subSampleLumiweight("ZZ", decayChannel, verbose)));               
     outputFilename+="VVPytia6Z2Summer11PF.root";
   } 
   // QCD files
@@ -201,7 +202,7 @@ double subSampleLumiweight(TString sample, TString decayChannel, int verbose)
   }
   else if(sample=="stopS"){
     crossSection=3.19;
-    Nevents     =1; //FIXME: this sample has to come
+    Nevents     =259971; 
   }
   else if(sample=="santiTopT"){
     crossSection=22.65;
@@ -230,7 +231,7 @@ double subSampleLumiweight(TString sample, TString decayChannel, int verbose)
   }
   else if(sample=="ZZ"){
     crossSection=5.9;
-    Nevents     =1; //FIXME: this sample has to come
+    Nevents     =4187885; 
   }
   else {
     std::cout << "ERROR: unknown sample " << sample << std::endl;
