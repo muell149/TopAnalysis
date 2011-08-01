@@ -84,7 +84,7 @@ clean=true
 ## if error for 2011 analysis is not available
 ## NOTE: the rootfile ./diffXSecTopSemiMu2010.root
 ## must be available and contain the uncertainties 
-oldErrors=false
+oldErrors=true
 # disabled for 2010 mu+jets
 if [ $dataLuminosity2 -le 3600 ]
     then
