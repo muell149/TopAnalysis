@@ -534,7 +534,7 @@ namespace semileptonic {
       // D6T Spring11
       if(newSpring11MC) Nevents=14722996;
       // Z2 Summer11
-      if(newSummer11MC) Nevents=56789563;
+      if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
       // Fall10 systematic samples:
       if(!newSummer11MC&&!newSpring11MC){
 	if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
