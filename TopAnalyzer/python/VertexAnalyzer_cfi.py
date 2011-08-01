@@ -4,7 +4,7 @@ from PU_Eventweight_cfi import *
 analyzePrimaryVertex = cms.EDAnalyzer("VertexAnalyzer",
 
     vertices = cms.InputTag('offlinePrimaryVertices'),
-    muons    = cms.InputTag('selectedPatMuons'),
+    leptons  = cms.InputTag('selectedPatMuons'),
 
     ndof = cms.uint32(4),
     rho  = cms.double(2),
