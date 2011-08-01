@@ -1,5 +1,5 @@
 #include "TopAnalysis/TopAnalyzer/plugins/VertexAnalyzer.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
@@ -7,7 +7,7 @@
 VertexAnalyzer::VertexAnalyzer(const ParameterSet& cfg)
 {
   vertices_ = cfg.getParameter<InputTag>    ("vertices"),
-  muons_    = cfg.getParameter<InputTag>    ("muons"   ),
+  leptons_  = cfg.getParameter<InputTag>    ("leptons" ),
   ndof_     = cfg.getParameter<unsigned int>("ndof"    ),
   rho_      = cfg.getParameter<double>      ("rho"     ),
   z_        = cfg.getParameter<double>      ("z"       );
@@ -82,9 +82,9 @@ VertexAnalyzer::beginJob()
   nchi2_->GetXaxis()->SetTitle("#chi^2/N_{dof}");
   nchi2_->GetYaxis()->SetTitle("N");
 
-  dzMu_= fs->make<TH1D>( "dzMu", "z-Distance #mu,Vrtx", 200,0,20);
-  dzMu_->GetXaxis()->SetTitle("#Delta z [cm]");
-  dzMu_->GetYaxis()->SetTitle("N");
+  dzLep_= fs->make<TH1D>( "dzLep", "z-Distance Lepton,Vrtx", 200,0,20);
+  dzLep_->GetXaxis()->SetTitle("#Delta z [cm]");
+  dzLep_->GetYaxis()->SetTitle("N");
 
   position3D_= fs->make<TH3D>( "position3D", "Position of good Vertices", 1000,-50.,50.,100,-5.,5.,100,-5.,5.);
   position3D_->GetXaxis()->SetTitle("z [cm]"); // this is NO typo!
@@ -96,7 +96,7 @@ void
 VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 {
   double weight = getPUEventWeight(evt, weight_);
-  Handle<std::vector<reco::Vertex> > vertices;
+  edm::Handle<std::vector<reco::Vertex> > vertices;
   evt.getByLabel(vertices_, vertices);
 
   multi_->Fill(vertices->size(), weight);
@@ -131,11 +131,11 @@ VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 
       position3D_->Fill(vrtx->z(),vrtx->x(),vrtx->y(), weight); // this is NO typo!
 
-      Handle<std::vector<pat::Muon> > muons;
-      evt.getByLabel(muons_, muons);
+      edm::Handle<edm::View<reco::Candidate> > leptons;
+      evt.getByLabel(leptons_, leptons);
 
-      for(std::vector<pat::Muon>::const_iterator muon = muons->begin(); muon!= muons->end(); ++muon) {
-        dzMu_->Fill(abs(muon->vz()-z), weight);
+      for(edm::View<reco::Candidate>::const_iterator lepton = leptons->begin(); lepton!= leptons->end(); ++lepton) {
+        dzLep_->Fill(abs(lepton->vz()-z), weight);
       }
     }
   }

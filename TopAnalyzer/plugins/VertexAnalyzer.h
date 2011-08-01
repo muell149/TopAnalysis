@@ -43,8 +43,8 @@ class VertexAnalyzer : public EDAnalyzer {
         
      /// input vertex collection
     InputTag vertices_;    
-     /// input muon collection
-    InputTag muons_;    
+     /// input lepton collection
+    InputTag leptons_;    
     
     /// ndof criterium for good vrtx
     unsigned int ndof_;
@@ -68,10 +68,10 @@ class VertexAnalyzer : public EDAnalyzer {
     TH1D* nDof_;
     TH1D* chi2_; 
     TH1D* nchi2_; 
-    TH1D* dzMu_; 
+    TH1D* dzLep_; 
     
     TH3D* position3D_;        
-InputTag weight_;
+    InputTag weight_;
 
 };
 
