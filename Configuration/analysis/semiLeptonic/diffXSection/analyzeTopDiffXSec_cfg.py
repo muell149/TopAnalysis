@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 ##    example to run this cfg file
 ## ---
-# cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,eventsToProcess=5000
+## cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,eventsToProcess=5000
 
 ## ---
 ##    options
@@ -359,6 +359,8 @@ process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
 process.load("TopAnalysis.TopAnalyzer.MuonJetKinematics_cfi")
 ## muon vertex analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonVertexKinematics_cfi")
+## vertex analyzer
+process.load("TopAnalysis.TopAnalyzer.VertexAnalyzer_cfi")
 
 ## ---
 ##    set up vertex filter
@@ -564,6 +566,11 @@ process.tightElectronQualityNjets3     = process.tightElectronQuality   .clone()
 process.analyzeMETMuon = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzeMETMuonTagged = process.analyzeMETMuon.clone()
 
+## Vertices
+process.PrimaryVertex       = process.analyzePrimaryVertex.clone(vertices = 'offlinePrimaryVertices', leptons = 'tightMuons')
+process.PrimaryVertexTagged = process.PrimaryVertex.clone()
+process.PrimaryVertexPreSel = process.analyzePrimaryVertex.clone(vertices = 'offlinePrimaryVertices', leptons = 'tightMuons')
+
 ## collect kinematics
 process.monitorKinematicsNjets1 = cms.Sequence(process.tightJetKinematicsNjets1  +
                                                process.tightJetQualityNjets1
@@ -598,36 +605,36 @@ elif(decayChannel =='electron'):
     process.monitorKinematicsNjets3 += cms.Sequence(process.tightElectronKinematicsNjets3 +
                                                     process.tightElectronQualityNjets3    
                                                     )
-
+     
     
-    
-    
-process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinematics       +
-                                                       process.tightMuonQuality          +
-                                                       process.tightLead_0_JetKinematics +
-                                                       process.tightLead_1_JetKinematics +
-                                                       process.tightLead_2_JetKinematics +
-                                                       process.tightLead_3_JetKinematics +
-                                                       process.tightJetKinematics        +
-                                                       process.tightJetQuality           +
-                                                       process.bottomJetKinematics       +
-                                                       process.analyzeMETMuon            +
-                                                       process.tightMuontightJetsKinematics)
+process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinematics          +
+                                                       process.tightMuonQuality             +
+                                                       process.tightLead_0_JetKinematics    +
+                                                       process.tightLead_1_JetKinematics    +
+                                                       process.tightLead_2_JetKinematics    +
+                                                       process.tightLead_3_JetKinematics    +
+                                                       process.tightJetKinematics           +
+                                                       process.tightJetQuality              +
+                                                       process.bottomJetKinematics          +
+                                                       process.analyzeMETMuon               +
+                                                       process.tightMuontightJetsKinematics +
+                                                       process.PrimaryVertex)
 
 
-process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematicsTagged       +
-                                                      process.tightMuonQualityTagged          +
-                                                      process.tightLead_0_JetKinematicsTagged +
-                                                      process.tightLead_1_JetKinematicsTagged +
-                                                      process.tightLead_2_JetKinematicsTagged +
-                                                      process.tightLead_3_JetKinematicsTagged +
-                                                      process.tightJetKinematicsTagged        +
-                                                      process.tightJetQualityTagged           +
-                                                      process.bottomJetKinematicsTagged       +
-                                                      process.analyzeMETMuonTagged            +
-                                                      process.tightMuontightJetsKinematicsTagged+
-                                                      process.bottomLead_0_JetKinematicsTagged  +
-                                                      process.bottomLead_1_JetKinematicsTagged)
+process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematicsTagged          +
+                                                      process.tightMuonQualityTagged             +
+                                                      process.tightLead_0_JetKinematicsTagged    +
+                                                      process.tightLead_1_JetKinematicsTagged    +
+                                                      process.tightLead_2_JetKinematicsTagged    +
+                                                      process.tightLead_3_JetKinematicsTagged    +
+                                                      process.tightJetKinematicsTagged           +
+                                                      process.tightJetQualityTagged              +
+                                                      process.bottomJetKinematicsTagged          +
+                                                      process.analyzeMETMuonTagged               +
+                                                      process.tightMuontightJetsKinematicsTagged +
+                                                      process.bottomLead_0_JetKinematicsTagged   +
+                                                      process.bottomLead_1_JetKinematicsTagged   +
+                                                      process.PrimaryVertexTagged)
     
 process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSel +
                                        process.kinematicMuonQualityPreSel         +
@@ -635,7 +642,8 @@ process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSe
                                        process.tightMuonKinematicsPreSel          +
                                        process.tightMuonQualityPreSel             +
                                        process.tightJetKinematicsPreSel           +
-                                       process.tightJetQualityPreSel              )
+                                       process.tightJetQualityPreSel              +
+                                       process.PrimaryVertexPreSel)
 
 process.monitorElectronKinematicsBeforeBtagging = cms.Sequence(process.tightElectronKinematics+
                                                                process.tightElectronQuality   )
