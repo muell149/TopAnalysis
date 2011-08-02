@@ -2,7 +2,12 @@ import FWCore.ParameterSet.Config as cms
 
 eventIDPrinter = cms.EDAnalyzer("EventIDPrinter",
     outputString = cms.string(''),
-    runOnMC = cms.bool(False)
+    runOnMC = cms.bool(False),
+    showDetails = cms.bool(False),
+    elecs = cms.InputTag("selectedPatElectrons"),
+    muons = cms.InputTag("selectedPatMuons"),
+    jets = cms.InputTag("selectedPatJets"),
+    mets = cms.InputTag("pfMET")
 )
 
 
