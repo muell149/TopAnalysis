@@ -147,6 +147,12 @@ if(not globals().has_key('eventFilter')):
     eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 if(runningOnData=="MC"):
     print 'chosen ttbar filter:' , eventFilter
+    
+## choose whether synchronisation exercise should be done
+if(not globals().has_key('cutflowSynch')): 
+    cutflowSynch  = False # True
+if(cutflowSynch):
+    print "!!!! CUTFLOW SYNCHRONISATION EXERCISE !!!!"
 
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
@@ -845,7 +851,7 @@ else:
 ## ---
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist.root")
+process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
 if(options.sample=="ttbar"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
 if(options.sample=="wjets"):
@@ -1256,6 +1262,10 @@ if(pfToPAT):
         PFoptions['skipIfNoPFMuon']=True
         PFoptions['addNoCutPFMuon']=True
         #PFoptions['noElecTopProjection']=True
+	## option to change PF2PAT settings for cutflow excercise:
+	if(cutflowSynch):
+	    PFoptions['pfIsoValMuon'] = 0.2
+	    #PFoptions['cutsElec'] = 'pt>5 && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits<2'
     prependPF2PATSequence(process, recoPaths, PFoptions)
     # remove electron collections as long as id does not exist in the tuples
     for path in recoPaths:
@@ -1312,7 +1322,7 @@ if(not BtagReweigthing or runningOnData=="data"):
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not effSFReweigthing) ):
     for path in allpaths:
-        getattr(process,path).remove( process.eventWeightForReconalyzers )
+        getattr(process,path).remove( process.eventWeightForRecoAnalyzers )
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing and not effSFReweigthing) ):
     for path in allpaths:
