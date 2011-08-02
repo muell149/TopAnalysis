@@ -60,9 +60,12 @@ if(not globals().has_key('pfToPAT')):
 print "run PF2PAT?: ",pfToPAT,"(won't work if the file does not contain the necessary information!)"
 
 ## choose the semileptonic decay channel (electron or muon)
-decayChannel=options.lepton
-if(decayChannel=='unset'):
-    decayChannel = 'muon' # 'electron'
+#decayChannel=options.lepton
+if(options.lepton=='unset'): 
+    if(not globals().has_key('decayChannel')):
+        decayChannel = 'muon' # 'electron'
+else:
+    decayChannel=options.lepton
 print "used lepton decay channel: "+decayChannel
 
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
