@@ -932,21 +932,30 @@ process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
 process.eventWeightMultiplier.verbose=cms.int32(0)
 ## make clone for PU + effSF
 process.eventWeightForRecoAnalyzers = process.eventWeightMultiplier.clone();
+process.eventWeightNoEffSFWeight    = process.eventWeightMultiplier.clone();
+process.eventWeightNoBtagSFWeight   = process.eventWeightMultiplier.clone();
 ## create weightlists
 weightlistForRecoAnalyzer=cms.VInputTag()
 weightlistBtag           =cms.VInputTag()
+weightlistNoEffSFWeight  =cms.VInputTag()
+weightlistNoBtagSFWeight =cms.VInputTag()
 if(PUreweigthing):
     weightlistForRecoAnalyzer.append(PUweight)
     weightlistBtag.append(PUweight)
+    weightlistNoEffSFWeight.append(PUweight)
+    weightlistNoBtagSFWeight.append(PUweight)
 if(effSFReweigthing and decayChannel=="muon"):
     weightlistForRecoAnalyzer.append(EffSFWeight)
     weightlistBtag.append(EffSFWeight)
+    weightlistNoBtagSFWeight.append(EffSFWeight)
 if(BtagReweigthing):
     weightlistBtag.append(BtagWeight)
+    weightlistNoEffSFWeight.append(BtagWeight)
     
 process.eventWeightForRecoAnalyzers.eventWeightTags = weightlistForRecoAnalyzer
-process.eventWeightMultiplier.eventWeightTags   = weightlistBtag
-
+process.eventWeightMultiplier.eventWeightTags       = weightlistBtag
+process.eventWeightNoEffSFWeight.eventWeightTags    = weightlistNoEffSFWeight
+process.eventWeightNoBtagSFWeight.eventWeightTags   = weightlistNoBtagSFWeight
 
 # use weight in single and double object analyzer modules
 # a) Reco (PU + EffSF) reweight
@@ -992,7 +1001,33 @@ if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     print genModules2
     for module2 in genModules2:
         getattr(process,module2).weight=PUweight
-
+	
+## copies of TopRecoKinematicsKinFit analyzers with varied weights
+if(runningOnData=="MC" and applyKinFit==True):
+    ## no weight at all
+    process.analyzeTopRecoKinematicsKinFitNoWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")
+    ## only PU weight
+    process.analyzeTopRecoKinematicsKinFitOnlyPUWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight=PUweight)
+    process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=PUweight)
+    ## no Eff SF weight
+    process.analyzeTopRecoKinematicsKinFitNoEffSFWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightNoEffSFWeight")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopNoEffSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightNoEffSFWeight")
+    ## no btag SF weight
+    process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightNoBtagSFWeight")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightNoBtagSFWeight")
+    ## add to Sequence
+    process.kinFit*=(process.eventWeightNoEffSFWeight *
+                          process.eventWeightNoBtagSFWeight *
+                          process.analyzeTopRecoKinematicsKinFitNoWeight *
+                          process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight * 
+                          process.analyzeTopRecoKinematicsKinFitOnlyPUWeight *
+                          process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight * 
+                          process.analyzeTopRecoKinematicsKinFitNoEffSFWeight *
+                          process.analyzeTopRecoKinematicsKinFitTopAntitopNoEffSFWeight * 
+                          process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight *
+                          process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight )
+    
 ## ---
 ##    run the final sequences
 ## ---
