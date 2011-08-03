@@ -7,6 +7,7 @@ eventIDPrinter = cms.EDAnalyzer("EventIDPrinter",
     elecs = cms.InputTag("selectedPatElectrons"),
     muons = cms.InputTag("selectedPatMuons"),
     jets = cms.InputTag("selectedPatJets"),
+    jecLevel = cms.string(''), #empty string = default jec level
     mets = cms.InputTag("pfMET")
 )
 

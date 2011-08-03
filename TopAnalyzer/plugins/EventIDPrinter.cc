@@ -27,6 +27,7 @@ private:
     edm::InputTag elecs_;
     edm::InputTag muons_;
     edm::InputTag jets_;
+    std::string jecLevel_;
     edm::InputTag mets_;
 };
 
@@ -37,6 +38,7 @@ EventIDPrinter::EventIDPrinter( const edm::ParameterSet& ps ) {
     elecs_ = ps.getParameter<edm::InputTag>("elecs");
     muons_ = ps.getParameter<edm::InputTag>("muons");
     jets_ = ps.getParameter<edm::InputTag>("jets");
+    jecLevel_ = ps.getParameter<std::string>("jecLevel");
     mets_ = ps.getParameter<edm::InputTag>("mets");
 }
 
@@ -54,38 +56,34 @@ void EventIDPrinter::analyze(const edm::Event& evt, const edm::EventSetup& conte
         if (showDetails_) {
             edm::Handle< std::vector<pat::Muon> > muons;
             evt.getByLabel(muons_, muons);
-            std::cout << outputString_;
             for (std::vector<pat::Muon>::const_iterator it = muons->begin(); it != muons->end(); ++it) {
-                std::cout << "Muon pT: " << it->pt() << "\teta: " << it->eta() << "\t";
+                std::cout << outputString_ << "Muon pT: " << it->pt() << "\teta: " << it->eta() << "\tphi: " << it->phi() << "\t";
                 std::cout << "pfiso: " << (it->chargedHadronIso()+it->neutralHadronIso()+it->photonIso()) / it->pt()  << "\t";
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
 
             edm::Handle< std::vector<pat::Electron> > electrons;
             evt.getByLabel(elecs_, electrons);
-            std::cout << outputString_;
             for (std::vector<pat::Electron>::const_iterator it = electrons->begin(); it != electrons->end(); ++it) {
-                std::cout << "Electron pT: " << it->pt() << "\teta: " << it->eta() << "\t";
+                std::cout << outputString_ << "Elec pT: " << it->pt() << "\teta: " << it->eta() << "\tphi: " << it->phi() << "\t";
                 std::cout << "pfiso: " << (it->chargedHadronIso()+it->neutralHadronIso()+it->photonIso()) / it->pt()  << "\t";
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
 
             edm::Handle< std::vector<pat::Jet> > jets;
             evt.getByLabel(jets_, jets);
-            std::cout << outputString_;
             for (std::vector<pat::Jet>::const_iterator it = jets->begin(); it != jets->end(); ++it) {
-                std::cout << "Jet pT: " << it->pt() << "\teta: " << it->eta() << "\t";
+                const pat::Jet jet = jecLevel_.size() ? it->correctedJet(jecLevel_) : *it;
+                std::cout << outputString_ << "Jet  pT: " << jet.pt() << "\teta: " << jet.eta() << "\tphi: " << jet.phi() << "\t";
+                std::cout << jet.currentJECLevel() << std::endl;
             }
-            std::cout << std::endl;
 
             edm::Handle< std::vector<pat::MET> > mets;
             evt.getByLabel(mets_, mets);
-            std::cout << outputString_;
             for (std::vector<pat::MET>::const_iterator it = mets->begin(); it != mets->end(); ++it) {
-                std::cout << "MET eT: " << it->et() << "\tphi: " << it->phi() << "\t";
+                std::cout << outputString_ << "MET  eT: " << it->et() << "\tphi: " << it->phi() << "\t";
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
-
         }
     }
 }
