@@ -54,7 +54,8 @@ namespace semileptonic {
 			    /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup ,
 			    /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
 			    /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
-			    /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysDiBosUp        , /*27:*/sysDiBosDown};
+			    /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
+			    /*28:*/sysDiBosUp     , /*29:*/sysDiBosDown}; // NOTE: please add new uncertainties directly before sysDiBosUp!
 	
   bool newSpring11MC=true;
   bool newSummer11MC=true;
@@ -94,8 +95,10 @@ namespace semileptonic {
     if(sys==23)systematicVariationlabel="sysSTopDown";
     if(sys==24)systematicVariationlabel="btagEffUp";
     if(sys==25)systematicVariationlabel="btagEffDown";
-    if(sys==26)systematicVariationlabel="sysDiBosUp";
-    if(sys==27)systematicVariationlabel="sysDiBosDown";
+    if(sys==26)systematicVariationlabel="sysShapeUp";
+    if(sys==27)systematicVariationlabel="sysShapeDown";
+    if(sys==28)systematicVariationlabel="sysDiBosUp";
+    if(sys==29)systematicVariationlabel="sysDiBosDown";
     // check if valid input was chosen
     if(systematicVariationlabel==""){
       std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
@@ -805,6 +808,12 @@ namespace semileptonic {
     // JER
     if(sys==sysJERUp  ) fileName += "JERup";
     if(sys==sysJERDown) fileName += "JERdown";
+    // Shape variation
+    // only for new MC and ttbar signal
+    if(newSummer11MC&&sample==kSig){
+      if(sys==sysShapeUp  ) fileName += "MCShapeVarUp"  ;
+      if(sys==sysShapeDown) fileName += "MCShapeVarDown";
+    }
     // Pile Up
     // at the moment: no variation for QCD
     if(sys==sysPileUp&&sample!=kQCD) fileName += "PileUp";
@@ -1644,6 +1653,19 @@ namespace semileptonic {
     return (TH1F*)targetPlot;
   }	
   
+  double signum(double value){
+    // this function is a 
+    // simple signum function
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+    
+    if(value>0) return  1.0;
+    if(value<0) return -1.0;
+    return 0;
+  }
+
+
 #ifdef DILEPTON_MACRO
 }
 #endif
