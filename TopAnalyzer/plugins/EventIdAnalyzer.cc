@@ -1,5 +1,4 @@
-#include "TopQuarkAnalysis/Examples/plugins/EventIdAnalyzer.h"
-
+#include "TopAnalysis/TopAnalyzer/plugins/EventIdAnalyzer.h"
 
 EventIdAnalyzer::EventIdAnalyzer(const edm::ParameterSet& cfg):
   verbose_(cfg.getParameter<bool>                ("verbose")),
