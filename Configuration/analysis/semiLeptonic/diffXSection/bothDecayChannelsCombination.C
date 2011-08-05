@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsigned int verbose=0){
+void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0){
 	
   // ---
   //    Setup
@@ -123,7 +123,7 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	    std::cout << plotName << " for MC@Nlo chosen" << std::endl;
 	    exit(0);
 	  }
-	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction("MCatNLO/"+plotName2,"./diffXSecFromSignal/analysisRootFilesWithKinFit/ttbarNtupleCteq6m.root");
+	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction(plotName2,"./diffXSecFromSignal/analysisRootFilesWithKinFit/ttbarNtupleCteq6m.root");
 	  TH1F* unbinnedTheory2 = (TH1F*)unbinnedTheory->Clone();
 	  TH1F* unbinnedTheoryMCAtNLO2 = (TH1F*)unbinnedTheoryMCAtNLO->Clone();
 	  // normalize to unsit area for diff. norm. plots
@@ -133,8 +133,9 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->GetBinWidth(1)));
 	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->Integral(0,unbinnedTheory2->GetNbinsX()+1)));
 	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->GetBinWidth(1)));
-	    if(xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Rebin(25);
-	    else if(xSecVariables_[i].Contains("ttbarPt"))unbinnedTheoryMCAtNLO->Rebin(5);
+	    if(xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Rebin(20);
+	    else if(xSecVariables_[i].Contains("ttbarPt"))unbinnedTheoryMCAtNLO->Rebin(2);
+	    else if(xSecVariables_[i].Contains("Mass"))unbinnedTheoryMCAtNLO->Rebin(4);
 	    else unbinnedTheoryMCAtNLO->Rebin(10);
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->Integral(0,unbinnedTheoryMCAtNLO->GetNbinsX()+1)));
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->GetBinWidth(1)));
@@ -159,19 +160,23 @@ void bothDecayChannelsCombination(double luminosity=1090, bool save=true, unsign
 
 	  }
 	  histogramStyle(*unbinnedTheory , kSig  , false);
-	  histogramStyle(*unbinnedTheory2, kSig  , false);
-	  histogramStyle(*unbinnedTheoryMCAtNLO , kZjets, false);
-	  histogramStyle(*unbinnedTheoryMCAtNLO2, kZjets, false);
+	  histogramStyle(*unbinnedTheory2, kSig+1, false);
+	  histogramStyle(*unbinnedTheoryMCAtNLO , kZjets  , false);
+	  histogramStyle(*unbinnedTheoryMCAtNLO2, kZjets+1, false);
 	  if(xSecVariables_[i].Contains("Y"      )) unbinnedTheory->Smooth(2);
 	  else if(xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Smooth(10);
 	  else unbinnedTheory->Smooth(10);
-	  if(!xSecVariables_[i].Contains("Y"      )) unbinnedTheoryMCAtNLO->Smooth(10);
+	  if(xSecVariables_[i].Contains("Mass")) unbinnedTheoryMCAtNLO->Smooth(50);
+	  else if(!xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Smooth(10);
 	  else unbinnedTheoryMCAtNLO->Smooth(3);
 	  if(xSecVariables_[i].Contains("Norm")){
-	    //unbinnedTheoryMCAtNLO2->Draw("c same");
+	    // draw unsmoothed theory curves
+	    // to see if rebinning/smoothing changes the shape
+	    //unbinnedTheoryMCAtNLO2->Draw("same");
 	    //unbinnedTheory2->Draw("same");
-	    unbinnedTheoryMCAtNLO->Draw("c hist same");
-	    unbinnedTheory       ->Draw("c same"     );
+	    // draw smoothed theory curves
+	    unbinnedTheoryMCAtNLO->Draw("c same");
+	    unbinnedTheory       ->Draw("c same");
 	    TLegend *leg = new TLegend();
 	    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
 	    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.1);
