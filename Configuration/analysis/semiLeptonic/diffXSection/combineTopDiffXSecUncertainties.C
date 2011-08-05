@@ -1,14 +1,16 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, unsigned int verbose=1, TString decayChannel="muon", bool adpatOldUncertainties=true){
+void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString decayChannel="muon", bool adpatOldUncertainties=true){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
      8:sysTopScaleDown    9:sysVBosonScaleUp  10:sysVBosonScaleDown  11:sysTopMatchUp 
      12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
-     20:sysQCDup         21:sysQCDdown
+     20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
+     24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
+     28:sysDiBosUp       29:sysDiBosDown
   */
   
   TStyle myStyle("HHStyle","HHStyle");
