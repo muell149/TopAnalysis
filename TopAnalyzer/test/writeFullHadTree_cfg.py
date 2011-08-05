@@ -15,7 +15,7 @@ options.register('jetEResol', 0 , VarParsing.VarParsing.multiplicity.singleton, 
 ## set the resolution fractor for the kinematic fit
 options.register('fitResol'   ,  1.1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "kinFit resolution factor")
 ## choose whether to write output to disk or not
-options.register('writeOutput',    0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int  , "write events surviving all cuts to disk")
+options.register('writeOutput', False , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "write events surviving all cuts to disk")
 ## setup the ptHatFilter in case 'eventFilter' is chosen to be qcd
 options.register('maxPtHat', 999999., VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "maxPtHat to be processed")
 options.register('minPtHat', 0.     , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "minPtHat to be processed")
@@ -25,18 +25,14 @@ options.register('pdfUn'   , 0 , VarParsing.VarParsing.multiplicity.singleton, V
 options.register('backgroundEstimation', False , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "do a background estimation")
 ## run directly on AOD, do everything on the fly
 options.register('runOnAOD', False , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "run on AOD, do everything on the fly")
-## include b-tag efficiency and mis-tag rate in FullHadTreeWriter's TTree
-options.register('bTagPara', 1 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "include bTagEff and mis-tag rate")
-## change b-tagging discriminator for b-tagging uncertainty measurement
-#options.register('bTag', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "bTag uncertainty")
 ## which b-tag algo and WP should be used
-options.register('bTagAlgoWP', 'SSVHEM', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which b-tag algo and WP should be used")
+options.register('bTagAlgoWP', 'SSVHPT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which b-tag algo and WP should be used")
 ## do mva selection instead of old style selection
 options.register('mvaSelection', True , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "mva selection")
 ## weight of events (should be used only for MC samples)
 options.register('mcWeight', 1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "MC sample event weight")
 ## which PU scenario for PU reweighting
-options.register('PUscenario', '11_166861', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
+options.register('PUscenario', '11_167913', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
 ## trigger results tag
 options.register('triggerTag', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "tag of trigger Results")
 
@@ -60,8 +56,6 @@ print "minPtHat  . . . . . :", options.minPtHat
 print "pdfUncertainty  . . :", options.pdfUn
 print "backgroundEstimation:", options.backgroundEstimation
 print "runOnAOD  . . . . . :", options.runOnAOD
-print "bTagParametersOn  . :", options.bTagPara
-#print "bTag  . . . . . . . :", options.bTag
 print "bTagAlgoWP  . . . . :", options.bTagAlgoWP
 print "mvaSelection  . . . :", options.mvaSelection
 print "mcWeight  . . . . . :", options.mcWeight
@@ -84,6 +78,7 @@ process.source = cms.Source("PoolSource",
     ## add your favourite file here
     fileNames = cms.untracked.vstring(
     #'file:patTuple.root',
+    #'file:patTuple_selected.root',
     #'file:/tmp/eschliec/tmp.root',
     #'/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_131_1_MfV.root',
     #'/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_182_1_CNE.root',
@@ -152,7 +147,7 @@ process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = 
                                                          inputMETs            = cms.InputTag("patMETsPF"),
                                                          payload              = cms.string("AK5PFchs"),
                                                          scaleFactor          = cms.double(options.jesFactor),
-                                                         scaleType            = cms.string("abs"), #abs or rel
+                                                         scaleType            = cms.string("abs"), #abs, rel, top:up, top:down, jes:up, jes:down
                                                          jetPTThresholdForMET = cms.double(20.),
                                                          jetEMLimitForMET     = cms.double(0.9),
                                                          resolutionFactors    = cms.vdouble(resolutions),
@@ -237,7 +232,7 @@ if not options.eventFilter=='sig' :
     removeTtFullHadHypGenMatch(process)
 
 ## changing bTagger, possible are: TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT, CSV, CSVMVA
-## only TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT and CSV have a officialy blessed WP
+## CSVMVA has NO officialy blessed WP
 if options.bTagAlgoWP == "TCHEM" :
     switchToTCHEM(process)
 elif options.bTagAlgoWP == "TCHEL" :
@@ -292,8 +287,10 @@ process.FullHadTreeWriter = process.writeFullHadTree.clone(JetSrc = "tightLeadin
 process.FullHadTreeWriter.MCweight = options.mcWeight
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU = process.eventWeightPU.clone()
-if options.PUscenario == '11_166861':
+process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
+if options.PUscenario == '11_167913':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root"
+elif options.PUscenario == '11_166861':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166861_7TeV_PromptReco_Collisions11.root"
 elif options.PUscenario == '11_166502':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-166502_7TeV_PromptReco_Collisions11.root"
@@ -304,21 +301,14 @@ elif options.PUscenario == '10_Apr21':
 elif not options.eventFilter == 'data':
     exit('PU SCENARIO * ' + options.PUscenario + " * NOT SUPPORTED, STOP PROCESSING")
 
-## switch bTagEff and mis-tag rate for FullHadTreeWriter
-if options.bTagPara==0 :
-    process.FullHadTreeWriter.bTagParams = 0
-
 ## remove PDF uncertainties
 removePDFUncertainties(process)
 if options.pdfUn==0 :
     process.FullHadTreeWriter.GenSrc = ""
 
 ## get b-tag efficiency infos
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
-
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1101")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1101")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 
 ## ---
 ##    run the final sequence
@@ -381,10 +371,16 @@ pf2patOptions['pfIsoConeElec'] = 0.3
 pf2patOptions['pfIsoValMuon'] = 0.2
 pf2patOptions['pfIsoValElec'] = 0.2
 pf2patOptions['electronIDs'] = ''
+pf2patOptions['excludeElectronsFromWsFromGenJets'] = True
+#pf2patOptions['noMuonTopProjection'] = True
+#pf2patOptions['noElecTopProjection'] = True
+pf2patOptions['applyMETCorrections'] = True
 if options.eventFilter=='data':
     pf2patOptions['runOnMC'] = False
 if options.runOnAOD:
     pf2patOptions['runOnAOD'] = True
+if options.writeOutput:
+    pf2patOptions['switchOffEmbedding'] = False
 prependPF2PATSequence(process, options = pf2patOptions)
 
 ## adaptions (re-aranging of modules) to speed up processing
@@ -411,4 +407,32 @@ for pathname in pathnames:
         massSearchReplaceAnyInputTag(getattr(process, pathname), cms.InputTag("TriggerResults","","HLT"), cms.InputTag("TriggerResults","",options.triggerTag))
         process.patTrigger.processName      = options.triggerTag
         process.patTriggerEvent.processName = options.triggerTag
+
+## Output Module Configuration
+if options.writeOutput:
+    process.outModule = cms.OutputModule("PoolOutputModule",
+                                         fileName = cms.untracked.string('patTuple_selected.root'),
+                                         # save only events passing the full path
+                                         SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p1') ),
+                                         # drop meta data for dropped events
+                                         dropMetaData = cms.untracked.string('DROPPED'),
+                                         # save output (comment to keep everything...)
+                                         outputCommands = cms.untracked.vstring('drop *',
+                                                                                'keep *_generator_*_*',
+                                                                                'keep *_TriggerResults_*_HLT',
+                                                                                'keep *_addPileupInfo_*_*',
+                                                                                'keep *_genEvt_*_FullHadTreeWriter',
+                                                                                'keep *_decaySubset_*_FullHadTreeWriter',
+                                                                                'keep *_initSubset_*_FullHadTreeWriter',
+                                                                                'keep *_ttFullHadEvent_*_FullHadTreeWriter',
+                                                                                'keep *_mvaDisc_*_*',
+                                                                                'keep *_eventWeightPU_*_*',
+                                                                                'keep *_selectedPatJets_*_*',
+                                                                                'keep *_selectedPatElectrons_*_*',
+                                                                                'keep *_selectedPatMuons_*_*',
+                                                                                'keep *_patMETs_*_*',
+                                                                                ) 
+                                         )
+    process.outpath = cms.EndPath(process.outModule)
+
 
