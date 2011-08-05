@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1090.0, bool save = false, int systematicVariation=sysNo, unsigned int verbose=1,
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1,
 			     //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
-			     std::string decayChannel = "muon" )
+std::string decayChannel = "muon" )
 {
   // c) set root style
   // set root style
@@ -44,8 +44,8 @@ void analyzeHypothesisKinFit(double luminosity = 1090.0, bool save = false, int 
      20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
      24:sysBtagUp        25:sysBtagDown       26:sysDiBosUp          27:sysDiBosDown
   */
-  if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.04;
-  else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
+  if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.045;
+  else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.955;
   if(luminosity>40.&&systematicVariation==sysLumiUp  ) luminosity*=1.06;
   else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.94;
   // verbose: set detail level of output 
