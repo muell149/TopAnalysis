@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool adpatOldUncertainties=true){
+void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, unsigned int verbose=1, TString decayChannel="muon", bool adpatOldUncertainties=true){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -169,7 +169,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
 	}
-	if(adpatOldUncertainties&&!canvas&&sys!=sysNo){
+	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysShapeUp&&sys!=sysShapeDown){
 	  if(verbose>1) std::cout << "use 2010 uncertainties for variation " << sysLabel(sys)+", "+xSecVariables_[i] << std::endl;
 	  // adapt 2010 UNCERTAINTIES
 	  // if systematic variation does not exist for 2011 data (indicated by luminosity), 
@@ -193,7 +193,16 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 		TH1F* plot= (TH1F*)oldCanvas->GetPrimitive("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
 		if(plot){ 
 		  if(verbose>1) std::cout << "got plot" << std::endl;
-		  double relSysErrorBin = plot->GetBinContent(sys);
+		  // take into account that some systematics in 2010
+		  // were not present and therefore the last (diboson)
+		  // bins are shifted
+		  int sysold=sys;
+		  if(sys==sysDiBosDown||sys==sysDiBosUp){
+		    int NbinsOld=plot->GetNbinsX();
+		    int NbinsNew=sysDiBosDown+5;
+		    sysold-=(NbinsNew-NbinsOld);
+		  }
+		  double relSysErrorBin = plot->GetBinContent(sysold);
 		  if(verbose>1) std::cout << "bin rel uncertainty: " << relSysErrorBin << std::endl;
 		  // apply binwise SF for the relative uncertainty 
 		  // from 2010 mu+jets analysis to the copy of the 
@@ -415,7 +424,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1090, bool save=true, uns
 	      // draw plot into canvas
 	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");
 	      // draw axis also on the right side of canvas
-	      int xPosition=32;
+	      int xPosition=sysDiBosDown+5;
 	      double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
 	      double histMin = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMinimumBin());
 	      double max = errMax;
