@@ -12,9 +12,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-//#include "FWCore/Framework/interface/MakerMacros.h"
-//#include "FWCore/ServiceRegistry/interface/Service.h"
-//#include "FWCore/Utilities/interface/EDMException.h"
 
 #include "AnalysisDataFormats/TopObjects/interface/TtFullHadronicEvent.h"
 
@@ -51,7 +48,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   int comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h);
 
   /// src's for the different infos
-  edm::InputTag JetSrc_, METSrc_, FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
+  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
 
   /// MC weight
   double MCweight_;
@@ -66,9 +63,6 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   // Max possible number of jets in events
   const unsigned short kMAX;
 
-  // Max entries in bTag array of jets in events
-  unsigned int kBTagMAX;
-
   /// define variables for tree
   
   // bools
@@ -78,6 +72,8 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   short * fitAssigns;
   short * pdgId;
   short * partonFlavour;
+  short * jetConst;
+  short * chargeMulti;
   short comboTypeValue;
   short nPU;
   short nVertex;
@@ -97,8 +93,12 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   // unsigend longs
 
   // floats
-  float * bTag_TCHE, * bTag_TCHP, * bTag_SSVHE, * bTag_SSVHP, * bTag_CSV, * bTag_CSVMVA;
-  float * charge;
+  float * bTag_TCHE      , * bTag_TCHP      , * bTag_SSVHE      , * bTag_SSVHP      , * bTag_CSV, * bTag_CSVMVA;
+  float * bTag_TCHE_SF   , * bTag_TCHP_SF   , * bTag_SSVHE_SF   , * bTag_SSVHP_SF   , * bTag_CSV_SF;   
+  float * bTag_TCHE_SF_Un, * bTag_TCHP_SF_Un, * bTag_SSVHE_SF_Un, * bTag_SSVHP_SF_Un, * bTag_CSV_SF_Un;
+  float * mTag_TCHE_SF   , * mTag_TCHP_SF   , * mTag_SSVHE_SF   , * mTag_SSVHP_SF   , * mTag_CSV_SF;   
+  float * mTag_TCHE_SF_Un, * mTag_TCHP_SF_Un, * mTag_SSVHE_SF_Un, * mTag_SSVHP_SF_Un, * mTag_CSV_SF_Un;
+  float * charge, * fChHad, * fNeHad, * fChEm, * fNeEm, * fElec, * fPhot, * fMuon;
   float Q;
 
   float H, Ht, Ht123, Ht3jet, sqrt_s, Et56, M3;
@@ -178,14 +178,13 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   float pbarInW2FrameW2InDetFrame           ;
 
   // doubles
-  double weight;
   double MCweight, PUweight;
   double prob, chi2, topMass, ttMass;
   double multiJetMVADisc;
   double x1, x2;
   
   // TClonesArray(TLorentzVectors)
-  TClonesArray * jets, * MET, * fitVecs;
+  TClonesArray * jets, * MET, * muons, * electrons, * fitVecs;
 
 };
 

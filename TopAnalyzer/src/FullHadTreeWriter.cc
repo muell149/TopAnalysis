@@ -7,12 +7,14 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+//#include "FWCore/Utilities/interface/EDMException.h"
 
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
-//#include "DataFormats/Candidate/interface/Candidate.h"
-//#include "DataFormats/Candidate/interface/LeafCandidate.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+
 #include "AnalysisDataFormats/TopObjects/interface/TtFullHadEvtPartons.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -21,6 +23,8 @@
 FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   JetSrc_            (cfg.getParameter<edm::InputTag>("JetSrc")),
   METSrc_            (cfg.getParameter<edm::InputTag>("METSrc")),
+  MuonSrc_           (cfg.getParameter<edm::InputTag>("MuonSrc")),
+  ElectronSrc_       (cfg.getParameter<edm::InputTag>("ElectronSrc")),
   FitSrc_            (cfg.getParameter<edm::InputTag>("FitSrc")),
   MultiJetMVADiscSrc_(cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc")),
   GenSrc_            (cfg.getParameter<edm::InputTag>("GenSrc")),
@@ -31,7 +35,6 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   bTagName_(cfg.getParameter<std::vector<std::string> >("bTagName")),
   bTagVal_ (cfg.getParameter<std::vector<std::string> >("bTagVal" )),
   kMAX(50),
-  kBTagMAX(cfg.getParameter<unsigned int>("bTagParams")),
   doPDFUncertainty(false)
 {
 }
@@ -61,8 +64,6 @@ FullHadTreeWriter::beginJob()
   tree->Branch("eventNumber", &eventNumber, "eventNumber/i");
 
   // event weight
-  //weight = -1.;
-  //tree->Branch("weight", &weight, "weight/D");
   MCweight = MCweight_;
   PUweight = -10.;
   tree->Branch("MCweight", &MCweight, "MCweight/D");
@@ -74,6 +75,20 @@ FullHadTreeWriter::beginJob()
   MET = new TClonesArray("TLorentzVector", 1);
   tree->Branch("MET", &MET, 32000, -1);
   MET->BypassStreamer();
+
+  /// muons
+
+  // 4-vector of muons
+  muons = new TClonesArray("TLorentzVector", 5);
+  tree->Branch("muons", &muons, 32000, -1);
+  muons->BypassStreamer();
+
+  /// electrons
+
+  // 4-vector of electrons
+  electrons = new TClonesArray("TLorentzVector", 5);
+  tree->Branch("electrons", &electrons, 32000, -1);
+  electrons->BypassStreamer();
 
   /// jets
 
@@ -87,40 +102,149 @@ FullHadTreeWriter::beginJob()
   tree->Branch("Njet", &Njet, "Njet/I");
 
   // b-tag discriminators of jets
-  bTag_TCHE     = new float[(kBTagMAX+1)*kMAX];
-  bTag_TCHP     = new float[(kBTagMAX+1)*kMAX];
-  bTag_SSVHE    = new float[(kBTagMAX+1)*kMAX];
-  bTag_SSVHP    = new float[(kBTagMAX+1)*kMAX];
-  bTag_CSV      = new float[kMAX];
-  bTag_CSVMVA   = new float[kMAX];
-  charge        = new float[kMAX];
-  pdgId         = new short[kMAX];
-  partonFlavour = new short[kMAX];
+  bTag_TCHE        = new float[kMAX];
+  bTag_TCHP        = new float[kMAX];
+  bTag_SSVHE       = new float[kMAX];
+  bTag_SSVHP       = new float[kMAX];
+  bTag_CSV         = new float[kMAX];
+  bTag_CSVMVA      = new float[kMAX];
+  bTag_TCHE_SF     = new float[kMAX];
+  bTag_TCHP_SF     = new float[kMAX];
+  bTag_SSVHE_SF    = new float[kMAX];
+  bTag_SSVHP_SF    = new float[kMAX];
+  bTag_CSV_SF      = new float[kMAX];
+  bTag_TCHE_SF_Un  = new float[kMAX];
+  bTag_TCHP_SF_Un  = new float[kMAX];
+  bTag_SSVHE_SF_Un = new float[kMAX];
+  bTag_SSVHP_SF_Un = new float[kMAX];
+  bTag_CSV_SF_Un   = new float[kMAX];
+  mTag_TCHE_SF     = new float[kMAX];
+  mTag_TCHP_SF     = new float[kMAX];
+  mTag_SSVHE_SF    = new float[kMAX];
+  mTag_SSVHP_SF    = new float[kMAX];
+  mTag_CSV_SF      = new float[kMAX];
+  mTag_TCHE_SF_Un  = new float[kMAX];
+  mTag_TCHP_SF_Un  = new float[kMAX];
+  mTag_SSVHE_SF_Un = new float[kMAX];
+  mTag_SSVHP_SF_Un = new float[kMAX];
+  mTag_CSV_SF_Un   = new float[kMAX];
+
+  // additional jet variables
+  charge           = new float[kMAX];
+  fChHad           = new float[kMAX];
+  fNeHad           = new float[kMAX];
+  fChEm            = new float[kMAX];
+  fNeEm            = new float[kMAX];
+  //fElec            = new float[kMAX];
+  //fPhot            = new float[kMAX];
+  fMuon            = new float[kMAX];
+  jetConst         = new short[kMAX];
+  chargeMulti      = new short[kMAX];
+  pdgId            = new short[kMAX];
+  partonFlavour    = new short[kMAX];
+
+  EtSin2Theta      = new float[kMAX];
+  theta            = new float[kMAX];
+  sinTheta         = new float[kMAX];
+  EtStar           = new float[kMAX];
+  thetaStar        = new float[kMAX];
+  sinThetaStar     = new float[kMAX];
+
   for(unsigned short i = 0; i < kMAX; ++i) {
-    for(unsigned short j = 0; j < kBTagMAX+1; ++j) {
-      bTag_TCHE  [i*j+j] = -100.;
-      bTag_TCHP  [i*j+j] = -100.;
-      bTag_SSVHE [i*j+j] = -100.;
-      bTag_SSVHP [i*j+j] = -100.;
-    }
-    bTag_CSV     [i] = -100.;
-    bTag_CSVMVA  [i] = -100.;
-    charge       [i] = -100.;
-    pdgId        [i] =    0 ;
-    partonFlavour[i] =    0 ;
+    bTag_TCHE_SF     [i] = -100.;
+    bTag_TCHP_SF     [i] = -100.;
+    bTag_SSVHE_SF    [i] = -100.;
+    bTag_SSVHP_SF    [i] = -100.;
+    bTag_CSV_SF      [i] = -100.;
+    bTag_TCHE_SF_Un  [i] = -100.;
+    bTag_TCHP_SF_Un  [i] = -100.;
+    bTag_SSVHE_SF_Un [i] = -100.;
+    bTag_SSVHP_SF_Un [i] = -100.;
+    bTag_CSV_SF_Un   [i] = -100.;
+    mTag_TCHE_SF     [i] = -100.;
+    mTag_TCHP_SF     [i] = -100.;
+    mTag_SSVHE_SF    [i] = -100.;
+    mTag_SSVHP_SF    [i] = -100.;
+    mTag_CSV_SF      [i] = -100.;
+    mTag_TCHE_SF_Un  [i] = -100.;
+    mTag_TCHP_SF_Un  [i] = -100.;
+    mTag_SSVHE_SF_Un [i] = -100.;
+    mTag_SSVHP_SF_Un [i] = -100.;
+    mTag_CSV_SF_Un   [i] = -100.;
+
+    bTag_TCHE        [i] = -100.;
+    bTag_TCHP        [i] = -100.;
+    bTag_SSVHE       [i] = -100.;
+    bTag_SSVHP       [i] = -100.;
+    bTag_CSV         [i] = -100.;
+    bTag_CSVMVA      [i] = -100.;
+    charge           [i] = -100.;
+    fChHad           [i] =   -2.;
+    fNeHad           [i] =   -2.;
+    fChEm            [i] =   -2.;
+    fNeEm            [i] =   -2.;
+    //fElec            [i] =   -2.;
+    //fPhot            [i] =   -2.;
+    fMuon            [i] =   -2.;
+    jetConst         [i] =   -2 ;
+    chargeMulti      [i] =   -2 ;
+    pdgId            [i] =    0 ;
+    partonFlavour    [i] =    0 ;
+
+    EtSin2Theta      [i] = -1.;
+    theta            [i] = -100.;
+    sinTheta         [i] = -100 ;
+    EtStar           [i] = -1.;
+    thetaStar        [i] = -100.;
+    sinThetaStar     [i] = -100 ;
   }
-  char buffer[7];
-  sprintf(buffer, "[%i]/F", kBTagMAX+1);
+  //char buffer[7];
+  //sprintf(buffer, "[%i]/F", kBTagMAX);
   //std::cout << (std::string("bTag_TCHE[Njet]") + std::string(buffer)).c_str() << std::endl;
-  tree->Branch("bTag_TCHE"    , bTag_TCHE    , (std::string("bTag_TCHE[Njet]" ) + std::string(buffer)).c_str() );
-  tree->Branch("bTag_TCHP"    , bTag_TCHP    , (std::string("bTag_TCHP[Njet]" ) + std::string(buffer)).c_str() );
-  tree->Branch("bTag_SSVHE"   , bTag_SSVHE   , (std::string("bTag_SSVHE[Njet]") + std::string(buffer)).c_str() );
-  tree->Branch("bTag_SSVHP"   , bTag_SSVHP   , (std::string("bTag_SSVHP[Njet]") + std::string(buffer)).c_str() );
-  tree->Branch("bTag_CSV"     , bTag_CSV     , "bTag_CSV[Njet]/F"     );
-  tree->Branch("bTag_CSVMVA"  , bTag_CSVMVA  , "bTag_CSVMVA[Njet]/F"  );
-  tree->Branch("charge"       , charge       , "charge[Njet]/F"       );
-  tree->Branch("pdgId"        , pdgId        , "pdgId[Njet]/S"        );
-  tree->Branch("partonFlavour", partonFlavour, "partonFlavour[Njet]/S");
+  tree->Branch("bTag_TCHE"       , bTag_TCHE       , "bTag_TCHE[Njet]"       );
+  tree->Branch("bTag_TCHP"       , bTag_TCHP       , "bTag_TCHP[Njet]"       );
+  tree->Branch("bTag_SSVHE"      , bTag_SSVHE      , "bTag_SSVHE[Njet]"      );
+  tree->Branch("bTag_SSVHP"      , bTag_SSVHP      , "bTag_SSVHP[Njet]"      );
+  tree->Branch("bTag_CSV"        , bTag_CSV        , "bTag_CSV[Njet]/F"      );
+  tree->Branch("bTag_CSVMVA"     , bTag_CSVMVA     , "bTag_CSVMVA[Njet]/F"   );
+  tree->Branch("bTag_TCHE_SF"    , bTag_TCHE_SF    , "bTag_TCHE_SF[Njet]"    );
+  tree->Branch("bTag_TCHP_SF"    , bTag_TCHP_SF    , "bTag_TCHP_SF[Njet]"    );
+  tree->Branch("bTag_SSVHE_SF"   , bTag_SSVHE_SF   , "bTag_SSVHE_SF[Njet]"   );
+  tree->Branch("bTag_SSVHP_SF"   , bTag_SSVHP_SF   , "bTag_SSVHP_SF[Njet]"   );
+  tree->Branch("bTag_CSV_SF"     , bTag_CSV_SF     , "bTag_CSV_SF[Njet]"     );
+  tree->Branch("bTag_TCHE_SF_Un" , bTag_TCHE_SF_Un , "bTag_TCHE_SF_Un[Njet]" );
+  tree->Branch("bTag_TCHP_SF_Un" , bTag_TCHP_SF_Un , "bTag_TCHP_SF_Un[Njet]" );
+  tree->Branch("bTag_SSVHE_SF_Un", bTag_SSVHE_SF_Un, "bTag_SSVHE_SF_Un[Njet]");
+  tree->Branch("bTag_SSVHP_SF_Un", bTag_SSVHP_SF_Un, "bTag_SSVHP_SF_Un[Njet]");
+  tree->Branch("bTag_CSV_SF_Un"  , bTag_CSV_SF_Un  , "bTag_CSV_SF_Un[Njet]"  );
+  tree->Branch("mTag_TCHE_SF"    , mTag_TCHE_SF    , "mTag_TCHE_SF[Njet]"    );
+  tree->Branch("mTag_TCHP_SF"    , mTag_TCHP_SF    , "mTag_TCHP_SF[Njet]"    );
+  tree->Branch("mTag_SSVHE_SF"   , mTag_SSVHE_SF   , "mTag_SSVHE_SF[Njet]"   );
+  tree->Branch("mTag_SSVHP_SF"   , mTag_SSVHP_SF   , "mTag_SSVHP_SF[Njet]"   );
+  tree->Branch("mTag_CSV_SF"     , mTag_CSV_SF     , "mTag_CSV_SF[Njet]"     );
+  tree->Branch("mTag_TCHE_SF_Un" , mTag_TCHE_SF_Un , "mTag_TCHE_SF_Un[Njet]" );
+  tree->Branch("mTag_TCHP_SF_Un" , mTag_TCHP_SF_Un , "mTag_TCHP_SF_Un[Njet]" );
+  tree->Branch("mTag_SSVHE_SF_Un", mTag_SSVHE_SF_Un, "mTag_SSVHE_SF_Un[Njet]");
+  tree->Branch("mTag_SSVHP_SF_Un", mTag_SSVHP_SF_Un, "mTag_SSVHP_SF_Un[Njet]");
+  tree->Branch("mTag_CSV_SF_Un"  , mTag_CSV_SF_Un  , "mTag_CSV_SF_Un[Njet]"  );
+  tree->Branch("charge"          , charge          , "charge[Njet]/F"        );
+  tree->Branch("fChHad"          , fChHad          , "fChHad[Njet]/F"        );
+  tree->Branch("fNeHad"          , fNeHad          , "fNeHad[Njet]/F"        );
+  tree->Branch("fChEm"           , fChEm           , "fChEm[Njet]/F"         );
+  tree->Branch("fNeEm"           , fNeEm           , "fNeEm[Njet]/F"         );
+  //tree->Branch("fElec"           , fElec           , "fElec[Njet]/F"         );
+  //tree->Branch("fPhot"           , fPhot           , "fPhot[Njet]/F"         );
+  tree->Branch("fMuon"           , fMuon           , "fMuon[Njet]/F"         );
+  tree->Branch("jetConst"        , jetConst        , "jetConst[Njet]/S"      );
+  tree->Branch("chargeMulti"     , chargeMulti     , "chargeMulti[Njet]/S"   );
+  tree->Branch("pdgId"           , pdgId           , "pdgId[Njet]/S"         );
+  tree->Branch("partonFlavour"   , partonFlavour   , "partonFlavour[Njet]/S" );
+  tree->Branch("EtSin2Theta"     , EtSin2Theta     , "EtSin2Theta[Njet]/F"   );
+  tree->Branch("theta"           , theta           , "theta[Njet]/F"         );
+  tree->Branch("sinTheta"        , sinTheta        , "sinTheta[Njet]/F"      );
+  tree->Branch("EtStar"          , EtStar          , "EtStar[Njet]/F"        );
+  tree->Branch("thetaStar"       , thetaStar       , "thetaStar[Njet]/F"     );
+  tree->Branch("sinThetaStar"    , sinThetaStar    , "sinThetaStar[Njet]/F"  );
 
   measureMap["BTAGBEFF"]=PerformanceResult::BTAGBEFF;
   measureMap["BTAGBERR"]=PerformanceResult::BTAGBERR;
@@ -138,12 +262,12 @@ FullHadTreeWriter::beginJob()
   measureMap["BTAGLERRCORR"]=PerformanceResult::BTAGLERRCORR;
   measureMap["BTAGNBEFFCORR"]=PerformanceResult::BTAGNBEFFCORR;
   measureMap["BTAGNBERRCORR"]=PerformanceResult::BTAGNBERRCORR;
-  measureMap["BTAGNBERRCORR"]=PerformanceResult::BTAGNBERRCORR;
   measureMap["MUEFF"]=PerformanceResult::MUEFF;
   measureMap["MUERR"]=PerformanceResult::MUERR;
   measureMap["MUFAKE"]=PerformanceResult::MUFAKE; 
   measureMap["MUEFAKE"]=PerformanceResult::MUEFAKE;
 
+  // event variables
   H      = -1.;
   Ht     = -1.;
   Ht123  = -1.;
@@ -160,28 +284,6 @@ FullHadTreeWriter::beginJob()
   tree->Branch("Et56"  , &Et56  , "Et56/F"  );
   tree->Branch("M3"    , &M3    , "M3/F"    );
   
-  EtSin2Theta  = new float[kMAX];
-  theta        = new float[kMAX];
-  sinTheta     = new float[kMAX];
-  EtStar       = new float[kMAX];
-  thetaStar    = new float[kMAX];
-  sinThetaStar = new float[kMAX];
-  for(unsigned short i = 0; i < kMAX; ++i) {
-    EtSin2Theta [i] = -1.;
-    theta       [i] = -100.;
-    sinTheta    [i] = -100 ;
-    EtStar      [i] = -1.;
-    thetaStar   [i] = -100.;
-    sinThetaStar[i] = -100 ;
-  }
-
-  tree->Branch("EtSin2Theta" , EtSin2Theta , "EtSin2Theta[Njet]/F" );
-  tree->Branch("theta"       , theta       , "theta[Njet]/F"       );
-  tree->Branch("sinTheta"    , sinTheta    , "sinTheta[Njet]/F"    );
-  tree->Branch("EtStar"      , EtStar      , "EtStar[Njet]/F"      );
-  tree->Branch("thetaStar"   , thetaStar   , "thetaStar[Njet]/F"   );
-  tree->Branch("sinThetaStar", sinThetaStar, "sinThetaStar[Njet]/F");
-
   EtSin2Theta3jet  = -1.  ;
   theta3jet        = -100.;
   sinTheta3jet     = -100.;
@@ -621,6 +723,12 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   edm::Handle<edm::View< pat::MET > > MET_h;
   event.getByLabel(METSrc_, MET_h);
   
+  edm::Handle<edm::View< pat::Muon > > muons_h;
+  event.getByLabel(MuonSrc_, muons_h);
+  
+  edm::Handle<edm::View< pat::Electron > > electrons_h;
+  event.getByLabel(ElectronSrc_, electrons_h);
+  
   edm::Handle<edm::View< pat::Jet > > jets_h;
   event.getByLabel(JetSrc_, jets_h);
   
@@ -653,6 +761,20 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
       break;
     }
   }
+  if(muons_h.isValid()){
+    unsigned short i = 0;
+    muons->Clear();
+    for(edm::View< pat::Muon >::const_iterator muon = muons_h->begin(); muon != muons_h->end(); ++muon, ++i){
+      new((*muons)[i]) TLorentzVector(muon->px(), muon->py(), muon->pz(), muon->energy());
+    }
+  }
+  if(electrons_h.isValid()){
+    unsigned short i = 0;
+    electrons->Clear();
+    for(edm::View< pat::Electron >::const_iterator elec = electrons_h->begin(); elec != electrons_h->end(); ++elec, ++i){
+      new((*electrons)[i]) TLorentzVector(elec->px(), elec->py(), elec->pz(), elec->energy());
+    }
+  }
 
   if(jets_h.isValid()){
     Njet = (int)jets_h->size();
@@ -664,76 +786,85 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
     for(edm::View< pat::Jet >::const_iterator jet = jets_h->begin(); jet != jets_h->end(); ++jet, ++i){
       jets_v.push_back(*jet);
       new((*jets)[i]) TLorentzVector(jet->px(), jet->py(), jet->pz(), jet->energy());
-      bTag_TCHE  [i*(kBTagMAX+1)] = jet->bDiscriminator("trackCountingHighEffBJetTags");
-      bTag_TCHP  [i*(kBTagMAX+1)] = jet->bDiscriminator("trackCountingHighPurBJetTags");
-      bTag_SSVHE [i*(kBTagMAX+1)] = jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-      bTag_SSVHP [i*(kBTagMAX+1)] = jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-      bTag_CSV     [i]            = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
-      bTag_CSVMVA  [i]            = jet->bDiscriminator("combinedSecondaryVertexMVABJetTags");
-      charge       [i]            = jet->jetCharge();
-      pdgId        [i]            = (jet->genParticle()) ? jet->genParticle()->pdgId() : 0;
-      partonFlavour[i]            = jet->partonFlavour();
-      
-      if(kBTagMAX > 0){ 
-	unsigned short arrayCount = 0;
-	for( size_t ibTag = 0; ibTag < bTagName_.size(); ++ibTag , ++arrayCount ){
+      bTag_TCHE    [i] = jet->bDiscriminator("trackCountingHighEffBJetTags");
+      bTag_TCHP    [i] = jet->bDiscriminator("trackCountingHighPurBJetTags");
+      bTag_SSVHE   [i] = jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+      bTag_SSVHP   [i] = jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+      bTag_CSV     [i] = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
+      bTag_CSVMVA  [i] = jet->bDiscriminator("combinedSecondaryVertexMVABJetTags");
+      charge       [i] = jet->jetCharge();
+      fChHad       [i] = jet->chargedHadronEnergyFraction();
+      fNeHad       [i] = jet->neutralHadronEnergyFraction();
+      fChEm        [i] = jet->chargedEmEnergyFraction();
+      fNeEm        [i] = jet->neutralEmEnergyFraction();
+      //fElec        [i] = jet->electronEnergyFraction();
+      //fPhot        [i] = jet->photonEnergyFraction();
+      fMuon        [i] = jet->muonEnergyFraction();
+      jetConst     [i] = jet->nConstituents();
+      chargeMulti  [i] = jet->chargedMultiplicity();
+      pdgId        [i] = (jet->genParticle()) ? jet->genParticle()->pdgId() : 0;
+      partonFlavour[i] = jet->partonFlavour();
 
-	  if(arrayCount == kBTagMAX) arrayCount = 0;
+      for(size_t ibTag = 0; ibTag < bTagName_.size(); ++ibTag){
 
-	  iSetup.get<BTagPerformanceRecord>().get( bTagName_[ibTag],bTagPerf_h);
-	  const BtagPerformance & bTagPerf = *(bTagPerf_h.product());
+	iSetup.get<BTagPerformanceRecord>().get(bTagName_[ibTag],bTagPerf_h);
+	const BtagPerformance & bTagPerf = *(bTagPerf_h.product());
 
-	  BinningPointByMap measurePoint;
-	  measurePoint.insert(BinningVariables::JetEt, jet->et());
-	  measurePoint.insert(BinningVariables::JetAbsEta, std::abs(jet->eta()));
+	BinningPointByMap measurePoint;
+	measurePoint.insert(BinningVariables::JetEt, jet->et());
+	measurePoint.insert(BinningVariables::JetAbsEta, std::abs(jet->eta()));
 
-	  if     (bTagName_[ibTag].find("TCHEM" )!=std::string::npos) bTag_TCHE [i*(kBTagMAX+1)+arrayCount+1] = bTagPerf.getResult( measureMap[bTagVal_[ibTag]], measurePoint);
-	  else if(bTagName_[ibTag].find("TCHPT" )!=std::string::npos) bTag_TCHP [i*(kBTagMAX+1)+arrayCount+1] = bTagPerf.getResult( measureMap[bTagVal_[ibTag]], measurePoint);
-	  else if(bTagName_[ibTag].find("SSVHEM")!=std::string::npos) bTag_SSVHE[i*(kBTagMAX+1)+arrayCount+1] = bTagPerf.getResult( measureMap[bTagVal_[ibTag]], measurePoint);
-	  else if(bTagName_[ibTag].find("SSVHPT")!=std::string::npos) bTag_SSVHP[i*(kBTagMAX+1)+arrayCount+1] = bTagPerf.getResult( measureMap[bTagVal_[ibTag]], measurePoint);
-
+	if(measureMap[bTagVal_[ibTag]] == PerformanceResult::BTAGBEFFCORR){
+	  if(bTagName_[ibTag].find("TCHEM")!=std::string::npos)
+	    bTag_TCHE_SF [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("TCHPT")!=std::string::npos)
+	    bTag_TCHP_SF [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHEM")!=std::string::npos)
+	    bTag_SSVHE_SF[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHPT")!=std::string::npos)
+	    bTag_SSVHP_SF[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("CSVT")!=std::string::npos)
+	    bTag_CSV_SF  [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	}
+	else if(measureMap[bTagVal_[ibTag]] == PerformanceResult::BTAGLEFFCORR){
+	  if(bTagName_[ibTag].find("TCHEM")!=std::string::npos)
+	    mTag_TCHE_SF [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("TCHPT")!=std::string::npos)
+	    mTag_TCHP_SF [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHEM")!=std::string::npos)
+	    mTag_SSVHE_SF[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHPT")!=std::string::npos)
+	    mTag_SSVHP_SF[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("CSVT")!=std::string::npos)
+	    mTag_CSV_SF  [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	}
+	else if(measureMap[bTagVal_[ibTag]] == PerformanceResult::BTAGBERRCORR){
+	  if(bTagName_[ibTag].find("TCHEM")!=std::string::npos)
+	    bTag_TCHE_SF_Un [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("TCHPT")!=std::string::npos)
+	    bTag_TCHP_SF_Un [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHEM")!=std::string::npos)
+	    bTag_SSVHE_SF_Un[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHPT")!=std::string::npos)
+	    bTag_SSVHP_SF_Un[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("CSVT")!=std::string::npos)
+	    bTag_CSV_SF_Un  [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	}
+	else if(measureMap[bTagVal_[ibTag]] == PerformanceResult::BTAGLERRCORR){
+	  if(bTagName_[ibTag].find("TCHEM")!=std::string::npos)
+	    mTag_TCHE_SF_Un [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("TCHPT")!=std::string::npos)
+	    mTag_TCHP_SF_Un [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHEM")!=std::string::npos)
+	    mTag_SSVHE_SF_Un[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("SSVHPT")!=std::string::npos)
+	    mTag_SSVHP_SF_Un[i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
+	  else if(bTagName_[ibTag].find("CSVT")!=std::string::npos)
+	    mTag_CSV_SF_Un  [i] = bTagPerf.getResult(measureMap[bTagVal_[ibTag]], measurePoint);
 	}
       }
-      /*
-      //////////
-      
-
-      for( size_t ibTag = 0; ibTag < bTagName_.size(); ++ibTag )
-	{
-	  std::cout << "Testing: " << bTagName_[ ibTag ] << " of type " << bTagVal_[ ibTag ] << std::endl;
-
-	  //Setup our measurement
-	  iSetup.get<BTagPerformanceRecord>().get( bTagName_[ ibTag ],bTagPerf_h);
-	  const BtagPerformance & bTagPerf = *(bTagPerf_h.product());
-
-	  //Working point
-	  std::cout << "Working point: " << bTagPerf.workingPoint().cut() << std::endl;
-	  //Setup the point we wish to test!
-	  BinningPointByMap measurePoint;
-	  measurePoint.insert(BinningVariables::JetEt,jet->pt());
-	  measurePoint.insert(BinningVariables::JetAbsEta,std::abs(jet->eta()));
-
-	  std::cout << "Is it OK? " << bTagPerf.isResultOk( measureMap[ bTagVal_[ ibTag] ], measurePoint)
-		    << " result at "<< jet->pt() << " GeV, " << std::abs(jet->eta()) << " |eta| " << bTagPerf.getResult( measureMap[ bTagVal_[ ibTag] ], measurePoint)
-		    << std::endl;
-
-	  std::cout << "Error checking!" << std::endl;
-	  measurePoint.reset();
-	  measurePoint.insert(BinningVariables::JetEt,0);
-	  measurePoint.insert(BinningVariables::JetAbsEta,10);
-
-	  std::cout << "Is it OK? " << bTagPerf.isResultOk( measureMap[ bTagVal_[ ibTag] ], measurePoint)
-		    << " result at 0 GeV, 10 |eta| " << bTagPerf.getResult( measureMap[ bTagVal_[ ibTag] ], measurePoint)
-		    << std::endl;
-	  std::cout << std::endl;
-	}
-
-      //std::cout << "Values: " << PerformanceResult::BTAGNBEFF << " " << PerformanceResult::MUERR << " " << std::endl;
-
-      
-      //////////
-      */
     }
+
     TtFullHadSignalSel mvaVariables = TtFullHadSignalSel(jets_v);
 
     H      = mvaVariables.H();
@@ -746,18 +877,18 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
     
     for(int i = 0 ; i < Njet ; ++i){
       EtSin2Theta[i]  = mvaVariables.EtSin2Theta(i+1);
-      theta[i]        = mvaVariables.theta(i+1);	    
-      sinTheta[i]     = mvaVariables.sinTheta(i+1);   
+      theta[i]        = mvaVariables.theta      (i+1);	    
+      sinTheta[i]     = mvaVariables.sinTheta   (i+1);   
       EtStar[i]       = mvaVariables.EtSin2Theta(i+1,true);
-      thetaStar[i]    = mvaVariables.theta(i+1, true);
-      sinThetaStar[i] = mvaVariables.sinTheta(i+1,true);
+      thetaStar[i]    = mvaVariables.theta      (i+1,true);
+      sinThetaStar[i] = mvaVariables.sinTheta   (i+1,true);
     }
     EtSin2Theta3jet  = mvaVariables.EtSin2Theta3jet();
-    theta3jet        = mvaVariables.theta3jet();      
-    sinTheta3jet     = mvaVariables.sinTheta3jet();   
+    theta3jet        = mvaVariables.theta3jet      ();      
+    sinTheta3jet     = mvaVariables.sinTheta3jet   ();   
     EtStar3jet       = mvaVariables.EtSin2Theta3jet(true);
-    thetaStar3jet    = mvaVariables.theta3jet(true);
-    sinThetaStar3jet = mvaVariables.sinTheta3jet(true);
+    thetaStar3jet    = mvaVariables.theta3jet      (true);
+    sinThetaStar3jet = mvaVariables.sinTheta3jet   (true);
     
     pt1_pt6 = mvaVariables.pti_ptj(1,6);
     pt1_pt5 = mvaVariables.pti_ptj(1,5);
@@ -1161,9 +1292,42 @@ FullHadTreeWriter::endJob()
   delete[] bTag_CSV;
   delete[] bTag_CSVMVA;
 
-  delete[] fitAssigns;
+  delete[] bTag_TCHE_SF;
+  delete[] bTag_TCHP_SF;
+  delete[] bTag_SSVHE_SF;
+  delete[] bTag_SSVHP_SF;
+  delete[] bTag_CSV_SF;
+  delete[] bTag_TCHE_SF_Un;
+  delete[] bTag_TCHP_SF_Un;
+  delete[] bTag_SSVHE_SF_Un;
+  delete[] bTag_SSVHP_SF_Un;
+  delete[] bTag_CSV_SF_Un;
+  delete[] mTag_TCHE_SF;
+  delete[] mTag_TCHP_SF;
+  delete[] mTag_SSVHE_SF;
+  delete[] mTag_SSVHP_SF;
+  delete[] mTag_CSV_SF;
+  delete[] mTag_TCHE_SF_Un;
+  delete[] mTag_TCHP_SF_Un;
+  delete[] mTag_SSVHE_SF_Un;
+  delete[] mTag_SSVHP_SF_Un;
+  delete[] mTag_CSV_SF_Un;
+
+  delete[] charge;
+  delete[] fChHad;
+  delete[] fNeHad;
+  delete[] fChEm;
+  delete[] fNeEm;
+  //delete[] fElec;
+  //delete[] fPhot;
+  delete[] fMuon;
+
+  delete[] jetConst;
+  delete[] chargeMulti;
   delete[] pdgId;
   delete[] partonFlavour;
+
+  delete[] fitAssigns;
 
   delete[] EtSin2Theta;
   delete[] theta;
@@ -1172,8 +1336,11 @@ FullHadTreeWriter::endJob()
   delete[] thetaStar;
   delete[] sinThetaStar;
 
-  jets->Delete();
   MET->Delete();
+  jets->Delete();
+  muons->Delete();
+  electrons->Delete();
+
   fitVecs->Delete();
 }
 
