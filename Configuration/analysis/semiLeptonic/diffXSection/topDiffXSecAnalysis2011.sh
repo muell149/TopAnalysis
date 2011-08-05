@@ -23,6 +23,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/effAndAcc
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/kinFitPerformance
+## mkdir -p diffXSecFromSignal/plots/muon/2011/shapeReweighting
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/monitoring
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/recoYield
@@ -32,6 +33,7 @@
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/effAndAcc
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/kinFitPerformance
+## mkdir -p diffXSecFromSignal/plots/electron/2011/shapeReweighting
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertainties
 
@@ -48,7 +50,7 @@
 decayChannel=\"muon\" 
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=1090
+dataLuminosity=1143.22
 ## dataset: 2010 or 2011
 dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
@@ -72,8 +74,9 @@ verbose=0
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
-#maxSys=0
 maxSys=2
+## shape variations?
+shapeVar=true
 ## disable waiting time to read output
 ## fast = true / false
 fast=true
@@ -231,12 +234,37 @@ else
     echo "will be ignored, only done for decayChannel=muon/electron"
 fi
 
+##################################################################
+# run shape distortion macro to get root files for MC dependency #
+##################################################################
+BEFORED=$(date +%s)
+echo
+echo "part D: create rootfiles with shape variations"
+if [ $shapeVar = true ]
+    then
+    if [ $decayChannel != \"combined\" ]
+	then    
+	if [ $dataLuminosity2 -ge 3601 ]
+	    then
+	    echo "will be done"
+	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$decayChannel', '$save', '$verbose')'
+	else
+	    echo "only done for 2011 analysis in e/mu channel separate"
+	fi
+    else
+	echo "only done for 2011 analysis in e/mu channel separate"
+    fi
+else
+    echo "choose shapeVar = true!"
+fi
+
+
 #########################################
 ## run efficiency& cross section macro ##
 #########################################
-BEFORED=$(date +%s)
+BEFOREE=$(date +%s)
 echo
-echo "part D1: process cross section calculation macro for all systematics"
+echo "part E1: process cross section calculation macro for all systematics"
 echo "INFO: missing files must not be problematic"
 echo "      either all WZ, WW and ZZ or the combined VV sample are necessary"
 echo "      same is true for the single top samples (s, t, tW)"
@@ -253,7 +281,8 @@ echo " 8: sysTopScaleDown  9: sysVBosonScaleUp 10: sysVBosonScaleDown 11: sysTop
 echo "12: sysTopMatchDown 13: sysVBosonMatchUp 14: sysVBosonMatchDown 15: sysMuEffSFup "
 echo "16: sysMuEffSFdown  17: sysISRFSRup      18: sysISRFSRdown      19: sysPileUp    "
 echo "20: sysQCDup        21: sysQCDdown       22: sysSTopUp          23: sysSTopDown  "
-echo "24: sysBtagUp       25: sysBtagDown      26: sysDiBosUp         27: sysDiBosDown "
+echo "24: sysBtagUp       25: sysBtagDown      26: sysShapeUp         27: sysShapeDown "  
+echo "28: sysDiBosUp      29: sysDiBosDown"
 if [ $fast = false ]
     then
     sleep 5
@@ -273,18 +302,34 @@ do
   fi
   if [ $decayChannel != \"combined\" ]
       then
-      ## run macro
-      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+      ## exclude shape variation
+      if [ $systematicVariation != 26 ]
+	  then
+	  if [ $systematicVariation != 27 ]
+	      then
+              ## run macro
+	      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+	  fi
+      fi
   else
       echo "will be ignored, only done for decayChannel=muon/electron"
   fi
 done
+## shape variation
+if [ $shapeVar = true ]
+    then
+    if [ $decayChannel != \"combined\" ]
+	then
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 26, '$verbose', '$dataSample', '$decayChannel')'
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 27, '$verbose', '$dataSample', '$decayChannel')'
+    fi
+fi
 
 #######################################
 ## combine electron and muon channel ##
 #######################################
 echo
-echo "part D2: combine electron and muon channel"
+echo "part E2: combine electron and muon channel"
 if [ $fast = false ]
     then
     sleep 2
@@ -304,9 +349,9 @@ AFTERSYS=$(date +%s)
 ###########################################
 ## combine uncertainties for final xSecs ##
 ###########################################
-BEFOREE=$(date +%s)
+BEFOREF=$(date +%s)
 echo
-echo "part E: calculate systematic errors and draw final cross section"
+echo "part F: calculate systematic errors and draw final cross section"
 if [ $fast = false ]
     then
     sleep 3
@@ -340,5 +385,6 @@ fi
 echo "part A: $(( $BEFOREB - $START  )) seconds (clean up  )"
 echo "part B: $(( $BEFOREC - $BEFOREB)) seconds (monitoring)"
 echo "part C: $(( $BEFORED - $BEFOREC)) seconds (migration)"
-echo "part D: $(( $BEFOREE - $BEFORED)) seconds (xSec, $maxSys systematic variations considered)"
-echo "part E: $(( $END     - $BEFOREE)) seconds (errors and final xSec)"
+echo "part D: $(( $BEFOREE - $BEFORED)) seconds (shape variations)"
+echo "part D: $(( $BEFOREF - $BEFOREE)) seconds (xSec, $maxSys systematic variations considered)"
+echo "part E: $(( $END     - $BEFOREF)) seconds (errors and final xSec)"
