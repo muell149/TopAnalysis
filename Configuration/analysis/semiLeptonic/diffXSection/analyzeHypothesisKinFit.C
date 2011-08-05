@@ -42,12 +42,13 @@ std::string decayChannel = "muon" )
      12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
      20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
-     24:sysBtagUp        25:sysBtagDown       26:sysDiBosUp          27:sysDiBosDown
+     24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
+     28:sysDiBosUp       29:sysDiBosDown
   */
-  if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.045;
-  else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.955;
-  if(luminosity>40.&&systematicVariation==sysLumiUp  ) luminosity*=1.06;
-  else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.94;
+  if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.04;
+  else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
+  if(luminosity>40.&&systematicVariation==sysLumiUp  ) luminosity*=1.045;
+  else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.955;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
