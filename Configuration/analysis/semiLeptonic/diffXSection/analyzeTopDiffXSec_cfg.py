@@ -898,6 +898,8 @@ if(options.sample=="ZZ"):
     
 process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
 PUweight=cms.InputTag("eventWeightPU","eventWeightPU")
+PUweightUp=cms.InputTag("eventWeightPU","eventWeightPUUp")
+PUweightDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
                                                 
 ## ---
 ##    MC B-tag reweighting
@@ -912,52 +914,126 @@ process.bTagSFEventWeight.bTagAlgo=cms.string("SSVHEM")
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown possible;
 process.bTagSFEventWeight.filename= cms.string("../../../../Configuration/data/analyzeBTagEfficiency.root")
 process.bTagSFEventWeight.verbose=cms.int32(0)
-BtagWeight=cms.InputTag("bTagSFEventWeight")
+
+process.bTagSFEventWeightBTagSFUp     = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
+process.bTagSFEventWeightBTagSFDown   = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
+process.bTagSFEventWeightMisTagSFUp   = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
+process.bTagSFEventWeightMisTagSFDown = process.bTagSFEventWeight.clone(sysVar = "misTagSFDown")
 
 ## ---
 ##    MC eff SF reweighting
 ## ---
+## scale factor for trigger and lepton selection efficiency
 process.load("TopAnalysis.TopUtils.EffSFMuonEventWeight_cfi")
 process.effSFMuonEventWeight.particles=cms.InputTag("tightMuons")
-process.effSFMuonEventWeight.sysVar   = cms.string("") ## EffSFUp, EffSFDown possible;
+process.effSFMuonEventWeight.sysVar   = cms.string("")
 process.effSFMuonEventWeight.filename= cms.string("../../../../Configuration/data/efficiencyIsoMu17Combined_tapTrigger_SF_Eta.root")
 process.effSFMuonEventWeight.verbose=cms.int32(0)
-process.effSFMuonEventWeight.additionalFactor=1
-EffSFWeight=cms.InputTag("effSFMuonEventWeight")
+process.effSFMuonEventWeight.additionalFactor=0.9990 ## lepton selection eff. SF
+process.effSFMuonEventWeight.additionalFactorErr=0.03 ## 3% sys error to account for selection difference Z - ttbar
+process.effSFMuonEventWeight.meanTriggerEffSF=0.9905
+process.effSFMuonEventWeight.shapeDistortionFactor=0.5
+
+process.effSFMuonEventWeightFlatTriggerSF            = process.effSFMuonEventWeight.clone(sysVar = "flatTriggerSF")
+process.effSFMuonEventWeightTriggerEffSFNormUp       = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFNormUp")
+process.effSFMuonEventWeightTriggerEffSFNormDown     = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFNormDown")
+process.effSFMuonEventWeightTriggerEffSFShapeUp0p5   = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUp")
+process.effSFMuonEventWeightTriggerEffSFShapeDown0p5 = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDown")
+process.effSFMuonEventWeightSelectionEffSFNormUp     = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormUp")
+process.effSFMuonEventWeightSelectionEffSFNormDown   = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormDown")
+
 
 ## ---
 ##    collect all eventweights
 ## ---
-process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
-process.eventWeightMultiplier.verbose=cms.int32(0)
-## make clone for PU + effSF
-process.eventWeightForRecoAnalyzers = process.eventWeightMultiplier.clone();
-process.eventWeightNoEffSFWeight    = process.eventWeightMultiplier.clone();
-process.eventWeightNoBtagSFWeight   = process.eventWeightMultiplier.clone();
-## create weightlists
-weightlistForRecoAnalyzer=cms.VInputTag()
-weightlistBtag           =cms.VInputTag()
-weightlistNoEffSFWeight  =cms.VInputTag()
-weightlistNoBtagSFWeight =cms.VInputTag()
-if(PUreweigthing):
-    weightlistForRecoAnalyzer.append(PUweight)
-    weightlistBtag.append(PUweight)
-    weightlistNoEffSFWeight.append(PUweight)
-    weightlistNoBtagSFWeight.append(PUweight)
-if(effSFReweigthing and decayChannel=="muon"):
-    weightlistForRecoAnalyzer.append(EffSFWeight)
-    weightlistBtag.append(EffSFWeight)
-    weightlistNoBtagSFWeight.append(EffSFWeight)
-if(BtagReweigthing):
-    weightlistBtag.append(BtagWeight)
-    weightlistNoEffSFWeight.append(BtagWeight)
-    
-process.eventWeightForRecoAnalyzers.eventWeightTags = weightlistForRecoAnalyzer
-process.eventWeightMultiplier.eventWeightTags       = weightlistBtag
-process.eventWeightNoEffSFWeight.eventWeightTags    = weightlistNoEffSFWeight
-process.eventWeightNoBtagSFWeight.eventWeightTags   = weightlistNoBtagSFWeight
 
-# use weight in single and double object analyzer modules
+## create weightlists
+weightlistFinal                    =cms.VInputTag()
+weightlistNoEffSFWeight            =cms.VInputTag()
+weightlistNoBtagSFWeight           =cms.VInputTag()
+weightlistPUup                     =cms.VInputTag()
+weightlistPUdown                   =cms.VInputTag()
+weightlistFlatTriggerSF            =cms.VInputTag()
+weightlistTriggerEffSFNormUp       =cms.VInputTag()
+weightlistTriggerEffSFNormDown     =cms.VInputTag()
+weightlistTriggerEffSFShapeUp0p5   =cms.VInputTag()
+weightlistTriggerEffSFShapeDown0p5 =cms.VInputTag()
+weightlistSelectionEffSFNormUp     =cms.VInputTag()
+weightlistSelectionEffSFNormDown   =cms.VInputTag()
+weightlistBtagSFup                 =cms.VInputTag()
+weightlistBtagSFdown               =cms.VInputTag()
+weightlistMisTagSFup               =cms.VInputTag()
+weightlistMisTagSFdown             =cms.VInputTag()
+
+if(PUreweigthing):
+    weightlistFinal                    .append(PUweight)
+    weightlistNoBtagSFWeight           .append(PUweight)
+    weightlistPUup                     .append(PUweightUp)
+    weightlistPUdown                   .append(PUweightDown)
+    weightlistFlatTriggerSF            .append(PUweight)
+    weightlistTriggerEffSFNormUp       .append(PUweight)
+    weightlistTriggerEffSFNormDown     .append(PUweight)
+    weightlistTriggerEffSFShapeUp0p5   .append(PUweight)
+    weightlistTriggerEffSFShapeDown0p5 .append(PUweight)
+    weightlistSelectionEffSFNormUp     .append(PUweight)
+    weightlistSelectionEffSFNormDown   .append(PUweight)
+    weightlistBtagSFup                 .append(PUweight)
+    weightlistBtagSFdown               .append(PUweight)
+    weightlistMisTagSFup               .append(PUweight)
+    weightlistMisTagSFdown             .append(PUweight)
+if(effSFReweigthing and decayChannel=="muon"):
+    weightlistFinal                    .append("effSFMuonEventWeight")
+    weightlistNoBtagSFWeight           .append("effSFMuonEventWeight")
+    weightlistPUup                     .append("effSFMuonEventWeight")
+    weightlistPUdown                   .append("effSFMuonEventWeight")
+    weightlistFlatTriggerSF            .append("effSFMuonEventWeightFlatTriggerSF")
+    weightlistTriggerEffSFNormUp       .append("effSFMuonEventWeightTriggerEffSFNormUp")
+    weightlistTriggerEffSFNormDown     .append("effSFMuonEventWeightTriggerEffSFNormDown")
+    weightlistTriggerEffSFShapeUp0p5   .append("effSFMuonEventWeightTriggerEffSFShapeUp0p5")
+    weightlistTriggerEffSFShapeDown0p5 .append("effSFMuonEventWeightTriggerEffSFShapeDown0p5")
+    weightlistSelectionEffSFNormUp     .append("effSFMuonEventWeightSelectionEffSFNormUp")
+    weightlistSelectionEffSFNormDown   .append("effSFMuonEventWeightSelectionEffSFNormDown")
+    weightlistBtagSFup                 .append("effSFMuonEventWeight")
+    weightlistBtagSFdown               .append("effSFMuonEventWeight")
+    weightlistMisTagSFup               .append("effSFMuonEventWeight")
+    weightlistMisTagSFdown             .append("effSFMuonEventWeight")
+if(BtagReweigthing):
+    weightlistFinal                    .append("bTagSFEventWeight")
+    weightlistPUup                     .append("bTagSFEventWeight")
+    weightlistPUdown                   .append("bTagSFEventWeight")
+    weightlistFlatTriggerSF            .append("bTagSFEventWeight")
+    weightlistTriggerEffSFNormUp       .append("bTagSFEventWeight")
+    weightlistTriggerEffSFNormDown     .append("bTagSFEventWeight")
+    weightlistTriggerEffSFShapeUp0p5   .append("bTagSFEventWeight")
+    weightlistTriggerEffSFShapeDown0p5 .append("bTagSFEventWeight")
+    weightlistSelectionEffSFNormUp     .append("bTagSFEventWeight")
+    weightlistSelectionEffSFNormDown   .append("bTagSFEventWeight")
+    weightlistBtagSFup                 .append("bTagSFEventWeightBTagSFUp")
+    weightlistBtagSFdown               .append("bTagSFEventWeightBTagSFDown")
+    weightlistMisTagSFup               .append("bTagSFEventWeightMisTagSFUp")
+    weightlistMisTagSFdown             .append("bTagSFEventWeightMisTagSFDown")
+    
+process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
+process.eventWeightNoBtagSFWeight           = process.eventWeightMultiplier.clone(eventWeightTags = weightlistNoBtagSFWeight)
+process.eventWeightFinal                    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFinal)
+## systematics
+process.eventWeightPUup                     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistPUup)
+process.eventWeightPUdown                   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistPUdown)
+process.eventWeightFlatTriggerSF            = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFlatTriggerSF)
+process.eventWeightTriggerEffSFNormUp       = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFNormUp)
+process.eventWeightTriggerEffSFNormDown     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFNormDown)
+process.eventWeightTriggerEffSFShapeUp0p5   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeUp0p5)
+process.eventWeightTriggerEffSFShapeDown0p5 = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeDown0p5)
+process.eventWeightSelectionEffSFNormUp     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistSelectionEffSFNormUp)
+process.eventWeightSelectionEffSFNormDown   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistSelectionEffSFNormDown)
+process.eventWeightBtagSFup                 = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBtagSFup)
+process.eventWeightBtagSFdown               = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBtagSFdown)
+process.eventWeightMisTagSFup               = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMisTagSFup)
+process.eventWeightMisTagSFdown             = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMisTagSFdown)
+
+
+    
+# use weight in single and double object analyzer modules for central values
 # a) Reco (PU + EffSF) reweight
 modulelist= process.analyzers_().keys()
 if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
@@ -967,7 +1043,7 @@ if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     if(effSFReweigthing and decayChannel=="muon"):
         print "all Reco modules will use the eff SF event weights"
     for module in modulelist:
-        getattr(process,module).weight=cms.InputTag("eventWeightForRecoAnalyzers")
+        getattr(process,module).weight=cms.InputTag("eventWeightNoBtagSFWeight")
         
 # b) Btag reweight
 if(runningOnData=="MC" and BtagReweigthing):
@@ -977,19 +1053,19 @@ if(runningOnData=="MC" and BtagReweigthing):
     btagModules1 = process.monitorKinematicsAfterBtagging.moduleNames()
     print btagModules1
     for module1 in btagModules1:
-        getattr(process,module1).weight=cms.InputTag("eventWeightMultiplier")
+        getattr(process,module1).weight=cms.InputTag("eventWeightFinal")
     btagModules2 = process.kinFit.moduleNames()
     print btagModules2
     for module2 in btagModules2:
-        getattr(process,module2).weight=cms.InputTag("eventWeightMultiplier")
+        getattr(process,module2).weight=cms.InputTag("eventWeightFinal")
     btagModules3 = process.monitorElectronKinematicsAfterBtagging.moduleNames()
     print btagModules3
     for module3 in btagModules3:
-        getattr(process,module3).weight=cms.InputTag("eventWeightMultiplier")
+        getattr(process,module3).weight=cms.InputTag("eventWeightFinal")
     print
     
 # c) gen reweight
-if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
+if(runningOnData=="MC" and (PUreweigthing)):
     # only in gen modules
     print
     print "the following gen modules will only use the PU reweighting:"
@@ -1002,7 +1078,7 @@ if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     for module2 in genModules2:
         getattr(process,module2).weight=PUweight
 	
-## copies of TopRecoKinematicsKinFit analyzers with varied weights
+## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
 if(runningOnData=="MC" and applyKinFit==True):
     ## no weight at all
     process.analyzeTopRecoKinematicsKinFitNoWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
@@ -1010,23 +1086,108 @@ if(runningOnData=="MC" and applyKinFit==True):
     ## only PU weight
     process.analyzeTopRecoKinematicsKinFitOnlyPUWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight=PUweight)
     process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=PUweight)
-    ## no Eff SF weight
-    process.analyzeTopRecoKinematicsKinFitNoEffSFWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightNoEffSFWeight")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopNoEffSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightNoEffSFWeight")
     ## no btag SF weight
     process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightNoBtagSFWeight")
     process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightNoBtagSFWeight")
+    ## PU up
+    process.analyzeTopRecoKinematicsKinFitPUup = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightPUup")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopPUup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightPUup")
+    ## PU down
+    process.analyzeTopRecoKinematicsKinFitPUdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightPUdown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightPUdown")
+    ## flat trigger Eff SF weight
+    process.analyzeTopRecoKinematicsKinFitFlatTriggerSF = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightFlatTriggerSF")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopFlatTriggerSF = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightFlatTriggerSF")
+    ## TriggerEffSFNormUp
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormUp = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFNormUp")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormUp")    
+    ## TriggerEffSFNormDown
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFNormDown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormDown")    
+    ## TriggerEffSFShapeUp0p5
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUp0p5 = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeUp0p5")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUp0p5 = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeUp0p5")
+    ## TriggerEffSFShapeDown0p5
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDown0p5 = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeDown0p5")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDown0p5 = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeDown0p5")
+    ## SelectionEffSFNormUp
+    process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightSelectionEffSFNormUp")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightSelectionEffSFNormUp")      
+    ## SelectionEffSFNormDown
+    process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightSelectionEffSFNormDown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormDown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightSelectionEffSFNormDown")
+    ## BtagSFup
+    process.analyzeTopRecoKinematicsKinFitBtagSFup = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightBtagSFup")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightBtagSFup")
+    ## BtagSFdown
+    process.analyzeTopRecoKinematicsKinFitBtagSFdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightBtagSFdown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightBtagSFdown")
+    ## MisTagSFup
+    process.analyzeTopRecoKinematicsKinFitMisTagSFup = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightMisTagSFup")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightMisTagSFup")
+    ## MisTagSFdown
+    process.analyzeTopRecoKinematicsKinFitMisTagSFdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightMisTagSFdown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightMisTagSFdown")
     ## add to Sequence
-    process.kinFit*=(process.eventWeightNoEffSFWeight *
-                          process.eventWeightNoBtagSFWeight *
+    process.kinFit.replace(process.analyzeTopRecoKinematicsKinFitTopAntitop, 
+                          process.analyzeTopRecoKinematicsKinFitTopAntitop* 
+                          process.bTagSFEventWeightBTagSFUp    *
+			  process.bTagSFEventWeightBTagSFDown  *
+			  process.bTagSFEventWeightMisTagSFUp  *
+			  process.bTagSFEventWeightMisTagSFDown*
+			  process.effSFMuonEventWeightFlatTriggerSF*           
+			  process.effSFMuonEventWeightTriggerEffSFNormUp*      
+			  process.effSFMuonEventWeightTriggerEffSFNormDown*    
+			  process.effSFMuonEventWeightTriggerEffSFShapeUp0p5*  
+			  process.effSFMuonEventWeightTriggerEffSFShapeDown0p5*
+			  process.effSFMuonEventWeightSelectionEffSFNormUp    *
+			  process.effSFMuonEventWeightSelectionEffSFNormDown*
+			  process.eventWeightPUup                    *
+			  process.eventWeightPUdown                  *
+			  process.eventWeightFlatTriggerSF           *
+			  process.eventWeightTriggerEffSFNormUp      *
+			  process.eventWeightTriggerEffSFNormDown    *
+			  process.eventWeightTriggerEffSFShapeUp0p5  *
+			  process.eventWeightTriggerEffSFShapeDown0p5*
+			  process.eventWeightSelectionEffSFNormUp    *
+			  process.eventWeightSelectionEffSFNormDown  *
+			  process.eventWeightBtagSFup                *
+			  process.eventWeightBtagSFdown              *
+			  process.eventWeightMisTagSFup              *
+			  process.eventWeightMisTagSFdown             *      
                           process.analyzeTopRecoKinematicsKinFitNoWeight *
                           process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight * 
                           process.analyzeTopRecoKinematicsKinFitOnlyPUWeight *
                           process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight * 
-                          process.analyzeTopRecoKinematicsKinFitNoEffSFWeight *
-                          process.analyzeTopRecoKinematicsKinFitTopAntitopNoEffSFWeight * 
                           process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight *
-                          process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight )
+                          process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight*
+			  process.analyzeTopRecoKinematicsKinFitPUup*
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopPUup*
+			  process.analyzeTopRecoKinematicsKinFitPUdown*
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown*
+			  process.analyzeTopRecoKinematicsKinFitFlatTriggerSF *
+                          process.analyzeTopRecoKinematicsKinFitTopAntitopFlatTriggerSF *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormUp *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUp0p5 *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUp0p5 *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDown0p5 *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDown0p5 *
+                          process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp *
+                          process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormDown *
+                          process.analyzeTopRecoKinematicsKinFitBtagSFup *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFup *
+                          process.analyzeTopRecoKinematicsKinFitBtagSFdown *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFdown *
+                          process.analyzeTopRecoKinematicsKinFitMisTagSFup *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFup *
+                          process.analyzeTopRecoKinematicsKinFitMisTagSFdown*
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown
+ )
     
 ## ---
 ##    run the final sequences
@@ -1044,7 +1205,7 @@ process.p1 = cms.Path(
 		      ## create effSF eventWeight
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
-		      process.eventWeightForRecoAnalyzers           *
+		      process.eventWeightNoBtagSFWeight             *
                       ## monitoring of PU reweighting and PV
                       process.PUControlDistributions                *
                       ## muon selection
@@ -1061,7 +1222,7 @@ process.p1 = cms.Path(
                       ## create PU event weights
                       process.bTagSFEventWeight                     *
                       ## create combined weight
-                      process.eventWeightMultiplier                 *
+                      process.eventWeightFinal                      *
                       ## monitor kinematics after b-tagging
                       process.monitorKinematicsAfterBtagging        *
                       ## apply kinematic fit
@@ -1085,7 +1246,7 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
 		      ## create effSF eventWeight
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
-		      process.eventWeightForRecoAnalyzers           *
+		      process.eventWeightNoBtagSFWeight             *
                       ## monitoring of PU reweighting and PV
                       process.PUControlDistributions                *
                       ## loose selection (slightly above mu17TriCentralJet30 Trigger)
@@ -1360,10 +1521,10 @@ if(not BtagReweigthing or runningOnData=="data"):
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not effSFReweigthing) ):
     for path in allpaths:
-        getattr(process,path).remove( process.eventWeightForRecoAnalyzers )
+        getattr(process,path).remove( process.eventWeightNoBtagSFWeight )
 # combined scale factor
 if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing and not effSFReweigthing) ):
     for path in allpaths:
-        getattr(process,path).remove( process.eventWeightMultiplier )
+        getattr(process,path).remove( process.eventWeightFinal )
 
 
