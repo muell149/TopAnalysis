@@ -8,7 +8,7 @@ if(not globals().has_key("leptonTypeId")):
 ## switch modeSelector to 1 for TagAndProbe, to 2 for generator efficiency
 if(not globals().has_key("modeSelector")):
 	modeSelector = 1
-## switch dataSelector to 1 for MC Spring2010, 2 for Fall10 MC, 3 for Spring11, to 11 for Run2010 data (GR_R_38X_V13), to 12 for Run2010 (old RECO, GR_R_36X_V12), to 13 for Run2011A
+## switch dataSelector to 1 for MC Summer11, to 11 for Run2011 data (GR_R_38X_V13)
 if(not globals().has_key("dataSelector")):
 	dataSelector = 1
 ## select triggerPath of single muon trigger (HLT_Mu9, HLT_Mu15_v1, ...)
@@ -18,9 +18,6 @@ if(not globals().has_key("triggerPathSelector")):
 ## if empty ("") only T&P for first triggerPath is done
 if(not globals().has_key("triggerPathSelector2")):
 	triggerPathSelector2 = ""
-## switch between efficiency and cutflow studies (for purity)
-if(not globals().has_key("cutflowSelector")):
-	cutflowSelector = "effOnly" # cutflowOnly, effAndCutflow
 ## select filterPath of cross trigger, which includes the firing muon
 if(not globals().has_key("filterPathSelector")):
 	filterPathSelector = ""
@@ -39,7 +36,20 @@ if(not globals().has_key("jetMinNumber2")):
 ## select jet type (any for calo, "PF" for particle flow
 if(not globals().has_key("jetType")):
 	jetType = "PF"
-	
+## run PF2PAT?
+## only possible for special pat tuples!!!
+if(not globals().has_key('pfToPAT')):
+    pfToPAT = True #False
+print "run PF2PAT?: ",pfToPAT," won't work if the file does not contain the necessary information!"
+## select whether to run directly on AOD
+if(not globals().has_key("runOnAOD")):
+	runOnAOD = True
+if(not globals().has_key("PF2PATwithoutLeptonIsoCut")):
+	PF2PATwithoutLeptonIsoCut = True
+## choose JSON file for data
+if(not globals().has_key('jsonFile')):
+    jsonFile =  ''
+
 print "----------------------------------------------"
 print "Tag and Probe for Lepton ID (11 electron, 13 muon): ", leptonTypeId
 print "----------------------------------------------"
@@ -94,7 +104,9 @@ process.patTriggerEvent.processName = triggerProcessName
 ## the following format for matchedCuts is needed for 3_11_X and higher, e.g.
 ## matchedCuts = cms.string( 'type( "TriggerMuon" ) && ( path( "HLT_Mu15_v*" ) || path( "HLT_Mu15" ) )' )
 if(filterPathSelector == ""):
-    matchedCutsString=' type( "TriggerMuon" ) && path( "'+triggerPathSelector+'" )'
+    ## in path (after triggerPathSelector): first number stands for lastFilterAccepted, the second
+    ## number for L3FilterAccepted
+    matchedCutsString=' type( "TriggerMuon" ) && path( "'+triggerPathSelector+'",1,0 )'
 else:
     matchedCutsString=' type( "TriggerMuon" ) && path( "'+triggerPathSelector+'" ,0) && filter( "'+filterPathSelector+'" )'
 print "matchedCutsString = ", matchedCutsString
@@ -187,31 +199,31 @@ process.hltTriggerFilter = hltHighLevel.clone(TriggerResultsTag = triggerResults
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "dataSelector = ", dataSelector
 if(dataSelector == 1):
-     process.GlobalTag.globaltag = cms.string('START36_V4::All')
-     print "dataSelector = 1"
-elif(dataSelector == 2):
-     process.GlobalTag.globaltag = cms.string('START38_V14::All')
-     print "dataSelector = 2"
-elif(dataSelector == 3):
-     process.GlobalTag.globaltag = cms.string('START311_V2::All')
-     print "dataSelector = 3"
+     process.GlobalTag.globaltag = cms.string('START42_V13::All')
+     jsonFile = ""
+     print "dataSelector = 1, global tag: ", process.GlobalTag.globaltag
 elif(dataSelector == 11):
-     process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
-     print "dataSelector = 11"
-elif(dataSelector == 12):
-     process.GlobalTag.globaltag = cms.string('GR_R_36X_V12::All')
-     print "dataSelector = 12"
-elif(dataSelector == 13):
-     process.GlobalTag.globaltag = cms.string('GR_R_311_V3::All')
-     print "dataSelector = 13"
-elif(dataSelector == 14):
-     process.GlobalTag.globaltag = cms.string('GR_R_41_V0::All')
+     process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
      ##-------------------- Import the JEC services -----------------------
      process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
      ##-------------------- Import the Jet RECO modules -----------------------
      process.load('RecoJets.Configuration.RecoPFJets_cff')
+     
+     ## load JSON file for data
+     if(jsonFile!=""):
+	  import PhysicsTools.PythonAnalysis.LumiList as LumiList
+	  import FWCore.ParameterSet.Types as CfgTypes
+	  print "The following JSON file is used in the cfg file: ", jsonFile
+	  myLumis = LumiList.LumiList(filename = jsonFile).getCMSSWString().split(',')
+	  process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+	  process.source.lumisToProcess.extend(myLumis)
+	  ## ATTENTION!!! At the moment myLumis are filled in the separate data_cfg files again
+	  ## as otherwise overwritten by load("data_cff")
+     else:
+	  print "No JSON file specified in cfg file (but possibly via CRAB)."
 
-     print "dataSelector = 14"
+
+     print "dataSelector = 11, global tag: ", process.GlobalTag.globaltag
 else:
      print "ERROR! DataSelector not defined. No global tag can be chosen."
 
@@ -285,7 +297,8 @@ if(modeSelector == 1):
                   'abs(dB)<0.02 &'
                   'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
                   'numberOfMatches>1 &'
-                  '(trackIso+caloIso)/pt < 0.05'
+		  '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+                  #'(trackIso+caloIso)/pt < 0.05'
        )
        ## jet-muon-distance filter
        process.tagMuons = cms.EDProducer("MuonJetOverlapSelector",
@@ -333,26 +346,17 @@ else:
 # ----- Further Selection on  P r o b e  M u o n s ----- #
 #-----------------------------------------------------------------------------
 
-## probe muons with deltaZ(muonVertex, PV) < 1
+## probe muons with deltaZ(muonVertex, PV) < 0.5
 process.probeMuonsDZ = cms.EDProducer("MuonVertexDistanceSelector",
   src           = cms.InputTag("probeMuons"),
-  primaryVertex = cms.InputTag("offlinePrimaryVertices")
+  primaryVertex = cms.InputTag("offlinePrimaryVertices"),
+  cutValue      = cms.double(0.5)
 )
 
 ## probe muons to test track quality on: triggered muons
 process.probeMuonsTrkQ = selectedPatMuons.clone(
    src = 'probeMuons',
    cut = ''
-)
-
-## probe muons to test track significance dB on: muons with other track quality cuts
-process.probeMuonsTrkSig = selectedPatMuons.clone(
-   src = 'probeMuonsDZ',
-   cut = 'innerTrack.numberOfValidHits >= 11 &'
-         'globalTrack.normalizedChi2 < 10.0  &'
-         'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-         'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-         'numberOfMatches>1'
 )
 
 ## probe muons to test isolation on: muons passing track quality selection
@@ -375,7 +379,8 @@ process.probeMuonsMinDR = selectedPatMuons.clone(
          'abs(dB)<0.02 &'
          'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
          'numberOfMatches>1 &'
-         '(trackIso+caloIso)/pt < 0.05'
+	 '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+         #'(trackIso+caloIso)/pt < 0.05'
 )
 
 ## probe muons to test cut of minimum distance (mu,jet) on: NON-isolated muons
@@ -404,7 +409,8 @@ process.probeMuonsTriggerNoDR = selectedPatMuons.clone(
          'abs(dB)<0.02 &'
          'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
          'numberOfMatches>1 &'
-         '(trackIso+caloIso)/pt < 0.05'
+	 '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+         #'(trackIso+caloIso)/pt < 0.05'
 )
 process.probeMuonsTrigger = cms.EDProducer("MuonJetOverlapSelector",
   muons = cms.InputTag("probeMuonsTriggerNoDR"),
@@ -428,23 +434,18 @@ process.testMuonsTrkQNoDZ = selectedPatMuons.clone(
         'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
         'numberOfMatches>1'	
 )
-## deltaZ(muonVertex, PV) < 1
+## deltaZ(muonVertex, PV) < 0.5
 process.testMuonsTrkQ = cms.EDProducer("MuonVertexDistanceSelector",
   src           = cms.InputTag("testMuonsTrkQNoDZ"),
-  primaryVertex = cms.InputTag("offlinePrimaryVertices")
-)
-
-
-## cut on track significance
-process.testMuonsTrkSig = selectedPatMuons.clone(
-  src = 'probeMuonsTrkSig',
-  cut = 'abs(dB)<0.02'	
+  primaryVertex = cms.InputTag("offlinePrimaryVertices"),
+  cutValue      = cms.double(0.5)
 )
 
 ## cut on muon isolation
 process.testMuonsIso = selectedPatMuons.clone(
   src = 'probeMuonsIso',
-  cut = '(trackIso+caloIso)/pt < 0.05'	
+  cut = '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125' 
+        #'(trackIso+caloIso)/pt < 0.05'	
 )
 
 ## cut on jet-muon-distance
@@ -472,12 +473,14 @@ process.testMuonsTotalSelectionNoDZNoDR = selectedPatMuons.clone(
         'abs(dB)<0.02 &'
         'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
         'numberOfMatches>1 &'
-        '(trackIso+caloIso)/pt < 0.05'
+	'(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+        #'(trackIso+caloIso)/pt < 0.05'
 )
-## deltaZ(muonVertex, PV) < 1
+## deltaZ(muonVertex, PV) < 0.5
 process.testMuonsTotalSelectionNoDR = cms.EDProducer("MuonVertexDistanceSelector",
   src           = cms.InputTag("testMuonsTotalSelectionNoDZNoDR"),
-  primaryVertex = cms.InputTag("offlinePrimaryVertices")
+  primaryVertex = cms.InputTag("offlinePrimaryVertices"),
+  cutValue      = cms.double(0.5)
 )
 process.testMuonsTotalSelection = cms.EDProducer("MuonJetOverlapSelector",
   muons = cms.InputTag("testMuonsTotalSelectionNoDR"),
@@ -502,12 +505,6 @@ from TopAnalysis.TopAnalyzer.TagAndProbeAnalyzer_cfi import tagAndProbeAnalyzer
 process.tapTrkQ = tagAndProbeAnalyzer.clone(
   probes = "probeMuonsTrkQ", 
   tests  = "testMuonsTrkQ",
-  jets   = "selectedJets"
-)
-
-process.tapTrkSig = tagAndProbeAnalyzer.clone(
-  probes = "probeMuonsTrkSig", 
-  tests  = "testMuonsTrkSig",
   jets   = "selectedJets"
 )
 
@@ -559,7 +556,8 @@ else:
     process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
     ## define ordered jets
     ## ATTENTION!!! For MC it should be 'L3Absolute' !!!!
-    corrLevel='L2L3Residual'
+    #corrLevel='L2L3Residual'
+    corrLevel=''
     uds0    = cms.PSet(index = cms.int32(0),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
     uds1    = cms.PSet(index = cms.int32(1),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
     uds2    = cms.PSet(index = cms.int32(2),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
@@ -679,6 +677,12 @@ process.analyzePostTriggerPatMuons=analyzeMuonKinematics.clone(
   analyze = cms.PSet(index = cms.int32(-1))
 )
 
+## look at quality of reconstructed muons after HLT_mu9 trigger (i.e. use it after trigger is applied)
+process.analyzePostTriggerPatMuonsQuality=analyzeMuonQuality.clone(
+  src = "selectedPatMuons",
+  analyze = cms.PSet(index = cms.int32(-1))
+)
+
 ## look at kinematics of muons which fired HLT_Mu9 (i.e. trigger matched muons)
 process.analyzeTriggerMatchedPatMuons=analyzeMuonKinematics.clone(
   src = "triggerMatchedPatMuons",
@@ -696,13 +700,14 @@ process.analyzeTestMuonsTrigger=analyzeMuonKinematics.clone(
 ##-----------------------------------------------------------------------------
 
 process.p1 = cms.Path(
-    process.analyzeAllPatMuons     *
-    process.analyzeAllPatMuonsMass *
+    #process.analyzeAllPatMuons     *
+    #process.analyzeAllPatMuonsMass *
     ## apply primary vertex selection
     process.PVSelection                *
     ## apply trigger selection
     process.hltTriggerFilter           *
     process.analyzePostTriggerPatMuons *
+    process.analyzePostTriggerPatMuonsQuality *
     ## prepare trigger matching
     process.patTriggerSequenceUser     *
     process.triggerMatchedPatMuons *
@@ -717,7 +722,6 @@ process.p1 = cms.Path(
     process.produceProbeMuons  *
     process.probeMuonsDZ       *
     process.probeMuonsTrkQ     *
-    process.probeMuonsTrkSig   *
     process.probeMuonsIso      *
     process.probeMuonsMinDR      *
     process.probeMuonsMinDRNoIso *
@@ -727,7 +731,6 @@ process.p1 = cms.Path(
     ## prepare test muons
     process.testMuonsTrkQNoDZ  *
     process.testMuonsTrkQ      *
-    process.testMuonsTrkSig    *
     process.testMuonsIso       *
     process.testMuonsMinDR     *
     process.testMuonsMinDRNoIso*
@@ -738,7 +741,6 @@ process.p1 = cms.Path(
     process.analyzeTestMuonsTrigger *
     ## do tag and probe analysis
     process.tapTrkQ            *
-    process.tapTrkSig          *
     process.tapIso             *
     process.tapMinDR           *
     process.tapMinDRNoIso      *
@@ -767,3 +769,90 @@ if(jetType=="PF"):
         getattr(process,path).remove(process.goodJets)
         getattr(process,path).remove(process.tightLeadingJets)
         getattr(process,path).remove(process.tightBottomJets)
+
+# switch to PF2PAT
+if(pfToPAT):
+    #from PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi import *
+    #patMuons.pfMuonSource = cms.InputTag("pfAllMuons") # ODER cms.InputTag("pfMuonsFromVertex")
+    from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
+    allpaths  = process.paths_().keys()
+    recoPaths=['p1']
+    # define general options
+    options = {
+        'runOnMC': True,
+        'runOnAOD': True,
+        'switchOffEmbedding': False,
+        'addResolutions': True,
+        'runOnOLDcfg': True,
+        'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
+        'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
+        'electronIDs': ['CiC','classical'],
+        'pfIsoConeMuon': 0.4,
+        'pfIsoConeElec': 0.4,
+        'pfIsoValMuon': 0.2,
+        'pfIsoValElec': 0.2,
+        'skipIfNoPFMuon': False,
+        'skipIfNoPFElec': False,
+        'addNoCutPFMuon': False,
+        'addNoCutPFElec': False,
+        'noMuonTopProjection': False,
+        'noElecTopProjection': False,
+        'analyzersBeforeMuonIso':cms.Sequence(),
+        'excludeElectronsFromWsFromGenJets': True
+        }
+    # adaptions when running on data
+    if(dataSelector == 11):
+        options['runOnMC']=False
+    options['runOnAOD']=runOnAOD
+    if(leptonTypeId==11):
+    # take into account different electron vetos in mu and e channel
+        options['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
+	if(PF2PATwithoutLeptonIsoCut):
+	    ## change the source of the PAT leptons to nonIso leptons to be able to do isolation studies
+	    #process.load("PhysicsTools.PatAlgos.producersLayer1.electronProducer_cfi")
+            #process.patElectrons.pfElectronSource = cms.InputTag("pfSelectedElectrons")
+	    options['addNoCutPFElec']=True
+	else:
+	    options['skipIfNoPFElec']=True
+    elif(leptonTypeId==13):
+	if(PF2PATwithoutLeptonIsoCut):
+	    ## change the source of the PAT leptons to nonIso leptons to be able to do isolation studies
+	    #process.load("PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi")
+            #process.patMuons.pfMuonSource = cms.InputTag("pfSelectedMuons")
+	    options['addNoCutPFMuon']=True 
+	else:
+	    options['skipIfNoPFMuon']=True 
+    prependPF2PATSequence(process, recoPaths, options)
+    ## change the source of the PAT leptons to nonIso leptons to be able to do isolation studies
+    if(PF2PATwithoutLeptonIsoCut):
+        if(leptonTypeId==11):
+	    process.selectedPatElectrons.src="noCutPatElectrons"
+	    #process.p1.remove(process.electronMatch)
+	    #process.p1.remove(process.patElectrons)
+	    #if(dataSelector == 1):
+            #    process.p1.replace(process.pfIsolatedElectrons, process.electronMatch*process.patElectrons*process.pfIsolatedElectrons)
+	    #else:
+	    #    process.p1.replace(process.pfIsolatedElectrons, process.patElectrons*process.pfIsolatedElectrons)
+		  
+        elif(leptonTypeId==13):
+	    process.selectedPatMuons.src="noCutPatMuons"
+	    #process.p1.remove(process.muonMatch)
+            #process.p1.remove(process.patMuons)
+	    #if(dataSelector == 1):
+            #    process.p1.replace(process.pfIsolatedMuons, process.muonMatch*process.patMuons*process.pfIsolatedMuons)
+	    #else:
+	    #    process.p1.replace(process.pfIsolatedMuons, process.patMuons*process.pfIsolatedMuons)
+    
+    # remove electron collections as long as id does not exist in the tuples
+    for path in recoPaths:
+        #getattr(process,path).remove( process.looseElectronsEJ )
+        #getattr(process,path).remove( process.tightElectronsEJ )
+        #getattr(process,path).remove( process.unconvTightElectronsEJ )
+        #getattr(process,path).remove( process.goodElectronsEJ )
+        # replace object consistently with names from PF2PAT
+        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
+        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
+        # run trigger at the beginning to save a lot of time
+        getattr(process,path).insert(0,process.hltTriggerFilter)
+    
