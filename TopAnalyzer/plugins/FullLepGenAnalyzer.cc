@@ -245,9 +245,9 @@ FullLepGenAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
   NuBarGen_.push_back( fs->make<TH1D>(ns.name("NuBarPhi"     ), "#phi (#bar{#nu}^{-})"       , 62, -3.1,   3.1) );
   NuBarGen_.push_back( fs->make<TH1D>(ns.name("NuBarMass"    ), "M (#bar{#nu}^{-}) [GeV]"    ,100,  0. , 500. ) );
 
-  TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarPt"      ), "p_{t} (t#bar{t}) [GeV]", 50,  0. , 500. ) );
+  TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarPt"      ), "p_{t} (t#bar{t}) [GeV]",100,  0. , 500. ) );
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarEta"     ), "#eta (t#bar{t})"       , 62, -3.1,   3.1) );
-  TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarRapidity"), "rapidity (t#bar{t})"   , 62, -3.1,   3.1) );
+  TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarRapidity"), "rapidity (t#bar{t})"   ,100, -5.0,   5.0) );
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"     ), "#phi (t#bar{t})"       , 62, -3.1,   3.1) );
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarMass"    ), "M (t#bar{t}) [GeV]"    ,100,  0. ,1000. ) );
 
