@@ -87,12 +87,16 @@ ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 
     nlost_->Fill(electron->gsfTrack()->trackerExpectedHitsInner().numberOfLostHits(), weight);
 
-    double minDr = 999.;
-    for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) {
-      double dr = reco::deltaR<const pat::Electron, const pat::Jet>(*electron, *jet);
-      if(dr<minDr) minDr = dr;
+    if (jets.failedToGet()) {
+        jet_dist_->Fill(jet_dist_->GetBinLowEdge(jet_dist_->GetNbinsX()), weight);
+    } else {
+        double minDr = 999.;
+        for(PatJetCollection::const_iterator jet = jets->begin(); jet!= jets->end(); ++jet) {
+            double dr = reco::deltaR<const pat::Electron, const pat::Jet>(*electron, *jet);
+            if(dr<minDr) minDr = dr;
+        }
+        jet_dist_->Fill(minDr, weight);
     }
-    jet_dist_->Fill(minDr, weight);
 
     d0_   ->Fill(electron->gsfTrack()->d0(), weight); /////
 
