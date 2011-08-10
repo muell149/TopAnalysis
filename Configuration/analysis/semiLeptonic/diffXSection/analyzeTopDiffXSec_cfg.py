@@ -156,6 +156,12 @@ if(not globals().has_key('cutflowSynch')):
     cutflowSynch  = False # True
 if(cutflowSynch):
     print "!!!! CUTFLOW SYNCHRONISATION EXERCISE !!!!"
+    
+## choose whether additional event weights should be applied
+if(not globals().has_key('additionalEventWeights')): 
+    additionalEventWeights  = True
+if(additionalEventWeights):
+    print "Additional event weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations!"
 
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
@@ -1079,7 +1085,7 @@ if(runningOnData=="MC" and (PUreweigthing)):
         getattr(process,module2).weight=PUweight
 	
 ## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
-if(runningOnData=="MC" and applyKinFit==True):
+if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     ## no weight at all
     process.analyzeTopRecoKinematicsKinFitNoWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
     process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")
