@@ -94,7 +94,6 @@ process.p1.remove(process.goodJets)
 process.p1.remove(process.tightLeadingJets)
 process.p1.remove(process.tightBottomJets)
 
-
 # switch to PF2PAT
 if(pfToPAT):
     from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
@@ -109,34 +108,23 @@ if(pfToPAT):
         'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
         'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
         'electronIDs': ['CiC','classical'],
         'pfIsoConeMuon': 0.4,
         'pfIsoConeElec': 0.4,
         'pfIsoValMuon': 0.2,
         'pfIsoValElec': 0.2,
         'skipIfNoPFMuon': True,
-        'skipIfNoPFElec': False
+        'skipIfNoPFElec': False,
+        'addNoCutPFMuon': False,
+        'addNoCutPFElec': False,
+        'noMuonTopProjection': False,
+        'noElecTopProjection': False,
+        'analyzersBeforeMuonIso':cms.Sequence(),
+        'excludeElectronsFromWsFromGenJets': True
         }
-    # adaptions when running on data
-    #if(runningOnData=="data"):
-        #PFoptions['runOnMC']=False
-    ##    elif(options.sample=="ttbar"):
-    ##        PFoptions['runOnAOD']=False
-    #if(decayChannel=="electron"):
-    ## take into account different electron vetos in mu and e channel
-        #PFoptions['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
-    ## skip events (and jet calculation) if no lepton is found
-    ## only done in data, as in MC you need the events for parton truth plots
-        #PFoptions['skipIfNoPFElec']=True 
-    #elif(decayChannel=="muon"):
-        #PFoptions['skipIfNoPFMuon']=True
     prependPF2PATSequence(process, recoPaths, PFoptions)
-    # remove electron collections as long as id does not exist in the tuples
     for path in recoPaths:
-        #getattr(process,path).remove( process.looseElectronsEJ )
-        #getattr(process,path).remove( process.tightElectronsEJ )
-        #getattr(process,path).remove( process.unconvTightElectronsEJ )
-        #getattr(process,path).remove( process.goodElectronsEJ )
         # replace object consistently with names from PF2PAT
         massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
         massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')
