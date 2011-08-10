@@ -589,8 +589,12 @@ process.PUControlDistributions.PUEventWeightSource     = cms.InputTag("eventWeig
 process.PUControlDistributions.PUEventWeightUpSource   = cms.InputTag("eventWeightPU","eventWeightPUUp"  )
 process.PUControlDistributions.PUEventWeightDownSource = cms.InputTag("eventWeightPU","eventWeightPUDown")
 
-process.PUControlDistributionsDefault        = process.PUControlDistributions.clone( DefEventWeight = "effSFMuonEventWeight")
-process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.clone( DefEventWeight = "effSFMuonEventWeight")
+if(decayChannel=="muon"):
+    process.PUControlDistributionsDefault        = process.PUControlDistributions.clone( DefEventWeight = "effSFMuonEventWeight")
+    process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.clone( DefEventWeight = "effSFMuonEventWeight")
+elif(decayChannel=="electron"):
+    process.PUControlDistributionsDefault        = process.PUControlDistributions.clone( DefEventWeight = "effSFElectronEventWeight")
+    process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.clone( DefEventWeight = "effSFElectronEventWeight")
 process.PUControlDistributionsAfterBtagging  = process.PUControlDistributions.clone( DefEventWeight = "eventWeightNoPUWeight")
 
 ## collect kinematics
@@ -940,10 +944,32 @@ process.effSFMuonEventWeight.shapeDistortionFactor=0.5
 process.effSFMuonEventWeightFlatTriggerSF            = process.effSFMuonEventWeight.clone(sysVar = "flatTriggerSF")
 process.effSFMuonEventWeightTriggerEffSFNormUp       = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFNormUp")
 process.effSFMuonEventWeightTriggerEffSFNormDown     = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFNormDown")
-process.effSFMuonEventWeightTriggerEffSFShapeUp0p5   = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUp")
-process.effSFMuonEventWeightTriggerEffSFShapeDown0p5 = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDown")
+process.effSFMuonEventWeightTriggerEffSFShapeUpEta   = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpEta")
+process.effSFMuonEventWeightTriggerEffSFShapeDownEta = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownEta")
+process.effSFMuonEventWeightTriggerEffSFShapeUpPt    = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpPt")
+process.effSFMuonEventWeightTriggerEffSFShapeDownPt  = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownPt")
 process.effSFMuonEventWeightSelectionEffSFNormUp     = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormUp")
 process.effSFMuonEventWeightSelectionEffSFNormDown   = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormDown")
+
+process.load("TopAnalysis.TopUtils.EffSFElectronEventWeight_cfi")
+process.effSFElectronEventWeight.particles=cms.InputTag("goodElectronsEJ")
+process.effSFElectronEventWeight.sysVar   = cms.string("")
+process.effSFElectronEventWeight.verbose=cms.int32(0)
+process.effSFElectronEventWeight.additionalFactor=1. ## lepton selection eff. SF
+process.effSFElectronEventWeight.additionalFactorErr=0.03 ## 3% sys error to account for selection difference Z - ttbar
+process.effSFElectronEventWeight.meanTriggerEffSF=1.
+process.effSFElectronEventWeight.meanTriggerEffSFErr=0.01
+process.effSFElectronEventWeight.shapeDistortionFactor=2.
+
+process.effSFElectronEventWeightFlatTriggerSF            = process.effSFElectronEventWeight.clone(sysVar = "flatTriggerSF")
+process.effSFElectronEventWeightTriggerEffSFNormUp       = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFNormUp")
+process.effSFElectronEventWeightTriggerEffSFNormDown     = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFNormDown")
+process.effSFElectronEventWeightTriggerEffSFShapeUpEta   = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFShapeUpEta")
+process.effSFElectronEventWeightTriggerEffSFShapeDownEta = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFShapeDownEta")
+process.effSFElectronEventWeightTriggerEffSFShapeUpPt    = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFShapeUpPt")
+process.effSFElectronEventWeightTriggerEffSFShapeDownPt  = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFShapeDownPt")
+process.effSFElectronEventWeightSelectionEffSFNormUp     = process.effSFElectronEventWeight.clone(sysVar = "selectionEffSFNormUp")
+process.effSFElectronEventWeightSelectionEffSFNormDown   = process.effSFElectronEventWeight.clone(sysVar = "selectionEffSFNormDown")
 
 
 ## ---
@@ -960,8 +986,10 @@ weightlistPUdown                   =cms.VInputTag()
 weightlistFlatTriggerSF            =cms.VInputTag()
 weightlistTriggerEffSFNormUp       =cms.VInputTag()
 weightlistTriggerEffSFNormDown     =cms.VInputTag()
-weightlistTriggerEffSFShapeUp0p5   =cms.VInputTag()
-weightlistTriggerEffSFShapeDown0p5 =cms.VInputTag()
+weightlistTriggerEffSFShapeUpEta   =cms.VInputTag()
+weightlistTriggerEffSFShapeDownEta =cms.VInputTag()
+weightlistTriggerEffSFShapeUpPt    =cms.VInputTag()
+weightlistTriggerEffSFShapeDownPt  =cms.VInputTag()
 weightlistSelectionEffSFNormUp     =cms.VInputTag()
 weightlistSelectionEffSFNormDown   =cms.VInputTag()
 weightlistBtagSFup                 =cms.VInputTag()
@@ -977,8 +1005,10 @@ if(PUreweigthing):
     weightlistFlatTriggerSF            .append(PUweight)
     weightlistTriggerEffSFNormUp       .append(PUweight)
     weightlistTriggerEffSFNormDown     .append(PUweight)
-    weightlistTriggerEffSFShapeUp0p5   .append(PUweight)
-    weightlistTriggerEffSFShapeDown0p5 .append(PUweight)
+    weightlistTriggerEffSFShapeUpEta   .append(PUweight)
+    weightlistTriggerEffSFShapeDownEta .append(PUweight)
+    weightlistTriggerEffSFShapeUpPt   .append(PUweight)
+    weightlistTriggerEffSFShapeDownPt .append(PUweight)
     weightlistSelectionEffSFNormUp     .append(PUweight)
     weightlistSelectionEffSFNormDown   .append(PUweight)
     weightlistBtagSFup                 .append(PUweight)
@@ -994,14 +1024,35 @@ if(effSFReweigthing and decayChannel=="muon"):
     weightlistFlatTriggerSF            .append("effSFMuonEventWeightFlatTriggerSF")
     weightlistTriggerEffSFNormUp       .append("effSFMuonEventWeightTriggerEffSFNormUp")
     weightlistTriggerEffSFNormDown     .append("effSFMuonEventWeightTriggerEffSFNormDown")
-    weightlistTriggerEffSFShapeUp0p5   .append("effSFMuonEventWeightTriggerEffSFShapeUp0p5")
-    weightlistTriggerEffSFShapeDown0p5 .append("effSFMuonEventWeightTriggerEffSFShapeDown0p5")
+    weightlistTriggerEffSFShapeUpEta   .append("effSFMuonEventWeightTriggerEffSFShapeUpEta")
+    weightlistTriggerEffSFShapeDownEta .append("effSFMuonEventWeightTriggerEffSFShapeDownEta")
+    weightlistTriggerEffSFShapeUpPt    .append("effSFMuonEventWeightTriggerEffSFShapeUpPt")
+    weightlistTriggerEffSFShapeDownPt  .append("effSFMuonEventWeightTriggerEffSFShapeDownPt")
     weightlistSelectionEffSFNormUp     .append("effSFMuonEventWeightSelectionEffSFNormUp")
     weightlistSelectionEffSFNormDown   .append("effSFMuonEventWeightSelectionEffSFNormDown")
     weightlistBtagSFup                 .append("effSFMuonEventWeight")
     weightlistBtagSFdown               .append("effSFMuonEventWeight")
     weightlistMisTagSFup               .append("effSFMuonEventWeight")
     weightlistMisTagSFdown             .append("effSFMuonEventWeight")
+if(effSFReweigthing and decayChannel=="electron"):
+    weightlistFinal                    .append("effSFElectronEventWeight")
+    weightlistNoBtagSFWeight           .append("effSFElectronEventWeight")
+    weightlistNoPUWeight               .append("effSFElectronEventWeight")
+    weightlistPUup                     .append("effSFElectronEventWeight")
+    weightlistPUdown                   .append("effSFElectronEventWeight")
+    weightlistFlatTriggerSF            .append("effSFElectronEventWeightFlatTriggerSF")
+    weightlistTriggerEffSFNormUp       .append("effSFElectronEventWeightTriggerEffSFNormUp")
+    weightlistTriggerEffSFNormDown     .append("effSFElectronEventWeightTriggerEffSFNormDown")
+    weightlistTriggerEffSFShapeUpEta   .append("effSFElectronEventWeightTriggerEffSFShapeUpEta")
+    weightlistTriggerEffSFShapeDownEta .append("effSFElectronEventWeightTriggerEffSFShapeDownEta")
+    weightlistTriggerEffSFShapeUpPt    .append("effSFElectronEventWeightTriggerEffSFShapeUpPt")
+    weightlistTriggerEffSFShapeDownPt  .append("effSFElectronEventWeightTriggerEffSFShapeDownPt")
+    weightlistSelectionEffSFNormUp     .append("effSFElectronEventWeightSelectionEffSFNormUp")
+    weightlistSelectionEffSFNormDown   .append("effSFElectronEventWeightSelectionEffSFNormDown")
+    weightlistBtagSFup                 .append("effSFElectronEventWeight")
+    weightlistBtagSFdown               .append("effSFElectronEventWeight")
+    weightlistMisTagSFup               .append("effSFElectronEventWeight")
+    weightlistMisTagSFdown             .append("effSFElectronEventWeight")
 if(BtagReweigthing):
     weightlistFinal                    .append("bTagSFEventWeight")
     weightlistNoPUWeight               .append("bTagSFEventWeight")
@@ -1010,8 +1061,10 @@ if(BtagReweigthing):
     weightlistFlatTriggerSF            .append("bTagSFEventWeight")
     weightlistTriggerEffSFNormUp       .append("bTagSFEventWeight")
     weightlistTriggerEffSFNormDown     .append("bTagSFEventWeight")
-    weightlistTriggerEffSFShapeUp0p5   .append("bTagSFEventWeight")
-    weightlistTriggerEffSFShapeDown0p5 .append("bTagSFEventWeight")
+    weightlistTriggerEffSFShapeUpEta   .append("bTagSFEventWeight")
+    weightlistTriggerEffSFShapeDownEta .append("bTagSFEventWeight")
+    weightlistTriggerEffSFShapeUpPt    .append("bTagSFEventWeight")
+    weightlistTriggerEffSFShapeDownPt  .append("bTagSFEventWeight")
     weightlistSelectionEffSFNormUp     .append("bTagSFEventWeight")
     weightlistSelectionEffSFNormDown   .append("bTagSFEventWeight")
     weightlistBtagSFup                 .append("bTagSFEventWeightBTagSFUp")
@@ -1029,8 +1082,8 @@ process.eventWeightPUdown                   = process.eventWeightMultiplier.clon
 process.eventWeightFlatTriggerSF            = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFlatTriggerSF)
 process.eventWeightTriggerEffSFNormUp       = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFNormUp)
 process.eventWeightTriggerEffSFNormDown     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFNormDown)
-process.eventWeightTriggerEffSFShapeUp0p5   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeUp0p5)
-process.eventWeightTriggerEffSFShapeDown0p5 = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeDown0p5)
+process.eventWeightTriggerEffSFShapeUpEta   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeUpEta)
+process.eventWeightTriggerEffSFShapeDownEta = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeDownEta)
 process.eventWeightSelectionEffSFNormUp     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistSelectionEffSFNormUp)
 process.eventWeightSelectionEffSFNormDown   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistSelectionEffSFNormDown)
 process.eventWeightBtagSFup                 = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBtagSFup)
@@ -1111,12 +1164,18 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     ## TriggerEffSFNormDown
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFNormDown")
     process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormDown")    
-    ## TriggerEffSFShapeUp0p5
-    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUp0p5 = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeUp0p5")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUp0p5 = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeUp0p5")
-    ## TriggerEffSFShapeDown0p5
-    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDown0p5 = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeDown0p5")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDown0p5 = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeDown0p5")
+    ## TriggerEffSFShapeUpEta
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpEta = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeUpEta")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpEta = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeUpEta")
+    ## TriggerEffSFShapeDownEta
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownEta = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeDownEta")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownEta = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeDownEta")
+    ## TriggerEffSFShapeUpPt
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeUpPt")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeUpPt")
+    ## TriggerEffSFShapeDownPt
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeDownPt")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeDownPt")
     ## SelectionEffSFNormUp
     process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightSelectionEffSFNormUp")
     process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightSelectionEffSFNormUp")      
@@ -1136,26 +1195,51 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     process.analyzeTopRecoKinematicsKinFitMisTagSFdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightMisTagSFdown")
     process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightMisTagSFdown")
     ## add to Sequence
-    process.kinFit.replace(process.analyzeTopRecoKinematicsKinFitTopAntitop, 
-                          process.analyzeTopRecoKinematicsKinFitTopAntitop* 
-                          process.bTagSFEventWeightBTagSFUp    *
-			  process.bTagSFEventWeightBTagSFDown  *
-			  process.bTagSFEventWeightMisTagSFUp  *
-			  process.bTagSFEventWeightMisTagSFDown*
-			  process.effSFMuonEventWeightFlatTriggerSF*           
-			  process.effSFMuonEventWeightTriggerEffSFNormUp*      
-			  process.effSFMuonEventWeightTriggerEffSFNormDown*    
-			  process.effSFMuonEventWeightTriggerEffSFShapeUp0p5*  
-			  process.effSFMuonEventWeightTriggerEffSFShapeDown0p5*
-			  process.effSFMuonEventWeightSelectionEffSFNormUp    *
-			  process.effSFMuonEventWeightSelectionEffSFNormDown*
+    if(decayChannel=="muon"):
+	process.kinFit.replace(process.analyzeTopRecoKinematicsKinFitTopAntitop, 
+			      process.analyzeTopRecoKinematicsKinFitTopAntitop*
+			      process.effSFMuonEventWeightFlatTriggerSF*           
+			      process.effSFMuonEventWeightTriggerEffSFNormUp*      
+			      process.effSFMuonEventWeightTriggerEffSFNormDown*    
+			      process.effSFMuonEventWeightTriggerEffSFShapeUpEta*  
+			      process.effSFMuonEventWeightTriggerEffSFShapeDownEta*
+			      process.effSFMuonEventWeightTriggerEffSFShapeUpPt*  
+			      process.effSFMuonEventWeightTriggerEffSFShapeDownPt*
+			      process.effSFMuonEventWeightSelectionEffSFNormUp    *
+			      process.effSFMuonEventWeightSelectionEffSFNormDown*
+			      process.bTagSFEventWeightBTagSFUp    *
+			      process.bTagSFEventWeightBTagSFDown  *
+			      process.bTagSFEventWeightMisTagSFUp  *
+			      process.bTagSFEventWeightMisTagSFDown
+			      )
+    elif(decayChannel=="electron"):
+	process.kinFit.replace(process.analyzeTopRecoKinematicsKinFitTopAntitop, 
+			      process.analyzeTopRecoKinematicsKinFitTopAntitop*
+			      process.effSFMuonEventWeightFlatTriggerSF*           
+			      process.effSFMuonEventWeightTriggerEffSFNormUp*      
+			      process.effSFMuonEventWeightTriggerEffSFNormDown*    
+			      process.effSFMuonEventWeightTriggerEffSFShapeUpEta*  
+			      process.effSFMuonEventWeightTriggerEffSFShapeDownEta*
+			      process.effSFMuonEventWeightTriggerEffSFShapeUpPt*  
+			      process.effSFMuonEventWeightTriggerEffSFShapeDownPt*
+			      process.effSFMuonEventWeightSelectionEffSFNormUp    *
+			      process.effSFMuonEventWeightSelectionEffSFNormDown*
+			      process.bTagSFEventWeightBTagSFUp    *
+			      process.bTagSFEventWeightBTagSFDown  *
+			      process.bTagSFEventWeightMisTagSFUp  *
+			      process.bTagSFEventWeightMisTagSFDown
+			      )
+    process.kinFit.replace(process.bTagSFEventWeightMisTagSFDown,  
+                          process.bTagSFEventWeightMisTagSFDown      *			  
 			  process.eventWeightPUup                    *
 			  process.eventWeightPUdown                  *
 			  process.eventWeightFlatTriggerSF           *
 			  process.eventWeightTriggerEffSFNormUp      *
 			  process.eventWeightTriggerEffSFNormDown    *
-			  process.eventWeightTriggerEffSFShapeUp0p5  *
-			  process.eventWeightTriggerEffSFShapeDown0p5*
+			  process.eventWeightTriggerEffSFShapeUpEta  *
+			  process.eventWeightTriggerEffSFShapeDownEta*
+			  process.eventWeightTriggerEffSFShapeUpPt   *
+			  process.eventWeightTriggerEffSFShapeDownPt *
 			  process.eventWeightSelectionEffSFNormUp    *
 			  process.eventWeightSelectionEffSFNormDown  *
 			  process.eventWeightBtagSFup                *
@@ -1178,10 +1262,14 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
 			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp *
                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown *
 			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUp0p5 *
-			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUp0p5 *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDown0p5 *
-			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDown0p5 *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpEta *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpEta *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownEta *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownEta *
+			  process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt *
+                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt *
+			  process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt *
                           process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp *
 			  process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp *
                           process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown *
@@ -1401,7 +1489,7 @@ if(decayChannel=="electron"):
         path.remove(process.secondMuonVeto)
         path.replace( process.electronVeto, process.electronSelection)
 	## remove effSF for muons
-        path.remove(process.effSFMuonEventWeight)
+        path.replace(process.effSFMuonEventWeight, process.effSFElectronEventWeight)
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
@@ -1519,7 +1607,10 @@ if(not effSFReweigthing or runningOnData=="data"):
     if(not pfToPAT):
       allpaths  = process.paths_().keys()
     for path in allpaths:
-        getattr(process,path).remove( process.effSFMuonEventWeight )
+        if(decayChannel=="muon"):
+            getattr(process,path).remove( process.effSFMuonEventWeight )
+	elif(decayChannel=="electron"):
+            getattr(process,path).remove( process.effSFElectronEventWeight )
 
 # Btag scale factor
 if(not BtagReweigthing or runningOnData=="data"):
