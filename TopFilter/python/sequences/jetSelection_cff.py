@@ -7,36 +7,40 @@ from TopAnalysis.TopFilter.sequences.MuonVertexDistanceSelector_cfi import *
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
 
-noOverlapJetsPF = cleanPatJets.clone(
-   src = cms.InputTag("selectedPatJetsAK5PF"),
+## NOTE: For PF2PAT "selectedPatJets" instead of "selectedPatJetsAK5PF" must be used!
+## At the moment this is implemented by overwriting it in each cfg file
+noOverlapJetsPF = selectedPatJets.clone(src = "selectedPatJetsAK5PF")
+#noOverlapJetsPF = cleanPatJets.clone(
+   #src = cms.InputTag("selectedPatJetsAK5PF"),
 
-   # preselection (any string-based cut on pat::Jet)
-   preselection = cms.string(''),
+   ## preselection (any string-based cut on pat::Jet)
+   #preselection = cms.string(''),
 
-   # overlap checking configurables
-   checkOverlaps = cms.PSet(
-       muons = cms.PSet(
-          src       = cms.InputTag("vertexSelectedMuons"),
-          algorithm = cms.string("byDeltaR"),
-          preselection        = cms.string('pt > 20. & abs(eta) < 2.1 &'
-                                           'combinedMuon.isNull = 0 &'
-                                           'isTrackerMuon() =1 &'
-                                           '(trackIso+caloIso)/pt < 0.05 &'
-                                           'innerTrack.numberOfValidHits >= 11 &'
-                                           'globalTrack.normalizedChi2 < 10.0 &'
-                                           'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                           'abs(dB)<0.02 &'
-                                           'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-                                           'numberOfMatches>1'),
-          deltaR              = cms.double(0.1),
-          checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-          pairCut             = cms.string(""),
-          requireNoOverlaps   = cms.bool(True), # overlaps don't cause the jet to be discared
-       )
-   ),
-   # finalCut (any string-based cut on pat::Jet)
-   finalCut = cms.string(''),
-)
+   ## overlap checking configurables
+   #checkOverlaps = cms.PSet(
+       #muons = cms.PSet(
+          #src       = cms.InputTag("vertexSelectedMuons"),
+          #algorithm = cms.string("byDeltaR"),
+          #preselection        = cms.string('pt > 20. & abs(eta) < 2.1 &'
+                                           #'combinedMuon.isNull = 0 &'
+                                           #'isTrackerMuon() =1 &'
+                                           ##'(trackIso+caloIso)/pt < 0.05 &'
+                                           #'(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125&'
+                                           #'innerTrack.numberOfValidHits >= 11 &'
+                                           #'globalTrack.normalizedChi2 < 10.0 &'
+                                           #'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
+                                           #'abs(dB)<0.02 &'
+                                           #'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                           #'numberOfMatches>1'),
+          #deltaR              = cms.double(0.1),
+          #checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
+          #pairCut             = cms.string(""),
+          #requireNoOverlaps   = cms.bool(True), # overlaps don't cause the jet to be discared
+       #)
+   #),
+   ## finalCut (any string-based cut on pat::Jet)
+   #finalCut = cms.string(''),
+#)
 
 ## getting started
 centralJets  = selectedPatJets.clone(src = 'selectedPatJets',
