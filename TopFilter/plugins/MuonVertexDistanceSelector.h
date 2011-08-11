@@ -19,6 +19,7 @@ class MuonVertexDistanceSelector : public edm::EDProducer {
  private:
   edm::InputTag src_;
   edm::InputTag primaryVertex_;
+  double cutValue_;
 
 };
 

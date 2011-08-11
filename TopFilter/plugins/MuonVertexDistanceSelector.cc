@@ -6,7 +6,8 @@
 
 MuonVertexDistanceSelector::MuonVertexDistanceSelector(const edm::ParameterSet& cfg):
   src_          (cfg.getParameter<edm::InputTag>("src"          )),
-  primaryVertex_(cfg.getParameter<edm::InputTag>("primaryVertex"))
+  primaryVertex_(cfg.getParameter<edm::InputTag>("primaryVertex")),
+  cutValue_     (cfg.getParameter<double>("cutValue"))
 {
   produces<std::vector<pat::Muon> >();
 }
@@ -30,7 +31,7 @@ MuonVertexDistanceSelector::produce(edm::Event& evt, const edm::EventSetup& setu
 
   std::auto_ptr<std::vector<pat::Muon> > selectedMuons(new std::vector<pat::Muon>());
   for(std::vector<pat::Muon>::const_iterator muon=src->begin(); muon!=src->end(); ++muon) {
-    if(std::abs(muon->vertex().z() - primaryVertex->begin()->z()) < 1)
+    if(std::abs(muon->vertex().z() - primaryVertex->begin()->z()) < cutValue_)
       selectedMuons->push_back(*muon);
   }
   evt.put(selectedMuons);
