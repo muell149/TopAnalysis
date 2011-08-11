@@ -1139,7 +1139,7 @@ if(runningOnData=="MC" and (PUreweigthing)):
     print genModules2
     for module2 in genModules2:
         getattr(process,module2).weight=PUweight
-    if(additionalEventWeights):
+    if(additionalEventWeights and eventFilter=='signal only'):
         print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
         process.analyzeTopPartonLevelKinematicsNoPUWeight = process.analyzeTopPartonLevelKinematics.clone(weight="")
 	process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight="")
