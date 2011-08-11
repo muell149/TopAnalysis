@@ -26,7 +26,7 @@ PUreweigthing = False
 ## use L2L3Residual correction in analyzers
 corrLevel="L2L3Residual"
 ## JSON file
-jsonFile =  '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/Prompt/Cert_160404-166502_7TeV_PromptReco_Collisions11_JSON.txt'
+jsonFile =  '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/Prompt/Cert_160404-167151_7TeV_PromptReco_Collisions11_JSON.txt'
 
 ## get the mother file
 execfile("analyzeTopDiffXSec_cfg.py")
@@ -71,4 +71,7 @@ if(writeOutput):
     process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag2_Run2011PromptReco.root')
 
 ## change output name 
+<<<<<<< analyzeMuonDiffXData2011MuHad_cfg.py
+process.TFileService.fileName = 'analyzeDiffXData2011_MuonHad_160404_167151.root'=======
 process.TFileService.fileName = 'analyzeDiffXData2011_MuonHad_160404_166861.root'
+>>>>>>> 1.4

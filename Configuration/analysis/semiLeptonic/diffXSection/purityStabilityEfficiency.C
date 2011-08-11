@@ -18,7 +18,7 @@
 #include <TLegend.h>
 #include "basicFunctions.h"
 
-int purityStabilityEfficiency(TString variable = "topY", bool save=false, TString lepton="muon", bool plotEfficiency = true, bool plotEfficiencyPhaseSpace = true)
+int purityStabilityEfficiency(TString variable = "topY", bool save=false, TString lepton="muon", bool plotEfficiency = true, bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false)
 {
   // ARGUMENTS of function:
   // variable:       choose variable to plot, e.g.:
@@ -30,12 +30,15 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   //                           efficiency in restricted phase space (i.e. Acceptance=1) is plotted (if true)
   
   // output folder in case of saving the canvases:
-  TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff/"+lepton;
-  //TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff/electron";
+  //TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff/"+lepton;
+  TString outputFolder = "/afs/naf.desy.de/user/j/jlange/public/analysis/purStabEff/compSpringSummer11";
   
   // input file
-  TFile* myFile1 = new TFile("/afs/naf.desy.de/user/j/jlange/public/analysis/"+lepton+"DiffXSecSigMadD6TSpring11PF.root", "READ"); //TFile("/afs/desy.de/user/m/mgoerner/public/analysisRootFilesWithKinFit/"+lepton+"DiffXSecSigMadD6TSpring11PF.root", "READ");
+  TFile* myFile1 = new TFile("/scratch/hh/current/cms/user/mgoerner/summer11Samples/"+lepton+"DiffXSecSigMadD6TSummer11PF.root", "READ");
+  //TFile* myFile1 = new TFile("/afs/naf.desy.de/user/j/jlange/public/analysis/"+lepton+"DiffXSecSigMadD6TSpring11PF.root", "READ"); //TFile("/afs/desy.de/user/m/mgoerner/public/analysisRootFilesWithKinFit/"+lepton+"DiffXSecSigMadD6TSpring11PF.root", "READ");
   //TFile("/afs/naf.desy.de/user/j/jlange/public/analysis/elecDiffXSecSigMadD6TSpring11PF.root", "READ");
+  TFile* myFile2;
+  if(plotEfficiency2) myFile2 = new TFile("/scratch/hh/current/cms/user/mgoerner/summer11Samples/"+lepton+"DiffXSecSigMadD6TSummer11PF.root", "READ");
   
   // determine here the binning:
   // Attention: binning ALWAYS should start from left boundary of first and bin of the input file;
@@ -198,6 +201,22 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   // calculate efficiency histogram
     effHistPS->Divide(genHistPS);
   }
+  
+    // if 2 effiency plots are supposed to be compared:
+  TH1F* effHist2 = 0;
+  if(plotEfficiency2){
+    // get histogram of generated quantity
+    TH1F* genHist2 = (TH1F*)myFile2->Get("analyzeTopPartonLevelKinematics/"+variable);
+    TCanvas* Canv4 = new TCanvas("analyzeTopPartonLevelKinematics2","analyzeTopPartonLevelKinematics2",600,600);
+    genHist2->Draw();
+    // rebin histogram of generated quantity
+    genHist2 = (TH1F*)genHist2->Rebin(binvec.size()-1, genHist2->GetName(), &(binvec.front()));
+    effHist2 = (TH1F*)((TH1F*)myFile2->Get("analyzeTopRecoKinematicsKinFit/"+variable))->Clone();
+  // rebin histogram of reconstructed quantity
+    effHist2 = (TH1F*)effHist2->Rebin(binvec.size()-1, effHist2->GetName(), &(binvec.front()));
+  // calculate efficiency histogram
+    effHist2->Divide(genHist2);
+  }
     
 
   for(int i=0; i<numberOfBins; i++)
@@ -232,6 +251,7 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   purityhist->GetYaxis()->SetLabelSize  ( 0.07);
   purityhist->GetYaxis()->SetLabelFont  (   62);
   purityhist->GetYaxis()->SetNdivisions (  505);
+  purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
 
   purityhist->SetMinimum(0.);
   double max=purityhist->GetMaximum();
@@ -253,24 +273,36 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   purityhist->Draw();
   stabilityhist->Draw("same");
   if(plotEfficiency)effHist->Draw("same");
+  //if(plotEfficiency)effHist->Draw();
   if(plotEfficiencyPhaseSpace){
     effHistPS->SetLineColor(1);
     effHistPS->SetLineStyle(2);
     effHistPS->SetLineWidth(4);
     effHistPS->Draw("same");
   }
+  if(plotEfficiency2){
+    effHist2->SetLineColor(1);
+    effHist2->SetLineStyle(2);
+    effHist2->SetLineWidth(4);
+    effHist2->Draw("same");
+  }
 
 
   double legEdge = 0.4;
   if(plotEfficiency)legEdge = effHist->GetMinimum();
   TLegend* leg=new TLegend(0.4,0.48,0.6,0.68);
+  //TLegend* leg=new TLegend(0.15,0.65,0.55,0.85);
+  
   //TLegend* leg=new TLegend(0.4,legEdge,0.6,legEdge+0.2);
   //TLegend* leg=new TLegend(0,0,1,1);
   leg->SetTextSize(0.07);
   leg->AddEntry(purityhist,   "Purity"    ,"l");
   leg->AddEntry(stabilityhist,"Stability" ,"l");
+  //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
   if(plotEfficiency)leg->AddEntry(effHist,"Efficiency * A","l");
-  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"Efficiency","l");
+  //if(plotEfficiency)leg->AddEntry(effHist,"Eff*A full PS Spring11","l");
+  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"Efficiency in restr. PS","l");
+  if(plotEfficiency2)leg->AddEntry(effHist2,"Eff*A full PS Summer11","l");
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   if(variable == "topPt") leg->Draw("same");

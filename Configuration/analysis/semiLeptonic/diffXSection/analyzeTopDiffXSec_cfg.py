@@ -1084,6 +1084,8 @@ process.eventWeightTriggerEffSFNormUp       = process.eventWeightMultiplier.clon
 process.eventWeightTriggerEffSFNormDown     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFNormDown)
 process.eventWeightTriggerEffSFShapeUpEta   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeUpEta)
 process.eventWeightTriggerEffSFShapeDownEta = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeDownEta)
+process.eventWeightTriggerEffSFShapeUpPt    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeUpPt)
+process.eventWeightTriggerEffSFShapeDownPt  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistTriggerEffSFShapeDownPt)
 process.eventWeightSelectionEffSFNormUp     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistSelectionEffSFNormUp)
 process.eventWeightSelectionEffSFNormDown   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistSelectionEffSFNormDown)
 process.eventWeightBtagSFup                 = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBtagSFup)
@@ -1137,6 +1139,20 @@ if(runningOnData=="MC" and (PUreweigthing)):
     print genModules2
     for module2 in genModules2:
         getattr(process,module2).weight=PUweight
+    if(additionalEventWeights):
+        print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
+        process.analyzeTopPartonLevelKinematicsNoPUWeight = process.analyzeTopPartonLevelKinematics.clone(weight="")
+	process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight="")
+	process.analyzeTopPartonLevelKinematicsPUup = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightUp)
+	process.analyzeTopPartonLevelKinematicsPhaseSpacePUup = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightUp)
+	process.analyzeTopPartonLevelKinematicsPUdown = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightDown)
+	process.analyzeTopPartonLevelKinematicsPhaseSpacePUdown = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightDown)
+        process.kinFitGen           *= (process.analyzeTopPartonLevelKinematicsNoPUWeight *
+					process.analyzeTopPartonLevelKinematicsPUup       *
+					process.analyzeTopPartonLevelKinematicsPUdown)
+	process.kinFitGenPhaseSpace *= (process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight *
+	                                process.analyzeTopPartonLevelKinematicsPhaseSpacePUup       *
+			                process.analyzeTopPartonLevelKinematicsPhaseSpacePUdown)
 	
 ## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
 if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
@@ -1215,15 +1231,15 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     elif(decayChannel=="electron"):
 	process.kinFit.replace(process.analyzeTopRecoKinematicsKinFitTopAntitop, 
 			      process.analyzeTopRecoKinematicsKinFitTopAntitop*
-			      process.effSFMuonEventWeightFlatTriggerSF*           
-			      process.effSFMuonEventWeightTriggerEffSFNormUp*      
-			      process.effSFMuonEventWeightTriggerEffSFNormDown*    
-			      process.effSFMuonEventWeightTriggerEffSFShapeUpEta*  
-			      process.effSFMuonEventWeightTriggerEffSFShapeDownEta*
-			      process.effSFMuonEventWeightTriggerEffSFShapeUpPt*  
-			      process.effSFMuonEventWeightTriggerEffSFShapeDownPt*
-			      process.effSFMuonEventWeightSelectionEffSFNormUp    *
-			      process.effSFMuonEventWeightSelectionEffSFNormDown*
+			      process.effSFElectronEventWeightFlatTriggerSF*           
+			      process.effSFElectronEventWeightTriggerEffSFNormUp*      
+			      process.effSFElectronEventWeightTriggerEffSFNormDown*    
+			      process.effSFElectronEventWeightTriggerEffSFShapeUpEta*  
+			      process.effSFElectronEventWeightTriggerEffSFShapeDownEta*
+			      process.effSFElectronEventWeightTriggerEffSFShapeUpPt*  
+			      process.effSFElectronEventWeightTriggerEffSFShapeDownPt*
+			      process.effSFElectronEventWeightSelectionEffSFNormUp    *
+			      process.effSFElectronEventWeightSelectionEffSFNormDown*
 			      process.bTagSFEventWeightBTagSFUp    *
 			      process.bTagSFEventWeightBTagSFDown  *
 			      process.bTagSFEventWeightMisTagSFUp  *

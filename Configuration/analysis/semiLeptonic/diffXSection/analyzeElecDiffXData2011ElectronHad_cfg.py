@@ -26,7 +26,7 @@ PUreweigthing = False
 ## use L2L3Residual correction in analyzers
 corrLevel="L2L3Residual"
 ## JSON file
-jsonFile =  '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/Prompt/Cert_160404-166502_7TeV_PromptReco_Collisions11_JSON.txt'
+jsonFile =  '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/Prompt/Cert_160404-167151_7TeV_PromptReco_Collisions11_JSON.txt'
 
 ## get the mother file
 execfile("analyzeTopDiffXSec_cfg.py")
