@@ -3,6 +3,7 @@
 ##    but shifting JES up
 ## ---
 
+additionalEventWeights  = False
 ## get the mother file
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 

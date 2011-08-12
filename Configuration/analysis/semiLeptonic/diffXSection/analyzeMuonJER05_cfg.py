@@ -3,6 +3,7 @@
 ##    but JER are scaled up by 00% (JER variation down)
 ## ---
 
+additionalEventWeights  = False
 ## get the mother file
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 

@@ -3,6 +3,7 @@
 ##    but shifting JES down and without filtering on gen level
 ## ---
 
+additionalEventWeights  = False
 ## get the mother file
 execfile("analyzeMuonDiffXSecAll_cfg.py")
 

@@ -3,6 +3,7 @@
 ##    but shifting JES up and for ttbar BG (filtered on gen level)
 ## ---
 
+additionalEventWeights  = False
 ## get the mother file
 execfile("analyzeMuonDiffXSecBG_cfg.py")
 
