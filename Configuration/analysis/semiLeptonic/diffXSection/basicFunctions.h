@@ -43,7 +43,7 @@
 #ifdef DILEPTON_MACRO
 namespace semileptonic {
 #endif
-	
+
   /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
   enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
   int color_ [] = {kRed+1, kRed-7, kAzure-2, kGreen-3, kYellow, kMagenta, 10    , kBlack, 10 , 10 , 10 , kMagenta, kMagenta, kMagenta};
@@ -56,10 +56,10 @@ namespace semileptonic {
 			    /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
 			    /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
 			    /*28:*/sysDiBosUp     , /*29:*/sysDiBosDown}; // NOTE: please add new uncertainties directly before sysDiBosUp!
-	
+
   bool newSpring11MC=true;
   bool newSummer11MC=true;
-  
+
   TString sysLabel(unsigned int sys)
   {
     // this function returns a TString that corresponds
@@ -67,7 +67,7 @@ namespace semileptonic {
     // modified quantities: none
     // used functions: none
     // used enumerators: none (label correspond to systematicVariation)
-    
+
     TString systematicVariationlabel="";
     if(sys==0 )systematicVariationlabel="sysNo";
     if(sys==1 )systematicVariationlabel="sysLumiUp";
@@ -108,7 +108,7 @@ namespace semileptonic {
     }
     return systematicVariationlabel;
   }
-	
+
   double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   {
     // this function returns the muon eff SF
@@ -119,7 +119,7 @@ namespace semileptonic {
     // "sys": if sysMuEffSFup/sysMuEffSFdown is
     // chosen, the corresponding systematic shifted
     // SF is returned
-		
+
     // combined single muon SF Run A+B from tag and probe
     double result = -1.;
     if (decayChannel.compare("muon")==0) {
@@ -140,10 +140,10 @@ namespace semileptonic {
     if(sys==sysMuEffSFdown) result-=errorDown;
     return result;
   }
-	
+
   // BR correction for ttbar->lnuqq'bb'
   double BRcorrectionSemileptonic = 0.985608;
-	
+
   void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.2, unsigned int color=0)
   {
     // this function configures the style of a TH1 histogram "hist"
@@ -154,7 +154,7 @@ namespace semileptonic {
     // used functions: marker_, color_
     // used enumerators: samples
     // "filled": = 0: line only, =1: area under plot filled
-		
+
     hist.SetStats(kFALSE);
     if(sampleTyp==kData || !filled){
       if(!filled)hist.SetLineWidth(3);
@@ -180,7 +180,7 @@ namespace semileptonic {
       hist.SetFillColor(color);
     }
   }
-	
+
   void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY)
   {
     // this function configures the style of a TH2 histogram "hist"
@@ -190,13 +190,13 @@ namespace semileptonic {
     // "titleHisto": set tite of the histo (drawn in upper left)
     // "titleX": title of the x-axis
     // "titleY": title of the y-axis
-		
+
     hist.SetTitle(titleHisto);
     if(titleX!="") hist.GetXaxis()->SetTitle(titleX);
     if(titleY!="") hist.GetYaxis()->SetTitle(titleY);
     hist.SetStats(kFALSE);
   }
-	
+
   double readLineFromFile(int line, TString file="crossSectionCalculation.txt")
   {
     // this function to reads and returns a double value
@@ -204,7 +204,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: NONE
-		
+
     // define variables
     std::ifstream finDouble (file);
     std::string readIn;
@@ -224,14 +224,14 @@ namespace semileptonic {
     std::cout << "can not find line" << line << std::endl;
     return -1.;
   }
-	
+
   //void canvasStyle(TCanvas& canv) re-definition of header to avoid warnings when compiling, must be changed once function body is not empty anymore
   void canvasStyle()
   {
     // function is not called anymore - just kept if indiviudal configurations might be required
     // could be considered to be deleted
   }
-	
+
   void axesStyle(TH1& hist, const char* titleX, const char* titleY, float yMin=-123, float yMax=-123)
   {
     // this function configures the axis style of a TH1 histogram "hist"
@@ -242,14 +242,14 @@ namespace semileptonic {
     // "titleY": title of the y-axis
     // "yMin": minimum of the y axis
     // "yMax": maximum of the y axis
-		
+
     hist.SetTitle("");
     hist.GetXaxis()->SetTitle(titleX);
     hist.GetYaxis()->SetTitle(titleY);
     if(yMin!=-123) hist.SetMinimum(yMin);
     if(yMax!=-123) hist.SetMaximum(yMax);
   }
-	
+
   template <class T>
     void writeToFile(T output, TString file, bool append)
     {
@@ -261,7 +261,7 @@ namespace semileptonic {
       // used enumerators: NONE
       // "append": if false, "file" will be recreated and
       // the existing "file" will be deleted
-		
+
       // a) write into file
       if(!append){
 	std::ofstream fout(file);
@@ -275,7 +275,7 @@ namespace semileptonic {
 	fapp.close();
       }
     }
-	
+
   void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=3.0, const unsigned int lineStyle=1)
   {
     // this function draws a line withe the chosen coordinates,
@@ -289,7 +289,7 @@ namespace semileptonic {
     line->SetLineColor(color);
     line->DrawLine(xmin, ymin, xmax, ymax);
   }
-	
+
   int roundToInt(double value, bool roundDown=false)
   {
     // function to round an double "value"
@@ -298,7 +298,7 @@ namespace semileptonic {
     // used functions: NONE
     // used enumerators: NONE
     // "roundDown": choose if you always want to round down
-		
+
     // create output
     int outputInt=0;
     // take care of negative numbers
@@ -315,7 +315,7 @@ namespace semileptonic {
     // return result
     return outputInt;
   }
-	
+
   TString getTStringFromInt(int i)
   {
     // function to convert an int "i" to
@@ -327,7 +327,7 @@ namespace semileptonic {
     sprintf(result, "%i", i);
     return (TString)result;
   }
-	
+
   TString sampleLabel(unsigned int sample, const std::string decayChannel, bool TwoThousandEleven=false)
   {
     // this function returns the name of the entered MC process
@@ -335,7 +335,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: samples
-		
+
     // create output
     TString MCprocess;
     // list all MC process/sample names
@@ -358,7 +358,7 @@ namespace semileptonic {
     // return result
     return MCprocess;
   }
-	
+
   TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
     {
       // function divides the #entries in every bin of the input plot "histo"
@@ -368,7 +368,7 @@ namespace semileptonic {
       // modified quantities: NONE
       // used functions: NONE
       // used enumerators: NONE
-		
+
       // create output histo
       TH1F* outputHisto = (TH1F*)histo->Clone();
       // loop bins, excluding underflow and overflow
@@ -387,39 +387,39 @@ namespace semileptonic {
       // return result
       return outputHisto;
     }
-	
+
   void DrawDecayChLabel(TString decaychannel="", double textSize=0.04)
   {
     // Draw label for Decay Channel in upper left corner of plot
-		
+
     TPaveText *decch = new TPaveText();
-		
+
     decch -> AddText(decaychannel);
-		
+
     decch -> SetX1NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength()        );
     decch -> SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 );
     decch -> SetX2NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.15 );
     decch -> SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength()        );
-		
+
     decch -> SetFillStyle(0);
     decch -> SetBorderSize(0);
     if(textSize!=0) decch->SetTextSize(textSize);
     decch -> SetTextAlign(12);
     decch -> Draw("same");
   }
-	
+
   void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04)
   {
     // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
-		
+
     TPaveText *label = new TPaveText();
-		
+
     label -> SetX1NDC(gStyle->GetPadLeftMargin());
     label -> SetY1NDC(1.0-gStyle->GetPadTopMargin());
     label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
     label -> SetY2NDC(1.0);
     label -> SetTextFont(42);
-		
+
     if (cmsprelim)
       {
 	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
@@ -428,14 +428,14 @@ namespace semileptonic {
       {
 	label -> AddText(Form("%2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity));
       }
-		
+
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     if(textSize!=0) label->SetTextSize(textSize);
     label->SetTextAlign(32);
     label->Draw("same");
   }
-	
+
   void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering=12, double textSize=0.04)
   {
     // function to directly draw a label into the active canvas
@@ -444,7 +444,7 @@ namespace semileptonic {
     // modified quantities: the active canvas
     // used functions: NONE
     // used enumerators: NONE
-		
+
     TPaveText *label = new TPaveText(x1, y1, x2, y2, "br NDC");
     label->AddText(text);
     label->SetFillStyle(0);
@@ -453,7 +453,7 @@ namespace semileptonic {
     label->SetTextAlign(centering);
     label->Draw("same");
   }
-	
+
   void scaleByFactor(TH1F*& histo, const double scaleValue)
   {
     // function to scale the TH1F plot "histo" and its errors
@@ -462,7 +462,7 @@ namespace semileptonic {
     // modified quantities: histo
     // used functions: NONE
     // used enumerators: NONE
-		
+
     // scaling factor = 0?
     if(scaleValue==0) std::cout << "WARNING: scaling histogram by 0" << std::endl;
     // loop bins (including underflow and overflow)
@@ -473,7 +473,7 @@ namespace semileptonic {
       histo->SetBinError  (bin, oldError                 /scaleValue);
     }
   }
-	
+
   double lumiweight(unsigned int sample, double luminosity, unsigned int kSys, const std::string decayChannel)
   {
     // this function derives the lumiweight for every standard MC
@@ -484,7 +484,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: BRcorrectionSemileptonic
     // used enumerators: samples, systematicVariation
-		
+
     // function internal detail level of text output
     int verbose=0;
     // a) check if input is valid
@@ -507,7 +507,7 @@ namespace semileptonic {
     double crossSection=1;
     double Nevents=0;
     double weight =0;
-		
+
     // c) fill #events in sample and cross sections (in / pb)
     // 2*ttbar MADGRAPH
     if((sample==kSig)||(sample==kBkg)){
@@ -662,7 +662,7 @@ namespace semileptonic {
     // Data
     else if(sample==kData){
       crossSection=1.;         // this leads to a weight
-			
+
       Nevents     =luminosity; // of 1.0 as data needs no weight
     }
     // unknown input
@@ -717,7 +717,7 @@ namespace semileptonic {
     // return result
     return weight;
   }
-	
+
   TString getStringEntry(const TString inputTString, unsigned int entry=42, const TString seperateBy="/")
   {
     // this function devides "inputTString" using "seperateBy"
@@ -767,7 +767,7 @@ namespace semileptonic {
     // return output
     return result_[entry-1];
   }
-	
+
   TString TopFilename(unsigned int sample, unsigned int sys, const std::string decayChannel)
   {
     // this function contains the basic convention for the MC
@@ -776,7 +776,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: samples, systematicVariation
-		
+
     TString fileName = "decayChannel_undefined" ;
     if (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
     else fileName ="muonDiffXSec";
@@ -838,7 +838,7 @@ namespace semileptonic {
     // return output
     return fileName;
   }
-	
+
   void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true )
   {
     // introduce function that saves every single canvas in
@@ -847,7 +847,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: NONE
-		
+
     // a) save all plots in one pdf
     if(savePdf){
       MyCanvas[0]->Print(outputFolder+pdfName+".pdf(", "pdf");
@@ -863,7 +863,7 @@ namespace semileptonic {
       }
     }
   }
-	
+
   std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder, const unsigned int systematicVariation, const TString dataFile, const std::string decayChannel)
     {
       // this function returns a map containing all existing .root in "inputFolder"
@@ -874,7 +874,7 @@ namespace semileptonic {
       // modified quantities: NONE
       // used functions: TopFilename
       // used enumerators: samples
-		
+
       // open our standard analysis files and save them in a map
       std::map<unsigned int, TFile*> files_;
       // loop samples
@@ -890,7 +890,7 @@ namespace semileptonic {
       }
       return files_;
     }
-	
+
   void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset" )
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
@@ -902,7 +902,7 @@ namespace semileptonic {
     // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
     // "Nplots": the total # of plots is calclated
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
-		
+
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
       // check if plot exists in any sample
@@ -964,7 +964,7 @@ namespace semileptonic {
       }
     }
   }
-	
+
   void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const int verbose=1, const int systematicVariation=sysNo, const std::string decayChannel = "unset")
   {
     // this function scales every histo in histo_ and histo2_ to the corresponding luminosity
@@ -976,7 +976,7 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "luminosity": [/pb]
     // "systematicVariation": specify systematic variation corresponding to enum systematicVariation
-		
+
     // loop samples
     for(unsigned int sample=kSig; sample<=kSToptW; ++sample) {
       // loop plots
@@ -1010,7 +1010,7 @@ namespace semileptonic {
       }
     }
   }
-	
+
   void AddSingleTopAndDiBoson(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const int verbose=1, bool reCreate=false, const std::string decayChannel = "unset")
   {
     // this function creates plots for all diboson and all single
@@ -1028,7 +1028,7 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "reCreate": choose if you want to create the combined plot from the
     // single plots if it alredy exists. Careful: the old one will be deleted
-		
+
     if(verbose>0) std::cout << std::endl;
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1087,7 +1087,7 @@ namespace semileptonic {
       }
     }
   }
-	
+
   void createStackPlot(const std::vector<TString> plotList_, std::map< TString, std::map <unsigned int, TH1F*> >& histo_, const unsigned int plot, const unsigned int N1Dplots, const int verbose=1, const std::string decayChannel="muon")
   {
     // this function will transform the histogram "plotList_"["plot"]
@@ -1097,7 +1097,7 @@ namespace semileptonic {
     // used enumerators: samples
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
-		
+
     // loop samples backwards
     for(int sample=kDiBos-1; sample>=kSig; --sample){
       // check if plot exists
@@ -1111,7 +1111,7 @@ namespace semileptonic {
       }
     }
   }
-	
+
   float modulo(const float a, const float b)
   {
     // this function calculates a modulo b
@@ -1121,7 +1121,7 @@ namespace semileptonic {
     // used enumerators: none
     // "a": dividend
     // "b": divisor
-		
+
     // round a and b to the 3rd decimal place
     // this should prevent errors due to rounding effects
     float astar=ceil(a*1000.-0.5)/1000.;
@@ -1143,7 +1143,7 @@ namespace semileptonic {
     }
     return rest;
   }
-	
+
   void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const int verbose=0)
   {
     // this function rebins an histogram using a variable binning
@@ -1154,7 +1154,7 @@ namespace semileptonic {
     // "histoUnbinned": plot to be binned
     // "binlowerEdges": vector containing all lower bin edges starting at xaxis.min, ending with xaxis.max
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
-		
+
     unsigned int NinitialBins=histoUnbinned.GetNbinsX();
     double xMin=histoUnbinned.GetBinLowEdge(1);
     double xMax=histoUnbinned.GetBinLowEdge(NinitialBins+1);
@@ -1174,7 +1174,7 @@ namespace semileptonic {
     // 2) coarseness of chosen binning
     //  double initialBinWidth=(xMax-xMin)/(double)NinitialBins;
     double initialBinWidth = (double)(roundToInt(10000.*histoUnbinned.GetBinWidth(1)))/10000.;
-		
+
     if(verbose>1) std::cout << "initial binwidth: " << initialBinWidth << std::endl;
     if(binlowerEdges_.size()>1){
       for(unsigned int finalBin=1; finalBin<binlowerEdges_.size()-1; ++finalBin){
@@ -1222,7 +1222,7 @@ namespace semileptonic {
     }
     delete binLowerEdgeArray;
   }
-	
+
   bool plotExists(std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
   {
     // this function checks the existence of an specific
@@ -1231,14 +1231,14 @@ namespace semileptonic {
     // modified quantities: none
     // used functions: none
     // used enumerators: none
-		
+
     bool result=false;
     if((histo_.count(plotName)>0)&&(histo_[plotName].count(sample)>0)){
       result=true;
     }
     return result;
   }
-	
+
   void equalReBinTH1(const int reBinFactor, std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
   {
     // this uses an equal rebinning (factor "reBinFactor")
@@ -1247,14 +1247,14 @@ namespace semileptonic {
     // modified quantities: histo_[plotName][sample]
     // used functions: plotExists
     // used enumerators: none
-		
+
     if(plotExists(histo_, plotName, sample)){
       (histo_[plotName][sample])->Rebin(reBinFactor);
     }
-		
+
   }
-	
-	
+
+
   std::map<TString, std::vector<double> > makeVariableBinning()
     {
       // this function creates a map with the hard coded
@@ -1266,11 +1266,11 @@ namespace semileptonic {
       // modified quantities: none
       // used functions: none
       // used enumerators: none
-		
+
       std::map<TString, std::vector<double> > result;
       std::vector<double> bins_;
-		
-		
+
+
       // pt(top)
       double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
@@ -1301,11 +1301,11 @@ namespace semileptonic {
       result["ttbarMass"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
       bins_.clear();
-		
+
       return result;
-		
+
     }
-	
+
   template <class T>
     unsigned int positionInVector(std::vector<T> vec_, T object)
     {
@@ -1314,7 +1314,7 @@ namespace semileptonic {
       // modified quantities: none
       // used functions: none
       // used enumerators: none
-		
+
       // loop vector elements
       for(unsigned int element=0; element<vec_.size(); ++element)
 	{
@@ -1327,7 +1327,7 @@ namespace semileptonic {
       std::cout << "requested element " << object << " is not found in  vector" << std::endl;
       return -1;
     }
-	
+
   void DivideYieldByEfficiencyAndLumi(TH1F* yield, TH1F* efficiency, double luminosity, bool includeEffError)
   {
     // this function divides yield by efficiency
@@ -1336,7 +1336,7 @@ namespace semileptonic {
     // modified quantities: yield
     // used functions: none
     // used enumerators: none
-		
+
     // check if #bins are the same
     if(yield->GetNbinsX()!=efficiency->GetNbinsX()){
       std::cout << "#bins in yield and efficiency plots are not the same!" << std::endl;
@@ -1365,7 +1365,7 @@ namespace semileptonic {
       yield->SetBinError  (bin, xSecError);
     }
   }
-	
+
   template <class T>
     void saveToRootFile(const TString& outputFile, const T& object, const bool& overwrite=false, const int& verbose=1, const TString& folder="")
     {
@@ -1374,7 +1374,7 @@ namespace semileptonic {
       // modified quantities: outputFile
       // used functions: none
       // used enumerators: none
-		
+
       bool saveObject=true;
       // check if file exist
       TFile* file = TFile::Open(outputFile, "UPDATE");
@@ -1449,7 +1449,7 @@ namespace semileptonic {
       // close file
       file->Close();
     }
-	
+
   void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0))
   {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
@@ -1463,7 +1463,7 @@ namespace semileptonic {
     // modified quantities: none
     // used functions: none
     // used enumerators: none
-		
+
     // check that histos have the same binning
     if(histNumerator->GetNbinsX()!=histDenominator->GetNbinsX()){
       std::cout << "error when calling drawRatio - histos have different number of bins" << std::endl;
@@ -1495,11 +1495,11 @@ namespace semileptonic {
     //Int_t    logx = gPad->GetLogx();
     //Double_t left = gPad->GetLeftMargin();
     //Double_t right = gPad->GetRightMargin();
-		
+
     Int_t    logx  = myStyle.GetOptLogx();
     Double_t left  = myStyle.GetPadLeftMargin();
     Double_t right = myStyle.GetPadRightMargin();
-		
+
     // y:x size ratio for canvas
     double canvAsym = 4./3.;
     // ratio size of pad with plot and pad with ratio
@@ -1514,8 +1514,12 @@ namespace semileptonic {
     // create new pad for ratio plot
     TPad *rPad;
     rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
+#ifdef DILEPTON_MACRO
+    rPad->SetFillColor(10);
+#else
     rPad->SetFillStyle(0);
     rPad->SetFillColor(0);
+#endif
     rPad->SetBorderSize(0);
     rPad->SetBorderMode(0);
     rPad->Draw();
@@ -1559,7 +1563,7 @@ namespace semileptonic {
     gPad->RedrawAxis();
     // draw grid
     rPad->SetGrid(1,1);
-		
+
     // draw a horizontal lines on a given histogram
     // a) at 1
     Double_t xmin = ratio->GetXaxis()->GetXmin();
@@ -1578,7 +1582,7 @@ namespace semileptonic {
     f2->SetLineColor(kBlack);
     f2->Draw("L same");
   }
-	
+
   double getInclusiveXSec(TH1* hist, int verbose=0)
   {
     // this function integrates a given
@@ -1600,8 +1604,8 @@ namespace semileptonic {
     if(verbose>0) std::cout << "integrated xSec: " << value << std::endl;
     return value;
   }
-	
-	
+
+
   void whipEmptyBinsAway(TGraphAsymmErrors* hist, int verbose=0)
   {
     // this function shifts all unset points
@@ -1625,10 +1629,10 @@ namespace semileptonic {
       }
     }
   }
-  
+
   TH1F* getTheoryPrediction(TString plotName="", TString fileName="")
   {
-    
+
     // check if input is valid
     if(plotName==""||fileName==""){
       std::cout << "ERROR: no plotName or filename chosen in function getTheoryPrediction" << std::endl;
@@ -1651,15 +1655,15 @@ namespace semileptonic {
       exit(0);
     }
     return (TH1F*)targetPlot;
-  }	
-  
+  }
+
   double signum(double value){
-    // this function is a 
+    // this function is a
     // simple signum function
     // modified quantities: none
     // used functions: none
     // used enumerators: none
-    
+
     if(value>0) return  1.0;
     if(value<0) return -1.0;
     return 0;
