@@ -37,8 +37,8 @@ hardJets = selectedPatJets.clone(src = 'goodIdJets', cut = 'pt > 30. & abs(eta) 
 
 ## check for different btag properties
 trackCountingHighEffBJetsLoose = selectedPatJets.clone( src = 'hardJets',
-                                                   cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.7'
-                                                   #cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3' medium wp
+                                                   #cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.7' loose wp
+                                                   cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3' 
                                                    )
 
 simpleSecondaryVertexBJets = selectedPatJets.clone( src = 'hardJets',
