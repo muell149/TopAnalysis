@@ -84,6 +84,12 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
 
   /// book and fill additional plots with gen information?
   bool isSignalMC_;
+  /// is b-tagging taken into account to choose best hypothessis
+  bool useBtagging_;
+  /// b-tagging algorithm to be used
+  std::string bAlgo_;
+  /// cut value for b-tagging
+  double bCut_;
   /// input given in config has to be TtFullLeptonicEvent
   edm::InputTag FullLepEvt_;
   /// keyword for hypothesis from config: ttFullLepHypKinSolution:Key or ttFullLepHypGenMatch:Key

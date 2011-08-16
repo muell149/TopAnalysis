@@ -6,7 +6,10 @@ analyzeFullLepKinematics = cms.EDAnalyzer("FullLepKinAnalyzer",
     hypoKey      = cms.InputTag("ttFullLepHypKinSolution","Key"),
     FullLepEvent = cms.InputTag("ttFullLepEvent"),
     jets         = cms.InputTag("hardJets"),
-    weight = eventWeightInputTag
+    useBtagging  = cms.bool(True),
+    bAlgorithm   = cms.string("trackCountingHighEffBJetTags"),
+    bCut         = cms.double(3.3),
+    weight       = eventWeightInputTag,
 )
 
 

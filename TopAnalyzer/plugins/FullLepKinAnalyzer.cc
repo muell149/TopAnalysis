@@ -11,6 +11,9 @@
 /// default constructor
 FullLepKinAnalyzer::FullLepKinAnalyzer(const edm::ParameterSet& cfg):
   isSignalMC_      (cfg.getParameter<bool>         ("isSignalMC"  )),
+  useBtagging_     (cfg.getParameter<bool>         ("useBtagging" )),  
+  bAlgo_           (cfg.getParameter<std::string>  ("bAlgorithm"  )),  
+  bCut_            (cfg.getParameter<double>       ("bCut"        )),    
   FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent")),
   hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"     )),
   jets_            (cfg.getParameter<edm::InputTag>("jets"        )),
@@ -89,6 +92,38 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     return;  // return if any of the hypotheses is not valid
   }
 
+  // if more than 1 solution is found they can be accessed via the index cmb
+  // by default the first solution with the highest probability is used
+  int cmb = 0;
+  // find best solution taking into account which jets are b-tagged
+  if(useBtagging_){
+  
+    std::vector<int> bidcs;
+    int idx=0;
+    // find indices of b-tagged jets
+    for(edm::View<pat::Jet>::const_iterator jet = jets->begin();jet != jets->end(); ++jet) {
+      if(jet->bDiscriminator(bAlgo_) > bCut_) { 
+        bidcs.push_back(idx);
+      }
+      idx++;
+    }
+    
+    int btagsinhypo;
+    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){
+      btagsinhypo = 0;
+      for(size_t j=0; j<bidcs.size(); ++j){
+        if(FullLepEvt->jetLeptonCombination(hypoKey,i)[0]==bidcs[j]) btagsinhypo++;
+        if(FullLepEvt->jetLeptonCombination(hypoKey,i)[1]==bidcs[j]) btagsinhypo++;		
+      }
+      if(btagsinhypo==2){ // stop if hypothesis has two b-jets
+        cmb = i;
+	break;
+      }	else if(btagsinhypo==1){ // if one b-tag in hypothesis store index but go on and look for solution with 2 tags
+        cmb = i;     
+      }
+    }        
+  }
+
   // -----------------------
   // fill histos related to quality of the TtFullLeptonicEvent
   // -----------------------
@@ -106,17 +141,17 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   // -----------------------
   // fill histos for basic kinematic variables
   // -----------------------
-  const reco::Candidate* Top    = FullLepEvt->top(hypoKey);
-  const reco::Candidate* Wplus  = FullLepEvt->wPlus(hypoKey);
-  const reco::Candidate* B      = FullLepEvt->b(hypoKey);
-  const reco::Candidate* LepBar = FullLepEvt->leptonBar(hypoKey);
-  const reco::Candidate* Nu     = FullLepEvt->neutrino(hypoKey);
+  const reco::Candidate* Top    = FullLepEvt->top(hypoKey, cmb);
+  const reco::Candidate* Wplus  = FullLepEvt->wPlus(hypoKey, cmb);
+  const reco::Candidate* B      = FullLepEvt->b(hypoKey, cmb);
+  const reco::Candidate* LepBar = FullLepEvt->leptonBar(hypoKey, cmb);
+  const reco::Candidate* Nu     = FullLepEvt->neutrino(hypoKey, cmb);
 
-  const reco::Candidate* TopBar = FullLepEvt->topBar(hypoKey);
-  const reco::Candidate* Wminus = FullLepEvt->wMinus(hypoKey);
-  const reco::Candidate* BBar   = FullLepEvt->bBar(hypoKey);
-  const reco::Candidate* Lep    = FullLepEvt->lepton(hypoKey);
-  const reco::Candidate* NuBar  = FullLepEvt->neutrinoBar(hypoKey);
+  const reco::Candidate* TopBar = FullLepEvt->topBar(hypoKey, cmb);
+  const reco::Candidate* Wminus = FullLepEvt->wMinus(hypoKey, cmb);
+  const reco::Candidate* BBar   = FullLepEvt->bBar(hypoKey, cmb);
+  const reco::Candidate* Lep    = FullLepEvt->lepton(hypoKey, cmb);
+  const reco::Candidate* NuBar  = FullLepEvt->neutrinoBar(hypoKey, cmb);
 
   AddFourMomenta addFourMomenta;
 
@@ -168,6 +203,7 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   diLeptonMassVsTtBarMass_    ->Fill(LepPair->mass(), TtBar->mass(), weight);
 
   // count again the number of b-jets this time only looking at the two jets used in the event reconstruction
+  // note( cmb = 0 in this case -> choose hypotheses independent of b-tags)
   nTCHEL  = 0;
   nTCHEM  = 0;
   nSSVHEM = 0;
@@ -384,12 +420,12 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   const TtEvent::HypoClassKey kinKey = TtEvent::HypoClassKey(6);
 
   if(FullLepEvt->isHypoValid(genKey) && FullLepEvt->isHypoValid(kinKey)){
-    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[0]   , FullLepEvt->jetLeptonCombination(kinKey)[0]   , weight);
-    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[1]+ 4, FullLepEvt->jetLeptonCombination(kinKey)[1]+ 4, weight);
-    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[2]+ 8, FullLepEvt->jetLeptonCombination(kinKey)[2]+ 8, weight);
-    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[3]+12, FullLepEvt->jetLeptonCombination(kinKey)[3]+12, weight);
-    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[4]+16, FullLepEvt->jetLeptonCombination(kinKey)[4]+16, weight);
-    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[5]+20, FullLepEvt->jetLeptonCombination(kinKey)[5]+20, weight);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[0]   , FullLepEvt->jetLeptonCombination(kinKey, cmb)[0]   , weight);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[1]+ 4, FullLepEvt->jetLeptonCombination(kinKey, cmb)[1]+ 4, weight);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[2]+ 8, FullLepEvt->jetLeptonCombination(kinKey, cmb)[2]+ 8, weight);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[3]+12, FullLepEvt->jetLeptonCombination(kinKey, cmb)[3]+12, weight);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[4]+16, FullLepEvt->jetLeptonCombination(kinKey, cmb)[4]+16, weight);
+    compare_->Fill(FullLepEvt->jetLeptonCombination(genKey)[5]+20, FullLepEvt->jetLeptonCombination(kinKey, cmb)[5]+20, weight);
   }
 }
 
