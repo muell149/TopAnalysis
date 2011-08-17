@@ -125,7 +125,7 @@ namespace semileptonic {
     if (decayChannel.compare("muon")==0) {
       result = 0.964155;
       if(newSpring11MC) result = 0.9581;// TO BE DERIVED
-      if(newSummer11MC) result = 0.9946;
+      if(newSummer11MC) result = 1.;    // SF is now applied as event weight in analyzer // result = 0.9946;
     }
     else if (decayChannel.compare("electron")==0) {
       result = 1.0;                   // TO BE DERIVED
@@ -537,7 +537,12 @@ namespace semileptonic {
       // D6T Spring11
       if(newSpring11MC) Nevents=14722996;
       // Z2 Summer11
-      if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
+      //if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
+      // ATTENTION!!! The above is the right number for the full dataset. Below is just preliminary!!!
+      if(newSummer11MC){
+	if      (decayChannel.compare("muon")==0)     Nevents=79994186;
+	else if (decayChannel.compare("electron")==0) Nevents=47936173;
+      }
       // Fall10 systematic samples:
       if(!newSummer11MC&&!newSpring11MC){
 	if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
@@ -655,7 +660,7 @@ namespace semileptonic {
       // Fall10 Z2
       Nevents     =2113368;
       // Summer11 Z2
-      //if(newSummer11MC) Nevents=; FIXME: this sample will come soon
+      if(newSummer11MC) Nevents=4187885;
       // systematic samples:
       if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2113368;
     }
