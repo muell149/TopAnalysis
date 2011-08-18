@@ -270,7 +270,7 @@ namespace semileptonic {
       }
       // b) add output to the end of the file
       if(append){
-	std::ofstream fapp(file, ios::app);
+	std::ofstream fapp(file, std::ios::app);
 	fapp << output << std::endl;;
 	fapp.close();
       }
@@ -730,7 +730,7 @@ namespace semileptonic {
     // enable output for debugging
     bool verbose=false;
     // save inputstring in char* path
-    string inputString=(std::string)inputTString;
+    std::string inputString=(std::string)inputTString;
     path = new char [inputString.size()+1];
     strcpy (path, inputString.c_str());
     //  path = (char*)inputTString.Data();
@@ -745,7 +745,7 @@ namespace semileptonic {
     }
     while(element!=NULL){
       if(verbose) std::cout << element << std::endl;
-      string output="";
+      std::string output="";
       output=output+element;
       result_.push_back((TString)output);
       element=strtok(NULL,(char*)(seperateBy.Data()));
