@@ -1586,8 +1586,8 @@ if(pfToPAT):
         #getattr(process,path).remove( process.unconvTightElectronsEJ )
         #getattr(process,path).remove( process.goodElectronsEJ )
         # replace object consistently with names from PF2PAT
-        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
-        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
+        #massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
+        #massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
         # run trigger at the beginning to save a lot of time
         getattr(process,path).insert(0,process.hltFilter)
 
