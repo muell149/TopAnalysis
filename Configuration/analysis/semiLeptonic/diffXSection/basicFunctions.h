@@ -537,12 +537,7 @@ namespace semileptonic {
       // D6T Spring11
       if(newSpring11MC) Nevents=14722996;
       // Z2 Summer11
-      //if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
-      // ATTENTION!!! The above is the right number for the full dataset. Below is just preliminary!!!
-      if(newSummer11MC){
-	if      (decayChannel.compare("muon")==0)     Nevents=79994186;
-	else if (decayChannel.compare("electron")==0) Nevents=47936173;
-      }
+      if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
       // Fall10 systematic samples:
       if(!newSummer11MC&&!newSpring11MC){
 	if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
