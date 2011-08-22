@@ -5,7 +5,7 @@
 TH1F* distort(const TH1& hist, TString variation, TString variable, double distortParameter, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b, double distortParameter);
 
-void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true, int verbose=1)
+void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true, int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun")
 {
   // ---
   //     Configuration
@@ -23,8 +23,8 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
   // define names
   // file name for input rootfile
   TString analysisFileName="";
-  if     (decayChannel=="muon"    ) analysisFileName="./diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSecSigMadD6TSummer11PF.root";
-  else if(decayChannel=="electron") analysisFileName="./diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSecSigMadD6TSummer11PF.root";
+  if     (decayChannel=="muon"    ) analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigMadD6TSummer11PF.root";
+  else if(decayChannel=="electron") analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigMadD6TSummer11PF.root";
   else{
     std::cout << "ERROR: decay channel " << decayChannel << " is no valid choice, use electron or muon!" << std::endl;
     exit(0);

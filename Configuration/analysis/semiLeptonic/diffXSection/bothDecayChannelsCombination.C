@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0){
+void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun"){
 	
   // ---
   //    Setup
@@ -109,8 +109,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  // get unbinned Madgraph theory curve
 	  // add muon and electron channel to
 	  // minimize statistical fluctuations
-	  TH1F* unbinnedTheory = getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "muon"));
-	  unbinnedTheory->Add(getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "electron")));
+	  TH1F* unbinnedTheory = getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon"));
+	  unbinnedTheory->Add(getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "electron")));
 	  // get MC@NLO curve
 	  TString plotName2="";
 	  if     (plotName=="topPt"    ) plotName2="hVisTopPt";
@@ -123,7 +123,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    std::cout << plotName << " for MC@Nlo chosen" << std::endl;
 	    exit(0);
 	  }
-	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction(plotName2,"./diffXSecFromSignal/analysisRootFilesWithKinFit/ttbarNtupleCteq6m.root");
+	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction(plotName2,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
 	  TH1F* unbinnedTheory2 = (TH1F*)unbinnedTheory->Clone();
 	  TH1F* unbinnedTheoryMCAtNLO2 = (TH1F*)unbinnedTheoryMCAtNLO->Clone();
 	  // normalize to unsit area for diff. norm. plots
@@ -175,21 +175,22 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    //unbinnedTheoryMCAtNLO2->Draw("same");
 	    //unbinnedTheory2->Draw("same");
 	    // draw smoothed theory curves
-	    unbinnedTheoryMCAtNLO->Draw("c same");
+	    unbinnedTheoryMCAtNLO->Draw("hist c same");
 	    unbinnedTheory       ->Draw("c same");
 	    TLegend *leg = new TLegend();
 	    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-	    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.1);
+	    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.15);
 	    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
 	    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
 	    leg->SetTextFont(42);
 	    leg->SetTextSize(0.04);
 	    leg->SetFillStyle(0);
 	    leg->SetBorderSize(0);
-	    leg->SetTextAlign(32);
+	    leg->SetTextAlign(12);
 	    //leg->SetHeader("");
+	    leg->AddEntry(plotCombination,       "Data    ","P");
 	    leg->AddEntry(unbinnedTheory       , "MadGraph", "L");
-	    leg->AddEntry(unbinnedTheoryMCAtNLO, "MC@NLO"  , "L");
+	    leg->AddEntry(unbinnedTheoryMCAtNLO, "MC@NLO  ", "L");
 	    leg->Draw("same");
 	  }
 	  plotCombination->Draw("e1 same");

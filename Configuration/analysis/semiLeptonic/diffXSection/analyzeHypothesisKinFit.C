@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1,
-			     //TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-			     TString dataFile= "./diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+			   //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 std::string decayChannel = "muon" )
 {
   // c) set root style
@@ -57,7 +57,7 @@ std::string decayChannel = "muon" )
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));
   // b) options to be configured only once
   // get the .root files from the following folder:
-  TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
+  TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
   TString dataSample="";
   if(luminosity<50) dataSample="2010";

@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, int verbose=0, 
-				  TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
-				  //TString dataFile= "diffXSecFromSignal/summer11Samples/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
+void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
 				  , const std::string decayChannel = "electron")
 {
   // set root style
@@ -39,7 +39,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
   // 0: no output, 1: std output 2: output for debugging
   // b) options to be configured only once
   // get the .root files from the following folder:
-  TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
+  //  TString inputFolder = "./diffXSecFromSignal/analysisRootFilesWithKinFit";
+  TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
   TString dataSample="";
   if(luminosity<36) dataSample="2010";
@@ -127,6 +128,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     // (iv) MET monitoring
     "analyzeMETMuon/metEt"   ,
     "analyzeMETMuon/metSumEt",
+    // (v) Vertices and pileup
+    "PUControlDistributionsBeforeBtagging/pileup",
+    "PUControlDistributionsBeforeBtagging/pileup_reweighted",
+    "PUControlDistributionsBeforeBtagging/pileup_reweighted3BX",
+    "PUControlDistributionsBeforeBtagging/npvertex",
+    "PUControlDistributionsBeforeBtagging/npvertex_reweighted",
+    "PUControlDistributionsBeforeBtagging/npvertex_reweighted3BX",
     // (III) after btagging 
     // (ii) jet monitoring
     "tightJetKinematicsTagged/n"  ,
@@ -148,7 +156,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "bottomLead_1_JetKinematicsTagged/eta",
     // (iv) MET monitoring
     "analyzeMETMuonTagged/metEt"   ,
-    "analyzeMETMuonTagged/metSumEt"
+    "analyzeMETMuonTagged/metSumEt",
+    // (v) Vertices and pileup
+    "PUControlDistributionsAfterBtagging/pileup",
+    "PUControlDistributionsAfterBtagging/pileup_reweighted",
+    "PUControlDistributionsAfterBtagging/pileup_reweighted3BX",
+    "PUControlDistributionsAfterBtagging/npvertex",
+    "PUControlDistributionsAfterBtagging/npvertex_reweighted",
+    "PUControlDistributionsAfterBtagging/npvertex_reweighted3BX"
   };
 
   TString plots1Dmu[ ] = { 
@@ -270,6 +285,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     // (iv) MET monitoring 
     "#slash{E}_{T}/events/0/10",
     "#SigmaE_{T}/events/0/50"  ,
+    // (v) Vertices and pileup
+    "Number of PU Events/Frequency/1/1",
+    "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
+    "Number of PU Events (Reweighted 3BX)/Frequency/1/1",
+    "Number of Vertices/Frequency/1/1",
+    "Number of Vertices (Reweighted 1BX)/Frequency/1/1",
+    "Number of Vertices (Reweighted 3BX)/Frequency/1/1",
     // (III) after btagging 
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
@@ -291,7 +313,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
     // (iv) MET monitoring 
     "#slash{E}_{T}/events/0/20",
-    "#SigmaE_{T}/events/0/30"  
+    "#SigmaE_{T}/events/0/30",
+    // (v) Vertices and pileup
+    "Number of PU Events/Frequency/1/1",
+    "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
+    "Number of PU Events (Reweighted 3BX)/Frequency/1/1",
+    "Number of Vertices/Frequency/1/1",
+    "Number of Vertices (Reweighted 1BX)/Frequency/1/1",
+    "Number of Vertices (Reweighted 3BX)/Frequency/1/1"
   };
 
   TString axisLabel1De[ ] = {
@@ -668,16 +697,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
 	    histo_[plotList_[plot]][42]->Draw("axis same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection
-	      TString label = "pre-tagged";
-	      if(plotList_[plot].Contains("Tagged")) label = "tagged";
-	      if(plotList_[plot].Contains("PreSel")) label = "pre-selected";
+	      TString label = "pre-Tagged";
+	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
+	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 jet";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 			1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 32       );
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
-	      if (decayChannel=="muon") DrawDecayChLabel("#mu + jets");
-	      else if (decayChannel=="electron") DrawDecayChLabel("e + jets");
-	      else DrawDecayChLabel("e/#mu + jets Combined");
+	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
+	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
+	      else DrawDecayChLabel("e/#mu + Jets Combined");
 	      // set first parameter to false once "CMS Preliminary" is not required anymore
 	      DrawCMSLabels(true,luminosity); 
 	      //draw data/MC ratio

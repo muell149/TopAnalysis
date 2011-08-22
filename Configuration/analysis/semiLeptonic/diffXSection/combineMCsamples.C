@@ -16,7 +16,7 @@ using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, float > >& files, TFile *target, int verbose);
 double subSampleLumiweight(TString sample, TString decayChannel, int verbose);
 
-void combineMCsamples(TString whichFiles = "singleTop", TString decayChannel="muon", int verbose=1) {
+void combineMCsamples(TString sysTag="", TString whichFiles = "singleTop", TString decayChannel="muon", int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun") {
   // whichFiles: "singleTop", diBoson, or QCD (only electron)
   // decayChannel: "muon" or "electron"
   std::vector< std::pair< TFile*, float > > files_;
@@ -24,55 +24,56 @@ void combineMCsamples(TString whichFiles = "singleTop", TString decayChannel="mu
     std::cout << "chosen decay channel: " << decayChannel << std::endl;
     std::cout << "chosen sample: " << decayChannel << std::endl;    
   }
+  TString pathname = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   TString samplePreName="";
   if(decayChannel=="muon"    ) samplePreName="muon";
   if(decayChannel=="electron") samplePreName="elec";
-  TString outputFilename=samplePreName+"DiffXSec";
+  TString outputFilename=pathname+"/"+samplePreName+"DiffXSec";
 
   // ---
   //    list all files to be added
   // ---
   // single top files
   if(whichFiles == "singleTop"){
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleTopSchannelMadZ2Summer11PF.root"),
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleTopSchannelMadZ2Summer11"+sysTag+"PF.root"),
 			       subSampleLumiweight("stopS", decayChannel, verbose)));                         
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleAntiTopSchannelMadZ2Summer11PF.root" ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleAntiTopSchannelMadZ2Summer11"+sysTag+"PF.root" ), 
 			       subSampleLumiweight("santiTopS" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleTopTchannelMadZ2Summer11PF.root"     ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleTopTchannelMadZ2Summer11"+sysTag+"PF.root"     ), 
 			       subSampleLumiweight("stopT"     , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleAntiTopTchannelMadZ2Summer11PF.root" ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleAntiTopTchannelMadZ2Summer11"+sysTag+"PF.root" ), 
 			       subSampleLumiweight("santiTopT" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleTopTWchannelMadZ2Summer11PF.root"    ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleTopTWchannelMadZ2Summer11"+sysTag+"PF.root"    ), 
 			       subSampleLumiweight("stopTW"    , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecSingleAntiTopTWchannelMadZ2Summer11PF.root"), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleAntiTopTWchannelMadZ2Summer11"+sysTag+"PF.root"), 
 			       subSampleLumiweight("santiTopTW", decayChannel, verbose)));
-    outputFilename+="SingleTopMadZ2Summer11PF.root";
+    outputFilename+="SingleTopMadZ2Summer11"+sysTag+"PF.root";
   }
   // DiBoson files
   else if(whichFiles == "diBoson"){
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecWWPytia6Z2Summer11PF.root"), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecWWPytia6Z2Summer11"+sysTag+"PF.root"), 
 			       subSampleLumiweight("WW", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecWZPytia6Z2Summer11PF.root"), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecWZPytia6Z2Summer11"+sysTag+"PF.root"), 
 			       subSampleLumiweight("WZ", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecZZPytia6Z2Summer11PF.root"),
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecZZPytia6Z2Summer11"+sysTag+"PF.root"),
 			       subSampleLumiweight("ZZ", decayChannel, verbose)));               
-    outputFilename+="VVPytia6Z2Summer11PF.root";
+    outputFilename+="VVPytia6Z2Summer11"+sysTag+"PF.root";
   } 
   // QCD files
   else if(whichFiles == "QCD"&&decayChannel=="electron"){
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecQCDPythiaEM1Z2Summer11PF.root" ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaEM1Z2Summer11"+sysTag+"PF.root" ), 
 			       subSampleLumiweight("QCDEM1" , decayChannel, verbose))); 
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecQCDPythiaEM2Z2Summer11PF.root" ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaEM2Z2Summer11"+sysTag+"PF.root" ), 
 			       subSampleLumiweight("QCDEM2" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecQCDPythiaEM3Z2Summer11PF.root" ), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaEM3Z2Summer11"+sysTag+"PF.root" ), 
 			       subSampleLumiweight("QCDEM3" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecQCDPythiaBCE1Z2Summer11PF.root"), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaBCE1Z2Summer11"+sysTag+"PF.root"), 
 			       subSampleLumiweight("QCDBCE1", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecQCDPythiaBCE2Z2Summer11PF.root"), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaBCE2Z2Summer11"+sysTag+"PF.root"), 
 			       subSampleLumiweight("QCDBCE2", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile("./"+samplePreName+"DiffXSecQCDPythiaBCE3Z2Summer11PF.root"), 
+    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaBCE3Z2Summer11"+sysTag+"PF.root"), 
 			       subSampleLumiweight("QCDBCE3", decayChannel, verbose)));
-    outputFilename+="QCDPythiaZ2Summer11PF.root";
+    outputFilename+="QCDPythiaZ2Summer11"+sysTag+"PF.root";
   }
   // ERROR: undefined sample/decayChannel combination
   else{

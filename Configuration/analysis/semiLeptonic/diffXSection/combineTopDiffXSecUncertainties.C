@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString decayChannel="muon", bool adpatOldUncertainties=true){
+void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun", TString decayChannel="muon", bool adpatOldUncertainties=true){
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
      0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
      4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
@@ -101,7 +101,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   if(verbose>0&&save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
   // loading bin center corrections
   std::cout << "loading bin center corrections" << std::endl;
-  BCC b("./diffXSecFromSignal/analysisRootFilesWithKinFit/"+TopFilename(kSig, 0, "muon"),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
+  BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
   b.runBCCCalculation();
   std::map<TString, std::vector<double> > correctedCenters_ = b.getMapWithCorrectedCentersInX();
   std::map<TString, std::vector<double> > corrCenterErrors_ = b.getMapWithCenterErrorsInX();

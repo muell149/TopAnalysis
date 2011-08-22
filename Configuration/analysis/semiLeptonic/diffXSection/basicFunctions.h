@@ -704,7 +704,7 @@ namespace semileptonic {
     }
     if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
     // printout for systematic variation
-    if(verbose>0){
+    if(verbose==1){
       std::cout << "weight";
       if(verbose>1){
 	if(weight!=weight2) std::cout << "(scaled)";
@@ -778,8 +778,10 @@ namespace semileptonic {
     // used enumerators: samples, systematicVariation
 
     TString fileName = "decayChannel_undefined" ;
-    if (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
-    else fileName ="muonDiffXSec";
+    if      (decayChannel.compare("electron")==0) fileName ="elecDiffXSec";
+    else if (decayChannel.compare("muon")==0)     fileName ="muonDiffXSec";
+    else if (decayChannel.compare("combined")==0) fileName ="combinedDiffXSec"; 
+    else fileName ="muonDiffXSec"; // default
     // name of data file is given directly in the .C file
     if(sample==kData) return "";
     // standard MC filenames
@@ -803,11 +805,11 @@ namespace semileptonic {
     else fileName += "Fall10"  ;
     // take care of systematic variations
     // JES
-    if(sys==sysJESUp  ) fileName += "JESup";
-    if(sys==sysJESDown) fileName += "JESdown";
+    if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESup";
+    if(sys==sysJESDown) fileName = "JESDown/"+fileName+"JESdown";
     // JER
-    if(sys==sysJERUp  ) fileName += "JERup";
-    if(sys==sysJERDown) fileName += "JERdown";
+    if(sys==sysJERUp  ) fileName = "JERUp/"+fileName+"JERup";
+    if(sys==sysJERDown) fileName = "JERDown/"+fileName+"JERdown";
     // Shape variation
     // only for new MC and ttbar signal
     if(newSummer11MC&&sample==kSig){

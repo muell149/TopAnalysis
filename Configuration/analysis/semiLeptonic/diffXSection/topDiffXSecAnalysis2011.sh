@@ -47,13 +47,13 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"muon\" 
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
-dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun//analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
@@ -71,10 +71,12 @@ save=true
 ## detail level of output 
 ## 0: no output, 1: std output 2: output for debugging
 verbose=0
+## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
+inputFolderName=\"TOP2011/110819_AnalysisRun\"
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time
-maxSys=2
+maxSys=0
 ## shape variations?
 shapeVar=true
 ## disable waiting time to read output
@@ -213,7 +215,7 @@ if [ $fast = false ]
 fi
 if [ $decayChannel != \"combined\" ]
     then
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$dataSample', '$decayChannel')'
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
 fi
 
 #####################################
@@ -247,7 +249,7 @@ if [ $shapeVar = true ]
 	if [ $dataLuminosity2 -ge 3601 ]
 	    then
 	    echo "will be done"
-	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$decayChannel', '$save', '$verbose')'
+	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$decayChannel', '$save', '$verbose', '$inputFolderName')'
 	else
 	    echo "only done for 2011 analysis in e/mu channel separate"
 	fi
@@ -308,7 +310,7 @@ do
 	  if [ $systematicVariation != 27 ]
 	      then
               ## run macro
-	      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$dataSample', '$decayChannel')'
+	      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
 	  fi
       fi
   else
@@ -320,8 +322,8 @@ if [ $shapeVar = true ]
     then
     if [ $decayChannel != \"combined\" ]
 	then
-	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 26, '$verbose', '$dataSample', '$decayChannel')'
-	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 27, '$verbose', '$dataSample', '$decayChannel')'
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 26, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 27, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
     fi
 fi
 
@@ -339,7 +341,7 @@ if [ $decayChannel == \"combined\" ]
     echo "cross sections for all systematic variations"
     echo "and all decay channels"
     echo
-    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose')'
+    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName')'
 else
     echo "will be ignored, only done for decayChannel=combined"
 fi
@@ -356,18 +358,21 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-if [ -f commands.cint ];
-then
+if [ -f commands.cint ]; then
+    
     rm commands.cint
 fi
+
 cat >> commands.cint << EOF
 .L BCC.C++
 .L BCC_C.so
 .L combineTopDiffXSecUncertainties.C++
 .L combineTopDiffXSecUncertainties_C.so
-combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $oldErrors)
+combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $oldErrors)
 EOF
+
 root -l -b < commands.cint
+
 echo "all analysis steps finished!"
 
 ################################
