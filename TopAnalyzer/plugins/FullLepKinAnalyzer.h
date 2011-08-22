@@ -268,9 +268,11 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* compare_;
 
   /// correlation histograms for different reconstructed quantities
-  TH2D* diLeptonMassVsLeptonPt_;
-  TH2D* diLeptonMassVsLeptonEta_;
+  TH2D* diLeptonMassVsLeptonsPt_;
+  TH2D* diLeptonMassVsLeptonsEta_;
   TH2D* diLeptonMassVsDiLeptonPt_;
+  TH2D* diLeptonMassVsJetsPt_;
+  TH2D* diLeptonMassVsJetsEta_;  
   TH2D* diLeptonMassVsTopPt_;
   TH2D* diLeptonMassVsTopRapidity_;
   TH2D* diLeptonMassVsTtBarPt_;
@@ -278,30 +280,36 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* diLeptonMassVsTtBarMass_;
   
   // correlation between number of tagged jets and relevant quantities for differential cross sections
-  TH2D* nBtagsTCHELVsLeptonPt_;
-  TH2D* nBtagsTCHELVsLeptonEta_;
+  TH2D* nBtagsTCHELVsLeptonsPt_;
+  TH2D* nBtagsTCHELVsLeptonsEta_;
   TH2D* nBtagsTCHELVsDiLeptonPt_;
   TH2D* nBtagsTCHELVsDiLeptonMass_;
+  TH2D* nBtagsTCHELVsJetsPt_;
+  TH2D* nBtagsTCHELVsJetsEta_;  
   TH2D* nBtagsTCHELVsTopPt_;
   TH2D* nBtagsTCHELVsTopRapidity_;
   TH2D* nBtagsTCHELVsTtBarPt_;
   TH2D* nBtagsTCHELVsTtBarRapidity_;
   TH2D* nBtagsTCHELVsTtBarMass_;
 
-  TH2D* nBtagsTCHEMVsLeptonPt_;
-  TH2D* nBtagsTCHEMVsLeptonEta_;
+  TH2D* nBtagsTCHEMVsLeptonsPt_;
+  TH2D* nBtagsTCHEMVsLeptonsEta_;
   TH2D* nBtagsTCHEMVsDiLeptonPt_;
   TH2D* nBtagsTCHEMVsDiLeptonMass_;
+  TH2D* nBtagsTCHEMVsJetsPt_;
+  TH2D* nBtagsTCHEMVsJetsEta_;  
   TH2D* nBtagsTCHEMVsTopPt_;
   TH2D* nBtagsTCHEMVsTopRapidity_;
   TH2D* nBtagsTCHEMVsTtBarPt_;
   TH2D* nBtagsTCHEMVsTtBarRapidity_;
   TH2D* nBtagsTCHEMVsTtBarMass_;
 
-  TH2D* nBtagsSSVHEMVsLeptonPt_;
-  TH2D* nBtagsSSVHEMVsLeptonEta_;
+  TH2D* nBtagsSSVHEMVsLeptonsPt_;
+  TH2D* nBtagsSSVHEMVsLeptonsEta_;
   TH2D* nBtagsSSVHEMVsDiLeptonPt_;
   TH2D* nBtagsSSVHEMVsDiLeptonMass_;
+  TH2D* nBtagsSSVHEMVsJetsPt_;
+  TH2D* nBtagsSSVHEMVsJetsEta_;  
   TH2D* nBtagsSSVHEMVsTopPt_;
   TH2D* nBtagsSSVHEMVsTopRapidity_;
   TH2D* nBtagsSSVHEMVsTtBarPt_;
@@ -309,10 +317,12 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH2D* nBtagsSSVHEMVsTtBarMass_;
     
   // correlation between number of matched jets and relevant quantities for differential cross sections
-  TH2D* nMatchesVsLeptonPt_;
-  TH2D* nMatchesVsLeptonEta_;
+  TH2D* nMatchesVsLeptonsPt_;
+  TH2D* nMatchesVsLeptonsEta_;
   TH2D* nMatchesVsDiLeptonPt_;
   TH2D* nMatchesVsDiLeptonMass_;
+  TH2D* nMatchesVsJetsPt_;
+  TH2D* nMatchesVsJetsEta_;  
   TH2D* nMatchesVsTopPt_;
   TH2D* nMatchesVsTopRapidity_;
   TH2D* nMatchesVsTtBarPt_;

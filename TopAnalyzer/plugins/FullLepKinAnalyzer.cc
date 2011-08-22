@@ -189,11 +189,15 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   fillKinHistos(LepPairKin_, *LepPair, weight);
   fillKinHistos(JetPairKin_, *JetPair, weight);
 
-  diLeptonMassVsLeptonPt_     ->Fill(LepPair->mass(), Lep->pt(), weight);
-  diLeptonMassVsLeptonPt_     ->Fill(LepPair->mass(), LepBar->pt(), weight);
-  diLeptonMassVsLeptonEta_    ->Fill(LepPair->mass(), Lep->eta(), weight);
-  diLeptonMassVsLeptonEta_    ->Fill(LepPair->mass(), LepBar->eta(), weight);
+  diLeptonMassVsLeptonsPt_    ->Fill(LepPair->mass(), Lep->pt(), weight);
+  diLeptonMassVsLeptonsPt_    ->Fill(LepPair->mass(), LepBar->pt(), weight);
+  diLeptonMassVsLeptonsEta_   ->Fill(LepPair->mass(), Lep->eta(), weight);
+  diLeptonMassVsLeptonsEta_   ->Fill(LepPair->mass(), LepBar->eta(), weight);
   diLeptonMassVsDiLeptonPt_   ->Fill(LepPair->mass(), LepPair->pt(), weight);
+  diLeptonMassVsJetsPt_       ->Fill(LepPair->mass(), B->pt(), weight);
+  diLeptonMassVsJetsPt_       ->Fill(LepPair->mass(), BBar->pt(), weight);
+  diLeptonMassVsJetsEta_      ->Fill(LepPair->mass(), B->eta(), weight);
+  diLeptonMassVsJetsEta_      ->Fill(LepPair->mass(), BBar->eta(), weight);  
   diLeptonMassVsTopPt_	      ->Fill(LepPair->mass(), Top->pt(), weight);
   diLeptonMassVsTopPt_	      ->Fill(LepPair->mass(), TopBar->pt(), weight);
   diLeptonMassVsTopRapidity_  ->Fill(LepPair->mass(), Top->rapidity(), weight);
@@ -225,12 +229,16 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   if(jet2.bDiscriminator("simpleSecondaryVertexHighEffBJetTags")>1.74)
     nSSVHEM++;
 
-  nBtagsTCHELVsLeptonPt_     ->Fill(nTCHEL, Lep->pt(), weight);
-  nBtagsTCHELVsLeptonPt_     ->Fill(nTCHEL, LepBar->pt(), weight);
-  nBtagsTCHELVsLeptonEta_    ->Fill(nTCHEL, Lep->eta(), weight);
-  nBtagsTCHELVsLeptonEta_    ->Fill(nTCHEL, LepBar->eta(), weight);
+  nBtagsTCHELVsLeptonsPt_    ->Fill(nTCHEL, Lep->pt(), weight);
+  nBtagsTCHELVsLeptonsPt_    ->Fill(nTCHEL, LepBar->pt(), weight);
+  nBtagsTCHELVsLeptonsEta_   ->Fill(nTCHEL, Lep->eta(), weight);
+  nBtagsTCHELVsLeptonsEta_   ->Fill(nTCHEL, LepBar->eta(), weight);
   nBtagsTCHELVsDiLeptonPt_   ->Fill(nTCHEL, LepPair->pt(), weight);
   nBtagsTCHELVsDiLeptonMass_ ->Fill(nTCHEL, LepPair->mass(), weight);
+  nBtagsTCHELVsJetsPt_       ->Fill(nTCHEL, B->pt(), weight);
+  nBtagsTCHELVsJetsPt_       ->Fill(nTCHEL, BBar->pt(), weight);
+  nBtagsTCHELVsJetsEta_      ->Fill(nTCHEL, B->eta(), weight);
+  nBtagsTCHELVsJetsEta_      ->Fill(nTCHEL, BBar->eta(), weight);  
   nBtagsTCHELVsTopPt_	     ->Fill(nTCHEL, Top->pt(), weight);
   nBtagsTCHELVsTopPt_	     ->Fill(nTCHEL, TopBar->pt(), weight);
   nBtagsTCHELVsTopRapidity_  ->Fill(nTCHEL, Top->rapidity(), weight);
@@ -239,12 +247,16 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   nBtagsTCHELVsTtBarRapidity_->Fill(nTCHEL, TtBar->rapidity(), weight);
   nBtagsTCHELVsTtBarMass_    ->Fill(nTCHEL, TtBar->mass(), weight);
 
-  nBtagsTCHEMVsLeptonPt_     ->Fill(nTCHEM, Lep->pt(), weight);
-  nBtagsTCHEMVsLeptonPt_     ->Fill(nTCHEM, LepBar->pt(), weight);
-  nBtagsTCHEMVsLeptonEta_    ->Fill(nTCHEM, Lep->eta(), weight);
-  nBtagsTCHEMVsLeptonEta_    ->Fill(nTCHEM, LepBar->eta(), weight);
+  nBtagsTCHEMVsLeptonsPt_    ->Fill(nTCHEM, Lep->pt(), weight);
+  nBtagsTCHEMVsLeptonsPt_    ->Fill(nTCHEM, LepBar->pt(), weight);
+  nBtagsTCHEMVsLeptonsEta_   ->Fill(nTCHEM, Lep->eta(), weight);
+  nBtagsTCHEMVsLeptonsEta_   ->Fill(nTCHEM, LepBar->eta(), weight);
   nBtagsTCHEMVsDiLeptonPt_   ->Fill(nTCHEM, LepPair->pt(), weight);
   nBtagsTCHEMVsDiLeptonMass_ ->Fill(nTCHEM, LepPair->mass(), weight);
+  nBtagsTCHEMVsJetsPt_       ->Fill(nTCHEM, B->pt(), weight);
+  nBtagsTCHEMVsJetsPt_       ->Fill(nTCHEM, BBar->pt(), weight);
+  nBtagsTCHEMVsJetsEta_      ->Fill(nTCHEM, B->eta(), weight);
+  nBtagsTCHEMVsJetsEta_      ->Fill(nTCHEM, BBar->eta(), weight);    
   nBtagsTCHEMVsTopPt_	     ->Fill(nTCHEM, Top->pt(), weight);
   nBtagsTCHEMVsTopPt_	     ->Fill(nTCHEM, TopBar->pt(), weight);
   nBtagsTCHEMVsTopRapidity_  ->Fill(nTCHEM, Top->rapidity(), weight);
@@ -253,12 +265,16 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   nBtagsTCHEMVsTtBarRapidity_->Fill(nTCHEM, TtBar->rapidity(), weight);
   nBtagsTCHEMVsTtBarMass_    ->Fill(nTCHEM, TtBar->mass(), weight);
 
-  nBtagsSSVHEMVsLeptonPt_     ->Fill(nSSVHEM, Lep->pt(), weight);
-  nBtagsSSVHEMVsLeptonPt_     ->Fill(nSSVHEM, LepBar->pt(), weight);
-  nBtagsSSVHEMVsLeptonEta_    ->Fill(nSSVHEM, Lep->eta(), weight);
-  nBtagsSSVHEMVsLeptonEta_    ->Fill(nSSVHEM, LepBar->eta(), weight);
+  nBtagsSSVHEMVsLeptonsPt_    ->Fill(nSSVHEM, Lep->pt(), weight);
+  nBtagsSSVHEMVsLeptonsPt_    ->Fill(nSSVHEM, LepBar->pt(), weight);
+  nBtagsSSVHEMVsLeptonsEta_   ->Fill(nSSVHEM, Lep->eta(), weight);
+  nBtagsSSVHEMVsLeptonsEta_   ->Fill(nSSVHEM, LepBar->eta(), weight);
   nBtagsSSVHEMVsDiLeptonPt_   ->Fill(nSSVHEM, LepPair->pt(), weight);
   nBtagsSSVHEMVsDiLeptonMass_ ->Fill(nSSVHEM, LepPair->mass(), weight);
+  nBtagsSSVHEMVsJetsPt_       ->Fill(nSSVHEM, B->pt(), weight);
+  nBtagsSSVHEMVsJetsPt_       ->Fill(nSSVHEM, BBar->pt(), weight);
+  nBtagsSSVHEMVsJetsEta_      ->Fill(nSSVHEM, B->eta(), weight);
+  nBtagsSSVHEMVsJetsEta_      ->Fill(nSSVHEM, BBar->eta(), weight);    
   nBtagsSSVHEMVsTopPt_	      ->Fill(nSSVHEM, Top->pt(), weight);
   nBtagsSSVHEMVsTopPt_	      ->Fill(nSSVHEM, TopBar->pt(), weight);
   nBtagsSSVHEMVsTopRapidity_  ->Fill(nSSVHEM, Top->rapidity(), weight);
@@ -390,17 +406,21 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   if(isRealBJet(*BBar,*genB,*genBBar)) 
     nMatchedBjets++;
 
-  nMatchesVsLeptonPt_     ->Fill(nMatchedBjets, Lep->pt());
-  nMatchesVsLeptonPt_     ->Fill(nMatchedBjets, LepBar->pt());
-  nMatchesVsLeptonEta_    ->Fill(nMatchedBjets, Lep->eta());
-  nMatchesVsLeptonEta_    ->Fill(nMatchedBjets, LepBar->eta());
+  nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, Lep->pt());
+  nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, LepBar->pt());
+  nMatchesVsLeptonsEta_   ->Fill(nMatchedBjets, Lep->eta());
+  nMatchesVsLeptonsEta_   ->Fill(nMatchedBjets, LepBar->eta());
   nMatchesVsDiLeptonPt_   ->Fill(nMatchedBjets, LepPair->pt());
   nMatchesVsDiLeptonMass_ ->Fill(nMatchedBjets, LepPair->mass());
-  nMatchesVsTopPt_	   ->Fill(nMatchedBjets, Top->pt());
-  nMatchesVsTopPt_	   ->Fill(nMatchedBjets, TopBar->pt());
+  nMatchesVsJetsPt_       ->Fill(nMatchedBjets, B->pt());
+  nMatchesVsJetsPt_       ->Fill(nMatchedBjets, BBar->pt());
+  nMatchesVsJetsEta_      ->Fill(nMatchedBjets, B->eta());
+  nMatchesVsJetsEta_      ->Fill(nMatchedBjets, BBar->eta());    
+  nMatchesVsTopPt_	  ->Fill(nMatchedBjets, Top->pt());
+  nMatchesVsTopPt_	  ->Fill(nMatchedBjets, TopBar->pt());
   nMatchesVsTopRapidity_  ->Fill(nMatchedBjets, Top->rapidity());
   nMatchesVsTopRapidity_  ->Fill(nMatchedBjets, TopBar->rapidity());
-  nMatchesVsTtBarPt_	   ->Fill(nMatchedBjets, TtBar->pt());
+  nMatchesVsTtBarPt_	  ->Fill(nMatchedBjets, TtBar->pt());
   nMatchesVsTtBarRapidity_->Fill(nMatchedBjets, TtBar->rapidity());
   nMatchesVsTtBarMass_    ->Fill(nMatchedBjets, TtBar->mass());
 
@@ -800,49 +820,59 @@ void
 FullLepKinAnalyzer::bookRecCorrelHistos(edm::Service<TFileService>& fs)
 {
   NameScheme ns("correlation");
-  diLeptonMassVsLeptonPt_     = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonPt"),     "", 200,  0. , 400. , 250,  0. , 500. );
-  diLeptonMassVsLeptonEta_    = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonEta"),    "", 200,  0. , 400. , 100, -5.0,   5.0);
+  diLeptonMassVsLeptonsPt_    = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonsPt"),    "", 200,  0. , 400. , 250,  0. , 500. );
+  diLeptonMassVsLeptonsEta_   = fs->make<TH2D>(ns.name("diLeptonMassVsLeptonsEta"),   "", 200,  0. , 400. , 100, -5.0,   5.0);
   diLeptonMassVsDiLeptonPt_   = fs->make<TH2D>(ns.name("diLeptonMassVsDiLeptonPt"),   "", 200,  0. , 400. , 250,  0. , 500. );
+  diLeptonMassVsJetsPt_       = fs->make<TH2D>(ns.name("diLeptonMassVsJetsPt"),       "", 200,  0. , 400. , 250,  0. , 500. );
+  diLeptonMassVsJetsEta_      = fs->make<TH2D>(ns.name("diLeptonMassVsJetsEta"),      "", 200,  0. , 400. , 100, -5.0,   5.0);  
   diLeptonMassVsTopPt_        = fs->make<TH2D>(ns.name("diLeptonMassVsTopPt"),        "", 200,  0. , 400. , 250,  0. , 500. );
   diLeptonMassVsTopRapidity_  = fs->make<TH2D>(ns.name("diLeptonMassVsTopRapidity"),  "", 200,  0. , 400. , 100, -5.0,   5.0);
   diLeptonMassVsTtBarPt_      = fs->make<TH2D>(ns.name("diLeptonMassVsTtBarPt"),      "", 200,  0. , 400. , 250,  0. , 500. );     
   diLeptonMassVsTtBarRapidity_= fs->make<TH2D>(ns.name("diLeptonMassVsTtBarRapidity"),"", 200,  0. , 400. , 100, -5.0,   5.0);
   diLeptonMassVsTtBarMass_    = fs->make<TH2D>(ns.name("diLeptonMassVsTtBarMass"),    "", 200,  0. , 400. , 500,  0. ,1000. );
 
-  nBtagsTCHELVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonPt"),       "", 3, -0.5, 2.5 , 250,  0. , 500. );
-  nBtagsTCHELVsLeptonEta_    = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonEta"),      "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
-  nBtagsTCHELVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonPt"),     "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHELVsLeptonsPt_    = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonsPt"),      "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHELVsLeptonsEta_   = fs->make<TH2D>(ns.name("nBtagsTCHELVsLeptonsEta"),     "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
+  nBtagsTCHELVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonPt"),     "", 3, -0.5, 2.5 , 250,  0. , 500. );  
   nBtagsTCHELVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsTCHELVsDiLeptonMass"),   "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHELVsJetsPt_       = fs->make<TH2D>(ns.name("nBtagsTCHELVsJetsPt"),         "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHELVsJetsEta_      = fs->make<TH2D>(ns.name("nBtagsTCHELVsJetsEta"),        "", 3, -0.5, 2.5 , 100, -5.0,   5.0);  
   nBtagsTCHELVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsTCHELVsTopPt"),          "", 3, -0.5, 2.5 , 250,  0. , 500. );
   nBtagsTCHELVsTopRapidity_  = fs->make<TH2D>(ns.name("nBtagsTCHELVsTopRapidity"),    "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsTCHELVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarPt"),        "", 3, -0.5, 2.5 , 250,  0. , 500. );   
   nBtagsTCHELVsTtBarRapidity_= fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarRapidity"),  "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsTCHELVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsTCHELVsTtBarMass"),      "", 3, -0.5, 2.5 , 500,  0. ,1000. );
 
-  nBtagsTCHEMVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonPt"),       "", 3, -0.5, 2.5 , 250,  0. , 500. );
-  nBtagsTCHEMVsLeptonEta_    = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonEta"),      "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
+  nBtagsTCHEMVsLeptonsPt_    = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonsPt"),      "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHEMVsLeptonsEta_   = fs->make<TH2D>(ns.name("nBtagsTCHEMVsLeptonsEta"),     "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsTCHEMVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsTCHEMVsDiLeptonPt"),     "", 3, -0.5, 2.5 , 250,  0. , 500. );
   nBtagsTCHEMVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsTCHEMVsDiLeptonMass"),   "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHEMVsJetsPt_       = fs->make<TH2D>(ns.name("nBtagsTCHEMVsJetsPt"),         "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsTCHEMVsJetsEta_      = fs->make<TH2D>(ns.name("nBtagsTCHEMVsJetsEta"),        "", 3, -0.5, 2.5 , 100, -5.0,   5.0);   
   nBtagsTCHEMVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTopPt"),          "", 3, -0.5, 2.5 , 250,  0. , 500. );
   nBtagsTCHEMVsTopRapidity_  = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTopRapidity"),    "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsTCHEMVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarPt"),        "", 3, -0.5, 2.5 , 250,  0. , 500. );	
   nBtagsTCHEMVsTtBarRapidity_= fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarRapidity"),  "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsTCHEMVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsTCHEMVsTtBarMass"),      "", 3, -0.5, 2.5 , 500,  0. ,1000. );
 
-  nBtagsSSVHEMVsLeptonPt_     = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonPt"),     "", 3, -0.5, 2.5 , 250,  0. , 500. );
-  nBtagsSSVHEMVsLeptonEta_    = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonEta"),    "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
+  nBtagsSSVHEMVsLeptonsPt_    = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonsPt"),    "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsSSVHEMVsLeptonsEta_   = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsLeptonsEta"),   "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsSSVHEMVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsDiLeptonPt"),   "", 3, -0.5, 2.5 , 250,  0. , 500. );
   nBtagsSSVHEMVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsDiLeptonMass"), "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsSSVHEMVsJetsPt_       = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsJetsPt"),        "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nBtagsSSVHEMVsJetsEta_      = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsJetsEta"),       "", 3, -0.5, 2.5 , 100, -5.0,   5.0);   
   nBtagsSSVHEMVsTopPt_        = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTopPt"),        "", 3, -0.5, 2.5 , 250,  0. , 500. );
   nBtagsSSVHEMVsTopRapidity_  = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTopRapidity"),  "", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsSSVHEMVsTtBarPt_      = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarPt"),      "", 3, -0.5, 2.5 , 250,  0. , 500. );  
   nBtagsSSVHEMVsTtBarRapidity_= fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarRapidity"),"", 3, -0.5, 2.5 , 100, -5.0,   5.0);
   nBtagsSSVHEMVsTtBarMass_    = fs->make<TH2D>(ns.name("nBtagsSSVHEMVsTtBarMass"),    "", 3, -0.5, 2.5 , 500,  0. ,1000. );
   
-  nMatchesVsLeptonPt_	  = fs->make<TH2D>(ns.name("nMatchesVsLeptonPt"),	"", 3, -0.5, 2.5 , 250,  0. , 500. );
-  nMatchesVsLeptonEta_    = fs->make<TH2D>(ns.name("nMatchesVsLeptonEta"),	"", 3, -0.5, 2.5 , 100, -5.0,	5.0);
+  nMatchesVsLeptonsPt_	  = fs->make<TH2D>(ns.name("nMatchesVsLeptonsPt"),	"", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nMatchesVsLeptonsEta_   = fs->make<TH2D>(ns.name("nMatchesVsLeptonsEta"),	"", 3, -0.5, 2.5 , 100, -5.0,	5.0);
   nMatchesVsDiLeptonPt_   = fs->make<TH2D>(ns.name("nMatchesVsDiLeptonPt"),	"", 3, -0.5, 2.5 , 250,  0. , 500. );
   nMatchesVsDiLeptonMass_ = fs->make<TH2D>(ns.name("nMatchesVsDiLeptonMass"),	"", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nMatchesVsJetsPt_	  = fs->make<TH2D>(ns.name("nMatchesVsJetsPt"),	        "", 3, -0.5, 2.5 , 250,  0. , 500. );
+  nMatchesVsJetsEta_      = fs->make<TH2D>(ns.name("nMatchesVsJetsEta"),	"", 3, -0.5, 2.5 , 100, -5.0,	5.0);  
   nMatchesVsTopPt_	  = fs->make<TH2D>(ns.name("nMatchesVsTopPt"),  	"", 3, -0.5, 2.5 , 250,  0. , 500. );
   nMatchesVsTopRapidity_  = fs->make<TH2D>(ns.name("nMatchesVsTopRapidity"),	"", 3, -0.5, 2.5 , 100, -5.0,	5.0);
   nMatchesVsTtBarPt_	  = fs->make<TH2D>(ns.name("nMatchesVsTtBarPt"),	"", 3, -0.5, 2.5 , 250,  0. , 500. );	
