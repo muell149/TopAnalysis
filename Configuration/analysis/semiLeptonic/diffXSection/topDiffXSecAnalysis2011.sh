@@ -47,7 +47,7 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"electron\"
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
@@ -228,10 +228,21 @@ if [ $fast = false ]
     then
     sleep 3
 fi
+# Array of differential variables:
+listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\")
 if [ $decayChannel != \"combined\" ]
     then
-    echo "not integrated yet in the automatic workflow"
-    #root -l -q -b './findBinning.C++()'
+    echo "purity and stability will be calculated for the following variables:"
+    # loop over all systematic variations
+    for (( iVar=0; iVar<7; iVar++ ))
+    do
+    echo
+    echo purity and stability for: ${listVar_[$iVar]}
+    echo
+    root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName')'
+    done
+    echo
+    echo "purity and stability done"
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
 fi
