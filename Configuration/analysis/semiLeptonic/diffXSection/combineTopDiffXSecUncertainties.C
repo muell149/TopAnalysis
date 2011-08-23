@@ -137,7 +137,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // open mu+jets 2010 analysis file
   TFile* oldAnalysisfile=0;
   if(adpatOldUncertainties){ 
-    oldAnalysisfile = TFile::Open("diffXSecTopSemiMu2010.root", "READ");
+    oldAnalysisfile = TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/diffXSecTopSemiMu2010.root", "READ");
     if(verbose>1) std::cout << "opened old file diffXSecTopSemiMu2010.root" << std::endl;
   }
   // check if file exist
