@@ -1302,10 +1302,12 @@ namespace semileptonic {
       bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
       result["ttbarMass"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
+      bins_.clear();
       // pt(lepton)
       double lepPtBins[]={0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
       bins_.insert( bins_.begin(), lepPtBins, lepPtBins + sizeof(lepPtBins)/sizeof(double) );
       result["lepPt"]=bins_;
+      bins_.clear();
       // eta(lepton)
       double lepEtaBins[]={-5., -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 5.};
       bins_.insert( bins_.begin(), lepEtaBins, lepEtaBins + sizeof(lepEtaBins)/sizeof(double) );
