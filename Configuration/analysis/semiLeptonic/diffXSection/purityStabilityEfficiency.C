@@ -247,9 +247,11 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   TString xtitle = "";
   if(variable.Contains("Pt"))xtitle+="p_{t}";
   else if(variable.Contains("Y"))xtitle+="y";
+  else if(variable.Contains("Eta"))xtitle+="#eta";
   else if(variable.Contains("Mass"))xtitle+="m";
   if(variable.Contains("top"))xtitle+="(top)";
   else if(variable.Contains("ttbar"))xtitle+="(ttbar)";
+  else if(variable.Contains("lep"))xtitle+="(lep)";
   if(variable.Contains("Pt") || variable.Contains("Mass"))xtitle+=" [GeV]";
   if(variable=="topWAngle")xtitle="Angle(top,W)";
   purityhist->GetXaxis()->SetTitle(xtitle);
