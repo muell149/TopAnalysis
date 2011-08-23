@@ -37,9 +37,13 @@ hardJets = selectedPatJets.clone(src = 'goodIdJets', cut = 'pt > 30. & abs(eta) 
 
 ## check for different btag properties
 trackCountingHighEffBJetsLoose = selectedPatJets.clone( src = 'hardJets',
-                                                   #cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.7' loose wp
-                                                   cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3' 
+                                                   cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 1.7'
                                                    )
+						   
+trackCountingHighEffBJetsMedium = selectedPatJets.clone( src = 'hardJets',
+                                                   cut = 'bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3' 
+                                                   )						   
+						   
 
 simpleSecondaryVertexBJets = selectedPatJets.clone( src = 'hardJets',
                                                     cut = 'bDiscriminator(\"simpleSecondaryVertexHighEffBJetTags\") > 1.74'
@@ -48,9 +52,9 @@ simpleSecondaryVertexBJets = selectedPatJets.clone( src = 'hardJets',
 ## Count Filters
 oneHardJetPFSelection = countPatJets.clone(src = 'hardJets',                   minNumber = 1)
 twoHardJetPFSelection = countPatJets.clone(src = 'hardJets',                   minNumber = 2)
-bJetTCHSelection      = countPatJets.clone(src = 'trackCountingHighEffBJetsLoose',  minNumber = 1)
-twobJetTCHSelection   = countPatJets.clone(src = 'trackCountingHighEffBJetsLoose',  minNumber = 2)
-bJetSSVSelection      = countPatJets.clone(src = 'simpleSecondaryVertexBJets', minNumber = 1)
+bJetTCHELSelection    = countPatJets.clone(src = 'trackCountingHighEffBJetsLoose',  minNumber = 1)
+bJetTCHEMSelection    = countPatJets.clone(src = 'trackCountingHighEffBJetsMedium',  minNumber = 1)
+bJetSSVHEMSelection   = countPatJets.clone(src = 'simpleSecondaryVertexBJets', minNumber = 1)
 
 #-------------------------------------------------
 # met selection
@@ -92,15 +96,20 @@ twoPFJetSelection = cms.Sequence( twoHardJetPFSelection )
 
 pfMETSelection    = cms.Sequence( highMETs *
                                   metSelection
-                                  )
+                                )
 
 pfMETSelectionEMu = cms.Sequence( lowEMuMETs *
                                   metSelectionEMu
-                                  )
+                                )
 
-bTagSelection     = cms.Sequence( trackCountingHighEffBJetsLoose *
-                                  bJetTCHSelection
-                                  #twobJetTCHSelection
-                                  #simpleSecondaryVertexBJets *
-                                  #bJetSSVSelection
+bTagSelectionTCHEL = cms.Sequence( trackCountingHighEffBJetsLoose *
+                                   bJetTCHELSelection
                                   )
+				  
+bTagSelectionTCHEM = cms.Sequence( trackCountingHighEffBJetsMedium *
+                                   bJetTCHEMSelection
+                                  )
+				  
+bTagSelectionSSVHEM = cms.Sequence( simpleSecondaryVertexBJets *
+                                    bJetSSVHEMSelection
+                                  )				  
