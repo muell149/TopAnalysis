@@ -78,12 +78,12 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   // change x axis range
   double rangeUserLeft = -1e6;
   double rangeUserRight = 1e6;
-  if ( variable == "topPt")          { rangeUserLeft = 0   ; rangeUserRight = 400-0.001; }
-  else if ( variable == "topY")      { rangeUserLeft = -2.5; rangeUserRight = 2.5-0.001; }
-  else if ( variable == "ttbarPt")   { rangeUserLeft = 0   ; rangeUserRight = 300-0.001; }
-  else if ( variable == "ttbarY")    { rangeUserLeft = -1.3; rangeUserRight = 1.3-0.001; }
-  else if ( variable == "ttbarMass") { rangeUserLeft = 0   ; rangeUserRight = 1200-0.001;}
-  else if ( variable == "lepPt" )    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
+  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 400-0.001; }
+  else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001; }
+  else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001; }
+  else if ( variable == "ttbarY")    { rangeUserLeft = -1.3+0.001; rangeUserRight = 1.3-0.001; }
+  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1200-0.001;}
+  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001; }
   else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001; }
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
