@@ -10,7 +10,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
      20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
      24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
-     28:sysDiBosUp       29:sysDiBosDown
+     28:sysPUup          29:sysPUdown         30:sysflatTrigSF       31:sysTrigEffSFNormUp
+     32:sysTrigEffSFNormDown     33:sysTriggerEffSFShapeUpEta   34:sysTriggerEffSFShapeDownEta
+     35:sysTriggerEffSFShapeUpPt 36:sysTriggerEffSFShapeDownPt  37:sysMisTagSFup     38:sysMisTagSFdown     
+     39:sysDiBosUp       40:sysDiBosDown
   */
   
   TStyle myStyle("HHStyle","HHStyle");
@@ -85,6 +88,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
     }
   }
+  xSecVariableBranchNames_.push_back("lepPt" );
+  xSecVariableBranchNames_.push_back("lepEta");
   // parameter printout
   if(verbose>0) std::cout << std::endl << "executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl << std::endl;
   if(verbose>0) std::cout << "target file: " << outputFile << std::endl;
@@ -161,22 +166,26 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	  TH1F* plot= (TH1F*)canvas->GetPrimitive(plotName+"kData");
 	  if(plot){ 
 	    if(verbose>1) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
-	    // got to root directory keep plot when closing rootfile
+	    // go to root directory, keep plot when closing rootfile
 	    gROOT->cd();
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
+	    // exclude "old" PU error
+	    if(sys==sysPileUp) calculateError_[xSecVariables_[i]][sys]=false;
 	  }
 	  if(!plot&&verbose>1){ 
 	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
 	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
 	}
-	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysShapeUp&&sys!=sysShapeDown){
+	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysPileUp&&!(sys>=sysBtagSFUp&&sys<=sysMisTagSFdown)){
 	  if(verbose>1) std::cout << "use 2010 uncertainties for variation " << sysLabel(sys)+", "+xSecVariables_[i] << std::endl;
 	  // adapt 2010 UNCERTAINTIES
 	  // if systematic variation does not exist for 2011 data (indicated by luminosity), 
 	  // take the binwise relative uncertainty from 2010 mu+jets analysis (no PF2PAT)
 	  // and save relative shifted plot for 2011 result
+	  // exclude PU uncertainty
+	  // exclude new uncertainties, that does not exist in 2010 analysis
 	  if(luminosity>40.0){
 	    if(verbose>1) std::cout << "luminosity>40/pb" << std::endl;
 	    // copy std analysis plot to scale bins later with relative uncertainties 
@@ -353,6 +362,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		// e) total stat+systematic uncertainty down
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+5, -100*combinedErrorDownBinVar/stdBinXSecValue);
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+5, "total Down");
+		// f) set 2010 PU uncertainty for 2011 analysis to 0
+		if(calculateError_[xSecVariables_[i]][sysPileUp]==false) relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysPileUp, 0);
 		// set combined errors for final xSec plot
 		double pointXValue = histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
 		double pointXError = 0;
@@ -593,7 +604,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      if(max>1&&max<100) totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(false);
 	      else totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(true);
 	      // for combined cross sections:
-	      // change TH1F witch statistical errors into 
+	      // change TH1F with statistical errors into 
 	      // TGraphAsymmErrors with bin center corrections
 	      if(decayChannel=="combined"&&xSecVariables_[i]!="inclusive"){
 		TString plotName = xSecVariables_[i];
