@@ -37,8 +37,8 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertainties
 
-## b) copy root files needed for the Analysis
-## scp -r /scratch/hh/current/cms/user/mgoerner/analysisRootFilesWithKinFit ./diffXSecFromSignal
+## b) you don't need to copy root files needed for the Analysis 
+##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/
 ## c) when using the shell script for the very first time, do "chmod a+x topDiffXSecAnalysis2011.sh
 ## find final plots in ./diffXSecFromSignal/plots/ after running the analysis via ./topDiffXSecAnalysis2011.sh
 
@@ -47,13 +47,13 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"electron\"
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun//analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
@@ -75,8 +75,8 @@ verbose=0
 inputFolderName=\"TOP2011/110819_AnalysisRun\"
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time
-maxSys=0
+## maxSys>0 needs a lot of time (must be<=40, see list of systematics below)
+maxSys=40
 ## shape variations?
 shapeVar=true
 ## disable waiting time to read output
@@ -141,6 +141,7 @@ else
     echo "decay channel: $decayChannel"
     echo "luminosity: $dataLuminosity"
     echo "considered systematics: $maxSys"
+    echo "consider shape variation? $shapeVar"
     echo "take missing systematics relative from 2010 mu+jets analysis? $oldErrors" 
     echo "save plots?: $save"
     grep newSpring11MC= ./basicFunctions.h
@@ -271,7 +272,6 @@ else
     echo "choose shapeVar = true!"
 fi
 
-
 #########################################
 ## run efficiency& cross section macro ##
 #########################################
@@ -295,7 +295,10 @@ echo "12: sysTopMatchDown 13: sysVBosonMatchUp 14: sysVBosonMatchDown 15: sysMuE
 echo "16: sysMuEffSFdown  17: sysISRFSRup      18: sysISRFSRdown      19: sysPileUp    "
 echo "20: sysQCDup        21: sysQCDdown       22: sysSTopUp          23: sysSTopDown  "
 echo "24: sysBtagUp       25: sysBtagDown      26: sysShapeUp         27: sysShapeDown "  
-echo "28: sysDiBosUp      29: sysDiBosDown"
+echo "28: sysPUup         29: sysPUdown        30: sysflatTrigSF      31: sysTrigEffSFNormUp"
+echo "32: sysTrigEffSFNormDown     33: sysTriggerEffSFShapeUpEta  34: sysTriggerEffSFShapeDownEta"
+echo "35: sysTriggerEffSFShapeUpPt 36: sysTriggerEffSFShapeDownPt  37: sysMisTagSFup"     
+echo "38: sysMisTagSFdown  39: sysDiBosUp      40: sysDiBosDown"
 if [ $fast = false ]
     then
     sleep 5
@@ -316,11 +319,28 @@ do
   if [ $decayChannel != \"combined\" ]
       then
       ## exclude shape variation
-      if [ $systematicVariation != 26 ]
+      if [ $systematicVariation == 26 -o $systematicVariation == 27 ]
 	  then
-	  if [ $systematicVariation != 27 ]
+	  echo "shape variations are done separately"
+      else
+	  ## exclude missing uncertainties theory uncertainties for 2011 analysis
+	  if [ $dataLuminosity2 -ge 3601 ]
 	      then
-              ## run macro
+	      if [ $systematicVariation -ge 7 -a $systematicVariation -le 19 ]
+		  then
+		  if [ $systematicVariation -ge 15 -a $systematicVariation -le 16 ]
+		      then
+                      ## run macro for 2011 analysis
+		      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+		  else
+		    echo "not doing theory uncertainties for 2011 analysis- missing samples, old PU uncertainty also excluded!"
+		  fi
+	      else	
+	          ## run macro for 2011 analysis
+		  root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	      fi
+	  else
+	      ## run macro for 2010 analysis
 	      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
 	  fi
       fi
@@ -328,6 +348,7 @@ do
       echo "will be ignored, only done for decayChannel=muon/electron"
   fi
 done
+
 ## shape variation
 if [ $shapeVar = true ]
     then
