@@ -219,7 +219,9 @@ void BCC::MakeHistos()
   // Can be replaced by a non-static way of finding an optimal binning
 	
   std::map<TString,double> BinWidthScaler;
-	
+
+  BinWidthScaler["lepEta"]    = 20.0;
+  BinWidthScaler["lepPt"]     =  0.4;
   BinWidthScaler["topPt"]     =  0.2;
   BinWidthScaler["topY"]      = 20.0;
   BinWidthScaler["ttbarMass"] =  0.2;
