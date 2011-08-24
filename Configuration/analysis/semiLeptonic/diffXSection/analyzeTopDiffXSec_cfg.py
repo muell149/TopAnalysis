@@ -1159,146 +1159,182 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     ## no weight at all
     process.analyzeTopRecoKinematicsKinFitNoWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
     process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitNoWeight.analyze.useTree = False
     ## only PU weight
     process.analyzeTopRecoKinematicsKinFitOnlyPUWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight=PUweight)
     process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=PUweight)
+    process.analyzeTopRecoKinematicsKinFitOnlyPUWeight.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight.analyze.useTree = False
     ## no btag SF weight
     process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightNoBtagSFWeight")
     process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightNoBtagSFWeight")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight.analyze.useTree = False
     ## PU up
     process.analyzeTopRecoKinematicsKinFitPUup = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightPUup")
     process.analyzeTopRecoKinematicsKinFitTopAntitopPUup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightPUup")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopPUup.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitPUup.analyze.useTree = False
     ## PU down
     process.analyzeTopRecoKinematicsKinFitPUdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightPUdown")
     process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightPUdown")
+    process.analyzeTopRecoKinematicsKinFitPUdown.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown.analyze.useTree = False
     ## flat trigger Eff SF weight
     process.analyzeTopRecoKinematicsKinFitFlatTriggerSF = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightFlatTriggerSF")
     process.analyzeTopRecoKinematicsKinFitTopAntitopFlatTriggerSF = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightFlatTriggerSF")
+    process.analyzeTopRecoKinematicsKinFitFlatTriggerSF.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopFlatTriggerSF.analyze.useTree = False
     ## TriggerEffSFNormUp
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormUp = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFNormUp")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormUp")    
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormUp")
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormUp.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp.analyze.useTree = False
     ## TriggerEffSFNormDown
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFNormDown")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormDown")    
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFNormDown")
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown.analyze.useTree = False
     ## TriggerEffSFShapeUpEta
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpEta = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeUpEta")
     process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpEta = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeUpEta")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpEta.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpEta.analyze.useTree = False
     ## TriggerEffSFShapeDownEta
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownEta = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeDownEta")
     process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownEta = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeDownEta")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownEta.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownEta.analyze.useTree = False
     ## TriggerEffSFShapeUpPt
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeUpPt")
     process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeUpPt")
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt.analyze.useTree = False
     ## TriggerEffSFShapeDownPt
     process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightTriggerEffSFShapeDownPt")
     process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightTriggerEffSFShapeDownPt")
+    process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt.analyze.useTree = False
     ## SelectionEffSFNormUp
     process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightSelectionEffSFNormUp")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightSelectionEffSFNormUp")      
+    process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightSelectionEffSFNormUp")
+    process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp.analyze.useTree = False
     ## SelectionEffSFNormDown
     process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightSelectionEffSFNormDown")
     process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormDown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightSelectionEffSFNormDown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormDown.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown.analyze.useTree = False
     ## BtagSFup
     process.analyzeTopRecoKinematicsKinFitBtagSFup = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightBtagSFup")
     process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightBtagSFup")
+    process.analyzeTopRecoKinematicsKinFitBtagSFup.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFup.analyze.useTree = False
     ## BtagSFdown
     process.analyzeTopRecoKinematicsKinFitBtagSFdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightBtagSFdown")
     process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightBtagSFdown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFdown.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitBtagSFdown.analyze.useTree = False
     ## MisTagSFup
     process.analyzeTopRecoKinematicsKinFitMisTagSFup = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightMisTagSFup")
     process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightMisTagSFup")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFup.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitMisTagSFup.analyze.useTree = False
     ## MisTagSFdown
     process.analyzeTopRecoKinematicsKinFitMisTagSFdown = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightMisTagSFdown")
     process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightMisTagSFdown")
+    process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown.analyze.useTree = False
+    process.analyzeTopRecoKinematicsKinFitMisTagSFdown.analyze.useTree = False
     ## add to Sequence
     if(decayChannel=="muon"):
 	process.kinFit.replace(process.analyzeTopRecoKinematicsKinFit, 
-			      process.analyzeTopRecoKinematicsKinFit*
-			      process.effSFMuonEventWeightFlatTriggerSF*           
-			      process.effSFMuonEventWeightTriggerEffSFNormUp*      
-			      process.effSFMuonEventWeightTriggerEffSFNormDown*    
-			      process.effSFMuonEventWeightTriggerEffSFShapeUpEta*  
-			      process.effSFMuonEventWeightTriggerEffSFShapeDownEta*
-			      process.effSFMuonEventWeightTriggerEffSFShapeUpPt*  
-			      process.effSFMuonEventWeightTriggerEffSFShapeDownPt*
-			      process.effSFMuonEventWeightSelectionEffSFNormUp    *
-			      process.effSFMuonEventWeightSelectionEffSFNormDown*
-			      process.bTagSFEventWeightBTagSFUp    *
-			      process.bTagSFEventWeightBTagSFDown  *
-			      process.bTagSFEventWeightMisTagSFUp  *
-			      process.bTagSFEventWeightMisTagSFDown
-			      )
+                               process.analyzeTopRecoKinematicsKinFit*
+                               process.effSFMuonEventWeightFlatTriggerSF*           
+                               process.effSFMuonEventWeightTriggerEffSFNormUp*      
+                               process.effSFMuonEventWeightTriggerEffSFNormDown*    
+                               process.effSFMuonEventWeightTriggerEffSFShapeUpEta*  
+                               process.effSFMuonEventWeightTriggerEffSFShapeDownEta*
+                               process.effSFMuonEventWeightTriggerEffSFShapeUpPt*  
+                               process.effSFMuonEventWeightTriggerEffSFShapeDownPt*
+                               process.effSFMuonEventWeightSelectionEffSFNormUp    *
+                               process.effSFMuonEventWeightSelectionEffSFNormDown*
+                               process.bTagSFEventWeightBTagSFUp    *
+                               process.bTagSFEventWeightBTagSFDown  *
+                               process.bTagSFEventWeightMisTagSFUp  *
+                               process.bTagSFEventWeightMisTagSFDown
+                               )
     elif(decayChannel=="electron"):
-	process.kinFit.replace(process.analyzeTopRecoKinematicsKinFit, 
-			      process.analyzeTopRecoKinematicsKinFit*
-			      process.effSFElectronEventWeightFlatTriggerSF*           
-			      process.effSFElectronEventWeightTriggerEffSFNormUp*      
-			      process.effSFElectronEventWeightTriggerEffSFNormDown*    
-			      process.effSFElectronEventWeightTriggerEffSFShapeUpEta*  
-			      process.effSFElectronEventWeightTriggerEffSFShapeDownEta*
-			      process.effSFElectronEventWeightTriggerEffSFShapeUpPt*  
-			      process.effSFElectronEventWeightTriggerEffSFShapeDownPt*
-			      process.effSFElectronEventWeightSelectionEffSFNormUp    *
-			      process.effSFElectronEventWeightSelectionEffSFNormDown*
-			      process.bTagSFEventWeightBTagSFUp    *
-			      process.bTagSFEventWeightBTagSFDown  *
-			      process.bTagSFEventWeightMisTagSFUp  *
-			      process.bTagSFEventWeightMisTagSFDown
-			      )
+        process.kinFit.replace(process.analyzeTopRecoKinematicsKinFit, 
+                               process.analyzeTopRecoKinematicsKinFit*
+                               process.effSFElectronEventWeightFlatTriggerSF*           
+                               process.effSFElectronEventWeightTriggerEffSFNormUp*      
+                               process.effSFElectronEventWeightTriggerEffSFNormDown*    
+                               process.effSFElectronEventWeightTriggerEffSFShapeUpEta*  
+                               process.effSFElectronEventWeightTriggerEffSFShapeDownEta*
+                               process.effSFElectronEventWeightTriggerEffSFShapeUpPt*  
+                               process.effSFElectronEventWeightTriggerEffSFShapeDownPt*
+                               process.effSFElectronEventWeightSelectionEffSFNormUp    *
+                               process.effSFElectronEventWeightSelectionEffSFNormDown*
+                               process.bTagSFEventWeightBTagSFUp    *
+                               process.bTagSFEventWeightBTagSFDown  *
+                               process.bTagSFEventWeightMisTagSFUp  *
+                               process.bTagSFEventWeightMisTagSFDown
+                               )
     process.kinFit.replace(process.bTagSFEventWeightMisTagSFDown,  
-                          process.bTagSFEventWeightMisTagSFDown      *			  
-			  process.eventWeightPUup                    *
-			  process.eventWeightPUdown                  *
-			  process.eventWeightFlatTriggerSF           *
-			  process.eventWeightTriggerEffSFNormUp      *
-			  process.eventWeightTriggerEffSFNormDown    *
-			  process.eventWeightTriggerEffSFShapeUpEta  *
-			  process.eventWeightTriggerEffSFShapeDownEta*
-			  process.eventWeightTriggerEffSFShapeUpPt   *
-			  process.eventWeightTriggerEffSFShapeDownPt *
-			  process.eventWeightSelectionEffSFNormUp    *
-			  process.eventWeightSelectionEffSFNormDown  *
-			  process.eventWeightBtagSFup                *
-			  process.eventWeightBtagSFdown              *
-			  process.eventWeightMisTagSFup              *
-			  process.eventWeightMisTagSFdown             *      
-                          process.analyzeTopRecoKinematicsKinFitNoWeight *
-                          #process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight * 
-                          process.analyzeTopRecoKinematicsKinFitOnlyPUWeight *
-                          #process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight * 
-                          process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight *
-                          #process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight*
-			  process.analyzeTopRecoKinematicsKinFitPUup*
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopPUup*
-			  process.analyzeTopRecoKinematicsKinFitPUdown*
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown*
-			  process.analyzeTopRecoKinematicsKinFitFlatTriggerSF *
-                          #process.analyzeTopRecoKinematicsKinFitTopAntitopFlatTriggerSF *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormUp *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpEta *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpEta *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownEta *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownEta *
-			  process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt *
-                          process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt *
-                          process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp *
-                          process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormDown *
-                          process.analyzeTopRecoKinematicsKinFitBtagSFup *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFup *
-                          process.analyzeTopRecoKinematicsKinFitBtagSFdown *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFdown *
-                          process.analyzeTopRecoKinematicsKinFitMisTagSFup *
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFup *
-                          process.analyzeTopRecoKinematicsKinFitMisTagSFdown
-			  #process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown
- )
+                           process.bTagSFEventWeightMisTagSFDown      *			  
+                           process.eventWeightPUup                    *
+                           process.eventWeightPUdown                  *
+                           process.eventWeightFlatTriggerSF           *
+                           process.eventWeightTriggerEffSFNormUp      *
+                           process.eventWeightTriggerEffSFNormDown    *
+                           process.eventWeightTriggerEffSFShapeUpEta  *
+                           process.eventWeightTriggerEffSFShapeDownEta*
+                           process.eventWeightTriggerEffSFShapeUpPt   *
+                           process.eventWeightTriggerEffSFShapeDownPt *
+                           process.eventWeightSelectionEffSFNormUp    *
+                           process.eventWeightSelectionEffSFNormDown  *
+                           process.eventWeightBtagSFup                *
+                           process.eventWeightBtagSFdown              *
+                           process.eventWeightMisTagSFup              *
+                           process.eventWeightMisTagSFdown             *      
+                           process.analyzeTopRecoKinematicsKinFitNoWeight *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight * 
+                           process.analyzeTopRecoKinematicsKinFitOnlyPUWeight *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight * 
+                           process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight*
+                           process.analyzeTopRecoKinematicsKinFitPUup*
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopPUup*
+                           process.analyzeTopRecoKinematicsKinFitPUdown*
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown*
+                           process.analyzeTopRecoKinematicsKinFitFlatTriggerSF *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopFlatTriggerSF *
+                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormUp *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormUp *
+                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFNormDown *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFNormDown *
+                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpEta *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpEta *
+                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownEta *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownEta *
+                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt *
+                           #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt *
+                           process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt *
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt *
+                           process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp *
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp *
+                           process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown *
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormDown *
+                           process.analyzeTopRecoKinematicsKinFitBtagSFup *
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFup *
+                           process.analyzeTopRecoKinematicsKinFitBtagSFdown *
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopBtagSFdown *
+                           process.analyzeTopRecoKinematicsKinFitMisTagSFup *
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFup *
+                           process.analyzeTopRecoKinematicsKinFitMisTagSFdown
+			   #process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown
+                           )
     
 ## ---
 ##    run the final sequences
@@ -1555,7 +1591,9 @@ if(pfToPAT):
         'noMuonTopProjection': False,
         'noElecTopProjection': False,
         'analyzersBeforeMuonIso':cms.Sequence(),
-        'excludeElectronsFromWsFromGenJets': True
+        'analyzersBeforeElecIso':cms.Sequence(),
+        'excludeElectronsFromWsFromGenJets': True,
+        'METCorrectionLevel': 0
         }
     # adaptions when running on data
     if(runningOnData=="data"):
@@ -1647,3 +1685,5 @@ if(runningOnData=="data" or (not BtagReweigthing and not effSFReweigthing) ):
 if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing and not effSFReweigthing) ):
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightFinal )
+
+
