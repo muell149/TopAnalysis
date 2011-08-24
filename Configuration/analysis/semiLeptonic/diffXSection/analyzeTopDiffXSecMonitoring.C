@@ -57,13 +57,17 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
   // choose name of the output .pdf file
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
   /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
-     0: sysNo             1: sysLumiUp          2: sysLumiDown          3: sysJESUp      
-     4: sysJESDown        5: sysJERUp           6: sysJERDown           7: sysTopScaleUp 
-     8: sysTopScaleDown   9: sysVBosonScaleUp   10: sysVBosonScaleDown  11: sysTopMatchUp 
-     12: sysTopMatchDown  13: sysVBosonMatchUp  14: sysVBosonMatchDown  15: sysMuEffSFup  
-     16: sysMuEffSFdown   17: sysISRFSRup       18: sysISRFSRdown       19: sysPileUp    
-     20: sysQCDup         21: sysQCDdown        22: sysSTopUp           23: sysSTopDown  
-     24: sysBtagUp        25: sysBtagDown       26: sysDiBosUp          27: sysDiBosDown
+     0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
+     4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
+     8:sysTopScaleDown    9:sysVBosonScaleUp  10:sysVBosonScaleDown  11:sysTopMatchUp 
+     12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
+     16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
+     20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
+     24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
+     28:sysPUup          29:sysPUdown         30:sysflatTrigSF       31:sysTrigEffSFNormUp
+     32:sysTrigEffSFNormDown     33:sysTriggerEffSFShapeUpEta   34:sysTriggerEffSFShapeDownEta
+     35:sysTriggerEffSFShapeUpPt 36:sysTriggerEffSFShapeDownPt  37:sysMisTagSFup     38:sysMisTagSFdown     
+     39:sysDiBosUp       40:sysDiBosDown
   */
   int systematicVariation=sysNo;
 
