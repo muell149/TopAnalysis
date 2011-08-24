@@ -54,8 +54,12 @@ namespace semileptonic {
 			    /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup ,
 			    /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
 			    /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
-			    /*24:*/sysBtagUp      , /*25:*/sysBtagDown     , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
-			    /*28:*/sysDiBosUp     , /*29:*/sysDiBosDown}; // NOTE: please add new uncertainties directly before sysDiBosUp!
+			    /*24:*/sysBtagSFUp    , /*25:*/sysBtagSFDown     , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
+			    /*28:*/sysPUup        , /*29:*/sysPUdown       , /*30:*/sysflatTrigSF     , /*31:*/sysTrigEffSFNormUp,
+			    /*32:*/sysTrigEffSFNormDown    , /*33:*/sysTriggerEffSFShapeUpEta , /*34:*/sysTriggerEffSFShapeDownEta,
+			    /*35:*/sysTriggerEffSFShapeUpPt, /*36:*/sysTriggerEffSFShapeDownPt, /*37:*/sysMisTagSFup              ,
+			    /*38:*/sysMisTagSFdown, /*39:*/sysDiBosUp      , /*40:*/sysDiBosDown}; 
+                            // NOTE: please add new uncertainties directly before sysDiBosUp!
 
   bool newSpring11MC=true;
   bool newSummer11MC=true;
@@ -93,12 +97,23 @@ namespace semileptonic {
     if(sys==21)systematicVariationlabel="sysQCDdown";
     if(sys==22)systematicVariationlabel="sysSTopUp";
     if(sys==23)systematicVariationlabel="sysSTopDown";
-    if(sys==24)systematicVariationlabel="btagEffUp";
-    if(sys==25)systematicVariationlabel="btagEffDown";
+    if(sys==24)systematicVariationlabel="btagEffSFUp";
+    if(sys==25)systematicVariationlabel="btagEffSFDown";
     if(sys==26)systematicVariationlabel="sysShapeUp";
     if(sys==27)systematicVariationlabel="sysShapeDown";
-    if(sys==28)systematicVariationlabel="sysDiBosUp";
-    if(sys==29)systematicVariationlabel="sysDiBosDown";
+    if(sys==28)systematicVariationlabel="sysPUup";
+    if(sys==29)systematicVariationlabel="sysPUdown";
+    if(sys==30)systematicVariationlabel="sysflatTrigSF";
+    if(sys==31)systematicVariationlabel="sysTrigEffSFNormUp";
+    if(sys==32)systematicVariationlabel="sysTrigEffSFNormDown";
+    if(sys==33)systematicVariationlabel="sysTriggerEffSFShapeUpEta";
+    if(sys==34)systematicVariationlabel="sysTriggerEffSFShapeDownEta";
+    if(sys==35)systematicVariationlabel="sysTriggerEffSFShapeUpPt";
+    if(sys==36)systematicVariationlabel="sysTriggerEffSFShapeDownPt";
+    if(sys==37)systematicVariationlabel="sysMisTagSFup";
+    if(sys==38)systematicVariationlabel="sysMisTagSFdown";
+    if(sys==39)systematicVariationlabel="sysDiBosUp";
+    if(sys==40)systematicVariationlabel="sysDiBosDown";
     // check if valid input was chosen
     if(systematicVariationlabel==""){
       std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
@@ -893,7 +908,7 @@ namespace semileptonic {
       return files_;
     }
 
-  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset" )
+  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", const TString redundantPartOfNameInData="" )
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
     // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -904,6 +919,8 @@ namespace semileptonic {
     // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
     // "Nplots": the total # of plots is calclated
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
+    // "redundantPartOfNameInData": delete this part in the (folder)name when loading the plots from data
+    // (needed to handle systematic variations where foldername in data and MC is different)
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -915,9 +932,17 @@ namespace semileptonic {
 	if(files_.count(sample)!=0){
 	  // create plot container
 	  TH1* targetPlot;
+	  // delete additional part of MC foldername
+	  // that does not exist in data 
+	  TString plotname=plotList_[plot];
+	  if(sample==kData) plotname.ReplaceAll(redundantPartOfNameInData, "");
 	  files_[sample]->GetObject(plotList_[plot], targetPlot);
 	  // Check existence of plot
-	  if(targetPlot) existsInAnySample=true;
+	  if(targetPlot){ 
+	    existsInAnySample=true;
+	    // go to end of loop
+	    sample=kSToptW;
+	  }
 	}
       }
       // end program and draw error if plot does not exist at all
@@ -929,6 +954,10 @@ namespace semileptonic {
 	// otherwise: get plots from sample
 	// loop samples
 	for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
+	  // delete additional part of MC foldername
+	  // that does not exist in data 
+	  TString plotname=plotList_[plot];
+	  if(sample==kData) plotname.ReplaceAll(redundantPartOfNameInData, "");
 	  // check if file exists
 	  // give warning if file does not exist
 	  if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample,decayChannel) << " does not exist- continue and neglect this sample" << std::endl;
@@ -937,24 +966,24 @@ namespace semileptonic {
 	    TH1* targetPlot;
 	    if(verbose>0){
 	      std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
-	      std::cout << "plot: " << plot << ", " << plotList_[plot] << std::endl;
+	      std::cout << "plot: " << plot << ", " << plotname << std::endl;
 	    }
-	    files_[sample]->GetObject(plotList_[plot], targetPlot);
+	    files_[sample]->GetObject(plotname, targetPlot);
 	    // Check if plot exits
 	    // give warning if plot does not exist
-	    if((!targetPlot)&&(verbose>0)) std::cout << "can not find plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " - continue and neglect this plot" << std::endl;
+	    if((!targetPlot)&&(verbose>0)) std::cout << "can not find plot "+plotname << " in file "+(TString)(files_[sample]->GetName()) << " - continue and neglect this plot" << std::endl;
 	    if(targetPlot){
 	      // check if plot is empty
 	      bool emptyPlot=false;
-	      if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
-	      if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotList_[plot])))->GetEntries())==0.)) emptyPlot=true;
+	      if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotname)))->GetEntries())==0.)) emptyPlot=true;
+	      if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotname)))->GetEntries())==0.)) emptyPlot=true;
 	      if(emptyPlot && verbose>0) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
 	      // to avoid problems with samples where no event is passing the selection we will drop this requirement by now
 	      emptyPlot=false;
 	      if(!emptyPlot){
 		// save plot in corresponding map
-		if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotList_[plot]));
-		if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotList_[plot]));
+		if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotname));
+		if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotname));
 		// count every existing 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
 		if(plot>=N1Dplots) Nplots++;
 	      }
@@ -1666,7 +1695,11 @@ namespace semileptonic {
       std::cout << " does not exist in file " << fileName << std::endl;
       exit(0);
     }
-    return (TH1F*)targetPlot;
+    gROOT->cd();
+    TH1F* result = (TH1F*)(targetPlot->Clone());
+    file->Close();
+    delete file;
+    return result;
   }
 
   double signum(double value){
