@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int systematicVariation=sysMisTagSFdown, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
 			   //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 std::string decayChannel = "muon" )
@@ -43,7 +43,10 @@ std::string decayChannel = "muon" )
      16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
      20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
      24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
-     28:sysDiBosUp       29:sysDiBosDown
+     28:sysPUup          29:sysPUdown         30:sysflatTrigSF       31:sysTrigEffSFNormUp
+     32:sysTrigEffSFNormDown     33:sysTriggerEffSFShapeUpEta   34:sysTriggerEffSFShapeDownEta
+     35:sysTriggerEffSFShapeUpPt 36:sysTriggerEffSFShapeDownPt  37:sysMisTagSFup     38:sysMisTagSFdown     
+     39:sysDiBosUp       40:sysDiBosDown
   */
   if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.04;
   else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
@@ -72,27 +75,50 @@ std::string decayChannel = "muon" )
   outputFileName+=dataSample+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitpbHypothesis"+lumi+"pb";
-  // choose if xSec are extrapolated to whole phase space
+  // choose if differential xSecs are extrapolated to whole phase space
   bool extrapolate=false;
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
-
-
+  // choose plot input folder corresponding to systematic Variation  
+  TString sysInputFolderExtension="";
+  TString sysInputGenFolderExtension="";
+  if(systematicVariation==sysPUup  ){ 
+    sysInputFolderExtension="PUup";
+    sysInputGenFolderExtension=sysInputFolderExtension;
+  }
+  else if(systematicVariation==sysPUdown){
+    sysInputFolderExtension="PUdown";
+    sysInputGenFolderExtension=sysInputFolderExtension;
+  }
+  else if(systematicVariation==sysflatTrigSF       ) sysInputFolderExtension="FlatTriggerSF";
+  else if(systematicVariation==sysTrigEffSFNormUp  ) sysInputFolderExtension="TriggerEffSFNormUp";
+  else if(systematicVariation==sysTrigEffSFNormDown) sysInputFolderExtension="TriggerEffSFNormDown";
+  else if(systematicVariation==sysTriggerEffSFShapeUpEta  ) sysInputFolderExtension="TriggerEffSFShapeUpEta";
+  else if(systematicVariation==sysTriggerEffSFShapeDownEta) sysInputFolderExtension="TriggerEffSFShapeDownEta";
+  else if(systematicVariation==sysTriggerEffSFShapeUpPt   ) sysInputFolderExtension="TriggerEffSFShapeUpPt";
+  else if(systematicVariation==sysTriggerEffSFShapeDownPt ) sysInputFolderExtension="TriggerEffSFShapeDownPt";
+  else if(systematicVariation==sysMuEffSFup   ) sysInputFolderExtension="SelectionEffSFNormUp";
+  else if(systematicVariation==sysMuEffSFdown ) sysInputFolderExtension="SelectionEffSFNormDown";
+  else if(systematicVariation==sysBtagSFUp    ) sysInputFolderExtension="BtagSFup";
+  else if(systematicVariation==sysBtagSFDown  ) sysInputFolderExtension="BtagSFdown";
+  else if(systematicVariation==sysMisTagSFup  ) sysInputFolderExtension="MisTagSFup";
+  else if(systematicVariation==sysMisTagSFdown) sysInputFolderExtension="MisTagSFdown";
+  // additional (control plot folders): NoWeight, OnlyPUWeight, NoBtagSFWeight;
 
   //  ---
   //     choose plots
   //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
   TString plots1D[ ] = { // general fit performance
-    "analyzeTopRecoKinematicsKinFit/prob"       , 
-    "analyzeTopRecoKinematicsKinFit/chi2"       , 
-    "analyzeTopRecoKinematicsKinFit/delChi2"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob"       , 
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/chi2"       , 
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/delChi2"    ,
     // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
     "analyzeHypoKinFit/hadBQuark"               , 
     "analyzeHypoKinFit/lepBQuark"               , 
     "analyzeHypoKinFit/lightQuark"              , 
     "analyzeHypoKinFit/wrongAssign"             ,
-    "analyzeTopRecoKinematicsKinFit/qAssignment",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qAssignment",
     "analyzeHypoKinFit/PartonJetDRall"          ,
     // pull distributions
     "analyzeHypoKinFit/hadBQuarkPt"             ,
@@ -117,122 +143,122 @@ std::string decayChannel = "muon" )
     "analyzeHypoKinFit/hadWEta"                 ,
     "analyzeHypoKinFit/hadWPhi"                 ,
     // reconstructed top quantities
-    "analyzeTopRecoKinematicsKinFit/topMass"    ,
-    "analyzeTopRecoKinematicsKinFit/topPt"      ,                         
-    "analyzeTopRecoKinematicsKinFit/topPhi"     ,
-    "analyzeTopRecoKinematicsKinFit/topY"       ,
-    "analyzeTopRecoKinematicsKinFit/topPtHad"   ,
-    "analyzeTopRecoKinematicsKinFit/topPhiHad"  ,
-    "analyzeTopRecoKinematicsKinFit/topYHad"    ,
-    "analyzeTopRecoKinematicsKinFit/topPtLep"   ,
-    "analyzeTopRecoKinematicsKinFit/topPhiLep"  ,
-    "analyzeTopRecoKinematicsKinFit/topYLep"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topMass"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"      ,                         
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY"       ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtHad"   ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiHad"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYHad"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLep"   ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiLep"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,
     // reconstructed angular distributions
-    "analyzeTopRecoKinematicsKinFit/bbbarAngle"  ,
-    "analyzeTopRecoKinematicsKinFit/bbbarAngleTtRF",
-    "analyzeTopRecoKinematicsKinFit/WWAngle"     ,
-    "analyzeTopRecoKinematicsKinFit/topWAngleLep",
-    "analyzeTopRecoKinematicsKinFit/topWAngleHad",
-    "analyzeTopRecoKinematicsKinFit/topBAngleLep",
-    "analyzeTopRecoKinematicsKinFit/topBAngleHad",
-    "analyzeTopRecoKinematicsKinFit/bWAngleLep"  ,
-    "analyzeTopRecoKinematicsKinFit/bWAngleHad"  ,
-    "analyzeTopRecoKinematicsKinFit/qqbarAngle"  ,
-    "analyzeTopRecoKinematicsKinFit/qBlepAngle"  ,
-    "analyzeTopRecoKinematicsKinFit/qBhadAngle"  ,
-    "analyzeTopRecoKinematicsKinFit/lepBlepAngle",
-    "analyzeTopRecoKinematicsKinFit/lepBlepAngleTtRF",
-    "analyzeTopRecoKinematicsKinFit/lepBhadAngle",
-    "analyzeTopRecoKinematicsKinFit/lepQAngle"   ,
-    "analyzeTopRecoKinematicsKinFit/MuonNeutrinoAngle",
-    "analyzeTopRecoKinematicsKinFit/lepBNeutrinoAngle",
-    "analyzeTopRecoKinematicsKinFit/hadBNeutrinoAngle",
-    "analyzeTopRecoKinematicsKinFit/qNeutrinoAngle"   ,
-    "analyzeTopRecoKinematicsKinFit/lepWDir"     ,
-    "analyzeTopRecoKinematicsKinFit/nuWDir"      ,
-    "analyzeTopRecoKinematicsKinFit/qWDir"       ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngleTtRF",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/WWAngle"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleLep",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleHad",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleLep",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleHad",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleLep"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleHad"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qqbarAngle"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBlepAngle"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBhadAngle"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngle",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngleTtRF",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBhadAngle",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepQAngle"   ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/MuonNeutrinoAngle",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBNeutrinoAngle",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/hadBNeutrinoAngle",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qNeutrinoAngle"   ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepWDir"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/nuWDir"      ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qWDir"       ,
     // reconstructed event shape variables
-    "analyzeTopRecoKinematicsKinFit/aplanarity" ,
-    "analyzeTopRecoKinematicsKinFit/sphericity" ,
-    "analyzeTopRecoKinematicsKinFit/C"          ,
-    "analyzeTopRecoKinematicsKinFit/D"          ,
-    "analyzeTopRecoKinematicsKinFit/circularity",
-    "analyzeTopRecoKinematicsKinFit/isotropy"   ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/aplanarity" ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/sphericity" ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/C"          ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/D"          ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/circularity",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/isotropy"   ,
     // generated top quantities
-    "analyzeTopPartonLevelKinematics/topMass"      , 
-    "analyzeTopPartonLevelKinematics/topPt"        ,    
-    "analyzeTopPartonLevelKinematicsPhaseSpace/topPt", 
-    "analyzeTopPartonLevelKinematics/topPhi"       ,
-    "analyzeTopPartonLevelKinematics"+PS+"/topY",
-    "analyzeTopPartonLevelKinematics/topPtHad"     ,
-    "analyzeTopPartonLevelKinematics/topPhiHad"    ,
-    "analyzeTopPartonLevelKinematics/topYHad"      ,
-    "analyzeTopPartonLevelKinematics/topPtLep"     ,
-    "analyzeTopPartonLevelKinematics/topPhiLep"    ,
-    "analyzeTopPartonLevelKinematics/topYLep"      ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topMass"      , 
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"        ,    
+    "analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt", 
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhi"       ,
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/topY",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtHad"     ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiHad"    ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYHad"      ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLep"     ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiLep"    ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYLep"      ,
     // generated angular distributions
-    "analyzeTopPartonLevelKinematics/bbbarAngle"   ,
-    "analyzeTopPartonLevelKinematics/bbbarAngleTtRF",
-    "analyzeTopPartonLevelKinematics/WWAngle"     ,
-    "analyzeTopPartonLevelKinematics/topWAngleLep",
-    "analyzeTopPartonLevelKinematics/topWAngleHad",
-    "analyzeTopPartonLevelKinematics/topBAngleLep",
-    "analyzeTopPartonLevelKinematics/topBAngleHad",
-    "analyzeTopPartonLevelKinematics/bWAngleLep"  ,
-    "analyzeTopPartonLevelKinematics/bWAngleHad"  ,
-    "analyzeTopPartonLevelKinematics/qqbarAngle"  ,
-    "analyzeTopPartonLevelKinematics/qBlepAngle"  ,
-    "analyzeTopPartonLevelKinematics/qBhadAngle"  ,
-    "analyzeTopPartonLevelKinematics/lepBlepAngle",
-    "analyzeTopPartonLevelKinematics/lepBlepAngleTtRF",
-    "analyzeTopPartonLevelKinematics/lepBhadAngle",
-    "analyzeTopPartonLevelKinematics/lepQAngle"   ,
-    "analyzeTopPartonLevelKinematics/MuonNeutrinoAngle",
-    "analyzeTopPartonLevelKinematics/lepBNeutrinoAngle",
-    "analyzeTopPartonLevelKinematics/hadBNeutrinoAngle",
-    "analyzeTopPartonLevelKinematics/qNeutrinoAngle"   ,
-    "analyzeTopPartonLevelKinematics/lepWDir"     ,
-    "analyzeTopPartonLevelKinematics/qWDir"       ,
-    "analyzeTopPartonLevelKinematics/nuWDir"      ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngle"   ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngleTtRF",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/WWAngle"     ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleLep",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleHad",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleLep",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleHad",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleLep"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleHad"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qqbarAngle"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBlepAngle"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBhadAngle"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngle",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngleTtRF",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBhadAngle",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepQAngle"   ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/MuonNeutrinoAngle",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBNeutrinoAngle",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/hadBNeutrinoAngle",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qNeutrinoAngle"   ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepWDir"     ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qWDir"       ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/nuWDir"      ,
     // reconstructed ttbar quantities
-    "analyzeTopRecoKinematicsKinFit/ttbarMass"  ,
-    "analyzeTopRecoKinematicsKinFit/ttbarPt"    ,
-    "analyzeTopRecoKinematicsKinFit/ttbarY"     ,
-    "analyzeTopRecoKinematicsKinFit/ttbarHT"    ,
-    "analyzeTopRecoKinematicsKinFit/ttbarSumY"  ,
-    "analyzeTopRecoKinematicsKinFit/ttbarDelPhi",
-    "analyzeTopRecoKinematicsKinFit/ttbarDelY"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY"  ,
     // generated ttbar quantities
-    "analyzeTopPartonLevelKinematics"+PS+"/ttbarMass",
-    "analyzeTopPartonLevelKinematics"+PS+"/ttbarPt"  ,
-    "analyzeTopPartonLevelKinematics"+PS+"/ttbarY"   ,
-    "analyzeTopPartonLevelKinematics/ttbarHT"    ,
-    "analyzeTopPartonLevelKinematics/ttbarSumY"  ,
-    "analyzeTopPartonLevelKinematics/ttbarDelPhi",
-    "analyzeTopPartonLevelKinematics/ttbarDelY"  ,
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarMass",
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarPt"  ,
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarY"   ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarHT"    ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarSumY"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarDelPhi",
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarDelY"  ,
     // reconstructed lepton quantities
-    "analyzeTopRecoKinematicsKinFit/lepPt" ,
-    "analyzeTopRecoKinematicsKinFit/lepEta",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepPt" ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta",
     // generated lepton quantities
-    "analyzeTopPartonLevelKinematics"+PS+"/lepPt" ,
-    "analyzeTopPartonLevelKinematics"+PS+"/lepEta"
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepPt" ,
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepEta"
   };
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
     "analyzeHypoKinFit/mapKinFit_"               ,
     // b) reconstructed Top quantities
-    "analyzeTopRecoKinematicsKinFit/topPt_"      ,
-    "analyzeTopRecoKinematicsKinFit/topPhi_"     ,
-    "analyzeTopRecoKinematicsKinFit/topY_"       ,
-    "analyzeTopRecoKinematicsKinFit/bbbarAngle_" ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"       ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
     // c) reconstructed ttbar quantities
-    "analyzeTopRecoKinematicsKinFit/ttbarMass_"  ,
-    "analyzeTopRecoKinematicsKinFit/ttbarPt_"    ,
-    "analyzeTopRecoKinematicsKinFit/ttbarY_"     ,
-    "analyzeTopRecoKinematicsKinFit/ttbarHT_"    ,
-    "analyzeTopRecoKinematicsKinFit/ttbarSumY_"  ,
-    "analyzeTopRecoKinematicsKinFit/ttbarDelPhi_",
-    "analyzeTopRecoKinematicsKinFit/ttbarDelY_"  
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass_"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt_"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY_"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT_"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  
   };
 
   // b) list plot axes style
@@ -429,8 +455,7 @@ std::string decayChannel = "muon" )
   // save all histos from plotList_ that exist in files_ into 
   // histo_ and histo2_ and count total # of plots as Nplots
   if(verbose>1) std::cout << std::endl;
-  getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel );
-
+  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, sysInputFolderExtension);
   // ---
   //    lumiweighting for choosen luminosity
   // ---
@@ -445,23 +470,23 @@ std::string decayChannel = "muon" )
   // for SingleTop and DiBoson samples:
   // every plot plotList_ existing in sTop/ diBoson .root file
   // will be combined and saved in the histo_ and histo2_ map
-  // reCreate: reCreate combined plots if they are already existing
-  bool reCreate=true;
+  // reCreate: recreate combined plots if they are already existing
+  bool reCreate=false;
   AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
 
   // ---
   //    copy event yields for total xSec calculation
   // ---
-  TH1F* dataYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kData ]->Clone());
-  TH1F* SigYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kSig  ]->Clone());
-  TH1F* BkgYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kBkg  ]->Clone());
-  TH1F* STopYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kSTop ]->Clone());
-  TH1F* WjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kWjets]->Clone());
-  TH1F* ZjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kZjets]->Clone());
-  TH1F* DiBosYield=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kDiBos]->Clone());
-  TH1F* QCDYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/topPt"][kQCD  ]->Clone());
-  TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics/topPt"          ][kSig]->Clone());
-  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace/topPt"][kSig]->Clone());
+  TH1F* dataYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kData ]->Clone());
+  TH1F* SigYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kSig  ]->Clone());
+  TH1F* BkgYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kBkg  ]->Clone());
+  TH1F* STopYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kSTop ]->Clone());
+  TH1F* WjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kWjets]->Clone());
+  TH1F* ZjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kZjets]->Clone());
+  TH1F* DiBosYield=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kDiBos]->Clone());
+  TH1F* QCDYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kQCD  ]->Clone());
+  TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"          ][kSig]->Clone());
+  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt"][kSig]->Clone());
 
   // ---
   //    configure histogras
@@ -565,12 +590,12 @@ std::string decayChannel = "muon" )
     TString variable=xSecVariables_[number];
     TString efficiency="efficiency/"+variable;
     // check if gen and reco plots are available
-    if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, kSig)){
+    if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kSig)){
       //    std::cout << "found gen and reco" << std::endl;
       // get reco plot
-      histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
+      histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
       // divide by gen plot
-      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]->Clone()));
+      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone()));
 
       // std::cout << "gen(bin1): "  <<  histo_["analyzeTopPartonLevelKinematics/"+variable  ][kSig]->GetBinContent(1) << std::endl;
       // std::cout << "reco(bin1): " <<  histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->GetBinContent(1) << std::endl;
@@ -579,15 +604,15 @@ std::string decayChannel = "muon" )
       // add plot to list of plots
       plotList_.push_back(efficiency);
       // add axis configuration
-      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
+      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       // set binomial errors
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
 	double eff=histo_[efficiency][kSig]->GetBinContent(bin); 
-	double N=histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]->GetBinContent(bin);
-	double width=histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig]->GetBinWidth(bin);
+	double N=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
+	double width=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinWidth(bin);
 	N*=width*effSFAB(systematicVariation,decayChannel);
 	N/=(lumiweight(kSig, luminosity, systematicVariation, decayChannel));
 	if(verbose>1){
@@ -618,7 +643,7 @@ std::string decayChannel = "muon" )
     // loop samples 
     for(unsigned int sample=kSig; sample<=kData; ++sample){
       // check if reco MC plot and data event yield plots are available
-      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, sample)){
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, sample)){
 	calculateXSec=false;
       }
     }
@@ -629,24 +654,24 @@ std::string decayChannel = "muon" )
     if(calculateXSec){
       // a) differential XSec from data
       // get data plot
-      TString name=TString(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetName())+"kData";
-      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->Clone(name));
+      TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
+      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(name));
       // subtract BG(MC)
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kBkg  ]->Clone()), -1);
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets]->Clone()), -1);
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kWjets]->Clone()), -1);
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSTop ]->Clone()), -1);
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kDiBos]->Clone()), -1);
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kQCD  ]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->Clone()), -1);
+      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->Clone()), -1);
       // apply efficiency correction
       DivideYieldByEfficiencyAndLumi(histo_[xSec][kData], ((TH1F*)(histo_["efficiency/"+variable][kSig])), luminosity, 0);
       // b) differential XSec from Signal(MC prediction)
-      histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
+      histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
       DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
       // add plot to list of plots
       plotList_.push_back(xSec);
       // add axis configuration
-      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
+      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       recoAxisLabel.ReplaceAll("KinFit ","");
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
@@ -771,7 +796,7 @@ std::string decayChannel = "muon" )
     // loop samples 
     for(unsigned int sample=kSig; sample<=kData; ++sample){
       // check if reco MC plot and data event yield plots are available
-      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit/"+variable, sample)){
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, sample)){
 	calculateXSec=false;
       }
     }
@@ -782,22 +807,22 @@ std::string decayChannel = "muon" )
     if(calculateXSec){
       // a) differential norm XSec from data
       // get data plot
-      TString name=TString(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetName())+"kData";
-      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->Clone(name));
+      TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
+      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(name));
       // total number of data events for this variable
-      double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData],verbose-1);
+      double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData],verbose-1);
       // total number of BG events for this variable
-      double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kBkg],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kWjets],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSTop ],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kDiBos],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kQCD  ],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets],verbose-1);
+      double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ],verbose-1);
+      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets],verbose-1);
       // inclusive efficiency (* A) for this variable
-      double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit/"+variable ][kSig],verbose-1);
-      effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+"/"+variable][kSig],verbose-1);
+      double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kSig],verbose-1);
+      effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig],verbose-1);
       // loop bins
-      for(int bin =0; bin<=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1; ++bin){
+      for(int bin =0; bin<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin){
 	// for inclusive values of xSecResult, effA, BR, Ndata and NBG 
 	// which are used in the calculation are taken from section
 	// "total inclusive cross section (ttbar->X) determination" above
@@ -805,16 +830,16 @@ std::string decayChannel = "muon" )
 	// get data entries in bin
 
 	// get binwidth
-	double binwidth=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetBinWidth(bin);
-	double NdataBin=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetBinContent(bin);
+	double binwidth=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinWidth(bin);
+	double NdataBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin);
 	NdataBin*=binwidth;
 	// get BG in bin
-	double NBGBin=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kBkg]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kZjets]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kWjets]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSTop ]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kDiBos]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kQCD  ]->GetBinContent(bin);
+	double NBGBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
+	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin);
+	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin);
+	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin);
+	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin);
+	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin);
 	NBGBin*=binwidth;
 	// calculate Ni = number of signal only events in bin from data
 	double Ni= NdataBin-NBGBin;
@@ -827,10 +852,10 @@ std::string decayChannel = "muon" )
 	// calculate complete error
 	double Nierror=sqrt(NdataBin); // the error of NBG is treated as systematic variation
 	double sumErrorNjSquare = 0; // sum(j,i!=j) [ errorNj*errorNj ]
-	for(int bin2=1; bin2<=histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1; ++bin2){
+	for(int bin2=1; bin2<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin2){
 	  if(bin2!=bin){    
-	    double errorNj = sqrt( histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetBinContent(bin2) 
-				   * (histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetBinWidth(bin2)) );   
+	    double errorNj = sqrt( histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin2) 
+				   * (histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinWidth(bin2)) );   
 	    // remark: Nj=NdataBinj-NBGBinj, as above, the error of NBGBinj is treated 
 	    // as systematic variation and therefore not incorporated here
 	    sumErrorNjSquare += errorNj*errorNj;
@@ -844,7 +869,7 @@ std::string decayChannel = "muon" )
 	if(!isfinite(xSecBin)||isnan(xSecBin)){
 	  if(verbose>1){ 
 	    std::cout << "bin " << bin << " in ";
-	    std::cout << "analyzeTopRecoKinematicsKinFit/"+variable;
+	    std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable;
 	    std::cout << "gives no valid cross section!" << std::endl;
 	    std::cout << "!will set this bin to 0!" << std::endl;
 	  }
@@ -853,7 +878,7 @@ std::string decayChannel = "muon" )
 	}
 	// set underflow/overflow to 0
 	// because of infinite binwidth
-	if(bin==0||bin==histo_["analyzeTopRecoKinematicsKinFit/"+variable][kData]->GetNbinsX()+1){
+	if(bin==0||bin==histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1){
 	  xSecBinError=0;
 	  xSecBin=0;
 	}
@@ -890,7 +915,7 @@ std::string decayChannel = "muon" )
       std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
     }
     // b) differential normalized XSec from Signal(MC prediction)
-    histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->Clone());
+    histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
     DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
     double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig], verbose-1);
     // exclude underflow and overflow bins because they are negligible and treated wrong
@@ -904,7 +929,7 @@ std::string decayChannel = "muon" )
     // add plot to list of plots
     plotList_.push_back(xSec);
     // add axis configuration
-    unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit/"+variable);
+    unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
     axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{1}{"+label2+"} ] (t#bar{t}#rightarrow"+(TString)decayChannel+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
@@ -1025,10 +1050,10 @@ std::string decayChannel = "muon" )
 	  // for efficiency plots: draw grid
 	  if(getStringEntry(plotList_[plot], 1)=="efficiency") plotCanvas_[canvasNumber]->SetGrid(1,1);
 	  // for histos with variable binning:
-	  if(binning_.count("analyzeTopRecoKinematicsKinFit/"+getStringEntry(plotList_[plot], 2))>0){
+	  if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
 	    // get variable binning
 	    TString plotName=getStringEntry(plotList_[plot], 2);
-	    std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit/"+plotName];
+	    std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
 	    // set maximum of histo to last bin considered 
 	    // in variable binning (overflow excluded)
 	    double firstBin=0;
@@ -1058,7 +1083,7 @@ std::string decayChannel = "muon" )
 	      plotCanvas_[canvasNumber]->SetLogy(1);
 	      min=1;
 	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit/prob") min=0.1; 
+	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
 	    }
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
