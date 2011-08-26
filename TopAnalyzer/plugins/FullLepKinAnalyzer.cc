@@ -108,6 +108,7 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     }
     
     int btagsinhypo;
+    bool foundOneTagSolution = false;
     for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){
       btagsinhypo = 0;
       for(size_t j=0; j<bidcs.size(); ++j){
@@ -117,8 +118,9 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
       if(btagsinhypo==2){ // stop if hypothesis has two b-jets
         cmb = i;
 	break;
-      }	else if(btagsinhypo==1){ // if one b-tag in hypothesis store index but go on and look for solution with 2 tags
-        cmb = i;     
+      }	else if(btagsinhypo==1 && !foundOneTagSolution){ // if one b-tag in hypothesis store index but go on and look for solution with 2 tags
+        cmb = i;
+        foundOneTagSolution = true;
       }
     }        
   }
