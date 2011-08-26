@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int systematicVariation=sysMisTagSFdown, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
 			   //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 std::string decayChannel = "muon" )
@@ -275,7 +275,7 @@ std::string decayChannel = "muon" )
     "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
     "N(wrong assigned jets)/events/0/1"                                 , 
     "permutation/events/0/1"                                            ,
-    "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"                        ,
+    "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"       ,
     // pull distributions
     "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
     "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
@@ -400,11 +400,11 @@ std::string decayChannel = "muon" )
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
     // reconstructed lepton quantities
-    "p_{T}^{#mu}/events/0/10",
-    "#eta^{#mu}/events/0/10" ,
+    "p_{T}^{#mu}/events/0/1",
+    "#eta^{#mu}/events/0/1" ,
     // generated lepton quantities
-    "p_{T}^{#mu} parton truth/events/0/10",
-    "#eta^{#mu} parton truth/events/0/10"
+    "p_{T}^{#mu} parton truth/events/0/1",
+    "#eta^{#mu} parton truth/events/0/1"
   };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
@@ -497,7 +497,7 @@ std::string decayChannel = "muon" )
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    if(decayChannel=="muon"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "e");
+    if(decayChannel=="electron"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "e");
     if(verbose>1){
       std::cout << "(plot, x Axis label , y Axis label , log scale?, rebinning factor):" << std::endl;
       std::cout << plotList_[plot] << ": " << getStringEntry(axisLabel_[plot],1);
@@ -581,8 +581,9 @@ std::string decayChannel = "muon" )
   unsigned int NMCeff=0;
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
-  TString xSecVariables[] ={"topPt"          , "topY"           , "ttbarPt"            , "ttbarMass"      , "ttbarY"              };
-  TString xSecLabel    [] ={"p_{T}^{t}/GeV" , "y^{t}/binwidth", "p_{T}^{t#bar{t}}/GeV", "m^{t#bar{t}}/GeV", "y^{t#bar{t}}/binwidth"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta"};
+  TString xSecLabel    [] ={"p_{T}^{t}/GeV" , "y^{t}/binwidth", "p_{T}^{t#bar{t}}/GeV", "m^{t#bar{t}}/GeV", "y^{t#bar{t}}/binwidth", 
+			    "p_{T}^{l}/GeV" , "#eta^{l}/binwidth"};
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
   // loop all variables

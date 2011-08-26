@@ -62,7 +62,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // NOTE: these must be identical to those defined in 
   // xSecVariables_ in analyzeHypothesisKinFit.C
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "inclusive"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "inclusive"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.;
@@ -88,8 +88,6 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
     }
   }
-  xSecVariableBranchNames_.push_back("lepPt" );
-  xSecVariableBranchNames_.push_back("lepEta");
   // parameter printout
   if(verbose>0) std::cout << std::endl << "executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl << std::endl;
   if(verbose>0) std::cout << "target file: " << outputFile << std::endl;
@@ -178,7 +176,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
 	}
-	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysPileUp&&!(sys>=sysBtagSFUp&&sys<=sysMisTagSFdown)){
+	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysPileUp&&!(sys>=sysBtagSFUp&&sys<=sysMisTagSFdown)&&!xSecVariables_[i].Contains("lep")){
 	  if(verbose>1) std::cout << "use 2010 uncertainties for variation " << sysLabel(sys)+", "+xSecVariables_[i] << std::endl;
 	  // adapt 2010 UNCERTAINTIES
 	  // if systematic variation does not exist for 2011 data (indicated by luminosity), 

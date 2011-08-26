@@ -33,7 +33,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
   // NOTE: these must be included in xSecVariables_ 
   // in analyzeHypothesisKinFit.C and combineTopDiffXSecUncertainties.C
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm" ,"lepEtaNorm"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // create plot container for combined e+#mu plots
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -65,7 +65,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  // combine the results
 	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
 	  plotCombination->Scale(0.0);
-	  // loop bins
+	  // loopins
 	  for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
 	    // consider only non-empty bins
 	    if(plotMu->GetBinContent(bin)!=0&&plotEl->GetBinContent(bin)!=0){
@@ -118,6 +118,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  else if(plotName=="ttbarPt"  ) plotName2="hVisTTbarPt";
 	  else if(plotName=="ttbarY"   ) plotName2="hVisTTbarY";
 	  else if(plotName=="ttbarMass") plotName2="hVisTTbarM";
+	  else if(plotName=="lepPt"    ) plotName2="hVisLepPt";
+	  else if(plotName=="lepEta"   ) plotName2="hVisLepEta";
 	  else{ 
 	    std::cout << "no valid name for input variable ";
 	    std::cout << plotName << " for MC@Nlo chosen" << std::endl;
