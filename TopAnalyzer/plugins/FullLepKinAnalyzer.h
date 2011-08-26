@@ -88,6 +88,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   bool useBtagging_;
   /// b-tagging algorithm to be used
   std::string bAlgo_;
+    /// cut value for b-tagging
+  double bCut_;
   /// input given in config has to be TtFullLeptonicEvent
   edm::InputTag FullLepEvt_;
   /// keyword for hypothesis from config: ttFullLepHypKinSolution:Key or ttFullLepHypGenMatch:Key

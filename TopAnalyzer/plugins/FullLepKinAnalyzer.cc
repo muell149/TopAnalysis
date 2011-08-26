@@ -97,23 +97,32 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   // find best solution taking into account the b-tagging discriminators
   if(useBtagging_){
   
-    std::vector<double> bDiscriminators;
+    std::vector<int> bidcs;
+    int idx=0;
+    // find indices of b-tagged jets
     for(edm::View<pat::Jet>::const_iterator jet = jets->begin();jet != jets->end(); ++jet) {
-      bDiscriminators.push_back(jet->bDiscriminator(bAlgo_));
+      if(jet->bDiscriminator(bAlgo_) > bCut_) { 
+        bidcs.push_back(idx);
+      }
+      idx++;
     }
     
-    int bestIdx = 0;
-    double bestDiscriminator = 0;
-    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){    
-      int jetIdx1 = FullLepEvt->jetLeptonCombination(hypoKey,i)[0];
-      int jetIdx2 = FullLepEvt->jetLeptonCombination(hypoKey,i)[1];	      
-      double discriminator = bDiscriminators[jetIdx1]*bDiscriminators[jetIdx1]+bDiscriminators[jetIdx2]*bDiscriminators[jetIdx2];
-      if(discriminator > bestDiscriminator){
-        bestIdx=i;     
+    int btagsinhypo;
+    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){
+      btagsinhypo = 0;
+      for(size_t j=0; j<bidcs.size(); ++j){
+        if(FullLepEvt->jetLeptonCombination(hypoKey,i)[0]==bidcs[j]) btagsinhypo++;
+        if(FullLepEvt->jetLeptonCombination(hypoKey,i)[1]==bidcs[j]) btagsinhypo++;		
       }
-    }
-    cmb = bestIdx;        
+      if(btagsinhypo==2){ // stop if hypothesis has two b-jets
+        cmb = i;
+	break;
+      }	else if(btagsinhypo==1){ // if one b-tag in hypothesis store index but go on and look for solution with 2 tags
+        cmb = i;     
+      }
+    }        
   }
+
 
   // -----------------------
   // fill histos related to quality of the TtFullLeptonicEvent
