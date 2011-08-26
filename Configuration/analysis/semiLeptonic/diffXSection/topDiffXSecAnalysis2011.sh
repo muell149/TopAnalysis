@@ -47,7 +47,7 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"electron\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22

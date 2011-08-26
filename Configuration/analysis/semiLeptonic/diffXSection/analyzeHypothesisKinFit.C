@@ -455,7 +455,9 @@ std::string decayChannel = "muon" )
   // save all histos from plotList_ that exist in files_ into 
   // histo_ and histo2_ and count total # of plots as Nplots
   if(verbose>1) std::cout << std::endl;
-  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, sysInputFolderExtension);
+  std::vector<TString> vecRedundantPartOfNameInData;
+  vecRedundantPartOfNameInData.push_back(sysInputFolderExtension);
+  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
   // ---
   //    lumiweighting for choosen luminosity
   // ---

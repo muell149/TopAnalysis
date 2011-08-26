@@ -908,7 +908,7 @@ namespace semileptonic {
       return files_;
     }
 
-  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", const TString redundantPartOfNameInData="" )
+    void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0 )
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
     // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -935,7 +935,14 @@ namespace semileptonic {
 	  // delete additional part of MC foldername
 	  // that does not exist in data 
 	  TString plotname=plotList_[plot];
-	  if(sample==kData) plotname.ReplaceAll(redundantPartOfNameInData, "");
+	  if(sample==kData){
+	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
+	      std::vector<TString>::iterator iter;
+	      for (iter = (vecRedundantPartOfNameInData->begin()); iter != (vecRedundantPartOfNameInData->end()); iter++){
+		plotname.ReplaceAll((*iter), ""); 
+	      }
+	    }
+	  }
 	  files_[sample]->GetObject(plotList_[plot], targetPlot);
 	  // Check existence of plot
 	  if(targetPlot){ 
@@ -957,7 +964,14 @@ namespace semileptonic {
 	  // delete additional part of MC foldername
 	  // that does not exist in data 
 	  TString plotname=plotList_[plot];
-	  if(sample==kData) plotname.ReplaceAll(redundantPartOfNameInData, "");
+	  if(sample==kData){
+	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
+	      std::vector<TString>::iterator iter;
+	      for (iter = (vecRedundantPartOfNameInData->begin()); iter != (vecRedundantPartOfNameInData->end()); iter++){
+		plotname.ReplaceAll((*iter), ""); 
+	      }
+	    }
+	  }
 	  // check if file exists
 	  // give warning if file does not exist
 	  if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample,decayChannel) << " does not exist- continue and neglect this sample" << std::endl;
