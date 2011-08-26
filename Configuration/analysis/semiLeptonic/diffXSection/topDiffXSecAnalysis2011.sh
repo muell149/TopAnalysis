@@ -390,9 +390,12 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-if [ -f commands.cint ]; then
-    
+if [ -f commands.cint ]; then    
+  
     rm commands.cint
+    rm combineTopDiffXSecUncertainties_C.so
+    rm combineTopDiffXSecUncertainties_C.d
+
 fi
 
 cat >> commands.cint << EOF
