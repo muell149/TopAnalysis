@@ -7,14 +7,15 @@
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& cfg):
-  electrons_  ( cfg.getParameter<edm::InputTag>     ( "electrons"    ) ),
-  jets_       ( cfg.getParameter<edm::InputTag>     ( "jets"     ) ),
-  verbosity_  ( cfg.getParameter<bool>              ( "verbosity") ),
-  fromTo_     ( cfg.getParameter<std::vector<int> > ( "from_to"  ) ),
-  weight_     ( cfg.getParameter<edm::InputTag>("weight"))
+  electrons_  ( cfg.getParameter<edm::InputTag>     ( "electrons"  )),
+  jets_       ( cfg.getParameter<edm::InputTag>     ( "jets"       )),
+  puWeight_   ( cfg.getParameter<edm::InputTag>     ( "weightPU"   )),
+  lepSfWeight_( cfg.getParameter<edm::InputTag>     ( "weightLepSF")),    
+  verbosity_  ( cfg.getParameter<bool>              ( "verbosity"  )),
+  fromTo_     ( cfg.getParameter<std::vector<int> > ( "from_to"    ))
 {
 
 }
@@ -26,7 +27,7 @@ ElectronAnalyzer::~ElectronAnalyzer()
 void
 ElectronAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   if(verbosity_){
     std::cout << "-------------------------------------------" << std::endl;
     std::cout << "      Run: " << evt.id().run()              << std::endl;

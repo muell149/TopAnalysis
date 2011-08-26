@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from PU_Eventweight_cfi import *
+from DileptonEventWeight_cfi import *
 
 analyzeJets = cms.EDAnalyzer("JetAnalyzer",
 
@@ -8,6 +8,8 @@ analyzeJets = cms.EDAnalyzer("JetAnalyzer",
 
     # only jets from first to last index
     from_to = cms.vint32(0,1),
-    weight = eventWeightInputTag
+    
+    weightPU     = eventWeightPUTag,
+    weightLepSF  = eventWeightLepSFTag 
 )
 

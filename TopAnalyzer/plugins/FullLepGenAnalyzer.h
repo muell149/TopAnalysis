@@ -41,7 +41,9 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   /// returns electron/muon daughter of tau lepton		     
   const reco::Candidate* getTauDaughter(const reco::Candidate*);	     
   /// pile-up weight
-  edm::InputTag weight_;
+  edm::InputTag puWeight_;
+  /// lep SF weight
+  edm::InputTag lepSfWeight_;
 
     /// histograms for generated top quark kinematics
   std::vector<TH1D*> TopGen_;

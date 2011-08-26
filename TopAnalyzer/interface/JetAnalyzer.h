@@ -23,6 +23,9 @@ class JetAnalyzer : public edm::EDAnalyzer {
   virtual void endJob();
 
   edm::InputTag jets_;
+  edm::InputTag puWeight_;
+  edm::InputTag lepSfWeight_;  
+  
   std::vector<int> fromTo_;
 
   TH1D* multi_;
@@ -51,8 +54,6 @@ class JetAnalyzer : public edm::EDAnalyzer {
   TH1D* multiSSVHEM_;
   TH1D* multiSSVHET_;
   TH1D* multiSSVHPM_;
-  edm::InputTag weight_;
-
 };
 
 #endif

@@ -5,18 +5,18 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 using namespace std;
 using namespace edm;
 
-TriggerAnalyzer::TriggerAnalyzer(const edm::ParameterSet& cfg)
+TriggerAnalyzer::TriggerAnalyzer(const edm::ParameterSet& cfg):
+  trigResults_ (cfg.getParameter<edm::InputTag>  ( "TriggerResults")),
+  muons_       (cfg.getParameter<edm::InputTag>  ( "muons"	   )),
+  puWeight_    (cfg.getParameter<edm::InputTag>  ( "weightPU"	   )),
+  lepSfWeight_ (cfg.getParameter<edm::InputTag>  ( "weightLepSF"   )),  
+  hltPaths_    (cfg.getParameter<vector<string> >( "hltPaths"      ))
 {
-  trigResults_ = cfg.getParameter<edm::InputTag>       ("TriggerResults");
-  muons_       = cfg.getParameter<edm::InputTag>       ("muons"         );
-  hltPaths_    = cfg.getParameter<vector<string> >("hltPaths"      );
-  weight_      = cfg.getParameter<edm::InputTag>("weight");
-
 }
 
 TriggerAnalyzer::~TriggerAnalyzer()
@@ -60,7 +60,7 @@ TriggerAnalyzer::beginJob()
 void
 TriggerAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup&)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
 
   n_evts++;
 

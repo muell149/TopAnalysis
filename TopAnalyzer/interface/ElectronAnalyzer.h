@@ -27,6 +27,8 @@ private:
 
   edm::InputTag electrons_;
   edm::InputTag jets_;
+  edm::InputTag puWeight_;
+  edm::InputTag lepSfWeight_;
 
   bool verbosity_;
   std::vector<int> fromTo_;
@@ -56,10 +58,7 @@ private:
   TH1D* nlost_;
   TH1D* convDcot_;
   TH1D* convDist_;
-
-    edm::InputTag weight_;
-    TH1D* pfIso_;
-
+  TH1D* pfIso_;
 };
 
 #endif

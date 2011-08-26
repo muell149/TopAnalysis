@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from PU_Eventweight_cfi import *
+from DileptonEventWeight_cfi import *
 
 analyzeLeptonPair = cms.EDAnalyzer("DiLeptonAnalyzer",
 
@@ -22,5 +22,6 @@ analyzeLeptonPair = cms.EDAnalyzer("DiLeptonAnalyzer",
     MassWindow_up   = cms.double( 9999. ),
     MassWindow_down = cms.double(   12. ),
 
-    weight = eventWeightInputTag
+    weightPU     = eventWeightPUTag,
+    weightLepSF  = eventWeightLepSFTag     
 )

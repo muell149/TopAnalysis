@@ -2,16 +2,17 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
-VertexAnalyzer::VertexAnalyzer(const ParameterSet& cfg)
+VertexAnalyzer::VertexAnalyzer(const ParameterSet& cfg):
+  vertices_   (cfg.getParameter<InputTag>     ( "vertices"    )),
+  leptons_    (cfg.getParameter<InputTag>     ( "leptons"     )),
+  puWeight_   (cfg.getParameter<edm::InputTag>( "weightPU"    )),
+  lepSfWeight_(cfg.getParameter<edm::InputTag>( "weightLepSF" )),  
+  ndof_       (cfg.getParameter<unsigned int> ( "ndof"        )),
+  rho_        (cfg.getParameter<double>	      ( "rho"         )),
+  z_          (cfg.getParameter<double>       ( "z"           ))  
 {
-  vertices_ = cfg.getParameter<InputTag>    ("vertices"),
-  leptons_  = cfg.getParameter<InputTag>    ("leptons" ),
-  ndof_     = cfg.getParameter<unsigned int>("ndof"    ),
-  rho_      = cfg.getParameter<double>      ("rho"     ),
-  z_        = cfg.getParameter<double>      ("z"       );
-  weight_   = cfg.getParameter<InputTag>("weight");
 }
 
 VertexAnalyzer::~VertexAnalyzer()
@@ -95,7 +96,7 @@ VertexAnalyzer::beginJob()
 void
 VertexAnalyzer::analyze(const Event& evt, const EventSetup&)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   edm::Handle<std::vector<reco::Vertex> > vertices;
   evt.getByLabel(vertices_, vertices);
 

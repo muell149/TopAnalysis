@@ -6,19 +6,18 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 /// default constructor
 FullLepKinAnalyzer::FullLepKinAnalyzer(const edm::ParameterSet& cfg):
   isSignalMC_      (cfg.getParameter<bool>         ("isSignalMC"  )),
   useBtagging_     (cfg.getParameter<bool>         ("useBtagging" )),  
-  bAlgo_           (cfg.getParameter<std::string>  ("bAlgorithm"  )),  
-  bCut_            (cfg.getParameter<double>       ("bCut"        )),    
+  bAlgo_           (cfg.getParameter<std::string>  ("bAlgorithm"  )),      
   FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent")),
   hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"     )),
   jets_            (cfg.getParameter<edm::InputTag>("jets"        )),
-  weight_          (cfg.getParameter<edm::InputTag>("weight"))
-
+  puWeight_        (cfg.getParameter<edm::InputTag>("weightPU"    )),
+  lepSfWeight_     (cfg.getParameter<edm::InputTag>("weightLepSF" ))  
 {
 }
 
@@ -48,7 +47,7 @@ FullLepKinAnalyzer::beginJob()
 void
 FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   edm::Handle<TtFullLeptonicEvent> FullLepEvt;
   evt.getByLabel(FullLepEvt_, FullLepEvt);
 
@@ -95,33 +94,25 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   // if more than 1 solution is found they can be accessed via the index cmb
   // by default the first solution with the highest probability is used
   int cmb = 0;
-  // find best solution taking into account which jets are b-tagged
+  // find best solution taking into account the b-tagging discriminators
   if(useBtagging_){
   
-    std::vector<int> bidcs;
-    int idx=0;
-    // find indices of b-tagged jets
+    std::vector<double> bDiscriminators;
     for(edm::View<pat::Jet>::const_iterator jet = jets->begin();jet != jets->end(); ++jet) {
-      if(jet->bDiscriminator(bAlgo_) > bCut_) { 
-        bidcs.push_back(idx);
-      }
-      idx++;
+      bDiscriminators.push_back(jet->bDiscriminator(bAlgo_));
     }
     
-    int btagsinhypo;
-    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){
-      btagsinhypo = 0;
-      for(size_t j=0; j<bidcs.size(); ++j){
-        if(FullLepEvt->jetLeptonCombination(hypoKey,i)[0]==bidcs[j]) btagsinhypo++;
-        if(FullLepEvt->jetLeptonCombination(hypoKey,i)[1]==bidcs[j]) btagsinhypo++;		
+    int bestIdx = 0;
+    double bestDiscriminator = 0;
+    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){    
+      int jetIdx1 = FullLepEvt->jetLeptonCombination(hypoKey,i)[0];
+      int jetIdx2 = FullLepEvt->jetLeptonCombination(hypoKey,i)[1];	      
+      double discriminator = bDiscriminators[jetIdx1]*bDiscriminators[jetIdx1]+bDiscriminators[jetIdx2]*bDiscriminators[jetIdx2];
+      if(discriminator > bestDiscriminator){
+        bestIdx=i;     
       }
-      if(btagsinhypo==2){ // stop if hypothesis has two b-jets
-        cmb = i;
-	break;
-      }	else if(btagsinhypo==1){ // if one b-tag in hypothesis store index but go on and look for solution with 2 tags
-        cmb = i;     
-      }
-    }        
+    }
+    cmb = bestIdx;        
   }
 
   // -----------------------

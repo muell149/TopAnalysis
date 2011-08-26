@@ -22,13 +22,13 @@ class MetAnalyzer : public edm::EDAnalyzer {
   virtual void endJob();
 
   edm::InputTag METs_;
+  edm::InputTag puWeight_;
+  edm::InputTag lepSfWeight_;  
 
   typedef std::vector<pat::MET> PatMETCollection;
 
   TH1D* et_;
   TH1D* phi_;
-  edm::InputTag weight_;
-
 };
 
 #endif

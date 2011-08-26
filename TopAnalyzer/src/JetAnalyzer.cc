@@ -4,12 +4,13 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 JetAnalyzer::JetAnalyzer(const edm::ParameterSet& cfg):
-  jets_   ( cfg.getParameter<edm::InputTag>    ( "jets"        ) ),
-  fromTo_ ( cfg.getParameter<std::vector<int> >( "from_to"     ) ),
-  weight_ ( cfg.getParameter<edm::InputTag>("weight"))
+  jets_       ( cfg.getParameter<edm::InputTag>    ( "jets"        ) ),
+  puWeight_   (cfg.getParameter<edm::InputTag>     ( "weightPU"    ) ),
+  lepSfWeight_(cfg.getParameter<edm::InputTag>     ( "weightLepSF" ) ),  
+  fromTo_     ( cfg.getParameter<std::vector<int> >( "from_to"     ) )
 {
 }
 
@@ -20,7 +21,7 @@ JetAnalyzer::~JetAnalyzer()
 void
 JetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   edm::Handle<edm::View< pat::Jet > > jets;
   evt.getByLabel(jets_, jets);
 

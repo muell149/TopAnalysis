@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from PU_Eventweight_cfi import *
+from DileptonEventWeight_cfi import *
 
 analyzeFullLepKinematics = cms.EDAnalyzer("FullLepKinAnalyzer",
     isSignalMC   = cms.bool(False),
@@ -8,8 +8,8 @@ analyzeFullLepKinematics = cms.EDAnalyzer("FullLepKinAnalyzer",
     jets         = cms.InputTag("hardJets"),
     useBtagging  = cms.bool(True),
     bAlgorithm   = cms.string("trackCountingHighEffBJetTags"),
-    bCut         = cms.double(3.3),
-    weight       = eventWeightInputTag,
+    weightPU     = eventWeightPUTag,
+    weightLepSF  = eventWeightLepSFTag       
 )
 
 

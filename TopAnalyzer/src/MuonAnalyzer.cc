@@ -4,14 +4,15 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "TMath.h"
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 MuonAnalyzer::MuonAnalyzer(const edm::ParameterSet& cfg):
-  muons_      ( cfg.getParameter<edm::InputTag>     ( "muons"    ) ),
-  jets_       ( cfg.getParameter<edm::InputTag>     ( "jets"     ) ),
-  verbosity_  ( cfg.getParameter<bool>              ( "verbosity") ),
-  fromTo_     ( cfg.getParameter<std::vector<int> > ( "from_to"  ) ),
-  weight_     ( cfg.getParameter<edm::InputTag>("weight"))
+  muons_      ( cfg.getParameter<edm::InputTag>     ( "muons"      )),
+  jets_       ( cfg.getParameter<edm::InputTag>     ( "jets"       )),
+  puWeight_   (cfg.getParameter<edm::InputTag>      ("weightPU"    )),
+  lepSfWeight_(cfg.getParameter<edm::InputTag>      ("weightLepSF" )),  
+  verbosity_  ( cfg.getParameter<bool>              ( "verbosity"  )),
+  fromTo_     ( cfg.getParameter<std::vector<int> > ( "from_to"    ))
 {
 }
 
@@ -22,7 +23,7 @@ MuonAnalyzer::~MuonAnalyzer()
 void
 MuonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   if(verbosity_){
     std::cout << "-------------------------------------------" << std::endl;
      std::cout << "      Run: " << evt.id().run()              << std::endl;

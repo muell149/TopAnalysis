@@ -44,7 +44,11 @@ class TriggerAnalyzer : public edm::EDAnalyzer {
     /// triger result input collection	
     edm::InputTag trigResults_;
     /// muon input collection
-    edm::InputTag muons_;    
+    edm::InputTag muons_; 
+    /// pile-up weight
+    edm::InputTag puWeight_;
+    /// lep SF weight
+    edm::InputTag lepSfWeight_;       
     /// triggers to be studied given in config
     std::vector<std::string> hltPaths_;
     /// for this trigger extra histos are plotted (pt and eta)
@@ -60,8 +64,6 @@ class TriggerAnalyzer : public edm::EDAnalyzer {
     TH1D* Passed_; 
     /// shows how many evts have fired two triggers
     TH2D* Correlations_;                   
-edm::InputTag weight_;
-
 };
 
 #endif

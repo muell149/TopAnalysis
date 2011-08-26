@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from PU_Eventweight_cfi import *
+from DileptonEventWeight_cfi import *
 
 analyzeTrigger = cms.EDAnalyzer("TriggerAnalyzer",
 
@@ -25,5 +25,6 @@ analyzeTrigger = cms.EDAnalyzer("TriggerAnalyzer",
         'HLT_IsoMu30_v1',
     ),
 
-    weight = eventWeightInputTag
+    weightPU     = eventWeightPUTag,
+    weightLepSF  = eventWeightLepSFTag 
 )

@@ -1,36 +1,37 @@
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
 #include "TopAnalysis/TopAnalyzer/plugins/DiLeptonAnalyzer.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 using namespace std;
 using namespace edm;
 
-DiLeptonAnalyzer::DiLeptonAnalyzer( const edm::ParameterSet& ps ) {
+DiLeptonAnalyzer::DiLeptonAnalyzer(const edm::ParameterSet& cfg):
 
-  fileOutput_      = ps.getParameter<bool>("fileOutput");
-  outputFile_      = ps.getUntrackedParameter<string>("outputFile");
+  fileOutput_      (cfg.getParameter<bool>("fileOutput")),
+  outputFile_      (cfg.getUntrackedParameter<string>("outputFile")),
 
-  vertex_          = ps.getParameter<edm::InputTag>("vertexCollection");
-  vertex_X_cut_    = ps.getParameter<double>("vertex_X_cut");
-  vertex_Y_cut_    = ps.getParameter<double>("vertex_Y_cut");
-  vertex_Z_cut_    = ps.getParameter<double>("vertex_Z_cut");
+  vertex_          (cfg.getParameter<edm::InputTag>("vertexCollection")),
+  vertex_X_cut_    (cfg.getParameter<double>("vertex_X_cut")),
+  vertex_Y_cut_    (cfg.getParameter<double>("vertex_Y_cut")),
+  vertex_Z_cut_    (cfg.getParameter<double>("vertex_Z_cut")),
 
-  loose_muons_     = ps.getParameter<edm::InputTag>("loose_muons");
-  muons_           = ps.getParameter<edm::InputTag>("muons");
-  elecs_           = ps.getParameter<edm::InputTag>("elecs");
-  jets_            = ps.getParameter<edm::InputTag>("jets");
+  loose_muons_     (cfg.getParameter<edm::InputTag>("loose_muons")),
+  muons_           (cfg.getParameter<edm::InputTag>("muons")),
+  elecs_           (cfg.getParameter<edm::InputTag>("elecs")),
+  jets_            (cfg.getParameter<edm::InputTag>("jets")),
+  puWeight_        (cfg.getParameter<edm::InputTag>("weightPU")),
+  lepSfWeight_     (cfg.getParameter<edm::InputTag>("weightLepSF")),   
 
-  muon_iso_cut_    = ps.getParameter<double>("muon_iso_cut");
-  elec_iso_cut_    = ps.getParameter<double>("elec_iso_cut");
+  muon_iso_cut_    (cfg.getParameter<double>("muon_iso_cut")),
+  elec_iso_cut_    (cfg.getParameter<double>("elec_iso_cut")),
 
-  MassWindow_up_   = ps.getParameter<double>("MassWindow_up");
-  MassWindow_down_ = ps.getParameter<double>("MassWindow_down");
-  weight_          = ps.getParameter<edm::InputTag>("weight");
-
+  MassWindow_up_   (cfg.getParameter<double>("MassWindow_up")),
+  MassWindow_down_ (cfg.getParameter<double>("MassWindow_down"))
+{
   if( fileOutput_ ) {
     const char *fileName = outputFile_.c_str();
     outfile.open (fileName);
@@ -143,7 +144,8 @@ void DiLeptonAnalyzer::beginRun(const edm::Run& r, const edm::EventSetup& contex
 }
 
 void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& context) {
-    double weight = getPUEventWeight(evt, weight_);
+
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
 
   // ------------------------
   //  Global Event Variables

@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from PU_Eventweight_cfi import *
+from DileptonEventWeight_cfi import *
 
 analyzePrimaryVertex = cms.EDAnalyzer("VertexAnalyzer",
 
@@ -9,5 +9,6 @@ analyzePrimaryVertex = cms.EDAnalyzer("VertexAnalyzer",
     ndof = cms.uint32(4),
     rho  = cms.double(2),
     z    = cms.double(24),
-    weight = eventWeightInputTag
+    weightPU     = eventWeightPUTag,
+    weightLepSF  = eventWeightLepSFTag 
 )

@@ -88,8 +88,6 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   bool useBtagging_;
   /// b-tagging algorithm to be used
   std::string bAlgo_;
-  /// cut value for b-tagging
-  double bCut_;
   /// input given in config has to be TtFullLeptonicEvent
   edm::InputTag FullLepEvt_;
   /// keyword for hypothesis from config: ttFullLepHypKinSolution:Key or ttFullLepHypGenMatch:Key
@@ -97,8 +95,10 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   /// inputJetCollection
   edm::InputTag jets_;
   /// pile-up weight
-  edm::InputTag weight_;
-
+  edm::InputTag puWeight_;
+  /// lep SF weight
+  edm::InputTag lepSfWeight_;
+  
   /// histograms for top quark kinematics
   std::vector<TH1D*> TopKin_;
   /// histograms for W^+ kinematics

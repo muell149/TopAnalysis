@@ -27,7 +27,9 @@ class MuonAnalyzer : public edm::EDAnalyzer {
 
   edm::InputTag muons_;
   edm::InputTag jets_;
-
+  edm::InputTag puWeight_;
+  edm::InputTag lepSfWeight_;
+  
   bool verbosity_;
   std::vector<int> fromTo_;
 
@@ -53,7 +55,6 @@ class MuonAnalyzer : public edm::EDAnalyzer {
   TH1D* dB_;
   TH1D* type_;
   TH1D* phi_;
-  edm::InputTag weight_;
 };
 
 #endif

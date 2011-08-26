@@ -2,12 +2,13 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Utilities/interface/EDMException.h"
-#include <TopAnalysis/TopAnalyzer/interface/PUEventWeight.h>
-
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 MetAnalyzer::MetAnalyzer(const edm::ParameterSet& cfg):
-  METs_ ( cfg.getParameter<edm::InputTag>( "METs" ) ),
-  weight_ ( cfg.getParameter<edm::InputTag>("weight"))
+  METs_       (cfg.getParameter<edm::InputTag> ( "METs"       )),
+  puWeight_   (cfg.getParameter<edm::InputTag> ( "weightPU"   )),
+  lepSfWeight_(cfg.getParameter<edm::InputTag> ( "weightLepSF"))
 {
 }
 
@@ -18,7 +19,7 @@ MetAnalyzer::~MetAnalyzer()
 void
 MetAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
-  double weight = getPUEventWeight(evt, weight_);
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   edm::Handle<PatMETCollection> METs;
   evt.getByLabel(METs_, METs);
 

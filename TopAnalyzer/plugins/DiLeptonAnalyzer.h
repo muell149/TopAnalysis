@@ -73,7 +73,9 @@ class DiLeptonAnalyzer : public edm::EDAnalyzer {
     edm::InputTag loose_muons_;
     edm::InputTag muons_;
     edm::InputTag elecs_;
-    edm::InputTag  jets_;
+    edm::InputTag jets_;
+    edm::InputTag puWeight_;
+    edm::InputTag lepSfWeight_;
 
     double muon_iso_cut_;
     double elec_iso_cut_;
@@ -131,8 +133,6 @@ class DiLeptonAnalyzer : public edm::EDAnalyzer {
     TH1F * D_eta_elecsWC;
     TH1F * D_phi_elecsRC;
     TH1F * D_phi_elecsWC;
-    edm::InputTag weight_;
-
 };
 
 #endif

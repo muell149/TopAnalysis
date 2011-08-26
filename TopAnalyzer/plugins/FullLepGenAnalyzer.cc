@@ -1,15 +1,16 @@
-#include "TopAnalysis/TopAnalyzer/interface/PUEventWeight.h"
 #include "TopAnalysis/TopAnalyzer/plugins/FullLepGenAnalyzer.h"
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 
 
-FullLepGenAnalyzer::FullLepGenAnalyzer(const edm::ParameterSet& cfg)
+FullLepGenAnalyzer::FullLepGenAnalyzer(const edm::ParameterSet& cfg):
+  puWeight_   (cfg.getParameter<edm::InputTag>( "weightPU"   )),
+  lepSfWeight_(cfg.getParameter<edm::InputTag>( "weightLepSF"))
 {
-      weight_  = cfg.getParameter<edm::InputTag>("weight");
 }
 
 
@@ -30,9 +31,9 @@ void FullLepGenAnalyzer::beginJob()
 
 
 void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es) {
-  double weight = getPUEventWeight(evt, weight_);
 
-
+  double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
+  
   edm::Handle<reco::GenParticleCollection> genParticles;
   evt.getByLabel("genParticles", genParticles);
 
