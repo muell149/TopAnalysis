@@ -130,7 +130,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  TH1F* unbinnedTheoryMCAtNLO2 = (TH1F*)unbinnedTheoryMCAtNLO->Clone();
 	  // normalize to unsit area for diff. norm. plots
 	  if(xSecVariables_[i].Contains("Norm")){
-	    if(!xSecVariables_[i].Contains("Y")&&!xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Rebin(10);
+	    if(!xSecVariables_[i].Contains("lep")&&!xSecVariables_[i].Contains("Y")&&!xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Rebin(10);
 	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->Integral(0,unbinnedTheory->GetNbinsX()+1)));
 	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->GetBinWidth(1)));
 	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->Integral(0,unbinnedTheory2->GetNbinsX()+1)));
@@ -138,6 +138,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    if(xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Rebin(20);
 	    else if(xSecVariables_[i].Contains("ttbarPt"))unbinnedTheoryMCAtNLO->Rebin(2);
 	    else if(xSecVariables_[i].Contains("Mass"))unbinnedTheoryMCAtNLO->Rebin(4);
+	    else if(!xSecVariables_[i].Contains("lep"))unbinnedTheoryMCAtNLO->Rebin(2);
+	    else if(xSecVariables_[i].Contains("lepPt")) unbinnedTheoryMCAtNLO->Rebin(2);
 	    else unbinnedTheoryMCAtNLO->Rebin(10);
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->Integral(0,unbinnedTheoryMCAtNLO->GetNbinsX()+1)));
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->GetBinWidth(1)));
