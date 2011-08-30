@@ -104,15 +104,18 @@ process.TFileService = cms.Service("TFileService",
 )
 
 ## configure geometry & conditions
-process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+#process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(options.eventFilter=='data'):
     #process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
     #process.GlobalTag.globaltag = cms.string('GR_R_42_V14::All')
     #process.GlobalTag.globaltag = cms.string('FT_R_42_V18A::All')
-    process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
+    #process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
+    process.GlobalTag.globaltag = cms.string('GR_R_42_V20::All')
 else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('START42_V12::All')
