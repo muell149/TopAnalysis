@@ -177,6 +177,8 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   float pInW2FrameW2InDetFrame              ;
   float pbarInW2FrameW2InDetFrame           ;
 
+  float dRbb;
+
   // doubles
   double MCweight, PUweight;
   double prob, chi2, topMass, ttMass;

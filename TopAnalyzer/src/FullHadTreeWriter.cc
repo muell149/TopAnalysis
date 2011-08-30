@@ -9,6 +9,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 //#include "FWCore/Utilities/interface/EDMException.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
@@ -665,6 +666,9 @@ FullHadTreeWriter::beginJob()
   tree->Branch("pInW2FrameW2InDetFrame"             , &pInW2FrameW2InDetFrame             , "pInW2FrameW2InDetFrame/F"             );
   tree->Branch("pbarInW2FrameW2InDetFrame"          , &pbarInW2FrameW2InDetFrame          , "pbarInW2FrameW2InDetFrame/F"          );
 
+  dRbb = -100;
+  tree->Branch("dRbb", &dRbb, "dRbb/F");
+
   // jet-parton assignments
   fitAssigns = new short[6];
   for(short i = 0; i < 6; ++i){
@@ -1075,6 +1079,8 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   pInW2FrameW2InDetFrame              = -100.;
   pbarInW2FrameW2InDetFrame           = -100.;
 
+  dRbb = -100.;
+
   for(short i = 0; i < 6; ++i){
     fitAssigns[i] = -1;
   }
@@ -1158,6 +1164,9 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
     qbarInW1FrameW1InDetFrame           =  angles.qbarInW1FrameW1InDetFrame()          ;		
     pInW2FrameW2InDetFrame              =  angles.pInW2FrameW2InDetFrame()             ; 		
     pbarInW2FrameW2InDetFrame           =  angles.pbarInW2FrameW2InDetFrame()          ;                
+
+    dRbb = deltaR( fullHadEvent_h->b   ("kKinFit")->eta(), fullHadEvent_h->b   ("kKinFit")->phi(),
+		   fullHadEvent_h->bBar("kKinFit")->eta(), fullHadEvent_h->bBar("kKinFit")->phi());
 
   }
   
