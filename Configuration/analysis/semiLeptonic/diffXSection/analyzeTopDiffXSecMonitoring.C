@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
-				  , const std::string decayChannel = "electron")
+void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
+				  , const std::string decayChannel = "muon")
 {
   // set root style
 	
@@ -245,11 +245,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
     "N_{jets}/events/1/1",
-    "E(jets)/jets/1/1",
-    "p_{t}(jets)/jets/1/1",
+    "E(jets) [#frac{GeV}{c^{2}}]/jets/1/1",
+    "p_{t}(jets) [#frac{GeV}{c}]/jets/1/1",
     "#eta(jets)/jets/0/5",
     "#phi(jets)/jets/0/10",
-    "H_{T}/events/0/50",
+    "H_{T} [#frac{GeV}{c^{2}}]/events/0/50",
     "N(jet constituents)/jets/0/10",
     "jet charge/jets/0/10"         ,
     "neutral hadron fraction (jets)/jets/1/1"         ,
@@ -257,20 +257,20 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "charged hadron fraction (jets)/jets/0/1"         ,
     "charged electromagnetic fraction (jets)/jets/1/1",
     "N_{charged particles} (jets)/jets/0/2"           ,
-    "E(lead 1^{st} jet)/events/1/2",
-    "p_{t}(lead 1^{st} jet)/events/1/5",
+    "E(lead 1^{st} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "p_{t}(lead 1^{st} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5",
     "#phi(lead 1^{st} jet)/events/0/10",
-    "E(lead 2^{nd} jet)/events/1/2",
-    "p_{t}(lead 2^{nd} jet)/events/1/5",
+    "E(lead 2^{nd} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "p_{t}(lead 2^{nd} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 2^{nd} jet)/events/0/5",
     "#phi(lead 2^{nd} jet)/events/0/10",
-    "E(lead 3^{rd} jet)/events/1/2",
-    "p_{t}(lead 3^{rd} jet)/events/1/5",
+    "E(lead 3^{rd} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "p_{t}(lead 3^{rd} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 3^{rd} jet)/events/0/5",
     "#phi(lead 3^{rd} jet)/events/0/10",
-    "E(lead 4^{th} jet)/events/1/2",
-    "p_{t}(lead 4^{th} jet)/events/1/5",
+    "E(lead 4^{th} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "p_{t}(lead 4^{th} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 4^{th} jet)/events/0/5",
     "#phi(lead 4^{th} jet)/events/0/10",
     // (iii) btag monitoring
@@ -287,8 +287,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "b-discr.(soft#muIP3d)/jets/0/10",
     "N_{b-jets}(SSVHE)/events/0/1"      ,
     // (iv) MET monitoring 
-    "#slash{E}_{T}/events/0/10",
-    "#SigmaE_{T}/events/0/50"  ,
+    "#slash{E}_{T} [#frac{GeV}{c^{2}}]/events/0/10",
+    "#SigmaE_{T} [#frac{GeV}{c^{2}}]/events/0/50"  ,
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/1/1",
     "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
@@ -299,20 +299,20 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     // (III) after btagging 
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
-    "p_{t}(jets)/jets/1/2",
+    "p_{t}(jets) [#frac{GeV}{c}]/jets/1/2",
     "#eta(jets)/jets/0/5" ,
     "#phi(jets)/jets/0/10",
-    "H_{T}/events/0/100",
-    "p_{t}(lead 1^{st} jet)/events/1/5",
+    "H_{T} [#frac{GeV}{c^{2}}]/events/0/100",
+    "p_{t}(lead 1^{st} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5" ,
-    "p_{t}(lead 2^{nd} jet)/events/1/5",
+    "p_{t}(lead 2^{nd} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 2^{nd} jet)/events/0/5" ,
-    "p_{t}(lead 3^{rd} jet)/events/1/5",
+    "p_{t}(lead 3^{rd} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 3^{rd} jet)/events/0/5" ,
-    "p_{t}(lead 4^{th} jet)/events/1/5",
+    "p_{t}(lead 4^{th} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 4^{th} jet)/events/0/5" ,
-    "p_{t}(lead 1^{st} b-tagged jet)/events/1/5",
-    "p_{t}(lead 2^{nd} b-tagged jet)/events/1/5",
+    "p_{t}(lead 1^{st} b-tagged jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 2^{nd} b-tagged jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
     "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
     // (iv) MET monitoring 
@@ -328,22 +328,22 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
   };
 
   TString axisLabel1De[ ] = {
-    // (ib) electron monitoring
+    // (iv) electron monitoring
     "N_{e}/events/0/1" ,
-    "E(e)/events/0/2",
-    "E_{t}(e)/events/0/1" ,
+    "E(e) [#frac{GeV}{c^{2}}]/events/0/2",
+    "E_{t}(e) [#frac{GeV}{c^{2}}]/events/0/1" ,
     "#eta(e)/events/0/5",
     "#phi(e)/events/0/5",
     "#eta(S.C.)/events/0/1"  ,
-    "d_{xy} (e wrt. beamspot)/events/0/1",
+    "d_{xy} (e wrt. beamspot) [cm]/events/0/1",
     "simpleEleId70cIso/events/0/1", 
     "nHitsInner(conv)/events/0/1",
     "convCot/events/0/5",
     "convDist/events/0/5" ,
     "PF relIso(e)/events/0/1" ,
-    // (ib) electron monitoring
+    // (iv) electron monitoring
     "PF relIso(e)/events/0/1" ,
-    "E_{t}(e)/events/0/2",
+    "E_{t}(e) [#frac{GeV}{c^{2}}]/events/0/2",
     "#eta(e)/events/0/1",
     "#phi(e)/events/0/1"
   };
@@ -369,8 +369,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     "#phi(#mu)/events/0/5" ,
     "N_{hits}(inner tracker #mu)/events/0/1"          ,
     "#chi^{2} (global trackfit #mu)/events/1/1",
-    "d_{xy} (#mu wrt. beamspot)/events/0/1" ,
-    "d_{z} (#mu)/events/0/10"               ,
+    "d_{xy} (#mu wrt. beamspot) [cm]/events/0/1" ,
+    "d_{z} (#mu) [cm]/events/0/10"               ,
     "E_{Ecal} (#mu)/events/1/1",
     "E_{Hcal} (#mu)/events/1/1",
     "PF relIso(#mu)/events/0/1",
@@ -619,13 +619,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
     bool first=true;
     // open canvas and set titel corresponding to plotname in .root file
     plotCanvas_[canvasNumber]->cd(0);
-    plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
+    plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));	    
     // loop samples
     for(unsigned int sample=kSig; sample<=kData; ++sample){
       // a1) for 1D event yields, efficiency and cross section plots (existing)
       if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
 	// check if plot is existing
 	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
+	  histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	  if(verbose>0){
 	    std::cout << "plotting " << plotList_[plot];
 	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
@@ -676,16 +677,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1090, bool save = true, in
 	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("bottomJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
 	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,350);
-	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);
-						
+	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);			
 	    // axis style
+	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	    if(max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
 	    // draw histos (as stack)
 	    histo_[plotList_[plot]][sample]->Draw("hist");
 	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	    histo_[plotList_[plot]][42]->GetXaxis()->SetNoExponent(true);
 	  }
 	  // draw other plots into same canvas
 	  else{ 

@@ -299,14 +299,14 @@ std::string decayChannel = "muon" )
     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
     // reconstructed top quantities
-    "m^{t} [GeV]/top quarks/0/10"     ,
-    "p_{T}^{t} [GeV]/top quarks/0/1"   ,//20"
-    "#phi^{t}/top quarks/0/4"         ,
-    "y^{t}/top quarks/0/1"             ,//5"
-    "p_{T}(hadronic t) [GeV]/events/0/20",                         
+    "m^{t and #bar{t}} [#frac{GeV}{c^{2}}]/top quarks [(#frac{GeV}{c^{2}})^{-1}]/0/10"     ,
+    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}]/top quarks [(#frac{GeV}{c})^{-1}]/0/1"   ,//20"
+    "#phi^{t and #bar{t}}/top quarks/0/4"         ,
+    "y^{t and #bar{t}}/top quarks/0/1"             ,//5"
+    "p_{T}(hadronic t) [#frac{GeV}{c}]/events [(#frac{GeV}{c})^{-1}]/0/20",                         
     "#phi(hadronic t)/events/0/4",
     "y(hadronic t)/events/0/5"    ,
-    "p_{T}(leptonic t) [GeV]/events/0/20",                         
+    "p_{T}(leptonic t) [#frac{GeV}{c}]/events [(#frac{GeV}{c})^{-1}]/0/20",                         
     "#phi(leptonic t)/events/0/4",
     "y(leptonic t)/events/0/5"   ,
     //  reconstructed angular distributions
@@ -341,15 +341,15 @@ std::string decayChannel = "muon" )
     "circularity/events/0/10",
     "isotropy/events/0/10"   ,
     // generated top quantities
-    "m^{t} parton truth [GeV]/events/0/10"      ,
-    "p_{T}^{t} parton truth/events/0/1"          ,//20"
-    "p_{T}^{t} parton truth Phase Space/events/0/1",//20"
+    "m^{t and #bar{t}} parton truth [#frac{GeV}{c^{2}}]/events/0/10"      ,
+    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}] parton truth/events/0/1"          ,//20"
+    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}] parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4"           ,
-    "y^{t} parton truth/events/0/1"              ,//5"
-    "p_{T}(hadronic t) parton truth/events/0/20",                         
+    "y^{t and #bar{t}} parton truth/events/0/1"              ,//5"
+    "p_{T}(hadronic t) [#frac{GeV}{c}] parton truth/events/0/20",                         
     "#phi(hadronic t) parton truth/events/0/4"  ,
     "y(hadronic t) parton truth/events/0/5"     ,
-    "p_{T}(leptonic t) parton truth/events/0/20",                         
+    "p_{T}(leptonic t) [#frac{GeV}{c}] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4"  ,
     "y(leptonic t) parton truth/events/0/5"     ,
     // generated angular distributions
@@ -384,26 +384,26 @@ std::string decayChannel = "muon" )
     // 			     "circularity parton truth/events/0/10",
     // 			     "isotropy parton truth/events/0/10"   ,
     // reconstructed ttbar quantities	                            
-    "m^{t#bar{t}}/events/0/1"                         ,//60"
-    "p_{T}^{t#bar{t}}/events/0/1"                     ,//10"
+    "m^{t#bar{t}} [#frac{GeV}{c^{2}}] /events/0/1"                         ,//60"
+    "p_{T}^{t#bar{t}} [#frac{GeV}{c}]/events/0/1"                     ,//10"
     "y^{t#bar{t}}/events/0/1"                         ,//2
-    "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets))/events/0/20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) [#frac{GeV}{c^{2}}]/events/0/20",
     "y^{t}+y^{#bar{t}}/events/0/10"                   ,
     "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
     // generated ttbar quantities	                            
-    "m^{t#bar{t}} parton truth/events/0/1"                         ,//60"
-    "p_{T}^{t#bar{t}} parton truth/events/0/1"                     ,//10"
+    "m^{t#bar{t}} [#frac{GeV}{c^{2}}] parton truth/events/0/1"                         ,//60"
+    "p_{T}^{t#bar{t}} [#frac{GeV}{c}] parton truth/events/0/1"                     ,//10"
     "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
-    "H_{T}^{t#bar{t}}=#Sigma(p_{T}(jets)) parton truth/events/0/20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) [#frac{GeV}{c^{2}}] parton truth/events/0/20",
     "y^{t}+y^{#bar{t}} parton truth/events/0/10"                   ,
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
     // reconstructed lepton quantities
-    "p_{T}^{#mu}/events/0/1",
+    "p_{T}^{#mu} [#frac{GeV}{c}]/events [(#frac{GeV}{c})^{-1}]/0/1",
     "#eta^{#mu}/events/0/1" ,
     // generated lepton quantities
-    "p_{T}^{#mu} parton truth/events/0/1",
+    "p_{T}^{#mu} [#frac{GeV}{c}] parton truth/events/0/1",
     "#eta^{#mu} parton truth/events/0/1"
   };
   // 2D: "x-axis title"/"y-axis title"
@@ -411,15 +411,15 @@ std::string decayChannel = "muon" )
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) reconstructed Top quantities
-    "p_{T}^{t} gen/p_{T}^{t} reco"                    ,
-    "#phi^{t} gen/#phi^{t} reco"                      ,
-    "y^{t} gen/y^{t} reco"                            ,
+    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}] gen/p_{T}^{t and #bar{t}} [#frac{GeV}{c}] reco"                    ,
+    "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco"                      ,
+    "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco"                            ,
     "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) reconstructed ttbar quantities
-    "m(t#bar{t}) gen/m(t#bar{t}) reco"              ,
-    "p_{T}(t#bar{t}) gen/p_{T}(t#bar{t}) reco"      ,
+    "m(t#bar{t}) [#frac{GeV}{c^{2}}] gen/m(t#bar{t}) [#frac{GeV}{c^{2}}] reco"              ,
+    "p_{T}(t#bar{t}) [#frac{GeV}{c}] gen/p_{T}(t#bar{t}) [#frac{GeV}{c}] reco"      ,
     "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
-    "H_{T}(t#bar{t}) gen/H_{T}(t#bar{t}) reco"      ,
+    "H_{T}(t#bar{t}) [#frac{GeV}{c^{2}}] gen/H_{T}(t#bar{t}) [#frac{GeV}{c^{2}}] reco"      ,
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
@@ -564,10 +564,10 @@ std::string decayChannel = "muon" )
 	    }
 	    // change y axis label
 	    if(!axisLabel_[plot].Contains("binwidth")){
-	      axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" per binwidth");
+	      //axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" per binwidth");
 	      // check if unit is GeV
 	      if(getStringEntry(axisLabel_[plot],1).Contains("GeV")){
-		axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" [GeV^{-1}]");
+		//axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" [#frac{c}{GeV}]");
 	      }
 	    }
 	  }
@@ -584,8 +584,7 @@ std::string decayChannel = "muon" )
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
   TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta"};
-  TString xSecLabel    [] ={"p_{T}^{t}/GeV" , "y^{t}/binwidth", "p_{T}^{t#bar{t}}/GeV", "m^{t#bar{t}}/GeV", "y^{t#bar{t}}/binwidth", 
-			    "p_{T}^{l}/GeV" , "#eta^{l}/binwidth"};
+  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[#frac{GeV}{c}]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[#frac{GeV}{c}]", "m_{t#bar{t}}/[#frac{GeV}{c^{2}}]", "y^{t#bar{t}}/ ", "p_{T}^{#mu}/[#frac{GeV}{c}]" , "#eta^{#mu}/ "};
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
   // loop all variables
@@ -610,6 +609,7 @@ std::string decayChannel = "muon" )
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()].ReplaceAll("#mu", "e");
       // set binomial errors
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
@@ -641,6 +641,9 @@ std::string decayChannel = "muon" )
     TString variable=xSecVariables_[number];
     TString label =getStringEntry(xSecLabel_[number],1);
     TString label2=getStringEntry(xSecLabel_[number],2);
+    if(label2=="[#frac{GeV}{c}]") label2="GeV c^{-1}";
+    else if(label2=="[#frac{GeV}{c^{2}}]") label2="GeV c^{-2}";
+    else if(label2==" ") label2="binwidth";
     TString xSec ="xSec/"+variable;
     bool calculateXSec=true;
     // loop samples 
@@ -677,7 +680,8 @@ std::string decayChannel = "muon" )
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       recoAxisLabel.ReplaceAll("KinFit ","");
-      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()].ReplaceAll("#mu", "e");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false );
@@ -689,6 +693,10 @@ std::string decayChannel = "muon" )
       if(variable=="topY"){ 
 	histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
 	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
+      }
+      if(variable=="lepEta"){ 
+	histo_[xSec][kData]->GetXaxis()->SetRange(2, histo_[xSec][kData]->GetNbinsX()-2);
+	histo_[xSec][kSig ]->GetXaxis()->SetRange(2, histo_[xSec][kSig ]->GetNbinsX()-2);
       }
       ++NXSec;
     }
@@ -794,6 +802,9 @@ std::string decayChannel = "muon" )
     TString variable=xSecVariables_[number];
     TString label =getStringEntry(xSecLabel_[number],1);
     TString label2=getStringEntry(xSecLabel_[number],2);
+    if(label2=="[#frac{GeV}{c}]") label2="#frac{c}{GeV}";
+    else if(label2=="[#frac{GeV}{c^{2}}]") label2="#frac{c^{2}}{GeV}";
+    else if(label2==" ") label2="#frac{1}{binwidth}";
     TString xSec ="xSecNorm/"+variable;
     bool calculateXSec=true;
     // loop samples 
@@ -935,7 +946,8 @@ std::string decayChannel = "muon" )
     unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ #frac{1}{"+label2+"} ] (t#bar{t}#rightarrow"+(TString)decayChannel+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ "+label2+" ] (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    if(decayChannel=="electron") axisLabel_[axisLabel_.size()].ReplaceAll("#mu", "e");
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);
     histogramStyle(*histo_[xSec][kSig ], kSig , false);
@@ -947,6 +959,10 @@ std::string decayChannel = "muon" )
     if(variable=="topY"){ 
       histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
       histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
+    }
+    if(variable=="lepEta"){ 
+      histo_[xSec][kData]->GetXaxis()->SetRange(2, histo_[xSec][kData]->GetNbinsX()-2);
+      histo_[xSec][kSig ]->GetXaxis()->SetRange(2, histo_[xSec][kSig ]->GetNbinsX()-2);
     }
     ++NXSec;
   }
@@ -1098,11 +1114,12 @@ std::string decayChannel = "muon" )
 	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
+	    if(getStringEntry(plotList_[plot], 2)=="lepEta") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
 	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
 						     getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
 	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
 	    }
-	    if(getStringEntry(plotList_[plot], 2)=="lepPt" ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,200);
+	    if(getStringEntry(plotList_[plot], 2)=="lepPt" ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
 	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
 	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 	    // draw efficiency plots as line
