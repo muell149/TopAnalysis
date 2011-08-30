@@ -370,7 +370,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  plotName.ReplaceAll("Norm","");
 		  pointXValue = correctedCenters_[plotName].at(bin-1);
 		  pointXError = corrCenterErrors_[plotName].at(bin-1);
+		  pointXError=0;
 		}
+		combinedErrors->SetPoint(0, 0, -1000);
 		combinedErrors->SetPoint(bin, pointXValue, histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin));
 		combinedErrors->SetPointError(bin, pointXError, pointXError, combinedErrorDownBinVar, combinedErrorUpBinVar);
 		// define style for relative error plots
@@ -620,6 +622,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		    double pointXError = corrCenterErrors_[plotName].at(bin-1);
 		    double pointYError = dataStat->GetBinError(bin);
 		    statErrors->SetPoint(bin, pointXValue, dataStat->GetBinContent(bin));
+		    statErrors->SetPoint(0, 0, -1000);
+		    pointXError=0;
 		    statErrors->SetPointError(bin, pointXError, pointXError, pointYError, pointYError);
 		  }
 		}
