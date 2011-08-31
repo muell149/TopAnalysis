@@ -170,6 +170,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    calculateError_[xSecVariables_[i]][sys]=true;
 	    // exclude "old" PU error
 	    if(sys==sysPileUp) calculateError_[xSecVariables_[i]][sys]=false;
+	    // exclude flat SF error
+	    if(sys==sysflatTrigSF) calculateError_[xSecVariables_[i]][sys]=false;
 	  }
 	  if(!plot&&verbose>1){ 
 	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
