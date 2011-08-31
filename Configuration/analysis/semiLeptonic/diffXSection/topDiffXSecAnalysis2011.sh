@@ -15,6 +15,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2010/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2010/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/monitoring
+## mkdir -p diffXSecFromSignal/plots/muon/2011/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertainties
@@ -25,6 +26,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/shapeReweighting
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/monitoring
+## mkdir -p diffXSecFromSignal/plots/electron/2011/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertainties
@@ -53,7 +55,9 @@ decayChannel=\"electron\"
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
@@ -216,7 +220,8 @@ if [ $fast = false ]
 fi
 if [ $decayChannel != \"combined\" ]
     then
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'true')'   # with ratio plots
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'false')'  # without ratio plots
 fi
 
 #####################################
