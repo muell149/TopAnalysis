@@ -344,6 +344,13 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  std::cout << " +/- " << statErrorBinVar << " ( =";
 		  std::cout << 100*statErrorBinVar/stdBinXSecValue << "% )" << std::endl;
 		}
+		if(verbose>0){
+		  std::cout << "total uncertainty: " << std::endl;
+		  std::cout << " +" <<  combinedErrorUpBinVar   << " ( =";
+		  std::cout << 100*combinedErrorUpBinVar/stdBinXSecValue   << "% )" << std::endl;
+		  std::cout << " -" <<  combinedErrorDownBinVar << " ( =";
+		  std::cout << 100*combinedErrorDownBinVar/stdBinXSecValue << "% )" << std::endl;
+		}
 		// save relative uncertainties for bin & variable in map relativeUncertainties_
 		// a) statistic uncertainty
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+1, 100*statErrorBinVar/stdBinXSecValue);
