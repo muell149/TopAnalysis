@@ -93,7 +93,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  if(max>1&&max<100) plotTheo->GetYaxis()->SetNoExponent(true);
 	  else plotTheo->GetYaxis()->SetNoExponent(false);
 	  TString yTitle=plotTheo->GetYaxis()->GetTitle();
-	  TString xTitle=plotTheo->GetXaxis()->GetTitle()
+	  TString xTitle=plotTheo->GetXaxis()->GetTitle();
 	  if(verbose>1)std::cout << "original title: " << yTitle  << std::endl;
 	  yTitle.ReplaceAll("#mu","l");
 	  xTitle.ReplaceAll("#mu","l");
