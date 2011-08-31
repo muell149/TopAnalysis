@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
 void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
-			   //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
-std::string decayChannel = "muon" )
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+			     //  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
+			     std::string decayChannel = "electron" )
 {
   // c) set root style
   // set root style
@@ -526,7 +526,6 @@ std::string decayChannel = "muon" )
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
     }
   }
-
   // ---
   //    rebinning 1D histograms
   // ---
@@ -540,7 +539,7 @@ std::string decayChannel = "muon" )
       // check if plot exists and is 1D
       if((plot<N1Dplots)&&(plotExists(histo_, plotName, sample))){
 	// equidistant binning
-	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
+	  double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
 	if(reBinFactor>1&&binning_.count(plotName)==0){
 	  equalReBinTH1(reBinFactor, histo_, plotName, sample);
 	}
@@ -575,7 +574,7 @@ std::string decayChannel = "muon" )
       }
     }
   }
-
+  
   // ---
   //    MC efficiency determination
   // ---
@@ -593,7 +592,7 @@ std::string decayChannel = "muon" )
     TString efficiency="efficiency/"+variable;
     // check if gen and reco plots are available
     if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kSig)){
-      //    std::cout << "found gen and reco" << std::endl;
+      // std::cout << "found gen and reco" << std::endl;
       // get reco plot
       histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
       // divide by gen plot
@@ -609,7 +608,7 @@ std::string decayChannel = "muon" )
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-      if(decayChannel=="electron") axisLabel_[axisLabel_.size()].ReplaceAll("#mu", "e");
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
       // set binomial errors
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
@@ -631,6 +630,7 @@ std::string decayChannel = "muon" )
       ++NMCeff;
     }
   }
+
   // ---
   //    differential cross section (extrapolated or PS) determination
   // ---
@@ -681,7 +681,7 @@ std::string decayChannel = "muon" )
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       recoAxisLabel.ReplaceAll("KinFit ","");
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-      if(decayChannel=="electron") axisLabel_[axisLabel_.size()].ReplaceAll("#mu", "e");
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false );
@@ -947,7 +947,7 @@ std::string decayChannel = "muon" )
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
     axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ "+label2+" ] (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-    if(decayChannel=="electron") axisLabel_[axisLabel_.size()].ReplaceAll("#mu", "e");
+    if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);
     histogramStyle(*histo_[xSec][kSig ], kSig , false);
