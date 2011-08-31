@@ -3,7 +3,7 @@
 void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
-				  , const std::string decayChannel = "muon")
+				  , const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
   // set root style
 	
@@ -48,7 +48,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample+"/";
-  outputFolder+="monitoring/";
+  outputFolder += (withRatioPlot ? "monitoring/" : "monitoring/withoutRatioPlots/") ;
   // save all plots within a root file named:
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
@@ -245,11 +245,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
     "N_{jets}/events/1/1",
-    "E(jets) [#frac{GeV}{c^{2}}]/jets/1/1",
+    "E(jets) [GeV]/jets/1/1",
     "p_{t}(jets) [#frac{GeV}{c}]/jets/1/1",
     "#eta(jets)/jets/0/5",
     "#phi(jets)/jets/0/10",
-    "H_{T} [#frac{GeV}{c^{2}}]/events/0/50",
+    "H_{T} [#frac{GeV}{c}]/events/0/50",
     "N(jet constituents)/jets/0/10",
     "jet charge/jets/0/10"         ,
     "neutral hadron fraction (jets)/jets/1/1"         ,
@@ -257,19 +257,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "charged hadron fraction (jets)/jets/0/1"         ,
     "charged electromagnetic fraction (jets)/jets/1/1",
     "N_{charged particles} (jets)/jets/0/2"           ,
-    "E(lead 1^{st} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "E(lead 1^{st} jet) [GeV]/events/1/2",
     "p_{t}(lead 1^{st} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5",
     "#phi(lead 1^{st} jet)/events/0/10",
-    "E(lead 2^{nd} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "E(lead 2^{nd} jet) [GeV]/events/1/2",
     "p_{t}(lead 2^{nd} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 2^{nd} jet)/events/0/5",
     "#phi(lead 2^{nd} jet)/events/0/10",
-    "E(lead 3^{rd} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "E(lead 3^{rd} jet) [GeV]/events/1/2",
     "p_{t}(lead 3^{rd} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 3^{rd} jet)/events/0/5",
     "#phi(lead 3^{rd} jet)/events/0/10",
-    "E(lead 4^{th} jet) [#frac{GeV}{c^{2}}]/events/1/2",
+    "E(lead 4^{th} jet) [GeV]/events/1/2",
     "p_{t}(lead 4^{th} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 4^{th} jet)/events/0/5",
     "#phi(lead 4^{th} jet)/events/0/10",
@@ -287,8 +287,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "b-discr.(soft#muIP3d)/jets/0/10",
     "N_{b-jets}(SSVHE)/events/0/1"      ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} [#frac{GeV}{c^{2}}]/events/0/10",
-    "#SigmaE_{T} [#frac{GeV}{c^{2}}]/events/0/50"  ,
+    "#slash{E}_{T} [#frac{GeV}{c}]/events/0/10",
+    "#SigmaE_{T} [GeV]/events/0/50"  ,
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/1/1",
     "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
@@ -302,7 +302,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "p_{t}(jets) [#frac{GeV}{c}]/jets/1/2",
     "#eta(jets)/jets/0/5" ,
     "#phi(jets)/jets/0/10",
-    "H_{T} [#frac{GeV}{c^{2}}]/events/0/100",
+    "H_{T} [#frac{GeV}{c}]/events/0/100",
     "p_{t}(lead 1^{st} jet) [#frac{GeV}{c}]/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5" ,
     "p_{t}(lead 2^{nd} jet) [#frac{GeV}{c}]/events/1/5",
@@ -316,8 +316,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
     "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
     // (iv) MET monitoring 
-    "#slash{E}_{T}/events/0/20",
-    "#SigmaE_{T}/events/0/30",
+    "#slash{E}_{T} [#frac{GeV}{c}]/events/0/20",
+    "#SigmaE_{T} [GeV]/events/0/30",
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/1/1",
     "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
@@ -330,8 +330,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   TString axisLabel1De[ ] = {
     // (iv) electron monitoring
     "N_{e}/events/0/1" ,
-    "E(e) [#frac{GeV}{c^{2}}]/events/0/2",
-    "E_{t}(e) [#frac{GeV}{c^{2}}]/events/0/1" ,
+    "E(e) [GeV]/events/0/2",
+    "E_{t}(e) [GeV]/events/0/1" ,
     "#eta(e)/events/0/5",
     "#phi(e)/events/0/5",
     "#eta(S.C.)/events/0/1"  ,
@@ -343,7 +343,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "PF relIso(e)/events/0/1" ,
     // (iv) electron monitoring
     "PF relIso(e)/events/0/1" ,
-    "E_{t}(e) [#frac{GeV}{c^{2}}]/events/0/2",
+    "E_{t}(e) [GeV]/events/0/2",
     "#eta(e)/events/0/1",
     "#phi(e)/events/0/1"
   };
@@ -426,7 +426,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // save all histos from plotList_ that exist in files_ into 
   // histo_ and histo2_ and count total # of plots as Nplots
   if(verbose>0) std::cout << std::endl;
-  getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel );
+  std::vector<TString> vecRedundantPartOfNameInData;
+  vecRedundantPartOfNameInData.push_back("_reweighted3BX");
+  vecRedundantPartOfNameInData.push_back("_reweighted");
+  getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
 	
   // ---
   //    lumiweighting for choosen luminosity
@@ -521,7 +524,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
       std::cout << "expected event composition:"   << std::endl; 
       std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
       std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
-      std::cout << "W+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl;
+      std::cout << "W+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl; 
       std::cout << "Z+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
       std::cout << "QCD:  "      << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
       std::cout << "single top:" << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
@@ -559,8 +562,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   leg0->SetBorderSize(0);
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg0->SetHeader("after selection, before b-tagging");
-  leg1->SetHeader("after selection & b-tagging");
+  leg0->SetHeader("After Selection, Before b-Tagging");
+  leg1->SetHeader("After Selection & b-Tagging");
   // fill in contributing sample
   // loop samples
   for(unsigned int sample=kSig; sample<=kData; ++sample){
@@ -705,7 +708,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	      TString label = "pre-Tagged";
 	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
 	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
-	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 jet";
+	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 			1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 32       );
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
@@ -715,7 +718,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	      // set first parameter to false once "CMS Preliminary" is not required anymore
 	      DrawCMSLabels(true,luminosity); 
 	      //draw data/MC ratio
-	      if((histo_[plotList_[plot]].count(kSig)>0)){
+	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot){
 		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, myStyle, verbose);	       
 	      }
 	    }
