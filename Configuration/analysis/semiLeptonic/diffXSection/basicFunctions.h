@@ -357,19 +357,19 @@ namespace semileptonic {
     if(sample==kSig && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt)";
     if(sample==kSig && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt)";
     if(sample==kBkg    ) MCprocess="t#bar{t} other";
-    if(sample==kSTop   ) MCprocess="single top";
-    if(sample==kSToptW ) MCprocess="single top tW";
-    if(sample==kSTops  ) MCprocess="single top s";
-    if(sample==kSTopt  ) MCprocess="single top t";
-    if(sample==kWjets  ) MCprocess="W+jets";
-    if(sample==kZjets  ) MCprocess="Z+jets";
-    if(sample==kDiBos  ) MCprocess="DiBoson";
+    if(sample==kSTop   ) MCprocess="Single Top";
+    if(sample==kSToptW ) MCprocess="Single Top tW";
+    if(sample==kSTops  ) MCprocess="Single Top s";
+    if(sample==kSTopt  ) MCprocess="Single Top t";
+    if(sample==kWjets  ) MCprocess="W+Jets";
+    if(sample==kZjets  ) MCprocess="Z+Jets";
+    if(sample==kDiBos  ) MCprocess="Diboson";
     if(sample==kWW     ) MCprocess="WW";
     if(sample==kWZ     ) MCprocess="WZ";
     if(sample==kZZ     ) MCprocess="ZZ";
     if(sample==kQCD    ) MCprocess="QCD";
-    if(sample==kData&&!TwoThousandEleven) MCprocess="2010 data";
-    if(sample==kData&& TwoThousandEleven) MCprocess="2011 data";
+    if(sample==kData&&!TwoThousandEleven) MCprocess="Data 2010";
+    if(sample==kData&& TwoThousandEleven) MCprocess="Data 2011";
     // return result
     return MCprocess;
   }

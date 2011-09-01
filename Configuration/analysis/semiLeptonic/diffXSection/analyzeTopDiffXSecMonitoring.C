@@ -246,10 +246,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "N_{jets}/events/1/1",
     "N_{jets}/events/1/1",
     "E(jets) [GeV]/jets/1/1",
-    "p_{t}(jets) [#frac{GeV}{c}]/jets/1/1",
+    "p_{t}(jets) #left[#frac{GeV}{c}#right]/jets/1/1",
     "#eta(jets)/jets/0/5",
     "#phi(jets)/jets/0/10",
-    "H_{T} [#frac{GeV}{c}]/events/0/50",
+    "H_{T} #left[#frac{GeV}{c}#right]/events/0/50",
     "N(jet constituents)/jets/0/10",
     "jet charge/jets/0/10"         ,
     "neutral hadron fraction (jets)/jets/1/1"         ,
@@ -258,19 +258,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "charged electromagnetic fraction (jets)/jets/1/1",
     "N_{charged particles} (jets)/jets/0/2"           ,
     "E(lead 1^{st} jet) [GeV]/events/1/2",
-    "p_{t}(lead 1^{st} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5",
     "#phi(lead 1^{st} jet)/events/0/10",
     "E(lead 2^{nd} jet) [GeV]/events/1/2",
-    "p_{t}(lead 2^{nd} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 2^{nd} jet)/events/0/5",
     "#phi(lead 2^{nd} jet)/events/0/10",
     "E(lead 3^{rd} jet) [GeV]/events/1/2",
-    "p_{t}(lead 3^{rd} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 3^{rd} jet)/events/0/5",
     "#phi(lead 3^{rd} jet)/events/0/10",
     "E(lead 4^{th} jet) [GeV]/events/1/2",
-    "p_{t}(lead 4^{th} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 4^{th} jet)/events/0/5",
     "#phi(lead 4^{th} jet)/events/0/10",
     // (iii) btag monitoring
@@ -287,7 +287,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "b-discr.(soft#muIP3d)/jets/0/10",
     "N_{b-jets}(SSVHE)/events/0/1"      ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} [#frac{GeV}{c}]/events/0/10",
+    "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/10",
     "#SigmaE_{T} [GeV]/events/0/50"  ,
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/1/1",
@@ -299,24 +299,24 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     // (III) after btagging 
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
-    "p_{t}(jets) [#frac{GeV}{c}]/jets/1/2",
+    "p_{t}(jets) #left[#frac{GeV}{c}#right]/jets/1/2",
     "#eta(jets)/jets/0/5" ,
     "#phi(jets)/jets/0/10",
     "H_{T} [#frac{GeV}{c}]/events/0/100",
-    "p_{t}(lead 1^{st} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 1^{st} jet)/events/0/5" ,
-    "p_{t}(lead 2^{nd} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 2^{nd} jet)/events/0/5" ,
-    "p_{t}(lead 3^{rd} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 3^{rd} jet)/events/0/5" ,
-    "p_{t}(lead 4^{th} jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 4^{th} jet)/events/0/5" ,
-    "p_{t}(lead 1^{st} b-tagged jet) [#frac{GeV}{c}]/events/1/5",
-    "p_{t}(lead 2^{nd} b-tagged jet) [#frac{GeV}{c}]/events/1/5",
+    "p_{t}(lead 1^{st} b-tagged jet) #left[#frac{GeV}{c}#right]/events/1/5",
+    "p_{t}(lead 2^{nd} b-tagged jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
     "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} [#frac{GeV}{c}]/events/0/20",
+    "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/20",
     "#SigmaE_{T} [GeV]/events/0/30",
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/1/1",
@@ -554,35 +554,41 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // ---
   //    create legends
   // ---
-  unsigned int Nlegends=0;  
+  unsigned int Nlegends=0; 
+  TLegend *leg  = new TLegend(); 
   TLegend *leg0 = new TLegend(0.05, 0.15, 1.05, 0.9);
   TLegend *leg1 = new TLegend(0.05, 0.15, 1.05, 0.9);
-  Nlegends+=2;
+  Nlegends+=3;
+  leg ->SetFillStyle(0);
+  leg ->SetBorderSize(0);
+  leg ->SetTextSize(0.03);
+  leg ->SetTextAlign(12);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
+  leg0->SetHeader("After Selection, Before b-Tagging");
   leg1->SetFillStyle(0);
   leg1->SetBorderSize(0);
-  leg0->SetHeader("After Selection, Before b-Tagging");
   leg1->SetHeader("After Selection & b-Tagging");
   // fill in contributing sample
-  // loop samples
-  for(unsigned int sample=kSig; sample<=kData; ++sample){
-    // check if sampe exists in at least one plot
+  // data is to be first entry
+  bool TwoThousandElevenData=false;
+  TString lumilabel = Form("%3.2f fb^{-1}",luminosity/1000);
+  if(luminosity>36.0) TwoThousandElevenData=true;
+  else lumilabel=Form("%2.0f pb^{-1}",luminosity);    
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData),"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData)+", "+lumilabel,"PL");
+  leg1->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData)+", "+lumilabel,"PL");
+  // now loop over MC samples
+  for(unsigned int sample=kSig; sample<kData; ++sample){
+    // check if sample exists in at least one plot
     bool exit=false;
     // loop plots
-    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
       // if found: add entry to legend
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)&&(!exit)){
-	bool TwoThousandElevenData=false;
-	if(luminosity>36.0) TwoThousandElevenData=true;
-	if(sample==kData){
-	  leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
-	  leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
-	}
-	else{
-	  leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	  leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	}
+	leg ->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
 	exit=true;
       }
     }
@@ -704,13 +710,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	    // redraw axis 
 	    histo_[plotList_[plot]][42]->Draw("axis same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
-	      // draw label indicating event selection
+	      // draw label indicating event selection, common labels and legend
 	      TString label = "pre-Tagged";
 	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
 	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
-			1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 32       );
+		 	       1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12    );
+	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.29);
+	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05);
+	      leg->Draw("SAME");
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
 	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");

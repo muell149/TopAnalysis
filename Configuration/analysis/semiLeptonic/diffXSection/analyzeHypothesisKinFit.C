@@ -299,14 +299,14 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
     // reconstructed top quantities
-    "m^{t and #bar{t}} [#frac{GeV}{c^{2}}]/top quarks [(#frac{GeV}{c^{2}})^{-1}]/0/10"     ,
-    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}]/top quarks [(#frac{GeV}{c})^{-1}]/0/1"   ,//20"
+    "m^{t and #bar{t}} #left[#frac{GeV}{c^{2}}#right]/top quarks #left[(#frac{GeV}{c^{2}})^{-1}#right]/0/10",
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/top quarks #left[(#frac{GeV}{c})^{-1}#right]/0/1", //20"
     "#phi^{t and #bar{t}}/top quarks/0/4"         ,
     "y^{t and #bar{t}}/top quarks/0/1"             ,//5"
-    "p_{T}(hadronic t) [#frac{GeV}{c}]/events [(#frac{GeV}{c})^{-1}]/0/20",                         
+    "p_{T}(hadronic t) #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/20",                         
     "#phi(hadronic t)/events/0/4",
     "y(hadronic t)/events/0/5"    ,
-    "p_{T}(leptonic t) [#frac{GeV}{c}]/events [(#frac{GeV}{c})^{-1}]/0/20",                         
+    "p_{T}(leptonic t) #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/20",                         
     "#phi(leptonic t)/events/0/4",
     "y(leptonic t)/events/0/5"   ,
     //  reconstructed angular distributions
@@ -341,15 +341,15 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "circularity/events/0/10",
     "isotropy/events/0/10"   ,
     // generated top quantities
-    "m^{t and #bar{t}} parton truth [#frac{GeV}{c^{2}}]/events/0/10"      ,
-    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}] parton truth/events/0/1"          ,//20"
-    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}] parton truth Phase Space/events/0/1",//20"
+    "m^{t and #bar{t}} parton truth #left[#frac{GeV}{c^{2}}#right]/events/0/10"      ,
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1"          ,//20"
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4"           ,
     "y^{t and #bar{t}} parton truth/events/0/1"              ,//5"
-    "p_{T}(hadronic t) [#frac{GeV}{c}] parton truth/events/0/20",                         
+    "p_{T}(hadronic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
     "#phi(hadronic t) parton truth/events/0/4"  ,
     "y(hadronic t) parton truth/events/0/5"     ,
-    "p_{T}(leptonic t) [#frac{GeV}{c}] parton truth/events/0/20",                         
+    "p_{T}(leptonic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4"  ,
     "y(leptonic t) parton truth/events/0/5"     ,
     // generated angular distributions
@@ -384,26 +384,26 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     // 			     "circularity parton truth/events/0/10",
     // 			     "isotropy parton truth/events/0/10"   ,
     // reconstructed ttbar quantities	                            
-    "m^{t#bar{t}} [#frac{GeV}{c^{2}}] /events/0/1"                         ,//60"
-    "p_{T}^{t#bar{t}} [#frac{GeV}{c}]/events/0/1"                     ,//10"
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/0/1"                         ,//60"
+    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/events/0/1"                     ,//10"
     "y^{t#bar{t}}/events/0/1"                         ,//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) [#frac{GeV}{c^{2}}]/events/0/20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c^{2}}#right]/events/0/20",
     "y^{t}+y^{#bar{t}}/events/0/10"                   ,
     "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
     // generated ttbar quantities	                            
-    "m^{t#bar{t}} [#frac{GeV}{c^{2}}] parton truth/events/0/1"                         ,//60"
-    "p_{T}^{t#bar{t}} [#frac{GeV}{c}] parton truth/events/0/1"                     ,//10"
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/0/1"                         ,//60"
+    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1"                     ,//10"
     "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) [#frac{GeV}{c^{2}}] parton truth/events/0/20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c^{2}}#right] parton truth/events/0/20",
     "y^{t}+y^{#bar{t}} parton truth/events/0/10"                   ,
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
     // reconstructed lepton quantities
-    "p_{T}^{#mu} [#frac{GeV}{c}]/events [(#frac{GeV}{c})^{-1}]/0/1",
+    "p_{T}^{#mu} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
     "#eta^{#mu}/events/0/1" ,
     // generated lepton quantities
-    "p_{T}^{#mu} [#frac{GeV}{c}] parton truth/events/0/1",
+    "p_{T}^{#mu} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
     "#eta^{#mu} parton truth/events/0/1"
   };
   // 2D: "x-axis title"/"y-axis title"
@@ -411,15 +411,15 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) reconstructed Top quantities
-    "p_{T}^{t and #bar{t}} [#frac{GeV}{c}] gen/p_{T}^{t and #bar{t}} [#frac{GeV}{c}] reco"                    ,
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] gen/p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] reco"                    ,
     "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco"                      ,
     "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco"                            ,
     "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) reconstructed ttbar quantities
-    "m(t#bar{t}) [#frac{GeV}{c^{2}}] gen/m(t#bar{t}) [#frac{GeV}{c^{2}}] reco"              ,
-    "p_{T}(t#bar{t}) [#frac{GeV}{c}] gen/p_{T}(t#bar{t}) [#frac{GeV}{c}] reco"      ,
+    "m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco"              ,
+    "p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco"      ,
     "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
-    "H_{T}(t#bar{t}) [#frac{GeV}{c^{2}}] gen/H_{T}(t#bar{t}) [#frac{GeV}{c^{2}}] reco"      ,
+    "H_{T}(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco"      ,
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
@@ -641,9 +641,9 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     TString variable=xSecVariables_[number];
     TString label =getStringEntry(xSecLabel_[number],1);
     TString label2=getStringEntry(xSecLabel_[number],2);
-    if(label2=="[#frac{GeV}{c}]") label2="GeV c^{-1}";
-    else if(label2=="[#frac{GeV}{c^{2}}]") label2="GeV c^{-2}";
-    else if(label2==" ") label2="binwidth";
+    if(label2=="[#frac{GeV}{c}]")          label2="#left[pb #left(#frac{GeV}{c}#right)^{-1}#right]";
+    else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[pb #left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+    else if(label2==" ") label2="[pb]";
     TString xSec ="xSec/"+variable;
     bool calculateXSec=true;
     // loop samples 
@@ -680,7 +680,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       recoAxisLabel.ReplaceAll("KinFit ","");
-      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} [ #frac{pb}{"+label2+"} ] (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
@@ -802,9 +802,9 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     TString variable=xSecVariables_[number];
     TString label =getStringEntry(xSecLabel_[number],1);
     TString label2=getStringEntry(xSecLabel_[number],2);
-    if(label2=="[#frac{GeV}{c}]") label2="#frac{c}{GeV}";
-    else if(label2=="[#frac{GeV}{c^{2}}]") label2="#frac{c^{2}}{GeV}";
-    else if(label2==" ") label2="#frac{1}{binwidth}";
+    if(label2=="[#frac{GeV}{c}]") label2="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
+    else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+    else if(label2==" ") label2="";
     TString xSec ="xSecNorm/"+variable;
     bool calculateXSec=true;
     // loop samples 
@@ -946,7 +946,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} [ "+label2+" ] (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
     if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);
