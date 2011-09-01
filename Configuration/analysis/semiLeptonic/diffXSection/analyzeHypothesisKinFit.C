@@ -387,16 +387,16 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/0/1"                         ,//60"
     "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/events/0/1"                     ,//10"
     "y^{t#bar{t}}/events/0/1"                         ,//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c^{2}}#right]/events/0/20",
-    "y^{t}+y^{#bar{t}}/events/0/10"                   ,
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right]/events/0/20",
+    "y^{t and #bar{t}}/events/0/10"                   ,
     "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
     // generated ttbar quantities	                            
     "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/0/1"                         ,//60"
     "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1"                     ,//10"
     "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c^{2}}#right] parton truth/events/0/20",
-    "y^{t}+y^{#bar{t}} parton truth/events/0/10"                   ,
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right] parton truth/events/0/20",
+    "y^{t and #bar{t}} parton truth/events/0/10"                   ,
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
     // reconstructed lepton quantities
@@ -419,7 +419,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco"              ,
     "p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco"      ,
     "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
-    "H_{T}(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco"      ,
+    "H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco"      ,
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
@@ -981,24 +981,34 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   //    create one legend for all 1D histos
   // ---
   unsigned int Nlegends=0;  
+  TLegend *leg  = new TLegend();  
   TLegend *leg0 = new TLegend(0.05, 0.15, 1.05, 0.9);
-  ++Nlegends;
+  Nlegends+=2;
+  leg ->SetFillStyle(0);
+  leg ->SetBorderSize(0);
+  leg ->SetTextSize(0.03);
+  leg ->SetTextAlign(12);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
   leg0->SetHeader("Kin. Fit (after selection)");
   // fill in contributing sample
-  // loop samples
-  for(unsigned int sample=kSig; sample<=kData; ++sample){
+  // data is to be first entry
+  bool TwoThousandElevenData=false;
+  TString lumilabel = Form("%3.2f fb^{-1}",luminosity/1000);
+  if(luminosity>50.0) TwoThousandElevenData=true;
+  else lumilabel=Form("%2.0f pb^{-1}",luminosity);    
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData),"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData)+", "+lumilabel,"P");
+  // now loop over MC samples
+  for(unsigned int sample=kSig; sample<kData; ++sample){
     // check if sampe exists in at least one plot
     bool exit=false;
     // loop plots
-    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
       // if found: add entry to legend
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)&&(!exit)){
-	bool TwoThousandElevenData=false;
-	if(luminosity>50.0) TwoThousandElevenData=true;
-	if(sample==kData) leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel,TwoThousandElevenData)+", "+lumi+" pb^{-1}", "PL");
-	else leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg ->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
 	exit=true;
       }
     }
@@ -1142,9 +1152,17 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    }
 	  }
 	  first=false;
+	  // draw legend for recoYield plots
+	  TString title=plotCanvas_[canvasNumber]->GetTitle();
+	  if(title.Contains("analyzeTopRecoKinematicsKinFit")){
+	    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.24);
+	    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+	    leg->Draw("SAME");
+	  }
 	  // redraw axis at the end
-	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)) histo_[plotList_[plot]][42]->Draw("axis same");
-	  // draw CMS label for xSecs
+	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)) histo_[plotList_[plot]][42]->Draw("axis same");	 
 	  TString plotType=getStringEntry(plotList_[plot], 1);
 	  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
 	    if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
@@ -1152,7 +1170,8 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    DrawCMSLabels(true,luminosity);
 	  }
 	}
-      }
+      }	     
+      
       // a3) for 2D plots
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
 	// new Canvas for every plot
@@ -1175,7 +1194,8 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	TString corr = (TString)correlation;
 	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
       }
-    }
+    }    
+
     // for 1D hists and efficiency hists: next canvas
     if(((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots))&&(histo_.count(plotList_[plot])>0)) ++canvasNumber;
   }
