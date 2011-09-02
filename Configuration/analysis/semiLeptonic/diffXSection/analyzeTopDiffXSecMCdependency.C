@@ -1,11 +1,15 @@
 #include "basicFunctions.h"
 #include "TTree.h"
 #include "algorithm"
+#include <TF1.h>
+#include <TMath.h>
 
 TH1F* distort(const TH1& hist, TString variation, TString variable, double distortParameter, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b, double distortParameter);
 
-void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true, int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun")
+void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root")
 {
   // ---
   //     Configuration
@@ -73,7 +77,7 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
   std::vector<TString> variation_;
   variation_.push_back("Up");
   variation_.push_back("Down");
-
+  
   // ---
   //     Loading
   // ---
@@ -277,7 +281,7 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
 
   // B2 distort distributions
   double distortParameter=2;
-  if(verbose>0) std::cout << "performing a linear distortion" /*<<" with parameter " << distortParameter*/ << std::endl;
+  if(verbose>0) std::cout << "performing a fit and change parameter for Y and otherwise a linear distortion" /*<<" with parameter " << distortParameter*/ << std::endl;
   // loop all variables
   for(unsigned int i=0; i<variable_.size();++i){
     // loop all variations 
@@ -343,7 +347,7 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
   }
     
   // ---
-  //    part C: create control plots for weighted (phase space) parton level distributions
+  //    part C: Draw control plots for weighted (phase space) parton level distributions
   // ---
   if(verbose>0) std::cout << std::endl << "part C: create control plots" << std::endl;
   std::vector<TCanvas*> plotCanvas_;
@@ -374,11 +378,11 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
     histogramStyle(*plotsScaled_[variable_[i]+"PartonTruth"+"Down"], 2, false);
     histogramStyle(*plots_      [variable_[i]+"PartonTruth"       ], 0, false);
     plots_      [variable_[i]+"PartonTruth"       ]->SetLineColor(kBlack);
-    plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->GetXaxis()->SetNoExponent(true);
-    plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->GetXaxis()->SetTitle(variable_[i]);
-    plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->GetYaxis()->SetTitle("events");
-    plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Draw("");
-    plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Draw("same");
+    plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetXaxis()->SetNoExponent(true);
+    plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetXaxis()->SetTitle(variable_[i]);
+    plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetYaxis()->SetTitle("events");
+    plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Draw("");
+    plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Draw("same");
     plots_      [variable_[i]+"PartonTruth"       ]->Draw("same");
     legPS->Draw("same");
     ++canvasNumber;
@@ -447,7 +451,62 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
   }
 
   // ---
-  //    part E: draw all reweighted reco level plots
+  //    part E: get BG subtracted data shape plots
+  // ---
+  // define data reference plot list
+  std::vector<TString> plotList_;
+  std::vector<TString> axisLabel_;
+  for(unsigned int plot=0; plot<variable_.size(); ++plot){
+    plotList_.push_back( folder+"/"+variable_[plot] );
+    TString rebinFactor="1";
+    if(variable_[plot]=="ttbarMass") rebinFactor="20";
+    if(variable_[plot]=="ttbarPt"  ) rebinFactor="6";
+    if(variable_[plot]=="topPt"    ) rebinFactor="10";
+    axisLabel_.push_back(variable_[plot]+" from data/events/0/"+rebinFactor);
+    std::cout << variable_[plot]+" from data/events/0/"+rebinFactor << std::endl;
+    //    plotList_.push_back( genfolder+"/"+variable_[i] );
+  }
+  unsigned int N1Dplots = plotList_.size();
+
+  // open standard analysis files
+  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName, 0, dataFile, decayChannel);
+  // define container for data plots
+  std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
+  // total # plots 
+  int Nplots=0;
+  std::vector<TString> vecRedundantPartOfNameInData;
+  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
+  // apply lumiweighting
+  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, 0, decayChannel);
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    // apply rebinning
+    TString plotName=plotList_[plot];
+    double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
+    equalReBinTH1(reBinFactor, histo_, plotName, kBkg  );
+    equalReBinTH1(reBinFactor, histo_, plotName, kSTop );
+    equalReBinTH1(reBinFactor, histo_, plotName, kWjets);
+    equalReBinTH1(reBinFactor, histo_, plotName, kZjets);
+    equalReBinTH1(reBinFactor, histo_, plotName, kDiBos);
+    equalReBinTH1(reBinFactor, histo_, plotName, kQCD  );
+    equalReBinTH1(reBinFactor, histo_, plotName, kData );
+    // subtract non ttbar prompt lepton BG from data
+    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kBkg  ],-1);
+    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kSTop ],-1);
+    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kWjets],-1);
+    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kZjets],-1);
+    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kDiBos],-1);
+    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kQCD  ],-1);
+    // normalize data to ttbar MC reco yield
+    double areaMC = plots_[variable_[plot]]->Integral(0,plots_[variable_[plot]]->GetNbinsX()+1);
+    double areaData = histo_[plotList_[plot]][kData]->Integral(0,histo_[plotList_[plot]][kData]->GetNbinsX()+1);
+    histo_[plotList_[plot]][kData]->Scale(areaMC/areaData);
+    // adapt style
+    histogramStyle( *histo_[plotList_[plot]][kData], kData, true);
+  }
+  
+  // ---
+  //    part F: draw all reweighted reco level plots
   // ---
   TLegend* legReco= new TLegend(0.65, 0.696, 1.15, 0.86);
   legReco->SetFillStyle(0);
@@ -456,6 +515,7 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
   legReco->AddEntry(finalPlots_[variable_[0]][variable_[0]+"Up"  ], "up"     , "L");
   legReco->AddEntry(plots_      [variable_[0]]                    , "central", "L");
   legReco->AddEntry(finalPlots_[variable_[0]][variable_[0]+"Down"], "down"   , "L");
+  legReco->AddEntry(histo_[plotList_[0]][kData]                   , "data"   ,"PL");
   if(verbose>0) std::cout << std::endl << "part E: collect all final plots" << std::endl;
   // i: loop all variables (for SF)
   for(unsigned int i=0; i<variable_.size();++i){
@@ -479,14 +539,28 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
 	histogramStyle(*finalPlots_[variable_[j]][variable_[i]+"Up"  ], 0, false);
 	histogramStyle(*finalPlots_[variable_[j]][variable_[i]+"Down"], 2, false);
 	histogramStyle(*plots_[variable_[j]], 0, false);
-	plots_[variable_[j]]->SetLineColor(kBlack);
-	// draw
-	finalPlots_[variable_[j]][variable_[i]+"Down"]->GetXaxis()->SetNoExponent(true);
-	finalPlots_[variable_[j]][variable_[i]+"Down"]->GetXaxis()->SetTitle(variable_[j]);
-	finalPlots_[variable_[j]][variable_[i]+"Down"]->GetYaxis()->SetTitle("events");
-	finalPlots_[variable_[j]][variable_[i]+"Down"]->DrawClone("");
-	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->DrawClone("same");
-	plots_[variable_[j]]->DrawClone("same");
+	plots_[variable_[j]]->SetLineColor(kGreen);
+	finalPlots_[variable_[j]][variable_[i]+"Up"]->GetXaxis()->SetNoExponent(true);
+	finalPlots_[variable_[j]][variable_[i]+"Up"]->GetXaxis()->SetTitle(variable_[j]);
+	finalPlots_[variable_[j]][variable_[i]+"Up"]->GetYaxis()->SetTitle("events");
+	// clone histos
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]=(TH1F*)finalPlots_[variable_[j]][variable_[i]+"Up"  ]->Clone();
+	finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]=(TH1F*)finalPlots_[variable_[j]][variable_[i]+"Down"]->Clone();
+	plots_[variable_[j]+"Rebinned"]=(TH1F*)plots_[variable_[j]]->Clone();
+	// rebin MC histos (only for this plot, NOT for the rootfile) 
+	double reBinFactor = atof(((string)getStringEntry(axisLabel_[i],4)).c_str());
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->Rebin(reBinFactor);
+	finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->Rebin(reBinFactor);
+	plots_[variable_[j]+"Rebinned"]->Rebin(reBinFactor);
+	// take care of maximum
+	if(finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->GetMaximum()>finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->GetMaximum()){
+	  finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->SetMaximum(finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->GetMaximum());
+	}
+	// draw histos
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->DrawClone("");
+	finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->DrawClone("same");
+	plots_[variable_[j]+"Rebinned"]->DrawClone("same");
+	if(i==j&&PS=="RecoLevel") histo_[plotList_[i]][kData]->DrawClone("p e1 same");
 	// change name
 	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetName (variable_[j]);
 	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetTitle(variable_[j]);
@@ -501,7 +575,7 @@ void analyzeTopDiffXSecMCdependency(TString decayChannel="muon", bool save=true,
   }
 
   // ---
-  //    part F: save weighted plots and control plots
+  //    part G: save weighted plots and control plots
   // ---
   bool saveIntoRootfile=true;
   if(save){
@@ -544,56 +618,204 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
   // are scaled more/less
   if(verbose>1) std::cout << variable << " (" << variation << ")" << std::endl;
   TH1F* result=(TH1F*)(hist.Clone());
-  // parameter of linear smearing
-  double a=0;
-  if     (variation=="Up"  ) a=1;
-  else if(variation=="Down") a=-1;
-  else{
-    std::cout << "ERROR in function distort: chose variation " << variation << " not known" << std::endl;
-    exit(0);
-  }   
-  double b=hist.GetBinLowEdge(hist.GetNbinsX()+1);
-  // take different distribution shapes into account
-  double distortParameter2=0;
-  if     (variable=="topPt"    )distortParameter2=distortParameter*1.2;
-  else if(variable=="ttbarPt"  )distortParameter2=distortParameter;
-  else if(variable=="ttbarMass")distortParameter2=distortParameter*1.5;
-  else if(variable=="topY"  )distortParameter2=1.0;
-  else if(variable=="ttbarY")distortParameter2=1.0;
-  else{
-    std::cout << "ERROR in function distort: chose variable " << variable << " not known" << std::endl;
-    exit(0);
-  }
-  // SF control variables
-  double SFmin=10000;
-  double SFmax=0;
-  // find maximum
-  double xmax= 0.;//hist.GetBinCenter(hist.GetMaximumBin());
-  // loop bins
-  for(int bin=1; bin<result->GetNbinsX(); ++bin){ 
-    // get SF 
-    double x= hist.GetBinCenter(bin);
-    double SF=linSF(x, xmax, a, b, distortParameter2);
-    // avoid SF=0 at maximum
-    if(x==xmax){
-      double xMaxNext    = hist.GetBinCenter(hist.GetMaximumBin()+1);
-      double xMaxPrevious= hist.GetBinCenter(hist.GetMaximumBin()-1);
-      // take SF slightly above/below average Sf 
-      // of surrounding bins for variation=="up"/"down"
-      SF= 0.5*(linSF(x, xMaxNext, a, b, distortParameter2)+linSF(x, xMaxPrevious, a, b, distortParameter2));
-    }
-    // search max/min SF
+  TH1F* histo =(TH1F*)(hist.Clone());
+
+  if(variable.Contains("Y")){
+    // create empty original histogram to have binning at hand
+    result->Scale(0.);
+    // print out info
     if(verbose>1){
-      if(SF>SFmax) SFmax=SF;
-      if(SF<SFmin) SFmin=SF;
+      std::cout << "" << std::endl;
+      std::cout << "fitting [0]*TMath::Cos(x*[1])+[2]*TMath::Gaus(x, 0, [3]) to " << variable << std::endl;
+      std::cout << "---------------------------------------" << std::endl;
     }
-    // scale bin content
-    result->SetBinContent(bin,SF*hist.GetBinContent(bin));
+    double xmin=0;
+    double xmax=0;
+    if(variable.Contains("top")){
+      xmin=-2.5;
+      xmax=2.5;
+    }
+    else if(variable.Contains("ttbar")){
+      xmin=-2.0;
+      xmax=2.0;
+    }
+    else{
+      std::cout << "ERROR: unknown quantity " << variable << std::endl;
+      exit(0);
+    }
+    TF1* myFunc = new TF1("myFunc","[0]*TMath::Cos(x*[1])+[2]*TMath::Gaus(x, 0, [3])", xmin, xmax);
+    if(variable.Contains("top")){
+      myFunc->SetParameter(0, 4.34485e+03); 
+      myFunc->SetParameter(1, 1.33482e+00); 
+      myFunc->SetParameter(2, 4.35032e+03); 
+      myFunc->SetParameter(3, 9.59915e+01);
+      myFunc->SetParLimits(0, 2000, 10000);
+      myFunc->SetParLimits(1, 1   , 1.6  );
+      myFunc->SetParLimits(2, 3000, 10000);
+      myFunc->SetParLimits(3, 0.5 , 1000 ); 
+    }
+    else if(variable.Contains("ttbar")){
+      myFunc->SetParameter(0, 2.02216e+03); 
+      myFunc->SetParameter(1, 1.76526e+00); 
+      myFunc->SetParameter(2, 3.28315e+03); 
+      myFunc->SetParameter(3, 1.92234e+00); 
+      myFunc->SetParLimits(0, 0   , 10000);
+      myFunc->SetParLimits(1, 0.5 , 2.0  );
+      myFunc->SetParLimits(2, 0   , 10000);
+      myFunc->SetParLimits(3, 1   , 1000 );
+    }
+    // do fit for hist in range [xmin,xmax]
+    histo->Fit(myFunc,"Q","same",xmin, xmax);
+    // vary shape 
+    double scaleFactor=0;
+    if(variation=="Up") scaleFactor=0.9;
+    else if(variation=="Down") scaleFactor=2;
+    else{ 
+      std::cout << "ERROR: unknown systematic variation" << variation << std::endl;
+      exit(0);
+    }
+    if(variation=="Down"){
+      // vary frequency of cosinus function
+      myFunc->SetParameter(1, myFunc->GetParameter(1)/(0.6*scaleFactor));
+      // vary normalization of gaussian
+      myFunc->SetParameter(2, scaleFactor*scaleFactor*scaleFactor*scaleFactor*myFunc->GetParameter(2));
+      // vary broughtness of gaussian parameter
+      myFunc->SetParameter(3, scaleFactor*scaleFactor*scaleFactor*myFunc->GetParameter(3));
+    }
+    // vary broughtness of gaussian parameter
+    else{
+      if(variable.Contains("ttbar")) myFunc->SetParameter(3,0.8*myFunc->GetParameter(3));
+      else myFunc->SetParameter(3, scaleFactor*0.7*myFunc->GetParameter(3));
+    }
+
+    // separate gaussian and cosinus part
+    TF1* mygaus = new TF1("mygaus","[0]*TMath::Gaus(x, 0, [1])",xmin, xmax);
+    TF1* mycos  = new TF1("mycos" ,"[0]*TMath::Cos(x*[1])",xmin, xmax);
+    mygaus->SetParameter(0, myFunc->GetParameter(2));
+    mygaus->SetParameter(1, myFunc->GetParameter(3));
+    //    mygaus->SetRange(scaleFactor*xmin, scaleFactor*xmax);
+    mycos ->SetParameter(0, myFunc->GetParameter(0));
+    mycos ->SetParameter(1, myFunc->GetParameter(1));
+    // apply chosen binning to obtained histogram
+    result->Add(mycos);
+    result->Add(mygaus);
+    // correct for offset <0
+    TF1* myOffset  = new TF1("myOffset","[0]",scaleFactor*xmin, scaleFactor*xmax);
+    // for more narrow distribution: draw only part for y above 0
+    if(myFunc->GetMinimum()<0){
+      double min=std::abs(result->GetXaxis()->GetBinCenter(result->FindFirstBinAbove(0,1)));
+      if(verbose>1){
+	std::cout << "min ,0 (findbin, lowedge, min)" << std::endl;
+	std::cout << result->FindFirstBinAbove(0,1) << std::endl;
+	std::cout << result->GetXaxis()->GetBinCenter(result->FindFirstBinAbove(0,1)) << std::endl;
+	std::cout << min << std::endl;
+      }
+      mygaus->SetRange(-1.*min,min);
+      mycos->SetRange(-1.*min,min);
+      result->Scale(0.);
+      result->Add(mycos);
+      result->Add(mygaus);
+    }
+    // for more brought distribution: remove offset, draw only up to minimum
+    else if(myFunc->GetMinimum()!=0){
+      double offset=myFunc->GetMinimum();
+      double min=std::abs(myFunc->GetX(offset));
+      myOffset->SetParameter(0, -1*offset);
+      myOffset->SetRange(-1.*min,min);
+      if(verbose>1){
+	std::cout << "min ,0 (offset, xvalue)" << std::endl;
+	std::cout << offset << std::endl;
+	std::cout << min << std::endl;
+      }
+      mygaus->SetRange(-1.*min,min);
+      mycos ->SetRange(-1.*min,min);
+      result->Scale(0.);
+      result->Add(mycos);
+      result->Add(mygaus);
+      result->Add(myOffset);
+    }
+    // edit color of fit and extrapolate to whole region of x
+    
+    //  std::cout << "a = " << myPol->GetParameter(1) << " +/- " << myPol->GetParError(1) << std::endl;
+    //std::cout << "b = " << myPol->GetParameter(0) << " +/- " << myPol->GetParError(0) << std::endl;
+    //std::cout << "chi2/ndof = " << myPol->GetChisquare() / myPol->GetNDF() << std::endl;
+    //std::cout << "probability = " << TMath::Prob(myPol->GetChisquare(),myPol->GetNDF()) << std::endl;
+
+    
+    // top Y: [0]*TMath::Cos(x*[1])+[2]*TMath::Gaus(x, 0, [3])
+    // range: -2.5 - 2,5
+    //   parameter,   value,        uncertainty    boundary
+    //1  p0           4.34485e+03   1.81315e+01    2000 - 10000
+    //2  p1           1.33482e+00   1.53763e-03    1    - 1.6
+    //3  p2           4.35032e+03   1.24700e+01    3000 - 10000
+    //4  p3           9.59915e+01   2.29207e+02    0.5  - 1000
+
+
+    // ttbar Y: [0]*TMath::Cos(x*[1])+[2]*TMath::Gaus(x, 0, [3])
+    // range: -2.0 - 2.0
+    //   parameter,   value,        uncertainty    boundary
+    //1  p0           2.02216e+03   2.79619e+02    0-10000
+    //2  p1           1.76526e+00   6.07716e-02    0.5-2
+    //3  p2           3.28315e+03   2.92333e+02    0-10000
+    //4  p3           1.92234e+00   4.89337e-01    1-1000
   }
-  // print max/min SF
-  if(verbose>1){
-    std::cout << "minimum SF: "<< SFmin << std::endl;
-    std::cout << "maximum SF: "<< SFmax << std::endl;
+  else{
+    // parameter of linear smearing
+    double a=0;
+    if     (variation=="Up"  ) a=1;
+    else if(variation=="Down") a=-1;
+    else{
+      std::cout << "ERROR in function distort: chose variation " << variation << " not known" << std::endl;
+      exit(0);
+    }   
+    double b=hist.GetBinLowEdge(hist.GetNbinsX()+1);
+    // take different distribution shapes into account
+    double distortParameter2=0;
+    if(variable=="topPt"){
+      distortParameter2=distortParameter*1.2;
+      if(variation=="Down") distortParameter2*=1.4;
+    }
+    else if(variable=="ttbarPt"  )distortParameter2=distortParameter*0.7;
+    else if(variable=="ttbarMass"){
+      distortParameter2=distortParameter*1.1;
+    }
+    //else if(variable=="topY"  )distortParameter2=1.0;
+    //else if(variable=="ttbarY")distortParameter2=1.0;
+    else{
+      std::cout << "ERROR in function distort: chose variable " << variable << " not known" << std::endl;
+      exit(0);
+    }
+    // SF control variables
+    double SFmin=10000;
+    double SFmax=0;
+    // find maximum
+    double xmax= 0.;//hist.GetBinCenter(hist.GetMaximumBin());
+    // loop bins
+    for(int bin=1; bin<result->GetNbinsX(); ++bin){ 
+      // get SF 
+      double x= hist.GetBinCenter(bin);
+      double SF=linSF(x, xmax, a, b, distortParameter2);
+      // avoid SF=0 at maximum
+      if(x==xmax){
+	double xMaxNext    = hist.GetBinCenter(hist.GetMaximumBin()+1);
+	double xMaxPrevious= hist.GetBinCenter(hist.GetMaximumBin()-1);
+	// take SF slightly above/below average Sf 
+	// of surrounding bins for variation=="up"/"down"
+	SF= 0.5*(linSF(x, xMaxNext, a, b, distortParameter2)+linSF(x, xMaxPrevious, a, b, distortParameter2));
+      }
+      // search max/min SF
+      if(verbose>1){
+	if(SF>SFmax) SFmax=SF;
+	if(SF<SFmin) SFmin=SF;
+      }
+      // scale bin content
+      result->SetBinContent(bin,SF*hist.GetBinContent(bin));
+    }
+    // print max/min SF
+    if(verbose>1){
+      std::cout << "minimum SF: "<< SFmin << std::endl;
+      std::cout << "maximum SF: "<< SFmax << std::endl;
+    }
   }
   // return distorted plot
   return result;
