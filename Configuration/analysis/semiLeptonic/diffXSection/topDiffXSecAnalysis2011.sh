@@ -266,7 +266,7 @@ if [ $shapeVar = true ]
 	if [ $dataLuminosity2 -ge 3601 ]
 	    then
 	    echo "will be done"
-	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$decayChannel', '$save', '$verbose', '$inputFolderName')'
+	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample')'
 	else
 	    echo "only done for 2011 analysis in e/mu channel separate"
 	fi
