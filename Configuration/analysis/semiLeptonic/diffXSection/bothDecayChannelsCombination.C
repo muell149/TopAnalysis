@@ -99,6 +99,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  xTitle.ReplaceAll("#mu","l");
 	  if(verbose>1)std::cout << "new title: " << yTitle  << std::endl;
 	  plotTheo->GetYaxis()->SetTitle(yTitle);
+	  plotTheo->GetXaxis()->SetTitle(xTitle);
 	  // create Canvas
 	  TCanvas* combicanvas = new TCanvas("combicanvas", "combicanvas", 600, 600);
 	  //canvasStyle(*combicanvas);
