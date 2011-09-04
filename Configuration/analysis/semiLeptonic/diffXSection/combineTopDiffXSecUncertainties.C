@@ -406,6 +406,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		combinedErrors->SetLineColor(histo_[xSecVariables_[i]][sysNo]->GetLineColor());
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
 		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]], verbose);
+		// remove ugly first point in m(ttbar)
+		if(xSecVariables_[i].Contains("ttbarMass")){
+		  totalErrors_[xSecVariables_[i]]->SetPoint(1, 0, -1000);
+		}
 	      }
 	    }
 	    delete relSysPlot;
