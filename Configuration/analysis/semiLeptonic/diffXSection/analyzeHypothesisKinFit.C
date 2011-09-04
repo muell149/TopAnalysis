@@ -384,7 +384,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     // 			     "circularity parton truth/events/0/10",
     // 			     "isotropy parton truth/events/0/10"   ,
     // reconstructed ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/0/1"                         ,//60"
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/1/1"                         ,//60"
     "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/events/0/1"                     ,//10"
     "y^{t#bar{t}}/events/0/1"                         ,//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right]/events/0/20",
@@ -392,7 +392,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
     "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
     // generated ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/0/1"                         ,//60"
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/1/1"                         ,//60"
     "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1"                     ,//10"
     "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right] parton truth/events/0/20",
@@ -1113,6 +1113,14 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	      min=1;
 	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
 	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
+	      if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
+		min=0.0001;
+		max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+		if(plotList_[plot].Contains("Norm")){
+		  min=0.00001;
+		  max=0.6;
+		}
+	      }
 	    }
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
