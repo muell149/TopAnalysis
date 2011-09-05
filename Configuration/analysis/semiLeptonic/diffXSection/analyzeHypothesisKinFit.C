@@ -1118,7 +1118,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 		max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
 		if(plotList_[plot].Contains("Norm")){
 		  min=0.00001;
-		  max=0.6;
+		  max=0.06;
 		}
 	      }
 	    }
