@@ -7,7 +7,7 @@
 TH1F* distort(const TH1& hist, TString variation, TString variable, double distortParameter, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b, double distortParameter);
 
-void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root")
 {
@@ -46,7 +46,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   TString savePlotsTo="./diffXSecFromSignal/plots/"+decayChannel+"/2011/shapeReweighting";
   // define variables
   std::vector<TString> variable_;
-  TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY"};
+  TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY"};//, "lepPt", "lepEta"};
   variable_.insert( variable_.begin(), variable, variable + sizeof(variable)/sizeof(TString) );
   // container for values read from tree
   std::map< TString, float > value_;
@@ -164,7 +164,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       tree->SetBranchAddress(variable_[i]+"LepPartonTruth",(&value_[variable_[i]+"LepPartonTruth"]));
       tree->SetBranchAddress(variable_[i]+"HadPartonTruth",(&value_[variable_[i]+"HadPartonTruth"]));
     }
-    // same for ttbar quantities
+    // same for ttbar / lepton quantities
     else{
       tree->SetBranchStatus(variable_[i],1);
       tree->SetBranchStatus(variable_[i]+"PartonTruth",1);
@@ -196,7 +196,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	  if(uninitialized_.size()==0||it!=uninitialized_.end()) uninitialized_.push_back(variable_[i]+"Had");
 	}
       }
-      // check ttbar quantities
+      // check ttbar / lepton quantities
       else{ 
 	if(value_[variable_[i]]==-9999){
 	  // check if already an invalid branch entry was found
@@ -288,9 +288,9 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
       // loop all bins
-      for(int bin=0; bin<=plotsScaled_[variable_[i]+"PartonTruth"+Var]->GetNbinsX()+1; ++bin){
+      //for(int bin=0; bin<=plotsScaled_[variable_[i]+"PartonTruth"+Var]->GetNbinsX()+1; ++bin){
 	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distort(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], distortParameter, verbose-1);
-      }
+	//}
     }
   }
   
@@ -418,11 +418,17 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	  }
 	  // for other quantities: use one SF only (from variable i)
 	  else{
-	    LepShapeWeight=SF_[variable_[i]+Var]->GetBinContent(SF_[variable_[i]+Var]->FindBin(value_[variable_[i]]));
+	    LepShapeWeight=SF_[variable_[i]+Var]->GetBinContent(SF_[variable_[i]+Var]->FindBin(value_[variable_[i]+"PartonTruth"]));
 	    HadShapeWeight=LepShapeWeight;
 	  }
 	  if(verbose>3) std::cout << "had weight: " << HadShapeWeight << std::endl;
 	  if(verbose>3) std::cout << "lep weight: " << LepShapeWeight << std::endl;
+	  if(verbose>1&&i==j&&variable_[i].Contains("Mass")&&HadShapeWeight==0.){
+	    std::cout << "variable: " << variable_[i] << std::endl;
+	    std::cout << "weight: " << HadShapeWeight << std::endl;
+	    std::cout << "gen value " << value_[variable_[i]+"PartonTruth"] << std::endl;
+	    std::cout << "rec value " << value_[variable_[i]] << std::endl;
+	  }
 	  // filling for top quantities: fill leptonic and hadronic top quantities in same plot
 	  if(variable_[j].Contains("top")){
 	    // parton truth plots
@@ -619,8 +625,60 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
   if(verbose>1) std::cout << variable << " (" << variation << ")" << std::endl;
   TH1F* result=(TH1F*)(hist.Clone());
   TH1F* histo =(TH1F*)(hist.Clone());
-
-  if(variable.Contains("Y")){
+  if(variable.Contains("Mass")){
+    double xmin=200;
+    double xmax=1200;
+    TF1* myFunc = new TF1("myFunc", "landau", xmin, xmax);
+    myFunc->SetParameter(0, 2890); 
+    myFunc->SetParameter(1, 420); 
+    myFunc->SetParameter(2, 34); 
+    myFunc->SetParLimits(0, 1000, 3500);
+    myFunc->SetParLimits(1, 300 , 500 );
+    myFunc->SetParLimits(2, 10, 80);
+    if(verbose>1){
+      std::cout << "" << std::endl;
+      std::cout << "fitting landau to " << variable << std::endl;
+      std::cout << "---------------------------------------" << std::endl;
+    }
+    //histo->Fit(myFunc,"","same",xmin, xmax);
+    histo->Fit(myFunc,"Q","same");
+    // vary shape 
+    TF1* myVarFunc=(TF1*)(myFunc->Clone("myVarFunc"));
+    if(variation=="Down"){
+      myVarFunc->SetParameter(0, 0.95*myFunc->GetParameter(0)); 
+      myVarFunc->SetParameter(1, 1.05*myFunc->GetParameter(1)); 
+      myVarFunc->SetParameter(2, 1.2*myFunc->GetParameter(2));
+    }
+    else if(variation=="Up"){
+      myVarFunc->SetParameter(0, 1.05*myFunc->GetParameter(0)); 
+      myVarFunc->SetParameter(1, 0.95*myFunc->GetParameter(1)); 
+      myVarFunc->SetParameter(2, 0.8*myFunc->GetParameter(2));
+    }
+    // derive SF
+    TH1F* fit = (TH1F*)result->Clone();
+    fit->Scale(0.);
+    fit->Add(myFunc);
+    TH1F* fitVar = (TH1F*)result->Clone();
+    fitVar->Scale(0.);
+    fitVar->Add(myVarFunc);
+    TH1F* SFVar=(TH1F*)fitVar->Clone();
+    SFVar->Divide(fit);
+    // apply SF to original plot
+    result->Multiply(SFVar);
+    // additional scaling for the tail
+    for(int bin=1; bin<=result->GetNbinsX(); ++bin){
+      if(result->GetBinCenter(bin)>=420){
+	double scalefactor=myVarFunc->GetParameter(1)/myFunc->GetParameter(1);
+	std::cout << variable << "(" << variation << "): " << scalefactor << std::endl;
+	result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
+	if(result->GetBinCenter(bin)>=450) result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
+	if(result->GetBinCenter(bin)>=650) result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
+	if(result->GetBinCenter(bin)>=700) result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
+      }
+    }
+    return result;
+  }
+  else if(variable.Contains("Y")){
     // create empty original histogram to have binning at hand
     result->Scale(0.);
     // print out info
@@ -687,7 +745,6 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
       if(variable.Contains("ttbar")) myFunc->SetParameter(3,0.8*myFunc->GetParameter(3));
       else myFunc->SetParameter(3, scaleFactor*0.7*myFunc->GetParameter(3));
     }
-
     // separate gaussian and cosinus part
     TF1* mygaus = new TF1("mygaus","[0]*TMath::Gaus(x, 0, [1])",xmin, xmax);
     TF1* mycos  = new TF1("mycos" ,"[0]*TMath::Cos(x*[1])",xmin, xmax);
@@ -775,14 +832,14 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
       distortParameter2=distortParameter*1.2;
       if(variation=="Down") distortParameter2*=1.4;
     }
-    else if(variable=="ttbarPt"  )distortParameter2=distortParameter*0.7;
-    else if(variable=="ttbarMass"){
-      distortParameter2=distortParameter*1.1;
-    }
+    else if(variable=="ttbarPt"  ) distortParameter2=distortParameter*0.7;
+    //else if(variable=="ttbarMass") distortParameter2=distortParameter*1.1;
     //else if(variable=="topY"  )distortParameter2=1.0;
     //else if(variable=="ttbarY")distortParameter2=1.0;
+    //  else if(variable=="lepEta"  )distortParameter2=1.0;
+    //  else if(variable=="lepPt"   )distortParameter2=1.0;
     else{
-      std::cout << "ERROR in function distort: chose variable " << variable << " not known" << std::endl;
+     std::cout << "ERROR in function distort: chose variable " << variable << " not known" << std::endl;
       exit(0);
     }
     // SF control variables
@@ -818,6 +875,7 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
     }
   }
   // return distorted plot
+  if(verbose>1) std::cout << "return result" << std::endl;
   return result;
 }
 
