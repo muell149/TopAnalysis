@@ -369,7 +369,7 @@ namespace semileptonic {
     if(sample==kZZ     ) MCprocess="ZZ";
     if(sample==kQCD    ) MCprocess="QCD";
     if(sample==kData&&!TwoThousandEleven) MCprocess="Data 2010";
-    if(sample==kData&& TwoThousandEleven) MCprocess="Data 2011";
+    if(sample==kData&& TwoThousandEleven) MCprocess="Data";
     // return result
     return MCprocess;
   }
@@ -555,7 +555,7 @@ namespace semileptonic {
       if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
       // Fall10 systematic samples:
       if(!newSummer11MC&&!newSpring11MC){
-	if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
+	  if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
 	if(kSys==sysVBosonScaleDown) Nevents=4842219;
 	if(kSys==sysVBosonMatchUp  ) Nevents=10370368;
 	if(kSys==sysVBosonMatchDown) Nevents=2706986;
@@ -630,7 +630,7 @@ namespace semileptonic {
       if(kSys==sysPileUp)Nevents=484060;
     }
     else if(sample==kSToptW&&!newSummer11MC){
-      crossSection=10.6;
+	crossSection=15.7;  // has been 10.6, adapted from https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
       Nevents     =494961.;
       if(newSpring11MC) Nevents =489417;
       // systematic samples:
