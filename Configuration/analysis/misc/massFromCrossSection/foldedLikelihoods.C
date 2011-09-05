@@ -105,8 +105,8 @@ TGraphAsymmErrors* readMoc()
     double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
     double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
 
-    err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2));
-    err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2));
+    err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
+    err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
 
     i++;
   }  
@@ -145,7 +145,7 @@ void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, TString 
   relUncUp->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
   relUncUp->GetYaxis()->CenterTitle();
-  relUncUp->GetYaxis()->SetRangeUser(.0, .15);
+  relUncUp->GetYaxis()->SetRangeUser(.08, .115);
   relUncUp  ->SetLineStyle(2);
   relUncDown->SetLineStyle(3);
   relUncUp->Draw("AL");
@@ -311,7 +311,7 @@ int foldedLikelihoods()
   RooRealVar moc_p3("moc_p3", "moc_p3", moc->GetFunction("f1")->GetParameter(3));  
   RooFormulaVar mocXSec("mocXSec", "mocXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
 			RooArgSet(mPole, moc_p0, moc_p1, moc_p2, moc_p3));
-  RooFormulaVar mocXSecErr("mocXSecErr", "mocXSecErr", "@0*0.055", RooArgSet(mocXSec));
+  RooFormulaVar mocXSecErr("mocXSecErr", "mocXSecErr", "@0*0.096", RooArgSet(mocXSec));
   RooGaussian mocXSecPDF("mocXSecPDF", "mocXSecPDF", xsec, mocXSec, mocXSecErr);
 
   RooRealVar ahr_p0("ahr_p0", "ahr_p0", ahr->GetFunction("f1")->GetParameter(0));
@@ -320,7 +320,7 @@ int foldedLikelihoods()
   RooRealVar ahr_p3("ahr_p3", "ahr_p3", ahr->GetFunction("f1")->GetParameter(3));  
   RooFormulaVar ahrXSec("ahrXSec", "ahrXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
 			RooArgSet(mPole, ahr_p0, ahr_p1, ahr_p2, ahr_p3));
-  RooFormulaVar ahrXSecErr("ahrXSecErr", "ahrXSecErr", "@0*0.11", RooArgSet(ahrXSec));
+  RooFormulaVar ahrXSecErr("ahrXSecErr", "ahrXSecErr", "@0*0.107", RooArgSet(ahrXSec));
   RooGaussian ahrXSecPDF("ahrXSecPDF", "ahrXSecPDF", xsec, ahrXSec, ahrXSecErr);
 
   const int colorKid = kRed+1;
@@ -341,7 +341,7 @@ int foldedLikelihoods()
   RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocXSecPDF));
   RooProdPdf ahrProdPDF("ahrProdPDF", "ahrProdPDF", RooArgList(measXSecPDF, ahrXSecPDF));
 
-  frame = mPole.frame(RooFit::Range(145., 185.));
+  frame = mPole.frame(RooFit::Range(150., 190.));
 
   RooAbsPdf* kidProjectedPDF = kidProdPDF.createProjection(xsec);
   RooAbsPdf* mocProjectedPDF = mocProdPDF.createProjection(xsec);
@@ -368,6 +368,7 @@ int foldedLikelihoods()
   plotProjectedPDF(ahrProjectedPDF, frame, colorAhr, ahrMax, ahrLowErr, ahrHigErr);
 
   frame->GetYaxis()->SetTitle("Probability density");
+  frame->GetYaxis()->SetRangeUser(0., 0.034);
   frame->Draw();
 
   kidTF->SetLineColor(kBlack);
@@ -382,7 +383,7 @@ int foldedLikelihoods()
   ahrTF->SetFillColor(colorAhr);
   ahrTF->SetFillStyle(1001);
 
-  TLegend leg = TLegend(0.2, 0.7, 0.6, 0.9);
+  TLegend leg = TLegend(0.2, 0.7, 0.9, 0.9);
   leg.SetFillStyle(0);
   leg.SetBorderSize(0);
 
