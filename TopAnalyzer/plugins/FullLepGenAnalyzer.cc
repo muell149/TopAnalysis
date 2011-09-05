@@ -9,6 +9,7 @@
 #include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
 
 FullLepGenAnalyzer::FullLepGenAnalyzer(const edm::ParameterSet& cfg):
+  src_        (cfg.getParameter<edm::InputTag>("src"       )),
   puWeight_   (cfg.getParameter<edm::InputTag>( "weightPU"   )),
   lepSfWeight_(cfg.getParameter<edm::InputTag>( "weightLepSF"))
 {
