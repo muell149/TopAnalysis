@@ -102,7 +102,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  plotTheo->GetXaxis()->SetTitle(xTitle);
 	  // create Canvas
 	  TCanvas* combicanvas = new TCanvas("combicanvas", "combicanvas", 600, 600);
-	  //canvasStyle(*combicanvas);
+	  // get style from old canvas
+	  combicanvas->SetLogy(canvasMu->GetLogy());
 	  // plot into canvas
 	  combicanvas->cd(0);
 	  combicanvas->SetBottomMargin(myStyle.GetPadBottomMargin());
