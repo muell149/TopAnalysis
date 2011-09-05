@@ -40,6 +40,8 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   void fillGenHistos(std::vector<TH1D*>&, const reco::Candidate&, double weight);
   /// returns electron/muon daughter of tau lepton		     
   const reco::Candidate* getTauDaughter(const reco::Candidate*);	     
+  /// GenParticle Collection
+  edm::InputTag src_;
   /// pile-up weight
   edm::InputTag puWeight_;
   /// lep SF weight

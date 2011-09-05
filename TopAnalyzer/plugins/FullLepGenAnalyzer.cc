@@ -5,7 +5,8 @@
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
-
+#include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
+#include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
 
 FullLepGenAnalyzer::FullLepGenAnalyzer(const edm::ParameterSet& cfg):
   puWeight_   (cfg.getParameter<edm::InputTag>( "weightPU"   )),
@@ -34,8 +35,14 @@ void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   
-  edm::Handle<reco::GenParticleCollection> genParticles;
-  evt.getByLabel("genParticles", genParticles);
+  //Herwig stuff
+  edm::Handle<TtGenEvent> genEvt;
+  evt.getByLabel(src_, genEvt );
+  const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
+
+  // Pythia stuff
+  //  edm::Handle<reco::GenParticleCollection> genParticles;
+  //  evt.getByLabel(src_, genParticles);
 
   const reco::Candidate* genTop = 0;
   const reco::Candidate* genTopBar = 0;
