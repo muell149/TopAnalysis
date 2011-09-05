@@ -33,6 +33,9 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
   /// gives a summary how many events have been selected
   virtual void endJob();
 
+  /// input
+  edm::InputTag src_;
+
   /// generator level cuts
   double lepPt_;
   double centralLeptonEta_;
@@ -49,15 +52,15 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
 
 
 GeneratorTtDileptonFilter::GeneratorTtDileptonFilter(const edm::ParameterSet& cfg) :
-  src_             (cfg.getParameter<edm::InputTag>("src"       )),
-  lepPt_          (cfg.getParameter<double>( "leptonPt"	           )),
-  centralLeptonEta_(cfg.getParameter<double>( "centralLeptonEta")),
-  lepEta_	  (cfg.getParameter<double>( "leptonEta"	   )),
-  bPt_ 	          (cfg.getParameter<double>( "bPt"	           )),
-  bEta_	          (cfg.getParameter<double>( "bEta"	           )),
-  met_ 	          (cfg.getParameter<double>( "met"	           )),
-  invLepLepMass_  (cfg.getParameter<double>( "invariantLepLepMass" )),
-  zVeto_          (cfg.getParameter<std::vector<double> >( "zVeto" ))
+  src_             (cfg.getParameter<edm::InputTag>("src"           )),
+  lepPt_           (cfg.getParameter<double>( "leptonPt"	    )),
+  centralLeptonEta_(cfg.getParameter<double>( "centralLeptonEta"    )),
+  lepEta_	   (cfg.getParameter<double>( "leptonEta"	    )),
+  bPt_ 	           (cfg.getParameter<double>( "bPt"	            )),
+  bEta_	           (cfg.getParameter<double>( "bEta"	            )),
+  met_ 	           (cfg.getParameter<double>( "met"	            )),
+  invLepLepMass_   (cfg.getParameter<double>( "invariantLepLepMass" )),
+  zVeto_           (cfg.getParameter<std::vector<double> >( "zVeto" ))
 {
 }
 
