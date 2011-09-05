@@ -7,6 +7,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
+#include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
 
 /**
   \class   GeneratorTtDileptonFilter GeneratorTtDileptonFilter.cc "TopAnalysis/TopFilter/plugins/GeneratorTtDileptonFilter.cc"
@@ -47,6 +49,7 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
 
 
 GeneratorTtDileptonFilter::GeneratorTtDileptonFilter(const edm::ParameterSet& cfg) :
+  src_             (cfg.getParameter<edm::InputTag>("src"       )),
   lepPt_          (cfg.getParameter<double>( "leptonPt"	           )),
   centralLeptonEta_(cfg.getParameter<double>( "centralLeptonEta")),
   lepEta_	  (cfg.getParameter<double>( "leptonEta"	   )),
@@ -64,8 +67,14 @@ GeneratorTtDileptonFilter::~GeneratorTtDileptonFilter() {
 
 bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& es) {
 
-  edm::Handle<reco::GenParticleCollection> genParticles;
-  evt.getByLabel("genParticles", genParticles);
+  //Herwig stuff
+  edm::Handle<TtGenEvent> genEvt;
+  evt.getByLabel(src_, genEvt );
+  const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
+
+  // Pythia stuff
+  //  edm::Handle<reco::GenParticleCollection> genParticles;
+  //  evt.getByLabel(src_, genParticles);
 
   const reco::Candidate* topQuark = 0;
   const reco::Candidate* topBarQuark = 0;

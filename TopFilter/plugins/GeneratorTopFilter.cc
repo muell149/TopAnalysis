@@ -7,6 +7,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
+#include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
 
 /**
   \class   GeneratorTopFilter GeneratorTopFilter.cc "TopAnalysis/TopFilter/plugins/GeneratorTopFilter.h"
@@ -186,20 +188,40 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
   tau = 0;
   wdaugh1 = 0;
   wdaugh2 = 0;
-  
-  edm::Handle<reco::GenParticleCollection> genParticles;
-  evt.getByLabel(src_, genParticles);
-    
+
+  //Herwig stuff
+  edm::Handle<TtGenEvent> genEvt;
+  evt.getByLabel(src_, genEvt );
+  const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
+
+  // Pythia stuff
+  //  edm::Handle<reco::GenParticleCollection> genParticles;
+  //  evt.getByLabel(src_, genParticles);
+
+  //  std::cout << "--------------------------------------" << std::endl << std::endl;
+
   for(reco::GenParticleCollection::const_iterator cand = genParticles->begin(); cand!=genParticles->end(); ++cand) {
+
     if(abs(cand->pdgId())!=6) continue; 
+
+    //    std::cout << "Particle ID: " << cand->pdgId()  << std::endl;
+    //    std::cout << "Status     : " << cand->status() << std::endl;
     
-    for(size_t i=0; i<cand->numberOfDaughters(); ++i){        
+    for(size_t i=0; i<cand->numberOfDaughters(); ++i){
+
+      //      std::cout << "     Daughter PID  : " << cand->daughter(i)->pdgId()  << std::endl;
+      //      std::cout << "     Dauther Status: " << cand->daughter(i)->status() << std::endl;
+
       if(abs(cand->daughter(i)->pdgId())==5){
 	bquark = cand->daughter(i);
       }
       if(abs(cand->daughter(i)->pdgId())==24){
-	wbos = cand->daughter(i);	  	  
-      }	
+	wbos = cand->daughter(i);
+	//	for(size_t i=0; i<wbos->numberOfDaughters(); ++i){
+	//	  std::cout << "          W-Daughter PID  : " << wbos->daughter(i)->pdgId()  << std::endl;
+	//	  std::cout << "          W-Dauther Status: " << wbos->daughter(i)->status() << std::endl;
+	//	}
+      }
     }
     // in few event the top decays to s or d
     if(bquark==0){ 
@@ -282,8 +304,9 @@ int GeneratorTopFilter::wDecay(){
     }
     return tauDecay();          
   }
+
   // if w does not decay into quarks or leptons
-  return -1;     
+  return -1;
 }
 
 int GeneratorTopFilter::tauDecay(){  
