@@ -28,6 +28,48 @@
 
 #include "tdrstyle.C"
 
+double alpha_s(const double Q)
+{
+  //
+  // c.f. arXiv:0908.1135 (Bethke: The 2009 World Average of alphaS)
+  //
+  const unsigned Nf = 5; // number of active flavors (assumed range here: from b mass threshold up to top mass scale!)
+  const double lambda2 = 0.213*0.213; // from lambda_MSbar with alpha_s(mZ) = 0.1184 and Nf = 5
+  const double beta0 = (33-2*Nf)/(12*TMath::Pi());
+  const double beta1 = (153-19*Nf)/(24*TMath::Power(TMath::Pi(),2));
+  const double beta2 = (77139-15099*Nf+325*Nf*Nf)/(3456*TMath::Power(TMath::Pi(),3));
+  const double L = TMath::Log(Q*Q/lambda2);
+  const double lnL = TMath::Log(L);
+  return 1./(beta0*L) - beta1*lnL/(beta0*beta0*beta0*L*L)
+    + 1./(beta0*beta0*beta0*L*L*L)*(TMath::Power(beta1/beta0,2)*(lnL*lnL-lnL-1)+beta2/beta0);
+  //  return alpha_s_mZ / (1+alpha_s_mZ*beta0*TMath::Log(Q*Q/mZ/mZ)); // just as a cross check: the 1-loop approximation
+}
+
+double mMSbar(const double mPole, const double alpha_s)
+{
+  //
+  // c.f. arXiv:0805.1333 (Bernreuther: Top Quark Physics at the LHC)
+  // note that the value of alpha_s has to be given in the MSbar scheme!
+  //
+  const double aOverPi = alpha_s / TMath::Pi();
+  return mPole / (1. + 4./3*aOverPi + 8.2364*TMath::Power(aOverPi,2) + 73.638*TMath::Power(aOverPi,3));
+}
+
+double mMSbar(const double mPole)
+{
+  //
+  // including iterative calculation of alpha_s(mMSbar)
+  //
+  double mMSbarPre = mPole;
+  double mMSbarNew = mPole;
+  do {
+    const double alpha = alpha_s(mMSbarNew);
+    mMSbarPre = mMSbarNew;
+    mMSbarNew = mMSbar(mPole, alpha);
+  } while(TMath::Abs(mMSbarNew-mMSbarPre) > 0.01); // convergence criterion
+  return mMSbarNew;
+}
+
 TGraphAsymmErrors* readAhr()
 {
   ifstream in;
@@ -228,6 +270,8 @@ void fitSimpleGaussForComparison(TF1* f1, TCanvas* canvas)
 
 int foldedLikelihoods()
 {
+  // add control plots for alpha_s runnning and mPole to mMSbar conversion!
+
   setTDRStyle();
   gStyle->SetTitleBorderSize(1);
   gStyle->SetOptFit(0011);
