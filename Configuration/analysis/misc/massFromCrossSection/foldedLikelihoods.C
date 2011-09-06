@@ -123,10 +123,13 @@ TGraphAsymmErrors* readKid()
   return new TGraphAsymmErrors(n, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
 }
 
-TGraphAsymmErrors* readMoc()
+TGraphAsymmErrors* readMoc(const bool heraPDF=false)
 {
   ifstream in;
-  in.open("Moch_mpole_mstw_cropped.out");
+  if(heraPDF)
+    in.open("herapdf.tab");
+  else
+    in.open("Moch_mpole_mstw_cropped.out");
 
   int n = 51;
   double mass [n];
@@ -138,18 +141,31 @@ TGraphAsymmErrors* readMoc()
   int i=0;
   while( 1 ) {
     if( in.eof() ) break;
-    double mt, sig, uPdf, dPdf, uRen, dRen, uFac, dFac;
-    in >> mt >> sig >> uPdf >> dPdf >> uRen >> dRen >> uFac >> dFac;
+
+    double mt, sig;
+
+    if(heraPDF) {
+      double err;
+      in >> mt >> sig >> err;
+
+      err_yu[i] = err;
+      err_yd[i] = err;
+    }
+
+    else {
+      double uPdf, dPdf, uRen, dRen, uFac, dFac;
+      in >> mt >> sig >> uPdf >> dPdf >> uRen >> dRen >> uFac >> dFac;
+
+      double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
+      double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
+
+      err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
+      err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
+    }
+
     dummy_err[i] = 0;
     mass [i] = mt;
     sigma[i] = sig;
-
-    double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
-    double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
-
-    err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
-    err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
-
     i++;
   }  
   in.close();
@@ -187,7 +203,7 @@ void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, TString 
   relUncUp->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
   relUncUp->GetYaxis()->CenterTitle();
-  relUncUp->GetYaxis()->SetRangeUser(.08, .115);
+  relUncUp->GetYaxis()->SetRangeUser(.055, .115);
   relUncUp  ->SetLineStyle(2);
   relUncDown->SetLineStyle(3);
   relUncUp->Draw("AL");
@@ -270,6 +286,8 @@ void fitSimpleGaussForComparison(TF1* f1, TCanvas* canvas)
 
 int foldedLikelihoods()
 {
+  const bool heraPDF = false;
+
   // add control plots for alpha_s runnning and mPole to mMSbar conversion!
 
   setTDRStyle();
@@ -282,7 +300,7 @@ int foldedLikelihoods()
 
   TGraphAsymmErrors* ahr = readAhr();
   TGraphAsymmErrors* kid = readKid();
-  TGraphAsymmErrors* moc  = readMoc();
+  TGraphAsymmErrors* moc  = readMoc(heraPDF);
 
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
 //  TF1* f1 = new TF1("f1", "([0]+[1]*(x-172.5)+[2]*TMath::Power(x-172.5,2)+[3]*TMath::Power(x-172.5,3))/TMath::Power(x-172.5,4)", 0, 1000);
@@ -355,7 +373,10 @@ int foldedLikelihoods()
   RooRealVar moc_p3("moc_p3", "moc_p3", moc->GetFunction("f1")->GetParameter(3));  
   RooFormulaVar mocXSec("mocXSec", "mocXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
 			RooArgSet(mPole, moc_p0, moc_p1, moc_p2, moc_p3));
-  RooFormulaVar mocXSecErr("mocXSecErr", "mocXSecErr", "@0*0.096", RooArgSet(mocXSec));
+  RooRealVar mocXSecRelErr("mocXSecRelErr", "mocXSecRelErr", 0.096);
+  if(heraPDF)
+    mocXSecRelErr.setVal(0.074);
+  RooFormulaVar mocXSecErr("mocXSecErr", "mocXSecErr", "@0*@1", RooArgSet(mocXSec, mocXSecRelErr));
   RooGaussian mocXSecPDF("mocXSecPDF", "mocXSecPDF", xsec, mocXSec, mocXSecErr);
 
   RooRealVar ahr_p0("ahr_p0", "ahr_p0", ahr->GetFunction("f1")->GetParameter(0));
