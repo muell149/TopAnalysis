@@ -10,14 +10,15 @@
 
 /// default constructor
 FullLepKinAnalyzer::FullLepKinAnalyzer(const edm::ParameterSet& cfg):
-  isSignalMC_      (cfg.getParameter<bool>         ("isSignalMC"  )),
-  useBtagging_     (cfg.getParameter<bool>         ("useBtagging" )),  
-  bAlgo_           (cfg.getParameter<std::string>  ("bAlgorithm"  )),      
-  FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent")),
-  hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"     )),
-  jets_            (cfg.getParameter<edm::InputTag>("jets"        )),
-  puWeight_        (cfg.getParameter<edm::InputTag>("weightPU"    )),
-  lepSfWeight_     (cfg.getParameter<edm::InputTag>("weightLepSF" ))  
+  isSignalMC_      (cfg.getParameter<bool>         ("isSignalMC"     )),
+  useLeadingJets_  (cfg.getParameter<bool>         ("useLeadingJets" )),   
+  useBtagging_     (cfg.getParameter<bool>         ("useBtagging"    )),  
+  bAlgo_           (cfg.getParameter<std::string>  ("bAlgorithm"     )),      
+  FullLepEvt_      (cfg.getParameter<edm::InputTag>("FullLepEvent"   )),
+  hypoKey_         (cfg.getParameter<edm::InputTag>("hypoKey"        )),
+  jets_            (cfg.getParameter<edm::InputTag>("jets"           )),
+  puWeight_        (cfg.getParameter<edm::InputTag>("weightPU"       )),
+  lepSfWeight_     (cfg.getParameter<edm::InputTag>("weightLepSF"    ))  
 {
 }
 
@@ -40,6 +41,9 @@ FullLepKinAnalyzer::beginJob()
     bookGenHistos (fs);
     bookPullHistos(fs);
     book2DHistos  (fs);
+  }
+  if(useLeadingJets_ && useBtagging_){
+    edm::LogWarning ( "KinAnalyzerSetting" ) << "Both 'useLeadingJets' and 'useBtagging' are set which is probably not intended.";
   }
 }
 
@@ -94,8 +98,21 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   // if more than 1 solution is found they can be accessed via the index cmb
   // by default the first solution with the highest probability is used
   int cmb = 0;
-  // find best solution taking into account the b-tagging discriminators
-  if(useBtagging_){
+  
+  // use only the hypotheses which use the two leading jets
+  if(useLeadingJets_){
+    bool foundSolution = false;
+    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){
+      int idx1 = FullLepEvt->jetLeptonCombination(hypoKey,i)[0];
+      int idx2 = FullLepEvt->jetLeptonCombination(hypoKey,i)[1];      
+    
+      if((idx1==0 && idx2==1) || (idx1==1 && idx2==0)){
+        cmb = i;
+	foundSolution = true;
+      }
+    }
+    if(!foundSolution) return;
+  }else if(useBtagging_){  // find best solution taking into account the b-tagging discriminators
   
     std::vector<int> bidcs;
     int idx=0;

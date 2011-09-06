@@ -84,7 +84,9 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
 
   /// book and fill additional plots with gen information?
   bool isSignalMC_;
-  /// is b-tagging taken into account to choose best hypothessis
+  /// only accept hypotheses with the two leading jets?
+  bool useLeadingJets_;  
+  /// is b-tagging taken into account to choose best hypothesis
   bool useBtagging_;
   /// b-tagging algorithm to be used
   std::string bAlgo_;
