@@ -258,7 +258,7 @@ FullLepGenAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarEta"     ), "#eta (t#bar{t})"       , 62, -3.1,   3.1) );
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarRapidity"), "rapidity (t#bar{t})"   ,100, -5.0,   5.0) );
   TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarPhi"     ), "#phi (t#bar{t})"       , 62, -3.1,   3.1) );
-  TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarMass"    ), "M (t#bar{t}) [GeV]"    ,100,  0. ,1000. ) );
+  TtBarGen_.push_back( fs->make<TH1D>(ns.name("TtBarMass"    ), "M (t#bar{t}) [GeV]"    ,400,  0. ,2000. ) );
 
   LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairPt"	 ), "p_{t} (l^{+}l^{-}) [GeV]",100,  0. , 500. ) );
   LepPairGen_.push_back( fs->make<TH1D>(ns.name("LepPairEta"	 ), "#eta (l^{+}l^{-})"       ,100, -5.0,   5.0) );
