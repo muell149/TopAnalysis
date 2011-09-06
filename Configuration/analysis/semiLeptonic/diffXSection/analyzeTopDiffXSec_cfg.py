@@ -201,9 +201,33 @@ if(not options.sample=="none"):
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="wjetsMatchingUp"):        
+        process.load("TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="wjetsMatchingDown"):        
+        process.load("TopAnalysis/Configuration/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="wjetsScaleUp"):        
+        process.load("TopAnalysis/Configuration/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="wjetsScaleDown"):
+        process.load("TopAnalysis/Configuration/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"        
     if(options.sample=="zjets"):        
         process.load("TopAnalysis/Configuration/dylljetsM50_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/dylljetsM50_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="zjetsMatchingUp"):        
+        process.load("TopAnalysis/Configuration/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="zjetsMatchingDown"):        
+        process.load("TopAnalysis/Configuration/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="zjetsScaleUp"):        
+        process.load("TopAnalysis/Configuration/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="zjetsScaleDown"):        
+        process.load("TopAnalysis/Configuration/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"      
     if(options.sample=="singleTopS"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
