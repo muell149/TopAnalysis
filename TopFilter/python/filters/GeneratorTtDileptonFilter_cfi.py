@@ -1,8 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 generatorTtDileptonFilter = cms.EDFilter("GeneratorTtDileptonFilter",
-   # src                 = cms.InputTag("genParticles"), ##pythia
-    src                 = cms.InputTag("genEvt"),       ##herwig
+    src                 = cms.InputTag("genEvt"),
     leptonPt	        = cms.double(0. ),
     centralLeptonEta    = cms.double(100),
     leptonEta           = cms.double(100),

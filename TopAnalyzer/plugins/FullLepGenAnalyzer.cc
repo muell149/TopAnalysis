@@ -36,14 +36,9 @@ void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& e
 
   double weight = getDileptonEventWeight(evt, puWeight_, lepSfWeight_);
   
-  //Herwig stuff
   edm::Handle<TtGenEvent> genEvt;
   evt.getByLabel(src_, genEvt );
   const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
-
-  // Pythia stuff
-  //  edm::Handle<reco::GenParticleCollection> genParticles;
-  //  evt.getByLabel(src_, genParticles);
 
   const reco::Candidate* genTop = 0;
   const reco::Candidate* genTopBar = 0;

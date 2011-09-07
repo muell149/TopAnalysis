@@ -2,11 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from DileptonEventWeight_cfi import *
 
 analyzeFullLepGenEvent = cms.EDAnalyzer("FullLepGenAnalyzer",
-   # src = cms.InputTag("genParticles"), ##pythia
-    src = cms.InputTag("genEvt"),       ##herwig
+    src = cms.InputTag("genEvt"),      
     weightPU     = eventWeightPUTag,
-    weightLepSF  = eventWeightLepSFTag 
+    weightLepSF  = cms.InputTag("") 
 )
-
-
-

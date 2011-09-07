@@ -189,16 +189,9 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
   wdaugh1 = 0;
   wdaugh2 = 0;
 
-  //Herwig stuff
   edm::Handle<TtGenEvent> genEvt;
   evt.getByLabel(src_, genEvt );
   const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
-
-  // Pythia stuff
-  //  edm::Handle<reco::GenParticleCollection> genParticles;
-  //  evt.getByLabel(src_, genParticles);
-
-  //  std::cout << "--------------------------------------" << std::endl << std::endl;
 
   for(reco::GenParticleCollection::const_iterator cand = genParticles->begin(); cand!=genParticles->end(); ++cand) {
 

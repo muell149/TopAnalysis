@@ -70,14 +70,9 @@ GeneratorTtDileptonFilter::~GeneratorTtDileptonFilter() {
 
 bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& es) {
 
-  //Herwig stuff
   edm::Handle<TtGenEvent> genEvt;
   evt.getByLabel(src_, genEvt );
   const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
-
-  // Pythia stuff
-  //  edm::Handle<reco::GenParticleCollection> genParticles;
-  //  evt.getByLabel(src_, genParticles);
 
   const reco::Candidate* topQuark = 0;
   const reco::Candidate* topBarQuark = 0;

@@ -2,8 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 generatorTopFilter = cms.EDFilter("GeneratorTopFilter",
 
-    #src = cms.InputTag("genParticles"), ##pythia
-    src = cms.InputTag("genEvt"),  ##herwig
+    src = cms.InputTag("genEvt"), 
 
     #how many event do you want to select?
     n_events = cms.int32(-1),
