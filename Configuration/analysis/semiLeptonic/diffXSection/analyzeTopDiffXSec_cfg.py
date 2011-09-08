@@ -231,21 +231,58 @@ if(not options.sample=="none"):
     if(options.sample=="singleTopS"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleTopSScaleDown"):        
+        process.load("TopAnalysis/Configuration/singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"   
+    if(options.sample=="singleTopSScaleUp"):        
+        process.load("TopAnalysis/Configuration/singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopS"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopSScaleDown"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopSScaleUp"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopT"):        
         process.load("TopAnalysis/Configuration/singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleTopTScaleDown"):        
+        process.load("TopAnalysis/Configuration/singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleTopTScaleUp"):        
+        process.load("TopAnalysis/Configuration/singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopT"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopTScaleDown"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopTScaleUp"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopTw"):        
         process.load("TopAnalysis/Configuration/singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleTopTwScaleDown"):        
+        process.load("TopAnalysis/Configuration/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleTopTwScaleUp"):        
+        process.load("TopAnalysis/Configuration/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleTop_twchannelDR_PythiaPowhegZ2_scale_up_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopTw"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopTwScaleDown"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+    if(options.sample=="singleAntiTopTwScaleUp"):        
+        process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
+        print "analyzed sample: singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
             process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
