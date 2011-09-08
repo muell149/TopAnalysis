@@ -155,7 +155,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       TString subfolder=sysLabel(sys);
       // loop variables
       for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-	// get canvas
+	// get canvas       
 	TCanvas* canvas = (TCanvas*)file->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]);
 	if(canvas){
 	  // get data plot for all systematics
@@ -177,7 +177,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
 	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
-	}
+	}	
 	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysPileUp&&!(sys>=sysBtagSFUp&&sys<=sysMisTagSFdown)&&!xSecVariables_[i].Contains("lep")){
 	  if(verbose>1) std::cout << "use 2010 uncertainties for variation " << sysLabel(sys)+", "+xSecVariables_[i] << std::endl;
 	  // adapt 2010 UNCERTAINTIES
@@ -195,12 +195,13 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    if(verbose>1) std::cout << "std analysis file for this variation copied" << std::endl;
 	    // loop all bins of current 2011 analysis histogram without variations
 	    for(int bin=1; bin<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){
+	      if (xSecVariables_[i].Contains("ttbarMass") && bin==1) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Thomas)
 	      //ensure to have non-empty bins
 	      if(histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin)>0){
 		if(verbose>1) std::cout << "bin " << bin << std::endl;
 		// get plot with relative uncertainties for given quantity and bin
 		TCanvas* oldCanvas = (TCanvas*)oldAnalysisfile->Get("relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
-		if(verbose>1) std::cout << "got canvas" << std::endl;
+		if(verbose>1) std::cout << "got canvas" << std::endl; 
 		TH1F* plot= (TH1F*)oldCanvas->GetPrimitive("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
 		if(plot){ 
 		  if(verbose>1) std::cout << "got plot" << std::endl;
