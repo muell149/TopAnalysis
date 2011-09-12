@@ -34,6 +34,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // a) options directly entered when calling function
   // luminosity: [/pb]
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));
+  double lumiError = 0.045;  // relative luminosity error
   // save: save plots?
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: output for debugging
@@ -285,7 +286,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "b-discr.(soft#mu)/jets/0/10"	,
     "b-discr.(soft#muPt)/jets/0/10"  ,                  
     "b-discr.(soft#muIP3d)/jets/0/10",
-    "N_{b-jets}(SSVHE)/events/0/1"      ,
+    "N_{b-jets}(SSVHE)/events/1/1"      ,
     // (iv) MET monitoring 
     "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/10",
     "#SigmaE_{T} [GeV]/events/0/50"  ,
@@ -404,7 +405,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // ---
   //    open our standard analysis files
   // ---
-  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
+  std::map<unsigned int, TFile*> files_           = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
+  std::map<unsigned int, TFile*> filesUncJESUp_   = getStdTopAnalysisFiles(inputFolder, sysJESUp,   dataFile, decayChannel);
+  std::map<unsigned int, TFile*> filesUncJESDown_ = getStdTopAnalysisFiles(inputFolder, sysJESDown, dataFile, decayChannel);
 	
   // ---
   //    loading histos
@@ -420,7 +423,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigned int, TH1F*> > histoUncJESUp_;
+  std::map< TString, std::map <unsigned int, TH1F*> > histoUncJESDown_;
+  std::map< TString, TH1F* > histoErrorBand_;
   std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
+  std::map< TString, std::map <unsigned int, TH2F*> > histo2UncJESUp_;
+  std::map< TString, std::map <unsigned int, TH2F*> > histo2UncJESDown_;
+  std::map< TString, TH2F* > histo2ErrorBand_;
   // total # plots 
   int Nplots=0;
   // save all histos from plotList_ that exist in files_ into 
@@ -429,7 +438,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back("_reweighted3BX");
   vecRedundantPartOfNameInData.push_back("_reweighted");
-  getAllPlots( files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
+  getAllPlots( files_,           plotList_, histo_,           histo2_,           N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
+  getAllPlots( filesUncJESUp_,   plotList_, histoUncJESUp_,   histo2UncJESUp_,   N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
+  getAllPlots( filesUncJESDown_, plotList_, histoUncJESDown_, histo2UncJESDown_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
 	
   // ---
   //    lumiweighting for choosen luminosity
@@ -437,7 +448,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
+  scaleByLuminosity(plotList_, histo_,           histo2_,           N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
+  scaleByLuminosity(plotList_, histoUncJESUp_,   histo2UncJESUp_,   N1Dplots, luminosity, verbose, sysJESUp,            decayChannel);
+  scaleByLuminosity(plotList_, histoUncJESDown_, histo2UncJESDown_, N1Dplots, luminosity, verbose, sysJESDown,          decayChannel);
 	
   // ---
   //    add single top channels and DiBoson contributions
@@ -447,7 +460,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // will be combined and saved in the histo_ and histo2_ map
   // reCreate: reCreate combined plots if they are already existing
   bool reCreate=true;
-  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
+  AddSingleTopAndDiBoson(plotList_, histo_,           histo2_,           N1Dplots, verbose, reCreate, decayChannel);
+  AddSingleTopAndDiBoson(plotList_, histoUncJESUp_,   histo2UncJESUp_,   N1Dplots, verbose, reCreate, decayChannel);
+  AddSingleTopAndDiBoson(plotList_, histoUncJESDown_, histo2UncJESDown_, N1Dplots, verbose, reCreate, decayChannel);
 	
   // ---
   //    configure histograms
@@ -478,13 +493,23 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
       // a) 1D
       if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){ 
 	// default
-	histogramStyle( *histo_[plotList_[plot]][sample], sample, true);
+	histogramStyle( *histo_[plotList_[plot]][sample],           sample, true);
+	histogramStyle( *histoUncJESUp_[plotList_[plot]][sample],   sample, true);
+	histogramStyle( *histoUncJESDown_[plotList_[plot]][sample], sample, true);
 	// special configurations
-	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall")histo_[plotList_[plot]][sample]->SetNdivisions(816);
+	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall"){
+	  histo_[plotList_[plot]][sample]           -> SetNdivisions(816);
+	  histoUncJESUp_[plotList_[plot]][sample]   -> SetNdivisions(816);
+	  histoUncJESDown_[plotList_[plot]][sample] -> SetNdivisions(816);
+	}
       }
       // b) 2D
-      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
-    }
+      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
+	histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
+ 	histStyle2D( *histo2UncJESUp_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
+      	histStyle2D( *histo2UncJESDown_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
+      }
+   }
   }
 
   // ---
@@ -545,12 +570,67 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	// equidistant binning
 	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
 	if(reBinFactor>1){
-	  equalReBinTH1(reBinFactor, histo_, plotName, sample);
+	  equalReBinTH1(reBinFactor, histo_,           plotName, sample);
+	  equalReBinTH1(reBinFactor, histoUncJESUp_,   plotName, sample);
+	  equalReBinTH1(reBinFactor, histoUncJESDown_, plotName, sample);
 	}
       }
     }
   }
-	
+  // ========================================================
+  //  Errors for uncertainty bands from JES and luminosity
+  // ========================================================
+  
+  std::cout << std::endl << " Start calculating error bands .... " << std::endl;
+
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot)
+  {
+    TString plotName     = plotList_[plot];
+
+    // Initialize and reset histograms
+
+    TH1F* histoSumRef  = (TH1F*)histo_[plotName][kSig]->Clone();
+    TH1F* histoSumUp   = (TH1F*)histo_[plotName][kSig]->Clone();
+    TH1F* histoSumDown = (TH1F*)histo_[plotName][kSig]->Clone();
+    TH1F* histoError   = (TH1F*)histo_[plotName][kSig]->Clone();
+
+    histoSumRef    -> Reset("ICESM");
+    histoSumUp     -> Reset("ICESM");
+    histoSumDown   -> Reset("ICESM");
+    histoError     -> Reset("ICESM");
+
+    // Integral over all samples before assessing the differences
+
+    for(unsigned int sample=kSig; sample<kData; ++sample)
+    {
+      if((plot<N1Dplots)&&(plotExists(histo_, plotName, sample)))
+      {
+	histoSumRef  -> Add(histo_[plotName][sample]);
+	histoSumUp   -> Add(histoUncJESUp_[plotName][sample]);
+	histoSumDown -> Add(histoUncJESDown_[plotName][sample]);
+      }
+    }
+
+    // Compare summed histograms, symmetrize deviations and store relative deviation to error histogram after adding constant contributions
+        
+    for (int bin = 0; bin < histoSumRef->GetNbinsX(); bin++)
+    {
+      double diffUp   = fabs(histoSumUp->GetBinContent(bin+1)   - histoSumRef->GetBinContent(bin+1));
+      double diffDown = fabs(histoSumDown->GetBinContent(bin+1) - histoSumRef->GetBinContent(bin+1));
+      double maxDiff  = (diffUp > diffDown) ? diffUp : diffDown; // symmetrize error
+
+      maxDiff = (histoSumRef->GetBinContent(bin+1) > 0) ? (maxDiff/histoSumRef->GetBinContent(bin+1)) : 0; 
+      maxDiff = sqrt(maxDiff*maxDiff+lumiError*lumiError); // add constant error for luminosity (defined at beginning of macro)
+      histoError -> SetBinContent(bin+1,maxDiff);
+      
+      histoSumRef->SetBinError(bin+1,maxDiff*histoSumRef->GetBinContent(bin+1));
+    }
+
+    histoErrorBand_[plotName] = (TH1F*)histoSumRef->Clone();
+  }
+
+  std::cout << " .... Finished calculation of error bands." << std::endl;  
+
   // ---
   //    create legends
   // ---
@@ -593,7 +673,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
       }
     }
   }
-	
+  // add entry for uncertainty to legends
+  if (histoErrorBand_.size() > 0 && plotList_.size() > 0){
+      leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+      leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+      leg1->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+  }
   // ---
   //    create canvas
   // ---
@@ -693,7 +778,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	    if(max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
 	    // draw histos (as stack)
-	    histo_[plotList_[plot]][sample]->Draw("hist");
+	    histo_[plotList_[plot]][sample]->Draw("hist X0");
 	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
 	    histo_[plotList_[plot]][42]->GetXaxis()->SetNoExponent(true);
 	  }
@@ -702,13 +787,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	    // draw data as points
 	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e1 X0 same");
 	    // draw others as histo (stack)
-	    else histo_[plotList_[plot]][sample]->Draw("hist same");
+	    else histo_[plotList_[plot]][sample]->Draw("hist X0 same");
 	  }
 	  first=false;
 	  // at the end:
 	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)){
+	    // configure style of and draw uncertainty bands
+	    histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
+	    histoErrorBand_[plotList_[plot]]->SetFillColor(1);
+	    histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
+	    gStyle->SetErrorX(0.5);  
+	    histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 
 	    // redraw axis 
-	    histo_[plotList_[plot]][42]->Draw("axis same");
+	    histo_[plotList_[plot]][42]->Draw("axis X0 same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection, common labels and legend
 	      TString label = "pre-Tagged";
@@ -718,7 +809,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 		 	       1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12    );
 	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.29);
+	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.32);
 	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05);
 	      leg->Draw("SAME");
