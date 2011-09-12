@@ -82,7 +82,7 @@ TGraph* getRunningAlphaGraph()
     m += 1;
   }
   TGraph* graph = new TGraph(n, mass, alpha);
-  graph->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
+  graph->GetXaxis()->SetTitle("Q (GeV)");
   graph->GetYaxis()->SetTitle("#alpha_{S}");
   graph->SetTitle("At three-loop level and with N(flavors)=5, using 2009 world average for #alpha_{s}(M_{Z})");
   graph->GetYaxis()->CenterTitle();
@@ -106,13 +106,13 @@ TGraph* getMassShiftGraph()
   return graph;
 }
 
-TGraphAsymmErrors* readAhr(const bool pole=true)
+TGraphAsymmErrors* readAhr(const bool pole, const bool useAlphaUnc)
 {
   ifstream in;
   if(pole)
-    in.open("ahrens_mstw_pole_cropped.tab");
+    in.open("ahrens_all.tab");
   else
-    in.open("mstw_ahrens_msbar.tab");
+    in.open("mstw_ahrens_msbar_all.tab");
 
   int n = 51;
   if(!pole)
@@ -126,11 +126,18 @@ TGraphAsymmErrors* readAhr(const bool pole=true)
   int i=0;
   while( 1 ) {
     if( in.eof() ) break;
-    double err_u1, err_d1, err_u2, err_d2;
-    in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2;
+    double err_u1, err_d1, err_u2, err_d2, err_u3, err_d3;
+    in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2 >> err_u3 >> err_d3;
     dummy_err[i] = 0;
-    err_yu[i] = TMath::Sqrt(err_u1*err_u1+err_u2*err_u2);
-    err_yd[i] = TMath::Sqrt(err_d1*err_d1+err_d2*err_d2);
+    if(useAlphaUnc) {
+      err_yu[i] = TMath::Sqrt(err_u1*err_u1+err_u2*err_u2);
+      err_yd[i] = TMath::Sqrt(err_d1*err_d1+err_d2*err_d2);
+    }
+    else {
+      err_yu[i] = TMath::Sqrt(err_u1*err_u1+err_u3*err_u3);
+      err_yd[i] = TMath::Sqrt(err_d1*err_d1+err_d3*err_d3);
+    }
+
     if(sigma[i]>0)
       i++;
   }  
@@ -139,7 +146,7 @@ TGraphAsymmErrors* readAhr(const bool pole=true)
   return new TGraphAsymmErrors(n, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
 }
 
-TGraphAsymmErrors* readKid()
+TGraphAsymmErrors* readKid(const bool useAlphaUnc)
 {
   ifstream in;
   in.open("Kidonakis-ttbarLHC7.dat");
@@ -156,8 +163,15 @@ TGraphAsymmErrors* readKid()
     if( in.eof() ) break;
     in >> mass[i] >> sigma[i];
     dummy_err[i] = 0;
-    err_yu[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.078,2)+TMath::Power(sigma[i]*0.044,2)+TMath::Power(sigma[i]*0.055,2));
-    err_yd[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.070,2)+TMath::Power(sigma[i]*0.031,2)+TMath::Power(sigma[i]*0.055,2));
+    if(useAlphaUnc) {
+      //                                            alpha_s                        scale
+      err_yu[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.078,2)+TMath::Power(sigma[i]*0.044,2)+TMath::Power(sigma[i]*0.055,2));
+      err_yd[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.070,2)+TMath::Power(sigma[i]*0.031,2)+TMath::Power(sigma[i]*0.055,2));
+    }
+    else {
+      err_yu[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.000,2)+TMath::Power(sigma[i]*0.044,2)+TMath::Power(sigma[i]*0.055,2));
+      err_yd[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.000,2)+TMath::Power(sigma[i]*0.031,2)+TMath::Power(sigma[i]*0.055,2));
+    }
     i++;
   }  
   in.close();
@@ -165,7 +179,7 @@ TGraphAsymmErrors* readKid()
   return new TGraphAsymmErrors(n, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
 }
 
-TGraphAsymmErrors* readMoc(const bool pole=true, const bool heraPDF=false)
+TGraphAsymmErrors* readMoc(const bool pole, const bool useAlphaUnc, const bool heraPDF)
 {
   ifstream in;
   if(heraPDF)
@@ -200,11 +214,17 @@ TGraphAsymmErrors* readMoc(const bool pole=true, const bool heraPDF=false)
       double uPdf, dPdf, uRen, dRen, uFac, dFac;
       in >> mt >> sig >> uPdf >> dPdf >> uRen >> dRen >> uFac >> dFac;
 
-      double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
-      double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
+      const double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
+      const double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
 
-      err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
-      err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
+      if(useAlphaUnc) {
+	err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
+	err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
+      }
+      else {
+	err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2));
+	err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2));
+      }
     }
 
     dummy_err[i] = 0;
@@ -234,19 +254,24 @@ void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
   canvas->Print(label+".eps");
 }
 
-void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole, TString label, TString printNameBase)
+void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
+			     TString label, TString printNameBase, double& deltaMax)
 {
   const int n = graph->GetN();
   double uncUp  [n];
   double uncDown[n];
   double* y = graph->GetY();
+  deltaMax = 0;
   for(int i=0; i<n; i++) {
     uncUp  [i] = graph->GetErrorYhigh(i)/y[i];
     uncDown[i] = graph->GetErrorYlow (i)/y[i];
+    deltaMax = TMath::Max(deltaMax, TMath::Max(uncUp[i], uncDown[i]));
   }
   TGraph* relUncUp   = new TGraph(n, graph->GetX(), uncUp  );
   TGraph* relUncDown = new TGraph(n, graph->GetX(), uncDown);
-  relUncUp->SetTitle(graph->GetTitle());
+  char tmpTxt[99];
+  sprintf(tmpTxt, "%s (#delta_{max} =  %.4f)", graph->GetTitle(), deltaMax);
+  relUncUp->SetTitle(tmpTxt);
   if(pole)
     relUncUp->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
   else
@@ -339,8 +364,9 @@ void fitSimpleGaussForComparison(TF1* f1, TCanvas* canvas, const bool pole, TStr
 
 int foldedLikelihoods()
 {
-  const bool heraPDF = false;
   const bool pole    = true;
+  const bool useAlphaUnc = true;
+  const bool heraPDF = false;
 
   setTDRStyle();
   gStyle->SetTitleBorderSize(1);
@@ -354,22 +380,28 @@ int foldedLikelihoods()
   canvas->cd()->SetRightMargin(0.04);
   canvas->Print(printNameBase+".ps[");
 
-  gStyle->SetOptTitle(1);
+  TGraph* runningAlpha = 0;
+  if(!pole) {
+    runningAlpha = getRunningAlphaGraph();
+    gStyle->SetOptTitle(1);
+    runningAlpha->Draw("AP");
+    canvas->Print(printNameBase+".ps");
+    canvas->Print("alpha_s.eps");
+    gStyle->SetOptTitle(0);
+  }
 
-  TGraph* runningAlpha = getRunningAlphaGraph();
-  runningAlpha->Draw("AP");
-  canvas->Print(printNameBase+".ps");
+  TGraph* mShift = 0;
+  if(!pole) {
+    mShift = getMassShiftGraph();
+    mShift->Draw("AP");
+    mShift->Fit("pol1");
+    canvas->Print(printNameBase+".ps");
+    canvas->Print("MSbar_vs_pole_mass.eps");
+  }
 
-  gStyle->SetOptTitle(0);
-
-  TGraph* mShift = getMassShiftGraph();
-  mShift->Draw("AP");
-  mShift->Fit("pol1");
-  canvas->Print(printNameBase+".ps");
-
-  TGraphAsymmErrors* ahr = readAhr(pole);
-  TGraphAsymmErrors* kid = readKid();
-  TGraphAsymmErrors* moc  = readMoc(pole, heraPDF);
+  TGraphAsymmErrors* ahr = readAhr(pole, useAlphaUnc);
+  TGraphAsymmErrors* kid = readKid(useAlphaUnc);
+  TGraphAsymmErrors* moc = readMoc(pole, useAlphaUnc, heraPDF);
 
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
 //  TF1* f1 = new TF1("f1", "([0]+[1]*(x-172.5)+[2]*TMath::Power(x-172.5,2)+[3]*TMath::Power(x-172.5,3))/TMath::Power(x-172.5,4)", 0, 1000);
@@ -387,14 +419,18 @@ int foldedLikelihoods()
 
   gStyle->SetOptTitle(1);
 
+  double deltaMaxKid, deltaMaxMoc, deltaMaxAhr;
+
   if(pole) {
     drawTheoryGraph        (kid, canvas, pole, "kidonakis", printNameBase);
-    drawRelativeUncertainty(kid, canvas, pole, "kidonakis", printNameBase);
+    drawRelativeUncertainty(kid, canvas, pole, "kidonakis", printNameBase, deltaMaxKid);
   }
+  else
+    deltaMaxKid = 999.;
   drawTheoryGraph        (moc, canvas, pole, "moch"     , printNameBase);
-  drawRelativeUncertainty(moc, canvas, pole, "moch"     , printNameBase);
+  drawRelativeUncertainty(moc, canvas, pole, "moch"     , printNameBase, deltaMaxMoc);
   drawTheoryGraph        (ahr, canvas, pole, "ahrens"   , printNameBase);
-  drawRelativeUncertainty(ahr, canvas, pole, "ahrens"   , printNameBase);
+  drawRelativeUncertainty(ahr, canvas, pole, "ahrens"   , printNameBase, deltaMaxAhr);
 
   gStyle->SetOptTitle(0);
 
@@ -406,11 +442,11 @@ int foldedLikelihoods()
 
   mass.setRange("fullRange", 140., 200.);
 
-  RooRealVar shift_p0("shift_p0", "shift_p0", mShift->GetFunction("pol1")->GetParameter(0));
-  RooRealVar shift_p1("shift_p1", "shift_p1", mShift->GetFunction("pol1")->GetParameter(1));
-  if(pole) {
-    shift_p0.setVal(0.);
-    shift_p1.setVal(0.);
+  RooRealVar shift_p0("shift_p0", "shift_p0", 0.);
+  RooRealVar shift_p1("shift_p1", "shift_p1", 0.);
+  if(!pole) {
+    shift_p0.setVal(mShift->GetFunction("pol1")->GetParameter(0));
+    shift_p1.setVal(mShift->GetFunction("pol1")->GetParameter(1));
   }
   RooPolyVar shift("shift", "shift", mass, RooArgSet(shift_p0, shift_p1));
 
@@ -433,10 +469,12 @@ int foldedLikelihoods()
   RooRealVar p2("p2", "p2",  1.125E-04 ); // e-mu
 
   RooPolyVar measXSecMassDepRel("measXSecMassDepRel", "measXSecMassDepRel", deltaM, RooArgSet(p0, p1, p2));
-  RooRealVar measXSec("measXSec"   , "measXSec"   , 169.9, "pb");
+  RooRealVar measXSec("measXSec", "measXSec", 169.9, "pb");
   // total exp uncert of 18.3 from adding quadr. 3.9 (stat), 16.3 (syst) and 7.6 (lumi)
-  // and subtracting 1.5 for the top mass (in e-mu, it is 2.6 for ee and mumu)
-  RooRealVar measXSecErr("measXSecErr", "measXSecErr", 18.3 , "pb");
+  // and subtracting 1.5 % = 2.5485 pb for the top mass (in e-mu, it is 2.6 % for ee and mumu)
+  // FIXME: This should rather be 18.23 pb!? Resulting m_t from Moch changes from 170.3 to 170.4 GeV, no other effects
+  // Kept at 18.3 pb for the time being, in order to have stable numbers for the PAS
+  RooRealVar measXSecErr("measXSecErr", "measXSecErr", 18.3, "pb");
   RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
 
@@ -446,7 +484,8 @@ int foldedLikelihoods()
   RooRealVar kid_p3("kid_p3", "kid_p3", kid->GetFunction("f1")->GetParameter(3));  
   RooFormulaVar kidXSec("kidXSec", "kidXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
 			RooArgSet(mass, kid_p0, kid_p1, kid_p2, kid_p3));
-  RooFormulaVar kidXSecErr("kidXSecErr", "kidXSecErr", "@0*sqrt(0.078*0.078+0.055*0.055+0.044*0.044)", RooArgSet(kidXSec));
+  RooRealVar kidXSecRelErr("kidXSecRelErr", "kidXSecRelErr", deltaMaxKid);
+  RooFormulaVar kidXSecErr("kidXSecErr", "kidXSecErr", "@0*@1", RooArgSet(kidXSec, kidXSecRelErr));
   RooGaussian kidXSecPDF("kidXSecPDF", "kidXSecPDF", xsec, kidXSec, kidXSecErr);
 
   RooRealVar moc_p0("moc_p0", "moc_p0", moc->GetFunction("f1")->GetParameter(0));
@@ -455,9 +494,7 @@ int foldedLikelihoods()
   RooRealVar moc_p3("moc_p3", "moc_p3", moc->GetFunction("f1")->GetParameter(3));  
   RooFormulaVar mocXSec("mocXSec", "mocXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
 			RooArgSet(mass, moc_p0, moc_p1, moc_p2, moc_p3));
-  RooRealVar mocXSecRelErr("mocXSecRelErr", "mocXSecRelErr", 0.096);
-  if(heraPDF)
-    mocXSecRelErr.setVal(0.074);
+  RooRealVar mocXSecRelErr("mocXSecRelErr", "mocXSecRelErr", deltaMaxMoc);
   RooFormulaVar mocXSecErr("mocXSecErr", "mocXSecErr", "@0*@1", RooArgSet(mocXSec, mocXSecRelErr));
   RooGaussian mocXSecPDF("mocXSecPDF", "mocXSecPDF", xsec, mocXSec, mocXSecErr);
 
@@ -467,7 +504,8 @@ int foldedLikelihoods()
   RooRealVar ahr_p3("ahr_p3", "ahr_p3", ahr->GetFunction("f1")->GetParameter(3));  
   RooFormulaVar ahrXSec("ahrXSec", "ahrXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
 			RooArgSet(mass, ahr_p0, ahr_p1, ahr_p2, ahr_p3));
-  RooFormulaVar ahrXSecErr("ahrXSecErr", "ahrXSecErr", "@0*0.107", RooArgSet(ahrXSec));
+  RooRealVar ahrXSecRelErr("ahrXSecRelErr", "ahrXSecRelErr", deltaMaxAhr);
+  RooFormulaVar ahrXSecErr("ahrXSecErr", "ahrXSecErr", "@0*@1", RooArgSet(ahrXSec, ahrXSecRelErr));
   RooGaussian ahrXSecPDF("ahrXSecPDF", "ahrXSecPDF", xsec, ahrXSec, ahrXSecErr);
 
   const int colorKid = kRed+1;
@@ -562,14 +600,17 @@ int foldedLikelihoods()
   mocTF->SetTitle("Langenfeld et al.");
   ahrTF->SetTitle("Ahrens et al.");
 
-  fitSimpleGaussForComparison(kidTF, canvas, pole, printNameBase);
+  if(pole)
+    fitSimpleGaussForComparison(kidTF, canvas, pole, printNameBase);
   fitSimpleGaussForComparison(ahrTF, canvas, pole, printNameBase);
   fitSimpleGaussForComparison(mocTF, canvas, pole, printNameBase);
 
   canvas->Print(printNameBase+".ps]");
 
-  delete runningAlpha;
-  delete mShift;
+  if(!pole) {
+    delete runningAlpha;
+    delete mShift;
+  }
   delete ahr;
   delete kid;
   delete moc;
