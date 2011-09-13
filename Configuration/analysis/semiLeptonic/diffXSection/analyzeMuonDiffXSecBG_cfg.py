@@ -13,9 +13,6 @@ print "ttbar decay subset filter is inverted semileptonic muon decay"
 ## get the mother file
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 
-## choose data set
-process.load("TopAnalysis/Configuration/samples/TTJets_madgraph_Summer11_cff")
-
 #process.hltFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
 #process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
 
