@@ -198,6 +198,18 @@ if(not options.sample=="none"):
     if(options.sample=="ttbar"):        
         process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="ttbarMatchingDown"):        
+        process.load("TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="ttbarMatchingUp"):        
+        process.load("TopAnalysis/Configuration/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="ttbarScaleDown"):        
+        process.load("TopAnalysis/Configuration/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"
+    if(options.sample=="ttbarScaleUp"):        
+        process.load("TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"        
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
