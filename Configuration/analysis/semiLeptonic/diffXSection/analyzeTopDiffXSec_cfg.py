@@ -201,99 +201,123 @@ if(not options.sample=="none"):
     if(options.sample=="ttbarMatchingDown"):        
         process.load("TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="ttbarMatchingUp"):        
         process.load("TopAnalysis/Configuration/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="ttbarScaleDown"):        
         process.load("TopAnalysis/Configuration/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="ttbarScaleUp"):        
         process.load("TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"        
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False        
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="wjetsMatchingUp"):        
         process.load("TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="wjetsMatchingDown"):        
         process.load("TopAnalysis/Configuration/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="wjetsScaleUp"):        
         process.load("TopAnalysis/Configuration/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="wjetsScaleDown"):
         process.load("TopAnalysis/Configuration/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"        
+        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False        
     if(options.sample=="zjets"):        
         process.load("TopAnalysis/Configuration/dylljetsM50_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/dylljetsM50_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="zjetsMatchingUp"):        
         process.load("TopAnalysis/Configuration/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="zjetsMatchingDown"):        
         process.load("TopAnalysis/Configuration/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="zjetsScaleUp"):        
         process.load("TopAnalysis/Configuration/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="zjetsScaleDown"):        
         process.load("TopAnalysis/Configuration/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/python/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"      
+        print "analyzed sample: TopAnalysis/Configuration/python/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False      
     if(options.sample=="singleTopS"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopSScaleDown"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"   
+        print "analyzed sample: singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False   
     if(options.sample=="singleTopSScaleUp"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleAntiTopS"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopSScaleDown"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleAntiTopSScaleUp"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleTopT"):        
         process.load("TopAnalysis/Configuration/singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopTScaleDown"):        
         process.load("TopAnalysis/Configuration/singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleTopTScaleUp"):        
         process.load("TopAnalysis/Configuration/singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleAntiTopT"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopTScaleDown"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleAntiTopTScaleUp"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleTopTw"):        
         process.load("TopAnalysis/Configuration/singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleTopTwScaleDown"):        
         process.load("TopAnalysis/Configuration/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleTopTwScaleUp"):        
         process.load("TopAnalysis/Configuration/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleTop_twchannelDR_PythiaPowhegZ2_scale_up_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleAntiTopTw"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
     if(options.sample=="singleAntiTopTwScaleDown"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
     if(options.sample=="singleAntiTopTwScaleUp"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
         
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
