@@ -44,6 +44,8 @@ process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,-1.)
 
 if(applyKinFit==True):
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
+# use status 3 particles (!)
+    process.decaySubset.fillMode = cms.string("kME")
 
 ## include module to create JES-shifted collection
 for path in pathlist:
