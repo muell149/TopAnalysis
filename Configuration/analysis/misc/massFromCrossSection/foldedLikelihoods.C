@@ -106,13 +106,21 @@ TGraph* getMassShiftGraph()
   return graph;
 }
 
-TGraphAsymmErrors* readAhr(const bool pole, const bool useAlphaUnc)
+TGraphAsymmErrors* readAhr(const bool pole, const bool useAlphaUnc, const bool heraPDF)
 {
   ifstream in;
-  if(pole)
-    in.open("ahrens_all.tab");
-  else
-    in.open("mstw_ahrens_msbar_all.tab");
+  if(pole) {
+    if(heraPDF)
+      in.open("ahrens_mpole_exp_hera.tab");
+    else
+      in.open("ahrens_all.tab");
+  }
+  else {
+    if(heraPDF)
+      in.open("ahrens_ms_hera_exp.dat");
+    else
+      in.open("mstw_ahrens_msbar_all.tab");
+  }
 
   int n = 51;
   if(!pole)
@@ -127,17 +135,31 @@ TGraphAsymmErrors* readAhr(const bool pole, const bool useAlphaUnc)
   while( 1 ) {
     if( in.eof() ) break;
     double err_u1, err_d1, err_u2, err_d2, err_u3, err_d3;
-    in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2 >> err_u3 >> err_d3;
-    dummy_err[i] = 0;
-    if(useAlphaUnc) {
-      err_yu[i] = TMath::Sqrt(err_u1*err_u1+err_u2*err_u2);
-      err_yd[i] = TMath::Sqrt(err_d1*err_d1+err_d2*err_d2);
+    if(heraPDF) {
+      in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2;
+      if(useAlphaUnc) {
+	const double relAlphaUnc = (heraPDF ? 0.04 : 0.05);
+	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2 + TMath::Power(sigma[i]*relAlphaUnc,2));
+	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2 + TMath::Power(sigma[i]*relAlphaUnc,2));
+      }
+      else {
+	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2);
+	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2);
+      }
     }
     else {
-      err_yu[i] = TMath::Sqrt(err_u1*err_u1+err_u3*err_u3);
-      err_yd[i] = TMath::Sqrt(err_d1*err_d1+err_d3*err_d3);
+      in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2 >> err_u3 >> err_d3;
+      if(useAlphaUnc) {
+	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2);
+	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2);
+      }
+      else {
+	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u3*err_u3);
+	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d3*err_d3);
+      }
     }
 
+    dummy_err[i] = 0;
     if(sigma[i]>0)
       i++;
   }  
@@ -182,12 +204,18 @@ TGraphAsymmErrors* readKid(const bool useAlphaUnc)
 TGraphAsymmErrors* readMoc(const bool pole, const bool useAlphaUnc, const bool heraPDF)
 {
   ifstream in;
-  if(heraPDF)
-    in.open("herapdf.tab");
-  else if(!pole)
+  if(pole) {    
+    if(heraPDF)
+      in.open("herapdf.tab");
+    else
+      in.open("Moch_mpole_mstw_cropped.out");
+  }
+  else {
+    if(heraPDF)
+      in.open("moch_ms_hera15nnlo_rel.out");
+    else
     in.open("top_mstw.tab");
-  else
-    in.open("Moch_mpole_mstw_cropped.out");
+  }
 
   int n = 51;
   double mass [n];
@@ -203,20 +231,32 @@ TGraphAsymmErrors* readMoc(const bool pole, const bool useAlphaUnc, const bool h
     double mt, sig;
 
     if(heraPDF) {
-      double err;
-      in >> mt >> sig >> err;
-
-      err_yu[i] = err;
-      err_yd[i] = err;
+      if(pole) {
+	double err;
+	in >> mt >> sig >> err;
+	
+	err_yu[i] = err;
+	err_yd[i] = err;
+      }
+      else {
+	double uScale, dScale, pdf, uAlpha, dAlpha;
+	in >> mt >> sig >> uScale >> dScale >> pdf >> uAlpha >> dAlpha;
+	
+	if(!useAlphaUnc) {
+	  uAlpha = 0;
+	  dAlpha = 0;
+	}
+	err_yu[i] = TMath::Sqrt(TMath::Power(uScale/100*sig,2)+TMath::Power(pdf/100*sig,2)+TMath::Power(uAlpha/100*sig,2));
+	err_yd[i] = TMath::Sqrt(TMath::Power(dScale/100*sig,2)+TMath::Power(pdf/100*sig,2)+TMath::Power(dAlpha/100*sig,2));
+      }
     }
-
-    else {
+    else{
       double uPdf, dPdf, uRen, dRen, uFac, dFac;
       in >> mt >> sig >> uPdf >> dPdf >> uRen >> dRen >> uFac >> dFac;
-
+      
       const double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
       const double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
-
+      
       if(useAlphaUnc) {
 	err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
 	err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
@@ -260,15 +300,18 @@ void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, const bo
   const int n = graph->GetN();
   double uncUp  [n];
   double uncDown[n];
+  double uncMax [n];
   double* y = graph->GetY();
   deltaMax = 0;
   for(int i=0; i<n; i++) {
     uncUp  [i] = graph->GetErrorYhigh(i)/y[i];
     uncDown[i] = graph->GetErrorYlow (i)/y[i];
+    uncMax [i] = TMath::Max(uncUp[i], uncDown[i]);
     deltaMax = TMath::Max(deltaMax, TMath::Max(uncUp[i], uncDown[i]));
   }
   TGraph* relUncUp   = new TGraph(n, graph->GetX(), uncUp  );
   TGraph* relUncDown = new TGraph(n, graph->GetX(), uncDown);
+  TGraph* maxUnc     = new TGraph(n, graph->GetX(), uncMax );
   char tmpTxt[99];
   sprintf(tmpTxt, "%s (#delta_{max} =  %.4f)", graph->GetTitle(), deltaMax);
   relUncUp->SetTitle(tmpTxt);
@@ -279,19 +322,25 @@ void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, const bo
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
   relUncUp->GetYaxis()->CenterTitle();
   relUncUp->GetYaxis()->SetRangeUser(.055, .115);
+  //  relUncUp->GetYaxis()->SetRangeUser(.0, .115);
   relUncUp  ->SetLineStyle(2);
   relUncDown->SetLineStyle(3);
   relUncUp->Draw("AL");
   relUncDown->Draw("L");
+  maxUnc->Fit("pol2");
+  maxUnc->GetFunction("pol2")->Draw("same");
   TLegend leg = TLegend(0.8, 0.2, 0.9, 0.35);
   leg.SetFillColor(0);
   leg.SetBorderSize(0);
   leg.AddEntry(relUncUp  , "#delta_{+}", "L");
   leg.AddEntry(relUncDown, "#delta_{-}", "L");
   leg.Draw();
+  gStyle->SetOptFit(0000);
   canvas->Print(printNameBase+".ps");
   delete relUncUp;
   delete relUncDown;
+  delete maxUnc;
+  gStyle->SetOptFit(0011);
 }
 
 void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
@@ -375,6 +424,8 @@ int foldedLikelihoods()
   TString printNameBase = "foldedLikelihoods";
   if(!pole)
     printNameBase += "_MSbar";
+  if(heraPDF)
+    printNameBase += "_hera";
 
   TCanvas* canvas = new TCanvas("canvas", "canvas", 10, 10, 900, 600);
   canvas->cd()->SetRightMargin(0.04);
@@ -399,7 +450,7 @@ int foldedLikelihoods()
     canvas->Print("MSbar_vs_pole_mass.eps");
   }
 
-  TGraphAsymmErrors* ahr = readAhr(pole, useAlphaUnc);
+  TGraphAsymmErrors* ahr = readAhr(pole, useAlphaUnc, heraPDF);
   TGraphAsymmErrors* kid = readKid(useAlphaUnc);
   TGraphAsymmErrors* moc = readMoc(pole, useAlphaUnc, heraPDF);
 
@@ -421,7 +472,7 @@ int foldedLikelihoods()
 
   double deltaMaxKid, deltaMaxMoc, deltaMaxAhr;
 
-  if(pole) {
+  if(pole && !heraPDF) {
     drawTheoryGraph        (kid, canvas, pole, "kidonakis", printNameBase);
     drawRelativeUncertainty(kid, canvas, pole, "kidonakis", printNameBase, deltaMaxKid);
   }
@@ -514,7 +565,7 @@ int foldedLikelihoods()
   const int colorDil = kBlue;
 
   RooPlot* frame = mass.frame();
-  if(pole)
+  if(pole && !heraPDF)
     kidXSec.plotOn(frame, RooFit::LineColor(colorKid));
   ahrXSec.plotOn(frame, RooFit::LineColor(colorAhr));
   mocXSec.plotOn(frame, RooFit::LineColor(colorMoc));
@@ -550,7 +601,7 @@ int foldedLikelihoods()
   getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr);
 
   plotProjectedPDF(mocProjectedPDF, frame, colorMoc, mocMax, mocLowErr, mocHigErr);
-  if(pole)
+  if(pole && !heraPDF)
     plotProjectedPDF(kidProjectedPDF, frame, colorKid, kidMax, kidLowErr, kidHigErr);
   plotProjectedPDF(ahrProjectedPDF, frame, colorAhr, ahrMax, ahrLowErr, ahrHigErr);
 
@@ -571,7 +622,7 @@ int foldedLikelihoods()
   ahrTF->SetFillStyle(1001);
 
   double yMin = 0.70;
-  if(!pole)
+  if(!pole || heraPDF)
     yMin = 0.77;
   TLegend leg = TLegend(0.2, yMin, 0.9, 0.9);
   leg.SetFillStyle(0);
@@ -580,7 +631,7 @@ int foldedLikelihoods()
   char legTmpTxt[99];
   sprintf(legTmpTxt, "Langenfeld et al. (%.1f +%.1f -%.1f GeV)", mocMax, mocHigErr, mocLowErr);
   leg.AddEntry(mocTF, legTmpTxt, "F");
-  if(pole) {
+  if(pole && !heraPDF) {
     sprintf(legTmpTxt, "Kidonakis (%.1f +%.1f -%.1f GeV)", kidMax, kidHigErr, kidLowErr);
     leg.AddEntry(kidTF, legTmpTxt, "F");
   }
@@ -589,10 +640,12 @@ int foldedLikelihoods()
   leg.Draw();
 
   canvas->Print(printNameBase+".ps");
-  TString epsName = "densities.eps";
+  TString epsName = "densities";
   if(!pole)
-    epsName = "densities_MSbar.eps";
-  canvas->Print(epsName);
+    epsName += "_MSbar";
+  if(heraPDF)
+    epsName += "_hera";
+  canvas->Print(epsName+".eps");
 
   gStyle->SetOptTitle(1);
 
@@ -600,7 +653,7 @@ int foldedLikelihoods()
   mocTF->SetTitle("Langenfeld et al.");
   ahrTF->SetTitle("Ahrens et al.");
 
-  if(pole)
+  if(pole && !heraPDF)
     fitSimpleGaussForComparison(kidTF, canvas, pole, printNameBase);
   fitSimpleGaussForComparison(ahrTF, canvas, pole, printNameBase);
   fitSimpleGaussForComparison(mocTF, canvas, pole, printNameBase);
