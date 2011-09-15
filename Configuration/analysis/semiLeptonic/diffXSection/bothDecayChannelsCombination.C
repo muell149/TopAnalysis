@@ -196,9 +196,9 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
           errorTheoryMCatNLOdown   ->Scale(1./errorTheoryMCatNLOdown   ->GetBinWidth(1)) ;
     
           // these are used to check if smoothing does not distort distributions too much  
-	  TH1F* errorTheoryMCatNLOcentralClean = (TH1F*) errorTheoryMCatNLOcentral->Clone() ;
-	  TH1F* errorTheoryMCatNLOupClean      = (TH1F*) errorTheoryMCatNLOup     ->Clone() ;
-	  TH1F* errorTheoryMCatNLOdownClean    = (TH1F*) errorTheoryMCatNLOdown   ->Clone() ;
+	  //TH1F* errorTheoryMCatNLOcentralClean = (TH1F*) errorTheoryMCatNLOcentral->Clone() ;
+	  //TH1F* errorTheoryMCatNLOupClean      = (TH1F*) errorTheoryMCatNLOup     ->Clone() ;
+	  //TH1F* errorTheoryMCatNLOdownClean    = (TH1F*) errorTheoryMCatNLOdown   ->Clone() ;
 
           if (errorSmooth) {
             errorTheoryMCatNLOcentral->Smooth(errorSmooth);
@@ -273,6 +273,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->Draw("same");
 	  }
 	  plotCombination->Draw("e1 same");
+          gPad->RedrawAxis(); 
 	  DrawCMSLabels(true,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
