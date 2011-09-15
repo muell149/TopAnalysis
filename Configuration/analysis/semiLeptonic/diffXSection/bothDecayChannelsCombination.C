@@ -132,6 +132,12 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction(plotName2,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
 	  TH1F* unbinnedTheory2 = (TH1F*)unbinnedTheory->Clone();
 	  TH1F* unbinnedTheoryMCAtNLO2 = (TH1F*)unbinnedTheoryMCAtNLO->Clone();
+          // get histogram central value & up/down variations for MC@NLO error bands
+          TString plotName2_Up   = plotName2; plotName2_Up  .Append("_Up"  ) ;
+          TString plotName2_Down = plotName2; plotName2_Down.Append("_Down") ;
+	  TH1F* errorTheoryMCatNLOcentral = getTheoryPrediction(plotName2     ,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
+	  TH1F* errorTheoryMCatNLOup      = getTheoryPrediction(plotName2_Up  ,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
+	  TH1F* errorTheoryMCatNLOdown    = getTheoryPrediction(plotName2_Down,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
 	  // normalize to unsit area for diff. norm. plots
 	  if(xSecVariables_[i].Contains("Norm")){
 	    if(!xSecVariables_[i].Contains("lep")&&!xSecVariables_[i].Contains("Y")&&!xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Rebin(10);
@@ -143,7 +149,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("ttbarPt"))unbinnedTheoryMCAtNLO->Rebin(2);
 	    else if(xSecVariables_[i].Contains("Mass"))unbinnedTheoryMCAtNLO->Rebin(4);
 	    else if(!xSecVariables_[i].Contains("lep"))unbinnedTheoryMCAtNLO->Rebin(2);
-	    else if(xSecVariables_[i].Contains("lepPt")) unbinnedTheoryMCAtNLO->Rebin(2);
+	    else if(xSecVariables_[i].Contains("lepPt")) unbinnedTheoryMCAtNLO->Rebin(1);
 	    else unbinnedTheoryMCAtNLO->Rebin(10);
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->Integral(0,unbinnedTheoryMCAtNLO->GetNbinsX()+1)));
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->GetBinWidth(1)));
@@ -167,6 +173,60 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    unbinnedTheoryMCAtNLO2->Scale(158./10000);
 
 	  }
+
+          // uncertainty bands MC@NLO
+          Int_t errorRebin  = 0 ;
+          Int_t errorSmooth = 0 ;
+          if(xSecVariables_[i].Contains("lepPt"  )) { errorRebin =  0 ; errorSmooth =   10 ; }
+          if(xSecVariables_[i].Contains("lepEta" )) { errorRebin =  5 ; errorSmooth =   10 ; }
+          if(xSecVariables_[i].Contains("topPt"  )) { errorRebin = 10 ; errorSmooth =   10 ; }
+          if(xSecVariables_[i].Contains("topY"   )) { errorRebin =  5 ; errorSmooth =   10 ; }
+          if(xSecVariables_[i].Contains("ttbarPt")) { errorRebin =  2 ; errorSmooth =    5 ; }
+          if(xSecVariables_[i].Contains("ttbarY" )) { errorRebin =  5 ; errorSmooth =   10 ; }
+          if(xSecVariables_[i].Contains("ttbarM" )) { errorRebin =  5 ; errorSmooth =   10 ; }
+ 
+          if (errorRebin) {
+            errorTheoryMCatNLOcentral->Rebin(errorRebin) ;
+            errorTheoryMCatNLOup     ->Rebin(errorRebin) ;
+            errorTheoryMCatNLOdown   ->Rebin(errorRebin) ;
+          }
+        
+          errorTheoryMCatNLOcentral->Scale(1./errorTheoryMCatNLOcentral->GetBinWidth(1)) ;
+          errorTheoryMCatNLOup     ->Scale(1./errorTheoryMCatNLOup     ->GetBinWidth(1)) ;
+          errorTheoryMCatNLOdown   ->Scale(1./errorTheoryMCatNLOdown   ->GetBinWidth(1)) ;
+    
+          // these are used to check if smoothing does not distort distributions too much  
+	  TH1F* errorTheoryMCatNLOcentralClean = (TH1F*) errorTheoryMCatNLOcentral->Clone() ;
+	  TH1F* errorTheoryMCatNLOupClean      = (TH1F*) errorTheoryMCatNLOup     ->Clone() ;
+	  TH1F* errorTheoryMCatNLOdownClean    = (TH1F*) errorTheoryMCatNLOdown   ->Clone() ;
+
+          if (errorSmooth) {
+            errorTheoryMCatNLOcentral->Smooth(errorSmooth);
+            errorTheoryMCatNLOup     ->Smooth(errorSmooth);
+            errorTheoryMCatNLOdown   ->Smooth(errorSmooth);
+          }
+
+          // with a TGraphAsymmErrors we can do the nice error band plotting without running in trouble when overlaying multiple histograms
+          TGraphAsymmErrors * errorBandsMCatNLO = new TGraphAsymmErrors(errorTheoryMCatNLOcentral->GetNbinsX()-1);
+          for (Int_t iBin = 1; iBin < errorTheoryMCatNLOcentral->GetNbinsX() ; iBin++ ) {
+
+            Double_t centralValue = errorTheoryMCatNLOcentral->GetBinContent(iBin) ;
+            Double_t     maxValue = errorTheoryMCatNLOup     ->GetBinContent(iBin) ;
+            Double_t     minValue = errorTheoryMCatNLOdown   ->GetBinContent(iBin) ;
+
+            errorBandsMCatNLO->SetPoint        ( iBin, errorTheoryMCatNLOcentral->GetBinCenter(iBin), centralValue  );
+            errorBandsMCatNLO->SetPointEXlow   ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinLowEdge(iBin)   );
+            errorBandsMCatNLO->SetPointEXhigh  ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinUpEdge (iBin)   );
+ 
+            if (maxValue > minValue) {
+              errorBandsMCatNLO->SetPointEYhigh( iBin, maxValue     - centralValue                                  );
+              errorBandsMCatNLO->SetPointEYlow ( iBin, centralValue - minValue                                      );
+            } else {
+              errorBandsMCatNLO->SetPointEYhigh( iBin, minValue     - centralValue                                  );
+              errorBandsMCatNLO->SetPointEYlow ( iBin, centralValue - maxValue                                      );
+            }
+          }
+
 	  histogramStyle(*unbinnedTheory , kSig  , false);
 	  histogramStyle(*unbinnedTheory2, kSig+1, false);
 	  histogramStyle(*unbinnedTheoryMCAtNLO , kZjets  , false);
@@ -178,13 +238,24 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  else if(!xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Smooth(10);
 	  else unbinnedTheoryMCAtNLO->Smooth(3);
 	  if(xSecVariables_[i].Contains("Norm")){
-	    // draw unsmoothed theory curves
+            // adapt style for error bands to central curve mc@nlo
+            errorBandsMCatNLO->SetFillColor  (kGray)    ;
+            errorBandsMCatNLO->SetFillStyle  (1001)     ; // NB: explicitly needed, otherwise filling invisible due to default "0"
+            errorBandsMCatNLO->SetLineColor  (unbinnedTheoryMCAtNLO->GetLineColor()) ;
+            errorBandsMCatNLO->SetLineWidth  (unbinnedTheoryMCAtNLO->GetLineWidth()) ;
+            errorBandsMCatNLO->SetMarkerColor(unbinnedTheoryMCAtNLO->GetLineColor()) ;
+            errorBandsMCatNLO->Draw("e3 same")          ; 
+  	    // draw unsmoothed theory curves
 	    // to see if rebinning/smoothing changes the shape
 	    //unbinnedTheoryMCAtNLO2->Draw("same");
 	    //unbinnedTheory2->Draw("same");
+	    //errorTheoryMCatNLOcentralClean->Draw("hist c same");
+	    //errorTheoryMCatNLOupClean     ->Draw("hist c same");
+	    //errorTheoryMCatNLOdownClean   ->Draw("hist c same");
 	    // draw smoothed theory curves
-	    unbinnedTheoryMCAtNLO->Draw("hist c same");
-	    unbinnedTheory       ->Draw("c same");
+	    plotTheo->Draw("hist same")                 ;
+	    unbinnedTheoryMCAtNLO->Draw("hist c same")  ;
+	    unbinnedTheory       ->Draw("c same")       ;
 	    TLegend *leg = new TLegend();
 	    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
 	    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.15);
@@ -196,9 +267,9 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->SetBorderSize(0);
 	    leg->SetTextAlign(12);
 	    //leg->SetHeader("");
-	    leg->AddEntry(plotCombination,       "Data    ","P");
-	    leg->AddEntry(unbinnedTheory       , "MadGraph", "L");
-	    leg->AddEntry(unbinnedTheoryMCAtNLO, "MC@NLO  ", "L");
+	    leg->AddEntry(plotCombination  , "Data    ", "P" );
+	    leg->AddEntry(unbinnedTheory   , "MadGraph", "L" );
+	    leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    leg->Draw("same");
 	  }
 	  plotCombination->Draw("e1 same");
