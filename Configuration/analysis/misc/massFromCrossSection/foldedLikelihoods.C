@@ -592,11 +592,24 @@ int foldedLikelihoods()
   const double mocMax = mocTF->GetMaximumX();
   const double ahrMax = ahrTF->GetMaximumX();
 
+  if(pole) {
+    std::cout << "============================================================" << std::endl;
+    std::cout << "Langenfeld et al.: Extracted pole mass = " << mocMax
+	      << " GeV (converted to MSbar mass: " << mMSbar(mocMax) << " GeV)" << std::endl;
+    if(!heraPDF)
+      std::cout << "Kidonakis        : Extracted pole mass = " << kidMax
+		<< " GeV (converted to MSbar mass: " << mMSbar(kidMax) << " GeV)" << std::endl;
+    std::cout << "Ahrens et al.    : Extracted pole mass = " << ahrMax
+	      << " GeV (converted to MSbar mass: " << mMSbar(ahrMax) << " GeV)" << std::endl;
+    std::cout << "============================================================" << std::endl;
+  }
+
   double kidLowErr, kidHigErr;
   double mocLowErr, mocHigErr;
   double ahrLowErr, ahrHigErr;
 
-  getUncertaintiesFromIntegral(kidTF, kidLowErr, kidHigErr);
+  if(pole && !heraPDF)
+    getUncertaintiesFromIntegral(kidTF, kidLowErr, kidHigErr);
   getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr);
   getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr);
 
