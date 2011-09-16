@@ -111,7 +111,10 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 	foundSolution = true;
       }
     }
-    if(!foundSolution) return;
+    if(!foundSolution){
+      TopKin_[4]->SetBinContent(1,TopKin_[4]->GetBinContent(1)+1);
+      return;
+    }
   }else if(useBtagging_){  // find best solution taking into account the b-tagging discriminators
   
     std::vector<int> bidcs;
