@@ -168,7 +168,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "PUControlDistributionsAfterBtagging/pileup_reweighted3BX",
     "PUControlDistributionsAfterBtagging/npvertex",
     "PUControlDistributionsAfterBtagging/npvertex_reweighted",
-    "PUControlDistributionsAfterBtagging/npvertex_reweighted3BX"
+    "PUControlDistributionsAfterBtagging/npvertex_reweighted3BX", 
+    // (III) after kinematic fit 
+    "analyzeTopRecoKinematicsKinFit/topPt",
+    "analyzeTopRecoKinematicsKinFit/topY",
+    "analyzeTopRecoKinematicsKinFit/ttbarPt",
+    "analyzeTopRecoKinematicsKinFit/ttbarY",
+    "analyzeTopRecoKinematicsKinFit/ttbarMass",
+    "analyzeTopRecoKinematicsKinFit/lepPt",
+    "analyzeTopRecoKinematicsKinFit/lepEta"
+    
   };
 
   TString plots1Dmu[ ] = { 
@@ -320,12 +329,20 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/20",
     "#SigmaE_{T} [GeV]/events/0/30",
     // (v) Vertices and pileup
-    "Number of PU Events/Frequency/1/1",
-    "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
-    "Number of PU Events (Reweighted 3BX)/Frequency/1/1",
-    "Number of Vertices/Frequency/1/1",
-    "Number of Vertices (Reweighted 1BX)/Frequency/1/1",
-    "Number of Vertices (Reweighted 3BX)/Frequency/1/1"
+    "Number of PU Events/Frequency/0/1",
+    "Number of PU Events (Reweighted 1BX)/Frequency/0/1",
+    "Number of PU Events (Reweighted 3BX)/Frequency/0/1",
+    "Number of Vertices/Frequency/0/1",
+    "Number of Vertices (Reweighted 1BX)/Frequency/0/1",
+    "Number of Vertices (Reweighted 3BX)/Frequency/0/1", 
+    // (III) after kinematic fit 
+    "p_{t}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/1",
+    "y^{t and #bar{t}}/Frequency/0/1",
+    "p_{t}^{t#bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/1",
+    "y^{t#bar{t}}/Frequency/0/1",
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/Frequency/0/1",
+    "p_{t}^{l} #left[#frac{GeV}{c}#right]/Frequency/0/1",    
+    "#eta^{l}/Frequency/0/1"
   };
 
   TString axisLabel1De[ ] = {
@@ -520,11 +537,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   std::vector<TString> selection_;
   selection_.push_back("tightJetKinematics/n"      );
   selection_.push_back("tightJetKinematicsTagged/n");
+  selection_.push_back("analyzeTopRecoKinematicsKinFit/ttbarMass");                                                       
   unsigned int MCBG=42;
   events_[selection_[0]][MCBG]=0;
-  events_[selection_[1]][MCBG]=0;
+  events_[selection_[1]][MCBG]=0; 
+  events_[selection_[2]][MCBG]=0;
   // loop pretagged/tagged
-  for(unsigned int step=0; step<=1; ++step){
+  for(unsigned int step=0; step<selection_.size(); ++step){
     // loop samples
     for(unsigned int sample=kSig; sample<=kData; ++sample){
       // save number
@@ -536,24 +555,27 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // b) print composition
   if(verbose>=0){
     // loop pretagged/tagged
-    for(unsigned int step=0; step<=1; ++step){    
+    for(unsigned int step=0; step<selection_.size(); ++step){    
       // print label
-      std::cout << "event composition";
-      if(step==0)  std::cout << " (pre-tagged)" << std::endl;
-      if(step==1)  std::cout << " (tagged)" << std::endl;
+      switch (step){
+          case 0 : std::cout << std::endl << "Event composition ---- pre-tagged, derived from: "+selection_[step]          << std::endl; break;
+          case 1 : std::cout << std::endl << "Event composition ---- after b-tagging, derived from: "+selection_[step]     << std::endl; break;
+          case 2 : std::cout << std::endl << "Event composition ---- after kinematic fit, derived from: "+selection_[step] << std::endl; break;
+          default: break;
+      }
       // all MC events
       double NAllMC=events_[selection_[step]][kSig]+events_[selection_[step]][MCBG];
       // print yield and composition
       std::cout << "events observed in data: " << events_[selection_[step]][kData] << std::endl;
       std::cout << "events expected from MC: " << NAllMC << std::endl;
       std::cout << "expected event composition:"   << std::endl; 
-      std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
-      std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
-      std::cout << "W+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl; 
-      std::cout << "Z+jets:  "   << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
-      std::cout << "QCD:  "      << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
-      std::cout << "single top:" << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
-      std::cout << "diboson:"    << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
+      std::cout << "ttbar SG:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
+      std::cout << "ttbar BG:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
+      std::cout << "W+jets:     " << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl; 
+      std::cout << "Z+jets:     " << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
+      std::cout << "QCD:        " << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
+      std::cout << "single top: " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
+      std::cout << "diboson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
     }
   }
 	
@@ -785,7 +807,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	  // draw other plots into same canvas
 	  else{ 
 	    // draw data as points
-	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e1 X0 same");
+	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e X0 same");
 	    // draw others as histo (stack)
 	    else histo_[plotList_[plot]][sample]->Draw("hist X0 same");
 	  }
