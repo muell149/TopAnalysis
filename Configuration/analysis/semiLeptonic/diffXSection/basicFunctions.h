@@ -54,7 +54,7 @@ namespace semileptonic {
 			    /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup ,
 			    /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
 			    /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
-			    /*24:*/sysBtagSFUp    , /*25:*/sysBtagSFDown     , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
+			    /*24:*/sysBtagSFUp    , /*25:*/sysBtagSFDown   , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
 			    /*28:*/sysPUup        , /*29:*/sysPUdown       , /*30:*/sysflatTrigSF     , /*31:*/sysTrigEffSFNormUp,
 			    /*32:*/sysTrigEffSFNormDown    , /*33:*/sysTriggerEffSFShapeUpEta , /*34:*/sysTriggerEffSFShapeDownEta,
 			    /*35:*/sysTriggerEffSFShapeUpPt, /*36:*/sysTriggerEffSFShapeDownPt, /*37:*/sysMisTagSFup              ,
@@ -528,17 +528,20 @@ namespace semileptonic {
     if((sample==kSig)||(sample==kBkg)){
       crossSection=158.; // combined 2010 CMS XSec
       // D6T Fall10
-      Nevents     =1306182.;
+      Nevents     =1306182;
       // D6T Spring11
       if(newSpring11MC) Nevents=1286491;
       // Z2 Summer11
-      if(newSummer11MC) Nevents=3701947;
-      // Fall10 systematic samples:
+      if(newSummer11MC){
+	Nevents=3701947;
+	// Summer11 systematic samples
+	if(kSys==sysTopScaleUp  ) Nevents=930483;  //1153236 (old Fall10);
+	if(kSys==sysTopScaleDown) Nevents=967055;  //1098971 (old Fall10);
+	if(kSys==sysTopMatchUp  ) Nevents=1062792; //1036492 (old Fall10);
+	if(kSys==sysTopMatchDown) Nevents=1065232; //938005  (old Fall10);
+      }
+      // Fall10 systematic samples
       if(!newSummer11MC&&!newSpring11MC){
-	if(kSys==sysTopScaleUp  ) Nevents=1153236;
-	if(kSys==sysTopScaleDown) Nevents=1098971;
-	if(kSys==sysTopMatchUp  ) Nevents=1036492;
-	if(kSys==sysTopMatchDown) Nevents=938005;
 	if(kSys==sysISRFSRup    ) Nevents=1394010;
 	if(kSys==sysISRFSRdown  ) Nevents=1221664;
 	if(kSys==sysPileUp      ) Nevents=1281237;
@@ -552,13 +555,16 @@ namespace semileptonic {
       // D6T Spring11
       if(newSpring11MC) Nevents=14722996;
       // Z2 Summer11
-      if(newSummer11MC) Nevents=81352581; //Nevents=56789563;
+      if(newSummer11MC){
+	Nevents=81352581; //Nevents=56789563;
+	// Summer11 systematic samples:
+	if(kSys==sysVBosonScaleUp  ) Nevents=9784907;  //6118255  (old Fall10);
+	if(kSys==sysVBosonScaleDown) Nevents=10022324; //4842219  (old Fall10);
+	if(kSys==sysVBosonMatchUp  ) Nevents=10461655; //10370368 (old Fall10);
+	if(kSys==sysVBosonMatchDown) Nevents=9956679;  //2706986  (old Fall10);
+      } 
       // Fall10 systematic samples:
       if(!newSummer11MC&&!newSpring11MC){
-	  if(kSys==sysVBosonScaleUp  ) Nevents=6118255;
-	if(kSys==sysVBosonScaleDown) Nevents=4842219;
-	if(kSys==sysVBosonMatchUp  ) Nevents=10370368;
-	if(kSys==sysVBosonMatchDown) Nevents=2706986;
 	if(kSys==sysPileUp         ) Nevents=14766396;
       }
     }
@@ -572,13 +578,14 @@ namespace semileptonic {
       // Z2 Summer11
       if(newSummer11MC){
 	Nevents=35101516;
+      // Summer11 systematic samples:
+	if(kSys==sysVBosonScaleUp  ) Nevents=1593052; //1329028 (old Fall10);
+	if(kSys==sysVBosonScaleDown) Nevents=1658995; //1436150 (old Fall10);
+	if(kSys==sysVBosonMatchUp  ) Nevents=1641367; //1667367 (old Fall10);
+	if(kSys==sysVBosonMatchDown) Nevents=1615032; //1662884 (old Fall10);
       }
       // Fall10 systematic samples:
       if(!newSummer11MC&&!newSpring11MC){
-	if(kSys==sysVBosonScaleUp  ) Nevents=1329028;
-	if(kSys==sysVBosonScaleDown) Nevents=1436150;
-	if(kSys==sysVBosonMatchUp  ) Nevents=1667367;
-	if(kSys==sysVBosonMatchDown) Nevents=1662884;
 	if(kSys==sysPileUp         ) Nevents=2539858;
       }
     }
@@ -823,7 +830,7 @@ namespace semileptonic {
     if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESup";
     if(sys==sysJESDown) fileName = "JESDown/"+fileName+"JESdown";
     // JER
-    if(sys==sysJERUp  ) fileName = "JERUp/"+fileName+"JERup";
+    if(sys==sysJERUp  ) fileName = "JERUp/"+fileName+"JERup"; 
     if(sys==sysJERDown) fileName = "JERDown/"+fileName+"JERdown";
     // Shape variation
     // only for new MC and ttbar signal
@@ -839,18 +846,18 @@ namespace semileptonic {
     if((sys==sysISRFSRdown)&&((sample==kSig)||(sample==kBkg))) fileName += "ISRFSRdown";
     // Scale
     // a) top
-    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg))) fileName+="ScaleUp";
-    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg))) fileName+="ScaleDown";
+    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "ScaleUp/"+fileName+"ScaleUp";
+    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg))) fileName = "ScaleDown/"+fileName+"ScaleDown";
     // b) V+jets
-    if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) fileName+="ScaleUp";
-    if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) fileName+="ScaleDown";
+    if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleUp/"+fileName+"ScaleUp";
+    if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleDown/"+fileName+"ScaleDown"; 
     // Match
     // a) top
-    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) fileName+="MatchUp";
-    if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) fileName+="MatchDown";
+    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "MatchUp/"+fileName+"MatchUp";
+    if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) fileName = "MatchDown/"+fileName+"MatchDown";
     // b) V+jets
-    if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) fileName+="MatchUp";
-    if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) fileName+="MatchDown";
+    if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "MatchUp/"+fileName+"MatchUp";
+    if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "MatchDown/"+fileName+"MatchDown";
     fileName+="PF.root";
     // return output
     return fileName;
@@ -1608,9 +1615,9 @@ namespace semileptonic {
     histDenominator->GetXaxis()->SetLabelSize(0);
     histDenominator->GetXaxis()->SetTitleSize(0);
     // draw ratio plot
-    ratio->DrawClone("pe1 X0");
+    ratio->DrawClone("p e X0");
     ratio->SetMarkerSize(1.2);
-    ratio->DrawClone("pe1 X0 same");
+    ratio->DrawClone("p e X0 same");
     rPad->SetTopMargin(0.0);
     rPad->SetBottomMargin(0.15*scaleFactor);
     rPad->SetRightMargin(right);
