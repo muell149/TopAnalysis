@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
 void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-			     //  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
-			     std::string decayChannel = "electron" )
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
+			     std::string decayChannel = "muon" )
 {
   // c) set root style
   // set root style
@@ -597,7 +597,12 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
       // divide by gen plot
       histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone()));
-
+//       if(sys==sysHadronisationUp){
+// 	double SF=1;
+// 	for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
+// 	  histo_[efficiency][kSig]->SetBinContent(bin histo_[efficiency][kSig]->GetBinContent(bin)*SF);
+// 	}
+//       }
       // std::cout << "gen(bin1): "  <<  histo_["analyzeTopPartonLevelKinematics/"+variable  ][kSig]->GetBinContent(1) << std::endl;
       // std::cout << "reco(bin1): " <<  histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->GetBinContent(1) << std::endl;
       // std::cout << "eff(bin1): "  <<  histo_[efficiency][kSig]->GetBinContent(1) << std::endl;
@@ -663,12 +668,18 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
       histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(name));
       // subtract BG(MC)
-      histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->Clone()), -1);
+      //histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->Clone()), -1); // other ttbar BG is accessed by a signal fraction (see below) 
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->Clone()), -1);
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->Clone()), -1);
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->Clone()), -1);
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->Clone()), -1);
       histo_[xSec][kData]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->Clone()), -1);
+      // correct for fraction of ttbar events that are signal
+      histo_[xSec+"AllTtBar"][kSig]=     (TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
+      histo_[xSec+"AllTtBar"][kSig]->Add((TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone()));
+      histo_[xSec+"SignalFraction"][kSig]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone();
+      histo_[xSec+"SignalFraction"][kSig]->Divide(histo_[xSec+"AllTtBar"][kSig]);
+      histo_[xSec][kData]->Multiply(histo_[xSec+"SignalFraction"][kSig]);
       // apply efficiency correction
       DivideYieldByEfficiencyAndLumi(histo_[xSec][kData], ((TH1F*)(histo_["efficiency/"+variable][kSig])), luminosity, 0);
       // b) differential XSec from Signal(MC prediction)
@@ -713,14 +724,15 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // careful: plot contains leptonic and hadronic top -> *0.5
   double Ndata  = 0.5 * dataYield ->Integral(0, dataYield ->GetNbinsX()+1);
   double NSig   = 0.5 * SigYield  ->Integral(0, SigYield  ->GetNbinsX()+1);
-  double NBGtop = 0.5 * BkgYield  ->Integral(0, BkgYield  ->GetNbinsX()+1);
+  double NBGtop = 0.5 * BkgYield  ->Integral(0, BkgYield  ->GetNbinsX()+1); 
   double NBGZ   = 0.5 * ZjetYield ->Integral(0, ZjetYield ->GetNbinsX()+1);
   double NBGW   = 0.5 * WjetYield ->Integral(0, WjetYield ->GetNbinsX()+1);
   double NBGsTop= 0.5 * STopYield ->Integral(0, STopYield ->GetNbinsX()+1);
   double NBGVV  = 0.5 * DiBosYield->Integral(0, DiBosYield->GetNbinsX()+1);
   double NBGQCD = 0.5 * QCDYield  ->Integral(0, QCDYield  ->GetNbinsX()+1);
-  double NBG= NBGtop+NBGZ+NBGW+NBGsTop+NBGVV+NBGQCD;
-  double NAllMC=NSig+NBG;
+  double NBG= NBGZ+NBGW+NBGsTop+NBGVV+NBGQCD; //other ttbar BG is handled by a signal fraction (see below sigFrac)
+  double NAllMC=NSig+NBGtop+NBG;
+  double sigFrac=NSig/(NSig+NBGtop);
   // print event composition
   if(verbose>0&&systematicVariation==sysNo){ 
     std::cout << std::endl;
@@ -760,8 +772,8 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   BR=NGen*1.0/(158*luminosity);
   //  double BR2=12.0/81.0;
   // calculate xSec
-  xSecResult= ( Ndata-NBG ) / ( eff*A*luminosity*BR );
-  double sigmaxSec = sqrt( Ndata ) / ( eff*A*luminosity*BR );
+  xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity*BR );
+  double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity*BR );
   // text output
   if(verbose>0){ 
     std::cout << std::endl;
@@ -772,6 +784,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     std::cout << "eff: "    << eff   << std::endl;
     std::cout << "A: "      << A     << std::endl;
     std::cout << "BR MC: "  << BR    << std::endl;
+    std::cout << "ttbar sigfrac: " << sigFrac << std::endl;
     std::cout << "inclusive cross section";
     if(extrapolate) std::cout << " (extrapolated)";
     std::cout << " [pb]: ";
@@ -826,12 +839,18 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       // total number of data events for this variable
       double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData],verbose-1);
       // total number of BG events for this variable
-      double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets],verbose-1);
+      double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets],verbose-1);
+      // NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
+      // BG from other ttbar events is treated in the signal fraction
       NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ],verbose-1);
       NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos],verbose-1);
       NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ],verbose-1);
       NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets],verbose-1);
+      // ttbar signal fraction
+      double NttbarAll=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig],verbose-1);
+      NttbarAll+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
+      double sigFracVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig],verbose-1);
+      sigFracVariable/=NttbarAll;
       // inclusive efficiency (* A) for this variable
       double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kSig],verbose-1);
       effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig],verbose-1);
@@ -848,23 +867,30 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	double NdataBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin);
 	NdataBin*=binwidth;
 	// get BG in bin
-	double NBGBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin);
+	double NBGBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin);
+	//NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
+	// BG from other ttbar events is treated in the signal fraction
 	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin);
 	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin);
 	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin);
 	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin);
 	NBGBin*=binwidth;
-	// calculate Ni = number of signal only events in bin from data
+	// ttbar signal fraction
+	double NttbarAllBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
+	NttbarAllBin      +=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
+	double sigFracBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
+	sigFracBin/=NttbarAllBin;
+	if(!isfinite(sigFracBin)||isnan(sigFracBin)) sigFracBin=1;
+	// calculate Ni = number of ttbar only events in bin from data
 	double Ni= NdataBin-NBGBin;
 	// calculate Ntot = sum_i(Ni) number of signal only events from data for this variable
 	double Ntot =NdataVariable-NBGVariable;
 	// get eff*A in bin
 	double effABin=(histo_["efficiency/"+variable][kSig])->GetBinContent(bin);
 	// calculate cross section for this bin
-	double xSecBin = (Ni/Ntot) * (effIncl/effABin) * (1/binwidth);
+	double xSecBin = (Ni/Ntot) * (sigFracBin/sigFracVariable) * (effIncl/effABin) * (1/binwidth);
 	// calculate complete error
-	double Nierror=sqrt(NdataBin); // the error of NBG is treated as systematic variation
+ 	double Nierror=sqrt(NdataBin); // the error of NBG is treated as systematic variation
 	double sumErrorNjSquare = 0; // sum(j,i!=j) [ errorNj*errorNj ]
 	for(int bin2=1; bin2<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin2){
 	  if(bin2!=bin){    
@@ -878,7 +904,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	// calculate complete error
 	double xSecBinError = sqrt( ((Ntot - Ni)*(Ntot - Ni)*Nierror*Nierror) + (Ni*Ni*sumErrorNjSquare) );
 	xSecBinError/= (Ntot*Ntot);
-	xSecBinError*= (effIncl/effABin) * (1/binwidth);
+	xSecBinError*= (effIncl/effABin) * (sigFracBin/sigFracVariable) * (1/binwidth);
 	// check for ambiguities
 	if(!isfinite(xSecBin)||isnan(xSecBin)){
 	  if(verbose>1){ 
@@ -907,9 +933,11 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	  std::cout << "Ndata(bin): " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
 	  std::cout << "NBG(bin): " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
 	  std::cout << "eff*A(bin): " << std::setprecision(3) << std::fixed << effABin << std::endl;
+	  std::cout << "ttbar sig frac(bin): " << std::setprecision(3) << std::fixed << sigFracBin << std::endl;
 	  std::cout << "Ndata(incl): " << std::setprecision(3) << std::fixed << NdataVariable << std::endl;
 	  std::cout << "NBG(incl): " << std::setprecision(3) << std::fixed << NBGVariable << std::endl;
 	  std::cout << "eff*A(incl): " << std::setprecision(3) << std::fixed << effIncl << std::endl;
+	  std::cout << "ttbar sig frac(incl): " << std::setprecision(3) << std::fixed << sigFracVariable << std::endl;
 	  std::cout << "result: " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
 	  if(extrapolate){
 	    double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
