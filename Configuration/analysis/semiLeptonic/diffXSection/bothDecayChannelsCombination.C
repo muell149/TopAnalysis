@@ -167,10 +167,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->GetBinWidth(1)));
 	    unbinnedTheoryMCAtNLO->Scale(1.0/(unbinnedTheoryMCAtNLO->GetBinWidth(1)));
 	    // cross section / Ngen
-	    unbinnedTheoryMCAtNLO->Scale(158./10000);
+	    unbinnedTheoryMCAtNLO->Scale(ttbarCrossSection/10000);
 	    unbinnedTheoryMCAtNLO2->Scale(1.0/(unbinnedTheoryMCAtNLO2->GetBinWidth(1)));
 	    // cross section / Ngen
-	    unbinnedTheoryMCAtNLO2->Scale(158./10000);
+	    unbinnedTheoryMCAtNLO2->Scale(ttbarCrossSection/10000);
 
 	  }
 

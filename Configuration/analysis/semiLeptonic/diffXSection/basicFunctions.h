@@ -63,6 +63,7 @@ namespace semileptonic {
 
   bool newSpring11MC=true;
   bool newSummer11MC=true;
+  double ttbarCrossSection=158; // combined 2010 CMS XSec
 
   TString sysLabel(unsigned int sys)
   {
@@ -526,7 +527,7 @@ namespace semileptonic {
     // c) fill #events in sample and cross sections (in / pb)
     // 2*ttbar MADGRAPH
     if((sample==kSig)||(sample==kBkg)){
-      crossSection=158.; // combined 2010 CMS XSec
+      crossSection=ttbarCrossSection; 
       // D6T Fall10
       Nevents     =1306182;
       // D6T Spring11

@@ -769,7 +769,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // branching ratio
   // careful: the xSec here needs to be 
   // consistent with the one in lumiweight()
-  BR=NGen*1.0/(158*luminosity);
+  BR=NGen*1.0/(ttbarCrossSection*luminosity);
   //  double BR2=12.0/81.0;
   // calculate xSec
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity*BR );
