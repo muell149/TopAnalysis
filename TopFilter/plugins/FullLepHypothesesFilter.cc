@@ -4,12 +4,13 @@
 #include "TopAnalysis/TopFilter/plugins/FullLepHypothesesFilter.h"
 
 FullLepHypothesesFilter::FullLepHypothesesFilter(const edm::ParameterSet& cfg):
-  hypoKey_    (cfg.getParameter<edm::InputTag>(       "hypoKey"        )),
-  FullLepEvt_ (cfg.getParameter<edm::InputTag>(       "FullLepEvent"   )),
-  weightCut_  (cfg.getParameter<double>(              "weightCut"      )),
-  jets_       (cfg.getParameter<edm::InputTag>(       "jets"           )),         
-  bAlgo_      (cfg.getParameter<std::string >(        "bAlgorithm"     )),  
-  bDisc_      (cfg.getParameter<std::vector<double> >("bDiscriminator" ))
+  hypoKey_         (cfg.getParameter<edm::InputTag>(       "hypoKey"        )),
+  FullLepEvt_      (cfg.getParameter<edm::InputTag>(       "FullLepEvent"   )),
+  useLeadingJets_  (cfg.getParameter<bool>         (       "useLeadingJets" )),  
+  weightCut_       (cfg.getParameter<double>(              "weightCut"      )),
+  jets_            (cfg.getParameter<edm::InputTag>(       "jets"           )),         
+  bAlgo_           (cfg.getParameter<std::string >(        "bAlgorithm"     )),  
+  bDisc_           (cfg.getParameter<std::vector<double> >("bDiscriminator" ))
 {
 }
 
@@ -38,6 +39,24 @@ bool FullLepHypothesesFilter::filter(edm::Event& evt, const edm::EventSetup& set
     edm::LogInfo ( "NonValidHyp" ) << "Hypothesis not valid for this event";
     return false; 
   }
+
+  // reject events without solution containing te two leading jets if this is chosen in config
+  if(useLeadingJets_){
+    bool foundSolution = false;
+    for(size_t i=0;i<FullLepEvt->numberOfAvailableHypos(hypoKey);++i){
+      int idx1 = FullLepEvt->jetLeptonCombination(hypoKey,i)[0];
+      int idx2 = FullLepEvt->jetLeptonCombination(hypoKey,i)[1];      
+    
+      if((idx1==0 && idx2==1) || (idx1==1 && idx2==0)){
+	foundSolution = true;
+	break;
+      }
+    }
+    if(!foundSolution){
+      edm::LogInfo ( "NonValidHyp" ) << "No solution with leading jets";
+      return false;
+    }
+  }   
   
   // cut on probability weight of solution
   if(FullLepEvt->solWeight()<weightCut_){
