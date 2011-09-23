@@ -1220,8 +1220,10 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	  std::cout << " to canvas " << canvasNumber  << " ( ";
 	  std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )"  << std::endl;
 	}
-	++canvasNumber;
 	// draw histo
+	plotCanvas_[canvasNumber]->SetRightMargin(0.15);
+	histo2_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	histo2_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	histo2_[plotList_[plot]][sample]->Draw("colz");
 	// print correlation factor
 	double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
@@ -1229,6 +1231,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	sprintf(correlation, "%f", d);
 	TString corr = (TString)correlation;
 	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
+	++canvasNumber;
       }
     }    
 
