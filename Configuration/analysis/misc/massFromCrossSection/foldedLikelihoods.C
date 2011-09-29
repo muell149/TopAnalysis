@@ -13,6 +13,7 @@
 #include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1.h"
+#include "TLatex.h"
 #include "TLegend.h"
 #include "TMath.h"
 #include "TROOT.h"
@@ -411,9 +412,21 @@ void fitSimpleGaussForComparison(TF1* f1, TCanvas* canvas, const bool pole, TStr
   canvas->Print(printNameBase+".ps");
 }
 
+TLatex* cmsPreliminaryTxt()
+{
+  TLatex* text = new TLatex(3.570061,23.08044,"CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
+  text->SetNDC();
+  text->SetTextAlign(13);
+  text->SetX(0.16);
+  text->SetY(1.003);
+  text->SetTextFont(42);
+  text->SetTextSizePixels(24);
+  return text;
+}
+
 int foldedLikelihoods()
 {
-  const bool pole    = true;
+  const bool pole    = false;
   const bool useAlphaUnc = true;
   const bool heraPDF = false;
 
@@ -573,6 +586,7 @@ int foldedLikelihoods()
   frame->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame->Draw();
   canvas->Print(printNameBase+".ps");
+  canvas->Print("xsec_vs_mass.eps");
   
   RooProdPdf kidProdPDF("kidProdPDF", "kidProdPDF", RooArgList(measXSecPDF, kidXSecPDF));
   RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocXSecPDF));
@@ -621,6 +635,9 @@ int foldedLikelihoods()
   frame->GetYaxis()->SetTitle("Probability density");
   frame->GetYaxis()->SetRangeUser(0., 0.034);
   frame->Draw();
+
+  TLatex* cmsPreliminary = cmsPreliminaryTxt();
+  cmsPreliminary->Draw();
 
   kidTF->SetLineColor(kBlack);
   kidTF->SetFillColor(colorKid);
@@ -682,6 +699,7 @@ int foldedLikelihoods()
   delete moc;
   delete canvas;
   delete f1;
+  delete cmsPreliminary;
 
   return 0;
 }
