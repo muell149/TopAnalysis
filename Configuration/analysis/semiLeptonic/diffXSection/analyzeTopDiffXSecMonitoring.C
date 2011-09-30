@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
+void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
 				  , const std::string decayChannel = "muon", bool withRatioPlot = true)
@@ -476,11 +476,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // every plot plotList_ existing in sTop/ diBoson .root file
   // will be combined and saved in the histo_ and histo2_ map
   // reCreate: reCreate combined plots if they are already existing
-  bool reCreate=true;
+  bool reCreate=false;
   AddSingleTopAndDiBoson(plotList_, histo_,           histo2_,           N1Dplots, verbose, reCreate, decayChannel);
   AddSingleTopAndDiBoson(plotList_, histoUncJESUp_,   histo2UncJESUp_,   N1Dplots, verbose, reCreate, decayChannel);
   AddSingleTopAndDiBoson(plotList_, histoUncJESDown_, histo2UncJESDown_, N1Dplots, verbose, reCreate, decayChannel);
-	
+
   // ---
   //    configure histograms
   // ---
@@ -503,6 +503,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
       std::cout << std::endl;
     }
   }
+
   // loop samples
   for(unsigned int sample=kSig; sample<=kData; ++sample){
     // loop plots
@@ -526,9 +527,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
  	histStyle2D( *histo2UncJESUp_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
       	histStyle2D( *histo2UncJESDown_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
       }
-   }
+    }
   }
-
+  
   // ---
   //    event composition
   // ---
@@ -537,7 +538,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   std::vector<TString> selection_;
   selection_.push_back("tightJetKinematics/n"      );
   selection_.push_back("tightJetKinematicsTagged/n");
-  selection_.push_back("analyzeTopRecoKinematicsKinFit/ttbarMass");                                                       
+  selection_.push_back("analyzeTopRecoKinematicsKinFit/ttbarMass");  
   unsigned int MCBG=42;
   events_[selection_[0]][MCBG]=0;
   events_[selection_[1]][MCBG]=0; 
@@ -621,7 +622,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     histoSumDown   -> Reset("ICESM");
     histoError     -> Reset("ICESM");
 
-    // Integral over all samples before assessing the differences
+    // Integral over all samples before accessing the differences
 
     for(unsigned int sample=kSig; sample<kData; ++sample)
     {
