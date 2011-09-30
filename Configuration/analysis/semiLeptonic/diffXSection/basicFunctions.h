@@ -45,9 +45,23 @@ namespace semileptonic {
 #endif
 
   /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
-  enum samples    {kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW };
-  int color_ [] = {kRed+1, kRed-7, kAzure-2, kGreen-3, kYellow, kMagenta, 10    , kBlack, 10 , 10 , 10 , kMagenta, kMagenta, kMagenta};
-  int marker_[] = {20    , 22    , 29      , 23      , 21     , 27      , 28    , 20    , 28 , 28 , 28 , 27      , 27      , 27      };
+  enum samples    {kSig    , kBkg    , kZjets  , kWjets  , 
+		   kQCD    , kSTop   , kDiBos  , kData   , 
+		   kQCDEM1 , kQCDEM2 , kQCDEM3 , kQCDBCE1, kQCDBCE2, kQCDBCE3,  
+		   kWW     , kWZ     , kZZ     , 
+		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW };
+  int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
+		   kYellow , kMagenta, 10      , kBlack  , 
+		   kYellow , kYellow , kYellow , kYellow , kYellow , kYellow ,
+		   10      , 10      , 10      , 
+		   kMagenta, kMagenta, kMagenta, kMagenta, kMagenta, kMagenta };
+
+  int marker_[] = {20    , 22    , 29     , 23  , 
+		   21    , 27    , 28     , 20  , 
+		   21 , 21 , 21 , 21 , 21 , 21  ,
+		   28    , 28    , 28 ,
+		   27 , 27 , 27 , 27 , 27 , 27 };
+
   enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:*/sysLumiDown       , /* 3:*/sysJESUp     ,
 			    /* 4:*/sysJESDown     , /* 5:*/sysJERUp        , /* 6:*/sysJERDown        , /* 7:*/sysTopScaleUp,
 			    /* 8:*/sysTopScaleDown, /* 9:*/sysVBosonScaleUp, /*10:*/sysVBosonScaleDown, /*11:*/sysTopMatchUp,
@@ -61,8 +75,6 @@ namespace semileptonic {
 			    /*38:*/sysMisTagSFdown, /*39:*/sysDiBosUp      , /*40:*/sysDiBosDown}; 
                             // NOTE: please add new uncertainties directly before sysDiBosUp!
 
-  bool newSpring11MC=true;
-  bool newSummer11MC=true;
   double ttbarCrossSection=158; // combined 2010 CMS XSec
 
   TString sysLabel(unsigned int sys)
@@ -136,17 +148,16 @@ namespace semileptonic {
     // chosen, the corresponding systematic shifted
     // SF is returned
 
+    // SF is now applied as event weight in analyzer
+    return 1.0;
+
     // combined single muon SF Run A+B from tag and probe
     double result = -1.;
     if (decayChannel.compare("muon")==0) {
-      result = 0.964155;
-      if(newSpring11MC) result = 0.9581;// TO BE DERIVED
-      if(newSummer11MC) result = 1.;    // SF is now applied as event weight in analyzer // result = 0.9946;
+      result = 1.0; // SF is now applied as event weight in analyzer
     }
     else if (decayChannel.compare("electron")==0) {
-      result = 1.0;                   // TO BE DERIVED
-      if(newSpring11MC) result = 1.0; // TO BE DERIVED
-      if(newSummer11MC) result = 1.0; // TO BE DERIVED
+      result = 1.0; // SF is now applied as event weight in analyzer
     }
     // errors for the derived SF
     double errorUp   = 0.03*result;
@@ -156,11 +167,11 @@ namespace semileptonic {
     if(sys==sysMuEffSFdown) result-=errorDown;
     return result;
   }
-
+  
   // BR correction for ttbar->lnuqq'bb'
-  double BRcorrectionSemileptonic = 0.985608;
-
-  void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.2, unsigned int color=0)
+  double BRcorrectionSemileptonic = 1.0; // BR correction not needed in new samples //0.985608;
+  
+   void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.2, unsigned int color=0)
   {
     // this function configures the style of a TH1 histogram "hist"
     // using "sampleTyp" to identify the corresponding sample from
@@ -344,7 +355,7 @@ namespace semileptonic {
     return (TString)result;
   }
 
-  TString sampleLabel(unsigned int sample, const std::string decayChannel, bool TwoThousandEleven=false)
+  TString sampleLabel(unsigned int sample, const std::string decayChannel, bool TwoThousandEleven=true)
   {
     // this function returns the name of the entered MC process
     // corresponding to the enumerator entry "sample" as defined in samples
@@ -362,6 +373,9 @@ namespace semileptonic {
     if(sample==kSToptW ) MCprocess="Single Top tW";
     if(sample==kSTops  ) MCprocess="Single Top s";
     if(sample==kSTopt  ) MCprocess="Single Top t";
+    if(sample==kSAToptW) MCprocess="Single Anti Top tW";
+    if(sample==kSATops ) MCprocess="Single Anti Top s";
+    if(sample==kSATopt ) MCprocess="Single Anti Top t";
     if(sample==kWjets  ) MCprocess="W+Jets";
     if(sample==kZjets  ) MCprocess="Z+Jets";
     if(sample==kDiBos  ) MCprocess="Diboson";
@@ -369,6 +383,12 @@ namespace semileptonic {
     if(sample==kWZ     ) MCprocess="WZ";
     if(sample==kZZ     ) MCprocess="ZZ";
     if(sample==kQCD    ) MCprocess="QCD";
+    if(sample==kQCDEM1 ) MCprocess="QCDEM1";
+    if(sample==kQCDEM2 ) MCprocess="QCDEM2";
+    if(sample==kQCDEM3 ) MCprocess="QCDEM3";
+    if(sample==kQCDBCE1) MCprocess="QCDBCE1"; 
+    if(sample==kQCDBCE2) MCprocess="QCDBCE2";
+    if(sample==kQCDBCE3) MCprocess="QCDBCE3"; 
     if(sample==kData&&!TwoThousandEleven) MCprocess="Data 2010";
     if(sample==kData&& TwoThousandEleven) MCprocess="Data";
     // return result
@@ -505,7 +525,7 @@ namespace semileptonic {
     int verbose=0;
     // a) check if input is valid
     // sample existing?
-    if(sample>kSToptW){
+    if(sample>kSAToptW){
       std::cout << "ERROR: invalid sample label for lumiweight calculation, no scaling will be done" << std::endl;
       return 1.;
     }
@@ -528,159 +548,134 @@ namespace semileptonic {
     // 2*ttbar MADGRAPH
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
-      // D6T Fall10
-      Nevents     =1306182;
-      // D6T Spring11
-      if(newSpring11MC) Nevents=1286491;
       // Z2 Summer11
-      if(newSummer11MC){
-	Nevents=3701947;
-	// Summer11 systematic samples
-	if(kSys==sysTopScaleUp  ) Nevents=930483;  //1153236 (old Fall10);
-	if(kSys==sysTopScaleDown) Nevents=967055;  //1098971 (old Fall10);
-	if(kSys==sysTopMatchUp  ) Nevents=1062792; //1036492 (old Fall10);
-	if(kSys==sysTopMatchDown) Nevents=1065232; //938005  (old Fall10);
-      }
-      // Fall10 systematic samples
-      if(!newSummer11MC&&!newSpring11MC){
-	if(kSys==sysISRFSRup    ) Nevents=1394010;
-	if(kSys==sysISRFSRdown  ) Nevents=1221664;
-	if(kSys==sysPileUp      ) Nevents=1281237;
-      }
+      Nevents=3701947;
+      // Summer11 systematic samples
+      if(kSys==sysTopScaleUp  ) Nevents=930483;  
+      if(kSys==sysTopScaleDown) Nevents=967055;  
+      if(kSys==sysTopMatchUp  ) Nevents=1062792; 
+      if(kSys==sysTopMatchDown) Nevents=1065232; 
     }
     // W->lnu+jets MADGRAPH
     else if(sample==kWjets){
       crossSection=31314.;
-      // D6T Fall10
-      Nevents     =14805546.;
-      // D6T Spring11
-      if(newSpring11MC) Nevents=14722996;
       // Z2 Summer11
-      if(newSummer11MC){
-	Nevents=81352581; //Nevents=56789563;
-	// Summer11 systematic samples:
-	if(kSys==sysVBosonScaleUp  ) Nevents=9784907;  //6118255  (old Fall10);
-	if(kSys==sysVBosonScaleDown) Nevents=10022324; //4842219  (old Fall10);
-	if(kSys==sysVBosonMatchUp  ) Nevents=10461655; //10370368 (old Fall10);
-	if(kSys==sysVBosonMatchDown) Nevents=9956679;  //2706986  (old Fall10);
-      } 
-      // Fall10 systematic samples:
-      if(!newSummer11MC&&!newSpring11MC){
-	if(kSys==sysPileUp         ) Nevents=14766396;
-      }
+      Nevents=81352581;
+      // Summer11 systematic samples:
+      if(kSys==sysVBosonScaleUp  ) Nevents=9784907;  
+      if(kSys==sysVBosonScaleDown) Nevents=10022324; 
+      if(kSys==sysVBosonMatchUp  ) Nevents=10461655; 
+      if(kSys==sysVBosonMatchDown) Nevents=9956679;  
     }
     // DY->ll+jets MADGRAPH
     else if(sample==kZjets){
       crossSection=3048.;
-      // D6T Fall10
-      Nevents     =2543727.;
-      // D6T Spring11
-      if(newSpring11MC) Nevents=2543706;
       // Z2 Summer11
-      if(newSummer11MC){
-	Nevents=35101516;
+      Nevents=35101516;
       // Summer11 systematic samples:
-	if(kSys==sysVBosonScaleUp  ) Nevents=1593052; //1329028 (old Fall10);
-	if(kSys==sysVBosonScaleDown) Nevents=1658995; //1436150 (old Fall10);
-	if(kSys==sysVBosonMatchUp  ) Nevents=1641367; //1667367 (old Fall10);
-	if(kSys==sysVBosonMatchDown) Nevents=1615032; //1662884 (old Fall10);
-      }
-      // Fall10 systematic samples:
-      if(!newSummer11MC&&!newSpring11MC){
-	if(kSys==sysPileUp         ) Nevents=2539858;
-      }
+      if(kSys==sysVBosonScaleUp  ) Nevents=1593052;
+      if(kSys==sysVBosonScaleDown) Nevents=1658995;
+      if(kSys==sysVBosonMatchUp  ) Nevents=1641367;
+      if(kSys==sysVBosonMatchDown) Nevents=1615032;
     }
     // QCD Mu enriched PYTHIA6
     else if(sample==kQCD&&decayChannel.compare("muon")==0){
-      // Z2 Fall10
-      crossSection=296600000.*0.00028550; // generator crossSection * prefilter efficiency
-      Nevents     =29504866.;
-      // Z2 Spring11
-      if(newSpring11MC) Nevents=29434562;
       // Z2 Summer11
-      if(newSummer11MC){
-	crossSection=296600000.*0.0002855; // generator crossSection * prefilter efficiency
-	Nevents     =20416038.;
-      }
+      crossSection=296600000.*0.0002855; // generator crossSection * prefilter efficiency
+      Nevents     =20416038.;
     }
-    // QCD e+jets channel combined
+    // QCD e+jets channel 
+    // a) subsamples
+    else if(sample==kQCDEM1){
+      crossSection=0.0106*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     =35729669;
+    }
+    else if(sample==kQCDEM2){
+      crossSection=0.061*59440000; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     =70392060;
+    }
+    else if(sample==kQCDEM3){
+      crossSection=0.159*898200; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     =8150672;
+    }
+    else if(sample==kQCDBCE1){
+      crossSection=0.00059*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     =2081560;
+    }
+    else if(sample==kQCDBCE2){
+      crossSection=0.00242*59440000; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     =2030033;
+    }
+    else if(sample==kQCDBCE3){
+      crossSection=0.0105*898200; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     =1082691;
+    }
+    // b)combined
     else if(sample==kQCD&&decayChannel.compare("electron")==0){
-      // Z2 Fall10/Spring11: no samples yet!
-      crossSection=1; // generator crossSection * prefilter efficiency
-      Nevents     =0.;
       // Z2 Summer11: already added in combineMCsamples.C
-      // with cross section as weight,
+      // with cross section as weight, only
       // lumi normalization is done here
-      if(newSummer11MC) Nevents     =1.;
+      Nevents     =1.;
+      crossSection=1;
     }
-    // Fall10/Spring11 singleTop MADGRAPH Z2 samples
-    // single top->lnu (added singleTop, s,t,tW channel) MADGRAPH Z2 Fall10
+    // singleTop POWHEG samples
+    // a) subsamples
+    else if(sample==kSATops){
+      crossSection=1.44;
+      Nevents     =137980;
+    }
+    else if(sample==kSTops){
+      crossSection=3.19;
+      Nevents     =259971; 
+    }
+    else if(sample==kSATopt){
+      crossSection=22.65;
+      Nevents     =1944826;
+    }
+    else if(sample==kSTopt){
+      crossSection=41.92;
+      Nevents     =3900171;
+    }
+    else if(sample==kSAToptW){
+      crossSection=7.87;
+      Nevents     =809984;
+    }
+    else if(sample==kSToptW){
+      crossSection=7.87;
+      Nevents     =814390;
+    }
+    // b) combined single top sample
     else if(sample==kSTop){
-      crossSection=1.;         // this leads to a weight
-      Nevents     =luminosity; // of 1.0 as kSTop is already weighted
       // Summer11 Z2: already added in combineMCsamples.C
       // with cross section as weight,
       // lumi normalization is done here
-      if(newSummer11MC) Nevents=1;
-    }
-    else if(sample==kSTops&&!newSummer11MC){
-      crossSection=4.6*0.108*3; // correct theory XSec for leptonic decay only
-      Nevents     =494967.;
-      if(newSpring11MC) Nevents =494967;
-      // systematic samples:
-      if(kSys==sysPileUp)Nevents=494967;
-    }
-    else if(sample==kSTopt&&!newSummer11MC){
-      crossSection=64.6*0.108*3; // correct theory XSec for leptonic decay only
-      Nevents     =484060.;
-      if(newSpring11MC) Nevents =484060;
-      // systematic samples:
-      if(kSys==sysPileUp)Nevents=484060;
-    }
-    else if(sample==kSToptW&&!newSummer11MC){
-	crossSection=15.7;  // has been 10.6, adapted from https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
-      Nevents     =494961.;
-      if(newSpring11MC) Nevents =489417;
-      // systematic samples:
-      if(kSys==sysPileUp)Nevents=494961;
+      Nevents=1;
+      crossSection=1.;
     }
     // DiBoson PYTHIA6 Z2
-    // (added diboson,WW,WZ,ZZ)
-    else if(sample==kDiBos){
-      // Fall10 Z2
-      crossSection=1.;         // this leads to a weight
-      Nevents     =luminosity; // of 1.0 as kDiBos is already weighted
-      // Summer11 Z2: already added in combineMCsamples.C
-      // with cross section as weight,
-      // lumi normalization is done here
-      if(newSummer11MC) Nevents=1;
-    }
+    // a) subsamples
     else if(sample==kWW){
       crossSection=43.0;
-      // Fall10 Z2
-      Nevents     =2061760;
       // Summer11 Z2
-      if(newSummer11MC) Nevents=4225916;
-      // systematic samples:
-      if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2061760;
+      Nevents=4225916;
     }
     else if(sample==kWZ){
       crossSection=18.2;
-      // Fall10 Z2
-      Nevents     =2194752;
       // Summer11 Z2
-      if(newSummer11MC) Nevents=4265243;
-      // systematic samples:
-      if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2185664;
+      Nevents=4265243;
     }
     else if(sample==kZZ){
       crossSection=5.9;
-      // Fall10 Z2
-      Nevents     =2113368;
       // Summer11 Z2
-      if(newSummer11MC) Nevents=4187885;
-      // systematic samples:
-      if(kSys==sysPileUp&&!newSummer11MC&&!newSpring11MC)Nevents=2113368;
+      Nevents=4187885;
+    }
+    // b) combined diboson: WW,WZ,ZZ
+    else if(sample==kDiBos){
+      // Summer11 Z2: already added in combineMCsamples.C
+      // with cross section as weight,
+      // lumi normalization is done here
+      crossSection=1.;
+      Nevents=1;
     }
     // Data
     else if(sample==kData){
@@ -720,7 +715,7 @@ namespace semileptonic {
       if(kSys==sysQCDdown) weight*=(1.0-scale);
     }
     // (iii) more/less single top
-    if(sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
+    if(sample==kSATops||sample==kSATopt||sample==kSAToptW||sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
       scale=0.3;
       if(kSys==sysSTopUp  ) weight*=(1.0+scale);
       if(kSys==sysSTopDown) weight*=(1.0-scale);
@@ -817,15 +812,21 @@ namespace semileptonic {
     if(sample==kZZ    )fileName += "ZZPytia6Z2";
     if(sample==kDiBos )fileName += "VVPytia6Z2";
     if(sample==kQCD   )fileName += "QCDPythiaZ2";
-    if(sample==kSToptW)fileName += "SingleTopTWchannelMadZ2";
-    if(sample==kSTops )fileName += "SingleTopSchannelMadZ2";
-    if(sample==kSTopt )fileName += "SingleTopTchannelMadZ2";
-    if(sample==kSTop  )fileName += "SingleTopMadZ2";
+    if(sample==kQCDEM1  )fileName += "QCDPythiaEM1Z2";
+    if(sample==kQCDEM2  )fileName += "QCDPythiaEM2Z2";
+    if(sample==kQCDEM3  )fileName += "QCDPythiaEM3Z2";
+    if(sample==kQCDBCE1 )fileName += "QCDPythiaBCE1Z2"; 
+    if(sample==kQCDBCE2 )fileName += "QCDPythiaBCE2Z2";
+    if(sample==kQCDBCE3 )fileName += "QCDPythiaBCE3Z2";  
+    if(sample==kSToptW )fileName += "SingleTopTWchannelMadZ2";
+    if(sample==kSTops  )fileName += "SingleTopSchannelMadZ2";
+    if(sample==kSTopt  )fileName += "SingleTopTchannelMadZ2";
+    if(sample==kSAToptW)fileName += "SingleAntiTopTWchannelMadZ2";
+    if(sample==kSATops )fileName += "SingleAntiTopSchannelMadZ2";
+    if(sample==kSATopt )fileName += "SingleAntiTopTchannelMadZ2";
+    if(sample==kSTop   )fileName += "SingleTopMadZ2";
     // label for MC production cycle
-    // note: we have no Diboson spring11 MC up to now
-    if(!newSummer11MC&&newSpring11MC&&sample!=kWW&&sample!=kWZ&&sample!=kZZ) fileName += "Spring11";
-    else if(newSummer11MC) fileName += "Summer11";
-    else fileName += "Fall10"  ;
+    fileName += "Summer11";
     // take care of systematic variations
     // JES
     if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESup";
@@ -835,7 +836,7 @@ namespace semileptonic {
     if(sys==sysJERDown) fileName = "JERDown/"+fileName+"JERdown";
     // Shape variation
     // only for new MC and ttbar signal
-    if(newSummer11MC&&sample==kSig){
+    if(sample==kSig){
       if(sys==sysShapeUp  ) fileName += "MCShapeVarUp"  ;
       if(sys==sysShapeDown) fileName += "MCShapeVarDown";
     }
@@ -903,7 +904,7 @@ namespace semileptonic {
       // open our standard analysis files and save them in a map
       std::map<unsigned int, TFile*> files_;
       // loop samples
-      for(int sample = kSig; sample<=kSToptW; sample++){
+      for(int sample = kSig; sample<=kSAToptW; sample++){
 	TString fileName;
 	if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
 	if(sample==kData) fileName = dataFile;
@@ -935,7 +936,7 @@ namespace semileptonic {
       // check if plot exists in any sample
       bool existsInAnySample=false;
       // loop samples
-      for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
+      for(unsigned int sample=kSig; sample<=kSAToptW; ++sample){
 	// check existence of sample
 	if(files_.count(sample)!=0){
 	  // create plot container
@@ -956,7 +957,7 @@ namespace semileptonic {
 	  if(targetPlot){ 
 	    existsInAnySample=true;
 	    // go to end of loop
-	    sample=kSToptW;
+	    sample=kSAToptW;
 	  }
 	}
       }
@@ -968,7 +969,7 @@ namespace semileptonic {
       else{
 	// otherwise: get plots from sample
 	// loop samples
-	for(unsigned int sample=kSig; sample<=kSToptW; ++sample){
+	for(unsigned int sample=kSig; sample<=kSAToptW; ++sample){
 	  // delete additional part of MC foldername
 	  // that does not exist in data 
 	  TString plotname=plotList_[plot];
@@ -1031,7 +1032,7 @@ namespace semileptonic {
     // "systematicVariation": specify systematic variation corresponding to enum systematicVariation
 
     // loop samples
-    for(unsigned int sample=kSig; sample<=kSToptW; ++sample) {
+    for(unsigned int sample=kSig; sample<=kSAToptW; ++sample) {
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	// a) 1D
@@ -1105,34 +1106,37 @@ namespace semileptonic {
 	  // loop all three subchannels
 	  unsigned int firstSubChannel=kSTops;
 	  if(sample==kDiBos) firstSubChannel=kWW;
-	  for(unsigned int subSample=firstSubChannel; subSample<=firstSubChannel+2; ++subSample){
-	    // check if plot exists for the subchannel
-	    bool subPlotExists=false;
-	    if((plot<N1Dplots )&&(histo_ [plotList_[plot]].count(subSample)>0)) subPlotExists=true;
-	    if((plot>=N1Dplots)&&(histo2_[plotList_[plot]].count(subSample)>0)) subPlotExists=true;
-	    if((subPlotExists==false)&&(verbose>0)){
-	      std::cout << "plot " << plotList_[plot];
-	      std::cout << " does not exist for subSample ";
-	      std::cout << sampleLabel(subSample,decayChannel) << std::endl;
-	    }
-	    if(subPlotExists){
-	      // add histo
-	      // a) 1D
-	      if(plot<N1Dplots){
-		if(first ) histo_[plotList_[plot]][sample]   =  (TH1F*)histo_[plotList_[plot]][subSample]->Clone();
-		if(!first) histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][subSample]->Clone());
+	  for(unsigned int subSample=firstSubChannel; subSample<=firstSubChannel+5; ++subSample){
+	    // single top has 6, diboson only 2 subsamples
+	    if((sample==kDiBos&&subSample<firstSubChannel+3)||sample==kSTop){
+	      // check if plot exists for the subchannel
+	      bool subPlotExists=false;
+	      if((plot<N1Dplots )&&(histo_ [plotList_[plot]].count(subSample)>0)) subPlotExists=true;
+	      if((plot>=N1Dplots)&&(histo2_[plotList_[plot]].count(subSample)>0)) subPlotExists=true;
+	      if((subPlotExists==false)&&(verbose>0)){
+		std::cout << "plot " << plotList_[plot];
+		std::cout << " does not exist for subSample ";
+		std::cout << sampleLabel(subSample,decayChannel) << std::endl;
 	      }
-	      // b) 2D
-	      if(plot>=N1Dplots){
-		if(first ) histo2_[plotList_[plot]][sample]   =  (TH2F*)histo2_[plotList_[plot]][subSample]->Clone();
-		if(!first) histo2_[plotList_[plot]][sample]->Add((TH2F*)histo2_[plotList_[plot]][subSample]->Clone());
-	      }
-	      // indicate that already one plot is found
-	      first=0;
-	      // print out information
-	      if(verbose>0){
-		std::cout << "will add " << plotList_[plot];
-		std::cout << " from " << sampleLabel(subSample,decayChannel) << std::endl;
+	      if(subPlotExists){
+		// add histo
+		// a) 1D
+		if(plot<N1Dplots){
+		  if(first ) histo_[plotList_[plot]][sample]   =  (TH1F*)histo_[plotList_[plot]][subSample]->Clone();
+		  if(!first) histo_[plotList_[plot]][sample]->Add((TH1F*)histo_[plotList_[plot]][subSample]->Clone());
+		}
+		// b) 2D
+		if(plot>=N1Dplots){
+		  if(first ) histo2_[plotList_[plot]][sample]   =  (TH2F*)histo2_[plotList_[plot]][subSample]->Clone();
+		  if(!first) histo2_[plotList_[plot]][sample]->Add((TH2F*)histo2_[plotList_[plot]][subSample]->Clone());
+		}
+		// indicate that already one plot is found
+		first=0;
+		// print out information
+		if(verbose>0){
+		  std::cout << "will add " << plotList_[plot];
+		  std::cout << " from " << sampleLabel(subSample,decayChannel) << std::endl;
+		}
 	      }
 	    }
 	  }
