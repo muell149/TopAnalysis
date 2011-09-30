@@ -669,7 +669,7 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
     for(int bin=1; bin<=result->GetNbinsX(); ++bin){
       if(result->GetBinCenter(bin)>=420){
 	double scalefactor=myVarFunc->GetParameter(1)/myFunc->GetParameter(1);
-	std::cout << variable << "(" << variation << "): " << scalefactor << std::endl;
+	//	std::cout << variable << "(" << variation << "): " << scalefactor << std::endl;
 	result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
 	if(result->GetBinCenter(bin)>=450) result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
 	if(result->GetBinCenter(bin)>=650) result->SetBinContent(bin,result->GetBinContent(bin)*scalefactor*scalefactor);
