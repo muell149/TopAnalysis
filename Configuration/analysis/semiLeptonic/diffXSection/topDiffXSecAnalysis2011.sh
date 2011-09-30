@@ -49,15 +49,15 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"electron\" 
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
@@ -108,19 +108,19 @@ if [ $decayChannel == \"combined\" ]
     then
     oldErrors=false
 fi
-## automatic definition of used MC sets
-## 2010: fall10 MC
-if [ $dataLuminosity2 -le 3600 ]
-    then
-    sed -i s/newSpring11MC=true/newSpring11MC=false/g ./basicFunctions.h
-    sed -i s/newSummer11MC=true/newSummer11MC=false/g ./basicFunctions.h
-fi
-## 2011: summer11MC
-if [ $dataLuminosity2 -ge 3601 ]
-    then
-    sed -i s/newSpring11MC=false/newSpring11MC=true/g ./basicFunctions.h
-    sed -i s/newSummer11MC=true/newSummer11MC=true/g ./basicFunctions.h
-fi
+### automatic definition of used MC sets
+### 2010: fall10 MC
+#if [ $dataLuminosity2 -le 3600 ]
+#    then
+#    sed -i s/newSpring11MC=true/newSpring11MC=false/g ./basicFunctions.h
+#    sed -i s/newSummer11MC=true/newSummer11MC=false/g ./basicFunctions.h
+#fi
+### 2011: summer11MC
+#if [ $dataLuminosity2 -ge 3601 ]
+#    then
+#    sed -i s/newSpring11MC=false/newSpring11MC=true/g ./basicFunctions.h
+#    sed -i s/newSummer11MC=true/newSummer11MC=true/g ./basicFunctions.h
+#fi
 
 #####################
 ## prepare running ##
