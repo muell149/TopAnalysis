@@ -13,13 +13,17 @@
 #include <TKey.h>
 #include <TDirectory.h>
 
-void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1);
+void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1);
 
-void createPseudoData(double luminosity= 35.9){
+void createPseudoData(double luminosity= 1100, const std::string decayChannel="muon"){
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
-  int verbose=0;
+  int verbose=1;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
-  bool smear=true;
+  bool smear=false;
+  // "dataFile": absolute path of data file, used to define plots of interest
+  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root";
+
   //  ---
   //     create container for histos and files
   //  ---
@@ -33,42 +37,25 @@ void createPseudoData(double luminosity= 35.9){
   // -----------------------------------------
   // !!! add all contributing samples here !!!
   // -----------------------------------------
-  TString inputFolder = "./diffXSecFromSignal/analysisRootFiles";
+  TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun";
   // save all default top analysis samples in files_
-  files_ = getStdTopAnalysisFiles(inputFolder, sysNo, "no");
+  files_ = getStdTopAnalysisFiles(inputFolder, sysNo, dataFile, decayChannel);
   // remove single Top (combined), DiBoson (combined) and data
   if(files_.count(kSTop )>0)files_.erase(kSTop );
   if(files_.count(kDiBos)>0)files_.erase(kDiBos);
-  if(files_.count(kData )>0)files_.erase(kData );
-  // print list of files considered
-  if(verbose>0){
-    std::cout << std::endl << "the following files will be considered: " << std::endl;
-    // loop files
-    for(int sample = kSig; sample<=kSToptW; sample++){
-      // check existence of folder in all existing files
-      if(files_.count(sample)>0){
-	std::cout << files_[sample]->GetName() << std::endl;
-      }
-    }
-  }
+  //if(files_.count(kData )>0)files_.erase(kData ); // data file needed for list of plots
+  // remove combined QCD file for electron channel
+  if(decayChannel.compare("electron")==0&&files_.count(kQCD)>0) files_.erase(kQCD);
+
   //  -----------------------------------------
   //     get list of all plots to be considered
   //  -----------------------------------------
   std::vector<TString> plotList_;
   TString currentFolder ="";
   TString currentPlot = "";
-  // search for the first file existing to get list of plots from
-  unsigned int existingFile=111;
-  for(unsigned int sample = kSig; sample<=kSToptW; ++sample){
-    if((files_.count(sample)>0)&&(existingFile==111)) existingFile=sample;
-  }    
-  if(existingFile==111){
-    std::cout << std::endl << "ERROR: no valid inputfile found" << std::endl;
-    exit(0);
-  }
-  if(verbose>0) std::cout << std::endl << "searching for all plots in file " << files_[existingFile]->GetName() << std::endl;
-  // go to existing file for getting plot names
-  files_[existingFile]->cd();
+  if(verbose>0) std::cout << std::endl << "searching for all plots in file " << files_[kData]->GetName() << std::endl;
+  // go to data file for getting plot names
+  files_[kData]->cd();
   // loop objects in file
   TIter fileIterator(gDirectory->GetListOfKeys());
   if(verbose>1){
@@ -86,78 +73,52 @@ void createPseudoData(double luminosity= 35.9){
     if(fileObject->InheritsFrom("TDirectory")){
       currentFolder = (TString)fileObject->GetName();
       if(verbose>1) std::cout << " ("+currentFolder+")" << std::endl;
-      // check existence of folder in all existing files
-      bool folderExistsInAllFiles=true;
-      // loop files
-      for(int sample = kSig; sample<=kSToptW; sample++){
-	// check existence of folder in all existing file
-	if((files_.count(sample)>0)&&(files_[sample]->GetDirectory(currentFolder))==0){
-	  folderExistsInAllFiles=false;
-	    if(verbose>1){
-	      std::cout << " does NOT exist in " << files_[sample]->GetName();
-	      std::cout << " will be neglected" << std::endl;
-	    }
-	  break;
-	}
+      // go to directory
+      ((TDirectory*)fileObject)->cd();
+      if(verbose>1){
+	std::cout << "looping objects in in ";
+	gDirectory->pwd();
       }
-      // if existing in all files, continue
-      if(folderExistsInAllFiles){
-	if(verbose>1) std::cout << " exist in all input files" << std::endl;
-	// go to directory
-	((TDirectory*)fileObject)->cd();
-	if(verbose>1){
-	  std::cout << "looping objects in in ";
-	  gDirectory->pwd();
-	}
-	// loop objects in directory
-	TIter folderIterator(gDirectory->GetListOfKeys());
-	TKey *folderKey = (TKey*)folderIterator();
-	int count2=0;
-	while( (folderKey = (TKey*)folderIterator()) ) {
-	  ++count2;
-	  TObject *folderObject = folderKey->ReadObj(); 
-	  currentPlot = (TString)folderObject->GetName();
-	  if(verbose>1) std::cout << "plotObject #" << count2 << " ("+currentPlot+")" << std::endl;
-	  // check if object is a TH1 
-	  if(folderObject->InheritsFrom("TH1")){
-	    if(verbose>1) std::cout << "inherits from TH1";
-	    // check if TH2 and neglect because a simple 
-	    // resmearing here is not possible
-	    if((folderObject->InheritsFrom("TH2"))&&(verbose>1)) std::cout << " and from TH2" << std::endl;
-	    else{
-	      if(verbose>1) std::cout << " and NOT from TH2" << std::endl;
-	      // check if this plot exists in all files
-	      bool plotExistsInAllFiles=true;
-	      // loop files
-	      for(int sample = kSig; sample<=kSToptW; sample++){
-		// check existence of plot in all existing files
-		if((files_.count(sample)>0)){
-		  TH1* targetPlot;
-		  files_[sample]->GetObject(currentFolder+"/"+currentPlot, targetPlot);
-		  // if not existing in all files, neglect
-		  if(!targetPlot){
-		    plotExistsInAllFiles=false;
-		      if(verbose>1){
-			std::cout << " does NOT exist in " << files_[sample]->GetName();
-			std::cout << " will be neglected" << std::endl;
-		      }
-		    break;
-		  }
-		}
-	      }
-	      // if existing in all files, add to list of plots
-	      if(plotExistsInAllFiles){
-		if(verbose>1) std::cout << "will be added to list of output plots" << std::endl;
-		plotList_.push_back(currentFolder+"/"+currentPlot);
-	      }
-	    }
+      // loop objects in directory
+      TIter folderIterator(gDirectory->GetListOfKeys());
+      TKey *folderKey = (TKey*)folderIterator();
+      int count2=0;
+      while( (folderKey = (TKey*)folderIterator()) ) {
+	++count2;
+	TObject *folderObject = folderKey->ReadObj(); 
+	currentPlot = (TString)folderObject->GetName();
+	if(verbose>1) std::cout << "plotObject #" << count2 << " ("+currentPlot+")" << std::endl;
+	// check if object is a TH1 
+	if(folderObject->InheritsFrom("TH1")){
+	  if(verbose>1) std::cout << "inherits from TH1";
+	  // check if TH2 and neglect because a simple 
+	  // resmearing here is not possible
+	  if((folderObject->InheritsFrom("TH2"))&&(verbose>1)) std::cout << " and from TH2" << std::endl;
+	  else{
+	    if(verbose>1) std::cout << " and NOT from TH2" << std::endl;
+	    // add to list of plots
+	    if(verbose>1) std::cout << "will be added to list of output plots" << std::endl;
+	    plotList_.push_back(currentFolder+"/"+currentPlot);
 	  }
 	}
       }
     }
   }
-  // close existing file for getting plot names
-  files_[existingFile]->Close(); 
+  // close data file for getting plot names
+  files_[kData]->Close();
+  // remove data file from list of considered files
+  if(files_.count(kData )>0)files_.erase(kData );
+  // print list of files considered
+  if(verbose>0){
+    std::cout << std::endl << "the following files will be considered: " << std::endl;
+    // loop files
+    for(int sample = kSig; sample<=kSAToptW; sample++){
+      // check existence of folder in all existing files
+      if(files_.count(sample)>0){
+	std::cout << files_[sample]->GetName() << std::endl;
+      }
+    }
+  }
   // print out the name of all plots
   if(verbose>0){
     std::cout << std::endl << "list of all plots to be considered: " << std::endl;
@@ -179,14 +140,14 @@ void createPseudoData(double luminosity= 35.9){
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-  TString outputfile="./diffXSecFromSignal/analysisRootFiles/Fall10PseudoData7TeV"+lum+"pb.root";
+  TString outputfile="./"+(TString)decayChannel+"PseudoData"+lum+"pb7TeV.root";
   TFile* out = new TFile(outputfile, "recreate");
   if(verbose>0) std::cout << std::endl << "outputfile: " << outputfile << std::endl;
-  poisson(histo_, plotList_, *out, luminosity, verbose, smear);
+  poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear);
   out->Close();
 }
 
-void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::vector<TString> plotList_, TFile& outputfile, int luminosity, const unsigned int verbose, bool smear){
+void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, int luminosity, const unsigned int verbose, bool smear){
   unsigned int kCombined=111;
   // go to output file
   outputfile.cd();
@@ -203,11 +164,11 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
     // indicate first plot existing in sample
     bool first=true;
     // loop samples
-    for(int sample = kSig; sample<=kSToptW; sample++){
+    for(int sample = kSig; sample<=kSAToptW; sample++){
       // check if plot exists
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample))){
 	// do lumiweighting
-	histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity));
+	histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity, sysNo, decayChannel));
 	// add all plots
 	if(first ) histo_[plotList_[plot]][kCombined]  =   (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
 	if(!first) histo_[plotList_[plot]][kCombined]->Add((TH1F*)(histo_[plotList_[plot]][sample]->Clone()));
