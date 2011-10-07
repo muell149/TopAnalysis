@@ -75,8 +75,9 @@ namespace semileptonic {
 			    /*38:*/sysMisTagSFdown, /*39:*/sysDiBosUp      , /*40:*/sysDiBosDown}; 
                             // NOTE: please add new uncertainties directly before sysDiBosUp!
 
-  double ttbarCrossSection=158; // combined 2010 CMS XSec
-
+  double ttbarCrossSection=164.4; // combined 2011 CMS XSec
+  double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error
+ 
   TString sysLabel(unsigned int sys)
   {
     // this function returns a TString that corresponds
@@ -137,6 +138,41 @@ namespace semileptonic {
     return systematicVariationlabel;
   }
 
+  TString sampleLabel(unsigned int sample)
+  {
+    // this function returns a TString that corresponds
+    // to the enumerator entry "sample" in enum samples
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none (label correspond to samples)
+
+    TString sampleLabel="";
+    if(sample==kSig  ) sampleLabel="ttbar prompt lepton";
+    if(sample==kBkg  ) sampleLabel="ttbar other";
+    if(sample==kZjets) sampleLabel="Z+jets";
+    if(sample==kWjets) sampleLabel="W+jets";
+    if(sample==kQCD  ) sampleLabel="combined QCD multijet";
+    if(sample==kSTop ) sampleLabel="combined single top";
+    if(sample==kDiBos) sampleLabel="combined diboson";
+    if(sample==kData ) sampleLabel="data";
+    if(sample==kQCDEM1) sampleLabel="QCD electromagnetic enriched 1";
+    if(sample==kQCDEM2) sampleLabel="QCD electromagnetic enriched 2";
+    if(sample==kQCDEM3) sampleLabel="QCD electromagnetic enriched 3";
+    if(sample==kQCDBCE1) sampleLabel="QCD heavy quark to electron enriched 1";
+    if(sample==kQCDBCE2) sampleLabel="QCD heavy quark to electron enriched 2";
+    if(sample==kQCDBCE3) sampleLabel="QCD heavy quark to electron enriched 3";
+    if(sample==kWW) sampleLabel="WW";
+    if(sample==kWZ) sampleLabel="WZ";
+    if(sample==kZZ) sampleLabel="ZZ";
+    if(sample==kSTops  ) sampleLabel="single top production s channel";
+    if(sample==kSATops ) sampleLabel="single anti top production s channel";
+    if(sample==kSTopt  ) sampleLabel="single top production t channel";
+    if(sample==kSATopt ) sampleLabel="single anti top production t channel";
+    if(sample==kSToptW ) sampleLabel="single top production tW channel";
+    if(sample==kSAToptW) sampleLabel="single anti top production tW channel";
+    return sampleLabel;
+}
+
   double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   {
     // this function returns the muon eff SF
@@ -169,9 +205,10 @@ namespace semileptonic {
   }
   
   // BR correction for ttbar->lnuqq'bb'
-  double BRcorrectionSemileptonic = 1.0; // BR correction not needed in new samples //0.985608;
+  // used for ttbar SG and BG (which is mainly from tau decays)
+  double BRcorrectionSemileptonic = 0.985608;
   
-   void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.2, unsigned int color=0)
+  void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.2, unsigned int color=0)
   {
     // this function configures the style of a TH1 histogram "hist"
     // using "sampleTyp" to identify the corresponding sample from
@@ -733,6 +770,14 @@ namespace semileptonic {
       if(weight!=weight2&&sample==kSig) std::cout << "(BR correction applied)" << std::endl;
     }
     // return result
+    if(sample!=kData&&weight==1){
+      std::cout << "WARNING: function lumiweight";
+      std::cout << " gives result 1 for sample:" << std::endl;
+      std::cout << sampleLabel(sample) << ", " << decayChannel << " channel" << std::endl;
+      std::cout << "used xSec: " << crossSection << std::endl;
+      std::cout << "used Nevents: " << Nevents << std::endl;
+      std::cout << "used luminosity: " << luminosity << std::endl;
+    }
     return weight;
   }
 
@@ -789,7 +834,7 @@ namespace semileptonic {
   TString TopFilename(unsigned int sample, unsigned int sys, const std::string decayChannel)
   {
     // this function contains the basic convention for the MC
-    // .root files and returns the correct names for choosen sample "sample"
+    // .root files and returns the correct names for choosen samplesample"
     // and systematic variation "sys"
     // modified quantities: NONE
     // used functions: NONE
@@ -803,31 +848,33 @@ namespace semileptonic {
     // name of data file is given directly in the .C file
     if(sample==kData) return "";
     // standard MC filenames
-    if(sample==kSig   )fileName += "SigMadD6T";
-    if(sample==kBkg   )fileName += "BkgMadD6T";
-    if(sample==kWjets )fileName += "WjetsMadD6T";
-    if(sample==kZjets )fileName += "ZjetsMadD6T";
-    if(sample==kWW    )fileName += "WWPytia6Z2";
-    if(sample==kWZ    )fileName += "WZPytia6Z2";
-    if(sample==kZZ    )fileName += "ZZPytia6Z2";
-    if(sample==kDiBos )fileName += "VVPytia6Z2";
-    if(sample==kQCD   )fileName += "QCDPythiaZ2";
-    if(sample==kQCDEM1  )fileName += "QCDPythiaEM1Z2";
-    if(sample==kQCDEM2  )fileName += "QCDPythiaEM2Z2";
-    if(sample==kQCDEM3  )fileName += "QCDPythiaEM3Z2";
-    if(sample==kQCDBCE1 )fileName += "QCDPythiaBCE1Z2"; 
-    if(sample==kQCDBCE2 )fileName += "QCDPythiaBCE2Z2";
-    if(sample==kQCDBCE3 )fileName += "QCDPythiaBCE3Z2";  
-    if(sample==kSToptW )fileName += "SingleTopTWchannelMadZ2";
-    if(sample==kSTops  )fileName += "SingleTopSchannelMadZ2";
-    if(sample==kSTopt  )fileName += "SingleTopTchannelMadZ2";
-    if(sample==kSAToptW)fileName += "SingleAntiTopTWchannelMadZ2";
-    if(sample==kSATops )fileName += "SingleAntiTopSchannelMadZ2";
-    if(sample==kSATopt )fileName += "SingleAntiTopTchannelMadZ2";
-    if(sample==kSTop   )fileName += "SingleTopMadZ2";
+    if(sample==kSig  )fileName += "SigMadD6T";
+    if(sample==kBkg  )fileName += "BkgMadD6T";
+    if(sample==kWjets)fileName += "WjetsMadD6T";
+    if(sample==kZjets)fileName += "ZjetsMadD6T";
+    if(sample==kDiBos)fileName += "VVPytia6Z2";
+    if(sample==kQCD  )fileName += "QCDPythiaZ2";
+    if(sample==kSTop )fileName += "SingleTopMadZ2";
+    // subsamples are (hopefully) all located in MergedFiles subfolder
+    if(sample==kWW     )fileName = "MergedFiles/"+fileName+"WWPytia6Z2";
+    if(sample==kWZ     )fileName = "MergedFiles/"+fileName+"WZPytia6Z2";
+    if(sample==kZZ     )fileName = "MergedFiles/"+fileName+"ZZPytia6Z2";
+    if(sample==kQCDEM1 )fileName = "MergedFiles/"+fileName+"QCDPythiaEM1Z2";
+    if(sample==kQCDEM2 )fileName = "MergedFiles/"+fileName+"QCDPythiaEM2Z2";
+    if(sample==kQCDEM3 )fileName = "MergedFiles/"+fileName+"QCDPythiaEM3Z2";
+    if(sample==kQCDBCE1)fileName = "MergedFiles/"+fileName+"QCDPythiaBCE1Z2"; 
+    if(sample==kQCDBCE2)fileName = "MergedFiles/"+fileName+"QCDPythiaBCE2Z2";
+    if(sample==kQCDBCE3)fileName = "MergedFiles/"+fileName+"QCDPythiaBCE3Z2";  
+    if(sample==kSToptW )fileName = "MergedFiles/"+fileName+"SingleTopTWchannelMadZ2";
+    if(sample==kSTops  )fileName = "MergedFiles/"+fileName+"SingleTopSchannelMadZ2";
+    if(sample==kSTopt  )fileName = "MergedFiles/"+fileName+"SingleTopTchannelMadZ2";
+    if(sample==kSAToptW)fileName = "MergedFiles/"+fileName+"SingleAntiTopTWchannelMadZ2";
+    if(sample==kSATops )fileName = "MergedFiles/"+fileName+"SingleAntiTopSchannelMadZ2";
+    if(sample==kSATopt )fileName = "MergedFiles/"+fileName+"SingleAntiTopTchannelMadZ2";
     // label for MC production cycle
     fileName += "Summer11";
     // take care of systematic variations
+    // they are located in dedicated subfolders
     // JES
     if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESup";
     if(sys==sysJESDown) fileName = "JESDown/"+fileName+"JESdown";
@@ -1525,7 +1572,7 @@ namespace semileptonic {
     // per default only the gaussian error of the 'histNumerator' is considered:
     // (error(bin i) = sqrt(histNumerator->GetBinContent(i))/histDenominator->GetBinContent(i))
     // if 'err_' is present and its size equals the number of bins in the histos,
-    // its values are considered as error for the ratio
+    // its valus are considered as error for the ratio
     // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
     // modified quantities: none
     // used functions: none
