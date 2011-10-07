@@ -318,6 +318,10 @@ if(not options.sample=="none"):
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
 	additionalEventWeights=False
+    if(options.sample=="zprime_m500gev_w5gev"):        
+        process.load("TopAnalysis/Configuration/zprime_M500GeV_W5GeV_Madgraph_Summer11_AOD_cff")
+        print "analyzed sample: zprime_M500GeV_W5GeV_Madgraph_Summer11_AOD_cff.py"
+	additionalEventWeights=False
         
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
@@ -977,6 +981,8 @@ if(options.sample=="singleTopTw"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
 if(options.sample=="singleAntiTopTw"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
+if(options.sample=="zprime_m500gev_w5gev"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_Zprime_M500GeV_W5GeV_Madgraph.root")
 if(decayChannel=='muon'):
     if(options.sample=="qcd"):
         process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6.root")
