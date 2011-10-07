@@ -3,104 +3,173 @@
 #include <utility>
 #include <iostream>
 
+#include "basicFunctions.h"
+
 #include "TDirectory.h"
-#include "TString.h"
 #include "TClass.h"
-#include "TFile.h"
-#include "TKey.h"
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TF1.h"
+
 
 using std::make_pair;
-void addDir(const std::string& path, const std::vector< std::pair< TFile*, float > >& files, TFile *target, int verbose);
-double subSampleLumiweight(TString sample, TString decayChannel, int verbose);
+void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
+void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName);
 
-void combineMCsamples(TString sysTag="", TString whichFiles = "singleTop", TString decayChannel="muon", int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun") {
-  // whichFiles: "singleTop", diBoson, or QCD (only electron)
-  // decayChannel: "muon" or "electron"
-  std::vector< std::pair< TFile*, float > > files_;
+void combineMCsamples(int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun") {
+  // ---
+  //    list all of all subsamples to be combined 
+  // ---
+  //a) leptons
+  std::vector<TString> leptons_;
+  leptons_.push_back("muon"    );
+  leptons_.push_back("electron");
+  // b) BG processes
+  //    (based on enum samples in basicFunctions.h)
+  std::vector<int> samples_;
+  samples_.push_back(kQCD  );
+  samples_.push_back(kDiBos);
+  samples_.push_back(kSTop );
+  // c) systematic variations
+  //    (based on enum systematicVariation in basicFunctions.h)
+  // N.B: exclude variations that
+  //      - don't effect the samples in samples_, e.g. top scale variation
+  //      - are treated within different subfolders, e.g. different eff weights
+  //      - correspond only to a different event weight, e.g. QCD up variation
+  //      -> later treated in the macro
+  std::vector<int> sysVariation_;
+  sysVariation_.push_back(sysNo     );
+  sysVariation_.push_back(sysJESUp  );
+  sysVariation_.push_back(sysJESDown);
+  sysVariation_.push_back(sysJERUp  );
+  sysVariation_.push_back(sysJERDown);
+
+  // ---
+  //    do the combination
+  // ---
+  // loop all combinations for the parameters
+  // a)
+  for(unsigned int lepton=0; lepton<leptons_.size(); ++lepton){
+    // b)
+    for(unsigned int sample=0; sample<samples_.size(); ++sample){
+      // the QCD sample is only for electrons splitted
+      if(!(samples_[sample]==kQCD&&leptons_[lepton]=="muon")){
+	// c)
+	for(unsigned int sys=0; sys<sysVariation_.size(); ++sys){
+	  combineAllPlots(sysVariation_[sys], samples_[sample], leptons_[lepton], verbose, inputFolderName);
+	}
+      }
+    }
+  }
+}
+
+void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName){
+  // ---
+  //    check input 
+  // ---
+  // a) check if sample input is valid
+  if(!(sample==kQCD||sample==kDiBos||sample==kSTop)){
+    std::cout << "chosen input sample enumerator " << sample << " is invalid" << std::endl;
+    std::cout << "please check the list of allowed sample inputs" << std::endl;
+    exit(0);
+  }
+  
+  // b) check if decayChannel input is valid
+  if(!(decayChannel=="electron"||decayChannel=="muon")){
+    std::cout << "chosen decay channel " << decayChannel << " is invalid" << std::endl;
+    std::cout << "must be electron or muon" << std::endl;
+    exit(0);
+  }
+
+  // ---
+  //    assign enumerator for subsamples 
+  //    corresponding to "sample"
+  // ---
+  // (i) collect first and last enumerator corresponding 
+  // to enum samples in basicFunctions.h
+  // a) single top
+  int first=kSTops;
+  int last =kSAToptW;
+  // b) QCD electron channel 
+  //    (muon channel excluded above)
+  if(sample==kQCD){
+    first=kQCDEM1;
+    last =kQCDBCE3;
+  }
+  // c) diboson samples
+  else if(sample==kDiBos){
+    first=kWW;
+    last =kZZ;
+  }
+  // (ii) list subsamples in vector
+  std::vector<int> subSamples_;
+  for(int subsample=first; subsample<=last; ++subsample){
+    subSamples_.push_back(subsample);
+  }
+
+  // ---
+  //    input & output
+  // ---
+  // folder were subsamples can be found
+  TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
+  // folder and name of the (combined) output file
+  TString outputFilename=inputFolder+"/"+TopFilename(sample, sysTag, (std::string)decayChannel);
+
+  // ---
+  //    container for all subsample files and
+  //    their corresponding lumiweights 
+  // ---
+  std::vector< std::pair< TFile*, double > > files_;
+  // loop subsamples
+  for(unsigned int subsample=0; subsample<subSamples_.size(); ++subsample){
+    // get subsample file name
+    TString fileName = inputFolder+"/"+TopFilename(subSamples_[subsample], sysTag, (std::string)decayChannel);
+    // check existence & availability of file
+    if((fileName!="no")&&(fileName!="")){
+      TFile* file = new (TFile)(fileName);
+      if(!(file->IsZombie())){ 
+	// N.B.: a luminosity of 1 pb is used, lumi normalization is done later in the main file 
+	files_.push_back(make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, (std::string)decayChannel)));   
+      }
+    }
+  }
+  // check if all files are found
+  if(subSamples_.size()!=files_.size()){
+    std::cout << "ERROR: not all subsamples could be found" << std::endl;
+    exit(0);
+  }
+
+  // ---
+  //    print out all information about current combination
+  // ---
   if(verbose>0){
-    std::cout << "chosen decay channel: " << decayChannel << std::endl;
-    std::cout << "chosen sample: " << decayChannel << std::endl;    
+    std::cout << "combining MC subsamples for: " << std::endl;
+    std::cout << " - " << sampleLabel(sample) << std::endl;
+    std::cout << " - " << decayChannel << " channel " << std::endl;
+    std::cout << " - " << "systematic variation " <<  sysLabel(sysTag) << std::endl;
+    std::cout << " - " << "input folder:" << inputFolder << std::endl;
+    std::cout << " - " << "input subSamples(weights without luminosity):";
+    for(unsigned int subsample=0; subsample<subSamples_.size(); ++subsample){
+      std::cout << std::endl << "   " << sampleLabel(subSamples_[subsample]) << " ( " << files_[subsample].second << " )";
+    }
+    std::cout << std::endl;
+    std::cout << " - " << " output file created: " << outputFilename << std::endl << std::endl;
+    // wait for 3 seconds
+    sleep(1);    
   }
-  TString pathname = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
-  TString samplePreName="";
-  if(decayChannel=="muon"    ) samplePreName="muon";
-  if(decayChannel=="electron") samplePreName="elec";
-  TString outputFilename=pathname+"/"+samplePreName+"DiffXSec";
 
   // ---
-  //    list all files to be added
+  //    create output file
   // ---
-  // single top files
-  if(whichFiles == "singleTop"){
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleTopSchannelMadZ2Summer11"+sysTag+"PF.root"),
-			       subSampleLumiweight("stopS", decayChannel, verbose)));                         
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleAntiTopSchannelMadZ2Summer11"+sysTag+"PF.root" ), 
-			       subSampleLumiweight("santiTopS" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleTopTchannelMadZ2Summer11"+sysTag+"PF.root"     ), 
-			       subSampleLumiweight("stopT"     , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleAntiTopTchannelMadZ2Summer11"+sysTag+"PF.root" ), 
-			       subSampleLumiweight("santiTopT" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleTopTWchannelMadZ2Summer11"+sysTag+"PF.root"    ), 
-			       subSampleLumiweight("stopTW"    , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecSingleAntiTopTWchannelMadZ2Summer11"+sysTag+"PF.root"), 
-			       subSampleLumiweight("santiTopTW", decayChannel, verbose)));
-    outputFilename+="SingleTopMadZ2Summer11"+sysTag+"PF.root";
-  }
-  // DiBoson files
-  else if(whichFiles == "diBoson"){
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecWWPytia6Z2Summer11"+sysTag+"PF.root"), 
-			       subSampleLumiweight("WW", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecWZPytia6Z2Summer11"+sysTag+"PF.root"), 
-			       subSampleLumiweight("WZ", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecZZPytia6Z2Summer11"+sysTag+"PF.root"),
-			       subSampleLumiweight("ZZ", decayChannel, verbose)));               
-    outputFilename+="VVPytia6Z2Summer11"+sysTag+"PF.root";
-  } 
-  // QCD files
-  else if(whichFiles == "QCD"&&decayChannel=="electron"){
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaEM1Z2Summer11"+sysTag+"PF.root" ), 
-			       subSampleLumiweight("QCDEM1" , decayChannel, verbose))); 
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaEM2Z2Summer11"+sysTag+"PF.root" ), 
-			       subSampleLumiweight("QCDEM2" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaEM3Z2Summer11"+sysTag+"PF.root" ), 
-			       subSampleLumiweight("QCDEM3" , decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaBCE1Z2Summer11"+sysTag+"PF.root"), 
-			       subSampleLumiweight("QCDBCE1", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaBCE2Z2Summer11"+sysTag+"PF.root"), 
-			       subSampleLumiweight("QCDBCE2", decayChannel, verbose)));
-    files_.push_back(make_pair(new TFile(pathname+"/"+samplePreName+"DiffXSecQCDPythiaBCE3Z2Summer11"+sysTag+"PF.root"), 
-			       subSampleLumiweight("QCDBCE3", decayChannel, verbose)));
-    outputFilename+="QCDPythiaZ2Summer11"+sysTag+"PF.root";
-  }
-  // ERROR: undefined sample/decayChannel combination
-  else{
-    std::cout << "ERROR: the combination whichFiles = " << whichFiles << " and " << decayChannel << " is not defined" << std::endl;
-    std::cout << "choose whichFiles= singleTop (and decayChannel=muon or electron), QCD (and decayChannel=electron) ";
-    std::cout << "or diBoson (and decayChannel=muon or electron)" << std::endl;
-    exit(0);
-  }
-  // ERROR: files not found
-  if(files_.empty()){
-    std::cout << "ERROR: No files added, will not continue" << std::endl;
-    exit(0);
-  }
-  // define output file
-  if(verbose>0) std::cout << "chosen output file: " << outputFilename << std::endl;
   TFile* output_file = TFile::Open(outputFilename, "recreate");
-  //  open input files and lumiweight them
+  // open input files and weight them
   addDir("",files_,output_file, verbose);
   // close output files
   output_file->Close();
 }
 
-// helper function to add and weight files
-void addDir(const std::string& path, const std::vector< std::pair< TFile*, float > >& files, TFile *target, int verbose) 
+// helper function to add and weight all plots in the subsamples
+void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose) 
 {
-  // loop all objects ion the file
-  std::vector< std::pair< TFile*, float > >::const_iterator first=files.begin();
+  // loop all objects in the file
+  std::vector< std::pair< TFile*, double > >::const_iterator first=files.begin();
   first->first->cd(path.c_str());
   TIter nextkey(gDirectory->GetListOfKeys());
   TKey *key;
@@ -108,16 +177,14 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, float
     // read object from first source file
     first->first->cd(path.c_str());
     TObject *obj = key->ReadObj();
-    
     if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
-      // descendant of TH1 -> merge it
+      // if descendant of TH1 -> merge it
       TH1 *h1 = (TH1*)obj;
       h1->Sumw2();
       h1->Scale(first->second);
       // loop over all source files and add the content of the
-      // correspondant histogram to the one pointed to by "h1"
-      for(std::vector< std::pair< TFile*, float > >::const_iterator file=first+1; file!=files.end(); ++file) {
-	       
+      // corresponding histogram to the one pointed to by "h1"
+      for(std::vector< std::pair< TFile*, double > >::const_iterator file=first+1; file!=files.end(); ++file) {
 	// make sure we are at the correct directory level by cd'ing to path
 	file->first->cd(path.c_str());
 	TH1 *h2 = (TH1*)gDirectory->Get( h1->GetName() );
@@ -131,13 +198,10 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, float
     }
     else if (obj->IsA()->InheritsFrom( "TDirectory"  ) ) {
       // for a subdirectory
-      
-      std::cout << "Found subdirectory " << obj->GetName() << std::endl;
-      
+      if(verbose>1) std::cout << "Found subdirectory " << obj->GetName() << std::endl;
       // create a new subdir of same name and title in the target file
       target->cd();
       TDirectory *newdir = target->mkdir( obj->GetName(), obj->GetTitle() );
-      
       // newdir is now the starting point of another round of merging
       // newdir still knows its depth within the target file via
       // GetPath(), so we can still figure out where we are in the recursion
@@ -149,101 +213,4 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, float
     }
   }
   target->Write();
-}
-
-// helper function to get the event weights
-double subSampleLumiweight(TString sample, TString decayChannel, int verbose)
-{
-  // this function derives the lumiweight for the 
-  // chosen MC "sample" based on the theoretical cross 
-  // section, the number of generated events and the 
-  // chosen "luminosity"
-  // FIXME: need to add systematic variations
-  
-  // valid decayChannel entered?
-  if(!(decayChannel=="muon" || decayChannel=="electron")){
-    std::cout << "ERROR: chosen decaychannel does not correspond to electron or muon, no scaling will be done" << std::endl;
-    exit(1);
-  }
-  // b) define in/output for weight calculation
-  double crossSection=1;
-  double Nevents=0;
-  double weight =0;
-
-  // c) fill #events in sample and cross sections (in / pb)
-  // QCD e+jets weights 
-  if(sample=="QCDEM1"&&decayChannel=="electron"){
-    crossSection=0.0106*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
-    Nevents     =35729669;
-  }
-  else if(sample=="QCDEM2"&&decayChannel=="electron"){
-    crossSection=0.061*59440000; // generator prefilter efficiency * LO PYTHIA crossSection
-    Nevents     =70392060;
-  }
-  else if(sample=="QCDEM3"&&decayChannel=="electron"){
-    crossSection=0.159*898200; // generator prefilter efficiency * LO PYTHIA crossSection
-    Nevents     =8150672;
-  }
-  else if(sample=="QCDBCE1"&&decayChannel=="electron"){
-    crossSection=0.00059*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
-    Nevents     =2081560;
-  }
-  else if(sample=="QCDBCE2"&&decayChannel=="electron"){
-    crossSection=0.00242*59440000; // generator prefilter efficiency * LO PYTHIA crossSection
-    Nevents     =2030033;
-  }
-  else if(sample=="QCDBCE3"&&decayChannel=="electron"){
-    crossSection=0.0105*898200; // generator prefilter efficiency * LO PYTHIA crossSection
-    Nevents     =1082691;
-  }
-  // single top weights
-  else if(sample=="santiTopS"){
-    crossSection=1.44;
-    Nevents     =137980;
-  }
-  else if(sample=="stopS"){
-    crossSection=3.19;
-    Nevents     =259971; 
-  }
-  else if(sample=="santiTopT"){
-    crossSection=22.65;
-    Nevents     =1944826;
-  }
-  else if(sample=="stopT"){
-    crossSection=41.92;
-    Nevents     =3900171;
-  }
-  else if(sample=="santiTopTW"){
-    crossSection=7.87;
-    Nevents     =809984;
-  }
-  else if(sample=="stopTW"){
-    crossSection=7.87;
-    Nevents     =814390;
-  }
-  // diboson weights
-  else if(sample=="WW"){
-    crossSection=43;
-    Nevents     =4225916;
-  }
-  else if(sample=="WZ"){
-    crossSection=18.2;
-    Nevents     =4265243;
-  }
-  else if(sample=="ZZ"){
-    crossSection=5.9;
-    Nevents     =4187885; 
-  }
-  else {
-    std::cout << "ERROR: unknown sample " << sample << std::endl;
-    exit(0);
-  }
-  // d) calculate weight for 1/pb 
-  weight = 1 / ( Nevents / crossSection );
-  if(verbose>0){
-    std::cout << "sample: "        << sample       << std::endl;
-    std::cout << "decay channel: " << decayChannel << std::endl;
-    std::cout << "weight: "        << weight       << std::endl;
-  }
-  return weight;
 }
