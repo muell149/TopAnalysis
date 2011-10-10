@@ -40,6 +40,8 @@ void combineMCsamples(int verbose=1, TString inputFolderName="TOP2011/110819_Ana
   sysVariation_.push_back(sysJESDown);
   sysVariation_.push_back(sysJERUp  );
   sysVariation_.push_back(sysJERDown);
+  sysVariation_.push_back(sysTopScaleUp  );
+  sysVariation_.push_back(sysTopScaleDown);
 
   // ---
   //    do the combination
@@ -53,7 +55,10 @@ void combineMCsamples(int verbose=1, TString inputFolderName="TOP2011/110819_Ana
       if(!(samples_[sample]==kQCD&&leptons_[lepton]=="muon")){
 	// c)
 	for(unsigned int sys=0; sys<sysVariation_.size(); ++sys){
-	  combineAllPlots(sysVariation_[sys], samples_[sample], leptons_[lepton], verbose, inputFolderName);
+	  // scale variation exists only for single top
+	  if(!(((sysVariation_[sys]==sysTopScaleUp)||(sysVariation_[sys]==sysTopScaleDown))&&(samples_[sample]!=kSTop))){
+	    combineAllPlots(sysVariation_[sys], samples_[sample], leptons_[lepton], verbose, inputFolderName);
+	  }
 	}
       }
     }
@@ -214,3 +219,4 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, doubl
   }
   target->Write();
 }
+
