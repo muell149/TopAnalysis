@@ -664,26 +664,45 @@ namespace semileptonic {
     else if(sample==kSATops){
       crossSection=1.44;
       Nevents     =137980;
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =153981;
+      if(kSys==sysTopScaleDown) Nevents =153971;
     }
     else if(sample==kSTops){
       crossSection=3.19;
       Nevents     =259971; 
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =285972;
+      if(kSys==sysTopScaleDown) Nevents =285602;
     }
     else if(sample==kSATopt){
       crossSection=22.65;
       Nevents     =1944826;
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =565520;
+      if(kSys==sysTopScaleDown) Nevents =565454;
     }
     else if(sample==kSTopt){
       crossSection=41.92;
       Nevents     =3900171;
+      // scale variation
+      // FIXME MARTIN: t channel single top scale samples still missing 
+      // if(kSys==sysTopScaleUp  ) Nevents =;
+      // if(kSys==sysTopScaleDown) Nevents =;
     }
     else if(sample==kSAToptW){
       crossSection=7.87;
       Nevents     =809984;
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =437863;
+      if(kSys==sysTopScaleDown) Nevents =437798;
     }
     else if(sample==kSToptW){
       crossSection=7.87;
       Nevents     =814390;
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =437416;
+      if(kSys==sysTopScaleDown) Nevents =437736;
     }
     // b) combined single top sample
     else if(sample==kSTop){
