@@ -44,11 +44,15 @@
 namespace semileptonic {
 #endif
 
-  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
+                   /*0:*/    /*1:*/    /*2:*/    /*3:*/    
   enum samples    {kSig    , kBkg    , kZjets  , kWjets  , 
-		   kQCD    , kSTop   , kDiBos  , kData   , 
+		   /*4:*/    /*5:*/    /*6:*/    /*7:*/  
+		   kQCD    , kSTop   , kDiBos  , kData,   
+		   /*8*/     /*9*/     /*10*/    /*11*/    /*12*/    /*13*/
 		   kQCDEM1 , kQCDEM2 , kQCDEM3 , kQCDBCE1, kQCDBCE2, kQCDBCE3,  
+		   /*14*/    /*15*/    /*16*/
 		   kWW     , kWZ     , kZZ     , 
+		   /*17*/    /*18*/    /*19*/    /*20*/    /*21*/    /*22*/
 		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW };
   int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
 		   kYellow , kMagenta, 10      , kBlack  , 
@@ -895,8 +899,8 @@ namespace semileptonic {
     if((sys==sysISRFSRdown)&&((sample==kSig)||(sample==kBkg))) fileName += "ISRFSRdown";
     // Scale
     // a) top
-    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "ScaleUp/"+fileName+"ScaleUp";
-    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg))) fileName = "ScaleDown/"+fileName+"ScaleDown";
+    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleUp/"+fileName+"ScaleUp";
+    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleDown/"+fileName+"ScaleDown";
     // b) V+jets
     if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleUp/"+fileName+"ScaleUp";
     if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleDown/"+fileName+"ScaleDown"; 
@@ -1034,8 +1038,8 @@ namespace semileptonic {
 	  if(files_.count(sample)>0){
 	    // create plot container
 	    TH1* targetPlot;
-	    if(verbose>0){
-	      std::cout << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
+	    if(verbose>1){
+	      std::cout << std::endl << "sample: " << sample << ", " << files_[sample]->GetName() << std::endl;
 	      std::cout << "plot: " << plot << ", " << plotname << std::endl;
 	    }
 	    files_[sample]->GetObject(plotname, targetPlot);
@@ -1047,7 +1051,7 @@ namespace semileptonic {
 	      bool emptyPlot=false;
 	      if((plot<N1Dplots )&&((((TH1*)(files_[sample]->Get(plotname)))->GetEntries())==0.)) emptyPlot=true;
 	      if((plot>=N1Dplots)&&((((TH2*)(files_[sample]->Get(plotname)))->GetEntries())==0.)) emptyPlot=true;
-	      if(emptyPlot && verbose>0) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
+	      if(emptyPlot && verbose>1) std::cout << "plot "+plotList_[plot] << " in file "+(TString)(files_[sample]->GetName()) << " is empty- continue and neglect this plot" << std::endl;
 	      // to avoid problems with samples where no event is passing the selection we will drop this requirement by now
 	      emptyPlot=false;
 	      if(!emptyPlot){
