@@ -83,6 +83,11 @@ class DiLeptonAnalyzer : public edm::EDAnalyzer {
     double MassWindow_up_;
     double MassWindow_down_;
 
+    // these two histograms are needed for the analysis
+    // the other ones are kept for backward compatibility
+    TH1F * DiLeptonMass;
+    TH1F * DiLeptonPt;
+
     TH1F * Events_RC;
     TH1F * Events_WC;
     TH2F * Events_iso;

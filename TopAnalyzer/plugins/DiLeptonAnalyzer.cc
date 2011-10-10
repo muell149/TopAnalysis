@@ -36,7 +36,6 @@ DiLeptonAnalyzer::DiLeptonAnalyzer(const edm::ParameterSet& cfg):
     const char *fileName = outputFile_.c_str();
     outfile.open (fileName);
   }
-
 }
 
 
@@ -90,6 +89,9 @@ void DiLeptonAnalyzer::beginJob() {
 
   Muon_CombRelIso03 = fs->make<TH1F>("Muon_CombRelIso03", "Muon CombRelIso03",     50,  0.,  1.);
   Elec_CombRelIso03 = fs->make<TH1F>("Elec_CombRelIso03", "Electron CombRelIso03", 50,  0.,  1.);
+
+  DiLeptonMass = fs->make<TH1F>("DiLeptonMass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", 250, 0., 500.);
+  DiLeptonPt   = fs->make<TH1F>("DiLeptonPt",   "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", 250, 0., 500.);  
 
   const int nbins = 100;
 
@@ -163,7 +165,9 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
   reco::MuonCollection        Isolated_muons;
   reco::GsfElectronCollection Isolated_elecs;
 
+  TLorentzVector diLepLVector;
   double DilepMass = 0.;
+  double DilepPt   = 0.;
 
   double vertex_X  = 100.;
   double vertex_Y  = 100.;
@@ -220,7 +224,6 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
       vertex_Z = primaryVertex.z();
 
     }
-
   }
 
   // ------------------------
@@ -447,12 +450,15 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	  reco::MuonCollection::const_reference mu1 = Isolated_muons.at(i);
 	  reco::MuonCollection::const_reference mu2 = Isolated_muons.at(j);
 
-	  DilepMass = sqrt( (mu1.energy()+mu2.energy())*(mu1.energy()+mu2.energy())
-			    - (mu1.px()+mu2.px())*(mu1.px()+mu2.px())
-			    - (mu1.py()+mu2.py())*(mu1.py()+mu2.py())
-			    - (mu1.pz()+mu2.pz())*(mu1.pz()+mu2.pz())
-			    );
+          diLepLVector = TLorentzVector(mu1.px()+mu2.px(), mu1.py()+mu2.py(), 
+			                mu1.pz()+mu2.pz(), mu1.energy()+mu2.energy());
 
+	  DilepMass = diLepLVector.M();
+	  DilepPt   = diLepLVector.Pt();
+	  
+	  DiLeptonMass->Fill(DilepMass, weight);
+	  DiLeptonPt  ->Fill(DilepPt,   weight);
+	  
 	  if( DilepMass < 1. ) {
 
 	    if( i > 0 ) {
@@ -575,11 +581,14 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	  reco::MuonCollection::const_reference        mu1 = Isolated_muons.at(i);
 	  reco::GsfElectronCollection::const_reference el1 = Isolated_elecs.at(j);
 
-	  DilepMass = sqrt( (mu1.energy()+el1.energy())*(mu1.energy()+el1.energy())
-			    - (mu1.px()+el1.px())*(mu1.px()+el1.px())
-			    - (mu1.py()+el1.py())*(mu1.py()+el1.py())
-			    - (mu1.pz()+el1.pz())*(mu1.pz()+el1.pz())
-			    );
+          diLepLVector = TLorentzVector(mu1.px()+el1.px(), mu1.py()+el1.py(), 
+			                mu1.pz()+el1.pz(), mu1.energy()+el1.energy());
+
+	  DilepMass = diLepLVector.M();
+	  DilepPt   = diLepLVector.Pt();
+	  
+	  DiLeptonMass->Fill(DilepMass, weight);
+	  DiLeptonPt  ->Fill(DilepPt,   weight);
 
 	  if( DilepMass < 1. )  continue;
 
@@ -700,12 +709,14 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	  reco::GsfElectronCollection::const_reference el1 = Isolated_elecs.at(i);
 	  reco::GsfElectronCollection::const_reference el2 = Isolated_elecs.at(j);
 
+          diLepLVector = TLorentzVector(el1.px()+el2.px(), el1.py()+el2.py(), 
+			                el1.pz()+el2.pz(), el1.energy()+el2.energy());
 
-	  DilepMass = sqrt( (el1.energy()+el2.energy())*(el1.energy()+el2.energy())
-			    - (el1.px()+el2.px())*(el1.px()+el2.px())
-			    - (el1.py()+el2.py())*(el1.py()+el2.py())
-			    - (el1.pz()+el2.pz())*(el1.pz()+el2.pz())
-			    );
+	  DilepMass = diLepLVector.M();
+	  DilepPt   = diLepLVector.Pt();
+	  
+	  DiLeptonMass->Fill(DilepMass, weight);
+	  DiLeptonPt  ->Fill(DilepPt,   weight);
 
 	  if( DilepMass < 1. )  continue;
 
