@@ -37,14 +37,8 @@ using namespace std;
 
 // path to the ingoing root histogram files
 const char *USERNAME = getenv("USER");
-const TString inpath(
-    !strcmp(USERNAME, "wbehrenh") ? "./" :
-    !strcmp(USERNAME, "dammann") ?  "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/standard/" :
-    "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/standard/");
-const TString outpath(
-    !strcmp(USERNAME, "wbehrenh") ? "plots/" :
-    !strcmp(USERNAME, "dammann") ? "../plots/" :
-    "./");
+const TString inpath(!strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/standard/");
+const TString outpath("plots/");
 
 // output format
 const TString outform(".eps");
