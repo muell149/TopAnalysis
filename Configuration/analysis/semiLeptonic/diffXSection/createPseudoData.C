@@ -15,9 +15,9 @@
 
 void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1);
 
-void createPseudoData(double luminosity= 1100, const std::string decayChannel="muon"){
+void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="muon"){
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
-  int verbose=1;
+  int verbose=0;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
   bool smear=false;
   // "dataFile": absolute path of data file, used to define plots of interest
@@ -58,7 +58,7 @@ void createPseudoData(double luminosity= 1100, const std::string decayChannel="m
   files_[kData]->cd();
   // loop objects in file
   TIter fileIterator(gDirectory->GetListOfKeys());
-  if(verbose>1){
+  if(verbose>2){
     std::cout << "looping objects in in ";
     gDirectory->pwd();
   }
@@ -66,16 +66,16 @@ void createPseudoData(double luminosity= 1100, const std::string decayChannel="m
   int count=0;
   while( (fileKey = (TKey*)fileIterator()) ){
     ++count;
-    if(verbose>1) std::cout << "folderObject #" << count;
+    if(verbose>2) std::cout << "folderObject #" << count;
     TObject *fileObject = fileKey->ReadObj(); 
     // check if object is a directory
-    if(!(fileObject->InheritsFrom("TDirectory"))&&(verbose>1)) std::cout << " is no directory" << count << std::endl;
+    if(!(fileObject->InheritsFrom("TDirectory"))&&(verbose>2)) std::cout << " is no directory" << count << std::endl;
     if(fileObject->InheritsFrom("TDirectory")){
       currentFolder = (TString)fileObject->GetName();
-      if(verbose>1) std::cout << " ("+currentFolder+")" << std::endl;
+      if(verbose>2) std::cout << " ("+currentFolder+")" << std::endl;
       // go to directory
       ((TDirectory*)fileObject)->cd();
-      if(verbose>1){
+      if(verbose>2){
 	std::cout << "looping objects in in ";
 	gDirectory->pwd();
       }
@@ -87,17 +87,17 @@ void createPseudoData(double luminosity= 1100, const std::string decayChannel="m
 	++count2;
 	TObject *folderObject = folderKey->ReadObj(); 
 	currentPlot = (TString)folderObject->GetName();
-	if(verbose>1) std::cout << "plotObject #" << count2 << " ("+currentPlot+")" << std::endl;
+	if(verbose>2) std::cout << "plotObject #" << count2 << " ("+currentPlot+")" << std::endl;
 	// check if object is a TH1 
 	if(folderObject->InheritsFrom("TH1")){
-	  if(verbose>1) std::cout << "inherits from TH1";
+	  if(verbose>2) std::cout << "inherits from TH1";
 	  // check if TH2 and neglect because a simple 
 	  // resmearing here is not possible
-	  if((folderObject->InheritsFrom("TH2"))&&(verbose>1)) std::cout << " and from TH2" << std::endl;
+	  if((folderObject->InheritsFrom("TH2"))&&(verbose>2)) std::cout << " and from TH2" << std::endl;
 	  else{
-	    if(verbose>1) std::cout << " and NOT from TH2" << std::endl;
+	    if(verbose>2) std::cout << " and NOT from TH2" << std::endl;
 	    // add to list of plots
-	    if(verbose>1) std::cout << "will be added to list of output plots" << std::endl;
+	    if(verbose>2) std::cout << "will be added to list of output plots" << std::endl;
 	    plotList_.push_back(currentFolder+"/"+currentPlot);
 	  }
 	}
@@ -134,7 +134,7 @@ void createPseudoData(double luminosity= 1100, const std::string decayChannel="m
   unsigned int N1Dplots=plotList_.size();
   int Nplots=0;
   std::cout << std::endl << "loading plots: " << std::endl;
-  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose);
+  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1);
   std::cout << Nplots << " plots loaded from " << plotList_.size();
   std::cout << " requested" << std::endl << "empty plots are not counted" << std::endl;
   // ---------------------------------------
@@ -169,10 +169,15 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample))){
 	// do lumiweighting
 	histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity, sysNo, decayChannel));
-	// add all plots
-	if(first ) histo_[plotList_[plot]][kCombined]  =   (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
-	if(!first) histo_[plotList_[plot]][kCombined]->Add((TH1F*)(histo_[plotList_[plot]][sample]->Clone()));
-	if(verbose>1) std::cout << sampleLabel(sample) << std::endl;
+	// first subsample (should be ttbar signal)
+	// -> create histogram map entry
+	if(first){ 
+	  histo_[plotList_[plot]][kCombined] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	  first=false;
+	}
+	// add other subsample
+	else histo_[plotList_[plot]][kCombined]->Add((TH1F*)(histo_[plotList_[plot]][sample]->Clone()));
+	if(verbose>1) std::cout << sampleLabel(sample) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
       }
     }
   }
@@ -185,7 +190,6 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     // check if plot exists
     if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(kCombined))){
-      histo_[plotList_[plot]][kCombined];
       if(verbose>1) std::cout << "plot " << plotList_[plot] << std::endl;
       // do the poisson smearing
       TRandom3 rnd(0);
