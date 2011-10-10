@@ -1,0 +1,58 @@
+# cff files in TopAnalysis.Configuration.samples.
+
+#JOBS  DATASET                                   OUTPUT HISTOGRAM NAME                   SAMPLENAME
+
+###### MU E channel
+
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    emu_ttbarsignal_matchingup.root     ttbarsignal,runOnAOD=True
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    emu_ttbarviatau_matchingup.root     ttbarsignalviatau,runOnAOD=True
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    emu_ttbarbg_matchingup.root         ttbarbg,runOnAOD=True
+
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  emu_ttbarsignal_matchingdown.root   ttbarsignal,runOnAOD=True
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  emu_ttbarviatau_matchingdown.root   ttbarsignalviatau,runOnAOD=True
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  emu_ttbarbg_matchingdown.root       ttbarbg,runOnAOD=True
+
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       emu_ttbarsignal_scaleup.root        ttbarsignal,runOnAOD=True
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       emu_ttbarviatau_scaleup.root        ttbarsignalviatau,runOnAOD=True
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       emu_ttbarbg_scaleup.root            ttbarbg,runOnAOD=True
+
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     emu_ttbarsignal_scaledown.root      ttbarsignal,runOnAOD=True
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     emu_ttbarviatau_scaledown.root      ttbarsignalviatau,runOnAOD=True
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     emu_ttbarbg_scaledown.root          ttbarbg,runOnAOD=True
+
+###### MUMU channel
+
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    mumu_ttbarsignal_matchingup.root     ttbarsignal,runOnAOD=True
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    mumu_ttbarviatau_matchingup.root     ttbarsignalviatau,runOnAOD=True
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    mumu_ttbarbg_matchingup.root         ttbarbg,runOnAOD=True
+
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  mumu_ttbarsignal_matchingdown.root   ttbarsignal,runOnAOD=True
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  mumu_ttbarviatau_matchingdown.root   ttbarsignalviatau,runOnAOD=True
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  mumu_ttbarbg_matchingdown.root       ttbarbg,runOnAOD=True
+
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       mumu_ttbarsignal_scaleup.root        ttbarsignal,runOnAOD=True
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       mumu_ttbarviatau_scaleup.root        ttbarsignalviatau,runOnAOD=True
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       mumu_ttbarbg_scaleup.root            ttbarbg,runOnAOD=True
+
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     mumu_ttbarsignal_scaledown.root      ttbarsignal,runOnAOD=True
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     mumu_ttbarviatau_scaledown.root      ttbarsignalviatau,runOnAOD=True
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     mumu_ttbarbg_scaledown.root          ttbarbg,runOnAOD=True
+
+#### EE channel
+
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    ee_ttbarsignal_matchingup.root     ttbarsignal,runOnAOD=True
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    ee_ttbarviatau_matchingup.root     ttbarsignalviatau,runOnAOD=True
+17  TTJets_TuneZ2_matchingup_7TeV_madgraph_tauola_Summer11_cff    ee_ttbarbg_matchingup.root         ttbarbg,runOnAOD=True
+
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  ee_ttbarsignal_matchingdown.root   ttbarsignal,runOnAOD=True
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  ee_ttbarviatau_matchingdown.root   ttbarsignalviatau,runOnAOD=True
+21  TTJets_TuneZ2_matchingdown_7TeV_madgraph_tauola_Summer11_cff  ee_ttbarbg_matchingdown.root       ttbarbg,runOnAOD=True
+
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       ee_ttbarsignal_scaleup.root        ttbarsignal,runOnAOD=True
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       ee_ttbarviatau_scaleup.root        ttbarsignalviatau,runOnAOD=True
+15  TTJets_TuneZ2_scaleup_7TeV_madgraph_tauola_Summer11_cff       ee_ttbarbg_scaleup.root            ttbarbg,runOnAOD=True
+
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     ee_ttbarsignal_scaledown.root      ttbarsignal,runOnAOD=True
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     ee_ttbarviatau_scaledown.root      ttbarsignalviatau,runOnAOD=True
+18  TTJets_TuneZ2_scaledown_7TeV_madgraph_tauola_Summer11_cff     ee_ttbarbg_scaledown.root          ttbarbg,runOnAOD=True
+
