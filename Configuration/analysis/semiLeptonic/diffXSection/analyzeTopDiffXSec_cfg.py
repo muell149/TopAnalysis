@@ -23,8 +23,8 @@ options = VarParsing.VarParsing ('standard')
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
 # create sample label with default value data
-# for summer11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, WW, WZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel)
-# still missing: ZZ, singleTopS
+# for summer11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), zprime_m500gev_w5gev
+# for systematic samples see list for each MC sample
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
 options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen decay channel")
@@ -163,6 +163,20 @@ if(not globals().has_key('additionalEventWeights')):
 if(additionalEventWeights):
     print "Additional event weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations!"
 
+## enable/ disable systematic shape distortion event reweighting
+if(not globals().has_key('sysDistort')):
+    sysDistort =  'up'
+    #sysDistort =  'up'
+    #sysDistort =  'down'
+# only done for ttbar
+if(not options.sample=="ttbar"):
+    sysDistort=''
+# coupled to PU weight, therefore not applicable without
+if(not PUreweigthing):
+    sysDistort=''
+if(not sysDistort==''):
+    print "ATTENTION!!! apply shape reweighting, variation", sysDistort
+
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
 
@@ -195,7 +209,7 @@ process.source = cms.Source("PoolSource",
 
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
-    if(options.sample=="ttbar"):        
+    if(options.sample=="ttbar"):
         process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
     if(options.sample=="ttbarMatchingDown"):        
@@ -322,7 +336,6 @@ if(not options.sample=="none"):
         process.load("TopAnalysis/Configuration/zprime_M500GeV_W5GeV_Madgraph_Summer11_AOD_cff")
         print "analyzed sample: zprime_M500GeV_W5GeV_Madgraph_Summer11_AOD_cff.py"
 	additionalEventWeights=False
-        
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
             process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
@@ -1007,10 +1020,59 @@ if(options.sample=="ZZ"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_ZZ_TuneZ2_7TeV_pythia6_tauola.root")
     
 process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
-PUweight=cms.InputTag("eventWeightPU","eventWeightPU")
-PUweightUp=cms.InputTag("eventWeightPU","eventWeightPUUp")
-PUweightDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
-                                                
+
+# relevant PU event weights (potentially merged with shape distortion weights)
+PUweightraw=cms.InputTag("eventWeightPU","eventWeightPU")
+PUweightrawUp=cms.InputTag("eventWeightPU","eventWeightPUUp")
+PUweightrawDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
+
+## ---
+##    MC ttbar systematic variation reweighting
+## ---
+## tool to multiply event weights
+process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
+## load weight producer
+process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
+# specify parameters
+#process.eventWeightDileptonModelVariation.variation=cms.string(sysDistort)
+#process.eventWeightDileptonModelVariation.ttGenEvent=cms.InputTag('genEvt')
+process.eventWeightDileptonModelVariation.ttGenEvent = cms.InputTag('genEvt')
+process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass
+process.eventWeightDileptonModelVariation.slope = cms.double(0)
+process.eventWeightDileptonModelVariation.weight1x = cms.double(600)  #position where weight is 1
+process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-off, at least 0.1 event weight
+process.eventWeightDileptonModelVariation.maxWeight = cms.double(2)  #high cut-off, at most 2 event weight
+process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
+process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
+if(sysDistort=='up'):
+    process.eventWeightDileptonModelVariation.landauMoveX = cms.double(100)
+if(sysDistort=='down'):
+    process.eventWeightDileptonModelVariation.landauMoveX = cms.double(-100)
+# multiply with PU weight
+eventWeightDileptonModelVariation=cms.InputTag("eventWeightDileptonModelVariation")
+weightlistDistortPU=cms.VInputTag()
+weightlistDistortPU.append(PUweightraw)
+weightlistDistortPU.append(eventWeightDileptonModelVariation)
+weightlistDistortPUup=cms.VInputTag()
+weightlistDistortPUup.append(PUweightrawUp)
+weightlistDistortPUup.append(eventWeightDileptonModelVariation)
+weightlistDistortPUdown=cms.VInputTag()
+weightlistDistortPUdown.append(PUweightrawDown)
+weightlistDistortPUdown.append(eventWeightDileptonModelVariation)
+process.eventWeightPUDistort     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistDistortPU)
+process.eventWeightPUupDistort   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistDistortPUup)
+process.eventWeightPUdownDistort = process.eventWeightMultiplier.clone(eventWeightTags = weightlistDistortPUdown)
+if(sysDistort==''):
+    # final PU weights without shape distortion weights
+    PUweight    =cms.InputTag("eventWeightPU","eventWeightPU")
+    PUweightUp  =cms.InputTag("eventWeightPU","eventWeightPUUp")
+    PUweightDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
+else:
+    # final PU x shape distortion weights
+    PUweight    =cms.InputTag("eventWeightPUDistort")
+    PUweightUp  =cms.InputTag("eventWeightPUupDistort")
+    PUweightDown=cms.InputTag("eventWeightPUdownDistort")
+
 ## ---
 ##    MC B-tag reweighting
 ## ---
@@ -1073,7 +1135,6 @@ process.effSFElectronEventWeightTriggerEffSFShapeUpPt    = process.effSFElectron
 process.effSFElectronEventWeightTriggerEffSFShapeDownPt  = process.effSFElectronEventWeight.clone(sysVar = "triggerEffSFShapeDownPt")
 process.effSFElectronEventWeightSelectionEffSFNormUp     = process.effSFElectronEventWeight.clone(sysVar = "selectionEffSFNormUp")
 process.effSFElectronEventWeightSelectionEffSFNormDown   = process.effSFElectronEventWeight.clone(sysVar = "selectionEffSFNormDown")
-
 
 ## ---
 ##    collect all eventweights
@@ -1174,12 +1235,14 @@ if(BtagReweigthing):
     weightlistBtagSFdown               .append("bTagSFEventWeightBTagSFDown")
     weightlistMisTagSFup               .append("bTagSFEventWeightMisTagSFUp")
     weightlistMisTagSFdown             .append("bTagSFEventWeightMisTagSFDown")
-    
-process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
+
+## multiply all event weights
+## a) default
 process.eventWeightNoBtagSFWeight           = process.eventWeightMultiplier.clone(eventWeightTags = weightlistNoBtagSFWeight)
 process.eventWeightNoPUWeight               = process.eventWeightMultiplier.clone(eventWeightTags = weightlistNoPUWeight)
 process.eventWeightFinal                    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFinal)
-## systematics
+
+## b) for systematics
 process.eventWeightPUup                     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistPUup)
 process.eventWeightPUdown                   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistPUdown)
 process.eventWeightFlatTriggerSF            = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFlatTriggerSF)
@@ -1195,7 +1258,6 @@ process.eventWeightBtagSFup                 = process.eventWeightMultiplier.clon
 process.eventWeightBtagSFdown               = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBtagSFdown)
 process.eventWeightMisTagSFup               = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMisTagSFup)
 process.eventWeightMisTagSFdown             = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMisTagSFdown)
-
     
 # use weight in single and double object analyzer modules for central values
 # a) Reco (PU + EffSF) reweight
@@ -1438,7 +1500,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            process.analyzeTopRecoKinematicsKinFitMisTagSFdown
 			   #process.analyzeTopRecoKinematicsKinFitTopAntitopMisTagSFdown
                            )
-    
+
 ## ---
 ##    run the final sequences
 ## ---
@@ -1452,6 +1514,11 @@ process.p1 = cms.Path(
                       process.semiLeptonicSelection                 *
                       ## create PU event weights
                       process.makeWeightsPU                         *
+                      ## create shape distortion event weights
+                      process.eventWeightDileptonModelVariation     *
+                      process.eventWeightPUDistort                  *
+                      process.eventWeightPUupDistort                *
+                      process.eventWeightPUdownDistort              *
 		      ## create effSF eventWeight
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
@@ -1476,7 +1543,7 @@ process.p1 = cms.Path(
                       process.eventWeightFinal                      *
                       ## monitor after b-tagging
                       process.monitorKinematicsAfterBtagging        *
-                      process.PUControlDistributionsAfterBtagging   *
+                      #process.PUControlDistributionsAfterBtagging   *
                       ## apply kinematic fit
                       process.kinFit
                       )
@@ -1495,6 +1562,11 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.semiLeptonicSelection                 *
                       ## create PU event weights
                       process.makeWeightsPU                         *
+                      ## create shape distortion event weights
+                      process.eventWeightDileptonModelVariation     *
+                      process.eventWeightPUDistort                  *
+                      process.eventWeightPUupDistort                *
+                      process.eventWeightPUdownDistort              *
 		      ## create effSF eventWeight
 		      process.effSFMuonEventWeight                  *
 		      ## multiply event weights
@@ -1521,6 +1593,11 @@ if(runningOnData=="MC"):
                           process.semiLeptGenCollections                *
                           ## create PU event weights
                           process.makeWeightsPU                         *
+                          ## create shape distortion event weights
+                          process.eventWeightDileptonModelVariation     *
+                          process.eventWeightPUDistort                  *
+                          process.eventWeightPUupDistort                *
+                          process.eventWeightPUdownDistort              *
                           ## investigate top reconstruction
                           process.kinFitGen
                           )
@@ -1542,6 +1619,11 @@ if(runningOnData=="MC"):
                               process.semiLeptGenCollections                *
                               ## create PU event weights
                               process.makeWeightsPU                         *
+                              ## create shape distortion event weights
+                              process.eventWeightDileptonModelVariation     *
+                              process.eventWeightPUDistort                  *
+                              process.eventWeightPUupDistort                *
+                              process.eventWeightPUdownDistort              *
                               ## muon selection
                               #process.genMuonSelection                      *
                               ## jet selection
@@ -1789,4 +1871,10 @@ if(runningOnData=="data" or (not PUreweigthing and not BtagReweigthing and not e
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightFinal )
 
-
+# shape distortion scale factor
+if(sysDistort==''):
+    for path in allpaths:
+        getattr(process,path).remove( process.eventWeightDileptonModelVariation )
+        getattr(process,path).remove( process.eventWeightPUDistort              )
+        getattr(process,path).remove( process.eventWeightPUupDistort            )
+        getattr(process,path).remove( process.eventWeightPUdownDistort          )
