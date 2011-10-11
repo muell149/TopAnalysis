@@ -165,7 +165,7 @@ if(additionalEventWeights):
 
 ## enable/ disable systematic shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
-    sysDistort =  'up'
+    sysDistort =  ''
     #sysDistort =  'up'
     #sysDistort =  'down'
 # only done for ttbar
