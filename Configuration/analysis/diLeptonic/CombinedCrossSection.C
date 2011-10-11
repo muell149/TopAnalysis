@@ -180,7 +180,7 @@ void DrawRatio(const TH1* histNumerator, THStack* histDenominator, const Double_
     TH1* stacksum = SummedStackHisto(histDenominator);
     if (!stacksum) {
         stacksum = (TH1*) histNumerator->Clone();
-        std::cerr << "Cannot draw ratio plot with empty denominator!\n";
+        std::cerr << "WARNING in DrawRatio: Cannot draw ratio plot with empty denominator!\n";
     }
     semileptonic::drawRatio(histNumerator, stacksum, ratioMin, ratioMax, *gStyle);
     if (stacksum->GetNbinsX() < 15 && stacksum->GetBinContent(4) == 0 && TString(stacksum->GetXaxis()->GetTitle()).Contains("N_{muons}")) {
@@ -293,7 +293,7 @@ void SetWeights(TH1* hist[], Double_t zECorr=1., Double_t zMuCorr=1.)
             if (hist[i]) hist[i]->Scale(lumi*sampleCrossSection[i]*dy/totalEvents[i]);
         }
     } else {
-        std::cout << "ERROR in SetWeights: Unknown MC production!" << std::endl;
+        std::cout << "WARNING in SetWeights: Unknown MC production!" << std::endl;
     }
 }
 
@@ -312,7 +312,7 @@ Int_t GetCloneHist(const TString path, const TString name, const Int_t channel, 
     else
         hist = (TH1*)fhist->Clone();
 
-    if(!ok) cout << "cannot get hist " << path << name << endl;
+    if(!ok) cout << "WARNING in GetCloneHist: cannot get hist " << path << name << endl;
 
     //delete fhist;
     return ok;
@@ -332,7 +332,7 @@ Int_t AddHist(const TString path, const TString name, const Int_t channel, const
     else
         hist->Add(fhist);
 
-    if(!ok) cout << "cannot get hist " << path << name << endl;
+    if(!ok) cout << "WARNING in AddHist: cannot get hist " << path << name << endl;
     
     //delete fhist;
     return ok;
@@ -416,34 +416,34 @@ Int_t AddHistArray(const TString path, const TString name, const Int_t channel, 
 // merge the the Nfiles histograms to Nplots histograms
 void MergeHistArray(TH1* inhists[], TH1* outhists[])
 {
-    outhists[kDATA] = inhists[0];    //data
+    outhists[kDATA] = (TH1*)inhists[0]->Clone();    //data
 
-    outhists[kSIG] = inhists[1];     //ttbar signal
+    outhists[kSIG] = (TH1*)inhists[1]->Clone();     //ttbar signal
     outhists[kSIG]->Add(inhists[2]);
 
-    outhists[kTTBG] = inhists[3];    //ttbar other
+    outhists[kTTBG] = (TH1*)inhists[3]->Clone();    //ttbar other
 
-    outhists[kTW] = inhists[4];      // tW
+    outhists[kTW] = (TH1*)inhists[4]->Clone();      // tW
     outhists[kTW]->Add(inhists[5]);
 
-    outhists[kVV] = inhists[6];      // vv
+    outhists[kVV] = (TH1*)inhists[6]->Clone();      // vv
     outhists[kVV]->Add(inhists[7]);
     outhists[kVV]->Add(inhists[8]);
 
-    outhists[kDYT] = inhists[9];     //dytautau
+    outhists[kDYT] = (TH1*)inhists[9]->Clone();     //dytautau
     outhists[kDYT]->Add(inhists[10]);
     outhists[kDYT]->Add(inhists[11]);
 
-    outhists[kDYEM] = inhists[12];   //dy ee/mumu
+    outhists[kDYEM] = (TH1*)inhists[12]->Clone();   //dy ee/mumu
     outhists[kDYEM]->Add(inhists[13]);
     outhists[kDYEM]->Add(inhists[14]);
     outhists[kDYEM]->Add(inhists[15]);
     outhists[kDYEM]->Add(inhists[16]);
     outhists[kDYEM]->Add(inhists[17]);
 
-    outhists[kW] = inhists[18];      // wmu+wtau
+    outhists[kW] = (TH1*)inhists[18]->Clone();      // wmu+wtau
 
-    outhists[kQCD] = inhists[19];    //QCD muenriched, 3x eenriched
+    outhists[kQCD] = (TH1*)inhists[19]->Clone();    //QCD muenriched, 3x eenriched
     outhists[kQCD]->Add(inhists[20]);
     outhists[kQCD]->Add(inhists[21]);
     outhists[kQCD]->Add(inhists[22]);
@@ -2935,27 +2935,21 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 	    } 
 	}    
     }
-    
-    // get the numbers of the bins corresponding to the given bins
-    Int_t intBinsGen[nbins+1];
-    for (Int_t i=0; i<nbins+1; ++i) {
-        intBinsGen[i] = genHist->GetXaxis()->FindBin(bins[i]);
-    }
 
-    Int_t intBinsRec[nbins+1];
-    for (Int_t i=0; i<nbins+1; ++i) {
-        intBinsRec[i] = hists[0]->GetXaxis()->FindBin(bins[i]);
+    // rebin hitograms to anlalysis binning
+    TH1* binhists[Nfiles];
+    for (size_t i=0; i<Nfiles; ++i) {
+        binhists[i] = hists[i]->Rebin(nbins,"",bins);
     }
+    TH1* bingenhist = genHist->Rebin(nbins,"",bins);
 
-    // calculate the efficiencies in bins
-    Double_t efficiencies[nbins];
+    // calculate efficiency binwise from signal MC    
+    Double_t efficiencies[nbins];        
     for (Int_t i=0; i<nbins; ++i) {
-        Double_t nrec = hists[1]->Integral(intBinsRec[i],intBinsRec[i+1]-1);
-        nrec += hists[2]->Integral(intBinsRec[i],intBinsRec[i+1]-1);
-        Double_t ngen = genHist ->Integral(intBinsGen[i],intBinsGen[i+1]-1);
-        efficiencies[i] = nrec/ngen;		
-    }
-
+        efficiencies[i] = (binhists[1]->GetBinContent(i+1)+binhists[2]->GetBinContent(i+1)) / bingenhist->GetBinContent(i+1);
+    }    
+    
+    // weight samples inclusing DY correction   
     Double_t zElCorr = 1.;
     Double_t zMuCorr = 1.;
     Double_t zCorr   = 1.;
@@ -2982,22 +2976,13 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         zCorr = (zMuCorr*w1 + zElCorr*w2)/(w1+w2);
       }
     }
-
-    SetWeights(hists, zElCorr, zMuCorr);
+    SetWeights(binhists, zElCorr, zMuCorr);
 
     // extract numbers of selected events in all samples and bins
     Double_t nreconstructed[nbins][Nfiles];
     for (Int_t i=0; i<nbins; ++i) {
         for (size_t j=0; j<Nfiles; ++j) {
-            nreconstructed[i][j]=hists[j]->Integral(intBinsRec[i],intBinsRec[i+1]-1);
-        }
-    }
-
-    TH1* binhists[Nfiles];
-    for (size_t j=0; j<Nfiles; ++j) {
-        binhists[j] = new TH1D("","",nbins,bins);
-        for (Int_t i=1; i<=nbins; ++i) {
-            binhists[j]->SetBinContent(i,nreconstructed[i-1][j]);
+            nreconstructed[i][j] = hists[j]->GetBinContent(i+1);
         }
     }
 
@@ -3031,8 +3016,6 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     title.Append("_");
     title.Append(quantity);   
 
-
-
     THStack* hstack = new THStack("hstack",title);
     for (size_t i=1; i<Nplots; ++i) {
         hstack->Add(mergedhists[i]);
@@ -3049,13 +3032,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     hstack->GetXaxis()->SetTitle(xtitle);
     hstack->GetYaxis()->SetTitle("N_{evts}");
 
-    // style data
-    //TH1* withSysNoBCC = CloneAddSystematics(mergedhists[kDATA]);     
-    //withSysNoBCC->SetMarkerStyle(20);
-    //withSysNoBCC->SetMarkerSize(1.5);
-    //withSysNoBCC->SetLineWidth(2);
-    //withSysNoBCC->Draw("same,P");
-        
+    // style data        
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
     mergedhists[kDATA]->SetLineWidth(2);   
@@ -3076,7 +3053,6 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     mergedhists[kSIG]->GetXaxis()->SetTitle(xtitle);
     mergedhists[kSIG]->GetYaxis()->SetTitle("N_{evts}");
     kinEffHistogramList.Add(mergedhists[kSIG]->Clone());    
-    //delete withSysNoBCC;
 
     // histogram for measured cross section
     TH1* crossHist = (TH1*)binhists[0]->Clone();
@@ -3104,7 +3080,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error	    
         }
         // set generated cross section
-        genCrossHist->SetBinContent(i,genHist->Integral(intBinsGen[i-1],intBinsGen[i]-1)*sampleCrossSection[1]/totalEvents[1]/binw);
+        genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
 
         if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
             crossHist->SetBinContent(i,crossHist->GetBinContent(i)/2);
