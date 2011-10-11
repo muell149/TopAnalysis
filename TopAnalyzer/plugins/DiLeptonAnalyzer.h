@@ -87,6 +87,10 @@ class DiLeptonAnalyzer : public edm::EDAnalyzer {
     // the other ones are kept for backward compatibility
     TH1F * DiLeptonMass;
     TH1F * DiLeptonPt;
+    TH1F * LeptonMinPt;
+    TH1F * LeptonMaxPt;
+    TH1F * LeptonMinEta;
+    TH1F * LeptonMaxEta;    
 
     TH1F * Events_RC;
     TH1F * Events_WC;

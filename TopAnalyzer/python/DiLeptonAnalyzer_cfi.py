@@ -23,5 +23,5 @@ analyzeLeptonPair = cms.EDAnalyzer("DiLeptonAnalyzer",
     MassWindow_down = cms.double(   12. ),
 
     weightPU     = eventWeightPUTag,
-    weightLepSF  = eventWeightLepSFTag     
+    weightLepSF  = eventWeightLepSFTag  
 )

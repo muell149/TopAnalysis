@@ -92,6 +92,10 @@ void DiLeptonAnalyzer::beginJob() {
 
   DiLeptonMass = fs->make<TH1F>("DiLeptonMass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", 250, 0., 500.);
   DiLeptonPt   = fs->make<TH1F>("DiLeptonPt",   "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", 250, 0., 500.);  
+  LeptonMinPt = fs->make<TH1F>("LeptonMinPt", "min p_{T}^{l} #left[#frac{GeV}{c}#right]", 250, 0., 500.);
+  LeptonMaxPt = fs->make<TH1F>("LeptonMaxPt", "max p_{T}^{l} #left[#frac{GeV}{c}#right]", 250, 0., 500.);    
+  LeptonMinEta = fs->make<TH1F>("LeptonMinEta", "min #eta^{l}", 100, -5., 5.);
+  LeptonMaxEta = fs->make<TH1F>("LeptonMaxEta", "max #eta^{l}", 100, -5., 5.);    
 
   const int nbins = 100;
 
@@ -450,6 +454,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	  reco::MuonCollection::const_reference mu1 = Isolated_muons.at(i);
 	  reco::MuonCollection::const_reference mu2 = Isolated_muons.at(j);
 
+          LeptonMinPt->Fill(min(mu1.pt(),mu2.pt()));
+	  LeptonMaxPt->Fill(max(mu1.pt(),mu2.pt()));
+	  
+          LeptonMinEta->Fill(fabs(mu1.eta())<=fabs(mu2.eta()) ? mu1.eta() : mu2.eta());
+	  LeptonMaxEta->Fill(fabs(mu1.eta())> fabs(mu2.eta()) ? mu1.eta() : mu2.eta());	  
+	  
           diLepLVector = TLorentzVector(mu1.px()+mu2.px(), mu1.py()+mu2.py(), 
 			                mu1.pz()+mu2.pz(), mu1.energy()+mu2.energy());
 
@@ -581,6 +591,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 	  reco::MuonCollection::const_reference        mu1 = Isolated_muons.at(i);
 	  reco::GsfElectronCollection::const_reference el1 = Isolated_elecs.at(j);
 
+          LeptonMinPt->Fill(min(mu1.pt(),el1.pt()));
+	  LeptonMaxPt->Fill(max(mu1.pt(),el1.pt()));
+	  
+          LeptonMinEta->Fill(fabs(mu1.eta())<=fabs(el1.eta()) ? mu1.eta() : el1.eta());
+	  LeptonMaxEta->Fill(fabs(mu1.eta())> fabs(el1.eta()) ? mu1.eta() : el1.eta());	
+
           diLepLVector = TLorentzVector(mu1.px()+el1.px(), mu1.py()+el1.py(), 
 			                mu1.pz()+el1.pz(), mu1.energy()+el1.energy());
 
@@ -708,6 +724,12 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
 	  reco::GsfElectronCollection::const_reference el1 = Isolated_elecs.at(i);
 	  reco::GsfElectronCollection::const_reference el2 = Isolated_elecs.at(j);
+
+          LeptonMinPt->Fill(min(el1.pt(),el2.pt()));
+	  LeptonMaxPt->Fill(max(el1.pt(),el2.pt()));
+	  
+          LeptonMinEta->Fill(fabs(el1.eta())<=fabs(el2.eta()) ? el1.eta() : el2.eta());
+	  LeptonMaxEta->Fill(fabs(el1.eta())> fabs(el2.eta()) ? el1.eta() : el2.eta());	
 
           diLepLVector = TLorentzVector(el1.px()+el2.px(), el1.py()+el2.py(), 
 			                el1.pz()+el2.pz(), el1.energy()+el2.energy());
