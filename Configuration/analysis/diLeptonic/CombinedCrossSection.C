@@ -66,7 +66,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kFALSE;
+const bool doPrintControlPlots = kTRUE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
 const bool drawSystematicErrorBand = kTRUE;
 // Plots for PAS
@@ -153,7 +153,7 @@ Double_t zElNorm9      =  1.;
 Double_t visCrossSections[] = {-1.,-1.,-1.,-1.};
 Double_t visCrossSectionsNoFit[] = {-1.,-1.,-1.,-1.};
 
-bool dataIsFakeFromMonteCarlo = false;
+bool dataIsFakeFromMonteCarlo = kFALSE;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1214,7 +1214,7 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
         cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl; 
       } else{
         Double_t nevents = weight->GetEntries();
-        Double_t crosssection = 157.5;      
+        Double_t crosssection = 157.5;     
         Double_t binw = hist->GetBinWidth(1);
         wgt = crosssection/nevents/binw;
       }    
@@ -1866,13 +1866,8 @@ void PrintCutflowTable() {
             for (Long_t step = 0; steps[step]; ++step) {
                 TString histoname("multi");
                 stringstream ss; ss << steps[step];
-                TString module("analyzeElecs");
+                TString module("analyzeJets");
                 module.Append(ss.str());
-                if (steps[step] == 10) {
-                    //for kin fit, there is no filter, thus read from kin fit histogram
-                    module = kinAnalyzer;
-                    histoname = "kin_TopRapidity";
-                }
 
                 GetCloneHistArray(module.Copy().Append("/"), histoname, channel, hists);
 
@@ -2291,9 +2286,9 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
     cout.precision(3);
 
     // determine input histograms from selected selection
-    TString selModule("analyzeKinSolution7/"); // name of the analyzer module which contains the plot from which selected events are extracted
+    TString selModule("analyzeJets7/");        // name of the analyzer module which contains the plot from which selected events are extracted
     TString genModule("analyzeGenTopEvent/");  // name of the analyzer module which contains the plot from which generated events are extracted
-    TString selPlot("kin_TopMass");            // name of the plot from which selected events are extracted
+    TString selPlot("multi");                  // name of the plot from which selected events are extracted
     TString genPlot("gen_TopMass");            // name of the plot from which generated events are extracted
     
     Double_t btagSF = 1.;
@@ -2304,12 +2299,12 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
 	zMuCorr = zMuNorm7;
 	zElCorr = zElNorm7;
     } else if (strcmp(selection,"TCHEL")==0) {
-        selModule = "analyzeKinSolution8/";
+        selModule = "analyzeJets8/";
 	btagSF = btagSFMap["TCHEL"];
 	zMuCorr = zMuNorm8;
 	zElCorr = zElNorm8;		
     } else if (strcmp(selection,"KINTCHEL")==0) {
-        selModule = "analyzeKinSolution9/";
+        selModule = "analyzeJets9/";
 	btagSF = btagSFMap["TCHEL"];
 	zMuCorr = zMuNorm9;
 	zElCorr = zElNorm9;		
@@ -2749,10 +2744,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
-            AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
-            
-            GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
-            
+            AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);	    
+            if(dataIsFakeFromMonteCarlo)
+                GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
 	} else if (channel==kEE) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
@@ -3423,6 +3417,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
 
     efficiency->SetName(title);
+    efficiency->GetXaxis()->SetTitle(xtitle);    
     diffXsecHistogramList.Add(efficiency->Clone());
 
     delete grE;
@@ -3690,7 +3685,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Canvas->Print(outpath.Copy().Append("combined/").Append(specialPrefix).Append(title).Append(outform));
 
     crossHist->GetXaxis()->SetTitle(xtitle);
-    crossHist->GetYaxis()->SetTitle(ytitle);         
+    crossHist->GetYaxis()->SetTitle(ytitle);        
     diffXsecHistogramList.Add(crossHist->Clone());
         
     // print summary table for combined cross section
