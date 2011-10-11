@@ -711,8 +711,9 @@ setForAllTtFullLepHypotheses(process,"maxNJets",-1)
 #process.ttFullLepJetPartonMatch.jets = hardJets
 
 process.kinSolutionTtFullLepEventHypothesis.maxNComb = -1
-process.kinSolutionTtFullLepEventHypothesis.tmassbegin = 172.5
-process.kinSolutionTtFullLepEventHypothesis.tmassend   = 172.5
+process.kinSolutionTtFullLepEventHypothesis.searchWrongCharge = True
+process.kinSolutionTtFullLepEventHypothesis.tmassbegin = 100.0
+process.kinSolutionTtFullLepEventHypothesis.tmassend   = 300.0
 process.kinSolutionTtFullLepEventHypothesis.neutrino_parameters = (30.641, 57.941, 22.344, 57.533, 22.232)
 
 process.kinSolutionTtFullLepEventHypothesis.mumuChannel = False
