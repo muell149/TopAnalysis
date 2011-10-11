@@ -13,16 +13,29 @@
 #include <TKey.h>
 #include <TDirectory.h>
 
-void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1);
+void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1, bool useZprime=0, double zPrimeLumiWeight=1);
 
-void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="muon"){
+void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="muon", bool zprime=false){
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
   int verbose=0;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
   bool smear=false;
   // "dataFile": absolute path of data file, used to define plots of interest
-  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root";
+  TString dataFile= "";
+  if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root";
+  else dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root";
+  // "zprime": include additional Zprime in pseudo data?
+  
+  // Z prime 
+  TString nameZprime="";
+  if(decayChannel.compare("electron")==0) nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecZPrime_M500_W5_MadSummer11PF.root";
+  else nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecZPrime_M500_W5_MadSummer11PF.root";
+  double zPrimeLumiWeight=(16.2208794979645*luminosity)/232074;
+  TString outNameExtension="";
+  if(zprime) outNameExtension="and500GeVZprime";
+  unsigned int kLast=kSAToptW;
+  unsigned int kZprime=kSAToptW+1;
+  if(zprime) kLast=kZprime;
 
   //  ---
   //     create container for histos and files
@@ -46,6 +59,8 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   //if(files_.count(kData )>0)files_.erase(kData ); // data file needed for list of plots
   // remove combined QCD file for electron channel
   if(decayChannel.compare("electron")==0&&files_.count(kQCD)>0) files_.erase(kQCD);
+  // add zprime
+  if(zprime) files_[kZprime]=new (TFile)(nameZprime);
 
   //  -----------------------------------------
   //     get list of all plots to be considered
@@ -80,8 +95,10 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
 	gDirectory->pwd();
       }
       // loop objects in directory
+      //TList* folderList = gDirectory->GetListOfKeys();
+      //TIter folderIterator=folderList->MakeIterator();
       TIter folderIterator(gDirectory->GetListOfKeys());
-      TKey *folderKey = (TKey*)folderIterator();
+      TKey *folderKey;// = (TKey*)folderIterator();
       int count2=0;
       while( (folderKey = (TKey*)folderIterator()) ) {
 	++count2;
@@ -112,7 +129,7 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   if(verbose>0){
     std::cout << std::endl << "the following files will be considered: " << std::endl;
     // loop files
-    for(int sample = kSig; sample<=kSAToptW; sample++){
+    for(int sample = kSig; sample<=kLast; sample++){
       // check existence of folder in all existing files
       if(files_.count(sample)>0){
 	std::cout << files_[sample]->GetName() << std::endl;
@@ -134,21 +151,35 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   unsigned int N1Dplots=plotList_.size();
   int Nplots=0;
   std::cout << std::endl << "loading plots: " << std::endl;
+  // a) for std analysis file
   getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1);
   std::cout << Nplots << " plots loaded from " << plotList_.size();
   std::cout << " requested" << std::endl << "empty plots are not counted" << std::endl;
+  // b) for zprime
+  if(zprime){ 
+    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+      histo_[plotList_[plot]][kZprime] = (TH1F*)(files_[kZprime]->Get(plotList_[plot]));
+    }
+  }
+
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-  TString outputfile="./"+(TString)decayChannel+"PseudoData"+lum+"pb7TeV.root";
+  TString outputfile="./"+(TString)decayChannel+"PseudoData"+lum+"pb"+outNameExtension+"7TeV.root";
   TFile* out = new TFile(outputfile, "recreate");
   if(verbose>0) std::cout << std::endl << "outputfile: " << outputfile << std::endl;
-  poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear);
+  poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear, zprime, zPrimeLumiWeight);
   out->Close();
 }
 
-void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, int luminosity, const unsigned int verbose, bool smear){
+void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, int luminosity, const unsigned int verbose, bool smear, bool useZprime, double zPrimeLumiWeight){
   unsigned int kCombined=111;
+  
+  // upper bound for looping events: in/exclude zprime
+  unsigned int kLast=kSAToptW;
+  unsigned int kZprime=kSAToptW+1;
+  if(useZprime) kLast=kZprime;
+
   // go to output file
   outputfile.cd();
   //  ---
@@ -164,11 +195,12 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
     // indicate first plot existing in sample
     bool first=true;
     // loop samples
-    for(int sample = kSig; sample<=kSAToptW; sample++){
+    for(int sample = kSig; sample<=kLast; sample++){
       // check if plot exists
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample))){
 	// do lumiweighting
-	histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity, sysNo, decayChannel));
+	if(useZprime&&sample==kZprime) histo_[plotList_[plot]][sample]->Scale(zPrimeLumiWeight);
+	else histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity, sysNo, decayChannel));
 	// first subsample (should be ttbar signal)
 	// -> create histogram map entry
 	if(first){ 
@@ -177,7 +209,10 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
 	}
 	// add other subsample
 	else histo_[plotList_[plot]][kCombined]->Add((TH1F*)(histo_[plotList_[plot]][sample]->Clone()));
-	if(verbose>1) std::cout << sampleLabel(sample) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
+	if(verbose>1){ 
+	  if(!useZprime||sample!=kZprime) std::cout << sampleLabel(sample) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
+	  else std::cout << "z prime, weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
+	}
       }
     }
   }
