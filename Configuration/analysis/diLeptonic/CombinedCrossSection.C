@@ -66,7 +66,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kTRUE;
+const bool doPrintControlPlots = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
 const bool drawSystematicErrorBand = kTRUE;
 // Plots for PAS
@@ -3021,7 +3021,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     TLegend* leg = new TLegend(0.70,0.58,0.95,0.87);
     FillLegend(leg, mergedhists, zCorr);
 
-    TString title("combined_");
+    TString title(channelName[channel]);
+    title.Append("_");  
     if(useKinFit)
         title.Append("FixedMt_Btag_Yield_");
     else
