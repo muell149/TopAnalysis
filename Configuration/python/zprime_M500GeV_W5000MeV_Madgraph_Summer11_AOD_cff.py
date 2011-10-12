@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
-#######################################################################
-# Dataset: Zprime_M500GeV_W5GeV-madgraph/AODSIM/PU_S4_START42_V11-v2/ #
-# Events : 232074                                                     # 
-# eff    : 1.0                                                        # 
-#######################################################################
+##########################################################################
+# Dataset: Zprime_M500GeV_W5000MeV-madgraph/AODSIM/PU_S4_START42_V11-v2/ #
+# Events : 232074                                                        # 
+# eff    : 1.0                                                           # 
+##########################################################################
 
 maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 readFiles = cms.untracked.vstring()
