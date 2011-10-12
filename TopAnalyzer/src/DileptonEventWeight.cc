@@ -24,10 +24,12 @@ double getDileptonSFWeight(const edm::Event& evt,
     return *weightHandle;
 }
 
-double getModelVariationWeight(const edm::Event& evt, const edm::InputTag& modelWeight_) {
+
+double getWeight(const edm::Event& evt, const edm::InputTag& tag_) {
     edm::Handle<double> weightHandle;
-    evt.getByLabel( modelWeight_, weightHandle);
-    return weightHandle.failedToGet() ? 1 : *weightHandle;
+    evt.getByLabel( tag_, weightHandle);
+    
+    return weightHandle.failedToGet() ? 1. : *weightHandle;
 }
 
 
@@ -37,14 +39,18 @@ double getDileptonEventWeight(const edm::Event& evt,
                               const edm::InputTag& puweight_, 
 			      const edm::InputTag& lepweight_) {
 				   				   			   
-    if (evt.isRealData()) return 1.; // for data neither pu weight nor lepton SF are applied
+    if (evt.isRealData()) return 1.; // the data are the data!
 
     // get PU weight first
     double weight = getPuWeight(evt, puweight_);
 
     weight *= getDileptonSFWeight(evt, lepweight_);
-    const edm::InputTag tag("eventWeightDileptonModelVariation");
-    weight *= getModelVariationWeight(evt, tag);
+    
+    const edm::InputTag tagKin("eventWeightDileptonKinEffSF", "eventWeightDileptonKinEffSF");
+    weight *= getWeight(evt, tagKin); 
+      
+    const edm::InputTag tagMdl("eventWeightDileptonModelVariation");
+    weight *= getWeight(evt, tagMdl);
   
     return weight;
 }
