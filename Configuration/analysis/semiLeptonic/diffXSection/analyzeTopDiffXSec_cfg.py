@@ -23,7 +23,7 @@ options = VarParsing.VarParsing ('standard')
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
 # create sample label with default value data
-# for summer11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), zprime_m500gev_w5gev
+# for summer11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), zprime_m500gev_w5000mev, zprime_m750gev_w7500mev
 # for systematic samples see list for each MC sample
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
@@ -332,9 +332,12 @@ if(not options.sample=="none"):
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff")
         print "analyzed sample: singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff.py"
 	additionalEventWeights=False
-    if(options.sample=="zprime_m500gev_w5gev"):        
-        process.load("TopAnalysis/Configuration/zprime_M500GeV_W5GeV_Madgraph_Summer11_AOD_cff")
-        print "analyzed sample: zprime_M500GeV_W5GeV_Madgraph_Summer11_AOD_cff.py"
+    if(options.sample=="zprime_m500gev_w5000mev"):        
+        process.load("TopAnalysis/Configuration/zprime_M500GeV_W5000MeV_Madgraph_Summer11_AOD_cff")
+        print "analyzed sample: zprime_M500GeV_W5000MeV_Madgraph_Summer11_AOD_cff.py"
+    if(options.sample=="zprime_m750gev_w7500mev"):        
+        process.load("TopAnalysis/Configuration/zprime_M750GeV_W7500MeV_Madgraph_Summer11_AOD_cff")
+        print "analyzed sample: zprime_M750GeV_W7500MeV_Madgraph_Summer11_AOD_cff.py"
 	additionalEventWeights=False
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
@@ -994,8 +997,10 @@ if(options.sample=="singleTopTw"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
 if(options.sample=="singleAntiTopTw"):
     process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
-if(options.sample=="zprime_m500gev_w5gev"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_Zprime_M500GeV_W5GeV_Madgraph.root")
+if(options.sample=="zprime_m500gev_w5000mev"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_Zprime_M500GeV_W5000MeV_Madgraph.root")
+if(options.sample=="zprime_m750gev_w7500mev"):
+    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_Zprime_M750GeV_W7500MeV_Madgraph.root")
 if(decayChannel=='muon'):
     if(options.sample=="qcd"):
         process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6.root")
