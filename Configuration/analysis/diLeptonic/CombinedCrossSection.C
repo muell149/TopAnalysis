@@ -2719,7 +2719,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     TH1* genRec2DHist;   // reconstructed vs generated signal properties. needed  for correlation and pse plot
     TString genTopEvent("analyzeVisibleGenTopEvent/");    
     
-    if(useKinFit){
+    if(useKinFit) {
 
 	// get histograms of reconstructed quantity and generated signal
 	if (strcmp(particle,"Leptons")==0) {
@@ -3146,6 +3146,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       if (genHistSmear) {
         genHistSmear->Sumw2();
         genHistSmear = genHistSmear->Rebin(nbins, "", bins);
+        for (int i = 1; i <= nbins; ++i) {
+            genHistSmear->SetBinContent(i, genHistSmear->GetBinContent(i) / genHistSmear->GetBinWidth(i));
+            genHistSmear->SetBinError(i, genHistSmear->GetBinError(i) / genHistSmear->GetBinWidth(i));
+        }
         Double_t scale_smear = 1./genHistSmear->Integral("width");
         genHistSmear->Scale(scale_smear);
       }
@@ -3171,7 +3175,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       genCrossHist->Draw();
 
       // for pt and mass distribution use log scale
-      if(strcmp(quantity,"Pt")==0 || strcmp(quantity,"Mass")==0){
+      if (!strcmp(quantity, "Mass")) {
+        genCrossHist->SetMaximum(2e-2);   
+        genCrossHist->SetMinimum(1e-4);
+        gPad->SetLogy(1);
+      } else
+      if(strcmp(quantity,"Pt")==0) {
         genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));   
         genCrossHist->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
         gPad->SetLogy(1);
