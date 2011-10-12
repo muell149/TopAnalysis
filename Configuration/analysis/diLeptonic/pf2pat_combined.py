@@ -582,6 +582,11 @@ process.load("TopAnalysis.TopUtils.EventWeightDileptonSF_cfi")
 process.eventWeightDileptonSF.electrons = cms.InputTag('filterDiLeptonMassQCDveto')
 process.eventWeightDileptonSF.muons = cms.InputTag('filterDiLeptonMassQCDveto')
 
+## produces weight for kin reconstruction efficiency SF
+process.load("TopAnalysis.TopUtils.EventWeightDileptonKinEffSF_cfi")
+process.eventWeightDileptonKinEffSF.electrons = cms.InputTag('filterDiLeptonMassQCDveto')
+process.eventWeightDileptonKinEffSF.muons = cms.InputTag('filterDiLeptonMassQCDveto')
+
 ## Zveto
 process.filterDiLeptonMassZveto = filterLeptonPair.clone(
     electrons = "filterDiLeptonMassQCDveto",
@@ -955,6 +960,7 @@ process.afterLeptonChargeSelection = cms.Sequence(
     process.eventIDPrinter8          *
     
     process.filterFullLepHypothesis  *
+    process.eventWeightDileptonKinEffSF*     
     process.analyzeKinSolution9      *
     process.analyzeJets9             *
     process.analyzeMet9              *
@@ -999,6 +1005,7 @@ process.pZWindow = cms.Path(
     process.filterOppositeCharge          *
     process.filterChannel                 *
     process.filterDiLeptonMassQCDveto     *
+    process.eventWeightDileptonSF         *    
     process.ZWindowSelection              *
     process.analyzeLeptonPairZvetoRegion4 *
     process.onePFJetSelection             *
@@ -1012,6 +1019,7 @@ process.pZWindow = cms.Path(
     process.analyzeLeptonPairZvetoRegion8 *
     process.makeTtFullLepEvent            *
     process.filterFullLepHypothesis       *
+    process.eventWeightDileptonKinEffSF   *     
     process.analyzeLeptonPairZvetoRegion9
 )
 
