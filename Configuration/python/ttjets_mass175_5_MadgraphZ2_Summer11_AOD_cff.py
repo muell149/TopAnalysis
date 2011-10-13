@@ -1,5 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
+######################################################################################
+# Dataset: /TTJets_TuneZ2_mass175_5_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v3 #
+# Events : 1538301 (102 files)                                                       # 
+# eff    : 1.0                                                                       # 
+######################################################################################
+
 maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring() 
