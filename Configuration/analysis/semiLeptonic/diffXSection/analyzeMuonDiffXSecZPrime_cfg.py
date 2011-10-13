@@ -6,8 +6,12 @@
 ## change gen level event filter to ttbarBG
 eventFilter='signal only'
 
-## get the mother file
+## get the mother file and adapt required changes
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
+
+pathlist = [process.p1, process.p2]
+for path in pathlist:
+    path.replace( process.filterSequence, process.makeGenEvt )
 
 ## reduce output
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
