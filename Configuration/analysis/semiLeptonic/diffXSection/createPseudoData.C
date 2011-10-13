@@ -15,9 +15,9 @@
 
 void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1, bool useReweightedTop=0, double avReweight=1, bool useZprime=0, double zPrimeLumiWeight=1);
 
-void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="electron", bool zprime=false, bool useReweightedTop=true){
+void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="muon", bool zprime=false, bool useReweightedTop=true){
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
-  int verbose=0;
+  int verbose=2;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
   bool smear=false;
   // "dataFile": absolute path of data file, used to define plots of interest
@@ -27,7 +27,7 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   // "useReweightedTop": use parton level reweighted ttbar signal file in pseudo data?
   TString rewVar="ttbarMassUp";
   // "zprime": include additional Zprime in pseudo data?
-  if(useReweightedTop) zprime=0;
+  if(useReweightedTop) zprime=false;
   TString outNameExtension="";
   //  ---
   //     create container for histos and files
@@ -55,7 +55,16 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
     histo_["avWeight"][kSig] = (TH1F*)(ttbarRewfile->Get(weightPlot));
     avWeight=histo_ ["avWeight"][kSig]->GetBinContent(2)/histo_ ["avWeight"][kSig]->GetBinContent(1);
     histo_["avWeight"].erase(kSig);
+    //std::cout << "histo ratio: " << avWeight << std::endl;
+    TFile* sigfile = new (TFile)("/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/"+TopFilename(kSig, sysNo, decayChannel));
+    TString partonPlot="analyzeTopPartonLevelKinematics/ttbarMass";
+    histo_["parton"   ][kSig] = (TH1F*)(sigfile     ->Get(partonPlot));
+    histo_["partonRew"][kSig] = (TH1F*)(ttbarRewfile->Get(partonPlot));
+    double avWeight2  = histo_["partonRew"][kSig]->Integral(0, histo_["partonRew"][kSig]->GetNbinsX()+1);
+    avWeight2        /= histo_["parton"   ][kSig]->Integral(0, histo_["parton"   ][kSig]->GetNbinsX()+1);
+    //std::cout << "area ratio: "<< avWeight2 << std::endl;
     delete ttbarRewfile;
+    delete sigfile;
   }
 
   //  ---
@@ -67,12 +76,17 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   else nameZprime+="muon";
   nameZprime+="DiffXSecZPrime_M"+zprimeMass+"_W"+zprimeMass+"0_MadSummer11PF.root";
   double zPrimeLumiWeight=1;
-  if     (zprimeMass=="500") zPrimeLumiWeight=(16.2208794979645*luminosity)/232074*10;
-  else if(zprimeMass=="750") zPrimeLumiWeight=(3.16951400706147*luminosity)/206525*10;
+  if     (zprimeMass=="500") zPrimeLumiWeight=(10*16.2208794979645*luminosity)/232074;
+  else if(zprimeMass=="750") zPrimeLumiWeight=(10*3.16951400706147*luminosity)/206525;
   if(zprime) outNameExtension="and"+zprimeMass+"GeVZprime";
   unsigned int kLast=kSAToptW;
   unsigned int kZprime=kSAToptW+1;
   if(zprime) kLast=kZprime;
+
+  if(zprime&&zPrimeLumiWeight==1){
+    exit(0);
+    std::cout << "ERROR: chosen zprime weight is exactly 1!" << std::endl;
+  }
 
   // -------------------------
   // !!! choose luminosity !!!
@@ -201,13 +215,25 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   TString outputfile="./"+(TString)decayChannel+"PseudoData"+lum+"pb"+outNameExtension+"7TeV.root";
   TFile* out = new TFile(outputfile, "recreate");
   if(verbose>0) std::cout << std::endl << "outputfile: " << outputfile << std::endl;
-  poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear, zprime, zPrimeLumiWeight);
+  poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear, useReweightedTop, avWeight, zprime, zPrimeLumiWeight);
   out->Close();
 }
 
 void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, int luminosity, const unsigned int verbose, bool smear, bool useReweightedTop, double avReweight, bool useZprime, double zPrimeLumiWeight){
   unsigned int kCombined=111;
   
+  if(verbose>1){
+    std::cout << "running function poisson" << std::endl;
+    std::cout << "-----------------------------" << std::endl;
+    std::cout << "luminosity: " << luminosity << std::endl;
+    std::cout << "decayChannel: " << decayChannel << std::endl;
+    std::cout << "smear: " << smear << std::endl;
+    std::cout << "useReweightedTop: " << useReweightedTop << std::endl;
+    std::cout << "avReweight: " << avReweight << std::endl;
+    std::cout << "useZprime: " << useZprime << std::endl;
+    std::cout << "zPrimeLumiWeight: " << zPrimeLumiWeight << std::endl;
+    sleep(5);
+  }
   // upper bound for looping events: in/exclude zprime
   unsigned int kLast=kSAToptW;
   unsigned int kZprime=kSAToptW+1;
@@ -231,21 +257,25 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
     for(int sample = kSig; sample<=kLast; sample++){
       // check if plot exists
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample))){
-	// do lumiweighting
-	if     (useZprime       &&sample==kZprime) histo_[plotList_[plot]][sample]->Scale(zPrimeLumiWeight);
-	else if(useReweightedTop&&sample==kSig   ) histo_[plotList_[plot]][sample]->Scale(1.0/avReweight  );
-	else                                       histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity, sysNo, decayChannel));
-	// first subsample (should be ttbar signal)
-	// -> create histogram map entry
-	if(first){ 
-	  histo_[plotList_[plot]][kCombined] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
-	  first=false;
-	}
-	// add other subsample
-	else histo_[plotList_[plot]][kCombined]->Add((TH1F*)(histo_[plotList_[plot]][sample]->Clone()),1.0);
-	if(verbose>1){ 
-	  if(!useZprime||sample!=kZprime) std::cout << sampleLabel(sample) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
-	  else std::cout << "z prime, weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
+	// take care of non existing plots
+	if(!(useZprime&&sample==kZprime&&plotList_[plot].Contains("PUControlDistributions"))){
+	  // do lumiweighting
+	  if     (useZprime       &&sample==kZprime) histo_[plotList_[plot]][sample]->Scale(zPrimeLumiWeight);
+	  else histo_[plotList_[plot]][sample]->Scale(lumiweight(sample, luminosity, sysNo, decayChannel));
+	  if(useReweightedTop&&sample==kSig   ) histo_[plotList_[plot]][sample]->Scale(1.0/avReweight);
+	  // first subsample (should be ttbar signal)
+	  // -> create histogram map entry
+	  if(first){ 
+	    histo_[plotList_[plot]][kCombined] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	    first=false;
+	  }
+	  // add other subsample
+	  else histo_[plotList_[plot]][kCombined]->Add((TH1F*)(histo_[plotList_[plot]][sample]->Clone()),1.0);
+	  if(verbose>1){ 
+	    if(useZprime&&sample==kZprime) std::cout << "z prime, weight " << zPrimeLumiWeight << std::endl;
+	    else if(useReweightedTop&&sample==kSig)  std::cout << "reweighted ttbar signal, weight " << 1.0/avReweight << std::endl;
+	    else std::cout << sampleLabel(sample) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
+	  }
 	}
       }
     }
