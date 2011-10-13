@@ -15,7 +15,7 @@
 
 void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=1, bool smear=1, bool useReweightedTop=0, double avReweight=1, bool useZprime=0, double zPrimeLumiWeight=1);
 
-void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="electron", bool zprime=false, bool useReweightedTop=false){
+void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="electron", bool zprime=false, bool useReweightedTop=true){
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
   int verbose=0;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
@@ -25,11 +25,10 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root";
   else dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root";
   // "useReweightedTop": use parton level reweighted ttbar signal file in pseudo data?
-  TString rewVar="ttbarMass";
+  TString rewVar="ttbarMassUp";
   // "zprime": include additional Zprime in pseudo data?
   if(useReweightedTop) zprime=0;
   TString outNameExtension="";
-
   //  ---
   //     create container for histos and files
   //  ---
@@ -44,13 +43,16 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   TString nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/";
   if(decayChannel.compare("electron")==0) nameTtbarReweighted+="elecDiffXSec";
   else                                    nameTtbarReweighted+="muonDiffXSec";
-  nameTtbarReweighted+="SigMadD6TSummer11Reweighted"+rewVar+"MadSummer11PF.root";
+  nameTtbarReweighted+="SigMadD6TSummer11Reweighted"+rewVar+"PF.root";
   if(useReweightedTop) outNameExtension="Reweighted"+rewVar;
   // b) get average weight of reweighting
   double avWeight=1;
   if(useReweightedTop){
     TFile* ttbarRewfile = new (TFile)(nameTtbarReweighted);
-    histo_["avWeight"][kSig] = (TH1F*)(ttbarRewfile->Get("eventWeightDileptonModelVariation"));
+    TString weightPlot="eventWeightDileptonModelVariation/modelWeightSum";
+    weightPlot.ReplaceAll("Up"  ,"");
+    weightPlot.ReplaceAll("Down","");
+    histo_["avWeight"][kSig] = (TH1F*)(ttbarRewfile->Get(weightPlot));
     avWeight=histo_ ["avWeight"][kSig]->GetBinContent(2)/histo_ ["avWeight"][kSig]->GetBinContent(1);
     histo_["avWeight"].erase(kSig);
     delete ttbarRewfile;
