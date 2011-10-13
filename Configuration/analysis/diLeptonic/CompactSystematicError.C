@@ -37,8 +37,8 @@ using namespace std;
 const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsSept21/");
 
 // path where the output is written
-// const TString outpath("Markus/DiffXS2011/Systematics/plots/");
-const TString outpath("~wbehrenh/cms/systematicsSept21-output/");
+const TString outpath("Markus/DiffXS2011/Systematics/plots/");
+//const TString outpath("~wbehrenh/cms/systematicsSept21-output/");
 
 // output format
 const TString outform(".eps");
@@ -46,8 +46,8 @@ const TString outform(".eps");
 
 ///////////////////////////////////////////////////////////
 
-Bool_t set_LogY = kTRUE;
-//Bool_t set_LogY = kFALSE;
+//Bool_t set_LogY = kTRUE;
+Bool_t set_LogY = kFALSE;
 
 const Bool_t isDiff   = kTRUE;
 // Bool_t isDiff   = kFALSE;
@@ -66,8 +66,8 @@ Bool_t isModel = kTRUE;
 Bool_t isExp = kTRUE;
 //Bool_t isExp = kFALSE;
 
-Bool_t isStat  = kTRUE;
-// Bool_t isStat  = kFALSE;
+//Bool_t isStat  = kTRUE;
+Bool_t isStat  = kFALSE;
 
 ///////////////////////////////////////////////////////////
 
@@ -127,37 +127,45 @@ TH1* SummedStackHisto(const THStack *stack) {
 }
 
 void SymmetricAroundZero(TH1* h_ref, TH1* h_var_up, TH1* h_var_down, TH1* h_sys, TH1* h_sys2, double &Sum_Errors ) {
-    for(Int_t bin = 1; bin <= h_ref->GetNbinsX()/2.; ++bin) {
 
-        if( h_ref->GetBinContent(bin) == 0 )  continue;
+  Int_t N_bins = h_ref->GetNbinsX();
 
-        Double_t PlusMinus_Average_Ref  = 0.;
-        Double_t PlusMinus_Average_Up   = 0.;
-        Double_t PlusMinus_Average_Down = 0.;
+  Double_t Sys_Error      = 0.;
+  Double_t Sys_Error2     = 0.;
+  Double_t Sys_Error_Up   = 0.;
+  Double_t Sys_Error_Down = 0.;
 
-        PlusMinus_Average_Ref  = (h_ref->GetBinContent(bin)      + h_ref->GetBinContent(N_bins+1-bin)     ) / 2.;
-        PlusMinus_Average_Up   = (h_var_up->GetBinContent(bin)   + h_var_up->GetBinContent(N_bins+1-bin)  ) / 2.;
-        PlusMinus_Average_Down = (h_var_down->GetBinContent(bin) + h_var_down->GetBinContent(N_bins+1-bin)) / 2.;
+  for(Int_t bin = 1; bin <= h_ref->GetNbinsX()/2.; ++bin) {
 
-        //      Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
-        //      Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
+    if( h_ref->GetBinContent(bin) == 0 )  continue;
 
-        Sys_Error_Up   = abs(PlusMinus_Average_Ref - PlusMinus_Average_Up  ) / PlusMinus_Average_Ref;
-        Sys_Error_Down = abs(PlusMinus_Average_Ref - PlusMinus_Average_Down) / PlusMinus_Average_Ref;
+    Double_t PlusMinus_Average_Ref  = 0.;
+    Double_t PlusMinus_Average_Up   = 0.;
+    Double_t PlusMinus_Average_Down = 0.;
 
-        //      Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
-        Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
-        Sys_Error2 = Sys_Error * Sys_Error;
+    PlusMinus_Average_Ref  = (h_ref->GetBinContent(bin)      + h_ref->GetBinContent(N_bins+1-bin)     ) / 2.;
+    PlusMinus_Average_Up   = (h_var_up->GetBinContent(bin)   + h_var_up->GetBinContent(N_bins+1-bin)  ) / 2.;
+    PlusMinus_Average_Down = (h_var_down->GetBinContent(bin) + h_var_down->GetBinContent(N_bins+1-bin)) / 2.;
 
-        h_sys->SetBinContent(           bin, Sys_Error  );
-        h_sys->SetBinContent(  N_bins+1-bin, Sys_Error  );
-        h_sys2->SetBinContent(          bin, Sys_Error2 );
-        h_sys2->SetBinContent( N_bins+1-bin, Sys_Error2 );
+    //    Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
+    //    Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
 
-        cout << "Sys. Error: " << Sys_Error << endl;
-        Sum_Errors += (2.*Sys_Error);
+    Sys_Error_Up   = abs(PlusMinus_Average_Ref - PlusMinus_Average_Up  ) / PlusMinus_Average_Ref;
+    Sys_Error_Down = abs(PlusMinus_Average_Ref - PlusMinus_Average_Down) / PlusMinus_Average_Ref;
 
-    }
+    //    Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
+    Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
+    Sys_Error2 = Sys_Error * Sys_Error;
+
+    h_sys->SetBinContent(           bin, Sys_Error  );
+    h_sys->SetBinContent(  N_bins+1-bin, Sys_Error  );
+    h_sys2->SetBinContent(          bin, Sys_Error2 );
+    h_sys2->SetBinContent( N_bins+1-bin, Sys_Error2 );
+
+    cout << "Sys. Error: " << Sys_Error << endl;
+    Sum_Errors += (2.*Sys_Error);
+
+  }
 
 }
 
@@ -210,8 +218,6 @@ void SystematicErrors() {
 
       Double_t Stat_Error  = 0.;
       Double_t Stat_Error2 = 0.;
-
-      Int_t        N_bins  = 0;
       Double_t Sum_Errors  = 0.;
 
       files[0]->GetObject( title, h_ref);
@@ -219,6 +225,8 @@ void SystematicErrors() {
 
       TH1* h_stat  = (TH1*) h_ref->Clone();   h_stat->Reset();
       TH1* h_stat2 = (TH1*) h_ref->Clone();   h_stat2->Reset();
+
+      Int_t N_bins = h_ref->GetNbinsX();
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
 
@@ -230,7 +238,6 @@ void SystematicErrors() {
 	h_stat->SetBinContent(  bin, Stat_Error  );
 	h_stat2->SetBinContent( bin, Stat_Error2 );
 	cout << "Stat. Error: " << Stat_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Stat_Error;
       }
 
@@ -308,7 +315,7 @@ void SystematicErrors() {
       if( set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_JER").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -325,7 +332,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -405,7 +411,7 @@ void SystematicErrors() {
       if( set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_JES").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -422,7 +428,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -503,7 +508,7 @@ void SystematicErrors() {
       if( set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_BG").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -520,7 +525,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -600,7 +604,7 @@ void SystematicErrors() {
       if( set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_DY").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -617,7 +621,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -671,7 +674,7 @@ void SystematicErrors() {
       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -696,7 +699,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -749,7 +751,7 @@ void SystematicErrors() {
       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -774,7 +776,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -827,7 +828,7 @@ void SystematicErrors() {
       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-      Int_t        N_bins = 0;
+      //      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -852,7 +853,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -901,7 +901,7 @@ void SystematicErrors() {
 //       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
 //       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-//       Int_t        N_bins = 0;
+//       Int_t N_bins = h_ref->GetNbinsX();
 //       Double_t Sum_Errors = 0.;
 
 //       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -926,7 +926,6 @@ void SystematicErrors() {
 // 	h_sys->SetBinContent(  bin, Sys_Error  );
 // 	h_sys2->SetBinContent( bin, Sys_Error2 );
 // 	cout << "Sys. Error: " << Sys_Error << endl;
-// 	N_bins = bin;
 // 	Sum_Errors = Sum_Errors+Sys_Error;
 //       }
 
@@ -1002,7 +1001,7 @@ void SystematicErrors() {
       if( set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_PILE_UP").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -1019,7 +1018,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -1072,32 +1070,31 @@ void SystematicErrors() {
       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
 
 	//  TOTAL XS
 	if(isTotal) {
-	  if( title.Contains("mumu_") )      Sys_Error  = 0.01;
-	  if( title.Contains("ee_") )        Sys_Error  = 0.01;
-	  if( title.Contains("emu_") )       Sys_Error  = 0.01;
-	  if( title.Contains("combined_") )  Sys_Error  = 0.006;
+	  if( title.Contains("mumu_") )      Sys_Error  = 0.03;
+	  if( title.Contains("ee_") )        Sys_Error  = 0.03;
+	  if( title.Contains("emu_") )       Sys_Error  = 0.03;
+	  if( title.Contains("combined_") )  Sys_Error  = 0.017;
 	}
 
 	//  DIFFERENTIAL XS
 	if(isDiff) {
-	  if( title.Contains("mumu_") )      Sys_Error  = 0.01;
-	  if( title.Contains("ee_") )        Sys_Error  = 0.01;
-	  if( title.Contains("emu_") )       Sys_Error  = 0.01;
-	  if( title.Contains("combined_") )  Sys_Error  = 0.006;
+	  if( title.Contains("mumu_") )      Sys_Error  = 0.03;
+	  if( title.Contains("ee_") )        Sys_Error  = 0.03;
+	  if( title.Contains("emu_") )       Sys_Error  = 0.03;
+	  if( title.Contains("combined_") )  Sys_Error  = 0.017;
 	}
 
 	Sys_Error2 = Sys_Error * Sys_Error;
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -1151,7 +1148,7 @@ void SystematicErrors() {
 //       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
 //       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-//       Int_t        N_bins = 0;
+//       Int_t N_bins = h_ref->GetNbinsX();
 //       Double_t Sum_Errors = 0.;
 
 //       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -1176,7 +1173,6 @@ void SystematicErrors() {
 // 	h_sys->SetBinContent(  bin, Sys_Error  );
 // 	h_sys2->SetBinContent( bin, Sys_Error2 );
 // 	cout << "Sys. Error: " << Sys_Error << endl;
-// 	N_bins = bin;
 // 	Sum_Errors = Sum_Errors+Sys_Error;
 //       }
 
@@ -1275,7 +1271,7 @@ void SystematicErrors() {
       //      gPad->SetGridy();
       Canvas->Print(outpath.Copy().Append(title).Append("_HAD").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -1292,7 +1288,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -1322,113 +1317,113 @@ void SystematicErrors() {
 
   // ISR/FSR ----------------------------------------------
 
-  LineColor = kBlack;
-  LineStyle = 1;
-  LineWidth = 1;
-  HistColor = kMagenta+4;
+//   LineColor = kBlack;
+//   LineStyle = 1;
+//   LineWidth = 1;
+//   HistColor = kMagenta+4;
 
-  files[0]  = new TFile(inpath.Copy().Append("madgraph_Fall10.root"));
-  files[13] = new TFile(inpath.Copy().Append("ISRFSR_up_Fall10.root"));
-  files[14] = new TFile(inpath.Copy().Append("ISRFSR_down_Fall10.root"));
+//   files[0]  = new TFile(inpath.Copy().Append("madgraph_Fall10.root"));
+//   files[13] = new TFile(inpath.Copy().Append("ISRFSR_up_Fall10.root"));
+//   files[14] = new TFile(inpath.Copy().Append("ISRFSR_down_Fall10.root"));
 
-  if( files[13] && !files[13]->IsZombie() && files[14] && !files[14]->IsZombie() && isModel ) {
+//   if( files[13] && !files[13]->IsZombie() && files[14] && !files[14]->IsZombie() && isModel ) {
 
-    cout << "   >>>   " << "ISR/FSR" << endl;
-    cout << "----------------------" << endl << endl;
+//     cout << "   >>>   " << "ISR/FSR" << endl;
+//     cout << "----------------------" << endl << endl;
 
-    for(Int_t j = 0; j < ListOfKeys->GetEntries(); ++j) {
+//     for(Int_t j = 0; j < ListOfKeys->GetEntries(); ++j) {
 
-      TString title = ListOfKeys->At(j)->GetName();
-      cout << "   >>>   " << title << endl;
-      if( !(isPSE) &&   title.Contains("PSE_")  )  continue;
-      if(   isPSE  && !(title.Contains("PSE_")) )  continue;
+//       TString title = ListOfKeys->At(j)->GetName();
+//       cout << "   >>>   " << title << endl;
+//       if( !(isPSE) &&   title.Contains("PSE_")  )  continue;
+//       if(   isPSE  && !(title.Contains("PSE_")) )  continue;
 
-      Sys_Error      = 0.;
-      Sys_Error2     = 0.;
-      Sys_Error_Up   = 0.;
-      Sys_Error_Down = 0.;
+//       Sys_Error      = 0.;
+//       Sys_Error2     = 0.;
+//       Sys_Error_Up   = 0.;
+//       Sys_Error_Down = 0.;
 
-      files[0]->GetObject(  title, h_ref);
-      files[0]->GetObject(  title, h_style);
-      files[13]->GetObject( title, h_var_up);
-      files[14]->GetObject( title, h_var_down);
+//       files[0]->GetObject(  title, h_ref);
+//       files[0]->GetObject(  title, h_style);
+//       files[13]->GetObject( title, h_var_up);
+//       files[14]->GetObject( title, h_var_down);
 
-      TH1* h_sys       = (TH1*) h_var_up->Clone();   h_sys->Reset();
-      TH1* h_sys2      = (TH1*) h_var_down->Clone(); h_sys2->Reset();
-      TH1* h_sys_up    = (TH1*) h_var_up->Clone();   h_sys_up->Reset();
-      TH1* h_sys_down  = (TH1*) h_var_down->Clone(); h_sys_down->Reset();
-      TH1* h_sys2_up   = (TH1*) h_var_up->Clone();   h_sys2_up->Reset();
-      TH1* h_sys2_down = (TH1*) h_var_down->Clone(); h_sys2_down->Reset();
+//       TH1* h_sys       = (TH1*) h_var_up->Clone();   h_sys->Reset();
+//       TH1* h_sys2      = (TH1*) h_var_down->Clone(); h_sys2->Reset();
+//       TH1* h_sys_up    = (TH1*) h_var_up->Clone();   h_sys_up->Reset();
+//       TH1* h_sys_down  = (TH1*) h_var_down->Clone(); h_sys_down->Reset();
+//       TH1* h_sys2_up   = (TH1*) h_var_up->Clone();   h_sys2_up->Reset();
+//       TH1* h_sys2_down = (TH1*) h_var_down->Clone(); h_sys2_down->Reset();
 
-      TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
+//       TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
 
-      setHistogramStyle(h_ref,      kBlack, 1, 2, HistColor);
-      setHistogramStyle(h_var_up,   kBlue,  1, 1, HistColor);
-      setHistogramStyle(h_var_down, kRed,   1, 1, HistColor);
+//       setHistogramStyle(h_ref,      kBlack, 1, 2, HistColor);
+//       setHistogramStyle(h_var_up,   kBlue,  1, 1, HistColor);
+//       setHistogramStyle(h_var_down, kRed,   1, 1, HistColor);
 
-      Canvas->Clear();
-      h_ref->SetMarkerColor(kBlack);
-      h_ref->Draw();
-      h_var_up->SetMarkerColor(kBlue);
-      h_var_up->Draw("SAME");
-      h_var_down->SetMarkerColor(kRed);
-      h_var_down->Draw("SAME");
-      if( !(isPSE) && set_LogY ) gPad->SetLogy();
-      Canvas->Print(outpath.Copy().Append(title).Append("_ISR_FSR").Append(outform));
+//       Canvas->Clear();
+//       h_ref->SetMarkerColor(kBlack);
+//       h_ref->Draw();
+//       h_var_up->SetMarkerColor(kBlue);
+//       h_var_up->Draw("SAME");
+//       h_var_down->SetMarkerColor(kRed);
+//       h_var_down->Draw("SAME");
+//       if( !(isPSE) && set_LogY ) gPad->SetLogy();
+//       Canvas->Print(outpath.Copy().Append(title).Append("_ISR_FSR").Append(outform));
 
-      Int_t        N_bins = h_ref->GetNbinsX();
-      Double_t Sum_Errors = 0.;
+//       Int_t N_bins = h_ref->GetNbinsX();
+//       Double_t Sum_Errors = 0.;
 
-      //  Leptons Eta  ---------------------------------------
+//       //  Leptons Eta  ---------------------------------------
 
-      if(title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity")){
-          SymmetricAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors);
-      }
+//       if(title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity")){
+//           SymmetricAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors);
+//       }
 
-      else {
+//       else {
 
-	for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+// 	for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
 
-	  if( h_ref->GetBinContent(bin) == 0 )  continue;
+// 	  if( h_ref->GetBinContent(bin) == 0 )  continue;
 
-	  Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
-	  Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
+// 	  Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
+// 	  Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
   
-	  //	  Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
-	  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
-	  Sys_Error2 = Sys_Error * Sys_Error;
+// 	  //	  Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
+// 	  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
+// 	  Sys_Error2 = Sys_Error * Sys_Error;
 
-	  h_sys->SetBinContent(  bin, Sys_Error  );
-	  h_sys2->SetBinContent( bin, Sys_Error2 );
-	  cout << "Sys. Error: " << Sys_Error << endl;
-	  Sum_Errors = Sum_Errors+Sys_Error;
+// 	  h_sys->SetBinContent(  bin, Sys_Error  );
+// 	  h_sys2->SetBinContent( bin, Sys_Error2 );
+// 	  cout << "Sys. Error: " << Sys_Error << endl;
+// 	  Sum_Errors = Sum_Errors+Sys_Error;
 
-	}
+// 	}
 
-      }
+//       }
 
-      cout << "-------------" << endl;
-      cout << " Ave. Error: " << Sum_Errors/N_bins << endl;
-      cout << "-------------" << endl << endl;
+//       cout << "-------------" << endl;
+//       cout << " Ave. Error: " << Sum_Errors/N_bins << endl;
+//       cout << "-------------" << endl << endl;
 
-      setHistogramStyle(h_sys,  LineColor, LineStyle, LineWidth, HistColor);
-      setHistogramStyle(h_sys2, LineColor, LineStyle, LineWidth, HistColor);
-      h_style = h_sys;
+//       setHistogramStyle(h_sys,  LineColor, LineStyle, LineWidth, HistColor);
+//       setHistogramStyle(h_sys2, LineColor, LineStyle, LineWidth, HistColor);
+//       h_style = h_sys;
 
-      title.Append("_sys_error_ISR_FSR");
-      h_sys->SetName(title);
-      Hlist.Add(h_sys);
+//       title.Append("_sys_error_ISR_FSR");
+//       h_sys->SetName(title);
+//       Hlist.Add(h_sys);
 
-      // ***WARNING NEXT LINE!!!*** ==> (j-1)
-      sum_sys_errors[j]->Add(h_sys2);
-      sum_mod_errors[j]->Add(h_sys2);
+//       // ***WARNING NEXT LINE!!!*** ==> (j-1)
+//       sum_sys_errors[j]->Add(h_sys2);
+//       sum_mod_errors[j]->Add(h_sys2);
 
-    }
+//     }
 
-    leg->AddEntry(h_style,"ISR/FSR","F");
-    cout << "-------------" << endl << endl;
+//     leg->AddEntry(h_style,"ISR/FSR","F");
+//     cout << "-------------" << endl << endl;
 
-  }
+//   }
 
   // Q^2 Scale ----------------------------------------------
 
@@ -1486,14 +1481,18 @@ void SystematicErrors() {
       if( !(isPSE) && set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_SCALE").Append(outform));
 
-      Int_t        N_bins = h_ref->GetNbinsX();
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
-      //  Leptons Eta  ---------------------------------------
+      // Symmetrise Eta / Rapidity  ---------------------------------------
 
-      if(title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity")){
+      if( title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity") ) {
+
           SymmetricAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors);
-      } else {
+
+      }
+
+      else {
 
 	for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
 
@@ -1595,27 +1594,39 @@ void SystematicErrors() {
       if( !(isPSE) && set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_MASS").Append(outform));
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
-      for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+      // Symmetrise Eta / Rapidity  ---------------------------------------
 
-	if( h_ref->GetBinContent(bin) == 0 )  continue;
+      if( title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity") ) {
 
-	Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
-	Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
+          SymmetricAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors);
 
-	//	Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
+      }
 
-	// ***WARNING NEXT LINE!!!*** ==> Divide by 5
-	Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*5.);
-	Sys_Error2 = Sys_Error * Sys_Error;
+      else {
 
-	h_sys->SetBinContent(  bin, Sys_Error  );
-	h_sys2->SetBinContent( bin, Sys_Error2 );
-	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
-	Sum_Errors = Sum_Errors+Sys_Error;
+	for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+
+	  if( h_ref->GetBinContent(bin) == 0 )  continue;
+
+	  Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
+	  Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
+
+	  //	  Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
+
+	  // ***WARNING NEXT LINE!!!*** ==> Divide by 5
+	  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*5.);
+	  Sys_Error2 = Sys_Error * Sys_Error;
+
+	  h_sys->SetBinContent(  bin, Sys_Error  );
+	  h_sys2->SetBinContent( bin, Sys_Error2 );
+	  cout << "Sys. Error: " << Sys_Error << endl;
+	  Sum_Errors = Sum_Errors+Sys_Error;
+
+	}
+
       }
 
       cout << "-------------" << endl;
@@ -1697,14 +1708,18 @@ void SystematicErrors() {
       if( !(isPSE) && set_LogY ) gPad->SetLogy();
       Canvas->Print(outpath.Copy().Append(title).Append("_MATCH").Append(outform));
 
-      Int_t        N_bins = h_ref->GetNbinsX();
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
-      //  Leptons Eta  ---------------------------------------
+      // Symmetrise Eta / Rapidity  ---------------------------------------
 
-      if(title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity")){
+      if( title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity") ) {
+
         SymmetricAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors);
-      } else {
+
+      }
+
+      else {
 
 	for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
 
@@ -1776,7 +1791,7 @@ void SystematicErrors() {
       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -1785,7 +1800,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
@@ -1835,7 +1849,7 @@ void SystematicErrors() {
       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
-      Int_t        N_bins = 0;
+      Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
@@ -1844,7 +1858,6 @@ void SystematicErrors() {
 	h_sys->SetBinContent(  bin, Sys_Error  );
 	h_sys2->SetBinContent( bin, Sys_Error2 );
 	cout << "Sys. Error: " << Sys_Error << endl;
-	N_bins = bin;
 	Sum_Errors = Sum_Errors+Sys_Error;
       }
 
