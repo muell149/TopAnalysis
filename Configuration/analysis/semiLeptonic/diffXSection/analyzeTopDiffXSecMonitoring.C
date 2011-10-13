@@ -1,7 +1,6 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root"
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
 				  , const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
@@ -268,19 +267,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
     "charged electromagnetic fraction (jets)/jets/1/1",
     "N_{charged particles} (jets)/jets/0/2"           ,
     "E(lead 1^{st} jet) [GeV]/events/1/2",
-    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right]/events/1/5",
+    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right]/events/0/5",
     "#eta(lead 1^{st} jet)/events/0/5",
     "#phi(lead 1^{st} jet)/events/0/10",
     "E(lead 2^{nd} jet) [GeV]/events/1/2",
-    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
+    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right]/events/0/5",
     "#eta(lead 2^{nd} jet)/events/0/5",
     "#phi(lead 2^{nd} jet)/events/0/10",
     "E(lead 3^{rd} jet) [GeV]/events/1/2",
-    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
+    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right]/events/0/5",
     "#eta(lead 3^{rd} jet)/events/0/5",
     "#phi(lead 3^{rd} jet)/events/0/10",
     "E(lead 4^{th} jet) [GeV]/events/1/2",
-    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right]/events/1/5",
+    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right]/events/0/5",
     "#eta(lead 4^{th} jet)/events/0/5",
     "#phi(lead 4^{th} jet)/events/0/10",
     // (iii) btag monitoring
@@ -336,12 +335,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
     "Number of Vertices (Reweighted 1BX)/Frequency/0/1",
     "Number of Vertices (Reweighted 3BX)/Frequency/0/1", 
     // (III) after kinematic fit 
-    "p_{t}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/1",
+    "p_{t}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/20",
     "y^{t and #bar{t}}/Frequency/0/1",
-    "p_{t}^{t#bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/1",
+    "p_{t}^{t#bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/20",
     "y^{t#bar{t}}/Frequency/0/1",
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/Frequency/0/1",
-    "p_{t}^{l} #left[#frac{GeV}{c}#right]/Frequency/0/1",    
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/Frequency/0/20",
+    "p_{t}^{l} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
     "#eta^{l}/Frequency/0/1"
   };
 
