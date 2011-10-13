@@ -228,6 +228,14 @@ if(not options.sample=="none"):
         process.load("TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
 	additionalEventWeights=False        
+    if(options.sample=="ttbarMassDown"):        
+        process.load("TopAnalysis/Configuration/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False
+    if(options.sample=="ttbarMassUp"):        
+        process.load("TopAnalysis/Configuration/ttjets_mass175_5_MadgraphZ2_Summer11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_mass175_5__MadgraphZ2_Summer11_AOD_cff.py"
+	additionalEventWeights=False      
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
