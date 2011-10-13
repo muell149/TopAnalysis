@@ -314,8 +314,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  // set btagging error to 0 as long as it is not there
 		  //if(sys==sysBtagDown||sys==sysBtagUp) sysDiff=0;
 		  // asymmetric errors
-		  if(sysDiff>0) totalSystematicErrorUp  +=sysDiff*sysDiff;
-		  if(sysDiff<0) totalSystematicErrorDown+=sysDiff*sysDiff;
+		  //if(sysDiff>0) totalSystematicErrorUp  +=sysDiff*sysDiff;
+		  //if(sysDiff<0) totalSystematicErrorDown+=sysDiff*sysDiff;
+		  totalSystematicErrorUp  +=0.5*sysDiff*0.5*sysDiff;
+		  totalSystematicErrorDown+=0.5*sysDiff*0.5*sysDiff;
 		}
 		else{ 
 		  if(verbose>0) std::cout << "(not considered): ";
@@ -405,7 +407,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("rel. uncertainty (%)");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitleOffset(1.2);
 		// save asymmetric errors in map totalErrors_
-		combinedErrors->SetLineWidth(histo_[xSecVariables_[i]][sysNo]->GetLineWidth());
+		combinedErrors->SetLineWidth(1.0); // histo_[xSecVariables_[i]][sysNo]->GetLineWidth());
 		combinedErrors->SetLineColor(histo_[xSecVariables_[i]][sysNo]->GetLineColor());
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
 		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]], verbose);
@@ -630,7 +632,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		TH1F* dataStat = (TH1F*)canvas->GetPrimitive(plotName+"kData");
 		// convert to TGraphAsymmErrors
 		TGraphAsymmErrors* statErrors= new TGraphAsymmErrors(dataStat->GetNbinsX());
-		statErrors->SetLineWidth(totalErrors_[xSecVariables_[i]]->GetLineWidth());
+		statErrors->SetLineWidth(1.0) ; // totalErrors_[xSecVariables_[i]]->GetLineWidth());
 		statErrors->SetLineColor(totalErrors_[xSecVariables_[i]]->GetLineColor());
 		for(int bin=1; bin<=dataStat->GetNbinsX(); ++bin){
 		  if(dataStat->GetBinWidth(bin)!=0){
@@ -650,7 +652,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		canvas->GetListOfPrimitives()->Remove(canvas->GetPrimitive(plotName+"kData"));
 	      }
 	      // Draw errors into Canvas
-	      totalErrors_[xSecVariables_[i]]->Draw("p same");
+	      totalErrors_[xSecVariables_[i]]->Draw("p z same");
 	      canvas->SetName (xSecVariables_[i]);
 	    }
 	    // save Canvas
