@@ -227,10 +227,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
             }
           }
 
-	  histogramStyle(*unbinnedTheory , kSig  , false);
-	  histogramStyle(*unbinnedTheory2, kSig+1, false);
-	  histogramStyle(*unbinnedTheoryMCAtNLO , kZjets  , false);
-	  histogramStyle(*unbinnedTheoryMCAtNLO2, kZjets+1, false);
+	  histogramStyle(*unbinnedTheory        , kSig, false, 1.2, kRed+1); 
+	  histogramStyle(*unbinnedTheory2       , kSig, false, 1.2, kRed+1);
+	  histogramStyle(*unbinnedTheoryMCAtNLO , kSig, false, 1.2, kAzure);
+	  histogramStyle(*unbinnedTheoryMCAtNLO2, kSig, false, 1.2, kAzure);
 	  if(xSecVariables_[i].Contains("Y"      )) unbinnedTheory->Smooth(2);
 	  else if(xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Smooth(10);
 	  else unbinnedTheory->Smooth(10);
