@@ -1548,7 +1548,7 @@ process.p1 = cms.Path(
                       process.eventWeightFinal                      *
                       ## monitor after b-tagging
                       process.monitorKinematicsAfterBtagging        *
-                      #process.PUControlDistributionsAfterBtagging   *
+                      process.PUControlDistributionsAfterBtagging   *
                       ## apply kinematic fit
                       process.kinFit
                       )
