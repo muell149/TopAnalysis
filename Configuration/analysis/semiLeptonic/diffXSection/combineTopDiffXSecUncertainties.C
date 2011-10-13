@@ -195,7 +195,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    if(verbose>1) std::cout << "std analysis file for this variation copied" << std::endl;
 	    // loop all bins of current 2011 analysis histogram without variations
 	    for(int bin=1; bin<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){
-	      if (xSecVariables_[i].Contains("ttbarMass") && bin==1) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Thomas)
+	      if (xSecVariables_[i].Contains("ttbarMass") && bin== 1) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Thomas)
+	      if (xSecVariables_[i].Contains("topY")      && bin== 1) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Martijn)
+	      if (xSecVariables_[i].Contains("topY")      && bin==10) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Martijn)
 	      //ensure to have non-empty bins
 	      if(histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin)>0){
 		if(verbose>1) std::cout << "bin " << bin << std::endl;
