@@ -37,7 +37,7 @@ using namespace std;
 
 // path to the ingoing root histogram files
 const char *USERNAME = getenv("USER");
-const TString inpath(!strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/standard/");
+const TString inpath(!strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/standard/");
 const TString outpath("plots/");
 
 // output format
@@ -212,20 +212,20 @@ void FillLegend(TLegend* leg, TH1* hist[], double factor=1.) {
         sprintf(zlabel, "%.2f #times Z/a* #rightarrow ee/#mu#mu", factor);
 //         sprintf(zlabel, "#splitline{Z/a* #rightarrow ee/#mu#mu}{(#times %.2f)}", factor);
 
-    if (hist[kDATA])  leg->AddEntry(hist[kDATA], "Data",                       "pe");
-    if (hist[kSIG] )  leg->AddEntry(hist[kSIG],  "t#bar{t} signal",            "f" );
-    if (hist[kTTBG])  leg->AddEntry(hist[kTTBG], "other t#bar{t}" ,            "f" );
-    if (hist[kTW]  )  leg->AddEntry(hist[kTW],   "tW",                         "f" );
-    if (hist[kVV]  )  leg->AddEntry(hist[kVV],   "dibosons",                   "f" );
-    if (hist[kDYT] )  leg->AddEntry(hist[kDYT],  "Z/a* #rightarrow #tau#tau",  "f" );
+    if (hist[kDATA])  leg->AddEntry(hist[kDATA], "Data",                            "pe");
+    if (hist[kSIG] )  leg->AddEntry(hist[kSIG],  "t#bar{t} signal",                 "f" );
+    if (hist[kTTBG])  leg->AddEntry(hist[kTTBG], "other t#bar{t}" ,                 "f" );
+    if (hist[kTW]  )  leg->AddEntry(hist[kTW],   "tW",                              "f" );
+    if (hist[kVV]  )  leg->AddEntry(hist[kVV],   "dibosons",                        "f" );
+    if (hist[kDYT] )  leg->AddEntry(hist[kDYT],  "Z/#gamma* #rightarrow #tau#tau",  "f" );
     if (hist[kDYEM])  leg->AddEntry(hist[kDYEM], zlabel, "f" );
 //     if (hist[kDYEM])  leg->AddEntry(hist[kDYEM], "Z/a* #rightarrow ee/#mu#mu", "f" );
 //     if (factor != 1) {
 //         sprintf(zlabel, "($times %.2f)", factor);
 //         if (hist[kDYEM])  leg->AddEntry(zlabel, "f" );
 //     }
-    if (hist[kW]   )  leg->AddEntry(hist[kW],    "W+jets",                     "f" );
-    if (hist[kQCD] )  leg->AddEntry(hist[kQCD],  "QCD",                        "f" );
+    if (hist[kW]   )  leg->AddEntry(hist[kW],    "W+jets",                          "f" );
+    if (hist[kQCD] )  leg->AddEntry(hist[kQCD],  "QCD",                             "f" );
     return;
 }
 
@@ -1342,7 +1342,7 @@ void SetupInputFiles() {
     files[kEM][22]=new TFile(inpath.Copy().Append("emu_qcdem80170.root"));
     files[kEM][23]=new TFile(inpath.Copy().Append("emu_qcdbcem2030.root"));
     files[kEM][24]=new TFile(inpath.Copy().Append("emu_qcdbcem3080.root"));
-    files[kEM][25]=new TFile(inpath.Copy().Append("emu_qcdbcem80170.root"));    
+    files[kEM][25]=new TFile(inpath.Copy().Append("emu_qcdbcem80170.root"));	
     
     // ee files
     files[kEE][0]= new TFile(inpath.Copy().Append("ee_1fb.root"));
@@ -1851,9 +1851,9 @@ void CreateOutputDirectories() {
 
 void PrintCutflowTable() {
     TH1* hists[Nfiles];
-    const char* stepname[] = {"", "", "", "", "dilepton", "", "2 jets", "met", "tchel", "tchem", "kinfit"};
+    const char* stepname[] = {"", "", "", "", "dilepton", "", "2 jets", "met", "tchel", "kinfit"};
     //int steps[] = {4, 6, 7, 8, 9, 10, 0};
-    int steps[] = {4, 6, 7, 8, 10, 0};
+    int steps[] = {4, 6, 7, 8, 9, 0};
     int sam[] = {kSIG, kTTBG, kTW, kVV, kW, kDYT, kDYEM, kQCD, kDATA, -1};
     
     for ( int channel = kMM; channel <= kEE; ++channel) {
@@ -2836,8 +2836,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 	}           
     } else { // no use of kin reconstruction
  
-	if(strcmp(particle,"LeptonPair")!=0 && strcmp(particle,"Leptons")!=0){
-	    cout << "ERROR in PlotDifferentialCrossSectionNoKinFit: " << particle << " not available without kinematic reconstruction!" << endl;      
+	if(strcmp(particle,"LepPair")!=0 && strcmp(particle,"Leptons")!=0){
+	    cout << "ERROR in PlotDifferentialCrossSectionNoKinFit: " << particle << " not available without kinematic reconstruction!" << endl;
+	    return;   
 	}
 
 	// get gen histograms
@@ -3142,8 +3143,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
           scale_data = 1./visCrossSectionsNoFit[channel];
       crossHist->Scale(scale_data); 
     	
-      Double_t scale_gen1 = 1./genCrossHist->Integral("width");
-      genCrossHist->Scale(scale_gen1);
+      Double_t scale_gen1 = 1./gh->Integral("width"); // use fine-binned gh since genCrossHist does 
+      genCrossHist->Scale(scale_gen1);                // not cover the range of the whole visible phase space
 
       Double_t scale_gen2 = 1./gh->Integral("width");      
       gh->Scale(scale_gen2);
@@ -3599,22 +3600,13 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     }
 
     genHist->Scale(sampleCrossSection[1]/totalEvents[1]);
+    Double_t visCrossGen = genHist->Integral();
 
     // histogram for generated cross section
-    TH1* genHistBinned = new TH1D("","",nbins,bins);
-    Int_t intBinsGen[nbins]; 
+    TH1* genHistBinned = genHist->Rebin(nbins,"",bins);
   
-    for (Int_t i=0; i<=nbins; ++i) {    
-      intBinsGen[i] = genHist->GetXaxis()->FindBin(bins[i]);  
-    
-      if(i==0) continue;
-      
-      Double_t binw = bins[i]-bins[i-1];      
-      genHistBinned->SetBinContent(i,genHist->Integral(intBinsGen[i-1],intBinsGen[i]-1)/binw);
-
-      if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
-	genHistBinned->SetBinContent(i,genHistBinned->GetBinContent(i)/2);
-      }
+    for (Int_t i=1; i<=nbins; ++i) {
+      genHistBinned->SetBinContent(i,genHistBinned->GetBinContent(i)/genHistBinned->GetBinWidth(i));
     }
 
     genHist->Scale(1./genHist->GetBinWidth(1));
@@ -3629,7 +3621,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     //two entries
     if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0){
-      genHist ->Scale(0.5); 
+      //genHist ->Scale(0.5);
+      //genHistBinned ->Scale(0.5); 
       mcatnloh->Scale(0.5);      
       powhegh ->Scale(0.5);      
     }
@@ -3640,11 +3633,11 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
           scale_data = 1./visCrossSectionsNoFit[kCOMBINED];
       crossHist->Scale(scale_data);    
     	
-      Double_t scale_gen1 = 1./genHist->Integral("width");
-      genHist->Scale(scale_gen1);
+      //Double_t scale_gen1 = 1./genHist->Integral("width");
+      genHist->Scale(1./visCrossGen);
 
-      Double_t scale_gen2 = 1./genHistBinned->Integral("width");      
-      genHistBinned->Scale(scale_gen2);
+      //Double_t scale_gen2 = 1./genHist->Integral("width"); 
+      genHistBinned->Scale(1./visCrossGen);
   
       Double_t scale_mcatnlo = 1./mcatnloh->Integral("width");
       mcatnloh->Scale(scale_mcatnlo);
@@ -4701,7 +4694,10 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     //const Int_t nbinsLepPairMassJohannes = 2;
     //const Double_t binsLepPairMassJohannes[nbinsLepPairMassJohannes+1] = {60, 120, 400};
     //const Double_t binCenterMassJohannes[nbinsLepPairMassJohannes] = {bccAuto, bccAuto};
-    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes, nbinsLepPairMassJohannes, binCenterMassJohannes, "Johannes_");
+    //const Int_t nbinsLepPairMassJohannes = 4;
+    //const Double_t binsLepPairMassJohannes[nbinsLepPairMassJohannes+1] = {60, 76, 106, 120, 400};        
+    //const Double_t binCenterMassJohannes[nbinsLepPairMassJohannes] = {bccAuto, bccAuto, bccAuto, bccAuto};
+    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes, nbinsLepPairMassJohannes, binCenterMassJohannes, kFALSE, "Johannes_");
 
 
     // jets
@@ -4724,7 +4720,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binCenterTopRapidity[nbinsTopRapidity] = {bccAuto, bccAuto, bccAuto, bccAuto-0.05};    
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
-   GetBtagEfficiencyInBins("TCHEL",  "Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
+    GetBtagEfficiencyInBins("TCHEL",  "Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     
     const Int_t nbinsTopPt = 4;
     const Double_t binsTopPt[nbinsTopPt+1] = {0, 70, 140, 240, 400};
