@@ -34,7 +34,7 @@ using namespace std;
 
 //const TString inpath("Markus/DiffXS2011/Rootfiles/Systematics/");
 //const TString inpath("~markusm/cms/systematics/");
-const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsSept21/");
+const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct14/");
 
 // path where the output is written
 const TString outpath("Markus/DiffXS2011/Systematics/plots/");
@@ -46,11 +46,11 @@ const TString outform(".eps");
 
 ///////////////////////////////////////////////////////////
 
-//Bool_t set_LogY = kTRUE;
-Bool_t set_LogY = kFALSE;
+Bool_t set_LogY = kTRUE;
+//Bool_t set_LogY = kFALSE;
 
-const Bool_t isDiff   = kTRUE;
-// Bool_t isDiff   = kFALSE;
+Bool_t isDiff   = kTRUE;
+//Bool_t isDiff   = kFALSE;
 
 // output file name
 const TString outfileName(isDiff ? outpath+"Systematic_Errors_DIFF.root" : outpath+"Systematic_Errors_TOTAL.root");
@@ -60,8 +60,8 @@ Bool_t isTotal = !(isDiff);
 //Bool_t isPSE = kTRUE;    // Make efficiency plots "_PSE"
 Bool_t isPSE = kFALSE;
 
-Bool_t isModel = kTRUE;
-//Bool_t isModel = kFALSE;
+//Bool_t isModel = kTRUE;
+Bool_t isModel = kFALSE;
 
 Bool_t isExp = kTRUE;
 //Bool_t isExp = kFALSE;
@@ -458,7 +458,8 @@ void SystematicErrors() {
   LineColor = kBlack;
   LineStyle = 1;
   LineWidth = 1;
-  HistColor = kMagenta;
+  //  HistColor = kMagenta;
+  HistColor = kPink;
 
   files[5] = new TFile(inpath.Copy().Append("bg_up.root"));
   files[6] = new TFile(inpath.Copy().Append("bg_down.root"));
@@ -805,7 +806,7 @@ void SystematicErrors() {
   LineColor = kBlack;
   LineStyle = 1;
   LineWidth = 1;
-  HistColor = kYellow;
+  HistColor = kGreen+3;
 
   if(isExp) {
 
@@ -878,7 +879,7 @@ void SystematicErrors() {
   LineColor = kBlack;
   LineStyle = 1;
   LineWidth = 1;
-  HistColor = kGreen+3;
+  HistColor = kYellow-6;
 
   files[9]  = new TFile(inpath.Copy().Append("pu_up.root"));
   files[10] = new TFile(inpath.Copy().Append("pu_down.root"));
@@ -971,93 +972,13 @@ void SystematicErrors() {
 
   // KIN FIT !!!(OLD)!!!  ----------------------------------------------
 
-  LineColor = kBlack;
-  LineStyle = 1;
-  LineWidth = 1;
-  HistColor = kMagenta-6;
-
-  if(isExp) {
-
-    cout << "   >>>   " << "KIN FIT" << endl;
-    cout << "----------------------" << endl << endl;
-
-    for(Int_t j = 0; j < ListOfKeys->GetEntries(); ++j) {
-
-      TString title = ListOfKeys->At(j)->GetName();
-      cout << "   >>>   " << title << endl;
-      if( title.Contains("PSE_") )  continue;
-
-      Sys_Error  = 0.;
-      Sys_Error2 = 0.;
-
-      files[0]->GetObject( title, h_ref);
-      files[0]->GetObject( title, h_style);
-
-      TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
-      TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
-
-      Int_t N_bins = h_ref->GetNbinsX();
-      Double_t Sum_Errors = 0.;
-
-      for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
-
-	//  TOTAL XS
-	if(isTotal) {
-	  if( title.Contains("mumu_") )      Sys_Error  = 0.03;
-	  if( title.Contains("ee_") )        Sys_Error  = 0.03;
-	  if( title.Contains("emu_") )       Sys_Error  = 0.03;
-	  if( title.Contains("combined_") )  Sys_Error  = 0.017;
-	}
-
-	//  DIFFERENTIAL XS
-	if(isDiff) {
-	  if( title.Contains("mumu_") )      Sys_Error  = 0.03;
-	  if( title.Contains("ee_") )        Sys_Error  = 0.03;
-	  if( title.Contains("emu_") )       Sys_Error  = 0.03;
-	  if( title.Contains("combined_") )  Sys_Error  = 0.017;
-	}
-
-	Sys_Error2 = Sys_Error * Sys_Error;
-	h_sys->SetBinContent(  bin, Sys_Error  );
-	h_sys2->SetBinContent( bin, Sys_Error2 );
-	cout << "Sys. Error: " << Sys_Error << endl;
-	Sum_Errors = Sum_Errors+Sys_Error;
-      }
-
-      cout << "-------------" << endl;
-      cout << " Ave. Error: " << Sum_Errors/N_bins << endl;
-      cout << "-------------" << endl << endl;
-
-      setHistogramStyle(h_sys,  LineColor, LineStyle, LineWidth, HistColor);
-      setHistogramStyle(h_sys2, LineColor, LineStyle, LineWidth, HistColor);
-      h_style = h_sys;
-
-      title.Append("_sys_error_KIN_FIT");
-      h_sys->SetName(title);
-      Hlist.Add(h_sys);
-
-      sum_sys_errors[j]->Add(h_sys2);
-      sum_exp_errors[j]->Add(h_sys2);
-
-    }
-
-    leg->AddEntry(h_style,"KIN FIT","F");
-    cout << "-------------" << endl << endl;
-
-  }
-
-  //  KIN FIT  !!!(NEW)!!! --------------------------------------------------
-
 //   LineColor = kBlack;
 //   LineStyle = 1;
 //   LineWidth = 1;
-//   HistColor = kMagenta-6;
+//   //  HistColor = kMagenta-6;
+//   HistColor = kYellow;
 
-//   files[11] = new TFile(inpath.Copy().Append("standard.root"));
-//   //  files[11] = new TFile(inpath.Copy().Append("kinFit_scale.root"));
-//   //  files[12] = new TFile(inpath.Copy().Append("DUMMY.root"));
-
-//   if( files[11] && !files[11]->IsZombie() && isExp ) {
+//   if(isExp) {
 
 //     cout << "   >>>   " << "KIN FIT" << endl;
 //     cout << "----------------------" << endl << endl;
@@ -1071,56 +992,34 @@ void SystematicErrors() {
 //       Sys_Error  = 0.;
 //       Sys_Error2 = 0.;
 
-//       files[0]->GetObject(  title, h_ref);
-//       files[0]->GetObject(  title, h_style);
-//       files[0]->GetObject(  title, h_var_up);
-//       files[11]->GetObject( title, h_var_down);
+//       files[0]->GetObject( title, h_ref);
+//       files[0]->GetObject( title, h_style);
 
-//       TH1* h_sys       = (TH1*) h_var_up->Clone();   h_sys->Reset();
-//       TH1* h_sys2      = (TH1*) h_var_down->Clone(); h_sys2->Reset();
-//       TH1* h_sys_up    = (TH1*) h_var_up->Clone();   h_sys_up->Reset();
-//       TH1* h_sys_down  = (TH1*) h_var_down->Clone(); h_sys_down->Reset();
-//       TH1* h_sys2_up   = (TH1*) h_var_up->Clone();   h_sys2_up->Reset();
-//       TH1* h_sys2_down = (TH1*) h_var_down->Clone(); h_sys2_down->Reset();
-
-//       TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
-
-//       setHistogramStyle(h_ref,      kBlack, 1, 2, HistColor);
-//       setHistogramStyle(h_var_up,   kBlue,  1, 1, HistColor);
-//       setHistogramStyle(h_var_down, kRed,   1, 1, HistColor);
-
-//       Canvas->Clear();
-
-//       h_var_up->SetMarkerColor(kBlue);
-//       h_var_up->SetMarkerStyle(20);
-//       h_var_up->SetMarkerSize(1.);
-//       h_var_up->SetLineWidth(2.);
-//       h_var_up->Draw("E1,P");
-//       h_var_down->SetMarkerColor(kRed);
-//       h_var_down->SetMarkerStyle(22);
-//       h_var_down->SetMarkerSize(1.);
-//       h_var_down->SetLineWidth(2.);
-//       h_var_down->Draw("E1,P,SAME");
-//       h_ref->SetMarkerColor(kBlack);
-//       h_ref->SetMarkerStyle(24);
-//       h_ref->SetMarkerSize(1.);
-//       h_ref->SetLineWidth(2.);
-//       //      h_ref->Draw("E1,P,SAME");
-//       if( set_LogY ) gPad->SetLogy();
-//       //      gPad->SetGridx();
-//       //      gPad->SetGridy();
-//       Canvas->Print(outpath.Copy().Append(title).Append("_KIN_FIT").Append(outform));
+//       TH1* h_sys  = (TH1*) h_ref->Clone(); h_sys->Reset();
+//       TH1* h_sys2 = (TH1*) h_ref->Clone(); h_sys2->Reset();
 
 //       Int_t N_bins = h_ref->GetNbinsX();
 //       Double_t Sum_Errors = 0.;
 
 //       for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
 
-// 	if( h_var_up->GetBinContent(bin) == 0 || h_var_down->GetBinContent(bin) == 0 )  continue;
+// 	//  TOTAL XS
+// 	if(isTotal) {
+// 	  if( title.Contains("mumu_") )      Sys_Error  = 0.03;
+// 	  if( title.Contains("ee_") )        Sys_Error  = 0.03;
+// 	  if( title.Contains("emu_") )       Sys_Error  = 0.03;
+// 	  if( title.Contains("combined_") )  Sys_Error  = 0.017;
+// 	}
 
-// 	Sys_Error  = abs(h_var_up->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_var_up->GetBinContent(bin);
+// 	//  DIFFERENTIAL XS
+// 	if(isDiff) {
+// 	  if( title.Contains("mumu_") )      Sys_Error  = 0.03;
+// 	  if( title.Contains("ee_") )        Sys_Error  = 0.03;
+// 	  if( title.Contains("emu_") )       Sys_Error  = 0.03;
+// 	  if( title.Contains("combined_") )  Sys_Error  = 0.017;
+// 	}
+
 // 	Sys_Error2 = Sys_Error * Sys_Error;
-
 // 	h_sys->SetBinContent(  bin, Sys_Error  );
 // 	h_sys2->SetBinContent( bin, Sys_Error2 );
 // 	cout << "Sys. Error: " << Sys_Error << endl;
@@ -1140,7 +1039,7 @@ void SystematicErrors() {
 //       Hlist.Add(h_sys);
 
 //       sum_sys_errors[j]->Add(h_sys2);
-//       sum_mod_errors[j]->Add(h_sys2);
+//       sum_exp_errors[j]->Add(h_sys2);
 
 //     }
 
@@ -1148,6 +1047,98 @@ void SystematicErrors() {
 //     cout << "-------------" << endl << endl;
 
 //   }
+
+  //  KIN FIT  !!!(NEW)!!! --------------------------------------------------
+
+  LineColor = kBlack;
+  LineStyle = 1;
+  LineWidth = 1;
+  //  HistColor = kMagenta-6;
+  HistColor = kYellow;
+
+  files[11] = new TFile(inpath.Copy().Append("kin_free.root"));
+  files[12] = new TFile(inpath.Copy().Append("kin_scale.root"));
+
+  if( files[11] && !files[11]->IsZombie() &&  files[12] && !files[12]->IsZombie() && isExp ) {
+
+    cout << "   >>>   " << "KIN FIT" << endl;
+    cout << "----------------------" << endl << endl;
+
+    for(Int_t j = 0; j < ListOfKeys->GetEntries(); ++j) {
+
+      TString title = ListOfKeys->At(j)->GetName();
+      cout << "   >>>   " << title << endl;
+      if( title.Contains("PSE_") )    continue;
+      if( title.Contains("NoFit_") )  continue;
+
+      Sys_Error  = 0.;
+      Sys_Error2 = 0.;
+
+      files[11]->GetObject( title, h_ref);
+      files[11]->GetObject( title, h_style);
+      files[11]->GetObject( title, h_var_up);
+      files[12]->GetObject( title, h_var_down);
+
+      TH1* h_sys       = (TH1*) h_var_up->Clone();   h_sys->Reset();
+      TH1* h_sys2      = (TH1*) h_var_down->Clone(); h_sys2->Reset();
+      TH1* h_sys_up    = (TH1*) h_var_up->Clone();   h_sys_up->Reset();
+      TH1* h_sys_down  = (TH1*) h_var_down->Clone(); h_sys_down->Reset();
+      TH1* h_sys2_up   = (TH1*) h_var_up->Clone();   h_sys2_up->Reset();
+      TH1* h_sys2_down = (TH1*) h_var_down->Clone(); h_sys2_down->Reset();
+
+      TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
+
+      setHistogramStyle(h_ref,      kBlack, 1, 2, HistColor);
+      setHistogramStyle(h_var_up,   kBlue,  1, 1, HistColor);
+      setHistogramStyle(h_var_down, kRed,   1, 1, HistColor);
+
+      Canvas->Clear();
+      //      h_ref->SetMarkerColor(kBlack);
+      //      h_ref->Draw();
+      h_var_up->SetMarkerColor(kBlue);
+      h_var_up->Draw();
+      h_var_down->SetMarkerColor(kRed);
+      h_var_down->Draw("SAME");
+      if( set_LogY ) gPad->SetLogy();
+      Canvas->Print(outpath.Copy().Append(title).Append("_KIN_FIT").Append(outform));
+
+      Int_t N_bins = h_ref->GetNbinsX();
+      Double_t Sum_Errors = 0.;
+
+      for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+
+	if( h_var_up->GetBinContent(bin) == 0 || h_var_down->GetBinContent(bin) == 0 )  continue;
+
+	Sys_Error  = abs(h_var_up->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_var_up->GetBinContent(bin);
+	Sys_Error2 = Sys_Error * Sys_Error;
+
+	h_sys->SetBinContent(  bin, Sys_Error  );
+	h_sys2->SetBinContent( bin, Sys_Error2 );
+	cout << "Sys. Error: " << Sys_Error << endl;
+	Sum_Errors = Sum_Errors+Sys_Error;
+      }
+
+      cout << "-------------" << endl;
+      cout << " Ave. Error: " << Sum_Errors/N_bins << endl;
+      cout << "-------------" << endl << endl;
+
+      setHistogramStyle(h_sys,  LineColor, LineStyle, LineWidth, HistColor);
+      setHistogramStyle(h_sys2, LineColor, LineStyle, LineWidth, HistColor);
+      h_style = h_sys;
+
+      title.Append("_sys_error_KIN_FIT");
+      h_sys->SetName(title);
+      Hlist.Add(h_sys);
+
+      sum_sys_errors[j]->Add(h_sys2);
+      sum_mod_errors[j]->Add(h_sys2);
+
+    }
+
+    leg->AddEntry(h_style,"KIN FIT","F");
+    cout << "-------------" << endl << endl;
+
+  }
 
   // MODEL ----------------------------------------------
 
@@ -1677,7 +1668,7 @@ void SystematicErrors() {
   LineColor = kBlack;
   LineStyle = 1;
   LineWidth = 1;
-  HistColor = kMagenta+2;
+  HistColor = kMagenta-6;
 
   files[21] = new TFile(inpath.Copy().Append("powheg_pythia6_Fall10.root"));
   files[22] = new TFile(inpath.Copy().Append("powheg_herwig6_Fall10.root"));
@@ -1725,40 +1716,66 @@ void SystematicErrors() {
 	h_var_up->SetMinimum(0.);
       }
 
+      Canvas->Clear();
+      //      h_ref->SetMarkerColor(kBlack);
+      //      h_ref->Draw();
       h_var_up->SetMarkerColor(kBlue);
-      h_var_up->SetMarkerStyle(20);
-      h_var_up->SetMarkerSize(1.);
-      h_var_up->SetLineWidth(2.);
-      h_var_up->Draw("E1,P");
+      h_var_up->Draw();
       h_var_down->SetMarkerColor(kRed);
-      h_var_down->SetMarkerStyle(22);
-      h_var_down->SetMarkerSize(1.);
-      h_var_down->SetLineWidth(2.);
-      h_var_down->Draw("E1,P,SAME");
-      h_ref->SetMarkerColor(kBlack);
-      h_ref->SetMarkerStyle(24);
-      h_ref->SetMarkerSize(1.);
-      h_ref->SetLineWidth(2.);
-      //      h_ref->Draw("E1,P,SAME");
+      h_var_down->Draw("SAME");
       if( !(isPSE) && set_LogY ) gPad->SetLogy();
-      //      gPad->SetGridx();
-      //      gPad->SetGridy();
       Canvas->Print(outpath.Copy().Append(title).Append("_HAD").Append(outform));
 
       Int_t N_bins = h_ref->GetNbinsX();
       Double_t Sum_Errors = 0.;
 
-      for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+      // Symmetrise Eta / Rapidity  ---------------------------------------
 
-	if( h_var_up->GetBinContent(bin) == 0 || h_var_down->GetBinContent(bin) == 0 )  continue;
+      if( title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity") ) {
 
-	Sys_Error  = abs(h_var_up->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_var_up->GetBinContent(bin);
-	Sys_Error2 = Sys_Error * Sys_Error;
+	for(Int_t bin = 1; bin <= h_ref->GetNbinsX()/2.; ++bin) {
 
-	h_sys->SetBinContent(  bin, Sys_Error  );
-	h_sys2->SetBinContent( bin, Sys_Error2 );
-	cout << "Sys. Error: " << Sys_Error << endl;
-	Sum_Errors = Sum_Errors+Sys_Error;
+	  if( h_var_up->GetBinContent(bin) == 0 || h_var_down->GetBinContent(bin) == 0 )  continue;
+
+	  //	  Double_t PlusMinus_Average_Ref  = 0.;
+	  Double_t PlusMinus_Average_Up   = 0.;
+	  Double_t PlusMinus_Average_Down = 0.;
+
+	  //	  PlusMinus_Average_Ref  = (h_ref->GetBinContent(bin)      + h_ref->GetBinContent(N_bins+1-bin)     ) / 2.;
+	  PlusMinus_Average_Up   = (h_var_up->GetBinContent(bin)   + h_var_up->GetBinContent(N_bins+1-bin)  ) / 2.;
+	  PlusMinus_Average_Down = (h_var_down->GetBinContent(bin) + h_var_down->GetBinContent(N_bins+1-bin)) / 2.;
+
+	  Sys_Error  = abs(PlusMinus_Average_Up - PlusMinus_Average_Down) / PlusMinus_Average_Up;
+	  Sys_Error2 = Sys_Error * Sys_Error;
+
+	  h_sys->SetBinContent(           bin, Sys_Error  );
+	  h_sys->SetBinContent(  N_bins+1-bin, Sys_Error  );
+	  h_sys2->SetBinContent(          bin, Sys_Error2 );
+	  h_sys2->SetBinContent( N_bins+1-bin, Sys_Error2 );
+
+	  cout << "Sys. Error: " << Sys_Error << endl;
+	  Sum_Errors += (2.*Sys_Error);
+
+	}
+
+      }
+
+      else {
+
+	for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+
+	  if( h_var_up->GetBinContent(bin) == 0 || h_var_down->GetBinContent(bin) == 0 )  continue;
+
+	  Sys_Error  = abs(h_var_up->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_var_up->GetBinContent(bin);
+	  Sys_Error2 = Sys_Error * Sys_Error;
+
+	  h_sys->SetBinContent(  bin, Sys_Error  );
+	  h_sys2->SetBinContent( bin, Sys_Error2 );
+	  cout << "Sys. Error: " << Sys_Error << endl;
+	  Sum_Errors = Sum_Errors+Sys_Error;
+
+	}
+
       }
 
       cout << "-------------" << endl;
