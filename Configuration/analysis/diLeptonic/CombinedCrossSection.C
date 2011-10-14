@@ -66,7 +66,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kTRUE;
+const bool doPrintControlPlots = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
 const bool drawSystematicErrorBand = kTRUE;
 // Plots for PAS
@@ -3030,6 +3030,13 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
     mergedhists[kDATA]->SetLineWidth(2);   
+    if (dataIsFakeFromMonteCarlo && channel == kEM) {
+        //we are using pseudo data and must apply a global weight
+        TH1 *modelWeightSum;
+        GetCloneHist("eventWeightDileptonModelVariation/", "modelWeightSum", kEM, 0, modelWeightSum);
+        //modelWeightSum contains 2 bins: nevents, nevents_weighted
+        mergedhists[kDATA]->Scale(modelWeightSum->GetBinContent(1)/modelWeightSum->GetBinContent(2));
+    }
     mergedhists[kDATA]->Draw("same,E0");
     if (drawLegend) leg->Draw("same");
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
@@ -3093,6 +3100,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     cout << "visible cross section (" << channelName[channel] << ") : " << crossHist->Integral("width") << endl;
 
     gStyle->SetErrorX();
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
     title = channelName[channel];
     if(useKinFit)
@@ -3251,6 +3262,21 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 	totalErrDown[i] = (withSys->GetEYlow())[i];    
 	statErr[i] = (bccCrossGraph->GetEYlow())[i];
       } 
+      
+        if (channel == kEM && dataIsFakeFromMonteCarlo && genHistSmear) {
+            //write out a table of numbers
+            std::cout << "CSV XXXXXXXXXXXXXX cross section values XXXXXXXXXXXXXX\n";
+            std::cout << "CSV " << particle << quantity << std::endl;
+            std::cout << "CSV\tmad\tsmear\tpseudodata\n";
+            for (int i = 1; i <= genCrossHist->GetNbinsX(); ++i) {
+                std::cout << "CSV\t" << std::setprecision(6)
+                          << genCrossHist->GetBinContent(i) << "\t"
+                          << genHistSmear->GetBinContent(i) << "\t"
+                          << crossHist->GetBinContent(i) << "\n";
+              //  << "\n";
+            }
+        }
+
 
       delete withSys;
       gPad->SetLogy(0);
@@ -3262,6 +3288,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
        delete Canvas;
        return; 
     }
+    
     
     // print 2D correlation plot
     genRec2DHist->GetXaxis()->SetTitle(TString("generated ").Append(xtitle));
