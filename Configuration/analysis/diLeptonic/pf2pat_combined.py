@@ -322,6 +322,7 @@ zfilter = False
 topfilter = False
 signal = False
 isdata = False
+alsoViaTau = False
 useGenCutsInTopSignal = True
 mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
 
@@ -337,6 +338,12 @@ if mcname == 'ttbarsignalviatau':
     topfilter = True
     signal = True
     viaTau = True
+
+if mcname == 'ttbarsignalplustau':
+    topfilter = True
+    signal = True
+    viaTau = False
+    alsoViaTau = True
 
 if mcname == 'ttbarbg':
     topfilter = True
@@ -490,6 +497,8 @@ if topfilter:
                 process.generatorTopFilter.invert_selection = False
                 if viaTau:
                         process.generatorTopFilter.channels = [ttFilterChannelName + 'ViaTau']
+                elif alsoViaTau:
+                        process.generatorTopFilter.channels = [ttFilterChannelName, ttFilterChannelName + 'ViaTau']
                 else:
                         process.generatorTopFilter.channels = [ttFilterChannelName]
         else:
@@ -798,36 +807,10 @@ if topfilter:
 	        process.makeGenEvt *
 		process.generatorTopFilter 
 	)
+
         #PLACE_MODEL_VARIATION_HERE
-	if False:
-            from TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi import *
-            process.eventWeightDileptonModelVariation = eventWeightDileptonModelVariation.clone(
-                weightVariable = 'toppt',
-                slope = 1./100.,
-                #slope = -1./100.,
-                #slope = 0.,
-                weight1x = 100
-            )
-            
-            #process.eventWeightDileptonModelVariation = eventWeightDileptonModelVariation.clone(
-                #weightVariable = 'topeta',
-                #slope = 1./5.,
-                ##slope = -1./5.,
-                ##slope = 0.,
-                #weight1x = 0
-            #)
-            
-            #process.eventWeightDileptonModelVariation = eventWeightDileptonModelVariation.clone(
-                #weightVariable = 'ttbarmass',
-                #slope = 1./100.,
-                ##slope = -1./100.,
-                ##slope = 0.,
-                #weight1x = 2*172.5
-            #)
-            
-            process.topsequence += process.eventWeightDileptonModelVariation
-            process.maxEvents.input = int(157.5 * 1143.221)
-            
+        #leave line above with PLACE_MODEL_VARIATION_HERE in place, it is replaced by makeModel.pl
+
         if signal:
                 from TopAnalysis.TopAnalyzer.FullLepGenAnalyzer_cfi import analyzeFullLepGenEvent
                 analyzeFullLepGenEvent.weightPU = eventWeightPuTag
