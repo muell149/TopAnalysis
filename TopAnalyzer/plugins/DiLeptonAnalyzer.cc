@@ -142,6 +142,7 @@ void DiLeptonAnalyzer::beginJob() {
   D_phi_leptsRC = fs->make<TH1F>("D_phi_leptsRC", "#Delta phi_lepts RC", 50, -5., 5.);
   D_phi_leptsWC = fs->make<TH1F>("D_phi_leptsWC", "#Delta phi_lepts WC", 50, -5., 5.);
 
+  corr_pt = fs->make<TH2F>("corr_pt", "Lepton+pt vs Lepton-pt", 250, 0, 500, 250, 0, 500);
 }
 
 
@@ -436,7 +437,25 @@ void DiLeptonAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& con
 
   N_iso_lep = N_iso_el + N_iso_mu;
 
-
+  if (Isolated_elecs.size() + Isolated_muons.size() ==2) {
+    const reco::RecoCandidate *lep1, *lep2;
+    if (Isolated_elecs.size() == 0) {
+        lep1 = &(Isolated_muons.at(0));
+        lep2 = &(Isolated_muons.at(1));
+    } else if (Isolated_elecs.size() == 1) {
+        lep1 = &(Isolated_elecs.at(0));
+        lep2 = &(Isolated_muons.at(0));
+    } else {
+        lep1 = &(Isolated_elecs.at(0));
+        lep2 = &(Isolated_elecs.at(1));
+    }
+    if (lep1->charge() > 0) 
+        corr_pt->Fill(lep1->pt(), lep2->pt(), weight);
+    else
+        corr_pt->Fill(lep2->pt(), lep1->pt(), weight);
+  }
+  
+  
   // --------------------
   //  TWO Isolated MUONS
   // --------------------

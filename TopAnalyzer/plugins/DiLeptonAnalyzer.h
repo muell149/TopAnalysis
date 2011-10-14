@@ -39,6 +39,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "HLTrigger/HLTfilters/interface/HLTHighLevel.h"
+#include <TH2.h>
 
 class TH1F;
 class TH2F;
@@ -142,6 +143,8 @@ class DiLeptonAnalyzer : public edm::EDAnalyzer {
     TH1F * D_eta_elecsWC;
     TH1F * D_phi_elecsRC;
     TH1F * D_phi_elecsWC;
+    
+    TH2 * corr_pt;
 };
 
 #endif
