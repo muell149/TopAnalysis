@@ -16,7 +16,11 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
   // say if closure test with reweighted m(ttbar) on parton level is done
   // will plot additionally the modified diff. norm. xSec on parton level
   bool reweightClosure=false;
-  TString dataLabel= reweightClosure ? "Pseudo-Data": "Data"; 
+  // Zprime pseudo data test
+  // choose "", "500" or "750"
+  TString zprime="";
+  // adjust data label
+  TString dataLabel= (reweightClosure||zprime!="") ? "Pseudo-Data": "Data"; 
   // choose if xSec are extrapolated to whole phase space
   bool extrapolate=false;
   TString PS="";
@@ -96,7 +100,6 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  //    additional histos for reweighting closure test
 	  // ---
 	  if(reweightClosure&&sys==sysNo){
-	     //!(histo_.count("reweightedttbarMass")>0)){
 	    // get reweighted samples
 	    TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecSigMadD6TSummer11ReweightedttbarMassUpPF.root";
 	    TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecSigMadD6TSummer11ReweightedttbarMassUpPF.root";
@@ -122,6 +125,47 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    //set style
 	    histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, kRed+1);
 	    histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
+	  }
+	  // ---
+	  //    additional histos for z prime closure test
+	  // ---
+	  if(zprime!=""&&sys==sysNo){
+	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecSigMadD6TSummer11PF.root";
+	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecSigMadD6TSummer11PF.root";
+	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecZPrime_M"+zprime+"_W"+zprime+"0_MadSummer11PF.root";
+	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecZPrime_M"+zprime+"_W"+zprime+"0_MadSummer11PF.root";
+	    TFile* muSigfile = new (TFile)(muSig);
+	    TFile* elSigfile = new (TFile)(elSig);
+	    TFile* muZprimefile = new (TFile)(muZprime);
+	    TFile* elZprimefile = new (TFile)(elZprime);
+	     // get plot
+	    TString partonPlot="analyzeTopPartonLevelKinematicsPhaseSpace/"+plotName;
+	    histo_["modified"+plotName           ][kSig] = (TH1F*)(muSigfile   ->Get(partonPlot)->Clone("modified"+plotName));
+	    histo_["modified"+plotName+"ElSig"   ][kSig] = (TH1F*)(elSigfile   ->Get(partonPlot)->Clone("elSig"+plotName   ));
+	    histo_["modified"+plotName+"muZprime"][kSig] = (TH1F*)(muZprimefile->Get(partonPlot)->Clone("zprime"+plotName  ));
+	    histo_["modified"+plotName+"ElZprime"][kSig] = (TH1F*)(elZprimefile->Get(partonPlot)->Clone("zprime"+plotName  ));
+	    // relative apply lumiweight- needed because these are different samples
+	    histo_["modified"+plotName           ][kSig]->Scale(lumiweight(kSig, luminosity, 0, "muon"    ));
+	    histo_["modified"+plotName+"ElSig"   ][kSig]->Scale(lumiweight(kSig, luminosity, 0, "electron"));
+	    double zPrimeLumiWeight=1;
+	    if     (zprime=="500") zPrimeLumiWeight=(10*16.2208794979645*luminosity)/232074;
+	    else if(zprime=="750") zPrimeLumiWeight=(10*3.16951400706147*luminosity)/206525;
+	    histo_["modified"+plotName+"muZprime"][kSig]->Scale(zPrimeLumiWeight);
+	    histo_["modified"+plotName+"ElZprime"][kSig]->Scale(zPrimeLumiWeight);
+	    // add plots
+	    histo_["modified"+plotName][kSig]->Add(histo_["modified"+plotName+"ElSig"   ][kSig]);
+	    histo_["modified"+plotName][kSig]->Add(histo_["modified"+plotName+"muZprime"][kSig]);
+	    histo_["modified"+plotName][kSig]->Add(histo_["modified"+plotName+"ElZprime"][kSig]);
+	    // apply standard rebinning
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    reBinTH1F(*histo_["modified"+plotName][kSig], binning_[plotName], verbose-1);
+	    // scale to unit area
+	    histo_["modified"+plotName][kSig]->Scale(1/histo_["modified"+plotName][kSig]->Integral(0,histo_["modified"+plotName][kSig]->GetNbinsX()+1));
+	    // divide by binwidth
+	    histo_["modified"+plotName][kSig]=divideByBinwidth(histo_["modified"+plotName][kSig], verbose-1);
+	    // set style
+	    histogramStyle(*histo_["modified"+plotName][kSig], kSig, false, 1.2, kRed+1);
+	    histo_["modified"+plotName][kSig]->SetLineColor(kMagenta);
 	  }
 	  // adapt plot style
 	  double max = plotTheo->GetMaximum();
@@ -177,7 +221,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  TH1F* errorTheoryMCatNLOdown    = getTheoryPrediction(plotName2_Down,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
 	  // normalize to unsit area for diff. norm. plots
 	  if(xSecVariables_[i].Contains("Norm")){
-	    if(!xSecVariables_[i].Contains("lep")&&!xSecVariables_[i].Contains("Y")&&!xSecVariables_[i].Contains("ttbarPt")) unbinnedTheory->Rebin(10);
+	    if(!xSecVariables_[i].Contains("lep")&&!xSecVariables_[i].Contains("Y")&&!xSecVariables_[i].Contains("ttbarPt")&&!xSecVariables_[i].Contains("ttbarMass")) unbinnedTheory->Rebin(10);
+	    if(xSecVariables_[i].Contains("ttbarMass")) unbinnedTheory->Rebin(6);
 	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->Integral(0,unbinnedTheory->GetNbinsX()+1)));
 	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->GetBinWidth(1)));
 	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->Integral(0,unbinnedTheory2->GetNbinsX()+1)));
@@ -185,6 +230,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    if(xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Rebin(20);
 	    else if(xSecVariables_[i].Contains("ttbarPt"))unbinnedTheoryMCAtNLO->Rebin(2);
 	    else if(xSecVariables_[i].Contains("Mass"))unbinnedTheoryMCAtNLO->Rebin(4);
+	    else if(xSecVariables_[i].Contains("Mass"))unbinnedTheoryMCAtNLO->Rebin(2);
 	    else if(!xSecVariables_[i].Contains("lep"))unbinnedTheoryMCAtNLO->Rebin(2);
 	    else if(xSecVariables_[i].Contains("lepPt")) unbinnedTheoryMCAtNLO->Rebin(1);
 	    else unbinnedTheoryMCAtNLO->Rebin(10);
@@ -267,7 +313,6 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	      errorBandsMCatNLO->SetPointEXhigh  ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinUpEdge (iBin)   );
             }
 
-
             if (maxValue > minValue) {
               errorBandsMCatNLO->SetPointEYhigh( iBin, maxValue     - centralValue                                  );
               errorBandsMCatNLO->SetPointEYlow ( iBin, centralValue - minValue                                      );
@@ -287,7 +332,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  if(xSecVariables_[i].Contains("Mass")) unbinnedTheoryMCAtNLO->Smooth(50);
 	  else if(!xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Smooth(10);
 	  else unbinnedTheoryMCAtNLO->Smooth(3);
-	  if(xSecVariables_[i].Contains("Norm")){
+  if(xSecVariables_[i].Contains("Norm")){
             // adapt style for error bands to central curve mc@nlo
             errorBandsMCatNLO->SetFillColor  (kGray)    ;
             errorBandsMCatNLO->SetFillStyle  (1001)     ; // NB: explicitly needed, otherwise filling invisible due to default "0"
@@ -309,6 +354,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    if(reweightClosure&&sys==sysNo){ 
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
 	    }
+	    // draw distorted parton truth histo including zprime
+	    if(zprime!=""&&sys==sysNo){
+	      histo_["modified"+plotName][kSig]->Draw("hist same");
+	    }
 	    // GOSSIE quick fix
 	    if(cutTtbarMass&&xSecVariables_[i].Contains("ttbarMass")) {
 	      unbinnedTheory->GetXaxis()->SetRangeUser(325.,1200.);
@@ -327,7 +376,9 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    //leg->SetHeader("");
 	    leg->AddEntry(plotCombination  , dataLabel , "P" );
 	    leg->AddEntry(unbinnedTheory   , "MadGraph", "L" );
+	    // add additional labels for closure test(s)
 	    if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph reweighted", "L");
+	    if(zprime!=""&&sys==sysNo)  leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
 	    leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    leg->Draw("same");
 	  }
