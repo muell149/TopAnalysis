@@ -13,10 +13,16 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
   TGaxis::SetMaxDigits(2);
   gROOT->SetStyle("HHStyle");
 
+  // say if closure test with reweighted m(ttbar) on parton level is done
+  // will plot additionally the modified diff. norm. xSec on parton level
+  bool reweightClosure=false;
+  TString dataLabel= reweightClosure ? "Pseudo-Data": "Data"; 
   // choose if xSec are extrapolated to whole phase space
   bool extrapolate=false;
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
+  // GOSSIE quick fix: cut of m(ttbar) below 354 GeV
+  bool cutTtbarMass=true;
   // decay channels
   enum channel {kMuon, kElectron};
   // define folders where XSec plots are stored
@@ -85,6 +91,37 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 		std::cout << "combined: " << combinedxSec << " +/- " << combinedxSecError << std::endl;
 	      }
 	    }
+	  }
+	  // ---
+	  //    additional histos for reweighting closure test
+	  // ---
+	  if(reweightClosure&&sys==sysNo){
+	     //!(histo_.count("reweightedttbarMass")>0)){
+	    // get reweighted samples
+	    TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecSigMadD6TSummer11ReweightedttbarMassUpPF.root";
+	    TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecSigMadD6TSummer11ReweightedttbarMassUpPF.root";
+	    TFile* mufile = new (TFile)(muReweighted);
+	    TFile* elfile = new (TFile)(elReweighted);
+	    // get plot
+	    TString partonPlot="analyzeTopPartonLevelKinematicsPhaseSpace/"+plotName;
+	    histo_["reweighted"+plotName     ][kSig] = (TH1F*)(mufile->Get(partonPlot)->Clone("mu"+plotName));
+	    histo_["reweighted"+plotName+"El"][kSig] = (TH1F*)(elfile->Get(partonPlot)->Clone("el"+plotName));
+	    histo_["reweighted"+plotName     ][kSig]->Add(histo_["reweighted"+plotName+"El"][kSig]);
+	    // apply standard rebinning
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    reBinTH1F(*histo_["reweighted"+plotName][kSig], binning_[plotName], verbose-1);
+	    // scale to unit area
+	    histo_["reweighted"+plotName][kSig]->Scale(1/histo_["reweighted"+plotName][kSig]->Integral(0,histo_["reweighted"+plotName][kSig]->GetNbinsX()+1));
+	    // divide by binwidth
+	    histo_["reweighted"+plotName][kSig]=divideByBinwidth(histo_["reweighted"+plotName][kSig], verbose-1);
+	    // delete files
+	    //delete mufile;
+	    //mufile=NULL;
+	    //delete elfile;
+	    //elfile=NULL;
+	    //set style
+	    histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, kRed+1);
+	    histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
 	  }
 	  // adapt plot style
 	  double max = plotTheo->GetMaximum();
@@ -214,10 +251,23 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
             Double_t     maxValue = errorTheoryMCatNLOup     ->GetBinContent(iBin) ;
             Double_t     minValue = errorTheoryMCatNLOdown   ->GetBinContent(iBin) ;
 
-            errorBandsMCatNLO->SetPoint        ( iBin, errorTheoryMCatNLOcentral->GetBinCenter(iBin), centralValue  );
-            errorBandsMCatNLO->SetPointEXlow   ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinLowEdge(iBin)   );
-            errorBandsMCatNLO->SetPointEXhigh  ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinUpEdge (iBin)   );
- 
+            //errorBandsMCatNLO->SetPoint        ( iBin, errorTheoryMCatNLOcentral->GetBinCenter(iBin), centralValue  );
+            //errorBandsMCatNLO->SetPointEXlow   ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinLowEdge(iBin)   );
+            //errorBandsMCatNLO->SetPointEXhigh  ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinUpEdge (iBin)   );
+	    // GOSSIE quick fix
+	    if (cutTtbarMass&&xSecVariables_[i].Contains("ttbarM" ) &&
+		errorTheoryMCatNLOcentral->GetBinCenter(iBin) < 345.) {
+	      errorBandsMCatNLO->SetPoint        ( iBin, errorTheoryMCatNLOcentral->GetBinCenter(iBin), 0.            );
+	      errorBandsMCatNLO->SetPointEXlow   ( iBin, 0.);
+	      errorBandsMCatNLO->SetPointEXhigh  ( iBin, 0.);
+	    } 
+	    else {
+	      errorBandsMCatNLO->SetPoint        ( iBin, errorTheoryMCatNLOcentral->GetBinCenter(iBin), centralValue  );
+	      errorBandsMCatNLO->SetPointEXlow   ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinLowEdge(iBin)   );
+	      errorBandsMCatNLO->SetPointEXhigh  ( iBin, errorTheoryMCatNLOcentral->GetXaxis()->GetBinUpEdge (iBin)   );
+            }
+
+
             if (maxValue > minValue) {
               errorBandsMCatNLO->SetPointEYhigh( iBin, maxValue     - centralValue                                  );
               errorBandsMCatNLO->SetPointEYlow ( iBin, centralValue - minValue                                      );
@@ -255,6 +305,14 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    // draw smoothed theory curves
 	    plotTheo->Draw("hist same")                 ;
 	    unbinnedTheoryMCAtNLO->Draw("hist c same")  ;
+	    // draw reweighted histo for closure test
+	    if(reweightClosure&&sys==sysNo){ 
+	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
+	    }
+	    // GOSSIE quick fix
+	    if(cutTtbarMass&&xSecVariables_[i].Contains("ttbarMass")) {
+	      unbinnedTheory->GetXaxis()->SetRangeUser(325.,1200.);
+	    }
 	    unbinnedTheory       ->Draw("c same")       ;
 	    TLegend *leg = new TLegend();
 	    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
@@ -267,8 +325,9 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->SetBorderSize(0);
 	    leg->SetTextAlign(12);
 	    //leg->SetHeader("");
-	    leg->AddEntry(plotCombination  , "Data    ", "P" );
+	    leg->AddEntry(plotCombination  , dataLabel , "P" );
 	    leg->AddEntry(unbinnedTheory   , "MadGraph", "L" );
+	    if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph reweighted", "L");
 	    leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    leg->Draw("same");
 	  }
