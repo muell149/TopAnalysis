@@ -84,6 +84,8 @@ process.source = cms.Source("PoolSource",
     #'/store/user/eschliec/TTJets_TuneZ2_7TeV-madgraph-tauola/PATWithPF_v4/247cdaa1cf6bc716522e6e8a50301fbd/patTuple_182_1_CNE.root',
     #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_9_1_LMr.root',
     #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_8_1_OjE.root',
+    #'/store/mc/Fall10/TTJets_TuneD6T_7TeV-madgraph-tauola/AODSIM/START38_V12-v2/0022/2A4828B2-FCE3-DF11-ABDD-0015C5E673AE.root',
+    #'/store/user/eschliec/TTJets_TuneD6T_mass166_5_7TeV-madgraph-tauola/PATWithPF_v4/e59efddd8a1547799dca5b47d5556447/patTuple_21_1_rkC.root',
     ),
                             skipEvents = cms.untracked.uint32(0)
 )
@@ -234,7 +236,7 @@ addTtFullHadHypotheses(process,
 if not options.eventFilter=='sig' :
     removeTtFullHadHypGenMatch(process)
 
-## changing bTagger, possible are: TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT, CSV, CSVMVA
+## changing bTagger, possible are: TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT, CSVM, CSVT, CSVMVA
 ## CSVMVA has NO officialy blessed WP
 if options.bTagAlgoWP == "TCHEM" :
     switchToTCHEM(process)
@@ -248,8 +250,10 @@ elif options.bTagAlgoWP == "SSVHEM" :
     switchToSSVHEM(process)
 elif options.bTagAlgoWP == "SSVHPT" :
     switchToSSVHPT(process)
-elif options.bTagAlgoWP == "CSV" :
-    switchToCSV(process)
+elif options.bTagAlgoWP == "CSVM" :
+    switchToCSVM(process)
+elif options.bTagAlgoWP == "CSVT" :
+    switchToCSVT(process)
 elif options.bTagAlgoWP == "CSVMVA" :
     switchToCSVMVA(process)
 else :
@@ -290,7 +294,10 @@ process.FullHadTreeWriter = process.writeFullHadTree.clone(JetSrc = "tightLeadin
 process.FullHadTreeWriter.MCweight = options.mcWeight
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
+if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
+    process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
+elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
+    process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_WJets_Spring11.root")
 if options.PUscenario == '11_167913':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root"
 elif options.PUscenario == '11_166861':
@@ -301,6 +308,8 @@ elif options.PUscenario == '11_May10':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11.root"
 elif options.PUscenario == '10_Apr21':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_136033-149442_7TeV_Apr21ReReco_Collisions10.root"
+elif options.PUscenario == 'EPS':
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root"
 elif not options.eventFilter == 'data':
     exit('PU SCENARIO * ' + options.PUscenario + " * NOT SUPPORTED, STOP PROCESSING")
 
@@ -377,7 +386,7 @@ pf2patOptions['electronIDs'] = ''
 pf2patOptions['excludeElectronsFromWsFromGenJets'] = True
 #pf2patOptions['noMuonTopProjection'] = True
 #pf2patOptions['noElecTopProjection'] = True
-pf2patOptions['applyMETCorrections'] = True
+pf2patOptions['METCorrectionLevel'] = 0
 if options.eventFilter=='data':
     pf2patOptions['runOnMC'] = False
 if options.runOnAOD:
@@ -411,6 +420,10 @@ for pathname in pathnames:
         process.patTrigger.processName      = options.triggerTag
         process.patTriggerEvent.processName = options.triggerTag
 
+    ## adaption for 38X MC files, they don't have PUSummaryInfo
+    if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_') and (options.triggerTag=='HLT' or options.triggerTag=='REDIGI38X') :
+         getattr(process, pathname).remove(process.eventWeightPU)
+         
 ## Output Module Configuration
 if options.writeOutput:
     process.outModule = cms.OutputModule("PoolOutputModule",
@@ -437,5 +450,4 @@ if options.writeOutput:
                                                                                 ) 
                                          )
     process.outpath = cms.EndPath(process.outModule)
-
 
