@@ -147,8 +147,8 @@ ElectronAnalyzer::beginJob()
   eta_->GetXaxis()->SetTitle("#eta_{el}");
   eta_->GetYaxis()->SetTitle("Electrons");
 
-  phi_ = fs->make<TH1D>("phi", "Muon Phi", 48, -TMath::Pi(), TMath::Pi());
-  phi_->GetXaxis()->SetTitle("#phi_{#mu}");
+  phi_ = fs->make<TH1D>("phi", "Electron Phi", 48, -TMath::Pi(), TMath::Pi());
+  phi_->GetXaxis()->SetTitle("#phi_{e}");
   phi_->GetYaxis()->SetTitle("N per 7.5 degree");
 
   supercluster_energy_= fs->make<TH1D>("supercluster_energy", "Electron supercluster Energy", 300, 0., 300.);
