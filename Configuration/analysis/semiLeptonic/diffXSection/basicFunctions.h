@@ -225,7 +225,7 @@ namespace semileptonic {
 
     hist.SetStats(kFALSE);
     if(sampleTyp==kData || !filled){
-      if(!filled)hist.SetLineWidth(3);
+      if(!filled)hist.SetLineWidth(2);
       hist.SetLineColor(color_[sampleTyp]);
       hist.SetMarkerColor(color_[sampleTyp]);
       if(sampleTyp==kQCD){
