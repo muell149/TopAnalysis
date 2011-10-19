@@ -37,7 +37,7 @@ using namespace std;
 
 // path to the ingoing root histogram files
 const char *USERNAME = getenv("USER");
-const TString inpath(!strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/standard/");
+const TString inpath(!strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
 const TString outpath("plots/");
 
 // output format
@@ -51,8 +51,8 @@ const TString kinEffOutfileName(outpath+"KinEfficienies_Histograms.root");
 // input file name with systematic errors
 TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 
-TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsSept21-output/Systematic_Errors_TOTAL.root");
-TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsSept21-output/Systematic_Errors_DIFF.root");
+TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/m/markusm/public/Systematics/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/m/markusm/public/Systematics/Systematic_Errors_DIFF.root");
 
 // input file name with Powheg curves
 TFile* powhegInput = TFile::Open("~dammann/public/Powheg.root");
@@ -2897,11 +2897,14 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 	}
 
 	// get reco histograms   
-	if(strcmp(particle,"Leptons")==0){ 
-
-	    plotStr = "pt";
-	    if (strcmp(quantity,"Eta")==0)
+	if(strcmp(particle,"Leptons")==0){
+	
+            if (strcmp(quantity,"Pt")==0)
+	        plotStr = "pt";
+	    else if (strcmp(quantity,"Eta")==0)
         	plotStr = "eta";
+            else
+		cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;
 
 	    if (channel==kMM) {
         	GetCloneHistArray("analyzeMuons8/", plotStr, kMM, hists);
@@ -2917,16 +2920,23 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         	AddHistArray(     "analyzeMuons8/", plotStr, kMM, hists);	
 	    } 
 	} else{  // if lepton pair
+	    if (strcmp(quantity,"Mass")==0)
+        	plotStr = "DiLeptonMass";
+	    else if(strcmp(quantity,"Pt")==0)
+        	plotStr = "DiLeptonPt";
+	    else
+	        cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;			
+		
 	    if (channel==kMM) {
-        	GetCloneHistArray("analyzeLeptonPair8/", "DimassRC_MM", kMM, hists);
+        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM, hists);
 	    } else if (channel==kEM) {
-        	GetCloneHistArray("analyzeLeptonPair8/", "DimassRC_ME", kEM, hists);
+        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kEM, hists);
 	    } else if (channel==kEE) {
-        	GetCloneHistArray("analyzeLeptonPair8/", "DimassRC_EE", kEE, hists);
+        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kEE, hists);
 	    } else if (channel==kCOMBINED) {
-        	GetCloneHistArray("analyzeLeptonPair8/", "DimassRC_MM", kMM,  hists);
-        	AddHistArray(     "analyzeLeptonPair8/", "DimassRC_ME", kEM,  hists);
-        	AddHistArray(     "analyzeLeptonPair8/", "DimassRC_EE", kEE,  hists);	
+        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM,  hists);
+        	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEM,  hists);
+        	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEE,  hists);	
 	    } 
 	}    
     }
@@ -3063,7 +3073,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     // histogram for generated cross section
     TH1* genCrossHist = new TH1D("","",nbins,bins);
 
-    cout.precision(3);
+    cout.precision(5);
 
     for (Int_t i=1; i<=nbins; ++i) {
         Double_t bgsum=0;
@@ -3185,6 +3195,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       genCrossHist->SetLineColor(kRed+1);
       FormatHisto(genCrossHist);
       genCrossHist->Draw();
+      
+//       cout << endl;      
+//       for(Int_t i=1; i<=genCrossHist->GetNbinsX(); ++i){	
+// 	cout << "cross section in bin is " << genCrossHist->GetBinContent(i) << endl;
+//       } 
+//       cout << endl;      
 
       // for pt and mass distribution use log scale
       if (!strcmp(quantity, "Mass")) {
@@ -3253,6 +3269,22 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       semileptonic::DrawCMSLabels(isPreliminary, lumi);
       semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
       Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
+
+//       // print summary table for all channels
+//       std::cout << "BCC Corrections done: " << particle << " " << quantity << std::endl;
+//       for (int bin = 0; bin < nbins; ++bin) {
+// 	double y = bccCrossGraph->GetY()[bin];
+// 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+//            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
+//            << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
+//            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
+//            << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
+//            << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
+//            << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
+//            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
+//            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
+//            << "\t\\\\" << std::endl;
+//        } 
 
       diffXsecHistogramList.Add(crossHist->Clone());
 
@@ -4577,6 +4609,7 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
 
 
 
+
 // main function
 void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double xsec = 157.5) {
     for (int i = 0; btagSFAlgos[i]; ++i)
@@ -4682,6 +4715,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binsLepPairPt[nbinsLepPairPt+1] = {0, 10, 20, 40, 60, 100, 150, 400};
     const Double_t binCenterLepPairPt[nbinsLepPairPt] = {bccAuto, bccAuto, bccAuto, bccAuto+2., bccAuto, bccAuto-2., bccAuto};    
     PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt );
+    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE ); 
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", binsLepPairPt, nbinsLepPairPt);
 
     const Int_t nbinsLepPairMass = 5;
@@ -4691,13 +4725,16 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );    
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
 
-    //const Int_t nbinsLepPairMassJohannes = 2;
-    //const Double_t binsLepPairMassJohannes[nbinsLepPairMassJohannes+1] = {60, 120, 400};
-    //const Double_t binCenterMassJohannes[nbinsLepPairMassJohannes] = {bccAuto, bccAuto};
-    //const Int_t nbinsLepPairMassJohannes = 4;
-    //const Double_t binsLepPairMassJohannes[nbinsLepPairMassJohannes+1] = {60, 76, 106, 120, 400};        
-    //const Double_t binCenterMassJohannes[nbinsLepPairMassJohannes] = {bccAuto, bccAuto, bccAuto, bccAuto};
-    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes, nbinsLepPairMassJohannes, binCenterMassJohannes, kFALSE, "Johannes_");
+    // special plots for johannes
+    const Int_t nbinsLepPairMassJohannes1 = 2;
+    const Double_t binsLepPairMassJohannes1[nbinsLepPairMassJohannes1+1] = {60, 120, 400};
+    const Double_t binCenterMassJohannes1[nbinsLepPairMassJohannes1] = {bccAuto, bccAuto};
+    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kFALSE, "Johannes1_");
+        
+    const Int_t nbinsLepPairMassJohannes2 = 4;
+    const Double_t binsLepPairMassJohannes2[nbinsLepPairMassJohannes2+1] = {60, 76, 106, 120, 400};        
+    const Double_t binCenterMassJohannes2[nbinsLepPairMassJohannes2] = {bccAuto, bccAuto, bccAuto, bccAuto};
+    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kFALSE, "Johannes2_");
 
 
     // jets
@@ -4806,9 +4843,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PutHistToRootFile("analyzeLeptonPair9", "DimassRC_MM", kCOMBINED, kinEffHistogramList, kFALSE);
     PutHistToRootFile("analyzeLeptonPair9", "DimassRC_ME", kCOMBINED, kinEffHistogramList, kFALSE);
     PutHistToRootFile("analyzeLeptonPair9", "DimassRC_EE", kCOMBINED, kinEffHistogramList, kFALSE);     
-    
-          
-    
+
 
     std::cout << ">>> " << "-------------------------------------------" << std::endl;
     std::cout << ">>> " << "Final size of diffXsecHistogramList: " << diffXsecHistogramList.GetEntries() << std::endl << std::endl << std::endl;
