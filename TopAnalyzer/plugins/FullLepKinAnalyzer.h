@@ -77,9 +77,9 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
                                 double
                                );
 
-  bool isRealBJet(const reco::Candidate&,
-                  const reco::Candidate&,
-		  const reco::Candidate&
+  bool isRealBJet(const reco::Candidate*,
+                  const reco::Candidate*,
+		  const reco::Candidate* = 0
                  );
 
   /// book and fill additional plots with gen information?
@@ -249,7 +249,8 @@ class FullLepKinAnalyzer : public edm::EDAnalyzer {
   TH1D* bJetIdcs_;
   /// histogram for index of bBarJet in jet collection used for the event reconstruction
   TH1D* bBarJetIdcs_;
-
+  /// number of correct jet assignments
+  TH1D* nCorrectAssignments_;
   /// histogram for the mass difference between reconstructed top and anti-top.
   /// For kinSolution hypothesis it should give a sharp peak around zero since the assumption that both masses
   /// are equal is used as a boundary condition. Differences appear only from rounding errors

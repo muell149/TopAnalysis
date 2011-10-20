@@ -422,10 +422,11 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   fill2DHistos(LepPair2D_, *LepPair, *genLepPair, weight);
   fill2DHistos(JetPair2D_, *JetPair, *genJetPair, weight);
 
+  // count jets matched to b flavour jets
   int nMatchedBjets = 0;
-  if(isRealBJet(*B,*genB,*genBBar)) 
+  if(isRealBJet(B,genB,genBBar)) 
     nMatchedBjets++;    
-  if(isRealBJet(*BBar,*genB,*genBBar)) 
+  if(isRealBJet(BBar,genB,genBBar)) 
     nMatchedBjets++;
 
   nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, Lep->pt());
@@ -449,6 +450,15 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   nMatchVsNtagsTCHEL_ ->Fill(nTCHEL, nMatchedBjets, weight); 
   nMatchVsNtagsTCHEM_ ->Fill(nTCHEM, nMatchedBjets, weight); 
   nMatchVsNtagsSSVHEM_->Fill(nSSVHEM,nMatchedBjets, weight);
+
+  // reset counter to count now the number of jets matched to the correct jet
+  nMatchedBjets = 0;
+  if(isRealBJet(B,genB)) 
+    nMatchedBjets++;    
+  if(isRealBJet(BBar,genBBar)) 
+    nMatchedBjets++;  
+  
+  nCorrectAssignments_->Fill(nMatchedBjets);
 
   delete TtBar;
   delete LepPair;
@@ -917,6 +927,7 @@ FullLepKinAnalyzer::bookQualityHistos(edm::Service<TFileService>& fs)
   kinSolWeight_        = fs->make<TH1D>(ns.name("kinSolWeight"        ), "Weight of kin solution",           50,  0. , 1. ); 
   bJetIdcs_            = fs->make<TH1D>(ns.name("bJetIdcs"            ), "b jet indices used for hypo",       4, -0.5, 3.5);
   bBarJetIdcs_         = fs->make<TH1D>(ns.name("bBarJetIdcs"         ), "bbar jet indices used for hypo",    4, -0.5, 3.5);
+  nCorrectAssignments_ = fs->make<TH1D>(ns.name("nCorrectAssignments" ), "N correctly assigned jets",         3, -0.5, 2.5);
   deltaM_              = fs->make<TH1D>(ns.name("deltaM"              ), "M_{top}",		             50, -25., 25.);
   LepBarBMass_         = fs->make<TH1D>(ns.name("LepBarBMass"	      ), "M_{l^{+},b}",		            250,   0.,250.);  
   LepBMass_            = fs->make<TH1D>(ns.name("LepBMass"	      ), "M_{l^{-},b}",		            250,   0.,250.);  
@@ -997,10 +1008,12 @@ FullLepKinAnalyzer::fillQualityHistos(const TtFullLeptonicEvent& FullLepEvt, con
 
 
 bool 
-FullLepKinAnalyzer::isRealBJet(const reco::Candidate& jet, const reco::Candidate& genB, const reco::Candidate& genBBar)
+FullLepKinAnalyzer::isRealBJet(const reco::Candidate* jet, const reco::Candidate* genB, const reco::Candidate* genBBar)
 {
-  double dist1 = deltaR(jet.eta(), jet.phi(), genB.eta(),    genB.phi()   );
-  double dist2 = deltaR(jet.eta(), jet.phi(), genBBar.eta(), genBBar.phi());
+  double dist1 = deltaR(jet->eta(), jet->phi(), genB->eta(),    genB->phi()   );
+  double dist2 = 999.;
+  if(genBBar)
+    dist2 = deltaR(jet->eta(), jet->phi(), genBBar->eta(), genBBar->phi());
 
   if(dist1 < .2 || dist2 < .2){  
     return true;
