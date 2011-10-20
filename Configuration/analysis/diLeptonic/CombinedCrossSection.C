@@ -37,8 +37,11 @@ using namespace std;
 
 // path to the ingoing root histogram files
 const char *USERNAME = getenv("USER");
-const TString inpath(!strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+const TString inpath(
+		     !strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+		     //!strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" : "./");
 const TString outpath("plots/");
+
 
 // output format
 const TString outform(".eps");
@@ -57,9 +60,13 @@ TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/m/markusm/publ
 TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/m/markusm/public/Systematics/Systematic_Errors_DIFF.root");
 
 // input file name with Powheg curves
-TFile* powhegInput = TFile::Open("~dammann/public/Powheg.root");
+TFile* powhegInput = TFile::Open("/afs/naf.desy.de/user/d/dammann/public/Powheg.root");
 // input file name with MC@NLO curves
-TFile* mcatnloInput = TFile::Open("~dammann/public/MCatNLO_status3.root");
+TFile* mcatnloInput = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_status3.root");
+// input file names with MC@NLO uncertainty curves due to m_top, Q2, and the PDF
+TFile* mcatnloInputUp = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Up_status3.root"); 
+TFile* mcatnloInputDn = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Down_status3.root"); 
+
 //(not) constants for background scaling - it is preferred to set them via command line!
 Bool_t scaleUpBG = kFALSE;
 Bool_t scaleDownBG = kFALSE;
@@ -741,7 +748,8 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     // style data histogram
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
-    mergedhists[kDATA]->SetLineWidth(1.5);
+    mergedhists[kDATA]->SetLineWidth(1.5);  ///////////////////////////////////// 
+
     mergedhists[kDATA]->Draw("same,e1");
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
     setex1->Draw();
@@ -1053,7 +1061,7 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     // style data histogram
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
-    mergedhists[kDATA]->SetLineWidth(1.5);
+    mergedhists[kDATA]->SetLineWidth(1.5); ////////////////////////////////////
     mergedhists[kDATA]->Draw("same,e1");
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
     setex1->Draw();
@@ -1194,7 +1202,16 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
     TFile* file = NULL;
     if(strcmp(generator, "MCatNLO")==0){
       file = mcatnloInput;
-    } else if(strcmp(generator, "Powheg")==0){
+    }
+    else if(strcmp(generator, "MCNLOup")==0){
+      file = mcatnloInputUp;
+      std::cout << "MCNLOUp: " << file->GetName() << std::endl; 
+    } 
+     else if(strcmp(generator, "MCNLOdown")==0){
+      file = mcatnloInputDn;
+      std::cout << "MCNLODn: " << file->GetName() << std::endl; 
+    }  
+    else if(strcmp(generator, "Powheg")==0){
       file = powhegInput;
     } else{
       cerr << "WARNING in GetNloCurve: unknown generator '" << generator << "' specified!" << endl;
@@ -3045,7 +3062,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     // style data
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
-    mergedhists[kDATA]->SetLineWidth(2);
+    mergedhists[kDATA]->SetLineWidth(1);   
+
     if (dataIsFakeFromMonteCarlo && channel == kEM) {
         //we are using pseudo data and must apply a global weight
         TH1 *modelWeightSum;
@@ -3149,16 +3167,28 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     TH1* mcatnloh = GetNloCurve(particle, quantity, "MCatNLO");
     mcatnloh->Scale(branchingFraction[channel]);
     mcatnloh->Rebin(10); mcatnloh->Scale(0.1);
-   
+
+    TH1* mcatnlohUp = GetNloCurve(particle, quantity, "MCNLOup");
+    mcatnlohUp->Scale(branchingFraction[channel]);
+    mcatnlohUp->Rebin(10); mcatnlohUp->Scale(0.1);
+
+    TH1* mcatnlohDn = GetNloCurve(particle, quantity, "MCNLOdown");
+    mcatnlohDn->Scale(branchingFraction[channel]);
+    mcatnlohDn->Rebin(10); mcatnlohDn->Scale(0.1);
+
+
     TH1* powhegh  = GetNloCurve(particle, quantity, "Powheg");
     powhegh->Scale(branchingFraction[channel]);
     powhegh->Rebin(2); powhegh->Scale(0.5);
 
     //two entries
     if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0){
-      gh      ->Scale(0.5);
+      gh      ->Scale(0.5); 
       mcatnloh->Scale(0.5);
-      powhegh ->Scale(0.5);
+      mcatnlohUp->Scale(0.5);
+      mcatnlohDn->Scale(0.5);            
+      powhegh ->Scale(0.5);      
+
     }
     
     if (normaliseToUnitArea) {
@@ -3175,6 +3205,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
   
       Double_t scale_mcatnlo = 1./mcatnloh->Integral("width");
       mcatnloh->Scale(scale_mcatnlo);
+
+      //The Up and Down variations cannot be normalized to 1 in order to indicate the envelope of the shape uncertainty 
+      mcatnlohUp->Scale(scale_mcatnlo);
+      mcatnlohDn->Scale(scale_mcatnlo);
        
       Double_t scale_powheg = 1./powhegh->Integral("width");
       powhegh->Scale(scale_powheg);
@@ -3205,7 +3239,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
       genCrossHist->GetXaxis()->SetTitle(xtitle);
       genCrossHist->GetYaxis()->SetTitle(ytitle);
-      genCrossHist->SetLineWidth(1);
+      genCrossHist->SetLineWidth(2);
       genCrossHist->SetLineColor(kRed+1);
       FormatHisto(genCrossHist);
       genCrossHist->Draw();
@@ -3235,18 +3269,59 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
 	nrebin=4;
 	mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
-      }
+        mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
+        mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);
+      }  
       else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0)
 	nrebin=8;
 
       gh->SetLineColor(kRed+1);
-      gh->SetLineWidth(4);
+      gh->SetLineWidth(2);
       gh->Rebin(nrebin); gh->Scale(1./nrebin);
       gh->Draw("same,C");
 
       mcatnloh->SetLineColor(kAzure);
       mcatnloh->SetLineWidth(2);
       if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
+
+      mcatnlohUp->SetLineColor(kGray);
+      mcatnlohUp->SetLineWidth(2);
+      if (mcatnlohUp->GetEntries()) mcatnlohUp->Draw("same,HIST,C");    
+
+      mcatnlohDn->SetLineColor(kGray);
+      mcatnlohDn->SetLineWidth(2);
+      if (mcatnlohDn->GetEntries()) mcatnlohDn->Draw("same,HIST,C"); 
+
+
+      //Uncertainty band for MC@NLO
+      const Int_t nMCNLOBins = mcatnlohUp->GetNbinsX();
+      Double_t x[nMCNLOBins];
+      Double_t xband[2*nMCNLOBins];
+      Double_t errup[nMCNLOBins];
+      Double_t errdn[nMCNLOBins];
+      Double_t errorband[2*nMCNLOBins];
+
+      for( Int_t j = 0; j< nMCNLOBins; j++ ){
+        x[j]=mcatnloh->GetBinCenter(j+1);
+        errup[j]=mcatnlohUp->GetBinContent(j+1);
+        errdn[j]=mcatnlohDn->GetBinContent(j+1);
+
+        xband[j] = x[j];
+        errorband[j] = errdn[j]; //lower band
+        xband[2*nMCNLOBins-j-1] = x[j];
+        errorband[2*nMCNLOBins-j-1] = errup[j]; //upper band
+
+      }
+
+       TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
+       mcatnloBand->SetFillColor(kGray);
+       mcatnloBand->SetLineColor(kAzure);
+       mcatnloBand->SetLineWidth(2);
+       mcatnloBand->Draw("same, F");
+
+       genCrossHist->Draw("same");
+       gh->Draw("same,C");
+       mcatnloh->Draw("same,HIST,C");      
 
       powhegh->SetLineColor(kGreen+1);
       powhegh->SetLineWidth(2);
@@ -3261,21 +3336,22 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       TLegend leg2 = *getNewLegend();
       leg2.AddEntry(bccCrossGraph, "Data",    "p");
       leg2.AddEntry(gh,            "Madgraph","l");
-      if (mcatnloh->GetEntries()) leg2.AddEntry(mcatnloh,      "MC@NLO",  "l");
-      if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");
+      if (mcatnlohUp->GetEntries() && mcatnlohDn->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
+      else if (mcatnloh->GetEntries()) leg2.AddEntry(mcatnloh,      "MC@NLO",  "l");
+      if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");        
       leg2.SetFillStyle(0);
       leg2.SetBorderSize(0);
       leg2.Draw("same");
 
       TGraphAsymmErrors* withSys = CloneAddSystematics(bccCrossGraph, title);
-      withSys->SetLineWidth(2);
+      withSys->SetLineWidth(1); 
       //withSys->SetLineColor(kBlue);
       withSys->SetLineColor(kBlack);
       withSys->Draw("same,Z");
 
       bccCrossGraph->SetMarkerStyle(20);
       bccCrossGraph->SetMarkerSize(1.5);
-      bccCrossGraph->SetLineWidth(3);
+      bccCrossGraph->SetLineWidth(1); 
       bccCrossGraph->SetLineColor(1);
       bccCrossGraph->Draw("same,P");
       //crossHist->Draw("same hist"); //data histogram
@@ -3658,8 +3734,16 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     genHist->Scale(1./genHist->GetBinWidth(1));
 
     TH1* mcatnloh = GetNloCurve(particle, quantity, "MCatNLO");
-    mcatnloh->Scale(branchingFraction[kCOMBINED]);
+    mcatnloh->Scale(branchingFraction[kCOMBINED]); 
     mcatnloh->Rebin(10); mcatnloh->Scale(0.1);
+
+    TH1* mcatnlohUp = GetNloCurve(particle, quantity, "MCNLOup");
+    mcatnlohUp->Scale(branchingFraction[kCOMBINED]); 
+    mcatnlohUp->Rebin(10); mcatnlohUp->Scale(0.1);
+
+    TH1* mcatnlohDn = GetNloCurve(particle, quantity, "MCNLOdown");
+    mcatnlohDn->Scale(branchingFraction[kCOMBINED]); 
+    mcatnlohDn->Rebin(10); mcatnlohDn->Scale(0.1);
    
     TH1* powhegh  = GetNloCurve(particle, quantity, "Powheg");
     powhegh->Scale(branchingFraction[kCOMBINED]);
@@ -3667,10 +3751,12 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     //two entries
     if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0){
-      //genHist ->Scale(0.5);
-      //genHistBinned ->Scale(0.5);
-      mcatnloh->Scale(0.5);
-      powhegh ->Scale(0.5);
+      //genHist ->Scale(0.5); 
+     //genHistBinned ->Scale(0.5); 
+      mcatnloh->Scale(0.5); 
+      mcatnlohUp->Scale(0.5);
+      mcatnlohDn->Scale(0.5);     
+      powhegh ->Scale(0.5);      
     }
     
     if (normaliseToUnitArea) {
@@ -3685,8 +3771,13 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       //Double_t scale_gen2 = 1./genHist->Integral("width");
       genHistBinned->Scale(1./visCrossGen);
   
+
       Double_t scale_mcatnlo = 1./mcatnloh->Integral("width");
       mcatnloh->Scale(scale_mcatnlo);
+
+      //The Up and Down variations cannot be normalized to 1 in order to indicate the envelope of the shape uncertainty 
+      mcatnlohUp->Scale(scale_mcatnlo);
+      mcatnlohDn->Scale(scale_mcatnlo);    
        
       Double_t scale_powheg = 1./powhegh->Integral("width");;
       powhegh->Scale(scale_powheg);
@@ -3698,7 +3789,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     genHistBinned->GetXaxis()->SetTitle(xtitle);
     genHistBinned->GetYaxis()->SetTitle(ytitle);
-    genHistBinned->SetLineWidth(1);
+    genHistBinned->SetLineWidth(2);
     genHistBinned->SetLineColor(kRed+1);
     FormatHisto(genHistBinned);
     genHistBinned->Draw();
@@ -3717,18 +3808,60 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
       nrebin=4;
       mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
+      mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
+      mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);      
     } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0){
       nrebin=8;
     }
      
     genHist->SetLineColor(kRed+1);
-    genHist->SetLineWidth(4);
+    genHist->SetLineWidth(2);
     genHist->Rebin(nrebin); genHist->Scale(1./nrebin);
     genHist->Draw("same,C");
     
     mcatnloh->SetLineColor(kAzure);
     mcatnloh->SetLineWidth(2);
     if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
+
+    mcatnlohUp->SetLineColor(kGray);
+    mcatnlohUp->SetLineWidth(2);
+    if (mcatnlohUp->GetEntries()) mcatnlohUp->Draw("same,HIST,C");    
+
+    mcatnlohDn->SetLineColor(kGray);
+    mcatnlohDn->SetLineWidth(2);
+    if (mcatnlohDn->GetEntries()) mcatnlohDn->Draw("same,HIST,C"); 
+
+    //MC@NLO uncertainty bands
+      const Int_t nMCNLOBins = mcatnlohUp->GetNbinsX();
+      Double_t x[nMCNLOBins];
+      Double_t xband[2*nMCNLOBins];
+      Double_t errup[nMCNLOBins];
+      Double_t errdn[nMCNLOBins];
+      Double_t errorband[2*nMCNLOBins];
+
+      for( Int_t j = 0; j < nMCNLOBins; j++ ){
+        x[j]=mcatnloh->GetBinCenter(j+1);
+        errup[j]=mcatnlohUp->GetBinContent(j+1);
+        errdn[j]=mcatnlohDn->GetBinContent(j+1);
+
+        xband[j] = x[j];
+        errorband[j] = errdn[j]; //lower band
+        xband[2*nMCNLOBins-j-1] = x[j];
+        errorband[2*nMCNLOBins-j-1] = errup[j]; //upper band
+
+	}
+
+       TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
+       mcatnloBand->SetFillColor(kGray);
+       mcatnloBand->SetLineColor(kAzure);
+       mcatnloBand->SetLineWidth(2);
+       mcatnloBand->Draw("same, F");
+
+
+      genHistBinned->Draw("same");
+      genHist->Draw("same,C");
+      mcatnloh->Draw("same,HIST,C");
+
     
     powhegh->SetLineColor(kGreen+1);
     powhegh->SetLineWidth(2);
@@ -3741,15 +3874,16 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     bccCrossGraph->SetMarkerStyle(20);
     bccCrossGraph->SetMarkerSize(1.5);
-    bccCrossGraph->SetLineWidth(3);
+    bccCrossGraph->SetLineWidth(1);
     bccCrossGraph->SetLineColor(1);
     bccCrossGraph->Draw("same,P");
 
     TLegend leg = *getNewLegend();
     leg.AddEntry(bccCrossGraph, "Data",    "p");
     leg.AddEntry(genHist,       "Madgraph","l");
-    if (mcatnloh->GetEntries()) leg.AddEntry(mcatnloh,      "MC@NLO",  "l");
-    if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "Powheg",  "l");
+    if (mcatnlohUp->GetEntries() && mcatnlohDn->GetEntries()) leg.AddEntry(mcatnloBand,      "MC@NLO",  "lf");
+    else if (mcatnloh->GetEntries()) leg.AddEntry(mcatnloh,      "MC@NLO",  "l");
+    if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "Powheg",  "l");        
     leg.SetFillStyle(0);
     leg.SetBorderSize(0);
     leg.Draw("same");
