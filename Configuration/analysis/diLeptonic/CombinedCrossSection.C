@@ -48,6 +48,8 @@ const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
 const TString unfoldOutfileName(outpath+"Unfold_Histograms.root");
 // output file name for kin reconstruction efficiency
 const TString kinEffOutfileName(outpath+"KinEfficienies_Histograms.root");
+// output file with data-bg histograms
+const TString preUnfoldedPlotsName(outpath+"preUnfoldedPlots.root");
 // input file name with systematic errors
 TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 
@@ -81,6 +83,7 @@ const bool normaliseToUnitArea = kTRUE;
 const bool isPreliminary = kTRUE;
 // luminosity used to normalise MC in plots and to calcutate cross sections
 const Double_t lumi = 1143.221;
+//const Double_t lumi = 22743;
 // relative uncertainty on the luminosity
 const Double_t lumierr = 0.045;
 // branching fractions for the different decay channels: mm, em, ee, combined (from BTV-11-001)
@@ -112,7 +115,7 @@ const Double_t bccAuto = 100000;
 
 
 // number of files to be opened
-const size_t Nfiles = 26; // number of ingoing files per channel
+const size_t Nfiles = 27; // number of ingoing files per channel, have one more for Z'
 const size_t Nplots = 9;  // number of plots after merging
 
 // define enums to avoid madnes while reading the code
@@ -127,6 +130,7 @@ const char *sampleNameTeX[] = {"Data", "\\ttbar\\ signal", "other \\ttbar\\", "t
 
 // input files for all channels and samples
 TFile* files[3][Nfiles];
+TFile* &zprimeFile = files[kEM][Nfiles - 1];
 int totalEvents[Nfiles];
 double sampleCrossSection[Nfiles];
 
@@ -134,6 +138,7 @@ double sampleCrossSection[Nfiles];
 TObjArray diffXsecHistogramList;
 TObjArray unfoldHistogramList;
 TObjArray kinEffHistogramList;
+TObjArray preUnfoldedList;
 
 // corrections scale factors for DY BG are hard coded output from the other macros at the moment
 Double_t ROutInEE      = -1.;
@@ -3072,6 +3077,11 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     // histogram for generated cross section
     TH1* genCrossHist = new TH1D("","",nbins,bins);
+    TH1* dataMinusBg = (TH1*)genCrossHist->Clone(TString("dataMinusBg_").Append(title));
+    TH1* efficiencyHist = (TH1*)genCrossHist->Clone(TString("efficiency_").Append(title));
+    preUnfoldedList.Add(dataMinusBg);
+    preUnfoldedList.Add(efficiencyHist);
+    
 
     cout.precision(5);
 
@@ -3080,7 +3090,11 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         for (size_t j=3; j<Nplots; ++j) {
             bgsum += mergedhists[j]->GetBinContent(i);
         }
+        dataMinusBg->SetBinContent(i, binhists[0]->GetBinContent(i)-bgsum);
+        efficiencyHist->SetBinContent(i, efficiencies[i-1]);
+        
         if (dataIsFakeFromMonteCarlo) bgsum = 0;
+        
         Double_t binw = bins[i]-bins[i-1];
         // set measured cross section
         if (efficiencies[i-1] == 0) { //cannot divide by zero
@@ -3100,7 +3114,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             genCrossHist->SetBinContent(i,genCrossHist->GetBinContent(i)/2);
         }
     }
-      
+    
     // store the visible cross section for normalisation
     if (strcmp(particle,"Leptons")==0 && strcmp(quantity,"Eta")==0 && channel!=kCOMBINED) {
       if(useKinFit)
@@ -4629,6 +4643,10 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
             std::cout << "using file as data: " << files[kEM][0]->GetName() << std::endl;
             dataIsFakeFromMonteCarlo = true;
         }
+        else if (TString(systematicVariation).BeginsWith("zprime=")) {
+            zprimeFile = new TFile(systematicVariation+7);
+            std::cout << "adding a Z' to our signal\n";
+        }
         else if (nevents > 0) {
             //We have systematics!
             files[kMM][1]=incompleteSystematics(files[kMM][1], new TFile(sysinpath.Copy().Append("mumu_ttbarsignal_").Append(systematicVariation).Append(".root")));
@@ -4725,6 +4743,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );    
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
 
+
     // special plots for johannes
     const Int_t nbinsLepPairMassJohannes1 = 2;
     const Double_t binsLepPairMassJohannes1[nbinsLepPairMassJohannes1+1] = {60, 120, 400};
@@ -4791,10 +4810,16 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 
     const Int_t nbinsTtBarMass = 5;
     const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345, 400, 475, 550, 700, 1000};
+    const Int_t nfinebinsTtBarMass = 2*nbinsTtBarMass+1;
+    const Double_t finebinsTtBarMass[nfinebinsTtBarMass] = {345, 373, 400, 437, 475, 513, 550, 625, 700, 850, 1000};
     const Double_t binCenterTtBarMass[nbinsTtBarMass] = {365, 445, 498, bccAuto, bccAuto};
     PlotDifferentialCrossSections("TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Mass", kCOMBINED, "generated M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
+    SaveUnfoldingHists("TtBar", "Mass", kMM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
+    SaveUnfoldingHists("TtBar", "Mass", kEM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
+    SaveUnfoldingHists("TtBar", "Mass", kEE, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
+    SaveUnfoldingHists("TtBar", "Mass", kCOMBINED, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
 
     // Calculate inclusive cross sections
     TGaxis::SetMaxDigits(3);    
@@ -4864,7 +4889,11 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     
     TFile kinEffOutFile(kinEffOutfileName,"recreate");
     kinEffHistogramList.Write();
-    kinEffOutFile.Close();    
+    kinEffOutFile.Close();
+    
+    TFile preUnfoldedPlots(preUnfoldedPlotsName, "recreate");
+    preUnfoldedList.Write();
+    preUnfoldedPlots.Close();
 
     PrintCutflowTable();
 
