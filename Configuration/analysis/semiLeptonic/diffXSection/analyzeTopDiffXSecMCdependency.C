@@ -4,12 +4,14 @@
 #include <TF1.h>
 #include <TMath.h>
 
-TH1F* distort(const TH1& hist, TString variation, TString variable, double distortParameter, int verbose);
+TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, int verbose);
+TH1F* distort   (const TH1& hist, TString variation, TString variable, double distortParameter, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b, double distortParameter);
 
 void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root")
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
+                                    bool doPDFuncertainty=false)
 {
   // ---
   //     Configuration
@@ -36,8 +38,13 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   // file name for output rootfiles
   TString outputFileNameUp=analysisFileName;
   TString outputFileNameDown=analysisFileName;
-  outputFileNameUp.ReplaceAll  ("PF", "MCShapeVarUpPF"  );
-  outputFileNameDown.ReplaceAll("PF", "MCShapeVarDownPF");
+  if (doPDFuncertainty) {
+    outputFileNameUp.ReplaceAll  ("PF", "PdfVarUpPF"  );
+    outputFileNameDown.ReplaceAll("PF", "PdfVarDownPF");
+  } else { 
+    outputFileNameUp.ReplaceAll  ("PF", "MCShapeVarUpPF"  );
+    outputFileNameDown.ReplaceAll("PF", "MCShapeVarDownPF");
+  }
   // name for folder where tree is read from
   TString folder="analyzeTopRecoKinematicsKinFit";
   TString genfolder="analyzeTopPartonLevelKinematics";
@@ -289,13 +296,18 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       TString Var=variation_[var];
       // loop all bins
       //for(int bin=0; bin<=plotsScaled_[variable_[i]+"PartonTruth"+Var]->GetNbinsX()+1; ++bin){
-	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distort(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], distortParameter, verbose-1);
+        if (doPDFuncertainty) {
+          plotsScaled_[variable_[i]+"PartonTruth"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], inputFolderName,  verbose-1);
+        } else {
+          plotsScaled_[variable_[i]+"PartonTruth"+Var]=distort   (*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], distortParameter, verbose-1);
+        }
 	//}
     }
   }
   
   // B3 calculate SF
   std::map< TString, TH1F* > SF_;
+
   // loop all variables
   for(unsigned int i=0; i<variable_.size();++i){
     // loop all variations 
@@ -303,6 +315,12 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       TString Var=variation_[var];
       SF_[variable_[i]+Var]=(TH1F*)plotsScaled_[variable_[i]+"PartonTruth"+Var]->Clone();
       SF_[variable_[i]+Var]->Divide(plots_[variable_[i]+"PartonTruth"]);
+//      // Following lines are just to check whether reweighting values from MC@NLO to MadGraph works
+//      if (doPDFuncertainty) {
+//        // add central values (witouth PDF reweighting) from MC@NLO to the list of plots using MadGraph normalisation
+//        plots_[variable_[i]+"PartonTruth"+"MCatNLO"] = getTheoryPrediction(variable_[i], "/afs/naf.desy.de/group/cms/scratch/tophh/" + inputFolderName + "/ttbarNtupleCteq6mPDFuncertOnly.root");
+//        plots_[variable_[i]+"PartonTruth"+"MCatNLO"]->Scale(plots_[variable_[i]+"PartonTruth"]->Integral(0,plots_[variable_[i]+"PartonTruth"]->GetNbinsX()+1));
+//      }
     }
   }
 
@@ -317,10 +335,15 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       double initArea = plots_[variable_[i]+"PartonTruth"]->Integral(0,plots_[variable_[i]+"PartonTruth"]->GetNbinsX()+1);
       double areaSFUp   = initArea/plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Integral(0,plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->GetNbinsX()+1);
       double areaSFDown = initArea/plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Integral(0,plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->GetNbinsX()+1);
-      SF_[variable_[i]+"Up"  ]->Scale(areaSFUp  );
-      plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Scale(areaSFUp);
-      SF_[variable_[i]+"Down"]->Scale(areaSFDown);
-      plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Scale(areaSFDown);
+      if (doPDFuncertainty) {
+        std::cout << "NOTE: not doing any normalization for PDF uncertainties as this would underestimate the maximum variations (normalization should cancel out anyway in reco/parton level ratio, right?!)" << std::endl;
+      } else {
+        SF_[variable_[i]+"Up"  ]->Scale(areaSFUp);
+        plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Scale(areaSFUp);
+        SF_[variable_[i]+"Down"]->Scale(areaSFDown);
+        plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Scale(areaSFDown);
+      }
+      if(verbose>1) std::cout << "area central value    for "   << variable_[i] << ": " << initArea   << std::endl;
       if(verbose>1) std::cout << "area SF(up variation) for "   << variable_[i] << ": " << areaSFUp   << std::endl;
       if(verbose>1) std::cout << "area SF(down variation) for " << variable_[i] << ": " << areaSFDown << std::endl;
     }
@@ -384,6 +407,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Draw("");
     plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Draw("same");
     plots_      [variable_[i]+"PartonTruth"       ]->Draw("same");
+    // only for cross check
+    //plots_      [variable_[i]+"PartonTruth"+"MCatNLO"]->Draw("same");
     legPS->Draw("same");
     ++canvasNumber;
   }
@@ -888,3 +913,35 @@ double linSF(const double x, const double xmax, const double a, const double b, 
   }
   return pow(SF, distortParameter);
 }
+
+TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, int verbose)
+{
+  // this function loads the max/min PDF uncertainties as determined externally with MC@NLO for the desired variables
+
+  TString fileName    = "/afs/naf.desy.de/group/cms/scratch/tophh/" + inputFolderName + "/ttbarNtupleCteq6mPDFuncertOnly.root" ;
+  TString plotNameVar = (variation == "") ? variable : variable + "_" + variation ;
+  TString plotNameNom = variable ;                 
+
+  if(verbose>0) std::cout << "distortPDF: using file " << fileName << " for estimated PDF uncertainties in plot " << plotNameVar << std::endl;
+
+  TH1F * histPdfNom = getTheoryPrediction(plotNameNom,fileName);
+  TH1F * histPdfVar = getTheoryPrediction(plotNameVar,fileName);
+  TH1F * histPdf    = getTheoryPrediction(plotNameVar,fileName);
+
+  // check if binning and ranges are consistent
+  if ( histPdf->GetNbinsX() != hist.GetNbinsX() || histPdf->GetXaxis()->GetXmin() != hist.GetXaxis()->GetXmin() || histPdf->GetXaxis()->GetXmax() != hist.GetXaxis()->GetXmax() )
+  {
+    std::cout << "ERROR in distortPDF function: histograms do not have the same binning/ranges" << std::endl ;
+    exit(1);
+  }
+
+  // scale each bin such that it represents the PDF uncertainty found with MC@NLO but with MadGraph as the default central value
+  for (int i=0 ; i <= hist.GetNbinsX()+1; ++i) {
+    histPdf->SetBinContent(i,0.) ;
+    if (histPdfNom->GetBinContent(i) != 0.) histPdf->SetBinContent(i, histPdfVar->GetBinContent(i) / histPdfNom->GetBinContent(i) * hist.GetBinContent(i) ); 
+  }
+
+  return histPdf ;
+}
+
+
