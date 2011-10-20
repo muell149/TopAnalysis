@@ -31,6 +31,7 @@ options.register('prompt', False, VarParsing.VarParsing.multiplicity.singleton, 
 options.register('syncExcercise', False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "do sync excercise, i.e. print all event numbers")
 options.register('json', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "limit to certain lumis")
 options.register('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
+options.register('pu', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "Pileup distribution input file")
 
 # get and parse the command line arguments
 if( hasattr(sys, "argv") ):
@@ -443,6 +444,10 @@ if mcname == 'qcdbcem3080':
 
 if mcname == 'qcdbcem80170':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia.root"
+
+if options.pu != '':
+    print "Using user-definded PU file"
+    mcpufile = options.pu
 
 #-------------------------------------------------
 # process configuration
