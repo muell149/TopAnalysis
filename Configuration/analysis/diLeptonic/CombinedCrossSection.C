@@ -4696,6 +4696,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     }
 
     setHHStyle(*gStyle);
+    gROOT->ForceStyle();
     
     // Print control plots
     if (doPrintControlPlots) CreateControlPlots();
