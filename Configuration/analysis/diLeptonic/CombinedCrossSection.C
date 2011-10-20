@@ -96,7 +96,7 @@ const Double_t leptonSF[] = {1., 1., 1.};
 const char *btagSFAlgos[] = {"TCHEL", "TCHEM", "SSVHEM", 0};
 const double btagSFValues[] = {0.982, 0.963, 0.973};
 std::map <std::string, double> btagSFMap;
-// which kin analyzer to use: 
+// which kin analyzer to use:
 const char *kinAnalyzer = "analyzeKinSolution8/"; //for TCHEL
 //const char *kinAnalyzer = "analyzeKinSolution9/"; //for TCHEM
 // MC production
@@ -167,7 +167,7 @@ bool dataIsFakeFromMonteCarlo = kFALSE;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-TH1* SummedStackHisto(const THStack *stack) 
+TH1* SummedStackHisto(const THStack *stack)
 {
     TList* l = stack->GetHists();
     if (l->GetEntries() == 0) return 0;
@@ -469,72 +469,72 @@ void PutHistToRootFile(const TString path, const TString name, const Int_t chann
 
 	   if(GetCloneHist(TString(path).Copy().Append("/"), name, channel, 0, hist)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hist  " << name << "!" << endl;
-	      return;  
-	   }       
+	      return;
+	   }
        } else{
 	   TH1* fhists[Nfiles];
 	   if(GetCloneHistArray(TString(path).Copy().Append("/"), name, channel, fhists)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hists  " << name << "!" << endl;
-	      return;  
+	      return;
 	   }
 	   SetWeights(fhists);
 	   TH1* mhists[Nplots];
 	   MergeHistArray(fhists, mhists);
-	   hist = mhists[1];    
+	   hist = mhists[1];
 	   for(size_t i=2; i<Nfiles; ++i){
-              hist->Add(mhists[i]); 
+              hist->Add(mhists[i]);
 	   }
        }
-   } else {   
-       if(data){       
+   } else {
+       if(data){
 	   if(GetCloneHist(TString(path).Copy().Append("/"), name, kMM, 0, hist)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hist  " << name << "!" << endl;
-	      return;  
-	   }	   
+	      return;
+	   }
 	   if(AddHist(TString(path).Copy().Append("/"), name, kEM, 0, hist)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hist  " << name << "!" << endl;
-	      return;  
-	   }	   
+	      return;
+	   }
 	   if(AddHist(TString(path).Copy().Append("/"), name, kEE, 0, hist)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hist  " << name << "!" << endl;
-	      return;  
-	   }	   	   	            
+	      return;
+	   }
        } else{
 	   TH1* fhists[Nfiles];
 	   if(GetCloneHistArray(TString(path).Copy().Append("/"), name, kMM, fhists)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hists  " << name << "!" << endl;
-	      return;  
-	   }	   
+	      return;
+	   }
 	   if(AddHistArray(TString(path).Copy().Append("/"), name, kEM, fhists)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hists  " << name << "!" << endl;
-	      return;  
-	   }	   
+	      return;
+	   }
 	   if(AddHistArray(TString(path).Copy().Append("/"), name, kEE, fhists)==0){
               cout << "WARNING in PutHistToRootFile: Could not get hists  " << name << "!" << endl;
-	      return;  
-	   }	   	   
+	      return;
+	   }
 	   SetWeights(fhists);
 	   
-	   TH1* mhists[Nplots];	   
-	   MergeHistArray(fhists, mhists);	   	   
-	   hist = mhists[1];    
+	   TH1* mhists[Nplots];
+	   MergeHistArray(fhists, mhists);
+	   hist = mhists[1];
 	      
-	   for(size_t i=2; i<Nplots; ++i){		      
-              hist->Add(mhists[i]);	       
-	   }   	   
-       }      
+	   for(size_t i=2; i<Nplots; ++i){
+              hist->Add(mhists[i]);
+	   }
+       }
    }
    
    TString hname(channelName[channel]);
-   hname.Append("_");   
-   hname.Append(path);   
    hname.Append("_");
-   hname.Append(name);   
+   hname.Append(path);
+   hname.Append("_");
+   hname.Append(name);
    if(!data)
-     hname.Append("_MC");    
+     hname.Append("_MC");
    
-   hist->SetName(hname);      
-   objArr.Add(hist);         
+   hist->SetName(hname);
+   objArr.Add(hist);
 }
 
 
@@ -668,17 +668,17 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     Double_t zElCorr = 1.;
     
     if (doDYcorrection) {
-      if (moduleStr.Contains("7")) {		    
+      if (moduleStr.Contains("7")) {
   	zMuCorr = zMuNorm7;
   	zElCorr = zElNorm7;
       } else if (moduleStr.Contains("8")) {
   	zMuCorr = zMuNorm8;
-  	zElCorr = zElNorm8; 
+  	zElCorr = zElNorm8;
       } else if (moduleStr.Contains("9")) {
   	zMuCorr = zMuNorm9;
-  	zElCorr = zElNorm9; 
-      } 	 
-    }	 
+  	zElCorr = zElNorm9;
+      }
+    }
     
     SetWeights(hists, zElCorr, zMuCorr);
 
@@ -723,11 +723,11 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     if (min>0) hstack->SetMinimum(min);
     if (max>0) hstack->SetMaximum(max);
 
-    // if max =-1 set default maximum    
+    // if max =-1 set default maximum
     else {
         Double_t vspace = 1.3;
         if(logy){
-          vspace = 10.;    
+          vspace = 10.;
         }
         max = vspace*hstack->GetMaximum();
         if (mergedhists[kDATA]->GetMaximum() > max) {
@@ -741,10 +741,10 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     // style data histogram
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
-    mergedhists[kDATA]->SetLineWidth(1.5);   
+    mergedhists[kDATA]->SetLineWidth(1.5);
     mergedhists[kDATA]->Draw("same,e1");
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
-    setex1->Draw();     
+    setex1->Draw();
     
     TLegend* leg = new TLegend(0.67,0.58,0.92,0.87);
     
@@ -782,7 +782,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
         Double_t binc = 0;
 	for(size_t j=1; j<Nplots; ++j){
 	  binc += mergedhists[j]->GetBinContent(i);
-	}    
+	}
         syshist->SetBinContent(i, binc);
 	
 	// calculate uncertainty: lumi uncertainty
@@ -797,26 +797,26 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
 	      dyunc += mergedhists[j]->GetBinContent(i)*0.5;
 	    }else{
 	      bgunc += mergedhists[j]->GetBinContent(i)*0.3;
-	    }	  
-	  } else{	  
+	    }
+	  } else{
 	    bgunc += mergedhists[j]->GetBinContent(i)*0.3;
-	  } 
-	} 
+	  }
+	}
 		
 	binerr2 += (bgunc*bgunc);
 	binerr2 += (dyunc*dyunc);
 	
-        syshist->SetBinError(i, TMath::Sqrt(binerr2));      
+        syshist->SetBinError(i, TMath::Sqrt(binerr2));
       }
       
       syshist->SetFillStyle(3004);
-      syshist->SetFillColor(kBlack); 
+      syshist->SetFillColor(kBlack);
       leg->AddEntry( syshist, "uncertainty", "f" );
 
       syshist->Draw("same,e2");
       
       TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
-      setex2->Draw();            
+      setex2->Draw();
     }
             
     if (drawLegend) leg->Draw("same");
@@ -846,7 +846,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
 
 
 // print plot for a given channel (MC stack and data markers)
-void PrintPlot(const char* module, const char* plot, Int_t channel, const char* xtitle, const char* ytitle, Double_t min=-1., Double_t max=-1., 
+void PrintPlot(const char* module, const char* plot, Int_t channel, const char* xtitle, const char* ytitle, Double_t min=-1., Double_t max=-1.,
                Bool_t logx=kFALSE, Bool_t logy=kFALSE, Int_t rebin=1) {
     PrintCombinedPlot(module, plot, "", "", "", "", channel, xtitle, ytitle, min, max, logx, logy, rebin);
 }
@@ -907,16 +907,16 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     Double_t zElCorr = 1.;
 
     if (doDYcorrection) {
-      if (moduleStr.Contains("7")) {		    
+      if (moduleStr.Contains("7")) {
   	zMuCorr = zMuNorm7;
   	zElCorr = zElNorm7;
       } else if (moduleStr.Contains("8")) {
   	zMuCorr = zMuNorm8;
-  	zElCorr = zElNorm8; 
+  	zElCorr = zElNorm8;
       } else if (moduleStr.Contains("9")) {
   	zMuCorr = zMuNorm9;
-  	zElCorr = zElNorm9; 
-      } 	 
+  	zElCorr = zElNorm9;
+      }
     }
 
     SetWeights(hists, zElCorr, zMuCorr);
@@ -991,11 +991,11 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     if (min>0) hstack->SetMinimum(min);
     if (max>0) hstack->SetMaximum(max);
 
-    // if max =-1 set default maximum    
+    // if max =-1 set default maximum
     else {
         Double_t vspace = 1.3;
         if(logy){
-          vspace = 10.;    
+          vspace = 10.;
         }
         max = vspace*hstack->GetMaximum();
         if (mergedhists[kDATA]->GetMaximum() > max) {
@@ -1014,7 +1014,7 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
         Double_t binc = 0;
 	for(size_t j=1; j<Nplots; ++j){
 	  binc += mergedhists[j]->GetBinContent(i);
-	}    
+	}
         syshist->SetBinContent(i, binc);
 	
 	// calculate uncertainty: lumi uncertainty
@@ -1029,25 +1029,25 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
 	      dyunc += mergedhists[j]->GetBinContent(i)*0.5;
 	    }else{
 	      bgunc += mergedhists[j]->GetBinContent(i)*0.3;
-	    }	  
-	  } else{	  
+	    }
+	  } else{
 	    bgunc += mergedhists[j]->GetBinContent(i)*0.3;
-	  } 
-	} 
+	  }
+	}
 		
 	binerr2 += (bgunc*bgunc);
 	binerr2 += (dyunc*dyunc);
 	
-        syshist->SetBinError(i, TMath::Sqrt(binerr2));     
+        syshist->SetBinError(i, TMath::Sqrt(binerr2));
       }
       syshist->SetFillStyle(3004);
-      syshist->SetFillColor(kBlack); 
+      syshist->SetFillColor(kBlack);
       leg->AddEntry( syshist, "uncertainty", "f" );
 
       syshist->Draw("same,e2");
       
       TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
-      setex2->Draw();            
+      setex2->Draw();
     }
 
     // style data histogram
@@ -1056,7 +1056,7 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     mergedhists[kDATA]->SetLineWidth(1.5);
     mergedhists[kDATA]->Draw("same,e1");
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
-    setex1->Draw(); 
+    setex1->Draw();
 
     if (drawLegend) leg->Draw("same");
 
@@ -1088,7 +1088,7 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     delete Canvas;
     delete leg;
     delete hstack;
-    delete syshist;    
+    delete syshist;
     return;
 }
 
@@ -1209,20 +1209,20 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
         return hist;
       }
       
-      TH1* rethist = (TH1*)hist->Clone(); 
+      TH1* rethist = (TH1*)hist->Clone();
     
       TH1* weight;
       file->GetObject<TH1>(TString("total_LeptonsPt_").Append(generator), weight);
       
-      Double_t wgt = 1.;      
+      Double_t wgt = 1.;
       if(!weight){
-        cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl; 
+        cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
       } else{
         Double_t nevents = weight->GetEntries();
-        Double_t crosssection = 157.5;     
+        Double_t crosssection = 157.5;
         Double_t binw = hist->GetBinWidth(1);
         wgt = crosssection/nevents/binw;
-      }    
+      }
       rethist->Scale(wgt);
       return rethist;
     }
@@ -1262,7 +1262,7 @@ void SetupInputFiles() {
     totalEvents[22] = 8150672;
     totalEvents[23] = 2081560;
     totalEvents[24] = 2030033;
-    totalEvents[25] = 1082691;    
+    totalEvents[25] = 1082691;
     
     
     sampleCrossSection[0] = 1;
@@ -1319,7 +1319,7 @@ void SetupInputFiles() {
     //files[kMM][22]=new TFile(inpath.Copy().Append("mumu_qcdem80170.root"));
     //files[kMM][23]=new TFile(inpath.Copy().Append("mumu_qcdbcem2030.root"));
     //files[kMM][24]=new TFile(inpath.Copy().Append("mumu_qcdbcem3080.root"));
-    //files[kMM][25]=new TFile(inpath.Copy().Append("mumu_qcdbcem80170.root"));    
+    //files[kMM][25]=new TFile(inpath.Copy().Append("mumu_qcdbcem80170.root"));
     
     // emu files
     files[kEM][0]= new TFile(inpath.Copy().Append("emu_1fb.root"));
@@ -1347,7 +1347,7 @@ void SetupInputFiles() {
     files[kEM][22]=new TFile(inpath.Copy().Append("emu_qcdem80170.root"));
     files[kEM][23]=new TFile(inpath.Copy().Append("emu_qcdbcem2030.root"));
     files[kEM][24]=new TFile(inpath.Copy().Append("emu_qcdbcem3080.root"));
-    files[kEM][25]=new TFile(inpath.Copy().Append("emu_qcdbcem80170.root"));	
+    files[kEM][25]=new TFile(inpath.Copy().Append("emu_qcdbcem80170.root"));
     
     // ee files
     files[kEE][0]= new TFile(inpath.Copy().Append("ee_1fb.root"));
@@ -1375,7 +1375,7 @@ void SetupInputFiles() {
     files[kEE][22]=new TFile(inpath.Copy().Append("ee_qcdem80170.root"));
     files[kEE][23]=new TFile(inpath.Copy().Append("ee_qcdbcem2030.root"));
     files[kEE][24]=new TFile(inpath.Copy().Append("ee_qcdbcem3080.root"));
-    files[kEE][25]=new TFile(inpath.Copy().Append("ee_qcdbcem80170.root"));      
+    files[kEE][25]=new TFile(inpath.Copy().Append("ee_qcdbcem80170.root"));
 }
 
 
@@ -1880,16 +1880,16 @@ void PrintCutflowTable() {
                 Double_t zElCorr = 1.;
 
                 if (doDYcorrection) {
-		  if (step == 7) {		
+		  if (step == 7) {
                     zMuCorr = zMuNorm7;
                     zElCorr = zElNorm7;
 		  } else if (step == 8) {
                     zMuCorr = zMuNorm8;
-                    zElCorr = zElNorm8;	
+                    zElCorr = zElNorm8;
 		  } else if (step == 9) {
                     zMuCorr = zMuNorm9;
-                    zElCorr = zElNorm9;	
-		  } 	     
+                    zElCorr = zElNorm9;
+		  }
                 }
 
                 SetWeights(hists, zElCorr, zMuCorr);
@@ -1919,7 +1919,7 @@ void PrintCutflowTable() {
 
 
 // save a background-subtracted data hist and a signal MC hist with the gerated vs the reconstructed quantity
-void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channel, const Double_t bins[], const Int_t nbins, 
+void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channel, const Double_t bins[], const Int_t nbins,
                         const Double_t finebins[], const Int_t nfinebins) {
     // get histograms of reconstructed quantity and generated signal
     TString plotStr("");
@@ -2062,7 +2062,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       Double_t widthExtraBin = finebins[nfinebins]-finebins[nfinebins-1];
       Double_t finebins2[nfinebins+3];
       for(Int_t i=0; i<=nfinebins; ++i){
-	finebins2[i+1]=finebins[i];   
+	finebins2[i+1]=finebins[i];
       }
       finebins2[0]           = finebins[0]        -widthExtraBin;
       finebins2[nfinebins+2] = finebins[nfinebins]+widthExtraBin;
@@ -2075,7 +2075,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       dataStr.Append(quantity);
 
       // book hist with extra bin
-      TH1D* dataHist = new TH1D(dataStr, dataStr, nfinebins+2, finebins2); 
+      TH1D* dataHist = new TH1D(dataStr, dataStr, nfinebins+2, finebins2);
 
       TH1* oldHist = hists[0]->Rebin(nfinebins, "oldHist", finebins);
 
@@ -2083,9 +2083,9 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       for(Int_t i=0; i<=nfinebins+1; ++i){
 	if(oldHist->GetBinContent(i)>0.)
           dataHist->SetBinContent(i+1, oldHist->GetBinContent(i));
-	else      
-          dataHist->SetBinContent(i+1, 0.); // remove bins where content is negative after BG subtraction      
-      }  
+	else
+          dataHist->SetBinContent(i+1, 0.); // remove bins where content is negative after BG subtraction
+      }
 
       // book new rebinned 2-dimensional hist
       TString mcStr(channelName[channel]);
@@ -2097,7 +2097,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       // 2D MC HIST
       TH2D* mcHist = new TH2D(mcStr, mcStr, nfinebins+2, finebins2, nbins, bins);
       
-      // fill main entries (swapped axes)   
+      // fill main entries (swapped axes)
       for(Int_t j=1; j<=mcHist->GetNbinsY()+1; ++j){
 	for(Int_t i=1; i<=mcHist->GetNbinsX(); ++i){
           Int_t x1 = genRec2DHist->GetYaxis()->FindBin(finebins2[i-1]);
@@ -2120,7 +2120,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       }
 
       // calculate and fill non-reconstructed events
-      for(Int_t j=1; j<=mcHist->GetNbinsY(); ++j){            
+      for(Int_t j=1; j<=mcHist->GetNbinsY(); ++j){
 	// underflow
 	Int_t x1 = genHist->GetXaxis()->FindBin(bins[j-1]);
 	Int_t x2 = genHist->GetXaxis()->FindBin(bins[j])-1;
@@ -2134,24 +2134,24 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
 
 	Double_t nnonrec = ngen0 - ngen1;
 
-	mcHist->SetBinContent(0, j, nnonrec);     		     	 
+	mcHist->SetBinContent(0, j, nnonrec);
       }
       
-//       cout << "UNFOLDING: " << particle << quantity << endl; 
-// 
+//       cout << "UNFOLDING: " << particle << quantity << endl;
+//
 //       // check finebins
 //       cout << "Old" << endl;
 //       for(Int_t i=0; i<=oldHist->GetNbinsX()+1; ++i){
 //         cout << oldHist->GetBinContent(i) << endl;;
-//       }        
+//       }
 //       cout << endl;
 //       cout << "New" << endl;
 //       for(Int_t i=0; i<=dataHist->GetNbinsX()+1; ++i){
 //         cout << dataHist->GetBinContent(i) << endl;;
-//       }    
+//       }
 //       cout << endl;
-// 
-// 
+//
+//
 //       // check hist
 //       for(Int_t j=mcHist->GetNbinsY()+1; j>=0; --j){
 //         for(Int_t i=0; i<=mcHist->GetNbinsX()+1; ++i){
@@ -2164,14 +2164,14 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
 
 
       unfoldHistogramList.Add(dataHist);
-      unfoldHistogramList.Add(mcHist);                  
+      unfoldHistogramList.Add(mcHist);
     }else{
       // book new hist with additional bin for overflow
       // calculate bins
       Double_t widthExtraBin = finebins[nfinebins]-finebins[nfinebins-1];
       Double_t finebins2[nfinebins+2];
       for(Int_t i=0; i<=nfinebins; ++i){
-	finebins2[i]=finebins[i];   
+	finebins2[i]=finebins[i];
       }
       finebins2[nfinebins+1] = finebins[nfinebins]+widthExtraBin;
 
@@ -2183,7 +2183,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       dataStr.Append(quantity);
 
       // book hist with extra bin
-      TH1D* dataHist = new TH1D(dataStr, dataStr, nfinebins+1, finebins2); 
+      TH1D* dataHist = new TH1D(dataStr, dataStr, nfinebins+1, finebins2);
 
       TH1* oldHist = hists[0]->Rebin(nfinebins, "oldHist", finebins);
 
@@ -2191,9 +2191,9 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       for(Int_t i=0; i<=nfinebins; ++i){
 	if(oldHist->GetBinContent(i+1)>0.)
           dataHist->SetBinContent(i+1, oldHist->GetBinContent(i+1));
-	else      
-          dataHist->SetBinContent(i+1, 0.); // remove bins where content is negative after BG subtraction      
-      }  
+	else
+          dataHist->SetBinContent(i+1, 0.); // remove bins where content is negative after BG subtraction
+      }
 
       // book new rebinned 2-dimensional hist
       TString mcStr(channelName[channel]);
@@ -2205,7 +2205,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
       // 2D MC HIST
       TH2D* mcHist = new TH2D(mcStr, mcStr, nfinebins+1, finebins2, nbins, bins);
 
-      // fill main entries (swapped axes)   
+      // fill main entries (swapped axes)
       for(Int_t j=1; j<=mcHist->GetNbinsY()+1; ++j){
 	for(Int_t i=1; i<=mcHist->GetNbinsX(); ++i){
           Int_t x1 = genRec2DHist->GetYaxis()->FindBin(finebins2[i-1]);
@@ -2213,18 +2213,18 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
 	  if(i==mcHist->GetNbinsX())
 	    x2 = genRec2DHist->GetNbinsY()+1;
 
-          Int_t y1 = genRec2DHist->GetXaxis()->FindBin(bins[j-1]);   
+          Int_t y1 = genRec2DHist->GetXaxis()->FindBin(bins[j-1]);
           Int_t y2 = genRec2DHist->GetXaxis()->FindBin(bins[j]-1);
 	  if(j==mcHist->GetNbinsY()+1)
 	    y2 = genRec2DHist->GetNbinsX()+1;
 
 	  Double_t n = ((TH2D*)genRec2DHist)->Integral(y1, y2, x1, x2);
-          mcHist->SetBinContent(i, j, n);	
+          mcHist->SetBinContent(i, j, n);
 	}
       }
 
       // calculate and fill non-reconstructed events
-      for(Int_t j=1; j<=mcHist->GetNbinsY(); ++j){            
+      for(Int_t j=1; j<=mcHist->GetNbinsY(); ++j){
 	// underflow
 	Int_t x1 = genHist->GetXaxis()->FindBin(bins[j-1]);
 	Int_t x2 = genHist->GetXaxis()->FindBin(bins[j])-1;
@@ -2238,24 +2238,24 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
 
 	Double_t nnonrec = ngen0 - ngen1;
 
-	mcHist->SetBinContent(0, j, nnonrec);     		     	 
+	mcHist->SetBinContent(0, j, nnonrec);
       }
       
-//       cout << "UNFOLDING: " << particle << quantity << endl; 
-// 
+//       cout << "UNFOLDING: " << particle << quantity << endl;
+//
 //       // check finebins
 //       cout << "Old" << endl;
 //       for(Int_t i=0; i<=oldHist->GetNbinsX()+1; ++i){
 //         cout << oldHist->GetBinContent(i) << endl;;
-//       }        
+//       }
 //       cout << endl;
 //       cout << "New" << endl;
 //       for(Int_t i=0; i<=dataHist->GetNbinsX()+1; ++i){
 //         cout << dataHist->GetBinContent(i) << endl;;
-//       }    
+//       }
 //       cout << endl;
-// 
-// 
+//
+//
 //       // check hist
 //       for(Int_t j=mcHist->GetNbinsY()+1; j>=0; --j){
 //         for(Int_t i=0; i<=mcHist->GetNbinsX()+1; ++i){
@@ -2268,7 +2268,7 @@ void SaveUnfoldingHists(const char* particle, const char* quantity, Int_t channe
 
 
       unfoldHistogramList.Add(dataHist);
-      unfoldHistogramList.Add(mcHist);  
+      unfoldHistogramList.Add(mcHist);
     }
 
 }
@@ -2307,12 +2307,12 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
         selModule = "analyzeJets8/";
 	btagSF = btagSFMap["TCHEL"];
 	zMuCorr = zMuNorm8;
-	zElCorr = zElNorm8;		
+	zElCorr = zElNorm8;
     } else if (strcmp(selection,"KINTCHEL")==0) {
         selModule = "analyzeJets9/";
 	btagSF = btagSFMap["TCHEL"];
 	zMuCorr = zMuNorm9;
-	zElCorr = zElNorm9;		
+	zElCorr = zElNorm9;
     } else {
         cout << "ERROR in Calculate Cross Section: unknown selection specified: " << selection << endl;
     }
@@ -2633,9 +2633,9 @@ void CalculateInclusiveCrossSections(const char* selection){
    Double_t mstweyh[] = {    23.2,    23.2,    23.2,	23.2,	 23.2,    23.2};
 
    TGraphAsymmErrors *mstwplot = new TGraphAsymmErrors(6, mstwx, mstwy, mstwexl, mstwexh, mstweyl, mstweyh);
-   mstwplot->SetLineColor(kGreen+1);   
-   mstwplot->SetLineWidth(4);   
-   mstwplot->SetFillColor(kGreen+1);   
+   mstwplot->SetLineColor(kGreen+1);
+   mstwplot->SetLineWidth(4);
+   mstwplot->SetFillColor(kGreen+1);
    mstwplot->SetFillStyle(3004);
 
    // herapdf
@@ -2648,8 +2648,8 @@ void CalculateInclusiveCrossSections(const char* selection){
    Double_t herapdfeyh[] = {   5.475,	5.475,   5.475,   5.475,   5.475,   5.475};
 
    TGraphAsymmErrors *herapdfplot = new TGraphAsymmErrors(6, herapdfx, herapdfy, herapdfexl, herapdfexh, herapdfeyl, herapdfeyh);
-   herapdfplot->SetLineColor(kBlue+1);   
-   herapdfplot->SetLineWidth(4);    
+   herapdfplot->SetLineColor(kBlue+1);
+   herapdfplot->SetLineWidth(4);
    herapdfplot->SetFillColor(kBlue+1);
    herapdfplot->SetFillStyle(3005);
 
@@ -2713,16 +2713,16 @@ void CalculateInclusiveCrossSections(const char* selection){
 
 
 // plot differential cross section with yield plot, purity-stability-efficiency plot and gen-reco correlation for signal
-void PlotDifferentialCrossSection(const char* particle, const char* quantity, Int_t channel, const char* xtitle, const char* ytitle, 
-                                  const Double_t bins[], const Int_t nbins, Double_t crosss[], Double_t statErr[], Double_t totalErrUp[], 
+void PlotDifferentialCrossSection(const char* particle, const char* quantity, Int_t channel, const char* xtitle, const char* ytitle,
+                                  const Double_t bins[], const Int_t nbins, Double_t crosss[], Double_t statErr[], Double_t totalErrUp[],
 				  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPrefix=0) {
     
-    TString plotStr("");    
+    TString plotStr("");
     TH1* hists[Nfiles];  // histograms needed for event yields and bg sustraction
     TH1* genHist;	 // genHist needed to calculate the efficiencies
     TH1* genHistSmear = 0;   // for pseudo data
     TH1* genRec2DHist;   // reconstructed vs generated signal properties. needed  for correlation and pse plot
-    TString genTopEvent("analyzeVisibleGenTopEvent/");    
+    TString genTopEvent("analyzeVisibleGenTopEvent/");
     
     if(useKinFit) {
 
@@ -2749,7 +2749,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
-            AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);	    
+            AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
             if(dataIsFakeFromMonteCarlo)
                 GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
 	} else if (channel==kEE) {
@@ -2800,7 +2800,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
 
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);	    
+        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
             } else if (channel==kEM) {
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
 
@@ -2838,12 +2838,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
             }
-	}           
+	}
     } else { // no use of kin reconstruction
  
 	if(strcmp(particle,"LepPair")!=0 && strcmp(particle,"Leptons")!=0){
 	    cout << "ERROR in PlotDifferentialCrossSectionNoKinFit: " << particle << " not available without kinematic reconstruction!" << endl;
-	    return;   
+	    return;
 	}
 
 	// get gen histograms
@@ -2884,7 +2884,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
             if (channel==kMM) {
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);	    
+        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
             } else if (channel==kEM) {
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
@@ -2901,7 +2901,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             }
 	}
 
-	// get reco histograms   
+	// get reco histograms
 	if(strcmp(particle,"Leptons")==0){
 	
             if (strcmp(quantity,"Pt")==0)
@@ -2922,15 +2922,15 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         	GetCloneHistArray("analyzeElecs8/", plotStr, kEE, hists);
         	AddHistArray(     "analyzeElecs8/", plotStr, kEM, hists);
         	AddHistArray(     "analyzeMuons8/", plotStr, kEM, hists);
-        	AddHistArray(     "analyzeMuons8/", plotStr, kMM, hists);	
-	    } 
+        	AddHistArray(     "analyzeMuons8/", plotStr, kMM, hists);
+	    }
 	} else{  // if lepton pair
 	    if (strcmp(quantity,"Mass")==0)
         	plotStr = "DiLeptonMass";
 	    else if(strcmp(quantity,"Pt")==0)
         	plotStr = "DiLeptonPt";
 	    else
-	        cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;			
+	        cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;
 		
 	    if (channel==kMM) {
         	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM, hists);
@@ -2941,9 +2941,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 	    } else if (channel==kCOMBINED) {
         	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM,  hists);
         	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEM,  hists);
-        	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEE,  hists);	
-	    } 
-	}    
+        	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEE,  hists);
+	    }
+	}
     }
 
     // rebin hitograms to anlalysis binning
@@ -2953,13 +2953,13 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     }
     TH1* bingenhist = genHist->Rebin(nbins,"",bins);
 
-    // calculate efficiency binwise from signal MC    
-    Double_t efficiencies[nbins];        
+    // calculate efficiency binwise from signal MC
+    Double_t efficiencies[nbins];
     for (Int_t i=0; i<nbins; ++i) {
         efficiencies[i] = (binhists[1]->GetBinContent(i+1)+binhists[2]->GetBinContent(i+1)) / bingenhist->GetBinContent(i+1);
-    }    
+    }
     
-    // weight samples inclusing DY correction   
+    // weight samples inclusing DY correction
     Double_t zElCorr = 1.;
     Double_t zMuCorr = 1.;
     Double_t zCorr   = 1.;
@@ -3017,14 +3017,14 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     FillLegend(leg, mergedhists, zCorr);
 
     TString title(channelName[channel]);
-    title.Append("_");  
+    title.Append("_");
     if(useKinFit)
         title.Append("FixedMt_Btag_Yield_");
     else
-        title.Append("NoFit_Yield_");    
+        title.Append("NoFit_Yield_");
     title.Append(particle);
     title.Append("_");
-    title.Append(quantity);   
+    title.Append(quantity);
 
     THStack* hstack = new THStack("hstack",title);
     for (size_t i=1; i<Nplots; ++i) {
@@ -3042,10 +3042,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     hstack->GetXaxis()->SetTitle(xtitle);
     hstack->GetYaxis()->SetTitle("N_{evts}");
 
-    // style data        
+    // style data
     mergedhists[kDATA]->SetMarkerStyle(20);
     mergedhists[kDATA]->SetMarkerSize(1.5);
-    mergedhists[kDATA]->SetLineWidth(2);   
+    mergedhists[kDATA]->SetLineWidth(2);
     if (dataIsFakeFromMonteCarlo && channel == kEM) {
         //we are using pseudo data and must apply a global weight
         TH1 *modelWeightSum;
@@ -3069,7 +3069,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     mergedhists[kSIG]->SetName(title.Copy().Append("_signalMC"));
     mergedhists[kSIG]->GetXaxis()->SetTitle(xtitle);
     mergedhists[kSIG]->GetYaxis()->SetTitle("N_{evts}");
-    kinEffHistogramList.Add(mergedhists[kSIG]->Clone());    
+    kinEffHistogramList.Add(mergedhists[kSIG]->Clone());
 
     // histogram for measured cross section
     TH1* crossHist = (TH1*)binhists[0]->Clone();
@@ -3103,7 +3103,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             crossHist->SetBinError(i, 0);
         } else {
             crossHist->SetBinContent(i,(binhists[0]->GetBinContent(i)-bgsum)/efficiencies[i-1]/lumi/binw);
-            crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error	    
+            crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error
         }
         // set generated cross section
         genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
@@ -3120,7 +3120,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       if(useKinFit)
         visCrossSections[channel] = crossHist->Integral("width");
       else
-        visCrossSectionsNoFit[channel] = crossHist->Integral("width");                  
+        visCrossSectionsNoFit[channel] = crossHist->Integral("width");
     }
     cout << "visible cross section (" << channelName[channel] << ") : " << crossHist->Integral("width") << endl;
 
@@ -3134,7 +3134,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     if(useKinFit)
         title.Append("_FixedMt_Btag_Cross_");
     else
-        title.Append("_NoFit_Cross_");      
+        title.Append("_NoFit_Cross_");
     title.Append(particle);
     title.Append("_");
     title.Append(quantity);
@@ -3156,28 +3156,28 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     //two entries
     if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0){
-      gh      ->Scale(0.5); 
-      mcatnloh->Scale(0.5);      
-      powhegh ->Scale(0.5);      
+      gh      ->Scale(0.5);
+      mcatnloh->Scale(0.5);
+      powhegh ->Scale(0.5);
     }
     
-    if (normaliseToUnitArea) {    
+    if (normaliseToUnitArea) {
       Double_t scale_data = 1./visCrossSections[channel];
       if(!useKinFit)
           scale_data = 1./visCrossSectionsNoFit[channel];
-      crossHist->Scale(scale_data); 
+      crossHist->Scale(scale_data);
     	
-      Double_t scale_gen1 = 1./gh->Integral("width"); // use fine-binned gh since genCrossHist does 
+      Double_t scale_gen1 = 1./gh->Integral("width"); // use fine-binned gh since genCrossHist does
       genCrossHist->Scale(scale_gen1);                // not cover the range of the whole visible phase space
 
-      Double_t scale_gen2 = 1./gh->Integral("width");      
+      Double_t scale_gen2 = 1./gh->Integral("width");
       gh->Scale(scale_gen2);
   
       Double_t scale_mcatnlo = 1./mcatnloh->Integral("width");
       mcatnloh->Scale(scale_mcatnlo);
        
       Double_t scale_powheg = 1./powhegh->Integral("width");
-      powhegh->Scale(scale_powheg);              
+      powhegh->Scale(scale_powheg);
       
       if (genHistSmear) {
         genHistSmear->Sumw2();
@@ -3194,7 +3194,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     //  store Cross Section histograms
     crossHist->SetName(title);
     crossHist->GetXaxis()->SetTitle(xtitle);
-    crossHist->GetYaxis()->SetTitle(ytitle);    
+    crossHist->GetYaxis()->SetTitle(ytitle);
 
     TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, gh, binCenters);
     
@@ -3210,32 +3210,32 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       FormatHisto(genCrossHist);
       genCrossHist->Draw();
       
-//       cout << endl;      
-//       for(Int_t i=1; i<=genCrossHist->GetNbinsX(); ++i){	
+//       cout << endl;
+//       for(Int_t i=1; i<=genCrossHist->GetNbinsX(); ++i){
 // 	cout << "cross section in bin is " << genCrossHist->GetBinContent(i) << endl;
-//       } 
-//       cout << endl;      
+//       }
+//       cout << endl;
 
       // for pt and mass distribution use log scale
       if (!strcmp(quantity, "Mass")) {
-        genCrossHist->SetMaximum(2e-2);   
+        genCrossHist->SetMaximum(2e-2);
         genCrossHist->SetMinimum(1e-4);
         gPad->SetLogy(1);
       } else
       if(strcmp(quantity,"Pt")==0) {
-        genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));   
+        genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));
         genCrossHist->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
         gPad->SetLogy(1);
       } else{
-        genCrossHist->SetMaximum(std::max(1.2*gh->GetMaximum(), 1.2*grLmts[3]));      
-        genCrossHist->SetMinimum(0);            
+        genCrossHist->SetMaximum(std::max(1.2*gh->GetMaximum(), 1.2*grLmts[3]));
+        genCrossHist->SetMinimum(0);
       }
 
       Int_t nrebin = 4.;
       if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
 	nrebin=4;
 	mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
-      }  
+      }
       else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0)
 	nrebin=8;
 
@@ -3262,7 +3262,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       leg2.AddEntry(bccCrossGraph, "Data",    "p");
       leg2.AddEntry(gh,            "Madgraph","l");
       if (mcatnloh->GetEntries()) leg2.AddEntry(mcatnloh,      "MC@NLO",  "l");
-      if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");        
+      if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");
       leg2.SetFillStyle(0);
       leg2.SetBorderSize(0);
       leg2.Draw("same");
@@ -3298,17 +3298,17 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 //            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
 //            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
 //            << "\t\\\\" << std::endl;
-//        } 
+//        }
 
       diffXsecHistogramList.Add(crossHist->Clone());
 
-      // fill values for cross section and errors that are then used by PlotDifferentialCrossSection in order to calculate the combined cross section value           
-      for(Int_t i=0; i<nbins; ++i){    
+      // fill values for cross section and errors that are then used by PlotDifferentialCrossSection in order to calculate the combined cross section value
+      for(Int_t i=0; i<nbins; ++i){
 	crosss[i]       = (withSys->GetY())[i];
 	totalErrUp[i]   = (withSys->GetEYhigh())[i];
-	totalErrDown[i] = (withSys->GetEYlow())[i];    
+	totalErrDown[i] = (withSys->GetEYlow())[i];
 	statErr[i] = (bccCrossGraph->GetEYlow())[i];
-      } 
+      }
       
         if (channel == kEM && dataIsFakeFromMonteCarlo && genHistSmear) {
             //write out a table of numbers
@@ -3333,7 +3333,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     
     if(!useKinFit){ // for cross sections without kinematic reconstruction the 2d histogram is not available -> stop here
        delete Canvas;
-       return; 
+       return;
     }
     
     
@@ -3469,7 +3469,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     recBinHist->SetMaximum(1.);
     FormatHisto(recBinHist);
     
-    grE->Draw("P,SAME");       
+    grE->Draw("P,SAME");
     grP->Draw("P,SAME");
     grS->Draw("P,SAME");
 
@@ -3500,7 +3500,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
 
     efficiency->SetName(title);
-    efficiency->GetXaxis()->SetTitle(xtitle);    
+    efficiency->GetXaxis()->SetTitle(xtitle);
     diffXsecHistogramList.Add(efficiency->Clone());
 
     delete grE;
@@ -3514,7 +3514,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
 
 // plot differential cross section in all channels and combine them
-void PlotDifferentialCrossSections(const char* particle, const char* quantity, const char* xtitle, const char* ytitle, 
+void PlotDifferentialCrossSections(const char* particle, const char* quantity, const char* xtitle, const char* ytitle,
                                    const Double_t bins[], const Int_t nbins, const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPrefix=0) {
 
     Double_t crosssMM[nbins];
@@ -3535,7 +3535,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Double_t crosssCombined[nbins];
     Double_t statErrCombined[nbins];
     Double_t totalErrUpCombined[nbins];
-    Double_t totalErrDownCombined[nbins];  
+    Double_t totalErrDownCombined[nbins];
    
     PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPrefix);
     PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPrefix);
@@ -3546,12 +3546,12 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     if(useKinFit)
         title.Append("FixedMt_Btag_Cross_");
     else
-        title.Append("NoFit_Cross_");    
+        title.Append("NoFit_Cross_");
     title.Append(particle);
     title.Append("_");
-    title.Append(quantity);   
+    title.Append(quantity);
     
-    TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);     
+    TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
    
     TH1D* crossHist = new TH1D(title, title, nbins, bins);
     for(Int_t i=0;i<nbins;++i){
@@ -3559,8 +3559,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 //       statErrCombined[i] += statErrMM[i]*statErrMM[i];
 //       statErrCombined[i] += statErrEM[i]*statErrEM[i];
 //       statErrCombined[i] += statErrEE[i]*statErrEE[i];
-//       statErrCombined[i] = TMath::Sqrt(statErrCombined[i]);   
-// 
+//       statErrCombined[i] = TMath::Sqrt(statErrCombined[i]);
+//
 //       crosssCombined[i] = crosssMM[i]+crosssEM[i]+crosssEE[i];
 
       // FIXME: Here the AVERAGE of the three cross sections is calculated but it should be the sum.
@@ -3569,24 +3569,24 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       statErrCombined[i] = 0.;
       if(statErrMM[i]>0.)
         statErrCombined[i] += 1./statErrMM[i]/statErrMM[i];
-      if(statErrEM[i]>0.)	
-        statErrCombined[i] += 1./statErrEM[i]/statErrEM[i]; 
-      if(statErrEE[i]>0.)          
+      if(statErrEM[i]>0.)
+        statErrCombined[i] += 1./statErrEM[i]/statErrEM[i];
+      if(statErrEE[i]>0.)
         statErrCombined[i] += 1./statErrEE[i]/statErrEE[i];
 
-      crosssCombined[i] = 0.;      
+      crosssCombined[i] = 0.;
       if(statErrMM[i]>0.)
         crosssCombined[i] += crosssMM[i]/statErrMM[i]/statErrMM[i];
-      if(statErrEM[i]>0.)	
+      if(statErrEM[i]>0.)
         crosssCombined[i] += crosssEM[i]/statErrEM[i]/statErrEM[i];
-      if(statErrEE[i]>0.)          
-        crosssCombined[i] += crosssEE[i]/statErrEE[i]/statErrEE[i];      
+      if(statErrEE[i]>0.)
+        crosssCombined[i] += crosssEE[i]/statErrEE[i]/statErrEE[i];
       crosssCombined[i] /= statErrCombined[i];
 
-      statErrCombined[i] = 1./TMath::Sqrt(statErrCombined[i]); 
+      statErrCombined[i] = 1./TMath::Sqrt(statErrCombined[i]);
       
       crossHist->SetBinContent(i+1, crosssCombined[i]);
-      crossHist->SetBinError(i+1, statErrCombined[i]);         
+      crossHist->SetBinError(i+1, statErrCombined[i]);
     }
 
     // store the visible cross section for normalisation
@@ -3596,8 +3596,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
         cout << "visible cross section combined = " << visCrossSections[kCOMBINED] << endl;
       } else {
         visCrossSectionsNoFit[kCOMBINED] = crossHist->Integral("width");
-        cout << "visible cross section combined = " << visCrossSectionsNoFit[kCOMBINED] << endl;      
-      }     
+        cout << "visible cross section combined = " << visCrossSectionsNoFit[kCOMBINED] << endl;
+      }
     }
     
     // get histograms for madgraph gen curve
@@ -3662,39 +3662,39 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     mcatnloh->Rebin(10); mcatnloh->Scale(0.1);
    
     TH1* powhegh  = GetNloCurve(particle, quantity, "Powheg");
-    powhegh->Scale(branchingFraction[kCOMBINED]);    
+    powhegh->Scale(branchingFraction[kCOMBINED]);
     //powhegh->Rebin(2); powhegh->Scale(0.5);
 
     //two entries
     if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0){
       //genHist ->Scale(0.5);
-      //genHistBinned ->Scale(0.5); 
-      mcatnloh->Scale(0.5);      
-      powhegh ->Scale(0.5);      
+      //genHistBinned ->Scale(0.5);
+      mcatnloh->Scale(0.5);
+      powhegh ->Scale(0.5);
     }
     
-    if (normaliseToUnitArea) {	    
+    if (normaliseToUnitArea) {
       Double_t scale_data = 1./visCrossSections[kCOMBINED];
       if(!useKinFit)
           scale_data = 1./visCrossSectionsNoFit[kCOMBINED];
-      crossHist->Scale(scale_data);    
+      crossHist->Scale(scale_data);
     	
       //Double_t scale_gen1 = 1./genHist->Integral("width");
       genHist->Scale(1./visCrossGen);
 
-      //Double_t scale_gen2 = 1./genHist->Integral("width"); 
+      //Double_t scale_gen2 = 1./genHist->Integral("width");
       genHistBinned->Scale(1./visCrossGen);
   
       Double_t scale_mcatnlo = 1./mcatnloh->Integral("width");
       mcatnloh->Scale(scale_mcatnlo);
        
       Double_t scale_powheg = 1./powhegh->Integral("width");;
-      powhegh->Scale(scale_powheg);   
+      powhegh->Scale(scale_powheg);
     }
 
     TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, genHist, binCenters);
     Double_t grLmts[4];
-    bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);    
+    bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);
 
     genHistBinned->GetXaxis()->SetTitle(xtitle);
     genHistBinned->GetYaxis()->SetTitle(ytitle);
@@ -3705,12 +3705,12 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     // for pt and mass distribution use log scale
     if(strcmp(quantity,"Pt")==0 || strcmp(quantity,"Mass")==0){
-      genHistBinned->SetMaximum(std::max(3.*genHist->GetMaximum(), 3.*grLmts[3]));   
+      genHistBinned->SetMaximum(std::max(3.*genHist->GetMaximum(), 3.*grLmts[3]));
       genHistBinned->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
       gPad->SetLogy(1);
     } else{
       genHistBinned->SetMaximum(std::max(1.2*genHist->GetMaximum(), 1.2*grLmts[3]));
-      genHistBinned->SetMinimum(0);    
+      genHistBinned->SetMinimum(0);
     }
 
     Int_t nrebin = 2.;
@@ -3719,7 +3719,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
     } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0){
       nrebin=8;
-    } 
+    }
      
     genHist->SetLineColor(kRed+1);
     genHist->SetLineWidth(4);
@@ -3732,7 +3732,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     
     powhegh->SetLineColor(kGreen+1);
     powhegh->SetLineWidth(2);
-    if (powhegh->GetEntries()) powhegh->Draw("same,C");  
+    if (powhegh->GetEntries()) powhegh->Draw("same,C");
 
     TGraphAsymmErrors* withSys = CloneAddSystematics(bccCrossGraph, title);
     withSys->SetLineWidth(2);
@@ -3749,7 +3749,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     leg.AddEntry(bccCrossGraph, "Data",    "p");
     leg.AddEntry(genHist,       "Madgraph","l");
     if (mcatnloh->GetEntries()) leg.AddEntry(mcatnloh,      "MC@NLO",  "l");
-    if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "Powheg",  "l");        
+    if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "Powheg",  "l");
     leg.SetFillStyle(0);
     leg.SetBorderSize(0);
     leg.Draw("same");
@@ -3760,7 +3760,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Canvas->Print(outpath.Copy().Append("combined/").Append(specialPrefix).Append(title).Append(outform));
 
     crossHist->GetXaxis()->SetTitle(xtitle);
-    crossHist->GetYaxis()->SetTitle(ytitle);        
+    crossHist->GetYaxis()->SetTitle(ytitle);
     diffXsecHistogramList.Add(crossHist->Clone());
         
     // print summary table for combined cross section
@@ -3777,15 +3777,15 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
          << 100*withSys->GetErrorYhigh(bin)/y << "\t"
          //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
          << "\t\\\\" << std::endl;
-     }   
+     }
         
     delete crossHist;
-    delete bccCrossGraph;    
-    delete withSys;        
-    delete genHist;        
+    delete bccCrossGraph;
+    delete withSys;
+    delete genHist;
     delete genHistBinned;
     
-    gPad->SetLogy(0);    
+    gPad->SetLogy(0);
 }
 
 
@@ -3801,16 +3801,16 @@ void SetROutIn(const Int_t channel, const Int_t step)
     if (step!=7 && step!=8 && step!=9) {
         cout << "ERROR in rOutIn: selected step is out of range!" << endl;
         return;
-    } 
+    }
 
     TString moduleOutStr("analyzeLeptonPair");
     TString moduleInStr("analyzeLeptonPairZvetoRegion");
 
-    char step_c[2]; 
+    char step_c[2];
     sprintf(step_c,"%d",step);
 
     moduleOutStr.Append(step_c);
-    moduleInStr.Append(step_c);     
+    moduleInStr.Append(step_c);
     
     TString plotStr("DimassRC_");
 
@@ -3909,7 +3909,7 @@ void SetROutIn(const Int_t channel, const Int_t step)
     } else if (channel==kMM) {
         ROutInMM      = outDY/inDY;
         ROutInMMError = errDY;
-    }     
+    }
     return;
 }
 
@@ -3948,19 +3948,19 @@ void SetDYScaleFactor(const Int_t channel, const Int_t step)
     if (step!=7 && step!=8 && step!=9) {
         cout << "ERROR in SetDYScaleFactor: selected step is out of range!" << endl;
         return;
-    }    
+    }
 
     TString moduleInStr("analyzeLeptonPairZvetoRegion");
     TString moduleOutStr("analyzeLeptonPair");
     
-    char step_c[2]; 
+    char step_c[2];
     sprintf(step_c,"%d",step);
 
     moduleInStr.Append(step_c);
-    moduleOutStr.Append(step_c); 
+    moduleOutStr.Append(step_c);
     
     moduleInStr.Append("/");
-    moduleOutStr.Append("/");     
+    moduleOutStr.Append("/");
        
     TString plotStr("DimassRC_MM");
 
@@ -4013,7 +4013,7 @@ void SetDYScaleFactor(const Int_t channel, const Int_t step)
         if (nevts[i-idx]>0)
             NOutMCError += hists[i]->Integral()*hists[i]->Integral()/nevts[i-idx];
     }
-    NOutMCError = TMath::Sqrt(NOutMCError);  
+    NOutMCError = TMath::Sqrt(NOutMCError);
 
     if (channel==kMM) {
         if(step==7)
@@ -4021,7 +4021,7 @@ void SetDYScaleFactor(const Int_t channel, const Int_t step)
 	else if(step==8)
 	  zMuNorm8 = NOut/NOutMC;
 	else if(step==9)
-	  zMuNorm9 = NOut/NOutMC;	  
+	  zMuNorm9 = NOut/NOutMC;
         Double_t SFError = TMath::Sqrt((NOutError/NOutMC)*(NOutError/NOutMC)+(NOut*NOutError/NOutMC/NOutMC)*(NOut*NOutMCError/NOutMC/NOutMC));
         cout << "            SF(mumu) : " << NOut/NOutMC << " +- " << SFError << endl << endl;
     }
@@ -4308,7 +4308,7 @@ Double_t IncompleteSampleScale(Channel_t ch, Int_t fileNo){//, int nEvents) {
 void PlotKinFitEfficiencyInGeneratorBins(const char* particle, const char* quantity, Int_t channel, const char* xtitle, const Double_t bins[], const Int_t nbins) {
 
     TString moduleStr("analyzeGenTopEvent");
-    TString plotStr("gen_");        
+    TString plotStr("gen_");
     if (strcmp(particle,"Leptons")==0) {
         plotStr.Append("Lep");
     } else if (strcmp(particle,"Jets")==0) {
@@ -4324,32 +4324,32 @@ void PlotKinFitEfficiencyInGeneratorBins(const char* particle, const char* quant
     TH1* hist2; // after kin solution
     if (channel==kMM) {
         GetCloneHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 1, hist1);
-        AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 2, hist1);		
+        AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 2, hist1);
         GetCloneHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 1, hist2);
-        AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 2, hist2);		
+        AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 2, hist2);
     } else if (channel==kEM) {
         GetCloneHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 1, hist1);
-        AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 2, hist1);		
+        AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 2, hist1);
         GetCloneHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 1, hist2);
-        AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 2, hist2);	
+        AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 2, hist2);
     } else if (channel==kEE) {
         GetCloneHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 1, hist1);
-        AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);		
+        AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);
         GetCloneHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 1, hist2);
-        AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);	
+        AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);
     } else if (channel==kCOMBINED) {
         GetCloneHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 1, hist1);
         AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 1, hist1);
         AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 1, hist1);
         AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 2, hist1);
         AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 2, hist1);
-        AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);		
+        AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);
         GetCloneHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 1, hist2);
         AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 1, hist2);
         AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 1, hist2);
         AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 2, hist2);
         AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 2, hist2);
-        AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);	   		
+        AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);
     } else {
         cout << "ERROR in PlotDifferentialCrossSection: index " << channel << " for channel is out of range!" << endl;
         return;
@@ -4370,38 +4370,38 @@ void PlotKinFitEfficiencyInGeneratorBins(const char* particle, const char* quant
 
     	if (channel==kMM) {
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 1, hist1);
-    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 2, hist1);	    
+    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 2, hist1);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 1, hist2);
-    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 2, hist2);	    
+    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 2, hist2);
     	} else if (channel==kEM) {
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 1, hist1);
-    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 2, hist1);	    
+    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 2, hist1);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 1, hist2);
-    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 2, hist2);   
+    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 2, hist2);
     	} else if (channel==kEE) {
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 1, hist1);
-    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);	    
+    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 1, hist2);
-    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);   
+    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);
     	} else if (channel==kCOMBINED) {
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 1, hist1);
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 1, hist1);
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 1, hist1);
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kMM, 2, hist1);
     	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEM, 2, hist1);
-    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);	    
+    	    AddHist(moduleStr.Copy().Append("8/"), plotStr, kEE, 2, hist1);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 1, hist2);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 1, hist2);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 1, hist2);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kMM, 2, hist2);
     	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEM, 2, hist2);
-    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);		    
+    	    AddHist(moduleStr.Copy().Append("9/"), plotStr, kEE, 2, hist2);
     	}
     }
     
     // rebin histograms
     TH1* binned1 = hist1->Rebin(nbins, "binned1", bins);
-    TH1* binned2 = hist2->Rebin(nbins, "binned2", bins);    
+    TH1* binned2 = hist2->Rebin(nbins, "binned2", bins);
     
     TH1* effHist =  (TH1*)binned1->Clone();
     effHist->Reset();
@@ -4415,12 +4415,12 @@ void PlotKinFitEfficiencyInGeneratorBins(const char* particle, const char* quant
     }
 
     effHist->GetXaxis()->SetTitle(xtitle);
-    effHist->GetYaxis()->SetTitle("#epsilon_{kin}");    
+    effHist->GetYaxis()->SetTitle("#epsilon_{kin}");
                
     TString title("kinEfficiency_gen");
     title.Append(particle);
     title.Append(quantity);
-    effHist->SetName(title); 
+    effHist->SetName(title);
     kinEffHistogramList.Add(effHist);
       
     delete binned1;
@@ -4442,7 +4442,7 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
     plotStr.ToLower();
 
     TH1* hists1[Nfiles];  // histograms before
-    TH1* hists2[Nfiles];  // histograms after  
+    TH1* hists2[Nfiles];  // histograms after
     
     if (channel==kMM) {
     	GetCloneHistArray(moduleStr.Copy().Append("8/"), plotStr, kMM, hists1);
@@ -4468,7 +4468,7 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
     // if particle = Leptons then muons and electrons have to be summed
     if (strcmp(particle,"Leptons")==0) {
 
-        moduleStr = "analyzeElecs";	
+        moduleStr = "analyzeElecs";
 
         if (strcmp(particle,"Leptons")==0) {
             plotStr = "LepBar";
@@ -4526,9 +4526,9 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
       }
     }
 
-    SetWeights(hists1, zElCorr, zMuCorr);    
+    SetWeights(hists1, zElCorr, zMuCorr);
 
-    // set weights for histogram after kin reconstruction    
+    // set weights for histogram after kin reconstruction
     if (doDYcorrection) {
       zElCorr = zElNorm9;
       zMuCorr = zMuNorm9;
@@ -4552,7 +4552,7 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
       }
     }
 
-    SetWeights(hists2, zElCorr, zMuCorr);      
+    SetWeights(hists2, zElCorr, zMuCorr);
 
     // bg-subtracted data hists
     TH1* dataHist1 = hists1[0];
@@ -4560,65 +4560,65 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
     
     for(size_t i=3; i<Nfiles; ++i){
       dataHist1->Add(hists1[i],-1.);
-      dataHist2->Add(hists2[i],-1.);      
+      dataHist2->Add(hists2[i],-1.);
     }
     
     // signal MC hists
     TH1* signalHist1 = hists1[1];
     signalHist1->Add(hists1[2]);
     TH1* signalHist2 = hists2[1];
-    signalHist2->Add(hists2[2]);        
+    signalHist2->Add(hists2[2]);
           
     // rebin histograms
-    dataHist1 = dataHist1->Rebin(nbins, "dataHist1", bins);    
-    dataHist2 = dataHist2->Rebin(nbins, "dataHist2", bins);    
+    dataHist1 = dataHist1->Rebin(nbins, "dataHist1", bins);
+    dataHist2 = dataHist2->Rebin(nbins, "dataHist2", bins);
     signalHist1 = signalHist1->Rebin(nbins, "signalHist1", bins);
-    signalHist2 = signalHist2->Rebin(nbins, "signalHist2", bins);  
+    signalHist2 = signalHist2->Rebin(nbins, "signalHist2", bins);
      
     TH1* effDataHist =  (TH1*)dataHist1->Clone();
     effDataHist->Reset();
     
     TH1* effSignalHist =  (TH1*)signalHist1->Clone();
-    effSignalHist->Reset();    
+    effSignalHist->Reset();
             
     // don't trust the divide function
     for(Int_t i=1; i<=effDataHist->GetNbinsX(); ++i){
       Double_t content = dataHist2->GetBinContent(i)/dataHist1->GetBinContent(i);
-      Double_t error = BinomialError(dataHist2->GetBinContent(i), dataHist1->GetBinContent(i));      
+      Double_t error = BinomialError(dataHist2->GetBinContent(i), dataHist1->GetBinContent(i));
       effDataHist->SetBinContent(i,content);
       effDataHist->SetBinError(i,error);
       
       content = signalHist2->GetBinContent(i)/signalHist1->GetBinContent(i);
-      error = BinomialError(signalHist2->GetBinContent(i), signalHist1->GetBinContent(i));      
+      error = BinomialError(signalHist2->GetBinContent(i), signalHist1->GetBinContent(i));
       effSignalHist->SetBinContent(i,content);
-      effSignalHist->SetBinError(i,error);           
+      effSignalHist->SetBinError(i,error);
     }
 
     effDataHist->GetXaxis()->SetTitle(xtitle);
-    effDataHist->GetYaxis()->SetTitle("#epsilon_{kin}");   
+    effDataHist->GetYaxis()->SetTitle("#epsilon_{kin}");
 
     effSignalHist->GetXaxis()->SetTitle(xtitle);
-    effSignalHist->GetYaxis()->SetTitle("#epsilon_{kin}");    
+    effSignalHist->GetYaxis()->SetTitle("#epsilon_{kin}");
                
     TString title("kinEfficiency_data_");
     title.Append(particle);
     title.Append(quantity);
-    effDataHist->SetName(title);    
+    effDataHist->SetName(title);
      
     kinEffHistogramList.Add(effDataHist);
     
     title = "kinEfficiency_signal_";
     title.Append(particle);
     title.Append(quantity);
-    effSignalHist->SetName(title);     
+    effSignalHist->SetName(title);
 
     kinEffHistogramList.Add(effSignalHist);
 
     delete dataHist1;
-    delete dataHist2;    
+    delete dataHist2;
     delete signalHist1;
     delete signalHist2;
-    //delete effHist;    
+    //delete effHist;
 }
 
 
@@ -4670,15 +4670,15 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
         cout << endl;
 	
 	SetKEff();
-        SetROutIn(kMM,7);       
+        SetROutIn(kMM,7);
         SetDYScaleFactor(kMM,7);
-        SetROutIn(kEE,7); 	
+        SetROutIn(kEE,7);
         SetDYScaleFactor(kEE,7);
         cout << endl;
 		
-        SetROutIn(kMM,8);       
+        SetROutIn(kMM,8);
         SetDYScaleFactor(kMM,8);
-        SetROutIn(kEE,8); 	
+        SetROutIn(kEE,8);
         SetDYScaleFactor(kEE,8);
         cout << endl;
 		
@@ -4708,16 +4708,16 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsLepEta = 6;
     const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
     const Double_t binCenterLepEta[nbinsLepEta] = {bccAuto-.05, bccAuto-.05, bccAuto+.05, bccAuto+.05, bccAuto+.04, bccAuto+.03};
-    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta ); 
-    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE ); 
+    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta );
+    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     GetBtagEfficiencyInBins("TCHEL",  "Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     
     const Int_t nbinsLepPt = 5;
     const Double_t binsLepPt[nbinsLepPt+1] = {20, 40, 70, 120, 180, 400};
-    const Double_t binCenterLepPt[nbinsLepPt] = {bccAuto-2., bccAuto,  bccAuto+3.,  bccAuto+3., bccAuto};    
+    const Double_t binCenterLepPt[nbinsLepPt] = {bccAuto-2., bccAuto,  bccAuto+3.,  bccAuto+3., bccAuto};
     PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt );
-    PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE );    
+    PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Pt", kCOMBINED, "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
     GetBtagEfficiencyInBins("TCHEL",  "Leptons",  "Pt", "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
     
@@ -4732,16 +4732,16 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // lepton pair
     const Int_t nbinsLepPairPt = 7;
     const Double_t binsLepPairPt[nbinsLepPairPt+1] = {0, 10, 20, 40, 60, 100, 150, 400};
-    const Double_t binCenterLepPairPt[nbinsLepPairPt] = {bccAuto, bccAuto, bccAuto, bccAuto+2., bccAuto, bccAuto-2., bccAuto};    
+    const Double_t binCenterLepPairPt[nbinsLepPairPt] = {bccAuto, bccAuto, bccAuto, bccAuto+2., bccAuto, bccAuto-2., bccAuto};
     PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt );
-    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE ); 
+    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE );
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", binsLepPairPt, nbinsLepPairPt);
 
     const Int_t nbinsLepPairMass = 5;
     const Double_t binsLepPairMass[nbinsLepPairMass+1] = {12, 50, 76, 106, 200, 400};
-    const Double_t binCenterLepPairMass[nbinsLepPairMass] = {bccAuto-1., bccAuto, bccAuto+2., bccAuto+2., bccAuto};    
+    const Double_t binCenterLepPairMass[nbinsLepPairMass] = {bccAuto-1., bccAuto, bccAuto+2., bccAuto+2., bccAuto};
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass );
-    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );    
+    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
 
 
@@ -4752,7 +4752,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kFALSE, "Johannes1_");
         
     const Int_t nbinsLepPairMassJohannes2 = 4;
-    const Double_t binsLepPairMassJohannes2[nbinsLepPairMassJohannes2+1] = {60, 76, 106, 120, 400};        
+    const Double_t binsLepPairMassJohannes2[nbinsLepPairMassJohannes2+1] = {60, 76, 106, 120, 400};
     const Double_t binCenterMassJohannes2[nbinsLepPairMassJohannes2] = {bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kFALSE, "Johannes2_");
 
@@ -4762,11 +4762,11 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binsJetEta[nbinsJetEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
     const Double_t binCenterJetEta[nbinsJetEta] = {bccAuto, bccAuto-0.05, bccAuto+0.05, bccAuto+0.05, bccAuto+0.05, bccAuto};
     PlotDifferentialCrossSections("Jets", "Eta", "#eta^{b and #bar{b}}", "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{b and #bar{b}}} ", binsJetEta, nbinsJetEta, binCenterJetEta );
-    GetBtagEfficiencyInBins("TCHEL", "Jets", "Eta", "#eta_{b/#bar{b}}", binsJetEta, nbinsJetEta);   
+    GetBtagEfficiencyInBins("TCHEL", "Jets", "Eta", "#eta_{b/#bar{b}}", binsJetEta, nbinsJetEta);
     
     const Int_t nbinsJetPt = 5;
     const Double_t binsJetPt[nbinsJetPt+1] = {30, 50, 70, 120, 180, 400};
-    const Double_t binCenterJetPt[nbinsJetPt] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};    
+    const Double_t binCenterJetPt[nbinsJetPt] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("Jets", "Pt", "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{b and #bar{b}}} #left[(#frac{GeV}{c})^{-1}#right]", binsJetPt, nbinsJetPt, binCenterJetPt );
     GetBtagEfficiencyInBins("TCHEL",  "Jets", "Pt", "p_{T,l}", binsJetPt, nbinsJetPt);
 
@@ -4774,7 +4774,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // top
     const Int_t nbinsTopRapidity = 4;
     const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    const Double_t binCenterTopRapidity[nbinsTopRapidity] = {bccAuto, bccAuto, bccAuto, bccAuto-0.05};    
+    const Double_t binCenterTopRapidity[nbinsTopRapidity] = {bccAuto, bccAuto, bccAuto, bccAuto-0.05};
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("TCHEL",  "Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
@@ -4787,7 +4787,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     GetBtagEfficiencyInBins("TCHEL",  "Top", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
     
     const Int_t nfinebinsTopPt = 8;
-    const Double_t finebinsTopPt[nfinebinsTopPt+1] = {0, 40, 70, 100, 140, 180, 240, 300, 400};    
+    const Double_t finebinsTopPt[nfinebinsTopPt+1] = {0, 40, 70, 100, 140, 180, 240, 300, 400};
     SaveUnfoldingHists("TopQuarks", "Pt", kMM, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
     SaveUnfoldingHists("TopQuarks", "Pt", kEM, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
     SaveUnfoldingHists("TopQuarks", "Pt", kEE, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
@@ -4804,7 +4804,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
-    const Double_t binCenterTtBarPt[nbinsTtBarPt] = {bccAuto, bccAuto, bccAuto, bccAuto};    
+    const Double_t binCenterTtBarPt[nbinsTtBarPt] = {bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t#bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTtBarPt, nbinsTtBarPt, binCenterTtBarPt );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Pt", kCOMBINED, "generated p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
     GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
@@ -4823,7 +4823,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     SaveUnfoldingHists("TtBar", "Mass", kCOMBINED, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
 
     // Calculate inclusive cross sections
-    TGaxis::SetMaxDigits(3);    
+    TGaxis::SetMaxDigits(3);
     
     CalculateInclusiveCrossSections("DEFAULT");
     CalculateInclusiveCrossSections("TCHEL");
@@ -4832,33 +4832,33 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 
     // put some extra hists to output file
     PutHistToRootFile("analyzeElecs8", "pt", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeElecs8", "pt", kCOMBINED, kinEffHistogramList, kFALSE);    
+    PutHistToRootFile("analyzeElecs8", "pt", kCOMBINED, kinEffHistogramList, kFALSE);
     
     PutHistToRootFile("analyzeElecs8", "eta", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeElecs8", "eta", kCOMBINED, kinEffHistogramList, kFALSE); 
+    PutHistToRootFile("analyzeElecs8", "eta", kCOMBINED, kinEffHistogramList, kFALSE);
     
     PutHistToRootFile("analyzeMuons8", "pt", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeMuons8", "pt", kCOMBINED, kinEffHistogramList, kFALSE);    
+    PutHistToRootFile("analyzeMuons8", "pt", kCOMBINED, kinEffHistogramList, kFALSE);
     
     PutHistToRootFile("analyzeMuons8", "eta", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeMuons8", "eta", kCOMBINED, kinEffHistogramList, kFALSE);         
+    PutHistToRootFile("analyzeMuons8", "eta", kCOMBINED, kinEffHistogramList, kFALSE);
 
     PutHistToRootFile("analyzeLeptonPair8", "DimassRC_MM", kCOMBINED, kinEffHistogramList);
     PutHistToRootFile("analyzeLeptonPair8", "DimassRC_ME", kCOMBINED, kinEffHistogramList);
     PutHistToRootFile("analyzeLeptonPair8", "DimassRC_EE", kCOMBINED, kinEffHistogramList);
     PutHistToRootFile("analyzeLeptonPair8", "DimassRC_MM", kCOMBINED, kinEffHistogramList, kFALSE);
     PutHistToRootFile("analyzeLeptonPair8", "DimassRC_ME", kCOMBINED, kinEffHistogramList, kFALSE);
-    PutHistToRootFile("analyzeLeptonPair8", "DimassRC_EE", kCOMBINED, kinEffHistogramList, kFALSE);    
+    PutHistToRootFile("analyzeLeptonPair8", "DimassRC_EE", kCOMBINED, kinEffHistogramList, kFALSE);
     
     
     PutHistToRootFile("analyzeElecs9", "pt", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeElecs9", "pt", kCOMBINED, kinEffHistogramList, kFALSE);    
+    PutHistToRootFile("analyzeElecs9", "pt", kCOMBINED, kinEffHistogramList, kFALSE);
     
     PutHistToRootFile("analyzeElecs9", "eta", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeElecs9", "eta", kCOMBINED, kinEffHistogramList, kFALSE);      
+    PutHistToRootFile("analyzeElecs9", "eta", kCOMBINED, kinEffHistogramList, kFALSE);
     
     PutHistToRootFile("analyzeMuons9", "pt", kCOMBINED, kinEffHistogramList);
-    PutHistToRootFile("analyzeMuons9", "pt", kCOMBINED, kinEffHistogramList, kFALSE);    
+    PutHistToRootFile("analyzeMuons9", "pt", kCOMBINED, kinEffHistogramList, kFALSE);
     
     PutHistToRootFile("analyzeMuons9", "eta", kCOMBINED, kinEffHistogramList);
     PutHistToRootFile("analyzeMuons9", "eta", kCOMBINED, kinEffHistogramList, kFALSE);
@@ -4868,7 +4868,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PutHistToRootFile("analyzeLeptonPair9", "DimassRC_EE", kCOMBINED, kinEffHistogramList);
     PutHistToRootFile("analyzeLeptonPair9", "DimassRC_MM", kCOMBINED, kinEffHistogramList, kFALSE);
     PutHistToRootFile("analyzeLeptonPair9", "DimassRC_ME", kCOMBINED, kinEffHistogramList, kFALSE);
-    PutHistToRootFile("analyzeLeptonPair9", "DimassRC_EE", kCOMBINED, kinEffHistogramList, kFALSE);     
+    PutHistToRootFile("analyzeLeptonPair9", "DimassRC_EE", kCOMBINED, kinEffHistogramList, kFALSE);
 
 
     std::cout << ">>> " << "-------------------------------------------" << std::endl;
