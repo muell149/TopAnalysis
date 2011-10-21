@@ -2,16 +2,20 @@
 
 void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun"){
 	
-  // ---
-  //    Setup
-  // ---
-  // set root style
+  // ============================
+  //  Set Root Style
+  // ============================
 	
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   myStyle.cd();
   TGaxis::SetMaxDigits(2);
   gROOT->SetStyle("HHStyle");
+
+  // ============================
+  //  Setup
+
+  // ============================
 
   // say if closure test with reweighted m(ttbar) on parton level is done
   // will plot additionally the modified diff. norm. xSec on parton level
@@ -52,7 +56,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
   //    Combination for all kinematic variables x systematic variations available
   // ---
   // loop systematic variations
-  for(unsigned int sys=sysNo; sys<=sysDiBosDown; ++sys){
+  for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
     TString subfolder=sysLabel(sys);
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -60,14 +64,14 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
       TCanvas* canvasMu   = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
       TCanvas* canvasTheo = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
       TCanvas* canvasEl   = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
-      if(canvasMu&&canvasEl){
+      if(canvasMu&&canvasEl&&canvasTheo){
 	// get data plots for all systematics
 	TString plotName = xSecVariables_[i];
 	plotName.ReplaceAll("Norm","");
 	TH1F* plotMu   = (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
 	TH1F* plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotName        );
 	TH1F* plotEl   = (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
-	if(plotMu&&plotEl){ 
+	if(plotMu&&plotEl&&plotTheo){ 
 	  if(verbose>1){
 	    std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i];
 	    std::cout << " for both channels found!" << std::endl;
@@ -332,7 +336,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  if(xSecVariables_[i].Contains("Mass")) unbinnedTheoryMCAtNLO->Smooth(50);
 	  else if(!xSecVariables_[i].Contains("Y")) unbinnedTheoryMCAtNLO->Smooth(10);
 	  else unbinnedTheoryMCAtNLO->Smooth(3);
-  if(xSecVariables_[i].Contains("Norm")){
+	  if(xSecVariables_[i].Contains("Norm")){
             // adapt style for error bands to central curve mc@nlo
             errorBandsMCatNLO->SetFillColor  (kGray)    ;
             errorBandsMCatNLO->SetFillStyle  (1001)     ; // NB: explicitly needed, otherwise filling invisible due to default "0"
@@ -364,10 +368,6 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    }
 	    unbinnedTheory       ->Draw("c same")       ;
 	    TLegend *leg = new TLegend();
-	    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-	    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.15);
-	    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
-	    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
 	    leg->SetTextFont(42);
 	    leg->SetTextSize(0.04);
 	    leg->SetFillStyle(0);
@@ -377,12 +377,16 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->AddEntry(plotCombination  , dataLabel , "P" );
 	    leg->AddEntry(unbinnedTheory   , "MadGraph", "L" );
 	    // add additional labels for closure test(s)
-	    if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph reweighted", "L");
-	    if(zprime!=""&&sys==sysNo)  leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
+	    if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph Reweighted", "L");
+	    if(zprime!=""     &&sys==sysNo) leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
+	    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() -0.25);
+	    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() -0.05 - (double)leg->GetNRows()*0.04);
+	    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	    leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    leg->Draw("same");
 	  }
-	  plotCombination->Draw("e1 same");
+	  plotCombination->Draw("e same");
           gPad->RedrawAxis(); 
 	  DrawCMSLabels(true,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
@@ -421,7 +425,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
   // loop variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // loop systematic variations
-    for(unsigned int sys=sysNo; sys<=sysDiBosDown; ++sys){
+    for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
       if(histo_[xSecVariables_[i]][sys]){
 	saveToRootFile("diffXSecTopSemiLep.root", canvas_[xSecVariables_[i]][sys], true, verbose,"xSec/"+sysLabel(sys));
       }
