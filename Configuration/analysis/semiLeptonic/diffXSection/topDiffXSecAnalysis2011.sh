@@ -49,12 +49,12 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"muon\" 
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pb7TeV.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pb7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pb7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pband500GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pband500GeVZprime7TeV.root\"
@@ -62,7 +62,7 @@ dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pband750GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
@@ -85,8 +85,8 @@ verbose=0
 inputFolderName=\"TOP2011/110819_AnalysisRun\"
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be<=40, see list of systematics below)
-maxSys=40
+## maxSys>0 needs a lot of time (must be<=42, see list of systematics below)
+maxSys=42
 ## shape variations?
 shapeVar=true
 ## disable waiting time to read output
@@ -95,25 +95,6 @@ fast=true
 ## delete all (old) existing .eps and .pdf plots?
 ## clean = true / false
 clean=true
-## use errors from 2010 mu+jets analysis
-## if error for 2011 analysis is not available
-## NOTE: the rootfile ./diffXSecTopSemiMu2010.root
-## must be available and contain the uncertainties 
-oldErrors=true
-# disabled for 2010 mu+jets
-if [ $dataLuminosity2 -le 3600 ]
-    then
-    if [ $decayChannel == \"muon\" ]
-	then
-	oldErrors=false
-	maxSys=27
-    fi
-fi
-# disabled for combined cross section
-if [ $decayChannel == \"combined\" ]
-    then
-    oldErrors=false
-fi
 ### automatic definition of used MC sets
 ### 2010: fall10 MC
 #if [ $dataLuminosity2 -le 3600 ]
@@ -147,13 +128,12 @@ if [ $decayChannel == \"combined\" ]
 else
     echo
     echo "doing the full differential top xSec analysis"
-    echo "used data: $dataSample"
-    echo "decay channel: $decayChannel"
-    echo "luminosity: $dataLuminosity"
-    echo "considered systematics: $maxSys"
-    echo "consider shape variation? $shapeVar"
-    echo "take missing systematics relative from 2010 mu+jets analysis? $oldErrors" 
-    echo "save plots?: $save"
+    echo "used data:                $dataSample"
+    echo "decay channel:            $decayChannel"
+    echo "luminosity:               $dataLuminosity"
+    echo "considered systematics:   $maxSys"
+    echo "consider shape variation: $shapeVar"
+    echo "save plots:               $save"
     grep newSpring11MC= ./basicFunctions.h
     grep newSummer11MC= ./basicFunctions.h
     echo
@@ -226,8 +206,8 @@ if [ $fast = false ]
 fi
 if [ $decayChannel != \"combined\" ]
     then
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'true')'   # with ratio plots
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'false')'  # without ratio plots
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'true')'   # with ratio plots
+    root -l -q -b './analyzeTopDiffXSecMonitoring.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'false')'  # without ratio plots
 fi
 
 #####################################
@@ -259,12 +239,29 @@ else
     echo "will be ignored, only done for decayChannel=muon/electron"
 fi
 
+#############################
+# prepare PDF uncertainties #
+#############################
+BEFOREPDF=$(date +%s)
+echo
+echo "part PDF: Prepare files for pdf uncertainties"
+echo
+
+if [ $decayChannel != \"combined\" ]
+    then
+    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true')' 
+else
+    echo "Done for 2011 analysis in e/mu channel separate."
+fi
+
 ##################################################################
 # run shape distortion macro to get root files for MC dependency #
 ##################################################################
 BEFORED=$(date +%s)
 echo
 echo "part D: create rootfiles with shape variations"
+echo
+
 if [ $shapeVar = true ]
     then
     if [ $decayChannel != \"combined\" ]
@@ -272,7 +269,7 @@ if [ $shapeVar = true ]
 	if [ $dataLuminosity2 -ge 3601 ]
 	    then
 	    echo "will be done"
-	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample')'
+	    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'false')'
 	else
 	    echo "only done for 2011 analysis in e/mu channel separate"
 	fi
@@ -299,68 +296,77 @@ if [ $fast = false ]
 fi
 ## print key for systematic variations
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
-echo " 0: sysNo            1: sysLumiUp         2: sysLumiDown         3: sysJESUp     "
-echo " 4: sysJESDown       5: sysJERUp          6: sysJERDown          7: sysTopScaleUp"
-echo " 8: sysTopScaleDown  9: sysVBosonScaleUp 10: sysVBosonScaleDown 11: sysTopMatchUp"
-echo "12: sysTopMatchDown 13: sysVBosonMatchUp 14: sysVBosonMatchDown 15: sysMuEffSFup "
-echo "16: sysMuEffSFdown  17: sysISRFSRup      18: sysISRFSRdown      19: sysPileUp    "
-echo "20: sysQCDup        21: sysQCDdown       22: sysSTopUp          23: sysSTopDown  "
-echo "24: sysBtagUp       25: sysBtagDown      26: sysShapeUp         27: sysShapeDown "  
-echo "28: sysPUup         29: sysPUdown        30: sysflatTrigSF      31: sysTrigEffSFNormUp"
-echo "32: sysTrigEffSFNormDown     33: sysTriggerEffSFShapeUpEta  34: sysTriggerEffSFShapeDownEta"
-echo "35: sysTriggerEffSFShapeUpPt 36: sysTriggerEffSFShapeDownPt  37: sysMisTagSFup"     
-echo "38: sysMisTagSFdown  39: sysDiBosUp      40: sysDiBosDown"
+echo
+echo "  0: noSys                                                     "
+echo "  1: sysLumiUp                  2: sysLumiDown                 "              
+echo "  3: sysPUUp                    4: sysPUDown                   "
+echo "  5: sysJESUp                   6: sysJESDown                  "
+echo "  7: sysJERUp                   8: sysJERDown                  "
+echo "  9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        " 
+echo " 11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta "
+echo " 13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  "
+echo " 15: sysMuEffSFUp              16: sysMuEffSFDown              " 
+echo " 17: sysBtagSFUp               18: sysBtagSFDown               "
+echo " 19: sysMisTagSFUp             20: sysMisTagSFDown             "
+echo " 21: sysTopScaleUp             22: sysTopScaleDown             "
+echo " 23: sysVBosonScaleUp          24: sysVBosonScaleDown          "
+echo " 25: sysSingleTopScaleUp       26: sysSingleTopScaleDown       "
+echo " 27: sysTopMatchUp             28: sysTopMatchDown             " 
+echo " 29: sysVBosonMatchUp          30: sysVBosonMatchDown          "
+echo " 31: sysTopMassUp              32: sysTopMassDown              "
+echo " 33: sysQCDUp                  34: sysQCDown                   " 
+echo " 35: sysSTopUp                 36: sysSTopDown                 "
+echo " 37: sysDiBosUp                38: sysDiBosDown                "
+echo " 39: sysShapeUp                40: sysShapeDown                " 
+echo " 41: sysPDFUp                  42: sysPDFDown                  " 
+echo " 43: ENDOFSYSENUM                                              "
+echo
 if [ $fast = false ]
     then
     sleep 5
 fi
+# get start time
+BEFORESYS=$(date +%s)
+
+if [ $decayChannel != \"combined\" ]
+    then
+    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 0, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+fi
+
 ## loop all systematic variations
-for ((  systematicVariation = 0 ;  systematicVariation <= $maxSys;  systematicVariation++  ))
-do 
+for (( systematicVariation = 1;  systematicVariation <= $maxSys;  systematicVariation++ ))
+  do 
   echo
-  echo "running systematic variation number $systematicVariation"
+  echo " Running systematic variation: $systematicVariation"
   if [ $fast = false ]
       then
       sleep 2
   fi
-  if [ $systematicVariation = 1 ]
-      then
-      BEFORESYS=$(date +%s)
-  fi
   if [ $decayChannel != \"combined\" ]
       then
       ## exclude shape variation
-      if [ $systematicVariation == 26 -o $systematicVariation == 27 ]
+      if [ $systematicVariation == 39 -o $systematicVariation == 40 ]
 	  then
-	  echo "shape variations are done separately"
+	  echo " Shape variations are executed separately."
       else
-	  ## exclude outdated 2010 uncertainties for 2011 analysis
-	  if [ $dataLuminosity2 -ge 3601 ]
-	      then
-	      if [ $systematicVariation -ge 17 -a $systematicVariation -le 19 ]
-		  then
-		    echo "not doing theory uncertainties for 2011 analysis- ISR/FSR, old PU uncertainty also excluded!"
-	      else	
-	          ## run macro for 2011 analysis
-		  root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
-	      fi
-	  else
-	      ## run macro for 2010 analysis
-	      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
-	  fi
-      fi
+	  ## run macro for 2011 analysis
+	  root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+      fi  
   else
       echo "will be ignored, only done for decayChannel=muon/electron"
   fi
 done
 
-## shape variation
+## shape and PDF variations
 if [ $shapeVar = true ]
     then
     if [ $decayChannel != \"combined\" ]
 	then
-	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 26, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
-	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 27, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	echo ""
+	echo " All regular systematic uncertainties processed .... Now running shape variations."
+	echo ""
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 39, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 40, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
     fi
 fi
 
@@ -408,7 +414,7 @@ cat >> commands.cint << EOF
 .L BCC_C.so
 .L combineTopDiffXSecUncertainties.C++
 .L combineTopDiffXSecUncertainties_C.so
-combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $oldErrors)
+combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel)
 EOF
 
 root -l -b < commands.cint
@@ -427,9 +433,10 @@ if [ $maxSys -ge 1 ]
     SYS=$(( $AFTERSYS - $BEFORESYS ))
     echo "($SYS seconds due to systematic variations)"
 fi
-echo "part A: $(( $BEFOREB - $START  )) seconds (clean up  )"
-echo "part B: $(( $BEFOREC - $BEFOREB)) seconds (monitoring)"
-echo "part C: $(( $BEFORED - $BEFOREC)) seconds (migration)"
-echo "part D: $(( $BEFOREE - $BEFORED)) seconds (shape variations)"
-echo "part D: $(( $BEFOREF - $BEFOREE)) seconds (xSec, $maxSys systematic variations considered)"
-echo "part E: $(( $END     - $BEFOREF)) seconds (errors and final xSec)"
+echo "part A: $(( $BEFOREB   - $START    )) seconds (clean up  )"
+echo "part B: $(( $BEFOREC   - $BEFOREB  )) seconds (monitoring)"
+echo "part C: $(( $BEFOREPDF - $BEFOREC  )) seconds (migration)"
+echo "part D: $(( $BEFORED   - $BEFOREPDF)) seconds (prepare PDF uncertainty run)"
+echo "part E: $(( $BEFOREE   - $BEFORED  )) seconds (shape variations)"
+echo "part F: $(( $BEFOREF   - $BEFOREE  )) seconds (xSec, $maxSys systematic variations considered)"
+echo "part G: $(( $END       - $BEFOREF  )) seconds (errors and final xSec)"
