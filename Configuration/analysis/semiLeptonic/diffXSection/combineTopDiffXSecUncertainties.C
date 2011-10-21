@@ -1,43 +1,57 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun", TString decayChannel="muon", bool adpatOldUncertainties=true){
-  /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
-     0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
-     4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
-     8:sysTopScaleDown    9:sysVBosonScaleUp  10:sysVBosonScaleDown  11:sysTopMatchUp 
-     12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
-     16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
-     20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
-     24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
-     28:sysPUup          29:sysPUdown         30:sysflatTrigSF       31:sysTrigEffSFNormUp
-     32:sysTrigEffSFNormDown     33:sysTriggerEffSFShapeUpEta   34:sysTriggerEffSFShapeDownEta
-     35:sysTriggerEffSFShapeUpPt 36:sysTriggerEffSFShapeDownPt  37:sysMisTagSFup     38:sysMisTagSFdown     
-     39:sysDiBosUp       40:sysDiBosDown
-  */
+void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun", TString decayChannel="muon"){
+
+  // ============================
+  //  Systematic Variations:
+  // ============================
   
+  //      0: sysNo
+  //      1: sysLumiUp                  2: sysLumiDown                
+  //      3: sysPUUp                    4: sysPUDown                  
+  //      5: sysJESUp                   6: sysJESDown                 
+  //      7: sysJERUp                   8: sysJERDown                 
+  //      9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        
+  //     11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta
+  //     13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  
+  //     15: sysMuEffSFUp              16: sysMuEffSFDown 
+  //     17: sysBtagSFUp               18: sysBtagSFDown  
+  //     19: sysMisTagSFUp             20: sysMisTagSFDown  
+  //     21: sysTopScaleUp             22: sysTopScaleDown            
+  //     23: sysVBosonScaleUp          24: sysVBosonScaleDown          
+  //     25: sysSingleTopScaleUp       26: sysSingleTopScaleDown     
+  //     27: sysTopMatchUp             28: sysTopMatchDown            
+  //     29: sysVBosonMatchUp          30: sysVBosonMatchDown         
+  //     31: sysTopMassUp              32: sysTopMassDown            
+  //     33: sysQCDUp                  34: sysQCDDown                 
+  //     35: sysSTopUp                 36: sysSTopDown               
+  //     37: sysDiBosUp                38: sysDiBosDown              
+  //     39: sysShapeUp                40: sysShapeDown   
+  //     41: sysPDFUp                  42: sysPDFDown  
+  //     43: ENDOFSYSENUM
+  //
+
+  // ============================
+  //  Set Root Style
+  // ============================
+
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   TGaxis::SetMaxDigits(2);
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
 
-  // ---
-  //    parameter Configuration
-  // ---
+  // ============================
+  //  Parameter Configuration
+  // ============================
+
   // set detail level of ouStput 
   // 0: no output, 1: std output 2: output for debugging
   // save: enable saving
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
   if(luminosity<50.) dataSample="2010";
-  // adpatOldUncertainties: choose if you want to apapt 
-  // uncertainties from 
-  // the 2010 mu+jets analysis if they are not available 
-  // for 2011 analysis, NOTE: these uncertainties 
-  // must exist in ./diffXSecTopSemiMu2010.root
-  // create container to save relative shifted plots
-  std::map< TString, std::map <unsigned int, TCanvas*> > adoptedUncertaintyPlot_;
   // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
@@ -46,7 +60,6 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   if(decayChannel=="electron") outputFile+="Elec"+dataSample;
   if(decayChannel=="combined"){
     outputFile+="Lep";
-    adpatOldUncertainties=false;
   }
   outputFile+=".root";
   // define folder where XSec plots are stored
@@ -55,9 +68,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
   
-  // ---
-  //    basic printout and variable definitions
-  // ---
+  // ==========================================
+  //  Basic Printout and Variable Definitions
+  // ==========================================
   // define variables for combination
   // NOTE: these must be identical to those defined in 
   // xSecVariables_ in analyzeHypothesisKinFit.C
@@ -75,8 +88,13 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   std::map<TString, std::map<unsigned int, bool> > calculateError_;
   // create container for combined Errors
   std::map<TString, TGraphAsymmErrors*> totalErrors_;
-  // setup for bin center corrected values
-  gSystem->Load("BCC_C.so");
+
+  // ===================================
+  //  Bin Center Corrections
+  // ===================================
+
+  //  basic configuration
+
   bool mergeLepAndHadTop=true;
   std::vector<TString> xSecVariableBranchNames_;
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -88,71 +106,68 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
     }
   }
+
   // parameter printout
-  if(verbose>0) std::cout << std::endl << "executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl << std::endl;
-  if(verbose>0) std::cout << "target file: " << outputFile << std::endl;
-  if(verbose>0) std::cout << "target variables for cross sections:" << std::endl;
-  // loop variables
-  for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-    if(verbose>0){
+
+  if(verbose>0){
+    std::cout << std::endl << "executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl << std::endl;
+    std::cout << "target file: " << outputFile << std::endl;
+    std::cout << "target variables for cross sections:" << std::endl;
+
+    // loop variables
+    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       std::cout << xSecVariables_[i]; 
       if(i<xSecVariables_.size()-1) std::cout << ", ";
       else std::cout << std::endl;
     }
+    std::cout << "target folder containing cross section plots: " << xSecFolder << std::endl;
+    if(save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
   }
-  if(verbose>0) std::cout << "target folder containing cross section plots: " << xSecFolder << std::endl;
-  if(verbose>0&&save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
+
   // loading bin center corrections
-  std::cout << "loading bin center corrections" << std::endl;
+  std::cout << " Loading and calculating bin center corrections .... " << std::endl;
   BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
   b.runBCCCalculation();
   std::map<TString, std::vector<double> > correctedCenters_ = b.getMapWithCorrectedCentersInX();
   std::map<TString, std::vector<double> > corrCenterErrors_ = b.getMapWithCenterErrorsInX();
- // output results
+  // Output of results
   if(verbose>1){
-    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 !=  correctedCenters_.end(); iter1++ )
-      {
+    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 !=  correctedCenters_.end(); iter1++ ){
       std::cout << iter1->first << ": ";
-      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)
-	{
-	  std::cout << (*iter2) << " ";
-	}
+      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++){
+	std::cout << (*iter2) << " ";
+      }
+      std::cout << std::endl;
+    }    
+    for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ ){
+      std::cout << iter1->first << ": ";
+      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++){
+	std::cout << (*iter2) << " ";
+      }
       std::cout << std::endl;
     }
-    
-    for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ )
-      {
-	std::cout << iter1->first << ": ";
-	
-	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)
-	  {
-	    std::cout << (*iter2) << " ";
-	  }
-	std::cout << std::endl;
-      }
   }
+  std::cout << " .... Executing bin center corrections finished." << std::endl;
 
   // ---
-  //    open rootfile
+  //  Open rootfile
   // ---
+
   TFile* file = TFile::Open(outputFile, "UPDATE");
   if(verbose>1) std::cout << "opened file "+outputFile << std::endl;
-  // open mu+jets 2010 analysis file
-  TFile* oldAnalysisfile=0;
-  if(adpatOldUncertainties){ 
-    oldAnalysisfile = TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/diffXSecTopSemiMu2010.root", "READ");
-    if(verbose>1) std::cout << "opened old file diffXSecTopSemiMu2010.root" << std::endl;
-  }
+
   // check if file exist
   if(file&&!file->IsZombie()){
     if(verbose>0) std::cout << "target file found!" << std::endl;
-    // ---
-    //    part A: get all data xSec with all systematic variations
-    // ---
+
+    // ===============================================================
+    //  Part A: get all data xSec with all systematic variations
+    // ===============================================================
+
     if(verbose>0) std::cout << std::endl << "part A: loading plots" << std::endl;
     // loop systematic variations
-    for(unsigned int sys=sysNo; sys<=sysDiBosDown; ++sys){
-      TString subfolder=sysLabel(sys);
+    for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
+      TString subfolder=sysLabel(sys);      
       // loop variables
       for(unsigned int i=0; i<xSecVariables_.size(); ++i){
 	// get canvas       
@@ -168,90 +183,20 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    gROOT->cd();
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
-	    // exclude "old" PU error
-	    if(sys==sysPileUp) calculateError_[xSecVariables_[i]][sys]=false;
-	    // exclude flat SF error
-	    if(sys==sysflatTrigSF) calculateError_[xSecVariables_[i]][sys]=false;
 	  }
 	  if(!plot&&verbose>1){ 
 	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
 	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
 	}	
-	if(adpatOldUncertainties&&!canvas&&sys!=sysNo&&sys!=sysPileUp&&!(sys>=sysBtagSFUp&&sys<=sysMisTagSFdown)&&!xSecVariables_[i].Contains("lep")){
-	  if(verbose>1) std::cout << "use 2010 uncertainties for variation " << sysLabel(sys)+", "+xSecVariables_[i] << std::endl;
-	  // adapt 2010 UNCERTAINTIES
-	  // if systematic variation does not exist for 2011 data (indicated by luminosity), 
-	  // take the binwise relative uncertainty from 2010 mu+jets analysis (no PF2PAT)
-	  // and save relative shifted plot for 2011 result
-	  // exclude PU uncertainty
-	  // exclude new uncertainties, that does not exist in 2010 analysis
-	  if(luminosity>40.0){
-	    if(verbose>1) std::cout << "luminosity>40/pb" << std::endl;
-	    // copy std analysis plot to scale bins later with relative uncertainties 
-	    TString plotName = xSecVariables_[i];
-	    plotName.ReplaceAll("Norm","");
-	    TH1F* currentShiftedCrossSectionPlot=(TH1F*)(histo_[xSecVariables_[i]][sysNo]->Clone(plotName+"kData"));
-	    if(verbose>1) std::cout << "std analysis file for this variation copied" << std::endl;
-	    // loop all bins of current 2011 analysis histogram without variations
-	    for(int bin=1; bin<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){
-	      if (xSecVariables_[i].Contains("ttbarMass") && bin== 1) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Thomas)
-	      if (xSecVariables_[i].Contains("topY")      && bin== 1) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Martijn)
-	      if (xSecVariables_[i].Contains("topY")      && bin==10) continue;   // Ad-hoc bug fix for non-empty first bin of ttbarmass (Martijn)
-	      //ensure to have non-empty bins
-	      if(histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin)>0){
-		if(verbose>1) std::cout << "bin " << bin << std::endl;
-		// get plot with relative uncertainties for given quantity and bin
-		TCanvas* oldCanvas = (TCanvas*)oldAnalysisfile->Get("relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
-		if(verbose>1) std::cout << "got canvas" << std::endl; 
-		TH1F* plot= (TH1F*)oldCanvas->GetPrimitive("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i]);
-		if(plot){ 
-		  if(verbose>1) std::cout << "got plot" << std::endl;
-		  // take into account that some systematics in 2010
-		  // were not present and therefore the last (diboson)
-		  // bins are shifted
-		  int sysold=sys;
-		  if(sys==sysDiBosDown||sys==sysDiBosUp){
-		    int NbinsOld=plot->GetNbinsX();
-		    int NbinsNew=sysDiBosDown+5;
-		    sysold-=(NbinsNew-NbinsOld);
-		  }
-		  double relSysErrorBin = plot->GetBinContent(sysold);
-		  if(verbose>1) std::cout << "bin rel uncertainty: " << relSysErrorBin << std::endl;
-		  // apply binwise SF for the relative uncertainty 
-		  // from 2010 mu+jets analysis to the copy of the 
-		  // std 2011 analysis plot
-		  double binSFForSystUncertainty=(1.0+relSysErrorBin/100.);
-		  if(verbose>1) std::cout << "binSF: " << binSFForSystUncertainty << std::endl;
-		  currentShiftedCrossSectionPlot->SetBinContent(bin, binSFForSystUncertainty*currentShiftedCrossSectionPlot->GetBinContent(bin));
-		  currentShiftedCrossSectionPlot->SetBinError  (bin, binSFForSystUncertainty*currentShiftedCrossSectionPlot->GetBinError(bin)  );
-		  if(verbose>1) std::cout << "scaled xSec: " << currentShiftedCrossSectionPlot->GetBinContent(bin) << std::endl;
-		  histo_[xSecVariables_[i]][sys]=(TH1F*)(currentShiftedCrossSectionPlot->Clone());
-		  // save plot in canvas 
-		  TCanvas* currentUncertainty = new TCanvas( xSecVariables_[i], xSecVariables_[i], 600, 600);
-		  //canvasStyle(*currentUncertainty);
-		  currentUncertainty->cd();
-		  currentShiftedCrossSectionPlot->Draw("");
-		  // draw label to indicate that sys error is adapted from 2010 mu+jets
-		  DrawLabel("!adopted from 2010 #mu+jets!", 0.2, 0.7, 0.7, 0.8, 0.07);
-		  // 
-		  adoptedUncertaintyPlot_[xSecVariables_[i]][sys]=(TCanvas*)(currentUncertainty->Clone());
-		  delete currentUncertainty;
-		  // enable error calculation
-		  if(!calculateError_[xSecVariables_[i]].count(sys)>0) calculateError_[xSecVariables_[i]][sys]=true;
-		}
-	      }
-	    }
-	    if(verbose>1) std::cout << "scaled xSec first bin: " << histo_[xSecVariables_[i]][sys]->GetBinContent(1) << std::endl;
-	  }
-	}
-	if(!canvas&&verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found!" << std::endl;
+	else if(verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found!" << std::endl;
       }
     }
     
-    // ---
-    //    part B:calculate combined systematic+statistic error
-    // ---
+    // ===============================================================
+    //  Part B: calculate combined systematic+statistic error
+    // ===============================================================
+
     if(verbose>0) std::cout << std::endl << "part B: calculate systematic errors for all variables and bins" << std::endl;
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -270,14 +215,14 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	  double stdBinXSecValue=histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
 	  // jump to bin without vanishing bin content
 	  while(stdBinXSecValue==0&&bin<Nbins){
-	    if(verbose>1) std::cout << "bin #" << bin << "/" << Nbins << " has bin content ==0, will be skipped!" << std::endl;
+	    if(verbose>1) std::cout << "bin #" << bin << "/" << Nbins << " has bin content == 0, will be skipped!" << std::endl;
 	    ++bin;
 	    stdBinXSecValue=histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
 	  }
 	  // if last bin is empty -> stop looping, next variable
 	  if(bin==histo_[xSecVariables_[i]][sysNo]->GetNbinsX()&&stdBinXSecValue==0){
 	    if(verbose>1){
-	      std::cout << "bin #" << bin << "/" << Nbins << " has bin content ==0, will be skipped!" << std::endl;
+	      std::cout << "bin #" << bin << "/" << Nbins << " has bin content == 0, will be skipped!" << std::endl;
 	      std::cout << "last bin reached" << std::endl;
 	    }
 	  }
@@ -289,10 +234,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    }
 	    // create plot that indicates all relative uncertainties
 	    // one plot for every variable in every bin
-	    TH1F* relSysPlot = new TH1F("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], "relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], sysDiBosDown+5, sysNo, sysDiBosDown+5);
+	    TH1F* relSysPlot = new TH1F("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], "relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], ENDOFSYSENUM+4, sysNo,ENDOFSYSENUM+4);
 	    relSysPlot->GetXaxis()->SetLabelSize(0.025);
 	    // loop systematic variations
-	    for(unsigned int sys=sysNo+1; sys<=sysDiBosDown; ++sys){
+	    for(unsigned int sys=sysNo+1; sys<ENDOFSYSENUM; ++sys){
 	      // set labels for relative uncertainties for bin & variable in map relativeUncertainties_
 	      relSysPlot->GetXaxis()->SetBinLabel(sys, sysLabel(sys).ReplaceAll("sys",""));
 	      // create plot that indicates the relative systematic uncertainty
@@ -311,13 +256,13 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  if(verbose>0) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
 		  sysDiff=sysBinXSecValue-stdBinXSecValue;
-		  // set btagging error to 0 as long as it is not there
-		  //if(sys==sysBtagDown||sys==sysBtagUp) sysDiff=0;
+		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= scaleFactorTopMassUncertainty; // scaleFactorTopMassUncertainty: defined in basicFunctions.h
 		  // asymmetric errors
-		  //if(sysDiff>0) totalSystematicErrorUp  +=sysDiff*sysDiff;
-		  //if(sysDiff<0) totalSystematicErrorDown+=sysDiff*sysDiff;
-		  totalSystematicErrorUp  +=0.5*sysDiff*0.5*sysDiff;
-		  totalSystematicErrorDown+=0.5*sysDiff*0.5*sysDiff;
+		  // if(sysDiff>0) totalSystematicErrorUp  +=sysDiff*sysDiff;
+		  // if(sysDiff<0) totalSystematicErrorDown+=sysDiff*sysDiff;
+		  // symmetric errors
+		  totalSystematicErrorUp   += 0.5*sysDiff*0.5*sysDiff;
+		  totalSystematicErrorDown += 0.5*sysDiff*0.5*sysDiff;		  
 		}
 		else{ 
 		  if(verbose>0) std::cout << "(not considered): ";
@@ -328,30 +273,28 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		relSysPlot->SetBinContent(sys, 100*sysDiff/stdBinXSecValue);
 	      }
 	      // for last systematic 
-	      if(sys==sysDiBosDown){
+	      if(sys==ENDOFSYSENUM-1){
 		// go to root directory keep plot when closing rootfile
 		gROOT->cd();
 		// finally save relative uncertainties in map relativeUncertainties_
 		relativeUncertainties_[xSecVariables_[i]][bin]=(TH1F*)relSysPlot->Clone();
-		// print total systematic uncertainty absolut and relative for bin & variable
+
+		// get statistical and total uncertainties
+		double statErrorBinVar = noSysPlot->GetBinError(bin);
+		double combinedErrorUpBinVar   = sqrt(totalSystematicErrorUp  +statErrorBinVar*statErrorBinVar);
+		double combinedErrorDownBinVar = sqrt(totalSystematicErrorDown+statErrorBinVar*statErrorBinVar);		
+		// print statistical, systematic and total uncertainties, absolut and relative for bin & variable
 		if(verbose>0){
+		  std::cout << "total statistic uncertainty: " << std::endl;
+		  std::cout << " +/- " << statErrorBinVar << " ( =";
+		  std::cout << 100*statErrorBinVar/stdBinXSecValue << "% )" << std::endl;
+
 		  std::cout << "total systematic uncertainty: " << std::endl;
 		  std::cout << " +" << sqrt(totalSystematicErrorUp)   << " ( =";
 		  std::cout << 100*sqrt(totalSystematicErrorUp  )/stdBinXSecValue << "% )" << std::endl;
 		  std::cout << " -" << sqrt(totalSystematicErrorDown) << " ( =";
 		  std::cout << 100*sqrt(totalSystematicErrorDown)/stdBinXSecValue << "% )" << std::endl;
-		}
-		// get statistical error
-		double statErrorBinVar = noSysPlot->GetBinError(bin);
-		double combinedErrorUpBinVar   = sqrt(totalSystematicErrorUp  +statErrorBinVar*statErrorBinVar);
-		double combinedErrorDownBinVar = sqrt(totalSystematicErrorDown+statErrorBinVar*statErrorBinVar);
-		// print statistical uncertainty absolut and relative for bin & variable
-		if(verbose>0){
-		  std::cout << "total statistic uncertainty: " << std::endl;
-		  std::cout << " +/- " << statErrorBinVar << " ( =";
-		  std::cout << 100*statErrorBinVar/stdBinXSecValue << "% )" << std::endl;
-		}
-		if(verbose>0){
+		
 		  std::cout << "total uncertainty: " << std::endl;
 		  std::cout << " +" <<  combinedErrorUpBinVar   << " ( =";
 		  std::cout << 100*combinedErrorUpBinVar/stdBinXSecValue   << "% )" << std::endl;
@@ -360,22 +303,20 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		}
 		// save relative uncertainties for bin & variable in map relativeUncertainties_
 		// a) statistic uncertainty
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+1, 100*statErrorBinVar/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+1, "statistical");
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(ENDOFSYSENUM, 100*statErrorBinVar/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(ENDOFSYSENUM, "statistical");
 		// b) total systematic uncertainty up
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+2, 100*sqrt(totalSystematicErrorUp  )/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+2, "total syst. Up");
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(ENDOFSYSENUM+1, 100*sqrt(totalSystematicErrorUp  )/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(ENDOFSYSENUM+1, "total syst. Up");
 		// c) total systematic uncertainty down
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+3, -100*sqrt(totalSystematicErrorDown)/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+3, "total syst. Down");
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(ENDOFSYSENUM+2, -100*sqrt(totalSystematicErrorDown)/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(ENDOFSYSENUM+2, "total syst. Down");
 		// d) total stat+systematic uncertainty up
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+4, 100*combinedErrorUpBinVar/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+4, "total Up");
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(ENDOFSYSENUM+3, 100*combinedErrorUpBinVar/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(ENDOFSYSENUM+3, "total Up");
 		// e) total stat+systematic uncertainty down
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysDiBosDown+5, -100*combinedErrorDownBinVar/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(sysDiBosDown+5, "total Down");
-		// f) set 2010 PU uncertainty for 2011 analysis to 0
-		if(calculateError_[xSecVariables_[i]][sysPileUp]==false) relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(sysPileUp, 0);
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(ENDOFSYSENUM+4, -100*combinedErrorDownBinVar/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(ENDOFSYSENUM+4, "total Down");
 		// set combined errors for final xSec plot
 		double pointXValue = histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
 		double pointXError = 0;
@@ -407,7 +348,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("rel. uncertainty (%)");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitleOffset(1.2);
 		// save asymmetric errors in map totalErrors_
-		combinedErrors->SetLineWidth(1.0); // histo_[xSecVariables_[i]][sysNo]->GetLineWidth());
+		combinedErrors->SetLineWidth(1.0);
 		combinedErrors->SetLineColor(histo_[xSecVariables_[i]][sysNo]->GetLineColor());
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
 		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]], verbose);
@@ -427,10 +368,11 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
     // which also opens the file
     file->Close();
     
-    // ---
-    //    part C:draw plot with combined systematic+statistic error
-    //           in new cross section plot
-    // ---
+    // ===============================================================
+    //  Part C: draw plot with combined systematic+statistic error
+    //          in new cross section plot
+    // ===============================================================
+
     if(save){
       if(verbose>0) std::cout << std::endl << "part C: save xSec plots with stat.+sys. errors and plots with relative uncertainties" << std::endl;
       // loop variables
@@ -455,7 +397,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      // draw plot into canvas
 	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");
 	      // draw axis also on the right side of canvas
-	      int xPosition=sysDiBosDown+5;
+	      int xPosition=ENDOFSYSENUM+4;
 	      double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
 	      double histMin = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMinimumBin());
 	      double max = errMax;
@@ -473,27 +415,26 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      axis->Draw("same");
 	      // redraw to have statistical error as +/-
 	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
-	      relUnCertaintyCopy->SetBinContent(sysDiBosDown+1, (-1.)*(relUnCertaintyCopy->GetBinContent(sysDiBosDown+1)));
+	      relUnCertaintyCopy->SetBinContent(ENDOFSYSENUM, (-1.)*(relUnCertaintyCopy->GetBinContent(ENDOFSYSENUM)));
 	      relUnCertaintyCopy->DrawClone("hist same");
 	      // draw every systematic variation with different color
 	      int colourCounter=1;
 	      unsigned int colour=kBlack;
 	      for(unsigned int sys=1; sys<=(unsigned int)relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX(); ++sys, ++colourCounter){
-		if(sys==sysPileUp  ) ++colourCounter;
 		if(colourCounter==5) colourCounter=1;
 		if(colourCounter==1||colourCounter==2) colour=kBlack;
 		if(colourCounter==3||colourCounter==4) colour=kRed;
 		relUnCertaintyCopy->Scale(0.);
 		relUnCertaintyCopy->SetBinContent(sys, relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(sys));
-		if(sys<=sysDiBosDown){
+		if(sys<ENDOFSYSENUM){
 		  relUnCertaintyCopy->SetFillColor(colour);
 		  relUnCertaintyCopy->DrawCopy("hist same");
 		}
-		if(sys>=sysDiBosDown+2&&sys<=sysDiBosDown+3){
+		if(sys>=ENDOFSYSENUM+1&&sys<=ENDOFSYSENUM+2){
 		  relUnCertaintyCopy->SetFillColor(kOrange);
 		  relUnCertaintyCopy->DrawCopy("hist same");
 		}
-		if(sys>=sysDiBosDown+4){
+		if(sys>=ENDOFSYSENUM+3){
 		  relUnCertaintyCopy->SetFillColor(kBlue);
 		  relUnCertaintyCopy->DrawCopy("hist same");
 		}
@@ -652,7 +593,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		canvas->GetListOfPrimitives()->Remove(canvas->GetPrimitive(plotName+"kData"));
 	      }
 	      // Draw errors into Canvas
-	      totalErrors_[xSecVariables_[i]]->Draw("p z same");
+	      totalErrors_[xSecVariables_[i]]->Draw("p Z same");
 	      canvas->SetName (xSecVariables_[i]);
 	    }
 	    // save Canvas
@@ -675,19 +616,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
     }
   }
   else std::cout << std::endl << "ERROR:target file does not exist or is broken!" << std::endl;
-  // close files
+
+  // close file
   file->Close();
-  if(adpatOldUncertainties) oldAnalysisfile->Close();
-  // save relative uncertainty shifted canvas to file
-  if(adpatOldUncertainties&&save){ 
-    // loop variables
-    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-      // loop systematic variations
-      for(unsigned int sys=sysNo+1; sys<=sysDiBosDown; ++sys){
-	if(adoptedUncertaintyPlot_[xSecVariables_[i]][sys]){
-	  saveToRootFile(outputFile, adoptedUncertaintyPlot_[xSecVariables_[i]][sys], false, 0,"xSec/"+sysLabel(sys));
-	}
-      }
-    }
-  }
 }
