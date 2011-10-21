@@ -5,9 +5,10 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 			     std::string decayChannel = "muon" )
 {
-  // c) set root style
-  // set root style
-  
+  // ============================
+  //  Set ROOT Style
+  // ============================
+ 
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   TGaxis::SetMaxDigits(2);
@@ -15,42 +16,56 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   gROOT->SetStyle("HHStyle");
   gROOT->ForceStyle();	
   
-  //  ---
-  //     name conventions
-  //  ---
+  // ============================
+  //  Name Conventions
+  // ============================
   // a) enumerator sample convention (as defined in basicFunctions.h)
-  /*0:*/  /*1:*/  /*2:*/    /*3:*/    /*4:*/   /*5:*/    /*6:*/  /*7:*/  /*8,  9,  10*/ /* 11   ,  12     ,   13:  */
-  // kSig  , kBkg  , kZjets  , kWjets  , kQCD   , kSTop   , kDiBos, kData , kWW, kWZ, kZZ, kSTops  , kSTopt  , kSToptW 
+  //    kSig,    kBkg,    kZjets,  kWjets, 
+  //    kQCD,    kSTop,   kDiBos,  kData, 
+  //    kQCDEM1, kQCDEM2, kQCDEM3, kQCDBCE1, kQCDBCE2, kQCDBCE3,  
+  //    kWW,     kWZ,     kZZ, 
+  //    kSTops,  kSATops, kSTopt,  kSATopt,  kSToptW , kSAToptW};
+
   // b) file name convention (implemented in basicFunctions.h)
-  // "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
-  // sampleName = "Sig", "Bkg", Wjets", "Zjets", "WW", "WZ", "ZZ", "VV", "SingleTopSchannel", 
-  //              "SingleTopTchannel", "SingleTopTWchannel", "QCD"
-  // GeneratorName= "Mad", "Pythia6"
-  // GeneratorTune= "Z2", "D6T"
-  // MCProductionCycle= "Fall10"
-  // systematicVariation= "JESup", "JESdown", "JERup", "JERdown", "PileUp", "ScaleUp", 
-  //                      "ScaleDown", "MatchUp", "MatchDown"
-  
-  //  ---
-  //     options
-  //  ---
+  //    "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
+  //    GeneratorName= "Mad", "Pythia6"
+  //    GeneratorTune= "Z2", "D6T"
+  //    MCProductionCycle= "Summer11"
+
+  // ============================
+  //  Options
+  // ============================
+  //
   // a) options directly entered when calling function
-  /* systematicVariation: which systematic shift do you want to make? from basicFunctions.h:
-     0:sysNo              1:sysLumiUp          2:sysLumiDown          3:sysJESUp      
-     4:sysJESDown         5:sysJERUp           6:sysJERDown           7:sysTopScaleUp 
-     8:sysTopScaleDown    9:sysVBosonScaleUp  10:sysVBosonScaleDown  11:sysTopMatchUp 
-     12:sysTopMatchDown  13:sysVBosonMatchUp  14:sysVBosonMatchDown  15:sysMuEffSFup  
-     16:sysMuEffSFdown   17:sysISRFSRup       18:sysISRFSRdown       19:sysPileUp    
-     20:sysQCDup         21:sysQCDdown        22:sysSTopUp           23:sysSTopDown  
-     24:sysBtagUp        25:sysBtagDown       26:sysShapeUp          27:sysShapeUp 
-     28:sysPUup          29:sysPUdown         30:sysflatTrigSF       31:sysTrigEffSFNormUp
-     32:sysTrigEffSFNormDown     33:sysTriggerEffSFShapeUpEta   34:sysTriggerEffSFShapeDownEta
-     35:sysTriggerEffSFShapeUpPt 36:sysTriggerEffSFShapeDownPt  37:sysMisTagSFup     38:sysMisTagSFdown     
-     39:sysDiBosUp       40:sysDiBosDown
-  */
-  if(luminosity<40.&&systematicVariation==sysLumiUp  ) luminosity*=1.04;
+  //    systematicVariation: which systematic shift do you want to make? from basicFunctions.h:  
+  //
+  //    0: sysNo
+  //    1: sysLumiUp                  2: sysLumiDown                
+  //    3: sysPUUp                    4: sysPUDown                  
+  //    5: sysJESUp                   6: sysJESDown                 
+  //    7: sysJERUp                   8: sysJERDown                 
+  //    9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        
+  //   11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta
+  //   13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  
+  //   15: sysMuEffSFUp              16: sysMuEffSFDown 
+  //   17: sysBtagSFUp               18: sysBtagSFDown  
+  //   19: sysMisTagSFUp             20: sysMisTagSFDown  
+  //   21: sysTopScaleUp             22: sysTopScaleDown            
+  //   23: sysVBosonScaleUp          24: sysVBosonScaleDown          
+  //   25: sysSingleTopScaleUp       26: sysSingleTopScaleDown     
+  //   27: sysTopMatchUp             28: sysTopMatchDown            
+  //   29: sysVBosonMatchUp          30: sysVBosonMatchDown         
+  //   31: sysTopMassUp              32: sysTopMassDown            
+  //   33: sysQCDUp                  34: sysQCDDown                 
+  //   35: sysSTopUp                 36: sysSTopDown               
+  //   37: sysDiBosUp                38: sysDiBosDown              
+  //   39: sysShapeUp                40: sysShapeDown   
+  //   41: sysPDFUp                  42: sysPDFDown 
+  //   43: ENDOFSYSENUM
+  
+  if(luminosity<40.&&systematicVariation==sysLumiUp  )      luminosity*=1.04;
   else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
-  if(luminosity>40.&&systematicVariation==sysLumiUp  ) luminosity*=1.045;
+  if(luminosity>40.&&systematicVariation==sysLumiUp  )      luminosity*=1.045;
   else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.955;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
@@ -82,27 +97,26 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
-  if(systematicVariation==sysPUup  ){ 
-    sysInputFolderExtension="PUup";
-    sysInputGenFolderExtension=sysInputFolderExtension;
+
+  switch (systematicVariation)
+  {
+    case sysPUUp                     : sysInputFolderExtension="PUup";   sysInputGenFolderExtension=sysInputFolderExtension; break;
+    case sysPUDown                   : sysInputFolderExtension="PUdown"; sysInputGenFolderExtension=sysInputFolderExtension; break;
+    case sysTrigEffSFNormUp          : sysInputFolderExtension="TriggerEffSFNormUp";       break;
+    case sysTrigEffSFNormDown        : sysInputFolderExtension="TriggerEffSFNormDown";     break;
+    case sysTriggerEffSFShapeUpEta   : sysInputFolderExtension="TriggerEffSFShapeUpEta";   break;
+    case sysTriggerEffSFShapeDownEta : sysInputFolderExtension="TriggerEffSFShapeDownEta"; break;
+    case sysTriggerEffSFShapeUpPt    : sysInputFolderExtension="TriggerEffSFShapeUpPt";    break;
+    case sysTriggerEffSFShapeDownPt  : sysInputFolderExtension="TriggerEffSFShapeDownPt";  break;
+    case sysMuEffSFUp                : sysInputFolderExtension="SelectionEffSFNormUp";     break;
+    case sysMuEffSFDown              : sysInputFolderExtension="SelectionEffSFNormDown";   break;
+    case sysBtagSFUp                 : sysInputFolderExtension="BtagSFup";     break;
+    case sysBtagSFDown               : sysInputFolderExtension="BtagSFdown";   break;
+    case sysMisTagSFUp               : sysInputFolderExtension="MisTagSFup";   break;
+    case sysMisTagSFDown             : sysInputFolderExtension="MisTagSFdown"; break;
+    default: break;
   }
-  else if(systematicVariation==sysPUdown){
-    sysInputFolderExtension="PUdown";
-    sysInputGenFolderExtension=sysInputFolderExtension;
-  }
-  else if(systematicVariation==sysflatTrigSF       ) sysInputFolderExtension="FlatTriggerSF";
-  else if(systematicVariation==sysTrigEffSFNormUp  ) sysInputFolderExtension="TriggerEffSFNormUp";
-  else if(systematicVariation==sysTrigEffSFNormDown) sysInputFolderExtension="TriggerEffSFNormDown";
-  else if(systematicVariation==sysTriggerEffSFShapeUpEta  ) sysInputFolderExtension="TriggerEffSFShapeUpEta";
-  else if(systematicVariation==sysTriggerEffSFShapeDownEta) sysInputFolderExtension="TriggerEffSFShapeDownEta";
-  else if(systematicVariation==sysTriggerEffSFShapeUpPt   ) sysInputFolderExtension="TriggerEffSFShapeUpPt";
-  else if(systematicVariation==sysTriggerEffSFShapeDownPt ) sysInputFolderExtension="TriggerEffSFShapeDownPt";
-  else if(systematicVariation==sysMuEffSFup   ) sysInputFolderExtension="SelectionEffSFNormUp";
-  else if(systematicVariation==sysMuEffSFdown ) sysInputFolderExtension="SelectionEffSFNormDown";
-  else if(systematicVariation==sysBtagSFUp    ) sysInputFolderExtension="BtagSFup";
-  else if(systematicVariation==sysBtagSFDown  ) sysInputFolderExtension="BtagSFdown";
-  else if(systematicVariation==sysMisTagSFup  ) sysInputFolderExtension="MisTagSFup";
-  else if(systematicVariation==sysMisTagSFdown) sysInputFolderExtension="MisTagSFdown";
+
   // additional (control plot folders): NoWeight, OnlyPUWeight, NoBtagSFWeight;
 
   //  ---
@@ -341,17 +355,17 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "circularity/events/0/10",
     "isotropy/events/0/10"   ,
     // generated top quantities
-    "m^{t and #bar{t}} parton truth #left[#frac{GeV}{c^{2}}#right]/events/0/10"      ,
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1"          ,//20"
+    "m^{t and #bar{t}} parton truth #left[#frac{GeV}{c^{2}}#right]/events/0/10",
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",//20"
     "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth Phase Space/events/0/1",//20"
-    "#phi(t) parton truth/events/0/4"           ,
-    "y^{t and #bar{t}} parton truth/events/0/1"              ,//5"
+    "#phi(t) parton truth/events/0/4",
+    "y^{t and #bar{t}} parton truth/events/0/1",//5"
     "p_{T}(hadronic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
-    "#phi(hadronic t) parton truth/events/0/4"  ,
-    "y(hadronic t) parton truth/events/0/5"     ,
+    "#phi(hadronic t) parton truth/events/0/4",
+    "y(hadronic t) parton truth/events/0/5",
     "p_{T}(leptonic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
-    "#phi(leptonic t) parton truth/events/0/4"  ,
-    "y(leptonic t) parton truth/events/0/5"     ,
+    "#phi(leptonic t) parton truth/events/0/4",
+    "y(leptonic t) parton truth/events/0/5",
     // generated angular distributions
     "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
     "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
@@ -384,21 +398,21 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     // 			     "circularity parton truth/events/0/10",
     // 			     "isotropy parton truth/events/0/10"   ,
     // reconstructed ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/1/1"                         ,//60"
-    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/events/0/1"                     ,//10"
-    "y^{t#bar{t}}/events/0/1"                         ,//2
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/1/1",//60"
+    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/events/0/1",//10"
+    "y^{t#bar{t}}/events/0/1",//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right]/events/0/20",
-    "y^{t and #bar{t}}/events/0/10"                   ,
-    "#phi(leptonic t)-#phi(hadronic t)/events/0/4"    ,                
-    "y(leptonic t)-y(hadronic t)/events/0/4"          ,  
+    "y^{t and #bar{t}}/events/0/10",
+    "#phi(leptonic t)-#phi(hadronic t)/events/0/4",                
+    "y(leptonic t)-y(hadronic t)/events/0/4",  
     // generated ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/1/1"                         ,//60"
-    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1"                     ,//10"
-    "y^{t#bar{t}} parton truth/events/0/1"                         ,//2
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/1/1",//60"
+    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",//10"
+    "y^{t#bar{t}} parton truth/events/0/1",//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right] parton truth/events/0/20",
-    "y^{t and #bar{t}} parton truth/events/0/10"                   ,
-    "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4"    ,                
-    "y(leptonic t)-y(hadronic t) parton truth/events/0/4"          ,
+    "y^{t and #bar{t}} parton truth/events/0/10",
+    "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4",                
+    "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
     // reconstructed lepton quantities
     "p_{T}^{#mu} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
     "#eta^{#mu}/events/0/1" ,
@@ -411,15 +425,15 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) reconstructed Top quantities
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] gen/p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] reco"                    ,
-    "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco"                      ,
-    "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco"                            ,
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] gen/p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] reco",
+    "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
+    "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco",
     "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) reconstructed ttbar quantities
-    "m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco"              ,
-    "p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco"      ,
+    "m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco",
+    "p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco",
     "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
-    "H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco"      ,
+    "H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco",
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
@@ -491,7 +505,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt"][kSig]->Clone());
 
   // ---
-  //    configure histogras
+  //    configure histograms
   // ---
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
@@ -778,12 +792,12 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   if(verbose>0){ 
     std::cout << std::endl;
     std::cout << "systematic variation:" << sysLabel(systematicVariation) << std::endl;
-    std::cout << "lumi[pb]:" << luminosity << std::endl;
-    std::cout << "N(Data):" << Ndata << std::endl;
-    std::cout << "N(BG): "  << NBG   << std::endl;
-    std::cout << "eff: "    << eff   << std::endl;
-    std::cout << "A: "      << A     << std::endl;
-    std::cout << "BR MC: "  << BR    << std::endl;
+    std::cout << "lumi[pb]:      " << luminosity << std::endl;
+    std::cout << "N(Data):       " << Ndata << std::endl;
+    std::cout << "N(BG):         " << NBG   << std::endl;
+    std::cout << "eff:           " << eff   << std::endl;
+    std::cout << "A:             " << A     << std::endl;
+    std::cout << "BR MC:         " << BR    << std::endl;
     std::cout << "ttbar sigfrac: " << sigFrac << std::endl;
     std::cout << "inclusive cross section";
     if(extrapolate) std::cout << " (extrapolated)";
@@ -923,22 +937,22 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	  xSecBin=0;
 	}
 	// check calculation for one example bin
-	TString testVar = "ttbarPt";
+	TString testVar  = "ttbarPt";
 	TString testVar2 = "ttbarMass";
 	int testBin=0;
 	if(verbose>0&&xSecBin!=0&&(variable==testVar||variable==testVar2)&&bin==testBin){
 	  std::cout << std::endl << "differential normalized xSec ";
 	  std::cout << variable+" bin " << bin << ":" << std::endl;
-	  std::cout << "binwidth: " << std::setprecision(3) << std::fixed << binwidth << std::endl;
-	  std::cout << "Ndata(bin): " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
-	  std::cout << "NBG(bin): " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
-	  std::cout << "eff*A(bin): " << std::setprecision(3) << std::fixed << effABin << std::endl;
-	  std::cout << "ttbar sig frac(bin): " << std::setprecision(3) << std::fixed << sigFracBin << std::endl;
-	  std::cout << "Ndata(incl): " << std::setprecision(3) << std::fixed << NdataVariable << std::endl;
-	  std::cout << "NBG(incl): " << std::setprecision(3) << std::fixed << NBGVariable << std::endl;
-	  std::cout << "eff*A(incl): " << std::setprecision(3) << std::fixed << effIncl << std::endl;
+	  std::cout << "binwidth:             " << std::setprecision(3) << std::fixed << binwidth << std::endl;
+	  std::cout << "Ndata(bin):           " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
+	  std::cout << "NBG(bin):             " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
+	  std::cout << "eff*A(bin):           " << std::setprecision(3) << std::fixed << effABin << std::endl;
+	  std::cout << "ttbar sig frac(bin):  " << std::setprecision(3) << std::fixed << sigFracBin << std::endl;
+	  std::cout << "Ndata(incl):          " << std::setprecision(3) << std::fixed << NdataVariable << std::endl;
+	  std::cout << "NBG(incl):            " << std::setprecision(3) << std::fixed << NBGVariable << std::endl;
+	  std::cout << "eff*A(incl):          " << std::setprecision(3) << std::fixed << effIncl << std::endl;
 	  std::cout << "ttbar sig frac(incl): " << std::setprecision(3) << std::fixed << sigFracVariable << std::endl;
-	  std::cout << "result: " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
+	  std::cout << "result:               " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
 	  if(extrapolate){
 	    double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
 	    std::cout << "from diff and incl. xSec: ";
@@ -1160,16 +1174,16 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	    if(getStringEntry(plotList_[plot], 2)=="lepEta") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
+	    if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
 	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
-						     getStringEntry(plotList_[plot], 2)=="topYHad"|| getStringEntry(plotList_[plot], 2)=="topYLep")){
-	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);
-	    }
-	    if(getStringEntry(plotList_[plot], 2)=="lepPt" ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
-	    if(getStringEntry(plotList_[plot], 2)=="ttbarY") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
+						     getStringEntry(plotList_[plot], 2)=="topYHad"|| 
+						     getStringEntry(plotList_[plot], 2)=="topYLep")){
+	                                                      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
+	    if(getStringEntry(plotList_[plot], 2)=="lepPt" )  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
+	    if(getStringEntry(plotList_[plot], 2)=="ttbarY")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
 	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 	    // draw efficiency plots as line
-	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e1");
+	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
 	    // others as histo (stack)
 	    else histo_[plotList_[plot]][sample]->Draw("hist");
 	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
@@ -1178,11 +1192,11 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	  else{ 
 	    // draw data as points
 	    if(sample==kData){ 
-	      histo_[plotList_[plot]][sample]->Draw("p e1 X0 same");
+	      histo_[plotList_[plot]][sample]->Draw("p e X0 same");
 	    }
 	    else{
 	      // draw efficiencies as points
-	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e1 same");
+	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
 	      // draw others as histo (stack)
 	      else histo_[plotList_[plot]][sample]->Draw("hist same");
 	    }
