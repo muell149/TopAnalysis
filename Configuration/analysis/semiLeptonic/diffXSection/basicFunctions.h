@@ -54,34 +54,53 @@ namespace semileptonic {
 		   kWW     , kWZ     , kZZ     , 
 		   /*17*/    /*18*/    /*19*/    /*20*/    /*21*/    /*22*/
 		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW };
+
   int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
 		   kYellow , kMagenta, 10      , kBlack  , 
 		   kYellow , kYellow , kYellow , kYellow , kYellow , kYellow ,
 		   10      , 10      , 10      , 
 		   kMagenta, kMagenta, kMagenta, kMagenta, kMagenta, kMagenta };
 
-  int marker_[] = {20    , 22    , 29     , 23  , 
-		   21    , 27    , 28     , 20  , 
-		   21 , 21 , 21 , 21 , 21 , 21  ,
-		   28    , 28    , 28 ,
-		   27 , 27 , 27 , 27 , 27 , 27 };
+  int marker_[] = {20, 22, 29, 23, 
+		   21, 27, 28, 20, 
+		   21, 21, 21, 21, 21, 21,
+		   28, 28, 28,
+		   27, 27, 27, 27, 27, 27};
 
-  enum systematicVariation {/* 0:*/sysNo          , /* 1:*/sysLumiUp       , /* 2:*/sysLumiDown       , /* 3:*/sysJESUp     ,
-			    /* 4:*/sysJESDown     , /* 5:*/sysJERUp        , /* 6:*/sysJERDown        , /* 7:*/sysTopScaleUp,
-			    /* 8:*/sysTopScaleDown, /* 9:*/sysVBosonScaleUp, /*10:*/sysVBosonScaleDown, /*11:*/sysTopMatchUp,
-			    /*12:*/sysTopMatchDown, /*13:*/sysVBosonMatchUp, /*14:*/sysVBosonMatchDown, /*15:*/sysMuEffSFup ,
-			    /*16:*/sysMuEffSFdown , /*17:*/sysISRFSRup     , /*18:*/sysISRFSRdown     , /*19:*/sysPileUp    ,
-			    /*20:*/sysQCDup       , /*21:*/sysQCDdown      , /*22:*/sysSTopUp         , /*23:*/sysSTopDown  ,
-			    /*24:*/sysBtagSFUp    , /*25:*/sysBtagSFDown   , /*26:*/sysShapeUp        , /*27:*/sysShapeDown ,
-			    /*28:*/sysPUup        , /*29:*/sysPUdown       , /*30:*/sysflatTrigSF     , /*31:*/sysTrigEffSFNormUp,
-			    /*32:*/sysTrigEffSFNormDown    , /*33:*/sysTriggerEffSFShapeUpEta , /*34:*/sysTriggerEffSFShapeDownEta,
-			    /*35:*/sysTriggerEffSFShapeUpPt, /*36:*/sysTriggerEffSFShapeDownPt, /*37:*/sysMisTagSFup              ,
-			    /*38:*/sysMisTagSFdown, /*39:*/sysDiBosUp      , /*40:*/sysDiBosDown}; 
-                            // NOTE: please add new uncertainties directly before sysDiBosUp!
+  enum systematicVariation { /* 0:*/ sysNo,
+			     /* 1:*/ sysLumiUp,                /* 2:*/ sysLumiDown,                
+			     /* 3:*/ sysPUUp,                  /* 4:*/ sysPUDown,                  
+			     /* 5:*/ sysJESUp,                 /* 6:*/ sysJESDown,                 
+			     /* 7:*/ sysJERUp,                 /* 8:*/ sysJERDown,                 
+			     /* 9:*/ sysTrigEffSFNormUp,       /*10:*/ sysTrigEffSFNormDown,        
+			     /*11:*/ sysTriggerEffSFShapeUpEta,/*12:*/ sysTriggerEffSFShapeDownEta,
+			     /*13:*/ sysTriggerEffSFShapeUpPt, /*14:*/ sysTriggerEffSFShapeDownPt,  
+			     /*15:*/ sysMuEffSFUp,             /*16:*/ sysMuEffSFDown, 
+			     /*17:*/ sysBtagSFUp,              /*18:*/ sysBtagSFDown,  
+			     /*19:*/ sysMisTagSFUp,            /*20:*/ sysMisTagSFDown,  
+			     /*21:*/ sysTopScaleUp,            /*22:*/ sysTopScaleDown,            
+			     /*23:*/ sysVBosonScaleUp,         /*24:*/ sysVBosonScaleDown,          
+			     /*25:*/ sysSingleTopScaleUp,      /*26:*/ sysSingleTopScaleDown,     
+			     /*27:*/ sysTopMatchUp,            /*28:*/ sysTopMatchDown,            
+			     /*29:*/ sysVBosonMatchUp,         /*30:*/ sysVBosonMatchDown,         
+			     /*31:*/ sysTopMassUp,             /*32:*/ sysTopMassDown,            
+			     /*33:*/ sysQCDUp,                 /*34:*/ sysQCDDown,                 
+			     /*35:*/ sysSTopUp,                /*36:*/ sysSTopDown,               
+			     /*37:*/ sysDiBosUp,               /*38:*/ sysDiBosDown,              
+			     /*39:*/ sysShapeUp,               /*40:*/ sysShapeDown,
+			     /*41:*/ sysPDFUp,                 /*42:*/ sysPDFDown,    
+			     /*43:*/ ENDOFSYSENUM};
 
-  double ttbarCrossSection=164.4; // combined 2011 CMS XSec
-  double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error
- 
+  double ttbarCrossSection=164.4;                                // combined 2011 CMS XSec
+  double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error 
+                                                                 // --> should contain luminosity error
+                                                                 // --> for MC error bands: luminosity error is subtracted in analyzeTopDiffXSecMonitoring.C
+
+  double scaleFactorTopMassUncertainty=0.9/3.0; // scale factor for top mass uncertainty
+                                                // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
+                                                // --> systematic samples are varied by +/-3.0 GeV 
+                                                // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+
   TString sysLabel(unsigned int sys)
   {
     // this function returns a TString that corresponds
@@ -90,56 +109,56 @@ namespace semileptonic {
     // used functions: none
     // used enumerators: none (label correspond to systematicVariation)
 
-    TString systematicVariationlabel="";
-    if(sys==0 )systematicVariationlabel="sysNo";
-    if(sys==1 )systematicVariationlabel="sysLumiUp";
-    if(sys==2 )systematicVariationlabel="sysLumiDown";
-    if(sys==3 )systematicVariationlabel="sysJESUp";
-    if(sys==4 )systematicVariationlabel="sysJESDown";
-    if(sys==5 )systematicVariationlabel="sysJERUp";
-    if(sys==6 )systematicVariationlabel="sysJERDown";
-    if(sys==7 )systematicVariationlabel="sysTopScaleUp";
-    if(sys==8 )systematicVariationlabel="sysTopScaleDown";
-    if(sys==9 )systematicVariationlabel="sysVBosonScaleUp";
-    if(sys==10)systematicVariationlabel="sysVBosonScaleDown";
-    if(sys==11)systematicVariationlabel="sysTopMatchUp";
-    if(sys==12)systematicVariationlabel="sysTopMatchDown";
-    if(sys==13)systematicVariationlabel="sysVBosonMatchUp";
-    if(sys==14)systematicVariationlabel="sysVBosonMatchDown";
-    if(sys==15)systematicVariationlabel="sysMuEffSFup";
-    if(sys==16)systematicVariationlabel="sysMuEffSFdown";
-    if(sys==17)systematicVariationlabel="sysISRFSRup";
-    if(sys==18)systematicVariationlabel="sysISRFSRdown";
-    if(sys==19)systematicVariationlabel="sysPileUp";
-    if(sys==20)systematicVariationlabel="sysQCDup";
-    if(sys==21)systematicVariationlabel="sysQCDdown";
-    if(sys==22)systematicVariationlabel="sysSTopUp";
-    if(sys==23)systematicVariationlabel="sysSTopDown";
-    if(sys==24)systematicVariationlabel="btagEffSFUp";
-    if(sys==25)systematicVariationlabel="btagEffSFDown";
-    if(sys==26)systematicVariationlabel="sysShapeUp";
-    if(sys==27)systematicVariationlabel="sysShapeDown";
-    if(sys==28)systematicVariationlabel="sysPUup";
-    if(sys==29)systematicVariationlabel="sysPUdown";
-    if(sys==30)systematicVariationlabel="sysflatTrigSF";
-    if(sys==31)systematicVariationlabel="sysTrigEffSFNormUp";
-    if(sys==32)systematicVariationlabel="sysTrigEffSFNormDown";
-    if(sys==33)systematicVariationlabel="sysTriggerEffSFShapeUpEta";
-    if(sys==34)systematicVariationlabel="sysTriggerEffSFShapeDownEta";
-    if(sys==35)systematicVariationlabel="sysTriggerEffSFShapeUpPt";
-    if(sys==36)systematicVariationlabel="sysTriggerEffSFShapeDownPt";
-    if(sys==37)systematicVariationlabel="sysMisTagSFup";
-    if(sys==38)systematicVariationlabel="sysMisTagSFdown";
-    if(sys==39)systematicVariationlabel="sysDiBosUp";
-    if(sys==40)systematicVariationlabel="sysDiBosDown";
-    // check if valid input was chosen
-    if(systematicVariationlabel==""){
-      std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
-      std::cout << "max syst. variation: 20" << std::endl;
-      std::cout << "max syst. variation: " << sys << std::endl;
-      exit(1);
+    switch (sys)
+    {
+      case sysNo                       : return "sysNo";
+      case sysLumiUp                   : return "sysLumiUp";
+      case sysLumiDown                 : return "sysLumiDown";                
+      case sysPUUp                     : return "sysPUUp";                  
+      case sysPUDown                   : return "sysPUDown";                  
+      case sysJESUp                    : return "sysJESUp";
+      case sysJESDown                  : return "sysJESDown";
+      case sysJERUp                    : return "sysJERUp";                 
+      case sysJERDown                  : return "sysJERDown";                
+      case sysTrigEffSFNormUp          : return "sysTrigEffSFNormUp";
+      case sysTrigEffSFNormDown        : return "sysTrigEffSFNormDown";
+      case sysTriggerEffSFShapeUpEta   : return "sysTriggerEffSFShapeUpEta";
+      case sysTriggerEffSFShapeDownEta : return "sysTriggerEffSFShapeDownEta";
+      case sysTriggerEffSFShapeUpPt    : return "sysTriggerEffSFShapeUpPt";
+      case sysTriggerEffSFShapeDownPt  : return "sysTriggerEffSFShapeDownPt";
+      case sysMuEffSFUp                : return "sysMuEffSFUp";            
+      case sysMuEffSFDown              : return "sysMuEffSFDown";
+      case sysBtagSFUp                 : return "sysBtagSFUp";
+      case sysBtagSFDown               : return "sysBtagSFDown";
+      case sysMisTagSFUp               : return "sysMisTagSFUp";
+      case sysMisTagSFDown             : return "sysMisTagSFDown";
+      case sysTopScaleUp               : return "sysTopScaleUp";
+      case sysTopScaleDown             : return "sysTopScaleDown";
+      case sysVBosonScaleUp            : return "sysVBosonScaleUp";
+      case sysVBosonScaleDown          : return "sysVBosonScaleDown";
+      case sysSingleTopScaleUp         : return "sysSingleTopScaleUp";
+      case sysSingleTopScaleDown       : return "sysSingleTopScaleDown";
+      case sysTopMatchUp               : return "sysTopMatchUp";
+      case sysTopMatchDown             : return "sysTopMatchDown";            
+      case sysVBosonMatchUp            : return "sysVBosonMatchUp";          
+      case sysVBosonMatchDown          : return "sysVBosonMatchDown";
+      case sysTopMassUp                : return "sysTopMassUp";  
+      case sysTopMassDown              : return "sysTopMassDown";            
+      case sysQCDUp                    : return "sysQCDUp";           
+      case sysQCDDown                  : return "sysQCDDown";
+      case sysSTopUp                   : return "sysSTopUp";               
+      case sysSTopDown                 : return "sysSTopDown";
+      case sysDiBosUp                  : return "sysDiBosUp";              
+      case sysDiBosDown                : return "sysDiBosDown";
+      case sysShapeUp                  : return "sysShapeUp";              
+      case sysShapeDown                : return "sysShapeDown";  
+      case sysPDFUp                    : return "sysPDFUp";              
+      case sysPDFDown                  : return "sysPDFDown";
+      default                          : std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
+                                         std::cout << "chosen systematic variation:  " << sys            << std::endl;
+                                         std::cout << "maximum systematic variation: " << ENDOFSYSENUM-1 << std::endl;
+                                         return "";
     }
-    return systematicVariationlabel;
   }
 
   TString sampleLabel(unsigned int sample)
@@ -151,28 +170,28 @@ namespace semileptonic {
     // used enumerators: none (label correspond to samples)
 
     TString sampleLabel="";
-    if(sample==kSig  ) sampleLabel="ttbar prompt lepton";
-    if(sample==kBkg  ) sampleLabel="ttbar other";
-    if(sample==kZjets) sampleLabel="Z+jets";
-    if(sample==kWjets) sampleLabel="W+jets";
-    if(sample==kQCD  ) sampleLabel="combined QCD multijet";
-    if(sample==kSTop ) sampleLabel="combined single top";
-    if(sample==kDiBos) sampleLabel="combined diboson";
-    if(sample==kData ) sampleLabel="data";
-    if(sample==kQCDEM1) sampleLabel="QCD electromagnetic enriched 1";
-    if(sample==kQCDEM2) sampleLabel="QCD electromagnetic enriched 2";
-    if(sample==kQCDEM3) sampleLabel="QCD electromagnetic enriched 3";
+    if(sample==kSig)     sampleLabel="ttbar prompt lepton";
+    if(sample==kBkg)     sampleLabel="ttbar other";
+    if(sample==kZjets)   sampleLabel="Z+jets";
+    if(sample==kWjets)   sampleLabel="W+jets";
+    if(sample==kQCD)     sampleLabel="combined QCD multijet";
+    if(sample==kSTop)    sampleLabel="combined single top";
+    if(sample==kDiBos)   sampleLabel="combined diboson";
+    if(sample==kData)    sampleLabel="data";
+    if(sample==kQCDEM1)  sampleLabel="QCD electromagnetic enriched 1";
+    if(sample==kQCDEM2)  sampleLabel="QCD electromagnetic enriched 2";
+    if(sample==kQCDEM3)  sampleLabel="QCD electromagnetic enriched 3";
     if(sample==kQCDBCE1) sampleLabel="QCD heavy quark to electron enriched 1";
     if(sample==kQCDBCE2) sampleLabel="QCD heavy quark to electron enriched 2";
     if(sample==kQCDBCE3) sampleLabel="QCD heavy quark to electron enriched 3";
-    if(sample==kWW) sampleLabel="WW";
-    if(sample==kWZ) sampleLabel="WZ";
-    if(sample==kZZ) sampleLabel="ZZ";
-    if(sample==kSTops  ) sampleLabel="single top production s channel";
-    if(sample==kSATops ) sampleLabel="single anti top production s channel";
-    if(sample==kSTopt  ) sampleLabel="single top production t channel";
-    if(sample==kSATopt ) sampleLabel="single anti top production t channel";
-    if(sample==kSToptW ) sampleLabel="single top production tW channel";
+    if(sample==kWW)      sampleLabel="WW";
+    if(sample==kWZ)      sampleLabel="WZ";
+    if(sample==kZZ)      sampleLabel="ZZ";
+    if(sample==kSTops)   sampleLabel="single top production s channel";
+    if(sample==kSATops)  sampleLabel="single anti top production s channel";
+    if(sample==kSTopt)   sampleLabel="single top production t channel";
+    if(sample==kSATopt)  sampleLabel="single anti top production t channel";
+    if(sample==kSToptW)  sampleLabel="single top production tW channel";
     if(sample==kSAToptW) sampleLabel="single anti top production tW channel";
     return sampleLabel;
 }
@@ -203,8 +222,8 @@ namespace semileptonic {
     double errorUp   = 0.03*result;
     double errorDown = 0.03*result;
     // return requestet SF
-    if(sys==sysMuEffSFup  ) result+=errorUp;
-    if(sys==sysMuEffSFdown) result-=errorDown;
+    if(sys==sysMuEffSFUp  ) result+=errorUp;
+    if(sys==sysMuEffSFDown) result-=errorDown;
     return result;
   }
   
@@ -221,32 +240,40 @@ namespace semileptonic {
     // modified quantities: hist
     // used functions: marker_, color_
     // used enumerators: samples
-    // "filled": = 0: line only, =1: area under plot filled
+    // "filled": 0 - line only
+    //           1 - area under plot filled
 
     hist.SetStats(kFALSE);
-    if(sampleTyp==kData || !filled){
-      if(!filled)hist.SetLineWidth(2);
-      hist.SetLineColor(color_[sampleTyp]);
-      hist.SetMarkerColor(color_[sampleTyp]);
-      if(sampleTyp==kQCD){
+
+    if (color!=0)
+    {
+      hist.SetLineColor(color);
+      if (filled) hist.SetFillColor(color);
+    }
+    else if (!filled || sampleTyp==kData)
+    {
+      if(sampleTyp==kQCD)
+      {
 	hist.SetLineColor(kYellow+1);
 	hist.SetMarkerColor(kYellow+1);
       }
-      if(sampleTyp==kDiBos){
+      else if(sampleTyp==kDiBos)
+      {
 	hist.SetLineColor(kGray);
 	hist.SetMarkerColor(kGray);
       }
+      else
+      {
+	hist.SetLineColor(color_[sampleTyp]);
+	hist.SetMarkerColor(color_[sampleTyp]);
+      }
+
+      if (!filled) hist.SetLineWidth(2.0);
       hist.SetMarkerStyle(marker_[sampleTyp]);
       hist.SetMarkerSize(markersize);
       hist.SetFillStyle(0);
     }
-    else{
-      hist.SetFillColor(color_[sampleTyp]);
-    }
-    if(color!=0){
-      hist.SetLineColor(color);
-      hist.SetFillColor(color);
-    }
+    else hist.SetFillColor(color_[sampleTyp]);
   }
 
   void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY)
@@ -344,7 +371,7 @@ namespace semileptonic {
       }
     }
 
-  void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=3.0, const unsigned int lineStyle=1)
+  void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=2.0, const unsigned int lineStyle=1)
   {
     // this function draws a line withe the chosen coordinates,
     // color and width into the active canvas
@@ -423,7 +450,7 @@ namespace semileptonic {
     if(sample==kWW     ) MCprocess="WW";
     if(sample==kWZ     ) MCprocess="WZ";
     if(sample==kZZ     ) MCprocess="ZZ";
-    if(sample==kQCD    ) MCprocess="QCD";
+    if(sample==kQCD    ) MCprocess="QCD Multijet";
     if(sample==kQCDEM1 ) MCprocess="QCDEM1";
     if(sample==kQCDEM2 ) MCprocess="QCDEM2";
     if(sample==kQCDEM3 ) MCprocess="QCDEM3";
@@ -595,7 +622,9 @@ namespace semileptonic {
       if(kSys==sysTopScaleUp  ) Nevents=930483;  
       if(kSys==sysTopScaleDown) Nevents=967055;  
       if(kSys==sysTopMatchUp  ) Nevents=1062792; 
-      if(kSys==sysTopMatchDown) Nevents=1065232; 
+      if(kSys==sysTopMatchDown) Nevents=1065232;  
+      if(kSys==sysTopMassUp   ) Nevents=1538301; 
+      if(kSys==sysTopMassDown ) Nevents=1606570; 
     }
     // W->lnu+jets MADGRAPH
     else if(sample==kWjets){
@@ -604,7 +633,7 @@ namespace semileptonic {
       Nevents=81352581;
       // Summer11 systematic samples:
       if(kSys==sysVBosonScaleUp  ) Nevents=9784907;  
-      if(kSys==sysVBosonScaleDown) Nevents=10022324; 
+      if(kSys==sysVBosonScaleDown) Nevents = (decayChannel == "electron" ? 10022324/3.0 : 10022324/0.75); 
       if(kSys==sysVBosonMatchUp  ) Nevents=10461655; 
       if(kSys==sysVBosonMatchDown) Nevents=9956679;  
     }
@@ -771,8 +800,8 @@ namespace semileptonic {
     // (ii) more/less QCD
     if(sample==kQCD){
       scale=0.5;
-      if(kSys==sysQCDup  ) weight*=(1.0+scale);
-      if(kSys==sysQCDdown) weight*=(1.0-scale);
+      if(kSys==sysQCDUp  ) weight*=(1.0+scale);
+      if(kSys==sysQCDDown) weight*=(1.0-scale);
     }
     // (iii) more/less single top
     if(sample==kSATops||sample==kSATopt||sample==kSAToptW||sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
@@ -797,9 +826,9 @@ namespace semileptonic {
       std::cout << "WARNING: function lumiweight";
       std::cout << " gives result 1 for sample:" << std::endl;
       std::cout << sampleLabel(sample) << ", " << decayChannel << " channel" << std::endl;
-      std::cout << "used xSec: " << crossSection << std::endl;
-      std::cout << "used Nevents: " << Nevents << std::endl;
-      std::cout << "used luminosity: " << luminosity << std::endl;
+      std::cout << "used xSec:       " << crossSection << std::endl;
+      std::cout << "used Nevents:    " << Nevents      << std::endl;
+      std::cout << "used luminosity: " << luminosity   << std::endl;
     }
     return weight;
   }
@@ -878,7 +907,7 @@ namespace semileptonic {
     if(sample==kDiBos)fileName += "VVPytia6Z2";
     if(sample==kQCD  )fileName += "QCDPythiaZ2";
     if(sample==kSTop )fileName += "SingleTopMadZ2";
-    // subsamples are (hopefully) all located in MergedFiles subfolder
+    // subsamples are all located in subfolder called "MergedFiles"
     if(sample==kWW     )fileName = "MergedFiles/"+fileName+"WWPytia6Z2";
     if(sample==kWZ     )fileName = "MergedFiles/"+fileName+"WZPytia6Z2";
     if(sample==kZZ     )fileName = "MergedFiles/"+fileName+"ZZPytia6Z2";
@@ -907,29 +936,35 @@ namespace semileptonic {
     // Shape variation
     // only for new MC and ttbar signal
     if(sample==kSig){
-      if(sys==sysShapeUp  ) fileName += "MCShapeVarUp"  ;
-      if(sys==sysShapeDown) fileName += "MCShapeVarDown";
+      if(sys==sysShapeUp  ) fileName = "MCShapeUp/"+fileName+"MCShapeVarUp";
+      if(sys==sysShapeDown) fileName = "MCShapeDown/"+fileName+"MCShapeVarDown";
     }
-    // Pile Up
-    // at the moment: no variation for QCD
-    if(sys==sysPileUp&&sample!=kQCD) fileName += "PileUp";
-    // larger ISR/FSR (top only)
-    if((sys==sysISRFSRup  )&&((sample==kSig)||(sample==kBkg))) fileName += "ISRFSRup";
-    if((sys==sysISRFSRdown)&&((sample==kSig)||(sample==kBkg))) fileName += "ISRFSRdown";
+    // Shape variation
+    // only for new MC and ttbar signal
+    if(sample==kSig){
+      if(sys==sysPDFUp  ) fileName = "PDFUp/"+fileName+"PdfVarUp";
+      if(sys==sysPDFDown) fileName = "PDFDown/"+fileName+"PdfVarDown";
+    }
     // Scale
-    // a) top
+    // (a) top
     if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleUp/"+fileName+"ScaleUp";
     if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleDown/"+fileName+"ScaleDown";
-    // b) V+jets
+    // (b) V+jets
     if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleUp/"+fileName+"ScaleUp";
-    if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleDown/"+fileName+"ScaleDown"; 
-    // Match
-    // a) top
+    if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleDown/"+fileName+"ScaleDown";  
+    // (c) SingleTop
+    if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) fileName = "ScaleUp/"+fileName+"ScaleUp";
+    if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) fileName = "ScaleDown/"+fileName+"ScaleDown";  
+    // (a) top   
     if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "MatchUp/"+fileName+"MatchUp";
     if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) fileName = "MatchDown/"+fileName+"MatchDown";
-    // b) V+jets
+    // (b) V+jets
     if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "MatchUp/"+fileName+"MatchUp";
     if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "MatchDown/"+fileName+"MatchDown";
+    // Top Mass
+    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";
+    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
+
     fileName+="PF.root";
     // return output
     return fileName;
@@ -1380,7 +1415,6 @@ namespace semileptonic {
     }
 
   }
-
 
   std::map<TString, std::vector<double> > makeVariableBinning()
     {
