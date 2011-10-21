@@ -36,13 +36,17 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     exit(0);
   }
   // file name for output rootfiles
-  TString outputFileNameUp=analysisFileName;
-  TString outputFileNameDown=analysisFileName;
+  TString outputFileNameUp   = analysisFileName;
+  TString outputFileNameDown = analysisFileName;
   if (doPDFuncertainty) {
-    outputFileNameUp.ReplaceAll  ("PF", "PdfVarUpPF"  );
+    outputFileNameUp.ReplaceAll(inputFolderName, inputFolderName+"/PDFUp");
+    outputFileNameDown.ReplaceAll(inputFolderName, inputFolderName+"/PDFDown");
+    outputFileNameUp.ReplaceAll("PF", "PdfVarUpPF"  );
     outputFileNameDown.ReplaceAll("PF", "PdfVarDownPF");
   } else { 
-    outputFileNameUp.ReplaceAll  ("PF", "MCShapeVarUpPF"  );
+    outputFileNameUp.ReplaceAll(inputFolderName, inputFolderName+"/MCShapeUp");
+    outputFileNameDown.ReplaceAll(inputFolderName, inputFolderName+"/MCShapeDown");
+    outputFileNameUp.ReplaceAll("PF", "MCShapeVarUpPF"  );
     outputFileNameDown.ReplaceAll("PF", "MCShapeVarDownPF");
   }
   // name for folder where tree is read from
@@ -99,9 +103,9 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   // be replaced in part F
   if(save){
     std::cout << "copy old root file, will only replace shifted plots" << std::endl;
-    std::cout << "a) varition up" << std::endl;
+    std::cout << "a) variation up" << std::endl;
     inFile->Cp(analysisFileName, outputFileNameUp);
-    std::cout << "b) varition down" << std::endl;
+    std::cout << "b) variation down" << std::endl;
     inFile->Cp(analysisFileName, outputFileNameDown);
   }
   // loading trees
