@@ -365,7 +365,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       TString Var=variation_[var];
       // loop all bins
       for(int bin=0; bin<=SF_[variable_[i]+Var]->GetNbinsX()+1; ++bin){
-	if(SF_[variable_[i]+Var]->GetBinContent(bin)==1){
+	// Rescaling with factor 1 is allowed for PDF uncertainties
+	if (!doPDFuncertainty && SF_[variable_[i]+Var]->GetBinContent(bin)==1){
 	  std::cout << "ERROR: some distortion SF for "+Var+" variation is 1!" << std::endl;
 	  exit(1);
 	}
