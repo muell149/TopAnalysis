@@ -115,7 +115,7 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   // folder were subsamples can be found
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // folder and name of the (combined) output file
-  TString outputFilename=inputFolder+"/"+TopFilename(sample, sysTag, (std::string)decayChannel);
+  TString outputFilename=inputFolder+"/"+TopFilename(sample, sysTag, std::string(decayChannel));
 
   // ---
   //    container for all subsample files and
@@ -125,13 +125,13 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   // loop subsamples
   for(unsigned int subsample=0; subsample<subSamples_.size(); ++subsample){
     // get subsample file name
-    TString fileName = inputFolder+"/"+TopFilename(subSamples_[subsample], sysTag, (std::string)decayChannel);
+    TString fileName = inputFolder+"/"+TopFilename(subSamples_[subsample], sysTag, std::string(decayChannel));
     // check existence & availability of file
     if((fileName!="no")&&(fileName!="")){
-      TFile* file = new (TFile)(fileName);
-      if(!(file->IsZombie())){ 
+      TFile* file =  TFile::Open(fileName);
+      if(file&&!(file->IsZombie())){ 
 	// N.B.: a luminosity of 1 pb is used, lumi normalization is done later in the main file 
-	files_.push_back(make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, (std::string)decayChannel)));   
+	files_.push_back(make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, std::string(decayChannel))));   
       }
     }
   }
@@ -156,7 +156,7 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
     }
     std::cout << std::endl;
     std::cout << " - " << " output file created: " << outputFilename << std::endl << std::endl;
-    // wait for 3 seconds
+    // wait for 1 second
     sleep(1);    
   }
 
@@ -168,6 +168,11 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   addDir("",files_,output_file, verbose);
   // close output files
   output_file->Close();
+  // close and delete input files
+  for(std::vector< std::pair< TFile*, double > >::const_iterator file=files_.begin(); file!=files_.end(); ++file){
+    file->first->Close();
+    delete file->first;
+  }
 }
 
 // helper function to add and weight all plots in the subsamples
@@ -177,7 +182,7 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, doubl
   std::vector< std::pair< TFile*, double > >::const_iterator first=files.begin();
   first->first->cd(path.c_str());
   TIter nextkey(gDirectory->GetListOfKeys());
-  TKey *key;
+  TKey *key=0;
   while ( (key = (TKey*)nextkey())) {
     // read object from first source file
     first->first->cd(path.c_str());
@@ -216,7 +221,9 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, doubl
       target->cd(path.c_str());
       obj->Write( key->GetName() );
     }
+    delete obj;
   }
   target->Write();
+  delete key;
 }
 
