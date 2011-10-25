@@ -231,7 +231,7 @@ namespace semileptonic {
   // used for ttbar SG and BG (which is mainly from tau decays)
   double BRcorrectionSemileptonic = 0.985608;
   
-  void histogramStyle(TH1& hist, int sampleTyp, bool filled=true, double markersize=1.2, unsigned int color=0)
+  void histogramStyle(TH1& hist, int sampleType, bool filled=true, double markersize=1.2, unsigned int color=0)
   {
     // this function configures the style of a TH1 histogram "hist"
     // using "sampleTyp" to identify the corresponding sample from
@@ -244,36 +244,29 @@ namespace semileptonic {
     //           1 - area under plot filled
 
     hist.SetStats(kFALSE);
-
-    if (color!=0)
-    {
-      hist.SetLineColor(color);
-      if (filled) hist.SetFillColor(color);
-    }
-    else if (!filled || sampleTyp==kData)
-    {
-      if(sampleTyp==kQCD)
-      {
+    if(sampleType==kData || !filled){
+      if(!filled)hist.SetLineWidth(2);
+      hist.SetLineColor(color_[sampleType]);
+      hist.SetMarkerColor(color_[sampleType]);
+      if(sampleType==kQCD){
 	hist.SetLineColor(kYellow+1);
 	hist.SetMarkerColor(kYellow+1);
       }
-      else if(sampleTyp==kDiBos)
-      {
+      if(sampleType==kDiBos){
 	hist.SetLineColor(kGray);
 	hist.SetMarkerColor(kGray);
       }
-      else
-      {
-	hist.SetLineColor(color_[sampleTyp]);
-	hist.SetMarkerColor(color_[sampleTyp]);
-      }
-
-      if (!filled) hist.SetLineWidth(2.0);
-      hist.SetMarkerStyle(marker_[sampleTyp]);
+      hist.SetMarkerStyle(marker_[sampleType]);
       hist.SetMarkerSize(markersize);
       hist.SetFillStyle(0);
     }
-    else hist.SetFillColor(color_[sampleTyp]);
+    else{
+      hist.SetFillColor(color_[sampleType]);
+    }
+    if(color!=0){
+      hist.SetLineColor(color);
+      hist.SetFillColor(color);
+    }
   }
 
   void histStyle2D(TH2& hist, const TString titleHisto, const TString titleX, const TString titleY)
@@ -371,7 +364,7 @@ namespace semileptonic {
       }
     }
 
-  void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=2.0, const unsigned int lineStyle=1)
+  void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color=kBlack, const double lineWidth=2, const unsigned int lineStyle=1)
   {
     // this function draws a line withe the chosen coordinates,
     // color and width into the active canvas
