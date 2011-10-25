@@ -39,7 +39,7 @@ using namespace std;
 const char *USERNAME = getenv("USER");
 const TString inpath(
 		     !strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-		     //!strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" : "./");
+		     // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" : "./");
 const TString outpath("plots/");
 
 
@@ -1253,11 +1253,19 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
 
 // open all input files, set event numbers and cross sections
 void SetupInputFiles() {
-
+    //const double topxsec = 169.9; //157.5
+    const double topxsec = 157.5;
+    const int nEventsTop = 3581947; //without madgraph-pythia-bug filter (eike)
+    //const int nEventsTop = 3701947; //without madgraph-pythia-bug filter (aod)
+    //const int nEventsTop = 3631452; //with madgraph-pythia-bug filter (aod)
+    
+    const int nEventsDYJets = 35101516; //without madgraph-pythia-bug filter
+    //const int nEventsDYJets = 34881569; //with madgraph-pythia-bug filter
+    
     totalEvents[0] = -1; //never scale data
-    totalEvents[1] = 3581947;
-    totalEvents[2] = 3581947;
-    totalEvents[3] = 3581947;
+    totalEvents[1] = nEventsTop;
+    totalEvents[2] = nEventsTop;
+    totalEvents[3] = nEventsTop;
     totalEvents[4] = 814390;
     totalEvents[5] = 809984;
     totalEvents[6] = 210667;
@@ -1265,13 +1273,13 @@ void SetupInputFiles() {
     totalEvents[8] = 4187885;
     totalEvents[9] = 2200000;
     totalEvents[10] = 2032536;
-    totalEvents[11] = 35101516;
+    totalEvents[11] = nEventsDYJets;
     totalEvents[12] = 2186909;
     totalEvents[13] = 2133856;
-    totalEvents[14] = 35101516;
+    totalEvents[14] = nEventsDYJets;
     totalEvents[15] = 2121872;
     totalEvents[16] = 2254925;
-    totalEvents[17] = 35101516;
+    totalEvents[17] = nEventsDYJets;
     totalEvents[18] = 56789563;
     totalEvents[19] = 20258122;
     totalEvents[20] = 35729669;
@@ -1280,12 +1288,13 @@ void SetupInputFiles() {
     totalEvents[23] = 2081560;
     totalEvents[24] = 2030033;
     totalEvents[25] = 1082691;
+    totalEvents[26] = 100000000; //z', ignore
     
     
     sampleCrossSection[0] = 1;
-    sampleCrossSection[1] = 157.5;
-    sampleCrossSection[2] = 157.5;
-    sampleCrossSection[3] = 157.5;
+    sampleCrossSection[1] = topxsec;
+    sampleCrossSection[2] = topxsec;
+    sampleCrossSection[3] = topxsec;
     sampleCrossSection[4] = 7.87;
     sampleCrossSection[5] = 7.87;
     sampleCrossSection[6] = 4.51;
@@ -1308,7 +1317,7 @@ void SetupInputFiles() {
     sampleCrossSection[23] = 2.361E8*5.9E-4; //see    http://cms.cern.ch/iCMS/prep/requestmanagement?dsn=QCD_Pt-20to30_BCtoE_TuneZ2_7TeV-pythia6
     sampleCrossSection[24] = 5.944E7*0.00242; //see    http://cms.cern.ch/iCMS/prep/requestmanagement?dsn=QCD_Pt-30to80_BCtoE_TuneZ2_7TeV-pythia6
     sampleCrossSection[25] = 898200.0*0.0105; //see    http://cms.cern.ch/iCMS/prep/requestmanagement?dsn=QCD_Pt-80to170_BCtoE_TuneZ2_7TeV-pythia
-
+    sampleCrossSection[26] = 0; //z'
     
     // mumu files
     files[kMM][0]= new TFile(inpath.Copy().Append("mumu_1fb.root"));
