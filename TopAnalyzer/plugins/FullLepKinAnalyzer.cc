@@ -109,6 +109,7 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
       if((idx1==0 && idx2==1) || (idx1==1 && idx2==0)){
         cmb = i;
 	foundSolution = true;
+        break;
       }
     }
     if(!foundSolution){
