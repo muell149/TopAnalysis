@@ -41,6 +41,7 @@ const TString outpath("Markus/DiffXS2011/Systematics/plots/");
 //const TString outpath("~wbehrenh/cms/systematicsSept21-output/");
 
 // output format
+//const TString outform(".png");
 const TString outform(".eps");
 
 
@@ -79,7 +80,8 @@ THStack  *sum_sys_errors[1000];
 THStack  *sum_exp_errors[1000];
 THStack  *sum_mod_errors[1000];
 
-TLegend* leg = new TLegend(0.70,0.58,0.95,0.87);
+//TLegend* leg = new TLegend(0.70,0.58,0.95,0.87);
+TLegend* leg = new TLegend(0.25,0.58,0.50,0.87);
 
 
 void setupTotalErrors() {
@@ -147,13 +149,9 @@ void SymmetricAroundZero(TH1* h_ref, TH1* h_var_up, TH1* h_var_down, TH1* h_sys,
     PlusMinus_Average_Up   = (h_var_up->GetBinContent(bin)   + h_var_up->GetBinContent(N_bins+1-bin)  ) / 2.;
     PlusMinus_Average_Down = (h_var_down->GetBinContent(bin) + h_var_down->GetBinContent(N_bins+1-bin)) / 2.;
 
-    //    Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
-    //    Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
-
     Sys_Error_Up   = abs(PlusMinus_Average_Ref - PlusMinus_Average_Up  ) / PlusMinus_Average_Ref;
     Sys_Error_Down = abs(PlusMinus_Average_Ref - PlusMinus_Average_Down) / PlusMinus_Average_Ref;
 
-    //    Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
     Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
     Sys_Error2 = Sys_Error * Sys_Error;
 
@@ -324,7 +322,6 @@ void SystematicErrors() {
  	Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
 	Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
   
-	//	Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
 	Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
 	Sys_Error2 = Sys_Error * Sys_Error;
 
@@ -420,7 +417,6 @@ void SystematicErrors() {
 	Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
 	Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
   
-	//	Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
 	Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
 	Sys_Error2 = Sys_Error * Sys_Error;
 
@@ -518,7 +514,6 @@ void SystematicErrors() {
 	Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
 	Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
   
-	//	Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
 	Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
 	Sys_Error2 = Sys_Error * Sys_Error;
 
@@ -614,7 +609,6 @@ void SystematicErrors() {
 	Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
 	Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
   
-	//	Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
 	Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
 	Sys_Error2 = Sys_Error * Sys_Error;
 
@@ -938,7 +932,6 @@ void SystematicErrors() {
 	Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
 	Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
   
-	//	Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
 	Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
 	Sys_Error2 = Sys_Error * Sys_Error;
 
@@ -1056,8 +1049,15 @@ void SystematicErrors() {
   //  HistColor = kMagenta-6;
   HistColor = kYellow;
 
-  files[11] = new TFile(inpath.Copy().Append("kin_free.root"));
-  files[12] = new TFile(inpath.Copy().Append("kin_scale.root"));
+  //  files[11] = new TFile(inpath.Copy().Append("kin_free.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("kin_scale.root"));
+
+  files[11] = new TFile(inpath.Copy().Append("kin_scale.root"));
+  files[12] = new TFile(inpath.Copy().Append("pythiaBug.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("mll30.root"));
+
+  //  files[11] = new TFile(inpath.Copy().Append("kin_scale.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("kin_scale2.root"));
 
   if( files[11] && !files[11]->IsZombie() &&  files[12] && !files[12]->IsZombie() && isExp ) {
 
@@ -1069,7 +1069,6 @@ void SystematicErrors() {
       TString title = ListOfKeys->At(j)->GetName();
       cout << "   >>>   " << title << endl;
       if( title.Contains("PSE_") )    continue;
-      if( title.Contains("NoFit_") )  continue;
 
       Sys_Error  = 0.;
       Sys_Error2 = 0.;
@@ -1515,10 +1514,9 @@ void SystematicErrors() {
 	  Sys_Error_Up   = abs(h_ref->GetBinContent(bin) - h_var_up->GetBinContent(bin))/h_ref->GetBinContent(bin);
 	  Sys_Error_Down = abs(h_ref->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_ref->GetBinContent(bin);
 
-	  //	  Sys_Error  = TMath::Max ( Sys_Error_Up, Sys_Error_Down);
-
-	  // ***WARNING NEXT LINE!!!*** ==> Divide by 5
+	  // ++++++++ WARNING ++++++++ Divide by 5
 	  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*5.);
+	  // ++++++++ WARNING ++++++++ Divide by 5
 	  Sys_Error2 = Sys_Error * Sys_Error;
 
 	  h_sys->SetBinContent(  bin, Sys_Error  );
@@ -1961,6 +1959,7 @@ void CompactSystematicError() {
 
     if( sum_sys_errors[i]->GetMaximum() > 0. )  hist_max = sum_sys_errors[i]->GetMaximum();
     sum_sys_errors[i]->SetMaximum(1.8 * hist_max);
+    //    sum_sys_errors[i]->SetMaximum(0.01);
     sum_sys_errors[i]->SetMinimum(hist_min);
     sum_sys_errors[i]->GetXaxis()->SetTitle(xaxis->GetTitle());
     //    sum_sys_errors[i]->GetXaxis()->SetTitle(ListOfKeys->At(i)->GetName());

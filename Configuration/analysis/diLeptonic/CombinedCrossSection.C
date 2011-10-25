@@ -23,8 +23,8 @@
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
 #include "TPaveText.h"
-#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
-#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
+#include "../../../../TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
+#include "../../../../TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
 
 
 using namespace std;
@@ -36,15 +36,13 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // path to the ingoing root histogram files
-const char *USERNAME = getenv("USER");
-const TString inpath(
-		     !strcmp(USERNAME, "wbehrenh") ? "./" : "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-		     // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" : "./");
-const TString outpath("plots/");
-
+const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
 
 // output format
-const TString outform(".eps");
+const TString outform(".png");
+//const TString outform(".eps");
+
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
 // output file name for cross section hists
@@ -122,7 +120,7 @@ const Double_t bccAuto = 100000;
 
 
 // number of files to be opened
-const size_t Nfiles = 27; // number of ingoing files per channel, have one more for Z'
+const size_t Nfiles = 26; // number of ingoing files per channel, have one more for Z'
 const size_t Nplots = 9;  // number of plots after merging
 
 // define enums to avoid madnes while reading the code
@@ -2500,11 +2498,16 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
     cout << "    significance     : " << setw(8) << significance << endl;
     cout << "    assumed eff      : " << setw(8) << eff          << endl;
 
-    TString totalXsecName("total_xsec_"); totalXsecName.Append(channelName[channel]).Append("_").Append(selection);
-    TH1 *totalXsec = new TH1F(totalXsecName.Data(), totalXsecName.Data(), 1, -0.5, 0.5);
-    totalXsec->SetBinContent(1, crosssection);
-    totalXsec->SetBinError(1, staterr);
-    diffXsecHistogramList.Add(totalXsec);
+    if(channel==kMM || channel==kEM || channel==kEE){
+      TString totalXsecName("total_xsec_"); totalXsecName.Append(channelName[channel]).Append("_").Append(selection);
+      TH1 *totalXsec = new TH1F(totalXsecName.Data(), totalXsecName.Data(), 1, -0.5, 0.5);
+      totalXsec->SetBinContent(1, crosssection);
+      totalXsec->SetBinError(1, staterr);
+      diffXsecHistogramList.Add(totalXsec);
+      ////////////////////////////////////////////////////
+      //      std::cout << "!!!!!!!!!!!!!!!!!! xsec = " << totalXsec->Integral() << std::endl;
+      ////////////////////////////////////////////////////
+    }
 
     TString totalXsecEffName("total_xsec_PSE_"); totalXsecEffName.Append(channelName[channel]).Append("_").Append(selection);
     TH1 *totalXsecEff = new TH1F(totalXsecEffName.Data(), totalXsecEffName.Data(), 1, -0.5, 0.5);
@@ -2625,6 +2628,16 @@ void CalculateInclusiveCrossSections(const char* selection){
 
    totalErrUp[3]   = TMath::Sqrt(statErr[3]*statErr[3] + systErrUp[3]*systErrUp[3]);
    totalErrDown[3] = TMath::Sqrt(statErr[3]*statErr[3] + systErrDown[3]*systErrDown[3]);
+
+   TString totalXsecName("total_xsec_"); totalXsecName.Append(channelName[kCOMBINED]).Append("_").Append(selection);
+   TH1 *totalXsec = new TH1F(totalXsecName.Data(), totalXsecName.Data(), 1, -0.5, 0.5);
+
+   totalXsec->SetBinContent( 1,  crosss[3]);
+   totalXsec->SetBinError(   1, statErr[3]);
+   diffXsecHistogramList.Add(totalXsec);
+   ////////////////////////////////////////////////////
+   //   std::cout << "!!!!!!!!!!!!!!!!!! xsec = " << totalXsec->Integral() << std::endl;
+   ////////////////////////////////////////////////////
 
    cout << "    CROSS SECTION    : " << setw(8) << crosss[3]     << endl;
    cout << "    stat err         : " << setw(8) << statErr[3]    << endl;
