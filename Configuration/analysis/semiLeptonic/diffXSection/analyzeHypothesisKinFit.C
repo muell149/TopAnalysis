@@ -1088,10 +1088,24 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // ---
   //    change 1D plots into stack plots
   // ---
-  // loop plots -> all 1D plots will become stacked plots
+  // loop plots 
   if(verbose>2) std::cout << std::endl;
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
+    // show kinfit permutation plot as relative plot for signal
+    // and delete this plot for all other samples 
+    if(plotList_[plot].Contains("qAssignment")){
+      TString permutationLabel=plotList_[plot];
+      for(unsigned int sample=kBkg; sample<=kData; ++sample){
+	if(histo_[permutationLabel].count(sample)>0)  histo_[permutationLabel].erase(sample);
+      }
+      if(histo_[permutationLabel].count(kSig)>0){ 
+	histo_[permutationLabel][kSig]->Scale(1./histo_[permutationLabel][kSig]->Integral(0, histo_[permutationLabel][kSig]->GetNbinsX()));
+	axisLabel_[plot].ReplaceAll("events","relative fraction of events");
+	histogramStyle( *histo_[permutationLabel][kSig], kSig, true);
+      }
+    }
+    // otherwise: all 1D plots will become stacked plots
+    else createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
   }
   if(verbose>2) std::cout << std::endl;
 
@@ -1119,7 +1133,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
 	  }
 	  // for efficiency plots: draw grid
-	  if(getStringEntry(plotList_[plot], 1)=="efficiency") plotCanvas_[canvasNumber]->SetGrid(1,1);
+	  if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[canvasNumber]->SetGrid(1,1);
 	  // for histos with variable binning:
 	  if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
 	    // get variable binning
@@ -1171,6 +1185,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	    if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
+	    if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
 	    // restrict x axis for different plots
 	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
