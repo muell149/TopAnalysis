@@ -14,6 +14,9 @@ PUControlDistributions = cms.EDAnalyzer('PUControlDistributionsAnalyzer',
                                         PUEventWeight3BXSource     = cms.InputTag("eventWeightPU","eventWeightPU3BX"),
                                         PUEventWeight3BXUpSource   = cms.InputTag("eventWeightPU","eventWeightPU3BXUp"),
                                         PUEventWeight3BXDownSource = cms.InputTag("eventWeightPU","eventWeightPU3BXDown"),
-                                        DefEventWeight             = cms.InputTag("I","dont","weight")
+                                        PUEventWeight3DSource      = cms.InputTag("eventWeightPU","eventWeightPU3D"),
+                                        PUEventWeight3DUpSource    = cms.InputTag("eventWeightPU","eventWeightPU3DUp"),
+                                        PUEventWeight3DDownSource  = cms.InputTag("eventWeightPU","eventWeightPU3DDown"),
+                                        DefEventWeight             = cms.InputTag("I","dont","mind")
                                         )
 

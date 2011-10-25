@@ -48,6 +48,9 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       TH1F* histoNPUReweighted3BXScaleUp;
       TH1F* histoNPUReweighted3BXScaleDown;
 
+      TH1F* histoNPUReweighted3D;
+      TH1F* histoNPUReweighted3DScaleUp;
+      TH1F* histoNPUReweighted3DScaleDown;
 
       TH1F* histoNPVertex;
       TH1F* histoNPVertexReweighted; 
@@ -58,6 +61,10 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       TH1F* histoNPVertexReweighted3BXScaleUp;
       TH1F* histoNPVertexReweighted3BXScaleDown;
 
+      TH1F* histoNPVertexReweighted3D; 
+      TH1F* histoNPVertexReweighted3DScaleUp;
+      TH1F* histoNPVertexReweighted3DScaleDown;
+
       TH1F* histoEventWeights;
       TH1F* histoEventWeightsUp;
       TH1F* histoEventWeightsDown;
@@ -65,6 +72,10 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       TH1F* histoEventWeights3BX;
       TH1F* histoEventWeights3BXUp;
       TH1F* histoEventWeights3BXDown;   
+
+      TH1F* histoEventWeights3D;
+      TH1F* histoEventWeights3DUp;
+      TH1F* histoEventWeights3DDown;   
 
       TH2F* histoNPUvsNPVertex;
 
@@ -75,6 +86,9 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag inTag_PUEventWeight3BXSource;
       edm::InputTag inTag_PUEventWeight3BXUpSource;
       edm::InputTag inTag_PUEventWeight3BXDownSource;
+      edm::InputTag inTag_PUEventWeight3DSource;
+      edm::InputTag inTag_PUEventWeight3DUpSource;
+      edm::InputTag inTag_PUEventWeight3DDownSource;
       edm::InputTag inTag_PVertexSource; 
       edm::InputTag inTag_defaultEventWeight;
 };

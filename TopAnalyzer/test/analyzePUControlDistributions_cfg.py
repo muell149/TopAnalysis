@@ -26,7 +26,7 @@ process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring("file
 
 #### Number of Events
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 #### Load default configuration
 
