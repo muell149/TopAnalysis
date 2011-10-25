@@ -23,9 +23,16 @@
 #95  TTJets_madgraph_Summer11_cff                  emu_ttbarbg.root            ttbarbg
 #95  TTJets_madgraph_Summer11_cff                  emu_ttbarsignal.root        ttbarsignal
 #95  TTJets_madgraph_Summer11_cff                  emu_ttbarviatau.root        ttbarsignalviatau
-192  TTJets_madgraph_Summer11_cff                  emu_ttbarbg.root            ttbarbg
-192  TTJets_madgraph_Summer11_cff                  emu_ttbarsignal.root        ttbarsignal
-192  TTJets_madgraph_Summer11_cff                  emu_ttbarviatau.root        ttbarsignalviatau
+#192  TTJets_madgraph_Summer11_cff                  emu_ttbarbg.root            ttbarbg
+#192  TTJets_madgraph_Summer11_cff                  emu_ttbarsignal.root        ttbarsignal
+#192  TTJets_madgraph_Summer11_cff                  emu_ttbarviatau.root        ttbarsignalviatau
+
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarbg.root            ttbarbg,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarsignal.root        ttbarsignal,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+
+
+
 
 #884 Files in DY->Jets
 #442  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dyee50inf.root           dyee50inf
@@ -34,9 +41,9 @@
 #221  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dyee50inf.root           dyee50inf
 #221  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dymumu50inf.root         dymumu50inf
 #221  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dytautau50inf.root       dytautau50inf
-111  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dyee50inf.root           dyee50inf
-111  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dymumu50inf.root         dymumu50inf
-111  DYJetsToLL_M50_madgraph_Summer11_cff          emu_dytautau50inf.root       dytautau50inf
+111  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          emu_dyee50inf.root           dyee50inf,runOnAOD=True
+111  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          emu_dymumu50inf.root         dymumu50inf,runOnAOD=True
+111  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          emu_dytautau50inf.root       dytautau50inf,runOnAOD=True
 
 200  ..wlnujets_MadgraphZ2_Summer11_AOD_cff.py emu_wtolnu.root                 wjets,runOnAOD=True
 300  ..qcdmu15enriched_Pythia6_Summer11_AOD_cff  emu_qcdmu15.root qcdmu15,runOnAOD=True
@@ -70,12 +77,16 @@
 20  ..singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff  mumu_singleantitop_tw.root   singleantitop,runOnAOD=True
 20  ..singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff      mumu_singletop_tw.root       singletop,runOnAOD=True
 
-192  TTJets_madgraph_Summer11_cff                  mumu_ttbarbg.root            ttbarbg
-192  TTJets_madgraph_Summer11_cff                  mumu_ttbarsignal.root        ttbarsignal
-192  TTJets_madgraph_Summer11_cff                  mumu_ttbarviatau.root        ttbarsignalviatau
+#192  TTJets_madgraph_Summer11_cff                  mumu_ttbarbg.root            ttbarbg
+#192  TTJets_madgraph_Summer11_cff                  mumu_ttbarsignal.root        ttbarsignal
+#192  TTJets_madgraph_Summer11_cff                  mumu_ttbarviatau.root        ttbarsignalviatau
 
-300  DYJetsToLL_M50_madgraph_Summer11_cff          mumu_dymumu50inf.root         dymumu50inf
-150  DYJetsToLL_M50_madgraph_Summer11_cff          mumu_dytautau50inf.root       dytautau50inf
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarbg.root            ttbarbg,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarsignal.root        ttbarsignal,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+
+300  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          mumu_dymumu50inf.root         dymumu50inf,runOnAOD=True
+150  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          mumu_dytautau50inf.root       dytautau50inf,runOnAOD=True
 
 200  ..wlnujets_MadgraphZ2_Summer11_AOD_cff.py mumu_wtolnu.root                 wjets,runOnAOD=True
 300  ..qcdmu15enriched_Pythia6_Summer11_AOD_cff  mumu_qcdmu15.root qcdmu15,runOnAOD=True
@@ -101,12 +112,18 @@
 20  ..singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff  ee_singleantitop_tw.root   singleantitop,runOnAOD=True
 20  ..singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff      ee_singletop_tw.root       singletop,runOnAOD=True
 
-192  TTJets_madgraph_Summer11_cff                  ee_ttbarbg.root            ttbarbg
-192  TTJets_madgraph_Summer11_cff                  ee_ttbarsignal.root        ttbarsignal
-192  TTJets_madgraph_Summer11_cff                  ee_ttbarviatau.root        ttbarsignalviatau
+#192  TTJets_madgraph_Summer11_cff                  ee_ttbarbg.root            ttbarbg
+#192  TTJets_madgraph_Summer11_cff                  ee_ttbarsignal.root        ttbarsignal
+#192  TTJets_madgraph_Summer11_cff                  ee_ttbarviatau.root        ttbarsignalviatau
 
-300  DYJetsToLL_M50_madgraph_Summer11_cff          ee_dyee50inf.root           dyee50inf
-150  DYJetsToLL_M50_madgraph_Summer11_cff          ee_dytautau50inf.root       dytautau50inf
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarbg.root            ttbarbg,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarsignal.root        ttbarsignal,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+
+#300  DYJetsToLL_M50_madgraph_Summer11_cff          ee_dyee50inf.root           dyee50inf
+#150  DYJetsToLL_M50_madgraph_Summer11_cff          ee_dytautau50inf.root       dytautau50inf
+300  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          ee_dyee50inf.root           dyee50inf,runOnAOD=True
+150  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          ee_dytautau50inf.root       dytautau50inf,runOnAOD=True
 
 200  ..wlnujets_MadgraphZ2_Summer11_AOD_cff.py ee_wtolnu.root                 wjets,runOnAOD=True
 200 ..qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff   ee_qcdem2030.root      qcdem2030,runOnAOD=True
