@@ -107,6 +107,11 @@ else:
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
 ####################################################################
+
+# Pythia rejection
+process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+# adds process.totalKinematicsFilter
+
 # trigger filtering
 
 process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi")
@@ -325,6 +330,7 @@ signal = False
 isdata = False
 alsoViaTau = False
 useGenCutsInTopSignal = True
+filterMadgraphPythiaBug = False
 mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root"
 
 if mcname == 'realdata':
@@ -334,20 +340,24 @@ if mcname == 'ttbarsignal':
     topfilter = True
     signal = True
     viaTau = False
+    filterMadgraphPythiaBug = True
 
 if mcname == 'ttbarsignalviatau':
     topfilter = True
     signal = True
     viaTau = True
+    filterMadgraphPythiaBug = True
 
 if mcname == 'ttbarsignalplustau':
     topfilter = True
     signal = True
     viaTau = False
     alsoViaTau = True
+    filterMadgraphPythiaBug = True
 
 if mcname == 'ttbarbg':
     topfilter = True
+    filterMadgraphPythiaBug = True
 
 if mcname == 'dyee1020':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToEE_M20.root"
@@ -390,18 +400,21 @@ if mcname == 'dyee50inf':
     zfilter = True
     zfilterValue = 11
     zrange = (50,1e9)
+    filterMadgraphPythiaBug = True
 
 if mcname == 'dymumu50inf':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root"
     zfilter = True
     zfilterValue = 13
     zrange = (50,1e9)
+    filterMadgraphPythiaBug = True
 
 if mcname == 'dytautau50inf':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root"
     zfilter = True
     zfilterValue = 15
     zrange = (50,1e9)
+    filterMadgraphPythiaBug = True
 
 if mcname == 'singleantitop':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root"
@@ -411,6 +424,7 @@ if mcname == 'singletop':
 
 if mcname == 'wjets':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root"
+    filterMadgraphPythiaBug = True
 
 if mcname == 'ww':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WWto2l2nu_tuneZ2.root"
@@ -446,8 +460,11 @@ if mcname == 'qcdbcem80170':
     mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia.root"
 
 if options.pu != '':
-    print "Using user-definded PU file"
+    print "Using user-definded PU file", options.pu
     mcpufile = options.pu
+
+filterMadgraphPythiaBug = filterMadgraphPythiaBug and options.runOnAOD
+print "Madgraph/Pythia energy/momentum conservation filter: ", filterMadgraphPythiaBug
 
 #-------------------------------------------------
 # process configuration
@@ -1073,6 +1090,8 @@ if options.runOnMC and not options.syncExcercise:
     for pathname in pathnames:
         getattr(process, pathname).replace(process.selectedPatJets,
                                         process.scaledJetEnergy * process.selectedPatJets)
+        if filterMadgraphPythiaBug:
+            getattr(process, pathname).insert(0, cms.Sequence(process.totalKinematicsFilter))
 
     process.selectedPatJets.src = cms.InputTag("scaledJetEnergy", "patJets")
     process.highMETs.src = cms.InputTag("scaledJetEnergy", "patMETs")
