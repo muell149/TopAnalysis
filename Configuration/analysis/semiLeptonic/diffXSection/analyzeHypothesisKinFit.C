@@ -1320,5 +1320,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   
   // delete pointer
   delete leg0;
+  closeStdTopAnalysisFiles(files_);
 }
 

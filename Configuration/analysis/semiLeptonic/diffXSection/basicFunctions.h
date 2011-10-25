@@ -1015,8 +1015,8 @@ namespace semileptonic {
 	if(sample==kData) fileName = dataFile;
 	// if file exists - save in map
 	if((fileName!="no")&&(fileName!="")){
-	  TFile* file = new (TFile)(fileName);
-	  if(!(file->IsZombie())) files_[sample]= file;
+	  TFile* file = TFile::Open(fileName);
+	  if(file&&!(file->IsZombie())) files_[sample]= file;
 	}
       }
       return files_;
@@ -1843,6 +1843,20 @@ namespace semileptonic {
     if(value<0) return -1.0;
     return 0;
   }
+
+  void closeStdTopAnalysisFiles(std::map<unsigned int, TFile*> files_)
+    {
+      // this function closes and deletes the files saved in "files_"
+      // modified quantities: files_
+      // used functions: NONE
+      // used enumerators: NONE
+
+      // close and delete input files
+      for(std::map<unsigned int, TFile*>::const_iterator file=files_.begin(); file!=files_.end(); ++file){
+	file->second->Close();
+	delete file->second;
+      }
+    }
 
 
 #ifdef DILEPTON_MACRO

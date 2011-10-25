@@ -431,5 +431,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
       }
     }
   }
+  // delete pointer
+  closeStdTopAnalysisFiles(files_);
 }
 
