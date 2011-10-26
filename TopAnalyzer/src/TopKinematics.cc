@@ -611,6 +611,9 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "topYLepPartonTruth"   );  
     bookVariable(fs, "topPhiLepPartonTruth" );
     bookVariable(fs, "lepTopMassPartonTruth");
+    // lepton quantities
+    bookVariable(fs, "lepPtPartonTruth"     );
+    bookVariable(fs, "lepEtaPartonTruth"    );
   }
 }
 
@@ -682,6 +685,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genTtbarMass     =-9999;
   double genDeltaPhi      =-9999;
   double genDeltaRapidity =-9999;
+  double genLepPt         =-9999;
+  double genLepEta        =-9999;
   double sumRapidity      =-9999;
   double HTgen            =-9999;
   double hadTopGenPt      =-9999;
@@ -777,6 +782,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       lepTopGenRapidity= lepTopGen->rapidity();
       lepTopGenPhi     = lepTopGen->phi();
       lepTopGenMass    = lepTopGen->mass();
+      genLepPt         = tops.singleLepton()->pt();
+      genLepEta        = tops.singleLepton()->eta();
 
       // fill pt correlation plot for ttbar pair
       corrs_.find("ttbarPt_"  )->second->Fill( genTtbar.pt()      , recTtbar.pt()       , weight );
@@ -1051,6 +1058,9 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "topYLepPartonTruth"    , lepTopGenRapidity, weight );  
   fillValue( "topPhiLepPartonTruth"  , lepTopGenPhi     , weight );
   fillValue( "lepTopMassPartonTruth" , lepTopGenMass    , weight );
+  fillValue( "lepPtPartonTruth"      , genLepPt , weight );      
+  fillValue( "lepEtaPartonTruth"     , genLepEta, weight );   
+
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
 }
