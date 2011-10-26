@@ -23,8 +23,8 @@
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
 #include "TPaveText.h"
-#include "../../../../TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
-#include "../../../../TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
+#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
+#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
 
 
 using namespace std;
@@ -36,12 +36,17 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // path to the ingoing root histogram files
-const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
+const char *USERNAME = getenv("USER");
+const TString inpath(
+        !strcmp(USERNAME, "wbehrenh") ? "./" : 
+        // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
+        "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+const TString outpath("plots/");
+//const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
+
 
 // output format
-const TString outform(".png");
-//const TString outform(".eps");
+const TString outform(".eps");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -73,9 +78,12 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kFALSE;
+const bool doPrintControlPlots = kTRUE;
+// also print same sign control plots?
+const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
-const bool drawSystematicErrorBand = kTRUE;
+const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
+const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
 const bool PAS = kFALSE;
 // do you want a legend in the plots?
@@ -86,6 +94,11 @@ bool drawRatioPlot = kTRUE && !PAS;
 const bool normaliseToUnitArea = kTRUE;
 // preliminary?
 const bool isPreliminary = kTRUE;
+
+const double topxsec = 169.9; //157.5
+// const double topxsec = 157.5;
+const double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
+
 // luminosity used to normalise MC in plots and to calcutate cross sections
 const Double_t lumi = 1143.221;
 //const Double_t lumi = 22743;
@@ -120,7 +133,7 @@ const Double_t bccAuto = 100000;
 
 
 // number of files to be opened
-const size_t Nfiles = 26; // number of ingoing files per channel, have one more for Z'
+const size_t Nfiles = 27; // number of ingoing files per channel, have one more for Z'
 const size_t Nplots = 9;  // number of plots after merging
 
 // define enums to avoid madnes while reading the code
@@ -242,6 +255,7 @@ void FillLegend(TLegend* leg, TH1* hist[], double factor=1.) {
 
 
 // helper function for axis layout
+// sets an exponent on the y axis unless values are in 0.5 .. 100
 void FormatHisto(TH1 *histo) {
     double max = histo->GetMaximum();
     histo->GetYaxis()->SetNoExponent(max >= 0.5 && max <= 100);
@@ -700,7 +714,6 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     Canvas->Clear();
     hstack->Draw("HIST");
     FormatHisto(hstack->GetHistogram());
-
     
     // set axis titles
     TAxis *xaxis;
@@ -751,9 +764,9 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     mergedhists[kDATA]->Draw("same,e1");
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
     setex1->Draw();
-    
+
     TLegend* leg = new TLegend(0.67,0.58,0.92,0.87);
-    
+
     if (channel == kEE) {
       FillLegend(leg, mergedhists, zElCorr);
     }
@@ -780,51 +793,88 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
 
     // draw systematics error band
     TH1* syshist;
-    if(drawSystematicErrorBand){
-      syshist = (TH1*)hists[1]->Clone();
-      
-      for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
-      
-        Double_t binc = 0;
-	for(size_t j=1; j<Nplots; ++j){
-	  binc += mergedhists[j]->GetBinContent(i);
-	}
-        syshist->SetBinContent(i, binc);
-	
-	// calculate uncertainty: lumi uncertainty
-	Double_t binerr2 = binc*binc*lumierr*lumierr;
-	Double_t bgunc = 0; // 30% uncertainty on BG from MC
-	Double_t dyunc = 0; // 50% uncertainty on rescaled DY
-	
-	for(size_t j=3; j<Nplots; ++j){
-	  
-	  if(doDYcorrection && (moduleStr.Contains("7") || moduleStr.Contains("8") || moduleStr.Contains("9"))){
-            if(j==kDYEM){
-	      dyunc += mergedhists[j]->GetBinContent(i)*0.5;
-	    }else{
-	      bgunc += mergedhists[j]->GetBinContent(i)*0.3;
-	    }
-	  } else{
-	    bgunc += mergedhists[j]->GetBinContent(i)*0.3;
-	  }
-	}
-		
-	binerr2 += (bgunc*bgunc);
-	binerr2 += (dyunc*dyunc);
-	
-        syshist->SetBinError(i, TMath::Sqrt(binerr2));
-      }
-      
-      syshist->SetFillStyle(3004);
-      syshist->SetFillColor(kBlack);
-      leg->AddEntry( syshist, "uncertainty", "f" );
-
-      syshist->Draw("same,e2");
-      
-      TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
-      setex2->Draw();
-    }
+    if (drawSystematicErrorBandBackgroundAndLumi) {
+        syshist = (TH1*)hists[1]->Clone();
+        
+        for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
+        
+            Double_t binc = 0;
+            for(size_t j=1; j<Nplots; ++j){
+                binc += mergedhists[j]->GetBinContent(i);
+            }
+            syshist->SetBinContent(i, binc);
             
+            // calculate uncertainty: lumi uncertainty
+            Double_t binerr2 = binc*binc*lumierr*lumierr;
+            Double_t bgunc = 0; // 30% uncertainty on BG from MC
+            Double_t dyunc = 0; // 50% uncertainty on rescaled DY
+            
+            for(size_t j=3; j<Nplots; ++j){
+            
+                if(doDYcorrection && (moduleStr.Contains("7") || moduleStr.Contains("8") || moduleStr.Contains("9"))){
+                    if(j==kDYEM){
+                        dyunc += mergedhists[j]->GetBinContent(i)*0.5;
+                    }else{
+                        bgunc += mergedhists[j]->GetBinContent(i)*0.3;
+                    }
+                } else{
+                    bgunc += mergedhists[j]->GetBinContent(i)*0.3;
+                }
+            }
+                    
+            binerr2 += (bgunc*bgunc);
+            binerr2 += (dyunc*dyunc);
+            
+            syshist->SetBinError(i, TMath::Sqrt(binerr2));
+        }
+        
+        syshist->SetFillStyle(3004);
+        syshist->SetFillColor(kBlack);
+        leg->AddEntry( syshist, "uncertainty", "f" );
+
+        syshist->Draw("same,e2");
+        
+        TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
+        setex2->Draw();
+    }
+    if (drawSystematicErrorBandTopXsecErr) {
+        syshist = (TH1*)hists[1]->Clone();
+        
+        for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
+        
+            Double_t binc = 0;
+            for(size_t j=1; j<Nplots; ++j){
+                binc += mergedhists[j]->GetBinContent(i);
+            }
+            syshist->SetBinContent(i, binc);
+            
+            // calculate uncertainty: lumi uncertainty
+            Double_t binerr2 = binc*binc*lumierr*lumierr;
+            Double_t topunc = 0; // uncertainty on top xsec
+            
+            double topRelUnc = TMath::Sqrt(topxsecErr2)/topxsec;
+            for (size_t j=1; j<=3; ++j) { //for signal:
+                topunc += mergedhists[j]->GetBinContent(i)*topRelUnc;
+            }
+                    
+            binerr2 += (topunc*topunc);
+            
+            syshist->SetBinError(i, TMath::Sqrt(binerr2));
+        }
+        
+        syshist->SetFillStyle(3004);
+        syshist->SetFillColor(kBlack);
+        leg->AddEntry( syshist, "uncertainty", "f" );
+
+        syshist->Draw("same,e2");
+        
+        TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
+        setex2->Draw();
+    }
+    if (drawSystematicErrorBandBackgroundAndLumi && drawSystematicErrorBandTopXsecErr) {
+        std::cerr << "Warning: dont draw two different error bands!\n";
+        exit(1);
+    }
     if (drawLegend) leg->Draw("same");
 
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
@@ -1011,8 +1061,8 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     }
 
     // draw systematics error band
-    TH1* syshist;
-    if(drawSystematicErrorBand){
+    TH1* syshist = 0;
+    if(drawSystematicErrorBandBackgroundAndLumi){
       syshist = (TH1*)hists[1]->Clone();
       
       for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
@@ -1234,7 +1284,7 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
         cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
       } else{
         Double_t nevents = weight->GetEntries();
-        Double_t crosssection = 157.5;
+        Double_t crosssection = topxsec;
         Double_t binw = hist->GetBinWidth(1);
         wgt = crosssection/nevents/binw;
       }
@@ -1251,14 +1301,12 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
 
 // open all input files, set event numbers and cross sections
 void SetupInputFiles() {
-    //const double topxsec = 169.9; //157.5
-    const double topxsec = 157.5;
-    const int nEventsTop = 3581947; //without madgraph-pythia-bug filter (eike)
+    //const int nEventsTop = 3581947; //without madgraph-pythia-bug filter (eike)
     //const int nEventsTop = 3701947; //without madgraph-pythia-bug filter (aod)
-    //const int nEventsTop = 3631452; //with madgraph-pythia-bug filter (aod)
+    const int nEventsTop = 3631452; //with madgraph-pythia-bug filter (aod)
     
-    const int nEventsDYJets = 35101516; //without madgraph-pythia-bug filter
-    //const int nEventsDYJets = 34881569; //with madgraph-pythia-bug filter
+    //const int nEventsDYJets = 35101516; //without madgraph-pythia-bug filter
+    const int nEventsDYJets = 34881569; //with madgraph-pythia-bug filter
     
     totalEvents[0] = -1; //never scale data
     totalEvents[1] = nEventsTop;
@@ -1461,7 +1509,7 @@ void CreateControlPlots() {
     PrintPlot("analyzeElecs2", "pf_iso", kEE, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 4);
     PrintPlot("analyzeMuons2", "pf_iso", kEM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
     PrintPlot("analyzeMuons2", "pf_iso", kMM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
-
+//return;
     // STEP 3
     PrintPlotAll("analyzeUnscaledVertex", "multi", "N_{vtx}", "N_{events} / bin", 0, -1, kFALSE, kFALSE);
     PrintPlotAll("analyzeVertex2", "multi", "N_{vtx}", "N_{events} / bin", 0, -1, kFALSE, kFALSE);
@@ -1509,9 +1557,9 @@ void CreateControlPlots() {
     PrintPlot("analyzeLeptonPair3", "DimassRC_EE", kEE,       "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair3", "DimassRC_EE", kCOMBINED, "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
 
-    PrintPlot("analyzeLeptonPair3SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
-    PrintPlot("analyzeLeptonPair3SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
-    PrintPlot("analyzeLeptonPair3SS", "DimassWC_EE", kCOMBINED, "M_{e^{#pm}e^{#pm}} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair3SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair3SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair3SS", "DimassWC_EE", kCOMBINED, "M_{e^{#pm}e^{#pm}} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
 
     PrintPlotAll("analyzeMuons4",       "multi",     "N_{muons}",        "N_{events} / bin", 0.0, -1,0,0);
     PrintPlot("analyzeLeptonPair4", "D_eta_elecsRC", kEE, "eta1-eta2", "N_{events} / bin", -1, -1, kFALSE, kFALSE, 1);
@@ -1534,9 +1582,9 @@ void CreateControlPlots() {
     PrintPlotAll("analyzeMuons6",       "pt",          "p_{T,#mu} [GeV]",  "N_{#mu} / bin",  0.0, -1,0,0,5);
     PrintPlotAll("analyzeMuons6",       "eta",         "#eta_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,2);
     
-    PrintPlotAll("analyzeMuons6SS",       "pt",        "p_{T,#mu} [GeV]",  "N_{#mu} / bin",  0.0, -1,0,0,5);
-    PrintPlotAll("analyzeMuons6SS",       "eta",       "#eta_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,2);
-    PrintPlotAll("analyzeMuons6SS",       "pf_iso",    "pf_iso_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,4);
+//     PrintPlotAll("analyzeMuons6SS",       "pt",        "p_{T,#mu} [GeV]",  "N_{#mu} / bin",  0.0, -1,0,0,5);
+//     PrintPlotAll("analyzeMuons6SS",       "eta",       "#eta_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeMuons6SS",       "pf_iso",    "pf_iso_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,4);
 
     PrintPlotAll("analyzeElecs6",       "multi",       "N_{e}",           "N_{events} / bin",  0.0, -1,0,0);
     PrintPlotAll("analyzeElecs6",       "pt",          "p_{T,e} [GeV]",   "N_{e} / bin",     0.0, -1,0,0,5);
@@ -1556,9 +1604,9 @@ void CreateControlPlots() {
     PrintPlot("analyzeLeptonPair6", "DimassRC_EE", kEE,       "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair6", "DimassRC_EE", kCOMBINED, "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
 
-    PrintPlot("analyzeLeptonPair6SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
-    PrintPlot("analyzeLeptonPair6SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
-    PrintPlot("analyzeLeptonPair6SS", "DimassWC_EE", kCOMBINED, "M_{e^{#pm}e^{#pm}} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair6SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair6SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair6SS", "DimassWC_EE", kCOMBINED, "M_{e^{#pm}e^{#pm}} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
 
     PrintPlotAll("analyzeVertex6", "multi", "N_{vtx}", "N_{events} / bin", 0, -1, kFALSE, kFALSE);
 
@@ -1673,9 +1721,9 @@ void CreateControlPlots() {
     PrintPlot("analyzeLeptonPair9", "DimassRC_EE", kEE,       "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair9", "DimassRC_EE", kCOMBINED, "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
 
-    PrintPlot("analyzeLeptonPair9SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
-    PrintPlot("analyzeLeptonPair9SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
-    PrintPlot("analyzeLeptonPair9SS", "DimassWC_EE", kCOMBINED, "M_{e^{#pm}e^{#pm}} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair9SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair9SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
+//     PrintPlot("analyzeLeptonPair9SS", "DimassWC_EE", kCOMBINED, "M_{e^{#pm}e^{#pm}} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
 
     PrintPlotAll("analyzeVertex9", "multi", "N_{vtx}", "N_{events} / bin", 0, -1, kFALSE, kFALSE);
 
@@ -1688,7 +1736,8 @@ void CreateControlPlots() {
 //********************************************************************************************
 //********************************************************************************************
 //********************************************************************************************
-
+    if (! doPrintControlPlotsSameSign) return;
+    
     PrintPlotAll("analyzeJets3SS",       "multi",       "N_{jets}",         "N_{events} / bin", 1.0, -1,0,1);
     PrintPlotAll("analyzeJets3SS",       "multiTCHEM",  "N_{tags,TCHEL}",   "N_{events} / bin", 1.0, -1,0,1);
     PrintPlotAll("analyzeJets3SS",       "pt",        "p_{T,jet} [GeV]",  "N_{jets} / bin", 0.0, -1,0,0,5);
@@ -3382,7 +3431,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
       Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
 
-//       // print summary table for all channels
+//       // print summary table for all channels (for Johannes)
 //       std::cout << "BCC Corrections done: " << particle << " " << quantity << std::endl;
 //       for (int bin = 0; bin < nbins; ++bin) {
 // 	double y = bccCrossGraph->GetY()[bin];
@@ -3635,6 +3684,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Double_t totalErrUpCombined[nbins];
     Double_t totalErrDownCombined[nbins];
    
+    gROOT->ForceStyle(); //somehow combined plots have strange labels otherwise
     PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPrefix);
     PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPrefix);
     PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPrefix);
@@ -4781,7 +4831,7 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
 
 
 // main function
-void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double xsec = 157.5) {
+void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double xsec = topxsec) {
     for (int i = 0; btagSFAlgos[i]; ++i)
         btagSFMap[btagSFAlgos[i]] = btagSFValues[i];
 
@@ -4852,11 +4902,10 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     }
 
     setHHStyle(*gStyle);
-    gROOT->ForceStyle();
     
     // Print control plots
     if (doPrintControlPlots) CreateControlPlots();
-    
+
     // Calculate differential cross sections
     TGaxis::SetMaxDigits(2);
 
@@ -4869,6 +4918,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     GetBtagEfficiencyInBins("TCHEL",  "Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     
+    //return;
     const Int_t nbinsLepPt = 5;
     const Double_t binsLepPt[nbinsLepPt+1] = {20, 40, 70, 120, 180, 400};
     const Double_t binCenterLepPt[nbinsLepPt] = {bccAuto-2., bccAuto,  bccAuto+3.,  bccAuto+3., bccAuto};
