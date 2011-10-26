@@ -5,8 +5,8 @@
 #include <TMath.h>
 
 TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, int verbose);
-TH1F* distort   (const TH1& hist, TString variation, TString variable, double distortParameter, int verbose);
-double linSF(const double x, const double xmax, const double a, const double b, double distortParameter);
+TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
+double linSF(const double x, const double xmax, const double a, const double b);
 
 void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
@@ -291,21 +291,18 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   if(verbose>0) std::cout << "original parton level phase space plots loaded successfully" << std::endl;
 
   // B2 distort distributions
-  double distortParameter=2;
-  if(verbose>0) std::cout << "performing a fit and change parameter for Y and otherwise a linear distortion" /*<<" with parameter " << distortParameter*/ << std::endl;
+  if(verbose>0) std::cout << "performing a fit and change parameter for Y(ttbar,top) and m(ttbar), otherwise a linear distortion is performed" << std::endl;
   // loop all variables
   for(unsigned int i=0; i<variable_.size();++i){
     // loop all variations 
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
-      // loop all bins
-      //for(int bin=0; bin<=plotsScaled_[variable_[i]+"PartonTruth"+Var]->GetNbinsX()+1; ++bin){
-        if (doPDFuncertainty) {
-          plotsScaled_[variable_[i]+"PartonTruth"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], inputFolderName,  verbose-1);
-        } else {
-          plotsScaled_[variable_[i]+"PartonTruth"+Var]=distort   (*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], distortParameter, verbose-1);
-        }
-	//}
+      if (doPDFuncertainty) {
+	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], inputFolderName,  verbose-1);
+      } 
+      else {
+	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distort   (*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], verbose-1);
+      }
     }
   }
   
@@ -365,9 +362,10 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       TString Var=variation_[var];
       // loop all bins
       for(int bin=0; bin<=SF_[variable_[i]+Var]->GetNbinsX()+1; ++bin){
-	// Rescaling with factor 1 is allowed for PDF uncertainties
-	if (!doPDFuncertainty && SF_[variable_[i]+Var]->GetBinContent(bin)==1){
-	  std::cout << "ERROR: some distortion SF for "+Var+" variation is 1!" << std::endl;
+	// search for negative SFs
+	// but only in non-empty bins
+	if (SF_[variable_[i]+Var]->GetBinContent(bin)<0.&&plots_[variable_[i]+"PartonTruth"]->GetBinContent(bin)>0.){
+	  std::cout << "ERROR: distortion SF for variable "+variable_[i]+" variation "+Var+" bin " << bin << " is negative!" << std::endl;
 	  exit(1);
 	}
       }
@@ -387,7 +385,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     //canvasStyle(*plotCanvas_[sample]);
   }
   // C2 create legend
-  TLegend *legPS = new TLegend(0.69, 0.66, 1.00, 0.85);
+  TLegend *legPS = new TLegend(0.7, 0.6, 1.0, 0.85);
   legPS->SetFillStyle(0);
   legPS->SetBorderSize(0);
   legPS->SetEntrySeparation(0.45);
@@ -409,6 +407,13 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetXaxis()->SetNoExponent(true);
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetXaxis()->SetTitle(variable_[i]);
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetYaxis()->SetTitle("events");
+    // take care of maximum
+    double maxDown=plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->GetMaximum();
+    double maxUp  =plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->GetMaximum();
+    double maxStd =plots_      [variable_[i]+"PartonTruth"       ]->GetMaximum();
+    double maximum=std::max(std::max(maxUp,maxDown), maxStd);
+    plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->SetMaximum(1.2*maximum);
+    //draw plots
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Draw("");
     plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Draw("same");
     plots_      [variable_[i]+"PartonTruth"       ]->Draw("same");
@@ -453,7 +458,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	  }
 	  if(verbose>3) std::cout << "had weight: " << HadShapeWeight << std::endl;
 	  if(verbose>3) std::cout << "lep weight: " << LepShapeWeight << std::endl;
-	  if(verbose>1&&i==j&&variable_[i].Contains("Mass")&&HadShapeWeight==0.){
+	  if(verbose>3&&i==j&&variable_[i].Contains("Mass")&&HadShapeWeight==0.){
 	    std::cout << "variable: " << variable_[i] << std::endl;
 	    std::cout << "weight: " << HadShapeWeight << std::endl;
 	    std::cout << "gen value " << value_[variable_[i]+"PartonTruth"] << std::endl;
@@ -498,6 +503,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     if(variable_[plot]=="ttbarMass") rebinFactor="20";
     if(variable_[plot]=="ttbarPt"  ) rebinFactor="6";
     if(variable_[plot]=="topPt"    ) rebinFactor="10";
+    if(variable_[plot]=="lepPt"    ) rebinFactor="10";
     axisLabel_.push_back(variable_[plot]+" from data/events/0/"+rebinFactor);
     std::cout << variable_[plot]+" from data/events/0/"+rebinFactor << std::endl;
     //    plotList_.push_back( genfolder+"/"+variable_[i] );
@@ -527,26 +533,27 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     equalReBinTH1(reBinFactor, histo_, plotName, kQCD  );
     equalReBinTH1(reBinFactor, histo_, plotName, kData );
     // subtract non ttbar prompt lepton BG from data
-    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kBkg  ],-1);
-    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kSTop ],-1);
-    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kWjets],-1);
-    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kZjets],-1);
-    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kDiBos],-1);
-    histo_[plotList_[plot]][kData]->Add(histo_[plotList_[plot]][kQCD  ],-1);
+    histo_[plotName][kData]->Add(histo_[plotName][kBkg  ],-1);
+    histo_[plotName][kData]->Add(histo_[plotName][kSTop ],-1);
+    histo_[plotName][kData]->Add(histo_[plotName][kWjets],-1);
+    histo_[plotName][kData]->Add(histo_[plotName][kZjets],-1);
+    histo_[plotName][kData]->Add(histo_[plotName][kDiBos],-1);
+    histo_[plotName][kData]->Add(histo_[plotName][kQCD  ],-1);
     // normalize data to ttbar MC reco yield
     double areaMC = plots_[variable_[plot]]->Integral(0,plots_[variable_[plot]]->GetNbinsX()+1);
-    double areaData = histo_[plotList_[plot]][kData]->Integral(0,histo_[plotList_[plot]][kData]->GetNbinsX()+1);
+    double areaData = histo_[plotName][kData]->Integral(0,histo_[plotName][kData]->GetNbinsX()+1);
     histo_[plotList_[plot]][kData]->Scale(areaMC/areaData);
     // adapt style
-    histogramStyle( *histo_[plotList_[plot]][kData], kData, true);
+    histogramStyle( *histo_[plotName][kData], kData, true);
   }
   
   // ---
   //    part F: draw all reweighted reco level plots
   // ---
-  TLegend* legReco= new TLegend(0.65, 0.696, 1.15, 0.86);
+  TLegend* legReco= new TLegend(0.65, 0.55, 1.2, 0.85);
   legReco->SetFillStyle(0);
   legReco->SetBorderSize(0);
+  legReco->SetEntrySeparation(0.25);
   legReco->SetHeader("reconstruction level");
   legReco->AddEntry(finalPlots_[variable_[0]][variable_[0]+"Up"  ], "up"     , "L");
   legReco->AddEntry(plots_      [variable_[0]]                    , "central", "L");
@@ -589,9 +596,19 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->Rebin(reBinFactor);
 	plots_[variable_[j]+"Rebinned"]->Rebin(reBinFactor);
 	// take care of maximum
-	if(finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->GetMaximum()>finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->GetMaximum()){
-	  finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->SetMaximum(finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->GetMaximum());
-	}
+	double maxDown=finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->GetMaximum();
+	double maxUp  =finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->GetMaximum();
+	double maxData=0;
+	if(i==j&&PS=="RecoLevel") maxData=histo_[plotList_[i]][kData]->GetMaximum();
+	double maxStd =plots_[variable_[j]+"Rebinned"]->GetMaximum();
+	double maximum=std::max(std::max(maxUp,maxDown), std::max(maxData, maxStd));
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->SetMaximum(1.2*maximum);
+	// remaining style issues
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->GetXaxis()->SetNoExponent(true);
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->GetXaxis()->SetTitle(variable_[i]);
+	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->GetYaxis()->SetTitle("events");
+	// adapt plot range
+	if(variable_[j]=="lepPt") finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->GetXaxis()->SetRangeUser(0,400);
 	// draw histos
 	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->DrawClone("");
 	finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->DrawClone("same");
@@ -646,7 +663,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   }
 }
 
-TH1F* distort(const TH1& hist, TString variation, TString variable, double distortParameter, int verbose)
+TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
 {
   // this function does a linear shape distortion.
   // for variation=="up"/"down" bins that are close in 
@@ -655,7 +672,7 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
   if(verbose>1) std::cout << variable << " (" << variation << ")" << std::endl;
   TH1F* result=(TH1F*)(hist.Clone());
   TH1F* histo =(TH1F*)(hist.Clone());
-  if(variable.Contains("Mass")){
+  if(variable.Contains("ttbarMass")){
     double xmin=200;
     double xmax=1200;
     TF1* myFunc = new TF1("myFunc", "landau", xmin, xmax);
@@ -846,28 +863,34 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
     //3  p2           3.28315e+03   2.92333e+02    0-10000
     //4  p3           1.92234e+00   4.89337e-01    1-1000
   }
+  // linear reweighting for other quantities
   else{
     // parameter of linear smearing
     double a=0;
-    if     (variation=="Up"  ) a=1;
-    else if(variation=="Down") a=-1;
+    if     (variation=="Up"  ) a=1.0;
+    else if(variation=="Down") a=-1.0;
     else{
       std::cout << "ERROR in function distort: chose variation " << variation << " not known" << std::endl;
       exit(0);
     }   
-    double b=hist.GetBinLowEdge(hist.GetNbinsX()+1);
-    // take different distribution shapes into account
-    double distortParameter2=0;
+    // adjust amount of smearing
+    // depending on reco level data shape
     if(variable=="topPt"){
-      distortParameter2=distortParameter*1.2;
-      if(variation=="Down") distortParameter2*=1.4;
+      if     (variation=="Up"  ) a*=0.5;
+      else if(variation=="Down") a*=10.0;
     }
-    else if(variable=="ttbarPt"  ) distortParameter2=distortParameter*0.7;
-    //else if(variable=="ttbarMass") distortParameter2=distortParameter*1.1;
-    //else if(variable=="topY"  )distortParameter2=1.0;
-    //else if(variable=="ttbarY")distortParameter2=1.0;
-    //  else if(variable=="lepEta"  )distortParameter2=1.0;
-    //  else if(variable=="lepPt"   )distortParameter2=1.0;
+    else if(variable=="ttbarPt"  ){ 
+      if     (variation=="Up"  ) a*=0.5;
+      else if(variation=="Down") a*=10.0;
+    }
+    else if(variable=="lepEta"  ){
+      if     (variation=="Up"  ) a*=1.5;
+      else if(variation=="Down") a*=4.0;
+    }
+    else if(variable=="lepPt"   ){
+      if     (variation=="Up"  ) a*=0.1;
+      else if(variation=="Down") a*=1.0;
+    }
     else{
      std::cout << "ERROR in function distort: chose variable " << variable << " not known" << std::endl;
       exit(0);
@@ -875,20 +898,24 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
     // SF control variables
     double SFmin=10000;
     double SFmax=0;
-    // find maximum
-    double xmax= 0.;//hist.GetBinCenter(hist.GetMaximumBin());
+    // find reference point so that 
+    // weight is always positive 0 for up 
+    // and x_max for down variation
+    double xmax= 0.;
+    if(variation=="Down") xmax=hist.GetBinCenter(hist.GetNbinsX());
     // loop bins
     for(int bin=1; bin<result->GetNbinsX(); ++bin){ 
       // get SF 
       double x= hist.GetBinCenter(bin);
-      double SF=linSF(x, xmax, a, b, distortParameter2);
-      // avoid SF=0 at maximum
-      if(x==xmax){
-	double xMaxNext    = hist.GetBinCenter(hist.GetMaximumBin()+1);
-	double xMaxPrevious= hist.GetBinCenter(hist.GetMaximumBin()-1);
-	// take SF slightly above/below average Sf 
-	// of surrounding bins for variation=="up"/"down"
-	SF= 0.5*(linSF(x, xMaxNext, a, b, distortParameter2)+linSF(x, xMaxPrevious, a, b, distortParameter2));
+      double SF=linSF(x, xmax, a, 0.);
+      // avoid SF=0 
+      if(SF==0){
+	std::cout << "WARNING: SF for bin " << bin << " is 0" << std::endl;
+      	double xPrevious= hist.GetBinCenter(bin-1);
+	double xNext=xPrevious;
+      	if(xPrevious!=hist.GetNbinsX()) xNext=hist.GetBinCenter(bin+1);
+      	// take average SF of surrounding bins
+      	SF= 0.5*(linSF(x, xNext, a, 0)+linSF(x, xPrevious, a, 0));
       }
       // search max/min SF
       if(verbose>1){
@@ -909,14 +936,16 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, double disto
   return result;
 }
 
-double linSF(const double x, const double xmax, const double a, const double b, double distortParameter){
-  double SF= a*std::abs(x-xmax)+b;
+double linSF(const double x, const double xmax, const double a, const double b){
+  double SF=(x-xmax)*a+b;
   if(SF<0){
     std::cout << "ERROR in function SF: negative result!" << std::endl;
-    std::cout << a << "*" << "|" << x << "-" << xmax << "|" << "+" << b << "=" << SF << std::endl;
+    std::cout << "(" << a << "*" << "[" << x << "-" << xmax << "])" << "+" << b << "=" << SF << std::endl;
     exit(0);
   }
-  return pow(SF, distortParameter);
+  if(a<0) SF=pow(SF, 5.);
+  else  SF=pow(SF, 0.5);
+  return SF;
 }
 
 TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, int verbose)
