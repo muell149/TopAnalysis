@@ -31,10 +31,9 @@ using namespace std;
 /// CONFIGURABLES
 
 // path to the ingoing root histogram files
-
-//const TString inpath("Markus/DiffXS2011/Rootfiles/Systematics/");
 //const TString inpath("~markusm/cms/systematics/");
-const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct14/");
+//const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct14/");
+const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct27/");
 
 // path where the output is written
 const TString outpath("Markus/DiffXS2011/Systematics/plots/");
@@ -61,8 +60,8 @@ Bool_t isTotal = !(isDiff);
 //Bool_t isPSE = kTRUE;    // Make efficiency plots "_PSE"
 Bool_t isPSE = kFALSE;
 
-//Bool_t isModel = kTRUE;
-Bool_t isModel = kFALSE;
+Bool_t isModel = kTRUE;
+//Bool_t isModel = kFALSE;
 
 Bool_t isExp = kTRUE;
 //Bool_t isExp = kFALSE;
@@ -1049,14 +1048,14 @@ void SystematicErrors() {
   //  HistColor = kMagenta-6;
   HistColor = kYellow;
 
-  //  files[11] = new TFile(inpath.Copy().Append("kin_free.root"));
-  //  files[12] = new TFile(inpath.Copy().Append("kin_scale.root"));
+  files[11] = new TFile(inpath.Copy().Append("no_kin_scale.root"));
+  files[12] = new TFile(inpath.Copy().Append("standard.root"));
 
-  files[11] = new TFile(inpath.Copy().Append("kin_scale.root"));
-  files[12] = new TFile(inpath.Copy().Append("pythiaBug.root"));
+  //  files[11] = new TFile(inpath.Copy().Append("standard.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("pythiaBug.root"));
   //  files[12] = new TFile(inpath.Copy().Append("mll30.root"));
 
-  //  files[11] = new TFile(inpath.Copy().Append("kin_scale.root"));
+  //  files[11] = new TFile(inpath.Copy().Append("standard.root"));
   //  files[12] = new TFile(inpath.Copy().Append("kin_scale2.root"));
 
   if( files[11] && !files[11]->IsZombie() &&  files[12] && !files[12]->IsZombie() && isExp ) {
@@ -1501,7 +1500,35 @@ void SystematicErrors() {
 
       if( title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity") ) {
 
-          SymmetricAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors);
+        for(Int_t bin = 1; bin <= h_ref->GetNbinsX()/2.; ++bin) {
+
+	  if( h_ref->GetBinContent(bin) == 0 )  continue;
+
+	  Double_t PlusMinus_Average_Ref  = 0.;
+	  Double_t PlusMinus_Average_Up   = 0.;
+	  Double_t PlusMinus_Average_Down = 0.;
+
+	  PlusMinus_Average_Ref  = (h_ref->GetBinContent(bin)      + h_ref->GetBinContent(N_bins+1-bin)     ) / 2.;
+	  PlusMinus_Average_Up   = (h_var_up->GetBinContent(bin)   + h_var_up->GetBinContent(N_bins+1-bin)  ) / 2.;
+	  PlusMinus_Average_Down = (h_var_down->GetBinContent(bin) + h_var_down->GetBinContent(N_bins+1-bin)) / 2.;
+
+	  Sys_Error_Up   = abs(PlusMinus_Average_Ref - PlusMinus_Average_Up  ) / PlusMinus_Average_Ref;
+	  Sys_Error_Down = abs(PlusMinus_Average_Ref - PlusMinus_Average_Down) / PlusMinus_Average_Ref;
+
+	  // ++++++++ WARNING ++++++++ Divide by 5
+	  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*5.);
+	  // ++++++++ WARNING ++++++++ Divide by 5
+	  Sys_Error2 = Sys_Error * Sys_Error;
+
+	  h_sys->SetBinContent(           bin, Sys_Error  );
+	  h_sys->SetBinContent(  N_bins+1-bin, Sys_Error  );
+	  h_sys2->SetBinContent(          bin, Sys_Error2 );
+	  h_sys2->SetBinContent( N_bins+1-bin, Sys_Error2 );
+
+	  cout << "Sys. Error: " << Sys_Error << endl;
+	  Sum_Errors += (2.*Sys_Error);
+
+	}
 
       }
 
