@@ -78,7 +78,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kTRUE;
+const bool doPrintControlPlots = kFALSE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
@@ -230,10 +230,10 @@ void FillLegend(TLegend* leg, TH1* hist[], double factor=1.) {
 
     char zlabel[200];
     if (factor == 1)
-        strcpy(zlabel, "Z/a* #rightarrow ee/#mu#mu       ");
+        strcpy(zlabel, "Z/#gamma* #rightarrow ee/#mu#mu       ");
     else
-        sprintf(zlabel, "%.2f #times Z/a* #rightarrow ee/#mu#mu", factor);
-//         sprintf(zlabel, "#splitline{Z/a* #rightarrow ee/#mu#mu}{(#times %.2f)}", factor);
+        sprintf(zlabel, "%.2f #times Z/#gamma* #rightarrow ee/#mu#mu", factor);
+//         sprintf(zlabel, "#splitline{Z/#gamma* #rightarrow ee/#mu#mu}{(#times %.2f)}", factor);
 
     if (hist[kDATA])  leg->AddEntry(hist[kDATA], "Data",                            "pe");
     if (hist[kSIG] )  leg->AddEntry(hist[kSIG],  "t#bar{t} signal",                 "f" );
@@ -242,7 +242,7 @@ void FillLegend(TLegend* leg, TH1* hist[], double factor=1.) {
     if (hist[kVV]  )  leg->AddEntry(hist[kVV],   "dibosons",                        "f" );
     if (hist[kDYT] )  leg->AddEntry(hist[kDYT],  "Z/#gamma* #rightarrow #tau#tau",  "f" );
     if (hist[kDYEM])  leg->AddEntry(hist[kDYEM], zlabel, "f" );
-//     if (hist[kDYEM])  leg->AddEntry(hist[kDYEM], "Z/a* #rightarrow ee/#mu#mu", "f" );
+//     if (hist[kDYEM])  leg->AddEntry(hist[kDYEM], "Z/#gamma* #rightarrow ee/#mu#mu", "f" );
 //     if (factor != 1) {
 //         sprintf(zlabel, "($times %.2f)", factor);
 //         if (hist[kDYEM])  leg->AddEntry(zlabel, "f" );
@@ -792,7 +792,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
     }
 
     // draw systematics error band
-    TH1* syshist;
+    TH1* syshist = 0;
     if (drawSystematicErrorBandBackgroundAndLumi) {
         syshist = (TH1*)hists[1]->Clone();
         
@@ -837,7 +837,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
         TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
         setex2->Draw();
     }
-    if (drawSystematicErrorBandTopXsecErr) {
+    if (drawSystematicErrorBandTopXsecErr && (moduleStr.Contains("7") || moduleStr.Contains("8") || moduleStr.Contains("9"))) {
         syshist = (TH1*)hists[1]->Clone();
         
         for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
@@ -3227,6 +3227,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     title.Append(particle);
     title.Append("_");
     title.Append(quantity);
+    if (specialPrefix) title.Append(specialPrefix);
 
     Canvas->Clear();
     genCrossHist->SetMinimum(0);
@@ -3429,7 +3430,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
       semileptonic::DrawCMSLabels(isPreliminary, lumi);
       semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
-      Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
+      Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
 
 //       // print summary table for all channels (for Johannes)
 //       std::cout << "BCC Corrections done: " << particle << " " << quantity << std::endl;
@@ -3698,6 +3699,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     title.Append(particle);
     title.Append("_");
     title.Append(quantity);
+    if (specialPrefix) title.Append(specialPrefix);
     
     TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
    
@@ -3963,7 +3965,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
     semileptonic::DrawDecayChLabel(channelNameTeX[kCOMBINED]);
 
-    Canvas->Print(outpath.Copy().Append("combined/").Append(specialPrefix).Append(title).Append(outform));
+    Canvas->Print(outpath.Copy().Append("combined/").Append(title).Append(outform));
 
     crossHist->GetXaxis()->SetTitle(xtitle);
     crossHist->GetYaxis()->SetTitle(ytitle);
@@ -3973,10 +3975,14 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     std::cout << "BCC Corrections done: " << particle << " " << quantity << std::endl;
     for (int bin = 0; bin < nbins; ++bin) {
       double y = bccCrossGraph->GetY()[bin];
+      double y_mc = genHistBinned->GetBinContent(bin+1);
       std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
          << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
          << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
          << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
+         //<< std::setprecision(5) << y_mc << "\t&\t" << std::setprecision(1)
+         //this line is wrong << genHistBinned->GetBinError(bin+1)/y_mc << "\t&\t"
+         
          << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
          << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
          << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
@@ -4955,11 +4961,13 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsLepPairMassJohannes1 = 2;
     const Double_t binsLepPairMassJohannes1[nbinsLepPairMassJohannes1+1] = {60, 120, 400};
     const Double_t binCenterMassJohannes1[nbinsLepPairMassJohannes1] = {bccAuto, bccAuto};
+    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kTRUE, "Johannes1_");
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kFALSE, "Johannes1_");
         
     const Int_t nbinsLepPairMassJohannes2 = 4;
     const Double_t binsLepPairMassJohannes2[nbinsLepPairMassJohannes2+1] = {60, 76, 106, 120, 400};
     const Double_t binCenterMassJohannes2[nbinsLepPairMassJohannes2] = {bccAuto, bccAuto, bccAuto, bccAuto};
+    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kTRUE, "Johannes2_");
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kFALSE, "Johannes2_");
 
 
