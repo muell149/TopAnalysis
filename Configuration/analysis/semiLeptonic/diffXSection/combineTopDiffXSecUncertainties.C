@@ -188,6 +188,16 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
 	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
+	  // get MC prediction plot without systematic variation
+	  if(sys==sysNo){
+	    TH1F* MCplot= (TH1F*)canvas->GetPrimitive(plotName);
+	    if(MCplot){ 
+	      if(verbose>1) std::cout << "MC plot "+plotName+" in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
+	      // go to root directory, keep plot when closing rootfile
+	      gROOT->cd();
+	      histo_[xSecVariables_[i]+"MC"][sys]=(TH1F*)(MCplot->Clone());
+	    }
+	  }
 	}	
 	else if(verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found!" << std::endl;
       }
@@ -213,6 +223,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	  double totalSystematicErrorUp  =0;
 	  double totalSystematicErrorDown=0;
 	  double stdBinXSecValue=histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
+	  double MCpredBinVar=histo_[xSecVariables_[i]+"MC"][sysNo]->GetBinContent(bin);
 	  // jump to bin without vanishing bin content
 	  while(stdBinXSecValue==0&&bin<Nbins){
 	    if(verbose>1) std::cout << "bin #" << bin << "/" << Nbins << " has bin content == 0, will be skipped!" << std::endl;
@@ -230,7 +241,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	  else{
 	    if(verbose>0){ 
 	      std::cout << std::endl << xSecVariables_[i] << " bin #" << bin << "/" << Nbins;
-	      std::cout << " ( std value[pb/binwidth]: " << stdBinXSecValue << " )" << std::endl;
+	      std::cout << "std value[pb/binwidth]: " << std::endl;
+	      std::cout << "a) data   : " << stdBinXSecValue << std::endl;
+	      std::cout << "b) MC pred: " << MCpredBinVar << std::endl;
 	    }
 	    // create plot that indicates all relative uncertainties
 	    // one plot for every variable in every bin
@@ -242,10 +255,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      relSysPlot->GetXaxis()->SetBinLabel(sys, sysLabel(sys).ReplaceAll("sys",""));
 	      // create plot that indicates the relative systematic uncertainty
 	      double sysDiff=0;
-	      if(verbose>0) std::cout << sysLabel(sys);
+	      if(verbose>1) std::cout << sysLabel(sys);
 	      // check if chosen systematic variation of chosen variable has been found and std value is nonzero
 	      if(calculateError_[xSecVariables_[i]].count(sys)<=0||stdBinXSecValue==0){
-		if(verbose>0){
+		if(verbose>1){
 		  if(stdBinXSecValue!=0) std::cout << ": not found" << std::endl;
 		  else std::cout << ": std value is 0" << std::endl;
 		}
@@ -253,7 +266,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      else{
 		// check if variable has to be considerered for total systematic error
 		if(calculateError_[xSecVariables_[i]][sys]==true){
-		  if(verbose>0) std::cout << "(considered): ";
+		  if(verbose>1) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
 		  sysDiff=sysBinXSecValue-stdBinXSecValue;
 		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= scaleFactorTopMassUncertainty; // scaleFactorTopMassUncertainty: defined in basicFunctions.h
@@ -265,10 +278,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  totalSystematicErrorDown += 0.5*sysDiff*0.5*sysDiff;		  
 		}
 		else{ 
-		  if(verbose>0) std::cout << "(not considered): ";
+		  if(verbose>1) std::cout << "(not considered): ";
 		}
 		// print single systematic uncertainty absolut and relative for bin & variable
-		if(verbose>0) std::cout << sysDiff << " ( = " << 100*sysDiff/stdBinXSecValue << "% )" << std::endl;
+		if(verbose>1) std::cout << sysDiff << " ( = " << 100*sysDiff/stdBinXSecValue << "% )" << std::endl;
 		// save relative systematic uncertainties for bin & variable
 		relSysPlot->SetBinContent(sys, 100*sysDiff/stdBinXSecValue);
 	      }
@@ -300,6 +313,16 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  std::cout << 100*combinedErrorUpBinVar/stdBinXSecValue   << "% )" << std::endl;
 		  std::cout << " -" <<  combinedErrorDownBinVar << " ( =";
 		  std::cout << 100*combinedErrorDownBinVar/stdBinXSecValue << "% )" << std::endl;
+		}
+		// print MC prediction value and difference in std variations
+		double xSecDiff=stdBinXSecValue-MCpredBinVar;
+		double absError=combinedErrorDownBinVar;
+		if(xSecDiff<0) absError=combinedErrorUpBinVar;
+		double relativeDifference=xSecDiff/absError; 
+		if(verbose>0){
+		  std::cout << "difference data-MC = " << xSecDiff << " pb" << std::endl;
+		  std::cout << "( = " << (xSecDiff/stdBinXSecValue)*100 << "% )" << std::endl;
+		  std::cout << "( = " << relativeDifference << " std variations )" << std::endl;
 		}
 		// save relative uncertainties for bin & variable in map relativeUncertainties_
 		// a) statistic uncertainty
