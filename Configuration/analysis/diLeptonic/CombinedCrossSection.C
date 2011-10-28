@@ -36,17 +36,13 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // path to the ingoing root histogram files
-const char *USERNAME = getenv("USER");
-const TString inpath(
-        !strcmp(USERNAME, "wbehrenh") ? "./" : 
-        // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
-        "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-const TString outpath("plots/");
-//const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
-
+//const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+const TString inpath("/scratch/hh/current/cms/user/wbehrenh/Oct25default/standard/");
+const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
 
 // output format
 const TString outform(".eps");
+//const TString outform(".png");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -78,7 +74,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kFALSE;
+const bool doPrintControlPlots = kTRUE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
@@ -1481,7 +1477,7 @@ void CreateControlPlots() {
 //         PrintCombinedPlot("analyzeLeptonPair3", "DimassRC_EE",
 //                           "analyzeLeptonPair3", "DimassRC_EM",
 //                           "analyzeLeptonPair3", "DimassRC_MM", kCOMBINED, "M^{l^{+}l^{-}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
-			  
+
         PrintPlot("analyzeJets8", "multi",      kCOMBINED, "N_{jets}",       "events", 0, -1,kFALSE,kTRUE);
         PrintPlot("analyzeJets8", "multiTCHEL", kCOMBINED, "N_{tags,TCHEL}", "events", 0, -1,kFALSE,kTRUE);
         PrintPlot("analyzeJets8", "pt",         kCOMBINED, "p_{T}^{jet} #left[#frac{GeV}{c}#right]","jets", 0, -1,kFALSE,kTRUE, 5);
@@ -1556,6 +1552,10 @@ void CreateControlPlots() {
     PrintPlot("analyzeLeptonPair3", "DimassRC_ME", kCOMBINED, "M_{e#mu} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair3", "DimassRC_EE", kEE,       "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair3", "DimassRC_EE", kCOMBINED, "M_{ee} [GeV]",     "N_{events} / bin", 0.05,-1,0,1,2);
+
+    PrintCombinedPlot("analyzeLeptonPair3", "DimassRC_EE",
+		      "analyzeLeptonPair3", "DimassRC_EM",
+		      "analyzeLeptonPair3", "DimassRC_MM", kCOMBINED, "M^{l^{+}l^{-}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
 
 //     PrintPlot("analyzeLeptonPair3SS", "DimassWC_MM", kCOMBINED, "M_{#mu^{#pm}#mu^{#pm}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
 //     PrintPlot("analyzeLeptonPair3SS", "DimassWC_ME", kCOMBINED, "M_{e^{#pm}#mu^{#pm}} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
