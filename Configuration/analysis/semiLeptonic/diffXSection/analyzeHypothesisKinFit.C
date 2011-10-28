@@ -1224,7 +1224,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.24);
 	    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-	    leg->Draw("SAME");
+	    if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
 	  }
 	  // redraw axis at the end
 	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)) histo_[plotList_[plot]][42]->Draw("axis same");	 
