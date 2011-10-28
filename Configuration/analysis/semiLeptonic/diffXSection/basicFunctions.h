@@ -96,10 +96,10 @@ namespace semileptonic {
                                                                  // --> should contain luminosity error
                                                                  // --> for MC error bands: luminosity error is subtracted in analyzeTopDiffXSecMonitoring.C
 
-  double scaleFactorTopMassUncertainty=0.9/3.0; // scale factor for top mass uncertainty
-                                                // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
-                                                // --> systematic samples are varied by +/-3.0 GeV 
-                                                // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+  double SF_TopMassUncertainty=0.9/3.0; // scale factor for top mass uncertainty
+                                        // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
+                                        // --> systematic samples are varied by +/-3.0 GeV 
+                                        // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   TString sysLabel(unsigned int sys)
   {
