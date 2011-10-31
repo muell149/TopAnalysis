@@ -829,6 +829,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
 	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
 	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
+	      if(plotList_[plot].Contains("KinFit")) label = "";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 		 	       1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12    );
 	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
@@ -908,4 +909,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
       saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose, "monitoring");
     }
   }
+  // delete pointer
+  closeStdTopAnalysisFiles(files_);
 }
