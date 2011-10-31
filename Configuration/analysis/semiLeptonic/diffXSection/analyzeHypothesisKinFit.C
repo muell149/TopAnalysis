@@ -259,8 +259,8 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   };
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-    "analyzeHypoKinFit/mapKinFit_"               ,
-    // b) reconstructed Top quantities
+    "analyzeHypoKinFit/mapKinFit_"                                          ,
+    // b) reconstructed top quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_"     ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"       ,
@@ -272,7 +272,10 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT_"    ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
+    // d) reconstructed lepton quantities
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepPt_"      ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta_"     ,
   };
 
   // b) list plot axes style
@@ -414,11 +417,11 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4",                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
     // reconstructed lepton quantities
-    "p_{T}^{#mu} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
-    "#eta^{#mu}/events/0/1" ,
+    "p_{T}^{l} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
+    "#eta^{l}/events/0/1" ,
     // generated lepton quantities
-    "p_{T}^{#mu} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
-    "#eta^{#mu} parton truth/events/0/1"
+    "p_{T}^{l} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
+    "#eta^{l} parton truth/events/0/1"
   };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
@@ -436,7 +439,10 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco",
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
-    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit"            
+    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
+    // d) reconstructed lepton quantities
+    "p_{T}^{l} #left[#frac{GeV}{c}#right] gen/p_{T}^{l} #left[#frac{GeV}{c}#right] reco",
+    "#eta^{l} gen/#eta^{l} reco",           
   };
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
