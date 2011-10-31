@@ -37,12 +37,16 @@ using namespace std;
 
 // path to the ingoing root histogram files
 //const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-const TString inpath("/scratch/hh/current/cms/user/wbehrenh/Oct25default/standard/");
-const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
+const char *USERNAME = getenv("USER");
+const TString inpath(
+        !strcmp(USERNAME, "wbehrenh") ? "./" : 
+        // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
+        "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+const TString outpath("plots/");
+//const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
 
 // output format
 const TString outform(".eps");
-//const TString outform(".png");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -74,7 +78,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kTRUE;
+const bool doPrintControlPlots = kFALSE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
@@ -1308,23 +1312,23 @@ void SetupInputFiles() {
     totalEvents[1] = nEventsTop;
     totalEvents[2] = nEventsTop;
     totalEvents[3] = nEventsTop;
-    totalEvents[4] = 814390;
-    totalEvents[5] = 809984;
-    totalEvents[6] = 210667;
-    totalEvents[7] = 204725;
-    totalEvents[8] = 4187885;
-    totalEvents[9] = 2200000;
-    totalEvents[10] = 2032536;
+    totalEvents[4] = 814390; //singletop
+    totalEvents[5] = 809984; //singleantitop
+    totalEvents[6] = 210667; //ww
+    totalEvents[7] = 204725; //wz
+    totalEvents[8] = 4187885; //zz
+    totalEvents[9] = 2200000; //tau1020
+    totalEvents[10] = 2032536; //tau2050
     totalEvents[11] = nEventsDYJets;
-    totalEvents[12] = 2186909;
+    totalEvents[12] = 2186909; //mu1020
     totalEvents[13] = 2133856;
     totalEvents[14] = nEventsDYJets;
-    totalEvents[15] = 2121872;
+    totalEvents[15] = 2121872; //ee1020
     totalEvents[16] = 2254925;
     totalEvents[17] = nEventsDYJets;
-    totalEvents[18] = 56789563;
-    totalEvents[19] = 20258122;
-    totalEvents[20] = 35729669;
+    totalEvents[18] = 56789563; //w+jets -> lnu
+    totalEvents[19] = 20258122; //qcd mu
+    totalEvents[20] = 35729669; //qcd e
     totalEvents[21] = 70392060;
     totalEvents[22] = 8150672;
     totalEvents[23] = 2081560;
@@ -3433,20 +3437,21 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
 
 //       // print summary table for all channels (for Johannes)
-//       std::cout << "BCC Corrections done: " << particle << " " << quantity << std::endl;
-//       for (int bin = 0; bin < nbins; ++bin) {
-// 	double y = bccCrossGraph->GetY()[bin];
-// 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
-//            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
-//            << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
-//            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
-//            << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
-//            << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
-//            << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
-//            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
-//            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
-//            << "\t\\\\" << std::endl;
-//        }
+      std::cout << "BCC Corrections done: " << particle << " " << quantity 
+                << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
+      for (int bin = 0; bin < nbins; ++bin) {
+	double y = bccCrossGraph->GetY()[bin];
+	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+           << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
+           << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
+           << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
+           << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
+           << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
+           << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
+           << 100*withSys->GetErrorYhigh(bin)/y << "\t"
+           //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
+           << "\t\\\\" << std::endl;
+       }
 
       diffXsecHistogramList.Add(crossHist->Clone());
 
@@ -3972,10 +3977,12 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     diffXsecHistogramList.Add(crossHist->Clone());
         
     // print summary table for combined cross section
-    std::cout << "BCC Corrections done: " << particle << " " << quantity << std::endl;
+    std::cout << "BCC Corrections done: " << particle << " " << quantity 
+              << " (" << channelName[kCOMBINED] 
+              << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
     for (int bin = 0; bin < nbins; ++bin) {
       double y = bccCrossGraph->GetY()[bin];
-      double y_mc = genHistBinned->GetBinContent(bin+1);
+      //double y_mc = genHistBinned->GetBinContent(bin+1);
       std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
          << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
          << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
@@ -4958,18 +4965,19 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 
 
     // special plots for johannes
+    std::cout << "\n\nPlots for Johannes:\n************\n";
     const Int_t nbinsLepPairMassJohannes1 = 2;
     const Double_t binsLepPairMassJohannes1[nbinsLepPairMassJohannes1+1] = {60, 120, 400};
     const Double_t binCenterMassJohannes1[nbinsLepPairMassJohannes1] = {bccAuto, bccAuto};
-    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kTRUE, "Johannes1_");
+    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kTRUE, "Johannes1_");
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kFALSE, "Johannes1_");
         
     const Int_t nbinsLepPairMassJohannes2 = 4;
     const Double_t binsLepPairMassJohannes2[nbinsLepPairMassJohannes2+1] = {60, 76, 106, 120, 400};
     const Double_t binCenterMassJohannes2[nbinsLepPairMassJohannes2] = {bccAuto, bccAuto, bccAuto, bccAuto};
-    PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kTRUE, "Johannes2_");
+    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kTRUE, "Johannes2_");
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kFALSE, "Johannes2_");
-
+    std::cout << "End plots for Johannes\n************\n\n";
 
     // jets
     const Int_t nbinsJetEta = 6;
