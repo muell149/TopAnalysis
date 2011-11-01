@@ -88,8 +88,9 @@ namespace semileptonic {
 			     /*35:*/ sysSTopUp,                /*36:*/ sysSTopDown,               
 			     /*37:*/ sysDiBosUp,               /*38:*/ sysDiBosDown,              
 			     /*39:*/ sysShapeUp,               /*40:*/ sysShapeDown,
-			     /*41:*/ sysPDFUp,                 /*42:*/ sysPDFDown,    
-			     /*43:*/ ENDOFSYSENUM};
+			     /*41:*/ sysPDFUp,                 /*42:*/ sysPDFDown,
+			     /*43:*/ sysHadUp,                 /*44:*/ sysHadDown,      
+			     /*45:*/ ENDOFSYSENUM};
 
   double ttbarCrossSection=164.4;                                // combined 2011 CMS XSec
   double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error 
@@ -100,6 +101,8 @@ namespace semileptonic {
                                         // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
                                         // --> systematic samples are varied by +/-3.0 GeV 
                                         // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+
+  double constHadUncertainty = 0.05;
 
   TString sysLabel(unsigned int sys)
   {
@@ -154,6 +157,8 @@ namespace semileptonic {
       case sysShapeDown                : return "sysShapeDown";  
       case sysPDFUp                    : return "sysPDFUp";              
       case sysPDFDown                  : return "sysPDFDown";
+      case sysHadUp                    : return "sysHadronizationUp";
+      case sysHadDown                  : return "sysHadronizationDown";
       default                          : std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
                                          std::cout << "chosen systematic variation:  " << sys            << std::endl;
                                          std::cout << "maximum systematic variation: " << ENDOFSYSENUM-1 << std::endl;
@@ -957,7 +962,9 @@ namespace semileptonic {
     // Top Mass
     if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";
     if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
-
+    // Hadronization
+    if((sys==sysHadUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationUp/"+fileName+"HadUp";
+    if((sys==sysHadDown)&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationDown/"+fileName+"HadDown";
     fileName+="PF.root";
     // return output
     return fileName;

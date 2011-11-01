@@ -29,7 +29,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   //     37: sysDiBosUp                38: sysDiBosDown              
   //     39: sysShapeUp                40: sysShapeDown   
   //     41: sysPDFUp                  42: sysPDFDown  
-  //     43: ENDOFSYSENUM
+  //     43: sysHadUp                  44: sysHadDown
+  //     45: ENDOFSYSENUM
   //
 
   // ============================
@@ -288,7 +289,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		  if(verbose>1) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
 		  sysDiff=fabs(sysBinXSecValue-stdBinXSecValue);
-		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= SF_TopMassUncertainty; // SF_TopMassUncertainty: defined in basicFunctions.h
+		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= SF_TopMassUncertainty;                // SF_TopMassUncertainty: defined in basicFunctions.h
+		  if(sys==sysHadUp    ||sys==sysHadDown )    sysDiff += constHadUncertainty*stdBinXSecValue;  // constHadUncertainty:   defined in basicFunctions.h
 		}
 		else if(verbose>1) std::cout << "(not considered): ";
 		// print single systematic uncertainty absolut and relative for bin & variable

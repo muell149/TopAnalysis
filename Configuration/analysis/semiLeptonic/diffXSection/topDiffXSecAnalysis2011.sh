@@ -49,7 +49,7 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"electron\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
@@ -62,8 +62,8 @@ dataLuminosity=1143.22
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pband750GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
@@ -86,7 +86,7 @@ inputFolderName=\"TOP2011/110819_AnalysisRun\"
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time (must be<=42, see list of systematics below)
-maxSys=42
+maxSys=44
 ## shape variations?
 shapeVar=true
 ## disable waiting time to read output
@@ -205,7 +205,8 @@ if [ $fast = false ]
     sleep 3
 fi
 if [ $decayChannel != \"combined\" ]
-    then
+    then  
+    echo
     root -l -q -b './analyzeTopDiffXSecMonitoring.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'true')'   # with ratio plots
     root -l -q -b './analyzeTopDiffXSecMonitoring.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'false')'  # without ratio plots
 fi
@@ -249,6 +250,7 @@ echo
 
 if [ $decayChannel != \"combined\" ]
     then
+    echo
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true')' 
 else
     echo "Done for 2011 analysis in e/mu channel separate."
@@ -319,7 +321,8 @@ echo " 35: sysSTopUp                 36: sysSTopDown                 "
 echo " 37: sysDiBosUp                38: sysDiBosDown                "
 echo " 39: sysShapeUp                40: sysShapeDown                " 
 echo " 41: sysPDFUp                  42: sysPDFDown                  " 
-echo " 43: ENDOFSYSENUM                                              "
+echo " 43: sysHadUp                  44: sysHadDown                  "    
+echo " 45: ENDOFSYSENUM                                              "
 echo
 if [ $fast = false ]
     then
@@ -412,7 +415,7 @@ fi
 cat >> commands.cint << EOF
 .L BCC.C++
 .L BCC_C.so
-.L combineTopDiffXSecUncertainties.C++
+.L combineTopDiffXSecUncertainties.C++g
 .L combineTopDiffXSecUncertainties_C.so
 combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel)
 EOF
