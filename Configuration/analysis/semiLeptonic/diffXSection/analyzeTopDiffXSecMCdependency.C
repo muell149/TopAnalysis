@@ -364,7 +364,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       for(int bin=0; bin<=SF_[variable_[i]+Var]->GetNbinsX()+1; ++bin){
 	// search for negative SFs
 	// but only in non-empty bins
-	if (SF_[variable_[i]+Var]->GetBinContent(bin)<0.&&plots_[variable_[i]+"PartonTruth"]->GetBinContent(bin)>0.){
+        // NB: skip check for PDF uncertainties 
+	if (!doPDFuncertainty&&SF_[variable_[i]+Var]->GetBinContent(bin)<0.&&plots_[variable_[i]+"PartonTruth"]->GetBinContent(bin)>0.){
 	  std::cout << "ERROR: distortion SF for variable "+variable_[i]+" variation "+Var+" bin " << bin << " is negative!" << std::endl;
 	  exit(1);
 	}
