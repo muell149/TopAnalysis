@@ -610,7 +610,7 @@ namespace semileptonic {
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
       // Z2 Summer11
-      Nevents=3701947;
+      Nevents = (sample == kSig) ? 3701947 : 3581947 ;
       // Summer11 systematic samples
       if(kSys==sysTopScaleUp  ) Nevents=930483;  
       if(kSys==sysTopScaleDown) Nevents=967055;  
