@@ -46,7 +46,7 @@ const TString outpath("plots/");
 //const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
 
 // output format
-const TString outform(".eps");
+const TString outform(".png");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -65,10 +65,10 @@ TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/m/markusm/publ
 // input file name with Powheg curves
 TFile* powhegInput = TFile::Open("/afs/naf.desy.de/user/d/dammann/public/Powheg.root");
 // input file name with MC@NLO curves
-TFile* mcatnloInput = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_status3.root");
+TFile* mcatnloInput = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_status3_v20111028.root");
 // input file names with MC@NLO uncertainty curves due to m_top, Q2, and the PDF
-TFile* mcatnloInputUp = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Up_status3.root"); 
-TFile* mcatnloInputDn = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Down_status3.root"); 
+TFile* mcatnloInputUp = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Up_status3_v20111028.root"); 
+TFile* mcatnloInputDn = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Down_status3_v20111028.root"); 
 
 //(not) constants for background scaling - it is preferred to set them via command line!
 Bool_t scaleUpBG = kFALSE;
@@ -2815,7 +2815,6 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     TH1* genHistSmear = 0;   // for pseudo data
     TH1* genRec2DHist;   // reconstructed vs generated signal properties. needed  for correlation and pse plot
     TString genTopEvent("analyzeVisibleGenTopEvent/");
-    
     if(useKinFit) {
 
 	// get histograms of reconstructed quantity and generated signal
@@ -3435,6 +3434,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       semileptonic::DrawCMSLabels(isPreliminary, lumi);
       semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
       Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
+      
+      std::cout << " int=" << crossHist->Integral("width")<< "\n";
+
 
 //       // print summary table for all channels (for Johannes)
       std::cout << "BCC Corrections done: " << particle << " " << quantity 
@@ -3696,6 +3698,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPrefix);
     PlotDifferentialCrossSection(particle, quantity, kCOMBINED, xtitle, ytitle, bins, nbins, crosssCombined, statErrCombined, totalErrUpCombined, totalErrDownCombined, binCenters, useKinFit, specialPrefix);
     
+    //bool normaliseToUnitArea = 0;
+
     TString title("combined_");
     if(useKinFit)
         title.Append("FixedMt_Btag_Cross_");
@@ -3743,6 +3747,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       crossHist->SetBinContent(i+1, crosssCombined[i]);
       crossHist->SetBinError(i+1, statErrCombined[i]);
     }
+    std::cout << " int=" << crossHist->Integral("width")<< "\n";
 
     // store the visible cross section for normalisation
     if (strcmp(particle,"Leptons")==0 && strcmp(quantity,"Eta")==0) {
@@ -3837,12 +3842,14 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       mcatnlohDn->Scale(0.5);     
       powhegh ->Scale(0.5);      
     }
-    
+
+    std::cout << "Factor " << normaliseToUnitArea << "\n";
     if (normaliseToUnitArea) {
       Double_t scale_data = 1./visCrossSections[kCOMBINED];
       if(!useKinFit)
           scale_data = 1./visCrossSectionsNoFit[kCOMBINED];
-      crossHist->Scale(scale_data);
+      //crossHist->Scale(scale_data);
+      //dont scale data
     	
       //Double_t scale_gen1 = 1./genHist->Integral("width");
       genHist->Scale(1./visCrossGen);
@@ -3895,6 +3902,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
      
     genHist->SetLineColor(kRed+1);
     genHist->SetLineWidth(2);
+    //genHist->Draw("same");
     genHist->Rebin(nrebin); genHist->Scale(1./nrebin);
     genHist->Draw("same,C");
     
