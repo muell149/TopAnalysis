@@ -312,17 +312,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		double combinedErrorBinVar = sqrt(totalSystematicError*totalSystematicError + statErrorBinVar*statErrorBinVar);
 		// print statistical, systematic and total uncertainties, absolut and relative for bin & variable
 		if(verbose>0){
-		  std::cout << "total statistic uncertainty: " << std::endl;
-		  std::cout << " +/- " << statErrorBinVar << " ( =";
-		  std::cout << 100*statErrorBinVar/stdBinXSecValue << "% )" << std::endl;
-
-		  std::cout << "total systematic uncertainty: " << std::endl;
-		  std::cout << " +/-" << totalSystematicError   << " ( =";
-		  std::cout << 100*totalSystematicError/stdBinXSecValue << "% )" << std::endl;
-		
-		  std::cout << "total uncertainty: " << std::endl;
-		  std::cout << " +/-" <<  combinedErrorBinVar   << " ( =";
-		  std::cout << 100*combinedErrorBinVar/stdBinXSecValue   << "% )" << std::endl;
+		  std::cout << "total statistic uncertainty:  " << " +/- " << statErrorBinVar      << " (" << 100*statErrorBinVar/stdBinXSecValue      << "% )" << std::endl;
+		  std::cout << "total systematic uncertainty: " << " +/- " << totalSystematicError << " (" << 100*totalSystematicError/stdBinXSecValue << "% )" << std::endl;
+		  std::cout << "total uncertainty:            " << " +/- " << combinedErrorBinVar  << " (" << 100*combinedErrorBinVar/stdBinXSecValue  << "% )" << std::endl;
 		}
 		// print MC prediction value and difference in std variations
 		double xSecDiff=stdBinXSecValue-MCpredBinVar;
@@ -356,19 +348,15 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		combinedErrors->SetPoint(0, 0, -1000);
 		combinedErrors->SetPoint(bin, pointXValue, histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin));
 		combinedErrors->SetPointError(bin, pointXError, pointXError, combinedErrorBinVar, combinedErrorBinVar);
-		// define style for relative error plots
+		// define style for relative error plots, uncertainties are only plotted positively after implementing the symmetrization
 		histogramStyle(*relativeUncertainties_[xSecVariables_[i]][bin], kSig, true, 2.0, kBlack); 
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->LabelsOption("v");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetLabelSize(0.05);
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(errMax);
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(errMin);
 		double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
-		double histMin = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMinimumBin());
-		if(histMax>errMax||histMin<errMin){
-		  double newRange=histMax;
-		  if(fabs(histMax)<fabs(histMin)) newRange=-1*histMin;
-		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(1.2*newRange);
-		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(-1.2*newRange);
+		if (histMax>errMax){
+		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(1.2*histMax);
 		}
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetStats(kFALSE);
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("Relative Uncertainty (symmetrized) [%]");
@@ -422,30 +410,19 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      relUnCertaintyCanvas->SetGrid(1,1);
 	      // draw plot into canvas
 	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");
-	      // draw axis also on the right side of canvas
-	      double xPosition  = relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->GetXmax();
-	      double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
-	      double histMin = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMinimumBin());
-	      double max = errMax;
-	      double min = errMin;
-	      if(histMax>errMax||histMin<errMin){
-		double newRange=1.2*histMax;
-		if(fabs(histMax)<fabs(histMin)) newRange=-1.2*histMin;
-		max=newRange;
-		min=-1*newRange;
-	      }	      
 	      relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetTickLength(0.0);
+	      // draw axis also on the right side of canvas, uncertainties are only plotted positively after implementing the symmetrization
+	      double xPosition = relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->GetXmax();
+	      double histMax   = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
+	      double max       = ( errMax>histMax ) ? errMax : 1.2*histMax;
+	      double min       = errMin;
 	      TGaxis *axis = new TGaxis(xPosition,min,xPosition,max,min,max,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
 	      axis->SetLabelSize(myStyle.GetLabelSize());
 	      axis->SetLabelFont(myStyle.GetLabelFont());
 	      axis->SetLabelOffset(myStyle.GetLabelOffset());
 	      axis->Draw("same");
-	      // redraw to have statistical error as +/-
-	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
-	      relUnCertaintyCopy->GetXaxis()->SetTickLength(0.001);
-	      relUnCertaintyCopy->SetBinContent(ENDOFSYSENUM, (-1.)*(relUnCertaintyCopy->GetBinContent(ENDOFSYSENUM)));
-	      relUnCertaintyCopy->DrawClone("hist same");
 	      // draw every systematic variation with different color
+	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
 	      int colourCounter=1;
 	      unsigned int colour=kBlack;
 	      for(int sys=1; sys<=relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX(); ++sys, ++colourCounter){
