@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun", TString decayChannel="muon"){
+void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun", TString decayChannel="muon", bool exclShapeVar="true"){
 
   // ============================
   //  Systematic Variations:
@@ -27,9 +27,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   //     33: sysQCDUp                  34: sysQCDDown                 
   //     35: sysSTopUp                 36: sysSTopDown               
   //     37: sysDiBosUp                38: sysDiBosDown              
-  //     39: sysShapeUp                40: sysShapeDown   
-  //     41: sysPDFUp                  42: sysPDFDown  
-  //     43: sysHadUp                  44: sysHadDown
+  //     39: sysPDFUp                  40: sysPDFDown  
+  //     41: sysHadUp                  42: sysHadDown
+  //     43: sysShapeUp                44: sysShapeDown 
   //     45: ENDOFSYSENUM
   //
 
@@ -68,6 +68,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
+
+  unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
+                                             // value might change later, sysShapeDown/2 is the default
   
   // ==========================================
   //  Basic Printout and Variable Definitions
@@ -270,6 +273,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      else if (!(label.Contains("Down") || label.Contains("down"))){nSysCnt++; setNewLabel=1;}
 	      else setNewLabel=0;
 	      if (setNewLabel){
+		if (exclShapeVar && label=="Shape"){
+		  shapeVarIdx=nSysCnt;
+		  label="("+label+")";		  
+		}
 		relSysPlot->GetXaxis()->SetBinLabel(nSysCnt,label);
 		setNewLabel=0;
 	      }
@@ -300,8 +307,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      }
 	      // for last systematic 
 	      if(sys==ENDOFSYSENUM-1){
-		// calculate total systematic error
-		for (unsigned int n=0; n<nSysTypes; n++) totalSystematicError += pow(stdBinXSecValue*relSysPlot->GetBinContent(n+1)/100.0,2);
+		// calculate total systematic uncertainty
+		for (unsigned int n=0; n<nSysTypes-1; n++) // -1 due to conversion between loop index and bin number
+		  if (exclShapeVar && n==shapeVarIdx) std::cout << "Shape uncertainties are excluded from total systematic uncertainty" << std::endl;
+		  else totalSystematicError += pow(stdBinXSecValue*relSysPlot->GetBinContent(n+1)/100.0,2);
 		totalSystematicError = sqrt(totalSystematicError);
 		// go to root directory keep plot when closing rootfile
 		gROOT->cd();
@@ -408,8 +417,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      relUnCertaintyCanvas->SetTopMargin(0.07);
 	      relUnCertaintyCanvas->cd(0);
 	      relUnCertaintyCanvas->SetGrid(1,1);
-	      // draw plot into canvas
-	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");
+	      // draw plot into canvas (transparent) for having axis AND grid
+	      relativeUncertainties_[xSecVariables_[i]][bin]->SetFillColor(10);
+	      relativeUncertainties_[xSecVariables_[i]][bin]->SetLineColor(10);
+	      relativeUncertainties_[xSecVariables_[i]][bin]->Draw("hist");	      
 	      relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetTickLength(0.0);
 	      // draw axis also on the right side of canvas, uncertainties are only plotted positively after implementing the symmetrization
 	      double xPosition = relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->GetXmax();
@@ -423,12 +434,22 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      axis->Draw("same");
 	      // draw every systematic variation with different color
 	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
-	      int colourCounter=1;
+	      int colourCounter =    1;
+	      int fillStyle     = 1001;
 	      unsigned int colour=kBlack;
 	      for(int sys=1; sys<=relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX(); ++sys, ++colourCounter){
 		colour = (colourCounter%2==0) ? kYellow-7 : 8;
-		relUnCertaintyCopy->Scale(0.);
+		if (exclShapeVar && (unsigned int)sys==shapeVarIdx){
+		  colour=kGray;
+		  fillStyle=3002;
+		}
+		else{
+		  colour = (colourCounter%2==0) ? kYellow-7 : 8;
+		  fillStyle = 1001;
+		}	   
+		relUnCertaintyCopy->Reset("ICEMS");
 		relUnCertaintyCopy->SetBinContent(sys, relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(sys));
+		relUnCertaintyCopy->SetFillStyle(fillStyle);
 		// single systematic uncertainties
 		if(sys<=relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX()-3){
 		  relUnCertaintyCopy->SetFillColor(colour);

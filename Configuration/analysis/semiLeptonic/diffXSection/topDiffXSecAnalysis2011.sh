@@ -49,7 +49,7 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"electron\" 
+decayChannel=\"muon\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
@@ -62,8 +62,8 @@ dataLuminosity=1143.22
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pband750GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
@@ -319,9 +319,9 @@ echo " 31: sysTopMassUp              32: sysTopMassDown              "
 echo " 33: sysQCDUp                  34: sysQCDown                   " 
 echo " 35: sysSTopUp                 36: sysSTopDown                 "
 echo " 37: sysDiBosUp                38: sysDiBosDown                "
-echo " 39: sysShapeUp                40: sysShapeDown                " 
-echo " 41: sysPDFUp                  42: sysPDFDown                  " 
-echo " 43: sysHadUp                  44: sysHadDown                  "    
+echo " 39: sysPDFUp                  40: sysPDFDown                  " 
+echo " 41: sysHadUp                  43: sysHadDown                  "    
+echo " 43: sysShapeUp                44: sysShapeDown                " 
 echo " 45: ENDOFSYSENUM                                              "
 echo
 if [ $fast = false ]
@@ -348,7 +348,7 @@ for (( systematicVariation = 1;  systematicVariation <= $maxSys;  systematicVari
   if [ $decayChannel != \"combined\" ]
       then
       ## exclude shape variation
-      if [ $systematicVariation == 39 -o $systematicVariation == 40 ]
+      if [ $systematicVariation == 43 -o $systematicVariation == 44 ]
 	  then
 	  echo " Shape variations are executed separately."
       else
@@ -368,8 +368,8 @@ if [ $shapeVar = true ]
 	echo ""
 	echo " All regular systematic uncertainties processed .... Now running shape variations."
 	echo ""
-	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 39, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
-	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 40, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 43, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 44, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
     fi
 fi
 

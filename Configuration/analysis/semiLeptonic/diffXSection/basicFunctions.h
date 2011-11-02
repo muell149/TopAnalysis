@@ -87,9 +87,9 @@ namespace semileptonic {
 			     /*33:*/ sysQCDUp,                 /*34:*/ sysQCDDown,                 
 			     /*35:*/ sysSTopUp,                /*36:*/ sysSTopDown,               
 			     /*37:*/ sysDiBosUp,               /*38:*/ sysDiBosDown,              
-			     /*39:*/ sysShapeUp,               /*40:*/ sysShapeDown,
-			     /*41:*/ sysPDFUp,                 /*42:*/ sysPDFDown,
-			     /*43:*/ sysHadUp,                 /*44:*/ sysHadDown,      
+			     /*39:*/ sysPDFUp,                 /*40:*/ sysPDFDown,
+			     /*41:*/ sysHadUp,                 /*42:*/ sysHadDown,      
+			     /*43:*/ sysShapeUp,               /*44:*/ sysShapeDown,
 			     /*45:*/ ENDOFSYSENUM};
 
   double ttbarCrossSection=164.4;                                // combined 2011 CMS XSec
@@ -153,12 +153,12 @@ namespace semileptonic {
       case sysSTopDown                 : return "sysSTopDown";
       case sysDiBosUp                  : return "sysDiBosUp";              
       case sysDiBosDown                : return "sysDiBosDown";
-      case sysShapeUp                  : return "sysShapeUp";              
-      case sysShapeDown                : return "sysShapeDown";  
       case sysPDFUp                    : return "sysPDFUp";              
       case sysPDFDown                  : return "sysPDFDown";
       case sysHadUp                    : return "sysHadronizationUp";
-      case sysHadDown                  : return "sysHadronizationDown";
+      case sysHadDown                  : return "sysHadronizationDown"; 
+      case sysShapeUp                  : return "sysShapeUp";              
+      case sysShapeDown                : return "sysShapeDown"; 
       default                          : std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
                                          std::cout << "chosen systematic variation:  " << sys            << std::endl;
                                          std::cout << "maximum systematic variation: " << ENDOFSYSENUM-1 << std::endl;
