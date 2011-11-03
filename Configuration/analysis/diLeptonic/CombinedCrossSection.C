@@ -78,7 +78,7 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kFALSE;
+const bool doPrintControlPlots = kTRUE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
@@ -486,13 +486,13 @@ void PutHistToRootFile(const TString path, const TString name, const Int_t chann
    if(channel!=kCOMBINED){
        if(data){
 
-	   if(GetCloneHist(TString(path).Copy().Append("/"), name, channel, 0, hist)==0){
+	   if(GetCloneHist(TString(path).Copy().Append("/"), name, channel, 0, hist)==0) {
               cout << "WARNING in PutHistToRootFile: Could not get hist  " << name << "!" << endl;
 	      return;
 	   }
        } else{
 	   TH1* fhists[Nfiles];
-	   if(GetCloneHistArray(TString(path).Copy().Append("/"), name, channel, fhists)==0){
+	   if(GetCloneHistArray(TString(path).Copy().Append("/"), name, channel, fhists)==0) {
               cout << "WARNING in PutHistToRootFile: Could not get hists  " << name << "!" << endl;
 	      return;
 	   }
@@ -879,6 +879,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
         syshist->SetFillColor(kBlack);
         leg->AddEntry( syshist, "uncertainty", "f" );
 
+        syshist->SetMarkerSize(0);
         syshist->Draw("same,e2");
         
         TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0)");
@@ -1486,43 +1487,43 @@ void CloseFiles() {
 
 void CreateControlPlots() {
     if (PAS) {
-        PrintPlot("analyzeJets7", "multi",      kCOMBINED, "N_{jets}",       "events", 0, -1,kFALSE,kTRUE);
-        PrintPlot("analyzeJets7", "multiTCHEL", kCOMBINED, "N_{tags,TCHEL}", "events", 0, -1,kFALSE,kTRUE);
-        PrintPlot("analyzeJets7", "pt",         kCOMBINED, "p_{T}^{jet} #left[#frac{GeV}{c}#right]","jets", 0, -1,kFALSE,kTRUE, 5);
-        PrintPlot("analyzeJets7", "ht",         kCOMBINED, "H_{T} [GeV]","events", 0, -1,kFALSE,kTRUE, 5);
-        PrintCombinedPlot("analyzeElecs7", "pt", "analyzeMuons7", "pt", "", "", kCOMBINED, "p_{T}^{l} #left[#frac{GeV}{c}#right]",  "leptons",  0.0, -1,0,kTRUE,5);
-//         PrintCombinedPlot("analyzeLeptonPair3", "DimassRC_EE",
-//                           "analyzeLeptonPair3", "DimassRC_EM",
-//                           "analyzeLeptonPair3", "DimassRC_MM", kCOMBINED, "M^{l^{+}l^{-}} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
+        PrintPlot("analyzeJets7", "multiTCHEL", kCOMBINED, "N_{tags,TCHEL}", "events", 1, 1e4, kFALSE,kTRUE);
 
-        PrintPlot("analyzeJets8", "multi",      kCOMBINED, "N_{jets}",       "events", 0, -1,kFALSE,kTRUE);
-        PrintPlot("analyzeJets8", "multiTCHEL", kCOMBINED, "N_{tags,TCHEL}", "events", 0, -1,kFALSE,kTRUE);
-        PrintPlot("analyzeJets8", "pt",         kCOMBINED, "p_{T}^{jet} #left[#frac{GeV}{c}#right]","jets", 0, -1,kFALSE,kTRUE, 5);
-        PrintPlot("analyzeJets8", "ht",         kCOMBINED, "H_{T} [GeV]", "events", 0, -1,kFALSE,kTRUE, 5);
-        PrintCombinedPlot("analyzeElecs8", "pt", "analyzeMuons8", "pt", "", "", kCOMBINED, "p_{T}^{l} #left[#frac{GeV}{c}#right]",  "leptons",  0.0, -1,0,kTRUE,5);
+        PrintPlot("analyzeJets8", "multi",      kCOMBINED, "N_{jets}",       "events", 1, 1e4, kFALSE,kTRUE);
+        PrintPlot("analyzeJets8", "pt",         kCOMBINED, "p_{T}^{jet} #left[#frac{GeV}{c}#right]","jets", 1, 1e4, kFALSE,kTRUE, 5);
+        PrintCombinedPlot("analyzeElecs8", "pt", "analyzeMuons8", "pt", "", "", kCOMBINED, "p_{T}^{l} #left[#frac{GeV}{c}#right]",  "leptons",  1, 1e4,0,kTRUE,5);
+        
+        PrintPlot("analyzeKinSolution9", "kin_TopPt",      kCOMBINED, "p_{T,t} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
+        PrintPlot("analyzeKinSolution9", "kin_TopMass",    kCOMBINED, "M_{t} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
+        PrintPlot("analyzeKinSolution9", "kin_TopRapidity",kCOMBINED, "y_{t}",                "N_{events} / bin",  1, -1,0,0,2);
+        PrintPlot("analyzeKinSolution9", "kin_TtBarPt",    kCOMBINED, "p_{T,t#bar{t}} [GeV]", "N_{events} / bin",  1, -1,0,0,2);
+
         return;
     };
 
-    PrintPlotAll("analyzeMuons1", "pf_iso", "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
-    PrintPlotAll("analyzeMuons1", "multi",     "N_{muons}",        "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "pt",        "p_{T,#mu} [GeV]",  "N_{#mu} / bin",  0.0, -1,0,0,5);
-    PrintPlotAll("analyzeMuons1", "eta",       "#eta_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,2);
-    PrintPlotAll("analyzeMuons1", "iso_comb2", "pf_iso_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,4);
-    PrintPlotAll("analyzeMuons1", "dep_ecal",     "muon dep_ecal",        "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "dep_hcal",     "muon dep_hcal",        "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "nhits",        "muon nhits",           "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "n_pixhits",        "muon pix hits",           "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "n_trackerhits",        "muon tracker hits",           "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "n_mustations",        "muon station hits",           "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "n_validmuhits","muon n valid mu hits", "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "chi_norm",     "muon chi norm",        "N_{events} / bin", 0.0, -1,0,0);
-    PrintPlotAll("analyzeMuons1", "d0",           "muon d0",              "N_{events} / bin", 0.0, -1,0,0);
     
-    PrintPlot("analyzeElecs2", "pf_iso", kEM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 4);
-    PrintPlot("analyzeElecs2", "pf_iso", kEE, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 4);
-    PrintPlot("analyzeMuons2", "pf_iso", kEM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
-    PrintPlot("analyzeMuons2", "pf_iso", kMM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
-//return;
+//     PrintPlotAll("analyzeMuons1", "pf_iso", "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
+//     PrintPlotAll("analyzeMuons1", "multi",     "N_{muons}",        "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "pt",        "p_{T,#mu} [GeV]",  "N_{#mu} / bin",  0.0, -1,0,0,5);
+//     PrintPlotAll("analyzeMuons1", "eta",       "#eta_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeMuons1", "iso_comb2", "pf_iso_{#mu}",      "N_{#mu} / bin",   0.0, -1,0,0,4);
+//     PrintPlotAll("analyzeMuons1", "dep_ecal",     "muon dep_ecal",        "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "dep_hcal",     "muon dep_hcal",        "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "nhits",        "muon nhits",           "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "n_pixhits",        "muon pix hits",           "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "n_trackerhits",        "muon tracker hits",           "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "n_mustations",        "muon station hits",           "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "n_validmuhits","muon n valid mu hits", "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "chi_norm",     "muon chi norm",        "N_{events} / bin", 0.0, -1,0,0);
+//     PrintPlotAll("analyzeMuons1", "d0",           "muon d0",              "N_{events} / bin", 0.0, -1,0,0);
+//     
+//     PrintPlot("analyzeElecs2", "pf_iso", kEM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 4);
+//     PrintPlot("analyzeElecs2", "pf_iso", kEE, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 4);
+//     PrintPlot("analyzeMuons2", "pf_iso", kEM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
+//     PrintPlot("analyzeMuons2", "pf_iso", kMM, "PF Iso", "N_{events} / bin", 1, -1, kFALSE, kTRUE, 2);
+
+    gROOT->ForceStyle();
+    
     // STEP 3
     PrintPlotAll("analyzeUnscaledVertex", "multi", "N_{vtx}", "N_{events} / bin", 0, -1, kFALSE, kFALSE);
     PrintPlotAll("analyzeVertex2", "multi", "N_{vtx}", "N_{events} / bin", 0, -1, kFALSE, kFALSE);
@@ -1551,7 +1552,6 @@ void CreateControlPlots() {
     PrintPlotAll("analyzeElecs3", "electronmap", "electronmap", "N");
 
     PrintCombinedPlot("analyzeElecs3", "pt", "analyzeMuons3", "pt", "", "", kEM, "p_{T,l}", "N_{l} / bin", 0, -1, kFALSE, kFALSE, 5);
-
 
     PrintPlotAll("analyzeElecs4", "convDcot", "convDcot", "N", 0, 0, 0, 0, 5);
     PrintPlotAll("analyzeElecs4", "convDist", "convDist", "N", 0, 0, 0, 0, 5);
@@ -3452,21 +3452,26 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
 
 //       // print summary table for all channels (for Johannes)
-//       std::cout << "BCC Corrections done: " << particle << " " << quantity 
-//                 << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
-//       for (int bin = 0; bin < nbins; ++bin) {
-// 	double y = bccCrossGraph->GetY()[bin];
-// 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
-//            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
-//            << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
-//            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
-//            << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
-//            << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
-//            << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
-//            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
-//            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
-//            << "\t\\\\" << std::endl;
-//        }
+      std::cout << "BCC Corrections done: " << particle << " " << quantity 
+                << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
+      for (int bin = 0; bin < nbins; ++bin) {
+	double y = bccCrossGraph->GetY()[bin];
+	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+           << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
+           << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
+           << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
+           << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
+           << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
+           << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
+           << 100*withSys->GetErrorYhigh(bin)/y << "\t"
+           //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
+           << "\t\\\\" << std::endl;
+       }
+       
+       if (nbins == 2) {
+          std::cout << "Bin 1: " << std::setprecision(5) << genCrossHist->GetBinContent(1) << "\n";
+          std::cout << "Bin 2: " << std::setprecision(5) << genCrossHist->GetBinContent(2) << "\n";
+       }
 
       diffXsecHistogramList.Add(crossHist->Clone());
 
@@ -4944,7 +4949,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // leptons
     const Int_t nbinsLepEta = 6;
     const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
-    const Double_t binCenterLepEta[nbinsLepEta] = {bccAuto-.05, bccAuto+.05, bccAuto+.05, bccAuto, bccAuto+.04, bccAuto+.02};
+    const Double_t binCenterLepEta[nbinsLepEta] = {-1.93, -1.15, -0.45, 0.47, 1.15, 1.93};
     //const Double_t binCenterLepEta[nbinsLepEta] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta );
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE );
@@ -4954,7 +4959,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     //return;
     const Int_t nbinsLepPt = 5;
     const Double_t binsLepPt[nbinsLepPt+1] = {20, 40, 70, 120, 180, 400};
-    const Double_t binCenterLepPt[nbinsLepPt] = {bccAuto-2., bccAuto,  bccAuto+3.,  bccAuto+3., bccAuto};
+    const Double_t binCenterLepPt[nbinsLepPt] = {28, 55, 93, 147, 249};
     PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt );
     PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Pt", kCOMBINED, "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
@@ -4971,14 +4976,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // lepton pair
     const Int_t nbinsLepPairPt = 7;
     const Double_t binsLepPairPt[nbinsLepPairPt+1] = {0, 10, 20, 40, 60, 100, 150, 400};
-    const Double_t binCenterLepPairPt[nbinsLepPairPt] = {bccAuto, bccAuto, bccAuto, bccAuto+2., bccAuto, bccAuto-2., bccAuto+5};
+    const Double_t binCenterLepPairPt[nbinsLepPairPt] = {5, 15, 30, 47, 80, 123, 215};
     PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt );
     PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE );
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", binsLepPairPt, nbinsLepPairPt);
 
     const Int_t nbinsLepPairMass = 5;
     const Double_t binsLepPairMass[nbinsLepPairMass+1] = {12, 50, 76, 106, 200, 400};
-    const Double_t binCenterLepPairMass[nbinsLepPairMass] = {bccAuto-1., bccAuto, bccAuto, bccAuto+2., bccAuto};
+    const Double_t binCenterLepPairMass[nbinsLepPairMass] = {31, 60, 93, 146, 271};
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass );
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );
     GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
@@ -5016,14 +5021,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // top
     const Int_t nbinsTopRapidity = 4;
     const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    const Double_t binCenterTopRapidity[nbinsTopRapidity] = {bccAuto, bccAuto-0.05, bccAuto, bccAuto-0.07};
+    const Double_t binCenterTopRapidity[nbinsTopRapidity] = {-1.78, -0.66, 0.69, 1.76};
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("TCHEL",  "Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     
     const Int_t nbinsTopPt = 4;
     const Double_t binsTopPt[nbinsTopPt+1] = {0, 70, 140, 240, 400};
-    const Double_t binCenterTopPt[nbinsTopPt] = {bccAuto-3., bccAuto+4., bccAuto, bccAuto+3.};
+    const Double_t binCenterTopPt[nbinsTopPt] = {32, 109, 185, 308};
     PlotDifferentialCrossSections("TopQuarks", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t and #bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTopPt, nbinsTopPt, binCenterTopPt );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Pt", kCOMBINED, "generated p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
     GetBtagEfficiencyInBins("TCHEL",  "Top", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
@@ -5039,14 +5044,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // ttbar quantities
     const Int_t nbinsTtBarRapidity = 4;
     const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    const Double_t binCenterTtBarRapidity[nbinsTtBarRapidity] = {-1.7, -0.65, 0.7, 1.65};
+    const Double_t binCenterTtBarRapidity[nbinsTtBarRapidity] = {-1.68, -0.65, 0.68, 1.65};
     PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidity, nbinsTtBarRapidity, binCenterTtBarRapidity );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Rapidity", kCOMBINED, "generated y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
     GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Rapidity", "y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
     
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
-    const Double_t binCenterTtBarPt[nbinsTtBarPt] = {bccAuto, bccAuto, bccAuto, bccAuto-15};
+    const Double_t binCenterTtBarPt[nbinsTtBarPt] = {5, 39, 86, 231};
     PlotDifferentialCrossSections("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t#bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTtBarPt, nbinsTtBarPt, binCenterTtBarPt );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Pt", kCOMBINED, "generated p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
     GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
@@ -5055,7 +5060,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345, 400, 475, 550, 700, 1000};
     const Int_t nfinebinsTtBarMass = 2*nbinsTtBarMass+1;
     const Double_t finebinsTtBarMass[nfinebinsTtBarMass] = {345, 373, 400, 437, 475, 513, 550, 625, 700, 850, 1000};
-    const Double_t binCenterTtBarMass[nbinsTtBarMass] = {bccAuto, bccAuto, bccAuto, bccAuto, 825};
+    const Double_t binCenterTtBarMass[nbinsTtBarMass] = {364, 439, 515, 616, 823};
     PlotDifferentialCrossSections("TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Mass", kCOMBINED, "generated M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
