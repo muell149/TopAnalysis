@@ -23,9 +23,6 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
 
-  // restricted kinematic phase space?
-  bool phaseSpace=true;
-
   // define names
   // file name for input rootfile
   TString analysisFileName="";
@@ -52,12 +49,13 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   // name for folder where tree is read from
   TString folder="analyzeTopRecoKinematicsKinFit";
   TString genfolder="analyzeTopPartonLevelKinematics";
-  if(phaseSpace==true) genfolder+="PhaseSpace";
+  TString genfolder2=genfolder;
+  genfolder+="PhaseSpace";
   // name for folder where plots are saved to
   TString savePlotsTo="./diffXSecFromSignal/plots/"+decayChannel+"/2011/shapeReweighting";
   // define variables
   std::vector<TString> variable_;
-  TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY"};//, "lepPt", "lepEta"};
+  TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta"};
   variable_.insert( variable_.begin(), variable, variable + sizeof(variable)/sizeof(TString) );
   // container for values read from tree
   std::map< TString, float > value_;
@@ -133,15 +131,17 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     }
     // initialize plots with correct binning
     // original plots for parton level phase space / reconstruction level
-    plots_      [variable_[i]+"PartonTruth"]=new TH1F( variable_[i]+"PartonTruth", variable_[i]+"PartonTruth", hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
-    plots_      [variable_[i]              ]=new TH1F( variable_[i]              , variable_[i]              , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+    plots_      [variable_[i]+"PartonTruth"    ]=new TH1F( variable_[i]+"PartonTruth"    , variable_[i]+"PartonTruth"    , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+    plots_      [variable_[i]+"PartonTruthFull"]=new TH1F( variable_[i]+"PartonTruthFull", variable_[i]+"PartonTruthFull", hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+    plots_      [variable_[i]                  ]=new TH1F( variable_[i]                  , variable_[i]                  , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
     // loop all variations 
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
       // systematic distorted plots for parton level phase space / reconstruction level
       // used for SF determination
-      plotsScaled_[variable_[i]+"PartonTruth"+Var]=new TH1F( variable_[i]+"PartonTruth"+Var, variable_[i]+"PartonTruth"+Var, hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
-      plotsScaled_[variable_[i]              +Var]=new TH1F( variable_[i]+Var              , variable_[i]+Var              , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+      plotsScaled_[variable_[i]+"PartonTruth"+Var    ]=new TH1F( variable_[i]+"PartonTruth"+Var    , variable_[i]+"PartonTruth"+Var    , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+      plotsScaled_[variable_[i]+"PartonTruthFull"+Var]=new TH1F( variable_[i]+"PartonTruthFull"+Var, variable_[i]+"PartonTruthFull"+Var, hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+      plotsScaled_[variable_[i]              +Var    ]=new TH1F( variable_[i]+Var                  , variable_[i]+Var                  , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
       for(unsigned int j=0; j<variable_.size();++j){
 	// final plots: reweighted plots from tree entries
 	// (reweighting based on all events on parton level within phase space)
@@ -240,8 +240,10 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   for(unsigned int i=0; i<variable_.size();++i){
     TH1* targetPlot;
     TH1* targetPlot2;
+    TH1* targetPlot3;
     inFile->GetObject(genfolder+"/"+variable_[i], targetPlot);
     inFile->GetObject(folder+"/"+variable_[i]   , targetPlot2);
+    inFile->GetObject(genfolder2+"/"+variable_[i], targetPlot3);
     // check if plot exits
     if(!targetPlot){ 
       std::cout << "plot " << genfolder+"/"+variable_[i] << "can not ";
@@ -268,6 +270,20 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       if(plots_[variable_[i]]->GetEntries()==0){
 	std::cout << "ERROR: empty plot " << analysisFileName;
 	std::cout << "/"+folder+"/"+variable_[i] << std::endl;
+	exit(0);
+      }
+    }
+    if(!targetPlot3){ 
+      std::cout << "plot " << genfolder2+"/"+variable_[i] << "can not ";
+      std::cout << "be found in file " << analysisFileName << std::endl;
+      exit(0);
+    }
+    else{
+      plots_[variable_[i]+"PartonTruthFull"]=(TH1F*)(targetPlot3->Clone());
+      // check for empty plots
+      if(plots_[variable_[i]+"PartonTruthFull"]->GetEntries()==0){
+	std::cout << "ERROR: empty plot " << analysisFileName;
+	std::cout << "/"+genfolder2+"/"+variable_[i] << std::endl;
 	exit(0);
       }
     }
@@ -301,7 +317,10 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], inputFolderName,  verbose-1);
       } 
       else {
-	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distort   (*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], verbose-1);
+	// restricted phase space
+	plotsScaled_[variable_[i]+"PartonTruth"+Var    ]=distort   (*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], verbose-1);
+	// full phase space
+	plotsScaled_[variable_[i]+"PartonTruthFull"+Var]=distort   (*plots_[variable_[i]+"PartonTruthFull"], Var, variable_[i], verbose-1);
       }
     }
   }
@@ -314,8 +333,24 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     // loop all variations 
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
-      SF_[variable_[i]+Var]=(TH1F*)plotsScaled_[variable_[i]+"PartonTruth"+Var]->Clone();
-      SF_[variable_[i]+Var]->Divide(plots_[variable_[i]+"PartonTruth"]);
+      // calculate lepton variation SF from full PS
+      // others from restricted
+      // temporary necessary because of different gen and reco cuts
+      TString PS="Full";
+      //if(!(variable_[i]=="lepPt"||variable_[i]=="lepEta")) PS="";
+      if(variable_[i].Contains("Y")) PS="";
+      SF_[variable_[i]+Var]=(TH1F*)plotsScaled_[variable_[i]+"PartonTruth"+PS+Var]->Clone();
+      SF_[variable_[i]+Var]->Divide(plots_[variable_[i]+"PartonTruth"+PS]);
+      // if SF is derived by full PS
+      if(PS=="Full"){
+	for(int bin=0; bin<=SF_[variable_[i]+Var]->GetNbinsX()+1; ++bin){
+	  //std::cout << "bin #" << bin << "(" << SF_[variable_[i]+Var]->GetBinCenter(bin) << "): " << SF_[variable_[i]+Var]->GetBinContent(bin) << std::endl;
+	  // replace full PS parton truth plot by limited PS plot
+	  // and apply weight from full PS
+	  double SFbin=SF_[variable_[i]+Var]->GetBinContent(bin);
+	  plotsScaled_[variable_[i]+"PartonTruth"+Var]->SetBinContent(bin, plots_[variable_[i]+"PartonTruth"]->GetBinContent(bin)*SFbin);
+	}
+      }
 //      // Following lines are just to check whether reweighting values from MC@NLO to MadGraph works
 //      if (doPDFuncertainty) {
 //        // add central values (witouth PDF reweighting) from MC@NLO to the list of plots using MadGraph normalisation
@@ -327,7 +362,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 
   // B4 make sure to normalize the distorted plot 
   //    to the same area as the original one
-  // -> dont change the absolut amount of events!
+  // -> dont change the absolut amount of events (in Phase space)!
   // loop all variables
   for(unsigned int i=0; i<variable_.size();++i){
     // loop all variations 
@@ -414,6 +449,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     double maxStd =plots_      [variable_[i]+"PartonTruth"       ]->GetMaximum();
     double maximum=std::max(std::max(maxUp,maxDown), maxStd);
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->SetMaximum(1.2*maximum);
+    // adapt plot range
+    if(variable_[i]=="lepPt") plotsScaled_[variable_[i]+"PartonTruth"+"Up"]->GetXaxis()->SetRangeUser(0,400);
     //draw plots
     plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Draw("");
     plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Draw("same");
@@ -574,11 +611,11 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	plotCanvas_[canvasNumber]->cd(0);
 	// set canvas title and headline
 	TString title = finalPlots_[variable_[j]][variable_[i]+"Up"]->GetTitle();
-	TString PS="RecoLevel";
-	if(title.Contains("PartonTruth")) PS="PartonLevel";
-	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->SetTitle(variable_[j]+PS+"SFfrom"+variable_[i]+"Up"  );
-	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetTitle(variable_[j]+PS+"SFfrom"+variable_[i]+"Down");
-	plotCanvas_[canvasNumber]->SetTitle(variable_[j]+PS+"SFfrom"+variable_[i]);
+	TString PS2="RecoLevel";
+	if(title.Contains("PartonTruth")) PS2="PartonLevel";
+	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->SetTitle(variable_[j]+PS2+"SFfrom"+variable_[i]+"Up"  );
+	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetTitle(variable_[j]+PS2+"SFfrom"+variable_[i]+"Down");
+	plotCanvas_[canvasNumber]->SetTitle(variable_[j]+PS2+"SFfrom"+variable_[i]);
 	// set style
 	histogramStyle(*finalPlots_[variable_[j]][variable_[i]+"Up"  ], 0, false);
 	histogramStyle(*finalPlots_[variable_[j]][variable_[i]+"Down"], 2, false);
@@ -600,7 +637,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	double maxDown=finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->GetMaximum();
 	double maxUp  =finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->GetMaximum();
 	double maxData=0;
-	if(i==j&&PS=="RecoLevel") maxData=histo_[plotList_[i]][kData]->GetMaximum();
+	if(i==j&&PS2=="RecoLevel") maxData=histo_[plotList_[i]][kData]->GetMaximum();
 	double maxStd =plots_[variable_[j]+"Rebinned"]->GetMaximum();
 	double maximum=std::max(std::max(maxUp,maxDown), std::max(maxData, maxStd));
 	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"]->SetMaximum(1.2*maximum);
@@ -614,14 +651,14 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
 	finalPlots_[variable_[j]][variable_[i]+"UpRebinned"  ]->DrawClone("");
 	finalPlots_[variable_[j]][variable_[i]+"DownRebinned"]->DrawClone("same");
 	plots_[variable_[j]+"Rebinned"]->DrawClone("same");
-	if(i==j&&PS=="RecoLevel") histo_[plotList_[i]][kData]->DrawClone("p e1 same");
+	if(i==j&&PS2=="RecoLevel") histo_[plotList_[i]][kData]->DrawClone("p e1 same");
 	// change name
 	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetName (variable_[j]);
 	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetTitle(variable_[j]);
 	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->SetName (variable_[j]);
 	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->SetTitle(variable_[j]);
 	// draw legend
-	if(PS=="RecoLevel") legReco->Draw("same");
+	if(PS2=="RecoLevel") legReco->Draw("same");
 	// adapt counter
 	++canvasNumber;
       }
@@ -673,6 +710,33 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
   if(verbose>1) std::cout << variable << " (" << variation << ")" << std::endl;
   TH1F* result=(TH1F*)(hist.Clone());
   TH1F* histo =(TH1F*)(hist.Clone());
+  if(variable.Contains("lepEta")){
+    // fit gaussian
+    //    TF1* myFunc = new TF1("myFunc", "gaus", xmin, xmax);
+    TF1* myFunc = new TF1("myFunc", "[0]*TMath::Gaus(x, 0, [1])", -5.0, 5.0);
+    myFunc->SetParameter(0, 18000); 
+    myFunc->SetParameter(1, 1.3); 
+    myFunc->SetParLimits(0, 100, 100000);
+    myFunc->SetParLimits(1, 0.5 , 10);
+    histo->Fit(myFunc,"","same");
+    // do variation
+    // vary shape 
+    TF1* myVarFunc=(TF1*)(myFunc->Clone("myVarFunc"));
+    if(     variation=="Down") myVarFunc->SetParameter(1, 0.85*myVarFunc->GetParameter(1));
+    else if(variation=="Up"  ) myVarFunc->SetParameter(1, 1.5*myVarFunc->GetParameter(1));
+    // get SF
+    TH1F* fit = (TH1F*)result->Clone();
+    fit->Scale(0.);
+    fit->Add(myFunc);
+    TH1F* fitVar = (TH1F*)result->Clone();
+    fitVar->Scale(0.);
+    fitVar->Add(myVarFunc);
+    TH1F* SFVar=(TH1F*)fitVar->Clone();
+    SFVar->Divide(fit);
+    // apply SF to original plot
+    result->Multiply(SFVar);
+    return result;
+  }
   if(variable.Contains("ttbarMass")){
     double xmin=200;
     double xmax=1200;
@@ -693,9 +757,9 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
     // vary shape 
     TF1* myVarFunc=(TF1*)(myFunc->Clone("myVarFunc"));
     if(variation=="Down"){
-      myVarFunc->SetParameter(0, 0.95*myFunc->GetParameter(0)); 
-      myVarFunc->SetParameter(1, 1.05*myFunc->GetParameter(1)); 
-      myVarFunc->SetParameter(2, 1.2*myFunc->GetParameter(2));
+      myVarFunc->SetParameter(0, 0.98*myFunc->GetParameter(0)); 
+      myVarFunc->SetParameter(1, 1.02*myFunc->GetParameter(1)); 
+      myVarFunc->SetParameter(2, 1.1*myFunc->GetParameter(2));
     }
     else if(variation=="Up"){
       myVarFunc->SetParameter(0, 1.05*myFunc->GetParameter(0)); 
@@ -890,7 +954,7 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
     }
     else if(variable=="lepPt"   ){
       if     (variation=="Up"  ) a*=0.1;
-      else if(variation=="Down") a*=1.0;
+      else if(variation=="Down") a*=10.0;
     }
     else{
      std::cout << "ERROR in function distort: chose variable " << variable << " not known" << std::endl;
@@ -903,12 +967,23 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
     // weight is always positive 0 for up 
     // and x_max for down variation
     double xmax= 0.;
-    if(variation=="Down") xmax=hist.GetBinCenter(hist.GetNbinsX());
+    if(variation=="Down") xmax=std::abs(hist.GetBinCenter(hist.GetNbinsX())+1);
     // loop bins
     for(int bin=1; bin<result->GetNbinsX(); ++bin){ 
       // get SF 
-      double x= hist.GetBinCenter(bin);
+      double x= std::abs(hist.GetBinCenter(bin));
       double SF=linSF(x, xmax, a, 0.);
+      if(variable=="lepPt"){ 
+	if(a<0) SF=pow(SF, 1.4);
+	else SF=pow(SF, 0.4);
+      }
+      else if(variable=="topPt"&&variation=="Up"){
+	SF=pow(SF, 0.7);	
+      }
+     else if(variable=="ttbarPt"){
+       if(variation=="Up") SF=pow(SF, 0.7);
+       else SF=pow(SF, 0.6);
+      }
       // avoid SF=0 
       if(SF==0){
 	std::cout << "WARNING: SF for bin " << bin << " is 0" << std::endl;
