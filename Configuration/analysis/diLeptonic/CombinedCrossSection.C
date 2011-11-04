@@ -78,14 +78,14 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kTRUE;
+const bool doPrintControlPlots = kFALSE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
 const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
 const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
-const bool PAS = kFALSE;
+const bool PAS = kTRUE;
 // do you want a legend in the plots?
 const bool drawLegend = kTRUE;
 // should there be ratio Ndata/Nmc plots below the actual distributions?
@@ -2802,7 +2802,7 @@ void CalculateInclusiveCrossSections(const char* selection){
    herapdfplot->Draw("C,2,SAME");
    mstwplot->Draw("C,2,SAME");
    mplot->Draw("p,SAME");
-   mplotwithsys->Draw("p,SAME");
+   mplotwithsys->Draw("p,SAME,Z");
    leg ->Draw("SAME");
    box1->Draw("SAME");
    box2->Draw("SAME");
@@ -4939,9 +4939,12 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     }
 
     setHHStyle(*gStyle);
+    gStyle->SetEndErrorSize(0);
+
     
     // Print control plots
     if (doPrintControlPlots) CreateControlPlots();
+    gStyle->SetEndErrorSize(8);
 
     // Calculate differential cross sections
     TGaxis::SetMaxDigits(2);
