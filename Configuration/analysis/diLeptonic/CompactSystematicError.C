@@ -33,7 +33,7 @@ using namespace std;
 // path to the ingoing root histogram files
 //const TString inpath("~markusm/cms/systematics/");
 //const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct14/");
-const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsNov1/");
+const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsNov4/");
 
 // path where the output is written
 //const TString outpath("Markus/DiffXS2011/Systematics/plots/");
@@ -50,7 +50,7 @@ Bool_t set_LogY = kTRUE;
 //Bool_t set_LogY = kFALSE;
 
 Bool_t isDiff   = kTRUE;
-//Bool_t isDiff   = kFALSE;
+// Bool_t isDiff   = kFALSE;
 
 // output file name
 const TString outfileName(isDiff ? outpath+"Systematic_Errors_DIFF.root" : outpath+"Systematic_Errors_TOTAL.root");
@@ -66,7 +66,7 @@ Bool_t isModel = kTRUE;
 Bool_t isExp = kTRUE;
 //Bool_t isExp = kFALSE;
 
-//Bool_t isStat  = kTRUE;
+// Bool_t isStat  = kTRUE;
 Bool_t isStat  = kFALSE;
 
 ///////////////////////////////////////////////////////////
