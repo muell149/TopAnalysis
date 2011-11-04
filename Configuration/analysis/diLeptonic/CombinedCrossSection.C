@@ -59,8 +59,8 @@ const TString preUnfoldedPlotsName(outpath+"preUnfoldedPlots.root");
 // input file name with systematic errors
 TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 
-TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/m/markusm/public/Systematics/Systematic_Errors_TOTAL.root");
-TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/m/markusm/public/Systematics/Systematic_Errors_DIFF.root");
+TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_DIFF.root");
 
 // input file name with Powheg curves
 TFile* powhegInput = TFile::Open("/afs/naf.desy.de/user/d/dammann/public/Powheg.root");
@@ -3452,21 +3452,21 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
 
 //       // print summary table for all channels (for Johannes)
-      std::cout << "BCC Corrections done: " << particle << " " << quantity 
-                << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
-      for (int bin = 0; bin < nbins; ++bin) {
-	double y = bccCrossGraph->GetY()[bin];
-	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
-           << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
-           << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
-           << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
-           << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
-           << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
-           << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
-           << 100*withSys->GetErrorYhigh(bin)/y << "\t"
-           //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
-           << "\t\\\\" << std::endl;
-       }
+//       std::cout << "BCC Corrections done: " << particle << " " << quantity 
+//                 << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
+//       for (int bin = 0; bin < nbins; ++bin) {
+// 	double y = bccCrossGraph->GetY()[bin];
+// 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+//            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
+//            << std::setprecision(strcasecmp(quantity, "eta") ? 0:2)
+//            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
+//            << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
+//            << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
+//            << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
+//            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
+//            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
+//            << "\t\\\\" << std::endl;
+//        }
        
        if (nbins == 2) {
           std::cout << "Bin 1: " << std::setprecision(5) << genCrossHist->GetBinContent(1) << "\n";
@@ -4007,7 +4007,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     for (int bin = 0; bin < nbins; ++bin) {
       double y = bccCrossGraph->GetY()[bin];
       //double y_mc = genHistBinned->GetBinContent(bin+1);
-      std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+      std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : bccCrossGraph->GetX()[bin]<4 ? std::setprecision(2) : std::setprecision(0))
          << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
          << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
          << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
