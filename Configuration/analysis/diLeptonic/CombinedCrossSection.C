@@ -2542,7 +2542,7 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
     if (scaleUpBG)   nBg += 0.3*(nTToth+nTW+nVV+nDYtt+nW+nQCD);
     if (scaleDownBG) nBg -= 0.3*(nTToth+nTW+nVV+nDYtt+nW+nQCD);
     if (scaleUpDY)   nBg += 0.5*(nDYmm+nDYee);
-    if (scaleDownBG) nBg -= 0.5*(nDYmm+nDYee);
+    if (scaleDownDY) nBg -= 0.5*(nDYmm+nDYee);
     errBg = ((nTToth+nTW+nVV+nDYtt+nW+nQCD)*.3)*
             ((nTToth+nTW+nVV+nDYtt+nW+nQCD)*.3);
     errBg += ((nDYmm+nDYee)*.5) * ((nDYmm+nDYee)*.5);
