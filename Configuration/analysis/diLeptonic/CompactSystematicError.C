@@ -33,14 +33,14 @@ using namespace std;
 // path to the ingoing root histogram files
 //const TString inpath("~markusm/cms/systematics/");
 //const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct14/");
-const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsOct27/");
+const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsNov1/");
 
 // path where the output is written
-const TString outpath("Markus/DiffXS2011/Systematics/plots/");
-//const TString outpath("~wbehrenh/cms/systematicsSept21-output/");
+//const TString outpath("Markus/DiffXS2011/Systematics/plots/");
+const TString outpath("~wbehrenh/cms/systematicsNov4-output/");
 
 // output format
-//const TString outform(".png");
+// const TString outform(".png");
 const TString outform(".eps");
 
 
@@ -136,7 +136,7 @@ void SymmetricAroundZero(TH1* h_ref, TH1* h_var_up, TH1* h_var_down, TH1* h_sys,
   Double_t Sys_Error_Up   = 0.;
   Double_t Sys_Error_Down = 0.;
 
-  for(Int_t bin = 1; bin <= h_ref->GetNbinsX()/2.; ++bin) {
+  for(Int_t bin = 1; bin <= h_ref->GetNbinsX()/2; ++bin) {
 
     if( h_ref->GetBinContent(bin) == 0 )  continue;
 
@@ -169,6 +169,8 @@ void SymmetricAroundZero(TH1* h_ref, TH1* h_var_up, TH1* h_var_down, TH1* h_sys,
 
 void SystematicErrors() {
 
+  TH1 *dysys[1000], *dysys2[1000];
+  
   leg->Clear();
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -631,6 +633,9 @@ void SystematicErrors() {
 
       sum_sys_errors[j]->Add(h_sys2);
       sum_exp_errors[j]->Add(h_sys2);
+      
+      dysys[j] = h_sys;
+      dysys2[j] = h_sys2;
 
     }
 
@@ -1137,6 +1142,130 @@ void SystematicErrors() {
     cout << "-------------" << endl << endl;
 
   }
+
+
+
+
+
+  LineColor = kGray;
+  LineStyle = 1;
+  LineWidth = 1;
+  //  HistColor = kMagenta-6;
+  HistColor = kGray;
+
+  files[11] = new TFile(inpath.Copy().Append("mll30_new.root"));
+  files[12] = new TFile(inpath.Copy().Append("standard_new.root"));
+
+  //  files[11] = new TFile(inpath.Copy().Append("standard.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("pythiaBug.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("mll30.root"));
+
+  //  files[11] = new TFile(inpath.Copy().Append("standard.root"));
+  //  files[12] = new TFile(inpath.Copy().Append("kin_scale2.root"));
+
+  if( files[11] && !files[11]->IsZombie() &&  files[12] && !files[12]->IsZombie() && isExp ) {
+
+    cout << "   >>>   " << "MLL 30 " << endl;
+    cout << "----------------------" << endl << endl;
+
+    for(Int_t j = 0; j < ListOfKeys->GetEntries(); ++j) {
+
+      TString title = ListOfKeys->At(j)->GetName();
+      cout << "   >>>   " << title << endl;
+      if( title.Contains("PSE_") )    continue;
+
+      Sys_Error  = 0.;
+      Sys_Error2 = 0.;
+
+      files[11]->GetObject( title, h_ref);
+      files[11]->GetObject( title, h_style);
+      files[11]->GetObject( title, h_var_up);
+      files[12]->GetObject( title, h_var_down);
+
+      TH1* h_sys       = (TH1*) h_var_up->Clone();   h_sys->Reset();
+      TH1* h_sys2      = (TH1*) h_var_down->Clone(); h_sys2->Reset();
+      TH1* h_sys_up    = (TH1*) h_var_up->Clone();   h_sys_up->Reset();
+      TH1* h_sys_down  = (TH1*) h_var_down->Clone(); h_sys_down->Reset();
+      TH1* h_sys2_up   = (TH1*) h_var_up->Clone();   h_sys2_up->Reset();
+      TH1* h_sys2_down = (TH1*) h_var_down->Clone(); h_sys2_down->Reset();
+
+      TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
+
+      setHistogramStyle(h_ref,      kBlack, 1, 2, HistColor);
+      setHistogramStyle(h_var_up,   kBlue,  1, 1, HistColor);
+      setHistogramStyle(h_var_down, kRed,   1, 1, HistColor);
+
+      Canvas->Clear();
+      //      h_ref->SetMarkerColor(kBlack);
+      //      h_ref->Draw();
+      h_var_up->SetMarkerColor(kBlue);
+      h_var_up->Draw();
+      h_var_down->SetMarkerColor(kRed);
+      h_var_down->Draw("SAME");
+      if( set_LogY ) gPad->SetLogy();
+      Canvas->Print(outpath.Copy().Append(title).Append("_MLL_30").Append(outform));
+
+      Int_t N_bins = h_ref->GetNbinsX();
+      Double_t Sum_Errors = 0.;
+
+      if(title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity") ) {
+
+        SymmetricAroundZero(h_ref, h_var_down, h_var_down, h_sys, h_sys2, Sum_Errors);
+
+      } else {
+
+        for(Int_t bin = 1; bin <= h_ref->GetNbinsX(); ++bin) {
+
+            if( h_var_up->GetBinContent(bin) == 0 || h_var_down->GetBinContent(bin) == 0 )  continue;
+
+            Sys_Error  = fabs(h_var_up->GetBinContent(bin) - h_var_down->GetBinContent(bin))/h_var_up->GetBinContent(bin);
+            Sys_Error2 = Sys_Error * Sys_Error;
+
+            h_sys->SetBinContent(  bin, Sys_Error  );
+            h_sys2->SetBinContent( bin, Sys_Error2 );
+            cout << "Sys. Error: " << Sys_Error << endl;
+            Sum_Errors = Sum_Errors+Sys_Error;
+        }
+      }
+      
+      cout << "-------------" << endl;
+      cout << " Ave. Error: " << Sum_Errors/N_bins << endl;
+      cout << "-------------" << endl << endl;
+
+      setHistogramStyle(h_sys,  LineColor, LineStyle, LineWidth, HistColor);
+      setHistogramStyle(h_sys2, LineColor, LineStyle, LineWidth, HistColor);
+      h_style = h_sys;
+
+      title.Append("_sys_error_MLL_30");
+      h_sys->SetName(title);
+
+      //dont add this as own error, but rather add to DY
+//       Hlist.Add(h_sys);
+//       sum_sys_errors[j]->Add(h_sys2);
+//       sum_exp_errors[j]->Add(h_sys2);
+
+      //loop over all bins
+      dysys2[j]->Add(h_sys2);
+      for (int i = 1; i <= dysys[j]->GetNbinsX(); ++i) {
+          dysys[j]->SetBinContent(i, TMath::Sqrt(dysys2[j]->GetBinContent(i)));
+      }
+      
+
+    }
+
+    //leg->AddEntry(h_style,"MLL 30","F");
+    cout << "-------------" << endl << endl;
+
+  }
+
+
+
+
+
+
+
+
+
 
   // MODEL ----------------------------------------------
 
