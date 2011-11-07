@@ -5,6 +5,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "TopAnalysis/TopAnalyzer/interface/DoubleObject.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 
 /**
    \class   HypothesisKinFitMET HypothesisKinFitMET.h "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMET.h"
