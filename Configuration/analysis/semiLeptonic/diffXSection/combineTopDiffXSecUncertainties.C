@@ -127,35 +127,39 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
     std::cout << "target folder containing cross section plots: " << xSecFolder << std::endl;
     if(save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
   }
-
-  // loading bin center corrections
+  
+  // ============================
+  //  Bin Center Corrections
+  // ============================
+  
   std::cout << " Loading and calculating bin center corrections .... " << std::endl;
+ 
   BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
+
   b.runBCCCalculation();
   std::map<TString, std::vector<double> > correctedCenters_ = b.getMapWithCorrectedCentersInX();
   std::map<TString, std::vector<double> > corrCenterErrors_ = b.getMapWithCenterErrorsInX();
+
   // Output of results
+
   if(verbose>1){
-    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 !=  correctedCenters_.end(); iter1++ ){
+    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
       std::cout << iter1->first << ": ";
-      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++){
-	std::cout << (*iter2) << " ";
-      }
+      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)	std::cout << (*iter2) << " ";
       std::cout << std::endl;
     }    
     for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ ){
       std::cout << iter1->first << ": ";
-      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++){
-	std::cout << (*iter2) << " ";
-      }
+      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++) std::cout << (*iter2) << " ";
       std::cout << std::endl;
     }
   }
+
   std::cout << " .... Executing bin center corrections finished." << std::endl;
 
-  // ---
+  // ============================
   //  Open rootfile
-  // ---
+  // ============================
 
   TFile* file = TFile::Open(outputFile, "UPDATE");
   if(verbose>1) std::cout << "opened file "+outputFile << std::endl;
@@ -219,7 +223,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       if(calculateError_.count(xSecVariables_[i])>0&&calculateError_[xSecVariables_[i]][sysNo]==true){
 	// define object to save uncertainties
 	int Nbins=histo_[xSecVariables_[i]][sysNo]->GetNbinsX();
-	TGraphAsymmErrors* combinedErrors= new TGraphAsymmErrors(Nbins);
+	TGraphAsymmErrors* combinedErrors = new TGraphAsymmErrors(Nbins);
 	// get plot without variation
 	TH1F* noSysPlot=(TH1F*)histo_[xSecVariables_[i]][sysNo]->Clone();
 	// loop bins
@@ -321,9 +325,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		double combinedErrorBinVar = sqrt(totalSystematicError*totalSystematicError + statErrorBinVar*statErrorBinVar);
 		// print statistical, systematic and total uncertainties, absolut and relative for bin & variable
 		if(verbose>0){
-		  std::cout << "total statistic uncertainty:  " << " +/- " << statErrorBinVar      << " (" << 100*statErrorBinVar/stdBinXSecValue      << "% )" << std::endl;
-		  std::cout << "total systematic uncertainty: " << " +/- " << totalSystematicError << " (" << 100*totalSystematicError/stdBinXSecValue << "% )" << std::endl;
-		  std::cout << "total uncertainty:            " << " +/- " << combinedErrorBinVar  << " (" << 100*combinedErrorBinVar/stdBinXSecValue  << "% )" << std::endl;
+		  std::cout << "total statistic uncertainty:  " << " +/- " << statErrorBinVar      << " (" << 100*statErrorBinVar/stdBinXSecValue      << "%)" << std::endl;
+		  std::cout << "total systematic uncertainty: " << " +/- " << totalSystematicError << " (" << 100*totalSystematicError/stdBinXSecValue << "%)" << std::endl;
+		  std::cout << "total uncertainty:            " << " +/- " << combinedErrorBinVar  << " (" << 100*combinedErrorBinVar/stdBinXSecValue  << "%)" << std::endl;
 		}
 		// print MC prediction value and difference in std variations
 		double xSecDiff=stdBinXSecValue-MCpredBinVar;
@@ -331,8 +335,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		double relativeDifference=xSecDiff/absError; 
 		if(verbose>0){
 		  std::cout << "difference data-MC = " << xSecDiff << " pb" << std::endl;
-		  std::cout << " ( = " << (xSecDiff/stdBinXSecValue)*100 << "% )" << std::endl;
-		  std::cout << " ( = " << relativeDifference << " std variations )" << std::endl;
+		  std::cout << " (" << (xSecDiff/stdBinXSecValue)*100 << "%)" << std::endl;
+		  std::cout << " (" << relativeDifference << " std variations)" << std::endl;
 		}
 		// save relative uncertainties for bin & variable in map relativeUncertainties_
 		// a) statistic uncertainty
@@ -387,8 +391,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       }
     }
     // close file
-    // needed to be able to use the saveToRootFile function 
-    // which also opens the file
+    // needed to be able to use the saveToRootFile function, which also opens the file
     file->Close();
     
     // ===============================================================

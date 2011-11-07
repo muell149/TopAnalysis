@@ -214,8 +214,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    std::cout << plotName << " for MC@Nlo chosen" << std::endl;
 	    exit(0);
 	  }
-	  TH1F* unbinnedTheoryMCAtNLO = getTheoryPrediction(plotName2,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
-	  TH1F* unbinnedTheory2 = (TH1F*)unbinnedTheory->Clone();
+	  TH1F* unbinnedTheoryMCAtNLO  = getTheoryPrediction(plotName2,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
+	  TH1F* unbinnedTheory2        = (TH1F*)unbinnedTheory->Clone();
 	  TH1F* unbinnedTheoryMCAtNLO2 = (TH1F*)unbinnedTheoryMCAtNLO->Clone();
           // get histogram central value & up/down variations for MC@NLO error bands
           TString plotName2_Up   = plotName2; plotName2_Up  .Append("_Up"  ) ;
