@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyzeHypothesisKinFitMuon = cms.EDAnalyzer("HypothesisKinFitMuonAnalyzer",
+analyzeHypothesisKinFitLepton = cms.EDAnalyzer("HypothesisKinFitLeptonAnalyzer",
     ## input collectionA
     srcA = cms.InputTag("ttSemiLepEvent"),
     ## input collectionB                            

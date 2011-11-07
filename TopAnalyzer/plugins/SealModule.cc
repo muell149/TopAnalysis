@@ -102,9 +102,9 @@ DEFINE_FWK_MODULE(HypothesisKinFitAnalyzer);
 typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::Jet>, HypothesisKinFitJets> HypothesisKinFitJetsAnalyzer;
 DEFINE_FWK_MODULE(HypothesisKinFitJetsAnalyzer);
 
-#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMuon.h"
-typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::Muon>, HypothesisKinFitMuon> HypothesisKinFitMuonAnalyzer;
-DEFINE_FWK_MODULE(HypothesisKinFitMuonAnalyzer);
+#include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitLepton.h"
+typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<reco::Candidate>, HypothesisKinFitLepton> HypothesisKinFitLeptonAnalyzer;
+DEFINE_FWK_MODULE(HypothesisKinFitLeptonAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFitMET.h"
 typedef DoubleObjectAnalyzer<TtSemiLeptonicEvent, edm::View<pat::MET> , HypothesisKinFitMET> HypothesisKinFitMETAnalyzer;
