@@ -893,7 +893,7 @@ process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cf
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
-## ## configure top reconstruction analyzers & define PSets
+## configure top reconstruction analyzers & define PSets
 ## a) for top reconstruction analyzer
 process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
 ## 1)  plots built from event hypothesis kinFit after reco selection
@@ -927,12 +927,15 @@ hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
                       wantTree = cms.bool(True),
                       maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKinFit)
-#process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
-#process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"         )
-#process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
-#process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets")
-#process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMuon_cfi")
-#process.analyzeHypoKinFitMuon = process.analyzeHypothesisKinFitMuon.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"      )
+
+
+## define analyzers for kinfit object reconstruction quality
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
+process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"           )
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
+process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets")
+process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitLepton_cfi")
+process.analyzeHypoKinFitLepton = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"    )
 
 ## ---
 ##    collect KinFit Analyzers depending on sample processed
@@ -951,6 +954,9 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
                                              process.analyzeHypoKinFit                       +
+                                             process.analyzeHypoKinFitLepton                 + 
+                                             process.analyzeHypoKinFitJets                   +
+                                             process.analyzeHypoKinFitMET                    +
                                              process.filterMatchKinFit
                                              )
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics          )
@@ -1051,10 +1057,10 @@ process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
 #process.eventWeightDileptonModelVariation.ttGenEvent=cms.InputTag('genEvt')
 process.eventWeightDileptonModelVariation.ttGenEvent = cms.InputTag('genEvt')
 process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass
-process.eventWeightDileptonModelVariation.slope = cms.double(0)
-process.eventWeightDileptonModelVariation.weight1x = cms.double(600)  #position where weight is 1
+process.eventWeightDileptonModelVariation.slope = cms.double(0.03)
+process.eventWeightDileptonModelVariation.weight1x = cms.double(350)  #position where weight is 1
 process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-off, at least 0.1 event weight
-process.eventWeightDileptonModelVariation.maxWeight = cms.double(2)  #high cut-off, at most 2 event weight
+process.eventWeightDileptonModelVariation.maxWeight = cms.double(100)  #high cut-off, at most 2 event weight
 process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
 process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
 if(sysDistort=='up'):
