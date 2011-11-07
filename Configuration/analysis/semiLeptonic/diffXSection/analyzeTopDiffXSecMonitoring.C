@@ -44,8 +44,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
   // a) options directly entered when calling function
   // luminosity: [/pb]
 
-  TString lumi = getTStringFromInt(roundToInt((luminosity), false));
-  double lumiError = 0.045;  // relative luminosity error
+  TString lumi = getTStringFromInt(roundToInt((luminosity), false));  
 
   // save:    save plots?
   // verbose: set detail level of output 
@@ -598,60 +597,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
 	// equidistant binning
 	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
 	if(reBinFactor>1){
-	  equalReBinTH1(reBinFactor, histo_,           plotName, sample);
+	  equalReBinTH1(reBinFactor, histo_, plotName, sample);
 	}
       }
     }
   }
-  // ========================================================
-  //  Errors for uncertainty bands from JES and luminosity
-  // ========================================================
+
+  // ===============================================================
+  //  Errors for uncertainty bands from ttbar Xsec and luminosity
+  // ===============================================================
   
-  std::cout << std::endl << " Start calculating error bands .... " << std::endl;
-
-  for(unsigned int plot=0; plot<plotList_.size(); ++plot)
-  {
-    TString plotName     = plotList_[plot];
-
-    // Initialize and reset histograms
-
-    TH1F* histoSumRef       = (TH1F*)histo_[plotName][kSig]->Clone();
-    TH1F* histoSumTTbarOnly = (TH1F*)histo_[plotName][kSig]->Clone();
-
-    histoSumRef       -> Reset("ICESM");
-    histoSumTTbarOnly -> Reset("ICESM");
-
-    // Integral over all samples before accessing the differences
-
-    for(unsigned int sample=kSig; sample<kData; ++sample)
-    {
-      if((plot<N1Dplots)&&(plotExists(histo_, plotName, sample)))
-      {
-	histoSumRef -> Add(histo_[plotName][sample]);
-
-	if (sample == kSig || sample == kBkg) 
-	  histoSumTTbarOnly -> Add(histo_[plotName][sample]);
-      }
-    }
-
-    // Compare summed histograms, symmetrize deviations and store relative deviation to error histogram after adding constant contributions
-        
-    double relXSecError = sqrt(pow(ttbarCrossSectionError/ttbarCrossSection,2)-pow(lumiError,2));  // to avoid double counting of luminosity error
-  
-    for (int bin = 0; bin < histoSumRef->GetNbinsX(); bin++)
-    {
-      double xSecError       = (histoSumTTbarOnly->GetBinContent(bin+1))*relXSecError;
-      double luminosityError = (histoSumRef->GetBinContent(bin+1))*lumiError;
-
-      double totalError      = sqrt(xSecError*xSecError+luminosityError*luminosityError);
-      
-      histoSumRef->SetBinError(bin+1,totalError);
-    }
-
-    histoErrorBand_[plotName] = (TH1F*)histoSumRef->Clone();
-  }
-
-  std::cout << " .... Finished calculation of error bands." << std::endl;  
+  std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
+  makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
+  std::cout << " .... Finished." << std::endl; 
 
   // ========================================================
   //  Create Legends

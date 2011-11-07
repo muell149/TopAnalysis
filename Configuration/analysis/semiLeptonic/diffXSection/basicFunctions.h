@@ -102,7 +102,8 @@ namespace semileptonic {
                                         // --> systematic samples are varied by +/-3.0 GeV 
                                         // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
-  double constHadUncertainty = 0.05;
+  double constHadUncertainty   = 0.050; // relative uncertainty
+  double globalLumiUncertainty = 0.045; // relative uncertainty
 
   TString sysLabel(unsigned int sys)
   {
@@ -1858,6 +1859,56 @@ namespace semileptonic {
       }
     }
 
+  void makeUncertaintyBands(std::map< TString, std::map <unsigned int, TH1F*> >& histo_,
+			    std::map< TString, TH1F* >& histoErrorBand_,
+			    std::vector<TString>& plotList_,
+			    unsigned int& Nplots)
+  {
+    
+    for(unsigned int plot=0; plot<Nplots; ++plot){
+      
+      TString plotName     = plotList_[plot];
+      
+      // Initialize and reset histograms
+      
+      TH1F* histoSumRef       = (TH1F*)histo_[plotName][kSig]->Clone();
+      TH1F* histoSumTTbarOnly = (TH1F*)histo_[plotName][kSig]->Clone();
+      
+      histoSumRef       -> Reset("ICESM");
+      histoSumTTbarOnly -> Reset("ICESM");
+      
+      // Integral over all samples before accessing the differences
+      
+      for(unsigned int sample=kSig; sample<kData; ++sample){
+
+	if((plot<Nplots)&&(plotExists(histo_, plotName, sample))){
+
+	  histoSumRef -> Add(histo_[plotName][sample]);
+
+	  if (sample == kSig || sample == kBkg) 
+	    histoSumTTbarOnly -> Add(histo_[plotName][sample]);
+	}
+      }
+      
+      // Compare summed histograms, symmetrize deviations and store relative deviation to error histogram after adding constant contributions
+      
+      double relXSecError = sqrt(pow(ttbarCrossSectionError/ttbarCrossSection,2)-pow(globalLumiUncertainty,2));  // to avoid double counting of luminosity error
+      
+      for (int bin = 0; bin < histoSumRef->GetNbinsX(); bin++){
+
+	double xSecError       = (histoSumTTbarOnly->GetBinContent(bin+1))*relXSecError;
+	double luminosityError = (histoSumRef->GetBinContent(bin+1))*globalLumiUncertainty;
+	
+	double totalError      = sqrt(xSecError*xSecError+luminosityError*luminosityError);
+	
+	histoSumRef->SetBinError(bin+1,totalError);
+      }
+      
+      histoErrorBand_[plotName] = (TH1F*)histoSumRef->Clone();
+    }
+  
+  }
+  
 
 #ifdef DILEPTON_MACRO
 }

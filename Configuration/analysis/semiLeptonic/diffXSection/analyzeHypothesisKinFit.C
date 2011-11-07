@@ -72,7 +72,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // data file: relative path of .root file
   // save: save plots?
   // luminosity: [/pb]
-  TString lumi = getTStringFromInt(roundToInt((luminosity), false));
+  TString lumi = getTStringFromInt(roundToInt((luminosity), false));  
   // b) options to be configured only once
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
@@ -316,16 +316,16 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
     // reconstructed top quantities
-    "m^{t and #bar{t}} #left[#frac{GeV}{c^{2}}#right]/top quarks #left[(#frac{GeV}{c^{2}})^{-1}#right]/0/10",
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/top quarks #left[(#frac{GeV}{c})^{-1}#right]/0/1", //20"
-    "#phi^{t and #bar{t}}/top quarks/0/4"         ,
-    "y^{t and #bar{t}}/top quarks/0/1"             ,//5"
-    "p_{T}(hadronic t) #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/20",                         
-    "#phi(hadronic t)/events/0/4",
-    "y(hadronic t)/events/0/5"    ,
-    "p_{T}(leptonic t) #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/20",                         
-    "#phi(leptonic t)/events/0/4",
-    "y(leptonic t)/events/0/5"   ,
+    "m^{t and #bar{t}} #left[#frac{GeV}{c^{2}}#right]/#frac{dN}{dm^{t and #bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]/0/10",
+    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/1", //20"
+    "#phi^{t and #bar{t}}/#frac{dN}{d#phi^{t and #bar{t}}}/0/4",
+    "y^{t and #bar{t}}/#frac{dN}{dy^{t and #bar{t}}}/0/1",//5"
+    "p_{T}(hadronic t) #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{had. t}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/20",                         
+    "#phi(hadronic t)/#frac{dN}{d#phi^{had. t}}/0/4",
+    "y(hadronic t)/#frac{dN}{dy^{had. t}}/0/5"    ,
+    "p_{T}(leptonic t) #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{lep. t}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/20",                         
+    "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
+    "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,
     //  reconstructed angular distributions
     "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
     "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
@@ -401,13 +401,13 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     // 			     "circularity parton truth/events/0/10",
     // 			     "isotropy parton truth/events/0/10"   ,
     // reconstructed ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] /events/1/1",//60"
-    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/events/0/1",//10"
-    "y^{t#bar{t}}/events/0/1",//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right]/events/0/20",
-    "y^{t and #bar{t}}/events/0/10",
-    "#phi(leptonic t)-#phi(hadronic t)/events/0/4",                
-    "y(leptonic t)-y(hadronic t)/events/0/4",  
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/#frac{dN}{dm^{t#bar{t}}} #left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]/1/1",//60"
+    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{t#bar{t}}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/1",//10"
+    "y^{t#bar{t}}/#frac{dN}{dy^{t#bar{t}}}/0/1",//2
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right]/#frac{dN}{dH_{T}^{t#bar{t}}}/0/20",
+    "y^{t}+y^{#bar{t}}/#frac{dN}{d(y^{t}+y^{#bar{t}})}/0/10",
+    "#phi{lep. t}-#phi{had. t}/#frac{dN}{d(#phi^(lep. t)-#phi^{had. t})}/0/4",                
+    "y^{lep. t}-y^{had. t}/#frac{dN}{d(y^(lep. t)-y^{had. t})}/0/4",  
     // generated ttbar quantities	                            
     "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/1/1",//60"
     "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",//10"
@@ -469,6 +469,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, TH1F* > histoErrorBand_;
   std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
   // total # plots 
   int Nplots=0;
@@ -1025,9 +1026,17 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   //     }	
   //   }
 
-  // ---
-  //    create one legend for all 1D histos
-  // ---
+  // ===============================================================
+  //  Errors for uncertainty bands from ttbar Xsec and luminosity
+  // ===============================================================
+  
+  std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
+  makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
+  std::cout << " .... Finished." << std::endl; 
+
+  // =========================================
+  //  Create one legend for all 1D histos
+  // =========================================
   unsigned int Nlegends=0;  
   TLegend *leg  = new TLegend();  
   TLegend *leg0 = new TLegend(0.05, 0.15, 1.05, 0.9);
@@ -1060,6 +1069,11 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	exit=true;
       }
     }
+  }
+  // add entry for uncertainty to legends
+  if (histoErrorBand_.size() > 0 && plotList_.size() > 0){
+      leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+      leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
   }
 
   // ---
@@ -1223,22 +1237,34 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    }
 	  }
 	  first=false;
-	  // draw legend for recoYield plots
-	  TString title=plotCanvas_[canvasNumber]->GetTitle();
-	  if(title.Contains("analyzeTopRecoKinematicsKinFit")){
-	    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-	    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.24);
-	    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-	    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-	    if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
-	  }
-	  // redraw axis at the end
-	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)) histo_[plotList_[plot]][42]->Draw("axis same");	 
-	  TString plotType=getStringEntry(plotList_[plot], 1);
-	  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	    if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
-	    else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-	    DrawCMSLabels(true,luminosity);
+	  // draw uncertainty bands, add legend and labels and re-draw axis
+	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)){
+	    // configure style of and draw uncertainty bands
+	    if (!plotList_[plot].Contains("xSec")){
+	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
+	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);
+	      histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
+	      gStyle->SetErrorX(0.5);  
+	      histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
+	      // draw legend for recoYield plots
+	      TString tempTitle = plotCanvas_[canvasNumber]->GetTitle();
+	      if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
+		leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+		leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03 * leg->GetNRows() );
+		leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+		leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+		if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
+	      }	 
+	      // labels
+	      TString plotType=getStringEntry(plotList_[plot], 1);
+	      if(plotType.Contains("xSec")||plotType.Contains("Reco")){
+		if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
+		else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+		DrawCMSLabels(true,luminosity);
+	      }
+	      // redraw axis
+	      histo_[plotList_[plot]][42]->Draw("axis same");
+	    }
 	  }
 	}
       }	     
