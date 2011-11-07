@@ -204,7 +204,9 @@ process.source = cms.Source("PoolSource",
     #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_21_1_JdU.root'
     #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
+    #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
     )
+
 )
 
 ## automatically load the correct (AOD) .root file list for each MC sample
@@ -475,6 +477,10 @@ process.load("TopAnalysis.TopFilter.sequences.genSelection_cff")
 ## at ttGenEventLevel
 from TopAnalysis.TopFilter.filters.SemiLeptonicGenPhaseSpaceFilter_cfi import filterSemiLeptonicGenPhaseSpace
 process.filterGenPhaseSpace = filterSemiLeptonicGenPhaseSpace.clone(src = "genEvt")
+
+## Generator kinematics selection (https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html)
+process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+process.totalKinematicsFilterDefault = process.totalKinematicsFilter.clone(tolerance = 0.5)
 
 ## ---
 ## including analysis tools
@@ -1524,8 +1530,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
 ##    run the final sequences
 ## ---
 ## standard sequence for cross section analyis and detailed cut monitoring
-process.p1 = cms.Path(
-                      ## gen event selection (decay channel) and the trigger selection (hltFilter)
+process.p1 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequence                        *
                       ## PV event selection
                       process.PVSelection                           *
@@ -1551,7 +1556,7 @@ process.p1 = cms.Path(
                       process.jetSelection                          *
                       ## monitoring before b-tagging
                       process.monitorKinematicsBeforeBtagging       *
-                      process.PUControlDistributionsBeforeBtagging  *
+                      process.PUControlDistributionsBeforeBtagging  *                      
                       ## b-tagging
                       process.btagSelection                         *
                       ## create PU event weights
@@ -1602,7 +1607,8 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
 ## no phase space cuts
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
-    process.p3 = cms.Path(
+    process.p3 = cms.Path(## generator kinematics (check E-p conservation on gen level)
+                          process.totalKinematicsFilterDefault          *
                           ## gen event selection: semileptonic (muon & tau->lepton)
                           ## tau->Mu if eventFilter=='background only' and
                           ## process.ttSemiLeptonicFilter.invert = True
@@ -1632,8 +1638,7 @@ else:
 ## std analysis with generator objects as input for efficiency determination
 ## phase space cuts for muon and jets
 if(runningOnData=="MC"):
-    process.s4 = cms.Sequence(
-                              ## introduce some collections
+    process.s4 = cms.Sequence(## introduce some collections
                               process.isolatedGenLeptons                    *
                               process.semiLeptGenCollections                *
                               ## create PU event weights
@@ -1652,7 +1657,8 @@ if(runningOnData=="MC"):
                               ## investigate top reconstruction
                               process.kinFitGenPhaseSpace
                               )
-    process.p4 = cms.Path(
+    process.p4 = cms.Path(## generator kinematics (check E-p conservation on gen level)
+                          process.totalKinematicsFilterDefault           *
                           ## gen event selection: semileptonic (muon & tau->lepton)
                           ## tau->Mu if eventFilter=='background only' and
                           ## process.ttSemiLeptonicFilter.invert = True
@@ -1832,7 +1838,10 @@ if(pfToPAT):
         #massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
         # run trigger at the beginning to save a lot of time
         getattr(process,path).insert(0,process.hltFilter)
-
+        ## generator kinematics (check E-p conservation on gen level)
+        if(runningOnData=="MC"):
+            getattr(process,path).insert(0,process.totalKinematicsFilterDefault)
+ 
 ## change decay subset to parton level (ME)
 #process.decaySubset.fillMode = cms.string("kME")
 
