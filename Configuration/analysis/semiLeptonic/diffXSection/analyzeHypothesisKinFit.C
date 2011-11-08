@@ -127,35 +127,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob"       , 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/chi2"       , 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/delChi2"    ,
-    // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-    "analyzeHypoKinFit/hadBQuark"               , 
-    "analyzeHypoKinFit/lepBQuark"               , 
-    "analyzeHypoKinFit/lightQuark"              , 
-    "analyzeHypoKinFit/wrongAssign"             ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qAssignment",
-    "analyzeHypoKinFit/PartonJetDRall"          ,
-    // pull distributions
-    "analyzeHypoKinFit/hadBQuarkPt"             ,
-    "analyzeHypoKinFit/hadBQuarkEta"            ,
-    "analyzeHypoKinFit/hadBQuarkPhi"            ,
-    "analyzeHypoKinFit/lepBQuarkPt"             ,
-    "analyzeHypoKinFit/lepBQuarkEta"            ,
-    "analyzeHypoKinFit/lepBQuarkPhi"            ,
-    "analyzeHypoKinFit/lightQuarkPt"            ,
-    "analyzeHypoKinFit/lightQuarkEta"           ,
-    "analyzeHypoKinFit/lightQuarkPhi"           ,
-    "analyzeHypoKinFit/leptonPt"                ,
-    "analyzeHypoKinFit/leptonEta"               ,
-    "analyzeHypoKinFit/leptonPhi"               ,
-    "analyzeHypoKinFit/neutrinoPt"              ,
-    "analyzeHypoKinFit/neutrinoEta"             ,
-    "analyzeHypoKinFit/neutrinoPhi"             ,
-    "analyzeHypoKinFit/lepWPt"                  ,
-    "analyzeHypoKinFit/lepWEta"                 ,
-    "analyzeHypoKinFit/lepWPhi"                 ,
-    "analyzeHypoKinFit/hadWPt"                  ,
-    "analyzeHypoKinFit/hadWEta"                 ,
-    "analyzeHypoKinFit/hadWPhi"                 ,
     // reconstructed top quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topMass"    ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"      ,                         
@@ -167,37 +138,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLep"   ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiLep"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,
-    // reconstructed angular distributions
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngleTtRF",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/WWAngle"     ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleLep",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleHad",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleLep",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleHad",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleLep"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleHad"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qqbarAngle"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBlepAngle"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBhadAngle"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngle",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngleTtRF",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBhadAngle",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepQAngle"   ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/MuonNeutrinoAngle",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBNeutrinoAngle",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/hadBNeutrinoAngle",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qNeutrinoAngle"   ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepWDir"     ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/nuWDir"      ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qWDir"       ,
-    // reconstructed event shape variables
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/aplanarity" ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/sphericity" ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/C"          ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/D"          ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/circularity",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/isotropy"   ,
     // generated top quantities
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topMass"      , 
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"        ,    
@@ -210,30 +150,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLep"     ,
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiLep"    ,
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYLep"      ,
-    // generated angular distributions
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngle"   ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngleTtRF",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/WWAngle"     ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleLep",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleHad",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleLep",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleHad",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleLep"  ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleHad"  ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qqbarAngle"  ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBlepAngle"  ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBhadAngle"  ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngle",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngleTtRF",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBhadAngle",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepQAngle"   ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/MuonNeutrinoAngle",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBNeutrinoAngle",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/hadBNeutrinoAngle",
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qNeutrinoAngle"   ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepWDir"     ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qWDir"       ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/nuWDir"      ,
     // reconstructed ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt"    ,
@@ -257,6 +173,145 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepPt" ,
     "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepEta"
   };
+ TString plots1Dadd[ ] = {
+   // generated angular distributions
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngle"   ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngleTtRF",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/WWAngle"     ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleLep",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleHad",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleLep",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleHad",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleLep"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleHad"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qqbarAngle"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBlepAngle"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBhadAngle"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngleTtRF",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBhadAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepQAngle"   ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/MuonNeutrinoAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBNeutrinoAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/hadBNeutrinoAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qNeutrinoAngle"   ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepWDir"     ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qWDir"       ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/nuWDir"      ,
+   // reconstructed angular distributions
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle"  ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngleTtRF",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/WWAngle"     ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleLep",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleHad",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleLep",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleHad",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleLep"  ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleHad"  ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qqbarAngle"  ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBlepAngle"  ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBhadAngle"  ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngle",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngleTtRF",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBhadAngle",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepQAngle"   ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/MuonNeutrinoAngle",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBNeutrinoAngle",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/hadBNeutrinoAngle",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qNeutrinoAngle"   ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepWDir"     ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/nuWDir"      ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qWDir"       ,
+   // reconstructed event shape variables
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/aplanarity" ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/sphericity" ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/C"          ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/D"          ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/circularity",
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/isotropy"   ,
+   // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
+   "analyzeHypoKinFit/hadBQuark"               , 
+   "analyzeHypoKinFit/lepBQuark"               , 
+   "analyzeHypoKinFit/lightQuark"              , 
+   "analyzeHypoKinFit/wrongAssign"             ,
+   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qAssignment",
+   "analyzeHypoKinFit/PartonJetDRall"          ,
+   // pull distributions top quantities
+   "analyzeHypoKinFit/hadBQuarkPt"             ,
+   "analyzeHypoKinFit/hadBQuarkEta"            ,
+   "analyzeHypoKinFit/hadBQuarkPhi"            ,
+   "analyzeHypoKinFit/lepBQuarkPt"             ,
+   "analyzeHypoKinFit/lepBQuarkEta"            ,
+   "analyzeHypoKinFit/lepBQuarkPhi"            ,
+   "analyzeHypoKinFit/lightQuarkPt"            ,
+   "analyzeHypoKinFit/lightQuarkEta"           ,
+   "analyzeHypoKinFit/lightQuarkPhi"           ,
+   "analyzeHypoKinFit/leptonPt"                ,
+   "analyzeHypoKinFit/leptonEta"               ,
+   "analyzeHypoKinFit/leptonPhi"               ,
+   "analyzeHypoKinFit/neutrinoPt"              ,
+   "analyzeHypoKinFit/neutrinoEta"             ,
+   "analyzeHypoKinFit/neutrinoPhi"             ,
+   "analyzeHypoKinFit/lepWPt"                  ,
+   "analyzeHypoKinFit/lepWEta"                 ,
+   "analyzeHypoKinFit/lepWPhi"                 ,
+   "analyzeHypoKinFit/hadWPt"                  ,
+   "analyzeHypoKinFit/hadWEta"                 ,
+   "analyzeHypoKinFit/hadWPhi"                 ,
+   // pull distributions input objects before/after kinematic fit
+   // (i) lepton
+   "analyzeHypoKinFitLepton/leptonPullPtKinFitRec",
+   "analyzeHypoKinFitLepton/leptonPullPtKinFitPartonTruth",
+   "analyzeHypoKinFitLepton/leptonPullPtRecPartonTruth",
+   "analyzeHypoKinFitLepton/leptonPullEtaKinFitRec",
+   "analyzeHypoKinFitLepton/leptonPullEtaKinFitPartonTruth",
+   "analyzeHypoKinFitLepton/leptonPullEtaRecPartonTruth",
+   "analyzeHypoKinFitLepton/leptonPullPhiKinFitRec",
+   "analyzeHypoKinFitLepton/leptonPullPhiKinFitPartonTruth",
+   "analyzeHypoKinFitLepton/leptonPullPhiRecPartonTruth",
+   // (ii) neutrino
+   "analyzeHypoKinFitMET/neutrinoPullPtKinFitRec",
+   "analyzeHypoKinFitMET/neutrinoPullPtKinFitPartonTruth",
+   "analyzeHypoKinFitMET/neutrinoPullPtRecPartonTruth",
+   "analyzeHypoKinFitMET/neutrinoPullEtaKinFitRec",
+   "analyzeHypoKinFitMET/neutrinoPullEtaKinFitPartonTruth",
+   "analyzeHypoKinFitMET/neutrinoPullEtaRecPartonTruth",
+   "analyzeHypoKinFitMET/neutrinoPullPhiKinFitRec",
+   "analyzeHypoKinFitMET/neutrinoPullPhiKinFitPartonTruth",
+   "analyzeHypoKinFitMET/neutrinoPullPhiRecPartonTruth",
+   // (iii) hadronic b jet
+   "analyzeHypoKinFitJets/hadBQuarkPullPtKinFitRec",
+   "analyzeHypoKinFitJets/hadBQuarkPullPtKinFitPartonTruth",
+   "analyzeHypoKinFitJets/hadBQuarkPullPtRecPartonTruth",
+   "analyzeHypoKinFitJets/hadBQuarkPullEtaKinFitRec",
+   "analyzeHypoKinFitJets/hadBQuarkPullEtaKinFitPartonTruth",
+   "analyzeHypoKinFitJets/hadBQuarkPullEtaRecPartonTruth",
+   "analyzeHypoKinFitJets/hadBQuarkPullPhiKinFitRec",
+   "analyzeHypoKinFitJets/hadBQuarkPullPhiKinFitPartonTruth",
+   "analyzeHypoKinFitJets/hadBQuarkPullPhiRecPartonTruth",
+   // (iv) leptonic b jet
+   "analyzeHypoKinFitJets/lepBQuarkPullPtKinFitRec",
+   "analyzeHypoKinFitJets/lepBQuarkPullPtKinFitPartonTruth",
+   "analyzeHypoKinFitJets/lepBQuarkPullPtRecPartonTruth",
+   "analyzeHypoKinFitJets/lepBQuarkPullEtaKinFitRec",
+   "analyzeHypoKinFitJets/lepBQuarkPullEtaKinFitPartonTruth",
+   "analyzeHypoKinFitJets/lepBQuarkPullEtaRecPartonTruth",
+   "analyzeHypoKinFitJets/lepBQuarkPullPhiKinFitRec",
+   "analyzeHypoKinFitJets/lepBQuarkPullPhiKinFitPartonTruth",
+   "analyzeHypoKinFitJets/lepBQuarkPullPhiRecPartonTruth",   
+   // (v) light jets
+   "analyzeHypoKinFitJets/lightQuarkPullPtKinFitRec",
+   "analyzeHypoKinFitJets/lightQuarkPullPtKinFitPartonTruth",
+   "analyzeHypoKinFitJets/lightQuarkPullPtRecPartonTruth",
+   "analyzeHypoKinFitJets/lightQuarkPullEtaKinFitRec",
+   "analyzeHypoKinFitJets/lightQuarkPullEtaKinFitPartonTruth",
+   "analyzeHypoKinFitJets/lightQuarkPullEtaRecPartonTruth",
+   "analyzeHypoKinFitJets/lightQuarkPullPhiKinFitRec",
+   "analyzeHypoKinFitJets/lightQuarkPullPhiKinFitPartonTruth",
+   "analyzeHypoKinFitJets/lightQuarkPullPhiRecPartonTruth"
+ };
+
+
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
     "analyzeHypoKinFit/mapKinFit_"                                          ,
@@ -286,35 +341,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "probability (best fit hypothesis)/events/1/25"                   , 
     "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
-    // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-    "#Deltai_{lead jet}(genMatch - kinFit), hadronic b-quark/events/0/1", 
-    "#Deltai_{lead jet}(genMatch - kinFit), leptonic b-quark/events/0/1", 
-    "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
-    "N(wrong assigned jets)/events/0/1"                                 , 
-    "permutation/events/0/1"                                            ,
-    "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"       ,
-    // pull distributions
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (hadronic b-quark)/events/0/1" ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (leptonic b-quark)/events/0/1"  ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (leptonic b-quark)/events/0/1" ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (leptonic b-quark)/events/0/1" ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (light quark)/events/0/1"       ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (light quark)/events/0/1"      ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (light quark)/events/0/1"      ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (lepton)/events/0/1"            ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (lepton)/events/0/1"           ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (lepton)/events/0/1"           ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (neutrino)/events/0/1"          ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (neutrino)/events/0/1"         ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (neutrino)/events/0/1"         ,
-    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (leptonic W)/events/0/1"          ,
-    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (leptonic W)/events/0/1"       ,
-    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (leptonic W)/events/0/1"       ,
-    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (hadronic W)/events/0/1"          ,
-    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
-    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
     // reconstructed top quantities
     "m^{t and #bar{t}} #left[#frac{GeV}{c^{2}}#right]/#frac{dN}{dm^{t and #bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]/0/10",
     "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/1", //20"
@@ -326,37 +352,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "p_{T}(leptonic t) #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{lep. t}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/20",                         
     "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
     "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,
-    //  reconstructed angular distributions
-    "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
-    "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
-    "#angle(W,W) (t#bar{t} RF)/events/0/21"              ,
-    "#angle(lep.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(had.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(lep.t,b) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.t,b) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(lep.b,W) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.b,W) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,#bar{q}) (top rest frame)/events/0/21"     ,
-    "#angle(q,lep.b) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,had.b) (top rest frame)/events/0/21"       ,
-    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     , 
-    "#angle(#mu,lep.b) (t#bar{t} rest frame)/events/0/21",
-    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     ,
-    "#angle(#mu,q) (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,#nu) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(#nu,lep.b) (top rest frame)/events/0/21"     ,
-    "#angle(#nu,had.b) (t#bar{t} rest frame)/events/0/21",
-    "#angle(#nu,q) (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,lep.W) (#mu:W RF, W:Det RF)/events/0/21" ,
-    "#angle(#nu,lep.W) (#nu:W RF, W:Det RF)/events/0/21" ,
-    "#angle(q,had.W) (q:W RF, W:Det RF)/events/0/21"     ,
-    // reconstructed event shape variables
-    "aplanarity/events/0/2"  ,
-    "sphericity/events/0/10" ,
-    "C/events/0/10"          ,
-    "D/events/0/4"           ,
-    "circularity/events/0/10",
-    "isotropy/events/0/10"   ,
     // generated top quantities
     "m^{t and #bar{t}} parton truth #left[#frac{GeV}{c^{2}}#right]/events/0/10",
     "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",//20"
@@ -369,37 +364,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "p_{T}(leptonic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4",
     "y(leptonic t) parton truth/events/0/5",
-    // generated angular distributions
-    "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
-    "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
-    "#angle(W,W) parton truth (t#bar{t} RF)/events/0/21"              ,
-    "#angle(lep.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(had.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(lep.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(lep.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,#bar{q}) parton truth (top rest frame)/events/0/21"     ,
-    "#angle(q,lep.b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,had.b) parton truth (top rest frame)/events/0/21"       ,
-    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     , 
-    "#angle(#mu,lep.b) parton truth (t#bar{t} rest frame)/events/0/21",
-    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     ,
-    "#angle(#mu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,#nu) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(#nu,lep.b) parton truth (top rest frame)/events/0/21"     ,
-    "#angle(#nu,had.b) parton truth (t#bar{t} rest frame)/events/0/21",
-    "#angle(#nu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,W) parton truth (#mu:W RF, W:Det RF)/events/0/21"     ,
-    "#angle(q,W) parton truth (q:W RF, W:Det RF)/events/0/21"         ,
-    "#angle(#nu,W) parton truth (#nu:W RF, W:Det RF)/events/0/21"     ,
-    // 			     // generated event shape variables
-    // 			     "aplanarity parton truth/events/0/4"  ,
-    // 			     "sphericity parton truth/events/0/10" ,
-    // 			     "C parton truth/events/0/10"          ,
-    // 			     "D parton truth/events/0/4"           ,
-    // 			     "circularity parton truth/events/0/10",
-    // 			     "isotropy parton truth/events/0/10"   ,
     // reconstructed ttbar quantities	                            
     "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/#frac{dN}{dm^{t#bar{t}}} #left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]/1/1",//60"
     "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{t#bar{t}}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/1",//10"
@@ -444,13 +408,162 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "p_{T}^{l} #left[#frac{GeV}{c}#right] gen/p_{T}^{l} #left[#frac{GeV}{c}#right] reco",
     "#eta^{l} gen/#eta^{l} reco",           
   };
+  TString axisLabel1Dadd[ ] = {
+    // generated angular distributions
+    "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
+    "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
+    "#angle(W,W) parton truth (t#bar{t} RF)/events/0/21"              ,
+    "#angle(lep.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(had.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(lep.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(lep.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,#bar{q}) parton truth (top rest frame)/events/0/21"     ,
+    "#angle(q,lep.b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,had.b) parton truth (top rest frame)/events/0/21"       ,
+    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     , 
+    "#angle(#mu,lep.b) parton truth (t#bar{t} rest frame)/events/0/21",
+    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     ,
+    "#angle(#mu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,#nu) parton truth (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(#nu,lep.b) parton truth (top rest frame)/events/0/21"     ,
+    "#angle(#nu,had.b) parton truth (t#bar{t} rest frame)/events/0/21",
+    "#angle(#nu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,W) parton truth (#mu:W RF, W:Det RF)/events/0/21"     ,
+    "#angle(q,W) parton truth (q:W RF, W:Det RF)/events/0/21"         ,
+    "#angle(#nu,W) parton truth (#nu:W RF, W:Det RF)/events/0/21"     ,
+    //  reconstructed angular distributions
+    "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
+    "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
+    "#angle(W,W) (t#bar{t} RF)/events/0/21"              ,
+    "#angle(lep.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(had.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
+    "#angle(lep.t,b) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.t,b) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(lep.b,W) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(had.b,W) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,#bar{q}) (top rest frame)/events/0/21"     ,
+    "#angle(q,lep.b) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(q,had.b) (top rest frame)/events/0/21"       ,
+    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     , 
+    "#angle(#mu,lep.b) (t#bar{t} rest frame)/events/0/21",
+    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     ,
+    "#angle(#mu,q) (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,#nu) (t#bar{t} rest frame)/events/0/21"  ,
+    "#angle(#nu,lep.b) (top rest frame)/events/0/21"     ,
+    "#angle(#nu,had.b) (t#bar{t} rest frame)/events/0/21",
+    "#angle(#nu,q) (t#bar{t} rest frame)/events/0/21"    ,
+    "#angle(#mu,lep.W) (#mu:W RF, W:Det RF)/events/0/21" ,
+    "#angle(#nu,lep.W) (#nu:W RF, W:Det RF)/events/0/21" ,
+    "#angle(q,had.W) (q:W RF, W:Det RF)/events/0/21"     ,
+    // reconstructed event shape variables
+    "aplanarity/events/0/2"  ,
+    "sphericity/events/0/10" ,
+    "C/events/0/10"          ,
+    "D/events/0/4"           ,
+    "circularity/events/0/10",
+    "isotropy/events/0/10"   ,
+    // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
+    "#Deltai_{lead jet}(genMatch - kinFit), hadronic b-quark/events/0/1", 
+    "#Deltai_{lead jet}(genMatch - kinFit), leptonic b-quark/events/0/1", 
+    "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
+    "N(wrong assigned jets)/events/0/1"                                 , 
+    "permutation/events/0/1"                                            ,
+    "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"       ,
+    // pull distributions
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (hadronic b-quark)/events/0/1" ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (leptonic b-quark)/events/0/1"  ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (leptonic b-quark)/events/0/1" ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (leptonic b-quark)/events/0/1" ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (light quark)/events/0/1"       ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (light quark)/events/0/1"      ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (light quark)/events/0/1"      ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (lepton)/events/0/1"            ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (lepton)/events/0/1"           ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (lepton)/events/0/1"           ,
+    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (neutrino)/events/0/1"          ,
+    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (neutrino)/events/0/1"         ,
+    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (neutrino)/events/0/1"         ,
+    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (leptonic W)/events/0/1"          ,
+    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (leptonic W)/events/0/1"       ,
+    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (leptonic W)/events/0/1"       ,
+    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (hadronic W)/events/0/1"          ,
+    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"       ,
+    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
+    // (IV) pull distributions input objects before/after kinematic fit
+    // (i) lepton
+    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) * (p_{t}^{lep rec})^{-1}/Frequency/0/10",
+    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) * (p_{t}^{lep parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) * (p_{t}^{lep parton})^{-1}/Frequency/0/10",
+    "(#eta^{lep kinFit}-#eta^{lep rec}) * (#eta^{lep rec})^{-1}/Frequency/0/10",
+    "(#eta^{lep kinFit}-#eta^{lep parton}) * (#eta^{lep parton})^{-1}/Frequency/0/10",
+    "(#eta^{lep Rec}-#eta^{lep parton}) * (#eta^{lep parton})^{-1}/Frequency/0/10",
+    "(#phi^{lep kinFit}-#phi^{lep rec}) * (#phi^{lep rec})^{-1}/Frequency/0/10",
+    "(#phi^{lep kinFit}-#phi^{lep parton}) * (#phi^{lep parton})^{-1}/Frequency/0/10",
+    "(#phi^{lep Rec}-#phi^{lep parton}) * (#phi^{lep parton})^{-1}/Frequency/0/10",
+    // (ii) neutrino
+    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) * (p_{t}^{#nu rec})^{-1}/Frequency/0/10",
+    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) * (p_{t}^{#nu parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) * (p_{t}^{#nu parton})^{-1}/Frequency/0/10",
+    "(#eta^{#nu kinFit}-#eta^{#nu rec}) * (#eta^{#nu rec})^{-1}/Frequency/0/10",
+    "(#eta^{#nu kinFit}-#eta^{#nu parton}) * (#eta^{#nu parton})^{-1}/Frequency/0/10",
+    "(#eta^{#nu Rec}-#eta^{#nu parton}) * (#eta^{#nu parton})^{-1}/Frequency/0/10",
+    "(#phi^{#nu kinFit}-#phi^{#nu rec}) * (#phi^{#nu rec})^{-1}/Frequency/0/10",
+    "(#phi^{#nu kinFit}-#phi^{#nu parton}) * (#phi^{#nu parton})^{-1}/Frequency/0/10",
+    "(#phi^{#nu Rec}-#phi^{#nu parton}) * (#phi^{#nu parton})^{-1}/Frequency/0/10",
+    // (iii) hadronic b jet
+    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) * (p_{t}^{had b-jet rec})^{-1}/Frequency/0/10",
+    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) * (p_{t}^{had b-jet parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) * (p_{t}^{had b-jet parton})^{-1}/Frequency/0/10",
+    "(#eta^{had b-jet kinFit}-#eta^{had b-jet rec}) * (#eta^{had b-jet rec})^{-1}/Frequency/0/10",
+    "(#eta^{had b-jet kinFit}-#eta^{had b-jet parton}) * (#eta^{had b-jet parton})^{-1}/Frequency/0/10",
+    "(#eta^{had b-jet Rec}-#eta^{had b-jet parton}) * (#eta^{had b-jet parton})^{-1}/Frequency/0/10",
+    "(#phi^{had b-jet kinFit}-#phi^{had b-jet rec}) * (#phi^{had b-jet rec})^{-1}/Frequency/0/10",
+    "(#phi^{had b-jet kinFit}-#phi^{had b-jet parton}) * (#phi^{had b-jet parton})^{-1}/Frequency/0/10",
+    "(#phi^{had b-jet Rec}-#phi^{had b-jet parton}) * (#phi^{had b-jet parton})^{-1}/Frequency/0/10",
+   
+    // (iv) leptonic b jet
+    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) * (p_{t}^{lep b-jet rec})^{-1}/Frequency/0/10",
+    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) * (p_{t}^{lep b-jet parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) * (p_{t}^{lep b-jet parton})^{-1}/Frequency/0/10",
+    "(#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}) * (#eta^{lep b-jet rec})^{-1}/Frequency/0/10",
+    "(#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}) * (#eta^{lep b-jet parton})^{-1}/Frequency/0/10",
+    "(#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}) * (#eta^{lep b-jet parton})^{-1}/Frequency/0/10",
+    "(#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}) * (#phi^{lep b-jet rec})^{-1}/Frequency/0/10",
+    "(#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}) * (#phi^{lep b-jet parton})^{-1}/Frequency/0/10",
+    "(#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}) * (#phi^{lep b-jet parton})^{-1}/Frequency/0/10",
+    // (v) light jets
+    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) * (p_{t}^{light jet rec})^{-1}/Frequency/0/10",
+    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) * (p_{t}^{light jet parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) * (p_{t}^{light jet parton})^{-1}/Frequency/0/10",
+    "(#eta^{light jet kinFit}-#eta^{light jet rec}) * (#eta^{light jet rec})^{-1}/Frequency/0/10",
+    "(#eta^{light jet kinFit}-#eta^{light jet parton}) * (#eta^{light jet parton})^{-1}/Frequency/0/10",
+    "(#eta^{light jet Rec}-#eta^{light jet parton}) * (#eta^{light jet parton})^{-1}/Frequency/0/10",
+    "(#phi^{light jet kinFit}-#phi^{light jet rec}) * (#phi^{light jet rec})^{-1}/Frequency/0/10",
+    "(#phi^{light jet kinFit}-#phi^{light jet parton}) * (#phi^{light jet parton})^{-1}/Frequency/0/10",
+    "(#phi^{light jet Rec}-#phi^{light jet parton}) * (#phi^{light jet parton})^{-1}/Frequency/0/10",
+  };
+
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
+  unsigned int N1Dplotsadd = sizeof(plots1Dadd)/sizeof(TString);
+  
+  
   // check if all axis labels exist
   if(N1Dplots != sizeof(axisLabel1D)/sizeof(TString)) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
   if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
   if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
+  if(systematicVariation==sysNo){
+    if(N1Dplotsadd != sizeof(axisLabel1Dadd)/sizeof(TString)){
+      std::cout << "ERROR: some additional 1D plots or axis label are missing" << std::endl;
+      exit(1);
+    }
+    N1Dplots+=N1Dplotsadd;
+  }
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
@@ -465,7 +578,11 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // collect all plot names in vector (first 1D, then 2D)
   std::vector<TString> plotList_;
   plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
+  if(systematicVariation==sysNo) plotList_.insert( plotList_.end(), plots1Dadd, plots1Dadd + sizeof(plots1Dadd)/sizeof(TString) );
   plotList_.insert( plotList_.end()  , plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
+  // remove irrelevant plots for systemtic variation to speed up
+
+
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -517,6 +634,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
   axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
+  if(systematicVariation==sysNo) axisLabel_.insert( axisLabel_.end(), axisLabel1Dadd, axisLabel1Dadd + sizeof(axisLabel1Dadd)/sizeof(TString) );
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1075,6 +1193,22 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
       leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
   }
+  
+  // create in canvas legend for pull distributions
+  TLegend *legPull = new TLegend(0.63, 0.5, 0.93, 0.85);
+  legPull->SetFillStyle(0);
+  legPull->SetBorderSize(0);
+  //legPull->SetEntrySeparation(0.45);
+  legPull->SetHeader("pull input objects");
+  if(histo_.count("analyzeHypoKinFitLepton/leptonPullPtKinFitRec")>0&&histo_["analyzeHypoKinFitLepton/leptonPullPtKinFitRec"].count(kSig)>0){
+    legPull->AddEntry(histo_["analyzeHypoKinFitLepton/leptonPullPtKinFitRec"     ][kSig], "#splitline{variation by kinFit}{(reco wrt. fit)}", "L");
+  }
+  if(histo_.count("analyzeHypoKinFitLepton/leptonPullPtRecPartonTruth")>0&&histo_["analyzeHypoKinFitLepton/leptonPullPtRecPartonTruth"].count(kSig)>0){
+    legPull->AddEntry(histo_["analyzeHypoKinFitLepton/leptonPullPtRecPartonTruth"][kSig], "#splitline{before KinFit}{reco wrt parton}"      , "L");
+  }  
+  if(histo_.count("analyzeHypoKinFitLepton/leptonPullPtKinFitPartonTruth")>0&&histo_["analyzeHypoKinFitLepton/leptonPullPtKinFitPartonTruth"].count(kSig)>0){
+    legPull->AddEntry(histo_["analyzeHypoKinFitLepton/leptonPullPtKinFitPartonTruth"][kSig], "#splitline{after KinFit}{fit wrt parton}"       , "L");
+  }
 
   // ---
   //     print information about plots, canvas and legends
@@ -1098,7 +1232,10 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   //  int NCanvas = Nplots+Nlegends;
   // a) create canvas for all plots + legends
   //  for(int sample=0; sample<NCanvas; sample++){
-  for(unsigned int sample=0; sample<Nplots+NMCeff+NXSec+Nlegends; sample++){
+  // 3 pull plots in one canvas: Nvar*Nquantities-Nvar*NpullsPerCanvas*Nquantities
+  int Npull=3*5-3*3*5;
+  if(systematicVariation!=sysNo) Npull=0;
+  for(int sample=0; sample<Nplots+Npull+NMCeff+NXSec+Nlegends; sample++){
     char canvname[10];
     sprintf(canvname,"canv%i",sample);    
     plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
@@ -1124,6 +1261,21 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	histogramStyle( *histo_[permutationLabel][kSig], kSig, true);
       }
     }
+    // pull plots as line, signal only, no stack, relative 
+    else if(plotList_[plot].Contains("analyzeHypoKinFitLepton")||plotList_[plot].Contains("analyzeHypoKinFitMET")||plotList_[plot].Contains("analyzeHypoKinFitJets")){
+      TString pullLabel=plotList_[plot];
+      for(unsigned int sample=kBkg; sample<=kData; ++sample){
+	if(histo_[pullLabel].count(sample)>0)  histo_[pullLabel].erase(sample);
+      }
+      if(histo_[pullLabel].count(kSig)>0){ 
+	histo_[pullLabel][kSig]->Scale(1./histo_[pullLabel][kSig]->Integral(0, histo_[pullLabel][kSig]->GetNbinsX()));
+	axisLabel_[plot].ReplaceAll("Frequency","event fraction");
+	histogramStyle( *histo_[pullLabel][kSig], kSig, false);
+	if(pullLabel.Contains("RecPartonTruth")) histo_[pullLabel][kSig]->SetLineColor(kBlue );
+	if(pullLabel.Contains("KinFitRec"     )) histo_[pullLabel][kSig]->SetLineColor(kBlack);
+	//histo_[pullLabel][kSig]->SetLineWidth(0.5);
+      }
+    }
     // otherwise: all 1D plots will become stacked plots
     else createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
   }
@@ -1146,94 +1298,137 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
 	// check if plot is existing
 	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	  if(verbose>1){
-	    std::cout << "plotting " << plotList_[plot];
-	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	    std::cout << " to canvas " << canvasNumber << " ( ";
-	    std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
-	  }
-	  // for efficiency plots: draw grid
-	  if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[canvasNumber]->SetGrid(1,1);
-	  // for histos with variable binning:
-	  if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
-	    // get variable binning
-	    TString plotName=getStringEntry(plotList_[plot], 2);
-	    std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
-	    // set maximum of histo to last bin considered 
-	    // in variable binning (overflow excluded)
-	    double firstBin=0;
-	    double lastBin=binEdges_.size()-2;
-	    // -2 for subtracting overflow bin
-	    if(verbose>2){
-	      std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
+	  // draw all pull distributions in same canvas if RecPartonTruth pull is called
+	  if(!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth")){
+	    if(verbose>1){
+	      std::cout << "plotting " << plotList_[plot];
+	      std::cout << " from sample " << sampleLabel(sample,decayChannel);
+	      std::cout << " to canvas " << canvasNumber << " ( ";
+	      std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
 	    }
-	    histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
-	  }
-	  // first plot
-	  if(first){
-	    // min / max
-	    double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
-	    // if data file exists
-	    if(histo_[plotList_[plot]].count(kData)>0){
-	      // and has larger maximum
-	      if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
-		// take this maximum
-		max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
-		if(verbose>1) std:: cout << "take max from data! " << std::endl;
+	    // for efficiency plots: draw grid
+	    if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[canvasNumber]->SetGrid(1,1);
+	    // for histos with variable binning:
+	    if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
+	      // get variable binning
+	      TString plotName=getStringEntry(plotList_[plot], 2);
+	      std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
+	      // set maximum of histo to last bin considered 
+	      // in variable binning (overflow excluded)
+	      double firstBin=0;
+	      double lastBin=binEdges_.size()-2;
+	      // -2 for subtracting overflow bin
+	      if(verbose>2){
+		std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
 	      }
+	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
 	    }
-	    double min = 0;
-	    // log plots
-	    if(getStringEntry(axisLabel_[plot],3)=="1"){
-	      plotCanvas_[canvasNumber]->SetLogy(1);
-	      min=1;
-	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
-	      if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
-		min=0.0001;
-		max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-		if(plotList_[plot].Contains("Norm")){
-		  min=0.00001;
-		  max=0.06;
+	    // first plot
+	    if(first){
+	      // min / max
+	      double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
+	      // if data file exists
+	      if(histo_[plotList_[plot]].count(kData)>0){
+		// and has larger maximum
+		if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
+		  // take this maximum
+		  max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
+		  if(verbose>1) std:: cout << "take max from data! " << std::endl;
 		}
 	      }
+	      double min = 0;
+	      // log plots
+	      if(getStringEntry(axisLabel_[plot],3)=="1"){
+		plotCanvas_[canvasNumber]->SetLogy(1);
+		min=1;
+		max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+		if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
+		if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
+		  min=0.0001;
+		  max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+		  if(plotList_[plot].Contains("Norm")){
+		    min=0.00001;
+		    max=0.06;
+		  }
+		}
+	      }
+	      // get nicer int values if maximum is large enough
+	      if(max>3) max = (double)roundToInt(max);
+	      // style for pull plots
+	      if(plotList_[plot].Contains("RecPartonTruth")){
+		min=0;
+		//max=1;
+		TString title=(TString)plotCanvas_[canvasNumber]->GetTitle();
+		title.ReplaceAll("RecPartonTruth","");
+		plotCanvas_[canvasNumber]->SetTitle(title);
+		histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+		plotCanvas_[canvasNumber]->SetGrid(1,1);
+	      }
+	      // axis style
+	      axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
+	      histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	      if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	      else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
+	      if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	      if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
+	      // restrict x axis for different plots
+	      if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
+	      if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
+	      if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
+						       getStringEntry(plotList_[plot], 2)=="topYHad"|| 
+						       getStringEntry(plotList_[plot], 2)=="topYLep")){
+		histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
+	      if(getStringEntry(plotList_[plot], 2)=="lepPt" )  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
+	      if(getStringEntry(plotList_[plot], 2)=="ttbarY")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
+	      if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
+	      // draw efficiency plots as line
+	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
+	      // draw pull plots as line into same canvas with extra legend
+	      if(plotList_[plot].Contains("RecPartonTruth")){
+		histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
+		histo_[plotList_[plot]][sample]->Draw("hist");
+		TString afterKinFit=plotList_[plot];
+		afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
+		TString kinFitShift=plotList_[plot];
+		kinFitShift.ReplaceAll("RecPartonTruth","KinFitRec"        );
+		if(histo_.count(afterKinFit)>0) histo_[afterKinFit][sample]->Draw("hist same");
+		if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
+		legPull->Draw("same");
+	      }
+	      // others as histo (stack)
+	      else histo_[plotList_[plot]][sample]->Draw("hist");
+	      histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
 	    }
-	    // get nicer int values if maximum is large enough
-	    if(max>3) max = (double)roundToInt(max);
-	    // axis style
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
-	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
-	    if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
-	    if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
-	    // restrict x axis for different plots
-	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	    if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
-	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
-						     getStringEntry(plotList_[plot], 2)=="topYHad"|| 
-						     getStringEntry(plotList_[plot], 2)=="topYLep")){
-	                                                      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
-	    if(getStringEntry(plotList_[plot], 2)=="lepPt" )  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
-	    if(getStringEntry(plotList_[plot], 2)=="ttbarY")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
-	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
-	    // draw efficiency plots as line
-	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
-	    // others as histo (stack)
-	    else histo_[plotList_[plot]][sample]->Draw("hist");
-	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
-	  }
-	  // draw other plots into same canvas
-	  else{ 
-	    // draw data as points
-	    if(sample==kData){ 
-	      histo_[plotList_[plot]][sample]->Draw("p e X0 same");
+	    // draw other plots into same canvas
+	    else{ 
+	      // draw data as points
+	      if(sample==kData){ 
+		histo_[plotList_[plot]][sample]->Draw("p e X0 same");
+	      }
+	      else{
+		// draw efficiencies as points
+		if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
+		// draw others as histo (stack)
+		else histo_[plotList_[plot]][sample]->Draw("hist same");
+	      }
 	    }
-	    else{
-	      // draw efficiencies as points
-	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
-	      // draw others as histo (stack)
-	      else histo_[plotList_[plot]][sample]->Draw("hist same");
+	    first=false;
+	    // draw legend for recoYield plots
+	    TString title=plotCanvas_[canvasNumber]->GetTitle();
+	    if(title.Contains("analyzeTopRecoKinematicsKinFit")){
+	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.24);
+	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+	      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
+	    }
+	    // redraw axis at the end
+	    if((histo_.count(plotList_[plot])>0)&&(sample==kData)) histo_[plotList_[plot]][42]->Draw("axis same");	 
+	    TString plotType=getStringEntry(plotList_[plot], 1);
+	    if(plotType.Contains("xSec")||plotType.Contains("Reco")){
+	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
+	      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+	      DrawCMSLabels(true,luminosity);
 	    }
 	  }
 	  first=false;
@@ -1298,12 +1493,14 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 
     // for 1D hists and efficiency hists: next canvas
     if(((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots))&&(histo_.count(plotList_[plot])>0)) ++canvasNumber;
+    // pull distribution are all drawn in one canvas (at "RecPartonTruth")!
+    if(plotList_[plot].Contains("Pull")&&!plotList_[plot].Contains("RecPartonTruth")) --canvasNumber; 
   }
   // b) for legends
   plotCanvas_[canvasNumber]->cd(0);
   plotCanvas_[canvasNumber]->SetTitle("legend");
   leg0->Draw("");
-  ++canvasNumber;
+   ++canvasNumber;
 
   // ---
   // saving
@@ -1354,4 +1551,3 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   delete leg0;
   closeStdTopAnalysisFiles(files_);
 }
-
