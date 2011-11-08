@@ -4,7 +4,7 @@
 #include <TF1.h>
 #include <TMath.h>
 
-TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, int verbose);
+TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, TString phaseSpace, int verbose);
 TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b);
 
@@ -314,7 +314,10 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
       if (doPDFuncertainty) {
-	plotsScaled_[variable_[i]+"PartonTruth"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"], Var, variable_[i], inputFolderName,  verbose-1);
+	// restricted phase space
+	plotsScaled_[variable_[i]+"PartonTruth"    +Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"    ], Var, variable_[i], inputFolderName, ""       , verbose-1);
+	// full phase space
+	plotsScaled_[variable_[i]+"PartonTruthFull"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruthFull"], Var, variable_[i], inputFolderName, "Full"   , verbose-1);
       } 
       else {
 	// restricted phase space
@@ -353,7 +356,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       }
 //      // Following lines are just to check whether reweighting values from MC@NLO to MadGraph works
 //      if (doPDFuncertainty) {
-//        // add central values (witouth PDF reweighting) from MC@NLO to the list of plots using MadGraph normalisation
+//        // add central values (witouth PDF reweighting) from MC@NLO to the list of plots using MadGraph normalisation (see also ~line 462)
 //        plots_[variable_[i]+"PartonTruth"+"MCatNLO"] = getTheoryPrediction(variable_[i], "/afs/naf.desy.de/group/cms/scratch/tophh/" + inputFolderName + "/ttbarNtupleCteq6mPDFuncertOnly.root");
 //        plots_[variable_[i]+"PartonTruth"+"MCatNLO"]->Scale(plots_[variable_[i]+"PartonTruth"]->Integral(0,plots_[variable_[i]+"PartonTruth"]->GetNbinsX()+1));
 //      }
@@ -1024,19 +1027,20 @@ double linSF(const double x, const double xmax, const double a, const double b){
   return SF;
 }
 
-TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, int verbose)
+TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, TString phaseSpace, int verbose)
 {
-  // this function loads the max/min PDF uncertainties as determined externally with MC@NLO for the desired variables
 
+  // this function loads the max/min PDF uncertainties as determined externally with MC@NLO for the desired variables and applies it to MadGraph
   TString fileName    = "/afs/naf.desy.de/group/cms/scratch/tophh/" + inputFolderName + "/ttbarNtupleCteq6mPDFuncertOnly.root" ;
-  TString plotNameVar = (variation == "") ? variable : variable + "_" + variation ;
-  TString plotNameNom = variable ;                 
+  TString plotNameVar = (variation == "") ? variable : variable + "_" + variation                                              ;
+  TString plotNameNom = variable                                                                                               ;                 
+  TString directory   = (phaseSpace == "Full") ? "FullPhaseSpace" : "VisiblePhaseSpace"                                        ; 
 
   if(verbose>0) std::cout << "distortPDF: using file " << fileName << " for estimated PDF uncertainties in plot " << plotNameVar << std::endl;
 
-  TH1F * histPdfNom = getTheoryPrediction(plotNameNom,fileName);
-  TH1F * histPdfVar = getTheoryPrediction(plotNameVar,fileName);
-  TH1F * histPdf    = getTheoryPrediction(plotNameVar,fileName);
+  TH1F * histPdfNom = getTheoryPrediction(directory + "/" + plotNameNom,fileName) ;  // the central values of MC@NLO (needed to rescale to central values of MadGraph)
+  TH1F * histPdfVar = getTheoryPrediction(directory + "/" + plotNameVar,fileName) ;  // the varied  values of MC@NLO (needed to add     to central values of MadGraph)
+  TH1F * histPdf    = getTheoryPrediction(directory + "/" + plotNameVar,fileName) ;  // the desired histogram (PDF variations for MadGraph)
 
   // check if binning and ranges are consistent
   if ( histPdf->GetNbinsX() != hist.GetNbinsX() || histPdf->GetXaxis()->GetXmin() != hist.GetXaxis()->GetXmin() || histPdf->GetXaxis()->GetXmax() != hist.GetXaxis()->GetXmax() )
@@ -1048,10 +1052,9 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
   // scale each bin such that it represents the PDF uncertainty found with MC@NLO but with MadGraph as the default central value
   for (int i=0 ; i <= hist.GetNbinsX()+1; ++i) {
     histPdf->SetBinContent(i,0.) ;
-    if (histPdfNom->GetBinContent(i) != 0.) histPdf->SetBinContent(i, histPdfVar->GetBinContent(i) / histPdfNom->GetBinContent(i) * hist.GetBinContent(i) ); 
+    if (histPdfNom->GetBinContent(i) != 0.) histPdf->SetBinContent(i, histPdfVar->GetBinContent(i) / histPdfNom->GetBinContent(i) * hist.GetBinContent(i) ) ; 
   }
 
   return histPdf ;
+
 }
-
-
