@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.1 2011/10/11 11:33:31 jkiesele Exp $
+// $Id: NTupleWriter.cc,v 1.1 2011/11/08 13:17:02 tdorland Exp $
 //
 //
 
@@ -519,20 +519,17 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   std::vector<pat::Muon>::const_iterator amuon  = muons->begin();
   std::vector<pat::Electron>::const_iterator anelectron  = electrons->begin();
 
-  bool writemuon=false;
-  bool writeelec=false;
 
   while(amuon < muons->end() || anelectron < electrons->end()){ //sort input leptons by pt
 
-    writemuon=false;
-    writeelec=false;
+    bool writemuon=false;
+    bool writeelec=false;
 
-    if(amuon < muons->end() && anelectron < electrons->end()){
-      if( amuon->pt() > anelectron->pt()) writemuon=true ;
-      else writeelec=true;
-    }
-    if(anelectron == electrons->end())  writemuon=true ;
-    if(amuon == muons->end())           writeelec=true;
+    if(anelectron == electrons->end())  writemuon=true;
+    else if(amuon == muons->end())      writeelec=true;
+    else if(amuon->pt() > anelectron->pt()) writemuon=true;
+    else writeelec=true;
+    
 
     if(writemuon){
       //Fill muonstuff
@@ -564,11 +561,11 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       VlepType.push_back(-1) ;
       VlepPfIso.push_back(((anelectron->chargedHadronIso()+anelectron->neutralHadronIso()+anelectron->photonIso()) / anelectron->pt()));
 
-      if( fabs(anelectron->superCluster()->eta()) > 1.479 ){
-	VlepCombIso.push_back((anelectron->dr03TkSumPt()+anelectron->dr03EcalRecHitSumEt()+anelectron->dr03HcalTowerSumEt())/TMath::Max(20.,anelectron->pt()));
+      if( fabs(anelectron->superCluster()->eta()) <= 1.479 ){ //barrel region
+        VlepCombIso.push_back((anelectron->dr03TkSumPt()+TMath::Max(0.,anelectron->dr03EcalRecHitSumEt()-1.)+anelectron->dr03HcalTowerSumEt())/TMath::Max(20.,anelectron->pt()));
       }
-      if( fabs(anelectron->superCluster()->eta()) <= 1.479 ){
-	VlepCombIso.push_back((anelectron->dr03TkSumPt()+TMath::Max(0.,anelectron->dr03EcalRecHitSumEt()-1.)+anelectron->dr03HcalTowerSumEt())/TMath::Max(20.,anelectron->pt()));
+      else { //endcap
+        VlepCombIso.push_back((anelectron->dr03TkSumPt()+anelectron->dr03EcalRecHitSumEt()+anelectron->dr03HcalTowerSumEt())/TMath::Max(20.,anelectron->pt()));
       }
 
       anelectron++;
