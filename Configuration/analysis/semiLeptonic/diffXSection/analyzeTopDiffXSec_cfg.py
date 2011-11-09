@@ -936,10 +936,34 @@ process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKi
 
 
 ## define analyzers for kinfit object reconstruction quality
+analyzeAll = cms.PSet(
+    corrPerm=cms.bool(False),
+    maxChi2=cms.double(0)
+    )
+analyzeCorrect = cms.PSet(
+    corrPerm=cms.bool(True),
+    maxChi2=cms.double(0)
+    )
+analyzeChi5 = cms.PSet(
+    corrPerm=cms.bool(False),
+    maxChi2=cms.double(5)
+    )
+analyzeChi30 = cms.PSet(
+    corrPerm=cms.bool(False),
+    maxChi2=cms.double(30)
+    )
+analyzeChi50 = cms.PSet(
+    corrPerm=cms.bool(False),
+    maxChi2=cms.double(50)
+    )
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
 process.analyzeHypoKinFitMET  = process.analyzeHypothesisKinFitMET.clone (srcA = "ttSemiLepEvent", srcB = "patMETs"           )
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
-process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets")
+process.analyzeHypoKinFitJets = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeAll)
+process.analyzeHypoKinFitJetsCorr = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeCorrect)
+process.analyzeHypoKinFitJetsChi5 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi5)
+process.analyzeHypoKinFitJetsChi30 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi30)
+process.analyzeHypoKinFitJetsChi50 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi50)
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitLepton_cfi")
 process.analyzeHypoKinFitLepton = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons"    )
 
@@ -962,6 +986,10 @@ if(applyKinFit==True):
                                              process.analyzeHypoKinFit                       +
                                              process.analyzeHypoKinFitLepton                 + 
                                              process.analyzeHypoKinFitJets                   +
+                                             process.analyzeHypoKinFitJetsCorr               +
+                                             process.analyzeHypoKinFitJetsChi5               +
+                                             process.analyzeHypoKinFitJetsChi30              +
+                                             process.analyzeHypoKinFitJetsChi50              +
                                              process.analyzeHypoKinFitMET                    +
                                              process.filterMatchKinFit
                                              )

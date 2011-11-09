@@ -55,7 +55,10 @@ class HypothesisKinFitJets : public DoubleObject<TtSemiLeptonicEvent, const edm:
   void process(){};
 
  private:
-  /// nothing to be done here for the moment
+  /// bool indicating if only correct permutations should be considered
+  bool corrPerm_;
+  /// chi2 selection criteria
+  double maxChi2_;
 };
 
 #endif
