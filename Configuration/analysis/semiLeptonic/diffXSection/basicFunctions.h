@@ -1909,6 +1909,17 @@ namespace semileptonic {
   
   }
   
+  void addCanvas(std::vector<TCanvas*> &plotCanvas_){
+    // this function adds a new canvas to the vector of canvas "plotCanvas_"
+    // modified quantities: plotCanvas_
+    // used functions: NONE
+    // used enumerators: NONE
+    char canvname[10];
+    int number =plotCanvas_.size()+1;
+    sprintf(canvname,"canv%i",number);    
+    plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
+    //canvasStyle(*plotCanvas_[number-1]);
+  }
 
 #ifdef DILEPTON_MACRO
 }
