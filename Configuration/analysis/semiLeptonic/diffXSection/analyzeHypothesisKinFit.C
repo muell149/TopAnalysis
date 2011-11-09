@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=4, TString inputFolderName="TOP2011/110819_AnalysisRun",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 			     std::string decayChannel = "muon" )
@@ -1229,18 +1229,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   //    create canvas
   // ---
   std::vector<TCanvas*> plotCanvas_;
-  //  int NCanvas = Nplots+Nlegends;
-  // a) create canvas for all plots + legends
-  //  for(int sample=0; sample<NCanvas; sample++){
-  // 3 pull plots in one canvas: Nvar*Nquantities-Nvar*NpullsPerCanvas*Nquantities
-  int Npull=3*5-3*3*5;
-  if(systematicVariation!=sysNo) Npull=0;
-  for(int sample=0; sample<Nplots+Npull+NMCeff+NXSec+Nlegends; sample++){
-    char canvname[10];
-    sprintf(canvname,"canv%i",sample);    
-    plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
-    //canvasStyle(*plotCanvas_[sample]);
-  }
+  // entries added when printing is done
 
   // ---
   //    change 1D plots into stack plots
@@ -1273,7 +1262,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	histogramStyle( *histo_[pullLabel][kSig], kSig, false);
 	if(pullLabel.Contains("RecPartonTruth")) histo_[pullLabel][kSig]->SetLineColor(kBlue );
 	if(pullLabel.Contains("KinFitRec"     )) histo_[pullLabel][kSig]->SetLineColor(kBlack);
-	//histo_[pullLabel][kSig]->SetLineWidth(0.5);
       }
     }
     // otherwise: all 1D plots will become stacked plots
@@ -1285,13 +1273,9 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   //    do the printing
   // ---
   // a) for plots
-  int canvasNumber=0;
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     bool first=true;
-    // open canvas and set titel corresponding to plotname in .root file
-    plotCanvas_[canvasNumber]->cd(0);
-    plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
     // loop samples
     for(unsigned int sample=kSig; sample<=kData; ++sample){
       // a1) for 1D event yields, efficiency and cross section plots (existing)
@@ -1300,14 +1284,20 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
 	  // draw all pull distributions in same canvas if RecPartonTruth pull is called
 	  if(!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth")){
+	    // create canvas and set titel corresponding to plotname in .root file
+	    if(first){
+	      addCanvas(plotCanvas_);
+	      plotCanvas_[plotCanvas_.size()-1]->cd(0);
+	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
+	    }
 	    if(verbose>1){
 	      std::cout << "plotting " << plotList_[plot];
 	      std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	      std::cout << " to canvas " << canvasNumber << " ( ";
-	      std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
+	      std::cout << " to canvas " << plotCanvas_.size()-1 << " ( ";
+	      std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )" << std::endl;
 	    }
 	    // for efficiency plots: draw grid
-	    if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[canvasNumber]->SetGrid(1,1);
+	    if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
 	    // for histos with variable binning:
 	    if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
 	      // get variable binning
@@ -1339,7 +1329,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	      double min = 0;
 	      // log plots
 	      if(getStringEntry(axisLabel_[plot],3)=="1"){
-		plotCanvas_[canvasNumber]->SetLogy(1);
+		plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
 		min=1;
 		max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
 		if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
@@ -1358,11 +1348,11 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	      if(plotList_[plot].Contains("RecPartonTruth")){
 		min=0;
 		//max=1;
-		TString title=(TString)plotCanvas_[canvasNumber]->GetTitle();
+		TString title=(TString)plotCanvas_[plotCanvas_.size()-1]->GetTitle();
 		title.ReplaceAll("RecPartonTruth","");
-		plotCanvas_[canvasNumber]->SetTitle(title);
+		plotCanvas_[plotCanvas_.size()-1]->SetTitle(title);
 		histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-		plotCanvas_[canvasNumber]->SetGrid(1,1);
+		plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
 	      }
 	      // axis style
 	      axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
@@ -1414,10 +1404,10 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    }
 	    first=false;
 	    // draw legend for recoYield plots
-	    TString title=plotCanvas_[canvasNumber]->GetTitle();
+	    TString title=plotCanvas_[plotCanvas_.size()-1]->GetTitle();
 	    if(title.Contains("analyzeTopRecoKinematicsKinFit")){
 	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.24);
+	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03*leg->GetNRows());
 	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
@@ -1442,7 +1432,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	      gStyle->SetErrorX(0.5);  
 	      histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
 	      // draw legend for recoYield plots
-	      TString tempTitle = plotCanvas_[canvasNumber]->GetTitle();
+	      TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
 	      if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
 		leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
 		leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03 * leg->GetNRows() );
@@ -1462,22 +1452,25 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    }
 	  }
 	}
-      }	     
+      }
       
       // a3) for 2D plots
-      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
+      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)&&	  
+	 // draw gen-reco correlation only for signal 
+	 (!plotList_[plot].Contains("_"   )||sample==kSig)){
 	// new Canvas for every plot
-	plotCanvas_[canvasNumber]->cd(0);
-	plotCanvas_[canvasNumber]->SetRightMargin(myStyle.GetPadRightMargin());
-	plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample)); 
+	addCanvas(plotCanvas_);
+	plotCanvas_[plotCanvas_.size()-1]->cd(0);
+	plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
+	plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample));
 	if(verbose>1){
 	  std::cout << "plotting " << plotList_[plot];
 	  std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	  std::cout << " to canvas " << canvasNumber  << " ( ";
-	  std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )"  << std::endl;
+	  std::cout << " to canvas " << plotCanvas_.size()-1  << " ( ";
+	  std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )"  << std::endl;
 	}
 	// draw histo
-	plotCanvas_[canvasNumber]->SetRightMargin(0.15);
+	plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(0.15);
 	histo2_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	histo2_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	histo2_[plotList_[plot]][sample]->Draw("colz");
@@ -1487,20 +1480,14 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	sprintf(correlation, "%f", d);
 	TString corr = (TString)correlation;
 	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
-	++canvasNumber;
       }
-    }    
-
-    // for 1D hists and efficiency hists: next canvas
-    if(((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots))&&(histo_.count(plotList_[plot])>0)) ++canvasNumber;
-    // pull distribution are all drawn in one canvas (at "RecPartonTruth")!
-    if(plotList_[plot].Contains("Pull")&&!plotList_[plot].Contains("RecPartonTruth")) --canvasNumber; 
+    }
   }
   // b) for legends
-  plotCanvas_[canvasNumber]->cd(0);
-  plotCanvas_[canvasNumber]->SetTitle("legend");
+  addCanvas(plotCanvas_);
+  plotCanvas_[plotCanvas_.size()-1]->cd(0);
+  plotCanvas_[plotCanvas_.size()-1]->SetTitle("legend");
   leg0->Draw("");
-   ++canvasNumber;
 
   // ---
   // saving
