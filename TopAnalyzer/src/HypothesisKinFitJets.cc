@@ -254,7 +254,7 @@ HypothesisKinFitJets::fill(const TtSemiLeptonicEvent& tops, const edm::View<pat:
 	pullQQbarSwitched +=     std::abs((lightQBarPtKinFit -lightQPtPartonTruth )/lightQPtPartonTruth );
 	pullQQbarSwitched +=     std::abs((lightQBarEtaKinFit-lightQEtaPartonTruth)/lightQEtaPartonTruth);
 	pullQQbarSwitched +=     std::abs((lightQBarPhiKinFit-lightQPhiPartonTruth)/lightQPhiPartonTruth);
-	if(pullQQbarSwitched<pullQQbar){
+	if( (corrPerm_&&tops.jetLeptonCombination("kKinFit")[TtSemiLepEvtPartons::LightQ]==tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar]&&tops.jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ]==tops.jetLeptonCombination("kKinFit")[TtSemiLepEvtPartons::LightQBar]) || (!corrPerm_&&pullQQbarSwitched<pullQQbar) ){
 	  lightQBarPtPartonTruth  = tops.hadronicDecayQuark()->pt();
 	  lightQBarEtaPartonTruth = tops.hadronicDecayQuark()->eta();
 	  lightQBarPhiPartonTruth = tops.hadronicDecayQuark()->phi();

@@ -7,7 +7,11 @@ analyzeHypothesisKinFitLepton = cms.EDAnalyzer("HypothesisKinFitLeptonAnalyzer",
     srcB = cms.InputTag("selectedPatMuons"),                                         
     ## analyzer specific configurables
     analyze   = cms.PSet(
-      ## no additional configurables needed in this case
+      ## consider only events with correct jet assignment?
+      ## judgement is done wrt. dR matching algorithm
+      corrPerm=cms.bool(False),
+      ## apply chi2 cut for events plotted
+      maxChi2=cms.double(10000)
     )    
 )
 

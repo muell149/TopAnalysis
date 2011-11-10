@@ -11,7 +11,7 @@ analyzeHypothesisKinFitJets = cms.EDAnalyzer("HypothesisKinFitJetsAnalyzer",
       ## judgement is done wrt. dR matching algorithm
       corrPerm=cms.bool(False),
       ## apply chi2 cut for events plotted
-      maxChi2=cms.double(0)
+      maxChi2=cms.double(10000)
     )
 )
 
