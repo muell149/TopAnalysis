@@ -58,8 +58,8 @@ Bool_t isTotal = !(isDiff);
 //Bool_t isPSE = kTRUE;    // Make efficiency plots "_PSE"
 Bool_t isPSE = kFALSE;
 
-//Bool_t isModel = kTRUE;
-Bool_t isModel = kFALSE;
+Bool_t isModel = kTRUE;
+//Bool_t isModel = kFALSE;
 
 Bool_t isExp = kTRUE;
 //Bool_t isExp = kFALSE;
@@ -212,7 +212,7 @@ void SystematicErrors() {
   setupTotalErrors();
 
   TH1 *h_ref;
-  TH1 *h_style;
+  TH1 *h_style = 0;
   TH1 *h_var_up;
   TH1 *h_var_down;
 
