@@ -1622,6 +1622,100 @@ namespace semileptonic {
       file->Close();
     }
 
+  template <class T>
+    void saveToRootFileAll(const TString& outputFile, const std::vector< std::pair< T*,TString > > &objects_, const bool& overwrite=false, const int& verbose=1)
+    {
+      // this function saves all objects of class T in saveCanvas_
+      // (such as TH1) in an output rootfile with name outputFile
+      // modified quantities: outputFile
+      // used functions: none
+      // used enumerators: none
+
+      bool saveObject=true;
+      // check if file exist
+      TFile* file = TFile::Open(outputFile, "UPDATE");
+      // if not exist: create
+      if(!file){
+	if(verbose>1) std::cout << "file " << outputFile << " does not exist, will be created" << std::endl;
+	file = new TFile(outputFile, "RECREATE");
+      }
+      // check if file is broken
+      if(file->IsZombie()){
+	std:: cout << "file " << outputFile << " is broken" << std::endl;
+	// if broken: don't save object
+	saveObject=false;
+      }
+      else{
+	// if not broken: open file
+	file->cd();
+	// loop list of plots to be saved
+	for(unsigned int idx=0; idx<objects_.size(); ++idx){  
+	  //get object and folder
+	  TString folder=(TString)(objects_[idx].second);
+	  T* object=(T*)(objects_[idx].first);
+	  // create folder if it does not exist
+	  if(folder!=""){
+	    if(verbose>1) std::cout << "check existence of directory " << folder << std::endl;
+	    // see how many subfolders are within folder
+	    unsigned int Nfolders=folder.CountChar(*"/")+1;
+	    if(verbose>1) std::cout << "these are " << Nfolders << " subdirectories" << std::endl;
+	    // loop subdirectories
+	    for(unsigned int subfolderNumber=1; subfolderNumber<=Nfolders; ++subfolderNumber){
+	      TString subfolder= getStringEntry(folder, subfolderNumber, "/");
+	      if(gDirectory->GetDirectory(subfolder)==0){
+		if(verbose>1) std::cout << "subfolder " << subfolder  << " not existing - will create it" << std::endl;
+		gDirectory->mkdir(subfolder);
+	      }
+	      else if(verbose>1) std::cout << "subfolder " << subfolder  << " is already existing" << std::endl;
+	      // go to directory
+	      gDirectory->cd(subfolder);
+	    }
+	  }
+	  // if you don't want to overwrite, check if object exists
+	  int count=-1;
+	  if(!overwrite){
+	    TString saveObjectName=(TString)object->GetTitle();
+	    if(verbose>1) std::cout << "searching for object " << saveObjectName << std::endl;
+	    // loop all objects in file
+	    TList * list = gDirectory->GetListOfKeys();
+	    while( list->At( count+1 ) != list->Last()){
+	      ++count;
+	      TObject *folderObject = list->At(count);
+	      TString folderObjectName = (TString)folderObject->GetName();
+	      if(verbose>1) std::cout << "candidate #" << count+1 << ": " << folderObjectName << std::endl;
+	      // check if object you want to save is already existing
+	      // by comparing the names
+	      if(folderObjectName==saveObjectName){
+		if(verbose>1){
+		  std::cout << "already exists in file " << outputFile << std::endl;
+		  std::cout << "will keep the old one!" << std::endl << std::endl;
+		}
+		saveObject=false;
+		break;
+	      }
+	    }
+	  }
+	  // save object
+	  if(saveObject){
+	    if(verbose>0){
+	      std::cout << "saving object " << (TString)object->GetTitle();
+	      std::cout << " to file " << outputFile;
+	      if(folder!="") std::cout << " ( folder " << folder << " )";
+	      std::cout << std::endl << std::endl;
+	    }
+	    // overwrite existing
+	    object->Write(object->GetTitle(), TObject::kOverwrite);
+	  }
+	  // return to main folder
+	  for(int nfolder=1; nfolder<=folder.CountChar(*"/")+1; ++nfolder){
+	    gDirectory->cd("..");
+	  }
+	}
+      }
+      // close file
+      file->Close();
+    }
+
   void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0))
   {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'

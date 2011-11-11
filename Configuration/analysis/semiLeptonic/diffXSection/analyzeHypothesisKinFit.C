@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=4, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
 			     std::string decayChannel = "muon" )
@@ -89,7 +89,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   if(decayChannel=="electron") outputFileName+="Elec";
   outputFileName+=dataSample+".root";
   // choose name of the output .pdf file
-  TString pdfName="kinFitpbHypothesis"+lumi+"pb";
+  TString pdfName="kinFitHypothesis"+lumi+"pb";
   // choose if differential xSecs are extrapolated to whole phase space
   bool extrapolate=false;
   TString PS="";
@@ -495,56 +495,56 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"       ,
     // (IV) pull distributions input objects before/after kinematic fit
     // (i) lepton
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) * (p_{t}^{lep rec})^{-1}/Frequency/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) * (p_{t}^{lep parton})^{-1}/Frequency/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) * (p_{t}^{lep parton})^{-1}/Frequency/0/10",
-    "(#eta^{lep kinFit}-#eta^{lep rec}) * (#eta^{lep rec})^{-1}/Frequency/0/10",
-    "(#eta^{lep kinFit}-#eta^{lep parton}) * (#eta^{lep parton})^{-1}/Frequency/0/10",
-    "(#eta^{lep Rec}-#eta^{lep parton}) * (#eta^{lep parton})^{-1}/Frequency/0/10",
-    "(#phi^{lep kinFit}-#phi^{lep rec}) * (#phi^{lep rec})^{-1}/Frequency/0/10",
-    "(#phi^{lep kinFit}-#phi^{lep parton}) * (#phi^{lep parton})^{-1}/Frequency/0/10",
-    "(#phi^{lep Rec}-#phi^{lep parton}) * (#phi^{lep parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency/0/10",
+    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency/0/10",
+    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency/0/10",
+    "(#eta^{lep kinFit}-#eta^{lep rec}) : #eta^{lep rec}/Frequency/0/10",
+    "(#eta^{lep kinFit}-#eta^{lep parton}) : #eta^{lep parton}/Frequency/0/10",
+    "(#eta^{lep Rec}-#eta^{lep parton}) : #eta^{lep parton}/Frequency/0/10",
+    "(#phi^{lep kinFit}-#phi^{lep rec}) : #phi^{lep rec}/Frequency/0/10",
+    "(#phi^{lep kinFit}-#phi^{lep parton}) : #phi^{lep parton}/Frequency/0/10",
+    "(#phi^{lep Rec}-#phi^{lep parton}) : #phi^{lep parton}/Frequency/0/10",
     // (ii) neutrino
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) * (p_{t}^{#nu rec})^{-1}/Frequency/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) * (p_{t}^{#nu parton})^{-1}/Frequency/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) * (p_{t}^{#nu parton})^{-1}/Frequency/0/10",
-    "(#eta^{#nu kinFit}-#eta^{#nu rec}) * (#eta^{#nu rec})^{-1}/Frequency/0/10",
-    "(#eta^{#nu kinFit}-#eta^{#nu parton}) * (#eta^{#nu parton})^{-1}/Frequency/0/10",
-    "(#eta^{#nu Rec}-#eta^{#nu parton}) * (#eta^{#nu parton})^{-1}/Frequency/0/10",
-    "(#phi^{#nu kinFit}-#phi^{#nu rec}) * (#phi^{#nu rec})^{-1}/Frequency/0/10",
-    "(#phi^{#nu kinFit}-#phi^{#nu parton}) * (#phi^{#nu parton})^{-1}/Frequency/0/10",
-    "(#phi^{#nu Rec}-#phi^{#nu parton}) * (#phi^{#nu parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency/0/10",
+    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency/0/10",
+    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency/0/10",
+    "(#eta^{#nu kinFit}-#eta^{#nu rec}) : #eta^{#nu rec}/Frequency/0/10",
+    "(#eta^{#nu kinFit}-#eta^{#nu parton}) : #eta^{#nu parton}/Frequency/0/10",
+    "(#eta^{#nu Rec}-#eta^{#nu parton}) : #eta^{#nu parton}/Frequency/0/10",
+    "(#phi^{#nu kinFit}-#phi^{#nu rec}) : #phi^{#nu rec}/Frequency/0/10",
+    "(#phi^{#nu kinFit}-#phi^{#nu parton}) : #phi^{#nu parton}/Frequency/0/10",
+    "(#phi^{#nu Rec}-#phi^{#nu parton}) : #phi^{#nu parton}/Frequency/0/10",
     // (iii) hadronic b jet
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) * (p_{t}^{had b-jet rec})^{-1}/Frequency/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) * (p_{t}^{had b-jet parton})^{-1}/Frequency/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) * (p_{t}^{had b-jet parton})^{-1}/Frequency/0/10",
-    "(#eta^{had b-jet kinFit}-#eta^{had b-jet rec}) * (#eta^{had b-jet rec})^{-1}/Frequency/0/10",
-    "(#eta^{had b-jet kinFit}-#eta^{had b-jet parton}) * (#eta^{had b-jet parton})^{-1}/Frequency/0/10",
-    "(#eta^{had b-jet Rec}-#eta^{had b-jet parton}) * (#eta^{had b-jet parton})^{-1}/Frequency/0/10",
-    "(#phi^{had b-jet kinFit}-#phi^{had b-jet rec}) * (#phi^{had b-jet rec})^{-1}/Frequency/0/10",
-    "(#phi^{had b-jet kinFit}-#phi^{had b-jet parton}) * (#phi^{had b-jet parton})^{-1}/Frequency/0/10",
-    "(#phi^{had b-jet Rec}-#phi^{had b-jet parton}) * (#phi^{had b-jet parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency/0/10",
+    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency/0/10",
+    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency/0/10",
+    "(#eta^{had b-jet kinFit}-#eta^{had b-jet rec}) : #eta^{had b-jet rec}/Frequency/0/10",
+    "(#eta^{had b-jet kinFit}-#eta^{had b-jet parton}) : #eta^{had b-jet parton}/Frequency/0/10",
+    "(#eta^{had b-jet Rec}-#eta^{had b-jet parton}) : #eta^{had b-jet parton}/Frequency/0/10",
+    "(#phi^{had b-jet kinFit}-#phi^{had b-jet rec}) : #phi^{had b-jet rec}/Frequency/0/10",
+    "(#phi^{had b-jet kinFit}-#phi^{had b-jet parton}) : #phi^{had b-jet parton}/Frequency/0/10",
+    "(#phi^{had b-jet Rec}-#phi^{had b-jet parton}) : #phi^{had b-jet parton}/Frequency/0/10",
    
     // (iv) leptonic b jet
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) * (p_{t}^{lep b-jet rec})^{-1}/Frequency/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) * (p_{t}^{lep b-jet parton})^{-1}/Frequency/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) * (p_{t}^{lep b-jet parton})^{-1}/Frequency/0/10",
-    "(#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}) * (#eta^{lep b-jet rec})^{-1}/Frequency/0/10",
-    "(#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}) * (#eta^{lep b-jet parton})^{-1}/Frequency/0/10",
-    "(#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}) * (#eta^{lep b-jet parton})^{-1}/Frequency/0/10",
-    "(#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}) * (#phi^{lep b-jet rec})^{-1}/Frequency/0/10",
-    "(#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}) * (#phi^{lep b-jet parton})^{-1}/Frequency/0/10",
-    "(#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}) * (#phi^{lep b-jet parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency/0/10",
+    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency/0/10",
+    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency/0/10",
+    "(#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}) : #eta^{lep b-jet rec}/Frequency/0/10",
+    "(#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}) : #eta^{lep b-jet parton}/Frequency/0/10",
+    "(#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}) : #eta^{lep b-jet parton}/Frequency/0/10",
+    "(#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}) : #phi^{lep b-jet rec}/Frequency/0/10",
+    "(#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}) : #phi^{lep b-jet parton}/Frequency/0/10",
+    "(#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}) : #phi^{lep b-jet parton}/Frequency/0/10",
     // (v) light jets
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) * (p_{t}^{light jet rec})^{-1}/Frequency/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) * (p_{t}^{light jet parton})^{-1}/Frequency/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) * (p_{t}^{light jet parton})^{-1}/Frequency/0/10",
-    "(#eta^{light jet kinFit}-#eta^{light jet rec}) * (#eta^{light jet rec})^{-1}/Frequency/0/10",
-    "(#eta^{light jet kinFit}-#eta^{light jet parton}) * (#eta^{light jet parton})^{-1}/Frequency/0/10",
-    "(#eta^{light jet Rec}-#eta^{light jet parton}) * (#eta^{light jet parton})^{-1}/Frequency/0/10",
-    "(#phi^{light jet kinFit}-#phi^{light jet rec}) * (#phi^{light jet rec})^{-1}/Frequency/0/10",
-    "(#phi^{light jet kinFit}-#phi^{light jet parton}) * (#phi^{light jet parton})^{-1}/Frequency/0/10",
-    "(#phi^{light jet Rec}-#phi^{light jet parton}) * (#phi^{light jet parton})^{-1}/Frequency/0/10",
+    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency/0/10",
+    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency/0/10",
+    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency/0/10",
+    "(#eta^{light jet kinFit}-#eta^{light jet rec}) : #eta^{light jet rec}/Frequency/0/10",
+    "(#eta^{light jet kinFit}-#eta^{light jet parton}) : #eta^{light jet parton}/Frequency/0/10",
+    "(#eta^{light jet Rec}-#eta^{light jet parton}) : #eta^{light jet parton}/Frequency/0/10",
+    "(#phi^{light jet kinFit}-#phi^{light jet rec}) : #phi^{light jet rec}/Frequency/0/10",
+    "(#phi^{light jet kinFit}-#phi^{light jet parton}) : #phi^{light jet parton}/Frequency/0/10",
+    "(#phi^{light jet Rec}-#phi^{light jet parton}) : #phi^{light jet parton}/Frequency/0/10",
   };
 
   // count # plots
@@ -1260,6 +1260,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	histo_[pullLabel][kSig]->Scale(1./histo_[pullLabel][kSig]->Integral(0, histo_[pullLabel][kSig]->GetNbinsX()));
 	axisLabel_[plot].ReplaceAll("Frequency","event fraction");
 	histogramStyle( *histo_[pullLabel][kSig], kSig, false);
+	histo_[pullLabel][kSig]->SetLineWidth(1.5);
 	if(pullLabel.Contains("RecPartonTruth")) histo_[pullLabel][kSig]->SetLineColor(kBlue );
 	if(pullLabel.Contains("KinFitRec"     )) histo_[pullLabel][kSig]->SetLineColor(kBlack);
       }
@@ -1376,12 +1377,17 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	      // draw pull plots as line into same canvas with extra legend
 	      if(plotList_[plot].Contains("RecPartonTruth")){
 		histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
+		histo_[plotList_[plot]][sample]->GetXaxis()->SetTitle(((TString)(histo_[plotList_[plot]][sample]->GetXaxis()->GetTitle())).ReplaceAll(":","/"));
+		histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 		histo_[plotList_[plot]][sample]->Draw("hist");
 		TString afterKinFit=plotList_[plot];
 		afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
 		TString kinFitShift=plotList_[plot];
 		kinFitShift.ReplaceAll("RecPartonTruth","KinFitRec"        );
-		if(histo_.count(afterKinFit)>0) histo_[afterKinFit][sample]->Draw("hist same");
+		if(histo_.count(afterKinFit)>0){ 
+		  histo_[plotList_[plot]][sample]->SetMaximum(1.3*histo_[afterKinFit][sample]->GetMaximum());
+		  histo_[afterKinFit][sample]->Draw("hist same");
+		}
 		if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
 		legPull->Draw("same");
 	      }
@@ -1516,6 +1522,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       }
     }
     // c) root file
+    std::vector< std::pair< TCanvas*,TString > > saveCanvas_;
     if(verbose>0) std::cout << "will save all plots in outputfile named " << outputFileName << std::endl;
     for(unsigned int idx=0; idx<plotCanvas_.size(); ++idx){
       // get correct folder
@@ -1530,8 +1537,13 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	}
       }
       // save only canvas from selected subfolders or legends
-      if(outputfolder!=""||title.Contains("legend")) saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose-1,outputfolder);
+      if(outputfolder!=""||title.Contains("legend")){ 
+	// collect information in saveCanvas_
+	saveCanvas_.push_back(std::make_pair((TCanvas*)plotCanvas_[idx]->Clone(),outputfolder));
+      }
     }
+    // save all collected plots
+    saveToRootFileAll(outputFileName, saveCanvas_, true, verbose-1);
   }
   
   // delete pointer
