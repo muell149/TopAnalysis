@@ -10,6 +10,8 @@
 300  dilepton.emu_200rereco_cff.py           emu_200rereco.root           realdata,rereco=True
 10   dilepton.emu_200rereco_AOD_cff          emu_run161119.root           realdata,rereco=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/missingRun161119.txt
 500  dilepton.emu_800prompt_cff.py           emu_800prompt.root           realdata,prompt=True
+250  dilepton.emu_Run2011A_PromptReco_v5_cff.py emu_run2011a_v5.root      realdata,prompt=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+250  dilepton.emu_Run2011A_PromptReco_v6_cff.py emu_run2011a_v6.root      realdata,prompt=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
 
 4    ..wwto2l2nu_tuneZ2_Summer11_AOD_cff      emu_wwto2l2nu.root               ww,runOnAOD=True
 4    ..wzto3lnu_tuneZ2_Summer11_AOD_cff       emu_wzto3lnu.root                wz,runOnAOD=True
@@ -68,6 +70,8 @@
 300   dilepton.mumu_200rereco_cff.py	       mumu_200rereco.root	     realdata,rereco=True
 10    dilepton.mumu_200rereco_AOD_cff	       mumu_run161119.root	     realdata,rereco=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/missingRun161119.txt
 500   dilepton.mumu_800prompt_cff.py	       mumu_800prompt.root	     realdata,prompt=True
+250  dilepton.mumu_Run2011A_PromptReco_v5_cff.py mumu_run2011a_v5.root      realdata,prompt=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+250  dilepton.mumu_Run2011A_PromptReco_v6_cff.py mumu_run2011a_v6.root      realdata,prompt=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
 
 4    ..wwto2l2nu_tuneZ2_Summer11_AOD_cff      mumu_wwto2l2nu.root               ww,runOnAOD=True
 4    ..wzto3lnu_tuneZ2_Summer11_AOD_cff       mumu_wzto3lnu.root                wz,runOnAOD=True
@@ -103,6 +107,8 @@
 300  dilepton.ee_200rereco_cff.py	    ee_200rereco.root		realdata,rereco=True
 10   dilepton.ee_200rereco_AOD_cff	    ee_run161119.root		realdata,rereco=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/missingRun161119.txt
 500  dilepton.ee_800prompt_cff.py	    ee_800prompt.root		realdata,prompt=True
+250  dilepton.ee_Run2011A_PromptReco_v5_cff.py ee_run2011a_v5.root      realdata,prompt=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+250  dilepton.ee_Run2011A_PromptReco_v6_cff.py ee_run2011a_v6.root      realdata,prompt=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
 
 4    ..wwto2l2nu_tuneZ2_Summer11_AOD_cff      ee_wwto2l2nu.root               ww,runOnAOD=True
 4    ..wzto3lnu_tuneZ2_Summer11_AOD_cff       ee_wzto3lnu.root                wz,runOnAOD=True

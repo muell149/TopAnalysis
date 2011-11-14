@@ -10,13 +10,15 @@ writeNTuple = cms.EDAnalyzer('NTupleWriter',
                        jets      = cms.InputTag("jets"),
                        met       = cms.InputTag("met"),
                        vertices  = cms.InputTag('offlinePrimaryVertices'),
-                       weight    =  cms.InputTag('eventWeightPU', 'eventWeightPU'),
+                       weightPU    =  cms.InputTag('eventWeightPU', 'eventWeightPU'),   
+                       weightLepSF =  cms.InputTag('eventWeightDileptonSF', 'eventWeightDileptonSF'),
+                       weightKinFit = cms.InputTag("eventWeightKinEffForNtuple", "eventWeightDileptonKinEffSF"),
                        datatype  =  cms.InputTag("data"),
                        includeTrigger = cms.bool(False),
                        triggerResults = cms.InputTag('TriggerResults','','HLT'),
-                       useLeadingJets  = cms.bool(False),
-                       useBtagging     = cms.bool(True),
-                       bAlgorithm      = cms.string("trackCountingHighEffBJetTags"),
-                       bCut            = cms.double(1.7),
+                       decayMode = cms.InputTag("generatorTopFilter", "decayMode"),
+                       isTtBarSample = cms.bool(True),
+                       #directory = cms.string(""), #../NTupDir
+                       directory = cms.string("../NTupDir"), #../NTupDir
 )
 

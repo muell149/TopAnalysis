@@ -151,8 +151,9 @@ GeneratorTopFilter::GeneratorTopFilter(const edm::ParameterSet& cfg) :
   Tau2Muon_         (cfg.getParameter<bool>("Tau_To_Muon"        )), 
   invert_           (cfg.getParameter<bool>("invert_selection"   ))              
 {
-  nEvts = 0;
-  nHits = 0;     
+    nEvts = 0;
+    nHits = 0;
+    produces<int>("decayMode");
 }
 
 
@@ -275,8 +276,13 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
   }
 
   for(unsigned int i=0; i<selChSize; i++){
-    if(decayVl==selectedChannels.at(i)) return passed;
-  }      
+    if(decayVl==selectedChannels.at(i)) {
+        std::auto_ptr<int> decay(new int);
+        *decay = decayVl;
+        evt.put(decay, "decayMode");
+        return passed;
+    }
+  }
   return blocked;
 }   
 
