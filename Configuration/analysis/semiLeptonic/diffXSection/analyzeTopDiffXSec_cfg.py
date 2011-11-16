@@ -209,6 +209,12 @@ process.source = cms.Source("PoolSource",
 
 )
 
+## Flag required to compensate bug in energy-momentum conservation for non Pythia samples
+## Modified in the following depending on the input sample, but only for the Pythia samples!
+## Default value: False
+
+PythiaSample="False"
+
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
     if(options.sample=="ttbar"):
@@ -229,7 +235,7 @@ if(not options.sample=="none"):
     if(options.sample=="ttbarScaleUp"):        
         process.load("TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff.py"
-	additionalEventWeights=False        
+	additionalEventWeights=False
     if(options.sample=="ttbarMassDown"):        
         process.load("TopAnalysis/Configuration/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff.py"
@@ -237,7 +243,7 @@ if(not options.sample=="none"):
     if(options.sample=="ttbarMassUp"):        
         process.load("TopAnalysis/Configuration/ttjets_mass175_5_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_mass175_5__MadgraphZ2_Summer11_AOD_cff.py"
-	additionalEventWeights=False      
+	additionalEventWeights=False
     if(options.sample=="wjets"):        
         process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
@@ -353,34 +359,44 @@ if(not options.sample=="none"):
         if(options.sample=="qcd"):
             process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdmu15enriched_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
     if(decayChannel=='electron'):
         if(options.sample=="qcdEM1"):
             process.load("TopAnalysis/Configuration/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
         if(options.sample=="qcdEM2"):
             process.load("TopAnalysis/Configuration/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
         if(options.sample=="qcdEM3"):
             process.load("TopAnalysis/Configuration/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
         if(options.sample=="qcdBCE1"):
             process.load("TopAnalysis/Configuration/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
         if(options.sample=="qcdBCE2"):
             process.load("TopAnalysis/Configuration/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
         if(options.sample=="qcdBCE3"):
             process.load("TopAnalysis/Configuration/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff")
             print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff.py"
+            PythiaSample="True"
     if(options.sample=="WW"):        
         process.load("TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff.py"
+        PythiaSample="True"
     if(options.sample=="WZ"):        
         process.load("TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff.py"
+        PythiaSample="True"
     if(options.sample=="ZZ"):        
         process.load("TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff")
         print "analyzed sample: TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff.py"
+        PythiaSample="True"
         
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
@@ -864,6 +880,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+#process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
 #process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
@@ -1661,9 +1679,7 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
 ## no phase space cuts
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
-    process.p3 = cms.Path(## generator kinematics (check E-p conservation on gen level)
-                          process.totalKinematicsFilterDefault          *
-                          ## gen event selection: semileptonic (muon & tau->lepton)
+    process.p3 = cms.Path(## gen event selection: semileptonic (muon & tau->lepton)
                           ## tau->Mu if eventFilter=='background only' and
                           ## process.ttSemiLeptonicFilter.invert = True
                           process.genFilterSequence                     *
@@ -1711,9 +1727,7 @@ if(runningOnData=="MC"):
                               ## investigate top reconstruction
                               process.kinFitGenPhaseSpace
                               )
-    process.p4 = cms.Path(## generator kinematics (check E-p conservation on gen level)
-                          process.totalKinematicsFilterDefault           *
-                          ## gen event selection: semileptonic (muon & tau->lepton)
+    process.p4 = cms.Path(## gen event selection: semileptonic (muon & tau->lepton)
                           ## tau->Mu if eventFilter=='background only' and
                           ## process.ttSemiLeptonicFilter.invert = True
                           process.genFilterSequence                      *
@@ -1828,10 +1842,12 @@ if(decayChannel=="electron"):
         # replace muon by electron in (remaining) kinfit analyzers
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
 
+
+allpaths  = process.paths_().keys()
+
 # switch to PF2PAT
 if(pfToPAT):
     from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
-    allpaths  = process.paths_().keys()
     recoPaths=['p1','p2']
     # define general options
     PFoptions = {
@@ -1893,12 +1909,16 @@ if(pfToPAT):
         #massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
         # run trigger at the beginning to save a lot of time
         getattr(process,path).insert(0,process.hltFilter)
-        ## generator kinematics (check E-p conservation on gen level)
-        if(runningOnData=="MC"):
-            getattr(process,path).insert(0,process.totalKinematicsFilterDefault)
- 
+  
 ## change decay subset to parton level (ME)
 #process.decaySubset.fillMode = cms.string("kME")
+
+## generator kinematics (check E-p conservation on gen level)
+if (PythiaSample=="False" and runningOnData=="MC"):
+    print
+    print "Applying MC Kinematics Filter"
+    for path in allpaths:
+        getattr(process,path).insert(0,process.totalKinematicsFilterDefault)
 
 ## Output Module Configuration
 if(writeOutput):
@@ -1917,17 +1937,11 @@ if(writeOutput):
 ## possibly remove event reweighting
 # Pile up
 if(not PUreweigthing or runningOnData=="data"):
-    # define allpaths if not done yet
-    if(not pfToPAT):
-      allpaths  = process.paths_().keys()
     for path in allpaths:
         getattr(process,path).remove( process.eventWeightPU )
 
 # Eff SF
 if(not effSFReweigthing or runningOnData=="data"):
-    # define allpaths if not done yet
-    if(not pfToPAT):
-      allpaths  = process.paths_().keys()
     for path in allpaths:
         if(decayChannel=="muon"):
             getattr(process,path).remove( process.effSFMuonEventWeight )
