@@ -76,5 +76,5 @@ if(writeOutput):
     process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag2_Run2011A.root')
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXData2011APromptRecoV6_172620_175770_cfg.root'
+process.TFileService.fileName = 'analyzeDiffXDataElectron2011APromptRecoV6_172620_175770_cfg.root'
 #process.TFileService.fileName = 'analyzeDiffXData2011ACombinedElectron_165970_167913_Trig2.root'
