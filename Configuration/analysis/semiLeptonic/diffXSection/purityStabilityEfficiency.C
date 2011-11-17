@@ -16,11 +16,15 @@
 #include <TStyle.h>
 #include <TROOT.h>
 #include <TLegend.h>
+#include "TTree.h"
+#include "algorithm"
+#include <TMath.h>
+#include "HHStyle.h"
 #include "basicFunctions.h"
 
-int purityStabilityEfficiency(TString variable = "topY", bool save=false, TString lepton="muon", 
-                              TString inputFolderName="TOP2011/110819_AnalysisRun", bool plotEfficiency = true, 
-			      bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false)
+int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TString lepton="muon", 
+			       TString inputFolderName="TOP2011/110819_AnalysisRun", bool plotEfficiency = true, 
+			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999)
 {
   // ARGUMENTS of function:
   // variable:       choose variable to plot, e.g.:
@@ -30,12 +34,18 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   // plotEfficiency: in addition to purity and stability also efficiency*acceptance is plotted (if true)
   // plotEfficiencyPhaseSpace: in addition to purity, stability, efficiency*acceptance also 
   //                           efficiency in restricted phase space (i.e. Acceptance=1) is plotted (if true)
-  
+  bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
+  if(!useTree) chi2Max=99999; // can be done only with tree
   // output folder in case of saving the canvases:
   //TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff/"+lepton;
   //TString outputFolder = "/afs/naf.desy.de/user/j/jlange/public/analysis/purStabEff/compSpringSummer11";
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2011/binning";
-  
+  if(useTree&&chi2Max<100){ 
+    plotEfficiencyPhaseSpace = false;
+    plotEfficiency = false;
+    plotEfficiency2= false;
+  }
+
   if(lepton=="electron") lepton="elec";
   
   // input file
@@ -93,20 +103,99 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   
   
   // make a nice style
-  gROOT->SetStyle("Plain");
-  gStyle->SetOptStat(0);
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  myStyle.cd();
+  TGaxis::SetMaxDigits(2);
+  gROOT->SetStyle("HHStyle");
+  gROOT->ForceStyle();	
 
-  // get the 2D histogram
+  // ---
+  //    get the 2D histogram
+  // ---
   // x-Axis should be generated value, y-Axis should be reconstructed value
-  TH2F* myHist2d = (TH2F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable+"_");
+  TH2F* myHist2d = (TH2F*)(((TH2F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable+"_"))->Clone());
+  // empty histogram
+  if(useTree) myHist2d->Scale(0);
+  // loading tree
+  TTree *tree=(TTree*)(myFile1->Get("analyzeTopRecoKinematicsKinFit/tree"));
+  if(!tree||tree->IsZombie()){
+     std::cout << "there seems to be a problem with the chosen tree " << "analyzeTopRecoKinematicsKinFit/tree" << std::endl;
+     exit(0);  
+  }
+  // list relevant tree entries
+  std::vector<TString> variable_;
+  if(variable.Contains("top")){
+    variable_.push_back(variable+"Lep");
+    variable_.push_back(variable+"Had");
+  }
+  else variable_.push_back(variable);
+  // container for values read from tree
+  std::map< TString, float > value_;
+  // container for chi2 cut efficiency
+  TH1F* chi2eff = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable))->Clone());
+  chi2eff->Scale(0);
+  TH1F* all=(TH1F*)chi2eff->Clone();
+  
+  // initialize map entries with 0 
+  // to avoid problems with the map re-ordering
+  // when new entries are added
+  value_["weight"]=0;
+  for(unsigned int i=0; i<variable_.size(); ++i){
+    value_[variable_[i]]=0;
+    value_[variable_[i]+"PartonTruth"]=0;
+  }
+  // initialize branches
+  tree->SetBranchStatus("*",0);
+  tree->SetBranchStatus("weight",1);
+  tree->SetBranchAddress("weight",(&value_["weight"]));
+  tree->SetBranchStatus("chi2",1);
+  tree->SetBranchAddress("chi2",(&value_["chi2"]));
+  for(unsigned int i=0; i<variable_.size(); ++i){
+    // activate branches
+    tree->SetBranchStatus(variable_[i],1);
+    tree->SetBranchStatus(variable_[i]+"PartonTruth",1);
+    // save branch values in map
+    tree->SetBranchAddress(variable_[i],(&value_[variable_[i]]));
+    tree->SetBranchAddress(variable_[i]+"PartonTruth",(&value_[variable_[i]+"PartonTruth"]));
+  }
+  // loop all events to fill plots
+  for(unsigned int event=0; event<tree->GetEntries(); ++event){
+    tree->GetEntry(event);
+    double weight=value_["weight"];
+    double chi2=value_["chi2"];
+    for(unsigned int i=0; i<variable_.size(); ++i){
+      double rec =value_[variable_[i]];
+      double gen =value_[variable_[i]+"PartonTruth"];
+      if(rec==-9999||gen==-9999){ 
+	std::cout << "variable " << variable << " is not filled properly:" << std::endl;
+	std::cout << "rec " <<  variable_[i] << ": " << rec << std::endl;
+	std::cout << "gen " <<  variable_[i]+"PartonTruth" << ": " << gen << std::endl;
+	exit(0);
+      }
+      // apply chi2 cut
+      if(chi2<chi2Max){
+	if(useTree) myHist2d->Fill(gen, rec, weight);
+	// fill events passing chi2
+	chi2eff->Fill(rec, weight);
+      }
+      // fill all events
+      all->Fill(rec, weight);
+    }
+  }
+  
   int xbins = myHist2d->GetNbinsX();
   double xmax = myHist2d->GetXaxis()->GetXmax();
   //double xmin = myHist2d->GetXaxis()->GetXmin();
   
   // draw the obtained histo
-  TCanvas* Canv1 = new TCanvas("analyzeTopRecoKinematicsKinFit","analyzeTopRecoKinematicsKinFit",600,600);
+  TCanvas* Canv1 = new TCanvas("analyzeTopRecoKinematicsKinFitCorr","analyzeTopRecoKinematicsKinFitCorr",600,600);
   Canv1->cd();
-  myHist2d->Draw();
+  Canv1->SetRightMargin(0.1);
+  myHist2d->SetStats(kFALSE);
+  myHist2d->GetXaxis()->SetTitle("gen");
+  myHist2d->GetYaxis()->SetTitle("rec");
+  myHist2d->Draw("colz");
   
   // initialize variables
   int numberOfBins=0;
@@ -187,36 +276,36 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   // ----------- Efficiency calculation--------------------------------
 
   // get histogram of generated quantity
-  TH1F* genHist = (TH1F*)myFile1->Get("analyzeTopPartonLevelKinematics/"+variable);
+  TH1F* genHist = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematics/"+variable))->Clone());
+  //genHist->SetStats(kFALSE);
   TCanvas* Canv2 = new TCanvas("analyzeTopPartonLevelKinematics","analyzeTopPartonLevelKinematics",600,600);
   Canv2->cd();
   genHist->Draw();
   // rebin histogram of generated quantity
   genHist = (TH1F*)genHist->Rebin(binvec.size()-1, genHist->GetName(), &(binvec.front()));
   // get histogram of reconstructed quantity
-  TH1F* effHist = (TH1F*)((TH1F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable))->Clone();
+  TH1F* effHist = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable))->Clone());
+  //effHist->SetStats(kFALSE);
   TCanvas* Canv3 = new TCanvas("analyzeTopRecoKinematicsKinFit","analyzeTopRecoKinematicsKinFit",600,600);
   Canv3->cd();
   effHist->Draw();
   // rebin histogram of reconstructed quantity
   effHist = (TH1F*)effHist->Rebin(binvec.size()-1, effHist->GetName(), &(binvec.front()));
+  TH1F* effHistPS=(TH1F*)(effHist->Clone());
   // calculate efficiency histogram
   effHist->Divide(genHist);
   
   // if als effiency in limited phase space interesting:
-  TH1F* effHistPS = 0;
   if(plotEfficiencyPhaseSpace){
     // get histogram of generated quantity
-    TH1F* genHistPS = (TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable);
+    TH1F* genHistPS = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable))->Clone());
     TCanvas* Canv4 = new TCanvas("analyzeTopPartonLevelKinematicsPhaseSpace","analyzeTopPartonLevelKinematicsPhaseSpace",600,600);
     Canv4->cd();
+    //genHistPS->SetStats(kFALSE);
     genHistPS->Draw();
     // rebin histogram of generated quantity
     genHistPS = (TH1F*)genHistPS->Rebin(binvec.size()-1, genHistPS->GetName(), &(binvec.front()));
-    effHistPS = (TH1F*)((TH1F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable))->Clone();
-  // rebin histogram of reconstructed quantity
-    effHistPS = (TH1F*)effHistPS->Rebin(binvec.size()-1, effHistPS->GetName(), &(binvec.front()));
-  // calculate efficiency histogram
+    // calculate efficiency histogram
     effHistPS->Divide(genHistPS);
   }
   
@@ -224,19 +313,18 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   TH1F* effHist2 = 0;
   if(plotEfficiency2){
     // get histogram of generated quantity
-    TH1F* genHist2 = (TH1F*)myFile2->Get("analyzeTopPartonLevelKinematics/"+variable);
+    TH1F* genHist2 = (TH1F*)(((TH1F*)myFile2->Get("analyzeTopPartonLevelKinematics/"+variable))->Clone());
     TCanvas* Canv4 = new TCanvas("analyzeTopPartonLevelKinematics2","analyzeTopPartonLevelKinematics2",600,600);
     Canv4->cd();
     genHist2->Draw();
     // rebin histogram of generated quantity
     genHist2 = (TH1F*)genHist2->Rebin(binvec.size()-1, genHist2->GetName(), &(binvec.front()));
-    effHist2 = (TH1F*)((TH1F*)myFile2->Get("analyzeTopRecoKinematicsKinFit/"+variable))->Clone();
-  // rebin histogram of reconstructed quantity
+    effHist2 = (TH1F*)(((TH1F*)myFile2->Get("analyzeTopRecoKinematicsKinFit/"+variable))->Clone());
+    // rebin histogram of reconstructed quantity
     effHist2 = (TH1F*)effHist2->Rebin(binvec.size()-1, effHist2->GetName(), &(binvec.front()));
-  // calculate efficiency histogram
+    // calculate efficiency histogram
     effHist2->Divide(genHist2);
   }
-    
 
   for(int i=0; i<numberOfBins; i++)
     {
@@ -245,39 +333,43 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
     }
   purityhist->SetTitle("");
   TString xtitle = "";
-  if(variable.Contains("Pt"))xtitle+="p_{t}";
+  if(variable.Contains("Pt"))xtitle+="p_{T}";
   else if(variable.Contains("Y"))xtitle+="y";
   else if(variable.Contains("Eta"))xtitle+="#eta";
   else if(variable.Contains("Mass"))xtitle+="m";
-  if(variable.Contains("top"))xtitle+="(top)";
-  else if(variable.Contains("ttbar"))xtitle+="(ttbar)";
-  else if(variable.Contains("lep"))xtitle+="(lep)";
-  if(variable.Contains("Pt") || variable.Contains("Mass"))xtitle+=" [GeV]";
+  if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
+  else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
+  else if(variable.Contains("lep"))xtitle+="^{l}";
+  if(variable.Contains("Pt"))xtitle+=" #left[#frac{GeV}{c}#right]";
+  else if(variable.Contains("Mass"))xtitle+=" #left[#frac{GeV}{c^{2}}#right]";
   if(variable=="topWAngle")xtitle="Angle(top,W)";
   purityhist->GetXaxis()->SetTitle(xtitle);
+  purityhist->GetXaxis()->SetNoExponent(true);
+  purityhist->GetYaxis()->SetNoExponent(true);
 
-  purityhist->GetXaxis()->SetTitleSize  ( 0.07);
-  purityhist->GetXaxis()->SetTitleColor (    1);
-  purityhist->GetXaxis()->SetTitleOffset(  0.95);
-  purityhist->GetXaxis()->SetTitleFont  (   62);
-  purityhist->GetXaxis()->SetLabelSize  ( 0.07);
-  purityhist->GetXaxis()->SetLabelFont  (   62);
-  purityhist->GetXaxis()->SetNdivisions (  505);
+  //purityhist->GetXaxis()->SetTitleSize  ( 0.07);
+  //purityhist->GetXaxis()->SetTitleColor (    1);
+  //purityhist->GetXaxis()->SetTitleOffset(  0.95);
+  //purityhist->GetXaxis()->SetTitleFont  (   62);
+  //purityhist->GetXaxis()->SetLabelSize  ( 0.07);
+  //purityhist->GetXaxis()->SetLabelFont  (   62);
+  //purityhist->GetXaxis()->SetNdivisions (  505);
   purityhist->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
   
-  purityhist->GetYaxis()->SetTitleSize  ( 0.07);
-  purityhist->GetYaxis()->SetTitleColor (    1);
-  purityhist->GetYaxis()->SetTitleOffset(  1.0);
-  purityhist->GetYaxis()->SetTitleFont  (   62);
-  purityhist->GetYaxis()->SetLabelSize  ( 0.07);
-  purityhist->GetYaxis()->SetLabelFont  (   62);
-  purityhist->GetYaxis()->SetNdivisions (  505);
+  //purityhist->GetYaxis()->SetTitleSize  ( 0.07);
+  //purityhist->GetYaxis()->SetTitleColor (    1);
+  //purityhist->GetYaxis()->SetTitleOffset(  1.0);
+  //purityhist->GetYaxis()->SetTitleFont  (   62);
+  //purityhist->GetYaxis()->SetLabelSize  ( 0.07);
+  //purityhist->GetYaxis()->SetLabelFont  (   62);
+  //purityhist->GetYaxis()->SetNdivisions (  505);
   purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
 
   purityhist->SetMinimum(0.);
-  double max=purityhist->GetMaximum();
-  if(stabilityhist->GetMaximum()>max)max=stabilityhist->GetMaximum();
-  purityhist->SetMaximum(1.1*max);
+  //double max=purityhist->GetMaximum();
+  //if(stabilityhist->GetMaximum()>max)max=stabilityhist->GetMaximum();
+  //purityhist->SetMaximum(1.1*max);
+  purityhist->SetMaximum(1.0);
   purityhist->SetLineColor(2);
   purityhist->SetLineWidth(4);
   stabilityhist->SetLineColor(4);
@@ -286,15 +378,17 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
   effHist->SetLineColor(1);
   effHist->SetLineStyle(1);
   effHist->SetLineWidth(4);
-  
-  TCanvas* purstab = new TCanvas("purstab","purstab",600,600);
-  gPad->SetBottomMargin(0.19);
-  purstab->cd();
+  effHist->GetXaxis()->SetNoExponent(true);
+  effHist->GetYaxis()->SetNoExponent(true);
+  purityhist->SetStats(kFALSE);
 
+  TCanvas* purstab = new TCanvas("purstab","purstab",600,600);
+  //gPad->SetBottomMargin(0.19);
+  purstab->cd();
+  purstab->SetGrid(1,1);
   purityhist->Draw();
   stabilityhist->Draw("same");
   if(plotEfficiency)effHist->Draw("same");
-  //if(plotEfficiency)effHist->Draw();
   if(plotEfficiencyPhaseSpace){
     effHistPS->SetLineColor(1);
     effHistPS->SetLineStyle(2);
@@ -307,37 +401,54 @@ int purityStabilityEfficiency(TString variable = "topY", bool save=false, TStrin
     effHist2->SetLineWidth(4);
     effHist2->Draw("same");
   }
-
-
+  // chi2 cut efficiency
+  if(chi2Max<100){    
+    chi2eff = (TH1F*)chi2eff->Rebin(binvec.size()-1, chi2eff->GetName(), &(binvec.front()));
+    all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));
+    chi2eff->Divide(all);
+    chi2eff->SetLineColor(1);
+    //chi2eff->SetLineStyle(2);
+    chi2eff->SetLineWidth(4);
+    chi2eff->Draw("same");
+  }
+  if (lepton=="muon") DrawDecayChLabel("#mu + Jets");
+  else if(lepton=="electron") DrawDecayChLabel("e + Jets");
   double legEdge = 0.4;
   if(plotEfficiency)legEdge = effHist->GetMinimum();
-  TLegend* leg=new TLegend(0.4,0.48,0.6,0.68);
-  //TLegend* leg=new TLegend(0.15,0.65,0.55,0.85);
-  
-  //TLegend* leg=new TLegend(0.4,legEdge,0.6,legEdge+0.2);
-  //TLegend* leg=new TLegend(0,0,1,1);
-  leg->SetTextSize(0.07);
+  TLegend* leg=new TLegend(0.47,0.68,0.67,0.87);
+  leg->SetTextSize(0.05);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
   leg->AddEntry(purityhist,   "Purity"    ,"l");
   leg->AddEntry(stabilityhist,"Stability" ,"l");
   //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
-  if(plotEfficiency)leg->AddEntry(effHist,"Eff. * A","l");
+  if(plotEfficiency)leg->AddEntry(effHist,"eff'*A","l");
   //if(plotEfficiency)leg->AddEntry(effHist,"Eff*A full PS Spring11","l");
-  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"Eff. in restr. PS","l");
-  if(plotEfficiency2)leg->AddEntry(effHist2,"Eff*A full PS Summer11","l");
+  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"eff' in restr. PS","l");
+  if(plotEfficiency2)leg->AddEntry(effHist2,"eff'*A full PS Summer11","l");
+  if(chi2Max<100){
+    TString entry="#chi^{2} < ";
+    entry+=chi2Max;
+    entry+=" cut eff.";
+    leg->AddEntry(chi2eff,entry,"l");
+  }
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
-  if(variable == "topPt") leg->Draw("same");
+  if(variable == "topPt"||chi2Max<100) leg->Draw("same");
   
   // canvas for legend
   //TCanvas* purstabLeg = new TCanvas("purstabLeg","purstabLeg",600,300);
   //leg->Draw("same");
   
   if(save){
-    purstab->Print(outputFolder+"/purStabEff_"+lepton+"_"+variable+".png");
+    TString chi="";
+    if(chi2Max<100){ 
+      chi+="chi";
+      chi+=chi2Max;
+    }
+    purstab->Print(outputFolder+"/purStabEff_"+lepton+"_"+variable+chi+".png");
     std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
   }
-  
-  
-  
+    
   return 0;
 }
