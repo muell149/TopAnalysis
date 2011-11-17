@@ -106,16 +106,16 @@ HypothesisKinFitMET::fill(const TtSemiLeptonicEvent& tops, const edm::View<pat::
 	// b) fill plots
 	// (i) reconstructed vs kin.fitted
 	hists_.find("neutrinoPullPtKinFitRec"   )->second->Fill( (neutrinoPtKinFit- neutrinoPtRec )/neutrinoPtRec, weight);
-	hists_.find("neutrinoPullEtaKinFitRec"  )->second->Fill( (neutrinoEtaKinFit-neutrinoEtaRec)/neutrinoPtRec, weight);
-	hists_.find("neutrinoPullPhiKinFitRec"  )->second->Fill( (neutrinoPhiKinFit-neutrinoEtaRec)/neutrinoPtRec, weight);
+	hists_.find("neutrinoPullEtaKinFitRec"  )->second->Fill( (neutrinoEtaKinFit-neutrinoEtaRec), weight);
+	hists_.find("neutrinoPullPhiKinFitRec"  )->second->Fill( (neutrinoPhiKinFit-neutrinoPhiRec), weight);
 	// (ii) reconstructed vs parton truth
 	hists_.find("neutrinoPullPtRecPartonTruth" )->second->Fill( (neutrinoPtRec -neutrinoPtPartonTruth )/neutrinoPtPartonTruth , weight);
-	hists_.find("neutrinoPullEtaRecPartonTruth")->second->Fill( (neutrinoEtaRec-neutrinoEtaPartonTruth)/neutrinoEtaPartonTruth, weight);
-	hists_.find("neutrinoPullPhiRecPartonTruth")->second->Fill( (neutrinoPhiRec-neutrinoPhiPartonTruth)/neutrinoPhiPartonTruth, weight);
+	hists_.find("neutrinoPullEtaRecPartonTruth")->second->Fill( (neutrinoEtaRec-neutrinoEtaPartonTruth), weight);
+	hists_.find("neutrinoPullPhiRecPartonTruth")->second->Fill( (neutrinoPhiRec-neutrinoPhiPartonTruth), weight);
 	// (iii) kin.fitted vs parton truth
 	hists_.find("neutrinoPullPtKinFitPartonTruth" )->second->Fill( (neutrinoPtKinFit- neutrinoPtPartonTruth )/neutrinoPtPartonTruth , weight);
-	hists_.find("neutrinoPullEtaKinFitPartonTruth")->second->Fill( (neutrinoEtaKinFit-neutrinoEtaPartonTruth)/neutrinoEtaPartonTruth, weight);
-	hists_.find("neutrinoPullPhiKinFitPartonTruth")->second->Fill( (neutrinoPhiKinFit-neutrinoPhiPartonTruth)/neutrinoPhiPartonTruth, weight);
+	hists_.find("neutrinoPullEtaKinFitPartonTruth")->second->Fill( (neutrinoEtaKinFit-neutrinoEtaPartonTruth), weight);
+	hists_.find("neutrinoPullPhiKinFitPartonTruth")->second->Fill( (neutrinoPhiKinFit-neutrinoPhiPartonTruth), weight);
       }
     }
   }

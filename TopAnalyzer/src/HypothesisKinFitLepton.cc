@@ -110,16 +110,16 @@ HypothesisKinFitLepton::fill(const TtSemiLeptonicEvent& tops, const edm::View<re
 	// d) fill plots
 	// (i) reconstructed vs kin.fitted
 	hists_.find("leptonPullPtKinFitRec"   )->second->Fill( (lepPtKinFit- lepPtRec )/lepPtRec, weight);
-	hists_.find("leptonPullEtaKinFitRec"  )->second->Fill( (lepEtaKinFit-lepEtaRec)/lepPtRec, weight);
-	hists_.find("leptonPullPhiKinFitRec"  )->second->Fill( (lepPhiKinFit-lepEtaRec)/lepPtRec, weight);
+	hists_.find("leptonPullEtaKinFitRec"  )->second->Fill( (lepEtaKinFit-lepEtaRec), weight);
+	hists_.find("leptonPullPhiKinFitRec"  )->second->Fill( (lepPhiKinFit-lepPhiRec), weight);
 	// (ii) reconstructed vs parton truth
 	hists_.find("leptonPullPtRecPartonTruth" )->second->Fill( (lepPtRec -lepPtPartonTruth )/lepPtPartonTruth , weight);
-	hists_.find("leptonPullEtaRecPartonTruth")->second->Fill( (lepEtaRec-lepEtaPartonTruth)/lepEtaPartonTruth, weight);
-	hists_.find("leptonPullPhiRecPartonTruth")->second->Fill( (lepPhiRec-lepPhiPartonTruth)/lepPhiPartonTruth, weight);
+	hists_.find("leptonPullEtaRecPartonTruth")->second->Fill( (lepEtaRec-lepEtaPartonTruth), weight);
+	hists_.find("leptonPullPhiRecPartonTruth")->second->Fill( (lepPhiRec-lepPhiPartonTruth), weight);
 	// (iii) kin.fitted vs parton truth
 	hists_.find("leptonPullPtKinFitPartonTruth" )->second->Fill( (lepPtKinFit- lepPtPartonTruth )/lepPtPartonTruth , weight);
-	hists_.find("leptonPullEtaKinFitPartonTruth")->second->Fill( (lepEtaKinFit-lepEtaPartonTruth)/lepEtaPartonTruth, weight);
-	hists_.find("leptonPullPhiKinFitPartonTruth")->second->Fill( (lepPhiKinFit-lepPhiPartonTruth)/lepPhiPartonTruth, weight);
+	hists_.find("leptonPullEtaKinFitPartonTruth")->second->Fill( (lepEtaKinFit-lepEtaPartonTruth), weight);
+	hists_.find("leptonPullPhiKinFitPartonTruth")->second->Fill( (lepPhiKinFit-lepPhiPartonTruth), weight);
       }
     }
   }
