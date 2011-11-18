@@ -529,7 +529,7 @@ namespace semileptonic {
       }
     else
       {
-	label -> AddText(Form("%3.2f fb^{-1} at #sqrt{s}=7 TeV",luminosity));
+	label -> AddText(Form("CMS Work in progress, %3.2f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
       }
 
     label->SetFillStyle(0);
