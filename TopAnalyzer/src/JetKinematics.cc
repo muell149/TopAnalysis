@@ -34,6 +34,8 @@ JetKinematics::book()
   hists_["phi"] = new TH1F( "phi" , "phi" ,   70 ,  -3.14 ,   3.14 );
   // scalar sum	of jet et			    
   hists_["ht" ] = new TH1F( "ht"  , "ht"  , 2000 ,     0. ,  2000. );
+  // 2D histogram of eta and phi
+  hists2D_["etaPt"] = new TH2F ("etaPt","etaPt", 70 , -3.5 , 3.5, 120 , 0. , 600.);
 }
 
 /// histogramm booking for full fw
@@ -43,24 +45,42 @@ JetKinematics::book(edm::Service<TFileService>& fs)
   /** 
       Kinematic Variables
   **/
+  
+  /// histos in any case (also if tree is produced)
   // jet multiplicty
-  bookVariable( fs, "n"      ,  20,  0. , 20. , useTree_ );
+  bookVariable( fs, "n"      ,  20,  0. , 20.);
+ // energy of the jet
+  bookVariable( fs, "en"  ,  180 ,  0.   , 900.);
+  // transverse momentum of the jet
+  bookVariable( fs, "pt"  ,  120 ,  0.   , 600.);
+  // pseudorapidity eta of the jet
+  bookVariable( fs, "eta" ,   70 , -3.5  ,  3.5);
+  // azimuthal angle phi of the jet
+  bookVariable( fs, "phi" ,   70 , -M_PI , M_PI);
+  // scalar sum	of jet et
+  bookVariable( fs, "ht"  , 2000 ,  0.   , 2000.);
+  // 2D histogram of eta and phi
+  hists2D_["etaPt"] = fs->make<TH2F>( "etaPt", "etaPt", 70 , -3.5 , 3.5, 120 , 0. , 600. );
 
+  /// tree
   // only produce a tree for the following collctions if they are only
   // for one object and a tree should be written
-  bool singleObjectInTree = false;
-  if(index_ > -1 && useTree_) singleObjectInTree = true;
-
+  if(index_ > -1 && useTree_){
+  // jet multiplicty
+  bookVariable( fs, "n");
   // energy of the jet
-  bookVariable( fs, "en"  ,  180 ,  0.   , 900. , singleObjectInTree );
+  bookVariable( fs, "en");
   // transverse momentum of the jet
-  bookVariable( fs, "pt"  ,  120 ,  0.   , 600. , singleObjectInTree );
+  bookVariable( fs, "pt");
   // pseudorapidity eta of the jet
-  bookVariable( fs, "eta" ,   70 , -3.5  ,  3.5 , singleObjectInTree );
+  bookVariable( fs, "eta");
   // azimuthal angle phi of the jet
-  bookVariable( fs, "phi" ,   70 , -M_PI , M_PI , singleObjectInTree );
+  bookVariable( fs, "phi");
   // scalar sum	of jet et
-  bookVariable( fs, "ht"  , 2000 ,  0.   , 2000., singleObjectInTree );
+  bookVariable( fs, "ht");
+  }
+
+  
 }
 
 /// histogram filling for fwlite and for full fw
@@ -89,6 +109,8 @@ JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
       fillValue( "eta" , jet->eta() , weight );
       // azimuthal angle phi of the jet
       fillValue( "phi" , jet->phi() , weight );
+      // eta, phi for 2D histo
+      hists2D_.find("etaPt")->second->Fill(jet->eta() , jet->pt() , weight);
     }
   }
   // scalar sum of jet et filled at least
@@ -128,6 +150,10 @@ const std::string JetKinematics::correctionFlavor() const
 void
 JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
 {
+  
+  // initialize tree
+  if(index_ > -1 && useTree_) initializeTrees(-9999, weight);
+  
   /** 
       Fill Kinematic Variables
   **/
@@ -149,6 +175,8 @@ JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
       fillValue( "eta" , jet->eta() , weight );
       // azimuthal angle phi of the jet
       fillValue( "phi" , jet->phi() , weight );
+      // eta, pt for 2D histo
+      hists2D_.find("etaPt")->second->Fill(jet->eta() , jet->pt() , weight);
     }
   }
   // scalar sum of jet et filled at least
