@@ -78,14 +78,14 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kFALSE;
+const bool doPrintControlPlots = kTRUE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
 const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
 const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
-const bool PAS = kTRUE;
+const bool PAS = kFALSE;
 // do you want a legend in the plots?
 const bool drawLegend = kTRUE;
 // should there be ratio Ndata/Nmc plots below the actual distributions?
@@ -93,14 +93,19 @@ bool drawRatioPlot = kTRUE && !PAS;
 // hide integrated value
 const bool normaliseToUnitArea = kTRUE;
 // preliminary?
-const bool isPreliminary = kTRUE;
+const bool isPreliminary = kFALSE;
 
 const double topxsec = 169.9; //157.5
 // const double topxsec = 157.5;
 const double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
 
 // luminosity used to normalise MC in plots and to calcutate cross sections
-const Double_t lumi = 1143.221;
+//const Double_t lumi = 1143.221; const char* dataFilename = "1fb";
+//const Double_t lumi = 4683.8; const char* dataFilename = "5fb";
+//const Double_t lumi = 2170.1; const char* dataFilename = "2fb";
+const Double_t lumi = 2511.0; const char* dataFilename = "run2011b_v1";
+//const Double_t lumi = 1026.9; const char* dataFilename = "2011av5v6";
+
 //const Double_t lumi = 22743;
 // relative uncertainty on the luminosity
 const Double_t lumierr = 0.045;
@@ -1380,7 +1385,7 @@ void SetupInputFiles() {
     sampleCrossSection[26] = 0; //z'
     
     // mumu files
-    files[kMM][0]= new TFile(inpath.Copy().Append("mumu_1fb.root"));
+    files[kMM][0]= new TFile(inpath.Copy().Append("mumu_").Append(dataFilename).Append(".root"));
     files[kMM][1]= new TFile(inpath.Copy().Append("mumu_ttbarsignal.root"));
     files[kMM][2]= new TFile(inpath.Copy().Append("mumu_ttbarviatau.root"));
     files[kMM][3]= new TFile(inpath.Copy().Append("mumu_ttbarbg.root"));
@@ -1408,7 +1413,7 @@ void SetupInputFiles() {
     //files[kMM][25]=new TFile(inpath.Copy().Append("mumu_qcdbcem80170.root"));
     
     // emu files
-    files[kEM][0]= new TFile(inpath.Copy().Append("emu_1fb.root"));
+    files[kEM][0]= new TFile(inpath.Copy().Append("emu_").Append(dataFilename).Append(".root"));
     files[kEM][1]= new TFile(inpath.Copy().Append("emu_ttbarsignal.root"));
     files[kEM][2]= new TFile(inpath.Copy().Append("emu_ttbarviatau.root"));
     files[kEM][3]= new TFile(inpath.Copy().Append("emu_ttbarbg.root"));
@@ -1436,7 +1441,7 @@ void SetupInputFiles() {
     files[kEM][25]=new TFile(inpath.Copy().Append("emu_qcdbcem80170.root"));
     
     // ee files
-    files[kEE][0]= new TFile(inpath.Copy().Append("ee_1fb.root"));
+    files[kEE][0]= new TFile(inpath.Copy().Append("ee_").Append(dataFilename).Append(".root"));
     files[kEE][1]= new TFile(inpath.Copy().Append("ee_ttbarsignal.root"));
     files[kEE][2]= new TFile(inpath.Copy().Append("ee_ttbarviatau.root"));
     files[kEE][3]= new TFile(inpath.Copy().Append("ee_ttbarbg.root"));
