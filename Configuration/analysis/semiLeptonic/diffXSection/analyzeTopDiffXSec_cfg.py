@@ -652,7 +652,15 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   process.leadingGenJetSelectionNjets3 +
                                   process.leadingGenJetSelectionNjets4 
                                   )
-
+process.selectedGenMuonCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
+process.selectedGenElectronCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
+process.genMuonKinematics = process.analyzeMuonKinematics.clone    (src = 'isolatedGenMuons')
+process.genElectronKinematics = process.analyzeMuonKinematics.clone(src = 'isolatedGenElectrons')
+process.genJetKinematics  = process.analyzeJetKinematics.clone(src = 'ak5GenJets', analyze = udsAll)
+process.hadLvObjectMonitoring = cms.Sequence(process.genElectronKinematics *
+                                             process.genMuonKinematics #*                    
+                                             #process.genJetKinematics 
+                                             )
 ## ---
 ##    Set up selection for b-jet multiplicity
 ## ---
@@ -939,13 +947,16 @@ recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), lepton=cms.string(
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
 ## 4) plots built from parton level objects
-## a)  after phase space selection
+## a) after parton level phase space selection
 genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), lepton=cms.string(decayChannel), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
                              maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets)
 process.analyzeTopPartonLevelKinematics = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 ## b) without phase space selection
 process.analyzeTopPartonLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
+## c) after hadron level phase space selection
+process.analyzeTopHadronLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
+
 
 ## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
@@ -1042,7 +1053,7 @@ if(applyKinFit==True):
                                              )
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics          )
             process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace)
-            
+            process.kinFitGenPhaseSpaceHad = cms.Sequence(process.analyzeTopHadronLevelKinematicsPhaseSpace)
         ## case 1b): other MC
         else:
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
@@ -1052,6 +1063,7 @@ if(applyKinFit==True):
                                              )
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
+            process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
     ## case 2: data sample
     elif(runningOnData=="data"):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
@@ -1061,12 +1073,14 @@ if(applyKinFit==True):
                                          )
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
+        process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
     else:
          print "choose runningOnData= data or MC"
 else:
     process.kinFit              = cms.Sequence(process.dummy)
     process.kinFitGen           = cms.Sequence(process.dummy)
     process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
+    process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
 
 ## ---
 ##    MC PU reweighting
@@ -1413,25 +1427,43 @@ if(runningOnData=="MC" and PUreweigthing):
         getattr(process,module1).weight=PUweight
     for module2 in genModules2:
         getattr(process,module2).weight=PUweight
+    genModules3 = process.kinFitGenPhaseSpaceHad.moduleNames()
+    print genModules3
+    for module3 in genModules3:
+        getattr(process,module3).weight=PUweight
+    genModules4 = process.hadLvObjectMonitoring.moduleNames()
+    print genModules3
+    for module4 in genModules4:
+        getattr(process,module4).weight=PUweight
     if(additionalEventWeights and eventFilter=='signal only'):
         print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
         process.analyzeTopPartonLevelKinematicsNoPUWeight           = process.analyzeTopPartonLevelKinematics.clone(weight="")
 	process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight="")
-	process.analyzeTopPartonLevelKinematicsPUup                 = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightUp)
-	process.analyzeTopPartonLevelKinematicsPhaseSpacePUup       = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightUp)
-	process.analyzeTopPartonLevelKinematicsPUdown               = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightDown)
-	process.analyzeTopPartonLevelKinematicsPhaseSpacePUdown     = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightDown)
+        process.analyzeTopHadronLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight="")
+	process.analyzeTopPartonLevelKinematicsPUup = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightUp)
+	process.analyzeTopPartonLevelKinematicsPhaseSpacePUup = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightUp)
+        process.analyzeTopHadronLevelKinematicsPhaseSpacePUup = process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=PUweightUp)
+	process.analyzeTopPartonLevelKinematicsPUdown = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightDown)
+	process.analyzeTopPartonLevelKinematicsPhaseSpacePUdown = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightDown)
+      	process.analyzeTopHadronLevelKinematicsPhaseSpacePUdown = process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=PUweightDown)
         process.kinFitGen           *= (process.analyzeTopPartonLevelKinematicsNoPUWeight *
 					process.analyzeTopPartonLevelKinematicsPUup       *
 					process.analyzeTopPartonLevelKinematicsPUdown)
 	process.kinFitGenPhaseSpace *= (process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight *
 	                                process.analyzeTopPartonLevelKinematicsPhaseSpacePUup       *
 			                process.analyzeTopPartonLevelKinematicsPhaseSpacePUdown)
+        process.kinFitGenPhaseSpaceHad *= (process.analyzeTopHadronLevelKinematicsPhaseSpaceNoPUWeight *
+                                           process.analyzeTopHadronLevelKinematicsPhaseSpacePUup       *
+                                           process.analyzeTopHadronLevelKinematicsPhaseSpacePUdown)
 elif(not PUreweigthing):
     for module1 in genModules1:
         getattr(process,module1).weight=cms.InputTag("")
     for module2 in genModules2:
         getattr(process,module2).weight=cms.InputTag("")
+    for module3 in genModules3:
+        getattr(process,module3).weight=cms.InputTag("")
+    for module4 in genModules4:
+        getattr(process,module4).weight=cms.InputTag("")
 
 # e) PU Modules - special configuration because of different possible PU weights that are handled in the modules themselves
 if(runningOnData=="MC"):
@@ -1446,8 +1478,7 @@ if(runningOnData=="MC"):
         process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("")
     # 'eventWeightNoPUWeight' combines the correct combination of 'effSFReweigthing' and 'BtagReweigthing'
     process.PUControlDistributionsAfterBtagging.DefEventWeight  = cms.InputTag("eventWeightNoPUWeight")    
-            
-## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
+    ## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
 if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     ## no weight at all
     process.analyzeTopRecoKinematicsKinFitNoWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
@@ -1741,7 +1772,7 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       )
 
 ## std analysis with generator objects as input for efficiency determination
-## no phase space cuts
+## no phase space cuts and phase space cuts for hadron level
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
     process.p3 = cms.Path(## gen event selection: semileptonic (muon & tau->lepton)
@@ -1758,8 +1789,18 @@ if(runningOnData=="MC"):
                           process.eventWeightPUDistort                  *
                           process.eventWeightPUupDistort                *
                           process.eventWeightPUdownDistort              *
-                          ## investigate top reconstruction
-                          process.kinFitGen
+                          ## investigate top reconstruction full PS
+                          process.kinFitGen                             *
+                          ## monitoring of hadron level kinematics
+                          process.hadLvObjectMonitoring                 *
+                          ## hadron level muon selection
+                          process.genMuonSelection                      *
+                          ## hadron level gen jet selection
+                          process.genJetCuts                            *
+                          ## investigate top reconstruction parton level PS
+                          process.kinFitGenPhaseSpaceHad                *
+                          ## new phase space cuts on the basis of genTtbarEvent
+                          process.filterGenPhaseSpace   
                           )
     ## delete gen filter
     if(removeGenTtbar==True):    
@@ -1771,7 +1812,7 @@ else:
     process.p3 = cms.Path(process.dummy)
     
 ## std analysis with generator objects as input for efficiency determination
-## phase space cuts for muon and jets
+## phase space cuts for parton level
 if(runningOnData=="MC"):
     process.s4 = cms.Sequence(## introduce some collections
                               process.isolatedGenLeptons                    *
@@ -1783,14 +1824,14 @@ if(runningOnData=="MC"):
                               process.eventWeightPUDistort                  *
                               process.eventWeightPUupDistort                *
                               process.eventWeightPUdownDistort              *
-                              ## muon selection
-                              #process.genMuonSelection                      *
-                              ## jet selection
-                              #process.genJetCuts                            *
 			      ## new phase space cuts on the basis of genTtbarEvent
 			      process.filterGenPhaseSpace                   *
-                              ## investigate top reconstruction
-                              process.kinFitGenPhaseSpace
+                              ## investigate top reconstruction parton level PS
+                              process.kinFitGenPhaseSpace                   *
+                              ## hadron level muon selection
+                              process.genMuonSelection                      *
+                              ## hadron level gen jet selection
+                              process.genJetCuts                            
                               )
     process.p4 = cms.Path(## gen event selection: semileptonic (muon & tau->lepton)
                           ## tau->Mu if eventFilter=='background only' and
@@ -1874,7 +1915,7 @@ if(decayChannel=="electron"):
     process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
     # gen selection
-    #process.p4.replace(process.genMuonSelection, process.genElectronSelection)
+    process.p4.replace(process.genMuonSelection, process.genElectronSelection)
     pathlist = [process.p1, process.p2, process.p3, process.p4]
     for path in pathlist:
         # replace jet lepton veto
@@ -1883,8 +1924,11 @@ if(decayChannel=="electron"):
         path.remove(process.muonCuts)
         path.remove(process.secondMuonVeto)
         path.replace( process.electronVeto, process.electronSelection)
-	## remove effSF for muons
+	## replace effSF
         path.replace(process.effSFMuonEventWeight, process.effSFElectronEventWeight)
+        ## replace gen object kinematics
+        process.genElectronKinematics.weight=""      
+        #path.replace(process.genMuonKinematics, process.genElectronKinematics)
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
