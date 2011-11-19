@@ -589,8 +589,6 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "lightQbarEta");
     bookVariable(fs, "lepBEta"     );
     bookVariable(fs, "hadBEta"     );
-    bookVariable(fs, "leadqPt"     );  
-    bookVariable(fs, "leadqEta"    );
     // parton truth value
     // ttbar quantities
     bookVariable(fs, "ttbarPtPartonTruth"    );
@@ -614,6 +612,18 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     // lepton quantities
     bookVariable(fs, "lepPtPartonTruth"     );
     bookVariable(fs, "lepEtaPartonTruth"    );
+    // neutrino quantities
+    bookVariable(fs, "neutrinoPtPartonTruth"  );
+    bookVariable(fs, "neutrinoEtaPartonTruth" );
+    // quark quantities
+    bookVariable(fs, "lightQPtPartonTruth"    );
+    bookVariable(fs, "lightQbarPtPartonTruth" );
+    bookVariable(fs, "lepBPtPartonTruth"      );
+    bookVariable(fs, "hadBPtPartonTruth"      );  
+    bookVariable(fs, "lightQEtaPartonTruth"   );
+    bookVariable(fs, "lightQbarEtaPartonTruth");
+    bookVariable(fs, "lepBEtaPartonTruth"     );
+    bookVariable(fs, "hadBEtaPartonTruth"     );
   }
 }
 
@@ -687,6 +697,19 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genDeltaRapidity =-9999;
   double genLepPt         =-9999;
   double genLepEta        =-9999;
+  double genNuPt          =-9999;
+  double genNuEta         =-9999;
+  double genQPt           =-9999;
+  double genQEta          =-9999;
+  double genQbarPt        =-9999;
+  double genQbarEta       =-9999;
+  double genLepBPt        =-9999;
+  double genLepBEta       =-9999;
+  double genHadBPt        =-9999;
+  double genHadBEta       =-9999;
+
+
+
   double sumRapidity      =-9999;
   double HTgen            =-9999;
   double hadTopGenPt      =-9999;
@@ -784,6 +807,16 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       lepTopGenMass    = lepTopGen->mass();
       genLepPt         = tops.singleLepton()->pt();
       genLepEta        = tops.singleLepton()->eta();
+      genNuPt          = tops.singleNeutrino()->pt();
+      genNuEta         = tops.singleNeutrino()->eta();
+      genQPt           = tops.hadronicDecayQuark()->pt();
+      genQEta          = tops.hadronicDecayQuark()->eta();
+      genQbarPt        = tops.hadronicDecayQuarkBar()->pt();
+      genQbarEta       = tops.hadronicDecayQuarkBar()->eta();
+      genLepBPt        = tops.leptonicDecayB()->pt();
+      genLepBEta       = tops.leptonicDecayB()->eta();
+      genHadBPt        = tops.hadronicDecayB()->pt();
+      genHadBEta       = tops.hadronicDecayB()->eta();
 
       // fill pt correlation plot for ttbar pair
       corrs_.find("ttbarPt_"  )->second->Fill( genTtbar.pt()      , recTtbar.pt()       , weight );
@@ -1059,8 +1092,17 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "topPhiLepPartonTruth"  , lepTopGenPhi     , weight );
   fillValue( "lepTopMassPartonTruth" , lepTopGenMass    , weight );
   fillValue( "lepPtPartonTruth"      , genLepPt , weight );      
-  fillValue( "lepEtaPartonTruth"     , genLepEta, weight );   
-
+  fillValue( "lepEtaPartonTruth"     , genLepEta, weight );  
+  fillValue( "neutrinoPtPartonTruth"  , genNuPt    , weight );
+  fillValue( "neutrinoEtaPartonTruth" , genNuEta   , weight );
+  fillValue( "lightQPtPartonTruth"    , genQPt     , weight );
+  fillValue( "lightQbarPtPartonTruth" , genQbarPt  , weight );
+  fillValue( "lepBPtPartonTruth"      , genLepBPt  , weight );
+  fillValue( "hadBPtPartonTruth"      , genHadBPt  , weight );  
+  fillValue( "lightQEtaPartonTruth"   , genQEta    , weight );
+  fillValue( "lightQbarEtaPartonTruth", genQbarEta , weight );
+  fillValue( "lepBEtaPartonTruth"     , genLepBEta , weight );
+  fillValue( "hadBEtaPartonTruth"     , genHadBEta , weight );
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
 }
