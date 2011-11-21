@@ -27,7 +27,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Jet>, JetQuality> JetQualityAnalyzer
 DEFINE_FWK_MODULE(JetQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/JetKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<pat::Jet>, JetKinematics> JetKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<reco::Jet>, JetKinematics> JetKinematicsAnalyzer;
 DEFINE_FWK_MODULE(JetKinematicsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/JetResolution.h"

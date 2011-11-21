@@ -36,6 +36,8 @@ JetKinematics::book()
   hists_["ht" ] = new TH1F( "ht"  , "ht"  , 2000 ,     0. ,  2000. );
   // 2D histogram of eta and phi
   hists2D_["etaPt"] = new TH2F ("etaPt","etaPt", 70 , -3.5 , 3.5, 120 , 0. , 600.);
+  // indicator wheter it is gen or rec jet
+  hists_["type"   ] = new TH1F( "type"   , "type"   ,   2 ,     0. ,    2. );
 }
 
 /// histogramm booking for full fw
@@ -61,6 +63,10 @@ JetKinematics::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "ht"  , 2000 ,  0.   , 2000.);
   // 2D histogram of eta and phi
   hists2D_["etaPt"] = fs->make<TH2F>( "etaPt", "etaPt", 70 , -3.5 , 3.5, 120 , 0. , 600. );
+  // indicator wheter it is gen or rec jet
+  bookVariable( fs, "type",   2 ,     0. ,    2.);
+  hists_.find("type")->second->GetXaxis()->SetBinLabel(1, "pat");
+  hists_.find("type")->second->GetXaxis()->SetBinLabel(2, "other");
 
   /// tree
   // only produce a tree for the following collctions if they are only
@@ -78,49 +84,11 @@ JetKinematics::book(edm::Service<TFileService>& fs)
   bookVariable( fs, "phi");
   // scalar sum	of jet et
   bookVariable( fs, "ht");
+  // scalar sum	of jet et
+  bookVariable( fs, "type");
   }
 
   
-}
-
-/// histogram filling for fwlite and for full fw
-void
-JetKinematics::fill(const std::vector<reco::GenJet>& jets, const double& weight)
-{
-  /** 
-      Fill Kinematic Variables
-  **/
-
-  // index for the leading, 2. leading, 3. leading jet
-  // to be compared with index_ from the module config
-  // where index_=-1 means 'fill all jets' and index_=n
-  // n>=-1 means 'fill only n-th leading jet'
-  int index=0;
-  double HT=0.;
-  for(std::vector<reco::GenJet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
-    // calculate scalar sum of jet et
-    HT+=jet->et();
-    if( index_<0 || index_==index ){
-      // energy of the jet
-      fillValue( "en" , jet->energy() , weight );
-      // transverse momentum of the jet
-      fillValue( "pt" , jet->pt() , weight );
-      // pseudorapidity eta of the jet
-      fillValue( "eta" , jet->eta() , weight );
-      // azimuthal angle phi of the jet
-      fillValue( "phi" , jet->phi() , weight );
-      // eta, phi for 2D histo
-      hists2D_.find("etaPt")->second->Fill(jet->eta() , jet->pt() , weight);
-    }
-  }
-  // scalar sum of jet et filled at least
-  fillValue( "ht" , HT , weight );
-  // jet multiplicty is always filled the same way
-  // independent from the choice of index_
-  fillValue( "n" , index , weight );
-
-  // fill the tree, if any variable should be put in
-  if(treeVars_.size()) tree->Fill();
 }
 
 /// return the desired correction step from the configuration string, which is expected to be of type 'step' or 'step:flavor'
@@ -148,7 +116,7 @@ const std::string JetKinematics::correctionFlavor() const
 
 /// histogram filling for fwlite and for full fw
 void
-JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
+JetKinematics::fill(const edm::View<reco::Jet>& jets, const double& weight)
 {
   
   // initialize tree
@@ -161,22 +129,49 @@ JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
   // to be compared with index_ from the module config
   // where index_=-1 means 'fill all jets' and index_=n
   // n>=-1 means 'fill only n-th leading jet'
+
   int index=0;
   double HT=0.;
-  for(edm::View<pat::Jet>::const_iterator jet=jets.begin(); jet!=jets.end(); ++jet, ++index){
-    // calculate scalar sum of jet et
-    HT+=jet->correctedJet(correctionStep(), correctionFlavor()).et();
-    if( index_<0 || index_==index ){
-      // energy of the jet
-      fillValue( "en" , jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
-      // transverse momentum of the jet
-      fillValue( "pt" , jet->correctedJet(correctionStep(), correctionFlavor()).pt() , weight );
-      // pseudorapidity eta of the jet
-      fillValue( "eta" , jet->eta() , weight );
-      // azimuthal angle phi of the jet
-      fillValue( "phi" , jet->phi() , weight );
-      // eta, pt for 2D histo
-      hists2D_.find("etaPt")->second->Fill(jet->eta() , jet->pt() , weight);
+  for(edm::View<reco::Jet>::const_iterator recoJet=jets.begin(); recoJet!=jets.end(); ++recoJet, ++index){
+    // switch to pat::jet to use information of correction level
+    const pat::Jet* jet = dynamic_cast< const pat::Jet* >(&(*recoJet));
+    if(jet){
+      // calculate scalar sum of jet et
+      HT+=jet->correctedJet(correctionStep(), correctionFlavor()).et();
+      if( index_<0 || index_==index ){
+	// fill pat/other jet type
+	fillValue( "type" , 0.5 , weight );
+	// energy of the jet
+	fillValue( "en" , 0.5 , weight );
+	fillValue( "en" , jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
+	// transverse momentum of the jet
+	fillValue( "pt" , jet->correctedJet(correctionStep(), correctionFlavor()).pt() , weight );
+	// pseudorapidity eta of the jet
+	fillValue( "eta" , jet->eta() , weight );
+	// azimuthal angle phi of the jet
+	fillValue( "phi" , jet->phi() , weight );
+	// eta, pt for 2D histo
+	hists2D_.find("etaPt")->second->Fill(jet->eta() , jet->pt() , weight);
+      }
+    }
+    // use uncorrected energy otherwise
+    else{
+      // calculate scalar sum of jet et
+      HT+=recoJet->et();
+      if( index_<0 || index_==index ){
+	// fill pat/other jet type
+	fillValue( "type" , 1.5 , weight );
+	// energy of the recoJet
+	fillValue( "en" , recoJet->energy() , weight );
+	// transverse momentum of the jet
+	fillValue( "pt" , recoJet->pt() , weight );
+	// pseudorapidity eta of the jet
+	fillValue( "eta" , recoJet->eta() , weight );
+	// azimuthal angle phi of the jet
+	fillValue( "phi" , recoJet->phi() , weight );
+	// eta, phi for 2D histo
+	hists2D_.find("etaPt")->second->Fill(recoJet->eta() , recoJet->pt() , weight);
+      }
     }
   }
   // scalar sum of jet et filled at least
@@ -184,7 +179,6 @@ JetKinematics::fill(const edm::View<pat::Jet>& jets, const double& weight)
   // jet multiplicty is always filled the same way
   // independent from the choice of index_
   fillValue( "n" , jets.size() , weight );
-
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
 }
