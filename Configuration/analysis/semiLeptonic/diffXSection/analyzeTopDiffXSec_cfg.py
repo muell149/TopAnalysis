@@ -654,12 +654,14 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   )
 process.selectedGenMuonCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
 process.selectedGenElectronCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
-process.genMuonKinematics = process.analyzeMuonKinematics.clone    (src = 'isolatedGenMuons')
-process.genElectronKinematics = process.analyzeMuonKinematics.clone(src = 'isolatedGenElectrons')
-process.genJetKinematics  = process.analyzeJetKinematics.clone(src = 'ak5GenJets', analyze = udsAll)
-process.hadLvObjectMonitoring = cms.Sequence(process.genElectronKinematics *
-                                             process.genMuonKinematics #*                    
-                                             #process.genJetKinematics 
+process.genAllMuonKinematics = process.analyzeMuonKinematics.clone    (src = 'isolatedGenMuons')
+process.genAllElectronKinematics = process.analyzeMuonKinematics.clone(src = 'isolatedGenElectrons')
+process.genAllJetKinematics  = process.analyzeJetKinematics.clone(src = 'ak5GenJets', analyze = udsAll)
+process.genSelJetKinematics  = process.analyzeJetKinematics.clone(src = 'selectedGenJetCollection', analyze = udsAll)
+process.hadLvObjectMonitoring = cms.Sequence(process.genAllElectronKinematics *
+                                             process.genAllMuonKinematics     *
+                                             process.genAllJetKinematics      *
+                                             process.genSelJetKinematics      
                                              )
 ## ---
 ##    Set up selection for b-jet multiplicity
