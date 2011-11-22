@@ -1457,7 +1457,7 @@ if(runningOnData=="MC" and PUreweigthing):
         process.kinFitGenPhaseSpaceHad *= (process.analyzeTopHadronLevelKinematicsPhaseSpaceNoPUWeight *
                                            process.analyzeTopHadronLevelKinematicsPhaseSpacePUup       *
                                            process.analyzeTopHadronLevelKinematicsPhaseSpacePUdown)
-elif(not PUreweigthing):
+elif(runningOnData=="MC" and not PUreweigthing):
     for module1 in genModules1:
         getattr(process,module1).weight=cms.InputTag("")
     for module2 in genModules2:
@@ -1929,8 +1929,9 @@ if(decayChannel=="electron"):
 	## replace effSF
         path.replace(process.effSFMuonEventWeight, process.effSFElectronEventWeight)
         ## replace gen object kinematics
-        process.genElectronKinematics.weight=""      
-        #path.replace(process.genMuonKinematics, process.genElectronKinematics)
+        if(runningOnData=="MC"):
+            process.genAllElectronKinematics.weight=""  
+            process.selectedGenElectronCollection.weight=""  
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
