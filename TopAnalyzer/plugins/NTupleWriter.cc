@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.1 2011/11/08 13:17:02 tdorland Exp $
+// $Id: NTupleWriter.cc,v 1.3 2011/11/14 17:05:27 wbehrenh Exp $
 //
 //
 
@@ -56,7 +56,6 @@
 #include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 #include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
-#include <TLorentzVector.h>
 
 //
 // class declaration
@@ -82,12 +81,15 @@ private:
     virtual void beginLuminosityBlock ( edm::LuminosityBlock const&, edm::EventSetup const& );
     virtual void endLuminosityBlock ( edm::LuminosityBlock const&, edm::EventSetup const& );
     void clearVariables();
+     int getTriggerBits ( const edm::Event& iEvent, const edm::Handle< edm::TriggerResults >& trigResults );
 
     // ----------member data ---------------------------
 
+    std::map<std::string, int> triggerMap_;
     edm::InputTag weightPU_, weightLepSF_, weightKinFit_;
     edm::InputTag elecs_, muons_, jets_, met_;
     edm::InputTag vertices_, genEvent_ , FullLepEvt_, hypoKey_;
+    edm::InputTag genParticles_;
     
     bool includeTrig_, isTtBarSample_;
     edm::InputTag dType_ , trigResults_, decayMode_;
@@ -95,9 +97,10 @@ private:
 
     TTree* Ntuple;
 
-    int runno;
-    int lumibl;
-    int eventno;
+    unsigned int runno;
+    unsigned int lumibl;
+    unsigned int eventno;
+    unsigned int triggerBits;
 
     std::vector<std::string> datatype;
 
@@ -108,12 +111,17 @@ private:
     std::vector<double> VlepPfIso;
     std::vector<double> VlepCombIso;
     
-
+    //True level info from FullLepGenEvent
     LV GenTop, GenAntiTop;
     LV GenLepton, GenAntiLepton;
     LV GenNeutrino, GenAntiNeutrino;
     LV GenB, GenAntiB;
     LV GenWPlus, GenWMinus;
+    
+    //Complete true level info
+    std::vector<LV> GenParticleP4;
+    std::vector<int> GenParticlePdgId;
+    std::vector<int> GenParticleStatus;
     
     std::vector<LV> HypTop;
     std::vector<LV> HypAntiTop;
@@ -148,8 +156,8 @@ private:
     double weightLepSF;
     double weightKinFit;
     double weightTotal;
+    
     ////Vertices////
-
     int vertMulti;
     
     const LV dummy;
@@ -179,6 +187,7 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
     genEvent_ ( iConfig.getParameter<edm::InputTag> ( "src" ) ),
     FullLepEvt_ ( iConfig.getParameter<edm::InputTag> ( "FullLepEvent" ) ),
     hypoKey_ ( iConfig.getParameter<edm::InputTag> ( "hypoKey" ) ),
+    genParticles_( iConfig.getParameter<edm::InputTag> ( "genParticles" ) ),
 
     includeTrig_ ( iConfig.getParameter<bool> ( "includeTrigger" ) ),
     isTtBarSample_ ( iConfig.getParameter<bool> ( "isTtBarSample" ) ),
@@ -189,8 +198,28 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
     
     directory_ ( iConfig.getParameter<std::string>("directory")),
     
-    dummy(-1, -1, -1, -1)
+    dummy(0, 0, 0, 0)
 {
+    //use first 8 bits for mumu
+    triggerMap_["HLT_DoubleMu6_v"] = 1;
+    triggerMap_["HLT_DoubleMu7_v"] = 2;
+    triggerMap_["HLT_Mu13_Mu8_v"] = 4;
+    triggerMap_["HLT_Mu17_Mu8_v"] = 8;
+    triggerMap_["HLT_DoubleMu45_v"] = 0x10;
+    
+    //use bits 9 to 16 for mu e
+    triggerMap_["HLT_Mu8_Ele17_CaloIdL_v"] = 0x100;
+    triggerMap_["HLT_Mu17_Ele8_CaloIdL_v"] = 0x200;
+    triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v"] = 0x400;
+    triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v"] = 0x800;
+    triggerMap_["HLT_Mu10_Ele10_CaloIdL_v"] = 0x1000;
+    
+    
+    //use bits 17-24 for ee
+    triggerMap_["HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v"] = 0x10000;
+    triggerMap_["HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v"] = 0x20000;
+    triggerMap_["HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"] = 0x40000;
+    triggerMap_["HLT_DoubleEle45_CaloIdL_v"] = 0x80000;
 }
 
 
@@ -211,97 +240,119 @@ NTupleWriter::~NTupleWriter()
 void
 NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
-    weightTotal = getDileptonEventWeight ( iEvent, weightPU_, weightLepSF_ );
+    clearVariables();
+    
     weightPU = getPUEventWeight( iEvent, weightPU_ );
-    weightLepSF = getDileptonSFWeight(iEvent, weightLepSF_);
-    weightKinFit = getWeight(iEvent, weightKinFit_);
-    /////////////clear vectors!!////////////////////////////////////
+    weightLepSF = 0; weightKinFit = 0; weightTotal = 0;
+    try {
+        weightLepSF = getDileptonSFWeight(iEvent, weightLepSF_);
+        weightKinFit = getWeight(iEvent, weightKinFit_);
+        weightTotal = getDileptonEventWeight ( iEvent, weightPU_, weightLepSF_ );
+    } catch (cms::Exception e_dummy) {};
+    
+    edm::Handle<int> decayModeH;
+    iEvent.getByLabel ( decayMode_, decayModeH );
+    decayMode = decayModeH.failedToGet() ? 0 : *decayModeH;
+
+    datatype.push_back ( dType_.encode() );
+    
     edm::Handle<TtFullLeptonicEvent> FullLepEvt;
     iEvent.getByLabel ( FullLepEvt_, FullLepEvt );
 
     edm::Handle<int> hypoKeyHandle;
     iEvent.getByLabel ( hypoKey_, hypoKeyHandle );
-    TtEvent::HypoClassKey& hypoKey = ( TtEvent::HypoClassKey& ) *hypoKeyHandle;
-    
-    clearVariables();
-    
-    datatype.push_back ( dType_.encode() );
+    if (! hypoKeyHandle.failedToGet()) {
+        TtEvent::HypoClassKey& hypoKey = ( TtEvent::HypoClassKey& ) *hypoKeyHandle;
 
-    edm::Handle<int> decayModeH;
-    iEvent.getByLabel ( decayMode_, decayModeH );
-    decayMode = decayModeH.failedToGet() ? 0 : *decayModeH;
+        //////////////////////////////dilepton and lepton properties/////////////////////
 
-    //////////////////////////////dilepton and lepton properties/////////////////////
-
-    //////Generator info
-    edm::Handle<TtGenEvent> genEvt;
-    iEvent.getByLabel ( genEvent_, genEvt );
-
-    if (FullLepEvt->isHypoAvailable(hypoKey) && FullLepEvt->isHypoValid(hypoKey))
-    {
-        for ( size_t i=0; i<FullLepEvt->numberOfAvailableHypos (hypoKey); ++i )
+        if (FullLepEvt->isHypoAvailable(hypoKey) && FullLepEvt->isHypoValid(hypoKey))
         {
-            const reco::Candidate* Top    = FullLepEvt->top ( hypoKey, i );
-            const reco::Candidate* TopBar = FullLepEvt->topBar ( hypoKey, i );
-            const reco::Candidate* Lep    = FullLepEvt->lepton ( hypoKey, i );
-            const reco::Candidate* LepBar = FullLepEvt->leptonBar ( hypoKey, i );
-            const reco::Candidate* Nu     = FullLepEvt->neutrino ( hypoKey, i );
-            const reco::Candidate* NuBar  = FullLepEvt->neutrinoBar ( hypoKey, i );
-            const reco::Candidate* B      = FullLepEvt->b ( hypoKey, i );
-            const reco::Candidate* BBar   = FullLepEvt->bBar ( hypoKey, i );
-            const reco::Candidate* Wplus  = FullLepEvt->wPlus ( hypoKey, i );
-            const reco::Candidate* Wminus = FullLepEvt->wMinus ( hypoKey, i );
+            for ( size_t i=0; i<FullLepEvt->numberOfAvailableHypos (hypoKey); ++i )
+            {
+                const reco::Candidate* Top    = FullLepEvt->top ( hypoKey, i );
+                const reco::Candidate* TopBar = FullLepEvt->topBar ( hypoKey, i );
+                const reco::Candidate* Lep    = FullLepEvt->lepton ( hypoKey, i );
+                const reco::Candidate* LepBar = FullLepEvt->leptonBar ( hypoKey, i );
+                const reco::Candidate* Nu     = FullLepEvt->neutrino ( hypoKey, i );
+                const reco::Candidate* NuBar  = FullLepEvt->neutrinoBar ( hypoKey, i );
+                const reco::Candidate* B      = FullLepEvt->b ( hypoKey, i );
+                const reco::Candidate* BBar   = FullLepEvt->bBar ( hypoKey, i );
+                const reco::Candidate* Wplus  = FullLepEvt->wPlus ( hypoKey, i );
+                const reco::Candidate* Wminus = FullLepEvt->wMinus ( hypoKey, i );
 
-            HypTop.push_back(Top->p4());
-            HypAntiTop.push_back( TopBar->p4() );
-            HypLepton.push_back( Lep->p4() );
-            HypAntiLepton.push_back( LepBar->p4() );
-            HypNeutrino.push_back( Nu->p4() );
-            HypAntiNeutrino.push_back( NuBar->p4() );
-            HypB.push_back( B->p4() );
-            HypAntiB.push_back( BBar->p4() );
-            HypWPlus.push_back( Wplus->p4());
-            HypWMinus.push_back(Wminus->p4());
+                HypTop.push_back(Top->p4());
+                HypAntiTop.push_back( TopBar->p4() );
+                HypLepton.push_back( Lep->p4() );
+                HypAntiLepton.push_back( LepBar->p4() );
+                HypNeutrino.push_back( Nu->p4() );
+                HypAntiNeutrino.push_back( NuBar->p4() );
+                HypB.push_back( B->p4() );
+                HypAntiB.push_back( BBar->p4() );
+                HypWPlus.push_back( Wplus->p4());
+                HypWMinus.push_back(Wminus->p4());
 
-            HypJet0index.push_back(FullLepEvt->jetLeptonCombination ( hypoKey,i ) [0]);
-            HypJet1index.push_back(FullLepEvt->jetLeptonCombination ( hypoKey,i ) [1]);
+                HypJet0index.push_back(FullLepEvt->jetLeptonCombination ( hypoKey,i ) [0]);
+                HypJet1index.push_back(FullLepEvt->jetLeptonCombination ( hypoKey,i ) [1]);
 
+            }
         }
 
     }
 
     if ( isTtBarSample_ ) 
     {
-        if (! (!FullLepEvt->genEvent()))
+        //Generator info
+        edm::Handle<TtGenEvent> genEvt;
+        iEvent.getByLabel ( genEvent_, genEvt );
+        if (! genEvt.failedToGet())
         {
-            const reco::Candidate* genTop    = FullLepEvt->genTop();
-            const reco::Candidate* genWplus  = FullLepEvt->genWPlus();
-            const reco::Candidate* genB      = FullLepEvt->genB();
-            const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
-            const reco::Candidate* genNu     = FullLepEvt->genNeutrino();
-
-            const reco::Candidate* genTopBar = FullLepEvt->genTopBar();
-            const reco::Candidate* genWminus = FullLepEvt->genWMinus();
-            const reco::Candidate* genBBar   = FullLepEvt->genBBar();
-            const reco::Candidate* genLep    = FullLepEvt->genLepton();
-            const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
-
-            GenTop = genTop->p4(); GenAntiTop = genTopBar->p4();
-            GenLepton = genLep->p4(); GenAntiLepton = genLepBar->p4();
-            GenB = genB->p4(); GenAntiB = genBBar->p4();
-            GenNeutrino = genNu->p4(); GenAntiNeutrino = genNuBar->p4();
-            GenWPlus = genWplus->p4(); GenWMinus = genWminus->p4();
-            
+            GenTop = genEvt->top()->p4(); GenAntiTop = genEvt->topBar()->p4();
+            GenLepton = genEvt->lepton(1)->p4(); GenAntiLepton = genEvt->leptonBar(1)->p4();
+            GenB = genEvt->b()->p4(); GenAntiB = genEvt->bBar()->p4();
+            GenNeutrino = genEvt->neutrino(1)->p4(); GenAntiNeutrino = genEvt->neutrinoBar(1)->p4();
+            GenWPlus = genEvt->wPlus()->p4(); GenWMinus = genEvt->wMinus()->p4();
         }
+
+//         if (! FullLepEvt.failedToGet() && !(!FullLepEvt->genEvent()))
+//         {
+//             const reco::Candidate* genTop    = FullLepEvt->genTop();
+//             const reco::Candidate* genWplus  = FullLepEvt->genWPlus();
+//             const reco::Candidate* genB      = FullLepEvt->genB();
+//             const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
+//             const reco::Candidate* genNu     = FullLepEvt->genNeutrino();
+// 
+//             const reco::Candidate* genTopBar = FullLepEvt->genTopBar();
+//             const reco::Candidate* genWminus = FullLepEvt->genWMinus();
+//             const reco::Candidate* genBBar   = FullLepEvt->genBBar();
+//             const reco::Candidate* genLep    = FullLepEvt->genLepton();
+//             const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
+// 
+//             GenTop = genTop->p4(); GenAntiTop = genTopBar->p4();
+//             GenLepton = genLep->p4(); GenAntiLepton = genLepBar->p4();
+//             GenB = genB->p4(); GenAntiB = genBBar->p4();
+//             GenNeutrino = genNu->p4(); GenAntiNeutrino = genNuBar->p4();
+//             GenWPlus = genWplus->p4(); GenWMinus = genWminus->p4();
+//             
+//         }
         else 
         {
-            std::cout << "NO GEN EVENT!!" << endl;
+            std::cerr << "Error: no gen event?!\n";
             GenTop = dummy; GenAntiTop = dummy;
             GenLepton = dummy; GenAntiLepton = dummy;
             GenB = dummy; GenAntiB = dummy;
             GenNeutrino = dummy; GenAntiNeutrino = dummy;
             GenWMinus = dummy; GenWPlus = dummy;
         }
+        
+        //put more true info
+//         edm::Handle<std::vector<reco::GenParticle> > genParticles;
+//         iEvent.getByLabel(genParticles_, genParticles);
+//         for ( vector< reco::GenParticle >::const_iterator p = genParticles->begin(); p != genParticles->end(); ++p) {
+//             GenParticleP4.push_back(p->p4());
+//             GenParticlePdgId.push_back(p->pdgId());
+//             GenParticleStatus.push_back(p->status());
+//         }
     }
     
     //////fill pfiso///maybe other iso??
@@ -394,42 +445,47 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
     }
 
     //////////////////////////////Event Info/////////////////////
-    runno= iEvent.id().run();
-    lumibl=iEvent.id().luminosityBlock();
-    eventno=iEvent.id().event();
+    runno = iEvent.id().run();
+    lumibl = iEvent.id().luminosityBlock();
+    eventno = iEvent.id().event();
 
 
     //////////////////Trigger Stuff///////////////hltPaths_[i].c_str()
-
-    if ( includeTrig_ )
-    {
-        edm::Handle<edm::TriggerResults> trigResults;
-        iEvent.getByLabel ( trigResults_, trigResults );
-
-
-
-        if ( !trigResults.failedToGet() )
-        {
-            int n_Triggers = trigResults->size();
-            edm::TriggerNames trigName = iEvent.triggerNames ( *trigResults );
-
-            for ( int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig )
-            {
-                if ( trigResults.product()->accept ( i_Trig ) )
-                {
-                    VfiredTriggers.push_back ( trigName.triggerName ( i_Trig ) );
-                }
-            }
-        }
-    }
+    
+    edm::Handle<edm::TriggerResults> trigResults;
+    iEvent.getByLabel ( trigResults_, trigResults );
+    triggerBits = getTriggerBits(iEvent, trigResults);
 
     edm::Handle<std::vector<reco::Vertex> > vertices;
     iEvent.getByLabel ( vertices_, vertices );
+    vertMulti = vertices->size();
 
-    vertMulti=vertices->size();
+    Ntuple->Fill();
 
-    Ntuple ->Fill();
+}
 
+int NTupleWriter::getTriggerBits (const edm::Event &iEvent, const edm::Handle< edm::TriggerResults > &trigResults )
+{
+    int n_Triggers = trigResults->size();
+    edm::TriggerNames trigName = iEvent.triggerNames ( *trigResults );
+    int result = 0;
+    
+    for ( int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig )
+    {
+        if ( trigResults.product()->accept ( i_Trig ) )
+        {
+            if (includeTrig_) VfiredTriggers.push_back ( trigName.triggerName ( i_Trig ) );
+            std::string triggerName = trigName.triggerName ( i_Trig );
+            while (triggerName.length() > 0
+                && triggerName[triggerName.length()-1] >= '0'
+                && triggerName[triggerName.length()-1] <= '9')
+            {
+                triggerName.replace(triggerName.length()-1, 1, "");
+            }
+            result |= triggerMap_[triggerName];
+        }
+    }
+    return result;
 }
 
 
@@ -468,10 +524,10 @@ NTupleWriter::beginJob()
 
 
     ///////////event info///////////
-    Ntuple->Branch ( "runNumber",&runno, "runNumber/I" );
-    Ntuple->Branch ( "lumiBlock",&lumibl,"lumiBlock/I" );
-    Ntuple->Branch ( "eventNumber",&eventno, "eventNumber/I" );
-
+    Ntuple->Branch ( "runNumber",&runno, "runNumber/i" );
+    Ntuple->Branch ( "lumiBlock",&lumibl,"lumiBlock/i" );
+    Ntuple->Branch ( "eventNumber",&eventno, "eventNumber/i" );
+    Ntuple->Branch( "triggerBits", &triggerBits, "triggerBits/i");
     Ntuple->Branch ( "dataType",&datatype );
 
 
@@ -500,6 +556,9 @@ NTupleWriter::beginJob()
         Ntuple->Branch("GenAntiB", &GenAntiB);
         Ntuple->Branch("GenWPlus", &GenWPlus);
         Ntuple->Branch("GenWMinus", &GenWMinus);
+        Ntuple->Branch("GenParticleP4", &GenParticleP4);
+        Ntuple->Branch("GenParticlePdgId", &GenParticlePdgId);
+        Ntuple->Branch("GenParticleStatus", &GenParticleStatus);
     }
 
     //Hypothesis Info
@@ -562,9 +621,10 @@ NTupleWriter::fillDescriptions ( edm::ConfigurationDescriptions& descriptions )
 
 void NTupleWriter::clearVariables()
 {
-    runno=0;
-    lumibl=0;
-    eventno=0;
+    runno = 0;
+    lumibl = 0;
+    eventno = 0;
+    triggerBits = 0;
 
     datatype.clear();
 
@@ -575,6 +635,9 @@ void NTupleWriter::clearVariables()
     VlepPfIso.clear();
     VlepCombIso.clear();
 
+    GenParticleP4.clear();
+    GenParticlePdgId.clear();
+    GenParticleStatus.clear();
 
     /////////jets///////////
     Vjet.clear();
@@ -591,7 +654,7 @@ void NTupleWriter::clearVariables()
     VfiredTriggers.clear();
 
     //////vertices
-    vertMulti=-1;
+    vertMulti=0;
 
     HypTop.clear();
     HypAntiTop.clear();
