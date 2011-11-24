@@ -1931,7 +1931,6 @@ if(decayChannel=="electron"):
         ## replace gen object kinematics
         if(runningOnData=="MC"):
             process.genAllElectronKinematics.weight=""  
-            process.selectedGenElectronCollection.weight=""  
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
