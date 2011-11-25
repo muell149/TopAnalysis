@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.3 2011/11/14 17:05:27 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.4 2011/11/23 17:44:54 wbehrenh Exp $
 //
 //
 
@@ -61,6 +61,8 @@
 // class declaration
 //
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LV;
+const char * LVstr = "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >";
+const char * VLVstr = "std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >";
 
 class NTupleWriter : public edm::EDAnalyzer
 {
@@ -546,19 +548,19 @@ NTupleWriter::beginJob()
 
     ////////Gen Info
     if (isTtBarSample_) {
-        Ntuple->Branch("GenTop", &GenTop);
-        Ntuple->Branch("GenAntiTop", &GenAntiTop);
-        Ntuple->Branch("GenLepton", &GenLepton);
-        Ntuple->Branch("GenAntiLepton", &GenAntiLepton);
-        Ntuple->Branch("GenNeutrino", &GenNeutrino);
-        Ntuple->Branch("GenAntiNeutrino", &GenAntiNeutrino);
-        Ntuple->Branch("GenB", &GenB);
-        Ntuple->Branch("GenAntiB", &GenAntiB);
-        Ntuple->Branch("GenWPlus", &GenWPlus);
-        Ntuple->Branch("GenWMinus", &GenWMinus);
-        Ntuple->Branch("GenParticleP4", &GenParticleP4);
-        Ntuple->Branch("GenParticlePdgId", &GenParticlePdgId);
-        Ntuple->Branch("GenParticleStatus", &GenParticleStatus);
+        Ntuple->Branch("GenTop.", &GenTop);
+        Ntuple->Branch("GenAntiTop.", &GenAntiTop);
+        Ntuple->Branch("GenLepton.", &GenLepton);
+        Ntuple->Branch("GenAntiLepton.", &GenAntiLepton);
+        Ntuple->Branch("GenNeutrino.", &GenNeutrino);
+        Ntuple->Branch("GenAntiNeutrino.", &GenAntiNeutrino);
+        Ntuple->Branch("GenB.", &GenB);
+        Ntuple->Branch("GenAntiB.", &GenAntiB);
+        Ntuple->Branch("GenWPlus.", &GenWPlus);
+        Ntuple->Branch("GenWMinus.", &GenWMinus);
+        Ntuple->Branch("GenParticleP4.", &GenParticleP4);
+        Ntuple->Branch("GenParticlePdgId.", &GenParticlePdgId);
+        Ntuple->Branch("GenParticleStatus.", &GenParticleStatus);
     }
 
     //Hypothesis Info

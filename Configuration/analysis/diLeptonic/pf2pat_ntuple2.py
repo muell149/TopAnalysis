@@ -136,6 +136,7 @@ if options.mode == 'mumu':
                 #'HLT_DoubleMu7_*',
                 'HLT_Mu13_Mu8_v*',
                 'HLT_Mu17_Mu8_v*',
+                'HLT_DoubleMu45_v*',
                 #'HLT_Mu17_DiCentralJet30_*'
             )
 
@@ -147,7 +148,7 @@ elif options.mode == 'emu':
         'HLT_Mu17_Ele8_CaloIdL_*',
         'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*',
         'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v*',
-        #'HLT_Mu10_Ele10*'
+        'HLT_Mu10_Ele10_CaloIdL_v*'
     )
 elif options.mode == 'ee':
     ttFilterChannelName = 'ElectronElectron'
@@ -155,6 +156,7 @@ elif options.mode == 'ee':
         'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*',
         'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v*',
         'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*',
+        'HLT_DoubleEle45_CaloIdL_v*',
     )
 else:
     print 'ERROR: unrecognised mode ' + options.mode +'\nuse ee, emu, or mumu'
