@@ -1297,10 +1297,12 @@ namespace semileptonic {
       std::cout << "because " << astar << " < " << bstar << std::endl;
       exit(1);
     }
-    for(float n=1; rest>0; n++){
+    for(float n=1.; rest>0.; n++){
       rest=astar-n*bstar;
       if(rest<0){
-	rest = astar-(n-1.)*bstar;
+	// allow some precision tolerance because of rounding effects
+	if(rest>-0.000001) rest=0;
+	else rest = astar-(n-1.)*bstar;
 	break;
       }
     }
@@ -1353,7 +1355,10 @@ namespace semileptonic {
 	  std::cout << "the ininital binning is to coarse for the chosen binning!" << std::endl;
 	  std::cout << "attention: probably error in modulo function," << std::endl;
 	  std::cout << "bin #" << finalBin << " of the choosen binning has ";
-	  std::cout << "finalBinWidth modulo initialBinWidth of " << modulo(finalBinWidth,initialBinWidth) << std::endl;
+	  std::cout << "finalBinWidth modulo initialBinWidth of:" <<std::endl;
+	  std::cout << std::setprecision(20) << std::fixed << finalBinWidth;
+	  std::cout << " modulo " << std::setprecision(20) << std::fixed << initialBinWidth << " = ";
+	  std::cout << std::setprecision(20) << std::fixed << modulo(finalBinWidth,initialBinWidth) << std::endl;
 	  exit(1);
 	}
       }
@@ -1473,9 +1478,17 @@ namespace semileptonic {
       bins_.insert( bins_.begin(), lepEtaBins, lepEtaBins + sizeof(lepEtaBins)/sizeof(double) );
       result["lepEta"]=bins_;
       bins_.clear();
-
+      // pt(bquark)
+      double bqPtBins[]={0., 30., 60., 95., 140., 200., 400., 1200.};
+      bins_.insert( bins_.begin(), bqPtBins, bqPtBins + sizeof(bqPtBins)/sizeof(double) );
+      result["bqPt"]=bins_;
+      bins_.clear();
+      // eta(bquark)
+      double bqEtaBins[]={-5., -2.4, -1.5, -1, -0.5, 0., 0.5, 1., 1.5, 2.4, 5};
+      bins_.insert( bins_.begin(), bqEtaBins, bqEtaBins + sizeof(bqEtaBins)/sizeof(double) );
+      result["bqEta"]=bins_;
+      bins_.clear();
       return result;
-
     }
 
   template <class T>
