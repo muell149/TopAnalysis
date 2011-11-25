@@ -583,12 +583,12 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "neutrinoEta" );
     bookVariable(fs, "lightQPt"    );
     bookVariable(fs, "lightQbarPt" );
-    bookVariable(fs, "lepBPt"      );
-    bookVariable(fs, "hadBPt"      );  
+    bookVariable(fs, "bqPtLep"      );
+    bookVariable(fs, "bqPtHad"      );  
     bookVariable(fs, "lightQEta"   );
     bookVariable(fs, "lightQbarEta");
-    bookVariable(fs, "lepBEta"     );
-    bookVariable(fs, "hadBEta"     );
+    bookVariable(fs, "bqEtaLep"     );
+    bookVariable(fs, "bqEtaHad"     );
     // parton truth value
     // ttbar quantities
     bookVariable(fs, "ttbarPtPartonTruth"    );
@@ -707,9 +707,6 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genLepBEta       =-9999;
   double genHadBPt        =-9999;
   double genHadBEta       =-9999;
-
-
-
   double sumRapidity      =-9999;
   double HTgen            =-9999;
   double hadTopGenPt      =-9999;
@@ -1509,12 +1506,12 @@ TopKinematics::fillFinalStateObjects(const ROOT::Math::LorentzVector<ROOT::Math:
   // fill trees for (light/b)x(quark/antiquark)
   fillValue("lightQPt"    , q.Pt()    , weight);
   fillValue("lightQbarPt" , qbar.Pt() , weight);
-  fillValue("lepBPt"      , lepB.Pt() , weight);
-  fillValue("hadBPt"      , hadB.Pt() , weight);  
+  fillValue("bqPtLep"     , lepB.Pt() , weight);
+  fillValue("bqPtHad"     , hadB.Pt() , weight);  
   fillValue("lightQEta"   , q.Eta()   , weight);
   fillValue("lightQbarEta", qbar.Eta(), weight);
-  fillValue("lepBEta"     , lepB.Eta(), weight);
-  fillValue("hadBEta"     , hadB.Eta(), weight);
+  fillValue("bqEtaLep"    , lepB.Eta(), weight);
+  fillValue("bqEtaHad"    , hadB.Eta(), weight);
 
   // find leading jet
   ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadq=hadB;
