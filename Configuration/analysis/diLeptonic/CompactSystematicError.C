@@ -65,8 +65,8 @@ Bool_t isModel = kTRUE;
 Bool_t isExp = kTRUE;
 //Bool_t isExp = kFALSE;
 
-//Bool_t isStat  = kTRUE;
-Bool_t isStat  = kFALSE;
+Bool_t isStat  = kTRUE;
+//Bool_t isStat  = kFALSE;
 
 Bool_t isPSE = kFALSE;
 
@@ -223,6 +223,14 @@ void CalculateSystematicErrors(Color_t LineColor, Style_t LineStyle, Width_t Lin
 
     TString title = ListOfKeys->At(j)->GetName();
     cout << "   >>>   " << title << endl;
+
+    //     if( label.Contains("Q2_SCALE") || label.Contains("TOP_MASS") || label.Contains("MATCHING") || label.Contains("HADRON") ) {
+    //       if( !(isPSE) &&   title.Contains("PSE_")  )  continue;
+    //       if(   isPSE  && !(title.Contains("PSE_")) )  continue;
+    //     }
+
+    //     else if( title.Contains("PSE_") )  continue;
+
     if( title.Contains("PSE_") )  continue;
 
     Double_t Sys_Error      = 0.;
@@ -252,13 +260,13 @@ void CalculateSystematicErrors(Color_t LineColor, Style_t LineStyle, Width_t Lin
     h_var_up->Draw("SAME");
     h_var_down->SetMarkerColor(kRed);
     h_var_down->Draw("SAME");
-    if( set_LogY ) gPad->SetLogy();
+    if(set_LogY) gPad->SetLogy();
     Canvas->Print(outpath.Copy().Append(title).Append("_").Append(label).Append(outform));
 
     Int_t N_bins = h_ref->GetNbinsX();
 
     if( (title.Contains("Leptons_Eta") || title.Contains("TopQuarks_Rapidity")) &&
-	(label.Contains("MLL30") || label.Contains("Q_SCALE") || label.Contains("TOP_MASS") || label.Contains("MATCHING") || label.Contains("HAD")) ) {
+	(label.Contains("MLL30") || label.Contains("Q2_SCALE") || label.Contains("TOP_MASS") || label.Contains("MATCHING") || label.Contains("HADRON")) ) {
       SymmetrizeAroundZero(h_ref, h_var_up, h_var_down, h_sys, h_sys2, Sum_Errors, scale);
     }
 
@@ -287,6 +295,7 @@ void CalculateSystematicErrors(Color_t LineColor, Style_t LineStyle, Width_t Lin
     title.Append(label);
     h_sys->SetName(title);
     Hlist.Add(h_sys);
+
     sum_errors[j]->Add(h_sys2);
     errors[j]->Add(h_sys2);
 
@@ -627,6 +636,10 @@ void SystematicErrors() {
     HistColor = kGray+3;
 
     files[0] = new TFile(inpath.Copy().Append("standard.root"));
+    //    files[0] = new TFile("/afs/naf.desy.de/user/w/wbehrenh/scratch/final/standard/plots_5fb/DiffXS_Histograms.root");
+    //    files[0] = new TFile("/afs/naf.desy.de/user/w/wbehrenh/scratch/final/standard/plots_2fb/DiffXS_Histograms.root");
+    //    files[0] = new TFile("/afs/naf.desy.de/user/w/wbehrenh/scratch/final/standard/plots_2011b/DiffXS_Histograms.root");
+    //    files[0] = new TFile("/afs/naf.desy.de/user/w/wbehrenh/scratch/final/standard/plots_2011av5v6/DiffXS_Histograms.root");
 
     if( files[0] && !files[0]->IsZombie() ) {
       cout << "--------------------------------" << endl;
