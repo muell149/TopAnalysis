@@ -1807,6 +1807,7 @@ if(runningOnData=="MC"):
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p3.remove(process.genFilterSequence)
+        process.p3.remove(process.filterGenPhaseSpace)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p3.remove(process.dummy)
