@@ -1918,6 +1918,7 @@ if(decayChannel=="electron"):
     process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
     # gen selection
+    process.p3.replace(process.genMuonSelection, process.genElectronSelection)
     process.p4.replace(process.genMuonSelection, process.genElectronSelection)
     pathlist = [process.p1, process.p2, process.p3, process.p4]
     for path in pathlist:
