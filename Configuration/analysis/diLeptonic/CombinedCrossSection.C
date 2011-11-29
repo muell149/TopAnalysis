@@ -39,17 +39,19 @@ using namespace std;
 //const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
 const char *USERNAME = getenv("USER");
 const TString inpath(
-        !strcmp(USERNAME, "wbehrenh") ? "./" : 
-        // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
-        "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-const TString outpath("plots/");
-//const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
+		     !strcmp(USERNAME, "wbehrenh") ? "./" : 
+		     // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
+		     "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+//const TString outpath("plots/");
+const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
 
 // output format
 const TString outform(".eps");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
+// output file name for efficiency hists
+const TString pseOutfileName(outpath+"PSE_Histograms.root");
 // output file name for cross section hists
 const TString unfoldOutfileName(outpath+"Unfold_Histograms.root");
 // output file name for kin reconstruction efficiency
@@ -159,6 +161,7 @@ double sampleCrossSection[Nfiles];
 
 // list of output root plots
 TObjArray diffXsecHistogramList;
+TObjArray efficiencyHistogramList;
 TObjArray unfoldHistogramList;
 TObjArray kinEffHistogramList;
 TObjArray preUnfoldedList;
@@ -2583,7 +2586,7 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
     TString totalXsecEffName("total_xsec_PSE_"); totalXsecEffName.Append(channelName[channel]).Append("_").Append(selection);
     TH1 *totalXsecEff = new TH1F(totalXsecEffName.Data(), totalXsecEffName.Data(), 1, -0.5, 0.5);
     totalXsecEff->SetBinContent(1, eff);
-    diffXsecHistogramList.Add(totalXsecEff);
+    efficiencyHistogramList.Add(totalXsecEff);
 
     Double_t syserrUp   =0;
     Double_t syserrDown =0;
@@ -3679,7 +3682,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     efficiency->SetName(title);
     efficiency->GetXaxis()->SetTitle(xtitle);
-    diffXsecHistogramList.Add(efficiency->Clone());
+    efficiencyHistogramList.Add(efficiency->Clone());
 
     delete grE;
     delete grP;
@@ -5132,6 +5135,13 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     TFile crossOutFile(crossOutfileName,"recreate");
     diffXsecHistogramList.Write();
     crossOutFile.Close();
+
+    std::cout << ">>> " << "-------------------------------------------" << std::endl;
+    std::cout << ">>> " << "Final size of efficiencyHistogramList: " << efficiencyHistogramList.GetEntries() << std::endl << std::endl << std::endl;
+
+    TFile pseOutFile(pseOutfileName,"recreate");
+    efficiencyHistogramList.Write();
+    pseOutFile.Close();
 
     std::cout << ">>> " << "-------------------------------------------" << std::endl;
     std::cout << ">>> " << "Final size of unfoldHistogramList: " << unfoldHistogramList.GetEntries() << std::endl << std::endl << std::endl;
