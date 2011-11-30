@@ -6,10 +6,10 @@ secFiles = cms.untracked.vstring()
 source = cms.Source ("PoolSource", fileNames = cms.untracked.vstring( *( 
         ## complete AOD files without skimming!!!
         ## May10ReRecoV1 + PromptRecoV4
-        ## 3586+2028 files, from July 13 (should be the complete EPS dataset)
+        ## 3568+2028 files, from July 13 (should be the complete EPS dataset)
 
         ##------------------------------------------------------------------------
-        ## May10ReReco, 3586 files
+        ## May10ReReco, 3568 files
         '/store/data/Run2011A/SingleMu/AOD/May10ReReco-v1/0005/FCFA7A2C-CA7D-E011-8F26-1CC1DE1CDD02.root',
         '/store/data/Run2011A/SingleMu/AOD/May10ReReco-v1/0005/FAF326C9-DF7D-E011-A815-1CC1DE1CDDBC.root',
         '/store/data/Run2011A/SingleMu/AOD/May10ReReco-v1/0005/FAE083F7-997D-E011-B9E3-1CC1DE051060.root',

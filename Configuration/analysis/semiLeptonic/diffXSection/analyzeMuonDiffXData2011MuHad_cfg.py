@@ -61,7 +61,7 @@ else:
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change number of processed events
-process.maxEvents.input = 5000
+process.maxEvents.input = -1
 process.source.skipEvents = cms.untracked.uint32(0)
 
 ## create tuples with events surviving the cuts
@@ -71,7 +71,4 @@ if(writeOutput):
     process.out.fileName = cms.untracked.string('patTuple_selectedNjets4Btag2_Run2011PromptReco.root')
 
 ## change output name 
-<<<<<<< analyzeMuonDiffXData2011MuHad_cfg.py
-process.TFileService.fileName = 'analyzeDiffXData2011_MuonHad_160404_167151.root'=======
-process.TFileService.fileName = 'analyzeDiffXData2011_MuonHad_160404_166861.root'
->>>>>>> 1.4
+process.TFileService.fileName = 'analyzeDiffXData2011_MuonHad_160404_167151.root'

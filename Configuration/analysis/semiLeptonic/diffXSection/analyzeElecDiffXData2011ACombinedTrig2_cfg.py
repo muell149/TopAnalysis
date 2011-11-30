@@ -28,7 +28,7 @@ effSFReweigthing = False
 ## use L2L3Residual correction in analyzers
 corrLevel="L2L3Residual"
 ## JSON file
-jsonFile =  'Cert_160404-167913_7TeV_ReRecoV1_and_PromptRecoV4_Collisions11_JSON_modified.txt'
+jsonFile =  'Cert_160404-180252_7TeV_PromptReco_ReReco_Combined_Collisions11_JSON_modified.txt'
 
 ## get the mother file
 execfile("analyzeTopDiffXSec_cfg.py")
@@ -42,7 +42,7 @@ process.hltFilter.TriggerResultsTag = "TriggerResults::HLT"
 #process.hltFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*",
 #    "HLT_Ele25_CaloIdVT_TrkIdT_TriCentralJet30_v*"]
 process.hltFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
-process.hltFilter.throw = False
+#process.hltFilter.throw = False
 
 # Lumi range
 ## ATTENTION!!! At the moment myLumis are filled in this data_cfg files again
@@ -78,6 +78,3 @@ if(writeOutput):
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXData2011ACombinedElectron_160404_165633_Trig1.root'
 process.TFileService.fileName = 'analyzeDiffXData2011ACombinedElectron_165970_167913_Trig2.root'
-
-## FIND BETTER SOLUTION LATER!!!!!!!!!!!!!!!
-process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
