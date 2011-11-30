@@ -940,8 +940,8 @@ process.afterLeptonChargeSelection = cms.Sequence(
     process.filterChannel            *
     process.filterDiLeptonMassQCDveto*
     process.makeTtFullLepEvent       *
-    process.ntupleInRecoSeq *
     process.eventWeightDileptonSF    *
+    process.ntupleInRecoSeq *
 
     process.analyzeLeptonPair3       *
     process.analyzeJets3             *
