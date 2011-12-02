@@ -718,8 +718,8 @@ void SystematicErrors() {
     HistColor = kAzure+8;
 
     files[0] = new TFile(inpath.Copy().Append("standard.root"));
-    files[7]  = new TFile(inpath.Copy().Append("dy_up.root"));
-    files[8]  = new TFile(inpath.Copy().Append("dy_down.root"));
+    files[7] = new TFile(inpath.Copy().Append("dy_up.root"));
+    files[8] = new TFile(inpath.Copy().Append("dy_down.root"));
 
     if( files[0] && !files[0]->IsZombie() && files[7] && !files[7]->IsZombie() && files[8] && !files[8]->IsZombie() ) {
       cout << "------------------------" << endl;
@@ -735,9 +735,12 @@ void SystematicErrors() {
     LineWidth = 1;
     HistColor = kAzure+8;
 
-    files[0] = new TFile(inpath.Copy().Append("standard.root"));
+    files[0]  = new TFile(inpath.Copy().Append("standard.root"));
     files[9]  = new TFile(inpath.Copy().Append("standard_new.root"));
+    //    files[10] = new TFile(inpath.Copy().Append("mll20_new.root"));
     files[10] = new TFile(inpath.Copy().Append("mll30_new.root"));
+    //    files[10] = new TFile(inpath.Copy().Append("mll40_new.root"));
+    //    files[10] = new TFile(inpath.Copy().Append("mll50_new.root"));
 
     if( files[0] && !files[0]->IsZombie() && files[9] && !files[9]->IsZombie() &&  files[10] && !files[10]->IsZombie() ) {
       cout << "--------------------" << endl;
@@ -753,7 +756,7 @@ void SystematicErrors() {
     LineWidth = 1;
     HistColor = kYellow;
 
-    files[0] = new TFile(inpath.Copy().Append("standard.root"));\
+    files[0]  = new TFile(inpath.Copy().Append("standard.root"));
     files[11] = new TFile(inpath.Copy().Append("pu_up.root"));
     files[12] = new TFile(inpath.Copy().Append("pu_down.root"));
 
@@ -771,10 +774,10 @@ void SystematicErrors() {
     LineWidth = 1;
     HistColor = kYellow-6;
 
-    files[0] = new TFile(inpath.Copy().Append("standard.root"));
+    files[0]  = new TFile(inpath.Copy().Append("standard.root"));
     files[13] = new TFile(inpath.Copy().Append("no_kin_scale.root"));
     files[14] = new TFile(inpath.Copy().Append("standard.root"));
-    //  files[14] = new TFile(inpath.Copy().Append("kin_scale2.root"));
+    //    files[14] = new TFile(inpath.Copy().Append("kin_scale2.root"));
 
     if( files[0] && !files[0]->IsZombie() && files[13] && !files[13]->IsZombie() &&  files[14] && !files[14]->IsZombie() ) {
       cout << "----------------------" << endl;
