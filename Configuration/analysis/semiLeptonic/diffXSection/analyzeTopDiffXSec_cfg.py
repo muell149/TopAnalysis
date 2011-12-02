@@ -495,8 +495,11 @@ from TopAnalysis.TopFilter.filters.SemiLeptonicGenPhaseSpaceFilter_cfi import fi
 process.filterGenPhaseSpace = filterSemiLeptonicGenPhaseSpace.clone(src = "genEvt")
 
 ## Generator kinematics selection (https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html)
+## Currently set to 5.0 to prevent bias in throwing out heavy flavours, see:
+## https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489/4/1/1/1/1/1.html
 process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
-process.totalKinematicsFilterDefault = process.totalKinematicsFilter.clone(tolerance = 0.5)
+#process.totalKinematicsFilterDefault = process.totalKinematicsFilter.clone(tolerance = 0.5)
+process.totalKinematicsFilterDefault = process.totalKinematicsFilter.clone(tolerance = 5.0)
 
 ## ---
 ## including analysis tools
