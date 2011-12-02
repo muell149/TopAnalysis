@@ -1,8 +1,7 @@
 #include "basicFunctions.h"
 
 void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root", 
 			     std::string decayChannel = "muon" )
 {
   // ============================
@@ -171,7 +170,13 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta",
     // generated lepton quantities
     "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepPt" ,
-    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepEta"
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/lepEta",
+    // reconstructed b-quark quantities
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqPt",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqEta",
+    // generated b-quark quantities
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/bqPt",
+    "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/bqEta"
   };
  TString plots1Dadd[ ] = {
    // generated angular distributions
@@ -656,7 +661,13 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#eta^{l}/events/0/1" ,
     // generated lepton quantities
     "p_{T}^{l} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
-    "#eta^{l} parton truth/events/0/1"
+    "#eta^{l} parton truth/events/0/1",
+    // reconstructed b-quark quantities
+    "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
+    "#eta^{b and #bar{b}}/events/0/1" ,
+    // generated b-quark quantities
+    "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
+    "#eta^{b and #bar{b}} parton truth/events/0/1",
   };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
@@ -1122,7 +1133,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   plotList_.insert( plotList_.end()  , plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
   // remove irrelevant plots for systemtic variation to speed up
 
-
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -1229,6 +1239,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	    reBinTH1F(*histo_[plotName][sample], binning_[getStringEntry(plotName, 2)], verbose-1);
 	    if(verbose>1){
 	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){
+	       
 		std::cout << "bin " << i << ": " << histo_[plotName][sample]->GetBinContent(i) << " / ";
 		std::cout << histo_[plotName][sample]->GetBinWidth(i) << std::endl;
 	      }
@@ -1261,14 +1272,14 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   unsigned int NMCeff=0;
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta"};
-  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[#frac{GeV}{c}]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[#frac{GeV}{c}]", "m_{t#bar{t}}/[#frac{GeV}{c^{2}}]", "y^{t#bar{t}}/ ", "p_{T}^{#mu}/[#frac{GeV}{c}]" , "#eta^{#mu}/ "};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "bqPt", "bqEta"};
+  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[#frac{GeV}{c}]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[#frac{GeV}{c}]", "m_{t#bar{t}}/[#frac{GeV}{c^{2}}]", "y^{t#bar{t}}/ ", "p_{T}^{#mu}/[#frac{GeV}{c}]" , "#eta^{#mu}/ ", "p_{T}^{b and #bar{b}}/[#frac{GeV}{c}]" , "#eta^{b and #bar{b}}/ "};
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
   // loop all variables
   for(unsigned int number=0; number<xSecVariables_.size(); ++number){
-    TString variable=xSecVariables_[number];
-    TString efficiency="efficiency/"+variable;
+    TString variable=xSecVariables_[number];    
+TString efficiency="efficiency/"+variable;
     // check if gen and reco plots are available
     if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kSig)){
       // std::cout << "found gen and reco" << std::endl;
@@ -1380,13 +1391,21 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
 	histo_[xSec][kSig ]->GetXaxis()->SetRange(1,5);
       }
-      if(variable=="topY"){ 
+      else if(variable=="topY"){ 
 	histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
 	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
       }
-      if(variable=="lepEta"){ 
+      else if(variable=="lepEta"){ 
 	histo_[xSec][kData]->GetXaxis()->SetRange(2, histo_[xSec][kData]->GetNbinsX()-2);
 	histo_[xSec][kSig ]->GetXaxis()->SetRange(2, histo_[xSec][kSig ]->GetNbinsX()-2);
+      }  
+      else if(variable=="bqPt"){ 
+	histo_[xSec][kData]->GetXaxis()->SetRange(2,6);
+	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,6);
+      }
+      else if(variable=="bqEta"){ 
+	histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
+	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
       }
       ++NXSec;
     }
@@ -1663,13 +1682,21 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
       histo_[xSec][kSig ]->GetXaxis()->SetRange(1,5);
     }
-    if(variable=="topY"){ 
+    else if(variable=="topY"){ 
       histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
       histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
     }
-    if(variable=="lepEta"){ 
+    else if(variable=="lepEta"){ 
       histo_[xSec][kData]->GetXaxis()->SetRange(2, histo_[xSec][kData]->GetNbinsX()-2);
       histo_[xSec][kSig ]->GetXaxis()->SetRange(2, histo_[xSec][kSig ]->GetNbinsX()-2);
+    }
+    else if(variable=="bqPt"){ 
+      histo_[xSec][kData]->GetXaxis()->SetRange(2,6);
+      histo_[xSec][kSig ]->GetXaxis()->SetRange(2,6);
+    }
+    else if(variable=="bqEta"){ 
+      histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
+      histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
     }
     ++NXSec;
   }
@@ -2052,8 +2079,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	if(title.Contains("analyzeTopPartonLevelKinematics")) saveToFolder+="partonLevel/";
 	if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
 	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
-
-	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
+       	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
 	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
 	if(!title.Contains("canv")){
 	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".eps"); 
