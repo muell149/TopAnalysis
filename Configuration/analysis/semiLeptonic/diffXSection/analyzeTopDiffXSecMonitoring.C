@@ -201,8 +201,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
     "analyzeTopRecoKinematicsKinFit/ttbarY",
     "analyzeTopRecoKinematicsKinFit/ttbarMass",
     "analyzeTopRecoKinematicsKinFit/lepPt",
-    "analyzeTopRecoKinematicsKinFit/lepEta"
-    
+    "analyzeTopRecoKinematicsKinFit/lepEta",
+    "analyzeTopRecoKinematicsKinFit/lightqPt",
+    "analyzeTopRecoKinematicsKinFit/lightqEta",   
+    "analyzeTopRecoKinematicsKinFit/bqPt",
+    "analyzeTopRecoKinematicsKinFit/bqEta"    
   };
 
   TString plots1Dmu[ ] = { 
@@ -367,7 +370,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
     "y^{t#bar{t}}/Frequency/0/1",
     "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/Frequency/0/20",
     "p_{t}^{l} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
-    "#eta^{l}/Frequency/0/1"
+    "#eta^{l}/Frequency/0/1",
+    "p_{t}^{light q} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
+    "#eta^{light q}/Frequency/0/1",
+    "p_{t}^{b quark} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
+    "#eta^{b quark}/Frequency/0/1"
   };
 
   TString axisLabel1De[ ] = {
