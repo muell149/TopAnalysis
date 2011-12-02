@@ -58,29 +58,31 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   // Attention: binning ALWAYS should start from left boundary of first and bin of the input file;
   // it ends with the last bin of the input file even if this is not part of the array defined below
   
-  
   std::map<TString, std::vector<double> > binningMap = makeVariableBinning();
   std::vector<double> xBins = binningMap[variable];
-  int NxBins = xBins.size();
-  
+  int NxBins = xBins.size();  
   
   // pt
-   //double xBins[] = {0, 60, 120, 200, 280, 400};
+  // double xBins[] = {0, 60, 120, 200, 280, 400};
   // y
-   //double xBins[] = {-5., -2.5, -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2.5};
-   // ttbar pt
-   //double xBins[] = {0, 20, 60, 110, 200};
-   // ttbar Y
-   //double xBins[] = {-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3};
-   // ttbarMass
-   //double xBins[] = {0, 400, 500, 630, 900};
-   //double xBins[] = {0, 345, 410, 480, 580, 750};
-   //Korea:
-   //double xBins[] = {0, 350, 400, 450, 500, 550,600,700,800};
+  // double xBins[] = {-5., -2.5, -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2.5};
+  // ttbar pt
+  // double xBins[] = {0, 20, 60, 110, 200};
+  // ttbar Y
+  // double xBins[] = {-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3};
+  // ttbarMass
+  // double xBins[] = {0, 400, 500, 630, 900};
+  // double xBins[] = {0, 345, 410, 480, 580, 750};
+  // Korea:
+  // double xBins[] = {0, 350, 400, 450, 500, 550,600,700,800};
   // lepPt
-  //double xBins[] = {0., 20., 25., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
+  // double xBins[] = {0., 20., 25., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
   // lepEta
-  //double xBins[] = {-5., -2.5, -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.5, 5.};
+  // double xBins[] = {-5., -2.5, -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.5, 5.};
+  // b-quark Pt
+  // double bqPtBins[]  = {0, 30, 60, 95, 140, 200, 400 };
+  // b-quark Eta 
+  // double bqEtaBins[] = {-5.0, -2.5, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.5, 5.0};
   //int NxBins = sizeof(xBins)/sizeof(double);
 
   std::cout << "size of xBins array: " << NxBins << std::endl;
@@ -95,13 +97,14 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1200-0.001;}
   else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001; }
   else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001; }
+  else if ( variable == "bqPt")      { rangeUserLeft = 0         ; rangeUserRight = 350-0.001; useTree=false;}
+  else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001; useTree=false;}
+
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepEta" && lepton == "muon")    { rangeUserLeft = -2.1; rangeUserRight = 2.1-0.001; }
   //else if ( variable == "lepEta" && lepton == "elec")    { rangeUserLeft = -2.5; rangeUserRight = 2.5-0.001; }
-  
-  
-  
+    
   // make a nice style
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
@@ -116,74 +119,87 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   // x-Axis should be generated value, y-Axis should be reconstructed value
   TH2F* myHist2d = (TH2F*)(((TH2F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable+"_"))->Clone());
   // empty histogram
-  if(useTree) myHist2d->Scale(0);
+  if(useTree) myHist2d->Reset("ICES"); // Scale(0);
+  // create pointer to avoid problems with object persistence  
+  TH1F* chi2eff = NULL;
+  TH1F* all     = NULL;
   // loading tree
-  TTree *tree=(TTree*)(myFile1->Get("analyzeTopRecoKinematicsKinFit/tree"));
-  if(!tree||tree->IsZombie()){
-     std::cout << "there seems to be a problem with the chosen tree " << "analyzeTopRecoKinematicsKinFit/tree" << std::endl;
-     exit(0);  
-  }
-  // list relevant tree entries
-  std::vector<TString> variable_;
-  if(variable.Contains("top")){
-    variable_.push_back(variable+"Lep");
-    variable_.push_back(variable+"Had");
-  }
-  else variable_.push_back(variable);
-  // container for values read from tree
-  std::map< TString, float > value_;
-  // container for chi2 cut efficiency
-  TH1F* chi2eff = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable))->Clone());
-  chi2eff->Scale(0);
-  TH1F* all=(TH1F*)chi2eff->Clone();
+  if (useTree){
+    TTree *tree=(TTree*)(myFile1->Get("analyzeTopRecoKinematicsKinFit/tree"));
+    if(!tree||tree->IsZombie()){
+      std::cout << "there seems to be a problem with the chosen tree " << "analyzeTopRecoKinematicsKinFit/tree" << std::endl;
+      exit(0);  
+    }
+    // list relevant tree entries
+    std::vector<TString> variable_;
+    if(variable.Contains("top")){
+      variable_.push_back(variable+"Lep");
+      variable_.push_back(variable+"Had");
+    }
+    else if(variable.Contains("bqPt")){
+      variable_.push_back("lepBPt");
+      variable_.push_back("hadBPt");
+    }  
+    else if(variable.Contains("bqEta")){
+      variable_.push_back("lepBEta");
+      variable_.push_back("hadBEta");
+    }
+    else variable_.push_back(variable);
+    // container for values read from tree
+    std::map< TString, float > value_;
+    // container for chi2 cut efficiency
+    chi2eff = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable))->Clone());
+    chi2eff->Scale(0);
+    all=(TH1F*)chi2eff->Clone();
   
   // initialize map entries with 0 
   // to avoid problems with the map re-ordering
   // when new entries are added
-  value_["weight"]=0;
-  for(unsigned int i=0; i<variable_.size(); ++i){
-    value_[variable_[i]]=0;
-    value_[variable_[i]+"PartonTruth"]=0;
-  }
-  // initialize branches
-  tree->SetBranchStatus("*",0);
-  tree->SetBranchStatus("weight",1);
-  tree->SetBranchAddress("weight",(&value_["weight"]));
-  tree->SetBranchStatus("chi2",1);
-  tree->SetBranchAddress("chi2",(&value_["chi2"]));
-  for(unsigned int i=0; i<variable_.size(); ++i){
-    // activate branches
-    tree->SetBranchStatus(variable_[i],1);
-    tree->SetBranchStatus(variable_[i]+"PartonTruth",1);
-    // save branch values in map
-    tree->SetBranchAddress(variable_[i],(&value_[variable_[i]]));
-    tree->SetBranchAddress(variable_[i]+"PartonTruth",(&value_[variable_[i]+"PartonTruth"]));
-  }
-  // loop all events to fill plots
-  for(unsigned int event=0; event<tree->GetEntries(); ++event){
-    tree->GetEntry(event);
-    double weight=value_["weight"];
-    double chi2=value_["chi2"];
+    value_["weight"]=0;
     for(unsigned int i=0; i<variable_.size(); ++i){
-      double rec =value_[variable_[i]];
-      double gen =value_[variable_[i]+"PartonTruth"];
-      if(rec==-9999||gen==-9999){ 
-	std::cout << "variable " << variable << " is not filled properly:" << std::endl;
-	std::cout << "rec " <<  variable_[i] << ": " << rec << std::endl;
-	std::cout << "gen " <<  variable_[i]+"PartonTruth" << ": " << gen << std::endl;
-	exit(0);
+      value_[variable_[i]]=0;
+      value_[variable_[i]+"PartonTruth"]=0;
+    }
+    // initialize branches
+    tree->SetBranchStatus("*",0);
+    tree->SetBranchStatus("weight",1);
+    tree->SetBranchAddress("weight",(&value_["weight"]));
+    tree->SetBranchStatus("chi2",1);
+    tree->SetBranchAddress("chi2",(&value_["chi2"]));
+    for(unsigned int i=0; i<variable_.size(); ++i){
+      // activate branches
+      tree->SetBranchStatus(variable_[i],1);
+      tree->SetBranchStatus(variable_[i]+"PartonTruth",1);
+      // save branch values in map
+      tree->SetBranchAddress(variable_[i],(&value_[variable_[i]]));
+      tree->SetBranchAddress(variable_[i]+"PartonTruth",(&value_[variable_[i]+"PartonTruth"]));
+    }
+    // loop all events to fill plots
+    for(unsigned int event=0; event<tree->GetEntries(); ++event){
+      tree->GetEntry(event);
+      double weight=value_["weight"];
+      double chi2=value_["chi2"];
+      for(unsigned int i=0; i<variable_.size(); ++i){
+	double rec =value_[variable_[i]];
+	double gen =value_[variable_[i]+"PartonTruth"];
+	if(rec==-9999||gen==-9999){ 
+	  std::cout << "variable " << variable << " is not filled properly:" << std::endl;
+	  std::cout << "rec " <<  variable_[i] << ": " << rec << std::endl;
+	  std::cout << "gen " <<  variable_[i]+"PartonTruth" << ": " << gen << std::endl;
+	  exit(0);
+	}
+	// apply chi2 cut
+	if(chi2<chi2Max){
+	  if(useTree) myHist2d->Fill(gen, rec, weight);
+	  // fill events passing chi2
+	  chi2eff->Fill(rec, weight);
+	}
+	// fill all events
+	all->Fill(rec, weight);
       }
-      // apply chi2 cut
-      if(chi2<chi2Max){
-	if(useTree) myHist2d->Fill(gen, rec, weight);
-	// fill events passing chi2
-	chi2eff->Fill(rec, weight);
-      }
-      // fill all events
-      all->Fill(rec, weight);
     }
   }
-  
+
   int xbins = myHist2d->GetNbinsX();
   double xmax = myHist2d->GetXaxis()->GetXmax();
   //double xmin = myHist2d->GetXaxis()->GetXmin();
@@ -402,7 +418,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
     effHist2->Draw("same");
   }
   // chi2 cut efficiency
-  if(chi2Max<100){    
+  if(useTree && chi2Max<100){    
     chi2eff = (TH1F*)chi2eff->Rebin(binvec.size()-1, chi2eff->GetName(), &(binvec.front()));
     all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));
     chi2eff->Divide(all);
@@ -412,7 +428,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
     chi2eff->Draw("same");
   }
   if (lepton=="muon") DrawDecayChLabel("#mu + Jets");
-  else if(lepton=="electron") DrawDecayChLabel("e + Jets");
+  else if(lepton=="elec") DrawDecayChLabel("e + Jets");
   double legEdge = 0.4;
   if(plotEfficiency)legEdge = effHist->GetMinimum();
   TLegend* leg=new TLegend(0.47,0.68,0.67,0.87);
@@ -426,7 +442,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   //if(plotEfficiency)leg->AddEntry(effHist,"Eff*A full PS Spring11","l");
   if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"eff' in restr. PS","l");
   if(plotEfficiency2)leg->AddEntry(effHist2,"eff'*A full PS Summer11","l");
-  if(chi2Max<100){
+  if(useTree && chi2Max<100){
     TString entry="#chi^{2} < ";
     entry+=chi2Max;
     entry+=" cut eff.";
@@ -447,6 +463,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
       chi+=chi2Max;
     }
     purstab->Print(outputFolder+"/purStabEff_"+lepton+"_"+variable+chi+".png");
+    purstab->Print(outputFolder+"/purStabEff_"+lepton+"_"+variable+chi+".eps");
     std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
   }
     
