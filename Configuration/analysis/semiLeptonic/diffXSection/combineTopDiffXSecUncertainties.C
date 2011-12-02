@@ -79,7 +79,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // NOTE: these must be identical to those defined in 
   // xSecVariables_ in analyzeHypothesisKinFit.C
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "inclusive"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "bqPtNorm", "bqEtaNorm", "inclusive"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.0;
@@ -106,6 +106,14 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
       if(xSecVariables_[i].Contains("top")){
 	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
 	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
+      }
+      else if(xSecVariables_[i].Contains("bqPt")){
+	  xSecVariableBranchNames_.push_back("lepBPt");
+	  xSecVariableBranchNames_.push_back("hadBPt");
+      }  
+      else if(xSecVariables_[i].Contains("bqEta")){
+	  xSecVariableBranchNames_.push_back("lepBEta");
+	  xSecVariableBranchNames_.push_back("hadBEta");
       }
       else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
     }
