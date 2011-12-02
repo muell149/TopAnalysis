@@ -47,7 +47,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
   // NOTE: these must be included in xSecVariables_ 
   // in analyzeHypothesisKinFit.C and combineTopDiffXSecUncertainties.C
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm" ,"lepEtaNorm"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // create plot container for combined e+#mu plots
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -202,6 +202,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  unbinnedTheory->Add(getTheoryPrediction("analyzeTopPartonLevelKinematics"+PS+"/"+plotName,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "electron")));
 	  // get MC@NLO curve
 	  TString plotName2="";
+	  bool DrawMCAtNLOPlot = true;
 	  if     (plotName=="topPt"    ) plotName2="hVisTopPt";
 	  else if(plotName=="topY"     ) plotName2="hVisTopY";
 	  else if(plotName=="ttbarPt"  ) plotName2="hVisTTbarPt";
@@ -209,10 +210,19 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  else if(plotName=="ttbarMass") plotName2="hVisTTbarM";
 	  else if(plotName=="lepPt"    ) plotName2="hVisLepPt";
 	  else if(plotName=="lepEta"   ) plotName2="hVisLepEta";
+	  //
+	  // !!!! PLEASE READ !!!!
+	  //
+	  // - Inserted only placeholder for b-quark distributions to avoid seg. faults later on
+	  // - To be modified if MC@NLO curves and dedicated error bands are available
+	  // - MC@NLO curves are not drawn at the moment (coupled to variable 'DrawMCAtNLOPlot').
+	  // - This comment and the variable 'DrawMCAtNLOPlot' can be deleted if MC@NLO curves are again complete.
+ 	  else if(plotName=="bqPt"     ) {plotName2="hVisTopPt"; DrawMCAtNLOPlot=false;}
+	  else if(plotName=="bqEta"    ) {plotName2="hVisTopY";  DrawMCAtNLOPlot=false;}
 	  else{ 
-	    std::cout << "no valid name for input variable ";
-	    std::cout << plotName << " for MC@Nlo chosen" << std::endl;
-	    exit(0);
+	      std::cout << "no valid name for input variable ";
+	      std::cout << plotName << " for MC@Nlo chosen" << std::endl;
+	      exit(0);
 	  }
 	  TH1F* unbinnedTheoryMCAtNLO  = getTheoryPrediction(plotName2,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root");
 	  TH1F* unbinnedTheory2        = (TH1F*)unbinnedTheory->Clone();
@@ -343,7 +353,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
             errorBandsMCatNLO->SetLineColor  (unbinnedTheoryMCAtNLO->GetLineColor()) ;
             errorBandsMCatNLO->SetLineWidth  (unbinnedTheoryMCAtNLO->GetLineWidth()) ;
             errorBandsMCatNLO->SetMarkerColor(unbinnedTheoryMCAtNLO->GetLineColor()) ;
-            errorBandsMCatNLO->Draw("e3 same")          ; 
+            if (DrawMCAtNLOPlot) errorBandsMCatNLO->Draw("e3 same")          ; 
   	    // draw unsmoothed theory curves
 	    // to see if rebinning/smoothing changes the shape
 	    //unbinnedTheoryMCAtNLO2->Draw("same");
@@ -353,7 +363,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    //errorTheoryMCatNLOdownClean   ->Draw("hist c same");
 	    // draw smoothed theory curves
 	    plotTheo->Draw("hist same")                 ;
-	    unbinnedTheoryMCAtNLO->Draw("hist c same")  ;
+	    if (DrawMCAtNLOPlot) unbinnedTheoryMCAtNLO->Draw("hist c same")  ;
 	    // draw reweighted histo for closure test
 	    if(reweightClosure&&sys==sysNo){ 
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
@@ -383,7 +393,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() -0.05 - (double)leg->GetNRows()*0.04);
 	    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-	    leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
+	    if (DrawMCAtNLOPlot) leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    leg->Draw("same");
 	  }
 	  plotCombination->Draw("e same");
