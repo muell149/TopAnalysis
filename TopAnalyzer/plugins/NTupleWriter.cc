@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.4 2011/11/23 17:44:54 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.5 2011/11/25 13:08:26 wbehrenh Exp $
 //
 //
 
@@ -83,8 +83,11 @@ private:
     virtual void beginLuminosityBlock ( edm::LuminosityBlock const&, edm::EventSetup const& );
     virtual void endLuminosityBlock ( edm::LuminosityBlock const&, edm::EventSetup const& );
     void clearVariables();
-     int getTriggerBits ( const edm::Event& iEvent, const edm::Handle< edm::TriggerResults >& trigResults );
-
+    int getTriggerBits ( const edm::Event& iEvent, const edm::Handle< edm::TriggerResults >& trigResults );
+    void AssignLeptonAndTau ( const reco::GenParticle* lepton, LV &GenLepton, int &pdgid, LV &GenTau );
+    bool isTau( const reco::GenParticle* lepton);
+    const reco::GenParticle* getTauDaughter(const reco::GenParticle* tau);
+    
     // ----------member data ---------------------------
 
     std::map<std::string, int> triggerMap_;
@@ -116,6 +119,8 @@ private:
     //True level info from FullLepGenEvent
     LV GenTop, GenAntiTop;
     LV GenLepton, GenAntiLepton;
+    int GenLeptonPdgId, GenAntiLeptonPdgId;
+    LV GenTau, GenAntiTau;
     LV GenNeutrino, GenAntiNeutrino;
     LV GenB, GenAntiB;
     LV GenWPlus, GenWMinus;
@@ -172,6 +177,21 @@ private:
 //
 // static data member definitions
 //
+
+void NTupleWriter::AssignLeptonAndTau ( const reco::GenParticle* lepton, LV& GenLepton, int& pdgid, LV& GenTau )
+{
+    const reco::GenParticle *finalLepton;
+    if (isTau(lepton)) {
+        GenTau = lepton->p4();
+        finalLepton = getTauDaughter(lepton);
+    } else {
+        GenTau = dummy;
+        finalLepton = lepton;
+    }
+    GenLepton = finalLepton->p4();
+    pdgid = finalLepton->pdgId();
+}
+
 
 //
 // constructors and destructor
@@ -233,6 +253,22 @@ NTupleWriter::~NTupleWriter()
 
 }
 
+bool NTupleWriter::isTau(const reco::GenParticle *lepton) {
+    return std::abs(lepton->pdgId()) == 15;
+}
+
+const reco::GenParticle*
+NTupleWriter::getTauDaughter(const reco::GenParticle* tau)
+{
+    for (size_t i = 0; i < tau->numberOfDaughters(); ++i) {
+        const reco::GenParticle* daughter = dynamic_cast<const reco::GenParticle*>(tau->daughter(i));
+        if (std::abs(daughter->pdgId()) == 11 || std::abs(daughter->pdgId()) == 13) 
+            return daughter;
+        else if (isTau(daughter))
+            return getTauDaughter(daughter);
+    }
+    return tau;
+}
 
 //
 // member functions
@@ -310,38 +346,19 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         if (! genEvt.failedToGet())
         {
             GenTop = genEvt->top()->p4(); GenAntiTop = genEvt->topBar()->p4();
-            GenLepton = genEvt->lepton(1)->p4(); GenAntiLepton = genEvt->leptonBar(1)->p4();
+            AssignLeptonAndTau(genEvt->lepton(), GenLepton, GenLeptonPdgId, GenTau);
+            AssignLeptonAndTau(genEvt->leptonBar(), GenAntiLepton, GenAntiLeptonPdgId, GenAntiTau);
             GenB = genEvt->b()->p4(); GenAntiB = genEvt->bBar()->p4();
-            GenNeutrino = genEvt->neutrino(1)->p4(); GenAntiNeutrino = genEvt->neutrinoBar(1)->p4();
+            GenNeutrino = genEvt->neutrino()->p4(); GenAntiNeutrino = genEvt->neutrinoBar()->p4();
             GenWPlus = genEvt->wPlus()->p4(); GenWMinus = genEvt->wMinus()->p4();
         }
-
-//         if (! FullLepEvt.failedToGet() && !(!FullLepEvt->genEvent()))
-//         {
-//             const reco::Candidate* genTop    = FullLepEvt->genTop();
-//             const reco::Candidate* genWplus  = FullLepEvt->genWPlus();
-//             const reco::Candidate* genB      = FullLepEvt->genB();
-//             const reco::Candidate* genLepBar = FullLepEvt->genLeptonBar();
-//             const reco::Candidate* genNu     = FullLepEvt->genNeutrino();
-// 
-//             const reco::Candidate* genTopBar = FullLepEvt->genTopBar();
-//             const reco::Candidate* genWminus = FullLepEvt->genWMinus();
-//             const reco::Candidate* genBBar   = FullLepEvt->genBBar();
-//             const reco::Candidate* genLep    = FullLepEvt->genLepton();
-//             const reco::Candidate* genNuBar  = FullLepEvt->genNeutrinoBar();
-// 
-//             GenTop = genTop->p4(); GenAntiTop = genTopBar->p4();
-//             GenLepton = genLep->p4(); GenAntiLepton = genLepBar->p4();
-//             GenB = genB->p4(); GenAntiB = genBBar->p4();
-//             GenNeutrino = genNu->p4(); GenAntiNeutrino = genNuBar->p4();
-//             GenWPlus = genWplus->p4(); GenWMinus = genWminus->p4();
-//             
-//         }
         else 
         {
             std::cerr << "Error: no gen event?!\n";
             GenTop = dummy; GenAntiTop = dummy;
             GenLepton = dummy; GenAntiLepton = dummy;
+            GenTau = dummy; GenAntiTau = dummy;
+            GenLeptonPdgId = 0; GenAntiLeptonPdgId = 0;
             GenB = dummy; GenAntiB = dummy;
             GenNeutrino = dummy; GenAntiNeutrino = dummy;
             GenWMinus = dummy; GenWPlus = dummy;
@@ -552,6 +569,10 @@ NTupleWriter::beginJob()
         Ntuple->Branch("GenAntiTop.", &GenAntiTop);
         Ntuple->Branch("GenLepton.", &GenLepton);
         Ntuple->Branch("GenAntiLepton.", &GenAntiLepton);
+        Ntuple->Branch("GenLeptonPdgId", &GenLeptonPdgId, "GenLeptonPdgId/I");
+        Ntuple->Branch("GenAntiLeptonPdgId", &GenAntiLeptonPdgId, "GenAntiLeptonPdgId/I");
+        Ntuple->Branch("GenTau.", &GenTau);
+        Ntuple->Branch("GenAntiTau.", &GenAntiTau);
         Ntuple->Branch("GenNeutrino.", &GenNeutrino);
         Ntuple->Branch("GenAntiNeutrino.", &GenAntiNeutrino);
         Ntuple->Branch("GenB.", &GenB);
