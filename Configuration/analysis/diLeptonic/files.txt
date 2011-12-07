@@ -34,8 +34,9 @@
 #192  TTJets_madgraph_Summer11_cff                  emu_ttbarviatau.root        ttbarsignalviatau
 
 192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarbg.root            ttbarbg,runOnAOD=True
-192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarsignal.root        ttbarsignal,runOnAOD=True
-192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+#192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarsignal.root        ttbarsignal,runOnAOD=True
+#192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          emu_ttbarplustau.root        ttbarsignalplustau,runOnAOD=True
 
 
 
@@ -94,8 +95,9 @@
 #192  TTJets_madgraph_Summer11_cff                  mumu_ttbarviatau.root        ttbarsignalviatau
 
 192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarbg.root            ttbarbg,runOnAOD=True
-192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarsignal.root        ttbarsignal,runOnAOD=True
-192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+#192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarsignal.root        ttbarsignal,runOnAOD=True
+#192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          mumu_ttbarplustau.root        ttbarsignalplustau,runOnAOD=True
 
 300  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          mumu_dymumu50inf.root         dymumu50inf,runOnAOD=True
 150  ..dylljetsM50_MadgraphZ2_Summer11_AOD_cff          mumu_dytautau50inf.root       dytautau50inf,runOnAOD=True
@@ -135,8 +137,9 @@
 #192  TTJets_madgraph_Summer11_cff                  ee_ttbarviatau.root        ttbarsignalviatau
 
 192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarbg.root            ttbarbg,runOnAOD=True
-192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarsignal.root        ttbarsignal,runOnAOD=True
-192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+#192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarsignal.root        ttbarsignal,runOnAOD=True
+#192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarviatau.root        ttbarsignalviatau,runOnAOD=True
+192  ..ttjets_MadgraphZ2_Summer11_AOD_cff          ee_ttbarplustau.root        ttbarsignalplustau,runOnAOD=True
 
 #300  DYJetsToLL_M50_madgraph_Summer11_cff          ee_dyee50inf.root           dyee50inf
 #150  DYJetsToLL_M50_madgraph_Summer11_cff          ee_dytautau50inf.root       dytautau50inf
