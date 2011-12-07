@@ -15,19 +15,19 @@
 #include <TH1.h>
 #include "plotterclass.h"
 
-   const Int_t kMaxlepton = 49;
-   const Int_t kMaxjet = 49;
-   const Int_t kMaxgenJet = 49;
-   const Int_t kMaxHypTop = 49;
-   const Int_t kMaxHypAntiTop = 49;
-   const Int_t kMaxHypLepton = 49;
-   const Int_t kMaxHypAntiLepton = 49;
-   const Int_t kMaxHypNeutrino = 49;
-   const Int_t kMaxHypAntiNeutrino = 49;
-   const Int_t kMaxHypB = 49;
-   const Int_t kMaxHypAntiB = 49;
-   const Int_t kMaxHypWPlus = 49;
-   const Int_t kMaxHypWMinus = 49;
+   const Int_t kMaxlepton = 99;
+   const Int_t kMaxjet = 99;
+   const Int_t kMaxgenJet = 99;
+   const Int_t kMaxHypTop = 99;
+   const Int_t kMaxHypAntiTop = 99;
+   const Int_t kMaxHypLepton = 99;
+   const Int_t kMaxHypAntiLepton = 99;
+   const Int_t kMaxHypNeutrino = 99;
+   const Int_t kMaxHypAntiNeutrino = 99;
+   const Int_t kMaxHypB = 99;
+   const Int_t kMaxHypAntiB = 99;
+   const Int_t kMaxHypWPlus = 99;
+   const Int_t kMaxHypWMinus = 99;
 
 using namespace std;
 
