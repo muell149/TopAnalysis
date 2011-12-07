@@ -234,7 +234,7 @@ Bool_t Analysis::Process(Long64_t entry)
     LVHypWPlus.push_back(wplustemp);
     TLorentzVector wminustemp(HypWMinuspX[i], HypWMinuspY[i], HypWMinuspZ[i], HypWMinusE[i]);
     LVHypWMinus.push_back(wminustemp);
- }
+  }
 
 
   TLorentzVector LVGenAntiTop(GenAntiToppX, GenAntiToppY, GenAntiToppZ, GenAntiTopE);
@@ -256,7 +256,7 @@ Bool_t Analysis::Process(Long64_t entry)
     TLorentzVector jettemp(jetpX[i], jetpY[i], jetpZ[i], jetE[i]);
     LVlepton.push_back(jettemp);
   }
- double BtagWP = 1.7; 
+  double BtagWP = 1.7; 
   int NJets =0;
   vector<int> BJetIndex;
   for(vector<double>::iterator it = jetBTagTCHE->begin(); it<jetBTagTCHE->end(); it++){
@@ -336,9 +336,66 @@ Bool_t Analysis::Process(Long64_t entry)
     //if(*(metEt->begin()) > 30 && dimass>12 && jet_>1 && BJetIndex.size()>0){//Analysis step 8?
     if(*(metEt->begin()) > 30 && dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){//Analysis step 9?
       Allh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+      
       if (dimass < 106 && dimass > 76 ){
       	Zh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
-      }else{
+      }
+
+      if(channel->find("emu")!=string::npos){//quick and DIRTY!
+	if(MCSample->find("ttbarsignal")!=string::npos){
+	  
+	  if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
+	    if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
+	      h_jetMultiVisTop->Fill(jet_,weightLepSF*btagSF*trigEFF); 
+	    }
+	  }//for visible top events
+	}	  
+	if(HypTop_){
+	  h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_jetMultiNoPU->Fill(jet_,weightLepSF*btagSF*trigEFF);
+	  TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  //	  cout<<"SolutionIndex: "<<solutionIndex<<endl;
+	  //cout<< "BJetTCHE[HypJet0index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet0index)[solutionIndex]]<<endl;
+	  //cout<< "BJetTCHE[HypJet1index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet1index)[solutionIndex]]<<endl<<endl;
+	  double HypTTBarMass = (LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).M();
+	  h_RecoTTBarMass->Fill(HypTTBarMass,1);
+	  h_HypTTBarMass->Fill(HypTTBarMass,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypTopMass->Fill(LVHypTop[solutionIndex].M(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiTopMass->Fill(LVHypAntiTop[solutionIndex].M(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypToppT->Fill(LVHypTop[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypWMinuspT->Fill(LVHypWMinus[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypWPluspT->Fill(LVHypWPlus[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypBpT->Fill(LVHypB[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiBpT->Fill(LVHypAntiB[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypNeutrinopT->Fill(LVHypNeutrino[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiNeutrinopT->Fill(LVHypAntiNeutrino[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  
+	  h_HypTopEta->Fill(LVHypTop[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiTopEta->Fill(LVHypAntiTop[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypWMinusEta->Fill(LVHypWMinus[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypWPlusEta->Fill(LVHypWPlus[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypBEta->Fill(LVHypB[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiBEta->Fill(LVHypAntiB[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypNeutrinoEta->Fill(LVHypNeutrino[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiNeutrinoEta->Fill(LVHypAntiNeutrino[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	     
+	  h_HypTopE->Fill(LVHypTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiTopE->Fill(LVHypAntiTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypWMinusE->Fill(LVHypWMinus[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypWPlusE->Fill(LVHypWPlus[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypBE->Fill(LVHypB[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiBE->Fill(LVHypAntiB[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypLeptonE->Fill(LVHypLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiLeptonE->Fill(LVHypAntiLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypNeutrinoE->Fill(LVHypNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	  h_HypAntiNeutrinoE->Fill(LVHypAntiNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
+	}
+      }else if(dimass<76 || dimass>106){
 	h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
 	h_jetMultiNoPU->Fill(jet_,weightLepSF*btagSF*trigEFF);
       	TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF);
