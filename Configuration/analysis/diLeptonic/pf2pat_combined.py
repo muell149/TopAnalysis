@@ -7,8 +7,8 @@ import os
 ####################################################################
 # global job options
 
-MAXEVENTS = -1
-REPORTEVERY = 10000
+MAXEVENTS   = 10000
+REPORTEVERY = 500
 WANTSUMMARY = True
 
 ####################################################################
@@ -113,43 +113,46 @@ process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
 # adds process.totalKinematicsFilter
 
 # trigger filtering
-
 process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi")
 process.filterTrigger.TriggerResults = cms.InputTag('TriggerResults','','HLT')
 process.filterTrigger.printTriggers = False
 if options.mode == 'mumu':
     ttFilterChannelName = 'MuonMuon'
     if options.runOnMC:
-        process.filterTrigger.hltPaths  = cms.vstring('HLT_DoubleMu7_*')
+        process.filterTrigger.hltPaths  = cms.vstring('HLT_DoubleMu7_v*')
     else:
-        if options.rereco:
-            process.filterTrigger.hltPaths  = cms.vstring(
-                'HLT_DoubleMu7_*',
-                #'HLT_Mu13_Mu8_v*',
-                #'HLT_Mu17_Mu8_v*',
-                #'HLT_Mu17_DiCentralJet30_*'
-            )
-        else:
-            process.filterTrigger.hltPaths  = cms.vstring(
-                #'HLT_DoubleMu7_*',
-                'HLT_Mu13_Mu8_v*',
-                #'HLT_Mu17_Mu8_v*',
-                #'HLT_Mu17_DiCentralJet30_*'
+        process.filterTrigger.hltPaths  = cms.vstring(
+            'HLT_DoubleMu6_v*',
+            'HLT_DoubleMu7_v*',
+            'HLT_Mu13_Mu8_v*',
+            'HLT_Mu17_Mu8_v*',
+            'HLT_DoubleMu45_v*'
             )
 
 elif options.mode == 'emu':
     ttFilterChannelName = 'ElectronMuon'
-    process.filterTrigger.hltPaths  = cms.vstring(
-        #'HLT_Mu10_Ele10_CaloIdL_*',
-        'HLT_Mu8_Ele17_CaloIdL_*',
-        'HLT_Mu17_Ele8_CaloIdL_*'
-        #'HLT_Mu10_Ele10*'
-        )
+    if options.runOnMC:
+        process.filterTrigger.hltPaths  = cms.vstring('HLT_Mu8_Ele17_CaloIdL_v*','HLT_Mu17_Ele8_CaloIdL_v*')
+    else:
+        process.filterTrigger.hltPaths  = cms.vstring(
+            'HLT_Mu8_Ele17_CaloIdL_v*',
+            'HLT_Mu17_Ele8_CaloIdL_v*',
+            'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*',
+            'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v*',
+            'HLT_Mu10_Ele10_CaloIdL_v*'
+            )
+
 elif options.mode == 'ee':
     ttFilterChannelName = 'ElectronElectron'
-    process.filterTrigger.hltPaths  = cms.vstring(
-        'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*',
-        'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v*')
+    if options.runOnMC:
+        process.filterTrigger.hltPaths  = cms.vstring('HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*')
+    else:
+        process.filterTrigger.hltPaths  = cms.vstring(
+            'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*',
+            'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v*',
+            'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*',
+            'HLT_DoubleEle45_CaloIdL_v*'
+            )
 else:
     print 'ERROR: unrecognised mode ' + options.mode +'\nuse ee, emu, or mumu'
     exit(8888)
