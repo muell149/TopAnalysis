@@ -23,7 +23,7 @@ void Analysis::Begin(TTree * /*tree*/)
   //  ifstream insample("samples.txt",std::ios::in);
   //insample>>sample;
 
-   TString dataset="ee";
+   TString dataset="mumu";
 
   
    /*   AllDIM.setDataSet(dataset);
