@@ -1,0 +1,16 @@
+selectionRoot/mumu/run2011a_v4.root
+selectionRoot/mumu/run2011av1v2.root
+selectionRoot/mumu/ttbarsignalplustau.root
+selectionRoot/mumu/ttbarbg.root
+selectionRoot/mumu/singleantitop_tw.root
+selectionRoot/mumu/singletop_tw.root
+selectionRoot/mumu/wwto2l2nu.root
+selectionRoot/mumu/wzto3lnu.root
+selectionRoot/mumu/zztoall.root
+selectionRoot/mumu/dytautau2050.root
+selectionRoot/mumu/dytautau50inf.root
+selectionRoot/mumu/dymumu1020.root
+selectionRoot/mumu/dymumu2050.root
+selectionRoot/mumu/dymumu50inf.root
+selectionRoot/mumu/wtolnu.root
+selectionRoot/mumu/qcdmu15.root

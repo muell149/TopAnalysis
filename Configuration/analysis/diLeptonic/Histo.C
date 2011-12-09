@@ -10,35 +10,65 @@ void Histo::MakePlots(){
   //h_HypTTbarMass.write();
 
   h_jetMulti.setOptions("","jetMulti","Events", 0, 0, 0, 1);
-  h_jetMulti.fillHisto();
   h_jetMulti.setDataSet("mumu");
+  h_jetMulti.fillHisto();
+  h_jetMulti.CalcXSec();
+  h_jetMulti.write();
+
+  h_jetMulti.setDataSet("ee");
+  h_jetMulti.fillHisto();
+  h_jetMulti.CalcXSec();
+  h_jetMulti.write();
+
+  h_jetMulti.setDataSet("emu");
+  h_jetMulti.fillHisto();
+  h_jetMulti.CalcXSec();
+  h_jetMulti.write();
+
+  h_jetMulti.setDataSet("combined");
+  h_jetMulti.fillHisto();
   h_jetMulti.CalcXSec();
   h_jetMulti.write();
 
   h_HypTTbarMass.setOptions("","HypTTBarMass","Events", 0, 0, 0, 1);
-  h_HypTTbarMass.fillHisto();
   h_HypTTbarMass.setDataSet("mumu");
+  h_HypTTbarMass.fillHisto();
+  h_HypTTbarMass.PlotDiffXSec();
+  h_HypTTbarMass.write();
+
+  h_HypTTbarMass.setDataSet("ee");
+  h_HypTTbarMass.fillHisto();
+  h_HypTTbarMass.PlotDiffXSec();
+  h_HypTTbarMass.write();
+
+  h_HypTTbarMass.setDataSet("emu");
+  h_HypTTbarMass.fillHisto();
+  h_HypTTbarMass.PlotDiffXSec();
+
+  h_HypTTbarMass.write();
+  h_HypTTbarMass.setDataSet("combined");
+  h_HypTTbarMass.fillHisto();
   h_HypTTbarMass.PlotDiffXSec();
   h_HypTTbarMass.write();
   
-  AllDIM.setOptions("","Allh1","Events", 0, 0, 0, 1);
-  AllDIM.fillHisto();
+  /*AllDIM.setOptions("","Allh1","Events", 0, 0, 0, 1);
   AllDIM.setDataSet("mumu");
+  AllDIM.fillHisto();
   AllDIM.write();
 
   GenDIM.setOptions("","GenAll","Events", 0, 0, 0, 1);
-  GenDIM.fillHisto();
   GenDIM.setDataSet("mumu");
+  GenDIM.fillHisto();
   GenDIM.write();
 
   InDIM.setOptions("","Zh1","Events", 0, 0, 0, 1);
-  InDIM.fillHisto();
   InDIM.setDataSet("mumu");
+  InDIM.fillHisto();
   InDIM.write();
 
   OutDIM.setOptions("","TTh1","Events", 0, 0, 0, 1);
-  OutDIM.fillHisto();
   OutDIM.setDataSet("mumu");
+  OutDIM.fillHisto();
   OutDIM.write();
 
   h_HypTopMass.setOptions("","HypTopMass","Events", 0, 0, 0, 1);
@@ -203,7 +233,7 @@ void Histo::MakePlots(){
   h_HypAntiNeutrinoE.fillHisto();
   h_HypAntiNeutrinoE.setDataSet("mumu");
   h_HypAntiNeutrinoE.write();
-
+  */
   return;
 
 

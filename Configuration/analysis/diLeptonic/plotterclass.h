@@ -8,6 +8,7 @@
 #include "TH1F.h"
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TSystem.h"
@@ -44,7 +45,8 @@ class Plotter {
   void   write();
   void writeRescaleHisto(TString, std::vector<TString> ); //for specific samples
   void writeRescaleHisto(TString);                        //for all MC
-  void CalcXSec();
+  double CalcXSec();
+  double CalcDYScale();
   void PlotDiffXSec();
   TLegend* getNewLegend();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
@@ -62,12 +64,21 @@ class Plotter {
   double DYScale;
   TString DYEntry;
   TString YAxis;
-
+  TString channel;
+  int channelType; //0=ee 1==mumu 2==emu 3==combined  
   TH1F onehist;
   std::vector<TH1F> hists;
   std::vector<TH1D> hists2;
   bool initialized;
-
+  int lumi;
+  double InclusiveXsection[4];
+  double InclusiveXsectionError[4];
+  double VisXsection[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
+  double VisXsectionError[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
+  double DiffXSec[4][10];//the differential X-section per channel by bin [channel][bin]
+  double DiffXSecError[4][10];//the differential X-section Error per channel by bin [channel][bin]
+  double GenDiffXSec[4][10];//the differential X-section per channel by bin [channel][bin]
+  double GenDiffXSecError[4][10];//the differential X-section Error per channel by bin [channel][bin]
 
 };
 
@@ -75,7 +86,6 @@ class Plotter {
 
 Plotter::Plotter()
 {
-  setDataSet("mumu");
   title="defaultTitle";
   name="defaultName";
   bins=10;
@@ -89,7 +99,6 @@ Plotter::Plotter()
 
 Plotter::Plotter(TString title_, TString name_, TString YAxis_, int bins_, double rangemin_, double rangemax_, double DYScale_)
 {
-  setDataSet("mumu");
   title=title_;
   name=name_;
   bins=bins_;
@@ -116,8 +125,6 @@ void Plotter::setOptions(TString title_, TString name_, TString YAxis_, int bins
 }
 
 
-
-
 void Plotter::setDataSet(std::vector<TString> dataset_, std::vector<double> scales_, std::vector<TString> legends_, std::vector<int> colors_, TString DYEntry_)
 {
   dataset.clear();
@@ -133,372 +140,136 @@ void Plotter::setDataSet(std::vector<TString> dataset_, std::vector<double> scal
 
 void Plotter::setDataSet(TString mode)
 {
+  initialized=false;
 
+  channel=mode;
+  if(channel =="ee")channelType=0;
+  if(channel =="mumu")channelType=1;
+  if(channel =="emu")channelType=2;
+  if(channel =="combined")channelType=3;
 
-  double Lumi=1141;
+  lumi=1141;
+  
 
+  if(channel=="ee"){  
+    DYEntry = "Z^{0} / #gamma* #rightarrow ee";
+    ifstream FileList("HistoFileList_ee.txt");
+    TString filename;
 
+    dataset.clear();
+    legends.clear();
+    colors.clear();
+  
+    while(!FileList.eof()){
+      FileList>>filename;
 
-  if(mode=="ee"){  DYEntry = "Z^{0} / #gamma* #rightarrow ee";
-
-  dataset.clear();
-  scales.clear();
-  legends.clear();
-  colors.clear();
-
-
-
-  dataset.push_back("ee_200rereco.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("ee_800prompt.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("ee_run161119.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("ee_ttbarsignal.root");
-  scales.push_back(Lumi*157.5/3581947.);
-  legends.push_back("t#bar{t} signal");
-  colors.push_back(kRed+1);
-
-  dataset.push_back("ee_ttbarviatau.root");
-  scales.push_back(Lumi*157.5/3581947.);
-  legends.push_back("t#bar{t} signal");
-  colors.push_back(kRed+1);
-
-  dataset.push_back("ee_ttbarbg.root");
-  scales.push_back(Lumi*157.5/3581947.);
-  legends.push_back("t#bar{t} background");
-  colors.push_back(kRed+2);
-
-  dataset.push_back("ee_singletop_tw.root");
-  scales.push_back(Lumi*7.87/814390);
-  legends.push_back("tW");
-  colors.push_back(kMagenta);
-
-  dataset.push_back("ee_singleantitop_tw.root");
-  scales.push_back(Lumi*7.87/809984);
-  legends.push_back("tW");
-  colors.push_back(kMagenta);
-
-  dataset.push_back("ee_wwto2l2nu.root");
-  scales.push_back(Lumi*4.51/210667.);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("ee_wzto3lnu.root");
-  scales.push_back(Lumi*0.61/204725.);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("ee_zzto2l2nu.root");
-  scales.push_back(Lumi*7.4/4187885);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("ee_dytautau1020.root");
-  scales.push_back(Lumi*3457./2200000);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("ee_dytautau2050.root");
-  scales.push_back(Lumi*1666./2032536.);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("ee_dytautau50inf.root");
-  scales.push_back(Lumi*3048./35101516);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("ee_dyee1020.root");
-  scales.push_back(Lumi*3457./2121872);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ee");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("ee_dyee2050.root");
-  scales.push_back(Lumi*1666./2254925);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ee");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("ee_dyee50inf.root");
-  scales.push_back(Lumi*3048./35101516);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ee");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("ee_wtolnu.root");
-  scales.push_back(Lumi*31314./56789563);
-  legends.push_back("W #rightarrow ll");
-  colors.push_back(kGreen-3);
-
-  dataset.push_back("ee_qcdem2030.root");
-  scales.push_back(Lumi*2.361E8 * 0.0106 /35729669);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
-
-  dataset.push_back("ee_qcdem3080.root");
-  scales.push_back(Lumi*5.944E7 * 0.061/70392060);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
-
-  dataset.push_back("ee_qcdem80170.root");
-  scales.push_back(Lumi*898200.0*0.159/8150672);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
+      if(filename!=""){
+	dataset.push_back(filename);
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
+	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
+	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
+	else if(filename.Contains("dymumu")){legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
+      }
+    }
   }
 
   if(mode=="mumu"){
 
-  DYEntry = "Z^{0} / #gamma* #rightarrow #mu#mu";
+    dataset.clear();
+    legends.clear();
+    colors.clear();
+    DYEntry = "Z^{0} / #gamma* #rightarrow #mu#mu";
+    ifstream FileList("HistoFileList_mumu.txt");
+    TString filename;
 
-  dataset.clear();
-  scales.clear();
-  legends.clear();
-  colors.clear();
+    while(!FileList.eof()){
+      FileList>>filename;
 
+      if(filename!=""){
+	dataset.push_back(filename);
 
-
-  dataset.push_back("selectionRoot/mumu/run2011av1v2.root");
-  //dataset.push_back("selectionRoot/mumu/200rereco.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("selectionRoot/mumu/run2011a_v4.root");
-  //dataset.push_back("selectionRoot/mumu/800prompt.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("selectionRoot/mumu/ttbarsignalplustau.root");
-  scales.push_back(1);
-  legends.push_back("t#bar{t} signal");
-  colors.push_back(kRed+1);
-
-  dataset.push_back("selectionRoot/mumu/ttbarbg.root");
-  scales.push_back(1);
-  legends.push_back("t#bar{t} background");
-  colors.push_back(kRed+2);
-
-  dataset.push_back("selectionRoot/mumu/singletop_tw.root");
-  scales.push_back(1);
-  legends.push_back("tW");
-  colors.push_back(kMagenta);
-
-  dataset.push_back("selectionRoot/mumu/singleantitop_tw.root");
-  scales.push_back(1);
-  legends.push_back("tW");
-  colors.push_back(kMagenta);
-
-  dataset.push_back("selectionRoot/mumu/wwto2l2nu.root");
-  scales.push_back(1);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("selectionRoot/mumu/wzto3lnu.root");
-  scales.push_back(1);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("selectionRoot/mumu/zztoall.root");
-  scales.push_back(1);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  //  dataset.push_back("selectionRoot/mumu/dytautau1020.root");
-  //scales.push_back(1);
-  //legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  //colors.push_back(kAzure+8);
-
-  dataset.push_back("selectionRoot/mumu/dytautau2050.root");
-  scales.push_back(1);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("selectionRoot/mumu/dytautau50inf.root");
-  scales.push_back(1);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("selectionRoot/mumu/dymumu1020.root");
-  scales.push_back(1);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("selectionRoot/mumu/dymumu2050.root");
-  scales.push_back(1);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("selectionRoot/mumu/dymumu50inf.root");
-  scales.push_back(1);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("selectionRoot/mumu/wtolnu.root");
-  scales.push_back(1);
-  legends.push_back("W #rightarrow ll");
-  colors.push_back(kGreen-3);
-
-  dataset.push_back("selectionRoot/mumu/qcdmu15.root");
-  scales.push_back(1);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
+	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
+	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
+	else if(filename.Contains("dymumu")){legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
+      }
+    }
   }
-  if(mode == "emu"){
+  if(mode=="emu"){
 
+    dataset.clear();
+    legends.clear();
+    colors.clear();
+    DYEntry = "";
+    ifstream FileList("HistoFileList_emu.txt");
+    TString filename;
 
-  dataset.clear();
-  scales.clear();
-  legends.clear();
-  colors.clear();
+    while(!FileList.eof()){
+      FileList>>filename;
 
-
-
-  dataset.push_back("emu_200rereco.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("emu_800prompt.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("emu_run161119.root");
-  scales.push_back(1);
-  legends.push_back("data");
-  colors.push_back(kBlack);
-
-  dataset.push_back("emu_ttbarsignal.root");
-  scales.push_back(Lumi*157.5/3581947.);
-  legends.push_back("t#bar{t} signal");
-  colors.push_back(kRed+1);
-
-  dataset.push_back("emu_ttbarviatau.root");
-  scales.push_back(Lumi*157.5/3581947.);
-  legends.push_back("t#bar{t} signal");
-  colors.push_back(kRed+1);
-
-  dataset.push_back("emu_ttbarbg.root");
-  scales.push_back(Lumi*157.5/3581947.);
-  legends.push_back("t#bar{t} background");
-  colors.push_back(kRed+2);
-
-  dataset.push_back("emu_singletop_tw.root");
-  scales.push_back(Lumi*5.3/814390.);
-  legends.push_back("tW");
-  colors.push_back(kMagenta);
-
-  dataset.push_back("emu_singleantitop_tw.root");
-  scales.push_back(Lumi*5.3/809984.);
-  legends.push_back("tW");
-  colors.push_back(kMagenta);
-
-  dataset.push_back("emu_wwto2l2nu.root");
-  scales.push_back(Lumi*4.51/210667.);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("emu_wzto3lnu.root");
-  scales.push_back(Lumi*0.61/204725.);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("emu_zztoall.root");
-  scales.push_back(Lumi*7.4/4187885.);
-  legends.push_back("VV");
-  colors.push_back(kYellow-10);
-
-  dataset.push_back("emu_dytautau1020.root");
-  scales.push_back(Lumi*3457./2200000.);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("emu_dytautau2050.root");
-  scales.push_back(Lumi*1666./2032536.);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("emu_dytautau50inf.root");
-  scales.push_back(Lumi*3048./35101516);
-  legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau");
-  colors.push_back(kAzure+8);
-
-  dataset.push_back("emu_dyee1020.root");
-  scales.push_back(Lumi*3457./2121872.);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ll");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("emu_dyee2050.root");
-  scales.push_back(Lumi*1666./2254925.);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ll");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("emu_dyee50inf.root");
-  scales.push_back(Lumi*3048./35101516.);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ll");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("mumu_dymumu1020.root");
-  scales.push_back(Lumi*3457./2121872);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ll");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("mumu_dymumu2050.root");
-  scales.push_back(Lumi*1666./2254925);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ll");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("mumu_dymumu50inf.root");
-  scales.push_back(Lumi*3048./35101516);
-  legends.push_back("Z^{0} / #gamma* #rightarrow ll");
-  colors.push_back(kAzure-2);
-
-  dataset.push_back("emu_wtolnu.root");
-  scales.push_back(Lumi*31314./56789563.);
-  legends.push_back("W #rightarrow ll");
-  colors.push_back(kGreen-3);
-
-  dataset.push_back("emu_qcdem2030.root");
-  scales.push_back(Lumi*2.361E8 * 0.0106 /35729669.);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
-
-  dataset.push_back("emu_qcdem3080.root");
-  scales.push_back(Lumi*5.944E7 * 0.061/70392060.);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
-
-  dataset.push_back("emu_qcdem80170.root");
-  scales.push_back(Lumi*898200.0*0.159/8150672.);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
-
-  dataset.push_back("emu_qcdmu15.root");
-  scales.push_back(Lumi*2.966E8*2.855E-4 /20258122);
-  legends.push_back("QCD");
-  colors.push_back(kYellow);
-
-
-
+      if(filename!=""){
+	dataset.push_back(filename);
+	
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
+	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
+	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
+	else if(filename.Contains("dymumu")){legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
+      }
+    }
   }
+  if(mode=="combined"){
 
+    dataset.clear();
+    legends.clear();
+    colors.clear();
+    DYEntry = "";
+    ifstream FileList("HistoFileList_emu.txt");
+    TString filename;
 
+    while(!FileList.eof()){
+      FileList>>filename;
+
+      if(filename!=""){
+	dataset.push_back(filename);
+	
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
+	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
+	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
+	else if(filename.Contains("dymumu")){legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
+      }
+    }
+  }
 }
 
 
 void Plotter::fillHisto()
 {
   if(!initialized){
-
+    hists.clear();
     for(unsigned int i=0; i<dataset.size(); i++){
       TFile *ftemp = TFile::Open(dataset[i]);
       TH1F *hist = (TH1F*)ftemp->Get(name);     
@@ -566,7 +337,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 {
   //hists[0].Write();
   //c->Write();
-
+  
   if(initialized){
 
   TCanvas * c = new TCanvas(title,title);
@@ -580,7 +351,9 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   TH1F *drawhists[hists.size()];
 
   std::stringstream ss;
-  DYScale = 1.23;
+  if(channelType==0){DYScale = 1.23;}
+  if(channelType==1){DYScale = 1.27;}
+  if(channelType==2){DYScale = 1.00;}
   ss << DYScale;
   TString scale;
 
@@ -592,12 +365,10 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   leg->SetBorderSize(0);
   c->SetName(title);
   c->SetTitle(title);
-
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
     drawhists[i]=(TH1F*) hists[i].Clone();
     setStyle(*drawhists[i], i);
     if(legends[i] != "data"){
-      drawhists[i]->Scale(scales[i]);
       if(legends[i] == DYEntry) drawhists[i]->Scale(DYScale);
       if(i > 1){
 	if(legends[i] != legends[i-1]){
@@ -619,7 +390,6 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
       }
     }
   }
-  
   TList* l = stack->GetHists();
   TH1* stacksum = (TH1*) l->At(0)->Clone();
   for (int i = 1; i < l->GetEntries(); ++i) {
@@ -630,12 +400,12 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   stack->Draw("same");
   drawhists[0]->Draw("same, e1");
   DrawCMSLabels(true, 1143);
-  DrawDecayChLabel("#mu#mu");    
+  DrawDecayChLabel(channel);    
   leg->Draw("SAME");
   //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
   gSystem->MakeDirectory("Plots");
-  gSystem->MakeDirectory("Plots/mumu");
-  c->Print("Plots/mumu/"+name+".eps");
+  gSystem->MakeDirectory("Plots/"+channel);
+  c->Print("Plots/"+channel+"/"+name+".eps");
   c->Clear();
   leg->Clear();
   delete c;
@@ -647,11 +417,12 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 
 void Plotter::setStyle(TH1 &hist, unsigned int i)
 {
-  //  hist.SetFillColor(colors[i]);
+  hist.SetFillColor(colors[i]);
   hist.SetLineColor(colors[i]);
   
 
   if(legends[i] == "data"){
+    hist.SetFillColor(0);
     hist.SetMarkerStyle(20); 
     hist.SetMarkerSize(1.);
     hist.SetLineWidth(1);
@@ -674,29 +445,34 @@ void Plotter::setStyle(TH1F &hist, unsigned int i)
     hist.SetLineWidth(1);
     hist.GetXaxis()->SetLabelFont(42);
     hist.GetXaxis()->SetTitle(name);
-    hist.GetYaxis()->SetTitle("Events test");
+    hist.GetYaxis()->SetTitle(YAxis);
   }
 }
 
-void Plotter::CalcXSec(){
-
-  double BranchingFraction[3]={0.0162, 0.0167, 0.0328};//[mumu, ee, emu]
-  double lumi = 1141;
+double Plotter::CalcXSec(){
+  double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
+  lumi = 1141;
 
   TH1F *numhists[hists.size()];
   double numbers[4]={0};
-  
+
+  for(unsigned int i=0; i<dataset.size(); i++){
+    TFile *ftemp = TFile::Open(dataset[i]);
+    TH1F *hist = (TH1F*)ftemp->Get("jetMulti");     
+    numhists[i]=hist;
+  }
+
+
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
-    numhists[i]=(TH1F*) hists[i].Clone();
 
     if(legends[i] == "data"){
-      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
+      //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[0]+=numhists[i]->Integral();
     }
     else if(legends[i] == "t#bar{t} signal"){
       TFile *ftemp2 = TFile::Open(dataset[i]);
       TH1D *NoPUPlot = (TH1D*)ftemp2->Get("jetMultiNoPU");
-      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
+      //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[1]+=NoPUPlot->Integral();
       
       TFile *ftemp = TFile::Open(dataset[i]);
@@ -705,21 +481,46 @@ void Plotter::CalcXSec(){
     } 
     else{
       if(legends[i] == DYEntry) hists[i].Scale(DYScale);
-      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
+      //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[3]+=(int)numhists[i]->Integral();
     }        
   }  
-  cout<<"Total Data: "<<numbers[0]<<endl;
-  cout<<"Total ttbar signal: "<<numbers[1]<<endl;
-  cout<<"Total GenTTBar: "<<numbers[2]<<endl;
-  cout<<"Total Other Bg: "<<numbers[3]<<endl;
+  //  cout<<"Total Data: "<<numbers[0]<<endl;
+  //cout<<"Total ttbar signal: "<<numbers[1]<<endl;
+  //cout<<"Total GenTTBar: "<<numbers[2]<<endl;
+  //cout<<"Total Other Bg: "<<numbers[3]<<endl;
 
-  double xsec = (numbers[0]-numbers[3])/((numbers[1]/numbers[2])*BranchingFraction[0]*lumi);
-  cout<<"X-sec: "<<xsec<<endl;
+  double xsec = (numbers[0]-numbers[3])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
+  double xsecstaterror = TMath::Sqrt(numbers[0])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
+  if(channelType!=3){
+    InclusiveXsection[channelType] = xsec;
+    InclusiveXsectionError[channelType] = xsecstaterror;
+  }else{
+    InclusiveXsection[channelType] =(InclusiveXsection[0]/(InclusiveXsectionError[0]*InclusiveXsectionError[0])
+				    +InclusiveXsection[1]/(InclusiveXsectionError[1]*InclusiveXsectionError[1])			
+		   		    +InclusiveXsection[2]/(InclusiveXsectionError[2]*InclusiveXsectionError[2]))/
+				     (1/(InclusiveXsectionError[0]*InclusiveXsectionError[0])
+				    +(1/(InclusiveXsectionError[1]*InclusiveXsectionError[1]))			
+				    +(1/(InclusiveXsectionError[2]*InclusiveXsectionError[2])));			
+
+    InclusiveXsectionError[channelType] =1/(TMath::Sqrt((1/(InclusiveXsectionError[0]*InclusiveXsectionError[0]))
+							+(1/(InclusiveXsectionError[1]*InclusiveXsectionError[1]))			
+    							+(1/(InclusiveXsectionError[2]*InclusiveXsectionError[2]))));			
+
+    cout<<"!!!!!!!!!!!!!!!!!!!!ee Cross Section: "<<InclusiveXsection[0]<<" +/- "<<InclusiveXsectionError[0]<<endl;
+    cout<<"!!!!!!!!!!!!!!!!!!!!mumu Cross Section: "<<InclusiveXsection[1]<<" +/- "<<InclusiveXsectionError[1]<<endl;
+    cout<<"!!!!!!!!!!!!!!!!!!!!emu Cross Section: "<<InclusiveXsection[2]<<" +/- "<<InclusiveXsectionError[2]<<endl;
+    cout<<"!!!!!!!!!!!!!!!!!!!!Combined Cross Section: "<<InclusiveXsection[3]<<" +/- "<<InclusiveXsectionError[3]<<endl;
+  }
+  return xsec;
 }
 
 void Plotter::PlotDiffXSec(){
+    double topxsec = 169.9;
+    double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
+    double SignalEvents = 3701947.0;
+
     const Int_t nbins = 5;
     const Double_t Xbins[nbins+1] = {345, 400, 475, 550, 700, 1000};//for ttbarmass
     //    const Double_t binCenterTopPt[nbinsTopPt] = {32, 109, 185, 308};
@@ -767,55 +568,119 @@ void Plotter::PlotDiffXSec(){
       }
     }
     double binWidth[nbins] ={0};
-    double DiffXSec[nbins]={0};
-    double GenDiffXSec[nbins]={0};
+    //    double DiffXSec[nbins]={0};
+    //    double DiffXSec[nbins]={0};
+    //    double GenDiffXSec[nbins]={0};
     TH1 *h_DiffXSec = (TH1*)varhists[0]->Clone();
     TH1 *h_GenDiffXSec = (TH1*)varhists[0]->Clone();
     h_DiffXSec->Reset();
 
     for (Int_t i=0; i<nbins; ++i) {
-      binWidth[i] = Xbins[i+1]-Xbins[i];      
-      //      DiffXSec[i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*1141);
-      DiffXSec[i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*1141);
-      GenDiffXSec[i] = (GenSignalSum[i]*169)/(3701947*.0162*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
-      cout<<"DataSum[i]: "<<DataSum[i]<<endl;
-      cout<<"GenSignalSum[i]: "<<GenSignalSum[i]<<endl;
-      cout<<"BGSum[i]: "<<BGSum[i]<<endl;
-      cout<<"efficiencies[i]: "<<efficiencies[i]<<endl;
-      cout<<"binWidth[i]: "<<binWidth[i]<<endl;
+      if(channelType!=3){
+	binWidth[i] = Xbins[i+1]-Xbins[i];      
+	DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
+	DiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
+	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+	cout<<"DataSum[i]: "<<DataSum[i]<<endl;
+	cout<<"GenSignalSum[i]: "<<GenSignalSum[i]<<endl;
+	cout<<"BGSum[i]: "<<BGSum[i]<<endl;
+	cout<<"efficiencies[i]: "<<efficiencies[i]<<endl;
+	cout<<"binWidth[i]: "<<binWidth[i]<<endl;
+	
+	
+	// set measured cross section
+	if (efficiencies[i] == 0) { //cannot divide by zero
+	  cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << title << endl;
+	  h_DiffXSec->SetBinContent(i+1, 0);
+	  //	h_DiffXSec->SetBinError(i+1, 0);
+	} else {
+	  cout<<"DiffXSec[i]: "<<DiffXSec[channelType][i]<<endl;;
+	  cout<<"GenDiffXSec[i]: "<<GenDiffXSec[i]<<endl;;
+	  h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+	  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
+	  h_DiffXSec->SetBinError(i+1,(TMath::Sqrt(DataSum[i]))/(efficiencies[i]*lumi*binWidth[i])); // statistical error
+	  //	h_GenDiffXSec->SetBinError(i+1,0);
+	}
+	cout<<endl;
+      }else{//For the combination
+	DiffXSec[channelType][i] =(DiffXSec[0][i]/(DiffXSecError[0][i]*DiffXSecError[0][i])
+					 +DiffXSec[1][i]/(DiffXSecError[1][i]*DiffXSecError[1][i])			
+					 +DiffXSec[2][i]/(DiffXSecError[2][i]*DiffXSecError[2][i]))/
+	                                 (1/(DiffXSecError[0][i]*DiffXSecError[0][i])
+				         +(1/(DiffXSecError[1][i]*DiffXSecError[1][i]))			
+				         +(1/(DiffXSecError[2][i]*DiffXSecError[2][i])));			
+
+	DiffXSecError[channelType][i]=1/(TMath::Sqrt((1/(DiffXSecError[0][i]*DiffXSecError[0][i]))
+							+(1/(DiffXSecError[1][i]*DiffXSecError[1][i]))			
+    							+(1/(DiffXSecError[2][i]*DiffXSecError[2][i]))));			
+
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!ee DiffCross Sec: "<<DiffXSec[0][i]<<" +/- "<<DiffXSecError[0][i]<<endl;
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu DiffCross Sec: "<<DiffXSec[1][i]<<" +/- "<<DiffXSecError[1][i]<<endl;
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu DiffCross Sec: "<<DiffXSec[2][i]<<" +/- "<<DiffXSecError[2][i]<<endl;
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecError[3][i]<<endl;
+	h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+	h_DiffXSec->SetBinError(i+1,DiffXSecError[channelType][i]);
 
 
-      // set measured cross section
-      if (efficiencies[i] == 0) { //cannot divide by zero
-	cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << title << endl;
-	h_DiffXSec->SetBinContent(i+1, 0);
-	//	h_DiffXSec->SetBinError(i+1, 0);
-      } else {
-	cout<<"DiffXSec[i]: "<<DiffXSec[i]<<endl;;
-	cout<<"GenDiffXSec[i]: "<<GenDiffXSec[i]<<endl;;
-	h_DiffXSec->SetBinContent(i+1,DiffXSec[i]);
-	h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[i]);
-	h_DiffXSec->SetBinError(i+1,(TMath::Sqrt(DataSum[i]))/(efficiencies[i]*1141*binWidth[i])); // statistical error
-	//	h_GenDiffXSec->SetBinError(i+1,0);
+	/*	GenDiffXSec[channelType][i] =(GenDiffXSec[0][i]/(GenDiffXSecError[0][i]*GenDiffXSecError[0][i])
+				      +GenDiffXSec[1][i]/(GenDiffXSecError[1][i]*GenDiffXSecError[1][i])			
+				      +GenDiffXSec[2][i]/(GenDiffXSecError[2][i]*GenDiffXSecError[2][i]))/
+	                                 (1/(GenDiffXSecError[0][i]*GenDiffXSecError[0][i])
+				         +(1/(GenDiffXSecError[1][i]*GenDiffXSecError[1][i]))			
+				         +(1/(GenDiffXSecError[2][i]*GenDiffXSecError[2][i])));			
+
+	GenDiffXSecError[channelType][i]=1/(TMath::Sqrt((1/(GenDiffXSecError[0][i]*GenDiffXSecError[0][i]))
+							+(1/(GenDiffXSecError[1][i]*GenDiffXSecError[1][i]))			
+    							+(1/(GenDiffXSecError[2][i]*GenDiffXSecError[2][i]))));			
+
+	cout<<"&&&&&&&&&&&&&&&!!!!!!!!ee GenDiffCross Sec: "<<GenDiffXSec[0][i]<<" +/- "<<GenDiffXSecError[0][i]<<endl;
+	cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu GenDiffCross Sec: "<<GenDiffXSec[1][i]<<" +/- "<<GenDiffXSecError[1][i]<<endl;
+	cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu GenDiffCross Sec: "<<GenDiffXSec[2][i]<<" +/- "<<GenDiffXSecError[2][i]<<endl;
+	cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined GenDiffCross Sec: "<<GenDiffXSec[3][i]<<" +/- "<<GenDiffXSecError[3][i]<<endl;
+	h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
+	h_GenDiffXSec->SetBinError(i+1,GenDiffXSecError[channelType][i]);*/
       }
-      cout<<endl;
     }
 
-
     //data normalization
-    double datascale = 1./h_DiffXSec->Integral("width");
+    double datascale;
+    datascale = 1./h_DiffXSec->Integral("width");//this is fine for one channel, but for the combination?
     h_DiffXSec->Scale(datascale);
+    
 
+    for (Int_t i=0; i<nbins; ++i) {//I don't think this is needed, but put it here for good measure
+      if(channelType!=3){
+	   VisXsection[channelType][i]=DiffXSec[channelType][i]*binWidth[i];//this is probably cheating
+	   VisXsectionError[channelType][i]=TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi);//then this is as well
+      }else{
+	VisXsection[channelType][i] =(VisXsection[0][i]/(VisXsectionError[0][i]*VisXsectionError[0][i])
+				   +VisXsection[1][i]/(VisXsectionError[1][i]*VisXsectionError[1][i])			
+				   +VisXsection[2][i]/(VisXsectionError[2][i]*VisXsectionError[2][i]))/
+	                          (1/(VisXsectionError[0][i]*VisXsectionError[0][i])
+				   +(1/(VisXsectionError[1][i]*VisXsectionError[1][i]))			
+				   +(1/(VisXsectionError[2][i]*VisXsectionError[2][i])));			
+	
+	VisXsectionError[channelType][i]=1/(TMath::Sqrt((1/(VisXsectionError[0][i]*VisXsectionError[0][i]))
+						     +(1/(VisXsectionError[1][i]*VisXsectionError[1][i]))			
+						     +(1/(VisXsectionError[2][i]*VisXsectionError[2][i]))));			
+	
+	//	cout<<"&&&&&&&&&&&&&&&!!!!!!!!ee VisCross section: "<<VisXsection[0][i]<<" +/- "<<VisXsectionError[0][i]<<endl;
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu VisCross section: "<<VisXsection[1][i]<<" +/- "<<VisXsectionError[1][i]<<endl;
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu VisCross section: "<<VisXsection[2][i]<<" +/- "<<VisXsectionError[2][i]<<endl;
+	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined VisCross section: "<<VisXsection[3][i]<<" +/- "<<VisXsectionError[3][i]<<endl;
+      }	 
+    }
     //theory curves
 
-    GenPlotTheory->Scale(170./(3701947.*GenPlotTheory->GetBinWidth(1)));
+    GenPlotTheory->Scale(topxsec/(SignalEvents*GenPlotTheory->GetBinWidth(1)));
     
     double genscale = 1./GenPlotTheory->Integral("width");
     
     GenPlotTheory->Scale(genscale);
 	
     //genscale = 1./ h_GenDiffXSec->Integral("width");
-    h_GenDiffXSec->Scale(genscale);
+    //h_GenDiffXSec->Scale(genscale);
 
 
 
@@ -882,8 +747,8 @@ void Plotter::PlotDiffXSec(){
     powheghist->SetLineColor(kGreen+1);
     powheghist->Draw("SAME,C");
     h_DiffXSec->Draw("SAME, EP0");
-    DrawCMSLabels(true, 1143);
-    DrawDecayChLabel("#mu#mu");    
+    DrawCMSLabels(true, lumi);
+    DrawDecayChLabel(channel);    
     
     TLegend leg2 = *getNewLegend();
     leg2.AddEntry(h_DiffXSec, "Data",    "p");
@@ -897,7 +762,7 @@ void Plotter::PlotDiffXSec(){
 
     
     
-    c->Print("Plots/mumu/DiffXS.eps");
+    c->Print("Plots/"+channel+"/DiffXS.eps");
     c->Clear();
     delete c;
     
@@ -909,7 +774,6 @@ void Plotter::PlotDiffXSec(){
       //varhists[i]=(TH1F*) hists[i].Clone();
       setStyle(*varhists[i], i);
       if(legends[i] != "data"){
-	varhists[i]->Scale(scales[i]);
 	if(legends[i] == DYEntry) varhists[i]->Scale(DYScale);
 	if(i > 1){
 	  if(legends[i] != legends[i-1]){
@@ -932,6 +796,7 @@ void Plotter::PlotDiffXSec(){
       }
     }
     
+    TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TList* l = stack->GetHists();
     TH1* stacksum = (TH1*) l->At(0)->Clone();
     for (int i = 1; i < l->GetEntries(); ++i) {
@@ -945,12 +810,9 @@ void Plotter::PlotDiffXSec(){
     DrawDecayChLabel("#mu#mu");    
     leg->Draw("SAME");
     
-    TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
-    c1->Print("Plots/mumu/BinnedMass.eps");
+    c1->Print("Plots/"+channel+"/BinnedMass.eps");
     c1->Clear();
     delete c1;
-    
-
 }
 
 void Plotter::writeRescaleHisto(TString histname, std::vector<TString> samples)
@@ -967,10 +829,10 @@ void Plotter::writeRescaleHisto(TString histname, std::vector<TString> samples)
       float nSample=0;
 
       for(unsigned int i=0; i<hists.size() ; i++){
-	if(legends[i] == "data") nData=nData + scales[i] * hists[i].GetBinContent(binIter);
-	else                     nMC=nMC + scales[i] * hists[i].GetBinContent(binIter);
+	if(legends[i] == "data") nData=nData + hists[i].GetBinContent(binIter);
+	else                     nMC=nMC +  hists[i].GetBinContent(binIter);
 	for(unsigned int j=0; j<samples.size(); j++){
-	  if(dataset[i] == samples[j]) nSample=nSample + scales[i] * hists[i].GetBinContent(binIter);
+	  if(dataset[i] == samples[j]) nSample=nSample +  hists[i].GetBinContent(binIter);
 	}
       }
       if(nSample!=0 && 1+(nData-nMC)/nSample > 0) h.SetBinContent(binIter, 1+(nData-nMC)/nSample);
@@ -1000,7 +862,7 @@ void Plotter::writeRescaleHisto(TString histname)
 
       for(unsigned int i=0; i<hists.size() ; i++){
 	if(legends[i] == "data") nData=nData +  hists[i].GetBinContent(binIter);
-	else                     nMC=nMC + scales[i] * hists[i].GetBinContent(binIter);
+	else                     nMC=nMC +  hists[i].GetBinContent(binIter);
 	
       }
       if(nMC!=0 && nData!=0) h.SetBinContent(binIter, (nData/nMC));
@@ -1065,7 +927,7 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
       } else{
 	Double_t nevents = weight->GetEntries();
 	//
-        Double_t crosssection = 177;
+        Double_t crosssection = CalcXSec();
         Double_t binw = hist->GetBinWidth(1);
         wgt = crosssection/nevents/binw;
       }
