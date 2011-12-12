@@ -38,12 +38,21 @@ using namespace std;
 // path to the ingoing root histogram files
 //const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
 const char *USERNAME = getenv("USER");
+
 const TString inpath(
 		     !strcmp(USERNAME, "wbehrenh") ? "./" : 
 		     // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
 		     "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-//const TString outpath("plots/");
-const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
+
+
+//const TString inpath("/scratch/hh/current/cms/user/asincruz/njs/M20Inf/");
+
+
+
+//const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
+
+//const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/systematics/M20Inf/");
+const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/Finalresults/M20Inf/");
 
 // output format
 const TString outform(".eps");
@@ -61,8 +70,45 @@ const TString preUnfoldedPlotsName(outpath+"preUnfoldedPlots.root");
 // input file name with systematic errors
 TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 
+
+
+/*
 TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_TOTAL.root");
 TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_DIFF.root");
+*/
+
+
+//-------------------------------------------------------------------------------------------------------------------------
+//DY Systematic errors for each Mll cut
+
+//================================================================================================
+//*******    Mll>30GeV  (Standard)  *******
+/*
+TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_DIFF.root");
+*/
+
+//================================================================================================
+//*******    Mll>20GeV   *******
+
+
+TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M20Inf/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M20Inf/Systematic_Errors_DIFF.root");
+
+//================================================================================================
+//*******    Mll>40GeV   *******
+
+/*
+TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M40Inf/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M40Inf/Systematic_Errors_DIFF.root");
+*/
+
+//================================================================================================
+//*******    Mll>50GeV   *******
+/*
+TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M50Inf/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M50Inf/Systematic_Errors_DIFF.root");
+*/
 
 // input file name with Powheg curves
 TFile* powhegInput = TFile::Open("/afs/naf.desy.de/user/d/dammann/public/Powheg.root");
@@ -102,10 +148,10 @@ const double topxsec = 169.9; //157.5
 const double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
 
 // luminosity used to normalise MC in plots and to calcutate cross sections
-//const Double_t lumi = 1143.221; const char* dataFilename = "1fb";
+const Double_t lumi = 1143.221; const char* dataFilename = "1fb";
 //const Double_t lumi = 4683.8; const char* dataFilename = "5fb";
 //const Double_t lumi = 2170.1; const char* dataFilename = "2fb";
-const Double_t lumi = 2511.0; const char* dataFilename = "run2011b_v1";
+//const Double_t lumi = 2511.0; const char* dataFilename = "run2011b_v1";
 //const Double_t lumi = 1026.9; const char* dataFilename = "2011av5v6";
 
 //const Double_t lumi = 22743;
@@ -1200,11 +1246,11 @@ TGraphAsymmErrors* CloneAddSystematics(TGraphAsymmErrors* graph, TString title) 
     TGraphAsymmErrors *withsystematics = (TGraphAsymmErrors*) graph->Clone();
     if (systematicsInputDiff && !systematicsInputDiff->IsZombie()) {
         //std::cout << "Systematics file is open!\n";
-        TString upName = title + "_total_sys_error_up";
-        TString downName = title + "_total_sys_error_down";
-        //currently no difference between up+down errors - so take both from total_sys_error
-        upName = title + "_total_sys_error";
-        downName = title + "_total_sys_error";
+        TString upName = title + "_total_error_up";
+        TString downName = title + "_total_error_down";
+        //currently no difference between up+down errors - so take both from total_error
+        upName = title + "_total_error";
+        downName = title + "_total_error";
         TH1 *up, *down;
 
         systematicsInputDiff->GetObject<TH1>(upName, up);
@@ -2601,9 +2647,9 @@ void CalculateCrossSection(Int_t channel, const char* selection, Double_t& cross
           channelStr = "ee";
         }
 
-        //currently no difference between up+down errors - so take both from total_sys_error
-        TString upName = "total_xsec_" + channelStr + "_" + selection + "_total_sys_error";
-        TString downName = "total_xsec_" + channelStr + "_" + selection + "_total_sys_error";
+        //currently no difference between up+down errors - so take both from total_error
+        TString upName = "total_xsec_" + channelStr + "_" + selection + "_total_error";
+        TString downName = "total_xsec_" + channelStr + "_" + selection + "_total_error";
 
         TH1 *up, *down;
 
@@ -2682,9 +2728,9 @@ void CalculateInclusiveCrossSections(const char* selection){
    statErr[3] = 1./TMath::Sqrt(statErr[3]);
 
    if (systematicsInputTotal && !systematicsInputTotal->IsZombie()) {
-       //currently no difference between up+down errors - so take both from total_sys_error
-       TString upName   = "total_xsec_combined_" + TString(selection) + "_total_sys_error";
-       TString downName = "total_xsec_combined_" + TString(selection) + "_total_sys_error";
+       //currently no difference between up+down errors - so take both from total_error
+       TString upName   = "total_xsec_combined_" + TString(selection) + "_total_error";
+       TString downName = "total_xsec_combined_" + TString(selection) + "_total_error";
 
        TH1 *up, *down;
 
