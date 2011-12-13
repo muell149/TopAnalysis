@@ -184,6 +184,14 @@ process = cms.Process("topDifferentialXSec")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.categories.append('TtSemiLepKinFitter')
+process.MessageLogger.categories.append('KinFitter')
+process.MessageLogger.cerr.TtSemiLepKinFitter = cms.untracked.PSet(
+    limit = cms.untracked.int32(0)
+)
+process.MessageLogger.cerr.KinFitter = cms.untracked.PSet(
+    limit = cms.untracked.int32(0)
+)
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -869,7 +877,6 @@ else:
     if(applyKinFit==True):
         print 'kinfit: processing bkg or data - genmatch removed'
 
-
 ## choose collections
 ## in fitting procedure
 process.kinFitTtSemiLepEventHypothesis.leps = 'tightMuons'
@@ -884,6 +891,7 @@ process.ttSemiLepHypGenMatch.jetCorrectionLevel=corrLevel
 process.ttSemiLepHypKinFit.jets = 'tightLeadingPFJets'
 process.ttSemiLepHypKinFit.leps = 'tightMuons'
 process.ttSemiLepHypKinFit.mets = 'patMETsPF'
+process.ttSemiLepEvent.verbosity=0
 
 # maximum number of jets to be considered in the jet combinatorics
 # (has to be >= 4, can be set to -1 if you want to take all)
@@ -893,7 +901,7 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 # (has to be >= 1, can be set to -1 if you want to take all)
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
-# set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses
+# set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
 process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
 #process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 #process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
@@ -1802,7 +1810,7 @@ if(runningOnData=="MC"):
                           process.genMuonSelection                      *
                           ## hadron level gen jet selection
                           process.genJetCuts                            *
-                          ## investigate top reconstruction parton level PS
+                          ## investigate top reconstruction hadron level PS
                           process.kinFitGenPhaseSpaceHad                *
                           ## new phase space cuts on the basis of genTtbarEvent
                           process.filterGenPhaseSpace   
@@ -1935,7 +1943,7 @@ if(decayChannel=="electron"):
         path.replace(process.effSFMuonEventWeight, process.effSFElectronEventWeight)
         ## replace gen object kinematics
         if(runningOnData=="MC"):
-            process.genAllElectronKinematics.weight=""  
+            process.genAllElectronKinematics.weight=""
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
