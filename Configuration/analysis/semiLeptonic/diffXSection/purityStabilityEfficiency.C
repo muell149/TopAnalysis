@@ -11,6 +11,7 @@
 #include <TFile.h>
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TPaletteAxis.h>
 #include <TF1.h>
 #include <TCanvas.h>
 #include <TStyle.h>
@@ -37,7 +38,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
   if(!useTree) chi2Max=99999; // can be done only with tree
   // output folder in case of saving the canvases:
-  //TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff/"+lepton;
+  //TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff";
   //TString outputFolder = "/afs/naf.desy.de/user/j/jlange/public/analysis/purStabEff/compSpringSummer11";
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2011/binning";
   if(useTree&&chi2Max<100){ 
@@ -60,7 +61,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   
   std::map<TString, std::vector<double> > binningMap = makeVariableBinning();
   std::vector<double> xBins = binningMap[variable];
-  int NxBins = xBins.size();  
+  int NxBins = xBins.size()-1;  
   
   // pt
   // double xBins[] = {0, 60, 120, 200, 280, 400};
@@ -85,7 +86,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   // double bqEtaBins[] = {-5.0, -2.5, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.5, 5.0};
   //int NxBins = sizeof(xBins)/sizeof(double);
 
-  std::cout << "size of xBins array: " << NxBins << std::endl;
+  std::cout << "size of xBins: " << NxBins << std::endl;
   
   // change x axis range
   double rangeUserLeft = -1e6;
@@ -120,6 +121,9 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   TH2F* myHist2d = (TH2F*)(((TH2F*)myFile1->Get("analyzeTopRecoKinematicsKinFit/"+variable+"_"))->Clone());
   // empty histogram
   if(useTree) myHist2d->Reset("ICES"); // Scale(0);
+  // create response matrix with and without efficiency correction in final binning; will be only filled if useTree==true
+  TH2F* responseMatrix = new TH2F("responseMatrix", "responseMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
+  TH2F* migrationMatrix = new TH2F("migrationMatrix", "migrationMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
   // create pointer to avoid problems with object persistence  
   TH1F* chi2eff = NULL;
   TH1F* all     = NULL;
@@ -190,7 +194,8 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
 	}
 	// apply chi2 cut
 	if(chi2<chi2Max){
-	  if(useTree) myHist2d->Fill(gen, rec, weight);
+	  myHist2d       ->Fill(gen, rec, weight);
+	  responseMatrix ->Fill(gen, rec, weight);
 	  // fill events passing chi2
 	  chi2eff->Fill(rec, weight);
 	}
@@ -211,7 +216,8 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   myHist2d->SetStats(kFALSE);
   myHist2d->GetXaxis()->SetTitle("gen");
   myHist2d->GetYaxis()->SetTitle("rec");
-  myHist2d->Draw("colz");
+  //myHist2d->Draw("colz");
+  myHist2d->Draw("");
   
   // initialize variables
   int numberOfBins=0;
@@ -261,7 +267,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
       if(stabilitydenom)stability=myenum/stabilitydenom;
       else stability=0;
 
-      if( (numberOfBins+1 < NxBins && myHist2d->GetBinCenter(i+1) > xBins[numberOfBins+1]) || i==xbins){
+      if( (numberOfBins+1 < NxBins+1 && myHist2d->GetBinCenter(i+1) > xBins[numberOfBins+1]) || i==xbins){
 	    // write results to vector
 	    purityvec.push_back(purity);
 	    stabilityvec.push_back(stability);
@@ -311,16 +317,18 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   // calculate efficiency histogram
   effHist->Divide(genHist);
   
-  // if als effiency in limited phase space interesting:
+  // if also effiency in limited phase space interesting:
+  TH1F* genHistPS = 0;
   if(plotEfficiencyPhaseSpace){
     // get histogram of generated quantity
-    TH1F* genHistPS = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable))->Clone());
+    genHistPS = (TH1F*)(((TH1F*)myFile1->Get("analyzeTopPartonLevelKinematicsPhaseSpace/"+variable))->Clone());
     TCanvas* Canv4 = new TCanvas("analyzeTopPartonLevelKinematicsPhaseSpace","analyzeTopPartonLevelKinematicsPhaseSpace",600,600);
     Canv4->cd();
     //genHistPS->SetStats(kFALSE);
     genHistPS->Draw();
     // rebin histogram of generated quantity
     genHistPS = (TH1F*)genHistPS->Rebin(binvec.size()-1, genHistPS->GetName(), &(binvec.front()));
+    //genHistPS->Draw("");
     // calculate efficiency histogram
     effHistPS->Divide(genHistPS);
   }
@@ -438,10 +446,10 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   leg->AddEntry(purityhist,   "Purity"    ,"l");
   leg->AddEntry(stabilityhist,"Stability" ,"l");
   //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
-  if(plotEfficiency)leg->AddEntry(effHist,"eff'*A","l");
+  if(plotEfficiency)leg->AddEntry(effHist,"eff.*A","l");
   //if(plotEfficiency)leg->AddEntry(effHist,"Eff*A full PS Spring11","l");
-  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"eff' in restr. PS","l");
-  if(plotEfficiency2)leg->AddEntry(effHist2,"eff'*A full PS Summer11","l");
+  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"eff. in restr. PS","l");
+  if(plotEfficiency2)leg->AddEntry(effHist2,"eff.*A full PS Summer11","l");
   if(useTree && chi2Max<100){
     TString entry="#chi^{2} < ";
     entry+=chi2Max;
@@ -456,6 +464,106 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   //TCanvas* purstabLeg = new TCanvas("purstabLeg","purstabLeg",600,300);
   //leg->Draw("same");
   
+  // create histo with efficiency counting all events stemming from a gen bin that are reconstructed anywhere 
+  // wrt. all events initially created in that bin, which are reconstructed or not 
+  TH1F* effHistGen = new TH1F("effHistGen","effHistGen", NxBins, &xBins[0]);
+  TCanvas* CanvEffGen = new TCanvas("CanvEffGen","CanvEffGen",600,600);
+  
+  // calculate response matrix as probability matrix: divide number in bin(gen,rec) by number of all
+  // initially generated events in the gen bin (i.e. also if they have been lost due to inefficiencies);
+  // if restricted phase space shall be plotted, it is calculated for that one
+  TCanvas* CanvResponseMatrix = new TCanvas("CanvResponseMatrix","CanvResponseMatrix",600,600);
+  // additionally: calculate response matrix that only includes migration effects, not limited acc. or eff.
+  TCanvas* CanvMigrationMatrix = new TCanvas("CanvMigrationMatrix","CanvMigrationMatrix",600,600);
+  if(useTree){
+    for(int iGenBin=1; iGenBin <=NxBins; iGenBin++){
+      double allRecEvtsFromGenBin=0.;
+      double effDenom=-1.;
+      double effGen=0.;
+      double effDenomMigrationOnly = responseMatrix->Integral(iGenBin,iGenBin,0,NxBins+1);
+      if(plotEfficiencyPhaseSpace && genHistPS->GetBinContent(iGenBin)) effDenom=genHistPS->GetBinContent(iGenBin);
+      else if(genHist->GetBinContent(iGenBin))                          effDenom=genHist  ->GetBinContent(iGenBin);
+      
+      for(int iRecBin=1; iRecBin <=NxBins; iRecBin++){
+	double binContentResponse=0.;
+	double binContentMigration=0.;
+	if(effDenom>0)              binContentResponse  = responseMatrix->GetBinContent(iGenBin, iRecBin)/ effDenom;
+	if(effDenomMigrationOnly>0) binContentMigration = responseMatrix->GetBinContent(iGenBin, iRecBin)/ effDenomMigrationOnly;
+	//binContent=99;
+// 	std::cout<<"num= "<<responseMatrix->GetBinContent(iGenBin, iRecBin) <<"; denom= "<<effDenom<<"; binContentResponse= "<< binContent<<std::endl;
+	allRecEvtsFromGenBin+=responseMatrix->GetBinContent(iGenBin, iRecBin);
+	responseMatrix  ->SetBinContent(iGenBin, iRecBin, binContentResponse);
+	migrationMatrix ->SetBinContent(iGenBin, iRecBin, binContentMigration);
+      }
+      effGen=(double)allRecEvtsFromGenBin/effDenom;
+//       std::cout<<"-------------------------"<<std::endl;
+//       std::cout<<"EffNum= "<<allRecEvtsFromGenBin<<"; Eff.= "<<effGen <<std::endl;
+//       std::cout<<"effDenomMigrationOnly= "<<effDenomMigrationOnly <<std::endl;
+//       std::cout<<"-------------------------"<<std::endl;
+      effHistGen->SetBinContent(iGenBin, effGen);
+    }
+  
+  // draw responseMatrix incl. eff.
+  CanvResponseMatrix->cd();
+  CanvResponseMatrix->SetRightMargin(0.2);
+  responseMatrix->SetStats(kFALSE);
+  responseMatrix->GetXaxis()->SetTitle("gen "+xtitle);
+  responseMatrix->GetYaxis()->SetTitle("rec "+xtitle);
+  responseMatrix->GetXaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  responseMatrix->GetYaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  responseMatrix->GetXaxis()->SetNoExponent(true);
+  responseMatrix->GetYaxis()->SetNoExponent(true);
+  responseMatrix->GetZaxis()->SetNoExponent(true);
+  responseMatrix->GetZaxis()->SetRangeUser(0,0.3);
+  responseMatrix->SetTitle("Response Matrix - Including Efficiency");
+  responseMatrix->Draw("COLZ");
+  //TPaletteAxis *palette = (TPaletteAxis*)responseMatrix->GetListOfFunctions()->FindObject("palette");
+  //gPad->Update();
+  if(plotEfficiencyPhaseSpace) DrawLabel("Full Response Matrix - Migration and Efficiency",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  else DrawLabel("Full Response Matrix - Migration and Eff.*Acc.",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  
+  // draw migrationMatrix w/o eff.
+  CanvMigrationMatrix->cd();
+  CanvMigrationMatrix->SetRightMargin(0.2);
+  migrationMatrix->SetStats(kFALSE);
+  migrationMatrix->GetXaxis()->SetTitle("gen "+xtitle);
+  migrationMatrix->GetYaxis()->SetTitle("rec "+xtitle);
+  migrationMatrix->GetXaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  migrationMatrix->GetYaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  migrationMatrix->GetXaxis()->SetNoExponent(true);
+  migrationMatrix->GetYaxis()->SetNoExponent(true);
+  migrationMatrix->GetZaxis()->SetNoExponent(true);
+  migrationMatrix->GetZaxis()->SetRangeUser(0,1);
+  migrationMatrix->SetTitle("Response Matrix - Migration Only");
+  //gStyle->SetPaintTextFormat("3.2f");
+  migrationMatrix->Draw("COLZ");
+  DrawLabel("Response Matrix - Migration Only",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  
+  // draw effGen together with effective efficiencies from bin-by-bin
+  CanvEffGen->cd();
+  effHistGen->GetXaxis()->SetTitle("gen "+xtitle);
+  effHistGen->GetXaxis()->SetNoExponent(true);
+  effHistGen->GetYaxis()->SetNoExponent(true);
+  effHistGen->SetLineColor(kGreen+2);
+  effHistGen->SetLineStyle(1);
+  effHistGen->SetLineWidth(4);
+  effHistGen->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
+  effHistGen->GetYaxis()->SetRangeUser  (0., 0.5);
+  effHistGen->Draw("");
+  if(plotEfficiency)           effHist->Draw("same");
+  if(plotEfficiencyPhaseSpace) effHistPS->Draw("same");
+  
+  TLegend* leg2=new TLegend(0.2,0.68,0.67,0.87);
+  leg2->SetTextSize(0.03);
+  leg2->SetFillStyle(0);
+  leg2->SetBorderSize(0);
+  if(plotEfficiencyPhaseSpace) leg2->AddEntry(effHistGen,   "Pure eff. in restr. PS (no migration)"    ,"l");
+  else                         leg2->AddEntry(effHistGen,   "Pure eff.*A (no migration)"    ,"l");
+  if(plotEfficiency)           leg2->AddEntry(effHist,"eff.*A (bin-by-bin)","l");
+  if(plotEfficiencyPhaseSpace) leg2->AddEntry(effHistPS,"eff. in restr. PS (bin-by-bin)","l");
+  leg2->Draw();
+}
+  
   if(save){
     TString chi="";
     if(chi2Max<100){ 
@@ -464,6 +572,11 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
     }
     purstab->Print(outputFolder+"/purStabEff_"+lepton+"_"+variable+chi+".png");
     purstab->Print(outputFolder+"/purStabEff_"+lepton+"_"+variable+chi+".eps");
+    if(useTree){
+      CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+lepton+"_"+variable+chi+".png");
+      CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+lepton+"_"+variable+chi+".png");
+      CanvEffGen->Print(outputFolder+"/pureGenEff_"+lepton+"_"+variable+chi+".png");
+    }
     std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
   }
     
