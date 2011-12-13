@@ -25,6 +25,7 @@
 #include <TLegend.h>
 #include <TKey.h>
 #include <TGraphAsymmErrors.h>
+#include <TString.h>
 
 #include <TLine.h>
 #include <TBox.h>
@@ -1489,6 +1490,21 @@ namespace semileptonic {
       result["bqEta"]=bins_;
       bins_.clear();
       return result;
+    }
+    
+    void setXAxisRange(TH1F*& his, TString variable)
+    {
+      // this function restricts the drawn range of the x axis in the differential variable
+      // modified quantities: xAxis of his
+      // used functions: none
+      // used enumerators: none
+      
+      // restrict axis
+      if(variable=="topPt")       his->GetXaxis()->SetRange(1,5);
+      else if(variable=="topY")   his->GetXaxis()->SetRange(2,9);
+      else if(variable=="lepEta") his->GetXaxis()->SetRange(2, his->GetNbinsX()-2);
+      else if(variable=="bqPt")   his->GetXaxis()->SetRange(2,6);
+      else if(variable=="bqEta")  his->GetXaxis()->SetRange(2,9);
     }
 
   template <class T>

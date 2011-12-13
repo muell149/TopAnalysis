@@ -1389,26 +1389,8 @@ TString efficiency="efficiency/"+variable;
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false );
       // restrict axis
-      if(variable=="topPt"){ 
-	histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
-	histo_[xSec][kSig ]->GetXaxis()->SetRange(1,5);
-      }
-      else if(variable=="topY"){ 
-	histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
-	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
-      }
-      else if(variable=="lepEta"){ 
-	histo_[xSec][kData]->GetXaxis()->SetRange(2, histo_[xSec][kData]->GetNbinsX()-2);
-	histo_[xSec][kSig ]->GetXaxis()->SetRange(2, histo_[xSec][kSig ]->GetNbinsX()-2);
-      }  
-      else if(variable=="bqPt"){ 
-	histo_[xSec][kData]->GetXaxis()->SetRange(2,6);
-	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,6);
-      }
-      else if(variable=="bqEta"){ 
-	histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
-	histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
-      }
+      setXAxisRange(histo_[xSec][kData], variable);
+      setXAxisRange(histo_[xSec][kSig ], variable);
       ++NXSec;
     }
   }
@@ -1680,26 +1662,8 @@ TString efficiency="efficiency/"+variable;
     histogramStyle(*histo_[xSec][kData], kData, false);
     histogramStyle(*histo_[xSec][kSig ], kSig , false);
     // restrict axis
-    if(variable=="topPt"){ 
-      histo_[xSec][kData]->GetXaxis()->SetRange(1,5);
-      histo_[xSec][kSig ]->GetXaxis()->SetRange(1,5);
-    }
-    else if(variable=="topY"){ 
-      histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
-      histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
-    }
-    else if(variable=="lepEta"){ 
-      histo_[xSec][kData]->GetXaxis()->SetRange(2, histo_[xSec][kData]->GetNbinsX()-2);
-      histo_[xSec][kSig ]->GetXaxis()->SetRange(2, histo_[xSec][kSig ]->GetNbinsX()-2);
-    }
-    else if(variable=="bqPt"){ 
-      histo_[xSec][kData]->GetXaxis()->SetRange(2,6);
-      histo_[xSec][kSig ]->GetXaxis()->SetRange(2,6);
-    }
-    else if(variable=="bqEta"){ 
-      histo_[xSec][kData]->GetXaxis()->SetRange(2,9);
-      histo_[xSec][kSig ]->GetXaxis()->SetRange(2,9);
-    }
+    setXAxisRange(histo_[xSec][kData], variable);
+    setXAxisRange(histo_[xSec][kSig ], variable);
     ++NXSec;
   }
   //   std::cout << std::endl;
