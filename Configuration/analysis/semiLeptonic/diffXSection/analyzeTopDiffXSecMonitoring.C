@@ -1,7 +1,8 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
+void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root"
 				  , const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
   // ============================
@@ -205,7 +206,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
     "analyzeTopRecoKinematicsKinFit/lightqPt",
     "analyzeTopRecoKinematicsKinFit/lightqEta",   
     "analyzeTopRecoKinematicsKinFit/bqPt",
-    "analyzeTopRecoKinematicsKinFit/bqEta"    
+    "analyzeTopRecoKinematicsKinFit/bqEta",
+    "analyzeTopRecoKinematicsKinFit/prob", 
+    "analyzeTopRecoKinematicsKinFit/chi2"
   };
 
   TString plots1Dmu[ ] = { 
@@ -374,7 +377,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
     "p_{t}^{light q} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
     "#eta^{light q}/Frequency/0/1",
     "p_{t}^{b quark} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
-    "#eta^{b quark}/Frequency/0/1"
+    "#eta^{b quark}/Frequency/0/1",
+    "probability (best fit hypothesis)/events/1/50", 
+    "#chi^{2} (best fit hypothesis)/events/0/25"
   };
 
   TString axisLabel1De[ ] = {
@@ -748,7 +753,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = false, i
 	    if(plotList_[plot].Contains("btagSimpleSecVtx"))max*=0.8;
 	    // restrict x axis for special plots
 	    if(getStringEntry(plotList_[plot], 2)=="nHit"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(10,30 );
-	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10  );
+	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ){ 
+	      if(getStringEntry(plotList_[plot], 1)=="analyzeTopRecoKinematicsKinFit") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,60);
+	      else histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10);
+ 
+	    }
 	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
 	    if(plotList_[plot].Contains("relIso")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.15);
 	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,10);
