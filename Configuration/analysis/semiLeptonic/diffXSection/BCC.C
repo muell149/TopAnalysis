@@ -67,6 +67,8 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
     datafile = new TFile(filename,"READ");
     datafile -> cd(pathname); 
 
+    std::cout << filename << " " <<  pathname << std::endl;
+
     TTree *treeData = (TTree*)gDirectory->Get("tree");
     
     // Local variables
@@ -83,11 +85,21 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 	{
 	    vecBranchData.clear();
 
-	    std::cout << " Processing Data for .... " << *iterBranch << std::endl;
+	    std::cout << " Processing Data for .... " << *iterBranch;
+	    
+	    TString activeBranchName = "";
+	    
+	    if      ((*iterBranch)=="bqEtaHad") activeBranchName = "hadBEta";
+	    else if ((*iterBranch)=="bqEtaLep") activeBranchName = "lepBEta";
+	    else if ((*iterBranch)=="bqPtHad" ) activeBranchName = "hadBPt";
+	    else if ((*iterBranch)=="bqPtLep" ) activeBranchName = "lepBPt";
+	    else activeBranchName = (*iterBranch);	    
+
+	    std::cout << " --> " << activeBranchName << std::endl;
 
 	    treeData->SetBranchStatus("*",0);
-	    treeData->SetBranchStatus(*iterBranch,1);
-	    treeData->SetBranchAddress((*iterBranch),(&tempData));
+	    treeData->SetBranchStatus(activeBranchName,1);
+	    treeData->SetBranchAddress(activeBranchName,(&tempData));
 	    
 	    for (int j=0; j<treeData->GetEntries(); j++)
 	    {	
@@ -128,14 +140,14 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 		// Check if immediately following entry in map belongs to top -> blnu 
 		// This works because the map is sorted alphabetically -> must be reviewed and fixed if new a branch is added between topxxHad and topxxLep
 		
-		if (iter != mapTempData.end() && iter->first.EndsWith("Lep")) strLep = (iter->first); 
-		
+		if (iter != mapTempData.end() && iter->first.EndsWith("Lep"))    strLep = (iter->first); 
+
 		if (strHad != "DefaultHad" && strLep != "DefaultLep" && strHad(0,strHad.Length()-3) == strLep(0,strLep.Length()-3) )
 		{
 		    strNew = iter->first(0,(iter->first).Length()-3);
 		    vecBranchData.insert(vecBranchData.end(),iter->second.begin(),iter->second.end());		    
 		}
-			
+
 		mapData[strNew] = vecBranchData;
 	    }
 	}
@@ -219,6 +231,8 @@ void BCC::MakeHistos()
   // Can be replaced by a non-static way of finding an optimal binning
 	
   std::map<TString,double> BinWidthScaler;
+  std::map<TString,int>    HistoBins; 
+  std::map<TString,int>    HistoSmoothingValue;
 
   BinWidthScaler["lepEta"]    = 20.0;
   BinWidthScaler["lepPt"]     =  0.4;
@@ -227,11 +241,33 @@ void BCC::MakeHistos()
   BinWidthScaler["ttbarMass"] =  0.2;
   BinWidthScaler["ttbarPt"]   =  0.5;
   BinWidthScaler["ttbarY"]    = 20.0;
-	
+  BinWidthScaler["bqPt"]      =  0.2;
+  BinWidthScaler["bqEta"]     = 20.0;
+
+  HistoBins["lepEta"]    = 200;
+  HistoBins["lepPt"]     = 160;
+  HistoBins["topPt"]     = 160;
+  HistoBins["topY"]      = 200;
+  HistoBins["ttbarMass"] = 240;
+  HistoBins["ttbarPt"]   = 300;
+  HistoBins["ttbarY"]    = 200;
+  HistoBins["bqPt"]      = 160;
+  HistoBins["bqEta"]     = 200;
+
+  HistoSmoothingValue["lepEta"]    =  4;
+  HistoSmoothingValue["lepPt"]     = 10;
+  HistoSmoothingValue["topPt"]     = 10;
+  HistoSmoothingValue["topY"]      =  4;
+  HistoSmoothingValue["ttbarMass"] = 10;
+  HistoSmoothingValue["ttbarPt"]   = 10;
+  HistoSmoothingValue["ttbarY"]    =  4;
+  HistoSmoothingValue["bqPt"]      = 10;
+  HistoSmoothingValue["bqEta"]     =  4;
+
   for (BCCMap::iterator iter = mapData.begin(); iter != mapData.end(); iter++)
   {
     std::vector<double>& refVecTempBinning = mapBinning[iter->first];  // required for ROOT purposes
-    std::vector<double>& refVecTempData    = iter->second;	         // required for ROOT purposes
+    std::vector<double>& refVecTempData    = iter->second;	       // required for ROOT purposes
     
     std::vector<double>::iterator iterVecData;
     
@@ -240,10 +276,12 @@ void BCC::MakeHistos()
     binmax = refVecTempBinning[refVecTempBinning.size()-1];
     
     TH1F temphisto(hname,hname, BinWidthScaler[hname]*(binmax-binmin),binmin,binmax);
+    //TH1F temphisto(hname,hname, HistoBins[hname], binmin, binmax);
     
     for (iterVecData = refVecTempData.begin(); iterVecData != refVecTempData.end(); iterVecData++ )
       temphisto.Fill(*iterVecData);
-    
+
+    temphisto.Smooth(HistoSmoothingValue[hname]);
     mapHistos[hname] = temphisto;
   }
   
@@ -299,7 +337,7 @@ void BCC::setBCCinX_IntersectionInBin()
       sumWeights[jBinData] = 0.0;
       integral[jBinData]   = 0.0;
       average[jBinData]    = 0.0;
-      NTheoryBinsPerDataBin[jBinData] = 0.0;
+      NTheoryBinsPerDataBin[jBinData] = 0;
       avXvalues[jBinData]  = 0.0;
     }
     

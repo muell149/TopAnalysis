@@ -103,17 +103,9 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   std::vector<TString> xSecVariableBranchNames_;
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
-      if(xSecVariables_[i].Contains("top")){
+      if(xSecVariables_[i].Contains("top") || xSecVariables_[i].Contains("bq")){
 	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
 	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
-      }
-      else if(xSecVariables_[i].Contains("bqPt")){
-	  xSecVariableBranchNames_.push_back("lepBPt");
-	  xSecVariableBranchNames_.push_back("hadBPt");
-      }  
-      else if(xSecVariables_[i].Contains("bqEta")){
-	  xSecVariableBranchNames_.push_back("lepBEta");
-	  xSecVariableBranchNames_.push_back("hadBEta");
       }
       else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
     }
@@ -141,7 +133,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // ============================
   
   std::cout << " Loading and calculating bin center corrections .... " << std::endl;
- 
+
   BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
 
   b.runBCCCalculation();
