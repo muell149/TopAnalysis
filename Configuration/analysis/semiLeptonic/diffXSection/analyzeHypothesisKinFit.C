@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/111124_AnalysisRun",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
 			     std::string decayChannel = "muon" )
