@@ -13,7 +13,7 @@ using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
 void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName);
 
-void combineMCsamples(int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun") {
+void combineMCsamples(int verbose=1, TString inputFolderName="TOP2011/111124_AnalysisRun") {
   // ---
   //    list all of all subsamples to be combined 
   // ---
@@ -188,7 +188,7 @@ void addDir(const std::string& path, const std::vector< std::pair< TFile*, doubl
     first->first->cd(path.c_str());
     TObject *obj = key->ReadObj();
     if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
-      // if descendant of TH1 -> merge it
+      // if descendant of TH1 -> mergeit
       TH1 *h1 = (TH1*)obj;
       h1->Sumw2();
       h1->Scale(first->second);

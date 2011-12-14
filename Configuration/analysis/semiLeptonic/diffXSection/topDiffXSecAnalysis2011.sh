@@ -54,6 +54,7 @@ decayChannel=\"muon\"
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pbReweightedttbarMassUp7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pbReweightedttbarMassUp7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pb7TeV.root\"
@@ -68,7 +69,7 @@ dataLuminosity=1143.22
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pband750GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
 #######dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
 #dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
@@ -94,7 +95,7 @@ save=true
 verbose=0
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
-inputFolderName=\"TOP2011/110819_AnalysisRun\"
+inputFolderName=\"TOP2011/111124_AnalysisRun\"
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
@@ -121,7 +122,7 @@ exclShapeVar=true
 ## fast = true / false (default: true)
 fast=true
 
-## delete all (old) existing .eps and .pdf plots?
+## delete all (old) existing .eps, .png and .pdf plots?
 ## clean = true / false (default: false)
 clean=false
 
@@ -302,7 +303,7 @@ echo
 
 if [ $shapeVar = true -a $redoSystematics = true ]
     then
-    if [ $decayChannel != \"combined\"]
+    if [ $decayChannel != \"combined\" ]
 	then    
 	if [ $dataLuminosity2 -ge 3601 ]
 	    then
