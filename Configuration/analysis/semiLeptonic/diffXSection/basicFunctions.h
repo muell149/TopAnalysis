@@ -103,7 +103,7 @@ namespace semileptonic {
                                         // --> systematic samples are varied by +/-3.0 GeV 
                                         // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
-  double constHadUncertainty   = 0.050; // relative uncertainty
+  double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
   double globalLumiUncertainty = 0.045; // relative uncertainty
 
   TString sysLabel(unsigned int sys)
@@ -617,36 +617,39 @@ namespace semileptonic {
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
       // Z2 Summer11
-      Nevents = (sample == kSig) ? 3701947 : 3581947 ;
+      //Nevents = (sample == kSig) ? 3701947 : 3581947 ;
+      Nevents = 3697693; // after kinematics filter
       // Summer11 systematic samples
-      if(kSys==sysTopScaleUp  ) Nevents=930483;  
-      if(kSys==sysTopScaleDown) Nevents=967055;  
-      if(kSys==sysTopMatchUp  ) Nevents=1062792; 
-      if(kSys==sysTopMatchDown) Nevents=1065232;  
-      if(kSys==sysTopMassUp   ) Nevents=1538301; 
-      if(kSys==sysTopMassDown ) Nevents=1606570; 
+      if(kSys==sysTopScaleUp  ) Nevents=929319;//930483;  
+      if(kSys==sysTopScaleDown) Nevents=966082;//967055;  
+      if(kSys==sysTopMatchUp  ) Nevents=1061531;//1062792; 
+      if(kSys==sysTopMatchDown) Nevents=1064250;//1065232;  
+      if(kSys==sysTopMassUp   ) Nevents=1536566;//1538301; 
+      if(kSys==sysTopMassDown ) Nevents=1604710;//1606570; 
     }
     // W->lnu+jets MADGRAPH
     else if(sample==kWjets){
       crossSection=31314.;
       // Z2 Summer11
-      Nevents=81352581;
+      //Nevents=81352581;
+      Nevents = 81178819; // after kinematics filter
       // Summer11 systematic samples:
-      if(kSys==sysVBosonScaleUp  ) Nevents=9784907;  
-      if(kSys==sysVBosonScaleDown) Nevents = (decayChannel == "electron" ? 10022324/3.0 : 10022324/0.75); 
-      if(kSys==sysVBosonMatchUp  ) Nevents=10461655; 
-      if(kSys==sysVBosonMatchDown) Nevents=9956679;  
+      if(kSys==sysVBosonScaleUp  ) Nevents=9761537;//9784907;  
+      if(kSys==sysVBosonScaleDown) Nevents=10005371;//(decayChannel == "electron" ? 10022324/3.0 : 10022324/0.75); 
+      if(kSys==sysVBosonMatchUp  ) Nevents=10438789;//10461655; 
+      if(kSys==sysVBosonMatchDown) Nevents=9936639;//9956679;  
     }
     // DY->ll+jets MADGRAPH
     else if(sample==kZjets){
       crossSection=3048.;
       // Z2 Summer11
-      Nevents=35101516;
+      //Nevents=35101516;
+      Nevents = 35032553; // after kinematics filter
       // Summer11 systematic samples:
-      if(kSys==sysVBosonScaleUp  ) Nevents=1593052;
-      if(kSys==sysVBosonScaleDown) Nevents=1658995;
-      if(kSys==sysVBosonMatchUp  ) Nevents=1641367;
-      if(kSys==sysVBosonMatchDown) Nevents=1615032;
+      if(kSys==sysVBosonScaleUp  ) Nevents=1589496;//1593052;
+      if(kSys==sysVBosonScaleDown) Nevents=1656321;//1658995;
+      if(kSys==sysVBosonMatchUp  ) Nevents=1638100;//1641367;
+      if(kSys==sysVBosonMatchDown) Nevents=1612036;//1615032;
     }
     // QCD Mu enriched PYTHIA6
     else if(sample==kQCD&&decayChannel.compare("muon")==0){
@@ -692,28 +695,32 @@ namespace semileptonic {
     // a) subsamples
     else if(sample==kSATops){
       crossSection=1.44;
-      Nevents     =137980;
+      //Nevents     =137980;
+      Nevents = 137662; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =153981;
-      if(kSys==sysTopScaleDown) Nevents =153971;
+      if(kSys==sysTopScaleUp  ) Nevents =153584;//153981;
+      if(kSys==sysTopScaleDown) Nevents =153650;//153971;
     }
     else if(sample==kSTops){
       crossSection=3.19;
-      Nevents     =259971; 
+      //Nevents     =259971; 
+      Nevents = 259595; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =285972;
-      if(kSys==sysTopScaleDown) Nevents =285602;
+      if(kSys==sysTopScaleUp  ) Nevents =285513;//285972;
+      if(kSys==sysTopScaleDown) Nevents =285182;//285602;
     }
     else if(sample==kSATopt){
       crossSection=22.65;
-      Nevents     =1944826;
+      //Nevents     =1944826;
+      Nevents = 1939703; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =565520;
-      if(kSys==sysTopScaleDown) Nevents =565454;
+      if(kSys==sysTopScaleUp  ) Nevents =563929;//565520;
+      if(kSys==sysTopScaleDown) Nevents =564169;//565454;
     }
     else if(sample==kSTopt){
       crossSection=41.92;
-      Nevents     =3900171;
+      //Nevents     =3900171;
+      Nevents = 3891841; // after kinematics filter
       // scale variation
       // FIXME MARTIN: t channel single top scale samples still missing 
       // if(kSys==sysTopScaleUp  ) Nevents =;
@@ -721,17 +728,19 @@ namespace semileptonic {
     }
     else if(sample==kSAToptW){
       crossSection=7.87;
-      Nevents     =809984;
+      //Nevents     =809984;
+      Nevents = 808200; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =437863;
-      if(kSys==sysTopScaleDown) Nevents =437798;
+      if(kSys==sysTopScaleUp  ) Nevents =436750;//437863;
+      if(kSys==sysTopScaleDown) Nevents =437007;//437798;
     }
     else if(sample==kSToptW){
       crossSection=7.87;
-      Nevents     =814390;
+      //Nevents     =814390;
+      Nevents = 812600; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =437416;
-      if(kSys==sysTopScaleDown) Nevents =437736;
+      if(kSys==sysTopScaleUp  ) Nevents =436656;//437416;
+      if(kSys==sysTopScaleDown) Nevents =437007;//437736;
     }
     // b) combined single top sample
     else if(sample==kSTop){
@@ -1012,13 +1021,16 @@ namespace semileptonic {
       std::map<unsigned int, TFile*> files_;
       // loop samples
       for(int sample = kSig; sample<=kSAToptW; sample++){
-	TString fileName;
-	if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
-	if(sample==kData) fileName = dataFile;
-	// if file exists - save in map
-	if((fileName!="no")&&(fileName!="")){
-	  TFile* file = TFile::Open(fileName);
-	  if(file&&!(file->IsZombie())) files_[sample]= file;
+	// there are no QCD subsamples for muon channel
+	if(!(sample>=kQCDEM1&&sample<=kQCDBCE3&&decayChannel.compare("muon")==0)){
+	  TString fileName;
+	  if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
+	  if(sample==kData) fileName = dataFile;
+	  // if file exists - save in map
+	  if((fileName!="no")&&(fileName!="")){
+	    TFile* file = TFile::Open(fileName);
+	    if(file&&!(file->IsZombie())) files_[sample]= file;
+	  }
 	}
       }
       return files_;
