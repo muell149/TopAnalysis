@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/110819_AnalysisRun", TString decayChannel="muon", bool exclShapeVar="true"){
+void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/111124_AnalysisRun", TString decayChannel="muon", bool exclShapeVar="true"){
 
   // ============================
   //  Systematic Variations:
@@ -176,6 +176,31 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   if(file&&!file->IsZombie()){
     if(verbose>0) std::cout << "target file found!" << std::endl;
 
+    // =================================
+    //  Load hadronization uncertainties
+    // =================================
+    // container for hadronization uncertainties
+    std::map< TString, TH1F*> hadUnc_;
+    // get file 
+    TFile* hadfile=TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root", "OPEN");
+    if(!hadfile||hadfile->IsZombie()){
+      std::cout << "corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
+      exit(0);
+    }
+    // loop quantities 
+    for(unsigned int var=0; var<xSecVariables_.size(); ++var){
+      // exclude inclusive cross section
+      // FIXME: exclude bquark quantities for the moment
+      if(!xSecVariables_[var].Contains("inclusive")&&!xSecVariables_[var].Contains("bq")){
+	TString name=xSecVariables_[var];
+	name.ReplaceAll("Norm","");
+	// get plot 
+	hadUnc_[xSecVariables_[var]]=(TH1F*)(hadfile->Get(name)->Clone());
+	calculateError_[xSecVariables_[var]][sysHadUp  ]=true;
+	calculateError_[xSecVariables_[var]][sysHadDown]=true;
+      }
+    }
+    
     // ===============================================================
     //  Part A: get all data xSec with all systematic variations
     // ===============================================================
@@ -307,9 +332,20 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		if(calculateError_[xSecVariables_[i]][sys]==true){
 		  if(verbose>1) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
-		  sysDiff=fabs(sysBinXSecValue-stdBinXSecValue);
-		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= SF_TopMassUncertainty;                // SF_TopMassUncertainty: defined in basicFunctions.h
-		  if(sys==sysHadUp    ||sys==sysHadDown )    sysDiff += constHadUncertainty*stdBinXSecValue;  // constHadUncertainty:   defined in basicFunctions.h
+		  if(sys==sysHadUp||sys==sysHadDown){
+		    // placeholder for bquark quantities and inclusive xSec
+		    if(xSecVariables_[i].Contains("bq")||xSecVariables_[i].Contains("inclusive")){
+		      sysBinXSecValue=(1.+std::abs(constHadUncertainty))*stdBinXSecValue;
+		    }
+		    // otherwise from external studies
+		    else{
+		      double unc=hadUnc_[xSecVariables_[i]]->GetBinContent(bin);
+		      sysBinXSecValue = (1.+std::abs(unc))*stdBinXSecValue;
+		    }
+		  }
+
+		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
+		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= SF_TopMassUncertainty; // SF_TopMassUncertainty: defined in basicFunctions.h
 		}
 		else if(verbose>1) std::cout << "(not considered): ";
 		// print single systematic uncertainty absolut and relative for bin & variable
@@ -664,6 +700,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	}
       }
     }
+    // close file
+    hadfile->Close();
   }
   else std::cout << std::endl << "ERROR:target file does not exist or is broken!" << std::endl;
 
