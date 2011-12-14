@@ -8,7 +8,7 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
 TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b);
 
-void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun",
+void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="TOP2011/111124_AnalysisRun",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
                                     bool doPDFuncertainty=false)
@@ -16,13 +16,13 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   // ---
   //     Configuration
   // ---
-  // det up common analysis style
+  // set up common analysis style
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   TGaxis::SetMaxDigits(2);
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
-
+  
   // define names
   // file name for input rootfile
   TString analysisFileName="";
@@ -32,6 +32,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     std::cout << "ERROR: decay channel " << decayChannel << " is no valid choice, use electron or muon!" << std::endl;
     exit(0);
   }
+  
   // file name for output rootfiles
   TString outputFileNameUp   = analysisFileName;
   TString outputFileNameDown = analysisFileName;
@@ -46,6 +47,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     outputFileNameUp.ReplaceAll("PF", "MCShapeVarUpPF"  );
     outputFileNameDown.ReplaceAll("PF", "MCShapeVarDownPF");
   }
+  outputFileNameUp.ReplaceAll("TOP2011/110819","TOP2011/111124");
+  outputFileNameDown.ReplaceAll("TOP2011/110819","TOP2011/111124");
   // name for folder where tree is read from
   TString folder="analyzeTopRecoKinematicsKinFit";
   TString genfolder="analyzeTopPartonLevelKinematics";
