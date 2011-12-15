@@ -88,12 +88,7 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 	    std::cout << " Processing Data for .... " << *iterBranch;
 	    
 	    TString activeBranchName = "";
-	    
-	    if      ((*iterBranch)=="bqEtaHad") activeBranchName = "hadBEta";
-	    else if ((*iterBranch)=="bqEtaLep") activeBranchName = "lepBEta";
-	    else if ((*iterBranch)=="bqPtHad" ) activeBranchName = "hadBPt";
-	    else if ((*iterBranch)=="bqPtLep" ) activeBranchName = "lepBPt";
-	    else activeBranchName = (*iterBranch);	    
+	    activeBranchName = (*iterBranch);	    
 
 	    std::cout << " --> " << activeBranchName << std::endl;
 
