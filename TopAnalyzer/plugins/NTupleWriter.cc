@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.5 2011/11/25 13:08:26 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.6 2011/12/02 13:28:11 wbehrenh Exp $
 //
 //
 
@@ -91,7 +91,7 @@ private:
     // ----------member data ---------------------------
 
     std::map<std::string, int> triggerMap_;
-    edm::InputTag weightPU_, weightLepSF_, weightKinFit_;
+  edm::InputTag weightPU_, weightPU_Up_, weightPU_Down_, weightLepSF_, weightKinFit_;
     edm::InputTag elecs_, muons_, jets_, met_;
     edm::InputTag vertices_, genEvent_ , FullLepEvt_, hypoKey_;
     edm::InputTag genParticles_;
@@ -160,6 +160,8 @@ private:
 
     ///////////weight//////////
     double weightPU;
+    double weightPU_Down;
+    double weightPU_Up;
     double weightLepSF;
     double weightKinFit;
     double weightTotal;
@@ -198,6 +200,8 @@ void NTupleWriter::AssignLeptonAndTau ( const reco::GenParticle* lepton, LV& Gen
 //
 NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
     weightPU_ ( iConfig.getParameter<edm::InputTag> ( "weightPU" ) ),
+    weightPU_Up_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Up" ) ),
+    weightPU_Down_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Down" ) ),
     weightLepSF_ ( iConfig.getParameter<edm::InputTag> ( "weightLepSF" ) ),
     weightKinFit_( iConfig.getParameter<edm::InputTag> ( "weightKinFit" ) ),
     elecs_ ( iConfig.getParameter<edm::InputTag> ( "elecs" ) ),
@@ -281,6 +285,8 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
     clearVariables();
     
     weightPU = getPUEventWeight( iEvent, weightPU_ );
+    weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
+    weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
     weightLepSF = 0; weightKinFit = 0; weightTotal = 0;
     try {
         weightLepSF = getDileptonSFWeight(iEvent, weightLepSF_);
@@ -555,6 +561,8 @@ NTupleWriter::beginJob()
 
     ////////////weight////////////
     Ntuple->Branch ( "weightPU",&weightPU, "weightPU/D" );
+    Ntuple->Branch ( "weightPU_Up",&weightPU_Up, "weightPU_Up/D" );
+    Ntuple->Branch ( "weightPU_Down",&weightPU_Down, "weightPU_Down/D" );
     Ntuple->Branch ( "weightLepSF",&weightLepSF, "weightLepSF/D" );
     Ntuple->Branch( "weightKinFit",&weightKinFit, "weightKinFit/D" );
     Ntuple->Branch ( "weightTotal",&weightTotal, "weightTotal/D" );

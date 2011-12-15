@@ -485,6 +485,8 @@ if signal:
 
 # Pileup Reweighting
 eventWeightPuTag = cms.InputTag('eventWeightPU', 'eventWeightPU')
+eventWeightPuTag_Up = cms.InputTag('eventWeightPU', 'eventWeightPUUp')
+eventWeightPuTag_Down = cms.InputTag('eventWeightPU', 'eventWeightPUDown')
 # lepton SF
 eventWeightDileptonSfTag = cms.InputTag('eventWeightDileptonSF', 'eventWeightDileptonSF')
 
@@ -723,6 +725,8 @@ process.analyzeElecs9 = process.analyzeElecs8.clone()
 ##Write Ntuple
 from TopAnalysis.TopAnalyzer.ntuplewriter_cfi import writeNTuple
 writeNTuple.weightPU    = eventWeightPuTag
+writeNTuple.weightPU_Up    = eventWeightPuTag_Up
+writeNTuple.weightPU_Down    = eventWeightPuTag_Down
 writeNTuple.weightLepSF = eventWeightDileptonSfTag
 
 process.writeNTuple = writeNTuple.clone(
