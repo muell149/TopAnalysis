@@ -52,7 +52,8 @@ const TString inpath(
 //const TString outpath("/afs/naf.desy.de/user/m/markusm/CMSSW_4_2_5/src/Markus/DiffXS2011/plots/");
 
 //const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/systematics/M20Inf/");
-const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/Finalresults/M20Inf/");
+//const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/Finalresults/M20Inf/");
+const TString outpath("plots/");
 
 // output format
 const TString outform(".eps");
@@ -72,28 +73,22 @@ TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 
 
 
-/*
-TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_TOTAL.root");
-TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_DIFF.root");
-*/
-
-
 //-------------------------------------------------------------------------------------------------------------------------
 //DY Systematic errors for each Mll cut
 
 //================================================================================================
 //*******    Mll>30GeV  (Standard)  *******
-/*
+
 TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_TOTAL.root");
 TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_DIFF.root");
-*/
+
 
 //================================================================================================
 //*******    Mll>20GeV   *******
 
 
-TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M20Inf/Systematic_Errors_TOTAL.root");
-TFile* systematicsInputDiff = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/new/M20Inf/Systematic_Errors_DIFF.root");
+//TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/M20Inf/Systematic_Errors_TOTAL.root");
+// TFile* systematicsInputDiff = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultSystematics/M20Inf/Systematic_Errors_DIFF.root");
 
 //================================================================================================
 //*******    Mll>40GeV   *******
@@ -3261,6 +3256,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             crossHist->SetBinContent(i, 0);
             crossHist->SetBinError(i, 0);
         } else {
+            if (!strcmp(particle, "TtBar") && !strcmp(quantity, "Mass") && i == 1) {
+                std::cout << "Content: " << binhists[0]->GetBinContent(i) << " bg: " << bgsum << " effi: " << efficiencies[i-1] << " lumi: " << lumi << " bw: " << binw << "\n";
+            }
             crossHist->SetBinContent(i,(binhists[0]->GetBinContent(i)-bgsum)/efficiencies[i-1]/lumi/binw);
             crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error
         }
@@ -4445,7 +4443,9 @@ void PlotHistsAndRatio(TH1* numeratorHistogram, TH1* denominatorHist, TString ti
 
 
 // plot b-tag efficiency
-void GetBtagEfficiencyInBins(const char* algo, const char* particle, const char* quantity, const char* xtitle, const Double_t bins[], const Int_t nbins)
+// called by GetBtagEfficiencyInBins (see next function)
+
+void GetBtagEfficiencyInBinsWithAlgo(const char* algo, const char* particle, const char* quantity, const char* xtitle, const Double_t bins[], const Int_t nbins)
 {
     TString plotStr("correlation_nBtags");
     plotStr.Append(algo);
@@ -4586,6 +4586,12 @@ void GetBtagEfficiencyInBins(const char* algo, const char* particle, const char*
 
     delete eff2DataHist;
     delete eff2MCHist;
+}
+
+void GetBtagEfficiencyInBins(const char* particle, const char* quantity, const char* xtitle, const Double_t bins[], const Int_t nbins) {
+    GetBtagEfficiencyInBinsWithAlgo("TCHEL", particle, quantity, xtitle, bins, nbins);
+    GetBtagEfficiencyInBinsWithAlgo("TCHEM", particle, quantity, xtitle, bins, nbins);
+    GetBtagEfficiencyInBinsWithAlgo("SSVHEM", particle, quantity, xtitle, bins, nbins);
 }
 
 
@@ -5011,7 +5017,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta );
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
-    GetBtagEfficiencyInBins("TCHEL",  "Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
+    GetBtagEfficiencyInBins("Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     
     //return;
     const Int_t nbinsLepPt = 5;
@@ -5020,7 +5026,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt );
     PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Pt", kCOMBINED, "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
-    GetBtagEfficiencyInBins("TCHEL",  "Leptons",  "Pt", "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
+    GetBtagEfficiencyInBins("Leptons",  "Pt", "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
     
     const Int_t nfinebinsLepPt = 10;
     const Double_t finebinsLepPt[nfinebinsLepPt+1] = {20, 30, 40, 55, 70, 95, 120, 160, 180, 250, 400};
@@ -5036,14 +5042,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binCenterLepPairPt[nbinsLepPairPt] = {5, 15, 30, 47, 80, 123, 215};
     PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt );
     PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE );
-    GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", binsLepPairPt, nbinsLepPairPt);
+    GetBtagEfficiencyInBins("DiLepton", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", binsLepPairPt, nbinsLepPairPt);
 
     const Int_t nbinsLepPairMass = 5;
     const Double_t binsLepPairMass[nbinsLepPairMass+1] = {12, 50, 76, 106, 200, 400};
     const Double_t binCenterLepPairMass[nbinsLepPairMass] = {31, 60, 93, 146, 271};
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass );
     PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );
-    GetBtagEfficiencyInBins("TCHEL",  "DiLepton", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
+    GetBtagEfficiencyInBins("DiLepton", "Mass", "M^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
 
 
     // special plots for johannes
@@ -5066,13 +5072,13 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binsJetEta[nbinsJetEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
     const Double_t binCenterJetEta[nbinsJetEta] = {bccAuto, bccAuto-0.05, bccAuto+0.05, bccAuto+0.05, bccAuto+0.05, bccAuto};
     PlotDifferentialCrossSections("Jets", "Eta", "#eta^{b and #bar{b}}", "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{b and #bar{b}}} ", binsJetEta, nbinsJetEta, binCenterJetEta );
-    GetBtagEfficiencyInBins("TCHEL", "Jets", "Eta", "#eta_{b/#bar{b}}", binsJetEta, nbinsJetEta);
+    GetBtagEfficiencyInBins("Jets", "Eta", "#eta_{b/#bar{b}}", binsJetEta, nbinsJetEta);
     
     const Int_t nbinsJetPt = 5;
     const Double_t binsJetPt[nbinsJetPt+1] = {30, 50, 70, 120, 180, 400};
     const Double_t binCenterJetPt[nbinsJetPt] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("Jets", "Pt", "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{b and #bar{b}}} #left[(#frac{GeV}{c})^{-1}#right]", binsJetPt, nbinsJetPt, binCenterJetPt );
-    GetBtagEfficiencyInBins("TCHEL",  "Jets", "Pt", "p_{T,l}", binsJetPt, nbinsJetPt);
+    GetBtagEfficiencyInBins("Jets", "Pt", "p_{T,l}", binsJetPt, nbinsJetPt);
 
   
     // top
@@ -5081,14 +5087,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binCenterTopRapidity[nbinsTopRapidity] = {-1.78, -0.66, 0.69, 1.76};
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
-    GetBtagEfficiencyInBins("TCHEL",  "Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
+    GetBtagEfficiencyInBins("Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     
     const Int_t nbinsTopPt = 4;
     const Double_t binsTopPt[nbinsTopPt+1] = {0, 70, 140, 240, 400};
     const Double_t binCenterTopPt[nbinsTopPt] = {32, 109, 185, 308};
     PlotDifferentialCrossSections("TopQuarks", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t and #bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTopPt, nbinsTopPt, binCenterTopPt );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Pt", kCOMBINED, "generated p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
-    GetBtagEfficiencyInBins("TCHEL",  "Top", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
+    GetBtagEfficiencyInBins("Top", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
     
     const Int_t nfinebinsTopPt = 8;
     const Double_t finebinsTopPt[nfinebinsTopPt+1] = {0, 40, 70, 100, 140, 180, 240, 300, 400};
@@ -5104,14 +5110,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binCenterTtBarRapidity[nbinsTtBarRapidity] = {-1.68, -0.65, 0.68, 1.65};
     PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidity, nbinsTtBarRapidity, binCenterTtBarRapidity );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Rapidity", kCOMBINED, "generated y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
-    GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Rapidity", "y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
+    GetBtagEfficiencyInBins("TtBar", "Rapidity", "y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
     
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
     const Double_t binCenterTtBarPt[nbinsTtBarPt] = {5, 39, 86, 231};
     PlotDifferentialCrossSections("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t#bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTtBarPt, nbinsTtBarPt, binCenterTtBarPt );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Pt", kCOMBINED, "generated p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
-    GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
+    GetBtagEfficiencyInBins("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
 
     const Int_t nbinsTtBarMass = 5;
     const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345, 400, 475, 550, 700, 1000};
@@ -5120,7 +5126,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binCenterTtBarMass[nbinsTtBarMass] = {364, 439, 515, 616, 823};
     PlotDifferentialCrossSections("TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Mass", kCOMBINED, "generated M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
-    GetBtagEfficiencyInBins("TCHEL",  "TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
+    GetBtagEfficiencyInBins("TtBar", "Mass", "M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     SaveUnfoldingHists("TtBar", "Mass", kMM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
     SaveUnfoldingHists("TtBar", "Mass", kEM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
     SaveUnfoldingHists("TtBar", "Mass", kEE, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
