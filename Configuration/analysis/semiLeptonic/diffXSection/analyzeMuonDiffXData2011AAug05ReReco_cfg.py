@@ -61,7 +61,7 @@ else:
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change number of processed events
-process.maxEvents.input = 10000
+process.maxEvents.input = options.eventsToProcess
 process.source.skipEvents = cms.untracked.uint32(0)
 
 ## create tuples with events surviving the cuts

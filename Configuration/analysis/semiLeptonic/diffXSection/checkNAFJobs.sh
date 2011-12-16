@@ -19,12 +19,12 @@ while [ $wait -ge 0 ]
       # perform check
       # LIST all folders here
       echo "$(date)"
-      nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedMtop_cfg_MuttbarSGMtop
-      rm ./naf_analyzeMuonDiffXSecCorrectedMtop_cfg_MuttbarSGMtop/err*.txt
-      nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedMtop_cfg_MuttbarSGMtop
+      #nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedMtop_cfg_MuttbarSGMtop
+      #rm ./naf_analyzeMuonDiffXSecCorrectedMtop_cfg_MuttbarSGMtop/err*.txt
+      #nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedMtop_cfg_MuttbarSGMtop
       nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedFourJets_cfg_MuttbarSGFourJets
-      rm ./naf_analyzeMuonDiffXSecCorrectedFourJets_cfg_MuttbarSGFourJets/err*.txt
-      nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedFourJets_cfg_MuttbarSGFourJets
+      #rm ./naf_analyzeMuonDiffXSecCorrectedFourJets_cfg_MuttbarSGFourJets/err*.txt
+      #nafJobSplitter.pl check ./naf_analyzeMuonDiffXSecCorrectedFourJets_cfg_MuttbarSGFourJets
       #nafJobSplitter.pl check ./naf_analyzeElecDiffXData2011BPromptRecoV1_cfg
       #nafJobSplitter.pl check ./naf_analyzeMuonDiffXData2011AAug05ReReco_cfg 
       #nafJobSplitter.pl check ./naf_analyzeMuonDiffXData2011APromptRecoV6_cfg

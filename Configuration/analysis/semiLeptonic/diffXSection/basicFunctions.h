@@ -2056,6 +2056,89 @@ namespace semileptonic {
     //canvasStyle(*plotCanvas_[number-1]);
   }
 
+  void DrawNormTheoryCurve(TString filname="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0)
+  {
+    // this function draws "plot" from "file" into the active canvas
+    // modified quantities: NONE
+    // used functions: getTheoryPrediction, histogramStyle
+    // used enumerators: NONE
+
+    // get plot
+    TH1F* result=getTheoryPrediction(plotname, filname);
+    // configure style
+    histogramStyle(*result, kSig, false, 1.2, color);
+    // rebinning
+    if(rebinFactor) result->Rebin(rebinFactor);
+    // normalize to area
+    result->Scale(1/(result->Integral(0,result->GetNbinsX()+1)));
+    // divide by binwidth
+    result->Scale(1.0/result->GetBinWidth(1));
+    // smoothing
+    if(smoothFactor) result->Smooth(smoothFactor);
+    // set range
+    if(rangeLow!=-1.&&rangeHigh!=-1.) result->GetXaxis()->SetRangeUser(rangeLow, rangeHigh);
+    // error bands
+    if(errorbands){
+      // get values
+      TH1F* central   =getTheoryPrediction(plotname        , filname);
+      TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filname);
+      TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filname);
+      // rebinning
+      if(errorRebinFactor){ 
+	central  ->Rebin(errorRebinFactor);
+	ErrorUp  ->Rebin(errorRebinFactor);
+	ErrorDown->Rebin(errorRebinFactor);
+      }
+      // normalize to area
+      central  ->Scale(1/(central  ->Integral(0,central  ->GetNbinsX()+1)));
+      ErrorUp  ->Scale(1/(ErrorUp  ->Integral(0,ErrorUp  ->GetNbinsX()+1)));
+      ErrorDown->Scale(1/(ErrorDown->Integral(0,ErrorDown->GetNbinsX()+1)));
+      // smoothing
+      if(errorSmoothFactor){
+	central  ->Smooth(errorSmoothFactor);
+	ErrorUp  ->Smooth(errorSmoothFactor);
+	ErrorDown->Smooth(errorSmoothFactor);
+      }
+      // create errorbands
+      TGraphAsymmErrors * errorBands = new TGraphAsymmErrors(central->GetNbinsX()-1);
+      // loop bins
+      for(Int_t iBin=1; iBin<central->GetNbinsX(); iBin++){
+	Double_t centralValue = central  ->GetBinContent(iBin);
+	Double_t maxValue     = ErrorUp  ->GetBinContent(iBin);
+	Double_t minValue     = ErrorDown->GetBinContent(iBin);
+	// points outside plotrange
+	if((rangeLow!=-1.&&central->GetBinCenter(iBin)<rangeLow)||(rangeHigh!=-1.&&central->GetBinCenter(iBin)>rangeHigh)){
+	  errorBands->SetPoint      (iBin, central->GetBinCenter(iBin), 0.);
+	  errorBands->SetPointEXlow (iBin, 0.);
+	  errorBands->SetPointEXhigh(iBin, 0.);
+	}
+	else {
+	  errorBands->SetPoint      (iBin, central->GetBinCenter(iBin), centralValue  );
+	  errorBands->SetPointEXlow (iBin, central->GetXaxis()->GetBinLowEdge(iBin)   );
+	  errorBands->SetPointEXhigh(iBin, central->GetXaxis()->GetBinUpEdge (iBin)   );
+	}
+	if(maxValue>minValue){
+	  errorBands->SetPointEYhigh(iBin, maxValue     - centralValue);
+	  errorBands->SetPointEYlow (iBin, centralValue - minValue    );
+	}
+	else{
+	  errorBands->SetPointEYhigh(iBin, minValue     - centralValue);
+	  errorBands->SetPointEYlow (iBin, centralValue - maxValue    );
+	}
+      }
+      // plotstyle for error bands
+      errorBands->SetFillColor(kGray);
+      errorBands->SetFillStyle(1001); // NB: explicitly needed, otherwise filling invisible due to default "0"
+      errorBands->SetLineColor  (result->GetLineColor());
+      errorBands->SetLineWidth  (result->GetLineWidth());
+      errorBands->SetMarkerColor(result->GetLineColor());
+      // draw error bands
+      errorBands->Draw("e3 same");
+    }
+    //draw central value
+    result->Draw("same"); 
+  }
+
 #ifdef DILEPTON_MACRO
 }
 #endif
