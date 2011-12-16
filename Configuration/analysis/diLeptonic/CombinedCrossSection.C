@@ -128,7 +128,7 @@ const bool doPrintControlPlotsSameSign = kFALSE;
 const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
 const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
-const bool PAS = kFALSE;
+const bool PAS = kTRUE;
 // do you want a legend in the plots?
 const bool drawLegend = kTRUE;
 // should there be ratio Ndata/Nmc plots below the actual distributions?
@@ -136,7 +136,7 @@ bool drawRatioPlot = kTRUE && !PAS;
 // hide integrated value
 const bool normaliseToUnitArea = kTRUE;
 // preliminary?
-const bool isPreliminary = kFALSE;
+const bool isPreliminary = kTRUE;
 
 const double topxsec = 169.9; //157.5
 // const double topxsec = 157.5;
@@ -144,7 +144,7 @@ const double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
 
 // luminosity used to normalise MC in plots and to calcutate cross sections
 const Double_t lumi = 1143.221; const char* dataFilename = "1fb";
-//const Double_t lumi = 4683.8; const char* dataFilename = "5fb";
+// const Double_t lumi = 4683.8; const char* dataFilename = "5fb";
 //const Double_t lumi = 2170.1; const char* dataFilename = "2fb";
 //const Double_t lumi = 2511.0; const char* dataFilename = "run2011b_v1";
 //const Double_t lumi = 1026.9; const char* dataFilename = "2011av5v6";
@@ -171,6 +171,10 @@ const TString MCproduction("SUMMER11");
 const Double_t totalSystematic = 0.10; //default if no systematic hists are available
 const Double_t bccAuto = 100000;
 
+// order (data, then bottom to top)
+//  0      1          2      3   4   5       6          7     8
+// data, ttsignal, ttother, tW, VV, Z/tt, Z/ee,mumu, W+jets, QCD
+const size_t orderStackPlot[] = {0, 8, 7, 6, 5, 4, 3, 2, 1};
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -770,7 +774,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
 
     THStack* hstack = new THStack("hstack","");
     for (size_t i=1; i<Nplots; ++i) {
-        hstack->Add(mergedhists[i]);
+        hstack->Add(mergedhists[orderStackPlot[i]]);
     }
 
     Canvas->Clear();
@@ -1047,7 +1051,7 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
 
     THStack* hstack = new THStack("hstack","#mu#mu mass");
     for (size_t i=1; i<Nplots; ++i) {
-        hstack->Add(mergedhists[i]);
+        hstack->Add(mergedhists[orderStackPlot[i]]);
     }
 
     if (channel == kEE) {
@@ -3181,7 +3185,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     THStack* hstack = new THStack("hstack",title);
     for (size_t i=1; i<Nplots; ++i) {
-        hstack->Add(mergedhists[i]);
+        hstack->Add(mergedhists[orderStackPlot[i]]);
     }
 
     // make canvas
