@@ -71,21 +71,68 @@ JetKinematics::book(edm::Service<TFileService>& fs)
   /// tree
   // only produce a tree for the following collctions if they are only
   // for one object and a tree should be written
-  if(index_ > -1 && useTree_){
-  // jet multiplicty
-  bookVariable( fs, "n");
-  // energy of the jet
-  bookVariable( fs, "en");
-  // transverse momentum of the jet
-  bookVariable( fs, "pt");
-  // pseudorapidity eta of the jet
-  bookVariable( fs, "eta");
-  // azimuthal angle phi of the jet
-  bookVariable( fs, "phi");
-  // scalar sum	of jet et
-  bookVariable( fs, "ht");
-  // scalar sum	of jet et
-  bookVariable( fs, "type");
+  if(useTree_){
+    if(index_ > -1){
+    // jet multiplicty
+    bookVariable( fs, "n");
+    // energy of the jet
+    bookVariable( fs, "en");
+    // transverse momentum of the jet
+    bookVariable( fs, "pt");
+    // pseudorapidity eta of the jet
+    bookVariable( fs, "eta");
+    // azimuthal angle phi of the jet
+    bookVariable( fs, "phi");
+    // scalar sum	of jet et
+    bookVariable( fs, "ht");
+    // scalar sum	of jet et
+    bookVariable( fs, "type");
+    }
+    else if( index_ == -1){
+      /// in case of index_==-1 tree is filled with kinematic variables of first 5 jets
+      // jet multiplicty
+      bookVariable( fs, "n");
+      // energy of the jet 1
+      bookVariable( fs, "en1");
+      // transverse momentum of the jet 1
+      bookVariable( fs, "pt1");
+      // pseudorapidity eta of the jet 1
+      bookVariable( fs, "eta1");
+      // azimuthal angle phi of the jet 1
+      bookVariable( fs, "phi1");
+      // energy of the jet 2
+      bookVariable( fs, "en2");
+      // transverse momentum of the jet 2
+      bookVariable( fs, "pt2");
+      // pseudorapidity eta of the jet 2
+      bookVariable( fs, "eta2");
+      // azimuthal angle phi of the jet 2
+      bookVariable( fs, "phi2");
+      // energy of the jet 3
+      bookVariable( fs, "en3");
+      // transverse momentum of the jet 3
+      bookVariable( fs, "pt3");
+      // pseudorapidity eta of the jet 3
+      bookVariable( fs, "eta3");
+      // azimuthal angle phi of the jet 3
+      bookVariable( fs, "phi3");
+      // energy of the jet 4
+      bookVariable( fs, "en4");
+      // transverse momentum of the jet 4
+      bookVariable( fs, "pt4");
+      // pseudorapidity eta of the jet 4
+      bookVariable( fs, "eta4");
+      // azimuthal angle phi of the jet 4
+      bookVariable( fs, "phi4");
+      // energy of the jet 5
+      bookVariable( fs, "en5");
+      // transverse momentum of the jet 5
+      bookVariable( fs, "pt5");
+      // pseudorapidity eta of the jet 5
+      bookVariable( fs, "eta5");
+      // azimuthal angle phi of the jet 5
+      bookVariable( fs, "phi5");
+    }
   }
 
   
@@ -120,7 +167,7 @@ JetKinematics::fill(const edm::View<reco::Jet>& jets, const double& weight)
 {
   
   // initialize tree
-  if(index_ > -1 && useTree_) initializeTrees(-9999, weight);
+  if(useTree_) initializeTrees(-9999, weight);
   
   /** 
       Fill Kinematic Variables
@@ -172,6 +219,17 @@ JetKinematics::fill(const edm::View<reco::Jet>& jets, const double& weight)
 	// eta, phi for 2D histo
 	hists2D_.find("etaPt")->second->Fill(recoJet->eta() , recoJet->pt() , weight);
       }
+    }
+    // fill tree in case of index==-1
+    if(useTree_ && index_==-1 && index<5){
+      // energy of the jet
+      fillValue( Form("en%i",index+1) , jet->energy() , weight );
+      // transverse momentum of the jet
+      fillValue( Form("pt%i",index+1) , jet->pt() , weight );
+      // pseudorapidity eta of the jet
+      fillValue( Form("eta%i",index+1) , jet->eta() , weight );
+      // azimuthal angle phi of the jet
+      fillValue( Form("phi%i",index+1) , jet->phi() , weight );
     }
   }
   // scalar sum of jet et filled at least
