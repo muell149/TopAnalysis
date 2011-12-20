@@ -183,7 +183,7 @@ process = cms.Process("topDifferentialXSec")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.MessageLogger.categories.append('TtSemiLepKinFitter')
 process.MessageLogger.categories.append('KinFitter')
 process.MessageLogger.cerr.TtSemiLepKinFitter = cms.untracked.PSet(
@@ -1921,6 +1921,8 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeUpPt *
                            process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt *
 			   #process.analyzeTopRecoKinematicsKinFitTopAntitopTriggerEffSFShapeDownPt *
+			   process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeUpPt40 *
+			   process.analyzeTopRecoKinematicsKinFitTriggerEffSFShapeDownPt40 *
                            process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormUp *
 			   #process.analyzeTopRecoKinematicsKinFitTopAntitopSelectionEffSFNormUp *
                            process.analyzeTopRecoKinematicsKinFitSelectionEffSFNormDown *
@@ -1937,6 +1939,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownPt65 *
 			   process.analyzeTopRecoKinematicsKinFitBTagSFShapeUpEta1p2 *
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownEta1p2 *
+			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeUpPt65 *
+			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeDownPt65 *
+			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeUpEta0p7 *
+			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeDownEta0p7 *
 			   process.analyzeTopRecoKinematicsKinFitBTagSFShapeUpPt100 *
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownPt100 *
 			   process.analyzeTopRecoKinematicsKinFitBTagSFShapeUpEta0p7 *
