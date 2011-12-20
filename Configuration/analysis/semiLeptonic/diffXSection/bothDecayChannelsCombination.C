@@ -190,13 +190,15 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  // get style from old canvas
 	  combicanvas->SetLogy(canvasMu->GetLogy());
 	  // adjust max
-	  if(plotName=="lepEta"||plotName=="topY") plotTheo->GetYaxis()->SetNoExponent(true);
-	  if(plotName=="topY"   ) plotTheo->SetMaximum(0.6);
-	  if(plotName=="topPt"  ) plotTheo->SetMaximum(0.008);
-	  if(plotName=="ttbarPt") plotTheo->SetMaximum(0.02);
-	  if(plotName=="ttbarY" ) plotTheo->SetMaximum(0.7);
-	  if(plotName=="lepPt"  ) plotTheo->SetMaximum(0.03);
-	  if(plotName=="lepEta" ) plotTheo->SetMaximum(0.5);
+	  if (xSecVariables_[i].Contains("Norm")){
+	    if(plotName=="lepEta"||plotName=="topY") plotTheo->GetYaxis()->SetNoExponent(true);
+	    if(plotName=="topY"   ) plotTheo->SetMaximum(0.6);
+	    if(plotName=="topPt"  ) plotTheo->SetMaximum(0.008);
+	    if(plotName=="ttbarPt") plotTheo->SetMaximum(0.02);
+	    if(plotName=="ttbarY" ) plotTheo->SetMaximum(0.7);
+	    if(plotName=="lepPt"  ) plotTheo->SetMaximum(0.03);
+	    if(plotName=="lepEta" ) plotTheo->SetMaximum(0.5);
+	  }
 	  // plot into canvas
 	  combicanvas->cd(0);
 	  combicanvas->SetBottomMargin(myStyle.GetPadBottomMargin());
