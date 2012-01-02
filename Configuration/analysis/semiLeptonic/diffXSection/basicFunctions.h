@@ -273,6 +273,7 @@ namespace semileptonic {
     if(color!=0){
       hist.SetLineColor(color);
       hist.SetFillColor(color);
+      hist.SetMarkerColor(color);
     }
   }
 
@@ -2056,21 +2057,60 @@ namespace semileptonic {
     //canvasStyle(*plotCanvas_[number-1]);
   }
 
-  void DrawNormTheoryCurve(TString filname="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0)
+  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false)
   {
     // this function draws "plot" from "file" into the active canvas
     // modified quantities: NONE
     // used functions: getTheoryPrediction, histogramStyle
     // used enumerators: NONE
+    // filename: name of input file
+    // plotname: name of histogram
+    // smoothFactor: argument of ->Smooth()
+    // rebinFactor:  argument of ->Rebin()
+    // color: color of histogram
+    // rangeLow:  lower plot range of histo
+    // rangeHigh: upper plot range of histo
+    // errorbands: additional errorbands are calculated and drawn
+    // INFORMATION: if errorbands==true is chosen, the varied up/down plots are expected
+    //              to have the same name with an additional "_Up"/"_Down" in the end
+    // errorRebinFactor: argument of ->Rebin()
+    // errorSmoothFactor: argument of ->Smooth()
+    // verbose: level of output
+    // drawOnlyErrors: draw only error bands but no central curve
+    // drawRawPlot: draw in addition the unbinned and unsmoothed plot 
+    //              to see whether rebinning and smoothing has changed the shape 
 
+    // output
+    if(verbose>0){
+      std::cout << "variable: " << plotname << std::endl;
+      if(rangeLow!=-1.||rangeHigh!=-1.) std::cout << "range: " << rangeLow << ".." << rangeHigh << std::endl;
+      std::cout << "file: " << filename << std::endl;
+      std::cout << "smoothFactor: " << smoothFactor << std::endl;
+      std::cout << "rebinFactor: " << rebinFactor << std::endl;
+      std::cout << "color: " << color << std::endl;
+      std::cout << "draw errorbands? " << errorbands << std::endl;
+      if(errorbands){
+	std::cout << "errorRebinFactor: " << errorRebinFactor << std::endl;
+	std::cout << "errorSmoothFactor: " << errorSmoothFactor << std::endl;
+      }
+    }
     // get plot
-    TH1F* result=getTheoryPrediction(plotname, filname);
+    TH1F* result=getTheoryPrediction(plotname, filename);
+    // rename
+    TString name=plotname;
+    name.ReplaceAll("analyzeTopPartonLevelKinematicsPhaseSpace/","");
+    if(filename.Contains("powheg")) name+="POWHEG";
+    else if(filename.Contains("mcatnlo" )) name+="MC@NLO";
+    else if(filename.Contains("NtupleCteq6m" )) name+="MC@NLO2";
+    else if(filename.Contains("madgraph")) name+="MADGRAPH";
+    if(verbose>0) std::cout << "name of theory curve: " << name << std::endl;
+    result->SetName(name);
     // configure style
     histogramStyle(*result, kSig, false, 1.2, color);
     // rebinning
     if(rebinFactor) result->Rebin(rebinFactor);
     // normalize to area
-    result->Scale(1/(result->Integral(0,result->GetNbinsX()+1)));
+    result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
     // divide by binwidth
     result->Scale(1.0/result->GetBinWidth(1));
     // smoothing
@@ -2080,9 +2120,9 @@ namespace semileptonic {
     // error bands
     if(errorbands){
       // get values
-      TH1F* central   =getTheoryPrediction(plotname        , filname);
-      TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filname);
-      TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filname);
+      TH1F* central   =getTheoryPrediction(plotname        , filename);
+      TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
+      TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filename);
       // rebinning
       if(errorRebinFactor){ 
 	central  ->Rebin(errorRebinFactor);
@@ -2090,9 +2130,13 @@ namespace semileptonic {
 	ErrorDown->Rebin(errorRebinFactor);
       }
       // normalize to area
-      central  ->Scale(1/(central  ->Integral(0,central  ->GetNbinsX()+1)));
-      ErrorUp  ->Scale(1/(ErrorUp  ->Integral(0,ErrorUp  ->GetNbinsX()+1)));
-      ErrorDown->Scale(1/(ErrorDown->Integral(0,ErrorDown->GetNbinsX()+1)));
+      central  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+      ErrorUp  ->Scale(1./(ErrorUp  ->Integral(0,ErrorUp  ->GetNbinsX()+1)));
+      ErrorDown->Scale(1./(ErrorDown->Integral(0,ErrorDown->GetNbinsX()+1)));
+      // divide by binwidth
+      central  ->Scale(1.0/central  ->GetBinWidth(1));
+      ErrorUp  ->Scale(1.0/ErrorUp  ->GetBinWidth(1));
+      ErrorDown->Scale(1.0/ErrorDown->GetBinWidth(1));
       // smoothing
       if(errorSmoothFactor){
 	central  ->Smooth(errorSmoothFactor);
@@ -2101,12 +2145,17 @@ namespace semileptonic {
       }
       // create errorbands
       TGraphAsymmErrors * errorBands = new TGraphAsymmErrors(central->GetNbinsX()-1);
+      TString errorBandName=name;
+      errorBandName.ReplaceAll("2","");
+      errorBandName+="errorBand";
+      if(verbose>0) std::cout << "name of error bands: " << errorBandName << std::endl;
+      errorBands->SetName(errorBandName);
       // loop bins
       for(Int_t iBin=1; iBin<central->GetNbinsX(); iBin++){
 	Double_t centralValue = central  ->GetBinContent(iBin);
 	Double_t maxValue     = ErrorUp  ->GetBinContent(iBin);
 	Double_t minValue     = ErrorDown->GetBinContent(iBin);
-	// points outside plotrange
+	// take care of points outside x-plotrange
 	if((rangeLow!=-1.&&central->GetBinCenter(iBin)<rangeLow)||(rangeHigh!=-1.&&central->GetBinCenter(iBin)>rangeHigh)){
 	  errorBands->SetPoint      (iBin, central->GetBinCenter(iBin), 0.);
 	  errorBands->SetPointEXlow (iBin, 0.);
@@ -2117,13 +2166,28 @@ namespace semileptonic {
 	  errorBands->SetPointEXlow (iBin, central->GetXaxis()->GetBinLowEdge(iBin)   );
 	  errorBands->SetPointEXhigh(iBin, central->GetXaxis()->GetBinUpEdge (iBin)   );
 	}
-	if(maxValue>minValue){
-	  errorBands->SetPointEYhigh(iBin, maxValue     - centralValue);
-	  errorBands->SetPointEYlow (iBin, centralValue - minValue    );
+	// symmetrize errors 
+	double difference=std::abs((maxValue-minValue)*0.5);
+	if((maxValue>centralValue&&minValue>centralValue)||(maxValue<centralValue&&minValue<centralValue)){
+	  difference=(std::abs((maxValue-centralValue))+std::abs((minValue-centralValue)))*0.5;
 	}
-	else{
-	  errorBands->SetPointEYhigh(iBin, minValue     - centralValue);
-	  errorBands->SetPointEYlow (iBin, centralValue - maxValue    );
+	errorBands->SetPointEYhigh(iBin, difference);
+	errorBands->SetPointEYlow (iBin, difference);
+	// per bin output
+	if(verbose>1){
+	  std::cout << "bin " << iBin << std::endl;
+	  std::cout << "central TH1: " << std::endl;
+	  std::cout << "(<x>,y)= (" << result->GetBinCenter(iBin) << "," << result->GetBinContent(iBin) << ")" << std::endl;
+	  std::cout << "error input:" << std::endl;
+	  std::cout << "central, min, max: " << central->GetBinContent(iBin);
+	  std::cout << ", " << ErrorDown->GetBinContent(iBin) << ", ";
+	  std::cout <<  ErrorUp->GetBinContent(iBin) << std::endl;
+	  std::cout << "error band" << std::endl;
+	  std::cout << "(x,y): (" << *errorBands->GetX() << "," << *errorBands->GetY() << ")" << std::endl;
+	  std::cout << "error xlow:  " << errorBands->GetErrorXlow(iBin)  << std::endl;
+	  std::cout << "error xhigh: " << errorBands->GetErrorXhigh(iBin) << std::endl;
+	  std::cout << "error ylow:  " << errorBands->GetErrorYlow(iBin)  << std::endl;
+	  std::cout << "error yhigh: " << errorBands->GetErrorYhigh(iBin) << std::endl;
 	}
       }
       // plotstyle for error bands
@@ -2131,12 +2195,25 @@ namespace semileptonic {
       errorBands->SetFillStyle(1001); // NB: explicitly needed, otherwise filling invisible due to default "0"
       errorBands->SetLineColor  (result->GetLineColor());
       errorBands->SetLineWidth  (result->GetLineWidth());
-      errorBands->SetMarkerColor(result->GetLineColor());
+      errorBands->SetMarkerColor(result->GetMarkerColor());
       // draw error bands
       errorBands->Draw("e3 same");
     }
     //draw central value
-    result->Draw("same"); 
+    if(!drawOnlyErrors) result->Draw("hist c same"); 
+    // draw raw plot to estimate effect of rebinning and smoothing
+    if(drawRawPlot){
+      TH1F* raw=getTheoryPrediction(plotname, filename);
+      raw->SetMarkerColor(color);
+      raw->SetLineColor(color);
+      raw->SetMarkerSize(2);
+      raw->SetMarkerStyle(29);
+      //raw->Rebin(5); // minimal rebinning
+      raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
+      raw->Scale(1.0/raw->GetBinWidth(1));
+      //if(smoothFactor) raw->Smooth(smoothFactor);
+      raw->Draw("p hist same"); 
+    }
   }
 
 #ifdef DILEPTON_MACRO
