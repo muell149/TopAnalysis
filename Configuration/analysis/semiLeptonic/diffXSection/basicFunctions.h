@@ -2107,13 +2107,15 @@ namespace semileptonic {
     result->SetName(name);
     // configure style
     histogramStyle(*result, kSig, false, 1.2, color);
+    // smoothing 1
+    if(smoothFactor) result->Smooth(smoothFactor);
     // rebinning
     if(rebinFactor) result->Rebin(rebinFactor);
     // normalize to area
     result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
     // divide by binwidth
     result->Scale(1.0/result->GetBinWidth(1));
-    // smoothing
+    // smoothing 2
     if(smoothFactor) result->Smooth(smoothFactor);
     // set range
     if(rangeLow!=-1.&&rangeHigh!=-1.) result->GetXaxis()->SetRangeUser(rangeLow, rangeHigh);
@@ -2123,6 +2125,12 @@ namespace semileptonic {
       TH1F* central   =getTheoryPrediction(plotname        , filename);
       TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
       TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filename);
+      // smoothing 1
+      if(errorSmoothFactor){
+	central  ->Smooth(errorSmoothFactor);
+	ErrorUp  ->Smooth(errorSmoothFactor);
+	ErrorDown->Smooth(errorSmoothFactor);
+      }
       // rebinning
       if(errorRebinFactor){ 
 	central  ->Rebin(errorRebinFactor);
@@ -2137,7 +2145,7 @@ namespace semileptonic {
       central  ->Scale(1.0/central  ->GetBinWidth(1));
       ErrorUp  ->Scale(1.0/ErrorUp  ->GetBinWidth(1));
       ErrorDown->Scale(1.0/ErrorDown->GetBinWidth(1));
-      // smoothing
+      // smoothing 2
       if(errorSmoothFactor){
 	central  ->Smooth(errorSmoothFactor);
 	ErrorUp  ->Smooth(errorSmoothFactor);
