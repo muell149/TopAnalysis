@@ -91,7 +91,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  bool DrawMCAtNLOPlot2 = DrawMCAtNLOPlot;
 	  bool DrawPOWHEGPlot2  = DrawPOWHEGPlot;
 	  if(plotName=="bqPt"||plotName=="bqEta"){
-	    DrawPOWHEGPlot2=false;
+	    //DrawPOWHEGPlot2=false;
 	    DrawMCAtNLOPlot2=false;
 	  }
 	  // combine the results
@@ -286,7 +286,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    double rangeLow=-1.;
 	    double rangeHigh=-1.;
 	    if(     xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=200; rebinFactor=2; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarM" ; 
-	      if(/*cutTtbarMass*/true){rangeLow=325. ; rangeHigh=1200.;} }
+	      if(/*cutTtbarMass*/true){rangeLow=330. ; rangeHigh=1200.;} }
 	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=3 ; rebinFactor=20; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarY" ;}
 	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=10; rebinFactor=2 ; errorRebinFactor =  2 ; errorSmoothFactor =    5 ; plotNameMCAtNLO="hVisTTbarPt";}
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; errorRebinFactor = 10 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTopPt"  ;}
@@ -311,13 +311,15 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    rangeLow=-1.;
 	    rangeHigh=-1.;
 	    if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=500; rebinFactor=5; 
-	      if(cutTtbarMass){rangeLow=325.; rangeHigh=1200.;} }
+	      if(cutTtbarMass){rangeLow=300.; rangeHigh=1200.;} }
 	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=3 ; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; }
 	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=3 ; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor=10; rebinFactor=2 ; }
+	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
+	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=10; rebinFactor=2 ; }
 	    // draw curve
 	    if(DrawPOWHEGPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_powheg.root", plotNamePOWHEG, smoothFactor, rebinFactor, kGreen+2, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false);
 	    // c) reweighted histos for closure test
