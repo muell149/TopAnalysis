@@ -666,7 +666,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		}
 		whipEmptyBinsAway(statErrors, verbose);
 		// print new object
-		statErrors->Draw("p same");
+		statErrors->SetMarkerSize(0.01);
+		statErrors->Draw("e p same");
 		// delete (old) TH1F plot from canvas
 		canvas->GetListOfPrimitives()->Remove(canvas->GetPrimitive(plotName+"kData"));
 	      }
