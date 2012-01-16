@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.6 2011/12/02 13:28:11 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.7 2011/12/15 15:28:43 tdorland Exp $
 //
 //
 
@@ -91,10 +91,13 @@ private:
     // ----------member data ---------------------------
 
     std::map<std::string, int> triggerMap_;
-  edm::InputTag weightPU_, weightPU_Up_, weightPU_Down_, weightLepSF_, weightKinFit_;
+    edm::InputTag weightPU_, weightPU_Up_, weightPU_Down_, weightLepSF_, weightKinFit_;
     edm::InputTag elecs_, muons_, jets_, met_;
     edm::InputTag vertices_, genEvent_ , FullLepEvt_, hypoKey_;
     edm::InputTag genParticles_;
+    edm::InputTag genJets_;
+    edm::InputTag bIndex_;
+    edm::InputTag antiBIndex_;
     
     bool includeTrig_, isTtBarSample_;
     edm::InputTag dType_ , trigResults_, decayMode_;
@@ -123,6 +126,7 @@ private:
     LV GenTau, GenAntiTau;
     LV GenNeutrino, GenAntiNeutrino;
     LV GenB, GenAntiB;
+    LV HadronGenB, HadronGenAntiB;
     LV GenWPlus, GenWMinus;
     
     //Complete true level info
@@ -146,10 +150,13 @@ private:
     int decayMode;
 
     /////////jets///////////
+    std::vector<LV> VallGenJets;
     std::vector<LV> VgenJet;
     std::vector<LV> Vjet;
     std::vector<double> VjetBTagTCHE;
     std::vector<double> VjetBTagSSVHE;
+    std::vector<double> VjetBTagCSV;
+    std::vector<double> VjetBTagCSVMVA;
 
     /////////met///////////
     std::vector<double> VmetEt;
@@ -214,6 +221,10 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
     FullLepEvt_ ( iConfig.getParameter<edm::InputTag> ( "FullLepEvent" ) ),
     hypoKey_ ( iConfig.getParameter<edm::InputTag> ( "hypoKey" ) ),
     genParticles_( iConfig.getParameter<edm::InputTag> ( "genParticles" ) ),
+    
+    genJets_   (iConfig.getParameter<edm::InputTag>("genJets")),
+    bIndex_    (iConfig.getParameter<edm::InputTag>("BJetIndex")),
+    antiBIndex_(iConfig.getParameter<edm::InputTag>("AntiBJetIndex")),
 
     includeTrig_ ( iConfig.getParameter<bool> ( "includeTrigger" ) ),
     isTtBarSample_ ( iConfig.getParameter<bool> ( "isTtBarSample" ) ),
@@ -346,6 +357,8 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
     if ( isTtBarSample_ ) 
     {
+        HadronGenAntiB = dummy;
+        HadronGenB = dummy;
         //Generator info
         edm::Handle<TtGenEvent> genEvt;
         iEvent.getByLabel ( genEvent_, genEvt );
@@ -357,6 +370,20 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
             GenB = genEvt->b()->p4(); GenAntiB = genEvt->bBar()->p4();
             GenNeutrino = genEvt->neutrino()->p4(); GenAntiNeutrino = genEvt->neutrinoBar()->p4();
             GenWPlus = genEvt->wPlus()->p4(); GenWMinus = genEvt->wMinus()->p4();
+            
+            //find the b jets corresponding to b quarks
+            edm::Handle<int> BJetIndex;
+            iEvent.getByLabel(bIndex_, BJetIndex );
+            edm::Handle<int> AntiBJetIndex;
+            iEvent.getByLabel(antiBIndex_, AntiBJetIndex);
+            edm::Handle<reco::GenJetCollection> genJets;
+            iEvent.getByLabel(genJets_, genJets);
+            if (*BJetIndex >= 0) (HadronGenB = genJets->at(*BJetIndex).p4());
+            if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
+            for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
+                VallGenJets.push_back(aJet->p4());
+            }
+
         }
         else 
         {
@@ -454,7 +481,8 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         }
         VjetBTagTCHE.push_back ( ajet->bDiscriminator ( "trackCountingHighEffBJetTags" ) );
         VjetBTagSSVHE.push_back ( ajet->bDiscriminator ( "simpleSecondaryVertexHighEffBJetTags" ) );
-        
+        VjetBTagCSV.push_back(ajet->bDiscriminator("combinedSecondaryVertexBJetTags"));
+        VjetBTagCSVMVA.push_back(ajet->bDiscriminator("combinedSecondaryVertexMVABJetTags"));
         
     }
 
@@ -541,6 +569,9 @@ NTupleWriter::beginJob()
     Ntuple->Branch ( "jet",&Vjet );
     Ntuple->Branch ( "jetBTagTCHE",&VjetBTagTCHE );
     Ntuple->Branch ( "jetBTagSSVHE",&VjetBTagSSVHE );
+    Ntuple->Branch(  "jetBTagCSV", &VjetBTagCSV);
+    Ntuple->Branch(  "jetBTagCSVMVA", &VjetBTagCSVMVA);
+    Ntuple->Branch( "allGenJets", &VallGenJets);
     Ntuple->Branch( "genJet", &VgenJet);
 
     /////////////met properties///////////
@@ -674,6 +705,9 @@ void NTupleWriter::clearVariables()
     Vjet.clear();
     VjetBTagTCHE.clear();
     VjetBTagSSVHE.clear();
+    VjetBTagCSV.clear();
+    VjetBTagCSVMVA.clear();
+    VallGenJets.clear();
     VgenJet.clear();
 
     /////////met///////////

@@ -46,6 +46,10 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   edm::InputTag puWeight_;
   /// lep SF weight
   edm::InputTag lepSfWeight_;
+  
+    edm::InputTag genJets_;
+    edm::InputTag bIndex_;
+    edm::InputTag antiBIndex_;
 
     /// histograms for generated top quark kinematics
   std::vector<TH1D*> TopGen_;
@@ -53,6 +57,7 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   std::vector<TH1D*> WplusGen_;
   /// histograms for generated B kinematics
   std::vector<TH1D*> BGen_;
+  std::vector<TH1D*> HadronBGen_;
   /// histograms for generated l^+ kinematics
   std::vector<TH1D*> LepBarGen_;
   /// histograms for generated neutrino kinematics
@@ -63,6 +68,7 @@ class FullLepGenAnalyzer : public edm::EDAnalyzer {
   std::vector<TH1D*> WminusGen_;
   /// histograms for generated anti-b kinematics
   std::vector<TH1D*> BBarGen_;
+  std::vector<TH1D*> HadronBBarGen_;
   /// histograms for generated l^- kinematics
   std::vector<TH1D*> LepGen_;
   /// histograms for generated anti-neutrino kinematics

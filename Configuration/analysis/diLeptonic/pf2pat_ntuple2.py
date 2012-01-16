@@ -121,29 +121,19 @@ process.filterTrigger.TriggerResults = cms.InputTag('TriggerResults','','HLT')
 process.filterTrigger.printTriggers = False
 if options.mode == 'mumu':
     ttFilterChannelName = 'MuonMuon'
-    if options.runOnMC:
-        process.filterTrigger.hltPaths  = cms.vstring('HLT_DoubleMu7_*')
-    else:
-        if options.rereco:
-            process.filterTrigger.hltPaths  = cms.vstring(
-                'HLT_DoubleMu7_*',
-                #'HLT_Mu13_Mu8_v*',
-                #'HLT_Mu17_Mu8_v*',
-                #'HLT_Mu17_DiCentralJet30_*'
-            )
-        else:
-            process.filterTrigger.hltPaths  = cms.vstring(
-                #'HLT_DoubleMu7_*',
-                'HLT_Mu13_Mu8_v*',
-                'HLT_Mu17_Mu8_v*',
-                'HLT_DoubleMu45_v*',
-                #'HLT_Mu17_DiCentralJet30_*'
-            )
+    process.filterTrigger.hltPaths  = cms.vstring(
+        'HLT_Mu10_Ele10_CaloIdL_*',
+        'HLT_DoubleMu6_v*',
+        'HLT_DoubleMu7_v*',
+        'HLT_Mu13_Mu8_v*',
+        'HLT_Mu17_Mu8_v*',
+        'HLT_DoubleMu45_v*'
+    )
 
 elif options.mode == 'emu':
     ttFilterChannelName = 'ElectronMuon'
     process.filterTrigger.hltPaths  = cms.vstring(
-        #'HLT_Mu10_Ele10_CaloIdL_*',
+        'HLT_Mu10_Ele10_CaloIdL_*',
         'HLT_Mu8_Ele17_CaloIdL_*',
         'HLT_Mu17_Ele8_CaloIdL_*',
         'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*',
@@ -842,8 +832,10 @@ if signal and useGenCutsInTopSignal:
         leptonEta           = 2.4,
     )
     process.generatorTtCutsBJets = generatorTtDileptonFilter.clone(
-        bPt                 = 30.,
-        bEta                = 2.4,
+        #bPt                 = 30.,
+        #bEta                = 2.4,
+        bHadronPt = 30,
+        bHadronEta = 2.4,
     )
 else:
     process.generatorTtCutsLeptons = cms.Sequence()
@@ -855,9 +847,11 @@ process.analyzeGenEvent9 = cms.Sequence()
 
 if topfilter:
 	process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+	process.load("TopAnalysis.TopUtils.HadronLevelBJetProducer_cfi")
 	process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2     
         process.topsequence = cms.Sequence( 
 	        process.makeGenEvt *
+	        process.produceHadronLevelBJets *
 		process.generatorTopFilter 
 	)
 
@@ -923,11 +917,6 @@ else:
 
 ### OLD ANALYSIS ENDS HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #process.source.skipEvents = cms.untracked.uint32(40000)
-
-if options.runOnMC and not options.syncExcercise and filterMadgraphPythiaBug:
-    process.kinematicsFilterSequence = cms.Sequence(process.totalKinematicsFilter)
-else:
-    process.kinematicsFilterSequence = cms.Sequence()
 
 process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 from PhysicsTools.PatAlgos.tools.helpers import cloneProcessingSnippet, massSearchReplaceAnyInputTag
@@ -1028,7 +1017,6 @@ process.p = cms.Path(
     process.buildJets                *
     process.eventIDPrinter2          *
     process.filterOppositeCharge     *
-    process.kinematicsFilterSequence *
     process.afterLeptonChargeSelection
 )
 
@@ -1045,7 +1033,6 @@ process.p = cms.Path(
 #   process.buildJets              *
    #process.eventIDPrinter2       *
 #   process.filterSameCharge       *
-#   process.kinematicsFilterSequence *
 #   process.afterLeptonChargeSelectionSS
 #)
 
@@ -1058,7 +1045,6 @@ process.pZWindow = cms.Path(
     process.filterDiLeptonMassQCDveto     *
     process.eventWeightDileptonSF         *    
     process.ZWindowSelection              *
-    process.kinematicsFilterSequence      *
     process.analyzeLeptonPairZvetoRegion4 *
     process.onePFJetSelection             *
     process.analyzeLeptonPairZvetoRegion5 *
@@ -1077,7 +1063,6 @@ process.pZWindow = cms.Path(
 
 if signal:
     process.pNtuple = cms.Path(
-        process.kinematicsFilterSequence *
         process.additionalPatSelection *
         process.buildJets *
         process.writeNTuple
@@ -1137,7 +1122,6 @@ if signal:
     process.genPath = cms.Path(
         process.topsequence *
         process.makeWeightsPU *
-        process.kinematicsFilterSequence *
         process.analyzeGenTopEvent *
         process.generatorTtCutsLeptons    *
         process.generatorTtCutsBJets *
@@ -1160,6 +1144,11 @@ if options.runOnMC and not options.syncExcercise:
     #process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.0, 0.95, 0.9) # JER down
     process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.1, 1.1, 1.1) # JER standard
     #process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.2, 1.25, 1.3) # JER up
+
+
+if options.runOnMC and not options.syncExcercise and filterMadgraphPythiaBug:
+    for pathname in process.paths_().keys():
+        getattr(process, pathname).insert(0, process.totalKinematicsFilter)
 
 
 process.load("TopAnalysis.TopUtils.SignalCatcher_cfi")

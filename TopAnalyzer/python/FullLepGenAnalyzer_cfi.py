@@ -4,5 +4,8 @@ from DileptonEventWeight_cfi import *
 analyzeFullLepGenEvent = cms.EDAnalyzer("FullLepGenAnalyzer",
     src = cms.InputTag("genEvt"),      
     weightPU     = eventWeightPUTag,
-    weightLepSF  = cms.InputTag("") 
+    weightLepSF  = cms.InputTag(""),
+    genJets             = cms.InputTag("ak5GenJets"),
+    BJetIndex           = cms.InputTag("produceHadronLevelBJets", "BJetIndex"),
+    AntiBJetIndex       = cms.InputTag("produceHadronLevelBJets", "AntiBJetIndex"),
 )

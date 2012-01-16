@@ -2,6 +2,7 @@
 #include "TopAnalysis/TopUtils/interface/NameScheme.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
@@ -11,7 +12,10 @@
 FullLepGenAnalyzer::FullLepGenAnalyzer(const edm::ParameterSet& cfg):
   src_        (cfg.getParameter<edm::InputTag>("src"       )),
   puWeight_   (cfg.getParameter<edm::InputTag>( "weightPU"   )),
-  lepSfWeight_(cfg.getParameter<edm::InputTag>( "weightLepSF"))
+  lepSfWeight_(cfg.getParameter<edm::InputTag>( "weightLepSF")),
+  genJets_         (cfg.getParameter<edm::InputTag>("genJets")),
+  bIndex_          (cfg.getParameter<edm::InputTag>("BJetIndex")),
+  antiBIndex_      (cfg.getParameter<edm::InputTag>("AntiBJetIndex"))
 {
 }
 
@@ -132,6 +136,8 @@ void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& e
     return;
   }
 
+//   std::cout << evt.id().event() << "     flga.genlep.pt = " << std::setprecision(9) << genLep->pt() << "\n";
+//   std::cout << evt.id().event() << "     flga.genlepBar.pt = " << std::setprecision(9) << genLepBar->pt() << "\n";
   AddFourMomenta addFourMomenta;
 
   // combined top pair object
@@ -168,12 +174,22 @@ void FullLepGenAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& e
   fillGenHistos(TtBarGen_,  *genTtBar,   weight);
   fillGenHistos(LepPairGen_,*genLepPair, weight);
   fillGenHistos(JetPairGen_,*genJetPair, weight);
-
+  
+  
+  //find the b jets corresponding to b quarks
+  edm::Handle<int> BJetIndex;
+  evt.getByLabel(bIndex_, BJetIndex );
+  edm::Handle<int> AntiBJetIndex;
+  evt.getByLabel(antiBIndex_, AntiBJetIndex);
+  edm::Handle<reco::GenJetCollection> genJets;
+  evt.getByLabel(genJets_, genJets);
+  if (*BJetIndex >= 0) fillGenHistos(HadronBGen_, genJets->at(*BJetIndex), weight);
+  if (*AntiBJetIndex >= 0) fillGenHistos(HadronBBarGen_, genJets->at(*AntiBJetIndex), weight);
+  
   delete genTtBar;
   delete genLepPair;
   delete genJetPair;
 }
-
 
 
 void FullLepGenAnalyzer::endJob()
@@ -207,6 +223,12 @@ FullLepGenAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
   BGen_.push_back( fs->make<TH1D>(ns.name("BPhi"     ), "#phi (b)"	 , 62, -3.1,   3.1) );
   BGen_.push_back( fs->make<TH1D>(ns.name("BMass"    ), "M (b) [GeV]"	 ,100,  0. , 500. ) );
 
+  HadronBGen_.push_back( fs->make<TH1D>(ns.name("HadronBPt"      ), "p_{t} (b) [GeV]",100,  0. , 500. ) );
+  HadronBGen_.push_back( fs->make<TH1D>(ns.name("HadronBEta"     ), "#eta (b)"       ,100, -5.0,   5.0) );
+  HadronBGen_.push_back( fs->make<TH1D>(ns.name("HadronBRapidity"), "rapidity (b)"   ,100, -5.0,   5.0) );
+  HadronBGen_.push_back( fs->make<TH1D>(ns.name("HadronBPhi"     ), "#phi (b)"       , 62, -3.1,   3.1) );
+  HadronBGen_.push_back( fs->make<TH1D>(ns.name("HadronBMass"    ), "M (b) [GeV]"    ,100,  0. , 500. ) );
+
   LepBarGen_.push_back( fs->make<TH1D>(ns.name("LepBarPt"      ), "p_{t} (l^{+}) [GeV]",100,  0. , 500. ) );
   LepBarGen_.push_back( fs->make<TH1D>(ns.name("LepBarEta"     ), "#eta (l^{+})"       ,100, -5.0,   5.0) );
   LepBarGen_.push_back( fs->make<TH1D>(ns.name("LepBarRapidity"), "rapidity (l^{+})"   ,100, -5.0,   5.0) );
@@ -231,7 +253,13 @@ FullLepGenAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
   WminusGen_.push_back( fs->make<TH1D>(ns.name("WMinusPhi"     ), "#phi (W^{-})"       , 62, -3.1,   3.1) );
   WminusGen_.push_back( fs->make<TH1D>(ns.name("WMinusMass"    ), "M (W^{-}) [GeV]"    ,100,  0. , 500. ) );
 
-  BBarGen_.push_back( fs->make<TH1D>(ns.name("BBarPt"	   ), "p_{t} (#bar{b}) [GeV]",100,  0. , 500. ) );
+  HadronBBarGen_.push_back( fs->make<TH1D>(ns.name("HadronBBarPt"          ), "p_{t} (#bar{b}) [GeV]",100,  0. , 500. ) );
+  HadronBBarGen_.push_back( fs->make<TH1D>(ns.name("HadronBBarEta"     ), "#eta (#bar{b})"       ,100, -5.0,   5.0) );
+  HadronBBarGen_.push_back( fs->make<TH1D>(ns.name("HadronBBarRapidity"), "rapidity (#bar{b})"   ,100, -5.0,   5.0) );
+  HadronBBarGen_.push_back( fs->make<TH1D>(ns.name("HadronBBarPhi"     ), "#phi (#bar{b})"       , 62, -3.1,   3.1) );
+  HadronBBarGen_.push_back( fs->make<TH1D>(ns.name("HadronBBarMass"    ), "M (#bar{b}) [GeV]"    ,100,  0. , 500. ) );
+
+  BBarGen_.push_back( fs->make<TH1D>(ns.name("BBarPt"        ), "p_{t} (#bar{b}) [GeV]",100,  0. , 500. ) );
   BBarGen_.push_back( fs->make<TH1D>(ns.name("BBarEta"     ), "#eta (#bar{b})"       ,100, -5.0,   5.0) );
   BBarGen_.push_back( fs->make<TH1D>(ns.name("BBarRapidity"), "rapidity (#bar{b})"   ,100, -5.0,   5.0) );
   BBarGen_.push_back( fs->make<TH1D>(ns.name("BBarPhi"     ), "#phi (#bar{b})"       , 62, -3.1,   3.1) );
@@ -274,11 +302,12 @@ FullLepGenAnalyzer::bookGenHistos(edm::Service<TFileService>& fs)
 void
 FullLepGenAnalyzer::fillGenHistos(std::vector<TH1D*>& histos, const reco::Candidate& candidate, double weight)
 {
-  histos[0]->Fill( candidate.pt(), weight      );
-  histos[1]->Fill( candidate.eta(), weight     );
-  histos[2]->Fill( candidate.rapidity(), weight);
-  histos[3]->Fill( candidate.phi(), weight     );
-  histos[4]->Fill( candidate.mass(), weight    );
+    assert(histos.size() == 5);
+    histos[0]->Fill( candidate.pt(), weight      );
+    histos[1]->Fill( candidate.eta(), weight     );
+    histos[2]->Fill( candidate.rapidity(), weight);
+    histos[3]->Fill( candidate.phi(), weight     );
+    histos[4]->Fill( candidate.mass(), weight    );
 }
 
 

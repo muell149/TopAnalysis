@@ -9,6 +9,8 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 #include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 /**
   \class   GeneratorTtDileptonFilter GeneratorTtDileptonFilter.cc "TopAnalysis/TopFilter/plugins/GeneratorTtDileptonFilter.cc"
@@ -35,6 +37,9 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
 
   /// input
   edm::InputTag src_;
+  edm::InputTag genJets_;
+  edm::InputTag bIndex_;
+  edm::InputTag antiBIndex_;
 
   /// generator level cuts
   double lepPt_;
@@ -42,6 +47,8 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
   double lepEta_;
   double bPt_;
   double bEta_;
+  double bHadronPt_;
+  double bHadronEta_;
   double met_;
   double invLepLepMass_;
   std::vector<double> zVeto_;
@@ -53,11 +60,16 @@ class GeneratorTtDileptonFilter : public edm::EDFilter {
 
 GeneratorTtDileptonFilter::GeneratorTtDileptonFilter(const edm::ParameterSet& cfg) :
   src_             (cfg.getParameter<edm::InputTag>("src"           )),
+  genJets_         (cfg.getParameter<edm::InputTag>("genJets")),
+  bIndex_          (cfg.getParameter<edm::InputTag>("BJetIndex")),
+  antiBIndex_      (cfg.getParameter<edm::InputTag>("AntiBJetIndex")),
   lepPt_           (cfg.getParameter<double>( "leptonPt"	    )),
   centralLeptonEta_(cfg.getParameter<double>( "centralLeptonEta"    )),
   lepEta_	   (cfg.getParameter<double>( "leptonEta"	    )),
   bPt_ 	           (cfg.getParameter<double>( "bPt"	            )),
   bEta_	           (cfg.getParameter<double>( "bEta"	            )),
+  bHadronPt_       (cfg.getParameter<double>( "bHadronPt"           )),
+  bHadronEta_      (cfg.getParameter<double>( "bHadronEta"          )),
   met_ 	           (cfg.getParameter<double>( "met"	            )),
   invLepLepMass_   (cfg.getParameter<double>( "invariantLepLepMass" )),
   zVeto_           (cfg.getParameter<std::vector<double> >( "zVeto" ))
@@ -73,7 +85,7 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
   edm::Handle<TtGenEvent> genEvt;
   evt.getByLabel(src_, genEvt );
   const std::vector<reco::GenParticle> *genParticles = &(genEvt->particles()); 
-
+  
   const reco::Candidate* topQuark = 0;
   const reco::Candidate* topBarQuark = 0;
   const reco::Candidate* bQuark = 0;
@@ -166,7 +178,7 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
     std::cout << "nuBar not found" << std::endl;
     return false;
   }
-
+  
   // apply cuts
   if(lepton ->pt()<lepPt_        || leptonBar->pt()<lepPt_        ) return false;
   if(fabs(lepton->eta())>lepEta_ || fabs(leptonBar->eta())>lepEta_) return false;
@@ -189,8 +201,26 @@ bool GeneratorTtDileptonFilter::filter(edm::Event& evt, const edm::EventSetup& e
 
   if(dilepMass>zVeto_[0] && dilepMass<zVeto_[1]) return false;
 
+  //find the b jets corresponding to b quarks
+  edm::Handle<int> BJetIndex;
+  evt.getByLabel(bIndex_, BJetIndex );
+  edm::Handle<int> AntiBJetIndex;
+  evt.getByLabel(antiBIndex_, AntiBJetIndex);
+
+  edm::Handle<reco::GenJetCollection> genJets;
+  evt.getByLabel(genJets_, genJets);
+  
+  if (bHadronPt_ > 0 || bHadronEta_ < 100) { //make cuts
+    if (*BJetIndex < 0 || *AntiBJetIndex < 0) return false;
+    const reco::GenJet& genBJet = genJets->at(*BJetIndex );
+    if (genBJet.pt() < bHadronPt_ || genBJet.eta() > bHadronEta_) return false;
+    const reco::GenJet &genAntiBJet = genJets->at(*AntiBJetIndex);
+    if (genAntiBJet.pt() < bHadronPt_ || genAntiBJet.eta() > bHadronEta_) return false;
+  }
   return true;
 }
+
+
 
 
 void GeneratorTtDileptonFilter::beginJob()
