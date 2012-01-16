@@ -107,175 +107,60 @@ TGraph* getMassShiftGraph()
   return graph;
 }
 
-TGraphAsymmErrors* readAhr(const bool pole, const bool useAlphaUnc, const bool heraPDF)
+TGraphAsymmErrors* readTheory(const TString name, const bool pole, const bool useAlphaUnc, const bool heraPDF)
 {
+  const unsigned nPoints = (name=="kidonakis" ? 91 : 51);
+
+  TString fileName = "input/" + name;
+  if(pole || name=="kidonakis")
+    fileName += "_pole";
+  else
+    fileName += "_msbar";
+  if(heraPDF && name!="kidonakis")
+    fileName += "_hera.tab";
+  else
+    fileName += "_mstw.tab";
+
   ifstream in;
-  if(pole) {
-    if(heraPDF)
-      in.open("ahrens_mpole_exp_hera.tab");
-    else
-      in.open("ahrens_all.tab");
-  }
-  else {
-    if(heraPDF)
-      in.open("ahrens_ms_hera_exp.dat");
-    else
-      in.open("mstw_ahrens_msbar_all.tab");
-  }
+  in.open(fileName);
 
-  int n = 51;
-  if(!pole)
-    n=50;
-  double mass [n];
-  double sigma[n];
-  double dummy_err[n];
-  double err_yu[n];
-  double err_yd[n];
+  double mass     [nPoints];
+  double sigma    [nPoints];
+  double dummy_err[nPoints];
+  double err_yu   [nPoints];
+  double err_yd   [nPoints];
 
-  int i=0;
-  while( 1 ) {
+  unsigned i=0;
+  while( !in.eof() ) {
+    double mt, xsec, err_u1, err_d1, err_u2, err_d2, err_u3, err_d3;
+    in >> mt >> xsec >> err_u1 >> err_d1 >> err_u2 >> err_d2 >> err_u3 >> err_d3;
     if( in.eof() ) break;
-    double err_u1, err_d1, err_u2, err_d2, err_u3, err_d3;
-    if(heraPDF) {
-      in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2;
-      if(useAlphaUnc) {
-	const double relAlphaUnc = (heraPDF ? 0.04 : 0.05);
-	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2 + TMath::Power(sigma[i]*relAlphaUnc,2));
-	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2 + TMath::Power(sigma[i]*relAlphaUnc,2));
-      }
-      else {
-	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2);
-	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2);
-      }
-    }
-    else {
-      in >> mass[i] >> sigma[i] >> err_u1 >> err_d1 >> err_u2 >> err_d2 >> err_u3 >> err_d3;
-      if(useAlphaUnc) {
-	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2);
-	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2);
-      }
-      else {
-	err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u3*err_u3);
-	err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d3*err_d3);
-      }
-    }
-
-    dummy_err[i] = 0;
-    if(sigma[i]>0)
-      i++;
-  }  
-  in.close();
-
-  return new TGraphAsymmErrors(n, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
-}
-
-TGraphAsymmErrors* readKid(const bool useAlphaUnc)
-{
-  ifstream in;
-  in.open("Kidonakis-ttbarLHC7.dat");
-
-  int n = 91;
-  double mass [n];
-  double sigma[n];
-  double dummy_err[n];
-  double err_yu[n];
-  double err_yd[n];
-
-  int i=0;
-  while( 1 ) {
-    if( in.eof() ) break;
-    in >> mass[i] >> sigma[i];
-    dummy_err[i] = 0;
+    mass[i] = mt;
+    sigma[i] = xsec;
     if(useAlphaUnc) {
-      //                                            alpha_s                        scale
-      err_yu[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.078,2)+TMath::Power(sigma[i]*0.044,2)+TMath::Power(sigma[i]*0.055,2));
-      err_yd[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.070,2)+TMath::Power(sigma[i]*0.031,2)+TMath::Power(sigma[i]*0.055,2));
+      err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2 + err_u3*err_u3);
+      err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2 + err_d3*err_d3);
     }
     else {
-      err_yu[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.000,2)+TMath::Power(sigma[i]*0.044,2)+TMath::Power(sigma[i]*0.055,2));
-      err_yd[i] = TMath::Sqrt(TMath::Power(sigma[i]*0.000,2)+TMath::Power(sigma[i]*0.031,2)+TMath::Power(sigma[i]*0.055,2));
+      err_yu[i] = TMath::Sqrt(err_u1*err_u1 + err_u2*err_u2);
+      err_yd[i] = TMath::Sqrt(err_d1*err_d1 + err_d2*err_d2);
     }
-    i++;
-  }  
-  in.close();
-
-  return new TGraphAsymmErrors(n, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
-}
-
-TGraphAsymmErrors* readMoc(const bool pole, const bool useAlphaUnc, const bool heraPDF)
-{
-  ifstream in;
-  if(pole) {    
-    if(heraPDF)
-      in.open("herapdf.tab");
-    else
-      in.open("Moch_mpole_mstw_cropped.out");
-  }
-  else {
-    if(heraPDF)
-      in.open("moch_ms_hera15nnlo_rel.out");
-    else
-    in.open("top_mstw.tab");
-  }
-
-  int n = 51;
-  double mass [n];
-  double sigma[n];
-  double dummy_err[n];
-  double err_yu[n];
-  double err_yd[n];
-
-  int i=0;
-  while( 1 ) {
-    if( in.eof() ) break;
-
-    double mt, sig;
-
-    if(heraPDF) {
-      if(pole) {
-	double err;
-	in >> mt >> sig >> err;
-	
-	err_yu[i] = err;
-	err_yd[i] = err;
-      }
-      else {
-	double uScale, dScale, pdf, uAlpha, dAlpha;
-	in >> mt >> sig >> uScale >> dScale >> pdf >> uAlpha >> dAlpha;
-	
-	if(!useAlphaUnc) {
-	  uAlpha = 0;
-	  dAlpha = 0;
-	}
-	err_yu[i] = TMath::Sqrt(TMath::Power(uScale/100*sig,2)+TMath::Power(pdf/100*sig,2)+TMath::Power(uAlpha/100*sig,2));
-	err_yd[i] = TMath::Sqrt(TMath::Power(dScale/100*sig,2)+TMath::Power(pdf/100*sig,2)+TMath::Power(dAlpha/100*sig,2));
-      }
-    }
-    else{
-      double uPdf, dPdf, uRen, dRen, uFac, dFac;
-      in >> mt >> sig >> uPdf >> dPdf >> uRen >> dRen >> uFac >> dFac;
-      
-      const double uScale = TMath::Max(sig, TMath::Max( TMath::Max(uRen,dRen), TMath::Max(uFac,dFac)));
-      const double dScale = TMath::Min(sig, TMath::Min( TMath::Min(uRen,dRen), TMath::Min(uFac,dFac)));
-      
-      if(useAlphaUnc) {
-	err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2) + TMath::Power(sig*0.08,2));
-	err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2) + TMath::Power(sig*0.08,2));
-      }
-      else {
-	err_yu[i] = TMath::Sqrt(TMath::Power(uPdf-sig,2) + TMath::Power(uScale-sig,2));
-	err_yd[i] = TMath::Sqrt(TMath::Power(sig-dPdf,2) + TMath::Power(sig-dScale,2));
-      }
-    }
-
     dummy_err[i] = 0;
-    mass [i] = mt;
-    sigma[i] = sig;
-    i++;
-  }  
-  in.close();
+    if(sigma[i]<1) {
+      std::cout << "Spurious cross section of " << sigma[i] << " in line " << i+1 << " of " << fileName << std::endl;
+      abort();
+    }
+    i++;      
+  }
 
-  return new TGraphAsymmErrors(n, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
+  in.close();
+  if(i!=nPoints){
+    std::cout << "Spurious number of lines in " << fileName << std::endl;
+    std::cout << "Found / expected: " << i << " / " << nPoints << std::endl;
+    abort();
+  }
+
+  return new TGraphAsymmErrors(nPoints, mass, sigma, dummy_err, dummy_err, err_yd, err_yu);
 }
 
 void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole, TString label, TString printNameBase)
@@ -322,8 +207,8 @@ void drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, const bo
     relUncUp->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
   relUncUp->GetYaxis()->CenterTitle();
-  relUncUp->GetYaxis()->SetRangeUser(.055, .115);
-  //  relUncUp->GetYaxis()->SetRangeUser(.0, .115);
+  //  relUncUp->GetYaxis()->SetRangeUser(.055, .115);
+  relUncUp->GetYaxis()->SetRangeUser(.0, .115);
   relUncUp  ->SetLineStyle(2);
   relUncDown->SetLineStyle(3);
   relUncUp->Draw("AL");
@@ -426,7 +311,7 @@ TLatex* cmsPreliminaryTxt()
 
 int foldedLikelihoods()
 {
-  const bool pole    = false;
+  const bool pole    = true;
   const bool useAlphaUnc = true;
   const bool heraPDF = false;
 
@@ -463,9 +348,9 @@ int foldedLikelihoods()
     canvas->Print("MSbar_vs_pole_mass.eps");
   }
 
-  TGraphAsymmErrors* ahr = readAhr(pole, useAlphaUnc, heraPDF);
-  TGraphAsymmErrors* kid = readKid(useAlphaUnc);
-  TGraphAsymmErrors* moc = readMoc(pole, useAlphaUnc, heraPDF);
+  TGraphAsymmErrors* ahr = readTheory("ahrens"   , pole, useAlphaUnc, heraPDF);
+  TGraphAsymmErrors* kid = readTheory("kidonakis", pole, useAlphaUnc, heraPDF);
+  TGraphAsymmErrors* moc = readTheory("moch"     , pole, useAlphaUnc, heraPDF);
 
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
 //  TF1* f1 = new TF1("f1", "([0]+[1]*(x-172.5)+[2]*TMath::Power(x-172.5,2)+[3]*TMath::Power(x-172.5,3))/TMath::Power(x-172.5,4)", 0, 1000);
