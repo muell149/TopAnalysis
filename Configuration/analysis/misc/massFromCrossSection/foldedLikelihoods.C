@@ -277,26 +277,6 @@ void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color,
 	      RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
 }
 
-void fitSimpleGaussForComparison(TF1* f1, TCanvas* canvas, const bool pole, TString printNameBase)
-{
-  TH1* hist = f1->GetHistogram();
-  if(pole)
-    hist->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
-  else
-    hist->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
-  hist->GetYaxis()->SetTitle("a.u.");
-  hist->GetYaxis()->CenterTitle();
-  hist->SetFillStyle(0);
-  hist->Draw("hist");
-  hist->Fit("gaus");
-  hist->GetFunction("gaus")->SetLineWidth(2);
-  char tmpTxt[99];
-  sprintf(tmpTxt, "%s: %.1f GeV vs. %.1f GeV",
-	  f1->GetTitle(), f1->GetMaximumX(), hist->GetFunction("gaus")->GetParameter(1));
-  hist->SetTitle(tmpTxt);
-  canvas->Print(printNameBase+".ps");
-}
-
 TLatex* cmsPreliminaryTxt()
 {
   TLatex* text = new TLatex(3.570061,23.08044,"CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
@@ -561,17 +541,6 @@ int foldedLikelihoods()
   if(heraPDF)
     epsName += "_hera";
   canvas->Print(epsName+".eps");
-
-  gStyle->SetOptTitle(1);
-
-  kidTF->SetTitle("Kidonakis");
-  mocTF->SetTitle("Langenfeld et al.");
-  ahrTF->SetTitle("Ahrens et al.");
-
-  if(pole && !heraPDF)
-    fitSimpleGaussForComparison(kidTF, canvas, pole, printNameBase);
-  fitSimpleGaussForComparison(ahrTF, canvas, pole, printNameBase);
-  fitSimpleGaussForComparison(mocTF, canvas, pole, printNameBase);
 
   canvas->Print(printNameBase+".ps]");
 
