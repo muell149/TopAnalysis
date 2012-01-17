@@ -57,6 +57,7 @@ class ObjectResolution{
   **/
   /// histogram filling for fwlite and for fwfull
   virtual void fill(const Collection& inputCollection, const double& weight=1.) = 0;
+  void fill2(const Collection& inputCollection, const double& a=1., const double& b=1., const double& c=1., const double& weight=1.){return fill(inputCollection, weight);};
 
  protected:
   /**
