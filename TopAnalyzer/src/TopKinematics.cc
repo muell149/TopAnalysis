@@ -48,6 +48,12 @@ void TopKinematics::book()
 {
 
   /** 
+      ttbar decay setup
+  **/
+  // decay channel
+  hists_["decayChannel"] = new TH1F( "decayChannel", "decayChannel",  25,   -4.,   40.);
+
+  /** 
       KinFit Monitoring Variables
   **/
   // fit probability of the best fit hypothesis
@@ -285,6 +291,27 @@ void TopKinematics::book()
 /// histogramm booking for fw
 void TopKinematics::book(edm::Service<TFileService>& fs)
 {
+
+  /** 
+      ttbar decay setup
+  **/
+  // decay channel
+  hists_["decayChannel"] = fs->make<TH1F>( "decayChannel", "decayChannel",  25,   -4.5,   20.5);
+  // set labels (decayChannel=-4 corresponds to bin 1)
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(1 , "undef"   );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(2 , "non tt"  );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(3 , "ll?"     );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(4 , "l?+j"    );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(6 , "e+j"     );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(7 , "#mu+j"   );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(8 , "#tau+j"  );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(16, "ee"      );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(17, "e#mu"    );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(18, "e#tau"   );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(19, "#mu#mu"  );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(20, "#mu#tau" );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(21, "#tau#tau");
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(25, "allhad"  );
   /** 
       KinFit Monitoring Variables
   **/
@@ -520,6 +547,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
 
   // book ttree entries
   if(useTree_){
+    // ttbar decay channel
+    bookVariable(fs, "decayChannel");
     // Kinfit performance
     bookVariable(fs, "prob"   );
     bookVariable(fs, "chi2"   );
@@ -678,6 +707,8 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
 			  weight);
     // save lepton charge
     fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton()))->charge(), weight );
+    // decay channel
+    fillValue( "decayChannel", getDecayChannel(tops), weight );
     // fill the tree, if any variable exists to put in
     if(treeVars_.size()) tree->Fill();
   }
@@ -687,6 +718,7 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
 void
 TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 {
+
   double charge           =-9999;
   double assignment       =-9999;
   double genTtbarPt       =-9999;
@@ -722,6 +754,9 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double chi2             =-9999;
   double delChi2          =-9999;
   if(useTree_) initializeTrees(-9999, weight);
+  // ttbar decay channel
+  if(tops.genEvent().isAvailable()) fillValue( "decayChannel", getDecayChannel(*tops.genEvent()), weight );
+  else fillValue( "decayChannel", -4, weight );
   // make sure to have a valid hypothesis on reconstruction level.
   if( tops.isHypoValid(hypoKey_) ){
     // define leptonic/hadronic or positive/negative charged objects (B,W,t)

@@ -109,6 +109,56 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepton  ,
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
 			     const double& weight);
+  double getDecayChannel(const TtGenEvent& tops){
+    double eventType=-4;
+    // identify event by the following number coding:
+    // -4 : undefined
+    // -3 : non ttbar MC
+    // -2 : dileptonic unknown    ttbar MC
+    // -1 : semileptonic unknown  ttbar MC
+    // 01 : semileptonic electron ttbar MC
+    // 02 : semileptonic muon     ttbar MC
+    // 03 : semileptonic tau      ttbar MC
+    // 11 : dileptonic e   e      ttbar MC
+    // 12 : dileptonic e   mu     ttbar MC
+    // 13 : dileptonic e   tau    ttbar MC
+    // 14 : dileptonic mu  mu     ttbar MC
+    // 15 : dileptonic mu  tau    ttbar MC
+    // 16 : dileptonic tau tau    ttbar MC
+    // 20 : fully hadronic        ttbar MC
+    if( !tops.isTtBar()        ) eventType = -3;
+    else if(  tops.isFullHadronic() ) eventType = 20;
+    else if(  tops.isSemiLeptonic() ) {
+      switch( tops.semiLeptonicChannel() ) {
+      case WDecay::kElec : eventType = 1; break;
+      case WDecay::kMuon : eventType = 2; break;
+      case WDecay::kTau  : eventType = 3; break;
+      default            : eventType = -1; break;
+      }
+    }
+    else if( tops.isFullLeptonic() ) {
+      if     (  tops.fullLeptonicChannel().first  == WDecay::kElec  && 
+		tops.fullLeptonicChannel().second == WDecay::kElec    )    eventType = 11;
+      else if( ( tops.fullLeptonicChannel().first  == WDecay::kElec && 
+		 tops.fullLeptonicChannel().second == WDecay::kMuon   ) ||
+	       ( tops.fullLeptonicChannel().first  == WDecay::kMuon && 
+		 tops.fullLeptonicChannel().second == WDecay::kElec   )  ) eventType = 12;
+      else if( ( tops.fullLeptonicChannel().first  == WDecay::kElec && 
+		 tops.fullLeptonicChannel().second == WDecay::kTau    ) ||
+	       ( tops.fullLeptonicChannel().first  == WDecay::kTau && 
+		 tops.fullLeptonicChannel().second == WDecay::kElec   )  ) eventType = 13;
+      else if(  tops.fullLeptonicChannel().first  == WDecay::kMuon && 
+		tops.fullLeptonicChannel().second == WDecay::kMuon  )      eventType = 14;
+      else if( ( tops.fullLeptonicChannel().first  == WDecay::kMuon && 
+		 tops.fullLeptonicChannel().second == WDecay::kTau    ) ||
+	       ( tops.fullLeptonicChannel().first  == WDecay::kTau  &&
+		 tops.fullLeptonicChannel().second  == WDecay::kMuon) )    eventType = 15;
+      else if(  tops.fullLeptonicChannel().first  == WDecay::kTau &&
+		tops.fullLeptonicChannel().second == WDecay::kTau   )      eventType = 16;
+      else eventType = -2;
+    }
+    return eventType;
+  }
   
  private:
   /// class key of hypothesis
