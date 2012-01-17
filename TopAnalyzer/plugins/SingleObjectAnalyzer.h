@@ -113,8 +113,12 @@ void SingleObjectAnalyzer<Collection, Analyze>::analyze(const edm::Event& event,
     event.getByLabel(wgt_, wgt);
     weight = *wgt;
   }
+  edm::EventAuxiliary aux = event.eventAuxiliary();
+  double runNumber             = aux.run();
+  double luminosityBlockNumber = aux.luminosityBlock();
+  double eventNumber           = aux.event();
   // hand over to the common analyzer function
-  analyze_->fill(*src, weight);
+  analyze_->fill2(*src, runNumber, luminosityBlockNumber, eventNumber, weight);
 }
 
 /// everything which has to be done before the event loop  

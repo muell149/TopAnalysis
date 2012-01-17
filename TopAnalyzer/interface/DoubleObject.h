@@ -81,8 +81,10 @@ class DoubleObject{
   /// function is needed as the input of the second collection 
   /// can be optional. If this doea not apply to your module 
   /// throw an exception here.
+  void fill2(const CollectionA& inputCollectionA, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.);
   virtual void fill(const CollectionA& inputCollectionA, const double& weight=1.) = 0;
   /// histogram filling for fwlite and for fwfull
+  void fill2(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.);
   virtual void fill(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& weight=1.) = 0;
   /// everything which needs to be done after the event loop
   virtual void process() = 0;
@@ -94,6 +96,24 @@ class DoubleObject{
   std::map<std::string, float> treeVars_;
   TTree * tree;
 };
+
+template <typename CollectionA, typename CollectionB>
+  void DoubleObject<CollectionA, CollectionB>::fill2(const CollectionA& inputCollectionA, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight)
+{
+  fillValue("runNumber", runNumber, weight);
+  fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
+  fillValue("eventNumber", eventNumber, weight);
+  fill(inputCollectionA, weight);
+}
+
+template <typename CollectionA, typename CollectionB>
+  void DoubleObject<CollectionA, CollectionB>::fill2(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight)
+{
+  fillValue("runNumber", runNumber, weight);
+  fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
+  fillValue("eventNumber", eventNumber, weight);
+  fill(inputCollectionA, inputCollectionB, weight);
+}
 
 /// book histograms or tree variables
 template <typename CollectionA, typename CollectionB>
@@ -107,6 +127,12 @@ template <typename CollectionA, typename CollectionB>
       tree = fs->make<TTree>("tree","tree",0);
       treeVars_["weight"];
       tree->Branch("weight", &treeVars_["weight"], (std::string("weight") + "/F").c_str());
+      treeVars_["runNumber"];
+      tree->Branch("runNumber", &treeVars_["runNumber"], (std::string("runNumber") + "/F").c_str());
+      treeVars_["luminosityBlockNumber"];
+      tree->Branch("luminosityBlockNumber", &treeVars_["luminosityBlockNumber"], (std::string("luminosityBlockNumber") + "/F").c_str());
+      treeVars_["eventNumber"];
+      tree->Branch("eventNumber", &treeVars_["eventNumber"], (std::string("eventNumber") + "/F").c_str());
     }
     treeVars_[variable];
     tree->Branch(variable, &treeVars_[variable], (std::string(variable) + "/F").c_str());
@@ -169,8 +195,8 @@ void DoubleObject<CollectionA, CollectionB>::initializeTrees(float value, const 
 {
   // loop all branches in the tree
   for(std::map<std::string, float>::iterator treeEntry=treeVars_.begin(); treeEntry!=treeVars_.end(); ++treeEntry){
-    if(treeEntry->first!="weight") treeEntry->second = value;
-    else treeEntry->second = weight;
+    if(treeEntry->first!="weight"&&treeEntry->first!="runNumber"&&treeEntry->first!="eventNumber"&&treeEntry->first!="luminosityBlockNumber") treeEntry->second = value;
+    else if (treeEntry->first=="weight") treeEntry->second = weight;
   }
 }
 

@@ -73,6 +73,7 @@ class SingleObject{
   virtual void book(edm::Service<TFileService>& fileService) = 0;
   /// histogram filling for fwlite and for fwfull
   virtual void fill(const Collection& inputCollection, const double& weight=1.) = 0;
+  void fill2(const Collection& inputCollection, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.);
   /// everything which needs to be done after the event loop
   virtual void process() = 0;
 
@@ -92,6 +93,15 @@ class SingleObject{
   TTree * tree;
 };
 
+template <typename Collection>
+  void SingleObject<Collection>::fill2(const Collection& inputCollection, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight)
+{
+  fillValue("runNumber", runNumber, weight);
+  fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
+  fillValue("eventNumber", eventNumber, weight);
+  fill(inputCollection, weight);
+}
+
 /// book histograms or tree variables
 template <typename Collection>
   void SingleObject<Collection>::bookVariable(edm::Service<TFileService>& fs, const char * variable,
@@ -104,6 +114,12 @@ template <typename Collection>
       tree = fs->make<TTree>("tree","tree",0);
       treeVars_["weight"];
       tree->Branch("weight", &treeVars_["weight"], (std::string("weight") + "/F").c_str());
+      treeVars_["runNumber"];
+      tree->Branch("runNumber", &treeVars_["runNumber"], (std::string("runNumber") + "/F").c_str());
+      treeVars_["luminosityBlockNumber"];
+      tree->Branch("luminosityBlockNumber", &treeVars_["luminosityBlockNumber"], (std::string("luminosityBlockNumber") + "/F").c_str());
+      treeVars_["eventNumber"];
+      tree->Branch("eventNumber", &treeVars_["eventNumber"], (std::string("eventNumber") + "/F").c_str());
     }
     treeVars_[variable];
     tree->Branch(variable, &treeVars_[variable], (std::string(variable) + "/F").c_str());
@@ -166,8 +182,8 @@ void SingleObject<Collection>::initializeTrees(float value, const double& weight
 {
   // loop all branches in the tree
   for(std::map<std::string, float>::iterator treeEntry=treeVars_.begin(); treeEntry!=treeVars_.end(); ++treeEntry){
-    if(treeEntry->first!="weight") treeEntry->second = value;
-    else treeEntry->second = weight;
+    if(treeEntry->first!="weight"&&treeEntry->first!="runNumber"&&treeEntry->first!="eventNumber"&&treeEntry->first!="luminosityBlockNumber") treeEntry->second = value;
+    else if (treeEntry->first=="weight") treeEntry->second = weight;
   }
 }
 

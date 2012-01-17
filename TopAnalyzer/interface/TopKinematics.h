@@ -58,6 +58,20 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   void fill(const TtSemiLeptonicEvent& tops, const double& weight=1.);
   /// histogram filling interface for generator level for access with fw or fwlite 
   void fill(const TtGenEvent& tops, const double& weight=1.);
+  // histogram filling and in addition save information for event identification
+  // double definition to avoid problems with different module inputs
+  void fill2(const TtGenEvent& tops, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.){
+    fillValue("runNumber", runNumber, weight);
+    fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
+    fillValue("eventNumber", eventNumber, weight);
+    fill(tops, weight);
+  }
+  void fill2(const TtSemiLeptonicEvent& tops, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.){
+    fillValue("runNumber", runNumber, weight);
+    fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
+    fillValue("eventNumber", eventNumber, weight);
+    fill(tops, weight);
+  }
   /// everything which needs to be done after the event loop
   void process(){};
 
