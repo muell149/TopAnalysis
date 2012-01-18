@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <map>
+#include <ctime>
 #include "assert.h"
 #include "TString.h"
 #include "TExec.h"
@@ -25,6 +26,9 @@
 #include "TPaveText.h"
 #include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
 #include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
+// if the include path is not found, put   
+// gSystem->Load("libFWCoreFWLite.so"); AutoLibraryLoader::enable(); gSystem->Load("libDataFormatsFWLite.so");
+// into your ~/.rootlogon.C
 
 
 using namespace std;
@@ -56,7 +60,7 @@ const TString inpath(
 const TString outpath("plots/");
 
 // output format
-const TString outform(".png");
+const TString outform(".eps");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -69,8 +73,8 @@ const TString kinEffOutfileName(outpath+"KinEfficienies_Histograms.root");
 // output file with data-bg histograms
 const TString preUnfoldedPlotsName(outpath+"preUnfoldedPlots.root");
 // input file name with systematic errors
-TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
-
+//TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
+TString sysinpath("/data/group/top/CompleteRun/Nov1/fall10systematics/");
 
 
 //-------------------------------------------------------------------------------------------------------------------------
@@ -79,10 +83,10 @@ TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 //================================================================================================
 //*******    Mll>30GeV  (Standard)  *******
 
-// TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_TOTAL.root");
-// TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/Systematic_Errors_DIFF.root");
-TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsDec19-output/Systematic_Errors_TOTAL.root");
-TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsDec19-output/Systematic_Errors_DIFF.root");
+TFile* systematicsInputTotal = TFile::Open("/data/group/top/CompleteRun/Nov1/fall10systematics-result/Systematic_Errors_TOTAL.root");
+TFile* systematicsInputDiff  = TFile::Open("/data/group/top/CompleteRun/Nov1/fall10systematics-result/Systematic_Errors_DIFF.root");
+// TFile* systematicsInputTotal = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsDec19-output/Systematic_Errors_TOTAL.root");
+// TFile* systematicsInputDiff  = TFile::Open("/afs/naf.desy.de/user/w/wbehrenh/cms/systematicsDec19-output/Systematic_Errors_DIFF.root");
 
 
 //================================================================================================
@@ -1557,11 +1561,11 @@ void CreateControlPlots() {
 
         PrintPlot("analyzeJets8", "multi",      kCOMBINED, "N_{jets}",       "events", 1, 1e4, kFALSE,kTRUE);
         PrintPlot("analyzeJets8", "pt",         kCOMBINED, "p_{T}^{jet} #left[#frac{GeV}{c}#right]","jets", 1, 1e4, kFALSE,kTRUE, 5);
-        PrintCombinedPlot("analyzeElecs8", "pt", "analyzeMuons8", "pt", "", "", kCOMBINED, "p_{T}^{l} #left[#frac{GeV}{c}#right]",  "leptons",  1, 1e4,0,kTRUE,5);
+        PrintCombinedPlot("analyzeElecs8", "pt", "analyzeMuons8", "pt", "", "", kCOMBINED, "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]",  "leptons",  1, 1e4,0,kTRUE,5);
         
-        PrintCombinedPlot("analyzeKinSolution9", "kin_TopPt",      "analyzeKinSolution9", "kin_TopBarPt",      "", "", kCOMBINED, "p_{T,t} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
-        PrintCombinedPlot("analyzeKinSolution9", "kin_TopMass",    "analyzeKinSolution9", "kin_TopBarMass",    "", "", kCOMBINED, "M_{t} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
-        PrintCombinedPlot("analyzeKinSolution9", "kin_TopRapidity","analyzeKinSolution9", "kin_TopBarRapidity","", "", kCOMBINED, "y_{t}",                "N_{events} / bin",  1, -1,0,0,2);
+        PrintCombinedPlot("analyzeKinSolution9", "kin_TopPt",      "analyzeKinSolution9", "kin_TopBarPt",      "", "", kCOMBINED, "p_{T}^{t and #bar{t}} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
+        PrintCombinedPlot("analyzeKinSolution9", "kin_TopMass",    "analyzeKinSolution9", "kin_TopBarMass",    "", "", kCOMBINED, "m_{t and #bar{t}} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
+        PrintCombinedPlot("analyzeKinSolution9", "kin_TopRapidity","analyzeKinSolution9", "kin_TopBarRapidity","", "", kCOMBINED, "y_{t and #bar{t}}",                "N_{events} / bin",  1, -1,0,0,2);
 
 //         PrintPlot("analyzeKinSolution9", "kin_TopPt",      kCOMBINED, "p_{T,t} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
 //         PrintPlot("analyzeKinSolution9", "kin_TopMass",    kCOMBINED, "M_{t} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
@@ -3214,6 +3218,19 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         hstack->Add(mergedhists[orderStackPlot[i]]);
     }
 
+    if (title.Contains("FixedMt_Btag_Yield_Leptons_Pt")) {
+        std::cout << "Channel: " << channelName[channel] << "\n";
+        for (size_t i=1; i<Nplots; ++i) std::cout << sampleName[i] << " / ";
+        std::cout << "\n";
+        for (int bin = 1; bin <= mergedhists[1]->GetNbinsX(); ++bin) {
+            std::cout << "Bin " << bin << ": ";
+            for (size_t i=1; i<Nplots; ++i) {
+                std::cout << std::setprecision(1) << mergedhists[i]->GetBinContent(bin) << " / ";
+            }
+            std::cout << std::endl;
+        }
+    }
+    
     // make canvas
     TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
 
@@ -3244,7 +3261,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     if (!specialPrefix) specialPrefix = "";
     Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
+
     
+    //now calculate cross section
     mergedhists[kDATA]->SetName(title);
     mergedhists[kDATA]->GetXaxis()->SetTitle(xtitle);
     mergedhists[kDATA]->GetYaxis()->SetTitle("N_{evts}");
@@ -4960,6 +4979,10 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
 
 // main function
 void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double xsec = topxsec) {
+    time_t starttime;
+    time(&starttime);
+    std::cout << "CombinedCrossSection.C started: " << ctime(&starttime) << std::endl;
+    
     for (int i = 0; btagSFAlgos[i]; ++i)
         btagSFMap[btagSFAlgos[i]] = btagSFValues[i];
 
@@ -5124,7 +5147,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsTopRapidityMoreBins = 5;
     const Double_t binsTopRapidityMoreBins[nbinsTopRapidityMoreBins+1] = {-2.5, -1.2, -0.3, 0.3, 1.2, 2.5};
     const Double_t binCenterTopRapidityMoreBins[nbinsTopRapidityMoreBins] = {-1.78, bccAuto, bccAuto, bccAuto, 1.76};
-    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidityMoreBins, nbinsTopRapidityMoreBins, binCenterTopRapidityMoreBins, kTRUE, "moreBins" );
+    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidityMoreBins, nbinsTopRapidityMoreBins, binCenterTopRapidityMoreBins, kTRUE, "MoreBins" );
 
     const Int_t nbinsTopPt = 4;
     const Double_t binsTopPt[nbinsTopPt+1] = {0, 70, 140, 240, 400};
@@ -5153,7 +5176,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsTtBarRapidityMoreBins = 5;
     const Double_t binsTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins+1] = {-2.5, -1.2, -0.3, 0.3, 1.2, 2.5};
     const Double_t binCenterTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins] = {-1.68, bccAuto, bccAuto, bccAuto, 1.65};
-    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins );
+    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins, kTRUE, "MoreBins" );
     
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
