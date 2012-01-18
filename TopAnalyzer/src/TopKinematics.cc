@@ -298,20 +298,20 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // decay channel
   hists_["decayChannel"] = fs->make<TH1F>( "decayChannel", "decayChannel",  25,   -4.5,   20.5);
   // set labels (decayChannel=-4 corresponds to bin 1)
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(1 , "undef"   );
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(2 , "non tt"  );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(1 , "??"      );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(2 , "ntt"     );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(3 , "ll?"     );
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(4 , "l?+j"    );
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(6 , "e+j"     );
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(7 , "#mu+j"   );
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(8 , "#tau+j"  );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(4 , "l?j"     );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(6 , "ej"      );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(7 , "#muj"    );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(8 , "#tauj"   );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(16, "ee"      );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(17, "e#mu"    );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(18, "e#tau"   );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(19, "#mu#mu"  );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(20, "#mu#tau" );
   hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(21, "#tau#tau");
-  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(25, "allhad"  );
+  hists_.find("decayChannel")->second->GetXaxis()->SetBinLabel(25, "jj"      );
   /** 
       KinFit Monitoring Variables
   **/
@@ -665,7 +665,8 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
   // make sure to have a ttbar pair belonging to the semi-leptonic decay channel with 
   // a muon in the final state and neglect events where top decay is not via Vtb
   if( ( (tops.isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")    ==0) || 
-        (tops.isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0)  ) 
+        (tops.isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0) || 
+         tops.isSemiLeptonic(WDecay::kTau)                                     ) 
       && tops.leptonicDecayB() 
       && tops.hadronicDecayB() ){
     // define leptonic/hadronic or positive/negative charged objects (B,W,t)
@@ -696,14 +697,16 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     // ---
     //    fill 1D angle histos
     // ---
+    const reco::GenParticle *lep   = tops.singleLepton();
+    if(tops.isSemiLeptonic(WDecay::kTau)&&getFinalStateLepton(*tops.singleLepton())) lep=(const reco::GenParticle *) getFinalStateLepton(*tops.singleLepton());
     fillAngles(tops.hadronicDecayB()->p4(), tops.hadronicDecayQuark()->p4(), tops.hadronicDecayQuarkBar()->p4(),
-	       tops.leptonicDecayB()->p4(), tops.singleLepton()      ->p4(), tops.singleNeutrino()       ->p4(),
+	       tops.leptonicDecayB()->p4(), lep                      ->p4(), tops.singleNeutrino()       ->p4(),
 	       weight);
     // ---
     //    fill  final state objects histo
     // ---
     fillFinalStateObjects(tops.hadronicDecayB()->p4(), tops.hadronicDecayQuark()->p4(), tops.hadronicDecayQuarkBar()->p4(),
-			  tops.leptonicDecayB()->p4(), tops.singleLepton()      ->p4(), tops.singleNeutrino()       ->p4(),
+			  tops.leptonicDecayB()->p4(), lep                      ->p4(), tops.singleNeutrino()       ->p4(),
 			  weight);
     // save lepton charge
     fillValue( "lepCharge", ((reco::LeafCandidate*)(tops.singleLepton()))->charge(), weight );
@@ -794,7 +797,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // neglect events where top decay is not via Vtb
     if( tops.genEvent().isAvailable() && 
         ( (tops.genEvent()->isSemiLeptonic(WDecay::kMuon)&&lepton_.compare("muon")    ==0) || 
-          (tops.genEvent()->isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0) ) &&
+          (tops.genEvent()->isSemiLeptonic(WDecay::kElec)&&lepton_.compare("electron")==0) ||
+	   tops.genEvent()->isSemiLeptonic(WDecay::kTau)                                    ) &&
         lepBRec && hadBRec ){
       const reco::GenParticle *lepTopGen= switchLepAndHadTop ? tops.hadronicDecayTop() : tops.leptonicDecayTop();
       const reco::GenParticle *hadTopGen= switchLepAndHadTop ? tops.leptonicDecayTop() : tops.hadronicDecayTop();
@@ -839,6 +843,10 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       lepTopGenMass    = lepTopGen->mass();
       genLepPt         = tops.singleLepton()->pt();
       genLepEta        = tops.singleLepton()->eta();
+      if(tops.genEvent().isAvailable()&&((*tops.genEvent()).isSemiLeptonic(WDecay::kTau))&&getFinalStateLepton(*tops.singleLepton())){
+	genLepPt         = getFinalStateLepton(*tops.singleLepton())->pt();
+	genLepEta        = getFinalStateLepton(*tops.singleLepton())->eta();
+      }
       genNuPt          = tops.singleNeutrino()->pt();
       genNuEta         = tops.singleNeutrino()->eta();
       genQPt           = tops.hadronicDecayQuark()->pt();
@@ -891,9 +899,15 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       //    fill correlation for ttbar final state object distributions
       // ---  
       // gen-rec level correlation for leptonPt
-      corrs_.find("lepPt_"      )->second->Fill(tops.singleLepton()->pt()   , tops.singleLepton(hypoKey_)->pt()   , weight); 
+      double pt  = tops.singleLepton()->pt();
+      double eta = tops.singleLepton()->eta();
+      if(tops.genEvent().isAvailable()&&((*tops.genEvent()).isSemiLeptonic(WDecay::kTau))&&getFinalStateLepton(*tops.singleLepton())){
+	pt  = getFinalStateLepton(*tops.singleLepton())->pt();
+	eta = getFinalStateLepton(*tops.singleLepton())->eta();
+      }
+      corrs_.find("lepPt_"      )->second->Fill(pt   , tops.singleLepton(hypoKey_)->pt()   , weight); 
       // gen-rec level correlation for leptonEta
-      corrs_.find("lepEta_"     )->second->Fill(tops.singleLepton()->eta()  , tops.singleLepton(hypoKey_)->eta()  , weight); 
+      corrs_.find("lepEta_"     )->second->Fill(eta  , tops.singleLepton(hypoKey_)->eta()  , weight); 
       // gen-rec level correlation for neutrinoPt
       corrs_.find("neutrinoPt_" )->second->Fill(tops.singleNeutrino()->pt() , tops.singleNeutrino(hypoKey_)->pt() , weight); 
       // gen-rec level correlation for neutrinoEta
@@ -983,7 +997,11 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 						ROOT::Math::VectorUtil::Angle(recLeptonicDecayBBoosted, recHadronicDecayBBoosted),
 						weight);
       // fill correlation plot for muon - neutrino angle plot
-      reco::Particle::LorentzVector genMuonBoosted     = CoMBoostGenTtbar(tops.singleLepton  ()->p4());
+      const reco::GenParticle *lep   = tops.singleLepton();
+      if(tops.genEvent().isAvailable()&&((*tops.genEvent()).isSemiLeptonic(WDecay::kTau))&&getFinalStateLepton(*tops.singleLepton())){
+	lep=(const reco::GenParticle *) getFinalStateLepton(*tops.singleLepton());
+      }
+      reco::Particle::LorentzVector genMuonBoosted     = CoMBoostGenTtbar(lep->p4());
       reco::Particle::LorentzVector genNeutrinoBoosted = CoMBoostGenTtbar(tops.singleNeutrino()->p4());
       reco::Particle::LorentzVector recMuonBoosted     = CoMBoostRecTtbar(tops.singleLepton  (hypoKey_)->p4());
       reco::Particle::LorentzVector recNeutrinoBoosted = CoMBoostRecTtbar(tops.singleNeutrino(hypoKey_)->p4());

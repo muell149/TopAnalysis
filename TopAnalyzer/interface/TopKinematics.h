@@ -109,6 +109,7 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepton  ,
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
 			     const double& weight);
+  /// helper function to get the decay mode
   double getDecayChannel(const TtGenEvent& tops){
     double eventType=-4;
     // identify event by the following number coding:
@@ -159,7 +160,35 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
     }
     return eventType;
   }
-  
+  /// helper function to get the final state lepton in tau->lepton events 
+  // decay chain is: tau(status 3)->tau(status 2)->e/mu(status 1)
+  reco::GenParticle* getFinalStateLepton(const reco::GenParticle& particle){
+    //std::cout << "getFinalStateLepton called!" << std::endl;
+    //std::cout << "which has " << particle.numberOfDaughters() << " daughters" << std::endl; 
+    // loop daughters
+    for(unsigned int i=0; i<particle.numberOfDaughters(); ++i){
+      //std::cout << "daughter #" << i << std::endl;
+      reco::GenParticle *daughter = (reco::GenParticle *) particle.daughter(i);
+      //std::cout << daughter << std::endl;
+      if(daughter){
+	int ID=daughter->pdgId();
+	//std::cout << "ID: " << ID << ", status: " << daughter->status() << std::endl;
+	// if daughter is tau
+	if(ID==15||ID==-15){
+	  //std::cout << "tau daughter found!" << std::endl;
+	  // bubble up
+	  return getFinalStateLepton(*daughter);
+	}
+	// if daughter is muon or electron return
+	if(ID==-13||ID==13||ID==-11||ID==11){
+	  //std::cout << "e/#mu found!" << std::endl;
+	  return daughter;
+	}
+      }
+    }
+    return 0;
+  }
+
  private:
   /// class key of hypothesis
   std::string hypoKey_;
