@@ -68,6 +68,11 @@ else:
     decayChannel=options.lepton
 print "used lepton decay channel: "+decayChannel
 
+## choose if you want to include tau (->e/mu) events
+if(not globals().has_key('tau')):
+    tau = False # True 
+print "include tau->l events? ",tau
+
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
@@ -204,7 +209,6 @@ process.source = cms.Source("PoolSource",
     #'/store/data/Run2011A/MuHad/AOD/May10ReReco-v1/0005/FC809CA7-0C7D-E011-AE04-003048678B1C.root' 
 
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
-
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
     #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
     #'/store/user/wbehrenh/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_2_k5G.root'
@@ -214,7 +218,6 @@ process.source = cms.Source("PoolSource",
     #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
     #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
     )
-
 )
 
 ## Flag required to compensate bug in energy-momentum conservation for non Pythia samples
@@ -548,6 +551,14 @@ process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
 process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
+if(tau==True):
+    
+    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau  = True
+    process.ttSemiLeptonicFilter.restrictTauDecays = cms.PSet(
+        leptonic   = cms.bool(True ),
+        oneProng   = cms.bool(False),
+        threeProng = cms.bool(False)
+        )
 # take care of electron channel
 if(decayChannel=='electron'):
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = False
@@ -593,19 +604,7 @@ if(not eventFilter=='all'):
 if(eventFilter=='all') or (removeGenTtbar==True) or (runningOnData=="data"):
     process.filterSequence = cms.Sequence(process.hltFilter)
      
-## ---
-##    set up genFilter for semileptonic muons and taus, where taus are decaying into leptons
-## ---
-process.ttSemiLeptonicFilterSemiTauMuon= process.ttDecaySelection.clone()
-process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.tau = True
-process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.muon= True
-process.ttSemiLeptonicFilterSemiTauMuon.restrictTauDecays = cms.PSet(
-    leptonic   = cms.bool(True),
-    oneProng   = cms.bool(False),
-    threeProng = cms.bool(False)
-    )
 process.genFilterSequence = cms.Sequence(process.makeGenEvt                      *
-                                         process.ttSemiLeptonicFilterSemiTauMuon *
                                          process.ttSemiLeptonicFilter             )
 
 ## define ordered jets
@@ -2030,9 +2029,8 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
 ## no phase space cuts and phase space cuts for hadron level
 if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
-    process.p3 = cms.Path(## gen event selection: semileptonic (muon & tau->lepton)
-                          ## tau->Mu if eventFilter=='background only' and
-                          ## process.ttSemiLeptonicFilter.invert = True
+    process.p3 = cms.Path(## gen event selection: semileptonic (lepton &
+                          ## tau->lepton if tau==True), lepton=muon/electron
                           process.genFilterSequence                     *
                           ## introduce some collections
                           process.isolatedGenLeptons                    *
