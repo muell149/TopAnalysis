@@ -2136,8 +2136,8 @@ if(decayChannel=="electron"):
     process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
     process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
     # adapt gen filter
-    process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.electron = True
-    process.ttSemiLeptonicFilterSemiTauMuon.allowedTopDecays.decayBranchA.muon= False
+    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = True
+    process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon= False
     ## lepton-jet veto
     from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
