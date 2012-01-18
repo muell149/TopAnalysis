@@ -58,16 +58,16 @@ bool SemiLeptonicGenPhaseSpaceFilter::filter(edm::Event& event, const edm::Event
   // decay chain is: tau(status 3)->tau(status 2)->e/mu(status 1)
   reco::GenParticle *lep2 = (reco::GenParticle *) tops.singleLepton();
   if(tops.isSemiLeptonic(WDecay::kTau)) lep2 = getFinalStateLepton(*lep);
-
+  if(!lep2) lep2 = (reco::GenParticle *) tops.singleLepton();
   if(decayLevelCuts_){
     /// cut on lepton pt and eta
     if(lep2->pt()  < leptonMinPt_ || std::abs(lep2->eta())  > leptonMaxEta_)   return false;
     /// cut on b quark pt and eta 
     if(lepB->pt() < partonMinPt_ || std::abs(lepB->eta()) > partonMaxEta_ ||
-      hadB->pt() < partonMinPt_ || std::abs(hadB->eta()) > partonMaxEta_)   return false;
+       hadB->pt() < partonMinPt_ || std::abs(hadB->eta()) > partonMaxEta_  )   return false;
     /// cut on light quark pt and eta
     if(q->pt()    < partonMinPt_ || std::abs(q->eta())    > partonMaxEta_ ||
-      qbar->pt() < partonMinPt_ || std::abs(qbar->eta()) > partonMaxEta_)   return false;
+       qbar->pt() < partonMinPt_ || std::abs(qbar->eta()) > partonMaxEta_  )   return false;
   }
   
   if(topLevelCuts_){
