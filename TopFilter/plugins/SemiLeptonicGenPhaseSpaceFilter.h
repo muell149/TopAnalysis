@@ -27,6 +27,7 @@ class SemiLeptonicGenPhaseSpaceFilter : public edm::EDFilter {
   virtual void beginJob();
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void endJob();
+  reco::GenParticle* getFinalStateLepton(const reco::GenParticle& particle);
 
  private:
   

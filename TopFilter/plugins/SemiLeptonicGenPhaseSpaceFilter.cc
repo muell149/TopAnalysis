@@ -54,9 +54,14 @@ bool SemiLeptonicGenPhaseSpaceFilter::filter(edm::Event& event, const edm::Event
 //       <<"; qPt = "<<q->pt()<<"; qEta=" << q->eta()<<"; qbarPt = "<<qbar->pt()<<"; qbarEta=" << qbar->eta()
 //   <<std::endl;
 
+  /// tau->lepton events 
+  // decay chain is: tau(status 3)->tau(status 2)->e/mu(status 1)
+  reco::GenParticle *lep2 = (reco::GenParticle *) tops.singleLepton();
+  if(tops.isSemiLeptonic(WDecay::kTau)) lep2 = getFinalStateLepton(*lep);
+
   if(decayLevelCuts_){
     /// cut on lepton pt and eta
-    if(lep->pt()  < leptonMinPt_ || std::abs(lep->eta())  > leptonMaxEta_)   return false;
+    if(lep2->pt()  < leptonMinPt_ || std::abs(lep2->eta())  > leptonMaxEta_)   return false;
     /// cut on b quark pt and eta 
     if(lepB->pt() < partonMinPt_ || std::abs(lepB->eta()) > partonMaxEta_ ||
       hadB->pt() < partonMinPt_ || std::abs(hadB->eta()) > partonMaxEta_)   return false;
@@ -86,6 +91,33 @@ void SemiLeptonicGenPhaseSpaceFilter::beginJob()
 
 void SemiLeptonicGenPhaseSpaceFilter::endJob()
 {
+}
+
+reco::GenParticle* SemiLeptonicGenPhaseSpaceFilter::getFinalStateLepton(const reco::GenParticle& particle){
+  //std::cout << "getFinalStateLepton called!" << std::endl;
+  //std::cout << "which has " << particle.numberOfDaughters() << " daughters" << std::endl; 
+  // loop daughters
+  for(unsigned int i=0; i<particle.numberOfDaughters(); ++i){
+    //std::cout << "daughter #" << i << std::endl;
+    reco::GenParticle *daughter = (reco::GenParticle *) particle.daughter(i);
+    //std::cout << daughter << std::endl;
+    if(daughter){
+      int ID=daughter->pdgId();
+      //std::cout << "ID: " << ID << ", status: " << daughter->status() << std::endl;
+      // if daughter is tau
+      if(ID==15||ID==-15){
+	//std::cout << "tau daughter found!" << std::endl;
+	// bubble up
+	return getFinalStateLepton(*daughter);
+      }
+      // if daughter is muon or electron return
+      if(ID==-13||ID==13||ID==-11||ID==11){
+	//std::cout << "e/#mu found!" << std::endl;
+	return daughter;
+      }
+    }
+  }
+  return 0;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
