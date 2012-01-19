@@ -510,13 +510,13 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // gen-rec level correlation ttbar mass
   corrs_["ttbarMass_" ] = fs->make<TH2F>( "ttbarMass_"  , "ttbarMass_" , 1200,    0., 1200.,    1200,   0., 1200.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
-  corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   , 1500,    0., 1500.,    1500,   0., 1500.);
+  corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   ,  150,    0., 1500.,     150,   0., 1500.);
   // gen-rec level correlation ttbar deltaPhi
-  corrs_["ttbarDelPhi_"]= fs->make<TH2F>( "ttbarDelPhi_", "ttbarDelPhi_", 628,   -pi,   pi ,     628,  -pi,   pi );
+  corrs_["ttbarDelPhi_"]= fs->make<TH2F>( "ttbarDelPhi_", "ttbarDelPhi_", 314,   -pi,   pi ,     314,  -pi,   pi );
   // gen-rec level correlation ttbar deltaY
-  corrs_["ttbarDelY_" ] = fs->make<TH2F>( "ttbarDelY_"  , "ttbarDelY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
+  corrs_["ttbarDelY_" ] = fs->make<TH2F>( "ttbarDelY_"  , "ttbarDelY_" ,   50,   -5.,    5.,      50,  -5.,    5.);
   // gen-rec level correlation ttbar sumY
-  corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" , 1000,   -5.,    5.,    1000,  -5.,    5.);
+  corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" ,   50,   -5.,    5.,      50,  -5.,    5.);
   // gen-rec level correlation angle between b jets
   corrs_["bbbarAngle_"] = fs->make<TH2F>( "bbbarAngle_" , "bbbarAngle_",  315,    0.,    pi,     315,   0.,   pi );
   // gen-rec level correlation for lepton charge
@@ -528,7 +528,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // gen-rec level correlation for leptonEta
   corrs_["lepEta_"     ] = fs->make<TH2F>( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
   // gen-rec level correlation for neutrinoPt
-  corrs_["neutrinoPt_" ] = fs->make<TH2F>( "neutrinoPt_" , "neutrinoPt_" ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+  corrs_["neutrinoPt_" ] = fs->make<TH2F>( "neutrinoPt_" , "neutrinoPt_" ,  120,  0. ,  1200.  ,  120,  0.  ,  1200.);
   // gen-rec level correlation for neutrinoEta
   corrs_["neutrinoEta_"] = fs->make<TH2F>( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
   // gen-rec level correlation for light-quarks Pt
@@ -1576,4 +1576,87 @@ TopKinematics::fillFinalStateObjects(const ROOT::Math::LorentzVector<ROOT::Math:
   // leading quark Eta
   fillValue("leadqEta", leadq.Eta() , weight);
 
+}
+
+// get the decay mode
+double 
+TopKinematics::getDecayChannel(const TtGenEvent& tops){
+  double eventType=-4;
+  // identify event by the following number coding:
+  // -4 : undefined
+  // -3 : non ttbar MC
+  // -2 : dileptonic unknown    ttbar MC
+  // -1 : semileptonic unknown  ttbar MC
+  // 01 : semileptonic electron ttbar MC
+  // 02 : semileptonic muon     ttbar MC
+  // 03 : semileptonic tau      ttbar MC
+  // 11 : dileptonic e   e      ttbar MC
+  // 12 : dileptonic e   mu     ttbar MC
+  // 13 : dileptonic e   tau    ttbar MC
+  // 14 : dileptonic mu  mu     ttbar MC
+  // 15 : dileptonic mu  tau    ttbar MC
+  // 16 : dileptonic tau tau    ttbar MC
+  // 20 : fully hadronic        ttbar MC
+  if( !tops.isTtBar()        ) eventType = -3;
+  else if(  tops.isFullHadronic() ) eventType = 20;
+  else if(  tops.isSemiLeptonic() ) {
+    switch( tops.semiLeptonicChannel() ) {
+    case WDecay::kElec : eventType = 1; break;
+    case WDecay::kMuon : eventType = 2; break;
+    case WDecay::kTau  : eventType = 3; break;
+    default            : eventType = -1; break;
+    }
+  }
+  else if( tops.isFullLeptonic() ) {
+    if     (  tops.fullLeptonicChannel().first  == WDecay::kElec  && 
+	      tops.fullLeptonicChannel().second == WDecay::kElec    )    eventType = 11;
+    else if( ( tops.fullLeptonicChannel().first  == WDecay::kElec && 
+	       tops.fullLeptonicChannel().second == WDecay::kMuon   ) ||
+	     ( tops.fullLeptonicChannel().first  == WDecay::kMuon && 
+	       tops.fullLeptonicChannel().second == WDecay::kElec   )  ) eventType = 12;
+    else if( ( tops.fullLeptonicChannel().first  == WDecay::kElec && 
+	       tops.fullLeptonicChannel().second == WDecay::kTau    ) ||
+	     ( tops.fullLeptonicChannel().first  == WDecay::kTau && 
+	       tops.fullLeptonicChannel().second == WDecay::kElec   )  ) eventType = 13;
+    else if(  tops.fullLeptonicChannel().first  == WDecay::kMuon && 
+	      tops.fullLeptonicChannel().second == WDecay::kMuon  )      eventType = 14;
+    else if( ( tops.fullLeptonicChannel().first  == WDecay::kMuon && 
+	       tops.fullLeptonicChannel().second == WDecay::kTau    ) ||
+	     ( tops.fullLeptonicChannel().first  == WDecay::kTau  &&
+	       tops.fullLeptonicChannel().second  == WDecay::kMuon) )    eventType = 15;
+    else if(  tops.fullLeptonicChannel().first  == WDecay::kTau &&
+	      tops.fullLeptonicChannel().second == WDecay::kTau   )      eventType = 16;
+    else eventType = -2;
+  }
+  return eventType;
+}
+
+// get the final state lepton in tau->lepton events 
+// decay chain is: tau(status 3)->tau(status 2)->e/mu(status 1)
+reco::GenParticle* 
+TopKinematics::getFinalStateLepton(const reco::GenParticle& particle){
+  //std::cout << "getFinalStateLepton called!" << std::endl;
+  //std::cout << "which has " << particle.numberOfDaughters() << " daughters" << std::endl; 
+  // loop daughters
+  for(unsigned int i=0; i<particle.numberOfDaughters(); ++i){
+    //std::cout << "daughter #" << i << std::endl;
+    reco::GenParticle *daughter = (reco::GenParticle *) particle.daughter(i);
+    //std::cout << daughter << std::endl;
+    if(daughter){
+      int ID=daughter->pdgId();
+      //std::cout << "ID: " << ID << ", status: " << daughter->status() << std::endl;
+      // if daughter is tau
+      if(ID==15||ID==-15){
+	//std::cout << "tau daughter found!" << std::endl;
+	// bubble up
+	return getFinalStateLepton(*daughter);
+      }
+      // if daughter is muon or electron return
+      if(ID==-13||ID==13||ID==-11||ID==11){
+	//std::cout << "e/#mu found!" << std::endl;
+	return daughter;
+      }
+    }
+  }
+  return 0;
 }
