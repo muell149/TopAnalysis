@@ -69,6 +69,7 @@ public :
    Double_t        weightTotal;
    Int_t           vertMulti;
 
+   Double_t        phonebook;
    Double_t        GenWPluspX;
    Double_t        GenWPluspY;
    Double_t        GenWPluspZ;
@@ -323,16 +324,35 @@ public :
 
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
+   TH2D *h_2DMatching;
+   TH1D *h_NJetMatching;
 
-   TH1D *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti, *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll;
+   TH1D *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti, *h_BjetMulti,*h_jetMultiXSec,*h_jetMultiAll, *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_diLepMassFull;
 
-   TH1D *h_HypTTBarMass, *h_GenTTBarMass,*h_VisGenTTBarMass, *h_RecoTTBarMass;
-   
-   TH1D *h_Lep1pT, *h_Lep1Eta, *h_Lep1E;
-   TH1D *h_Lep2pT, *h_Lep2Eta, *h_Lep2E;
+   TH1D *h_HypTTBarMass, *h_HypTTBarRapidity, *h_HypTTBarpT;
+   TH1D *h_HypLLBarMass, *h_HypLLBarpT;
+   TH1D *h_GenTTBarMass, *h_GenTTBarRapidity, *h_GenTTBarpT;
+   TH1D *h_GenLLBarMass, *h_GenLLBarpT;
 
-   TH1D *h_HypAntiToppT, *h_HypAntiTopEta, *h_HypAntiTopE, *h_HypAntiTopMass;
-   TH1D *h_HypToppT, *h_HypTopEta, *h_HypTopE,*h_HypTopMass;
+   TH1D *h_VisGenTTBarMass,*h_VisGenTTBarRapidity,*h_VisGenTTBarpT;
+   TH1D *h_VisGenTopRapidity,*h_VisGenAntiTopRapidity;
+   TH1D *h_VisGenLLBarMass,*h_VisGenLLBarpT;
+
+   TH1D *h_RecoTTBarMass, *h_RecoTTBarRapidity,*h_RecoTTBarpT;
+   TH1D *h_RecoToppT,*h_RecoAntiToppT,*h_RecoTopRapidity,*h_RecoAntiTopRapidity;
+   TH1D *h_RecoLLBarMass, *h_RecoLLBarpT;
+   TH1D *h_RecoLeptonpT,*h_RecoAntiLeptonpT,*h_RecoLeptonEta,*h_RecoAntiLeptonEta;
+
+   TH1D *h_vertMulti, *h_MET;
+
+   TH1D *h_jetpT,*h_jetHT;
+   TH1D *h_MuonpT, *h_MuonEta, *h_MuonE;
+   TH1D *h_ElectronpT, *h_ElectronEta, *h_ElectronE;
+   TH1D *h_LeptonpT, *h_LeptonEta, *h_LeptonE;
+   TH1D *h_AntiLeptonpT, *h_AntiLeptonEta, *h_AntiLeptonE;
+
+   TH1D *h_HypAntiToppT, *h_HypAntiTopEta, *h_HypAntiTopE, *h_HypAntiTopMass,*h_HypAntiTopRapidity;
+   TH1D *h_HypToppT, *h_HypTopEta, *h_HypTopE,*h_HypTopMass, *h_HypTopRapidity ;
 
    TH1D *h_HypWPluspT, *h_HypWPlusEta, *h_HypWPlusE;
    TH1D *h_HypWMinuspT, *h_HypWMinusEta, *h_HypWMinusE;
@@ -361,8 +381,8 @@ public :
    TH1D *h_VisGenAntiNeutrinopT, *h_VisGenAntiNeutrinoEta, *h_VisGenAntiNeutrinoE;
    TH1D *h_VisGenNeutrinopT, *h_VisGenNeutrinoEta, *h_VisGenNeutrinoE;
 
-   TH1D *h_GenAntiToppT, *h_GenAntiTopEta, *h_GenAntiTopE;
-   TH1D *h_GenToppT, *h_GenTopEta, *h_GenTopE;
+   TH1D *h_GenAntiToppT, *h_GenAntiTopEta, *h_GenAntiTopE, *h_GenAntiTopRapidity;
+   TH1D *h_GenToppT, *h_GenTopEta, *h_GenTopE, *h_GenTopRapidity;
 
    TH1D *h_GenWPluspT, *h_GenWPlusEta, *h_GenWPlusE;
    TH1D *h_GenWMinuspT, *h_GenWMinusEta, *h_GenWMinusE;
