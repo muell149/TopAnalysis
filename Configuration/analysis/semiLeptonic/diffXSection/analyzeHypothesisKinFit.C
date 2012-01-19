@@ -39,29 +39,31 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // a) options directly entered when calling function
   //    systematicVariation: which systematic shift do you want to make? from basicFunctions.h:  
   //
-  //    0: sysNo
-  //    1: sysLumiUp                  2: sysLumiDown                
-  //    3: sysPUUp                    4: sysPUDown                  
-  //    5: sysJESUp                   6: sysJESDown                 
-  //    7: sysJERUp                   8: sysJERDown                 
-  //    9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        
-  //   11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta
-  //   13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  
-  //   15: sysMuEffSFUp              16: sysMuEffSFDown 
-  //   17: sysBtagSFUp               18: sysBtagSFDown  
-  //   19: sysMisTagSFUp             20: sysMisTagSFDown  
-  //   21: sysTopScaleUp             22: sysTopScaleDown            
-  //   23: sysVBosonScaleUp          24: sysVBosonScaleDown          
-  //   25: sysSingleTopScaleUp       26: sysSingleTopScaleDown     
-  //   27: sysTopMatchUp             28: sysTopMatchDown            
-  //   29: sysVBosonMatchUp          30: sysVBosonMatchDown         
-  //   31: sysTopMassUp              32: sysTopMassDown            
-  //   33: sysQCDUp                  34: sysQCDDown                 
-  //   35: sysSTopUp                 36: sysSTopDown               
-  //   37: sysDiBosUp                38: sysDiBosDown              
-  //   39: sysShapeUp                40: sysShapeDown   
-  //   41: sysPDFUp                  42: sysPDFDown 
-  //   43: ENDOFSYSENUM
+  //  0: noSys                                                      
+  //  1: sysLumiUp                   2: sysLumiDown                               
+  //  3: sysPUUp                     4: sysPUDown                   
+  //  5: sysJESUp                    6: sysJESDown                  
+  //  7: sysJERUp                    8: sysJERDown                  
+  //  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown         
+  // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta 
+  // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
+  // 15: sysMuEffSFUp               16: sysMuEffSFDown              
+  // 17: sysBtagSFHalfShapeUpPt65   18: sysBtagSFHalfShapeDownPt65  
+  // 19: sysBtagSFHalfShapeUpEta0p7 20: sysBtagSFHalfShapeDownEta0p7
+  // 21: sysMisTagSFUp              22: sysMisTagSFDown             
+  // 23: sysTopScaleUp              24: sysTopScaleDown             
+  // 25: sysVBosonScaleUp           26: sysVBosonScaleDown           
+  // 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
+  // 29: sysTopMatchUp              20: sysTopMatchDown             
+  // 31: sysVBosonMatchUp           32: sysVBosonMatchDown          
+  // 33: sysTopMassUp               34: sysTopMassDown              
+  // 35: sysQCDUp                   36: sysQCDDown                  
+  // 37: sysSTopUp                  38: sysSTopDown                 
+  // 39: sysDiBosUp                 40: sysDiBosDown                
+  // 41: sysPDFUp                   42: sysPDFDown                  
+  // 43: sysHadUp                   44: sysHadDown                  
+  // 45: sysShapeUp                 46: sysShapeDown                
+  // 47: ENDOFSYSENUM
   
   if(luminosity<40.&&systematicVariation==sysLumiUp  )      luminosity*=1.04;
   else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
@@ -102,18 +104,32 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   {
     case sysPUUp                     : sysInputFolderExtension="PUup";   sysInputGenFolderExtension=sysInputFolderExtension; break;
     case sysPUDown                   : sysInputFolderExtension="PUdown"; sysInputGenFolderExtension=sysInputFolderExtension; break;
-    case sysTrigEffSFNormUp          : sysInputFolderExtension="TriggerEffSFNormUp";       break;
-    case sysTrigEffSFNormDown        : sysInputFolderExtension="TriggerEffSFNormDown";     break;
-    case sysTriggerEffSFShapeUpEta   : sysInputFolderExtension="TriggerEffSFShapeUpEta";   break;
-    case sysTriggerEffSFShapeDownEta : sysInputFolderExtension="TriggerEffSFShapeDownEta"; break;
-    case sysTriggerEffSFShapeUpPt    : sysInputFolderExtension="TriggerEffSFShapeUpPt";    break;
-    case sysTriggerEffSFShapeDownPt  : sysInputFolderExtension="TriggerEffSFShapeDownPt";  break;
-    case sysMuEffSFUp                : sysInputFolderExtension="SelectionEffSFNormUp";     break;
-    case sysMuEffSFDown              : sysInputFolderExtension="SelectionEffSFNormDown";   break;
-    case sysBtagSFUp                 : sysInputFolderExtension="BtagSFup";     break;
-    case sysBtagSFDown               : sysInputFolderExtension="BtagSFdown";   break;
-    case sysMisTagSFUp               : sysInputFolderExtension="MisTagSFup";   break;
-    case sysMisTagSFDown             : sysInputFolderExtension="MisTagSFdown"; break;
+    case sysTrigEffSFNormUp          : sysInputFolderExtension="TriggerEffSFNormUp";        break;
+    case sysTrigEffSFNormDown        : sysInputFolderExtension="TriggerEffSFNormDown";      break;
+    case sysTriggerEffSFShapeUpEta   : sysInputFolderExtension="TriggerEffSFShapeUpEta";    break;
+    case sysTriggerEffSFShapeDownEta : sysInputFolderExtension="TriggerEffSFShapeDownEta";  break;
+    case sysTriggerEffSFShapeUpPt    : sysInputFolderExtension="TriggerEffSFShapeUpPt";     break;
+    case sysTriggerEffSFShapeDownPt  : sysInputFolderExtension="TriggerEffSFShapeDownPt";   break;
+ // case sysTriggerEffSFShapeUpPt40  : sysInputFolderExtension="TriggerEffSFShapeUpPt40";   break;
+ // case sysTriggerEffSFShapeDownPt40: sysInputFolderExtension="TriggerEffSFShapeUpPt40";   break;
+    case sysMuEffSFUp                : sysInputFolderExtension="SelectionEffSFNormUp";      break;
+    case sysMuEffSFDown              : sysInputFolderExtension="SelectionEffSFNormDown";    break;
+ // case sysBtagSFUp                 : sysInputFolderExtension="BtagSFup";                  break;
+ // case sysBtagSFDown               : sysInputFolderExtension="BtagSFdown";                break;
+ // case sysBtagSFShapeUpPt65        : sysInputFolderExtension="BTagSFShapeUpPt65";         break;
+ // case sysBtagSFShapeDownPt65      : sysInputFolderExtension="BTagSFShapeDownPt65";       break;
+ // case sysBtagSFShapeUpPt100       : sysInputFolderExtension="BTagSFShapeUpPt100";        break;
+ // case sysBtagSFShapeDownPt100     : sysInputFolderExtension="BTagSFShapeDownPt100";      break;
+ // case sysBtagSFShapeUpEta0p7      : sysInputFolderExtension="BTagSFShapeUpEta0p7";       break;
+ // case sysBtagSFShapeDownEta0p7    : sysInputFolderExtension="BTagSFShapeDownEta0p7";     break;
+ // case sysBtagSFShapeUpEta1p2      : sysInputFolderExtension="BTagSFShapeUpEta1p2";       break;
+ // case sysBtagSFShapeDownEta1p2    : sysInputFolderExtension="BTagSFShapeDownEta1p2";     break;
+    case sysBtagSFHalfShapeUpPt65    : sysInputFolderExtension="BTagSFHalfShapeUpPt65";     break;
+    case sysBtagSFHalfShapeDownPt65  : sysInputFolderExtension="BTagSFHalfShapeDownPt65";   break;
+    case sysBtagSFHalfShapeUpEta0p7  : sysInputFolderExtension="BTagSFHalfShapeUpEta0p7";   break;
+    case sysBtagSFHalfShapeDownEta0p7: sysInputFolderExtension="BTagSFHalfShapeDownEta0p7"; break;
+    case sysMisTagSFUp               : sysInputFolderExtension="MisTagSFup";                break;
+    case sysMisTagSFDown             : sysInputFolderExtension="MisTagSFdown";              break;
     default: break;
   }
 
@@ -121,7 +137,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 
   //  ---
   //     choose plots
-  //  ---
+  //  ---sysInputFolderExtension
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
   TString plots1D[ ] = { // general fit performance
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob"       , 
@@ -1383,7 +1399,8 @@ TString efficiency="efficiency/"+variable;
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       recoAxisLabel.ReplaceAll("KinFit ","");
-      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      //      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
@@ -1656,7 +1673,8 @@ TString efficiency="efficiency/"+variable;
     unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
     TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
     recoAxisLabel.ReplaceAll("KinFit ","");
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    //    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
     if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
     // configure xSec plot histo style
     histogramStyle(*histo_[xSec][kData], kData, false);

@@ -19,6 +19,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertainties
+## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertaintiyDistributions
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/binning
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/effAndAcc
@@ -30,6 +31,7 @@
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertainties
+## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertaintyDistributions
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/binning
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/effAndAcc
@@ -38,6 +40,7 @@
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/shapeReweighting
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertainties
+## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertaintyDistributions
 
 ## b) you don't need to copy root files needed for the Analysis 
 ##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/
@@ -54,8 +57,8 @@ decayChannel=\"combined\"
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pbReweightedttbarMassUp7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pbReweightedttbarMassUp7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pb7TeV.root\"
@@ -70,14 +73,6 @@ dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pband750GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb_withVTXDistributions.root\"
-#######dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb_withVTXDistributions.root\"
-#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Electron204pb.root\"
-#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_Muon204pb.root\"
-#dataSample=\"diffXSecFromSignal/differentDataSets/analyzeDiffXData2011_MuonIso678pb_160404_167151.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2010Data36pbNov4ReRecoNov12Json.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/muonDiffXSec2011Data188pPromptReco1305Json.root\"
-#dataSample=\"diffXSecFromSignal/analysisRootFilesWithKinFit/elecDiffXSec2011Data191pPromptReco1305Json.root\"
 
 dataLabel=2011
 dataLuminosity2=`echo $dataLuminosity '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
@@ -109,7 +104,7 @@ redoSystematics=true
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time (must be <= 44 (default), see list of systematics below)
-maxSys=44
+maxSys=46
 
 ## Shape variations:
 ## a) Calculate them at all
@@ -336,31 +331,33 @@ if [ $fast = false ]
 fi
 ## print key for systematic variations
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
+
 echo
-echo "  0: noSys                                                     "
-echo "  1: sysLumiUp                  2: sysLumiDown                 "              
-echo "  3: sysPUUp                    4: sysPUDown                   "
-echo "  5: sysJESUp                   6: sysJESDown                  "
-echo "  7: sysJERUp                   8: sysJERDown                  "
-echo "  9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        " 
-echo " 11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta "
-echo " 13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  "
-echo " 15: sysMuEffSFUp              16: sysMuEffSFDown              " 
-echo " 17: sysBtagSFUp               18: sysBtagSFDown               "
-echo " 19: sysMisTagSFUp             20: sysMisTagSFDown             "
-echo " 21: sysTopScaleUp             22: sysTopScaleDown             "
-echo " 23: sysVBosonScaleUp          24: sysVBosonScaleDown          "
-echo " 25: sysSingleTopScaleUp       26: sysSingleTopScaleDown       "
-echo " 27: sysTopMatchUp             28: sysTopMatchDown             " 
-echo " 29: sysVBosonMatchUp          30: sysVBosonMatchDown          "
-echo " 31: sysTopMassUp              32: sysTopMassDown              "
-echo " 33: sysQCDUp                  34: sysQCDown                   " 
-echo " 35: sysSTopUp                 36: sysSTopDown                 "
-echo " 37: sysDiBosUp                38: sysDiBosDown                "
-echo " 39: sysPDFUp                  40: sysPDFDown                  " 
-echo " 41: sysHadUp                  43: sysHadDown                  "    
-echo " 43: sysShapeUp                44: sysShapeDown                " 
-echo " 45: ENDOFSYSENUM                                              "
+echo "  0: noSys                                                      "
+echo "  1: sysLumiUp                   2: sysLumiDown                 "              
+echo "  3: sysPUUp                     4: sysPUDown                   "
+echo "  5: sysJESUp                    6: sysJESDown                  "
+echo "  7: sysJERUp                    8: sysJERDown                  "
+echo "  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown        " 
+echo " 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta "
+echo " 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  "
+echo " 15: sysMuEffSFUp               16: sysMuEffSFDown              "
+echo " 17: sysBtagSFHalfShapeUpPt65   18: sysBtagSFHalfShapeDownPt65  "
+echo " 19: sysBtagSFHalfShapeUpEta0p7 20: sysBtagSFHalfShapeDownEta0p7"
+echo " 21: sysMisTagSFUp              22: sysMisTagSFDown             "
+echo " 23: sysTopScaleUp              24: sysTopScaleDown             "
+echo " 25: sysVBosonScaleUp           26: sysVBosonScaleDown          " 
+echo " 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       "
+echo " 29: sysTopMatchUp              20: sysTopMatchDown             "
+echo " 31: sysVBosonMatchUp           32: sysVBosonMatchDown          "
+echo " 33: sysTopMassUp               34: sysTopMassDown              "
+echo " 35: sysQCDUp                   36: sysQCDDown                  "
+echo " 37: sysSTopUp                  38: sysSTopDown                 "
+echo " 39: sysDiBosUp                 40: sysDiBosDown                "
+echo " 41: sysPDFUp                   42: sysPDFDown                  "
+echo " 43: sysHadUp                   44: sysHadDown                  "
+echo " 45: sysShapeUp                 46: sysShapeDown                "
+echo " 47: ENDOFSYSENUM                                               "
 echo
 if [ $fast = false ]
     then
@@ -388,7 +385,7 @@ if [ $redoSystematics = true ]; then
       if [ $decayChannel != \"combined\" ]
       then
           ## exclude shape variation
-	  if [ $systematicVariation == 43 -o $systematicVariation == 44 ]
+	  if [ $systematicVariation == 45 -o $systematicVariation == 46 ]
 	  then
 	      echo " Shape variations are executed separately."
 	  else
@@ -408,8 +405,8 @@ if [ $redoSystematics = true ]; then
 	    echo ""
 	    echo " All regular systematic uncertainties processed .... Now running shape variations."
 	    echo ""
-	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 43, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
-	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 44, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 45, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 46, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
 	fi
     fi
 fi

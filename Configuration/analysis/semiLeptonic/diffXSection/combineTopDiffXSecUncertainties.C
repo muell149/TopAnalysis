@@ -6,33 +6,33 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // ============================
   //  Systematic Variations:
   // ============================
-  
-  //      0: sysNo
-  //      1: sysLumiUp                  2: sysLumiDown                
-  //      3: sysPUUp                    4: sysPUDown                  
-  //      5: sysJESUp                   6: sysJESDown                 
-  //      7: sysJERUp                   8: sysJERDown                 
-  //      9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        
-  //     11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta
-  //     13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  
-  //     15: sysMuEffSFUp              16: sysMuEffSFDown 
-  //     17: sysBtagSFUp               18: sysBtagSFDown  
-  //     19: sysMisTagSFUp             20: sysMisTagSFDown  
-  //     21: sysTopScaleUp             22: sysTopScaleDown            
-  //     23: sysVBosonScaleUp          24: sysVBosonScaleDown          
-  //     25: sysSingleTopScaleUp       26: sysSingleTopScaleDown     
-  //     27: sysTopMatchUp             28: sysTopMatchDown            
-  //     29: sysVBosonMatchUp          30: sysVBosonMatchDown         
-  //     31: sysTopMassUp              32: sysTopMassDown            
-  //     33: sysQCDUp                  34: sysQCDDown                 
-  //     35: sysSTopUp                 36: sysSTopDown               
-  //     37: sysDiBosUp                38: sysDiBosDown              
-  //     39: sysPDFUp                  40: sysPDFDown  
-  //     41: sysHadUp                  42: sysHadDown
-  //     43: sysShapeUp                44: sysShapeDown 
-  //     45: ENDOFSYSENUM
-  //
-
+ 
+  //  0: noSys                                                      
+  //  1: sysLumiUp                   2: sysLumiDown                               
+  //  3: sysPUUp                     4: sysPUDown                   
+  //  5: sysJESUp                    6: sysJESDown                  
+  //  7: sysJERUp                    8: sysJERDown                  
+  //  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown         
+  // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta 
+  // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
+  // 15: sysMuEffSFUp               16: sysMuEffSFDown              
+  // 17: sysBtagSFHalfShapeUpPt65   18: sysBtagSFHalfShapeDownPt65  
+  // 19: sysBtagSFHalfShapeUpEta0p7 20: sysBtagSFHalfShapeDownEta0p7
+  // 21: sysMisTagSFUp              22: sysMisTagSFDown             
+  // 23: sysTopScaleUp              24: sysTopScaleDown             
+  // 25: sysVBosonScaleUp           26: sysVBosonScaleDown           
+  // 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
+  // 29: sysTopMatchUp              20: sysTopMatchDown             
+  // 31: sysVBosonMatchUp           32: sysVBosonMatchDown          
+  // 33: sysTopMassUp               34: sysTopMassDown              
+  // 35: sysQCDUp                   36: sysQCDDown                  
+  // 37: sysSTopUp                  38: sysSTopDown                 
+  // 39: sysDiBosUp                 40: sysDiBosDown                
+  // 41: sysPDFUp                   42: sysPDFDown                  
+  // 43: sysHadUp                   44: sysHadDown                  
+  // 45: sysShapeUp                 46: sysShapeDown                
+  // 47: ENDOFSYSENUM
+ 
   // ============================
   //  Set Root Style
   // ============================
@@ -87,6 +87,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // create plot container
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   std::map< TString, std::map <unsigned int, TH1F*> > relativeUncertainties_;
+  std::map< TString, std::map <unsigned int, TH1F*> > relUncertDistributions_;  // 1st: type of uncertainty, 2nd: xSec variable, 3rd: uncertainty value  
+  std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
   // create container to indicate that plots have been found 
   // and therefor systematics will be calculated
   std::map<TString, std::map<unsigned int, bool> > calculateError_;
@@ -426,6 +428,75 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	}
       }
     }
+    // Create plot to show distribution of uncertainties per xSec variable
+
+    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+
+      std::map<TString, std::map<unsigned int, TH1F*> >::const_iterator outerIter = relativeUncertainties_.find(xSecVariables_[i]);
+
+      if (outerIter == relativeUncertainties_.end()){
+	std::cout << "Variable '" << xSecVariables_[i] << "' not found to build uncertainty distributions." << std::endl;
+      }
+      else{
+	std::cout << "Building uncertainty distributions for '" << xSecVariables_[i] << "'." << std::endl;
+
+	TString plotNameForBinning = xSecVariables_[i];
+	plotNameForBinning.ReplaceAll("Norm","");
+	// int NBINS = histo_[xSecVariables_[i]][sysNo]->GetNbinsX();
+	int NBINS = binning_[plotNameForBinning].size()-1;
+
+	std::map<unsigned int, TH1F*>::const_iterator innerIter = outerIter->second.begin();
+	int NSYSTYPES = innerIter->second->GetNbinsX() - 3;
+
+	for (int binUnc=0; binUnc<NSYSTYPES; ++binUnc){
+
+	  TCanvas *canvasUncertaintyDistributions = new TCanvas("canvasUncertaintyDistributions","canvasUncertaintyDistributions",800,600);
+
+	  TString label = sysLabel(2*binUnc);
+	  
+	  if (calculateError_[xSecVariables_[i]][2*binUnc] && label != "sysNo"){
+
+	    TH1F* tempResult = new TH1F(xSecVariables_[i]+"_"+label,xSecVariables_[i]+"_"+label,NBINS,0.5,NBINS+0.5);
+	    tempResult->GetXaxis()->SetTitle("Bin Number ("+xSecVariables_[i]+")");
+	    tempResult->GetYaxis()->SetTitle(label.ReplaceAll("Down","")+" Relative Uncertainty [%]"); 
+	    tempResult->SetFillColor(38);
+	    tempResult->SetNdivisions(10,"X");
+
+	    int binCounter = 1;
+
+	    for (std::map<unsigned int, TH1F*>::const_iterator histoIter = outerIter->second.begin(); histoIter != outerIter->second.end();){
+	      
+	      // jump over leading empty bins
+	      
+	      if (histo_[xSecVariables_[i]][sysNo]->GetBinContent(binCounter) == 0)
+		binCounter++;
+		
+	      else
+	      {
+		double value = histoIter->second->GetBinContent(binUnc); 
+		tempResult->Fill(binCounter,value);
+		
+		binCounter++;
+		histoIter++;
+	      }
+
+	      if (binCounter>NBINS) break;  // to avoid endless loop for empty histogrammes
+	    }    
+
+	    tempResult->SetMaximum(((int)(tempResult->GetMaximum()/5)+1)*5);
+
+	    relUncertDistributions_[xSecVariables_[i]][binUnc] = (TH1F*)tempResult->Clone();
+	    canvasUncertaintyDistributions->cd();
+	    tempResult->Draw();
+	    canvasUncertaintyDistributions->Print(outputFolder+"/uncertaintyDistributions/relativeUncertainties"+xSecVariables_[i]+"_"+label+".eps");
+	  
+	    delete tempResult; tempResult = NULL;
+	  }	  
+	  delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;
+	}
+      }
+    }
+  
     // close file
     // needed to be able to use the saveToRootFile function, which also opens the file
     file->Close();
@@ -673,7 +744,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      }
 	      // Draw errors into Canvas
 	      totalErrors_[xSecVariables_[i]]->Draw("p Z same");
-	      canvas->SetName (xSecVariables_[i]);
+	      canvas->SetName(xSecVariables_[i]);
 	    }
 	    // save Canvas
 	    int initialIgnoreLevel=gErrorIgnoreLevel;

@@ -213,7 +213,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    if(plotName=="lepEta" ) plotTheo->SetMaximum(0.6);
 	    if(plotName=="bqEta"  ) plotTheo->SetMaximum(0.55);
 	  }
-	  // activate canvas canvas
+	  // activate canvas
 	  combicanvas->cd(0);
 	  combicanvas->SetBottomMargin(myStyle.GetPadBottomMargin());
 	  combicanvas->SetLeftMargin(myStyle.GetPadLeftMargin());
