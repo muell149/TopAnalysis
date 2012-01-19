@@ -68,11 +68,6 @@ else:
     decayChannel=options.lepton
 print "used lepton decay channel: "+decayChannel
 
-## choose if you want to include tau (->e/mu) events
-if(not globals().has_key('tau')):
-    tau = False # True 
-print "include tau->l events? ",tau
-
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
@@ -155,7 +150,15 @@ if(not globals().has_key('eventFilter')):
     eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 if(runningOnData=="MC"):
     print 'chosen ttbar filter:' , eventFilter
-    
+
+## choose if you want to include tau (->e/mu) events
+if(not globals().has_key('tau')):
+    tau = True # False
+# use these tau events only in SG/SB configuration not for single decay modes or all
+if(not eventFilter=='signal only' or not eventFilter=='background only'):
+    tau= False
+print "include tau->l events? ",tau
+
 ## choose whether synchronisation exercise should be done
 if(not globals().has_key('cutflowSynch')): 
     cutflowSynch  = False # True
@@ -197,6 +200,9 @@ process.MessageLogger.cerr.TtSemiLepKinFitter = cms.untracked.PSet(
 process.MessageLogger.cerr.KinFitter = cms.untracked.PSet(
     limit = cms.untracked.int32(0)
 )
+
+## print memory infos to check for modules with memory leaks
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck", ignoreTotal = cms.untracked.int32(0)) 
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -552,7 +558,6 @@ process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi"
 process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
 if(tau==True):
-    
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau  = True
     process.ttSemiLeptonicFilter.restrictTauDecays = cms.PSet(
         leptonic   = cms.bool(True ),
@@ -2057,7 +2062,9 @@ if(runningOnData=="MC"):
                           )
     ## delete gen filter
     if(removeGenTtbar==True):    
-        process.p3.remove(process.genFilterSequence)
+        process.p3.remove(process.genFilterSequence)        
+        process.p3.remove(process.filterGenPhaseSpace)
+    if(eventFilter=='background only'):
         process.p3.remove(process.filterGenPhaseSpace)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
@@ -2098,6 +2105,8 @@ if(runningOnData=="MC"):
     if(removeGenTtbar==True):    
         process.p4.remove(process.genFilterSequence)
 	process.p4.remove(process.filterGenPhaseSpace)
+    if(eventFilter=='background only'):
+        process.p4.remove(process.filterGenPhaseSpace)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p4.remove(process.dummy)
