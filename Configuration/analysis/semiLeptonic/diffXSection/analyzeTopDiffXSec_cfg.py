@@ -155,7 +155,7 @@ if(runningOnData=="MC"):
 if(not globals().has_key('tau')):
     tau = True # False
 # use these tau events only in SG/SB configuration not for single decay modes or all
-if(not eventFilter=='signal only' or not eventFilter=='background only'):
+if(not eventFilter=='signal only' and not eventFilter=='background only'):
     tau= False
 print "include tau->l events? ",tau
 
