@@ -161,8 +161,8 @@ void merge_mc(string channel){
 
 int merge(){
   
-  //merge_mc("mumu");
-  //merge_mc("emu");
+  merge_mc("mumu");
+  merge_mc("emu");
   merge_mc("ee");
 
   return 0;
