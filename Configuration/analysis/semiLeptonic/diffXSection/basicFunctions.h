@@ -2201,10 +2201,9 @@ namespace semileptonic {
 	//  difference=(std::abs((maxValue-centralValue))+std::abs((minValue-centralValue)))*0.5;
 	//}
 	if((maxValue>centralValue&&minValue>centralValue)||(maxValue<centralValue&&minValue<centralValue)){
-	  double larger=minValue;
-	  if(larger<maxValue) larger=maxValue;
-	  minValue=-larger;
+	  double larger = (minValue > maxValue) ? minValue : maxValue;
 	  maxValue=larger;
+	  minValue=centralValue - (larger - centralValue); 
 	}
 	errorBands->SetPointEYhigh(iBin, maxValue-centralValue);
 	errorBands->SetPointEYlow (iBin, centralValue-minValue);
