@@ -142,7 +142,7 @@ bool drawRatioPlot = kTRUE && !PAS;
 // hide integrated value
 const bool normaliseToUnitArea = kTRUE;
 // preliminary?
-const bool isPreliminary = kFALSE;
+const bool isPreliminary = kTRUE;
 
 const double topxsec = 169.9; //157.5
 // const double topxsec = 157.5;
@@ -208,7 +208,7 @@ const char *channelNameTeX[] = {"#mu#mu", "e#mu", "ee", "Dilepton Combined"};
 enum Sample_t  {kDATA=0, kSIG=1, kTTBG=2, kTW=3, kVV=4, kDYT=5, kDYEM=6, kW=7, kQCD=8};
 const char *sampleName[] = {"Data", "TTbar signal", "TTbar other", "tW", "VV", "DY tau tau", "DY mumu/ee", "W", "QCD"};
 const char *sampleNameTeX[] = {"Data", "\\ttbar\\ signal", "other \\ttbar\\", "tW", "diboson",
-                                "DY$\\rightarrow\\tau\\tau$", "DY$\\rightarrow e^+ e^-$", "W", "QCD"};
+                                "DY$\\rightarrow\\tau\\tau$", "DY$\\rightarrow l^+ l^-$", "W", "QCD"};
 
 // input files for all channels and samples
 TFile* files[3][Nfiles];
@@ -3444,12 +3444,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       if (!strcmp(quantity, "Mass")) {
         genCrossHist->SetMaximum(2e-2);
         genCrossHist->SetMinimum(1e-4);
-        gPad->SetLogy(0);
+        gPad->SetLogy(1);
       } else
       if(strcmp(quantity,"Pt")==0) {
         genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));
         genCrossHist->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
-        gPad->SetLogy(0);
+        gPad->SetLogy(1);
       } else{
         genCrossHist->SetMaximum(std::max(1.2*gh->GetMaximum(), 1.2*grLmts[3]));
         genCrossHist->SetMinimum(0);
@@ -4004,7 +4004,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     if(strcmp(quantity,"Pt")==0 || strcmp(quantity,"Mass")==0){
       genHistBinned->SetMaximum(std::max(3.*genHist->GetMaximum(), 3.*grLmts[3]));
       genHistBinned->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
-      gPad->SetLogy(0);
+      gPad->SetLogy(1);
     } else{
       genHistBinned->SetMaximum(std::max(1.2*genHist->GetMaximum(), 1.2*grLmts[3]));
       genHistBinned->SetMinimum(0);
@@ -4273,10 +4273,14 @@ void SetKEff()
 
     kEff      = TMath::Sqrt(Nmm/Nee);
     kEffError = TMath::Sqrt(1/4/Nee + Nmm/4/Nee/Nee);
+    
+    double invkEff      = TMath::Sqrt(Nee/Nmm);
+    double invkEffError = TMath::Sqrt(1/4/Nmm + Nee/4/Nmm/Nmm);
 
     cout << "Correction for different lepton efficienies:" << endl << endl;
-    cout << "            k(mm/ee) : " << kEff    << " +- " << kEffError << endl << endl;
-
+    cout << "            k(mm/ee) : " << kEff    << " +- " << kEffError << endl;
+    cout << "    ==>     k(ee/mm) : " << invkEff << " +- " << invkEffError << endl << endl;
+    
     return;
 }
 
