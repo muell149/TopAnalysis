@@ -2160,8 +2160,8 @@ namespace semileptonic {
       }
       // normalize to area
       central  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
-      ErrorUp  ->Scale(1./(ErrorUp  ->Integral(0,ErrorUp  ->GetNbinsX()+1)));
-      ErrorDown->Scale(1./(ErrorDown->Integral(0,ErrorDown->GetNbinsX()+1)));
+      ErrorUp  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+      ErrorDown->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
       // divide by binwidth
       central  ->Scale(1.0/central  ->GetBinWidth(1));
       ErrorUp  ->Scale(1.0/ErrorUp  ->GetBinWidth(1));
@@ -2196,12 +2196,18 @@ namespace semileptonic {
 	  errorBands->SetPointEXhigh(iBin, central->GetXaxis()->GetBinUpEdge (iBin)   );
 	}
 	// symmetrize errors 
-	double difference=std::abs((maxValue-minValue)*0.5);
+	//double difference=std::abs((maxValue-minValue)*0.5);
+	//if((maxValue>centralValue&&minValue>centralValue)||(maxValue<centralValue&&minValue<centralValue)){
+	//  difference=(std::abs((maxValue-centralValue))+std::abs((minValue-centralValue)))*0.5;
+	//}
 	if((maxValue>centralValue&&minValue>centralValue)||(maxValue<centralValue&&minValue<centralValue)){
-	  difference=(std::abs((maxValue-centralValue))+std::abs((minValue-centralValue)))*0.5;
+	  double larger=minValue;
+	  if(larger<maxValue) larger=maxValue;
+	  minValue=-larger;
+	  maxValue=larger;
 	}
-	errorBands->SetPointEYhigh(iBin, difference);
-	errorBands->SetPointEYlow (iBin, difference);
+	errorBands->SetPointEYhigh(iBin, maxValue-centralValue);
+	errorBands->SetPointEYlow (iBin, centralValue-minValue);
 	// per bin output
 	if(verbose>1){
 	  std::cout << "bin " << iBin << std::endl;
