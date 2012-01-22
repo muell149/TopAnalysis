@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 generatorTtDileptonFilter = cms.EDFilter("GeneratorTtDileptonFilter",
     src                 = cms.InputTag("genEvt"),
-    genJets             = cms.InputTag("ak5GenJets"),
+    genJets             = cms.InputTag("ak5GenJets", '', 'HLT'),
     BJetIndex           = cms.InputTag("produceHadronLevelBJets", "BJetIndex"),
     AntiBJetIndex       = cms.InputTag("produceHadronLevelBJets", "AntiBJetIndex"),
     leptonPt	        = cms.double(0. ),
