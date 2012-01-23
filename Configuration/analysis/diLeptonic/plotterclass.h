@@ -1208,7 +1208,8 @@ void Plotter::PlotDiffXSec(){
     double topxsec = 169.9;
     double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     //    double SignalEvents = 3701945.0;
-    double SignalEvents = 3631452.0;
+    //double SignalEvents = 3631452.0;
+    double SignalEvents = 3697693;
 
     double Xbins[XAxisbins.size()];
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
