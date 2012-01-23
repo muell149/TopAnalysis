@@ -168,7 +168,10 @@ public :
    Double_t        trigEFF;
    string          *channel;
    string          *MCSample;
+   string          systematic;
    Double_t        lumiWeight;
+   
+
 
    // List of branches
    TBranch        *b_lepton_;   //!
@@ -324,7 +327,7 @@ public :
 
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
-   TH2D *h_2DMatching;
+   TH2D *h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta;
    TH1D *h_NJetMatching;
 
    TH1D *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti, *h_BjetMulti,*h_jetMultiXSec,*h_jetMultiAll, *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_diLepMassFull;

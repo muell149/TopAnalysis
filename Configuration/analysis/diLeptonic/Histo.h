@@ -24,6 +24,8 @@ class Histo {
 
  private:
 
+  Plotter h_generalPlot;
+
   Plotter AllDIM, InDIM, OutDIM, GenDIM;  
 
   Plotter h_HypTTbarMass;

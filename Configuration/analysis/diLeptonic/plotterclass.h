@@ -24,9 +24,9 @@ class Plotter {
 
  public:
   Plotter();
-  Plotter(TString, TString, TString, TString, int, double, double);
+  Plotter(TString, TString, TString, double, double);
   ~Plotter();
-  void   setOptions(TString, TString, TString, TString, bool, bool, int, double, double, double, double);
+  void   setOptions(TString, TString, TString, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
   void   setDataSet(std::vector<TString>, std::vector<double>, std::vector<TString>, std::vector<int>, TString);
   void   setDataSet(TString);
   void   setSystDataSet(TString);
@@ -42,12 +42,11 @@ class Plotter {
   void CalcInclSystematics(TString Systematic, int syst_number);
   void CalcDiffSystematics(TString Systematic, int syst_number);
   void InclFlatSystematics(int syst_number);
-  void DiffFlatSystematics(int syst_number, const int nbins);
+  void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
  private:
   TString name;
-  TString title;
   int bins;
   double rangemin, rangemax, ymin, ymax;
   std::vector<TFile> files, filesUp, filesDown;
@@ -55,6 +54,7 @@ class Plotter {
   std::vector<double> scales;
   std::vector<TString> legends, legendsUp, legendsDown;
   std::vector<int> colors, colorsUp, colorsDown;
+  std::vector<double> XAxisbins, XAxisbinCenters;
   double DYScale[4];
   TString DYEntry;
   TString YAxis;
@@ -237,7 +237,7 @@ void Plotter::InclFlatSystematics(int syst_number){
   syst_number++;
 
 }
-void Plotter::DiffFlatSystematics(int syst_number, const int nbins){
+void Plotter::DiffFlatSystematics(int syst_number, int nbins){
   
   for(int bin = 0; bin<nbins; bin++){
     int syst = syst_number;
@@ -349,26 +349,25 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
 
 void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 
-  const Int_t nbins = 5;
-  //const Double_t Xbins[nbins+1] = {345, 400, 475, 550, 700, 1000};//for ttbarmass
-  const Double_t Xbins[nbins+1] = {20, 40, 70, 120, 180, 400};//for lepton pT
-  //    const Double_t binCenterTopPt[nbinsTopPt] = {32, 109, 185, 308};
+  double Xbins[XAxisbins.size()];
+  for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
   setSystDataSet(Systematic);
   fillSystHisto();
-  TH1D* stacksum = (TH1D*)hists[2].Rebin(nbins,"stack",Xbins);
-  TH1D* stacksumUp = (TH1D*)systhistsUp[2].Rebin(nbins,"stackup",Xbins);
-  TH1D* stacksumDown = (TH1D*)systhistsDown[2].Rebin(nbins,"stackdown",Xbins);
+  TH1D* stacksum = (TH1D*)hists[2].Rebin(bins,"stack",Xbins);
+  TH1D* stacksumUp = (TH1D*)systhistsUp[2].Rebin(bins,"stackup",Xbins);
+  TH1D* stacksumDown = (TH1D*)systhistsDown[2].Rebin(bins,"stackdown",Xbins);
 
+  //DYScale Factor...
   for(unsigned int i=3; i<hists.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)hists[i].Rebin(nbins,"htemp",Xbins);
+    TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
     stacksum->Add(htemp);
   }
   for(unsigned int i=3; i<systhistsUp.size() ; i++){ // prepare histos and leg
-    TH1 *htempup = (TH1D*)systhistsUp[i].Rebin(nbins,"htempup",Xbins);
+    TH1 *htempup = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
     stacksumUp->Add(htempup);
   }
   for(unsigned int i=3; i<systhistsDown.size() ; i++){ // prepare histos and leg
-    TH1 *htempdown = (TH1D*)systhistsDown[i].Rebin(nbins,"htempdown",Xbins);
+    TH1 *htempdown = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
     stacksumDown->Add(htempdown);
   }
   double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
@@ -387,9 +386,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 
 Plotter::Plotter()
 {
-  title="defaultTitle";
   name="defaultName";
-  bins=10;
   rangemin=0;
   rangemax=3;
   YAxis="N_{events}";
@@ -397,11 +394,9 @@ Plotter::Plotter()
   
 }
 
-Plotter::Plotter(TString title_, TString name_, TString XAxis_,TString YAxis_, int bins_, double rangemin_, double rangemax_)
+Plotter::Plotter(TString name_, TString XAxis_,TString YAxis_, double rangemin_, double rangemax_)
 {
-  title=title_;
   name=name_;
-  bins=bins_;
   rangemin=rangemin_;
   rangemax=rangemax_;
   XAxis=XAxis_;
@@ -413,9 +408,12 @@ Plotter::~Plotter()
 {
 }
 
-void Plotter::setOptions(TString title_, TString name_, TString YAxis_, TString XAxis_, bool logX_, bool logY_, int bins_, double ymin_, double ymax_, double rangemin_, double rangemax_)
+void Plotter::setOptions(TString name_, TString YAxis_, TString XAxis_, bool logX_, bool logY_, double ymin_, double ymax_, double rangemin_, double rangemax_, int bins_, std::vector<double>XAxisbins_, std::vector<double>XAxisbinCenters_)
 {
-  title=title_;
+  XAxisbins.clear();
+  XAxisbinCenters.clear();
+  XAxisbinCenters = XAxisbinCenters_;
+  XAxisbins = XAxisbins_;
   name=name_;
   bins=bins_;
   logX = logX_;
@@ -508,8 +506,6 @@ void Plotter::setDataSet(TString mode)
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-//	else if(filename.Contains("dymumu")){legends.push_back("Z^{0} / #gamma* #rightarrow #mu#mu"); colors.push_back(kAzure-2);}
-//	else if(filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
 	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
 	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
       }
@@ -772,17 +768,18 @@ void Plotter::fillHisto()
     hists.clear();
     for(unsigned int i=0; i<dataset.size(); i++){
       TFile *ftemp = TFile::Open(dataset[i]);
-      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+      //TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -805,17 +802,17 @@ void Plotter::fillSystHisto()
     systhistsDown.clear();
     for(unsigned int i=0; i<datasetUp.size(); i++){
       TFile *ftemp = TFile::Open(datasetUp[i]);
-      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
+      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -826,17 +823,17 @@ void Plotter::fillSystHisto()
     }
     for(unsigned int i=0; i<datasetDown.size(); i++){
       TFile *ftemp = TFile::Open(datasetDown[i]);
-      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
+      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -854,7 +851,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 {
   if(initialized){
 
-  TCanvas * c = new TCanvas(title,title);
+  TCanvas * c = new TCanvas("","");
 
   THStack * stack=  new THStack("def", "def");
   TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
@@ -871,8 +868,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   c->Clear();
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
-  c->SetName(title);
-  c->SetTitle(title);
+  c->SetName("");
+  c->SetTitle("");
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
     drawhists[i]=(TH1D*) hists[i].Clone();
     setStyle(*drawhists[i], i);
@@ -971,7 +968,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   delete leg;
   //delete stack;
   }
-  else std::cout << "Histogram " << title << " not filled during the process." << std::endl;
+  else std::cout << "Histogram " << name << " not filled during the process." << std::endl;
 }
 
 void Plotter::setStyle(TH1 &hist, unsigned int i)
@@ -1122,9 +1119,9 @@ void Plotter::PlotXSec(){
 
 double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
-  CalcInclSystematics("JES",0);
-  CalcInclSystematics("RES",1);
-  InclFlatSystematics(2);
+  //  CalcInclSystematics("JES",0);
+  //CalcInclSystematics("RES",1);
+  //InclFlatSystematics(2);
   
   double syst_square=0;
 
@@ -1141,7 +1138,7 @@ double Plotter::CalcXSec(){
 
   for(unsigned int i=0; i<dataset.size(); i++){
     TFile *ftemp = TFile::Open(dataset[i]);
-    TH1D *hist = (TH1D*)ftemp->Get("jetMultiXSec")->Clone();     
+    TH1D *hist = (TH1D*)ftemp->Get("HypjetMultiXSec")->Clone();     
     numhists[i]=hist;
     delete ftemp;
   }
@@ -1155,7 +1152,7 @@ double Plotter::CalcXSec(){
     }
     else if(legends[i] == "t#bar{t} signal"){
       TFile *ftemp2 = TFile::Open(dataset[i]);
-      TH1D *NoPUPlot = (TH1D*)ftemp2->Get("jetMultiNoPU")->Clone();
+      TH1D *NoPUPlot = (TH1D*)ftemp2->Get("HypjetMultiNoPU")->Clone();
       //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[1]+=NoPUPlot->Integral();
       delete ftemp2;
@@ -1204,56 +1201,62 @@ double Plotter::CalcXSec(){
 }
 
 void Plotter::PlotDiffXSec(){
-    const Int_t nbins = 5;
     TH1::AddDirectory(kFALSE);
-    CalcDiffSystematics("JES", 0);
-    CalcDiffSystematics("RES", 1);
-    DiffFlatSystematics(2,nbins);
+    //CalcDiffSystematics("JES", 0);
+    //CalcDiffSystematics("RES", 1);
+    //DiffFlatSystematics(2,nbins);
     double topxsec = 169.9;
     double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     //    double SignalEvents = 3701945.0;
     double SignalEvents = 3631452.0;
 
-    //const Double_t Xbins[nbins+1] = {345, 400, 475, 550, 700, 1000};//for ttbarmass
-    const Double_t Xbins[nbins+1] = {20, 40, 70, 120, 180, 400};//for lepton pT
-    const Double_t binCenters[nbins] = {28, 55, 93, 147, 249};
-    //    const Double_t binCenterTopPt[nbinsTopPt] = {32, 109, 185, 308};
+    double Xbins[XAxisbins.size()];
+    for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
+    double binCenters[XAxisbinCenters.size()];
+    for(unsigned int i = 0; i<XAxisbinCenters.size();i++){binCenters[i]=XAxisbinCenters[i];}
     
 
     TH1 *RecoPlot = new TH1D;
     TH1 *GenPlot =new TH1D;
     TH1 *GenPlotTheory =new TH1D;
-    double DataSum[nbins]={0};
-    double GenSignalSum[nbins]={0};
-    double BGSum[nbins]={0};
+    //    double DataSum[nbins]={0};
+    //double GenSignalSum[nbins]={0};
+    //double BGSum[nbins]={0};
+    double DataSum[XAxisbinCenters.size()];
+    double GenSignalSum[XAxisbinCenters.size()];
+    double BGSum[XAxisbinCenters.size()];
 
     TH1 *varhists[hists.size()];
 
     for (unsigned int i =0; i<hists.size(); i++){
-      varhists[i]=hists[i].Rebin(nbins,"varhists",Xbins);            
+      varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);            
       setStyle(*varhists[i], i);
       if(legends[i] == "t#bar{t} signal"){
 	TFile *ftemp2 = TFile::Open(dataset[i]);
-	TH1D *temp2 =  (TH1D*)ftemp2->Get("RecoLeptonpT")->Clone();
-	temp2->Add((TH1D*)ftemp2->Get("RecoAntiLeptonpT")->Clone());
+	TH1D *temp2 =  (TH1D*)ftemp2->Get("Reco"+name)->Clone();
+	if(name.Contains("Lepton")||name.Contains("Top")){
+	  temp2->Add((TH1D*)ftemp2->Get("RecoAnti"+name)->Clone());
+	}
 	//	TH1D *temp2 =  (TH1D*)ftemp2->Get("RecoTTBarMass")->Clone();
-	RecoPlot = (TH1D*)temp2->Rebin(nbins,"recohists",Xbins);
+	RecoPlot = (TH1D*)temp2->Rebin(bins,"recohists",Xbins);
 	//      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
 	//numbers[1]+=NoPUPlot->Integral();
 	
 	TFile *ftemp = TFile::Open(dataset[i]);
 	//	GenPlotTheory=(TH1D*)ftemp->Get("VisGenTTBarMass")->Clone();
-	GenPlotTheory=(TH1D*)ftemp->Get("VisGenLeptonpT")->Clone();
-	GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAntiLeptonpT")->Clone());
-	GenPlot = GenPlotTheory->Rebin(nbins,"genplot",Xbins);	
+	GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+name)->Clone();
+	if(name.Contains("Lepton")||name.Contains("Top")){
+	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
+	}
+	GenPlot = GenPlotTheory->Rebin(bins,"genplot",Xbins);	
 	delete ftemp;
 	delete ftemp2;
       }           
     }
 
-    double efficiencies[nbins];
+    double efficiencies[XAxisbinCenters.size()];
     for (unsigned int hist =0; hist<hists.size(); hist++){
-      for (Int_t bin=0; bin<nbins; ++bin) {
+      for (Int_t bin=0; bin<bins; ++bin) {
 	if(legends[hist] == "data"){
 	  DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	}
@@ -1266,12 +1269,12 @@ void Plotter::PlotDiffXSec(){
 	}
       }
     }
-    double binWidth[nbins] ={0};
+    double binWidth[XAxisbinCenters.size()];
     TH1 *h_DiffXSec = (TH1D*)varhists[0]->Clone();
     TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone();
     h_DiffXSec->Reset();
 
-    for (Int_t i=0; i<nbins; ++i) {
+    for (Int_t i=0; i<bins; ++i) {
       if(channelType!=3){
 	binWidth[i] = Xbins[i+1]-Xbins[i];      
 	DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
@@ -1281,7 +1284,7 @@ void Plotter::PlotDiffXSec(){
 	
 	// set measured cross section
 	if (efficiencies[i] == 0) { //cannot divide by zero
-	  cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << title << endl;
+	  cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << name << endl;
 	  h_DiffXSec->SetBinContent(i+1, 0);
 	} else {
 	  //cout<<"DiffXSec[i]: "<<DiffXSec[channelType][i]<<endl;;
@@ -1318,7 +1321,7 @@ void Plotter::PlotDiffXSec(){
     h_DiffXSec->Scale(datascale);
     
 
-    for (Int_t i=0; i<nbins; ++i) {//I don't think this is needed, but put it here for good measure
+    for (Int_t i=0; i<bins; ++i) {//I don't think this is needed, but put it here for good measure
       if(channelType!=3){
 	   VisXsection[channelType][i]=DiffXSec[channelType][i]*binWidth[i];//this is probably cheating
 	   VisXsectionError[channelType][i]=TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi);//then this is as well
@@ -1339,11 +1342,11 @@ void Plotter::PlotDiffXSec(){
 
     //theory curves
 
-    double DiffXSecPlot[nbins];
-    double DiffXSecStatErrorPlot[nbins];
-    double DiffXSecTotalErrorPlot[nbins];
+    double DiffXSecPlot[XAxisbinCenters.size()];
+    double DiffXSecStatErrorPlot[XAxisbinCenters.size()];
+    double DiffXSecTotalErrorPlot[XAxisbinCenters.size()];
 
-    for (Int_t bin=0; bin<nbins; bin++){//condense matrices to arrays for plotting
+    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       double syst_square = 0;
       for(int syst =0; syst<15; syst++){
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
@@ -1365,15 +1368,15 @@ void Plotter::PlotDiffXSec(){
       cout<<"DiffXSecTotalErrorPlot[bin]: "<<DiffXSecTotalErrorPlot[bin]<<endl<<endl;
     }
 
-    Double_t mexl[nbins] = {0};
-    Double_t mexh[nbins] = {0};
-    TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(nbins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
+    Double_t mexl[XAxisbinCenters.size()];
+    Double_t mexh[XAxisbinCenters.size()];
+    TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
     tga_DiffXSecPlot->SetMarkerStyle(20);
     tga_DiffXSecPlot->SetMarkerColor(kBlack);
     tga_DiffXSecPlot->SetMarkerSize(1);
     tga_DiffXSecPlot->SetLineColor(kBlack);
    
-    TGraphAsymmErrors *tga_DiffXSecPlotwithSys = new TGraphAsymmErrors(nbins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecTotalErrorPlot, DiffXSecTotalErrorPlot);
+    TGraphAsymmErrors *tga_DiffXSecPlotwithSys = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecTotalErrorPlot, DiffXSecTotalErrorPlot);
     tga_DiffXSecPlotwithSys->SetMarkerStyle(20);
     tga_DiffXSecPlotwithSys->SetMarkerColor(kBlack);
     tga_DiffXSecPlotwithSys->SetMarkerSize(1);

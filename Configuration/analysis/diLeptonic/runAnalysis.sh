@@ -1,7 +1,21 @@
 #!/bin/zsh
 
-ls mergedRoot/mumu/mumu*.root > selectionlist_mumu.txt
-ls mergedRoot/emu/emu*.root > selectionlist_emu.txt
-ls mergedRoot/ee/ee*.root > selectionlist_ee.txt
+mkdir FileLists
 
-root -l -q load_Analysis.C
+#foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN)
+foreach syst (RESUP RESDOWN)
+
+   echo $syst > syst.txt
+
+   foreach channel (ee emu mumu)
+
+      ls mergedRoot/$syst/$channel/*.root > selectionList.txt
+      cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
+
+      root -l -b -q load_long.C
+
+   end
+   
+   rm syst.txt
+
+end

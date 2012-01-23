@@ -18,28 +18,17 @@ void Analysis::Begin(TTree * /*tree*/)
 
   
 
-  ///init counters
-  //  ifstream insample("samples.txt",std::ios::in);
-  //insample>>sample;
+  ifstream insample("syst.txt",std::ios::in);
+  insample>>systematic;
 
-  //TString dataset="mumu";
-
-  
-  /*   AllDIM.setDataSet(dataset);
-       AllDIM.setOptions("AllDIM","AllDIM","Events",50,0,400,1);
-       InDIM.setDataSet(dataset);
-       InDIM.setOptions("InDIM","InDIM","Events",50,0,400,1);
-       OutDIM.setDataSet(dataset);
-       OutDIM.setOptions("OutDIM","OutDIM","Events",50,0,400,1);
-  */
   gStyle->SetOptStat(0);
 
-  h_jetMultiAll = new TH1D("jetMultiAll", "Jet Multiplicity (AllJets)", 10, 0, 10);
-  h_jetMultiXSec = new TH1D("jetMultiXSec", "Jet Multiplicity (for cross-section)", 10, 0, 10);
-  h_jetMulti = new TH1D("jetMulti", "Jet Multiplicity", 10, 0, 10);
-  h_jetMultiNoPU = new TH1D("jetMultiNoPU", "Jet Multiplicity (No Pileup or lumi weight)", 10, 0, 10);
-  h_jetMultiVisTop = new TH1D("jetMultiVisTop", "Jet Multiplicity for Visible Top (No Pileup or lumi Weight)", 10, 0, 10);
-  h_BjetMulti = new TH1D("BjetMulti", "B-Jet Multiplicity", 10, 0, 10);
+  h_jetMultiAll = new TH1D("HypjetMultiAll", "Jet Multiplicity (AllJets)", 10, 0, 10);
+  h_jetMultiXSec = new TH1D("HypjetMultiXSec", "Jet Multiplicity (for cross-section)", 10, 0, 10);
+  h_jetMulti = new TH1D("HypjetMulti", "Jet Multiplicity", 10, 0, 10);
+  h_jetMultiNoPU = new TH1D("HypjetMultiNoPU", "Jet Multiplicity (No Pileup or lumi weight)", 10, 0, 10);
+  h_jetMultiVisTop = new TH1D("HypjetMultiVisTop", "Jet Multiplicity for Visible Top (No Pileup or lumi Weight)", 10, 0, 10);
+  h_BjetMulti = new TH1D("HypBjetMulti", "B-Jet Multiplicity", 10, 0, 10);
 
   h_HypTTBarRapidity = new TH1D("HypTTBarRapidity","Rapidity of TTbar System (HYP)",50,-5,5);
   h_HypTTBarpT = new TH1D("HypTTBarpT","pT of TTbar System (HYP)",50,0,500);
@@ -205,10 +194,8 @@ void Analysis::Begin(TTree * /*tree*/)
   h_GenAntiNeutrinoEta = new TH1D("GenAntiNeutrinoEta","AntiNeutrino Genothesis Eta",40,-4,4);
   h_GenAntiNeutrinoE = new TH1D("GenAntiNeutrinoE","AntiNeutrino Genothesis Energy",40,0,400);
 
-  //   h1 = new TH1D("h1","h1",60,-3,3);
-  //h1 = new TH1D("h1","h1",100,0,400);
-   
-  h_2DMatching = new TH2D("GenRecoMatching", "Gen/Reco Matching", 500,0,500,500,0,500);
+  h_GenRecoLeptonEta = new TH2D("GenRecoLeptonEta", "Gen/Reco Matching", 100,-5,5,100,-5,5);
+  h_GenRecoAntiLeptonEta = new TH2D("GenRecoAntiLeptonEta", "Gen/Reco Matching", 100,-5,5,100,-5,5);
   h_NJetMatching = new TH1D("NJetMatching", "NJet Gen/Reco Matching",5,0,5);
 }
 
@@ -466,7 +453,7 @@ Bool_t Analysis::Process(Long64_t entry)
     if (dimass>76 && dimass < 106)Looseh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
     
     //if(dimass>12 && (lepQ[0]!=lepQ[1])){//Analysis step 6
-    //if(dimass>12 && jet_>1 && (lepQ[0]!=lepQ[1])){//Analysis step 6
+    //if(dimass>12 && jet_>1 && (lepQ[0]!=lepQ[1])){//Analysis step 7
     //if(dimass>12 && jet_>1 && BJetIndex.size()>0 && (lepQ[0]!=lepQ[1])){btagSFuse=btagSF;//Analysis step 8?
     if(dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_ && (lepQ[0]!=lepQ[1])){btagSFuse=btagSF; weightKinFituse=weightKinFit;//Analysis step 9?
       
@@ -486,6 +473,10 @@ Bool_t Analysis::Process(Long64_t entry)
 	      h_jetMultiVisTop->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit); 
 	    }
 	  }//for visible top events
+	  if(HypTop_){
+	    h_GenRecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),LVGenLepton.Eta());
+	    h_GenRecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),LVGenAntiLepton.Eta());
+	  }//for purity stability calculations
 	  double GenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
 	  h_GenTTBarMass->Fill(GenTTBarMass,1);
 	  h_GenToppT->Fill(LVGenTop.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -586,7 +577,11 @@ Bool_t Analysis::Process(Long64_t entry)
 	    }
 	  }//for visible top events
 
-
+	  if(HypTop_){
+	    h_GenRecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),LVGenLepton.Eta());
+	    h_GenRecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),LVGenAntiLepton.Eta());
+	  }//for purity stability calculations
+	  
 	  double GenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
 	  h_GenTTBarMass->Fill(GenTTBarMass,1);
 	  h_GenToppT->Fill(LVGenTop.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -621,10 +616,6 @@ Bool_t Analysis::Process(Long64_t entry)
 	  //	  cout<<"SolutionIndex: "<<solutionIndex<<endl;
 	  //cout<< "BJetTCHE[HypJet0index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet0index)[solutionIndex]]<<endl;
 	  //cout<< "BJetTCHE[HypJet1index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet1index)[solutionIndex]]<<endl<<endl;
-	  int NJetMatching=0;
-
-	  h_NJetMatching->Fill(NJetMatching);
-
 	  double HypTTBarMass = (LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).M();
 	  h_RecoTTBarMass->Fill(HypTTBarMass,1);
 	  h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),1);
@@ -705,6 +696,9 @@ void Analysis::Terminate()
 
   string f_savename = "selectionRoot/";
   gSystem->MakeDirectory(f_savename.c_str());
+  f_savename.append(systematic); 
+  gSystem->MakeDirectory(f_savename.c_str());
+  f_savename.append("/");
   f_savename.append(*channel); 
   gSystem->MakeDirectory(f_savename.c_str());
   f_savename.append("/");
@@ -713,6 +707,7 @@ void Analysis::Terminate()
   
 
   std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<*MCSample<<"!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl<<std:: endl;
+  cout<<"Created: "<<f_savename<<endl;
 
   TFile *f = new TFile(f_savename.c_str(),"RECREATE");
 
@@ -720,7 +715,8 @@ void Analysis::Terminate()
   //InDIM.writeone();
   //OutDIM.writeone();
 
-  h_2DMatching->Write();
+  h_GenRecoLeptonEta->Write();
+  h_GenRecoAntiLeptonEta->Write();
   h_NJetMatching->Write();
   h_diLepMassFull->Write();
   Allh1->Write();
