@@ -112,12 +112,12 @@ TFile* systematicsInputDiff = TFile::Open("/afs/naf.desy.de/user/a/asincruz/CMSS
 */
 
 // input file name with Powheg curves
-TFile* powhegInput = TFile::Open("/afs/naf.desy.de/user/d/dammann/public/Powheg.root");
+TFile* powhegInput = TFile::Open("/data/group/top/CompleteRun/Nov1/Powheg.root");
 // input file name with MC@NLO curves
-TFile* mcatnloInput = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_status3_v20111028.root");
+TFile* mcatnloInput = TFile::Open("/data/group/top/CompleteRun/Nov1/MCatNLO_status3_v20111028.root");
 // input file names with MC@NLO uncertainty curves due to m_top, Q2, and the PDF
-TFile* mcatnloInputUp = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Up_status3_v20111028.root"); 
-TFile* mcatnloInputDn = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Down_status3_v20111028.root"); 
+TFile* mcatnloInputUp = TFile::Open("/data/group/top/CompleteRun/Nov1/MCatNLO_Uncert_Up_status3_v20111028.root"); 
+TFile* mcatnloInputDn = TFile::Open("/data/group/top/CompleteRun/Nov1/MCatNLO_Uncert_Down_status3_v20111028.root"); 
 
 //(not) constants for background scaling - it is preferred to set them via command line!
 Bool_t scaleUpBG = kFALSE;
@@ -422,7 +422,8 @@ Int_t AddHist(const TString path, const TString name, const Int_t channel, const
     else
         hist->Add(fhist);
 
-    if(!ok) cout << "WARNING in AddHist: cannot get hist " << path << name << endl;
+    if(!ok) cout << "WARNING in AddHist: cannot get hist " << path << name << " from " 
+                << files[channel][idx]->GetName() << endl;
     
     return ok;
 }
@@ -1336,11 +1337,11 @@ TH1* GetNloCurve(const char* particle, const char* quantity, const char* generat
     }
     else if(strcmp(generator, "MCNLOup")==0){
       file = mcatnloInputUp;
-      std::cerr << "MCNLOUp: " << file->GetName() << std::endl; 
+//       std::cerr << "MCNLOUp: " << file->GetName() << std::endl; 
     } 
      else if(strcmp(generator, "MCNLOdown")==0){
       file = mcatnloInputDn;
-      std::cerr << "MCNLODn: " << file->GetName() << std::endl; 
+//       std::cerr << "MCNLODn: " << file->GetName() << std::endl; 
     }  
     else if(strcmp(generator, "Powheg")==0){
       file = powhegInput;
@@ -2900,7 +2901,7 @@ void CalculateInclusiveCrossSections(const char* selection){
 // plot differential cross section with yield plot, purity-stability-efficiency plot and gen-reco correlation for signal
 void PlotDifferentialCrossSection(const char* particle, const char* quantity, Int_t channel, const char* xtitle, const char* ytitle,
                                   const Double_t bins[], const Int_t nbins, Double_t crosss[], Double_t statErr[], Double_t totalErrUp[],
-				  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPrefix=0) {
+				  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0) {
     
     TString plotStr("");
     TH1* hists[Nfiles];  // histograms needed for event yields and bg sustraction
@@ -2994,7 +2995,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
                 
-                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
+                if(dataIsFakeFromMonteCarlo)
+                    AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
             } else if (channel==kEE) {
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
 
@@ -3130,7 +3132,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 	}
     }
 
-    // rebin hitograms to anlalysis binning
+    // rebin hitograms to analysis binning
     TH1* binhists[Nfiles];
     for (size_t i=0; i<Nfiles; ++i) {
         binhists[i] = hists[i]->Rebin(nbins,"",bins);
@@ -3259,8 +3261,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
     semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
 
-    if (!specialPrefix) specialPrefix = "";
-    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
+    if (!specialPostfix) specialPostfix = "";
+    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(specialPostfix).Append(outform));
 
     
     //now calculate cross section
@@ -3293,7 +3295,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         for (size_t j=2; j<Nplots; ++j) {
             bgsum += mergedhists[j]->GetBinContent(i);
         }
-        cout << "Sum background: " << channelName[channel] << particle << quantity << " " << bgsum << endl;
+        //cout << "Sum background: " << channelName[channel] << particle << quantity << " " << bgsum << endl;
         dataMinusBg->SetBinContent(i, binhists[0]->GetBinContent(i)-bgsum);
         efficiencyHist->SetBinContent(i, efficiencies[i-1]);
         
@@ -3345,7 +3347,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     title.Append(particle);
     title.Append("_");
     title.Append(quantity);
-    if (specialPrefix) title.Append(specialPrefix);
+    if (specialPostfix) title.Append(specialPostfix);
 
     Canvas->Clear();
     genCrossHist->SetMinimum(0);
@@ -3640,21 +3642,29 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     box->SetTextSize(0.03);
     box->AddText(corrstr);
     box->Draw("SAME");
-    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
+    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(specialPostfix).Append(outform));
 
     TH1* genRecHist = new TH1D("","",nbins,bins);
 
-    Int_t intbins[nbins+1];
+    Int_t intbinsX[nbins+1];
+    Int_t intbinsY[nbins+1];
     // fill the elements of the main diagonal of the 2d hist into binned 1D histogram
     for (Int_t i=0; i<nbins+1; ++i) {
-        intbins[i] = genRec2DHist->GetXaxis()->FindBin(bins[i]);
+        intbinsX[i] = genRec2DHist->GetXaxis()->FindBin(bins[i]+0.001);
+        intbinsY[i] = genRec2DHist->GetYaxis()->FindBin(bins[i]+0.001);
+//         std::cout << "PSE_bins " << intbinsX[i] << " " << intbinsY[i] << "\n";
+        
+//         if (intbinsX[i] != intbinsY[i]) std::cout << "ARGH!!!!!\n";
         if (i>0) {
-            genRecHist->SetBinContent(i,((TH2D*)genRec2DHist)->Integral(intbins[i-1],intbins[i]-1,intbins[i-1],intbins[i]-1));
+            genRecHist->SetBinContent(i,
+                        ((TH2D*)genRec2DHist)->Integral( intbinsX[i-1],intbinsX[i]-1,intbinsY[i-1],intbinsY[i]-1));
         }
     }
 
     TH1* genPseHist = ((TH2D*)genRec2DHist)->ProjectionX();
     TH1* recPseHist = ((TH2D*)genRec2DHist)->ProjectionY();
+    
+    //((TH2*)genRec2DHist)->ProfileX()
 
     TH1* genBinHist    = genPseHist->Rebin(nbins,"genBinHist", bins);
     TH1* recBinHist    = recPseHist->Rebin(nbins,"recBinHist", bins);
@@ -3677,8 +3687,9 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     for(Int_t i=1; i<=genRecHist->GetNbinsX(); ++i){
       if(genRecHist->GetBinContent(i) > recBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,recBinHist->GetBinContent(i));
-	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
-	<< " is larger than number of reconstructed events in that bin" << endl;
+	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
+	<< " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
+	<< " = " << recBinHist->GetBinContent(i) << endl;
       }
       if(genRecHist->GetBinContent(i) > genBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,genBinHist->GetBinContent(i));
@@ -3722,19 +3733,19 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     grS->SetMarkerColor(2);
 
     // correct bin center also for these graphs
-    for (Int_t i=0; i<bccCrossGraph->GetN();++i) {
-      grE->SetPoint(i, (bccCrossGraph->GetX())[i], (grE->GetY())[i]);
-      grP->SetPoint(i, (bccCrossGraph->GetX())[i], (grP->GetY())[i]);
-      grS->SetPoint(i, (bccCrossGraph->GetX())[i], (grS->GetY())[i]);
-
-      grE->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
-      grP->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
-      grS->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
-
-      grE->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
-      grP->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
-      grS->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
-    }
+//     for (Int_t i=0; i<bccCrossGraph->GetN();++i) {
+//       grE->SetPoint(i, (bccCrossGraph->GetX())[i], (grE->GetY())[i]);
+//       grP->SetPoint(i, (bccCrossGraph->GetX())[i], (grP->GetY())[i]);
+//       grS->SetPoint(i, (bccCrossGraph->GetX())[i], (grS->GetY())[i]);
+// 
+//       grE->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
+//       grP->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
+//       grS->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
+// 
+//       grE->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
+//       grP->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
+//       grS->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
+//     }
 
     grE->GetXaxis()->SetTitle(xtitle);
 
@@ -3772,7 +3783,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     title.Append(quantity);
 
     Canvas->Update();
-    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(specialPrefix).Append(title).Append(outform));
+    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(specialPostfix).Append(outform));
 
     efficiency->SetName(title);
     efficiency->GetXaxis()->SetTitle(xtitle);
@@ -3790,7 +3801,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
 // plot differential cross section in all channels and combine them
 void PlotDifferentialCrossSections(const char* particle, const char* quantity, const char* xtitle, const char* ytitle,
-                                   const Double_t bins[], const Int_t nbins, const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPrefix=0) {
+                                   const Double_t bins[], const Int_t nbins, const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0) {
 
     Double_t crosssMM[nbins];
     Double_t statErrMM[nbins];
@@ -3813,10 +3824,10 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Double_t totalErrDownCombined[nbins];
    
     gROOT->ForceStyle(); //somehow combined plots have strange labels otherwise
-    PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPrefix);
-    PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPrefix);
-    PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPrefix);
-    PlotDifferentialCrossSection(particle, quantity, kCOMBINED, xtitle, ytitle, bins, nbins, crosssCombined, statErrCombined, totalErrUpCombined, totalErrDownCombined, binCenters, useKinFit, specialPrefix);
+    PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPostfix);
+    PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPostfix);
+    PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPostfix);
+    PlotDifferentialCrossSection(particle, quantity, kCOMBINED, xtitle, ytitle, bins, nbins, crosssCombined, statErrCombined, totalErrUpCombined, totalErrDownCombined, binCenters, useKinFit, specialPostfix);
     
     //bool normaliseToUnitArea = 0;
 
@@ -3828,7 +3839,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     title.Append(particle);
     title.Append("_");
     title.Append(quantity);
-    if (specialPrefix) title.Append(specialPrefix);
+    if (specialPostfix) title.Append(specialPostfix);
     
     TCanvas* Canvas = new TCanvas("plot", "plot", 800, 800);
    
@@ -5078,6 +5089,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     GetBtagEfficiencyInBins("Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     
     //return;
+    const Int_t nbinsLepEtaMoreBins = 7;
+    const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.1, -0.4, 0.4, 1.1, 1.7, 2.4};
+//     const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.0, -0.3, 0.3, 1.0, 1.7, 2.4};
+    const Double_t binCenterLepEtaMoreBins[nbinsLepEtaMoreBins] = {bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto};
+    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins" );
+
+
+
     const Int_t nbinsLepPt = 5;
     const Double_t binsLepPt[nbinsLepPt+1] = {20, 40, 70, 120, 180, 400};
     const Double_t binCenterLepPt[nbinsLepPt] = {28, 55, 93, 147, 249};
@@ -5149,9 +5168,9 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     
     //other plot as requested by ARC
     const Int_t nbinsTopRapidityMoreBins = 5;
-    const Double_t binsTopRapidityMoreBins[nbinsTopRapidityMoreBins+1] = {-2.5, -1.2, -0.3, 0.3, 1.2, 2.5};
-    const Double_t binCenterTopRapidityMoreBins[nbinsTopRapidityMoreBins] = {-1.78, bccAuto, bccAuto, bccAuto, 1.76};
-    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidityMoreBins, nbinsTopRapidityMoreBins, binCenterTopRapidityMoreBins, kTRUE, "MoreBins" );
+    const Double_t binsTopRapidityMoreBins[nbinsTopRapidityMoreBins+1] = {-2.5, -1.4, -0.5, 0.5, 1.4, 2.5};
+    const Double_t binCenterTopRapidityMoreBins[nbinsTopRapidityMoreBins] = {-1.85, -0.95, 0, 0.95, 1.85};
+    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidityMoreBins, nbinsTopRapidityMoreBins, binCenterTopRapidityMoreBins, kTRUE, "_MoreBins" );
 
     const Int_t nbinsTopPt = 4;
     const Double_t binsTopPt[nbinsTopPt+1] = {0, 70, 140, 240, 400};
@@ -5178,9 +5197,9 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     
     //more bins requested by ARC
     const Int_t nbinsTtBarRapidityMoreBins = 5;
-    const Double_t binsTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins+1] = {-2.5, -1.2, -0.3, 0.3, 1.2, 2.5};
-    const Double_t binCenterTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins] = {-1.68, bccAuto, bccAuto, bccAuto, 1.65};
-    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins, kTRUE, "MoreBins" );
+    const Double_t binsTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins+1] = {-2.5, -1.2, -0.4, 0.4, 1.2, 2.5};
+    const Double_t binCenterTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins] = {-1.68, bccAuto, 0, bccAuto, 1.65};
+    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins, kTRUE, "_MoreBins" );
     
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
