@@ -1227,15 +1227,17 @@ void Plotter::PlotDiffXSec(){
     double BGSum[XAxisbinCenters.size()];
 
     TH1 *varhists[hists.size()];
-
+    TH2 *genReco2d;
     for (unsigned int i =0; i<hists.size(); i++){
       varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);            
       setStyle(*varhists[i], i);
       if(legends[i] == "t#bar{t} signal"){
 	TFile *ftemp2 = TFile::Open(dataset[i]);
 	TH1D *temp2 =  (TH1D*)ftemp2->Get("Reco"+name)->Clone();
+	genReco2d = (TH2*)ftemp2->Get("GenReco"+name)->Clone();
 	if(name.Contains("Lepton")||name.Contains("Top")){
 	  temp2->Add((TH1D*)ftemp2->Get("RecoAnti"+name)->Clone());
+	  genReco2d->Add((TH2*)ftemp2->Get("GenRecoAnti"+name)->Clone());
 	}
 	//	TH1D *temp2 =  (TH1D*)ftemp2->Get("RecoTTBarMass")->Clone();
 	RecoPlot = (TH1D*)temp2->Rebin(bins,"recohists",Xbins);
@@ -1254,6 +1256,115 @@ void Plotter::PlotDiffXSec(){
       }           
     }
 
+    ///////////////////////////////////
+    //purity and stability plots as taken from CombinedCrossSection... ...
+    
+    TH1* genHist = (TH1*)GenPlot->Clone();
+    TH1* genRecHist = new TH1D("","",bins,Xbins);
+    int intbinsX[XAxisbins.size()];
+    int intbinsY[XAxisbins.size()];
+    // fill the elements of the main diagonal of the 2d hist into binned 1D histogram
+    for (unsigned int i=0; i<XAxisbins.size(); ++i) {
+        intbinsX[i] = genReco2d->GetXaxis()->FindBin(Xbins[i]+0.001);
+        intbinsY[i] = genReco2d->GetYaxis()->FindBin(Xbins[i]+0.001);
+//         std::cout << "PSE_bins " << intbinsX[i] << " " << intbinsY[i] << "\n";
+        
+//         if (intbinsX[i] != intbinsY[i]) std::cout << "ARGH!!!!!\n";
+        if (i>0) {
+            genRecHist->SetBinContent(i,
+                        ((TH2D*)genReco2d)->Integral( intbinsX[i-1],intbinsX[i]-1,intbinsY[i-1],intbinsY[i]-1));
+        }
+    }
+
+    TH1* genPseHist = ((TH2D*)genReco2d)->ProjectionX();
+    TH1* recPseHist = ((TH2D*)genReco2d)->ProjectionY();
+    
+    TH1* genBinHist    = genPseHist->Rebin(bins,"genBinHist", Xbins);
+    TH1* recBinHist    = recPseHist->Rebin(bins,"recBinHist", Xbins);
+
+    genRecHist->SetBinContent(0,      0);
+    genRecHist->SetBinContent(bins+1,0);
+    genBinHist->SetBinContent(0,      0);
+    genBinHist->SetBinContent(bins+1,0);
+    recBinHist->SetBinContent(0,      0);
+    recBinHist->SetBinContent(bins+1,0);
+    genHist   ->SetBinContent(0,      0);
+    genHist   ->SetBinContent(bins+1,0);
+
+    // this is realy ugly but necessary:
+    // As it seems, somewhere a double is tranformed into a float so that
+    // efficiencies can be larger than 1.
+    for(Int_t i=1; i<=genRecHist->GetNbinsX(); ++i){
+      if(genRecHist->GetBinContent(i) > recBinHist->GetBinContent(i)){
+        genRecHist->SetBinContent(i,recBinHist->GetBinContent(i));
+	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
+	<< " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
+	<< " = " << recBinHist->GetBinContent(i) << endl;
+      }
+      if(genRecHist->GetBinContent(i) > genBinHist->GetBinContent(i)){
+        genRecHist->SetBinContent(i,genBinHist->GetBinContent(i));
+	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
+	<< " is larger than number of genrated events in that bin" << endl;
+      }
+    }
+
+    // efficiency, purity, stability
+    TGraphAsymmErrors* grE; // for efficiency
+    TGraphAsymmErrors* grP; // for purity
+    TGraphAsymmErrors* grS; // for stability
+
+    // efficiency
+    grE = new TGraphAsymmErrors(recBinHist, genHist);
+    grE->SetMinimum(0);
+    grE->SetMaximum(1);
+    grE->SetLineColor(8);
+    grE->SetLineWidth(2);
+    grE->SetMarkerSize(2);
+    grE->SetMarkerStyle(21);
+    grE->SetMarkerColor(8);
+
+    // purity
+    grP = new TGraphAsymmErrors(genRecHist, recBinHist);
+    grP->SetLineColor(4);
+    grP->SetLineWidth(2);
+    grP->SetMarkerSize(2);
+    grP->SetMarkerStyle(23);
+    grP->SetMarkerColor(4);
+
+    // stability
+    grS = new TGraphAsymmErrors(genRecHist, genBinHist);
+    grS->SetLineColor(2);
+    grS->SetLineWidth(2);
+    grS->SetMarkerSize(2);
+    grS->SetMarkerStyle(22);
+    grS->SetMarkerColor(2);
+
+
+    grE->GetXaxis()->SetTitle(XAxis);
+    TCanvas * cESP = new TCanvas("ESP","ESP");
+
+    // this is a dummy to get the x axis range corrct
+    recBinHist->Reset();
+    recBinHist->Draw();
+    recBinHist->SetMaximum(1.);
+    //    FormatHisto(recBinHist);
+    
+    grE->Draw("P,SAME");
+    grP->Draw("P,SAME");
+    grS->Draw("P,SAME");
+
+    TLegend* leg3 = getNewLegend(); // new TLegend(0.60,0.73,0.95,0.83);
+    leg3->SetFillStyle(0);
+    leg3->SetBorderSize(0);
+    leg3->AddEntry(grE, "Efficiency", "p" );
+    leg3->AddEntry(grP, "Purity",    "p" );
+    leg3->AddEntry(grS, "Stability", "p" );
+    leg3->Draw("SAME");
+
+    cESP->Print("Plots/"+channel+"/ESP_"+name+".eps");
+    cESP->Clear();
+    delete cESP;
+    
     double efficiencies[XAxisbinCenters.size()];
     for (unsigned int hist =0; hist<hists.size(); hist++){
       for (Int_t bin=0; bin<bins; ++bin) {
@@ -1479,7 +1590,7 @@ void Plotter::PlotDiffXSec(){
     leg2.Draw("same");
     gPad->RedrawAxis();
     
-    c->Print("Plots/"+channel+"/DiffXS.eps");
+    c->Print("Plots/"+channel+"/DiffXS_"+name+".eps");
     c->Clear();
     delete c;
     
@@ -1531,7 +1642,7 @@ void Plotter::PlotDiffXSec(){
     leg->Draw("SAME");
     gPad->RedrawAxis();
     
-    c1->Print("Plots/"+channel+"/BinnedMass.eps");
+    c1->Print("Plots/"+channel+"/preunfolded_"+name+".eps");
     c1->Clear();
     delete c1;
 }
