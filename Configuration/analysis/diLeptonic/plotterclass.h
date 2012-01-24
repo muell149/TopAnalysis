@@ -183,10 +183,10 @@ void Plotter::InclFlatSystematics(int syst_number){
   syst_number++;
 
   //PU (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .001;}//emu  
-  syst_number++;
+  //if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//ee 
+  //if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//mumu  
+  //if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .001;}//emu  
+  //syst_number++;
 
   //B-tagging (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//ee 
@@ -267,10 +267,10 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     syst++;
     
     //PU (for now)
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
-    syst++;
+    //if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//ee 
+    //if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//mumu  
+    //if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
+    //syst++;
     
     //B-tagging (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
@@ -1121,7 +1121,8 @@ double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
   //  CalcInclSystematics("JES",0);
   //CalcInclSystematics("RES",1);
-  //InclFlatSystematics(2);
+  //CalcInclSystematics("PU_",2);
+  //InclFlatSystematics(3);
   
   double syst_square=0;
 
@@ -1204,7 +1205,8 @@ void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
     //CalcDiffSystematics("JES", 0);
     //CalcDiffSystematics("RES", 1);
-    //DiffFlatSystematics(2,nbins);
+    //CalcDiffSystematics("PU_", 2);
+    //DiffFlatSystematics(3,nbins);
     double topxsec = 169.9;
     double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     //    double SignalEvents = 3701945.0;
