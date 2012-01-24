@@ -196,6 +196,21 @@ void Analysis::Begin(TTree * /*tree*/)
 
   h_GenRecoLeptonEta = new TH2D("GenRecoLeptonEta", "Gen/Reco Matching", 100,-5,5,100,-5,5);
   h_GenRecoAntiLeptonEta = new TH2D("GenRecoAntiLeptonEta", "Gen/Reco Matching", 100,-5,5,100,-5,5);
+  h_GenRecoLeptonpT = new TH2D("GenRecoLeptonpT", "Gen/Reco Matching", 40,0,400,40,0,400);
+  h_GenRecoAntiLeptonpT = new TH2D("GenRecoAntiLeptonpT", "Gen/Reco Matching", 40,0,400,40,0,400);
+
+  h_GenRecoTopRapidity = new TH2D("GenRecoTopRapidity", "Gen/Reco Matching", 100,-5,5,100,-5,5);
+  h_GenRecoAntiTopRapidity = new TH2D("GenRecoAntiTopRapidity", "Gen/Reco Matching", 100,-5,5,100,-5,5);
+  h_GenRecoToppT = new TH2D("GenRecoToppT", "Gen/Reco Matching", 40,0,400,40,0,400);
+  h_GenRecoAntiToppT = new TH2D("GenRecoAntiToppT", "Gen/Reco Matching", 40,0,400,40,0,400);
+
+  h_GenRecoTTBarRapidity = new TH2D("GenRecoTTBarRapidity","Rapidity of TTbar System (HYP)",50,-5,5,50,-5,5);
+  h_GenRecoTTBarpT = new TH2D("GenRecoTTBarpT","pT of TTbar System (HYP)",50,0,500,50,0,500);
+  h_GenRecoTTBarMass = new TH2D("GenRecoTTBarMass","Mass of TTbar System (HYP)",100,0,2000,100,0,2000);
+  h_GenRecoLLBarMass = new TH2D("GenRecoLLBarMass","Mass of LLbar System (HYP)",100,0,2000,100,0,2000);
+  h_GenRecoLLBarpT = new TH2D("GenRecoLLBarpT","pT of LLbar System (HYP)",100,0,2000,100,0,2000);
+
+
   h_NJetMatching = new TH1D("NJetMatching", "NJet Gen/Reco Matching",5,0,5);
 }
 
@@ -218,6 +233,8 @@ Bool_t Analysis::Process(Long64_t entry)
   double btagSFuse=1.0;//only use the btag SF when applying b-tagging
   //trigEFF=1.0;
   double weightKinFituse = 1.0;//only use the kin fit SF when using the kinematic reconstruction
+  if(systematic=="PU_UP"){weightPU = weightPU_Up;}//only for PU systematic run
+  if(systematic=="PU_DOWN"){weightPU = weightPU_Down;}//only for PU systematic run
   std::vector<float> VLepton;
 
   std::vector<TLorentzVector> LVlepton;
@@ -476,6 +493,21 @@ Bool_t Analysis::Process(Long64_t entry)
 	  if(HypTop_){
 	    h_GenRecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),LVGenLepton.Eta());
 	    h_GenRecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),LVGenAntiLepton.Eta());
+	    h_GenRecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),LVGenLepton.Pt());
+	    h_GenRecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),LVGenAntiLepton.Pt());
+	    
+	    h_GenRecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),LVGenTop.Rapidity());
+	    h_GenRecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),LVGenAntiTop.Rapidity());
+	    h_GenRecoToppT->Fill(LVHypTop[solutionIndex].Pt(),LVGenTop.Pt());
+	    h_GenRecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),LVGenAntiTop.Pt());
+
+	    h_GenRecoLLBarMass->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).M(),(LVGenLepton+LVGenAntiLepton).M());
+	    h_GenRecoLLBarpT->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).Pt(),(LVGenLepton+LVGenAntiLepton).Pt());
+
+	    h_GenRecoTTBarMass->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).M(),(LVGenTop+LVGenAntiTop).M());
+	    h_GenRecoTTBarpT->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Pt(),(LVGenTop+LVGenAntiTop).Pt());
+	    h_GenRecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Rapidity(),(LVGenTop+LVGenAntiTop).Rapidity());
+	    
 	  }//for purity stability calculations
 	  double GenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
 	  h_GenTTBarMass->Fill(GenTTBarMass,1);
@@ -580,6 +612,21 @@ Bool_t Analysis::Process(Long64_t entry)
 	  if(HypTop_){
 	    h_GenRecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),LVGenLepton.Eta());
 	    h_GenRecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),LVGenAntiLepton.Eta());
+	    h_GenRecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),LVGenLepton.Pt());
+	    h_GenRecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),LVGenAntiLepton.Pt());
+	    
+	    h_GenRecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),LVGenTop.Rapidity());
+	    h_GenRecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),LVGenAntiTop.Rapidity());
+	    h_GenRecoToppT->Fill(LVHypTop[solutionIndex].Pt(),LVGenTop.Pt());
+	    h_GenRecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),LVGenAntiTop.Pt());
+
+	    h_GenRecoLLBarMass->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).M(),(LVGenLepton+LVGenAntiLepton).M());
+	    h_GenRecoLLBarpT->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).Pt(),(LVGenLepton+LVGenAntiLepton).Pt());
+
+	    h_GenRecoTTBarMass->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).M(),(LVGenTop+LVGenAntiTop).M());
+	    h_GenRecoTTBarpT->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Pt(),(LVGenTop+LVGenAntiTop).Pt());
+	    h_GenRecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Rapidity(),(LVGenTop+LVGenAntiTop).Rapidity());
+	    
 	  }//for purity stability calculations
 	  
 	  double GenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
@@ -706,8 +753,7 @@ void Analysis::Terminate()
   f_savename.append(".root");
   
 
-  std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<*MCSample<<"!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl<<std:: endl;
-  cout<<"Created: "<<f_savename<<endl;
+  std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<*MCSample<<"!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
 
   TFile *f = new TFile(f_savename.c_str(),"RECREATE");
 
@@ -717,6 +763,20 @@ void Analysis::Terminate()
 
   h_GenRecoLeptonEta->Write();
   h_GenRecoAntiLeptonEta->Write();
+  h_GenRecoLeptonpT->Write();
+  h_GenRecoAntiLeptonpT->Write();
+
+  h_GenRecoTopRapidity->Write();
+  h_GenRecoAntiTopRapidity->Write();
+  h_GenRecoToppT->Write();
+  h_GenRecoAntiToppT->Write();
+
+  h_GenRecoLLBarpT->Write();
+  h_GenRecoLLBarMass->Write();
+  h_GenRecoTTBarpT->Write();
+  h_GenRecoTTBarMass->Write();
+  h_GenRecoTTBarRapidity->Write();
+
   h_NJetMatching->Write();
   h_diLepMassFull->Write();
   Allh1->Write();
@@ -870,4 +930,5 @@ void Analysis::Terminate()
   h_HypAntiTopE->Write();
 
   f->Close();
+  cout<<"Created: "<<f_savename<<endl;
 }

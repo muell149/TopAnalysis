@@ -64,6 +64,8 @@ public :
    Int_t           eventNumber;
    vector<string>  *dataType;
    Double_t        weightPU;
+   Double_t        weightPU_Up;
+   Double_t        weightPU_Down;
    Double_t        weightLepSF;
    Double_t        weightKinFit;
    Double_t        weightTotal;
@@ -202,6 +204,8 @@ public :
    TBranch        *b_eventNumber;   //!
    TBranch        *b_dataType;   //!
    TBranch        *b_weightPU;   //!
+   TBranch        *b_weightPU_Up;   //!
+   TBranch        *b_weightPU_Down;   //!
    TBranch        *b_weightLepSF;   //!
    TBranch        *b_weightKinFit;   //!
    TBranch        *b_weightTotal;   //!
@@ -327,7 +331,9 @@ public :
 
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
-   TH2D *h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta;
+   TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT, ;
+   TH2D *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
+   
    TH1D *h_NJetMatching;
 
    TH1D *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti, *h_BjetMulti,*h_jetMultiXSec,*h_jetMultiAll, *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_diLepMassFull;
@@ -461,6 +467,8 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("eventNumber", &eventNumber, &b_eventNumber);
    fChain->SetBranchAddress("dataType", &dataType, &b_dataType);
    fChain->SetBranchAddress("weightPU", &weightPU, &b_weightPU);
+   fChain->SetBranchAddress("weightPU_Up", &weightPU_Up, &b_weightPU_Up);
+   fChain->SetBranchAddress("weightPU_Down", &weightPU_Down, &b_weightPU_Down);
    fChain->SetBranchAddress("weightLepSF", &weightLepSF, &b_weightLepSF);
    fChain->SetBranchAddress("weightKinFit", &weightKinFit, &b_weightKinFit);
    fChain->SetBranchAddress("weightTotal", &weightTotal, &b_weightTotal);
@@ -557,6 +565,8 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_runNumber->GetEntry(entry);   //!
   b_lumiBlock->GetEntry(entry);   //!
   b_weightPU->GetEntry(entry);   //!
+  b_weightPU_Up->GetEntry(entry);   //!
+  b_weightPU_Down->GetEntry(entry);   //!
   b_weightLepSF->GetEntry(entry);   //!
   b_weightKinFit->GetEntry(entry);   //!
   b_weightTotal->GetEntry(entry);   //!

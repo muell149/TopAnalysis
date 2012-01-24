@@ -2,8 +2,7 @@
 
 mkdir FileLists
 
-#foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN)
-foreach syst (RESUP RESDOWN)
+foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN PU_UP PU_DOWN)
 
    echo $syst > syst.txt
 
