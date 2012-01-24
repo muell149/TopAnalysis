@@ -88,7 +88,7 @@ class Plotter {
 
 void Plotter::DYScaleFactor(){
   TH1::AddDirectory(kFALSE);
-  ifstream FileList("HistoFileList_combined.txt");
+  ifstream FileList("FileLists/HistoFileList_Nominal_combined.txt");
   TString filename;
   
   double NoutEEDYMC=0, NinEEDYMC=0, NoutMuMuDYMC=0, NinMuMuDYMC=0;//Number of events in/out of z-veto region for the DY MC
@@ -459,7 +459,7 @@ void Plotter::setDataSet(TString mode)
   DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
 
   if(channel=="ee"){  
-    ifstream FileList("HistoFileList_ee.txt");
+    ifstream FileList("FileLists/HistoFileList_Nominal_ee.txt");
     TString filename;
 
     dataset.clear();
@@ -490,7 +490,7 @@ void Plotter::setDataSet(TString mode)
     dataset.clear();
     legends.clear();
     colors.clear();
-    ifstream FileList("HistoFileList_mumu.txt");
+    ifstream FileList("FileLists/HistoFileList_Nominal_mumu.txt");
     TString filename;
 
     while(!FileList.eof()){
@@ -516,7 +516,7 @@ void Plotter::setDataSet(TString mode)
     dataset.clear();
     legends.clear();
     colors.clear();
-    ifstream FileList("HistoFileList_emu.txt");
+    ifstream FileList("FileLists/HistoFileList_Nominal_emu.txt");
     TString filename;
 
     while(!FileList.eof()){
@@ -542,7 +542,7 @@ void Plotter::setDataSet(TString mode)
     dataset.clear();
     legends.clear();
     colors.clear();
-    ifstream FileList("HistoFileList_combined.txt");
+    ifstream FileList("FileLists/HistoFileList_Nominal_combined.txt");
     TString filename;
 
     while(!FileList.eof()){
@@ -572,8 +572,8 @@ void Plotter::setSystDataSet(TString systematic)
   DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
   lumi=1141;
   if(channel=="ee"){  
-    TString HistoFileUp = "HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
+    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
     TString filenameUp, filenameDown;
@@ -619,8 +619,8 @@ void Plotter::setSystDataSet(TString systematic)
   }
 
   if(channel=="mumu"){  
-    TString HistoFileUp = "HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
+    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
     TString filenameUp, filenameDown;
@@ -666,8 +666,8 @@ void Plotter::setSystDataSet(TString systematic)
   }
 
   if(channel=="emu"){  
-    TString HistoFileUp = "HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
+    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
     TString filenameUp, filenameDown;
@@ -713,8 +713,8 @@ void Plotter::setSystDataSet(TString systematic)
   }
 
   if(channel=="combined"){  
-    TString HistoFileUp = "HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
+    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
     TString filenameUp, filenameDown;
@@ -1208,8 +1208,7 @@ void Plotter::PlotDiffXSec(){
     double topxsec = 169.9;
     double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     //    double SignalEvents = 3701945.0;
-    //double SignalEvents = 3631452.0;
-    double SignalEvents = 3697693;
+    double SignalEvents = 3631452.0;
 
     double Xbins[XAxisbins.size()];
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
