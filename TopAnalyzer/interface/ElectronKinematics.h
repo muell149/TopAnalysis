@@ -15,7 +15,7 @@
    interface, which makes it usable in fwfull or fwlite. 
 */
 
-class ElectronKinematics : public SingleObject<const edm::View<pat::Electron> > {
+class ElectronKinematics : public SingleObject<const edm::View<reco::Candidate> > {
 
  public:
   /// default constructor for fw lite
@@ -34,7 +34,7 @@ class ElectronKinematics : public SingleObject<const edm::View<pat::Electron> > 
   /// histogramm booking for fwfull
   void book(edm::Service<TFileService>& fileService);
   /// histogram filling for fwlite and for fwfull from generator and reco objects
-  void fill(const edm::View<pat::Electron>& electrons, const double& weight=1.0);
+  void fill(const edm::View<reco::Candidate>& electrons, const double& weight=1.0);
   /// everything which needs to be done after the event loop
   void process() {};
 

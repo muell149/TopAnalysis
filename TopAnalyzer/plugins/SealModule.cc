@@ -11,7 +11,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonQuality> MuonQualityAnaly
 DEFINE_FWK_MODULE(MuonQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonKinematics> MuonKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, MuonKinematics> MuonKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonKinematicsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
@@ -46,7 +46,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronQuality> Electron
 DEFINE_FWK_MODULE(ElectronQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/ElectronKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronKinematics> ElectronKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, ElectronKinematics> ElectronKinematicsAnalyzer;
 DEFINE_FWK_MODULE(ElectronKinematicsAnalyzer);
 
 /**

@@ -71,14 +71,12 @@ ElectronKinematics::book(edm::Service<TFileService>& fs)
       bookVariable( fs, "eta");
     // azimuthal angle phi of the electron
       bookVariable( fs, "phi");
-      // additionally relIso
-      bookVariable( fs, "relIso");
     }
 }
 
 /// histogram filling for fwlite and for full fw
 void
-    ElectronKinematics::fill(const edm::View<pat::Electron>& electrons, const double& weight)
+ElectronKinematics::fill(const edm::View<reco::Candidate>& electrons, const double& weight)
 {
   /** 
       Fill Kinematic Variables
@@ -92,7 +90,7 @@ void
   // where index_=-1 means 'fill all electrons' and index_=n
   // n>=-1 means 'fill only n-th leading electron'
   int index=0;
-  for(edm::View<pat::Electron>::const_iterator electron=electrons.begin(); electron!=electrons.end(); ++electron, ++index){
+  for(edm::View<reco::Candidate>::const_iterator electron=electrons.begin(); electron!=electrons.end(); ++electron, ++index){
     if( index_<0 || index_==index ){
       // energy of the electron
       fillValue("en", electron->energy() , weight );
@@ -104,9 +102,6 @@ void
       fillValue("eta", electron->eta() , weight );
       // azimuthal angle phi of the electron
       fillValue("phi", electron->phi() , weight );
-      // relIso of the electron (only for tree)
-      fillValue("relIso", (electron->chargedHadronIso() + electron->neutralHadronIso() + 
-	  electron->photonIso()) / electron->et() , weight );
     }
   }
   // electron multiplicty is always filled the same way

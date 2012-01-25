@@ -70,15 +70,13 @@ MuonKinematics::book(edm::Service<TFileService>& fs)
     bookVariable( fs, "y");
   // azimuthal angle phi of the muon
     bookVariable( fs, "phi");
-    // additionally relIso
-    bookVariable( fs, "relIso");
   }
 
 }
 
 /// histogram filling for fwlite and for full fw
 void
-    MuonKinematics::fill(const edm::View<pat::Muon>& muons, const double& weight)
+MuonKinematics::fill(const edm::View<reco::Candidate>& muons, const double& weight)
 {
   /** 
       Fill Kinematic Variables
@@ -92,7 +90,7 @@ void
   // where index_=-1 means 'fill all muons' and index_=n
   // n>=-1 means 'fill only (n-1)-th leading muon'
   int index=0;
-  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
+  for(edm::View<reco::Candidate>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     if( index_<0 || index_==index ){
       // energy of the muon
       fillValue( "en" , muon->energy() , weight );
@@ -104,9 +102,6 @@ void
       fillValue( "y"  , muon->rapidity(), weight );
       // azimuthal angle phi of the muon
       fillValue( "phi", muon->phi()    , weight );
-      // relIso of the muon (only for tree)
-      fillValue("relIso", (muon->chargedHadronIso() + muon->neutralHadronIso() + 
-	  muon->photonIso()) / muon->et() , weight );
     }
   }
   // muon multiplicty is always filled the same way

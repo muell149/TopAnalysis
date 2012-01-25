@@ -15,7 +15,7 @@
    SingleObject<Collection> interface, which makes it usable in fwfull or fwlite. 
 */
 
-class MuonKinematics : public SingleObject<const edm::View<pat::Muon> > {
+class MuonKinematics : public SingleObject<const edm::View<reco::Candidate> > {
 
  public:
   /// default constructor for fw lite
@@ -34,7 +34,7 @@ class MuonKinematics : public SingleObject<const edm::View<pat::Muon> > {
   /// histogramm booking for fwfull
   void book(edm::Service<TFileService>& fileService);
   /// histogram filling for fwlite and for fwfull
-  void fill(const edm::View<pat::Muon>& muons, const double& weight=1.);
+  void fill(const edm::View<reco::Candidate>& muons, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process(){}
 
