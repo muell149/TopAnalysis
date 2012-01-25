@@ -442,10 +442,12 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # b) 4_2:
 from Configuration.PyReleaseValidation.autoCond import autoCond
 if(runningOnData=="MC"):
-    process.GlobalTag.globaltag = cms.string('START42_V13::All')
+    #process.GlobalTag.globaltag = cms.string('START42_V13::All')
+    process.GlobalTag.globaltag = cms.string('START42_V17::All')
     #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 else:
-    process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
+    #process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
+    process.GlobalTag.globaltag = cms.string('GR_R_42_V23::All')
 
 ## Needed for redoing the ak5GenJets
 #if(runningOnData=="MC" and pfToPAT==False):
@@ -1219,22 +1221,22 @@ process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misT
 process.bTagSFEventWeight.filename= cms.string("../../../../Configuration/data/analyzeBTagEfficiency.root")
 process.bTagSFEventWeight.verbose=cms.int32(0)
 
-process.bTagSFEventWeightBTagSFUp                = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
-process.bTagSFEventWeightBTagSFDown              = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
-process.bTagSFEventWeightMisTagSFUp              = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
-process.bTagSFEventWeightMisTagSFDown            = process.bTagSFEventWeight.clone(sysVar = "misTagSFDown")
-process.bTagSFEventWeightBTagSFShapeUpPt65       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt")
-process.bTagSFEventWeightBTagSFShapeDownPt65     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt")
-process.bTagSFEventWeightBTagSFShapeUpEta0p7     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta")
-process.bTagSFEventWeightBTagSFShapeDownEta0p7   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta")
-process.bTagSFEventWeightBTagSFShapeUpPt100      = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt", shapeVarPtThreshold=100.)
-process.bTagSFEventWeightBTagSFShapeDownPt100    = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt", shapeVarPtThreshold=100.)
-process.bTagSFEventWeightBTagSFShapeUpEta1p2     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta", shapeVarEtaThreshold=1.2)
-process.bTagSFEventWeightBTagSFShapeDownEta1p2   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeVarEtaThreshold=1.2)
-process.bTagSFEventWeightBTagSFHalfShapeUpPt65       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt", shapeDistortionFactor=0.5)
-process.bTagSFEventWeightBTagSFHalfShapeDownPt65     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt", shapeDistortionFactor=0.5)
-process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta", shapeDistortionFactor=0.5)
-process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeDistortionFactor=0.5)
+process.bTagSFEventWeightBTagSFUp                  = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
+process.bTagSFEventWeightBTagSFDown                = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
+process.bTagSFEventWeightMisTagSFUp                = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
+process.bTagSFEventWeightMisTagSFDown              = process.bTagSFEventWeight.clone(sysVar = "misTagSFDown")
+process.bTagSFEventWeightBTagSFShapeUpPt65         = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt")
+process.bTagSFEventWeightBTagSFShapeDownPt65       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt")
+process.bTagSFEventWeightBTagSFShapeUpEta0p7       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta")
+process.bTagSFEventWeightBTagSFShapeDownEta0p7     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta")
+process.bTagSFEventWeightBTagSFShapeUpPt100        = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt",    shapeVarPtThreshold   = 100.0)
+process.bTagSFEventWeightBTagSFShapeDownPt100      = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt",  shapeVarPtThreshold   = 100.0)
+process.bTagSFEventWeightBTagSFShapeUpEta1p2       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta",   shapeVarEtaThreshold  =   1.2)
+process.bTagSFEventWeightBTagSFShapeDownEta1p2     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeVarEtaThreshold  =   1.2)
+process.bTagSFEventWeightBTagSFHalfShapeUpPt65     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt",    shapeDistortionFactor =   0.5)
+process.bTagSFEventWeightBTagSFHalfShapeDownPt65   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt",  shapeDistortionFactor =   0.5)
+process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta",   shapeDistortionFactor =   0.5)
+process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7 = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeDistortionFactor =   0.5)
 
 ## ---
 ##    MC eff SF reweighting
@@ -1257,8 +1259,8 @@ process.effSFMuonEventWeightTriggerEffSFShapeUpEta   = process.effSFMuonEventWei
 process.effSFMuonEventWeightTriggerEffSFShapeDownEta = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownEta")
 process.effSFMuonEventWeightTriggerEffSFShapeUpPt    = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpPt")
 process.effSFMuonEventWeightTriggerEffSFShapeDownPt  = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownPt")
-process.effSFMuonEventWeightTriggerEffSFShapeUpPt40  = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpPt", shapeVarPtThreshold=40.)
-process.effSFMuonEventWeightTriggerEffSFShapeDownPt40= process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownPt", shapeVarPtThreshold=40.)
+process.effSFMuonEventWeightTriggerEffSFShapeUpPt40  = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpPt",   shapeVarPtThreshold=40.0)
+process.effSFMuonEventWeightTriggerEffSFShapeDownPt40= process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownPt", shapeVarPtThreshold=40.0)
 process.effSFMuonEventWeightSelectionEffSFNormUp     = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormUp")
 process.effSFMuonEventWeightSelectionEffSFNormDown   = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormDown")
 
