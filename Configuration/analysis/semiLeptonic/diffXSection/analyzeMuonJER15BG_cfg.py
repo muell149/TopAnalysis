@@ -14,4 +14,6 @@ if(applyKinFit==True):
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.20
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXSecJERup_testBkg.root'
+#process.TFileService.fileName = 'analyzeDiffXSecJERup_testBkg.root'
+process.TFileService.fileName = outputFileName+"JERupPF.root"
+print "output file name = ", process.TFileService.fileName

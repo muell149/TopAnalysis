@@ -18,4 +18,6 @@ else:
     print "unknown jetType"
 
 ## change output name 
-process.TFileService.fileName = 'analyzeDiffXSecJESUp_testAll.root'
+#process.TFileService.fileName = 'analyzeDiffXSecJESUp_testAll.root'
+process.TFileService.fileName = outputFileName+"JESupPF.root"
+print "output file name = ", process.TFileService.fileName
