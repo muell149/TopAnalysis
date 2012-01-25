@@ -1225,6 +1225,8 @@ process.bTagSFEventWeightBTagSFUp                  = process.bTagSFEventWeight.c
 process.bTagSFEventWeightBTagSFDown                = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
 process.bTagSFEventWeightMisTagSFUp                = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
 process.bTagSFEventWeightMisTagSFDown              = process.bTagSFEventWeight.clone(sysVar = "misTagSFDown")
+## per default SF is only varied by half of the BTV uncertainty for shape variations in BTagSFEventWeight_cfi 
+## -> "HalfShape" not needed anymore (commented out later on)
 process.bTagSFEventWeightBTagSFShapeUpPt65         = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt")
 process.bTagSFEventWeightBTagSFShapeDownPt65       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt")
 process.bTagSFEventWeightBTagSFShapeUpEta0p7       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta")
@@ -1832,10 +1834,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                                process.bTagSFEventWeightBTagSFShapeDownPt65  *
 			       process.bTagSFEventWeightBTagSFShapeUpEta1p2    *
                                process.bTagSFEventWeightBTagSFShapeDownEta1p2  *
-			       process.bTagSFEventWeightBTagSFHalfShapeUpPt65    *
-                               process.bTagSFEventWeightBTagSFHalfShapeDownPt65  *
-			       process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7    *
-                               process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7  *
+			       #process.bTagSFEventWeightBTagSFHalfShapeUpPt65    *
+                               #process.bTagSFEventWeightBTagSFHalfShapeDownPt65  *
+			       #process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7    *
+                               #process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7  *
 			       process.bTagSFEventWeightBTagSFShapeUpPt100    *
                                process.bTagSFEventWeightBTagSFShapeDownPt100  *
 			       process.bTagSFEventWeightBTagSFShapeUpEta0p7    *
@@ -1863,10 +1865,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                                process.bTagSFEventWeightBTagSFShapeDownPt65  *
 			       process.bTagSFEventWeightBTagSFShapeUpEta1p2    *
                                process.bTagSFEventWeightBTagSFShapeDownEta1p2  *
-			       process.bTagSFEventWeightBTagSFHalfShapeUpPt65    *
-                               process.bTagSFEventWeightBTagSFHalfShapeDownPt65  *
-			       process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7    *
-                               process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7  *
+			       #process.bTagSFEventWeightBTagSFHalfShapeUpPt65    *
+                               #process.bTagSFEventWeightBTagSFHalfShapeDownPt65  *
+			       #process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7    *
+                               #process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7  *
 			       process.bTagSFEventWeightBTagSFShapeUpPt100    *
                                process.bTagSFEventWeightBTagSFShapeDownPt100  *
 			       process.bTagSFEventWeightBTagSFShapeUpEta0p7    *
@@ -1945,10 +1947,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownPt65 *
 			   process.analyzeTopRecoKinematicsKinFitBTagSFShapeUpEta1p2 *
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownEta1p2 *
-			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeUpPt65 *
-			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeDownPt65 *
-			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeUpEta0p7 *
-			   process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeDownEta0p7 *
+			   #process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeUpPt65 *
+			   #process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeDownPt65 *
+			   #process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeUpEta0p7 *
+			   #process.analyzeTopRecoKinematicsKinFitBTagSFHalfShapeDownEta0p7 *
 			   process.analyzeTopRecoKinematicsKinFitBTagSFShapeUpPt100 *
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownPt100 *
 			   process.analyzeTopRecoKinematicsKinFitBTagSFShapeUpEta0p7 *
