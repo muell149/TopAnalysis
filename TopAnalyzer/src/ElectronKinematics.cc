@@ -3,12 +3,15 @@
 /// default constructor for fw lite
 ElectronKinematics::ElectronKinematics(const int index) : index_(index)
 {
+  tree = 0;
 }
 
 /// default constructor for fwfull
 ElectronKinematics::ElectronKinematics(const edm::ParameterSet& cfg) :
+  useTree_ ( cfg.getParameter<bool>( "useTree" ) ),
   index_( cfg.getParameter<int>( "index" ) )
 {
+  tree = 0;
 }
 
 /// histogramm booking for fwlite 
@@ -51,36 +54,64 @@ ElectronKinematics::book(edm::Service<TFileService>& fs)
   hists_["eta"] = fs->make<TH1F>( "eta" , "eta" ,  35 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the electron
   hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  30 ,  -3.14 ,   3.14 );
+  
+  /// tree
+  // only produce a tree for the following collctions if they are only
+  // for one object and a tree should be written
+  if(index_ > -1 && useTree_){
+    // electron multiplicty
+      bookVariable( fs, "n");
+    // energy of the electron
+      bookVariable( fs, "en");
+    // transverse energy of the electron
+      bookVariable( fs, "et");
+    // transverse momentum of the electron
+      bookVariable( fs, "pt");
+    // pseudorapidity eta of the electron
+      bookVariable( fs, "eta");
+    // azimuthal angle phi of the electron
+      bookVariable( fs, "phi");
+      // additionally relIso
+      bookVariable( fs, "relIso");
+    }
 }
 
 /// histogram filling for fwlite and for full fw
 void
-ElectronKinematics::fill(const edm::View<reco::Candidate>& electrons, const double& weight)
+    ElectronKinematics::fill(const edm::View<pat::Electron>& electrons, const double& weight)
 {
   /** 
       Fill Kinematic Variables
   **/
+  
+  // initialize tree
+  if(useTree_) initializeTrees(-9999, weight);
 
   // index for the leading, 2. leading, 3. leading electron
   // to be compared with index_ from the module config
   // where index_=-1 means 'fill all electrons' and index_=n
   // n>=-1 means 'fill only n-th leading electron'
   int index=0;
-  for(edm::View<reco::Candidate>::const_iterator electron=electrons.begin(); electron!=electrons.end(); ++electron, ++index){
+  for(edm::View<pat::Electron>::const_iterator electron=electrons.begin(); electron!=electrons.end(); ++electron, ++index){
     if( index_<0 || index_==index ){
       // energy of the electron
-      hists_.find("en"  )->second->Fill( electron->energy() , weight );
+      fillValue("en", electron->energy() , weight );
       // transverse energy of the electron
-      hists_.find("et"  )->second->Fill( electron->et() , weight ); 
+      fillValue("et", electron->et() , weight ); 
       // transverse momentum of the electron
-      hists_.find("pt"  )->second->Fill( electron->pt() , weight );
+      fillValue("pt", electron->pt() , weight );
       // pseudorapidity eta of the electron
-      hists_.find("eta" )->second->Fill( electron->eta() , weight );
+      fillValue("eta", electron->eta() , weight );
       // azimuthal angle phi of the electron
-      hists_.find("phi" )->second->Fill( electron->phi() , weight );
+      fillValue("phi", electron->phi() , weight );
+      // relIso of the electron (only for tree)
+      fillValue("relIso", (electron->chargedHadronIso() + electron->neutralHadronIso() + 
+	  electron->photonIso()) / electron->et() , weight );
     }
   }
   // electron multiplicty is always filled the same way
   // independent from the choice of index_
-  hists_.find("n"  )->second->Fill( index , weight );
+  fillValue("n", index , weight );
+  // fill the tree, if any variable should be put in
+  if(treeVars_.size()) tree->Fill();
 }

@@ -7,8 +7,10 @@ MuonKinematics::MuonKinematics(const int index) : index_(index)
 
 /// default constructor for fwfull
 MuonKinematics::MuonKinematics(const edm::ParameterSet& cfg) :
+  useTree_ ( cfg.getParameter<bool>( "useTree" ) ),
   index_( cfg.getParameter<int>( "index" ) )
 {
+  tree = 0;
 }
 
 /// histogramm booking for fwlite 
@@ -51,36 +53,66 @@ MuonKinematics::book(edm::Service<TFileService>& fs)
   hists_["y"  ] = fs->make<TH1F>( "y"   , "y"   ,  70 ,   -3.5 ,    3.5 );
   // azimuthal angle phi of the muon
   hists_["phi"] = fs->make<TH1F>( "phi" , "phi" ,  70 ,  -3.14 ,   3.14 );
+  
+  /// tree
+  // only produce a tree for the following collctions if they are only
+  // for one object and a tree should be written
+  if(index_ > -1 && useTree_){
+  // muon multiplicty
+    bookVariable( fs, "n");
+  // energy of the muon
+    bookVariable( fs, "en");
+  // transverse momentum of the muon
+    bookVariable( fs, "pt");
+  // pseudorapidity eta of the muon
+    bookVariable( fs, "eta");
+  // rapidity y of the muon
+    bookVariable( fs, "y");
+  // azimuthal angle phi of the muon
+    bookVariable( fs, "phi");
+    // additionally relIso
+    bookVariable( fs, "relIso");
+  }
+
 }
 
 /// histogram filling for fwlite and for full fw
 void
-MuonKinematics::fill(const edm::View<reco::Candidate>& muons, const double& weight)
+    MuonKinematics::fill(const edm::View<pat::Muon>& muons, const double& weight)
 {
   /** 
       Fill Kinematic Variables
   **/
+
+  // initialize tree
+  if(index_ > -1 && useTree_) initializeTrees(-9999, weight);
 
   // index for the leading, 2. leading, 3. leading muon
   // to be compared with index_ from the module config
   // where index_=-1 means 'fill all muons' and index_=n
   // n>=-1 means 'fill only (n-1)-th leading muon'
   int index=0;
-  for(edm::View<reco::Candidate>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
+  for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     if( index_<0 || index_==index ){
       // energy of the muon
-      fill( "en" , muon->energy() , weight );
+      fillValue( "en" , muon->energy() , weight );
       // transverse momentum of the muon
-      fill( "pt" , muon->et()     , weight );
+      fillValue( "pt" , muon->et()     , weight );
       // pseudorapidity eta of the muon
-      fill( "eta", muon->eta()    , weight );
+      fillValue( "eta", muon->eta()    , weight );
       // rapidity y of the muon
-      fill( "y"  , muon->rapidity(), weight );
+      fillValue( "y"  , muon->rapidity(), weight );
       // azimuthal angle phi of the muon
-      fill( "phi", muon->phi()    , weight );
+      fillValue( "phi", muon->phi()    , weight );
+      // relIso of the muon (only for tree)
+      fillValue("relIso", (muon->chargedHadronIso() + muon->neutralHadronIso() + 
+	  muon->photonIso()) / muon->et() , weight );
     }
   }
   // muon multiplicty is always filled the same way
   // independent from the choice of index_
-  fill("n",  index , weight );
+  fillValue("n",  index , weight );
+  
+  // fill the tree, if any variable should be put in
+  if(treeVars_.size()) tree->Fill();
 }

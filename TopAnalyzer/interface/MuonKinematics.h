@@ -15,7 +15,7 @@
    SingleObject<Collection> interface, which makes it usable in fwfull or fwlite. 
 */
 
-class MuonKinematics : public SingleObject<const edm::View<reco::Candidate> > {
+class MuonKinematics : public SingleObject<const edm::View<pat::Muon> > {
 
  public:
   /// default constructor for fw lite
@@ -34,7 +34,7 @@ class MuonKinematics : public SingleObject<const edm::View<reco::Candidate> > {
   /// histogramm booking for fwfull
   void book(edm::Service<TFileService>& fileService);
   /// histogram filling for fwlite and for fwfull
-  void fill(const edm::View<reco::Candidate>& muons, const double& weight=1.);
+  void fill(const edm::View<pat::Muon>& muons, const double& weight=1.);
   /// everything which needs to be done after the event loop
   void process(){}
 
@@ -50,6 +50,8 @@ class MuonKinematics : public SingleObject<const edm::View<reco::Candidate> > {
   void fill(const std::string histName, double valueA, double valueB, double weight) const { if(booked(hists2D_, histName)) hists2D_.find(histName)->second->Fill(valueA, valueB, weight); }
 
  private:
+   /// produce a TTree as output instead of histograms
+   bool useTree_;
   /// index of jet to be plotted
   int index_;
 };

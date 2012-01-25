@@ -11,7 +11,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonQuality> MuonQualityAnaly
 DEFINE_FWK_MODULE(MuonQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, MuonKinematics> MuonKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Muon>, MuonKinematics> MuonKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonKinematicsAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/MuonResolution.h"
@@ -46,7 +46,7 @@ typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronQuality> Electron
 DEFINE_FWK_MODULE(ElectronQualityAnalyzer);
 
 #include "TopAnalysis/TopAnalyzer/interface/ElectronKinematics.h"
-typedef SingleObjectAnalyzer<edm::View<reco::Candidate>, ElectronKinematics> ElectronKinematicsAnalyzer;
+typedef SingleObjectAnalyzer<edm::View<pat::Electron>, ElectronKinematics> ElectronKinematicsAnalyzer;
 DEFINE_FWK_MODULE(ElectronKinematicsAnalyzer);
 
 /**
@@ -85,6 +85,14 @@ DEFINE_FWK_MODULE(MuonJetKinematicsAnalyzer);
 #include "TopAnalysis/TopAnalyzer/interface/MuonVertexKinematics.h"
 typedef DoubleObjectAnalyzer<edm::View<pat::Muon>, edm::View<reco::Vertex>, MuonVertexKinematics> MuonVertexKinematicsAnalyzer;
 DEFINE_FWK_MODULE(MuonVertexKinematicsAnalyzer);
+
+/**
+    Define modules needed for the analysis of jet kinematics including PV distributions
+ **/
+
+#include "TopAnalysis/TopAnalyzer/interface/JetKinematicsVertex.h"
+typedef DoubleObjectAnalyzer<edm::View<pat::Jet>, edm::View<reco::Vertex>, JetKinematicsVertex> JetKinematicsVertexAnalyzer;
+DEFINE_FWK_MODULE(JetKinematicsVertexAnalyzer);
 
 /**
     Define modules needed for the analysis of different event hypothesis
