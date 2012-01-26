@@ -24,6 +24,7 @@
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
 #include "TPaveText.h"
+#include "TSpline.h"
 #include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
 #include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
 // if the include path is not found, put   
@@ -60,7 +61,7 @@ const TString inpath(
 const TString outpath("plots/");
 
 // output format
-const TString outform(".eps");
+const TString outform(".png");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -72,6 +73,9 @@ const TString unfoldOutfileName(outpath+"Unfold_Histograms.root");
 const TString kinEffOutfileName(outpath+"KinEfficienies_Histograms.root");
 // output file with data-bg histograms
 const TString preUnfoldedPlotsName(outpath+"preUnfoldedPlots.root");
+
+const TString fineBinnedGenHistogramName(outpath+"fineBinnedGenHistograms.root");
+
 // input file name with systematic errors
 //TString sysinpath("/afs/naf.desy.de/group/cms/scratch/markusm/Systematics/");
 TString sysinpath("/data/group/top/CompleteRun/Nov1/fall10systematics/");
@@ -222,6 +226,7 @@ TObjArray efficiencyHistogramList;
 TObjArray unfoldHistogramList;
 TObjArray kinEffHistogramList;
 TObjArray preUnfoldedList;
+TObjArray fineBinnedGenHistogramList;
 
 // corrections scale factors for DY BG are hard coded output from the other macros at the moment
 Double_t ROutInEE      = -1.;
@@ -629,7 +634,7 @@ void PutHistToRootFile(const TString path, const TString name, const Int_t chann
 
 
 // calculate bin center corrections
-TGraphAsymmErrors* BinCenterCorrectedGraph(TH1* dataHist, TH1* sigHist, const Double_t manualBinCenters[])
+TGraphAsymmErrors* BinCenterCorrectedGraphOld(TH1* dataHist, TH1* sigHist, const Double_t manualBinCenters[])
 {
     const Int_t nDataBins = dataHist->GetNbinsX();
 
@@ -714,6 +719,58 @@ TGraphAsymmErrors* BinCenterCorrectedGraph(TH1* dataHist, TH1* sigHist, const Do
     return graph;
 }
 
+TGraphAsymmErrors* BinCenterCorrectedGraph(TH1* dataHist, TH1* sigHist, TH1* signalCoarse, const Double_t manualBinCenters[])
+{
+    const Int_t nDataBins = dataHist->GetNbinsX();
+
+    Double_t xval[nDataBins];  // x-values of markers
+    Double_t yval[nDataBins];  // y-value of markers
+    Double_t xerrl[nDataBins]; // left x-errors of markers
+    Double_t xerrr[nDataBins]; // right x-errors of markers
+    Double_t yerrl[nDataBins]; // low y-errors of markers
+    Double_t yerrh[nDataBins]; // up y-errors of markers
+    
+    TSpline3 spline(sigHist);
+    for (Int_t i=1;i<=nDataBins;++i) {
+        // Get values of bin edges in data hist...
+        Double_t lowEdge= dataHist->GetXaxis()->GetBinLowEdge(i);
+        Double_t upEdge = dataHist->GetXaxis()->GetBinUpEdge(i);
+        
+        // ... and find corresponding bin numbers in signal MC hist.
+        double binAve = signalCoarse->GetBinContent(signalCoarse->FindBin((lowEdge+upEdge)/2));
+
+        double binCenter = lowEdge;
+        double bestval = 1e40;
+        for (double x = lowEdge; x < upEdge; x += (upEdge-lowEdge)/200) {
+            double delta = std::abs(spline.Eval(x) - binAve);
+            if (delta < bestval) {
+                bestval = delta;
+                binCenter = x;
+            }
+        }
+        
+        // set values and errors of point i
+        // in case of manualBinCenters, use them
+        if (false && manualBinCenters && manualBinCenters[i-1] != bccAuto) {
+            if (manualBinCenters[i-1] > bccAuto/10)
+                xval[i-1] = binCenter + manualBinCenters[i-1] - bccAuto;
+            else
+                xval[i-1] = manualBinCenters[i-1];
+        } else {
+            xval[i-1]  = binCenter;
+        }
+        yval[i-1]  = dataHist->GetBinContent(i);
+        xerrl[i-1] = binCenter - lowEdge;
+        xerrr[i-1] = upEdge - binCenter;
+        xerrl[i-1] = 0; xerrr[i-1] = 0;
+        yerrl[i-1] = dataHist->GetBinError(i);
+        yerrh[i-1] = dataHist->GetBinError(i);
+    }
+    
+    TGraphAsymmErrors* graph = new TGraphAsymmErrors(nDataBins, xval, yval, xerrl, xerrr, yerrl, yerrh);
+
+    return graph;
+}
 
 
 // plot sum of up to three plots (e.g. add pt hists for electrons and muons)
@@ -3422,188 +3479,188 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     crossHist->GetXaxis()->SetTitle(xtitle);
     crossHist->GetYaxis()->SetTitle(ytitle);
 
-    TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, gh, binCenters);
+    TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, gh, bingenhist, binCenters);
     
-    if(channel!=kCOMBINED){
+    if(channel!=kCOMBINED) {
 
-      Double_t grLmts[4];
-      bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);
+        Double_t grLmts[4];
+        bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);
 
-      genCrossHist->GetXaxis()->SetTitle(xtitle);
-      genCrossHist->GetYaxis()->SetTitle(ytitle);
-      genCrossHist->SetLineWidth(2);
-      genCrossHist->SetLineColor(kRed+1);
-      FormatHisto(genCrossHist);
-      genCrossHist->Draw();
-      
-//       cout << endl;
-//       for(Int_t i=1; i<=genCrossHist->GetNbinsX(); ++i){
-// 	cout << "cross section in bin is " << genCrossHist->GetBinContent(i) << endl;
-//       }
-//       cout << endl;
+        genCrossHist->GetXaxis()->SetTitle(xtitle);
+        genCrossHist->GetYaxis()->SetTitle(ytitle);
+        genCrossHist->SetLineWidth(2);
+        genCrossHist->SetLineColor(kRed+1);
+        FormatHisto(genCrossHist);
+        genCrossHist->Draw();
+        
+    //       cout << endl;
+    //       for(Int_t i=1; i<=genCrossHist->GetNbinsX(); ++i){
+    // 	cout << "cross section in bin is " << genCrossHist->GetBinContent(i) << endl;
+    //       }
+    //       cout << endl;
 
-      // for pt and mass distribution use log scale
-      if (!strcmp(quantity, "Mass")) {
-        genCrossHist->SetMaximum(2e-2);
-        genCrossHist->SetMinimum(1e-4);
-        gPad->SetLogy(1);
-      } else
-      if(strcmp(quantity,"Pt")==0) {
-        genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));
-        genCrossHist->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
-        gPad->SetLogy(1);
-      } else{
-        genCrossHist->SetMaximum(std::max(1.2*gh->GetMaximum(), 1.2*grLmts[3]));
-        genCrossHist->SetMinimum(0);
-      }
-
-      Int_t nrebin = 4.;
-      if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
-	nrebin=4;
-	mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
-        mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
-        mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);
-      }  
-      else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0)
-	nrebin=8;
-
-      gh->SetLineColor(kRed+1);
-      gh->SetLineWidth(2);
-      gh->Rebin(nrebin); gh->Scale(1./nrebin);
-      gh->Draw("same,C");
-
-      mcatnloh->SetLineColor(kAzure);
-      mcatnloh->SetLineWidth(2);
-      if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
-
-      mcatnlohUp->SetLineColor(kGray);
-      mcatnlohUp->SetLineWidth(2);
-      if (mcatnlohUp->GetEntries()) mcatnlohUp->Draw("same,HIST,C");    
-
-      mcatnlohDn->SetLineColor(kGray);
-      mcatnlohDn->SetLineWidth(2);
-      if (mcatnlohDn->GetEntries()) mcatnlohDn->Draw("same,HIST,C"); 
-
-
-      //Uncertainty band for MC@NLO
-      const Int_t nMCNLOBins = mcatnlohUp->GetNbinsX();
-      Double_t x[nMCNLOBins];
-      Double_t xband[2*nMCNLOBins];
-      Double_t errup[nMCNLOBins];
-      Double_t errdn[nMCNLOBins];
-      Double_t errorband[2*nMCNLOBins];
-
-      for( Int_t j = 0; j< nMCNLOBins; j++ ){
-        x[j]=mcatnloh->GetBinCenter(j+1);
-        errup[j]=mcatnlohUp->GetBinContent(j+1);
-        errdn[j]=mcatnlohDn->GetBinContent(j+1);
-
-        xband[j] = x[j];
-        errorband[j] = errdn[j]; //lower band
-        xband[2*nMCNLOBins-j-1] = x[j];
-        errorband[2*nMCNLOBins-j-1] = errup[j]; //upper band
-
-      }
-
-       TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
-       mcatnloBand->SetFillColor(kGray);
-       mcatnloBand->SetLineColor(kAzure);
-       mcatnloBand->SetLineWidth(2);
-       mcatnloBand->Draw("same, F");
-
-       genCrossHist->Draw("same");
-       gh->Draw("same,C");
-       mcatnloh->Draw("same,HIST,C");      
-
-      powhegh->SetLineColor(kGreen+1);
-      powhegh->SetLineWidth(2);
-      if (powhegh->GetEntries()) powhegh->Draw("same,C");
-
-      if (genHistSmear) {
-        genHistSmear->SetLineColor(kBlack);
-        genHistSmear->Draw("esame");
-      }
-      
-      //TLegend leg2(0.70,0.70,0.95,0.87);
-      TLegend leg2 = *getNewLegend();
-      leg2.AddEntry(bccCrossGraph, "Data",    "p");
-      leg2.AddEntry(gh,            "Madgraph","l");
-      if (mcatnlohUp->GetEntries() && mcatnlohDn->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
-      else if (mcatnloh->GetEntries()) leg2.AddEntry(mcatnloh,      "MC@NLO",  "l");
-      if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");        
-      leg2.SetFillStyle(0);
-      leg2.SetBorderSize(0);
-      leg2.Draw("same");
-
-      TGraphAsymmErrors* withSys = CloneAddSystematics(bccCrossGraph, title);
-      withSys->SetLineWidth(1); 
-      //withSys->SetLineColor(kBlue);
-      withSys->SetLineColor(kBlack);
-      withSys->Draw("same,Z");
-
-      bccCrossGraph->SetMarkerStyle(20);
-      bccCrossGraph->SetMarkerSize(1.5);
-      bccCrossGraph->SetLineWidth(1); 
-      bccCrossGraph->SetLineColor(1);
-      bccCrossGraph->Draw("same,P");
-      //crossHist->Draw("same hist"); //data histogram
-
-      semileptonic::DrawCMSLabels(isPreliminary, lumi);
-      semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
-      Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
-      
-      std::cout << " int=" << crossHist->Integral("width")<< "\n";
-
-
-//       // print summary table for all channels (for Johannes)
-//       std::cout << "BCC Corrections done: " << particle << " " << quantity 
-//                 << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
-//       for (int bin = 0; bin < nbins; ++bin) {
-// 	double y = bccCrossGraph->GetY()[bin];
-// 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
-//            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
-//            << std::setprecision(strcasecmp(quantity, "eta") ? 0:2)
-//            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
-//            << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
-//            << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
-//            << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
-//            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
-//            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
-//            << "\t\\\\" << std::endl;
-//        }
-       
-       if (nbins == 2) {
-          std::cout << "Bin 1: " << std::setprecision(5) << genCrossHist->GetBinContent(1) << "\n";
-          std::cout << "Bin 2: " << std::setprecision(5) << genCrossHist->GetBinContent(2) << "\n";
-       }
-
-      diffXsecHistogramList.Add(crossHist->Clone());
-
-      // fill values for cross section and errors that are then used by PlotDifferentialCrossSection in order to calculate the combined cross section value
-      for(Int_t i=0; i<nbins; ++i){
-	crosss[i]       = (withSys->GetY())[i];
-	totalErrUp[i]   = (withSys->GetEYhigh())[i];
-	totalErrDown[i] = (withSys->GetEYlow())[i];
-	statErr[i] = (bccCrossGraph->GetEYlow())[i];
-      }
-      
-        if (channel == kEM && dataIsFakeFromMonteCarlo && genHistSmear) {
-            //write out a table of numbers
-            std::cout << "CSV XXXXXXXXXXXXXX cross section values XXXXXXXXXXXXXX\n";
-            std::cout << "CSV " << particle << quantity << std::endl;
-            std::cout << "CSV\tmad\tsmear\tpseudodata\n";
-            for (int i = 1; i <= genCrossHist->GetNbinsX(); ++i) {
-                std::cout << "CSV\t" << std::setprecision(6)
-                          << genCrossHist->GetBinContent(i) << "\t"
-                          << genHistSmear->GetBinContent(i) << "\t"
-                          << crossHist->GetBinContent(i) << "\n";
-              //  << "\n";
-            }
+        // for pt and mass distribution use log scale
+        if (!strcmp(quantity, "Mass")) {
+            genCrossHist->SetMaximum(2e-2);
+            genCrossHist->SetMinimum(1e-4);
+            gPad->SetLogy(1);
+        } else
+        if(strcmp(quantity,"Pt")==0) {
+            genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));
+            genCrossHist->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
+            gPad->SetLogy(1);
+        } else{
+            genCrossHist->SetMaximum(std::max(1.2*gh->GetMaximum(), 1.2*grLmts[3]));
+            genCrossHist->SetMinimum(0);
         }
 
+        Int_t nrebin = 4.;
+        if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
+            nrebin=4;
+            mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
+            mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
+            mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);
+        }  
+        else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0)
+            nrebin=8;
 
-      delete withSys;
-      gPad->SetLogy(0);
+        gh->SetLineColor(kRed+1);
+        gh->SetLineWidth(2);
+        gh->Rebin(nrebin); gh->Scale(1./nrebin);
+        gh->Draw("same,C");
+
+        mcatnloh->SetLineColor(kAzure);
+        mcatnloh->SetLineWidth(2);
+        if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
+
+        mcatnlohUp->SetLineColor(kGray);
+        mcatnlohUp->SetLineWidth(2);
+        if (mcatnlohUp->GetEntries()) mcatnlohUp->Draw("same,HIST,C");    
+
+        mcatnlohDn->SetLineColor(kGray);
+        mcatnlohDn->SetLineWidth(2);
+        if (mcatnlohDn->GetEntries()) mcatnlohDn->Draw("same,HIST,C"); 
+
+
+        //Uncertainty band for MC@NLO
+        const Int_t nMCNLOBins = mcatnlohUp->GetNbinsX();
+        Double_t x[nMCNLOBins];
+        Double_t xband[2*nMCNLOBins];
+        Double_t errup[nMCNLOBins];
+        Double_t errdn[nMCNLOBins];
+        Double_t errorband[2*nMCNLOBins];
+
+        for( Int_t j = 0; j< nMCNLOBins; j++ ){
+            x[j]=mcatnloh->GetBinCenter(j+1);
+            errup[j]=mcatnlohUp->GetBinContent(j+1);
+            errdn[j]=mcatnlohDn->GetBinContent(j+1);
+
+            xband[j] = x[j];
+            errorband[j] = errdn[j]; //lower band
+            xband[2*nMCNLOBins-j-1] = x[j];
+            errorband[2*nMCNLOBins-j-1] = errup[j]; //upper band
+
+        }
+
+        TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
+        mcatnloBand->SetFillColor(kGray);
+        mcatnloBand->SetLineColor(kAzure);
+        mcatnloBand->SetLineWidth(2);
+        mcatnloBand->Draw("same, F");
+
+        genCrossHist->Draw("same");
+        gh->Draw("same,C");
+        mcatnloh->Draw("same,HIST,C");      
+
+        powhegh->SetLineColor(kGreen+1);
+        powhegh->SetLineWidth(2);
+        if (powhegh->GetEntries()) powhegh->Draw("same,C");
+
+        if (genHistSmear) {
+            genHistSmear->SetLineColor(kBlack);
+            genHistSmear->Draw("esame");
+        }
+        
+        //TLegend leg2(0.70,0.70,0.95,0.87);
+        TLegend leg2 = *getNewLegend();
+        leg2.AddEntry(bccCrossGraph, "Data",    "p");
+        leg2.AddEntry(gh,            "Madgraph","l");
+        if (mcatnlohUp->GetEntries() && mcatnlohDn->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
+        else if (mcatnloh->GetEntries()) leg2.AddEntry(mcatnloh,      "MC@NLO",  "l");
+        if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");        
+        leg2.SetFillStyle(0);
+        leg2.SetBorderSize(0);
+        leg2.Draw("same");
+
+        TGraphAsymmErrors* withSys = CloneAddSystematics(bccCrossGraph, title);
+        withSys->SetLineWidth(1); 
+        //withSys->SetLineColor(kBlue);
+        withSys->SetLineColor(kBlack);
+        withSys->Draw("same,Z");
+
+        bccCrossGraph->SetMarkerStyle(20);
+        bccCrossGraph->SetMarkerSize(1.5);
+        bccCrossGraph->SetLineWidth(1); 
+        bccCrossGraph->SetLineColor(1);
+        bccCrossGraph->Draw("same,P");
+        //crossHist->Draw("same hist"); //data histogram
+
+        semileptonic::DrawCMSLabels(isPreliminary, lumi);
+        semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
+        Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
+        
+        std::cout << " int=" << crossHist->Integral("width")<< "\n";
+
+
+    //       // print summary table for all channels (for Johannes)
+    //       std::cout << "BCC Corrections done: " << particle << " " << quantity 
+    //                 << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
+    //       for (int bin = 0; bin < nbins; ++bin) {
+    // 	double y = bccCrossGraph->GetY()[bin];
+    // 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+    //            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
+    //            << std::setprecision(strcasecmp(quantity, "eta") ? 0:2)
+    //            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
+    //            << std::setprecision(5) << y << "\t&\t" << std::setprecision(1)
+    //            << 100*bccCrossGraph->GetErrorYhigh(bin)/y << "\t&\t"
+    //            << TMath::Sqrt(TMath::Power(100*withSys->GetErrorYhigh(bin)/y,2) - TMath::Power(100*bccCrossGraph->GetErrorYhigh(bin)/y,2)) << "\t&\t"
+    //            << 100*withSys->GetErrorYhigh(bin)/y << "\t"
+    //            //<< "+" << 100*bccCrossGraph->GetErrorYhigh(bin)/y << " / -" << 100*bccCrossGraph->GetErrorYlow(bin)/y
+    //            << "\t\\\\" << std::endl;
+    //        }
+        
+        if (nbins == 2) {
+            std::cout << "Bin 1: " << std::setprecision(5) << genCrossHist->GetBinContent(1) << "\n";
+            std::cout << "Bin 2: " << std::setprecision(5) << genCrossHist->GetBinContent(2) << "\n";
+        }
+
+        diffXsecHistogramList.Add(crossHist->Clone());
+
+        // fill values for cross section and errors that are then used by PlotDifferentialCrossSection in order to calculate the combined cross section value
+        for(Int_t i=0; i<nbins; ++i){
+            crosss[i]       = (withSys->GetY())[i];
+            totalErrUp[i]   = (withSys->GetEYhigh())[i];
+            totalErrDown[i] = (withSys->GetEYlow())[i];
+            statErr[i] = (bccCrossGraph->GetEYlow())[i];
+        }
+        
+            if (channel == kEM && dataIsFakeFromMonteCarlo && genHistSmear) {
+                //write out a table of numbers
+                std::cout << "CSV XXXXXXXXXXXXXX cross section values XXXXXXXXXXXXXX\n";
+                std::cout << "CSV " << particle << quantity << std::endl;
+                std::cout << "CSV\tmad\tsmear\tpseudodata\n";
+                for (int i = 1; i <= genCrossHist->GetNbinsX(); ++i) {
+                    std::cout << "CSV\t" << std::setprecision(6)
+                            << genCrossHist->GetBinContent(i) << "\t"
+                            << genHistSmear->GetBinContent(i) << "\t"
+                            << crossHist->GetBinContent(i) << "\n";
+                //  << "\n";
+                }
+            }
+
+
+        delete withSys;
+        gPad->SetLogy(0);
     }
 
     delete crossHist;
@@ -3797,6 +3854,56 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     return;
 }
 
+void SmoothTopPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 200, 500);
+    f->SetParameters(-0.017, 0.036);
+    h2->Fit(f, "", "", 200, 360);
+    for (int i = h->FindBin(200); i <= h->GetNbinsX(); ++i) {
+        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
+    }
+    delete h2;
+}
+
+
+
+void SmoothLepPairMass(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 170, 500);
+    f->SetParameters(-0.017, 0.036);
+    h2->Fit(f, "", "", 170, 350);
+    for (int i = h->FindBin(175); i <= h->GetNbinsX(); ++i) {
+        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
+    }
+    delete h2;
+}
+
+void SmoothRapidity(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "[0]*TMath::Gaus(x, [1], [2]) + pol2(3) ", -2., 2.);
+    f->SetParameters(0.9, 0, 1, -0.4, 0, 0.06);
+    h2->Fit(f, "", "", -2., 2.);
+    for (int i = 1; i <= h->GetNbinsX(); ++i) {
+        double center = h->GetBinCenter(i);
+        h->SetBinContent(i, std::abs(center) > 2 ? 0 : f->Eval(center));
+    }
+    delete h2;
+}
+
+void SmoothEta(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "[0]*TMath::Gaus(x, [1], [2])", -2.4, 2.4);
+    f->SetParameters(0.3, 0, 1);
+    f->FixParameter(1,0);
+    h2->Fit(f, "", "", -2.4, 2.4);
+    for (int i = 1; i <= h->GetNbinsX(); ++i) {
+        double center = h->GetBinCenter(i);
+        h->SetBinContent(i, f->Eval(center));
+    }
+    delete h2;
+}
+
+void doNothing(TH1*) {}
 
 
 // plot differential cross section in all channels and combine them
@@ -4000,7 +4107,29 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       powhegh->Scale(scale_powheg);
     }
 
-    TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, genHist, binCenters);
+    void (*SmoothFunction)(TH1*) = &doNothing;
+    Int_t nrebin = 2.;
+    if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
+      nrebin=4;
+      mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
+      mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
+      mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);      
+    } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0){
+        SmoothFunction = &SmoothLepPairMass;
+        nrebin=8;
+    } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Pt")==0){
+        SmoothFunction = &SmoothLepPairMass;
+    }
+    if (strcmp(quantity, "Rapidity") == 0) SmoothFunction = &SmoothRapidity;
+    if (strcmp(quantity, "Eta") == 0) SmoothFunction = &SmoothEta;
+    if (strcmp(particle, "TopQuarks") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTopPt;
+     
+    SmoothFunction(genHist);
+    SmoothFunction(mcatnloh); SmoothFunction(mcatnlohUp); SmoothFunction(mcatnlohDn);
+    SmoothFunction(powhegh);
+
+    //now calculate bin centers
+    TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, genHist, genHistBinned, binCenters);
     Double_t grLmts[4];
     bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);
 
@@ -4009,33 +4138,28 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     genHistBinned->SetLineWidth(2);
     genHistBinned->SetLineColor(kRed+1);
     FormatHisto(genHistBinned);
-    genHistBinned->Draw();
 
     // for pt and mass distribution use log scale
     if(strcmp(quantity,"Pt")==0 || strcmp(quantity,"Mass")==0){
-      genHistBinned->SetMaximum(std::max(3.*genHist->GetMaximum(), 3.*grLmts[3]));
-      genHistBinned->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
-      gPad->SetLogy(1);
-    } else{
-      genHistBinned->SetMaximum(std::max(1.2*genHist->GetMaximum(), 1.2*grLmts[3]));
-      genHistBinned->SetMinimum(0);
+        genHistBinned->SetMaximum(std::max(3.*genHist->GetMaximum(), 3.*grLmts[3]));
+        genHistBinned->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
+        gPad->SetLogy(1);
+    } else {
+        genHistBinned->SetMaximum(std::max(1.2*genHist->GetMaximum(), 1.2*grLmts[3]));
+        genHistBinned->SetMinimum(0);
     }
 
-    Int_t nrebin = 2.;
-    if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
-      nrebin=4;
-      mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
-      mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
-      mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);      
-    } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0){
-      nrebin=8;
-    }
-     
+    //start drawing
+    genHistBinned->Draw();
     genHist->SetLineColor(kRed+1);
     genHist->SetLineWidth(2);
-    //genHist->Draw("same");
+    //genHist->DrawClone("same");
+    
+    fineBinnedGenHistogramList.Add(genHist->Clone());
     genHist->Rebin(nrebin); genHist->Scale(1./nrebin);
+    //TSpline3 spline(genHist);
     genHist->Draw("same,C");
+    //spline.Draw();
     
     mcatnloh->SetLineColor(kAzure);
     mcatnloh->SetLineWidth(2);
@@ -5301,6 +5425,10 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     TFile preUnfoldedPlots(preUnfoldedPlotsName, "recreate");
     preUnfoldedList.Write();
     preUnfoldedPlots.Close();
+
+//     TFile fineBinnedGenFile(fineBinnedGenHistogramName, "recreate");
+//     fineBinnedGenHistogramList.Write();
+//     fineBinnedGenFile.Close();
 
     PrintCutflowTable();
 
