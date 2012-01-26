@@ -288,10 +288,6 @@ Bool_t Analysis::Process(Long64_t entry)
     LVlepton.push_back(leptemp);
   }
   
-  for(int i=0; i<jet_;i++){
-    TLorentzVector jettemp(jetpX[i], jetpY[i], jetpZ[i], jetE[i]);
-    LVlepton.push_back(jettemp);
-  }
   double BtagWP = 1.7; 
   int NJets =0;
   vector<int> BJetIndex;
