@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <cmath>
 #include <math.h>
+#include <algorithm>
 
 #include <TROOT.h>
 #include <TSystem.h>
@@ -38,6 +39,7 @@
 #include <TBox.h>
 #include <TGaxis.h>
 #include <TError.h>
+#include <TMath.h>
 
 #include "HHStyle.h"
 
@@ -2078,11 +2080,306 @@ namespace semileptonic {
     //canvasStyle(*plotCanvas_[number-1]);
   }
 
-  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false)
+  TH1F* useFittedFunctions(TH1F* input, TString model="", TString plotname="", int verbose=0){
+    // this function modifys "input" in a way that wiggly parts 
+    // with large uncertainties are replaced by fitted functions
+    // modified quantities: input
+    // used functions: NONE
+    // used enumerators: NONE
+    // input: fine binned theory curve
+    // model: indicates theory (madgraph, powheg or mcatnalo)
+    // verbose: level of output
+    if(verbose>1) std::cout << plotname << "(" << model << ")" << std::endl;
+    // clone histo for output
+    TH1F* result=(TH1F*)input->Clone();
+    // define fit function A
+    double fitLowEdge=0;
+    double fitHighEdge=0;
+    TString def="";
+    double a=0.;
+    double b=0.;
+    double c=0.;
+    double d=0.;
+    double e=0.;
+    TString addOpt="";
+    // define fit function B
+    double fitLowEdgeB=0;
+    double fitHighEdgeB=0;
+    TString defB="";
+    double aB=0.;
+    double bB=0.;
+    double cB=0.;
+    double dB=0.;
+    double eB=0.;
+    TString addOptB="";
+    // define fit function C
+    double fitLowEdgeC=0;
+    double fitHighEdgeC=0;
+    TString defC="";
+    double aC=0.;
+    double bC=0.;
+    double cC=0.;
+    double dC=0.;
+    double eC=0.;
+    TString addOptC="";
+    // configure parameter for all specific plots
+    if(model=="mcatnlo"){
+      if(plotname.Contains("TTbarM")){
+	//tail:
+	fitLowEdge=430.;
+	fitHighEdge=1200.;
+	def="[0]*exp([1]*x)+[2]";
+	a=0.11;
+	b=-0.0074;
+	c=0.00001;
+	addOpt="LL";
+	// start:
+	fitLowEdgeB=345.;
+	fitHighEdgeB=400.;
+	defB="TMath::GammaDist(x,[0],[1],[2])";
+	aB=1.53;
+	bB=345.;
+	cB=96.2;
+	addOptB="LL";
+	// very early start:
+	fitLowEdgeC=317.;
+	fitHighEdgeC=336.;
+	defC="[0]*exp([1]*x)+[2]";
+	aC=0.00000373757;
+	bC=0.0125775;
+	cC=-0.000194989;
+	addOptC="LL";
+      }
+      else if(plotname.Contains("TTbarPt")){
+	//tail:
+	fitLowEdge=50.;
+	fitHighEdge=300.;
+	def="[0]*exp([1]*x)+[2]*x+[3]*x*x+[4]";
+	a= 0.0214186;
+	b=-0.0274519;
+	c=-0.0000135818;
+	d= 0.0000000213453;
+	e= 0.00227380;
+	addOpt="LL";
+      }
+    }
+    else if(model=="powheg"){
+      if(plotname.Contains("ttbarMass")){
+      fitLowEdge=480.;
+      fitHighEdge=1200.;
+      def="[0]*exp([1]*x)+[2]";
+      a=40556.;
+      b=-0.007;
+      c=3.1;
+      addOpt="LL";
+      // start:
+      fitLowEdgeC=345.;
+      fitHighEdgeC=500.;
+      defC="[3]*TMath::GammaDist(x,[0],[1],[2])";
+      aC=1.58;
+      bC=344.;
+      cC=86.6;
+      dC=234473.;
+      addOptC="LL";
+      // very early start:
+      fitLowEdgeB=295.;
+      fitHighEdgeB=337.;
+      defB="[0]*exp([1]*x)+[2]";
+      aB=0.000000000530501;
+      bB=0.075;
+      cB=3.81;
+      addOptB="LL";
+      }
+    }
+    // use fit function A
+    if(def!=""&&fitLowEdge!=fitHighEdge){
+      if(verbose>0) std::cout << "will perform fit" << std::endl;
+      // empty bins within fit range for output histo
+      bool lastBin=false;
+      for(int bin=1; bin<=result->GetNbinsX()+1; ++bin){
+	bool thisBin=false;
+	double binX=result->GetBinCenter(bin);
+	if(binX>=fitLowEdge&&binX<=fitHighEdge){ 
+	  result->SetBinContent(bin, 0.);
+	  thisBin=true;
+	}
+	// adapt fit range to binning
+	// low
+	if(lastBin==false&&thisBin==true) fitLowEdge=result->GetBinLowEdge(bin);
+	// high
+	if(lastBin==true&&thisBin==false) fitHighEdge=result->GetBinLowEdge(bin);	
+	lastBin=thisBin;
+      }
+      if(verbose>0){
+	std::cout << "fitting " << def << " in: " << fitLowEdge << ".." << fitHighEdge << std::endl;
+	if(a!=0) std::cout << "start value [0]:" << a << std::endl;
+	if(b!=0) std::cout << "start value [1]:" << b << std::endl;
+	if(c!=0) std::cout << "start value [2]:" << c << std::endl;
+	if(d!=0) std::cout << "start value [3]:" << d << std::endl;
+	if(e!=0) std::cout << "start value [4]:" << e << std::endl;
+      }
+      // perform fit
+      TF1* function=new TF1("function",def,fitLowEdge, fitHighEdge);
+      if(a!=0.){
+	function->SetParameter(0,a);
+	//if(def.Contains("GammaDist")) function->SetParLimits(0,0.6*a,1.4*a);
+      }
+      if(b!=0.){
+	function->SetParameter(1,b);
+	if(def.Contains("GammaDist")) function->SetParLimits(1,0.85*b,1.15*b);
+      }
+      if(c!=0.){
+	function->SetParameter(2,c);
+	//if(def.Contains("GammaDist")) function->SetParLimits(2,0.6*c,1.4*c);
+      }
+      if(d!=0.){
+	function->SetParameter(3,d);
+	//if(def.Contains("GammaDist")) function->SetParLimits(3,0.6*d,1.4*d);
+      }
+      if(e!=0.){
+	function->SetParameter(4,e);
+	//if(def.Contains("GammaDist")) function->SetParLimits(4,0.6*e,1.4*e);
+      }
+      TString option="Q";
+      if(verbose>0)option="";
+      if(verbose>1)option="V";
+      option+="N";
+      option+=addOpt;
+      option+="R";
+      //option+="M";
+      input->Fit(function,option,"same",fitLowEdge, fitHighEdge);
+      // add part from fit
+      result->Add(function);
+    }
+    // use fit function B
+    if(defB!=""&&fitLowEdgeB!=fitHighEdgeB){
+      if(verbose>0) std::cout << "will perform fit" << std::endl;
+      // empty bins within fit range for output histo
+      bool lastBin=false;
+      for(int bin=1; bin<=result->GetNbinsX()+1; ++bin){
+	bool thisBin=false;
+	double binX=result->GetBinCenter(bin);
+	if(binX>=fitLowEdgeB&&binX<=fitHighEdgeB){ 
+	  result->SetBinContent(bin, 0.);
+	  thisBin=true;
+	}
+	// adapt fit range to binning
+	// low
+	if(lastBin==false&&thisBin==true) fitLowEdgeB=result->GetBinLowEdge(bin);
+	// high
+	if(lastBin==true&&thisBin==false) fitHighEdgeB=result->GetBinLowEdge(bin);	
+	lastBin=thisBin;
+      }
+      if(verbose>0){
+	std::cout << "fitting " << defB << " in: " << fitLowEdgeB << ".." << fitHighEdgeB << std::endl;
+	if(aB!=0) std::cout << "start value [0]:" << aB << std::endl;
+	if(bB!=0) std::cout << "start value [1]:" << bB << std::endl;
+	if(cB!=0) std::cout << "start value [2]:" << cB << std::endl;
+	if(dB!=0) std::cout << "start value [3]:" << dB << std::endl;
+	if(eB!=0) std::cout << "start value [4]:" << eB << std::endl;
+      }
+      // perform fit
+      TF1* functionB=new TF1("functionB",defB,fitLowEdgeB, fitHighEdgeB);
+      if(aB!=0.){
+	functionB->SetParameter(0,aB);
+	//if(defB.Contains("GammaDist")) functionB->SetParLimits(0,0.6*aB,1.4*aB);
+      }
+      if(bB!=0.){
+	functionB->SetParameter(1,bB);
+	if(defB.Contains("GammaDist")) functionB->SetParLimits(1,0.85*bB,1.15*bB);
+      }
+      if(cB!=0.){
+	functionB->SetParameter(2,cB);
+	//if(defB.Contains("GammaDist")) functionB->SetParLimits(2,0.6*cB,1.4*cB);
+      }
+      if(dB!=0.){
+	functionB->SetParameter(3,dB);
+	//if(defB.Contains("GammaDist")) functionB->SetParLimits(3,0.6*dB,1.4*dB);
+      }
+      if(eB!=0.){
+	functionB->SetParameter(4,eB);
+	//if(defB.Contains("GammaDist")) functionB->SetParLimits(4,0.6*eB,1.4*eB);
+      }
+      TString option="Q";
+      if(verbose>0)option="";
+      if(verbose>1)option="V";
+      option+="N";
+      option+=addOptB;
+      option+="R";
+      //option+="M";
+      input->Fit(functionB,option,"same",fitLowEdgeB, fitHighEdgeB);
+      // add part from fit
+      result->Add(functionB);
+    }
+   // use fit function C
+    if(defC!=""&&fitLowEdgeC!=fitHighEdgeC){
+      if(verbose>0) std::cout << "will perform fit" << std::endl;
+      // empty bins within fit range for output histo
+      bool lastBin=false;
+      for(int bin=1; bin<=result->GetNbinsX()+1; ++bin){
+	bool thisBin=false;
+	double binX=result->GetBinCenter(bin);
+	if(binX>=fitLowEdgeC&&binX<=fitHighEdgeC){ 
+	  result->SetBinContent(bin, 0.);
+	  thisBin=true;
+	}
+	// adapt fit range to binning
+	// low
+	if(lastBin==false&&thisBin==true) fitLowEdgeC=result->GetBinLowEdge(bin);
+	// high
+	if(lastBin==true&&thisBin==false) fitHighEdgeC=result->GetBinLowEdge(bin);	
+	lastBin=thisBin;
+      }
+      if(verbose>0){
+	std::cout << "fitting " << defC << " in: " << fitLowEdgeC << ".." << fitHighEdgeC << std::endl;
+	if(aC!=0) std::cout << "start value [0]:" << aC << std::endl;
+	if(bC!=0) std::cout << "start value [1]:" << bC << std::endl;
+	if(cC!=0) std::cout << "start value [2]:" << cC << std::endl;
+	if(dC!=0) std::cout << "start value [3]:" << dC << std::endl;
+	if(eC!=0) std::cout << "start value [4]:" << eC << std::endl;
+      }
+      // perform fit
+      TF1* functionC=new TF1("functionC",defC,fitLowEdgeC, fitHighEdgeC);
+      if(aC!=0.){
+	functionC->SetParameter(0,aC);
+	if(defC.Contains("GammaDist")) functionC->SetParLimits(0,0.6*aC,1.4*aC);
+      }
+      if(bC!=0.){
+	functionC->SetParameter(1,bC);
+	if(defC.Contains("GammaDist")) functionC->SetParLimits(1,0.85*bC,1.15*bC);
+      }
+      if(cC!=0.){
+	functionC->SetParameter(2,cC);
+	if(defC.Contains("GammaDist")) functionC->SetParLimits(2,0.6*cC,1.4*cC);
+      }
+      if(dC!=0.){
+	functionC->SetParameter(3,dC);
+	if(defC.Contains("GammaDist")) functionC->SetParLimits(3,0.6*dC,1.4*dC);
+      }
+      if(eC!=0.){
+	functionC->SetParameter(4,eC);
+	if(defC.Contains("GammaDist")) functionC->SetParLimits(4,0.6*eC,1.4*eC);
+      }
+      TString option="Q";
+      if(verbose>0)option="";
+      if(verbose>1)option="V";
+      option+="N";
+      option+=addOptC;
+      option+="R";
+      //option+="M";
+      input->Fit(functionC,option,"same",fitLowEdgeC, fitHighEdgeC);
+      // add part from fit
+      result->Add(functionC);
+    }
+    // return result
+    return result;
+  }
+
+  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="")
   {
     // this function draws "plot" from "file" into the active canvas
     // modified quantities: NONE
-    // used functions: getTheoryPrediction, histogramStyle
+    // used functions: getTheoryPrediction, histogramStyle, useFittedFunctions
     // used enumerators: NONE
     // filename: name of input file
     // plotname: name of histogram
@@ -2100,6 +2397,7 @@ namespace semileptonic {
     // drawOnlyErrors: draw only error bands but no central curve
     // drawRawPlot: draw in addition the unbinned and unsmoothed plot 
     //              to see whether rebinning and smoothing has changed the shape 
+    // model: indicates theory (madgraph, powheg or mcatnalo)
 
     // output
     if(verbose>0){
@@ -2115,15 +2413,32 @@ namespace semileptonic {
 	std::cout << "errorSmoothFactor: " << errorSmoothFactor << std::endl;
       }
     }
+    // draw raw plot to estimate effect of rebinning and smoothing
+    if(drawRawPlot){
+      TH1F* raw=getTheoryPrediction(plotname, filename);
+      raw->SetMarkerColor(kBlack);
+      raw->SetLineColor(kBlack);
+      raw->SetMarkerSize(2);
+      //raw->SetMarkerStyle(29);
+      //raw->Rebin(5); // minimal rebinning
+      raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
+      raw->Scale(1.0/raw->GetBinWidth(1));
+      //if(smoothFactor) raw->Smooth(smoothFactor);
+      raw->Draw("p e3 same"); 
+    }
     // get plot
     TH1F* result=getTheoryPrediction(plotname, filename);
+    // replace low statistic parts with fitted curve
+    result=useFittedFunctions(result, model, plotname, verbose);
     // rename
     TString name=plotname;
     name.ReplaceAll("analyzeTopPartonLevelKinematicsPhaseSpace/","");
-    if(filename.Contains("powheg")) name+="POWHEG";
-    else if(filename.Contains("mcatnlo" )) name+="MC@NLO";
-    else if(filename.Contains("NtupleCteq6m" )) name+="MC@NLO2";
-    else if(filename.Contains("madgraph")) name+="MADGRAPH";
+    if(model=="powheg") name+="POWHEG";
+    else if(model=="mcatnlo"){
+      if(filename.Contains("mcatnlo" )) name+="MC@NLO";
+      else if(filename.Contains("NtupleCteq6m" )) name+="MC@NLO2";
+    }
+    else if(model=="madgraph") name+="MADGRAPH";
     if(verbose>0) std::cout << "name of theory curve: " << name << std::endl;
     result->SetName(name);
     // configure style
@@ -2235,19 +2550,6 @@ namespace semileptonic {
     }
     //draw central value
     if(!drawOnlyErrors) result->Draw("hist c same"); 
-    // draw raw plot to estimate effect of rebinning and smoothing
-    if(drawRawPlot){
-      TH1F* raw=getTheoryPrediction(plotname, filename);
-      raw->SetMarkerColor(color);
-      raw->SetLineColor(color);
-      raw->SetMarkerSize(2);
-      raw->SetMarkerStyle(29);
-      //raw->Rebin(5); // minimal rebinning
-      raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
-      raw->Scale(1.0/raw->GetBinWidth(1));
-      //if(smoothFactor) raw->Smooth(smoothFactor);
-      raw->Draw("p hist same"); 
-    }
   }
 
 #ifdef DILEPTON_MACRO
