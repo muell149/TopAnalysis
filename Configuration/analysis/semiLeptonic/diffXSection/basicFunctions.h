@@ -2416,6 +2416,13 @@ namespace semileptonic {
     // draw raw plot to estimate effect of rebinning and smoothing
     if(drawRawPlot){
       TH1F* raw=getTheoryPrediction(plotname, filename);
+      // add muon and electron channel to
+      // minimize statistical fluctuations
+      if(model=="madgraph"){
+	TString filenameEl = filename;
+	filenameEl.ReplaceAll("muon", "elec");
+	raw->Add(getTheoryPrediction(plotname, filenameEl));
+      }
       raw->SetMarkerColor(kBlack);
       raw->SetLineColor(kBlack);
       raw->SetMarkerSize(2);
@@ -2428,6 +2435,13 @@ namespace semileptonic {
     }
     // get plot
     TH1F* result=getTheoryPrediction(plotname, filename);
+    // add muon and electron channel to
+    // minimize statistical fluctuations
+    if(model=="madgraph"){
+      TString filenameEl = filename;
+      filenameEl.ReplaceAll("muon", "elec");
+      result->Add(getTheoryPrediction(plotname, filenameEl));
+    }
     // replace low statistic parts with fitted curve
     result=useFittedFunctions(result, model, plotname, verbose);
     // rename
@@ -2461,6 +2475,10 @@ namespace semileptonic {
       TH1F* central   =getTheoryPrediction(plotname        , filename);
       TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
       TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filename);
+      // replace low statistic parts with fitted curve
+      central=useFittedFunctions(central, model, plotname, verbose);
+      ErrorUp=useFittedFunctions(ErrorUp, model, plotname+"_Up", verbose);
+      ErrorDown=useFittedFunctions(ErrorDown, model, plotname+"_Down", verbose);
       // smoothing 1
       if(errorSmoothFactor){
 	central  ->Smooth(errorSmoothFactor);

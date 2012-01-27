@@ -218,70 +218,8 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  combicanvas->SetBottomMargin(myStyle.GetPadBottomMargin());
 	  combicanvas->SetLeftMargin(myStyle.GetPadLeftMargin());
 	  gStyle->SetEndErrorSize(8);
-	  // draw binned MADGRAPH curve
+	  // MADGRAPH curve binned
 	  plotTheo->Draw("AXIS");
-	  // get unbinned Madgraph theory curve
-	  TString theofolder="analyzeTop"+state+"LevelKinematics"+PS;
-	  TH1F* unbinnedTheory = getTheoryPrediction(""+theofolder+"/"+plotName,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon"));
-	  // add muon and electron channel to
-	  // minimize statistical fluctuations
-	  unbinnedTheory->Add(getTheoryPrediction(""+theofolder+"/"+plotName,"/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "electron")));
-	  // keep control curve without smoothing and rebinning
-	  TH1F* unbinnedTheory2 = (TH1F*)unbinnedTheory->Clone();
-	  if(     xSecVariables_[i].Contains("ttbarY"   )) unbinnedTheory->Smooth(2);
-	  else if(xSecVariables_[i].Contains("ttbarPt"  )) unbinnedTheory->Smooth(30);
-	  else if(xSecVariables_[i].Contains("ttbarMass")) unbinnedTheory->Smooth(100);
-	  else if(xSecVariables_[i].Contains("topPt"    )) unbinnedTheory->Smooth(10);
-	  else if(xSecVariables_[i].Contains("topY"     )) unbinnedTheory->Smooth(10);
-	  else if(xSecVariables_[i].Contains("bqEta"    )) unbinnedTheory->Smooth(2);
-	  else if(xSecVariables_[i].Contains("bqPt"     )) unbinnedTheory->Smooth(10);
-	  else if(xSecVariables_[i].Contains("lepEta"   )) unbinnedTheory->Smooth(4);
-	  else if(xSecVariables_[i].Contains("lepPt"    )) unbinnedTheory->Smooth(10);
-	  // A) for normalized cross sections:
-	  if(xSecVariables_[i].Contains("Norm")){
-	    // rebinning to avoid statistical fluctuations
-	    if(     xSecVariables_[i].Contains("ttbarMass")) unbinnedTheory->Rebin(6 );
-	    else if(xSecVariables_[i].Contains("topPt"    )) unbinnedTheory->Rebin(10);
-	    else if(xSecVariables_[i].Contains("bqPt"     )) unbinnedTheory->Rebin(2);
-	    // else if(xSecVariables_[i].Contains("bqEta"    )) unbinnedTheory->Rebin();
-	    // else if(xSecVariables_[i].Contains("ttbarY"   )) unbinnedTheory->Rebin();
-	    //else if(xSecVariables_[i].Contains("ttbarPt"  )) unbinnedTheory->Rebin(2);
-	    // else if(xSecVariables_[i].Contains("topY"     )) unbinnedTheory->Rebin();
-	    // else if(xSecVariables_[i].Contains("lepPt"    )) unbinnedTheory->Rebin();
-	    // else if(xSecVariables_[i].Contains("lepEta"   )) unbinnedTheory->Rebin();
-	    // divide by area and binwidth
-	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->Integral(0,unbinnedTheory->GetNbinsX()+1)));
-	    unbinnedTheory ->Scale(1.0/(unbinnedTheory ->GetBinWidth(1)));
-	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->Integral(0,unbinnedTheory2->GetNbinsX()+1)));
-	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->GetBinWidth(1)));
-	  }
-	  // b) for absolut differential cross sections:
-	  else{
-	    // take into account that e and mu channel were added 
-	    unbinnedTheory->Scale(0.5);
-	    unbinnedTheory2->Scale(0.5);
-	    // scale by absolute xSec
-	    unbinnedTheory->Scale(lumiweight(kSig, luminosity, 0, "muon"));
-	    unbinnedTheory->Scale(1/luminosity);
-	    unbinnedTheory2->Scale(lumiweight(kSig, luminosity, 0, "muon"));
-	    unbinnedTheory2->Scale(1/luminosity);
-	    // divide by binwidth
-	    unbinnedTheory->Scale(1.0/(unbinnedTheory->GetBinWidth(1)));
-	    unbinnedTheory2->Scale(1.0/(unbinnedTheory2->GetBinWidth(1)));
-	  }
-	  // choose style
-	  histogramStyle(*unbinnedTheory        , kSig, false, 1.2, kRed+1); 
-	  histogramStyle(*unbinnedTheory2       , kSig, false, 1.2, kRed+1);
-	  // do smoothing
-	  if(     xSecVariables_[i].Contains("ttbarY"   )) unbinnedTheory->Smooth(2);
-	  else if(xSecVariables_[i].Contains("ttbarPt"  )) unbinnedTheory->Smooth(30);
-	  else if(xSecVariables_[i].Contains("ttbarMass")) unbinnedTheory->Smooth(100);
-	  else if(xSecVariables_[i].Contains("topPt"    )) unbinnedTheory->Smooth(10);
-	  else if(xSecVariables_[i].Contains("topY"     )) unbinnedTheory->Smooth(10);
-	  else if(xSecVariables_[i].Contains("bqEta"    )) unbinnedTheory->Smooth(2);
-	  else if(xSecVariables_[i].Contains("bqPt"     )) unbinnedTheory->Smooth(10);
-	  else if(xSecVariables_[i].Contains("lepEta"   )) unbinnedTheory->Smooth(4);
-	  else if(xSecVariables_[i].Contains("lepPt"    )) unbinnedTheory->Smooth(10);
 	  if(xSecVariables_[i].Contains("Norm")){
 	    // draw binned theory curves
 	    plotTheo->Draw("hist same");
@@ -294,10 +232,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    TString plotNameMCAtNLO="";
 	    double rangeLow=-1.;
 	    double rangeHigh=-1.;
-	    if(     xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=5 ; rebinFactor=1; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarM" ; 
+	    if(     xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=5 ; rebinFactor=1; errorRebinFactor =  1 ; errorSmoothFactor =   5 ; plotNameMCAtNLO="hVisTTbarM" ; 
 	      if(cutTtbarMass){rangeLow=330. ; rangeHigh=1200.;} }
 	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=3 ; rebinFactor=20; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarY" ;}
-	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=10; rebinFactor=1 ; errorRebinFactor =  2 ; errorSmoothFactor =    5 ; plotNameMCAtNLO="hVisTTbarPt";}
+	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=10; rebinFactor=1 ; errorRebinFactor =  1 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarPt";}
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; errorRebinFactor = 10 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTopPt"  ;}
 	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=3 ; rebinFactor=20; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTopY"   ;}
 	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; errorRebinFactor =  0 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisLepPt"  ;}
@@ -340,13 +278,25 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    // d) draw distorted parton truth histo including zprime
 	    if(zprime!=""&&sys==sysNo){
 	      histo_["modified"+plotName][kSig]->Draw("hist same");
-	    }
+	    }	    
 	    // e) MADGRAPH
-	    // GOSSIE quick fix
-	    if(cutTtbarMass&&xSecVariables_[i].Contains("ttbarMass")) {
-	      unbinnedTheory->GetXaxis()->SetRangeUser(325.,1200.);
-	    }
-	    unbinnedTheory->Draw("c same");
+	    smoothFactor=0;
+	    rebinFactor=0;
+	    TString plotNameMadgraph="analyzeTop"+state+"LevelKinematics"+PS+"/"+plotName;
+	    plotNameMadgraph.ReplaceAll("Norm","");
+	    rangeLow=-1.;
+	    rangeHigh=-1.;
+	    if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=100; rebinFactor=6; 
+	      if(cutTtbarMass){rangeLow=325.; rangeHigh=1200.;} }
+	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=2 ; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=30; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; }
+	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=10; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor=4 ; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
+	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=2 ; rebinFactor=1 ; }
+	    DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon"), plotNameMadgraph, smoothFactor, rebinFactor, kRed+1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
 	    // set up legend
 	    TLegend *leg = new TLegend();
 	    leg->SetTextFont(42);
@@ -358,7 +308,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->AddEntry(plotCombination  , dataLabel , "P" );
 	    // add theory predictions to legend
 	    // a) MADGRAPH
-	    leg->AddEntry(unbinnedTheory   , "MadGraph", "L" );
+	    TString nameMADGRAPHcurve=plotName;
+	    nameMADGRAPHcurve.ReplaceAll("Norm","");
+	    TH1F* madgraphcurve =(TH1F*)combicanvas->GetPrimitive(nameMADGRAPHcurve);
+	    if(madgraphcurve) leg->AddEntry(madgraphcurve , "MadGraph", "L" );
 	    // b) MC@NLO
 	    if(DrawMCAtNLOPlot2){
 	      //leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
