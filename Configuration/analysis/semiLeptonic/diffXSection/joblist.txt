@@ -57,14 +57,14 @@ nafJobSplitter.pl -q 1 -d ElttbarSGMatchDn -c triggerTag=HLT,sample=ttbarMatchin
 # other ttbar #
 ###############
 # standard
-nafJobSplitter.pl -q 1 -d MuttbarBG -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBG -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBG -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBG -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonDiffXSecBG_cfg.py
 
 # JER
-nafJobSplitter.pl -q 1 -d MuttbarBGJERUp -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonJER15BG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGJERUp -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonJER15BG_cfg.py
-nafJobSplitter.pl -q 1 -d MuttbarBGJERDn -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonJER05BG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGJERDn -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonJER05BG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBGJERUp -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonJER15BG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBGJERUp -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonJER15BG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBGJERDn -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonJER05BG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBGJERDn -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonJER05BG_cfg.py
 
 # JES
 nafJobSplitter.pl -q 1 -d MuttbarBGJESDn -c triggerTag=HLT,sample=ttbar,lepton=muon     246 analyzeMuonJES09BG_cfg.py
@@ -73,16 +73,16 @@ nafJobSplitter.pl -q 1 -d MuttbarBGJESUp -c triggerTag=HLT,sample=ttbar,lepton=m
 nafJobSplitter.pl -q 1 -d ElttbarBGJESUp -c triggerTag=HLT,sample=ttbar,lepton=electron 246 analyzeMuonJES11BG_cfg.py
 
 # mass
-nafJobSplitter.pl -q 1 -d MuttbarBGMassUp -c triggerTag=HLT,sample=ttbarMassUp,lepton=muon     102 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGMassUp -c triggerTag=HLT,sample=ttbarMassUp,lepton=electron 102 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d MuttbarBGMassDn -c triggerTag=HLT,sample=ttbarMassDown,lepton=muon     99 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGMassDn -c triggerTag=HLT,sample=ttbarMassDown,lepton=electron 99 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBGMassUp -c triggerTag=HLT,sample=ttbarMassUp,lepton=muon     102 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBGMassUp -c triggerTag=HLT,sample=ttbarMassUp,lepton=electron 102 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBGMassDn -c triggerTag=HLT,sample=ttbarMassDown,lepton=muon     99 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBGMassDn -c triggerTag=HLT,sample=ttbarMassDown,lepton=electron 99 analyzeMuonDiffXSecBG_cfg.py
 
 # scale
-nafJobSplitter.pl -q 1 -d MuttbarBGScaleUp -c triggerTag=HLT,sample=ttbarScaleUp,lepton=muon     60 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGScaleUp -c triggerTag=HLT,sample=ttbarScaleUp,lepton=electron 60 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d MuttbarBGScaleDn -c triggerTag=HLT,sample=ttbarScaleDown,lepton=muon     70 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGScaleDn -c triggerTag=HLT,sample=ttbarScaleDown,lepton=electron 70 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBGScaleUp -c triggerTag=HLT,sample=ttbarScaleUp,lepton=muon     60 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBGScaleUp -c triggerTag=HLT,sample=ttbarScaleUp,lepton=electron 60 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d MuttbarBGScaleDn -c triggerTag=HLT,sample=ttbarScaleDown,lepton=muon     70 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1  -d ElttbarBGScaleDn -c triggerTag=HLT,sample=ttbarScaleDown,lepton=electron 70 analyzeMuonDiffXSecBG_cfg.py
 
 # matching
 nafJobSplitter.pl -q 1 -d MuttbarBGMatchUp -c triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     68 analyzeMuonDiffXSecBG_cfg.py
@@ -147,10 +147,10 @@ nafJobSplitter.pl -q 1 -d MuzjetsScaleDn -c triggerTag=HLT,sample=zjetsScaleDown
 nafJobSplitter.pl -q 1 -d ElzjetsScaleDn -c triggerTag=HLT,sample=zjetsScaleDown,lepton=electron 81 analyzeMuonDiffXSecAll_cfg.py
 
 # matching
-nafJobSplitter.pl -q 1 -d MuzjetsScaleUp -c triggerTag=HLT,sample=zjetsMatchingUp,lepton=muon     74 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -d ElzjetsScaleUp -c triggerTag=HLT,sample=zjetsMatchingUp,lepton=electron 74 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -d MuzjetsScaleDn -c triggerTag=HLT,sample=zjetsMatchingDown,lepton=muon     72 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -d ElzjetsScaleDn -c triggerTag=HLT,sample=zjetsMatchingDown,lepton=electron 72 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -d MuzjetsMatchUp -c triggerTag=HLT,sample=zjetsMatchingUp,lepton=muon     74 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -d ElzjetsMatchUp -c triggerTag=HLT,sample=zjetsMatchingUp,lepton=electron 74 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -d MuzjetsMatchDn -c triggerTag=HLT,sample=zjetsMatchingDown,lepton=muon     72 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -d ElzjetsMatchDn -c triggerTag=HLT,sample=zjetsMatchingDown,lepton=electron 72 analyzeMuonDiffXSecAll_cfg.py
 
 ########################
 # single top s channel #
