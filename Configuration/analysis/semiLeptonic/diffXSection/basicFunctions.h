@@ -755,16 +755,16 @@ namespace semileptonic {
       //Nevents     =809984;
       Nevents = 808200; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =436750;//437863;
-      if(kSys==sysTopScaleDown) Nevents =437007;//437798;
+      if(kSys==sysTopScaleUp  ) Nevents =436750;//437798;
+      if(kSys==sysTopScaleDown) Nevents =437007;//437863;
     }
     else if(sample==kSToptW){
       crossSection=7.87;
       //Nevents     =814390;
       Nevents = 812600; // after kinematics filter
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =436656;//437416;
-      if(kSys==sysTopScaleDown) Nevents =437007;//437736;
+      if(kSys==sysTopScaleUp  ) Nevents =436656;//437736;
+      if(kSys==sysTopScaleDown) Nevents =436986;//437819;
     }
     // b) combined single top sample
     else if(sample==kSTop){
