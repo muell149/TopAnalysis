@@ -2225,6 +2225,18 @@ namespace semileptonic {
       cC=3.81;
       addOptC="LL";
       }
+      else if(plotname.Contains("ttbarPt")){
+	//tail:
+	fitLowEdge=50.;
+	fitHighEdge=300.;
+	def="[0]*exp([1]*x)+[2]*x+[3]*x*x+[4]";
+	a= 5180.;
+	b=-0.03;
+	c=-4.48;
+	d= 0.007;
+	e= 745.5;
+	addOpt="LL";
+      }
     }
     // use fit function A
     if(def!=""&&fitLowEdge!=fitHighEdge){
