@@ -286,10 +286,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    plotNameMadgraph.ReplaceAll("Norm","");
 	    rangeLow=-1.;
 	    rangeHigh=-1.;
-	    if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=100; rebinFactor=6; 
+	    if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=10; rebinFactor=1; 
 	      if(cutTtbarMass){rangeLow=325.; rangeHigh=1200.;} }
 	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=2 ; rebinFactor=1 ; }
-	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=30; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=5 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; }
 	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=10; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; }

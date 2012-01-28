@@ -2089,6 +2089,8 @@ namespace semileptonic {
     // input: fine binned theory curve
     // model: indicates theory (madgraph, powheg or mcatnalo)
     // verbose: level of output
+    int initialIgnoreLevel=gErrorIgnoreLevel;
+    if(verbose==0) gErrorIgnoreLevel=kFatal;
     if(verbose>1) std::cout << plotname << "(" << model << ")" << std::endl;
     // clone histo for output
     TH1F* result=(TH1F*)input->Clone();
@@ -2163,6 +2165,39 @@ namespace semileptonic {
 	addOpt="LL";
       }
     }
+    else if(model=="madgraph"){
+      if(plotname.Contains("ttbarMass")){
+	//tail:
+	fitLowEdge=430.;
+	fitHighEdge=1200.;
+	def="[0]*exp([1]*x)+[2]";
+	a=28165.;
+	b=-0.00756;
+	c=2.77;
+	addOpt="LL";
+	// start:
+	fitLowEdgeB=345.;
+	fitHighEdgeB=400.;
+	defB="[3]*TMath::GammaDist(x,[0],[1],[2])";
+	aB=1.56;
+	bB=344.8;
+	cB=80.8;
+	dB=216786.;
+	addOptB="LL";
+      }
+      else if(plotname.Contains("ttbarPt")){
+	//tail:
+	fitLowEdge=50.;
+	fitHighEdge=300.;
+	def="[0]*exp([1]*x)+[2]*x+[3]*x*x+[4]";
+	a= 5180.;
+	b=-0.03;
+	c=-4.48;
+	d= 0.007;
+	e= 745.5;
+	addOpt="LL";
+      }
+    }
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
       fitLowEdge=480.;
@@ -2173,22 +2208,22 @@ namespace semileptonic {
       c=3.1;
       addOpt="LL";
       // start:
-      fitLowEdgeC=345.;
-      fitHighEdgeC=500.;
-      defC="[3]*TMath::GammaDist(x,[0],[1],[2])";
-      aC=1.58;
-      bC=344.;
-      cC=86.6;
-      dC=234473.;
-      addOptC="LL";
-      // very early start:
-      fitLowEdgeB=295.;
-      fitHighEdgeB=337.;
-      defB="[0]*exp([1]*x)+[2]";
-      aB=0.000000000530501;
-      bB=0.075;
-      cB=3.81;
+      fitLowEdgeB=345.;
+      fitHighEdgeB=500.;
+      defB="[3]*TMath::GammaDist(x,[0],[1],[2])";
+      aB=1.58;
+      bB=344.;
+      cB=86.6;
+      dB=234473.;
       addOptB="LL";
+      // very early start:
+      fitLowEdgeC=295.;
+      fitHighEdgeC=337.;
+      defC="[0]*exp([1]*x)+[2]";
+      aC=0.000000000530501;
+      bC=0.075;
+      cC=3.81;
+      addOptC="LL";
       }
     }
     // use fit function A
@@ -2282,23 +2317,38 @@ namespace semileptonic {
       TF1* functionB=new TF1("functionB",defB,fitLowEdgeB, fitHighEdgeB);
       if(aB!=0.){
 	functionB->SetParameter(0,aB);
-	//if(defB.Contains("GammaDist")) functionB->SetParLimits(0,0.6*aB,1.4*aB);
+	if(defB.Contains("GammaDist")){
+	  if(aB<0.)functionB->SetParLimits(0,1.4*aB,0.6*aB);
+	  if(aB>0.)functionB->SetParLimits(0,0.6*aB,1.4*aB);	  
+	}
       }
       if(bB!=0.){
 	functionB->SetParameter(1,bB);
-	if(defB.Contains("GammaDist")) functionB->SetParLimits(1,0.85*bB,1.15*bB);
+	if(defB.Contains("GammaDist")){
+	  if(bB<0.) functionB->SetParLimits(1,1.15*bB,0.85*bB);
+	  if(bB>0.) functionB->SetParLimits(1,0.85*bB,1.15*bB);
+	}
       }
       if(cB!=0.){
 	functionB->SetParameter(2,cB);
-	//if(defB.Contains("GammaDist")) functionB->SetParLimits(2,0.6*cB,1.4*cB);
+	if(defB.Contains("GammaDist")){
+	  if(cB<0.) functionB->SetParLimits(2,1.4*cB,0.6*cB);
+	  if(cB>0.) functionB->SetParLimits(2,0.6*cB,1.4*cB);
+	}
       }
       if(dB!=0.){
 	functionB->SetParameter(3,dB);
-	//if(defB.Contains("GammaDist")) functionB->SetParLimits(3,0.6*dB,1.4*dB);
+	if(defB.Contains("GammaDist")){
+	  if(dB<0.) functionB->SetParLimits(3,1.4*dB,0.6*dB);
+	  if(dB>0.) functionB->SetParLimits(3,0.6*dB,1.4*dB);
+	}
       }
       if(eB!=0.){
 	functionB->SetParameter(4,eB);
-	//if(defB.Contains("GammaDist")) functionB->SetParLimits(4,0.6*eB,1.4*eB);
+	if(defB.Contains("GammaDist")){
+	  if(eB<0.) functionB->SetParLimits(4,1.4*eB,0.6*eB);
+	  if(eB>0.) functionB->SetParLimits(4,0.6*eB,1.4*eB);
+	}
       }
       TString option="Q";
       if(verbose>0)option="";
@@ -2371,6 +2421,7 @@ namespace semileptonic {
       // add part from fit
       result->Add(functionC);
     }
+    gErrorIgnoreLevel=initialIgnoreLevel;
     // return result
     return result;
   }
