@@ -488,8 +488,10 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    relUncertDistributions_[xSecVariables_[i]][binUnc] = (TH1F*)tempResult->Clone();
 	    canvasUncertaintyDistributions->cd();
 	    tempResult->Draw();
+	    int initialIgnoreLevel=gErrorIgnoreLevel;
+	    if(verbose==0) gErrorIgnoreLevel=kWarning;
 	    canvasUncertaintyDistributions->Print(outputFolder+"/uncertaintyDistributions/relativeUncertainties"+xSecVariables_[i]+"_"+label+".eps");
-	  
+	    gErrorIgnoreLevel=initialIgnoreLevel;
 	    delete tempResult; tempResult = NULL;
 	  }	  
 	  delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;
