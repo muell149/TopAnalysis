@@ -648,9 +648,9 @@ if(decayChannel=='electron'):
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = True
 if(not eventFilter=='all'):
     ## adapt output filename
-    if(eventFilter=='signal only'):
-        process.TFileService.fileName = 'analyzeDiffXSec_testSig.root'
-    elif(eventFilter=='background only'):
+    #if(eventFilter=='signal only'):
+        #process.TFileService.fileName = 'analyzeDiffXSec_testSig.root'
+    if(eventFilter=='background only'):
         process.ttSemiLeptonicFilter.invert = True
     elif(eventFilter=='semileptonic electron only'):
         process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = False
@@ -748,7 +748,7 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
 process.selectedGenMuonCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
 process.selectedGenElectronCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
 process.genAllMuonKinematics = process.analyzeMuonKinematics.clone    (src = 'isolatedGenMuons')
-process.genAllElectronKinematics = process.analyzeMuonKinematics.clone(src = 'isolatedGenElectrons')
+process.genAllElectronKinematics = process.analyzeElectronKinematics.clone(src = 'isolatedGenElectrons')
 process.genAllJetKinematics  = process.analyzeJetKinematics.clone(src = 'ak5GenJets', analyze = udsAll)
 process.genSelJetKinematics  = process.analyzeJetKinematics.clone(src = 'selectedGenJetCollection', analyze = udsAll)
 process.hadLvObjectMonitoring = cms.Sequence(process.genAllElectronKinematics *
