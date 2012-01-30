@@ -5293,7 +5293,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // Calculate differential cross sections
     TGaxis::SetMaxDigits(2);
 
-/*    // leptons
+    // leptons
     const Int_t nbinsLepEta = 6;
     const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
     const Double_t binCenterLepEta[nbinsLepEta] = {-1.93, -1.15, -0.45, 0.47, 1.15, 1.93};
@@ -5371,7 +5371,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binCenterJetPt[nbinsJetPt] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("Jets", "Pt", "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{b and #bar{b}}} #left[(#frac{GeV}{c})^{-1}#right]", binsJetPt, nbinsJetPt, binCenterJetPt, true, 0, doSVD  );
     GetBtagEfficiencyInBins("Jets", "Pt", "p_{T,l}", binsJetPt, nbinsJetPt);
-*/
+
   
     // top
     const Int_t nbinsTopRapidity = 4;
@@ -5401,7 +5401,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     SaveUnfoldingHists("TopQuarks", "Pt", kEE, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
     SaveUnfoldingHists("TopQuarks", "Pt", kCOMBINED, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
 
-return;
+
     // ttbar quantities
     const Int_t nbinsTtBarRapidity = 4;
     const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
