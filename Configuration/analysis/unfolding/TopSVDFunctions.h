@@ -893,7 +893,8 @@ int SVD_Ndof(TH1D* dataHist, TH1D* xiniHist)
 
 
 
-// PERFORM UNFOLDING        
+// PERFORM UNFOLDING
+// By Input Histograms
 // Note: This function can do both, BBB and SVD Unfolding.
 // If kreg > 0:
 //       SVD Unfolding is done with 'kreg'
@@ -902,10 +903,16 @@ int SVD_Ndof(TH1D* dataHist, TH1D* xiniHist)
 //       BBB Unfolding is returned in 'unfolded'
 // The boolean parameters let you choose wether you want
 // to create and save a whole lot of plots
-int SVD_Unfold(
+
+int SVD_UnfoldByHist(
         TString channel,                        // Channel, i.e. "emu", "ee", "mumu", "combined", et. al.
         TString particle,                       // "Leptons", "Jets" or "TopQuarks", et. al.
-        TString quantity,                       // "Eta", "Pt", or "Mass" 
+        TString quantity,                       // "Eta", "Pt", or "Mass"
+        TH1* dataInputHist,                     // Data Input incl. Background
+        TH1* bgrInputHist,                      // Background
+        TH1* genInputHist,                      // Generated MC
+        TH1* recInputHist,                      // Reconstructed MC
+        TH1* respInputHist,                     // Response Matrix 
         const double thebins[],                 // Binning for the unfolding
         const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!)
         int kreg,                               // Regularization parameter
@@ -927,15 +934,6 @@ int SVD_Unfold(
     // Do All Plots
     bool doAllPlots = false;
     if ( plotsToRoot == true || plotsToPs == true ) doAllPlots = true;
-
-
-    // Fetch the input histograms
-    TH1* dataInputHist = NULL;
-    TH1* bgrInputHist = NULL;
-    TH1* genInputHist = NULL;
-    TH1* recInputHist = NULL;
-    TH1* respInputHist = NULL;
-    SVD_GetInputHists(channel, particle, quantity, dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist);
 
 
     // Prepare the binning 
@@ -1067,7 +1065,7 @@ int SVD_Unfold(
 
 
     // THE UNFOLDING with chosen regularization
-    cout << "Unfolding " << dataHist->GetName() << " with k=" << TMath::Abs(kreg) << " ... " << endl;
+    cout << "Unfolding " << channel << "/" << quantity << "/" << particle << " with k=" << TMath::Abs(kreg) << " ... " << endl;
     TH1D* unfHist = mySVDUnfold->Unfold(TMath::Abs(kreg));
     cout << "Unfolding done!" << endl;
 
@@ -1826,6 +1824,49 @@ int SVD_Unfold(
     // Return 
     return 0;
 }
+
+
+
+
+
+
+// PERFORM UNFOLDING
+// By Channel Name
+// Note: This function can do both, BBB and SVD Unfolding.
+// If kreg > 0:
+//       SVD Unfolding is done with 'kreg'
+//       and the result of SVD Unfolding is returned in 'unfolded'
+// If kreg <= 0:
+//       BBB Unfolding is returned in 'unfolded'
+// The boolean parameters let you choose wether you want
+// to create and save a whole lot of plots
+int SVD_Unfold(
+        TString channel,                        // Channel, i.e. "emu", "ee", "mumu", "combined", et. al.
+        TString particle,                       // "Leptons", "Jets" or "TopQuarks", et. al.
+        TString quantity,                       // "Eta", "Pt", or "Mass"
+        const double thebins[],                 // Binning for the unfolding
+        const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!)
+        int kreg,                               // Regularization parameter
+        TH1D*& unfolded,                        // Returned: Unfolded Distribution.
+        bool plotsToRoot,                       // Save Plots in ROOT File
+        bool plotsToPs                          // Save Plots in Graphics File
+)
+{
+
+    // Fetch the input histograms
+    TH1* dataInputHist = NULL;
+    TH1* bgrInputHist = NULL;
+    TH1* genInputHist = NULL;
+    TH1* recInputHist = NULL;
+    TH1* respInputHist = NULL;
+    SVD_GetInputHists(channel, particle, quantity, dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist);
+
+    // Unfold
+    return SVD_UnfoldByHist(channel, particle, quantity, dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist, thebins, numbins, kreg, unfolded, plotsToRoot, plotsToPs);
+
+}
+
+
 
 #endif
 
