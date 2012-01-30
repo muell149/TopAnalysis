@@ -16,7 +16,7 @@ void Analysis::Begin(TTree * /*tree*/)
   TString option = GetOption();
   //  totalEventCount=0;
 
-  
+  EventCounter=0;
 
   ifstream insample("syst.txt",std::ios::in);
   insample>>systematic;
@@ -228,8 +228,10 @@ Bool_t Analysis::Process(Long64_t entry)
 {
   Analysis::GetAllBranches(entry);
   if(MCSample->find("ttbarsignal")!=string::npos){ Analysis::GetSignalBranches(entry);}
-
-  float dimass=0;
+  if(MCSample->find("run")!=string::npos){ weightLepSF = 1.0;}
+  EventCounter++;
+  if(EventCounter % 10000 == 0){cout<<"Event Counter: "<<EventCounter<<endl;}
+  float dimass=0.;
   double btagSFuse=1.0;//only use the btag SF when applying b-tagging
   //trigEFF=1.0;
   double weightKinFituse = 1.0;//only use the kin fit SF when using the kinematic reconstruction
@@ -287,7 +289,7 @@ Bool_t Analysis::Process(Long64_t entry)
     TLorentzVector leptemp(leptonpX[i], leptonpY[i], leptonpZ[i], leptonE[i]);
     LVlepton.push_back(leptemp);
   }
-  
+
   double BtagWP = 1.7; 
   int NJets =0;
   vector<int> BJetIndex;
@@ -363,32 +365,71 @@ Bool_t Analysis::Process(Long64_t entry)
       }    
     }
   }//for visible top events	  
+  int LeadLeptonNumber = 0;
+  int NLeadLeptonNumber = 0;
   if(lepton_>1){
-    dimass = (LVlepton[0]+LVlepton[1]).M();
+    if(channel->find("emu")!=string::npos){//quick and DIRTY!
+      for(int i = 1; i<lepton_; i++){
+	if(((*lepQ)[0]!=(*lepQ)[i]) && ((*lepType)[0]!=(*lepType)[i])){
+	  LeadLeptonNumber = 0;
+	  NLeadLeptonNumber = i;
+	  break;
+	}
+      }//set dimass to first two highest pT oppositely charged leptons
+    }
+    if(channel->find("ee")!=string::npos){//quick and DIRTY!
+      for(int i = 0; i<lepton_; i++){
+	if((*lepType)[i]<0){
+	  LeadLeptonNumber=i;	  
+	  break;
+	}
+      }
+      for(int i = LeadLeptonNumber+1; i<lepton_; i++){
+	if(((*lepQ)[LeadLeptonNumber]!=(*lepQ)[i]) && (*lepType)[i]<0){
+	  NLeadLeptonNumber = i;
+	  break;
+	}
+      }//set dimass to first two highest pT oppositely charged leptons
+    }
+    if(channel->find("mumu")!=string::npos){//quick and DIRTY!
+      for(int i = 0; i<lepton_; i++){
+	if((*lepType)[i]>0){
+	  LeadLeptonNumber=i;	  
+	  break;
+	}
+      }
+      for(int i = LeadLeptonNumber+1; i<lepton_; i++){
+	if(((*lepQ)[LeadLeptonNumber]!=(*lepQ)[i]) && (*lepType)[i]>0){
+	  NLeadLeptonNumber = i;
+	  break;
+	}
+      }//set dimass to first two highest pT oppositely charged leptons
+    }
+    dimass = (LVlepton[LeadLeptonNumber]+LVlepton[NLeadLeptonNumber]).M();
     h_vertMulti->Fill(vertMulti,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
   }
-
+  
   //Cross-section Plots
-  if(lepton_>1 && ((*lepQ)[0]!=(*lepQ)[1])&& dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){
+  //if(lepton_>1 && dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){
+  if(lepton_>1){
     if(channel->find("emu")!=string::npos){//quick and DIRTY!
       h_jetMultiXSec->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF*weightKinFit);
       h_jetMultiNoPU->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit);
     }else{
-      if(*(metEt->begin()) > 30 && (dimass < 76 || dimass >116)){
+      //      if(*(metEt->begin()) > 30 && (dimass < 76 || dimass >106)){
+      if((dimass < 76.0 || dimass >106.0)){
 	h_jetMultiXSec->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF*weightKinFit);
 	h_jetMultiNoPU->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit);
       }  
     }
   }
   //Control plots
-  //  if(lepton_>1&& jet_>1){  //two isolated leptons create dimass out of highest pt pair
-
   
   if(lepton_>1){  //two isolated leptons create dimass out of highest pt pair
-    if(dimass>12 && ((*lepQ)[0]!=(*lepQ)[1])){
+    if(dimass>12.0 && NLeadLeptonNumber!=0){
       h_diLepMassFull->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
       if(channel->find("emu")!=string::npos){//quick and DIRTY!
-	if(dimass>12 && jet_>1){
+	if(dimass>12.0 && jet_>1){
 	  h_BjetMulti->Fill(BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  double jetHT = 0;
@@ -401,36 +442,36 @@ Bool_t Analysis::Process(Long64_t entry)
 	  }
 	  
 	  if((*lepQ)[0]==1){
-	    h_LeptonpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_LeptonEta->Fill(LVlepton[1].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonEta->Fill(LVlepton[0].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }else{
-	    h_LeptonpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_LeptonEta->Fill(LVlepton[0].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonEta->Fill(LVlepton[1].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }	
 	  h_MET->Fill(*(metEt->begin()),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  if((*lepType)[0]==-1){
-	    h_ElectronpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_ElectronEta->Fill(LVlepton[0].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_ElectronpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_ElectronEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
-	  if((*lepType)[1]==-1){
-	    h_ElectronpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_ElectronEta->Fill(LVlepton[1].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  if((*lepType)[NLeadLeptonNumber]==-1){
+	    h_ElectronpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_ElectronEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
 	  if((*lepType)[0]==1){
-	    h_MuonpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_MuonEta->Fill(LVlepton[0].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_MuonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_MuonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
-	  if((*lepType)[1]==1){
-	    h_MuonpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_MuonEta->Fill(LVlepton[1].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  if((*lepType)[NLeadLeptonNumber]==1){
+	    h_MuonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_MuonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
 	}
       }else{
-	if (dimass> 12 && (dimass<76 || dimass > 106) && jet_>1 && *(metEt->begin()) > 30){
+	if (dimass> 12.0 && (dimass<76.0 || dimass > 106.0) && jet_>1 && *(metEt->begin()) > 30){
 	  h_BjetMulti->Fill(BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  double jetHT = 0;
@@ -442,37 +483,37 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_jetpT->Fill(LVjet[i].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
 	  if((*lepQ)[0]==1){
-	    h_LeptonpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_LeptonEta->Fill(LVlepton[1].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonEta->Fill(LVlepton[0].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
 	  else{
-	    h_LeptonpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_LeptonEta->Fill(LVlepton[0].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    h_AntiLeptonEta->Fill(LVlepton[1].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_LeptonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_AntiLeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }	
 	  h_MET->Fill(*(metEt->begin()),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  if(*(metEt->begin()) > 30){
-	    if((*lepType)[0]==-1)h_ElectronpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if((*lepType)[1]==-1)h_ElectronpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if((*lepType)[0]==1)h_MuonpT->Fill(LVlepton[0].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if((*lepType)[1]==1)h_MuonpT->Fill(LVlepton[1].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    if((*lepType)[0]==-1)h_ElectronpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    if((*lepType)[1]==-1)h_ElectronpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    if((*lepType)[0]==1)h_MuonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    if((*lepType)[1]==1)h_MuonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  } 
 	}
       }      
     } //
-    if (dimass>76 && dimass < 106)Looseh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+    if (dimass>76.0 && dimass < 106.0)Looseh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
     
     //if(dimass>12 && (lepQ[0]!=lepQ[1])){//Analysis step 6
     //if(dimass>12 && jet_>1 && (lepQ[0]!=lepQ[1])){//Analysis step 7
-    //if(dimass>12 && jet_>1 && BJetIndex.size()>0 && (lepQ[0]!=lepQ[1])){btagSFuse=btagSF;//Analysis step 8?
-    if(dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_ && (lepQ[0]!=lepQ[1])){btagSFuse=btagSF; weightKinFituse=weightKinFit;//Analysis step 9?
+    //if(dimass>12 && jet_>1 && BJetIndex.size()>0 && NLeadLeptonNumber>0){btagSFuse=btagSF;//Analysis step 8?
+    if(dimass>12.0 && jet_>1 && BJetIndex.size()>0 && HypTop_ && NLeadLeptonNumber>0){btagSFuse=btagSF; weightKinFituse=weightKinFit;//Analysis step 9?
       
       if(*(metEt->begin()) > 30){//for DY Scale Factor
 	Allh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	if (dimass < 106 && dimass > 76 ){
+	if (dimass < 106.0 && dimass > 76.0 ){
 	  Zh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	}
 	else{TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);}
@@ -594,7 +635,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	  h_HypNeutrinoE->Fill(LVHypNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_HypAntiNeutrinoE->Fill(LVHypAntiNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	}
-      }else if(*(metEt->begin()) > 30 && (dimass<76 || dimass>106)){
+      }else if(*(metEt->begin()) > 30 && (dimass<76.0 || dimass>106.0)){
 	//h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	//TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	if(MCSample->find("ttbarsignal")!=string::npos){
