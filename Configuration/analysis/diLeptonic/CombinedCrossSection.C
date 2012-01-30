@@ -27,6 +27,11 @@
 #include "TSpline.h"
 #include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
 #include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
+
+// DAVID
+#include "TopAnalysis/Configuration/analysis/unfolding/TopSVDUnfold.h"
+#include "TopAnalysis/Configuration/analysis/unfolding/TopSVDFunctions.h"
+
 // if the include path is not found, put   
 // gSystem->Load("libFWCoreFWLite.so"); AutoLibraryLoader::enable(); gSystem->Load("libDataFormatsFWLite.so");
 // into your ~/.rootlogon.C
@@ -42,12 +47,9 @@ using namespace std;
 
 // path to the ingoing root histogram files
 //const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
-const char *USERNAME = getenv("USER");
 
-const TString inpath(
-		     !strcmp(USERNAME, "wbehrenh") ? "./" : 
-		     // !strcmp(USERNAME, "aldaya") ? "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/" :
-		     "/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
+
+const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/scratch/Nov1/standard_new/");
 
 
 //const TString inpath("/scratch/hh/current/cms/user/asincruz/njs/M20Inf/");
@@ -61,7 +63,7 @@ const TString inpath(
 const TString outpath("plots/");
 
 // output format
-const TString outform(".png");
+const TString outform(".eps");
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -192,6 +194,11 @@ const Double_t bccAuto = 100000;
 //const size_t orderStackPlot[] = {0, 8, 7, 6, 5, 4, 3, 2, 1};
 const size_t orderStackPlot[] = {0, 6, 5, 4, 7, 8, 3, 2, 1};
 
+
+// Unfolding Flags
+const bool doSVD = false;
+const bool unfoldingPlotsToPs = true;
+const bool unfoldingPlotsToRoot = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2958,11 +2965,12 @@ void CalculateInclusiveCrossSections(const char* selection){
 // plot differential cross section with yield plot, purity-stability-efficiency plot and gen-reco correlation for signal
 void PlotDifferentialCrossSection(const char* particle, const char* quantity, Int_t channel, const char* xtitle, const char* ytitle,
                                   const Double_t bins[], const Int_t nbins, Double_t crosss[], Double_t statErr[], Double_t totalErrUp[],
-				  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0) {
+				  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0, bool doUnfolding = false) {
     
     TString plotStr("");
     TH1* hists[Nfiles];  // histograms needed for event yields and bg sustraction
     TH1* genHist;	 // genHist needed to calculate the efficiencies
+    TH1* recHist;        // redHist needed for Unfolding //DAVID
     TH1* genHistSmear = 0;   // for pseudo data
     TH1* genRec2DHist;   // reconstructed vs generated signal properties. needed  for correlation and pse plot
     TString genTopEvent("analyzeVisibleGenTopEvent/");
@@ -2986,12 +2994,17 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
+            GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+
 	} else if (channel==kEM) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
+            GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
             if(dataIsFakeFromMonteCarlo)
                 GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
 	} else if (channel==kEE) {
@@ -3000,6 +3013,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+            GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
 	} else if (channel==kCOMBINED) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
             AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
@@ -3016,6 +3031,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+            GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+            AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
 	} else {
             cout << "ERROR in PlotDifferentialCrossSection: index " << channel << " for channel is out of range!" << endl;
             return;
@@ -3037,49 +3058,53 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
             if (channel==kMM) {
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+ 
             } else if (channel==kEM) {
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
-                
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist); 
                 if(dataIsFakeFromMonteCarlo)
                     AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
             } else if (channel==kEE) {
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);                
             } else if (channel==kCOMBINED) {
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
         	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
         	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
         	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+                AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
             }
 	}
     } else { // no use of kin reconstruction
@@ -3347,39 +3372,102 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     cout.precision(5);
 
-    for (Int_t i=1; i<=nbins; ++i) {
-        Double_t bgsum=0;
-        for (size_t j=2; j<Nplots; ++j) {
-            bgsum += mergedhists[j]->GetBinContent(i);
-        }
-        //cout << "Sum background: " << channelName[channel] << particle << quantity << " " << bgsum << endl;
-        dataMinusBg->SetBinContent(i, binhists[0]->GetBinContent(i)-bgsum);
-        efficiencyHist->SetBinContent(i, efficiencies[i-1]);
-        
-        if (dataIsFakeFromMonteCarlo) bgsum = 0;
-        
-        Double_t binw = bins[i]-bins[i-1];
-        // set measured cross section
-        if (efficiencies[i-1] == 0) { //cannot divide by zero
-            cout << "WARNING in PlotDifferentialCrossSection: Efficiency is zero in bin " << i << " while creating " << title << endl;
-            crossHist->SetBinContent(i, 0);
-            crossHist->SetBinError(i, 0);
-        } else {
-            if (!strcmp(particle, "TtBar") && !strcmp(quantity, "Mass") && i == 1) {
-                std::cout << "Content: " << binhists[0]->GetBinContent(i) << " bg: " << bgsum << " effi: " << efficiencies[i-1] << " lumi: " << lumi << " bw: " << binw << "\n";
-            }
-            crossHist->SetBinContent(i,(binhists[0]->GetBinContent(i)-bgsum)/efficiencies[i-1]/lumi/binw);
-            crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error
-        }
-        // set generated cross section
-        genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
+    // DAVID
+    if ( doUnfolding ) {
+    
+        // Determine the right kValue
+        int kValue = -1 ;
+        kValue = SVD_GetKValue(channelName[channel], particle, quantity);
 
-        if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
-            crossHist->SetBinContent(i,crossHist->GetBinContent(i)/2);
-            crossHist->SetBinError(i,crossHist->GetBinError(i)/2);
-            genCrossHist->SetBinContent(i,genCrossHist->GetBinContent(i)/2);
+        // Raw Data Histogram
+        TH1D* dataHist = (TH1D*) mergedhists[kDATA];
+
+
+        // Background Histogram
+        TH1D* bgrHist = (TH1D*) mergedhists[kTTBG]->Clone("Background");
+        for(size_t i = 3; i < Nplots; ++i){ 
+            bgrHist->Add(mergedhists[i],1.);
+        }
+
+
+        // Retrieve a histogram with the unfolded quantities.
+        // Note: The unfolded histogram has additional side bins!
+        // Keep this in mind when accessing bin content via indices.
+        TH1D* unfoldedDistribution = NULL;
+        SVD_UnfoldByHist(channelName[channel], particle, quantity, dataHist, bgrHist, genHist, recHist, genRec2DHist, bins, nbins, kValue, unfoldedDistribution, unfoldingPlotsToRoot, unfoldingPlotsToPs);
+
+
+        // Calculate Cross Sections
+        // Using SVD helper functions. Old code is commented out, see below
+        for (Int_t i=1; i<=nbins; ++i) {
+            Double_t bgsum=0;
+            for (size_t j=3; j<Nplots; ++j) {
+                bgsum += mergedhists[j]->GetBinContent(i);
+            }
+            dataMinusBg->SetBinContent(i, binhists[0]->GetBinContent(i)-bgsum);
+            efficiencyHist->SetBinContent(i, efficiencies[i-1]);
+
+            if (dataIsFakeFromMonteCarlo) bgsum = 0;
+
+            Double_t binw = bins[i]-bins[i-1];
+
+            // set measured cross section
+            crossHist->SetBinContent(i,unfoldedDistribution->GetBinContent(i+1)/lumi/binw);
+            crossHist->SetBinError(i,unfoldedDistribution->GetBinError(i+1)/lumi/binw); // statistical error
+
+
+            // set generated cross section
+            genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
+
+            if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
+                crossHist->SetBinContent(i,crossHist->GetBinContent(i)/2);
+                crossHist->SetBinError(i,crossHist->GetBinError(i)/2);
+                genCrossHist->SetBinContent(i,genCrossHist->GetBinContent(i)/2);
+            }
+
+
         }
     }
+
+
+    if ( doUnfolding == false ) {
+
+        for (Int_t i=1; i<=nbins; ++i) {
+            Double_t bgsum=0;
+            for (size_t j=3; j<Nplots; ++j) {
+                bgsum += mergedhists[j]->GetBinContent(i);
+            }
+            dataMinusBg->SetBinContent(i, binhists[0]->GetBinContent(i)-bgsum);
+            efficiencyHist->SetBinContent(i, efficiencies[i-1]);
+
+            if (dataIsFakeFromMonteCarlo) bgsum = 0;
+
+            Double_t binw = bins[i]-bins[i-1];
+            // set measured cross section
+            if (efficiencies[i-1] == 0) { //cannot divide by zero
+                cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << title << endl;
+                crossHist->SetBinContent(i, 0);
+                crossHist->SetBinError(i, 0);
+            } else {
+                if (!strcmp(particle, "TtBar") && !strcmp(quantity, "Mass") && i == 1) {
+                    std::cout << "Content: " << binhists[0]->GetBinContent(i) << " bg: " << bgsum << " effi: " << efficiencies[i-1] << " lumi: " << lumi << " bw: " << binw << "\n";
+                }
+                crossHist->SetBinContent(i,(binhists[0]->GetBinContent(i)-bgsum)/efficiencies[i-1]/lumi/binw);
+                crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error
+            }
+            // set generated cross section
+            genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
+
+            if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
+                crossHist->SetBinContent(i,crossHist->GetBinContent(i)/2);
+                crossHist->SetBinError(i,crossHist->GetBinError(i)/2);
+                genCrossHist->SetBinContent(i,genCrossHist->GetBinContent(i)/2);
+            }
+        }
+
+		
+    }
+
     
     // store the visible cross section for normalisation
     if (strcmp(particle,"Leptons")==0 && strcmp(quantity,"Eta")==0 && channel!=kCOMBINED) {
@@ -3392,9 +3480,6 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     gStyle->SetErrorX();
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 
     title = channelName[channel];
     if(useKinFit)
@@ -3908,7 +3993,7 @@ void doNothing(TH1*) {}
 
 // plot differential cross section in all channels and combine them
 void PlotDifferentialCrossSections(const char* particle, const char* quantity, const char* xtitle, const char* ytitle,
-                                   const Double_t bins[], const Int_t nbins, const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0) {
+                                   const Double_t bins[], const Int_t nbins, const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0, bool doUnfolding = false) {
 
     Double_t crosssMM[nbins];
     Double_t statErrMM[nbins];
@@ -3931,10 +4016,10 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Double_t totalErrDownCombined[nbins];
    
     gROOT->ForceStyle(); //somehow combined plots have strange labels otherwise
-    PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPostfix);
-    PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPostfix);
-    PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPostfix);
-    PlotDifferentialCrossSection(particle, quantity, kCOMBINED, xtitle, ytitle, bins, nbins, crosssCombined, statErrCombined, totalErrUpCombined, totalErrDownCombined, binCenters, useKinFit, specialPostfix);
+    PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPostfix, doUnfolding);
+    PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPostfix, doUnfolding);
+    PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPostfix, doUnfolding);
+    PlotDifferentialCrossSection(particle, quantity, kCOMBINED, xtitle, ytitle, bins, nbins, crosssCombined, statErrCombined, totalErrUpCombined, totalErrDownCombined, binCenters, useKinFit, specialPostfix, doUnfolding);
     
     //bool normaliseToUnitArea = 0;
 
@@ -5118,6 +5203,12 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
 
 // main function
 void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double xsec = topxsec) {
+
+
+     // DAVID
+    // SVD_Plots();
+    // return;
+    
     time_t starttime;
     time(&starttime);
     std::cout << "CombinedCrossSection.C started: " << ctime(&starttime) << std::endl;
@@ -5202,30 +5293,30 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // Calculate differential cross sections
     TGaxis::SetMaxDigits(2);
 
-    // leptons
+/*    // leptons
     const Int_t nbinsLepEta = 6;
     const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
     const Double_t binCenterLepEta[nbinsLepEta] = {-1.93, -1.15, -0.45, 0.47, 1.15, 1.93};
     //const Double_t binCenterLepEta[nbinsLepEta] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
-    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta );
-    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE );
+    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, true, 0, doSVD );
+    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE, 0, false);
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     GetBtagEfficiencyInBins("Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
-    
-    //return;
+   
+ 
     const Int_t nbinsLepEtaMoreBins = 7;
     const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.1, -0.4, 0.4, 1.1, 1.7, 2.4};
 //     const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.0, -0.3, 0.3, 1.0, 1.7, 2.4};
     const Double_t binCenterLepEtaMoreBins[nbinsLepEtaMoreBins] = {bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto};
-    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins" );
+    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins", doSVD);
 
 
 
     const Int_t nbinsLepPt = 5;
     const Double_t binsLepPt[nbinsLepPt+1] = {20, 40, 70, 120, 180, 400};
     const Double_t binCenterLepPt[nbinsLepPt] = {28, 55, 93, 147, 249};
-    PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt );
-    PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE );
+    PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, true, 0, doSVD );
+    PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE, 0, false );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Pt", kCOMBINED, "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
     GetBtagEfficiencyInBins("Leptons",  "Pt", "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
     
@@ -5241,15 +5332,15 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsLepPairPt = 7;
     const Double_t binsLepPairPt[nbinsLepPairPt+1] = {0, 10, 20, 40, 60, 100, 150, 400};
     const Double_t binCenterLepPairPt[nbinsLepPairPt] = {5, 15, 30, 47, 80, 123, 215};
-    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt );
-    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE );
+    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, true, 0, doSVD );
+    PlotDifferentialCrossSections("LepPair", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+}l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPairPt, nbinsLepPairPt, binCenterLepPairPt, kFALSE, 0, false );
     GetBtagEfficiencyInBins("DiLepton", "Pt", "p_{T}^{l^{+}l^{-}} #left[#frac{GeV}{c}#right]", binsLepPairPt, nbinsLepPairPt);
 
     const Int_t nbinsLepPairMass = 5;
     const Double_t binsLepPairMass[nbinsLepPairMass+1] = {12, 50, 76, 106, 200, 400};
     const Double_t binCenterLepPairMass[nbinsLepPairMass] = {31, 60, 93, 146, 271};
-    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass );
-    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE );
+    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, true, 0, doSVD  );
+    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMass, nbinsLepPairMass, binCenterLepPairMass, kFALSE, 0, false  );
     GetBtagEfficiencyInBins("DiLepton", "Mass", "m^{l^{+}l^{-}} #left[#frac{GeV}{c^{2}}#right]", binsLepPairMass, nbinsLepPairMass);
 
 
@@ -5258,35 +5349,35 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsLepPairMassJohannes1 = 2;
     const Double_t binsLepPairMassJohannes1[nbinsLepPairMassJohannes1+1] = {60, 120, 400};
     const Double_t binCenterMassJohannes1[nbinsLepPairMassJohannes1] = {bccAuto, bccAuto};
-    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kTRUE, "Johannes1_");
-    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kFALSE, "Johannes1_");
+    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kTRUE, "Johannes1_", false);
+    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes1, nbinsLepPairMassJohannes1, binCenterMassJohannes1, kFALSE, "Johannes1_",false);
         
     const Int_t nbinsLepPairMassJohannes2 = 4;
     const Double_t binsLepPairMassJohannes2[nbinsLepPairMassJohannes2+1] = {60, 76, 106, 120, 400};
     const Double_t binCenterMassJohannes2[nbinsLepPairMassJohannes2] = {bccAuto, bccAuto, bccAuto, bccAuto};
-    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kTRUE, "Johannes2_");
-    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kFALSE, "Johannes2_");
+    //PlotDifferentialCrossSections("LepPair", "Mass", "M^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kTRUE, "Johannes2_",false);
+    PlotDifferentialCrossSections("LepPair", "Mass", "m^{l^{+}l^{-}} [GeV]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{l^{+}l^{-}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsLepPairMassJohannes2, nbinsLepPairMassJohannes2, binCenterMassJohannes2, kFALSE, "Johannes2_", false);
     std::cout << "End plots for Johannes\n************\n\n";
 
     // jets
     const Int_t nbinsJetEta = 6;
     const Double_t binsJetEta[nbinsJetEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
     const Double_t binCenterJetEta[nbinsJetEta] = {bccAuto, bccAuto-0.05, bccAuto+0.05, bccAuto+0.05, bccAuto+0.05, bccAuto};
-    PlotDifferentialCrossSections("Jets", "Eta", "#eta^{b and #bar{b}}", "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{b and #bar{b}}} ", binsJetEta, nbinsJetEta, binCenterJetEta );
+    PlotDifferentialCrossSections("Jets", "Eta", "#eta^{b and #bar{b}}", "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{b and #bar{b}}} ", binsJetEta, nbinsJetEta, binCenterJetEta, true, 0, doSVD );
     GetBtagEfficiencyInBins("Jets", "Eta", "#eta_{b/#bar{b}}", binsJetEta, nbinsJetEta);
     
     const Int_t nbinsJetPt = 5;
     const Double_t binsJetPt[nbinsJetPt+1] = {30, 50, 70, 120, 180, 400};
     const Double_t binCenterJetPt[nbinsJetPt] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
-    PlotDifferentialCrossSections("Jets", "Pt", "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{b and #bar{b}}} #left[(#frac{GeV}{c})^{-1}#right]", binsJetPt, nbinsJetPt, binCenterJetPt );
+    PlotDifferentialCrossSections("Jets", "Pt", "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{b and #bar{b}}} #left[(#frac{GeV}{c})^{-1}#right]", binsJetPt, nbinsJetPt, binCenterJetPt, true, 0, doSVD  );
     GetBtagEfficiencyInBins("Jets", "Pt", "p_{T,l}", binsJetPt, nbinsJetPt);
-
+*/
   
     // top
     const Int_t nbinsTopRapidity = 4;
     const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
     const Double_t binCenterTopRapidity[nbinsTopRapidity] = {-1.78, -0.66, 0.69, 1.76};
-    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity );
+    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     
@@ -5294,12 +5385,12 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsTopRapidityMoreBins = 5;
     const Double_t binsTopRapidityMoreBins[nbinsTopRapidityMoreBins+1] = {-2.5, -1.4, -0.5, 0.5, 1.4, 2.5};
     const Double_t binCenterTopRapidityMoreBins[nbinsTopRapidityMoreBins] = {-1.85, -0.95, 0, 0.95, 1.85};
-    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidityMoreBins, nbinsTopRapidityMoreBins, binCenterTopRapidityMoreBins, kTRUE, "_MoreBins" );
+    PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidityMoreBins, nbinsTopRapidityMoreBins, binCenterTopRapidityMoreBins, kTRUE, "_MoreBins" , doSVD );
 
     const Int_t nbinsTopPt = 4;
     const Double_t binsTopPt[nbinsTopPt+1] = {0, 70, 140, 240, 400};
     const Double_t binCenterTopPt[nbinsTopPt] = {32, 109, 185, 308};
-    PlotDifferentialCrossSections("TopQuarks", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t and #bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTopPt, nbinsTopPt, binCenterTopPt );
+    PlotDifferentialCrossSections("TopQuarks", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t and #bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTopPt, nbinsTopPt, binCenterTopPt , true, 0, doSVD );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Pt", kCOMBINED, "generated p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
     GetBtagEfficiencyInBins("Top", "Pt", "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]", binsTopPt, nbinsTopPt);
     
@@ -5310,12 +5401,12 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     SaveUnfoldingHists("TopQuarks", "Pt", kEE, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
     SaveUnfoldingHists("TopQuarks", "Pt", kCOMBINED, binsTopPt, nbinsTopPt, finebinsTopPt, nfinebinsTopPt );
 
-
+return;
     // ttbar quantities
     const Int_t nbinsTtBarRapidity = 4;
     const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
     const Double_t binCenterTtBarRapidity[nbinsTtBarRapidity] = {-1.68, -0.65, 0.68, 1.65};
-    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidity, nbinsTtBarRapidity, binCenterTtBarRapidity );
+    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidity, nbinsTtBarRapidity, binCenterTtBarRapidity , true, 0, doSVD );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Rapidity", kCOMBINED, "generated y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
     GetBtagEfficiencyInBins("TtBar", "Rapidity", "y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
     
@@ -5323,12 +5414,12 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nbinsTtBarRapidityMoreBins = 5;
     const Double_t binsTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins+1] = {-2.5, -1.2, -0.4, 0.4, 1.2, 2.5};
     const Double_t binCenterTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins] = {-1.68, bccAuto, 0, bccAuto, 1.65};
-    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins, kTRUE, "_MoreBins" );
+    PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins, kTRUE, "_MoreBins" , doSVD );
     
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
     const Double_t binCenterTtBarPt[nbinsTtBarPt] = {5, 39, 86, 231};
-    PlotDifferentialCrossSections("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t#bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTtBarPt, nbinsTtBarPt, binCenterTtBarPt );
+    PlotDifferentialCrossSections("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{t#bar{t}}} #left[(#frac{GeV}{c})^{-1}#right]", binsTtBarPt, nbinsTtBarPt, binCenterTtBarPt , true, 0, doSVD );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Pt", kCOMBINED, "generated p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
     GetBtagEfficiencyInBins("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
 
@@ -5337,7 +5428,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Int_t nfinebinsTtBarMass = 2*nbinsTtBarMass+1;
     const Double_t finebinsTtBarMass[nfinebinsTtBarMass] = {345, 373, 400, 437, 475, 513, 550, 625, 700, 850, 1000};
     const Double_t binCenterTtBarMass[nbinsTtBarMass] = {364, 439, 515, 616, 823};
-    PlotDifferentialCrossSections("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass );
+    PlotDifferentialCrossSections("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Mass", kCOMBINED, "generated m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     GetBtagEfficiencyInBins("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     SaveUnfoldingHists("TtBar", "Mass", kMM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
@@ -5439,3 +5530,506 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 int main() {
     CombinedCrossSection();
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////    S V D     Functions      /////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+// SVD Helper Function
+// Return a k-Value for the particle/quantity/channel combination
+int SVD_GetKValue(TString channel, TString particle, TString quantity)
+{
+    // Define the kValues
+    int kLepEta[] = {8,8,8,8};
+    int kLepPt[] = {7,7,7,7};
+    int kLepPairEta[] = {8,8,8,8};
+    int kLepPairPt[] = {7,7,7,7};
+    int kLepPairMass[] = {6,6,6,6};
+    int kJetEta[] = {6,6,6,6};
+    int kJetPt[] = {4,4,4,4};
+    int kTopEta[] = {4,4,4,4};
+    int kTopPt[] = {4,4,4,4};
+    int kTtEta[] = {4,4,4,4};
+    int kTtPt[] = {4,4,4,4};
+    int kTtMass[] = {4,4,4,4};
+
+
+    // ChannelNumbers
+    int channelnumber = -1;
+    if ( TString(channel).CompareTo("mumu") == 0 ) channelnumber = 0;
+    if ( TString(channel).CompareTo("emu") == 0 ) channelnumber = 1;
+    if ( TString(channel).CompareTo("ee") == 0 ) channelnumber = 2;
+    if ( TString(channel).CompareTo("combined") == 0 ) channelnumber = 3;
+    if ( channelnumber == -1 ) {
+        cout << "Error in SVD_GetKValue()" << endl;
+        cout << "I dont know which channel you want." << endl;
+        cout << "particle="<<particle<<", quantity="<<quantity<<", channel="<<channel<<endl;
+        cout << "Check the reason for this NOW." << endl;
+        exit(1);
+    }
+
+
+
+    // Return a kValue
+    int kValue = 0;
+    if ( TString(particle).CompareTo("Leptons") == 0 && TString(quantity).CompareTo("Eta") == 0 ) {
+        kValue = kLepEta[channelnumber];
+    }
+    if ( TString(particle).CompareTo("Leptons") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
+        kValue = kLepPt[channelnumber];
+    }
+    if ( TString(particle).CompareTo("LepPair") == 0 && TString(quantity).CompareTo("Eta") == 0 ) {
+        kValue = kLepPairEta[channelnumber];
+    }
+    if ( TString(particle).CompareTo("LepPair") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
+        kValue = kLepPairPt[channelnumber];
+    }
+    if ( TString(particle).CompareTo("LepPair") == 0 && TString(quantity).CompareTo("Mass") == 0 ) {
+        kValue = kLepPairMass[channelnumber];
+    }
+    if ( TString(particle).CompareTo("Jets") == 0 && TString(quantity).CompareTo("Eta") == 0 ) {
+        kValue = kJetEta[channelnumber];
+    }
+    if ( TString(particle).CompareTo("Jets") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
+        kValue = kJetPt[channelnumber];
+    }
+    if ( TString(particle).CompareTo("TopQuarks") == 0 && TString(quantity).CompareTo("Rapidity") == 0 ) {
+        kValue = kTopEta[channelnumber];
+    }
+    if ( TString(particle).CompareTo("TopQuarks") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
+        kValue = kTopPt[channelnumber];
+    }
+    if ( TString(particle).CompareTo("TtBar") == 0 && TString(quantity).CompareTo("Rapidity") == 0 ) {
+        kValue = kTtEta[channelnumber];
+    }
+    if ( TString(particle).CompareTo("TtBar") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
+        kValue = kTtPt[channelnumber];
+    }
+    if ( TString(particle).CompareTo("TtBar") == 0 && TString(quantity).CompareTo("Mass") == 0 ) {
+        kValue = kTtMass[channelnumber];
+    }
+
+    // Exit if this fails
+    if ( kValue == 0 ) {
+        cout << "Error in SVD_GetKValue()" << endl;
+        cout << "Level of regularization could not be determined." << endl;
+        cout << "particle="<<particle<<", quantity="<<quantity<<", channelnumber="<<channelnumber<<endl;
+        cout << "Check the reason for this NOW." << endl;
+        exit(1);
+    }
+
+    return kValue;
+}
+
+
+// DAVID
+// SVD Unfolding Helper Function
+// Create Tex Snippets for the histograms
+void SVD_Tex(TString channel, TString particle, TString quantity, TString& particleTex, TString& quantityTex, TString& channelTex)
+{
+    
+    quantityTex = "";
+    if ( strcmp(quantity, "Pt") == 0 ) {
+        quantityTex.Append("p_{T}");
+    } else if ( strcmp(quantity, "Eta") == 0 ) {
+        quantityTex.Append("#eta");
+    } else if ( strcmp(quantity, "Mass") == 0 ) {
+        quantityTex.Append("M_{t #bar{t}}");
+    } else {
+        quantityTex.Append(quantity);
+    }
+
+    channelTex = "";
+    if ( strcmp(channel, "mumu") == 0 ) {
+        channelTex.Append("#mu^{+}#mu^{-}");
+    } else if ( strcmp(channel, "emu") == 0 ) {
+        channelTex.Append("e^{+}#mu^{-}");
+    } else if ( strcmp(channel, "ee") == 0 ) {
+        channelTex.Append("e^{+}e^{-}");
+    } else if ( strcmp(channel, "combined") == 0 ) {
+        channelTex.Append("comb.");
+    } else {
+        channelTex.Append(channel);
+    }
+    
+    particleTex = "";
+    if ( strcmp(particle, "Leptons") == 0 ) {
+        particleTex.Append("l^{+} / l^{-}");
+    } else if ( strcmp(particle, "LepPair") == 0 ) {
+        particleTex.Append("l^{+}l^{-}-Pair");
+    } else if ( strcmp(particle, "Jets") == 0 ){
+        particleTex.Append("Jets");
+    } else if ( strcmp(particle, "TopQuarks") == 0 ) {
+        particleTex.Append("t / #bar{t}");
+    } else if ( strcmp(particle, "TtBar") == 0 ) {
+        particleTex.Append("t#bar{t}-Pair");
+    } else {
+        particleTex.Append(particle);
+    }
+
+}
+
+
+
+// DAVID
+// SVD Unfolding Helper Function
+TString SVD_GetOutputPath()
+{
+
+    TString outputfilename = "";
+    outputfilename.Append(outpath);
+    outputfilename.Append("SVD");
+
+    return outputfilename;
+
+}
+
+
+
+// DAVID
+// SVD Unfolding Helper Function
+// This function provides all the histograms that are needed
+// as Input for the SVD Unfolding
+void SVD_GetInputHists(TString channel, TString particle, TString quantity, TH1*& dataHist, TH1*& bgrHist, TH1*& genHist, TH1*& recHist, TH1*& genRec2DHist)
+{
+	
+
+    // Suffix of the names of the input histograms 	
+    TString plotStr("");
+    if (strcmp(particle,"Leptons")==0) {
+        plotStr.Append("Lep");
+    } else if (strcmp(particle,"Jets")==0) {
+        plotStr.Append("B");
+    } else if (strcmp(particle,"TopQuarks")==0) {
+        plotStr.Append("Top");
+    } else {
+        plotStr.Append(particle);
+    }
+    plotStr.Append(quantity);
+
+
+    // Prepare the input histograms 
+    TH1* hists[Nfiles];  // REC (Data, Signal, Bgr)  
+   
+
+
+    // Fill the input histograms
+    if (channel=="mumu") {
+        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
+  
+        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+
+        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
+
+        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
+    } else if (channel=="emu") {
+        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
+
+        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
+
+        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
+
+        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
+    } else if (channel=="ee") {
+        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
+
+        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
+
+        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
+
+        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
+    } else if (channel=="combined") {
+        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
+        AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
+        AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
+
+        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
+
+
+        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
+        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
+
+        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
+        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
+    } else {
+        cout << "ERROR in SaveUnfoldingHists: index " << channel << " for channel is out of range!" << endl;
+        return ;
+    }
+                                        
+     
+                                    	
+    // if particle = Leptons, Jets or TopQuarks 
+    // then the histogram of the antiparticle is added to that of the particle
+    bool addAntiParticles = false;
+    if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
+	addAntiParticles = true;
+    }	
+
+
+    // Add Anti Particles 	
+    if ( addAntiParticles == true ) { 
+
+
+        // Suffix of Names of Input Histos
+        plotStr.Clear();
+        plotStr = "";
+        if (strcmp(particle,"Leptons")==0) {
+            plotStr.Append("LepBar");
+        } else if (strcmp(particle,"Jets")==0) {
+            plotStr.Append("BBar");
+        } else if (strcmp(particle,"TopQuarks")==0) {
+            plotStr.Append("TopBar");
+        }
+        plotStr.Append(quantity);
+
+
+        // Add the anti particle histos to the histos which are already there
+        if (channel=="mumu") {
+            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
+
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
+
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
+        } else if (channel=="emu") {
+            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
+
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
+
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
+
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
+        } else if (channel=="ee") {
+            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
+
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
+
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
+
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
+
+        } else if (channel=="combined") {
+            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
+            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
+            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
+
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
+            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
+
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
+            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
+
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
+            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
+        }
+    }
+
+
+    // MC NORMALIZATION 
+    // ... all MC's are scaled according to nominal cross section.
+    // ... exception: DY-MC's get an ADDITIONAL correction
+    // ... data are not normalized ;-) 
+    Double_t zElCorr = 1.;
+    Double_t zMuCorr = 1.;
+    SetWeights(hists, zElCorr, zMuCorr);
+
+
+    // Raw Data Histogram    
+    dataHist = hists[0];
+
+
+    // Background Histogram
+    bgrHist = (TH1D*) hists[3]->Clone("Background");
+    for(size_t i = 4; i < Nplots; ++i){
+      bgrHist->Add(hists[i],1.);
+    }
+
+}
+
+
+
+
+// DAVID
+// Create Plots concerning the unfolding step
+int SVD_Plots()
+{
+    //////////////////////////////////////////////
+    // Playground to produce  Unfolding plots ////
+    //////////////////////////////////////////////
+
+    // Dummy return histo
+    TH1D* returnhisto = NULL;
+
+    // Bin Numbers
+    const Int_t nbinsLepEta = 6;
+    const Int_t nbinsLepPt = 5;
+    const Int_t nbinsLepPairEta = 6;
+    const Int_t nbinsLepPairPt = 7;
+    const Int_t nbinsLepPairMass = 5;
+    const Int_t nbinsJetEta = 6;
+    const Int_t nbinsJetPt = 5;
+    const Int_t nbinsTopRapidity = 4;
+    const Int_t nbinsTopPt = 4;
+    const Int_t nbinsTtBarRapidity = 4;
+    const Int_t nbinsTtBarPt = 4;
+    const Int_t nbinsTtBarMass = 5;
+
+
+
+
+    // Leptons Eta
+    const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
+    SVD_Unfold("mumu", "Leptons", "Eta",  binsLepEta, nbinsLepEta, SVD_GetKValue("mumu", "Leptons", "Eta"), returnhisto, false, true);
+    SVD_Unfold("emu", "Leptons", "Eta", binsLepEta, nbinsLepEta, SVD_GetKValue("emu", "Leptons", "Eta"), returnhisto, false, true);
+    SVD_Unfold("ee", "Leptons", "Eta", binsLepEta, nbinsLepEta, SVD_GetKValue("ee",  "Leptons", "Eta"), returnhisto, false, true);
+    SVD_Unfold("combined", "Leptons", "Eta", binsLepEta, nbinsLepEta, SVD_GetKValue("combined", "Leptons", "Eta"), returnhisto, false, true);
+
+
+    // Leptons Pt
+    const Double_t binsLepPt[nbinsLepPt+1] = {20., 40., 70., 120., 180., 400.};
+    SVD_Unfold("mumu", "Leptons", "Pt",  binsLepPt, nbinsLepPt, SVD_GetKValue("mumu", "Leptons", "Pt"), returnhisto, false, true);
+    SVD_Unfold("emu", "Leptons", "Pt", binsLepPt, nbinsLepPt, SVD_GetKValue("emu", "Leptons", "Pt"), returnhisto, false, true);
+    SVD_Unfold("ee", "Leptons", "Pt", binsLepPt, nbinsLepPt, SVD_GetKValue("ee",  "Leptons", "Pt"), returnhisto, false, true);
+    SVD_Unfold("combined", "Leptons", "Pt", binsLepPt, nbinsLepPt, SVD_GetKValue("combined", "Leptons", "Pt"), returnhisto, false, true);
+
+
+
+    // LepPair Eta
+    // Attention! Here you take the same bins as for the single leptons.
+    const Double_t binsLepPairEta[nbinsLepPairEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};   
+    SVD_Unfold("mumu", "LepPair", "Eta",  binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("mumu", "LepPair", "Eta"), returnhisto, false, true);
+    SVD_Unfold("emu", "LepPair", "Eta", binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("emu", "LepPair", "Eta"), returnhisto, false, true);
+    SVD_Unfold("ee", "LepPair", "Eta", binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("ee",  "LepPair", "Eta"), returnhisto, false, true);
+    SVD_Unfold("combined", "LepPair", "Eta", binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("combined", "LepPair", "Eta"), returnhisto, false, true);
+
+
+
+    // LepPair Pt
+    const Double_t binsLepPairPt[nbinsLepPairPt+1] = {0., 10., 20., 40., 60., 100., 150., 400.};
+    SVD_Unfold("mumu", "LepPair", "Pt",  binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("mumu", "LepPair", "Pt"), returnhisto, false, true);
+    SVD_Unfold("emu", "LepPair", "Pt", binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("emu", "LepPair", "Pt"), returnhisto, false, true);
+    SVD_Unfold("ee", "LepPair", "Pt", binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("ee",  "LepPair", "Pt"), returnhisto, false, true);
+    SVD_Unfold("combined", "LepPair", "Pt", binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("combined", "LepPair", "Pt"), returnhisto, false, true);
+
+      
+    // LepPair Mass
+    const Double_t binsLepPairMass[nbinsLepPairMass+1] = {12., 50., 76., 106., 200., 400.};
+    SVD_Unfold("mumu", "LepPair", "Mass",  binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("mumu", "LepPair", "Mass"), returnhisto, false, true);
+    SVD_Unfold("emu", "LepPair", "Mass", binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("emu", "LepPair", "Mass"), returnhisto, false, true);
+    SVD_Unfold("ee", "LepPair", "Mass", binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("ee",  "LepPair", "Mass"), returnhisto, false, true);
+    SVD_Unfold("combined", "LepPair", "Mass", binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("combined", "LepPair", "Mass"), returnhisto, false, true);
+
+
+
+
+    // Jets Eta
+    const Double_t binsJetEta[nbinsJetEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
+    SVD_Unfold("mumu", "Jets", "Eta",  binsJetEta, nbinsJetEta, SVD_GetKValue("mumu", "Jets", "Eta"), returnhisto, false, true);
+    SVD_Unfold("emu", "Jets", "Eta", binsJetEta, nbinsJetEta, SVD_GetKValue("emu", "Jets", "Eta"), returnhisto, false, true);
+    SVD_Unfold("ee", "Jets", "Eta", binsJetEta, nbinsJetEta, SVD_GetKValue("ee",  "Jets", "Eta"), returnhisto, false, true);
+    SVD_Unfold("combined", "Jets", "Eta", binsJetEta, nbinsJetEta, SVD_GetKValue("combined", "Jets", "Eta"), returnhisto, false, true);
+
+
+    // Jets Pt
+    const Double_t binsJetPt[nbinsJetPt+1] = {30, 50, 70, 120, 180, 400};
+    SVD_Unfold("mumu", "Jets", "Pt",  binsJetPt, nbinsJetPt, SVD_GetKValue("mumu", "Jets", "Pt"), returnhisto, false, true);
+    SVD_Unfold("emu", "Jets", "Pt", binsJetPt, nbinsJetPt, SVD_GetKValue("emu", "Jets", "Pt"), returnhisto, false, true);
+    SVD_Unfold("ee", "Jets", "Pt", binsJetPt, nbinsJetPt, SVD_GetKValue("ee",  "Jets", "Pt"), returnhisto, false, true);
+    SVD_Unfold("combined", "Jets", "Pt", binsJetPt, nbinsJetPt, SVD_GetKValue("combined", "Jets", "Pt"), returnhisto, false, true);
+
+
+
+    // Tops Eta
+    const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
+    SVD_Unfold("mumu", "TopQuarks", "Eta",  binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("mumu", "TopQuarks", "Eta"), returnhisto, false, true);
+    SVD_Unfold("emu", "TopQuarks", "Eta", binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("emu", "TopQuarks", "Eta"), returnhisto, false, true);
+    SVD_Unfold("ee", "TopQuarks", "Eta", binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("ee",  "TopQuarks", "Eta"), returnhisto, false, true);
+    SVD_Unfold("combined", "TopQuarks", "Eta", binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("combined", "TopQuarks", "Eta"), returnhisto, false, true);
+
+
+    // Tops Pt
+    const Double_t binsTopPt[nbinsTopPt+1] = {0., 70., 140., 240., 400.};
+    SVD_Unfold("mumu", "TopQuarks", "Pt",  binsTopPt, nbinsTopPt, SVD_GetKValue("mumu", "TopQuarks", "Pt"), returnhisto, false, true);
+    SVD_Unfold("emu", "TopQuarks", "Pt", binsTopPt, nbinsTopPt, SVD_GetKValue("emu", "TopQuarks", "Pt"), returnhisto, false, true);
+    SVD_Unfold("ee", "TopQuarks", "Pt", binsTopPt, nbinsTopPt, SVD_GetKValue("ee",  "TopQuarks", "Pt"), returnhisto, false, true);
+    SVD_Unfold("combined", "TopQuarks", "Pt", binsTopPt, nbinsTopPt, SVD_GetKValue("combined", "TopQuarks", "Pt"), returnhisto, false, true);
+
+
+    // Top Pair Eta
+    const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
+    SVD_Unfold("mumu", "TtBar", "Eta",  binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("mumu", "TtBar", "Eta"), returnhisto, false, true);
+    SVD_Unfold("emu", "TtBar", "Eta", binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("emu", "TtBar", "Eta"), returnhisto, false, true);
+    SVD_Unfold("ee", "TtBar", "Eta", binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("ee",  "TtBar", "Eta"), returnhisto, false, true);
+    SVD_Unfold("combined", "TtBar", "Eta", binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("combined", "TtBar", "Eta"), returnhisto, false, true);
+
+
+
+    // TtBar Pt
+    const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0., 20., 60., 120., 500.};
+    SVD_Unfold("mumu", "TtBar", "Pt",  binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("mumu", "TtBar", "Pt"), returnhisto, false, true);
+    SVD_Unfold("emu", "TtBar", "Pt", binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("emu", "TtBar", "Pt"), returnhisto, false, true);
+    SVD_Unfold("ee", "TtBar", "Pt", binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("ee",  "TtBar", "Pt"), returnhisto, false, true);
+    SVD_Unfold("combined", "TtBar", "Pt", binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("combined", "TtBar", "Pt"), returnhisto, false, true);
+
+
+    // TtBar Mass
+    const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345., 400., 475., 550., 700., 1000.};
+    SVD_Unfold("mumu", "TtBar", "Mass",  binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("mumu", "TtBar", "Mass"), returnhisto, false, true);
+    SVD_Unfold("emu", "TtBar", "Mass", binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("emu", "TtBar", "Mass"), returnhisto, false, true);
+    SVD_Unfold("ee", "TtBar", "Mass", binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("ee",  "TtBar", "Mass"), returnhisto, false, true);
+    SVD_Unfold("combined", "TtBar", "Mass", binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("combined", "TtBar", "Mass"), returnhisto, false, true);
+
+
+    return 0;
+}
+
+
