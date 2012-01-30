@@ -65,24 +65,24 @@ void Histo::MakePlots(){
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();
-    h_generalPlot.PlotDiffXSec();
     h_generalPlot.write();
-    /*  h_generalPlot.DYScaleFactor();
+    h_generalPlot.PlotDiffXSec();
+    h_generalPlot.DYScaleFactor();
 	h_generalPlot.setDataSet("emu");
 	h_generalPlot.fillHisto();
-	h_generalPlot.PlotDiffXSec();
 	h_generalPlot.write();
+	h_generalPlot.PlotDiffXSec();
 	h_generalPlot.DYScaleFactor();
 	h_generalPlot.setDataSet("ee");
 	h_generalPlot.fillHisto();
-	h_generalPlot.PlotDiffXSec();
 	h_generalPlot.write();
+	h_generalPlot.PlotDiffXSec();
 	h_generalPlot.DYScaleFactor();
 	h_generalPlot.setDataSet("combined");
 	h_generalPlot.fillHisto();
-	h_generalPlot.PlotDiffXSec();
 	h_generalPlot.write();
-    */
+	h_generalPlot.PlotDiffXSec();
+	
     
   }
   return;

@@ -186,7 +186,7 @@ void Plotter::InclFlatSystematics(int syst_number){
   //if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//ee 
   //if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//mumu  
   //if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .001;}//emu  
-  //syst_number++;
+  syst_number++;
 
   //B-tagging (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//ee 
@@ -1119,10 +1119,10 @@ void Plotter::PlotXSec(){
 
 double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
-  //  CalcInclSystematics("JES",0);
-  //CalcInclSystematics("RES",1);
+  CalcInclSystematics("JES",0);
+  CalcInclSystematics("RES",1);
   //CalcInclSystematics("PU_",2);
-  //InclFlatSystematics(3);
+  InclFlatSystematics(2);
   
   double syst_square=0;
 
@@ -1504,29 +1504,56 @@ void Plotter::PlotDiffXSec(){
 	
     genscale = 1./ h_GenDiffXSec->Integral("width");
     h_GenDiffXSec->Scale(genscale);
-
-
-
-    //    TH1* mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");
-    TH1* mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");
+    TH1* mcnlohist;TH1* mcnlohistup;TH1* mcnlohistdown;TH1* powheghist;
+    if(name.Contains("LeptonpT")){mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
+    else if(name.Contains("LeptonEta")){mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");}
+    else if(name.Contains("LLBarpT")){mcnlohist = GetNloCurve("LepPair","Pt","MCatNLO");}
+    else if(name.Contains("LLBarMass")){mcnlohist = GetNloCurve("LepPair","Mass","MCatNLO");}
+    else if(name.Contains("ToppT")){mcnlohist = GetNloCurve("TopQuarks","Pt","MCatNLO");}
+    else if(name.Contains("TopRapidity")){mcnlohist = GetNloCurve("TopQuarks","Rapidity","MCatNLO");}
+    else if(name.Contains("TTBarpT")){mcnlohist = GetNloCurve("TtBar","Pt","MCatNLO");}
+    else if(name.Contains("TTBarRapidity")){mcnlohist = GetNloCurve("TtBar","Rapidity","MCatNLO");}
+    else if(name.Contains("TTBarMass")){mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");}
+    //    mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
-    mcnlohist->Rebin(10);mcnlohist->Scale(0.1);
+    mcnlohist->Rebin(1);mcnlohist->Scale(1);
     mcnlohist->Scale(mcnloscale);
 
-    //    TH1* mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");
-    TH1* mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");
-    mcnlohistup->Rebin(10);mcnlohistup->Scale(0.1);
+    if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
+    else if(name.Contains("LeptonEta")){mcnlohistup = GetNloCurve("Leptons","Eta","MCNLOup");}
+    else if(name.Contains("LLBarpT")){mcnlohistup = GetNloCurve("LepPair","Pt","MCNLOup");}
+    else if(name.Contains("LLBarMass")){mcnlohistup = GetNloCurve("LepPair","Mass","MCNLOup");}
+    else if(name.Contains("ToppT")){mcnlohistup = GetNloCurve("TopQuarks","Pt","MCNLOup");}
+    else if(name.Contains("TopRapidity")){mcnlohistup = GetNloCurve("TopQuarks","Rapidity","MCNLOup");}
+    else if(name.Contains("TTBarpT")){mcnlohistup = GetNloCurve("TtBar","Pt","MCNLOup");}
+    else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
+    else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
+    mcnlohistup->Rebin(1);mcnlohistup->Scale(1);
     mcnlohistup->Scale(mcnloscale);
 
-    //    TH1* mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");
-    TH1* mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");
-    mcnlohistdown->Rebin(10);mcnlohistdown->Scale(0.1);
+    if(name.Contains("LeptonpT")){mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");}//temprorary until I change the naming convention in the root file
+    else if(name.Contains("LeptonEta")){mcnlohistdown = GetNloCurve("Leptons","Eta","MCNLOdown");}
+    else if(name.Contains("LLBarpT")){mcnlohistdown = GetNloCurve("LepPair","Pt","MCNLOdown");}
+    else if(name.Contains("LLBarMass")){mcnlohistdown = GetNloCurve("LepPair","Mass","MCNLOdown");}
+    else if(name.Contains("ToppT")){mcnlohistdown = GetNloCurve("TopQuarks","Pt","MCNLOdown");}
+    else if(name.Contains("TopRapidity")){mcnlohistdown = GetNloCurve("TopQuarks","Rapidity","MCNLOdown");}
+    else if(name.Contains("TTBarpT")){mcnlohistdown = GetNloCurve("TtBar","Pt","MCNLOdown");}
+    else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
+    else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
+    mcnlohistdown->Rebin(1);mcnlohistdown->Scale(1);
     mcnlohistdown->Scale(mcnloscale);
 
-    //    TH1* powheghist = GetNloCurve("TtBar","Mass","Powheg");
-    TH1* powheghist = GetNloCurve("Leptons","Pt","Powheg");
+    if(name.Contains("LeptonpT")){powheghist = GetNloCurve("Leptons","Pt","Powheg");}//temprorary until I change the naming convention in the root file
+    else if(name.Contains("LeptonEta")){powheghist = GetNloCurve("Leptons","Eta","Powheg");}
+    else if(name.Contains("LLBarpT")){powheghist = GetNloCurve("LepPair","Pt","Powheg");}
+    else if(name.Contains("LLBarMass")){powheghist = GetNloCurve("LepPair","Mass","Powheg");}
+    else if(name.Contains("ToppT")){powheghist = GetNloCurve("TopQuarks","Pt","Powheg");}
+    else if(name.Contains("TopRapidity")){powheghist = GetNloCurve("TopQuarks","Rapidity","Powheg");}
+    else if(name.Contains("TTBarpT")){powheghist = GetNloCurve("TtBar","Pt","Powheg");}
+    else if(name.Contains("TTBarRapidity")){powheghist = GetNloCurve("TtBar","Rapidity","Powheg");}
+    else if(name.Contains("TTBarMass")){powheghist = GetNloCurve("TtBar","Mass","Powheg");}
     double powhegscale = 1./powheghist->Integral("width");
-    powheghist->Rebin(2);powheghist->Scale(0.5);
+    powheghist->Rebin(1);powheghist->Scale(1);
     powheghist->Scale(powhegscale);
 
     //Uncertainty band for MC@NLO
