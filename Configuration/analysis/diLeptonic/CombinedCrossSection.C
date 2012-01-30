@@ -48,8 +48,10 @@ using namespace std;
 // path to the ingoing root histogram files
 //const TString inpath("/scratch/hh/lustre/cms/user/dammann/TopDileptonDiffXsec/results/2011_Oct_14/kin_scale/");
 
-
-const TString inpath("/afs/naf.desy.de/user/w/wbehrenh/scratch/Nov1/standard_new/");
+const char *USERNAME = getenv("USER");
+const TString inpath(  !strcmp(USERNAME, "wbehrenh") ? "./" : //PLEASE LEAVE THIS LINE ALONE!!!!!!! I need it this way for all the systematics.
+    "/data/group/top/CompleteRun/standard_for_Nov1/"  //MODIFY THIS LINE if you need a different directory
+    );
 
 
 //const TString inpath("/scratch/hh/current/cms/user/asincruz/njs/M20Inf/");
@@ -133,14 +135,16 @@ Bool_t scaleDownDY = kFALSE;
 // if kTRUE the Drell Yan background is corrected by comparing the numbers of events in data and MC in Z veto region
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
-const bool doPrintControlPlots = kTRUE;
+const bool doPrintControlPlots = kFALSE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
+// print all channels or only combined
+const bool doPrintAllChannels = kTRUE;
 // do you want a shaded area to show the systematic uncertainty in the control plots?
 const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
 const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
-const bool PAS = kTRUE;
+const bool PAS = kFALSE;
 // do you want a legend in the plots?
 const bool drawLegend = kTRUE;
 // should there be ratio Ndata/Nmc plots below the actual distributions?
@@ -194,6 +198,11 @@ const Double_t bccAuto = 100000;
 //const size_t orderStackPlot[] = {0, 8, 7, 6, 5, 4, 3, 2, 1};
 const size_t orderStackPlot[] = {0, 6, 5, 4, 7, 8, 3, 2, 1};
 
+const Style_t styleMcAtNLO = 7;
+const Style_t stylePOWHEG = 9;
+const Color_t colorMadGraph = kRed + 1;
+const Color_t colorPOWHEG = kGreen + 1;
+const Color_t colorMcAtNLO = kAzure;
 
 // Unfolding Flags
 const bool doSVD = false;
@@ -746,13 +755,13 @@ TGraphAsymmErrors* BinCenterCorrectedGraph(TH1* dataHist, TH1* sigHist, TH1* sig
         // ... and find corresponding bin numbers in signal MC hist.
         double binAve = signalCoarse->GetBinContent(signalCoarse->FindBin((lowEdge+upEdge)/2));
 
-        double binCenter = lowEdge;
-        double bestval = 1e40;
-        for (double x = lowEdge; x < upEdge; x += (upEdge-lowEdge)/200) {
-            double delta = std::abs(spline.Eval(x) - binAve);
-            if (delta < bestval) {
-                bestval = delta;
+        double binCenter = upEdge;
+        bool startSign = spline.Eval(upEdge) - binAve > 0;
+        for (double x = upEdge; x > lowEdge; x -= (upEdge-lowEdge)/400) {
+            double delta = spline.Eval(x) - binAve;
+            if ((delta > 0) != startSign) {
                 binCenter = x;
+                break;
             }
         }
         
@@ -802,6 +811,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
 
     TH1* hists[Nfiles];
     if (channel==kMM || channel==kEM || channel==kEE) {
+        if (!doPrintAllChannels) return;
         if (!GetCloneHistArray(moduleStr.Copy().Append("/"), plotStr, channel, hists)) return;
         if (module2Str.Length()) AddHistArray(module2Str.Copy().Append("/"), plotStr2, channel, hists);
         if (module3Str.Length()) AddHistArray(module3Str.Copy().Append("/"), plotStr3, channel, hists);
@@ -3344,9 +3354,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
 
     if (!specialPostfix) specialPostfix = "";
-    Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(specialPostfix).Append(outform));
+    if (doPrintAllChannels && !PAS) Canvas->Print(
+        outpath.Copy().Append(channelName[channel]).Append("/").
+        Append(title).Append(specialPostfix).Append(outform));
 
-    
     //now calculate cross section
     mergedhists[kDATA]->SetName(title);
     mergedhists[kDATA]->GetXaxis()->SetTitle(xtitle);
@@ -3574,7 +3585,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         genCrossHist->GetXaxis()->SetTitle(xtitle);
         genCrossHist->GetYaxis()->SetTitle(ytitle);
         genCrossHist->SetLineWidth(2);
-        genCrossHist->SetLineColor(kRed+1);
+        genCrossHist->SetLineColor(colorMadGraph);
         FormatHisto(genCrossHist);
         genCrossHist->Draw();
         
@@ -3609,12 +3620,13 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0)
             nrebin=8;
 
-        gh->SetLineColor(kRed+1);
+        gh->SetLineColor(colorMadGraph);
         gh->SetLineWidth(2);
         gh->Rebin(nrebin); gh->Scale(1./nrebin);
         gh->Draw("same,C");
 
-        mcatnloh->SetLineColor(kAzure);
+        mcatnloh->SetLineColor(colorMcAtNLO);
+        mcatnloh->SetLineStyle(styleMcAtNLO);
         mcatnloh->SetLineWidth(2);
         if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
 
@@ -3649,7 +3661,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
         TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
         mcatnloBand->SetFillColor(kGray);
-        mcatnloBand->SetLineColor(kAzure);
+        mcatnloBand->SetLineColor(colorMcAtNLO);
+        mcatnloBand->SetLineStyle(styleMcAtNLO);
         mcatnloBand->SetLineWidth(2);
         mcatnloBand->Draw("same, F");
 
@@ -3657,7 +3670,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         gh->Draw("same,C");
         mcatnloh->Draw("same,HIST,C");      
 
-        powhegh->SetLineColor(kGreen+1);
+        powhegh->SetLineColor(colorPOWHEG);
+        powhegh->SetLineStyle(stylePOWHEG);
         powhegh->SetLineWidth(2);
         if (powhegh->GetEntries()) powhegh->Draw("same,C");
 
@@ -3669,10 +3683,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         //TLegend leg2(0.70,0.70,0.95,0.87);
         TLegend leg2 = *getNewLegend();
         leg2.AddEntry(bccCrossGraph, "Data",    "p");
-        leg2.AddEntry(gh,            "Madgraph","l");
+        leg2.AddEntry(gh,            "MadGraph","l");
         if (mcatnlohUp->GetEntries() && mcatnlohDn->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
         else if (mcatnloh->GetEntries()) leg2.AddEntry(mcatnloh,      "MC@NLO",  "l");
-        if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "Powheg",  "l");        
+        if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "POWHEG",  "l");        
         leg2.SetFillStyle(0);
         leg2.SetBorderSize(0);
         leg2.Draw("same");
@@ -3692,6 +3706,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
         semileptonic::DrawCMSLabels(isPreliminary, lumi);
         semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
+        if (doPrintAllChannels && !PAS) 
         Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
         
         std::cout << " int=" << crossHist->Integral("width")<< "\n";
@@ -3784,6 +3799,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     box->SetTextSize(0.03);
     box->AddText(corrstr);
     box->Draw("SAME");
+    if (doPrintAllChannels && !PAS) 
     Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(specialPostfix).Append(outform));
 
     TH1* genRecHist = new TH1D("","",nbins,bins);
@@ -3925,6 +3941,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     title.Append(quantity);
 
     Canvas->Update();
+    if (doPrintAllChannels && !PAS) 
     Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(specialPostfix).Append(outform));
 
     efficiency->SetName(title);
@@ -3939,39 +3956,75 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     return;
 }
 
+
+void setHistoFromFunction(TH1* h, TF1* f, double startvalue = 0) {
+    for (int i = startvalue ? h->FindBin(startvalue) : 1; i <= h->GetNbinsX(); ++i) {
+        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
+    }
+}
+
 void SmoothTopPt(TH1 *h) {
     TH1* h2 = dynamic_cast<TH1*>(h->Clone());
     TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 200, 500);
     f->SetParameters(-0.017, 0.036);
     h2->Fit(f, "", "", 200, 360);
-    for (int i = h->FindBin(200); i <= h->GetNbinsX(); ++i) {
-        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
-    }
+    setHistoFromFunction(h, f, 200);
     delete h2;
 }
 
 
+void SmoothTtBarMass(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 400, 1000);
+    f->SetParameters(-8e-3, -2);
+    h2->Fit(f, "", "", 550, 900);
+    setHistoFromFunction(h, f, 550);
+    delete h2;
+}
+
+void SmoothTtBarPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
+    f->SetParameters(-1.91177e-02,1.09216e-05,1.57909e-02);
+    h2->Fit(f, "", "", 70, 500);
+    setHistoFromFunction(h, f, 70);
+    delete h2;
+}
 
 void SmoothLepPairMass(TH1 *h) {
     TH1* h2 = dynamic_cast<TH1*>(h->Clone());
     TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 170, 500);
     f->SetParameters(-0.017, 0.036);
     h2->Fit(f, "", "", 170, 350);
-    for (int i = h->FindBin(175); i <= h->GetNbinsX(); ++i) {
-        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
-    }
+    setHistoFromFunction(h, f, 175);
     delete h2;
 }
 
+void SmoothLepPairPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
+    f->SetParameters(-4.71076e-02, 3.50707e-05, 4.12185e-01);
+    h2->Fit(f, "", "", 150, 470);
+    setHistoFromFunction(h, f, 150);
+    delete h2;
+}
+
+void SmoothLeptonsPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
+    f->SetParameters(-4.14389e-02, 3.34359e-05, 1.33893e-01);
+    h2->Fit(f, "", "", 100, 380);
+    setHistoFromFunction(h, f, 120);
+    delete h2;
+}
+
+
 void SmoothRapidity(TH1 *h) {
     TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "[0]*TMath::Gaus(x, [1], [2]) + pol2(3) ", -2., 2.);
-    f->SetParameters(0.9, 0, 1, -0.4, 0, 0.06);
-    h2->Fit(f, "", "", -2., 2.);
-    for (int i = 1; i <= h->GetNbinsX(); ++i) {
-        double center = h->GetBinCenter(i);
-        h->SetBinContent(i, std::abs(center) > 2 ? 0 : f->Eval(center));
-    }
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]", -5, 5);
+    f->SetParameters(-3.78339e-01, -2.47758e-02, -9.45412e-03, 4.00964e-01);
+    h2->Fit(f, "", "", -2.5, 2.5);
+    setHistoFromFunction(h, f);
     delete h2;
 }
 
@@ -3981,14 +4034,25 @@ void SmoothEta(TH1 *h) {
     f->SetParameters(0.3, 0, 1);
     f->FixParameter(1,0);
     h2->Fit(f, "", "", -2.4, 2.4);
-    for (int i = 1; i <= h->GetNbinsX(); ++i) {
-        double center = h->GetBinCenter(i);
-        h->SetBinContent(i, f->Eval(center));
-    }
+    setHistoFromFunction(h, f);
     delete h2;
 }
 
 void doNothing(TH1*) {}
+
+void (*getSmoothFunction(const char *particle, const char *quantity))(TH1*) {
+    void (*SmoothFunction)(TH1*);
+    SmoothFunction = &doNothing;
+    if (strcmp(quantity, "Rapidity") == 0) SmoothFunction = &SmoothRapidity;
+    if (strcmp(quantity, "Eta") == 0) SmoothFunction = &SmoothEta;
+    if (strcmp(particle, "LepPair") == 0 && strcmp(quantity, "Mass") == 0) SmoothFunction = &SmoothLepPairMass;
+    if (strcmp(particle, "LepPair") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothLepPairPt;
+    if (strcmp(particle, "TopQuarks") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTopPt;
+    if (strcmp(particle, "TtBar") == 0 && strcmp(quantity, "Mass") == 0) SmoothFunction = &SmoothTtBarMass;
+    if (strcmp(particle, "TtBar") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTtBarPt;
+    if (strcmp(particle, "Leptons") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothLeptonsPt;
+    return SmoothFunction;
+}
 
 
 // plot differential cross section in all channels and combine them
@@ -4192,23 +4256,20 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       powhegh->Scale(scale_powheg);
     }
 
-    void (*SmoothFunction)(TH1*) = &doNothing;
     Int_t nrebin = 2.;
     if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
-      nrebin=4;
-      mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
-      mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
-      mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);      
+        nrebin=4;
+        mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
+        mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
+        mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);
     } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0){
-        SmoothFunction = &SmoothLepPairMass;
         nrebin=8;
-    } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Pt")==0){
-        SmoothFunction = &SmoothLepPairMass;
     }
-    if (strcmp(quantity, "Rapidity") == 0) SmoothFunction = &SmoothRapidity;
-    if (strcmp(quantity, "Eta") == 0) SmoothFunction = &SmoothEta;
-    if (strcmp(particle, "TopQuarks") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTopPt;
+    
+    void (*SmoothFunction)(TH1*) = getSmoothFunction(particle, quantity);
+    
      
+    TH1* originalGenHist = (TH1*)genHist->Clone();
     SmoothFunction(genHist);
     SmoothFunction(mcatnloh); SmoothFunction(mcatnlohUp); SmoothFunction(mcatnlohDn);
     SmoothFunction(powhegh);
@@ -4221,7 +4282,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     genHistBinned->GetXaxis()->SetTitle(xtitle);
     genHistBinned->GetYaxis()->SetTitle(ytitle);
     genHistBinned->SetLineWidth(2);
-    genHistBinned->SetLineColor(kRed+1);
+    genHistBinned->SetLineColor(colorMadGraph);
     FormatHisto(genHistBinned);
 
     // for pt and mass distribution use log scale
@@ -4236,7 +4297,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     //start drawing
     genHistBinned->Draw();
-    genHist->SetLineColor(kRed+1);
+    genHist->SetLineColor(colorMadGraph);
     genHist->SetLineWidth(2);
     //genHist->DrawClone("same");
     
@@ -4246,7 +4307,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     genHist->Draw("same,C");
     //spline.Draw();
     
-    mcatnloh->SetLineColor(kAzure);
+    mcatnloh->SetLineColor(colorMcAtNLO);
+    mcatnloh->SetLineStyle(styleMcAtNLO);
     mcatnloh->SetLineWidth(2);
     if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
 
@@ -4279,7 +4341,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
     mcatnloBand->SetFillColor(kGray);
-    mcatnloBand->SetLineColor(kAzure);
+    mcatnloBand->SetLineColor(colorMcAtNLO);
+    mcatnloBand->SetLineStyle(styleMcAtNLO);
     mcatnloBand->SetLineWidth(2);
     mcatnloBand->Draw("same, F");
 
@@ -4288,7 +4351,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     genHist->Draw("same,C");
     mcatnloh->Draw("same,HIST,C");
 
-    powhegh->SetLineColor(kGreen+1);
+    powhegh->SetLineColor(colorPOWHEG);
+    powhegh->SetLineStyle(stylePOWHEG);
     powhegh->SetLineWidth(2);
     if (powhegh->GetEntries()) powhegh->Draw("same,C");
 
@@ -4305,16 +4369,19 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     TLegend leg = *getNewLegend();
     leg.AddEntry(bccCrossGraph, "Data",    "p");
-    leg.AddEntry(genHist,       "Madgraph","l");
+    leg.AddEntry(genHist,       "MadGraph","l");
     if (mcatnlohUp->GetEntries() && mcatnlohDn->GetEntries()) leg.AddEntry(mcatnloBand,      "MC@NLO",  "lf");
     else if (mcatnloh->GetEntries()) leg.AddEntry(mcatnloh,      "MC@NLO",  "l");
-    if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "Powheg",  "l");        
+    if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "POWHEG",  "l");        
     leg.SetFillStyle(0);
     leg.SetBorderSize(0);
     leg.Draw("same");
     
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
     semileptonic::DrawDecayChLabel(channelNameTeX[kCOMBINED]);
+    
+    originalGenHist->SetLineColor(kYellow);
+    //originalGenHist->Draw("same");
 
     Canvas->Print(outpath.Copy().Append("combined/").Append(title).Append(outform));
 
@@ -4704,6 +4771,7 @@ void PlotHistsAndRatio(TH1* numeratorHistogram, TH1* denominatorHist, TString ti
 
     c1_2->SetLogy(0);
 
+    if (doPrintControlPlots && !PAS)
     c1->Print(outpath.Copy().Append("btagging").Append("/").Append(title));
 
     delete nomHist;
