@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="TOP2011/111124_AnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
 			     std::string decayChannel = "muon" )
 {
   // ============================
@@ -48,8 +48,8 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta 
   // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
   // 15: sysMuEffSFUp               16: sysMuEffSFDown              
-  // 17: sysBtagSFHalfShapeUpPt65   18: sysBtagSFHalfShapeDownPt65  
-  // 19: sysBtagSFHalfShapeUpEta0p7 20: sysBtagSFHalfShapeDownEta0p7
+  // 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65  
+  // 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7
   // 21: sysMisTagSFUp              22: sysMisTagSFDown             
   // 23: sysTopScaleUp              24: sysTopScaleDown             
   // 25: sysVBosonScaleUp           26: sysVBosonScaleDown           
@@ -116,18 +116,14 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     case sysMuEffSFDown              : sysInputFolderExtension="SelectionEffSFNormDown";    break;
  // case sysBtagSFUp                 : sysInputFolderExtension="BtagSFup";                  break;
  // case sysBtagSFDown               : sysInputFolderExtension="BtagSFdown";                break;
- // case sysBtagSFShapeUpPt65        : sysInputFolderExtension="BTagSFShapeUpPt65";         break;
- // case sysBtagSFShapeDownPt65      : sysInputFolderExtension="BTagSFShapeDownPt65";       break;
  // case sysBtagSFShapeUpPt100       : sysInputFolderExtension="BTagSFShapeUpPt100";        break;
  // case sysBtagSFShapeDownPt100     : sysInputFolderExtension="BTagSFShapeDownPt100";      break;
- // case sysBtagSFShapeUpEta0p7      : sysInputFolderExtension="BTagSFShapeUpEta0p7";       break;
- // case sysBtagSFShapeDownEta0p7    : sysInputFolderExtension="BTagSFShapeDownEta0p7";     break;
  // case sysBtagSFShapeUpEta1p2      : sysInputFolderExtension="BTagSFShapeUpEta1p2";       break;
  // case sysBtagSFShapeDownEta1p2    : sysInputFolderExtension="BTagSFShapeDownEta1p2";     break;
-    case sysBtagSFHalfShapeUpPt65    : sysInputFolderExtension="BTagSFHalfShapeUpPt65";     break;
-    case sysBtagSFHalfShapeDownPt65  : sysInputFolderExtension="BTagSFHalfShapeDownPt65";   break;
-    case sysBtagSFHalfShapeUpEta0p7  : sysInputFolderExtension="BTagSFHalfShapeUpEta0p7";   break;
-    case sysBtagSFHalfShapeDownEta0p7: sysInputFolderExtension="BTagSFHalfShapeDownEta0p7"; break;
+    case sysBtagSFShapeUpPt65        : sysInputFolderExtension="BTagSFShapeUpPt65";         break;
+    case sysBtagSFShapeDownPt65      : sysInputFolderExtension="BTagSFShapeDownPt65";       break;
+    case sysBtagSFShapeUpEta0p7      : sysInputFolderExtension="BTagSFShapeUpEta0p7";       break;
+    case sysBtagSFShapeDownEta0p7    : sysInputFolderExtension="BTagSFShapeDownEta0p7";     break;
     case sysMisTagSFUp               : sysInputFolderExtension="MisTagSFup";                break;
     case sysMisTagSFDown             : sysInputFolderExtension="MisTagSFdown";              break;
     default: break;

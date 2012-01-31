@@ -81,12 +81,10 @@ namespace semileptonic {
 			     //      sysTriggerEffSFShapeUpPt40,         sysTriggerEffSFShapeDownPt40,  
 			     /*15:*/ sysMuEffSFUp,               /*16:*/ sysMuEffSFDown, 
 			     // old: sysBtagSFUp,                        sysBtagSFDown,  
-			     //      sysBtagSFShapeUpPt65,               sysBtagSFShapeDownPt65, 
 			     //      sysBtagSFShapeUpPt100,              sysBtagSFShapeDownPt100,
-			     //      sysBtagSFShapeUpEta0p7,             sysBtagSFShapeDownEta0p7,
 			     //      sysBtagSFShapeUpEta1p2,             sysBtagSFShapeDownEta1p2,
-			     /*17:*/ sysBtagSFHalfShapeUpPt65,   /*18:*/ sysBtagSFHalfShapeDownPt65,
-			     /*19:*/ sysBtagSFHalfShapeUpEta0p7, /*20:*/ sysBtagSFHalfShapeDownEta0p7,
+			     /*17:*/ sysBtagSFShapeUpPt65,       /*18:*/ sysBtagSFShapeDownPt65,
+			     /*19:*/ sysBtagSFShapeUpEta0p7,     /*20:*/ sysBtagSFShapeDownEta0p7,
 			     /*21:*/ sysMisTagSFUp,              /*22:*/ sysMisTagSFDown,
 			     /*23:*/ sysTopScaleUp,              /*24:*/ sysTopScaleDown,            
 			     /*25:*/ sysVBosonScaleUp,           /*26:*/ sysVBosonScaleDown,          
@@ -146,18 +144,14 @@ namespace semileptonic {
       case sysMuEffSFDown              : return "sysMuEffSFDown";
 //old case sysBtagSFUp                 : return "sysBtagSFUp";
 //old case sysBtagSFDown               : return "sysBtagSFDown";
-   // case sysBtagSFShapeUpPt65        : return "sysBtagSFShapeUpPt65";
-   // case sysBtagSFShapeDownPt65      : return "sysBtagSFShapeDownPt65";
    // case sysBtagSFShapeUpPt100       : return "sysBtagSFShapeUpPt100";
    // case sysBtagSFShapeDownPt100     : return "sysBtagSFShapeDownPt100";
-   // case sysBtagSFShapeUpEta0p7      : return "sysBtagSFShapeUpEta0p7";
-   // case sysBtagSFShapeDownEta0p7    : return "sysBtagSFShapeDownEta0p7";
    // case sysBtagSFShapeUpEta1p2      : return "sysBtagSFShapeUpEta1p2";
    // case sysBtagSFShapeDownEta1p2    : return "sysBtagSFShapeDownEta1p2";
-      case sysBtagSFHalfShapeUpPt65    : return "sysBtagSFHalfShapeUpPt65";
-      case sysBtagSFHalfShapeDownPt65  : return "sysBtagSFHalfShapeDownPt65";
-      case sysBtagSFHalfShapeUpEta0p7  : return "sysBtagSFHalfShapeUpEta0p7";
-      case sysBtagSFHalfShapeDownEta0p7: return "sysBtagSFHalfShapeDownEta0p7";  
+      case sysBtagSFShapeUpPt65        : return "sysBtagSFShapeUpPt65";
+      case sysBtagSFShapeDownPt65      : return "sysBtagSFShapeDownPt65";
+      case sysBtagSFShapeUpEta0p7      : return "sysBtagSFShapeUpEta0p7";
+      case sysBtagSFShapeDownEta0p7    : return "sysBtagSFShapeDownEta0p7";  
       case sysMisTagSFUp               : return "sysMisTagSFUp";
       case sysMisTagSFDown             : return "sysMisTagSFDown";
       case sysTopScaleUp               : return "sysTopScaleUp";
@@ -2438,7 +2432,7 @@ namespace semileptonic {
     return result;
   }
 
-  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="")
+  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="")
   {
     // this function draws "plot" from "file" into the active canvas
     // modified quantities: NONE
@@ -2520,6 +2514,7 @@ namespace semileptonic {
     result->SetName(name);
     // configure style
     histogramStyle(*result, kSig, false, 1.2, color);
+    result->SetLineStyle(linestyle);
     // smoothing 1
     if(smoothFactor) result->Smooth(smoothFactor);
     // rebinning

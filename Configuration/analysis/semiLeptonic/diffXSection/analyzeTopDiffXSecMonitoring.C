@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun", 
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root"
+void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun", 
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root"
 				  , const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
   // ============================

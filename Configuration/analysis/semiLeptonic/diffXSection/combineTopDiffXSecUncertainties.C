@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="TOP2011/111124_AnalysisRun", TString decayChannel="muon", bool exclShapeVar="true"){
+void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun", TString decayChannel="muon", bool exclShapeVar="true"){
 
   // ============================
   //  Systematic Variations:
@@ -16,8 +16,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta 
   // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
   // 15: sysMuEffSFUp               16: sysMuEffSFDown              
-  // 17: sysBtagSFHalfShapeUpPt65   18: sysBtagSFHalfShapeDownPt65  
-  // 19: sysBtagSFHalfShapeUpEta0p7 20: sysBtagSFHalfShapeDownEta0p7
+  // 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65  
+  // 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7
   // 21: sysMisTagSFUp              22: sysMisTagSFDown             
   // 23: sysTopScaleUp              24: sysTopScaleDown             
   // 25: sysVBosonScaleUp           26: sysVBosonScaleDown           
@@ -488,10 +488,20 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    relUncertDistributions_[xSecVariables_[i]][binUnc] = (TH1F*)tempResult->Clone();
 	    canvasUncertaintyDistributions->cd();
 	    tempResult->Draw();
+
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
-	    canvasUncertaintyDistributions->Print(outputFolder+"/uncertaintyDistributions/relativeUncertainties"+xSecVariables_[i]+"_"+label+".eps");
+	    // a) save to rootFile
+	    //if(save) saveToRootFile(outputFile, canvasUncertaintyDistributions, true, verbose, "uncertaintyDistributions");
+	    // b) save as eps and png
+	    if(save){
+		TString saveName=outputFolder+"/uncertaintyDistributions/relativeUncertainties"+xSecVariables_[i]+"_"+label;
+		if(decayChannel=="combined") saveName+="Combined";
+		canvasUncertaintyDistributions->Print(saveName+".eps");
+		canvasUncertaintyDistributions->Print(saveName+".png");
+	    }
 	    gErrorIgnoreLevel=initialIgnoreLevel;
+	  
 	    delete tempResult; tempResult = NULL;
 	  }	  
 	  delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;

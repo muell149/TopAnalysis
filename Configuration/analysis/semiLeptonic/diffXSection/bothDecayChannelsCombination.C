@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="TOP2011/110819_AnalysisRun"){
+void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun"){
 	
   // ============================
   //  Set Root Style
@@ -245,12 +245,12 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else {std::cout << "unknow variable " << xSecVariables_[i] << std::endl; exit(0);}
 	    bool error=true;
 	    if(xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")) error=false;
-	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, rangeLow, rangeHigh, error, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo");
+	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, 7, rangeLow, rangeHigh, error, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo");
 	    plotTheo->Draw("hist same");
-	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo");
+	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, 7, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo");
 	    //plotNameMCAtNLO="analyzeTopPartonLevelKinematicsPhaseSpace/"+xSecVariables_[i];
 	    //plotNameMCAtNLO.ReplaceAll("Norm","");
-	    //DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_mcatnlo.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure+5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false);
+	    //DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_mcatnlo.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure+5, 7, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false);
 	    // b) POWHEG
 	    // configure configuration
 	    smoothFactor=0;
@@ -270,7 +270,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=10; rebinFactor=2 ; }
 	    // draw curve
-	    if(DrawPOWHEGPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_powheg.root", plotNamePOWHEG, smoothFactor, rebinFactor, kGreen+2, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg");
+	    if(DrawPOWHEGPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_powheg.root", plotNamePOWHEG, smoothFactor, rebinFactor, kGreen+1, 9, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg");
 	    // c) reweighted histos for closure test
 	    if(reweightClosure&&sys==sysNo){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
@@ -296,7 +296,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor=4 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=2 ; rebinFactor=1 ; }
-	    DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon"), plotNameMadgraph, smoothFactor, rebinFactor, kRed+1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
+	    DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon"), plotNameMadgraph, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
 	    // set up legend
 	    TLegend *leg = new TLegend();
 	    leg->SetTextFont(42);

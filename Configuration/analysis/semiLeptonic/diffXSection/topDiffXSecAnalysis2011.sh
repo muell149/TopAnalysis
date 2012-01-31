@@ -57,7 +57,9 @@ decayChannel=\"combined\"
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pbReweightedttbarMassUp7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonPseudoData1143pbReweightedttbarMassUp7TeV.root\"
@@ -91,7 +93,7 @@ save=true
 verbose=0
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
-inputFolderName=\"TOP2011/111124_AnalysisRun\"
+inputFolderName=\"RecentAnalysisRun\"
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
@@ -342,8 +344,8 @@ echo "  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown        "
 echo " 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta "
 echo " 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  "
 echo " 15: sysMuEffSFUp               16: sysMuEffSFDown              "
-echo " 17: sysBtagSFHalfShapeUpPt65   18: sysBtagSFHalfShapeDownPt65  "
-echo " 19: sysBtagSFHalfShapeUpEta0p7 20: sysBtagSFHalfShapeDownEta0p7"
+echo " 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65      "
+echo " 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7    "
 echo " 21: sysMisTagSFUp              22: sysMisTagSFDown             "
 echo " 23: sysTopScaleUp              24: sysTopScaleDown             "
 echo " 25: sysVBosonScaleUp           26: sysVBosonScaleDown          " 
@@ -390,7 +392,7 @@ if [ $redoSystematics = true ]; then
 	      echo " Shape variations are executed separately."
 	  else
 	      ## run macro for 2011 analysis
-	      root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	      root -l -q -b './analyzeHypothesisKinFit.C++g('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
 	  fi  
       else
 	  echo "will be ignored, only done for decayChannel=muon/electron"
