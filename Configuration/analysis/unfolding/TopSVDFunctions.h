@@ -326,6 +326,10 @@ void SVD_EmptySideBins1D(TH1D* histo)
     histo->SetBinContent(1, 0.);
     histo->SetBinContent(bins, 0.);    
     histo->SetBinContent(bins+1, 0.);
+    histo->SetBinError(0, 0.);
+    histo->SetBinError(1, 0.);
+    histo->SetBinError(bins, 0.);
+    histo->SetBinError(bins+1, 0.);
 }
 
 
@@ -350,6 +354,10 @@ void SVD_EmptySideBins2D(TH2D* histo)
         histo->SetBinContent(1, j, 0.);
         histo->SetBinContent(binsx, j, 0.);
         histo->SetBinContent(binsx+1, j, 0.);
+        histo->SetBinError(0, j, 0.);
+        histo->SetBinError(1, j, 0.);
+        histo->SetBinError(binsx, j, 0.);
+        histo->SetBinError(binsx+1, j, 0.);
     }
 
 }
@@ -767,6 +775,7 @@ void SVD_DrawStack(THStack* stack, TString xTitle, TString yTitle, TString optio
 
 
     // Loop over all histos
+    // Set Colors and make cosmetic changes 
     TH2D* histo = NULL;
     int cnt = 0;
     TList* listHistos = stack->GetHists();
@@ -1184,7 +1193,7 @@ int SVD_UnfoldByHist(
 
     // Format Tot COV
     TString totCovStr = SVD_PlotName(channel, particle, quantity, "TOTCOV");
-    SVD_SetTitles2D(statCovHist, statCovStr, quantityTex, quantityTex, "Monte Carlo Covariance");
+    SVD_SetTitles2D(totCovHist, totCovStr, quantityTex, quantityTex, "Monte Carlo Covariance");
 
     
     ///////////////////////////////////////////////////////////////
@@ -1199,7 +1208,14 @@ int SVD_UnfoldByHist(
     TH1D* purHist = (TH1D*) biniHist->Clone(purStr);
     for ( int i = 1 ; i < nbins+1 ; i++ ) {
         double numerator = mcHist->GetBinContent(i, i);
-        double denominator = biniHist->GetBinContent(i);
+
+        // Sum over all Gen Level bins INCLUDING OF bins
+        double denominator = 0.;
+        for ( int j = 1 ; j < nbins+1 ; j++ ) {
+            denominator += mcHist->GetBinContent(i, j);
+        }
+
+        //double denominator = biniHist->GetBinContent(i);
         double purity = SVD_Divide(numerator, denominator);
         purHist->SetBinContent(i,purity);
         purHist->SetBinError(i, 0.);
@@ -1217,7 +1233,16 @@ int SVD_UnfoldByHist(
     TH1D* stabHist = (TH1D*) biniHist->Clone(stabStr);
     for ( int i = 1 ; i < nbins+1 ; i++ ) {
         double numerator = mcHist->GetBinContent(i, i);
-        double denominator = xiniHist->GetBinContent(i);
+
+        // Sum over all Rec Level bins EXCEPT OF bins
+        double denominator = 0.;
+        for ( int j = 1 ; j < nbins+1 ; j++ ) {
+            if ( j == 1 ) continue;
+            if ( j == nbins ) continue;
+            denominator += mcHist->GetBinContent(j, i);
+        }
+
+        //double denominator = xiniHist->GetBinContent(i);
         double stability = SVD_Divide(numerator, denominator);
         stabHist->SetBinContent(i,stability);
         stabHist->SetBinError(i, 0.);
@@ -1470,13 +1495,13 @@ int SVD_UnfoldByHist(
 
 
 
-	// Draw Response Matrix
+        // Draw Response Matrix
         SVD_Draw2D(mcHist, "COLZ");
         canvas->Print(outputfilename.Copy().Append("("));
 
 
-	// Draw Input Distributions
-	TLegend* legendinp = SVD_NewLegend();
+        // Draw Input Distributions
+        TLegend* legendinp = SVD_NewLegend();
         legendinp->SetHeader(CPQtex);
         THStack* stackinp = new THStack("","");
         stackinp->Add(xiniHist);
@@ -1506,7 +1531,7 @@ int SVD_UnfoldByHist(
         dataHist->Draw();
 
 
-	// Draw Unfolded distributions	
+        // Draw Unfolded distributions	
         TString unfHistLegendEntry = "Unf.";
         unfHistLegendEntry.Append(" k=");
         unfHistLegendEntry.Append(TString::Format("%i", TMath::Abs(kreg))); 
@@ -1526,7 +1551,7 @@ int SVD_UnfoldByHist(
 
         // RATIO: Unfolded versus BBB
         TLegend* legendRatioUnfBBB = SVD_NewLegend();
-	legendRatioUnfBBB->SetHeader(CPQtex);
+        legendRatioUnfBBB->SetHeader(CPQtex);
         TString legendentryRatioUnfBBB = TString::Format("Unf/BBB");
         SVD_DrawRange(histRatioUnfBBB, 0.3, 3., "", 0);
         legendRatioUnfBBB->AddEntry(histRatioUnfBBB, legendentryRatioUnfBBB);
@@ -1592,6 +1617,7 @@ int SVD_UnfoldByHist(
         legendspe->AddEntry(purHist, "Pur.");
         legendspe->AddEntry(stabHist, "Stab."); 
         legendspe->AddEntry(effHist, "Eff.");
+        SVD_EmptySideBins1D(effHist);
         stackspe->Add(stabHist); 
         stackspe->Add(purHist); 
         stackspe->Add(effHist);
@@ -1605,7 +1631,8 @@ int SVD_UnfoldByHist(
         legendeff->SetHeader(CPQtex);
         THStack* stackEff = new THStack("", ""); 
         beffHist->UseCurrentStyle();
-        effHist->UseCurrentStyle(); 
+        effHist->UseCurrentStyle();
+        SVD_EmptySideBins1D(beffHist); 
         legendeff->AddEntry(beffHist, "BBB-Eff.");
         legendeff->AddEntry(effHist, "Efficiency"); 
         stackEff->Add(beffHist);
@@ -1702,9 +1729,15 @@ int SVD_UnfoldByHist(
         canvas->Print(outputfilename);
 
 
-	// Last page empty
+	    // Last page empty
         canvas->Clear();
-	canvas->Print(outputfilename.Copy().Append(")"));
+	    canvas->Print(outputfilename.Copy().Append(")"));
+
+
+        // Reset Style
+        setHHStyle(*gStyle); 
+        TGaxis::SetMaxDigits(2);
+
 
         // Delete Legends
         delete legendinp;
