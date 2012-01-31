@@ -144,7 +144,7 @@ const bool doPrintAllChannels = kTRUE;
 const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
 const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
-const bool PAS = kFALSE;
+const bool PAS = kTRUE;
 // do you want a legend in the plots?
 const bool drawLegend = kTRUE;
 // should there be ratio Ndata/Nmc plots below the actual distributions?
@@ -198,8 +198,9 @@ const Double_t bccAuto = 100000;
 //const size_t orderStackPlot[] = {0, 8, 7, 6, 5, 4, 3, 2, 1};
 const size_t orderStackPlot[] = {0, 6, 5, 4, 7, 8, 3, 2, 1};
 
-const Style_t styleMcAtNLO = 7;
-const Style_t stylePOWHEG = 9;
+//root can't plot dashed curves to png
+const Style_t styleMcAtNLO = outform == ".png" ? 1 : 7;
+const Style_t stylePOWHEG = outform == ".png" ? 1 : 9;
 const Color_t colorMadGraph = kRed + 1;
 const Color_t colorPOWHEG = kGreen + 1;
 const Color_t colorMcAtNLO = kAzure;
@@ -305,7 +306,12 @@ void DrawRatio(const TH1* histNumerator, THStack* histDenominator, const Double_
     delete stacksum;
 }
 
-
+void FormatLegendSize(TLegend *leg) {
+    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
+    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 - leg->GetNRows()*0.04);
+    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
+}
 
 // fill legend with data markers and sample colours
 void FillLegend(TLegend* leg, TH1* hist[], double factor=1.) {
@@ -335,6 +341,7 @@ void FillLegend(TLegend* leg, TH1* hist[], double factor=1.) {
 //         sprintf(zlabel, "($times %.2f)", factor);
 //         if (hist[kDYEM])  leg->AddEntry(zlabel, "f" );
 //     }
+    FormatLegendSize(leg);
     return;
 }
 
@@ -1033,6 +1040,7 @@ void PrintCombinedPlot(const char* module, const char* plot, const char* module2
         std::cerr << "Warning: dont draw two different error bands!\n";
         exit(1);
     }
+    FormatLegendSize(leg);
     if (drawLegend) leg->Draw("same");
 
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
@@ -1272,6 +1280,7 @@ void PrintDyPlot(Int_t step, Int_t channel, Double_t min, Double_t max,  Bool_t 
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");
     setex1->Draw();
 
+    FormatLegendSize(leg);
     if (drawLegend) leg->Draw("same");
 
     // draw 2 lines marking the Z veto region
@@ -1384,11 +1393,11 @@ TLegend* getNewLegend() {
     leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.15);
     leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
     leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
-    leg->SetTextFont(42);
-    leg->SetTextSize(0.04);
-    leg->SetFillStyle(0);
-    leg->SetBorderSize(0);
-    leg->SetTextAlign(12);
+//     leg->SetTextFont(42);
+//     leg->SetTextSize(0.04);
+//     leg->SetFillStyle(0);
+//     leg->SetBorderSize(0);
+//     leg->SetTextAlign(12);
     return leg;
 }
 
@@ -2958,6 +2967,7 @@ void CalculateInclusiveCrossSections(const char* selection){
    mstwplot->Draw("C,2,SAME");
    mplot->Draw("p,SAME");
    mplotwithsys->Draw("p,SAME,Z");
+   FormatLegendSize(leg);
    leg ->Draw("SAME");
    box1->Draw("SAME");
    box2->Draw("SAME");
@@ -3689,6 +3699,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "POWHEG",  "l");        
         leg2.SetFillStyle(0);
         leg2.SetBorderSize(0);
+        FormatLegendSize(&leg2);
         leg2.Draw("same");
 
         TGraphAsymmErrors* withSys = CloneAddSystematics(bccCrossGraph, title);
@@ -3923,6 +3934,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     leg3->AddEntry(grE, "Efficiency", "p" );
     leg3->AddEntry(grP, "Purity",    "p" );
     leg3->AddEntry(grS, "Stability", "p" );
+    FormatLegendSize(leg3);
     if (drawLegend) leg3->Draw("SAME");
 
     title.Clear();
@@ -4375,6 +4387,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     if (powhegh->GetEntries())  leg.AddEntry(powhegh,       "POWHEG",  "l");        
     leg.SetFillStyle(0);
     leg.SetBorderSize(0);
+    FormatLegendSize(&leg);
     leg.Draw("same");
     
     semileptonic::DrawCMSLabels(isPreliminary, lumi);
@@ -5355,17 +5368,16 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 
     
     // Print control plots
-    if (doPrintControlPlots) CreateControlPlots();
+    if (doPrintControlPlots || PAS) CreateControlPlots();
     gStyle->SetEndErrorSize(8);
 
     // Calculate differential cross sections
     TGaxis::SetMaxDigits(2);
 
     // leptons
-    const Int_t nbinsLepEta = 6;
-    const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
-    const Double_t binCenterLepEta[nbinsLepEta] = {-1.93, -1.15, -0.45, 0.47, 1.15, 1.93};
-    //const Double_t binCenterLepEta[nbinsLepEta] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
+    const Int_t nbinsLepEta = 8;
+    const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.8, -1.2, -0.6, 0.0, 0.6, 1.2, 1.8, 2.4};
+    const Double_t binCenterLepEta[nbinsLepEta] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, true, 0, doSVD );
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE, 0, false);
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
@@ -5442,9 +5454,9 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 
   
     // top
-    const Int_t nbinsTopRapidity = 4;
-    const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    const Double_t binCenterTopRapidity[nbinsTopRapidity] = {-1.78, -0.66, 0.69, 1.76};
+    const Int_t nbinsTopRapidity = 6;
+    const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.6, -0.8, 0.0, 0.8, 1.6, 2.5};
+    const Double_t binCenterTopRapidity[nbinsTopRapidity] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
@@ -5471,9 +5483,9 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
 
 
     // ttbar quantities
-    const Int_t nbinsTtBarRapidity = 4;
-    const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    const Double_t binCenterTtBarRapidity[nbinsTtBarRapidity] = {-1.68, -0.65, 0.68, 1.65};
+    const Int_t nbinsTtBarRapidity = 6;
+    const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.5, -0.7, 0.0, 0.7, 1.5, 2.5};
+    const Double_t binCenterTtBarRapidity[nbinsTtBarRapidity] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto};
     PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidity, nbinsTtBarRapidity, binCenterTtBarRapidity , true, 0, doSVD );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Rapidity", kCOMBINED, "generated y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
     GetBtagEfficiencyInBins("TtBar", "Rapidity", "y^{t#bar{t}}", binsTtBarRapidity, nbinsTtBarRapidity);
