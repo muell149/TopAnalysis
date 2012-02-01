@@ -2158,6 +2158,25 @@ namespace semileptonic {
 	e= 0.00227380;
 	addOpt="LL";
       }
+     else if(plotname.Contains("TTbarY")){
+	fitLowEdge=-1.5;
+	fitHighEdge=1.5;
+	def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
+	a=-0.658848;
+	b=-0.0509368;
+	c=-0.0320204;
+	d=0.00513375;
+	addOpt="LL";
+      }
+     else if(plotname.Contains("TopY")){
+       //tail:
+       fitLowEdge=-1.;
+       fitHighEdge=1.;
+       def="[0]*TMath::Gaus(x,0,[1])";
+       a=0.00402075;
+       b=1.14871;
+       addOpt="LL";
+     }
     }
     else if(model=="madgraph"){
       if(plotname.Contains("ttbarMass")){
@@ -2189,6 +2208,25 @@ namespace semileptonic {
 	c=-4.48;
 	d= 0.007;
 	e= 745.5;
+	addOpt="LL";
+      }
+      else if(plotname.Contains("topY")){
+	//tail:
+	fitLowEdge=-1.;
+	fitHighEdge=1.;
+	def="[0]*TMath::Gaus(x,0,[1])";
+	a=19845.2;
+	b=1.09186;
+	addOpt="LL";
+      }
+      else if(plotname.Contains("ttbarY")){
+	fitLowEdge=-1.5;
+	fitHighEdge=1.5;
+	def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
+	a=-0.658848;
+	b=-0.0509368;
+	c=-0.0320204;
+	d=12297.7;
 	addOpt="LL";
       }
     }
@@ -2229,6 +2267,16 @@ namespace semileptonic {
 	c=-4.48;
 	d= 0.007;
 	e= 745.5;
+	addOpt="LL";
+      }
+     else if(plotname.Contains("ttbarY")){
+	fitLowEdge=-1.5;
+	fitHighEdge=1.5;
+	def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
+	a=-0.598570;
+	b=-0.120246;
+	c=-0.00770785;
+	d=12987.6;
 	addOpt="LL";
       }
     }
@@ -2480,15 +2528,13 @@ namespace semileptonic {
 	filenameEl.ReplaceAll("muon", "elec");
 	raw->Add(getTheoryPrediction(plotname, filenameEl));
       }
-      raw->SetMarkerColor(kBlack);
-      raw->SetLineColor(kBlack);
-      raw->SetMarkerSize(2);
+      raw->SetMarkerColor(color);
+      raw->SetLineColor(color);
+      //raw->SetMarkerSize(2);
       //raw->SetMarkerStyle(29);
-      //raw->Rebin(5); // minimal rebinning
       raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
-      raw->Scale(1.0/raw->GetBinWidth(1));
-      //if(smoothFactor) raw->Smooth(smoothFactor);
-      raw->Draw("p e3 same"); 
+      raw->Scale(1./(raw->GetBinWidth(1)));
+      raw->Draw("c same"); 
     }
     // get plot
     TH1F* result=getTheoryPrediction(plotname, filename);

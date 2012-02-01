@@ -234,10 +234,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    double rangeHigh=-1.;
 	    if(     xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=5 ; rebinFactor=1; errorRebinFactor =  1 ; errorSmoothFactor =   5 ; plotNameMCAtNLO="hVisTTbarM" ; 
 	      if(cutTtbarMass){rangeLow=330. ; rangeHigh=1200.;} }
-	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=3 ; rebinFactor=20; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarY" ;}
+	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=5 ; rebinFactor=1 ; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarY" ;}
 	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=10; rebinFactor=1 ; errorRebinFactor =  1 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTTbarPt";}
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; errorRebinFactor = 10 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTopPt"  ;}
-	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=3 ; rebinFactor=20; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisTopY"   ;}
+	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=5 ; rebinFactor=1 ; errorRebinFactor =  1 ; errorSmoothFactor =   5  ; plotNameMCAtNLO="hVisTopY"   ;}
 	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; errorRebinFactor =  0 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisLepPt"  ;}
 	    else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor=10; rebinFactor=20; errorRebinFactor = 20 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="hVisLepEta" ;}
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; errorRebinFactor =  5 ; errorSmoothFactor =   10 ; plotNameMCAtNLO="" ;}
@@ -261,10 +261,10 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    rangeHigh=-1.;
 	    if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor=5; rebinFactor=1; 
 	      if(cutTtbarMass){rangeLow=300.; rangeHigh=1200.;} }
-	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=3 ; rebinFactor=2 ; }
+	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=5 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; }
-	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=3 ; rebinFactor=2 ; }
+	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=3 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
@@ -291,7 +291,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor=2 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor=5 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("topPt"    )){ smoothFactor=10; rebinFactor=10; }
-	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=10; rebinFactor=1 ; }
+	    else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor=5 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor=10; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor=4 ; rebinFactor=1 ; }
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
