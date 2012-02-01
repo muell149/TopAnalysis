@@ -245,9 +245,9 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else {std::cout << "unknow variable " << xSecVariables_[i] << std::endl; exit(0);}
 	    bool error=true;
 	    if(xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")) error=false;
-	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, 7, rangeLow, rangeHigh, error, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo");
+	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, 1, rangeLow, rangeHigh, error, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo");
 	    plotTheo->Draw("hist same");
-	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, 7, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo");
+	    if (DrawMCAtNLOPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6m.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure, 1, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo");
 	    //plotNameMCAtNLO="analyzeTopPartonLevelKinematicsPhaseSpace/"+xSecVariables_[i];
 	    //plotNameMCAtNLO.ReplaceAll("Norm","");
 	    //DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_mcatnlo.root", plotNameMCAtNLO, smoothFactor, rebinFactor, kAzure+5, 7, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false);
@@ -270,7 +270,7 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=10; rebinFactor=2 ; }
 	    // draw curve
-	    if(DrawPOWHEGPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_powheg.root", plotNamePOWHEG, smoothFactor, rebinFactor, kGreen+1, 9, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg");
+	    if(DrawPOWHEGPlot2) DrawNormTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/tmp/topkinematics_combined_powheg.root", plotNamePOWHEG, smoothFactor, rebinFactor, kGreen+1, 1, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg");
 	    // c) reweighted histos for closure test
 	    if(reweightClosure&&sys==sysNo){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
@@ -346,8 +346,6 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() -0.05 - (double)leg->GetNRows()*0.04);
 	    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-	    
-
 	  }
 	  plotCombination->Draw("e same");
           gPad->RedrawAxis(); 
