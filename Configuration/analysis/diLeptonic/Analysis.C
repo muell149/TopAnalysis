@@ -63,8 +63,8 @@ void Analysis::Begin(TTree * /*tree*/)
   h_RecoLLBarpT = new TH1D("RecoLLBarpT","pT of LLbar System (HYP)",240,0,1200);
   h_RecoLeptonpT = new TH1D("RecoLeptonpT","pT of Lepton (HYP)",240,0,1200);
   h_RecoAntiLeptonpT = new TH1D("RecoAntiLeptonpT","pT of AntiLepton (HYP)",240,0,1200);
-  h_RecoLeptonEta = new TH1D("RecoLeptonEta","Eta of Lepton (HYP)",240,0,1200);
-  h_RecoAntiLeptonEta = new TH1D("RecoAntiLeptonEta","Eta of AntiLepton (HYP)",240,0,1200);
+  h_RecoLeptonEta = new TH1D("RecoLeptonEta","Eta of Lepton (HYP)",80,-4,4);
+  h_RecoAntiLeptonEta = new TH1D("RecoAntiLeptonEta","Eta of AntiLepton (HYP)",80,-4,4);
 
   h_VisGenAll = new TH1D("VisGenAll","All Visible Generated particles (IM)",40,0,400);
   h_GenAll = new TH1D("GenAll","AllGenerated particles (IM)",40,0,400);
@@ -80,118 +80,118 @@ void Analysis::Begin(TTree * /*tree*/)
   h_jetHT = new TH1D("jetHT", "jet HT", 40, 0, 1000);  
 
   h_MuonpT = new TH1D("MuonpT","Muon pT (emu channel)",40,0,400);
-  h_MuonEta = new TH1D("MuonEta","Muon Eta (emu channel)",40,-4,4);
+  h_MuonEta = new TH1D("MuonEta","Muon Eta (emu channel)",80,-4,4);
   h_ElectronpT = new TH1D("ElectronpT","Electron pT (emu channel)",40,0,400);
-  h_ElectronEta = new TH1D("ElectronEta","Electron Eta (emu channel)",40,-4,4);
+  h_ElectronEta = new TH1D("ElectronEta","Electron Eta (emu channel)",80,-4,4);
 
   h_LeptonpT = new TH1D("LeptonpT","Lepton pT",40,0,400);
-  h_LeptonEta = new TH1D("LeptonEta","Lepton Eta",40,-4,4);
+  h_LeptonEta = new TH1D("LeptonEta","Lepton Eta",80,-4,4);
   h_LeptonE = new TH1D("LeptonE","Lepton Energy",40,0,400);
 
   h_AntiLeptonpT = new TH1D("AntiLeptonpT","AntiLepton pT",40,0,400);
-  h_AntiLeptonEta = new TH1D("AntiLeptonEta","AntiLepton Eta",40,-4,4);
+  h_AntiLeptonEta = new TH1D("AntiLeptonEta","AntiLepton Eta",80,-4,4);
   h_AntiLeptonE = new TH1D("AntiLeptonE","AntiLepton Energy",40,0,400);
 
   h_HypToppT = new TH1D("HypToppT","Top pT",40,0,400);
-  h_HypTopEta = new TH1D("HypTopEta","Top pT",40,-4,4);
+  h_HypTopEta = new TH1D("HypTopEta","Top pT",80,-4,4);
   h_HypTopE = new TH1D("HypTopE","Top Eneregy",40,0,400);
   h_HypTopMass = new TH1D("HypTopMass","Top Mass",40,0,400);
   h_HypTopRapidity = new TH1D("HypTopRapidity","Top Rapidity",50,-5,5);
 
   h_HypAntiToppT = new TH1D("HypAntiToppT","AntiTop pT",40,0,400);
-  h_HypAntiTopEta = new TH1D("HypAntiTopEta","AntiTop pT",40,-4,4);
+  h_HypAntiTopEta = new TH1D("HypAntiTopEta","AntiTop pT",80,-4,4);
   h_HypAntiTopE = new TH1D("HypAntiTopE","AntiTop Energy",40,0,400);
   h_HypAntiTopMass = new TH1D("HypAntiTopMass","AntiTop Mass",40,0,400);
   h_HypAntiTopRapidity = new TH1D("HypAntiTopRapidity","Top Rapidity",50,-5,5);
 
   h_HypLeptonpT = new TH1D("HypLeptonpT","Lepton Hypothesis pT",40,0,400);
-  h_HypLeptonEta = new TH1D("HypLeptonEta","Lepton Eta",40,-4,4);
+  h_HypLeptonEta = new TH1D("HypLeptonEta","Lepton Eta",80,-4,4);
   h_HypLeptonE = new TH1D("HypLeptonE","Lepton Energy",40,0,400);
 
   h_HypAntiLeptonpT = new TH1D("HypAntiLeptonpT","AntiLepton Hypothesis pT",40,0,400);
-  h_HypAntiLeptonEta = new TH1D("HypAntiLeptonEta","AntiLepton Hypothesis Eta",40,-4,4);
+  h_HypAntiLeptonEta = new TH1D("HypAntiLeptonEta","AntiLepton Hypothesis Eta",80,-4,4);
   h_HypAntiLeptonE = new TH1D("HypAntiLeptonE","AntiLepton Hypothesis Energy",40,0,400);
 
   h_HypBpT = new TH1D("HypBpT","B Hypothesis pT",40,0,400);
-  h_HypBEta = new TH1D("HypBEta","B Eta",40,-4,4);
+  h_HypBEta = new TH1D("HypBEta","B Eta",80,-4,4);
   h_HypBE = new TH1D("HypBE","B Energy",40,0,400);
 
   h_HypAntiBpT = new TH1D("HypAntiBpT","AntiB Hypothesis pT",40,0,400);
-  h_HypAntiBEta = new TH1D("HypAntiBEta","AntiB Hypothesis Eta",40,-4,4);
+  h_HypAntiBEta = new TH1D("HypAntiBEta","AntiB Hypothesis Eta",80,-4,4);
   h_HypAntiBE = new TH1D("HypAntiBE","AntiB Hypothesis Energy",40,0,400);
 
   h_HypNeutrinopT = new TH1D("HypNeutrinopT","Neutrino Hypothesis pT",40,0,400);
-  h_HypNeutrinoEta = new TH1D("HypNeutrinoEta","Neutrino Eta",40,-4,4);
+  h_HypNeutrinoEta = new TH1D("HypNeutrinoEta","Neutrino Eta",80,-4,4);
   h_HypNeutrinoE = new TH1D("HypNeutrinoE","Neutrino Energy",40,0,400);
 
   h_HypAntiNeutrinopT = new TH1D("HypAntiNeutrinopT","AntiNeutrino Hypothesis pT",40,0,400);
-  h_HypAntiNeutrinoEta = new TH1D("HypAntiNeutrinoEta","AntiNeutrino Hypothesis Eta",40,-4,4);
+  h_HypAntiNeutrinoEta = new TH1D("HypAntiNeutrinoEta","AntiNeutrino Hypothesis Eta",80,-4,4);
   h_HypAntiNeutrinoE = new TH1D("HypAntiNeutrinoE","AntiNeutrino Hypothesis Energy",40,0,400);
 
   h_VisGenToppT = new TH1D("VisGenToppT","Top pT (VisGen)",40,0,400);
-  h_VisGenTopEta = new TH1D("VisGenTopEta","Top Eta (VisGen)",40,-4,4);
+  h_VisGenTopEta = new TH1D("VisGenTopEta","Top Eta (VisGen)",80,-4,4);
   h_VisGenTopE = new TH1D("VisGenTopE","Top E (VisGen)",40,0,400);
 
   h_VisGenAntiToppT = new TH1D("VisGenAntiToppT","AntiTop pT (VisGen)",40,0,400);
-  h_VisGenAntiTopEta = new TH1D("VisGenAntiTopEta","AntiTop pT (VisGen)",40,-4,4);
+  h_VisGenAntiTopEta = new TH1D("VisGenAntiTopEta","AntiTop pT (VisGen)",80,-4,4);
   h_VisGenAntiTopE = new TH1D("VisGenAntiTopE","AntiTop pT (VisGen)",40,0,400);
 
   h_VisGenLeptonpT = new TH1D("VisGenLeptonpT","Lepton VisGenothesis pT",80,0,400);
-  h_VisGenLeptonEta = new TH1D("VisGenLeptonEta","Lepton Eta",40,-4,4);
+  h_VisGenLeptonEta = new TH1D("VisGenLeptonEta","Lepton Eta",80,-4,4);
   h_VisGenLeptonE = new TH1D("VisGenLeptonE","Lepton Energy",40,0,400);
 
   h_VisGenAntiLeptonpT = new TH1D("VisGenAntiLeptonpT","AntiLepton VisGenothesis pT",80,0,400);
-  h_VisGenAntiLeptonEta = new TH1D("VisGenAntiLeptonEta","AntiLepton VisGenothesis Eta",40,-4,4);
+  h_VisGenAntiLeptonEta = new TH1D("VisGenAntiLeptonEta","AntiLepton VisGenothesis Eta",80,-4,4);
   h_VisGenAntiLeptonE = new TH1D("VisGenAntiLeptonE","AntiLepton VisGenothesis Energy",40,0,400);
 
   h_VisGenBpT = new TH1D("VisGenBpT","B VisGenothesis pT",40,0,400);
-  h_VisGenBEta = new TH1D("VisGenBEta","B Eta",40,-4,4);
+  h_VisGenBEta = new TH1D("VisGenBEta","B Eta",80,-4,4);
   h_VisGenBE = new TH1D("VisGenBE","B Energy",40,0,400);
 
   h_VisGenAntiBpT = new TH1D("VisGenAntiBpT","AntiB VisGenothesis pT",40,0,400);
-  h_VisGenAntiBEta = new TH1D("VisGenAntiBEta","AntiB VisGenothesis Eta",40,-4,4);
+  h_VisGenAntiBEta = new TH1D("VisGenAntiBEta","AntiB VisGenothesis Eta",80,-4,4);
   h_VisGenAntiBE = new TH1D("VisGenAntiBE","AntiB VisGenothesis Energy",40,0,400);
 
   h_VisGenNeutrinopT = new TH1D("VisGenNeutrinopT","Neutrino VisGenothesis pT",40,0,400);
-  h_VisGenNeutrinoEta = new TH1D("VisGenNeutrinoEta","Neutrino Eta",40,-4,4);
+  h_VisGenNeutrinoEta = new TH1D("VisGenNeutrinoEta","Neutrino Eta",80,-4,4);
   h_VisGenNeutrinoE = new TH1D("VisGenNeutrinoE","Neutrino Energy",40,0,400);
 
   h_VisGenAntiNeutrinopT = new TH1D("VisGenAntiNeutrinopT","AntiNeutrino VisGenothesis pT",40,0,400);
-  h_VisGenAntiNeutrinoEta = new TH1D("VisGenAntiNeutrinoEta","AntiNeutrino VisGenothesis Eta",40,-4,4);
+  h_VisGenAntiNeutrinoEta = new TH1D("VisGenAntiNeutrinoEta","AntiNeutrino VisGenothesis Eta",80,-4,4);
   h_VisGenAntiNeutrinoE = new TH1D("VisGenAntiNeutrinoE","AntiNeutrino VisGenothesis Energy",40,0,400);
 
   h_GenToppT = new TH1D("GenToppT","Top pT (Gen)",40,0,400);
-  h_GenTopEta = new TH1D("GenTopEta","Top Eta (Gen)",40,-4,4);
+  h_GenTopEta = new TH1D("GenTopEta","Top Eta (Gen)",80,-4,4);
   h_GenTopE = new TH1D("GenTopE","Top E (Gen)",40,0,400);
   h_GenTopRapidity = new TH1D("GenTopRapidity","Top Rapidity (Gen)",50,-5,5);
   
   h_GenAntiToppT = new TH1D("GenAntiToppT","AntiTop pT (Gen)",40,0,400);
-  h_GenAntiTopEta = new TH1D("GenAntiTopEta","AntiTop Eta (Gen)",40,-4,4);
+  h_GenAntiTopEta = new TH1D("GenAntiTopEta","AntiTop Eta (Gen)",80,-4,4);
   h_GenAntiTopE = new TH1D("GenAntiTopE","AntiTop E (Gen)",40,0,400);
   h_GenAntiTopRapidity = new TH1D("GenAntiTopRapidity","AntiTop (Gen)",50,-5,5);
 
   h_GenLeptonpT = new TH1D("GenLeptonpT","Lepton Genothesis pT",40,0,400);
-  h_GenLeptonEta = new TH1D("GenLeptonEta","Lepton Eta",40,-4,4);
+  h_GenLeptonEta = new TH1D("GenLeptonEta","Lepton Eta",80,-4,4);
   h_GenLeptonE = new TH1D("GenLeptonE","Lepton Energy",40,0,400);
 
   h_GenAntiLeptonpT = new TH1D("GenAntiLeptonpT","AntiLepton Genothesis pT",40,0,400);
-  h_GenAntiLeptonEta = new TH1D("GenAntiLeptonEta","AntiLepton Genothesis Eta",40,-4,4);
+  h_GenAntiLeptonEta = new TH1D("GenAntiLeptonEta","AntiLepton Genothesis Eta",80,-4,4);
   h_GenAntiLeptonE = new TH1D("GenAntiLeptonE","AntiLepton Genothesis Energy",40,0,400);
 
   h_GenBpT = new TH1D("GenBpT","B Genothesis pT",40,0,400);
-  h_GenBEta = new TH1D("GenBEta","B Eta",40,-4,4);
+  h_GenBEta = new TH1D("GenBEta","B Eta",80,-4,4);
   h_GenBE = new TH1D("GenBE","B Energy",40,0,400);
 
   h_GenAntiBpT = new TH1D("GenAntiBpT","AntiB Genothesis pT",40,0,400);
-  h_GenAntiBEta = new TH1D("GenAntiBEta","AntiB Genothesis Eta",40,-4,4);
+  h_GenAntiBEta = new TH1D("GenAntiBEta","AntiB Genothesis Eta",80,-4,4);
   h_GenAntiBE = new TH1D("GenAntiBE","AntiB Genothesis Energy",40,0,400);
 
   h_GenNeutrinopT = new TH1D("GenNeutrinopT","Neutrino Genothesis pT",40,0,400);
-  h_GenNeutrinoEta = new TH1D("GenNeutrinoEta","Neutrino Eta",40,-4,4);
+  h_GenNeutrinoEta = new TH1D("GenNeutrinoEta","Neutrino Eta",80,-4,4);
   h_GenNeutrinoE = new TH1D("GenNeutrinoE","Neutrino Energy",40,0,400);
 
   h_GenAntiNeutrinopT = new TH1D("GenAntiNeutrinopT","AntiNeutrino Genothesis pT",40,0,400);
-  h_GenAntiNeutrinoEta = new TH1D("GenAntiNeutrinoEta","AntiNeutrino Genothesis Eta",40,-4,4);
+  h_GenAntiNeutrinoEta = new TH1D("GenAntiNeutrinoEta","AntiNeutrino Genothesis Eta",80,-4,4);
   h_GenAntiNeutrinoE = new TH1D("GenAntiNeutrinoE","AntiNeutrino Genothesis Energy",40,0,400);
 
   h_GenRecoLeptonEta = new TH2D("GenRecoLeptonEta", "Gen/Reco Matching", 100,-5,5,100,-5,5);
@@ -233,7 +233,6 @@ Bool_t Analysis::Process(Long64_t entry)
   if(EventCounter % 10000 == 0){cout<<"Event Counter: "<<EventCounter<<endl;}
   float dimass=0.;
   double btagSFuse=1.0;//only use the btag SF when applying b-tagging
-  //trigEFF=1.0;
   double weightKinFituse = 1.0;//only use the kin fit SF when using the kinematic reconstruction
   if(systematic=="PU_UP"){weightPU = weightPU_Up;}//only for PU systematic run
   if(systematic=="PU_DOWN"){weightPU = weightPU_Down;}//only for PU systematic run
@@ -291,16 +290,13 @@ Bool_t Analysis::Process(Long64_t entry)
   }
 
   double BtagWP = 1.7; 
-  int NJets =0;
   vector<int> BJetIndex;
   for(vector<double>::iterator it = jetBTagTCHE->begin(); it<jetBTagTCHE->end(); it++){
-    if(*it > 0)NJets++;
     if(*it > BtagWP){
       BJetIndex.push_back(*it);
     }    
   }
   
-  //  BtagWP = 0;
   //Should we just look for two Bjets above 1.7 or the two highest bjets?:: Make this a function
   int solutionIndex = 0;
   bool oneTag = false;
@@ -312,7 +308,7 @@ Bool_t Analysis::Process(Long64_t entry)
     if(oneTag == false && ((*jetBTagTCHE)[(*HypJet0index)[i]] > BtagWP || (*jetBTagTCHE)[(*HypJet1index)[i]]>BtagWP)){solutionIndex = i; oneTag=true;}
 
   }  
-  //  solutionIndex = 0;
+  //solutionIndex = 0;
 
   //  if(HypTop_){
   // cout<<"SolutionIndex: "<<solutionIndex<<endl;
@@ -338,30 +334,30 @@ Bool_t Analysis::Process(Long64_t entry)
 	h_VisGenLeptonpT->Fill(LVGenLepton.Pt(),1);
 	h_VisGenAntiLeptonpT->Fill(LVGenAntiLepton.Pt(),1);
 
-	h_VisGenToppT->Fill(LVGenTop.Pt(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiToppT->Fill(LVGenAntiTop.Pt(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenBpT->Fill(LVGenB.Pt(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiBpT->Fill(LVGenAntiB.Pt(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenNeutrinopT->Fill(LVGenNeutrino.Pt(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiNeutrinopT->Fill(LVGenAntiNeutrino.Pt(),weightLepSF*btagSF*trigEFF*weightKinFit);
+	h_VisGenToppT->Fill(LVGenTop.Pt(),1);
+	h_VisGenAntiToppT->Fill(LVGenAntiTop.Pt(),1);
+	h_VisGenBpT->Fill(LVGenB.Pt(),1);
+	h_VisGenAntiBpT->Fill(LVGenAntiB.Pt(),1);
+	h_VisGenNeutrinopT->Fill(LVGenNeutrino.Pt(),1);
+	h_VisGenAntiNeutrinopT->Fill(LVGenAntiNeutrino.Pt(),1);
 	
-	h_VisGenTopEta->Fill(LVGenTop.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiTopEta->Fill(LVGenAntiTop.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenBEta->Fill(LVGenB.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiBEta->Fill(LVGenAntiB.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenLeptonEta->Fill(LVGenLepton.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiLeptonEta->Fill(LVGenAntiLepton.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenNeutrinoEta->Fill(LVGenNeutrino.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiNeutrinoEta->Fill(LVGenAntiNeutrino.Eta(),weightLepSF*btagSF*trigEFF*weightKinFit);
+	h_VisGenTopEta->Fill(LVGenTop.Eta(),1);
+	h_VisGenAntiTopEta->Fill(LVGenAntiTop.Eta(),1);
+	h_VisGenBEta->Fill(LVGenB.Eta(),1);
+	h_VisGenAntiBEta->Fill(LVGenAntiB.Eta(),1);
+	h_VisGenLeptonEta->Fill(LVGenLepton.Eta(),1);
+	h_VisGenAntiLeptonEta->Fill(LVGenAntiLepton.Eta(),1);
+	h_VisGenNeutrinoEta->Fill(LVGenNeutrino.Eta(),1);
+	h_VisGenAntiNeutrinoEta->Fill(LVGenAntiNeutrino.Eta(),1);
 	
-	h_VisGenTopE->Fill(LVGenTop.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiTopE->Fill(LVGenAntiTop.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenBE->Fill(LVGenB.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiBE->Fill(LVGenAntiB.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenLeptonE->Fill(LVGenLepton.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiLeptonE->Fill(LVGenAntiLepton.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenNeutrinoE->Fill(LVGenNeutrino.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
-	h_VisGenAntiNeutrinoE->Fill(LVGenAntiNeutrino.E(),weightLepSF*btagSF*trigEFF*weightKinFit);
+	h_VisGenTopE->Fill(LVGenTop.E(),1);
+	h_VisGenAntiTopE->Fill(LVGenAntiTop.E(),1);
+	h_VisGenBE->Fill(LVGenB.E(),1);
+	h_VisGenAntiBE->Fill(LVGenAntiB.E(),1);
+	h_VisGenLeptonE->Fill(LVGenLepton.E(),1);
+	h_VisGenAntiLeptonE->Fill(LVGenAntiLepton.E(),1);
+	h_VisGenNeutrinoE->Fill(LVGenNeutrino.E(),1);
+	h_VisGenAntiNeutrinoE->Fill(LVGenAntiNeutrino.E(),1);
       }    
     }
   }//for visible top events	  
@@ -410,14 +406,12 @@ Bool_t Analysis::Process(Long64_t entry)
   }
   
   //Cross-section Plots
-  //if(lepton_>1 && dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){
-  if(lepton_>1){
+  if(lepton_>1 && dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){
     if(channel->find("emu")!=string::npos){//quick and DIRTY!
       h_jetMultiXSec->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF*weightKinFit);
       h_jetMultiNoPU->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit);
     }else{
-      //      if(*(metEt->begin()) > 30 && (dimass < 76 || dimass >106)){
-      if((dimass < 76.0 || dimass >106.0)){
+      if(*(metEt->begin()) > 30 && (dimass < 76 || dimass >106)){
 	h_jetMultiXSec->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSF*trigEFF*weightKinFit);
 	h_jetMultiNoPU->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit);
       }  
@@ -441,7 +435,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_jetpT->Fill(LVjet[i].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
 	  
-	  if((*lepQ)[0]==1){
+	  if((*lepQ)[LeadLeptonNumber]==1){
 	    h_LeptonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_AntiLeptonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_LeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -453,7 +447,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_AntiLeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }	
 	  h_MET->Fill(*(metEt->begin()),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  if((*lepType)[0]==-1){
+	  if((*lepType)[LeadLeptonNumber]==-1){
 	    h_ElectronpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_ElectronEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
@@ -461,7 +455,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_ElectronpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_ElectronEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
-	  if((*lepType)[0]==1){
+	  if((*lepType)[LeadLeptonNumber]==1){
 	    h_MuonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_MuonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
@@ -482,7 +476,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	  for(int i=0; i<2;i++){
 	    h_jetpT->Fill(LVjet[i].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  }
-	  if((*lepQ)[0]==1){
+	  if((*lepQ)[LeadLeptonNumber]==1){
 	    h_LeptonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_AntiLeptonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_LeptonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -496,30 +490,43 @@ Bool_t Analysis::Process(Long64_t entry)
 	  }	
 	  h_MET->Fill(*(metEt->begin()),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  if(*(metEt->begin()) > 30){
-	    if((*lepType)[0]==-1)h_ElectronpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if((*lepType)[1]==-1)h_ElectronpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if((*lepType)[0]==1)h_MuonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if((*lepType)[1]==1)h_MuonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    if((*lepType)[LeadLeptonNumber]==-1){
+	      h_ElectronpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      h_ElectronEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    }
+	    if((*lepType)[NLeadLeptonNumber]==-1){
+	      h_ElectronpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      h_ElectronEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    }
+	    if((*lepType)[LeadLeptonNumber]==1){
+	      h_MuonpT->Fill(LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      h_MuonEta->Fill(LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    }
+	    if((*lepType)[NLeadLeptonNumber]==1){
+	      h_MuonpT->Fill(LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      h_MuonEta->Fill(LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    }
 	  } 
 	}
       }      
     } //
     if (dimass>76.0 && dimass < 106.0)Looseh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
     
-    //if(dimass>12 && (lepQ[0]!=lepQ[1])){//Analysis step 6
-    //if(dimass>12 && jet_>1 && (lepQ[0]!=lepQ[1])){//Analysis step 7
+    //if(dimass>12 && NLeadLeptonNumber>0){//Analysis step 6
+    //if(dimass>12 && jet_>1 && NLeadLeptonNumber>0){//Analysis step 7
     //if(dimass>12 && jet_>1 && BJetIndex.size()>0 && NLeadLeptonNumber>0){btagSFuse=btagSF;//Analysis step 8?
     if(dimass>12.0 && jet_>1 && BJetIndex.size()>0 && HypTop_ && NLeadLeptonNumber>0){btagSFuse=btagSF; weightKinFituse=weightKinFit;//Analysis step 9?
       
-      if(*(metEt->begin()) > 30){//for DY Scale Factor
+      if(channel->find("emu")!=string::npos){//quick and DIRTY!
 	Allh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	if (dimass < 106.0 && dimass > 76.0 ){
 	  Zh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	}
-	else{TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);}
-      }
-    
-      if(channel->find("emu")!=string::npos){//quick and DIRTY!
+	else{
+	  TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	}
+	
+	
 	if(MCSample->find("ttbarsignal")!=string::npos){
 	  
 	  if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
@@ -635,125 +642,136 @@ Bool_t Analysis::Process(Long64_t entry)
 	  h_HypNeutrinoE->Fill(LVHypNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_HypAntiNeutrinoE->Fill(LVHypAntiNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	}
-      }else if(*(metEt->begin()) > 30 && (dimass<76.0 || dimass>106.0)){
-	//h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	//TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	if(MCSample->find("ttbarsignal")!=string::npos){
-
-	  if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
-	    if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
-	      h_jetMultiVisTop->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit); 
-	    }
-	  }//for visible top events
-
-	  if(HypTop_){
-	    h_GenRecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),LVGenLepton.Eta());
-	    h_GenRecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),LVGenAntiLepton.Eta());
-	    h_GenRecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),LVGenLepton.Pt());
-	    h_GenRecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),LVGenAntiLepton.Pt());
-	    
-	    h_GenRecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),LVGenTop.Rapidity());
-	    h_GenRecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),LVGenAntiTop.Rapidity());
-	    h_GenRecoToppT->Fill(LVHypTop[solutionIndex].Pt(),LVGenTop.Pt());
-	    h_GenRecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),LVGenAntiTop.Pt());
-
-	    h_GenRecoLLBarMass->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).M(),(LVGenLepton+LVGenAntiLepton).M());
-	    h_GenRecoLLBarpT->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).Pt(),(LVGenLepton+LVGenAntiLepton).Pt());
-
-	    h_GenRecoTTBarMass->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).M(),(LVGenTop+LVGenAntiTop).M());
-	    h_GenRecoTTBarpT->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Pt(),(LVGenTop+LVGenAntiTop).Pt());
-	    h_GenRecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Rapidity(),(LVGenTop+LVGenAntiTop).Rapidity());
-	    
-	  }//for purity stability calculations
-	  
-	  double GenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
-	  h_GenTTBarMass->Fill(GenTTBarMass,1);
-	  h_GenToppT->Fill(LVGenTop.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiToppT->Fill(LVGenAntiTop.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenBpT->Fill(LVGenB.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiBpT->Fill(LVGenAntiB.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenLeptonpT->Fill(LVGenLepton.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiLeptonpT->Fill(LVGenAntiLepton.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenNeutrinopT->Fill(LVGenNeutrino.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiNeutrinopT->Fill(LVGenAntiNeutrino.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  
-	  h_GenTopEta->Fill(LVGenTop.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiTopEta->Fill(LVGenAntiTop.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenBEta->Fill(LVGenB.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiBEta->Fill(LVGenAntiB.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenLeptonEta->Fill(LVGenLepton.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiLeptonEta->Fill(LVGenAntiLepton.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenNeutrinoEta->Fill(LVGenNeutrino.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiNeutrinoEta->Fill(LVGenAntiNeutrino.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-
-	  h_GenTopE->Fill(LVGenTop.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiTopE->Fill(LVGenAntiTop.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenBE->Fill(LVGenB.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiBE->Fill(LVGenAntiB.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenLeptonE->Fill(LVGenLepton.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiLeptonE->Fill(LVGenAntiLepton.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenNeutrinoE->Fill(LVGenNeutrino.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_GenAntiNeutrinoE->Fill(LVGenAntiNeutrino.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+      }else if(*(metEt->begin()) > 30){
+	
+	Allh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	if (dimass < 106.0 && dimass > 76.0 ){
+	  Zh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	}
-	   
-	if(HypTop_){
-	  //	  cout<<"SolutionIndex: "<<solutionIndex<<endl;
-	  //cout<< "BJetTCHE[HypJet0index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet0index)[solutionIndex]]<<endl;
-	  //cout<< "BJetTCHE[HypJet1index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet1index)[solutionIndex]]<<endl<<endl;
-	  double HypTTBarMass = (LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).M();
-	  h_RecoTTBarMass->Fill(HypTTBarMass,1);
-	  h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),1);
-	  h_RecoTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),1);
-	  h_RecoToppT->Fill(LVHypTop[solutionIndex].Pt(),1);
-	  h_RecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),1);
-	  h_RecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),1);
-	  h_RecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),1);
+	else{
+	  TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	}
+	
+	if(dimass<76.0 || dimass>106.0){ 
+	  //h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  //TTh1->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  if(MCSample->find("ttbarsignal")!=string::npos){
+	    
+	    if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
+	      if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
+		h_jetMultiVisTop->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit); 
+	      }
+	    }//for visible top events
 
-	  h_RecoLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),1);
-	  h_RecoLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),1);
-	  h_RecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),1);
-	  h_RecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),1);
-	  h_RecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),1);
-	  h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),1);
+	    if(HypTop_){
+	      h_GenRecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),LVGenLepton.Eta());
+	      h_GenRecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),LVGenAntiLepton.Eta());
+	      h_GenRecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),LVGenLepton.Pt());
+	      h_GenRecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),LVGenAntiLepton.Pt());
+	    
+	      h_GenRecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),LVGenTop.Rapidity());
+	      h_GenRecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),LVGenAntiTop.Rapidity());
+	      h_GenRecoToppT->Fill(LVHypTop[solutionIndex].Pt(),LVGenTop.Pt());
+	      h_GenRecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),LVGenAntiTop.Pt());
 
-	  h_HypLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      h_GenRecoLLBarMass->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).M(),(LVGenLepton+LVGenAntiLepton).M());
+	      h_GenRecoLLBarpT->Fill((LVHypLepton[solutionIndex]+LVHypAntiLepton[solutionIndex]).Pt(),(LVGenLepton+LVGenAntiLepton).Pt());
 
-	  h_HypTTBarMass->Fill(HypTTBarMass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-
-	  h_HypTopMass->Fill(LVHypTop[solutionIndex].M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiTopMass->Fill(LVHypAntiTop[solutionIndex].M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypToppT->Fill(LVHypTop[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypBpT->Fill(LVHypB[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiBpT->Fill(LVHypAntiB[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypNeutrinopT->Fill(LVHypNeutrino[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiNeutrinopT->Fill(LVHypAntiNeutrino[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-
-	  h_HypTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      h_GenRecoTTBarMass->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).M(),(LVGenTop+LVGenAntiTop).M());
+	      h_GenRecoTTBarpT->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Pt(),(LVGenTop+LVGenAntiTop).Pt());
+	      h_GenRecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+LVHypAntiTop[solutionIndex]).Rapidity(),(LVGenTop+LVGenAntiTop).Rapidity());
+	    
+	    }//for purity stability calculations
 	  
-	  h_HypTopEta->Fill(LVHypTop[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiTopEta->Fill(LVHypAntiTop[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypBEta->Fill(LVHypB[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiBEta->Fill(LVHypAntiB[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypNeutrinoEta->Fill(LVHypNeutrino[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiNeutrinoEta->Fill(LVHypAntiNeutrino[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    double GenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
+	    h_GenTTBarMass->Fill(GenTTBarMass,1);
+	    h_GenToppT->Fill(LVGenTop.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiToppT->Fill(LVGenAntiTop.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenBpT->Fill(LVGenB.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiBpT->Fill(LVGenAntiB.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenLeptonpT->Fill(LVGenLepton.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiLeptonpT->Fill(LVGenAntiLepton.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenNeutrinopT->Fill(LVGenNeutrino.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiNeutrinopT->Fill(LVGenAntiNeutrino.Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  
+	    h_GenTopEta->Fill(LVGenTop.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiTopEta->Fill(LVGenAntiTop.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenBEta->Fill(LVGenB.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiBEta->Fill(LVGenAntiB.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenLeptonEta->Fill(LVGenLepton.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiLeptonEta->Fill(LVGenAntiLepton.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenNeutrinoEta->Fill(LVGenNeutrino.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiNeutrinoEta->Fill(LVGenAntiNeutrino.Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+
+	    h_GenTopE->Fill(LVGenTop.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiTopE->Fill(LVGenAntiTop.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenBE->Fill(LVGenB.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiBE->Fill(LVGenAntiB.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenLeptonE->Fill(LVGenLepton.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiLeptonE->Fill(LVGenAntiLepton.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenNeutrinoE->Fill(LVGenNeutrino.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_GenAntiNeutrinoE->Fill(LVGenAntiNeutrino.E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  }
+	   
+	  if(HypTop_){
+	    //	  cout<<"SolutionIndex: "<<solutionIndex<<endl;
+	    //cout<< "BJetTCHE[HypJet0index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet0index)[solutionIndex]]<<endl;
+	    //cout<< "BJetTCHE[HypJet1index[solutionIndex]]: "<<(*jetBTagTCHE)[(*HypJet1index)[solutionIndex]]<<endl<<endl;
+	    double HypTTBarMass = (LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).M();
+	    h_RecoTTBarMass->Fill(HypTTBarMass,1);
+	    h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),1);
+	    h_RecoTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),1);
+	    h_RecoToppT->Fill(LVHypTop[solutionIndex].Pt(),1);
+	    h_RecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),1);
+	    h_RecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),1);
+	    h_RecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),1);
+
+	    h_RecoLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),1);
+	    h_RecoLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),1);
+	    h_RecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),1);
+	    h_RecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),1);
+	    h_RecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),1);
+	    h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),1);
+
+	    h_HypLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+
+	    h_HypTTBarMass->Fill(HypTTBarMass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+
+	    h_HypTopMass->Fill(LVHypTop[solutionIndex].M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiTopMass->Fill(LVHypAntiTop[solutionIndex].M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypToppT->Fill(LVHypTop[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypBpT->Fill(LVHypB[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiBpT->Fill(LVHypAntiB[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypNeutrinopT->Fill(LVHypNeutrino[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiNeutrinopT->Fill(LVHypAntiNeutrino[solutionIndex].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+
+	    h_HypTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  
+	    h_HypTopEta->Fill(LVHypTop[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiTopEta->Fill(LVHypAntiTop[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypBEta->Fill(LVHypB[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiBEta->Fill(LVHypAntiB[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypNeutrinoEta->Fill(LVHypNeutrino[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiNeutrinoEta->Fill(LVHypAntiNeutrino[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	     
-	  h_HypTopE->Fill(LVHypTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiTopE->Fill(LVHypAntiTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypBE->Fill(LVHypB[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiBE->Fill(LVHypAntiB[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypLeptonE->Fill(LVHypLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiLeptonE->Fill(LVHypAntiLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypNeutrinoE->Fill(LVHypNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	  h_HypAntiNeutrinoE->Fill(LVHypAntiNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypTopE->Fill(LVHypTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiTopE->Fill(LVHypAntiTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypBE->Fill(LVHypB[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiBE->Fill(LVHypAntiB[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypLeptonE->Fill(LVHypLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiLeptonE->Fill(LVHypAntiLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypNeutrinoE->Fill(LVHypNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    h_HypAntiNeutrinoE->Fill(LVHypAntiNeutrino[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  }
 	}
       }
     }      

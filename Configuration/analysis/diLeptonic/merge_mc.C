@@ -71,7 +71,7 @@ void merge_mc(string channel){
     if(filename.find("1020")!=string::npos){MCXsecmap[filename] = 3457;}//DY 10-20 exclusive cross-section
     if(filename.find("2050")!=string::npos){MCXsecmap[filename] = 1666;}//DY 20-50 exclusive cross-section
     if(filename.find("50inf")!=string::npos){MCXsecmap[filename] = 3048;}//DY ll inclusive cross-section
-    if(filename.find("wtolnu")!=string::npos){MCXsecmap[filename] = 31314;}//WJets to lnu cross-section
+    if(filename.find("wtolnu")!=string::npos){MCXsecmap[filename] = 3048;}//WJets to lnu cross-section
     if(filename.find("qcdmu15")!=string::npos){MCXsecmap[filename] = 2.966E8*2.855E-4;}//Muon enriched QCD sample (x-sec * FilterEff)
     if(filename.find("qcdem2030")!=string::npos){MCXsecmap[filename] = 2.361E8*0.0106;}//EM enrichedpT 20-30GeV QCD sample (x-sec * FilterEff)
     if(filename.find("qcdem3080")!=string::npos){MCXsecmap[filename] = 5.944E7*0.061;}//EM enrichedpT 30-80GeV QCD sample (x-sec * FilterEff)
@@ -99,11 +99,11 @@ void merge_mc(string channel){
     //tree = t->CloneTree(0);
     
     double lumiWeight = sf;
-    double btagSF = 0.98; //btagSF applied to all one tag events
+    double btagSF = 0.982; //btagSF applied to all one tag events
     double trigEFF;
 
     if(channel=="mumu") trigEFF = 0.961;
-    if(channel=="emu") trigEFF = 0.997;
+    if(channel=="emu") trigEFF = 0.987;
     if(channel=="ee") trigEFF = 0.977;
 
     vector<string> Stringing;
@@ -162,8 +162,8 @@ void merge_mc(string channel){
 int merge(){
   
   merge_mc("mumu");
-  merge_mc("emu");
-  merge_mc("ee");
+  //  merge_mc("emu");
+  //merge_mc("ee");
 
   return 0;
 

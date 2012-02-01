@@ -95,47 +95,48 @@ void Plotter::DYScaleFactor(){
   double NinEE=0, NinMuMu=0, NinEMu=0;//Number of events in z-veto region for data
   double NinEEloose=0, NinMuMuloose=0;//Number of data events in Z-Veto region with MET cut
   double NinEEMC=0, NinMuMuMC=0;//All other MC events
-  
+
   while(!FileList.eof()){
     FileList>>filename;
-    
     if(filename!=""){
+      TFile *ftemp = TFile::Open(filename);
       if(filename.Contains("ee")){
 	if(filename.Contains("run")){
-	  TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinEE+=htemp->Integral();
-	  TH1D *htemp1 = (TH1D*)TFile::Open(filename)->Get("Looseh1"); NinEEloose+=htemp1->Integral();	  
+	  TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinEE+=htemp->Integral();
+	  TH1D *htemp1 = (TH1D*)ftemp->Get("Looseh1"); NinEEloose+=htemp1->Integral();	  
 	}
 	else if(filename.Contains("dy")){
 	  if(filename.Contains("50inf")){
-	    TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinEEDYMC+=htemp->Integral();
-	    TH1D *htemp1 = (TH1D*)TFile::Open(filename)->Get("TTh1"); NoutEEDYMC+=htemp1->Integral();
+	    TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinEEDYMC+=htemp->Integral();
+	    TH1D *htemp1 = (TH1D*)ftemp->Get("TTh1"); NoutEEDYMC+=htemp1->Integral();
 	  }
-	  else{TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("TTh1"); NoutEEDYMC+=htemp->Integral();}
+	  else{TH1D *htemp = (TH1D*)ftemp->Get("TTh1"); NoutEEDYMC+=htemp->Integral();}
 	}	
 	else{
-	  TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinEEMC+=htemp->Integral();
+	  TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinEEMC+=htemp->Integral();
 	}
       }
       
       if(filename.Contains("emu")){
-	if(filename.Contains("run")){TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinEMu+=htemp->Integral();}
+	if(filename.Contains("run")){TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinEMu+=htemp->Integral();}
       }
 	
       if(filename.Contains("mumu")){
 	if(filename.Contains("run")){
-	  TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinMuMu+=htemp->Integral();
-	  TH1D *htemp1 = (TH1D*)TFile::Open(filename)->Get("Looseh1"); NinMuMuloose+=htemp1->Integral();
+	  TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinMuMu+=htemp->Integral();
+	  TH1D *htemp1 = (TH1D*)ftemp->Get("Looseh1"); NinMuMuloose+=htemp1->Integral();
 	}
 	else if(filename.Contains("dy")){
 	  if(filename.Contains("50inf")){
-	    TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinMuMuDYMC+=htemp->Integral();
-	    TH1D *htemp1 = (TH1D*)TFile::Open(filename)->Get("TTh1"); NoutMuMuDYMC+=htemp1->Integral();}
-	  else{TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("TTh1"); NoutMuMuDYMC+=htemp->Integral();}
+	    TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinMuMuDYMC+=htemp->Integral();
+	    TH1D *htemp1 = (TH1D*)ftemp->Get("TTh1"); NoutMuMuDYMC+=htemp1->Integral();}
+	  else{TH1D *htemp = (TH1D*)ftemp->Get("TTh1"); NoutMuMuDYMC+=htemp->Integral();}
 	}	
 	else{
-	  TH1D *htemp = (TH1D*)TFile::Open(filename)->Get("Zh1"); NinMuMuMC+=htemp->Integral();
+	  TH1D *htemp = (TH1D*)ftemp->Get("Zh1"); NinMuMuMC+=htemp->Integral();
 	}
       }      
+      delete ftemp;
     }
   }
   double NoutMCEE = (NoutEEDYMC/NinEEDYMC)*(NinEE - 0.5*NinEMu*sqrt(NinEEloose/NinMuMuloose));
@@ -150,7 +151,7 @@ void Plotter::DYScaleFactor(){
   DYScale[0]=DYSFEE;
   DYScale[1]=DYSFMuMu;
   DYScale[2]=1.;
-  DYScale[3]=(DYSFEE+DYSFMuMu)/2;//not correct, fix later
+  DYScale[3]=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
 
 }
 
@@ -343,7 +344,6 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
   Sum_Errors += Sys_Error;
 
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
-  //cout<<"Sys_Error: "<<Sys_Error<<endl;
 
 }
 
@@ -774,12 +774,14 @@ void Plotter::fillHisto()
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
 	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	//TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
 	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	//TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -923,7 +925,6 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     double topxsec = 169.9; //157.5
     double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
 
-    //    double topRelUnc = InclusiveXsectionStatError[channelType]/InclusiveXsection[channelType];
     double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
     topunc += drawhists[signalHist]->GetBinContent(i)*topRelUnc;
     binerr2 += (topunc*topunc);
@@ -986,7 +987,7 @@ void Plotter::setStyle(TH1 &hist, unsigned int i)
     hist.GetYaxis()->SetTitleOffset(1.7);
     hist.GetXaxis()->SetTitle(XAxis);
     //hist.GetXaxis()->SetTitle("M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]");
-    hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{dX}");
+    hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");
   }
 }
 
@@ -1119,10 +1120,10 @@ void Plotter::PlotXSec(){
 
 double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
-  CalcInclSystematics("JES",0);
-  CalcInclSystematics("RES",1);
+  //CalcInclSystematics("JES",0);
+  //CalcInclSystematics("RES",1);
   //CalcInclSystematics("PU_",2);
-  InclFlatSystematics(2);
+  //InclFlatSystematics(2);
   
   double syst_square=0;
 
@@ -1148,7 +1149,7 @@ double Plotter::CalcXSec(){
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
 
     if(legends[i] == "data"){
-      //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
+      //      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[0]+=numhists[i]->Integral();
     }
     else if(legends[i] == "t#bar{t} signal"){
@@ -1376,12 +1377,20 @@ void Plotter::PlotDiffXSec(){
 	else if(legends[hist] == "t#bar{t} signal"){
 	  efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
 	  GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
+	  //	  cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
 	}
 	else{
-	  BGSum[bin]+=varhists[hist]->Integral(bin,bin+1);
+	  //BGSum[bin]+=varhists[hist]->Integral(bin,bin+1);
+	  BGSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	}
       }
     }
+    double totalDataSum = 0;
+    for (Int_t bin=0; bin<bins; ++bin) {
+      cout<<"DataSum[bin]: "<<DataSum[bin]<<endl;
+      totalDataSum+=DataSum[bin];
+    }
+    cout<<"totalDataSum: "<<totalDataSum<<endl;
     double binWidth[XAxisbinCenters.size()];
     TH1 *h_DiffXSec = (TH1D*)varhists[0]->Clone();
     TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone();
@@ -1390,6 +1399,7 @@ void Plotter::PlotDiffXSec(){
     for (Int_t i=0; i<bins; ++i) {
       if(channelType!=3){
 	binWidth[i] = Xbins[i+1]-Xbins[i];      
+	cout<<"Datasum[i]: "<<DataSum[i]<<" BGSum[i]: "<<BGSum[i]<<" efficiencies[i]: "<<efficiencies[i]<<" binWidth[i]: "<<binWidth[i]<<" lumi: "<<lumi<<endl; 
 	DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
 	DiffXSecStatError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
@@ -1431,6 +1441,8 @@ void Plotter::PlotDiffXSec(){
     //data normalization
     double datascale;
     datascale = 1./h_DiffXSec->Integral("width");//this is fine for one channel, but for the combination?  
+    cout<<"VISIBLE CROSS-SECTION: "<<h_DiffXSec->Integral("width")<<endl;
+    //datascale = 1./h_DiffXSec->Integral();//this is fine for one channel, but for the combination?  
     h_DiffXSec->Scale(datascale);
     
 
@@ -1467,18 +1479,18 @@ void Plotter::PlotDiffXSec(){
       }
       DiffXSecSysError[channelType][bin] = sqrt(syst_square)*DiffXSec[channelType][bin];
       cout<<"DiffXSec[channelType][bin]: "<<DiffXSec[channelType][bin]<<endl;
-      cout<<"DiffXSecSysError[channelType][bin]: "<<DiffXSecSysError[channelType][bin]<<endl;
-      cout<<"DiffXSecStatError[channelType][bin]: "<<DiffXSecStatError[channelType][bin]<<endl;
+      //      cout<<"DiffXSecSysError[channelType][bin]: "<<DiffXSecSysError[channelType][bin]<<endl;
+      //cout<<"DiffXSecStatError[channelType][bin]: "<<DiffXSecStatError[channelType][bin]<<endl;
       //DiffXSecTotalError[channelType][bin] = sqrt(DiffXSec[channelType][bin]*DiffXSecSysError[channelType][bin]*DiffXSec[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
       DiffXSecTotalError[channelType][bin] = sqrt(DiffXSecSysError[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
-      cout<<"DiffXSecTotalError[channelType][bin]: "<<DiffXSecTotalError[channelType][bin]<<endl;
+      //cout<<"DiffXSecTotalError[channelType][bin]: "<<DiffXSecTotalError[channelType][bin]<<endl;
 
       DiffXSecPlot[bin]=DiffXSec[channelType][bin]*datascale;
       DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin]*datascale;
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin]*datascale;
       cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<endl;
-      cout<<"DiffXSecStatErrorPlot[bin]: "<<DiffXSecStatErrorPlot[bin]<<endl;
-      cout<<"DiffXSecTotalErrorPlot[bin]: "<<DiffXSecTotalErrorPlot[bin]<<endl<<endl;
+      //      cout<<"DiffXSecStatErrorPlot[bin]: "<<DiffXSecStatErrorPlot[bin]<<endl;
+      //cout<<"DiffXSecTotalErrorPlot[bin]: "<<DiffXSecTotalErrorPlot[bin]<<endl<<endl;
     }
 
     Double_t mexl[XAxisbinCenters.size()];
@@ -1516,7 +1528,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarMass")){mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");}
     //    mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
-    mcnlohist->Rebin(1);mcnlohist->Scale(1);
+    mcnlohist->Rebin(5);mcnlohist->Scale(0.2);
     mcnlohist->Scale(mcnloscale);
 
     if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
@@ -1528,7 +1540,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistup = GetNloCurve("TtBar","Pt","MCNLOup");}
     else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
     else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
-    mcnlohistup->Rebin(1);mcnlohistup->Scale(1);
+    mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
     mcnlohistup->Scale(mcnloscale);
 
     if(name.Contains("LeptonpT")){mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");}//temprorary until I change the naming convention in the root file
@@ -1540,7 +1552,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistdown = GetNloCurve("TtBar","Pt","MCNLOdown");}
     else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
     else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
-    mcnlohistdown->Rebin(1);mcnlohistdown->Scale(1);
+    mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
     mcnlohistdown->Scale(mcnloscale);
 
     if(name.Contains("LeptonpT")){powheghist = GetNloCurve("Leptons","Pt","Powheg");}//temprorary until I change the naming convention in the root file
@@ -1553,7 +1565,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarRapidity")){powheghist = GetNloCurve("TtBar","Rapidity","Powheg");}
     else if(name.Contains("TTBarMass")){powheghist = GetNloCurve("TtBar","Mass","Powheg");}
     double powhegscale = 1./powheghist->Integral("width");
-    powheghist->Rebin(1);powheghist->Scale(1);
+    powheghist->Rebin(2);powheghist->Scale(0.5);
     powheghist->Scale(powhegscale);
 
     //Uncertainty band for MC@NLO
@@ -1588,6 +1600,11 @@ void Plotter::PlotDiffXSec(){
     }
     h_DiffXSec->SetMarkerStyle(20);
  
+    h_GenDiffXSec->SetMinimum(ymin);
+    if(logY){  
+      h_GenDiffXSec->SetMaximum(20*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+    }
+    else{ h_GenDiffXSec->SetMaximum(1.2*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     h_GenDiffXSec->Draw();
     //h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
@@ -1663,6 +1680,7 @@ void Plotter::PlotDiffXSec(){
       stacksum->Add((TH1D*)l->At(i));
     }
 
+    varhists[0]->SetMinimum(0);
     varhists[0]->Draw("el");
     stack->Draw("same HIST");
     varhists[0]->Draw("same, e1");
@@ -1690,33 +1708,11 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
 
     TFile* file = new TFile;
 
-    /*    if(strcmp(generator, "Powheg")==0){file = TFile::Open("/afs/naf.desy.de/user/d/dammann/public/Powheg.root","READ");}
-    else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_status3_v20111028.root","READ");}
-    else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Up_status3_v20111028.root","READ");}
-    else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("/afs/naf.desy.de/user/a/aldaya/public/MCatNLO_Uncert_Down_status3_v20111028.root","READ");}
-    */
     if(strcmp(generator, "Powheg")==0){file = TFile::Open("Powheg.root","READ");}
     else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20111028.root","READ");}
     else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20111028.root","READ");}
     else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20111028.root","READ");}
 
-    /*    if(strcmp(generator, "MCatNLO")==0){
-      file = mcatnloInput;
-    }
-    else if(strcmp(generator, "MCNLOup")==0){
-      file = mcatnloInputUp;
-      std::cerr << "MCNLOUp: " << file->GetName() << std::endl; 
-    } 
-     else if(strcmp(generator, "MCNLOdown")==0){
-      file = mcatnloInputDn;
-      std::cerr << "MCNLODn: " << file->GetName() << std::endl; 
-    }  
-    else if(strcmp(generator, "Powheg")==0){
-      file = powhegInput;
-    } else{
-      std::cerr << "WARNING in GetNloCurve: unknown generator '" << generator << "' specified!" << endl;
-    }
-    */
     if (file && !file->IsZombie()) {
       file->GetObject<TH1>(histname, hist);
 
@@ -1745,6 +1741,7 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
 
     std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
     hist = new TH1D();
+    delete file;
     return hist;
 }
 

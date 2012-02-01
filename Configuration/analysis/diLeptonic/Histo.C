@@ -9,7 +9,7 @@ void Histo::MakePlots(){
 
   std::vector<double> Xbins;
   std::vector<double> binCenters;
-  h_generalPlot.setOptions("jetMultiXSec","N_{Events}","N_{jets}", false, false, 0.1, 0, 0, 0,0,Xbins, binCenters);
+  /*  h_generalPlot.setOptions("jetMultiXSec","N_{Events}","N_{jets}", false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
   h_generalPlot.DYScaleFactor();
   h_generalPlot.setDataSet("mumu");
   h_generalPlot.fillHisto();
@@ -24,12 +24,13 @@ void Histo::MakePlots(){
   h_generalPlot.fillHisto();
   h_generalPlot.CalcXSec();
   h_generalPlot.PlotXSec();
-  
+  */
   string lumifile = "HistoList";
   ifstream HistStream;
   HistStream.open(lumifile.c_str());
 
   while(!HistStream.eof()){
+    Plotter h_generalPlot;
     TString name, YAxis, XAxis;
     bool logX, logY;
     int bins;
@@ -37,18 +38,15 @@ void Histo::MakePlots(){
     Xbins.clear();binCenters.clear();
   
     HistStream>>name>>YAxis>>XAxis>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
-    cout<<"bins: "<<bins<<endl;
     for(int i = 0; i < bins+1; i++){
       double temp;
       HistStream>>temp; 
       Xbins.push_back(temp);
-      cout<<Xbins[i]<<endl;
     }
     for(int i = 0; i < bins; i++){//only until bincenter code is finalized
       double temp;
       HistStream>>temp;
       binCenters.push_back(temp);
-      cout<<binCenters[i]<<endl;
     }
     
     //  h_generalPlot.setOptions("","DIMFull","N_{Events}","M_{#mu#mu}", false, true, 0, 0.1, 0, 0, 0);//Figure 2
@@ -68,21 +66,20 @@ void Histo::MakePlots(){
     h_generalPlot.write();
     h_generalPlot.PlotDiffXSec();
     h_generalPlot.DYScaleFactor();
-	h_generalPlot.setDataSet("emu");
-	h_generalPlot.fillHisto();
-	h_generalPlot.write();
-	h_generalPlot.PlotDiffXSec();
-	h_generalPlot.DYScaleFactor();
-	h_generalPlot.setDataSet("ee");
-	h_generalPlot.fillHisto();
-	h_generalPlot.write();
-	h_generalPlot.PlotDiffXSec();
-	h_generalPlot.DYScaleFactor();
-	h_generalPlot.setDataSet("combined");
-	h_generalPlot.fillHisto();
-	h_generalPlot.write();
-	h_generalPlot.PlotDiffXSec();
-	
+    h_generalPlot.setDataSet("emu");
+    h_generalPlot.fillHisto();
+    h_generalPlot.write();
+    h_generalPlot.PlotDiffXSec();
+    h_generalPlot.DYScaleFactor();
+    h_generalPlot.setDataSet("ee");
+    h_generalPlot.fillHisto();
+    h_generalPlot.write();
+    h_generalPlot.PlotDiffXSec();
+    h_generalPlot.DYScaleFactor();
+    h_generalPlot.setDataSet("combined");
+    h_generalPlot.fillHisto();
+    h_generalPlot.write();
+    h_generalPlot.PlotDiffXSec();
     
   }
   return;

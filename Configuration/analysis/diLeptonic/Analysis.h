@@ -36,6 +36,7 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
+   Int_t           EventCounter;
    Int_t           lepton_;
    Double_t        leptonpX[kMaxlepton];   //[lepton_]
    Double_t        leptonpY[kMaxlepton];   //[lepton_]
