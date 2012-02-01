@@ -1242,13 +1242,11 @@ void Plotter::PlotDiffXSec(){
 	  temp2->Add((TH1D*)ftemp2->Get("RecoAnti"+name)->Clone());
 	  genReco2d->Add((TH2*)ftemp2->Get("GenRecoAnti"+name)->Clone());
 	}
-	//	TH1D *temp2 =  (TH1D*)ftemp2->Get("RecoTTBarMass")->Clone();
 	RecoPlot = (TH1D*)temp2->Rebin(bins,"recohists",Xbins);
 	//      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
 	//numbers[1]+=NoPUPlot->Integral();
 	
 	TFile *ftemp = TFile::Open(dataset[i]);
-	//	GenPlotTheory=(TH1D*)ftemp->Get("VisGenTTBarMass")->Clone();
 	GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+name)->Clone();
 	if(name.Contains("Lepton")||name.Contains("Top")){
 	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
@@ -1257,6 +1255,37 @@ void Plotter::PlotDiffXSec(){
 	delete ftemp;
 	delete ftemp2;
       }           
+    }
+
+    THStack * stack=  new THStack("def", "def");
+    TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
+    for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
+      //varhists[i]=(TH1D*) hists[i].Clone();
+      setStyle(*varhists[i], i);
+      if(legends[i] != "data"){
+	if((legends[i] == DYEntry) && channelType!=2){
+	  varhists[i]->Scale(DYScale[channelType]);
+	}
+	if(i > 1){
+	  if(legends[i] != legends[i-1]){
+	    if( (legends[i] == DYEntry) && DYScale[channelType]!= 1){
+	      leg->AddEntry(varhists[i], legends[i]);
+	    }else leg->AddEntry(varhists[i], legends[i] ,"f");
+	  }
+	}
+	stack->Add(varhists[i]);  
+      }
+      else{
+	if(i==0) leg->AddEntry(varhists[i], legends[i] ,"pe");
+	if(i>0){
+	  if(legends[i] != legends[i-1]){
+	    leg->AddEntry(varhists[i], legends[i] ,"pe");
+	  }
+	  if(legends[i] == legends[0]){
+	    varhists[0]->Add(varhists[i]);
+	  }
+	}
+      }
     }
 
     ///////////////////////////////////
@@ -1381,6 +1410,7 @@ void Plotter::PlotDiffXSec(){
 	}
 	else{
 	  //BGSum[bin]+=varhists[hist]->Integral(bin,bin+1);
+	  if (bin==0)cout<<"legend: "<<legends[hist]<<" Content: "<<varhists[hist]->GetBinContent(bin+1)<<endl;
 	  BGSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	}
       }
@@ -1640,38 +1670,6 @@ void Plotter::PlotDiffXSec(){
     c->Clear();
     delete c;
     
-    THStack * stack=  new THStack("def", "def");
-    TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
-    //TH1 *varhists[hists.size()];
-    
-    for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
-      //varhists[i]=(TH1D*) hists[i].Clone();
-      setStyle(*varhists[i], i);
-      if(legends[i] != "data"){
-	if((legends[i] == DYEntry) && channelType!=2){
-	  varhists[i]->Scale(DYScale[channelType]);
-	}
-	if(i > 1){
-	  if(legends[i] != legends[i-1]){
-	    if( (legends[i] == DYEntry) && DYScale[channelType]!= 1){
-	      leg->AddEntry(varhists[i], legends[i]);
-	    }else leg->AddEntry(varhists[i], legends[i] ,"f");
-	  }
-	}
-	stack->Add(varhists[i]);  
-      }
-      else{
-	if(i==0) leg->AddEntry(varhists[i], legends[i] ,"pe");
-	if(i>0){
-	  if(legends[i] != legends[i-1]){
-	    leg->AddEntry(varhists[i], legends[i] ,"pe");
-	  }
-	  if(legends[i] == legends[0]){
-	    varhists[0]->Add(varhists[i]);
-	  }
-	}
-      }
-    }
     
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TList* l = stack->GetHists();
