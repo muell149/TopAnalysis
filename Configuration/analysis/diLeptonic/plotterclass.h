@@ -152,7 +152,6 @@ void Plotter::DYScaleFactor(){
   DYScale[1]=DYSFMuMu;
   DYScale[2]=1.;
   DYScale[3]=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
-
 }
 
 void Plotter::InclFlatSystematics(int syst_number){
@@ -1165,9 +1164,6 @@ double Plotter::CalcXSec(){
       delete ftemp;
     } 
     else{      
-      if(legends[i] == "W #rightarrow l#nu"){
-	//cout<<"numhists->Integral():"<<numhists[i]->Integral()<<endl;
-      }
       if((legends[i] == DYEntry) && channelType!=2){
 	numhists[i]->Scale(DYScale[channelType]);
       }
@@ -1210,9 +1206,7 @@ void Plotter::PlotDiffXSec(){
     //DiffFlatSystematics(3,nbins);
     double topxsec = 169.9;
     double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
-    //    double SignalEvents = 3701945.0;
-    double SignalEvents = 3631452.0;
-
+    double SignalEvents = 3697693.0;
     double Xbins[XAxisbins.size()];
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
     double binCenters[XAxisbinCenters.size()];
@@ -1220,6 +1214,7 @@ void Plotter::PlotDiffXSec(){
     
 
     TH1 *RecoPlot = new TH1D;
+    TH1 *RecoPlotFineBins = new TH1D;
     TH1 *GenPlot =new TH1D;
     TH1 *GenPlotTheory =new TH1D;
     //    double DataSum[nbins]={0};
@@ -1228,39 +1223,43 @@ void Plotter::PlotDiffXSec(){
     double DataSum[XAxisbinCenters.size()];
     double GenSignalSum[XAxisbinCenters.size()];
     double BGSum[XAxisbinCenters.size()];
-
+    bool init = false;
     TH1 *varhists[hists.size()];
     TH2 *genReco2d;
     for (unsigned int i =0; i<hists.size(); i++){
       varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);            
       setStyle(*varhists[i], i);
       if(legends[i] == "t#bar{t} signal"){
-	TFile *ftemp2 = TFile::Open(dataset[i]);
-	TH1D *temp2 =  (TH1D*)ftemp2->Get("Reco"+name)->Clone();
-	genReco2d = (TH2*)ftemp2->Get("GenReco"+name)->Clone();
-	if(name.Contains("Lepton")||name.Contains("Top")){
-	  temp2->Add((TH1D*)ftemp2->Get("RecoAnti"+name)->Clone());
-	  genReco2d->Add((TH2*)ftemp2->Get("GenRecoAnti"+name)->Clone());
-	}
-	RecoPlot = (TH1D*)temp2->Rebin(bins,"recohists",Xbins);
-	//      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
-	//numbers[1]+=NoPUPlot->Integral();
-	
 	TFile *ftemp = TFile::Open(dataset[i]);
-	GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+name)->Clone();
-	if(name.Contains("Lepton")||name.Contains("Top")){
-	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
+	if(init==false){
+	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+name)->Clone();
+	  genReco2d = (TH2*)ftemp->Get("GenReco"+name)->Clone();
+	  GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+name)->Clone();
+	  if(name.Contains("Lepton")||name.Contains("Top")){
+	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+name)->Clone());
+	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+name)->Clone());
+	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
+	  }
+	  init =true;
+	} else {//account for more than one signal histogram
+	  RecoPlotFineBins->Add((TH1D*)ftemp->Get("Reco"+name)->Clone());
+	  genReco2d->Add((TH2*)ftemp->Get("GenReco"+name)->Clone());
+	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGen"+name)->Clone());
+	  if(name.Contains("Lepton")||name.Contains("Top")){
+	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
+	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+name)->Clone());
+	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+name)->Clone());
+	  }	  
 	}
-	GenPlot = GenPlotTheory->Rebin(bins,"genplot",Xbins);	
 	delete ftemp;
-	delete ftemp2;
       }           
     }
+    GenPlot = GenPlotTheory->Rebin(bins,"genplot",Xbins);	
+    RecoPlot = (TH1D*)RecoPlotFineBins->Rebin(bins,"recohists",Xbins);
 
     THStack * stack=  new THStack("def", "def");
     TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
     for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
-      //varhists[i]=(TH1D*) hists[i].Clone();
       setStyle(*varhists[i], i);
       if(legends[i] != "data"){
 	if((legends[i] == DYEntry) && channelType!=2){
@@ -1278,11 +1277,8 @@ void Plotter::PlotDiffXSec(){
       else{
 	if(i==0) leg->AddEntry(varhists[i], legends[i] ,"pe");
 	if(i>0){
-	  if(legends[i] != legends[i-1]){
+	  if(legends[i] != legends[i-1]){//check
 	    leg->AddEntry(varhists[i], legends[i] ,"pe");
-	  }
-	  if(legends[i] == legends[0]){
-	    varhists[0]->Add(varhists[i]);
 	  }
 	}
       }
@@ -1396,24 +1392,27 @@ void Plotter::PlotDiffXSec(){
     cESP->Print("Plots/"+channel+"/ESP_"+name+".eps");
     cESP->Clear();
     delete cESP;
-    
     double efficiencies[XAxisbinCenters.size()];
+    init = false;
     for (unsigned int hist =0; hist<hists.size(); hist++){
-      for (Int_t bin=0; bin<bins; ++bin) {
-	if(legends[hist] == "data"){
+      if(legends[hist] == "data"){
+	for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	  DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	}
-	else if(legends[hist] == "t#bar{t} signal"){
+      }
+      else if((legends[hist] == "t#bar{t} signal")&&init==false){
+	init=true;
+	for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	  efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
 	  GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
 	  //	  cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
-	}
-	else{
-	  //BGSum[bin]+=varhists[hist]->Integral(bin,bin+1);
-	  if (bin==0)cout<<"legend: "<<legends[hist]<<" Content: "<<varhists[hist]->GetBinContent(bin+1)<<endl;
+	}      
+      }
+      else{
+	for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	  BGSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	}
-      }
+      }      
     }
     double totalDataSum = 0;
     for (Int_t bin=0; bin<bins; ++bin) {
@@ -1432,7 +1431,8 @@ void Plotter::PlotDiffXSec(){
 	cout<<"Datasum[i]: "<<DataSum[i]<<" BGSum[i]: "<<BGSum[i]<<" efficiencies[i]: "<<efficiencies[i]<<" binWidth[i]: "<<binWidth[i]<<" lumi: "<<lumi<<endl; 
 	DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
 	DiffXSecStatError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
-	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
+	//	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
+	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	
 	// set measured cross section
@@ -1448,6 +1448,7 @@ void Plotter::PlotDiffXSec(){
 	}
 	cout<<endl;
       }else{//For the combination
+	binWidth[i] = Xbins[i+1]-Xbins[i];      
 	DiffXSec[channelType][i] =(DiffXSec[0][i]/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
 					 +DiffXSec[1][i]/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i])			
 					 +DiffXSec[2][i]/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))/
@@ -1463,16 +1464,18 @@ void Plotter::PlotDiffXSec(){
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu DiffCross Sec: "<<DiffXSec[1][i]<<" +/- "<<DiffXSecStatError[1][i]<<endl;
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu DiffCross Sec: "<<DiffXSec[2][i]<<" +/- "<<DiffXSecStatError[2][i]<<endl;
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecStatError[3][i]<<endl;
+	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
 	h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
+	h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
       }
     }
 
     //data normalization
     double datascale;
-    datascale = 1./h_DiffXSec->Integral("width");//this is fine for one channel, but for the combination?  
+    datascale = 1./h_DiffXSec->Integral("width");
     cout<<"VISIBLE CROSS-SECTION: "<<h_DiffXSec->Integral("width")<<endl;
-    //datascale = 1./h_DiffXSec->Integral();//this is fine for one channel, but for the combination?  
     h_DiffXSec->Scale(datascale);
     
 
@@ -1539,12 +1542,13 @@ void Plotter::PlotDiffXSec(){
    
 
     GenPlotTheory->Scale(topxsec/(SignalEvents*GenPlotTheory->GetBinWidth(1)));
+    GenPlot->Scale(topxsec/(SignalEvents*GenPlot->GetBinWidth(1)));
     
     double genscale = 1./GenPlotTheory->Integral("width");
     
     GenPlotTheory->Scale(genscale);
-	
     genscale = 1./ h_GenDiffXSec->Integral("width");
+    
     h_GenDiffXSec->Scale(genscale);
     TH1* mcnlohist;TH1* mcnlohistup;TH1* mcnlohistdown;TH1* powheghist;
     if(name.Contains("LeptonpT")){mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
@@ -1643,7 +1647,6 @@ void Plotter::PlotDiffXSec(){
     GenPlotTheory->SetLineColor(2);
     GenPlotTheory->Rebin(4);GenPlotTheory->Scale(1./4.);
     GenPlotTheory->Draw("SAME,C");
-
     h_GenDiffXSec->SetLineColor(2);
     mcnlohist->SetLineColor(kAzure);
     mcnlohist->Draw("SAME,C");
@@ -1678,6 +1681,11 @@ void Plotter::PlotDiffXSec(){
       stacksum->Add((TH1D*)l->At(i));
     }
 
+    for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
+      if(legends[i] == legends[0]){
+	varhists[0]->Add(varhists[i]);
+      }
+    }
     varhists[0]->SetMinimum(0);
     varhists[0]->Draw("el");
     stack->Draw("same HIST");
