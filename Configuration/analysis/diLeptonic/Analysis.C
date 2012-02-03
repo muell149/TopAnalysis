@@ -33,14 +33,14 @@ void Analysis::Begin(TTree * /*tree*/)
   h_HypTTBarRapidity = new TH1D("HypTTBarRapidity","Rapidity of TTbar System (HYP)",50,-5,5);
   h_HypTTBarpT = new TH1D("HypTTBarpT","pT of TTbar System (HYP)",50,0,500);
   h_HypTTBarMass = new TH1D("HypTTBarMass","Mass of TTbar System (HYP)",100,0,2000);
-  h_HypLLBarMass = new TH1D("HypLLBarMass","Mass of LLbar System (HYP)",100,0,2000);
+  h_HypLLBarMass = new TH1D("HypLLBarMass","Mass of LLbar System (HYP)",500,0,1000);
   h_HypLLBarpT = new TH1D("HypLLBarpT","pT of LLbar System (HYP)",500,0,1000);
 
   h_GenTTBarMass = new TH1D("GenTTBarMass","Mass of TTbar System(GEN)",240,0,1200);
   h_GenTTBarRapidity = new TH1D("GenTTBarRapidity","Rapidity of TTbar System(GEN)",50,-5,5);
   h_GenTTBarpT = new TH1D("GenTTBarpT","pT of TTbar System(GEN)",240,0,1200);
   h_GenLLBarpT = new TH1D("GenLLBarpT","pT of LLbar System(GEN)",500,0,1000);
-  h_GenLLBarMass = new TH1D("GenLLBarMass","Mass of LLbar System(GEN)",240,0,1200);
+  h_GenLLBarMass = new TH1D("GenLLBarMass","Mass of LLbar System(GEN)",500,0,1000);
 
   h_VisGenTTBarMass = new TH1D("VisGenTTBarMass","Mass of TTbar System(VisGEN)",240,0,1200);
   h_VisGenTTBarRapidity = new TH1D("VisGenTTBarRapidity","Rapidity of TTbar System(VisGEN)",50,-5,5);
@@ -49,7 +49,7 @@ void Analysis::Begin(TTree * /*tree*/)
   h_VisGenAntiTopRapidity = new TH1D("VisGenAntiTopRapidity","Rapidity of AntiTop(VisGEN)",50,-5,5);
 
   h_VisGenLLBarpT = new TH1D("VisGenLLBarpT","pT of LLbar System(VisGEN)",500,0,1000);
-  h_VisGenLLBarMass = new TH1D("VisGenLLBarMass","Mass of LLbar System(VisGEN)",240,0,1200);
+  h_VisGenLLBarMass = new TH1D("VisGenLLBarMass","Mass of LLbar System(VisGEN)",500,0,1000);
 
   h_RecoTTBarMass = new TH1D("RecoTTBarMass","Mass of TTbar System (HYP)",240,0,1200);
   h_RecoTTBarRapidity = new TH1D("RecoTTBarRapidity","Rapidity of TTbar System (HYP)",50,-5,5);
@@ -59,7 +59,7 @@ void Analysis::Begin(TTree * /*tree*/)
   h_RecoTopRapidity = new TH1D("RecoTopRapidity","Rapidity of Top (HYP)",50,-5,5);
   h_RecoAntiTopRapidity = new TH1D("RecoAntiTopRapidity","Rapidity of AntiTop (HYP)",50,-5,5);
 
-  h_RecoLLBarMass = new TH1D("RecoLLBarMass","Mass of LLbar System (HYP)",240,0,1200);
+  h_RecoLLBarMass = new TH1D("RecoLLBarMass","Mass of LLbar System (HYP)",500,0,1000);
   h_RecoLLBarpT = new TH1D("RecoLLBarpT","pT of LLbar System (HYP)",500,0,1000);
   h_RecoLeptonpT = new TH1D("RecoLeptonpT","pT of Lepton (HYP)",240,0,1200);
   h_RecoAntiLeptonpT = new TH1D("RecoAntiLeptonpT","pT of AntiLepton (HYP)",240,0,1200);
@@ -207,7 +207,7 @@ void Analysis::Begin(TTree * /*tree*/)
   h_GenRecoTTBarRapidity = new TH2D("GenRecoTTBarRapidity","Rapidity of TTbar System (HYP)",50,-5,5,50,-5,5);
   h_GenRecoTTBarpT = new TH2D("GenRecoTTBarpT","pT of TTbar System (HYP)",50,0,500,50,0,500);
   h_GenRecoTTBarMass = new TH2D("GenRecoTTBarMass","Mass of TTbar System (HYP)",100,0,2000,100,0,2000);
-  h_GenRecoLLBarMass = new TH2D("GenRecoLLBarMass","Mass of LLbar System (HYP)",100,0,2000,100,0,2000);
+  h_GenRecoLLBarMass = new TH2D("GenRecoLLBarMass","Mass of LLbar System (HYP)",500,0,1000,500,0,1000);
   h_GenRecoLLBarpT = new TH2D("GenRecoLLBarpT","pT of LLbar System (HYP)",500,0,1000,500,0,1000);
 
 

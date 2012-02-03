@@ -82,7 +82,7 @@ class Plotter {
   double VisXsectionError[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
   double GenDiffXSec[4][10];//the differential X-section per channel by bin [channel][bin]
   double GenDiffXSecError[4][10];//the differential X-section Error per channel by bin [channel][bin]
-
+  double TotalVisXSection[4];
 };
 
 
@@ -767,20 +767,20 @@ void Plotter::fillHisto()
     hists.clear();
     for(unsigned int i=0; i<dataset.size(); i++){
       TFile *ftemp = TFile::Open(dataset[i]);
-      //TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
-      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();
+      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+      //TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
-	//TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
-	//TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	//TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -803,17 +803,20 @@ void Plotter::fillSystHisto()
     systhistsDown.clear();
     for(unsigned int i=0; i<datasetUp.size(); i++){
       TFile *ftemp = TFile::Open(datasetUp[i]);
-      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
+      //TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
+      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -824,17 +827,20 @@ void Plotter::fillSystHisto()
     }
     for(unsigned int i=0; i<datasetDown.size(); i++){
       TFile *ftemp = TFile::Open(datasetDown[i]);
-      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
+      //      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
+      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -1226,29 +1232,33 @@ void Plotter::PlotDiffXSec(){
     bool init = false;
     TH1 *varhists[hists.size()];
     TH2 *genReco2d;
+    TString newname = name;
+    if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
+      newname.ReplaceAll("Hyp",3,"",0);
+    }
     for (unsigned int i =0; i<hists.size(); i++){
       varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);            
       setStyle(*varhists[i], i);
       if(legends[i] == "t#bar{t} signal"){
 	TFile *ftemp = TFile::Open(dataset[i]);
 	if(init==false){
-	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+name)->Clone();
-	  genReco2d = (TH2*)ftemp->Get("GenReco"+name)->Clone();
-	  GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+name)->Clone();
-	  if(name.Contains("Lepton")||name.Contains("Top")){
-	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+name)->Clone());
-	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+name)->Clone());
-	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
+	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+newname)->Clone();
+	  genReco2d = (TH2*)ftemp->Get("GenReco"+newname)->Clone();
+	  GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+newname)->Clone();
+	  if(newname.Contains("Lepton")||newname.Contains("Top")){
+	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+newname)->Clone());
+	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+newname)->Clone());
+	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+newname)->Clone());
 	  }
 	  init =true;
 	} else {//account for more than one signal histogram
-	  RecoPlotFineBins->Add((TH1D*)ftemp->Get("Reco"+name)->Clone());
-	  genReco2d->Add((TH2*)ftemp->Get("GenReco"+name)->Clone());
-	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGen"+name)->Clone());
-	  if(name.Contains("Lepton")||name.Contains("Top")){
-	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+name)->Clone());
-	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+name)->Clone());
-	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+name)->Clone());
+	  RecoPlotFineBins->Add((TH1D*)ftemp->Get("Reco"+newname)->Clone());
+	  genReco2d->Add((TH2*)ftemp->Get("GenReco"+newname)->Clone());
+	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGen"+newname)->Clone());
+	  if(newname.Contains("Lepton")||newname.Contains("Top")){
+	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+newname)->Clone());
+	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+newname)->Clone());
+	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+newname)->Clone());
 	  }	  
 	}
 	delete ftemp;
@@ -1435,17 +1445,20 @@ void Plotter::PlotDiffXSec(){
 	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	
-	// set measured cross section
+	if(name.Contains("Lepton")||name.Contains("Top")){
+	  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
+	  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
+	  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
+	}
 	if (efficiencies[i] == 0) { //cannot divide by zero
 	  cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << name << endl;
 	  h_DiffXSec->SetBinContent(i+1, 0);
-	} else {
-	  //cout<<"DiffXSec[i]: "<<DiffXSec[channelType][i]<<endl;;
-	  //cout<<"GenDiffXSec[i]: "<<GenDiffXSec[i]<<endl;;
-	  h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
 	  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
-	  h_DiffXSec->SetBinError(i+1,(TMath::Sqrt(DataSum[i]))/(efficiencies[i]*lumi*binWidth[i])); // statistical error
-	}
+	}/* else {
+	  h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+	  h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
+	  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
+	  }*/
 	cout<<endl;
       }else{//For the combination
 	binWidth[i] = Xbins[i+1]-Xbins[i];      
@@ -1466,17 +1479,20 @@ void Plotter::PlotDiffXSec(){
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecStatError[3][i]<<endl;
 	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
-	h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
-	h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
-	h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
       }
+      h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+      h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
+      h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
     }
 
     //data normalization
     double datascale;
-    datascale = 1./h_DiffXSec->Integral("width");
-    cout<<"VISIBLE CROSS-SECTION: "<<h_DiffXSec->Integral("width")<<endl;
-    h_DiffXSec->Scale(datascale);
+    datascale = h_DiffXSec->Integral("width");
+    if(name.Contains("LeptonEta")){
+      TotalVisXSection[channelType] = datascale;
+    }
+    cout<<"VISIBLE CROSS-SECTION: "<<TotalVisXSection[channelType]<<endl;
+    h_DiffXSec->Scale(1/TotalVisXSection[channelType]);
     
 
     for (Int_t i=0; i<bins; ++i) {//I don't think this is needed, but put it here for good measure
@@ -1518,9 +1534,9 @@ void Plotter::PlotDiffXSec(){
       DiffXSecTotalError[channelType][bin] = sqrt(DiffXSecSysError[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
       //cout<<"DiffXSecTotalError[channelType][bin]: "<<DiffXSecTotalError[channelType][bin]<<endl;
 
-      DiffXSecPlot[bin]=DiffXSec[channelType][bin]*datascale;
-      DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin]*datascale;
-      DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin]*datascale;
+      DiffXSecPlot[bin]=DiffXSec[channelType][bin]/TotalVisXSection[channelType];
+      DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin]/TotalVisXSection[channelType];
+      DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin]/TotalVisXSection[channelType];
       cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<endl;
       //      cout<<"DiffXSecStatErrorPlot[bin]: "<<DiffXSecStatErrorPlot[bin]<<endl;
       //cout<<"DiffXSecTotalErrorPlot[bin]: "<<DiffXSecTotalErrorPlot[bin]<<endl<<endl;
@@ -1652,8 +1668,6 @@ void Plotter::PlotDiffXSec(){
     mcnlohist->Draw("SAME,C");
     powheghist->SetLineColor(kGreen+1);
     powheghist->Draw("SAME,C");
-    tga_DiffXSecPlot->Draw("p, SAME");
-    tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     //h_DiffXSec->Draw("SAME, EP0");
     DrawCMSLabels(true, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
@@ -1667,6 +1681,9 @@ void Plotter::PlotDiffXSec(){
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
     leg2.Draw("same");
+    h_GenDiffXSec->Draw("SAME");
+    tga_DiffXSecPlot->Draw("p, SAME");
+    //    tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
     
     c->Print("Plots/"+channel+"/DiffXS_"+name+".eps");
