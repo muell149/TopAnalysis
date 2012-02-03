@@ -100,9 +100,11 @@ else:
     if options.runOnMC:
         #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
         process.GlobalTag.globaltag = cms.string("START42_V13::All")
+        #process.GlobalTag.globaltag = cms.string("START42_V17::All")
     else:
         #process.GlobalTag.globaltag = cms.string( autoCond[ 'com10' ] )
         process.GlobalTag.globaltag = cms.string( 'GR_R_42_V19::All' )
+        #process.GlobalTag.globaltag = cms.string( 'GR_R_42_V23::All' )
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
