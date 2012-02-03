@@ -62,10 +62,21 @@ const TString inpath(  !strcmp(USERNAME, "wbehrenh") ? "./" : //PLEASE LEAVE THI
 
 //const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/systematics/M20Inf/");
 //const TString outpath("/afs/naf.desy.de/user/a/asincruz/CMSSW_4_2_5/src/Ivan/DefaultAnalysis/Finalresults/M20Inf/");
-const TString outpath("plots/");
 
-// output format
+
+// Unfolding Flags
+const bool doSVD = false; //true;
+const bool unfoldingPlotsToPs = true;
+const bool unfoldingPlotsToRoot = false;
+
+
+// Place for Output
+const TString outpath( (doSVD==true) ?
+    "/afs/desy.de/user/d/dfischer/www/TopUnfolding/SVD/" :
+    "/afs/desy.de/user/d/dfischer/www/TopUnfolding/BBB/" );
 const TString outform(".eps");
+
+
 
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
@@ -205,10 +216,6 @@ const Color_t colorMadGraph = kRed + 1;
 const Color_t colorPOWHEG = kGreen + 1;
 const Color_t colorMcAtNLO = kAzure;
 
-// Unfolding Flags
-const bool doSVD = false;
-const bool unfoldingPlotsToPs = true;
-const bool unfoldingPlotsToRoot = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -264,6 +271,20 @@ Double_t visCrossSections[] = {-1.,-1.,-1.,-1.};
 Double_t visCrossSectionsNoFit[] = {-1.,-1.,-1.,-1.};
 
 bool dataIsFakeFromMonteCarlo = kFALSE;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  SVD FUNCTION DECLARATIONS ... will be defined at the end of the file
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int SVD_GetKValue(TString channel, TString particle, TString quantity, TString special = "");
+void SVD_Tex(TString channel, TString particle, TString quantity, TString special, TString& channelTex, TString& particleTex, TString& quantityTex, TString& specialTex);
+TString SVD_GetOutputPath();
+TString SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity, TString special = "");
+TString SVD_GetOutputFileNameRoot(TString channel, TString particle, TString quantity, TString special = "");
+int SVD_DoUnfold(TH1* dataInputHist,TH1* bgrInputHist,TH1* genInputHist,TH1* recInputHist,TH1* respInputHist,const double thebins[],const int numbins,                  
+        TH1D*& unfolded,TString channel,TString particle,TString quantity,TString special);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3240,6 +3261,11 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         binhists[i] = hists[i]->Rebin(nbins,"",bins);
     }
     TH1* bingenhist = genHist->Rebin(nbins,"",bins);
+    TH1* binrechist = NULL;
+    if (doUnfolding) {
+        binrechist = recHist->Rebin(nbins,"",bins);
+    }
+
 
     // calculate efficiency binwise from signal MC
     Double_t efficiencies[nbins];
@@ -3396,9 +3422,6 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     // DAVID
     if ( doUnfolding ) {
     
-        // Determine the right kValue
-        int kValue = -1 ;
-        kValue = SVD_GetKValue(channelName[channel], particle, quantity);
 
         // Raw Data Histogram
         TH1D* dataHist = (TH1D*) mergedhists[kDATA];
@@ -3411,11 +3434,17 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         }
 
 
+        // UNFOLDING 
         // Retrieve a histogram with the unfolded quantities.
         // Note: The unfolded histogram has additional side bins!
-        // Keep this in mind when accessing bin content via indices.
+        // Keep this in mind when accessing bin content via indices
         TH1D* unfoldedDistribution = NULL;
-        SVD_UnfoldByHist(channelName[channel], particle, quantity, dataHist, bgrHist, genHist, recHist, genRec2DHist, bins, nbins, kValue, unfoldedDistribution, unfoldingPlotsToRoot, unfoldingPlotsToPs);
+        SVD_DoUnfold(dataHist, bgrHist, bingenhist, binrechist, genRec2DHist, 
+             bins, nbins,  
+             unfoldedDistribution, 
+             channelName[channel], particle, quantity, specialPostfix);
+
+  
 
 
         // Calculate Cross Sections
@@ -5460,7 +5489,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
-    
+   
     //other plot as requested by ARC
     const Int_t nbinsTopRapidityMoreBins = 5;
     const Double_t binsTopRapidityMoreBins[nbinsTopRapidityMoreBins+1] = {-2.5, -1.4, -0.5, 0.5, 1.4, 2.5};
@@ -5495,7 +5524,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     const Double_t binsTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins+1] = {-2.5, -1.2, -0.4, 0.4, 1.2, 2.5};
     const Double_t binCenterTtBarRapidityMoreBins[nbinsTtBarRapidityMoreBins] = {-1.68, bccAuto, 0, bccAuto, 1.65};
     PlotDifferentialCrossSections("TtBar", "Rapidity", "y^{t#bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t#bar{t}}}", binsTtBarRapidityMoreBins, nbinsTtBarRapidityMoreBins, binCenterTtBarRapidityMoreBins, kTRUE, "_MoreBins" , doSVD );
-    
+   
     const Int_t nbinsTtBarPt = 4;
     const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0, 20, 60, 120, 500};
     const Double_t binCenterTtBarPt[nbinsTtBarPt] = {5, 39, 86, 231};
@@ -5620,85 +5649,125 @@ int main() {
 
 
 
+	
 // SVD Helper Function
 // Return a k-Value for the particle/quantity/channel combination
-int SVD_GetKValue(TString channel, TString particle, TString quantity)
+int SVD_GetKValue(TString channel, TString particle, TString quantity, TString special)
 {
-    // Define the kValues
-    int kLepEta[] = {8,8,8,8};
-    int kLepPt[] = {7,7,7,7};
-    int kLepPairEta[] = {8,8,8,8};
-    int kLepPairPt[] = {7,7,7,7};
-    int kLepPairMass[] = {6,6,6,6};
-    int kJetEta[] = {6,6,6,6};
-    int kJetPt[] = {4,4,4,4};
-    int kTopEta[] = {4,4,4,4};
-    int kTopPt[] = {4,4,4,4};
-    int kTtEta[] = {4,4,4,4};
-    int kTtPt[] = {4,4,4,4};
-    int kTtMass[] = {4,4,4,4};
+ 
+	// Concatenate Strings
+	TString concatenation = SVD_CPQS(channel, particle, quantity, special); 
+	
+	// Standard Value for K 
+	int kValue = 0;
+	
+	
+	// Leptons Eta
+	if ( concatenation.CompareTo("mumu_Leptons_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("emu_Leptons_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("ee_Leptons_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("combined_Leptons_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("mumu_Leptons_Eta_MoreBins") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("emu_Leptons_Eta_MoreBins") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("ee_Leptons_Eta_MoreBins") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("combined_Leptons_Eta_MoreBins") == 0 ) kValue = 8;
+	
+	
+	// Leptons Pt
+	if ( concatenation.CompareTo("mumu_Leptons_Pt") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("emu_Leptons_Pt") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("ee_Leptons_Pt") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("combined_Leptons_Pt") == 0 ) kValue = 6;
+	 
+	
+	// LepPair Eta
+	if ( concatenation.CompareTo("mumu_LepPair_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("emu_LepPair_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("ee_LepPair_Eta") == 0 ) kValue = 8;
+	if ( concatenation.CompareTo("combined_LepPair_Eta") == 0 ) kValue = 8;
+	
+	
+	// LepPair Pt
+	if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("emu_LepPair_Pt") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 ) kValue = 6;
+	
+	
+	// LepPair Mass
+	if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 ) kValue = 6;
+	 
+	
+	// Jets Eta
+	if ( concatenation.CompareTo("mumu_Jets_Eta") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("emu_Jets_Eta") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("ee_Jets_Eta") == 0 ) kValue = 6;
+	if ( concatenation.CompareTo("combined_Jets_Eta") == 0 ) kValue = 6;
+	
+	
+	// Jets Pt
+	if ( concatenation.CompareTo("mumu_Jets_Pt") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("emu_Jets_Pt") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("ee_Jets_Pt") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("combined_Jets_Pt") == 0 ) kValue = 4;
+	
+	
+	// TopQuarks Rapidity
+	if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("combined_TopQuarks_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity_MoreBins") == 0 ) kValue = 5;
+	if ( concatenation.CompareTo("emu_TopQuarks_Rapidity_MoreBins") == 0 ) kValue = 5;
+	if ( concatenation.CompareTo("ee_TopQuarks_Rapidity_MoreBins") == 0 ) kValue = 5;
+	if ( concatenation.CompareTo("combined_TopQuarks_Rapidity_MoreBins") == 0 ) kValue = 5;
+	
+	
+	// TopQuarks Pt
+	if ( concatenation.CompareTo("mumu_TopQuarks_Pt") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("emu_TopQuarks_Pt") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("ee_TopQuarks_Pt") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("combined_TopQuarks_Pt") == 0 ) kValue = 3;
+	
+	
+	// TtBar Rapidity
+	if ( concatenation.CompareTo("mumu_TtBar_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("emu_TtBar_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("ee_TtBar_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("combined_TtBar_Rapidity") == 0 ) kValue = 3;
+	if ( concatenation.CompareTo("mumu_TtBar_Rapidity_MoreBins") == 0 ) kValue = 5;
+	if ( concatenation.CompareTo("emu_TtBar_Rapidity_MoreBins") == 0 ) kValue = 5;
+	if ( concatenation.CompareTo("ee_TtBar_Rapidity_MoreBins") == 0 ) kValue = 5;
+	if ( concatenation.CompareTo("combined_TtBar_Rapidity_MoreBins") == 0 ) kValue = 5;
+	
+	
+	// TtBar Pt
+	if ( concatenation.CompareTo("mumu_TtBar_Pt") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("emu_TtBar_Pt") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("ee_TtBar_Pt") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("combined_TtBar_Pt") == 0 ) kValue = 4;
+	
+	
+	// TtBar Mass
+	if ( concatenation.CompareTo("mumu_TtBar_Mass") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("emu_TtBar_Mass") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("ee_TtBar_Mass") == 0 ) kValue = 4;
+	if ( concatenation.CompareTo("combined_TtBar_Mass") == 0 ) kValue = 4; 
 
 
-    // ChannelNumbers
-    int channelnumber = -1;
-    if ( TString(channel).CompareTo("mumu") == 0 ) channelnumber = 0;
-    if ( TString(channel).CompareTo("emu") == 0 ) channelnumber = 1;
-    if ( TString(channel).CompareTo("ee") == 0 ) channelnumber = 2;
-    if ( TString(channel).CompareTo("combined") == 0 ) channelnumber = 3;
-    if ( channelnumber == -1 ) {
-        cout << "Error in SVD_GetKValue()" << endl;
-        cout << "I dont know which channel you want." << endl;
-        cout << "particle="<<particle<<", quantity="<<quantity<<", channel="<<channel<<endl;
-        cout << "Check the reason for this NOW." << endl;
-        exit(1);
-    }
 
-
-
-    // Return a kValue
-    int kValue = 0;
-    if ( TString(particle).CompareTo("Leptons") == 0 && TString(quantity).CompareTo("Eta") == 0 ) {
-        kValue = kLepEta[channelnumber];
-    }
-    if ( TString(particle).CompareTo("Leptons") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
-        kValue = kLepPt[channelnumber];
-    }
-    if ( TString(particle).CompareTo("LepPair") == 0 && TString(quantity).CompareTo("Eta") == 0 ) {
-        kValue = kLepPairEta[channelnumber];
-    }
-    if ( TString(particle).CompareTo("LepPair") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
-        kValue = kLepPairPt[channelnumber];
-    }
-    if ( TString(particle).CompareTo("LepPair") == 0 && TString(quantity).CompareTo("Mass") == 0 ) {
-        kValue = kLepPairMass[channelnumber];
-    }
-    if ( TString(particle).CompareTo("Jets") == 0 && TString(quantity).CompareTo("Eta") == 0 ) {
-        kValue = kJetEta[channelnumber];
-    }
-    if ( TString(particle).CompareTo("Jets") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
-        kValue = kJetPt[channelnumber];
-    }
-    if ( TString(particle).CompareTo("TopQuarks") == 0 && TString(quantity).CompareTo("Rapidity") == 0 ) {
-        kValue = kTopEta[channelnumber];
-    }
-    if ( TString(particle).CompareTo("TopQuarks") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
-        kValue = kTopPt[channelnumber];
-    }
-    if ( TString(particle).CompareTo("TtBar") == 0 && TString(quantity).CompareTo("Rapidity") == 0 ) {
-        kValue = kTtEta[channelnumber];
-    }
-    if ( TString(particle).CompareTo("TtBar") == 0 && TString(quantity).CompareTo("Pt") == 0 ) {
-        kValue = kTtPt[channelnumber];
-    }
-    if ( TString(particle).CompareTo("TtBar") == 0 && TString(quantity).CompareTo("Mass") == 0 ) {
-        kValue = kTtMass[channelnumber];
-    }
 
     // Exit if this fails
     if ( kValue == 0 ) {
         cout << "Error in SVD_GetKValue()" << endl;
         cout << "Level of regularization could not be determined." << endl;
-        cout << "particle="<<particle<<", quantity="<<quantity<<", channelnumber="<<channelnumber<<endl;
+        cout << "    particle = "<<particle<<endl;
+        cout << "    quantity = "<<quantity<<endl;
+        cout << "    channel  = "<<channel<<endl;
+        cout << "    special  = "<<special<<endl;
         cout << "Check the reason for this NOW." << endl;
         exit(1);
     }
@@ -5710,19 +5779,8 @@ int SVD_GetKValue(TString channel, TString particle, TString quantity)
 // DAVID
 // SVD Unfolding Helper Function
 // Create Tex Snippets for the histograms
-void SVD_Tex(TString channel, TString particle, TString quantity, TString& particleTex, TString& quantityTex, TString& channelTex)
+void SVD_Tex(TString channel, TString particle, TString quantity, TString special, TString& channelTex, TString& particleTex, TString& quantityTex, TString& specialTex)
 {
-    
-    quantityTex = "";
-    if ( strcmp(quantity, "Pt") == 0 ) {
-        quantityTex.Append("p_{T}");
-    } else if ( strcmp(quantity, "Eta") == 0 ) {
-        quantityTex.Append("#eta");
-    } else if ( strcmp(quantity, "Mass") == 0 ) {
-        quantityTex.Append("M_{t #bar{t}}");
-    } else {
-        quantityTex.Append(quantity);
-    }
 
     channelTex = "";
     if ( strcmp(channel, "mumu") == 0 ) {
@@ -5732,7 +5790,7 @@ void SVD_Tex(TString channel, TString particle, TString quantity, TString& parti
     } else if ( strcmp(channel, "ee") == 0 ) {
         channelTex.Append("e^{+}e^{-}");
     } else if ( strcmp(channel, "combined") == 0 ) {
-        channelTex.Append("comb.");
+        channelTex.Append("cb.");
     } else {
         channelTex.Append(channel);
     }
@@ -5741,20 +5799,38 @@ void SVD_Tex(TString channel, TString particle, TString quantity, TString& parti
     if ( strcmp(particle, "Leptons") == 0 ) {
         particleTex.Append("l^{+} / l^{-}");
     } else if ( strcmp(particle, "LepPair") == 0 ) {
-        particleTex.Append("l^{+}l^{-}-Pair");
+        particleTex.Append("(l^{+}l^{-})");
     } else if ( strcmp(particle, "Jets") == 0 ){
         particleTex.Append("Jets");
     } else if ( strcmp(particle, "TopQuarks") == 0 ) {
         particleTex.Append("t / #bar{t}");
     } else if ( strcmp(particle, "TtBar") == 0 ) {
-        particleTex.Append("t#bar{t}-Pair");
+        particleTex.Append("(t#bar{t})");
     } else {
         particleTex.Append(particle);
+    } 
+    
+    quantityTex = "";
+    if ( strcmp(quantity, "Pt") == 0 ) {
+        quantityTex.Append("p_{T}");
+    } else if ( strcmp(quantity, "Eta") == 0 ) {
+        quantityTex.Append("#eta");
+    } else if ( strcmp(quantity, "Rapidity") == 0 ) {
+        quantityTex.Append("y");
+    } else if ( strcmp(quantity, "Mass") == 0 ) {
+        quantityTex.Append("M_{t #bar{t}}");
+    } else {
+        quantityTex.Append(quantity);
+    } 
+    
+    specialTex = "";
+    if ( strcmp(special, "MoreBins") == 0 ) {
+        specialTex.Append("(MB)"); 
+    } else {
+        specialTex.Append(particle);
     }
 
-}
-
-
+} 
 
 // DAVID
 // SVD Unfolding Helper Function
@@ -5769,347 +5845,84 @@ TString SVD_GetOutputPath()
 
 }
 
+// DAVID
+// SVD Unfolding Helper Function
+// Get complete Output File Name for Ps
+TString SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity, TString special)
+{
+
+    TString outputfilename = SVD_GetOutputPath();
+    outputfilename.Append("/Unfolding_");
+    outputfilename.Append(SVD_CPQS(channel, particle, quantity, special));
+    outputfilename.Append(".ps");
+    return outputfilename;
+
+}
 
 
 // DAVID
 // SVD Unfolding Helper Function
-// This function provides all the histograms that are needed
-// as Input for the SVD Unfolding
-void SVD_GetInputHists(TString channel, TString particle, TString quantity, TH1*& dataHist, TH1*& bgrHist, TH1*& genHist, TH1*& recHist, TH1*& genRec2DHist)
+// Get complete Output File Name for Root
+TString SVD_GetOutputFileNameRoot(TString channel, TString particle, TString quantity, TString special)
 {
+    TString outputfilename = SVD_GetOutputPath();
+    outputfilename.Append("/Unfolding_");
+    outputfilename.Append(SVD_CPQS(channel, particle, quantity, special));
+    outputfilename.Append(".root");
+    return outputfilename;
+
+}
+ 
+ 
+// PERFORM UNFOLDING 
+// Note: This function can do both, BBB and SVD Unfolding.
+// If kreg > 0:
+//       SVD Unfolding is done with 'kreg'
+//       and the result of SVD Unfolding is returned in 'unfolded'
+// If kreg <= 0:
+//       BBB Unfolding is returned in 'unfolded' 
+// If you specify filenames, plots will be drawn and saved.
+int SVD_DoUnfold(
+        TH1* dataInputHist,                     // Data Input (RAW Data including the background)
+        TH1* bgrInputHist,                      // Background (will be substracted from data)
+        TH1* genInputHist,                      // Generated MC
+        TH1* recInputHist,                      // Reconstructed MC
+        TH1* respInputHist,                     // Response Matrix 
+        const double thebins[],                 // Binning for the unfolding
+        const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!) 
+        TH1D*& unfolded,                        // Returned: Unfolded Distribution.
+        TString channel,                        // Specify Name for the Channel ("mumu", "emu", "ee" ...)
+        TString particle,                       // Specify Name for the Physics Object ("Top", "Jets", "Leptons")
+        TString quantity,                       // Specify Name for the Quantity ("Eta", "Pt", or "Mass");
+        TString special                         // Special Postfix to be used for names of files and plots
+)   
+{ 
+        // Determine the right kValue
+        int kValue = -1 ;
+        kValue = SVD_GetKValue(channel, particle, quantity);
+        
+
+        // FileNames for output 
+        TString rootFile = "";
+        if ( unfoldingPlotsToRoot == true ) rootFile.Append(SVD_GetOutputFileNameRoot(channel, particle, quantity, special));
+        TString psFile = "";
+        if ( unfoldingPlotsToPs == true ) psFile.Append(SVD_GetOutputFileNamePs(channel, particle, quantity, special));
+         
+
+        // TexStrings for Formatting
+        TString particleTex = "";
+        TString quantityTex = "";
+        TString channelTex = "";
+        TString specialTex = "";
+        SVD_Tex(channel, particle, quantity, special, channelTex, particleTex, quantityTex, specialTex);
+        
+	   
+	    // Do the Unfolding 
+	    return SVD_Unfold(dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist, 
+             thebins, numbins, kValue, 
+             unfolded, 
+             channel, particle, quantity, special,
+             channelTex, particleTex, quantityTex, specialTex,
+             rootFile, psFile);
 	
-
-    // Suffix of the names of the input histograms 	
-    TString plotStr("");
-    if (strcmp(particle,"Leptons")==0) {
-        plotStr.Append("Lep");
-    } else if (strcmp(particle,"Jets")==0) {
-        plotStr.Append("B");
-    } else if (strcmp(particle,"TopQuarks")==0) {
-        plotStr.Append("Top");
-    } else {
-        plotStr.Append(particle);
-    }
-    plotStr.Append(quantity);
-
-
-    // Prepare the input histograms 
-    TH1* hists[Nfiles];  // REC (Data, Signal, Bgr)  
-   
-
-
-    // Fill the input histograms
-    if (channel=="mumu") {
-        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-  
-        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
-
-        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-
-        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
-    } else if (channel=="emu") {
-        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-
-        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
-
-        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-
-        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
-    } else if (channel=="ee") {
-        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-
-        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
-
-        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-
-        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
-    } else if (channel=="combined") {
-        GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-        AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-        AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-
-        GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
-        AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
-
-
-        GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
-        AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-
-        GetCloneHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
-        AddHist(     kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
-    } else {
-        cout << "ERROR in SaveUnfoldingHists: index " << channel << " for channel is out of range!" << endl;
-        return ;
-    }
-                                        
-     
-                                    	
-    // if particle = Leptons, Jets or TopQuarks 
-    // then the histogram of the antiparticle is added to that of the particle
-    bool addAntiParticles = false;
-    if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
-	addAntiParticles = true;
-    }	
-
-
-    // Add Anti Particles 	
-    if ( addAntiParticles == true ) { 
-
-
-        // Suffix of Names of Input Histos
-        plotStr.Clear();
-        plotStr = "";
-        if (strcmp(particle,"Leptons")==0) {
-            plotStr.Append("LepBar");
-        } else if (strcmp(particle,"Jets")==0) {
-            plotStr.Append("BBar");
-        } else if (strcmp(particle,"TopQuarks")==0) {
-            plotStr.Append("TopBar");
-        }
-        plotStr.Append(quantity);
-
-
-        // Add the anti particle histos to the histos which are already there
-        if (channel=="mumu") {
-            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
-
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
-        } else if (channel=="emu") {
-            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
-
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
-        } else if (channel=="ee") {
-            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
-
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
-
-        } else if (channel=="combined") {
-            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-            AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
-            AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
-
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
-            AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 1, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kMM, 2, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 1, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEM, 2, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 1, genHist);
-            AddHist(kinAnalyzer, TString("gen_").Append(plotStr), kEE, 2, genHist);
-        }
-    }
-
-
-    // MC NORMALIZATION 
-    // ... all MC's are scaled according to nominal cross section.
-    // ... exception: DY-MC's get an ADDITIONAL correction
-    // ... data are not normalized ;-) 
-    Double_t zElCorr = 1.;
-    Double_t zMuCorr = 1.;
-    SetWeights(hists, zElCorr, zMuCorr);
-
-
-    // Raw Data Histogram    
-    dataHist = hists[0];
-
-
-    // Background Histogram
-    bgrHist = (TH1D*) hists[3]->Clone("Background");
-    for(size_t i = 4; i < Nplots; ++i){
-      bgrHist->Add(hists[i],1.);
-    }
-
 }
-
-
-
-
-// DAVID
-// Create Plots concerning the unfolding step
-int SVD_Plots()
-{
-    //////////////////////////////////////////////
-    // Playground to produce  Unfolding plots ////
-    //////////////////////////////////////////////
-
-    // Dummy return histo
-    TH1D* returnhisto = NULL;
-
-    // Bin Numbers
-    const Int_t nbinsLepEta = 6;
-    const Int_t nbinsLepPt = 5;
-    const Int_t nbinsLepPairEta = 6;
-    const Int_t nbinsLepPairPt = 7;
-    const Int_t nbinsLepPairMass = 5;
-    const Int_t nbinsJetEta = 6;
-    const Int_t nbinsJetPt = 5;
-    const Int_t nbinsTopRapidity = 4;
-    const Int_t nbinsTopPt = 4;
-    const Int_t nbinsTtBarRapidity = 4;
-    const Int_t nbinsTtBarPt = 4;
-    const Int_t nbinsTtBarMass = 5;
-
-
-
-
-    // Leptons Eta
-    const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
-    SVD_Unfold("mumu", "Leptons", "Eta",  binsLepEta, nbinsLepEta, SVD_GetKValue("mumu", "Leptons", "Eta"), returnhisto, false, true);
-    SVD_Unfold("emu", "Leptons", "Eta", binsLepEta, nbinsLepEta, SVD_GetKValue("emu", "Leptons", "Eta"), returnhisto, false, true);
-    SVD_Unfold("ee", "Leptons", "Eta", binsLepEta, nbinsLepEta, SVD_GetKValue("ee",  "Leptons", "Eta"), returnhisto, false, true);
-    SVD_Unfold("combined", "Leptons", "Eta", binsLepEta, nbinsLepEta, SVD_GetKValue("combined", "Leptons", "Eta"), returnhisto, false, true);
-
-
-    // Leptons Pt
-    const Double_t binsLepPt[nbinsLepPt+1] = {20., 40., 70., 120., 180., 400.};
-    SVD_Unfold("mumu", "Leptons", "Pt",  binsLepPt, nbinsLepPt, SVD_GetKValue("mumu", "Leptons", "Pt"), returnhisto, false, true);
-    SVD_Unfold("emu", "Leptons", "Pt", binsLepPt, nbinsLepPt, SVD_GetKValue("emu", "Leptons", "Pt"), returnhisto, false, true);
-    SVD_Unfold("ee", "Leptons", "Pt", binsLepPt, nbinsLepPt, SVD_GetKValue("ee",  "Leptons", "Pt"), returnhisto, false, true);
-    SVD_Unfold("combined", "Leptons", "Pt", binsLepPt, nbinsLepPt, SVD_GetKValue("combined", "Leptons", "Pt"), returnhisto, false, true);
-
-
-
-    // LepPair Eta
-    // Attention! Here you take the same bins as for the single leptons.
-    const Double_t binsLepPairEta[nbinsLepPairEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};   
-    SVD_Unfold("mumu", "LepPair", "Eta",  binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("mumu", "LepPair", "Eta"), returnhisto, false, true);
-    SVD_Unfold("emu", "LepPair", "Eta", binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("emu", "LepPair", "Eta"), returnhisto, false, true);
-    SVD_Unfold("ee", "LepPair", "Eta", binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("ee",  "LepPair", "Eta"), returnhisto, false, true);
-    SVD_Unfold("combined", "LepPair", "Eta", binsLepPairEta, nbinsLepPairEta, SVD_GetKValue("combined", "LepPair", "Eta"), returnhisto, false, true);
-
-
-
-    // LepPair Pt
-    const Double_t binsLepPairPt[nbinsLepPairPt+1] = {0., 10., 20., 40., 60., 100., 150., 400.};
-    SVD_Unfold("mumu", "LepPair", "Pt",  binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("mumu", "LepPair", "Pt"), returnhisto, false, true);
-    SVD_Unfold("emu", "LepPair", "Pt", binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("emu", "LepPair", "Pt"), returnhisto, false, true);
-    SVD_Unfold("ee", "LepPair", "Pt", binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("ee",  "LepPair", "Pt"), returnhisto, false, true);
-    SVD_Unfold("combined", "LepPair", "Pt", binsLepPairPt, nbinsLepPairPt, SVD_GetKValue("combined", "LepPair", "Pt"), returnhisto, false, true);
-
-      
-    // LepPair Mass
-    const Double_t binsLepPairMass[nbinsLepPairMass+1] = {12., 50., 76., 106., 200., 400.};
-    SVD_Unfold("mumu", "LepPair", "Mass",  binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("mumu", "LepPair", "Mass"), returnhisto, false, true);
-    SVD_Unfold("emu", "LepPair", "Mass", binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("emu", "LepPair", "Mass"), returnhisto, false, true);
-    SVD_Unfold("ee", "LepPair", "Mass", binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("ee",  "LepPair", "Mass"), returnhisto, false, true);
-    SVD_Unfold("combined", "LepPair", "Mass", binsLepPairMass, nbinsLepPairMass, SVD_GetKValue("combined", "LepPair", "Mass"), returnhisto, false, true);
-
-
-
-
-    // Jets Eta
-    const Double_t binsJetEta[nbinsJetEta+1] = {-2.4, -1.5, -0.8, 0.0, 0.8, 1.5, 2.4};
-    SVD_Unfold("mumu", "Jets", "Eta",  binsJetEta, nbinsJetEta, SVD_GetKValue("mumu", "Jets", "Eta"), returnhisto, false, true);
-    SVD_Unfold("emu", "Jets", "Eta", binsJetEta, nbinsJetEta, SVD_GetKValue("emu", "Jets", "Eta"), returnhisto, false, true);
-    SVD_Unfold("ee", "Jets", "Eta", binsJetEta, nbinsJetEta, SVD_GetKValue("ee",  "Jets", "Eta"), returnhisto, false, true);
-    SVD_Unfold("combined", "Jets", "Eta", binsJetEta, nbinsJetEta, SVD_GetKValue("combined", "Jets", "Eta"), returnhisto, false, true);
-
-
-    // Jets Pt
-    const Double_t binsJetPt[nbinsJetPt+1] = {30, 50, 70, 120, 180, 400};
-    SVD_Unfold("mumu", "Jets", "Pt",  binsJetPt, nbinsJetPt, SVD_GetKValue("mumu", "Jets", "Pt"), returnhisto, false, true);
-    SVD_Unfold("emu", "Jets", "Pt", binsJetPt, nbinsJetPt, SVD_GetKValue("emu", "Jets", "Pt"), returnhisto, false, true);
-    SVD_Unfold("ee", "Jets", "Pt", binsJetPt, nbinsJetPt, SVD_GetKValue("ee",  "Jets", "Pt"), returnhisto, false, true);
-    SVD_Unfold("combined", "Jets", "Pt", binsJetPt, nbinsJetPt, SVD_GetKValue("combined", "Jets", "Pt"), returnhisto, false, true);
-
-
-
-    // Tops Eta
-    const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    SVD_Unfold("mumu", "TopQuarks", "Eta",  binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("mumu", "TopQuarks", "Eta"), returnhisto, false, true);
-    SVD_Unfold("emu", "TopQuarks", "Eta", binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("emu", "TopQuarks", "Eta"), returnhisto, false, true);
-    SVD_Unfold("ee", "TopQuarks", "Eta", binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("ee",  "TopQuarks", "Eta"), returnhisto, false, true);
-    SVD_Unfold("combined", "TopQuarks", "Eta", binsTopRapidity, nbinsTopRapidity, SVD_GetKValue("combined", "TopQuarks", "Eta"), returnhisto, false, true);
-
-
-    // Tops Pt
-    const Double_t binsTopPt[nbinsTopPt+1] = {0., 70., 140., 240., 400.};
-    SVD_Unfold("mumu", "TopQuarks", "Pt",  binsTopPt, nbinsTopPt, SVD_GetKValue("mumu", "TopQuarks", "Pt"), returnhisto, false, true);
-    SVD_Unfold("emu", "TopQuarks", "Pt", binsTopPt, nbinsTopPt, SVD_GetKValue("emu", "TopQuarks", "Pt"), returnhisto, false, true);
-    SVD_Unfold("ee", "TopQuarks", "Pt", binsTopPt, nbinsTopPt, SVD_GetKValue("ee",  "TopQuarks", "Pt"), returnhisto, false, true);
-    SVD_Unfold("combined", "TopQuarks", "Pt", binsTopPt, nbinsTopPt, SVD_GetKValue("combined", "TopQuarks", "Pt"), returnhisto, false, true);
-
-
-    // Top Pair Eta
-    const Double_t binsTtBarRapidity[nbinsTtBarRapidity+1] = {-2.5, -1.2, 0.0, 1.2, 2.5};
-    SVD_Unfold("mumu", "TtBar", "Eta",  binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("mumu", "TtBar", "Eta"), returnhisto, false, true);
-    SVD_Unfold("emu", "TtBar", "Eta", binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("emu", "TtBar", "Eta"), returnhisto, false, true);
-    SVD_Unfold("ee", "TtBar", "Eta", binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("ee",  "TtBar", "Eta"), returnhisto, false, true);
-    SVD_Unfold("combined", "TtBar", "Eta", binsTtBarRapidity, nbinsTtBarRapidity, SVD_GetKValue("combined", "TtBar", "Eta"), returnhisto, false, true);
-
-
-
-    // TtBar Pt
-    const Double_t binsTtBarPt[nbinsTtBarPt+1] = {0., 20., 60., 120., 500.};
-    SVD_Unfold("mumu", "TtBar", "Pt",  binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("mumu", "TtBar", "Pt"), returnhisto, false, true);
-    SVD_Unfold("emu", "TtBar", "Pt", binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("emu", "TtBar", "Pt"), returnhisto, false, true);
-    SVD_Unfold("ee", "TtBar", "Pt", binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("ee",  "TtBar", "Pt"), returnhisto, false, true);
-    SVD_Unfold("combined", "TtBar", "Pt", binsTtBarPt, nbinsTtBarPt, SVD_GetKValue("combined", "TtBar", "Pt"), returnhisto, false, true);
-
-
-    // TtBar Mass
-    const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345., 400., 475., 550., 700., 1000.};
-    SVD_Unfold("mumu", "TtBar", "Mass",  binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("mumu", "TtBar", "Mass"), returnhisto, false, true);
-    SVD_Unfold("emu", "TtBar", "Mass", binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("emu", "TtBar", "Mass"), returnhisto, false, true);
-    SVD_Unfold("ee", "TtBar", "Mass", binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("ee",  "TtBar", "Mass"), returnhisto, false, true);
-    SVD_Unfold("combined", "TtBar", "Mass", binsTtBarMass, nbinsTtBarMass, SVD_GetKValue("combined", "TtBar", "Mass"), returnhisto, false, true);
-
-
-    return 0;
-}
-
-
