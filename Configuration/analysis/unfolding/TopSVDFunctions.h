@@ -34,117 +34,43 @@
 #include "TopAnalysis/Configuration/analysis/unfolding/TopSVDUnfold.C"
 
 
-////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////    Function Declarations ////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// ATTENTION! ATTENTION! ATTENTION!
-
-// If you want to include this file in your code, than you have some work
-// to do:
-
-// The following 5 functions are only DECLARED!
-// YOU have to provide DEFINITIONS for them somewhere in your code. 
-// Otherwise your code won't work.
-
-// This is the logic behind this:
-// You want to run the unfolding code many times in your analysis, i.e. for
-// many particle/quantity/channel combinations. Such a combination could be
-// for example "Leptons/Eta/mumu" or "Jets/Pt/ePlusJets".
-// For each of those combinations, you need to provide input data and settings.
-// You provide those data/settings by defining the functions that are declared 
-// below.
-
-// Once this is done, you can call the function
-// SVD_
-// THE K VALUE!
-// Provide a function that returns the desired k value 
-// depending on the particle/quantity/channel combination 
-int SVD_GetKValue(TString channel, TString particle, TString quantity);
-
-
-// THE INPUT HISTOGRAMS
-// Provide a function that fills empty histograms with the input data,
-// i.e. fill the histograms dataHist, bgrHist, genHist, recHist and genRec2DHist
-// depending on the particle/quantity/channel combination
-void SVD_GetInputHists(TString channel, TString particle, TString quantity, TH1*& dataHist, TH1*& bgrHist, TH1*& genHist, TH1*& recHist, TH1*& genRec2DHist);
-
-
-// STRINGS FOR THE PLOTS
-// You want to have proper axis titles for your plots right from the beginning!
-// You do it by providing Tex snippets indicating the particle, the quantity and the channel.
-// So provide a function that fills the TStrings particleTex, quantityTex and channelTex with TeX.
-void SVD_Tex(TString channel, TString particle, TString quantity, TString& particleTex, TString& quantityTex, TString& channelTex);
-
-
-// OUTPUT FILES
-// Define the Outputpath for the unfolding plots
-TString SVD_GetOutputPath(); 
-
-
-// RUN OVER EVERYTHING
-// Define a function that runs over all article/quantity/channel combinations
-int SVD_Plots();
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////    Function Definitions  ////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Get complete Output File Name for Ps 
-TString SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity)
+
+// SVD Unfolding Helper Function
+TString SVD_CPQS(TString channel, TString particle, TString quantity, TString special)
 {
-
-    TString outputfilename = SVD_GetOutputPath(); 
-    outputfilename.Append("/Unfolding_");
-    outputfilename.Append(channel);
-    outputfilename.Append("_");
-    outputfilename.Append(particle);
-    outputfilename.Append("_");
-    outputfilename.Append(quantity);
-    outputfilename.Append(".ps");
-    return outputfilename;
-
+    TString cpq = ""; 
+    cpq.Append(channel);
+    cpq.Append("_");
+    cpq.Append(particle);
+    cpq.Append("_");
+    cpq.Append(quantity);
+    if ( special.CompareTo("") != 0 ) {
+    	cpq.Append("_");
+        cpq.Append(special);
+    }
+    return cpq;
 }
-
-
-// Get complete Output File Name for Root
-TString SVD_GetOutputFileNameRoot(TString channel, TString particle, TString quantity)
-{
-    TString outputfilename = SVD_GetOutputPath();
-    outputfilename.Append("/Unfolding_");
-    outputfilename.Append(channel);
-    outputfilename.Append("_");
-    outputfilename.Append(particle);
-    outputfilename.Append("_");
-    outputfilename.Append(quantity);
-    outputfilename.Append(".root");
-    return outputfilename;
-
-}
-
 
 
 // Create a name for a plot according to a certain scheme
 // This name will be used for saving the histogram in a root file
-TString SVD_PlotName(TString channel, TString particle, TString quantity, TString plotName)
+TString SVD_PlotName(TString channel, TString particle, TString quantity, TString special, TString plotName)
 {
     TString rawStr("SVD_");
-    rawStr.Append(channel);
+    rawStr.Append(SVD_CPQS(channel, particle, quantity, special));
     rawStr.Append("_");
-    rawStr.Append(plotName);
-    rawStr.Append("_");
-    rawStr.Append(particle);
-    rawStr.Append("_");
-    rawStr.Append(quantity);
+    rawStr.Append(plotName); 
 
     return rawStr;
 }
 
-
-
-
+ 
 // Division of positive doubles
 // If an argument is smaller or equal to zero,
 // the result is zero.
@@ -206,9 +132,7 @@ TLegend* SVD_NewLegend() {
 
     return leg;
 
-}
-
-
+} 
 
 
 // Move Events in OF/UF bins in dedicated side bins.
@@ -808,8 +732,6 @@ void SVD_DrawStack(THStack* stack, TString xTitle, TString yTitle, TString optio
 
 
 
-
-
 // Set Name, Title and Axis Titles
 // note: The Title is set to the value of name
 void SVD_SetTitles1D(TH1D* histo, TString name, TString xTitle, TString yTitle)
@@ -834,11 +756,7 @@ void SVD_SetTitles2D(TH2D* histo, TString name, TString xTitle, TString yTitle, 
     histo->GetYaxis()->SetTitle(yTitle);
     histo->GetZaxis()->SetTitle(zTitle);
 }
-
-
-
-
-
+ 
 
 
 // Calculate ChiSquare between Data and Refolded Distribution
@@ -858,8 +776,7 @@ double SVD_Chi2A(TH1D* dataHist, TH1D* refoldHist)
     return chi2a;
 }
 
-
-
+ 
 
 
 // Calculate the non-empty and non-side rec level bins
@@ -902,23 +819,17 @@ int SVD_Ndof(TH1D* dataHist, TH1D* xiniHist)
 
 
 
-// PERFORM UNFOLDING
-// By Input Histograms
+// PERFORM UNFOLDING 
 // Note: This function can do both, BBB and SVD Unfolding.
 // If kreg > 0:
 //       SVD Unfolding is done with 'kreg'
 //       and the result of SVD Unfolding is returned in 'unfolded'
 // If kreg <= 0:
-//       BBB Unfolding is returned in 'unfolded'
-// The boolean parameters let you choose wether you want
-// to create and save a whole lot of plots
-
-int SVD_UnfoldByHist(
-        TString channel,                        // Channel, i.e. "emu", "ee", "mumu", "combined", et. al.
-        TString particle,                       // "Leptons", "Jets" or "TopQuarks", et. al.
-        TString quantity,                       // "Eta", "Pt", or "Mass"
-        TH1* dataInputHist,                     // Data Input incl. Background
-        TH1* bgrInputHist,                      // Background
+//       BBB Unfolding is returned in 'unfolded' 
+// If you specify filenames, plots will be drawn and saved.
+int SVD_Unfold(
+        TH1* dataInputHist,                     // Data Input (RAW Data including the background)
+        TH1* bgrInputHist,                      // Background (will be substracted from data)
         TH1* genInputHist,                      // Generated MC
         TH1* recInputHist,                      // Reconstructed MC
         TH1* respInputHist,                     // Response Matrix 
@@ -926,8 +837,16 @@ int SVD_UnfoldByHist(
         const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!)
         int kreg,                               // Regularization parameter
         TH1D*& unfolded,                        // Returned: Unfolded Distribution.
-        bool plotsToRoot,                       // Save Plots in ROOT File
-        bool plotsToPs                          // Save Plots in Graphics File
+        TString channel = "",                   // Specify Name for the Channel ("mumu", "emu", "ee" ...)
+        TString particle = "",                  // Specify Name for the Physics Object ("Top", "Jets", "Leptons")
+        TString quantity = "",                  // Specify Name for the Quantity ("Eta", "Pt", or "Mass");
+        TString special = "",                   // Specify Name for special run of unfolding
+        TString channelTex = "",                // Nicely formatted name for the channel
+        TString particleTex = "",               // Nicely formatted name for the physics object
+        TString quantityTex = "",               // Nicely formatted name for ithe quantity
+        TString specialTex = "",                // Nicely formatted name indicating some special condition 
+        TString rootFile = "",                  // If specified, plots will be saved in ROOT File
+        TString psFile = ""                     // If specified, plots will be saved in PS File
 )
 {
 
@@ -940,7 +859,11 @@ int SVD_UnfoldByHist(
     if ( kreg > 0 ) doSVD = true;
 
 
-    // Do All Plots
+    // Plotting flags
+    bool plotsToRoot = false;
+    if ( !rootFile.CompareTo("")==0 ) plotsToRoot = true;
+    bool plotsToPs = false;
+    if ( !psFile.CompareTo("")==0 ) plotsToPs = true;
     bool doAllPlots = false;
     if ( plotsToRoot == true || plotsToPs == true ) doAllPlots = true;
 
@@ -1074,7 +997,7 @@ int SVD_UnfoldByHist(
 
 
     // THE UNFOLDING with chosen regularization
-    cout << "Unfolding " << channel << "/" << quantity << "/" << particle << " with k=" << TMath::Abs(kreg) << " ... " << endl;
+    cout << "Unfolding " << channel << "/" << quantity << "/" << particle << "/" << special << " with k=" << TMath::Abs(kreg) << " ... " << endl;
     TH1D* unfHist = mySVDUnfold->Unfold(TMath::Abs(kreg));
     cout << "Unfolding done!" << endl;
 
@@ -1105,23 +1028,26 @@ int SVD_UnfoldByHist(
     /////////////////////////////////////////////////////
     ////////////   FORMATTING   /////////////////////////
     /////////////////////////////////////////////////////
-
-
-    // TEX FOR AXIS TITLES
-    TString particleTex = "";
-    TString quantityTex = "";
-    TString channelTex = "";
-    SVD_Tex(channel, particle, quantity, particleTex, quantityTex, channelTex);
-
-
+ 
+ 
+    // Strings
+    if ( channel.CompareTo("") == 0 ) channel.Append("channel");
+    if ( particle.CompareTo("") == 0 ) particle.Append("particle");
+    if ( quantity.CompareTo("") == 0 ) quantity.Append("quantity");
+    if ( special.CompareTo("") == 0 ) quantity.Append("");
+    if ( channelTex.CompareTo("") == 0 ) channelTex.Append("channelTex");
+    if ( particleTex.CompareTo("") == 0 ) particleTex.Append("particleTex");
+    if ( quantityTex.CompareTo("") == 0 ) quantityTex.Append("quantityTex");
+    if ( specialTex.CompareTo("") == 0 ) specialTex.Append("");
+ 
    
     // Format BBB Plot
-    TString bbbStr = SVD_PlotName(channel, particle, quantity, "BBB");
+    TString bbbStr = SVD_PlotName(channel, particle, quantity, special, "BBB");
     SVD_SetTitles1D(bbbHist, bbbStr, quantityTex, "Events");
 
     
     // Format SVD Plot
-    TString unfStr = SVD_PlotName(channel, particle, quantity, "UNF");
+    TString unfStr = SVD_PlotName(channel, particle, quantity, special, "UNF");
     SVD_SetTitles1D(unfHist, unfStr, quantityTex, "Events");
  
 
@@ -1137,27 +1063,27 @@ int SVD_UnfoldByHist(
 
 
     // Format Covariance Matrix
-    TString dataCovStr = SVD_PlotName(channel, particle, quantity, "DATACOV");
+    TString dataCovStr = SVD_PlotName(channel, particle, quantity, special, "DATACOV");
     SVD_SetTitles2D(dataCovHist, dataCovStr, quantityTex, quantityTex, "Covariance on Measurements"); 
     
 
     // Format Raw Data
-    TString rawStr = SVD_PlotName(channel, particle, quantity, "YRAW");
+    TString rawStr = SVD_PlotName(channel, particle, quantity, special, "YRAW");
     SVD_SetTitles1D(rawHist, rawStr, quantityTex, "Events");
 
 
     // Format Bgr  
-    TString bgrStr = SVD_PlotName(channel, particle, quantity, "YBGR");
+    TString bgrStr = SVD_PlotName(channel, particle, quantity, special, "YBGR");
     SVD_SetTitles1D(bgrHist, bgrStr, quantityTex, "Events");
 
 
     // Format Data
-    TString dataStr = SVD_PlotName(channel, particle, quantity, "YDAT");
+    TString dataStr = SVD_PlotName(channel, particle, quantity, special, "YDAT");
     SVD_SetTitles1D(dataHist, dataStr, quantityTex, "Events");
 
 
     // Format Response Matrix
-    TString mcStr = SVD_PlotName(channel, particle, quantity, "AA");
+    TString mcStr = SVD_PlotName(channel, particle, quantity, special, "AA");
     TString mcStrX = quantityTex;
     mcStrX.Append(" (Reconstructed)");
     TString mcStrY = quantityTex;
@@ -1167,32 +1093,32 @@ int SVD_UnfoldByHist(
 
 
     // Format Gen MC
-    TString xiniStr = SVD_PlotName(channel, particle, quantity, "XGEN");
+    TString xiniStr = SVD_PlotName(channel, particle, quantity, special, "XGEN");
     SVD_SetTitles1D(xiniHist, xiniStr, quantityTex, "Events");
  
 
     // Format Rec MC
-    TString biniStr = SVD_PlotName(channel, particle, quantity, "XREC");
+    TString biniStr = SVD_PlotName(channel, particle, quantity, special, "XREC");
     SVD_SetTitles1D(biniHist, biniStr, quantityTex, "Events");
 
 
     // Format BBB Eff
-    TString beffStr = SVD_PlotName(channel, particle, quantity, "BBBEFF");    
+    TString beffStr = SVD_PlotName(channel, particle, quantity, special, "BBBEFF");    
     SVD_SetTitles1D(beffHist, beffStr, quantityTex, "Bin by Bin Efficiency");
 
     
     // Format Stat COV
-    TString statCovStr = SVD_PlotName(channel, particle, quantity, "STATCOV");
+    TString statCovStr = SVD_PlotName(channel, particle, quantity, special, "STATCOV");
     SVD_SetTitles2D(statCovHist, statCovStr, quantityTex, quantityTex, "Statistical Covariance");
 
 
     // Format MC COV 
-    TString mcCovStr = SVD_PlotName(channel, particle, quantity, "MCCOV");
+    TString mcCovStr = SVD_PlotName(channel, particle, quantity, special, "MCCOV");
     SVD_SetTitles2D(mcCovHist, mcCovStr, quantityTex, quantityTex, "Monte Carlo Covariance");
 
 
     // Format Tot COV
-    TString totCovStr = SVD_PlotName(channel, particle, quantity, "TOTCOV");
+    TString totCovStr = SVD_PlotName(channel, particle, quantity, special, "TOTCOV");
     SVD_SetTitles2D(totCovHist, totCovStr, quantityTex, quantityTex, "Monte Carlo Covariance");
 
     
@@ -1204,7 +1130,7 @@ int SVD_UnfoldByHist(
     // PURITY
     // Note: Purity is set to zero, if number of reconstructed
     // events in a bin is zero
-    TString purStr = SVD_PlotName(channel, particle, quantity, "PUR");
+    TString purStr = SVD_PlotName(channel, particle, quantity, special, "PUR");
     TH1D* purHist = (TH1D*) biniHist->Clone(purStr);
     for ( int i = 1 ; i < nbins+1 ; i++ ) {
         double numerator = mcHist->GetBinContent(i, i);
@@ -1229,7 +1155,7 @@ int SVD_UnfoldByHist(
     // gerenated events in a bin.
     // Note: If there is no reconstructed event in this bin,
     // then the stability is naturally zero, too
-    TString stabStr = SVD_PlotName(channel, particle, quantity, "STAB");
+    TString stabStr = SVD_PlotName(channel, particle, quantity, special, "STAB");
     TH1D* stabHist = (TH1D*) biniHist->Clone(stabStr);
     for ( int i = 1 ; i < nbins+1 ; i++ ) {
         double numerator = mcHist->GetBinContent(i, i);
@@ -1254,7 +1180,7 @@ int SVD_UnfoldByHist(
     // EFFICIENCY
     // Note: If no generated events are available in a bin,
     // then the efficiency is set to zero
-    TString effStr = SVD_PlotName(channel, particle, quantity, "EFF");
+    TString effStr = SVD_PlotName(channel, particle, quantity, special, "EFF");
     TH1D* effHist = (TH1D*) biniHist->Clone(effStr);
     for ( int i = 1 ; i <= nbins ; i++ ) {
         double denominator = xiniHist->GetBinContent(i);
@@ -1313,7 +1239,7 @@ int SVD_UnfoldByHist(
         refoldHist->SetBinContent(i, refoldedvalue);
         refoldHist->SetBinError(i, 0.);
     }
-    TString refoldStr = SVD_PlotName(channel, particle, quantity, "RFLD");
+    TString refoldStr = SVD_PlotName(channel, particle, quantity, special, "RFLD");
     SVD_SetTitles1D(refoldHist, refoldStr, "Bin i", "Refolded Value d_{i}");
 
 
@@ -1335,31 +1261,31 @@ int SVD_UnfoldByHist(
 
     // Get the D-Distribution
     TH1D* ddHist = mySVDUnfold->GetD();
-    TString ddStr = SVD_PlotName(channel, particle, quantity, "DD");
+    TString ddStr = SVD_PlotName(channel, particle, quantity, special, "DD");
     SVD_SetTitles1D(ddHist, ddStr, "Index i", "d-Value d_{i}");
 
 
     // Get the singular Values
     TH1D* svHist = mySVDUnfold->GetSV();
-    TString svStr = SVD_PlotName(channel, particle, quantity, "SV");
+    TString svStr = SVD_PlotName(channel, particle, quantity, special, "SV");
     SVD_SetTitles1D(svHist, svStr, "Index i", "Singular Value s_{i}");
    
  
 
     // ERROR PLOT (Statistics)
-    TString statErrStr = SVD_PlotName(channel, particle, quantity, "STATERR");
+    TString statErrStr = SVD_PlotName(channel, particle, quantity, special, "STATERR");
     TH1D* statErrHist = SVD_Cov2Err(statCovHist, unfHist, statErrStr, quantityTex, "Statistical");
 
 
 
     // ERROR PLOT (MC)
-    TString mcErrStr = SVD_PlotName(channel, particle, quantity, "MCERR");
+    TString mcErrStr = SVD_PlotName(channel, particle, quantity, special, "MCERR");
     TH1D* mcErrHist = SVD_Cov2Err(mcCovHist, unfHist, mcErrStr, quantityTex, "MC");
 
 
 
     // ERROR PLOT (Total)
-    TString totErrStr = SVD_PlotName(channel, particle, quantity, "TOTERR");
+    TString totErrStr = SVD_PlotName(channel, particle, quantity, special, "TOTERR");
     TH1D* totErrHist = SVD_Cov2Err(totCovHist, unfHist, totErrStr, quantityTex, "Total");
 
 
@@ -1373,7 +1299,7 @@ int SVD_UnfoldByHist(
         if ( valueBBB > 0. ) error = 100* errorBBBAbs / valueBBB;
         bbbErrHist->SetBinContent(i, error);
     }
-    TString bbbErrStr = SVD_PlotName(channel, particle, quantity, "BBBERR");
+    TString bbbErrStr = SVD_PlotName(channel, particle, quantity, special, "BBBERR");
     bbbErrHist->SetName(bbbErrStr);
     bbbErrHist->SetTitle(bbbErrStr);
     SVD_SetTitles1D(bbbErrHist, bbbErrStr, quantityTex, "Statistical Error in \%");
@@ -1385,17 +1311,17 @@ int SVD_UnfoldByHist(
 
 
     // CORRELATION STAT
-    TString statCorrStr = SVD_PlotName(channel, particle, quantity, "STATCORR");
+    TString statCorrStr = SVD_PlotName(channel, particle, quantity, special, "STATCORR");
     TH2D* statCorrHist = SVD_Cov2Corr(statCovHist, statCorrStr, quantityTex, "Statistical");
 
 
     // CORRELATION MC  
-    TString mcCorrStr = SVD_PlotName(channel, particle, quantity, "MCCORR");
+    TString mcCorrStr = SVD_PlotName(channel, particle, quantity, special, "MCCORR");
     TH2D* mcCorrHist = SVD_Cov2Corr(mcCovHist, mcCorrStr, quantityTex, "MC");
 
 
     // CORRELATION TOT
-    TString totCorrStr = SVD_PlotName(channel, particle, quantity, "TOTCORR");
+    TString totCorrStr = SVD_PlotName(channel, particle, quantity, special, "TOTCORR");
     TH2D* totCorrHist = SVD_Cov2Corr(totCovHist, totCorrStr, quantityTex, "Total");
 
 
@@ -1420,7 +1346,7 @@ int SVD_UnfoldByHist(
     TMatrixDSym statCovMatInv = statCovMat;
     statCovMatInv.Invert(detStatCovMat);
     TH1D* glcHist = (TH1D*) unfHist->Clone("glcHist"); 
-    TString glcStr = SVD_PlotName(channel, particle, quantity, "GLOBC");
+    TString glcStr = SVD_PlotName(channel, particle, quantity, special, "GLOBC");
     glcHist->SetName(glcStr);
     glcHist->SetTitle(mcErrStr);
     for ( int i = 1 ; i <= nbins ; i++ ) { 
@@ -1473,25 +1399,37 @@ int SVD_UnfoldByHist(
         TGaxis::SetMaxDigits(3);
 
 
-        // Output Plot File Name and Path
-        TString outputpath = SVD_GetOutputPath();
-        TString outputfilename = SVD_GetOutputFileNamePs(channel, particle, quantity);        
-        TString outputfilenameRoot = SVD_GetOutputFileNameRoot(channel, particle, quantity);  
+        // Output Plot File Name and Path 
+        TString outputfilename = psFile;        
+        TString outputfilenameRoot = rootFile;  
      
         // Make Output Path
-        TString mkdirCommand = "mkdir ";
-        mkdirCommand.Append(outputpath);
-        mkdirCommand.Append(" 2> /dev/null");
-        gSystem->Exec(mkdirCommand);
-
+        TString outputpath = "";
+        bool makeFolder = false;
+        if ( outputpath.CompareTo("") == 0 ) outputpath.Append(psFile);
+        if ( outputpath.CompareTo("") == 0 ) outputpath.Append(rootFile);
+        bool foundSlash = false;
+        while ( foundSlash == false ) {
+        	if ( outputpath.EndsWith("/") == true ) {
+        		foundSlash = true;
+        		makeFolder = true;
+        	}
+        	if ( foundSlash == false ) outputpath.Chop();
+        }
+        if ( makeFolder == true) { 
+        	TString mkdirCommand = "mkdir -p ";
+            mkdirCommand.Append(outputpath);
+            mkdirCommand.Append(" 2> /dev/null");
+            gSystem->Exec(mkdirCommand);
+        }
 
         // Channel, Particle and Quantity
-        TString CPQtex = "";
-        CPQtex.Append(channelTex);
-        CPQtex.Append(", ");
+        TString CPQtex = ""; 
+        CPQtex.Append(channelTex); 
+        CPQtex.Append(", "); 
         CPQtex.Append(particleTex);
         CPQtex.Append(", ");
-        CPQtex.Append(quantityTex);
+        CPQtex.Append(particleTex);   
 
 
 
@@ -1764,6 +1702,11 @@ int SVD_UnfoldByHist(
         delete stackEff;
         delete stackerr1;
         delete stackerr2;
+        
+        
+        // Delete Canvas
+        delete canvas;
+        
 
     }
   
@@ -1776,9 +1719,8 @@ int SVD_UnfoldByHist(
     if ( plotsToRoot == true ) {
 
    
-        // Open a ROOT file
-        TString outputfilename = SVD_GetOutputFileNameRoot(channel, quantity, particle);
-        TFile* file = new TFile(outputfilename, "RECREATE");
+        // Open a ROOT file 
+        TFile* file = new TFile(rootFile, "RECREATE");
 
 
         // Save Histograms
@@ -1857,47 +1799,7 @@ int SVD_UnfoldByHist(
     // Return 
     return 0;
 }
-
-
-
-
-
-
-// PERFORM UNFOLDING
-// By Channel Name
-// Note: This function can do both, BBB and SVD Unfolding.
-// If kreg > 0:
-//       SVD Unfolding is done with 'kreg'
-//       and the result of SVD Unfolding is returned in 'unfolded'
-// If kreg <= 0:
-//       BBB Unfolding is returned in 'unfolded'
-// The boolean parameters let you choose wether you want
-// to create and save a whole lot of plots
-int SVD_Unfold(
-        TString channel,                        // Channel, i.e. "emu", "ee", "mumu", "combined", et. al.
-        TString particle,                       // "Leptons", "Jets" or "TopQuarks", et. al.
-        TString quantity,                       // "Eta", "Pt", or "Mass"
-        const double thebins[],                 // Binning for the unfolding
-        const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!)
-        int kreg,                               // Regularization parameter
-        TH1D*& unfolded,                        // Returned: Unfolded Distribution.
-        bool plotsToRoot,                       // Save Plots in ROOT File
-        bool plotsToPs                          // Save Plots in Graphics File
-)
-{
-
-    // Fetch the input histograms
-    TH1* dataInputHist = NULL;
-    TH1* bgrInputHist = NULL;
-    TH1* genInputHist = NULL;
-    TH1* recInputHist = NULL;
-    TH1* respInputHist = NULL;
-    SVD_GetInputHists(channel, particle, quantity, dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist);
-
-    // Unfold
-    return SVD_UnfoldByHist(channel, particle, quantity, dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist, thebins, numbins, kreg, unfolded, plotsToRoot, plotsToPs);
-
-}
+ 
 
 
 
