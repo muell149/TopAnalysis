@@ -1,7 +1,7 @@
 #include<iostream>
 #include<fstream>
 
-void load_long(){
+void load_Analysis(){
 
   ifstream infile ("selectionList.txt");
   TString filename;

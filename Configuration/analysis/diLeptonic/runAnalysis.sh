@@ -12,7 +12,7 @@ foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN)
       ls mergedRoot/$syst/$channel/*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
-      root -l -b -q load_long.C
+      root -l -b -q load_Analysis.C
 
    end
    
@@ -29,7 +29,7 @@ foreach syst (PU_UP PU_DOWN)
       ls mergedRoot/Nominal/$channel/*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
-      root -l -b -q load_long.C
+      root -l -b -q load_Analysis.C
 
    end
    
