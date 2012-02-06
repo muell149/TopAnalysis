@@ -2177,9 +2177,9 @@ namespace semileptonic {
        b=1.14871;
        addOpt="LL";
      }
-     else if(plotname.Contains("lepPt")){
+     else if(plotname.Contains("LepPt")){
        fitLowEdge=45.;
-       fitHighEdge=200.;
+       fitHighEdge=210.;
        def="TMath::Exp(x*[0]+x*x*[1])*[2]";
        a=-0.0414389;
        b=0.0000334359;
@@ -2239,7 +2239,7 @@ namespace semileptonic {
       }
       else if(plotname.Contains("lepPt")){
 	fitLowEdge=45.;
-	fitHighEdge=200.;
+	fitHighEdge=210.;
 	def="TMath::Exp(x*[0]+x*x*[1])*[2]";
 	a=-0.0414389;
 	b=0.0000334359;
@@ -2297,7 +2297,7 @@ namespace semileptonic {
       }
      else if(plotname.Contains("lepPt")){
        fitLowEdge=45.;
-       fitHighEdge=200.;
+       fitHighEdge=210.;
        def="TMath::Exp(x*[0]+x*x*[1])*[2]";
        a=-0.0414389;
        b=0.0000334359;
