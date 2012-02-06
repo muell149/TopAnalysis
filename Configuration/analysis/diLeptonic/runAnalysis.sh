@@ -2,8 +2,7 @@
 
 mkdir FileLists
 
-foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN)
-#foreach syst (Nominal)
+foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN SCALEUP SCALEDOWN MATCHUP MATCHDOWN MASSUP MASSDOWN)
 
    echo $syst > syst.txt
 
@@ -12,7 +11,7 @@ foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN)
       ls mergedRoot/$syst/$channel/*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
-      root -l -b -q load_Analysis.C
+      root -l -b -q load_long.C
 
    end
    
@@ -29,7 +28,7 @@ foreach syst (PU_UP PU_DOWN)
       ls mergedRoot/Nominal/$channel/*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
-      root -l -b -q load_Analysis.C
+      root -l -b -q load_long.C
 
    end
    
