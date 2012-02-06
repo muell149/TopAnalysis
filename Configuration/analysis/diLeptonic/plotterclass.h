@@ -39,15 +39,15 @@ class Plotter {
   void PlotXSec();
   void PlotDiffXSec();
   void DYScaleFactor();
-  void CalcInclSystematics(TString Systematic, int syst_number);
-  void CalcDiffSystematics(TString Systematic, int syst_number);
+  void CalcInclSystematics(TString Systematic, int syst_number, bool signalSyst);
+  void CalcDiffSystematics(TString Systematic, int syst_number, bool signalSyst);
   void InclFlatSystematics(int syst_number);
   void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
  private:
   TString name;
-  int bins;
+  int bins, datafiles;
   double rangemin, rangemax, ymin, ymax;
   std::vector<TFile> files, filesUp, filesDown;
   std::vector<TString> dataset, datasetUp, datasetDown;
@@ -145,8 +145,8 @@ void Plotter::DYScaleFactor(){
   double DYSFEE = NoutMCEE/NoutEEDYMC;
   double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
 
-  cout<<"DYSFEE: "<<DYSFEE<<endl;
-  cout<<"DYSFMuMu: "<<DYSFMuMu<<endl;
+  //cout<<"DYSFEE: "<<DYSFEE<<endl;
+  //cout<<"DYSFMuMu: "<<DYSFMuMu<<endl;
 
   DYScale[0]=DYSFEE;
   DYScale[1]=DYSFMuMu;
@@ -161,79 +161,127 @@ void Plotter::InclFlatSystematics(int syst_number){
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .025;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//emu  
+  //if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
 
   syst_number++;
 
   //Lepton selection
 
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .04;//all 
+  //if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+  //    1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Other Backgrounds (needs to be varied in Analysis.C)
-
+  
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .024;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .019;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //DY Backgrounds (needs to be varied in Analysis.C)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .021;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .031;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .001;}//emu  
-  syst_number++;
-
-  //PU (for now)
-  //if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//ee 
-  //if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .003;}//mumu  
-  //if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .001;}//emu  
+  //if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .01;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //B-tagging (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//emu  
+  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+  //      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //KinFit 
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//emu  
+  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+  //   1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Hadronization (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .049;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .043;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .054;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Top Quark Mass (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .009;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .013;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .009;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Q^2 scale (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .032;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .021;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+ 	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Matrix Element threshold (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .028;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .012;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+     1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+	      1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+	      1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Branching Ratio
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//emu  
+  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+  //  1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Luminosity
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//emu  
+  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+  //   1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
 }
@@ -246,11 +294,19 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .025;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .02;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //Lepton selection
     
     DiffXSecSysErrorBySyst[channelType][bin][syst] = .02;//all (different from inclusive?) 
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //Other Backgrounds
@@ -258,78 +314,138 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //DY Backgrounds
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .014;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .016;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //PU (for now)
     //if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//ee 
     //if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//mumu  
     //if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
+    //if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+    //	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+    //		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+    //		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     //syst++;
     
     //B-tagging (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //KinFit 
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //Hadronization (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //Top Quark Mass (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .002;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
   //Q^2 scale (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .024;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .013;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //Matrix Element threshold (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .011;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
   }
 }
 
-void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
+void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool signalSyst){
   setSystDataSet(Systematic);
   fillSystHisto();
 
-  TH1D* stacksum = (TH1D*)hists[2].Clone();
-  TH1D* stacksumUp = (TH1D*)systhistsUp[2].Clone();
-  TH1D* stacksumDown = (TH1D*)systhistsDown[2].Clone();
+  TH1D* stacksum = (TH1D*)hists[datafiles].Clone();
+  TH1D* stacksumUp = (TH1D*)systhistsUp[0].Clone();
+  TH1D* stacksumDown = (TH1D*)systhistsDown[0].Clone();
 
-  for(unsigned int i=3; i<hists.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)hists[i].Clone();
-    stacksum->Add(htemp);
-  }
-  for(unsigned int i=3; i<systhistsUp.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
-    stacksumUp->Add(htemp);
-  }
-  for(unsigned int i=3; i<systhistsDown.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
-    stacksumDown->Add(htemp);
+  if(signalSyst == false){
+    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+      TH1 *htemp = (TH1D*)hists[i].Clone();
+      stacksum->Add(htemp);
+    }
+    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+      TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
+      stacksumUp->Add(htemp);
+    }
+    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+      TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
+      stacksumDown->Add(htemp);
+    }
+  }else{
+    stacksum->Reset();
+    stacksumUp->Reset();
+    stacksumDown->Reset();
+    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+      if(legends[i] == "t#bar{t} signal"){
+	TH1 *htemp = (TH1D*)hists[i].Clone();
+	stacksum->Add(htemp);
+      }
+    }
+    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+      if(legends[i] == "t#bar{t} signal"){
+	TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
+	stacksumUp->Add(htemp);
+      }
+    }
+    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+      if(legends[i] == "t#bar{t} signal"){
+	TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
+	stacksumDown->Add(htemp);
+      }
+    }
   }
   double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
@@ -346,28 +462,53 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
 
 }
 
-void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
+void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool signalSyst){
 
   double Xbins[XAxisbins.size()];
   for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
   setSystDataSet(Systematic);
   fillSystHisto();
-  TH1D* stacksum = (TH1D*)hists[2].Rebin(bins,"stack",Xbins);
-  TH1D* stacksumUp = (TH1D*)systhistsUp[2].Rebin(bins,"stackup",Xbins);
-  TH1D* stacksumDown = (TH1D*)systhistsDown[2].Rebin(bins,"stackdown",Xbins);
+  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);
+  TH1D* stacksumUp = (TH1D*)systhistsUp[0].Rebin(bins,"stackup",Xbins);
+  TH1D* stacksumDown = (TH1D*)systhistsDown[0].Rebin(bins,"stackdown",Xbins);
 
   //DYScale Factor...
-  for(unsigned int i=3; i<hists.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
-    stacksum->Add(htemp);
+  if(signalSyst == false){
+    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+      TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
+      stacksum->Add(htemp);
+    }
+    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+      TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
+      stacksumUp->Add(htemp);
+    }
+    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+      TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
+      stacksumDown->Add(htemp);
+    }
   }
-  for(unsigned int i=3; i<systhistsUp.size() ; i++){ // prepare histos and leg
-    TH1 *htempup = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
-    stacksumUp->Add(htempup);
-  }
-  for(unsigned int i=3; i<systhistsDown.size() ; i++){ // prepare histos and leg
-    TH1 *htempdown = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
-    stacksumDown->Add(htempdown);
+  else{
+    stacksum->Reset();
+    stacksumUp->Reset();
+    stacksumDown->Reset();
+    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+      if(legends[i] == "t#bar{t} signal"){
+	TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
+	stacksum->Add(htemp);
+      }
+    }
+    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+      if(legends[i] == "t#bar{t} signal"){
+	TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
+	stacksumUp->Add(htemp);
+      }
+    }
+    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+      if(legends[i] == "t#bar{t} signal"){
+	TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
+	stacksumDown->Add(htemp);
+      }
+    }
   }
   double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
@@ -390,7 +531,7 @@ Plotter::Plotter()
   rangemax=3;
   YAxis="N_{events}";
   initialized=false;
-  
+  datafiles = 0;
 }
 
 Plotter::Plotter(TString name_, TString XAxis_,TString YAxis_, double rangemin_, double rangemax_)
@@ -460,6 +601,7 @@ void Plotter::setDataSet(TString mode)
   if(channel=="ee"){  
     ifstream FileList("FileLists/HistoFileList_Nominal_ee.txt");
     TString filename;
+    datafiles=0;
 
     dataset.clear();
     legends.clear();
@@ -470,7 +612,7 @@ void Plotter::setDataSet(TString mode)
 
       if(filename!=""){
 	dataset.push_back(filename);
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
@@ -485,7 +627,7 @@ void Plotter::setDataSet(TString mode)
   }
 
   if(mode=="mumu"){
-
+    datafiles=0;
     dataset.clear();
     legends.clear();
     colors.clear();
@@ -498,7 +640,7 @@ void Plotter::setDataSet(TString mode)
       if(filename!=""){
 	dataset.push_back(filename);
 
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
@@ -511,6 +653,7 @@ void Plotter::setDataSet(TString mode)
     }
   }
   if(mode=="emu"){
+    datafiles=0;
 
     dataset.clear();
     legends.clear();
@@ -524,7 +667,7 @@ void Plotter::setDataSet(TString mode)
       if(filename!=""){
 	dataset.push_back(filename);
 	
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
@@ -537,7 +680,7 @@ void Plotter::setDataSet(TString mode)
     }
   }
   if(mode=="combined"){
-
+    datafiles=0;
     dataset.clear();
     legends.clear();
     colors.clear();
@@ -550,7 +693,7 @@ void Plotter::setDataSet(TString mode)
       if(filename!=""){
 	dataset.push_back(filename);
 	
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);}
+	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
@@ -1125,10 +1268,13 @@ void Plotter::PlotXSec(){
 
 double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
-  //CalcInclSystematics("JES",0);
-  //CalcInclSystematics("RES",1);
-  //CalcInclSystematics("PU_",2);
-  //InclFlatSystematics(2);
+  CalcInclSystematics("JES",0, false);
+  CalcInclSystematics("RES",1, false);
+  CalcInclSystematics("PU_",2, false);
+  CalcInclSystematics("SCALE",3, true);
+  CalcInclSystematics("MATCH",4, true);
+  CalcInclSystematics("MASS",5, true);
+  InclFlatSystematics(6);
   
   double syst_square=0;
 
@@ -1206,10 +1352,13 @@ double Plotter::CalcXSec(){
 
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    //CalcDiffSystematics("JES", 0);
-    //CalcDiffSystematics("RES", 1);
-    //CalcDiffSystematics("PU_", 2);
-    //DiffFlatSystematics(3,nbins);
+    CalcDiffSystematics("JES", 0, false);
+    CalcDiffSystematics("RES", 1, false);
+    CalcDiffSystematics("PU_", 2, false);
+    CalcDiffSystematics("SCALE", 3, true);
+    CalcDiffSystematics("MATCH", 4, true);
+    CalcDiffSystematics("MASS", 5, true);
+    DiffFlatSystematics(6,bins);
     double topxsec = 169.9;
     double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 3697693.0;
@@ -1426,10 +1575,8 @@ void Plotter::PlotDiffXSec(){
     }
     double totalDataSum = 0;
     for (Int_t bin=0; bin<bins; ++bin) {
-      cout<<"DataSum[bin]: "<<DataSum[bin]<<endl;
       totalDataSum+=DataSum[bin];
     }
-    cout<<"totalDataSum: "<<totalDataSum<<endl;
     double binWidth[XAxisbinCenters.size()];
     TH1 *h_DiffXSec = (TH1D*)varhists[0]->Clone();
     TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone();
@@ -1438,7 +1585,7 @@ void Plotter::PlotDiffXSec(){
     for (Int_t i=0; i<bins; ++i) {
       if(channelType!=3){
 	binWidth[i] = Xbins[i+1]-Xbins[i];      
-	cout<<"Datasum[i]: "<<DataSum[i]<<" BGSum[i]: "<<BGSum[i]<<" efficiencies[i]: "<<efficiencies[i]<<" binWidth[i]: "<<binWidth[i]<<" lumi: "<<lumi<<endl; 
+	//	cout<<"Datasum[i]: "<<DataSum[i]<<" BGSum[i]: "<<BGSum[i]<<" efficiencies[i]: "<<efficiencies[i]<<" binWidth[i]: "<<binWidth[i]<<" lumi: "<<lumi<<endl; 
 	DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
 	DiffXSecStatError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	//	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
@@ -1459,7 +1606,7 @@ void Plotter::PlotDiffXSec(){
 	  h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
 	  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
 	  }*/
-	cout<<endl;
+	//cout<<endl;
       }else{//For the combination
 	binWidth[i] = Xbins[i+1]-Xbins[i];      
 	DiffXSec[channelType][i] =(DiffXSec[0][i]/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
@@ -1491,7 +1638,7 @@ void Plotter::PlotDiffXSec(){
     if(name.Contains("LeptonEta")){
       TotalVisXSection[channelType] = datascale;
     }
-    cout<<"VISIBLE CROSS-SECTION: "<<TotalVisXSection[channelType]<<endl;
+    //cout<<"VISIBLE CROSS-SECTION: "<<TotalVisXSection[channelType]<<endl;
     h_DiffXSec->Scale(1/TotalVisXSection[channelType]);
     
 
@@ -1527,7 +1674,7 @@ void Plotter::PlotDiffXSec(){
 	//syst_square += DiffXSec[channelType][bin]*DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSec[channelType][bin]*DiffXSecSysErrorBySyst[channelType][bin][syst];
       }
       DiffXSecSysError[channelType][bin] = sqrt(syst_square)*DiffXSec[channelType][bin];
-      cout<<"DiffXSec[channelType][bin]: "<<DiffXSec[channelType][bin]<<endl;
+      //cout<<"DiffXSec[channelType][bin]: "<<DiffXSec[channelType][bin]<<endl;
       //      cout<<"DiffXSecSysError[channelType][bin]: "<<DiffXSecSysError[channelType][bin]<<endl;
       //cout<<"DiffXSecStatError[channelType][bin]: "<<DiffXSecStatError[channelType][bin]<<endl;
       //DiffXSecTotalError[channelType][bin] = sqrt(DiffXSec[channelType][bin]*DiffXSecSysError[channelType][bin]*DiffXSec[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
@@ -1537,7 +1684,7 @@ void Plotter::PlotDiffXSec(){
       DiffXSecPlot[bin]=DiffXSec[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin]/TotalVisXSection[channelType];
-      cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<endl;
+      //      cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<endl;
       //      cout<<"DiffXSecStatErrorPlot[bin]: "<<DiffXSecStatErrorPlot[bin]<<endl;
       //cout<<"DiffXSecTotalErrorPlot[bin]: "<<DiffXSecTotalErrorPlot[bin]<<endl<<endl;
     }
@@ -1683,7 +1830,7 @@ void Plotter::PlotDiffXSec(){
     leg2.Draw("same");
     h_GenDiffXSec->Draw("SAME");
     tga_DiffXSecPlot->Draw("p, SAME");
-    //    tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
+    tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
     
     c->Print("Plots/"+channel+"/DiffXS_"+name+".eps");
