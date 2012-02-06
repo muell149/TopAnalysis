@@ -1,11 +1,11 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun"){
+void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", bool pTPlotsLog=false){
 	
   // ============================
   //  Set Root Style
   // ============================
-	
+
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   myStyle.cd();
@@ -202,16 +202,27 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  TCanvas* combicanvas = new TCanvas("combicanvas", "combicanvas", 600, 600);
 	  // get style from old canvas
 	  combicanvas->SetLogy(canvasMu->GetLogy());
-	  // adjust max
+
 	  if (xSecVariables_[i].Contains("Norm")){
+	    if (pTPlotsLog && xSecVariables_[i].Contains("Pt") ){
+	      plotTheo->SetMinimum(0.0001);
+	      if      (plotName=="topPt"  ) plotTheo->SetMaximum(0.02);
+	      else if (plotName=="ttbarPt") plotTheo->SetMaximum(0.07);
+	      else if (plotName=="lepPt"  ) plotTheo->SetMaximum(0.07);
+	      combicanvas->SetLogy(1);
+	    }
+	    else{
+	      if      (plotName=="topPt"  ) plotTheo->SetMaximum(0.008);
+	      else if (plotName=="ttbarPt") plotTheo->SetMaximum(0.02);
+	      else if (plotName=="lepPt"  ) plotTheo->SetMaximum(0.03);
+	    }
+	    // adjust max
 	    if(plotName=="lepEta"||plotName=="topY") plotTheo->GetYaxis()->SetNoExponent(true);
-	    if(plotName=="topY"   ) plotTheo->SetMaximum(0.6);
-	    if(plotName=="topPt"  ) plotTheo->SetMaximum(0.008);
-	    if(plotName=="ttbarPt") plotTheo->SetMaximum(0.02);
-	    if(plotName=="ttbarY" ) plotTheo->SetMaximum(0.8);
-	    if(plotName=="lepPt"  ) plotTheo->SetMaximum(0.03);
-	    if(plotName=="lepEta" ) plotTheo->SetMaximum(0.6);
-	    if(plotName=="bqEta"  ) plotTheo->SetMaximum(0.55);
+	    
+	    if      (plotName=="topY"   ) plotTheo->SetMaximum(0.6);
+	    else if (plotName=="ttbarY" ) plotTheo->SetMaximum(0.8);
+	    else if (plotName=="lepEta" ) plotTheo->SetMaximum(0.6);
+	    else if (plotName=="bqEta"  ) plotTheo->SetMaximum(0.55);
 	  }
 	  // activate canvas
 	  combicanvas->cd(0);

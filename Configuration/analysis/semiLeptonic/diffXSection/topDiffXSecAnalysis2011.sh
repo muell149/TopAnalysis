@@ -57,8 +57,8 @@ decayChannel=\"combined\"
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/electronPseudoData1143pbReweightedttbarMassUp7TeV.root\"
@@ -93,6 +93,7 @@ save=true
 verbose=0
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
+#inputFolderName=\"RecentAnalysisRun\"
 inputFolderName=\"RecentAnalysisRun\"
 
 ## Re-create monitoring plots
@@ -102,6 +103,10 @@ redoControlPlots=true
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
 redoSystematics=true
+
+## Make pt plots logarithmic
+## makeLogPlots = true / false (default: false)
+makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
@@ -427,7 +432,7 @@ if [ $decayChannel == \"combined\" ]
     echo "cross sections for all systematic variations"
     echo "and all decay channels"
     echo
-    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName')'
+    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$makeLogPlots')'
 else
     echo "will be ignored, only done for decayChannel=combined"
 fi
