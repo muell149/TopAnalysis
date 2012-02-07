@@ -24,7 +24,7 @@
 
 using namespace std;
 
-void merge_mc(string channel){
+void merge(string channel){
 
   TList *tlist = new TList();
 
@@ -159,11 +159,11 @@ void merge_mc(string channel){
   return;
 }
 
-int merge(){
+int merge_mc(){
   
-  merge_mc("mumu");
-  //  merge_mc("emu");
-  //merge_mc("ee");
+  merge("mumu");
+  merge("emu");
+  merge("ee");
 
   return 0;
 
