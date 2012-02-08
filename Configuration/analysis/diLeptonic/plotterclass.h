@@ -447,7 +447,7 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
       }
     }
   }
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error;
   double scale = 1.;
 
   TH1D* h_sys  = (TH1D*) stacksumUp->Clone();   h_sys->Reset();
@@ -456,7 +456,6 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
   Sys_Error_Up   = abs(stacksum->Integral() - stacksumUp->Integral())/stacksum->Integral();
   Sys_Error_Down = abs(stacksum->Integral() - stacksumDown->Integral())/stacksum->Integral();
   Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
-  Sum_Errors += Sys_Error;
 
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
 
@@ -510,7 +509,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
       }
     }
   }
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error;
   double scale = 1.;
 
   for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
@@ -518,7 +517,6 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
     Sys_Error_Up   = abs(stacksum->GetBinContent(bin+1) - stacksumUp->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
     Sys_Error_Down = abs(stacksum->GetBinContent(bin+1) - stacksumDown->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
     Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
-    Sum_Errors += Sys_Error;
     DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
   } 
 
@@ -1023,9 +1021,9 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
     drawhists[i]=(TH1D*) hists[i].Clone();
     setStyle(*drawhists[i], i);
-    if(legends[i]!=legends[i+1] && i!=(hists.size()-1)){
-      drawhists[i]->SetLineColor(1);
-    }
+    //    if(legends[i]!=legends[i+1] && i!=(hists.size()-1)){
+    //  drawhists[i]->SetLineColor(1);
+    //}
 
     if(legends[i] != "data"){
       if(legends[i] == "t#bar{t} signal"){signalHist = i;}
