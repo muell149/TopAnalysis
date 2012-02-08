@@ -1254,7 +1254,7 @@ void Plotter::PlotXSec(){
    mstwplot->Draw("C,2,SAME");
    gStyle->SetEndErrorSize(8);
    mplot->Draw("p,SAME");
-   mplotwithsys->Draw("p,SAME,Z");
+   //mplotwithsys->Draw("p,SAME,Z");
    leg ->Draw("SAME");
    box1->Draw("SAME");
    box2->Draw("SAME");
@@ -1360,7 +1360,7 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("MASS", 5, true);
     DiffFlatSystematics(6,bins);
     double topxsec = 169.9;
-    double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
+    //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 3697693.0;
     double Xbins[XAxisbins.size()];
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
@@ -1380,7 +1380,7 @@ void Plotter::PlotDiffXSec(){
     double BGSum[XAxisbinCenters.size()];
     bool init = false;
     TH1 *varhists[hists.size()];
-    TH2 *genReco2d;
+    TH2 *genReco2d=0;
     TString newname = name;
     if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
       newname.ReplaceAll("Hyp",3,"",0);
@@ -1691,6 +1691,7 @@ void Plotter::PlotDiffXSec(){
 
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
+    for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
     TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
     tga_DiffXSecPlot->SetMarkerStyle(20);
     tga_DiffXSecPlot->SetMarkerColor(kBlack);
@@ -1713,7 +1714,7 @@ void Plotter::PlotDiffXSec(){
     genscale = 1./ h_GenDiffXSec->Integral("width");
     
     h_GenDiffXSec->Scale(genscale);
-    TH1* mcnlohist;TH1* mcnlohistup;TH1* mcnlohistdown;TH1* powheghist;
+    TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
     if(name.Contains("LeptonpT")){mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
     else if(name.Contains("LeptonEta")){mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");}
     else if(name.Contains("LLBarpT")){mcnlohist = GetNloCurve("LepPair","Pt","MCatNLO");}
@@ -1830,7 +1831,7 @@ void Plotter::PlotDiffXSec(){
     leg2.Draw("same");
     h_GenDiffXSec->Draw("SAME");
     tga_DiffXSecPlot->Draw("p, SAME");
-    tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
+    //tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
     
     c->Print("Plots/"+channel+"/DiffXS_"+name+".eps");
