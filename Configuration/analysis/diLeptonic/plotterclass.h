@@ -1380,7 +1380,7 @@ void Plotter::PlotDiffXSec(){
     double BGSum[XAxisbinCenters.size()];
     bool init = false;
     TH1 *varhists[hists.size()];
-    TH2 *genReco2d;
+    TH2 *genReco2d=0;
     TString newname = name;
     if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
       newname.ReplaceAll("Hyp",3,"",0);
@@ -1691,6 +1691,7 @@ void Plotter::PlotDiffXSec(){
 
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
+    for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
     TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
     tga_DiffXSecPlot->SetMarkerStyle(20);
     tga_DiffXSecPlot->SetMarkerColor(kBlack);
@@ -1713,7 +1714,7 @@ void Plotter::PlotDiffXSec(){
     genscale = 1./ h_GenDiffXSec->Integral("width");
     
     h_GenDiffXSec->Scale(genscale);
-    TH1* mcnlohist;TH1* mcnlohistup;TH1* mcnlohistdown;TH1* powheghist;
+    TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
     if(name.Contains("LeptonpT")){mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
     else if(name.Contains("LeptonEta")){mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");}
     else if(name.Contains("LLBarpT")){mcnlohist = GetNloCurve("LepPair","Pt","MCatNLO");}
