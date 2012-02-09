@@ -147,6 +147,8 @@ Bool_t scaleDownDY = kFALSE;
 const bool doDYcorrection = kTRUE;
 // do you want to print the plots?
 const bool doPrintControlPlots = kFALSE;
+// print yield and pse plots
+const bool doPrintControlPlotsXsec = kTRUE;
 // also print same sign control plots?
 const bool doPrintControlPlotsSameSign = kFALSE;
 // print all channels or only combined
@@ -155,7 +157,7 @@ const bool doPrintAllChannels = kTRUE;
 const bool drawSystematicErrorBandBackgroundAndLumi = kFALSE;
 const bool drawSystematicErrorBandTopXsecErr = kTRUE;
 // Plots for PAS
-const bool PAS = kTRUE;
+const bool PAS = kFALSE;
 // do you want a legend in the plots?
 const bool drawLegend = kTRUE;
 // should there be ratio Ndata/Nmc plots below the actual distributions?
@@ -210,8 +212,8 @@ const Double_t bccAuto = 100000;
 const size_t orderStackPlot[] = {0, 6, 5, 4, 7, 8, 3, 2, 1};
 
 //root can't plot dashed curves to png
-const Style_t styleMcAtNLO = outform == ".png" ? 1 : 7;
-const Style_t stylePOWHEG = outform == ".png" ? 1 : 9;
+const Style_t styleMcAtNLO = outform == ".png" ? 1 : 1; // 7;
+const Style_t stylePOWHEG = outform == ".png" ? 1 : 1; // 9;
 const Color_t colorMadGraph = kRed + 1;
 const Color_t colorPOWHEG = kGreen + 1;
 const Color_t colorMcAtNLO = kAzure;
@@ -317,6 +319,8 @@ void DrawRatio(const TH1* histNumerator, THStack* histDenominator, const Double_
 }
 
 void FormatLegendSize(TLegend *leg) {
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
     leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
     leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 - leg->GetNRows()*0.04);
     leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
@@ -803,6 +807,33 @@ TGraphAsymmErrors* BinCenterCorrectedGraph(TH1* dataHist, TH1* sigHist, TH1* sig
     TGraphAsymmErrors* graph = new TGraphAsymmErrors(nDataBins, xval, yval, xerrl, xerrr, yerrl, yerrh);
 
     return graph;
+}
+
+TH1* getTopXsecAndLumiErrorHistogram(TH1 *top, THStack *stack) {
+    TH1 *result = (TH1*)top->Clone();
+    
+    for(Int_t i=0; i<=result->GetNbinsX(); ++i){
+    
+        Double_t binc = 0;
+        for(int j=0; j<stack->GetHists()->GetEntries(); ++j){
+            binc += dynamic_cast<TH1*>(stack->GetHists()->At(j))->GetBinContent(i);
+        }
+        result->SetBinContent(i, binc);
+        
+        // calculate uncertainty: lumi uncertainty
+        Double_t binerr2 = binc*binc*lumierr*lumierr;
+        
+        double topRelUnc = TMath::Sqrt(topxsecErr2)/topxsec;
+        double topunc = top->GetBinContent(i)*topRelUnc;
+                
+        binerr2 += (topunc*topunc);
+        
+        result->SetBinError(i, TMath::Sqrt(binerr2));
+    }
+    result->SetFillStyle(3004);
+    result->SetFillColor(kBlack);
+    result->SetMarkerSize(0);
+    return result;
 }
 
 
@@ -1403,11 +1434,11 @@ TLegend* getNewLegend() {
     leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.15);
     leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
     leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
-//     leg->SetTextFont(42);
-//     leg->SetTextSize(0.04);
-//     leg->SetFillStyle(0);
-//     leg->SetBorderSize(0);
-//     leg->SetTextAlign(12);
+    leg->SetTextFont(42);
+    leg->SetTextSize(0.04);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetTextAlign(12);
     return leg;
 }
 
@@ -1817,13 +1848,17 @@ void CreateControlPlots() {
     PrintPlotAll("analyzeElecs7",       "pt",         "p_{T,e} [GeV]",   "N_{e} / bin",     0.0, -1,0,0,5);
     PrintPlotAll("analyzeElecs7",       "eta",        "#eta_{e}",        "N_{e} / bin",     0.0, -1,0,0,2);
 
-    PrintPlotAll("analyzeKinSolution7", "kin_TopPt",         "p_{T,t} [GeV]",   "N_{events} / bin",  0.0, -1,0,0,2);
-    PrintPlotAll("analyzeKinSolution7", "kin_TopMass",       "M_{t} [GeV]",     "N_{events} / bin",  0.0, -1,0,0,2);
-    PrintPlotAll("analyzeKinSolution7", "kin_TopRapidity",   "y_{t}",       "N_{events} / bin",  0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeKinSolution7", "kin_TopPt",         "p_{T,t} [GeV]",   "N_{events} / bin",  0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeKinSolution7", "kin_TopMass",       "M_{t} [GeV]",     "N_{events} / bin",  0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeKinSolution7", "kin_TopRapidity",   "y_{t}",       "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution7", "kin_TtBarPt",       "p_{T,t#bar{t}} [GeV]", "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution7", "kin_TtBarMass",     "M_{t#bar{t}} [GeV]", "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution7", "kin_TtBarRapidity", "y_{t#bar{t}}", "N_{events} / bin",  0.0, -1,0,0,2);
 
+    PrintCombinedPlot("analyzeKinSolution7", "kin_TopPt",      "analyzeKinSolution7", "kin_TopBarPt",      "", "", kCOMBINED, "p_{T}^{t and #bar{t}} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
+    PrintCombinedPlot("analyzeKinSolution7", "kin_TopMass",    "analyzeKinSolution7", "kin_TopBarMass",    "", "", kCOMBINED, "m_{t and #bar{t}} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
+    PrintCombinedPlot("analyzeKinSolution7", "kin_TopRapidity","analyzeKinSolution7", "kin_TopBarRapidity","", "", kCOMBINED, "y_{t and #bar{t}}",                "N_{events} / bin",  1, -1,0,0,2);
+    
     PrintPlot("analyzeLeptonPair7", "DimassRC_MM", kMM,       "M_{#mu#mu} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair7", "DimassRC_MM", kCOMBINED, "M_{#mu#mu} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair7", "DimassRC_ME", kEM,       "M_{e#mu} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
@@ -1855,12 +1890,16 @@ void CreateControlPlots() {
     PrintPlotAll("analyzeElecs8",       "pt",         "p_{T,e} [GeV]",   "N_{e} / bin",     0.0, -1,0,0,5);
     PrintPlotAll("analyzeElecs8",       "eta",        "#eta_{e}",        "N_{e} / bin",     0.0, -1,0,0,2);
 
-    PrintPlotAll("analyzeKinSolution8", "kin_TopPt",      "p_{T,t} [GeV]",   "N_{events} / bin",  0.0, -1,0,0,4);
-    PrintPlotAll("analyzeKinSolution8", "kin_TopMass",    "M_{t} [GeV]",     "N_{events} / bin",  0.0, -1,0,0,2);
-    PrintPlotAll("analyzeKinSolution8", "kin_TopRapidity",      "y_{t}",       "N_{events} / bin",  0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeKinSolution8", "kin_TopPt",      "p_{T,t} [GeV]",   "N_{events} / bin",  0.0, -1,0,0,4);
+//     PrintPlotAll("analyzeKinSolution8", "kin_TopMass",    "M_{t} [GeV]",     "N_{events} / bin",  0.0, -1,0,0,2);
+//     PrintPlotAll("analyzeKinSolution8", "kin_TopRapidity",      "y_{t}",       "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution8", "kin_TtBarPt",      "p_{T,t#bar{t}} [GeV]", "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution8", "kin_TtBarMass",            "M_{t#bar{t}} [GeV]", "N_{events} / bin",  0.0, -1,0,0,4);
     PrintPlotAll("analyzeKinSolution8", "kin_TtBarRapidity",    "y_{t#bar{t}}", "N_{events} / bin",  0.0, -1,0,0,2);
+
+    PrintCombinedPlot("analyzeKinSolution8", "kin_TopPt",      "analyzeKinSolution8", "kin_TopBarPt",      "", "", kCOMBINED, "p_{T}^{t and #bar{t}} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
+    PrintCombinedPlot("analyzeKinSolution8", "kin_TopMass",    "analyzeKinSolution8", "kin_TopBarMass",    "", "", kCOMBINED, "m_{t and #bar{t}} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
+    PrintCombinedPlot("analyzeKinSolution8", "kin_TopRapidity","analyzeKinSolution8", "kin_TopBarRapidity","", "", kCOMBINED, "y_{t and #bar{t}}",                "N_{events} / bin",  1, -1,0,0,2);
 
     PrintPlot("analyzeLeptonPair8", "DimassRC_MM", kMM,       "M_{#mu#mu} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair8", "DimassRC_MM", kCOMBINED, "M_{#mu#mu} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
@@ -1892,13 +1931,18 @@ void CreateControlPlots() {
     PrintPlotAll("analyzeElecs9",       "pt",         "p_{T,e} [GeV]",   "N_{e} / bin",     0.0, -1,0,0,5);
     PrintPlotAll("analyzeElecs9",       "eta",        "#eta_{e}",        "N_{e} / bin",     0.0, -1,0,0,2);
 
-    PrintPlotAll("analyzeKinSolution9", "kin_TopPt",      "p_{T,t} [GeV]",   "N_{events} / bin",  0.0, -1,0,0,4);
-    PrintPlotAll("analyzeKinSolution9", "kin_TopMass",    "M_{t} [GeV]",     "N_{events} / bin",  0.0, -1,0,0,2);
-    PrintPlotAll("analyzeKinSolution9", "kin_TopRapidity",      "y_{t}",       "N_{events} / bin",  0.0, -1,0,0,2);
+    //PrintPlotAll("analyzeKinSolution9", "kin_TopPt",      "p_{T,t} [GeV]",   "N_{events} / bin",  0.0, -1,0,0,4);
+    //PrintPlotAll("analyzeKinSolution9", "kin_TopMass",    "M_{t} [GeV]",     "N_{events} / bin",  0.0, -1,0,0,2);
+    //PrintPlotAll("analyzeKinSolution9", "kin_TopRapidity",      "y_{t}",       "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution9", "kin_TtBarPt",      "p_{T,t#bar{t}} [GeV]", "N_{events} / bin",  0.0, -1,0,0,2);
     PrintPlotAll("analyzeKinSolution9", "kin_TtBarMass",            "M_{t#bar{t}} [GeV]", "N_{events} / bin",  0.0, -1,0,0,4);
     PrintPlotAll("analyzeKinSolution9", "kin_TtBarRapidity",    "y_{t#bar{t}}", "N_{events} / bin",  0.0, -1,0,0,2);
 
+    PrintCombinedPlot("analyzeKinSolution9", "kin_TopPt",      "analyzeKinSolution9", "kin_TopBarPt",      "", "", kCOMBINED, "p_{T}^{t and #bar{t}} [GeV]",        "N_{events} / bin",  1, -1,0,0,4);
+    PrintCombinedPlot("analyzeKinSolution9", "kin_TopMass",    "analyzeKinSolution9", "kin_TopBarMass",    "", "", kCOMBINED, "m_{t and #bar{t}} [GeV]",          "N_{events} / bin",  1, -1,0,0,2);
+    PrintCombinedPlot("analyzeKinSolution9", "kin_TopRapidity","analyzeKinSolution9", "kin_TopBarRapidity","", "", kCOMBINED, "y_{t and #bar{t}}",                "N_{events} / bin",  1, -1,0,0,2);
+
+    
     PrintPlot("analyzeLeptonPair9", "DimassRC_MM", kMM,       "M_{#mu#mu} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair9", "DimassRC_MM", kCOMBINED, "M_{#mu#mu} [GeV]", "N_{events} / bin", 0.05,-1,0,1,2);
     PrintPlot("analyzeLeptonPair9", "DimassRC_ME", kEM,       "M_{e#mu} [GeV]",   "N_{events} / bin", 0.05,-1,0,1,2);
@@ -2991,34 +3035,186 @@ void CalculateInclusiveCrossSections(const char* selection){
 }
 
 
+void setHistoFromFunction(TH1* h, TF1* f, double startvalue = 0) {
+    for (int i = startvalue ? h->FindBin(startvalue) : 1; i <= h->GetNbinsX(); ++i) {
+        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
+    }
+}
+
+void SmoothTopPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 200, 500);
+    f->SetParameters(-0.017, 0.036);
+    h2->Fit(f, "", "", 200, 360);
+    setHistoFromFunction(h, f, 200);
+    delete h2;
+}
+
+
+void SmoothTtBarMass(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 400, 1000);
+    f->SetParameters(-8e-3, -2);
+    h2->Fit(f, "", "", 550, 900);
+    setHistoFromFunction(h, f, 550);
+    delete h2;
+}
+
+void SmoothTtBarPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
+    f->SetParameters(-1.91177e-02,1.09216e-05,1.57909e-02);
+    h2->Fit(f, "", "", 70, 500);
+    setHistoFromFunction(h, f, 70);
+    delete h2;
+}
+
+void SmoothLepPairMass(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 170, 500);
+    f->SetParameters(-0.017, 0.036);
+    h2->Fit(f, "", "", 170, 350);
+    setHistoFromFunction(h, f, 175);
+    delete h2;
+}
+
+void SmoothLepPairPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
+    f->SetParameters(-4.71076e-02, 3.50707e-05, 4.12185e-01);
+    h2->Fit(f, "", "", 150, 470);
+    setHistoFromFunction(h, f, 150);
+    delete h2;
+}
+
+void SmoothLeptonsPt(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
+    f->SetParameters(-4.14389e-02, 3.34359e-05, 1.33893e-01);
+    h2->Fit(f, "", "", 100, 380);
+    setHistoFromFunction(h, f, 120);
+    delete h2;
+}
+
+
+void SmoothRapidity(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]", -5, 5);
+    f->SetParameters(-3.78339e-01, -2.47758e-02, -9.45412e-03, 4.00964e-01);
+    h2->Fit(f, "", "", -2.5, 2.5);
+    setHistoFromFunction(h, f);
+    delete h2;
+}
+
+void SmoothEta(TH1 *h) {
+    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
+    TF1 *f = new TF1("smooth", "[0]*TMath::Gaus(x, [1], [2])", -2.4, 2.4);
+    f->SetParameters(0.3, 0, 1);
+    f->FixParameter(1,0);
+    h2->Fit(f, "", "", -2.4, 2.4);
+    setHistoFromFunction(h, f);
+    delete h2;
+}
+
+void doNothing(TH1*) {}
+
+void (*getSmoothFunction(const char *particle, const char *quantity))(TH1*) {
+    void (*SmoothFunction)(TH1*);
+    SmoothFunction = &doNothing;
+    if (strcmp(quantity, "Rapidity") == 0) SmoothFunction = &SmoothRapidity;
+    if (strcmp(quantity, "Eta") == 0) SmoothFunction = &SmoothEta;
+    if (strcmp(particle, "LepPair") == 0 && strcmp(quantity, "Mass") == 0) SmoothFunction = &SmoothLepPairMass;
+    if (strcmp(particle, "LepPair") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothLepPairPt;
+    if (strcmp(particle, "TopQuarks") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTopPt;
+    if (strcmp(particle, "TtBar") == 0 && strcmp(quantity, "Mass") == 0) SmoothFunction = &SmoothTtBarMass;
+    if (strcmp(particle, "TtBar") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTtBarPt;
+    if (strcmp(particle, "Leptons") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothLeptonsPt;
+    return SmoothFunction;
+}
+
+void setupCrossSectionAxis(TH1* histo, const char* particle, const char* quantity) {
+    // for pt and mass distribution use log scale
+    histo->SetMinimum(0);
+    if (strcmp(quantity, "Rapidity") == 0 && strcmp(particle, "TopQuarks") == 0) {
+        histo->SetMaximum(0.6);
+        histo->GetYaxis()->SetNoExponent(kTRUE);
+    }
+    if (strcmp(quantity, "Rapidity") == 0 && strcmp(particle, "TtBar") == 0) {
+        histo->SetMaximum(0.8);
+        histo->GetYaxis()->SetNoExponent(kTRUE);
+    }
+    if (strcmp(quantity, "Eta") == 0 && (strcmp(particle, "Leptons") == 0)) {
+        histo->SetMaximum(0.6);
+        histo->GetYaxis()->SetNoExponent(kTRUE);
+    }
+    if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "Leptons") == 0)) {
+        histo->SetMaximum(30e-3);
+    }
+    if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "TopQuarks") == 0)) {
+        histo->SetMaximum(8e-3);
+    }
+    if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "TtBar") == 0)) {
+        histo->SetMaximum(20e-3);
+    }
+    if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "LepPair") == 0)) {
+        histo->SetMaximum(15e-3);
+    }
+    if (strcmp(quantity, "Mass") == 0 && (strcmp(particle, "LepPair") == 0)) {
+        histo->SetMinimum(2e-4);
+        histo->SetMaximum(2e-2);
+        gPad->SetLogy(1);
+    }
+    if (strcmp(quantity, "Mass") == 0 && (strcmp(particle, "TtBar") == 0)) {
+        histo->SetMinimum(1e-5);
+        histo->SetMaximum(6e-2);
+        gPad->SetLogy(1);
+    }
+    if (1 && strcmp(quantity, "Pt") == 0) {
+        histo->SetMinimum(0.0001);
+        gPad->SetLogy(1);
+        if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "Leptons") == 0)) {
+            histo->SetMaximum(0.07);
+        }
+        if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "TopQuarks") == 0)) {
+            histo->SetMaximum(0.02);
+        }
+        if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "TtBar") == 0)) {
+            histo->SetMaximum(0.07);
+        }
+        if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "LepPair") == 0)) {
+            histo->SetMaximum(30e-3);
+        }
+    }
+    
+}
 
 // plot differential cross section with yield plot, purity-stability-efficiency plot and gen-reco correlation for signal
 void PlotDifferentialCrossSection(const char* particle, const char* quantity, Int_t channel, const char* xtitle, const char* ytitle,
                                   const Double_t bins[], const Int_t nbins, Double_t crosss[], Double_t statErr[], Double_t totalErrUp[],
-				  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0, bool doUnfolding = false) {
+                                  Double_t totalErrDown[], const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0, bool doUnfolding = false) {
     
     TString plotStr("");
     TH1* hists[Nfiles];  // histograms needed for event yields and bg sustraction
-    TH1* genHist;	 // genHist needed to calculate the efficiencies
+    TH1* genHist;        // genHist needed to calculate the efficiencies
     TH1* recHist;        // redHist needed for Unfolding //DAVID
     TH1* genHistSmear = 0;   // for pseudo data
     TH1* genRec2DHist;   // reconstructed vs generated signal properties. needed  for correlation and pse plot
     TString genTopEvent("analyzeVisibleGenTopEvent/");
     if(useKinFit) {
 
-	// get histograms of reconstructed quantity and generated signal
-	if (strcmp(particle,"Leptons")==0) {
+        // get histograms of reconstructed quantity and generated signal
+        if (strcmp(particle,"Leptons")==0) {
             plotStr.Append("Lep");
-	} else if (strcmp(particle,"Jets")==0) {
+        } else if (strcmp(particle,"Jets")==0) {
             plotStr.Append("B");
-	} else if (strcmp(particle,"TopQuarks")==0) {
+        } else if (strcmp(particle,"TopQuarks")==0) {
             plotStr.Append("Top");
-	} else {
+        } else {
             plotStr.Append(particle);
-	}
-	plotStr.Append(quantity);
+        }
+        plotStr.Append(quantity);
 
-	if (channel==kMM) {
+        if (channel==kMM) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
@@ -3027,7 +3223,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
             AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
 
-	} else if (channel==kEM) {
+        } else if (channel==kEM) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
@@ -3037,7 +3233,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
             if(dataIsFakeFromMonteCarlo)
                 GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
-	} else if (channel==kEE) {
+        } else if (channel==kEE) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
             GetCloneHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
             AddHist(     kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
@@ -3045,7 +3241,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
             GetCloneHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
             AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
-	} else if (channel==kCOMBINED) {
+        } else if (channel==kCOMBINED) {
             GetCloneHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
             AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
             AddHistArray(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
@@ -3067,68 +3263,68 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist);
             AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
             AddHist(     kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
-	} else {
+        } else {
             cout << "ERROR in PlotDifferentialCrossSection: index " << channel << " for channel is out of range!" << endl;
             return;
-	}
+        }
 
-	// if particle = Leptons, Jets or TopQuarks then the histogram of the antiparticle is added to that of the particle
-	if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
+        // if particle = Leptons, Jets or TopQuarks then the histogram of the antiparticle is added to that of the particle
+        if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
 
             plotStr.Clear();
 
             if (strcmp(particle,"Leptons")==0) {
-        	plotStr = "LepBar";
+                plotStr = "LepBar";
             } else if (strcmp(particle,"Jets")==0) {
-        	plotStr = "BBar";
+                plotStr = "BBar";
             } else if (strcmp(particle,"TopQuarks")==0) {
-        	plotStr = "TopBar";
+                plotStr = "TopBar";
             }
             plotStr.Append(quantity);
 
             if (channel==kMM) {
-        	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
+                AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
  
             } else if (channel==kEM) {
-        	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
+                AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 2, recHist); 
                 if(dataIsFakeFromMonteCarlo)
                     AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 0, genHistSmear);
             } else if (channel==kEE) {
-        	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+                AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);                
             } else if (channel==kCOMBINED) {
-        	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
-        	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
-        	AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
-        	AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+                AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kMM, hists);
+                AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEM, hists);
+                AddHistArray(kinAnalyzer, TString("kin_").Append(plotStr), kEE, hists);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 1, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kMM, 2, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 1, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEM, 2, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 1, genRec2DHist);
+                AddHist(kinAnalyzer, TString("2D_").Append(plotStr), kEE, 2, genRec2DHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 1, recHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kMM, 2, recHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEM, 1, recHist);
@@ -3136,112 +3332,112 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 1, recHist);
                 AddHist(kinAnalyzer, TString("kin_").Append(plotStr), kEE, 2, recHist);
             }
-	}
+        }
     } else { // no use of kin reconstruction
  
-	if(strcmp(particle,"LepPair")!=0 && strcmp(particle,"Leptons")!=0){
-	    cout << "ERROR in PlotDifferentialCrossSectionNoKinFit: " << particle << " not available without kinematic reconstruction!" << endl;
-	    return;
-	}
+        if(strcmp(particle,"LepPair")!=0 && strcmp(particle,"Leptons")!=0){
+            cout << "ERROR in PlotDifferentialCrossSectionNoKinFit: " << particle << " not available without kinematic reconstruction!" << endl;
+            return;
+        }
 
-	// get gen histograms
-	plotStr = "LepPair";
-	if (strcmp(particle,"Leptons")==0)
+        // get gen histograms
+        plotStr = "LepPair";
+        if (strcmp(particle,"Leptons")==0)
             plotStr = "Lep";
-	plotStr.Append(quantity);
+        plotStr.Append(quantity);
 
-	if (channel==kMM) {
+        if (channel==kMM) {
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
-	} else if (channel==kEM) {
+        } else if (channel==kEM) {
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
-	} else if (channel==kEE) {
+        } else if (channel==kEE) {
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
-	} else if (channel==kCOMBINED) {
+        } else if (channel==kCOMBINED) {
             GetCloneHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
             AddHist(     genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
-	} else {
+        } else {
             cout << "ERROR in PlotDifferentialCrossSection: index " << channel << " for channel is out of range!" << endl;
             return;
-	}
+        }
 
-	// if particle = Leptons, Jets or TopQuarks then the histogram of the antiparticle is added to that of the particle
-	if (strcmp(particle,"Leptons")==0) {
+        // if particle = Leptons, Jets or TopQuarks then the histogram of the antiparticle is added to that of the particle
+        if (strcmp(particle,"Leptons")==0) {
 
             plotStr.Clear();
 
             if (strcmp(particle,"Leptons")==0)
-        	plotStr = "LepBar";
+                plotStr = "LepBar";
             plotStr.Append(quantity);
 
             if (channel==kMM) {
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
             } else if (channel==kEM) {
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
             } else if (channel==kEE) {
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
             } else if (channel==kCOMBINED) {
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
-        	AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kMM, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEM, 2, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 1, genHist);
+                AddHist(genTopEvent, TString("gen_").Append(plotStr), kEE, 2, genHist);
             }
-	}
+        }
 
-	// get reco histograms
-	if(strcmp(particle,"Leptons")==0){
-	
+        // get reco histograms
+        if(strcmp(particle,"Leptons")==0){
+        
             if (strcmp(quantity,"Pt")==0)
-	        plotStr = "pt";
-	    else if (strcmp(quantity,"Eta")==0)
-        	plotStr = "eta";
+                plotStr = "pt";
+            else if (strcmp(quantity,"Eta")==0)
+                plotStr = "eta";
             else
-		cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;
+                cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;
 
-	    if (channel==kMM) {
-        	GetCloneHistArray("analyzeMuons8/", plotStr, kMM, hists);
-	    } else if (channel==kEM) {
-        	GetCloneHistArray("analyzeElecs8/", plotStr, kEM, hists);
-		AddHistArray(     "analyzeMuons8/", plotStr, kEM, hists);
-	    } else if (channel==kEE) {
-        	GetCloneHistArray("analyzeElecs8/", plotStr, kEE, hists);
-	    } else if (channel==kCOMBINED) {
-        	GetCloneHistArray("analyzeElecs8/", plotStr, kEE, hists);
-        	AddHistArray(     "analyzeElecs8/", plotStr, kEM, hists);
-        	AddHistArray(     "analyzeMuons8/", plotStr, kEM, hists);
-        	AddHistArray(     "analyzeMuons8/", plotStr, kMM, hists);
-	    }
-	} else{  // if lepton pair
-	    if (strcmp(quantity,"Mass")==0)
-        	plotStr = "DiLeptonMass";
-	    else if(strcmp(quantity,"Pt")==0)
-        	plotStr = "DiLeptonPt";
-	    else
-	        cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;
-		
-	    if (channel==kMM) {
-        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM, hists);
-	    } else if (channel==kEM) {
-        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kEM, hists);
-	    } else if (channel==kEE) {
-        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kEE, hists);
-	    } else if (channel==kCOMBINED) {
-        	GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM,  hists);
-        	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEM,  hists);
-        	AddHistArray(     "analyzeLeptonPair8/", plotStr, kEE,  hists);
-	    }
-	}
+            if (channel==kMM) {
+                GetCloneHistArray("analyzeMuons8/", plotStr, kMM, hists);
+            } else if (channel==kEM) {
+                GetCloneHistArray("analyzeElecs8/", plotStr, kEM, hists);
+                AddHistArray(     "analyzeMuons8/", plotStr, kEM, hists);
+            } else if (channel==kEE) {
+                GetCloneHistArray("analyzeElecs8/", plotStr, kEE, hists);
+            } else if (channel==kCOMBINED) {
+                GetCloneHistArray("analyzeElecs8/", plotStr, kEE, hists);
+                AddHistArray(     "analyzeElecs8/", plotStr, kEM, hists);
+                AddHistArray(     "analyzeMuons8/", plotStr, kEM, hists);
+                AddHistArray(     "analyzeMuons8/", plotStr, kMM, hists);
+            }
+        } else{  // if lepton pair
+            if (strcmp(quantity,"Mass")==0)
+                plotStr = "DiLeptonMass";
+            else if(strcmp(quantity,"Pt")==0)
+                plotStr = "DiLeptonPt";
+            else
+                cout << "WARNING in PlotDifferentialCrossSection: quantity '" << quantity << "' not available for Lepton Pair!" << endl;
+                
+            if (channel==kMM) {
+                GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM, hists);
+            } else if (channel==kEM) {
+                GetCloneHistArray("analyzeLeptonPair8/", plotStr, kEM, hists);
+            } else if (channel==kEE) {
+                GetCloneHistArray("analyzeLeptonPair8/", plotStr, kEE, hists);
+            } else if (channel==kCOMBINED) {
+                GetCloneHistArray("analyzeLeptonPair8/", plotStr, kMM,  hists);
+                AddHistArray(     "analyzeLeptonPair8/", plotStr, kEM,  hists);
+                AddHistArray(     "analyzeLeptonPair8/", plotStr, kEE,  hists);
+            }
+        }
     }
 
     // rebin hitograms to analysis binning
@@ -3333,8 +3529,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     title.Append(quantity);
 
     THStack* hstack = new THStack("hstack",title);
+    TH1* topContribution;
     for (size_t i=1; i<Nplots; ++i) {
-        hstack->Add(mergedhists[orderStackPlot[i]]);
+        TH1* scaledPlot = dynamic_cast<TH1*>(mergedhists[orderStackPlot[i]]->Clone()); assert(scaledPlot);
+        scaledPlot->Scale(0.98 * btagSFMap["TCHEL"]);
+        hstack->Add(scaledPlot);
+        topContribution = scaledPlot;
     }
 
     if (title.Contains("FixedMt_Btag_Yield_Leptons_Pt")) {
@@ -3355,6 +3555,10 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
     hstack->Draw("HIST");
     FormatHisto(hstack->GetHistogram());
+    
+    //Draw error band
+    TH1* errorbandYield = getTopXsecAndLumiErrorHistogram(topContribution, hstack);
+    errorbandYield->Draw("SAME,e2");
 
     hstack->SetMaximum(std::max(1.2*hstack->GetMaximum(), 1.2*mergedhists[kDATA]->GetMaximum()));
     hstack->SetMinimum(0);
@@ -3510,7 +3714,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
             }
         }
 
-		
+                
     }
 
     
@@ -3575,7 +3779,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
       if(!useKinFit)
           scale_data = 1./visCrossSectionsNoFit[channel];
       crossHist->Scale(scale_data);
-    	
+        
       Double_t scale_gen1 = 1./gh->Integral("width"); // use fine-binned gh since genCrossHist does
       genCrossHist->Scale(scale_gen1);                // not cover the range of the whole visible phase space
 
@@ -3608,71 +3812,54 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     crossHist->SetName(title);
     crossHist->GetXaxis()->SetTitle(xtitle);
     crossHist->GetYaxis()->SetTitle(ytitle);
-
-    TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, gh, bingenhist, binCenters);
     
+    Int_t nrebin = 2.;
+    if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
+        nrebin=4;
+        mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
+        mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
+        mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);
+    } else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0){
+        nrebin=8;
+    }
+    
+    //smoothen histograms
+    void (*SmoothFunction)(TH1*) = getSmoothFunction(particle, quantity);
+    SmoothFunction(gh);
+    SmoothFunction(mcatnloh); SmoothFunction(mcatnlohUp); SmoothFunction(mcatnlohDn);
+    SmoothFunction(powhegh);
+
+    genCrossHist->GetXaxis()->SetTitle(xtitle);
+    genCrossHist->GetYaxis()->SetTitle(ytitle);
+    genCrossHist->SetLineWidth(2);
+    genCrossHist->SetLineColor(colorMadGraph);
+    FormatHisto(genCrossHist);
+    setupCrossSectionAxis(genCrossHist, particle, quantity);
+    
+    genCrossHist->Draw();
+
+    gh->SetLineColor(colorMadGraph);
+    gh->SetLineWidth(2);
+    gh->Rebin(nrebin); gh->Scale(1./nrebin);
+    gh->Draw("same,C");
+
+    mcatnloh->SetLineColor(colorMcAtNLO);
+    mcatnloh->SetLineStyle(styleMcAtNLO);
+    mcatnloh->SetLineWidth(2);
+    if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
+
+    mcatnlohUp->SetLineColor(kGray);
+    mcatnlohUp->SetLineWidth(2);
+    if (mcatnlohUp->GetEntries()) mcatnlohUp->Draw("same,HIST,C");    
+
+    mcatnlohDn->SetLineColor(kGray);
+    mcatnlohDn->SetLineWidth(2);
+    if (mcatnlohDn->GetEntries()) mcatnlohDn->Draw("same,HIST,C"); 
+
+
+    TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, gh, genCrossHist, binCenters);
+
     if(channel!=kCOMBINED) {
-
-        Double_t grLmts[4];
-        bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);
-
-        genCrossHist->GetXaxis()->SetTitle(xtitle);
-        genCrossHist->GetYaxis()->SetTitle(ytitle);
-        genCrossHist->SetLineWidth(2);
-        genCrossHist->SetLineColor(colorMadGraph);
-        FormatHisto(genCrossHist);
-        genCrossHist->Draw();
-        
-    //       cout << endl;
-    //       for(Int_t i=1; i<=genCrossHist->GetNbinsX(); ++i){
-    // 	cout << "cross section in bin is " << genCrossHist->GetBinContent(i) << endl;
-    //       }
-    //       cout << endl;
-
-        // for pt and mass distribution use log scale
-        if (!strcmp(quantity, "Mass")) {
-            genCrossHist->SetMaximum(2e-2);
-            genCrossHist->SetMinimum(1e-4);
-            gPad->SetLogy(1);
-        } else
-        if(strcmp(quantity,"Pt")==0) {
-            genCrossHist->SetMaximum(std::max(3.*gh->GetMaximum(), 3.*grLmts[3]));
-            genCrossHist->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
-            gPad->SetLogy(1);
-        } else{
-            genCrossHist->SetMaximum(std::max(1.2*gh->GetMaximum(), 1.2*grLmts[3]));
-            genCrossHist->SetMinimum(0);
-        }
-
-        Int_t nrebin = 4.;
-        if((strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0) && strcmp(quantity,"Eta")==0){
-            nrebin=4;
-            mcatnloh->Rebin(2); mcatnloh->Scale(0.5);
-            mcatnlohUp->Rebin(2); mcatnlohUp->Scale(0.5);
-            mcatnlohDn->Rebin(2); mcatnlohDn->Scale(0.5);
-        }  
-        else if(strcmp(particle,"LepPair")==0 && strcmp(quantity,"Mass")==0)
-            nrebin=8;
-
-        gh->SetLineColor(colorMadGraph);
-        gh->SetLineWidth(2);
-        gh->Rebin(nrebin); gh->Scale(1./nrebin);
-        gh->Draw("same,C");
-
-        mcatnloh->SetLineColor(colorMcAtNLO);
-        mcatnloh->SetLineStyle(styleMcAtNLO);
-        mcatnloh->SetLineWidth(2);
-        if (mcatnloh->GetEntries()) mcatnloh->Draw("same,HIST,C");
-
-        mcatnlohUp->SetLineColor(kGray);
-        mcatnlohUp->SetLineWidth(2);
-        if (mcatnlohUp->GetEntries()) mcatnlohUp->Draw("same,HIST,C");    
-
-        mcatnlohDn->SetLineColor(kGray);
-        mcatnlohDn->SetLineWidth(2);
-        if (mcatnlohDn->GetEntries()) mcatnlohDn->Draw("same,HIST,C"); 
-
-
         //Uncertainty band for MC@NLO
         const Int_t nMCNLOBins = mcatnlohUp->GetNbinsX();
         Double_t x[nMCNLOBins];
@@ -3723,7 +3910,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
         if (powhegh->GetEntries())  leg2.AddEntry(powhegh,       "POWHEG",  "l");        
         leg2.SetFillStyle(0);
         leg2.SetBorderSize(0);
-        FormatLegendSize(&leg2);
+        //FormatLegendSize(&leg2);
         leg2.Draw("same");
 
         TGraphAsymmErrors* withSys = CloneAddSystematics(bccCrossGraph, title);
@@ -3741,6 +3928,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
         semileptonic::DrawCMSLabels(isPreliminary, lumi);
         semileptonic::DrawDecayChLabel(channelNameTeX[channel]);
+        gPad->RedrawAxis();
         if (doPrintAllChannels && !PAS) 
         Canvas->Print(outpath.Copy().Append(channelName[channel]).Append("/").Append(title).Append(outform));
         
@@ -3751,8 +3939,8 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     //       std::cout << "BCC Corrections done: " << particle << " " << quantity 
     //                 << " (" << channelName[channel] << (useKinFit ? ", after kin fit" : ", before kin fit" ) << ")" << std::endl;
     //       for (int bin = 0; bin < nbins; ++bin) {
-    // 	double y = bccCrossGraph->GetY()[bin];
-    // 	std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
+    //  double y = bccCrossGraph->GetY()[bin];
+    //  std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : std::setprecision(1))
     //            << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
     //            << std::setprecision(strcasecmp(quantity, "eta") ? 0:2)
     //            << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
@@ -3880,14 +4068,14 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     for(Int_t i=1; i<=genRecHist->GetNbinsX(); ++i){
       if(genRecHist->GetBinContent(i) > recBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,recBinHist->GetBinContent(i));
-	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
-	<< " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
-	<< " = " << recBinHist->GetBinContent(i) << endl;
+        cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
+        << " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
+        << " = " << recBinHist->GetBinContent(i) << endl;
       }
       if(genRecHist->GetBinContent(i) > genBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,genBinHist->GetBinContent(i));
-	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
-	<< " is larger than number of genrated events in that bin" << endl;
+        cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
+        << " is larger than number of genrated events in that bin" << endl;
       }
     }
 
@@ -3926,19 +4114,19 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     grS->SetMarkerColor(2);
 
     // correct bin center also for these graphs
-//     for (Int_t i=0; i<bccCrossGraph->GetN();++i) {
+    for (Int_t i=0; i<bccCrossGraph->GetN();++i) {
 //       grE->SetPoint(i, (bccCrossGraph->GetX())[i], (grE->GetY())[i]);
 //       grP->SetPoint(i, (bccCrossGraph->GetX())[i], (grP->GetY())[i]);
 //       grS->SetPoint(i, (bccCrossGraph->GetX())[i], (grS->GetY())[i]);
 // 
-//       grE->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
-//       grP->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
-//       grS->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
-// 
-//       grE->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
-//       grP->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
-//       grS->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
-//     }
+      grE->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
+      grP->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
+      grS->SetPointEXhigh(i, bccCrossGraph->GetErrorXhigh(i));
+
+      grE->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
+      grP->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
+      grS->SetPointEXlow(i, bccCrossGraph->GetErrorXlow(i));
+    }
 
     grE->GetXaxis()->SetTitle(xtitle);
 
@@ -3992,105 +4180,6 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     return;
 }
 
-
-void setHistoFromFunction(TH1* h, TF1* f, double startvalue = 0) {
-    for (int i = startvalue ? h->FindBin(startvalue) : 1; i <= h->GetNbinsX(); ++i) {
-        h->SetBinContent(i, f->Eval(h->GetBinCenter(i)));
-    }
-}
-
-void SmoothTopPt(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 200, 500);
-    f->SetParameters(-0.017, 0.036);
-    h2->Fit(f, "", "", 200, 360);
-    setHistoFromFunction(h, f, 200);
-    delete h2;
-}
-
-
-void SmoothTtBarMass(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 400, 1000);
-    f->SetParameters(-8e-3, -2);
-    h2->Fit(f, "", "", 550, 900);
-    setHistoFromFunction(h, f, 550);
-    delete h2;
-}
-
-void SmoothTtBarPt(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
-    f->SetParameters(-1.91177e-02,1.09216e-05,1.57909e-02);
-    h2->Fit(f, "", "", 70, 500);
-    setHistoFromFunction(h, f, 70);
-    delete h2;
-}
-
-void SmoothLepPairMass(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp([0]*x)*[1]", 170, 500);
-    f->SetParameters(-0.017, 0.036);
-    h2->Fit(f, "", "", 170, 350);
-    setHistoFromFunction(h, f, 175);
-    delete h2;
-}
-
-void SmoothLepPairPt(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
-    f->SetParameters(-4.71076e-02, 3.50707e-05, 4.12185e-01);
-    h2->Fit(f, "", "", 150, 470);
-    setHistoFromFunction(h, f, 150);
-    delete h2;
-}
-
-void SmoothLeptonsPt(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp(x*[0]+x*x*[1])*[2]", 20, 500);
-    f->SetParameters(-4.14389e-02, 3.34359e-05, 1.33893e-01);
-    h2->Fit(f, "", "", 100, 380);
-    setHistoFromFunction(h, f, 120);
-    delete h2;
-}
-
-
-void SmoothRapidity(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]", -5, 5);
-    f->SetParameters(-3.78339e-01, -2.47758e-02, -9.45412e-03, 4.00964e-01);
-    h2->Fit(f, "", "", -2.5, 2.5);
-    setHistoFromFunction(h, f);
-    delete h2;
-}
-
-void SmoothEta(TH1 *h) {
-    TH1* h2 = dynamic_cast<TH1*>(h->Clone());
-    TF1 *f = new TF1("smooth", "[0]*TMath::Gaus(x, [1], [2])", -2.4, 2.4);
-    f->SetParameters(0.3, 0, 1);
-    f->FixParameter(1,0);
-    h2->Fit(f, "", "", -2.4, 2.4);
-    setHistoFromFunction(h, f);
-    delete h2;
-}
-
-void doNothing(TH1*) {}
-
-void (*getSmoothFunction(const char *particle, const char *quantity))(TH1*) {
-    void (*SmoothFunction)(TH1*);
-    SmoothFunction = &doNothing;
-    if (strcmp(quantity, "Rapidity") == 0) SmoothFunction = &SmoothRapidity;
-    if (strcmp(quantity, "Eta") == 0) SmoothFunction = &SmoothEta;
-    if (strcmp(particle, "LepPair") == 0 && strcmp(quantity, "Mass") == 0) SmoothFunction = &SmoothLepPairMass;
-    if (strcmp(particle, "LepPair") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothLepPairPt;
-    if (strcmp(particle, "TopQuarks") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTopPt;
-    if (strcmp(particle, "TtBar") == 0 && strcmp(quantity, "Mass") == 0) SmoothFunction = &SmoothTtBarMass;
-    if (strcmp(particle, "TtBar") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothTtBarPt;
-    if (strcmp(particle, "Leptons") == 0 && strcmp(quantity, "Pt") == 0) SmoothFunction = &SmoothLeptonsPt;
-    return SmoothFunction;
-}
-
-
 // plot differential cross section in all channels and combine them
 void PlotDifferentialCrossSections(const char* particle, const char* quantity, const char* xtitle, const char* ytitle,
                                    const Double_t bins[], const Int_t nbins, const Double_t binCenters[]=0, const Bool_t useKinFit=kTRUE, const char* specialPostfix=0, bool doUnfolding = false) {
@@ -4116,8 +4205,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     Double_t totalErrDownCombined[nbins];
    
     gROOT->ForceStyle(); //somehow combined plots have strange labels otherwise
-    PlotDifferentialCrossSection(particle, quantity, kMM,	xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPostfix, doUnfolding);
     PlotDifferentialCrossSection(particle, quantity, kEM,       xtitle, ytitle, bins, nbins, crosssEM, statErrEM, totalErrUpEM, totalErrDownEM, binCenters, useKinFit, specialPostfix, doUnfolding);
+    PlotDifferentialCrossSection(particle, quantity, kMM,       xtitle, ytitle, bins, nbins, crosssMM, statErrMM, totalErrUpMM, totalErrDownMM, binCenters, useKinFit, specialPostfix, doUnfolding);
     PlotDifferentialCrossSection(particle, quantity, kEE,       xtitle, ytitle, bins, nbins, crosssEE, statErrEE, totalErrUpEE, totalErrDownEE, binCenters, useKinFit, specialPostfix, doUnfolding);
     PlotDifferentialCrossSection(particle, quantity, kCOMBINED, xtitle, ytitle, bins, nbins, crosssCombined, statErrCombined, totalErrUpCombined, totalErrDownCombined, binCenters, useKinFit, specialPostfix, doUnfolding);
     
@@ -4302,9 +4391,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
         nrebin=8;
     }
     
+    //smoothen histograms
     void (*SmoothFunction)(TH1*) = getSmoothFunction(particle, quantity);
-    
-     
     TH1* originalGenHist = (TH1*)genHist->Clone();
     SmoothFunction(genHist);
     SmoothFunction(mcatnloh); SmoothFunction(mcatnlohUp); SmoothFunction(mcatnlohDn);
@@ -4312,8 +4400,6 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
 
     //now calculate bin centers
     TGraphAsymmErrors* bccCrossGraph = BinCenterCorrectedGraph(crossHist, genHist, genHistBinned, binCenters);
-    Double_t grLmts[4];
-    bccCrossGraph->ComputeRange(grLmts[0], grLmts[1], grLmts[2], grLmts[3]);
 
     genHistBinned->GetXaxis()->SetTitle(xtitle);
     genHistBinned->GetYaxis()->SetTitle(ytitle);
@@ -4321,15 +4407,8 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     genHistBinned->SetLineColor(colorMadGraph);
     FormatHisto(genHistBinned);
 
-    // for pt and mass distribution use log scale
-    if(strcmp(quantity,"Pt")==0 || strcmp(quantity,"Mass")==0){
-        genHistBinned->SetMaximum(std::max(3.*genHist->GetMaximum(), 3.*grLmts[3]));
-        genHistBinned->SetMinimum(std::max(0.5*genHist->GetMinimum(), 0.5*grLmts[1]));
-        gPad->SetLogy(1);
-    } else {
-        genHistBinned->SetMaximum(std::max(1.2*genHist->GetMaximum(), 1.2*grLmts[3]));
-        genHistBinned->SetMinimum(0);
-    }
+    setupCrossSectionAxis(genHistBinned, particle, quantity);
+    
 
     //start drawing
     genHistBinned->Draw();
@@ -4419,6 +4498,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
     
     originalGenHist->SetLineColor(kYellow);
     //originalGenHist->Draw("same");
+    gPad->RedrawAxis();
 
     Canvas->Print(outpath.Copy().Append("combined/").Append(title).Append(outform));
 
@@ -4435,7 +4515,7 @@ void PlotDifferentialCrossSections(const char* particle, const char* quantity, c
       //double y_mc = genHistBinned->GetBinContent(bin+1);
       std::cout << (bccCrossGraph->GetX()[bin]>20 ? std::setprecision(0) : bccCrossGraph->GetX()[bin]<4 ? std::setprecision(2) : std::setprecision(0))
          << "$" << bccCrossGraph->GetX()[bin] << "$\t&\t"
-         << std::setprecision(strcasecmp(quantity, "eta") ? 0:1)
+         << std::setprecision(!strcasecmp(quantity, "eta") || !strcasecmp(quantity, "rapidity") ? 1 : 0)
          << "$" << bins[bin] << "$ to $" << bins[bin+1] << "$\t&\t"
          //<< std::setprecision(5) << y_mc << "\t&\t" << std::setprecision(1)
          //this line is wrong << genHistBinned->GetBinError(bin+1)/y_mc << "\t&\t"
@@ -4769,10 +4849,10 @@ void PlotHistsAndRatio(TH1* numeratorHistogram, TH1* denominatorHist, TString ti
     ratioHist->SetTitle(";"+xTitle+";"+yTitle2);
     ratioHist->GetXaxis()->SetTitleSize(0.14);
     ratioHist->GetXaxis()->SetLabelSize(0.14);
-    ratioHist->GetXaxis()->SetTitleOffset(0.9);
+    ratioHist->GetXaxis()->SetTitleOffset(1.5);
     ratioHist->GetYaxis()->SetLabelSize(0.11);
     ratioHist->GetYaxis()->SetTitleSize(0.14);
-    ratioHist->GetYaxis()->SetTitleOffset(0.40);
+    ratioHist->GetYaxis()->SetTitleOffset(0.80);
     ratioHist->SetLineWidth(1);
     ratioHist->SetLineColor(kBlack);
     ratioHist->Draw("E1");
@@ -4797,9 +4877,9 @@ void PlotHistsAndRatio(TH1* numeratorHistogram, TH1* denominatorHist, TString ti
     denomHist->GetXaxis()->SetTitleSize(0.00);
     denomHist->GetYaxis()->SetLabelSize(0.07);
     denomHist->GetYaxis()->SetTitleSize(0.08);
-    denomHist->GetYaxis()->SetTitleOffset(0.70);
-    denomHist->SetMinimum(0.70);
-    denomHist->SetMaximum(1.10);
+    denomHist->GetYaxis()->SetTitleOffset(0.80);
+    denomHist->SetMinimum(0.90);
+    denomHist->SetMaximum(1.05);
     denomHist->SetTitle(title+";;"+yTitle);
     nomHist  ->SetLineWidth(1.5);
     nomHist  ->SetMarkerSize(1.5);
@@ -4808,7 +4888,7 @@ void PlotHistsAndRatio(TH1* numeratorHistogram, TH1* denominatorHist, TString ti
 
     c1_2->SetLogy(0);
 
-    if (doPrintControlPlots && !PAS)
+    if (doPrintControlPlotsXsec && !PAS)
     c1->Print(outpath.Copy().Append("btagging").Append("/").Append(title));
 
     delete nomHist;
