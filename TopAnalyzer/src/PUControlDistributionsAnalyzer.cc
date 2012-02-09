@@ -160,14 +160,14 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
 	  histoNPVertexReweighted3DScaleUp   -> Fill(pPVertex->size(),weight*PUEventWeight3DUp);
 	  histoNPVertexReweighted3DScaleDown -> Fill(pPVertex->size(),weight*PUEventWeight3DDown);
 	  
-	  histoNPU                    -> Fill(iterPU->getPU_NumInteractions(),weight);
-	  histoNPUReweighted          -> Fill(iterPU->getPU_NumInteractions(),weight*PUEventWeight);
-	  histoNPUReweightedScaleUp   -> Fill(iterPU->getPU_NumInteractions(),weight*PUEventWeightUp);
-	  histoNPUReweightedScaleDown -> Fill(iterPU->getPU_NumInteractions(),weight*PUEventWeightDown);
+	  histoNPU                    -> Fill(iterPU->getTrueNumInteractions(),weight);
+	  histoNPUReweighted          -> Fill(iterPU->getTrueNumInteractions(),weight*PUEventWeight);
+	  histoNPUReweightedScaleUp   -> Fill(iterPU->getTrueNumInteractions(),weight*PUEventWeightUp);
+	  histoNPUReweightedScaleDown -> Fill(iterPU->getTrueNumInteractions(),weight*PUEventWeightDown);
 
-	  histoNPUReweighted3D          -> Fill(iterPU->getPU_NumInteractions(),weight*PUEventWeight3D);
-	  histoNPUReweighted3DScaleUp   -> Fill(iterPU->getPU_NumInteractions(),weight*PUEventWeight3DUp);
-	  histoNPUReweighted3DScaleDown -> Fill(iterPU->getPU_NumInteractions(),weight*PUEventWeight3DDown);
+	  histoNPUReweighted3D          -> Fill(iterPU->getTrueNumInteractions(),weight*PUEventWeight3D);
+	  histoNPUReweighted3DScaleUp   -> Fill(iterPU->getTrueNumInteractions(),weight*PUEventWeight3DUp);
+	  histoNPUReweighted3DScaleDown -> Fill(iterPU->getTrueNumInteractions(),weight*PUEventWeight3DDown);
 	  
 	  histoEventWeights     -> Fill(PUEventWeight,weight);
 	  histoEventWeightsUp   -> Fill(PUEventWeightUp,weight);
@@ -177,7 +177,7 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
 	  histoEventWeights3DUp   -> Fill(PUEventWeight3DUp,weight);
 	  histoEventWeights3DDown -> Fill(PUEventWeight3DDown,weight);	  
 
-	  histoNPUvsNPVertex    -> Fill(iterPU->getPU_NumInteractions(),pPVertex->size());
+	  histoNPUvsNPVertex    -> Fill(iterPU->getTrueNumInteractions(),pPVertex->size());
 	}
       }
     }
