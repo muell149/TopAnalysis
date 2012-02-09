@@ -20,6 +20,11 @@
 #include "basicFunctions.h"
 #include "HHStyle.h"
 #include "TGraphAsymmErrors.h"
+
+// DAVID
+#include "DilepSVDFunctions.h"
+#include "DilepSVDFunctions.C"
+
 class Plotter {
 
  public:
@@ -45,6 +50,9 @@ class Plotter {
   void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
+  // DAVID
+  void UnfoldingOptions(bool doSVD, bool plotsToPs, bool plotsToRoot);
+  void SetOutpath(TString path);
  private:
   TString name;
   int bins, datafiles;
@@ -83,7 +91,30 @@ class Plotter {
   double GenDiffXSec[4][10];//the differential X-section per channel by bin [channel][bin]
   double GenDiffXSecError[4][10];//the differential X-section Error per channel by bin [channel][bin]
   double TotalVisXSection[4];
+  
+  // DAVID
+  bool doUnfolding;
+  bool unfoldingPlotsToPs;
+  bool unfoldingPlotsToRoot;
+  TString outpath;
 };
+
+
+// DAVID
+void Plotter::UnfoldingOptions(bool doSVD, bool plotsToPs, bool plotsToRoot)
+{
+  doUnfolding = doSVD;
+  unfoldingPlotsToPs = plotsToPs;
+  unfoldingPlotsToRoot = plotsToRoot;
+}
+
+
+// DAVID
+void Plotter::SetOutpath(TString path)
+{
+  outpath = path;
+}
+
 
 
 void Plotter::DYScaleFactor(){
@@ -338,7 +369,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     //	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
     //		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
     //		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    //syst++;
+    //syst++;iLeptonic/d
     
     //B-tagging (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
@@ -447,7 +478,7 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
       }
     }
   }
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
 
   TH1D* h_sys  = (TH1D*) stacksumUp->Clone();   h_sys->Reset();
@@ -456,6 +487,7 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
   Sys_Error_Up   = abs(stacksum->Integral() - stacksumUp->Integral())/stacksum->Integral();
   Sys_Error_Down = abs(stacksum->Integral() - stacksumDown->Integral())/stacksum->Integral();
   Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
+  Sum_Errors += Sys_Error;
 
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
 
@@ -509,7 +541,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
       }
     }
   }
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
 
   for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
@@ -517,6 +549,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
     Sys_Error_Up   = abs(stacksum->GetBinContent(bin+1) - stacksumUp->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
     Sys_Error_Down = abs(stacksum->GetBinContent(bin+1) - stacksumDown->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
     Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
+    Sum_Errors += Sys_Error;
     DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
   } 
 
@@ -530,6 +563,13 @@ Plotter::Plotter()
   YAxis="N_{events}";
   initialized=false;
   datafiles = 0;
+  
+  // DAVID 
+  doUnfolding = false;
+  unfoldingPlotsToPs = false;
+  unfoldingPlotsToRoot = false;
+  outpath = "";
+
 }
 
 Plotter::Plotter(TString name_, TString XAxis_,TString YAxis_, double rangemin_, double rangemax_)
@@ -1006,6 +1046,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 
   TH1D *drawhists[hists.size()];
 
+
+
   std::stringstream ss;
   ss << DYScale[channelType];
   TString scale;
@@ -1021,35 +1063,35 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
     drawhists[i]=(TH1D*) hists[i].Clone();
     setStyle(*drawhists[i], i);
-    //    if(legends[i]!=legends[i+1] && i!=(hists.size()-1)){
-    //  drawhists[i]->SetLineColor(1);
-    //}
-
+  //  if(legends[i]!=legends[i+1] && i!=(hists.size()-1)){
+   //   drawhists[i]->SetLineColor(1);
+   // }
     if(legends[i] != "data"){
       if(legends[i] == "t#bar{t} signal"){signalHist = i;}
       if((legends[i] == DYEntry) && channelType!=2 ){
-	drawhists[i]->Scale(DYScale[channelType]);
+	    drawhists[i]->Scale(DYScale[channelType]);
       }
       if(i > 1){
-	if(legends[i] != legends[i-1]){
-	  if((legends[i] == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends[i],"f");
-	  else leg->AddEntry(drawhists[i], legends[i] ,"f");
-	}
+	    if(legends[i] != legends[i-1]){
+	      if((legends[i] == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends[i],"f");
+	      else leg->AddEntry(drawhists[i], legends[i] ,"f");
+	    }
       }
-      stack->Add(drawhists[i]);  
+      stack->Add(drawhists[i]); 
     }
     else{
       if(i==0) leg->AddEntry(drawhists[i], legends[i] ,"pe");
       if(i>0){
-	if(legends[i] != legends[i-1]){
-	  leg->AddEntry(drawhists[i], legends[i] ,"pe");
-	}
-	if(legends[i] == legends[0]){
-	  drawhists[0]->Add(drawhists[i]);
-	}
+	    if(legends[i] != legends[i-1]){
+	      leg->AddEntry(drawhists[i], legends[i] ,"pe");
+	    }
+	    if(legends[i] == legends[0]){
+	      drawhists[0]->Add(drawhists[i]);
+	    }
       }
     }
   }
+
   TList* l = stack->GetHists();
   TH1D* stacksum = (TH1D*) l->At(0)->Clone();
   for (int i = 1; i < l->GetEntries(); ++i) {
@@ -1077,7 +1119,6 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     syshist->SetLineColor(1);
     syshist->SetBinError(i, TMath::Sqrt(binerr2));
   }    
-
 
 
   if(logY)c->SetLogy();
@@ -1482,14 +1523,14 @@ void Plotter::PlotDiffXSec(){
     for(Int_t i=1; i<=genRecHist->GetNbinsX(); ++i){
       if(genRecHist->GetBinContent(i) > recBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,recBinHist->GetBinContent(i));
-	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
-	<< " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
-	<< " = " << recBinHist->GetBinContent(i) << endl;
+        cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
+	    << " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
+	    << " = " << recBinHist->GetBinContent(i) << endl;
       }
       if(genRecHist->GetBinContent(i) > genBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,genBinHist->GetBinContent(i));
-	cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
-	<< " is larger than number of genrated events in that bin" << endl;
+	    cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
+	    << " is larger than number of genrated events in that bin" << endl;
       }
     }
 
@@ -1553,22 +1594,22 @@ void Plotter::PlotDiffXSec(){
     init = false;
     for (unsigned int hist =0; hist<hists.size(); hist++){
       if(legends[hist] == "data"){
-	for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
-	  DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
-	}
+	    for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
+	      DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
+	    }
       }
       else if((legends[hist] == "t#bar{t} signal")&&init==false){
-	init=true;
-	for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
-	  efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
-	  GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
-	  //	  cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
-	}      
+	    init=true;
+	    for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
+	      efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
+	      GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
+	      //	  cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
+	    }      
       }
       else{
-	for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
-	  BGSum[bin]+=varhists[hist]->GetBinContent(bin+1);
-	}
+		for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
+		  BGSum[bin]+=varhists[hist]->GetBinContent(bin+1);
+		}
       }      
     }
     double totalDataSum = 0;
@@ -1580,54 +1621,184 @@ void Plotter::PlotDiffXSec(){
     TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone();
     h_DiffXSec->Reset();
 
-    for (Int_t i=0; i<bins; ++i) {
-      if(channelType!=3){
-	binWidth[i] = Xbins[i+1]-Xbins[i];      
-	//	cout<<"Datasum[i]: "<<DataSum[i]<<" BGSum[i]: "<<BGSum[i]<<" efficiencies[i]: "<<efficiencies[i]<<" binWidth[i]: "<<binWidth[i]<<" lumi: "<<lumi<<endl; 
-	DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
-	DiffXSecStatError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
-	//	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
-	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
-	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+    // DAVID 
+    if ( doUnfolding == true ) {
+    	
+		// SVD Helper Class
+		DilepSVDFunctions mySVDFunctions;
+		mySVDFunctions.SetUnfoldingPlotsToPs(unfoldingPlotsToPs);
+		mySVDFunctions.SetUnfoldingPlotsToRoot(unfoldingPlotsToRoot);
+		mySVDFunctions.SetOutputPath(outpath);
+
+		
+		// Getting the histogram 
+		TH1* theDataHist = NULL;
+		TH1* theBgrHist = NULL;
+		TH1* theRecHist = NULL;
+		TH1* theGenHist = GenPlot; 
+		TH1* theRespHist = genReco2d;
+		for ( size_t i = 0; i < hists.size() ; i++ ) {
+			if ( legends[i] == "data" ) {
+				if ( theDataHist == NULL ) {
+					theDataHist = (TH1*) (varhists[i])->Clone("theDataHist");
+				} else {
+					theDataHist->Add(varhists[i]);
+				}
+			} else if ( legends[i] == "t#bar{t} signal") {
+				if ( theRecHist == NULL ) {
+					theRecHist = (TH1*) (varhists[i])->Clone("theRecHist");
+				} else {
+					theRecHist->Add(varhists[i]);
+				}
+			} else {
+				if ( theBgrHist == NULL ) {
+					theBgrHist = (TH1*) (varhists[i])->Clone("theBgrHist");
+				} else {
+					theBgrHist->Add(varhists[i]);
+				}
+			}
+		}
 	
-	if(name.Contains("Lepton")||name.Contains("Top")){
-	  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
-	  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
-	  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
-	}
-	if (efficiencies[i] == 0) { //cannot divide by zero
-	  cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << name << endl;
-	  h_DiffXSec->SetBinContent(i+1, 0);
-	  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
-	}/* else {
-	  h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
-	  h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
-	  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
-	  }*/
-	//cout<<endl;
-      }else{//For the combination
-	binWidth[i] = Xbins[i+1]-Xbins[i];      
-	DiffXSec[channelType][i] =(DiffXSec[0][i]/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
-					 +DiffXSec[1][i]/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i])			
-					 +DiffXSec[2][i]/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))/
-	                                 (1/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
-				         +(1/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i]))			
-				         +(1/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i])));			
+		// Binning
+		double* theBins = Xbins;
+		int numberBins = bins;
+		
+		
+		// Names and Labels
+		TString channelLabelStr(channelLabel[channelType]);
+        TString theChannelName = channelLabelStr; 		
+        if ( channelLabelStr.Contains("#mu#mu")  ) theChannelName = "mumu";
+        if ( channelLabelStr.Contains("e#mu")    ) theChannelName = "emu";
+        if ( channelLabelStr.Contains("ee")      ) theChannelName = "ee";
+        if ( channelLabelStr.Contains("comb")    ) theChannelName = "combined";
+        TString theParticleName = "";
+		if ( name.Contains("Lepton") ) theParticleName = "Leptons";
+		if ( name.Contains("LLBar")   ) theParticleName = "LepPair";
+		if ( name.Contains("Top")     ) theParticleName = "TopQuark";
+		if ( name.Contains("TTBar")   ) theParticleName = "TtBar";
+		TString theQuantityName = "";
+		if ( name.Contains("pT")      ) theQuantityName = "Pt";
+		if ( name.Contains("Eta")     ) theQuantityName = "Eta";
+		if ( name.Contains("Rapidity")) theQuantityName = "Rapidity";
+		if ( name.Contains("Mass")    ) theQuantityName = "Mass";
+		TString theSpecialPostfix = "";
+		
+		
 
-	DiffXSecStatError[channelType][i]=1/(TMath::Sqrt((1/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i]))
-							+(1/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i]))			
-    							+(1/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))));			
+        // UNFOLDING 
+        // Retrieve a histogram with the unfolded quantities.
+        // Note: The unfolded histogram has additional side bins!
+        // Keep this in mind when accessing bin content via indices
+        TH1D* unfoldedDistribution = NULL;
+        mySVDFunctions.SVD_DoUnfold(theDataHist, theBgrHist, theGenHist, theRecHist, theRespHist, 
+             theBins, numberBins,  
+             unfoldedDistribution, 
+             theChannelName, theParticleName, theQuantityName, theSpecialPostfix);
+		
+		
+		// Make a vector from the result
+		double UnfoldingResult[XAxisbinCenters.size()];
+		double UnfoldingError[XAxisbinCenters.size()];
+		for ( size_t i = 0; i < XAxisbinCenters.size() ; i++ ) {
+			UnfoldingResult[i] = unfoldedDistribution->GetBinContent(i+1);
+			UnfoldingError[i] = unfoldedDistribution->GetBinError(i+1);
+		}
+		
+		
+		
+		// CROSS SECTION CALCULATION
+	    for (Int_t i=0; i<bins; ++i) {
+	        if(channelType!=3){
+				binWidth[i] = Xbins[i+1]-Xbins[i];       
+				DiffXSec[channelType][i] = UnfoldingResult[i]/(binWidth[i]*lumi);
+				DiffXSecStatError[channelType][i] = UnfoldingError[i]/(lumi*binWidth[i]); // statistical error 
+				GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+				GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+				
+				if(name.Contains("Lepton")||name.Contains("Top")){
+				  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
+				  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
+				  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
+				}
+			 
+	        }else{//For the combination
+				binWidth[i] = Xbins[i+1]-Xbins[i];      
+				DiffXSec[channelType][i] =(DiffXSec[0][i]/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
+								 +DiffXSec[1][i]/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i])			
+								 +DiffXSec[2][i]/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))/
+				                                 (1/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
+							         +(1/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i]))			
+							         +(1/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i])));			
+			
+				DiffXSecStatError[channelType][i]=1/(TMath::Sqrt((1/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i]))
+										+(1/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i]))			
+			    							+(1/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))));			 
+				GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+				GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+		    }
+		    h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+		    h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
+		    h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
+	    }
+	    
+	    
+	    // Delete things
+	    delete theDataHist;
+	    delete theBgrHist;
+	    delete theRecHist;
+	    delete unfoldedDistribution;
+    	
+    } else { // BBB Unfolding
 
-	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!ee DiffCross Sec: "<<DiffXSec[0][i]<<" +/- "<<DiffXSecStatError[0][i]<<endl;
-	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu DiffCross Sec: "<<DiffXSec[1][i]<<" +/- "<<DiffXSecStatError[1][i]<<endl;
-	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu DiffCross Sec: "<<DiffXSec[2][i]<<" +/- "<<DiffXSecStatError[2][i]<<endl;
-	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecStatError[3][i]<<endl;
-	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
-	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
-      }
-      h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
-      h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
-      h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
+	    for (Int_t i=0; i<bins; ++i) {
+	      if(channelType!=3){
+			binWidth[i] = Xbins[i+1]-Xbins[i];      
+			//	cout<<"Datasum[i]: "<<DataSum[i]<<" BGSum[i]: "<<BGSum[i]<<" efficiencies[i]: "<<efficiencies[i]<<" binWidth[i]: "<<binWidth[i]<<" lumi: "<<lumi<<endl; 
+			DiffXSec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
+			DiffXSecStatError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+			//	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
+			GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+			GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+			
+			if(name.Contains("Lepton")||name.Contains("Top")){
+			  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
+			  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
+			  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
+			}
+			if (efficiencies[i] == 0) { //cannot divide by zero
+			  cout << "WARNING in PlotDifferentialCrossSection: Efficieny is zero in bin " << i << " while creating " << name << endl;
+			  h_DiffXSec->SetBinContent(i+1, 0);
+			  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
+			}/* else {
+		  h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+		  h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
+		  h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);
+		  }*/
+		//cout<<endl;
+	      }else{//For the combination
+			binWidth[i] = Xbins[i+1]-Xbins[i];      
+			DiffXSec[channelType][i] =(DiffXSec[0][i]/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
+							 +DiffXSec[1][i]/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i])			
+							 +DiffXSec[2][i]/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))/
+			                                 (1/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i])
+						         +(1/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i]))			
+						         +(1/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i])));			
+		
+			DiffXSecStatError[channelType][i]=1/(TMath::Sqrt((1/(DiffXSecStatError[0][i]*DiffXSecStatError[0][i]))
+									+(1/(DiffXSecStatError[1][i]*DiffXSecStatError[1][i]))			
+		    							+(1/(DiffXSecStatError[2][i]*DiffXSecStatError[2][i]))));			
+		
+			//cout<<"&&&&&&&&&&&&&&&!!!!!!!!ee DiffCross Sec: "<<DiffXSec[0][i]<<" +/- "<<DiffXSecStatError[0][i]<<endl;
+			//cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu DiffCross Sec: "<<DiffXSec[1][i]<<" +/- "<<DiffXSecStatError[1][i]<<endl;
+			//cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu DiffCross Sec: "<<DiffXSec[2][i]<<" +/- "<<DiffXSecStatError[2][i]<<endl;
+			//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecStatError[3][i]<<endl;
+			GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+			GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+	      }
+	      h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
+	      h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
+	      h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
+	    }
     }
 
     //data normalization
