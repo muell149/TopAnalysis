@@ -28,10 +28,10 @@
 #include "TPaletteAxis.h"
 
 // Includes from Top Analysis
-#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
-#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
-#include "TopAnalysis/Configuration/analysis/unfolding/TopSVDUnfold.h"
-#include "TopAnalysis/Configuration/analysis/unfolding/TopSVDUnfold.C"
+#include "../semiLeptonic/diffXSection/basicFunctions.h"
+#include "../semiLeptonic/diffXSection/HHStyle.h"
+#include "TopSVDUnfold.h"
+#include "TopSVDUnfold.C"
 
 // Namespaces
 using namespace std;
