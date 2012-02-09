@@ -244,7 +244,8 @@ PythiaSample="False"
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
     if(options.sample=="ttbar"):
-        process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
+       # process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
+        process.load("TopAnalysis/Configuration/samples/Fall11_TTJets_TuneZ2_7TeV_madgraph_tauola_cff")
         print "analyzed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
 	if(eventFilter=='signal only'):
 	    outputFileName+="DiffXSecSigMadD6TSummer11"
@@ -518,11 +519,9 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # b) 4_2:
 from Configuration.PyReleaseValidation.autoCond import autoCond
 if(runningOnData=="MC"):
-    #process.GlobalTag.globaltag = cms.string('START42_V13::All')
     process.GlobalTag.globaltag = cms.string('START42_V17::All')
     #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 else:
-    #process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
     process.GlobalTag.globaltag = cms.string('GR_R_42_V23::All')
 
 ## Needed for redoing the ak5GenJets
@@ -648,9 +647,10 @@ if(decayChannel=='electron'):
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = True
 if(not eventFilter=='all'):
     ## adapt output filename
-    #if(eventFilter=='signal only'):
+    if(eventFilter=='signal only'):
+        print "Dummy output to avoid programme crash --> to be revised !!!!"
         #process.TFileService.fileName = 'analyzeDiffXSec_testSig.root'
-    if(eventFilter=='background only'):
+    elif(eventFilter=='background only'):
         process.ttSemiLeptonicFilter.invert = True
     elif(eventFilter=='semileptonic electron only'):
         process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = False
@@ -677,7 +677,7 @@ if(not eventFilter=='all'):
         process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon     = False
         process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau      = True
     else:
-        raise NameError, "'"+eventFilter+"' is not a prober eventFilter name choose: 'all', 'signal only', 'background only', 'semileptonic electron only', 'dileptonic electron only', 'dileptonic muon only', 'fullhadronic', 'via single tau only', 'dileptonic via tau only' or 'dileptonic muon + electron only'"
+        raise NameError, "'"+eventFilter+"' is not a proper eventFilter name choose: 'all', 'signal only', 'background only', 'semileptonic electron only', 'dileptonic electron only', 'dileptonic muon only', 'fullhadronic', 'via single tau only', 'dileptonic via tau only' or 'dileptonic muon + electron only'"
     ## sequence with filter for decay channel and trigger selection hltFilter
     process.filterSequence = cms.Sequence(process.makeGenEvt *
                                           process.ttSemiLeptonicFilter *
@@ -835,15 +835,12 @@ process.analyzeMETMuonTagged = process.analyzeMETMuon.clone()
 process.load("TopAnalysis.TopAnalyzer.PUControlDistributions_cfi")
 process.PUControlDistributions.PUSource                   = cms.InputTag("addPileupInfo"                       )
 process.PUControlDistributions.PVertexSource              = cms.InputTag("goodOfflinePrimaryVertices"          )
-process.PUControlDistributions.PUEventWeightSource        = cms.InputTag("eventWeightPU","eventWeightPU"       )
-process.PUControlDistributions.PUEventWeightUpSource      = cms.InputTag("eventWeightPU","eventWeightPUUp"     )
-process.PUControlDistributions.PUEventWeightDownSource    = cms.InputTag("eventWeightPU","eventWeightPUDown"   )
-process.PUControlDistributions.PUEventWeight3BXSource     = cms.InputTag("eventWeightPU","eventWeightPU3BX"    )
-process.PUControlDistributions.PUEventWeight3BXUpSource   = cms.InputTag("eventWeightPU","eventWeightPU3BXUp"  )
-process.PUControlDistributions.PUEventWeight3BXDownSource = cms.InputTag("eventWeightPU","eventWeightPU3BXDown")
-process.PUControlDistributions.PUEventWeight3DSource      = cms.InputTag("eventWeightPU","eventWeightPU3D"     )
-process.PUControlDistributions.PUEventWeight3DUpSource    = cms.InputTag("eventWeightPU","eventWeightPU3DUp"   )
-process.PUControlDistributions.PUEventWeight3DDownSource  = cms.InputTag("eventWeightPU","eventWeightPU3DDown" )
+process.PUControlDistributions.PUEventWeightSource        = cms.InputTag("eventWeightPU",       "eventWeightPU"       )
+process.PUControlDistributions.PUEventWeightUpSource      = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp"     )
+process.PUControlDistributions.PUEventWeightDownSource    = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown"   )
+process.PUControlDistributions.PUEventWeight3DSource      = cms.InputTag("eventWeightPU",       "eventWeightPU3D"     )
+process.PUControlDistributions.PUEventWeight3DUpSource    = cms.InputTag("eventWeightPUsysUp",  "eventWeightPU3DUp"   )
+process.PUControlDistributions.PUEventWeight3DDownSource  = cms.InputTag("eventWeightPUsysDown","eventWeightPU3DDown" )
 
 process.PUControlDistributionsDefault        = process.PUControlDistributions.clone()
 process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.clone()
@@ -1177,63 +1174,54 @@ else:
     process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
     process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
 
-## ---
-##    MC PU reweighting
-## ---
+## ============================
+##  MC PU reweighting
+## ============================
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
-if(options.sample=="ttbar"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
-if(options.sample=="wjets"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root")
-if(options.sample=="zjets"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root")
-if(options.sample=="singleTopS"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_s_channel_7TeV_powheg_tauola.root")
-if(options.sample=="singleAntiTopS"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_s_channel_7TeV_powheg_tauola.root")
-if(options.sample=="singleTopT"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_t_channel_7TeV_powheg_tauola.root")
-if(options.sample=="singleAntiTopT"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_t_channel_7TeV_powheg_tauola.root")
-if(options.sample=="singleTopTw"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
-if(options.sample=="singleAntiTopTw"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root")
-if(options.sample=="zprime_m500gev_w5000mev"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_Zprime_M500GeV_W5000MeV_Madgraph.root")
-if(options.sample=="zprime_m750gev_w7500mev"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_Zprime_M750GeV_W7500MeV_Madgraph.root")
-if(decayChannel=='muon'):
-    if(options.sample=="qcd"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6.root")
-if(decayChannel=='electron'):
-    if(options.sample=="qcdEM1"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20to30_EMEnriched_TuneZ2_7TeV_pythia6.root")
-    if(options.sample=="qcdEM2"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_EMEnriched_TuneZ2_7TeV_pythia.root")
-    if(options.sample=="qcdEM3"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_EMEnriched_TuneZ2_7TeV_pythia6.root")
-    if(options.sample=="qcdBCE1"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20to30_BCtoE_TuneZ2_7TeV_pythia6.root")
-    if(options.sample=="qcdBCE2"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_BCtoE_TuneZ2_7TeV_pythia6.root")
-    if(options.sample=="qcdBCE3"):
-        process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia.root")
-if(options.sample=="WW"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WW_TuneZ2_7TeV_pythia6_tauola.root")
-if(options.sample=="WZ"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WZ_TuneZ2_7TeV_pythia6_tauola.root")
-if(options.sample=="ZZ"):
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_ZZ_TuneZ2_7TeV_pythia6_tauola.root")
-    
-process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
+
+process.eventWeightPU        = process.eventWeightPU.clone()
+process.eventWeightPUsysUp   = process.eventWeightPU.clone()
+process.eventWeightPUsysDown = process.eventWeightPU.clone()
+
+#### Configuration for Nominal PU Weights
+
+process.eventWeightPU.WeightName          = "eventWeightPU"
+process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPU.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+
+process.eventWeightPU.CreateWeight3DHisto = True
+process.eventWeightPU.Weight3DHistoFile   = "DefaultWeight3D.root"
+
+#### Configuration for PU Up Variations
+
+process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
+process.eventWeightPUsysUp.Weight3DName        = "eventWeightPU3DUp"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+
+process.eventWeightPUsysUp.CreateWeight3DHisto = True
+process.eventWeightPUsysUp.Weight3DHistoFile   = "DefaultWeight3DUp.root"
+
+#### Configuration for PU Down Variations
+
+process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
+process.eventWeightPUsysDown.Weight3DName        = "eventWeightPU3DDown"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+
+process.eventWeightPUsysDown.CreateWeight3DHisto = True
+process.eventWeightPUsysDown.Weight3DHistoFile   = "DefaultWeight3DDown.root"
+
+process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
+                                          process.eventWeightPUsysUp   *
+                                          process.eventWeightPUsysDown  )
 
 # relevant PU event weights (potentially merged with shape distortion weights)
-PUweightraw=cms.InputTag("eventWeightPU","eventWeightPU")
-PUweightrawUp=cms.InputTag("eventWeightPU","eventWeightPUUp")
-PUweightrawDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
+PUweightraw     = cms.InputTag("eventWeightPU",       "eventWeightPU")
+PUweightrawUp   = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
+PUweightrawDown = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
 
 ## ---
 ##    MC ttbar systematic variation reweighting
@@ -1273,9 +1261,9 @@ process.eventWeightPUupDistort   = process.eventWeightMultiplier.clone(eventWeig
 process.eventWeightPUdownDistort = process.eventWeightMultiplier.clone(eventWeightTags = weightlistDistortPUdown)
 if(sysDistort==''):
     # final PU weights without shape distortion weights
-    PUweight    =cms.InputTag("eventWeightPU","eventWeightPU")
-    PUweightUp  =cms.InputTag("eventWeightPU","eventWeightPUUp")
-    PUweightDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
+    PUweight    =cms.InputTag("eventWeightPU",       "eventWeightPU3D")
+    PUweightUp  =cms.InputTag("eventWeightPUsysUp",  "eventWeightPU3DUp")
+    PUweightDown=cms.InputTag("eventWeightPUsysDown","eventWeightPU3DDown")
 else:
     # final PU x shape distortion weights
     PUweight    =cms.InputTag("eventWeightPUDistort")
@@ -1461,10 +1449,10 @@ if(effSFReweigthing and decayChannel=="muon"):
     weightlistBTagSFShapeDownPt65      .append("effSFMuonEventWeight")
     weightlistBTagSFShapeUpEta1p2      .append("effSFMuonEventWeight")
     weightlistBTagSFShapeDownEta1p2    .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeUpPt65        .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeDownPt65      .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeUpEta0p7      .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeDownEta0p7    .append("effSFMuonEventWeight")
+    weightlistBTagSFHalfShapeUpPt65    .append("effSFMuonEventWeight")
+    weightlistBTagSFHalfShapeDownPt65  .append("effSFMuonEventWeight")
+    weightlistBTagSFHalfShapeUpEta0p7  .append("effSFMuonEventWeight")
+    weightlistBTagSFHalfShapeDownEta0p7.append("effSFMuonEventWeight")
     weightlistBTagSFShapeUpPt100       .append("effSFMuonEventWeight")
     weightlistBTagSFShapeDownPt100     .append("effSFMuonEventWeight")
     weightlistBTagSFShapeUpEta0p7      .append("effSFMuonEventWeight")
@@ -1494,10 +1482,10 @@ if(effSFReweigthing and decayChannel=="electron"):
     weightlistBTagSFShapeDownPt65      .append("effSFElectronEventWeight")
     weightlistBTagSFShapeUpEta1p2      .append("effSFElectronEventWeight")
     weightlistBTagSFShapeDownEta1p2    .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeUpPt65        .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeDownPt65      .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeUpEta0p7      .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeDownEta0p7    .append("effSFElectronEventWeight")
+    weightlistBTagSFHalfShapeUpPt65    .append("effSFElectronEventWeight")
+    weightlistBTagSFHalfShapeDownPt65  .append("effSFElectronEventWeight")
+    weightlistBTagSFHalfShapeUpEta0p7  .append("effSFElectronEventWeight")
+    weightlistBTagSFHalfShapeDownEta0p7.append("effSFElectronEventWeight")
     weightlistBTagSFShapeUpPt100       .append("effSFElectronEventWeight")
     weightlistBTagSFShapeDownPt100     .append("effSFElectronEventWeight")
     weightlistBTagSFShapeUpEta0p7      .append("effSFElectronEventWeight")
@@ -1526,10 +1514,10 @@ if(BtagReweigthing):
     weightlistBTagSFShapeDownPt65      .append("bTagSFEventWeightBTagSFShapeDownPt65")
     weightlistBTagSFShapeUpEta1p2      .append("bTagSFEventWeightBTagSFShapeUpEta1p2")
     weightlistBTagSFShapeDownEta1p2    .append("bTagSFEventWeightBTagSFShapeDownEta1p2")
-    weightlistBTagSFHalfShapeUpPt65        .append("bTagSFEventWeightBTagSFHalfShapeUpPt65")
-    weightlistBTagSFHalfShapeDownPt65      .append("bTagSFEventWeightBTagSFHalfShapeDownPt65")
-    weightlistBTagSFHalfShapeUpEta0p7      .append("bTagSFEventWeightBTagSFHalfShapeUpEta0p7")
-    weightlistBTagSFHalfShapeDownEta0p7    .append("bTagSFEventWeightBTagSFHalfShapeDownEta0p7")
+    weightlistBTagSFHalfShapeUpPt65    .append("bTagSFEventWeightBTagSFHalfShapeUpPt65")
+    weightlistBTagSFHalfShapeDownPt65  .append("bTagSFEventWeightBTagSFHalfShapeDownPt65")
+    weightlistBTagSFHalfShapeUpEta0p7  .append("bTagSFEventWeightBTagSFHalfShapeUpEta0p7")
+    weightlistBTagSFHalfShapeDownEta0p7.append("bTagSFEventWeightBTagSFHalfShapeDownEta0p7")
     weightlistBTagSFShapeUpPt100       .append("bTagSFEventWeightBTagSFShapeUpPt100")
     weightlistBTagSFShapeDownPt100     .append("bTagSFEventWeightBTagSFShapeDownPt100")
     weightlistBTagSFShapeUpEta0p7      .append("bTagSFEventWeightBTagSFShapeUpEta0p7")
@@ -1563,10 +1551,10 @@ process.eventWeightBTagSFShapeUpPt65        = process.eventWeightMultiplier.clon
 process.eventWeightBTagSFShapeDownPt65      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeDownPt65)
 process.eventWeightBTagSFShapeUpEta1p2      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeUpEta1p2)
 process.eventWeightBTagSFShapeDownEta1p2    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeDownEta1p2)
-process.eventWeightBTagSFHalfShapeUpPt65        = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeUpPt65)
-process.eventWeightBTagSFHalfShapeDownPt65      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeDownPt65)
-process.eventWeightBTagSFHalfShapeUpEta0p7      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeUpEta0p7)
-process.eventWeightBTagSFHalfShapeDownEta0p7    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeDownEta0p7)
+process.eventWeightBTagSFHalfShapeUpPt65    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeUpPt65)
+process.eventWeightBTagSFHalfShapeDownPt65  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeDownPt65)
+process.eventWeightBTagSFHalfShapeUpEta0p7  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeUpEta0p7)
+process.eventWeightBTagSFHalfShapeDownEta0p7= process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeDownEta0p7)
 process.eventWeightBTagSFShapeUpPt100       = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeUpPt100)
 process.eventWeightBTagSFShapeDownPt100     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeDownPt100)
 process.eventWeightBTagSFShapeUpEta0p7      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeUpEta0p7)
@@ -2044,7 +2032,7 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
                       ## create PU event weights
-                      process.makeWeightsPU                         *
+                      process.makeEventWeightsPU                    *
                       ## create shape distortion event weights
                       process.eventWeightDileptonModelVariation     *
                       process.eventWeightPUDistort                  *
@@ -2092,7 +2080,7 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       ## introduce some collections
                       process.semiLeptonicSelection                 *
                       ## create PU event weights
-                      process.makeWeightsPU                         *
+                      process.makeEventWeightsPU                    *
                       ## create shape distortion event weights
                       process.eventWeightDileptonModelVariation     *
                       process.eventWeightPUDistort                  *
@@ -2121,7 +2109,7 @@ if(runningOnData=="MC"):
                           process.isolatedGenLeptons                    *
                           process.semiLeptGenCollections                *
                           ## create PU event weights
-                          process.makeWeightsPU                         *
+                          process.makeEventWeightsPU                    *
                           ## create shape distortion event weights
                           process.eventWeightDileptonModelVariation     *
                           process.eventWeightPUDistort                  *
@@ -2159,7 +2147,7 @@ if(runningOnData=="MC"):
                               process.isolatedGenLeptons                    *
                               process.semiLeptGenCollections                *
                               ## create PU event weights
-                              process.makeWeightsPU                         *
+                              process.makeEventWeightsPU                    *
                               ## create shape distortion event weights
                               process.eventWeightDileptonModelVariation     *
                               process.eventWeightPUDistort                  *
