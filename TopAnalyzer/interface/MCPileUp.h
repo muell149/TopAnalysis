@@ -45,10 +45,10 @@ class MCPileUp : public edm::EDAnalyzer {
       // ----------member data --------------------------- 
 
       TH1F* histoNPUEvents;
-      TH1F* histoNPUEvents3BX;  
+      TH1F* histoNPUEvents_true;  
       
       TH1F* histoNPUEvents_LessBins;
-      TH1F* histoNPUEvents3BX_LessBins;
+      TH1F* histoNPUEvents_LessBins_true;
 
   edm::InputTag inTag_PUSource;
 };

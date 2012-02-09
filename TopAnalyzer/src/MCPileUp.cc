@@ -26,23 +26,23 @@ void MCPileUp::beginJob()
   histoNPUEvents -> GetYaxis() -> SetTitle("Frequency");
   histoNPUEvents -> SetFillColor(2);
 
-  histoNPUEvents3BX = fs->make<TH1F>("pileup3BX","Number of PU Events (Average over 3 BXs)",71,-0.5,70.5);
-  histoNPUEvents3BX -> SetTitle("");
-  histoNPUEvents3BX -> GetXaxis() -> SetTitle("Number of PU Events (Average over 3 BXs)");
-  histoNPUEvents3BX -> GetYaxis() -> SetTitle("Frequency");
-  histoNPUEvents3BX -> SetFillColor(2); 
+  histoNPUEvents_true = fs->make<TH1F>("pileup_true","Number of PU Events (true)",71,-0.5,70.5);
+  histoNPUEvents_true -> SetTitle("");
+  histoNPUEvents_true -> GetXaxis() -> SetTitle("Number of PU Events (true)");
+  histoNPUEvents_true -> GetYaxis() -> SetTitle("Frequency");
+  histoNPUEvents_true -> SetFillColor(2);
 
-  histoNPUEvents_LessBins = fs->make<TH1F>("pileup_LessBins","Number of PU Events",25,-0.5,24.5);
+  histoNPUEvents_LessBins = fs->make<TH1F>("pileup_LessBins","Number of PU Events",51,-0.5,50.5);
   histoNPUEvents_LessBins -> SetTitle("");
   histoNPUEvents_LessBins -> GetXaxis() -> SetTitle("Number of PU Events");
   histoNPUEvents_LessBins -> GetYaxis() -> SetTitle("Frequency");
   histoNPUEvents_LessBins -> SetFillColor(2);
 
-  histoNPUEvents3BX_LessBins = fs->make<TH1F>("pileup3BX_LessBins","Number of PU Events (Average over 3 BXs)",25,-0.5,24.5);
-  histoNPUEvents3BX_LessBins -> SetTitle("");
-  histoNPUEvents3BX_LessBins -> GetXaxis() -> SetTitle("Number of PU Events (Average over 3 BXs)");
-  histoNPUEvents3BX_LessBins -> GetYaxis() -> SetTitle("Frequency");
-  histoNPUEvents3BX_LessBins -> SetFillColor(2);
+  histoNPUEvents_LessBins_true = fs->make<TH1F>("pileup_LessBins_true","Number of PU Events (true)",51,-0.5,50.5);
+  histoNPUEvents_LessBins_true -> SetTitle("");
+  histoNPUEvents_LessBins_true -> GetXaxis() -> SetTitle("Number of PU Events (true)");
+  histoNPUEvents_LessBins_true -> GetYaxis() -> SetTitle("Frequency");
+  histoNPUEvents_LessBins_true -> SetFillColor(2);
 }
 
 // =============================
@@ -58,17 +58,15 @@ void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)
    { 
-     sum_nvtx += iterPU->getPU_NumInteractions();
-
      if (iterPU->getBunchCrossing()==0) // -1: previous BX, 0: current BX,  1: next BX
      {
        histoNPUEvents          -> Fill(iterPU->getPU_NumInteractions());
        histoNPUEvents_LessBins -> Fill(iterPU->getPU_NumInteractions());
+
+       histoNPUEvents_true          -> Fill(iterPU->getTrueNumInteractions());
+       histoNPUEvents_LessBins_true -> Fill(iterPU->getTrueNumInteractions());
      }
    }
-
-   histoNPUEvents3BX          -> Fill(sum_nvtx/3.0);
-   histoNPUEvents3BX_LessBins -> Fill(sum_nvtx/3.0);
 }
 
 // =============================
