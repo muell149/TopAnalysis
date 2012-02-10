@@ -439,19 +439,19 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
   fillSystHisto();
 
   TH1D* stacksum = (TH1D*)hists[datafiles].Clone();
-  TH1D* stacksumUp = (TH1D*)systhistsUp[0].Clone();
-  TH1D* stacksumDown = (TH1D*)systhistsDown[0].Clone();
+  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Clone();
+  TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Clone();
 
   if(signalSyst == false){
     for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
       TH1 *htemp = (TH1D*)hists[i].Clone();
       stacksum->Add(htemp);
     }
-    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
       TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
       stacksumUp->Add(htemp);
     }
-    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
       TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
       stacksumDown->Add(htemp);
     }
@@ -465,13 +465,13 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
 	stacksum->Add(htemp);
       }
     }
-    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
       if(legends[i] == "t#bar{t} signal"){
 	TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
 	stacksumUp->Add(htemp);
       }
     }
-    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles; i<systhistsDown.size() ; i++){ // prepare histos and leg
       if(legends[i] == "t#bar{t} signal"){
 	TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
 	stacksumDown->Add(htemp);
@@ -500,25 +500,59 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
   setSystDataSet(Systematic);
   fillSystHisto();
   TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);
-  TH1D* stacksumUp = (TH1D*)systhistsUp[0].Rebin(bins,"stackup",Xbins);
-  TH1D* stacksumDown = (TH1D*)systhistsDown[0].Rebin(bins,"stackdown",Xbins);
+  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins);
+  TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Rebin(bins,"stackdown",Xbins);
 
+
+  TH2 *genReco2d=NULL;
+  TH2 *genReco2dUp=NULL;
+  TH2 *genReco2dDown=NULL;
+
+  TH1 *GenPlot = NULL;
+  TH1 *GenPlotUp = NULL;
+  TH1 *GenPlotDown = NULL;
+
+  TString newname = name;
+  if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
+    newname.ReplaceAll("Hyp",3,"",0);
+  }
   //DYScale Factor...
-  if(signalSyst == false){
     for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+      TFile *ftemp = TFile::Open(dataset[i]);
+      if(genReco2d==NULL){
+	genReco2d = (TH2*)ftemp->Get("GenReco"+newname)->Clone();
+	GenPlot = (TH1*)ftemp->Get("VisGen"+newname)->Clone();
+      } else{
+	genReco2d->Add((TH2*)ftemp->Get("GenReco"+newname)->Clone());
+	GenPlot->Add((TH1*)ftemp->Get("VisGen"+newname)->Clone());
+      }
       TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
       stacksum->Add(htemp);
+      delete ftemp;
     }
-    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+      TFile *ftempUp = TFile::Open(datasetUp[i]);
+      if(genReco2dUp==NULL){
+	genReco2dUp = (TH2*)ftempUp->Get("GenReco"+newname)->Clone();
+      } else{
+	genReco2dUp->Add((TH2*)ftempUp->Get("GenReco"+newname)->Clone());
+      }
       TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
       stacksumUp->Add(htemp);
+      delete ftempUp;
     }
-    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+      TFile *ftempDown = TFile::Open(datasetDown[i]);
+      if(genReco2dDown==NULL){
+	genReco2dDown = (TH2*)ftempDown->Get("GenReco"+newname)->Clone();
+      } else{
+	genReco2dDown->Add((TH2*)ftempDown->Get("GenReco"+newname)->Clone());
+      }
       TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
       stacksumDown->Add(htemp);
+      delete ftempDown;
     }
-  }
-  else{
+  /*  else{
     stacksum->Reset();
     stacksumUp->Reset();
     stacksumDown->Reset();
@@ -528,19 +562,19 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
 	stacksum->Add(htemp);
       }
     }
-    for(unsigned int i=1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
       if(legends[i] == "t#bar{t} signal"){
 	TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
 	stacksumUp->Add(htemp);
       }
     }
-    for(unsigned int i=1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
       if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
-	stacksumDown->Add(htemp);
+	TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
+	stacksumUp->Add(htemp);
       }
     }
-  }
+    }*/
   double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
 
@@ -1419,7 +1453,7 @@ void Plotter::PlotDiffXSec(){
     double BGSum[XAxisbinCenters.size()];
     bool init = false;
     TH1 *varhists[hists.size()];
-    TH2 *genReco2d=0;
+    TH2 *genReco2d=0; 
     TString newname = name;
     if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
       newname.ReplaceAll("Hyp",3,"",0);
