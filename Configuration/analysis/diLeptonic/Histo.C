@@ -1,9 +1,4 @@
-#define Histo_cxx
-
 #include "Histo.h"
-#include <fstream>
-#include <string>
-
 
 void Histo::MakePlots(){
 
@@ -69,10 +64,18 @@ void Histo::MakePlots(){
     //h_generalPlot.setOptions("","jetHT","N_{Events}","H_{T,all jets}[GeV]", false, true, 0, 0.1, 0, 0, 0);//Figure 9
     //  h_generalPlot.setOptions("","BjetMulti","N_{Events}","N_{tags, TCHEL}", false, false, 0, 0.0, 0, 0, 0);//Figure 10
     //  h_generalPlot.setOptions("","Allh1","N_{Events}","M_{#mumu}", false, false, 0, 0.0, 0, 0, 0);//Figure 11
-    //h_generalPlot.setOptions("LeptonpT","N_{Events}","p_{T}^{l^{+}andl^{-}}", false, true, 0, 0.0001, 0, 0, 0);//Figure 12
-    h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);//Figure 12
-    h_generalPlot.UnfoldingOptions(true, false, false);
-//    h_generalPlot.SetOutpath("");
+    //h_generalPlot.setOptions("LeptonpT","N_{Events}","p_{T}^{l^{+}andl^{-}}", false, true, 0, 0.0001, 0, 0, 0);//Figure 12/Figure 12
+    
+    // Unfolding Options
+    bool doSVD = true;
+    bool unfoldingPlotsToPs = false;
+    bool unfoldingPlotsToRoot = false;
+    TString outpath = "";
+    h_generalPlot.UnfoldingOptions(doSVD, unfoldingPlotsToPs, unfoldingPlotsToRoot);
+    h_generalPlot.SetOutpath("");
+    
+    
+    h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();
@@ -90,7 +93,8 @@ void Histo::MakePlots(){
     h_generalPlot.PlotDiffXSec();
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("combined");
-    h_generalPlot.fillHisto();
+    h_generalPlot
+    .fillHisto();
     h_generalPlot.write();
     h_generalPlot.PlotDiffXSec();
     
