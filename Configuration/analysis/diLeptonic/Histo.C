@@ -7,6 +7,8 @@
 
 void Histo::MakePlots(){
 
+  gROOT->SetBatch(kTRUE);
+
   std::vector<double> Xbins;
   std::vector<double> binCenters;
   /*  h_generalPlot.setOptions("jetMultiXSec","N_{Events}","N_{jets}", false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
@@ -30,14 +32,23 @@ void Histo::MakePlots(){
   HistStream.open(lumifile.c_str());
 
   while(!HistStream.eof()){
-    Plotter h_generalPlot;
+  	
+  	// Read HistoList-File
     TString name, YAxis, XAxis;
     bool logX, logY;
     int bins;
     double ymin, ymax, xmin, xmax;
-    Xbins.clear();binCenters.clear();
-  
     HistStream>>name>>YAxis>>XAxis>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
+    
+    // Avoid running over empty lines in 'HistoList'-File
+    if ( name.CompareTo("") == 0 ) continue;
+    
+    // Create Plotter 
+    Plotter h_generalPlot;
+    Xbins.clear();binCenters.clear();
+    
+     
+ 
     for(int i = 0; i < bins+1; i++){
       double temp;
       HistStream>>temp; 
@@ -60,7 +71,7 @@ void Histo::MakePlots(){
     //  h_generalPlot.setOptions("","Allh1","N_{Events}","M_{#mumu}", false, false, 0, 0.0, 0, 0, 0);//Figure 11
     //h_generalPlot.setOptions("LeptonpT","N_{Events}","p_{T}^{l^{+}andl^{-}}", false, true, 0, 0.0001, 0, 0, 0);//Figure 12
     h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);//Figure 12
-    h_generalPlot.UnfoldingOptions(false, false, false);
+    h_generalPlot.UnfoldingOptions(true, false, false);
 //    h_generalPlot.SetOutpath("");
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
