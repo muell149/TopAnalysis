@@ -3,7 +3,7 @@
 // Package:    NTupleWriter_two
 // Class:      NTupleWriter_two
 //
-/**\class NTupleWriter_two NTupleWriter_two.cc TopAnalysis/NTupleWriter_two/src/NTupleWriter_two.cc
+/* *\class NTupleWriter_two NTupleWriter_two.cc TopAnalysis/NTupleWriter_two/src/NTupleWriter_two.cc
 
 Description: [one line class summary]
 
@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.8 2012/01/16 10:30:11 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.9 2012/01/26 18:01:18 blutz Exp $
 //
 //
 
@@ -57,12 +57,16 @@ Implementation:
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 #include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
 
+#include <TLorentzVector.h>
+
 //
 // class declaration
 //
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LV;
 const char * LVstr = "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >";
 const char * VLVstr = "std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >";
+
+
 
 class NTupleWriter : public edm::EDAnalyzer
 {
@@ -87,7 +91,7 @@ private:
   void AssignLeptonAndTau ( const reco::GenParticle* lepton, LV &GenLepton, int &pdgid, LV &GenTau );
   bool isTau( const reco::GenParticle* lepton);
   const reco::GenParticle* getTauDaughter(const reco::GenParticle* tau);
-
+  const reco::Candidate* motherparticle(const reco::Candidate* particle);
   // ----------member data ---------------------------
 
   std::map<std::string, int> triggerMap_;
@@ -150,6 +154,7 @@ private:
   int decayMode;
 
   /////////jets///////////
+  
   std::vector<LV> VallGenJets;
   std::vector<LV> VgenJet;
   std::vector<LV> Vjet;
@@ -158,6 +163,12 @@ private:
   std::vector<double> VjetBTagCSV;
   std::vector<double> VjetBTagCSVMVA;
 
+  std::vector<int> VgenjetfromBhadron, VgenjetfromBhadronClone;
+  std::vector<LV> Vmotherparticle;
+  std::vector<int> VmotherparticlePdgId;
+  std::vector<double> VMotherDeltaRParticle;
+  
+  
   /////////met///////////
   std::vector<double> VmetEt;
   std::vector<double> VmetPhi;
@@ -285,6 +296,22 @@ NTupleWriter::getTauDaughter(const reco::GenParticle* tau)
   return tau;
 }
 
+
+const reco::Candidate*
+NTupleWriter::motherparticle(const reco::Candidate* particle){
+  const reco::Candidate* tempparticle = particle;
+  int stopper = 0;
+  while(stopper == 0){
+    if (abs(tempparticle->pdgId())<500 && abs(tempparticle->pdgId()) != 6 && abs(tempparticle->pdgId()) != 5) 	{tempparticle = tempparticle->mother();}
+    else if (abs(tempparticle->pdgId())/100==5 || abs(tempparticle->pdgId())/1000==5)				{stopper = 1;}//B-hadron particle
+    else if (abs(tempparticle->pdgId()) == 6 )									{stopper = 1;}//top particle
+    else if (abs(tempparticle->pdgId()) == 2212)								{stopper = 1;}//proton particle
+    else	 				{tempparticle = tempparticle->mother();};
+  }
+  return tempparticle;
+}
+
+
 //
 // member functions
 //
@@ -296,8 +323,8 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
   clearVariables();
 
   weightPU = getPUEventWeight( iEvent, weightPU_ );
-  weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
-  weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
+  //weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
+  //weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
   weightLepSF = 0; weightKinFit = 0; weightTotal = 0;
   try {
     weightLepSF = getDileptonSFWeight(iEvent, weightLepSF_);
@@ -363,27 +390,70 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
       edm::Handle<TtGenEvent> genEvt;
       iEvent.getByLabel ( genEvent_, genEvt );
       if (! genEvt.failedToGet())
-        {
-          GenTop = genEvt->top()->p4(); GenAntiTop = genEvt->topBar()->p4();
-          AssignLeptonAndTau(genEvt->lepton(), GenLepton, GenLeptonPdgId, GenTau);
-          AssignLeptonAndTau(genEvt->leptonBar(), GenAntiLepton, GenAntiLeptonPdgId, GenAntiTau);
-          GenB = genEvt->b()->p4(); GenAntiB = genEvt->bBar()->p4();
-          GenNeutrino = genEvt->neutrino()->p4(); GenAntiNeutrino = genEvt->neutrinoBar()->p4();
-          GenWPlus = genEvt->wPlus()->p4(); GenWMinus = genEvt->wMinus()->p4();
+      {
+        GenTop = genEvt->top()->p4(); GenAntiTop = genEvt->topBar()->p4();
+        AssignLeptonAndTau(genEvt->lepton(), GenLepton, GenLeptonPdgId, GenTau);
+        AssignLeptonAndTau(genEvt->leptonBar(), GenAntiLepton, GenAntiLeptonPdgId, GenAntiTau);
+        GenB = genEvt->b()->p4(); GenAntiB = genEvt->bBar()->p4();
+        GenNeutrino = genEvt->neutrino()->p4(); GenAntiNeutrino = genEvt->neutrinoBar()->p4();
+        GenWPlus = genEvt->wPlus()->p4(); GenWMinus = genEvt->wMinus()->p4();
 
-          //find the b jets corresponding to b quarks
-          edm::Handle<int> BJetIndex;
-          iEvent.getByLabel(bIndex_, BJetIndex );
-          edm::Handle<int> AntiBJetIndex;
-          iEvent.getByLabel(antiBIndex_, AntiBJetIndex);
-          edm::Handle<reco::GenJetCollection> genJets;
-          iEvent.getByLabel(genJets_, genJets);
-          if (*BJetIndex >= 0) (HadronGenB = genJets->at(*BJetIndex).p4());
-          if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
-          for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
-            VallGenJets.push_back(aJet->p4());
-          }
+        //find the b jets corresponding to b quarks
+        edm::Handle<int> BJetIndex;
+        iEvent.getByLabel(bIndex_, BJetIndex );
+        edm::Handle<int> AntiBJetIndex;
+        iEvent.getByLabel(antiBIndex_, AntiBJetIndex);
+        edm::Handle<reco::GenJetCollection> genJets;
+        iEvent.getByLabel(genJets_, genJets);
+        if (*BJetIndex >= 0) (HadronGenB = genJets->at(*BJetIndex).p4());
+        if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
+	  
+	  
+        for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
+          VallGenJets.push_back(aJet->p4());
+	  
+	  int nconstit = aJet->nConstituents();
+	  for (int i = 0; i<nconstit; ++i){
+	    const reco::Candidate* constituent = dynamic_cast<const reco::Candidate*>(aJet->getGenConstituent(i));
+	    const reco::Candidate* mother = motherparticle(constituent);
+	    if (abs(mother->pdgId())>=500 && (abs(mother->pdgId())/100==5 || abs(mother->pdgId())/1000==5)) {
+	      VmotherparticlePdgId.push_back(mother->pdgId());
+	      Vmotherparticle.push_back(mother->p4());
+	      VgenjetfromBhadron.push_back(1);
+	      break;
+	    }
+	    else if (i == nconstit-1) {
+	      VmotherparticlePdgId.push_back(mother->pdgId());
+	      Vmotherparticle.push_back(mother->p4());
+	      VgenjetfromBhadron.push_back(0);
+	    }
+	  }
+        }//end 'for' loop
+         
+        VgenjetfromBhadronClone=VgenjetfromBhadron;
+        for (int i=0; i<(int)VallGenJets.size(); ++i){VMotherDeltaRParticle.push_back(10e10);}; //filling with dummy variable
+         
+	for (int i=0; i<(int)VallGenJets.size(); ++i){
+	  TLorentzVector TLV1(VallGenJets.at(i).Px(), VallGenJets.at(i).Py(), VallGenJets.at(i).Pz(), VallGenJets.at(i).E());
+	  TLorentzVector TLV2(Vmotherparticle.at(i).Px(), Vmotherparticle.at(i).Py(), Vmotherparticle.at(i).Pz(), Vmotherparticle.at(i).E());
+	  if(TLV1.Pt() != 0 && TLV2.Pt() != 0){
+	    double deltar1= TLV1.DeltaR(TLV2);
+	    VMotherDeltaRParticle.at(i)=deltar1;
+	  }
+	};
+	
+	for (int i=0; i<((int)VallGenJets.size())-1;++i ){
+	  for (int j=i+1; j<(int)VallGenJets.size(); ++j){
+	    if (VgenjetfromBhadron.at(i) == 1 && VgenjetfromBhadron.at(j) == 1 && VmotherparticlePdgId.at(i) == VmotherparticlePdgId.at(j) && Vmotherparticle.at(i) == Vmotherparticle.at(j)){
+	      if(VMotherDeltaRParticle.at(i)<VMotherDeltaRParticle.at(j)){
+		VgenjetfromBhadron.at(j) = 0;
+	      }
+	    }
+	  }
+	}
 
+	
+	  
         }
       else
         {
@@ -569,10 +639,10 @@ NTupleWriter::beginJob()
   Ntuple->Branch ( "jet",&Vjet );
   Ntuple->Branch ( "jetBTagTCHE",&VjetBTagTCHE );
   Ntuple->Branch ( "jetBTagSSVHE",&VjetBTagSSVHE );
-  Ntuple->Branch(  "jetBTagCSV", &VjetBTagCSV);
-  Ntuple->Branch(  "jetBTagCSVMVA", &VjetBTagCSVMVA);
-  Ntuple->Branch( "allGenJets", &VallGenJets);
-  Ntuple->Branch( "genJet", &VgenJet);
+  Ntuple->Branch (  "jetBTagCSV", &VjetBTagCSV);
+  Ntuple->Branch (  "jetBTagCSVMVA", &VjetBTagCSVMVA);
+  Ntuple->Branch ( "allGenJets", &VallGenJets);
+  Ntuple->Branch ( "genJet", &VgenJet);
 
   /////////////met properties///////////
   Ntuple->Branch ( "metEt",&VmetEt );
@@ -583,7 +653,7 @@ NTupleWriter::beginJob()
   Ntuple->Branch ( "runNumber",&runno, "runNumber/i" );
   Ntuple->Branch ( "lumiBlock",&lumibl,"lumiBlock/i" );
   Ntuple->Branch ( "eventNumber",&eventno, "eventNumber/i" );
-  Ntuple->Branch( "triggerBits", &triggerBits, "triggerBits/i");
+  Ntuple->Branch ( "triggerBits", &triggerBits, "triggerBits/i");
   Ntuple->Branch ( "dataType",&datatype );
 
 
@@ -595,7 +665,7 @@ NTupleWriter::beginJob()
   Ntuple->Branch ( "weightPU_Up",&weightPU_Up, "weightPU_Up/D" );
   Ntuple->Branch ( "weightPU_Down",&weightPU_Down, "weightPU_Down/D" );
   Ntuple->Branch ( "weightLepSF",&weightLepSF, "weightLepSF/D" );
-  Ntuple->Branch( "weightKinFit",&weightKinFit, "weightKinFit/D" );
+  Ntuple->Branch ( "weightKinFit",&weightKinFit, "weightKinFit/D" );
   Ntuple->Branch ( "weightTotal",&weightTotal, "weightTotal/D" );
 
   /////////vertices
@@ -623,6 +693,10 @@ NTupleWriter::beginJob()
     Ntuple->Branch("GenParticleStatus.", &GenParticleStatus);
     Ntuple->Branch("GenJetHadronB",&HadronGenB);
     Ntuple->Branch("GenJetHadronAntiB",&HadronGenAntiB);
+    Ntuple->Branch("GenJetFromBHad", &VgenjetfromBhadron);
+//    Ntuple->Branch("GenJetFromBHadClone", &VgenjetfromBhadronClone);
+//     Ntuple->Branch("GenJetMother", &Vmotherparticle);
+//     Ntuple->Branch("GenJetMotherpdgId", &VmotherparticlePdgId);
   }
 
   //Hypothesis Info
@@ -712,6 +786,12 @@ void NTupleWriter::clearVariables()
   VallGenJets.clear();
   VgenJet.clear();
 
+  VgenjetfromBhadronClone.clear();
+  VgenjetfromBhadron.clear();
+  Vmotherparticle.clear();
+  VmotherparticlePdgId.clear();
+  VMotherDeltaRParticle.clear();
+  
   /////////met///////////
   VmetEt.clear();
   VmetPhi.clear();
