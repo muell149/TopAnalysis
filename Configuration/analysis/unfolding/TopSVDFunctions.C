@@ -1112,7 +1112,7 @@ int TopSVDFunctions::SVD_Unfold(
 
     // STABILITY
     // Note: Stability is set to zero, if there are no
-    // gerenated events in a bin.
+    // gerenated events in a b_Unfoldin.
     // Note: If there is no reconstructed event in this bin,
     // then the stability is naturally zero, too
     TString stabStr = SVD_PlotName(channel, particle, quantity, special, "STAB");
@@ -1346,7 +1346,10 @@ int TopSVDFunctions::SVD_Unfold(
 
     // DRAW IT ALL
     if ( plotsToPs == true ) {
-	 
+	
+        // Donot associate histograms with a directory
+        TH1::AddDirectory(kFALSE);
+    
         // Setup Style
         setHHStyle(*gStyle);
         gStyle->SetPadTopMargin(0.15);
@@ -1354,7 +1357,7 @@ int TopSVDFunctions::SVD_Unfold(
         gStyle->SetPaintTextFormat(".0f");
 
         // Setup Canvas
-        TCanvas* canvas = new TCanvas();
+        TCanvas canvas("Unfolding", "Unfolding");
         gROOT->ForceStyle();
         TGaxis::SetMaxDigits(3);
 
@@ -1395,7 +1398,7 @@ int TopSVDFunctions::SVD_Unfold(
 
         // Draw Response Matrix
         SVD_Draw2D(mcHist, "COLZ");
-        canvas->Print(outputfilename.Copy().Append("("));
+        canvas.Print(outputfilename.Copy().Append("("));
 
 
         // Draw Input Distributions
@@ -1410,7 +1413,7 @@ int TopSVDFunctions::SVD_Unfold(
         legendinp->AddEntry(dataHist, "Dat");
         SVD_DrawStack(stackinp, quantityTex, "Entries", "e nostack", 421);
         legendinp->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 	
 
         // Draw Background related Distributions
@@ -1425,7 +1428,7 @@ int TopSVDFunctions::SVD_Unfold(
         legendbgr->AddEntry(dataHist, "Data");
         SVD_DrawStack(stackbgr, quantityTex, "Entries", "e nostack", 124);
         legendbgr->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
         dataHist->Draw();
 
 
@@ -1444,7 +1447,7 @@ int TopSVDFunctions::SVD_Unfold(
         stackout->Add(unfHist);
         SVD_DrawStack(stackout, quantityTex, "Entries", "e nostack", 134);
         legendout->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // RATIO: Unfolded versus BBB
@@ -1454,7 +1457,7 @@ int TopSVDFunctions::SVD_Unfold(
         SVD_DrawRange(histRatioUnfBBB, 0.3, 3., "", 0);
         legendRatioUnfBBB->AddEntry(histRatioUnfBBB, legendentryRatioUnfBBB);
         legendRatioUnfBBB->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
  
 
         // Draw Refolded Distribution
@@ -1474,7 +1477,7 @@ int TopSVDFunctions::SVD_Unfold(
         stackrefold->Add(refoldHist);
         SVD_DrawStack(stackrefold, quantityTex, "Entries", "e nostack", 134);
         legendrefold->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
        
 
 
@@ -1485,7 +1488,7 @@ int TopSVDFunctions::SVD_Unfold(
         SVD_DrawRange(histRatioRefDat, 0.3, 3., "p", 0);
         legendRatioRefDat->AddEntry(histRatioRefDat, legendentryRatioRefDat);
         legendRatioRefDat->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
  
         // Draw D-Plot
@@ -1494,7 +1497,7 @@ int TopSVDFunctions::SVD_Unfold(
         legenddd->AddEntry(ddHist, "d-Values");
         SVD_Draw1D(ddHist, "", 1);
         legenddd->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Draw SV Plot
@@ -1504,7 +1507,7 @@ int TopSVDFunctions::SVD_Unfold(
         legendsv->AddEntry(ddHist, "Sing. Values");
         SVD_Draw1D(svHist, "", 1);
         legendsv->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
         gPad->SetLogy(false);
 
 
@@ -1521,7 +1524,7 @@ int TopSVDFunctions::SVD_Unfold(
         stackspe->Add(effHist);
         SVD_DrawStack(stackspe, quantityTex, "\%", "nostack", 321);
         legendspe->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Draw BBB Efficiency
@@ -1537,42 +1540,42 @@ int TopSVDFunctions::SVD_Unfold(
         stackEff->Add(effHist); 
         SVD_DrawStack(stackEff, quantityTex, "Efficiency \%", "nostack", 21);
         legendeff->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Covariance Matrix (DATA)
         SVD_Draw2D(dataCovHist, "COLZ");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Covariance Matrix (STAT)
         SVD_Draw2D(statCovHist, "COLZ");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Covariance Matrix (MC)
         SVD_Draw2D(mcCovHist, "COLZ");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Covariance Matrix (Total)
         SVD_Draw2D(totCovHist, "COLZ");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Correlation Matrix (STAT)
         SVD_Draw2D(statCorrHist, "COLZ TEXT");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Correlation Matrix (MC)
         SVD_Draw2D(mcCorrHist, "COLZ TEXT");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Correlation Matrix (Total)
         SVD_Draw2D(totCorrHist, "COLZ TEXT");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
      
 
  
@@ -1584,7 +1587,7 @@ int TopSVDFunctions::SVD_Unfold(
         legendglc->AddEntry(glcHist, "Glob. Corr. #rho_{i}"); 
         stackglc->Add(glcHist); 
         SVD_DrawStack(stackglc, quantityTex, "Glob. Corr. #rho_{i}", "HIST nostack", 4);
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
 
@@ -1599,7 +1602,7 @@ int TopSVDFunctions::SVD_Unfold(
         stackerr1->Add(bbbErrHist);
         SVD_DrawStack(stackerr1, quantityTex, "Error in \%", "HIST nostack", 34);
         legenderr1->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // Errors (STAT, MC, TOTAL)
@@ -1614,7 +1617,7 @@ int TopSVDFunctions::SVD_Unfold(
         stackerr2->Add(mcErrHist);
         SVD_DrawStack(stackerr2, quantityTex, "Error in \%", "HIST nostack", 134);
         legenderr2->Draw("SAME");
-        canvas->Print(outputfilename);
+        canvas.Print(outputfilename);
 
 
         // RATIO: UnfErrors versus BBBErrors
@@ -1624,12 +1627,11 @@ int TopSVDFunctions::SVD_Unfold(
         legendRatioErrors->AddEntry(histRatioErrors, legendentryRatioErrors);
         SVD_DrawRange(histRatioErrors, 0.3, 3., "p", 0);
         legendRatioErrors->Draw("SAME");
-        canvas->Print(outputfilename);
-
+        canvas.Print(outputfilename);
 
 	    // Last page empty
-        canvas->Clear();
-	    canvas->Print(outputfilename.Copy().Append(")"));
+        canvas.Clear();
+	    canvas.Print(outputfilename.Copy().Append(")"));
 
 
         // Reset Style
@@ -1665,8 +1667,7 @@ int TopSVDFunctions::SVD_Unfold(
         
         
         // Delete Canvas
-        delete canvas;
-        
+        //canvas.Clear(); 
 
     }
   
@@ -1719,7 +1720,9 @@ int TopSVDFunctions::SVD_Unfold(
  
 
     }	
-
+  
+    return 0;  
+        
     // Delete all old histograms
     delete rawHist;
     delete bgrHist;
