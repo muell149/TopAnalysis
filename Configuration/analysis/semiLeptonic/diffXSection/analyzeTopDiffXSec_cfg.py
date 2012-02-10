@@ -1261,9 +1261,9 @@ process.eventWeightPUupDistort   = process.eventWeightMultiplier.clone(eventWeig
 process.eventWeightPUdownDistort = process.eventWeightMultiplier.clone(eventWeightTags = weightlistDistortPUdown)
 if(sysDistort==''):
     # final PU weights without shape distortion weights
-    PUweight    =cms.InputTag("eventWeightPU",       "eventWeightPU3D")
-    PUweightUp  =cms.InputTag("eventWeightPUsysUp",  "eventWeightPU3DUp")
-    PUweightDown=cms.InputTag("eventWeightPUsysDown","eventWeightPU3DDown")
+    PUweight    =cms.InputTag("eventWeightPU",       "eventWeightPU")
+    PUweightUp  =cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
+    PUweightDown=cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
 else:
     # final PU x shape distortion weights
     PUweight    =cms.InputTag("eventWeightPUDistort")
