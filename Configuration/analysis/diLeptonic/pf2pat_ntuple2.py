@@ -499,7 +499,7 @@ if options.runOnMC:
     #MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_Summer11_S4_pileupD50.root"),
     #DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/PUdist_PromtV4_160404-167784.root"),
 else:
-    process.makeWeightsPU = cms.Sequence()
+    process.eventWeightPU = cms.Sequence()
 
 ## define which collections and correction you want to be used
 isolatedMuonCollection = "fullySelectedPatMuons"
@@ -1042,7 +1042,7 @@ process.p = cms.Path(
 #)
 
 process.pZWindow = cms.Path(
-    process.makeWeightsPU                 *
+    process.eventWeightPU                 *
     process.filterTrigger                 *
     process.buildJets                     *
     process.filterOppositeCharge          *
@@ -1114,7 +1114,7 @@ for pathname in pathnames:
     getattr(process, pathname).insert(0, cms.Sequence(
         process.topsequence *
         process.zsequence *
-        process.makeWeightsPU *
+        process.eventWeightPU *
         process.analyzeTrigger *
         process.filterTrigger
         ))
@@ -1126,7 +1126,7 @@ if signal:
 if signal:
     process.genPath = cms.Path(
         process.topsequence *
-        process.makeWeightsPU *
+        process.eventWeightPU *
         process.analyzeGenTopEvent *
         process.generatorTtCutsLeptons    *
         process.generatorTtCutsBJets *
