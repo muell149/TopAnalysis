@@ -13,6 +13,8 @@ foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN SCALEUP SCALEDOWN MATCHUP MATC
 
       root -l -b -q load_Analysis.C
 
+      rm selectionList.txt
+
    end
    
    rm syst.txt
@@ -29,6 +31,8 @@ foreach syst (PU_UP PU_DOWN)
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
       root -l -b -q load_Analysis.C
+
+      rm selectionList.txt
 
    end
    
