@@ -263,36 +263,6 @@ void Plotter::InclFlatSystematics(int syst_number){
   	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
-  //Top Quark Mass (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .009;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .013;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .009;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
-  syst_number++;
-
-  //Q^2 scale (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .032;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .021;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
- 	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
-  syst_number++;
-
-  //Matrix Element threshold (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .028;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .012;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-     1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-	      1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-	      1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
-  syst_number++;
-
   //Branching Ratio
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu  
@@ -361,16 +331,6 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
 		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
-    //PU (for now)
-    //if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//ee 
-    //if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .004;}//mumu  
-    //if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
-    //if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-    //	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-    //		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-    //		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    //syst++;iLeptonic/d
-    
     //B-tagging (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//mumu  
@@ -395,36 +355,6 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    syst++;
-    
-    //Top Quark Mass (for now)
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .002;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    syst++;
-    
-  //Q^2 scale (for now)
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .024;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .013;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    syst++;
-    
-    //Matrix Element threshold (for now)
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .011;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//emu  
     if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
 	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
 		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
