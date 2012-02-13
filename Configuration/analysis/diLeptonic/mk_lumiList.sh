@@ -25,3 +25,6 @@ do
     paste list_$i.txt samples_$i.txt eventCount_$i.txt > lumi_$i.txt
 
 done
+
+rm mergedRoot/ee/emu* 
+rm mergedRoot/mumu/emu*
