@@ -203,10 +203,6 @@ void Plotter::InclFlatSystematics(int syst_number){
   //Lepton selection
 
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .04;//all 
-  //if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-  //    1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
 
   //Other Backgrounds (needs to be varied in Analysis.C)
@@ -372,41 +368,26 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
   TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Clone();
   TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Clone();
 
-  if(signalSyst == false){
-    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
-      TH1 *htemp = (TH1D*)hists[i].Clone();
-      stacksum->Add(htemp);
+  for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+    TH1 *htemp = (TH1D*)hists[i].Clone();
+    if((legends[i] == DYEntry) && channelType!=2 ){
+      htemp->Scale(DYScale[channelType]);
     }
-    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
-      TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
-      stacksumUp->Add(htemp);
+    stacksum->Add(htemp);
+  }
+  for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+    TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
+    if((legends[i] == DYEntry) && channelType!=2 ){
+      htemp->Scale(DYScale[channelType]);
     }
-    for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
-      TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
-      stacksumDown->Add(htemp);
+    stacksumUp->Add(htemp);
+  }
+  for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+    TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
+    if((legends[i] == DYEntry) && channelType!=2 ){
+      htemp->Scale(DYScale[channelType]);
     }
-  }else{
-    stacksum->Reset();
-    stacksumUp->Reset();
-    stacksumDown->Reset();
-    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
-      if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)hists[i].Clone();
-	stacksum->Add(htemp);
-      }
-    }
-    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
-      if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
-	stacksumUp->Add(htemp);
-      }
-    }
-    for(unsigned int i=datafiles; i<systhistsDown.size() ; i++){ // prepare histos and leg
-      if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
-	stacksumDown->Add(htemp);
-      }
-    }
+    stacksumDown->Add(htemp);
   }
   double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
@@ -447,64 +428,51 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
     newname.ReplaceAll("Hyp",3,"",0);
   }
   //DYScale Factor...
-    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
-      TFile *ftemp = TFile::Open(dataset[i]);
-      if(genReco2d==NULL){
-	genReco2d = (TH2*)ftemp->Get("GenReco"+newname)->Clone();
-	GenPlot = (TH1*)ftemp->Get("VisGen"+newname)->Clone();
-      } else{
-	genReco2d->Add((TH2*)ftemp->Get("GenReco"+newname)->Clone());
-	GenPlot->Add((TH1*)ftemp->Get("VisGen"+newname)->Clone());
-      }
-      TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
-      stacksum->Add(htemp);
-      delete ftemp;
+  for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
+    TFile *ftemp = TFile::Open(dataset[i]);
+    if(genReco2d==NULL){
+      genReco2d = (TH2*)ftemp->Get("GenReco"+newname)->Clone();
+      GenPlot = (TH1*)ftemp->Get("VisGen"+newname)->Clone();
+    } else{
+      genReco2d->Add((TH2*)ftemp->Get("GenReco"+newname)->Clone());
+      GenPlot->Add((TH1*)ftemp->Get("VisGen"+newname)->Clone());
     }
-    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
-      TFile *ftempUp = TFile::Open(datasetUp[i]);
-      if(genReco2dUp==NULL){
-	genReco2dUp = (TH2*)ftempUp->Get("GenReco"+newname)->Clone();
-      } else{
-	genReco2dUp->Add((TH2*)ftempUp->Get("GenReco"+newname)->Clone());
-      }
-      TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
-      stacksumUp->Add(htemp);
-      delete ftempUp;
+    TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
+    if((legends[i] == DYEntry) && channelType!=2 ){
+      htemp->Scale(DYScale[channelType]);
     }
-    for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
-      TFile *ftempDown = TFile::Open(datasetDown[i]);
-      if(genReco2dDown==NULL){
-	genReco2dDown = (TH2*)ftempDown->Get("GenReco"+newname)->Clone();
-      } else{
-	genReco2dDown->Add((TH2*)ftempDown->Get("GenReco"+newname)->Clone());
-      }
-      TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
-      stacksumDown->Add(htemp);
-      delete ftempDown;
+    stacksum->Add(htemp);
+    delete ftemp;
+  }
+  for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
+    TFile *ftempUp = TFile::Open(datasetUp[i]);
+    if(genReco2dUp==NULL){
+      genReco2dUp = (TH2*)ftempUp->Get("GenReco"+newname)->Clone();
+    } else{
+      genReco2dUp->Add((TH2*)ftempUp->Get("GenReco"+newname)->Clone());
     }
-  /*  else{
-    stacksum->Reset();
-    stacksumUp->Reset();
-    stacksumDown->Reset();
-    for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
-      if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)hists[i].Rebin(bins,"htemp",Xbins);
-	stacksum->Add(htemp);
-      }
+    TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
+    if((legends[i] == DYEntry) && channelType!=2 ){
+      htemp->Scale(DYScale[channelType]);
     }
-    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
-      if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
-	stacksumUp->Add(htemp);
-      }
+    stacksumUp->Add(htemp);
+    delete ftempUp;
+  }
+  for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
+    TFile *ftempDown = TFile::Open(datasetDown[i]);
+    if(genReco2dDown==NULL){
+      genReco2dDown = (TH2*)ftempDown->Get("GenReco"+newname)->Clone();
+    } else{
+      genReco2dDown->Add((TH2*)ftempDown->Get("GenReco"+newname)->Clone());
     }
-    for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
-      if(legends[i] == "t#bar{t} signal"){
-	TH1 *htemp = (TH1D*)systhistsUp[i].Rebin(bins,"htempup",Xbins);
-	stacksumUp->Add(htemp);
-      }
+    TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
+    if((legends[i] == DYEntry) && channelType!=2 ){
+      htemp->Scale(DYScale[channelType]);
     }
-    }*/
+    stacksumDown->Add(htemp);
+    delete ftempDown;
+  }
+  
   double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
   double scale = 1.;
 
@@ -913,18 +881,15 @@ void Plotter::fillHisto()
     for(unsigned int i=0; i<dataset.size(); i++){
       TFile *ftemp = TFile::Open(dataset[i]);
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
-      //TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	//TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
