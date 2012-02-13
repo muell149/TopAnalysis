@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.9 2012/01/26 18:01:18 blutz Exp $
+// $Id: NTupleWriter.cc,v 1.10 2012/02/10 17:31:42 wbehrenh Exp $
 //
 //
 
@@ -302,7 +302,8 @@ NTupleWriter::motherparticle(const reco::Candidate* particle){
   const reco::Candidate* tempparticle = particle;
   int stopper = 0;
   while(stopper == 0){
-    if (abs(tempparticle->pdgId())<500 && abs(tempparticle->pdgId()) != 6 && abs(tempparticle->pdgId()) != 5) 	{tempparticle = tempparticle->mother();}
+    if (tempparticle->mother() == 0) {stopper =1;}
+    else if (abs(tempparticle->pdgId())<500 && abs(tempparticle->pdgId()) != 6 && abs(tempparticle->pdgId()) != 5) 	{tempparticle = tempparticle->mother();}
     else if (abs(tempparticle->pdgId())/100==5 || abs(tempparticle->pdgId())/1000==5)				{stopper = 1;}//B-hadron particle
     else if (abs(tempparticle->pdgId()) == 6 )									{stopper = 1;}//top particle
     else if (abs(tempparticle->pdgId()) == 2212)								{stopper = 1;}//proton particle
