@@ -205,48 +205,18 @@ void Plotter::InclFlatSystematics(int syst_number){
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .04;//all 
   syst_number++;
 
-  //Other Backgrounds (needs to be varied in Analysis.C)
-  
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .024;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .019;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
-  syst_number++;
-
-  //DY Backgrounds (needs to be varied in Analysis.C)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .021;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .031;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .001;}//emu  
-  //if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .01;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
-  syst_number++;
-
   //B-tagging (for now)
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//emu  
-  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-  //      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//combined  
   syst_number++;
 
   //KinFit 
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//emu  
-  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-  //   1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//combined 
   syst_number++;
 
   //Hadronization (for now)
@@ -263,22 +233,14 @@ void Plotter::InclFlatSystematics(int syst_number){
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//emu  
-  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-  //  1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//combined  
   syst_number++;
 
   //Luminosity
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//emu  
-  //  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-  //   1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  //	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  //	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//combined  
   syst_number++;
 
 }
@@ -300,51 +262,26 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     //Lepton selection
     
     DiffXSecSysErrorBySyst[channelType][bin][syst] = .02;//all (different from inclusive?) 
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    syst++;
-    
-    //Other Backgrounds
-    
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    syst++;
-    
-    //DY Backgrounds
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .014;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .016;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //B-tagging (for now)
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}
+	//	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+	//	 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+	//	 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //KinFit 
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}
+    //	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+    //		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+    //		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
     //Hadronization (for now)
@@ -380,12 +317,24 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
     if((legends[i] == DYEntry) && channelType!=2 ){
       htemp->Scale(DYScale[channelType]);
     }
+    if((legends[i] == DYEntry) && systematic == "DY_"){
+      htemp->Scale(1.5);
+    }
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+      htemp->Scale(1.3);
+    }
     stacksumUp->Add(htemp);
   }
   for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
     TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
     if((legends[i] == DYEntry) && channelType!=2 ){
       htemp->Scale(DYScale[channelType]);
+    }
+    if((legends[i] == DYEntry) && systematic == "DY_"){
+      htemp->Scale(0.5);
+    }
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+      htemp->Scale(0.7);
     }
     stacksumDown->Add(htemp);
   }
@@ -456,6 +405,13 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
       htemp->Scale(DYScale[channelType]);
     }
     stacksumUp->Add(htemp);
+    if((legends[i] == DYEntry) && systematic == "DY_"){
+      htemp->Scale(1.5);
+    }
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+      htemp->Scale(1.3);
+    }
+
     delete ftempUp;
   }
   for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
@@ -468,6 +424,12 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
     TH1 *htemp = (TH1D*)systhistsDown[i].Rebin(bins,"htempdown",Xbins);
     if((legends[i] == DYEntry) && channelType!=2 ){
       htemp->Scale(DYScale[channelType]);
+    }
+    if((legends[i] == DYEntry) && systematic == "DY_"){
+      htemp->Scale(0.5);
+    }
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+      htemp->Scale(0.7);
     }
     stacksumDown->Add(htemp);
     delete ftempDown;
@@ -1242,7 +1204,9 @@ double Plotter::CalcXSec(){
   CalcInclSystematics("SCALE",3, true);
   CalcInclSystematics("MATCH",4, true);
   CalcInclSystematics("MASS",5, true);
-  InclFlatSystematics(6);
+  CalcInclSystematics("DY_",6, false);
+  CalcInclSystematics("BG_",7, false);
+  InclFlatSystematics(8);
   
   double syst_square=0;
 
@@ -1326,7 +1290,9 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("SCALE", 3, true);
     CalcDiffSystematics("MATCH", 4, true);
     CalcDiffSystematics("MASS", 5, true);
-    DiffFlatSystematics(6,bins);
+    CalcDiffSystematics("DY_", 6, false);
+    CalcDiffSystematics("BG_", 7, false);
+    DiffFlatSystematics(8,bins);
     double topxsec = 169.9;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 3697693.0;
