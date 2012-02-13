@@ -13,7 +13,22 @@
 #include <TFile.h>
 #include <TSelector.h>
 #include <TH1.h>
-#include "plotterclass.h"
+#include <TH2.h>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TSystem.h"
+#include "TExec.h"
+#include "TStyle.h"
+#include "TMath.h"
+#include "TROOT.h"
+#include <sstream>
+#include "basicFunctions.h"
+#include "HHStyle.h"
+#include "TGraphAsymmErrors.h"
+
 
    const Int_t kMaxlepton = 99;
    const Int_t kMaxjet = 99;
