@@ -44,8 +44,8 @@ class Plotter {
   void PlotXSec();
   void PlotDiffXSec();
   void DYScaleFactor();
-  void CalcInclSystematics(TString Systematic, int syst_number, bool signalSyst);
-  void CalcDiffSystematics(TString Systematic, int syst_number, bool signalSyst);
+  void CalcInclSystematics(TString Systematic, int syst_number);
+  void CalcDiffSystematics(TString Systematic, int syst_number);
   void InclFlatSystematics(int syst_number);
   void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
@@ -80,11 +80,11 @@ class Plotter {
   double InclusiveXsectionStatError[4];
   double InclusiveXsectionTotalError[4];
   double InclusiveXsectionSysError[4];
-  double InclusiveXsectionSysErrorBySyst[4][15];
+  double InclusiveXsectionSysErrorBySyst[4][20];
   double DiffXSec[4][10];//the differential X-section per channel by bin [channel][bin]
   double DiffXSecStatError[4][10];//the differential X-section Error per channel by bin [channel][bin]
   double DiffXSecSysError[4][10];//the differential X-section Error per channel by bin [channel][bin]
-  double DiffXSecSysErrorBySyst[4][10][15];//the differential X-section Error per channel by bin [channel][bin][systematic]
+  double DiffXSecSysErrorBySyst[4][10][20];//the differential X-section Error per channel by bin [channel][bin][systematic]
   double DiffXSecTotalError[4][10];//the differential X-section Error per channel by bin [channel][bin]
   double VisXsection[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
   double VisXsectionError[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
@@ -192,7 +192,6 @@ void Plotter::InclFlatSystematics(int syst_number){
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .025;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//emu  
-  //if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//emu  
   if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
       1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
   	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
@@ -297,7 +296,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
   }
 }
 
-void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool signalSyst){
+void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
   setSystDataSet(Systematic);
   fillSystHisto();
 
@@ -317,10 +316,10 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
     if((legends[i] == DYEntry) && channelType!=2 ){
       htemp->Scale(DYScale[channelType]);
     }
-    if((legends[i] == DYEntry) && systematic == "DY_"){
+    if((legends[i] == DYEntry) && Systematic == "DY_"){
       htemp->Scale(1.5);
     }
-    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
       htemp->Scale(1.3);
     }
     stacksumUp->Add(htemp);
@@ -330,15 +329,15 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
     if((legends[i] == DYEntry) && channelType!=2 ){
       htemp->Scale(DYScale[channelType]);
     }
-    if((legends[i] == DYEntry) && systematic == "DY_"){
+    if((legends[i] == DYEntry) && Systematic == "DY_"){
       htemp->Scale(0.5);
     }
-    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
       htemp->Scale(0.7);
     }
     stacksumDown->Add(htemp);
   }
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error;//, Sum_Errors;
   double scale = 1.;
 
   TH1D* h_sys  = (TH1D*) stacksumUp->Clone();   h_sys->Reset();
@@ -347,13 +346,13 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number, bool sign
   Sys_Error_Up   = abs(stacksum->Integral() - stacksumUp->Integral())/stacksum->Integral();
   Sys_Error_Down = abs(stacksum->Integral() - stacksumDown->Integral())/stacksum->Integral();
   Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
-  Sum_Errors += Sys_Error;
+  //  Sum_Errors += Sys_Error;
 
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
 
 }
 
-void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool signalSyst){
+void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 
   double Xbins[XAxisbins.size()];
   for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
@@ -369,8 +368,6 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
   TH2 *genReco2dDown=NULL;
 
   TH1 *GenPlot = NULL;
-  TH1 *GenPlotUp = NULL;
-  TH1 *GenPlotDown = NULL;
 
   TString newname = name;
   if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
@@ -405,10 +402,10 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
       htemp->Scale(DYScale[channelType]);
     }
     stacksumUp->Add(htemp);
-    if((legends[i] == DYEntry) && systematic == "DY_"){
+    if((legends[i] == DYEntry) && Systematic == "DY_"){
       htemp->Scale(1.5);
     }
-    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
       htemp->Scale(1.3);
     }
 
@@ -425,17 +422,17 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
     if((legends[i] == DYEntry) && channelType!=2 ){
       htemp->Scale(DYScale[channelType]);
     }
-    if((legends[i] == DYEntry) && systematic == "DY_"){
+    if((legends[i] == DYEntry) && Systematic == "DY_"){
       htemp->Scale(0.5);
     }
-    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && systematic == "BG_"){
+    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
       htemp->Scale(0.7);
     }
     stacksumDown->Add(htemp);
     delete ftempDown;
   }
   
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error, Sum_Errors;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error;//, Sum_Errors;
   double scale = 1.;
 
   for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
@@ -443,7 +440,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number, bool sign
     Sys_Error_Up   = abs(stacksum->GetBinContent(bin+1) - stacksumUp->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
     Sys_Error_Down = abs(stacksum->GetBinContent(bin+1) - stacksumDown->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
     Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
-    Sum_Errors += Sys_Error;
+    //    Sum_Errors += Sys_Error;
     DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
   } 
 
@@ -530,8 +527,8 @@ void Plotter::setDataSet(TString mode)
   
   DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
 
-  if(channel=="ee"){  
-    ifstream FileList("FileLists/HistoFileList_Nominal_ee.txt");
+  if(channel=="ee" || channel=="emu" ||channel=="mumu"){  
+    ifstream FileList("FileLists/HistoFileList_Nominal_"+channel+".txt");
     TString filename;
     datafiles=0;
 
@@ -558,60 +555,7 @@ void Plotter::setDataSet(TString mode)
     }
   }
 
-  if(mode=="mumu"){
-    datafiles=0;
-    dataset.clear();
-    legends.clear();
-    colors.clear();
-    ifstream FileList("FileLists/HistoFileList_Nominal_mumu.txt");
-    TString filename;
-
-    while(!FileList.eof()){
-      FileList>>filename;
-
-      if(filename!=""){
-	dataset.push_back(filename);
-
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
-	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
-	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
-	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
-	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
-	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
-	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
-      }
-    }
-  }
-  if(mode=="emu"){
-    datafiles=0;
-
-    dataset.clear();
-    legends.clear();
-    colors.clear();
-    ifstream FileList("FileLists/HistoFileList_Nominal_emu.txt");
-    TString filename;
-
-    while(!FileList.eof()){
-      FileList>>filename;
-
-      if(filename!=""){
-	dataset.push_back(filename);
-	
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
-	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
-	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
-	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
-	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
-	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
-	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
-      }
-    }
-  }
-  if(mode=="combined"){
+  if(channel=="combined"){
     datafiles=0;
     dataset.clear();
     legends.clear();
@@ -645,103 +589,15 @@ void Plotter::setSystDataSet(TString systematic)
 
   DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
   lumi=1141;
-  if(channel=="ee"){  
-    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
-    ifstream FileListUp(HistoFileUp);
-    ifstream FileListDown(HistoFileDown);
-    TString filenameUp, filenameDown;
-
-    datasetUp.clear();
-    datasetDown.clear();
-    legendsUp.clear();
-    legendsDown.clear();
-    colorsUp.clear();
-    colorsDown.clear();
-  
-    while(!FileListUp.eof()){
-      FileListUp>>filenameUp;
-
-      if(filenameUp!=""){
-	datasetUp.push_back(filenameUp);
-	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
-	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed+2);}
-	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
-	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
-	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
-	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
-	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W #rightarrow l#nu"); colorsUp.push_back(kGreen-3);}
-	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD"); colorsUp.push_back(kYellow);}
-      }
+  if(channel=="ee" || channel=="emu" || channel=="mumu"){  
+    TString HistoFileUp,HistoFileDown; 
+    if(systematic=="DY_" || systematic=="BG_"){
+      HistoFileUp = "FileLists/HistoFileList_Nominal_"+channel+".txt";
+      HistoFileDown = "FileLists/HistoFileList_Nominal_"+channel+".txt";
+    }else{
+      HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
+      HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
     }
-    while(!FileListDown.eof()){
-      FileListDown>>filenameDown;
-      if(filenameDown!=""){
-	datasetDown.push_back(filenameDown);
-	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
-	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed+2);}
-	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
-	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
-	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
-	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
-	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W #rightarrow l#nu"); colorsDown.push_back(kGreen-3);}
-	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD"); colorsDown.push_back(kYellow);}
-      }
-    }
-  }
-
-  if(channel=="mumu"){  
-    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
-    ifstream FileListUp(HistoFileUp);
-    ifstream FileListDown(HistoFileDown);
-    TString filenameUp, filenameDown;
-
-    datasetUp.clear();
-    datasetDown.clear();
-    legendsUp.clear();
-    legendsDown.clear();
-    colorsUp.clear();
-    colorsDown.clear();
-  
-    while(!FileListUp.eof()){
-      FileListUp>>filenameUp;
-
-      if(filenameUp!=""){
-	datasetUp.push_back(filenameUp);
-	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
-	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed+2);}
-	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
-	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
-	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
-	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
-	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W #rightarrow l#nu"); colorsUp.push_back(kGreen-3);}
-	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD"); colorsUp.push_back(kYellow);}
-      }
-    }
-    while(!FileListDown.eof()){
-      FileListDown>>filenameDown;
-      if(filenameDown!=""){
-	datasetDown.push_back(filenameDown);
-	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
-	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed+2);}
-	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
-	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
-	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
-	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
-	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W #rightarrow l#nu"); colorsDown.push_back(kGreen-3);}
-	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD"); colorsDown.push_back(kYellow);}
-      }
-    }
-  }
-
-  if(channel=="emu"){  
-    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
     TString filenameUp, filenameDown;
@@ -787,8 +643,14 @@ void Plotter::setSystDataSet(TString systematic)
   }
 
   if(channel=="combined"){  
-    TString HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
-    TString HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+    TString HistoFileUp,HistoFileDown; 
+    if(systematic=="DY_" || systematic=="BG_"){
+      HistoFileUp = "FileLists/HistoFileList_Nominal_"+channel+".txt";
+      HistoFileDown = "FileLists/HistoFileList_Nominal_"+channel+".txt";
+    }else{
+      HistoFileUp= "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
+      HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+    }
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
     TString filenameUp, filenameDown;
@@ -1198,14 +1060,14 @@ void Plotter::PlotXSec(){
 
 double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
-  CalcInclSystematics("JES",0, false);
-  CalcInclSystematics("RES",1, false);
-  CalcInclSystematics("PU_",2, false);
-  CalcInclSystematics("SCALE",3, true);
-  CalcInclSystematics("MATCH",4, true);
-  CalcInclSystematics("MASS",5, true);
-  CalcInclSystematics("DY_",6, false);
-  CalcInclSystematics("BG_",7, false);
+  CalcInclSystematics("JES",0);
+  CalcInclSystematics("RES",1);
+  CalcInclSystematics("PU_",2);
+  CalcInclSystematics("SCALE",3);
+  CalcInclSystematics("MATCH",4);
+  CalcInclSystematics("MASS",5);
+  CalcInclSystematics("DY_",6);
+  CalcInclSystematics("BG_",7);
   InclFlatSystematics(8);
   
   double syst_square=0;
@@ -1284,14 +1146,14 @@ double Plotter::CalcXSec(){
 
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    CalcDiffSystematics("JES", 0, false);
-    CalcDiffSystematics("RES", 1, false);
-    CalcDiffSystematics("PU_", 2, false);
-    CalcDiffSystematics("SCALE", 3, true);
-    CalcDiffSystematics("MATCH", 4, true);
-    CalcDiffSystematics("MASS", 5, true);
-    CalcDiffSystematics("DY_", 6, false);
-    CalcDiffSystematics("BG_", 7, false);
+    CalcDiffSystematics("JES", 0);
+    CalcDiffSystematics("RES", 1);
+    CalcDiffSystematics("PU_", 2);
+    CalcDiffSystematics("SCALE", 3);
+    CalcDiffSystematics("MATCH", 4);
+    CalcDiffSystematics("MASS", 5);
+    CalcDiffSystematics("DY_", 6);
+    CalcDiffSystematics("BG_", 7);
     DiffFlatSystematics(8,bins);
     double topxsec = 169.9;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
