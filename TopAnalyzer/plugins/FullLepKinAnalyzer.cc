@@ -431,23 +431,23 @@ FullLepKinAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   if(isRealBJet(BBar,genB,genBBar)) 
     nMatchedBjets++;
 
-  nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, Lep->pt());
-  nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, LepBar->pt());
-  nMatchesVsLeptonsEta_   ->Fill(nMatchedBjets, Lep->eta());
-  nMatchesVsLeptonsEta_   ->Fill(nMatchedBjets, LepBar->eta());
-  nMatchesVsDiLeptonPt_   ->Fill(nMatchedBjets, LepPair->pt());
-  nMatchesVsDiLeptonMass_ ->Fill(nMatchedBjets, LepPair->mass());
-  nMatchesVsJetsPt_       ->Fill(nMatchedBjets, B->pt());
-  nMatchesVsJetsPt_       ->Fill(nMatchedBjets, BBar->pt());
-  nMatchesVsJetsEta_      ->Fill(nMatchedBjets, B->eta());
-  nMatchesVsJetsEta_      ->Fill(nMatchedBjets, BBar->eta());    
-  nMatchesVsTopPt_	  ->Fill(nMatchedBjets, Top->pt());
-  nMatchesVsTopPt_	  ->Fill(nMatchedBjets, TopBar->pt());
-  nMatchesVsTopRapidity_  ->Fill(nMatchedBjets, Top->rapidity());
-  nMatchesVsTopRapidity_  ->Fill(nMatchedBjets, TopBar->rapidity());
-  nMatchesVsTtBarPt_	  ->Fill(nMatchedBjets, TtBar->pt());
-  nMatchesVsTtBarRapidity_->Fill(nMatchedBjets, TtBar->rapidity());
-  nMatchesVsTtBarMass_    ->Fill(nMatchedBjets, TtBar->mass());
+  nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, Lep->pt(), weight);
+  nMatchesVsLeptonsPt_    ->Fill(nMatchedBjets, LepBar->pt(), weight);
+  nMatchesVsLeptonsEta_   ->Fill(nMatchedBjets, Lep->eta(), weight);
+  nMatchesVsLeptonsEta_   ->Fill(nMatchedBjets, LepBar->eta(), weight);
+  nMatchesVsDiLeptonPt_   ->Fill(nMatchedBjets, LepPair->pt(), weight);
+  nMatchesVsDiLeptonMass_ ->Fill(nMatchedBjets, LepPair->mass(), weight);
+  nMatchesVsJetsPt_       ->Fill(nMatchedBjets, B->pt(), weight);
+  nMatchesVsJetsPt_       ->Fill(nMatchedBjets, BBar->pt(), weight);
+  nMatchesVsJetsEta_      ->Fill(nMatchedBjets, B->eta(), weight);
+  nMatchesVsJetsEta_      ->Fill(nMatchedBjets, BBar->eta(), weight);
+  nMatchesVsTopPt_	  ->Fill(nMatchedBjets, Top->pt(), weight);
+  nMatchesVsTopPt_	  ->Fill(nMatchedBjets, TopBar->pt(), weight);
+  nMatchesVsTopRapidity_  ->Fill(nMatchedBjets, Top->rapidity(), weight);
+  nMatchesVsTopRapidity_  ->Fill(nMatchedBjets, TopBar->rapidity(), weight);
+  nMatchesVsTtBarPt_	  ->Fill(nMatchedBjets, TtBar->pt(), weight);
+  nMatchesVsTtBarRapidity_->Fill(nMatchedBjets, TtBar->rapidity(), weight);
+  nMatchesVsTtBarMass_    ->Fill(nMatchedBjets, TtBar->mass(), weight);
 
   nMatchVsNtagsTCHEL_ ->Fill(nTCHEL, nMatchedBjets, weight); 
   nMatchVsNtagsTCHEM_ ->Fill(nTCHEM, nMatchedBjets, weight); 
