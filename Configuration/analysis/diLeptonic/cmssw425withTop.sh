@@ -59,6 +59,10 @@ cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
 addpkg TopQuarkAnalysis/Configuration V06-01-04
 addpkg TopQuarkAnalysis/TopEventSelection V06-07-11
 
+###Fall11 MC pileup stuff##
+cvs co -r V08-03-17 PhysicsTools/Utilities
+cvs co -r V00-02-04 SimDataFormats/PileupSummaryInfo
+
 checkdeps -a
 
 # to filter the madgraph/pythia momentum convservation bug
