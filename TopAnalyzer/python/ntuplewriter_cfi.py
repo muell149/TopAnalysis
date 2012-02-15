@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 #from TopAnalysis.TopUtils.EventWeightPU_cfi import *
 
 writeNTuple = cms.EDAnalyzer('NTupleWriter',
+                       PUSource = cms.InputTag("addPileupInfo"),
                        hypoKey = cms.InputTag("ttFullLepHypKinSolution","Key"),
                        genParticles = cms.InputTag("genParticles"),
                        FullLepEvent = cms.InputTag("ttFullLepEvent"),

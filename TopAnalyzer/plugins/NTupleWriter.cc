@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.10 2012/02/10 17:31:42 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.11 2012/02/13 17:26:25 iasincru Exp $
 //
 //
 
@@ -56,6 +56,7 @@ Implementation:
 #include "TopAnalysis/TopAnalyzer/interface/DileptonEventWeight.h"
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 #include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 #include <TLorentzVector.h>
 
@@ -95,6 +96,7 @@ private:
   // ----------member data ---------------------------
 
   std::map<std::string, int> triggerMap_;
+  edm::InputTag inTag_PUSource;
   edm::InputTag weightPU_, weightPU_Up_, weightPU_Down_, weightLepSF_, weightKinFit_;
   edm::InputTag elecs_, muons_, jets_, met_;
   edm::InputTag vertices_, genEvent_ , FullLepEvt_, hypoKey_;
@@ -186,6 +188,7 @@ private:
 
   ////Vertices////
   int vertMulti;
+  int vertMultiTrue;
 
   const LV dummy;
 };
@@ -217,6 +220,7 @@ void NTupleWriter::AssignLeptonAndTau ( const reco::GenParticle* lepton, LV& Gen
 // constructors and destructor
 //
 NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
+  inTag_PUSource(iConfig.getParameter<edm::InputTag>("PUSource") ),
   weightPU_ ( iConfig.getParameter<edm::InputTag> ( "weightPU" ) ),
   weightPU_Up_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Up" ) ),
   weightPU_Down_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Down" ) ),
@@ -584,6 +588,17 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
   iEvent.getByLabel ( vertices_, vertices );
   vertMulti = vertices->size();
 
+  // default values to allow for tracing errors
+  edm::Handle<edm::View<PileupSummaryInfo> > pPUInfo;
+  iEvent.getByLabel(inTag_PUSource, pPUInfo);
+  edm::View<PileupSummaryInfo>::const_iterator iterPU;
+  for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)  // vector size is 3
+  { 
+    if (iterPU->getBunchCrossing() == 0) // -1: previous BX, 0: current BX,  1: next BX
+        vertMultiTrue = iterPU->getTrueNumInteractions();
+  }
+
+  
   Ntuple->Fill();
 
 }
@@ -672,6 +687,7 @@ NTupleWriter::beginJob()
   /////////vertices
 
   Ntuple->Branch ( "vertMulti",&vertMulti, "vertMulti/I" );
+  Ntuple->Branch ( "vertMultiTrue",&vertMultiTrue, "vertMultiTrue/I" );
 
   ////////Gen Info
   if (isTtBarSample_) {
@@ -803,6 +819,7 @@ void NTupleWriter::clearVariables()
 
   //////vertices
   vertMulti=0;
+  vertMultiTrue=0;
 
   HypTop.clear();
   HypAntiTop.clear();
