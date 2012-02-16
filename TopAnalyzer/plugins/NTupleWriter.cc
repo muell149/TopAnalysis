@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.11 2012/02/13 17:26:25 iasincru Exp $
+// $Id: NTupleWriter.cc,v 1.12 2012/02/15 15:50:06 wbehrenh Exp $
 //
 //
 
@@ -97,7 +97,7 @@ private:
 
   std::map<std::string, int> triggerMap_;
   edm::InputTag inTag_PUSource;
-  edm::InputTag weightPU_, weightPU_Up_, weightPU_Down_, weightLepSF_, weightKinFit_;
+  edm::InputTag weightPU_, weightPU3D_, weightPU_Up_, weightPU_Down_, weightLepSF_, weightKinFit_;
   edm::InputTag elecs_, muons_, jets_, met_;
   edm::InputTag vertices_, genEvent_ , FullLepEvt_, hypoKey_;
   edm::InputTag genParticles_;
@@ -180,6 +180,7 @@ private:
 
   ///////////weight//////////
   double weightPU;
+  double weightPU3D;
   double weightPU_Down;
   double weightPU_Up;
   double weightLepSF;
@@ -222,6 +223,7 @@ void NTupleWriter::AssignLeptonAndTau ( const reco::GenParticle* lepton, LV& Gen
 NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   inTag_PUSource(iConfig.getParameter<edm::InputTag>("PUSource") ),
   weightPU_ ( iConfig.getParameter<edm::InputTag> ( "weightPU" ) ),
+  weightPU3D_(iConfig.getParameter<edm::InputTag> ( "weightPU3D" ) ),
   weightPU_Up_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Up" ) ),
   weightPU_Down_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Down" ) ),
   weightLepSF_ ( iConfig.getParameter<edm::InputTag> ( "weightLepSF" ) ),
@@ -328,6 +330,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
   clearVariables();
 
   weightPU = getPUEventWeight( iEvent, weightPU_ );
+  weightPU3D = getPUEventWeight( iEvent, weightPU3D_);
   //weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
   //weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
   weightLepSF = 0; weightKinFit = 0; weightTotal = 0;
@@ -589,15 +592,16 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
   vertMulti = vertices->size();
 
   // default values to allow for tracing errors
-  edm::Handle<edm::View<PileupSummaryInfo> > pPUInfo;
-  iEvent.getByLabel(inTag_PUSource, pPUInfo);
-  edm::View<PileupSummaryInfo>::const_iterator iterPU;
-  for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)  // vector size is 3
-  { 
-    if (iterPU->getBunchCrossing() == 0) // -1: previous BX, 0: current BX,  1: next BX
-        vertMultiTrue = iterPU->getTrueNumInteractions();
+  if (! iEvent.isRealData()) {
+    edm::Handle<edm::View<PileupSummaryInfo> > pPUInfo;
+    iEvent.getByLabel(inTag_PUSource, pPUInfo);
+    edm::View<PileupSummaryInfo>::const_iterator iterPU;
+    for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)  // vector size is 3
+    { 
+        if (iterPU->getBunchCrossing() == 0) // -1: previous BX, 0: current BX,  1: next BX
+            vertMultiTrue = iterPU->getTrueNumInteractions();
+    }
   }
-
   
   Ntuple->Fill();
 
@@ -678,6 +682,7 @@ NTupleWriter::beginJob()
 
   ////////////weight////////////
   Ntuple->Branch ( "weightPU",&weightPU, "weightPU/D" );
+  Ntuple->Branch ( "weightPU3D", &weightPU3D, "weightPU3D/D");
   Ntuple->Branch ( "weightPU_Up",&weightPU_Up, "weightPU_Up/D" );
   Ntuple->Branch ( "weightPU_Down",&weightPU_Down, "weightPU_Down/D" );
   Ntuple->Branch ( "weightLepSF",&weightLepSF, "weightLepSF/D" );
