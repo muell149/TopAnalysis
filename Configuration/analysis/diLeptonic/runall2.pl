@@ -121,7 +121,7 @@ sub prepare {
             "samplename=$samplename";
     } else {
         $cmsRunCmdLine = "outputFile=$outputFile,".
-            "inputScript=TopAnalysis.Configuration.samples.$inputSample,".
+            "inputScript=TopAnalysis.Configuration.$inputSample,".
             "mode=$mode,".
             "samplename=$samplename";
     }
@@ -139,7 +139,7 @@ sub submit {
         my ($path, $cmdline) = @$_;
         chdir($path) or die "Cant chdir to $path: $!";
         if ($self->{submit}) {
-            system("~/CMSSW_4_2_5/src/TopAnalysis/TopUtils/scripts/nafJobSplitter.pl -W 0 $cmdline");
+            system("~/scratch/CMSSW_4_2_5/src/TopAnalysis/TopUtils/scripts/nafJobSplitter.pl -W 0 $cmdline");
         } else {
             print "DRY RUN: nafJobSplitter.pl -W 0 $cmdline\n";
         }
