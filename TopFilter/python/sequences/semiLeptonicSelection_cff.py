@@ -81,6 +81,7 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
                                      vetoJets                  *
                                      dRMuons                   *
                                      combinedMuons             *
+				     highPtMuons20             *
                                      highPtMuons               *
                                      kinematicMuons            *
                                      trackMuons                *

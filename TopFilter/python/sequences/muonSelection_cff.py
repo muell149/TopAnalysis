@@ -34,8 +34,11 @@ combinedMuons   = selectedPatMuons.clone(src = 'selectedPatMuons',
                                                'isTrackerMuon'
                                          )
 ## select Muons with high pt
-highPtMuons    = selectedPatMuons.clone(src = 'combinedMuons',
+highPtMuons20    = selectedPatMuons.clone(src = 'combinedMuons',
                                         cut = 'pt > 20.'
+                                        )
+highPtMuons    = selectedPatMuons.clone(src = 'combinedMuons',
+                                        cut = 'pt > 30.'
                                         )
 
 ## check muon kinematics
@@ -46,7 +49,7 @@ kinematicMuons    = selectedPatMuons.clone(src = 'highPtMuons',
 ## check tracker related muon qualities: isGlobalMuonPromptTight? & Tracker Muon & impact parameter
 trackMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons',
                                     cut = 'isGlobalMuon & isTrackerMuon &'
-                                          'pt > 20. &'
+                                          'pt > 30. &'
                                           'abs(eta) < 2.1 &'
                                           'innerTrack.numberOfValidHits >= 11 &'
                                           'globalTrack.normalizedChi2 < 10.0  &'
@@ -72,7 +75,7 @@ tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
 
 ## N-1 collections
 noDRMuons     = selectedPatMuons.clone(src = 'vertexSelectedMuons',
-                                       cut = 'pt > 20. & abs(eta) < 2.1 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
                                              '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125&'
@@ -99,7 +102,7 @@ noPtMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                              'numberOfMatches>1'
                                        )
 noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                        cut = 'pt > 20. &'
+                                        cut = 'pt > 30. &'
                                               'combinedMuon.isNull = 0 &'
                                               'isTrackerMuon() =1 &'
                                               '(trackIso+caloIso)/pt < 0.05 &'
@@ -113,7 +116,7 @@ noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                        )
 
 noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                        cut = 'pt > 20. & abs(eta) < 2.1 &'
+                                        cut = 'pt > 30. & abs(eta) < 2.1 &'
                                               'combinedMuon.isNull = 0 &'
                                               'isTrackerMuon() =1 &'                                            
                                               'innerTrack.numberOfValidHits >= 11 &'
@@ -124,7 +127,7 @@ noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                               'numberOfMatches>1'
                                         )
 noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                            cut = 'pt > 20. & abs(eta) < 2.1 &'
+                                            cut = 'pt > 30. & abs(eta) < 2.1 &'
                                                   'combinedMuon.isNull = 0 &'
                                                   'isTrackerMuon() =1 &'
                                                   #'(trackIso+caloIso)/pt < 0.05 &'
@@ -136,7 +139,7 @@ noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                                   'numberOfMatches>1'
                                             )
 noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
-                                         cut = 'pt > 20. & abs(eta) < 2.1 &'
+                                         cut = 'pt > 30. & abs(eta) < 2.1 &'
                                                'combinedMuon.isNull = 0 &'
                                                'isTrackerMuon() =1 &'
                                                #'(trackIso+caloIso)/pt < 0.05 &'
@@ -148,7 +151,7 @@ noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
                                                'numberOfMatches>1'
                                          )
 noDbMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                       cut = 'pt > 20. & abs(eta) < 2.1 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
                                              #'(trackIso+caloIso)/pt < 0.05 &'
