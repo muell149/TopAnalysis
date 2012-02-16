@@ -487,9 +487,11 @@ if options.runOnMC:
     process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
     #process.eventWeightPU.MCSampleFile = cms.FileInPath(mcpufile)
     #process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
-    process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPU.MCSample3DFile = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3D.root")
-    process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011A.root")
+    process.eventWeightPU.MCSampleFile   = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPU.MCSample3DFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
+    process.eventWeightPU.Data3DFile   = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
+    process.eventWeightPU.Weight3DHistoFile   = cms.string(os.getenv("CMSSW_BASE") + "/src/TopAnalysis/TopUtils/data/DefaultWeight3D.root")
 
     #Systematics: PU Up/Down
     process.eventWeightPU.PUSysShiftUp      = cms.double(0.6)
