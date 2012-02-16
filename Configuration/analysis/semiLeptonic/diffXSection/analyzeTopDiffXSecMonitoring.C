@@ -434,7 +434,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     // (i) muon monitoring
     "PF relIso(#mu)/events/0/1",
     "p_{t}(#mu)/events/0/2",
-    "#eta(#mu)/events/0/10",
+    "#eta(#mu)/events/0/1",
     "#phi(#mu)/events/0/10",
   };
 	
@@ -768,7 +768,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
 	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("bottomJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
 	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,350);
-	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);			
+	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);	
+	    if(plotList_[plot].Contains("lepPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
+	    if(plotList_[plot].Contains("lepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
+	    if(plotList_[plot].Contains("bqPt"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
+	    if(plotList_[plot].Contains("bqEta" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
+	    if(plotList_[plot].Contains("topPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,400.);
+	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
+	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);	
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
