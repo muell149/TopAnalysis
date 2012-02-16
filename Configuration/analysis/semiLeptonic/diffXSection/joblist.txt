@@ -331,9 +331,16 @@ nafJobSplitter.pl -q 1 -d ElWZJESUp -c triggerTag=HLT,sample=WZ,lepton=electron 
 nafJobSplitter.pl -q 1 -d MuZZJESUp -c triggerTag=HLT,sample=ZZ,lepton=muon 204 analyzeMuonJES11All_cfg.py
 nafJobSplitter.pl -q 1 -d ElZZJESUp -c triggerTag=HLT,sample=ZZ,lepton=electron 204 analyzeMuonJES11All_cfg.py
 # JES down
-nafJobSplitter.pl -q 1 -d MuWWJESDn -c triggerTag=HLT,sample=WW,lepton=muon 214 analyzeMuonJES09All_cfg.py
+nafJobSplitter.pl -q 1 -d MuWWJESDn -c triggerTag=HLT,sample=WW,lepton=muon 214 analyzeMuonJES0checkN9All_cfg.py
 nafJobSplitter.pl -q 1 -d ElWWJESDn -c triggerTag=HLT,sample=WW,lepton=electron 214 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d MuWZJESDn -c triggerTag=HLT,sample=WZ,lepton=muon 206  analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d ElWZJESDn -c triggerTag=HLT,sample=WZ,lepton=electron 206 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d MuZZJESDn -c triggerTag=HLT,sample=ZZ,lepton=muon 204 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d ElZZJESDn -c triggerTag=HLT,sample=ZZ,lepton=electron 204 analyzeMuonJES09All_cfg.py
+
+##########
+# Zprime #
+##########
+# 750 GeV mass, 7500 MeV width
+nafJobSplitter.pl -q 12 -d MuZprime750 -c triggerTag=HLT,sample=zprime_m750gev_w7500mev,lepton=muon 16 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 12 -d ElZprime750 -c triggerTag=HLT,sample=zprime_m750gev_w7500mev,lepton=electron 16 analyzeMuonDiffXSecAll_cfg.py
