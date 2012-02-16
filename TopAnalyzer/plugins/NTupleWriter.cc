@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.12 2012/02/15 15:50:06 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.13 2012/02/16 10:41:29 wbehrenh Exp $
 //
 //
 
@@ -601,7 +601,10 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         if (iterPU->getBunchCrossing() == 0) // -1: previous BX, 0: current BX,  1: next BX
             vertMultiTrue = iterPU->getTrueNumInteractions();
     }
+  } else{
+    vertMultiTrue = vertices->size();
   }
+
   
   Ntuple->Fill();
 
