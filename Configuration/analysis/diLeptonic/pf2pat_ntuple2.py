@@ -99,12 +99,12 @@ else:
     from Configuration.PyReleaseValidation.autoCond import autoCond
     if options.runOnMC:
         #process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
-        process.GlobalTag.globaltag = cms.string("START42_V13::All")
-        #process.GlobalTag.globaltag = cms.string("START42_V17::All")
+        #process.GlobalTag.globaltag = cms.string("START42_V13::All")
+        process.GlobalTag.globaltag = cms.string("START42_V17::All")
     else:
         #process.GlobalTag.globaltag = cms.string( autoCond[ 'com10' ] )
-        process.GlobalTag.globaltag = cms.string( 'GR_R_42_V19::All' )
-        #process.GlobalTag.globaltag = cms.string( 'GR_R_42_V23::All' )
+        #process.GlobalTag.globaltag = cms.string( 'GR_R_42_V19::All' )
+        process.GlobalTag.globaltag = cms.string( 'GR_R_42_V23::All' )
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
@@ -359,105 +359,44 @@ if mcname == 'ttbarbg':
     topfilter = True
     filterMadgraphPythiaBug = True
 
-if mcname == 'dyee1020':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToEE_M20.root"
+if mcname == 'dyee1050':
     zfilter = True
     zfilterValue = 11
-    zrange = (10,20)
+    zrange = (10,50)
+    filterMadgraphPythiaBug = True
 
-if mcname == 'dymumu1020':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToMuMu_M20.root"
+if mcname == 'dymumu1050':
     zfilter = True
     zfilterValue = 13
-    zrange = (10,20)
+    zrange = (10,50)
+    filterMadgraphPythiaBug = True
 
-if mcname == 'dytautau1020':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToTauTau_M20.root"
+if mcname == 'dytautau1050':
     zfilter = True
     zfilterValue = 15
-    zrange = (10,20)
-
-if mcname == 'dyee2050':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToEE_M20.root"
-    zfilter = True
-    zfilterValue = 11
-    zrange = (20, 50)
-
-if mcname == 'dymumu2050':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToMuMu_M20.root"
-    zfilter = True
-    zfilterValue = 13
-    zrange = (20, 50)
-
-if mcname == 'dytautau2050':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYToTauTau_M20.root"
-    zfilter = True
-    zfilterValue = 15
-    zrange = (20, 50)
+    zrange = (10,50)
+    filterMadgraphPythiaBug = True
 
 if mcname == 'dyee50inf':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root"
     zfilter = True
     zfilterValue = 11
     zrange = (50,1e9)
     filterMadgraphPythiaBug = True
 
 if mcname == 'dymumu50inf':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root"
     zfilter = True
     zfilterValue = 13
     zrange = (50,1e9)
     filterMadgraphPythiaBug = True
 
 if mcname == 'dytautau50inf':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root"
     zfilter = True
     zfilterValue = 15
     zrange = (50,1e9)
     filterMadgraphPythiaBug = True
 
-if mcname == 'singleantitop':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleAntiTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root"
-
-if mcname == 'singletop':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_SingleTop_TuneZ2_tW_channel_DR_7TeV_powheg_tauola.root"
-
 if mcname == 'wjets':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root"
     filterMadgraphPythiaBug = True
-
-if mcname == 'ww':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WWto2l2nu_tuneZ2.root"
-
-if mcname == 'wz':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WZto3lnu_tuneZ2.root"
-
-if mcname == 'zzl':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_ZZto2l2nu_tuneZ2.root"
-
-if mcname == 'zz':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_ZZ_TuneZ2_7TeV_pythia6_tauola.root"
-
-if mcname == 'qcdmu15':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6.root"
-
-if mcname == 'qcdem2030':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20to30_EMEnriched_TuneZ2_7TeV_pythia6.root"
-
-if mcname == 'qcdem3080':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_EMEnriched_TuneZ2_7TeV_pythia.root"
-
-if mcname == 'qcdem80170':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_EMEnriched_TuneZ2_7TeV_pythia6.root"
-
-if mcname == 'qcdbcem2030':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_20to30_BCtoE_TuneZ2_7TeV_pythia6.root"
-
-if mcname == 'qcdbcem3080':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_30to80_BCtoE_TuneZ2_7TeV_pythia6.root"
-
-if mcname == 'qcdbcem80170':
-    mcpufile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_QCD_Pt_80to170_BCtoE_TuneZ2_7TeV_pythia.root"
 
 if options.pu != '':
     print "Using user-definded PU file", options.pu
