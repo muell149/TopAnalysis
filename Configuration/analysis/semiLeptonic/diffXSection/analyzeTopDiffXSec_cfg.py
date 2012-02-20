@@ -89,6 +89,10 @@ if(not globals().has_key('PUreweigthing')):
         PUreweigthing = False
 print "apply PU reweighting?: ",PUreweigthing
 
+## version of the MC (important for trigger)
+if(not globals().has_key('MCversion')):
+    MCversion = "Fall11"
+
 ## enable/ disable btag SF event reweighting
 if(not globals().has_key('BtagReweigthing')):
     BtagReweigthing = True # False
@@ -559,7 +563,9 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 # for all PileUp sample use "TriggerResults::REDIGI38XPU"
 # for all spring11 MC use REDIGI311X
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_IsoMu17_v*"], throw=False)
+process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_IsoMu24_eta2p1_v*"], throw=False)
+if(MCversion=="Summer11"):
+      process.hltFilter.HLTPaths=["HLT_IsoMu24_v*"]
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu15_v*"], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = [""], throw=False)
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
@@ -2210,8 +2216,12 @@ if(jetType=="particleFlow"):
 ## switch to from muon to electron collections
 if(decayChannel=="electron"):
     # adpat trigger
-    process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
-    process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
+    if(MCversion=="Summer11"):
+      process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
+      process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
+    elif(MCversion=="Fall11"):
+      process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
+      process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
     # adapt gen filter
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = True
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon= False
