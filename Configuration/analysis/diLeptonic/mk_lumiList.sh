@@ -6,8 +6,8 @@ do
     rm -f eventCount_$i.txt 2>/dev/null
     mkdir -p mergedRoot/$i
 
-    cp naf*$i*/$i_*.root mergedRoot/$i
-    cp naf*$i*/$i\_*.txt mergedRoot/$i
+    cp naf*$i\_*/$i\_*.root mergedRoot/$i
+    cp naf*$i\_*/$i\_*.txt mergedRoot/$i
 
     ls mergedRoot/$i/$i*.root >list_$i.txt
     cat list_$i.txt | awk -F $i\_ '{print $NF}' | awk '{sub(/.root/,"");print}'>samples_$i.txt
