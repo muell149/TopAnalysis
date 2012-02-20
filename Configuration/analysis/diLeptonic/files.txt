@@ -20,20 +20,19 @@
 20   Fall11.singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff      emu_singletop_tw.root       singletop,runOnAOD=True
 
 #189 Files TTJets
+40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarsignalbg.root		   ttbarbg,runOnAOD=True
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
-
-
-
+250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarbgv2.root		   ttbarbg,runOnAOD=True
+250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarsignalplustauv2.root	   ttbarsignalplustau,runOnAOD=True
 
 #884 Files in DY->Jets
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dyee50inf.root           dyee50inf,runOnAOD=True
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dymumu50inf.root         dymumu50inf,runOnAOD=True
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dytautau50inf.root       dytautau50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dyee50inf.root           dyee50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dymumu50inf.root         dymumu50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dytautau50inf.root       dytautau50inf,runOnAOD=True
 
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dyee1050.root           dyee1050,runOnAOD=True
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dymumu1050.root         dymumu1050,runOnAOD=True
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dytautau1050.root       dytautau1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dyee1050.root           dyee1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dymumu1050.root         dymumu1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dytautau1050.root       dytautau1050,runOnAOD=True
 
 
 #100  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py emu_wtolnu.root                 wjets,runOnAOD=True
@@ -61,20 +60,22 @@
 20   Fall11.singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff      mumu_singletop_tw.root       singletop,runOnAOD=True
 
 #189 Files TTJets
+40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         mumu_ttbarbg.root        ttbarbg,runOnAOD=True
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         mumu_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
+250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         mumu_ttbarbgv2.root        ttbarbg,runOnAOD=True
 250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         mumu_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
 
 
 
 
 #884 Files in DY->Jets
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       mumu_dyee50inf.root           dyee50inf,runOnAOD=True
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       mumu_dymumu50inf.root         dymumu50inf,runOnAOD=True
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       mumu_dytautau50inf.root       dytautau50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       mumu_dyee50inf.root           dyee50inf,runOnAOD=True
+75 Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       mumu_dymumu50inf.root         dymumu50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       mumu_dytautau50inf.root       dytautau50inf,runOnAOD=True
 
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dyee1050.root           dyee1050,runOnAOD=True
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dymumu1050.root         dymumu1050,runOnAOD=True
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dytautau1050.root       dytautau1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dyee1050.root           dyee1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dymumu1050.root         dymumu1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dytautau1050.root       dytautau1050,runOnAOD=True
 
 
 #100  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py mumu_wtolnu.root                 wjets,runOnAOD=True
@@ -104,19 +105,18 @@
 
 #189 Files TTJets
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         ee_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
+40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         ee_ttbarbg.root                   ttbarbg,runOnAOD=True
 250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         ee_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
-
-
-
+250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         ee_ttbarbgv2.root                   ttbarbg,runOnAOD=True
 
 #884 Files in DY->Jets
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dyee50inf.root           dyee50inf,runOnAOD=True
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dymumu50inf.root         dymumu50inf,runOnAOD=True
-50  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dytautau50inf.root       dytautau50inf,runOnAOD=True
+75  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dyee50inf.root           dyee50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dymumu50inf.root         dymumu50inf,runOnAOD=True
+30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dytautau50inf.root       dytautau50inf,runOnAOD=True
 
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dyee1050.root           dyee1050,runOnAOD=True
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dymumu1050.root         dymumu1050,runOnAOD=True
-50  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dytautau1050.root       dytautau1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dyee1050.root           dyee1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dymumu1050.root         dymumu1050,runOnAOD=True
+30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dytautau1050.root       dytautau1050,runOnAOD=True
 
 
 #100  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py ee_wtolnu.root                 wjets,runOnAOD=True
