@@ -65,12 +65,11 @@ void merge(string channel){
     if(filename.find("data")!=string::npos){MCXsecmap[filename] = 1;}//data
     if(filename.find("ttbar")!=string::npos){MCXsecmap[filename] = topxsec;}//ttbar cross-section
     if(filename.find("single")!=string::npos){MCXsecmap[filename] = 7.87;}//single top cross-section
-    if(filename.find("ww")!=string::npos){MCXsecmap[filename] = 4.51;}//WW cross-section
-    if(filename.find("wz")!=string::npos){MCXsecmap[filename] = 0.61;}//WZ cross-section
-    if(filename.find("zz")!=string::npos){MCXsecmap[filename] = 7.4;}//ZZ cross-section
-    if(filename.find("1020")!=string::npos){MCXsecmap[filename] = 3457;}//DY 10-20 exclusive cross-section
-    if(filename.find("2050")!=string::npos){MCXsecmap[filename] = 1666;}//DY 20-50 exclusive cross-section
-    if(filename.find("50inf")!=string::npos){MCXsecmap[filename] = 3048;}//DY ll inclusive cross-section
+    if(filename.find("ww")!=string::npos){MCXsecmap[filename] = 43.;}//WW cross-section
+    if(filename.find("wz")!=string::npos){MCXsecmap[filename] = 18.;}//WZ cross-section
+    if(filename.find("zz")!=string::npos){MCXsecmap[filename] = 5.9;}//ZZ cross-section
+    if(filename.find("1050")!=string::npos){MCXsecmap[filename] = 11908;}//DY ll inclusive cross-section m 10-50
+    if(filename.find("50inf")!=string::npos){MCXsecmap[filename] = 3048;}//DY ll inclusive cross-section m 50->
     if(filename.find("wtolnu")!=string::npos){MCXsecmap[filename] = 31314;}//WJets to lnu cross-section
     if(filename.find("qcdmu15")!=string::npos){MCXsecmap[filename] = 2.966E8*2.855E-4;}//Muon enriched QCD sample (x-sec * FilterEff)
     if(filename.find("qcdem2030")!=string::npos){MCXsecmap[filename] = 2.361E8*0.0106;}//EM enrichedpT 20-30GeV QCD sample (x-sec * FilterEff)
