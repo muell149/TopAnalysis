@@ -16,11 +16,11 @@
 10    Fall11.wztoall_Pythia6Z2_Fall11_AOD_cff       emu_wztoall.root                wz,runOnAOD=True
 20   Fall11.zztoall_Pythia6Z2_Fall11_AOD_cff      emu_zztoall.root                  zz,runOnAOD=True
 
-20   Fall11.singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff  emu_singleantitop_tw.root   singleantitop,runOnAOD=True
-20   Fall11.singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff      emu_singletop_tw.root       singletop,runOnAOD=True
+20   Fall11.singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff  emu_singleantitop_tw.root   singleantitop,runOnAOD=True
+20   Fall11.singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff      emu_singletop_tw.root       singletop,runOnAOD=True
 
 #189 Files TTJets
-40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarsignalbg.root		   ttbarbg,runOnAOD=True
+40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarbg.root		   ttbarbg,runOnAOD=True
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
 250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarbgv2.root		   ttbarbg,runOnAOD=True
 250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarsignalplustauv2.root	   ttbarsignalplustau,runOnAOD=True
@@ -56,8 +56,8 @@
 10    Fall11.wztoall_Pythia6Z2_Fall11_AOD_cff       mumu_wztoall.root                wz,runOnAOD=True
 20   Fall11.zztoall_Pythia6Z2_Fall11_AOD_cff      mumu_zztoall.root                  zz,runOnAOD=True
 
-20   Fall11.singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff  mumu_singleantitop_tw.root   singleantitop,runOnAOD=True
-20   Fall11.singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff      mumu_singletop_tw.root       singletop,runOnAOD=True
+20   Fall11.singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff  mumu_singleantitop_tw.root   singleantitop,runOnAOD=True
+20   Fall11.singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff      mumu_singletop_tw.root       singletop,runOnAOD=True
 
 #189 Files TTJets
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         mumu_ttbarbg.root        ttbarbg,runOnAOD=True
@@ -100,8 +100,8 @@
 10    Fall11.wztoall_Pythia6Z2_Fall11_AOD_cff       ee_wztoall.root                wz,runOnAOD=True
 20   Fall11.zztoall_Pythia6Z2_Fall11_AOD_cff      ee_zztoall.root                  zz,runOnAOD=True
 
-20   Fall11.singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff  ee_singleantitop_tw.root   singleantitop,runOnAOD=True
-20   Fall11.singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff      ee_singletop_tw.root       singletop,runOnAOD=True
+20   Fall11.singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff  ee_singleantitop_tw.root   singleantitop,runOnAOD=True
+20   Fall11.singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff      ee_singletop_tw.root       singletop,runOnAOD=True
 
 #189 Files TTJets
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         ee_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
