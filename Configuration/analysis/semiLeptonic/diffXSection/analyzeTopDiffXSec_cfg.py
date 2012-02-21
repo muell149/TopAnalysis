@@ -987,9 +987,9 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
-#process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
 #process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
@@ -1024,6 +1024,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.05"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
@@ -1054,7 +1055,8 @@ process.analyzeTopPartonLevelKinematics = process.analyzeTopGenKinematics.clone(
 process.analyzeTopPartonLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 ## c) after hadron level phase space selection
 process.analyzeTopHadronLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
-
+## 5) same as 1) for monitoring before probability selection
+process.analyzeTopRecoKinematicsKinFitBeforeProbSel = process.analyzeTopRecoKinematicsKinFit.clone()
 
 ## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
@@ -1122,6 +1124,8 @@ if(applyKinFit==True):
         if(eventFilter=='signal only'):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
+                                             process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
+                                             process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -1156,6 +1160,8 @@ if(applyKinFit==True):
         else:
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
+                                             process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
+                                             process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFit          
                                              )
@@ -1166,6 +1172,8 @@ if(applyKinFit==True):
     elif(runningOnData=="data"):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                          process.filterRecoKinFit                        +
+                                         process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
+                                         process.filterProbKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFit          +
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop
                                          )
