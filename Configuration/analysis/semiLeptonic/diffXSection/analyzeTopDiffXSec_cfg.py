@@ -2402,7 +2402,7 @@ if(not pfToPAT):
 # Pile up
 if(not PUreweigthing or runningOnData=="data"):
     for path in allpaths:
-        getattr(process,path).remove( process.eventWeightPU )
+        getattr(process,path).remove( process.makeEventWeightsPU )
 
 # Eff SF
 if(not effSFReweigthing or runningOnData=="data"):
