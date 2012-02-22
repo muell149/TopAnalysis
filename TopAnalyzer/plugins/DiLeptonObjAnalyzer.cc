@@ -73,9 +73,9 @@ void DiLeptonObjAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& 
   //  Global Event Variables
   // ------------------------
 
-  int N_run   = (evt.id()).run();
-  int N_event = (evt.id()).event();
-  int N_lumi  =  evt.luminosityBlock();
+  //int N_run   = (evt.id()).run();
+  //int N_event = (evt.id()).event();
+  //int N_lumi  =  evt.luminosityBlock();
 
   double DR;
   double DPhi;
