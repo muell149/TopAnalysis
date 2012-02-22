@@ -54,8 +54,6 @@ void MCPileUp::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    edm::View<PileupSummaryInfo>::const_iterator iterPU;
 
-   float sum_nvtx = 0;
-
    for(iterPU = pPUInfo->begin(); iterPU != pPUInfo->end(); ++iterPU)
    { 
      if (iterPU->getBunchCrossing()==0) // -1: previous BX, 0: current BX,  1: next BX
