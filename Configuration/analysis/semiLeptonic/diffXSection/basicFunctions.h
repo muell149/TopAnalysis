@@ -232,7 +232,7 @@ namespace semileptonic {
     // SF is returned
 
     // SF is now applied as event weight in analyzer
-    return 1.0;
+    //return 1.0;
 
     // combined single muon SF Run A+B from tag and probe
     double result = -1.;
@@ -240,14 +240,16 @@ namespace semileptonic {
       result = 1.0; // SF is now applied as event weight in analyzer
     }
     else if (decayChannel.compare("electron")==0) {
-      result = 1.0; // SF is now applied as event weight in analyzer
+      // result = 0.9658; 
+      result = 1.; // SF is now applied as event weight in analyzer
     }
     // errors for the derived SF
-    double errorUp   = 0.03*result;
-    double errorDown = 0.03*result;
+    //double errorUp   = 0.03*result;
+    //double errorDown = 0.03*result;
     // return requestet SF
-    if(sys==sysMuEffSFUp  ) result+=errorUp;
-    if(sys==sysMuEffSFDown) result-=errorDown;
+    // SF uncertainty is now applied as event weight in analyzer
+    //if(sys==sysMuEffSFUp  ) result+=errorUp;
+    //if(sys==sysMuEffSFDown) result-=errorDown;
     return result;
   }
   
@@ -795,9 +797,9 @@ namespace semileptonic {
     }
     // Data
     else if(sample==kData){
-      crossSection=1.;         // this leads to a weight
-
-      Nevents     =luminosity; // of 1.0 as data needs no weight
+      return 1.;
+      // this leads to a weight
+      // of 1.0 as data needs no weight
     }
     // unknown input
     else{
@@ -806,7 +808,7 @@ namespace semileptonic {
       exit(0);
     }
     // d) calculate weight
-    weight = luminosity / ( Nevents / crossSection );
+    weight = effSFAB(kSys,decayChannel) * luminosity / ( Nevents / crossSection );
     if(verbose>0){
       std::cout << "sample: " << sampleLabel(sample,decayChannel) << std::endl;
       std::cout << "systematic var.: " << sysLabel(kSys) << std::endl;
@@ -1183,7 +1185,7 @@ namespace semileptonic {
 	  if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	  if(verbose>1) std::cout << "#events after weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
 	  // apply eff. SF for MC
-	  if(sample!=kData) histo_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation,decayChannel));
+	  //if(sample!=kData) histo_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation,decayChannel));
 	}
 	// b) 2D
 	// check if 2D plot exists
@@ -1196,7 +1198,7 @@ namespace semileptonic {
 	  if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	  if(verbose>1) std::cout << "#events after weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
 	  // apply eff. SF for MC
-	  if(sample!=kData) histo2_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation,decayChannel));
+	  //if(sample!=kData) histo2_[plotList_[plot]][sample]->Scale(effSFAB(systematicVariation,decayChannel));
 	}
       }
     }
