@@ -11,10 +11,10 @@ analyzeBTagEfficiency = cms.EDAnalyzer("BTagEfficiencyAnalyzer",
     #verbose  = cms.int32(  0)
   ## binning for b and c jets:
   ## bin edges for variable bins: vector of low-edges for each bin (including overflow), i.e. nBins+1 entries
-    binsPtB     = cms.vdouble(  0.,10.,20.,30.,40.,50.,60.,80.,140.,250.),
+    binsPtB     = cms.vdouble(  0.,10.,20.,30.,40.,50.,60.,70.,80.,100.,120.,140.,200.,250.,500.,1000.),
     binsEtaB    = cms.vdouble(  0.,0.45,0.9,1.2,1.65,2.1,2.4,3. ),
   ## binning for light jets
   ## bin edges for variable bins: vector of low-edges for each bin (including overflow), i.e. nBins+1 entries
-    binsPtL     = cms.vdouble(  0.,10.,20.,30.,40.,50.,60.,80.,140.,250.),
-    binsEtaL    = cms.vdouble(  0.,0.8,1.6,2.4,3. )
+    binsPtL     = cms.vdouble(  0.,10.,20.,30.,40.,50.,60.,70.,80.,100.,120.,140.,200.,250.,500.,1000.),
+    binsEtaL    = cms.vdouble(  0.,0.45,0.9,1.2,1.65,2.1,2.4,3. )
 )
