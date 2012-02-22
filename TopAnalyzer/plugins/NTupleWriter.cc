@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.13 2012/02/16 10:41:29 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.14 2012/02/16 12:23:41 tdorland Exp $
 //
 //
 
@@ -161,7 +161,11 @@ private:
   std::vector<LV> VgenJet;
   std::vector<LV> Vjet;
   std::vector<double> VjetBTagTCHE;
+  std::vector<double> VjetBTagTCHP;
+  std::vector<double> VjetBTagJetProbability;
+  std::vector<double> VjetBTagJetBProbability;
   std::vector<double> VjetBTagSSVHE;
+  std::vector<double> VjetBTagSSVHP;
   std::vector<double> VjetBTagCSV;
   std::vector<double> VjetBTagCSVMVA;
 
@@ -558,7 +562,11 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         }
       }
       VjetBTagTCHE.push_back ( ajet->bDiscriminator ( "trackCountingHighEffBJetTags" ) );
+      VjetBTagTCHP.push_back(ajet->bDiscriminator("trackCountingHighPurBJetTags") );
+      VjetBTagJetProbability.push_back(ajet->bDiscriminator("jetProbabilityBJetTags"));
+      VjetBTagJetBProbability.push_back(ajet->bDiscriminator("jetBProbabilityBJetTags"));
       VjetBTagSSVHE.push_back ( ajet->bDiscriminator ( "simpleSecondaryVertexHighEffBJetTags" ) );
+      VjetBTagSSVHP.push_back ( ajet->bDiscriminator ( "simpleSecondaryVertexHighPurBJetTags" ) );
       VjetBTagCSV.push_back(ajet->bDiscriminator("combinedSecondaryVertexBJetTags"));
       VjetBTagCSVMVA.push_back(ajet->bDiscriminator("combinedSecondaryVertexMVABJetTags"));
 
@@ -661,9 +669,13 @@ NTupleWriter::beginJob()
   /////////////jet properties////////////
   Ntuple->Branch ( "jet",&Vjet );
   Ntuple->Branch ( "jetBTagTCHE",&VjetBTagTCHE );
+  Ntuple->Branch ( "jetBTagTCHP",&VjetBTagTCHP );
   Ntuple->Branch ( "jetBTagSSVHE",&VjetBTagSSVHE );
-  Ntuple->Branch (  "jetBTagCSV", &VjetBTagCSV);
-  Ntuple->Branch (  "jetBTagCSVMVA", &VjetBTagCSVMVA);
+  Ntuple->Branch ( "jetBTagSSVHP",&VjetBTagSSVHP );
+  Ntuple->Branch ( "jetBTagJetProbability", &VjetBTagJetProbability );
+  Ntuple->Branch ( "jetBTagJetBProbability", &VjetBTagJetBProbability );
+  Ntuple->Branch ( "jetBTagCSV", &VjetBTagCSV);
+  Ntuple->Branch ( "jetBTagCSVMVA", &VjetBTagCSVMVA);
   Ntuple->Branch ( "allGenJets", &VallGenJets);
   Ntuple->Branch ( "genJet", &VgenJet);
 
@@ -805,7 +817,11 @@ void NTupleWriter::clearVariables()
   /////////jets///////////
   Vjet.clear();
   VjetBTagTCHE.clear();
+  VjetBTagTCHP.clear();
   VjetBTagSSVHE.clear();
+  VjetBTagSSVHP.clear();
+  VjetBTagJetProbability.clear();
+  VjetBTagJetBProbability.clear();
   VjetBTagCSV.clear();
   VjetBTagCSVMVA.clear();
   VallGenJets.clear();
