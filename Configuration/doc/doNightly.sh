@@ -42,13 +42,13 @@ if [ `grep -ic error scram.txt` -eq 0 ]
     then
     if [ `grep -ic warning scram.txt` -eq 0 ]
 	then
-	cp $docDir/green.jpg $docDir/scram.jpg
+	cp $docDir/passed.jpg $docDir/scram.jpg
     else
 	echo "+++ Got warnings from scram!"
-	cp $docDir/yellow.jpg $docDir/scram.jpg
+	cp $docDir/warnings.jpg $docDir/scram.jpg
     fi
 else
-    cp $docDir/red.jpg $docDir/scram.jpg
+    cp $docDir/errors.jpg $docDir/scram.jpg
     echo "+++ Got errors from scram!"
 fi
 
@@ -84,9 +84,9 @@ cd $docDir
 if [ -e doxyWarn.log -a ! -s doxyWarn.log ]
     then
     echo "No warnings from doxygen." > doxyWarn.log
-    cp green.jpg doxyWarn.jpg
+    cp passed.jpg doxyWarn.jpg
 else
-    cp red.jpg doxyWarn.jpg
+    cp warnings.jpg doxyWarn.jpg
     echo "+++ Got warnings from doxygen!"
 fi
 
