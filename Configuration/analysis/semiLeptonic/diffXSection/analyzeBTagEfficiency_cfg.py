@@ -49,7 +49,7 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
 from Configuration.PyReleaseValidation.autoCond import autoCond
-process.GlobalTag.globaltag = cms.string('START42_V13::All')
+process.GlobalTag.globaltag = cms.string('START42_V17::All')
 
 ##-----------------------------------------------------------------------
 ## semileptonic selection
@@ -67,6 +67,8 @@ process.load("TopAnalysis.TopAnalyzer.BTagEfficiencyAnalyzer_cfi")
 process.bTagEff = process.analyzeBTagEfficiency.clone(jets         = "tightLeadingPFJets",
                                                       bTagAlgo     = "simpleSecondaryVertexHighEffBJetTags",
                                                       bTagDiscrCut = 1.74
+						      #binsPtB=cms.vdouble(0,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,200,250,300,500 ),
+						      #binsEtaB = cms.vdouble(  0.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.,2.1,2.2,2.3,2.4,3. )
                                                      )
 
 ##-----------------------------------------------------------------------
