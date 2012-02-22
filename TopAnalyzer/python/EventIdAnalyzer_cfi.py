@@ -5,7 +5,8 @@ import FWCore.ParameterSet.Config as cms
 #
 analyzeEventId = cms.EDAnalyzer("EventIdAnalyzer",
     verbose = cms.bool(False),
-    textFileName = cms.string("")
+    textFileName = cms.string(""),
+    weight = cms.InputTag("eventWeightPU","eventWeightPU")
 )
 
 

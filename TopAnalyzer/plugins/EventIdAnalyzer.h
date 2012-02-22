@@ -33,6 +33,12 @@ class EventIdAnalyzer : public edm::EDAnalyzer {
   edm::InputTag input_;
   bool verbose_;
   std::string textFileName_;
+  edm::InputTag weight_;
+  
+  /// output histogram
+  std::map<std::string, TH1F*> hists_;
+
+
   
   ofstream myfile;
   
