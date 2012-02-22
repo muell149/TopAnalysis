@@ -15,15 +15,15 @@ cmsrel CMSSW_4_2_8_patch7
 cd CMSSW_4_2_8_patch7/src
 cmsenv
 
-cvs checkout -r V06-04-19 DataFormats/PatCandidates
-cvs checkout -r V08-03-17 PhysicsTools/Utilities
-cvs checkout -r V06-07-13 TopQuarkAnalysis/TopEventSelection 
+cvs -Q checkout -r V06-04-19 DataFormats/PatCandidates
+cvs -Q checkout -r V08-03-17 PhysicsTools/Utilities
+cvs -Q checkout -r V06-07-13 TopQuarkAnalysis/TopEventSelection 
 
 ############################################################
 # update our UserCode with the CVS head and compile
 ############################################################
 
-cvs checkout -d TopAnalysis -r HEAD UserCode/Bromo/TopAnalysis
+cvs -Q checkout -d TopAnalysis -r HEAD UserCode/Bromo/TopAnalysis
 
 showtags -r -t > $docDir/showtags.txt
 
@@ -63,7 +63,7 @@ fi
 for file in `ls $CMSSW_BASE/lib/$SCRAM_ARCH/*TopAnalysis*.so`
   do
   echo $file >> $docDir/libchecker.txt
-  libchecker.pl $file >> $docDir/libchecker.txt
+  libchecker.pl $file >> $docDir/libchecker.txt 2> /dev/null
 done
 
 ############################################################
