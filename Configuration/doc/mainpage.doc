@@ -2,6 +2,15 @@
 
 \mainpage
 
+<table>
+<tr><td></td><td align="center">SCRAM</td><td align="center">Doxygen</td></tr>
+<tr>
+<td>Status of latest test build:</td>
+<td><a href="scram.txt"><img src="scram.jpg" alt="scram.jpg"></a></td>
+<td><a href="doxyWarn.log"><img src="doxyWarn.jpg" alt="doxyWarn.jpg"></a></td>
+</tr>
+</table>
+
 CMSSW release and tags used: <a href="showtags.txt">showtags.txt</a>
 
 Printout from scram: <a href="scram.txt">scram.txt</a> <img src="scram.jpg" alt="scram.jpg" width="10" height="10" border="1">
