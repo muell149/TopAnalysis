@@ -14,9 +14,12 @@ if(not globals().has_key("triggerPathSelector1")):
 ##
 if(not globals().has_key("triggerPathSelector2")):
 	triggerPathSelector2 = "HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"
+## optionally filter on l3 filter of HLT path
+if(not globals().has_key("l3FilterSelector")):
+	l3FilterSelector = ""
 ## switch between efficiency and cutflow studies (for purity)
 if(not globals().has_key("cutflowSelector")):
-	cutflowSelector = "effOnly" # cutflowOnly, effAndCutflow
+	cutflowSelector = "effOnly" # cutflowOnly, effAndCutflow, analyzeAfterCut
 ## select processName of trigger, e.g. "HLT" for data, "REDIGIXXX" for some MC
 if(not globals().has_key("triggerProcessName")):
 	triggerProcessName = "HLT"
@@ -38,6 +41,30 @@ if(not globals().has_key("jetMinPt1")):
 ## minimum jet pt of 2nd jet
 if(not globals().has_key("jetMinPt2")):
 	jetMinPt2 = '30'
+## run PF2PAT?
+## only possible for special pat tuples!!!
+if(not globals().has_key('pfToPAT')):
+    pfToPAT = True #False
+print "run PF2PAT?: ",pfToPAT," won't work if the file does not contain the necessary information!"
+## select whether to run directly on AOD
+if(not globals().has_key("runOnAOD")):
+	runOnAOD = True
+if(not globals().has_key("PF2PATwithoutLeptonIsoCut")):
+	PF2PATwithoutLeptonIsoCut = False
+## choose JSON file for data
+if(not globals().has_key('jsonFile')):
+    jsonFile =  ''
+## enable/ disable PU event reweighting
+if(not globals().has_key('PUreweighting')):
+    PUreweighting = True
+## switch PU reweighting off for data
+if(dataSelector>10):
+    PUreweighting = False
+print "apply PU reweighting?: ",PUreweighting
+
+## choose JSON file for data
+if(not globals().has_key('noLeptonVetoes')):
+    noLeptonVetoes =  'False'
 
 print "----------------------------------------------"
 print "Efficiency Studies for Lepton ID (11 electron, 13 muon): ", leptonTypeId
@@ -80,6 +107,38 @@ process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
                                    maxZ    = cms.double(24.0),
                                    maxRho  = cms.double(2.0)
                                    )
+				   
+#----------------------------------------------------------------------------
+#    Trigger configuration
+#----------------------------------------------------------------------------
+## trigger sequences
+process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff" )
+				
+process.patTriggerSequenceUser = cms.Sequence(
+      process.patTrigger *
+      process.patTriggerEvent
+    )
+    
+    
+#-----------------------------------------------------------------------------
+# ----- MC PU reweighting                                         ----- #
+#-----------------------------------------------------------------------------
+
+process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
+process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
+#if(options.sample=="ttbar"):
+process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
+#if(options.sample=="wjets"):
+    #process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root")
+#if(options.sample=="zjets"):
+#process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root")
+
+process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
+
+# relevant PU event weights (potentially merged with shape distortion weights)
+PUweight    =cms.InputTag("eventWeightPU","eventWeightPU")
+PUweightUp  =cms.InputTag("eventWeightPU","eventWeightPUUp")
+PUweightDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
 
 #-----------------------------------------------------------------------------
 # ----- P r e p a r e   M u o n   C o l l e c t i o n s ----- #
@@ -95,18 +154,41 @@ print "triggerResultsTagString = ", triggerResultsTagString
 process.hltTriggerFilter1 = hltHighLevel.clone(TriggerResultsTag = triggerResultsTagString, HLTPaths = [triggerPathSelector1], throw=False)
 process.hltTriggerFilter2 = hltHighLevel.clone(TriggerResultsTag = triggerResultsTagString, HLTPaths = [triggerPathSelector2], throw=False)
 
+## optionally filter on L3 filter of HLTPath
+from TopAnalysis.TopFilter.filters.TriggerFilterFilter_cfi import filterTriggerFilters
+process.hltL3Filter = filterTriggerFilters.clone()
+process.hltL3Filter.hltFilter= l3FilterSelector
+
 ## Global tags
 ## needed for L1 lookup tables
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "dataSelector = ", dataSelector
-if(dataSelector == 14):
-     process.GlobalTag.globaltag = cms.string('GR_R_41_V0::All')
+if(dataSelector == 1):
+     process.GlobalTag.globaltag = cms.string('START42_V12::All')
+     jsonFile = ""
+     print "dataSelector = 1, global tag: ", process.GlobalTag.globaltag
+elif(dataSelector == 11):
+     process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
      ##-------------------- Import the JEC services -----------------------
      process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
      ##-------------------- Import the Jet RECO modules -----------------------
      process.load('RecoJets.Configuration.RecoPFJets_cff')
+     
+     ## load JSON file for data
+     if(jsonFile!=""):
+	  import PhysicsTools.PythonAnalysis.LumiList as LumiList
+	  import FWCore.ParameterSet.Types as CfgTypes
+	  print "The following JSON file is used in the cfg file: ", jsonFile
+	  myLumis = LumiList.LumiList(filename = jsonFile).getCMSSWString().split(',')
+	  process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+	  process.source.lumisToProcess.extend(myLumis)
+	  ## ATTENTION!!! At the moment myLumis are filled in the separate data_cfg files again
+	  ## as otherwise overwritten by load("data_cff")
+     else:
+	  print "No JSON file specified in cfg file (but possibly via CRAB)."
 
-     print "dataSelector = 14"
+
+     print "dataSelector = 11, global tag: ", process.GlobalTag.globaltag
 else:
      print "ERROR! DataSelector not defined. No global tag can be chosen."
 
@@ -128,45 +210,75 @@ process.vetoJets.cut=''
 #-----------------------------------------------------------------------------
 
 ## jet kinematics analyzer
-process.load("TopAnalysis.TopAnalyzer.JetKinematics_cfi")
+process.load("TopAnalysis.TopAnalyzer.JetKinematicsVertex_cfi")
+process.load("TopAnalysis.TopAnalyzer.JetKinematicsDifferentMultiplicities_cfi")
+
+if(PUreweighting):
+        process.analyzeJetKinematicsVertex.weight = PUweight
+	process.analyzeJetKinematicsDifferentMultiplicities.weight = PUweight
 ## define ordered jets
 ## ATTENTION!!! For MC it should be 'L3Absolute' !!!!
-corrLevel='L2L3Residual'
+corrLevel=''
+if(dataSelector == 1):
+    corrLevel='L3Absolute'
+elif(dataSelector == 11):
+    corrLevel='L2L3Residual'
+#corrLevel='L2L3Residual'
 uds0    = cms.PSet(index = cms.int32(0),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 uds1    = cms.PSet(index = cms.int32(1),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 uds2    = cms.PSet(index = cms.int32(2),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 uds3    = cms.PSet(index = cms.int32(3),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
-udsAll  = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+udsAll  = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(True) )
+#uds0    = cms.PSet(index = cms.int32(0),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+#uds1    = cms.PSet(index = cms.int32(1),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+#uds2    = cms.PSet(index = cms.int32(2),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+#uds3    = cms.PSet(index = cms.int32(3),  correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+#udsAll  = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 ##  Jet Kinematics Analyzer for the first 4 and all jets, for events fired by trigger 1 before the jet cut
-process.analyzeJet0Trig1BeforeCut  = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds0 )
-process.analyzeJet1Trig1BeforeCut  = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds1 )
-process.analyzeJet2Trig1BeforeCut  = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds2 )
-process.analyzeJet3Trig1BeforeCut  = process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = uds3 )
-process.analyzeJetAllTrig1BeforeCut= process.analyzeJetKinematics.clone (src = 'tightLeadingPFJets', analyze = udsAll)
+process.analyzeJet0Trig1BeforeCut  = process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = uds0 )
+process.analyzeJet1Trig1BeforeCut  = process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = uds1 )
+process.analyzeJet2Trig1BeforeCut  = process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = uds2 )
+process.analyzeJet3Trig1BeforeCut  = process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = uds3 )
+process.analyzeJetAllTrig1BeforeCut= process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = udsAll)
+#process.analyzeJetDiffMultTrig1BeforeCut  = process.analyzeJetKinematicsDifferentMultiplicities.clone (src = 'tightLeadingPFJets')
 ##  Jet Kinematics Analyzer for the first 4 and all jets, for events fired by trigger 1 after the jet cut 
 process.analyzeJet0Trig1AfterCut  = process.analyzeJet0Trig1BeforeCut.clone() 
 process.analyzeJet1Trig1AfterCut  = process.analyzeJet1Trig1BeforeCut.clone()
 process.analyzeJet2Trig1AfterCut  = process.analyzeJet2Trig1BeforeCut.clone()
 process.analyzeJet3Trig1AfterCut  = process.analyzeJet3Trig1BeforeCut.clone()
 process.analyzeJetAllTrig1AfterCut= process.analyzeJetAllTrig1BeforeCut.clone()
+#process.analyzeJetDiffMultTrig1AfterCut  = process.analyzeJetKinematicsDifferentMultiplicities.clone (src = 'tightLeadingPFJets')
 ##  Jet Kinematics Analyzer for the first 4 and all jets, for events fired by trigger 2 after the jet cut
 process.analyzeJet0Trig2AfterCut  = process.analyzeJet0Trig1BeforeCut.clone()
 process.analyzeJet1Trig2AfterCut  = process.analyzeJet1Trig1BeforeCut.clone()
 process.analyzeJet2Trig2AfterCut  = process.analyzeJet2Trig1BeforeCut.clone()
 process.analyzeJet3Trig2AfterCut  = process.analyzeJet3Trig1BeforeCut.clone()
 process.analyzeJetAllTrig2AfterCut= process.analyzeJetAllTrig1BeforeCut.clone()
+#process.analyzeJetDiffMultTrig2AfterCut  = process.analyzeJetKinematicsDifferentMultiplicities.clone (src = 'tightLeadingPFJets')
 
 ## lepton analyzers after trigger 1 and trigger 2
 process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
+if(PUreweighting):
+        process.analyzeMuonKinematics.weight = PUweight
 process.analyzeMuonKinematicsTrig1 = process.analyzeMuonKinematics.clone(src="tightMuons");
+process.analyzeMuonKinematicsTrig1.analyze=cms.PSet(index = cms.int32(0), useTree = cms.bool(True) )
 process.analyzeMuonKinematicsTrig2 = process.analyzeMuonKinematics.clone(src="tightMuons");
+process.analyzeMuonKinematicsTrig2.analyze=cms.PSet(index = cms.int32(0), useTree = cms.bool(True) )
 process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
+if(PUreweighting):
+        process.analyzeMuonQuality.weight = PUweight
 process.analyzeMuonQualityTrig1 = process.analyzeMuonQuality.clone(src="tightMuons");
 process.analyzeMuonQualityTrig2 = process.analyzeMuonQuality.clone(src="tightMuons");
 process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
-process.analyzeElectronKinematicsTrig1 = process.analyzeElectronKinematics.clone(src="tightElectronsEJ");
-process.analyzeElectronKinematicsTrig2 = process.analyzeElectronKinematics.clone(src="tightElectronsEJ");
+if(PUreweighting):
+        process.analyzeElectronKinematics.weight = PUweight
+process.analyzeElectronKinematicsTrig1 = process.analyzeElectronKinematics.clone(src="tightElectronsEJ")
+process.analyzeElectronKinematicsTrig1.analyze=cms.PSet(index = cms.int32(0), useTree = cms.bool(True) )
+process.analyzeElectronKinematicsTrig2 = process.analyzeElectronKinematics.clone(src="tightElectronsEJ")
+process.analyzeElectronKinematicsTrig2.analyze=cms.PSet(index = cms.int32(0), useTree = cms.bool(True) )
 process.load("TopAnalysis.TopAnalyzer.ElectronQuality_cfi")
+if(PUreweighting):
+        process.analyzeElectronQuality.weight = PUweight
 process.analyzeElectronQualityTrig1 = process.analyzeElectronQuality.clone(src="tightElectronsEJ");
 process.analyzeElectronQualityTrig2 = process.analyzeElectronQuality.clone(src="tightElectronsEJ");
 
@@ -204,6 +316,9 @@ if (leptonTypeId == 13):
                                            process.electronVeto           *
                                            process.secondMuonVeto
                                          )
+    if(noLeptonVetoes):
+        process.leptonSelection.remove(process.electronVeto)
+	process.leptonSelection.remove(process.secondMuonVeto)
 elif (leptonTypeId == 11):
     process.leptonSelection          = cms.Sequence( process.tightElectronSelection *
                                            process.muonVeto               *
@@ -211,6 +326,9 @@ elif (leptonTypeId == 11):
                                            process.convElecHitRejection   *
                                            process.convElecTrkRejection 
                                          )
+    if(noLeptonVetoes):
+        process.leptonSelection.remove(process.secondElectronVeto)
+	process.leptonSelection.remove(process.muonVeto)
 
 ## ---
 ##    Set up selection steps for different jet multiplicities
@@ -218,7 +336,7 @@ elif (leptonTypeId == 11):
 ## new pt cuts on jet 1 and 2
 process.tightLeadingPFJetsMinPt1 = process.tightLeadingPFJets.clone( cut = 'pt >'+ jetMinPt1 )
 process.tightLeadingPFJetsMinPt2 = process.tightLeadingPFJets.clone( cut = 'pt >'+ jetMinPt2 )
-process.leadingJetSelectionNjets1Pt1 = process.leadingJetSelection.clone (src = 'tightLeadingPFJetsMinPt1', minNumber = 1)
+process.leadingJetSelectionNjets1Pt1 = process.leadingJetSelection.clone (src = 'tightLeadingPFJetsMinPt1', minNumber = 1, maxNumber = jetMaxNumber)
 process.leadingJetSelectionNjets2Pt2 = process.leadingJetSelection.clone (src = 'tightLeadingPFJetsMinPt2', minNumber = 2, maxNumber = jetMaxNumber)
 process.leadingJetSelectionNjets3MaxNum = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 3, maxNumber = jetMaxNumber)
 process.leadingJetSelectionNjets4MaxNum = process.leadingJetSelection.clone (src = 'tightLeadingPFJets', minNumber = 4, maxNumber = jetMaxNumber)
@@ -244,18 +362,23 @@ if(cutflowSelector == "effOnly" or cutflowSelector == "effAndCutflow"):
     process.p1 = cms.Path(
        ## apply primary vertex selection
        process.PVSelection                           *
+       ## calculate PU weights
+       process.eventWeightPU                         *
        ## HLT trigger filter: lepton + 1jet
        process.hltTriggerFilter1                     *
+       ## trigger event
+       process.patTriggerSequenceUser                *
        ## introduce some collections
        process.semiLeptonicSelection                 *
        ## lepton selection
        process.leptonSelection                       *
        ## jet kinematics analyzer for events fired by trigger 1 before the jet cut
-       process.analyzeJet0Trig1BeforeCut             *
-       process.analyzeJet1Trig1BeforeCut             *
-       process.analyzeJet2Trig1BeforeCut             *
-       process.analyzeJet3Trig1BeforeCut             *
-       process.analyzeJetAllTrig1BeforeCut           *
+       #process.analyzeJet0Trig1BeforeCut             *
+       #process.analyzeJet1Trig1BeforeCut             *
+       #process.analyzeJet2Trig1BeforeCut             *
+       #process.analyzeJet3Trig1BeforeCut             *
+       #process.analyzeJetAllTrig1BeforeCut           *
+       #process.analyzeJetDiffMultTrig1BeforeCut      *
        ## jet selection
        process.tightLeadingPFJetsMinPt1              *
        process.tightLeadingPFJetsMinPt2              *
@@ -269,6 +392,7 @@ if(cutflowSelector == "effOnly" or cutflowSelector == "effAndCutflow"):
        process.analyzeJet2Trig1AfterCut              *
        process.analyzeJet3Trig1AfterCut              *
        process.analyzeJetAllTrig1AfterCut            *
+       #process.analyzeJetDiffMultTrig1AfterCut       *
        ## lepton analyzers
        process.leptonAnalyzersTrig1                  *
        ## HLT trigger filter: 2nd trigger
@@ -279,23 +403,33 @@ if(cutflowSelector == "effOnly" or cutflowSelector == "effAndCutflow"):
        process.analyzeJet2Trig2AfterCut              *
        process.analyzeJet3Trig2AfterCut              *
        process.analyzeJetAllTrig2AfterCut            *
+       #process.analyzeJetDiffMultTrig2AfterCut       *
        ## lepton analyzers
-       process.leptonAnalyzersTrig2
+       process.leptonAnalyzersTrig2                  
     )
     
 if(jetMinNumber < 4):
     process.p1.remove(process.leadingJetSelectionNjets4MaxNum)
 if(jetMinNumber < 3):
     process.p1.remove(process.leadingJetSelectionNjets3MaxNum)
+if(jetMinNumber < 2):
+    process.p1.remove(process.leadingJetSelectionNjets2Pt2)
 if(jetMinNumber == 0):
-    process.p1.remove(leadingJetSelectionNjets2Pt2, leadingJetSelectionNjets1Pt1)
+    process.p1.remove(process.leadingJetSelectionNjets1Pt1)
+    
+if(l3FilterSelector!=""):
+    process.p1.replace(process.hltTriggerFilter2, process.hltL3Filter)
+if(not PUreweighting):
+    process.p1.remove(process.eventWeightPU)
 
 ##-------------------------------------------------------------------------------------
 ## Cutflow path for purity studies
-if(cutflowSelector == "cutflowOnly" or cutflowSelector == "effAndCutflow"):
+if(cutflowSelector == "cutflowOnly" or cutflowSelector == "effAndCutflow" or cutflowSelector=="analyzeAfterCut"):
     process.p2 = cms.Path(
        ## apply primary vertex selection
        process.PVSelection                           *
+       ## calculate PU weights
+       process.eventWeightPU                         *
        ## HLT trigger filter
        process.hltTriggerFilter2                     *
        ## introduce some collections
@@ -304,10 +438,28 @@ if(cutflowSelector == "cutflowOnly" or cutflowSelector == "effAndCutflow"):
        process.leptonSelection                       *
        ## jet selections
        process.jetCuts                               *
-       process.bottomJetSelection                    *
-       process.bottomJetSelection2BTags
+       #process.bottomJetSelection                    *
+       #process.bottomJetSelection2BTags              *
+       ## analyzers after cuts
+       process.analyzeJet0Trig2AfterCut              *
+       process.analyzeJet1Trig2AfterCut              *
+       process.analyzeJet2Trig2AfterCut              *
+       process.analyzeJet3Trig2AfterCut              *
+       process.analyzeJetAllTrig2AfterCut            *
+       process.analyzeJetDiffMultTrig2AfterCut       *
+       ## lepton analyzers
+       process.leptonAnalyzersTrig2
     )
-    
+    if(cutflowSelector == "cutflowOnly"):
+	process.p2.remove(process.analyzeJet0Trig2AfterCut)
+	process.p2.remove(process.analyzeJet1Trig2AfterCut)
+	process.p2.remove(process.analyzeJet2Trig2AfterCut)
+	process.p2.remove(process.analyzeJet3Trig2AfterCut)
+	process.p2.remove(process.analyzeJetAllTrig2AfterCut)
+	process.p2.remove(process.analyzeJetDiffMultTrig2AfterCut)
+	process.p2.remove(process.leptonAnalyzersTrig2)
+    if(not PUreweighting):
+	process.p2.remove(process.eventWeightPU)
     
     ## switch to PF objects
 if(jetType=="PF"):
@@ -366,3 +518,95 @@ if(leptonTypeId==11):
     for path in allpaths:
         # replace jet lepton veto
         getattr(process,path).replace(process.noOverlapJetsPF, process.noOverlapJetsPFelec)
+	
+# switch to PF2PAT
+if(pfToPAT):
+    #from PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi import *
+    #patMuons.pfMuonSource = cms.InputTag("pfAllMuons") # ODER cms.InputTag("pfMuonsFromVertex")
+    from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
+    allpaths  = process.paths_().keys()
+    recoPaths=['p1']
+    # define general options
+    options = {
+        'runOnMC': True,
+        'runOnAOD': True,
+        'switchOffEmbedding': False,
+        'addResolutions': True,
+        'runOnOLDcfg': True,
+        'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
+        'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
+        'electronIDs': ['CiC','classical'],
+        'pfIsoConeMuon': 0.4,
+        'pfIsoConeElec': 0.4,
+        'pfIsoValMuon': 0.2,
+        'pfIsoValElec': 0.2,
+        'skipIfNoPFMuon': False,
+        'skipIfNoPFElec': False,
+        'addNoCutPFMuon': False,
+        'addNoCutPFElec': False,
+        'noMuonTopProjection': False,
+        'noElecTopProjection': False,
+        'analyzersBeforeMuonIso':cms.Sequence(),
+        'analyzersBeforeElecIso':cms.Sequence(),
+        'excludeElectronsFromWsFromGenJets': True,
+        'METCorrectionLevel': 0
+        }
+
+    # adaptions when running on data
+    if(dataSelector == 11):
+        options['runOnMC']=False
+    options['runOnAOD']=runOnAOD
+    if(leptonTypeId==11):
+    # take into account different electron vetos in mu and e channel
+        options['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
+	if(PF2PATwithoutLeptonIsoCut):
+	    ## change the source of the PAT leptons to nonIso leptons to be able to do isolation studies
+	    process.load("PhysicsTools.PatAlgos.producersLayer1.electronProducer_cfi")
+            process.patElectrons.pfElectronSource = cms.InputTag("pfSelectedElectrons")
+	else:
+	    options['skipIfNoPFElec']=True
+    elif(leptonTypeId==13):
+	if(PF2PATwithoutLeptonIsoCut):
+	    ## change the source of the PAT leptons to nonIso leptons to be able to do isolation studies
+	    process.load("PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi")
+            process.patMuons.pfMuonSource = cms.InputTag("pfSelectedMuons")
+	else:
+	    options['skipIfNoPFMuon']=True 
+    prependPF2PATSequence(process, allpaths, options)
+    ## change the source of the PAT leptons to nonIso leptons to be able to do isolation studies
+    if(PF2PATwithoutLeptonIsoCut):
+        for path in allpaths:
+	    if(leptonTypeId==11):
+		getattr(process,path).remove(process.electronMatch)
+		getattr(process,path).remove(process.patElectrons)
+		if(dataSelector == 1):
+		    getattr(process,path).replace(process.pfIsolatedElectrons, process.electronMatch*process.patElectrons*process.pfIsolatedElectrons)
+		else:
+		    getattr(process,path).replace(process.pfIsolatedElectrons, process.patElectrons*process.pfIsolatedElectrons)
+		      
+	    elif(leptonTypeId==13):
+		getattr(process,path).remove(process.muonMatch)
+		getattr(process,path).remove(process.patMuons)
+		if(dataSelector == 1):
+		    getattr(process,path).replace(process.pfIsolatedMuons, process.muonMatch*process.patMuons*process.pfIsolatedMuons)
+		else:
+		    getattr(process,path).replace(process.pfIsolatedMuons, process.patMuons*process.pfIsolatedMuons)
+    
+    # remove electron collections as long as id does not exist in the tuples
+    #for path in allpaths:
+        #getattr(process,path).remove( process.looseElectronsEJ )
+        #getattr(process,path).remove( process.tightElectronsEJ )
+        #getattr(process,path).remove( process.unconvTightElectronsEJ )
+        #getattr(process,path).remove( process.goodElectronsEJ )
+        # replace object consistently with names from PF2PAT
+        #massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
+        #massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')
+            
+    # run trigger at the beginning to save a lot of time
+    if(cutflowSelector == "effOnly" or cutflowSelector == "effAndCutflow"):
+        process.p1.insert(0,process.hltTriggerFilter1)
+	print "hltTriggerFilter1 moved to the beginning of p1"
+    if(cutflowSelector == "cutflowOnly" or cutflowSelector == "effAndCutflow"):
+        process.p2.insert(0,process.hltTriggerFilter2)
+	print "hltTriggerFilter2 moved to the beginning of p2"
