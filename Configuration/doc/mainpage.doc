@@ -19,4 +19,12 @@ Printout from the libchecker: <a href="libchecker.txt">libchecker.txt</a>
 
 Warnings from doxygen: <a href="doxyWarn.log">doxyWarn.log</a>
 
+<hr>
+
+History of CVS commits:
+<a href="https://hypernews.cern.ch/HyperNews/CMSCVS/get/UserCode-Bromo.html">CMSCVS HyperNews</a>
+
+Web-interface based version control:
+<a href="http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Bromo/TopAnalysis/">ViewVC</a>
+
 */
