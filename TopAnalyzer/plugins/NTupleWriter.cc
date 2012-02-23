@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.14 2012/02/16 12:23:41 tdorland Exp $
+// $Id: NTupleWriter.cc,v 1.15 2012/02/22 12:26:15 wbehrenh Exp $
 //
 //
 
@@ -335,8 +335,8 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
   weightPU = getPUEventWeight( iEvent, weightPU_ );
   weightPU3D = getPUEventWeight( iEvent, weightPU3D_);
-  //weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
-  //weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
+  weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
+  weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
   weightLepSF = 0; weightKinFit = 0; weightTotal = 0;
   try {
     weightLepSF = getDileptonSFWeight(iEvent, weightLepSF_);
