@@ -1205,8 +1205,8 @@ process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
 process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
 process.eventWeightPU.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
 
-process.eventWeightPU.CreateWeight3DHisto = True
-process.eventWeightPU.Weight3DHistoFile   = "DefaultWeight3D.root"
+process.eventWeightPU.CreateWeight3DHisto = False
+process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
@@ -1215,8 +1215,8 @@ process.eventWeightPUsysUp.Weight3DName        = "eventWeightPU3DUp"
 process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 process.eventWeightPUsysUp.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 
-process.eventWeightPUsysUp.CreateWeight3DHisto = True
-process.eventWeightPUsysUp.Weight3DHistoFile   = "DefaultWeight3DUp.root"
+process.eventWeightPUsysUp.CreateWeight3DHisto = False
+process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
@@ -1225,8 +1225,8 @@ process.eventWeightPUsysDown.Weight3DName        = "eventWeightPU3DDown"
 process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 process.eventWeightPUsysDown.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 
-process.eventWeightPUsysDown.CreateWeight3DHisto = True
-process.eventWeightPUsysDown.Weight3DHistoFile   = "DefaultWeight3DDown.root"
+process.eventWeightPUsysDown.CreateWeight3DHisto = False
+process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
 process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
                                           process.eventWeightPUsysUp   *
