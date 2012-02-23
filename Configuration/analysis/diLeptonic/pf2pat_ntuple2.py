@@ -8,7 +8,7 @@ import os
 # global job options
 
 MAXEVENTS = -1
-REPORTEVERY = 100
+REPORTEVERY = 10000
 WANTSUMMARY = True
 
 ####################################################################
@@ -416,29 +416,43 @@ if signal:
 
 # Pileup Reweighting
 eventWeightPuTag = cms.InputTag('eventWeightPU', 'eventWeightPU')
-eventWeightPuTag_Up = cms.InputTag('eventWeightPU', 'eventWeightPUUp')
-eventWeightPuTag_Down = cms.InputTag('eventWeightPU', 'eventWeightPUDown')
+eventWeightPuTag_Up = cms.InputTag('eventWeightPUsysUp', 'eventWeightPUUp')
+eventWeightPuTag_Down = cms.InputTag('eventWeightPUsysDown', 'eventWeightPUDown')
 # lepton SF
 eventWeightDileptonSfTag = cms.InputTag('eventWeightDileptonSF', 'eventWeightDileptonSF')
 
 
 if options.runOnMC:
     process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-    #process.eventWeightPU.MCSampleFile = cms.FileInPath(mcpufile)
-    #process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
-    process.eventWeightPU.MCSampleFile   = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPU.MCSample3DFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPU.DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
-    process.eventWeightPU.Data3DFile   = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
-    process.eventWeightPU.Weight3DHistoFile   = cms.string(os.getenv("CMSSW_BASE") + "/src/TopAnalysis/TopUtils/data/DefaultWeight3D.root")
+    process.eventWeightPU        = process.eventWeightPU.clone()
+    process.eventWeightPUsysUp   = process.eventWeightPU.clone()
+    process.eventWeightPUsysDown = process.eventWeightPU.clone()
+
+    process.eventWeightPU.WeightName          = "eventWeightPU"
+    process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
+    process.eventWeightPU.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPU.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
+    process.eventWeightPU.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
+    process.eventWeightPU.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3D.root")
 
     #Systematics: PU Up/Down
-    process.eventWeightPU.PUSysShiftUp      = cms.double(0.6)
-    process.eventWeightPU.PUSysShiftDown    = cms.double(-0.6)
-    #eventWeightPuTag = cms.InputTag('eventWeightPU', 'eventWeightPUUp')
-    #eventWeightPuTag = cms.InputTag('eventWeightPU', 'eventWeightPUDown')
-    #MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_Summer11_S4_pileupD50.root"),
-    #DataFile     = cms.FileInPath("TopAnalysis/TopUtils/data/PUdist_PromtV4_160404-167784.root"),
+    process.eventWeightPUsysUp.WeightName         = "eventWeightPUUp"
+    process.eventWeightPUsysUp.Weight3DName       = "eventWeightPU3DUp"
+    process.eventWeightPUsysUp.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPUsysUp.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root")
+    process.eventWeightPUsysUp.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root")
+    process.eventWeightPUsysUp.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3DUp.root")
+
+    process.eventWeightPUsysDown.WeightName         = "eventWeightPUDown"
+    process.eventWeightPUsysDown.Weight3DName       = "eventWeightPU3DDown"
+    process.eventWeightPUsysDown.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPUsysDown.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
+    process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root")
+    process.eventWeightPUsysDown.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root")
+    process.eventWeightPUsysDown.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3DDown.root")
+
 else:
     process.eventWeightPU = cms.Sequence()
 
@@ -984,6 +998,8 @@ process.p = cms.Path(
 
 process.pZWindow = cms.Path(
     process.eventWeightPU                 *
+    process.eventWeightPUsysUp            *
+    process.eventWeightPUsysDown          *
     process.filterTrigger                 *
     process.buildJets                     *
     process.filterOppositeCharge          *
@@ -1056,6 +1072,8 @@ for pathname in pathnames:
         process.topsequence *
         process.zsequence *
         process.eventWeightPU *
+        process.eventWeightPUsysUp *
+        process.eventWeightPUsysDown *
         process.analyzeTrigger *
         process.filterTrigger
         ))
@@ -1068,6 +1086,8 @@ if signal:
     process.genPath = cms.Path(
         process.topsequence *
         process.eventWeightPU *
+        process.eventWeightPUsysUp *
+        process.eventWeightPUsysDown *
         process.analyzeGenTopEvent *
         process.generatorTtCutsLeptons    *
         process.generatorTtCutsBJets *
