@@ -231,6 +231,11 @@ namespace semileptonic {
     // chosen, the corresponding systematic shifted
     // SF is returned
 
+    if(sys>=ENDOFSYSENUM){
+      std::cout << "ERROR in effSFAB:" << std::endl;
+      std::cout << "sys must be smaller than " << ENDOFSYSENUM << std::endl;
+    }
+
     // SF is now applied as event weight in analyzer
     //return 1.0;
 
@@ -241,7 +246,7 @@ namespace semileptonic {
     }
     else if (decayChannel.compare("electron")==0) {
       // result = 0.9658; 
-      result = 1.; // SF is now applied as event weight in analyzer
+      result = 1.0; // SF is now applied as event weight in analyzer
     }
     // errors for the derived SF
     //double errorUp   = 0.03*result;
@@ -1425,6 +1430,22 @@ namespace semileptonic {
   }
 
   bool plotExists(std::map< TString, std::map <unsigned int, TH1F*> > histo_, const TString plotName, const unsigned int sample)
+  {
+    // this function checks the existence of an specific
+    // entry "histo_[plotName][sample]" in the map "histo_"
+    // that contains all 1D plots
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+
+    bool result=false;
+    if((histo_.count(plotName)>0)&&(histo_[plotName].count(sample)>0)){
+      result=true;
+    }
+    return result;
+  }
+
+  bool plotExists(std::map< TString, std::map <unsigned int, TH2F*> > histo_, const TString plotName, const unsigned int sample)
   {
     // this function checks the existence of an specific
     // entry "histo_[plotName][sample]" in the map "histo_"
@@ -2698,6 +2719,38 @@ namespace semileptonic {
     }
     //draw central value
     if(!drawOnlyErrors) result->Draw("hist c same"); 
+  }
+
+  int regParameter(TString variable, int verbose){
+    // this function returns k/value for SVD 
+    // unfolding for the corresponding variable
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    // variable: name of variable
+    // verbose: level of output
+    
+    // NB: k-value should be independent from decay channel
+    // NB: at the moment k=N(bins) is used!
+    int k=-1;
+    if(variable.Contains("ttbarMass")) k=5;
+    else if(variable.Contains("ttbarPt"  )) k=5;
+    else if(variable.Contains("ttbarY"   )) k=8;
+    else if(variable.Contains("topPt"    )) k=5;
+    else if(variable.Contains("topY"     )) k=8;
+    else if(variable.Contains("lepPt"    )) k=13;
+    else if(variable.Contains("lepEta"   )) k=14;
+    else if(variable.Contains("bqPt"     )) k=5;
+    else if(variable.Contains("bqEta"    )) k=8;
+    // output
+    if(verbose>1) std::cout << "k(" << variable << ") = " << k << std::endl;
+    // check result
+    if(k<=0){
+      std::cout << "ERROR in regParameter:" << std::endl; 
+      std::cout << "invalid k=" << k << " for variable " << variable << std::endl;
+    }
+    // return result
+    return k;
   }
 
 #ifdef DILEPTON_MACRO
