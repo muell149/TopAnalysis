@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.15 2012/02/22 12:26:15 wbehrenh Exp $
+// $Id: NTupleWriter.cc,v 1.16 2012/02/23 15:09:17 tdorland Exp $
 //
 //
 
@@ -92,7 +92,6 @@ private:
   void AssignLeptonAndTau ( const reco::GenParticle* lepton, LV &GenLepton, int &pdgid, LV &GenTau );
   bool isTau( const reco::GenParticle* lepton);
   const reco::GenParticle* getTauDaughter(const reco::GenParticle* tau);
-  const reco::Candidate* motherparticle(const reco::Candidate* particle);
   // ----------member data ---------------------------
 
   std::map<std::string, int> triggerMap_;
@@ -104,6 +103,8 @@ private:
   edm::InputTag genJets_;
   edm::InputTag bIndex_;
   edm::InputTag antiBIndex_;
+  edm::InputTag bHadJetIdx_;
+  edm::InputTag antibHadJetIdx_;
 
   bool includeTrig_, isTtBarSample_;
   edm::InputTag dType_ , trigResults_, decayMode_;
@@ -152,6 +153,9 @@ private:
   std::vector<LV> HypWMinus;
   std::vector<int> HypJet0index;
   std::vector<int> HypJet1index;
+
+  std::vector<int>   VBHadJetIdx;
+  std::vector<int>   VAntiBHadJetIdx;
 
   int decayMode;
 
@@ -247,6 +251,9 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   bIndex_    (iConfig.getParameter<edm::InputTag>("BJetIndex")),
   antiBIndex_(iConfig.getParameter<edm::InputTag>("AntiBJetIndex")),
 
+  bHadJetIdx_(iConfig.getParameter<edm::InputTag> ("BHadJetIndex")),
+  antibHadJetIdx_(iConfig.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
+
   includeTrig_ ( iConfig.getParameter<bool> ( "includeTrigger" ) ),
   isTtBarSample_ ( iConfig.getParameter<bool> ( "isTtBarSample" ) ),
 
@@ -306,21 +313,6 @@ NTupleWriter::getTauDaughter(const reco::GenParticle* tau)
   return tau;
 }
 
-
-const reco::Candidate*
-NTupleWriter::motherparticle(const reco::Candidate* particle){
-  const reco::Candidate* tempparticle = particle;
-  int stopper = 0;
-  while(stopper == 0){
-    if (tempparticle->mother() == 0) {stopper =1;}
-    else if (abs(tempparticle->pdgId())<500 && abs(tempparticle->pdgId()) != 6 && abs(tempparticle->pdgId()) != 5) 	{tempparticle = tempparticle->mother();}
-    else if (abs(tempparticle->pdgId())/100==5 || abs(tempparticle->pdgId())/1000==5)				{stopper = 1;}//B-hadron particle
-    else if (abs(tempparticle->pdgId()) == 6 )									{stopper = 1;}//top particle
-    else if (abs(tempparticle->pdgId()) == 2212)								{stopper = 1;}//proton particle
-    else	 				{tempparticle = tempparticle->mother();};
-  }
-  return tempparticle;
-}
 
 
 //
@@ -419,54 +411,21 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         iEvent.getByLabel(genJets_, genJets);
         if (*BJetIndex >= 0) (HadronGenB = genJets->at(*BJetIndex).p4());
         if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
-	  
-	  
-        for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
-          VallGenJets.push_back(aJet->p4());
-	  
-	  int nconstit = aJet->nConstituents();
-	  for (int i = 0; i<nconstit; ++i){
-	    const reco::Candidate* constituent = dynamic_cast<const reco::Candidate*>(aJet->getGenConstituent(i));
-	    const reco::Candidate* mother = motherparticle(constituent);
-	    if (abs(mother->pdgId())>=500 && (abs(mother->pdgId())/100==5 || abs(mother->pdgId())/1000==5)) {
-	      VmotherparticlePdgId.push_back(mother->pdgId());
-	      Vmotherparticle.push_back(mother->p4());
-	      VgenjetfromBhadron.push_back(1);
-	      break;
-	    }
-	    else if (i == nconstit-1) {
-	      VmotherparticlePdgId.push_back(mother->pdgId());
-	      Vmotherparticle.push_back(mother->p4());
-	      VgenjetfromBhadron.push_back(0);
-	    }
-	  }
-        }//end 'for' loop
-         
-        VgenjetfromBhadronClone=VgenjetfromBhadron;
-        for (int i=0; i<(int)VallGenJets.size(); ++i){VMotherDeltaRParticle.push_back(10e10);}; //filling with dummy variable
-         
-	for (int i=0; i<(int)VallGenJets.size(); ++i){
-	  TLorentzVector TLV1(VallGenJets.at(i).Px(), VallGenJets.at(i).Py(), VallGenJets.at(i).Pz(), VallGenJets.at(i).E());
-	  TLorentzVector TLV2(Vmotherparticle.at(i).Px(), Vmotherparticle.at(i).Py(), Vmotherparticle.at(i).Pz(), Vmotherparticle.at(i).E());
-	  if(TLV1.Pt() != 0 && TLV2.Pt() != 0){
-	    double deltar1= TLV1.DeltaR(TLV2);
-	    VMotherDeltaRParticle.at(i)=deltar1;
-	  }
-	};
 	
-	for (int i=0; i<((int)VallGenJets.size())-1;++i ){
-	  for (int j=i+1; j<(int)VallGenJets.size(); ++j){
-	    if (VgenjetfromBhadron.at(i) == 1 && VgenjetfromBhadron.at(j) == 1 && VmotherparticlePdgId.at(i) == VmotherparticlePdgId.at(j) && Vmotherparticle.at(i) == Vmotherparticle.at(j)){
-	      if(VMotherDeltaRParticle.at(i)<VMotherDeltaRParticle.at(j)){
-		VgenjetfromBhadron.at(j) = 0;
-	      }
-	    }
-	  }
+
+	edm::Handle<std::vector<int> > BHadJetIndex;
+	iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
+	edm::Handle<std::vector<int> > AntiBHadJetIndex;
+	iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
+	
+        for (int i=0; i<(int) BHadJetIndex->size(); i++){  VBHadJetIdx.push_back(BHadJetIndex->at(i));};
+	for (int i=0; i<(int) AntiBHadJetIndex->size(); i++){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
+	
+	for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
+          VallGenJets.push_back(aJet->p4());
 	}
 
-	
-	  
-        }
+      }
       else
         {
           std::cerr << "Error: no gen event?!\n";
@@ -730,10 +689,10 @@ NTupleWriter::beginJob()
     Ntuple->Branch("GenParticleStatus.", &GenParticleStatus);
     Ntuple->Branch("GenJetHadronB",&HadronGenB);
     Ntuple->Branch("GenJetHadronAntiB",&HadronGenAntiB);
-    Ntuple->Branch("GenJetFromBHad", &VgenjetfromBhadron);
-//    Ntuple->Branch("GenJetFromBHadClone", &VgenjetfromBhadronClone);
-//     Ntuple->Branch("GenJetMother", &Vmotherparticle);
-//     Ntuple->Branch("GenJetMotherpdgId", &VmotherparticlePdgId);
+
+    Ntuple->Branch("BHadJetIndex", &VBHadJetIdx);
+    Ntuple->Branch("AntiBHadJetIndex", &VAntiBHadJetIdx);
+
   }
 
   //Hypothesis Info
