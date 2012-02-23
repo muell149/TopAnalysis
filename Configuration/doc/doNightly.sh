@@ -15,6 +15,8 @@ cmsrel CMSSW_4_2_8_patch7
 cd CMSSW_4_2_8_patch7/src
 cmsenv
 
+echo "+++ Retrieving code from the CVS repository..."
+
 cvs -Q checkout -r V06-04-19 DataFormats/PatCandidates
 cvs -Q checkout -r V08-03-17 PhysicsTools/Utilities
 cvs -Q checkout -r V06-07-13 TopQuarkAnalysis/TopEventSelection 
@@ -25,7 +27,10 @@ cvs -Q checkout -r V06-07-13 TopQuarkAnalysis/TopEventSelection
 
 cvs -Q checkout -d TopAnalysis -r HEAD UserCode/Bromo/TopAnalysis
 
+showtags
 showtags -r -t > $docDir/showtags.txt
+
+echo "+++ Compiling..."
 
 scram b > scram.txt 2> scram.txt
 if [ -e $docDir/scram.txt ]
@@ -42,19 +47,22 @@ if [ `grep -ic error scram.txt` -eq 0 ]
     then
     if [ `grep -ic warning scram.txt` -eq 0 ]
 	then
+	echo "+++ No errors or warnings from SCRAM."
 	cp $docDir/passed.jpg $docDir/scram.jpg
     else
-	echo "+++ Got warnings from scram!"
+	echo "+++ Got warnings from SCRAM!"
 	cp $docDir/warnings.jpg $docDir/scram.jpg
     fi
 else
     cp $docDir/errors.jpg $docDir/scram.jpg
-    echo "+++ Got errors from scram!"
+    echo "+++ Got errors from SCRAM!"
 fi
 
 ############################################################
 # run the libchecker
 ############################################################
+
+echo "+++ Checking libraries with the libchecker..."
 
 if [ -e $docDir/libchecker.txt ]
     then
@@ -69,6 +77,8 @@ done
 ############################################################
 # generate code documentation using doxygen
 ############################################################
+
+echo "+++ Running doxygen to update documentation..."
 
 rm -f $docDir/*.html
 rm -f $docDir/*.png
