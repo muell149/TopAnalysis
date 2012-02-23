@@ -1,9 +1,11 @@
 #include "basicFunctions.h"
+#include "../../unfolding/TopSVDFunctions.h" 
+#include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
-			     std::string decayChannel = "muon" )
+			     std::string decayChannel = "muon", bool SVDunfold=false)
 {
   // ============================
   //  Set ROOT Style
@@ -73,6 +75,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
   // save: save plots?
+  // SVDunfold: use SVD instead of bin to bin unfolding
   // luminosity: [/pb]
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));  
   // b) options to be configured only once
@@ -99,6 +102,12 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
+  // create list of variables you would like to create the efficiency / cross section for
+  std::vector<TString> xSecVariables_, xSecLabel_;
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "bqPt", "bqEta"};
+  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[#frac{GeV}{c}]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[#frac{GeV}{c}]", "m_{t#bar{t}}/[#frac{GeV}{c^{2}}]", "y^{t#bar{t}}/ ", "p_{T}^{#mu}/[#frac{GeV}{c}]" , "#eta^{#mu}/ ", "p_{T}^{b and #bar{b}}/[#frac{GeV}{c}]" , "#eta^{b and #bar{b}}/ "};
+  xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
+  xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
 
   switch (systematicVariation)
   {
@@ -296,51 +305,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
    "analyzeHypoKinFitLeptonCorr/leptonPullPhiKinFitRec",
    "analyzeHypoKinFitLeptonCorr/leptonPullPhiKinFitPartonTruth",
    "analyzeHypoKinFitLeptonCorr/leptonPullPhiRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi5/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLeptonChi5/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi5/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi5/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLeptonChi5/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi5/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi5/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLeptonChi5/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi5/leptonPullPhiRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi10/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLeptonChi10/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi10/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi10/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLeptonChi10/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi10/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi10/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLeptonChi10/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi10/leptonPullPhiRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi15/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLeptonChi15/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi15/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi15/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLeptonChi15/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi15/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi15/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLeptonChi15/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi15/leptonPullPhiRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi30/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLeptonChi30/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi30/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi30/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLeptonChi30/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi30/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi30/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLeptonChi30/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi30/leptonPullPhiRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi50/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLeptonChi50/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi50/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi50/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLeptonChi50/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi50/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLeptonChi50/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLeptonChi50/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonChi50/leptonPullPhiRecPartonTruth",
    // (ii) neutrino
    "analyzeHypoKinFitMET/neutrinoPullPtKinFitRec",
    "analyzeHypoKinFitMET/neutrinoPullPtKinFitPartonTruth",
@@ -360,52 +324,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
    "analyzeHypoKinFitMETCorr/neutrinoPullPhiKinFitRec",
    "analyzeHypoKinFitMETCorr/neutrinoPullPhiKinFitPartonTruth",
    "analyzeHypoKinFitMETCorr/neutrinoPullPhiRecPartonTruth",
-   "analyzeHypoKinFitMETChi5/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMETChi5/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi5/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMETChi5/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMETChi5/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi5/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMETChi5/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMETChi5/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi5/neutrinoPullPhiRecPartonTruth",
-   "analyzeHypoKinFitMETChi10/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMETChi10/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi10/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMETChi10/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMETChi10/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi10/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMETChi10/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMETChi10/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi10/neutrinoPullPhiRecPartonTruth",
-   "analyzeHypoKinFitMETChi15/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMETChi15/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi15/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMETChi15/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMETChi15/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi15/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMETChi15/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMETChi15/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi15/neutrinoPullPhiRecPartonTruth",
-   "analyzeHypoKinFitMETChi30/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMETChi30/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi30/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMETChi30/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMETChi30/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi30/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMETChi30/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMETChi30/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi30/neutrinoPullPhiRecPartonTruth",
-   "analyzeHypoKinFitMETChi50/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMETChi50/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi50/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMETChi50/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMETChi50/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi50/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMETChi50/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMETChi50/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMETChi50/neutrinoPullPhiRecPartonTruth",
-
    // (iii) hadronic b jet
    "analyzeHypoKinFitJets/hadBQuarkPullPtKinFitRec",
    "analyzeHypoKinFitJets/hadBQuarkPullPtKinFitPartonTruth",
@@ -425,51 +343,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
    "analyzeHypoKinFitJetsCorr/hadBQuarkPullPhiKinFitRec",
    "analyzeHypoKinFitJetsCorr/hadBQuarkPullPhiKinFitPartonTruth",
    "analyzeHypoKinFitJetsCorr/hadBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/hadBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/hadBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/hadBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/hadBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/hadBQuarkPullPhiRecPartonTruth",
    // (iv) leptonic b jet
    "analyzeHypoKinFitJets/lepBQuarkPullPtKinFitRec",
    "analyzeHypoKinFitJets/lepBQuarkPullPtKinFitPartonTruth",
@@ -489,51 +362,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
    "analyzeHypoKinFitJetsCorr/lepBQuarkPullPhiKinFitRec",
    "analyzeHypoKinFitJetsCorr/lepBQuarkPullPhiKinFitPartonTruth",
    "analyzeHypoKinFitJetsCorr/lepBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lepBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lepBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lepBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lepBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lepBQuarkPullPhiRecPartonTruth",
    // (v) light jets
    "analyzeHypoKinFitJets/lightQuarkPullPtKinFitRec",
    "analyzeHypoKinFitJets/lightQuarkPullPtKinFitPartonTruth",
@@ -553,63 +381,18 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
    "analyzeHypoKinFitJetsCorr/lightQuarkPullPhiKinFitRec",
    "analyzeHypoKinFitJetsCorr/lightQuarkPullPhiKinFitPartonTruth",
    "analyzeHypoKinFitJetsCorr/lightQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi5/lightQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi10/lightQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi15/lightQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi30/lightQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsChi50/lightQuarkPullPhiRecPartonTruth"
  };
 
 
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
     "analyzeHypoKinFit/mapKinFit_"                                          ,
-    // b) reconstructed top quantities
+    // b) response matrix top quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_"     ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"       ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
-    // c) reconstructed ttbar quantities
+    // c) response matrix ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass_"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt_"    ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY_"     ,
@@ -617,9 +400,12 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
-    // d) reconstructed lepton quantities
+    // d) response matrix lepton quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepPt_"      ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta_"     ,
+    // e) response matrix b-quark quantities
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqPt_"       ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqEta_"      ,   
   };
 
   // b) list plot axes style
@@ -686,12 +472,12 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
-    // b) reconstructed Top quantities
+    // b) response matrix Top quantities
     "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] gen/p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] reco",
     "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
     "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco",
     "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
-    // c) reconstructed ttbar quantities
+    // c) response matrix ttbar quantities
     "m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco",
     "p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco",
     "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
@@ -699,9 +485,12 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
-    // d) reconstructed lepton quantities
+    // d) response matrix lepton quantities
     "p_{T}^{l} #left[#frac{GeV}{c}#right] gen/p_{T}^{l} #left[#frac{GeV}{c}#right] reco",
     "#eta^{l} gen/#eta^{l} reco",           
+    // e) response matrix b-quark quantities
+    "p_{T}^{b or #bar{b}} #left[#frac{GeV}{c}#right] gen/p_{T}^{b or #bar{b}} #left[#frac{GeV}{c}#right] reco",
+    "#eta^{b or #bar{b}} gen/#eta^{b or #bar{b}} reco",           
   };
   TString axisLabel1Dadd[ ] = {
     // generated angular distributions
@@ -808,52 +597,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (correct permutation)/0/10",
     "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (correct permutation)/0/10",
     "#phi^{lep Rec}-#phi^{lep parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency (#chi^{2}<50)/0/10",
-
     // (ii) neutrino
     "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency/0/10",
     "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency/0/10",
@@ -873,51 +616,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (correct permutation)/0/10",
     "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (correct permutation)/0/10",
     "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (#chi^{2}<50)/0/10",
     // (iii) hadronic b jet
     "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency/0/10",
     "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency/0/10",
@@ -937,51 +635,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (correct permutation)/0/10",
     "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (correct permutation)/0/10",
     "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (#chi^{2}<50)/0/10",
     // (iv) leptonic b jet
     "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency/0/10",
     "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency/0/10",
@@ -1001,51 +654,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (correct permutation)/0/10",
     "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (correct permutation)/0/10",
     "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (#chi^{2}<50)/0/10",
     // (v) light jets
     "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency/0/10",
     "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency/0/10",
@@ -1065,53 +673,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
     "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (correct permutation)/0/10",
     "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (correct permutation)/0/10",
     "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (#chi^{2}<5)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (#chi^{2}<10)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (#chi^{2}<15)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (#chi^{2}<30)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (#chi^{2}<50)/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (#chi^{2}<50)/0/10"
   };
-
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
@@ -1229,6 +791,26 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
     }
   }
+  // -------------------------------------------
+  // clone relevant plots for SVD unfolding xSec
+  // -------------------------------------------
+  for(unsigned int var=0; var<xSecVariables_.size(); ++var){
+    TString variable=xSecVariables_[var];
+    // create combined BG reco plot
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
+    for(int bgsample=kZjets; bgsample<=kDiBos; ++bgsample){
+      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone());
+    }
+    // data event yield
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone();
+    // signal reco plot
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone();
+    // signal gen plot
+    histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone();
+    // response matrix plot
+    histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable+"_"][kSig]->Clone();
+  }
+  
   // ---
   //    rebinning 1D histograms
   // ---
@@ -1284,12 +866,6 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   // ---
   // count # of efficiency histos
   unsigned int NMCeff=0;
-  // create list of variables you would like to create the efficiency / cross section for
-  std::vector<TString> xSecVariables_, xSecLabel_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "bqPt", "bqEta"};
-  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[#frac{GeV}{c}]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[#frac{GeV}{c}]", "m_{t#bar{t}}/[#frac{GeV}{c^{2}}]", "y^{t#bar{t}}/ ", "p_{T}^{#mu}/[#frac{GeV}{c}]" , "#eta^{#mu}/ ", "p_{T}^{b and #bar{b}}/[#frac{GeV}{c}]" , "#eta^{b and #bar{b}}/ "};
-  xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
-  xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
   // loop all variables
   for(unsigned int number=0; number<xSecVariables_.size(); ++number){
     TString variable=xSecVariables_[number];    
@@ -1366,7 +942,7 @@ TString efficiency="efficiency/"+variable;
     if(!plotExists(histo_, "efficiency/"+variable, kSig)){
       calculateXSec=false;
     }
-    if(calculateXSec){
+    if(calculateXSec&&!SVDunfold){
       // a) differential XSec from data
       // get data plot
       TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
@@ -1505,191 +1081,383 @@ TString efficiency="efficiency/"+variable;
   // ---
   //    differential normalized cross section (phase space) determination
   // ---
-  // loop all variables
-  for(unsigned int number=0; number<xSecVariables_.size(); ++number){
-    TString variable=xSecVariables_[number];
-    TString label =getStringEntry(xSecLabel_[number],1);
-    TString label2=getStringEntry(xSecLabel_[number],2);
-    if(label2=="[#frac{GeV}{c}]") label2="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
-    else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
-    else if(label2==" ") label2="";
-    TString xSec ="xSecNorm/"+variable;
-    bool calculateXSec=true;
-    // loop samples 
-    for(unsigned int sample=kSig; sample<=kData; ++sample){
-      // check if reco MC plot and data event yield plots are available
-      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, sample)){
+  if(!SVDunfold){
+    // loop all variables
+    for(unsigned int number=0; number<xSecVariables_.size(); ++number){
+      TString variable=xSecVariables_[number];
+      TString label =getStringEntry(xSecLabel_[number],1);
+      TString label2=getStringEntry(xSecLabel_[number],2);
+      if(label2=="[#frac{GeV}{c}]") label2="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
+      else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+      else if(label2==" ") label2="";
+      TString xSec ="xSecNorm/"+variable;
+      bool calculateXSec=true;
+      // loop samples 
+      for(unsigned int sample=kSig; sample<=kData; ++sample){
+	// check if reco MC plot and data event yield plots are available
+	if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, sample)){
+	  calculateXSec=false;
+	}
+      }
+      // check if efficiency plot is available
+      if(!plotExists(histo_, "efficiency/"+variable, kSig)){
 	calculateXSec=false;
       }
-    }
-    // check if efficiency plot is available
-    if(!plotExists(histo_, "efficiency/"+variable, kSig)){
-      calculateXSec=false;
-    }
-    if(calculateXSec){
-      // a) differential norm XSec from data
-      // get data plot
-      TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
-      histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(name));
-      // total number of data events for this variable
-      double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData],verbose-1);
-      // total number of BG events for this variable
-      double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets],verbose-1);
-      // NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
-      // BG from other ttbar events is treated in the signal fraction
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ],verbose-1);
-      NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets],verbose-1);
-      // ttbar signal fraction
-      double NttbarAll=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig],verbose-1);
-      NttbarAll+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
-      double sigFracVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig],verbose-1);
-      sigFracVariable/=NttbarAll;
-      // inclusive efficiency (* A) for this variable
-      double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kSig],verbose-1);
-      effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig],verbose-1);
-      // loop bins
-      for(int bin =0; bin<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin){
-	// for inclusive values of xSecResult, effA, BR, Ndata and NBG 
-	// which are used in the calculation are taken from section
-	// "total inclusive cross section (ttbar->X) determination" above
-	// remark: event numbers are taken from yield plots-> *binwidth
-	// get data entries in bin
-
-	// get binwidth
-	double binwidth=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinWidth(bin);
-	double NdataBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin);
-	NdataBin*=binwidth;
-	// get BG in bin
-	double NBGBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin);
-	//NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
+      if(calculateXSec){
+	// a) differential norm XSec from data
+	// get data plot
+	TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
+	histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(name));
+	// total number of data events for this variable
+	double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData],verbose-1);
+	// total number of BG events for this variable
+	double NBGVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets],verbose-1);
+	// NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
 	// BG from other ttbar events is treated in the signal fraction
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin);
-	NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin);
-	NBGBin*=binwidth;
+	NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ],verbose-1);
+	NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos],verbose-1);
+	NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ],verbose-1);
+	NBGVariable+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets],verbose-1);
 	// ttbar signal fraction
-	double NttbarAllBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
-	NttbarAllBin      +=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
-	double sigFracBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
-	sigFracBin/=NttbarAllBin;
-	if(!isfinite(sigFracBin)||isnan(sigFracBin)) sigFracBin=1;
-	// calculate Ni = number of ttbar only events in bin from data
-	double Ni= NdataBin-NBGBin;
-	// calculate Ntot = sum_i(Ni) number of signal only events from data for this variable
-	double Ntot =NdataVariable-NBGVariable;
-	// get eff*A in bin
-	double effABin=(histo_["efficiency/"+variable][kSig])->GetBinContent(bin);
-	// calculate cross section for this bin
-	double xSecBin = (Ni/Ntot) * (sigFracBin/sigFracVariable) * (effIncl/effABin) * (1/binwidth);
-	// calculate complete error
- 	double Nierror=sqrt(NdataBin); // the error of NBG is treated as systematic variation
-	double sumErrorNjSquare = 0; // sum(j,i!=j) [ errorNj*errorNj ]
-	for(int bin2=1; bin2<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin2){
-	  if(bin2!=bin){    
-	    double errorNj = sqrt( histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin2) 
-				   * (histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinWidth(bin2)) );   
-	    // remark: Nj=NdataBinj-NBGBinj, as above, the error of NBGBinj is treated 
-	    // as systematic variation and therefore not incorporated here
-	    sumErrorNjSquare += errorNj*errorNj;
-	  }
-	}
-	// calculate complete error
-	double xSecBinError = sqrt( ((Ntot - Ni)*(Ntot - Ni)*Nierror*Nierror) + (Ni*Ni*sumErrorNjSquare) );
-	xSecBinError/= (Ntot*Ntot);
-	xSecBinError*= (effIncl/effABin) * (sigFracBin/sigFracVariable) * (1/binwidth);
-	// check for ambiguities
-	if(!isfinite(xSecBin)||isnan(xSecBin)){
-	  if(verbose>1){ 
-	    std::cout << "bin " << bin << " in ";
-	    std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable;
-	    std::cout << "gives no valid cross section!" << std::endl;
-	    std::cout << "!will set this bin to 0!" << std::endl;
-	  }
-	  xSecBin=0;	 
-	  xSecBinError=0;
-	}
-	// set underflow/overflow to 0
-	// because of infinite binwidth
-	if(bin==0||bin==histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1){
-	  xSecBinError=0;
-	  xSecBin=0;
-	}
-	// check calculation for one example bin
-	TString testVar  = "ttbarPt";
-	TString testVar2 = "ttbarMass";
-	int testBin=0;
-	if(verbose>0&&xSecBin!=0&&(variable==testVar||variable==testVar2)&&bin==testBin){
-	  std::cout << std::endl << "differential normalized xSec ";
-	  std::cout << variable+" bin " << bin << ":" << std::endl;
-	  std::cout << "binwidth:             " << std::setprecision(3) << std::fixed << binwidth << std::endl;
-	  std::cout << "Ndata(bin):           " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
-	  std::cout << "NBG(bin):             " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
-	  std::cout << "eff*A(bin):           " << std::setprecision(3) << std::fixed << effABin << std::endl;
-	  std::cout << "ttbar sig frac(bin):  " << std::setprecision(3) << std::fixed << sigFracBin << std::endl;
-	  std::cout << "Ndata(incl):          " << std::setprecision(3) << std::fixed << NdataVariable << std::endl;
-	  std::cout << "NBG(incl):            " << std::setprecision(3) << std::fixed << NBGVariable << std::endl;
-	  std::cout << "eff*A(incl):          " << std::setprecision(3) << std::fixed << effIncl << std::endl;
-	  std::cout << "ttbar sig frac(incl): " << std::setprecision(3) << std::fixed << sigFracVariable << std::endl;
-	  std::cout << "result:               " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
-	  if(extrapolate){
-	    double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
-	    std::cout << "from diff and incl. xSec: ";
-	    std::cout << std::setprecision(3) << std::fixed << xSecBinFromDiffAndIncl << std::endl;
-	    std::cout << "ratio: " << xSecBin/xSecBinFromDiffAndIncl << std::endl;
-	  }
-	}
-	// apply cross section and error to plot
-	histo_[xSec][kData]->SetBinContent(bin, xSecBin     );
-	histo_[xSec][kData]->SetBinError  (bin, xSecBinError);
-	//saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
-      }
-    }
-    if(verbose>1){
-      std::cout << "integral diff.norm.data distribution (" << variable << "): ";
-      std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
-    }
-    // b) differential normalized XSec from Signal(MC prediction)
-    histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
-    DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
-    double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig], verbose-1);
-    // exclude underflow and overflow bins because they are negligible and treated wrong
-    XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
-    XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
-    histo_[xSec][kSig]->Scale(1/(XSecInclTheoPS));
-    if(verbose>1){
-      std::cout << "integral diff.norm.MC distribution (" << variable << "): ";
-      std::cout << getInclusiveXSec(histo_[xSec][kSig],verbose-1) << std::endl;
-    }
-    // add plot to list of plots
-    plotList_.push_back(xSec);
-    // add axis configuration
-    unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
-    TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-    recoAxisLabel.ReplaceAll("KinFit ","");
-    //    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-    if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
-    // configure xSec plot histo style
-    histogramStyle(*histo_[xSec][kData], kData, false);
-    histogramStyle(*histo_[xSec][kSig ], kSig , false);
-    // restrict axis
-    setXAxisRange(histo_[xSec][kData], variable);
-    setXAxisRange(histo_[xSec][kSig ], variable);
-    ++NXSec;
-  }
-  //   std::cout << std::endl;
-  //   for(int bin=1; bin<=histo_["xSecNorm/ttbarPt"][kData]->GetNbinsX()+1; ++bin){
-  //     double value =histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin);
-  //     std::cout << "bin " << bin << ": " << value << std::endl;
-  //     if(!isfinite(value)||isnan(value)){
-  //       histo_["xSecNorm/ttbarPt"][kData]->SetBinContent(bin,0.);
-  //       std::cout << "bin " << bin << ": " << histo_["xSecNorm/ttbarPt"][kData]->GetBinContent(bin)<< std::endl;
+	double NttbarAll=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig],verbose-1);
+	NttbarAll+=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg],verbose-1);
+	double sigFracVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig],verbose-1);
+	sigFracVariable/=NttbarAll;
+	// inclusive efficiency (* A) for this variable
+	double effIncl= getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kSig],verbose-1);
+	effIncl/= getInclusiveXSec(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig],verbose-1);
+	// loop bins
+	for(int bin =0; bin<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin){
+	  // for inclusive values of xSecResult, effA, BR, Ndata and NBG 
+	  // which are used in the calculation are taken from section
+	  // "total inclusive cross section (ttbar->X) determination" above
+	  // remark: event numbers are taken from yield plots-> *binwidth
+	  // get data entries in bin
 
-  //     }	
-  //   }
+	  // get binwidth
+	  double binwidth=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinWidth(bin);
+	  double NdataBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin);
+	  NdataBin*=binwidth;
+	  // get BG in bin
+	  double NBGBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin);
+	  //NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
+	  // BG from other ttbar events is treated in the signal fraction
+	  NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin);
+	  NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin);
+	  NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin);
+	  NBGBin+=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin);
+	  NBGBin*=binwidth;
+	  // ttbar signal fraction
+	  double NttbarAllBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
+	  NttbarAllBin      +=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->GetBinContent(bin);
+	  double sigFracBin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
+	  sigFracBin/=NttbarAllBin;
+	  if(!isfinite(sigFracBin)||isnan(sigFracBin)) sigFracBin=1;
+	  // calculate Ni = number of ttbar only events in bin from data
+	  double Ni= NdataBin-NBGBin;
+	  // calculate Ntot = sum_i(Ni) number of signal only events from data for this variable
+	  double Ntot =NdataVariable-NBGVariable;
+	  // get eff*A in bin
+	  double effABin=(histo_["efficiency/"+variable][kSig])->GetBinContent(bin);
+	  // calculate cross section for this bin
+	  double xSecBin = (Ni/Ntot) * (sigFracBin/sigFracVariable) * (effIncl/effABin) * (1/binwidth);
+	  // calculate complete error
+	  double Nierror=sqrt(NdataBin); // the error of NBG is treated as systematic variation
+	  double sumErrorNjSquare = 0; // sum(j,i!=j) [ errorNj*errorNj ]
+	  for(int bin2=1; bin2<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1; ++bin2){
+	    if(bin2!=bin){    
+	      double errorNj = sqrt( histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(bin2) 
+				     * (histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinWidth(bin2)) );   
+	      // remark: Nj=NdataBinj-NBGBinj, as above, the error of NBGBinj is treated 
+	      // as systematic variation and therefore not incorporated here
+	      sumErrorNjSquare += errorNj*errorNj;
+	    }
+	  }
+	  // calculate complete error
+	  double xSecBinError = sqrt( ((Ntot - Ni)*(Ntot - Ni)*Nierror*Nierror) + (Ni*Ni*sumErrorNjSquare) );
+	  xSecBinError/= (Ntot*Ntot);
+	  xSecBinError*= (effIncl/effABin) * (sigFracBin/sigFracVariable) * (1/binwidth);
+	  // check for ambiguities
+	  if(!isfinite(xSecBin)||isnan(xSecBin)){
+	    if(verbose>1){ 
+	      std::cout << "bin " << bin << " in ";
+	      std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable;
+	      std::cout << "gives no valid cross section!" << std::endl;
+	      std::cout << "!will set this bin to 0!" << std::endl;
+	    }
+	    xSecBin=0;	 
+	    xSecBinError=0;
+	  }
+	  // set underflow/overflow to 0
+	  // because of infinite binwidth
+	  if(bin==0||bin==histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetNbinsX()+1){
+	    xSecBinError=0;
+	    xSecBin=0;
+	  }
+	  // check calculation for one example bin
+	  TString testVar  = "ttbarPt";
+	  TString testVar2 = "ttbarMass";
+	  int testBin=0;
+	  if(verbose>0&&xSecBin!=0&&(variable==testVar||variable==testVar2)&&bin==testBin){
+	    std::cout << std::endl << "differential normalized xSec ";
+	    std::cout << variable+" bin " << bin << ":" << std::endl;
+	    std::cout << "binwidth:             " << std::setprecision(3) << std::fixed << binwidth << std::endl;
+	    std::cout << "Ndata(bin):           " << std::setprecision(3) << std::fixed << NdataBin << std::endl;
+	    std::cout << "NBG(bin):             " << std::setprecision(3) << std::fixed << NBGBin << std::endl;
+	    std::cout << "eff*A(bin):           " << std::setprecision(3) << std::fixed << effABin << std::endl;
+	    std::cout << "ttbar sig frac(bin):  " << std::setprecision(3) << std::fixed << sigFracBin << std::endl;
+	    std::cout << "Ndata(incl):          " << std::setprecision(3) << std::fixed << NdataVariable << std::endl;
+	    std::cout << "NBG(incl):            " << std::setprecision(3) << std::fixed << NBGVariable << std::endl;
+	    std::cout << "eff*A(incl):          " << std::setprecision(3) << std::fixed << effIncl << std::endl;
+	    std::cout << "ttbar sig frac(incl): " << std::setprecision(3) << std::fixed << sigFracVariable << std::endl;
+	    std::cout << "result:               " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
+	    if(extrapolate){
+	      double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
+	      std::cout << "from diff and incl. xSec: ";
+	      std::cout << std::setprecision(3) << std::fixed << xSecBinFromDiffAndIncl << std::endl;
+	      std::cout << "ratio: " << xSecBin/xSecBinFromDiffAndIncl << std::endl;
+	    }
+	  }
+	  // apply cross section and error to plot
+	  histo_[xSec][kData]->SetBinContent(bin, xSecBin     );
+	  histo_[xSec][kData]->SetBinError  (bin, xSecBinError);
+	  //saveToRootFile(outputFileName, histo_[xSec][kData], true, verbose-1,"xSec/NormXSec");
+	}
+      }
+      if(verbose>1){
+	std::cout << "integral diff.norm.data distribution (" << variable << "): ";
+	std::cout << getInclusiveXSec(histo_[xSec][kData],verbose-1) << std::endl;
+      }
+      // b) differential normalized XSec from Signal(MC prediction)
+      histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
+      DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
+      double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig], verbose-1);
+      // exclude underflow and overflow bins because they are negligible and treated wrong
+      XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
+      XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
+      histo_[xSec][kSig]->Scale(1/(XSecInclTheoPS));
+      if(verbose>1){
+	std::cout << "integral diff.norm.MC distribution (" << variable << "): ";
+	std::cout << getInclusiveXSec(histo_[xSec][kSig],verbose-1) << std::endl;
+      }
+      // add plot to list of plots
+      plotList_.push_back(xSec);
+      // add axis configuration
+      unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
+      TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
+      recoAxisLabel.ReplaceAll("KinFit ","");
+      //    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+      // configure xSec plot histo style
+      histogramStyle(*histo_[xSec][kData], kData, false);
+      histogramStyle(*histo_[xSec][kSig ], kSig , false);
+      // restrict axis
+      setXAxisRange(histo_[xSec][kData], variable);
+      setXAxisRange(histo_[xSec][kSig ], variable);
+      ++NXSec;
+    }
+  }
+
+  // =======================================
+  //    use SVD unfolding for cross sections
+  // =======================================
+  if(SVDunfold){
+    // loop all variables
+    for(unsigned int number=0; number<xSecVariables_.size(); ++number){
+      // prepare style for xSec plots
+      TString variable=xSecVariables_[number];
+      TString labelNorm =getStringEntry(xSecLabel_[number],1);
+      TString label2Norm=getStringEntry(xSecLabel_[number],2);
+      if(label2Norm=="[#frac{GeV}{c}]") label2Norm="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
+      else if(label2Norm=="[#frac{GeV}{c^{2}}]") label2Norm="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+      else if(label2Norm==" ") label2Norm="";
+      TString label =getStringEntry(xSecLabel_[number],1);
+      TString label2=getStringEntry(xSecLabel_[number],2);
+      if(label2=="[#frac{GeV}{c}]")          label2="#left[pb #left(#frac{GeV}{c}#right)^{-1}#right]";
+      else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[pb #left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+      else if(label2==" ") label2="[pb]";
+      TString xSec ="xSec/"+variable;
+      TString xSecNorm ="xSecNorm/"+variable;
+      // -----------------------------------
+      // check availablility of input histos
+      // -----------------------------------
+      bool calculateXSec=true;
+      // check if BG reco plot is available
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable, kBkg)){
+	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable << " not found for BG" << std::endl;
+	calculateXSec=false;
+      }
+      // check if data event yield is available
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable, kData)){
+	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable << " not found for data" << std::endl;
+	calculateXSec=false;
+      }
+      // check if signal reco plot is available
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable, kSig)){
+	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable << " not found for signal" << std::endl;
+	calculateXSec=false;
+      }
+      // check if signal gen level plot is available
+      if(!plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable, kSig)){
+	std::cout << "warning: plot " << "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable << " not found for signal" << std::endl;
+	calculateXSec=false;
+      }
+      // check if response matrix plot is available
+      if(!plotExists(histo2_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_", kSig)){
+	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_" << " not found for signal" << std::endl;
+	calculateXSec=false;
+      }
+      // ----------------
+      // configure labels
+      // ----------------
+      // particle
+      TString particle="";
+      variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t and #bar{t}" : (variable.Contains("bq") ? particle="b and #bar{b}" : particle="unknown") ) );
+    
+      TString particleTex=particle;
+      particle.ReplaceAll("#","");
+      particle.ReplaceAll("{","");
+      particle.ReplaceAll("}","");
+      // quantity
+      TString quantity="";
+      variable.Contains("Mass") ? quantity="mass" : (variable.Contains("Pt") ? quantity="p_{t}" : (variable.Contains("Eta") ? quantity="#eta" : (variable.Contains("Y") ? quantity="y" : quantity="unknown") ) );
+      TString quantityTex=quantity;
+      quantity.ReplaceAll("#","");
+      quantity.ReplaceAll("{","");
+      quantity.ReplaceAll("}","");
+      // decay channel
+      TString channelTex="#mu";
+      if(decayChannel=="electron") channelTex="e";
+      TString rootFile="";
+      TString psFile="";
+      //if(save){ 
+      rootFile="diffXSecUnfoldTopSemi";
+      if(decayChannel=="muon"    ) rootFile+="Mu";
+      if(decayChannel=="electron") rootFile+="Elec";
+      rootFile+=dataSample+".root";
+      psFile=outputFolder+"unfolding/unfolding.ps";
+      //}
+      TString special="";
+      // -----------
+      // get binning
+      // -----------
+      int size=binning_[variable].size()-1;
+      // calculate number of considered bins for UF
+      int unfoldbins=size; 
+      // subtracting OF bin
+      if(!(variable.Contains("ttbarPt")||variable.Contains("ttbarMass"))) unfoldbins-=1;
+      // subtracting UF bin
+      unfoldbins-=1;
+      // no UF bin for distributions starting from 0 besides lepPT and ttbarMass
+      if(binning_[variable][0]==0.){  
+	if(!(variable.Contains("lepPt")||variable.Contains("ttbarMass"))) unfoldbins+=1;
+      }
+      double bins[size];
+      for(int bin=0; bin<=size; ++bin){
+	bins[bin]=binning_[variable][bin]; 
+	if(verbose>1) std::cout << "bin " << bin << ": " << bins[bin]<< std::endl;
+      }
+      if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
+      //    const double xSecbins[size]=bins;
+      // ----------------------
+      // use unfolding maschine
+      // ----------------------
+      if(calculateXSec){
+	TH1D* unfoldedData=new TH1D();
+	TopSVDFunctions::SVD_Unfold(
+	// Data Input (RAW Data including the background)
+	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
+	// Background (will be substracted from data)
+	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
+	// Generated MC
+	*&histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
+	// Reconstructed MC
+	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
+	// Response Matrix 
+	*&histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
+	// Binning for the unfolding
+	bins, 
+	// Number of bins for unfolding (not counting OF bins !!!)
+	unfoldbins, // -2 for deleting OF and UF bins  
+	// Regularization parameter
+	regParameter(variable, verbose), 
+	// Returned: Unfolded Distribution              
+	unfoldedData,
+	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
+	(TString)decayChannel,  
+	// Specify Name for the Physics Object ("Top", "Jets", "Leptons")      
+	particle,
+	// Specify Name for the Quantity ("Eta", "Pt", or "Mass");      
+	quantity,
+	// Specify Name for special run of unfolding
+	special, 
+	// Nicely formatted name for the channel
+	channelTex,
+	// Nicely formatted name for the physics object 
+	particleTex,
+	// Nicely formatted name for ithe quantity
+	quantityTex,
+	// Nicely formatted name indicating some special condition 
+	special,
+	// If specified, plots will be saved in ROOT File
+	rootFile,
+	// If specified, plots will be saved in PS File
+	psFile
+	);
+	// ---------------------------------------------
+	// remaining steps for cross section calculation
+	// ---------------------------------------------
+	histo_[xSecNorm][kData]=(TH1F*)unfoldedData->Clone();
+	// Normalization (incl. xSec and lumi)
+	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
+	histo_[xSec][kData]=(TH1F*)histo_[xSecNorm][kData]->Clone();
+	histo_[xSec    ][kData]->Scale(1./(luminosity));
+	histo_[xSecNorm][kData]->Scale(1./(histo_[xSecNorm][kData]->Integral(1,histo_[xSecNorm][kData]->GetNbinsX())*luminosity));
+	// divide by binwidth
+	histo_[xSecNorm][kData] = divideByBinwidth(histo_[xSecNorm][kData], verbose-1);
+	histo_[xSec    ][kData] = divideByBinwidth(histo_[xSec    ][kData], verbose-1);
+	// --------------
+	// styling issues
+	// --------------
+	// add plot to list of plots
+	plotList_.push_back(xSec);
+	plotList_.push_back(xSecNorm);
+	// add axis configuration
+	unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
+	TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
+	recoAxisLabel.ReplaceAll("KinFit ","");
+	axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+	axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+labelNorm+"} "+label2Norm+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+	// configure xSec plot histo style
+	histogramStyle(*histo_[xSecNorm][kData], kData, false);
+	// restrict axis
+	setXAxisRange(histo_[xSecNorm][kData], variable);
+	NXSec=NXSec+2;
+	// ------------------------------------------------------
+	// calculate differential XSec from Signal(MC prediction)
+	// ------------------------------------------------------
+	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
+	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
+	// lumi and efficiency
+	DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
+	DivideYieldByEfficiencyAndLumi(histo_[xSecNorm][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
+	// Normalization
+	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
+	double XSecInclTheoPS= (histo_[xSecNorm][kSig]->Integral(1,histo_[xSecNorm][kSig]->GetNbinsX()+1))/luminosity;
+	histo_[xSecNorm][kSig]->Scale(1/(XSecInclTheoPS));
+	// binwidth
+	histo_[xSecNorm][kSig] = divideByBinwidth(histo_[xSecNorm][kSig], verbose-1);
+	histo_[xSec    ][kSig] = divideByBinwidth(histo_[xSec    ][kSig], verbose-1);
+	// style
+	histogramStyle(*histo_[xSec][kSig ], kSig , false);
+	setXAxisRange(histo_[xSec][kSig ], variable);
+      }
+    
+    }
+  }
 
   // ===============================================================
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
