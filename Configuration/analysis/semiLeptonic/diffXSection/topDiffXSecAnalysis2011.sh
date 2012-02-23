@@ -26,6 +26,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/shapeReweighting
+## mkdir -p diffXSecFromSignal/plots/muon/2011/unfolding
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/monitoring
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/partonLevel
@@ -41,6 +42,7 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertainties
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertaintyDistributions
+## mkdir -p diffXSecFromSignal/plots/electron/2011/unfolding
 
 ## b) you don't need to copy root files needed for the Analysis 
 ##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/
@@ -52,11 +54,13 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"electron\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=1143.22
 ## dataset: 2010 or 2011
+#dataSample=\"./electronPseudoData1143pband750GeVZprime7TeV.root\"
+#dataSample=\"./muonPseudoData1143pband750GeVZprime7TeV.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
 dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/111124_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
