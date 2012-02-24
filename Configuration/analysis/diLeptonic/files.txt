@@ -22,8 +22,8 @@
 #189 Files TTJets
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarbg.root		   ttbarbg,runOnAOD=True
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         emu_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarbgv2.root		   ttbarbg,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarsignalplustauv2.root	   ttbarsignalplustau,runOnAOD=True
+350  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarbgv2.root		   ttbarbg,runOnAOD=True
+350  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         emu_ttbarsignalplustauv2.root	   ttbarsignalplustau,runOnAOD=True
 
 #884 Files in DY->Jets
 30  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       emu_dyee50inf.root           dyee50inf,runOnAOD=True
@@ -35,7 +35,7 @@
 30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       emu_dytautau1050.root       dytautau1050,runOnAOD=True
 
 
-#100  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py emu_wtolnu.root                 wjets,runOnAOD=True
+50  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py emu_wtolnu.root                 wjets,runOnAOD=True
 #50  Fall11.qcdmu15enriched_Pythia6_Fall11_AOD_cff  emu_qcdmu15.root qcdmu15,runOnAOD=True
 50  Fall11.qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff   emu_qcdem2030.root   qcdem2030,runOnAOD=True
 #50  Fall11.qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff   emu_qcdem3080.root   qcdem3080,runOnAOD=True
@@ -62,8 +62,8 @@
 #189 Files TTJets
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         mumu_ttbarbg.root        ttbarbg,runOnAOD=True
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         mumu_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         mumu_ttbarbgv2.root        ttbarbg,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         mumu_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
+350  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         mumu_ttbarbgv2.root        ttbarbg,runOnAOD=True
+350  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         mumu_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
 
 
 
@@ -78,7 +78,7 @@
 30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       mumu_dytautau1050.root       dytautau1050,runOnAOD=True
 
 
-#100  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py mumu_wtolnu.root                 wjets,runOnAOD=True
+50  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py mumu_wtolnu.root                 wjets,runOnAOD=True
 #50  Fall11.qcdmu15enriched_Pythia6_Fall11_AOD_cff  mumu_qcdmu15.root qcdmu15,runOnAOD=True
 50  Fall11.qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff   mumu_qcdem2030.root   qcdem2030,runOnAOD=True
 #50  Fall11.qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff   mumu_qcdem3080.root   qcdem3080,runOnAOD=True
@@ -106,8 +106,8 @@
 #189 Files TTJets
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         ee_ttbarsignalplustau.root        ttbarsignalplustau,runOnAOD=True
 40   Fall11.ttjets_MadgraphZ2_Fall11_v1_AOD_cff         ee_ttbarbg.root                   ttbarbg,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         ee_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
-250  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         ee_ttbarbgv2.root                   ttbarbg,runOnAOD=True
+350  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         ee_ttbarsignalplustauv2.root        ttbarsignalplustau,runOnAOD=True
+350  Fall11.ttjets_MadgraphZ2_Fall11_v2_AOD_cff         ee_ttbarbgv2.root                   ttbarbg,runOnAOD=True
 
 #884 Files in DY->Jets
 75  Fall11.dylljetsM50_MadgraphZ2_Fall11_AOD_cff       ee_dyee50inf.root           dyee50inf,runOnAOD=True
@@ -119,7 +119,7 @@
 30  Fall11.dylljetsM10to50_MadgraphZ2_Fall11_AOD_cff       ee_dytautau1050.root       dytautau1050,runOnAOD=True
 
 
-#100  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py ee_wtolnu.root                 wjets,runOnAOD=True
+50  Fall11.wlnujets_MadgraphZ2_Fall11_AOD_cff.py ee_wtolnu.root                 wjets,runOnAOD=True
 #50  Fall11.qcdmu15enriched_Pythia6_Fall11_AOD_cff  ee_qcdmu15.root qcdmu15,runOnAOD=True
 50  Fall11.qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff   ee_qcdem2030.root   qcdem2030,runOnAOD=True
 #50  Fall11.qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff   ee_qcdem3080.root   qcdem3080,runOnAOD=True
