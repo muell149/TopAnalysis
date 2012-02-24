@@ -1342,24 +1342,27 @@ TString efficiency="efficiency/"+variable;
       // -----------
       // get binning
       // -----------
-      int size=binning_[variable].size()-1;
-      // calculate number of considered bins for UF
-      int unfoldbins=size; 
-      // subtracting OF bin
-      if(!(variable.Contains("ttbarPt")||variable.Contains("ttbarMass"))) unfoldbins-=1;
-      // subtracting UF bin
-      unfoldbins-=1;
-      // no UF bin for distributions starting from 0 besides lepPT and ttbarMass
-      if(binning_[variable][0]==0.){  
-	if(!(variable.Contains("lepPt")||variable.Contains("ttbarMass"))) unfoldbins+=1;
+      // a) filter relevant bins
+      std::vector<double> relevantBins_;
+      // loop all entries in binning_
+      for(unsigned int bin=0; bin<binning_[variable].size(); ++bin){
+	bool relevant=true;
+	// exclude first bin for some variables
+	if(bin==0&&(variable=="topY"||variable=="ttbarY"||variable=="ttbarMass"||variable=="lepEta"||variable=="lepPt"||variable=="bqEta"||variable=="bqPt")) relevant=false;
+	// exclude last bin for some variables
+	if(bin==binning_[variable].size()-1&&(variable=="topY"||variable=="ttbarY"||variable=="lepEta"||variable=="bqEta"||variable=="topPt"||variable=="lepPt"||variable=="bqPt")) relevant=false;
+	if(relevant) relevantBins_.push_back(binning_[variable][bin]); 
       }
-      double bins[size];
-      for(int bin=0; bin<=size; ++bin){
-	bins[bin]=binning_[variable][bin]; 
+      // b) calculate number of considered bins 
+      int unfoldbins=relevantBins_.size()-1; // NB: N(bins)=NbinEdges-1 
+      // c) refill bin edges to array
+      double bins[relevantBins_.size()];
+      for(unsigned int bin=0; bin<relevantBins_.size(); ++bin){
+	bins[bin]=relevantBins_[bin]; 
 	if(verbose>1) std::cout << "bin " << bin << ": " << bins[bin]<< std::endl;
       }
       if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
-      //    const double xSecbins[size]=bins;
+
       // ----------------------
       // use unfolding maschine
       // ----------------------
@@ -1379,9 +1382,9 @@ TString efficiency="efficiency/"+variable;
 	// Binning for the unfolding
 	bins, 
 	// Number of bins for unfolding (not counting OF bins !!!)
-	unfoldbins, // -2 for deleting OF and UF bins  
+	unfoldbins, 
 	// Regularization parameter
-	regParameter(variable, verbose), 
+	unfoldbins+2,//regParameter(variable, verbose), 
 	// Returned: Unfolded Distribution              
 	unfoldedData,
 	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
