@@ -2333,7 +2333,7 @@ if(pfToPAT):
         'analyzersBeforeMuonIso':cms.Sequence(),
         'analyzersBeforeElecIso':cms.Sequence(),
         'excludeElectronsFromWsFromGenJets': True,
-        'METCorrectionLevel': 0
+        'METCorrectionLevel': 1
         }
     # adaptions when running on data
     if(runningOnData=="data"):
