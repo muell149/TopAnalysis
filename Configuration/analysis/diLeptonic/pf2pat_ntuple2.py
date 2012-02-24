@@ -1068,7 +1068,7 @@ prependPF2PATSequence(process, options = { 'switchOffEmbedding': False,
                                                 process.analyzeMuons2*
                                                 process.analyzeElecs2
                                                 ),
-                                           'METCorrectionLevel': 0,
+                                           'METCorrectionLevel': 1,
                                            }
                       )
 
