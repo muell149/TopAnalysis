@@ -139,7 +139,7 @@ sub submit {
         my ($path, $cmdline) = @$_;
         chdir($path) or die "Cant chdir to $path: $!";
         if ($self->{submit}) {
-            system("~/scratch/CMSSW_4_2_5/src/TopAnalysis/TopUtils/scripts/nafJobSplitter.pl -W 0 $cmdline");
+            system("nafJobSplitter.pl -W 0 $cmdline"); #nafJobSplitter is in the search path
         } else {
             print "DRY RUN: nafJobSplitter.pl -W 0 $cmdline\n";
         }
