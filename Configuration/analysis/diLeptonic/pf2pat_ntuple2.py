@@ -455,6 +455,8 @@ if options.runOnMC:
 
 else:
     process.eventWeightPU = cms.Sequence()
+    process.eventWeightPUsysUp = cms.Sequence()
+    process.eventWeightPUsysDown = cms.Sequence()
 
 ## define which collections and correction you want to be used
 isolatedMuonCollection = "fullySelectedPatMuons"
