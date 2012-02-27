@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.16 2012/02/23 15:09:17 tdorland Exp $
+// $Id: NTupleWriter.cc,v 1.17 2012/02/23 16:19:19 iasincru Exp $
 //
 //
 
@@ -103,8 +103,8 @@ private:
   edm::InputTag genJets_;
   edm::InputTag bIndex_;
   edm::InputTag antiBIndex_;
-  edm::InputTag bHadJetIdx_;
-  edm::InputTag antibHadJetIdx_;
+  //  edm::InputTag bHadJetIdx_;
+  //edm::InputTag antibHadJetIdx_;
 
   bool includeTrig_, isTtBarSample_;
   edm::InputTag dType_ , trigResults_, decayMode_;
@@ -154,8 +154,8 @@ private:
   std::vector<int> HypJet0index;
   std::vector<int> HypJet1index;
 
-  std::vector<int>   VBHadJetIdx;
-  std::vector<int>   VAntiBHadJetIdx;
+  //  std::vector<int>   VBHadJetIdx;
+  //std::vector<int>   VAntiBHadJetIdx;
 
   int decayMode;
 
@@ -251,8 +251,8 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   bIndex_    (iConfig.getParameter<edm::InputTag>("BJetIndex")),
   antiBIndex_(iConfig.getParameter<edm::InputTag>("AntiBJetIndex")),
 
-  bHadJetIdx_(iConfig.getParameter<edm::InputTag> ("BHadJetIndex")),
-  antibHadJetIdx_(iConfig.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
+  //bHadJetIdx_(iConfig.getParameter<edm::InputTag> ("BHadJetIndex")),
+  //antibHadJetIdx_(iConfig.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
 
   includeTrig_ ( iConfig.getParameter<bool> ( "includeTrigger" ) ),
   isTtBarSample_ ( iConfig.getParameter<bool> ( "isTtBarSample" ) ),
@@ -413,13 +413,13 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
 	
 
-	edm::Handle<std::vector<int> > BHadJetIndex;
-	iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
-	edm::Handle<std::vector<int> > AntiBHadJetIndex;
-	iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
+	//	edm::Handle<std::vector<int> > BHadJetIndex;
+	//iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
+	//edm::Handle<std::vector<int> > AntiBHadJetIndex;
+	//iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
 	
-        for (int i=0; i<(int) BHadJetIndex->size(); i++){  VBHadJetIdx.push_back(BHadJetIndex->at(i));};
-	for (int i=0; i<(int) AntiBHadJetIndex->size(); i++){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
+        //for (int i=0; i<(int) BHadJetIndex->size(); i++){  VBHadJetIdx.push_back(BHadJetIndex->at(i));};
+	//for (int i=0; i<(int) AntiBHadJetIndex->size(); i++){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
 	
 	for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
           VallGenJets.push_back(aJet->p4());
@@ -690,8 +690,8 @@ NTupleWriter::beginJob()
     Ntuple->Branch("GenJetHadronB",&HadronGenB);
     Ntuple->Branch("GenJetHadronAntiB",&HadronGenAntiB);
 
-    Ntuple->Branch("BHadJetIndex", &VBHadJetIdx);
-    Ntuple->Branch("AntiBHadJetIndex", &VAntiBHadJetIdx);
+    //    Ntuple->Branch("BHadJetIndex", &VBHadJetIdx);
+    //Ntuple->Branch("AntiBHadJetIndex", &VAntiBHadJetIdx);
 
   }
 
