@@ -820,7 +820,7 @@ if topfilter:
         process.topsequence = cms.Sequence( 
 	        process.makeGenEvt *
 	        process.produceHadronLevelBJets *
-                process.produceGenLevelBJets*
+        #        process.produceGenLevelBJets*
 		process.generatorTopFilter 
 	)
 
