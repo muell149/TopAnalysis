@@ -20,11 +20,9 @@
 #include "TROOT.h"
 #include "TSystem.h"
 
-//#include "RooFFTConvPdf.h"
 #include "RooFormulaVar.h"
 #include "RooGaussian.h"
 #include "RooGenericPdf.h"
-//#include "RooNumIntConfig.h"
 #include "RooPlot.h"
 #include "RooPolyVar.h"
 #include "RooProdPdf.h"
@@ -318,10 +316,10 @@ void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
 void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color,
 		      const double max, const double errLow, const double errHig)
 {
-  pdf->plotOn(frame, RooFit::LineColor(color), RooFit::NormRange("fullRange"));
-  pdf->plotOn(frame, RooFit::Range(max-errLow, max+errHig), RooFit::NormRange("fullRange"),
+  pdf->plotOn(frame, RooFit::LineColor(color), RooFit::NormRange("mass_fullRange"));
+  pdf->plotOn(frame, RooFit::Range(max-errLow, max+errHig), RooFit::NormRange("mass_fullRange"),
 	      RooFit::FillStyle(1001), RooFit::FillColor(color), RooFit::DrawOption("F"), RooFit::VLines());
-  pdf->plotOn(frame, RooFit::Range(max-.01, max+.01), RooFit::NormRange("fullRange"),
+  pdf->plotOn(frame, RooFit::Range(max-.01, max+.01), RooFit::NormRange("mass_fullRange"),
 	      RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
 }
 
@@ -354,31 +352,6 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   TCanvas* canvas = new TCanvas("canvas", "canvas", 10, 10, 900, 600);
   canvas->cd()->SetRightMargin(0.04);
   canvas->Print(printNameBase+".ps[");
-
-//  const TString integrators[10] = {"RooAdaptiveGaussKronrodIntegrator1D", //0
-//				   "RooAdaptiveIntegratorND",             //1
-//				   "RooBinIntegrator",                    //2
-//				   "RooGaussKronrodIntegrator1D",         //3
-//				   "RooImproperIntegrator1D",             //4
-//				   "RooIntegrator1D",                     //5
-//				   "RooIntegrator2D",                     //6
-//				   "RooMCIntegrator",                     //7
-//				   "RooSegmentedIntegrator1D",            //8
-//				   "RooSegmentedIntegrator2D"};           //9
-//  RooAbsReal::defaultIntegratorConfig()->method1D().setLabel(integrators[7]);
-//  RooAbsReal::defaultIntegratorConfig()->method2D().setLabel(integrators[9]);
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
-//  RooAbsReal::defaultIntegratorConfig()->printMultiline(std::cout, 1, true);
-
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooAdaptiveIntegratorND").setRealValue("maxEval2D", 100000.);
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooMCIntegrator").setRealValue("nRefinePerDim", 100.);
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooMCIntegrator").setRealValue("nIntPerDim", 100.);
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooMCIntegrator").setRealValue("nRefineIter", 2.);
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooMCIntegrator").setRealValue("alpha", 0.5);
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooMCIntegrator").setCatLabel("samplingMode", "Stratified");
-
-//  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooAdaptiveGaussKronrodIntegrator1D").setCatLabel("method",
-//													     "61Points");
 
   TGraph* runningAlpha = 0;
   if(!pole) {
@@ -426,8 +399,6 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
     
   gStyle->SetOptTitle(1);
 
-  double deltaMaxKid = 0.105, deltaMaxMoc = 0.1, deltaMaxAhr = 0.1;
-
   const TString errName [4] = {"Scale", "Experimental PDF", "#alpha_{S}", "Total"};
   const TString errLabel[4] = {"scale", "expPDF", "alphaS", "total"};
 
@@ -460,9 +431,9 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
   RooRealVar xsec("xsec" , "#sigma_{t #bar{t}}", 0., 900., "pb");
-  //  xsec.setBins(10000, "cache");
 
-  mass.setRange("fullRange", 140., 200.);
+  mass.setRange("mass_fullRange", 140., 200.);
+  xsec.setRange("xsec_fullRange", 130., 230.);
 
   RooRealVar shift_p0("shift_p0", "shift_p0", 0.);
   RooRealVar shift_p1("shift_p1", "shift_p1", 0.);
@@ -498,86 +469,28 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
 
-  ///////////////////////////////////
-
-  RooRealVar kid_p0("kid_p0", "kid_p0", kid->GetFunction("f1")->GetParameter(0));
-  RooRealVar kid_p1("kid_p1", "kid_p1", kid->GetFunction("f1")->GetParameter(1));
-  RooRealVar kid_p2("kid_p2", "kid_p2", kid->GetFunction("f1")->GetParameter(2));  
-  RooRealVar kid_p3("kid_p3", "kid_p3", kid->GetFunction("f1")->GetParameter(3));  
-  RooFormulaVar kidXSec("kidXSec", "kidXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
-			RooArgSet(mass, kid_p0, kid_p1, kid_p2, kid_p3));
-
-  LinRelUncertainty kidRelPdfErr  ("kidRelPdfErr"  , kid_funcs[1].at(0), mass);
-  LinRelUncertainty kidRelAlphaErr("kidRelAlphaErr", kid_funcs[2].at(0), mass);
-  RooFormulaVar kidXSecErr("kidXSecErr", "kidXSecErr", "@0*TMath::Sqrt(@1*@1+@2*@2)", RooArgSet(kidXSec,
-												kidRelPdfErr  .polyVar,
-												kidRelAlphaErr.polyVar));
-  RooGaussian kidXSecPDF("kidXSecPDF", "kidXSecPDF", xsec, kidXSec, kidXSecErr);
-  RooGaussian kidXSecPDF_clone(kidXSecPDF, "kidXSecPDF_clone");
-
-  LinRelUncertainty kidRelScaleErrUp  ("kidRelScaleErrUp"  , kid_funcs[0].at(0), mass);
-  LinRelUncertainty kidRelScaleErrDown("kidRelScaleErrDown", kid_funcs[0].at(1), mass);
-  RooFormulaVar kidScaleUp  ("kidScaleUp"  , "kidScaleUp"  , "@0+@0*@1", RooArgSet(kidXSec, kidRelScaleErrUp  .polyVar));
-  RooFormulaVar kidScaleDown("kidScaleDown", "kidScaleDown", "@0-@0*@1", RooArgSet(kidXSec, kidRelScaleErrDown.polyVar));
-  RooFormulaVar kidStepWidth("kidStepWidth", "kidStepWidth", "@0-@1", RooArgSet(kidScaleUp, kidScaleDown));
-//  RooGenericPdf kidScalePDF("kidScalePDF", "kidScalePDF",
-//			    "(@0 >= @1) && (@0 < @2)", RooArgList(xsec, kidScaleDown, kidScaleUp));
-
-  RooFormulaVar xsecShifted("xsecShifted", "xsecShifted", "@0+@1", RooArgSet(xsec, kidXSec));
-  xsecShifted.setAttribute("ORIGNAME:xsec", true);
-  kidXSecPDF.redirectServers(RooArgSet(xsecShifted), false, true);
-  
-//  RooFFTConvPdf kidPDF("kidPDF", "kidPDF", xsec, kidXSecPDF, kidScalePDF);
-//  kidPDF.setBufferFraction(0.2); //default is 0.1, results in distorted convolution, i.e. asymmetric PDF
-  RooGenericPdf kidPDF("kidPDF", "kidPDF",
-		       "1/(2*(@3-@2))*(TMath::Erf((@3-@0)/(@1*TMath::Sqrt(2)))-TMath::Erf((@2-@0)/(@1*TMath::Sqrt(2))))",
-		       RooArgList(xsec, kidXSecErr, kidScaleDown, kidScaleUp));
+  PredXSec kidPredXSec("kidPredXSec", xsec, mass, kid->GetFunction("f1"), kid_funcs);
+  PredXSec mocPredXSec("mocPredXSec", xsec, mass, moc->GetFunction("f1"), moc_funcs);
+  PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, ahr->GetFunction("f1"), ahr_funcs);
 
   if(pole && !heraPDF) {
     //    mass.setVal(140.);
-    RooPlot* testFrame = xsec.frame(100., 250.);
-    kidPDF.plotOn(testFrame, RooFit::LineColor(kRed));
-    kidPDF.paramOn(testFrame);
-    kidXSecPDF_clone.plotOn(testFrame);
-    //    kidScalePDF.plotOn(testFrame, RooFit::LineColor(kGreen));
-    testFrame->GetYaxis()->SetTitle("");
+    RooPlot* testFrame = xsec.frame(130., 230.);
+    kidPredXSec.gaussianProb.plotOn(testFrame, RooFit::LineColor(kGreen),
+				    RooFit::FillStyle(1001), RooFit::FillColor(kGreen), RooFit::DrawOption("F"));
+    kidPredXSec.gaussianProb.plotOn(testFrame, RooFit::Range(kid->GetFunction("f1")->Eval(mass.getVal())-0.01,
+							     kid->GetFunction("f1")->Eval(mass.getVal())+0.01),
+				    RooFit::NormRange("xsec_fullRange"),
+				    RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
+    kidPredXSec.rectangularProb.plotOn(testFrame, RooFit::Normalization(0.3));
+    kidPredXSec.prob.plotOn(testFrame, RooFit::LineColor(kRed));
+    testFrame->GetYaxis()->SetTitle("Probability density");
     testFrame->Draw();
     canvas->Print(printNameBase+".ps");
     canvas->Print("figs/convolution.eps");
 
-    RooPlot* kidFrame = mass.frame();
-    kidScaleUp.plotOn(kidFrame, RooFit::LineColor(kRed));
-    kidXSec.plotOn(kidFrame);
-    kidScaleDown.plotOn(kidFrame, RooFit::LineColor(kGreen));
-    kidFrame->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
-    kidFrame->Draw();
-    canvas->Print(printNameBase+".ps");
-    canvas->Print("figs/xsec_vs_mass_kid.eps");
-    delete kidFrame;
     delete testFrame;
   }
-
-  ///////////////////////////////////
-
-  RooRealVar moc_p0("moc_p0", "moc_p0", moc->GetFunction("f1")->GetParameter(0));
-  RooRealVar moc_p1("moc_p1", "moc_p1", moc->GetFunction("f1")->GetParameter(1));
-  RooRealVar moc_p2("moc_p2", "moc_p2", moc->GetFunction("f1")->GetParameter(2));  
-  RooRealVar moc_p3("moc_p3", "moc_p3", moc->GetFunction("f1")->GetParameter(3));  
-  RooFormulaVar mocXSec("mocXSec", "mocXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
-			RooArgSet(mass, moc_p0, moc_p1, moc_p2, moc_p3));
-  RooRealVar mocXSecRelErr("mocXSecRelErr", "mocXSecRelErr", deltaMaxMoc);
-  RooFormulaVar mocXSecErr("mocXSecErr", "mocXSecErr", "@0*@1", RooArgSet(mocXSec, mocXSecRelErr));
-  RooGaussian mocXSecPDF("mocXSecPDF", "mocXSecPDF", xsec, mocXSec, mocXSecErr);
-
-  RooRealVar ahr_p0("ahr_p0", "ahr_p0", ahr->GetFunction("f1")->GetParameter(0));
-  RooRealVar ahr_p1("ahr_p1", "ahr_p1", ahr->GetFunction("f1")->GetParameter(1));
-  RooRealVar ahr_p2("ahr_p2", "ahr_p2", ahr->GetFunction("f1")->GetParameter(2));  
-  RooRealVar ahr_p3("ahr_p3", "ahr_p3", ahr->GetFunction("f1")->GetParameter(3));  
-  RooFormulaVar ahrXSec("ahrXSec", "ahrXSec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
-			RooArgSet(mass, ahr_p0, ahr_p1, ahr_p2, ahr_p3));
-  RooRealVar ahrXSecRelErr("ahrXSecRelErr", "ahrXSecRelErr", deltaMaxAhr);
-  RooFormulaVar ahrXSecErr("ahrXSecErr", "ahrXSecErr", "@0*@1", RooArgSet(ahrXSec, ahrXSecRelErr));
-  RooGaussian ahrXSecPDF("ahrXSecPDF", "ahrXSecPDF", xsec, ahrXSec, ahrXSecErr);
 
   const int colorKid = kRed+1;
   const int colorAhr = kMagenta;
@@ -586,18 +499,18 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 
   RooPlot* frame = mass.frame();
   if(pole && !heraPDF)
-    kidXSec.plotOn(frame, RooFit::LineColor(colorKid));
-  ahrXSec.plotOn(frame, RooFit::LineColor(colorAhr));
-  mocXSec.plotOn(frame, RooFit::LineColor(colorMoc));
+    kidPredXSec.xsec.plotOn(frame, RooFit::LineColor(colorKid));
+  ahrPredXSec.xsec.plotOn(frame, RooFit::LineColor(colorAhr));
+  mocPredXSec.xsec.plotOn(frame, RooFit::LineColor(colorMoc));
   measXSecMassDep.plotOn(frame, RooFit::LineColor(colorDil));
   frame->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame->Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("xsec_vs_mass", pole, heraPDF));
   
-  RooProdPdf kidProdPDF("kidProdPDF", "kidProdPDF", RooArgList(measXSecPDF, kidPDF));
-  RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocXSecPDF));
-  RooProdPdf ahrProdPDF("ahrProdPDF", "ahrProdPDF", RooArgList(measXSecPDF, ahrXSecPDF));
+  RooProdPdf kidProdPDF("kidProdPDF", "kidProdPDF", RooArgList(measXSecPDF, kidPredXSec.prob));
+  RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocPredXSec.prob));
+  RooProdPdf ahrProdPDF("ahrProdPDF", "ahrProdPDF", RooArgList(measXSecPDF, ahrPredXSec.prob));
 
   frame = mass.frame(RooFit::Range(150., 190.));
 
