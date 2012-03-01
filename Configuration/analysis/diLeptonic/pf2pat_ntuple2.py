@@ -811,16 +811,16 @@ if topfilter:
 	process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 	process.load("TopAnalysis.TopUtils.HadronLevelBJetProducer_cfi")
 
-        process.load("SimGeneral.HepPDTESSource.pdt_cfi")#necessary for GOOD running of bHadronGenerator
+        process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
 	process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
         process.produceGenLevelBJets.deltaR = 5.0
         process.produceGenLevelBJets.noBBbarResonances = True
-        
+
 	process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2     
         process.topsequence = cms.Sequence( 
 	        process.makeGenEvt *
 	        process.produceHadronLevelBJets *
-        #        process.produceGenLevelBJets*
+                process.produceGenLevelBJets*
 		process.generatorTopFilter 
 	)
 
