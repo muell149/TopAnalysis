@@ -16,6 +16,7 @@ TString TopSVDFunctions::SVD_CPQS(TString channel, TString particle, TString qua
     cpq.Append("_");
     cpq.Append(quantity);
     if ( special.CompareTo("") != 0 ) {
+        if ( special.BeginsWith("_") == true ) special.Remove(0,1); 
     	cpq.Append("_");
         cpq.Append(special);
     }
@@ -303,7 +304,7 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1* input, int nbinsx, double* binsx)
     return outputhist;
 }
 
-
+    
 
 
 // Rebinning of a 2D Histogram. Creates a new histogram
@@ -333,7 +334,7 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH1* input, int nbinsx, double* binsx, int nb
             if ( i == nbinsx+1 ) {  // OF bin in X
                 double xlow = binsx[nbinsx];
                 nxlow = input->GetXaxis()->FindBin(xlow);
-                nxhigh = nbinsGenRecX;
+                nxhigh = nbinsGenRecX+1;
             }
             if ( i > 0 && i < nbinsx+1) {
                 double xlow = binsx[i-1];
@@ -354,7 +355,7 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH1* input, int nbinsx, double* binsx, int nb
             if ( j == nbinsy+1 ) {   // UF bin in Y
                 double ylow = binsy[nbinsy];
                 nylow = input->GetYaxis()->FindBin(ylow);
-                nyhigh = nbinsGenRecY;
+                nyhigh = nbinsGenRecY+1;
             }
             if ( j > 0 && j < nbinsy+1) {
                 double ylow = binsy[j-1];
@@ -497,10 +498,6 @@ void TopSVDFunctions::SVD_Draw2D(TH2D* hist, TString options)
 }
 
 
-
-
-
-
 // Formats a 1D histogram according to current style
 // Corrects formatting in a manner specific to 1D histos
 // If color < 1, then color will be set autmatically 
@@ -522,8 +519,323 @@ void TopSVDFunctions::SVD_Draw1D(TH1D* hist, TString options,  int color)
 
 }
 
+// Get Range of a Graph
+void TopSVDFunctions::SVD_RangeGraph(TGraph* graph, double& xmin, double& xmax, double& ymin, double& ymax)
+{
+	
+	int nPoints = graph->GetN();
+     
+    // Get Range
+    xmax = -FLT_MAX;
+    ymax = -FLT_MAX;
+	xmin = +FLT_MAX;
+	ymin = +FLT_MAX;
+	for ( int i = 0; i < nPoints ; i++ ) {
+		 double theX = 0.;
+		 double theY = 0.;
+		 graph->GetPoint(i, theX, theY);
+		 if ( theX > xmax ) xmax = theX;
+		 if ( theY > ymax ) ymax = theY;
+		 if ( theX < xmin ) xmin = theX;
+		 if ( theY < ymin ) ymin = theY;
+	}
+	 
+}
+
+// Makes a graph from two vectors and formats it
+// Corrects formatting in a manner specific to 1D histos
+// If color < 1, then color will be set autmatically 
+// Note: This function draws an empty histogram first,
+// then draws the graph on top of it. The histo is returned.
+// If you already have a background histo, provide it in the last argument.
+void TopSVDFunctions::SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options,  int color)
+{
+     
+    // Get Range
+    double xmax = 0.;
+	double xmin = 0.;
+    double ymax = 0.;
+	double ymin = 0.;
+	SVD_RangeGraph(graph, xmin, xmax, ymin, ymax);
+	
+	// New Ranges
+	double newXmin = 0.;
+	double newXmax = 0.; 
+	double newYmin = 0.; // Leave this
+	double newYmax = 0.; 
+	SVD_NewRange(xmin, xmax, newXmin, newXmax, gPad->GetLogx()); 
+	SVD_NewUpperRange(ymax, newYmax);
+	
+	
+	// Make new Histo
+	if ( bgrHisto == NULL) { 
+		
+		// Create the object
+		bgrHisto = new TH1D("bgrHist", "bgrHist", 10, newXmin, newXmax);
+		bgrHisto->UseCurrentStyle();
+		
+		// Draw it
+		bgrHisto->Draw();
+		
+		// Correct Y Range
+		bgrHisto->SetMinimum(newYmin);
+		bgrHisto->SetMaximum(newYmax);
+	}
+	
+	// Draw options
+	TString drawOptions = options;
+	drawOptions.Append(" SAME");
+	
+    // Use current style
+    graph->UseCurrentStyle();
+    if (color > 0) graph->SetLineColor(color);
+    if (color > 0) graph->SetMarkerColor(color);
+
+    // Draw it
+    graph->Draw(drawOptions);
+      
+
+}
+ 
+
+// A little shift on the position of a text string in X
+double TopSVDFunctions::SVD_TextPosX(TH1D* hist, double xpos, bool log, int orientation)
+{ 
+	// Get Axis Range
+	double min = hist->GetXaxis()->GetXmin();
+	double max = hist->GetXaxis()->GetXmax(); 
+	if ( min >= max ) return 0.;
+	 
+	 
+	// Position
+	double thePos = xpos; 
+	if ( thePos < min ) thePos = min;
+	if ( thePos > max ) thePos = max; 
+	
+	
+	// Log
+	if ( log == true ) {
+		if ( min > 0. ) { 
+			min = TMath::Log10(min); 	
+
+		} else {
+			return 0.;
+		}
+		if ( max > 0. ) { 
+			max = TMath::Log10(max); 
+		} else {
+			return 0.;
+		}
+		if ( thePos > 0. ) {
+			thePos = TMath::Log10(thePos); 
+		} else {
+			return 0.;
+		}
+	} 
+	
+	// Orientation ... take first digit
+	int theOrientation = orientation / 10;
+	
+	
+	// Shift
+	double shift = 0.05*(max - min); 
+	if ( theOrientation == 3 ) thePos = thePos - shift; 
+	if ( theOrientation == 2 ) thePos = thePos; 
+	if ( theOrientation == 1 ) thePos = thePos + shift; 
+	
+	 
+	// Log
+	if ( log == true ) {
+		thePos = TMath::Power(10., thePos);
+	}
+	 
+	// Return
+	return thePos; 
+}
+ 
+
+// A little shift on the position of a text string in Y
+double TopSVDFunctions::SVD_TextPosY(TH1D* hist, double ypos, bool log, int orientation)
+{ 
+	// Get Axis Range
+	double min = hist->GetMinimum();
+	double max = hist->GetMaximum(); 
+	if ( min >= max ) return 0.;
+	 
+	  
+	// Position
+	double thePos = ypos; 
+	if ( thePos < min ) thePos = min;
+	if ( thePos > max ) thePos = max; 
+	
+	// Log
+	if ( log == true ) {
+		if ( min > 0. ) {
+			min = TMath::Log10(min);
+		} else {
+			return 0.;
+		}
+		if ( max > 0. ) {
+			max = TMath::Log10(max);
+		} else {
+			return 0.;
+		}
+		if ( thePos > 0. ) {
+			thePos = TMath::Log10(thePos);
+		} else {
+			return 0.;
+		}
+	} 
+	
+	// Orientation ... take second digit
+	int theOrientation = orientation % 10;
+	
+	
+	// Shift
+	double shift = 0.05*(max - min);
+	if ( theOrientation == 3 ) thePos = thePos - shift; 
+	if ( theOrientation == 2 ) thePos = thePos; 
+	if ( theOrientation == 1 ) thePos = thePos + shift; 
+	
+	
+	// Log
+	if ( log == true ) {
+		thePos = TMath::Power(10., thePos);
+	}
+	
+	// Return
+	return thePos; 
+	
+} 
+ 
+
+// Draws a String somewhere in your pad
+// If a TLatex object is given, then it will be used. Otherwise, it will be created.
+TLatex* TopSVDFunctions::SVD_DrawText(TString theText, double xpos, double ypos, int orientation, TLatex*& mylatex)
+{
+	// Create Latex Object
+	if ( mylatex == NULL ) {
+		mylatex = new  TLatex();
+	    mylatex->SetTextSize(0.05);  
+	}
+     
+    // Set Orientation
+    mylatex->SetTextAlign(orientation);
+    
+    
+    // Draw it
+    mylatex->DrawLatex(xpos, ypos, theText);
+    
+    
+    // Make TPaveText
+    //TPaveText* pt = new TPaveText();
+    
+    
+    // Return it;
+    return mylatex;
+		
+}
 
 
+// Draws a vertical line from top to bottom of bgrHisto.
+// If color < 1, then color will be set autmatically 
+TLine* TopSVDFunctions::SVD_DrawVertLine(TH1D*& bgrHisto, double xpos, int color)
+{
+	// Get Range of Histogram
+	double Ymin = bgrHisto->GetMinimum();
+	double Ymax = bgrHisto->GetMaximum();
+	
+	// New Line
+	TLine* line = new TLine(xpos, Ymin, xpos, Ymax);
+	line->SetLineColor(color);
+	line->SetLineWidth(1);
+	line->SetLineStyle(1);
+	
+	// Test it, whether it is in the range of the histogram
+	bool draw = true;
+	int nbins = bgrHisto->GetNbinsX();
+	double xmin = bgrHisto->GetXaxis()->GetBinLowEdge(1);
+	double xmax = bgrHisto->GetXaxis()->GetBinLowEdge(nbins+1);
+	if ( xpos < xmin ) draw = false;
+	if ( xpos > xmax ) draw = false;
+	
+	// Draw it
+	if ( draw == true ) {
+		line->Draw("SAME");
+	}
+	
+	// REturn it
+	return line;
+	
+}
+
+
+// Draws a vertical lines from top to bottom of bgrHisto. 
+// If color < 1, then color will be set autmatically 
+void TopSVDFunctions::SVD_DrawVertLines(TH1D*& bgrHisto, TVectorD* xpositions, int color)
+{
+	
+	// Make Array of Pointers
+	int nPoints = xpositions->GetNoElements();   
+	
+	
+	// Loop
+	for ( int i = 0 ; i < nPoints ; i++ ) {
+		
+		// Get Position
+		double xpos = (*xpositions)[i];
+		
+		// Draw Line
+		SVD_DrawVertLine(bgrHisto, xpos, color);
+		  
+	}  
+	
+} 
+
+
+// Makes a graph from two vectors and formats it 
+// Attention: Creates a Graph on the heap. Dont forget to delete it!
+TGraph* TopSVDFunctions::SVD_Vect2Graph(TVectorD* vectorX, TVectorD* vectorY)
+{
+	//Test, if vectorX and vectorY have same number of entries
+	int nelements = vectorX->GetNoElements();
+	int nelementsY = vectorY->GetNoElements();
+	if ( nelements <= 0 || nelementsY <= 0 || nelements != nelementsY ) {
+		cout << "Error in TopSVDFunctions::SVD_Vect2Graph()" << endl;
+		cout << "   The two vectors have strange sizes." << endl;
+		cout << "   vectorX has " << nelements  << " entries." << endl;
+		cout << "   vectorY has " << nelementsY << " entries." << endl;
+		cout << "Exiting ... " << endl;
+		exit(1);
+	}
+	
+	
+	// New Graph
+	TGraph* graph = new TGraph(*vectorX, *vectorY);
+	
+	// Return
+	return graph;
+	
+}
+
+
+// Makes a graph from a the coordinates of a point
+// Attention: Creates a Graph on the heap. Dont forget to delete it!
+TGraph* TopSVDFunctions::SVD_Point2Graph(double x, double y)
+{
+	// Create new vectors
+	TVectorD vectorX(1);
+	TVectorD vectorY(1);
+	vectorX[0] = x;
+	vectorY[0] = y;
+	
+	// New Graph
+	TGraph* graph = new TGraph(vectorX, vectorY);
+	
+	// Return
+	return graph;
+	
+}
 
 // SVD Unfolding Helper FUnction
 // Format a Ratio plot according to current style
@@ -629,7 +941,35 @@ TH1D* TopSVDFunctions::SVD_MakeRatioDenom(TH1D* numerator, TH1D* denominator)
 }
              
 
+// SVD Unfolding Helper FUnction
+// Creates a Ratio plot of two histograms
+// Errors of ratio plot are all set to zero
+// Boundaries: If ymax < ymin, then range will be set automatically
+TH1D* TopSVDFunctions::SVD_MakeRatioZero(TH1D* numerator, TH1D* denominator)
+{
 
+    // Create new Histogram
+    TH1D* hist = (TH1D*) numerator->Clone("ratio");
+
+
+    // Fill Histogram
+    int numbins = hist->GetNbinsX();
+    for ( int i = 0 ; i < numbins ; i++) {
+        double num = numerator->GetBinContent(i);
+        double denom = denominator->GetBinContent(i);
+        double val = 0.;
+        double err = 0.;
+        if ( denom != 0. && num != 0.) {
+            val = num / denom; 
+        }
+        hist->SetBinContent(i, val);
+        hist->SetBinError(i, err);
+    }
+
+    
+    return hist;
+
+}  
 
 
 // Formats a Stack of Histos to the current style
@@ -697,7 +1037,7 @@ void TopSVDFunctions::SVD_DrawStack(THStack* stack, TString xTitle, TString yTit
 void TopSVDFunctions::SVD_SetTitles1D(TH1D* histo, TString name, TString xTitle, TString yTitle)
 {
     histo->SetName(name);
-    histo->SetTitle(name);
+    histo->SetTitle(name); 
     histo->GetXaxis()->SetTitle(xTitle);
     histo->GetYaxis()->SetTitle(yTitle);
 
@@ -779,23 +1119,462 @@ int TopSVDFunctions::SVD_Ndof(TH1D* dataHist, TH1D* xiniHist)
 
 
 
+// Tau Scan
+// Calculate Scan Points
+TVectorD* TopSVDFunctions::SVD_CalcScanPoints(double firstTau, double lastTau, int nScanPoints)
+{
+	
+    // Use 3 scan points minimum
+	if ( nScanPoints < 3 ) nScanPoints = 3;
+	
+	// Setup Vector 
+	TVectorD* vScanPoints = new TVectorD(nScanPoints);
+	
+	// Find the scan points
+	// Use equidistant steps on a logarithmic scale
+	double steplog = (TMath::Log10(lastTau) - TMath::Log10(firstTau)) / ((double) (nScanPoints-1));
+	for ( int i = 0 ; i < nScanPoints ; i++ ) {
+		double posScanPoint = TMath::Power(10., (TMath::Log10(firstTau) + ((double) i) * steplog));
+		(*vScanPoints)[i] = posScanPoint;
+	}
+	
+	return vScanPoints;
+}
+
+// Tau Scan
+// Scan Global Correlation	
+double TopSVDFunctions::SVD_ScanGlobalCorrelation(TH2D* statCovHist)
+{  
+  
+	// Calculate Global Correlation in all bins
+	TH1D* globCorrHist = SVD_CalcGlobCorr(statCovHist);
+	
+	// Averaged Global Correlation
+    double globcorr = SVD_AvgGlobCorr(globCorrHist); 
+     
+    // Delete old objects 
+    delete globCorrHist; 
+    
+    // return value 
+    return globcorr;
+	
+}
+
+// Tau Scan
+// Scan Chi Squared
+double TopSVDFunctions::SVD_ScanChiSquared(TH1D* weightHist, TH1D* dataHist, TH2D* mcHist)
+{ 
+ 
+	// Refold it 
+    TH1D* refoldHist = SVD_Refold(weightHist, NULL, mcHist, true);  
+	
+	// Calculate Chi2A
+	double chisq = SVD_Chi2A(dataHist, refoldHist);
+    
+    // Delete old objects
+    delete refoldHist; 
+     
+    // Return
+    return chisq;
+	
+}
+
+
+// Tau Scan
+// Scan Curvature
+double TopSVDFunctions::SVD_ScanCurvature(double curv)
+{  
+ 
+	// return vector
+	return curv;
+	 
+}
+
+// This is a crude thing.
+// It calculates the statistical uncertainty of the
+// unfolding result, averaged over all bins except
+// empty bins and side bins 
+double TopSVDFunctions::SVD_ScanAvgSqErr(TH2D* covMatrix)
+{
+	// nbins
+	int nbins = covMatrix->GetNbinsX(); 
+	
+	// Loop
+	double sumSquaredErrors = 0.;
+	int numRealBins = 0;
+	for ( int i = 1 ; i <= nbins ; i++ ) {
+		
+		// Get trace element of covariance Matrix
+		double binContent = covMatrix->GetBinContent(i,i);
+		
+		// Do not count this bin if it is empty
+		if ( binContent == 0. ) continue;
+		
+		sumSquaredErrors += binContent;
+		numRealBins++;
+	}
+	
+	// Average
+	double avgSqErr =   sumSquaredErrors / ((double) numRealBins );
+	return avgSqErr;
+} 
+
+
+// This is a crude thing.
+// It calculates the mean value of the
+// unfolding result, averaged over all bins except
+// empty bins and side bins
+double TopSVDFunctions::SVD_ScanAvgMean(TH1D* unfHist)
+{
+	
+	// nbins
+	int nbins = unfHist->GetNbinsX(); 
+	
+	// Loop
+	double sumElements = 0.;
+	int numRealBins = 0;
+	for ( int i = 1 ; i <= nbins ; i++ ) {
+		
+		// Get trace element of covariance Matrix
+		double binContent = unfHist->GetBinContent(i);
+		
+		// Do not count this bin if it is empty
+		if ( binContent == 0. ) continue;
+		
+		sumElements += binContent;
+		numRealBins++;
+	}
+	
+	// Average
+	double avgMean =  sumElements / ((double) numRealBins );
+	return avgMean; 
+	
+}
+
+// Helper Function
+// If you have a range you want to depict in a histogram,
+// than this function gives you a good range 
+void TopSVDFunctions::SVD_NewRange(double min, double max, double& newmin, double& newmax, bool log)
+{
+	// Set Min and Max Values
+	double theMin = min;
+	double theMax = max;
+	if ( log == true ) {
+		if ( min > 0 ) theMin = TMath::Log10(min);
+	    if ( max > 0 ) theMax = TMath::Log10(max);
+	}
+	
+	// Get margin
+	double margin = 0.15*(theMax - theMin);
+	
+	// New Min and Max
+	double theNewMin = theMin - margin;
+	double theNewMax = theMax + margin;
+	
+	
+	// Return
+	newmin = theNewMin;
+	newmax = theNewMax;
+	if ( log == true ) {
+		newmin = TMath::Power(10., theNewMin);
+		newmax = TMath::Power(10., theNewMax);
+	}
+	
+	
+}
+	
+// Helper Function
+// If you have a range you want to depict in a histogram,
+// than this function gives you a good range 
+void TopSVDFunctions::SVD_NewUpperRange(double max, double& newmax)
+{
+	// Set Min and Max Values
+	double theMin = 0.;
+	double theMax = max; 
+	
+	// Get margin
+	double margin = 0.3*(theMax - theMin);
+	
+	// New Min and Max 
+	double theNewMax = theMax + margin;
+	
+	 
+	// Return 
+	newmax = theNewMax;  
+	
+}
+	
+	
+
+// GLOBAL CORRELATION
+// Attention: We do not use the side bins for the computation
+// of the global correlation !!!  
+// The global correlation in the side bins will be set 
+// to zero!
+TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
+{
+	// Number of bins
+	int nbins = statCovHist->GetNbinsX();
+	
+	// New Matrix
+	// Beware the side bins of the problem
+	// AND the side bins of the TH2D object
+	TMatrixDSym statCovMat(nbins-2);
+    for ( int i = 1; i <= nbins ; i++ ) {
+        for ( int j = 1; j <= nbins ; j++ ) {
+            double value = statCovHist->GetBinContent(i,j);
+            // Skip Side bins
+            bool skipThis = false;
+            if ( i == 1 || i == nbins ) skipThis = true;
+            if ( j == 1 || j == nbins ) skipThis = true;
+            // Set Element
+            if ( skipThis == false ) statCovMat[i-2][j-2] = value;
+        }
+    }
+    
+    // Determinant
+    double detStatCovMat[1];
+    
+    // Invert the whole thing
+    TMatrixDSym statCovMatInv = statCovMat;
+    statCovMatInv.Invert(detStatCovMat);
+    
+    // Histo for global correlation
+    const TArrayD* xbins = statCovHist->GetXaxis()->GetXbins();
+    TH1D* glcHist = new TH1D("glcHist", "glcHist", nbins, xbins->GetArray());
+    for ( int i = 1 ; i <= nbins ; i++ ) { 
+        double glc = 0.; 
+        // Skip Side bins
+        bool skipThis = false;
+        if ( i == 1 || i == nbins ) skipThis = true;
+        if (  (*detStatCovMat) != 0. )  {
+            if ( skipThis == false ) {
+                double cov = statCovMat[i-2][i-2]; 
+                double covinv = statCovMatInv[i-2][i-2]; 
+                // The product cov*covinv should be greater than zero            
+                double hhh = SVD_Divide(1., cov * covinv);
+                double glcsq = 0.;
+                if ( hhh > 0.) glcsq = 1. - hhh;
+                glc = 100.*SVD_Sqrt(glcsq); 
+            } else {
+                glc = 0.;
+            }
+        } else {
+            cout << "WARNING!" << endl;
+            cout << "Could not calculate global correlation" << endl;
+            cout << "in Bin: " << i << endl;
+            cout << "Reason: Statistical Covariance Matrix is singular." << endl;
+        }
+        glcHist->SetBinContent(i, glc); 
+    }
+    
+    // return histo
+    return glcHist;
+}
+ 
+// Calculate Averaged Global Correlation
+double TopSVDFunctions::SVD_AvgGlobCorr(TH1D* globCorrHist)
+{
+	// Number of binsTLine* line = 
+	int nbins = globCorrHist->GetNbinsX();
+	
+	double sumSquared = 0.;
+	double avgSquared = 0.;
+	int bincounter = 0;
+	
+	// Do not use the side bins!
+	for ( int i = 1; i <= nbins; i++ ) {
+		if ( i == 1 ) continue;
+		if ( i == nbins ) continue;
+		sumSquared += globCorrHist->GetBinContent(i+1);
+		bincounter++;
+	}
+	
+	// Averaging
+	if ( bincounter > 0 ) {
+		avgSquared = sumSquared / ((double) bincounter);
+	}
+	
+	return avgSquared;
+	
+}
+
+
+// Find minimum of a graph, given as two vectors.
+// The coordinates of the minimum are returned in xBest and yBest
+// The position in the vectors is returned as an integer.
+int TopSVDFunctions::SVD_FindMinimum(TVectorD* xVec, TVectorD* yVec, double& xBest, double& yBest)
+{
+	//Test, if vectorX and vectorY have same number of entries
+	int nelements = xVec->GetNoElements();
+	int nelementsY = yVec->GetNoElements();
+	if ( nelements <= 0 || nelementsY <= 0 || nelements != nelementsY ) {
+		cout << "Error in TopSVDFunctions::SVD_FindMinimum()" << endl;
+		cout << "   The two vectors have strange sizes." << endl;
+		cout << "   xVec has " << nelements  << " entries." << endl;
+		cout << "   yVec has " << nelementsY << " entries." << endl;
+		cout << "Exiting ... " << endl;
+		exit(1);
+	}
+	
+	 
+	// Find smallest value
+	double minYValue = FLT_MAX;
+	double minXValue = 0.;
+	int minPosition = -1; 
+	for ( int i = 0 ; i < nelements ; i++ ) {
+		double yvalue = (*yVec)[i];
+		double xvalue = (*xVec)[i];
+		if ( yvalue < minYValue ) {
+			minYValue = yvalue;
+			minXValue = xvalue;
+			minPosition = i;
+		}
+	}
+	
+	
+	// Return it all
+	xBest = minXValue;
+	yBest = minYValue;
+	return minPosition;
+	
+}
+
+
+// REFOLDING - without Background
+// Two possibilities:
+// If useWeights==false (Standard)
+//     Divide "unfHist" by "xiniHist", then refold with event matrix "mcHist". 
+//     ATTENTION: If there are no generated events in a generator bin, then
+//     the division by "xini" doesnt work. But there is a way out:
+//     In such a case, the whole column of the event matrix will be empty! 
+//     Multiplication of x/xini with the event matrix will give zero.
+//     This justifies, that those bins can just be skipped in the sum!
+//     However: If the column of the event matrix is not empty for some
+//     reason, than something is odd and you have to check this.
+//     Overflow bins: Remember, all side bins are in regular binning.
+//     Indexing: i=Rec=(xAxis in mcHist), j=Gen=(yAxis in mcHist)
+// If useWeights==true
+//     "unfHist" is taken to be the ratio between unfolded data and generated distribution,
+//     which means "unfHist" is directly refolded with event matrix "mcHist". 
+//     "xiniHist" will not be used, can be set to NULL if you wish.
+// Attention: A new histogram ist created on the heap
+TH1D* TopSVDFunctions::SVD_Refold(TH1D* unfHist, TH1D* xiniHist, TH2D* mcHist, bool useWeights) 
+{
+	// Make a new Histogram
+    TH1D* refoldHist = (TH1D*) unfHist->Clone("Refolded");
+    int nbins = unfHist->GetNbinsX();
+cout << "asdfasdfasdfasdf " << endl;  
+    // Important Check:
+    // Make sure that generator level bins
+    // with empty xiniHist-bins
+    // have also empty mcHist-rows
+    // GenLevelIndex=j, DetLevelIndex=i
+    if ( useWeights == false ) {
+	    for ( int j = 1 ; j <= nbins ; j++ ) {
+	    	double numerator = xiniHist->GetBinContent(j);
+	    	if ( numerator > 0. ) continue; 
+	    	bool doWarning = true;
+	        for ( int i = 1 ; i <= nbins ; i++ ) {  
+	            double matrixelement = mcHist->GetBinContent(i,j); 
+	            if ( matrixelement == 0. ) continue; 
+	            if ( doWarning == true ) {
+		    		cout << endl;
+		    		cout << "******************************************************************" << endl;
+		    		cout << "WARNING! WARNING! WARNING! " << endl;
+		    		cout << "Severe problem in TopSVDFunctions::SVD_Refold() !!!" << endl;
+		    		cout << "For the generator level bin " << j << " ... " << endl;
+		    		cout << "    ... xiniHist is empty ... " << endl;
+		    		cout << "    ... but in the response matrix there are non-empty elements." << endl;
+		    		cout << "Unfolding might work, but refolding won't !!!" << endl;
+		    		cout << "This means, your chi square will be busted and no one will believe " <<  endl;
+		    		cout << "your results !!!" << endl;
+		    		cout << "******************************************************************" << endl;
+		    		cout << endl; 
+		    		doWarning = false;
+	            }
+	        }
+	    }
+    }      
+    
+    // Run over all bins
+    // GenLevelIndex=j, DetLevelIndex=i 
+    for ( int i = 1 ; i <= nbins ; i++ ) { 
+	    double refoldedvalue = 0.; 
+        for ( int j = 1 ; j <= nbins ; j++ ) { 
+            double xini = 1.;
+            if ( useWeights == false ) {
+            	xini = xiniHist->GetBinContent(j);
+            }
+            double unf = unfHist->GetBinContent(j); 
+            double matrixelement = mcHist->GetBinContent(i,j); 
+            double current = 0.; 
+            if ( xini > 0. ) {  
+                current = matrixelement * ( unf / xini );
+            } else {
+                current = 0.;
+            }
+            refoldedvalue += current;
+	    }
+        refoldHist->SetBinContent(i, refoldedvalue);
+        refoldHist->SetBinError(i, 0.);
+    }
+	 
+	// Return the histogram
+	return refoldHist;
+
+}
+
+// Calculate global lumi scale factor from reconstructed
+// distributions. Exclude overflow bins! Use background free
+// data distribution!
+double TopSVDFunctions::SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist)
+{
+	int nbins = dataHist->GetNbinsX();
+	double sumData = 0.;
+	double sumMC = 0.;
+	
+	for ( int i = 1 ; i <= nbins ; i++ ) {
+		sumData = sumData + dataHist->GetBinContent(i);
+		sumMC = sumMC + recHist->GetBinContent(i);
+	}
+	
+	if ( sumMC <= 0. ) return 1.;
+	if ( sumData <= 0. ) return 1.;
+	
+	double scalefactor = sumData / sumMC ;
+	return scalefactor;
+	
+}
+
 // PERFORM UNFOLDING 
-// Note: This function can do both, BBB and SVD Unfolding.
-// If kreg > 0:
-//       SVD Unfolding is done with 'kreg'
-//       and the result of SVD Unfolding is returned in 'unfolded'
-// If kreg <= 0:
-//       BBB Unfolding is returned in 'unfolded' 
+// Note the different regularization modes:
+// (1) regMode=0 is standard BBB unfolding, no regularization
+// (2) regMode=1 is SVD Unfolding, regularization by means of 
+//        the k Parameter. Specify the k Parameter in 'regPar'
+// (3) regMode=2 is SVD Unfolding, regularization by means of
+//        the tau Parameter. Specify the tau Parameter 
+//        in 'regpar'
+// (4) regMode=3 is SVD Unfolding. A scan for the optimal tau
+//        parameter is performed. The scan is performed around
+//        a "center value" for tau, to be specified in 'regpar' .
+//        Note: The scan may take a while!     
+// (5) regMode=4 is SVD Unfolding. A scan for the optimal tau
+//        parameter is performed. The scan is performed around
+//        a "center value" for k, to be specified in 'regpar'    
+//        Note: The scan may take a while!     
 // If you specify filenames, plots will be drawn and saved.
-int TopSVDFunctions::SVD_Unfold(
+// Return value: Best value of tau if scan is performed, -1. otherwise
+double TopSVDFunctions::SVD_Unfold(
         TH1* dataInputHist,                     // Data Input (RAW Data including the background)
         TH1* bgrInputHist,                      // Background (will be substracted from data)
         TH1* genInputHist,                      // Generated MC
         TH1* recInputHist,                      // Reconstructed MC
         TH1* respInputHist,                     // Response Matrix 
-        const double thebins[],                 // Binning for the unfolding
+        const double thebins[],                 // Binning for the unfolding (bin sizes !!!)
         const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!)
-        int kreg,                               // Regularization parameter
+        double regPar,                          // Regularization parameter
+        int regMode,							// Regularization Modus
         TH1D*& unfolded,                        // Returned: Unfolded Distribution.
         TString channel,                        // Specify Name for the Channel ("mumu", "emu", "ee" ...)
         TString particle,                       // Specify Name for the Physics Object ("Top", "Jets", "Leptons")
@@ -806,7 +1585,7 @@ int TopSVDFunctions::SVD_Unfold(
         TString quantityTex,                    // Nicely formatted name for ithe quantity
         TString specialTex,                     // Nicely formatted name indicating some special condition 
         TString rootFile,                       // If specified, plots will be saved in ROOT File
-        TString psFile                          // If specified, plots will be saved in PS File
+        TString psFile                          // If specified, plots will be saved in PS File 
 )
 {
 
@@ -814,9 +1593,19 @@ int TopSVDFunctions::SVD_Unfold(
     int nExperiments = 1000;
      
 
-    // BBB or SVD? 
-    bool doSVD = false;
-    if ( kreg > 0 ) doSVD = true;
+    // SVD Flag
+    bool doSVD = true;
+    if ( regMode == 0 ) doSVD = false;
+
+	// Regularization Flags
+	bool doUseTau = false;
+	if ( regMode == 2 ) doUseTau = true;
+	if ( regMode == 4 ) doUseTau = true;
+
+	// Scan Flags
+	bool doScan = false;
+	if ( regMode == 3 ) doScan = true;
+	if ( regMode == 4 ) doScan = true;
 
 
     // Plotting flags
@@ -894,10 +1683,14 @@ int TopSVDFunctions::SVD_Unfold(
 
     // BBB-Efficiency
     TH1D* beffHist = (TH1D*) biniHist->Clone("beffHist");
-    for ( int i = 1 ; i < nbins+1 ; i++ ) {
-        double numerator = biniHist->GetBinContent(i);
-        double denominator = xiniHist->GetBinContent(i);
-        double numeratorErr = biniHist->GetBinError(i);
+    for ( int i = 1 ; i < nbins+1 ; i++ ) {  
+        // Sum over all Gen Level bins Including OF bins
+        double numerator = 0.;
+        for ( int j = 1 ; j < nbins+1 ; j++ ) { 
+            numerator += mcHist->GetBinContent(i, j);
+        }
+    	double numeratorErr = SVD_Sqrt(numerator); 
+        double denominator = xiniHist->GetBinContent(i); 
         double denominatorErr = xiniHist->GetBinError(i);
         double bbbeff = 0.;
         double bbbeffErr = 0.;
@@ -949,16 +1742,44 @@ int TopSVDFunctions::SVD_Unfold(
     }
 
 
-    // FINALLY ....
-    // SETUP UNFOLDING TOOL
+    // Setup Unfolding Tool
     TopSVDUnfold *mySVDUnfold = new TopSVDUnfold(dataHist, biniHist, xiniHist, mcHist);
     mySVDUnfold->SetNormalize(false);
 
 
-
-    // THE UNFOLDING with chosen regularization
-    cout << "Unfolding " << channel << "/" << quantity << "/" << particle << "/" << special << " with k=" << TMath::Abs(kreg) << " ... " << endl;
-    TH1D* unfHist = mySVDUnfold->Unfold(TMath::Abs(kreg));
+	// Setup Regularization
+	int theKReg = -1;
+	double theTau = -1.;
+	if ( doUseTau == true ) {
+		theKReg = -1;
+		theTau = regPar;
+	} else {
+		theKReg = (int) regPar; 
+		theTau = 0.;
+	} 
+	mySVDUnfold->SetTau(theTau);
+	
+	
+	// Output
+	cout << "Unfolding " << channel << "/" << quantity << "/" << particle;
+	if ( ! special.CompareTo("") == 0 ) cout << "/" << special;
+	if ( doUseTau == true ) cout << " with tau=" << theTau;
+	if ( doUseTau == false ) cout << " with k=" << theKReg;
+	cout << endl;
+	
+    // Get Lumi SCale Factor
+    double lumiScaleFactor =  SVD_LumiScaleFactor(dataHist, biniHist); 
+    
+    
+    // THE UNFOLDING 
+    TH1D* unfHist = (TH1D*) mySVDUnfold->Unfold(theKReg)->Clone("unfHist"); 
+     
+    // Get More Output
+    TH1D* weightHist = (TH1D*) mySVDUnfold->GetWeights()->Clone("weightHist"); 
+    TH1D* svHist = (TH1D*) mySVDUnfold->GetSV()->Clone("svHist"); 
+    TH1D* ddHist = (TH1D*) mySVDUnfold->GetD()->Clone("ddHist"); 
+    
+    // Output
     cout << "Unfolding done!" << endl;
 
 
@@ -982,9 +1803,123 @@ int TopSVDFunctions::SVD_Unfold(
         unfHist->SetBinError(i, error);
     }
 
+    /////////////////////////////////////////////////////
+    ////////////   SCANNING     /////////////////////////
+    /////////////////////////////////////////////////////
+
+  
+
+	// Save Singular Values in TVector 
+    int nSingularValues = 0;
+    for ( int i = 0 ; i < svHist->GetNbinsX() ; i++ ) {
+    	double sv = svHist->GetBinContent(i+1);
+    	if ( sv > 0. ) nSingularValues++ ;
+    } 
+    TVectorD vSingularValues(nSingularValues);
+    for ( int i = 0 ; i < svHist->GetNbinsX() ; i++ ) {
+    	double sv = svHist->GetBinContent(i+1);
+    	vSingularValues[i] = sv;
+    }
+     
+
+    // Create Scan Vectors
+	TVectorD* vScanPoints = NULL; 
+	TVectorD* vGlobCorr = NULL; 
+	TVectorD* vChiSq = NULL; 
+	TVectorD* vCurv = NULL;  
+	TVectorD* vAvgSqErr = NULL;
+	TVectorD* vAvgMean = NULL;  
+    double optimalTauX = -1.;
+    double optimalTauY = -1.;
+    int optimalTauPos = -1; 
 
 
+    if ( doScan == true ) {
+    	
+    	
+    	// Steer Scan
+  		double rangefactor = 100.;
+   		int nScanPoints = 100;
+    	
+    	
+    	// Find interesting singular value 
+    	// Limit the kReg to the Modes which are actually there! 
+    	int effectiveKReg = theKReg;
+    	if ( effectiveKReg >= nSingularValues ) effectiveKReg = nSingularValues-1;
+    	double singularValueK =  vSingularValues[effectiveKReg];
+    	
+    	
+    	// Range for Scan
+    	double lowTau = 0.;
+    	double highTau = 0.;
+    	if ( doUseTau == false ) {
+    	    lowTau = (1./rangefactor) * singularValueK;
+    	    highTau = rangefactor * singularValueK;
+    	} else {
+    		lowTau = (1./rangefactor) * theTau;
+    		highTau = rangefactor * theTau;
+    	}
+    	  
+    	// Get the Scan Points
+    	vScanPoints = SVD_CalcScanPoints(lowTau, highTau, nScanPoints);
+    	   
+    	// Create the vectors
+    	vGlobCorr = new TVectorD(nScanPoints);
+		vChiSq = new TVectorD(nScanPoints);
+		vCurv = new TVectorD(nScanPoints);
+	    vAvgSqErr = new TVectorD(nScanPoints);
+	    vAvgMean = new TVectorD(nScanPoints);
+    	
+    	  
+    	// Perform the Scan
+    	cout << "Perform Tau Scan from " << lowTau << " to " << highTau << endl;  
+		for ( int i = 0 ; i < nScanPoints ; i++ ) {
+			
+			// Do the unfolding with k = -1
+		    double tau = (*vScanPoints)[i];
+		    mySVDUnfold->SetTau(tau); 
+		    TH1D* tmpUnfResult = (TH1D*) mySVDUnfold->Unfold(-1)->Clone("tmpUnfResult"); 
+		    TH1D* tmpWeights = (TH1D*) mySVDUnfold->GetWeights()->Clone("tmpWeightResult"); 
+			double tmpCurv = mySVDUnfold->GetCurv();
+		    
+		    // Calculate the Error matrix (internally, more unfoldings ... )
+			TH2D* tmpCovHist = (TH2D*) mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments)->Clone("tmpCovHist");
+			  
+			// Global Correlation 
+	 		(*vGlobCorr)[i] = SVD_ScanGlobalCorrelation(tmpCovHist);
+	 		
+	 		// Chi Squared
+	 		(*vChiSq)[i] = SVD_ScanChiSquared(tmpWeights, dataHist, mcHist);
+	 		
+	 		// Curvature
+	 		(*vCurv)[i] = SVD_ScanCurvature(tmpCurv);
+	 		
+	 		// Avg Err
+	 		(*vAvgSqErr)[i] = SVD_ScanAvgSqErr(tmpCovHist);
+	 		
+	 		// Avg Mean
+	 		(*vAvgMean)[i] = SVD_ScanAvgMean(tmpUnfResult);
+	 		
+	 		// Output
+		    cout << "    done for Tau = " << tau << endl;
+		    
+		    // delete things
+		    delete tmpUnfResult;
+		    delete tmpWeights;
+		    delete tmpCovHist;
+	 		
+		}	 
+    	
+    	// Find optimal tau
+    	optimalTauPos = SVD_FindMinimum(vScanPoints, vGlobCorr, optimalTauX, optimalTauY); 
+    	cout << "Optimal Tau = " << optimalTauX << " at scan position " << optimalTauPos << endl;
+    	
 
+    	
+    	
+    }
+
+ 
     /////////////////////////////////////////////////////
     ////////////   FORMATTING   /////////////////////////
     /////////////////////////////////////////////////////
@@ -1006,6 +1941,11 @@ int TopSVDFunctions::SVD_Unfold(
     SVD_SetTitles1D(bbbHist, bbbStr, quantityTex, "Events");
 
     
+    // Format SVD Plot (Weights)
+    TString weightStr = SVD_PlotName(channel, particle, quantity, special, "WGT");
+    SVD_SetTitles1D(weightHist, weightStr, quantityTex, "Events");
+    
+    
     // Format SVD Plot
     TString unfStr = SVD_PlotName(channel, particle, quantity, special, "UNF");
     SVD_SetTitles1D(unfHist, unfStr, quantityTex, "Events");
@@ -1014,12 +1954,12 @@ int TopSVDFunctions::SVD_Unfold(
     // Set Pointer
     if ( doSVD == true ) unfolded = (TH1D*) unfHist->Clone(unfStr.Append("_Returned"));
     if ( doSVD == false ) unfolded = (TH1D*) bbbHist->Clone(bbbStr.Append("_Returned"));
-
+ 
 
 
     // RETURN 
     // If no more plots are needed, return now 
-    if ( doAllPlots == false ) return 0;
+    if ( doAllPlots == false ) return optimalTauX; 
 
 
     // Format Covariance Matrix
@@ -1051,7 +1991,7 @@ int TopSVDFunctions::SVD_Unfold(
     TString mcStrZ("Entries");
     SVD_SetTitles2D(mcHist, mcStr, mcStrX, mcStrY, mcStrZ);
 
-
+ 
     // Format Gen MC
     TString xiniStr = SVD_PlotName(channel, particle, quantity, special, "XGEN");
     SVD_SetTitles1D(xiniHist, xiniStr, quantityTex, "Events");
@@ -1080,7 +2020,7 @@ int TopSVDFunctions::SVD_Unfold(
     // Format Tot COV
     TString totCovStr = SVD_PlotName(channel, particle, quantity, special, "TOTCOV");
     SVD_SetTitles2D(totCovHist, totCovStr, quantityTex, quantityTex, "Monte Carlo Covariance");
-
+ 
     
     ///////////////////////////////////////////////////////////////
     ////////   E X T R A     P L O T S    /////////////////////////
@@ -1112,7 +2052,7 @@ int TopSVDFunctions::SVD_Unfold(
 
     // STABILITY
     // Note: Stability is set to zero, if there are no
-    // gerenated events in a b_Unfoldin.
+    // gerenated events in a bin
     // Note: If there is no reconstructed event in this bin,
     // then the stability is naturally zero, too
     TString stabStr = SVD_PlotName(channel, particle, quantity, special, "STAB");
@@ -1135,7 +2075,7 @@ int TopSVDFunctions::SVD_Unfold(
     }
     SVD_SetTitles1D(stabHist, stabStr, quantityTex, "Stability");
 
-
+ 
 
     // EFFICIENCY
     // Note: If no generated events are available in a bin,
@@ -1169,36 +2109,13 @@ int TopSVDFunctions::SVD_Unfold(
     TH1D* histRatioUnfBBB = SVD_MakeRatioNum(unfHist, bbbHist);
     SVD_SetTitles1D(histRatioUnfBBB, "RATIO", quantityTex, "Ratio");
 
+ 
 
-
-    // REFOLDING - without Background
-    // Note: Divide by "xini", then refold with "event matrix" 
-    // Catch: If there are no generated events in a generator bin, then
-    // the division by "xini" doesnt work. But there is a way out:
-    // In such a case, the whole column of the event matrix will be empty! 
-    // Multiplication of x/xini with the event matrix will give zero.
-    // This justifies, that those bins can just be skipped in the sum!
-    // Isn't life great?
-    // Overflow bins: Remember, all side bins are in regular binning.
-    // Indexing: i=Rec=(xAxis in mcHist), j=Gen=(yAxis in mcHist) 
-    TH1D* refoldHist = (TH1D*) unfHist->Clone("Refolded");
-    for ( int i = 1 ; i <= nbins ; i++ ) { 
-	double refoldedvalue = 0.;
-        for ( int j = 1 ; j <= nbins ; j++ ) { 
-            double denominator = xiniHist->GetBinContent(j);
-            double numerator = unfHist->GetBinContent(j); 
-            double matrixelement = mcHist->GetBinContent(i,j); 
-            double current = 0.; 
-            if ( denominator > 0. ) {  
-                current = matrixelement * ( numerator / denominator );
-            } else {
-                current = 0.;
-            }
-            refoldedvalue += current;
-	}
-        refoldHist->SetBinContent(i, refoldedvalue);
-        refoldHist->SetBinError(i, 0.);
-    }
+    // REFOLDING - without Background 
+    // Note, here we need to use the weightHist, since the
+    // xiniHist contains empty gen level bins
+    //TH1D* refoldHist = SVD_Refold(unfHist, xiniHist, mcHist); 
+    TH1D* refoldHist = SVD_Refold(weightHist, NULL, mcHist, true); 
     TString refoldStr = SVD_PlotName(channel, particle, quantity, special, "RFLD");
     SVD_SetTitles1D(refoldHist, refoldStr, "Bin i", "Refolded Value d_{i}");
 
@@ -1219,14 +2136,12 @@ int TopSVDFunctions::SVD_Unfold(
     //TString goodRecStr = TString::Format("RecBins = %i", goodRecBins);
     //TString goodGenStr = TString::Format("GenBins = %i", goodGenBins);    
 
-    // Get the D-Distribution
-    TH1D* ddHist = mySVDUnfold->GetD();
+    // Get the D-Distribution 
     TString ddStr = SVD_PlotName(channel, particle, quantity, special, "DD");
     SVD_SetTitles1D(ddHist, ddStr, "Index i", "d-Value d_{i}");
 
 
     // Get the singular Values
-    TH1D* svHist = mySVDUnfold->GetSV();
     TString svStr = SVD_PlotName(channel, particle, quantity, special, "SV");
     SVD_SetTitles1D(svHist, svStr, "Index i", "Singular Value s_{i}");
    
@@ -1247,7 +2162,7 @@ int TopSVDFunctions::SVD_Unfold(
     // ERROR PLOT (Total)
     TString totErrStr = SVD_PlotName(channel, particle, quantity, special, "TOTERR");
     TH1D* totErrHist = SVD_Cov2Err(totCovHist, unfHist, totErrStr, quantityTex, "Total");
-
+ 
 
 
     // ERROR PLOT (BBB)
@@ -1266,7 +2181,7 @@ int TopSVDFunctions::SVD_Unfold(
 
 
     // RATIO: UnfErrors versus BBBErrors
-    TH1D* histRatioErrors = SVD_MakeRatioNum(statErrHist, bbbErrHist);
+    TH1D* histRatioErrors = SVD_MakeRatioZero(statErrHist, bbbErrHist);
     SVD_SetTitles1D(histRatioErrors, "RATIO", quantityTex, "Ratio");
 
 
@@ -1290,50 +2205,10 @@ int TopSVDFunctions::SVD_Unfold(
     // of the global correlation !!!  
     // The global correlation in the side bins will be set 
     // to zero!
-    TMatrixDSym statCovMat(nbins-2);
-    for ( int i = 1; i <= nbins ; i++ ) {
-        for ( int j = 1; j <= nbins ; j++ ) {
-            double value = statCovHist->GetBinContent(i,j);
-            // Skip Side bins
-            bool skipThis = false;
-            if ( i == 1 || i == nbins ) skipThis = true;
-            if ( j == 1 || j == nbins ) skipThis = true;
-            // Set Element
-            if ( skipThis == false ) statCovMat[i-2][j-2] = value;
-        }
-    }
-    double detStatCovMat[1];
-    TMatrixDSym statCovMatInv = statCovMat;
-    statCovMatInv.Invert(detStatCovMat);
-    TH1D* glcHist = (TH1D*) unfHist->Clone("glcHist"); 
+    TH1D* glcHist = SVD_CalcGlobCorr(statCovHist);
     TString glcStr = SVD_PlotName(channel, particle, quantity, special, "GLOBC");
     glcHist->SetName(glcStr);
-    glcHist->SetTitle(mcErrStr);
-    for ( int i = 1 ; i <= nbins ; i++ ) { 
-        double glc = 0.; 
-        // Skip Side bins
-        bool skipThis = false;
-        if ( i == 1 || i == nbins ) skipThis = true;
-        if (  (*detStatCovMat) != 0. )  {
-            if ( skipThis == false ) {
-                double cov = statCovMat[i-2][i-2]; 
-                double covinv = statCovMatInv[i-2][i-2]; 
-                // The product cov*covinv should be greater than zero            
-                double hhh = SVD_Divide(1., cov * covinv);
-                double glcsq = 0.;
-                if ( hhh > 0.) glcsq = 1. - hhh;
-                glc = 100.*SVD_Sqrt(glcsq); 
-            } else {
-                glc = 0.;
-            }
-        } else {
-            cout << "WARNING!" << endl;
-            cout << "Could not calculate global correlation" << endl;
-            cout << "for plot " <<  glcStr << ", Bin " << i << endl;
-            cout << "Reason: Statistical Covariance Matrix is singular." << endl;
-        }
-        glcHist->SetBinContent(i, glc); 
-    }
+    glcHist->SetTitle(glcStr);
     SVD_SetTitles1D(glcHist, glcStr, quantityTex, "Glob. Corr. in \%");
 
 
@@ -1342,12 +2217,12 @@ int TopSVDFunctions::SVD_Unfold(
     ///////////   SAVE IT ALL TO PS  //////////////////////////
     /////////////////////////////////////////////////////////// 
 
-
+ 
 
     // DRAW IT ALL
     if ( plotsToPs == true ) {
 	
-        // Donot associate histograms with a directory
+        // Do not associate histograms with a directory
         TH1::AddDirectory(kFALSE);
     
         // Setup Style
@@ -1392,7 +2267,7 @@ int TopSVDFunctions::SVD_Unfold(
         CPQtex.Append(", "); 
         CPQtex.Append(particleTex);
         CPQtex.Append(", ");
-        CPQtex.Append(particleTex);   
+        CPQtex.Append(quantityTex);   
 
 
 
@@ -1415,7 +2290,7 @@ int TopSVDFunctions::SVD_Unfold(
         legendinp->Draw("SAME");
         canvas.Print(outputfilename);
 	
-
+ 
         // Draw Background related Distributions
         TLegend* legendbgr = SVD_NewLegend();
         legendbgr->SetHeader(CPQtex);
@@ -1432,10 +2307,23 @@ int TopSVDFunctions::SVD_Unfold(
         dataHist->Draw();
 
 
+        // Draw Weight distributions	
+        weightHist->Scale(1./lumiScaleFactor);
+        TString weightHistLegendEntry = "Weights w_{i}"; 
+        TLegend* legendweight = SVD_NewLegend();
+        THStack* stackweight = new THStack("", "");
+        legendweight->SetHeader(CPQtex);
+        legendweight->AddEntry(weightHist, weightHistLegendEntry, "l");  
+        stackweight->Add(weightHist);
+        SVD_DrawStack(stackweight, quantityTex, "Weights", "e nostack", 134);
+        legendweight->Draw("SAME");
+        canvas.Print(outputfilename);
+
+
         // Draw Unfolded distributions	
         TString unfHistLegendEntry = "Unf.";
         unfHistLegendEntry.Append(" k=");
-        unfHistLegendEntry.Append(TString::Format("%i", TMath::Abs(kreg))); 
+        unfHistLegendEntry.Append(TString::Format("%i", TMath::Abs(theKReg))); 
         TLegend* legendout = SVD_NewLegend();
         THStack* stackout = new THStack("", "");
         legendout->SetHeader(CPQtex);
@@ -1454,7 +2342,7 @@ int TopSVDFunctions::SVD_Unfold(
         TLegend* legendRatioUnfBBB = SVD_NewLegend();
         legendRatioUnfBBB->SetHeader(CPQtex);
         TString legendentryRatioUnfBBB = TString::Format("Unf/BBB");
-        SVD_DrawRange(histRatioUnfBBB, 0.3, 3., "", 0);
+        SVD_DrawRange(histRatioUnfBBB, 0.7, 1.4, "", 0);
         legendRatioUnfBBB->AddEntry(histRatioUnfBBB, legendentryRatioUnfBBB);
         legendRatioUnfBBB->Draw("SAME");
         canvas.Print(outputfilename);
@@ -1463,7 +2351,7 @@ int TopSVDFunctions::SVD_Unfold(
         // Draw Refolded Distribution
         TString refoldHistLegendEntry = "Rfld.";
         refoldHistLegendEntry.Append(" k=");
-        refoldHistLegendEntry.Append(TString::Format("%i", TMath::Abs(kreg)));
+        refoldHistLegendEntry.Append(TString::Format("%i", TMath::Abs(theKReg)));
         TLegend* legendrefold = SVD_NewLegend();
         THStack* stackrefold = new THStack("", "");
         legendrefold->SetHeader(CPQtex);
@@ -1472,7 +2360,7 @@ int TopSVDFunctions::SVD_Unfold(
         legendrefold->AddEntry((TObject*) NULL, chi2AStr, "");
         //legendrefold->AddEntry((TObject*) NULL, goodRecStr, "");
         //legendrefold->AddEntry((TObject*) NULL, goodGenStr, "");
-        legendrefold->AddEntry((TObject*) NULL, nDOFStr, "");
+        //legendrefold->AddEntry((TObject*) NULL, nDOFStr, "");
         stackrefold->Add(dataHist); //dataHist
         stackrefold->Add(refoldHist);
         SVD_DrawStack(stackrefold, quantityTex, "Entries", "e nostack", 134);
@@ -1485,31 +2373,33 @@ int TopSVDFunctions::SVD_Unfold(
         TLegend* legendRatioRefDat = SVD_NewLegend();
         legendRatioRefDat->SetHeader(CPQtex);
         TString legendentryRatioRefDat = TString::Format("Ref/Data");
-        SVD_DrawRange(histRatioRefDat, 0.3, 3., "p", 0);
+        SVD_DrawRange(histRatioRefDat, 0.7, 1.5, "p", 0);
         legendRatioRefDat->AddEntry(histRatioRefDat, legendentryRatioRefDat);
         legendRatioRefDat->Draw("SAME");
         canvas.Print(outputfilename);
 
- 
+  
         // Draw D-Plot
         TLegend* legenddd = SVD_NewLegend();
         legenddd->SetHeader(CPQtex);
+        gPad->SetLogy(true);
         legenddd->AddEntry(ddHist, "d-Values");
         SVD_Draw1D(ddHist, "", 1);
         legenddd->Draw("SAME");
         canvas.Print(outputfilename);
-
+        gPad->SetLogy(false);
+ 
 
         // Draw SV Plot
         TLegend* legendsv = SVD_NewLegend();
         legendsv->SetHeader(CPQtex);
         gPad->SetLogy(true);
-        legendsv->AddEntry(ddHist, "Sing. Values");
+        legendsv->AddEntry(svHist, "Sing. Values");
         SVD_Draw1D(svHist, "", 1);
         legendsv->Draw("SAME");
         canvas.Print(outputfilename);
         gPad->SetLogy(false);
-
+ 
 
 
         // Draw Stab, Eff, Pur
@@ -1522,7 +2412,7 @@ int TopSVDFunctions::SVD_Unfold(
         stackspe->Add(stabHist); 
         stackspe->Add(purHist); 
         stackspe->Add(effHist);
-        SVD_DrawStack(stackspe, quantityTex, "\%", "nostack", 321);
+        SVD_DrawStack(stackspe, quantityTex, "Pur., Stab., Eff. in \%", "nostack", 321);
         legendspe->Draw("SAME");
         canvas.Print(outputfilename);
 
@@ -1561,7 +2451,7 @@ int TopSVDFunctions::SVD_Unfold(
         // Covariance Matrix (Total)
         SVD_Draw2D(totCovHist, "COLZ");
         canvas.Print(outputfilename);
-
+ 
 
         // Correlation Matrix (STAT)
         SVD_Draw2D(statCorrHist, "COLZ TEXT");
@@ -1584,7 +2474,7 @@ int TopSVDFunctions::SVD_Unfold(
         TLegend* legendglc = SVD_NewLegend(); 
         THStack* stackglc = new THStack("", ""); 
         legendglc->SetHeader(CPQtex);
-        legendglc->AddEntry(glcHist, "Glob. Corr. #rho_{i}"); 
+        legendglc->AddEntry(glcHist, "Glob. Corr. #rho_{i} in \%"); 
         stackglc->Add(glcHist); 
         SVD_DrawStack(stackglc, quantityTex, "Glob. Corr. #rho_{i}", "HIST nostack", 4);
         canvas.Print(outputfilename);
@@ -1623,11 +2513,162 @@ int TopSVDFunctions::SVD_Unfold(
         // RATIO: UnfErrors versus BBBErrors
         TLegend* legendRatioErrors = SVD_NewLegend();
         legendRatioErrors->SetHeader(CPQtex);
-        TString legendentryRatioErrors = "Err Ratio";
+        TString legendentryRatioErrors = "Err. Ratio";
         legendRatioErrors->AddEntry(histRatioErrors, legendentryRatioErrors);
         SVD_DrawRange(histRatioErrors, 0.3, 3., "p", 0);
         legendRatioErrors->Draw("SAME");
         canvas.Print(outputfilename);
+        
+         
+        // Scan Plots
+        if ( doScan == true ) {
+        	
+			// Logscale
+    		gPad->SetLogx(true); 
+        	
+        	// Global Correlation Plot
+        	canvas.Clear();
+        	TH1D* bgrHisto = NULL;
+        	TGraph* gGlobCorr = SVD_Vect2Graph(vScanPoints, vGlobCorr); 
+        	SVD_DrawGraph(gGlobCorr,  bgrHisto, "P", 1);
+        	TString gGlobCorrStr = SVD_PlotName(channel, particle, quantity, special, "scanGLOBC");
+        	SVD_SetTitles1D(bgrHisto, gGlobCorrStr, "Parameter #tau", "Averaged Global Correlation  #bar{#rho}  in %"); 
+        	TGraph* bestPoint = SVD_Point2Graph(optimalTauX, (*vGlobCorr)[optimalTauPos]);
+        	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
+        	bestPoint->SetMarkerSize(2.5); 
+        	bestPoint->SetMarkerStyle(3);
+        	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	TString textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
+        	int textOrientationBestPoint = 23;
+        	TLatex* latexBestPoint = new TLatex();
+        	latexBestPoint->SetTextSize(0.03);
+        	latexBestPoint->SetTextColor(2); 
+        	double textPosBestPointX =  SVD_TextPosX(bgrHisto, (*vScanPoints)[optimalTauPos], gPad->GetLogx(), textOrientationBestPoint);
+        	double textPosBestPointY =  SVD_TextPosY(bgrHisto,   (*vGlobCorr)[optimalTauPos], gPad->GetLogy(), textOrientationBestPoint); 
+        	SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint); 
+            canvas.Print(outputfilename); 
+        	delete gGlobCorr;
+        	delete bestPoint; 
+        	delete bgrHisto;
+        	delete latexBestPoint;
+        	
+        	
+        	// Chi Squared
+        	canvas.Clear();
+        	bgrHisto = NULL;
+        	TGraph* gChiSq = SVD_Vect2Graph(vScanPoints, vChiSq);
+        	SVD_DrawGraph(gChiSq,  bgrHisto, "P", 4); 
+        	TString gChiSqStr = SVD_PlotName(channel, particle, quantity, special, "scanCHI2A");
+        	SVD_SetTitles1D(bgrHisto, gChiSqStr, "Parameter #tau", "#chi^{2}");
+        	bestPoint = SVD_Point2Graph(optimalTauX, (*vChiSq)[optimalTauPos]);
+        	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
+        	bestPoint->SetMarkerSize(2.5); 
+        	bestPoint->SetMarkerStyle(3);
+        	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
+        	textOrientationBestPoint = 31;
+        	latexBestPoint = new TLatex();
+        	latexBestPoint->SetTextSize(0.03);
+        	latexBestPoint->SetTextColor(2); 
+        	textPosBestPointX =  SVD_TextPosX(bgrHisto, (*vScanPoints)[optimalTauPos], gPad->GetLogx(), textOrientationBestPoint);
+        	textPosBestPointY =  SVD_TextPosY(bgrHisto,      (*vChiSq)[optimalTauPos], gPad->GetLogy(), textOrientationBestPoint); 
+        	SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
+            canvas.Print(outputfilename);
+        	delete gChiSq;
+        	delete bestPoint; 
+        	delete bgrHisto;
+        	delete latexBestPoint; 
+        	
+        	
+        	// Curvature
+        	canvas.Clear();
+        	bgrHisto = NULL;
+        	TGraph* gCurv = SVD_Vect2Graph(vScanPoints, vCurv);
+        	SVD_DrawGraph(gCurv,  bgrHisto, "P", 7); 
+        	TString gCurvStr = SVD_PlotName(channel, particle, quantity, special, "scanCURV");
+        	SVD_SetTitles1D(bgrHisto, gCurvStr, "Parameter #tau", "Curvature x^{T}Cx");
+        	bestPoint = SVD_Point2Graph(optimalTauX, (*vCurv)[optimalTauPos]);
+        	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
+        	bestPoint->SetMarkerSize(2.5); 
+        	bestPoint->SetMarkerStyle(3);
+        	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
+        	textOrientationBestPoint = 11;
+        	latexBestPoint = new TLatex();
+        	latexBestPoint->SetTextSize(0.03);
+        	latexBestPoint->SetTextColor(2); 
+        	textPosBestPointX =  SVD_TextPosX(bgrHisto, (*vScanPoints)[optimalTauPos], gPad->GetLogx(), textOrientationBestPoint);
+        	textPosBestPointY =  SVD_TextPosY(bgrHisto,      (*vCurv)[optimalTauPos], gPad->GetLogy(), textOrientationBestPoint); 
+        	SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
+            canvas.Print(outputfilename);
+        	delete gCurv;
+        	delete bestPoint; 
+        	delete bgrHisto;
+        	delete latexBestPoint;  
+        	
+        	
+        	
+        	
+        	// Avg Squared Error
+        	canvas.Clear();
+        	bgrHisto = NULL;
+        	TGraph* gAvgSqErr = SVD_Vect2Graph(vScanPoints, vAvgSqErr);
+        	SVD_DrawGraph(gAvgSqErr,  bgrHisto, "P", 3); 
+        	TString gAvgSqErrStr = SVD_PlotName(channel, particle, quantity, special, "scanAVGERR");
+        	SVD_SetTitles1D(bgrHisto, gAvgSqErrStr, "Parameter #tau", "Avg. Stat. Error");
+        	bestPoint = SVD_Point2Graph(optimalTauX, (*vAvgSqErr)[optimalTauPos]);
+        	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
+        	bestPoint->SetMarkerSize(2.5); 
+        	bestPoint->SetMarkerStyle(3);
+        	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
+        	textOrientationBestPoint = 11;
+        	latexBestPoint = new TLatex();
+        	latexBestPoint->SetTextSize(0.03);
+        	latexBestPoint->SetTextColor(2); 
+        	textPosBestPointX =  SVD_TextPosX(bgrHisto, (*vScanPoints)[optimalTauPos], gPad->GetLogx(), textOrientationBestPoint);
+        	textPosBestPointY =  SVD_TextPosY(bgrHisto,      (*vAvgSqErr)[optimalTauPos], gPad->GetLogy(), textOrientationBestPoint); 
+        	SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
+            canvas.Print(outputfilename);
+        	delete gAvgSqErr;
+        	delete bestPoint; 
+        	delete bgrHisto;
+        	delete latexBestPoint;
+        	
+        	
+        	
+        	
+        	// Avg Mean
+        	canvas.Clear();
+        	bgrHisto = NULL;
+        	TGraph* gAvgMean = SVD_Vect2Graph(vScanPoints, vAvgMean);
+        	SVD_DrawGraph(gAvgMean,  bgrHisto, "P", 6); 
+        	TString gAvgMeanStr = SVD_PlotName(channel, particle, quantity, special, "scanAVGMEAN");
+        	SVD_SetTitles1D(bgrHisto, gAvgMeanStr, "Parameter #tau", "Average Bin Content");
+        	bestPoint = SVD_Point2Graph(optimalTauX, (*vAvgMean)[optimalTauPos]);
+        	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
+        	bestPoint->SetMarkerSize(2.5); 
+        	bestPoint->SetMarkerStyle(3);
+        	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
+        	textOrientationBestPoint = 23;
+        	latexBestPoint = new TLatex();
+        	latexBestPoint->SetTextSize(0.03);
+        	latexBestPoint->SetTextColor(2); 
+        	textPosBestPointX =  SVD_TextPosX(bgrHisto, (*vScanPoints)[optimalTauPos], gPad->GetLogx(), textOrientationBestPoint);
+        	textPosBestPointY =  SVD_TextPosY(bgrHisto,      (*vAvgMean)[optimalTauPos], gPad->GetLogy(), textOrientationBestPoint); 
+        	SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
+            canvas.Print(outputfilename);
+        	delete gAvgMean;
+        	delete bestPoint; 
+        	delete bgrHisto;
+        	delete latexBestPoint;   
+        	
+        	
+			// Logscale
+    		gPad->SetLogx(false);
+        } 
+        
 
 	    // Last page empty
         canvas.Clear();
@@ -1642,6 +2683,7 @@ int TopSVDFunctions::SVD_Unfold(
         // Delete Legends
         delete legendinp;
         delete legendbgr;
+        delete legendweight;
         delete legendout;
         delete legendRatioUnfBBB;
         delete legendrefold; 
@@ -1658,6 +2700,7 @@ int TopSVDFunctions::SVD_Unfold(
         // Delete Stacks
         delete stackinp;
         delete stackbgr;
+        delete stackweight;
         delete stackout;
         delete stackrefold;
         delete stackspe;
@@ -1666,8 +2709,10 @@ int TopSVDFunctions::SVD_Unfold(
         delete stackerr2;
         
         
+        
         // Delete Canvas
         //canvas.Clear(); 
+        
 
     }
   
@@ -1719,9 +2764,10 @@ int TopSVDFunctions::SVD_Unfold(
         file->Close();
  
 
-    }	
-  
-    return 0;  
+    }	 
+        
+    // return 
+    return optimalTauX;
         
     // Delete all old histograms
     delete rawHist;
@@ -1758,9 +2804,9 @@ int TopSVDFunctions::SVD_Unfold(
     // Delete TopSVDUnfold-Objekt
     delete mySVDUnfold;
 
-
-    // Return 
-    return 0;
+ 
+    // return 
+    return optimalTauX; 
 }
  
 
