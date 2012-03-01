@@ -25,12 +25,12 @@
 #include "TGraphAsymmErrors.h"
 #include "TPaveText.h"
 #include "TSpline.h"
-#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/basicFunctions.h"
-#include "TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/HHStyle.h"
+#include "../semiLeptonic/diffXSection/basicFunctions.h"
+#include "../semiLeptonic/diffXSection/HHStyle.h"
 
 // DAVID 
-#include "TopAnalysis/Configuration/analysis/diLeptonic/DilepSVDFunctions.h"
-#include "TopAnalysis/Configuration/analysis/diLeptonic/DilepSVDFunctions.C"
+#include "DilepSVDFunctions.h"
+#include "DilepSVDFunctions.C"
 
 // if the include path is not found, put   
 // gSystem->Load("libFWCoreFWLite.so"); AutoLibraryLoader::enable(); gSystem->Load("libDataFormatsFWLite.so");
@@ -65,9 +65,27 @@ const TString inpath(  !strcmp(USERNAME, "wbehrenh") ? "./" : //PLEASE LEAVE THI
 
 
 // Unfolding Flags
-const bool doSVD = false; //true;
+const bool doSVD = true;
 const bool unfoldingPlotsToPs = true;
 const bool unfoldingPlotsToRoot = false;
+
+// REGMODE for Unfolding
+// (1) regMode=0 is standard BBB unfolding, no regularization
+// (2) regMode=1 is SVD Unfolding, regularization by means of 
+//        the k Parameter. Specify the k Parameter in 'regPar'
+// (3) regMode=2 is SVD Unfolding, regularization by means of
+//        the tau Parameter. Specify the tau Parameter 
+//        in 'regpar'
+// (4) regMode=3 is SVD Unfolding. A scan for the optimal tau
+//        parameter is performed. The scan is performed around
+//        a "center value" for tau, to be specified in 'regpar' .
+//        Note: The scan may take a while!     
+// (5) regMode=4 is SVD Unfolding. A scan for the optimal tau
+//        parameter is performed. The scan is performed around
+//        a "center value" for k, to be specified in 'regpar'    
+//        Note: The scan may take a while!
+// Standard Value is (1). 
+const int regMode = 2;
 
 
 // Place for Output
@@ -172,8 +190,8 @@ const double topxsec = 169.9; //157.5
 const double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
 
 // luminosity used to normalise MC in plots and to calcutate cross sections
-const Double_t lumi = 1143.221; const char* dataFilename = "1fb";
-// const Double_t lumi = 4683.8; const char* dataFilename = "5fb";
+//const Double_t lumi = 1143.221; const char* dataFilename = "1fb";
+const Double_t lumi = 4683.8; const char* dataFilename = "5fb";
 //const Double_t lumi = 2170.1; const char* dataFilename = "2fb";
 //const Double_t lumi = 2511.0; const char* dataFilename = "run2011b_v1";
 //const Double_t lumi = 1026.9; const char* dataFilename = "2011av5v6";
@@ -3170,7 +3188,7 @@ void setupCrossSectionAxis(TH1* histo, const char* particle, const char* quantit
         gPad->SetLogy(1);
     }
     if (1 && strcmp(quantity, "Pt") == 0) {
-        histo->SetMinimum(0.0001);
+        histo->SetMinimum(0.00001);
         gPad->SetLogy(1);
         if (strcmp(quantity, "Pt") == 0 && (strcmp(particle, "Leptons") == 0)) {
             histo->SetMaximum(0.07);
@@ -3620,6 +3638,7 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 		DilepSVDFunctions mySVDFunctions;
 		mySVDFunctions.SetUnfoldingPlotsToPs(unfoldingPlotsToPs);
 		mySVDFunctions.SetUnfoldingPlotsToRoot(unfoldingPlotsToRoot);
+		mySVDFunctions.SetRegMode(regMode);
 		mySVDFunctions.SetOutputPath(outpath);
 
         // Raw Data Histogram
@@ -5390,9 +5409,6 @@ void PlotKinFitEfficiencyInRecoBins(const char* particle, const char* quantity, 
 void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double xsec = topxsec) {
 
 
-     // DAVID
-    // SVD_Plots();
-    // return;
     
     time_t starttime;
     time(&starttime);
@@ -5478,6 +5494,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     // Calculate differential cross sections
     TGaxis::SetMaxDigits(2);
 
+ 
     // leptons
     const Int_t nbinsLepEta = 8;
     const Double_t binsLepEta[nbinsLepEta+1] = {-2.4, -1.8, -1.2, -0.6, 0.0, 0.6, 1.2, 1.8, 2.4};
@@ -5486,14 +5503,11 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE, 0, false);
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     GetBtagEfficiencyInBins("Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
-   
  
-    const Int_t nbinsLepEtaMoreBins = 7;
-    const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.1, -0.4, 0.4, 1.1, 1.7, 2.4};
-//     const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.0, -0.3, 0.3, 1.0, 1.7, 2.4};
-    const Double_t binCenterLepEtaMoreBins[nbinsLepEtaMoreBins] = {bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto};
-    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins", doSVD);
-
+//    const Int_t nbinsLepEtaMoreBins = 11; //9; //7
+//    const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.1, -0.5, -0.4, -0.3, 0.3, 0.4, 0.5, 1.1, 1.7, 2.4}; //{-2.4, -1.7, -1.1, -0.4, 0.4, 1.1, 1.7, 2.4}; 
+//    const Double_t binCenterLepEtaMoreBins[nbinsLepEtaMoreBins] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto}; //{bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto};
+//    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins", doSVD);
 
 
     const Int_t nbinsLepPt = 5;
@@ -5503,7 +5517,8 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("Leptons", "Pt", "p_{T}^{l^{+} and l^{-}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{l^{+} and l^{-}}} #left[(#frac{GeV}{c})^{-1}#right]", binsLepPt, nbinsLepPt, binCenterLepPt, kFALSE, 0, false );
     PlotKinFitEfficiencyInRecoBins("Leptons", "Pt", kCOMBINED, "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
     GetBtagEfficiencyInBins("Leptons",  "Pt", "p_{T}^{l^{+} and l^{-}}", binsLepPt, nbinsLepPt);
-    
+
+
     const Int_t nfinebinsLepPt = 10;
     const Double_t finebinsLepPt[nfinebinsLepPt+1] = {20, 30, 40, 55, 70, 95, 120, 160, 180, 250, 400};
     SaveUnfoldingHists("Leptons", "Pt", kMM, binsLepPt, nbinsLepPt, finebinsLepPt, nfinebinsLepPt);
@@ -5556,7 +5571,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("Jets", "Pt", "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dp_{T}^{b and #bar{b}}} #left[(#frac{GeV}{c})^{-1}#right]", binsJetPt, nbinsJetPt, binCenterJetPt, true, 0, doSVD  );
     GetBtagEfficiencyInBins("Jets", "Pt", "p_{T,l}", binsJetPt, nbinsJetPt);
 
-  
+
     // top
     const Int_t nbinsTopRapidity = 6;
     const Double_t binsTopRapidity[nbinsTopRapidity+1] = {-2.5, -1.6, -0.8, 0.0, 0.8, 1.6, 2.5};
@@ -5564,6 +5579,8 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
+ 
+ 
    
     //other plot as requested by ARC
     const Int_t nbinsTopRapidityMoreBins = 5;
@@ -5615,6 +5632,12 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Mass", kCOMBINED, "generated m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     GetBtagEfficiencyInBins("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
+    
+    
+    // If this for scanning, just leave it here.
+    if ( regMode == 3 || regMode == 4 ) return;
+    
+    
     SaveUnfoldingHists("TtBar", "Mass", kMM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
     SaveUnfoldingHists("TtBar", "Mass", kEM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
     SaveUnfoldingHists("TtBar", "Mass", kEE, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
