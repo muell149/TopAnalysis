@@ -523,7 +523,7 @@ void Plotter::setDataSet(TString mode)
   if(channel =="emu"){channelType=2;channelLabel[2]="e#mu";}
   if(channel =="combined"){channelType=3;channelLabel[3]="Dilepton Combined";}
 
-  lumi=1141;
+  lumi=4966;
   
   DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
 
@@ -588,7 +588,7 @@ void Plotter::setSystDataSet(TString systematic)
   initialized=false;
 
   DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
-  lumi=1141;
+  lumi=4966;
   if(channel=="ee" || channel=="emu" || channel=="mumu"){  
     TString HistoFileUp,HistoFileDown; 
     if(systematic=="DY_" || systematic=="BG_"){
@@ -844,7 +844,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
       }
     }
   }
-
+  
   TList* l = stack->GetHists();
   TH1D* stacksum = (TH1D*) l->At(0)->Clone();
   for (int i = 1; i < l->GetEntries(); ++i) {
@@ -872,6 +872,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     syshist->SetLineColor(1);
     syshist->SetBinError(i, TMath::Sqrt(binerr2));
   }    
+  
 
 
   if(logY)c->SetLogy();
@@ -885,8 +886,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   }
   else{drawhists[0]->SetMaximum(1.2*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
 
-
-  drawhists[0]->Draw("e1");
+  
+  drawhists[0]->Draw("e1");  
   stack->Draw("same HIST");
   gPad->RedrawAxis();
   TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
@@ -896,17 +897,19 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   setex2->Draw();
   drawhists[0]->Draw("same,e1");
   
-  DrawCMSLabels(true, 1143);
+  DrawCMSLabels(true, lumi);
+  
   DrawDecayChLabel(channelLabel[channelType]);    
-  leg->Draw("SAME");
-  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
-  gSystem->MakeDirectory("Plots");
-  gSystem->MakeDirectory("Plots/"+channel);
-  c->Print("Plots/"+channel+"/"+name+".eps");
-  c->Clear();
-  leg->Clear();
-  delete c;
+  leg->Draw("SAME");  
+  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
+  gSystem->MakeDirectory("Plots");  
+  gSystem->MakeDirectory("Plots/"+channel);  
+  c->Print("Plots/"+channel+"/"+name+".eps");  
+  c->Clear();  
+  leg->Clear();  
+  delete c;  
   delete leg;
+  
   //delete stack;
   }
   else std::cout << "Histogram " << name << " not filled during the process." << std::endl;
@@ -1060,15 +1063,15 @@ void Plotter::PlotXSec(){
 
 double Plotter::CalcXSec(){
   TH1::AddDirectory(kFALSE);
-  CalcInclSystematics("JES",0);
-  CalcInclSystematics("RES",1);
-  CalcInclSystematics("PU_",2);
-  CalcInclSystematics("SCALE",3);
-  CalcInclSystematics("MATCH",4);
-  CalcInclSystematics("MASS",5);
-  CalcInclSystematics("DY_",6);
-  CalcInclSystematics("BG_",7);
-  InclFlatSystematics(8);
+  //  CalcInclSystematics("JES",0);
+  //CalcInclSystematics("RES",1);
+  //CalcInclSystematics("PU_",2);
+  //CalcInclSystematics("SCALE",3);
+  //CalcInclSystematics("MATCH",4);
+  //CalcInclSystematics("MASS",5);
+  //CalcInclSystematics("DY_",6);
+  //CalcInclSystematics("BG_",7);
+  //InclFlatSystematics(8);
   
   double syst_square=0;
 
@@ -1078,7 +1081,7 @@ double Plotter::CalcXSec(){
   InclusiveXsectionSysError[channelType] = sqrt(syst_square);
   //cout<<"&^&^&^&^&^&^^&^&^ InclusiveXsectionSysError[channelType]: "<<InclusiveXsectionSysError[channelType]<<endl;
   double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu, combined] including tau
-  lumi = 1141;
+  lumi = 4966;
 
   TH1D *numhists[hists.size()];
   double numbers[4]={0};
@@ -1146,15 +1149,15 @@ double Plotter::CalcXSec(){
 
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    CalcDiffSystematics("JES", 0);
-    CalcDiffSystematics("RES", 1);
-    CalcDiffSystematics("PU_", 2);
-    CalcDiffSystematics("SCALE", 3);
-    CalcDiffSystematics("MATCH", 4);
-    CalcDiffSystematics("MASS", 5);
-    CalcDiffSystematics("DY_", 6);
-    CalcDiffSystematics("BG_", 7);
-    DiffFlatSystematics(8,bins);
+    //CalcDiffSystematics("JES", 0);
+    //CalcDiffSystematics("RES", 1);
+    //CalcDiffSystematics("PU_", 2);
+    //CalcDiffSystematics("SCALE", 3);
+    //CalcDiffSystematics("MATCH", 4);
+    //CalcDiffSystematics("MASS", 5);
+    //CalcDiffSystematics("DY_", 6);
+    //CalcDiffSystematics("BG_", 7);
+    //DiffFlatSystematics(8,bins);
     double topxsec = 169.9;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 3697693.0;
@@ -1778,10 +1781,11 @@ void Plotter::PlotDiffXSec(){
       }
     }
     varhists[0]->SetMinimum(0);
+    varhists[0]->GetYaxis()->SetTitle("N_{Events}");
     varhists[0]->Draw("el");
     stack->Draw("same HIST");
     varhists[0]->Draw("same, e1");
-    DrawCMSLabels(true, 1143);
+    DrawCMSLabels(true, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
     leg->Draw("SAME");
     gPad->RedrawAxis();
