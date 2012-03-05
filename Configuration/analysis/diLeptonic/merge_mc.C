@@ -53,7 +53,7 @@ void merge(string channel){
 
   map<string,float> MCXsecmap; //map of sample and cross-section
   
-  double lumi = 1143.221;
+  double lumi = 4966.0;
 
   for(it = list_mc_files.begin(); it != list_mc_files.end(); it++){
   
