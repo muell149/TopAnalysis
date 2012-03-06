@@ -102,14 +102,15 @@ public:
 	// Unfolding function
 	static double SVD_Unfold(
 	        TH1* dataInputHist,                    
-	        TH1* bgrInputHist,                     
+	        TH1* bgrInputHist,   
+		TH1* ttbgrInputHist,
 	        TH1* genInputHist,                     
 	        TH1* recInputHist,                
 	        TH1* respInputHist,          
 	        const double thebins[],     
 	        const int numbins,        
 	        double regPar,          
-            int regMode,	                   
+		int regMode,	                   
 	        TH1D*& unfolded,            
 	        TString channel = "",                   
 	        TString particle = "",       
@@ -120,7 +121,8 @@ public:
 	        TString quantityTex = "",          
 	        TString specialTex = "",              
 	        TString rootFile = "",              
-	        TString psFile = ""          
+	        TString psFile = "",
+		const int verbose = 1
 	);
 	 
 };

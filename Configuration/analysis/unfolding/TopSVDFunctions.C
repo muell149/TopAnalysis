@@ -1732,28 +1732,62 @@ int TopSVDFunctions::SVD_FindBin(TAxis* axis, double bnd)
 // If you specify filenames, plots will be drawn and saved.
 // Return value: Best value of tau if scan is performed, -1. otherwise
 double TopSVDFunctions::SVD_Unfold(
-        TH1* dataInputHist,                     // Data Input (RAW Data including the background)
-        TH1* bgrInputHist,                      // Background (will be substracted from data)
-        TH1* genInputHist,                      // Generated MC
-        TH1* recInputHist,                      // Reconstructed MC
-        TH1* respInputHist,                     // Response Matrix 
-        const double thebins[],                 // Binning for the unfolding (bin sizes !!!)
-        const int numbins,                      // Number of bins for unfolding (not counting OF bins !!!)
-        double regPar,                          // Regularization parameter
-        int regMode,							// Regularization Modus
-        TH1D*& unfolded,                        // Returned: Unfolded Distribution.
-        TString channel,                        // Specify Name for the Channel ("mumu", "emu", "ee" ...)
-        TString particle,                       // Specify Name for the Physics Object ("Top", "Jets", "Leptons")
-        TString quantity,                       // Specify Name for the Quantity ("Eta", "Pt", or "Mass");
-        TString special,                        // Specify Name for special run of unfolding
-        TString channelTex,                     // Nicely formatted name for the channel
-        TString particleTex,                    // Nicely formatted name for the physics object
-        TString quantityTex,                    // Nicely formatted name for ithe quantity
-        TString specialTex,                     // Nicely formatted name indicating some special condition 
-        TString rootFile,                       // If specified, plots will be saved in ROOT File
-        TString psFile                          // If specified, plots will be saved in PS File 
+        // Data Input (RAW Data including the background)
+        TH1* dataInputHist,   
+	// Background (reco level, all BG, will be substracted from data)
+        TH1* bgrInputHist,
+	// ttbar background only (used to calculate a ttbar signal 
+	// fraction instead of subtracting the yield which depends 
+	// on the inclusive ttbar cross section.) 
+	// Note: if 0 pointer is handed over 
+	TH1* ttbgrInputHist, 
+	// Generated signal MC
+        TH1* genInputHist,
+	// Reconstructed signal MC
+        TH1* recInputHist,        
+	// Response Matrix 
+        TH1* respInputHist,   
+	// Binning for the unfolding (bin sizes !!!)
+        const double thebins[],     
+	// Number of bins for unfolding (not counting OF bins !!!)
+        const int numbins,  
+	// Regularization parameter
+        double regPar,                          
+	// Regularization Modus
+        int regMode,	
+	// Returned: Unfolded Distribution.	
+        TH1D*& unfolded,   
+	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
+        TString channel,  
+	// Specify Name for the Physics Object ("Top", "Jets", "Leptons")
+        TString particle, 
+	// Specify Name for the Quantity ("Eta", "Pt", or "Mass");
+        TString quantity,
+	// Specify Name for special run of unfolding
+        TString special,
+	// Nicely formatted name for the channel
+        TString channelTex,
+	// Nicely formatted name for the physics object
+        TString particleTex,
+	// Nicely formatted name for ithe quantity
+        TString quantityTex,
+	// Nicely formatted name indicating some special condition 
+        TString specialTex,
+	// If specified, plots will be saved in ROOT File
+        TString rootFile,
+	// If specified, plots will be saved in PS File 
+        TString psFile,
+	// parameter to control amount of output
+	// verbose=0: no output at all
+	// verbose=1: standard output
+	// verbose=2: debug output	
+	int verbose
 )
 {
+    // adapt gErrorIgnoreLevel to reduce output
+    int initialgErrorLv=gErrorIgnoreLevel;
+    if(verbose==1) gErrorIgnoreLevel=kWarning;
+    if(verbose==0) gErrorIgnoreLevel=kFatal;
 
     // Number of Pseudo Experiments for the error calculation    
     int nExperiments = 1000;
@@ -1801,61 +1835,115 @@ double TopSVDFunctions::SVD_Unfold(
     //////////////////////////////////////////////////////
 
 
+    ////////////////////////////////
+    // REBINNING INPUT HISTOGRAMS //
+    ////////////////////////////////
 
-    // DATA rebinned, with background
+    // data (including background)
     TH1D* rawHist = SVD_Rebin1D(dataInputHist, nbins, bins);
     SVD_EmptySideBins1D(rawHist);
 
-
-
-    // BACKGROUND SIGNAL
+    // all background
     // Set errors to zero!
     TH1D* bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins); 
- 	SVD_EmptyHistoErrors1D(bgrHist);
+    SVD_EmptyHistoErrors1D(bgrHist);
     SVD_EmptySideBins1D(bgrHist);
-
     
-    // BACKGROUND SUBSTRACTION FROM DATA
-    // ATTENTION! Errors from background
-    // will be neglected.
-    // You thought about this once!
-    // Dont mess this up!
-    TH1D* dataHist = (TH1D*) rawHist->Clone("dataHist");
-    if ( bgrHist != NULL ) {
-	    for ( int i = 0 ; i < nbins + 1 ; i++) {
-	    	double value_data = rawHist->GetBinContent(i);
-	    	double value_bgr = bgrHist->GetBinContent(i);
-	    	double err_data = rawHist->GetBinError(i);
-	    	double err_bgr = bgrHist->GetBinError(i);
-	    	double value_new = value_data - value_bgr;
-	    	//double err_bgr = bgrHist->GetBinError(i);
-	    	//double err_new = TMath::Sqrt(err_data*err_data + err_bgr*err_bgr);
-	    	double err_new = err_data; 
-	    	dataHist->SetBinContent(i, value_new);
-	    	dataHist->SetBinError(i, err_new); 
-	    }  
+    // ttbar background only
+    TH1D* ttbgrHist;
+    if ( ttbgrInputHist != NULL ) {
+      ttbgrHist= SVD_Rebin1D((TH1D*) ttbgrInputHist, nbins, bins); 
+      SVD_EmptyHistoErrors1D(ttbgrHist);
+      SVD_EmptySideBins1D   (ttbgrHist);
     }
-    SVD_EmptySideBins1D(dataHist);
-
-
-
-    // REBINNING of Response Matrix
+    
+    // Response Matrix
     // ... thereby transposing it
     TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, true);  
     //SVD_MoveOFBins2D(mcHist);
     //SVD_EmptySideBins2D(mcHist);
 
 
- 
-    // XINI (MC truth) rebinned 
+    // ttbar (MC truth signal)
     TH1D* xiniHist = SVD_Rebin1D((TH1D*) genInputHist, nbins, bins);
     SVD_MoveOFBins1D(xiniHist);
-
     
 
-    // BINI (reconstructed MC signal) rebinned
+    // ttbar (reconstructed MC signal)
     TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, nbins, bins);
     SVD_EmptySideBins1D(biniHist);
+
+
+    // BACKGROUND SUBSTRACTION FROM DATA
+    // ATTENTION! Errors from background
+    // will be neglected.
+    // You thought about this once!
+    // Dont mess this up!
+    // Note: if ttbar BG plot is handed over, 
+    //       a multiplicative approach is used
+    //       to deal with ttbar BG instead of 
+    //       subracting the (xSec dependend) yield
+    TH1D* dataHist = (TH1D*) rawHist->Clone("dataHist");
+    // loop bins
+    for ( int i = 0 ; i < nbins + 1 ; i++) {
+      // get bin and errors
+      double value_data = rawHist->GetBinContent(i);
+      double value_bgr = bgrHist->GetBinContent(i);
+      double err_data = rawHist->GetBinError(i);
+      //double err_bgr = bgrHist->GetBinError(i);
+      // feasibility check 
+      if(value_data<value_bgr){
+	std::cout << "ERROR in TopSVDFunctions::SVD_Unfold: " << std::endl;
+	std::cout << "N_MC BG > N_data in bin " << i << std::endl;
+	std::cout << "(" << value_bgr << ">" << value_data << ")" << std::endl;
+	exit(0);
+      }
+      double value_new = value_data - value_bgr;
+      //double err_bgr = bgrHist->GetBinError(i);
+      //double err_new = TMath::Sqrt(err_data*err_data + err_bgr*err_bgr);
+      double err_new = err_data; 
+      // debug output
+      if(verbose>=2){
+	std::cout << std::endl << "bin " << i << std::endl;
+	std::cout << "value_data: " << value_data << std::endl;
+	std::cout << "value_bgr: "  <<  value_bgr << std::endl;
+	std::cout << "err_data: "   << err_data << std::endl;
+      }
+      // use ttbar signal fraction if ttbar BG plot exists
+      if ( ttbgrInputHist != NULL ) {
+	double value_ttSig=biniHist->GetBinContent(i);
+	double value_ttBgr=ttbgrHist->GetBinContent(i);
+	// feasibility check 
+	if(value_ttBgr>value_bgr){
+	  std::cout << "ERROR in TopSVDFunctions::SVD_Unfold: " << std::endl;
+	  std::cout << "N_{MC ttbar BG} > N_{MC all BG} in bin " << i << std::endl;
+	  std::cout << "(" << value_ttBgr << ">" << value_bgr << ")" << std::endl;
+	  exit(0);
+	}
+	// don't subtract ttbar BG
+	value_bgr-=value_ttBgr;
+	// calculate signal fraction
+	double sigFrac=value_ttSig/(value_ttSig+value_ttBgr);
+	// debug output
+	if(verbose>=2){
+	  std::cout << "value_ttBgr: " << value_ttBgr << std::endl;
+	  std::cout << "value_bgr(no ttbar): " << value_bgr << std::endl;
+	  std::cout << "value_ttSig: " << value_ttSig << std::endl;
+	  std::cout << "sigFrac: " << sigFrac << std::endl;
+	}
+	// use ttbar signal fraction
+	value_new = (value_data - value_bgr)*sigFrac;
+	err_new = err_data*sigFrac; 
+      }
+      // debug output
+      if(verbose>=2){
+	std::cout << "data_value_new: " << value_new << std::endl;
+	std::cout << "data_err_new: "   << err_new   << std::endl;
+      }
+      dataHist->SetBinContent(i, value_new);
+      dataHist->SetBinError(i, err_new); 
+    }  
+    SVD_EmptySideBins1D(dataHist);
 
 
 
@@ -1933,25 +2021,28 @@ double TopSVDFunctions::SVD_Unfold(
     mySVDUnfold->SetNormalize(false);
 
 
-	// Setup Regularization
-	int theKReg = -1;
-	double theTau = -1.;
-	if ( doUseTau == true ) {
-		theKReg = -1;
-		theTau = regPar;
-	} else {
-		theKReg = (int) regPar; 
-		theTau = 0.;
-	} 
-	mySVDUnfold->SetTau(theTau);
-	
-	
-	// Output
-	cout << "Unfolding " << channel << "/" << quantity << "/" << particle;
-	if ( ! special.CompareTo("") == 0 ) cout << "/" << special;
-	if ( doUseTau == true ) cout << " with tau=" << theTau;
-	if ( doUseTau == false ) cout << " with k=" << theKReg;
-	cout << endl;
+    // Setup Regularization
+    int theKReg = -1;
+    double theTau = -1.;
+    if ( doUseTau == true ) {
+      theKReg = -1;
+      theTau = regPar;
+    } 
+    else {
+      theKReg = (int) regPar; 
+      theTau = 0.;
+    } 
+    mySVDUnfold->SetTau(theTau);
+    
+    
+    // Output
+    if(verbose>0){
+      cout << "Unfolding " << channel << "/" << quantity << "/" << particle;
+      if ( ! special.CompareTo("") == 0 ) cout << "/" << special;
+      if ( doUseTau == true ) cout << " with tau=" << theTau;
+      if ( doUseTau == false ) cout << " with k=" << theKReg;
+      cout << endl;
+    }
 	
     // Get Lumi SCale Factor
     double lumiScaleFactor =  SVD_LumiScaleFactor(dataHist, biniHist); 
@@ -1966,7 +2057,7 @@ double TopSVDFunctions::SVD_Unfold(
     TH1D* ddHist = (TH1D*) mySVDUnfold->GetD()->Clone("ddHist"); 
     
     // Output
-    cout << "Unfolding done!" << endl;
+    if(verbose>0) cout << "Unfolding done!" << endl;
 
 
     // Calculate TOTAL COVARIANCE
@@ -3016,9 +3107,12 @@ double TopSVDFunctions::SVD_Unfold(
     // Delete TopSVDUnfold-Objekt
     delete mySVDUnfold;
 
- 
+    // restore gErrorIgnoreLv
+    gErrorIgnoreLevel=initialgErrorLv;
+
     // return 
-    return optimalTauX; 
+    return optimalTauX;
+    
 }
  
 
