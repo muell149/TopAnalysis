@@ -1737,18 +1737,25 @@ double TopSVDFunctions::SVD_Unfold(
 
     
     // BACKGROUND SUBSTRACTION FROM DATA
-    // ATTENTION! Errors will be added in quadrature
+    // ATTENTION! Errors from background
+    // will be neglected.
+    // You thought about this once!
+    // Dont mess this up!
     TH1D* dataHist = (TH1D*) rawHist->Clone("dataHist");
-    for ( int i = 0 ; i < nbins + 1 ; i++) {
-    	double value_data = rawHist->GetBinContent(i);
-    	double value_bgr = bgrHist->GetBinContent(i);
-    	double err_data = rawHist->GetBinError(i);
-    	double err_bgr = bgrHist->GetBinError(i);
-    	double value_new = value_data - value_bgr;
-    	double err_new = TMath::Sqrt(err_data*err_data + err_bgr*err_bgr);
-    	dataHist->SetBinContent(i, value_new);
-    	dataHist->SetBinError(i, err_new); 
-    }  
+    if ( bgrHist != NULL ) {
+	    for ( int i = 0 ; i < nbins + 1 ; i++) {
+	    	double value_data = rawHist->GetBinContent(i);
+	    	double value_bgr = bgrHist->GetBinContent(i);
+	    	double err_data = rawHist->GetBinError(i);
+	    	double err_bgr = bgrHist->GetBinError(i);
+	    	double value_new = value_data - value_bgr;
+	    	//double err_bgr = bgrHist->GetBinError(i);
+	    	//double err_new = TMath::Sqrt(err_data*err_data + err_bgr*err_bgr);
+	    	double err_new = err_data; 
+	    	dataHist->SetBinContent(i, value_new);
+	    	dataHist->SetBinError(i, err_new); 
+	    }  
+    }
     SVD_EmptySideBins1D(dataHist);
 
 
@@ -1873,7 +1880,7 @@ double TopSVDFunctions::SVD_Unfold(
     
     // THE UNFOLDING 
     TH1D* unfHist = (TH1D*) mySVDUnfold->Unfold(theKReg)->Clone("unfHist"); 
-     
+      
     // Get More Output
     TH1D* weightHist = (TH1D*) mySVDUnfold->GetWeights()->Clone("weightHist"); 
     TH1D* svHist = (TH1D*) mySVDUnfold->GetSV()->Clone("svHist"); 
@@ -1909,20 +1916,20 @@ double TopSVDFunctions::SVD_Unfold(
     ////////////   SCANNING     /////////////////////////
     /////////////////////////////////////////////////////
 
-  
+   
 
 	// Save Singular Values in TVector 
     int nSingularValues = 0;
     for ( int i = 0 ; i < svHist->GetNbinsX() ; i++ ) {
     	double sv = svHist->GetBinContent(i+1);
     	if ( sv > 0. ) nSingularValues++ ;
-    } 
+    }  
     TVectorD vSingularValues(nSingularValues);
     for ( int i = 0 ; i < svHist->GetNbinsX() ; i++ ) {
-    	double sv = svHist->GetBinContent(i+1);
-    	vSingularValues[i] = sv;
+    	double sv = svHist->GetBinContent(i+1);  
+    	if ( sv > 0. ) vSingularValues[i] = sv; 
     }
-     
+      
 
     // Create Scan Vectors
 	TVectorD* vScanPoints = NULL; 
@@ -1934,8 +1941,7 @@ double TopSVDFunctions::SVD_Unfold(
     double optimalTauX = -1.;
     double optimalTauY = -1.;
     int optimalTauPos = -1; 
-
-
+ 
     // Doubles for BBB values
 	double bbbAvgSqErr = 0.;
 	double bbbAvgMean = 0.; 
@@ -1975,7 +1981,7 @@ double TopSVDFunctions::SVD_Unfold(
 		vCurv = new TVectorD(nScanPoints);
 	    vAvgSqErr = new TVectorD(nScanPoints);
 	    vAvgMean = new TVectorD(nScanPoints);
-    	
+    	 
     	  
     	// Perform the Scan
     	cout << "Perform Tau Scan from " << lowTau << " to " << highTau << endl;  
@@ -2015,7 +2021,7 @@ double TopSVDFunctions::SVD_Unfold(
 		    delete tmpCovHist;
 	 		
 		}	 
-    	
+    	 
     	// Find optimal tau
     	optimalTauPos = SVD_FindMinimum(vScanPoints, vGlobCorr, optimalTauX, optimalTauY); 
     	cout << "Optimal Tau = " << optimalTauX << " at scan position " << optimalTauPos << endl;
@@ -2037,8 +2043,7 @@ double TopSVDFunctions::SVD_Unfold(
     	}
     	bbbAvgSqErr = bbbAvgSqErr / ((double) bincounter );
     	bbbAvgSqErr = bbbAvgMean / ((double) bincounter );
-    	bbbAvgSqErr = TMath::Sqrt(bbbAvgSqErr);
-    	cout << "asdfasdfasdfasdf" << bbbAvgMean << endl;
+    	bbbAvgSqErr = TMath::Sqrt(bbbAvgSqErr); 
     	
     }
 
