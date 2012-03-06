@@ -224,7 +224,53 @@ void TopSVDFunctions::SVD_EmptySideBins1D(TH1D* histo)
 
 
 
+// Empties all bins and all errors in a histogram
+void TopSVDFunctions::SVD_EmptyHistogram1D(TH1D* histo)
+{
+	int nbins = histo->GetNbinsX();
+	for ( int i = 0 ; i < nbins ; i++ ) {
+		histo->SetBinContent(i, 0.);
+		histo->SetBinError(i, 0.);
+	}
+}
 
+
+
+// Empties all bins and all errors in a histogram
+void TopSVDFunctions::SVD_EmptyHistogram2D(TH2D* histo)
+{
+	int nbinsx = histo->GetNbinsX();
+	int nbinsy = histo->GetNbinsY();
+	int nbins = (nbinsx+2) * (nbinsy+2);
+	for ( int i = 0 ; i < nbins ; i++ ) {
+		histo->SetBinContent(i, 0.);
+		histo->SetBinError(i, 0.);
+	}
+}
+
+
+
+// Empties all errors in a histogram
+void TopSVDFunctions::SVD_EmptyHistoErrors1D(TH1D* histo)
+{
+	int nbins = histo->GetNbinsX();
+	for ( int i = 0 ; i < nbins ; i++ ) { 
+		histo->SetBinError(i, 0.);
+	}
+}
+
+
+
+// Empties all errors in a histogram
+void TopSVDFunctions::SVD_EmptyHistoErrors2D(TH2D* histo)
+{
+	int nbinsx = histo->GetNbinsX();
+	int nbinsy = histo->GetNbinsY();
+	int nbins = (nbinsx+2) * (nbinsy+2);
+	for ( int i = 0 ; i < nbins ; i++ ) { 
+		histo->SetBinError(i, 0.);
+	}
+}
 
 
 // This empties the dedicated side bins.
@@ -769,6 +815,38 @@ TLine* TopSVDFunctions::SVD_DrawVertLine(TH1D*& bgrHisto, double xpos, int color
 	
 }
 
+// Draws a horizontal line from top to bottom of bgrHisto.
+// If color < 1, then color will be set autmatically 
+TLine* TopSVDFunctions::SVD_DrawHorizLine(TH1D*& bgrHisto, double ypos, int color)
+{
+	// Get Range of Histogram
+	int nbins = bgrHisto->GetNbinsX();
+	double Xmin = bgrHisto->GetXaxis()->GetBinLowEdge(1);
+	double Xmax = bgrHisto->GetXaxis()->GetBinLowEdge(nbins+1);
+	
+	// New Line
+	TLine* line = new TLine(Xmin,  ypos, Xmax, ypos);
+	line->SetLineColor(color);
+	line->SetLineWidth(1);
+	line->SetLineStyle(1);
+	
+	// Test it, whether it is in the range of the histogram
+	bool draw = true; 
+	double ymin = bgrHisto->GetMinimum();
+	double ymax = bgrHisto->GetMaximum();
+	if ( ypos < ymin ) draw = false;
+	if ( ypos > ymax ) draw = false;
+	
+	// Draw it
+	if ( draw == true ) {
+		line->Draw("SAME");
+	}
+	
+	// REturn it
+	return line;
+	
+}
+
 
 // Draws a vertical lines from top to bottom of bgrHisto. 
 // If color < 1, then color will be set autmatically 
@@ -1202,7 +1280,9 @@ double TopSVDFunctions::SVD_ScanAvgSqErr(TH2D* covMatrix)
 	// Loop
 	double sumSquaredErrors = 0.;
 	int numRealBins = 0;
-	for ( int i = 1 ; i <= nbins ; i++ ) {
+	
+	// Recall: You have two sets of OF bins!
+	for ( int i = 2 ; i < nbins ; i++ ) {
 		
 		// Get trace element of covariance Matrix
 		double binContent = covMatrix->GetBinContent(i,i);
@@ -1215,7 +1295,12 @@ double TopSVDFunctions::SVD_ScanAvgSqErr(TH2D* covMatrix)
 	}
 	
 	// Average
-	double avgSqErr =   sumSquaredErrors / ((double) numRealBins );
+	double avgSqErr = sumSquaredErrors / ((double) numRealBins );
+	
+	// Take Square Root
+	avgSqErr = TMath::Sqrt(avgSqErr);
+	
+	// Return
 	return avgSqErr;
 } 
 
@@ -1233,7 +1318,9 @@ double TopSVDFunctions::SVD_ScanAvgMean(TH1D* unfHist)
 	// Loop
 	double sumElements = 0.;
 	int numRealBins = 0;
-	for ( int i = 1 ; i <= nbins ; i++ ) {
+	
+	// Recall: You have two sets of OF bins!
+	for ( int i = 2 ; i < nbins ; i++ ) {
 		
 		// Get trace element of covariance Matrix
 		double binContent = unfHist->GetBinContent(i);
@@ -1463,8 +1550,8 @@ TH1D* TopSVDFunctions::SVD_Refold(TH1D* unfHist, TH1D* xiniHist, TH2D* mcHist, b
 {
 	// Make a new Histogram
     TH1D* refoldHist = (TH1D*) unfHist->Clone("Refolded");
-    int nbins = unfHist->GetNbinsX();
-cout << "asdfasdfasdfasdf " << endl;  
+    int nbins = unfHist->GetNbinsX(); 
+    
     // Important Check:
     // Make sure that generator level bins
     // with empty xiniHist-bins
@@ -1643,14 +1730,25 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // BACKGROUND SIGNAL
-    TH1D* bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins);
+    // Set errors to zero!
+    TH1D* bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins); 
+ 	SVD_EmptyHistoErrors1D(bgrHist);
     SVD_EmptySideBins1D(bgrHist);
-
 
     
     // BACKGROUND SUBSTRACTION FROM DATA
+    // ATTENTION! Errors will be added in quadrature
     TH1D* dataHist = (TH1D*) rawHist->Clone("dataHist");
-    dataHist->Add(bgrHist, -1.);
+    for ( int i = 0 ; i < nbins + 1 ; i++) {
+    	double value_data = rawHist->GetBinContent(i);
+    	double value_bgr = bgrHist->GetBinContent(i);
+    	double err_data = rawHist->GetBinError(i);
+    	double err_bgr = bgrHist->GetBinError(i);
+    	double value_new = value_data - value_bgr;
+    	double err_new = TMath::Sqrt(err_data*err_data + err_bgr*err_bgr);
+    	dataHist->SetBinContent(i, value_new);
+    	dataHist->SetBinError(i, err_new); 
+    }  
     SVD_EmptySideBins1D(dataHist);
 
 
@@ -1706,26 +1804,28 @@ double TopSVDFunctions::SVD_Unfold(
     }
 
 
-    // First BBB Unfolding  ... use bbb Efficiency  
+    // First BBB Unfolding 
+    // ATTENTION:
+    // (1) Use BBB Efficiency.
+    // (2) Although this might be tempting,
+    //     do not include the error from the efficiency.
+    //     This would bust any serious BBB / SVD comparison.
+    //     Instead, add the error on the uncertainty
+    //     later on as a systematic MC uncertainty! 
     TH1D* bbbHist = (TH1D*) dataHist->Clone("bbbHist");
     for ( int i = 1 ; i <= nbins ; i++ ) {
-        double numerator = dataHist->GetBinContent(i);
-        double denominator = beffHist->GetBinContent(i);
-        double numeratorErr = dataHist->GetBinError(i);
-        double denominatorErr = beffHist->GetBinError(i);
+        double data = dataHist->GetBinContent(i);
+        double bbbeff  = beffHist->GetBinContent(i);
+        double dataErr = dataHist->GetBinError(i);
         double bbbunf = 0.;
         double bbbunfErr = 0.;
-        if ( denominator > 0. && numerator > 0.) {
-            bbbunf = numerator / denominator;
-            double bbbunfErrRelSq = 0.;
-            bbbunfErrRelSq += TMath::Power(numeratorErr/numerator, 2.);
-            bbbunfErrRelSq += TMath::Power(denominatorErr/denominator, 2.);
-            bbbunfErr = bbbunf * TMath::Sqrt(bbbunfErrRelSq);
+        if ( data > 0. && bbbeff > 0.) {
+            bbbunf = data / bbbeff;
+            bbbunfErr = dataErr / bbbeff;
         }
         bbbHist->SetBinContent(i,bbbunf);
         bbbHist->SetBinError(i,bbbunfErr);
-    }
-  
+    } 
  
 
     // DATA COVARIANCE
@@ -1791,16 +1891,18 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // STAT ERROR ON RESULT
-    // Save the diagonal elements of the statistical
-    // covariance matrix in the histogram with
-    // with the results ('unfHist')
+    // ATTENTION:
+    // Use only the statistical uncertainty!
+    // Not the MC uncertainty or anything else!
+    // Otherwise, comparisons to standard BBB unfolding
+    // will be very difficut. 
     for ( int i = 1 ; i <= nbins ; i++ ) {
         double errorsq = statCovHist->GetBinContent(i,i);
         double error = 0.;
         if ( errorsq > 0. ) {
             error = TMath::Sqrt(errorsq);
-        }
-        unfHist->SetBinError(i, error);
+        } 
+        unfHist->SetBinError(i, error); 
     }
 
     /////////////////////////////////////////////////////
@@ -1833,6 +1935,10 @@ double TopSVDFunctions::SVD_Unfold(
     double optimalTauY = -1.;
     int optimalTauPos = -1; 
 
+
+    // Doubles for BBB values
+	double bbbAvgSqErr = 0.;
+	double bbbAvgMean = 0.; 
 
     if ( doScan == true ) {
     	
@@ -1913,9 +2019,26 @@ double TopSVDFunctions::SVD_Unfold(
     	// Find optimal tau
     	optimalTauPos = SVD_FindMinimum(vScanPoints, vGlobCorr, optimalTauX, optimalTauY); 
     	cout << "Optimal Tau = " << optimalTauX << " at scan position " << optimalTauPos << endl;
-    	
-
-    	
+ 
+	    // Calculations for BBB
+	    // Do not count the OF bins!
+	    // Recall: You have 2 sets of OF bins
+	    bbbAvgSqErr = 0.;
+	    bbbAvgMean = 0.;
+	    int bincounter = 0;
+    	for ( int i = 2 ; i < nbins ; i++ ) {
+    		double bbb_mean = bbbHist->GetBinContent(i);
+    		double bbb_err = bbbHist->GetBinError(i);
+    		if ( bbb_mean <= 0.) continue;
+    		
+    		bincounter++;
+    		bbbAvgSqErr += bbb_err*bbb_err;
+    		bbbAvgMean += bbb_mean;
+    	}
+    	bbbAvgSqErr = bbbAvgSqErr / ((double) bincounter );
+    	bbbAvgSqErr = bbbAvgMean / ((double) bincounter );
+    	bbbAvgSqErr = TMath::Sqrt(bbbAvgSqErr);
+    	cout << "asdfasdfasdfasdf" << bbbAvgMean << endl;
     	
     }
 
@@ -2151,6 +2274,7 @@ double TopSVDFunctions::SVD_Unfold(
     TString statErrStr = SVD_PlotName(channel, particle, quantity, special, "STATERR");
     TH1D* statErrHist = SVD_Cov2Err(statCovHist, unfHist, statErrStr, quantityTex, "Statistical");
 
+ 
 
 
     // ERROR PLOT (MC)
@@ -2173,7 +2297,7 @@ double TopSVDFunctions::SVD_Unfold(
         double error = 0.;
         if ( valueBBB > 0. ) error = 100* errorBBBAbs / valueBBB;
         bbbErrHist->SetBinContent(i, error);
-    }
+    } 
     TString bbbErrStr = SVD_PlotName(channel, particle, quantity, special, "BBBERR");
     bbbErrHist->SetName(bbbErrStr);
     bbbErrHist->SetTitle(bbbErrStr);
@@ -2336,8 +2460,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_DrawStack(stackout, quantityTex, "Entries", "e nostack", 134);
         legendout->Draw("SAME");
         canvas.Print(outputfilename);
-
-
+ 
         // RATIO: Unfolded versus BBB
         TLegend* legendRatioUnfBBB = SVD_NewLegend();
         legendRatioUnfBBB->SetHeader(CPQtex);
@@ -2490,7 +2613,7 @@ double TopSVDFunctions::SVD_Unfold(
         legenderr1->AddEntry(bbbErrHist, "BBB Unc.");
         stackerr1->Add(statErrHist);
         stackerr1->Add(bbbErrHist);
-        SVD_DrawStack(stackerr1, quantityTex, "Error in \%", "HIST nostack", 34);
+        SVD_DrawStack(stackerr1, quantityTex, "Error in \%", "HIST nostack", 34); 
         legenderr1->Draw("SAME");
         canvas.Print(outputfilename);
 
@@ -2558,6 +2681,7 @@ double TopSVDFunctions::SVD_Unfold(
         	bgrHisto = NULL;
         	TGraph* gChiSq = SVD_Vect2Graph(vScanPoints, vChiSq);
         	SVD_DrawGraph(gChiSq,  bgrHisto, "P", 4); 
+        	bgrHisto->SetMaximum(2.*(*vChiSq)[optimalTauPos]); // Range 
         	TString gChiSqStr = SVD_PlotName(channel, particle, quantity, special, "scanCHI2A");
         	SVD_SetTitles1D(bgrHisto, gChiSqStr, "Parameter #tau", "#chi^{2}");
         	bestPoint = SVD_Point2Graph(optimalTauX, (*vChiSq)[optimalTauPos]);
@@ -2615,12 +2739,13 @@ double TopSVDFunctions::SVD_Unfold(
         	TGraph* gAvgSqErr = SVD_Vect2Graph(vScanPoints, vAvgSqErr);
         	SVD_DrawGraph(gAvgSqErr,  bgrHisto, "P", 3); 
         	TString gAvgSqErrStr = SVD_PlotName(channel, particle, quantity, special, "scanAVGERR");
-        	SVD_SetTitles1D(bgrHisto, gAvgSqErrStr, "Parameter #tau", "Avg. Stat. Error");
+        	SVD_SetTitles1D(bgrHisto, gAvgSqErrStr, "Parameter #tau", "Avg. Sq. Stat. Error");
         	bestPoint = SVD_Point2Graph(optimalTauX, (*vAvgSqErr)[optimalTauPos]);
         	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
         	bestPoint->SetMarkerSize(2.5); 
         	bestPoint->SetMarkerStyle(3);
         	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	SVD_DrawHorizLine(bgrHisto, bbbAvgSqErr, 3);
         	textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
         	textOrientationBestPoint = 11;
         	latexBestPoint = new TLatex();
@@ -2647,9 +2772,12 @@ double TopSVDFunctions::SVD_Unfold(
         	SVD_SetTitles1D(bgrHisto, gAvgMeanStr, "Parameter #tau", "Average Bin Content");
         	bestPoint = SVD_Point2Graph(optimalTauX, (*vAvgMean)[optimalTauPos]);
         	SVD_DrawGraph(bestPoint,  bgrHisto, "P", 2); 
+        	bgrHisto->SetMaximum(1.3*(*vAvgMean).Max()); // Range 
+        	bgrHisto->SetMinimum(0.8*(*vAvgMean).Min()); // Range 
         	bestPoint->SetMarkerSize(2.5); 
         	bestPoint->SetMarkerStyle(3);
         	SVD_DrawVertLines(bgrHisto, &vSingularValues, 2);
+        	SVD_DrawHorizLine(bgrHisto, bbbAvgMean, 3);
         	textBestPoint = TString::Format("log_{10} #tau = %.3f", optimalTauX);
         	textOrientationBestPoint = 23;
         	latexBestPoint = new TLatex();

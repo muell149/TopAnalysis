@@ -65,6 +65,7 @@ public:
 	static double SVD_TextPosY(TH1D* hist, double ypos, bool log, int orientation);
 	static TLatex* SVD_DrawText(TString theText, double xpos, double ypos, int orientation, TLatex*& mylatex); 
 	static TLine* SVD_DrawVertLine(TH1D*& bgrHisto, double xpos, int color = 1); 
+	static TLine* SVD_DrawHorizLine(TH1D*& bgrHisto, double ypos, int color = 1); 
 	static void SVD_DrawVertLines(TH1D*& bgrHisto, TVectorD* xpositions, int color = 1); 
     static TGraph* SVD_Vect2Graph(TVectorD* vectorX, TVectorD* vectorY);
     static TGraph* SVD_Point2Graph(double x, double y);
@@ -92,6 +93,10 @@ public:
 	static int SVD_FindMinimum(TVectorD* xVec, TVectorD* yVec, double& xBest, double& yBest);
 	static TH1D* SVD_Refold(TH1D* unfHist, TH1D* xiniHist, TH2D* mcHist, bool useWeights = false);
 	static double SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist);
+	static void SVD_EmptyHistogram1D(TH1D* histo);
+	static void SVD_EmptyHistogram2D(TH2D* histo);
+	static void SVD_EmptyHistoErrors1D(TH1D* histo);
+	static void SVD_EmptyHistoErrors2D(TH2D* histo);
 	
 	// Unfolding function
 	static double SVD_Unfold(
