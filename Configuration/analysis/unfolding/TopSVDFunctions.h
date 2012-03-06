@@ -97,6 +97,7 @@ public:
 	static void SVD_EmptyHistogram2D(TH2D* histo);
 	static void SVD_EmptyHistoErrors1D(TH1D* histo);
 	static void SVD_EmptyHistoErrors2D(TH2D* histo);
+	static int SVD_FindBin(TAxis* axis, double bnd);
 	
 	// Unfolding function
 	static double SVD_Unfold(

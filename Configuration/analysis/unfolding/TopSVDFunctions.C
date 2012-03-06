@@ -301,49 +301,74 @@ void TopSVDFunctions::SVD_EmptySideBins2D(TH2D* histo)
  
 
 
-// Rebinning of a 1D Histogram. Creates a new histogram
-// on the heap. So dont forget to delete it sometimes.
+// Rebinning of a 1D Histogram. 
+// ATTENTION! ATTENTION! ATTENTION! ATTENTION! ATTENTION!
+// (1) Creates a new histogram on the heap. 
+//     So dont forget to delete it sometimes. 
+// (2) In 'binsx' the bin boundaries are specified!
+//     'nbinsx' gives the number of specified bins!
+// (3) The first and last bin in 'binsx' are considered
+//     as overflow bins, all other bins as center bins!
+//     The overflow bins will get all events that cannot be
+//     assigned a center bin. The TH2D-side-bins will not be used
+//     for the output-histogram.
+// (5) Each (but the first and last) bin boundary in 'binsx'  
+//     MUST match one in the input-histogram, otherwise double counting 
+//     will occur.
 TH1D* TopSVDFunctions::SVD_Rebin1D(TH1* input, int nbinsx, double* binsx)
 {
     // Create new histo on the heap
     TString nameNewHist = input->GetName();
     nameNewHist.Append("Rebinned");
-    TH1D* outputhist = new TH1D(nameNewHist, nameNewHist, nbinsx, binsx);
-    int nbinsOld =input->GetNbinsX();
+    TH1D* outputhist = new TH1D(nameNewHist, nameNewHist, nbinsx, binsx); 
+    int nbinsGenRecX =input->GetNbinsX();
+ 
+    // Empty the bins
+    SVD_EmptyHistogram1D(outputhist); 
     
-    // Loop over all bins including OF and UF
-    for(int i=0; i<nbinsx+2; ++i){
 
+    // Do NOT use the side bins of th TH2D-Class! 
+    for(int i=1; i<=nbinsx; ++i){ 
+    
+     
         // Find bin boundaries in X
         int nxlow = -1;
         int nxhigh = -1;
-        if ( i == 0 ) {   // UF bin in X
+        if ( i == 1 ) {   // UF bin in X
             nxlow = 0;
-            double xhigh = binsx[0];
-            nxhigh = input->GetXaxis()->FindBin(xhigh)-1;
+            double xhigh = binsx[1]; 
+            nxhigh = SVD_FindBin(input->GetXaxis(), xhigh) - 1;  
         }
-        if ( i == nbinsx+1 ) {  // OF bin in X
-            double xlow = binsx[nbinsx];
-            nxlow = input->GetXaxis()->FindBin(xlow);
-            nxhigh = nbinsOld;
+        if ( i == nbinsx ) {  // OF bin in X
+            double xlow = binsx[nbinsx-1]; 
+            nxlow = SVD_FindBin(input->GetXaxis(), xlow);
+            nxhigh = nbinsGenRecX+1;
         }
-        if ( i > 0 && i < nbinsx+1) {
+        if ( i > 0 && i < nbinsx) { // Center bin in X
             double xlow = binsx[i-1];
             double xhigh = binsx[i];
-            nxlow = input->GetXaxis()->FindBin(xlow);
-            nxhigh = input->GetXaxis()->FindBin(xhigh)-1;
+            nxlow = SVD_FindBin(input->GetXaxis(), xlow);
+            nxhigh = SVD_FindBin(input->GetXaxis(), xhigh) - 1;  
         }
 
         // Integrate over all the original bins
-        double integral = 0.;
+        double sum = 0.;
+        double sumErrSq = 0.;
         if ( nxlow <= nxhigh ) {
-            integral = ((TH2D*)input)->Integral(nxlow, nxhigh);
+        	for ( int b = nxlow ; b <= nxhigh ; b++ ) {
+        		double binContent = ((TH1D*) input)->GetBinContent(b);
+        		double binError = ((TH1D*) input)->GetBinError(b);
+        		sum += binContent;
+        		sumErrSq += binError*binError;
+        	}
         } else {
-            integral = 0.;
+            sum = 0.;
+            sumErrSq = 0.;
         }
 
-        // Save it, thereby transpose if needed
-        outputhist->SetBinContent(i, integral);
+        // Save it
+        outputhist->SetBinContent(i, sum);
+        outputhist->SetBinError(i, TMath::Sqrt(sumErrSq));
     }
 
     // Return it
@@ -353,9 +378,21 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1* input, int nbinsx, double* binsx)
     
 
 
-// Rebinning of a 2D Histogram. Creates a new histogram
-// on the heap. So dont forget to delete it sometimes.
-// If needed, you can transpose the matrix, too. 
+// Rebinning of a 2D Histogram. 
+// ATTENTION! ATTENTION! ATTENTION! ATTENTION! ATTENTION!
+// (1) Creates a new histogram on the heap. 
+//     So dont forget to delete it sometimes.
+// (2) If needed, you can transpose the matrix, too. 
+// (3) In 'binsx' and 'binsy' the bin boundaries are specified!
+//     'nbinsx' and 'nbinsy' the number of specified bins!
+// (4) The first and last bin in 'binsx' and 'binsy' are considered
+//     as overflow bins, all other bins as center bins!
+//     The overflow bins will get all events that cannot be
+//     assigned a center bin. The TH2D-side-bins will not be used
+//     for the output-histogram.
+// (5) Each (but the first and last) bin boundary in 'binsx' and 'binsy' 
+//     MUST match one in the input-histogram, otherwise double counting 
+//     will occur.
 TH2D* TopSVDFunctions::SVD_Rebin2D(TH1* input, int nbinsx, double* binsx, int nbinsy, double* binsy, bool transpose)
 {
     // Create new histo on the heap
@@ -364,65 +401,79 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH1* input, int nbinsx, double* binsx, int nb
     TH2D* outputhist = new TH2D(nameNewHist, nameNewHist, nbinsx, binsx, nbinsy, binsy);
     int nbinsGenRecX =input->GetNbinsX();
     int nbinsGenRecY =input->GetNbinsY();
+ 
+    // Empty the bins
+    SVD_EmptyHistogram2D(outputhist); 
 
-    // Loop over all bins including OF and UF
-    for(int i=0; i<nbinsx+2; ++i){
-        for(int j=0; j<nbinsy+2; ++j){
+    // Do NOT use the side bins of th TH2D-Class! 
+    for(int i=1; i<=nbinsx; ++i){ 
+        for(int j=1; j<=nbinsy; ++j){ 
 
             // Find bin boundaries in X
             int nxlow = -1;
             int nxhigh = -1;
-            if ( i == 0 ) {   // UF bin in X
+            if ( i == 1 ) {   // UF bin in X
                 nxlow = 0;
-                double xhigh = binsx[0];
-                nxhigh = input->GetXaxis()->FindBin(xhigh)-1;
+                double xhigh = binsx[1];
+                nxhigh = SVD_FindBin(input->GetXaxis(), xhigh) - 1; 
             }
-            if ( i == nbinsx+1 ) {  // OF bin in X
-                double xlow = binsx[nbinsx];
-                nxlow = input->GetXaxis()->FindBin(xlow);
-                nxhigh = nbinsGenRecX+1;
+            if ( i == nbinsx ) {  // OF bin in X
+                double xlow = binsx[nbinsx-1];
+                nxlow = SVD_FindBin(input->GetXaxis(), xlow);
+                nxhigh = nbinsGenRecX+1; 
             }
-            if ( i > 0 && i < nbinsx+1) {
+            if ( i > 1 && i < nbinsx) { // Center bin in X
                 double xlow = binsx[i-1];
                 double xhigh = binsx[i];
-                nxlow = input->GetXaxis()->FindBin(xlow);
-                nxhigh = input->GetXaxis()->FindBin(xhigh)-1;
+                nxlow = SVD_FindBin(input->GetXaxis(), xlow);
+                nxhigh = SVD_FindBin(input->GetXaxis(), xhigh) - 1; 
             }
 
             // Find bin boundaries in Y
             int nylow = -1;
             int nyhigh = -1;
-            if ( j == 0 ) {  // UF bin in Y
+            if ( j == 1 ) {  // UF bin in Y
                 nylow = 0;
-                double yhigh = binsy[0];
-                nyhigh = input->GetYaxis()->FindBin(yhigh)-1;
+                double yhigh = binsy[1]; 
+                nyhigh = SVD_FindBin(input->GetYaxis(), yhigh) - 1; 
 
             }
-            if ( j == nbinsy+1 ) {   // UF bin in Y
-                double ylow = binsy[nbinsy];
-                nylow = input->GetYaxis()->FindBin(ylow);
-                nyhigh = nbinsGenRecY+1;
+            if ( j == nbinsy) {   // UF bin in Y
+                double ylow = binsy[nbinsy-1]; 
+                nylow = SVD_FindBin(input->GetYaxis(), ylow);
+                nyhigh = nbinsGenRecY+1; 
             }
-            if ( j > 0 && j < nbinsy+1) {
+            if ( j > 1 && j < nbinsy ) { // Center bin in Y
                 double ylow = binsy[j-1];
-                double yhigh = binsy[j];
-                nylow = input->GetYaxis()->FindBin(ylow);
-                nyhigh = input->GetYaxis()->FindBin(yhigh)-1;
+                double yhigh = binsy[j]; 
+                nylow = SVD_FindBin(input->GetYaxis(), ylow);
+                nyhigh = SVD_FindBin(input->GetYaxis(), yhigh) - 1; 
             }
 
-            // Integrate over all the original bins
-            double integral = 0.;
+            // Integrate over all the original bins        
+            double sum = 0.;
+      	    double sumErrSq = 0.;
             if ( nxlow <= nxhigh && nylow <= nyhigh ) {
-                integral = ((TH2D*)input)->Integral(nxlow, nxhigh, nylow, nyhigh);
-            } else {
-                integral = 0.;
+            	for ( int bx = nxlow ; bx <= nxhigh ; bx++ ) {
+            		for ( int by = nylow ; by <= nyhigh ; by++ ) { 
+        				double binContent = ((TH1D*) input)->GetBinContent(bx, by);
+        				double binError = ((TH1D*) input)->GetBinError(bx, by);
+        				sum += binContent;
+        				sumErrSq += binError*binError;
+            		}
+            	}
+        	} else { 
+           		sum = 0.;
+           		sumErrSq = 0.;
             }
 
             // Save it, thereby transpose if needed
             if ( transpose == true ) {
-                outputhist->SetBinContent(j, i, integral);
-            } else {
-                outputhist->SetBinContent(i, j, integral);
+      			outputhist->SetBinContent(j, i, sum);
+        		outputhist->SetBinError(j, i, TMath::Sqrt(sumErrSq)); 
+            } else { 
+      			outputhist->SetBinContent(i, j, sum);
+        		outputhist->SetBinError(i, j, TMath::Sqrt(sumErrSq)); 
             }
         }
     }
@@ -1634,6 +1685,34 @@ double TopSVDFunctions::SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist)
 	
 }
 
+// Find bin number on an axis
+// You give a bin boundary 'bnd' and this function gives
+// you the number of the bin that STARTS at 'bnd'
+int TopSVDFunctions::SVD_FindBin(TAxis* axis, double bnd)
+{
+	// First attempt to find bin number
+	int binnr = axis->FindBin(bnd);
+	
+	// Possibly, the binnr is by 1 too low.
+	// This can happen due to rounding errors
+	// busting the comparison between 'bnd' and the
+	// bin boundaries of the axis.
+	// To make sure that we found the right bin,
+	// we check which bin boundary is actually closer.
+	double lowxFirstTry  = axis->GetBinLowEdge(binnr);
+	double lowxStepUp    = axis->GetBinLowEdge(binnr+1);
+	double distanceFirstTry = TMath::Abs(bnd - lowxFirstTry);
+	double distanceStepUp = TMath::Abs(bnd - lowxStepUp);
+	if ( distanceStepUp < distanceFirstTry ) binnr++;
+	
+	// Return
+	return binnr;
+	 
+	
+}
+  
+
+
 // PERFORM UNFOLDING 
 // Note the different regularization modes:
 // (1) regMode=0 is standard BBB unfolding, no regularization
@@ -1762,9 +1841,9 @@ double TopSVDFunctions::SVD_Unfold(
 
     // REBINNING of Response Matrix
     // ... thereby transposing it
-    TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, true); 
-    SVD_MoveOFBins2D(mcHist);
-    SVD_EmptySideBins2D(mcHist);
+    TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, true);  
+    //SVD_MoveOFBins2D(mcHist);
+    //SVD_EmptySideBins2D(mcHist);
 
 
  
