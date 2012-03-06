@@ -819,9 +819,10 @@ if topfilter:
 	process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2     
         process.topsequence = cms.Sequence( 
 	        process.makeGenEvt *
+		process.generatorTopFilter *
 	        process.produceHadronLevelBJets *
-                process.produceGenLevelBJets*
-		process.generatorTopFilter 
+                process.produceGenLevelBJets
+
 	)
 
         #PLACE_MODEL_VARIATION_HERE
