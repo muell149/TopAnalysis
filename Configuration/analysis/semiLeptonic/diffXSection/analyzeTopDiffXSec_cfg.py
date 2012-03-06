@@ -1296,7 +1296,7 @@ process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
 process.bTagSFEventWeight.bTagAlgo=cms.string("SSVHEM")
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
-process.bTagSFEventWeight.filename= cms.string("../../../../Configuration/data/analyzeBTagEfficiency.root")
+process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency.root"
 process.bTagSFEventWeight.verbose=cms.int32(0)
 
 process.bTagSFEventWeightBTagSFUp                  = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
@@ -1325,7 +1325,7 @@ process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7 = process.bTagSFEventWeight.c
 process.load("TopAnalysis.TopUtils.EffSFMuonEventWeight_cfi")
 process.effSFMuonEventWeight.particles=cms.InputTag("tightMuons")
 process.effSFMuonEventWeight.sysVar   = cms.string("")
-process.effSFMuonEventWeight.filename= cms.string("../../../../Configuration/data/efficiencyIsoMu17Combined_tapTrigger_SF_Eta.root")
+process.effSFMuonEventWeight.filename= "TopAnalysis/Configuration/data/efficiencyIsoMu17Combined_tapTrigger_SF_Eta.root"
 process.effSFMuonEventWeight.verbose=cms.int32(0)
 process.effSFMuonEventWeight.additionalFactor=0.9990 ## lepton selection eff. SF
 process.effSFMuonEventWeight.additionalFactorErr=0.03 ## 3% sys error to account for selection difference Z - ttbar
