@@ -2732,7 +2732,7 @@ namespace semileptonic {
     
     // NB: k-value should be independent from decay channel
     // NB: at the moment k=N(bins) is used!
-    int k=-1;
+    double k=-1.;
     if(     variable.Contains("ttbarMass")){ 
       k=5; 
       // Optimal Tau = 1.35725 at scan position 54
@@ -2781,7 +2781,7 @@ namespace semileptonic {
     // output
     if(verbose>1) std::cout << "k(" << variable << ") = " << k << std::endl;
     // check result
-    if(k<=0){
+    if(k<0.){
       std::cout << "ERROR in regParameter:" << std::endl; 
       std::cout << "invalid k=" << k << " for variable " << variable << std::endl;
     }
