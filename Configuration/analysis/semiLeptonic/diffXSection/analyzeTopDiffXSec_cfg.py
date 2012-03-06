@@ -249,8 +249,8 @@ PythiaSample="False"
 if(not options.sample=="none"):
     if(options.sample=="ttbar"):
        # process.load("TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff")
-        process.load("TopAnalysis/Configuration/samples/Fall11_TTJets_TuneZ2_7TeV_madgraph_tauola_cff")
-        print "analyzed sample: TopAnalysis/Configuration/python/ttjets_MadgraphZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff.py"
 	if(eventFilter=='signal only'):
 	    outputFileName+="DiffXSecSigMadD6TSummer11"
 	elif(eventFilter=='background only'):
@@ -304,8 +304,8 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="DiffXSecBkgMadD6TSummer11TopMassUp"
     if(options.sample=="wjets"):        
-        process.load("TopAnalysis/Configuration/wlnujets_MadgraphZ2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/python/wlnujets_MadgraphZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/wlnujets_MadgraphZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/wlnujets_MadgraphZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecWjetsMadD6TSummer11"
     if(options.sample=="wjetsMatchingUp"):        
         process.load("TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff")
@@ -328,8 +328,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False        
 	outputFileName+="DiffXSecWjetsMadD6TSummer11ScaleDown"
     if(options.sample=="zjets"):        
-        process.load("TopAnalysis/Configuration/dylljetsM50_MadgraphZ2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/python/dylljetsM50_MadgraphZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/dylljetsM50_MadgraphZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/dylljetsM50_MadgraphZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecZjetsMadD6TSummer11"
     if(options.sample=="zjetsMatchingUp"):        
         process.load("TopAnalysis/Configuration/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff")
@@ -380,8 +380,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
 	outputFileName+="DiffXSecSingleAntiTopSchannelMadZ2Summer11ScaleUp"
     if(options.sample=="singleTopT"):        
-        process.load("TopAnalysis/Configuration/singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff.py")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecSingleTopTchannelMadZ2Summer11"
     if(options.sample=="singleTopTScaleDown"):        
         process.load("TopAnalysis/Configuration/singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
@@ -394,8 +394,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
 	outputFileName+="DiffXSecSingleTopTchannelMadZ2Summer11ScaleUp"
     if(options.sample=="singleAntiTopT"):        
-        process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleAntiTop_tchannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecSingleAntiTopTchannelMadZ2Summer11"
     if(options.sample=="singleAntiTopTScaleDown"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
@@ -408,8 +408,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
 	outputFileName+="DiffXSecSingleAntiTopTchannelMadZ2Summer11ScaleUp"
     if(options.sample=="singleTopTw"):        
-        process.load("TopAnalysis/Configuration/singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecSingleTopTWchannelMadZ2Summer11"
     if(options.sample=="singleTopTwScaleDown"):        
         process.load("TopAnalysis/Configuration/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
@@ -422,8 +422,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
 	outputFileName+="DiffXSecSingleTopTWchannelMadZ2Summer11ScaleUp"
     if(options.sample=="singleAntiTopTw"):        
-        process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/singleAntiTop_twchannelDR_PythiaPowhegZ2_Summer11_AOD_cff.py"
 	outputFileName+="DiffXSecSingleAntiTopTWchannelMadZ2Summer11"
     if(options.sample=="singleAntiTopTwScaleDown"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
@@ -444,54 +444,54 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
     if(decayChannel=='muon'):
         if(options.sample=="qcd"):
-            process.load("TopAnalysis/Configuration/qcdmu15enriched_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdmu15enriched_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdmu15enriched_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdmu15enriched_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaZ2Summer11"
     if(decayChannel=='electron'):
         if(options.sample=="qcdEM1"):
-            process.load("TopAnalysis/Configuration/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt20to30_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaEM1Z2Summer11"
         if(options.sample=="qcdEM2"):
-            process.load("TopAnalysis/Configuration/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt30to80_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaEM2Z2Summer11"
         if(options.sample=="qcdEM3"):
-            process.load("TopAnalysis/Configuration/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdEMenrichedPt80to170_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdEMenrichedPt80to170_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdEMenrichedPt80to170_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaEM3Z2Summer11"
         if(options.sample=="qcdBCE1"):
-            process.load("TopAnalysis/Configuration/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt20to30_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdBCtoEPt20to30_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdBCtoEPt20to30_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaBCE1Z2Summer11"
         if(options.sample=="qcdBCE2"):
-            process.load("TopAnalysis/Configuration/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt30to80_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdBCtoEPt30to80_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdBCtoEPt30to80_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaBCE2Z2Summer11"
         if(options.sample=="qcdBCE3"):
-            process.load("TopAnalysis/Configuration/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff")
-            print "analyzed sample: TopAnalysis/Configuration/python/qcdBCtoEPt80to170_Pythia6_Summer11_AOD_cff.py"
+            process.load("TopAnalysis/Configuration/Fall11/qcdBCtoEPt80to170_Pythia6_Fall11_AOD_cff")
+            print "analyzed sample: TopAnalysis/Configuration/Fall11/qcdBCtoEPt80to170_Pythia6_Fall11_AOD_cff.py"
             PythiaSample="True"
 	    outputFileName+="DiffXSecQCDPythiaBCE3Z2Summer11"
     if(options.sample=="WW"):        
-        process.load("TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/wwtoall_Pythia6Z2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/wwtoall_Pythia6Z2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/wwtoall_Pythia6Z2_Fall11_AOD_cff.py"
         PythiaSample="True"
 	outputFileName+="DiffXSecWWPytia6Z2Summer11"
     if(options.sample=="WZ"):        
-        process.load("TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/wztoall_Pythia6Z2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/wztoall_Pythia6Z2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/wztoall_Pythia6Z2_Fall11_AOD_cff.py"
         PythiaSample="True"
 	outputFileName+="DiffXSecWZPytia6Z2Summer11"
     if(options.sample=="ZZ"):        
-        process.load("TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff")
-        print "analyzed sample: TopAnalysis/Configuration/zztoall_Pythia6Z2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/zztoall_Pythia6Z2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/zztoall_Pythia6Z2_Fall11_AOD_cff.py"
         PythiaSample="True"
 	outputFileName+="DiffXSecZZPytia6Z2Summer11"
         	
