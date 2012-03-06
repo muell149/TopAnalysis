@@ -352,8 +352,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False      
 	outputFileName+="DiffXSecZjetsMadD6TSummer11ScaleDown"
     if(options.sample=="singleTopS"):        
-        process.load("TopAnalysis/Configuration/singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/singleTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/singleTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecSingleTopSchannelMadZ2Summer11"
     if(options.sample=="singleTopSScaleDown"):        
         process.load("TopAnalysis/Configuration/singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
@@ -366,8 +366,8 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
 	outputFileName+="DiffXSecSingleTopSchannelMadZ2Summer11ScaleUp"
     if(options.sample=="singleAntiTopS"):        
-        process.load("TopAnalysis/Configuration/singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff")
-        print "analyzed sample: singleAntiTop_schannel_PythiaPowhegZ2_Summer11_AOD_cff.py"
+        process.load("TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff")
+        print "analyzed sample: TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff.py"
 	outputFileName+="DiffXSecSingleAntiTopSchannelMadZ2Summer11"
     if(options.sample=="singleAntiTopSScaleDown"):        
         process.load("TopAnalysis/Configuration/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff")
