@@ -108,6 +108,21 @@ noEtaTightElectronsEJ  = selectedPatElectrons.clone( src = 'vertexSelectedElectr
                                                            'abs(convDist) > 0.02' 
                                                    )
 
+noKinTightElectronsEJ  = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
+                                                     cut = #'et > 30. &'
+                                                           #'abs(eta) <  2.1  &'
+                                                           '( abs(superCluster.eta) < 1.4442   |'
+                                                           '  abs(superCluster.eta) > 1.5660 ) &'
+                                                           'abs(dB)  <  0.02 &'
+                                                           #'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
+					                   'test_bit( electronID("eidHyperTight1MC"), 0 ) &'
+                                                           #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0. &'
+                                                           '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125 &'
+                                                           'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &' 
+                                                           'abs(convDcot) > 0.02 &'
+                                                           'abs(convDist) > 0.02' 
+                                                   )
+
 noSCTightElectronsEJ   = selectedPatElectrons.clone( src = 'vertexSelectedElectrons', 
                                                      cut = 'et > 30. &'
                                                            'abs(eta) <  2.1  &'

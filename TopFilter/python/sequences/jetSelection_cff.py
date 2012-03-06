@@ -143,6 +143,14 @@ noPtJetsPF      = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'chargedMultiplicity > 0            &'
                                               'nConstituents > 1'
                                         )
+noKinJetsPF      = selectedPatJets.clone(src = 'noOverlapJetsPF',
+                                         cut = 'chargedHadronEnergyFraction > 0.0  &'
+                                               'neutralHadronEnergyFraction < 0.99 &'
+                                               'chargedEmEnergyFraction     < 0.99 &'
+                                               'neutralEmEnergyFraction     < 0.99 &'
+                                               'chargedMultiplicity > 0            &'
+                                               'nConstituents > 1'
+                                         )
 noConstJetsPF   = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                         cut = 'abs(eta) < 2.4 & pt > 20.          &'
                                               'chargedHadronEnergyFraction > 0.0  &'

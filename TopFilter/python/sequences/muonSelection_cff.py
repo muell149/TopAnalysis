@@ -114,6 +114,18 @@ noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                               'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
                                               'numberOfMatches>1'
                                        )
+noKinMuons     = selectedPatMuons.clone(src = 'dRMuons',
+                                        cut = 'combinedMuon.isNull = 0 &'
+                                              'isTrackerMuon() =1 &'
+                                              '(trackIso+caloIso)/pt < 0.05 &'
+                                              #'(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125&'
+                                              'innerTrack.numberOfValidHits >= 11 &'
+                                              'globalTrack.normalizedChi2 < 10.0 &'
+                                              'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
+                                              'abs(dB)<0.02 &'
+                                              'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
+                                              'numberOfMatches>1'
+                                       )
 
 noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                         cut = 'pt > 30. & abs(eta) < 2.1 &'
