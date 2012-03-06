@@ -2,7 +2,7 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int systematicVariation=sysNo, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
 			     std::string decayChannel = "muon", bool SVDunfold=false)
@@ -76,6 +76,9 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int
   // data file: relative path of .root file
   // save: save plots?
   // SVDunfold: use SVD instead of bin to bin unfolding
+  // compare SVD and BBB results
+  bool compare=true;
+  if(!SVDunfold) compare=false;
   // luminosity: [/pb]
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));  
   // b) options to be configured only once
@@ -794,12 +797,15 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int
   // -------------------------------------------
   // clone relevant plots for SVD unfolding xSec
   // -------------------------------------------
+  int kAllMC=kSAToptW+1;
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
-    // create combined BG reco plot
+    // ttbar BG yield for signal fraction
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
+    // create combined BG reco plot
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
     for(int bgsample=kZjets; bgsample<=kDiBos; ++bgsample){
-      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone());
+      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone());
     }
     // data event yield
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone();
@@ -929,7 +935,9 @@ TString efficiency="efficiency/"+variable;
     if(label2=="[#frac{GeV}{c}]")          label2="#left[pb #left(#frac{GeV}{c}#right)^{-1}#right]";
     else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[pb #left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
     else if(label2==" ") label2="[pb]";
-    TString xSec ="xSec/"+variable;
+    TString xSec ="xSec/";
+    if(compare) xSec+="BBB";
+    xSec+=variable;
     bool calculateXSec=true;
     // loop samples 
     for(unsigned int sample=kSig; sample<=kData; ++sample){
@@ -942,7 +950,7 @@ TString efficiency="efficiency/"+variable;
     if(!plotExists(histo_, "efficiency/"+variable, kSig)){
       calculateXSec=false;
     }
-    if(calculateXSec&&!SVDunfold){
+    if(calculateXSec&&(!SVDunfold||compare)){
       // a) differential XSec from data
       // get data plot
       TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
@@ -976,11 +984,18 @@ TString efficiency="efficiency/"+variable;
       if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
-      histogramStyle(*histo_[xSec][kSig ], kSig , false );
+      histogramStyle(*histo_[xSec][kSig ], kSig , false);
+      if(compare){
+	histo_[xSec][kData]->SetLineColor  (kBlue);
+	histo_[xSec][kData]->SetMarkerColor(kBlue);
+	histo_[xSec][kData]->SetMarkerStyle(33);
+	histo_[xSec][kSig ]->SetLineColor  (kOrange);
+	histo_[xSec][kSig ]->SetMarkerColor(kOrange);
+      }
       // restrict axis
       setXAxisRange(histo_[xSec][kData], variable);
       setXAxisRange(histo_[xSec][kSig ], variable);
-      ++NXSec;
+      if(!compare)++NXSec;
     }
   }
 
@@ -1081,7 +1096,7 @@ TString efficiency="efficiency/"+variable;
   // ---
   //    differential normalized cross section (phase space) determination
   // ---
-  if(!SVDunfold){
+  if(!SVDunfold||compare){
     // loop all variables
     for(unsigned int number=0; number<xSecVariables_.size(); ++number){
       TString variable=xSecVariables_[number];
@@ -1090,7 +1105,9 @@ TString efficiency="efficiency/"+variable;
       if(label2=="[#frac{GeV}{c}]") label2="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
       else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
       else if(label2==" ") label2="";
-      TString xSec ="xSecNorm/"+variable;
+      TString xSec ="xSecNorm/";
+      if(compare) xSec+="BBB";
+      xSec+=variable;
       bool calculateXSec=true;
       // loop samples 
       for(unsigned int sample=kSig; sample<=kData; ++sample){
@@ -1252,10 +1269,17 @@ TString efficiency="efficiency/"+variable;
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false);
+      if(compare){
+	histo_[xSec][kData]->SetLineColor  (kBlue);
+	histo_[xSec][kData]->SetMarkerColor(kBlue);
+	histo_[xSec][kData]->SetMarkerStyle(33);
+	histo_[xSec][kSig ]->SetLineColor  (kOrange);
+	histo_[xSec][kSig ]->SetMarkerColor(kOrange);
+      }
       // restrict axis
       setXAxisRange(histo_[xSec][kData], variable);
       setXAxisRange(histo_[xSec][kSig ], variable);
-      ++NXSec;
+      if(!compare) ++NXSec;
     }
   }
 
@@ -1284,6 +1308,11 @@ TString efficiency="efficiency/"+variable;
       // -----------------------------------
       bool calculateXSec=true;
       // check if BG reco plot is available
+      if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable, kAllMC)){
+	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable << " not found for BG" << std::endl;
+	calculateXSec=false;
+      }
+      // check if ttbar BG reco plot is available
       if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable, kBkg)){
 	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable << " not found for BG" << std::endl;
 	calculateXSec=false;
@@ -1336,7 +1365,7 @@ TString efficiency="efficiency/"+variable;
       if(decayChannel=="muon"    ) rootFile+="Mu";
       if(decayChannel=="electron") rootFile+="Elec";
       rootFile+=dataSample+".root";
-      psFile=outputFolder+"unfolding/unfolding.ps";
+      psFile=outputFolder+"unfolding/unfolding"+variable+".ps";
       //}
       TString special="";
       // -----------
@@ -1364,7 +1393,7 @@ TString efficiency="efficiency/"+variable;
       if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
 
       // ----------------------
-      // use unfolding maschine
+      // use unfolding machine
       // ----------------------
       if(calculateXSec){
 	TH1D* unfoldedData=new TH1D();
@@ -1372,6 +1401,11 @@ TString efficiency="efficiency/"+variable;
 	// Data Input (RAW Data including the background)
 	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
 	// Background (will be substracted from data)
+	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC],
+	// ttbar background only (used to calculate a ttbar signal 
+	// fraction instead of subtracting the yield which depends 
+	// on the inclusive ttbar cross section.) 
+	// Note: if 0 pointer is handed over 
 	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
 	// Generated MC
 	*&histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
@@ -1384,7 +1418,19 @@ TString efficiency="efficiency/"+variable;
 	// Number of bins for unfolding (not counting OF bins !!!)
 	unfoldbins, 
 	// Regularization parameter
-	unfoldbins+2,//regParameter(variable, verbose), 
+	regParameter(variable, verbose, true),  //unfoldbins+2,
+	// Regularization Modus 
+	// regMode=0 is standard BBB unfolding, no regularization
+	// regMode=1 is SVD Unfolding, regularization by means of the k Parameter. Specify the k Parameter in 'regPar'
+	//           -> NOTE: tau=false otion is needed when using function "regParameter"
+	// regMode=2 is SVD Unfolding, regularization by means of the tau Parameter. Specify the tau Parameter in 'regpar'
+	//           -> NOTE: tau=true otion is needed when using function "regParameter"
+	// regMode=3 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
+	// a "center value" for tau, to be specified in 'regpar'. Note: The scan may take a while!
+	// regMode=4 is SVD Unfolding. A scan for the optimal k parameter is performed. The scan is performed around
+	// a "center value" for k, to be specified in 'regpar'
+	// Note: The scan may take a while! 
+	2,                            
 	// Returned: Unfolded Distribution              
 	unfoldedData,
 	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
@@ -1406,20 +1452,28 @@ TString efficiency="efficiency/"+variable;
 	// If specified, plots will be saved in ROOT File
 	rootFile,
 	// If specified, plots will be saved in PS File
-	psFile
+	psFile,
+	// output
+	// verbose=0: no output at all
+	// verbose=1: standard output
+	// verbose=2: debug output
+	verbose
 	);
 	// ---------------------------------------------
 	// remaining steps for cross section calculation
 	// ---------------------------------------------
-	histo_[xSecNorm][kData]=(TH1F*)unfoldedData->Clone();
-	// Normalization (incl. xSec and lumi)
-	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
-	histo_[xSec][kData]=(TH1F*)histo_[xSecNorm][kData]->Clone();
-	histo_[xSec    ][kData]->Scale(1./(luminosity));
-	histo_[xSecNorm][kData]->Scale(1./(histo_[xSecNorm][kData]->Integral(1,histo_[xSecNorm][kData]->GetNbinsX())*luminosity));
+	// use unfolded event yield as input
+	histo_[xSec][kData]=(TH1F*)unfoldedData->Clone();
 	// divide by binwidth
-	histo_[xSecNorm][kData] = divideByBinwidth(histo_[xSecNorm][kData], verbose-1);
-	histo_[xSec    ][kData] = divideByBinwidth(histo_[xSec    ][kData], verbose-1);
+	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
+	// divide by luminosity 
+	histo_[xSec][kData]->Scale(1./(luminosity));	
+	// Normalization
+	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
+	histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
+	std::cout << variable << ": " << std::endl;
+	double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],2);//verbose-1);
+	histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
 	// --------------
 	// styling issues
 	// --------------
@@ -1439,26 +1493,33 @@ TString efficiency="efficiency/"+variable;
 	// restrict axis
 	setXAxisRange(histo_[xSecNorm][kData], variable);
 	NXSec=NXSec+2;
+	// thicker error bars for comparison
+	if(compare){
+	  histo_[xSecNorm][kData]->SetLineWidth(4);
+	  histo_[xSec    ][kData]->SetLineWidth(4);
+	}
 	// ------------------------------------------------------
 	// calculate differential XSec from Signal(MC prediction)
 	// ------------------------------------------------------
-	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
-	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
-	// lumi and efficiency
-	DivideYieldByEfficiencyAndLumi(histo_[xSec][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
-	DivideYieldByEfficiencyAndLumi(histo_[xSecNorm][kSig], (TH1F*)(histo_["efficiency/"+variable][kSig]), luminosity, 0);
+	// get PS gen event yield/binwidth plots
+	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone());
+	// divide by lumi
+	histo_[xSec][kSig]->Scale(1/luminosity);
 	// Normalization
+	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
-	double XSecInclTheoPS= (histo_[xSecNorm][kSig]->Integral(1,histo_[xSecNorm][kSig]->GetNbinsX()+1))/luminosity;
+	double XSecInclTheoPS= getInclusiveXSec(histo_[xSecNorm][kSig],verbose-1);
 	histo_[xSecNorm][kSig]->Scale(1/(XSecInclTheoPS));
-	// binwidth
-	histo_[xSecNorm][kSig] = divideByBinwidth(histo_[xSecNorm][kSig], verbose-1);
-	histo_[xSec    ][kSig] = divideByBinwidth(histo_[xSec    ][kSig], verbose-1);
 	// style
-	histogramStyle(*histo_[xSec][kSig ], kSig , false);
+	histogramStyle(*histo_[xSec    ][kSig ], kSig , false);
+	histogramStyle(*histo_[xSecNorm][kSig ], kSig , false);
+	if(compare){
+	  histo_[xSec    ][kSig ]->SetLineWidth  (3);
+	  histo_[xSecNorm][kSig ]->SetLineWidth  (3);
+	}
 	setXAxisRange(histo_[xSec][kSig ], variable);
-      }
-    
+	setXAxisRange(histo_[xSecNorm][kSig ], variable);
+      }    
     }
   }
 
@@ -1466,9 +1527,9 @@ TString efficiency="efficiency/"+variable;
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
   // ===============================================================
   
-  std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
+  if(verbose>0) std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
   makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
-  std::cout << " .... Finished." << std::endl; 
+  if(verbose>0) std::cout << " .... Finished." << std::endl; 
 
   // =========================================
   //  Create one legend for all 1D histos
@@ -1590,6 +1651,11 @@ TString efficiency="efficiency/"+variable;
   }
   if(verbose>2) std::cout << std::endl;
 
+  // FIXME MARTIN BBB Cross check
+  //for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+  //  std::cout << plotList_[plot] << std::endl;
+  //}
+
   // ---
   //    do the printing
   // ---
@@ -1602,9 +1668,10 @@ TString efficiency="efficiency/"+variable;
       // a1) for 1D event yields, efficiency and cross section plots (existing)
       if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
 	// check if plot is existing
-	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
+	// draw BBB xSec control plots in same canvas with SVD result
+	if(((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))&&!plotList_[plot].Contains("BBB")){
 	  // draw all pull distributions in same canvas if RecPartonTruth pull is called
-	  if(!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth")){
+	  if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
 	    // create canvas and set titel corresponding to plotname in .root file
 	    if(first){
 	      addCanvas(plotCanvas_);
@@ -1714,12 +1781,26 @@ TString efficiency="efficiency/"+variable;
 	      // others as histo (stack)
 	      else histo_[plotList_[plot]][sample]->Draw("hist");
 	      histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	      // draw BBB comparison results in same canvas
+	      if(compare&&plotList_[plot].Contains("xSec")){
+		TString BBBlabel=plotList_[plot];
+		BBBlabel.ReplaceAll("xSec/","xSec/BBB");
+		BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
+		if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("hist same");
+	      }
 	    }
 	    // draw other plots into same canvas
 	    else{ 
 	      // draw data as points
 	      if(sample==kData){ 
 		histo_[plotList_[plot]][sample]->Draw("p e X0 same");
+		// draw BBB comparison results in same canvas
+		if(compare&&plotList_[plot].Contains("xSec")){
+		  TString BBBlabel=plotList_[plot];
+		  BBBlabel.ReplaceAll("xSec/","xSec/BBB");
+		  BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
+		  if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("p e X0 same");
+		}
 	      }
 	      else{
 		// draw efficiencies as points
