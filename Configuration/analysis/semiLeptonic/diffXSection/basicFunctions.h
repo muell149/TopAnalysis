@@ -2721,7 +2721,7 @@ namespace semileptonic {
     if(!drawOnlyErrors) result->Draw("hist c same"); 
   }
 
-  int regParameter(TString variable, int verbose){
+  double regParameter(TString variable, int verbose=0, bool tau=false){
     // this function returns k/value for SVD 
     // unfolding for the corresponding variable
     // modified quantities: NONE
@@ -2733,15 +2733,51 @@ namespace semileptonic {
     // NB: k-value should be independent from decay channel
     // NB: at the moment k=N(bins) is used!
     int k=-1;
-    if(variable.Contains("ttbarMass")) k=5;
-    else if(variable.Contains("ttbarPt"  )) k=5;
-    else if(variable.Contains("ttbarY"   )) k=8;
-    else if(variable.Contains("topPt"    )) k=5;
-    else if(variable.Contains("topY"     )) k=8;
-    else if(variable.Contains("lepPt"    )) k=13;
-    else if(variable.Contains("lepEta"   )) k=14;
-    else if(variable.Contains("bqPt"     )) k=5;
-    else if(variable.Contains("bqEta"    )) k=8;
+    if(     variable.Contains("ttbarMass")){ 
+      k=5; 
+      // Optimal Tau = 1.35725 at scan position 54
+      if(tau) k=1.35725;
+    }
+    else if(variable.Contains("ttbarPt"  )){ 
+      k=5; 
+      // Optimal Tau = 1.22257 at scan position 56
+      if(tau) k=1.22257;
+    }
+    else if(variable.Contains("ttbarY"   )){ 
+      k=8; 
+      // Optimal Tau = 1.22837 at scan position 54
+      if(tau) k=1.22837;
+    }
+    else if(variable.Contains("topPt"    )){ 
+      k=5; 
+      // Optimal Tau = 2.16919 at scan position 50
+      if(tau) k=2.16919;
+    }
+    else if(variable.Contains("topY"     )){ 
+      k=8; 
+      // Optimal Tau = 1.79251 at scan position 52
+      if(tau) k=1.79251;
+    }
+    else if(variable.Contains("lepPt"    )){ 
+      k=13;
+      // Optimal Tau = 0.240889 at scan position 43
+      if(tau) k=0.240889;
+    }
+    else if(variable.Contains("lepEta"   )){ 
+      k=14;
+      // Optimal Tau = 0.599823 at scan position 38
+      if(tau) k=0.599823;
+    }
+    else if(variable.Contains("bqPt"     )){ 
+      k=5; 
+      // Optimal Tau = 1.26626 at scan position 49
+      if(tau) k=1.26626;
+    }
+    else if(variable.Contains("bqEta"    )){ 
+      k=8; 
+      // Optimal Tau = 1.59257 at scan position 45
+      if(tau) k=1.59257;
+    }
     // output
     if(verbose>1) std::cout << "k(" << variable << ") = " << k << std::endl;
     // check result
