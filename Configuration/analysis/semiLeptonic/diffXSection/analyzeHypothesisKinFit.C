@@ -2,10 +2,10 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
+void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
-			     std::string decayChannel = "muon", bool SVDunfold=false)
+			     std::string decayChannel = "muon", bool SVDunfold=true)
 {
   // ============================
   //  Set ROOT Style
@@ -77,7 +77,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int
   // save: save plots?
   // SVDunfold: use SVD instead of bin to bin unfolding
   // compare SVD and BBB results
-  bool compare=true;
+  bool compare=false;
   if(!SVDunfold) compare=false;
   // luminosity: [/pb]
   TString lumi = getTStringFromInt(roundToInt((luminosity), false));  
@@ -145,7 +145,7 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = false, int
 
   //  ---
   //     choose plots
-  //  ---sysInputFolderExtension
+  //  ---
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
   TString plots1D[ ] = { // general fit performance
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob"       , 
@@ -986,8 +986,8 @@ TString efficiency="efficiency/"+variable;
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false);
       if(compare){
-	histo_[xSec][kData]->SetLineColor  (kBlue);
-	histo_[xSec][kData]->SetMarkerColor(kBlue);
+	histo_[xSec][kData]->SetLineColor  (38);
+	histo_[xSec][kData]->SetMarkerColor(38);
 	histo_[xSec][kData]->SetMarkerStyle(33);
 	histo_[xSec][kSig ]->SetLineColor  (kOrange);
 	histo_[xSec][kSig ]->SetMarkerColor(kOrange);
@@ -1270,8 +1270,8 @@ TString efficiency="efficiency/"+variable;
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false);
       if(compare){
-	histo_[xSec][kData]->SetLineColor  (kBlue);
-	histo_[xSec][kData]->SetMarkerColor(kBlue);
+	histo_[xSec][kData]->SetLineColor  (38);
+	histo_[xSec][kData]->SetMarkerColor(38);
 	histo_[xSec][kData]->SetMarkerStyle(33);
 	histo_[xSec][kSig ]->SetLineColor  (kOrange);
 	histo_[xSec][kSig ]->SetMarkerColor(kOrange);
@@ -1418,17 +1418,17 @@ TString efficiency="efficiency/"+variable;
 	// Number of bins for unfolding (not counting OF bins !!!)
 	unfoldbins, 
 	// Regularization parameter
-	regParameter(variable, verbose, true),  //unfoldbins+2,
+	regParameter(variable, decayChannel, 2, true),  //unfoldbins+2,
 	// Regularization Modus 
 	// regMode=0 is standard BBB unfolding, no regularization
-	// regMode=1 is SVD Unfolding, regularization by means of the k Parameter. Specify the k Parameter in 'regPar'
+	// regMode=1 is SVD Unfolding, regularization by means of the "K" Parameter. Specify the k Parameter in 'regPar'
 	//           -> NOTE: tau=false otion is needed when using function "regParameter"
-	// regMode=2 is SVD Unfolding, regularization by means of the tau Parameter. Specify the tau Parameter in 'regpar'
+	// regMode=2 is SVD Unfolding, regularization by means of the "TAU" Parameter. Specify the tau Parameter in 'regpar'
 	//           -> NOTE: tau=true otion is needed when using function "regParameter"
 	// regMode=3 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
-	// a "center value" for tau, to be specified in 'regpar'. Note: The scan may take a while!
+	// a "center value" for k, to be specified in 'regpar'. Note: The scan may take a while!
 	// regMode=4 is SVD Unfolding. A scan for the optimal k parameter is performed. The scan is performed around
-	// a "center value" for k, to be specified in 'regpar'
+	// a "center value" for tau, to be specified in 'regpar'
 	// Note: The scan may take a while! 
 	2,                            
 	// Returned: Unfolded Distribution              
@@ -1457,7 +1457,7 @@ TString efficiency="efficiency/"+variable;
 	// verbose=0: no output at all
 	// verbose=1: standard output
 	// verbose=2: debug output
-	verbose
+	0
 	);
 	// ---------------------------------------------
 	// remaining steps for cross section calculation
@@ -1471,8 +1471,9 @@ TString efficiency="efficiency/"+variable;
 	// Normalization
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
 	histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
-	std::cout << variable << ": " << std::endl;
-	double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],2);//verbose-1);
+	double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
+	inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
+	inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
 	histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
 	// --------------
 	// styling issues
@@ -1508,7 +1509,9 @@ TString efficiency="efficiency/"+variable;
 	// Normalization
 	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
-	double XSecInclTheoPS= getInclusiveXSec(histo_[xSecNorm][kSig],verbose-1);
+	double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig],verbose-1);
+	XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
+	XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
 	histo_[xSecNorm][kSig]->Scale(1/(XSecInclTheoPS));
 	// style
 	histogramStyle(*histo_[xSec    ][kSig ], kSig , false);
