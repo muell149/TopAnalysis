@@ -1633,6 +1633,28 @@ TString efficiency="efficiency/"+variable;
 	histo_[permutationLabel][kSig]->Scale(1./histo_[permutationLabel][kSig]->Integral(0, histo_[permutationLabel][kSig]->GetNbinsX()));
 	axisLabel_[plot].ReplaceAll("events","relative fraction of events");
 	histogramStyle( *histo_[permutationLabel][kSig], kSig, true);
+	// print permutations
+	if(systematicVariation==sysNo){
+	  std::cout << std::endl << "permutations wrt jet parton matching: " << std::endl;
+	  std::cout << "-------------------------------------" << std::endl;
+	  std::cout << "ok     : " << histo_[permutationLabel][kSig]->GetBinContent(1) << std::endl;
+	  std::cout << "(correct jet-quark assignment)" << std::endl;
+	  std::cout << "bb     : " << histo_[permutationLabel][kSig]->GetBinContent(2) << std::endl;
+	  std::cout << "(hadronic and leptonic b-jet interchanged)" << std::endl;
+	  double others=0.;
+	  for(int bin=3; bin<=7; ++bin){
+	    others+=histo_[permutationLabel][kSig]->GetBinContent(bin);
+	  }
+	  std::cout << "q<->q  : " << others << std::endl;
+	  std::cout << "(2 or more other quarks interchanged)" << std::endl;
+	  std::cout << "jmis   : " << histo_[permutationLabel][kSig]->GetBinContent(8) << std::endl;
+	  std::cout << "(jet(s) missing in leading 5) " << std::endl;
+	  std::cout << "wrongj : " << histo_[permutationLabel][kSig]->GetBinContent(9) << std::endl;
+	  std::cout << "(wrong 4 out of the 5 leading chosen)" << std::endl;
+	  std::cout << "nomatch: " << histo_[permutationLabel][kSig]->GetBinContent(10) << std::endl;
+	  std::cout << "(no unambigious matching due to e.g. jet splitting(ISR/FSR), jet merging,";
+	  std::cout << " jet(s) out of acceptance or jets close by)" << std::endl << std::endl;
+	}
       }
     }
     // pull plots as line, signal only, no stack, relative 
