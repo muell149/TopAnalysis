@@ -2721,7 +2721,7 @@ namespace semileptonic {
     if(!drawOnlyErrors) result->Draw("hist c same"); 
   }
 
-  double regParameter(TString variable, int verbose=0, bool tau=false){
+  double regParameter(TString variable, TString decayChannel, int verbose=0, bool tau=false){
     // this function returns k/value for SVD 
     // unfolding for the corresponding variable
     // modified quantities: NONE
@@ -2734,56 +2734,124 @@ namespace semileptonic {
     // NB: at the moment k=N(bins) is used!
     double k=-1.;
     if(     variable.Contains("ttbarMass")){ 
-      k=5; 
-      // Optimal Tau = 1.35725 at scan position 54
-      if(tau) k=1.35725;
+      if(decayChannel.Contains("muon")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=1.35725;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=1.42188 ;
+      }
     }
     else if(variable.Contains("ttbarPt"  )){ 
-      k=5; 
-      // Optimal Tau = 1.22257 at scan position 56
-      if(tau) k=1.22257;
+      if(decayChannel.Contains("muon")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=1.22257;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=1.28078 ;
+      }
     }
     else if(variable.Contains("ttbarY"   )){ 
-      k=8; 
-      // Optimal Tau = 1.22837 at scan position 54
-      if(tau) k=1.22837;
+      if(decayChannel.Contains("muon")){
+	k=8; 
+	// Optimal Tau
+	if(tau) k=1.22837;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=8; 
+	// Optimal Tau
+	if(tau) k=1.28686;
+      }
     }
     else if(variable.Contains("topPt"    )){ 
-      k=5; 
-      // Optimal Tau = 2.16919 at scan position 50
-      if(tau) k=2.16919;
+      if(decayChannel.Contains("muon")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=2.16919;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=2.49404;
+      }
     }
     else if(variable.Contains("topY"     )){ 
-      k=8; 
-      // Optimal Tau = 1.79251 at scan position 52
-      if(tau) k=1.79251;
+      if(decayChannel.Contains("muon")){
+	k=8; 
+	// Optimal Tau
+	if(tau) k=1.87786;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=8; 
+	// Optimal Tau
+	if(tau) k=1.79251;
+      }
     }
     else if(variable.Contains("lepPt"    )){ 
-      k=13;
-      // Optimal Tau = 0.240889 at scan position 43
-      if(tau) k=0.240889;
+      if(decayChannel.Contains("muon")){
+	k=13;
+	// Optimal Tau
+	if(tau) k=0.240889;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=13; 
+	// Optimal Tau
+	if(tau) k=0.22994;
+      }
     }
     else if(variable.Contains("lepEta"   )){ 
-      k=14;
-      // Optimal Tau = 0.599823 at scan position 38
-      if(tau) k=0.599823;
+      if(decayChannel.Contains("muon")){
+	k=14;
+	// Optimal Tau
+	if(tau) k=0.599823;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=14; 
+	// Optimal Tau
+	if(tau) k=0.475349;
+      }
     }
     else if(variable.Contains("bqPt"     )){ 
-      k=5; 
-      // Optimal Tau = 1.26626 at scan position 49
-      if(tau) k=1.26626;
+      if(decayChannel.Contains("muon")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=1.26626;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=5; 
+	// Optimal Tau
+	if(tau) k=1.45589;
+      }
     }
     else if(variable.Contains("bqEta"    )){ 
-      k=8; 
-      // Optimal Tau = 1.59257 at scan position 45
-      if(tau) k=1.59257;
+      if(decayChannel.Contains("muon")){
+	k=8; 
+	// Optimal Tau
+	if(tau) k=1.59257;
+      }
+      else if(decayChannel.Contains("electron")){
+	k=8; 
+	// Optimal Tau
+	if(tau) k=1.6684;
+      }
     }
     // output
-    if(verbose>1) std::cout << "k(" << variable << ") = " << k << std::endl;
+    if(verbose>1){
+      if(tau) std::cout << "tau";
+      else std::cout << "k";
+      std::cout << "(" << variable << ") = " << k << std::endl;
+    }
     // check result
     if(k<0.){
       std::cout << "ERROR in regParameter:" << std::endl; 
       std::cout << "invalid k=" << k << " for variable " << variable << std::endl;
+      std::cout << "unknown variable " << variable << " or decayChannel " << decayChannel << std::endl;
     }
     // return result
     return k;
