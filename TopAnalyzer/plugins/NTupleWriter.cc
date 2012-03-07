@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.17 2012/02/23 16:19:19 iasincru Exp $
+// $Id: NTupleWriter.cc,v 1.19 2012/03/01 12:22:55 blutz Exp $
 //
 //
 
@@ -172,11 +172,6 @@ private:
   std::vector<double> VjetBTagSSVHP;
   std::vector<double> VjetBTagCSV;
   std::vector<double> VjetBTagCSVMVA;
-
-  std::vector<int> VgenjetfromBhadron, VgenjetfromBhadronClone;
-  std::vector<LV> Vmotherparticle;
-  std::vector<int> VmotherparticlePdgId;
-  std::vector<double> VMotherDeltaRParticle;
   
   
   /////////met///////////
@@ -786,11 +781,8 @@ void NTupleWriter::clearVariables()
   VallGenJets.clear();
   VgenJet.clear();
 
-  VgenjetfromBhadronClone.clear();
-  VgenjetfromBhadron.clear();
-  Vmotherparticle.clear();
-  VmotherparticlePdgId.clear();
-  VMotherDeltaRParticle.clear();
+  VBHadJetIdx.clear();
+  VAntiBHadJetIdx.clear();
   
   /////////met///////////
   VmetEt.clear();
