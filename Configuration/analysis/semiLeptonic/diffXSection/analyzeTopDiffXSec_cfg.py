@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 ##    example to run this cfg file
 ## ---
-## cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,eventsToProcess=5000
+## cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,mctag=Fall11,eventsToProcess=5000
 
 ## ---
 ##    options
@@ -18,6 +18,7 @@ import FWCore.ParameterSet.Config as cms
 ## allows to choose registered parameter for every job individually
 import FWCore.ParameterSet.VarParsing as VarParsing
 import sys
+import os
 options = VarParsing.VarParsing ('standard')
 
 # create object triggerTag with default value HLT of type singleton and string
@@ -28,6 +29,8 @@ options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleto
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
 options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen decay channel")
+# create label to select version of MC samples (Summer11, Fall11) 
+options.register('mctag', 'Fall11',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "label for version of MC samples (Fall11, Summer11")
 # create variable to indicate number of processed events
 # -42 means nothing is changed wrt number typed below
 options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int, "events to process")
@@ -77,6 +80,10 @@ if(not globals().has_key('runningOnData')):
 # if set, switches runOnAOD in PF2PAT to true
 print "Chosen sample to run over: ", options.sample
 
+## version of the MC (important for trigger)
+## This parameter is also used to select the correct procedure for PU event reweighting
+print "Label of MC samples: ",options.mctag
+
 ## choose JSON file for data
 if(not globals().has_key('jsonFile')):
     jsonFile =  ''
@@ -88,12 +95,6 @@ if(not globals().has_key('PUreweigthing')):
     if (not runningOnData == "MC"):
         PUreweigthing = False
 print "apply PU reweighting?: ",PUreweigthing
-
-## version of the MC (important for trigger)
-## This parameter is also used to select the correct procedure for PU event reweighting
-if(not globals().has_key('MCversion')):
-    MCversion = "Fall11"
-#    MCversion = "Summer11"
 
 ## enable/ disable btag SF event reweighting
 if(not globals().has_key('BtagReweigthing')):
@@ -229,7 +230,6 @@ elif(decayChannel=="electron"):
     outputFileName = "elec"
 ## will be continued later
 
-
 ## Flag required to compensate bug in energy-momentum conservation for non Pythia samples
 ## Modified in the following depending on the input sample, but only for the Pythia samples!
 ## Default value: False
@@ -243,155 +243,155 @@ if(not options.sample=="none"):
         # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
         usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11"
+	    outputFileName+="DiffXSecSig"+options.mctag
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11"
+	    outputFileName+="DiffXSecBkg"+options.mctag
     if(options.sample=="ttbarMatchingDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11MatchDown"
+	    outputFileName+="DiffXSecSig"+options.mctag+"MatchDown"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11MatchDown"
+	    outputFileName+="DiffXSecBkg"+options.mctag+"MatchDown"
     if(options.sample=="ttbarMatchingUp"):        
         usedSample="TopAnalysis/Configuration/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11MatchUp"
+	    outputFileName+="DiffXSecSig"+options.mctag+"MatchUp"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11MatchUp"
+	    outputFileName+="DiffXSecBkg"+options.mctag+"MatchUp"
     if(options.sample=="ttbarScaleDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11ScaleDown"
+	    outputFileName+="DiffXSecSig"+options.mctag+"ScaleDown"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11ScaleDown"
+	    outputFileName+="DiffXSecBkg"+options.mctag+"ScaleDown"
     if(options.sample=="ttbarScaleUp"):        
         usedSample="TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11ScaleUp"
+	    outputFileName+="DiffXSecSig"+options.mctag+"ScaleUp"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11ScaleUp"
+	    outputFileName+="DiffXSecBkg"+options.mctag+"ScaleUp"
     if(options.sample=="ttbarMassDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11TopMassDown"
+	    outputFileName+="DiffXSecSig"+options.mctag+"TopMassDown"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11TopMassDown"
+	    outputFileName+="DiffXSecBkgM"+options.mctag+"TopMassDown"
     if(options.sample=="ttbarMassUp"):        
         usedSample="TopAnalysis/Configuration/ttjets_mass175_5_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSigMadD6TSummer11TopMassUp"
+	    outputFileName+="DiffXSecSig"+options.mctag+"TopMassUp"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgMadD6TSummer11TopMassUp"
+	    outputFileName+="DiffXSecBkg"+options.mctag+"TopMassUp"
     if(options.sample=="wjets"):        
         usedSample="TopAnalysis/Configuration/Fall11/wlnujets_MadgraphZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecWjetsMadD6TSummer11"
+	outputFileName+="DiffXSecWjets"+options.mctag
     if(options.sample=="wjetsMatchingUp"):        
         usedSample="TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecWjetsMadD6TSummer11MatchUp"
+	outputFileName+="DiffXSecWjets"+options.mctag+"MatchUp"
     if(options.sample=="wjetsMatchingDown"):        
         usedSample="TopAnalysis/Configuration/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecWjetsMadD6TSummer11MatchDown"
+	outputFileName+="DiffXSecWjets"+options.mctag+"MatchDown"
     if(options.sample=="wjetsScaleUp"):        
         usedSample="TopAnalysis/Configuration/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecWjetsMadD6TSummer11ScaleUp"
+	outputFileName+="DiffXSecWjets"+options.mctag+"ScaleUp"
     if(options.sample=="wjetsScaleDown"):
         usedSample="TopAnalysis/Configuration/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False        
-	outputFileName+="DiffXSecWjetsMadD6TSummer11ScaleDown"
+	outputFileName+="DiffXSecWjets"+options.mctag+"ScaleDown"
     if(options.sample=="zjets"):        
         usedSample="TopAnalysis/Configuration/Fall11/dylljetsM50_MadgraphZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecZjetsMadD6TSummer11"
+	outputFileName+="DiffXSecZjets"+options.mctag
     if(options.sample=="zjetsMatchingUp"):        
         usedSample="TopAnalysis/Configuration/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecZjetsMadD6TSummer11MatchUp"
+	outputFileName+="DiffXSecZjets"+options.mctag+"MatchUp"
     if(options.sample=="zjetsMatchingDown"):        
         usedSample="TopAnalysis/Configuration/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecZjetsMadD6TSummer11MatchDown"
+	outputFileName+="DiffXSecZjets"+options.mctag+"MatchDown"
     if(options.sample=="zjetsScaleUp"):        
         usedSample="TopAnalysis/Configuration/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecZjetsMadD6TSummer11ScaleUp"
+	outputFileName+="DiffXSecZjets"+options.mctag+"ScaleUp"
     if(options.sample=="zjetsScaleDown"):        
         usedSample="TopAnalysis/Configuration/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False      
-	outputFileName+="DiffXSecZjetsMadD6TSummer11ScaleDown"
+	outputFileName+="DiffXSecZjets"+options.mctag+"ScaleDown"
     if(options.sample=="singleTopS"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleTopSchannelMadZ2Summer11"
+	outputFileName+="DiffXSecSingleTopS"+options.mctag
     if(options.sample=="singleTopSScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False   
-	outputFileName+="DiffXSecSingleTopSchannelMadZ2Summer11ScaleDown"
+	outputFileName+="DiffXSecSingleTopS"+options.mctag+"ScaleDown"
     if(options.sample=="singleTopSScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopSchannelMadZ2Summer11ScaleUp"
+	outputFileName+="DiffXSecSingleTopS"+options.mctag+"ScaleUp"
     if(options.sample=="singleAntiTopS"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleAntiTopSchannelMadZ2Summer11"
+	outputFileName+="DiffXSecSingleAntiTopS"+options.mctag
     if(options.sample=="singleAntiTopSScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopSchannelMadZ2Summer11ScaleDown"
+	outputFileName+="DiffXSecSingleAntiTopS"+options.mctag+"ScaleDown"
     if(options.sample=="singleAntiTopSScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopSchannelMadZ2Summer11ScaleUp"
+	outputFileName+="DiffXSecSingleAntiTopS"+options.mctag+"ScaleUp"
     if(options.sample=="singleTopT"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleTopTchannelMadZ2Summer11"
+	outputFileName+="DiffXSecSingleTopT"+options.mctag
     if(options.sample=="singleTopTScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopTchannelMadZ2Summer11ScaleDown"
+	outputFileName+="DiffXSecSingleTopT"+options.mctag+"ScaleDown"
     if(options.sample=="singleTopTScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopTchannelMadZ2Summer11ScaleUp"
+	outputFileName+="DiffXSecSingleTopT"+options.mctag+"ScaleUp"
     if(options.sample=="singleAntiTopT"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleAntiTopTchannelMadZ2Summer11"
+	outputFileName+="DiffXSecSingleAntiTopT"+options.mctag
     if(options.sample=="singleAntiTopTScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopTchannelMadZ2Summer11ScaleDown"
+	outputFileName+="DiffXSecSingleAntiTopT"+options.mctag+"ScaleDown"
     if(options.sample=="singleAntiTopTScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopTchannelMadZ2Summer11ScaleUp"
+	outputFileName+="DiffXSecSingleAntiTopT"+options.mctag+"ScaleUp"
     if(options.sample=="singleTopTw"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleTopTWchannelMadZ2Summer11"
+	outputFileName+="DiffXSecSingleTopTW"+options.mctag
     if(options.sample=="singleTopTwScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopTWchannelMadZ2Summer11ScaleDown"
+	outputFileName+="DiffXSecSingleTopTW"+options.mctag+"ScaleDown"
     if(options.sample=="singleTopTwScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopTWchannelMadZ2Summer11ScaleUp"
+	outputFileName+="DiffXSecSingleTopTW"+options.mctag+"ScaleUp"
     if(options.sample=="singleAntiTopTw"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleAntiTopTWchannelMadZ2Summer11"
+	outputFileName+="DiffXSecSingleAntiTopTW"+options.mctag
     if(options.sample=="singleAntiTopTwScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopTWchannelMadZ2Summer11ScaleDown"
+	outputFileName+="DiffXSecSingleAntiTopTW"+options.mctag+"ScaleDown"
     if(options.sample=="singleAntiTopTwScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopTWchannelMadZ2Summer11ScaleUp"
+	outputFileName+="DiffXSecSingleAntiTopTW"+options.mctag+"ScaleUp"
     if(options.sample=="zprime_m500gev_w5000mev"):        
         usedSample="TopAnalysis/Configuration/zprime_M500GeV_W5000MeV_Madgraph_Summer11_AOD_cff"
     if(options.sample=="zprime_m750gev_w7500mev"):        
@@ -401,46 +401,50 @@ if(not options.sample=="none"):
         if(options.sample=="qcd"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdmu15enriched_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaZ2Summer11"
+	    outputFileName+="DiffXSecQCD"+options.mctag
     if(decayChannel=='electron'):
         if(options.sample=="qcdEM1"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaEM1Z2Summer11"
+	    outputFileName+="DiffXSecQCDEM1"+options.mctag
         if(options.sample=="qcdEM2"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaEM2Z2Summer11"
+	    outputFileName+="DiffXSecQCDEM2"+options.mctag
         if(options.sample=="qcdEM3"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt80to170_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaEM3Z2Summer11"
+	    outputFileName+="DiffXSecQCDEM3"+options.mctag
         if(options.sample=="qcdBCE1"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt20to30_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaBCE1Z2Summer11"
+	    outputFileName+="DiffXSecQCDBCE1"+options.mctag
         if(options.sample=="qcdBCE2"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt30to80_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaBCE2Z2Summer11"
+	    outputFileName+="DiffXSecQCDBCE2"+options.mctag
         if(options.sample=="qcdBCE3"):
             usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt80to170_Pythia6_Fall11_AOD_cff"
             PythiaSample="True"
-	    outputFileName+="DiffXSecQCDPythiaBCE3Z2Summer11"
+	    outputFileName+="DiffXSecQCDBCE3"+options.mctag
     if(options.sample=="WW"):        
         usedSample="TopAnalysis/Configuration/Fall11/wwtoall_Pythia6Z2_Fall11_AOD_cff"
         PythiaSample="True"
-	outputFileName+="DiffXSecWWPytia6Z2Summer11"
+	outputFileName+="DiffXSecWW"+options.mctag
     if(options.sample=="WZ"):        
         usedSample="TopAnalysis/Configuration/Fall11/wztoall_Pythia6Z2_Fall11_AOD_cff"
         PythiaSample="True"
-	outputFileName+="DiffXSecWZPytia6Z2Summer11"
+	outputFileName+="DiffXSecWZ"+options.mctag
     if(options.sample=="ZZ"):        
         usedSample="TopAnalysis/Configuration/Fall11/zztoall_Pythia6Z2_Fall11_AOD_cff"
         PythiaSample="True"
-	outputFileName+="DiffXSecZZPytia6Z2Summer11"
-    process.load(usedSample)
-    print "analyzed sample: "+usedSample+".py"
+	outputFileName+="DiffXSecZZ"+options.mctag
+    if(not usedSample=='none'):
+        process.load(usedSample)
+        print "analyzed sample: "+usedSample+".py"
+    else:
+        print "\n ERROR ---- Poolsource file does not exist.\n"
+        os._exit(0)
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
@@ -508,7 +512,7 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_IsoMu24_eta2p1_v*"], throw=False)
-if(MCversion=="Summer11"):
+if(options.mctag=="Summer11"):
       process.hltFilter.HLTPaths=["HLT_IsoMu24_v*"]
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu15_v*"], throw=False)
 #process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
@@ -785,7 +789,7 @@ process.PUControlDistributions.PVertexSource              = cms.InputTag("goodOf
 process.PUControlDistributions.PUEventWeightSource        = cms.InputTag("eventWeightPUsysNo",  "eventWeightPU"       )
 process.PUControlDistributions.PUEventWeightUpSource      = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp"     )
 process.PUControlDistributions.PUEventWeightDownSource    = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown"   )
-process.PUControlDistributions.MCSampleTag                = MCversion
+process.PUControlDistributions.MCSampleTag                = options.mctag
 
 process.PUControlDistributionsDefault        = process.PUControlDistributions.clone()
 process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.clone()
@@ -1135,12 +1139,12 @@ process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
 ## Apply common setting before module is cloned for systematic studies
 
-process.eventWeightPU.MCSampleTag = MCversion
+process.eventWeightPU.MCSampleTag = options.mctag
 
-if (MCversion == "Fall11"):
+if (options.mctag == "Fall11"):
     process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
     process.eventWeightPU.DataHistoName            = "histoData_true"
-elif (MCversion == "Summer11"):    
+elif (options.mctag == "Summer11"):    
     process.eventWeightPU.MCSampleHistoName        = "histoSummer11_flat_true"
     process.eventWeightPU.DataHistoName            = "histoData_true_fineBinning"
 
@@ -2171,10 +2175,10 @@ if(jetType=="particleFlow"):
 ## switch to from muon to electron collections
 if(decayChannel=="electron"):
     # adpat trigger
-    if(MCversion=="Summer11"):
+    if(options.mctag=="Summer11"):
       process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
       process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*"]
-    elif(MCversion=="Fall11"):
+    elif(options.mctag=="Fall11"):
       process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
       process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
     # adapt gen filter
