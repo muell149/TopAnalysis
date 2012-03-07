@@ -23,7 +23,7 @@ options = VarParsing.VarParsing ('standard')
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
 # create sample label with default value data
-# for summer11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), zprime_m500gev_w5000mev, zprime_m750gev_w7500mev
+# for Summer11/Fall11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), zprime_m500gev_w5000mev, zprime_m750gev_w7500mev
 # for systematic samples see list for each MC sample
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
@@ -90,8 +90,10 @@ if(not globals().has_key('PUreweigthing')):
 print "apply PU reweighting?: ",PUreweigthing
 
 ## version of the MC (important for trigger)
+## This parameter is also used to select the correct procedure for PU event reweighting
 if(not globals().has_key('MCversion')):
     MCversion = "Fall11"
+#    MCversion = "Summer11"
 
 ## enable/ disable btag SF event reweighting
 if(not globals().has_key('BtagReweigthing')):
@@ -216,17 +218,6 @@ process.source = cms.Source("PoolSource",
     #'/store/data/Run2011A/MuHad/AOD/PromptReco-v4/000/165/205/0C569F2A-D382-E011-B122-00304879FBB2.root' 
     #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
     #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/1204EE92-F397-E011-99E8-003048679012.root' 
-    #'/store/data/Run2011A/MuHad/AOD/May10ReReco-v1/0005/FC809CA7-0C7D-E011-AE04-003048678B1C.root' 
-
-    #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
-    #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_36_1_085.root'
-    #'/store/user/mgoerner/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/148435cd71339b79cc0025730c13472a/fall10MC_100_1_iJg.root'
-    #'/store/user/wbehrenh/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_2_k5G.root'
-    #'/store/user/henderle/TTJets_TuneD6T_7TeV-madgraph-tauola/PAT_FALL10HH/6c1c00d4602477b58cef63f182ce0614/fall10MC_14_3_M5Q.root'
-    #'/store/user/dammann/TTJets_TuneD6T_7TeV-madgraph-tauola/Fall10-PAT-v2/43e23e1dee19d970b0c8344e9053309f/mcpat_21_1_JdU.root'
-    #'/store/user/mgoerner/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/PAT_FALL10HH2/148435cd71339b79cc0025730c13472a/fall10MC_9_1_mFa.root'
-    #'/store/user/mgoerner/Mu/PAT_Nov4RerecoL1IncludedUHH/e37a6f43ad6b01bd8486b714dc367330/DataNov4RerecoL1included_196_1_jzY.root'
-    #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
     )
 )
 
@@ -249,7 +240,7 @@ usedSample="none"
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
     if(options.sample=="ttbar"):
-       # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
+        # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
         usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
 	if(eventFilter=='signal only'):
 	    outputFileName+="DiffXSecSigMadD6TSummer11"
@@ -515,17 +506,11 @@ if(runningOnData=="data"):
 process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 
 ## high level trigger filter
-#(use "TriggerResults::REDIGI38X" for fall10 QCD, WW, ZZ and WZ and "TriggerResults::HLT" for the other ones)
-# for all PileUp sample use "TriggerResults::REDIGI38XPU"
-# for all spring11 MC use REDIGI311X
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_IsoMu24_eta2p1_v*"], throw=False)
 if(MCversion=="Summer11"):
       process.hltFilter.HLTPaths=["HLT_IsoMu24_v*"]
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu15_v*"], throw=False)
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38X", HLTPaths = [""], throw=False)
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI38XPU", HLTPaths = ["HLT_Mu9"], throw=False)
-#process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::REDIGI311X", HLTPaths = ["HLT_Mu9"], throw=False)
 #process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
 
 ## semileptonic selection
@@ -797,12 +782,10 @@ process.analyzeMETMuonTagged = process.analyzeMETMuon.clone()
 process.load("TopAnalysis.TopAnalyzer.PUControlDistributions_cfi")
 process.PUControlDistributions.PUSource                   = cms.InputTag("addPileupInfo"                       )
 process.PUControlDistributions.PVertexSource              = cms.InputTag("goodOfflinePrimaryVertices"          )
-process.PUControlDistributions.PUEventWeightSource        = cms.InputTag("eventWeightPU",       "eventWeightPU"       )
+process.PUControlDistributions.PUEventWeightSource        = cms.InputTag("eventWeightPUsysNo",  "eventWeightPU"       )
 process.PUControlDistributions.PUEventWeightUpSource      = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp"     )
 process.PUControlDistributions.PUEventWeightDownSource    = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown"   )
-process.PUControlDistributions.PUEventWeight3DSource      = cms.InputTag("eventWeightPU",       "eventWeightPU3D"     )
-process.PUControlDistributions.PUEventWeight3DUpSource    = cms.InputTag("eventWeightPUsysUp",  "eventWeightPU3DUp"   )
-process.PUControlDistributions.PUEventWeight3DDownSource  = cms.InputTag("eventWeightPUsysDown","eventWeightPU3DDown" )
+process.PUControlDistributions.MCSampleTag                = MCversion
 
 process.PUControlDistributionsDefault        = process.PUControlDistributions.clone()
 process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.clone()
@@ -1150,52 +1133,60 @@ else:
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
-process.eventWeightPU        = process.eventWeightPU.clone()
+## Apply common setting before module is cloned for systematic studies
+
+process.eventWeightPU.MCSampleTag = MCversion
+
+if (MCversion == "Fall11"):
+    process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
+    process.eventWeightPU.DataHistoName            = "histoData_true"
+elif (MCversion == "Summer11"):    
+    process.eventWeightPU.MCSampleHistoName        = "histoSummer11_flat_true"
+    process.eventWeightPU.DataHistoName            = "histoData_true_fineBinning"
+
+process.eventWeightPUsysNo   = process.eventWeightPU.clone()
 process.eventWeightPUsysUp   = process.eventWeightPU.clone()
 process.eventWeightPUsysDown = process.eventWeightPU.clone()
 
+#### Parameters 'CreateWeight3DHisto' and 'Weight3DHistoFile' required for cff-file, but actually not used for Fall11 samples
+    
 #### Configuration for Nominal PU Weights
 
-process.eventWeightPU.WeightName          = "eventWeightPU"
-process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
-process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
-process.eventWeightPU.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
-
-process.eventWeightPU.CreateWeight3DHisto = False
-process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
+process.eventWeightPUsysNo.WeightName          = "eventWeightPU"
+process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPUsysNo.CreateWeight3DHisto = False 
+process.eventWeightPUsysNo.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.Weight3DName        = "eventWeightPU3DUp"
 process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
-process.eventWeightPUsysUp.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
-
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.Weight3DName        = "eventWeightPU3DDown"
 process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
-process.eventWeightPUsysDown.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
-
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
-process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
+#### event weight sequence
+
+process.makeEventWeightsPU = cms.Sequence(process.eventWeightPUsysNo   *
                                           process.eventWeightPUsysUp   *
                                           process.eventWeightPUsysDown  )
 
-# relevant PU event weights (potentially merged with shape distortion weights)
-PUweightraw     = cms.InputTag("eventWeightPU",       "eventWeightPU")
+#### relevant PU event weights (potentially merged with shape distortion weights)
+
+PUweightraw     = cms.InputTag("eventWeightPUsysNo",  "eventWeightPU")
 PUweightrawUp   = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
 PUweightrawDown = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
 
-## ---
+## =================================================
 ##    MC ttbar systematic variation reweighting
-## ---
+## =================================================
+
 ## tool to multiply event weights
 process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
 ## load weight producer
@@ -1231,7 +1222,7 @@ process.eventWeightPUupDistort   = process.eventWeightMultiplier.clone(eventWeig
 process.eventWeightPUdownDistort = process.eventWeightMultiplier.clone(eventWeightTags = weightlistDistortPUdown)
 if(sysDistort==''):
     # final PU weights without shape distortion weights
-    PUweight    =cms.InputTag("eventWeightPU",       "eventWeightPU")
+    PUweight    =cms.InputTag("eventWeightPUsysNo",  "eventWeightPU")
     PUweightUp  =cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
     PUweightDown=cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
 else:
