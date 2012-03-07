@@ -23,9 +23,9 @@
 #include "HHStyle.h"
 #include "basicFunctions.h"
 
-int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TString lepton="muon", 
+void purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TString lepton="muon", 
 			       TString inputFolderName="TOP2011/110819_AnalysisRun", bool plotEfficiency = true, 
-			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999)
+			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=0)
 {
   // ARGUMENTS of function:
   // variable:       choose variable to plot, e.g.:
@@ -86,7 +86,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   // double bqEtaBins[] = {-5.0, -2.5, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.5, 5.0};
   //int NxBins = sizeof(xBins)/sizeof(double);
 
-  std::cout << "size of xBins: " << NxBins << std::endl;
+  if(verbose>0) std::cout << "size of xBins: " << NxBins << std::endl;
   
   // change x axis range
   double rangeUserLeft = -1e6;
@@ -284,13 +284,15 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
   binvec.push_back(xmax);
 
   // print the binning
-  cout<<numberOfBins<<" bins: {";
-  for(int i=0; i<numberOfBins; i++)
-    {
-      cout<<binvec[i]<<", ";
-    }
-  cout<<xmax<<"}"<<endl;
-
+  if(verbose>0){
+    cout<<numberOfBins<<" bins: {";
+    for(int i=0; i<numberOfBins; i++)
+      {
+	cout<<binvec[i]<<", ";
+      }
+    cout<<xmax<<"}"<<endl;
+  }
+  
   // draw stability & purity histogram with the determined binning
   TH1F* purityhist    = new TH1F("purityhist"   ,"purityhist"   ,numberOfBins, &(binvec.front()));
   TH1F* stabilityhist = new TH1F("stabilityhist","stabilityhist",numberOfBins, &(binvec.front()));
@@ -490,16 +492,18 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
 	if(effDenom>0)              binContentResponse  = responseMatrix->GetBinContent(iGenBin, iRecBin)/ effDenom;
 	if(effDenomMigrationOnly>0) binContentMigration = responseMatrix->GetBinContent(iGenBin, iRecBin)/ effDenomMigrationOnly;
 	//binContent=99;
-// 	std::cout<<"num= "<<responseMatrix->GetBinContent(iGenBin, iRecBin) <<"; denom= "<<effDenom<<"; binContentResponse= "<< binContent<<std::endl;
+//  	if(verbose>1) std::cout<<"num= "<<responseMatrix->GetBinContent(iGenBin, iRecBin) <<"; denom= "<<effDenom<<"; binContentResponse= "<< binContent<<std::endl;
 	allRecEvtsFromGenBin+=responseMatrix->GetBinContent(iGenBin, iRecBin);
 	responseMatrix  ->SetBinContent(iGenBin, iRecBin, binContentResponse);
 	migrationMatrix ->SetBinContent(iGenBin, iRecBin, binContentMigration);
       }
       effGen=(double)allRecEvtsFromGenBin/effDenom;
-//       std::cout<<"-------------------------"<<std::endl;
-//       std::cout<<"EffNum= "<<allRecEvtsFromGenBin<<"; Eff.= "<<effGen <<std::endl;
-//       std::cout<<"effDenomMigrationOnly= "<<effDenomMigrationOnly <<std::endl;
-//       std::cout<<"-------------------------"<<std::endl;
+//    if(verbose>1){
+// 	std::cout<<"-------------------------"<<std::endl;
+// 	std::cout<<"EffNum= "<<allRecEvtsFromGenBin<<"; Eff.= "<<effGen <<std::endl;
+// 	std::cout<<"effDenomMigrationOnly= "<<effDenomMigrationOnly <<std::endl;
+// 	std::cout<<"-------------------------"<<std::endl;
+//    }
       effHistGen->SetBinContent(iGenBin, effGen);
     }
   
@@ -565,6 +569,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
 }
   
   if(save){
+    if(verbose==0) gErrorIgnoreLevel=kWarning; 
     TString chi="";
     if(chi2Max<100){ 
       chi+="chi";
@@ -577,8 +582,7 @@ int  purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
       CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+lepton+"_"+variable+chi+".png");
       CanvEffGen->Print(outputFolder+"/pureGenEff_"+lepton+"_"+variable+chi+".png");
     }
-    std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
+    if(verbose>0) std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
   }
-    
-  return 0;
+
 }

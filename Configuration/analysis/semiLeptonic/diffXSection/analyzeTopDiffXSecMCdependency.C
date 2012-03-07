@@ -6,8 +6,8 @@ TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbo
 double linSF(const double x, const double xmax, const double a, const double b);
 
 void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Elec_160404_167913_1fb.root",
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root",
+				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root"
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
                                     bool doPDFuncertainty=false)
 {
   // ---
@@ -19,6 +19,11 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   TGaxis::SetMaxDigits(2);
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
+  
+  // output
+  int initialgErrorLv=gErrorIgnoreLevel;
+  if(verbose==1) gErrorIgnoreLevel=kWarning;
+  if(verbose==0) gErrorIgnoreLevel=kFatal;
   
   // define names
   // file name for input rootfile
@@ -100,10 +105,12 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   // the cross section input plots will 
   // be replaced in part F
   if(save){
-    std::cout << "copy old root file, will only replace shifted plots" << std::endl;
-    std::cout << "a) variation up" << std::endl;
+    if(verbose>0){
+      std::cout << "copy old root file, will only replace shifted plots" << std::endl;
+      std::cout << "a) variation up" << std::endl;
+    }
     inFile->Cp(analysisFileName, outputFileNameUp);
-    std::cout << "b) variation down" << std::endl;
+    if(verbose>0) std::cout << "b) variation down" << std::endl;
     inFile->Cp(analysisFileName, outputFileNameDown);
   }
   // loading trees
@@ -227,8 +234,10 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     exit(0);
   }
   else{
-    std::cout << "all trees seem to be filled properly" << std::endl;
-    std::cout << Nevents << " events in total" << std::endl;
+    if(verbose>0){
+      std::cout << "all trees seem to be filled properly" << std::endl;
+      std::cout << Nevents << " events in total" << std::endl;
+    }
   }
 
   // ---
@@ -375,7 +384,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       double areaSFUp   = initArea/plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Integral(0,plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->GetNbinsX()+1);
       double areaSFDown = initArea/plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->Integral(0,plotsScaled_[variable_[i]+"PartonTruth"+"Down"]->GetNbinsX()+1);
       if (doPDFuncertainty) {
-        std::cout << "NOTE: not doing any normalization for PDF uncertainties as this would underestimate the maximum variations (normalization should cancel out anyway in reco/parton level ratio, right?!)" << std::endl;
+        if(verbose>0) std::cout << "NOTE: not doing any normalization for PDF uncertainties as this would underestimate the maximum variations (normalization should cancel out anyway in reco/parton level ratio, right?!)" << std::endl;
       } else {
         SF_[variable_[i]+"Up"  ]->Scale(areaSFUp);
         plotsScaled_[variable_[i]+"PartonTruth"+"Up"  ]->Scale(areaSFUp);
@@ -546,7 +555,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     if(variable_[plot]=="topPt"    ) rebinFactor="10";
     if(variable_[plot]=="lepPt"    ) rebinFactor="10";
     axisLabel_.push_back(variable_[plot]+" from data/events/0/"+rebinFactor);
-    std::cout << variable_[plot]+" from data/events/0/"+rebinFactor << std::endl;
+    if(verbose>2) std::cout << variable_[plot]+" from data/events/0/"+rebinFactor << std::endl;
     //    plotList_.push_back( genfolder+"/"+variable_[i] );
   }
   unsigned int N1Dplots = plotList_.size();
@@ -702,6 +711,9 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
       }
     }
   }
+
+  // restore gErrorIgnoreLv
+  gErrorIgnoreLevel=initialgErrorLv;
 }
 
 TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
@@ -721,7 +733,7 @@ TH1F* distort(const TH1& hist, TString variation, TString variable, int verbose)
     myFunc->SetParameter(1, 1.3); 
     myFunc->SetParLimits(0, 100, 100000);
     myFunc->SetParLimits(1, 0.5 , 10);
-    histo->Fit(myFunc,"","same");
+    histo->Fit(myFunc,"Q","same");
     // do variation
     // vary shape 
     TF1* myVarFunc=(TF1*)(myFunc->Clone("myVarFunc"));

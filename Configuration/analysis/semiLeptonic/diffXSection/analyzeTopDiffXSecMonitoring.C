@@ -569,8 +569,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
       if(sample>kSig&&sample<kData) events_[selection_[step]][MCBG]+=events_[selection_[step]][sample];
     }
   }
-  // b) print composition
-  if(verbose>=0){
+  // b) print composition (only if ratio is also drawn)
+  if(verbose>=0&&withRatioPlot){
     // loop pretagged/tagged
     for(unsigned int step=0; step<selection_.size(); ++step){    
       // print label
@@ -619,9 +619,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
   // ===============================================================
   
-  std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
+  if(verbose>0) std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
   makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
-  std::cout << " .... Finished." << std::endl; 
+  if(verbose>0) std::cout << " .... Finished." << std::endl; 
 
   // ========================================================
   //  Create Legends

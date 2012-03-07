@@ -133,6 +133,10 @@ fast=true
 ## clean = true / false (default: false)
 clean=false
 
+## use SVD unfolding?
+## SVD = true / false (default: true)
+SVD=true
+
 #####################
 ## prepare running ##
 #####################
@@ -379,7 +383,7 @@ BEFORESYS=$(date +%s)
 
 if [ $decayChannel != \"combined\" ]
     then
-    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 0, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 0, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD')'
 fi
 
 if [ $redoSystematics = true ]; then
@@ -401,7 +405,7 @@ if [ $redoSystematics = true ]; then
 	      echo " Shape variations are executed separately."
 	  else
 	      ## run macro for 2011 analysis
-	      root -l -q -b './analyzeHypothesisKinFit.C++g('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	      root -l -q -b './analyzeHypothesisKinFit.C++g('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD')'
 	  fi  
       else
 	  echo "will be ignored, only done for decayChannel=muon/electron"
@@ -416,8 +420,8 @@ if [ $redoSystematics = true ]; then
 	    echo ""
 	    echo " All regular systematic uncertainties processed .... Now running shape variations."
 	    echo ""
-	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 45, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
-	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 46, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel')'
+	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 45, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD')'
+	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 46, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD')'
 	fi
     fi
 fi
