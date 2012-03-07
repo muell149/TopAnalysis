@@ -43,27 +43,15 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       TH1F* histoNPUReweighted;
       TH1F* histoNPUReweightedScaleUp;
       TH1F* histoNPUReweightedScaleDown; 
-      
-      TH1F* histoNPUReweighted3D;
-      TH1F* histoNPUReweighted3DScaleUp;
-      TH1F* histoNPUReweighted3DScaleDown;
 
       TH1F* histoNPVertex;
       TH1F* histoNPVertexReweighted; 
       TH1F* histoNPVertexReweightedScaleUp;
       TH1F* histoNPVertexReweightedScaleDown;  
-      
-      TH1F* histoNPVertexReweighted3D; 
-      TH1F* histoNPVertexReweighted3DScaleUp;
-      TH1F* histoNPVertexReweighted3DScaleDown;
 
       TH1F* histoEventWeights;
       TH1F* histoEventWeightsUp;
       TH1F* histoEventWeightsDown;
-      
-      TH1F* histoEventWeights3D;
-      TH1F* histoEventWeights3DUp;
-      TH1F* histoEventWeights3DDown;   
 
       TH2F* histoNPUvsNPVertex;
 
@@ -71,11 +59,9 @@ class PUControlDistributionsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag inTag_PUEventWeightSource;
       edm::InputTag inTag_PUEventWeightUpSource;
       edm::InputTag inTag_PUEventWeightDownSource;    
-      edm::InputTag inTag_PUEventWeight3DSource;
-      edm::InputTag inTag_PUEventWeight3DUpSource;
-      edm::InputTag inTag_PUEventWeight3DDownSource;
       edm::InputTag inTag_PVertexSource; 
       edm::InputTag inTag_defaultEventWeight;
+      std::string   inTag_MCSampleTag;
 };
 
 #endif
