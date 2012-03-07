@@ -122,8 +122,6 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
 	  else if (inTag_MCSampleTag == "Summer11") NPUEvents = iterPU->getPU_NumInteractions(); 
 	  else NPUEvents = -1;
 
-	  std::cout << NPUEvents << std::endl;
-
 	  histoNPU                    -> Fill(NPUEvents,weight);
 	  histoNPUReweighted          -> Fill(NPUEvents,weight*PUEventWeight);
 	  histoNPUReweightedScaleUp   -> Fill(NPUEvents,weight*PUEventWeightUp);
