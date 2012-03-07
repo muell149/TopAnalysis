@@ -1418,7 +1418,7 @@ TString efficiency="efficiency/"+variable;
 	// Number of bins for unfolding (not counting OF bins !!!)
 	unfoldbins, 
 	// Regularization parameter
-	regParameter(variable, decayChannel, 2, true),  //unfoldbins+2,
+	regParameter(variable, decayChannel, verbose, true),  //unfoldbins+2,
 	// Regularization Modus 
 	// regMode=0 is standard BBB unfolding, no regularization
 	// regMode=1 is SVD Unfolding, regularization by means of the "K" Parameter. Specify the k Parameter in 'regPar'
@@ -1457,13 +1457,14 @@ TString efficiency="efficiency/"+variable;
 	// verbose=0: no output at all
 	// verbose=1: standard output
 	// verbose=2: debug output
-	0
+	verbose
 	);
 	// ---------------------------------------------
 	// remaining steps for cross section calculation
 	// ---------------------------------------------
 	// use unfolded event yield as input
-	histo_[xSec][kData]=(TH1F*)unfoldedData->Clone();
+	histo_[xSec][kData]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	histo_[xSec][kData]->SetTitle(variable);
 	// divide by binwidth
 	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
 	// divide by luminosity 
