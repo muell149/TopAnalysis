@@ -277,13 +277,8 @@ if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]
     # loop over all systematic variations
     for (( iVar=0; iVar<7; iVar++ ))
     do
-    echo
-    echo purity and stability for: ${listVar_[$iVar]}
-    echo
-    root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', 99999)'
+      root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', 99999)'
     done
-    echo
-    echo "purity and stability done"
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
 fi
@@ -421,6 +416,7 @@ if [ $redoSystematics = true ]; then
 	    echo " All regular systematic uncertainties processed .... Now running shape variations."
 	    echo ""
 	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 45, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD')'
+	    echo
 	    root -l -q -b './analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', 46, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD')'
 	fi
     fi

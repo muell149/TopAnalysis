@@ -23,7 +23,7 @@
 #include "HHStyle.h"
 #include "basicFunctions.h"
 
-void purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TString lepton="muon", 
+void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TString lepton="muon", 
 			       TString inputFolderName="TOP2011/110819_AnalysisRun", bool plotEfficiency = true, 
 			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=0)
 {
@@ -585,4 +585,57 @@ void purityStabilityEfficiency(TString variable = "lepPt", bool save=false, TStr
     if(verbose>0) std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
   }
 
+  // control value for pur/stab
+  double minMigr=0.4;
+  // print range of migration variables
+  double maxStab=0.;
+  double maxPur =0.;
+  double minStab=1.;
+  double minPur =1.;
+  int purityMinimumBin=0;
+  int purityMaximumBin=0;
+  int stabilityMinimumBin=0;
+  int stabilityMaximumBin=0;
+  int Nbins=0;
+  int NPurok=0;
+  int NStabok=0;
+  // loop bins
+  for(int bin=1; bin<=purityhist->GetNbinsX(); ++bin){
+    // check range
+    if(purityhist->GetBinCenter(bin)>=rangeUserLeft&&purityhist->GetBinCenter(bin)<=rangeUserRight){
+      // migration in this bin
+      double TMPStab=stabilityhist->GetBinContent(bin);
+      double TMPPur =purityhist   ->GetBinContent(bin);
+      if(TMPStab<1.&&TMPPur>0.){
+	// count all bins used for measurement
+	++Nbins;
+	// search for min/max values
+	if(TMPStab<1.&&TMPStab>maxStab){ maxStab= TMPStab; stabilityMaximumBin=bin;}
+	if(TMPPur<1. &&TMPPur>maxPur  ){ maxPur = TMPPur; purityMaximumBin=bin;    }
+	if(TMPStab>0.&&TMPStab<minStab){ minStab= TMPStab; stabilityMinimumBin=bin;}
+	if(TMPPur>0. &&TMPPur<minPur  ){ minPur = TMPPur; purityMinimumBin=bin;    }
+	// check minimal migration condition
+	if(TMPStab>minMigr)NStabok++;
+	if(TMPPur >minMigr)NPurok++;
+      }
+    }
+  }
+  std::cout << std::endl << variable << "(" << lepton << "):" << std::endl;
+  std::cout << "--------------------" << std::endl;
+  std::cout << std::setprecision(2) << std::fixed << minPur  << " (<" << variable; 
+  std::cout << ">=" << std::setprecision(0) << std::fixed;
+  std::cout << purityhist->GetBinCenter(purityMinimumBin) << ") < purity < ";
+  std::cout << std::setprecision(2) << std::fixed << maxPur  << " (<" << variable;
+  std::cout << ">=" << std::setprecision(0) << std::fixed;
+  std::cout << purityhist->GetBinCenter(purityMaximumBin) << ")" << std::endl;
+  std::cout << "( purity > " << std::setprecision(2) << std::fixed;
+  std::cout << minMigr << " in " << NPurok << "/" << Nbins << " bins)" << std::endl;
+  std::cout << std::setprecision(2) << std::fixed << minStab << " (<" << variable;
+  std::cout << ">=" << std::setprecision(0) << std::fixed;
+  std::cout << stabilityhist->GetBinCenter(stabilityMinimumBin) << ") < stability < ";
+  std::cout << std::setprecision(2) << std::fixed << maxStab << " (<" << variable;
+  std::cout << ">=" << std::setprecision(0) << std::fixed;
+  std::cout << stabilityhist->GetBinCenter(stabilityMaximumBin) << ")"<< std::endl;
+  std::cout << "( stability > " << std::setprecision(2) << std::fixed << minMigr;
+  std::cout << " in " << NStabok << "/" << Nbins << " bins)" << std::endl<< std::endl;
 }
