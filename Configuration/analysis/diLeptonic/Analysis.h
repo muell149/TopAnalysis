@@ -43,6 +43,7 @@
    const Int_t kMaxHypAntiB = 99;
    const Int_t kMaxHypWPlus = 99;
    const Int_t kMaxHypWMinus = 99;
+   const Int_t kMaxallGenJets = 99;
 
 using namespace std;
 
@@ -128,6 +129,13 @@ public :
    Double_t        GenAntiToppY;
    Double_t        GenAntiToppZ;
    Double_t        GenAntiTopE;
+   Int_t	   allGenJets_;
+   Double_t        allGenJetspX[kMaxallGenJets];   //[allGenJets_]
+   Double_t        allGenJetspY[kMaxallGenJets];   //[allGenJets_]
+   Double_t        allGenJetspZ[kMaxallGenJets];   //[allGenJets_]
+   Double_t        allGenJetsE[kMaxallGenJets];   //[allGenJets_]
+   vector<int>     *BHadJetIndex;
+   vector<int>     *AntiBHadJetIndex;
 
    Int_t           HypTop_;
    Double_t        HypToppX[kMaxHypTop];   //[HypTop_]
@@ -268,6 +276,13 @@ public :
    TBranch        *b_GenWMinuspY;   //!
    TBranch        *b_GenWMinuspZ;   //!
    TBranch        *b_GenWMinusE;   //!
+   TBranch        *b_allGenJets_;   //!
+   TBranch        *b_allGenJetspX;   //!
+   TBranch        *b_allGenJetspY;   //!
+   TBranch        *b_allGenJetspZ;   //!
+   TBranch        *b_allGenJetsE;   //!
+   TBranch	  *b_BHadJetIndex;   //!
+   TBranch	  *b_AntiBHadJetIndex;   //!
 
 
    TBranch        *b_HypTop_;   //!
@@ -420,7 +435,7 @@ public :
 
    TH1D *h_GenAntiNeutrinopT, *h_GenAntiNeutrinoEta, *h_GenAntiNeutrinoE;
    TH1D *h_GenNeutrinopT, *h_GenNeutrinoEta, *h_GenNeutrinoE;
-
+   
    ClassDef(Analysis,0);
 };
 
@@ -451,6 +466,9 @@ void Analysis::Init(TTree *tree)
    HypJet1index = 0;
    channel = 0;
    MCSample = 0;
+   BHadJetIndex = 0;
+   AntiBHadJetIndex = 0;
+   
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -490,7 +508,13 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("weightTotal", &weightTotal, &b_weightTotal);
    fChain->SetBranchAddress("vertMulti", &vertMulti, &b_vertMulti);
 
-
+   
+   fChain->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets_);
+   fChain->SetBranchAddress("allGenJets.fCoordinates.fX", allGenJetspX, &b_allGenJetspX);
+   fChain->SetBranchAddress("allGenJets.fCoordinates.fY", allGenJetspY, &b_allGenJetspY);
+   fChain->SetBranchAddress("allGenJets.fCoordinates.fZ", allGenJetspZ, &b_allGenJetspZ);
+   fChain->SetBranchAddress("allGenJets.fCoordinates.fT", allGenJetsE, &b_allGenJetsE);
+   
    fChain->SetBranchAddress("HypTop", &HypTop_, &b_HypTop_);
    fChain->SetBranchAddress("HypTop.fCoordinates.fX", HypToppX, &b_HypToppX);
    fChain->SetBranchAddress("HypTop.fCoordinates.fY", HypToppY, &b_HypToppY);
@@ -599,6 +623,11 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_genJetpZ->GetEntry(entry);   //!
   b_genJetE->GetEntry(entry);   //!
   
+  b_allGenJets_->GetEntry(entry);   //!
+  b_allGenJetspX->GetEntry(entry);   //!
+  b_allGenJetspY->GetEntry(entry);   //!
+  b_allGenJetspZ->GetEntry(entry);   //!
+  b_allGenJetsE->GetEntry(entry);   //!
   
   b_HypTop_->GetEntry(entry);   //!
   b_HypToppX->GetEntry(entry);   //!
@@ -708,6 +737,8 @@ void Analysis::GetSignalBranches(Long64_t & entry)
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fY", &GenWMinuspY, &b_GenWMinuspY);
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fZ", &GenWMinuspZ, &b_GenWMinuspZ);
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fT", &GenWMinusE, &b_GenWMinusE);
+   fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex, &b_BHadJetIndex);
+   fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex, &b_AntiBHadJetIndex);
   
   b_GenToppX->GetEntry(entry,1);   //!
   b_GenToppY->GetEntry(entry,1);   //!
@@ -758,5 +789,8 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   b_GenWMinuspY->GetEntry(entry);   //!
   b_GenWMinuspZ->GetEntry(entry);   //!
   b_GenWMinusE->GetEntry(entry);   //!  
+  
+  b_BHadJetIndex->GetEntry(entry);   //!
+  b_AntiBHadJetIndex->GetEntry(entry);   //!
 }
 #endif // #ifdef Analysis_cxx

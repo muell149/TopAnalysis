@@ -9,6 +9,8 @@
 #include <iostream>
 #include <TMath.h>
 #include <TSystem.h>
+#include <set>
+
 
 void Analysis::Begin(TTree * /*tree*/)
 {
@@ -212,6 +214,7 @@ void Analysis::Begin(TTree * /*tree*/)
 
 
   h_NJetMatching = new TH1D("NJetMatching", "NJet Gen/Reco Matching",5,0,5);
+  
 }
 
 void Analysis::SlaveBegin(TTree * /*tree*/)
@@ -240,6 +243,7 @@ Bool_t Analysis::Process(Long64_t entry)
 
   std::vector<TLorentzVector> LVlepton;
   std::vector<TLorentzVector> LVjet;
+  
 
   std::vector<TLorentzVector> LVHypTop;
   std::vector<TLorentzVector> LVHypAntiTop;
@@ -282,13 +286,22 @@ Bool_t Analysis::Process(Long64_t entry)
   TLorentzVector LVGenAntiB(GenAntiBpX, GenAntiBpY, GenAntiBpZ, GenAntiBE);    
   TLorentzVector LVGenB(GenBpX, GenBpY, GenBpZ, GenBE);    
   TLorentzVector LVGenAntiLepton(GenAntiLeptonpX, GenAntiLeptonpY, GenAntiLeptonpZ, GenAntiLeptonE);    
-  TLorentzVector LVGenLepton(GenLeptonpX, GenLeptonpY, GenLeptonpZ, GenLeptonE);    
+  TLorentzVector LVGenLepton(GenLeptonpX, GenLeptonpY, GenLeptonpZ, GenLeptonE);
+  std::vector<TLorentzVector> LVGenJets;
+  set<int> BHadIndex;
+
   
   for(int i=0; i<lepton_;i++){
     TLorentzVector leptemp(leptonpX[i], leptonpY[i], leptonpZ[i], leptonE[i]);
     LVlepton.push_back(leptemp);
   }
 
+  for(int i=0; i<allGenJets_;i++){
+    TLorentzVector genjettemp(allGenJetspX[i], allGenJetspY[i], allGenJetspZ[i], allGenJetsE[i]);
+    LVGenJets.push_back(genjettemp);
+  }
+  
+  
   double BtagWP = 1.7; 
   vector<int> BJetIndex;
   for(vector<double>::iterator it = jetBTagTCHE->begin(); it<jetBTagTCHE->end(); it++){
@@ -317,9 +330,16 @@ Bool_t Analysis::Process(Long64_t entry)
   //}
   
   if(MCSample->find("ttbarsignal")!=string::npos){  
+    
+    for(int i=0; i<(int) BHadJetIndex->size(); i++){	BHadIndex.insert((*BHadJetIndex)[i]);	}
+    for(int i=0; i<(int) AntiBHadJetIndex->size(); i++){	BHadIndex.insert((*AntiBHadJetIndex)[i]);	}
+
     h_GenAll->Fill(LVGenTop.M(),1);
     if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
-      if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
+     //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
+     if (BHadIndex.size() >= 2 && LVGenJets[*(BHadIndex.begin())].Pt()>30 && LVGenJets[*(++BHadIndex.begin())].Pt()>30 &&
+	abs(LVGenJets[*(BHadIndex.begin())].Eta())<2.4 && abs(LVGenJets[*(++BHadIndex.begin())].Eta())<2.4){
+//      if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){	
 	
 	h_VisGenAll->Fill(LVGenTop.M(),1); 
         double VisGenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
@@ -358,6 +378,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	h_VisGenAntiLeptonE->Fill(LVGenAntiLepton.E(),1);
 	h_VisGenNeutrinoE->Fill(LVGenNeutrino.E(),1);
 	h_VisGenAntiNeutrinoE->Fill(LVGenAntiNeutrino.E(),1);
+
       }    
     }
   }//for visible top events	  
@@ -530,7 +551,10 @@ Bool_t Analysis::Process(Long64_t entry)
 	if(MCSample->find("ttbarsignal")!=string::npos){
 	  
 	  if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
-	    if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
+	    //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts   
+	    if (BHadIndex.size() >= 2 && LVGenJets[*(BHadIndex.begin())].Pt()>30 && LVGenJets[*(++BHadIndex.begin())].Pt()>30 &&
+	      abs(LVGenJets[*(BHadIndex.begin())].Eta())<2.4 && abs(LVGenJets[*(++BHadIndex.begin())].Eta())<2.4){
+	      //if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
 	      h_jetMultiVisTop->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit); 
 	    }
 	  }//for visible top events
@@ -658,7 +682,10 @@ Bool_t Analysis::Process(Long64_t entry)
 	  if(MCSample->find("ttbarsignal")!=string::npos){
 	    
 	    if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
-	      if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
+	      //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
+	      if (BHadIndex.size() >= 2 && LVGenJets[*(BHadIndex.begin())].Pt()>30 && LVGenJets[*(++BHadIndex.begin())].Pt()>30 &&
+		abs(LVGenJets[*(BHadIndex.begin())].Eta())<2.4 && abs(LVGenJets[*(++BHadIndex.begin())].Eta())<2.4){
+	      //if (LVGenB.Pt()>30 && LVGenAntiB.Pt()>30 && abs(LVGenB.Eta())<2.4 && abs(LVGenAntiB.Eta())<2.4){
 		h_jetMultiVisTop->Fill(jet_,weightLepSF*btagSF*trigEFF*weightKinFit); 
 	      }
 	    }//for visible top events
@@ -984,6 +1011,7 @@ void Analysis::Terminate()
   h_HypTopE->Write();
   h_HypAntiTopE->Write();
 
+  
   f->Close();
   cout<<"Created: "<<f_savename<<endl;
 }
