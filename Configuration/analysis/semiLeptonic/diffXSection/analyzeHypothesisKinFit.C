@@ -1457,7 +1457,9 @@ TString efficiency="efficiency/"+variable;
 	// verbose=0: no output at all
 	// verbose=1: standard output
 	// verbose=2: debug output
-	verbose
+	verbose,
+	// produce tau scan plots
+	false
 	);
 	// ---------------------------------------------
 	// remaining steps for cross section calculation
