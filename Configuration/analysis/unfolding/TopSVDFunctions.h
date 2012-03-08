@@ -122,7 +122,8 @@ public:
 	        TString specialTex = "",              
 	        TString rootFile = "",              
 	        TString psFile = "",
-		const int verbose = 1
+		const int verbose = 1,
+		bool scanPlots = false
 	);
 	 
 };
