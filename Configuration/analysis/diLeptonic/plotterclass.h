@@ -711,6 +711,12 @@ void Plotter::fillHisto()
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
+      if(name.Contains("BJet")){
+      	TString stemp = name;
+	stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+      	hist->Add(hist2);
+      }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
@@ -737,19 +743,22 @@ void Plotter::fillSystHisto()
     systhistsDown.clear();
     for(unsigned int i=0; i<datasetUp.size(); i++){
       TFile *ftemp = TFile::Open(datasetUp[i]);
-      //TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
+      if(name.Contains("BJet")){
+      	TString stemp = name;
+	stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+      	hist->Add(hist2);
+      }
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
@@ -761,19 +770,22 @@ void Plotter::fillSystHisto()
     }
     for(unsigned int i=0; i<datasetDown.size(); i++){
       TFile *ftemp = TFile::Open(datasetDown[i]);
-      //      TH1D *hist = (TH1D*)ftemp->Get("Hyp"+name)->Clone();     
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
+      if(name.Contains("BJet")){
+      	TString stemp = name;
+	stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+      	hist->Add(hist2);
+      }
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
 	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	//	TH1D *hist2 = (TH1D*)ftemp->Get("Hyp"+stemp)->Clone();     
 	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
@@ -1193,7 +1205,7 @@ void Plotter::PlotDiffXSec(){
 	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+newname)->Clone();
 	  genReco2d = (TH2*)ftemp->Get("GenReco"+newname)->Clone();
 	  GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+newname)->Clone();
-	  if(newname.Contains("Lepton")||newname.Contains("Top")){
+	  if(newname.Contains("Lepton")||newname.Contains("Top")||newname.Contains("BJet")){
 	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+newname)->Clone());
 	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+newname)->Clone());
 	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+newname)->Clone());
@@ -1203,7 +1215,7 @@ void Plotter::PlotDiffXSec(){
 	  RecoPlotFineBins->Add((TH1D*)ftemp->Get("Reco"+newname)->Clone());
 	  genReco2d->Add((TH2*)ftemp->Get("GenReco"+newname)->Clone());
 	  GenPlotTheory->Add((TH1D*)ftemp->Get("VisGen"+newname)->Clone());
-	  if(newname.Contains("Lepton")||newname.Contains("Top")){
+	  if(newname.Contains("Lepton")||newname.Contains("Top")||newname.Contains("BJet")){
 	    GenPlotTheory->Add((TH1D*)ftemp->Get("VisGenAnti"+newname)->Clone());
 	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+newname)->Clone());
 	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+newname)->Clone());
@@ -1214,7 +1226,6 @@ void Plotter::PlotDiffXSec(){
     }
     GenPlot = GenPlotTheory->Rebin(bins,"genplot",Xbins);	
     RecoPlot = (TH1D*)RecoPlotFineBins->Rebin(bins,"recohists",Xbins);
-
     THStack * stack=  new THStack("def", "def");
     TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
     for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
@@ -1475,7 +1486,7 @@ void Plotter::PlotDiffXSec(){
 				GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 				GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 				
-				if(name.Contains("Lepton")||name.Contains("Top")){
+				if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
 				  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
 				  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
 				  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
@@ -1520,7 +1531,7 @@ void Plotter::PlotDiffXSec(){
 			GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 			GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 			
-			if(name.Contains("Lepton")||name.Contains("Top")){
+			if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
 			  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
 			  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
 			  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
@@ -1653,6 +1664,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohist = GetNloCurve("TtBar","Pt","MCatNLO");}
     else if(name.Contains("TTBarRapidity")){mcnlohist = GetNloCurve("TtBar","Rapidity","MCatNLO");}
     else if(name.Contains("TTBarMass")){mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");}
+    else{mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");mcnlohist->SetLineColor(kWhite);}
     //    mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
     mcnlohist->Rebin(5);mcnlohist->Scale(0.2);
@@ -1667,6 +1679,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistup = GetNloCurve("TtBar","Pt","MCNLOup");}
     else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
     else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
+    else {mcnlohistup = new TH1();}
     mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
     mcnlohistup->Scale(mcnloscale);
 
@@ -1679,6 +1692,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistdown = GetNloCurve("TtBar","Pt","MCNLOdown");}
     else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
     else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
+    else {mcnlohistdown = new TH1();}
     mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
     mcnlohistdown->Scale(mcnloscale);
 
@@ -1691,6 +1705,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){powheghist = GetNloCurve("TtBar","Pt","Powheg");}
     else if(name.Contains("TTBarRapidity")){powheghist = GetNloCurve("TtBar","Rapidity","Powheg");}
     else if(name.Contains("TTBarMass")){powheghist = GetNloCurve("TtBar","Mass","Powheg");}
+    else {powheghist = new TH1();}
     double powhegscale = 1./powheghist->Integral("width");
     powheghist->Rebin(2);powheghist->Scale(0.5);
     powheghist->Scale(powhegscale);
@@ -1789,7 +1804,10 @@ void Plotter::PlotDiffXSec(){
     DrawDecayChLabel(channelLabel[channelType]);    
     leg->Draw("SAME");
     gPad->RedrawAxis();
-    
+    TFile *f1 = new TFile("KinFitPlots.root","UPDATE");
+    stacksum->Write(name+"_"+channel+"_MC");
+    varhists[0]->Write(name+"_"+channel+"_Data");
+    f1->Close();
     c1->Print("Plots/"+channel+"/preunfolded_"+name+".eps");
     c1->Clear();
     delete c1;

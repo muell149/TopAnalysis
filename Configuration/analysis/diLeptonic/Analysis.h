@@ -363,6 +363,7 @@ public :
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
    TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT, ;
+   TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta;
    TH2D *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
    
    TH1D *h_NJetMatching;
@@ -382,6 +383,7 @@ public :
    TH1D *h_RecoToppT,*h_RecoAntiToppT,*h_RecoTopRapidity,*h_RecoAntiTopRapidity;
    TH1D *h_RecoLLBarMass, *h_RecoLLBarpT;
    TH1D *h_RecoLeptonpT,*h_RecoAntiLeptonpT,*h_RecoLeptonEta,*h_RecoAntiLeptonEta;
+   TH1D *h_RecoBJetpT,*h_RecoAntiBJetpT;
 
    TH1D *h_vertMulti, *h_MET;
 
@@ -397,8 +399,8 @@ public :
    TH1D *h_HypWPluspT, *h_HypWPlusEta, *h_HypWPlusE;
    TH1D *h_HypWMinuspT, *h_HypWMinusEta, *h_HypWMinusE;
 
-   TH1D *h_HypAntiBpT, *h_HypAntiBEta, *h_HypAntiBE;
-   TH1D *h_HypBpT, *h_HypBEta, *h_HypBE;
+   TH1D *h_HypAntiBJetpT, *h_HypAntiBJetEta, *h_HypAntiBJetE;
+   TH1D *h_HypBJetpT, *h_HypBJetEta, *h_HypBJetE;
 
    TH1D *h_HypAntiLeptonpT, *h_HypAntiLeptonEta, *h_HypAntiLeptonE;
    TH1D *h_HypLeptonpT, *h_HypLeptonEta, *h_HypLeptonE;
@@ -412,8 +414,8 @@ public :
    TH1D *h_VisGenWPluspT, *h_VisGenWPlusEta, *h_VisGenWPlusE;
    TH1D *h_VisGenWMinuspT, *h_VisGenWMinusEta, *h_VisGenWMinusE;
 
-   TH1D *h_VisGenAntiBpT, *h_VisGenAntiBEta, *h_VisGenAntiBE;
-   TH1D *h_VisGenBpT, *h_VisGenBEta, *h_VisGenBE;
+   TH1D *h_VisGenAntiBJetpT, *h_VisGenAntiBJetEta, *h_VisGenAntiBJetE;
+   TH1D *h_VisGenBJetpT, *h_VisGenBJetEta, *h_VisGenBJetE;
 
    TH1D *h_VisGenAntiLeptonpT, *h_VisGenAntiLeptonEta, *h_VisGenAntiLeptonE;
    TH1D *h_VisGenLeptonpT, *h_VisGenLeptonEta, *h_VisGenLeptonE;
@@ -427,8 +429,8 @@ public :
    TH1D *h_GenWPluspT, *h_GenWPlusEta, *h_GenWPlusE;
    TH1D *h_GenWMinuspT, *h_GenWMinusEta, *h_GenWMinusE;
 
-   TH1D *h_GenAntiBpT, *h_GenAntiBEta, *h_GenAntiBE;
-   TH1D *h_GenBpT, *h_GenBEta, *h_GenBE;
+   TH1D *h_GenAntiBJetpT, *h_GenAntiBJetEta, *h_GenAntiBJetE;
+   TH1D *h_GenBJetpT, *h_GenBJetEta, *h_GenBJetE;
 
    TH1D *h_GenAntiLeptonpT, *h_GenAntiLeptonEta, *h_GenAntiLeptonE;
    TH1D *h_GenLeptonpT, *h_GenLeptonEta, *h_GenLeptonE;
@@ -535,7 +537,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("HypAntiLepton.fCoordinates.fY", HypAntiLeptonpY, &b_HypAntiLeptonpY);
    fChain->SetBranchAddress("HypAntiLepton.fCoordinates.fZ", HypAntiLeptonpZ, &b_HypAntiLeptonpZ);
    fChain->SetBranchAddress("HypAntiLepton.fCoordinates.fT", HypAntiLeptonE, &b_HypAntiLeptonE);
-   fChain->SetBranchAddress("HypNeutrino", &HypNeutrino_, &b_HypNeutrino_);
+   /*   fChain->SetBranchAddress("HypNeutrino", &HypNeutrino_, &b_HypNeutrino_);
    fChain->SetBranchAddress("HypNeutrino.fCoordinates.fX", HypNeutrinopX, &b_HypNeutrinopX);
    fChain->SetBranchAddress("HypNeutrino.fCoordinates.fY", HypNeutrinopY, &b_HypNeutrinopY);
    fChain->SetBranchAddress("HypNeutrino.fCoordinates.fZ", HypNeutrinopZ, &b_HypNeutrinopZ);
@@ -545,6 +547,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("HypAntiNeutrino.fCoordinates.fY", HypAntiNeutrinopY, &b_HypAntiNeutrinopY);
    fChain->SetBranchAddress("HypAntiNeutrino.fCoordinates.fZ", HypAntiNeutrinopZ, &b_HypAntiNeutrinopZ);
    fChain->SetBranchAddress("HypAntiNeutrino.fCoordinates.fT", HypAntiNeutrinoE, &b_HypAntiNeutrinoE);
+*/
    fChain->SetBranchAddress("HypB", &HypB_, &b_HypB_);
    fChain->SetBranchAddress("HypB.fCoordinates.fX", HypBpX, &b_HypBpX);
    fChain->SetBranchAddress("HypB.fCoordinates.fY", HypBpY, &b_HypBpY);
@@ -555,7 +558,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("HypAntiB.fCoordinates.fY", HypAntiBpY, &b_HypAntiBpY);
    fChain->SetBranchAddress("HypAntiB.fCoordinates.fZ", HypAntiBpZ, &b_HypAntiBpZ);
    fChain->SetBranchAddress("HypAntiB.fCoordinates.fT", HypAntiBE, &b_HypAntiBE);
-   fChain->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
+   /*   fChain->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
    fChain->SetBranchAddress("HypWPlus.fCoordinates.fX", HypWPluspX, &b_HypWPluspX);
    fChain->SetBranchAddress("HypWPlus.fCoordinates.fY", HypWPluspY, &b_HypWPluspY);
    fChain->SetBranchAddress("HypWPlus.fCoordinates.fZ", HypWPluspZ, &b_HypWPluspZ);
@@ -565,7 +568,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("HypWMinus.fCoordinates.fY", HypWMinuspY, &b_HypWMinuspY);
    fChain->SetBranchAddress("HypWMinus.fCoordinates.fZ", HypWMinuspZ, &b_HypWMinuspZ);
    fChain->SetBranchAddress("HypWMinus.fCoordinates.fT", HypWMinusE, &b_HypWMinusE);
-
+   */
    fChain->SetBranchAddress("HypJet0index", &HypJet0index, &b_HypJet0index);
    fChain->SetBranchAddress("HypJet1index", &HypJet1index, &b_HypJet1index);
    fChain->SetBranchAddress("decayMode", &decayMode, &b_decayMode);
@@ -665,7 +668,7 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_HypAntiBpZ->GetEntry(entry);   //!
   b_HypAntiBE->GetEntry(entry);   //!
 
-  b_HypNeutrino_->GetEntry(entry);   //!
+  /*  b_HypNeutrino_->GetEntry(entry);   //!
   b_HypNeutrinopX->GetEntry(entry);   //!
   b_HypNeutrinopY->GetEntry(entry);   //!
   b_HypNeutrinopZ->GetEntry(entry);   //!
@@ -676,7 +679,7 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_HypAntiNeutrinopY->GetEntry(entry);   //!
   b_HypAntiNeutrinopZ->GetEntry(entry);   //!
   b_HypAntiNeutrinoE->GetEntry(entry);   //!
-
+  
   b_HypWPlus_->GetEntry(entry);   //!
   b_HypWPluspX->GetEntry(entry);   //!
   b_HypWPluspY->GetEntry(entry);   //!
@@ -688,7 +691,7 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_HypWMinuspY->GetEntry(entry);   //!
   b_HypWMinuspZ->GetEntry(entry);   //!
   b_HypWMinusE->GetEntry(entry);   //!  
-
+  */
   b_HypJet0index->GetEntry(entry);
   b_HypJet1index->GetEntry(entry);
   b_decayMode->GetEntry(entry);
@@ -713,14 +716,14 @@ void Analysis::GetSignalBranches(Long64_t & entry)
    fChain->SetBranchAddress("GenAntiLepton.fCoordinates.fY", &GenAntiLeptonpY, &b_GenAntiLeptonpY);
    fChain->SetBranchAddress("GenAntiLepton.fCoordinates.fZ", &GenAntiLeptonpZ, &b_GenAntiLeptonpZ);
    fChain->SetBranchAddress("GenAntiLepton.fCoordinates.fT", &GenAntiLeptonE, &b_GenAntiLeptonE);
-   fChain->SetBranchAddress("GenNeutrino.fCoordinates.fX", &GenNeutrinopX, &b_GenNeutrinopX);
+   /*   fChain->SetBranchAddress("GenNeutrino.fCoordinates.fX", &GenNeutrinopX, &b_GenNeutrinopX);
    fChain->SetBranchAddress("GenNeutrino.fCoordinates.fY", &GenNeutrinopY, &b_GenNeutrinopY);
    fChain->SetBranchAddress("GenNeutrino.fCoordinates.fZ", &GenNeutrinopZ, &b_GenNeutrinopZ);
    fChain->SetBranchAddress("GenNeutrino.fCoordinates.fT", &GenNeutrinoE, &b_GenNeutrinoE);
    fChain->SetBranchAddress("GenAntiNeutrino.fCoordinates.fX", &GenAntiNeutrinopX, &b_GenAntiNeutrinopX);
    fChain->SetBranchAddress("GenAntiNeutrino.fCoordinates.fY", &GenAntiNeutrinopY, &b_GenAntiNeutrinopY);
    fChain->SetBranchAddress("GenAntiNeutrino.fCoordinates.fZ", &GenAntiNeutrinopZ, &b_GenAntiNeutrinopZ);
-   fChain->SetBranchAddress("GenAntiNeutrino.fCoordinates.fT", &GenAntiNeutrinoE, &b_GenAntiNeutrinoE);
+   fChain->SetBranchAddress("GenAntiNeutrino.fCoordinates.fT", &GenAntiNeutrinoE, &b_GenAntiNeutrinoE);*/
    fChain->SetBranchAddress("GenB.fCoordinates.fX", &GenBpX, &b_GenBpX);
    fChain->SetBranchAddress("GenB.fCoordinates.fY", &GenBpY, &b_GenBpY);
    fChain->SetBranchAddress("GenB.fCoordinates.fZ", &GenBpZ, &b_GenBpZ);
@@ -729,14 +732,14 @@ void Analysis::GetSignalBranches(Long64_t & entry)
    fChain->SetBranchAddress("GenAntiB.fCoordinates.fY", &GenAntiBpY, &b_GenAntiBpY);
    fChain->SetBranchAddress("GenAntiB.fCoordinates.fZ", &GenAntiBpZ, &b_GenAntiBpZ);
    fChain->SetBranchAddress("GenAntiB.fCoordinates.fT", &GenAntiBE, &b_GenAntiBE);
-   fChain->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
+   /*   fChain->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
    fChain->SetBranchAddress("GenWPlus.fCoordinates.fY", &GenWPluspY, &b_GenWPluspY);
    fChain->SetBranchAddress("GenWPlus.fCoordinates.fZ", &GenWPluspZ, &b_GenWPluspZ);
    fChain->SetBranchAddress("GenWPlus.fCoordinates.fT", &GenWPlusE, &b_GenWPlusE);
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fX", &GenWMinuspX, &b_GenWMinuspX);
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fY", &GenWMinuspY, &b_GenWMinuspY);
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fZ", &GenWMinuspZ, &b_GenWMinuspZ);
-   fChain->SetBranchAddress("GenWMinus.fCoordinates.fT", &GenWMinusE, &b_GenWMinusE);
+   fChain->SetBranchAddress("GenWMinus.fCoordinates.fT", &GenWMinusE, &b_GenWMinusE);*/
    fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex, &b_BHadJetIndex);
    fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex, &b_AntiBHadJetIndex);
   
@@ -770,7 +773,7 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   b_GenAntiBpZ->GetEntry(entry);   //!
   b_GenAntiBE->GetEntry(entry);   //!
 
-  b_GenNeutrinopX->GetEntry(entry);   //!
+  /*  b_GenNeutrinopX->GetEntry(entry);   //!
   b_GenNeutrinopY->GetEntry(entry);   //!
   b_GenNeutrinopZ->GetEntry(entry);   //!
   b_GenNeutrinoE->GetEntry(entry);   //!
@@ -779,7 +782,7 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   b_GenAntiNeutrinopY->GetEntry(entry);   //!
   b_GenAntiNeutrinopZ->GetEntry(entry);   //!
   b_GenAntiNeutrinoE->GetEntry(entry);   //!
-
+  
   b_GenWPluspX->GetEntry(entry);   //!
   b_GenWPluspY->GetEntry(entry);   //!
   b_GenWPluspZ->GetEntry(entry);   //!
@@ -789,7 +792,7 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   b_GenWMinuspY->GetEntry(entry);   //!
   b_GenWMinuspZ->GetEntry(entry);   //!
   b_GenWMinusE->GetEntry(entry);   //!  
-  
+  */
   b_BHadJetIndex->GetEntry(entry);   //!
   b_AntiBHadJetIndex->GetEntry(entry);   //!
 }
