@@ -1388,16 +1388,16 @@ namespace semileptonic {
 	  std::cout << std::setprecision(20) << std::fixed << initialBinWidth;
 	  std::cout << " = " << modulo(finalBinWidth, initialBinWidth) << std::endl;
 	}
-	if(modulo(finalBinWidth, initialBinWidth)!=0){
-	  std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
+	if(modulo(finalBinWidth, initialBinWidth)!=0&&verbose>-1){
+	  std::cout << "WARNING: histo " << histoUnbinned.GetName() << " may not be rebinned correctly!" << std::endl;
 	  std::cout << "the ininital binning is to coarse for the chosen binning!" << std::endl;
-	  std::cout << "attention: probably error in modulo function," << std::endl;
+	  //std::cout << "attention: probably error in modulo function," << std::endl;
 	  std::cout << "bin #" << finalBin << " of the choosen binning has ";
 	  std::cout << "finalBinWidth modulo initialBinWidth of:" <<std::endl;
 	  std::cout << std::setprecision(20) << std::fixed << finalBinWidth;
 	  std::cout << " modulo " << std::setprecision(20) << std::fixed << initialBinWidth << " = ";
 	  std::cout << std::setprecision(20) << std::fixed << modulo(finalBinWidth,initialBinWidth) << std::endl;
-	  exit(1);
+	  //exit(1);
 	}
       }
     }
@@ -1490,7 +1490,6 @@ namespace semileptonic {
 
       std::map<TString, std::vector<double> > result;
       std::vector<double> bins_;
-
 
       // pt(top)
       double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
@@ -2527,11 +2526,11 @@ namespace semileptonic {
     return result;
   }
 
-  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="")
+  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="", bool smoothcurves=true)
   {
     // this function draws "plot" from "file" into the active canvas
     // modified quantities: NONE
-    // used functions: getTheoryPrediction, histogramStyle, useFittedFunctions
+    // used functions: getTheoryPrediction, histogramStyle, useFittedFunctions, makeVariableBinning
     // used enumerators: NONE
     // filename: name of input file
     // plotname: name of histogram
@@ -2550,7 +2549,22 @@ namespace semileptonic {
     // drawRawPlot: draw in addition the unbinned and unsmoothed plot 
     //              to see whether rebinning and smoothing has changed the shape 
     // model: indicates theory (madgraph, powheg or mcatnalo)
+    TString plotname2=plotname;
+    plotname2.ReplaceAll("hVis"   ,"");
+    plotname2.ReplaceAll("MC@NLO" ,"");
+    plotname2.ReplaceAll("MC@NLO2","");
+    plotname2.ReplaceAll("POWHEG","" );
+    plotname2.ReplaceAll("Top","top" );
+    plotname2.ReplaceAll("TTbarM","ttbarMass" );
+    plotname2.ReplaceAll("TTbar","ttbar");
+    plotname2.ReplaceAll("Lep","lep");
+    if(plotname2.Contains("/")){
+      plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
+    }
+    if(verbose>2) std::cout << "->" << plotname2 << std::endl;
 
+    // create variable bin edges for non smooth curves
+    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
     if(verbose>0){
       std::cout << "variable: " << plotname << std::endl;
@@ -2560,6 +2574,7 @@ namespace semileptonic {
       std::cout << "rebinFactor: " << rebinFactor << std::endl;
       std::cout << "color: " << color << std::endl;
       std::cout << "draw errorbands? " << errorbands << std::endl;
+      std::cout << "draw smooth curves?" << smoothcurves << std::endl;
       if(errorbands){
 	std::cout << "errorRebinFactor: " << errorRebinFactor << std::endl;
 	std::cout << "errorSmoothFactor: " << errorSmoothFactor << std::endl;
@@ -2593,7 +2608,7 @@ namespace semileptonic {
       result->Add(getTheoryPrediction(plotname, filenameEl));
     }
     // replace low statistic parts with fitted curve
-    result=useFittedFunctions(result, model, plotname, verbose);
+    if(smoothcurves) result=useFittedFunctions(result, model, plotname, verbose);
     // rename
     TString name=plotname;
     name.ReplaceAll("analyzeTopPartonLevelKinematicsPhaseSpace/","");
@@ -2609,15 +2624,18 @@ namespace semileptonic {
     histogramStyle(*result, kSig, false, 1.2, color);
     result->SetLineStyle(linestyle);
     // smoothing 1
-    if(smoothFactor) result->Smooth(smoothFactor);
-    // rebinning
-    if(rebinFactor) result->Rebin(rebinFactor);
+    if(smoothcurves&&smoothFactor) result->Smooth(smoothFactor);
+    // equal rebinning before
+    if(smoothcurves&&rebinFactor) result->Rebin(rebinFactor);
+    // variable rebinning for binned curve
+    if(!smoothcurves) reBinTH1F(*result, binning_[plotname2], verbose);
     // normalize to area
     result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
     // divide by binwidth
-    result->Scale(1.0/result->GetBinWidth(1));
+    if(smoothcurves) result->Scale(1.0/result->GetBinWidth(1));
+    else result=divideByBinwidth(result, false);
     // smoothing 2
-    if(smoothFactor) result->Smooth(smoothFactor);
+    if(smoothcurves&&smoothFactor) result->Smooth(smoothFactor);
     // set range
     if(rangeLow!=-1.&&rangeHigh!=-1.) result->GetXaxis()->SetRangeUser(rangeLow, rangeHigh);
     // error bands
@@ -2627,31 +2645,46 @@ namespace semileptonic {
       TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
       TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filename);
       // replace low statistic parts with fitted curve
-      central=useFittedFunctions(central, model, plotname, verbose);
-      ErrorUp=useFittedFunctions(ErrorUp, model, plotname+"_Up", verbose);
-      ErrorDown=useFittedFunctions(ErrorDown, model, plotname+"_Down", verbose);
+      if(smoothcurves){
+	central=useFittedFunctions(central, model, plotname, verbose);
+	ErrorUp=useFittedFunctions(ErrorUp, model, plotname+"_Up", verbose);
+	ErrorDown=useFittedFunctions(ErrorDown, model, plotname+"_Down", verbose);
+      }
       // smoothing 1
-      if(errorSmoothFactor){
+      if(smoothcurves&&errorSmoothFactor){
 	central  ->Smooth(errorSmoothFactor);
 	ErrorUp  ->Smooth(errorSmoothFactor);
 	ErrorDown->Smooth(errorSmoothFactor);
       }
       // rebinning
-      if(errorRebinFactor){ 
+      if(smoothcurves&&errorRebinFactor){ 
 	central  ->Rebin(errorRebinFactor);
 	ErrorUp  ->Rebin(errorRebinFactor);
 	ErrorDown->Rebin(errorRebinFactor);
+      }
+      // variable rebinning for binned curve
+      if(!smoothcurves){
+	reBinTH1F(*central  , binning_[plotname2], verbose-1);
+	reBinTH1F(*ErrorUp  , binning_[plotname2], verbose-1);
+	reBinTH1F(*ErrorDown, binning_[plotname2], verbose-1);
       }
       // normalize to area
       central  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
       ErrorUp  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
       ErrorDown->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
       // divide by binwidth
-      central  ->Scale(1.0/central  ->GetBinWidth(1));
-      ErrorUp  ->Scale(1.0/ErrorUp  ->GetBinWidth(1));
-      ErrorDown->Scale(1.0/ErrorDown->GetBinWidth(1));
+      if(smoothcurves){
+	central  ->Scale(1.0/central  ->GetBinWidth(1));
+	ErrorUp  ->Scale(1.0/ErrorUp  ->GetBinWidth(1));
+	ErrorDown->Scale(1.0/ErrorDown->GetBinWidth(1));
+      }
+      else{
+	central  =divideByBinwidth(central  , false);
+	ErrorUp  =divideByBinwidth(ErrorUp  , false);
+	ErrorDown=divideByBinwidth(ErrorDown, false);
+      }
       // smoothing 2
-      if(errorSmoothFactor){
+      if(smoothcurves&&errorSmoothFactor){
 	central  ->Smooth(errorSmoothFactor);
 	ErrorUp  ->Smooth(errorSmoothFactor);
 	ErrorDown->Smooth(errorSmoothFactor);
@@ -2676,8 +2709,14 @@ namespace semileptonic {
 	}
 	else {
 	  errorBands->SetPoint      (iBin, central->GetBinCenter(iBin), centralValue  );
-	  errorBands->SetPointEXlow (iBin, central->GetXaxis()->GetBinLowEdge(iBin)   );
-	  errorBands->SetPointEXhigh(iBin, central->GetXaxis()->GetBinUpEdge (iBin)   );
+	  if(smoothcurves){
+	    errorBands->SetPointEXlow (iBin, central->GetXaxis()->GetBinLowEdge(iBin) );
+	    errorBands->SetPointEXhigh(iBin, central->GetXaxis()->GetBinUpEdge (iBin) );
+	  }
+	  else{
+	    errorBands->SetPointEXlow (iBin, 0.5*central->GetBinWidth(iBin));
+	    errorBands->SetPointEXhigh(iBin, 0.5*central->GetBinWidth(iBin));
+	  }
 	}
 	// symmetrize errors 
 	//double difference=std::abs((maxValue-minValue)*0.5);
@@ -2715,10 +2754,18 @@ namespace semileptonic {
       errorBands->SetLineWidth  (result->GetLineWidth());
       errorBands->SetMarkerColor(result->GetMarkerColor());
       // draw error bands
-      errorBands->Draw("e3 same");
+      //whipEmptyBinsAway(errorBands, verbose);
+      if(smoothcurves) errorBands->Draw("e3 same");
+      else{
+	errorBands->Draw("e2 same");
+	//errorBands->Draw("p same");
+      }
     }
     //draw central value
-    if(!drawOnlyErrors) result->Draw("hist c same"); 
+    if(!drawOnlyErrors){ 
+      if(smoothcurves) result->Draw("hist c same"); 
+      else result->Draw("hist same");
+    }
   }
 
   double regParameter(TString variable, TString decayChannel, int verbose=0, bool tau=false){
