@@ -29,12 +29,13 @@ options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleto
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
 options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen decay channel")
-# create label to select version of MC samples (Summer11, Fall11) 
+# create label to select version of MC samples (Summer11, Fall11)
+# a) important for trigger
+# b) also used to automatically select the mode for PU event reweighting
 options.register('mctag', 'Fall11',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "label for version of MC samples (Fall11, Summer11")
 # create variable to indicate number of processed events
 # -42 means nothing is changed wrt number typed below
 options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int, "events to process")
-
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -50,8 +51,6 @@ if( hasattr(sys, "argv") ):
             if(len(val)==2):
                 setattr(options,val[0], val[1])
 
-print "used trigger path: TriggerResults::"+options.triggerTag
-
 ## choose jet collection and corresponding MET
 if(not globals().has_key('jetType')):
     jetType =  'particleFlow' # 'Calo'
@@ -60,7 +59,6 @@ if(not globals().has_key('jetType')):
 ## only possible for special pat tuples!!!
 if(not globals().has_key('pfToPAT')):
     pfToPAT = True #False
-print "run PF2PAT?: ",pfToPAT,"(won't work if the file does not contain the necessary information!)"
 
 ## choose the semileptonic decay channel (electron or muon)
 #decayChannel=options.lepton
@@ -69,7 +67,6 @@ if(options.lepton=='unset'):
         decayChannel = 'muon' # 'electron'
 else:
     decayChannel=options.lepton
-print "used lepton decay channel: "+decayChannel
 
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
@@ -78,11 +75,7 @@ if(not globals().has_key('runningOnData')):
 # print chosen sample (e.g. ttbar)
 # value is known from external parsing
 # if set, switches runOnAOD in PF2PAT to true
-print "Chosen sample to run over: ", options.sample
-
-## version of the MC (important for trigger)
-## This parameter is also used to select the correct procedure for PU event reweighting
-print "Label of MC samples: ",options.mctag
+#print "Chosen sample to run over: ", options.sample
 
 ## choose JSON file for data
 if(not globals().has_key('jsonFile')):
@@ -94,7 +87,6 @@ if(not globals().has_key('PUreweigthing')):
     # take care of data
     if (not runningOnData == "MC"):
         PUreweigthing = False
-print "apply PU reweighting?: ",PUreweigthing
 
 ## enable/ disable btag SF event reweighting
 if(not globals().has_key('BtagReweigthing')):
@@ -102,7 +94,6 @@ if(not globals().has_key('BtagReweigthing')):
     # take care of data
     if (not runningOnData == "MC"):
         BtagReweigthing = False
-print "apply Btag reweighting?: ",BtagReweigthing
 
 ## enable/ disable efficiency SF event reweighting
 if(not globals().has_key('effSFReweigthing')):
@@ -110,14 +101,11 @@ if(not globals().has_key('effSFReweigthing')):
     # take care of data
     if (not runningOnData == "MC"):
         effSFReweigthing = False
-print "apply effSF reweighting?: ",effSFReweigthing
 
 # choose jet correction level shown in plots
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
     corrLevel='L3Absolute'
-## define input
-print "used JEC level in jetKinematics: "+corrLevel
 
 ## run kinematic fit?
 ## ATTENTION: until the new parameter jetResolutionSmearFactor
@@ -127,10 +115,6 @@ print "used JEC level in jetKinematics: "+corrLevel
 
 if(not globals().has_key('applyKinFit')):
    applyKinFit = True#  False
-if(applyKinFit==True):
-    print "kinFit and top reconstruction is applied - attention: slows down!!!"
-if(applyKinFit==False):
-    print "kinFit and top reconstruction not applied"
     
 ## choose whether you want a pat tuple as output
 if(not globals().has_key('writeOutput')): 
@@ -139,10 +123,6 @@ if(not globals().has_key('writeOutput')):
 ## remove all ttbar specific gen level filter - used by other _cfg based on this file
 if(not globals().has_key('removeGenTtbar')):
     removeGenTtbar = False 
-if(removeGenTtbar==True):
-    print "all gen level filters using ttbar decay subset are removed" 
-    if(runningOnData=="MC"):
-        print "selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"
 
 ## implement anti b-tagging path
 if(not globals().has_key('implement0TagPath')):
@@ -155,8 +135,6 @@ if(not globals().has_key('implement0TagPath')):
 ## eventfilter is to select a special ttbar decay channel from ttbarSample by genmatching (ttbar MC only, other MC: choose 'all')
 if(not globals().has_key('eventFilter')):
     eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
-if(runningOnData=="MC"):
-    print 'chosen ttbar filter:' , eventFilter
 
 ## choose if you want to include tau (->e/mu) events
 if(not globals().has_key('tau')):
@@ -164,19 +142,14 @@ if(not globals().has_key('tau')):
 # use these tau events only in SG/SB configuration not for single decay modes or all
 if(not eventFilter=='signal only' and not eventFilter=='background only'):
     tau= False
-print "include tau->l events? ",tau
 
 ## choose whether synchronisation exercise should be done
 if(not globals().has_key('cutflowSynch')): 
     cutflowSynch  = False # True
-if(cutflowSynch):
-    print "!!!! CUTFLOW SYNCHRONISATION EXERCISE !!!!"
     
 ## choose whether additional event weights should be applied
 if(not globals().has_key('additionalEventWeights')): 
     additionalEventWeights  = True
-if(additionalEventWeights):
-    print "Additional event weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations!"
 
 ## enable/ disable systematic shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
@@ -189,8 +162,6 @@ if(not options.sample=="ttbar"):
 # coupled to PU weight, therefore not applicable without
 if(not PUreweigthing):
     sysDistort=''
-if(not sysDistort==''):
-    print "ATTENTION!!! apply shape reweighting, variation", sysDistort
 
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
@@ -239,218 +210,259 @@ usedSample="none"
 
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
+    outputFileName+="DiffXSec"    
     if(options.sample=="ttbar"):
         # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
         usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag
+	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkg"+options.mctag
-    if(options.sample=="ttbarMatchingDown"):        
+	    outputFileName+="Bkg"
+    elif(options.sample=="ttbarMatchingDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag+"MatchDown"
+	    outputFileName+="SigMatchDown"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkg"+options.mctag+"MatchDown"
-    if(options.sample=="ttbarMatchingUp"):        
+	    outputFileName+="BkgMatchDown"
+    elif(options.sample=="ttbarMatchingUp"):        
         usedSample="TopAnalysis/Configuration/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag+"MatchUp"
+	    outputFileName+="SigMatchUp"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkg"+options.mctag+"MatchUp"
-    if(options.sample=="ttbarScaleDown"):        
+	    outputFileName+="BkgMatchUp"
+    elif(options.sample=="ttbarScaleDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag+"ScaleDown"
+	    outputFileName+="SigScaleDown"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkg"+options.mctag+"ScaleDown"
-    if(options.sample=="ttbarScaleUp"):        
+	    outputFileName+="BkgScaleDown"
+    elif(options.sample=="ttbarScaleUp"):        
         usedSample="TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag+"ScaleUp"
+	    outputFileName+="SigScaleUp"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkg"+options.mctag+"ScaleUp"
-    if(options.sample=="ttbarMassDown"):        
+	    outputFileName+="BkgScaleUp"
+    elif(options.sample=="ttbarMassDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag+"TopMassDown"
+	    outputFileName+="SigTopMassDown"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkgM"+options.mctag+"TopMassDown"
-    if(options.sample=="ttbarMassUp"):        
+	    outputFileName+="BkgTopMassDown"
+    elif(options.sample=="ttbarMassUp"):        
         usedSample="TopAnalysis/Configuration/ttjets_mass175_5_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
-	    outputFileName+="DiffXSecSig"+options.mctag+"TopMassUp"
+	    outputFileName+="SigTopMassUp"
 	elif(eventFilter=='background only'):
-	    outputFileName+="DiffXSecBkg"+options.mctag+"TopMassUp"
-    if(options.sample=="wjets"):        
+	    outputFileName+="BkgTopMassUp"
+    elif(options.sample=="wjets"):        
         usedSample="TopAnalysis/Configuration/Fall11/wlnujets_MadgraphZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecWjets"+options.mctag
-    if(options.sample=="wjetsMatchingUp"):        
+	outputFileName+="Wjets"
+    elif(options.sample=="wjetsMatchingUp"):        
         usedSample="TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecWjets"+options.mctag+"MatchUp"
-    if(options.sample=="wjetsMatchingDown"):        
+	outputFileName+="WjetsMatchUp"
+    elif(options.sample=="wjetsMatchingDown"):        
         usedSample="TopAnalysis/Configuration/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecWjets"+options.mctag+"MatchDown"
-    if(options.sample=="wjetsScaleUp"):        
+	outputFileName+="WjetsMatchDown"
+    elif(options.sample=="wjetsScaleUp"):        
         usedSample="TopAnalysis/Configuration/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecWjets"+options.mctag+"ScaleUp"
-    if(options.sample=="wjetsScaleDown"):
+	outputFileName+="WjetsScaleUp"
+    elif(options.sample=="wjetsScaleDown"):
         usedSample="TopAnalysis/Configuration/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False        
-	outputFileName+="DiffXSecWjets"+options.mctag+"ScaleDown"
-    if(options.sample=="zjets"):        
+	outputFileName+="WjetsScaleDown"
+    elif(options.sample=="zjets"):        
         usedSample="TopAnalysis/Configuration/Fall11/dylljetsM50_MadgraphZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecZjets"+options.mctag
-    if(options.sample=="zjetsMatchingUp"):        
+	outputFileName+="Zjets"
+    elif(options.sample=="zjetsMatchingUp"):        
         usedSample="TopAnalysis/Configuration/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecZjets"+options.mctag+"MatchUp"
-    if(options.sample=="zjetsMatchingDown"):        
+	outputFileName+="ZjetsMatchUp"
+    elif(options.sample=="zjetsMatchingDown"):        
         usedSample="TopAnalysis/Configuration/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecZjets"+options.mctag+"MatchDown"
-    if(options.sample=="zjetsScaleUp"):        
+	outputFileName+="ZjetsMatchDown"
+    elif(options.sample=="zjetsScaleUp"):        
         usedSample="TopAnalysis/Configuration/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecZjets"+options.mctag+"ScaleUp"
-    if(options.sample=="zjetsScaleDown"):        
+	outputFileName+="ZjetsScaleUp"
+    elif(options.sample=="zjetsScaleDown"):        
         usedSample="TopAnalysis/Configuration/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False      
-	outputFileName+="DiffXSecZjets"+options.mctag+"ScaleDown"
-    if(options.sample=="singleTopS"):        
+	outputFileName+="ZjetsScaleDown"
+    elif(options.sample=="singleTopS"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleTopS"+options.mctag
-    if(options.sample=="singleTopSScaleDown"):        
+	outputFileName+="SingleTopS"
+    elif(options.sample=="singleTopSScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False   
-	outputFileName+="DiffXSecSingleTopS"+options.mctag+"ScaleDown"
-    if(options.sample=="singleTopSScaleUp"):        
+	outputFileName+="SingleTopSScaleDown"
+    elif(options.sample=="singleTopSScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopS"+options.mctag+"ScaleUp"
-    if(options.sample=="singleAntiTopS"):        
+	outputFileName+="SingleTopSScaleUp"
+    elif(options.sample=="singleAntiTopS"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleAntiTopS"+options.mctag
-    if(options.sample=="singleAntiTopSScaleDown"):        
+	outputFileName+="SingleAntiTopS"
+    elif(options.sample=="singleAntiTopSScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopS"+options.mctag+"ScaleDown"
-    if(options.sample=="singleAntiTopSScaleUp"):        
+	outputFileName+="SingleAntiTopSScaleDown"
+    elif(options.sample=="singleAntiTopSScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopS"+options.mctag+"ScaleUp"
-    if(options.sample=="singleTopT"):        
+	outputFileName+="SingleAntiTopSScaleUp"
+    elif(options.sample=="singleTopT"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleTopT"+options.mctag
-    if(options.sample=="singleTopTScaleDown"):        
+	outputFileName+="SingleTopT"
+    elif(options.sample=="singleTopTScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopT"+options.mctag+"ScaleDown"
-    if(options.sample=="singleTopTScaleUp"):        
+	outputFileName+="SingleTopTScaleDown"
+    elif(options.sample=="singleTopTScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopT"+options.mctag+"ScaleUp"
-    if(options.sample=="singleAntiTopT"):        
+	outputFileName+="SingleTopTScaleUp"
+    elif(options.sample=="singleAntiTopT"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleAntiTopT"+options.mctag
-    if(options.sample=="singleAntiTopTScaleDown"):        
+	outputFileName+="SingleAntiTopT"
+    elif(options.sample=="singleAntiTopTScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopT"+options.mctag+"ScaleDown"
-    if(options.sample=="singleAntiTopTScaleUp"):        
+	outputFileName+="SingleAntiTopTScaleDown"
+    elif(options.sample=="singleAntiTopTScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopT"+options.mctag+"ScaleUp"
-    if(options.sample=="singleTopTw"):        
+	outputFileName+="SingleAntiTopTScaleUp"
+    elif(options.sample=="singleTopTw"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleTopTW"+options.mctag
-    if(options.sample=="singleTopTwScaleDown"):        
+	outputFileName+="SingleTopTW"
+    elif(options.sample=="singleTopTwScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopTW"+options.mctag+"ScaleDown"
-    if(options.sample=="singleTopTwScaleUp"):        
+	outputFileName+="SingleTopTWScaleDown"
+    elif(options.sample=="singleTopTwScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleTopTW"+options.mctag+"ScaleUp"
-    if(options.sample=="singleAntiTopTw"):        
+	outputFileName+="SingleTopTWScaleUp"
+    elif(options.sample=="singleAntiTopTw"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff"
-	outputFileName+="DiffXSecSingleAntiTopTW"+options.mctag
-    if(options.sample=="singleAntiTopTwScaleDown"):        
+	outputFileName+="SingleAntiTopTW"
+    elif(options.sample=="singleAntiTopTwScaleDown"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopTW"+options.mctag+"ScaleDown"
-    if(options.sample=="singleAntiTopTwScaleUp"):        
+	outputFileName+="SingleAntiTopTWScaleDown"
+    elif(options.sample=="singleAntiTopTwScaleUp"):        
         usedSample="TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
-	outputFileName+="DiffXSecSingleAntiTopTW"+options.mctag+"ScaleUp"
-    if(options.sample=="zprime_m500gev_w5000mev"):        
+	outputFileName+="SingleAntiTopTWScaleUp"
+    elif(options.sample=="zprime_m500gev_w5000mev"):        
         usedSample="TopAnalysis/Configuration/zprime_M500GeV_W5000MeV_Madgraph_Summer11_AOD_cff"
-    if(options.sample=="zprime_m750gev_w7500mev"):        
+    elif(options.sample=="zprime_m750gev_w7500mev"):        
         usedSample="TopAnalysis/Configuration/zprime_M750GeV_W7500MeV_Madgraph_Summer11_AOD_cff"
 	additionalEventWeights=False
-    if(decayChannel=='muon'):
-        if(options.sample=="qcd"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdmu15enriched_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCD"+options.mctag
-    if(decayChannel=='electron'):
-        if(options.sample=="qcdEM1"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCDEM1"+options.mctag
-        if(options.sample=="qcdEM2"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCDEM2"+options.mctag
-        if(options.sample=="qcdEM3"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt80to170_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCDEM3"+options.mctag
-        if(options.sample=="qcdBCE1"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt20to30_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCDBCE1"+options.mctag
-        if(options.sample=="qcdBCE2"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt30to80_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCDBCE2"+options.mctag
-        if(options.sample=="qcdBCE3"):
-            usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt80to170_Pythia6_Fall11_AOD_cff"
-            PythiaSample="True"
-	    outputFileName+="DiffXSecQCDBCE3"+options.mctag
-    if(options.sample=="WW"):        
+    elif(options.sample=="qcd" and decayChannel=='muon'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdmu15enriched_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCD"
+    elif(options.sample=="qcdEM1" and decayChannel=='electron'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt20to30_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCDEM1"
+    elif(options.sample=="qcdEM2" and decayChannel=='electron'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt30to80_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCDEM2"
+    elif(options.sample=="qcdEM3" and decayChannel=='electron'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdEMenrichedPt80to170_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCDEM3"
+    elif(options.sample=="qcdBCE1" and decayChannel=='electron'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt20to30_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCDBCE1"
+    elif(options.sample=="qcdBCE2" and decayChannel=='electron'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt30to80_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCDBCE2"
+    elif(options.sample=="qcdBCE3" and decayChannel=='electron'):
+        usedSample="TopAnalysis/Configuration/Fall11/qcdBCtoEPt80to170_Pythia6_Fall11_AOD_cff"
+        PythiaSample="True"
+        outputFileName+="QCDBCE3"
+    elif(options.sample=="WW"):        
         usedSample="TopAnalysis/Configuration/Fall11/wwtoall_Pythia6Z2_Fall11_AOD_cff"
         PythiaSample="True"
-	outputFileName+="DiffXSecWW"+options.mctag
-    if(options.sample=="WZ"):        
+	outputFileName+="WW"
+    elif(options.sample=="WZ"):        
         usedSample="TopAnalysis/Configuration/Fall11/wztoall_Pythia6Z2_Fall11_AOD_cff"
         PythiaSample="True"
-	outputFileName+="DiffXSecWZ"+options.mctag
-    if(options.sample=="ZZ"):        
+	outputFileName+="WZ"
+    elif(options.sample=="ZZ"):        
         usedSample="TopAnalysis/Configuration/Fall11/zztoall_Pythia6Z2_Fall11_AOD_cff"
         PythiaSample="True"
-	outputFileName+="DiffXSecZZ"+options.mctag
+	outputFileName+="ZZ"
+    else:
+         usedSample="none"
+        
     if(not usedSample=='none'):
         process.load(usedSample)
-        print "analyzed sample: "+usedSample+".py"
     else:
         print "\n ERROR ---- Poolsource file does not exist.\n"
         os._exit(0)
 
+outputFileName+=options.mctag+"PF.root"
+
+#### =================================================
+####  Print out summary of configuration parameters
+#### =================================================
+
+print "                                     "
+print " =================================== "
+print "   Basic Configuration Parameters    "
+print " =================================== "
+print "                                     "
+print " Trigger path:                       ","TriggerResults::"+options.triggerTag
+print " Jet Type:                           ",jetType 
+print " Run PF2PAT:                         ",pfToPAT," ---- Not working if the file does not contain the necessary information"
+print " RunningOnData:                      ",runningOnData
+print " JsonFile:                           ",jsonFile
+print " Label for MC samples:               ",options.mctag
+print " Chosen sample                       ",options.sample
+print " Lepton decay channel:               ",decayChannel
+print " ttbar filter:                       ",eventFilter," ---- Obsolete if RunningOnData != 'MC' "
+print " Include tau->l events               ",tau
+print " Include 0 b-ttaged jets:            ",implement0TagPath
+print " Apply PU reweighting:               ",PUreweigthing
+print " Apply Btag reweighting:             ",BtagReweigthing
+print " Apply effSF reweighting:            ",effSFReweigthing
+print " JEC level in jetKinematics:         ",corrLevel
+print " Apply kinematic Fit:                ",applyKinFit," ---- Programme execution slowed down if 'True'"
+print " Write PAT tuples:                   ",writeOutput
+print " Analyzed sample:                    ",usedSample+".py"
+print " Output file name:                   ",outputFileName
+print " Synchronization exercise:           ",cutflowSynch
+print " Additional event weights:           ",additionalEventWeights," ---- If 'True' weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations"
+print " Apply shape reweighting, variation: ",sysDistort
+print " "
+if(removeGenTtbar==True):
+    print " All gen level filters using ttbar decay subset are removed" 
+    if(runningOnData=="MC"):
+        print " Selection for gen plots only via TopAnalysis.TopFilter.sequences.genSelection_cff"
+print " "
+
+#### =================================================
+
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string(outputFileName+"PF.root")
-)
-print "output file name = ", process.TFileService.fileName
+    fileName = cms.string(outputFileName))
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
@@ -599,8 +611,7 @@ if(decayChannel=='electron'):
 if(not eventFilter=='all'):
     ## adapt output filename
     if(eventFilter=='signal only'):
-        print "Dummy output to avoid programme crash --> to be revised !!!!"
-        #process.TFileService.fileName = 'analyzeDiffXSec_testSig.root'
+        print " " # Dummy output to avoid programme crash
     elif(eventFilter=='background only'):
         process.ttSemiLeptonicFilter.invert = True
     elif(eventFilter=='semileptonic electron only'):
@@ -899,11 +910,11 @@ if(decayChannel=='electron'):
     useElectronsForAllTtSemiLepHypotheses(process,'goodElectronsEJ')
 if(eventFilter=='signal only') and (runningOnData=="MC"):
     if(applyKinFit==True):
-        print 'kinfit: processing ttbar SG MC - build genmatch'
+        print ' kinFit: processing ttbar SG MC - build genmatch'
 else:
     removeTtSemiLepHypGenMatch(process)
     if(applyKinFit==True):
-        print 'kinfit: processing bkg or data - genmatch removed'
+        print ' kinFit: processing bkg or data - genmatch removed'
 
 ## choose collections
 ## in fitting procedure
@@ -1541,9 +1552,9 @@ if(runningOnData=="MC" and not PUreweigthing and not effSFReweigthing and not Bt
 # b) Re-weighting (PU and/or effSF) for reco-modules
 if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     if(PUreweigthing):
-        print "All reco-modules will use PU event weights"
+        print " All reco-modules will use PU event weights"
     if(effSFReweigthing):
-        print "All reco-modules will use eff SF event weights"
+        print " All reco-modules will use eff SF event weights"
     for module in modulelist:
         # exclude PU control modules and gen-modules
         if(module not in PUModuleList and module not in genModules1 and module not in genModules2):
@@ -1556,7 +1567,7 @@ if(runningOnData=="MC" and BtagReweigthing):
     btagModules2 = process.kinFit.moduleNames()
     btagModules3 = process.monitorElectronKinematicsAfterBtagging.moduleNames()
     print
-    print "The following reco-modules will use additionally the b-tag event weights:"
+    print " The following reco-modules will use additionally the b-tag event weights:"
     print btagModules1
     print btagModules2
     print btagModules3
@@ -1572,7 +1583,7 @@ if(runningOnData=="MC" and BtagReweigthing):
 # d) Re-weighting of gen-modules - PU reweighting only
 if(runningOnData=="MC" and PUreweigthing):
     print
-    print "The following gen-modules will only use the PU reweighting:"
+    print " The following gen-modules will only use the PU reweighting:"
     print genModules1
     print genModules2
     for module1 in genModules1:
