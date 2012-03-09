@@ -72,6 +72,7 @@ class SingleObjectAnalyzer : public edm::EDAnalyzer {
   edm::InputTag src_;
   /// event weight
   edm::InputTag wgt_;
+  std::vector<edm::InputTag> wgts_;
 
   /// common analzyer class
   Analyze* analyze_;
@@ -85,6 +86,9 @@ SingleObjectAnalyzer<Collection, Analyze>::SingleObjectAnalyzer(const edm::Param
   // weight is an optional parameter; if not present 
   // in the module the used weight will be 1.
   if(cfg.exists("weight" )) wgt_= cfg.getParameter<edm::InputTag>("weight" );
+  // weights is an optional parameter; 
+  // it can be used to store more than one weight in the tree
+  if(cfg.exists("weights" )) wgts_= cfg.getParameter< std::vector<edm::InputTag> >("weights" );
   // construct the common analyzer class with
   // corresponding parameter sets as input 
   cfg.exists("analyze") ? analyze_ = new Analyze( cfg.getParameter<edm::ParameterSet>("analyze") ) : analyze_ = new Analyze( edm::ParameterSet() );
@@ -107,18 +111,37 @@ void SingleObjectAnalyzer<Collection, Analyze>::analyze(const edm::Event& event,
   event.getByLabel(src_, src);
 
   // prepare the event weight
-  double weight = 1;
+  double weight = 1.;
   if(!wgt_.label().empty()) {
     edm::Handle<double> wgt;
     event.getByLabel(wgt_, wgt);
     weight = *wgt;
   }
+  // more weights to be stored in tree
+// loop over all eventWeightTags and multiply weights
+  std::vector<double> weights;
+  for(unsigned iWeight=0; iWeight < wgts_.size(); iWeight++){
+    if(!wgts_[iWeight].label().empty()) {
+    // get weight from the CMSSW event
+      edm::Handle<double> wgt;
+      event.getByLabel(wgts_[iWeight], wgt);
+    // ignore non existing weights
+      if(wgt.isValid()){
+	//std::cout<<"  eventWeight "<<iWeight<<" "<< weightTags_[iWeight].label() << weightTags_[iWeight].instance() <<": "<<*wgt<<std::endl;
+	weights.push_back(*wgt);
+      }
+      else{
+	std::cout<< "eventWeight " << iWeight << " not found"<<std::endl;
+	edm::LogInfo("weightNotFound") << "eventWeight " << iWeight << " not found";
+      }
+  }
+}
   edm::EventAuxiliary aux = event.eventAuxiliary();
   double runNumber             = aux.run();
   double luminosityBlockNumber = aux.luminosityBlock();
   double eventNumber           = aux.event();
   // hand over to the common analyzer function
-  analyze_->fill2(*src, runNumber, luminosityBlockNumber, eventNumber, weight);
+  analyze_->fill2(*src, runNumber, luminosityBlockNumber, eventNumber, weight, weights);
 }
 
 /// everything which has to be done before the event loop  
@@ -130,6 +153,8 @@ void SingleObjectAnalyzer<Collection, Analyze>::beginJob()
   if( !fs ){
     throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
   }
+  // hand InputTags of weights over
+  analyze_->book2(wgts_);
   // book the histograms
   analyze_->book(fs);
 }

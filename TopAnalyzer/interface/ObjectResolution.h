@@ -46,6 +46,8 @@ class ObjectResolution{
   virtual void book();
   /// histogramm booking for fwfull
   virtual void book(edm::Service<TFileService>& fileService);
+  /// dummy function
+  void book2(std::vector<edm::InputTag> wgts2_){};
   /// everything which needs to be done after the event loop
   virtual void process(){};
   /// write histograms to file for fwlite
@@ -57,7 +59,7 @@ class ObjectResolution{
   **/
   /// histogram filling for fwlite and for fwfull
   virtual void fill(const Collection& inputCollection, const double& weight=1.) = 0;
-  void fill2(const Collection& inputCollection, const double& a=1., const double& b=1., const double& c=1., const double& weight=1.){return fill(inputCollection, weight);};
+  void fill2(const Collection& inputCollection, const double& a, const double& b, const double& c, const double& weight, std::vector<double> weights){return fill(inputCollection, weight);};
 
  protected:
   /**

@@ -60,16 +60,32 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   void fill(const TtGenEvent& tops, const double& weight=1.);
   // histogram filling and in addition save information for event identification
   // double definition to avoid problems with different module inputs
-  void fill2(const TtGenEvent& tops, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.){
+  void fill2(const TtGenEvent& tops, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight, std::vector<double> weights){
     fillValue("runNumber", runNumber, weight);
     fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
     fillValue("eventNumber", eventNumber, weight);
+     // if more than one weight is supposed to be stored
+    for(unsigned int iWeight=0; iWeight < this->wgts_.size(); iWeight++){
+      std::string weightName = this->wgts_[iWeight].label()+this->wgts_[iWeight].instance();
+      if(this->wgts_.size() == this->weights.size()) {
+	fillValue(weightName, this->weights[iWeight], weight);
+      }
+      else std::cout<< "ERROR!!! Size of weights ("<<this->weights.size()<<") != size of weight tags ("<<wgts_.size()<<")!!! No weights are filled in tree!" <<std::endl;
+    }
     fill(tops, weight);
   }
-  void fill2(const TtSemiLeptonicEvent& tops, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.){
+  void fill2(const TtSemiLeptonicEvent& tops, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight, std::vector<double> weights){
     fillValue("runNumber", runNumber, weight);
     fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
     fillValue("eventNumber", eventNumber, weight);
+     // if more than one weight is supposed to be stored
+    for(unsigned int iWeight=0; iWeight < this->wgts_.size(); iWeight++){
+      std::string weightName = this->wgts_[iWeight].label()+this->wgts_[iWeight].instance();
+      if(this->wgts_.size() == this->weights.size()) {
+	fillValue(weightName, this->weights[iWeight], weight);
+      }
+      else std::cout<< "ERROR!!! Size of weights ("<<this->weights.size()<<") != size of weight tags ("<<wgts_.size()<<")!!! No weights are filled in tree!" <<std::endl;
+    }
     fill(tops, weight);
   }
   /// everything which needs to be done after the event loop

@@ -49,6 +49,16 @@
 template <typename CollectionA, typename CollectionB> 
 class DoubleObject{
 
+ protected:
+  /// histogram container
+  std::map<std::string, TH1*>  hists_;
+  std::map<std::string, TH2*>  hists2D_;
+  std::map<std::string, float> treeVars_;
+  TTree * tree;
+  /// weights
+  std::vector<edm::InputTag> wgts_;
+  std::vector<double> weights;
+    
  public:
   /// default constructor for fw lite
   explicit DoubleObject(){};
@@ -81,37 +91,48 @@ class DoubleObject{
   /// function is needed as the input of the second collection 
   /// can be optional. If this doea not apply to your module 
   /// throw an exception here.
-  void fill2(const CollectionA& inputCollectionA, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.);
+  void fill2(const CollectionA& inputCollectionA, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1., std::vector<double> weights=0);
   virtual void fill(const CollectionA& inputCollectionA, const double& weight=1.) = 0;
   /// histogram filling for fwlite and for fwfull
-  void fill2(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1.);
+  void fill2(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight=1., std::vector<double> weights=0);
+  /// books the weight tags
+  void book2(std::vector<edm::InputTag> wgts2_) {wgts_ = wgts2_;};
   virtual void fill(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& weight=1.) = 0;
   /// everything which needs to be done after the event loop
   virtual void process() = 0;
-
- protected:
-  /// histogram container
-  std::map<std::string, TH1*>  hists_;
-  std::map<std::string, TH2*>  hists2D_;
-  std::map<std::string, float> treeVars_;
-  TTree * tree;
 };
 
 template <typename CollectionA, typename CollectionB>
-  void DoubleObject<CollectionA, CollectionB>::fill2(const CollectionA& inputCollectionA, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight)
+  void DoubleObject<CollectionA, CollectionB>::fill2(const CollectionA& inputCollectionA, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight, std::vector<double> weights)
 {
   fillValue("runNumber", runNumber, weight);
   fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
   fillValue("eventNumber", eventNumber, weight);
+  // if more than one weight is supposed to be stored
+  for(unsigned int iWeight=0; iWeight < wgts_.size(); iWeight++){
+    std::string weightName = wgts_[iWeight].label()+wgts_[iWeight].instance();
+    if(wgts_.size() == weights.size()) {
+      fillValue(weightName, weights[iWeight], weight);
+    }
+    else std::cout<< "ERROR!!! Size of weights ("<<weights.size()<<") != size of weight tags ("<<wgts_.size()<<")!!! No weights are filled in tree!" <<std::endl;
+  }
   fill(inputCollectionA, weight);
 }
 
 template <typename CollectionA, typename CollectionB>
-  void DoubleObject<CollectionA, CollectionB>::fill2(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight)
+    void DoubleObject<CollectionA, CollectionB>::fill2(const CollectionA& inputCollectionA, const CollectionB& inputCollectionB, const double& runNumber, const double& luminosityBlockNumber, const double& eventNumber, const double& weight, std::vector<double> weights)
 {
   fillValue("runNumber", runNumber, weight);
   fillValue("luminosityBlockNumber", luminosityBlockNumber, weight);
   fillValue("eventNumber", eventNumber, weight);
+  // if more than one weight is supposed to be stored
+  for(unsigned int iWeight=0; iWeight < wgts_.size(); iWeight++){
+    std::string weightName = wgts_[iWeight].label()+wgts_[iWeight].instance();
+    if(wgts_.size() == weights.size()) {
+      fillValue(weightName, weights[iWeight], weight);
+    }
+    else std::cout<< "ERROR!!! Size of weights ("<<weights.size()<<") != size of weight tags ("<<wgts_.size()<<")!!! No weights are filled in tree!" <<std::endl;
+  }
   fill(inputCollectionA, inputCollectionB, weight);
 }
 
@@ -127,6 +148,14 @@ template <typename CollectionA, typename CollectionB>
       tree = fs->make<TTree>("tree","tree",0);
       treeVars_["weight"];
       tree->Branch("weight", &treeVars_["weight"], (std::string("weight") + "/F").c_str());
+      // if more than one weight is supposed to be stored in tree
+      for(unsigned iWeight=0; iWeight < wgts_.size(); iWeight++){
+	if(iWeight==0) std::cout << wgts_.size() <<" additional event weights are stored: " <<std::endl;
+	std::string weightName = wgts_[iWeight].label()+wgts_[iWeight].instance();
+	std::cout << "weightName = " <<weightName <<std::endl;
+	treeVars_[weightName];
+	tree->Branch(weightName.c_str(), &treeVars_[weightName], (std::string(weightName) + "/F").c_str());
+      }
       treeVars_["runNumber"];
       tree->Branch("runNumber", &treeVars_["runNumber"], (std::string("runNumber") + "/F").c_str());
       treeVars_["luminosityBlockNumber"];
@@ -195,6 +224,10 @@ void DoubleObject<CollectionA, CollectionB>::initializeTrees(float value, const 
 {
   // loop all branches in the tree
   for(std::map<std::string, float>::iterator treeEntry=treeVars_.begin(); treeEntry!=treeVars_.end(); ++treeEntry){
+    // skip initialising if treeEntry is one of the weights or run numbers etc.
+    for(unsigned iWeight=0; iWeight < wgts_.size(); iWeight++) {
+      if(treeEntry->first==(wgts_[iWeight].label()+wgts_[iWeight].instance())) return;
+    }
     if(treeEntry->first!="weight"&&treeEntry->first!="runNumber"&&treeEntry->first!="eventNumber"&&treeEntry->first!="luminosityBlockNumber") treeEntry->second = value;
     else if (treeEntry->first=="weight") treeEntry->second = weight;
   }
