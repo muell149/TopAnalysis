@@ -3330,10 +3330,15 @@ double TopSVDFunctions::SVD_Unfold(
 	        
 	        
 	        // Delete all the obsolete objects
-	        // delete[] arrK_StatError;
-	        // delete[] arrK_Weight;
-	        // delete[] arrK_GlC;
-	        // delete[] arrK_Mean;
+		delete k_stackerr;
+ 		delete k_stackweight;
+ 		delete k_stackglc;
+ 		delete k_stackunf;
+
+	        delete[] arrK_StatError;
+	        delete[] arrK_Weight;
+	        delete[] arrK_GlC;
+	        delete[] arrK_Mean;
             
         }
     
