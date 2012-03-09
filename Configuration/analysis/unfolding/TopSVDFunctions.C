@@ -2406,19 +2406,18 @@ double TopSVDFunctions::SVD_Unfold(
         int nScanPoints = 100;
           
           
-        // Find interesting singular value 
-        // Limit the kReg to the Modes which are actually there! 
-        int effectiveKReg = theKReg;
-        if ( effectiveKReg >= nSingularValues ) effectiveKReg = nSingularValues-1;
-        double singularValueK =  vSingularValues[effectiveKReg];
-            
-            
         // Range for Scan
         double lowTau = 0.;
         double highTau = 0.;
         if ( doUseTau == false ) {
-            lowTau = (1./rangefactor) * singularValueK;
-            highTau = rangefactor * singularValueK;
+	  // Find interesting singular value 
+	  // Limit the kReg to the Modes which are actually there! 
+	  int effectiveKReg = theKReg;
+	  if ( effectiveKReg >= nSingularValues ) effectiveKReg = nSingularValues-1;
+	  double singularValueK =  vSingularValues[effectiveKReg];
+
+	  lowTau = (1./rangefactor) * singularValueK;
+	  highTau = rangefactor * singularValueK;
         } else {
             lowTau = (1./rangefactor) * theTau;
             highTau = rangefactor * theTau;
