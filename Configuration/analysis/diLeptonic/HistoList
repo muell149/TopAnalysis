@@ -8,3 +8,4 @@ HypTTBarpT N_{Events} p_{T}^{t#bar{t}} 0 1 0.0001 0 0 0 4 0 20 60 120 500 5 39 8
 HypTopRapidity N_{Events} y^{tand#bar{t}} 0 0 0 0 0 0 4 -2.5 -1.2 0.0 1.2 2.5 -1.78 -0.66 0.69 1.76
 HypToppT N_{Events} p_{T}^{tand#bar{t}} 0 1 0.0001 0 0 0 4 0 70 140 240 400 32 109 185 308
 HypBJetpT N_{Events} p_{T}^{l^{+}andl^{-}} 0 1 0.00001 0 0 0 5 20 40 70 120 180 400 28 55 93 147 249
+HypBJetRapidity N_{Events} y^{band#bar{b}} 0 0 0 0 0 0 4 -2.5 -1.2 0.0 1.2 2.5 -1.78 -0.66 0.69 1.76

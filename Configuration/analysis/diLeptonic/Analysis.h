@@ -363,7 +363,7 @@ public :
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
    TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT, ;
-   TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta;
+   TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;
    TH2D *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
    
    TH1D *h_NJetMatching;
@@ -383,7 +383,7 @@ public :
    TH1D *h_RecoToppT,*h_RecoAntiToppT,*h_RecoTopRapidity,*h_RecoAntiTopRapidity;
    TH1D *h_RecoLLBarMass, *h_RecoLLBarpT;
    TH1D *h_RecoLeptonpT,*h_RecoAntiLeptonpT,*h_RecoLeptonEta,*h_RecoAntiLeptonEta;
-   TH1D *h_RecoBJetpT,*h_RecoAntiBJetpT;
+   TH1D *h_RecoBJetpT,*h_RecoAntiBJetpT, *h_RecoBJetRapidity,*h_RecoAntiBJetRapidity;
 
    TH1D *h_vertMulti, *h_MET;
 
@@ -396,48 +396,30 @@ public :
    TH1D *h_HypAntiToppT, *h_HypAntiTopEta, *h_HypAntiTopE, *h_HypAntiTopMass,*h_HypAntiTopRapidity;
    TH1D *h_HypToppT, *h_HypTopEta, *h_HypTopE,*h_HypTopMass, *h_HypTopRapidity ;
 
-   TH1D *h_HypWPluspT, *h_HypWPlusEta, *h_HypWPlusE;
-   TH1D *h_HypWMinuspT, *h_HypWMinusEta, *h_HypWMinusE;
-
-   TH1D *h_HypAntiBJetpT, *h_HypAntiBJetEta, *h_HypAntiBJetE;
-   TH1D *h_HypBJetpT, *h_HypBJetEta, *h_HypBJetE;
+   TH1D *h_HypAntiBJetpT, *h_HypAntiBJetEta, *h_HypAntiBJetE, *h_HypAntiBJetRapidity;
+   TH1D *h_HypBJetpT, *h_HypBJetEta, *h_HypBJetE, *h_HypBJetRapidity;
 
    TH1D *h_HypAntiLeptonpT, *h_HypAntiLeptonEta, *h_HypAntiLeptonE;
    TH1D *h_HypLeptonpT, *h_HypLeptonEta, *h_HypLeptonE;
 
-   TH1D *h_HypAntiNeutrinopT, *h_HypAntiNeutrinoEta, *h_HypAntiNeutrinoE;
-   TH1D *h_HypNeutrinopT, *h_HypNeutrinoEta, *h_HypNeutrinoE;
-
    TH1D *h_VisGenAntiToppT, *h_VisGenAntiTopEta, *h_VisGenAntiTopE;
    TH1D *h_VisGenToppT, *h_VisGenTopEta, *h_VisGenTopE;
 
-   TH1D *h_VisGenWPluspT, *h_VisGenWPlusEta, *h_VisGenWPlusE;
-   TH1D *h_VisGenWMinuspT, *h_VisGenWMinusEta, *h_VisGenWMinusE;
-
-   TH1D *h_VisGenAntiBJetpT, *h_VisGenAntiBJetEta, *h_VisGenAntiBJetE;
-   TH1D *h_VisGenBJetpT, *h_VisGenBJetEta, *h_VisGenBJetE;
+   TH1D *h_VisGenAntiBJetpT, *h_VisGenAntiBJetEta, *h_VisGenAntiBJetE, *h_VisGenAntiBJetRapidity;
+   TH1D *h_VisGenBJetpT, *h_VisGenBJetEta, *h_VisGenBJetE, *h_VisGenBJetRapidity;
 
    TH1D *h_VisGenAntiLeptonpT, *h_VisGenAntiLeptonEta, *h_VisGenAntiLeptonE;
    TH1D *h_VisGenLeptonpT, *h_VisGenLeptonEta, *h_VisGenLeptonE;
-
-   TH1D *h_VisGenAntiNeutrinopT, *h_VisGenAntiNeutrinoEta, *h_VisGenAntiNeutrinoE;
-   TH1D *h_VisGenNeutrinopT, *h_VisGenNeutrinoEta, *h_VisGenNeutrinoE;
-
+ 
    TH1D *h_GenAntiToppT, *h_GenAntiTopEta, *h_GenAntiTopE, *h_GenAntiTopRapidity;
    TH1D *h_GenToppT, *h_GenTopEta, *h_GenTopE, *h_GenTopRapidity;
 
-   TH1D *h_GenWPluspT, *h_GenWPlusEta, *h_GenWPlusE;
-   TH1D *h_GenWMinuspT, *h_GenWMinusEta, *h_GenWMinusE;
-
-   TH1D *h_GenAntiBJetpT, *h_GenAntiBJetEta, *h_GenAntiBJetE;
-   TH1D *h_GenBJetpT, *h_GenBJetEta, *h_GenBJetE;
+   TH1D *h_GenAntiBJetpT, *h_GenAntiBJetEta, *h_GenAntiBJetE, *h_GenAntiBJetRapidity;
+   TH1D *h_GenBJetpT, *h_GenBJetEta, *h_GenBJetE, *h_GenBJetRapidity;
 
    TH1D *h_GenAntiLeptonpT, *h_GenAntiLeptonEta, *h_GenAntiLeptonE;
    TH1D *h_GenLeptonpT, *h_GenLeptonEta, *h_GenLeptonE;
 
-   TH1D *h_GenAntiNeutrinopT, *h_GenAntiNeutrinoEta, *h_GenAntiNeutrinoE;
-   TH1D *h_GenNeutrinopT, *h_GenNeutrinoEta, *h_GenNeutrinoE;
-   
    ClassDef(Analysis,0);
 };
 

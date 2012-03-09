@@ -119,17 +119,6 @@ void Histo::MakePlots(){
       binCenters.push_back(temp);
     }
     
-    //  h_generalPlot.setOptions("","DIMFull","N_{Events}","M_{#mu#mu}", false, true, 0, 0.1, 0, 0, 0);//Figure 2
-    //h_generalPlot.setOptions("","jetMulti","N_{Events}","N_{jets}", false, true, 0, 0.1, 0, 0, 0);//Figure 3
-    //  h_generalPlot.setOptions("","LeptonpT","N_{Events}","p_{T,#mu}[GeV]", false, false, 0, 0., 0, 0, 0);//Figure 5
-    //  h_generalPlot.setOptions("","LeptonEta","N_{Events}","#eta_{#mu}", false, false, 0, 0., 0, 0, 0);//Figure 6
-    //h_generalPlot.setOptions("","jetMulti","N_{Events}","N_{jets}", false, false, 0, 0.0, 0, 0, 0);//Figure 7
-    //  h_generalPlot.setOptions("","jetpT","N_{Events}","p_{T,jet}[GeV]", false, false, 0, 0., 0, 0, 0);//Figure 8
-    //h_generalPlot.setOptions("","jetHT","N_{Events}","H_{T,all jets}[GeV]", false, true, 0, 0.1, 0, 0, 0);//Figure 9
-    //  h_generalPlot.setOptions("","BjetMulti","N_{Events}","N_{tags, TCHEL}", false, false, 0, 0.0, 0, 0, 0);//Figure 10
-    //  h_generalPlot.setOptions("","Allh1","N_{Events}","M_{#mumu}", false, false, 0, 0.0, 0, 0, 0);//Figure 11
-    //h_generalPlot.setOptions("LeptonpT","N_{Events}","p_{T}^{l^{+}andl^{-}}", false, true, 0, 0.0001, 0, 0, 0);//Figure 12/Figure 12
-
     // Unfolding Options
     bool doSVD = false;
     bool unfoldingPlotsToPs = false;
