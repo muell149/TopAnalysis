@@ -68,6 +68,7 @@ public :
    Double_t        jetpZ[kMaxjet];   //[jet_]
    Double_t        jetE[kMaxjet];   //[jet_]
    vector<double>  *jetBTagTCHE;
+   vector<double>  *jetBTagCSV;
    vector<double>  *jetBTagSSVHE;
    Int_t           genJet_;
    Double_t        genJetpX[kMaxgenJet];   //[genJet_]
@@ -215,6 +216,7 @@ public :
    TBranch        *b_jetpZ;   //!
    TBranch        *b_jetE;   //!
    TBranch        *b_jetBTagTCHE;   //!
+   TBranch        *b_jetBTagCSV;   //!
    TBranch        *b_jetBTagSSVHE;   //!
    TBranch        *b_genJet_;   //!
    TBranch        *b_genJetpX;   //!
@@ -442,6 +444,7 @@ void Analysis::Init(TTree *tree)
    lepPfIso = 0;
    lepCombIso = 0;
    jetBTagTCHE = 0;
+   jetBTagCSV = 0;
    jetBTagSSVHE = 0;
    metEt = 0;
    metPhi = 0;
@@ -472,6 +475,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("jet.fCoordinates.fZ", jetpZ, &b_jetpZ);
    fChain->SetBranchAddress("jet.fCoordinates.fT", jetE, &b_jetE);
    fChain->SetBranchAddress("jetBTagTCHE", &jetBTagTCHE, &b_jetBTagTCHE);
+   fChain->SetBranchAddress("jetBTagCSV", &jetBTagCSV, &b_jetBTagCSV);
    fChain->SetBranchAddress("jetBTagSSVHE", &jetBTagSSVHE, &b_jetBTagSSVHE);
    fChain->SetBranchAddress("genJet", &genJet_, &b_genJet_);
    fChain->SetBranchAddress("genJet.fCoordinates.fX", genJetpX, &b_genJetpX);
@@ -585,6 +589,7 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_lepPfIso->GetEntry(entry);   //!
   b_lepCombIso->GetEntry(entry);   //!
   b_jetBTagTCHE->GetEntry(entry);   //!
+  b_jetBTagCSV->GetEntry(entry);   //!
   b_jetBTagSSVHE->GetEntry(entry);   //!
   b_metPhi->GetEntry(entry);   //!
   b_runNumber->GetEntry(entry);   //!
