@@ -1358,15 +1358,26 @@ TString efficiency="efficiency/"+variable;
       // decay channel
       TString channelTex="#mu";
       if(decayChannel=="electron") channelTex="e";
+      // regularization mode (see below)
+      int regMode=2;
+      if(systematicVariation!=sysNo) regMode=2;
+      // produce scan plots? (see below)
+      bool scan =true;
+      if(regMode<3) scan =false;
+      // output files
       TString rootFile="";
       TString psFile="";
-      //if(save){ 
-      rootFile="diffXSecUnfoldTopSemi";
-      if(decayChannel=="muon"    ) rootFile+="Mu";
-      if(decayChannel=="electron") rootFile+="Elec";
-      rootFile+=dataSample+".root";
-      psFile=outputFolder+"unfolding/unfolding"+variable+".ps";
-      //}
+      TString regFile="";
+      if(save&&systematicVariation==sysNo){ 
+	rootFile="diffXSecUnfoldTopSemi";
+	if(decayChannel=="muon"    ) rootFile+="Mu";
+	if(decayChannel=="electron") rootFile+="Elec";
+	rootFile+=dataSample+".root";
+	psFile=outputFolder+"unfolding/unfolding"+variable;
+	if(scan) psFile+="Scan";
+	psFile+=".ps";
+	if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
+      }
       TString special="";
       // -----------
       // get binning
@@ -1427,10 +1438,10 @@ TString efficiency="efficiency/"+variable;
 	//           -> NOTE: tau=true otion is needed when using function "regParameter"
 	// regMode=3 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
 	// a "center value" for k, to be specified in 'regpar'. Note: The scan may take a while!
-	// regMode=4 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
+	// regMode=4 is SVD Unfolding. A scan for the optimal k parameter is performed. The scan is performed around
 	// a "center value" for tau, to be specified in 'regpar'
 	// Note: The scan may take a while! 
-	2,                            
+	regMode,                            
 	// Returned: Unfolded Distribution              
 	unfoldedData,
 	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
@@ -1453,19 +1464,21 @@ TString efficiency="efficiency/"+variable;
 	rootFile,
 	// If specified, plots will be saved in PS File
 	psFile,
-        // If specified, optimal Reg Parameters will be written to this file.
-        // The file will NOT be overwritten, rather the result will be appended.
+        // If specified, optimal Reg Parameters will be 
+	// written to this file. The file will NOT be 
+	// overwritten, rather the result will be appended
         // The following data will be saved in this order: 
         // (1) the optimal tau, (2) the two nearest k values,
         // (3) the k value from the d value method
-        "",
+        regFile,
 	// output
 	// verbose=0: no output at all
 	// verbose=1: standard output
 	// verbose=2: debug output
 	verbose,
-	// produce tau scan plots
-	false
+	// produce tau scan plots 
+	// (only used for illustrating minimum and performance)
+	scan
 	);
 	// ---------------------------------------------
 	// remaining steps for cross section calculation
@@ -1501,7 +1514,7 @@ TString efficiency="efficiency/"+variable;
 	// configure xSec plot histo style
 	histogramStyle(*histo_[xSecNorm][kData], kData, false);
 	// restrict axis
-	setXAxisRange(histo_[xSecNorm][kData], variable);
+	//setXAxisRange(histo_[xSecNorm][kData], variable);
 	NXSec=NXSec+2;
 	// thicker error bars for comparison
 	if(compare){
@@ -1529,7 +1542,7 @@ TString efficiency="efficiency/"+variable;
 	  histo_[xSec    ][kSig ]->SetLineWidth  (3);
 	  histo_[xSecNorm][kSig ]->SetLineWidth  (3);
 	}
-	setXAxisRange(histo_[xSec][kSig ], variable);
+	setXAxisRange(histo_[xSec    ][kSig ], variable);
 	setXAxisRange(histo_[xSecNorm][kSig ], variable);
       }    
     }
@@ -1936,6 +1949,7 @@ TString efficiency="efficiency/"+variable;
   if(save){
     // pdf and eps only for standard analysis without variation
     if(systematicVariation==sysNo){
+      if(verbose>0) std::cout << "will save all plots as png/eps/pdf" << std::endl;
       if(verbose<=1) gErrorIgnoreLevel=kWarning;
       // a) as pdf
       saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
@@ -1954,6 +1968,7 @@ TString efficiency="efficiency/"+variable;
 	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+".png");
 	}
       }
+      if(verbose>0) std::cout << "done" << std::endl;
     }
     // c) root file
     std::vector< std::pair< TCanvas*,TString > > saveCanvas_;
@@ -1978,6 +1993,7 @@ TString efficiency="efficiency/"+variable;
     }
     // save all collected plots
     saveToRootFileAll(outputFileName, saveCanvas_, true, verbose-1);
+    if(verbose>0) std::cout << "done" << std::endl; 
   }
   
   // delete pointer
