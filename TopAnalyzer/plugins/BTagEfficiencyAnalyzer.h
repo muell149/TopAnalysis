@@ -38,12 +38,15 @@ class BTagEfficiencyAnalyzer : public edm::EDAnalyzer {
  private:
   /// ...
   edm::InputTag jets_;
+  edm::InputTag vertices_;
   std::string bTagAlgo_;
   double bTagDiscrCut_;
   std::vector<double> binsPtB_;
   std::vector<double> binsEtaB_;
   std::vector<double> binsPtL_;
   std::vector<double> binsEtaL_;
+  
+  edm::InputTag weightTag_;
 
   /// b tag eff. histogram
   std::map<std::string, TH1F*> hists_;

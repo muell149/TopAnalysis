@@ -9,6 +9,7 @@
 /// default constructor
 BTagEfficiencyAnalyzer::BTagEfficiencyAnalyzer(const edm::ParameterSet& cfg):
   jets_         ( cfg.getParameter<edm::InputTag> ("jets") ),
+  vertices_     (cfg.getParameter<edm::InputTag>  ( "vertices" )),
   bTagAlgo_     ( cfg.getParameter<std::string>   ("bTagAlgo"  ) ),
   bTagDiscrCut_ ( cfg.getParameter<double>        ("bTagDiscrCut") ),
   binsPtB_       (cfg.getParameter<std::vector<double> >("binsPtB")),
@@ -16,6 +17,9 @@ BTagEfficiencyAnalyzer::BTagEfficiencyAnalyzer(const edm::ParameterSet& cfg):
   binsPtL_       (cfg.getParameter<std::vector<double> >("binsPtL")),
   binsEtaL_      (cfg.getParameter<std::vector<double> >("binsEtaL"))
 {
+   /// weight is an optional parameter; if not present 
+   /// in the module the used weight will be 1.
+   if(cfg.exists("weight" )) weightTag_= cfg.getParameter<edm::InputTag>("weight" );
 }
 
 /// default destructor
@@ -31,6 +35,26 @@ BTagEfficiencyAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
   edm::Handle<edm::View< pat::Jet > > jets;
   evt.getByLabel(jets_, jets);
   
+  // get vertex collection
+  edm::Handle<std::vector<reco::Vertex> > vertices;
+  evt.getByLabel(vertices_, vertices);
+  
+  // prepare the event weights
+  double weight = 1;
+  
+  // get weight from the CMSSW event
+  edm::Handle<double> wgt;
+  evt.getByLabel(weightTag_, wgt);
+  // ignore non existing weights
+  if(wgt.isValid()){
+	//std::cout<<"  eventWeight "<<iWeight<<" "<< weightTags_[iWeight].label() << weightTags_[iWeight].instance() <<": "<<*wgt<<std::endl;
+    weight= *wgt;
+  }
+  else{
+    std::cout<< "eventWeight not found"<<std::endl;
+    edm::LogInfo("weightNotFound") << "eventWeight not found";
+  }
+  
   hists_.find("NumEvents" )->second->Fill( 0.5 );
   
   for(edm::View<pat::Jet>::const_iterator jet = jets->begin();jet != jets->end(); ++jet) {
@@ -38,41 +62,47 @@ BTagEfficiencyAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& se
     double bTagDiscr = jet->bDiscriminator( bTagAlgo_ );
     
     if(jet->partonFlavour() == 5 || jet->partonFlavour() == -5){
-      hists_.find("NumBJets" )   ->second->Fill( 0.5 );
-      hists_.find("NumBJetsPt" ) ->second->Fill( jet->pt() );
-      hists_.find("NumBJetsEta" )->second->Fill( std::abs(jet->eta()) );
-      hists2D_.find("NumBJetsPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) );
+      hists_.find("NumBJets" )   ->second->Fill( 0.5 , weight);
+      hists_.find("NumBJetsPt" ) ->second->Fill( jet->pt() , weight );
+      hists_.find("NumBJetsEta" )->second->Fill( std::abs(jet->eta()) , weight );
+      hists2D_.find("NumBJetsPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) , weight );
+      hists_.find("NumBJetsPVMult" )->second->Fill( vertices->size() , weight );
       if(bTagDiscr > bTagDiscrCut_){
-	hists_.find("NumBJetsTagged" )   ->second->Fill( 0.5 );
-	hists_.find("NumBJetsTaggedPt" ) ->second->Fill( jet->pt() );
-	hists_.find("NumBJetsTaggedEta" )->second->Fill( std::abs(jet->eta()) );
-	hists2D_.find("NumBJetsTaggedPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) );
+	hists_.find("NumBJetsTagged" )   ->second->Fill( 0.5 , weight );
+	hists_.find("NumBJetsTaggedPt" ) ->second->Fill( jet->pt() , weight );
+	hists_.find("NumBJetsTaggedEta" )->second->Fill( std::abs(jet->eta()) , weight );
+	hists2D_.find("NumBJetsTaggedPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) , weight );
+	hists_.find("NumBJetsTaggedPVMult" )->second->Fill( vertices->size() , weight );
       }
     }
   
     else if(jet->partonFlavour() == 4 || jet->partonFlavour() == -4){
-      hists_.find("NumCJets" )   ->second->Fill( 0.5 );
-      hists_.find("NumCJetsPt" ) ->second->Fill( jet->pt() );
-      hists_.find("NumCJetsEta" )->second->Fill( std::abs(jet->eta()) );
-      hists2D_.find("NumCJetsPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) );
+      hists_.find("NumCJets" )   ->second->Fill( 0.5 , weight );
+      hists_.find("NumCJetsPt" ) ->second->Fill( jet->pt() , weight );
+      hists_.find("NumCJetsEta" )->second->Fill( std::abs(jet->eta()) , weight );
+      hists2D_.find("NumCJetsPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) , weight );
+      hists_.find("NumCJetsPVMult" )->second->Fill( vertices->size() , weight );
       if(bTagDiscr > bTagDiscrCut_){
-	hists_.find("NumCJetsTagged" )   ->second->Fill( 0.5 );
-	hists_.find("NumCJetsTaggedPt" ) ->second->Fill( jet->pt() );
-	hists_.find("NumCJetsTaggedEta" )->second->Fill( std::abs(jet->eta()) );
-	hists2D_.find("NumCJetsTaggedPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) );
+	hists_.find("NumCJetsTagged" )   ->second->Fill( 0.5 , weight );
+	hists_.find("NumCJetsTaggedPt" ) ->second->Fill( jet->pt() , weight );
+	hists_.find("NumCJetsTaggedEta" )->second->Fill( std::abs(jet->eta()) , weight );
+	hists2D_.find("NumCJetsTaggedPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) , weight );
+	hists_.find("NumCJetsTaggedPVMult" )->second->Fill( vertices->size() , weight );
       }
     }
   
     else{
-      hists_.find("NumLJets" )   ->second->Fill( 0.5 );
-      hists_.find("NumLJetsPt" ) ->second->Fill( jet->pt() );
-      hists_.find("NumLJetsEta" )->second->Fill( std::abs(jet->eta()) );
-      hists2D_.find("NumLJetsPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) );
+      hists_.find("NumLJets" )   ->second->Fill( 0.5 , weight );
+      hists_.find("NumLJetsPt" ) ->second->Fill( jet->pt() , weight );
+      hists_.find("NumLJetsEta" )->second->Fill( std::abs(jet->eta()) , weight );
+      hists2D_.find("NumLJetsPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) , weight );
+      hists_.find("NumLJetsPVMult" )->second->Fill( vertices->size() , weight );
       if(bTagDiscr > bTagDiscrCut_){
-	hists_.find("NumLJetsTagged" )   ->second->Fill( 0.5 );
-	hists_.find("NumLJetsTaggedPt" ) ->second->Fill( jet->pt() );
-	hists_.find("NumLJetsTaggedEta" )->second->Fill( std::abs(jet->eta()) );
-	hists2D_.find("NumLJetsTaggedPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) );
+	hists_.find("NumLJetsTagged" )   ->second->Fill( 0.5 , weight );
+	hists_.find("NumLJetsTaggedPt" ) ->second->Fill( jet->pt() , weight );
+	hists_.find("NumLJetsTaggedEta" )->second->Fill( std::abs(jet->eta()) , weight );
+	hists2D_.find("NumLJetsTaggedPtEta" ) ->second->Fill( jet->pt(), std::abs(jet->eta()) , weight );
+	hists_.find("NumLJetsTaggedPVMult" )->second->Fill( vertices->size() , weight );
       }
     }
   }
@@ -103,6 +133,9 @@ BTagEfficiencyAnalyzer::beginJob()
   hists2D_["NumBJetsPtEta"    ]   = fs->make<TH2F>( "NumBJetsPtEta"    , "NumBJetsPtEta"    ,  binsPtB_.size()-1, &binsPtB_[0],  binsEtaB_.size()-1, &binsEtaB_[0] );
   hists2D_["NumBJetsTaggedPtEta"] = fs->make<TH2F>( "NumBJetsTaggedPtEta", "NumBJetsTaggedPtEta",  binsPtB_.size()-1, &binsPtB_[0],  binsEtaB_.size()-1, &binsEtaB_[0] );
   hists2D_["EffBJetsTaggedPtEta"] = fs->make<TH2F>( "EffBJetsTaggedPtEta", "EffBJetsTaggedPtEta",  binsPtB_.size()-1, &binsPtB_[0],  binsEtaB_.size()-1, &binsEtaB_[0] );
+  hists_["NumBJetsPVMult" ]      = fs->make<TH1F>( "NumBJetsPVMult" , "NumBJetsPVMult" , 50, 0, 50 );
+  hists_["NumBJetsTaggedPVMult"] = fs->make<TH1F>( "NumBJetsTaggedPVMult"  , "NumBJetsTaggedPVMult"  , 50, 0, 50 );
+  hists_["EffBJetsTaggedPVMult"] = fs->make<TH1F>( "EffBJetsTaggedPVMult"  , "EffBJetsTaggedPVMult"  , 50, 0, 50 );
   
   hists_["NumCJets" ]      = fs->make<TH1F>( "NumCJets" , "NumCJets" , 1, 0, 1 );
   hists_["NumCJetsTagged"] = fs->make<TH1F>( "NumCJetsTagged"  , "NumCJetsTagged"  , 1, 0, 1 );
@@ -116,6 +149,9 @@ BTagEfficiencyAnalyzer::beginJob()
   hists2D_["NumCJetsPtEta"    ]   = fs->make<TH2F>( "NumCJetsPtEta"    , "NumCJetsPtEta"    ,  binsPtB_.size()-1, &binsPtB_[0],  binsEtaB_.size()-1, &binsEtaB_[0] );
   hists2D_["NumCJetsTaggedPtEta"] = fs->make<TH2F>( "NumCJetsTaggedPtEta", "NumCJetsTaggedPtEta",  binsPtB_.size()-1, &binsPtB_[0],  binsEtaB_.size()-1, &binsEtaB_[0] );
   hists2D_["EffCJetsTaggedPtEta"] = fs->make<TH2F>( "EffCJetsTaggedPtEta", "EffCJetsTaggedPtEta",  binsPtB_.size()-1, &binsPtB_[0],  binsEtaB_.size()-1, &binsEtaB_[0] );
+  hists_["NumCJetsPVMult" ]      = fs->make<TH1F>( "NumCJetsPVMult" , "NumCJetsPVMult" , 50, 0, 50 );
+  hists_["NumCJetsTaggedPVMult"] = fs->make<TH1F>( "NumCJetsTaggedPVMult"  , "NumCJetsTaggedPVMult"  , 50, 0, 50 );
+  hists_["EffCJetsTaggedPVMult"] = fs->make<TH1F>( "EffCJetsTaggedPVMult"  , "EffCJetsTaggedPVMult"  , 50, 0, 50 );
   
   
   hists_["NumLJets" ]      = fs->make<TH1F>( "NumLJets" , "NumLJets" , 1, 0, 1 );
@@ -130,6 +166,9 @@ BTagEfficiencyAnalyzer::beginJob()
   hists2D_["NumLJetsPtEta"    ]   = fs->make<TH2F>( "NumLJetsPtEta"    , "NumLJetsPtEta"    ,  binsPtL_.size()-1, &binsPtL_[0],  binsEtaL_.size()-1, &binsEtaL_[0] );
   hists2D_["NumLJetsTaggedPtEta"] = fs->make<TH2F>( "NumLJetsTaggedPtEta", "NumLJetsTaggedPtEta",  binsPtL_.size()-1, &binsPtL_[0],  binsEtaL_.size()-1, &binsEtaL_[0] );
   hists2D_["EffLJetsTaggedPtEta"] = fs->make<TH2F>( "EffLJetsTaggedPtEta", "EffLJetsTaggedPtEta",  binsPtL_.size()-1, &binsPtL_[0],  binsEtaL_.size()-1, &binsEtaL_[0] );
+  hists_["NumLJetsPVMult" ]      = fs->make<TH1F>( "NumLJetsPVMult" , "NumLJetsPVMult" , 50, 0, 50 );
+  hists_["NumLJetsTaggedPVMult"] = fs->make<TH1F>( "NumLJetsTaggedPVMult"  , "NumLJetsTaggedPVMult"  , 50, 0, 50 );
+  hists_["EffLJetsTaggedPVMult"] = fs->make<TH1F>( "EffLJetsTaggedPVMult"  , "EffLJetsTaggedPVMult"  , 50, 0, 50 );
  
 // set errors
   hists_["NumEvents"]      ->Sumw2();
@@ -145,6 +184,8 @@ BTagEfficiencyAnalyzer::beginJob()
   hists2D_["NumBJetsPtEta"    ]   ->Sumw2();
   hists2D_["NumBJetsTaggedPtEta"] ->Sumw2();
   hists2D_["EffBJetsTaggedPtEta"] ->Sumw2();
+  hists_["NumBJetsPVMult" ]      ->Sumw2();
+  hists_["NumBJetsTaggedPVMult"] ->Sumw2();
       
   hists_["NumCJets" ]      ->Sumw2();
   hists_["NumCJetsTagged"] ->Sumw2();
@@ -158,6 +199,8 @@ BTagEfficiencyAnalyzer::beginJob()
   hists2D_["NumCJetsPtEta"    ]   ->Sumw2();
   hists2D_["NumCJetsTaggedPtEta"] ->Sumw2();
   hists2D_["EffCJetsTaggedPtEta"] ->Sumw2();
+  hists_["NumCJetsPVMult" ]      ->Sumw2();
+  hists_["NumCJetsTaggedPVMult"] ->Sumw2();
   
   hists_["NumLJets" ]      ->Sumw2();
   hists_["NumLJetsTagged"] ->Sumw2();
@@ -171,6 +214,8 @@ BTagEfficiencyAnalyzer::beginJob()
   hists2D_["NumLJetsPtEta"    ]   ->Sumw2();
   hists2D_["NumLJetsTaggedPtEta"] ->Sumw2();
   hists2D_["EffLJetsTaggedPtEta"] ->Sumw2();
+  hists_["NumLJetsPVMult" ]      ->Sumw2();
+  hists_["NumLJetsTaggedPVMult"] ->Sumw2();
 }
 
 /// ...
@@ -186,6 +231,8 @@ BTagEfficiencyAnalyzer::endJob()
                  hists_.find("NumBJetsEta")->second,1,1,"B");
   hists2D_.find("EffBJetsTaggedPtEta")->second->Divide(hists2D_.find("NumBJetsTaggedPtEta")->second, 
   hists2D_.find("NumBJetsPtEta")->second,1,1,"B");
+  hists_.find("EffBJetsTaggedPVMult")->second->Divide(hists_.find("NumBJetsTaggedPVMult")->second, 
+  hists_.find("NumBJetsPVMult")->second,1,1,"B");
   
   hists_.find("EffCJetsTagged")->second->Divide(hists_.find("NumCJetsTagged")->second, 
                  hists_.find("NumCJets")->second,1,1,"B");
@@ -195,6 +242,8 @@ BTagEfficiencyAnalyzer::endJob()
                  hists_.find("NumCJetsEta")->second,1,1,"B");
   hists2D_.find("EffCJetsTaggedPtEta")->second->Divide(hists2D_.find("NumCJetsTaggedPtEta")->second, 
   hists2D_.find("NumCJetsPtEta")->second,1,1,"B");
+  hists_.find("EffCJetsTaggedPVMult")->second->Divide(hists_.find("NumCJetsTaggedPVMult")->second, 
+  hists_.find("NumCJetsPVMult")->second,1,1,"B");
   
   hists_.find("EffLJetsTagged")->second->Divide(hists_.find("NumLJetsTagged")->second, 
                  hists_.find("NumLJets")->second,1,1,"B");
@@ -204,6 +253,8 @@ BTagEfficiencyAnalyzer::endJob()
                  hists_.find("NumLJetsEta")->second,1,1,"B");
   hists2D_.find("EffLJetsTaggedPtEta")->second->Divide(hists2D_.find("NumLJetsTaggedPtEta")->second, 
   hists2D_.find("NumLJetsPtEta")->second,1,1,"B");
+  hists_.find("EffLJetsTaggedPVMult")->second->Divide(hists_.find("NumLJetsTaggedPVMult")->second, 
+  hists_.find("NumLJetsPVMult")->second,1,1,"B");
 }
 
 //define plugin
