@@ -1427,7 +1427,7 @@ TString efficiency="efficiency/"+variable;
 	//           -> NOTE: tau=true otion is needed when using function "regParameter"
 	// regMode=3 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
 	// a "center value" for k, to be specified in 'regpar'. Note: The scan may take a while!
-	// regMode=4 is SVD Unfolding. A scan for the optimal k parameter is performed. The scan is performed around
+	// regMode=4 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
 	// a "center value" for tau, to be specified in 'regpar'
 	// Note: The scan may take a while! 
 	2,                            
@@ -1453,6 +1453,12 @@ TString efficiency="efficiency/"+variable;
 	rootFile,
 	// If specified, plots will be saved in PS File
 	psFile,
+        // If specified, optimal Reg Parameters will be written to this file.
+        // The file will NOT be overwritten, rather the result will be appended.
+        // The following data will be saved in this order: 
+        // (1) the optimal tau, (2) the two nearest k values,
+        // (3) the k value from the d value method
+        "",
 	// output
 	// verbose=0: no output at all
 	// verbose=1: standard output
