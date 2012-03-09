@@ -95,6 +95,16 @@ if(not globals().has_key('BtagReweigthing')):
     if (not runningOnData == "MC"):
         BtagReweigthing = False
 
+## choose b tag algo
+if(not globals().has_key('bTagAlgo')):
+    bTagAlgo =  'combinedSecondaryVertexBJets' # 'simpleSecondaryVertexHighEffBJets'
+print "used b tag algo: "+bTagAlgo
+
+## choose b tag working point (discriminator cut value)
+if(not globals().has_key('bTagDiscrCut')):
+    bTagDiscrCut =  0.679  # 1.74 for SSVHEM
+print "used b tag discriminator cut value: ", bTagDiscrCut
+
 ## enable/ disable efficiency SF event reweighting
 if(not globals().has_key('effSFReweigthing')):
     effSFReweigthing = True # False
@@ -721,6 +731,10 @@ process.hadLvObjectMonitoring = cms.Sequence(process.genAllElectronKinematics *
 ## ---
 ##    Set up selection for b-jet multiplicity
 ## ---
+
+## switch to desired btagging algo
+process.tightBottomPFJets.src = bTagAlgo
+## select number of b tags
 process.btagSelection = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
 
 ## kinematic contributions
@@ -749,6 +763,7 @@ process.tightLead_3_JetKinematics = process.analyzeJetKinematics.clone(src = 'ti
 process.tightJetKinematics        = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQuality           = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 process.bottomJetKinematics       = process.analyzeJetKinematics.clone(src = 'tightBottomPFJets', analyze = udsAll)
+process.bottomJetQuality          = process.analyzeJetQuality.clone(src = 'tightBottomPFJets', analyze = udsAll)
 process.tightJetKinematicsPreSel  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQualityPreSel     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 
@@ -766,6 +781,7 @@ process.tightLead_3_JetKinematicsTagged  = process.tightLead_3_JetKinematics.clo
 process.tightJetKinematicsTagged         = process.tightJetKinematics.clone()
 process.tightJetQualityTagged            = process.tightJetQuality.clone()
 process.bottomJetKinematicsTagged        = process.bottomJetKinematics.clone()
+process.bottomJetQualityTagged           = process.bottomJetQuality.clone()
 process.bottomLead_0_JetKinematicsTagged = process.analyzeJetKinematics.clone (src = 'tightBottomPFJets', analyze = uds0 )
 process.bottomLead_1_JetKinematicsTagged = process.analyzeJetKinematics.clone (src = 'tightBottomPFJets', analyze = uds1 )
 
@@ -851,6 +867,7 @@ process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinemati
                                                        process.tightJetKinematics           +
                                                        process.tightJetQuality              +
                                                        process.bottomJetKinematics          +
+						       process.bottomJetQuality             +
                                                        process.analyzeMETMuon               +
                                                        process.tightMuontightJetsKinematics
                                                        )
@@ -865,6 +882,7 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.tightJetKinematicsTagged           +
                                                       process.tightJetQualityTagged              +
                                                       process.bottomJetKinematicsTagged          +
+                                                      process.bottomJetQualityTagged             +
                                                       process.analyzeMETMuonTagged               +
                                                       process.tightMuontightJetsKinematicsTagged +
                                                       process.bottomLead_0_JetKinematicsTagged   +
@@ -946,13 +964,13 @@ process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
-#process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "trackCountingHighEffBJetTags"
-process.kinFitTtSemiLepEventHypothesis.bTagAlgo = "simpleSecondaryVertexHighEffBJetTags"
+process.kinFitTtSemiLepEventHypothesis.bTagAlgo = bTagAlgo+"Tags" # "simpleSecondaryVertexHighEffBJetTags"
 
-# TCHE  discr.values 7TeV: 1.70, 3.30, 10.20
-# SSVHE discr.values 7TeV: x.xx, 1.74,  x.xx
-process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = 1.74
-process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = 1.74
+# TCHE  discr.values 7TeV: 1.70,  3.30  , 10.20
+# SSVHE discr.values 7TeV: x.xx,  1.74  ,  x.xx
+# CSV   discr.values 7TeV: 0.244, 0.679 , 0.898
+process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = bTagDiscrCut
+process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = bTagDiscrCut
 process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 
 # use larger JER in KinFit as it is obtained from data
@@ -1254,8 +1272,13 @@ process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 
 process.load("TopAnalysis.TopUtils.BTagSFEventWeight_cfi")
+## DB only accepts short tagger algo names
+bTagAlgoShort = "CSVM"
+if(bTagAlgo =='simpleSecondaryVertexHighEffBJets'):
+    bTagAlgoShort = "SSVHEM"
 process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
-process.bTagSFEventWeight.bTagAlgo=cms.string("SSVHEM")
+process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
+process.bTagSFEventWeight.version="11-004"
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
 process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency.root"
@@ -1287,24 +1310,26 @@ process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7 = process.bTagSFEventWeight.c
 process.load("TopAnalysis.TopUtils.EffSFMuonEventWeight_cfi")
 process.effSFMuonEventWeight.particles=cms.InputTag("tightMuons")
 process.effSFMuonEventWeight.sysVar   = cms.string("")
-process.effSFMuonEventWeight.filename= "TopAnalysis/Configuration/data/efficiencyIsoMu17Combined_tapTrigger_SF_Eta.root"
+process.effSFMuonEventWeight.filename= "TopAnalysis/Configuration/data/MuonEffSF2011.root"
 process.effSFMuonEventWeight.verbose=cms.int32(0)
-process.effSFMuonEventWeight.additionalFactor=0.9990 ## lepton selection eff. SF
-process.effSFMuonEventWeight.additionalFactorErr=0.03 ## 3% sys error to account for selection difference Z - ttbar
-process.effSFMuonEventWeight.meanTriggerEffSF=0.9905
-process.effSFMuonEventWeight.shapeDistortionFactor=0.5
+process.effSFMuonEventWeight.additionalFactor=1. ## lepton selection and trigger eff. SF both included in loaded histo
+process.effSFMuonEventWeight.additionalFactorErr=0.01 ## 1% sys error to account for non-flatness
+process.effSFMuonEventWeight.meanTriggerEffSF=0.9824
+process.effSFMuonEventWeight.shapeDistortionFactor=-1
 
-process.effSFMuonEventWeightFlatTriggerSF            = process.effSFMuonEventWeight.clone(sysVar = "flatTriggerSF")
-process.effSFMuonEventWeightTriggerEffSFNormUp       = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFNormUp")
-process.effSFMuonEventWeightTriggerEffSFNormDown     = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFNormDown")
-process.effSFMuonEventWeightTriggerEffSFShapeUpEta   = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpEta")
-process.effSFMuonEventWeightTriggerEffSFShapeDownEta = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownEta")
-process.effSFMuonEventWeightTriggerEffSFShapeUpPt    = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpPt")
-process.effSFMuonEventWeightTriggerEffSFShapeDownPt  = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownPt")
-process.effSFMuonEventWeightTriggerEffSFShapeUpPt40  = process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeUpPt",   shapeVarPtThreshold=40.0)
-process.effSFMuonEventWeightTriggerEffSFShapeDownPt40= process.effSFMuonEventWeight.clone(sysVar = "triggerEffSFShapeDownPt", shapeVarPtThreshold=40.0)
-process.effSFMuonEventWeightSelectionEffSFNormUp     = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormUp")
-process.effSFMuonEventWeightSelectionEffSFNormDown   = process.effSFMuonEventWeight.clone(sysVar = "selectionEffSFNormDown")
+process.effSFMuonEventWeightPUup              = process.effSFMuonEventWeight.clone(sysVar = "PUup")
+process.effSFMuonEventWeightPUdown            = process.effSFMuonEventWeight.clone(sysVar = "PUdown")
+process.effSFMuonEventWeightFlatTriggerSF     = process.effSFMuonEventWeight.clone(sysVar = "flatTriggerSF")
+process.effSFMuonEventWeightEffSFNormUpStat   = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormUpStat")
+process.effSFMuonEventWeightEffSFNormDownStat = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormDownStat")
+process.effSFMuonEventWeightEffSFShapeUpEta   = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeUpEta")
+process.effSFMuonEventWeightEffSFShapeDownEta = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeDownEta")
+process.effSFMuonEventWeightEffSFShapeUpPt    = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeUpPt")
+process.effSFMuonEventWeightEffSFShapeDownPt  = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeDownPt")
+process.effSFMuonEventWeightEffSFShapeUpPt40  = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeUpPt",   shapeVarPtThreshold=40.0)
+process.effSFMuonEventWeightEffSFShapeDownPt40= process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeDownPt", shapeVarPtThreshold=40.0)
+process.effSFMuonEventWeighEffSFNormUpSys     = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormUpSys")
+process.effSFMuonEventWeightEffSFNormDownSys  = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormDownSys")
 
 process.load("TopAnalysis.TopUtils.EffSFElectronEventWeight_cfi")
 process.effSFElectronEventWeight.particles=cms.InputTag("goodElectronsEJ")
@@ -1404,19 +1429,19 @@ if(effSFReweigthing and decayChannel=="muon"):
     weightlistFinal                    .append("effSFMuonEventWeight")
     weightlistNoBtagSFWeight           .append("effSFMuonEventWeight")
     weightlistNoPUWeight               .append("effSFMuonEventWeight")
-    weightlistPUup                     .append("effSFMuonEventWeight")
-    weightlistPUdown                   .append("effSFMuonEventWeight")
+    weightlistPUup                     .append("effSFMuonEventWeightPUup")
+    weightlistPUdown                   .append("effSFMuonEventWeightPUdown")
     weightlistFlatTriggerSF            .append("effSFMuonEventWeightFlatTriggerSF")
-    weightlistTriggerEffSFNormUp       .append("effSFMuonEventWeightTriggerEffSFNormUp")
-    weightlistTriggerEffSFNormDown     .append("effSFMuonEventWeightTriggerEffSFNormDown")
-    weightlistTriggerEffSFShapeUpEta   .append("effSFMuonEventWeightTriggerEffSFShapeUpEta")
-    weightlistTriggerEffSFShapeDownEta .append("effSFMuonEventWeightTriggerEffSFShapeDownEta")
-    weightlistTriggerEffSFShapeUpPt    .append("effSFMuonEventWeightTriggerEffSFShapeUpPt")
-    weightlistTriggerEffSFShapeDownPt  .append("effSFMuonEventWeightTriggerEffSFShapeDownPt")
-    weightlistTriggerEffSFShapeUpPt40  .append("effSFMuonEventWeightTriggerEffSFShapeUpPt40")
-    weightlistTriggerEffSFShapeDownPt40.append("effSFMuonEventWeightTriggerEffSFShapeDownPt40")
-    weightlistSelectionEffSFNormUp     .append("effSFMuonEventWeightSelectionEffSFNormUp")
-    weightlistSelectionEffSFNormDown   .append("effSFMuonEventWeightSelectionEffSFNormDown")
+    weightlistTriggerEffSFNormUp       .append("effSFMuonEventWeightEffSFNormUpStat")
+    weightlistTriggerEffSFNormDown     .append("effSFMuonEventWeightEffSFNormDownStat")
+    weightlistTriggerEffSFShapeUpEta   .append("effSFMuonEventWeightEffSFShapeUpEta")
+    weightlistTriggerEffSFShapeDownEta .append("effSFMuonEventWeightEffSFShapeDownEta")
+    weightlistTriggerEffSFShapeUpPt    .append("effSFMuonEventWeightEffSFShapeUpPt")
+    weightlistTriggerEffSFShapeDownPt  .append("effSFMuonEventWeightEffSFShapeDownPt")
+    weightlistTriggerEffSFShapeUpPt40  .append("effSFMuonEventWeightEffSFShapeUpPt40")
+    weightlistTriggerEffSFShapeDownPt40.append("effSFMuonEventWeightEffSFShapeDownPt40")
+    weightlistSelectionEffSFNormUp     .append("effSFMuonEventWeighEffSFNormUpSys")
+    weightlistSelectionEffSFNormDown   .append("effSFMuonEventWeightEffSFNormDownSys")
     weightlistBtagSFup                 .append("effSFMuonEventWeight")
     weightlistBtagSFdown               .append("effSFMuonEventWeight")
     weightlistMisTagSFup               .append("effSFMuonEventWeight")
@@ -1855,17 +1880,19 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     if(decayChannel=="muon"):
 	process.kinFit.replace(process.analyzeTopRecoKinematicsKinFit, 
                                process.analyzeTopRecoKinematicsKinFit*
+			       process.effSFMuonEventWeightPUup*
+			       process.effSFMuonEventWeightPUdown*
                                process.effSFMuonEventWeightFlatTriggerSF*           
-                               process.effSFMuonEventWeightTriggerEffSFNormUp*      
-                               process.effSFMuonEventWeightTriggerEffSFNormDown*    
-                               process.effSFMuonEventWeightTriggerEffSFShapeUpEta*  
-                               process.effSFMuonEventWeightTriggerEffSFShapeDownEta*
-                               process.effSFMuonEventWeightTriggerEffSFShapeUpPt*  
-                               process.effSFMuonEventWeightTriggerEffSFShapeDownPt*
-			       process.effSFMuonEventWeightTriggerEffSFShapeUpPt40*  
-                               process.effSFMuonEventWeightTriggerEffSFShapeDownPt40*
-                               process.effSFMuonEventWeightSelectionEffSFNormUp    *
-                               process.effSFMuonEventWeightSelectionEffSFNormDown*
+                               process.effSFMuonEventWeightEffSFNormUpStat*      
+                               process.effSFMuonEventWeightEffSFNormDownStat*    
+                               process.effSFMuonEventWeightEffSFShapeUpEta*  
+                               process.effSFMuonEventWeightEffSFShapeDownEta*
+                               process.effSFMuonEventWeightEffSFShapeUpPt*  
+                               process.effSFMuonEventWeightEffSFShapeDownPt*
+			       process.effSFMuonEventWeightEffSFShapeUpPt40*  
+                               process.effSFMuonEventWeightEffSFShapeDownPt40*
+                               process.effSFMuonEventWeighEffSFNormUpSys    *
+                               process.effSFMuonEventWeightEffSFNormDownSys*
                                process.bTagSFEventWeightBTagSFUp    *
                                process.bTagSFEventWeightBTagSFDown  *
                                process.bTagSFEventWeightMisTagSFUp  *
@@ -2159,11 +2186,8 @@ elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
     print "choose runningOnData= data or MC, creating no gen-plots"
-## switch to SSV btagging
+
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-massSearchReplaceAnyInputTag(process.p1, 'tightBottomPFJets', 'simpleSecondaryVertexHighEffBJets')
-process.simpleSecondaryVertexHighEffBJets.src="goodJetsPF30"
-process.p1.replace(process.semiLeptonicSelection, process.semiLeptonicSelection*process.simpleSecondaryVertexHighEffBJets)
 
 ## switch to PF objects
 if(jetType=="particleFlow"):
