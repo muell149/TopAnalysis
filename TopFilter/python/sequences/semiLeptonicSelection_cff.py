@@ -46,14 +46,13 @@ looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
 tightLeadingJets = selectedPatJets.clone(src = 'goodJets',
                                          cut=''
                                          )
-tightBottomJets  = selectedPatJets.clone(src = 'trackCountingHighEffBJets',
+tightBottomJets  = combinedSecondaryVertexBJets.clone(src = 'goodJets',
                                          cut=''
                                          )
 tightLeadingPFJets = selectedPatJets.clone(src = 'goodJetsPF30',
                                            cut=''
                                            )
-tightBottomPFJets  = selectedPatJets.clone(src = 'goodJetsPF30',
-                                           cut='bDiscriminator(\"trackCountingHighEffBJetTags\") > 3.3'
+tightBottomPFJets  = selectedPatJets.clone(src = 'combinedSecondaryVertexBJets'
                                            )
 ## setting up the collections for the semi-leptonic
 ## event selection; on these collection monitoring
@@ -95,6 +94,8 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
                                      noKinTightElectronsEJ     *
                                      trackCountingHighPurBJets *
                                      trackCountingHighEffBJets *
+                                     simpleSecondaryVertexHighEffBJets *
+				     combinedSecondaryVertexBJets      *
                                      tightLeadingJets          *
                                      tightBottomJets           *
                                      tightLeadingPFJets        *
