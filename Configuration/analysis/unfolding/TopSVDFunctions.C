@@ -1945,6 +1945,7 @@ double TopSVDFunctions::SVD_Unfold(
         // The following data will be saved in this order: 
         // (1) the optimal tau, (2) the two nearest k values,
         // (3) the k value from the d value method
+        // (4) the number of bins including side bins
         TString scanResultFile,
         // parameter to control amount of output
         // verbose=0: no output at all
@@ -2288,13 +2289,15 @@ double TopSVDFunctions::SVD_Unfold(
     // Count the Singular Values
     int nSingularValues = 0;
     int nSignSingularValues = 0;
-    int nScanSingularValues = 0; 
-    int nSigSingularValues = 0;
-    for ( int i = 0 ; i < svHist->GetNbinsX() ; i++ ) {
+    int nScanSingularValues = 0;  
+    for ( int i = 0 ; i < nbins ; i++ ) {
         double sv = svHist->GetBinContent(i+1);
-        if ( sv > 0. ) nSingularValues++ ;
-        if ( sv > 1. ) nSigSingularValues++ ;
-        if ( sv > 0.01 ) nScanSingularValues++ ;
+        double dd = ddHist->GetBinContent(i+1);
+        if ( sv > 0. ) {
+        	nSingularValues++ ;
+        	if ( dd > 1. ) nSignSingularValues++ ;
+        	if ( dd > 0.01 ) nScanSingularValues++ ; 
+        }
     }  
      
      
@@ -2473,6 +2476,9 @@ double TopSVDFunctions::SVD_Unfold(
             }
         }
 
+        // Before starting the golden section search, we have to reset the unfolding class
+        mySVDUnfold->Unfold(-1);
+
         // Determine optimal tau value with golden section     
         double goldSec = (3.-sqrt(5.))/2.;
         double globCorrLowTau = 1000.;
@@ -2632,6 +2638,8 @@ double TopSVDFunctions::SVD_Unfold(
 		lineStrList.Append(TString::Format("%i", optimalTauHighK)); 
 		for ( int i = lineStrList.Length() ; i < 80 ; i++ ) lineStrList.Append(" ");  
 		lineStrList.Append(TString::Format("%i", nSignSingularValues)); 
+		for ( int i = lineStrList.Length() ; i < 84 ; i++ ) lineStrList.Append(" ");  
+		lineStrList.Append(TString::Format("%i", nbins)); 
 		cout << lineStrList << endl;  
         
         // Reset Redirection
