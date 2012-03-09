@@ -2526,7 +2526,7 @@ namespace semileptonic {
     return result;
   }
 
-  void DrawNormTheoryCurve(TString filename="", TString plotname="", int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="", bool smoothcurves=true)
+  void DrawTheoryCurve(TString filename="", TString plotname="", bool normalize=true, int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="", bool smoothcurves=true)
   {
     // this function draws "plot" from "file" into the active canvas
     // modified quantities: NONE
@@ -2534,6 +2534,7 @@ namespace semileptonic {
     // used enumerators: NONE
     // filename: name of input file
     // plotname: name of histogram
+    // normalize: indicates whether absolute or normalized plot is shown
     // smoothFactor: argument of ->Smooth()
     // rebinFactor:  argument of ->Rebin()
     // color: color of histogram
@@ -2549,6 +2550,8 @@ namespace semileptonic {
     // drawRawPlot: draw in addition the unbinned and unsmoothed plot 
     //              to see whether rebinning and smoothing has changed the shape 
     // model: indicates theory (madgraph, powheg or mcatnalo)
+    // smoothcurves: indicates wheter smooth or binned curve is drawn
+
     TString plotname2=plotname;
     plotname2.ReplaceAll("hVis"   ,"");
     plotname2.ReplaceAll("MC@NLO" ,"");
@@ -2567,20 +2570,39 @@ namespace semileptonic {
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
     if(verbose>0){
-      std::cout << "variable: " << plotname << std::endl;
+      std::cout << "variable: " << plotname <<std::endl;
       if(rangeLow!=-1.||rangeHigh!=-1.) std::cout << "range: " << rangeLow << ".." << rangeHigh << std::endl;
       std::cout << "file: " << filename << std::endl;
+      std::cout << "normalize?: " << normalize << std::endl;
       std::cout << "smoothFactor: " << smoothFactor << std::endl;
       std::cout << "rebinFactor: " << rebinFactor << std::endl;
       std::cout << "color: " << color << std::endl;
-      std::cout << "draw errorbands? " << errorbands << std::endl;
-      std::cout << "draw smooth curves?" << smoothcurves << std::endl;
+      std::cout << "draw errorbands?: " << errorbands << std::endl;
+      std::cout << "draw smooth curves?: " << smoothcurves << std::endl;
       if(errorbands){
 	std::cout << "errorRebinFactor: " << errorRebinFactor << std::endl;
 	std::cout << "errorSmoothFactor: " << errorSmoothFactor << std::endl;
       }
     }
+    // --- 
+    // absolute normalization
+    // --- 
+    // scale to inclusive xSec
+    double weight=ttbarCrossSection;
+    // consider efficiency in phase space
+    //if(model=="powheg" ) weight*=255743./1227541.;
+    //if(model=="mcatnlo") weight*=119134./546459; // MadGraph value for the moment
+    // BR correction = <BR W->e/mu> * <BR W->qq> (from pdg)
+    weight*=0.5*(0.1075+0.1057)*0.676;
+    // N-> <e+mu>
+    weight*=0.5;
+    // output
+    if(!normalize&&(model=="powheg"||model=="mcatnlo")&&verbose>0){
+      std::cout << "incl xSec(PS): " << 2*weight << " (" << model << ")"<< std::endl;
+    }
+    // --- 
     // draw raw plot to estimate effect of rebinning and smoothing
+    // --- 
     if(drawRawPlot){
       TH1F* raw=getTheoryPrediction(plotname, filename);
       // add muon and electron channel to
@@ -2594,10 +2616,15 @@ namespace semileptonic {
       raw->SetLineColor(color);
       //raw->SetMarkerSize(2);
       //raw->SetMarkerStyle(29);
-      raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
+      if(normalize) raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
+      // absolute normalization for POWHEG and MCatNlo curve
+      if(!normalize&&(model=="powheg"||model=="mcatnlo")) raw->Scale(weight/getInclusiveXSec(raw));
       raw->Scale(1./(raw->GetBinWidth(1)));
       raw->Draw("c same"); 
     }
+    // --- 
+    // central prediction
+    // --- 
     // get plot
     TH1F* result=getTheoryPrediction(plotname, filename);
     // add muon and electron channel to
@@ -2630,7 +2657,9 @@ namespace semileptonic {
     // variable rebinning for binned curve
     if(!smoothcurves) reBinTH1F(*result, binning_[plotname2], verbose);
     // normalize to area
-    result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
+    if(normalize) result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
+    // absolute normalization for POWHEG and MCatNlo curve
+    if(!normalize&&(model=="powheg"||model=="mcatnlo")) result->Scale(weight/getInclusiveXSec(result));
     // divide by binwidth
     if(smoothcurves) result->Scale(1.0/result->GetBinWidth(1));
     else result=divideByBinwidth(result, false);
@@ -2638,7 +2667,9 @@ namespace semileptonic {
     if(smoothcurves&&smoothFactor) result->Smooth(smoothFactor);
     // set range
     if(rangeLow!=-1.&&rangeHigh!=-1.) result->GetXaxis()->SetRangeUser(rangeLow, rangeHigh);
+    // --- 
     // error bands
+    // --- 
     if(errorbands){
       // get values
       TH1F* central   =getTheoryPrediction(plotname        , filename);
@@ -2669,9 +2700,17 @@ namespace semileptonic {
 	reBinTH1F(*ErrorDown, binning_[plotname2], verbose-1);
       }
       // normalize to area
-      central  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
-      ErrorUp  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
-      ErrorDown->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+      if(normalize){
+	central  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+	ErrorUp  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+	ErrorDown->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+      }
+      // absolute normalization for POWHEG and MCatNlo curve
+/*       if(!normalize&&(model=="powheg"||model=="mcatnlo")){ */
+/* 	central  ->Scale(weight/getInclusiveXSec(central)); */
+/* 	ErrorUp  ->Scale(weight/getInclusiveXSec(central)); */
+/* 	ErrorDown->Scale(weight/getInclusiveXSec(central)); */
+/*       } */
       // divide by binwidth
       if(smoothcurves){
 	central  ->Scale(1.0/central  ->GetBinWidth(1));
@@ -2754,17 +2793,16 @@ namespace semileptonic {
       errorBands->SetLineWidth  (result->GetLineWidth());
       errorBands->SetMarkerColor(result->GetMarkerColor());
       // draw error bands
-      //whipEmptyBinsAway(errorBands, verbose);
       if(smoothcurves) errorBands->Draw("e3 same");
-      else{
-	errorBands->Draw("e2 same");
-	//errorBands->Draw("p same");
-      }
-    }
+      else errorBands->Draw("e2 same");
+    }    
+    // --- 
     //draw central value
+    // --- 
     if(!drawOnlyErrors){ 
       if(smoothcurves) result->Draw("hist c same"); 
       else result->Draw("hist same");
+      if(verbose>0) std::cout << "theory curve drawn" << std::endl;
     }
   }
 
