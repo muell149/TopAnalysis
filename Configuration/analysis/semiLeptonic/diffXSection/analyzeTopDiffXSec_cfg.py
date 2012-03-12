@@ -763,7 +763,7 @@ process.tightLead_3_JetKinematics = process.analyzeJetKinematics.clone(src = 'ti
 process.tightJetKinematics        = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQuality           = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 process.bottomJetKinematics       = process.analyzeJetKinematics.clone(src = 'tightBottomPFJets', analyze = udsAll)
-process.bottomJetQuality          = process.analyzeJetQuality.clone(src = 'tightBottomPFJets', analyze = udsAll)
+process.bottomJetQuality          = process.analyzeJetQuality.clone(src = 'tightBottomPFJets')
 process.tightJetKinematicsPreSel  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQualityPreSel     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 
@@ -1045,43 +1045,18 @@ process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKi
 analyzeAll = cms.PSet( corrPerm=cms.bool(False), maxChi2=cms.double(10000) )
 # b) correct permutation
 analyzeCorrect = cms.PSet( corrPerm=cms.bool(True), maxChi2=cms.double(10000) )
-# c) chi2<5
-analyzeChi5  = cms.PSet( corrPerm=cms.bool(False), maxChi2=cms.double(5)  )
-# d) chi2<10
-analyzeChi10 = cms.PSet( corrPerm=cms.bool(False), maxChi2=cms.double(10) )
-# e) chi2<15
-analyzeChi15 = cms.PSet( corrPerm=cms.bool(False), maxChi2=cms.double(15) )
-# f) chi2<30
-analyzeChi30 = cms.PSet( corrPerm=cms.bool(False), maxChi2=cms.double(30) )
-# g) chi2<50
-analyzeChi50 = cms.PSet( corrPerm=cms.bool(False), maxChi2=cms.double(50) )
 # 2) lepton
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitLepton_cfi")
 process.analyzeHypoKinFitLepton      = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeAll    )
 process.analyzeHypoKinFitLeptonCorr  = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeCorrect)
-process.analyzeHypoKinFitLeptonChi5  = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeChi5   )
-process.analyzeHypoKinFitLeptonChi10 = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeChi10  )
-process.analyzeHypoKinFitLeptonChi15 = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeChi15   )
-process.analyzeHypoKinFitLeptonChi30 = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeChi30  )
-process.analyzeHypoKinFitLeptonChi50 = process.analyzeHypothesisKinFitLepton.clone(srcA = "ttSemiLepEvent", srcB = "tightMuons", analyze=analyzeChi50  )
 # 3) jets
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitJets_cfi")
 process.analyzeHypoKinFitJets      = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeAll    )
 process.analyzeHypoKinFitJetsCorr  = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeCorrect)
-process.analyzeHypoKinFitJetsChi5  = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi5   )
-process.analyzeHypoKinFitJetsChi10 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi10  )
-process.analyzeHypoKinFitJetsChi15 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi15  )
-process.analyzeHypoKinFitJetsChi30 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi30  )
-process.analyzeHypoKinFitJetsChi50 = process.analyzeHypothesisKinFitJets.clone(srcA = "ttSemiLepEvent", srcB = "tightLeadingPFJets", analyze=analyzeChi50  )
 # 4) neutrino/MET
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFitMET_cfi" )
 process.analyzeHypoKinFitMET      = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeAll    )
 process.analyzeHypoKinFitMETCorr  = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeCorrect)
-process.analyzeHypoKinFitMETChi5  = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeChi5   )
-process.analyzeHypoKinFitMETChi10 = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeChi10  )
-process.analyzeHypoKinFitMETChi15 = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeChi15  )
-process.analyzeHypoKinFitMETChi30 = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeChi30  )
-process.analyzeHypoKinFitMETChi50 = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeChi50  )
 
 ## ---
 ##    collect KinFit Analyzers depending on sample processed
@@ -1104,25 +1079,10 @@ if(applyKinFit==True):
                                              process.analyzeHypoKinFit                       +
                                              process.analyzeHypoKinFitLepton                 +
                                              process.analyzeHypoKinFitLeptonCorr             +
-                                             process.analyzeHypoKinFitLeptonChi5             +
-                                             process.analyzeHypoKinFitLeptonChi10            +
-                                             process.analyzeHypoKinFitLeptonChi15            +
-                                             process.analyzeHypoKinFitLeptonChi30            +
-                                             process.analyzeHypoKinFitLeptonChi50            +
                                              process.analyzeHypoKinFitMET                    +
                                              process.analyzeHypoKinFitMETCorr                +
-                                             process.analyzeHypoKinFitMETChi5                +
-                                             process.analyzeHypoKinFitMETChi10               +
-                                             process.analyzeHypoKinFitMETChi15               +
-                                             process.analyzeHypoKinFitMETChi30               +
-                                             process.analyzeHypoKinFitMETChi50               +
                                              process.analyzeHypoKinFitJets                   +
                                              process.analyzeHypoKinFitJetsCorr               +
-                                             process.analyzeHypoKinFitJetsChi5               +
-                                             process.analyzeHypoKinFitJetsChi10              +
-                                             process.analyzeHypoKinFitJetsChi15              +
-                                             process.analyzeHypoKinFitJetsChi30              +
-                                             process.analyzeHypoKinFitJetsChi50              +
                                              process.filterMatchKinFit
                                              )
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics          )
