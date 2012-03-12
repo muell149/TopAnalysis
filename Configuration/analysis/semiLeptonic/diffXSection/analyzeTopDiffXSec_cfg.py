@@ -223,7 +223,7 @@ if(not options.sample=="none"):
     outputFileName+="DiffXSec"    
     if(options.sample=="ttbar"):
         # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
-        usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v2_AOD_cff"
 	if(eventFilter=='signal only'):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
