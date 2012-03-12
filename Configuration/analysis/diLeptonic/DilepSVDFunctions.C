@@ -93,58 +93,62 @@ double DilepSVDFunctions::SVD_GetRegPar(TString channel, TString particle, TStri
     
 	// Regularize Via tau
     if ( regMode == 2 || regMode == 4 ) {
-		if ( concatenation.CompareTo("emu_Leptons_Eta") == 0 )                          regPar = 11.60651;
-		if ( concatenation.CompareTo("mumu_Leptons_Eta") == 0 )                         regPar = 6.65463;
-		if ( concatenation.CompareTo("ee_Leptons_Eta") == 0 )                           regPar = 5.72994;
-		if ( concatenation.CompareTo("combined_Leptons_Eta") == 0 )                     regPar = 14.25360;
-		if ( concatenation.CompareTo("emu_Leptons_Pt") == 0 )                           regPar = 10.39686;
-		if ( concatenation.CompareTo("mumu_Leptons_Pt") == 0 )                          regPar = 5.18436;
-		if ( concatenation.CompareTo("ee_Leptons_Pt") == 0 )                            regPar = 4.82904;
-		if ( concatenation.CompareTo("combined_Leptons_Pt") == 0 )                      regPar = 12.47045;
-		if ( concatenation.CompareTo("emu_LepPair_Pt") == 0 )                           regPar = 14.17671;
-		if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 )                          regPar = 6.87167;
-		if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 )                            regPar = 6.92577;
-		if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 )                      regPar = 15.95395;
-		if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 )                         regPar = 17.76963;
-		if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 )                        regPar = 0.34067;
-		if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 )                          regPar = 0.43183;
-		if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 )                    regPar = 22.57879;
-		if ( concatenation.CompareTo("emu_Jets_Eta") == 0 )                             regPar = 23.17710;
-		if ( concatenation.CompareTo("mumu_Jets_Eta") == 0 )                            regPar = 12.41859;
-		if ( concatenation.CompareTo("ee_Jets_Eta") == 0 )                              regPar = 11.08602;
-		if ( concatenation.CompareTo("combined_Jets_Eta") == 0 )                        regPar = 26.40473;
-		if ( concatenation.CompareTo("emu_Jets_Pt") == 0 )                              regPar = 18.19060;
-		if ( concatenation.CompareTo("mumu_Jets_Pt") == 0 )                             regPar = 9.82304;
-		if ( concatenation.CompareTo("ee_Jets_Pt") == 0 )                               regPar = 9.45277;
-		if ( concatenation.CompareTo("combined_Jets_Pt") == 0 )                         regPar = 23.22770;
-		if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 )                   regPar = 21.31468;
-		if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 )                  regPar = 11.63043;
-		if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 )                    regPar = 11.58946;
-		if ( concatenation.CompareTo("combined_TopQuarks_Rapidity") == 0 )              regPar = 26.76945;
-		if ( concatenation.CompareTo("emu_TopQuarks_Rapidity_MoreBins") == 0 )          regPar = 27.27020;
-		if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity_MoreBins") == 0 )         regPar = 14.98169;
-		if ( concatenation.CompareTo("ee_TopQuarks_Rapidity_MoreBins") == 0 )           regPar = 14.55621;
-		if ( concatenation.CompareTo("combined_TopQuarks_Rapidity_MoreBins") == 0 )     regPar = 34.25092;
-		if ( concatenation.CompareTo("emu_TopQuarks_Pt") == 0 )                         regPar = 30.24627;
-		if ( concatenation.CompareTo("mumu_TopQuarks_Pt") == 0 )                        regPar = 17.72126;
-		if ( concatenation.CompareTo("ee_TopQuarks_Pt") == 0 )                          regPar = 16.59263;
-		if ( concatenation.CompareTo("combined_TopQuarks_Pt") == 0 )                    regPar = 38.74808;
-		if ( concatenation.CompareTo("emu_TtBar_Rapidity") == 0 )                       regPar = 13.09755;
-		if ( concatenation.CompareTo("mumu_TtBar_Rapidity") == 0 )                      regPar = 5.72065;
-		if ( concatenation.CompareTo("ee_TtBar_Rapidity") == 0 )                        regPar = 6.20367;
-		if ( concatenation.CompareTo("combined_TtBar_Rapidity") == 0 )                  regPar = 15.25706;
-		if ( concatenation.CompareTo("emu_TtBar_Rapidity_MoreBins") == 0 )              regPar = 19.52446;
-		if ( concatenation.CompareTo("mumu_TtBar_Rapidity_MoreBins") == 0 )             regPar = 10.47879;
-		if ( concatenation.CompareTo("ee_TtBar_Rapidity_MoreBins") == 0 )               regPar = 9.91619;
-		if ( concatenation.CompareTo("combined_TtBar_Rapidity_MoreBins") == 0 )         regPar = 23.85867;
-		if ( concatenation.CompareTo("emu_TtBar_Pt") == 0 )                             regPar = 23.84918;
-		if ( concatenation.CompareTo("mumu_TtBar_Pt") == 0 )                            regPar = 12.55188;
-		if ( concatenation.CompareTo("ee_TtBar_Pt") == 0 )                              regPar = 11.94456;
-		if ( concatenation.CompareTo("combined_TtBar_Pt") == 0 )                        regPar = 27.23497;
-		if ( concatenation.CompareTo("emu_TtBar_Mass") == 0 )                           regPar = 9.18666;
-		if ( concatenation.CompareTo("mumu_TtBar_Mass") == 0 )                          regPar = 6.42640;
-		if ( concatenation.CompareTo("ee_TtBar_Mass") == 0 )                            regPar = 6.16216; 
-		if ( concatenation.CompareTo("combined_TtBar_Mass") == 0 )                      regPar = 13.28851;
+    	if ( concatenation.CompareTo("emu_Leptons_Eta") == 0 )                          regPar = 12.46585;
+		if ( concatenation.CompareTo("mumu_Leptons_Eta") == 0 )                         regPar = 7.00469;
+		if ( concatenation.CompareTo("ee_Leptons_Eta") == 0 )                           regPar = 6.38505;
+		if ( concatenation.CompareTo("combined_Leptons_Eta") == 0 )                     regPar = 15.64009;
+		if ( concatenation.CompareTo("emu_Leptons_Pt") == 0 )                           regPar = 10.46604;
+		if ( concatenation.CompareTo("mumu_Leptons_Pt") == 0 )                          regPar = 5.73979;
+		if ( concatenation.CompareTo("ee_Leptons_Pt") == 0 )                            regPar = 5.26385;
+		if ( concatenation.CompareTo("combined_Leptons_Pt") == 0 )                      regPar = 12.95660;
+		if ( concatenation.CompareTo("emu_LepPair_Pt") == 0 )                           regPar = 14.21435;
+		if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 )                          regPar = 7.72164;
+		if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 )                            regPar = 7.34612;
+		if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 )                      regPar = 17.68402;
+		if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 )                         regPar = 19.03124;
+		if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 )                        regPar = 111.13875;
+		if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 )                          regPar = 219.42386;
+		if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 )                    regPar = 23.50532;
+		if ( concatenation.CompareTo("emu_Jets_Eta") == 0 )                             regPar = 23.07640;
+		if ( concatenation.CompareTo("mumu_Jets_Eta") == 0 )                            regPar = 12.61893;
+		if ( concatenation.CompareTo("ee_Jets_Eta") == 0 )                              regPar = 12.13045;
+		if ( concatenation.CompareTo("combined_Jets_Eta") == 0 )                        regPar = 28.89900;
+		if ( concatenation.CompareTo("emu_Jets_Pt") == 0 )                              regPar = 19.69450;
+		if ( concatenation.CompareTo("mumu_Jets_Pt") == 0 )                             regPar = 10.53993;
+		if ( concatenation.CompareTo("ee_Jets_Pt") == 0 )                               regPar = 10.10353;
+		if ( concatenation.CompareTo("combined_Jets_Pt") == 0 )                         regPar = 24.39646;
+		if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 )                   regPar = 22.01909;
+		if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 )                  regPar = 12.18932;
+		if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 )                    regPar = 11.80886;
+		if ( concatenation.CompareTo("combined_TopQuarks_Rapidity") == 0 )              regPar = 27.73292;
+		if ( concatenation.CompareTo("emu_TopQuarks_Rapidity_MoreBins") == 0 )          regPar = 28.86155;
+		if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity_MoreBins") == 0 )         regPar = 15.99503;
+		if ( concatenation.CompareTo("ee_TopQuarks_Rapidity_MoreBins") == 0 )           regPar = 15.23704;
+		if ( concatenation.CompareTo("combined_TopQuarks_Rapidity_MoreBins") == 0 )     regPar = 36.22604;
+		if ( concatenation.CompareTo("emu_TopQuarks_Pt") == 0 )                         regPar = 30.32823;
+		if ( concatenation.CompareTo("mumu_TopQuarks_Pt") == 0 )                        regPar = 18.05278;
+		if ( concatenation.CompareTo("ee_TopQuarks_Pt") == 0 )                          regPar = 16.97786;
+		if ( concatenation.CompareTo("combined_TopQuarks_Pt") == 0 )                    regPar = 39.06316;
+		if ( concatenation.CompareTo("emu_TtBar_Rapidity") == 0 )                       regPar = 13.92207;
+		if ( concatenation.CompareTo("mumu_TtBar_Rapidity") == 0 )                      regPar = 6.61194;
+		if ( concatenation.CompareTo("ee_TtBar_Rapidity") == 0 )                        regPar = 6.81676;
+		if ( concatenation.CompareTo("combined_TtBar_Rapidity") == 0 )                  regPar = 16.74603;
+		if ( concatenation.CompareTo("emu_TtBar_Rapidity_MoreBins") == 0 )              regPar = 21.82622;
+		if ( concatenation.CompareTo("mumu_TtBar_Rapidity_MoreBins") == 0 )             regPar = 11.46453;
+		if ( concatenation.CompareTo("ee_TtBar_Rapidity_MoreBins") == 0 )               regPar = 11.07554;
+		if ( concatenation.CompareTo("combined_TtBar_Rapidity_MoreBins") == 0 )         regPar = 26.91094;
+		if ( concatenation.CompareTo("emu_TtBar_Pt") == 0 )                             regPar = 23.54894;
+		if ( concatenation.CompareTo("mumu_TtBar_Pt") == 0 )                            regPar = 12.68250;
+		if ( concatenation.CompareTo("ee_TtBar_Pt") == 0 )                              regPar = 12.95903;
+		if ( concatenation.CompareTo("combined_TtBar_Pt") == 0 )                        regPar = 29.66756;
+		if ( concatenation.CompareTo("emu_TtBar_Mass") == 0 )                           regPar = 9.94907;
+		if ( concatenation.CompareTo("mumu_TtBar_Mass") == 0 )                          regPar = 6.90770;
+		if ( concatenation.CompareTo("ee_TtBar_Mass") == 0 )                            regPar = 6.43150;
+		if ( concatenation.CompareTo("combined_TtBar_Mass") == 0 )                      regPar = 13.71350;
+		
+		    	
+		    	
+    	
     }
 
 
@@ -307,7 +311,8 @@ double DilepSVDFunctions::SVD_DoUnfold(
         if ( unfoldingPlotsToRoot == true ) rootFile.Append(SVD_GetOutputFileNameRoot(channel, particle, quantity, special));
         TString psFile = "";
         if ( unfoldingPlotsToPs == true ) psFile.Append(SVD_GetOutputFileNamePs(channel, particle, quantity, special));
-         
+        TString scanResultFile =  SVD_GetOutputPath();
+        scanResultFile.Append("/optimalTau.txt");
 
 		// Screen Output
 		cout << "    RegPar:            " << regPar << endl;
@@ -326,12 +331,13 @@ double DilepSVDFunctions::SVD_DoUnfold(
 
 
 	    // Do the Unfolding 
-	    double optimalTauX = TopSVDFunctions::SVD_Unfold(dataInputHist, bgrInputHist, genInputHist, recInputHist, respInputHist, 
+	    double optimalTauX = TopSVDFunctions::SVD_Unfold(dataInputHist, bgrInputHist, NULL, genInputHist, recInputHist, respInputHist, 
              thebins, numbins, regPar, regMode,
              unfolded, 
              channel, particle, quantity, special,
              channelTex, particleTex, quantityTex, specialTex,
-             rootFile, psFile);
+             rootFile, psFile, scanResultFile,
+             1, true);
   
   		// Save best tau to file if you do a scan
   		if ( regMode == 3 || regMode == 4 ) {
@@ -350,9 +356,9 @@ double DilepSVDFunctions::SVD_DoUnfold(
   			cout << lineStrCode << endl;
   			gSystem->RedirectOutput(NULL, "a");
   			
-  			// Plain list
+  			// Plain list with Tau Parameters
   			TString tauTextFileList = SVD_GetOutputPath();
-  			tauTextFileList.Append("/optimalTau.txt");
+  			tauTextFileList.Append("/optimalTauDocu.txt");
   			gSystem->RedirectOutput(tauTextFileList, "a");
   			TString lineStrList =  SVD_CPQS(channel, particle, quantity, special);
   			lineStrList.ReplaceAll("_",""); // Remove underscores
