@@ -1241,8 +1241,12 @@ process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
 process.bTagSFEventWeight.version="11-004"
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
-process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency.root"
+process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+bTagAlgoShort+".root"
 process.bTagSFEventWeight.verbose=cms.int32(0)
+
+## for SSV:
+process.bTagSFEventWeightSSV                      =  process.bTagSFEventWeight.clone(bTagAlgo = "SSVHEM", 
+                                                                       filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiencySSVHEM.root")
 
 process.bTagSFEventWeightBTagSFUp                  = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
 process.bTagSFEventWeightBTagSFDown                = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
@@ -1335,6 +1339,7 @@ weightlistTriggerEffSFShapeUpPt40  =cms.VInputTag()
 weightlistTriggerEffSFShapeDownPt40=cms.VInputTag()
 weightlistSelectionEffSFNormUp     =cms.VInputTag()
 weightlistSelectionEffSFNormDown   =cms.VInputTag()
+weightlistFinalSSV                 =cms.VInputTag()
 weightlistBtagSFup                 =cms.VInputTag()
 weightlistBtagSFdown               =cms.VInputTag()
 weightlistMisTagSFup               =cms.VInputTag()
@@ -1368,6 +1373,7 @@ if(PUreweigthing):
     weightlistTriggerEffSFShapeDownPt40.append(PUweight)
     weightlistSelectionEffSFNormUp     .append(PUweight)
     weightlistSelectionEffSFNormDown   .append(PUweight)
+    weightlistFinalSSV                 .append(PUweight)
     weightlistBtagSFup                 .append(PUweight)
     weightlistBtagSFdown               .append(PUweight)
     weightlistMisTagSFup               .append(PUweight)
@@ -1402,6 +1408,7 @@ if(effSFReweigthing and decayChannel=="muon"):
     weightlistTriggerEffSFShapeDownPt40.append("effSFMuonEventWeightEffSFShapeDownPt40")
     weightlistSelectionEffSFNormUp     .append("effSFMuonEventWeighEffSFNormUpSys")
     weightlistSelectionEffSFNormDown   .append("effSFMuonEventWeightEffSFNormDownSys")
+    weightlistFinalSSV                 .append("effSFMuonEventWeight")
     weightlistBtagSFup                 .append("effSFMuonEventWeight")
     weightlistBtagSFdown               .append("effSFMuonEventWeight")
     weightlistMisTagSFup               .append("effSFMuonEventWeight")
@@ -1435,6 +1442,7 @@ if(effSFReweigthing and decayChannel=="electron"):
     weightlistTriggerEffSFShapeDownPt40.append("effSFElectronEventWeightTriggerEffSFShapeDownPt40")
     weightlistSelectionEffSFNormUp     .append("effSFElectronEventWeightSelectionEffSFNormUp")
     weightlistSelectionEffSFNormDown   .append("effSFElectronEventWeightSelectionEffSFNormDown")
+    weightlistFinalSSV                 .append("effSFElectronEventWeight")
     weightlistBtagSFup                 .append("effSFElectronEventWeight")
     weightlistBtagSFdown               .append("effSFElectronEventWeight")
     weightlistMisTagSFup               .append("effSFElectronEventWeight")
@@ -1467,6 +1475,7 @@ if(BtagReweigthing):
     weightlistTriggerEffSFShapeDownPt40.append("bTagSFEventWeight")
     weightlistSelectionEffSFNormUp     .append("bTagSFEventWeight")
     weightlistSelectionEffSFNormDown   .append("bTagSFEventWeight")
+    weightlistFinalSSV                 .append("bTagSFEventWeightSSV")
     weightlistBtagSFup                 .append("bTagSFEventWeightBTagSFUp")
     weightlistBtagSFdown               .append("bTagSFEventWeightBTagSFDown")
     weightlistMisTagSFup               .append("bTagSFEventWeightMisTagSFUp")
@@ -1489,6 +1498,8 @@ if(BtagReweigthing):
 process.eventWeightNoBtagSFWeight           = process.eventWeightMultiplier.clone(eventWeightTags = weightlistNoBtagSFWeight)
 process.eventWeightNoPUWeight               = process.eventWeightMultiplier.clone(eventWeightTags = weightlistNoPUWeight)
 process.eventWeightFinal                    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFinal)
+
+process.eventWeightFinalSSV                 = process.eventWeightMultiplier.clone(eventWeightTags = weightlistFinalSSV)
 
 ## b) for systematics
 process.eventWeightPUup                     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistPUup)
