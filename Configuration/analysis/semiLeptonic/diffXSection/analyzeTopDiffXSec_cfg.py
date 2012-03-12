@@ -736,6 +736,7 @@ process.hadLvObjectMonitoring = cms.Sequence(process.genAllElectronKinematics *
 process.tightBottomPFJets.src = bTagAlgo
 ## select number of b tags
 process.btagSelection = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
+process.btagSelectionSSV=process.btagSelection.clone(src = 'simpleSecondaryVertexHighEffBJets')
 
 ## kinematic contributions
 ## muon
@@ -743,10 +744,8 @@ process.tightMuonKinematics        = process.analyzeMuonKinematics.clone (src = 
 process.tightMuonQuality           = process.analyzeMuonQuality.clone    (src = 'tightMuons')
 process.tightMuonKinematicsTagged  = process.tightMuonKinematics.clone();
 process.tightMuonQualityTagged     = process.tightMuonQuality.clone();
-process.kinematicMuonQualityPreSel = process.analyzeMuonQuality.clone    (src = 'kinematicMuons')
-process.goldenMuonQualityPreSel    = process.analyzeMuonQuality.clone    (src = 'goldenMuons'   )
-process.tightMuonKinematicsPreSel  = process.analyzeMuonKinematics.clone (src = 'tightMuons'    )
-process.tightMuonQualityPreSel     = process.analyzeMuonQuality.clone    (src = 'tightMuons'    )
+process.tightMuonKinematicsSSV  = process.analyzeMuonKinematics.clone (src = 'tightMuons'    )
+process.tightMuonQualitySSV     = process.analyzeMuonQuality.clone    (src = 'tightMuons'    )
 
 process.tightMuonKinematicsNjets1 = process.tightMuonKinematics.clone() 
 process.tightMuonQualityNjets1    = process.tightMuonQuality.clone   ()    
@@ -764,8 +763,8 @@ process.tightJetKinematics        = process.analyzeJetKinematics.clone(src = 'ti
 process.tightJetQuality           = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 process.bottomJetKinematics       = process.analyzeJetKinematics.clone(src = 'tightBottomPFJets', analyze = udsAll)
 process.bottomJetQuality          = process.analyzeJetQuality.clone(src = 'tightBottomPFJets')
-process.tightJetKinematicsPreSel  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
-process.tightJetQualityPreSel     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
+process.tightJetKinematicsSSV  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
+process.tightJetQualitySSV     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 
 process.tightJetKinematicsNjets1=process.tightJetKinematics.clone()
 process.tightJetQualityNjets1   =process.tightJetQuality   .clone()
@@ -788,13 +787,15 @@ process.bottomLead_1_JetKinematicsTagged = process.analyzeJetKinematics.clone (s
 ## muon&jets
 process.tightMuontightJetsKinematics       = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons', srcB = 'tightLeadingPFJets')
 process.tightMuontightJetsKinematicsTagged = process.tightMuontightJetsKinematics.clone()
-process.trackMuontightJetsKinematicsPreSel = process.analyzeMuonJetKinematics.clone(srcA = 'trackMuons', srcB = 'vetoJets')
+process.tightMuontightJetsKinematicsSSV = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons', srcB = 'vetoJets')
 
 ## electrons
 process.tightElectronKinematics        = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
 process.tightElectronQuality           = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
 process.tightElectronKinematicsTagged  = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
 process.tightElectronQualityTagged     = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
+process.tightElectronKinematicsSSV     = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
+process.tightElectronQualitySSV        = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
 
 process.tightElectronKinematicsNjets1  = process.tightElectronKinematics.clone()
 process.tightElectronQualityNjets1     = process.tightElectronQuality   .clone()
@@ -889,14 +890,12 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.bottomLead_1_JetKinematicsTagged
                                                       )
     
-process.basicMonitoring = cms.Sequence(process.trackMuontightJetsKinematicsPreSel +
-                                       process.kinematicMuonQualityPreSel         +
-                                       process.goldenMuonQualityPreSel            +
-                                       process.tightMuonKinematicsPreSel          +
-                                       process.tightMuonQualityPreSel             +
-                                       process.tightJetKinematicsPreSel           +
-                                       process.tightJetQualityPreSel              
-                                       )
+process.SSVMonitoring = cms.Sequence(process.tightMuontightJetsKinematicsSSV +
+                                     process.tightMuonKinematicsSSV          +
+                                     process.tightMuonQualitySSV             +
+                                     process.tightJetKinematicsSSV           +
+                                     process.tightJetQualitySSV              
+                                     )
 
 process.monitorElectronKinematicsBeforeBtagging = cms.Sequence(process.tightElectronKinematics+
                                                                process.tightElectronQuality   )
@@ -1995,6 +1994,16 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            process.analyzeTopRecoKinematicsKinFitBTagSFShapeDownEta0p7
                            )
 
+## SSV event weights
+if(runningOnData=="MC" and BtagReweigthing):
+    SSVModules = process.SSVMonitoring.moduleNames()
+    print
+    print " The following reco-modules will use the SSV b-tag event weights:"
+    print SSVModules
+    # 'eventWeightFinal' combines the correct combination of 'PUreweigthing' and 'effSFReweigthing' with the SSV b-tag SF
+    for module in SSVModules:
+        getattr(process,module).weight=cms.InputTag("eventWeightFinalSSV")
+        
 ## ---
 ##    run the final sequences
 ## ---
@@ -2046,7 +2055,7 @@ if(runningOnData=="data"):
     process.p1.remove(process.isolatedGenMuons)
     process.p1.remove(process.semiLeptGenCollections)
 
-## loose selection and monitoring of some basic distributions
+## analysis with SSV btagger
 process.p2 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequence                        *
                       ## PV event selection
@@ -2066,10 +2075,19 @@ process.p2 = cms.Path(## gen event selection (decay channel) and the trigger sel
 		      process.eventWeightNoBtagSFWeight             *
                       ## monitoring of PU reweighting and PV
                       process.PUControlDistributionsDefault         *
-                      ## loose selection (slightly above mu17TriCentralJet30 Trigger)
-                      process.looseCuts                             *
-                      ## basic monitoring
-                      process.basicMonitoring
+                      ## std sel wo b-tagging
+                      process.muonCuts                              *
+                      process.secondMuonVeto                        *
+                      process.electronVeto                          *
+                      process.leadingJetSelectionNjets4             *
+                      ## SSV btag-selection
+                      process.btagSelectionSSV                      *
+                      ## create PU event weights
+                      process.bTagSFEventWeightSSV                  *
+                      ## create combined weight
+                      process.eventWeightFinalSSV                   *
+                      ## monitoring after SSV
+                      process.SSVMonitoring                         
                       )
 
 ## std analysis with generator objects as input for efficiency determination
@@ -2243,18 +2261,12 @@ if(decayChannel=="electron"):
         path.remove(process.tightMuontightJetsKinematicsTagged)
         path.remove(process.tightMuonKinematicsTagged         )
         path.remove(process.tightMuonQualityTagged            )
-        path.remove(process.trackMuontightJetsKinematicsPreSel)
-        path.remove(process.kinematicMuonQualityPreSel        )
-        path.remove(process.goldenMuonQualityPreSel           )
-        path.remove(process.tightMuonKinematicsPreSel         )
-        path.remove(process.tightMuonQualityPreSel            )
+        path.remove(process.tightMuontightJetsKinematicsSSV)
         # add electron monitoring
         path.replace(process.tightLead_0_JetKinematics      , process.tightElectronKinematics * process.tightElectronQuality * process.tightLead_0_JetKinematics)
         path.replace(process.tightLead_0_JetKinematicsTagged, process.tightElectronKinematicsTagged * process.tightElectronQualityTagged  * process.tightLead_0_JetKinematicsTagged)
-        # remove loose muon trigger based selection for muHad trigger
-        path.remove(process.looseCentralJets)
-        path.remove(process.kinematicMuonsSelection)
-        path.remove(process.looseJetSelectionNjets3)
+        path.replace(process.tightMuonKinematicsSSV, process.tightElectronKinematicsSSV)
+        path.replace(process.tightMuonQualitySSV   , process.tightElectronQualitySSV   )
         # replace muon by electron in (remaining) kinfit analyzers
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
 
