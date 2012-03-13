@@ -98,12 +98,10 @@ if(not globals().has_key('BtagReweigthing')):
 ## choose b tag algo
 if(not globals().has_key('bTagAlgo')):
     bTagAlgo =  'combinedSecondaryVertexBJet' # 'simpleSecondaryVertexHighEffBJet'
-print "used b tag algo: "+bTagAlgo
 
 ## choose b tag working point (discriminator cut value)
 if(not globals().has_key('bTagDiscrCut')):
     bTagDiscrCut =  0.679  # 1.74 for SSVHEM
-print "used b tag discriminator cut value: ", bTagDiscrCut
 
 ## enable/ disable efficiency SF event reweighting
 if(not globals().has_key('effSFReweigthing')):
@@ -449,6 +447,8 @@ print " Chosen sample                       ",options.sample
 print " Lepton decay channel:               ",decayChannel
 print " ttbar filter:                       ",eventFilter," ---- Obsolete if RunningOnData != 'MC' "
 print " Include tau->l events               ",tau
+print " B-tag algo:                         ",bTagAlgo
+print " B-tag discriminator cut value:      ",bTagDiscrCut
 print " Include 0 b-ttaged jets:            ",implement0TagPath
 print " Apply PU reweighting:               ",PUreweigthing
 print " Apply Btag reweighting:             ",BtagReweigthing
@@ -2238,6 +2238,7 @@ if(decayChannel=="electron"):
     process.noNEFJetsPF .src  ='noOverlapJetsPFelec'
     process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
+    process.noKinJetsPF.src   ='noOverlapJetsPFelec' 
     # gen selection
     process.p3.replace(process.genMuonSelection, process.genElectronSelection)
     process.p4.replace(process.genMuonSelection, process.genElectronSelection)
