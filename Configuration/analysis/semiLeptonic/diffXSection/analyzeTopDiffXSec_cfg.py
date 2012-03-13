@@ -97,7 +97,7 @@ if(not globals().has_key('BtagReweigthing')):
 
 ## choose b tag algo
 if(not globals().has_key('bTagAlgo')):
-    bTagAlgo =  'combinedSecondaryVertexBJets' # 'simpleSecondaryVertexHighEffBJets'
+    bTagAlgo =  'combinedSecondaryVertexBJet' # 'simpleSecondaryVertexHighEffBJet'
 print "used b tag algo: "+bTagAlgo
 
 ## choose b tag working point (discriminator cut value)
@@ -733,7 +733,7 @@ process.hadLvObjectMonitoring = cms.Sequence(process.genAllElectronKinematics *
 ## ---
 
 ## switch to desired btagging algo
-process.tightBottomPFJets.src = bTagAlgo
+process.tightBottomPFJets.src = bTagAlgo+"s"
 ## select number of b tags
 process.btagSelection = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
 process.btagSelectionSSV=process.btagSelection.clone(src = 'simpleSecondaryVertexHighEffBJets')
@@ -1233,7 +1233,7 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.load("TopAnalysis.TopUtils.BTagSFEventWeight_cfi")
 ## DB only accepts short tagger algo names
 bTagAlgoShort = "CSVM"
-if(bTagAlgo =='simpleSecondaryVertexHighEffBJets'):
+if(bTagAlgo =='simpleSecondaryVertexHighEffBJet'):
     bTagAlgoShort = "SSVHEM"
 process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
 process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
