@@ -365,7 +365,7 @@ public :
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
    TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT, ;
-   TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;
+   TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity, *h_GenRecoBJetE, *h_GenRecoAntiBJetE;;
    TH2D *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
    
    TH1D *h_NJetMatching;
@@ -410,6 +410,9 @@ public :
    TH1D *h_VisGenAntiBJetpT, *h_VisGenAntiBJetEta, *h_VisGenAntiBJetE, *h_VisGenAntiBJetRapidity;
    TH1D *h_VisGenBJetpT, *h_VisGenBJetEta, *h_VisGenBJetE, *h_VisGenBJetRapidity;
 
+   TH1D *h_VisGenAntiBQuarkpT, *h_VisGenAntiBQuarkEta, *h_VisGenAntiBQuarkE, *h_VisGenAntiBQuarkRapidity;
+   TH1D *h_VisGenBQuarkpT, *h_VisGenBQuarkEta, *h_VisGenBQuarkE, *h_VisGenBQuarkRapidity;
+   
    TH1D *h_VisGenAntiLeptonpT, *h_VisGenAntiLeptonEta, *h_VisGenAntiLeptonE;
    TH1D *h_VisGenLeptonpT, *h_VisGenLeptonEta, *h_VisGenLeptonE;
  
@@ -419,6 +422,9 @@ public :
    TH1D *h_GenAntiBJetpT, *h_GenAntiBJetEta, *h_GenAntiBJetE, *h_GenAntiBJetRapidity;
    TH1D *h_GenBJetpT, *h_GenBJetEta, *h_GenBJetE, *h_GenBJetRapidity;
 
+   TH1D *h_GenAntiBQuarkpT, *h_GenAntiBQuarkEta, *h_GenAntiBQuarkE, *h_GenAntiBQuarkRapidity;
+   TH1D *h_GenBQuarkpT, *h_GenBQuarkEta, *h_GenBQuarkE, *h_GenBQuarkRapidity;
+   
    TH1D *h_GenAntiLeptonpT, *h_GenAntiLeptonEta, *h_GenAntiLeptonE;
    TH1D *h_GenLeptonpT, *h_GenLeptonEta, *h_GenLeptonE;
 
