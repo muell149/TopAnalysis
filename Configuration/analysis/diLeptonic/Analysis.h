@@ -44,6 +44,8 @@
    const Int_t kMaxHypWPlus = 99;
    const Int_t kMaxHypWMinus = 99;
    const Int_t kMaxallGenJets = 99;
+   const Int_t kMaxBHadrons = 8;
+   const Int_t kMaxAntiBHadrons = 7;
 
 using namespace std;
 
@@ -137,6 +139,21 @@ public :
    Double_t        allGenJetsE[kMaxallGenJets];   //[allGenJets_]
    vector<int>     *BHadJetIndex;
    vector<int>     *AntiBHadJetIndex;
+
+   Int_t           BHadrons_;
+   Double_t        BHadronspX[kMaxBHadrons];   //[BHadrons_]
+   Double_t        BHadronspY[kMaxBHadrons];   //[BHadrons_]
+   Double_t        BHadronspZ[kMaxBHadrons];   //[BHadrons_]
+   Double_t        BHadronsE[kMaxBHadrons];   //[BHadrons_]
+   Int_t           AntiBHadrons_;
+   Double_t        AntiBHadronspX[kMaxAntiBHadrons];   //[AntiBHadrons_]
+   Double_t        AntiBHadronspY[kMaxAntiBHadrons];   //[AntiBHadrons_]
+   Double_t        AntiBHadronspZ[kMaxAntiBHadrons];   //[AntiBHadrons_]
+   Double_t        AntiBHadronsE[kMaxAntiBHadrons];   //[AntiBHadrons_]
+   vector<bool>    *BHadronFromTop;
+   vector<bool>    *AntiBHadronFromTopB;
+   vector<int>     *BHadronVsJet;
+   vector<int>     *AntiBHadronVsJet;   
 
    Int_t           HypTop_;
    Double_t        HypToppX[kMaxHypTop];   //[HypTop_]
@@ -285,6 +302,21 @@ public :
    TBranch        *b_allGenJetsE;   //!
    TBranch	  *b_BHadJetIndex;   //!
    TBranch	  *b_AntiBHadJetIndex;   //!
+
+   TBranch        *b_BHadrons_;   //!
+   TBranch        *b_BHadronspX;   //!
+   TBranch        *b_BHadronspY;   //!
+   TBranch        *b_BHadronspZ;   //!
+   TBranch        *b_BHadronsE;   //!
+   TBranch        *b_AntiBHadrons_;   //!
+   TBranch        *b_AntiBHadronspX;   //!
+   TBranch        *b_AntiBHadronspY;   //!
+   TBranch        *b_AntiBHadronspZ;   //!
+   TBranch        *b_AntiBHadronsE;   //!
+   TBranch        *b_BHadronFromTop;   //!
+   TBranch        *b_AntiBHadronFromTopB;   //!
+   TBranch        *b_BHadronVsJet;   //!
+   TBranch        *b_AntiBHadronVsJet;   //!
 
 
    TBranch        *b_HypTop_;   //!
@@ -735,7 +767,22 @@ void Analysis::GetSignalBranches(Long64_t & entry)
    fChain->SetBranchAddress("GenWMinus.fCoordinates.fT", &GenWMinusE, &b_GenWMinusE);*/
    fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex, &b_BHadJetIndex);
    fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex, &b_AntiBHadJetIndex);
-  
+   fChain->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons_);
+   fChain->SetBranchAddress("BHadrons.fCoordinates.fX", BHadronspX, &b_BHadronspX);
+   fChain->SetBranchAddress("BHadrons.fCoordinates.fY", BHadronspY, &b_BHadronspY);
+   fChain->SetBranchAddress("BHadrons.fCoordinates.fZ", BHadronspZ, &b_BHadronspZ);
+   fChain->SetBranchAddress("BHadrons.fCoordinates.fT", BHadronsE, &b_BHadronsE);
+   fChain->SetBranchAddress("AntiBHadrons", &AntiBHadrons_, &b_AntiBHadrons_);
+   fChain->SetBranchAddress("AntiBHadrons.fCoordinates.fX", AntiBHadronspX, &b_AntiBHadronspX);
+   fChain->SetBranchAddress("AntiBHadrons.fCoordinates.fY", AntiBHadronspY, &b_AntiBHadronspY);
+   fChain->SetBranchAddress("AntiBHadrons.fCoordinates.fZ", AntiBHadronspZ, &b_AntiBHadronspZ);
+   fChain->SetBranchAddress("AntiBHadrons.fCoordinates.fT", AntiBHadronsE, &b_AntiBHadronsE);
+   fChain->SetBranchAddress("BHadronFromTop", &BHadronFromTop, &b_BHadronFromTop);
+   fChain->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB, &b_AntiBHadronFromTopB);
+   fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet, &b_BHadronVsJet);
+   fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet, &b_AntiBHadronVsJet);
+
+
   b_GenToppX->GetEntry(entry,1);   //!
   b_GenToppY->GetEntry(entry,1);   //!
   b_GenToppZ->GetEntry(entry,1);   //!
@@ -788,5 +835,23 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   */
   b_BHadJetIndex->GetEntry(entry);   //!
   b_AntiBHadJetIndex->GetEntry(entry);   //!
+
+  b_BHadrons_->GetEntry(entry);
+  b_BHadronspX->GetEntry(entry);
+  b_BHadronspY->GetEntry(entry);
+  b_BHadronspZ->GetEntry(entry);
+  b_BHadronsE->GetEntry(entry);
+
+  b_AntiBHadrons_->GetEntry(entry);
+  b_AntiBHadronspX->GetEntry(entry);
+  b_AntiBHadronspY->GetEntry(entry);
+  b_AntiBHadronspZ->GetEntry(entry);
+  b_AntiBHadronsE->GetEntry(entry);
+
+  b_BHadronFromTop->GetEntry(entry);
+  b_AntiBHadronFromTopB->GetEntry(entry);
+  b_BHadronVsJet->GetEntry(entry);
+  b_AntiBHadronVsJet->GetEntry(entry);
+   
 }
 #endif // #ifdef Analysis_cxx

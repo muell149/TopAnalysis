@@ -299,6 +299,9 @@ Bool_t Analysis::Process(Long64_t entry)
   std::vector<TLorentzVector> LVGenJets;
   set<int> BHadIndex;
 
+  std::vector<TLorentzVector> LVBHadrons;
+  std::vector<TLorentzVector> LVAntiBHadrons;
+
   
   for(int i=0; i<lepton_;i++){
     TLorentzVector leptemp(leptonpX[i], leptonpY[i], leptonpZ[i], leptonE[i]);
@@ -310,7 +313,93 @@ Bool_t Analysis::Process(Long64_t entry)
     LVGenJets.push_back(genjettemp);
   }
   
+  for(int i=0; i<BHadrons_;i++){
+    TLorentzVector bhadrontemp(BHadronspX[i], BHadronspY[i], BHadronspZ[i], BHadronsE[i]);
+    LVBHadrons.push_back(bhadrontemp);
+  }
   
+  for(int i=0; i<AntiBHadrons_;i++){
+    TLorentzVector antibhadrontemp(AntiBHadronspX[i], AntiBHadronspY[i], AntiBHadronspZ[i], AntiBHadronsE[i]);
+    LVAntiBHadrons.push_back(antibhadrontemp);
+  }
+  
+  
+  //time to choose which genJet we actually want  
+
+  std::vector<int> idx_bHadJet;
+  std::vector<int> idx_antibHadJet;
+  /*
+    idx_bHadJet will have 4 jet indices 
+    [0] is the highest pT jet with a B-Hadron
+    [1] is the highest pT jet with a B-Hadron also matched to a top quark
+    [2] highest pT jet of those matched closest (in DeltaR) to the B-Hadron
+    [3] highest pT jet of those matched closest (in DeltaR) to the B-Hadron also matched to a top quark
+  */
+
+  bool BHadhighpTjet = false;
+  bool BHadhighpTjetfromtop = false;
+  bool AntiBHadhighpTjet = false;
+  bool AntiBHadhighpTjetfromtop = false;
+
+  //Case 1: highest pT genJet matched to a BHadron
+  for(int genJet=0; genJet<allGenJets_; genJet++){
+    for(int bHadron=0; bHadron<BHadrons_; bHadron++){
+      if((*BHadronVsJet)[genJet*BHadrons_+bHadron]==1 && (BHadhighpTjet ==false || BHadhighpTjetfromtop == false)){
+	if(BHadhighpTjet==false){
+	  idx_bHadJet.push_back(genJet);
+	  BHadhighpTjet = true;
+	  if((*BHadronFromTop)[bHadron] == true){
+	    idx_bHadJet.push_back(genJet);	  
+	    BHadhighpTjetfromtop = true;
+	  }
+	}else if(BHadhighpTjetfromtop == false){
+	  if((*BHadronFromTop)[bHadron] == true){
+	    idx_bHadJet.push_back(genJet);	  
+	    BHadhighpTjetfromtop = true;
+	  }
+	}
+      }      
+    }
+
+    if(idx_bHadJet.empty()){
+      idx_bHadJet.push_back(-1);
+      if(idx_bHadJet.size()==1) idx_bHadJet.push_back(-1);
+    }
+
+    for(int antibHadron=0; antibHadron<AntiBHadrons_; antibHadron++){
+      if((*AntiBHadronVsJet)[genJet*AntiBHadrons_+antibHadron]==1 && (AntiBHadhighpTjet ==false || AntiBHadhighpTjetfromtop == false)){
+	if(AntiBHadhighpTjet==false){
+	  idx_antibHadJet.push_back(genJet);
+	  AntiBHadhighpTjet = true;
+	  if((*AntiBHadronFromTopB)[antibHadron] == true){
+	    idx_antibHadJet.push_back(genJet);	  
+	    AntiBHadhighpTjetfromtop = true;
+	  }
+	}else if(AntiBHadhighpTjetfromtop == false){
+	  if((*AntiBHadronFromTopB)[antibHadron] == true){
+	    idx_antibHadJet.push_back(genJet);	  
+	    AntiBHadhighpTjetfromtop = true;
+	  }
+	}
+      }      
+    }
+    if(idx_antibHadJet.empty()){
+      idx_antibHadJet.push_back(-1);
+      if(idx_antibHadJet.size()==1) idx_bHadJet.push_back(-1);
+    }
+  }
+
+  if(idx_bHadJet.size()>1 && idx_antibHadJet.size()>1){
+    cout<<"idx_bHadJet.size(): "<<idx_bHadJet.size()<<endl;
+    cout<<"idx_bHadJet[0]: "<<idx_bHadJet[0]<<endl;
+    cout<<"idx_bHadJet[1]: "<<idx_bHadJet[1]<<endl;
+    cout<<"idx_antibHadJet.size()"<<idx_antibHadJet.size()<<endl;
+    cout<<"idx_antibHadJet[0]: "<<idx_antibHadJet[0]<<endl;
+    cout<<"idx_antibHadJet[1]: "<<idx_antibHadJet[1]<<endl;
+  }
+
+  //Case 2: highest pT genJets matched closest to a BHadron
+
   double BtagWP = 1.7; 
   vector<int> BJetIndex;
   for(vector<double>::iterator it = jetBTagTCHE->begin(); it<jetBTagTCHE->end(); it++){
@@ -318,6 +407,8 @@ Bool_t Analysis::Process(Long64_t entry)
       BJetIndex.push_back(*it);
     }    
   }
+
+  
   
   //Should we just look for two Bjets above 1.7 or the two highest bjets?:: Make this a function
   int solutionIndex = 0;
