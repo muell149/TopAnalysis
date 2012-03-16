@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.19 2012/03/01 12:22:55 blutz Exp $
+// $Id: NTupleWriter.cc,v 1.20 2012/03/07 12:43:37 iasincru Exp $
 //
 //
 
@@ -103,8 +103,11 @@ private:
   edm::InputTag genJets_;
   edm::InputTag bIndex_;
   edm::InputTag antiBIndex_;
-  edm::InputTag bHadJetIdx_;
-  edm::InputTag antibHadJetIdx_;
+  
+  edm::InputTag bHadJetIdx_, antibHadJetIdx_;
+  edm::InputTag BHadrons_, AntiBHadrons_;
+  edm::InputTag BHadronFromTopB_, AntiBHadronFromTopB_;
+  edm::InputTag BHadronVsJet_, AntiBHadronVsJet_;
 
   bool includeTrig_, isTtBarSample_;
   edm::InputTag dType_ , trigResults_, decayMode_;
@@ -133,8 +136,15 @@ private:
   LV GenTau, GenAntiTau;
   LV GenNeutrino, GenAntiNeutrino;
   LV GenB, GenAntiB;
-  LV HadronGenB, HadronGenAntiB;
+//  LV HadronGenB, HadronGenAntiB;
   LV GenWPlus, GenWMinus;
+  
+  std::vector<int>	VBHadJetIdx;
+  std::vector<int>	VAntiBHadJetIdx;
+  std::vector<LV>	VBHadron, VAntiBHadron;
+  std::vector<bool>	VBHadFromTop, VAntiBHadFromTop;
+  std::vector<int>	VBHadVsJet, VAntiBHadVsJet;
+  
 
   //Complete true level info
   std::vector<LV> GenParticleP4;
@@ -154,8 +164,6 @@ private:
   std::vector<int> HypJet0index;
   std::vector<int> HypJet1index;
 
-  std::vector<int>   VBHadJetIdx;
-  std::vector<int>   VAntiBHadJetIdx;
 
   int decayMode;
 
@@ -246,9 +254,16 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   bIndex_    (iConfig.getParameter<edm::InputTag>("BJetIndex")),
   antiBIndex_(iConfig.getParameter<edm::InputTag>("AntiBJetIndex")),
 
+  //Input from GenLevelBJetProducer
   bHadJetIdx_(iConfig.getParameter<edm::InputTag> ("BHadJetIndex")),
   antibHadJetIdx_(iConfig.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
-
+  BHadrons_(iConfig.getParameter<edm::InputTag> ("BHadrons")),
+  AntiBHadrons_(iConfig.getParameter<edm::InputTag> ("AntiBHadrons")),
+  BHadronFromTopB_ (iConfig.getParameter<edm::InputTag> ("BHadronFromTopB")),
+  AntiBHadronFromTopB_(iConfig.getParameter<edm::InputTag> ("AntiBHadronFromTopB")),
+  BHadronVsJet_(iConfig.getParameter<edm::InputTag> ("BHadronVsJet")),
+  AntiBHadronVsJet_(iConfig.getParameter<edm::InputTag> ("AntiBHadronVsJet")),
+  
   includeTrig_ ( iConfig.getParameter<bool> ( "includeTrigger" ) ),
   isTtBarSample_ ( iConfig.getParameter<bool> ( "isTtBarSample" ) ),
 
@@ -383,8 +398,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
   if ( isTtBarSample_ )
     {
-      HadronGenAntiB = dummy;
-      HadronGenB = dummy;
+
       //Generator info
       edm::Handle<TtGenEvent> genEvt;
       iEvent.getByLabel ( genEvent_, genEvt );
@@ -397,29 +411,62 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
         GenNeutrino = genEvt->neutrino()->p4(); GenAntiNeutrino = genEvt->neutrinoBar()->p4();
         GenWPlus = genEvt->wPlus()->p4(); GenWMinus = genEvt->wMinus()->p4();
 
-        //find the b jets corresponding to b quarks
-        edm::Handle<int> BJetIndex;
-        iEvent.getByLabel(bIndex_, BJetIndex );
-        edm::Handle<int> AntiBJetIndex;
-        iEvent.getByLabel(antiBIndex_, AntiBJetIndex);
+        
         edm::Handle<reco::GenJetCollection> genJets;
         iEvent.getByLabel(genJets_, genJets);
-        if (*BJetIndex >= 0) (HadronGenB = genJets->at(*BJetIndex).p4());
-        if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
-	
 
+	for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
+          VallGenJets.push_back(aJet->p4());
+	}
+
+	//find the b jets corresponding to b QUARKS (DeltaR selection)
+//         edm::Handle<int> BJetIndex;
+//         iEvent.getByLabel(bIndex_, BJetIndex );
+//         edm::Handle<int> AntiBJetIndex;
+//         iEvent.getByLabel(antiBIndex_, AntiBJetIndex);
+//	HadronGenAntiB = dummy;
+//	HadronGenB = dummy;
+//         if (*BJetIndex >= 0) (HadronGenB = genJets->at(*BJetIndex).p4());
+//         if (*AntiBJetIndex >= 0) (HadronGenAntiB = genJets->at(*AntiBJetIndex).p4());
+	
+	
 	edm::Handle<std::vector<int> > BHadJetIndex;
 	iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
 	edm::Handle<std::vector<int> > AntiBHadJetIndex;
 	iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
 	
-        for (int i=0; i<(int) BHadJetIndex->size(); i++){  VBHadJetIdx.push_back(BHadJetIndex->at(i));};
-	for (int i=0; i<(int) AntiBHadJetIndex->size(); i++){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
+        for (int i=0; i<(int) BHadJetIndex->size(); ++i){  VBHadJetIdx.push_back(BHadJetIndex->at(i));};
+	for (int i=0; i<(int) AntiBHadJetIndex->size(); ++i){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
 	
-	for ( std::vector< reco::GenJet >::const_iterator aJet = genJets->begin(); aJet != genJets->end(); ++aJet) {
-          VallGenJets.push_back(aJet->p4());
-	}
+	
+	edm::Handle<std::vector<reco::GenParticle> > BHadrons;
+	iEvent.getByLabel(BHadrons_, BHadrons);
+	edm::Handle<std::vector<reco::GenParticle> > AntiBHadrons;
+	iEvent.getByLabel(AntiBHadrons_, AntiBHadrons);
+	
+	
+	for (std::vector<reco::GenParticle>::const_iterator it=BHadrons->begin(); it!=BHadrons->end(); ++it){VBHadron.push_back(it->p4());}
+	for (std::vector<reco::GenParticle>::const_iterator it=AntiBHadrons->begin(); it!=AntiBHadrons->end(); ++it){VAntiBHadron.push_back(it->p4());}
+// 	for (int i=0; i< (int) BHadrons->size(); ++i){	VBHadron.push_back(BHadrons->at(i).p4());}
+// 	for (int i=0; i< (int) AntiBHadrons->size(); ++i){	VAntiBHadron.push_back(AntiBHadrons->at(i).p4());}
+	
+	
+	edm::Handle<std::vector<bool> > BHadronFromTopB;
+	iEvent.getByLabel(BHadronFromTopB_, BHadronFromTopB);
+	edm::Handle<std::vector<bool> > AntiBHadronFromTopB;
+	iEvent.getByLabel(AntiBHadronFromTopB_, AntiBHadronFromTopB);
+	for (int i=0; i<(int) BHadronFromTopB->size(); ++i){	VBHadFromTop.push_back(BHadronFromTopB->at(i));}
+	for (int i=0; i<(int) AntiBHadronFromTopB->size(); ++i){VAntiBHadFromTop.push_back(AntiBHadronFromTopB->at(i));}
+	
+	edm::Handle<std::vector<int> > BHadronVsJet;
+	iEvent.getByLabel(BHadronVsJet_, BHadronVsJet);
+	edm::Handle<std::vector<int> > AntiBHadronVsJet;
+	iEvent.getByLabel(AntiBHadronVsJet_, AntiBHadronVsJet);	
 
+	for (int i=0; i<(int) BHadronVsJet->size(); ++i){VBHadVsJet.push_back(BHadronVsJet->at(i));}
+	for (int i=0; i<(int) AntiBHadronVsJet->size(); ++i){VAntiBHadVsJet.push_back(AntiBHadronVsJet->at(i));}
+	
+	
       }
       else
         {
@@ -682,11 +729,17 @@ NTupleWriter::beginJob()
     Ntuple->Branch("GenParticleP4.", &GenParticleP4);
     Ntuple->Branch("GenParticlePdgId.", &GenParticlePdgId);
     Ntuple->Branch("GenParticleStatus.", &GenParticleStatus);
-    Ntuple->Branch("GenJetHadronB",&HadronGenB);
-    Ntuple->Branch("GenJetHadronAntiB",&HadronGenAntiB);
+//     Ntuple->Branch("GenJetHadronB",&HadronGenB);
+//     Ntuple->Branch("GenJetHadronAntiB",&HadronGenAntiB);
 
     Ntuple->Branch("BHadJetIndex", &VBHadJetIdx);
     Ntuple->Branch("AntiBHadJetIndex", &VAntiBHadJetIdx);
+    Ntuple->Branch("BHadrons", &VBHadron);
+    Ntuple->Branch("AntiBHadrons", &VAntiBHadron);
+    Ntuple->Branch("BHadronFromTop", &VBHadFromTop);
+    Ntuple->Branch("AntiBHadronFromTopB", &VAntiBHadFromTop);
+    Ntuple->Branch("BHadronVsJet", &VBHadVsJet);
+    Ntuple->Branch("AntiBHadronVsJet", &VAntiBHadVsJet);
 
   }
 
@@ -783,6 +836,12 @@ void NTupleWriter::clearVariables()
 
   VBHadJetIdx.clear();
   VAntiBHadJetIdx.clear();
+  VBHadron.clear();
+  VAntiBHadron.clear();
+  VBHadFromTop.clear();
+  VAntiBHadFromTop.clear();
+  VBHadVsJet.clear();
+  VAntiBHadVsJet.clear();
   
   /////////met///////////
   VmetEt.clear();
