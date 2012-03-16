@@ -2,26 +2,53 @@
 
 using namespace std;
  
- 
-// Constructors  and Destructor
+// Special Constructure that creates "empty" objects
+// This is needed create arrays of TopSVDUnfold on the heap 
+TopSVDUnfold::TopSVDUnfold() : BaseSVDUnfold()
+{
+    fTau = 0.;
+    fCurv = -1.;
+    fWeights = NULL;
+//  : TObject     (),
+//    fNdim       (0),
+//    fDdim       (2),
+//    fNormalize  (kFALSE),
+//    fKReg       (-1),
+//    fDHist      (NULL),
+//    fSVHist     (NULL),
+//    fXtau       (NULL),
+//    fXinv       (NULL),
+//    fBdat       (NULL),
+//    fBini       (NULL),
+//    fXini       (NULL),
+//    fAdet       (NULL),
+//    fToyhisto   (NULL),
+//    fToymat     (NULL),
+//    fToyMode    (kFALSE),
+//    fMatToyMode (kFALSE)
+} 
+
 TopSVDUnfold::TopSVDUnfold( const TH1D* bdat, const TH1D* bini, const TH1D* xini, const TH2D* Adet ) : BaseSVDUnfold(bdat, bini, xini, Adet) 
 {
     fTau = 0.;
     fCurv = -1.;
     fWeights = NULL;
 }
+
 TopSVDUnfold::TopSVDUnfold( const TH1D *bdat, TH2D* Bcov, const TH1D *bini, const TH1D *xini, const TH2D *Adet ) : BaseSVDUnfold(bdat, Bcov, bini, xini, Adet) 
 {
     fTau = 0.;
     fCurv = -1.; 
     fWeights = NULL;
 }
+
 TopSVDUnfold::TopSVDUnfold( const TopSVDUnfold& other ) : BaseSVDUnfold(other) 
 {
-    fTau = 0.;
-    fCurv = -1.;
-    fWeights = NULL; 
+    fTau = other.fTau;
+    fCurv = other.fCurv;
+    fWeights = other.fWeights;
 }
+
 TopSVDUnfold::~TopSVDUnfold() 
 {
 	if ( fWeights != NULL ) delete fWeights;	

@@ -73,6 +73,29 @@ End_Html */
 using namespace std;
 
 //_______________________________________________________________________
+BaseSVDUnfold::BaseSVDUnfold()
+  : TObject     (),
+    fNdim       (0),
+    fDdim       (2),
+    fNormalize  (kFALSE),
+    fKReg       (-1),
+    fDHist      (NULL),
+    fSVHist     (NULL),
+    fXtau       (NULL),
+    fXinv       (NULL),
+    fBdat       (NULL),
+    fBini       (NULL),
+    fXini       (NULL),
+    fAdet       (NULL),
+    fToyhisto   (NULL),
+    fToymat     (NULL),
+    fToyMode    (kFALSE),
+    fMatToyMode (kFALSE)
+{
+}
+//
+
+//_______________________________________________________________________
 BaseSVDUnfold::BaseSVDUnfold( const TH1D *bdat, const TH1D *bini, const TH1D *xini, const TH2D *Adet )
   : TObject     (),
     fNdim       (0),

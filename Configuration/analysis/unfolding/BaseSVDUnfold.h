@@ -62,6 +62,7 @@ public:
    // "bini" - reconstructed MC distribution (number of events)
    // "xini" - truth MC distribution (number of events)
    // "Adet" - detector response matrix (number of events)
+   BaseSVDUnfold();
    BaseSVDUnfold( const TH1D* bdat, const TH1D* bini, const TH1D* xini, const TH2D* Adet );
    BaseSVDUnfold( const TH1D* bdat, TH2D* Bcov, const TH1D* bini, const TH1D* xini, const TH2D* Adet );
    BaseSVDUnfold( const BaseSVDUnfold& other );
