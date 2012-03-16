@@ -54,20 +54,19 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"electron\" 
+decayChannel=\"combined\" 
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=1143.22
+dataLuminosity=4964
 ## dataset: 2010 or 2011
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root
-
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 ## Data label, required for filename
 ## dataLabel=2011 (default)
 dataLabel=2011
@@ -238,11 +237,47 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]
-    then  
-    echo
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'true')'   # with ratio plots
-    root -l -q -b './analyzeTopDiffXSecMonitoring.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', 'false')'  # without ratio plots
+
+if [ -f commandsMonPrepare.cint ]; then    
+    rm commandsMonPrepare.cint
+    rm analyzeTopDiffXSecMonitoring_C.so
+    rm analyzeTopDiffXSecMonitoring_C.d
+fi
+
+cat >> commandsMonPrepare.cint << EOF
+.L analyzeTopDiffXSecMonitoring.C++
+EOF
+
+root -l -b < commandsMonPrepare.cint
+
+if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+
+    # with ratio plots
+    if [ -f commandsMonRun1.cint ]; then    
+	rm commandsMonRun1.cint       
+    fi    
+
+    cat >> commandsMonRun1.cint << EOF
+.L analyzeTopDiffXSecMonitoring_C.so
+analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true) 
+EOF
+    echo ""
+    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true)"
+    root -l -b < commandsMonRun1.cint
+
+    # without ratio plots
+
+    if [ -f commandsMonRun2.cint ]; then    
+	rm commandsMonRun2.cint       
+    fi  
+
+    cat >> commandsMonRun2.cint << EOF
+.L analyzeTopDiffXSecMonitoring_C.so
+analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false) 
+EOF
+    echo ""
+    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false)"
+    root -l -b < commandsMonRun2.cint
 fi
 
 #####################################
