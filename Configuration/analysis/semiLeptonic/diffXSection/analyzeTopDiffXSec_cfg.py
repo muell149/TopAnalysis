@@ -221,7 +221,7 @@ if(not options.sample=="none"):
     outputFileName+="DiffXSec"    
     if(options.sample=="ttbar"):
         # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
-        usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v2_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_AOD_cff"
 	if(eventFilter=='signal only'):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
@@ -958,9 +958,9 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
-process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+#process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
 process.kinFitTtSemiLepEventHypothesis.bTagAlgo = bTagAlgo+"Tags" # "simpleSecondaryVertexHighEffBJetTags"
@@ -995,7 +995,8 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.05"  ) )
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
+#process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.05"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
@@ -1145,21 +1146,24 @@ process.eventWeightPUsysDown = process.eventWeightPU.clone()
 #### Configuration for Nominal PU Weights
 
 process.eventWeightPUsysNo.WeightName          = "eventWeightPU"
-process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_EPS.root"
+#process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
 process.eventWeightPUsysNo.CreateWeight3DHisto = False 
 process.eventWeightPUsysNo.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_EPS.root"
+#process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_EPS.root"
+#process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
