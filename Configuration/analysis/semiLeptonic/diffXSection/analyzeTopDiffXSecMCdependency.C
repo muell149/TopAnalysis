@@ -6,8 +6,8 @@ TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbo
 double linSF(const double x, const double xmax, const double a, const double b);
 
 void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root"
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
+				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root"
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
                                     bool doPDFuncertainty=false)
 {
   // ---
@@ -28,8 +28,9 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   // define names
   // file name for input rootfile
   TString analysisFileName="";
-  if     (decayChannel=="muon"    ) analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigMadD6TSummer11PF.root";
-  else if(decayChannel=="electron") analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigMadD6TSummer11PF.root";
+  TString SampleTag="Fall11";
+  if     (decayChannel=="muon"    ) analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSig"+SampleTag+"PF.root";
+  else if(decayChannel=="electron") analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSig"+SampleTag+"PF.root";
   else{
     std::cout << "ERROR: decay channel " << decayChannel << " is no valid choice, use electron or muon!" << std::endl;
     exit(0);
@@ -41,16 +42,14 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
   if (doPDFuncertainty) {
     outputFileNameUp.ReplaceAll(inputFolderName, inputFolderName+"/PDFUp");
     outputFileNameDown.ReplaceAll(inputFolderName, inputFolderName+"/PDFDown");
-    outputFileNameUp.ReplaceAll("PF", "PdfVarUpPF"  );
-    outputFileNameDown.ReplaceAll("PF", "PdfVarDownPF");
+    outputFileNameUp.ReplaceAll(SampleTag+"PF", "PdfVarUp"+SampleTag+"PF"  );
+    outputFileNameDown.ReplaceAll(SampleTag+"PF", "PdfVarDown"+SampleTag+"PF");
   } else { 
     outputFileNameUp.ReplaceAll(inputFolderName, inputFolderName+"/MCShapeUp");
     outputFileNameDown.ReplaceAll(inputFolderName, inputFolderName+"/MCShapeDown");
-    outputFileNameUp.ReplaceAll("PF", "MCShapeVarUpPF"  );
-    outputFileNameDown.ReplaceAll("PF", "MCShapeVarDownPF");
+    outputFileNameUp.ReplaceAll("PF", "MCShapeVarUp"+SampleTag+"PF"  );
+    outputFileNameDown.ReplaceAll("PF", "MCShapeVarDown"+SampleTag+"PF");
   }
-  outputFileNameUp.ReplaceAll("TOP2011/110819","TOP2011/111124");
-  outputFileNameDown.ReplaceAll("TOP2011/110819","TOP2011/111124");
   // name for folder where tree is read from
   TString folder="analyzeTopRecoKinematicsKinFit";
   TString genfolder="analyzeTopPartonLevelKinematics";

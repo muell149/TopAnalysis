@@ -466,9 +466,9 @@ namespace semileptonic {
     if(sample==kSToptW ) MCprocess="Single Top tW";
     if(sample==kSTops  ) MCprocess="Single Top s";
     if(sample==kSTopt  ) MCprocess="Single Top t";
-    if(sample==kSAToptW) MCprocess="Single Anti Top tW";
-    if(sample==kSATops ) MCprocess="Single Anti Top s";
-    if(sample==kSATopt ) MCprocess="Single Anti Top t";
+    if(sample==kSAToptW) MCprocess="Single Antitop tW";
+    if(sample==kSATops ) MCprocess="Single Antitop s";
+    if(sample==kSATopt ) MCprocess="Single Antitop t";
     if(sample==kWjets  ) MCprocess="W+Jets";
     if(sample==kZjets  ) MCprocess="Z+Jets";
     if(sample==kDiBos  ) MCprocess="Diboson";
@@ -638,163 +638,156 @@ namespace semileptonic {
     double weight =0;
 
     // c) fill #events in sample and cross sections (in / pb)
-    // 2*ttbar MADGRAPH
+    //
+    // The second number always indicates number without kinematics filter for non-Pythia samples
+    //
+    //  MadGraph: ttbar signal + background
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
-      // Z2 Summer11
-      //Nevents = (sample == kSig) ? 3701947 : 3581947 ;
-      Nevents = 3697693; // after kinematics filter
+      // Fall11
+      Nevents = 3697693;//3701947;
       // Summer11 systematic samples
-      if(kSys==sysTopScaleUp  ) Nevents=929319;//930483;  
-      if(kSys==sysTopScaleDown) Nevents=966082;//967055;  
+      if(kSys==sysTopScaleUp  ) Nevents= 929319;// 930483;  
+      if(kSys==sysTopScaleDown) Nevents= 966082;// 967055;  
       if(kSys==sysTopMatchUp  ) Nevents=1061531;//1062792; 
       if(kSys==sysTopMatchDown) Nevents=1064250;//1065232;  
       if(kSys==sysTopMassUp   ) Nevents=1536566;//1538301; 
       if(kSys==sysTopMassDown ) Nevents=1604710;//1606570; 
     }
-    // W->lnu+jets MADGRAPH
+    // MadGraph: W->lnu+jets
     else if(sample==kWjets){
-      crossSection=31314.;
-      // Z2 Summer11
-      //Nevents=81352581;
-      Nevents = 81178819; // after kinematics filter
+      crossSection=31314.0;
+      // Fall11
+      Nevents = 81171633;//81345381;
       // Summer11 systematic samples:
-      if(kSys==sysVBosonScaleUp  ) Nevents=9761537;//9784907;  
+      if(kSys==sysVBosonScaleUp  ) Nevents= 9761537;// 9784907;  
       if(kSys==sysVBosonScaleDown) Nevents=10075524;//10092532;
       if(kSys==sysVBosonMatchUp  ) Nevents=10438789;//10461655; 
-      if(kSys==sysVBosonMatchDown) Nevents=9936639;//9956679;  
+      if(kSys==sysVBosonMatchDown) Nevents= 9936639;// 9956679;  
     }
-    // DY->ll+jets MADGRAPH
+    // MadGraph: DY->ll+jets
     else if(sample==kZjets){
-      crossSection=3048.;
-      // Z2 Summer11
-      //Nevents=35101516;
-      Nevents = 35032553; // after kinematics filter
+      crossSection=3048.0;
+      // Fall11
+      Nevents = 36138495;//36209629;
       // Summer11 systematic samples:
       if(kSys==sysVBosonScaleUp  ) Nevents=1589496;//1593052;
       if(kSys==sysVBosonScaleDown) Nevents=1656321;//1658995;
       if(kSys==sysVBosonMatchUp  ) Nevents=1638100;//1641367;
       if(kSys==sysVBosonMatchDown) Nevents=1612036;//1615032;
     }
-    // QCD Mu enriched PYTHIA6
+    // Pythia6: QCD Mu enriched
     else if(sample==kQCD&&decayChannel.compare("muon")==0){
-      // Z2 Summer11
+      // Fall11
       crossSection=296600000.*0.0002855; // generator crossSection * prefilter efficiency
-      Nevents     =20416038.;
+      Nevents     =25080241;
     }
     // QCD e+jets channel 
+    // Fall11
     // a) subsamples
     else if(sample==kQCDEM1){
-      crossSection=0.0106*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     =35729669;
+      crossSection= 0.0106*236100000;  // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 35721833;
     }
     else if(sample==kQCDEM2){
-      crossSection=0.061*59440000; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     =70392060;
+      crossSection= 0.061*59440000;    // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 70392060;
     }
     else if(sample==kQCDEM3){
-      crossSection=0.159*898200; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     =8150672;
+      crossSection= 0.159*898200;      // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 8150672;
     }
     else if(sample==kQCDBCE1){
-      crossSection=0.00059*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     =2081560;
+      crossSection= 0.00059*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 2071133;
     }
     else if(sample==kQCDBCE2){
-      crossSection=0.00242*59440000; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     =2030033;
+      crossSection= 0.00242*59440000;  // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 2030033; 
     }
     else if(sample==kQCDBCE3){
-      crossSection=0.0105*898200; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     =1082691;
+      crossSection= 0.0105*898200;     // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 1082691; 
     }
     // b)combined
     else if(sample==kQCD&&decayChannel.compare("electron")==0){
-      // Z2 Summer11: already added in combineMCsamples.C
+      // Fall11: already added in combineMCsamples.C
       // with cross section as weight, only
       // lumi normalization is done here
       Nevents     =1.;
       crossSection=1;
     }
-    // singleTop POWHEG samples
+    // Powheg: singleTop/Antitop Samples
     // a) subsamples
     else if(sample==kSATops){
-      crossSection=1.44;
-      //Nevents     =137980;
-      Nevents = 137662; // after kinematics filter
+      crossSection= 1.44;
+      Nevents     = 137662;//137980;
       // scale variation
       if(kSys==sysTopScaleUp  ) Nevents =153584;//153981;
       if(kSys==sysTopScaleDown) Nevents =153650;//153971;
     }
     else if(sample==kSTops){
-      crossSection=3.19;
-      //Nevents     =259971; 
-      Nevents = 259595; // after kinematics filter
+      crossSection= 3.19;
+      Nevents     = 259595;//259971;
       // scale variation
       if(kSys==sysTopScaleUp  ) Nevents =285513;//285972;
       if(kSys==sysTopScaleDown) Nevents =285182;//285602;
     }
     else if(sample==kSATopt){
-      crossSection=22.65;
-      //Nevents     =1944826;
-      Nevents = 1939703; // after kinematics filter
+      crossSection= 22.65;
+      Nevents     = 1939703;//1944826;
       // scale variation
       if(kSys==sysTopScaleUp  ) Nevents =563929;//565520;
       if(kSys==sysTopScaleDown) Nevents =564169;//565454;
     }
     else if(sample==kSTopt){
-      crossSection=41.92;
-      //Nevents     =3900171;
-      Nevents = 3891841; // after kinematics filter
+      crossSection= 41.92;
+      Nevents     = 3891841;//3900171;
       // scale variation
-      // FIXME MARTIN: t channel single top scale samples still missing 
-      // if(kSys==sysTopScaleUp  ) Nevents =;
-      // if(kSys==sysTopScaleDown) Nevents =;
+      // FIXME: t channel single top scale samples after kinematics filter
+      if(kSys==sysTopScaleUp  ) Nevents = 1032197;
+      if(kSys==sysTopScaleDown) Nevents = 1041924;
     }
     else if(sample==kSAToptW){
-      crossSection=7.87;
-      //Nevents     =809984;
-      Nevents = 808200; // after kinematics filter
+      crossSection= 7.87;
+      Nevents     = 783536;//785246;
       // scale variation
       if(kSys==sysTopScaleUp  ) Nevents =436750;//437798;
       if(kSys==sysTopScaleDown) Nevents =437007;//437863;
     }
     else if(sample==kSToptW){
-      crossSection=7.87;
-      //Nevents     =814390;
-      Nevents = 812600; // after kinematics filter
+      crossSection= 7.87;
+      Nevents     = 812600;//814390;
       // scale variation
       if(kSys==sysTopScaleUp  ) Nevents =436656;//437736;
       if(kSys==sysTopScaleDown) Nevents =436986;//437819;
     }
     // b) combined single top sample
     else if(sample==kSTop){
-      // Summer11 Z2: already added in combineMCsamples.C
+      // Fall11: already added in combineMCsamples.C
       // with cross section as weight,
       // lumi normalization is done here
       Nevents=1;
       crossSection=1.;
     }
-    // DiBoson PYTHIA6 Z2
+    // Pythia6: DiBoson Samples
+    // Fall11
     // a) subsamples
     else if(sample==kWW){
-      crossSection=43.0;
-      // Summer11 Z2
-      Nevents=4225916;
+      crossSection= 43.0;
+      Nevents     = 4225916;
     }
     else if(sample==kWZ){
-      crossSection=18.2;
-      // Summer11 Z2
-      Nevents=4265243;
+      crossSection= 18.2;
+      Nevents     = 4265243;
     }
     else if(sample==kZZ){
-      crossSection=5.9;
-      // Summer11 Z2
-      Nevents=4187885;
+      crossSection= 5.9;
+      Nevents     = 4191045;
     }
     // b) combined diboson: WW,WZ,ZZ
     else if(sample==kDiBos){
-      // Summer11 Z2: already added in combineMCsamples.C
+      // Fall11: already added in combineMCsamples.C
       // with cross section as weight,
       // lumi normalization is done here
       crossSection=1.;
@@ -934,39 +927,38 @@ namespace semileptonic {
     // name of data file is given directly in the .C file
     if(sample==kData) return "";
     // standard MC filenames
-    if(sample==kSig  )fileName += "SigMadD6T";
-    if(sample==kBkg  )fileName += "BkgMadD6T";
-    if(sample==kWjets)fileName += "WjetsMadD6T";
-    if(sample==kZjets)fileName += "ZjetsMadD6T";
-    if(sample==kDiBos)fileName += "VVPytia6Z2";
-    if(sample==kQCD  )fileName += "QCDPythiaZ2";
-    if(sample==kSTop )fileName += "SingleTopMadZ2";
+    if(sample==kSig    )fileName += "Sig";
+    if(sample==kBkg    )fileName += "Bkg";
+    if(sample==kWjets  )fileName += "Wjets";
+    if(sample==kZjets  )fileName += "Zjets";
+    if(sample==kDiBos  )fileName += "VV";
+    if(sample==kQCD    )fileName += "QCD";
+    if(sample==kSTop   )fileName += "SingleTop";
     // subsamples are all located in subfolder called "MergedFiles"
-    if(sample==kWW     )fileName = "MergedFiles/"+fileName+"WWPytia6Z2";
-    if(sample==kWZ     )fileName = "MergedFiles/"+fileName+"WZPytia6Z2";
-    if(sample==kZZ     )fileName = "MergedFiles/"+fileName+"ZZPytia6Z2";
-    if(sample==kQCDEM1 )fileName = "MergedFiles/"+fileName+"QCDPythiaEM1Z2";
-    if(sample==kQCDEM2 )fileName = "MergedFiles/"+fileName+"QCDPythiaEM2Z2";
-    if(sample==kQCDEM3 )fileName = "MergedFiles/"+fileName+"QCDPythiaEM3Z2";
-    if(sample==kQCDBCE1)fileName = "MergedFiles/"+fileName+"QCDPythiaBCE1Z2"; 
-    if(sample==kQCDBCE2)fileName = "MergedFiles/"+fileName+"QCDPythiaBCE2Z2";
-    if(sample==kQCDBCE3)fileName = "MergedFiles/"+fileName+"QCDPythiaBCE3Z2";  
-    if(sample==kSToptW )fileName = "MergedFiles/"+fileName+"SingleTopTWchannelMadZ2";
-    if(sample==kSTops  )fileName = "MergedFiles/"+fileName+"SingleTopSchannelMadZ2";
-    if(sample==kSTopt  )fileName = "MergedFiles/"+fileName+"SingleTopTchannelMadZ2";
-    if(sample==kSAToptW)fileName = "MergedFiles/"+fileName+"SingleAntiTopTWchannelMadZ2";
-    if(sample==kSATops )fileName = "MergedFiles/"+fileName+"SingleAntiTopSchannelMadZ2";
-    if(sample==kSATopt )fileName = "MergedFiles/"+fileName+"SingleAntiTopTchannelMadZ2";
-    // label for MC production cycle
-    fileName += "Summer11";
+    if(sample==kWW     )fileName = "MergedFiles/"+fileName+"WW";
+    if(sample==kWZ     )fileName = "MergedFiles/"+fileName+"WZ";
+    if(sample==kZZ     )fileName = "MergedFiles/"+fileName+"ZZ";
+    if(sample==kQCDEM1 )fileName = "MergedFiles/"+fileName+"QCDEM1";
+    if(sample==kQCDEM2 )fileName = "MergedFiles/"+fileName+"QCDEM2";
+    if(sample==kQCDEM3 )fileName = "MergedFiles/"+fileName+"QCDEM3";
+    if(sample==kQCDBCE1)fileName = "MergedFiles/"+fileName+"QCDBCE1"; 
+    if(sample==kQCDBCE2)fileName = "MergedFiles/"+fileName+"QCDBCE2";
+    if(sample==kQCDBCE3)fileName = "MergedFiles/"+fileName+"QCDBCE3";  
+    if(sample==kSToptW )fileName = "MergedFiles/"+fileName+"SingleTopTW";
+    if(sample==kSTops  )fileName = "MergedFiles/"+fileName+"SingleTopS";
+    if(sample==kSTopt  )fileName = "MergedFiles/"+fileName+"SingleTopT";
+    if(sample==kSAToptW)fileName = "MergedFiles/"+fileName+"SingleAntiTopTW";
+    if(sample==kSATops )fileName = "MergedFiles/"+fileName+"SingleAntiTopS";
+    if(sample==kSATopt )fileName = "MergedFiles/"+fileName+"SingleAntiTopT";
     // take care of systematic variations
     // they are located in dedicated subfolders
     // JES
-    if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESup";
-    if(sys==sysJESDown) fileName = "JESDown/"+fileName+"JESdown";
+    bool MCTagSummer11 = 0;
+    if(sys==sysJESUp  ){ fileName = "JESUp/"+fileName+"JESUp";     MCTagSummer11=1;}
+    if(sys==sysJESDown){ fileName = "JESDown/"+fileName+"JESDown"; MCTagSummer11=1;}
     // JER
-    if(sys==sysJERUp  ) fileName = "JERUp/"+fileName+"JERup"; 
-    if(sys==sysJERDown) fileName = "JERDown/"+fileName+"JERdown";
+    if(sys==sysJERUp  ){ fileName = "JERUp/"+fileName+"JERUp";     MCTagSummer11=1;}
+    if(sys==sysJERDown){ fileName = "JERDown/"+fileName+"JERDown"; MCTagSummer11=1;}
     // Shape variation
     // only for new MC and ttbar signal
     if(sample==kSig){
@@ -981,27 +973,29 @@ namespace semileptonic {
     }
     // Scale
     // (a) top
-    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleUp/"+fileName+"ScaleUp";
-    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleDown/"+fileName+"ScaleDown";
+    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
+    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
     // (b) V+jets
-    if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleUp/"+fileName+"ScaleUp";
-    if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "ScaleDown/"+fileName+"ScaleDown";  
+    if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
+    if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
     // (c) SingleTop
-    if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) fileName = "ScaleUp/"+fileName+"ScaleUp";
-    if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) fileName = "ScaleDown/"+fileName+"ScaleDown";  
+    if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
+    if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
     // (a) top   
-    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "MatchUp/"+fileName+"MatchUp";
-    if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) fileName = "MatchDown/"+fileName+"MatchDown";
+    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) {fileName = "MatchUp/"+fileName+"MatchUp";     MCTagSummer11=1;}
+    if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
     // (b) V+jets
-    if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) fileName = "MatchUp/"+fileName+"MatchUp";
-    if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) fileName = "MatchDown/"+fileName+"MatchDown";
+    if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) {fileName = "MatchUp/"+fileName+"MatchUp";     MCTagSummer11=1;}
+    if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
     // Top Mass
-    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";
-    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
+    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) {fileName = "TopMassUp/"+fileName+"TopMassUp";     MCTagSummer11=1;}
+    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) {fileName = "TopMassDown/"+fileName+"TopMassDown"; MCTagSummer11=1;}
     // Hadronization
     if((sys==sysHadUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationUp/"+fileName+"HadUp";
     if((sys==sysHadDown)&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationDown/"+fileName+"HadDown";
-    fileName+="PF.root";
+    // label for MC production cycle
+    fileName += (MCTagSummer11) ? "Summer11" : "Fall11";
+    fileName += "PF.root";
     // return output
     return fileName;
   }
@@ -1073,7 +1067,7 @@ namespace semileptonic {
     // "Nplots": the total # of plots is calclated
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "redundantPartOfNameInData": delete this part in the (folder)name when loading the plots from data
-    // (needed to handle systematic variations where foldername in data and MC is different)
+    //                              (needed to handle systematic variations where foldername in data and MC is different)
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1087,7 +1081,7 @@ namespace semileptonic {
 	  TH1* targetPlot;
 	  // delete additional part of MC foldername
 	  // that does not exist in data 
-	  TString plotname=plotList_[plot];
+	  TString plotname=plotList_[plot];	  
 	  if(sample==kData){
 	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
 	      std::vector<TString>::iterator iter;
@@ -1121,7 +1115,7 @@ namespace semileptonic {
 	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
 	      std::vector<TString>::iterator iter;
 	      for (iter = (vecRedundantPartOfNameInData->begin()); iter != (vecRedundantPartOfNameInData->end()); iter++){
-		plotname.ReplaceAll((*iter), ""); 
+		if (plotname.Contains((*iter))) plotname.ReplaceAll((*iter), "");
 	      }
 	    }
 	  }

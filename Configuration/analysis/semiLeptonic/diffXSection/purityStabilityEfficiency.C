@@ -24,7 +24,7 @@
 #include "basicFunctions.h"
 
 void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TString lepton="muon", 
-			       TString inputFolderName="TOP2011/110819_AnalysisRun", bool plotEfficiency = true, 
+			       TString inputFolderName="RecentAnalysisRun", bool plotEfficiency = true, 
 			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=0)
 {
   // ARGUMENTS of function:
@@ -38,23 +38,19 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
   if(!useTree) chi2Max=99999; // can be done only with tree
   // output folder in case of saving the canvases:
-  //TString outputFolder = "/afs/desy.de/user/j/jlange/analysis/top/diffXSec/purStabEff";
-  //TString outputFolder = "/afs/naf.desy.de/user/j/jlange/public/analysis/purStabEff/compSpringSummer11";
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2011/binning";
   if(useTree&&chi2Max<100){ 
     plotEfficiencyPhaseSpace = false;
     plotEfficiency = false;
     plotEfficiency2= false;
   }
-
-  if(lepton=="electron") lepton="elec";
-  
+ 
   // input file
-  TFile* myFile1 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+lepton+"DiffXSecSigMadD6TSummer11PF.root", "READ");
-  //TFile* myFile1 = new TFile("/afs/naf.desy.de/user/j/jlange/public/analysis/"+lepton+"DiffXSecSigMadD6TSpring11PF.root", "READ"); //TFile("/afs/desy.de/user/m/mgoerner/public/analysisRootFilesWithKinFit/"+lepton+"DiffXSecSigMadD6TSpring11PF.root", "READ");
-  //TFile("/afs/naf.desy.de/user/j/jlange/public/analysis/elecDiffXSecSigMadD6TSpring11PF.root", "READ");
-  TFile* myFile2 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+lepton+"DiffXSecSigMadD6TSummer11PF.root", "READ");
-  
+  TFile* myFile1 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, sysNo, (std::string)lepton), "READ");
+  TFile* myFile2 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, sysNo, (std::string)lepton), "READ");
+ 
+  if(lepton=="electron") lepton="elec";
+    
   // determine here the binning:
   // Attention: binning ALWAYS should start from left boundary of first and bin of the input file;
   // it ends with the last bin of the input file even if this is not part of the array defined below

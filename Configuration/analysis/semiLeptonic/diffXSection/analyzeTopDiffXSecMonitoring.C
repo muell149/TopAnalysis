@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun", 
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913_1fb.root"
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root"
-				  , const std::string decayChannel = "muon", bool withRatioPlot = true)
+void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun", 
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
   // ============================
   //  Set Root Style
@@ -162,10 +162,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     // (v) Vertices and pileup
     "PUControlDistributionsBeforeBtagging/pileup",
     "PUControlDistributionsBeforeBtagging/pileup_reweighted",
-    "PUControlDistributionsBeforeBtagging/pileup_reweighted3BX",
+    "PUControlDistributionsBeforeBtagging/pileup_reweighted_up",
+    "PUControlDistributionsBeforeBtagging/pileup_reweighted_down",
     "PUControlDistributionsBeforeBtagging/npvertex",
     "PUControlDistributionsBeforeBtagging/npvertex_reweighted",
-    "PUControlDistributionsBeforeBtagging/npvertex_reweighted3BX",
+    "PUControlDistributionsBeforeBtagging/npvertex_reweighted_up",
+    "PUControlDistributionsBeforeBtagging/npvertex_reweighted_down",
     // (III) after btagging 
     // (ii) jet monitoring
     "tightJetKinematicsTagged/n"  ,
@@ -191,10 +193,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     // (v) Vertices and pileup
     "PUControlDistributionsAfterBtagging/pileup",
     "PUControlDistributionsAfterBtagging/pileup_reweighted",
-    "PUControlDistributionsAfterBtagging/pileup_reweighted3BX",
+    "PUControlDistributionsAfterBtagging/pileup_reweighted_up",
+    "PUControlDistributionsAfterBtagging/pileup_reweighted_down",
     "PUControlDistributionsAfterBtagging/npvertex",
     "PUControlDistributionsAfterBtagging/npvertex_reweighted",
-    "PUControlDistributionsAfterBtagging/npvertex_reweighted3BX", 
+    "PUControlDistributionsAfterBtagging/npvertex_reweighted_up", 
+    "PUControlDistributionsAfterBtagging/npvertex_reweighted_down", 
     // (III) after kinematic fit 
     "analyzeTopRecoKinematicsKinFit/topPt",
     "analyzeTopRecoKinematicsKinFit/topY",
@@ -326,17 +330,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "b-discr.(soft#mu)/jets/0/10"	,
     "b-discr.(soft#muPt)/jets/0/10"  ,                  
     "b-discr.(soft#muIP3d)/jets/0/10",
-    "N_{b-jets}(SSVHE)/events/1/1"      ,
+    "N_{b-jets}/events/1/1"      ,
     // (iv) MET monitoring 
     "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/10",
     "#SigmaE_{T} [GeV]/events/0/50"  ,
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/1/1",
-    "Number of PU Events (Reweighted 1BX)/Frequency/1/1",
-    "Number of PU Events (Reweighted 3BX)/Frequency/1/1",
+    "Number of PU Events (Reweighted)/Frequency/1/1",
+    "Number of PU Events (Reweighted sysUp)/Frequency/1/1",
+    "Number of PU Events (Reweighted sysDown)/Frequency/1/1",
     "Number of Vertices/Frequency/1/1",
-    "Number of Vertices (Reweighted 1BX)/Frequency/1/1",
-    "Number of Vertices (Reweighted 3BX)/Frequency/1/1",
+    "Number of Vertices (Reweighted)/Frequency/1/1",
+    "Number of Vertices (Reweighted sysUp)/Frequency/1/1",
+    "Number of Vertices (Reweighted sysDown)/Frequency/1/1",
     // (III) after btagging 
     // (ii) jet monitoring
     "N_{jets}/events/1/1",
@@ -361,11 +367,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
     "#SigmaE_{T} [GeV]/events/0/30",
     // (v) Vertices and pileup
     "Number of PU Events/Frequency/0/1",
-    "Number of PU Events (Reweighted 1BX)/Frequency/0/1",
-    "Number of PU Events (Reweighted 3BX)/Frequency/0/1",
+    "Number of PU Events (Reweighted)/Frequency/0/1",
+    "Number of PU Events (Reweighted sysUp)/Frequency/0/1",
+    "Number of PU Events (Reweighted sysDown)/Frequency/0/1",
     "Number of Vertices/Frequency/0/1",
-    "Number of Vertices (Reweighted 1BX)/Frequency/0/1",
-    "Number of Vertices (Reweighted 3BX)/Frequency/0/1", 
+    "Number of Vertices (Reweighted)/Frequency/0/1",
+    "Number of Vertices (Reweighted sysUp)/Frequency/0/1", 
+    "Number of Vertices (Reweighted sysDown)/Frequency/0/1", 
     // (III) after kinematic fit 
     "p_{t}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/20",
     "y^{t and #bar{t}}/Frequency/0/1",
@@ -482,16 +490,17 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // histo_ and histo2_ and count total # of plots as Nplots
   if(verbose>0) std::cout << std::endl;
   std::vector<TString> vecRedundantPartOfNameInData;
-  vecRedundantPartOfNameInData.push_back("_reweighted3BX");
+  vecRedundantPartOfNameInData.push_back("_reweighted_up");
+  vecRedundantPartOfNameInData.push_back("_reweighted_down");
   vecRedundantPartOfNameInData.push_back("_reweighted");
-  getAllPlots( files_,           plotList_, histo_,           histo2_,           N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
+  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
   // ---
   //    lumiweighting for choosen luminosity
   // ---
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_,           histo2_,           N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
+  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
 
   // ---
   //    add single top channels and DiBoson contributions
@@ -501,7 +510,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
   // will be combined and saved in the histo_ and histo2_ map
   // reCreate: reCreate combined plots if they are already existing
   bool reCreate=false;
-  AddSingleTopAndDiBoson(plotList_, histo_,           histo2_,           N1Dplots, verbose, reCreate, decayChannel);
+  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
 
   // ---
   //    configure histograms
@@ -594,6 +603,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 1143, bool save = true, in
       std::cout << " Single Top: " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
       std::cout << " DiBoson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
     }
+    std::cout << std::endl << " The event composition is only printed when running the monitoring macro using the option 'withRatioPlot=true' " << std::endl;
   }
 	
   // ---
