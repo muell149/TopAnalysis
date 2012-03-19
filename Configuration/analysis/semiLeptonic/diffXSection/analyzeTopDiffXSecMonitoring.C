@@ -75,8 +75,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
   // chose wheter SSV instead of CSV btagging control plots should be shown 
   // (WITHOUT ERRORBANDS..)
-  bool SSV=true;
-
+  bool SSV=false;
+  if(SSV) std::cout << std::endl << " for all \"...Tagged/...\" plots the SSV algorithm is chosen!" << std::endl;
+  
   //   0: sysNo
   //   1: sysLumiUp                  2: sysLumiDown                
   //   3: sysPUUp                    4: sysPUDown                  
@@ -192,6 +193,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     "bottomLead_1_JetKinematicsTagged/pt",
     "bottomLead_0_JetKinematicsTagged/eta",
     "bottomLead_1_JetKinematicsTagged/eta",
+    // (iii) btag monitoring    
+    "tightJetQualityTagged/btagCombSecVtx_",
+    "bottomJetKinematicsTagged/n"          ,
     // (iv) MET monitoring
     "analyzeMETMuonTagged/metEt"   ,
     "analyzeMETMuonTagged/metSumEt",
@@ -216,8 +220,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     "analyzeTopRecoKinematicsKinFit/lightqEta",   
     "analyzeTopRecoKinematicsKinFit/bqPt",
     "analyzeTopRecoKinematicsKinFit/bqEta",
-    "analyzeTopRecoKinematicsKinFit/prob", 
-    "analyzeTopRecoKinematicsKinFit/chi2"
+    "analyzeTopRecoKinematicsKinFitBeforeProbSel/prob", 
+    "analyzeTopRecoKinematicsKinFitBeforeProbSel/chi2"
   };
 
   TString plots1Dmu[ ] = { 
@@ -367,6 +371,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     "p_{t}(lead 2^{nd} b-tagged jet) #left[#frac{GeV}{c}#right]/events/1/5",
     "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
     "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
+    // (iii) btag monitoring    
+    "b-discr.(CSV)/jets/0/2",
+    "N_{b-jets}/events/1/1" ,
     // (iv) MET monitoring 
     "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/20",
     "#SigmaE_{T} [GeV]/events/0/30",
@@ -759,7 +766,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	      plotCanvas_[canvasNumber]->SetLogy(1);
 	      min=1;
 	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit/prob") min=0.1; 
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")&&plotList_[plot].Contains("/prob")) min=0.1; 
 	      if(plotList_[plot].Contains("_JetKinematicsTagged/pt")) min=0.1;
 	    }
 	    // get nicer int values if maximum is large enough
@@ -780,7 +787,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	    if(plotList_[plot].Contains("_JetKinematics/pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("analyzeMETMuon/metSumEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(200,1400);
 	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
-	    if(plotList_[plot].Contains("bottomJetKinematics/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
+	    if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
 	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,350);
 	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);	
 	    if(plotList_[plot].Contains("lepPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);

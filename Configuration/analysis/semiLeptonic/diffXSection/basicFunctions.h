@@ -1113,7 +1113,7 @@ namespace semileptonic {
 	  // that does not exist in data 
 	  TString plotname=plotList_[plot];
 	  // replace CSV with SSV plots
-	  if(SSV) plotname.ReplaceAll("Tagged", "SSV");
+	  if(SSV&&!plotname.Contains("bottomJet")) plotname.ReplaceAll("Tagged", "SSV");
 	  if(sample==kData){
 	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
 	      std::vector<TString>::iterator iter;
