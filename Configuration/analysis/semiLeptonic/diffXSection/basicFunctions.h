@@ -1055,7 +1055,7 @@ namespace semileptonic {
       return files_;
     }
 
-    void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0 )
+  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false)
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
     // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -1068,6 +1068,7 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "redundantPartOfNameInData": delete this part in the (folder)name when loading the plots from data
     //                              (needed to handle systematic variations where foldername in data and MC is different)
+    // "SSV": for all btagging plots SSV control plots are used instead of the default (CSV) plots
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1111,6 +1112,8 @@ namespace semileptonic {
 	  // delete additional part of MC foldername
 	  // that does not exist in data 
 	  TString plotname=plotList_[plot];
+	  // replace CSV with SSV plots
+	  if(SSV) plotname.ReplaceAll("Tagged", "SSV");
 	  if(sample==kData){
 	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
 	      std::vector<TString>::iterator iter;

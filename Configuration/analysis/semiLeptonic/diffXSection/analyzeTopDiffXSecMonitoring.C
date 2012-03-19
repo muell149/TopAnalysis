@@ -1,8 +1,10 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun", 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun", 
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root",
 				  const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
   // ============================
@@ -71,6 +73,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, in
   outputFileName+=dataSample+".root";
   // choose name of the output .pdf file
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
+  // chose wheter SSV instead of CSV btagging control plots should be shown 
+  // (WITHOUT ERRORBANDS..)
+  bool SSV=true;
 
   //   0: sysNo
   //   1: sysLumiUp                  2: sysLumiDown                
@@ -445,7 +450,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, in
     "#eta(#mu)/events/0/1",
     "#phi(#mu)/events/0/10",
   };
-	
+
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {
   };
@@ -476,8 +481,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, in
   plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
   if(decayChannel=="electron") plotList_.insert( plotList_.end(), plots1De , plots1De  + sizeof(plots1De )/sizeof(TString) );
   if(decayChannel=="muon"    ) plotList_.insert( plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString) );
-  plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
-	
+  plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );	
 	
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
@@ -493,7 +497,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, in
   vecRedundantPartOfNameInData.push_back("_reweighted_up");
   vecRedundantPartOfNameInData.push_back("_reweighted_down");
   vecRedundantPartOfNameInData.push_back("_reweighted");
-  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData);
+  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData, SSV);
   // ---
   //    lumiweighting for choosen luminosity
   // ---
@@ -630,7 +634,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, in
   // ===============================================================
   
   if(verbose>0) std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
-  makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
+  if(!SSV) makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
   if(verbose>0) std::cout << " .... Finished." << std::endl; 
 
   // ========================================================
@@ -806,18 +810,23 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4964, bool save = true, in
 	  first=false;
 	  // at the end:
 	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)){
-	    // configure style of and draw uncertainty bands
-	    histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
-	    histoErrorBand_[plotList_[plot]]->SetFillColor(1);
-	    histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
-	    gStyle->SetErrorX(0.5);  
-	    histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 
+	    if(!SSV){
+	      // configure style of and draw uncertainty bands
+	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
+	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);
+	      histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
+	      gStyle->SetErrorX(0.5);  
+	      histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");
+	    }
 	    // redraw axis 
 	    histo_[plotList_[plot]][42]->Draw("axis X0 same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection, common labels and legend
 	      TString label = "pre-Tagged";
-	      if(plotList_[plot].Contains("Tagged")) label = "Tagged";
+	      if(plotList_[plot].Contains("Tagged")){ 
+		label = "Tagged";
+		if(SSV) label+=" SSV";
+	      }
 	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
 	      if(plotList_[plot].Contains("KinFit")) label = "";
