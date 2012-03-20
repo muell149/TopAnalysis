@@ -247,7 +247,10 @@ void Analysis::SlaveBegin(TTree * /*tree*/)
 Bool_t Analysis::Process(Long64_t entry)
 {
   Analysis::GetAllBranches(entry);
-  if(MCSample->find("ttbarsignal")!=string::npos){ Analysis::GetSignalBranches(entry);}
+
+  if(MCSample->find("ttbarsignal")!=string::npos){ 
+    Analysis::GetSignalBranches(entry); 
+  }
   if(MCSample->find("run")!=string::npos){ weightLepSF = 1.0;}
   EventCounter++;
   if(EventCounter % 10000 == 0){cout<<"Event Counter: "<<EventCounter<<endl;}
@@ -390,12 +393,12 @@ Bool_t Analysis::Process(Long64_t entry)
   }
 
   if(idx_bHadJet.size()>1 && idx_antibHadJet.size()>1){
-    cout<<"idx_bHadJet.size(): "<<idx_bHadJet.size()<<endl;
+    /*    cout<<"idx_bHadJet.size(): "<<idx_bHadJet.size()<<endl;
     cout<<"idx_bHadJet[0]: "<<idx_bHadJet[0]<<endl;
     cout<<"idx_bHadJet[1]: "<<idx_bHadJet[1]<<endl;
     cout<<"idx_antibHadJet.size()"<<idx_antibHadJet.size()<<endl;
     cout<<"idx_antibHadJet[0]: "<<idx_antibHadJet[0]<<endl;
-    cout<<"idx_antibHadJet[1]: "<<idx_antibHadJet[1]<<endl;
+    cout<<"idx_antibHadJet[1]: "<<idx_antibHadJet[1]<<endl;*/
   }
 
   //Case 2: highest pT genJets matched closest to a BHadron
@@ -493,6 +496,19 @@ Bool_t Analysis::Process(Long64_t entry)
     }
   }//for visible top events
 
+  //check triggers for ttbarsignal
+  if(channel->find("emu")!=string::npos && ((triggerBits & 0x1000) || (triggerBits & 0x100) || (triggerBits & 0x200))){
+    int emutrig;
+  }
+  else if(channel->find("ee")!=string::npos && ((triggerBits & 0x20000) || (triggerBits & 0x10000))){
+    int eetrig;
+  }
+  else if(channel->find("mumu")!=string::npos && ((triggerBits & 2))){
+    int eetrig;
+  }
+  else{
+    return kTRUE;
+  }
  	  
   int LeadLeptonNumber = 0;
   int NLeadLeptonNumber = 0;

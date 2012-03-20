@@ -82,6 +82,7 @@ public :
    Int_t           runNumber;
    Int_t           lumiBlock;
    Int_t           eventNumber;
+   UInt_t          triggerBits;
    vector<string>  *dataType;
    Double_t        weightPU;
    Double_t        weightPU_Up;
@@ -246,6 +247,7 @@ public :
    TBranch        *b_lumiBlock;   //!
    TBranch        *b_eventNumber;   //!
    TBranch        *b_dataType;   //!
+   TBranch        *b_triggerBits;   //!
    TBranch        *b_weightPU;   //!
    TBranch        *b_weightPU_Up;   //!
    TBranch        *b_weightPU_Down;   //!
@@ -523,6 +525,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("metEt", &metEt, &b_metEt);
    fChain->SetBranchAddress("metPhi", &metPhi, &b_metPhi);
    fChain->SetBranchAddress("runNumber", &runNumber, &b_runNumber);
+   fChain->SetBranchAddress("triggerBits", &triggerBits, &b_triggerBits);
    fChain->SetBranchAddress("lumiBlock", &lumiBlock, &b_lumiBlock);
    fChain->SetBranchAddress("eventNumber", &eventNumber, &b_eventNumber);
    fChain->SetBranchAddress("dataType", &dataType, &b_dataType);
@@ -631,6 +634,7 @@ void Analysis::GetAllBranches(Long64_t & entry)
   b_jetBTagSSVHE->GetEntry(entry);   //!
   b_metPhi->GetEntry(entry);   //!
   b_runNumber->GetEntry(entry);   //!
+  b_triggerBits->GetEntry(entry);   //!
   b_lumiBlock->GetEntry(entry);   //!
   b_weightPU->GetEntry(entry);   //!
   b_weightPU_Up->GetEntry(entry);   //!
