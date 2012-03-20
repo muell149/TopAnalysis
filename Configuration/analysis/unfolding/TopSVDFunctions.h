@@ -114,7 +114,7 @@ public:
     static void SVD_Pur(TH1D*& purHist, TH2D* mcHist,int numHist = 1);
     static void SVD_Stab(TH1D*& stabHist, TH2D* mcHist,int numHist = 1);
     static void SVD_Eff(TH1D*& effHist, TH2D* mcHist, TH1D* xiniHist,  int numHist = 1);
-    static void SVD_BBBEff(TH1D*& beffHist, TH2D* mcHist, TH1D* xiniHist, int numHist = 1);
+    static void SVD_BBBEff(TH1D*& beffHist, TH1D* biniHist, TH1D* xiniHist, int numHist = 1);
     static void SVD_BBBUnf(TH1D*& bbbHist, TH1D* dataHist, TH1D* beffHist, int numHist = 1);
     static TH1D* SVD_ArrayToShifts(TH1D* array, int numHist = 1);
     
