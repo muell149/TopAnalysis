@@ -56,13 +56,13 @@ void PUControlDistributionsAnalyzer::beginJob()
 
   // Histograms for Event Weights
 
-  histoEventWeights = fs->make<TH1F>("eventweights",";Event Weights;Frequency",200,-1,3); 
+  histoEventWeights = fs->make<TH1F>("eventweights",";Event Weights;Frequency",300,-1,5); 
   histoEventWeights -> SetFillColor(2);
 
-  histoEventWeightsUp = fs->make<TH1F>("eventweights_up",";Event Weight (Scale Up);Frequency",200,-1,3); 
+  histoEventWeightsUp = fs->make<TH1F>("eventweights_up",";Event Weight (Scale Up);Frequency",300,-1,5); 
   histoEventWeightsUp -> SetFillColor(2);
 
-  histoEventWeightsDown = fs->make<TH1F>("eventweights_down",";Event Weight (Scale Down);Frequency",200,-1,3); 
+  histoEventWeightsDown = fs->make<TH1F>("eventweights_down",";Event Weight (Scale Down);Frequency",300,-1,5); 
   histoEventWeightsDown -> SetFillColor(2);
 
   // Histograms for correlations between PU events and number of vertices
