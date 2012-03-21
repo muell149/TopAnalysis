@@ -995,8 +995,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-#process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.05"  ) )
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.05"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
@@ -1059,6 +1058,38 @@ process.analyzeHypoKinFitMET      = process.analyzeHypothesisKinFitMET.clone(src
 process.analyzeHypoKinFitMETCorr  = process.analyzeHypothesisKinFitMET.clone(srcA = "ttSemiLepEvent", srcB = "patMETs", analyze=analyzeCorrect)
 
 ## ---
+##    b hadron level distributions
+## ---
+## tool to identify b-jets from genjet collection
+process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
+process.makeGenLevelBJets=process.produceGenLevelBJets.clone(
+    ttGenEvent = cms.InputTag('genEvt'),
+    genJets = cms.InputTag('ak5GenJets','','HLT'),
+    deltaR = cms.double(5.0),
+    resolveParticleName = cms.bool(False),
+    requireTopBquark = cms.bool(True),
+    noBBbarResonances = cms.bool(True)
+)
+# make b jet gen and rec plots using the identification from above
+process.load("TopAnalysis.TopAnalyzer.SemiLepBjetAnalyzer_cfi")
+process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
+    semiLepEvent = cms.InputTag("ttSemiLepEvent"),
+    hypoKey = cms.string("kKinFit"),
+    genJets = cms.InputTag('ak5GenJets','','HLT'),
+    output = cms.int32(0),
+    weight = cms.InputTag(""),
+    genPlots = cms.bool(True),
+    recPlots = cms.bool(True),
+    BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
+    AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex")
+    )
+
+process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
+process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
+process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
+
+## ---
 ##    collect KinFit Analyzers depending on sample processed
 ## ---
 ## dummy to avoid empty sequences
@@ -1083,11 +1114,30 @@ if(applyKinFit==True):
                                              process.analyzeHypoKinFitMETCorr                +
                                              process.analyzeHypoKinFitJets                   +
                                              process.analyzeHypoKinFitJetsCorr               +
+                                             # add bjet indices
+                                             process.makeGenLevelBJets                       +
+                                             process.analyzeTopRecoKinematicsBjets           +
                                              process.filterMatchKinFit
                                              )
-            process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics          )
-            process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace)
-            process.kinFitGenPhaseSpaceHad = cms.Sequence(process.analyzeTopHadronLevelKinematicsPhaseSpace)
+            process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     +
+                                                       # add bjet indices
+                                                       process.makeGenLevelBJets                   +
+                                                       # add bjet analyzer
+                                                       process.analyzeTopPartonLevelKinematicsBjets
+                                                       )
+            process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace+
+                                                       # add bjet indices
+                                                       process.makeGenLevelBJets                        +
+                                                       # add bjet analyzer
+                                                       process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace
+                                                       )
+            process.kinFitGenPhaseSpaceHad = cms.Sequence(process.analyzeTopHadronLevelKinematicsPhaseSpace +
+                                                          # add bjet indices
+                                                          process.makeGenLevelBJets                         +
+                                                          # add bjet analyzer
+                                                          process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace
+                                                          )
+
         ## case 1b): other MC
         else:
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
@@ -1146,24 +1196,21 @@ process.eventWeightPUsysDown = process.eventWeightPU.clone()
 #### Configuration for Nominal PU Weights
 
 process.eventWeightPUsysNo.WeightName          = "eventWeightPU"
-process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_EPS.root"
-#process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPUsysNo.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
 process.eventWeightPUsysNo.CreateWeight3DHisto = False 
 process.eventWeightPUsysNo.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_EPS.root"
-#process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_EPS.root"
-#process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
@@ -1574,7 +1621,8 @@ if(runningOnData=="MC" and BtagReweigthing):
     for module1 in btagModules1:
         getattr(process,module1).weight=cms.InputTag("eventWeightFinal")
     for module2 in btagModules2:
-        getattr(process,module2).weight=cms.InputTag("eventWeightFinal")
+        if(not module2=='makeGenLevelBJets'):
+            getattr(process,module2).weight=cms.InputTag("eventWeightFinal")
     for module3 in btagModules3:
         getattr(process,module3).weight=cms.InputTag("eventWeightFinal")
     print
@@ -1583,20 +1631,28 @@ if(runningOnData=="MC" and BtagReweigthing):
 if(runningOnData=="MC" and PUreweigthing):
     print
     print " The following gen-modules will only use the PU reweighting:"
-    print genModules1
-    print genModules2
+    #print genModules1
+    #print genModules2
     for module1 in genModules1:
-        getattr(process,module1).weight=PUweight
+        if(not module1=='makeGenLevelBJets'):
+            print module1
+            getattr(process,module1).weight=PUweight
     for module2 in genModules2:
-        getattr(process,module2).weight=PUweight
+        if(not module2=='makeGenLevelBJets'):
+            print module2
+            getattr(process,module2).weight=PUweight
     genModules3 = process.kinFitGenPhaseSpaceHad.moduleNames()
-    print genModules3
+    #print genModules3
     for module3 in genModules3:
-        getattr(process,module3).weight=PUweight
+        if(not module3=='makeGenLevelBJets'):
+            print module3
+            getattr(process,module3).weight=PUweight
     genModules4 = process.hadLvObjectMonitoring.moduleNames()
-    print genModules3
+    #print genModules4
     for module4 in genModules4:
-        getattr(process,module4).weight=PUweight
+        if(not module4=='makeGenLevelBJets'):
+            print module4
+            getattr(process,module4).weight=PUweight
     if(additionalEventWeights and eventFilter=='signal only'):
         print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
         process.analyzeTopPartonLevelKinematicsNoPUWeight           = process.analyzeTopPartonLevelKinematics.clone(weight="")
@@ -1619,13 +1675,17 @@ if(runningOnData=="MC" and PUreweigthing):
                                            process.analyzeTopHadronLevelKinematicsPhaseSpacePUdown)
 elif(runningOnData=="MC" and not PUreweigthing):
     for module1 in genModules1:
-        getattr(process,module1).weight=cms.InputTag("")
+        if(not module1=='makeGenLevelBJets'):
+            getattr(process,module1).weight=cms.InputTag("")
     for module2 in genModules2:
-        getattr(process,module2).weight=cms.InputTag("")
+        if(not module2=='makeGenLevelBJets'):
+            getattr(process,module2).weight=cms.InputTag("")
     for module3 in genModules3:
-        getattr(process,module3).weight=cms.InputTag("")
+        if(not module3=='makeGenLevelBJets'):
+            getattr(process,module3).weight=cms.InputTag("")
     for module4 in genModules4:
-        getattr(process,module4).weight=cms.InputTag("")
+        if(not module4=='makeGenLevelBJets'):
+            getattr(process,module4).weight=cms.InputTag("")
 
 # e) PU Modules - special configuration because of different possible PU weights that are handled in the modules themselves
 if(runningOnData=="MC"):
