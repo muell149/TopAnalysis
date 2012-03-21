@@ -140,6 +140,9 @@ DEFINE_FWK_MODULE(TopKinematicsGenAnalyzer);
 typedef SingleObjectAnalyzer<TtSemiLeptonicEvent, TopKinematics> TopKinematicsRecAnalyzer;
 DEFINE_FWK_MODULE(TopKinematicsRecAnalyzer);
 
+#include "TopAnalysis/TopAnalyzer/plugins/SemiLepBjetAnalyzer.h"
+DEFINE_FWK_MODULE(SemiLepBjetAnalyzer);
+
 #include "TopAnalysis/TopAnalyzer/interface/MuonCrossSection.h"
 typedef DoubleObjectAnalyzer<edm::View<reco::Candidate>, edm::View<reco::GenParticle>, MuonCrossSection> MuonCrossSectionAnalyzer;
 DEFINE_FWK_MODULE(MuonCrossSectionAnalyzer);
