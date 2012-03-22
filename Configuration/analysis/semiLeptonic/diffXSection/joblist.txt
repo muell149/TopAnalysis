@@ -94,20 +94,20 @@ nafJobSplitter.pl -q 1 -d ElttbarBGMatchDn -c mctag=Summer11,triggerTag=HLT,samp
 # W+jets #
 ##########
 # standard
-nafJobSplitter.pl -q 1 -d Muwjets -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -d Elwjets -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 12 -d Muwjets -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 12 -d Elwjets -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonDiffXSecAll_cfg.py
 
 # JER
-nafJobSplitter.pl -q 1 -d MuwjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJER15All_cfg.py
-nafJobSplitter.pl -q 1 -d ElwjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJER15All_cfg.py
-nafJobSplitter.pl -q 1 -d MuwjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJER05All_cfg.py
-nafJobSplitter.pl -q 1 -d ElwjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJER05All_cfg.py
+nafJobSplitter.pl -q 12 -d MuwjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJER15All_cfg.py
+nafJobSplitter.pl -q 12 -d ElwjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJER15All_cfg.py
+nafJobSplitter.pl -q 12 -d MuwjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJER05All_cfg.py
+nafJobSplitter.pl -q 12 -d ElwjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJER05All_cfg.py
 
 # JES
-nafJobSplitter.pl -q 1 -d MuwjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJES11All_cfg.py
-nafJobSplitter.pl -q 1 -d ElwjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJES11All_cfg.py
-nafJobSplitter.pl -q 1 -d MuwjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJES09All_cfg.py
-nafJobSplitter.pl -q 1 -d ElwjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJES09All_cfg.py
+nafJobSplitter.pl -q 12 -d MuwjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJES11All_cfg.py
+nafJobSplitter.pl -q 12 -d ElwjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJES11All_cfg.py
+nafJobSplitter.pl -q 12 -d MuwjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=muon     454 analyzeMuonJES09All_cfg.py
+nafJobSplitter.pl -q 12 -d ElwjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=wjets,lepton=electron 454 analyzeMuonJES09All_cfg.py
 
 # scale
 nafJobSplitter.pl -q 1 -d MuwjetsScaleUp -c mctag=Summer11,triggerTag=HLT,sample=wjetsScaleUp,lepton=muon       412 analyzeMuonDiffXSecAll_cfg.py
@@ -125,20 +125,20 @@ nafJobSplitter.pl -q 1 -d ElwjetsMatchDn -c mctag=Summer11,triggerTag=HLT,sample
 # Z+jets #
 ##########
 # standard
-nafJobSplitter.pl -q 1 -d Muzjets -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -d Elzjets -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 12 -d Muzjets -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 12 -d Elzjets -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonDiffXSecAll_cfg.py
 
 # JER
-nafJobSplitter.pl -q 1 -d MuzjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJER15All_cfg.py
-nafJobSplitter.pl -q 1 -d ElzjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJER15All_cfg.py
-nafJobSplitter.pl -q 1 -d MuzjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJER05All_cfg.py
-nafJobSplitter.pl -q 1 -d ElzjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJER05All_cfg.py
+nafJobSplitter.pl -q 12 -d MuzjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJER15All_cfg.py
+nafJobSplitter.pl -q 12 -d ElzjetsJERUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJER15All_cfg.py
+nafJobSplitter.pl -q 12 -d MuzjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJER05All_cfg.py
+nafJobSplitter.pl -q 12 -d ElzjetsJERDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJER05All_cfg.py
 
 # JES
-nafJobSplitter.pl -q 1 -d MuzjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJES11All_cfg.py
-nafJobSplitter.pl -q 1 -d ElzjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJES11All_cfg.py
-nafJobSplitter.pl -q 1 -d MuzjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJES09All_cfg.py
-nafJobSplitter.pl -q 1 -d ElzjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJES09All_cfg.py
+nafJobSplitter.pl -q 12 -d MuzjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJES11All_cfg.py
+nafJobSplitter.pl -q 12 -d ElzjetsJESUp -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJES11All_cfg.py
+nafJobSplitter.pl -q 12 -d MuzjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=muon     306 analyzeMuonJES09All_cfg.py
+nafJobSplitter.pl -q 12 -d ElzjetsJESDn -c mctag=Fall11,triggerTag=HLT,sample=zjets,lepton=electron 306 analyzeMuonJES09All_cfg.py
 
 # scale
 nafJobSplitter.pl -q 1 -d MuzjetsScaleUp -c mctag=Summer11,triggerTag=HLT,sample=zjetsScaleUp,lepton=muon       75 analyzeMuonDiffXSecAll_cfg.py
