@@ -1,4 +1,4 @@
-import FWCore.ParameterSet.Config as cms
+port FWCore.ParameterSet.Config as cms
 
 ## ---
 ##   use this file to study different distributions for measurement of differential Cross Section
@@ -958,8 +958,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
@@ -1068,7 +1068,7 @@ process.makeGenLevelBJets=process.produceGenLevelBJets.clone(
     genJets = cms.InputTag('ak5GenJets','','HLT'),
     deltaR = cms.double(5.0),
     resolveParticleName = cms.bool(False),
-    requireTopBquark = cms.bool(True),
+    requireTopBquark = cms.bool(False),
     noBBbarResonances = cms.bool(True)
 )
 # make b jet gen and rec plots using the identification from above
@@ -1103,7 +1103,7 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                             process.filterProbKinFit                        +
+                                             #process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -1143,7 +1143,7 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                             process.filterProbKinFit                        +
+                                             #process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFit          
                                              )
@@ -1155,7 +1155,7 @@ if(applyKinFit==True):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                          process.filterRecoKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                         process.filterProbKinFit                        +
+                                         #process.filterProbKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFit          +
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop
                                          )
@@ -1593,8 +1593,7 @@ PUModuleList = set(['PUControlDistributionsDefault','PUControlDistributionsBefor
 if(runningOnData=="MC" and not PUreweigthing and not effSFReweigthing and not BtagReweigthing):
     for module in modulelist:
         if module not in PUModuleList:
-            getattr(process,module).weight=cms.InputTag("")
-        
+            getattr(process,module).weight=cms.InputTag("")     
 # b) Re-weighting (PU and/or effSF) for reco-modules
 if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     if(PUreweigthing):
