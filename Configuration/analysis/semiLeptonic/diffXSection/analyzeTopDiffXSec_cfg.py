@@ -1,4 +1,4 @@
-port FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
 
 ## ---
 ##   use this file to study different distributions for measurement of differential Cross Section
@@ -1654,9 +1654,9 @@ if(runningOnData=="MC" and PUreweigthing):
             getattr(process,module4).weight=PUweight
     if(additionalEventWeights and eventFilter=='signal only'):
         print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
-        process.analyzeTopPartonLevelKinematicsNoPUWeight           = process.analyzeTopPartonLevelKinematics.clone(weight="")
-	process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight="")
-        process.analyzeTopHadronLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight="")
+        process.analyzeTopPartonLevelKinematicsNoPUWeight           = process.analyzeTopPartonLevelKinematics.clone(weight=cms.InputTag(""))
+	process.analyzeTopPartonLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=cms.InputTag(""))
+        process.analyzeTopHadronLevelKinematicsPhaseSpaceNoPUWeight = process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=cms.InputTag(""))
 	process.analyzeTopPartonLevelKinematicsPUup = process.analyzeTopPartonLevelKinematics.clone(weight=PUweightUp)
 	process.analyzeTopPartonLevelKinematicsPhaseSpacePUup = process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=PUweightUp)
         process.analyzeTopHadronLevelKinematicsPhaseSpacePUup = process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=PUweightUp)
@@ -1702,8 +1702,8 @@ if(runningOnData=="MC"):
     ## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
 if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     ## no weight at all
-    process.analyzeTopRecoKinematicsKinFitNoWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
-    process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")
+    process.analyzeTopRecoKinematicsKinFitNoWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight=cms.InputTag(""))
+    process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=cms.InputTag(""))
     process.analyzeTopRecoKinematicsKinFitTopAntitopNoWeight.analyze.useTree = False
     process.analyzeTopRecoKinematicsKinFitNoWeight.analyze.useTree           = False
 
@@ -1712,8 +1712,8 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         process.analyzeTopRecoKinematicsKinFitOnlyPUWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight=PUweight)
         process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=PUweight)
     elif(not PUreweigthing):
-        process.analyzeTopRecoKinematicsKinFitOnlyPUWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
-        process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")
+        process.analyzeTopRecoKinematicsKinFitOnlyPUWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight=cms.InputTag(""))
+        process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=cms.InputTag(""))
     process.analyzeTopRecoKinematicsKinFitTopAntitopOnlyPUWeight.analyze.useTree = False
     process.analyzeTopRecoKinematicsKinFitOnlyPUWeight.analyze.useTree           = False
     
@@ -1722,8 +1722,8 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightNoBtagSFWeight")
         process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightNoBtagSFWeight")
     else:
-        process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
-        process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")
+        process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight           = process.analyzeTopRecoKinematicsKinFit.clone(weight=cms.InputTag(""))
+        process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=cms.InputTag(""))
     process.analyzeTopRecoKinematicsKinFitTopAntitopNoBtagSFWeight.analyze.useTree = False
     process.analyzeTopRecoKinematicsKinFitNoBtagSFWeight.analyze.useTree           = False
 
@@ -1732,8 +1732,8 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         process.analyzeTopRecoKinematicsKinFitPUup           = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightPUup")
         process.analyzeTopRecoKinematicsKinFitTopAntitopPUup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightPUup")
     elif(not PUreweigthing):
-        process.analyzeTopRecoKinematicsKinFitPUup           = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
-        process.analyzeTopRecoKinematicsKinFitTopAntitopPUup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")       
+        process.analyzeTopRecoKinematicsKinFitPUup           = process.analyzeTopRecoKinematicsKinFit.clone(weight=cms.InputTag(""))
+        process.analyzeTopRecoKinematicsKinFitTopAntitopPUup = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=cms.InputTag(""))       
     process.analyzeTopRecoKinematicsKinFitTopAntitopPUup.analyze.useTree = False
     process.analyzeTopRecoKinematicsKinFitPUup.analyze.useTree           = False
     
@@ -1742,8 +1742,8 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         process.analyzeTopRecoKinematicsKinFitPUdown           = process.analyzeTopRecoKinematicsKinFit.clone(weight="eventWeightPUdown")
         process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="eventWeightPUdown")
     elif(not PUreweigthing):
-        process.analyzeTopRecoKinematicsKinFitPUdown           = process.analyzeTopRecoKinematicsKinFit.clone(weight="")
-        process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight="")  
+        process.analyzeTopRecoKinematicsKinFitPUdown           = process.analyzeTopRecoKinematicsKinFit.clone(weight=cms.InputTag(""))
+        process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown = process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=cms.InputTag(""))  
     process.analyzeTopRecoKinematicsKinFitTopAntitopPUdown.analyze.useTree = False
     process.analyzeTopRecoKinematicsKinFitPUdown.analyze.useTree           = False
 
@@ -2317,7 +2317,7 @@ if(decayChannel=="electron"):
         path.replace(process.effSFMuonEventWeight, process.effSFElectronEventWeight)
         ## replace gen object kinematics
         if(runningOnData=="MC"):
-            process.genAllElectronKinematics.weight=""
+            process.genAllElectronKinematics.weight=cms.InputTag("")
         # remove muon monitoring
         path.remove(process.tightMuontightJetsKinematics)
         path.remove(process.tightMuonKinematics)
