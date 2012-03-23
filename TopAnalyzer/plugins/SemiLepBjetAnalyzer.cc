@@ -38,7 +38,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   // ignore non existing weights
   if(wgt.isValid()) weight=*wgt;
   else{
-    std::cout << "eventWeight not found" << std::endl;
+    if(verbose>0) std::cout << "eventWeight not found" << std::endl;
     edm::LogInfo("weightNotFound") << "eventWeight not found";
   }
   if(verbose>1) std::cout << "weight=" << weight << std::endl;
