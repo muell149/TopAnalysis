@@ -32,6 +32,7 @@ options.register('syncExcercise', False, VarParsing.VarParsing.multiplicity.sing
 options.register('json', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "limit to certain lumis")
 options.register('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
 options.register('pu', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "Pileup distribution input file")
+options.register('triggerStudy',False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "do trigger efficiency study")
 
 # get and parse the command line arguments
 if( hasattr(sys, "argv") ):
@@ -118,41 +119,44 @@ process.totalKinematicsFilter.tolerance = 5
 
 # trigger filtering
 
+mumuTriggers = cms.vstring( 'HLT_Mu10_Ele10_CaloIdL_*',
+                            'HLT_DoubleMu6_v*',
+                            'HLT_DoubleMu7_v*',
+                            'HLT_Mu13_Mu8_v*',
+                            'HLT_Mu17_Mu8_v*',
+                            'HLT_DoubleMu45_v*'
+                            )
+emuTriggers  = cms.vstring( 'HLT_Mu10_Ele10_CaloIdL_*',
+                            'HLT_Mu8_Ele17_CaloIdL_*',
+                            'HLT_Mu17_Ele8_CaloIdL_*',
+                            'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*',
+                            'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v*',
+                            'HLT_Mu10_Ele10_CaloIdL_v*'
+                            )
+eeTriggers   = cms.vstring( 'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*',
+                            'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v*',
+                            'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*',
+                            'HLT_DoubleEle45_CaloIdL_v*'
+                            )
+
 process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi")
 process.filterTrigger.TriggerResults = cms.InputTag('TriggerResults','','HLT')
 process.filterTrigger.printTriggers = False
 if options.mode == 'mumu':
     ttFilterChannelName = 'MuonMuon'
-    process.filterTrigger.hltPaths  = cms.vstring(
-        'HLT_Mu10_Ele10_CaloIdL_*',
-        'HLT_DoubleMu6_v*',
-        'HLT_DoubleMu7_v*',
-        'HLT_Mu13_Mu8_v*',
-        'HLT_Mu17_Mu8_v*',
-        'HLT_DoubleMu45_v*'
-    )
-
+    process.filterTrigger.hltPaths  = mumuTriggers
 elif options.mode == 'emu':
     ttFilterChannelName = 'ElectronMuon'
-    process.filterTrigger.hltPaths  = cms.vstring(
-        'HLT_Mu10_Ele10_CaloIdL_*',
-        'HLT_Mu8_Ele17_CaloIdL_*',
-        'HLT_Mu17_Ele8_CaloIdL_*',
-        'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*',
-        'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v*',
-        'HLT_Mu10_Ele10_CaloIdL_v*'
-    )
+    process.filterTrigger.hltPaths  = emuTriggers
 elif options.mode == 'ee':
     ttFilterChannelName = 'ElectronElectron'
-    process.filterTrigger.hltPaths  = cms.vstring(
-        'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*',
-        'HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v*',
-        'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*',
-        'HLT_DoubleEle45_CaloIdL_v*',
-    )
+    process.filterTrigger.hltPaths  = eeTriggers
 else:
     print 'ERROR: unrecognised mode ' + options.mode +'\nuse ee, emu, or mumu'
     exit(8888)
+
+if options.triggerStudy == True:
+    process.filterTrigger.hltPaths  = cms.vstring( '*' )
 
 
 ####################################################################
@@ -286,7 +290,9 @@ print '  muons: ', muonSelectionPAT
 # skip events (and jet calculation) if event is empty
 skipIfNoElectrons = False
 skipIfNoMuons     = False
-if options.mode == 'mumu':
+if options.triggerStudy == True:
+    print 'doing trigger study, will not reject events without identified leptons'
+elif options.mode == 'mumu':
     skipIfNoMuons = True
 elif options.mode == 'emu':
     skipIfNoElectrons = True
@@ -497,8 +503,96 @@ if topfilter:
 
 ## produce pat trigger content
 process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
-process.patTriggerEvent.patTriggerMatches = []
 
+###############################################################
+# trigger matching for trigger studies
+###############################################################
+
+## build cut strings for the matchers
+mumuMatchingCut = ''
+eeMatchingCut = ''
+emuMatchingCut = ''
+
+for trig in mumuTriggers:
+    if mumuMatchingCut == '':
+        mumuMatchingCut += 'path("'+trig+'")'
+    else:
+        mumuMatchingCut += ' || path("'+trig+'")'
+
+for trig in eeTriggers:
+    if eeMatchingCut == '':
+        eeMatchingCut += 'path("'+trig+'")'
+    else:
+        eeMatchingCut += ' || path("'+trig+'")'
+
+for trig in emuTriggers:
+    if emuMatchingCut == '':
+        emuMatchingCut += 'path("'+trig+'")'
+    else:
+        emuMatchingCut += ' || path("'+trig+'")'
+
+
+print "mumu trigger matching cut string:",mumuMatchingCut
+print "ee trigger matching cut string:",eeMatchingCut
+print "emu trigger matching cut string:",emuMatchingCut
+
+## define input sources
+triggerMatcherInputMuons     = isolatedMuonCollection  # for the moment use what the rest uses, but we have to think about this a bit more
+triggerMatcherInputElectrons = isolatedElecCollection  # for the moment use what the rest uses, but we have to think about this a bit more
+
+## generate the different matchers
+process.muonTriggerMatchHLTmumu = cms.EDProducer( "PATTriggerMatcherDRLessByR",
+                                                  src     = cms.InputTag( triggerMatcherInputMuons ),
+                                                  matched = cms.InputTag( "patTrigger" ),
+                                                  matchedCuts = cms.string(mumuMatchingCut),
+                                                  maxDPtRel = cms.double( 0.2 ),  #originally: 0.5
+                                                  maxDeltaR = cms.double( 0.2 ),  #originally: 0.5
+                                                  resolveAmbiguities    = cms.bool( True ),
+                                                  resolveByMatchQuality = cms.bool( True )
+                                                  )
+
+process.electronTriggerMatchHLTee = process.muonTriggerMatchHLTmumu.clone()
+process.electronTriggerMatchHLTee.src = cms.InputTag( triggerMatcherInputElectrons )
+process.electronTriggerMatchHLTee.matchedCuts = cms.string(eeMatchingCut)
+
+process.muonTriggerMatchHLTemu = process.muonTriggerMatchHLTmumu.clone()
+process.muonTriggerMatchHLTemu.matchedCuts = cms.string(emuMatchingCut)
+
+process.electronTriggerMatchHLTemu = process.electronTriggerMatchHLTee.clone()
+process.electronTriggerMatchHLTemu.matchedCuts = cms.string(emuMatchingCut)
+
+process.patTriggerEvent.patTriggerMatches = [ "muonTriggerMatchHLTmumu",
+                                              "electronTriggerMatchHLTee",
+                                              "muonTriggerMatchHLTemu", "electronTriggerMatchHLTemu"
+                                              ]
+# embed the results
+process.triggerMatchedMuons = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
+                                              src = cms.InputTag( triggerMatcherInputMuons ),
+                                              matches = cms.VInputTag( "muonTriggerMatchHLTmumu", "muonTriggerMatchHLTemu" )
+                                              )
+
+process.triggerMatchedElectrons = cms.EDProducer( "PATTriggerMatchElectronEmbedder",
+                                                  src = cms.InputTag( triggerMatcherInputElectrons ),
+                                                  matches = cms.VInputTag( "electronTriggerMatchHLTee", "electronTriggerMatchHLTemu" )
+                                                  )
+
+# sequence to run
+process.triggerMatchers = cms.Sequence( process.muonTriggerMatchHLTmumu
+                                        + process.electronTriggerMatchHLTee
+                                        + process.muonTriggerMatchHLTemu + process.electronTriggerMatchHLTemu
+                                        )
+
+process.triggerEmbedders = cms.Sequence( process.triggerMatchedMuons
+                                         + process.triggerMatchedElectrons
+                                         )
+
+process.triggerMatching = cms.Sequence( process.patTrigger
+                                        * process.triggerMatchers
+                                        * process.patTriggerEvent
+                                        * process.triggerEmbedders )
+
+###############################################################
+###############################################################
 ## analyze and filter trigger
 process.load("TopAnalysis.TopAnalyzer.TriggerAnalyzer_cfi")
 process.analyzeTrigger.weightPU = eventWeightPuTag
@@ -575,7 +669,7 @@ process.filterDiLeptonMassQCDveto.muons     = 'filterOppositeCharge'
 process.filterDiLeptonMassQCDveto.electrons = 'filterOppositeCharge'
 process.filterDiLeptonMassQCDveto.Cut       = (0.,12.)
 
-## produces weight from lepton SF 
+## produces weight from lepton SF
 process.load("TopAnalysis.TopUtils.EventWeightDileptonSF_cfi")
 process.eventWeightDileptonSF.electrons = cms.InputTag('filterDiLeptonMassQCDveto')
 process.eventWeightDileptonSF.muons = cms.InputTag('filterDiLeptonMassQCDveto')
@@ -682,12 +776,17 @@ writeNTuple.weightPU_Down    = eventWeightPuTag_Down
 writeNTuple.weightLepSF = eventWeightDileptonSfTag
 
 process.writeNTuple = writeNTuple.clone(
-    muons=isolatedMuonCollection, 
-    elecs=isolatedElecCollection, 
-    jets=jetCollection, 
+    muons=isolatedMuonCollection,
+    elecs=isolatedElecCollection,
+    jets=jetCollection,
     met=metCollection,
     weightKinFit = cms.InputTag("eventWeightDileptonKinEffSF", "eventWeightDileptonKinEffSF"),
 )
+
+if options.triggerStudy:
+    process.writeNTuple.muons = 'triggerMatchedMuons'
+    process.writeNTuple.elecs = 'triggerMatchedElectrons'
+
 
 ## dilepton analyzer
 from TopAnalysis.TopAnalyzer.DiLeptonAnalyzer_cfi import analyzeLeptonPair
@@ -777,7 +876,7 @@ process.filterFullLepHypothesis.weightCut = 0
 process.filterFullLepHypothesis.jets = "hardJets"
 process.filterFullLepHypothesis.bAlgorithm = 'trackCountingHighEffBJetTags'
 process.filterFullLepHypothesis.bDiscriminator = cms.vdouble()
-    
+
 #-------------------------------------------------
 # analysis path
 #-------------------------------------------------
@@ -816,8 +915,8 @@ if topfilter:
         process.produceGenLevelBJets.deltaR = 5.0
         process.produceGenLevelBJets.noBBbarResonances = True
 
-	process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2     
-        process.topsequence = cms.Sequence( 
+	process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2
+        process.topsequence = cms.Sequence(
 	        process.makeGenEvt *
 		process.generatorTopFilter *
 	        process.produceHadronLevelBJets *
@@ -839,7 +938,7 @@ if topfilter:
 		process.analyzeGenTopEvent8 = analyzeFullLepGenEvent.clone()
                 process.analyzeGenEvent8 = cms.Sequence(process.analyzeGenTopEvent8)
 		process.analyzeGenTopEvent9 = analyzeFullLepGenEvent.clone()
-                process.analyzeGenEvent9 = cms.Sequence(process.analyzeGenTopEvent9) 
+                process.analyzeGenEvent9 = cms.Sequence(process.analyzeGenTopEvent9)
 else:
         process.topsequence = cms.Sequence()
 
@@ -897,7 +996,12 @@ if signal:
     process.ntupleInRecoSeq = cms.Sequence()
 else:
     process.writeNTuple.isTtBarSample = False
-    process.ntupleInRecoSeq = cms.Sequence(process.writeNTuple)
+    if options.triggerStudy:
+        process.ntupleInRecoSeq = cms.Sequence(process.triggerMatching
+                                               * process.writeNTuple)
+    else:
+        process.ntupleInRecoSeq = cms.Sequence(process.writeNTuple)
+
 
 process.afterLeptonChargeSelection = cms.Sequence(
     process.filterChannel            *
@@ -951,7 +1055,7 @@ process.afterLeptonChargeSelection = cms.Sequence(
     process.analyzeElecs7            *
     process.analyzeLeptonPair7       *
     process.analyzeKinSolution7      *
-    process.analyzeKinSolutionNoBtagging7 *     
+    process.analyzeKinSolutionNoBtagging7 *
     process.analyzeVertex7           *
     process.analyzeGenEvent7         *
     process.eventIDPrinter7          *
@@ -966,9 +1070,9 @@ process.afterLeptonChargeSelection = cms.Sequence(
     process.analyzeVertex8           *
     process.analyzeGenEvent8         *
     process.eventIDPrinter8          *
-    
+
     process.filterFullLepHypothesis  *
-    process.eventWeightDileptonKinEffSF*     
+    process.eventWeightDileptonKinEffSF*
     process.analyzeKinSolution9      *
     process.analyzeJets9             *
     process.analyzeMet9              *
@@ -1015,7 +1119,7 @@ process.pZWindow = cms.Path(
     process.filterOppositeCharge          *
     process.filterChannel                 *
     process.filterDiLeptonMassQCDveto     *
-    process.eventWeightDileptonSF         *    
+    process.eventWeightDileptonSF         *
     process.ZWindowSelection              *
     process.analyzeLeptonPairZvetoRegion4 *
     process.onePFJetSelection             *
@@ -1029,16 +1133,24 @@ process.pZWindow = cms.Path(
     process.analyzeLeptonPairZvetoRegion8 *
     process.makeTtFullLepEvent            *
     process.filterFullLepHypothesis       *
-    process.eventWeightDileptonKinEffSF   *     
+    process.eventWeightDileptonKinEffSF   *
     process.analyzeLeptonPairZvetoRegion9
 )
 
 if signal:
-    process.pNtuple = cms.Path(
-        process.additionalPatSelection *
-        process.buildJets *
-        process.writeNTuple
-    )
+    if options.triggerStudy:
+        process.pNtuple = cms.Path(
+            process.additionalPatSelection *
+            process.buildJets *
+            process.triggerMatching *
+            process.writeNTuple
+            )
+    else:
+        process.pNtuple = cms.Path(
+            process.additionalPatSelection *
+            process.buildJets *
+            process.writeNTuple
+            )
 
 
 ####################################################################
@@ -1079,13 +1191,13 @@ pathnames = process.paths_().keys()
 print 'prepending trigger sequence to paths:', pathnames
 for pathname in pathnames:
     getattr(process, pathname).insert(0, cms.Sequence(
+        process.analyzeTrigger *
+        process.filterTrigger *
         process.topsequence *
         process.zsequence *
         process.eventWeightPU *
         process.eventWeightPUsysUp *
-        process.eventWeightPUsysDown *
-        process.analyzeTrigger *
-        process.filterTrigger
+        process.eventWeightPUsysDown
         ))
 if signal:
     process.pNtuple.remove(process.analyzeTrigger)
