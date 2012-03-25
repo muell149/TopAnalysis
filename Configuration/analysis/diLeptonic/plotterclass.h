@@ -857,11 +857,23 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     }
   }
   
+  TFile *f0 = new TFile("SigBackground.root","UPDATE");
+
   TList* l = stack->GetHists();
   TH1D* stacksum = (TH1D*) l->At(0)->Clone();
+  TString aaa = "a";
   for (int i = 1; i < l->GetEntries(); ++i) {
+    aaa=aaa+"a";
     stacksum->Add((TH1D*)l->At(i));
+    if(legends[datafiles+i] == "t#bar{t} background") {
+      stacksum->Write(name+"_"+channel+aaa+"_Background");
+    }
+    if(legends[datafiles+i] == "t#bar{t} signal") {
+	stacksum->Write(name+"_"+channel+aaa+"_Signal");
+    }
+
   }
+  f0->Close();
   //stat uncertainty::make a function
   TH1D* syshist =0;
   syshist = (TH1D*)stacksum->Clone();
@@ -1092,7 +1104,8 @@ double Plotter::CalcXSec(){
   }
   InclusiveXsectionSysError[channelType] = sqrt(syst_square);
   //cout<<"&^&^&^&^&^&^^&^&^ InclusiveXsectionSysError[channelType]: "<<InclusiveXsectionSysError[channelType]<<endl;
-  double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu, combined] including tau
+  //  double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu, combined] including tau
+  double BranchingFraction[4]={0.011556, 0.011067, 0.022618, 0.04524};//[ee, mumu, emu, combined] not including tau
   lumi = 4966;
 
   TH1D *numhists[hists.size()];
@@ -1664,7 +1677,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohist = GetNloCurve("TtBar","Pt","MCatNLO");}
     else if(name.Contains("TTBarRapidity")){mcnlohist = GetNloCurve("TtBar","Rapidity","MCatNLO");}
     else if(name.Contains("TTBarMass")){mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");}
-    else{mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");mcnlohist->SetLineColor(kWhite);}
+    else{mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");mcnlohist->SetLineColor(kWhite);}//default curve
     //    mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
     mcnlohist->Rebin(5);mcnlohist->Scale(0.2);
@@ -1753,13 +1766,13 @@ void Plotter::PlotDiffXSec(){
     mcatnloBand->Draw("same, F");
 
     GenPlotTheory->SetLineColor(2);
-    GenPlotTheory->Rebin(4);GenPlotTheory->Scale(1./4.);
+    //    GenPlotTheory->Rebin(4);GenPlotTheory->Scale(1./4.);
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(2);
     mcnlohist->SetLineColor(kAzure);
-    mcnlohist->Draw("SAME,C");
+    //mcnlohist->Draw("SAME,C");
     powheghist->SetLineColor(kGreen+1);
-    powheghist->Draw("SAME,C");
+    //powheghist->Draw("SAME,C");
     //h_DiffXSec->Draw("SAME, EP0");
     DrawCMSLabels(true, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
@@ -1788,7 +1801,7 @@ void Plotter::PlotDiffXSec(){
     TH1D* stacksum = (TH1D*) l->At(0)->Clone();
     for (int i = 1; i < l->GetEntries(); ++i) {
       stacksum->Add((TH1D*)l->At(i));
-    }
+    } 
 
     for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
       if(legends[i] == legends[0]){
