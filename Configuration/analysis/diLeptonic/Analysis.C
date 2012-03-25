@@ -525,7 +525,7 @@ Bool_t Analysis::Process(Long64_t entry)
     if(channel->find("emu")!=string::npos && ((triggerBits & 0x1000) || (triggerBits & 0x100) || (triggerBits & 0x200))){
       int emutrig;
     }
-    else if(channel->find("ee")!=string::npos && ((triggerBits & 0x20000) || (triggerBits & 0x10000))){
+    else if(channel->find("ee")!=string::npos && ((triggerBits & 0x40000))){
       int eetrig;
     }
     else if(channel->find("mumu")!=string::npos && ((triggerBits & 2))){
@@ -535,7 +535,7 @@ Bool_t Analysis::Process(Long64_t entry)
       return kTRUE;
     }
   }
- 	  
+
   int LeadLeptonNumber = 0;
   int NLeadLeptonNumber = 0;
   if(lepton_>1){
