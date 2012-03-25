@@ -98,7 +98,7 @@ void merge(string channel){
     //tree = t->CloneTree(0);
     
     double lumiWeight = sf;
-    double btagSF = 0.982; //btagSF applied to all one tag events
+    double btagSF = 1.01; //btagSF applied to all one tag events
     double trigEFF;
 
     if(channel=="mumu") trigEFF = 0.961;
