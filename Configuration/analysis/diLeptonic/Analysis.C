@@ -23,6 +23,9 @@ void Analysis::Begin(TTree * /*tree*/)
   ifstream insample("syst.txt",std::ios::in);
   insample>>systematic;
 
+  ifstream inviatau("viaTau.txt",std::ios::in);
+  inviatau>>viaTau;
+
   gStyle->SetOptStat(0);
 
   h_jetMultiAll = new TH1D("HypjetMultiAll", "Jet Multiplicity (AllJets)", 10, 0, 10);
@@ -221,6 +224,21 @@ void Analysis::SlaveBegin(TTree * /*tree*/)
 Bool_t Analysis::Process(Long64_t entry)
 {
   Analysis::GetAllBranches(entry);
+  //initial check to see if we are doing the signal via tau (which is now background)
+  if(viaTau=="viaTau"){
+    if((MCSample->find("ttbarsignal")!=string::npos) && (decayMode>40 || (decayMode%10 > 4))){
+      MCSample->clear();
+      MCSample->append("ttbarbgviatau");
+    }else{
+      return kTRUE;
+    }
+  }else if(viaTau == "Nominal"){
+    if((MCSample->find("ttbarsignal")!=string::npos) &&(decayMode>40 || (decayMode%10 > 4))){
+      return kTRUE;
+    }
+  }else{
+    cout<<"Something went wrong"<<endl;
+  }
   if(MCSample->find("ttbarsignal")!=string::npos){ Analysis::GetSignalBranches(entry);}
   if(MCSample->find("run")!=string::npos){ weightLepSF = 1.0;}
   EventCounter++;
@@ -707,7 +725,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	if(MCSample->find("ttbarsignal")!=string::npos){
 	  if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
 //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
-       if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
+	    if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
 //       if (BHadIndex.size() >= 2 && LVGenJets[*(BHadIndex.begin())].Pt()>30 && LVGenJets[*(++BHadIndex.begin())].Pt()>30 &&
 // 	  abs(LVGenJets[*(BHadIndex.begin())].Eta())<2.4 && abs(LVGenJets[*(++BHadIndex.begin())].Eta())<2.4){
 //       if(BHadronIndex != -1 && LVGenJets[BHadronIndex].Pt()>30 && abs(LVGenJets[BHadronIndex].Eta())<2.4 &&
@@ -1035,6 +1053,10 @@ void Analysis::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
+  if(viaTau=="viaTau"){
+    MCSample->clear();
+    MCSample->append("ttbarbgviatau");
+  }
 
   string f_savename = "selectionRoot/";
   gSystem->MakeDirectory(f_savename.c_str());

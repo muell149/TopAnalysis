@@ -226,6 +226,7 @@ public :
    string          *channel;
    string          *MCSample;
    string          systematic;
+   string          viaTau;
    Double_t        lumiWeight;
    
 
