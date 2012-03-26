@@ -1766,7 +1766,7 @@ void Plotter::PlotDiffXSec(){
     mcatnloBand->Draw("same, F");
 
     GenPlotTheory->SetLineColor(2);
-    //    GenPlotTheory->Rebin(4);GenPlotTheory->Scale(1./4.);
+    GenPlotTheory->Rebin(4);GenPlotTheory->Scale(1./4.);
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(2);
     mcnlohist->SetLineColor(kAzure);
