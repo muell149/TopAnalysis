@@ -18,13 +18,37 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   genPlots_  (cfg.getParameter<bool>         ("genPlots"    )),
   recPlots_  (cfg.getParameter<bool>         ("recPlots"    )),
   bHadJetIdx_    (cfg.getParameter<edm::InputTag> ("BHadJetIndex"    )),
-  antibHadJetIdx_(cfg.getParameter<edm::InputTag> ("AntiBHadJetIndex"))
+  antibHadJetIdx_(cfg.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
+  useTree_   (cfg.getParameter<bool>("useTree")),
+  valueBqPtRec(0),
+  valueBqPtGen(0),
+  valueBqEtaRec(0),
+  valueBqEtaGen(0),
+  valueBqYRec(0),
+  valueBqYGen(0),
+  valueBbarqPtRec(0),
+  valueBbarqPtGen(0),
+  valueBbarqEtaRec(0),
+  valueBbarqEtaGen(0),
+  valueBbarqYRec(0),
+  valueBbarqYGen(0)
 {
 }
 
 void
 SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& setup)
 {
+
+  // ---
+  //     Z: Event information
+  // ---
+  if(useTree_){
+    edm::EventAuxiliary aux = event.eventAuxiliary();
+    runNumber             = aux.run();
+    luminosityBlockNumber = aux.luminosityBlock();
+    eventNumber           = aux.event();
+  }
+
   // ---
   //     A: configure input
   // ---
@@ -96,6 +120,14 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::Candidate* bbar= recBJets.second;
   // fill rec histograms
   if(b&&bbar){
+    if(useTree_){
+      valueBqPtRec =b->pt();
+      valueBqEtaRec=b->eta();
+      valueBqYRec  =b->rapidity(); 
+      valueBbarqPtRec =bbar->pt();
+      valueBbarqEtaRec=bbar->eta();
+      valueBbarqYRec  =bbar->rapidity();
+    }
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtRec ->Fill( b->pt()         , weight);
     bqPtRec ->Fill( bbar->pt()      , weight);
@@ -120,6 +152,14 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::GenJet* genbbar = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
   // fill gen histograms
   if(genb&&genbbar){
+    if(useTree_){
+      valueBqPtGen =genb->pt();
+      valueBqEtaGen=genb->eta();
+      valueBqYGen  =genb->rapidity();
+      valueBbarqPtGen =genbbar->pt();
+      valueBbarqEtaGen=genbbar->eta();
+      valueBbarqYGen  =genbbar->rapidity();
+    }
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtGen ->Fill( genb->pt()         , weight);
     bqPtGen ->Fill( genbbar->pt()      , weight);
@@ -146,6 +186,8 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
  
+
+  if(useTree_) tree->Fill();
 }
 
 void 
@@ -172,13 +214,40 @@ SemiLepBjetAnalyzer::beginJob()
   if(recPlots_) bqEtaRec = fs->make<TH1F>("bqEtaRec", "#eta^{b and #bar{b}} (rec)"       , 100, -5., 5.);
   if(genPlots_) bqEtaGen = fs->make<TH1F>("bqEtaGen", "#eta^{b and #bar{b}} (gen)"       , 100, -5., 5.);
   // rapidity
-  if(recPlots_)  bqYRec   = fs->make<TH1F>("bqYRec"  , "y^{b and #bar{b}} (rec)"          , 100, -5., 5.);
+  if(recPlots_) bqYRec   = fs->make<TH1F>("bqYRec"  , "y^{b and #bar{b}} (rec)"          , 100, -5., 5.);
   if(genPlots_) bqYGen   = fs->make<TH1F>("bqYGen"  , "y^{b and #bar{b}} (gen)"          , 100, -5., 5.);
   // correlation
   if(recPlots_&&genPlots_){
     bqPt_  = fs->make<TH2F>("bqPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
-    bqEta_ = fs->make<TH2F>("bqEta_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,    5, -5.,    5.);
-    bqY_   = fs->make<TH2F>("bqY_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,    5, -5.,    5.);
+    bqEta_ = fs->make<TH2F>("bqEta_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
+    bqY_   = fs->make<TH2F>("bqY_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
+  }
+  //---
+  //   create branches
+  //---
+  if(useTree_){
+    // define the tree and make it known to the TFileService
+    tree = fs->make<TTree>("tree","tree",0);
+    // event identifiers
+    runNumber = 0;
+    tree->Branch("runNumber", &runNumber, "runNumber/i");
+    luminosityBlockNumber = 0;
+    tree->Branch("luminosityBlockNumber", &luminosityBlockNumber, "luminosityBlockNumber/i");
+    eventNumber= 0;
+    tree->Branch("eventNumber", &eventNumber, "eventNumber/i");
+    // variables
+    tree->Branch("bqPtRec" , &valueBqPtRec , "bqPtRec/D" );
+    tree->Branch("bqPtGen" , &valueBqPtGen , "bqPtGen/D" );
+    tree->Branch("bqEtaRec", &valueBqEtaRec, "bqEtaRec/D");
+    tree->Branch("bqEtaGen", &valueBqEtaGen, "bqEtaGen/D");
+    tree->Branch("bqYRec"  , &valueBqYRec  , "bqYRec/D"  );
+    tree->Branch("bqYGen"  , &valueBqYGen  , "bqYGen/D"  );
+    tree->Branch("bbarqPtRec" , &valueBbarqPtRec , "bbarqPtRec/D" );
+    tree->Branch("bbarqPtGen" , &valueBbarqPtGen , "bbarqPtGen/D" );
+    tree->Branch("bbarqEtaRec", &valueBbarqEtaRec, "bbarqEtaRec/D");
+    tree->Branch("bbarqEtaGen", &valueBbarqEtaGen, "bbarqEtaGen/D");
+    tree->Branch("bbarqYRec"  , &valueBbarqYRec  , "bbarqYRec/D"  );
+    tree->Branch("bbarqYGen"  , &valueBbarqYGen  , "bbarqYGen/D"  );
   }
 }
 
@@ -207,7 +276,7 @@ SemiLepBjetAnalyzer::getbJets(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt,
       const reco::Candidate* blep  = semiLepEvt->leptonicDecayB(hypoKey_);
       if(bhad&&blep){
 	// destinguish b and bbar using the lepton charge
-	// (t->W-&bbar, W- -> l- nu, therefore: l- -> bbar; l+ -> b)
+	// (tbar->W-&bbar, W- -> l- nu, therefore: l- -> bbar; l+ -> b)
 	bool lminus = ((reco::LeafCandidate*)(semiLepEvt->singleLepton(hypoKey_)))->charge()<0 ? true : false;
 	const reco::Candidate* b    = lminus ? bhad : blep;
 	const reco::Candidate* bbar = lminus ? blep : bhad;   

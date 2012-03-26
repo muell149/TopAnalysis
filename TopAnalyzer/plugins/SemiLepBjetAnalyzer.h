@@ -3,6 +3,7 @@
 
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TTree.h"
 
 #include "DataFormats/JetReco/interface/GenJet.h"
 
@@ -57,6 +58,25 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   bool recPlots_;
   // from gen level b-jet identification  
   edm::InputTag bHadJetIdx_, antibHadJetIdx_;
+
+  // ---
+  //    define Tree for event content
+  // ---
+  TTree * tree;
+  bool useTree_;
+  unsigned int runNumber, luminosityBlockNumber, eventNumber;
+  double valueBqPtRec;
+  double valueBqPtGen;
+  double valueBqEtaRec;
+  double valueBqEtaGen;
+  double valueBqYRec;
+  double valueBqYGen;
+  double valueBbarqPtRec;
+  double valueBbarqPtGen;
+  double valueBbarqEtaRec;
+  double valueBbarqEtaGen;
+  double valueBbarqYRec;
+  double valueBbarqYGen;
 
   // ---
   //    histos

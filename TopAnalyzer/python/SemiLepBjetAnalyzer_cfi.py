@@ -28,5 +28,7 @@ analyzeSemiLepBJets = cms.EDAnalyzer("SemiLepBjetAnalyzer",
                                      # TopAnalysis/TopUtils/GenLevelBJetProducer
                                      # please adapt if cloning and renaming produceGenLevelBJets!
                                      BHadJetIndex     = cms.InputTag("produceGenLevelBJets", "BHadJetIndex"    ),
-                                     AntiBHadJetIndex = cms.InputTag("produceGenLevelBJets", "AntiBHadJetIndex")
+                                     AntiBHadJetIndex = cms.InputTag("produceGenLevelBJets", "AntiBHadJetIndex"),
+                                     # create tree?
+                                     useTree = cms.bool(False)
                                      )
