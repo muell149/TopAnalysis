@@ -8,10 +8,10 @@ additionalEventWeights  = False
 execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 
 # JER -> +00% (default: +10%)
-process.scaledJetEnergy.resolutionFactors   = cms.vdouble(1.0,   0.95,   0.9   )
-process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,1.5,1.5,2.0,2.0,-1)
+process.scaledJetEnergy.resolutionFactors   = cms.vdouble(0.990, 1.001, 1.032, 1.042, 1.089)
+process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.0,0.5,0.5,1.1,1.1,1.7,1.7,2.3,2.3,-1.)
 if(applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.0
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.0126
     
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXSecJERdown_testSig.root'

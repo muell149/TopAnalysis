@@ -39,11 +39,11 @@ if(pfToPAT==True):
     process.scaledJetEnergy.inputMETs = "patMETs"
 
 # JER +10%
-process.scaledJetEnergy.resolutionFactors = cms.vdouble(1.1)
-process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,-1.)
+process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 1.052 , 1.057 , 1.096 , 1.134 , 1.288 )
+process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.0,0.5,0.5,1.1,1.1,1.7,1.7,2.3,2.3,-1.)
 
 if(applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.0777
 # use status 3 particles (!)
     process.decaySubset.fillMode = cms.string("kME")
 
