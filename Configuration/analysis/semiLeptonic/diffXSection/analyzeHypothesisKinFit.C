@@ -1358,6 +1358,9 @@ TString efficiency="efficiency/"+variable;
       // decay channel
       TString channelTex="#mu";
       if(decayChannel=="electron") channelTex="e";
+      // list of systematics
+      TString sysList=sysLabel(systematicVariation);
+      //TString sysList[]={sysLabel(systematicVariation)};
       // regularization mode (see below)
       int regMode=2;
       if(systematicVariation!=sysNo) regMode=2;
@@ -1410,20 +1413,20 @@ TString efficiency="efficiency/"+variable;
 	TH1D* unfoldedData=new TH1D();
 	TopSVDFunctions::SVD_Unfold(
 	// Data Input (RAW Data including the background)
-	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
+	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
 	// Background (will be substracted from data)
-	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC],
+	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC],
 	// ttbar background only (used to calculate a ttbar signal 
 	// fraction instead of subtracting the yield which depends 
 	// on the inclusive ttbar cross section.) 
 	// Note: if 0 pointer is handed over 
-	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
+	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
 	// Generated MC
-	*&histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
+	(TH1D*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
 	// Reconstructed MC
-	*&histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
+	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
 	// Response Matrix 
-	*&histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
+	(TH2D*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
 	// Binning for the unfolding
 	bins, 
 	// Number of bins for unfolding (not counting OF bins !!!)
@@ -1444,6 +1447,8 @@ TString efficiency="efficiency/"+variable;
 	regMode,                            
 	// Returned: Unfolded Distribution              
 	unfoldedData,
+        // Specify the number of systematic samples to unfold 
+        0,
 	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
 	(TString)decayChannel,  
 	// Specify Name for the Physics Object ("Top", "Jets", "Leptons")      
@@ -1452,6 +1457,9 @@ TString efficiency="efficiency/"+variable;
 	quantity,
 	// Specify Name for special run of unfolding
 	special, 
+        // Array of Names for the different systematics
+        // if you run only over the nominal sample, provide NULL
+        sysList,
 	// Nicely formatted name for the channel
 	channelTex,
 	// Nicely formatted name for the physics object 
@@ -1460,6 +1468,9 @@ TString efficiency="efficiency/"+variable;
 	quantityTex,
 	// Nicely formatted name indicating some special condition 
 	special,
+	// Array of Names for the different systematics
+        // if you run only over the nominal sample, provide NULL
+        sysList,
 	// If specified, plots will be saved in ROOT File
 	rootFile,
 	// If specified, plots will be saved in PS File
@@ -1470,12 +1481,13 @@ TString efficiency="efficiency/"+variable;
         // The following data will be saved in this order: 
         // (1) the optimal tau, (2) the two nearest k values,
         // (3) the k value from the d value method
+        // (4) the number of bins including side bins
         regFile,
 	// output
 	// verbose=0: no output at all
 	// verbose=1: standard output
 	// verbose=2: debug output
-	verbose,
+	(int) verbose,
 	// produce tau scan plots 
 	// (only used for illustrating minimum and performance)
 	scan
