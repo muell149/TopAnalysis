@@ -1,11 +1,12 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun", 
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root",
-				  const std::string decayChannel = "muon", bool withRatioPlot = true)
+				  const std::string decayChannel = "electron", bool withRatioPlot = true)
 {
   // ============================
   //  Set Root Style
@@ -56,6 +57,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   //          2: output for debugging
 
   // b) options to be configured only once
+  // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
+  bool setQCDtoZero=true;
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
@@ -558,6 +561,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall"){
 	  histo_[plotList_[plot]][sample]           -> SetNdivisions(816);
 	}
+	// set QCD to 0
+	if(setQCDtoZero&&sample==kQCD&&(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("analyzeTopReco"))) histo_[plotList_[plot]][sample]->Scale(0.);
       }
       // b) 2D
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
@@ -610,7 +615,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
       std::cout << " ttbar BG:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
       std::cout << " W + Jets:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl; 
       std::cout << " Z + Jets:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
-      std::cout << " QCD:        " << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC << std::endl;
+      std::cout << " QCD:        " << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC;
+      if(setQCDtoZero&&events_[selection_[step]][kQCD  ]==0.) std::cout << " (artificially set to 0)";
+      std::cout << std::endl;
       std::cout << " Single Top: " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
       std::cout << " DiBoson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
     }
