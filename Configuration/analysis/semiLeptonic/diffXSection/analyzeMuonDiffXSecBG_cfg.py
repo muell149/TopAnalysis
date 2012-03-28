@@ -4,7 +4,6 @@
 ## ---
 
 sample="ttbar"
-decayChannel = 'muon'
 
 ## change gen level event filter to ttbarBG
 eventFilter='background only'
