@@ -974,7 +974,7 @@ process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 
 # use larger JER in KinFit as it is obtained from data
 if(runningOnData=="data") and (applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.1
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.0777
 
 ## keep only events with unambigues parton matches
 ## (no other partons exist in dR=0.3 cone) 
