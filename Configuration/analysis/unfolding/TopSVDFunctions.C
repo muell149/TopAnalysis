@@ -2952,7 +2952,9 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 double value_ttBgr=(ttbgrHist+h)->GetBinContent(i); 
                 if(value_ttBgr>value_bgr){
                     std::cout << "ERROR in TopSVDFunctions::SVD_BackgrHandling: " << std::endl;
-                    std::cout << "N_{MC ttbar BG} > N_{MC all BG} in bin " << i << std::endl;
+		    std::cout << "N_MC BG > N_data for plot " << rawHist->GetName() << std::endl;
+		    std::cout << "in bin " << i << " (range " << rawHist->GetBinLowEdge(i) << ",";
+		    std::cout << rawHist->GetBinLowEdge(i+1) << " )" << std::endl;
                     std::cout << "(" << value_ttBgr << ">" << value_bgr << ")" << std::endl;
                     exit(0);
                 }  
