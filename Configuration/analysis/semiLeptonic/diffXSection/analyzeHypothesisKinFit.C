@@ -2,10 +2,10 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true)
+void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
+			     std::string decayChannel = "electron", bool SVDunfold=true)
 {
   // ============================
   //  Set ROOT Style
@@ -102,6 +102,9 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
   bool extrapolate=false;
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
+  // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
+  bool setQCDtoZero=true;
+  if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
@@ -789,6 +792,8 @@ void analyzeHypothesisKinFit(double luminosity = 1143.22, bool save = true, int 
 	histogramStyle( *histo_[plotList_[plot]][sample], sample, true);
 	// special configurations
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall")histo_[plotList_[plot]][sample]->SetNdivisions(816);
+	// set QCD to 0
+	if(setQCDtoZero&&sample==kQCD) histo_[plotList_[plot]][sample]->Scale(0.);
       }
       // b) 2D
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
@@ -1039,11 +1044,17 @@ TString efficiency="efficiency/"+variable;
     std::cout << "QCD       :" << std::setprecision(4) << std::fixed << NBGQCD / NAllMC; 
     std::cout << " (" << lumiweight(kQCD, luminosity, systematicVariation, decayChannel) << "*";
     std::cout << NBGQCD/lumiweight(kQCD, luminosity, systematicVariation, decayChannel) << "=" << NBGQCD << ") " << std::endl;
+    if(setQCDtoZero) std::cout << " will be ignored for all calculations" << std::endl;
     std::cout << "Z+jets    :" << std::setprecision(4) << std::fixed << NBGZ   / NAllMC;
     std::cout << " (" << lumiweight(kZjets, luminosity, systematicVariation, decayChannel) << "*";
     std::cout << NBGZ/lumiweight(kZjets, luminosity, systematicVariation, decayChannel) << "=" << NBGZ << ") " << std::endl;
     std::cout << "Diboson   :" << std::setprecision(4) << std::fixed << NBGVV  / NAllMC; 
     std::cout << " (" << NBGVV << ") " << std::endl;
+  }
+  // set QCD to 0
+  if(setQCDtoZero){ 
+    NBG-=NBGQCD;
+    NAllMC-=NBGQCD;
   }
   // efficiency calculation
   double NGenPhaseSpace=0.5 * GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
@@ -1410,6 +1421,29 @@ TString efficiency="efficiency/"+variable;
       // use unfolding machine
       // ----------------------
       if(calculateXSec){
+	if(verbose>3){
+	  // N(events) output for each bin and variable
+	  std::cout << std::endl << variable << std::endl;
+	  for(int bin=0; bin<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetNbinsX()+1; ++bin){
+	    std::cout << "lep eta (bin" << bin << ")= (" <<  histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin) << "," << histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin+1) << ")" << std::endl;
+	    std::cout << "     N(data): " << histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinContent(bin)* histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinWidth(bin) << std::endl;
+	    double NumSig  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig  ]->GetBinWidth(bin);
+	    double NumBkg  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->GetBinWidth(bin);     
+	    double NumQCD  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinWidth(bin);
+	    double NumVV   = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinWidth(bin);
+	    double NumStop = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinWidth(bin);
+	    double NumWjet = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinWidth(bin);
+	    double NumZjet = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinWidth(bin); 
+	    std::cout << "     N(BG all): " << NumStop+NumWjet+NumZjet+NumVV+NumQCD << std::endl;
+	    std::cout << "     N(Sig): "    << NumSig  << std::endl;
+	    std::cout << "     N(Bkg): "    << NumBkg  << std::endl;
+	    std::cout << "     N(Stop): "   << NumStop << std::endl;
+	    std::cout << "     N(Wjets): "  << NumWjet << std::endl;
+	    std::cout << "     N(Zjets): "  << NumZjet << std::endl;
+	    std::cout << "     N(VV): "     << NumVV   << std::endl;
+	    std::cout << "     N(QCD): "    << NumQCD  << std::endl;
+ 	  }
+	}
 	TH1D* unfoldedData=new TH1D();
 	TopSVDFunctions::SVD_Unfold(
 	// Data Input (RAW Data including the background)
