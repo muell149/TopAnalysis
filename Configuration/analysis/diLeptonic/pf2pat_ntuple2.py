@@ -1191,13 +1191,13 @@ pathnames = process.paths_().keys()
 print 'prepending trigger sequence to paths:', pathnames
 for pathname in pathnames:
     getattr(process, pathname).insert(0, cms.Sequence(
-        process.analyzeTrigger *
-        process.filterTrigger *
         process.topsequence *
         process.zsequence *
         process.eventWeightPU *
         process.eventWeightPUsysUp *
-        process.eventWeightPUsysDown
+        process.eventWeightPUsysDown *
+        process.analyzeTrigger *
+        process.filterTrigger
         ))
 if signal:
     process.pNtuple.remove(process.analyzeTrigger)
