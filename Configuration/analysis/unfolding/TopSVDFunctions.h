@@ -49,13 +49,13 @@ class TopSVDFunctions
                         TH1D* ttbgrInputHist,
                         TH1D* genInputHist,                                         
                         TH1D* recInputHist,                                
-                        TH2D* respInputHist,                  
+                        TH2D* respInputHist,                                         
+                        TH1D*& unfolded,         
                         const double thebins[],         
                         const int numbins,                
-                        double regPar,                  
-                        int regMode,                                           
-                        TH1D*& unfolded,
-                        int numSys = 0,                        
+                        double regPar,          
+                        const int steering = 1103102,
+                        const int numSys = 0,                        
                         TString channel = "",                                   
                         TString particle = "",           
                         TString quantity = "",                          
@@ -68,9 +68,7 @@ class TopSVDFunctions
                         TString systnameTex = "",
                         TString rootFile = "",                          
                         TString psFile = "",                        
-                        TString regParFile = "",
-                        const int verbose = 1,
-                        bool scanPlots = false
+                        TString regParFile = ""
         );
     
     
@@ -103,6 +101,8 @@ class TopSVDFunctions
         static void SVD_DeleteHists2D(TH2D*& hist, int numHist = 1);
         static void SVD_WriteHists1D(TH1D* hists, int numHist = 1);
         static void SVD_WriteHists2D(TH2D* hists, int numHist = 1); 
+        static void SVD_RmDir1D(TH1D* hist, int numHist = 1);
+        static void SVD_RmDir2D(TH2D* hist, int numHist = 1);
         
         
         // Histogram Manipulation
@@ -209,6 +209,20 @@ class TopSVDFunctions
         
         // Systematics
         static TH1D* SVD_ArrayToShifts(TH1D* array, int numHist = 1); 
+        
+        
+        // Files and Folders
+        static TString SVD_FindFolder(TString filepath);
+        static TString SVD_FindFile(TString filepath);
+        static void SVD_MakeFolder(TString outputpath);
+        static void SVD_TouchFile(TString filepath);
+        static void SVD_RemoveFile(TString filepath);
+        static void SVD_LineToFile(TString string, TString filepath, TString option);
+        static TString SVD_LineFromFile(TString startstring, TString filepath);
+        
+        
+        // Misc
+        static int SVD_GetDigit(int number, int digit); 
      
 };
 

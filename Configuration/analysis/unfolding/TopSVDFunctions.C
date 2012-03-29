@@ -1318,7 +1318,7 @@ void TopSVDFunctions::SVD_RangeStack(THStack* stack, double& ymin, double& ymax,
 void TopSVDFunctions::SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options,  int color)
 { 
     // Draw Graph with automatically  
-    SVD_DrawGraphAutoRange(graph, bgrHisto, options, color);
+    SVD_DrawGraph(graph, bgrHisto, options, color);
       
 }
 
@@ -1335,7 +1335,7 @@ void TopSVDFunctions::SVD_DrawGraphRange(TGraph* graph, TH1D*& bgrHisto, double 
 {
     
     // Draw Graph with automatically set ranges FIRST
-    SVD_DrawGraphAutoRange(graph, bgrHisto, options, color);
+    SVD_DrawGraph(graph, bgrHisto, options, color);
     
     
     // Now make the correction to the range
@@ -1357,7 +1357,7 @@ void TopSVDFunctions::SVD_DrawGraphZero(TGraph* graph, TH1D*& bgrHisto, TString 
 {
     
     // Draw Graph with automatically set ranges FIRST
-    SVD_DrawGraphAutoRange(graph, bgrHisto, options, color);
+    SVD_DrawGraph(graph, bgrHisto, options, color);
      
     // Now make the correction to the range
     bgrHisto->SetMinimum(0.);  
@@ -2904,7 +2904,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
     
     
     
-    int verbose = 0; 
+    int flag_verbose = 0; 
     
 
     // Steer background handling
@@ -2937,7 +2937,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
             }
                  
             // Debug output
-            if(verbose>=2){
+            if(flag_verbose>=2){
                 std::cout << std::endl << "bin " << i << std::endl;
                 std::cout << "value_data: " << value_data << std::endl;
                 std::cout << "value_bgr: "  << value_bgr << std::endl;
@@ -2952,9 +2952,9 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 double value_ttBgr=(ttbgrHist+h)->GetBinContent(i); 
                 if(value_ttBgr>value_bgr){
                     std::cout << "ERROR in TopSVDFunctions::SVD_BackgrHandling: " << std::endl;
-		    std::cout << "N_MC BG > N_data for plot " << rawHist->GetName() << std::endl;
-		    std::cout << "in bin " << i << " (range " << rawHist->GetBinLowEdge(i) << ",";
-		    std::cout << rawHist->GetBinLowEdge(i+1) << " )" << std::endl;
+                    std::cout << "N_MC BG > N_data for plot " << rawHist->GetName() << std::endl;
+                    std::cout << "in bin " << i << " (range " << rawHist->GetBinLowEdge(i) << ",";
+                    std::cout << rawHist->GetBinLowEdge(i+1) << " )" << std::endl;
                     std::cout << "(" << value_ttBgr << ">" << value_bgr << ")" << std::endl;
                     exit(0);
                 }  
@@ -2966,7 +2966,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 sigFrac=value_ttSig/(value_ttSig+value_ttBgr);
                   
                 // debug output
-                if(verbose>=2){
+                if(flag_verbose>=2){
                     std::cout << "value_ttBgr: " << value_ttBgr << std::endl;
                     std::cout << "value_bgr(no ttbar): " << value_bgr << std::endl;
                     std::cout << "value_ttSig: " << value_ttSig << std::endl;
@@ -2981,7 +2981,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
              
               
             // debug output
-            if(verbose>=2){
+            if(flag_verbose>=2){
                 std::cout << "data_value_new: " << value_new << std::endl;
                 std::cout << "data_err_new: "   << err_new   << std::endl;
             }
@@ -3350,12 +3350,280 @@ void TopSVDFunctions::SVD_WriteHists2D(TH2D* hists, int numHist)
     } 
 }  
 
+
+// Remove from TDirectory
+void TopSVDFunctions::SVD_RmDir1D(TH1D* hists, int numHist)
+{
+    // Existence of Objects
+    if ( hists == NULL ) return;
+    
+    // Loop over all histograms
+    for ( int h = 0 ; h < numHist ; h++ ) {
+        (hists+h)->SetDirectory(NULL);
+    } 
+}  
+
+
+// Remove from TDirectory
+void TopSVDFunctions::SVD_RmDir2D(TH2D* hists, int numHist)
+{
+    // Existence of Objects
+    if ( hists == NULL ) return;
+    
+    // Loop over all histograms
+    for ( int h = 0 ; h < numHist ; h++ ) {
+        (hists+h)->SetDirectory(NULL);
+    } 
+}  
+
+
+// Find plain file name without path
+TString TopSVDFunctions::SVD_FindFile(TString filepath)
+{    
+    
+    
+    // Find the folder the file belongs to 
+    // and DO NOT Chop the last trailing slash
+    TString outputpath = filepath;
+    bool foundFolder = false; 
+    bool foundSlash = false;
+    while ( foundSlash == false ) {
+        if ( outputpath.EndsWith("/") == true ) {
+            foundSlash = true;
+            foundFolder = true; 
+        } else {
+            foundSlash = false;
+            outputpath.Chop(); 
+        }
+    }
+    
+    // if no path is given, return
+    if ( foundFolder == false ) {
+        return filepath;
+    }
+    
+    // Otherwise, remove the directory string
+    int lengthOfFolder = (int) outputpath.Length();
+    TString filename = filepath;
+    filename.Remove(0, lengthOfFolder);
+    
+    // return the truncated filename
+    return filename;        
+}
+
+
+// Find parent folder of a file
+// If just a filename is given, "." is returned
+TString TopSVDFunctions::SVD_FindFolder(TString filepath)
+{    
+    
+    // Find the folder the file belongs to 
+    TString outputpath = filepath;
+    bool foundFolder = false; 
+    bool foundSlash = false;
+    while ( foundSlash == false ) {
+        if ( outputpath.EndsWith("/") == true ) {
+            foundSlash = true;
+            foundFolder = true;
+            outputpath.Chop(); 
+        } else {
+            foundSlash = false;
+            outputpath.Chop(); 
+        }
+    }
+    
+
+    // Return folder
+    TString dot = ".";
+    if ( foundFolder == true ) {
+        return outputpath;
+    } else {
+        return dot;
+    }
+        
+}
+
+
+// Make Folder
+void TopSVDFunctions::SVD_MakeFolder(TString outputpath)
+{
+    // Use the TSystem class for this 
+    // Do it RECURSIVELY!!
+    int success = gSystem->mkdir(outputpath, true);  
+    success = 0;
+}
+
+
+// Make Folder and a file
+void TopSVDFunctions::SVD_TouchFile(TString filepath)
+{
+    
+    // Create folder
+    TString outputpath = SVD_FindFolder(filepath);
+    SVD_MakeFolder(outputpath);
+    
+    // Find file
+    TString filename = SVD_FindFile(filepath);
+     
+    // Touch the File
+    TString touchCommand = "cd ";
+    touchCommand.Append(outputpath);
+    touchCommand.Append(" ; touch ");
+    touchCommand.Append(filename);
+    gSystem->Exec(touchCommand); 
+    
+      
+}
+
+
+// Remove file
+void TopSVDFunctions::SVD_RemoveFile(TString filepath)
+{
+    
+    // Get the folder 
+    TString outputpath = SVD_FindFolder(filepath);
+    
+    // Find file
+    TString filename = SVD_FindFile(filepath);
+    
+    // Remove command
+    TString touchCommand = "cd ";
+    touchCommand.Append(outputpath);
+    touchCommand.Append(" ; rm ");
+    touchCommand.Append(filename);
+    touchCommand.Append(" 2> /dev/null");
+    gSystem->Exec(touchCommand); 
+    
+}
+
+
+// Get a digit from an int
+int TopSVDFunctions::SVD_GetDigit(int number, int digit)
+{
+    if ( number < 0 || digit < 1) {
+        cout << "**********************************************************************" << endl;
+        cout << "Error in TopSVDFunctions::SVD_GetDigit()" << endl;
+        cout << "These parameters do not make sense: " << endl;
+        cout << "number = " << number << endl;
+        cout << "digit = " << digit << endl;
+        cout << "**********************************************************************" << endl;
+        exit(1);
+    }
+    
+    // Chop from the left FIRST
+    int equiv = (int) TMath::Power(10., (double) (digit));
+    number = number % equiv;
+    
+    // Chop from the right SECOND
+    int divisor = (int) TMath::Power(10., (double) (digit-1));
+    number = number / divisor;
+
+    // REturn it
+    return number;
+}     
+
+// String to file
+// Options: "a" is append, "w" is write
+void TopSVDFunctions::SVD_LineToFile(TString string, TString filepath, TString option)
+{ 
+    
+    // Find and make folder
+    TString outputpath = SVD_FindFolder(filepath);
+    SVD_MakeFolder(outputpath);
+    
+    // Touch the file ... this won't hurt at all
+    SVD_TouchFile(filepath);
+     
+    // Open File
+    FILE* theFile;
+    const char* c_option = option.Data();
+    const char* c_path = filepath.Data();
+    theFile = fopen(c_path,c_option);
+    
+    // Warning
+    if ( theFile == NULL ) {
+        cout << "***********************************************************************" << endl;
+        cout << "Error in  TopSVDFunctions::SVD_LineToFile " << endl;
+        cout << "Not able to open file " << filepath << endl;
+        cout << "Check this now!" << endl;
+        cout << "***********************************************************************" << endl;
+        exit(1);
+    }
+    
+    // Append newline character to string
+    string.Append("\n");
+    
+    // Print to File 
+    const char* c_string = string.Data();
+    fputs(c_string, theFile);
+     
+    
+    
+    // Close file
+    fclose(theFile);  
+        
+}
+
+// line from file
+// Search for a line that starts with startstring and return it
+TString TopSVDFunctions::SVD_LineFromFile(TString startstring, TString filepath)
+{ 
+    // Read from file
+    FILE* theFile;
+    char linebuffer[256];
+    theFile = fopen(filepath,"r");
+    
+    // Did the file opening succeed?
+    if ( theFile == NULL ) {
+        cout << "***********************************************************************" << endl;
+        cout << "Error in  TopSVDFunctions::SVD_LineFromFile " << endl;
+        cout << "Not able to open file " << filepath << endl;
+        cout << "Check this now!" << endl;
+        cout << "***********************************************************************" << endl;
+        exit(1);
+    }
+
+    // Search for full line
+    bool foundKey = false; 
+    TString theFullLine = "";
+     
+    // Loop over all lines
+    while ( fgets(linebuffer, 256, theFile) ) {
+
+        // Get the line
+        TString theLine(linebuffer);
+        
+        // Check the beginning
+        if ( theLine.BeginsWith(startstring) == true ) {
+            foundKey = true;
+            theFullLine = theLine;
+            break;
+        }
+    }
+    
+    // Return what was found or give an error message
+    if ( foundKey == true ) {
+        return theFullLine;
+    } else {  
+        cout << "***********************************************************************" << endl;
+        cout << "Error in  TopSVDFunctions::SVD_Unfold() " << endl; 
+        cout << "We were searching for the key" << endl;
+        cout << "'" << startstring << "'" << endl;
+        cout << "but didn't find it in the file " << endl;
+        cout << filepath << " " << endl;
+        cout << "Check this now!" << endl;
+        cout << "***********************************************************************" << endl;
+        exit(1); 
+        return theFullLine;
+    }
+}
+
 // Delete obsolete TopSVDUnfold objects
 void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 {
-	if ( SVDs == NULL ) return;
-	if ( numSVDs <= 0 ) return;
-	
+    if ( SVDs == NULL ) return;
+    if ( numSVDs <= 0 ) return;
+    
     delete[] SVDs;  
     SVDs = NULL;
 
@@ -3363,38 +3631,54 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 
 
 // PERFORM UNFOLDING 
-// Note the different regularization modes:
-// (1) regMode=0 is standard BBB unfolding, no regularization
-// (2) regMode=1 is SVD Unfolding, regularization by means of 
-//        the k Parameter. Specify the k Parameter in 'regPar'
-// (3) regMode=2 is SVD Unfolding, regularization by means of
-//        the tau Parameter. Specify the tau Parameter 
-//        in 'regpar'
-// (4) regMode=3 is SVD Unfolding. A scan for the optimal tau
-//        parameter is performed. The scan is performed around
-//        a "center value" for k, to be specified in 'regpar' .
-//        Note: The scan may take a while!     
-// (5) regMode=4 is SVD Unfolding. A scan for the optimal tau
-//        parameter is performed. The scan is performed around
-//        a "center value" for tau, to be specified in 'regpar'    
-//        Note: The scan may take a while!     
-// (6) regMode=5 is SVD Unfolding. k is automatically set to
-//        the number of bins (not counting OF). The parameter
-//        'regPar' will be ignored. 
-// (7) regMode=6 is SVD Unfolding. A scan for the optimal tau
-//        parameter is performed. The scan is performed around
-//        a "center value" for k, which will be set to 
-//        the number of bins (not counting OF). The parameter
-//        'regPar' will be ignored.
-// (8) regMode=7 is SVD Unfolding. The Regularization parameter
-//        is read from the file given in 'regParFile'
-//        The numbers given are nterpreted to be k Values.
-// (9) regMode=8 is SVD Unfolding. The Regularization parameter
-//        is read from the file given in 'regParFile'
-//        The numbers given are nterpreted to be tau Values.
-// Modes for Plotting:
-//        If you specify filenames, plots will be drawn and saved.
-//        Scan Plots will only be produced if scanPlots=true
+// Steering options in parameter 'steering' 
+//     (1) REGMODE (1. digit from right)
+//         0 means: Bin by Bin Unfolding
+//         1 means: SVD Unfolding, minimal regularization.
+//              Regularization will be done with a k value
+//              and the k value will be set to the number of
+//              bins (not counting OF). Parameter 'regPar'
+//              is ignored.
+//         2 means: SVD unfolding, regularization according
+//              to the parameter 'regPar'. Whether this one
+//              is taken as k value or tau value, can be 
+//              specified with the second digit of this
+//              parameter. (default)
+//         3 means: SVD unfolding according to the file
+//              given in 'regParFile'. Whether this one
+//              is taken as k value or tau value, can be 
+//              specified with the second digit of this
+//              parameter.Parameter 'regPar'
+//              is ignored.
+//     (2) REGULARIZATION PARAMETER (2. digit from right)
+//         0 means: interpret 'regPar' as k value (default)
+//         1 means: interpret 'regPar' as tau value
+//     (3) SCAN ( 3. digit from right)
+//         0 means: no scan for optimal tau is perforemd,
+//         1 means: tau scan  (default).
+//              A scan for the optimal tau parameter is
+//              performed. The scan is performed around
+//              a "center value" to be specified in 'regpar'.
+//              Whether this one is taken
+//              as k value or tau value, can be 
+//              specified with the second digit of this
+//              parameter.
+//        Note: The scan may take a while!    
+//     (4) PS LOTTING  (4. digit from right)
+//         0 means: no plotting at all
+//         1 means: standard plots
+//         2 means: standard plots + k scan plots
+//         3 means: standard plots + k scan plots + tau scan plots (default)
+//     (5) ROOT FILE ( 5. digit from right)
+//         0 means: no root file will be written (default)
+//         1 means: standard plots to root file  
+//     (6) TEXT FILE ( 6. digit from right)
+//         0 means: no text file is written
+//         1 means: text file with optimal reg. params. is written (default)
+//     (7) VERBOSITY (7. digit from right)
+//         0 means: no output at all
+//         1 means: standard output (default)
+//         2 means: debugging output
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
 // Systematics Handling: 
@@ -3406,7 +3690,7 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 //        Exception: Since you do not want to shift the data distribution,
 //        this one will NOT be considered as an array!
 //        The placeholder parameter 'unfolded' must also be an
-//        array with numSys+1 elements.
+//        array with numSys+1 elements. 
 double TopSVDFunctions::SVD_Unfold(
         // Data Input (RAW Data including the background)
         TH1D* dataInputHist,   
@@ -3422,7 +3706,9 @@ double TopSVDFunctions::SVD_Unfold(
         // Reconstructed signal MC
         TH1D* recInputHist,        
         // Response Matrix 
-        TH2D* respInputHist,   
+        TH2D* respInputHist,    
+        // Returned: Unfolded Distribution.    
+        TH1D*& unfolded,    
         // Binning for the unfolding (bin sizes !!!)
         const double thebins[],     
         // Number of bins for unfolding (not counting OF bins !!!)
@@ -3430,11 +3716,9 @@ double TopSVDFunctions::SVD_Unfold(
         // Regularization parameter
         double regPar,                          
         // Regularization Modus
-        int regMode,    
-        // Returned: Unfolded Distribution.    
-        TH1D*& unfolded,   
+        const int steering,  
         // Specify the number of systematic samples to unfold 
-        int numSys, 
+        const int numSys, 
         // Specify Name for the Channel ("mumu", "emu", "ee" ...)
         TString channel,  
         // Specify Name for the Physics Object ("Top", "Jets", "Leptons")
@@ -3443,8 +3727,8 @@ double TopSVDFunctions::SVD_Unfold(
         TString quantity,
         // Specify Name for special run of unfolding
         TString special,
-        // Array of Names for the different systematics
-        // if you run only over the nominal sample, provide NULL
+        // Specify Name of systematic
+        // If you run over the nominal sample, provide NULL
         TString syst,
         // Nicely formatted name for the channel
         TString channelTex,
@@ -3460,24 +3744,16 @@ double TopSVDFunctions::SVD_Unfold(
         // If specified, plots will be saved in ROOT File
         TString rootFile,
         // If specified, plots will be saved in PS File 
-        TString psFile,  
-        // If specified, and if regMode is NOT 7 or 8,
-        // the optimal Reg Parameters will be written to this file.
+        TString psFile,
+        // The optimal Reg Parameters will be written to this file.
         // The file will NOT be overwritten, rather the result will be appended.
         // The following data will be saved in this order: 
         // (1) the optimal tau, (2) the two nearest k values,
         // (3) the k value from the d value method
         // (4) the number of bins including side bins
-        // If specified and if regMode is 7 or 8, a suitable regPar
+        // If specified and if regMode is 3, a suitable regPar
         // will be READ from the file
-        TString regParFile,
-        // parameter to control amount of output
-        // verbose=0: no output at all
-        // verbose=1: standard output
-        // verbose=2: debug output    
-        int verbose,
-        // produce scan plots
-        bool scanPlots 
+        TString regParFile
 )
 {  
 
@@ -3488,25 +3764,54 @@ double TopSVDFunctions::SVD_Unfold(
     // Remove REC OF bins
     bool doRemoveRecSideBins = true;
   
-   
-    // Screen Output
-    if ( verbose > 0 ) {
-	    cout << endl;
-	    cout << "***********************************************************************************" << endl;
-	    cout << "SVD Unfolding of ... " << endl;
-	    cout << "    Channel            " << channel << endl;
-	    cout << "    Particle           " << particle << endl;
-	    cout << "    Quantity:          " << quantity << endl;
-	    cout << "    Special condition: " << special << endl;
-	    cout << "    Systematic:        " << syst << endl;   
-	    cout << "    RegPar:            " << regPar << endl;
-	    cout << "    RegMode:           " << regMode << endl;
-	    cout << "    Root File:         " << rootFile << endl;
-	    cout << "    Ps File:           " << psFile << endl;
-	    cout << "    Best Tau File:     " << regParFile << endl;
-	    cout << "************************************************************************************" << endl;
-    }
+    
+    
       
+    ///////////////////////////////////////////////////////////////////  
+    /////////  S E T   F L A G S   //////////////////////////////////// 
+    /////////////////////////////////////////////////////////////////// 
+
+     
+    // REG MODE
+    int flag_regmode = SVD_GetDigit(steering, 1);
+     
+     
+    // REG PAR
+    int flag_regpar = SVD_GetDigit(steering, 2); 
+     
+     
+    // SCAN
+    int flag_scan = SVD_GetDigit(steering, 3);
+     
+     
+     // PS FILE
+     int flag_ps = SVD_GetDigit(steering, 4); 
+     if ( flag_scan == 0 && flag_ps == 3 ) flag_ps = 2;
+    if ( psFile.CompareTo("")==0 ) flag_ps = 0;
+     
+     
+     // ROOT FILE
+     int flag_root = SVD_GetDigit(steering, 5);
+    if ( rootFile.CompareTo("")==0 ) flag_root = 0;
+      
+     
+     // TEXT FILE
+    int flag_text = SVD_GetDigit(steering, 6);
+    if ( flag_scan == 0 ) flag_text = 0;
+    if ( flag_regmode == 3 ) flag_text = 0;
+    if ( regParFile.CompareTo("")==0 ) flag_text = 0;
+
+
+    // VERBOSITY
+    int flag_verbose = SVD_GetDigit(steering, 7);     
+ 
+ 
+    // Systematics Flags
+    int numberSyst = numSys;
+    if ( numberSyst < 0 ) numberSyst = 0;
+    bool doSystematics = false;
+    if ( numberSyst > 0 ) doSystematics = true;
+         
     ///////////////////////////////////////////////////////////////////  
     /////////  S E T U P   R O O T //////////////////////////////////// 
     /////////////////////////////////////////////////////////////////// 
@@ -3531,163 +3836,112 @@ double TopSVDFunctions::SVD_Unfold(
     
     // Adapt gErrorIgnoreLevel to reduce output
     int save_gErrorLv=gErrorIgnoreLevel;
-    if (verbose==1) gErrorIgnoreLevel=kWarning;
-    if (verbose==0) gErrorIgnoreLevel=kFatal; 
-    
-      
-    ///////////////////////////////////////////////////////////////////  
-    /////////  S E T   F L A G S   //////////////////////////////////// 
-    /////////////////////////////////////////////////////////////////// 
-
- 
-    // SVD Flag
-    bool doSVD = true;
-    if ( regMode == 0 ) doSVD = false;
-
-    // Regularization Flags
-    bool doUseTau = false;
-    if ( regMode == 2 ) doUseTau = true;
-    if ( regMode == 4 ) doUseTau = true; 
-    if ( regMode == 8 ) doUseTau = true; 
-
-    // Scan Flags
-    bool doScan = false;
-    if ( regMode == 3 ) doScan = true;
-    if ( regMode == 4 ) doScan = true;
-    if ( regMode == 6 ) doScan = true;
-
-
-    // Plotting flags
-    bool plotsToRoot = false;
-    if ( !rootFile.CompareTo("")==0 ) plotsToRoot = true;
-    bool plotsToPs = false;
-    if ( !psFile.CompareTo("")==0 ) plotsToPs = true;
-    bool doAllPlots = false;
-    if ( plotsToRoot == true || plotsToPs == true ) doAllPlots = true;
-    bool doTextFile = false;
-    if ( !regParFile.CompareTo("")==0 ) doTextFile = true;
-
-
-    // Systematics Flags
-    if ( numSys < 0 ) numSys = 0;
-    bool doSystematics = false;
-    if ( numSys > 0 ) doSystematics = true;
-
-    // Set regPar to number of bins
-    if ( regMode == 5 || regMode == 6 ) {
-        regPar = (double) numbins;
-    } 
-     
-    // Reading from file
-    bool readRegPar = false;
-    if ( regMode == 7 || regMode == 8 ) {
-    	readRegPar = true;
-    	regPar = 0.;
-    }
-    
-     
+    if (flag_verbose==1) gErrorIgnoreLevel=kWarning;
+    if (flag_verbose==0) gErrorIgnoreLevel=kFatal; 
       
     /////////////////////////////////////////////////////////////////// 
     /////////  R E A D   R E G P A R   //////////////////////////////// 
     ///////////////////////////////////////////////////////////////////
 
-     
-    if ( readRegPar == true ) {
- 
-    	// Read from file
-    	FILE* theRegParFile;
-    	char linebuffer[256];
-    	theRegParFile = fopen(regParFile,"r");
-    	
-    	// Did the file opening succeed?
-    	if ( theRegParFile == NULL ) {
-    		cout << "Error in  TopSVDFunctions::SVD_Unfold() " << endl;
-    		cout << "Not able to open file " << regParFile << endl;
-    		cout << "Check this now!" << endl;
-    		exit(1);
-    	}
-    
-    	// Key to search for
-        bool foundKey = false;
-        TString cpqss = SVD_CPQSS(channel, particle, quantity, special, syst);
-    	 
-    	 
-        // Loop over all lines
-        while ( fgets(linebuffer, 256, theRegParFile) ) {
 
-			// Get the line
-            TString theLine(linebuffer);
-            
-            // Compare the key
-            TString theKey = theLine;
-            theKey.Remove(61,100000);
-            if ( theLine.BeginsWith(cpqss) ) foundKey = true;
-            
-            // Check the next key
-            if ( foundKey == false ) continue;
-            
-            // Read Tau
-            TString theTauStr = theLine;
-            theTauStr.Remove(73, 100000);
-            theTauStr.Remove(0,60);
-            double theTau = (double) theTauStr.Atof();
-            
-            
-            // Read K Value
-            TString theKStr = theLine;
-            theKStr.Remove(85,100000);
-            theKStr.Remove(0,80);
-            int theK = (int) theKStr.Atoi();
-            
-            // Save Reg Par
-            if ( doUseTau == true ) {
-            	regPar = theTau;
-            } else {
-            	regPar = (double) theK ;
-            }
-        
-            // Output
-            if ( verbose > 0 ) { 
-	            cout << "************************************************************************************" << endl;
-            	cout << "Reading Regularization Parameter from File: " << endl; 
-            	cout << "    File:               " << regParFile << endl;
-            	cout << "    Key:                " << cpqss << endl;
-            	if ( doUseTau == false ) {
-            		cout << "    RegPar (k-Value):   " << regPar << endl;
-            	} else { 
-            		cout << "    RegPar (tau-Value): " << regPar << endl;
-            	}    
-            
-	            cout << "************************************************************************************" << endl;
-            }
-            
-            // Break the while loop
-            break;
-        }
-        
-        
-        // Warning if no key was found
-        if ( foundKey == false ) { 	
-    		cout << "Error in  TopSVDFunctions::SVD_Unfold() " << endl; 
-    		cout << "We were searching for the key" << endl;
-    		cout << "'" << cpqss << "'" << endl;
-    		cout << "but didn't find it in the file " << endl;
-    		cout << regParFile << "." << endl;
-    		cout << "Check this now!" << endl;
-    		exit(1);
-    	}
-    	
-    	// Close file
-    	fclose(theRegParFile);
+    // Get regularization parameter
+    // for minimal regularization
+    if ( flag_regmode == 1 ) {
+        regPar = (double) numbins;
     }
-    	 
-    	 
+
+    // Get regularization paramter from file     
+    if ( flag_regmode == 3 ) { 
+    
+        // Get the Line from File by searching for a key
+        TString cpqss = SVD_CPQSS(channel, particle, quantity, special, syst);
+        TString theLine = SVD_LineFromFile(cpqss, regParFile);
+         
+            
+        // Read Tau
+        TString theTauStr = theLine;
+        theTauStr.Remove(73, 100000);
+        theTauStr.Remove(0,60);
+        double theTau = (double) theTauStr.Atof();
+        
+        
+        // Read K Value
+        TString theKStr = theLine;
+        theKStr.Remove(85,100000);
+        theKStr.Remove(0,80);
+        int theK = (int) theKStr.Atoi();
+            
+            
+        // Save Reg Par
+        if ( flag_regpar >= 1 ) {
+            regPar = theTau;
+        } else {
+            regPar = (double) theK ;
+        }
+    
+        // Output
+        if ( flag_verbose > 0 ) { 
+            cout << "********************************************************************************************************************" << endl;
+            cout << "Reading Regularization Parameter from File: " << endl; 
+            cout << "    File:               " << regParFile << endl;
+            cout << "    Key:                " << cpqss << endl;
+            if ( flag_regpar >= 1 ) { 
+                cout << "    RegPar (tau-Value): " << regPar << endl;
+            } else {
+                cout << "    RegPar (k-Value):   " << regPar << endl;
+            }
+            cout << "********************************************************************************************************************" << endl;
+        }  
+    }
+         
+
+  
+    // Screen Output
+    if ( flag_verbose > 0 ) {
+        cout << endl;
+        cout << "*******************************************************************************************************************" << endl;
+        cout << "SVD Unfolding of ... " << endl;
+        cout << "    Channel                                " << channel << endl;
+        cout << "    Particle                               " << particle << endl;
+        cout << "    Quantity:                              " << quantity << endl;
+        cout << "    Special condition:                     " << special << endl;
+        cout << "    Systematic:                            " << syst << endl;
+        cout << "        Number Syst Samples:               " << numberSyst << endl;
+        cout << "    Root File:                             " << rootFile << endl;
+        cout << "    Ps File:                               " << psFile << endl;
+        cout << "    Best Tau File:                         " << regParFile << endl;
+        cout << "    Regularization Parameter:              " << regPar << endl;
+        cout << "    Steering Options (" <<  steering << "): " << endl;
+        cout << "        Use SVD:                           " << (flag_regmode >= 1) << endl;
+        cout << "            Minimal Regul.:                " << (flag_regmode == 1) << endl;
+        cout << "            Manual Reg. Par.:              " << (flag_regmode == 2) << endl;
+        cout << "            Reg. Par. from File:           " << (flag_regmode == 3) << endl;
+        cout << "        Use K:                             " << (flag_regpar == 0) << endl;
+        cout << "        Use Tau:                           " << (flag_regpar == 1) << endl;
+        cout << "        Scan for best tau:                 " << (flag_scan == 1) << endl;
+        cout << "        Write to PS:                       " << (flag_ps >= 1) << endl;
+        cout << "             K Scan Plots:                 " << (flag_ps >= 2 ) << endl;
+        cout << "             Tau Scan Plots:               " << (flag_ps >= 3 ) << endl;
+        cout << "        Write to ROOT:                     " << (flag_root == 1 ) << endl;
+        cout << "        Write to Text File:                " << (flag_text == 1 ) << endl;
+        cout << "        Verbosity:                         " << flag_verbose << endl;
+        cout << "********************************************************************************************************************" << endl;
+    }   
     
     /////////////////////////////////////////////////////////////////// 
     /////////  R E B I N N I N G   //////////////////////////////////// 
     ///////////////////////////////////////////////////////////////////
     
     // This is done for all systematics!
+    
+    // Remove the input histograms from the TDirectory
+    SVD_RmDir1D(dataInputHist, 1);
+    SVD_RmDir1D(bgrInputHist, 1+numberSyst);
+    SVD_RmDir1D(ttbgrInputHist, 1+numberSyst);
+    SVD_RmDir1D(genInputHist, 1+numberSyst);
+    SVD_RmDir1D(recInputHist, 1+numberSyst);
+    SVD_RmDir2D(respInputHist, 1+numberSyst);
+    
     
     // Prepare the binning 
     int nbins = numbins + 2;
@@ -3712,32 +3966,32 @@ double TopSVDFunctions::SVD_Unfold(
     // Set errors to zero!
     TH1D* bgrHist = NULL;
     if ( bgrInputHist != NULL ) {
-        bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins, numSys+1); 
-        SVD_EmptyHistoErrors1D(bgrHist, numSys+1);
-        if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(bgrHist, numSys+1);
+        bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins, numberSyst+1); 
+        SVD_EmptyHistoErrors1D(bgrHist, numberSyst+1);
+        if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(bgrHist, numberSyst+1);
     } 
      
     // ttbar background only
     TH1D* ttbgrHist = NULL;
     if ( ttbgrInputHist != NULL ) {
-        ttbgrHist= SVD_Rebin1D((TH1D*) ttbgrInputHist, nbins, bins, numSys+1); 
-        SVD_EmptyHistoErrors1D(ttbgrHist, numSys+1);
-        if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(ttbgrHist, numSys+1);
+        ttbgrHist= SVD_Rebin1D((TH1D*) ttbgrInputHist, nbins, bins, numberSyst+1); 
+        SVD_EmptyHistoErrors1D(ttbgrHist, numberSyst+1);
+        if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(ttbgrHist, numberSyst+1);
     } 
      
     // Response Matrix
     // ... thereby transposing it
-    TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, numSys+1, true);
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins2D(mcHist, numSys+1); 
+    TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, numberSyst+1, true);
+    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins2D(mcHist, numberSyst+1); 
 
  
     // MC truth signal
     // ATTENTION: Do not empty the side bins here!
-    TH1D* xiniHist = SVD_Rebin1D((TH1D*) genInputHist, nbins, bins, numSys+1);  
+    TH1D* xiniHist = SVD_Rebin1D((TH1D*) genInputHist, nbins, bins, numberSyst+1);  
      
     // Reconstructed MC signal
-    TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, nbins, bins, numSys+1);
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(biniHist, numSys+1);  
+    TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, nbins, bins, numberSyst+1);
+    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(biniHist, numberSyst+1);  
     
      
     /////////////////////////////////////////////////////////////////// 
@@ -3761,11 +4015,11 @@ double TopSVDFunctions::SVD_Unfold(
  
  
     // Placeholder for background free data
-    TH1D* dataHist = SVD_CloneHists1D(biniHist,numSys+1);
+    TH1D* dataHist = SVD_CloneHists1D(biniHist,numberSyst+1);
  
     // Background reduction
-    SVD_BackgrHandling(dataHist, bgrHist, ttbgrHist, biniHist, rawHist, numSys+1); 
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(dataHist, numSys+1);
+    SVD_BackgrHandling(dataHist, bgrHist, ttbgrHist, biniHist, rawHist, numberSyst+1); 
+    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(dataHist, numberSyst+1);
  
  
  
@@ -3782,13 +4036,13 @@ double TopSVDFunctions::SVD_Unfold(
      
  
      // xini Hist, scaled
-     TH1D* xiniScaledHist = SVD_CloneHists1D(xiniHist,numSys+1);
-     SVD_ArrayScale(xiniScaledHist, lumiScaleFactor, numSys+1);
+     TH1D* xiniScaledHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
+     SVD_ArrayScale(xiniScaledHist, lumiScaleFactor, numberSyst+1);
       
 
     // Scaled Data
-    TH1D* dataScaledHist = SVD_CloneHists1D(dataHist,numSys+1);
-    SVD_ArrayScale(dataScaledHist, 1./lumiScaleFactor, numSys+1);
+    TH1D* dataScaledHist = SVD_CloneHists1D(dataHist,numberSyst+1);
+    SVD_ArrayScale(dataScaledHist, 1./lumiScaleFactor, numberSyst+1);
        
  
     ///////////////////////////////////////////////////////////////////
@@ -3799,8 +4053,8 @@ double TopSVDFunctions::SVD_Unfold(
     // This is done for all systematics!
  
     // BBB-Efficiency
-    TH1D* beffHist = SVD_CloneHists1D(xiniHist,numSys+1);
-    SVD_BBBEff(beffHist, biniHist, xiniHist, numSys+1); 
+    TH1D* beffHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
+    SVD_BBBEff(beffHist, biniHist, xiniHist, numberSyst+1); 
   
   
     // Do BBB Unfolding 
@@ -3812,8 +4066,8 @@ double TopSVDFunctions::SVD_Unfold(
     //     This would bust your BBB / SVD comparison.
     //     Instead, add the error on the efficiency
     //     later on as a systematic MC uncertainty! 
-    TH1D* bbbHist = SVD_CloneHists1D(xiniHist,numSys+1);
-    SVD_BBBUnf(bbbHist, dataHist, beffHist, numSys+1); 
+    TH1D* bbbHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
+    SVD_BBBUnf(bbbHist, dataHist, beffHist, numberSyst+1); 
     
  
     ///////////////////////////////////////////////////////////////////
@@ -3845,7 +4099,7 @@ double TopSVDFunctions::SVD_Unfold(
     // Regularization
     int theKReg = -1;
     double theTau = -1.;
-    if ( doUseTau == true ) {
+    if ( flag_regpar >= 1 ) {
         theKReg = -1;
         theTau = regPar;
     } 
@@ -3858,17 +4112,17 @@ double TopSVDFunctions::SVD_Unfold(
     // Setup Unfolding Tools
     // One for each Systematic Sample
     // This way, they are all independent from each other
-    TopSVDUnfold*  mySVDUnfold = SVD_SetupTool(dataHist, biniHist, xiniHist, mcHist, theTau, numSys+1); 
+    TopSVDUnfold*  mySVDUnfold = SVD_SetupTool(dataHist, biniHist, xiniHist, mcHist, theTau, numberSyst+1); 
   
     
     // Unfolding 
-    TH1D* unfHist = SVD_CallSVDUnfolding(mySVDUnfold, theKReg, numSys+1);
+    TH1D* unfHist = SVD_CallSVDUnfolding(mySVDUnfold, theKReg, numberSyst+1);
     
      
     // Get more output
-    TH1D* weightHist = SVD_RetrieveWeights(mySVDUnfold, numSys+1);
-    TH1D* ddHist = SVD_RetrieveDD(mySVDUnfold, numSys+1);
-    TH1D* svHist = SVD_RetrieveSV(mySVDUnfold, numSys+1);
+    TH1D* weightHist = SVD_RetrieveWeights(mySVDUnfold, numberSyst+1);
+    TH1D* ddHist = SVD_RetrieveDD(mySVDUnfold, numberSyst+1);
+    TH1D* svHist = SVD_RetrieveSV(mySVDUnfold, numberSyst+1);
      
 
      
@@ -3938,10 +4192,8 @@ double TopSVDFunctions::SVD_Unfold(
     TH1D* arrK_Mean = NULL;
     TH1D* arrK_GlC = NULL;
      
-     
     
-    bool doKScan = true;
-    if ( doKScan == true ) {
+    if ( flag_ps >= 2 ) {
         
         // Create new Objects
         arrK_StatError = new TH1D[nScanSingularValues-1];
@@ -4034,18 +4286,21 @@ double TopSVDFunctions::SVD_Unfold(
     double bbbAvgMean = 0.;  
  
   
-    if ( doScan == true ) {
+    if ( flag_scan >= 1 ) {
             
             
         // Steer Scan
         double rangefactor = 100.;
-        int nScanPoints = 5; //100 ; 
+        int nScanPoints = 100 ; 
           
           
         // Range for Scan
         double lowTau = 0.;
         double highTau = 0.;
-        if ( doUseTau == false ) {
+        if ( flag_regpar >= 1 ) {
+            lowTau = (1./rangefactor) * theTau;
+            highTau = rangefactor * theTau;
+        } else{
             // Find interesting singular value 
             // Limit the kReg to the Modes which are actually there! 
             int effectiveKReg = theKReg;
@@ -4054,13 +4309,10 @@ double TopSVDFunctions::SVD_Unfold(
     
             lowTau = (1./rangefactor) * singularValueK;
             highTau = rangefactor * singularValueK;
-        } else {
-            lowTau = (1./rangefactor) * theTau;
-            highTau = rangefactor * theTau;
-        }
+        }  
 
         // Slow scan for plots
-        if ( scanPlots == true ) {       
+        if ( flag_ps >= 3 ) {       
               
             // Get the Scan Points
             vScanPoints = SVD_CalcScanPoints(lowTau, highTau, nScanPoints);
@@ -4073,7 +4325,7 @@ double TopSVDFunctions::SVD_Unfold(
             vAvgMean = new TVectorD(nScanPoints);
     
             // Perform the Scan
-            if (verbose>0) cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " for plotting purpose" << endl;  
+            if (flag_verbose>0) cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " for plotting purpose" << endl;  
             for ( int i = 0 ; i < nScanPoints ; i++ ) {
        
                 // Do the unfolding with k = -1
@@ -4102,7 +4354,7 @@ double TopSVDFunctions::SVD_Unfold(
                 (*vAvgMean)[i] = SVD_ScanAvgMean(tmpUnfResult);
                    
                 // Output
-                if(verbose>0)cout << "    done for Tau = " << tau << " -> GlobCorr: " << (*vGlobCorr)[i] <<endl;
+                if(flag_verbose>0)cout << "    done for Tau = " << tau << " -> GlobCorr: " << (*vGlobCorr)[i] <<endl;
                   
                 // delete things
                 SVD_DeleteHists1D(tmpUnfResult);
@@ -4133,7 +4385,7 @@ double TopSVDFunctions::SVD_Unfold(
                 // delete Error matrix
                 SVD_DeleteHists2D(tmpCovHist);
                 // print global correlation for new tau
-                if(verbose>0)cout << "newLowTau: " << newLowTau << " -> globCorr: " << globCorrLowTau << endl;
+                if(flag_verbose>0)cout << "newLowTau: " << newLowTau << " -> globCorr: " << globCorrLowTau << endl;
             }
             if(optimalTauX!=newHighTau){
                 // Do the unfolding for highTau
@@ -4145,7 +4397,7 @@ double TopSVDFunctions::SVD_Unfold(
                 // delete Error matrix
                 SVD_DeleteHists2D(tmpCovHist); 
                 // print global correlation for new tau
-                if(verbose>0)cout << "newHighTau: " << newHighTau << " -> globCorr: " << globCorrHighTau << endl;
+                if(flag_verbose>0)cout << "newHighTau: " << newHighTau << " -> globCorr: " << globCorrHighTau << endl;
             }
             if(globCorrLowTau<globCorrHighTau){
                 highTau=newHighTau;
@@ -4165,7 +4417,7 @@ double TopSVDFunctions::SVD_Unfold(
                 newHighTau=TMath::Power(10.,TMath::Log10(highTau) - goldSec*(TMath::Log10(highTau)-TMath::Log10(lowTau)));
             }
         }
-        if(verbose>0)cout << "Optimal Tau = " << optimalTauX << endl;
+        if(flag_verbose>0)cout << "Optimal Tau = " << optimalTauX << endl;
      
      
         // Find closest K values
@@ -4226,44 +4478,11 @@ double TopSVDFunctions::SVD_Unfold(
      
     ///////////////////////////////////////////////////////////////////
     ////////////   S A V E   B E S T   V A L U E S   //////////////////
-    ///////////////////////////////////////////////////////////////////   
-
+    ///////////////////////////////////////////////////////////////////    
  
-    if ( doScan == true && doTextFile == true) {
-        
+    if ( flag_scan >= 1 && flag_text >= 1) {
          
-        // Make Output Path
-        TString outputpath = "";
-        bool makeFolder = false;
-        if ( outputpath.CompareTo("") == 0 ) outputpath.Append(psFile);
-        if ( outputpath.CompareTo("") == 0 ) outputpath.Append(rootFile);
-        bool foundSlash = false;
-        while ( foundSlash == false ) {
-            if ( outputpath.EndsWith("/") == true ) {
-                foundSlash = true;
-                makeFolder = true;
-            }
-            if ( foundSlash == false ) outputpath.Chop();
-        }
-        if ( makeFolder == true) { 
-            TString mkdirCommand = "mkdir -p ";
-            mkdirCommand.Append(outputpath);
-            mkdirCommand.Append(" 2> /dev/null");
-            gSystem->Exec(mkdirCommand);
-        } 
-        
-        
-        // Touch the Text File
-        TString touchCommand = "cd ";
-        touchCommand.Append(outputpath);
-        touchCommand.Append(" ; touch ");
-        touchCommand.Append(regParFile);
-        gSystem->Exec(touchCommand);
-        
-        // Set Redirection
-        gSystem->RedirectOutput(regParFile, "a");
-        
-        // Write to File
+        // Create String to Print
         TString lineStrList =  SVD_CPQSS(channel, particle, quantity, special, syst); 
         lineStrList.Append(" ");
         for ( int i = lineStrList.Length() ; i < 60 ; i++ ) lineStrList.Append(" ");   
@@ -4275,15 +4494,13 @@ double TopSVDFunctions::SVD_Unfold(
         for ( int i = lineStrList.Length() ; i < 80 ; i++ ) lineStrList.Append(" ");  
         lineStrList.Append(TString::Format("%i", nSignSingularValues)); 
         for ( int i = lineStrList.Length() ; i < 84 ; i++ ) lineStrList.Append(" ");  
-        lineStrList.Append(TString::Format("%i", nbins)); 
-        cout << lineStrList << endl;  
+        lineStrList.Append(TString::Format("%i", nbins));
         
-        // Reset Redirection
-        gSystem->RedirectOutput(NULL, "a");
+        // Print to File, with option 'append'
+        SVD_LineToFile(lineStrList, regParFile, "a"); 
         
     }
-    
-    
+     
     ///////////////////////////////////////////////////////////////////
     ////////////   R E T U R N   O B J E C T S  ///////////////////////
     ///////////////////////////////////////////////////////////////////    
@@ -4305,32 +4522,25 @@ double TopSVDFunctions::SVD_Unfold(
      
     // Format BBB Plot
     TString bbbStr = SVD_PlotName(channel, particle, quantity, special, syst, "BBB");
-    SVD_SetTitles1D(bbbHist, bbbStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(bbbHist, bbbStr, quantityTex, "Events", numberSyst+1);
 
         
     // Format SVD Plot (Weights)
     TString weightStr = SVD_PlotName(channel, particle, quantity, special, syst, "WGT");
-    SVD_SetTitles1D(weightHist, weightStr, quantityTex, "Weights", numSys+1);
+    SVD_SetTitles1D(weightHist, weightStr, quantityTex, "Weights", numberSyst+1);
         
         
     // Format SVD Plot
     TString unfStr = SVD_PlotName(channel, particle, quantity, special, syst, "UNF");
-    SVD_SetTitles1D(unfHist, unfStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(unfHist, unfStr, quantityTex, "Events", numberSyst+1);
  
 
     // Set Pointer
-    if ( doSVD == true ) unfolded = SVD_CloneHists1D(unfHist, numSys+1);
-    if ( doSVD == false ) unfolded =  SVD_CloneHists1D(bbbHist, numSys+1);
+    if ( flag_regmode == 0 ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
+    if ( flag_regmode > 0 ) unfolded =  SVD_CloneHists1D(bbbHist, numberSyst+1);
  
 
-
-    // RETURN 
-    // If no more plots are needed, return now 
-    if ( doAllPlots == false ) return optimalTauX; 
- 
- 
-     
- 
+   
     ///////////////////////////////////////////////////////////////////
     ////////////   F O R M A T   H I S T O G R A M S   ////////////////
     ///////////////////////////////////////////////////////////////////  
@@ -4349,17 +4559,17 @@ double TopSVDFunctions::SVD_Unfold(
 
     // Format Bgr    
     TString bgrStr = SVD_PlotName(channel, particle, quantity, special, syst, "YBGR");
-    SVD_SetTitles1D(bgrHist, bgrStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(bgrHist, bgrStr, quantityTex, "Events", numberSyst+1);
 
 
     // Format Data
     TString dataStr = SVD_PlotName(channel, particle, quantity, special, syst, "YDAT");
-    SVD_SetTitles1D(dataHist, dataStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(dataHist, dataStr, quantityTex, "Events", numberSyst+1);
 
 
     // Format Scaled Data
     TString dataScaledStr = SVD_PlotName(channel, particle, quantity, special, syst, "YDATsc");
-    SVD_SetTitles1D(dataScaledHist, dataScaledStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(dataScaledHist, dataScaledStr, quantityTex, "Events", numberSyst+1);
 
 
     // Format Response Matrix
@@ -4369,27 +4579,27 @@ double TopSVDFunctions::SVD_Unfold(
     TString mcStrY = quantityTex;
     mcStrY.Append(" (Generated)");
     TString mcStrZ("Entries");
-    SVD_SetTitles2D(mcHist, mcStr, mcStrX, mcStrY, mcStrZ, numSys+1);
+    SVD_SetTitles2D(mcHist, mcStr, mcStrX, mcStrY, mcStrZ, numberSyst+1);
 
  
     // Format Gen MC
     TString xiniStr = SVD_PlotName(channel, particle, quantity, special, syst, "XGEN");
-    SVD_SetTitles1D(xiniHist, xiniStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(xiniHist, xiniStr, quantityTex, "Events", numberSyst+1);
 
  
     // Format Gen MC
     TString xiniScaledStr = SVD_PlotName(channel, particle, quantity, special, syst, "XGEN");
-    SVD_SetTitles1D(xiniScaledHist, xiniScaledStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(xiniScaledHist, xiniScaledStr, quantityTex, "Events", numberSyst+1);
  
 
     // Format Rec MC
     TString biniStr = SVD_PlotName(channel, particle, quantity, special, syst, "XREC");
-    SVD_SetTitles1D(biniHist, biniStr, quantityTex, "Events", numSys+1);
+    SVD_SetTitles1D(biniHist, biniStr, quantityTex, "Events", numberSyst+1);
 
 
     // Format BBB Eff
     TString beffStr = SVD_PlotName(channel, particle, quantity, special, syst, "BBBEFF");        
-    SVD_SetTitles1D(beffHist, beffStr, quantityTex, "Bin by Bin Efficiency", numSys+1);
+    SVD_SetTitles1D(beffHist, beffStr, quantityTex, "Bin by Bin Efficiency", numberSyst+1);
 
         
     // Format Stat COV
@@ -4412,12 +4622,12 @@ double TopSVDFunctions::SVD_Unfold(
 
     // Format D-Distribution 
     TString ddStr = SVD_PlotName(channel, particle, quantity, special, syst, "DD");
-    SVD_SetTitles1D(ddHist, ddStr, "Index i", "d-Value d_{i}", numSys+1);
+    SVD_SetTitles1D(ddHist, ddStr, "Index i", "d-Value d_{i}", numberSyst+1);
 
 
     // Format Singular Values
     TString svStr = SVD_PlotName(channel, particle, quantity, special, syst, "SV");
-    SVD_SetTitles1D(svHist, svStr, "Index i", "Singular Value s_{i}", numSys+1);
+    SVD_SetTitles1D(svHist, svStr, "Index i", "Singular Value s_{i}", numberSyst+1);
    
         
     /////////////////////////////////////////////////////////////////// 
@@ -4426,24 +4636,24 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // PROBABILIY MATRIX
-    TH2D* probMatrixHist = SVD_ProbMatrix(mcHist, xiniHist, numSys+1);
+    TH2D* probMatrixHist = SVD_ProbMatrix(mcHist, xiniHist, numberSyst+1);
     TString probMatrixStr = SVD_PlotName(channel, particle, quantity, special, syst, "PRM"); 
-    SVD_SetTitles2D(probMatrixHist, probMatrixStr, mcStrX, mcStrY, "Transition Probabilities in %", numSys+1);
+    SVD_SetTitles2D(probMatrixHist, probMatrixStr, mcStrX, mcStrY, "Transition Probabilities in %", numberSyst+1);
 
     
     // TRANSITION PROBABILITY
-    TH1D* probHist = SVD_ProbHist(mcHist, xiniHist, numSys+1);
+    TH1D* probHist = SVD_ProbHist(mcHist, xiniHist, numberSyst+1);
     TString probStr = SVD_PlotName(channel, particle, quantity, special, syst, "PROB"); 
-    SVD_SetTitles1D(probHist, probStr, quantityTex, "Trans. Prob.", numSys+1);
+    SVD_SetTitles1D(probHist, probStr, quantityTex, "Trans. Prob.", numberSyst+1);
     
  
     // PURITY
     // Note: Purity is set to zero, if number of reconstructed
     // events in a bin is zero
-    TH1D* purHist = SVD_CloneHists1D(biniHist, numSys+1);
-    SVD_Pur(purHist, mcHist, numSys+1); 
+    TH1D* purHist = SVD_CloneHists1D(biniHist, numberSyst+1);
+    SVD_Pur(purHist, mcHist, numberSyst+1); 
     TString purStr = SVD_PlotName(channel, particle, quantity, special, syst, "PUR");
-    SVD_SetTitles1D(purHist, purStr, quantityTex, "Purity", numSys+1);
+    SVD_SetTitles1D(purHist, purStr, quantityTex, "Purity", numberSyst+1);
  
 
 
@@ -4452,26 +4662,26 @@ double TopSVDFunctions::SVD_Unfold(
     // gerenated events in a bin
     // Note: If there is no reconstructed event in this bin,
     // then the stability is naturally zero, too
-    TH1D* stabHist = SVD_CloneHists1D(biniHist, numSys+1); 
-    SVD_Stab(stabHist, mcHist, numSys+1); 
+    TH1D* stabHist = SVD_CloneHists1D(biniHist, numberSyst+1); 
+    SVD_Stab(stabHist, mcHist, numberSyst+1); 
     TString stabStr = SVD_PlotName(channel, particle, quantity, special, syst, "STAB");
-    SVD_SetTitles1D(stabHist, stabStr, quantityTex, "Stability", numSys+1);
+    SVD_SetTitles1D(stabHist, stabStr, quantityTex, "Stability", numberSyst+1);
  
  
 
     // EFFICIENCY
     // Note: If no generated events are available in a bin,
     // then the efficiency is set to zero
-    TH1D* effHist = SVD_CloneHists1D(biniHist, numSys+1); 
-    SVD_Eff(effHist, mcHist, xiniHist, numSys+1);  
+    TH1D* effHist = SVD_CloneHists1D(biniHist, numberSyst+1); 
+    SVD_Eff(effHist, mcHist, xiniHist, numberSyst+1);  
     TString effStr = SVD_PlotName(channel, particle, quantity, special, syst, "EFF"); 
-    SVD_SetTitles1D(effHist, effStr, quantityTex, "Efficiency", numSys+1);
+    SVD_SetTitles1D(effHist, effStr, quantityTex, "Efficiency", numberSyst+1);
     
  
 
     // RATIO: Unfolded versus BBB
-    TH1D* histRatioUnfBBB = SVD_MakeRatioNum(unfHist, bbbHist, numSys+1);
-    SVD_SetTitles1D(histRatioUnfBBB, "RATIO", quantityTex, "Ratio", numSys+1);
+    TH1D* histRatioUnfBBB = SVD_MakeRatioNum(unfHist, bbbHist, numberSyst+1);
+    SVD_SetTitles1D(histRatioUnfBBB, "RATIO", quantityTex, "Ratio", numberSyst+1);
 
  
  
@@ -4485,14 +4695,14 @@ double TopSVDFunctions::SVD_Unfold(
     // REFOLDING - without Background 
     // Note, here we need to use the weightHist, since the
     // xiniHist contains empty gen level bins 
-    TH1D* refoldHist = SVD_Refold(weightHist, NULL, mcHist, true, numSys+1); 
+    TH1D* refoldHist = SVD_Refold(weightHist, NULL, mcHist, true, numberSyst+1); 
     TString refoldStr = SVD_PlotName(channel, particle, quantity, special, syst, "RFLD");
-    SVD_SetTitles1D(refoldHist, refoldStr, "Bin i", "Refolded Value d_{i}", numSys+1);
+    SVD_SetTitles1D(refoldHist, refoldStr, "Bin i", "Refolded Value d_{i}", numberSyst+1);
 
 
     // RATIO: Refolded versus Data
-    TH1D* histRatioRefDat = SVD_MakeRatioDenom(refoldHist, dataHist, numSys+1);
-    SVD_SetTitles1D(histRatioRefDat, "RATIO", quantityTex, "Ratio", numSys+1);
+    TH1D* histRatioRefDat = SVD_MakeRatioDenom(refoldHist, dataHist, numberSyst+1);
+    SVD_SetTitles1D(histRatioRefDat, "RATIO", quantityTex, "Ratio", numberSyst+1);
 
 
 
@@ -4570,18 +4780,18 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // Systematic Shifts with Unfolding
-    TH1D* unfShiftHist = SVD_ArrayToShifts(unfHist, numSys+1);
-    SVD_SetTitles1D(unfShiftHist, "SHIFT", quantityTex, "Syst. Shift in \%", numSys);
+    TH1D* unfShiftHist = SVD_ArrayToShifts(unfHist, numberSyst+1);
+    SVD_SetTitles1D(unfShiftHist, "SHIFT", quantityTex, "Syst. Shift in \%", numberSyst);
     
     
     // Systematic Shifts with BBB
-    TH1D* bbbShiftHist = SVD_ArrayToShifts(bbbHist, numSys+1);
-    SVD_SetTitles1D(bbbShiftHist, "SHIFT", quantityTex, "Syst. Shift in \%", numSys);
+    TH1D* bbbShiftHist = SVD_ArrayToShifts(bbbHist, numberSyst+1);
+    SVD_SetTitles1D(bbbShiftHist, "SHIFT", quantityTex, "Syst. Shift in \%", numberSyst);
     
     
     // Comparison of systematic shifts
-    TH1D* ratioShiftHist = SVD_MakeRatioZero(unfHist, bbbHist, numSys);
-    SVD_SetTitles1D(ratioShiftHist, "SHIFTRATIO", quantityTex, "Ratio of Syst. Shifts", numSys); 
+    TH1D* ratioShiftHist = SVD_MakeRatioZero(unfHist, bbbHist, numberSyst);
+    SVD_SetTitles1D(ratioShiftHist, "SHIFTRATIO", quantityTex, "Ratio of Syst. Shifts", numberSyst); 
     
 
 
@@ -4592,7 +4802,7 @@ double TopSVDFunctions::SVD_Unfold(
  
  
     // DRAW IT ALL
-    if ( plotsToPs == true ) { 
+    if ( flag_ps >= 1 ) { 
         
         // Setup Style
         setHHStyle(*gStyle);
@@ -4645,7 +4855,7 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Tex / Regularization
         TString RegTex = ""; 
-        if ( doUseTau == true ) { 
+        if ( flag_regpar >= 1 ) { 
             RegTex.Append("#tau = ");
             RegTex.Append(TString::Format("%.3f", regPar));  
         } else { 
@@ -4672,9 +4882,9 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Input Distributions
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_Array2Stack(theRegStack, theLegend, xiniHist, "Gen", "E", "", 4, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "E", "", 2, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "E", "", 1, numSys+1); 
+        SVD_Array2Stack(theRegStack, theLegend, xiniHist, "Gen", "E", "", 4, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "E", "", 2, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "E", "", 1, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         canvas.Print(outputfilename);         
  
@@ -4682,27 +4892,27 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Background related Distributions 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Data", "E", "", 1, numSys+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Data", "E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, rawHist, "Raw", "HIST E", "", 2, 1); // Only 1 Histogram
-        SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "P", "", 4, numSys+1); 
+        SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "P", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         canvas.Print(outputfilename);
  
 
         // Draw Weight distributions          
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_ArrayScale(weightHist, 1./lumiScaleFactor, numSys+1);
+        SVD_ArrayScale(weightHist, 1./lumiScaleFactor, numberSyst+1);
         TString weightHistLegendEntry = "Weights w_{i}";  
-        SVD_Array2Stack(theRegStack, theLegend, weightHist, "Weights", "HIST", "", 1, numSys+1); 
+        SVD_Array2Stack(theRegStack, theLegend, weightHist, "Weights", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Weights", "", 0, true);   
         canvas.Print(outputfilename);
 
   
         // Draw Unfolded distributions 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex); 
-        SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "E", "", 1, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "E", "", 3, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "E", "", 4, numSys+1); 
+        SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "E", "", 1, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "E", "", 3, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "E", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         canvas.Print(outputfilename);
 
@@ -4710,9 +4920,9 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Unfolded versus MC prediction  
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-        SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "E", "", 1, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, xiniScaledHist, "Gen, sc.", "E", "", 3, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "E", "", 4, numSys+1); 
+        SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "E", "", 1, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, xiniScaledHist, "Gen, sc.", "E", "", 3, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "E", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         canvas.Print(outputfilename);
      
@@ -4720,15 +4930,15 @@ double TopSVDFunctions::SVD_Unfold(
         // RATIO: Unfolded versus BBB 
         // Exclude OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-        SVD_Array2Stack(theRegStack, theLegend, histRatioUnfBBB, "Unf/BBB", "E", "", 1, numSys+1);  
+        SVD_Array2Stack(theRegStack, theLegend, histRatioUnfBBB, "Unf/BBB", "E", "", 1, numberSyst+1);  
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Ratio: SVD over BBB, Error from SVD", "", 0, false);  
         canvas.Print(outputfilename);
      
     
         // Draw Refolded Distribution 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-        SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "E", "", 1, numSys+1);  
+        SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "E", "", 1, numberSyst+1);  
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         canvas.Print(outputfilename); 
            
@@ -4737,7 +4947,7 @@ double TopSVDFunctions::SVD_Unfold(
         // RATIO: Refolded versus Data 
         // Exclude OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-        SVD_Array2Stack(theRegStack, theLegend, histRatioRefDat, "Ref/Data", "E", "", 1, numSys+1);  
+        SVD_Array2Stack(theRegStack, theLegend, histRatioRefDat, "Ref/Data", "E", "", 1, numberSyst+1);  
         SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Ratio: Refolded over Data, Error from Data", "", 0, false);   
         canvas.Print(outputfilename);
     
@@ -4745,7 +4955,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Draw D-Plot  
         SVD_ClearStackLeg(theDValStack, theLegend, CPQTex, SystTex, "");  
         gPad->SetLogy(true); 
-        SVD_Array2Stack(theDValStack, theLegend, ddHist, "d-Values", "HIST", "", 1, numSys+1); 
+        SVD_Array2Stack(theDValStack, theLegend, ddHist, "d-Values", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "d-Values", "", 0, true, gPad->GetLogy());   
         canvas.Print(outputfilename);
         gPad->SetLogy(false); 
@@ -4754,7 +4964,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Draw SV Plot  
         SVD_ClearStackLeg(theDValStack, theLegend, CPQTex, SystTex, "");  
         gPad->SetLogy(true);
-        SVD_Array2Stack(theDValStack, theLegend, svHist, "Sing. Values", "HIST", "", 1, numSys+1); 
+        SVD_Array2Stack(theDValStack, theLegend, svHist, "Sing. Values", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "Sing. Values", "", 0, true, gPad->GetLogy());   
         canvas.Print(outputfilename);
         gPad->SetLogy(false); 
@@ -4764,18 +4974,18 @@ double TopSVDFunctions::SVD_Unfold(
         // Draw Stab, Eff, Pur 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");   
         probHist->SetMarkerStyle(21);
-        SVD_Array2Stack(theRegStack, theLegend, purHist, "Pur.", "HIST", "", 3, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, stabHist, "Stab.", "HIST", "", 2, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, effHist, "Eff.", "HIST", "", 1, numSys+1); 
-        SVD_Array2Stack(theRegStack, theLegend, probHist, "Prob. i #rightarrow i", "P", "", 4, numSys+1);
+        SVD_Array2Stack(theRegStack, theLegend, purHist, "Pur.", "HIST", "", 3, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, stabHist, "Stab.", "HIST", "", 2, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, effHist, "Eff.", "HIST", "", 1, numberSyst+1); 
+        SVD_Array2Stack(theRegStack, theLegend, probHist, "Prob. i #rightarrow i", "P", "", 4, numberSyst+1);
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true); 
         canvas.Print(outputfilename);
     
     
         // Draw BBB Efficiency 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");   
-        SVD_Array2Stack(theRegStack, theLegend, beffHist, "Gen. Eff.", "HIST", "", 2, numSys+1);
-        SVD_Array2Stack(theRegStack, theLegend, effHist, "Efficiency", "HIST", "", 1, numSys+1); 
+        SVD_Array2Stack(theRegStack, theLegend, beffHist, "Gen. Eff.", "HIST", "", 2, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, effHist, "Efficiency", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true); 
         canvas.Print(outputfilename);
     
@@ -4868,14 +5078,14 @@ double TopSVDFunctions::SVD_Unfold(
          
             // Syst Shifts in Comparison
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
-            SVD_Array2Stack(theRegStack, theLegend, unfShiftHist, "Unfolding",  "HIST", "", 1, numSys);
-            SVD_Array2Stack(theRegStack, theLegend, bbbShiftHist, "BBB", "HIST", "", 2, numSys);  
+            SVD_Array2Stack(theRegStack, theLegend, unfShiftHist, "Unfolding",  "HIST", "", 1, numberSyst);
+            SVD_Array2Stack(theRegStack, theLegend, bbbShiftHist, "BBB", "HIST", "", 2, numberSyst);  
             SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false);  
             canvas.Print(outputfilename);
         
             // Shift Hist as Ratio
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
-            SVD_Array2Stack(theRegStack, theLegend, ratioShiftHist, "Shift Unf/BBB", "HIST", "", 1, numSys); 
+            SVD_Array2Stack(theRegStack, theLegend, ratioShiftHist, "Shift Unf/BBB", "HIST", "", 1, numberSyst); 
             SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Syst. Shift Ratio", "", 0, false);  
             canvas.Print(outputfilename);
             
@@ -4884,7 +5094,7 @@ double TopSVDFunctions::SVD_Unfold(
     
         // K Scan Plots 
         // Only for the nominal sample
-        if ( doKScan == true  ) {
+        if ( flag_ps >= 2 ) {
          
              
             // Draw Unfolded distributions    
@@ -4949,7 +5159,7 @@ double TopSVDFunctions::SVD_Unfold(
      
         // Scan Plots
         // Only for the nominal sample
-        if ( doScan == true && scanPlots == true ) {
+        if ( flag_ps >= 3 ) {
                   
             // Logscale
             gPad->SetLogx(true); 
@@ -4968,30 +5178,30 @@ double TopSVDFunctions::SVD_Unfold(
             TH1D* theBgrHisto = NULL;
             TLatex* latexBestPoint = new TLatex();
             
-                  
+                    
             // Global Correlation Plot
             canvas.Clear();
-            delete theBgrHisto; theBgrHisto = NULL;
+            delete theBgrHisto; theBgrHisto = NULL; 
             TGraph* gGlobCorr = SVD_Vect2Graph(vScanPoints, vGlobCorr);
             SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1); 
             TString gGlobCorrStr = SVD_PlotName(channel, particle, quantity, special, syst, "scanGLOBC");
             SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "Averaged Global Correlation  #bar{#rho}  in %");  
-            TGraph* bestPoint = SVD_Point2Graph(optimalTauX, optimalTauY);
+            TGraph* bestPoint = SVD_Point2Graph(optimalTauX, optimalTauY); 
             SVD_DrawGraph(bestPoint,  theBgrHisto, "P", 2); 
             bestPoint->SetMarkerSize(2.5); 
-            bestPoint->SetMarkerStyle(3);
+            bestPoint->SetMarkerStyle(3); 
             SVD_DrawVertLines(theBgrHisto, &vSingularValues, 2);
             TString textBestPoint = TString::Format("#tau = %.3f", optimalTauX);
             int textOrientationBestPoint = 23; 
-            latexBestPoint->SetTextSize(0.03);
+            latexBestPoint->SetTextSize(0.03); 
             latexBestPoint->SetTextColor(2); 
             double textPosBestPointX =  SVD_TextPosX(theBgrHisto, optimalTauX, gPad->GetLogx(), textOrientationBestPoint);
             double textPosBestPointY =  SVD_TextPosY(theBgrHisto, optimalTauY, gPad->GetLogy(), textOrientationBestPoint);
             SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint); 
-            canvas.Print(outputfilename); 
+            canvas.Print(outputfilename);  
             delete gGlobCorr;
             delete bestPoint;  
-                  
+                   
         
             // Chi Squared
             canvas.Clear();
@@ -5102,7 +5312,7 @@ double TopSVDFunctions::SVD_Unfold(
             delete gAvgMean;
             delete bestPoint;   
                   
-                  
+                   
              
             // Delete obsolete Objects
             delete latexBestPoint;     
@@ -5112,7 +5322,7 @@ double TopSVDFunctions::SVD_Unfold(
             gPad->SetLogx(false);
         } 
     
- 
+  
         // Last page empty
         canvas.Clear();
         canvas.Print(outputfilename.Copy().Append(")"));
@@ -5143,7 +5353,7 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // Save all relevant Plots in ROOT File
-    if ( plotsToRoot == true ) {
+    if ( flag_root >= 1 ) {
     
        
         // Open a ROOT file 
@@ -5151,30 +5361,30 @@ double TopSVDFunctions::SVD_Unfold(
     
         // Write histograms
         SVD_WriteHists1D(rawHist, 1); 
-        SVD_WriteHists1D(bgrHist, numSys+1); 
-        SVD_WriteHists1D(ttbgrHist, numSys+1); 
-        SVD_WriteHists1D(dataHist, numSys+1); 
-        SVD_WriteHists1D(dataScaledHist, numSys+1); 
-        SVD_WriteHists2D(mcHist, numSys+1); 
-        SVD_WriteHists1D(xiniHist, numSys+1); 
-        SVD_WriteHists1D(xiniScaledHist, numSys+1); 
-        SVD_WriteHists1D(biniHist, numSys+1); 
-        SVD_WriteHists1D(beffHist, numSys+1);  
-        SVD_WriteHists1D(bbbHist, numSys+1); 
+        SVD_WriteHists1D(bgrHist, numberSyst+1); 
+        SVD_WriteHists1D(ttbgrHist, numberSyst+1); 
+        SVD_WriteHists1D(dataHist, numberSyst+1); 
+        SVD_WriteHists1D(dataScaledHist, numberSyst+1); 
+        SVD_WriteHists2D(mcHist, numberSyst+1); 
+        SVD_WriteHists1D(xiniHist, numberSyst+1); 
+        SVD_WriteHists1D(xiniScaledHist, numberSyst+1); 
+        SVD_WriteHists1D(biniHist, numberSyst+1); 
+        SVD_WriteHists1D(beffHist, numberSyst+1);  
+        SVD_WriteHists1D(bbbHist, numberSyst+1); 
         SVD_WriteHists2D(dataCovHist, 1); 
-        SVD_WriteHists1D(weightHist, numSys+1); 
-        SVD_WriteHists1D(ddHist, numSys+1); 
-        SVD_WriteHists1D(svHist, numSys+1); 
+        SVD_WriteHists1D(weightHist, numberSyst+1); 
+        SVD_WriteHists1D(ddHist, numberSyst+1); 
+        SVD_WriteHists1D(svHist, numberSyst+1); 
         SVD_WriteHists2D(statCovHist, 1); 
         SVD_WriteHists2D(mcCovHist, 1); 
         SVD_WriteHists2D(totCovHist, 1); 
-        SVD_WriteHists1D(probHist, numSys+1); 
-        SVD_WriteHists1D(purHist, numSys+1); 
-        SVD_WriteHists1D(stabHist, numSys+1); 
-        SVD_WriteHists1D(effHist, numSys+1); 
+        SVD_WriteHists1D(probHist, numberSyst+1); 
+        SVD_WriteHists1D(purHist, numberSyst+1); 
+        SVD_WriteHists1D(stabHist, numberSyst+1); 
+        SVD_WriteHists1D(effHist, numberSyst+1); 
         SVD_WriteHists1D(histRatioUnfBBB); 
-        SVD_WriteHists1D(refoldHist, numSys+1); 
-        SVD_WriteHists1D(histRatioRefDat, numSys+1); 
+        SVD_WriteHists1D(refoldHist, numberSyst+1); 
+        SVD_WriteHists1D(histRatioRefDat, numberSyst+1); 
         SVD_WriteHists1D(statErrHist, 1); 
         SVD_WriteHists1D(mcErrHist, 1); 
         SVD_WriteHists1D(totErrHist, 1); 
@@ -5184,8 +5394,8 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_WriteHists2D(mcCorrHist, 1); 
         SVD_WriteHists2D(totCorrHist, 1); 
         SVD_WriteHists1D(glcHist, 1); 
-        SVD_WriteHists1D(bbbShiftHist, numSys); 
-        SVD_WriteHists1D(ratioShiftHist, numSys); 
+        SVD_WriteHists1D(bbbShiftHist, numberSyst); 
+        SVD_WriteHists1D(ratioShiftHist, numberSyst); 
     
         // Close file
         file->Close();
@@ -5200,30 +5410,30 @@ double TopSVDFunctions::SVD_Unfold(
                  
     // Delete all old histograms
     SVD_DeleteHists1D(rawHist, 1); 
-    SVD_DeleteHists1D(bgrHist, numSys+1); 
-    SVD_DeleteHists1D(ttbgrHist, numSys+1); 
-    SVD_DeleteHists1D(dataHist, numSys+1); 
-    SVD_DeleteHists1D(dataScaledHist, numSys+1); 
-    SVD_DeleteHists2D(mcHist, numSys+1);  
-    SVD_DeleteHists1D(xiniHist, numSys+1); 
-    SVD_DeleteHists1D(xiniScaledHist, numSys+1); 
-    SVD_DeleteHists1D(biniHist, numSys+1); 
-    SVD_DeleteHists1D(beffHist, numSys+1);  
-    SVD_DeleteHists1D(bbbHist, numSys+1); 
+    SVD_DeleteHists1D(bgrHist, numberSyst+1); 
+    SVD_DeleteHists1D(ttbgrHist, numberSyst+1); 
+    SVD_DeleteHists1D(dataHist, numberSyst+1); 
+    SVD_DeleteHists1D(dataScaledHist, numberSyst+1); 
+    SVD_DeleteHists2D(mcHist, numberSyst+1);  
+    SVD_DeleteHists1D(xiniHist, numberSyst+1); 
+    SVD_DeleteHists1D(xiniScaledHist, numberSyst+1); 
+    SVD_DeleteHists1D(biniHist, numberSyst+1); 
+    SVD_DeleteHists1D(beffHist, numberSyst+1);  
+    SVD_DeleteHists1D(bbbHist, numberSyst+1); 
     SVD_DeleteHists2D(dataCovHist, 1); 
-    SVD_DeleteHists1D(weightHist, numSys+1);  
-    SVD_DeleteHists1D(ddHist, numSys+1); 
-    SVD_DeleteHists1D(svHist, numSys+1); 
+    SVD_DeleteHists1D(weightHist, numberSyst+1);  
+    SVD_DeleteHists1D(ddHist, numberSyst+1); 
+    SVD_DeleteHists1D(svHist, numberSyst+1); 
     SVD_DeleteHists2D(statCovHist, 1); 
     SVD_DeleteHists2D(mcCovHist, 1); 
     SVD_DeleteHists2D(totCovHist, 1); 
-    SVD_DeleteHists1D(probHist, numSys+1);  
-    SVD_DeleteHists1D(purHist, numSys+1); 
-    SVD_DeleteHists1D(stabHist, numSys+1); 
-    SVD_DeleteHists1D(effHist, numSys+1); 
+    SVD_DeleteHists1D(probHist, numberSyst+1);  
+    SVD_DeleteHists1D(purHist, numberSyst+1); 
+    SVD_DeleteHists1D(stabHist, numberSyst+1); 
+    SVD_DeleteHists1D(effHist, numberSyst+1); 
     SVD_DeleteHists1D(histRatioUnfBBB); 
-    SVD_DeleteHists1D(refoldHist, numSys+1); 
-    SVD_DeleteHists1D(histRatioRefDat, numSys+1); 
+    SVD_DeleteHists1D(refoldHist, numberSyst+1); 
+    SVD_DeleteHists1D(histRatioRefDat, numberSyst+1); 
     SVD_DeleteHists1D(statErrHist, 1);  
     SVD_DeleteHists1D(mcErrHist, 1); 
     SVD_DeleteHists1D(totErrHist, 1); 
@@ -5233,12 +5443,12 @@ double TopSVDFunctions::SVD_Unfold(
     SVD_DeleteHists2D(mcCorrHist, 1); 
     SVD_DeleteHists2D(totCorrHist, 1);  
     SVD_DeleteHists1D(glcHist, 1);  
-    SVD_DeleteHists1D(bbbShiftHist, numSys);  
-    SVD_DeleteHists1D(ratioShiftHist, numSys);  
+    SVD_DeleteHists1D(bbbShiftHist, numberSyst);  
+    SVD_DeleteHists1D(ratioShiftHist, numberSyst);  
 
 
     // Delete TopSVDUnfold-Objekt
-    SVD_DeleteSVD(mySVDUnfold, numSys);
+    SVD_DeleteSVD(mySVDUnfold, numberSyst);
     
     
   
@@ -5261,11 +5471,11 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // Screen Output
-    if ( verbose > 0 ) {
+    if ( flag_verbose > 0 ) {
         cout << endl;
-        cout << "************************************************************************************" << endl;
+        cout << "********************************************************************************************************************" << endl;
         cout << "Unfolding finished." << endl;
-        cout << "************************************************************************************" << endl;
+        cout << "********************************************************************************************************************" << endl;
     }
 
     // return 
