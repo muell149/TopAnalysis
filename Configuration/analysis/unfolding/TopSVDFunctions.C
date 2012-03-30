@@ -2904,7 +2904,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
     
     
     
-    int flag_verbose = 0; 
+    int flag_verbose = 1; 
     
 
     // Steer background handling
@@ -2937,7 +2937,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
             }
                  
             // Debug output
-            if(flag_verbose>=2){
+            if(flag_verbose>=3){
                 std::cout << std::endl << "bin " << i << std::endl;
                 std::cout << "value_data: " << value_data << std::endl;
                 std::cout << "value_bgr: "  << value_bgr << std::endl;
@@ -2966,7 +2966,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 sigFrac=value_ttSig/(value_ttSig+value_ttBgr);
                   
                 // debug output
-                if(flag_verbose>=2){
+                if(flag_verbose>=3){
                     std::cout << "value_ttBgr: " << value_ttBgr << std::endl;
                     std::cout << "value_bgr(no ttbar): " << value_bgr << std::endl;
                     std::cout << "value_ttSig: " << value_ttSig << std::endl;
@@ -2981,7 +2981,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
              
               
             // debug output
-            if(flag_verbose>=2){
+            if(flag_verbose>=3){
                 std::cout << "data_value_new: " << value_new << std::endl;
                 std::cout << "data_err_new: "   << err_new   << std::endl;
             }
@@ -3633,29 +3633,32 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 // PERFORM UNFOLDING 
 // Steering options in parameter 'steering' 
 //     (1) REGMODE (1. digit from right)
-//         0 means: Bin by Bin Unfolding
-//         1 means: SVD Unfolding, minimal regularization.
+//         0 means: Default setting. Same as 2
+//         1 means: Bin by Bin Unfolding
+//         2 means: SVD Unfolding, minimal regularization.
 //              Regularization will be done with a k value
 //              and the k value will be set to the number of
 //              bins (not counting OF). Parameter 'regPar'
 //              is ignored.
-//         2 means: SVD unfolding, regularization according
+//         3 means: SVD unfolding, regularization according
 //              to the parameter 'regPar'. Whether this one
 //              is taken as k value or tau value, can be 
 //              specified with the second digit of this
 //              parameter. (default)
-//         3 means: SVD unfolding according to the file
+//         4 means: SVD unfolding according to the file
 //              given in 'regParFile'. Whether this one
 //              is taken as k value or tau value, can be 
 //              specified with the second digit of this
 //              parameter.Parameter 'regPar'
 //              is ignored.
 //     (2) REGULARIZATION PARAMETER (2. digit from right)
-//         0 means: interpret 'regPar' as k value (default)
-//         1 means: interpret 'regPar' as tau value
+//         0 means: Default setting, same as 1
+//         1 means: interpret 'regPar' as k value (default)
+//         2 means: interpret 'regPar' as tau value
 //     (3) SCAN ( 3. digit from right)
-//         0 means: no scan for optimal tau is perforemd,
-//         1 means: tau scan  (default).
+//         0 means: Default setting, same as 2
+//         1 means: no scan for optimal tau is perforemd,
+//         2 means: tau scan  (default).
 //              A scan for the optimal tau parameter is
 //              performed. The scan is performed around
 //              a "center value" to be specified in 'regpar'.
@@ -3663,22 +3666,26 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 //              as k value or tau value, can be 
 //              specified with the second digit of this
 //              parameter.
-//        Note: The scan may take a while!    
+//              Note: The scan may take a while!    
 //     (4) PS LOTTING  (4. digit from right)
-//         0 means: no plotting at all
-//         1 means: standard plots
-//         2 means: standard plots + k scan plots
-//         3 means: standard plots + k scan plots + tau scan plots (default)
+//         0 means: Default value, same as 4
+//         1 means: no plotting at all
+//         2 means: standard plots
+//         3 means: standard plots + k scan plots
+//         4 means: standard plots + k scan plots + tau scan plots (default)
 //     (5) ROOT FILE ( 5. digit from right)
-//         0 means: no root file will be written (default)
-//         1 means: standard plots to root file  
+//         0 means: Default value, same as 1
+//         1 means: no root file will be written (default)
+//         2 means: standard plots to root file  
 //     (6) TEXT FILE ( 6. digit from right)
-//         0 means: no text file is written
-//         1 means: text file with optimal reg. params. is written (default)
+//         0 means: Default value, same as 2
+//         1 means: no text file is written
+//         2 means: text file with optimal reg. params. is written (default)
 //     (7) VERBOSITY (7. digit from right)
-//         0 means: no output at all
-//         1 means: standard output (default)
-//         2 means: debugging output
+//         0 means: Default value, same as 2
+//         1 means: no output at all
+//         2 means: standard output (default)
+//         3 means: debugging output
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
 // Systematics Handling: 
@@ -3757,7 +3764,7 @@ double TopSVDFunctions::SVD_Unfold(
 )
 {  
 
-
+ 
     // Number of Pseudo Experiments for the error calculation    
     int nExperiments = 1000;
     
@@ -3774,36 +3781,43 @@ double TopSVDFunctions::SVD_Unfold(
      
     // REG MODE
     int flag_regmode = SVD_GetDigit(steering, 1);
+    if ( flag_regmode == 0 ) flag_regmode = 2;
      
      
     // REG PAR
     int flag_regpar = SVD_GetDigit(steering, 2); 
+    if ( flag_regpar == 0 ) flag_regpar = 1;
      
      
     // SCAN
     int flag_scan = SVD_GetDigit(steering, 3);
+    if ( flag_scan == 0 ) flag_scan = 2;
      
      
      // PS FILE
-     int flag_ps = SVD_GetDigit(steering, 4); 
-     if ( flag_scan == 0 && flag_ps == 3 ) flag_ps = 2;
-    if ( psFile.CompareTo("")==0 ) flag_ps = 0;
+    int flag_ps = SVD_GetDigit(steering, 4); 
+    if ( flag_ps == 0 ) flag_ps = 4;
+    if ( flag_scan == 1 && flag_ps == 4 ) flag_ps = 3;
+    if ( psFile.CompareTo("")==0 ) flag_ps = 1;
      
      
      // ROOT FILE
-     int flag_root = SVD_GetDigit(steering, 5);
-    if ( rootFile.CompareTo("")==0 ) flag_root = 0;
+    int flag_root = SVD_GetDigit(steering, 5);
+    if ( flag_root == 0 ) flag_root = 1;
+    if ( rootFile.CompareTo("")==0 ) flag_root = 1;
       
      
      // TEXT FILE
     int flag_text = SVD_GetDigit(steering, 6);
-    if ( flag_scan == 0 ) flag_text = 0;
-    if ( flag_regmode == 3 ) flag_text = 0;
-    if ( regParFile.CompareTo("")==0 ) flag_text = 0;
+    if ( flag_text == 0 ) flag_text = 2;
+    if ( flag_scan == 1 ) flag_text = 1;
+    if ( flag_regmode == 4 ) flag_text = 1;
+    if ( regParFile.CompareTo("")==0 ) flag_text = 1;
 
 
     // VERBOSITY
-    int flag_verbose = SVD_GetDigit(steering, 7);     
+    int flag_verbose = SVD_GetDigit(steering, 7);   
+    if ( flag_verbose == 0 ) flag_verbose = 2;  
  
  
     // Systematics Flags
@@ -3811,6 +3825,7 @@ double TopSVDFunctions::SVD_Unfold(
     if ( numberSyst < 0 ) numberSyst = 0;
     bool doSystematics = false;
     if ( numberSyst > 0 ) doSystematics = true;
+    
          
     ///////////////////////////////////////////////////////////////////  
     /////////  S E T U P   R O O T //////////////////////////////////// 
@@ -3836,26 +3851,29 @@ double TopSVDFunctions::SVD_Unfold(
     
     // Adapt gErrorIgnoreLevel to reduce output
     int save_gErrorLv=gErrorIgnoreLevel;
-    if (flag_verbose==1) gErrorIgnoreLevel=kWarning;
-    if (flag_verbose==0) gErrorIgnoreLevel=kFatal; 
+    if (flag_verbose==2) gErrorIgnoreLevel=kWarning;
+    if (flag_verbose==1) gErrorIgnoreLevel=kFatal; 
       
     /////////////////////////////////////////////////////////////////// 
     /////////  R E A D   R E G P A R   //////////////////////////////// 
     ///////////////////////////////////////////////////////////////////
 
 
+    TString cpqss = SVD_CPQSS(channel, particle, quantity, special, syst);
+    TString thekey = SVD_CPQSS(channel, particle, quantity, special, "");
+    
+
     // Get regularization parameter
     // for minimal regularization
-    if ( flag_regmode == 1 ) {
+    if ( flag_regmode == 2 ) {
         regPar = (double) numbins;
     }
 
     // Get regularization paramter from file     
-    if ( flag_regmode == 3 ) { 
+    if ( flag_regmode == 4 ) { 
     
         // Get the Line from File by searching for a key
-        TString cpqss = SVD_CPQSS(channel, particle, quantity, special, syst);
-        TString theLine = SVD_LineFromFile(cpqss, regParFile);
+        TString theLine = SVD_LineFromFile(thekey, regParFile);
          
             
         // Read Tau
@@ -3873,19 +3891,19 @@ double TopSVDFunctions::SVD_Unfold(
             
             
         // Save Reg Par
-        if ( flag_regpar >= 1 ) {
+        if ( flag_regpar == 2 ) {
             regPar = theTau;
         } else {
             regPar = (double) theK ;
         }
     
         // Output
-        if ( flag_verbose > 0 ) { 
+        if ( flag_verbose > 1 ) { 
             cout << "********************************************************************************************************************" << endl;
             cout << "Reading Regularization Parameter from File: " << endl; 
             cout << "    File:               " << regParFile << endl;
-            cout << "    Key:                " << cpqss << endl;
-            if ( flag_regpar >= 1 ) { 
+            cout << "    Key:                " << thekey << endl;
+            if ( flag_regpar == 2 ) { 
                 cout << "    RegPar (tau-Value): " << regPar << endl;
             } else {
                 cout << "    RegPar (k-Value):   " << regPar << endl;
@@ -3897,7 +3915,7 @@ double TopSVDFunctions::SVD_Unfold(
 
   
     // Screen Output
-    if ( flag_verbose > 0 ) {
+    if ( flag_verbose > 1 ) {
         cout << endl;
         cout << "*******************************************************************************************************************" << endl;
         cout << "SVD Unfolding of ... " << endl;
@@ -3910,21 +3928,26 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "    Root File:                             " << rootFile << endl;
         cout << "    Ps File:                               " << psFile << endl;
         cout << "    Best Tau File:                         " << regParFile << endl;
+        cout << "        Write to Text File:                " << (flag_text == 2 ) << endl;
+        cout << "        Read to Text File:                 " << (flag_regmode == 4 ) << endl;
+        cout << "        Key:                               " << cpqss << endl; 
         cout << "    Regularization Parameter:              " << regPar << endl;
         cout << "    Steering Options (" <<  steering << "): " << endl;
-        cout << "        Use SVD:                           " << (flag_regmode >= 1) << endl;
-        cout << "            Minimal Regul.:                " << (flag_regmode == 1) << endl;
-        cout << "            Manual Reg. Par.:              " << (flag_regmode == 2) << endl;
-        cout << "            Reg. Par. from File:           " << (flag_regmode == 3) << endl;
-        cout << "        Use K:                             " << (flag_regpar == 0) << endl;
-        cout << "        Use Tau:                           " << (flag_regpar == 1) << endl;
-        cout << "        Scan for best tau:                 " << (flag_scan == 1) << endl;
-        cout << "        Write to PS:                       " << (flag_ps >= 1) << endl;
-        cout << "             K Scan Plots:                 " << (flag_ps >= 2 ) << endl;
-        cout << "             Tau Scan Plots:               " << (flag_ps >= 3 ) << endl;
-        cout << "        Write to ROOT:                     " << (flag_root == 1 ) << endl;
-        cout << "        Write to Text File:                " << (flag_text == 1 ) << endl;
-        cout << "        Verbosity:                         " << flag_verbose << endl;
+        cout << "        Use SVD:                           " << (flag_regmode >= 2) << endl;
+        cout << "            Minimal Regul.:                " << (flag_regmode == 2) << endl;
+        cout << "            Manual Reg. Par.:              " << (flag_regmode == 3) << endl;
+        cout << "            Reg. Par. from File:           " << (flag_regmode == 4) << endl;
+        cout << "        Use K:                             " << (flag_regpar == 1) << endl;
+        cout << "        Use Tau:                           " << (flag_regpar == 2) << endl;
+        cout << "        Scan for best tau:                 " << (flag_scan == 2) << endl;
+        cout << "        Write to PS:                       " << (flag_ps >= 2) << endl;
+        cout << "             K Scan Plots:                 " << (flag_ps >= 3 ) << endl;
+        cout << "             Tau Scan Plots:               " << (flag_ps >= 4 ) << endl;
+        cout << "        Write to Text File:                " << (flag_text == 2 ) << endl;
+        cout << "        Write to ROOT:                     " << (flag_root == 2 ) << endl; 
+        cout << "        Verbosity:                         " << endl;
+        cout << "             Standard Output:              " << (flag_verbose>=2) << endl;
+        cout << "             Debugging Output:             " << (flag_verbose==3) << endl;
         cout << "********************************************************************************************************************" << endl;
     }   
     
@@ -4099,7 +4122,7 @@ double TopSVDFunctions::SVD_Unfold(
     // Regularization
     int theKReg = -1;
     double theTau = -1.;
-    if ( flag_regpar >= 1 ) {
+    if ( flag_regpar == 2 ) {
         theKReg = -1;
         theTau = regPar;
     } 
@@ -4111,7 +4134,7 @@ double TopSVDFunctions::SVD_Unfold(
 
     // Setup Unfolding Tools
     // One for each Systematic Sample
-    // This way, they are all independent from each other
+    // This way, they are all independent from each other 
     TopSVDUnfold*  mySVDUnfold = SVD_SetupTool(dataHist, biniHist, xiniHist, mcHist, theTau, numberSyst+1); 
   
     
@@ -4193,7 +4216,7 @@ double TopSVDFunctions::SVD_Unfold(
     TH1D* arrK_GlC = NULL;
      
     
-    if ( flag_ps >= 2 ) {
+    if ( flag_ps >= 3 ) {
         
         // Create new Objects
         arrK_StatError = new TH1D[nScanSingularValues-1];
@@ -4286,7 +4309,7 @@ double TopSVDFunctions::SVD_Unfold(
     double bbbAvgMean = 0.;  
  
   
-    if ( flag_scan >= 1 ) {
+    if ( flag_scan == 2 ) {
             
             
         // Steer Scan
@@ -4297,7 +4320,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Range for Scan
         double lowTau = 0.;
         double highTau = 0.;
-        if ( flag_regpar >= 1 ) {
+        if ( flag_regpar == 2 ) {
             lowTau = (1./rangefactor) * theTau;
             highTau = rangefactor * theTau;
         } else{
@@ -4312,7 +4335,7 @@ double TopSVDFunctions::SVD_Unfold(
         }  
 
         // Slow scan for plots
-        if ( flag_ps >= 3 ) {       
+        if ( flag_ps >= 4 ) {       
               
             // Get the Scan Points
             vScanPoints = SVD_CalcScanPoints(lowTau, highTau, nScanPoints);
@@ -4324,8 +4347,13 @@ double TopSVDFunctions::SVD_Unfold(
             vAvgSqErr = new TVectorD(nScanPoints);
             vAvgMean = new TVectorD(nScanPoints);
     
+            // Output
+            if (flag_verbose>1) { 
+                cout << "*******************************************************************************************************************" << endl;
+            	cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " for plotting purpose" << endl;
+            }  
+    
             // Perform the Scan
-            if (flag_verbose>0) cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " for plotting purpose" << endl;  
             for ( int i = 0 ; i < nScanPoints ; i++ ) {
        
                 // Do the unfolding with k = -1
@@ -4354,13 +4382,20 @@ double TopSVDFunctions::SVD_Unfold(
                 (*vAvgMean)[i] = SVD_ScanAvgMean(tmpUnfResult);
                    
                 // Output
-                if(flag_verbose>0)cout << "    done for Tau = " << tau << " -> GlobCorr: " << (*vGlobCorr)[i] <<endl;
+                if(flag_verbose>1){
+                	cout << "    Scanpoint " << i << " of " << nScanPoints << " ->  Tau = " << tau << " -> GlobCorr: " << (*vGlobCorr)[i] << endl;
+                }
                   
                 // delete things
                 SVD_DeleteHists1D(tmpUnfResult);
                 SVD_DeleteHists1D(tmpWeights);
                 SVD_DeleteHists2D(tmpCovHist); 
             }
+    
+            // Output
+            if (flag_verbose>1) { 
+                cout << "*******************************************************************************************************************" << endl; 
+            }  
              
         }
 
@@ -4374,6 +4409,13 @@ double TopSVDFunctions::SVD_Unfold(
         double newLowTau  = TMath::Power(10.,TMath::Log10(lowTau) + goldSec*(TMath::Log10(highTau)-TMath::Log10(lowTau)));
         double newHighTau = TMath::Power(10.,TMath::Log10(highTau) - goldSec*(TMath::Log10(highTau)-TMath::Log10(lowTau)));
     
+    
+        // Output
+        if (flag_verbose>1) { 
+            cout << "*******************************************************************************************************************" << endl;
+        	cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " with Golden Section Search" << endl;
+        }  
+            
         for ( int i = 0 ; i < nScanPoints ; i++ ) {
             if( optimalTauX!=newLowTau ){
                 // Do the unfolding for lowTau
@@ -4385,7 +4427,7 @@ double TopSVDFunctions::SVD_Unfold(
                 // delete Error matrix
                 SVD_DeleteHists2D(tmpCovHist);
                 // print global correlation for new tau
-                if(flag_verbose>0)cout << "newLowTau: " << newLowTau << " -> globCorr: " << globCorrLowTau << endl;
+                if(flag_verbose>1)cout << "    newLowTau: " << newLowTau << " -> globCorr: " << globCorrLowTau << endl;
             }
             if(optimalTauX!=newHighTau){
                 // Do the unfolding for highTau
@@ -4397,7 +4439,7 @@ double TopSVDFunctions::SVD_Unfold(
                 // delete Error matrix
                 SVD_DeleteHists2D(tmpCovHist); 
                 // print global correlation for new tau
-                if(flag_verbose>0)cout << "newHighTau: " << newHighTau << " -> globCorr: " << globCorrHighTau << endl;
+                if(flag_verbose>1)cout << "    newHighTau: " << newHighTau << " -> globCorr: " << globCorrHighTau << endl;
             }
             if(globCorrLowTau<globCorrHighTau){
                 highTau=newHighTau;
@@ -4417,8 +4459,13 @@ double TopSVDFunctions::SVD_Unfold(
                 newHighTau=TMath::Power(10.,TMath::Log10(highTau) - goldSec*(TMath::Log10(highTau)-TMath::Log10(lowTau)));
             }
         }
-        if(flag_verbose>0)cout << "Optimal Tau = " << optimalTauX << endl;
+        if(flag_verbose>1)cout << "Optimal Tau = " << optimalTauX << endl;
      
+    
+        // Output
+        if (flag_verbose>1) { 
+            cout << "*******************************************************************************************************************" << endl; 
+        }  
      
         // Find closest K values
         optimalTauLowK = 0;
@@ -4480,10 +4527,10 @@ double TopSVDFunctions::SVD_Unfold(
     ////////////   S A V E   B E S T   V A L U E S   //////////////////
     ///////////////////////////////////////////////////////////////////    
  
-    if ( flag_scan >= 1 && flag_text >= 1) {
+    if ( flag_scan == 2 && flag_text == 2) {
          
         // Create String to Print
-        TString lineStrList =  SVD_CPQSS(channel, particle, quantity, special, syst); 
+        TString lineStrList =  thekey;
         lineStrList.Append(" ");
         for ( int i = lineStrList.Length() ; i < 60 ; i++ ) lineStrList.Append(" ");   
         lineStrList.Append(TString::Format("%.5f", optimalTauX)); 
@@ -4536,8 +4583,8 @@ double TopSVDFunctions::SVD_Unfold(
  
 
     // Set Pointer
-    if ( flag_regmode == 0 ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
-    if ( flag_regmode > 0 ) unfolded =  SVD_CloneHists1D(bbbHist, numberSyst+1);
+    if ( flag_regmode == 1 ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
+    if ( flag_regmode > 1 ) unfolded =  SVD_CloneHists1D(bbbHist, numberSyst+1);
  
 
    
@@ -4802,7 +4849,7 @@ double TopSVDFunctions::SVD_Unfold(
  
  
     // DRAW IT ALL
-    if ( flag_ps >= 1 ) { 
+    if ( flag_ps >= 2 ) { 
         
         // Setup Style
         setHHStyle(*gStyle);
@@ -4855,7 +4902,7 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Tex / Regularization
         TString RegTex = ""; 
-        if ( flag_regpar >= 1 ) { 
+        if ( flag_regpar == 2 ) { 
             RegTex.Append("#tau = ");
             RegTex.Append(TString::Format("%.3f", regPar));  
         } else { 
@@ -5094,7 +5141,7 @@ double TopSVDFunctions::SVD_Unfold(
     
         // K Scan Plots 
         // Only for the nominal sample
-        if ( flag_ps >= 2 ) {
+        if ( flag_ps >= 3 ) {
          
              
             // Draw Unfolded distributions    
@@ -5159,7 +5206,7 @@ double TopSVDFunctions::SVD_Unfold(
      
         // Scan Plots
         // Only for the nominal sample
-        if ( flag_ps >= 3 ) {
+        if ( flag_ps >= 4 ) {
                   
             // Logscale
             gPad->SetLogx(true); 
@@ -5353,7 +5400,7 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // Save all relevant Plots in ROOT File
-    if ( flag_root >= 1 ) {
+    if ( flag_root == 2 ) {
     
        
         // Open a ROOT file 
@@ -5471,7 +5518,7 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     // Screen Output
-    if ( flag_verbose > 0 ) {
+    if ( flag_verbose > 1 ) {
         cout << endl;
         cout << "********************************************************************************************************************" << endl;
         cout << "Unfolding finished." << endl;

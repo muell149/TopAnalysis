@@ -43,6 +43,8 @@ class TopSVDFunctions
     public: 
          
         // Unfolding function
+        // For dokumentation, see the function definition
+        // in TopSVDFunctions.C
         static double SVD_Unfold(
                         TH1D* dataInputHist,                                        
                         TH1D* bgrInputHist,   
@@ -54,7 +56,7 @@ class TopSVDFunctions
                         const double thebins[],         
                         const int numbins,                
                         double regPar,          
-                        const int steering = 1103102,
+                        const int steering = 0,
                         const int numSys = 0,                        
                         TString channel = "",                                   
                         TString particle = "",           
@@ -84,7 +86,7 @@ class TopSVDFunctions
         // Legends, Stacks, Formatting and all that
         static TLegend* SVD_NewLegend(TString header1, TString header2, double regPar = 0., int mode = -1);
         static TLegend* SVD_NewLegendK();
-        static TString SVD_CPQSS(TString channel, TString particle, TString quantity, TString special, TString syst);
+        static TString SVD_CPQSS(TString channel, TString particle, TString quantity, TString special, TString syst); 
         static TString SVD_PlotName(TString channel, TString particle, TString quantity, TString special, TString syst, TString plotName);
         static void SVD_SetTitles1D(TH1D* histo, TString name, TString xTitle, TString yTitle, int numHist = 1);
         static void SVD_SetTitles2D(TH2D* histo, TString name, TString xTitle, TString yTitle, TString zTitle, int numHist = 1);
