@@ -65,27 +65,9 @@ const TString inpath(  !strcmp(USERNAME, "wbehrenh") ? "./" : //PLEASE LEAVE THI
 
 
 // Unfolding Flags
+// All other unfolding settings are done in DilepSVDFunctions::DoUnfold()
 const bool doSVD = true;
-const bool unfoldingPlotsToPs = true;
-const bool unfoldingPlotsToRoot = false;
 
-// REGMODE for Unfolding
-// (1) regMode=0 is standard BBB unfolding, no regularization
-// (2) regMode=1 is SVD Unfolding, regularization by means of 
-//        the k Parameter. Specify the k Parameter in 'regPar'
-// (3) regMode=2 is SVD Unfolding, regularization by means of
-//        the tau Parameter. Specify the tau Parameter 
-//        in 'regpar'
-// (4) regMode=3 is SVD Unfolding. A scan for the optimal tau
-//        parameter is performed. The scan is performed around
-//        a "center value" for tau, to be specified in 'regpar' .
-//        Note: The scan may take a while!     
-// (5) regMode=4 is SVD Unfolding. A scan for the optimal tau
-//        parameter is performed. The scan is performed around
-//        a "center value" for k, to be specified in 'regpar'    
-//        Note: The scan may take a while!
-// Standard Value is (1). 
-const int regMode = 2;
 
 
 // Place for Output
@@ -99,7 +81,8 @@ const TString outform(".eps");
 // output file name for cross section hists
 const TString crossOutfileName(outpath+"DiffXS_Histograms.root");
 // output file name for efficiency hists
-const TString pseOutfileName(outpath+"PSE_Histograms.root");
+const TString pseOutfileName(outpath+"PSE_Histograms.root")
+;
 // output file name for cross section hists
 const TString unfoldOutfileName(outpath+"Unfold_Histograms.root");
 // output file name for kin reconstruction efficiency
@@ -3631,42 +3614,301 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
     cout.precision(5);
 
     // DAVID
-    if ( doUnfolding ) {
+    if ( doUnfolding == true ) {
     
         
 		// SVD Helper Class
 		DilepSVDFunctions mySVDFunctions;
-		mySVDFunctions.SetUnfoldingPlotsToPs(unfoldingPlotsToPs);
-		mySVDFunctions.SetUnfoldingPlotsToRoot(unfoldingPlotsToRoot);
-		mySVDFunctions.SetRegMode(regMode);
 		mySVDFunctions.SetOutputPath(outpath);
 
         // Raw Data Histogram
-        TH1D* dataHist = (TH1D*) mergedhists[kDATA];
-
+        TH1D* dataHist = (TH1D*) mergedhists[0]->Clone("Raw Data"); 
 
         // Background Histogram
-        TH1D* bgrHist = (TH1D*) mergedhists[kTTBG]->Clone("Background");
+        // Attention! Set the Bgr Error to zero!
+        TH1D* bgrHist = (TH1D*) mergedhists[0]->Clone("Background");
+        for (Int_t i=0; i<=nbins+1; ++i) {
+        	bgrHist->SetBinContent(i,0.);
+        	bgrHist->SetBinError(i,0.);
+        }
         for(size_t i = 3; i < Nplots; ++i){ 
             bgrHist->Add(mergedhists[i],1.);
         }
+        for (Int_t i=0; i<=nbins+1; ++i) { 
+        	bgrHist->SetBinError(i,0.);
+        }
+        
+        
+        // Fantasy Systematics for Testing 
+        bool doFantasySystematics = false;
+        if ( doFantasySystematics == true ) { 
+        		
+        		// ATTENTION EVERYONE
+        		// This is Davids Playground. Don't touch it.
+        		// Will be deleted, if not needed any longer.
+        		
+        		
+                TH1D* bgrHistUp = (TH1D*) ((TH1D*) bgrHist)->Clone("BackgroundUp");
+                bgrHistUp->Scale(1.02);
+                TH1D* bgrHistDown = (TH1D*) ((TH1D*) bgrHist)->Clone("BackgroundUp");
+                bgrHistDown->Scale(0.98);
+                
+                TH1D* bingenhistUp = (TH1D*) ((TH1D*) bingenhist)->Clone("bingenhistUp");
+                TH1D* bingenhistDown = (TH1D*) ((TH1D*) bingenhist)->Clone("bingenhistDown");
+                
+                TH1D* binrechistUp = (TH1D*) ((TH1D*) binrechist)->Clone("bingenhistUp");
+                binrechistUp->Scale(1.02);
+                TH1D* binrechistDown =(TH1D*)  ((TH1D*) binrechist)->Clone("bingenhistDown");
+                binrechistDown->Scale(0.98);
 
+				TH2D* genRec2DHistUp = (TH2D*) ((TH2D*) genRec2DHist)->Clone("respUp");
+                genRec2DHistUp->Scale(1.02);
+				TH2D* genRec2DHistDown = (TH2D*) ((TH2D*) genRec2DHist)->Clone("respDown"); 
+                genRec2DHistDown->Scale(0.98);
+		
+				TH1D* unfoldedDistribution = NULL; 
+        		mySVDFunctions.SVD_DoUnfoldSys(
+        			(TH1D*) dataHist,
+		        	(TH1D*) bgrHist, bgrHistUp, bgrHistDown,
+        			(TH1D*) bingenhist, bingenhistUp, bingenhistDown,
+        			(TH1D*) binrechist, binrechistUp, binrechistDown,
+        			(TH2D*) genRec2DHist, genRec2DHistUp, genRec2DHistDown,
+		        	bins, nbins,  
+                    unfoldedDistribution,  
+                    channelName[channel], particle, quantity, specialPostfix, "Syst"
+		       ); 
+			   cout << "Fantasy Systematics successfully finished." << endl;
+			   exit(1);
+        }
+		
+		// Mtt Cross Check		
+        bool doMttCrossCheck = false;
+        if ( doMttCrossCheck == true ) { 
+        		
+        		// ATTENTION EVERYONE
+        		// This is Davids Playground. Don't touch it.
+        		// Will be deleted, if not needed any longer.
+        		
+        		
+        		// ATTENTION, DAVID
+        		// For the cross check of Taejeongs unfolding, keep in mind that:
+        		// (1) His histograms come with a set of OF bins on each side.
+        		//     Since your tool adds OF bins automatically, you have to
+        		//     remove his OF, otherwise you have them twice.
+        		//     What you do is, you copy his OF bins into the histo-OF's
+        		//     and your unfolding reverts that again.
+        		// (2) He uses a different axis convention that the dileptonic folks.
+        		//     While they have Gen=x and Rec=y, he has
+        		//     Gen=y and Rec=x. So you have to transpose this matrix first!
+        		// (3) He doesn't do the efficiency correction together with the
+        		//     migration correction. So
+        		//     xini == the sum over all Rec level bins (incl. OF)
+        		//     bini == the sum over all Gen level bins (incl. OF)
+        		// (4) His histograms have also histo-OFs. These are discareded here.
+        		
+        		// Settings
+        		bool doCollectHistoOFs = true;
+        		
+        		// Get histograms from Tae Jeaong
+        	    TFile* tmpfile = new TFile("/afs/desy.de/user/d/dfischer/TaeJeong/PreUnfoldHisto.root", "READ");
+                TH1D* hData_vsum= (TH1D*) tmpfile->Get("hData_vsum");
+                TH1D* hAccept_vsum = (TH1D*) tmpfile->Get("hAccept_vsum");
+                TH2D* h2_response_m = (TH2D*) tmpfile->Get("h2_response_m");
+
+				// Old Binning with OF bins
+				const double* theBinsOld = hData_vsum->GetXaxis()->GetXbins()->GetArray();
+				int numBinsOld = hData_vsum->GetNbinsX();
+				
+				
+				// New Binning without OF bins
+				int numBins = numBinsOld - 2;
+				double theBins[numBins+1];
+				for ( int i = 0 ; i <  numBins+1 ; i++  ) {
+					*(theBins+i) = *(theBinsOld+i+1);
+				}		
+				
+				
+				// Print the new binning		
+				cout << "******************************************************" << endl;
+				cout << "Binning with "<< numBins << " Bins:" << endl;
+				for ( int i = 0 ; i < numBins+1 ; i++ ) {
+					cout << " " << *(theBins+i);
+				}
+				cout << endl;
+				cout << "******************************************************" << endl;
+
+
+                
+                // Get Data
+                // Do carry around Rec OF bins
+                TH1D* theDataHist = new TH1D("Data", "Data", numBins, theBins);
+                for ( int i = 0 ; i <= numBins+1 ; i++ ) {
+                	double value = hData_vsum->GetBinContent(i+1);
+                	double error = hData_vsum->GetBinError(i+1); 
+                	if ( doCollectHistoOFs == true ) {
+	                	if ( i == 0 ) {
+	                		value += hData_vsum->GetBinContent(i); 
+	                		error = TMath::Sqrt(error*error + (hData_vsum->GetBinError(i))*(hData_vsum->GetBinError(i)));
+	                	}
+	                	if ( i == numBins+1 ) {
+	                		value += hData_vsum->GetBinContent(i+2); 
+	                		error = TMath::Sqrt(error*error + (hData_vsum->GetBinError(i+2))*(hData_vsum->GetBinError(i+2)));
+	                		
+	                	}
+                	}
+                	theDataHist->SetBinContent(i, value);
+                	theDataHist->SetBinError(i, error);
+                } 
+                
+                // Get Background
+                TH1D* theBgrHist = NULL;
+                TH1D* theTtbgrHist = NULL;
+                
+                
+                // Response Matrix 
+                // Do carry around Rec OF bins
+                bool transposeRespMatrix = true;
+                TH2D* theRespHist = new TH2D("Data", "Data", numBins, theBins, numBins, theBins);
+                for ( int i = 0 ; i <= numBins+1 ; i++ ) {
+					for ( int j = 0 ; j <= numBins+1 ; j++ ) {
+                		double value = h2_response_m->GetBinContent(i+1, j+1);  
+                	    if ( doCollectHistoOFs == true ) {
+		                    if ( i == 0 ) {  
+		                		value += h2_response_m->GetBinContent(i, j+1); 
+		                	}
+		                	if ( i == numBins+1 ) {
+		                		value += h2_response_m->GetBinContent(i+2, j+1);   
+		                	}
+		                	if ( j == 0 ) {
+		                		value += h2_response_m->GetBinContent(i+1, j); 
+		                	}
+		                	if ( j == numBins+1 ) {
+		                		value += h2_response_m->GetBinContent(i+1, j+2);   
+		                	}
+		                	if ( i == 0 && j == 0) {
+		                		value += h2_response_m->GetBinContent(i, j); 
+		                	}
+		                	if ( i == numBins+1 && j == numBins+1) {
+		                		value += h2_response_m->GetBinContent(i+2, j+2); 
+		                	} 
+		                	if ( i == 0 && j == numBins+1) {
+		                		value += h2_response_m->GetBinContent(i, j+2); 
+		                	} 
+		                	if ( i == numBins+1 && j == 0) {
+		                		value += h2_response_m->GetBinContent(i+2, j); 
+		                	} 
+                	    }
+	                	if ( transposeRespMatrix == false ) {
+                			theRespHist->SetBinContent(i, j, value); 
+                			theRespHist->SetBinError(i, j, 0.);
+	                	} else {
+                			theRespHist->SetBinContent(j, i, value); 
+                			theRespHist->SetBinError(j, i, 0.);
+	                	}
+					} 
+                }  
+				
+				
+				// Generator Level dist
+				// Sum over all rec level bins
+				// INCLUDING REC OF
+				// which are - after transpositon - the one on the y axis
+				// so we sum over the second index
+				TH1D* theGenHist = new TH1D("theGenHist", "theGenHist", numBins, theBins);
+				double valueSum = 0;
+				for ( int i = 0 ; i <= numBins+1 ; i++ ) {
+					double value = 0;
+					for ( int j = 0 ; j <= numBins+1 ; j++ ) {
+						value += theRespHist->GetBinContent(i, j);
+					}
+					valueSum += value; 
+					theGenHist->SetBinContent(i, value);
+					theGenHist->SetBinError(i, 0.);
+				}
+				
+				
+				// Rec level dist
+				// Sum over all GEN level bins
+				// INCLUDING GEN OF
+				// which are * after transposition - one on the x axis
+				// so we sum over the first index
+				TH1D* theRecHist = new TH1D("theRecHist", "theRecHist", numBins, theBins);
+				valueSum = 0;
+				for ( int i = 0 ; i <= numBins+1 ; i++ ) {
+					double value = 0;
+					for ( int j = 0 ; j <= numBins+1 ; j++ ) { 
+						value += theRespHist->GetBinContent(j, i);
+					}
+					valueSum += value; 
+					theRecHist->SetBinContent(i, value);
+					theRecHist->SetBinError(i, 0.);
+				}
+ 
+				// Regularization
+				int theRegMode = 2;    
+				double theRegPar = 4.;
+				
+				
+			    // Determine the Steering
+			    int useTau = 0;
+			    int doScan = 1;
+			    int doPsFile = 1;
+			    int doScanPlots = 1;
+			    int doRootFile = 0;
+			    int doTextFile = 1;
+			    int verbosity = 1;
+			    
+			    // Calculate Steering Parameter
+			    int steering = 0;
+			    steering +=       1*theRegMode;
+			    steering +=      10*useTau;
+			    steering +=     100*doScan;
+			    steering +=    1000*doPsFile;
+			    steering +=    1000*doScanPlots;
+			    steering +=   10000*doRootFile;
+			    steering +=  100000*doTextFile;
+                steering += 1000000*verbosity;
+
+
+		        // UNFOLDING  
+		        TH1D* unfoldedDistribution = NULL;  
+		        double optimalTauX = TopSVDFunctions::SVD_Unfold(theDataHist, theBgrHist, theTtbgrHist, theGenHist, theRecHist, theRespHist, 
+		        unfoldedDistribution,
+		        theBins, numBins, 
+		        theRegPar, steering, 0,
+		        "combined", "TtBar", "Mass", "TaeJeong", "",
+		        "comb.", "t #bar{t} ", "M", "TaeJeong", "",
+		        "", "/afs/desy.de/user/d/dfischer/TaeJeong/crosscheck.ps", "");
+		        
+		        cout << "DAVID! " << endl;
+		        cout << "Scan Result for Tae Jeong: " << endl;
+		        cout << "OptimalTau = " << optimalTauX << endl;
+                
+                // Exit
+			    exit(1); 
+        }
 
         // UNFOLDING 
         // Retrieve a histogram with the unfolded quantities.
         // Note: The unfolded histogram has additional side bins!
         // Keep this in mind when accessing bin content via indices
         TH1D* unfoldedDistribution = NULL;
-        mySVDFunctions.SVD_DoUnfold(dataHist, bgrHist, bingenhist, binrechist, genRec2DHist, 
-             bins, nbins,  
-             unfoldedDistribution, 
-             channelName[channel], particle, quantity, specialPostfix);
-
-  
+        int numSystematics = 0;
+        mySVDFunctions.SVD_DoUnfold(
+        	(TH1D*) dataHist, 
+        	(TH1D*) bgrHist, 
+        	(TH1D*) bingenhist, 
+        	(TH1D*) binrechist, 
+        	(TH2D*) genRec2DHist, 
+            bins, nbins,  
+            unfoldedDistribution, numSystematics,
+            channelName[channel], particle, quantity, specialPostfix, ""
+		);
+    
 
 
         // Calculate Cross Sections
-        // Using SVD helper functions. Old code is commented out, see below
+        // Using SVD helper functions. Old code is  below
         for (Int_t i=1; i<=nbins; ++i) {
             Double_t bgsum=0;
             for (size_t j=3; j<Nplots; ++j) {
@@ -3686,13 +3928,12 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
 
             // set generated cross section
             genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
-
+ 
             if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
                 crossHist->SetBinContent(i,crossHist->GetBinContent(i)/2);
                 crossHist->SetBinError(i,crossHist->GetBinError(i)/2);
                 genCrossHist->SetBinContent(i,genCrossHist->GetBinContent(i)/2);
-            }
-
+            } 
 
         }
     }
@@ -3722,15 +3963,20 @@ void PlotDifferentialCrossSection(const char* particle, const char* quantity, In
                 }
                 crossHist->SetBinContent(i,(binhists[0]->GetBinContent(i)-bgsum)/efficiencies[i-1]/lumi/binw);
                 crossHist->SetBinError(i,TMath::Sqrt(binhists[0]->GetBinContent(i))/efficiencies[i-1]/lumi/binw); // statistical error
+                
+                
+                
             }
             // set generated cross section
             genCrossHist->SetBinContent(i,bingenhist->GetBinContent(i)*sampleCrossSection[1]/totalEvents[1]/binw);
-
+ 
             if (strcmp(particle,"Leptons")==0 || strcmp(particle,"Jets")==0 || strcmp(particle,"TopQuarks")==0) {
                 crossHist->SetBinContent(i,crossHist->GetBinContent(i)/2);
                 crossHist->SetBinError(i,crossHist->GetBinError(i)/2);
                 genCrossHist->SetBinContent(i,genCrossHist->GetBinContent(i)/2);
             }
+            
+ 
         }
 
                 
@@ -5457,7 +5703,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
         cout.precision(2);
         cout << endl;
 	
-	SetKEff();
+        SetKEff();
         SetROutIn(kMM,7);
         SetDYScaleFactor(kMM,7);
         SetROutIn(kEE,7);
@@ -5474,7 +5720,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
         SetDYScaleFactor(kMM,9);
         SetROutIn(kEE,9);
         SetDYScaleFactor(kEE,9);
-	cout << endl;
+        cout << endl;
         
         zElNorm8 = zElNorm7;
         zElNorm9 = zElNorm7;
@@ -5503,12 +5749,14 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",	"#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEta, nbinsLepEta, binCenterLepEta, kFALSE, 0, false);
     PlotKinFitEfficiencyInRecoBins("Leptons", "Eta", kCOMBINED, "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
     GetBtagEfficiencyInBins("Leptons", "Eta", "#eta^{l^{+} and l^{-}}", binsLepEta, nbinsLepEta);
- 
-//    const Int_t nbinsLepEtaMoreBins = 11; //9; //7
-//    const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.1, -0.5, -0.4, -0.3, 0.3, 0.4, 0.5, 1.1, 1.7, 2.4}; //{-2.4, -1.7, -1.1, -0.4, 0.4, 1.1, 1.7, 2.4}; 
-//    const Double_t binCenterLepEtaMoreBins[nbinsLepEtaMoreBins] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto}; //{bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto};
-//    PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins", doSVD);
 
+
+    
+    //const Int_t nbinsLepEtaMoreBins = 11; //9; //7
+    //const Double_t binsLepEtaMoreBins[nbinsLepEtaMoreBins+1] = {-2.4, -1.7, -1.1, -0.4, 0.4, 1.1, 1.7, 2.4}; 
+    //const Double_t binCenterLepEtaMoreBins[nbinsLepEtaMoreBins] = {bccAuto, bccAuto, bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto, bccAuto, bccAuto}; //{bccAuto, bccAuto, bccAuto, 0, bccAuto, bccAuto, bccAuto};
+    //PlotDifferentialCrossSections("Leptons", "Eta", "#eta^{l^{+} and l^{-}}",   "#frac{1}{#sigma} #frac{d#sigma}{d#eta^{l^{+} and l^{-}}} ", binsLepEtaMoreBins, nbinsLepEtaMoreBins, binCenterLepEtaMoreBins, kTRUE, "_MoreBins", doSVD);
+    
 
     const Int_t nbinsLepPt = 5;
     const Double_t binsLepPt[nbinsLepPt+1] = {20, 40, 70, 120, 180, 400};
@@ -5579,8 +5827,7 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     PlotDifferentialCrossSections("TopQuarks", "Rapidity", "y^{t and #bar{t}}", "#frac{1}{#sigma} #frac{d#sigma}{dy^{t and #bar{t}}} ", binsTopRapidity, nbinsTopRapidity, binCenterTopRapidity, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("Top", "Rapidity", kCOMBINED, "generated y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
     GetBtagEfficiencyInBins("Top", "Rapidity", "y^{t and #bar{t}}", binsTopRapidity, nbinsTopRapidity);
- 
- 
+
    
     //other plot as requested by ARC
     const Int_t nbinsTopRapidityMoreBins = 5;
@@ -5625,17 +5872,16 @@ void CombinedCrossSection(char* systematicVariation = 0, int nevents = 0, double
     GetBtagEfficiencyInBins("TtBar", "Pt", "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]", binsTtBarPt, nbinsTtBarPt);
 
     const Int_t nbinsTtBarMass = 5;
-    const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345, 400, 475, 550, 700, 1000};
+    //const Double_t binsTtBarMass[nbinsTtBarMass+1] = {345, 400, 475, 550, 700, 1000};
+    const Double_t binsTtBarMass[nbinsTtBarMass+1] = {350, 400, 470, 550, 700, 1000};
     const Int_t nfinebinsTtBarMass = 2*nbinsTtBarMass+1;
     const Double_t finebinsTtBarMass[nfinebinsTtBarMass] = {345, 373, 400, 437, 475, 513, 550, 625, 700, 850, 1000};
     const Double_t binCenterTtBarMass[nbinsTtBarMass] = {364, 439, 515, 616, 823};
     PlotDifferentialCrossSections("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", "#frac{1}{#sigma} #frac{d#sigma}{dM^{t#bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]", binsTtBarMass, nbinsTtBarMass, binCenterTtBarMass, true, 0, doSVD  );
     PlotKinFitEfficiencyInGeneratorBins("TtBar", "Mass", kCOMBINED, "generated m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
     GetBtagEfficiencyInBins("TtBar", "Mass", "m^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]", binsTtBarMass, nbinsTtBarMass);
-    
-    
-    // If this for scanning, just leave it here.
-    if ( regMode == 3 || regMode == 4 ) return;
+
+ 
     
     
     SaveUnfoldingHists("TtBar", "Mass", kMM, binsTtBarMass, nbinsTtBarMass, finebinsTtBarMass, nfinebinsTtBarMass);
@@ -5738,10 +5984,4 @@ int main() {
     CombinedCrossSection();
 }
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////    S V D     Functions      /////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
+ 
