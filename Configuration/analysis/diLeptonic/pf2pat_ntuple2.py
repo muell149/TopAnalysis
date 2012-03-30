@@ -139,6 +139,23 @@ eeTriggers   = cms.vstring( 'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_
                             'HLT_DoubleEle45_CaloIdL_v*'
                             )
 
+METTriggers  = cms.vstring( 'HLT_CentralJet80_MET100_v*',
+                            'HLT_CentralJet80_MET110_v*',
+                            'HLT_CentralJet80_MET160_v*',
+                            'HLT_CentralJet80_MET65_v*',
+                            'HLT_CentralJet80_MET80_v*',
+                            'HLT_CentralJet80_MET95_v*',
+                            'HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v*',
+                            'HLT_DiCentralJet20_MET80_v*',
+                            'HLT_DiJet60_MET45_v*',
+                            'HLT_MET100_v*',
+                            'HLT_MET120_v*',
+                            'HLT_MET200_v*',
+                            'HLT_MET400_v*',
+                            'HLT_MET65_v*',
+                            )
+
+
 process.load("TopAnalysis.TopFilter.filters.TriggerFilter_cfi")
 process.filterTrigger.TriggerResults = cms.InputTag('TriggerResults','','HLT')
 process.filterTrigger.printTriggers = False
@@ -156,7 +173,7 @@ else:
     exit(8888)
 
 if options.triggerStudy == True:
-    process.filterTrigger.hltPaths  = cms.vstring( '*' )
+    process.filterTrigger.hltPaths  = METTriggers
 
 
 ####################################################################
