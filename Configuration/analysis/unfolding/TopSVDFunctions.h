@@ -220,7 +220,7 @@ class TopSVDFunctions
         static void SVD_TouchFile(TString filepath);
         static void SVD_RemoveFile(TString filepath);
         static void SVD_LineToFile(TString string, TString filepath, TString option);
-        static TString SVD_LineFromFile(TString startstring, TString filepath);
+        static TString SVD_LineFromFile(TString key, TString filepath);
         
         
         // Misc
