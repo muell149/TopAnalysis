@@ -2,7 +2,9 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
+void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+			     TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
 			     std::string decayChannel = "electron", bool SVDunfold=true)
@@ -1369,30 +1371,115 @@ TString efficiency="efficiency/"+variable;
       // decay channel
       TString channelTex="#mu";
       if(decayChannel=="electron") channelTex="e";
+      TString special="";
+      // -----------
+      // configure the unfolding details
+      // -----------
       // list of systematics
       TString sysList=sysLabel(systematicVariation);
       //TString sysList[]={sysLabel(systematicVariation)};
-      // regularization mode (see below)
-      int regMode=2;
+      // number of systematic samples to unfold 
+      int numSys=0;
+      // Regularization parameter
+      double regPar=regParameter(variable, decayChannel, verbose, true);
+      // Regularization Modus 
+      //         0 means: Default setting. Same as 2
+      //         1 means: Bin by Bin Unfolding
+      //         2 means: SVD Unfolding, minimal regularization.
+      //              Regularization will be done with a k value
+      //              and the k value will be set to the number of
+      //              bins (not counting OF). Parameter 'regPar'
+      //              is ignored.
+      //         3 means: SVD unfolding, regularization according
+      //              to the parameter 'regPar'. Whether this one
+      //              is taken as k value or tau value, can be 
+      //              specified with the second digit of this
+      //              parameter. (default)
+      //         4 means: SVD unfolding according to the file
+      //              given in 'regFile'. Whether this one
+      //              is taken as k value or tau value, can be 
+      //              specified with the second digit of this
+      //              parameter.Parameter 'regPar'
+      //              is ignored.
+      int regMode=3;
+      // continuous or discrete unfolding?
+      //         0 means: Default setting, same as 1
+      //         1 means: interpret 'regPar' as k value (default)
+      //         2 means: interpret 'regPar' as tau value
+      int unfoldWithParameter=2;
       if(systematicVariation!=sysNo) regMode=2;
-      // produce scan plots? (see below)
-      bool scan =true;
+      // produce scan plots? 
+      //         0 means: Default setting, same as 2
+      //         1 means: no scan for optimal tau is perforemd,
+      //         2 means: tau scan  (default).
+      //              A scan for the optimal tau parameter is
+      //              performed. The scan is performed around
+      //              a "center value" to be specified in 'regpar'.
+      //              Whether this one is taken
+      //              as k value or tau value, can be 
+      //              specified with the second digit of this
+      //              parameter.
+      //              Note: The scan may take a while!
+      int scan =1;
+      bool scanPlots=false;
       if(regMode<3) scan =false;
       // output files
       TString rootFile="";
       TString psFile="";
       TString regFile="";
+      //         0 means: Default value, same as 4
+      //         1 means: no plotting at all
+      //         2 means: standard plots
+      //         3 means: standard plots + k scan plots
+      //         4 means: standard plots + k scan plots + tau scan plots (default)
+      int plotting=1;
       if(save&&systematicVariation==sysNo){ 
+	// output file: content
+	plotting+=1;
+	if(scan==2&&scanPlots) plotting+=2; // k and tau scan plots
+	// output files: labels
 	rootFile="diffXSecUnfoldTopSemi";
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	if(decayChannel=="electron") rootFile+="Elec";
 	rootFile+=dataSample+".root";
 	psFile=outputFolder+"unfolding/unfolding"+variable;
-	if(scan) psFile+="Scan";
+	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
-	if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
+	if(regMode>2) regFile="/afs/naf.desy.de/group/cms/scratch/goerner/CMSSW_4_2_8_patch7/src/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection/"+outputFolder+"unfolding/optimalSVDRegularization.txt";
       }
-      TString special="";
+      // save unfolding plots in rootfile?
+      //         0 means: Default value, same as 1
+      //         1 means: no root file will be written (default)
+      //         2 means: standard plots to root file  
+      int doRootFile=(rootFile=="" ? 1 : 2);
+      // save in optimal unfolding parameter in textfile?
+      //         0 means: Default value, same as 2
+      //         1 means: no text file is written
+      //         2 means: text file with optimal reg. params. is written (default)
+      int doTextFile=(regFile=="" ? 1 : 2);
+      // Combine all options in one Steering Parameter
+      int steering=0;
+      // Steering options in parameter 'steering' 
+      //     (1) REGMODE (1. digit from right), see above
+      //     (2) REGULARIZATION PARAMETER (2. digit from right), see above
+      //     (3) SCAN ( 3. digit from right), see above    
+      //     (4) OUTPUT PS CONTENT  (4. digit from right), see above
+      //     (5) ROOT FILE ( 5. digit from right)
+      //     (6) TEXT FILE ( 6. digit from right)
+      //     (7) VERBOSITY (7. digit from right)
+      int verbosity=verbose+1;
+      if(verbosity<0) verbosity=1;
+      //         0 means: Default value, same as 2
+      //         1 means: no output at all
+      //         2 means: standard output (default)
+      //         3 means: debugging output
+      steering +=       1*regMode;
+      steering +=      10*unfoldWithParameter;
+      steering +=     100*scan;
+      steering +=    1000*plotting;
+      steering +=   10000*doRootFile;
+      steering +=  100000*doTextFile;
+      steering += 1000000*(verbosity-1); 
       // -----------
       // get binning
       // -----------
@@ -1446,6 +1533,9 @@ TString efficiency="efficiency/"+variable;
 	}
 	TH1D* unfoldedData=new TH1D();
 	TopSVDFunctions::SVD_Unfold(
+	// ---
+	//    HISTOS
+	// ---				    
 	// Data Input (RAW Data including the background)
 	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
 	// Background (will be substracted from data)
@@ -1461,28 +1551,27 @@ TString efficiency="efficiency/"+variable;
 	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
 	// Response Matrix 
 	(TH2D*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
+	// Returned: Unfolded Distribution              
+	unfoldedData,
+	// ---
+	//    BINS
+	// ---	
 	// Binning for the unfolding
 	bins, 
 	// Number of bins for unfolding (not counting OF bins !!!)
 	unfoldbins, 
+	// ---
+	//    OPTIONS
+	// ---
 	// Regularization parameter
-	regParameter(variable, decayChannel, verbose, true),  //unfoldbins+2,
-	// Regularization Modus 
-	// regMode=0 is standard BBB unfolding, no regularization
-	// regMode=1 is SVD Unfolding, regularization by means of the "K" Parameter. Specify the k Parameter in 'regPar'
-	//           -> NOTE: tau=false otion is needed when using function "regParameter"
-	// regMode=2 is SVD Unfolding, regularization by means of the "TAU" Parameter. Specify the tau Parameter in 'regpar'
-	//           -> NOTE: tau=true otion is needed when using function "regParameter"
-	// regMode=3 is SVD Unfolding. A scan for the optimal tau parameter is performed. The scan is performed around
-	// a "center value" for k, to be specified in 'regpar'. Note: The scan may take a while!
-	// regMode=4 is SVD Unfolding. A scan for the optimal k parameter is performed. The scan is performed around
-	// a "center value" for tau, to be specified in 'regpar'
-	// Note: The scan may take a while! 
-	regMode,                            
-	// Returned: Unfolded Distribution              
-	unfoldedData,
-        // Specify the number of systematic samples to unfold 
-        0,
+	regPar,
+	// steering parameter (as defined above)
+	steering,
+	// Specify the number of systematic samples to unfold 
+        numSys,
+	// ---
+	//    TEX(T) AND LABELS
+	// ---                          
 	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
 	(TString)decayChannel,  
 	// Specify Name for the Physics Object ("Top", "Jets", "Leptons")      
@@ -1505,6 +1594,9 @@ TString efficiency="efficiency/"+variable;
 	// Array of Names for the different systematics
         // if you run only over the nominal sample, provide NULL
         sysList,
+	// ---
+	//    OUTPUT
+	// ---  
 	// If specified, plots will be saved in ROOT File
 	rootFile,
 	// If specified, plots will be saved in PS File
@@ -1516,15 +1608,7 @@ TString efficiency="efficiency/"+variable;
         // (1) the optimal tau, (2) the two nearest k values,
         // (3) the k value from the d value method
         // (4) the number of bins including side bins
-        regFile,
-	// output
-	// verbose=0: no output at all
-	// verbose=1: standard output
-	// verbose=2: debug output
-	(int) verbose,
-	// produce tau scan plots 
-	// (only used for illustrating minimum and performance)
-	scan
+        regFile
 	);
 	// ---------------------------------------------
 	// remaining steps for cross section calculation

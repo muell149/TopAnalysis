@@ -2819,108 +2819,108 @@ namespace semileptonic {
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=1.79311;
+	if(tau) k=3.86619;
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=1.23338;
+	if(tau) k=3.67321;
       }
     }
     else if(variable.Contains("ttbarPt"  )){ 
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=1.65776;
+	if(tau) k=3.4413;
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=1.04651;
+	if(tau) k=3.2237;
       }
     }
     else if(variable.Contains("ttbarY"   )){ 
       if(decayChannel.Contains("muon")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=1.62444;
+	if(tau) k=3.31833;
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=1.08758;
+	if(tau) k=3.10849;
       }
     }
     else if(variable.Contains("topPt"    )){ 
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=2.82284;
+	if(tau) k=6.27921;
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=2.13989;
+	if(tau) k=6.13571;
       }
     }
     else if(variable.Contains("topY"     )){ 
       if(decayChannel.Contains("muon")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=2.35132;
+	if(tau) k=4.79079;
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=1.5484;
+	if(tau) k=4.35233;
       }
     }
     else if(variable.Contains("lepPt"    )){ 
       if(decayChannel.Contains("muon")){
 	k=13;
 	// Optimal Tau
-	if(tau) k=0.301808;
+	if(tau) k=0.767378;
       }
       else if(decayChannel.Contains("electron")){
 	k=13; 
 	// Optimal Tau
-	if(tau) k=0.368038;
+	if(tau) k=0.691769;
       }
     }
     else if(variable.Contains("lepEta"   )){ 
       if(decayChannel.Contains("muon")){
 	k=14;
 	// Optimal Tau
-	if(tau) k=0.761731;
+	if(tau) k=1.52633;
       }
       else if(decayChannel.Contains("electron")){
 	k=14; 
 	// Optimal Tau
-	if(tau) k=0.260235;
+	if(tau) k=1.09523;
       }
     }
     else if(variable.Contains("bqPt"     )){ 
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=1.7187;
+	if(tau) k=3.68081;
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=1.18464;
+	if(tau) k=3.71063;
       }
     }
     else if(variable.Contains("bqEta"    )){ 
       if(decayChannel.Contains("muon")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=2.11279;
+	if(tau) k=4.28004;
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=1.37956;
+	if(tau) k=3.90018;
       }
     }
     // output
