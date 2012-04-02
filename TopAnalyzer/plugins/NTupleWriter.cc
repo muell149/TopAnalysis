@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.21 2012/03/16 08:03:00 iasincru Exp $
+// $Id: NTupleWriter.cc,v 1.22 2012/03/23 21:56:23 blutz Exp $
 //
 //
 
@@ -237,7 +237,7 @@ void NTupleWriter::AssignLeptonAndTau ( const reco::GenParticle* lepton, LV& Gen
 NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   inTag_PUSource(iConfig.getParameter<edm::InputTag>("PUSource") ),
   weightPU_ ( iConfig.getParameter<edm::InputTag> ( "weightPU" ) ),
-  weightPU3D_(iConfig.getParameter<edm::InputTag> ( "weightPU3D" ) ),
+  //  weightPU3D_(iConfig.getParameter<edm::InputTag> ( "weightPU3D" ) ),
   weightPU_Up_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Up" ) ),
   weightPU_Down_ ( iConfig.getParameter<edm::InputTag> ( "weightPU_Down" ) ),
   weightLepSF_ ( iConfig.getParameter<edm::InputTag> ( "weightLepSF" ) ),
@@ -343,7 +343,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
   clearVariables();
 
   weightPU = getPUEventWeight( iEvent, weightPU_ );
-  weightPU3D = getPUEventWeight( iEvent, weightPU3D_);
+  //weightPU3D = getPUEventWeight( iEvent, weightPU3D_);
   weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
   weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
   weightLepSF = 0; weightKinFit = 0; weightTotal = 0;
@@ -532,7 +532,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
           int triggerResult = 0;
 
-          std::cout << "processing muon, is lepton object: " << Vlep.size() << std::endl;
+	  //          std::cout << "processing muon, is lepton object: " << Vlep.size() << std::endl;
 
           pat::TriggerObjectStandAloneCollection triggers = amuon->triggerObjectMatches();
           if (triggers.size() > 0) triggerResult = triggerMap_["general"];
@@ -540,7 +540,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
             triggerResult |= getTriggerBits ( triggers[i].pathNames() );
           VlepTrigger.push_back(triggerResult);
 
-          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
+	  //          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
           amuon++;
 
 
@@ -564,7 +564,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
           int triggerResult = 0;
 
-          std::cout << "processing electron, is lepton object: " << Vlep.size() << std::endl;
+	  //          std::cout << "processing electron, is lepton object: " << Vlep.size() << std::endl;
 
           pat::TriggerObjectStandAloneCollection triggers = anelectron->triggerObjectMatches();
           if (triggers.size() > 0) triggerResult = triggerMap_["general"];
@@ -572,7 +572,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
             triggerResult |= getTriggerBits ( triggers[i].pathNames() );
           VlepTrigger.push_back(triggerResult);
 
-          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
+	  //          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
 
           anelectron++;
 
@@ -749,7 +749,7 @@ NTupleWriter::beginJob()
 
   ////////////weight////////////
   Ntuple->Branch ( "weightPU",&weightPU, "weightPU/D" );
-  Ntuple->Branch ( "weightPU3D", &weightPU3D, "weightPU3D/D");
+  //Ntuple->Branch ( "weightPU3D", &weightPU3D, "weightPU3D/D");
   Ntuple->Branch ( "weightPU_Up",&weightPU_Up, "weightPU_Up/D" );
   Ntuple->Branch ( "weightPU_Down",&weightPU_Down, "weightPU_Down/D" );
   Ntuple->Branch ( "weightLepSF",&weightLepSF, "weightLepSF/D" );
