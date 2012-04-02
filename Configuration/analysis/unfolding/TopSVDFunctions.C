@@ -2320,7 +2320,8 @@ void TopSVDFunctions::SVD_NewUpperRange(double max, double& newmax)
 // Attention: 
 // (1) We do not use the side bins for the computation
 //     of the global correlation !!!
-// (2) We also exclude all bins that ...
+// (2) We also exclude all empty rows/columns int he
+//     covariance matrix.
 // (3) For excluded bins, the global correlation
 //     will be set to zero.
 TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
@@ -2328,21 +2329,69 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
     // Number of bins
     int nbins = statCovHist->GetNbinsX();
     
+    // Map Histo To Matrix
+    TArrayI binMap(nbins);
+    int numBinsToSkip = 0;
+    
+	// Search for bins that have to be skipped
+	int bincounter = 0;
+    for ( int i = 1; i <= nbins ; i++ ) {
+    	if ( i == 1 ) {
+    		// Through out underflow bin
+    		binMap[i-1] = -1;
+    		numBinsToSkip++;
+    	} else if ( i == nbins ) {
+    		// Through out overflow bin
+    		binMap[i-1] = -1;
+    		numBinsToSkip++;
+    	} else {
+    		// Search for  bins with empty rows/columns
+    		bool skipThisBin = true;
+    		for ( int j = 2; j <= nbins-1 ; j++ ) {
+        	    double value = statCovHist->GetBinContent(i,j); 
+        	    if ( value != 0. ) {
+        		    skipThisBin = false; 
+        	    }  
+    		} 
+    		// Through out bins with empty rows/columns
+    		if ( skipThisBin == true ) {
+    		    binMap[i-1] = -1;
+    		    numBinsToSkip++;
+    		} else {
+    			binMap[i-1] = bincounter;
+    			bincounter++;
+    		} 
+    	}
+    }		
+    
+    
+    // Create new Matrix
+    int matrixdim = nbins - numBinsToSkip;
+    TMatrixDSym statCovMat(matrixdim);
+    
+    
+    
     // New Matrix
     // Beware the side bins of the problem
-    // AND the side bins of the TH2D object
-    TMatrixDSym statCovMat(nbins-2);
-    for ( int i = 1; i <= nbins ; i++ ) {
-        for ( int j = 1; j <= nbins ; j++ ) {
-            double value = statCovHist->GetBinContent(i,j);
-            // Skip Side bins   
-            bool skipThis = false;
-            if ( i == 1 || i == nbins ) skipThis = true;
-            if ( j == 1 || j == nbins ) skipThis = true;
+    // AND the side bins of the TH2D object 
+    for ( int i = 2; i <= nbins-1 ; i++ ) {
+        for ( int j = 2; j <= nbins-1 ; j++ ) {
+        	
+        	// Is this bin to be skipped?
+        	bool skipThisBin = false;
+        	if (binMap[i-1] == -1 ) skipThisBin = true;
+        	if (binMap[j-1] == -1 ) skipThisBin = true;
+        	
             // Set Element
-            if ( skipThis == false ) statCovMat[i-2][j-2] = value;
+            if ( skipThisBin == false ) {
+                double value = statCovHist->GetBinContent(i,j);
+                int binnrI = binMap[i-1];
+                int binnrJ = binMap[j-1];
+                statCovMat[binnrI][binnrJ] = value;
+            }
         }
-    }
+    } 
+    
     
     // Determinant
     double detStatCovMat[1]; 
@@ -2350,11 +2399,18 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
     // Invert the whole thing
     TMatrixDSym statCovMatInv = statCovMat;
     statCovMatInv.Invert(detStatCovMat);
+    
+    // Check Invertibility
+    bool isInvertible = (bool) ((*detStatCovMat) != 0.);
+    if ( isInvertible == false ) {
+		cout << "Error in TopSVDFunctions::SVD_CalcGlobCorr() " << endl;
+		cout << "Covariance Matrix cannot be inverted." << endl;
+		cout << "Check the reason for this now." << endl;
+		exit(1);
+    }
      
-
-    
-    
-    // Histo for global correlation 
+ 
+    // Create new Histo for global correlation 
     TH1D* glcHist = new TH1D[1];
     glcHist->SetNameTitle("glcHist", "glcHist");
     bool isVariableBinSize =  statCovHist->GetXaxis()->IsVariableBinSize();
@@ -2366,29 +2422,35 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
         double xmax = statCovHist->GetXaxis()->GetXmax();
         glcHist->SetBins(nbins, xmin, xmax); 
     }
+    
+     
+    
+    // Fill the histo you just created
     for ( int i = 1 ; i <= nbins ; i++ ) { 
         double glc = 0.; 
-        // Skip Side bins
+        
+        // Find out the "true" bin number
+        int binnr = binMap[i-1];
+        
+        // Skip bad bins
         bool skipThis = false;
-        if ( i == 1 || i == nbins ) skipThis = true;
-        if (  (*detStatCovMat) != 0. )  {
-            if ( skipThis == false ) {
-                double cov = statCovMat[i-2][i-2]; 
-                double covinv = statCovMatInv[i-2][i-2]; 
-                // The product cov*covinv should be greater than zero            
-                double hhh = SVD_Divide(1., cov * covinv);
-                double glcsq = 0.;
-                if ( hhh > 0.) glcsq = 1. - hhh;
-                glc = 100.*SVD_Sqrt(glcsq); 
-            } else {
-                glc = 0.;
-            }
+        if ( binnr == -1 ) skipThis = true;
+        
+        
+		// Run over good bins 
+        if ( skipThis == false ) {
+            double cov = statCovMat[binnr][binnr]; 
+            double covinv = statCovMatInv[binnr][binnr]; 
+            // The product cov*covinv should be greater than zero            
+            double hhh = SVD_Divide(1., cov * covinv);
+            double glcsq = 0.;
+            if ( hhh > 0.) glcsq = 1. - hhh;
+            glc = 100.*SVD_Sqrt(glcsq); 
         } else {
-            cout << "WARNING!" << endl;
-            cout << "Could not calculate global correlation" << endl;
-            cout << "in Bin: " << i << endl;
-            cout << "Reason: Statistical Covariance Matrix is singular." << endl;
+            glc = 0.;
         }
+        
+        // Set the value
         glcHist->SetBinContent(i, glc); 
         glcHist->SetBinError(i, 0.); 
     }
@@ -3566,12 +3628,18 @@ void TopSVDFunctions::SVD_LineToFile(TString string, TString filepath, TString o
 
 // line from file
 // Search for a line that starts with startstring and return it
-TString TopSVDFunctions::SVD_LineFromFile(TString startstring, TString filepath)
+TString TopSVDFunctions::SVD_LineFromFile(TString key, TString filepath)
 { 
     // Read from file
     FILE* theFile;
     char linebuffer[256];
     theFile = fopen(filepath,"r");
+    
+    // Startstring
+    // Append a whitespace to avoid being sensitive
+    // to keys that start other keys
+    TString startstring = key;
+    startstring.Append(" ");
     
     // Did the file opening succeed?
     if ( theFile == NULL ) {
@@ -3686,6 +3754,21 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 //         1 means: no output at all
 //         2 means: standard output (default)
 //         3 means: debugging output
+//     (8) SCANPOINTS (8. digit from right)
+//         0 means: Default value, same as 3
+//         1 means: 5 scan points
+//         2 means: 25 scan points
+//         3 means: 125 scan points (default)
+//         4 means: 625 scan points
+//     (8) SCANRANGE (9. digit from right)
+//         0 means: Default value, same as 2
+//         1 means: Tau+ / Tau- = 100  
+//         2 means: Tau+ / Tau- = 10000
+//         3 means: Tau+ / Tau- = 1000000
+//     (9) REC LEVEL SIDE BINS (10. digit from right)
+//         0 means: Default value, same as 2
+//         1 means: Do not cut rec level side bins
+//         2 means: Cut rec level side bins (default)
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
 // Systematics Handling: 
@@ -3767,9 +3850,7 @@ double TopSVDFunctions::SVD_Unfold(
  
     // Number of Pseudo Experiments for the error calculation    
     int nExperiments = 1000;
-    
-    // Remove REC OF bins
-    bool doRemoveRecSideBins = true;
+     
   
     
     
@@ -3820,6 +3901,33 @@ double TopSVDFunctions::SVD_Unfold(
     if ( flag_verbose == 0 ) flag_verbose = 2;  
  
  
+    // SCAN POINTS
+    int flag_scanpoints = SVD_GetDigit(steering, 8);
+    if ( flag_scanpoints == 0 ) flag_scanpoints = 3;
+    int nScanPoints = 1;
+    for ( int i = 1 ; i <= flag_scanpoints ; i++ ) {
+    	nScanPoints = nScanPoints * 5;
+    } 
+    
+    
+ 	// SCAN RANGE
+ 	int flag_range = SVD_GetDigit(steering, 9);
+ 	if ( flag_range == 0 ) flag_range = 2;
+ 	double rangefactor = 1.;
+    for ( int i = 1 ; i <= flag_range ; i++ ) {
+    	rangefactor = rangefactor * 10.;
+    } 
+ 	
+ 	
+ 	
+ 	// REC LEVEL OF BINS
+ 	int flag_recOF = SVD_GetDigit(steering, 10);
+    if ( flag_scanpoints == 0 ) flag_scanpoints = 2;
+    
+ 	
+ 	
+ 
+ 
     // Systematics Flags
     int numberSyst = numSys;
     if ( numberSyst < 0 ) numberSyst = 0;
@@ -3860,7 +3968,7 @@ double TopSVDFunctions::SVD_Unfold(
 
 
     TString cpqss = SVD_CPQSS(channel, particle, quantity, special, syst);
-    TString thekey = SVD_CPQSS(channel, particle, quantity, special, "");
+    TString thekey = SVD_CPQSS(channel, particle, quantity, special, syst);
     
 
     // Get regularization parameter
@@ -3930,7 +4038,7 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "    Best Tau File:                         " << regParFile << endl;
         cout << "        Write to Text File:                " << (flag_text == 2 ) << endl;
         cout << "        Read to Text File:                 " << (flag_regmode == 4 ) << endl;
-        cout << "        Key:                               " << cpqss << endl; 
+        cout << "        Key:                               " << thekey << endl; 
         cout << "    Regularization Parameter:              " << regPar << endl;
         cout << "    Steering Options (" <<  steering << "): " << endl;
         cout << "        Use SVD:                           " << (flag_regmode >= 2) << endl;
@@ -3982,7 +4090,7 @@ double TopSVDFunctions::SVD_Unfold(
     // data (including background)
     // ATTENTION: Hier we assume to have only ONE histo in the array1
     TH1D* rawHist = SVD_Rebin1D(dataInputHist, nbins, bins, 1);
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(rawHist);
+    if ( flag_recOF == 2 ) SVD_EmptyRecSideBins1D(rawHist);
  
  
     // All Background
@@ -3991,7 +4099,7 @@ double TopSVDFunctions::SVD_Unfold(
     if ( bgrInputHist != NULL ) {
         bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins, numberSyst+1); 
         SVD_EmptyHistoErrors1D(bgrHist, numberSyst+1);
-        if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(bgrHist, numberSyst+1);
+        if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(bgrHist, numberSyst+1);
     } 
      
     // ttbar background only
@@ -3999,13 +4107,13 @@ double TopSVDFunctions::SVD_Unfold(
     if ( ttbgrInputHist != NULL ) {
         ttbgrHist= SVD_Rebin1D((TH1D*) ttbgrInputHist, nbins, bins, numberSyst+1); 
         SVD_EmptyHistoErrors1D(ttbgrHist, numberSyst+1);
-        if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(ttbgrHist, numberSyst+1);
+        if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(ttbgrHist, numberSyst+1);
     } 
      
     // Response Matrix
     // ... thereby transposing it
     TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, numberSyst+1, true);
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins2D(mcHist, numberSyst+1); 
+    if ( flag_recOF == 2  ) SVD_EmptyRecSideBins2D(mcHist, numberSyst+1); 
 
  
     // MC truth signal
@@ -4014,7 +4122,7 @@ double TopSVDFunctions::SVD_Unfold(
      
     // Reconstructed MC signal
     TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, nbins, bins, numberSyst+1);
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(biniHist, numberSyst+1);  
+    if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(biniHist, numberSyst+1);  
     
      
     /////////////////////////////////////////////////////////////////// 
@@ -4042,7 +4150,7 @@ double TopSVDFunctions::SVD_Unfold(
  
     // Background reduction
     SVD_BackgrHandling(dataHist, bgrHist, ttbgrHist, biniHist, rawHist, numberSyst+1); 
-    if ( doRemoveRecSideBins == true ) SVD_EmptyRecSideBins1D(dataHist, numberSyst+1);
+    if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(dataHist, numberSyst+1);
  
  
  
@@ -4311,12 +4419,7 @@ double TopSVDFunctions::SVD_Unfold(
   
     if ( flag_scan == 2 ) {
             
-            
-        // Steer Scan
-        double rangefactor = 100.;
-        int nScanPoints = 100 ; 
-          
-          
+             
         // Range for Scan
         double lowTau = 0.;
         double highTau = 0.;
@@ -4837,7 +4940,7 @@ double TopSVDFunctions::SVD_Unfold(
     
     
     // Comparison of systematic shifts
-    TH1D* ratioShiftHist = SVD_MakeRatioZero(unfHist, bbbHist, numberSyst);
+    TH1D* ratioShiftHist = SVD_MakeRatioZero(unfShiftHist, bbbShiftHist, numberSyst);
     SVD_SetTitles1D(ratioShiftHist, "SHIFTRATIO", quantityTex, "Ratio of Syst. Shifts", numberSyst); 
     
 
