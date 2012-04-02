@@ -51,7 +51,7 @@ class Plotter {
   TLegend* getNewLegend();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
   // DAVID
-  void UnfoldingOptions(bool doSVD, bool plotsToPs, bool plotsToRoot);
+  void UnfoldingOptions(bool doSVD);
   void SetOutpath(TString path);
  private:
   TString name;
@@ -93,19 +93,15 @@ class Plotter {
   double TotalVisXSection[4];
   
   // DAVID
-  bool doUnfolding;
-  bool unfoldingPlotsToPs;
-  bool unfoldingPlotsToRoot;
+  bool doUnfolding; 
   TString outpath;
 };
 
 
 // DAVID
-void Plotter::UnfoldingOptions(bool doSVD, bool plotsToPs, bool plotsToRoot)
+void Plotter::UnfoldingOptions(bool doSVD)
 {
   doUnfolding = doSVD;
-  unfoldingPlotsToPs = plotsToPs;
-  unfoldingPlotsToRoot = plotsToRoot;
 }
 
 
@@ -353,15 +349,14 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
 }
 
 void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
-
+ 
   double Xbins[XAxisbins.size()];
   for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
-  setSystDataSet(Systematic);
-  fillSystHisto();
-  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);
-  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins);
-  TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Rebin(bins,"stackdown",Xbins);
-
+  setSystDataSet(Systematic);  
+  fillSystHisto(); 
+  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);  
+  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins); 
+  TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Rebin(bins,"stackdown",Xbins); 
 
   TH2 *genReco2d=NULL;
   TH2 *genReco2dUp=NULL;
@@ -372,7 +367,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
   TString newname = name;
   if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
     newname.ReplaceAll("Hyp",3,"",0);
-  }
+  } 
   //DYScale Factor...
   for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
     TFile *ftemp = TFile::Open(dataset[i]);
@@ -389,7 +384,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     }
     stacksum->Add(htemp);
     delete ftemp;
-  }
+  } 
   for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
     TFile *ftempUp = TFile::Open(datasetUp[i]);
     if(genReco2dUp==NULL){
@@ -410,7 +405,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     }
 
     delete ftempUp;
-  }
+  } 
   for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
     TFile *ftempDown = TFile::Open(datasetDown[i]);
     if(genReco2dDown==NULL){
@@ -431,7 +426,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     stacksumDown->Add(htemp);
     delete ftempDown;
   }
-  
+   
   double Sys_Error_Up, Sys_Error_Down, Sys_Error;//, Sum_Errors;
   double scale = 1.;
 
@@ -443,7 +438,252 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     //    Sum_Errors += Sys_Error;
     DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
   } 
+   
+  // DAVID. Guckst du hier!
+  if ( doUnfolding == true ) {
+  	
+  		// SVD Helper Class
+		DilepSVDFunctions mySVDFunctions; 
+		mySVDFunctions.SetOutputPath(outpath);  
+		
+		// Variables for the needed histograms
+		TH1D* theDataHist = NULL;
+		TH1D* theBgrHist = NULL;
+		TH1D* theBgrHistUp = NULL;
+		TH1D* theBgrHistDown = NULL;
+		TH1D* theRecHist = NULL;
+		TH1D* theRecHistUp = NULL;
+		TH1D* theRecHistDown = NULL;
+		TH1D* theGenHist = NULL;
+		TH1D* theGenHistUp = NULL;
+		TH1D* theGenHistDown = NULL; 
+		TH2D* theRespHist = NULL;
+		TH2D* theRespHistUp = NULL;
+		TH2D* theRespHistDown = NULL;  
+		
+		 
+		
+		// DAVID:
+		// Data, Signal and Background
+		// can be obtained from vectors that Tyler fills.
+		// These are the vectors
+		// "hists", "systhistsUp" amd "systhistsDown"
+		for ( size_t i = 0; i < hists.size() ; i++ ) {
+			if ( legends[i] == "data" ) {
+				if ( theDataHist == NULL ) {
+					theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
+				} else {
+					theDataHist->Add(&(hists[i]));
+				}
+			} else if ( legends[i] == "t#bar{t} signal") {
+				 
+				if ( theRecHist == NULL ) {
+					theRecHist = (TH1D*) (hists[i]).Clone("theRecHist");
+				} else {
+					theRecHist->Add(&(hists[i]));
+				}
+				if ( theRecHistUp == NULL ) {
+					theRecHistUp = (TH1D*) (systhistsUp[i]).Clone("theRecHistUp");
+				} else {
+					theRecHistUp->Add(&(hists[i]));
+				}
+				if ( theRecHistDown == NULL ) {
+					theRecHistDown = (TH1D*) (systhistsDown[i]).Clone("theRecHistDown");
+				} else {
+					theRecHistDown->Add(&(hists[i]));
+				}
+			} else {
+				if ( theBgrHist == NULL ) {
+					theBgrHist = (TH1D*) (hists[i]).Clone("theBgrHist");
+				} else {
+					theBgrHist->Add(&(hists[i]));
+				}
+				if ( theBgrHistUp == NULL ) {
+					theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
+				} else {
+					theBgrHistUp->Add(&(hists[i]));
+				}
+				if ( theBgrHistDown == NULL ) {
+					theBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theBgrHistDown");
+				} else {
+					theBgrHistDown->Add(&(hists[i]));
+				} 
+			}
+		}
+	 
+		// DAVID
+		// Response Matrix and visible Gen Dist
+		// have to be obtained from the files directly
+		for ( size_t i = 0; i < hists.size() ; i++ ) {
+		    if(legends[i] == "t#bar{t} signal"){
+		    	
+		    	// Nominal Sample
+		    	TFile* ftemp = TFile::Open(dataset[i]);
+		    	TH2D* resptemp = (TH2D*) ftemp->Get("GenReco"+newname);
+		    	TH1D* gentemp = (TH1D*) ftemp->Get("VisGen"+newname); 
+				if ( theRespHist == NULL ) {
+					theRespHist = (TH2D*) (resptemp)->Clone("theRespHist");
+				} else {
+					theRespHist->Add(resptemp);
+				}
+				if ( theGenHist == NULL ) {
+					theGenHist = (TH1D*) (gentemp)->Clone("theGenHist");
+				} else {
+					theGenHist->Add(gentemp);
+				}
+				delete ftemp;
+				
+		    	// Shift Up
+		    	TFile* ftempUp = TFile::Open(datasetUp[i]);
+		    	TH2D* resptempUp = (TH2D*) ftempUp->Get("GenReco"+newname);
+				if ( theRespHistUp == NULL ) {
+					theRespHistUp = (TH2D*) (resptempUp)->Clone("theRespHistUp");
+				} else {
+					theRespHistUp->Add(resptempUp);
+				}
+				theGenHistUp = theGenHist; 
+				delete ftempUp;
+				
+		    	// Shift Down
+		    	TFile* ftempDown = TFile::Open(datasetDown[i]);
+		    	TH2D* resptempDown = (TH2D*) ftempDown->Get("GenReco"+newname);
+				if ( theRespHistDown == NULL ) {
+					theRespHistDown = (TH2D*) (resptempDown)->Clone("theRespHistDown");
+				} else {
+					theRespHistDown->Add(resptempDown);
+				}
+				theGenHistDown = theGenHist; 
+				delete ftempDown;
+		    	
+		    }
+		}
+// DAVID
+// Make a real crude reweighting of the Resp and Gen Hists
+double lumiResp = 	theRespHist->Integral();
+double lumiRespUp = 	theRespHistUp->Integral();
+double lumiRespDown = 	theRespHistDown->Integral();
+double lumiRec =     theRecHist->Integral();
+double lumiRecUp =     theRecHistUp->Integral();
+double lumiRecDown =     theRecHistDown->Integral();
+double lumiGen =     theGenHist->Integral();
+double lumiGenUp =     theGenHistUp->Integral();
+double lumiGenDown =     theGenHistDown->Integral(); 
+double extra_factor = 1.;
+if ( lumiRespDown < 0.7*lumiResp ) {
+	extra_factor = (2.*lumiResp) / (lumiRespDown+lumiRespUp);
+} 
+double scaleResp = lumiRec / lumiResp;
+double scaleGen = scaleResp;
+theRespHist->Scale(scaleResp);
+theRespHistUp->Scale(scaleResp*extra_factor);
+theRespHistDown->Scale(scaleResp*extra_factor);
+theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
+                             // histo here, because the shifted ones are
+                             // just pointers to the nominal one
+cout << "*******************************************************************************" << endl;
+cout << "Hey! " << endl;
+cout << "A real crude reweighting is being done here ... " << endl;
+cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
+cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
+cout << "     Integral Resp = " << lumiResp << endl;
+cout << "     Integral RespUp = " << lumiRespUp << endl;
+cout << "     Integral RespDown = " << lumiRespDown << endl;
+cout << "     Integral Rec = " << lumiRec << endl;
+cout << "     Integral RecUp = " << lumiRecUp << endl;
+cout << "     Integral RecDown = " << lumiRecDown << endl;
+cout << "     Integral Gen = " << lumiGen << endl;
+cout << "     Integral GenUp = " << lumiGenUp << endl;
+cout << "     Integral GenDown = " << lumiGenDown << endl; 
+cout << "     Integral Resp = " << lumiResp << endl;
+cout << "     Integral Rec  = " << lumiRec << endl;
+cout << "     Integral Gen  = " << lumiGen << endl;
+lumiResp = 	theRespHist->Integral();
+lumiRespUp = 	theRespHistUp->Integral();
+lumiRespDown = 	theRespHistDown->Integral();
+lumiRec =     theRecHist->Integral();
+lumiRecUp =     theRecHistUp->Integral();
+lumiRecDown =     theRecHistDown->Integral();
+lumiGen =     theGenHist->Integral();
+lumiGenUp =     theGenHistUp->Integral();
+lumiGenDown =     theGenHistDown->Integral();
+cout << "After reweighting" << endl;
+cout << "     Integral Resp = " << lumiResp << endl;
+cout << "     Integral RespUp = " << lumiRespUp << endl;
+cout << "     Integral RespDown = " << lumiRespDown << endl;
+cout << "     Integral Rec = " << lumiRec << endl;
+cout << "     Integral RecUp = " << lumiRecUp << endl;
+cout << "     Integral RecDown = " << lumiRecDown << endl;
+cout << "     Integral Gen = " << lumiGen << endl;
+cout << "     Integral GenUp = " << lumiGenUp << endl;
+cout << "     Integral GenDown = " << lumiGenDown << endl; 
+cout << "*******************************************************************************" << endl; 
+		    	 
+		// Get the binning 
+		double* theBins = Xbins;
+		int numberBins = bins;
+		
+		
+		// Names and Labels
+		TString channelLabelStr(channelLabel[channelType]);
+        TString theChannelName = channelLabelStr; 		
+        if ( channelLabelStr.Contains("#mu#mu")  ) theChannelName = "mumu";
+        if ( channelLabelStr.Contains("e#mu")    ) theChannelName = "emu";
+        if ( channelLabelStr.Contains("ee")      ) theChannelName = "ee";
+        if ( channelLabelStr.Contains("comb")    ) theChannelName = "combined";
+        TString theParticleName = "";
+		if ( name.Contains("Lepton") ) theParticleName = "Leptons";
+		if ( name.Contains("LLBar")   ) theParticleName = "LepPair";
+		if ( name.Contains("Top")     ) theParticleName = "TopQuark";
+		if ( name.Contains("TTBar")   ) theParticleName = "TtBar";
+		TString theQuantityName = "";
+		if ( name.Contains("pT")      ) theQuantityName = "Pt";
+		if ( name.Contains("Eta")     ) theQuantityName = "Eta";
+		if ( name.Contains("Rapidity")) theQuantityName = "Rapidity";
+		if ( name.Contains("Mass")    ) theQuantityName = "Mass";
+		TString theSpecialPostfix = "";
+		TString theSystematicName = Systematic;
+		
+		
+ 
+        // UNFOLDING OF SYSTEMATICS
+        // Retrieve histograms with the unfolded quantities.
+        // Note: The unfolded histograms have additional side bins!
+        // Keep this in mind when accessing bin content via indices 
+		TH1D* symmSysErrors = NULL; 
+		mySVDFunctions.SVD_DoUnfoldSys(
+			theDataHist,
+        	theBgrHist, theBgrHistUp, theBgrHistDown, 
+        	theGenHist, theGenHistUp, theGenHistDown, 
+        	theRecHist, theRecHistUp, theRecHistDown, 
+        	theRespHist, theRespHistUp, theRespHistDown, 
+        	theBins, numberBins,
+            symmSysErrors,  
+            theChannelName, theParticleName, theQuantityName, theSpecialPostfix, theSystematicName
+        ); 
+  	
 
+		
+  	    // Save the shifts in Tyler's triple-matrix ...
+        for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
+        	Sys_Error = symmSysErrors->GetBinContent(bin+2); // Keep in mind the extra layer of OF bins
+        	
+        	// Save it
+	        DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
+	    } 
+  }
+  
+  // Old pre SVD code
+  if ( doUnfolding == false) {
+  		for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
+	    if( stacksum->GetBinContent(bin+1) == 0 )  continue;
+	    Sys_Error_Up   = abs(stacksum->GetBinContent(bin+1) - stacksumUp->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
+	    Sys_Error_Down = abs(stacksum->GetBinContent(bin+1) - stacksumDown->GetBinContent(bin+1))/stacksum->GetBinContent(bin+1);
+	    Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
+	    //    Sum_Errors += Sys_Error;
+	    DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
+	} 
+  }
+  
 }
 
 Plotter::Plotter()
@@ -455,10 +695,7 @@ Plotter::Plotter()
   initialized=false;
   datafiles = 0;
   
-  // DAVID 
-  doUnfolding = false;
-  unfoldingPlotsToPs = false;
-  unfoldingPlotsToRoot = false;
+  // DAVID  
   outpath = "";
 
 }
@@ -700,27 +937,27 @@ void Plotter::setSystDataSet(TString systematic)
 void Plotter::fillHisto()
 {
   TH1::AddDirectory(kFALSE);
-  if(!initialized){
+  if(!initialized){ 
     hists.clear();
     for(unsigned int i=0; i<dataset.size(); i++){
       TFile *ftemp = TFile::Open(dataset[i]);
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
       if(name.Contains("Lepton")){
       	TString stemp = name;
-	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("BJet")){
       	TString stemp = name;
-	stemp.ReplaceAll("BJet",4,"AntiBJet",8);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
-	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("Top",3,"AntiTop",7);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -738,28 +975,63 @@ void Plotter::fillHisto()
 void Plotter::fillSystHisto()
 {
   TH1::AddDirectory(kFALSE);
-  if(!initialized){
+  if(!initialized){ 
+    hists.clear();
     systhistsUp.clear();
     systhistsDown.clear();
+    
+    // Fill nominal sample
+    for(unsigned int i=0; i<dataset.size(); i++){
+      TFile *ftemp = TFile::Open(dataset[i]);
+      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+      if(name.Contains("Lepton")){
+      	TString stemp = name;
+	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+      	hist->Add(hist2);
+      }
+      if(name.Contains("BJet")){
+      	TString stemp = name;
+	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+      	hist->Add(hist2);
+      }
+      if(name.Contains("Top")){
+      	TString stemp = name;
+	    stemp.ReplaceAll("Top",3,"AntiTop",7);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+      	hist->Add(hist2);
+      }
+      
+      setHHStyle(*gStyle);
+      //gStyle->SetErrorX(0);
+      hists.push_back(*hist);
+      //ftemp->Close("R");
+      //delete hist;
+      delete ftemp;
+    }
+    
+    
+    // Fill up-shifted sample
     for(unsigned int i=0; i<datasetUp.size(); i++){
       TFile *ftemp = TFile::Open(datasetUp[i]);
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
       if(name.Contains("BJet")){
       	TString stemp = name;
-	stemp.ReplaceAll("BJet",4,"AntiBJet",8);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Lepton")){
       	TString stemp = name;
-	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
-	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("Top",3,"AntiTop",7);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -768,25 +1040,27 @@ void Plotter::fillSystHisto()
       systhistsUp.push_back(*hist);
       delete ftemp;
     }
+    
+    // Fill down-shifted sample
     for(unsigned int i=0; i<datasetDown.size(); i++){
       TFile *ftemp = TFile::Open(datasetDown[i]);
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
       if(name.Contains("BJet")){
       	TString stemp = name;
-	stemp.ReplaceAll("BJet",4,"AntiBJet",8);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       if(name.Contains("Lepton")){
       	TString stemp = name;
-	stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
+	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+       	hist->Add(hist2);
       }
       if(name.Contains("Top")){
       	TString stemp = name;
-	stemp.ReplaceAll("Top",3,"AntiTop",7);
-	TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
+	    stemp.ReplaceAll("Top",3,"AntiTop",7);
+	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
       
@@ -855,15 +1129,17 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 	    }
       }
     }
-  }
+  } 
+    
   
   TFile *f0 = new TFile("SigBackground.root","UPDATE");
 
-  TList* l = stack->GetHists();
+  TList* l = stack->GetHists(); 
   TH1D* stacksum = (TH1D*) l->At(0)->Clone();
+ 
   TString aaa = "a";
   for (int i = 1; i < l->GetEntries(); ++i) {
-    aaa=aaa+"a";
+    aaa=aaa+"a"; 
     stacksum->Add((TH1D*)l->At(i));
     if(legends[datafiles+i] == "t#bar{t} background") {
       stacksum->Write(name+"_"+channel+aaa+"_Background");
@@ -872,12 +1148,12 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 	stacksum->Write(name+"_"+channel+aaa+"_Signal");
     }
 
-  }
+  } 
   f0->Close();
-  //stat uncertainty::make a function
+  //stat uncertainty::make a function 
   TH1D* syshist =0;
   syshist = (TH1D*)stacksum->Clone();
-  double lumierr = 0.045;
+  double lumierr = 0.045; 
   for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
     
     Double_t binc = 0;
@@ -1174,12 +1450,12 @@ double Plotter::CalcXSec(){
 
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    //CalcDiffSystematics("JES", 0);
-    //CalcDiffSystematics("RES", 1);
+    CalcDiffSystematics("JES", 0);
+    CalcDiffSystematics("RES", 1);
     //CalcDiffSystematics("PU_", 2);
-    //CalcDiffSystematics("SCALE", 3);
-    //CalcDiffSystematics("MATCH", 4);
-    //CalcDiffSystematics("MASS", 5);
+    CalcDiffSystematics("SCALE", 3);
+    CalcDiffSystematics("MATCH", 4);
+    CalcDiffSystematics("MASS", 5);
     //CalcDiffSystematics("DY_", 6);
     //CalcDiffSystematics("BG_", 7);
     //DiffFlatSystematics(8,bins);
@@ -1196,7 +1472,7 @@ void Plotter::PlotDiffXSec(){
     TH1 *RecoPlotFineBins = new TH1D;
     TH1 *GenPlot =new TH1D;
     TH1 *GenPlotTheory =new TH1D;
-    //    double DataSum[nbins]={0};
+    //double DataSum[nbins]={0};
     //double GenSignalSum[nbins]={0};
     //double BGSum[nbins]={0};
     double DataSum[XAxisbinCenters.size()];
@@ -1409,10 +1685,8 @@ void Plotter::PlotDiffXSec(){
     if ( doUnfolding == true ) {
     	
 		// SVD Helper Class
-		DilepSVDFunctions mySVDFunctions;
-		mySVDFunctions.SetUnfoldingPlotsToPs(unfoldingPlotsToPs);
-		mySVDFunctions.SetUnfoldingPlotsToRoot(unfoldingPlotsToRoot);
-		mySVDFunctions.SetOutputPath(outpath);
+		DilepSVDFunctions mySVDFunctions; 
+		mySVDFunctions.SetOutputPath(outpath); 
 
 		
 		// Getting the histogram 
@@ -1467,6 +1741,34 @@ void Plotter::PlotDiffXSec(){
 		if ( name.Contains("Mass")    ) theQuantityName = "Mass";
 		TString theSpecialPostfix = "";
 		
+//// DAVID
+//// Make a real crude reweighting of the Resp and Gen Hists
+//double lumiResp = 	theRespHist->Integral();
+//double lumiRec =     theRecHist->Integral();
+//double lumiGen =     theGenHist->Integral();
+//double scaleResp = lumiRec / lumiResp;
+//double scaleGen = scaleResp;
+//theRespHist->Scale(scaleResp); 
+//theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
+//                             // histo here, because the shifted ones are
+//                             // just pointers to the nominal one
+//cout << "*******************************************************************************" << endl;
+//cout << "Hey! " << endl;
+//cout << "A real crude reweighting is being done here ... " << endl;
+//cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
+//cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
+//cout << "     Integral Resp = " << lumiResp << endl;
+//cout << "     Integral Rec  = " << lumiRec << endl;
+//cout << "     Integral Gen  = " << lumiGen << endl;
+//lumiResp = 	theRespHist->Integral();
+//lumiRec =     theRecHist->Integral();
+//lumiGen =     theGenHist->Integral();
+//cout << "After reweighting" << endl;
+//cout << "     Integral Resp = " << lumiResp << endl;
+//cout << "     Integral Rec  = " << lumiRec << endl;
+//cout << "     Integral Gen  = " << lumiGen << endl;
+//cout << "*******************************************************************************" << endl; 
+		    	 
 		
 
         // UNFOLDING 
@@ -1474,11 +1776,17 @@ void Plotter::PlotDiffXSec(){
         // Note: The unfolded histogram has additional side bins!
         // Keep this in mind when accessing bin content via indices
         TH1D* unfoldedDistribution = NULL;
-        mySVDFunctions.SVD_DoUnfold(theDataHist, theBgrHist, theGenHist, theRecHist, theRespHist, 
-             theBins, numberBins,  
-             unfoldedDistribution, 
-             theChannelName, theParticleName, theQuantityName, theSpecialPostfix);
-		
+        int numSystematics = 0;
+        mySVDFunctions.SVD_DoUnfold(
+        	(TH1D*) theDataHist, 
+        	(TH1D*) theBgrHist, 
+        	(TH1D*) theGenHist, 
+        	(TH1D*) theRecHist, 
+        	(TH2D*) theRespHist, 
+            theBins, numberBins,  
+            unfoldedDistribution, numSystematics,
+            theChannelName, theParticleName, theQuantityName, theSpecialPostfix, "");
+ 		
 		
 		// Make a vector from the result
 		double UnfoldingResult[XAxisbinCenters.size()];
@@ -1488,7 +1796,7 @@ void Plotter::PlotDiffXSec(){
 			UnfoldingError[i] = unfoldedDistribution->GetBinError(i+1);
 		}
 		
-		
+		 	
 		
 		// CROSS SECTION CALCULATION
 	    for (Int_t i=0; i<bins; ++i) {
@@ -1524,13 +1832,7 @@ void Plotter::PlotDiffXSec(){
 		    h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
 		    h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
 	    }
-	    
-	    
-	    // Delete things
-	    delete theDataHist;
-	    delete theBgrHist;
-	    delete theRecHist;
-	    delete unfoldedDistribution;
+	     
     	
     } else { // BBB Unfolding
 
@@ -1584,7 +1886,7 @@ void Plotter::PlotDiffXSec(){
 	      h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
 	    }
     }
-
+ 	
     //data normalization
     double datascale;
     datascale = h_DiffXSec->Integral("width");
@@ -1641,7 +1943,7 @@ void Plotter::PlotDiffXSec(){
       //      cout<<"DiffXSecStatErrorPlot[bin]: "<<DiffXSecStatErrorPlot[bin]<<endl;
       //cout<<"DiffXSecTotalErrorPlot[bin]: "<<DiffXSecTotalErrorPlot[bin]<<endl<<endl;
     }
-
+ 	
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -1722,7 +2024,7 @@ void Plotter::PlotDiffXSec(){
     double powhegscale = 1./powheghist->Integral("width");
     powheghist->Rebin(2);powheghist->Scale(0.5);
     powheghist->Scale(powhegscale);
-
+ 	
     //Uncertainty band for MC@NLO
     const Int_t nMCNLOBins = mcnlohistup->GetNbinsX();
     Double_t x[nMCNLOBins];
@@ -1794,7 +2096,7 @@ void Plotter::PlotDiffXSec(){
     c->Print("Plots/"+channel+"/DiffXS_"+name+".eps");
     c->Clear();
     delete c;
-    
+     	
     
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TList* l = stack->GetHists();
@@ -1823,7 +2125,7 @@ void Plotter::PlotDiffXSec(){
     f1->Close();
     c1->Print("Plots/"+channel+"/preunfolded_"+name+".eps");
     c1->Clear();
-    delete c1;
+    delete c1; 	
 }
 
 // get generator cross section curve for NLO prediction
