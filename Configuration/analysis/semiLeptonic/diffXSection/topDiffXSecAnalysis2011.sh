@@ -54,12 +54,14 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"muon\" 
 ## lumi [/pb]
 ## has to fit to current dataset
 dataLuminosity=4964
 ## dataset: 2010 or 2011
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
@@ -82,7 +84,7 @@ verbose=0
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
 ## inputFolderName=\"RecentAnalysisRun\" (default)
-inputFolderName=\"RecentAnalysisRun\"
+inputFolderName=\"RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut\"
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
@@ -94,11 +96,11 @@ redoSystematics=true
 
 ## Make pt plots logarithmic
 ## makeLogPlots = true / false (default: false)
-makeLogPlots=true
+makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 44 (default), see list of systematics below)
+## maxSys>0 needs a lot of time (must be <= 46 (default), see list of systematics below)
 maxSys=46
 
 ## Shape variations:
