@@ -441,7 +441,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
    
   // DAVID. Guckst du hier!
   bool saveUnfStat = doUnfolding;
-  doUnfolding == false;
+  doUnfolding = false;
   if ( doUnfolding == true ) {
   
   		// SVD Helper Class
