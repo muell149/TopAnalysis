@@ -41,7 +41,8 @@ void Histo::MakePlots(){
     
     // Create Plotter 
     Plotter h_generalPlot;
-    Xbins.clear();binCenters.clear();
+    Xbins.clear();
+    binCenters.clear();
     
      
  
@@ -56,21 +57,26 @@ void Histo::MakePlots(){
       binCenters.push_back(temp);
     }
     
+    /////////////////////////////////////////////////////
+    /////////   UNFOLDING OPTIONS     ///////////////////
+    /////////////////////////////////////////////////////
+    
     // Unfolding Options
     bool doSVD = false;
-    bool unfoldingPlotsToPs = false;
-    bool unfoldingPlotsToRoot = false;
     TString outpath = "";
-    h_generalPlot.UnfoldingOptions(doSVD, unfoldingPlotsToPs, unfoldingPlotsToRoot);
+    h_generalPlot.UnfoldingOptions(doSVD);
     h_generalPlot.SetOutpath("");
     
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
     
     h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();
-    h_generalPlot.write();
-    h_generalPlot.PlotDiffXSec();
+    h_generalPlot.write();  
+    h_generalPlot.PlotDiffXSec(); 
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("emu");
     h_generalPlot.fillHisto();
@@ -106,7 +112,8 @@ void Histo::MakePlots(){
     if ( name.CompareTo("") == 0 ) continue;
     // Create Plotter 
     Plotter h_generalPlot;
-    Xbins.clear();binCenters.clear();
+    Xbins.clear();
+    binCenters.clear();
     
     for(int i = 0; i < bins+1; i++){
       double temp;
@@ -119,13 +126,20 @@ void Histo::MakePlots(){
       binCenters.push_back(temp);
     }
     
+    /////////////////////////////////////////////////////
+    /////////   UNFOLDING OPTIONS     ///////////////////
+    /////////////////////////////////////////////////////
+    
     // Unfolding Options
-    bool doSVD = false;
-    bool unfoldingPlotsToPs = false;
-    bool unfoldingPlotsToRoot = false;
+    bool doSVD = false; 
     TString outpath = "";
-    h_generalPlot.UnfoldingOptions(doSVD, unfoldingPlotsToPs, unfoldingPlotsToRoot);
+    h_generalPlot.UnfoldingOptions(doSVD);
     h_generalPlot.SetOutpath("");
+    
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////// 
+    
 
     h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
