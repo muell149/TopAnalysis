@@ -1418,9 +1418,38 @@ double Plotter::CalcXSec(){
 	numhists[i]->Scale(DYScale[channelType]);
       }
       //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
-      numbers[3]+=(int)numhists[i]->Integral();
+      numbers[3]+=numhists[i]->Integral();
     }        
   }  
+
+  ////////////////////////////Make output for tables
+  double tmp_num = 0;
+  
+  ofstream EventFile;
+  string EventFilestring = "Plots/";
+  if(channelType==0){EventFilestring.append("ee");}
+  else if(channelType==1){EventFilestring.append("mumu");}
+  else if(channelType==2){EventFilestring.append("emu");}
+  else{EventFilestring.append("combined");}
+  EventFilestring.append("/Events.txt");
+  EventFile.open(EventFilestring.c_str());
+  double bg_num = 0;
+  for(unsigned int i=0; i<hists.size() ; i++){ 
+    tmp_num+=numhists[i]->Integral();
+
+    if(i==(hists.size()-1)){
+      EventFile<<legends[i]<<": "<<tmp_num<<endl;
+      bg_num+=tmp_num;
+      tmp_num=0;
+    }else if(legends[i]!=legends[i+1]){
+      EventFile<<legends[i]<<": "<<tmp_num<<endl;
+      if(legends[i]!="data")bg_num+=tmp_num;
+      tmp_num=0;
+    }
+
+  }
+  EventFile<<"Total background: "<<bg_num<<endl;
+  EventFile.close();
 
   double xsec = (numbers[0]-numbers[3])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
   double xsecstaterror = TMath::Sqrt(numbers[0])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
@@ -1450,12 +1479,12 @@ double Plotter::CalcXSec(){
 
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    CalcDiffSystematics("JES", 0);
-    CalcDiffSystematics("RES", 1);
+    //CalcDiffSystematics("JES", 0);
+    //CalcDiffSystematics("RES", 1);
     //CalcDiffSystematics("PU_", 2);
-    CalcDiffSystematics("SCALE", 3);
-    CalcDiffSystematics("MATCH", 4);
-    CalcDiffSystematics("MASS", 5);
+    //CalcDiffSystematics("SCALE", 3);
+    //CalcDiffSystematics("MATCH", 4);
+    //CalcDiffSystematics("MASS", 5);
     //CalcDiffSystematics("DY_", 6);
     //CalcDiffSystematics("BG_", 7);
     //DiffFlatSystematics(8,bins);
