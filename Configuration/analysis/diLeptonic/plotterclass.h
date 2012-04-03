@@ -440,8 +440,10 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
   } 
    
   // DAVID. Guckst du hier!
+  bool saveUnfStat = doUnfolding;
+  doUnfolding == false;
   if ( doUnfolding == true ) {
-  	
+  
   		// SVD Helper Class
 		DilepSVDFunctions mySVDFunctions; 
 		mySVDFunctions.SetOutputPath(outpath);  
@@ -459,24 +461,27 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 		TH1D* theGenHistDown = NULL; 
 		TH2D* theRespHist = NULL;
 		TH2D* theRespHistUp = NULL;
-		TH2D* theRespHistDown = NULL;  
-		
-		 
+		TH2D* theRespHistDown = NULL;   
 		
 		// DAVID:
 		// Data, Signal and Background
 		// can be obtained from vectors that Tyler fills.
 		// These are the vectors
 		// "hists", "systhistsUp" amd "systhistsDown"
+		// Notice, that the DY Background will be scaled with
+		// the DYScale.
 		for ( size_t i = 0; i < hists.size() ; i++ ) {
 			if ( legends[i] == "data" ) {
+				
+				// Get Data Hist
 				if ( theDataHist == NULL ) {
 					theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
 				} else {
 					theDataHist->Add(&(hists[i]));
 				}
 			} else if ( legends[i] == "t#bar{t} signal") {
-				 
+				
+				// Get Signal Hist
 				if ( theRecHist == NULL ) {
 					theRecHist = (TH1D*) (hists[i]).Clone("theRecHist");
 				} else {
@@ -493,10 +498,19 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 					theRecHistDown->Add(&(hists[i]));
 				}
 			} else {
+				
+				// Calculate DYScale fist
+				double theDYScale = 1.;
+				if ( (legends[i] == DYEntry) && (channelType != 2 ) ) {
+				    theDYScale = DYScale[channelType];
+				}
+				
+				// Get Background HIst, thereby applying DY Scale
 				if ( theBgrHist == NULL ) {
 					theBgrHist = (TH1D*) (hists[i]).Clone("theBgrHist");
+					theBgrHist->Scale(theDYScale);
 				} else {
-					theBgrHist->Add(&(hists[i]));
+					theBgrHist->Add(&(hists[i]), theDYScale);
 				}
 				if ( theBgrHistUp == NULL ) {
 					theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
@@ -510,6 +524,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 				} 
 			}
 		}
+  
+		
+		 
 	 
 		// DAVID
 		// Response Matrix and visible Gen Dist
@@ -541,7 +558,11 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 				} else {
 					theRespHistUp->Add(resptempUp);
 				}
-				theGenHistUp = theGenHist; 
+				if ( theGenHistUp == NULL ) {
+					theGenHistUp = (TH1D*) (gentemp)->Clone("theGenHistUp");
+				} else {
+					theGenHistUp->Add(gentemp);
+				} 
 				delete ftempUp;
 				
 		    	// Shift Down
@@ -552,71 +573,72 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 				} else {
 					theRespHistDown->Add(resptempDown);
 				}
-				theGenHistDown = theGenHist; 
+				if ( theGenHistDown == NULL ) {
+					theGenHistDown = (TH1D*) (gentemp)->Clone("theGenHistDown");
+				} else {
+					theGenHistDown->Add(gentemp);
+				} 
 				delete ftempDown;
 		    	
 		    }
 		}
-// DAVID
-// Make a real crude reweighting of the Resp and Gen Hists
-double lumiResp = 	theRespHist->Integral();
-double lumiRespUp = 	theRespHistUp->Integral();
-double lumiRespDown = 	theRespHistDown->Integral();
-double lumiRec =     theRecHist->Integral();
-double lumiRecUp =     theRecHistUp->Integral();
-double lumiRecDown =     theRecHistDown->Integral();
-double lumiGen =     theGenHist->Integral();
-double lumiGenUp =     theGenHistUp->Integral();
-double lumiGenDown =     theGenHistDown->Integral(); 
-double extra_factor = 1.;
-if ( lumiRespDown < 0.7*lumiResp ) {
-	extra_factor = (2.*lumiResp) / (lumiRespDown+lumiRespUp);
-} 
-double scaleResp = lumiRec / lumiResp;
-double scaleGen = scaleResp;
-theRespHist->Scale(scaleResp);
-theRespHistUp->Scale(scaleResp*extra_factor);
-theRespHistDown->Scale(scaleResp*extra_factor);
-theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
-                             // histo here, because the shifted ones are
-                             // just pointers to the nominal one
-cout << "*******************************************************************************" << endl;
-cout << "Hey! " << endl;
-cout << "A real crude reweighting is being done here ... " << endl;
-cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
-cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
-cout << "     Integral Resp = " << lumiResp << endl;
-cout << "     Integral RespUp = " << lumiRespUp << endl;
-cout << "     Integral RespDown = " << lumiRespDown << endl;
-cout << "     Integral Rec = " << lumiRec << endl;
-cout << "     Integral RecUp = " << lumiRecUp << endl;
-cout << "     Integral RecDown = " << lumiRecDown << endl;
-cout << "     Integral Gen = " << lumiGen << endl;
-cout << "     Integral GenUp = " << lumiGenUp << endl;
-cout << "     Integral GenDown = " << lumiGenDown << endl; 
-cout << "     Integral Resp = " << lumiResp << endl;
-cout << "     Integral Rec  = " << lumiRec << endl;
-cout << "     Integral Gen  = " << lumiGen << endl;
-lumiResp = 	theRespHist->Integral();
-lumiRespUp = 	theRespHistUp->Integral();
-lumiRespDown = 	theRespHistDown->Integral();
-lumiRec =     theRecHist->Integral();
-lumiRecUp =     theRecHistUp->Integral();
-lumiRecDown =     theRecHistDown->Integral();
-lumiGen =     theGenHist->Integral();
-lumiGenUp =     theGenHistUp->Integral();
-lumiGenDown =     theGenHistDown->Integral();
-cout << "After reweighting" << endl;
-cout << "     Integral Resp = " << lumiResp << endl;
-cout << "     Integral RespUp = " << lumiRespUp << endl;
-cout << "     Integral RespDown = " << lumiRespDown << endl;
-cout << "     Integral Rec = " << lumiRec << endl;
-cout << "     Integral RecUp = " << lumiRecUp << endl;
-cout << "     Integral RecDown = " << lumiRecDown << endl;
-cout << "     Integral Gen = " << lumiGen << endl;
-cout << "     Integral GenUp = " << lumiGenUp << endl;
-cout << "     Integral GenDown = " << lumiGenDown << endl; 
-cout << "*******************************************************************************" << endl; 
+//// DAVID
+//// Make a real crude reweighting of the Resp and Gen Hists
+//double lumiResp = 	theRespHist->Integral();
+//double lumiRespUp = 	theRespHistUp->Integral();
+//double lumiRespDown = 	theRespHistDown->Integral();
+//double lumiRec =     theRecHist->Integral();
+//double lumiRecUp =     theRecHistUp->Integral();
+//double lumiRecDown =     theRecHistDown->Integral();
+//double lumiGen =     theGenHist->Integral();
+//double lumiGenUp =     theGenHistUp->Integral();
+//double lumiGenDown =     theGenHistDown->Integral(); 
+//double extra_factor = 1.;
+//if ( lumiRespDown < 0.7*lumiResp ) {
+//	extra_factor = (2.*lumiResp) / (lumiRespDown+lumiRespUp);
+//} 
+//double scaleResp = lumiRec / lumiResp;
+//double scaleGen = scaleResp;
+//theRespHist->Scale(scaleResp);
+//theRespHistUp->Scale(scaleResp*extra_factor);
+//theRespHistDown->Scale(scaleResp*extra_factor);
+//theGenHist->Scale(scaleGen);
+//theGenHistUp->Scale(scaleGen*extra_factor);
+//theGenHistDown->Scale(scaleGen*extra_factor);
+//cout << "*******************************************************************************" << endl;
+//cout << "Hey! " << endl;
+//cout << "A real crude reweighting is being done here ... " << endl;
+//cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
+//cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
+//cout << "     Integral Resp = " << lumiResp << endl;
+//cout << "     Integral RespUp = " << lumiRespUp << endl;
+//cout << "     Integral RespDown = " << lumiRespDown << endl;
+//cout << "     Integral Rec = " << lumiRec << endl;
+//cout << "     Integral RecUp = " << lumiRecUp << endl;
+//cout << "     Integral RecDown = " << lumiRecDown << endl;
+//cout << "     Integral Gen = " << lumiGen << endl;
+//cout << "     Integral GenUp = " << lumiGenUp << endl;
+//cout << "     Integral GenDown = " << lumiGenDown << endl;  
+//lumiResp = 	theRespHist->Integral();
+//lumiRespUp = 	theRespHistUp->Integral();
+//lumiRespDown = 	theRespHistDown->Integral();
+//lumiRec =     theRecHist->Integral();
+//lumiRecUp =     theRecHistUp->Integral();
+//lumiRecDown =     theRecHistDown->Integral();
+//lumiGen =     theGenHist->Integral();
+//lumiGenUp =     theGenHistUp->Integral();
+//lumiGenDown =     theGenHistDown->Integral();
+//cout << "After reweighting" << endl;
+//cout << "     Integral Resp = " << lumiResp << endl;
+//cout << "     Integral RespUp = " << lumiRespUp << endl;
+//cout << "     Integral RespDown = " << lumiRespDown << endl;
+//cout << "     Integral Rec = " << lumiRec << endl;
+//cout << "     Integral RecUp = " << lumiRecUp << endl;
+//cout << "     Integral RecDown = " << lumiRecDown << endl;
+//cout << "     Integral Gen = " << lumiGen << endl;
+//cout << "     Integral GenUp = " << lumiGenUp << endl;
+//cout << "     Integral GenDown = " << lumiGenDown << endl; 
+//cout << "*******************************************************************************" << endl; 
 		    	 
 		// Get the binning 
 		double* theBins = Xbins;
@@ -629,7 +651,7 @@ cout << "***********************************************************************
         if ( channelLabelStr.Contains("#mu#mu")  ) theChannelName = "mumu";
         if ( channelLabelStr.Contains("e#mu")    ) theChannelName = "emu";
         if ( channelLabelStr.Contains("ee")      ) theChannelName = "ee";
-        if ( channelLabelStr.Contains("comb")    ) theChannelName = "combined";
+        if ( channelLabelStr.Contains("Dilepton Combined")    ) theChannelName = "combined";
         TString theParticleName = "";
 		if ( name.Contains("Lepton") ) theParticleName = "Leptons";
 		if ( name.Contains("LLBar")   ) theParticleName = "LepPair";
@@ -683,7 +705,7 @@ cout << "***********************************************************************
 	    DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
 	} 
   }
-  
+  doUnfolding = saveUnfStat;
 }
 
 Plotter::Plotter()
@@ -1770,33 +1792,33 @@ void Plotter::PlotDiffXSec(){
 		if ( name.Contains("Mass")    ) theQuantityName = "Mass";
 		TString theSpecialPostfix = "";
 		
-//// DAVID
-//// Make a real crude reweighting of the Resp and Gen Hists
-//double lumiResp = 	theRespHist->Integral();
-//double lumiRec =     theRecHist->Integral();
-//double lumiGen =     theGenHist->Integral();
-//double scaleResp = lumiRec / lumiResp;
-//double scaleGen = scaleResp;
-//theRespHist->Scale(scaleResp); 
-//theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
-//                             // histo here, because the shifted ones are
-//                             // just pointers to the nominal one
-//cout << "*******************************************************************************" << endl;
-//cout << "Hey! " << endl;
-//cout << "A real crude reweighting is being done here ... " << endl;
-//cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
-//cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
-//cout << "     Integral Resp = " << lumiResp << endl;
-//cout << "     Integral Rec  = " << lumiRec << endl;
-//cout << "     Integral Gen  = " << lumiGen << endl;
-//lumiResp = 	theRespHist->Integral();
-//lumiRec =     theRecHist->Integral();
-//lumiGen =     theGenHist->Integral();
-//cout << "After reweighting" << endl;
-//cout << "     Integral Resp = " << lumiResp << endl;
-//cout << "     Integral Rec  = " << lumiRec << endl;
-//cout << "     Integral Gen  = " << lumiGen << endl;
-//cout << "*******************************************************************************" << endl; 
+// DAVID
+// Make a real crude reweighting of the Resp and Gen Hists
+double lumiResp = 	theRespHist->Integral();
+double lumiRec =     theRecHist->Integral();
+double lumiGen =     theGenHist->Integral();
+double scaleResp = lumiRec / lumiResp;
+double scaleGen = scaleResp;
+theRespHist->Scale(scaleResp); 
+theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
+                             // histo here, because the shifted ones are
+                             // just pointers to the nominal one
+cout << "*******************************************************************************" << endl;
+cout << "Hey! " << endl;
+cout << "A real crude reweighting is being done here ... " << endl;
+cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
+cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
+cout << "     Integral Resp = " << lumiResp << endl;
+cout << "     Integral Rec  = " << lumiRec << endl;
+cout << "     Integral Gen  = " << lumiGen << endl;
+lumiResp = 	theRespHist->Integral();
+lumiRec =     theRecHist->Integral();
+lumiGen =     theGenHist->Integral();
+cout << "After reweighting" << endl;
+cout << "     Integral Resp = " << lumiResp << endl;
+cout << "     Integral Rec  = " << lumiRec << endl;
+cout << "     Integral Gen  = " << lumiGen << endl;
+cout << "*******************************************************************************" << endl; 
 		    	 
 		
 
