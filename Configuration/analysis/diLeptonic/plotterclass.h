@@ -1792,33 +1792,33 @@ void Plotter::PlotDiffXSec(){
 		if ( name.Contains("Mass")    ) theQuantityName = "Mass";
 		TString theSpecialPostfix = "";
 		
-// DAVID
-// Make a real crude reweighting of the Resp and Gen Hists
-double lumiResp = 	theRespHist->Integral();
-double lumiRec =     theRecHist->Integral();
-double lumiGen =     theGenHist->Integral();
-double scaleResp = lumiRec / lumiResp;
-double scaleGen = scaleResp;
-theRespHist->Scale(scaleResp); 
-theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
-                             // histo here, because the shifted ones are
-                             // just pointers to the nominal one
-cout << "*******************************************************************************" << endl;
-cout << "Hey! " << endl;
-cout << "A real crude reweighting is being done here ... " << endl;
-cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
-cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
-cout << "     Integral Resp = " << lumiResp << endl;
-cout << "     Integral Rec  = " << lumiRec << endl;
-cout << "     Integral Gen  = " << lumiGen << endl;
-lumiResp = 	theRespHist->Integral();
-lumiRec =     theRecHist->Integral();
-lumiGen =     theGenHist->Integral();
-cout << "After reweighting" << endl;
-cout << "     Integral Resp = " << lumiResp << endl;
-cout << "     Integral Rec  = " << lumiRec << endl;
-cout << "     Integral Gen  = " << lumiGen << endl;
-cout << "*******************************************************************************" << endl; 
+//// DAVID
+//// Make a real crude reweighting of the Resp and Gen Hists
+//double lumiResp = 	theRespHist->Integral();
+//double lumiRec =     theRecHist->Integral();
+//double lumiGen =     theGenHist->Integral();
+//double scaleResp = lumiRec / lumiResp;
+//double scaleGen = scaleResp;
+//theRespHist->Scale(scaleResp); 
+//theGenHist->Scale(scaleGen); // ATTENTION: Scale only the nominal
+//                             // histo here, because the shifted ones are
+//                             // just pointers to the nominal one
+//cout << "*******************************************************************************" << endl;
+//cout << "Hey! " << endl;
+//cout << "A real crude reweighting is being done here ... " << endl;
+//cout << "Scale Factor applied on resp Matrix: " << scaleResp << endl;
+//cout << "Scale Factor applied on gen Dist: " << scaleGen << endl;
+//cout << "     Integral Resp = " << lumiResp << endl;
+//cout << "     Integral Rec  = " << lumiRec << endl;
+//cout << "     Integral Gen  = " << lumiGen << endl;
+//lumiResp = 	theRespHist->Integral();
+//lumiRec =     theRecHist->Integral();
+//lumiGen =     theGenHist->Integral();
+//cout << "After reweighting" << endl;
+//cout << "     Integral Resp = " << lumiResp << endl;
+//cout << "     Integral Rec  = " << lumiRec << endl;
+//cout << "     Integral Gen  = " << lumiGen << endl;
+//cout << "*******************************************************************************" << endl; 
 		    	 
 		
 
