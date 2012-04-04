@@ -1780,7 +1780,7 @@ TH1D* TopSVDFunctions::SVD_MakeRatioNum(TH1D* numerator, TH1D* denominator, int 
 // SVD Unfolding Helper FUnction
 // Creates a Ratio plot of two histograms
 // Errors: relative errors from the DENOMINATOR are taken
-// Boundaries: If ymax < ymin, then range will be set automatically
+// Boundaries: If ymax < ymin, then range will be set automaticallyf
 TH1D* TopSVDFunctions::SVD_MakeRatioDenom(TH1D* numerator, TH1D* denominator, int numHist)
 {
   
@@ -2964,7 +2964,8 @@ TH1D* TopSVDFunctions::SVD_ArrayToShifts(TH1D* array, int numHist)
 void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist)
 { 
     
-    
+    	    	 
+ 	
     
     int flag_verbose = 1; 
     
@@ -2976,17 +2977,17 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
     if ( ttbgrHist != NULL ) doTtBgr = true;
     
     // Nbins
-    int nbins = dataHist->GetNbinsX();
+    int nbins = rawHist->GetNbinsX();
     
     // Loop over all histograms
     for ( int h = 0 ; h < numHist ; h++ ) {
          
         // loop bins
-        for ( int i = 0 ; i < nbins + 1 ; i++) { 
+        for ( int i = 1 ; i <= nbins ; i++) { 
 
             // get bin and errors for data
             // Notice: Only ONE histogram will be used here!
-            double value_data = rawHist->GetBinContent(i);
+            double value_data = rawHist->GetBinContent(i); 
             double err_data = rawHist->GetBinError(i);  
             // Get background value to be substracted! 
             double value_bgr = 0.; 
@@ -2994,8 +2995,15 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
             if(value_data<value_bgr){
                 std::cout << "ERROR in TopSVDFunctions::SVD_BackgrHandling: " << std::endl;
                 std::cout << "N_MC BG > N_data in bin " << i << std::endl;
-                std::cout << "(" << value_bgr << ">" << value_data << ")" << std::endl;
-                exit(0);
+                for ( int k = 1 ; k <= nbins ; k++ ) {
+                    std::cout << "   Bin " << k << ":  Data=" << value_data << "    Bgr=" << value_bgr;
+                    if ( value_bgr > value_data ) {
+                    	cout << " !@#$%^&*! " << endl;
+                    } else {
+                    	cout << endl;
+                    }
+                }
+                exit(1);
             }
                  
             // Debug output
@@ -3922,7 +3930,7 @@ double TopSVDFunctions::SVD_Unfold(
  	
  	// REC LEVEL OF BINS
  	int flag_recOF = SVD_GetDigit(steering, 10);
-    if ( flag_scanpoints == 0 ) flag_scanpoints = 2;
+    if ( flag_recOF == 0 ) flag_recOF = 2;
     
  	
  	
@@ -4056,6 +4064,9 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "        Verbosity:                         " << endl;
         cout << "             Standard Output:              " << (flag_verbose>=2) << endl;
         cout << "             Debugging Output:             " << (flag_verbose==3) << endl;
+        cout << "        Number of scan points:             " << nScanPoints << endl;
+        cout << "        Range of scan:                     " << 1/rangefactor << " ... " << rangefactor << endl;
+        cout << "        Cut out Rec Level Side Bins:       " << (flag_recOF == 2) << endl;
         cout << "********************************************************************************************************************" << endl;
     }   
     
@@ -4091,8 +4102,8 @@ double TopSVDFunctions::SVD_Unfold(
     // ATTENTION: Hier we assume to have only ONE histo in the array1
     TH1D* rawHist = SVD_Rebin1D(dataInputHist, nbins, bins, 1);
     if ( flag_recOF == 2 ) SVD_EmptyRecSideBins1D(rawHist);
- 
- 
+ 	
+	
     // All Background
     // Set errors to zero!
     TH1D* bgrHist = NULL;
@@ -4101,7 +4112,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_EmptyHistoErrors1D(bgrHist, numberSyst+1);
         if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(bgrHist, numberSyst+1);
     } 
-     
+  
     // ttbar background only
     TH1D* ttbgrHist = NULL;
     if ( ttbgrInputHist != NULL ) {
