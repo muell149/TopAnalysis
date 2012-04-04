@@ -28,9 +28,16 @@ void Analysis::Begin(TTree * /*tree*/)
 
   gStyle->SetOptStat(0);
 
+  h_step5 = new TH1D("step5", "event count at step 5",10,0,10);
+  h_step6 = new TH1D("step6", "event count at step 6",10,0,10);
+  h_step7 = new TH1D("step7", "event count at step 7",10,0,10);
+  h_step8 = new TH1D("step8", "event count at step 8",10,0,10);
+  h_step9 = new TH1D("step9", "event count at step 9",10,0,10);
+
   h_jetMultiAll = new TH1D("HypjetMultiAll", "Jet Multiplicity (AllJets)", 10, 0, 10);
   h_jetMultiXSec = new TH1D("HypjetMultiXSec", "Jet Multiplicity (for cross-section)", 10, 0, 10);
   h_jetMulti = new TH1D("HypjetMulti", "Jet Multiplicity", 10, 0, 10);
+  h_jetMulti_diLep = new TH1D("HypjetMulti_diLep", "Jet Multiplicity (after dilepton)", 10, 0, 10);
   h_jetMultiNoPU = new TH1D("HypjetMultiNoPU", "Jet Multiplicity (No Pileup or lumi weight)", 10, 0, 10);
   h_jetMultiVisTop = new TH1D("HypjetMultiVisTop", "Jet Multiplicity for Visible Top (No Pileup or lumi Weight)", 10, 0, 10);
   h_BjetMulti = new TH1D("HypBjetMulti", "B-Jet Multiplicity", 10, 0, 10);
@@ -64,10 +71,12 @@ void Analysis::Begin(TTree * /*tree*/)
   h_RecoTopRapidity = new TH1D("RecoTopRapidity","Rapidity of Top (HYP)",100,-5,5);
   h_RecoAntiTopRapidity = new TH1D("RecoAntiTopRapidity","Rapidity of AntiTop (HYP)",100,-5,5);
 
-  h_RecoBJetpT = new TH1D("RecoBJetpT","pT of Top (HYP)",240,0,1200);
-  h_RecoAntiBJetpT = new TH1D("RecoAntiBJetpT","pT of AntiTop (HYP)",240,0,1200);
+  h_RecoBJetpT = new TH1D("RecoBJetpT","pT of Top (HYP)",80,0,400);
+  h_RecoAntiBJetpT = new TH1D("RecoAntiBJetpT","pT of AntiTop (HYP)",80,0,400);
   h_RecoBJetRapidity = new TH1D("RecoBJetRapidity","Rapidity of Top (HYP)",100,-5,5);
   h_RecoAntiBJetRapidity = new TH1D("RecoAntiBJetRapidity","Rapidity of AntiTop (HYP)",100,-5,5);
+  h_RecoBJetEta = new TH1D("RecoBJetEta","Rapidity of Top (HYP)",80,-4,4);
+  h_RecoAntiBJetEta = new TH1D("RecoAntiBJetEta","Rapidity of AntiTop (HYP)",80,-4,4);
 
   h_RecoLLBarMass = new TH1D("RecoLLBarMass","Mass of LLbar System (HYP)",500,0,1000);
   h_RecoLLBarpT = new TH1D("RecoLLBarpT","pT of LLbar System (HYP)",200,0,1000);
@@ -323,21 +332,24 @@ Bool_t Analysis::Process(Long64_t entry)
       LVAntiBHadrons.push_back(antibhadrontemp);
     }
     
-    std::vector<int> idx_bHadJet;
-    std::vector<int> idx_antibHadJet;
+    std::vector<int> idx_leadbHadJet;
+    std::vector<int> idx_nleadbHadJet;
     //To avoid recopying may code lines, we select HERE the BHadron JET Indices to cut on.
   
     LVBHadronGenJet =  TLorentzVector(BHadronJetpX, BHadronJetpY, BHadronJetpZ, BHadronJetE);
     LVAntiBHadronGenJet = TLorentzVector(AntiBHadronJetpX, AntiBHadronJetpY, AntiBHadronJetpZ, AntiBHadronJetE);
     
-  
+    
     
     for(int i=0; i<(int) BHadJetIndex->size(); i++){	BHadIndex.insert((*BHadJetIndex)[i]);	}
+    
     for(int i=0; i<(int) AntiBHadJetIndex->size(); i++){	BHadIndex.insert((*AntiBHadJetIndex)[i]);	}
     
+    
     //time to choose which genJet we actually want  
-    idx_bHadJet.insert(idx_bHadJet.begin(), 4, -1);
-    idx_antibHadJet.insert(idx_antibHadJet.begin(), 4, -1);
+    
+    idx_leadbHadJet.insert(idx_leadbHadJet.begin(), 4, -1);
+    idx_nleadbHadJet.insert(idx_nleadbHadJet.begin(), 4, -1);
     /*
       idx_bHadJet will have 4 jet indices 
       [0] is the highest pT jet with a B-Hadron
@@ -346,105 +358,184 @@ Bool_t Analysis::Process(Long64_t entry)
       [3] highest pT jet of those matched closest (in DeltaR) to the B-Hadron also matched to a top quark
     */
     
-    bool BHadhighpTjet = false;
-    bool BHadhighpTjetfromtop = false;
-    bool AntiBHadhighpTjet = false;
-    bool AntiBHadhighpTjetfromtop = false;
+    bool LeadBHadhighpTjet = false;
+    bool LeadBHadhighpTjetfromtop = false;
+    bool NLeadBHadhighpTjet = false;
+    bool NLeadBHadhighpTjetfromtop = false;
 
+    bool LeadBHadhighDRjet = false;
+    bool LeadBHadhighDRjetfromtop = false;
+    bool NLeadBHadhighDRjet = false;
+    bool NLeadBHadhighDRjetfromtop = false;
+
+    int leadHadron = -1;
+    int hadron_index = -1;
+    int antihadron_index = -1;
+    int hadrontop_index = -1;
+    int antihadrontop_index = -1;
     //Case 1: highest pT genJet matched to a BHadron
     for(int genJet=0; genJet<allGenJets_; genJet++){
+      if(LVGenJets[genJet].Pt()<30){break;}
       for(int bHadron=0; bHadron<BHadrons_; bHadron++){
-	if((*BHadronVsJet)[genJet*BHadrons_+bHadron]==1 && (BHadhighpTjet ==false || BHadhighpTjetfromtop == false)){
-	  if(BHadhighpTjet==false){
-	    idx_bHadJet[0] = genJet;
-	    BHadhighpTjet = true;
+	if((*BHadronVsJet)[genJet*BHadrons_+bHadron]==1 && (LeadBHadhighpTjet ==false || LeadBHadhighpTjetfromtop == false || NLeadBHadhighpTjet ==false || NLeadBHadhighpTjetfromtop == false)){
+	  if(LeadBHadhighpTjet==false){	    
+	    idx_leadbHadJet[0] = genJet;
+	    LeadBHadhighpTjet = true;
+	    hadron_index = bHadron;
 	    if((*BHadronFromTopB)[bHadron] == true){
-	      idx_bHadJet[1] = genJet;
-	      BHadhighpTjetfromtop = true;
+	      idx_leadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	      hadrontop_index = bHadron;
 	    }
-	  }else if(BHadhighpTjetfromtop == false){
+	  }else if(LeadBHadhighpTjetfromtop == false){
 	    if((*BHadronFromTopB)[bHadron] == true){
-	      idx_bHadJet[1] = genJet;
-	      BHadhighpTjetfromtop = true;
+	      idx_leadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	      hadrontop_index = bHadron;	      
+	    }
+	  }else if(NLeadBHadhighpTjet==false && bHadron!=hadron_index && idx_leadbHadJet[0] != genJet){
+	    idx_nleadbHadJet[0] = genJet;
+	    NLeadBHadhighpTjet = true;
+	    if((*BHadronFromTopB)[bHadron] == true && bHadron!=hadrontop_index && idx_leadbHadJet[1] != genJet){
+	      idx_nleadbHadJet[1] = genJet;
+	      NLeadBHadhighpTjetfromtop = true;
+	    }
+	  }else if(NLeadBHadhighpTjetfromtop == false && bHadron!=hadrontop_index && idx_leadbHadJet[1] != genJet){
+	    if((*BHadronFromTopB)[bHadron] == true){
+	      idx_nleadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	    }
+	  }//series of if statements to find highest pT jet
+	}      
+      }
+      for(int antibHadron=0; antibHadron<AntiBHadrons_; antibHadron++){
+	if((*AntiBHadronVsJet)[genJet*AntiBHadrons_+antibHadron]==1 && (LeadBHadhighpTjet ==false || LeadBHadhighpTjetfromtop == false || NLeadBHadhighpTjet ==false || NLeadBHadhighpTjetfromtop == false) && idx_leadbHadJet[0] != genJet){
+	  if(LeadBHadhighpTjet==false){
+	    idx_leadbHadJet[0] = genJet;
+	    LeadBHadhighpTjet = true;
+	    antihadron_index = antibHadron;
+	    if((*AntiBHadronFromTopB)[antibHadron] == true){
+	      idx_leadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	      antihadrontop_index = antibHadron;
+	    }
+	  }else if(LeadBHadhighpTjetfromtop == false){
+	    if((*AntiBHadronFromTopB)[antibHadron] == true){
+	      idx_leadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	      antihadrontop_index = antibHadron;	      
+	    }
+	  }else if(NLeadBHadhighpTjet==false && antibHadron!=antihadron_index && idx_leadbHadJet[0] != genJet){
+	    idx_nleadbHadJet[0] = genJet;
+	    NLeadBHadhighpTjet = true;
+	    if((*AntiBHadronFromTopB)[antibHadron] == true && antibHadron!=antihadrontop_index && idx_leadbHadJet[1] != genJet){
+	      idx_nleadbHadJet[1] = genJet;
+	      NLeadBHadhighpTjetfromtop = true;
+	    }
+	  }else if(NLeadBHadhighpTjetfromtop == false && antibHadron!=antihadrontop_index && idx_leadbHadJet[1] != genJet){
+	    if((*AntiBHadronFromTopB)[antibHadron] == true){
+	      idx_nleadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	    }
+	  }
+	}      
+      }    
+    }
+    /*
+    //Older version
+    for(int genJet=0; genJet<allGenJets_; genJet++){
+      for(int bHadron=0; bHadron<BHadrons_; bHadron++){
+	if((*BHadronVsJet)[genJet*BHadrons_+bHadron]==1 && (LeadBHadhighpTjet ==false || LeadBHadhighpTjetfromtop == false)){
+	  if(LeadBHadhighpTjet==false){
+	    idx_leadbHadJet[0] = genJet;
+	    LeadBHadhighpTjet = true;
+	    if((*BHadronFromTopB)[bHadron] == true){
+	      idx_leadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
+	    }
+	  }else if(LeadBHadhighpTjetfromtop == false){
+	    if((*BHadronFromTopB)[bHadron] == true){
+	      idx_leadbHadJet[1] = genJet;
+	      LeadBHadhighpTjetfromtop = true;
 	    }
 	  }
 	}      
       }
 
       for(int antibHadron=0; antibHadron<AntiBHadrons_; antibHadron++){
-	if((*AntiBHadronVsJet)[genJet*AntiBHadrons_+antibHadron]==1 && (AntiBHadhighpTjet ==false || AntiBHadhighpTjetfromtop == false)){
-	  if(AntiBHadhighpTjet==false){
-	    idx_antibHadJet[0] = genJet;
-	    AntiBHadhighpTjet = true;
+	if((*AntiBHadronVsJet)[genJet*AntiBHadrons_+antibHadron]==1 && (NLeadBHadhighpTjet ==false || NLeadBHadhighpTjetfromtop == false)){
+	  if(NLeadBHadhighpTjet==false){
+	    idx_nleadbHadJet[0] = genJet;
+	    NLeadBHadhighpTjet = true;
 	    if((*AntiBHadronFromTopB)[antibHadron] == true){
-	      idx_antibHadJet[1] = genJet;
-	      AntiBHadhighpTjetfromtop = true;
+	      idx_nleadbHadJet[1] = genJet;
+	      NLeadBHadhighpTjetfromtop = true;
 	    }
-	  }else if(AntiBHadhighpTjetfromtop == false){
+	  }else if(NLeadBHadhighpTjetfromtop == false){
 	    if((*AntiBHadronFromTopB)[antibHadron] == true){
-	      idx_antibHadJet[1] = genJet;
-	      AntiBHadhighpTjetfromtop = true;
+	      idx_nleadbHadJet[1] = genJet;
+	      NLeadBHadhighpTjetfromtop = true;
 	    }
 	  }
 	}
       }
-
     }
-    
+    */    
     //Case 2: highest pT genJets matched closest to a BHadron
     //BHadJetIndex: vector containing the GetJet indices matched, in DeltaR, to a BHadron. Starting from the highest pT jet.
-    if (BHadJetIndex->size() != 0) idx_bHadJet[2] = (*BHadJetIndex)[0];
+    if (BHadJetIndex->size() != 0) idx_leadbHadJet[2] = (*BHadJetIndex)[0];
     for (int i=0; i<(int) BHadJetIndex->size(); ++i){ 
       //Only search for those jets matched in DeltaR with a BHadron
       for(int j=0; j<BHadrons_ ; ++j){
 	//if ((*BHadronVsJet)[i*BHadrons_+j] == 1 && (*BHadronFromTopB)[j] == true) {idx_bHadJet[3] = (*BHadJetIndex)[i];}
-	if ((*BHadronVsJet)[((*BHadJetIndex)[i])*BHadrons_+j] == 1 && (*BHadronFromTopB)[j] == true) {idx_bHadJet[3] = (*BHadJetIndex)[i];}
+	if ((*BHadronVsJet)[((*BHadJetIndex)[i])*BHadrons_+j] == 1 && (*BHadronFromTopB)[j] == true) {idx_leadbHadJet[3] = (*BHadJetIndex)[i];}
       }
     }
-    
+        
     //AntiBHadJetIndex: vector containing the GetJet indices matched, in DeltaR, to a AntiBHadron. Starting from the highest pT jet.
-    if (AntiBHadJetIndex->size() != 0) idx_antibHadJet[2] = (*AntiBHadJetIndex)[0];
+    if (AntiBHadJetIndex->size() != 0) idx_nleadbHadJet[2] = (*AntiBHadJetIndex)[0];
     for (int i=0; i<(int) AntiBHadJetIndex->size(); ++i){ 
       //Only search for those jets matched in DeltaR with a AntiBHadron
       for(int j=0; j<AntiBHadrons_ ; ++j){
 	//if ((*AntiBHadronVsJet)[i*AntiBHadrons_+j] == 1 && (*AntiBHadronFromTopB)[j] == true) {idx_antibHadJet[3] = (*AntiBHadJetIndex)[i];}
-	if ((*AntiBHadronVsJet)[((*AntiBHadJetIndex)[i])*AntiBHadrons_+j] == 1 && (*AntiBHadronFromTopB)[j] == true) {idx_antibHadJet[3] = (*AntiBHadJetIndex)[i];}
+	if ((*AntiBHadronVsJet)[((*AntiBHadJetIndex)[i])*AntiBHadrons_+j] == 1 && (*AntiBHadronFromTopB)[j] == true) {idx_nleadbHadJet[3] = (*AntiBHadJetIndex)[i];}
       }
     }
-
-//     if(EventCounter % 1000 == 0 ){//&& idx_bHadJet.size()>1 && idx_antibHadJet.size()>1){
-//       cout<<"-----------------"<<endl;
-//       cout<<"idx_bHadJet.size(): "<<idx_bHadJet.size()<<endl;
-//       cout<<"idx_bHadJet[0]: "<<idx_bHadJet[0]<<endl;
-//       cout<<"idx_bHadJet[1]: "<<idx_bHadJet[1]<<endl;
-//       cout<<"idx_bHadJet[2]: "<<idx_bHadJet[2]<<endl;
-//       cout<<"idx_bHadJet[3]: "<<idx_bHadJet[3]<<endl;
-//       cout<<"idx_antibHadJet.size()"<<idx_antibHadJet.size()<<endl;
-//       cout<<"idx_antibHadJet[0]: "<<idx_antibHadJet[0]<<endl;
-//       cout<<"idx_antibHadJet[1]: "<<idx_antibHadJet[1]<<endl;
-//       cout<<"idx_antibHadJet[2]: "<<idx_antibHadJet[2]<<endl;
-//       cout<<"idx_antibHadJet[3]: "<<idx_antibHadJet[3]<<endl;
-//     }
-    
+        
+    //    if(EventCounter % 1000 == 0 && idx_leadbHadJet[0]!=idx_leadbHadJet[1]){//&& idx_bHadJet.size()>1 && idx_antibHadJet.size()>1){
+    /*if(idx_leadbHadJet[0]!=idx_leadbHadJet[1]){//&& idx_bHadJet.size()>1 && idx_antibHadJet.size()>1){
+      cout<<"-----------------"<<endl;
+      cout<<"idx_leadbHadJet.size(): "<<idx_leadbHadJet.size()<<endl;
+      cout<<"idx_leadbHadJet[0]: "<<idx_leadbHadJet[0]<<endl;
+      cout<<"idx_leadbHadJet[1]: "<<idx_leadbHadJet[1]<<endl;
+      cout<<"idx_leadbHadJet[2]: "<<idx_leadbHadJet[2]<<endl;
+      cout<<"idx_leadbHadJet[3]: "<<idx_leadbHadJet[3]<<endl;
+      cout<<"idx_nleadbHadJet.size()"<<idx_nleadbHadJet.size()<<endl;
+      cout<<"idx_nleadbHadJet[0]: "<<idx_nleadbHadJet[0]<<endl;
+      cout<<"idx_nleadbHadJet[1]: "<<idx_nleadbHadJet[1]<<endl;
+      cout<<"idx_nleadbHadJet[2]: "<<idx_nleadbHadJet[2]<<endl;
+      cout<<"idx_nleadbHadJet[3]: "<<idx_nleadbHadJet[3]<<endl;
+      }*/
+        
     
 //     //To avoid recopying many code lines, we select HERE the BHadron JET Indices to cut on.
 //     int BHadronIndex;
 //     int AntiBHadronIndex;
     //Case 1A: highest pT genJet matched to a BHadron
-    BHadronIndex = idx_bHadJet[0];
-    AntiBHadronIndex = idx_antibHadJet[0];
+    BHadronIndex = idx_leadbHadJet[0];
+    AntiBHadronIndex = idx_nleadbHadJet[0];
 //   
   //   //Case 1B: highest pT genJet matched to a BHadron from Top
-//     BHadronIndex = idx_bHadJet[1];
-//     AntiBHadronIndex = idx_antibHadJet[1];
+    //BHadronIndex = idx_bHadJet[1];
+    //AntiBHadronIndex = idx_antibHadJet[1];
     
   //   //Case 2A: highest pT genJets matched closest to a BHadron
-// //     BHadronIndex = idx_bHadJet[2];
-// //     AntiBHadronIndex = idx_antibHadJet[2];
+    //BHadronIndex = idx_bHadJet[2];
+    //AntiBHadronIndex = idx_antibHadJet[2];
   //   
   //   //Case 2B: highest pT genJets matched closest to a BHadron from Top
-    //    BHadronIndex = idx_bHadJet[3];
-    //AntiBHadronIndex = idx_antibHadJet[3];
+    //    BHadronIndex = idx_leadbHadJet[3];
+    //AntiBHadronIndex = idx_nleadbHadJet[3];
 
 
   }
@@ -482,9 +573,9 @@ Bool_t Analysis::Process(Long64_t entry)
     h_GenAll->Fill(LVGenTop.M(),1);
     if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
      //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
-      //       if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
-       if(BHadronIndex != -1 && LVGenJets[BHadronIndex].Pt()>30 && abs(LVGenJets[BHadronIndex].Eta())<2.4 &&
- 	AntiBHadronIndex != -1 && LVGenJets[AntiBHadronIndex].Pt()>30 && abs(LVGenJets[AntiBHadronIndex].Eta())<2.4 ){
+      //if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
+      if(BHadronIndex != -1 && LVGenJets[BHadronIndex].Pt()>30 && abs(LVGenJets[BHadronIndex].Eta())<2.4 &&
+	 AntiBHadronIndex != -1 && LVGenJets[AntiBHadronIndex].Pt()>30 && abs(LVGenJets[AntiBHadronIndex].Eta())<2.4 ){
 //       if(LVBHadronGenJet.Pt()>30 && abs(LVBHadronGenJet.Eta())<2.4 &&
 // 	LVAntiBHadronGenJet.Pt()>30 && abs(LVAntiBHadronGenJet.Eta())<2.4){
   
@@ -505,10 +596,6 @@ Bool_t Analysis::Process(Long64_t entry)
 	//h_VisGenAntiBQuarkpT->Fill(LVGenAntiBQuark.Pt(),1);
 	h_VisGenLeptonpT->Fill(LVGenLepton.Pt(),1);
 	h_VisGenAntiLeptonpT->Fill(LVGenAntiLepton.Pt(),1);
- 	h_VisGenBJetpT->Fill(LVGenJets[BHadronIndex].Pt(),1);
- 	h_VisGenAntiBJetpT->Fill(LVGenJets[AntiBHadronIndex].Pt(),1);
-//	h_VisGenBJetpT->Fill(LVBHadronGenJet.Pt(),1);
-//	h_VisGenAntiBJetpT->Fill(LVAntiBHadronGenJet.Pt(),1);
 	
 	h_VisGenTopEta->Fill(LVGenTop.Eta(),1);
 	h_VisGenAntiTopEta->Fill(LVGenAntiTop.Eta(),1);
@@ -521,7 +608,15 @@ Bool_t Analysis::Process(Long64_t entry)
  	h_VisGenAntiBJetEta->Fill(LVGenJets[AntiBHadronIndex].Eta(),1);
  	h_VisGenBJetRapidity->Fill(LVGenJets[BHadronIndex].Rapidity(),1);
  	h_VisGenAntiBJetRapidity->Fill(LVGenJets[AntiBHadronIndex].Rapidity(),1);
-	
+ 	h_VisGenBJetpT->Fill(LVGenJets[BHadronIndex].Pt(),1);
+ 	h_VisGenAntiBJetpT->Fill(LVGenJets[AntiBHadronIndex].Pt(),1);
+	/*h_VisGenBJetpT->Fill(LVBHadronGenJet.Pt(),1);
+	h_VisGenAntiBJetpT->Fill(LVAntiBHadronGenJet.Pt(),1);
+	h_VisGenBJetEta->Fill(LVBHadronGenJet.Eta(),1);
+	h_VisGenAntiBJetEta->Fill(LVAntiBHadronGenJet.Eta(),1);
+	h_VisGenBJetRapidity->Fill(LVBHadronGenJet.Rapidity(),1);
+	h_VisGenAntiBJetRapidity->Fill(LVAntiBHadronGenJet.Rapidity(),1);
+	*/
 // 	h_VisGenBQuarkRapidity->Fill(LVGenBQuark.Rapidity(),1);
 // 	h_VisGenAntiBQuarkRapidity->Fill(LVGenAntiBQuark.Rapidity(),1);
 
@@ -607,9 +702,22 @@ Bool_t Analysis::Process(Long64_t entry)
   
   if(lepton_>1){  //two isolated leptons create dimass out of highest pt pair
     if(dimass>12.0 && NLeadLeptonNumber!=0){
+      h_jetMulti_diLep->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
       h_diLepMassFull->Fill(dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
       if(channel->find("emu")!=string::npos){//quick and DIRTY!
+	h_step5->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	if(dimass>12.0 && jet_>1){
+	  h_step6->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  h_step7->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  
+	  if(BJetIndex.size()>0){btagSFuse=btagSF;
+	    h_step8->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);	    
+	    if(HypTop_){weightKinFituse=weightKinFit;
+	      h_step9->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);	    
+	    }
+	  }
+	  btagSFuse=1.0;
+	  weightKinFituse=1.0;
 	  h_BjetMulti->Fill(BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  double jetHT = 0;
@@ -651,6 +759,23 @@ Bool_t Analysis::Process(Long64_t entry)
 	  }
 	}
       }else{
+	if (dimass> 12.0 && (dimass<76.0 || dimass > 106.0)){
+	  h_step5->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	  if(jet_>1){
+	    h_step6->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    if(jet_>1){
+	      h_step7->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	      if(BJetIndex.size()>0){btagSFuse=btagSF;
+		h_step8->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);	    
+		if(HypTop_){weightKinFituse=weightKinFit;
+		  h_step9->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);	    
+		}
+	      }
+	    }
+	  }
+	}
+	btagSFuse=1.0;
+	weightKinFituse=1.0;
 	if (dimass> 12.0 && (dimass<76.0 || dimass > 106.0) && jet_>1 && *(metEt->begin()) > 30){
 	  h_BjetMulti->Fill(BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -716,7 +841,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	if(MCSample->find("ttbarsignal")!=string::npos){
 	  if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
 //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
-//	    if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
+	    //if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
 	    if(BHadronIndex != -1 && LVGenJets[BHadronIndex].Pt()>30 && abs(LVGenJets[BHadronIndex].Eta())<2.4 &&
 	       AntiBHadronIndex != -1 && LVGenJets[AntiBHadronIndex].Pt()>30 && abs(LVGenJets[AntiBHadronIndex].Eta())<2.4 ){
 	      //            if(LVBHadronGenJet.Pt()>30 && abs(LVBHadronGenJet.Eta())<2.4 &&
@@ -806,6 +931,8 @@ Bool_t Analysis::Process(Long64_t entry)
 	  h_RecoAntiBJetpT->Fill(LVHypAntiBJet[solutionIndex].Pt(),1);
 	  h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),1);
 	  h_RecoAntiBJetRapidity->Fill(LVHypAntiBJet[solutionIndex].Rapidity(),1);
+	  h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),1);
+	  h_RecoAntiBJetEta->Fill(LVHypAntiBJet[solutionIndex].Eta(),1);
 
 	  h_HypTTBarMass->Fill(HypTTBarMass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_HypTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -853,7 +980,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	    
 	    if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
 //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
-//	    if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
+	      //if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
 	      if(BHadronIndex != -1 && LVGenJets[BHadronIndex].Pt()>30 && abs(LVGenJets[BHadronIndex].Eta())<2.4 &&
 		 AntiBHadronIndex != -1 && LVGenJets[AntiBHadronIndex].Pt()>30 && abs(LVGenJets[AntiBHadronIndex].Eta())<2.4 ){
 		//            if(LVBHadronGenJet.Pt()>30 && abs(LVBHadronGenJet.Eta())<2.4 &&
@@ -946,6 +1073,8 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_RecoAntiBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),1);
 	    h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),1);
 	    h_RecoAntiBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),1);
+	    h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),1);
+	    h_RecoAntiBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),1);
 
 	    h_HypLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_HypLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -1062,6 +1191,7 @@ void Analysis::Terminate()
   h_VisGenAll->Write();
   h_vertMulti->Write();
   h_jetMulti->Write();
+  h_jetMulti_diLep->Write();
   h_BjetMulti->Write();
   h_jetMultiXSec->Write();
   h_jetMultiNoPU->Write();
@@ -1105,6 +1235,8 @@ void Analysis::Terminate()
   h_RecoAntiBJetpT->Write();
   h_RecoBJetRapidity->Write();
   h_RecoAntiBJetRapidity->Write();
+  h_RecoBJetEta->Write();
+  h_RecoAntiBJetEta->Write();
 
   h_jetpT->Write();
   h_jetHT->Write();
