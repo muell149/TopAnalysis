@@ -179,6 +179,10 @@ void Plotter::DYScaleFactor(){
   DYScale[1]=DYSFMuMu;
   DYScale[2]=1.;
   DYScale[3]=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
+  //DYScale[0]=1.;//need to make a switch for control plots that don't want DYScale
+  //DYScale[1]=1.;
+  //DYScale[2]=1.;
+  //DYScale[3]=1.;
 }
 
 void Plotter::InclFlatSystematics(int syst_number){
@@ -802,7 +806,7 @@ void Plotter::setDataSet(TString mode)
 	dataset.push_back(filename);
 	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
@@ -830,7 +834,7 @@ void Plotter::setDataSet(TString mode)
 	
 	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed+2);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
@@ -875,7 +879,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetUp.push_back(filenameUp);
 	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed+2);}
+	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
@@ -890,7 +894,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetDown.push_back(filenameDown);
 	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed+2);}
+	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
@@ -928,7 +932,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetUp.push_back(filenameUp);
 	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed+2);}
+	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
@@ -943,7 +947,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetDown.push_back(filenameDown);
 	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed+2);}
+	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
@@ -1204,9 +1208,9 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 
   drawhists[0]->SetMinimum(ymin);
   if(logY){  
-    drawhists[0]->SetMaximum(20*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));
+    drawhists[0]->SetMaximum(18*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));
   }
-  else{drawhists[0]->SetMaximum(1.2*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
+  else{drawhists[0]->SetMaximum(1.5*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
 
   
   drawhists[0]->Draw("e1");  
@@ -1380,6 +1384,12 @@ void Plotter::PlotXSec(){
    c->Print("Plots/"+channel+"/InclusiveXSec.eps");
    c->Clear();
    delete c;
+  
+}
+
+void MakeTable(){
+
+  
   
 }
 
@@ -2110,16 +2120,16 @@ void Plotter::PlotDiffXSec(){
  
     h_GenDiffXSec->SetMinimum(ymin);
     if(logY){  
-      h_GenDiffXSec->SetMaximum(20*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+      h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
     }
-    else{ h_GenDiffXSec->SetMaximum(1.2*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
+    else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     h_GenDiffXSec->Draw();
     //h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
-    mcatnloBand->Draw("same, F");
+    //    mcatnloBand->Draw("same, F");
 
     GenPlotTheory->SetLineColor(2);
-    GenPlotTheory->Rebin(4);GenPlotTheory->Scale(1./4.);
+    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(2);
     mcnlohist->SetLineColor(kAzure);
@@ -2133,9 +2143,9 @@ void Plotter::PlotDiffXSec(){
     TLegend leg2 = *getNewLegend();
     leg2.AddEntry(h_DiffXSec, "Data",    "p");
     leg2.AddEntry(GenPlotTheory,            "Madgraph","l");
-    if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
-    else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "Powheg",  "l");        
+    //if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
+    //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
+    //if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "Powheg",  "l");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
     leg2.Draw("same");
