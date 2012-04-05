@@ -1,12 +1,17 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
+void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, 
+				  //TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
+				  TString inputFolderName="RecentAnalysisRun/PU_2011Full",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full/analyzeDiffXData2011AllCombinedMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full/analyzeDiffXData2011AllCombinedElectron.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root",
-				  const std::string decayChannel = "electron", bool withRatioPlot = true)
+				  const std::string decayChannel = "muon", bool withRatioPlot = true)
 {
   // ============================
   //  Set Root Style
@@ -401,8 +406,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     "#eta^{light q}/Frequency/0/1",
     "p_{t}^{b quark} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
     "#eta^{b quark}/Frequency/0/1",
-    "probability (best fit hypothesis)/events/1/50", 
-    "#chi^{2} (best fit hypothesis)/events/0/25"
+    "probability (best fit hypothesis)/events/1/25", 
+    "#chi^{2} (best fit hypothesis)/events/0/10"
   };
 
   TString axisLabel1De[ ] = {
@@ -782,7 +787,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	    // restrict x axis for special plots
 	    if(getStringEntry(plotList_[plot], 2)=="nHit"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(10,30 );
 	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ){ 
-	      if(getStringEntry(plotList_[plot], 1)=="analyzeTopRecoKinematicsKinFit") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,60);
+	      if(getStringEntry(plotList_[plot], 1).Contains("analyzeTopRecoKinematicsKinFit")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,60);
 	      else histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10);
  
 	    }
