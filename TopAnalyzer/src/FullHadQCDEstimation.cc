@@ -14,7 +14,9 @@ FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
   MultiJetMVADiscSrc_( cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc") ),
   useTree_           ( cfg.getParameter<bool>( "useTree" ) ),
   bTagAlgoWP_        ( cfg.getParameter<std::string>( "bTagAlgoWP" ) ),
-  MCweight_          ( cfg.getParameter<double>("MCweight") )
+  MCweight_          ( cfg.getParameter<double>("MCweight") ),
+  jetEnergyResolutionScaleFactors_( cfg.getParameter<std::vector<double> >( "jetEnergyResolutionScaleFactors" ) ),
+  jetEnergyResolutionEtaBinning_  ( cfg.getParameter<std::vector<double> >( "jetEnergyResolutionEtaBinning"   ) )
 {
   
   if(cfg.exists("udscResolutions") && cfg.exists("bResolutions")){
@@ -37,7 +39,8 @@ FullHadQCDEstimation::FullHadQCDEstimation(const edm::ParameterSet& cfg) :
   //			       std::string jetCorrectionLevel, int maxNJets, int maxNComb,
   //			       unsigned int maxNrIter, double maxDeltaS, double maxF, unsigned int jetParam, std::vector<unsigned> constraints, double mW, double mTop)
   kinFitter = new TtFullHadKinFitter::KinFit(true, 2, "myPseudoBTags", 0.5, 0.5,
-					     udscResolutions_, bResolutions_, 1.1,
+					     udscResolutions_, bResolutions_, 
+					     jetEnergyResolutionScaleFactors_, jetEnergyResolutionEtaBinning_,
 					     jecLevel, -1, -1,
 					     500, 5e-5, 0.0001, 1, constraints_, 80.4, 173.);
   

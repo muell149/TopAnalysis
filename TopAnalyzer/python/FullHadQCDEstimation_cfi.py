@@ -28,7 +28,10 @@ analyzeFullHadQCDEstimation = cms.EDAnalyzer("FullHadQCDEstimation",
     # resolutions used for the kinematic fit
     # ------------------------------------------------
     udscResolutions = udscResolution.functions,
-    bResolutions    = bjetResolution.functions
+    bResolutions    = bjetResolution.functions,
+    ## resolution scale factors
+    jetEnergyResolutionScaleFactors = cms.vdouble(1.0),
+    jetEnergyResolutionEtaBinning = cms.vdouble(0.0,-1.0)                                          
 )
 
 

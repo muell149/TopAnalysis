@@ -78,6 +78,9 @@ class FullHadQCDEstimation : public edm::EDAnalyzer {
   std::vector<edm::ParameterSet> udscResolutions_;
   std::vector<edm::ParameterSet> bResolutions_;
 
+  /// store the resolution scale factors for the kinematic fit
+  std::vector<double> jetEnergyResolutionScaleFactors_, jetEnergyResolutionEtaBinning_;
+
   /// weight of MC sample
   double MCweight_;
 

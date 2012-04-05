@@ -64,6 +64,9 @@ class KinFitQuality : public DoubleObject<TtFullHadronicEvent, const edm::View<p
   /// store the resolutions for the jets
   std::vector<edm::ParameterSet> udscResolutions_, bResolutions_;
 
+  /// store the resolution scale factors for the jets
+  std::vector<double> jetEnergyResolutionScaleFactors_, jetEnergyResolutionEtaBinning_;
+
   /// get object resolutions and put them into a matrix
   CovarianceMatrix * covM;
 };

@@ -15,7 +15,9 @@ KinFitQuality::KinFitQuality(const edm::ParameterSet& cfg) :
   useTree_         ( cfg.getParameter<bool>                           ( "useTree"         ) ),
   numberOfHypos_   ( cfg.getParameter<unsigned int>                   ( "numberOfHypos"   ) ),
   udscResolutions_ ( cfg.getParameter<std::vector<edm::ParameterSet> >( "udscResolutions" ) ),
-  bResolutions_    ( cfg.getParameter<std::vector<edm::ParameterSet> >( "bResolutions"    ) )
+  bResolutions_    ( cfg.getParameter<std::vector<edm::ParameterSet> >( "bResolutions"    ) ),
+  jetEnergyResolutionScaleFactors_( cfg.getParameter<std::vector<double> >( "jetEnergyResolutionScaleFactors" ) ),
+  jetEnergyResolutionEtaBinning_  ( cfg.getParameter<std::vector<double> >( "jetEnergyResolutionEtaBinning"   ) )
 {
   covM = 0;
   tree = 0;
@@ -138,7 +140,7 @@ KinFitQuality::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>& 
 */
 
     // helper to get the resolutions for the jets
-    if(!covM) covM = new CovarianceMatrix(udscResolutions_, bResolutions_);
+    if(!covM) covM = new CovarianceMatrix(udscResolutions_, bResolutions_, jetEnergyResolutionScaleFactors_, jetEnergyResolutionEtaBinning_);
 
     // make sure the b-jet index is in the range of the jet collection
     if( b >=0 && b < (int)jets.size() ){
