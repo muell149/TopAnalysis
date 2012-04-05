@@ -4,10 +4,10 @@
 
 void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
-			     std::string decayChannel = "electron", bool SVDunfold=true)
+			     std::string decayChannel = "muon", bool SVDunfold=true)
 {
   // ============================
   //  Set ROOT Style
@@ -139,6 +139,8 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
   for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  // exclude shape variation
+  for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
   for(unsigned int i=0; i<ignoreSys_.size(); ++i){
     if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;
@@ -1709,6 +1711,28 @@ TString efficiency="efficiency/"+variable;
 	// ---------------------------------------------
 	// use unfolded event yield as input
 	histo_[xSec][kData]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	// remove additional OF/UF bins
+	if(verbose>1){ 
+	  std::cout << std::endl << variable << ":" << std::endl;
+	  for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
+	    std::cout << "bin " << bin << ": " << std::endl;
+	    std::cout << "(" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
+	    std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
+	    std::cout << ")" << std::endl;
+	  }
+	}
+	double * newBinLowEdges = new double[binning_[variable].size()];
+	newBinLowEdges = &binning_[variable].front();
+	histo_[xSec][kData] = (TH1F*) histo_[xSec][kData]->Rebin(binning_[variable].size()-1, histo_[xSec][kData]->GetName(), newBinLowEdges); 
+	if(verbose>1){
+	  std::cout << "->" << std::endl;
+	  for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
+	    std::cout << "bin " << bin << ": " << std::endl;
+	    std::cout << "(" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
+	    std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
+	    std::cout << ")" << std::endl;
+	  }
+	}
 	histo_[xSec][kData]->SetTitle(variable);
 	// divide by binwidth
 	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
@@ -1768,7 +1792,7 @@ TString efficiency="efficiency/"+variable;
 	}
 	setXAxisRange(histo_[xSec    ][kSig ], variable);
 	setXAxisRange(histo_[xSecNorm][kSig ], variable);
-      }    
+      }
     }
   }
 
