@@ -1,11 +1,10 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", bool pTPlotsLog=false){
+void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut", bool pTPlotsLog=false){
 	
   // ============================
   //  Set Root Style
   // ============================
-
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   myStyle.cd();
@@ -99,8 +98,13 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  // combine the results
 	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
 	  plotCombination->Scale(0.0);
-	  // loopins
+	  // loop bins
+	  if(verbose>1) std::cout << std::endl << xSecVariables_[i] << ":" << std::endl;
 	  for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
+	    if(verbose>1){
+	      std::cout << ", bin" << bin << ":" << std::endl;
+	      std::cout << "(" << plotCombination->GetBinLowEdge(bin) << " .. " << plotCombination->GetBinLowEdge(bin+1) << ")" << std::endl;
+	    }
 	    // consider only non-empty bins
 	    if(plotMu->GetBinContent(bin)!=0&&plotEl->GetBinContent(bin)!=0){
 	      double xSecMu     =plotMu->GetBinContent(bin);
@@ -113,7 +117,6 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	      plotCombination->SetBinContent(bin, combinedxSec     );
 	      plotCombination->SetBinError  (bin, combinedxSecError);
 	      if(verbose>1){
-		std::cout << xSecVariables_[i] << ", bin" << bin << ":" << std::endl;
 		std::cout << "mu: " << xSecMu << " +/- " << xSecErrorMu << std::endl;
 		std::cout << "el: " << xSecEl << " +/- " << xSecErrorEl << std::endl;
 		std::cout << "combined: " << combinedxSec << " +/- " << combinedxSecError << std::endl;
@@ -402,16 +405,26 @@ void bothDecayChannelsCombination(double luminosity=1143, bool save=true, unsign
 	  //delete combicanvas;
 	  delete combicanvas;
 	}
-	if(!(plotMu||plotEl)&&verbose>1){ 
-	  std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
-	  std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i];
-	  std::cout << " for decay channel ";
-	  if(!plotMu) std::cout << "muon";
-	  if(!plotEl) std::cout << " electron";
-	  std::cout << std::endl;
+	else{ 
+	  std::cout << "ERROR in bothDecayChannelsCombination.C! " << std::endl;
+	  std::cout << "plot " << xSecVariables_[i]+"kData" << " not found in ";
+	  std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for:" << std::endl;
+	  if(!plotMu) std::cout << "muon channel data" << std::endl;
+	  if(!plotEl) std::cout << "electron channel data" << std::endl;
+	  if(!plotTheo) std::cout << "theory" << std::endl;
+	  exit(0);
 	}
       }
-      if(!(canvasMu||canvasEl)&&verbose>1) std::cout << "ERROR: canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in either one or both decay channels!" << std::endl;
+      else{
+	std::cout << "ERROR in bothDecayChannelsCombination.C! " << std::endl;
+	if(!canvasMu||!canvasEl) std::cout << "canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
+	if(!canvasMu  ) std::cout << "muon file     diffXSecTopSemiMu"+dataSample+".root" << std::endl;
+	if(!canvasEl  ) std::cout << "electron file diffXSecTopSemiEl"+dataSample+".root" << std::endl;
+	if(!canvasTheo){ 
+	  std::cout << "theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSample+".root";
+	}
+	exit(0);
+      }
     }
   }
   // ---
