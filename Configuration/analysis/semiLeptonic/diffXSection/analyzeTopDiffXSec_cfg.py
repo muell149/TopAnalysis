@@ -972,10 +972,11 @@ process.kinFitTtSemiLepEventHypothesis.minBDiscBJets     = bTagDiscrCut
 process.kinFitTtSemiLepEventHypothesis.maxBDiscLightJets = bTagDiscrCut
 process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 
-# use larger JER in KinFit as it is obtained from data
-if(runningOnData=="data") and (applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.0777
-
+# eta-dependent scaling of JER (input to kinFit)
+if(applyKinFit==True):
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionScaleFactors = cms.vdouble( 1.052 , 1.057 , 1.096 , 1.134 , 1.288   )
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionEtaBinning = cms.vdouble(0.0  ,  0.5  ,  1.1  ,  1.7  ,  2.3  ,  -1.)
+    
 ## keep only events with unambigues parton matches
 ## (no other partons exist in dR=0.3 cone) 
 ## attention: improves purity but reduces efficiency

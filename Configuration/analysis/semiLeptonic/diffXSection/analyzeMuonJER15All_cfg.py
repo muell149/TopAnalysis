@@ -7,11 +7,13 @@ additionalEventWeights  = False
 ## get the mother file
 execfile("analyzeMuonDiffXSecAll_cfg.py")
 
-# JER +20%
-process.scaledJetEnergy.resolutionFactors   = cms.vdouble(1.2,   1.25,   1.30  )
-process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.,1.5,1.5,2.0,2.0,-1)
+# eta-dependent smearing of the jet energy
+process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 1.115 , 1.114 , 1.161 , 1.228 , 1.488 )
+#process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.0,0.5,0.5,1.1,1.1,1.7,1.7,2.3,2.3,-1.)
+
 if(applyKinFit==True):
-    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionSmearFactor = 1.20
+# eta-dependent scaling of the JER (input to kinFit) according to the smearing
+    process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionScaleFactors = cms.vdouble( 1.115 , 1.114 , 1.161 , 1.228 , 1.488   )
 
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXSecJERup_testAll.root'
