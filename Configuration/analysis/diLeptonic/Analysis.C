@@ -913,27 +913,27 @@ Bool_t Analysis::Process(Long64_t entry)
 	  //h_jetMulti->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  //	  cout<<"SolutionIndex: "<<solutionIndex<<endl;
 	  double HypTTBarMass = (LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).M();
-	  h_RecoTTBarMass->Fill(HypTTBarMass,1);
-	  h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),1);
-	  h_RecoTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),1);
-	  h_RecoToppT->Fill(LVHypTop[solutionIndex].Pt(),1);
-	  h_RecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),1);
-	  h_RecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),1);
-	  h_RecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),1);
+	  h_RecoTTBarMass->Fill(HypTTBarMass,weightPU*lumiWeight); 
+	  h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),weightPU*lumiWeight); 
+	  h_RecoTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),weightPU*lumiWeight); 
+	  h_RecoToppT->Fill(LVHypTop[solutionIndex].Pt(),weightPU*lumiWeight); 
+	  h_RecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),weightPU*lumiWeight); 
+	  h_RecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	  h_RecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),weightPU*lumiWeight); 
 
-	  h_RecoLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),1);
-	  h_RecoLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),1);
-	  h_RecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),1);
-	  h_RecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),1);
-	  h_RecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),1);
-	  h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),1);
+	  h_RecoLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*lumiWeight); 
+	  h_RecoLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*lumiWeight); 
+	  h_RecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),weightPU*lumiWeight); 
+	  h_RecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),weightPU*lumiWeight); 
+	  h_RecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*lumiWeight); 
+	  h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*lumiWeight); 
 
-	  h_RecoBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),1);
-	  h_RecoAntiBJetpT->Fill(LVHypAntiBJet[solutionIndex].Pt(),1);
-	  h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),1);
-	  h_RecoAntiBJetRapidity->Fill(LVHypAntiBJet[solutionIndex].Rapidity(),1);
-	  h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),1);
-	  h_RecoAntiBJetEta->Fill(LVHypAntiBJet[solutionIndex].Eta(),1);
+	  h_RecoBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
+	  h_RecoAntiBJetpT->Fill(LVHypAntiBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
+	  h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	  h_RecoAntiBJetRapidity->Fill(LVHypAntiBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	  h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
+	  h_RecoAntiBJetEta->Fill(LVHypAntiBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
 
 	  h_HypTTBarMass->Fill(HypTTBarMass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_HypTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -1055,27 +1055,27 @@ Bool_t Analysis::Process(Long64_t entry)
 	  if(HypTop_){
 	    //	  cout<<"SolutionIndex: "<<solutionIndex<<endl;
 	    double HypTTBarMass = (LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).M();
-	    h_RecoTTBarMass->Fill(HypTTBarMass,1);
-	    h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),1);
-	    h_RecoTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),1);
-	    h_RecoToppT->Fill(LVHypTop[solutionIndex].Pt(),1);
-	    h_RecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),1);
-	    h_RecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),1);
-	    h_RecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),1);
+	    h_RecoTTBarMass->Fill(HypTTBarMass,weightPU*lumiWeight); 
+	    h_RecoTTBarRapidity->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Rapidity(),weightPU*lumiWeight); 
+	    h_RecoTTBarpT->Fill((LVHypTop[solutionIndex]+ LVHypAntiTop[solutionIndex]).Pt(),weightPU*lumiWeight); 
+	    h_RecoToppT->Fill(LVHypTop[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoAntiToppT->Fill(LVHypAntiTop[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoTopRapidity->Fill(LVHypTop[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	    h_RecoAntiTopRapidity->Fill(LVHypAntiTop[solutionIndex].Rapidity(),weightPU*lumiWeight); 
 
-	    h_RecoLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),1);
-	    h_RecoLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),1);
-	    h_RecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),1);
-	    h_RecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),1);
-	    h_RecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),1);
-	    h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),1);
+	    h_RecoLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*lumiWeight); 
+	    h_RecoLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*lumiWeight); 
+	    h_RecoLeptonpT->Fill(LVHypLepton[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoAntiLeptonpT->Fill(LVHypAntiLepton[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*lumiWeight); 
+	    h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*lumiWeight); 
 
-	    h_RecoBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),1);
-	    h_RecoAntiBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),1);
-	    h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),1);
-	    h_RecoAntiBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),1);
-	    h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),1);
-	    h_RecoAntiBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),1);
+	    h_RecoBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoAntiBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	    h_RecoAntiBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	    h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
+	    h_RecoAntiBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
 
 	    h_HypLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_HypLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
