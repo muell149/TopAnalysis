@@ -257,12 +257,16 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	for(int bin=1; bin<=noSysPlot->GetNbinsX(); ++bin){
 	  double totalSystematicError = 0;
 	  double stdBinXSecValue      = histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
+	  double binEdgeDown          = histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin);
+	  double binEdgeUp            = histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin+1);
 	  double MCpredBinVar         = (decayChannel=="combined") ? histo_[xSecVariables_[i]+"MC"][sysNo]->GetBinContent(bin) : -1.0;
 	  // jump to bin without vanishing bin content
 	  while(stdBinXSecValue==0&&bin<Nbins){
 	    if(verbose>1) std::cout << "bin #" << bin << "/" << Nbins << " has bin content == 0, will be skipped!" << std::endl;
 	    ++bin;
 	    stdBinXSecValue=histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
+	    binEdgeDown          = histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin);
+	    binEdgeUp            = histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin+1);
 	  }
 	  // if last bin is empty -> stop looping, next variable
 	  if(bin==histo_[xSecVariables_[i]][sysNo]->GetNbinsX()&&stdBinXSecValue==0){
@@ -274,7 +278,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	  // else: continue with calculation
 	  else{
 	    if(verbose>0){ 
-	      std::cout << std::endl << xSecVariables_[i] << " bin #" << bin << "/" << Nbins;
+	      std::cout << std::endl << xSecVariables_[i] << " bin #" << bin << "/" << Nbins << std::endl;
+	      std::cout << "( range " << binEdgeDown << " .. " << binEdgeUp << ")" << std::endl;
 	      std::cout << "std value[pb/binwidth]: " << std::endl;
 	      std::cout << "a) data   : " << stdBinXSecValue << std::endl;
 	      std::cout << "b) MC pred: " << MCpredBinVar << std::endl;
@@ -392,6 +397,13 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		if(decayChannel=="combined"&&xSecVariables_[i]!="inclusive"){
 		  TString plotName=xSecVariables_[i];
 		  plotName.ReplaceAll("Norm","");
+		  if(verbose>1){ 
+		    std::cout << "try to access BCC result map for " << plotName << " (bin " << bin << ")" << std::endl;
+		    for(std::map<TString, std::vector<double> >::const_iterator val=correctedCenters_.begin(); val!=correctedCenters_.end(); ++val){
+		      std::cout << "found entry " << val->first << " (size " << val->second.size() << ", ";
+		      std::cout << "center (bin " << bin << ") " << ((int)val->second.size() >= bin ? val->second.at(bin-1) : -1.) << ")" << std::endl;
+		    }
+		  }
 		  pointXValue = correctedCenters_[plotName].at(bin-1);
 		  pointXError = corrCenterErrors_[plotName].at(bin-1);
 		  pointXError=0;
@@ -737,7 +749,15 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		statErrors->SetLineWidth(1.0) ; // totalErrors_[xSecVariables_[i]]->GetLineWidth());
 		statErrors->SetLineColor(totalErrors_[xSecVariables_[i]]->GetLineColor());
 		for(int bin=1; bin<=dataStat->GetNbinsX(); ++bin){
-		  if(dataStat->GetBinWidth(bin)!=0){
+		  // exclude over/underflow bins with empty bin content or zero width 
+		  if(dataStat->GetBinWidth(bin)!=0&&dataStat->GetBinContent(bin)!=0){
+		    if(verbose>1){ 
+		      std::cout << "try to access BCC result map for " << plotName << " (bin " << bin << ")" << std::endl;
+		      for(std::map<TString, std::vector<double> >::const_iterator val=correctedCenters_.begin(); val!=correctedCenters_.end(); ++val){
+			std::cout << "found entry " << val->first << " (size " << val->second.size() << ", ";
+			std::cout << "center (bin " << bin << ") " << ((int)val->second.size() >= bin ? val->second.at(bin-1) : -1.) << ")" << std::endl;
+		      }
+		    }
 		    double pointXValue = correctedCenters_[plotName].at(bin-1);
 		    double pointXError = corrCenterErrors_[plotName].at(bin-1);
 		    double pointYError = dataStat->GetBinError(bin);
