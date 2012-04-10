@@ -41,6 +41,7 @@ class Plotter {
   void setStyle(TH1&, unsigned int);
   void   write();
   double CalcXSec();
+  void MakeTable();
   void PlotXSec();
   void PlotDiffXSec();
   void DYScaleFactor();
@@ -806,7 +807,7 @@ void Plotter::setDataSet(TString mode)
 	dataset.push_back(filename);
 	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed-7);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
@@ -834,7 +835,7 @@ void Plotter::setDataSet(TString mode)
 	
 	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} background"); colors.push_back(kRed-7);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
@@ -879,7 +880,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetUp.push_back(filenameUp);
 	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed-7);}
+	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
@@ -894,7 +895,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetDown.push_back(filenameDown);
 	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed-7);}
+	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
@@ -932,7 +933,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetUp.push_back(filenameUp);
 	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} background"); colorsUp.push_back(kRed-7);}
+	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
@@ -947,7 +948,7 @@ void Plotter::setSystDataSet(TString systematic)
 	datasetDown.push_back(filenameDown);
 	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} background"); colorsDown.push_back(kRed-7);}
+	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
@@ -1167,7 +1168,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   for (int i = 1; i < l->GetEntries(); ++i) {
     aaa=aaa+"a"; 
     stacksum->Add((TH1D*)l->At(i));
-    if(legends[datafiles+i] == "t#bar{t} background") {
+    if(legends[datafiles+i] == "t#bar{t} other") {
       stacksum->Write(name+"_"+channel+aaa+"_Background");
     }
     if(legends[datafiles+i] == "t#bar{t} signal") {
@@ -1189,8 +1190,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     Double_t binerr2 = binc*binc*lumierr*lumierr;
     Double_t topunc = 0; // uncertainty on top xsec
     
-    double topxsec = 169.9; //157.5
-    double topxsecErr2 = 3.9*3.9 + 16.3*16.3;
+    double topxsec = 161.6.9; //157.5
+    double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
 
     double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
     topunc += drawhists[signalHist]->GetBinContent(i)*topRelUnc;
@@ -1387,10 +1388,132 @@ void Plotter::PlotXSec(){
   
 }
 
-void MakeTable(){
+void Plotter::MakeTable(){
+
+  TH1D *numhists5[hists.size()];
+  TH1D *numhists6[hists.size()];
+  TH1D *numhists7[hists.size()];
+  TH1D *numhists8[hists.size()];
+  TH1D *numhists9[hists.size()];
+
+  for(unsigned int i=0; i<dataset.size(); i++){
+    TFile *ftemp = TFile::Open(dataset[i]);
+    TH1D *temp_hist5 = (TH1D*)ftemp->Get("step5")->Clone();     
+    numhists5[i]=temp_hist5;
+    TH1D *temp_hist6 = (TH1D*)ftemp->Get("step6")->Clone();     
+    numhists6[i]=temp_hist6;
+    TH1D *temp_hist7 = (TH1D*)ftemp->Get("step7")->Clone();     
+    numhists7[i]=temp_hist7;
+    TH1D *temp_hist8 = (TH1D*)ftemp->Get("step8")->Clone();     
+    numhists8[i]=temp_hist8;
+    TH1D *temp_hist9 = (TH1D*)ftemp->Get("step9")->Clone();     
+    numhists9[i]=temp_hist9;
+    delete ftemp;
+  }
 
   
+
+  for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
+    if((legends[i] == DYEntry) && channelType!=2){
+      //numhists5[i]->Scale(DYScale[channelType]);//DYscale not applied in step5 and 6?
+      //numhists6[i]->Scale(DYScale[channelType]);
+      numhists7[i]->Scale(DYScale[channelType]);
+      numhists8[i]->Scale(DYScale[channelType]);
+      numhists9[i]->Scale(DYScale[channelType]);
+    }
+  }  
+
+  ////////////////////////////Make output for tables
+  double tmp_num5 = 0;
+  double tmp_num6 = 0;
+  double tmp_num7 = 0;
+  double tmp_num8 = 0;
+  double tmp_num9 = 0;
   
+  ofstream EventFile5;
+  ofstream EventFile6;
+  ofstream EventFile7;
+  ofstream EventFile8;
+  ofstream EventFile9;
+  string EventFilestring = "Plots/";
+  string EventFilestring5;
+  string EventFilestring6;
+  string EventFilestring7;
+  string EventFilestring8;
+  string EventFilestring9;
+  if(channelType==0){EventFilestring.append("ee");}
+  else if(channelType==1){EventFilestring.append("mumu");}
+  else if(channelType==2){EventFilestring.append("emu");}
+  else{EventFilestring.append("combined");}
+  EventFilestring5 =EventFilestring;EventFilestring5.append("/Events5.txt");
+  EventFilestring6 =EventFilestring;EventFilestring6.append("/Events6.txt");
+  EventFilestring7 =EventFilestring;EventFilestring7.append("/Events7.txt");
+  EventFilestring8 =EventFilestring;EventFilestring8.append("/Events8.txt");
+  EventFilestring9 =EventFilestring;EventFilestring9.append("/Events9.txt");
+  EventFile5.open(EventFilestring5.c_str());
+  EventFile6.open(EventFilestring6.c_str());
+  EventFile7.open(EventFilestring7.c_str());
+  EventFile8.open(EventFilestring8.c_str());
+  EventFile9.open(EventFilestring9.c_str());
+  double bg_num5 = 0;
+  double bg_num6 = 0;
+  double bg_num7 = 0;
+  double bg_num8 = 0;
+  double bg_num9 = 0;
+  for(unsigned int i=0; i<hists.size() ; i++){ 
+    tmp_num5+=numhists5[i]->Integral();
+    tmp_num6+=numhists6[i]->Integral();
+    tmp_num7+=numhists7[i]->Integral();
+    tmp_num8+=numhists8[i]->Integral();
+    tmp_num9+=numhists9[i]->Integral();
+
+    if(i==(hists.size()-1)){
+      EventFile5<<legends[i]<<": "<<tmp_num5<<endl;
+      EventFile6<<legends[i]<<": "<<tmp_num6<<endl;
+      EventFile7<<legends[i]<<": "<<tmp_num7<<endl;
+      EventFile8<<legends[i]<<": "<<tmp_num8<<endl;
+      EventFile9<<legends[i]<<": "<<tmp_num9<<endl;
+      bg_num5+=tmp_num5;
+      bg_num6+=tmp_num6;
+      bg_num7+=tmp_num7;
+      bg_num8+=tmp_num8;
+      bg_num9+=tmp_num9;
+      tmp_num5=0;
+      tmp_num6=0;
+      tmp_num7=0;
+      tmp_num8=0;
+      tmp_num9=0;
+    }else if(legends[i]!=legends[i+1]){
+      EventFile5<<legends[i]<<": "<<tmp_num5<<endl;
+      EventFile6<<legends[i]<<": "<<tmp_num6<<endl;
+      EventFile7<<legends[i]<<": "<<tmp_num7<<endl;
+      EventFile8<<legends[i]<<": "<<tmp_num8<<endl;
+      EventFile9<<legends[i]<<": "<<tmp_num9<<endl;
+      if(legends[i]!="data"){
+	bg_num5+=tmp_num5;
+	bg_num6+=tmp_num6;
+	bg_num7+=tmp_num7;
+	bg_num8+=tmp_num8;
+	bg_num9+=tmp_num9;
+      }
+      tmp_num5=0;
+      tmp_num6=0;
+      tmp_num7=0;
+      tmp_num8=0;
+      tmp_num9=0;
+    }
+
+  }
+  EventFile5<<"Total background: "<<bg_num5<<endl;
+  EventFile5.close();  
+  EventFile6<<"Total background: "<<bg_num6<<endl;
+  EventFile6.close();  
+  EventFile7<<"Total background: "<<bg_num7<<endl;
+  EventFile7.close();
+  EventFile8<<"Total background: "<<bg_num8<<endl;
+  EventFile8.close();  
+  EventFile9<<"Total background: "<<bg_num9<<endl;
+  EventFile9.close();  
 }
 
 double Plotter::CalcXSec(){
