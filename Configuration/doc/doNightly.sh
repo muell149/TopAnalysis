@@ -18,8 +18,11 @@ cmsenv
 echo "+++ Retrieving code from the CVS repository..."
 
 cvs -Q checkout -r V06-04-19 DataFormats/PatCandidates
+cvs -Q checkout -r V00-03-07 PhysicsTools/KinFitter
 cvs -Q checkout -r V08-03-17 PhysicsTools/Utilities
-cvs -Q checkout -r V06-07-13 TopQuarkAnalysis/TopEventSelection 
+cvs -Q checkout -r V06-07-13 TopQuarkAnalysis/TopEventSelection
+cvs -Q checkout -r V06-07-18 TopQuarkAnalysis/TopKinFitter
+cvs -Q checkout -r V06-07-09 TopQuarkAnalysis/TopObjectResolutions
 
 ############################################################
 # update our UserCode with the CVS head and compile
