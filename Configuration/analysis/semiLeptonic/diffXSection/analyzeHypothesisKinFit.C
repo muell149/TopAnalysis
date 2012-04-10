@@ -1710,34 +1710,88 @@ TString efficiency="efficiency/"+variable;
 	// remaining steps for cross section calculation
 	// ---------------------------------------------
 	// use unfolded event yield as input
-	histo_[xSec][kData]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
-	// remove additional OF/UF bins
-	if(verbose>1){ 
-	  std::cout << std::endl << variable << ":" << std::endl;
-	  for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
-	    std::cout << "bin " << bin << ": " << std::endl;
-	    std::cout << "(" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
-	    std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
-	    std::cout << ")" << std::endl;
-	  }
-	}
+	histo_[xSec][kData+42]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	// use reco yield plot clone to get correct and complete binning 
+	histo_[xSec][kData      ]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
+	histo_[xSec][kData      ]->Reset("icesm");
+	// remove additional bins with 0 width
 	double * newBinLowEdges = new double[binning_[variable].size()];
 	newBinLowEdges = &binning_[variable].front();
 	histo_[xSec][kData] = (TH1F*) histo_[xSec][kData]->Rebin(binning_[variable].size()-1, histo_[xSec][kData]->GetName(), newBinLowEdges); 
+	// remove additional OF/UF bins from SVD unfolded plots
+	if(verbose>1){ 
+	  std::cout << std::endl << variable << ":" << std::endl;
+	  for(int bin=0; bin<=histo_[xSec][kData+42]->GetNbinsX()+1; ++bin){
+	    std::cout << "bin " << bin;
+	    std::cout << " (" << histo_[xSec][kData+42]->GetBinLowEdge(bin) << " .. ";
+	    //std::cout << (bin==histo_[xSec][kData+42]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData+42]->GetBinLowEdge(bin+1));
+	    std::cout << histo_[xSec][kData+42]->GetBinLowEdge(bin+1);
+	    std::cout << "): " << histo_[xSec][kData+42]->GetBinContent(bin)  << std::endl;
+	  }
+	}
+	for(int binSVD=0; binSVD<=histo_[xSec][kData+42]->GetNbinsX()+1; ++binSVD){
+	  if(verbose>1) std::cout << "bin " << binSVD;
+	  double value=histo_[xSec][kData+42]->GetBinContent(binSVD);
+	  double error=histo_[xSec][kData+42]->GetBinError(binSVD);
+	  double loweredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD);
+	  double higheredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD+1);
+	  // search corresponding final bin
+	  bool found=false;
+	  for(int bin=1; bin<=histo_[xSec][kData]->GetNbinsX(); ++bin){
+	    double loweredge=histo_[xSec][kData]->GetBinLowEdge(bin);
+	    double higheredge=histo_[xSec][kData]->GetBinLowEdge(bin+1);
+	    if(!found){
+	      // normal bins
+	      if(loweredgeSVD>=loweredge&&higheredgeSVD<=higheredge){
+		found=true; 
+		if(verbose>1) std::cout << "-> bin " << bin << std::endl;
+		histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
+		histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(  bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+	      }
+	    }
+	  }
+	  // SVD bins outside plot range -> OF/UF
+	  if(!found){
+	    if(binSVD==0||(loweredgeSVD<=histo_[xSec][kData]->GetBinLowEdge(1)&&higheredgeSVD<=histo_[xSec][kData]->GetBinLowEdge(1))){
+	      found=true; 
+	      int bin=0;
+	      if(verbose>1) std::cout << "-> bin " << bin << std::endl;
+	      histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
+	      histo_[xSec][kData]->SetBinError(  bin, histo_[xSec][kData]->GetBinError(  bin)+error);
+	    }
+	    else if(binSVD==histo_[xSec][kData+42]->GetNbinsX()+1||(loweredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1)&&higheredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1))){
+	      found=true; 
+	      int bin=histo_[xSec][kData]->GetNbinsX()+1;
+	      if(verbose>1) std::cout << "-> bin " << bin << std::endl;
+	      histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
+	      histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(  bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+	    }
+	  }
+	  // make sure there is always a corresponding bin found!
+	  if(!found){ 
+	    std::cout << std::endl << "ERROR: bin " << binSVD << " (" << loweredgeSVD << " .. " << higheredgeSVD << ") from SVD plot does not match any of the final bins:" << std::endl;
+	    for(int i=0; i<(int)binning_[variable].size(); ++i){
+	      std::cout << binning_[variable][i] << " ";
+	    }
+	    std::cout << std::endl;
+	    exit(0);
+	  }
+	}
 	if(verbose>1){
-	  std::cout << "->" << std::endl;
+	  std::cout << std::endl << "->" << std::endl;
 	  for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
-	    std::cout << "bin " << bin << ": " << std::endl;
-	    std::cout << "(" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
-	    std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
-	    std::cout << ")" << std::endl;
+	    std::cout << "bin " << bin;
+	    std::cout << " (" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
+	    //std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
+	    std::cout << histo_[xSec][kData]->GetBinLowEdge(bin+1);
+	    std::cout << "): " << histo_[xSec][kData]->GetBinContent(bin) << std::endl;
 	  }
 	}
 	histo_[xSec][kData]->SetTitle(variable);
 	// divide by binwidth
 	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
 	// divide by luminosity 
-	histo_[xSec][kData]->Scale(1./(luminosity));	
+	histo_[xSec][kData]->Scale(1./(luminosity));
 	// Normalization
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
 	histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
@@ -1908,7 +1962,7 @@ TString efficiency="efficiency/"+variable;
 	  std::cout << "-------------------------------------" << std::endl;
 	  std::cout << "ok     : " << histo_[permutationLabel][kSig]->GetBinContent(1) << std::endl;
 	  std::cout << "(correct jet-quark assignment)" << std::endl;
-	  std::cout << "bb     : " << histo_[permutationLabel][kSig]->GetBinContent(2) << std::endl;
+	  std::cout << "b<->b  : " << histo_[permutationLabel][kSig]->GetBinContent(2) << std::endl;
 	  std::cout << "(hadronic and leptonic b-jet interchanged)" << std::endl;
 	  double others=0.;
 	  for(int bin=3; bin<=7; ++bin){
