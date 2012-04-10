@@ -98,7 +98,7 @@ from TopAnalysis.TopAnalyzer.PtHat_cfi import *
 ## analyzer for special variables in fully hadronic channel
 from TopAnalysis.TopAnalyzer.FullHadSpecial_cfi import *
 ## kinfit analyzer
-from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
+#from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
 from TopAnalysis.TopAnalyzer.KinFitImprover_cfi import *
 from TopAnalysis.TopAnalyzer.METKinFitAnalyzer_cfi import *
 ## analyzer for fully hadronic event reco
@@ -346,17 +346,17 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
 
         ## kinfit quality analyzer
         ## collect kinfit quality analyzers
-        globals()['kinFitQuality'   + suffix] = analyzeKinFitQuality.clone (srcB = jetSrc)
+        #globals()['kinFitQuality'   + suffix] = analyzeKinFitQuality.clone (srcB = jetSrc)
         globals()['kinFitImprover0' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(0) ) )
         globals()['kinFitImprover1' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(1) ) )
         globals()['kinFitImprover2' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(2) ) )
         globals()['kinFitImprover3' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(3) ) )
         globals()['kinFitImprover4' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(4) ) )
 
-        #globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolutionPF.functions
-        #globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolutionPF.functions
-        globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolution.functions
-        globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolution.functions
+        ##globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolutionPF.functions
+        ##globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolutionPF.functions
+        #globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolution.functions
+        #globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolution.functions
 
         ## collect fully hadronic top reco analyzers
         globals()['fullHadTopReco' + suffix] = analyzeFullHadTopReco.clone(srcB = jetSrc)
@@ -364,7 +364,7 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
         globals()['METKinFit'      + suffix] = analyzeMETKinFit.clone(JetSrc = jetSrc)
         
         ## monitor sequence for kinfit quality analyzers
-        globals()['monitorKinFit' + suffix] = cms.Sequence(globals()['kinFitQuality'   + suffix] *
+        globals()['monitorKinFit' + suffix] = cms.Sequence(#globals()['kinFitQuality'   + suffix] *
                                                            globals()['kinFitImprover0' + suffix] *
                                                            globals()['kinFitImprover1' + suffix] *
                                                            globals()['kinFitImprover2' + suffix] *

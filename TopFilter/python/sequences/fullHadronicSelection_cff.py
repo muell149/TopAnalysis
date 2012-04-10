@@ -76,7 +76,7 @@ from TopAnalysis.TopAnalyzer.PtHat_cfi import *
 ## analyzer for special variables in fully hadronic channel
 from TopAnalysis.TopAnalyzer.FullHadSpecial_cfi import *
 ## kinfit analyzer
-from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
+#from TopAnalysis.TopAnalyzer.KinFitQuality_cfi import *
 from TopAnalysis.TopAnalyzer.KinFitImprover_cfi import *
 from TopAnalysis.TopAnalyzer.METKinFitAnalyzer_cfi import *
 ## analyzer for fully hadronic event reco
@@ -494,7 +494,7 @@ monitorEventShapes_2 = cms.Sequence( eventShapes_2 )
 
 ## kinfit quality analyzer
 ## collect kinfit quality analyzers
-kinFitQuality_2  = analyzeKinFitQuality.clone  ( srcB = 'tightLeadingJets' )
+#kinFitQuality_2  = analyzeKinFitQuality.clone  ( srcB = 'tightLeadingJets' )
 kinFitImprover0_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , analyze = cms.PSet( comboType = cms.uint32(0) ) )
 kinFitImprover1_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , analyze = cms.PSet( comboType = cms.uint32(1) ) )
 kinFitImprover2_2 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , analyze = cms.PSet( comboType = cms.uint32(2) ) )
@@ -507,7 +507,7 @@ fullHadTopReco_2.analyze.bTagAlgo = 'trackCountingHighEffBJetTags'
 METKinFit_2 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
-monitorKinFit_2 = cms.Sequence( kinFitQuality_2   *
+monitorKinFit_2 = cms.Sequence( #kinFitQuality_2   *
                                 kinFitImprover0_2 *
                                 kinFitImprover1_2 *
                                 kinFitImprover2_2 *
@@ -621,7 +621,7 @@ monitorEventShapes_3 = cms.Sequence( eventShapes_3 )
 
 ## kinfit quality analyzer
 ## collect kinfit quality analyzers
-kinFitQuality_3  = analyzeKinFitQuality.clone  ( srcB = 'tightLeadingJets' )
+#kinFitQuality_3  = analyzeKinFitQuality.clone  ( srcB = 'tightLeadingJets' )
 kinFitImprover0_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , analyze = cms.PSet( comboType = cms.uint32(0) ) )
 kinFitImprover1_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , analyze = cms.PSet( comboType = cms.uint32(1) ) )
 kinFitImprover2_3 = analyzeKinFitImprover.clone( srcB = 'tightLeadingJets' , analyze = cms.PSet( comboType = cms.uint32(2) ) )
@@ -634,7 +634,7 @@ fullHadTopReco_3.analyze.bTagAlgo = 'trackCountingHighEffBJetTags'
 METKinFit_3 = analyzeMETKinFit.clone( JetSrc = 'tightLeadingJets' )
 
 ## monitor sequence for kinfit quality analyzers
-monitorKinFit_3 = cms.Sequence( kinFitQuality_3  *
+monitorKinFit_3 = cms.Sequence( #kinFitQuality_3  *
                                 kinFitImprover0_3 *
                                 kinFitImprover1_3 *
                                 kinFitImprover2_3 *
@@ -883,10 +883,10 @@ def runOnCalo(process):
     process.kinFitTtFullHadEventHypothesis.udscResolutions = process.udscResolutionPF.functions
     process.kinFitTtFullHadEventHypothesis.bResolutions    = process.bjetResolutionPF.functions
 
-    process.kinFitQuality_2.analyze.udscResolutions        = process.udscResolutionPF.functions
-    process.kinFitQuality_2.analyze.bResolutions           = process.bjetResolutionPF.functions
-    process.kinFitQuality_3.analyze.udscResolutions        = process.udscResolutionPF.functions
-    process.kinFitQuality_3.analyze.bResolutions           = process.bjetResolutionPF.functions
+    #process.kinFitQuality_2.analyze.udscResolutions        = process.udscResolutionPF.functions
+    #process.kinFitQuality_2.analyze.bResolutions           = process.bjetResolutionPF.functions
+    #process.kinFitQuality_3.analyze.udscResolutions        = process.udscResolutionPF.functions
+    #process.kinFitQuality_3.analyze.bResolutions           = process.bjetResolutionPF.functions
 
     ## run kinematic fit for CaloJets with L1L2L3L5 correted jets
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Hadron'
