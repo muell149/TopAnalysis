@@ -6,23 +6,27 @@ void Histo::MakePlots(){
 
   std::vector<double> Xbins;
   std::vector<double> binCenters;
-  /*  Plotter h_XSecPlot;
-  h_XSecPlot.setOptions("jetMultiXSec","N_{Events}","N_{jets}", false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
+  Plotter h_XSecPlot;
+  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
   h_XSecPlot.DYScaleFactor();
   h_XSecPlot.setDataSet("mumu");
   h_XSecPlot.fillHisto();
   h_XSecPlot.CalcXSec();
+  h_XSecPlot.MakeTable();
   h_XSecPlot.setDataSet("emu");
   h_XSecPlot.fillHisto();
   h_XSecPlot.CalcXSec();
+  h_XSecPlot.MakeTable();
   h_XSecPlot.setDataSet("ee");
   h_XSecPlot.fillHisto();
   h_XSecPlot.CalcXSec();
+  h_XSecPlot.MakeTable();
   h_XSecPlot.setDataSet("combined");
   h_XSecPlot.fillHisto();
   h_XSecPlot.CalcXSec();
+  h_XSecPlot.MakeTable();
   h_XSecPlot.PlotXSec();
-  */
+  
   string histolist = "HistoList";
   ifstream HistStream;
   HistStream.open(histolist.c_str());
