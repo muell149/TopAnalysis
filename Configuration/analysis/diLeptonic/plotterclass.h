@@ -1190,7 +1190,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     Double_t binerr2 = binc*binc*lumierr*lumierr;
     Double_t topunc = 0; // uncertainty on top xsec
     
-    double topxsec = 161.6.9; //157.5
+    double topxsec = 161.6; //157.5
     double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
 
     double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
@@ -1643,7 +1643,7 @@ void Plotter::PlotDiffXSec(){
     //CalcDiffSystematics("DY_", 6);
     //CalcDiffSystematics("BG_", 7);
     //DiffFlatSystematics(8,bins);
-    double topxsec = 169.9;
+    double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 3697693.0;
     double Xbins[XAxisbins.size()];
