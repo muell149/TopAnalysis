@@ -252,7 +252,7 @@ Bool_t Analysis::Process(Long64_t entry)
   if(MCSample->find("ttbarsignal")!=string::npos){ Analysis::GetSignalBranches(entry);}
   if(MCSample->find("run")!=string::npos){ weightLepSF = 1.0;}
   EventCounter++;
-  if(EventCounter % 10000 == 0){cout<<"Event Counter: "<<EventCounter<<endl;}
+  if(EventCounter % 100000 == 0){cout<<"Event Counter: "<<EventCounter<<endl;}
   float dimass=0.;
   double btagSFuse=1.0;//only use the btag SF when applying b-tagging
   double weightKinFituse = 1.0;//only use the kin fit SF when using the kinematic reconstruction
@@ -336,8 +336,8 @@ Bool_t Analysis::Process(Long64_t entry)
     std::vector<int> idx_nleadbHadJet;
     //To avoid recopying may code lines, we select HERE the BHadron JET Indices to cut on.
   
-    LVBHadronGenJet =  TLorentzVector(BHadronJetpX, BHadronJetpY, BHadronJetpZ, BHadronJetE);
-    LVAntiBHadronGenJet = TLorentzVector(AntiBHadronJetpX, AntiBHadronJetpY, AntiBHadronJetpZ, AntiBHadronJetE);
+    //    LVBHadronGenJet =  TLorentzVector(BHadronJetpX, BHadronJetpY, BHadronJetpZ, BHadronJetE);
+    //LVAntiBHadronGenJet = TLorentzVector(AntiBHadronJetpX, AntiBHadronJetpY, AntiBHadronJetpZ, AntiBHadronJetE);
     
     
     
@@ -764,7 +764,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	  h_step5->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  if(jet_>1){
 	    h_step6->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-	    if(jet_>1){
+	    if(*(metEt->begin()) > 30){
 	      h_step7->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	      if(BJetIndex.size()>0){btagSFuse=btagSF;
 		h_step8->Fill(1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);	    
