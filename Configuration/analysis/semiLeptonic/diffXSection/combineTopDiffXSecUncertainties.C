@@ -68,6 +68,17 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
+  // use BCC values?
+  bool useBCC=false;
+  // choose phase space
+  TString PS="";
+  // hadron level: LV="Hadron";
+  // parton level: LV="Parton";
+  TString LV="Hadron";
+  // full PS: extrapolate=true;
+  bool extrapolate=false;
+  if(LV=="Hadron") extrapolate=false;
+  if(!extrapolate) PS="PhaseSpace";
 
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
@@ -133,31 +144,35 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   // ============================
   //  Bin Center Corrections
   // ============================
-  
-  std::cout << " Loading and calculating bin center corrections .... " << std::endl;
+  std::map<TString, std::vector<double> > correctedCenters_;
+  std::map<TString, std::vector<double> > corrCenterErrors_;
 
-  BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTopPartonLevelKinematicsPhaseSpace",xSecVariableBranchNames_,mergeLepAndHadTop);
+  if(useBCC){
+    std::cout << " Loading and calculating bin center corrections .... " << std::endl;
 
-  b.runBCCCalculation();
-  std::map<TString, std::vector<double> > correctedCenters_ = b.getMapWithCorrectedCentersInX();
-  std::map<TString, std::vector<double> > corrCenterErrors_ = b.getMapWithCenterErrorsInX();
+    BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop);
 
-  // Output of results
+    b.runBCCCalculation();
+    correctedCenters_ = b.getMapWithCorrectedCentersInX();
+    corrCenterErrors_ = b.getMapWithCenterErrorsInX();
 
-  if(verbose>1){
-    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
-      std::cout << iter1->first << ": ";
-      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)	std::cout << (*iter2) << " ";
-      std::cout << std::endl;
-    }    
-    for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ ){
-      std::cout << iter1->first << ": ";
-      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++) std::cout << (*iter2) << " ";
-      std::cout << std::endl;
+    // Output of results
+
+    if(verbose>1){
+      for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
+	std::cout << iter1->first << ": ";
+	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)	std::cout << (*iter2) << " ";
+	std::cout << std::endl;
+      }    
+      for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ ){
+	std::cout << iter1->first << ": ";
+	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++) std::cout << (*iter2) << " ";
+	std::cout << std::endl;
+      }
     }
-  }
 
-  std::cout << " .... Executing bin center corrections finished." << std::endl;
+    std::cout << " .... Executing bin center corrections finished." << std::endl;
+  }
 
   // ============================
   //  Open rootfile
@@ -394,7 +409,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		// set combined errors for final xSec plot
 		double pointXValue = histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
 		double pointXError = 0;
-		if(decayChannel=="combined"&&xSecVariables_[i]!="inclusive"){
+		if(useBCC&&decayChannel=="combined"&&xSecVariables_[i]!="inclusive"){
 		  TString plotName=xSecVariables_[i];
 		  plotName.ReplaceAll("Norm","");
 		  if(verbose>1){ 
@@ -751,15 +766,15 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 		for(int bin=1; bin<=dataStat->GetNbinsX(); ++bin){
 		  // exclude over/underflow bins with empty bin content or zero width 
 		  if(dataStat->GetBinWidth(bin)!=0&&dataStat->GetBinContent(bin)!=0){
-		    if(verbose>1){ 
+		    if(useBCC && verbose>1){ 
 		      std::cout << "try to access BCC result map for " << plotName << " (bin " << bin << ")" << std::endl;
 		      for(std::map<TString, std::vector<double> >::const_iterator val=correctedCenters_.begin(); val!=correctedCenters_.end(); ++val){
 			std::cout << "found entry " << val->first << " (size " << val->second.size() << ", ";
 			std::cout << "center (bin " << bin << ") " << ((int)val->second.size() >= bin ? val->second.at(bin-1) : -1.) << ")" << std::endl;
 		      }
 		    }
-		    double pointXValue = correctedCenters_[plotName].at(bin-1);
-		    double pointXError = corrCenterErrors_[plotName].at(bin-1);
+		    double pointXValue = useBCC ? correctedCenters_[plotName].at(bin-1): histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
+		    double pointXError = useBCC ? corrCenterErrors_[plotName].at(bin-1): 0;
 		    double pointYError = dataStat->GetBinError(bin);
 		    statErrors->SetPoint(bin, pointXValue, dataStat->GetBinContent(bin));
 		    statErrors->SetPoint(0, 0, -1000);
