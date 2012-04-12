@@ -157,7 +157,7 @@ public :
    vector<int>     *BHadronVsJet;
    vector<int>     *AntiBHadronVsJet;   
    
-   Int_t           BHadronJet_;
+   /*   Int_t           BHadronJet_;
    Double_t	   BHadronJetpX;
    Double_t	   BHadronJetpY;
    Double_t	   BHadronJetpZ;
@@ -167,7 +167,7 @@ public :
    Double_t	   AntiBHadronJetpY;
    Double_t	   AntiBHadronJetpZ;
    Double_t	   AntiBHadronJetE;
-   
+   */
    Int_t           HypTop_;
    Double_t        HypToppX[kMaxHypTop];   //[HypTop_]
    Double_t        HypToppY[kMaxHypTop];   //[HypTop_]
@@ -333,7 +333,7 @@ public :
    TBranch        *b_BHadronVsJet;   //!
    TBranch        *b_AntiBHadronVsJet;   //!
 
-   TBranch	  *b_BHadronJet_;   //!
+   /*   TBranch	  *b_BHadronJet_;   //!
    TBranch        *b_BHadronJetpX;   //!
    TBranch        *b_BHadronJetpY;   //!
    TBranch        *b_BHadronJetpZ;   //!
@@ -343,7 +343,7 @@ public :
    TBranch        *b_AntiBHadronJetpY;   //!
    TBranch        *b_AntiBHadronJetpZ;   //!
    TBranch        *b_AntiBHadronJetE;   //!
-   
+   */
    
    TBranch        *b_HypTop_;   //!
    TBranch        *b_HypToppX;   //!
@@ -819,7 +819,7 @@ void Analysis::GetSignalBranches(Long64_t & entry)
    fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet, &b_BHadronVsJet);
    fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet, &b_AntiBHadronVsJet);
 
-   fChain->SetBranchAddress("GenJetHadronB.", &BHadronJet_, &b_BHadronJet_);
+   /*   fChain->SetBranchAddress("GenJetHadronB.", &BHadronJet_, &b_BHadronJet_);
    fChain->SetBranchAddress("GenJetHadronB.fCoordinates.fX", &BHadronJetpX, &b_BHadronJetpX);
    fChain->SetBranchAddress("GenJetHadronB.fCoordinates.fY", &BHadronJetpY, &b_BHadronJetpY);
    fChain->SetBranchAddress("GenJetHadronB.fCoordinates.fZ", &BHadronJetpZ, &b_BHadronJetpZ);
@@ -830,7 +830,7 @@ void Analysis::GetSignalBranches(Long64_t & entry)
    fChain->SetBranchAddress("GenJetHadronAntiB.fCoordinates.fY", &AntiBHadronJetpY, &b_AntiBHadronJetpY);
    fChain->SetBranchAddress("GenJetHadronAntiB.fCoordinates.fZ", &AntiBHadronJetpZ, &b_AntiBHadronJetpZ);
    fChain->SetBranchAddress("GenJetHadronAntiB.fCoordinates.fT", &AntiBHadronJetE, &b_AntiBHadronJetE);
-   
+   */
   b_GenToppX->GetEntry(entry,1);   //!
   b_GenToppY->GetEntry(entry,1);   //!
   b_GenToppZ->GetEntry(entry,1);   //!
@@ -902,7 +902,7 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   b_AntiBHadronVsJet->GetEntry(entry);   //!
   
   
-  b_BHadronJet_->GetEntry(entry);   //!
+  /*  b_BHadronJet_->GetEntry(entry);   //!
   b_BHadronJetpX->GetEntry(entry);   //!
   b_BHadronJetpY->GetEntry(entry);   //!
   b_BHadronJetpZ->GetEntry(entry);   //!
@@ -913,6 +913,6 @@ void Analysis::GetSignalBranches(Long64_t & entry)
   b_AntiBHadronJetpY->GetEntry(entry);   //!
   b_AntiBHadronJetpZ->GetEntry(entry);   //!
   b_AntiBHadronJetE->GetEntry(entry);   //!
-  
+  */
 }
 #endif // #ifdef Analysis_cxx
