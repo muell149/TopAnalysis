@@ -30,14 +30,14 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
   TString PS="";
   if(!extrapolate)PS="PhaseSpace";
   // choose if hadron or parton level xSec is taken
-  bool hadron=false;
+  bool hadron=true;
   TString state="";
   if(hadron) state="Hadron";
   else state="Parton";
   // choose additional theory curves to plot
-  bool DrawSmoothMadgraph = true;
-  bool DrawMCAtNLOPlot = true;
-  bool DrawPOWHEGPlot = true;
+  bool DrawSmoothMadgraph = false;
+  bool DrawMCAtNLOPlot = false;
+  bool DrawPOWHEGPlot = false;
   // GOSSIE quick fix: cut of m(ttbar) below 354 GeV
   bool cutTtbarMass=false;
   // decay channels
@@ -79,6 +79,10 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
 	plotName.ReplaceAll("Norm","");
 	TH1F* plotMu   = (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
 	TH1F* plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotName);
+	if(!plotTheo){
+	  plotTheo = (TH1F*)canvasTheo->GetPrimitive("analyzeTopPartonLevelKinematicsPhaseSpace/"+plotName);
+	  if(plotTheo) plotTheo->SetName(plotName);
+	}
 	TH1F* plotEl   = (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
 	if(plotMu&&plotEl&&plotTheo){ 
 	  if(verbose>1){
