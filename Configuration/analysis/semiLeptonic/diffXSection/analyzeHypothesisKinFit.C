@@ -104,7 +104,7 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   TString PS="";
   // hadron level: LV="Hadron";
   // parton level: LV="Parton";
-  TString LV="Parton";
+  TString LV="Hadron";
   // full PS: extrapolate=true;
   bool extrapolate=false;
   if(LV=="Hadron") extrapolate=false;
@@ -827,12 +827,12 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	    // check if plot exists 1D
 	    if(plotExists(histo_, plotList_[plot], sample)){
 	      // replace plot entry
-	      histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(newName); 
+	      histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
 	      histo_[plotList_[plot]].erase(sample);
 	    }
 	    // check if plot exists 2D
 	    else if(plotExists(histo2_, plotList_[plot], sample)){
-	      histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(newName); 
+	      histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
 	      histo2_[plotList_[plot]].erase(sample);
 	    }
 	    // finally delete the whole name entry
