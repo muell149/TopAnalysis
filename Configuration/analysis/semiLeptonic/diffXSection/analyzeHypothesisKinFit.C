@@ -116,6 +116,13 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
+  // redetermine optimal tau
+  bool redetermineopttau =false;
+  if(!SVDunfold) redetermineopttau =false;
+  if(redetermineopttau){
+    if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
+    save=false;
+  }
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
@@ -795,12 +802,12 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	  // check if plot exists 1D
 	  if(plotExists(histo_, plotList_[plot], sample)){
 	    // replace plot entry
-	    histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(newName); 
+	    histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
 	    histo_[plotList_[plot]].erase(sample);
 	  }
 	  // check if plot exists 2D
 	  else if(plotExists(histo2_, plotList_[plot], sample)){
-	    histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(newName); 
+	    histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
 	    histo2_[plotList_[plot]].erase(sample);
 	  }
 	  // finally delete the whole name entry
@@ -827,12 +834,12 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	    // check if plot exists 1D
 	    if(plotExists(histo_, plotList_[plot], sample)){
 	      // replace plot entry
-	      histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
+	      histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(newName); 
 	      histo_[plotList_[plot]].erase(sample);
 	    }
 	    // check if plot exists 2D
 	    else if(plotExists(histo2_, plotList_[plot], sample)){
-	      histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
+	      histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(newName); 
 	      histo2_[plotList_[plot]].erase(sample);
 	    }
 	    // finally delete the whole name entry
@@ -1516,6 +1523,7 @@ TString efficiency="efficiency/"+variable;
       //              parameter.
       //              Note: The scan may take a while!
       int scan =0;
+      if(redetermineopttau) scan=2;
       bool scanPlots=false;
       if(regMode<3) scan =1;
       if(scan==2) scanPlots=true;
@@ -1529,9 +1537,10 @@ TString efficiency="efficiency/"+variable;
       //         3 means: standard plots + k scan plots
       //         4 means: standard plots + k scan plots + tau scan plots (default)
       int plotting=1;
-      if(save&&systematicVariation==sysNo){ 
+      if(redetermineopttau) plotting=4;
+      if((save||redetermineopttau)&&systematicVariation==sysNo){ 
 	// output file: content
-	plotting+=1;
+	if(plotting==1) plotting+=1;
 	if(scan==2&&scanPlots) plotting+=2; // k and tau scan plots
 	// output files: labels
 	rootFile="diffXSecUnfoldTopSemi";
@@ -1564,6 +1573,7 @@ TString efficiency="efficiency/"+variable;
       //     (6) TEXT FILE ( 6. digit from right)
       //     (7) VERBOSITY (7. digit from right)
       int verbosity=verbose+1;
+      if(redetermineopttau) verbosity+=1;
       if(verbosity>3) verbosity=3;
       //         0 means: Default value, same as 2
       //         1 means: no output at all
