@@ -2146,7 +2146,7 @@ if(pfToPAT):
         'runOnAOD': True,
         'switchOffEmbedding': False,
         'addResolutions': True,
-        'resolutionsVersion': 'summer11',
+        'resolutionsVersion': 'fall11',
         'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
         'cutsElec': 'et > 15. & abs(eta) < 2.5',
