@@ -1645,7 +1645,7 @@ void Plotter::PlotDiffXSec(){
     //DiffFlatSystematics(8,bins);
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
-    double SignalEvents = 3697693.0;
+    double SignalEvents = 63244696.0;
     double Xbins[XAxisbins.size()];
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
     double binCenters[XAxisbinCenters.size()];
@@ -1864,6 +1864,7 @@ void Plotter::PlotDiffXSec(){
     TH1 *h_DiffXSec = (TH1D*)varhists[0]->Clone();
     TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone();
     h_DiffXSec->Reset();
+    h_GenDiffXSec->Reset();
 
     // DAVID 
     if ( doUnfolding == true ) {
@@ -2064,6 +2065,11 @@ void Plotter::PlotDiffXSec(){
 			//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecStatError[3][i]<<endl;
 			GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 			GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
+			if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
+			  DiffXSec[channelType][i]=DiffXSec[channelType][i]/2.;
+			  GenDiffXSec[channelType][i]=GenDiffXSec[channelType][i]/2.;
+			  DiffXSecStatError[channelType][i]=DiffXSecStatError[channelType][i]/2.;
+			}
 	      }
 	      h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
 	      h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
@@ -2144,13 +2150,18 @@ void Plotter::PlotDiffXSec(){
     tga_DiffXSecPlotwithSys->SetLineColor(kBlack);
    
 
+    //    for( Int_t j = 0; j< GenPlotTheory->GetNbinsX(); j++ ){
+    // GenPlotTheory->SetBinContent(j,(GenPlotTheory->GetBinContent(j)*topxsec)/(SignalEvents*GenPlotTheory->GetBinWidth(j)));
+    //}
     GenPlotTheory->Scale(topxsec/(SignalEvents*GenPlotTheory->GetBinWidth(1)));
     GenPlot->Scale(topxsec/(SignalEvents*GenPlot->GetBinWidth(1)));
-    
+    if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
+      GenPlotTheory->Scale(1/2.);
+    }
     double genscale = 1./GenPlotTheory->Integral("width");
     
     GenPlotTheory->Scale(genscale);
-    genscale = 1./ h_GenDiffXSec->Integral("width");
+    //genscale = 1./ h_GenDiffXSec->Integral("width");
     
     h_GenDiffXSec->Scale(genscale);
     TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
@@ -2252,7 +2263,7 @@ void Plotter::PlotDiffXSec(){
     //    mcatnloBand->Draw("same, F");
 
     GenPlotTheory->SetLineColor(2);
-    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
+    //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(2);
     mcnlohist->SetLineColor(kAzure);
