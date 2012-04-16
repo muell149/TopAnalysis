@@ -13,7 +13,19 @@ foreach syst (Nominal)
       ls mergedRoot/$syst/$channel/*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
+      echo
+      echo "**********************************************************************"
+      echo "Processing $syst / $channel ... " 
+      echo "**********************************************************************"
+      echo
+ 
       root -l -b -q load_Analysis.C
+
+      echo
+      echo "**********************************************************************"
+      echo "... Finished processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
 
       rm viaTau.txt
       rm selectionList.txt
@@ -25,8 +37,20 @@ foreach syst (Nominal)
 
       ls mergedRoot/$syst/$channel/*ttbarsignal*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel\_viaTau.txt
+      
+      echo 
+      echo "**********************************************************************"
+      echo "Processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
 
       root -l -b -q load_Analysis.C
+
+      echo
+      echo "**********************************************************************"
+      echo "... Finished processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
 
       rm selectionList.txt
       rm viaTau.txt
@@ -47,7 +71,19 @@ foreach syst ()
       ls mergedRoot/Nominal/$channel/*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel.txt
 
+      echo
+      echo "**********************************************************************"
+      echo "Processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
+      
       root -l -b -q load_Analysis.C
+
+      echo
+      echo "**********************************************************************"
+      echo "... Finished processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
 
       rm viaTau.txt
       rm selectionList.txt
@@ -60,7 +96,20 @@ foreach syst ()
       ls mergedRoot/Nominal/$channel/*ttbarsignal*.root > selectionList.txt
       cp selectionList.txt FileLists/selectionList_$syst\_$channel\_viaTau.txt
 
+      echo
+      echo "**********************************************************************"
+      echo "Processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
+
+
       root -l -b -q load_Analysis.C
+
+      echo
+      echo "**********************************************************************"
+      echo "... Finished processing $syst / $channel ... "
+      echo "**********************************************************************"
+      echo
 
       rm selectionList.txt
       rm viaTau.txt
