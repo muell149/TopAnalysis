@@ -150,43 +150,43 @@ from TopAnalysis.TopUtils.patTriggerEvent_cff import *
 
 ## high level trigger filter
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
-trigger = hltHighLevel.clone(HLTPaths = [#2010 trigger ('v*' to be immune to version changes)
-                                         'HLT_QuadJet15U'   , 'HLT_QuadJet20U'   ,'HLT_QuadJet25U'   ,
-                                         'HLT_QuadJet15U_v*', 'HLT_QuadJet20U_v*','HLT_QuadJet25U_v*',
+trigger = hltHighLevel.clone( HLTPaths = [ #2010 trigger ('v*' to be immune to version changes)
+                                           'HLT_QuadJet15U'   , 'HLT_QuadJet20U'   ,'HLT_QuadJet25U'   
+                                         , 'HLT_QuadJet15U_v*', 'HLT_QuadJet20U_v*','HLT_QuadJet25U_v*'
                                          #2011 1E33 trigger ('v*' to be immune to version changes)
-                                         'HLT_QuadJet50_Jet40_v*',
+                                         , 'HLT_QuadJet50_Jet40_v*'
                                          #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
-                                         'HLT_QuadJet50_Jet40_Jet30_v*'],
-                             throw = False)
+                                         , 'HLT_QuadJet50_Jet40_Jet30_v*']
+                             , throw = False)
 
 ## ---
 ##    FILTER STEP 0
 ## ---
 
 ### vertex filter
-#vertex = cms.EDFilter("VertexSelector",
-#                      src = cms.InputTag("offlinePrimaryVertices"),
-#                      cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2"),
-#                      filter = cms.bool(True),
-#                      )
+#vertex = cms.EDFilter( "VertexSelector"
+#                     , src = cms.InputTag("offlinePrimaryVertices")
+#                     , cut = cms.string("!isFake && ndof > 4 && abs(z) < 24 && position.Rho < 2")
+#                     , filter = cms.bool(True)
+#                     )
 #
 ### scraping filter
-#noscraping = cms.EDFilter("FilterOutScraping",
-#                          applyfilter = cms.untracked.bool(True),
-#                          debugOn = cms.untracked.bool(False),
-#                          numtrack = cms.untracked.uint32(10),
-#                          thresh = cms.untracked.double(0.25)
-#                          )
+#noscraping = cms.EDFilter( "FilterOutScraping"
+#                         , applyfilter = cms.untracked.bool(True)
+#                         , debugOn = cms.untracked.bool(False)
+#                         , numtrack = cms.untracked.uint32(10)
+#                         , thresh = cms.untracked.double(0.25)
+#                         )
 #
 ### setup good jet selection collection
-#goodJetSelection = countPatJets.clone(src = 'goodJetsPF',
-#                                      minNumber = 6
-#                                      )
+#goodJetSelection = countPatJets.clone( src = 'goodJetsPF'
+#                                     , minNumber = 6
+#                                     )
 #
-#filterStep0 = cms.Sequence(vertex *
-#                           noscraping *
-#                           goodJetSelection
-#                           )
+#filterStep0 = cms.Sequence( vertex
+#                          * noscraping
+#                          * goodJetSelection
+#                          )
 
 ## to switch verbosity modes of the kinFit
 #ttFullHadEvent.verbosity = 3
@@ -263,18 +263,18 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
     globals()['METKinematics'             + suffix] = analyzeMETKinematics.clone(srcA = 'patMETsPF')
 
     ## collect kinematics analyzers
-    globals()['monitorKinematics' + suffix] = cms.Sequence(globals()['tightBottomJetKinematics'  + suffix] *
-                                                           globals()['tightBJet_0_JetKinematics' + suffix] *
-                                                           globals()['tightBJet_1_JetKinematics' + suffix] *
-                                                           globals()['tightLeadingJetKinematics' + suffix] *
-                                                           globals()['tightLead_0_JetKinematics' + suffix] *
-                                                           globals()['tightLead_1_JetKinematics' + suffix] *
-                                                           globals()['tightLead_2_JetKinematics' + suffix] *
-                                                           globals()['tightLead_3_JetKinematics' + suffix] *
-                                                           globals()['tightLead_4_JetKinematics' + suffix] *
-                                                           globals()['tightLead_5_JetKinematics' + suffix] *
-                                                           globals()['METKinematics'             + suffix]
-                                                           )
+    globals()['monitorKinematics' + suffix] = cms.Sequence( globals()['tightBottomJetKinematics'  + suffix]
+                                                          * globals()['tightBJet_0_JetKinematics' + suffix]
+                                                          * globals()['tightBJet_1_JetKinematics' + suffix]
+                                                          * globals()['tightLeadingJetKinematics' + suffix]
+                                                          * globals()['tightLead_0_JetKinematics' + suffix]
+                                                          * globals()['tightLead_1_JetKinematics' + suffix]
+                                                          * globals()['tightLead_2_JetKinematics' + suffix]
+                                                          * globals()['tightLead_3_JetKinematics' + suffix]
+                                                          * globals()['tightLead_4_JetKinematics' + suffix]
+                                                          * globals()['tightLead_5_JetKinematics' + suffix]
+                                                          * globals()['METKinematics'             + suffix]
+                                                          )
 
     ## JET QUALITY
 
@@ -291,17 +291,17 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
     globals()['tightBJet_1_JetQuality' + suffix] = analyzeJetQuality.clone(src = bJetSrc, analyze = bottom1)
 
     ## collect quality analyzers
-    globals()['monitorJetsQuality' + suffix] = cms.Sequence(globals()['tightBottomJetQuality'  + suffix] *
-                                                            globals()['tightBJet_0_JetQuality' + suffix] *
-                                                            globals()['tightBJet_1_JetQuality' + suffix] *
-                                                            globals()['tightLeadingJetQuality' + suffix] *
-                                                            globals()['tightLead_0_JetQuality' + suffix] *
-                                                            globals()['tightLead_1_JetQuality' + suffix] *
-                                                            globals()['tightLead_2_JetQuality' + suffix] *
-                                                            globals()['tightLead_3_JetQuality' + suffix] *
-                                                            globals()['tightLead_4_JetQuality' + suffix] *
-                                                            globals()['tightLead_5_JetQuality' + suffix]  
-                                                            )
+    globals()['monitorJetsQuality' + suffix] = cms.Sequence( globals()['tightBottomJetQuality'  + suffix]
+                                                           * globals()['tightBJet_0_JetQuality' + suffix]
+                                                           * globals()['tightBJet_1_JetQuality' + suffix]
+                                                           * globals()['tightLeadingJetQuality' + suffix]
+                                                           * globals()['tightLead_0_JetQuality' + suffix]
+                                                           * globals()['tightLead_1_JetQuality' + suffix]
+                                                           * globals()['tightLead_2_JetQuality' + suffix]
+                                                           * globals()['tightLead_3_JetQuality' + suffix]
+                                                           * globals()['tightLead_4_JetQuality' + suffix]
+                                                           * globals()['tightLead_5_JetQuality' + suffix]
+                                                           )
 
     ## EVENT SHAPES
 
@@ -328,17 +328,17 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
     globals()['ptHat' + suffix] = analyzePtHat.clone()
 
     ## monitor sequence for generator
-    globals()['monitorGenerator' + suffix] = cms.Sequence(globals()['genParticles' + suffix] *
-                                                          globals()['ptHat' + suffix]
-                                                          )
+    globals()['monitorGenerator' + suffix] = cms.Sequence( globals()['genParticles' + suffix]
+                                                         * globals()['ptHat' + suffix]
+                                                         )
 
     ## collect all monitoring sequences
-    globals()['monitoringSequence' + suffix] = cms.Sequence(globals()['monitorKinematics'      + suffix] *
-                                                            globals()['monitorJetsQuality'     + suffix] *
-                                                            globals()['monitorEventShapes'     + suffix] *
-                                                            globals()['monitorFullHadSpecials' + suffix] *
-                                                            globals()['monitorGenerator'       + suffix]
-                                                            )
+    globals()['monitoringSequence' + suffix] = cms.Sequence( globals()['monitorKinematics'      + suffix]
+                                                           * globals()['monitorJetsQuality'     + suffix]
+                                                           * globals()['monitorEventShapes'     + suffix]
+                                                           * globals()['monitorFullHadSpecials' + suffix]
+                                                           * globals()['monitorGenerator'       + suffix]
+                                                           )
 
     if(state > 0):
         
@@ -353,8 +353,8 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
         globals()['kinFitImprover3' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(3) ) )
         globals()['kinFitImprover4' + suffix] = analyzeKinFitImprover.clone(srcB = jetSrc, analyze = cms.PSet(comboType = cms.uint32(4) ) )
 
-        ##globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolutionPF.functions
-        ##globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolutionPF.functions
+        #globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolutionPF.functions
+        #globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolutionPF.functions
         #globals()['kinFitQuality' + suffix].analyze.udscResolutions = udscResolution.functions
         #globals()['kinFitQuality' + suffix].analyze.bResolutions    = bjetResolution.functions
 
@@ -364,18 +364,24 @@ def createMonitoringSequence(suffix, jetSrc, bJetSrc, state=0):
         globals()['METKinFit'      + suffix] = analyzeMETKinFit.clone(JetSrc = jetSrc)
         
         ## monitor sequence for kinfit quality analyzers
-        globals()['monitorKinFit' + suffix] = cms.Sequence(#globals()['kinFitQuality'   + suffix] *
-                                                           globals()['kinFitImprover0' + suffix] *
-                                                           globals()['kinFitImprover1' + suffix] *
-                                                           globals()['kinFitImprover2' + suffix] *
-                                                           globals()['kinFitImprover3' + suffix] *
-                                                           globals()['kinFitImprover4' + suffix] *
-                                                           globals()['METKinFit'       + suffix] *
-                                                           globals()['fullHadTopReco'  + suffix]
-                                                           )
+        globals()['monitorKinFit' + suffix] = cms.Sequence(# globals()['kinFitQuality'   + suffix]
+                                                            globals()['kinFitImprover0' + suffix]
+                                                          * globals()['kinFitImprover1' + suffix]
+                                                          * globals()['kinFitImprover2' + suffix]
+                                                          * globals()['kinFitImprover3' + suffix]
+                                                          * globals()['kinFitImprover4' + suffix]
+                                                          * globals()['METKinFit'       + suffix]
+                                                          * globals()['fullHadTopReco'  + suffix]
+                                                          )
 
-        globals()['monitoringSequence' + suffix] += cms.Sequence(globals()['monitorKinFit' + suffix]
-                                                                 )
+        globals()['monitoringSequence' + suffix] = cms.Sequence( globals()['monitorKinematics'      + suffix]
+                                                               * globals()['monitorJetsQuality'     + suffix]
+                                                               * globals()['monitorEventShapes'     + suffix]
+                                                               * globals()['monitorFullHadSpecials' + suffix]
+                                                               * globals()['monitorGenerator'       + suffix]
+                                                               * globals()['monitorKinFit' + suffix]
+                                                               )
+
     ## add monitoring sequence to full analysis sequence
     globals()['analyseFullHadronicSelection'] += globals()['monitoringSequence' + suffix]
 
@@ -393,16 +399,16 @@ PDFUncertainty_0 = analyzePDFUncertainty.clone()
 ##
 ##    further elements added *in time*, see below
 ## ---
-analyseFullHadronicSelection = cms.Sequence(PDFUncertainty_0     *
-                                            ## do the hlt triggering
-                                            trigger              *
-                                            ## create the jet collections
-                                            createJetCollections #*
-                                            ## do the matching
-                                            #matchJetsToPartons   *
-                                            ## filter step 0
-                                            #filterStep0
-                                            )
+analyseFullHadronicSelection = cms.Sequence( PDFUncertainty_0
+                                           ## do the hlt triggering
+                                           * trigger
+                                           ## create the jet collections
+                                           * createJetCollections
+                                           ## do the matching
+                                           #* matchJetsToPartons
+                                           ## filter step 0
+                                           #* filterStep0
+                                           )
 
 createMonitoringSequence("_0", 'goodJetsPF', 'trackCountingHighEffBJets')
 
@@ -411,29 +417,29 @@ createMonitoringSequence("_0", 'goodJetsPF', 'trackCountingHighEffBJets')
 ##    Multi-Jet Selection
 ## ---
 
-## select all events with at least 6 jets
-leading4JetSelection = countPatJets.clone(src = 'tight4LeadingJets',
-                                          minNumber = 4
-                                          )
+## select all events with at least 4 jets
+leading4JetSelection = countPatJets.clone( src = 'tight4LeadingJets'
+                                         , minNumber = 4
+                                         )
+
+## select all events with at least 5 jets
+leading5JetSelection = countPatJets.clone( src = 'tight5LeadingJets'
+                                         , minNumber = 5
+                                         )
 
 ## select all events with at least 6 jets
-leading5JetSelection = countPatJets.clone(src = 'tight5LeadingJets',
-                                          minNumber = 5
-                                          )
+#leading6JetSelection = countPatJets.clone( src = 'tightLeadingJets'
+#                                         , minNumber = 6
+#                                         )
+leading6JetSelection = countPatJets.clone( src = 'tight6LeadingJets'
+                                         , minNumber = 6
+                                         )
 
 ## select all events with at least 6 jets
-#leading6JetSelection = countPatJets.clone(src = 'tightLeadingJets',
-#                                          minNumber = 6
-#                                          )
-leading6JetSelection = countPatJets.clone(src = 'tight6LeadingJets',
-                                          minNumber = 6
-                                          )
-
-## select all events with at least 6 jets
-leadingJetSelection = cms.Sequence(leading4JetSelection *
-                                   leading5JetSelection *
-                                   leading6JetSelection
-                                   )
+leadingJetSelection = cms.Sequence( leading4JetSelection
+                                  * leading5JetSelection
+                                  * leading6JetSelection
+                                  )
 
 analyseFullHadronicSelection += leadingJetSelection
 
@@ -456,8 +462,9 @@ mvaDisc = findTtFullHadSignalSelMVA.clone(jets = 'tightLeadingJets')
 filterMVADiscriminator.maxDisc = 0.92
 
 TtFullHadSignalSelMVAFileSource.ttFullHadSignalSelMVA = 'TopAnalysis/Configuration/data/TtFullHadSignalSel_tmva_test.mva'
-mvaSelection = cms.Sequence(mvaDisc *
-                            filterMVADiscriminator)
+mvaSelection = cms.Sequence( mvaDisc
+                           * filterMVADiscriminator
+                           )
 
 analyseFullHadronicSelection += mvaSelection
 
@@ -477,9 +484,9 @@ createMonitoringSequence("_2", 'tightLeadingJets', 'tightBottomJets')
 ## ---
 
 ## select events with at least 2 b jets
-tightBottomJetSelection   = countPatJets.clone(src = 'tightBottomJets',
-                                               minNumber = 2
-                                               )
+tightBottomJetSelection   = countPatJets.clone( src = 'tightBottomJets'
+                                              , minNumber = 2
+                                              )
 
 bottomJetSelection = cms.Sequence(tightBottomJetSelection
                                   )
@@ -574,6 +581,8 @@ def runOnData(process):
     #if(hasattr(process, 'goodJetsPF')):
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
     process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+    if(hasattr(process, 'analyzeFullHadEventMixer')):
+        process.analyzeFullHadEventMixer.jetCorrectionLevel   = 'L2L3Residual'
     
     udsall.correctionLevel  = 'L2L3Residual'
     uds0.correctionLevel    = 'L2L3Residual'
@@ -623,35 +632,62 @@ def removeTrigger(process):
 ## ---
 ##    switch all necessary filters to run this sequence for background estimation
 ## ---
-def runAsBackgroundEstimation(process):
-    print '++++++++++++++++++++++++++++++++++++++++++++'
-    print 'loading background estimation and switching'
-    print 'bottomJetSelection, implemation into'
-    print 'sequence needs to be done BY HAND !!!'
-    print '++++++++++++++++++++++++++++++++++++++++++++'
-    process.tightBottomJetSelection.minNumber = 0
-    process.tightBottomJetSelection.maxNumber = 0
+def runAsBackgroundEstimation(process, whichEstimate):
 
-    ## ---
-    ##    load FullHadQCDEstimation Analyzer
-    ## ---
-
-    ## analyze the QCD estimation for fully hadronic ttbar events
-    process.load("TopAnalysis.TopAnalyzer.FullHadQCDEstimation_cfi")
-    process.analyzeFullHadQCDEstimation = process.analyzeFullHadQCDEstimation.clone(JetSrc = "tightLeadingJets")
-    #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHPT40"
-    #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40"
-    #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
-    process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30"
-    #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30clean"
-
-    #process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
-    #process.analyzeFullHadQCDEstimation.udscResolutions = udscResolutionPF.functions
-    #process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolutionPF.functions
-    process.analyzeFullHadQCDEstimation.udscResolutions = udscResolution.functions
-    process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolution.functions
-
+    if whichEstimate == 0 :
+        print '++++++++++++++++++++++++++++++++++++++++++++'
+        print 'no background estimate done'
+        print '++++++++++++++++++++++++++++++++++++++++++++'
+    elif whichEstimate == 1 :
+        print '++++++++++++++++++++++++++++++++++++++++++++'
+        print 'loading background estimation and switching'
+        print 'bottomJetSelection, implemation into'
+        print 'sequence needs to be done BY HAND !!!'
+        print '++++++++++++++++++++++++++++++++++++++++++++'
+        process.tightBottomJetSelection.minNumber = 0
+        process.tightBottomJetSelection.maxNumber = 0
+    
+        ## ---
+        ##    load FullHadQCDEstimation Analyzer
+        ## ---
         
+        ## analyze the QCD estimation for fully hadronic ttbar events
+        process.load("TopAnalysis.TopAnalyzer.FullHadQCDEstimation_cfi")
+        process.analyzeFullHadQCDEstimation = process.analyzeFullHadQCDEstimation.clone(JetSrc = "tightLeadingJets")
+        #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHPT40"
+        #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40"
+        #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM40MC"
+        process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30"
+        #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30clean"
+        
+        #process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
+        #process.analyzeFullHadQCDEstimation.udscResolutions = udscResolutionPF.functions
+        #process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolutionPF.functions
+        process.analyzeFullHadQCDEstimation.udscResolutions = udscResolution.functions
+        process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolution.functions
+
+    elif whichEstimate == 2 :
+        ## ---
+        ##    load FullHadEventMixer
+        ## ---
+       
+        print '++++++++++++++++++++++++++++++++++++++++++++'
+        print 'loading background estimation using the '
+        print 'event mixing tequnique, implemation into'
+        print 'sequence needs to be done BY HAND !!!'
+        print '++++++++++++++++++++++++++++++++++++++++++++'
+        
+        process.load("TopAnalysis.TopAnalyzer.FullHadEventMixer_cfi")
+        process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets")
+        
+        #from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
+        process.analyzeFullHadEventMixer.udscResolutions = udscResolution.functions
+        process.analyzeFullHadEventMixer.bResolutions    = bjetResolution.functions
+
+    else:
+        print 'whichEstimate =', whichEstimate, 'not allowed, only supported options: 0 (no background estimate), 1 (b-tag weighting), 2 (event mixing)'
+
+
 ## ---
 ##    run analysis on CaloJets & MET instead of PFJets & PFMet
 ## ---
@@ -677,10 +713,10 @@ def runOnCalo(process):
     process.kinFitTtFullHadEventHypothesis.udscResolutions = process.udscResolution.functions
     process.kinFitTtFullHadEventHypothesis.bResolutions    = process.bjetResolution.functions
 
-    for suf in listOfMonitoringSuffixes:
-        if(hasattr(process, 'kinFitQuality'+suf)):
-            getattr(process, 'kinFitQuality'+suf).analyze.udscResolutions = process.udscResolution.functions
-            getattr(process, 'kinFitQuality'+suf).analyze.bResolutions    = process.bjetResolution.functions
+    #for suf in listOfMonitoringSuffixes:
+    #    if(hasattr(process, 'kinFitQuality'+suf)):
+    #        getattr(process, 'kinFitQuality'+suf).analyze.udscResolutions = process.udscResolution.functions
+    #        getattr(process, 'kinFitQuality'+suf).analyze.bResolutions    = process.bjetResolution.functions
 
     ## run kinematic fit for CaloJets with L1L2L3(Res)L5 correted jets
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Hadron'
@@ -717,6 +753,10 @@ def modifyBTagDiscs(process, algo, newMinDisc, newMaxDisc):
 
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = newMinDisc
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = newMaxDisc
+
+    if(hasattr(process, 'analyzeFullHadEventMixer')):
+        process.analyzeFullHadEventMixer.minBTagValueBJet    = newMinDisc
+        process.analyzeFullHadEventMixer.maxBTagValueNonBJet = newMaxDisc
 
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     massSearchReplaceAnyInputTag(process.analyseFullHadronicSelection, 'trackCountingHighEffBJets', algo + 'BJets')
@@ -782,8 +822,10 @@ def switchToCSVMVA(process):
 ## ---
 ##    increase resolutions of kinematic fit
 ## ---
-def increaseKinFitResolution(process, factor):
-    process.kinFitTtFullHadEventHypothesis.energyResolutionSmearFactor = factor
+def increaseKinFitResolution(process, binning, factors):
+    #process.kinFitTtFullHadEventHypothesis.energyResolutionSmearFactor = factor
+    process.kinFitTtFullHadEventHypothesis.jetEnergyResolutionScaleFactors = cms.vdouble(factors)
+    process.kinFitTtFullHadEventHypothesis.jetEnergyResolutionEtaBinning   = cms.vdouble(binning)
 
 ## ---
 ##    remove PDF uncertainty histograms / trees
