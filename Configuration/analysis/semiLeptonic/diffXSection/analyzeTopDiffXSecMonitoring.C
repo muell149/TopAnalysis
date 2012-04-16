@@ -35,16 +35,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   //  8: kQCDEM1   9: kQCDEM2  10: kQCDEM3  11: kQCDBCE1  12: kQCDBCE2  13: kQCDBCE3  
   // 14: kWW      15: kWZ      16: kZZ      
   // 17: kSTops   18: kSATops  19: kSTopt   20: kSATopt   21: kSToptW   22: kSAToptW
+  // 18: ENDOFSAMPLEENUM
 
   // b) file name convention (implemented in basicFunctions.h)
 
-  // "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
+  // decayChannel+"DiffXSec"+sampleName+systematicVariation+MCProduction+"PF.root"
 
+  // decayChannel      = "elec", "muon"
   // sampleName        = "Sig", "Bkg", Wjets", "Zjets", "WW", "WZ", "ZZ", "VV", "SingleTopSchannel", 
   //                     "SingleTopTchannel", "SingleTopTWchannel", "QCD"
-  // GeneratorName     = "Mad", "Pythia6"
-  // GeneratorTune     = "Z2", "D6T"
-  // MCProductionCycle = "Summer11"
+  // MCProductionCycle = "Summer11","Fall11"
 	
   // ============================
   //  Options
@@ -67,7 +67,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
-  TString dataSample="";
+  TString dataSample = "";
   if(luminosity<36) dataSample="2010";
   if(luminosity>36) dataSample="2011";
   // save all plots into the following folder
@@ -85,30 +85,32 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // (WITHOUT ERRORBANDS..)
   bool SSV=false;
   if(SSV) std::cout << std::endl << " for all \"...Tagged/...\" plots the SSV algorithm is chosen!" << std::endl;
-  
-  //   0: sysNo
-  //   1: sysLumiUp                  2: sysLumiDown                
-  //   3: sysPUUp                    4: sysPUDown                  
-  //   5: sysJESUp                   6: sysJESDown                 
-  //   7: sysJERUp                   8: sysJERDown                 
-  //   9: sysTrigEffSFNormUp        10: sysTrigEffSFNormDown        
-  //  11: sysTriggerEffSFShapeUpEta 12: sysTriggerEffSFShapeDownEta
-  //  13: sysTriggerEffSFShapeUpPt  14: sysTriggerEffSFShapeDownPt  
-  //  15: sysMuEffSFUp              16: sysMuEffSFDown 
-  //  17: sysBtagSFUp               18: sysBtagSFDown  
-  //  19: sysMisTagSFUp             20: sysMisTagSFDown  
-  //  21: sysTopScaleUp             22: sysTopScaleDown            
-  //  23: sysVBosonScaleUp          24: sysVBosonScaleDown          
-  //  25: sysSingleTopScaleUp       26: sysSingleTopScaleDown     
-  //  27: sysTopMatchUp             28: sysTopMatchDown            
-  //  29: sysVBosonMatchUp          30: sysVBosonMatchDown         
-  //  31: sysTopMassUp              32: sysTopMassDown            
-  //  33: sysQCDUp                  34: sysQCDDown                 
-  //  35: sysSTopUp                 36: sysSTopDown               
-  //  37: sysDiBosUp                38: sysDiBosDown              
-  //  39: sysShapeUp                40: sysShapeDown   
-  //  41: ENDOFSYSENUM
-
+ 
+  //  0: sysNo
+  //  1: sysLumiUp                   2: sysLumiDown                
+  //  3: sysPUUp                     4: sysPUDown                  
+  //  5: sysJESUp                    6: sysJESDown                 
+  //  7: sysJERUp                    8: sysJERDown                 
+  //  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown        
+  // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta
+  // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
+  // 15: sysMuEffSFUp               16: sysMuEffSFDown
+  // 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65
+  // 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7
+  // 21: sysMisTagSFUp              22: sysMisTagSFDown
+  // 23: sysTopScaleUp              24: sysTopScaleDown            
+  // 25: sysVBosonScaleUp           26: sysVBosonScaleDown          
+  // 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown     
+  // 29: sysTopMatchUp              20: sysTopMatchDown           
+  // 31: sysVBosonMatchUp           32: sysVBosonMatchDown         
+  // 33: sysTopMassUp               34: sysTopMassDown            
+  // 35: sysQCDUp                   36: sysQCDDown          
+  // 37: sysSTopUp                  38: sysSTopDown               
+  // 39: sysDiBosUp                 40: sysDiBosDown              
+  // 41: sysPDFUp                   42: sysPDFDown
+  // 43: sysHadUp                   44: sysHadDown      
+  // 45: sysShapeUp                 46: sysShapeDown
+ 
   int systematicVariation=sysNo;
 
   // ============================
@@ -294,7 +296,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // b) list plot axes style
   // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
   // log = 0 or 1 for linear or logarithmic axis 
-	
+      
   TString axisLabel1D[ ] = { 
     // (I) preselection
     // (ii) jet monitoring
@@ -305,130 +307,130 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     //"#phi(jets)/jets/0/10",
     // (II) before btagging
     // (ii) jet monitoring
-    "N_{jets}/events/1/1",
-    "N_{jets}/events/1/1",
-    "E(jets) [GeV]/jets/1/1",
-    "p_{t}(jets) #left[#frac{GeV}{c}#right]/jets/1/1",
-    "#eta(jets)/jets/0/5",
-    "#phi(jets)/jets/0/10",
-    "H_{T} #left[#frac{GeV}{c}#right]/events/0/50",
-    "N(jet constituents)/jets/0/10",
-    "jet charge/jets/0/10"         ,
-    "neutral hadron fraction (jets)/jets/1/1"         ,
-    "neutral electromagnetic fraction (jets)/jets/0/2",
-    "charged hadron fraction (jets)/jets/0/1"         ,
-    "charged electromagnetic fraction (jets)/jets/1/1",
-    "N_{charged particles} (jets)/jets/0/2"           ,
-    "E(lead 1^{st} jet) [GeV]/events/1/2",
-    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right]/events/0/5",
-    "#eta(lead 1^{st} jet)/events/0/5",
-    "#phi(lead 1^{st} jet)/events/0/10",
-    "E(lead 2^{nd} jet) [GeV]/events/1/2",
-    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right]/events/0/5",
-    "#eta(lead 2^{nd} jet)/events/0/5",
-    "#phi(lead 2^{nd} jet)/events/0/10",
-    "E(lead 3^{rd} jet) [GeV]/events/1/2",
-    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right]/events/0/5",
-    "#eta(lead 3^{rd} jet)/events/0/5",
-    "#phi(lead 3^{rd} jet)/events/0/10",
-    "E(lead 4^{th} jet) [GeV]/events/1/2",
-    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right]/events/0/5",
-    "#eta(lead 4^{th} jet)/events/0/5",
-    "#phi(lead 4^{th} jet)/events/0/10",
+    "N_{jets};events;1;1",
+    "N_{jets};events;1;1",
+    "E(jets) [GeV];jets;1;1",
+    "p_{t}(jets) #left[#frac{GeV}{c}#right];jets;1;1",
+    "#eta(jets);jets;0;5",
+    "#phi(jets);jets;0;10",
+    "H_{T} #left[#frac{GeV}{c}#right];events;0;50",
+    "N(jet constituents);jets;0;10",
+    "jet charge;jets;0;10"         ,
+    "neutral hadron fraction (jets);jets;1;1"         ,
+    "neutral electromagnetic fraction (jets);jets;0;2",
+    "charged hadron fraction (jets);jets;0;1"         ,
+    "charged electromagnetic fraction (jets);jets;1;1",
+    "N_{charged particles} (jets);jets;0;2"           ,
+    "E(lead 1^{st} jet) [GeV];events;1;2",
+    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right];events;0;5",
+    "#eta(lead 1^{st} jet);events;0;5",
+    "#phi(lead 1^{st} jet);events;0;10",
+    "E(lead 2^{nd} jet) [GeV];events;1;2",
+    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right];events;0;5",
+    "#eta(lead 2^{nd} jet);events;0;5",
+    "#phi(lead 2^{nd} jet);events;0;10",
+    "E(lead 3^{rd} jet) [GeV];events;1;2",
+    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right];events;0;5",
+    "#eta(lead 3^{rd} jet);events;0;5",
+    "#phi(lead 3^{rd} jet);events;0;10",
+    "E(lead 4^{th} jet) [GeV];events;1;2",
+    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right];events;0;5",
+    "#eta(lead 4^{th} jet);events;0;5",
+    "#phi(lead 4^{th} jet);events;0;10",
     // (iii) btag monitoring
-    "b-discr.(TCHP)/jets/0/2"        ,
-    "b-discr.(TCHE)/jets/0/2"	,
-    "b-discr.(SSV HEff)/jets/1/2"	,
-    "b-discr.(SSV HPur)/jets/0/2"	,
-    "b-discr.(CSV)/jets/0/2"	,
-    "b-discr.(CSVMVA)/jets/0/2"	,
-    "b-discr.(JetBProb)/jets/0/5"	,
-    "b-discr.(JetProb)/jets/0/5"	,
-    "b-discr.(soft#mu)/jets/0/10"	,
-    "b-discr.(soft#muPt)/jets/0/10"  ,                  
-    "b-discr.(soft#muIP3d)/jets/0/10",
-    "N_{b-jets}/events/1/1"      ,
+    "b-discr.(TCHP);jets;0;2"        ,
+    "b-discr.(TCHE);jets;0;2"	,
+    "b-discr.(SSV HEff);jets;1;2"	,
+    "b-discr.(SSV HPur);jets;0;2"	,
+    "b-discr.(CSV);jets;0;2"	,
+    "b-discr.(CSVMVA);jets;0;2"	,
+    "b-discr.(JetBProb);jets;0;5"	,
+    "b-discr.(JetProb);jets;0;5"	,
+    "b-discr.(soft#mu);jets;0;10"	,
+    "b-discr.(soft#muPt);jets;0;10"  ,                  
+    "b-discr.(soft#muIP3d);jets;0;10",
+    "N_{b-jets};events;1;1"      ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/10",
-    "#SigmaE_{T} [GeV]/events/0/50"  ,
+    "#slash{E}_{T} #left[#frac{GeV}{c}#right];events;0;10",
+    "#SigmaE_{T} [GeV];events;0;50"  ,
     // (v) Vertices and pileup
-    "Number of PU Events/Frequency/1/1",
-    "Number of PU Events (Reweighted)/Frequency/1/1",
-    "Number of PU Events (Reweighted sysUp)/Frequency/1/1",
-    "Number of PU Events (Reweighted sysDown)/Frequency/1/1",
-    "Number of Vertices/Frequency/1/1",
-    "Number of Vertices (Reweighted)/Frequency/1/1",
-    "Number of Vertices (Reweighted sysUp)/Frequency/1/1",
-    "Number of Vertices (Reweighted sysDown)/Frequency/1/1",
+    "Number of PU Events;Frequency;1;1",
+    "Number of PU Events (Reweighted);Frequency;1;1",
+    "Number of PU Events (Reweighted sysUp);Frequency;1;1",
+    "Number of PU Events (Reweighted sysDown);Frequency;1;1",
+    "Number of Vertices;Frequency;1;1",
+    "Number of Vertices (Reweighted);Frequency;1;1",
+    "Number of Vertices (Reweighted sysUp);Frequency;1;1",
+    "Number of Vertices (Reweighted sysDown);Frequency;1;1",
     // (III) after btagging 
     // (ii) jet monitoring
-    "N_{jets}/events/1/1",
-    "p_{t}(jets) #left[#frac{GeV}{c}#right]/jets/1/2",
-    "#eta(jets)/jets/0/5" ,
-    "#phi(jets)/jets/0/10",
-    "H_{T} [#frac{GeV}{c}]/events/0/100",
-    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right]/events/1/5",
-    "#eta(lead 1^{st} jet)/events/0/5" ,
-    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
-    "#eta(lead 2^{nd} jet)/events/0/5" ,
-    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right]/events/1/5",
-    "#eta(lead 3^{rd} jet)/events/0/5" ,
-    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right]/events/1/5",
-    "#eta(lead 4^{th} jet)/events/0/5" ,
-    "p_{t}(lead 1^{st} b-tagged jet) #left[#frac{GeV}{c}#right]/events/1/5",
-    "p_{t}(lead 2^{nd} b-tagged jet) #left[#frac{GeV}{c}#right]/events/1/5",
-    "#eta(lead 1^{st} b-tagged jet)/events/0/5" ,
-    "#eta(lead 2^{nd} b-tagged jet)/events/0/5" ,
+    "N_{jets};events;1;1",
+    "p_{t}(jets) #left[#frac{GeV}{c}#right];jets;1;2",
+    "#eta(jets);jets;0;5" ,
+    "#phi(jets);jets;0;10",
+    "H_{T} [#frac{GeV}{c}];events;0;100",
+    "p_{t}(lead 1^{st} jet) #left[#frac{GeV}{c}#right];events;1;5",
+    "#eta(lead 1^{st} jet);events;0;5" ,
+    "p_{t}(lead 2^{nd} jet) #left[#frac{GeV}{c}#right];events;1;5",
+    "#eta(lead 2^{nd} jet);events;0;5" ,
+    "p_{t}(lead 3^{rd} jet) #left[#frac{GeV}{c}#right];events;1;5",
+    "#eta(lead 3^{rd} jet);events;0;5" ,
+    "p_{t}(lead 4^{th} jet) #left[#frac{GeV}{c}#right];events;1;5",
+    "#eta(lead 4^{th} jet);events;0;5" ,
+    "p_{t}(lead 1^{st} b-tagged jet) #left[#frac{GeV}{c}#right];events;1;5",
+    "p_{t}(lead 2^{nd} b-tagged jet) #left[#frac{GeV}{c}#right];events;1;5",
+    "#eta(lead 1^{st} b-tagged jet);events;0;5" ,
+    "#eta(lead 2^{nd} b-tagged jet);events;0;5" ,
     // (iii) btag monitoring    
-    "b-discr.(CSV)/jets/0/2",
-    "N_{b-jets}/events/1/1" ,
+    "b-discr.(CSV);jets;0;2",
+    "N_{b-jets};events;1;1" ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} #left[#frac{GeV}{c}#right]/events/0/20",
-    "#SigmaE_{T} [GeV]/events/0/30",
+    "#slash{E}_{T} #left[#frac{GeV}{c}#right];events;0;20",
+    "#SigmaE_{T} [GeV];events;0;30",
     // (v) Vertices and pileup
-    "Number of PU Events/Frequency/0/1",
-    "Number of PU Events (Reweighted)/Frequency/0/1",
-    "Number of PU Events (Reweighted sysUp)/Frequency/0/1",
-    "Number of PU Events (Reweighted sysDown)/Frequency/0/1",
-    "Number of Vertices/Frequency/0/1",
-    "Number of Vertices (Reweighted)/Frequency/0/1",
-    "Number of Vertices (Reweighted sysUp)/Frequency/0/1", 
-    "Number of Vertices (Reweighted sysDown)/Frequency/0/1", 
+    "Number of PU Events;Frequency;0;1",
+    "Number of PU Events (Reweighted);Frequency;0;1",
+    "Number of PU Events (Reweighted sysUp);Frequency;0;1",
+    "Number of PU Events (Reweighted sysDown);Frequency;0;1",
+    "Number of Vertices;Frequency;0;1",
+    "Number of Vertices (Reweighted);Frequency;0;1",
+    "Number of Vertices (Reweighted sysUp);Frequency;0;1", 
+    "Number of Vertices (Reweighted sysDown);Frequency;0;1", 
     // (III) after kinematic fit 
-    "p_{t}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/20",
-    "y^{t and #bar{t}}/Frequency/0/1",
-    "p_{t}^{t#bar{t}} #left[#frac{GeV}{c}#right]/Frequency/0/20",
-    "y^{t#bar{t}}/Frequency/0/1",
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/Frequency/0/20",
-    "p_{t}^{l} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
-    "#eta^{l}/Frequency/0/1",
-    "p_{t}^{light q} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
-    "#eta^{light q}/Frequency/0/1",
-    "p_{t}^{b quark} #left[#frac{GeV}{c}#right]/Frequency/0/20",    
-    "#eta^{b quark}/Frequency/0/1",
-    "probability (best fit hypothesis)/events/1/25", 
-    "#chi^{2} (best fit hypothesis)/events/0/10"
+    "p_{t}^{t and #bar{t}} #left[#frac{GeV}{c}#right];Frequency;0;20",
+    "y^{t and #bar{t}};Frequency;0;1",
+    "p_{t}^{t#bar{t}} #left[#frac{GeV}{c}#right];Frequency;0;20",
+    "y^{t#bar{t}};Frequency;0;1",
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right];Frequency;0;20",
+    "p_{t}^{l} #left[#frac{GeV}{c}#right];Frequency;0;20",    
+    "#eta^{l};Frequency;0;1",
+    "p_{t}^{light q} #left[#frac{GeV}{c}#right];Frequency;0;20",    
+    "#eta^{light q};Frequency;0;1",
+    "p_{t}^{b quark} #left[#frac{GeV}{c}#right];Frequency;0;20",    
+    "#eta^{b quark};Frequency;0;1",
+    "probability (best fit hypothesis);events;1;25", 
+    "#chi^{2} (best fit hypothesis);events;0;10"
   };
 
   TString axisLabel1De[ ] = {
     // (iv) electron monitoring
-    "N_{e}/events/0/1" ,
-    "E(e) [GeV]/events/0/2",
-    "E_{t}(e) [GeV]/events/0/1" ,
-    "#eta(e)/events/0/5",
-    "#phi(e)/events/0/5",
-    "#eta(S.C.)/events/0/1"  ,
-    "d_{xy} (e wrt. beamspot) [cm]/events/0/1",
-    "simpleEleId70cIso/events/0/1", 
-    "nHitsInner(conv)/events/0/1",
-    "convCot/events/0/5",
-    "convDist/events/0/5" ,
-    "PF relIso(e)/events/0/1" ,
+    "N_{e};events;0;1" ,
+    "E(e) [GeV];events;0;2",
+    "E_{t}(e) [GeV];events;0;1" ,
+    "#eta(e);events;0;5",
+    "#phi(e);events;0;5",
+    "#eta(S.C.);events;0;1"  ,
+    "d_{xy} (e wrt. beamspot) [cm];events;0;1",
+    "simpleEleId70cIso;events;0;1", 
+    "nHitsInner(conv);events;0;1",
+    "convCot;events;0;5",
+    "convDist;events;0;5" ,
+    "PF relIso(e);events;0;1" ,
     // (iv) electron monitoring
-    "PF relIso(e)/events/0/1" ,
-    "E_{t}(e) [GeV]/events/0/2",
-    "#eta(e)/events/0/1",
-    "#phi(e)/events/0/1"
+    "PF relIso(e);events;0;1" ,
+    "E_{t}(e) [GeV];events;0;2",
+    "#eta(e);events;0;1",
+    "#phi(e);events;0;1"
   };
 	
   TString axisLabel1Dmu[ ] = {
@@ -444,53 +446,61 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     //"N_{#mu}/events/0/1",
     // (II) before btagging
     // (i) muon monitoring
-    "N_{#mu}/events/0/1"   ,
-    "E(#mu)/events/0/2"    ,
-    "p_{t}(#mu)/events/0/1",
-    "#eta(#mu)/events/0/5" ,
-    "y(#mu)/events/0/5"    ,	
-    "#phi(#mu)/events/0/5" ,
-    "N_{hits}(inner tracker #mu)/events/0/1"          ,
-    "#chi^{2} (global trackfit #mu)/events/1/1",
-    "d_{xy} (#mu wrt. beamspot) [cm]/events/0/1" ,
-    "d_{z} (#mu) [cm]/events/0/10"               ,
-    "E_{Ecal} (#mu)/events/1/1",
-    "E_{Hcal} (#mu)/events/1/1",
-    "PF relIso(#mu)/events/0/1",
-    "N_{matched #mu segments}(#mu)/events/0/1",
+    "N_{#mu};events;0;1"   ,
+    "E(#mu);events;0;2"    ,
+    "p_{t}(#mu);events;0;1",
+    "#eta(#mu);events;0;5" ,
+    "y(#mu);events;0;5"    ,	
+    "#phi(#mu);events;0;5" ,
+    "N_{hits}(inner tracker #mu);events;0;1"          ,
+    "#chi^{2} (global trackfit #mu);events;1;1",
+    "d_{xy} (#mu wrt. beamspot) [cm];events;0;1" ,
+    "d_{z} (#mu) [cm];events;0;10"               ,
+    "E_{Ecal} (#mu);events;1;1",
+    "E_{Hcal} (#mu);events;1;1",
+    "PF relIso(#mu);events;0;1",
+    "N_{matched #mu segments}(#mu);events;0;1",
     // (III) after btagging 
     // (i) muon monitoring
-    "PF relIso(#mu)/events/0/1",
-    "p_{t}(#mu)/events/0/2",
-    "#eta(#mu)/events/0/1",
-    "#phi(#mu)/events/0/10",
+    "PF relIso(#mu);events;0;1",
+    "p_{t}(#mu);events;0;2",
+    "#eta(#mu);events;0;1",
+    "#phi(#mu);events;0;10",
   };
 
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {
   };
-  // count # plots
+  // ======================================================================
+  //  Count number of plots + cross-check to number of axis-label defined 
+  // ======================================================================
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
   if(decayChannel=="electron") N1Dplots+=(sizeof(plots1De )/sizeof(TString));
   if(decayChannel=="muon"    ) N1Dplots+=(sizeof(plots1Dmu)/sizeof(TString));
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
-  // check if all axis labels exist
-  unsigned int Naxislabels=sizeof(axisLabel1D)/sizeof(TString);
+  // get number fo axis labels and check if it corresponds to number of plots
+  unsigned int Naxislabels = sizeof(axisLabel1D)/sizeof(TString);
   if(decayChannel=="electron") Naxislabels+=(sizeof(axisLabel1De )/sizeof(TString));
   if(decayChannel=="muon"    ) Naxislabels+=(sizeof(axisLabel1Dmu)/sizeof(TString));
-  if(N1Dplots != Naxislabels) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
-  if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
-  if((N1Dplots != Naxislabels)||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
+  if(N1Dplots != Naxislabels){
+    std::cout << "ERROR - 1D plots: Number of plots and axis label do not correspond .... Exiting macro!" << std::endl;
+    exit(1);
+  }
+  if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)){
+    std::cout << "ERROR - 2D plots: Number of plots and axis label do not correspond .... Exiting macro!" << std::endl;
+    exit (1);
+  }
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 	
-  // ---
-  //    open our standard analysis files
-  // ---
-  std::map<unsigned int, TFile*> files_           = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
-  // ---
-  //    loading histos
-  // ---
+  // ===================================
+  //  Open the standard analysis files
+  // ===================================
+  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
+
+  // =====================
+  //  Loading histos
+  // =====================
   // collect all plot names in vector (first 1D, then 2D)
   std::vector<TString> plotList_;
   plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
@@ -503,27 +513,29 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   std::map< TString, TH1F* > histoErrorBand_;
   std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
-  // total # plots 
-  int Nplots=0;
-  // save all histos from plotList_ that exist in files_ into 
-  // histo_ and histo2_ and count total # of plots as Nplots
+  // a) Save all histos from plotList_ that exist in files_ into histo_ and histo2_
+  // b) Count total number of plots as Nplots
+  // c) Special action required for control plots regarding PU and nVertex:
+  //    - Compare the reweighted histos in MC to the same but unweighted histo in data
+  //    - Strip off appendices from histo-names as redundant part of name to get the according plots from data
   if(verbose>0) std::cout << std::endl;
+  int Nplots=0;
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back("_reweighted_up");
   vecRedundantPartOfNameInData.push_back("_reweighted_down");
   vecRedundantPartOfNameInData.push_back("_reweighted");
   getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData, SSV);
-  // ---
-  //    lumiweighting for choosen luminosity
-  // ---
+
+  // ==========================================
+  //  Lumiweighting for choosen luminosity
+  // ==========================================
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
-  // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
   scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
 
-  // ---
-  //    add single top channels and DiBoson contributions
-  // ---
+  // =======================================================
+  //  Add single top channels and DiBoson contributions
+  // =======================================================
   // for SingleTop and DiBoson samples:
   // every plot plotList_ existing in sTop/ diBoson .root file
   // will be combined and saved in the histo_ and histo2_ map
@@ -531,9 +543,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   bool reCreate=false;
   AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
 
-  // ---
-  //    configure histograms
-  // ---
+  // ============================
+  //  Configure histograms
+  // ============================
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
   axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
@@ -541,14 +553,15 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   if(decayChannel=="muon"    ) axisLabel_.insert( axisLabel_.end(), axisLabel1Dmu, axisLabel1Dmu+sizeof(axisLabel1Dmu)/sizeof(TString) );
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
   if(verbose>1){
-    std::cout << "(plot, x Axis label , y Axis label , log scale?, rebinning factor):" << std::endl;
+    std::cout << "(plot, x Axis label, y Axis label, log scale?, rebinning factor):" << std::endl;
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-      std::cout << plotList_[plot] << ": " << getStringEntry(axisLabel_[plot],1);
-      std::cout << " , " << getStringEntry(axisLabel_[plot], 2);
+      std::cout << plotList_[plot];
+      std::cout << ": " << getStringEntry(axisLabel_[plot],1,";");
+      std::cout << ", " << getStringEntry(axisLabel_[plot],2,";");
       if(plot<N1Dplots){
-	std::cout<< " , " << getStringEntry(axisLabel_[plot], 3);
-	std::cout<< " , " << getStringEntry(axisLabel_[plot], 4);
+	std::cout << ", " << getStringEntry(axisLabel_[plot],3,";");
+	std::cout << ", " << getStringEntry(axisLabel_[plot],4,";");
       }
       std::cout << std::endl;
     }
@@ -560,32 +573,30 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
       // a) 1D
       if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){ 
-	// default
-	histogramStyle( *histo_[plotList_[plot]][sample],           sample, true);
-	// special configurations
-	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall"){
-	  histo_[plotList_[plot]][sample]           -> SetNdivisions(816);
-	}
+	// Default configuration
+	histogramStyle(*histo_[plotList_[plot]][sample], sample, true);
+	// Special configurations
+	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample] -> SetNdivisions(816);
 	// set QCD to 0
 	if(setQCDtoZero&&sample==kQCD&&(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("analyzeTopReco"))) histo_[plotList_[plot]][sample]->Scale(0.);
       }
       // b) 2D
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
-	histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
+	histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"));
       }
     }
   }
   
-  // ---
-  //    event composition
-  // ---
+  // ============================
+  //  Event composition
+  // ============================
   std::map< TString, std::map <unsigned int, double> > events_;
   // a) get event numbers
   std::vector<TString> selection_;
   selection_.push_back("tightJetKinematics/n"      );
   selection_.push_back("tightJetKinematicsTagged/n");
   selection_.push_back("analyzeTopRecoKinematicsKinFit/ttbarMass");  
-  unsigned int MCBG=42;
+  unsigned int MCBG=ENDOFSAMPLEENUM;
   events_[selection_[0]][MCBG]=0;
   events_[selection_[1]][MCBG]=0; 
   events_[selection_[2]][MCBG]=0;
@@ -621,7 +632,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
       std::cout << " W + Jets:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kWjets] / NAllMC << std::endl; 
       std::cout << " Z + Jets:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kZjets] / NAllMC << std::endl;
       std::cout << " QCD:        " << std::setprecision(4) << std::fixed << events_[selection_[step]][kQCD  ] / NAllMC;
-      if(setQCDtoZero&&events_[selection_[step]][kQCD  ]==0.) std::cout << " (artificially set to 0)";
+      if(setQCDtoZero&&events_[selection_[step]][kQCD]==0.0)  std::cout  << " (artificially set to 0)";
       std::cout << std::endl;
       std::cout << " Single Top: " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
       std::cout << " DiBoson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
@@ -629,9 +640,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     std::cout << std::endl << " The event composition is only printed when running the monitoring macro using the option 'withRatioPlot=true' " << std::endl;
   }
 	
-  // ---
-  //    rebinning 1D histograms
-  // ---
+  // ============================
+  //  Rebinning 1D histograms
+  // ============================
   // loop samples
   for(unsigned int sample=kSig; sample<=kData; ++sample){
     // loop plots
@@ -640,7 +651,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
       // check if plot exists and is 1D
       if((plot<N1Dplots)&&(plotExists(histo_, plotName, sample))){
 	// equidistant binning
-	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4)).c_str());
+	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4,";")).c_str());
 	if(reBinFactor>1){
 	  equalReBinTH1(reBinFactor, histo_, plotName, sample);
 	}
@@ -651,7 +662,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // ===============================================================
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
   // ===============================================================
-  
   if(verbose>0) std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
   if(!SSV) makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
   if(verbose>0) std::cout << " .... Finished." << std::endl; 
@@ -659,59 +669,51 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // ========================================================
   //  Create Legends
   // ========================================================
-
   unsigned int Nlegends=0; 
   TLegend *leg  = new TLegend(); 
   TLegend *leg0 = new TLegend(0.05, 0.15, 1.05, 0.9);
   TLegend *leg1 = new TLegend(0.05, 0.15, 1.05, 0.9);
   Nlegends+=3;
-  leg ->SetFillStyle(0);
-  leg ->SetBorderSize(0);
-  leg ->SetTextSize(0.03);
-  leg ->SetTextAlign(12);
-  leg0->SetFillStyle(0);
-  leg0->SetBorderSize(0);
-  leg0->SetHeader("After Selection, Before b-Tagging");
-  leg1->SetFillStyle(0);
-  leg1->SetBorderSize(0);
-  leg1->SetHeader("After Selection & b-Tagging");
-  // fill in contributing sample
-  // data is to be first entry
-  bool TwoThousandElevenData=false;
+  legendStyle(*leg,"");
+  legendStyle(*leg0,"After Selection, Before b-Tagging");
+  legendStyle(*leg1,"After Selection and b-Tagging");
+
+  // Set legend entries
+  // - First entry: data
+  // - Following entries: MC samples (if existing)
+  // - Last entry: uncertainty band
+  
+  // Data:
   TString lumilabel = Form("%3.2f fb^{-1}",luminosity/1000);
-  if(luminosity>36.0) TwoThousandElevenData=true;
-  else lumilabel=Form("%2.0f pb^{-1}",luminosity);    
-  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData),"P");
-  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData)+", "+lumilabel,"PL");
-  leg1->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData)+", "+lumilabel,"PL");
-  // now loop over MC samples
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel),"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg1->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+ 
+  // MC samples (add only if sample exists in at least one plot, then quit plot-loop to avoid duplication of entries)
   for(unsigned int sample=kSig; sample<kData; ++sample){
-    // check if sample exists in at least one plot
-    bool exit=false;
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
-      // if found: add entry to legend
-      if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)&&(!exit)){
+      if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
 	leg ->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
 	leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
 	leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	exit=true;
+	break;
       }
     }
   }
-  // add entry for uncertainty to legends
-  if (histoErrorBand_.size() > 0 && plotList_.size() > 0){
-      leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
-      leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
-      leg1->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+  
+  // Uncertainty band
+  if(histoErrorBand_.size() > 0 && plotList_.size() > 0){
+    leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+    leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+    leg1->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
   }
-  // ---
-  //    create canvas
-  // ---
+
+  // =====================
+  //  Create canvas
+  // =====================
   std::vector<TCanvas*> plotCanvas_;
-  //  int NCanvas = Nplots+Nlegends;
   // a) create canvas for all plots + legends
-  //  for(int sample=0; sample<NCanvas; sample++){
   for(unsigned int sample=0; sample<N1Dplots+N2Dplots+Nlegends; sample++){
     char canvname[10];
     sprintf(canvname,"canv%i",sample);    
@@ -719,9 +721,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     //canvasStyle(*plotCanvas_[sample]);
   }
 	
-  // ---
-  //    change 1D plots into stack plots
-  // ---
+  // ===================================
+  //  Change 1D plots into stack plots
+  // ===================================
   // loop plots -> all 1D plots will become stacked plots
   if(verbose>1) std::cout << std::endl;
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -729,15 +731,17 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   }
   if(verbose>1) std::cout << std::endl;
 	
-  // ---
-  //    do the printing
-  // ---
+  // =====================
+  //  Do the printing
+  // =====================
+  //
   // a) for plots
+  //
   int canvasNumber=0;
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     bool first=true;
-    // open canvas and set titel corresponding to plotname in .root file
+    // open canvas and set title corresponding to plotname in .root file
     plotCanvas_[canvasNumber]->cd(0);
     plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));	    
     // loop samples
@@ -745,22 +749,22 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
       // a1) for 1D event yields, efficiency and cross section plots (existing)
       if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
 	// check if plot is existing
-	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
+       	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
 	  histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	  if(verbose>0){
-	    std::cout << "plotting " << plotList_[plot];
+	    std::cout << " Plotting "    << plotList_[plot];
 	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	    std::cout << " to canvas " << canvasNumber << " ( ";
-	    std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )" << std::endl;
+	    std::cout << " to canvas "   << canvasNumber << " ( " << plotCanvas_[canvasNumber]->GetTitle() << " )";
+	    std::cout << std::endl;
 	  }
 	  // first plot
 	  if(first){
 	    // plot to take maximum from
 	    TString maxFrom=plotList_[plot];
 	    if(plotList_[plot].Contains("_JetKinematicsTagged/pt")) maxFrom="tightLead_3_JetKinematicsTagged/pt";
-	    if(plotList_[plot].Contains("_JetKinematics/pt")) maxFrom="tightLead_3_JetKinematics/pt";
+	    if(plotList_[plot].Contains("_JetKinematics/pt"))       maxFrom="tightLead_3_JetKinematics/pt";
 	    if(!histo_[maxFrom].count(sample)>0||!histo_[maxFrom].count(kData)>0) maxFrom=plotList_[plot];
-	    if(verbose>1) std:: cout << "take max for histo " << plotList_[plot] << " from histo " << maxFrom << std::endl;
+	    if(verbose>1) std:: cout << " Take max for histo " << plotList_[plot] << " from histo " << maxFrom << std::endl;
 	    // min / max
 	    double max = 1.3*histo_[maxFrom][sample]->GetMaximum();
 	    // if data file exists
@@ -769,12 +773,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	      if(max < 1.3*histo_[maxFrom][kData]->GetMaximum()){
 		// take this maximum
 		max = 1.3*histo_[maxFrom][kData]->GetMaximum();
-		if(verbose>1) std:: cout << "take max from data! " << std::endl;
+		if(verbose>1) std:: cout << " Take max from data! " << std::endl;
 	      }
 	    }
 	    double min = 0;
 	    // log plots
-	    if(getStringEntry(axisLabel_[plot],3)=="1"){
+	    if(getStringEntry(axisLabel_[plot],3,";")=="1"){
 	      plotCanvas_[canvasNumber]->SetLogy(1);
 	      min=1;
 	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
@@ -784,12 +788,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
 	    if(plotList_[plot].Contains("btagSimpleSecVtx"))max*=0.8;
-	    // restrict x axis for special plots
+	    // Set x-axis range for special plots
 	    if(getStringEntry(plotList_[plot], 2)=="nHit"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(10,30 );
 	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ){ 
 	      if(getStringEntry(plotList_[plot], 1).Contains("analyzeTopRecoKinematicsKinFit")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,60);
 	      else histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10);
- 
 	    }
 	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
 	    if(plotList_[plot].Contains("relIso")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.15);
@@ -810,16 +813,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);	
 	    // axis style
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max);
+	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	    if(max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
 	    // draw histos (as stack)
 	    histo_[plotList_[plot]][sample]->Draw("hist X0");
-	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
-	    histo_[plotList_[plot]][42]->GetXaxis()->SetNoExponent(true);
+	    histo_[plotList_[plot]][ENDOFSAMPLEENUM] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->GetXaxis()->SetNoExponent(true);
 	  }
-	  // draw other plots into same canvas
+	  // draw other plots into same canvas 
 	  else{ 
 	    // draw data as points
 	    if(sample==kData) histo_[plotList_[plot]][sample]->Draw("p e X0 same");
@@ -828,7 +831,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	  }
 	  first=false;
 	  // at the end:
-	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)){
+	  if((sample==kData)&&(histo_.count(plotList_[plot])>0)){
 	    if(!SSV){
 	      // configure style of and draw uncertainty bands
 	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
@@ -838,11 +841,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	      histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");
 	    }
 	    // redraw axis 
-	    histo_[plotList_[plot]][42]->Draw("axis X0 same");
+	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->Draw("axis X0 same");
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection, common labels and legend
 	      TString label = "pre-Tagged";
-	      if(plotList_[plot].Contains("Tagged")){ 
+	      if(plotList_[plot].Contains("Tagged") || plotList_[plot].Contains("AfterBtagging")){ 
 		label = "Tagged";
 		if(SSV) label+=" SSV";
 	      }
@@ -852,7 +855,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 		 	       1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12    );
 	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.32);
+	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 - 0.03 * leg->GetNRows());
 	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05);
 	      leg->Draw("SAME");
@@ -868,51 +871,53 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	      }
 	    }
 	  }
-	}
-      }
-      // a3) for 2D plots
+      	} // end: plot existing?
+      } // end: 1D plots
+      
+      //  a2) for 2D plots
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
 	// new Canvas for every plot
 	plotCanvas_[canvasNumber]->cd(0);
-	plotCanvas_[canvasNumber]->SetRightMargin ( 0.15 );
+	plotCanvas_[canvasNumber]->SetRightMargin(0.15);
 	plotCanvas_[canvasNumber]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample)); 
 	if(verbose>1){
-	  std::cout << "plotting " << plotList_[plot];
+	  std::cout << " Plotting "    << plotList_[plot];
 	  std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	  std::cout << " to canvas " << canvasNumber  << " ( ";
-	  std::cout << plotCanvas_[canvasNumber]->GetTitle() << " )"  << std::endl;
+	  std::cout << " to canvas "   << canvasNumber  << " ( " << plotCanvas_[canvasNumber]->GetTitle() << " )";
+	  std::cout << std::endl;
 	}
 	++canvasNumber;
 	// draw histo
 	histo2_[plotList_[plot]][sample]->Draw("colz");
 	// print correlation factor
-	double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
-	char correlation[20];
-	sprintf(correlation, "%f", d);
-	TString corr = (TString)correlation;
-	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
+	DrawLabel(Form("Correlation: %f",histo2_[plotList_[plot]][sample]->GetCorrelationFactor()), 0.35, 0.92, 0.75, 0.99, 0.7);
       }
     }
     // for 1D hists: next canvas
     if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)) ++canvasNumber;
   }
+
   // b) for legends
+  //
   // b1) before btagging
+  //  
   plotCanvas_[canvasNumber]->cd(0);
   plotCanvas_[canvasNumber]->SetTitle("legendMonitoringBeforeBtagging");
   leg0->Draw("");
   ++canvasNumber;
+  //
   // b2) after btagging
+  //
   plotCanvas_[canvasNumber]->cd(0);
   plotCanvas_[canvasNumber]->SetTitle("legendMonitoringAfterBtagging");
   leg1->Draw("");
   ++canvasNumber;
 	
-  // ---
-  // saving
-  // ---
+  // ==============
+  //  Saving plots
+  // ==============
   if(save){
-    // pdf, eps and png
+    // eps and png
     if(verbose==0) gErrorIgnoreLevel=kWarning;
     saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
     for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){

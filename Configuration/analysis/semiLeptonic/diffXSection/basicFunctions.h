@@ -56,7 +56,9 @@ namespace semileptonic {
 		   /*14*/    /*15*/    /*16*/
 		   kWW     , kWZ     , kZZ     , 
 		   /*17*/    /*18*/    /*19*/    /*20*/    /*21*/    /*22*/
-		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW };
+		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW,
+                   /*23*/
+		   ENDOFSAMPLEENUM};
 
   int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
 		   kYellow , kMagenta, 10      , kBlack  , 
@@ -370,6 +372,21 @@ namespace semileptonic {
     if(yMax!=-123) hist.SetMaximum(yMax);
   }
 
+  void legendStyle(TLegend& leg, TString header)
+  {
+    // this function configures the style of legends
+    // modified quantities: leg
+    // used functions: NONE
+    // used enumerators: NONE
+    // "header": header of the legend
+
+    leg.SetFillStyle(0);
+    leg.SetBorderSize(0);
+    leg.SetTextSize(0.03);
+    leg.SetTextAlign(12);
+    leg.SetHeader(header);
+  }
+
   template <class T>
     void writeToFile(T output, TString file, bool append)
     {
@@ -448,7 +465,7 @@ namespace semileptonic {
     return (TString)result;
   }
 
-  TString sampleLabel(unsigned int sample, const std::string decayChannel, bool TwoThousandEleven=true)
+  TString sampleLabel(unsigned int sample, const std::string decayChannel)
   {
     // this function returns the name of the entered MC process
     // corresponding to the enumerator entry "sample" as defined in samples
@@ -482,8 +499,7 @@ namespace semileptonic {
     if(sample==kQCDBCE1) MCprocess="QCDBCE1"; 
     if(sample==kQCDBCE2) MCprocess="QCDBCE2";
     if(sample==kQCDBCE3) MCprocess="QCDBCE3"; 
-    if(sample==kData&&!TwoThousandEleven) MCprocess="Data 2010";
-    if(sample==kData&& TwoThousandEleven) MCprocess="Data";
+    if(sample==kData   ) MCprocess="Data 2011";
     // return result
     return MCprocess;
   }
@@ -1219,7 +1235,7 @@ namespace semileptonic {
     // modified quantities: "histo_", "histo2_"
     // used functions: sampleLabel
     // used enumerators: samples
-    // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
+    // "N1Dplots": the #1D plots is needed as input to distinguish between 1D and 2D plots
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "reCreate": choose if you want to create the combined plot from the
     // single plots if it alredy exists. Careful: the old one will be deleted

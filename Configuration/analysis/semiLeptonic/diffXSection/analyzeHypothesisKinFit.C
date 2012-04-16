@@ -31,10 +31,13 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   //    kSTops,  kSATops, kSTopt,  kSATopt,  kSToptW , kSAToptW};
 
   // b) file name convention (implemented in basicFunctions.h)
-  //    "muonDiffXSec"+sampleName+GeneratorName+GeneratorTune+MCProductionCycle+systematicVariation+"PF.root"
-  //    GeneratorName= "Mad", "Pythia6"
-  //    GeneratorTune= "Z2", "D6T"
-  //    MCProductionCycle= "Summer11"
+
+  // decayChannel+"DiffXSec"+sampleName+systematicVariation+MCProduction+"PF.root"
+
+  // decayChannel      = "elec", "muon"
+  // sampleName        = "Sig", "Bkg", Wjets", "Zjets", "WW", "WZ", "ZZ", "VV", "SingleTopSchannel", 
+  //                     "SingleTopTchannel", "SingleTopTWchannel", "QCD"
+  // MCProductionCycle = "Summer11","Fall11"
 
   // ============================
   //  Options
@@ -984,7 +987,7 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   // loop all variables
   for(unsigned int number=0; number<xSecVariables_.size(); ++number){
     TString variable=xSecVariables_[number];    
-TString efficiency="efficiency/"+variable;
+    TString efficiency="efficiency/"+variable;
     // check if gen and reco plots are available
     if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kSig)){
       // std::cout << "found gen and reco" << std::endl;
@@ -1397,7 +1400,7 @@ TString efficiency="efficiency/"+variable;
       if(!compare) ++NXSec;
     }
   }
-
+  /*  
   // =======================================
   //    use SVD unfolding for cross sections
   // =======================================
@@ -1859,7 +1862,7 @@ TString efficiency="efficiency/"+variable;
       }
     }
   }
-
+  */
   // ===============================================================
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
   // ===============================================================
@@ -1884,12 +1887,9 @@ TString efficiency="efficiency/"+variable;
   leg0->SetHeader("Kin. Fit (after selection)");
   // fill in contributing sample
   // data is to be first entry
-  bool TwoThousandElevenData=false;
   TString lumilabel = Form("%3.2f fb^{-1}",luminosity/1000);
-  if(luminosity>50.0) TwoThousandElevenData=true;
-  else lumilabel=Form("%2.0f pb^{-1}",luminosity);    
-  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData),"P");
-  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel,TwoThousandElevenData)+", "+lumilabel,"P");
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel),"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"P");
   // now loop over MC samples
   for(unsigned int sample=kSig; sample<kData; ++sample){
     // check if sampe exists in at least one plot
@@ -1909,7 +1909,17 @@ TString efficiency="efficiency/"+variable;
       leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
       leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
   }
-  
+  // resize legends
+  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03*leg->GetNRows());
+  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+
+  leg0->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+  leg0->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03*leg->GetNRows());
+  leg0->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+  leg0->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+
   // create in canvas legend for residuals
   TLegend *legPull = new TLegend(0.6, 0.5, 0.96, 0.9);
   legPull->SetFillStyle(0);
@@ -2020,235 +2030,214 @@ TString efficiency="efficiency/"+variable;
   // ---
   // a) for plots
   // loop plots
-  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    bool first=true;
-    // loop samples
-    for(unsigned int sample=kSig; sample<=kData; ++sample){
-      // a1) for 1D event yields, efficiency and cross section plots (existing)
-      if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
-	// check if plot is existing
-	// draw BBB xSec control plots in same canvas with SVD result
-	if(((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))&&!plotList_[plot].Contains("BBB")){
-	  // draw all pull distributions in same canvas if RecPartonTruth pull is called
-	  if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
+for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+  bool first=true;
+  // loop samples
+  unsigned int sample=0;
+  for(sample=kSig; sample<=kData; ++sample){
+    // a1) for 1D event yields, efficiency and cross section plots (existing)
+    if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
+      // check if plot is existing
+      // draw BBB xSec control plots in same canvas with SVD result
+      if(((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))&&!plotList_[plot].Contains("BBB")){
+	// draw all pull distributions in same canvas if RecPartonTruth pull is called
+	if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
+	  if(verbose>1){
+	    std::cout << "plotting " << plotList_[plot];
+	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
+	    std::cout << " to canvas " << plotCanvas_.size()-1 << " ( ";
+	    std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )" << std::endl;
+	  }
+	  // for efficiency plots: draw grid
+	  if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
+	  // for histos with variable binning:
+	  if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
+	    // get variable binning
+	    TString plotName=getStringEntry(plotList_[plot], 2);
+	    std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
+	    // set maximum of histo to last bin considered 
+	    // in variable binning (overflow excluded)
+	    double firstBin=0;
+	    double lastBin=binEdges_.size()-2;
+	    // -2 for subtracting overflow bin
+	    if(verbose>2){
+	      std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
+	    }
+	    histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
+	  }
+	  // first plot
+	  if(first){ 
 	    // create canvas and set titel corresponding to plotname in .root file
-	    if(first){
-	      addCanvas(plotCanvas_);
-	      plotCanvas_[plotCanvas_.size()-1]->cd(0);
-	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
-	    }
-	    if(verbose>1){
-	      std::cout << "plotting " << plotList_[plot];
-	      std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	      std::cout << " to canvas " << plotCanvas_.size()-1 << " ( ";
-	      std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )" << std::endl;
-	    }
-	    // for efficiency plots: draw grid
-	    if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
-	    // for histos with variable binning:
-	    if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
-	      // get variable binning
-	      TString plotName=getStringEntry(plotList_[plot], 2);
-	      std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
-	      // set maximum of histo to last bin considered 
-	      // in variable binning (overflow excluded)
-	      double firstBin=0;
-	      double lastBin=binEdges_.size()-2;
-	      // -2 for subtracting overflow bin
-	      if(verbose>2){
-		std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
+	    addCanvas(plotCanvas_);
+	    plotCanvas_[plotCanvas_.size()-1]->cd(0);
+	    plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
+	    // min / max
+	    double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
+	    // if data file exists
+	    if(histo_[plotList_[plot]].count(kData)>0){
+	      // and has larger maximum
+	      if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
+		// take this maximum
+		max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
+		if(verbose>1) std:: cout << "take max from data! " << std::endl;
 	      }
-	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
 	    }
-	    // first plot
-	    if(first){
-	      // min / max
-	      double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
-	      // if data file exists
-	      if(histo_[plotList_[plot]].count(kData)>0){
-		// and has larger maximum
-		if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
-		  // take this maximum
-		  max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
-		  if(verbose>1) std:: cout << "take max from data! " << std::endl;
+	    double min = 0;
+	    // log plots
+	    if(getStringEntry(axisLabel_[plot],3)=="1"){
+	      plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
+	      min=1;
+	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
+	      if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
+		min=0.0001;
+		max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+		if(plotList_[plot].Contains("Norm")){
+		  min=0.00001;
+		  max=0.06;
 		}
 	      }
-	      double min = 0;
-	      // log plots
-	      if(getStringEntry(axisLabel_[plot],3)=="1"){
-		plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
-		min=1;
-		max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-		if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
-		if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
-		  min=0.0001;
-		  max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-		  if(plotList_[plot].Contains("Norm")){
-		    min=0.00001;
-		    max=0.06;
-		  }
-		}
+	    }
+	    // get nicer int values if maximum is large enough
+	    if(max>3) max = (double)roundToInt(max);
+	    // style for pull plots
+	    if(plotList_[plot].Contains("RecPartonTruth")){
+	      min=0;
+	      //max=1;
+	      TString title=(TString)plotCanvas_[plotCanvas_.size()-1]->GetTitle();
+	      title.ReplaceAll("RecPartonTruth","");
+	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(title);
+	      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	      plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
+	    }
+	    // axis style
+	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
+	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	    if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
+	    if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
+	    // restrict x axis for different plots
+	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
+	    if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
+	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
+						     getStringEntry(plotList_[plot], 2)=="topYHad"|| 
+						     getStringEntry(plotList_[plot], 2)=="topYLep")){
+	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
+	    if(getStringEntry(plotList_[plot], 2)=="lepPt" )  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
+	    if(getStringEntry(plotList_[plot], 2)=="ttbarY")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
+	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
+	    // draw efficiency plots as line
+	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
+	    // draw pull plots as line into same canvas with extra legend
+	    if(plotList_[plot].Contains("RecPartonTruth")){
+	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
+	      histo_[plotList_[plot]][sample]->GetXaxis()->SetTitle(((TString)(histo_[plotList_[plot]][sample]->GetXaxis()->GetTitle())).ReplaceAll(":","/"));
+	      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	      histo_[plotList_[plot]][sample]->Draw("hist");
+	      TString afterKinFit=plotList_[plot];
+	      afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
+	      TString kinFitShift=plotList_[plot];
+	      kinFitShift.ReplaceAll("RecPartonTruth","KinFitRec"        );
+	      if(histo_.count(afterKinFit)>0){ 
+		histo_[plotList_[plot]][sample]->SetMaximum(1.3*histo_[afterKinFit][sample]->GetMaximum());
+		histo_[afterKinFit][sample]->Draw("hist same");
 	      }
-	      // get nicer int values if maximum is large enough
-	      if(max>3) max = (double)roundToInt(max);
-	      // style for pull plots
-	      if(plotList_[plot].Contains("RecPartonTruth")){
-		min=0;
-		//max=1;
-		TString title=(TString)plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-		title.ReplaceAll("RecPartonTruth","");
-		plotCanvas_[plotCanvas_.size()-1]->SetTitle(title);
-		histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-		plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
-	      }
-	      // axis style
-	      axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
-	      histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
-	      if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	      else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
-	      if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	      if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
-	      // restrict x axis for different plots
-	      if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	      if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
-	      if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
-						       getStringEntry(plotList_[plot], 2)=="topYHad"|| 
-						       getStringEntry(plotList_[plot], 2)=="topYLep")){
-		histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
-	      if(getStringEntry(plotList_[plot], 2)=="lepPt" )  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
-	      if(getStringEntry(plotList_[plot], 2)=="ttbarY")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
-	      if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
-	      // draw efficiency plots as line
-	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
-	      // draw pull plots as line into same canvas with extra legend
-	      if(plotList_[plot].Contains("RecPartonTruth")){
-		histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
-		histo_[plotList_[plot]][sample]->GetXaxis()->SetTitle(((TString)(histo_[plotList_[plot]][sample]->GetXaxis()->GetTitle())).ReplaceAll(":","/"));
-		histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-		histo_[plotList_[plot]][sample]->Draw("hist");
-		TString afterKinFit=plotList_[plot];
-		afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
-		TString kinFitShift=plotList_[plot];
-		kinFitShift.ReplaceAll("RecPartonTruth","KinFitRec"        );
-		if(histo_.count(afterKinFit)>0){ 
-		  histo_[plotList_[plot]][sample]->SetMaximum(1.3*histo_[afterKinFit][sample]->GetMaximum());
-		  histo_[afterKinFit][sample]->Draw("hist same");
-		}
-		if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
-		legPull->Draw("same");
-	      }
-	      // others as histo (stack)
-	      else histo_[plotList_[plot]][sample]->Draw("hist");
-	      histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	      if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
+	      legPull->Draw("same");
+	    }
+	    // others as histo (stack)
+	    else histo_[plotList_[plot]][sample]->Draw("hist");
+	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+	    // draw BBB comparison results in same canvas
+	    if(compare&&plotList_[plot].Contains("xSec")){
+	      TString BBBlabel=plotList_[plot];
+	      BBBlabel.ReplaceAll("xSec/","xSec/BBB");
+	      BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
+	      if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("hist same");
+	    }
+	  }
+	  // draw other plots into same canvas
+	  else{ 
+	    // draw data as points
+	    if(sample==kData){ 
+	      histo_[plotList_[plot]][sample]->Draw("p e X0 same");
 	      // draw BBB comparison results in same canvas
 	      if(compare&&plotList_[plot].Contains("xSec")){
 		TString BBBlabel=plotList_[plot];
 		BBBlabel.ReplaceAll("xSec/","xSec/BBB");
 		BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
-		if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("hist same");
+		if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("p e X0 same");
 	      }
 	    }
-	    // draw other plots into same canvas
-	    else{ 
-	      // draw data as points
-	      if(sample==kData){ 
-		histo_[plotList_[plot]][sample]->Draw("p e X0 same");
-		// draw BBB comparison results in same canvas
-		if(compare&&plotList_[plot].Contains("xSec")){
-		  TString BBBlabel=plotList_[plot];
-		  BBBlabel.ReplaceAll("xSec/","xSec/BBB");
-		  BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
-		  if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("p e X0 same");
-		}
-	      }
-	      else{
-		// draw efficiencies as points
-		if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
-		// draw others as histo (stack)
-		else histo_[plotList_[plot]][sample]->Draw("hist same");
-	      }
-	    }
-	    first=false;
-	    // draw legend for recoYield plots
-	    TString title=plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-	    if(title.Contains("analyzeTopRecoKinematicsKinFit")){
-	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03*leg->GetNRows());
-	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-	      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
-	    }
-	    // redraw axis at the end
-	    if((histo_.count(plotList_[plot])>0)&&(sample==kData)) histo_[plotList_[plot]][42]->Draw("axis same");	 
-	    TString plotType=getStringEntry(plotList_[plot], 1);
-	    if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
-	      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-	      DrawCMSLabels(true,luminosity);
+	    else{
+	      // draw efficiencies as points
+	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
+	      // draw others as histo (stack)
+	      else histo_[plotList_[plot]][sample]->Draw("hist same");
 	    }
 	  }
 	  first=false;
-	  // draw uncertainty bands, add legend and labels and re-draw axis
-	  if((histo_.count(plotList_[plot])>0)&&(sample==kData)){
-	    // configure style of and draw uncertainty bands
-	    if (!plotList_[plot].Contains("xSec")){
-	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
-	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);
-	      histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
-	      gStyle->SetErrorX(0.5);  
-	      histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
-	      // draw legend for recoYield plots
-	      TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-	      if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
-		leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-		leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03 * leg->GetNRows() );
-		leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-		leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-		if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
-	      }	 
-	      // labels
-	      TString plotType=getStringEntry(plotList_[plot], 1);
-	      if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-		if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
-		else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-		DrawCMSLabels(true,luminosity);
-	      }
-	      // redraw axis
-	      histo_[plotList_[plot]][42]->Draw("axis same");
+	}
+	first=false;	
+	// draw uncertainty bands, add legend and labels and re-draw axis
+	if(sample==kData){
+	  // configure style of and draw uncertainty bands
+	  if (!plotList_[plot].Contains("xSec")){
+	    histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
+	    histoErrorBand_[plotList_[plot]]->SetFillColor(1);
+	    histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
+	    gStyle->SetErrorX(0.5);  
+	    histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
+	    // draw legend for recoYield plots
+	    TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
+	    if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
+	      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
+	    }	 
+	    // labels
+	    TString plotType=getStringEntry(plotList_[plot], 1);
+	    if(plotType.Contains("xSec")||plotType.Contains("Reco")){
+	      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
+	      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+	    DrawCMSLabels(true,luminosity);
 	    }
+	    // redraw axis
+	    histo_[plotList_[plot]][42]->Draw("axis same");
 	  }
 	}
       }
-      
-      // a3) for 2D plots
-      if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)&&	  
-	 // draw gen-reco correlation only for signal 
-	 (!plotList_[plot].Contains("_"   )||sample==kSig)){
-	// new Canvas for every plot
-	addCanvas(plotCanvas_);
-	plotCanvas_[plotCanvas_.size()-1]->cd(0);
-	plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
-	plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample));
-	if(verbose>1){
-	  std::cout << "plotting " << plotList_[plot];
-	  std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	  std::cout << " to canvas " << plotCanvas_.size()-1  << " ( ";
-	  std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )"  << std::endl;
-	}
-	// draw histo
-	plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(0.15);
-	histo2_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
-	histo2_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	histo2_[plotList_[plot]][sample]->Draw("colz");
-	// print correlation factor
-	double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
-	char correlation[20];
-	sprintf(correlation, "%f", d);
-	TString corr = (TString)correlation;
-	DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
-      }
     }
-  }
+    
+    // a3) for 2D plots
+    if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)&&	  
+       // draw gen-reco correlation only for signal 
+       (!plotList_[plot].Contains("_"   )||sample==kSig)){
+      // new Canvas for every plot
+      addCanvas(plotCanvas_);
+      plotCanvas_[plotCanvas_.size()-1]->cd(0);
+      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
+      plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample));
+      if(verbose>1){
+	std::cout << "plotting " << plotList_[plot];
+	std::cout << " from sample " << sampleLabel(sample,decayChannel);
+	std::cout << " to canvas " << plotCanvas_.size()-1  << " ( ";
+	std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )"  << std::endl;
+      }
+      // draw histo
+      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(0.15);
+      histo2_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+      histo2_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+      histo2_[plotList_[plot]][sample]->Draw("colz");
+      // print correlation factor
+      double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
+      char correlation[20];
+      sprintf(correlation, "%f", d);
+      TString corr = (TString)correlation;
+      DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
+    }
+  } // end of loop over samples
+ } // end of loop over plots
+ 
   // b) for legends
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
