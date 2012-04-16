@@ -1388,8 +1388,8 @@ TopKinematics::fillAngles(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<
 			  const double& weight)
 { 
   // calculate angles from the 4 momentum vectors
-  TopAngles angles = TopAngles::TopAngles(hadB, q   , qbar    ,  // branch1: hadronic
-					  lepB, muon, neutrino); // branch2: leptonic
+  TopAngles angles = TopAngles(hadB, q   , qbar    ,  // branch1: hadronic
+			       lepB, muon, neutrino); // branch2: leptonic
   // angle between t candidate (detector rest frame)
   fillValue("ttbarAngle"       , angles.ttDetFrame()  , weight);
   // angle between b candidates (detector rest frame)

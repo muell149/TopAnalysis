@@ -308,8 +308,8 @@ FullHadTopReco::fill(const TtFullHadronicEvent& tops, const edm::View<pat::Jet>&
     }
     
     // calculate angles from the 4 momentum vectors
-    TopAngles angles = TopAngles::TopAngles(tops.b   (hypo_)->p4(), tops.lightQ(hypo_)->p4(), tops.lightQBar(hypo_)->p4(),
-					    tops.bBar(hypo_)->p4(), tops.lightP(hypo_)->p4(), tops.lightPBar(hypo_)->p4());
+    TopAngles angles = TopAngles(tops.b   (hypo_)->p4(), tops.lightQ(hypo_)->p4(), tops.lightQBar(hypo_)->p4(),
+				 tops.bBar(hypo_)->p4(), tops.lightP(hypo_)->p4(), tops.lightPBar(hypo_)->p4());
 
     fillValue( "ttDetFrame"                         , angles.ttDetFrame()                          , weight );			
     fillValue( "bbDetFrame"                         , angles.bbDetFrame()                          , weight );			

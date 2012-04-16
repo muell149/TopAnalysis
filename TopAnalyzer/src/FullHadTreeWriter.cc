@@ -1132,8 +1132,8 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
     ptAsyBar = (fullHadEvent_h->bBar("kKinFit")->pt()-fullHadEvent_h->wMinus("kKinFit")->pt())/(fullHadEvent_h->bBar("kKinFit")->pt()+fullHadEvent_h->wMinus("kKinFit")->pt());
 
     // calculate angles from the 4 momentum vectors
-    TopAngles angles = TopAngles::TopAngles(fullHadEvent_h->b   ("kKinFit")->p4(), fullHadEvent_h->lightQ("kKinFit")->p4(), fullHadEvent_h->lightQBar("kKinFit")->p4(),
-					    fullHadEvent_h->bBar("kKinFit")->p4(), fullHadEvent_h->lightP("kKinFit")->p4(), fullHadEvent_h->lightPBar("kKinFit")->p4());
+    TopAngles angles = TopAngles(fullHadEvent_h->b   ("kKinFit")->p4(), fullHadEvent_h->lightQ("kKinFit")->p4(), fullHadEvent_h->lightQBar("kKinFit")->p4(),
+				 fullHadEvent_h->bBar("kKinFit")->p4(), fullHadEvent_h->lightP("kKinFit")->p4(), fullHadEvent_h->lightPBar("kKinFit")->p4());
 
     ttDetFrame                          =  angles.ttDetFrame()                         ;			
     bbDetFrame                          =  angles.bbDetFrame()                         ;			
