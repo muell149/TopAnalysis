@@ -1659,58 +1659,59 @@ if(runningOnData=="MC" and PUreweigthing):
     if(additionalEventWeights and eventFilter=='signal only'):
         print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
 
-    GENFULLanalyzers     =cms.Sequence(process.dummy)
-    GENpartonPSanalyzers =cms.Sequence(process.dummy)
-    GENhadronPSanalyzers =cms.Sequence(process.dummy)
-    GENFULLbanalyzers    =cms.Sequence(process.makeGenLevelBJets)
-    GENpartonPSbanalyzers=cms.Sequence(process.dummy)
-    GENhadronPSbanalyzers=cms.Sequence(process.dummy)
-    genSystExt=["NoPUWeight", "PUup", "PUdown"]
-    for sys in genSystExt:
-        # get correct weight
-        weightTagName=cms.InputTag("")
-        if(not sys.find("PUup") == -1):
-            weightTagName=PUweightUp
-        elif(not sys.find("PUdown") == -1):
-            weightTagName=PUweightDown
-        # create plots for full PS
-        setattr(process,"analyzeTopPartonLevelKinematics"+sys, process.analyzeTopPartonLevelKinematics.clone(weight=weightTagName))
-        getattr(process,"analyzeTopPartonLevelKinematics"+sys).analyze.useTree = False
-        setattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys, process.analyzeTopPartonLevelKinematicsBjets.clone(weight=weightTagName))
-        getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys).useTree = False
-        # create plots for parton level PS
-        setattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=weightTagName))
-        getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
-        setattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
-        getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys).useTree = False
-        # create plots for hadron level PS
-        setattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=weightTagName))
-        getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
-        setattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
-        getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys).useTree = False
-        # analyzer to be added to sequence
-        GENFULLanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematics"+sys)
-        GENpartonPSanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys)
-        GENhadronPSanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys)
-        GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys)
-        GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys)
-        GENhadronPSbanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys)
+        GENFULLanalyzers     =cms.Sequence(process.dummy)
+        GENpartonPSanalyzers =cms.Sequence(process.dummy)
+        GENhadronPSanalyzers =cms.Sequence(process.dummy)
+        GENFULLbanalyzers    =cms.Sequence(process.dummy)
+        GENpartonPSbanalyzers=cms.Sequence(process.dummy)
+        GENhadronPSbanalyzers=cms.Sequence(process.dummy)
+        genSystExt=["NoPUWeight", "PUup", "PUdown"]
+        for sys in genSystExt:
+            # get correct weight
+            weightTagName=cms.InputTag("")
+            if(not sys.find("PUup") == -1):
+                weightTagName=PUweightUp
+            elif(not sys.find("PUdown") == -1):
+                weightTagName=PUweightDown
+            # create plots for full PS
+            setattr(process,"analyzeTopPartonLevelKinematics"+sys, process.analyzeTopPartonLevelKinematics.clone(weight=weightTagName))
+            getattr(process,"analyzeTopPartonLevelKinematics"+sys).analyze.useTree = False
+            setattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys, process.analyzeTopPartonLevelKinematicsBjets.clone(weight=weightTagName))
+            getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys).useTree = False
+            # create plots for parton level PS
+            setattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=weightTagName))
+            getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
+            setattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
+            getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys).useTree = False
+            # create plots for hadron level PS
+            setattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=weightTagName))
+            getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
+            setattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
+            getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys).useTree = False
+            # analyzer to be added to sequence
+            GENFULLanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematics"+sys)
+            GENpartonPSanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys)
+            GENhadronPSanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys)
+            GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys)
+            GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys)
+            GENhadronPSbanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys)
 
-    GENFULLanalyzers.remove(process.dummy)
-    GENpartonPSanalyzers.remove(process.dummy)
-    GENhadronPSanalyzers.remove(process.dummy)
-    GENpartonPSbanalyzers.remove(process.dummy)
-    GENhadronPSbanalyzers.remove(process.dummy)
+        GENFULLanalyzers.remove(process.dummy)
+        GENpartonPSanalyzers.remove(process.dummy)
+        GENhadronPSanalyzers.remove(process.dummy)
+        GENFULLbanalyzers.remove(process.dummy)
+        GENpartonPSbanalyzers.remove(process.dummy)
+        GENhadronPSbanalyzers.remove(process.dummy)
         
-    # add them to sequence
-    process.kinFitGen              *= (GENFULLanalyzers *
-                                       GENFULLbanalyzers)
-
-    process.kinFitGenPhaseSpace    *= (GENpartonPSanalyzers *
-                                       GENpartonPSbanalyzers)
-    
-    process.kinFitGenPhaseSpaceHad *= (GENhadronPSanalyzers *
-                                       GENhadronPSbanalyzers)
+        # add them to sequence
+        process.kinFitGen              *= (GENFULLanalyzers *
+                                           GENFULLbanalyzers)
+        
+        process.kinFitGenPhaseSpace    *= (GENpartonPSanalyzers *
+                                           GENpartonPSbanalyzers)
+        
+        process.kinFitGenPhaseSpaceHad *= (GENhadronPSanalyzers *
+                                           GENhadronPSbanalyzers)
         
 elif(runningOnData=="MC" and not PUreweigthing):
     for module1 in genModules1:
