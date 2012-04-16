@@ -1662,7 +1662,7 @@ if(runningOnData=="MC" and PUreweigthing):
     GENFULLanalyzers     =cms.Sequence(process.dummy)
     GENpartonPSanalyzers =cms.Sequence(process.dummy)
     GENhadronPSanalyzers =cms.Sequence(process.dummy)
-    GENFULLbanalyzers    =cms.Sequence(process.dummy)
+    GENFULLbanalyzers    =cms.Sequence(process.makeGenLevelBJets)
     GENpartonPSbanalyzers=cms.Sequence(process.dummy)
     GENhadronPSbanalyzers=cms.Sequence(process.dummy)
     genSystExt=["NoPUWeight", "PUup", "PUdown"]
@@ -1699,7 +1699,6 @@ if(runningOnData=="MC" and PUreweigthing):
     GENFULLanalyzers.remove(process.dummy)
     GENpartonPSanalyzers.remove(process.dummy)
     GENhadronPSanalyzers.remove(process.dummy)
-    GENFULLbanalyzers.remove(process.dummy)
     GENpartonPSbanalyzers.remove(process.dummy)
     GENhadronPSbanalyzers.remove(process.dummy)
         
