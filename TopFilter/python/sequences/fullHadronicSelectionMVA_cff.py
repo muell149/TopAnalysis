@@ -156,7 +156,10 @@ trigger = hltHighLevel.clone( HLTPaths = [ #2010 trigger ('v*' to be immune to v
                                          #2011 1E33 trigger ('v*' to be immune to version changes)
                                          , 'HLT_QuadJet50_Jet40_v*'
                                          #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
-                                         , 'HLT_QuadJet50_Jet40_Jet30_v*']
+                                         , 'HLT_QuadJet50_Jet40_Jet30_v*'
+                                         #2012 5E33 trigger ('v*' to be immune to version changes)
+                                         , 'HLT_QuadJet60_DiJet20_v*'
+                                         , 'HLT_QuadJet60_DiJet20_L1FastJet_v*']
                              , throw = False)
 
 ## ---
@@ -214,16 +217,14 @@ ttFullHadHypGenMatch.jets           = 'tightLeadingJets'
 ttFullHadHypKinFit.jets             = 'tightLeadingJets'
 
 ## exchange resolutions for jets
-from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
+#from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
+from TopAnalysis.Configuration.stringResolutions_etEtaPhi_Fall11_cff import *
 kinFitTtFullHadEventHypothesis.udscResolutions = udscResolutionPF.functions
 kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolutionPF.functions
-#from TopAnalysis.TopUtils.stringResolutions_etEtaPhi_cff import *
-#kinFitTtFullHadEventHypothesis.udscResolutions = udscResolution.functions
-#kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolution.functions
 
 ## configure genMatch
 ttFullHadJetPartonMatch.useMaxDist = True
-ttFullHadJetPartonMatch.algorithm  = 'totalMinDist' #'unambigousOnly'
+ttFullHadJetPartonMatch.algorithm  = 'unambigousOnly' #'totalMinDist' #
 
 ## define ordered jets
 udsall =cms.PSet(index=cms.int32(-1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
@@ -661,10 +662,10 @@ def runAsBackgroundEstimation(process, whichEstimate):
         #process.analyzeFullHadQCDEstimation.bTagAlgoWP = "TCHEM30clean"
         
         #process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
-        #process.analyzeFullHadQCDEstimation.udscResolutions = udscResolutionPF.functions
-        #process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolutionPF.functions
-        process.analyzeFullHadQCDEstimation.udscResolutions = udscResolution.functions
-        process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolution.functions
+        process.analyzeFullHadQCDEstimation.udscResolutions = udscResolutionPF.functions
+        process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolutionPF.functions
+        #process.analyzeFullHadQCDEstimation.udscResolutions = udscResolution.functions
+        #process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolution.functions
 
     elif whichEstimate == 2 :
         ## ---
@@ -681,8 +682,8 @@ def runAsBackgroundEstimation(process, whichEstimate):
         process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets")
         
         #from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
-        process.analyzeFullHadEventMixer.udscResolutions = udscResolution.functions
-        process.analyzeFullHadEventMixer.bResolutions    = bjetResolution.functions
+        process.analyzeFullHadEventMixer.udscResolutions = udscResolutionPF.functions
+        process.analyzeFullHadEventMixer.bResolutions    = bjetResolutionPF.functions
 
     else:
         print 'whichEstimate =', whichEstimate, 'not allowed, only supported options: 0 (no background estimate), 1 (b-tag weighting), 2 (event mixing)'
