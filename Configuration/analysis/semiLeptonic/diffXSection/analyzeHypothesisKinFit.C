@@ -1597,7 +1597,6 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       // -----------
       // get binning
       // -----------
-      verbose=2;
       // a) filter relevant bins
       std::vector<double> relevantBins_;
       // loop all entries in binning_
@@ -1649,8 +1648,6 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	if(verbose>1) std::cout << "bin " << bin << ": " << bins[bin]<< std::endl;
       }
       if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
-
-      verbose=0;
       // ----------------------
       // use unfolding machine
       // ----------------------
