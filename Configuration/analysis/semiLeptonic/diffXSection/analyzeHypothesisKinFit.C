@@ -5,7 +5,7 @@
 void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
+			     //Ttring dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
 			     std::string decayChannel = "muon", bool SVDunfold=true)
 {
@@ -951,6 +951,10 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	  // check existence of e.g. binning_["topPt"]
 	  if(binning_.count(getStringEntry(plotName, 2))>0){
 	    reBinTH1F(*histo_[plotName][sample], binning_[getStringEntry(plotName, 2)], verbose-1);
+	    // remove additional bins with 0 width
+	    double * newBinLowEdges = new double[binning_[getStringEntry(plotName, 2)].size()];
+	    newBinLowEdges = &binning_[getStringEntry(plotName, 2)].front();
+	     histo_[plotName][sample]= (TH1F*) histo_[plotName][sample]->Rebin(binning_[getStringEntry(plotName, 2)].size()-1, histo_[plotName][sample]->GetName(), newBinLowEdges); 
 	    if(verbose>1){
 	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){
 	       
@@ -1400,7 +1404,7 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       if(!compare) ++NXSec;
     }
   }
-  /*  
+    
   // =======================================
   //    use SVD unfolding for cross sections
   // =======================================
@@ -1527,6 +1531,7 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       //              Note: The scan may take a while!
       int scan =0;
       if(redetermineopttau) scan=2;
+      else scan=1;
       bool scanPlots=false;
       if(regMode<3) scan =1;
       if(scan==2) scanPlots=true;
@@ -1592,16 +1597,48 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       // -----------
       // get binning
       // -----------
+      verbose=2;
       // a) filter relevant bins
       std::vector<double> relevantBins_;
       // loop all entries in binning_
       for(unsigned int bin=0; bin<binning_[variable].size(); ++bin){
 	bool relevant=true;
-	// exclude first bin for some variables
-	if(bin==0&&(variable=="topY"||variable=="ttbarY"||variable=="ttbarMass"||variable=="lepEta"||variable=="lepPt"||variable=="bqEta"||variable=="bqPt")) relevant=false;
-	// exclude last bin for some variables
-	if(bin==binning_[variable].size()-1&&(variable=="topY"||variable=="ttbarY"||variable=="lepEta"||variable=="bqEta"||variable=="topPt"||variable=="lepPt"||variable=="bqPt")) relevant=false;
-	if(relevant) relevantBins_.push_back(binning_[variable][bin]); 
+	// include UF/OF side bins if non-empty
+	// UF
+	double LowerBinEdge= binning_[variable].at(bin);
+	double UpperBinEdge=0;
+	if(bin==0){
+	  relevant=false;
+	  if(verbose>1) std:: cout << "check UF side bin " << binning_[variable].at(bin) << " for " << variable << std::endl;
+	  UpperBinEdge=binning_[variable].at(bin+1);
+	}
+	// OF
+	if(bin==binning_[variable].size()-1){
+	  relevant=false;
+	  if(verbose>1) std:: cout << "check OF side bin " << binning_[variable].at(bin) << std::endl;
+	  UpperBinEdge= LowerBinEdge;
+	  LowerBinEdge=binning_[variable].at(bin-1);
+	}
+	double center = 0.5*(UpperBinEdge+LowerBinEdge);
+	if(!relevant&&verbose>1) std:: cout << "and center " << center << std::endl;
+	// exclude most outer bins that are empty in data or in gen MC PS
+	if(!relevant){
+	  int databin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->FindBin(center);
+	  double data=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(databin);
+	  int genbin=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->FindBin(center);
+	  double gen=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(genbin);
+	  if(gen!=0.&&data!=0) relevant=true;
+	  // FIXME: exclude bins that are cut out for PS 
+	  //        only necessary for hadron level at the moment because plotted
+	  //        object and object for gen PS selection are not the same
+	  if(variable=="lepEta"||variable=="lepPt"||variable=="bqPt"||variable=="bqEta") relevant=false;
+	  if(verbose>1){
+	    std::cout << "data: " << data << " (" << databin << ")" << std::endl;
+	    std::cout << "gen: " << gen << " (" << genbin << ")" << std::endl;
+	    std::cout << "will be " << (relevant ? "in" : "ex" ) << "cluded" << std::endl;
+	  }
+	}
+	if(relevant) relevantBins_.push_back(binning_[variable][bin]);
       }
       // b) calculate number of considered bins 
       int unfoldbins=relevantBins_.size()-1; // NB: N(bins)=NbinEdges-1 
@@ -1613,6 +1650,7 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       }
       if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
 
+      verbose=0;
       // ----------------------
       // use unfolding machine
       // ----------------------
@@ -1812,6 +1850,11 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
 	inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
 	histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
+	if(verbose>1){
+	  std::cout << std::endl << variable << std::endl;
+	  std::cout << "data abs:"   << getInclusiveXSec(histo_[xSec    ][kData],2) << std::endl;
+	  std::cout << "data norm: " << getInclusiveXSec(histo_[xSecNorm][kData],2) << std::endl;
+	}	     
 	// --------------
 	// styling issues
 	// --------------
@@ -1847,8 +1890,8 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
 	double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig],verbose-1);
-	XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
-	XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
+	// XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
+	// XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
 	histo_[xSecNorm][kSig]->Scale(1/(XSecInclTheoPS));
 	// style
 	histogramStyle(*histo_[xSec    ][kSig ], kSig , false);
@@ -1859,10 +1902,14 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
 	}
 	setXAxisRange(histo_[xSec    ][kSig ], variable);
 	setXAxisRange(histo_[xSecNorm][kSig ], variable);
+	if(verbose>1){
+	  std::cout << "mc abs:"   << getInclusiveXSec(histo_[xSec    ][kSig],2) << std::endl;
+	  std::cout << "mc norm: " << getInclusiveXSec(histo_[xSecNorm][kSig],2) << std::endl;
+	}
       }
     }
   }
-  */
+  
   // ===============================================================
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
   // ===============================================================
