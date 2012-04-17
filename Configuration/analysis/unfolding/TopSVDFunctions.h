@@ -169,14 +169,14 @@ class TopSVDFunctions
         static int SVD_GoodRecBins(TH1D* dataHist);
         static int SVD_GoodGenBins(TH1D* xiniHist);
         static int SVD_Ndof(TH1D* dataHist, TH1D* xiniHist); 
-        static TH1D* SVD_CalcGlobCorr(TH2D* statCovHist);
+        static TH1D* SVD_CalcGlobCorr(TH2D* statCovHist, TH1D* dataHist);
         static double SVD_AvgGlobCorr(TH1D* globCorrHist);
         static TH1D* SVD_Refold(TH1D* unfHist, TH1D* xiniHist, TH2D* mcHist, bool useWeights, int numHist = 1);
         
         
         // Tau Scan  
         static TVectorD* SVD_CalcScanPoints(double firstTau, double lastTau, int nScanPoints);
-        static double SVD_ScanGlobalCorrelation(TH2D* statCovHist);
+        static double SVD_ScanGlobalCorrelation(TH2D* statCovHist, TH1D* dataHist);
         static double SVD_ScanChiSquared(TH1D* weightHist, TH1D* dataHist, TH2D* mcHist);
         static double SVD_ScanCurvature(double curv); 
         static double SVD_ScanAvgSqErr(TH2D* covMatrix); 
@@ -186,7 +186,8 @@ class TopSVDFunctions
         // Scaling
         static double SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist);
         static void SVD_ArrayScale(TH1D* histo, double scale, int numHist = 1); 
-        
+        static double SVD_Integral1D(TH1D* hist, bool doOF); 
+        static double SVD_Integral2D(TH2D* hist, bool doOF);
         
         // Background
         static void SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist = 1);

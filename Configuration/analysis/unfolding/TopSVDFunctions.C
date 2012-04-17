@@ -2147,15 +2147,18 @@ TVectorD* TopSVDFunctions::SVD_CalcScanPoints(double firstTau, double lastTau, i
 
 // Tau Scan
 // Scan Global Correlation    
-double TopSVDFunctions::SVD_ScanGlobalCorrelation(TH2D* statCovHist)
+double TopSVDFunctions::SVD_ScanGlobalCorrelation(TH2D* statCovHist, TH1D* dataHist)
 {  
   
     // Calculate Global Correlation in all bins
-    TH1D* globCorrHist = SVD_CalcGlobCorr(statCovHist);
+    TH1D* globCorrHist = SVD_CalcGlobCorr(statCovHist, dataHist);
+    	
     
+
     // Averaged Global Correlation
     double globcorr = SVD_AvgGlobCorr(globCorrHist); 
-     
+ 
+
     // Delete old objects 
     //delete globCorrHist; 
     
@@ -2322,13 +2325,15 @@ void TopSVDFunctions::SVD_NewUpperRange(double max, double& newmax)
 //     of the global correlation !!!
 // (2) We also exclude all empty rows/columns int he
 //     covariance matrix.
-// (3) For excluded bins, the global correlation
+// (3) We also exclude bins that are empty on REC level.
+//     These are only determined by the periphery.
+// (2) For excluded bins, the global correlation
 //     will be set to zero.
-TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
+TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist, TH1D* dataHist)
 {
     // Number of bins
     int nbins = statCovHist->GetNbinsX();
-    
+     
     // Map Histo To Matrix
     TArrayI binMap(nbins);
     int numBinsToSkip = 0;
@@ -2336,7 +2341,12 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
 	// Search for bins that have to be skipped
 	int bincounter = 0;
     for ( int i = 1; i <= nbins ; i++ ) {
-    	if ( i == 1 ) {
+    	double data = dataHist->GetBinContent(i);
+    	if ( data <= 0. ) {
+    		// Through out bin with no data
+    		binMap[i-1] = -1;
+    		numBinsToSkip++;
+    	} else if ( i == 1 ) {
     		// Through out underflow bin
     		binMap[i-1] = -1;
     		numBinsToSkip++;
@@ -2362,9 +2372,8 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
     			bincounter++;
     		} 
     	}
-    }		
-    
-    
+    }	 
+
     // Create new Matrix
     int matrixdim = nbins - numBinsToSkip;
     TMatrixDSym statCovMat(matrixdim);
@@ -2380,18 +2389,16 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
         	// Is this bin to be skipped?
         	bool skipThisBin = false;
         	if (binMap[i-1] == -1 ) skipThisBin = true;
-        	if (binMap[j-1] == -1 ) skipThisBin = true;
-        	
+        	if (binMap[j-1] == -1 ) skipThisBin = true;   	
             // Set Element
             if ( skipThisBin == false ) {
                 double value = statCovHist->GetBinContent(i,j);
                 int binnrI = binMap[i-1];
                 int binnrJ = binMap[j-1];
-                statCovMat[binnrI][binnrJ] = value;
+                statCovMat[binnrI][binnrJ] = value;  
             }
         }
-    } 
-    
+    }  
     
     // Determinant
     double detStatCovMat[1]; 
@@ -2422,7 +2429,6 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist)
         double xmax = statCovHist->GetXaxis()->GetXmax();
         glcHist->SetBins(nbins, xmin, xmax); 
     }
-    
      
     
     // Fill the histo you just created
@@ -2743,6 +2749,47 @@ double TopSVDFunctions::SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist)
     double scalefactor = sumData / sumMC ;
     return scalefactor;
     
+}
+
+// Count the number of weighted events in a histo
+double TopSVDFunctions::SVD_Integral1D(TH1D* hist, bool doOF)
+{
+	if ( hist == NULL ) return 0.; 
+    int nbins = hist->GetNbinsX();
+    double sumData = 0.;
+    
+    // Sum it up
+    for ( int i = 0 ; i <= nbins+1 ; i++ ) {
+		if ( i == 0       && doOF == false ) continue;
+		if ( i == nbins+1 && doOF == false ) continue;
+		double value = hist->GetBinContent(i);
+		sumData += value;
+    }
+		
+	return sumData;	
+}
+
+// Count the number of weighted events in a histo
+double TopSVDFunctions::SVD_Integral2D(TH2D* hist, bool doOF)
+{
+	if ( hist == NULL ) return 0.;
+    int nbinsx = hist->GetNbinsX();
+    int nbinsy = hist->GetNbinsY();
+    double sumData = 0.;
+    
+    // Sum it up
+    for ( int i = 0 ; i <= nbinsx+1 ; i++ ) {
+		if ( i == 0        && doOF == false ) continue;
+		if ( i == nbinsx+1 && doOF == false ) continue;
+        for ( int j = 0 ; j <= nbinsy+1 ; j++ ) {
+			if ( j == 0        && doOF == false ) continue;
+			if ( j == nbinsy+1 && doOF == false ) continue;
+		    double value = hist->GetBinContent(i,j);
+		    sumData += value;
+        }
+    }
+		
+	return sumData;	
 }
 
 // Find bin number on an axis
@@ -3652,7 +3699,7 @@ TString TopSVDFunctions::SVD_LineFromFile(TString key, TString filepath)
     // Did the file opening succeed?
     if ( theFile == NULL ) {
         cout << "***********************************************************************" << endl;
-        cout << "Error in  TopSVDFunctions::SVD_LineFromFile " << endl;
+        cout << "Error in  TopSVDFunctions::SVD_LineFromFile() " << endl;
         cout << "Not able to open file " << filepath << endl;
         cout << "Check this now!" << endl;
         cout << "***********************************************************************" << endl;
@@ -3682,7 +3729,7 @@ TString TopSVDFunctions::SVD_LineFromFile(TString key, TString filepath)
         return theFullLine;
     } else {  
         cout << "***********************************************************************" << endl;
-        cout << "Error in  TopSVDFunctions::SVD_Unfold() " << endl; 
+        cout << "Error in  TopSVDFunctions::SVD_LineFromFile() " << endl; 
         cout << "We were searching for the key" << endl;
         cout << "'" << startstring << "'" << endl;
         cout << "but didn't find it in the file " << endl;
@@ -4029,6 +4076,20 @@ double TopSVDFunctions::SVD_Unfold(
     }
          
 
+      
+    /////////////////////////////////////////////////////////////////// 
+    /////////  C O N T R O L   O U T P U T   ////////////////////////// 
+    ///////////////////////////////////////////////////////////////////
+  
+    
+    // Integrals of Input histogram
+    double integralData =  SVD_Integral1D(dataInputHist, true);
+    double integralBgr =   SVD_Integral1D(bgrInputHist, true);
+    double integralTtbgr = SVD_Integral1D(ttbgrInputHist, true);
+    double integralGen =   SVD_Integral1D(genInputHist, true);
+    double integralRec =   SVD_Integral1D(recInputHist, true);
+    double integralResp =  SVD_Integral2D(respInputHist, true);
+  
   
     // Screen Output
     if ( flag_verbose > 1 ) {
@@ -4067,7 +4128,15 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "        Number of scan points:             " << nScanPoints << endl;
         cout << "        Range of scan:                     " << 1/rangefactor << " ... " << rangefactor << endl;
         cout << "        Cut out Rec Level Side Bins:       " << (flag_recOF == 2) << endl;
-        cout << "********************************************************************************************************************" << endl;
+        cout << "    Integrals of Input Distributions:" << endl;
+        cout << "        Data:                              " << integralData << endl;
+        cout << "        Background:                        " << integralBgr << endl;
+        cout << "        Tt-Background:                     " << integralTtbgr << endl;
+        cout << "        Generated MC:                      " << integralGen << endl;
+        cout << "        Reconstructed MC:                  " << integralRec << endl;
+        cout << "        Response Matrix:                   " << integralResp << endl;
+        cout << "********************************************************************************************************************" << endl; 
+        
     }   
     
     /////////////////////////////////////////////////////////////////// 
@@ -4368,7 +4437,7 @@ double TopSVDFunctions::SVD_Unfold(
               
             
             // Global Correlation
-            TH1D* tmpGlC = SVD_CalcGlobCorr(tmpCovHist); 
+            TH1D* tmpGlC = SVD_CalcGlobCorr(tmpCovHist, dataHist); 
             TString glcStr = SVD_PlotName(channel, particle, quantity, special, syst, "GLOBC");
             SVD_SetTitles1D(tmpGlC, glcStr, quantityTex, "Glob. Corr. in \%");
                    
@@ -4481,7 +4550,7 @@ double TopSVDFunctions::SVD_Unfold(
                 TH2D* tmpCovHist = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments)); 
                    
                 // Global Correlation 
-                (*vGlobCorr)[i] = SVD_ScanGlobalCorrelation(tmpCovHist);
+                (*vGlobCorr)[i] = SVD_ScanGlobalCorrelation(tmpCovHist, dataHist);
                    
                 // Chi Squared
                 (*vChiSq)[i] = SVD_ScanChiSquared(tmpWeights, dataHist, mcHist);
@@ -4537,7 +4606,7 @@ double TopSVDFunctions::SVD_Unfold(
                 // Calculate the Error matrix (internally, more unfoldings ... )
                 TH2D* tmpCovHist = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments)); 
                 // Global Correlation 
-                globCorrLowTau = SVD_ScanGlobalCorrelation(tmpCovHist);
+                globCorrLowTau = SVD_ScanGlobalCorrelation(tmpCovHist, dataHist);
                 // delete Error matrix
                 SVD_DeleteHists2D(tmpCovHist);
                 // print global correlation for new tau
@@ -4549,7 +4618,7 @@ double TopSVDFunctions::SVD_Unfold(
                 // Calculate the Error matrix (internally, more unfoldings ... ) 
                 TH2D* tmpCovHist = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments));  
                 // Global Correlation 
-                globCorrHighTau = SVD_ScanGlobalCorrelation(tmpCovHist);
+                globCorrHighTau = SVD_ScanGlobalCorrelation(tmpCovHist, dataHist);
                 // delete Error matrix
                 SVD_DeleteHists2D(tmpCovHist); 
                 // print global correlation for new tau
@@ -4932,7 +5001,7 @@ double TopSVDFunctions::SVD_Unfold(
     // of the global correlation !!!    
     // The global correlation in the side bins will be set 
     // to zero!
-    TH1D* glcHist = SVD_CalcGlobCorr(statCovHist);
+    TH1D* glcHist = SVD_CalcGlobCorr(statCovHist, dataHist);
     TString glcStr = SVD_PlotName(channel, particle, quantity, special, syst, "GLOBC");
     glcHist->SetName(glcStr);
     glcHist->SetTitle(glcStr);
