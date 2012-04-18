@@ -49,7 +49,7 @@ if(applyKinFit==True):
 ## include module to create JES-shifted collection
 for path in pathlist:
     path.replace(process.selectedPatJets,
-                 process.scaledJetEnergy * process.selectedPatJets)
+                 process.selectedPatJets * process.scaledJetEnergy)
 
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXSecCorr_testSig.root'
