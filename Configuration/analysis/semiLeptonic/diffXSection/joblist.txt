@@ -2,14 +2,21 @@
 ## 2011 data ##
 ###############
 
-###########
-## 2011A ##
-###########
+###############
+## 2011A EPS ##
+###############
 # muon
-nafJobSplitter.pl -d MuDataRunA 500 analyzeMuonDiffXData2011ACombined_cfg.py
+nafJobSplitter.pl -q 12 900 analyzeMuonDiffXData2011AEPS_cfg.py
 # electron
-nafJobSplitter.pl -d ElDataRunAPartA 500 analyzeElecDiffXData2011ACombinedTrig1_cfg.py
-nafJobSplitter.pl -d ElDataRunAPartB 500 analyzeElecDiffXData2011ACombinedTrig2_cfg.py
+nafJobSplitter.pl -q 12 900 analyzeElecDiffXData2011AEPS_cfg.py
+
+#####################
+## 2011A+B postEPS ##
+#####################
+# muon
+nafJobSplitter.pl -q 12 900 analyzeMuonDiffXData2011PostEPS_cfg.py
+# electron
+nafJobSplitter.pl -q 12 900 analyzeElecDiffXData2011PostEPS_cfg.py
 
 
 ##################
