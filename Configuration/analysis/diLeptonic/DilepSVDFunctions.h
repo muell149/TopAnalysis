@@ -22,6 +22,7 @@ public:
 
     // Helpers
     double SVD_GetRegPar(TString channel, TString particle, TString quantity, TString special, bool useTau);
+    TString SVD_GetSteering(TString channel, TString particle, TString quantity, TString special);
     void SVD_Tex(TString channel, TString particle, TString quantity, TString special, TString& channelTex, TString& particleTex, TString& quantityTex, TString& specialTex);
     TString SVD_GetOutputPath();
     TString SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity, TString syst, TString special);

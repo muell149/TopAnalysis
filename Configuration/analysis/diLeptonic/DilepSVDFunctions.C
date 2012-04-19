@@ -12,6 +12,53 @@ DilepSVDFunctions::DilepSVDFunctions()
 
     
 // SVD Helper Function
+// Return String with Steering
+TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TString quantity, TString special)
+{
+	
+    
+    
+    // Determine the Steering 
+    int flag_regmode = 2; //3=manual, 4=fromfile
+    int flag_regpar = 2; //2=tau, 1=k
+    int flag_scan = 1; //2=doscan
+    int flag_ps = 4; 
+    int flag_root = 1;
+    int flag_text = 2;
+    int flag_verbose = 2;
+    int flag_scanpoints = 3;
+    int flag_scanrange = 2;
+    int flag_lowersidebin = 2; 
+    int flag_uppersidebin = 2;
+    int flag_matrixorientation = 1; 
+    
+    // Alter the Gen Level Treatment for the PT-Quantities
+    TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
+    if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_lowersidebin = 3;
+    if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_lowersidebin = 3;
+    if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_lowersidebin = 3;
+    
+    // Calculate Steering Parameter
+    TString steering = "";
+    steering.Prepend(TString::Format("%i", flag_regmode)); //1
+    steering.Prepend(TString::Format("%i", flag_regpar));  //2
+    steering.Prepend(TString::Format("%i", flag_scan));    //3
+    steering.Prepend(TString::Format("%i", flag_ps));      //4
+    steering.Prepend(TString::Format("%i", flag_root));    //5
+    steering.Prepend(TString::Format("%i", flag_text));    //6
+    steering.Prepend(TString::Format("%i", flag_verbose)); //7
+    steering.Prepend(TString::Format("%i", flag_scanpoints));   //8
+    steering.Prepend(TString::Format("%i", flag_scanrange));    //9
+    steering.Prepend(TString::Format("%i", flag_lowersidebin)); //10
+    steering.Prepend(TString::Format("%i", flag_uppersidebin)); //11
+    steering.Prepend(TString::Format("%i", flag_matrixorientation)); //12 
+    
+    // Return it
+    return steering;
+}
+
+    
+// SVD Helper Function
 // Return a k-Value for the particle/quantity/channel combination
 double DilepSVDFunctions::SVD_GetRegPar(TString channel, TString particle, TString quantity, TString special, bool useTau)
 {
@@ -116,14 +163,14 @@ double DilepSVDFunctions::SVD_GetRegPar(TString channel, TString particle, TStri
         if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 ) regPar = 6.;
         if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 ) regPar = 6.;
         if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 ) regPar = 6.; 
-        if ( concatenation.CompareTo("mumu_Jets_Eta") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("emu_Jets_Eta") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("ee_Jets_Eta") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("combined_Jets_Eta") == 0 ) regPar = 7.; //6.; 
-        if ( concatenation.CompareTo("mumu_Jets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("emu_Jets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("ee_Jets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("combined_Jets_Pt") == 0 ) regPar = 7.; //4.; 
+        if ( concatenation.CompareTo("mumu_BJets_Rapidity") == 0 ) regPar = 7.; //6.;
+        if ( concatenation.CompareTo("emu_BJets_Rapidity") == 0 ) regPar = 7.; //6.;
+        if ( concatenation.CompareTo("ee_BJets_Rapidity") == 0 ) regPar = 7.; //6.;
+        if ( concatenation.CompareTo("combined_BJets_Rapidity") == 0 ) regPar = 7.; //6.; 
+        if ( concatenation.CompareTo("mumu_BJets_Pt") == 0 ) regPar = 7.; //4.;
+        if ( concatenation.CompareTo("emu_BJets_Pt") == 0 ) regPar = 7.; //4.;
+        if ( concatenation.CompareTo("ee_BJets_Pt") == 0 ) regPar = 7.; //4.;
+        if ( concatenation.CompareTo("combined_BJets_Pt") == 0 ) regPar = 7.; //4.; 
         if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
         if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
         if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
@@ -169,18 +216,18 @@ double DilepSVDFunctions::SVD_GetRegPar(TString channel, TString particle, TStri
         if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 )                          regPar = 7.72164;
         if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 )                            regPar = 7.34612;
         if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 )                      regPar = 17.68402;
-        if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 )                         regPar = 19.03124;
-        if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 )                        regPar = 111.13875;
-        if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 )                          regPar = 219.42386;
-        if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 )                    regPar = 23.50532;
-        if ( concatenation.CompareTo("emu_Jets_Eta") == 0 )                             regPar = 23.07640;
-        if ( concatenation.CompareTo("mumu_Jets_Eta") == 0 )                            regPar = 12.61893;
-        if ( concatenation.CompareTo("ee_Jets_Eta") == 0 )                              regPar = 12.13045;
-        if ( concatenation.CompareTo("combined_Jets_Eta") == 0 )                        regPar = 28.89900;
-        if ( concatenation.CompareTo("emu_Jets_Pt") == 0 )                              regPar = 19.69450;
-        if ( concatenation.CompareTo("mumu_Jets_Pt") == 0 )                             regPar = 10.53993;
-        if ( concatenation.CompareTo("ee_Jets_Pt") == 0 )                               regPar = 10.10353;
-        if ( concatenation.CompareTo("combined_Jets_Pt") == 0 )                         regPar = 24.39646;
+        if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 )                         regPar = 19.10723;
+		if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 )                        regPar = 15.77096;
+		if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 )                          regPar = 14.36950;
+		if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 )                    regPar = 23.62244;
+        if ( concatenation.CompareTo("emu_BJets_Rapidity") == 0 )                             regPar = 23.07640;
+        if ( concatenation.CompareTo("mumu_BJets_Rapidity") == 0 )                            regPar = 12.61893;
+        if ( concatenation.CompareTo("ee_BJets_Rapidity") == 0 )                              regPar = 12.13045;
+        if ( concatenation.CompareTo("combined_BJets_Rapidity") == 0 )                        regPar = 28.89900;
+        if ( concatenation.CompareTo("emu_BJets_Pt") == 0 )                              regPar = 19.69450;
+        if ( concatenation.CompareTo("mumu_BJets_Pt") == 0 )                             regPar = 10.53993;
+        if ( concatenation.CompareTo("ee_BJets_Pt") == 0 )                               regPar = 10.10353;
+        if ( concatenation.CompareTo("combined_BJets_Pt") == 0 )                         regPar = 24.39646;
         if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 )                   regPar = 22.01909;
         if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 )                  regPar = 12.18932;
         if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 )                    regPar = 11.80886;
@@ -254,6 +301,8 @@ void DilepSVDFunctions::SVD_Tex(TString channel, TString particle, TString quant
         particleTex.Append("(l^{+}l^{-})");
     } else if ( strcmp(particle, "Jets") == 0 ){
         particleTex.Append("Jets");
+    } else if ( strcmp(particle, "BJets") == 0 ){
+        particleTex.Append("BJets");
     } else if ( strcmp(particle, "TopQuarks") == 0 ) {
         particleTex.Append("t / #bar{t}");
     } else if ( strcmp(particle, "TtBar") == 0 ) {
@@ -464,7 +513,7 @@ double DilepSVDFunctions::SVD_DoUnfold(
         TH1D*& unfolded,                         // Returned: Unfolded Distribution.
         const int numSys,                        // Number of used systematics (standard = 0 )
         TString channel,                         // Specify Name for the Channel ("mumu", "emu", "ee" ...)
-        TString particle,                        // Specify Name for the Physics Object ("Top", "Jets", "Leptons")
+        TString particle,                        // Specify Name for the Physics Object ("Top", "BJets", "Leptons")
         TString quantity,                        // Specify Name for the Quantity ("Eta", "Pt", or "Mass");
         TString special,                         // Special Postfix to be used for names of files and plots
         TString syst                             // Specify Name for the Up-Systematic
@@ -473,25 +522,10 @@ double DilepSVDFunctions::SVD_DoUnfold(
 
     
     
-    // Determine the Steering
-    int flag_regmode = 3;  
-    int flag_regpar = 1;
-    int flag_scan = 2;
-    int flag_ps = 4; 
-    int flag_root = 1;
-    int flag_text = 2;
-    int flag_verbose = 2;
     
-    // Calculate Steering Parameter
-    int steering = 0;
-    steering +=       1*flag_regmode;
-    steering +=      10*flag_regpar;
-    steering +=     100*flag_scan;
-    steering +=    1000*flag_ps; 
-    steering +=   10000*flag_root;
-    steering +=  100000*flag_text;
-    steering += 1000000*flag_verbose;
-        
+    // Determine the Steering 
+    TString steering = SVD_GetSteering(channel, particle, quantity, special); 
+    int flag_regpar = SVD_GetDigit(steering, 2, 1); 
     
 
     // Determine the right kValue
