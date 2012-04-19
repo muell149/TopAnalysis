@@ -415,25 +415,125 @@ void TopSVDFunctions::SVD_MoveOFBins2D(TH2D* hist, int numHist){
 // Should be called for reconstructed quantities.
 // Histogram side bins are also emptied.
 // Can handle arrays of histograms
-void TopSVDFunctions::SVD_EmptyRecSideBins1D(TH1D* histo, int numHist) 
+void TopSVDFunctions::SVD_EmptyRecSideBins1D(TH1D* histo, bool cutLowerRecSideBin, bool cutUpperRecSideBin, int numHist) 
 {
     // Existence of Objects
     if ( histo == NULL ) return;  
-    
     int bins = histo->GetNbinsX();
     
     // Loop over all histograms in the array 
     for ( int h = 0 ; h < numHist ; h++ ) {
         (histo+h)->SetBinContent(0, 0.);
-        (histo+h)->SetBinContent(1, 0.);
-        (histo+h)->SetBinContent(bins, 0.);    
         (histo+h)->SetBinContent(bins+1, 0.);
         (histo+h)->SetBinError(0, 0.);
-        (histo+h)->SetBinError(1, 0.);
-        (histo+h)->SetBinError(bins, 0.);
         (histo+h)->SetBinError(bins+1, 0.);
+        if ( cutLowerRecSideBin == true ) {
+            (histo+h)->SetBinContent(1, 0.);
+            (histo+h)->SetBinError(1, 0.);
+        }
+        if ( cutUpperRecSideBin == true ) {
+            (histo+h)->SetBinContent(bins, 0.);    
+            (histo+h)->SetBinError(bins, 0.);
+        } 
     }
     
+}
+
+
+// This empties the dedicated side bins.
+// Should be called for generated quantities.
+// Histogram side bins are also emptied.
+// Can handle arrays of histograms
+void TopSVDFunctions::SVD_EmptyGenSideBins1D(TH1D* histo, bool cutLowerGenSideBin, bool cutUpperGenSideBin, int numHist) 
+{
+    // Existence of Objects
+    if ( histo == NULL ) return;  
+    int bins = histo->GetNbinsX();
+    
+    // Loop over all histograms in the array 
+    for ( int h = 0 ; h < numHist ; h++ ) {
+        (histo+h)->SetBinContent(0, 0.);
+        (histo+h)->SetBinContent(bins+1, 0.);
+        (histo+h)->SetBinError(0, 0.);
+        (histo+h)->SetBinError(bins+1, 0.);
+        if ( cutLowerGenSideBin == true ) {
+            (histo+h)->SetBinContent(1, 0.);
+            (histo+h)->SetBinError(1, 0.);
+        }
+        if ( cutUpperGenSideBin == true ) {
+            (histo+h)->SetBinContent(bins, 0.);    
+            (histo+h)->SetBinError(bins, 0.);
+        } 
+    }
+    
+}
+
+// This empties the dedicated side bins.
+// Should be called for reconstructed quantities,
+// which are assumed to be on X axis.
+// Histogram side bins are also emptied.
+// Can handle arrays of histograms
+void TopSVDFunctions::SVD_EmptyRecSideBins2D(TH2D* histo, bool cutLowerRecSideBin, bool cutUpperRecSideBin, int numHist)
+{
+    // Existence of Objects
+    if ( histo == NULL ) return;   
+    
+    int binsx = histo->GetNbinsX();
+    int binsy = histo->GetNbinsY();
+    
+    // Loop over all histograms in the array 
+    for ( int h = 0 ; h < numHist ; h++ ) {
+
+        // Loop over generated bins (on Y axis)
+        for ( int j = 0 ; j < binsy+2 ; j++ ) { 
+            (histo+h)->SetBinContent(0, j, 0.);
+            (histo+h)->SetBinContent(binsx+1, j, 0.);
+            (histo+h)->SetBinError(0, j, 0.);
+            (histo+h)->SetBinError(binsx+1, j, 0.); 
+            if ( cutLowerRecSideBin == true ) {
+                (histo+h)->SetBinContent(1, j, 0.);
+                (histo+h)->SetBinError(1, j, 0.);
+            } 
+            if ( cutUpperRecSideBin == true ) {
+                (histo+h)->SetBinContent(binsx, j, 0.);
+                (histo+h)->SetBinError(binsx, j, 0.);
+            } 
+        } 
+    } 
+}
+
+// This empties the dedicated side bins.
+// Should be called for genetared quantities,
+// which are assumed to be on Y axis.
+// Histogram side bins are also emptied.
+// Can handle arrays of histograms
+void TopSVDFunctions::SVD_EmptyGenSideBins2D(TH2D* histo, bool cutLowerGenSideBin, bool cutUpperGenSideBin, int numHist)
+{
+    // Existence of Objects
+    if ( histo == NULL ) return;   
+    
+    int binsx = histo->GetNbinsX();
+    int binsy = histo->GetNbinsY();
+    
+    // Loop over all histograms in the array 
+    for ( int h = 0 ; h < numHist ; h++ ) {
+
+        // Loop over reconstructed bins (on X axis)
+        for ( int i = 0 ; i < binsx+2 ; i++ ) { 
+            (histo+h)->SetBinContent(i, 0, 0.);
+            (histo+h)->SetBinContent(i, binsy+1, 0.);
+            (histo+h)->SetBinError(i, 0, 0.);
+            (histo+h)->SetBinError(i, binsy+1, 0.);
+            if ( cutLowerGenSideBin == true ) {
+                (histo+h)->SetBinContent(i, 1, 0.);
+                (histo+h)->SetBinError(i, 1, 0.); 
+            } 
+            if ( cutUpperGenSideBin == true ) {
+                (histo+h)->SetBinContent(i, binsy, 0.);
+                (histo+h)->SetBinError(i, binsy, 0.); 
+            } 
+        } 
+    } 
 }
 
 
@@ -564,39 +664,6 @@ void TopSVDFunctions::SVD_EmptyHistoErrors2D(TH2D* histo, int numHist)
 }
 
 
-// This empties the dedicated side bins.
-// Should be called for reconstructed quantities,
-// which are assumed to be on X axis.
-// Histogram side bins are also emptied.
-// Can handle arrays of histograms
-void TopSVDFunctions::SVD_EmptyRecSideBins2D(TH2D* histo, int numHist)
-{
-    // Existence of Objects
-    if ( histo == NULL ) return;   
-    
-    int binsx = histo->GetNbinsX();
-    int binsy = histo->GetNbinsY();
-    
-    // Loop over all histograms in the array 
-    for ( int h = 0 ; h < numHist ; h++ ) {
-
-        // Loop over generated bins (on Y axis)
-        for ( int j = 0 ; j < binsy+2 ; j++ ) { 
-            (histo+h)->SetBinContent(0, j, 0.);
-            (histo+h)->SetBinContent(1, j, 0.);
-            (histo+h)->SetBinContent(binsx, j, 0.);
-            (histo+h)->SetBinContent(binsx+1, j, 0.);
-            (histo+h)->SetBinError(0, j, 0.);
-            (histo+h)->SetBinError(1, j, 0.);
-            (histo+h)->SetBinError(binsx, j, 0.);
-            (histo+h)->SetBinError(binsx+1, j, 0.);
-        }
-    
-    }
-
-}
-
-
 // Creates a histogram with just the errors
 // Attention:
 // (1) Depicts relative uncertainties in PERCENT
@@ -718,30 +785,82 @@ TH2D* TopSVDFunctions::SVD_HistoErrors2D(TH2D* histo, int numHist)
 }
 
 
+// Return new number of bins
+int TopSVDFunctions::SVD_NumNewBins(int oldNumBins, bool addLowerSideBin, bool addUpperSideBin)
+{ 
+    int nbins = oldNumBins;
+    if ( addLowerSideBin == true ) nbins++;
+    if ( addUpperSideBin == true ) nbins++; 
+    
+    return nbins;
+}
+
+
+// New Binning 
+void TopSVDFunctions::SVD_NewBins(double*& theNewBins, int newNumBins, const double* theOldBins, int oldNumBins, bool addLowerSideBin, bool addUpperSideBin)
+{
+    // Width of Side bins
+    double rangeWidth = theOldBins[oldNumBins] - theOldBins[0];
+    double ofWidth = rangeWidth / ((double) oldNumBins);
+     
+    // Potentially smaller UF Bin
+    double ufWidth = ofWidth;
+    if ( theOldBins[0] > 0. && theOldBins[0] < ufWidth ) ufWidth = theOldBins[0];
+
+    // Calculate new bins 
+    if ( addLowerSideBin == true) {
+        theNewBins[0] = theOldBins[0] - ufWidth;
+        for ( int i = 0 ; i <= oldNumBins ; i++ ) {
+            theNewBins[i+1] = theOldBins[i]; 
+        }
+    } else {
+        for ( int i = 0 ; i <= oldNumBins ; i++ ) {
+            theNewBins[i] = theOldBins[i];
+        } 
+    } 
+    if ( addUpperSideBin == true) { 
+        theNewBins[newNumBins] = theOldBins[oldNumBins]+ofWidth;
+    } 
+    
+}
+
+
+
 // Rebinning of 1D Histograms. 
 // ATTENTION! ATTENTION! ATTENTION! ATTENTION! ATTENTION!
 // (1) Creates new histograms on the heap. 
 //     So dont forget to delete them sometimes. 
 // (2) In 'binsx' the bin boundaries are specified!
 //     'nbinsx' gives the number of specified bins!
-// (3) The first and last bin in 'binsx' are considered
-//     as overflow bins, all other bins as center bins!
-//     The overflow bins will get all events that cannot be
-//     assigned a center bin. The TH2D-side-bins will not be used
-//     for the output-histogram.
-// (5) Each (but the first and last) bin boundary in 'binsx'  
-//     MUST match one in the input-histograms, otherwise double counting 
+// (3) If wished, one can add lower and upper side bins
+//     (This is highly recommended!) 
+//     Note: If no side bins are added, all events  
+//     outside the central bins will be discarded!!
+// (5) Each bin boundary in 'binsx' MUST match one in   
+//     the input-histograms, otherwise double counting 
 //     will occur.
 // (6) Can also handle Arrays of histograms, if numHist > 1.
 //     All input histograms must have the same binning!
-TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int numHist)
+TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, const double* binsx, bool addLowerSideBin, bool addUpperSideBin, int numHist) 
 { 
+	
+	addLowerSideBin = true;
+	addUpperSideBin = true;
     
     // Existence of Objects
     if ( input == NULL ) return NULL;   
      
     // Binning of old histogram
     int nbinsGenRecX =input->GetNbinsX();
+     
+    // How many bins do you need
+    int numnewbins = SVD_NumNewBins(nbinsx, addLowerSideBin, addUpperSideBin);
+     
+    // Calculate new bins
+    double arrayOfNewBinsX[numnewbins+1];
+    double* newbins = arrayOfNewBinsX;
+    SVD_NewBins(newbins, numnewbins, binsx, nbinsx, addLowerSideBin, addUpperSideBin);    
+    
     
     // Create new objects
     TH1D* outputhists = new TH1D[numHist];
@@ -751,13 +870,13 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int n
         TString nameNewHist = (input+h)->GetName();
         nameNewHist.Append("Rebinned");
         (outputhists+h)->SetNameTitle(nameNewHist, nameNewHist);
-        (outputhists+h)->SetBins(nbinsx, binsx);
+        (outputhists+h)->SetBins(numnewbins, newbins);
         SVD_EmptyHistogram1D(outputhists+h, 1); 
     
     
     
-        // Do NOT use the side bins of th TH2D-Class! 
-        for(int i=1; i<=nbinsx; ++i){ 
+        // Do NOT use the side bins of th TH1D-Class! 
+        for(int i=1; i<=numnewbins; ++i){ 
         
             // Variables for the bin boundaries
             double xlow  = 0.;
@@ -768,12 +887,19 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int n
             bool alarm = false;
             double alarmTresh = 0.0001;
             
+            // Which treatment for this bin?
+            bool isUFBin = false;
+            bool isOFBin = false; 
+            if ( i == 1 && addLowerSideBin == true ) isUFBin = true; 
+            if ( i == numnewbins && addUpperSideBin == true ) isUFBin = true; 
+            
+            
             // Find bin boundaries in X
             int nxlow = -1;
             int nxhigh = -1;
-            if ( i == 1 ) {   // UF bin in X 
-                xlow = binsx[0]; 
-                xhigh = binsx[1];  
+            if ( isUFBin == true) {    
+                xlow = newbins[0]; 
+                xhigh = newbins[1];  
                 nxlow = 0;
                 nxhigh = SVD_FindBin((input+h)->GetXaxis(), xhigh) - 1;   
                 newxlow = xlow;
@@ -781,25 +907,25 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int n
                 binwidth = xhigh - xlow; 
                 if ( TMath::Abs(newxhigh-xhigh)/binwidth >  alarmTresh ) alarm = true;
             }
-            if ( i == nbinsx ) {  // OF bin in X
-                xlow = binsx[nbinsx-1]; 
-                xhigh = binsx[nbinsx]; 
-                nxlow = SVD_FindBin((input+h)->GetXaxis(), xlow);
-                nxhigh = nbinsGenRecX+1;
-                newxlow = (input+h)->GetXaxis()->GetBinLowEdge(nxlow);
-                newxhigh = xhigh;
-                binwidth = xhigh - xlow;
-                if ( TMath::Abs(newxlow-xlow)/binwidth >  alarmTresh ) alarm = true;
-            }
-            if ( i > 1 && i < nbinsx) { // Center bin in X
-                xlow = binsx[i-1];
-                xhigh = binsx[i];
+            if ( isUFBin == false && isOFBin == false) {  
+                xlow = newbins[i-1];
+                xhigh = newbins[i];
                 nxlow = SVD_FindBin((input+h)->GetXaxis(), xlow);
                 nxhigh = SVD_FindBin((input+h)->GetXaxis(), xhigh) - 1;  
                 newxlow = (input+h)->GetXaxis()->GetBinLowEdge(nxlow);
                 newxhigh = (input+h)->GetXaxis()->GetBinLowEdge(nxhigh+1);
                 binwidth = xhigh - xlow;
                 if ( TMath::Abs(newxhigh-xhigh)/binwidth >  alarmTresh ) alarm = true;
+                if ( TMath::Abs(newxlow-xlow)/binwidth >  alarmTresh ) alarm = true;
+            }
+            if ( isOFBin == true ) {   
+                xlow = newbins[numnewbins-1]; 
+                xhigh = newbins[numnewbins]; 
+                nxlow = SVD_FindBin((input+h)->GetXaxis(), xlow);
+                nxhigh = nbinsGenRecX+1;
+                newxlow = (input+h)->GetXaxis()->GetBinLowEdge(nxlow);
+                newxhigh = xhigh;
+                binwidth = xhigh - xlow;
                 if ( TMath::Abs(newxlow-xlow)/binwidth >  alarmTresh ) alarm = true;
             }
 
@@ -816,8 +942,8 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int n
                 } 
                 cout << endl;
                 cout << "New bins in X: " << endl;
-                for ( int k = 0; k < nbinsx+1 ; k++ ) {
-                    cout << " " << binsx[k];
+                for ( int k = 0; k < numnewbins+1 ; k++ ) {
+                    cout << " " << newbins[k];
                 }
                 cout << endl;
                 cout << "Exiting ... " << endl;
@@ -868,22 +994,42 @@ TH1D* TopSVDFunctions::SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int n
 // (2) If needed, you can transpose the matrix, too. 
 // (3) In 'binsx' and 'binsy' the bin boundaries are specified!
 //     'nbinsx' and 'nbinsy' the number of specified bins!
-// (4) The first and last bin in 'binsx' and 'binsy' are considered
-//     as overflow bins, all other bins as center bins!
-//     The overflow bins will get all events that cannot be
-//     assigned a center bin. The TH2D-side-bins will not be used
-//     for the output-histogram.
+// (4) If wished, one can add lower and upper side bins
+//     (This is highly recommended!) 
+//     Note: If no side bins are added, all events  
+//     outside the central bins will be discarded!! 
 // (5) Each (but the first and last) bin boundary in 'binsx' and 'binsy' 
 //     MUST match one in the input-histogram, otherwise double counting 
 //     will occur.
-TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int nbinsy, double* binsy, int numHist, bool transpose)
+TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, const double* binsx, int nbinsy, const double* binsy, bool addLowerSideBin, bool addUpperSideBin, int numHist, bool transpose)
 { 
+	
+	addLowerSideBin = true;
+	addUpperSideBin = true;
+	
+	
     // Existence of Objects
     if ( input == NULL ) return NULL;  
     
     // Binning of old histogram
     int nbinsGenRecX =input->GetNbinsX();
     int nbinsGenRecY =input->GetNbinsY();
+     
+     
+    // How many bins do you need
+    int numnewbinsx = SVD_NumNewBins(nbinsx, addLowerSideBin, addUpperSideBin);
+    int numnewbinsy = SVD_NumNewBins(nbinsy, addLowerSideBin, addUpperSideBin);
+     
+     
+    // Calculate new bins
+    double arrayOfNewBinsX[numnewbinsx+1];
+    double* newbinsx = arrayOfNewBinsX;
+    SVD_NewBins(newbinsx, numnewbinsx, binsx, nbinsx, addLowerSideBin, addUpperSideBin);   
+    double arrayOfNewBinsY[numnewbinsy+1];
+    double* newbinsy = arrayOfNewBinsY;
+    SVD_NewBins(newbinsy, numnewbinsy, binsy, nbinsy, addLowerSideBin, addUpperSideBin); 
+    
+    
     
     // Create new objects
     TH2D* outputhists = new TH2D[numHist];
@@ -893,12 +1039,12 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
         TString nameNewHist = (input+h)->GetName();
         nameNewHist.Append("Rebinned");
         (outputhists+h)->SetNameTitle(nameNewHist, nameNewHist);
-        (outputhists+h)->SetBins(nbinsx, binsx, nbinsy, binsy);
+        (outputhists+h)->SetBins(numnewbinsx, newbinsx, numnewbinsy, newbinsy);
         SVD_EmptyHistogram2D(outputhists+h, 1);  
     
         // Do NOT use the side bins of th TH2D-Class! 
-        for(int i=1; i<=nbinsx; ++i){ 
-            for(int j=1; j<=nbinsy; ++j){ 
+        for(int i=1; i<=numnewbinsx; ++i){ 
+            for(int j=1; j<=numnewbinsy; ++j){ 
     
         
                 // Variables for the bin boundaries
@@ -916,12 +1062,23 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                 double alarmTresh = 0.0001;
             
             
+                // Which treatment for this bin?
+                bool isUFBinX = false;
+                bool isOFBinX = false; 
+                if ( i == 1 && addLowerSideBin == true ) isUFBinX = true; 
+                if ( i == numnewbinsx && addUpperSideBin == true ) isUFBinX = true; 
+                bool isUFBinY = false;
+                bool isOFBinY = false; 
+                if ( j == 1 && addLowerSideBin == true ) isUFBinY = true; 
+                if ( j == numnewbinsy && addUpperSideBin == true ) isUFBinY = true; 
+                
+                
                 // Find bin boundaries in X
                 int nxlow = -1;
                 int nxhigh = -1;
-                if ( i == 1 ) {   // UF bin in X
-                    xlow = binsx[0]; 
-                    xhigh = binsx[1];  
+                if ( isUFBinX == true ) {    
+                    xlow = newbinsx[0]; 
+                    xhigh = newbinsx[1];  
                     nxlow = 0;
                     nxhigh = SVD_FindBin((input+h)->GetXaxis(), xhigh) - 1;   
                     newxlow = xlow;
@@ -929,19 +1086,9 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                     binwidthx = xhigh - xlow; 
                     if ( TMath::Abs(newxhigh-xhigh)/binwidthx >  alarmTresh ) alarm = true; 
                 }
-                if ( i == nbinsx ) {  // OF bin in X
-                    xlow = binsx[nbinsx-1]; 
-                    xhigh = binsx[nbinsx]; 
-                    nxlow = SVD_FindBin((input+h)->GetXaxis(), xlow);
-                    nxhigh = nbinsGenRecX+1;
-                    newxlow = (input+h)->GetXaxis()->GetBinLowEdge(nxlow);
-                    newxhigh = xhigh;
-                    binwidthx = xhigh - xlow;
-                    if ( TMath::Abs(newxlow-xlow)/binwidthx >  alarmTresh ) alarm = true; 
-                }
-                if ( i > 1 && i < nbinsx) { // Center bin in X
-                    xlow = binsx[i-1];
-                    xhigh = binsx[i];
+                if ( isUFBinX == false && isOFBinX == false) {  
+                    xlow = newbinsx[i-1];
+                    xhigh = newbinsx[i];
                     nxlow = SVD_FindBin((input+h)->GetXaxis(), xlow);
                     nxhigh = SVD_FindBin((input+h)->GetXaxis(), xhigh) - 1;  
                     newxlow = (input+h)->GetXaxis()->GetBinLowEdge(nxlow);
@@ -950,13 +1097,23 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                     if ( TMath::Abs(newxhigh-xhigh)/binwidthx >  alarmTresh ) alarm = true;
                     if ( TMath::Abs(newxlow-xlow)/binwidthx >  alarmTresh ) alarm = true; 
                 }
+                if ( isOFBinX == true ) {   
+                    xlow = newbinsx[numnewbinsx-1]; 
+                    xhigh = newbinsx[numnewbinsx]; 
+                    nxlow = SVD_FindBin((input+h)->GetXaxis(), xlow);
+                    nxhigh = nbinsGenRecX+1;
+                    newxlow = (input+h)->GetXaxis()->GetBinLowEdge(nxlow);
+                    newxhigh = xhigh;
+                    binwidthx = xhigh - xlow;
+                    if ( TMath::Abs(newxlow-xlow)/binwidthx >  alarmTresh ) alarm = true; 
+                }
     
                 // Find bin boundaries in Y
                 int nylow = -1;
                 int nyhigh = -1;
-                if ( j == 1 ) {  // UF bin in Y
-                    ylow = binsy[0]; 
-                    yhigh = binsy[1];  
+                if ( isUFBinY == true  ) {  // UF bin in Y
+                    ylow = newbinsy[0]; 
+                    yhigh = newbinsy[1];  
                     nylow = 0;
                     nyhigh = SVD_FindBin((input+h)->GetYaxis(), yhigh) - 1;   
                     newylow = ylow;
@@ -964,19 +1121,9 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                     binwidthy = yhigh - ylow; 
                     if ( TMath::Abs(newyhigh-yhigh)/binwidthy >  alarmTresh ) alarm = true;   
                 }
-                if ( j == nbinsy) {   // UF bin in Y
-                    ylow = binsy[nbinsy-1]; 
-                    yhigh = binsy[nbinsy]; 
-                    nylow = SVD_FindBin((input+h)->GetYaxis(), ylow);
-                    nyhigh = nbinsGenRecY+1;
-                    newylow = (input+h)->GetYaxis()->GetBinLowEdge(nylow);
-                    newyhigh = yhigh;
-                    binwidthy = yhigh - ylow;
-                    if ( TMath::Abs(newylow-ylow)/binwidthy >  alarmTresh ) alarm = true;  
-                }
-                if ( j > 1 && j < nbinsy ) { // Center bin in Y
-                    ylow = binsy[j-1];
-                    yhigh = binsy[j];
+                if ( isUFBinY == false && isOFBinY == false ) { // Center bin in Y
+                    ylow = newbinsy[j-1];
+                    yhigh = newbinsy[j];
                     nylow = SVD_FindBin((input+h)->GetYaxis(), ylow);
                     nyhigh = SVD_FindBin((input+h)->GetYaxis(), yhigh) - 1;  
                     newylow = (input+h)->GetYaxis()->GetBinLowEdge(nylow);
@@ -985,6 +1132,16 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                     if ( TMath::Abs(newyhigh-yhigh)/binwidthy >  alarmTresh ) alarm = true;
                     if ( TMath::Abs(newylow-ylow)/binwidthy >  alarmTresh ) alarm = true;  
                 } 
+                if ( isOFBinY == true) {   // UF bin in Y
+                    ylow = newbinsy[numnewbinsy-1]; 
+                    yhigh = newbinsy[numnewbinsy]; 
+                    nylow = SVD_FindBin((input+h)->GetYaxis(), ylow);
+                    nyhigh = nbinsGenRecY+1;
+                    newylow = (input+h)->GetYaxis()->GetBinLowEdge(nylow);
+                    newyhigh = yhigh;
+                    binwidthy = yhigh - ylow;
+                    if ( TMath::Abs(newylow-ylow)/binwidthy >  alarmTresh ) alarm = true;  
+                }
                 
                 
                 
@@ -1001,8 +1158,8 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                     } 
                     cout << endl;
                     cout << "New bins in X: " << endl;
-                    for ( int k = 0; k < nbinsx+1 ; k++ ) {
-                        cout << " " << binsx[k];
+                    for ( int k = 0; k < numnewbinsx+1 ; k++ ) {
+                        cout << " " << newbinsx[k];
                     }
                     cout << endl;
                     cout << "Old bins in Y: " << endl;
@@ -1011,8 +1168,8 @@ TH2D* TopSVDFunctions::SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int n
                     } 
                     cout << endl;
                     cout << "New bins in Y: " << endl;
-                    for ( int k = 0; k < nbinsy+1 ; k++ ) {
-                        cout << " " << binsy[k];
+                    for ( int k = 0; k < numnewbinsy+1 ; k++ ) {
+                        cout << " " << newbinsy[k];
                     }
                     cout << endl;
                     cout << "Exiting ... " << endl;
@@ -2152,7 +2309,7 @@ double TopSVDFunctions::SVD_ScanGlobalCorrelation(TH2D* statCovHist, TH1D* dataH
   
     // Calculate Global Correlation in all bins
     TH1D* globCorrHist = SVD_CalcGlobCorr(statCovHist, dataHist);
-    	
+        
     
 
     // Averaged Global Correlation
@@ -2338,41 +2495,41 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist, TH1D* dataHist)
     TArrayI binMap(nbins);
     int numBinsToSkip = 0;
     
-	// Search for bins that have to be skipped
-	int bincounter = 0;
+    // Search for bins that have to be skipped
+    int bincounter = 0;
     for ( int i = 1; i <= nbins ; i++ ) {
-    	double data = dataHist->GetBinContent(i);
-    	if ( data <= 0. ) {
-    		// Through out bin with no data
-    		binMap[i-1] = -1;
-    		numBinsToSkip++;
-    	} else if ( i == 1 ) {
-    		// Through out underflow bin
-    		binMap[i-1] = -1;
-    		numBinsToSkip++;
-    	} else if ( i == nbins ) {
-    		// Through out overflow bin
-    		binMap[i-1] = -1;
-    		numBinsToSkip++;
-    	} else {
-    		// Search for  bins with empty rows/columns
-    		bool skipThisBin = true;
-    		for ( int j = 2; j <= nbins-1 ; j++ ) {
-        	    double value = statCovHist->GetBinContent(i,j); 
-        	    if ( value != 0. ) {
-        		    skipThisBin = false; 
-        	    }  
-    		} 
-    		// Through out bins with empty rows/columns
-    		if ( skipThisBin == true ) {
-    		    binMap[i-1] = -1;
-    		    numBinsToSkip++;
-    		} else {
-    			binMap[i-1] = bincounter;
-    			bincounter++;
-    		} 
-    	}
-    }	 
+        double data = dataHist->GetBinContent(i);
+        if ( data <= 0. ) {
+            // Through out bin with no data
+            binMap[i-1] = -1;
+            numBinsToSkip++;
+        } else if ( i == 1 ) {
+            // Through out underflow bin
+            binMap[i-1] = -1;
+            numBinsToSkip++;
+        } else if ( i == nbins ) {
+            // Through out overflow bin
+            binMap[i-1] = -1;
+            numBinsToSkip++;
+        } else {
+            // Search for  bins with empty rows/columns
+            bool skipThisBin = true;
+            for ( int j = 2; j <= nbins-1 ; j++ ) {
+                double value = statCovHist->GetBinContent(i,j); 
+                if ( value != 0. ) {
+                    skipThisBin = false; 
+                }  
+            } 
+            // Through out bins with empty rows/columns
+            if ( skipThisBin == true ) {
+                binMap[i-1] = -1;
+                numBinsToSkip++;
+            } else {
+                binMap[i-1] = bincounter;
+                bincounter++;
+            } 
+        }
+    }     
 
     // Create new Matrix
     int matrixdim = nbins - numBinsToSkip;
@@ -2385,11 +2542,11 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist, TH1D* dataHist)
     // AND the side bins of the TH2D object 
     for ( int i = 2; i <= nbins-1 ; i++ ) {
         for ( int j = 2; j <= nbins-1 ; j++ ) {
-        	
-        	// Is this bin to be skipped?
-        	bool skipThisBin = false;
-        	if (binMap[i-1] == -1 ) skipThisBin = true;
-        	if (binMap[j-1] == -1 ) skipThisBin = true;   	
+            
+            // Is this bin to be skipped?
+            bool skipThisBin = false;
+            if (binMap[i-1] == -1 ) skipThisBin = true;
+            if (binMap[j-1] == -1 ) skipThisBin = true;       
             // Set Element
             if ( skipThisBin == false ) {
                 double value = statCovHist->GetBinContent(i,j);
@@ -2410,10 +2567,10 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist, TH1D* dataHist)
     // Check Invertibility
     bool isInvertible = (bool) ((*detStatCovMat) != 0.);
     if ( isInvertible == false ) {
-		cout << "Error in TopSVDFunctions::SVD_CalcGlobCorr() " << endl;
-		cout << "Covariance Matrix cannot be inverted." << endl;
-		cout << "Check the reason for this now." << endl;
-		exit(1);
+        cout << "Error in TopSVDFunctions::SVD_CalcGlobCorr() " << endl;
+        cout << "Covariance Matrix cannot be inverted." << endl;
+        cout << "Check the reason for this now." << endl;
+        exit(1);
     }
      
  
@@ -2443,7 +2600,7 @@ TH1D* TopSVDFunctions::SVD_CalcGlobCorr(TH2D* statCovHist, TH1D* dataHist)
         if ( binnr == -1 ) skipThis = true;
         
         
-		// Run over good bins 
+        // Run over good bins 
         if ( skipThis == false ) {
             double cov = statCovMat[binnr][binnr]; 
             double covinv = statCovMatInv[binnr][binnr]; 
@@ -2752,44 +2909,44 @@ double TopSVDFunctions::SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist)
 }
 
 // Count the number of weighted events in a histo
-double TopSVDFunctions::SVD_Integral1D(TH1D* hist, bool doOF)
+double TopSVDFunctions::SVD_Integral1D(TH1D* hist, int syst, bool doOF)
 {
-	if ( hist == NULL ) return 0.; 
+    if ( hist == NULL ) return 0.; 
     int nbins = hist->GetNbinsX();
     double sumData = 0.;
     
     // Sum it up
     for ( int i = 0 ; i <= nbins+1 ; i++ ) {
-		if ( i == 0       && doOF == false ) continue;
-		if ( i == nbins+1 && doOF == false ) continue;
-		double value = hist->GetBinContent(i);
-		sumData += value;
+        if ( i == 0       && doOF == false ) continue;
+        if ( i == nbins+1 && doOF == false ) continue;
+        double value = (hist+syst)->GetBinContent(i);
+        sumData += value;
     }
-		
-	return sumData;	
+        
+    return sumData;    
 }
 
 // Count the number of weighted events in a histo
-double TopSVDFunctions::SVD_Integral2D(TH2D* hist, bool doOF)
+double TopSVDFunctions::SVD_Integral2D(TH2D* hist, int syst, bool doOF)
 {
-	if ( hist == NULL ) return 0.;
+    if ( hist == NULL ) return 0.;
     int nbinsx = hist->GetNbinsX();
     int nbinsy = hist->GetNbinsY();
     double sumData = 0.;
     
     // Sum it up
     for ( int i = 0 ; i <= nbinsx+1 ; i++ ) {
-		if ( i == 0        && doOF == false ) continue;
-		if ( i == nbinsx+1 && doOF == false ) continue;
+        if ( i == 0        && doOF == false ) continue;
+        if ( i == nbinsx+1 && doOF == false ) continue;
         for ( int j = 0 ; j <= nbinsy+1 ; j++ ) {
-			if ( j == 0        && doOF == false ) continue;
-			if ( j == nbinsy+1 && doOF == false ) continue;
-		    double value = hist->GetBinContent(i,j);
-		    sumData += value;
+            if ( j == 0        && doOF == false ) continue;
+            if ( j == nbinsy+1 && doOF == false ) continue;
+            double value = (hist+syst)->GetBinContent(i,j);
+            sumData += value;
         }
     }
-		
-	return sumData;	
+        
+    return sumData;    
 }
 
 // Find bin number on an axis
@@ -3011,8 +3168,8 @@ TH1D* TopSVDFunctions::SVD_ArrayToShifts(TH1D* array, int numHist)
 void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist)
 { 
     
-    	    	 
- 	
+                 
+     
     
     int flag_verbose = 1; 
     
@@ -3045,9 +3202,9 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 for ( int k = 1 ; k <= nbins ; k++ ) {
                     std::cout << "   Bin " << k << ":  Data=" << value_data << "    Bgr=" << value_bgr;
                     if ( value_bgr > value_data ) {
-                    	cout << " !@#$%^&*! " << endl;
+                        cout << " !@#$%^&*! " << endl;
                     } else {
-                    	cout << endl;
+                        cout << endl;
                     }
                 }
                 exit(1);
@@ -3615,26 +3772,68 @@ void TopSVDFunctions::SVD_RemoveFile(TString filepath)
 
 
 // Get a digit from an int
-int TopSVDFunctions::SVD_GetDigit(int number, int digit)
+int TopSVDFunctions::SVD_GetDigit(TString steering, int digit, int standard)
 {
-    if ( number < 0 || digit < 1) {
+	
+    int neededLength = 12;
+    TString oldsteering = steering;
+    
+    // Length
+    int length = steering.Length();
+	
+	// First Plausibility Check
+    if ( length < 0 || digit < 1 || digit > neededLength || standard < 1 || standard > 9) {
         cout << "**********************************************************************" << endl;
         cout << "Error in TopSVDFunctions::SVD_GetDigit()" << endl;
         cout << "These parameters do not make sense: " << endl;
-        cout << "number = " << number << endl;
+        cout << "steering = " << oldsteering << endl;
         cout << "digit = " << digit << endl;
+        cout << "standard = " << standard << endl;
         cout << "**********************************************************************" << endl;
         exit(1);
     }
     
-    // Chop from the left FIRST
-    int equiv = (int) TMath::Power(10., (double) (digit));
-    number = number % equiv;
     
-    // Chop from the right SECOND
-    int divisor = (int) TMath::Power(10., (double) (digit-1));
-    number = number / divisor;
+     
+    // Fill up Zeros
+    while ( steering.Length() < neededLength ) {
+    	steering.Prepend("0");
+    }
+    length = steering.Length();
+     
+    
+    // Remove digits from right
+    while ( steering.Length() > neededLength+1-digit ) {
+    	steering.Chop();
+    }
+    length = steering.Length();
+     
+    
+    // Remove digits from left
+    while ( steering.Length() > 1 ) {
+    	steering.Remove(0,1);
+    }
+    length = steering.Length(); 
+     
+    // Get Number
+    int number = steering.Atoi(); 
 
+	
+	// Second Plausibility Check
+    if ( number < 0 || digit > neededLength || length < 1 || length  > 1 ) {
+        cout << "**********************************************************************" << endl;
+        cout << "Error in TopSVDFunctions::SVD_GetDigit()" << endl;
+        cout << "These parameters do not make sense: " << endl;
+        cout << "steering = " << oldsteering << endl;
+        cout << "digit = " << digit << endl;
+        cout << "standard = " << standard << endl;
+        cout << "**********************************************************************" << endl;
+        exit(1);
+    }
+ 
+    // Standard Value
+    if ( number == 0 ) number = standard;
+ 
     // REturn it
     return number;
 }     
@@ -3755,7 +3954,7 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 
 // PERFORM UNFOLDING 
 // Steering options in parameter 'steering' 
-//     (1) REGMODE (1. digit from right)
+//    (1)  REGMODE (1. digit from right)
 //         0 means: Default setting. Same as 2
 //         1 means: Bin by Bin Unfolding
 //         2 means: SVD Unfolding, minimal regularization.
@@ -3774,11 +3973,11 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 //              specified with the second digit of this
 //              parameter.Parameter 'regPar'
 //              is ignored.
-//     (2) REGULARIZATION PARAMETER (2. digit from right)
+//    (2)  REGULARIZATION PARAMETER (2. digit from right)
 //         0 means: Default setting, same as 1
 //         1 means: interpret 'regPar' as k value (default)
 //         2 means: interpret 'regPar' as tau value
-//     (3) SCAN ( 3. digit from right)
+//    (3)  SCAN ( 3. digit from right)
 //         0 means: Default setting, same as 2
 //         1 means: no scan for optimal tau is perforemd,
 //         2 means: tau scan  (default).
@@ -3790,40 +3989,50 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 //              specified with the second digit of this
 //              parameter.
 //              Note: The scan may take a while!    
-//     (4) PS LOTTING  (4. digit from right)
+//    (4)  PS LOTTING  (4. digit from right)
 //         0 means: Default value, same as 4
 //         1 means: no plotting at all
 //         2 means: standard plots
 //         3 means: standard plots + k scan plots
 //         4 means: standard plots + k scan plots + tau scan plots (default)
-//     (5) ROOT FILE ( 5. digit from right)
+//    (5)  ROOT FILE ( 5. digit from right)
 //         0 means: Default value, same as 1
 //         1 means: no root file will be written (default)
 //         2 means: standard plots to root file  
-//     (6) TEXT FILE ( 6. digit from right)
+//    (6)  TEXT FILE ( 6. digit from right)
 //         0 means: Default value, same as 2
 //         1 means: no text file is written
 //         2 means: text file with optimal reg. params. is written (default)
-//     (7) VERBOSITY (7. digit from right)
+//    (7)  VERBOSITY (7. digit from right)
 //         0 means: Default value, same as 2
 //         1 means: no output at all
 //         2 means: standard output (default)
 //         3 means: debugging output
-//     (8) SCANPOINTS (8. digit from right)
+//    (8)  SCANPOINTS (8. digit from right)
 //         0 means: Default value, same as 3
 //         1 means: 5 scan points
 //         2 means: 25 scan points
 //         3 means: 125 scan points (default)
 //         4 means: 625 scan points
-//     (8) SCANRANGE (9. digit from right)
+//    (9)  SCANRANGE (9. digit from right)
 //         0 means: Default value, same as 2
 //         1 means: Tau+ / Tau- = 100  
 //         2 means: Tau+ / Tau- = 10000
 //         3 means: Tau+ / Tau- = 1000000
-//     (9) REC LEVEL SIDE BINS (10. digit from right)
+//    (10) LOWER SIDE BIN (10. digit from right)
+//         0 means: Default value, same as 1
+//         1 means: Regard as regular bin (not encouraged!)
+//         2 means: Cut away on Rec Level, unfold to Gen Level (default)
+//         3 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!) 
+//    (11) UPPER SIDE BIN (11. digit from right)
+//         0 means: Default value, same as 1
+//         1 means: Regard as regular bin (not encouraged!)
+//         2 means: Cut away on Rec Level, unfold to Gen Level (default)
+//         3 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!)  
+//    (12) ORIENTATION OF RESPONSE MATRIX
 //         0 means: Default value, same as 2
-//         1 means: Do not cut rec level side bins
-//         2 means: Cut rec level side bins (default)
+//         1 means: Do not transpose input response matrix during rebinning
+//         2 means: Do transpose input response matrix during rebinning (default)
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
 // Systematics Handling: 
@@ -3861,7 +4070,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Regularization parameter
         double regPar,                          
         // Regularization Modus
-        const int steering,  
+        TString steering,  
         // Specify the number of systematic samples to unfold 
         const int numSys, 
         // Specify Name for the Channel ("mumu", "emu", "ee" ...)
@@ -3916,72 +4125,75 @@ double TopSVDFunctions::SVD_Unfold(
 
      
     // REG MODE
-    int flag_regmode = SVD_GetDigit(steering, 1);
-    if ( flag_regmode == 0 ) flag_regmode = 2;
-     
-     
+    int flag_regmode = SVD_GetDigit(steering, 1, 2); 
+      
+      
     // REG PAR
-    int flag_regpar = SVD_GetDigit(steering, 2); 
-    if ( flag_regpar == 0 ) flag_regpar = 1;
+    int flag_regpar = SVD_GetDigit(steering, 2, 1);  
      
      
     // SCAN
-    int flag_scan = SVD_GetDigit(steering, 3);
-    if ( flag_scan == 0 ) flag_scan = 2;
+    int flag_scan = SVD_GetDigit(steering, 3, 2); 
      
      
-     // PS FILE
-    int flag_ps = SVD_GetDigit(steering, 4); 
-    if ( flag_ps == 0 ) flag_ps = 4;
+    // PS FILE
+    int flag_ps = SVD_GetDigit(steering, 4, 4);  
     if ( flag_scan == 1 && flag_ps == 4 ) flag_ps = 3;
     if ( psFile.CompareTo("")==0 ) flag_ps = 1;
      
      
-     // ROOT FILE
-    int flag_root = SVD_GetDigit(steering, 5);
-    if ( flag_root == 0 ) flag_root = 1;
+    // ROOT FILE
+    int flag_root = SVD_GetDigit(steering, 5, 1); 
     if ( rootFile.CompareTo("")==0 ) flag_root = 1;
       
      
-     // TEXT FILE
-    int flag_text = SVD_GetDigit(steering, 6);
-    if ( flag_text == 0 ) flag_text = 2;
+    // TEXT FILE
+    int flag_text = SVD_GetDigit(steering, 6, 2); 
     if ( flag_scan == 1 ) flag_text = 1;
     if ( flag_regmode == 4 ) flag_text = 1;
     if ( regParFile.CompareTo("")==0 ) flag_text = 1;
 
 
     // VERBOSITY
-    int flag_verbose = SVD_GetDigit(steering, 7);   
-    if ( flag_verbose == 0 ) flag_verbose = 2;  
+    int flag_verbose = SVD_GetDigit(steering, 7, 2);    
  
  
     // SCAN POINTS
-    int flag_scanpoints = SVD_GetDigit(steering, 8);
-    if ( flag_scanpoints == 0 ) flag_scanpoints = 3;
+    int flag_scanpoints = SVD_GetDigit(steering, 8, 3); 
     int nScanPoints = 1;
     for ( int i = 1 ; i <= flag_scanpoints ; i++ ) {
-    	nScanPoints = nScanPoints * 5;
+        nScanPoints = nScanPoints * 5;
     } 
     
     
- 	// SCAN RANGE
- 	int flag_range = SVD_GetDigit(steering, 9);
- 	if ( flag_range == 0 ) flag_range = 2;
- 	double rangefactor = 1.;
+    // SCAN RANGE
+    int flag_range = SVD_GetDigit(steering, 9, 2); 
+    double rangefactor = 1.;
     for ( int i = 1 ; i <= flag_range ; i++ ) {
-    	rangefactor = rangefactor * 10.;
+        rangefactor = rangefactor * 10.;
     } 
- 	
- 	
- 	
- 	// REC LEVEL OF BINS
- 	int flag_recOF = SVD_GetDigit(steering, 10);
-    if ( flag_recOF == 0 ) flag_recOF = 2;
+     
+     
+     
+    // LOWER SIDE BIN
+    int flag_lowerOF = SVD_GetDigit(steering, 10, 2); 
+    bool cutLowerRecSideBin = (flag_lowerOF >= 2); 
+    bool cutLowerGenSideBin = (flag_lowerOF == 3); 
     
- 	
- 	
- 
+     
+     
+     
+    // GEN LEVEL OF BINS
+    int flag_upperOF = SVD_GetDigit(steering, 11, 2); 
+    bool cutUpperRecSideBin = (flag_upperOF >= 2);
+    bool cutUpperGenSideBin = (flag_upperOF == 3);
+     
+     
+     
+     // RESP ORIENTATION
+    int flag_respOr = SVD_GetDigit(steering, 12, 2); 
+    
+      
  
     // Systematics Flags
     int numberSyst = numSys;
@@ -4017,6 +4229,7 @@ double TopSVDFunctions::SVD_Unfold(
     if (flag_verbose==2) gErrorIgnoreLevel=kWarning;
     if (flag_verbose==1) gErrorIgnoreLevel=kFatal; 
       
+      
     /////////////////////////////////////////////////////////////////// 
     /////////  R E A D   R E G P A R   //////////////////////////////// 
     ///////////////////////////////////////////////////////////////////
@@ -4024,6 +4237,7 @@ double TopSVDFunctions::SVD_Unfold(
 
     TString cpqss = SVD_CPQSS(channel, particle, quantity, special, syst);
     TString thekey = SVD_CPQSS(channel, particle, quantity, special, syst);
+    TString thekeynom = SVD_CPQSS(channel, particle, quantity, special, "");
     
 
     // Get regularization parameter
@@ -4036,7 +4250,7 @@ double TopSVDFunctions::SVD_Unfold(
     if ( flag_regmode == 4 ) { 
     
         // Get the Line from File by searching for a key
-        TString theLine = SVD_LineFromFile(thekey, regParFile);
+        TString theLine = SVD_LineFromFile(thekeynom, regParFile);
          
             
         // Read Tau
@@ -4075,20 +4289,38 @@ double TopSVDFunctions::SVD_Unfold(
         }  
     }
          
-
+    
+    /////////////////////////////////////////////////////////////////// 
+    /////////  P R E P A R E   R E B I N N I N G  ///////////////////// 
+    ///////////////////////////////////////////////////////////////////
+    
+    
+    // How many bins do you need
+    //int nbins = SVD_NumNewBins(numbins, !cutLowerGenSideBin, !cutUpperGenSideBin); 
+    int nbins = SVD_NumNewBins(numbins, true, true);
+     
+    // Calculate new bins
+    double arrayOfNewBins[nbins+1];
+    double* bins = arrayOfNewBins; 
+    SVD_NewBins(bins, nbins, thebins, numbins, true, true);   
+    
+    
+    // Create a string of the binnings
+    TString oldBinningStr = "";
+    for ( int i = 0 ; i <= numbins ; i++ ) { 
+        oldBinningStr.Append(TString::Format("%.5f  ", thebins[i]));
+    }
+    TString newBinningStr = "";
+    for ( int i = 0 ; i <= nbins ; i++ ) { 
+        newBinningStr.Append(TString::Format("%.5f  ", bins[i]));
+    }
+          
       
     /////////////////////////////////////////////////////////////////// 
     /////////  C O N T R O L   O U T P U T   ////////////////////////// 
     ///////////////////////////////////////////////////////////////////
   
-    
-    // Integrals of Input histogram
-    double integralData =  SVD_Integral1D(dataInputHist, true);
-    double integralBgr =   SVD_Integral1D(bgrInputHist, true);
-    double integralTtbgr = SVD_Integral1D(ttbgrInputHist, true);
-    double integralGen =   SVD_Integral1D(genInputHist, true);
-    double integralRec =   SVD_Integral1D(recInputHist, true);
-    double integralResp =  SVD_Integral2D(respInputHist, true);
+     
   
   
     // Screen Output
@@ -4096,54 +4328,79 @@ double TopSVDFunctions::SVD_Unfold(
         cout << endl;
         cout << "*******************************************************************************************************************" << endl;
         cout << "SVD Unfolding of ... " << endl;
-        cout << "    Channel                                " << channel << endl;
-        cout << "    Particle                               " << particle << endl;
-        cout << "    Quantity:                              " << quantity << endl;
-        cout << "    Special condition:                     " << special << endl;
-        cout << "    Systematic:                            " << syst << endl;
-        cout << "        Number Syst Samples:               " << numberSyst << endl;
-        cout << "    Root File:                             " << rootFile << endl;
-        cout << "    Ps File:                               " << psFile << endl;
-        cout << "    Best Tau File:                         " << regParFile << endl;
-        cout << "        Write to Text File:                " << (flag_text == 2 ) << endl;
-        cout << "        Read to Text File:                 " << (flag_regmode == 4 ) << endl;
-        cout << "        Key:                               " << thekey << endl; 
-        cout << "    Regularization Parameter:              " << regPar << endl;
-        cout << "    Steering Options (" <<  steering << "): " << endl;
-        cout << "        Use SVD:                           " << (flag_regmode >= 2) << endl;
-        cout << "            Minimal Regul.:                " << (flag_regmode == 2) << endl;
-        cout << "            Manual Reg. Par.:              " << (flag_regmode == 3) << endl;
-        cout << "            Reg. Par. from File:           " << (flag_regmode == 4) << endl;
-        cout << "        Use K:                             " << (flag_regpar == 1) << endl;
-        cout << "        Use Tau:                           " << (flag_regpar == 2) << endl;
-        cout << "        Scan for best tau:                 " << (flag_scan == 2) << endl;
-        cout << "        Write to PS:                       " << (flag_ps >= 2) << endl;
-        cout << "             K Scan Plots:                 " << (flag_ps >= 3 ) << endl;
-        cout << "             Tau Scan Plots:               " << (flag_ps >= 4 ) << endl;
-        cout << "        Write to Text File:                " << (flag_text == 2 ) << endl;
-        cout << "        Write to ROOT:                     " << (flag_root == 2 ) << endl; 
-        cout << "        Verbosity:                         " << endl;
-        cout << "             Standard Output:              " << (flag_verbose>=2) << endl;
-        cout << "             Debugging Output:             " << (flag_verbose==3) << endl;
-        cout << "        Number of scan points:             " << nScanPoints << endl;
-        cout << "        Range of scan:                     " << 1/rangefactor << " ... " << rangefactor << endl;
-        cout << "        Cut out Rec Level Side Bins:       " << (flag_recOF == 2) << endl;
+        cout << "    Channel                                    " << channel << endl;
+        cout << "    Particle                                   " << particle << endl;
+        cout << "    Quantity:                                  " << quantity << endl;
+        cout << "    Special condition:                         " << special << endl;
+        cout << "    Systematic:                                " << syst << endl;
+        cout << "        Number Syst Samples:                   " << numberSyst << endl;
+        cout << "    Root File:                                 " << rootFile << endl;
+        cout << "    Ps File:                                   " << psFile << endl;
+        cout << "    Best Tau File:                             " << regParFile << endl;
+        cout << "        Write to Text File:                    " << (flag_text == 2 ) << endl;
+        cout << "        Read to Text File:                     " << (flag_regmode == 4 ) << endl;
+        cout << "        Key:                                   " << thekey << endl; 
+        cout << "    Regularization Parameter:                  " << regPar << endl;
+        cout << "    Steering Options (" <<  steering << "):    " << endl;
+        cout << "        Use SVD:                               " << (flag_regmode >= 2) << endl;
+        cout << "            Minimal Regul.:                    " << (flag_regmode == 2) << endl;
+        cout << "            Manual Reg. Par.:                  " << (flag_regmode == 3) << endl;
+        cout << "            Reg. Par. from File:               " << (flag_regmode == 4) << endl;
+        cout << "        Use K:                                 " << (flag_regpar == 1) << endl;
+        cout << "        Use Tau:                               " << (flag_regpar == 2) << endl;
+        cout << "        Scan for best tau:                     " << (flag_scan == 2) << endl;
+        cout << "        Write to PS:                           " << (flag_ps >= 2) << endl;
+        cout << "             K Scan Plots:                     " << (flag_ps >= 3 ) << endl;
+        cout << "             Tau Scan Plots:                   " << (flag_ps >= 4 ) << endl;
+        cout << "        Write to Text File:                    " << (flag_text == 2 ) << endl;
+        cout << "        Write to ROOT:                         " << (flag_root == 2 ) << endl; 
+        cout << "        Verbosity:                             " << endl;
+        cout << "             Standard Output:                  " << (flag_verbose>=2) << endl;
+        cout << "             Debugging Output:                 " << (flag_verbose==3) << endl;
+        cout << "        Number of scan points:                 " << nScanPoints << endl;
+        cout << "        Range of scan:                         " << 1/rangefactor << " ... " << rangefactor << endl;
+        cout << "        Rebinning: " << endl;
+        cout << "            Cut out lower rec level Side Bin:  " << (flag_lowerOF >= 2) << endl;
+        cout << "            Ignore lower gen level Side Bin:   " << (flag_lowerOF == 3) << endl;
+        cout << "            Cut out upper rec level Side Bin:  " << (flag_upperOF >= 2) << endl;
+        cout << "            Ignore upper gen level Side Bin:   " << (flag_upperOF == 3) << endl; 
+        cout << "            Old Number of Bins:                " << numbins << endl;
+        cout << "            Old Binning:                       " << oldBinningStr << endl;
+        cout << "            New Number of Bins:                " << nbins << endl;
+        cout << "            New Binning:                       " << newBinningStr << endl;
+        cout << "        Transpose Response Matrix:             " << (flag_respOr == 2) << endl;
         cout << "    Integrals of Input Distributions:" << endl;
-        cout << "        Data:                              " << integralData << endl;
-        cout << "        Background:                        " << integralBgr << endl;
-        cout << "        Tt-Background:                     " << integralTtbgr << endl;
-        cout << "        Generated MC:                      " << integralGen << endl;
-        cout << "        Reconstructed MC:                  " << integralRec << endl;
-        cout << "        Response Matrix:                   " << integralResp << endl;
+        cout << "        Data:                                  " << SVD_Integral1D(dataInputHist, 0, true) << endl;
+        cout << "        Background:                            " << SVD_Integral1D(bgrInputHist, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "            Syst. Sample " << i << "                    " << SVD_Integral1D(bgrInputHist, i, true) << endl;
+        }           
+        cout << "        Tt-Background:                         " << SVD_Integral1D(ttbgrInputHist, 0, true)  << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "            Syst. Sample " << i << "                    " << SVD_Integral1D(ttbgrInputHist, i, true) << endl;
+        }          
+        cout << "        Generated MC:                          " << SVD_Integral1D(genInputHist, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "            Syst. Sample " << i << "                    " << SVD_Integral1D(genInputHist, i, true) << endl;
+        }   
+        cout << "        Reconstructed MC:                      " << SVD_Integral1D(recInputHist, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "            Syst. Sample " << i << "                    " << SVD_Integral1D(recInputHist, i, true) << endl;
+        }   
+        cout << "        Response Matrix:                       " << SVD_Integral2D(respInputHist, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "            Syst. Sample " << i << "                    " << SVD_Integral2D(respInputHist, i, true) << endl;
+        }   
         cout << "********************************************************************************************************************" << endl; 
         
-    }   
+    }    
+ 
     
     /////////////////////////////////////////////////////////////////// 
     /////////  R E B I N N I N G   //////////////////////////////////// 
     ///////////////////////////////////////////////////////////////////
-    
-    // This is done for all systematics!
+ 
+     
     
     // Remove the input histograms from the TDirectory
     SVD_RmDir1D(dataInputHist, 1);
@@ -4153,56 +4410,47 @@ double TopSVDFunctions::SVD_Unfold(
     SVD_RmDir1D(recInputHist, 1+numberSyst);
     SVD_RmDir2D(respInputHist, 1+numberSyst);
     
-    
-    // Prepare the binning 
-    int nbins = numbins + 2;
-    double bins[nbins+1];
-    double binwidthup = thebins[numbins] - thebins[numbins-1];
-    double binwidthdown = thebins[1] - thebins[0];
-    bins[0] = thebins[0] - binwidthdown;
-    bins[nbins]  = thebins[numbins] + binwidthup;
-    for ( int i = 1 ; i < nbins ; i++ ) {
-        bins[i] = thebins[i-1];
-    } 
-
- 
 
     // data (including background)
     // ATTENTION: Hier we assume to have only ONE histo in the array1
-    TH1D* rawHist = SVD_Rebin1D(dataInputHist, nbins, bins, 1);
-    if ( flag_recOF == 2 ) SVD_EmptyRecSideBins1D(rawHist);
- 	
-	
+    TH1D* rawHist = SVD_Rebin1D(dataInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, 1);
+    SVD_EmptyRecSideBins1D(rawHist, cutLowerRecSideBin, cutUpperRecSideBin); 
+     
+    
     // All Background
     // Set errors to zero!
     TH1D* bgrHist = NULL;
     if ( bgrInputHist != NULL ) {
-        bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, nbins, bins, numberSyst+1); 
+        bgrHist = SVD_Rebin1D((TH1D*) bgrInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, numberSyst+1); 
         SVD_EmptyHistoErrors1D(bgrHist, numberSyst+1);
-        if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(bgrHist, numberSyst+1);
+        SVD_EmptyRecSideBins1D(bgrHist, cutLowerRecSideBin, cutUpperRecSideBin, numberSyst+1);
     } 
   
     // ttbar background only
     TH1D* ttbgrHist = NULL;
     if ( ttbgrInputHist != NULL ) {
-        ttbgrHist= SVD_Rebin1D((TH1D*) ttbgrInputHist, nbins, bins, numberSyst+1); 
+        ttbgrHist= SVD_Rebin1D((TH1D*) ttbgrInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, numberSyst+1); 
         SVD_EmptyHistoErrors1D(ttbgrHist, numberSyst+1);
-        if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(ttbgrHist, numberSyst+1);
+        SVD_EmptyRecSideBins1D(ttbgrHist, cutLowerRecSideBin, cutUpperRecSideBin, numberSyst+1);
     } 
      
     // Response Matrix
-    // ... thereby transposing it
-    TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, nbins, bins, nbins, bins, numberSyst+1, true);
-    if ( flag_recOF == 2  ) SVD_EmptyRecSideBins2D(mcHist, numberSyst+1); 
+    // ... thereby transposing it, if needed
+    bool doTranspose = false;
+    if ( flag_respOr == 2 ) doTranspose = true; 
+    TH2D* mcHist = SVD_Rebin2D((TH2D*) respInputHist, numbins, thebins, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, numberSyst+1, doTranspose);
+    SVD_EmptyRecSideBins2D(mcHist, cutLowerRecSideBin, cutUpperRecSideBin, numberSyst+1); 
+    SVD_EmptyGenSideBins2D(mcHist, cutLowerGenSideBin, cutUpperGenSideBin, numberSyst+1);  
 
  
     // MC truth signal
     // ATTENTION: Do not empty the side bins here!
-    TH1D* xiniHist = SVD_Rebin1D((TH1D*) genInputHist, nbins, bins, numberSyst+1);  
+    TH1D* xiniHist = SVD_Rebin1D((TH1D*) genInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, numberSyst+1);  
+    SVD_EmptyGenSideBins1D(xiniHist, cutLowerGenSideBin, cutUpperGenSideBin, numberSyst+1);  
      
     // Reconstructed MC signal
-    TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, nbins, bins, numberSyst+1);
-    if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(biniHist, numberSyst+1);  
+    TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, numberSyst+1);
+    SVD_EmptyRecSideBins1D(biniHist, cutLowerRecSideBin, cutUpperRecSideBin, numberSyst+1);  
     
      
     /////////////////////////////////////////////////////////////////// 
@@ -4230,7 +4478,7 @@ double TopSVDFunctions::SVD_Unfold(
  
     // Background reduction
     SVD_BackgrHandling(dataHist, bgrHist, ttbgrHist, biniHist, rawHist, numberSyst+1); 
-    if ( flag_recOF == 2  ) SVD_EmptyRecSideBins1D(dataHist, numberSyst+1);
+    SVD_EmptyRecSideBins1D(dataHist, cutLowerRecSideBin, cutUpperRecSideBin, numberSyst+1);
  
  
  
@@ -4533,7 +4781,7 @@ double TopSVDFunctions::SVD_Unfold(
             // Output
             if (flag_verbose>1) { 
                 cout << "*******************************************************************************************************************" << endl;
-            	cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " for plotting purpose" << endl;
+                cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " for plotting purpose" << endl;
             }  
     
             // Perform the Scan
@@ -4566,7 +4814,7 @@ double TopSVDFunctions::SVD_Unfold(
                    
                 // Output
                 if(flag_verbose>1){
-                	cout << "    Scanpoint " << i << " of " << nScanPoints << " ->  Tau = " << tau << " -> GlobCorr: " << (*vGlobCorr)[i] << endl;
+                    cout << "    Scanpoint " << i << " of " << nScanPoints << " ->  Tau = " << tau << " -> GlobCorr: " << (*vGlobCorr)[i] << endl;
                 }
                   
                 // delete things
@@ -4596,7 +4844,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Output
         if (flag_verbose>1) { 
             cout << "*******************************************************************************************************************" << endl;
-        	cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " with Golden Section Search" << endl;
+            cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " with Golden Section Search" << endl;
         }  
             
         for ( int i = 0 ; i < nScanPoints ; i++ ) {

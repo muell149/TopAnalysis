@@ -56,7 +56,7 @@ class TopSVDFunctions
                         const double thebins[],         
                         const int numbins,                
                         double regPar,          
-                        const int steering = 0,
+                        TString steering = "",
                         const int numSys = 0,                        
                         TString channel = "",                                   
                         TString particle = "",           
@@ -110,17 +110,23 @@ class TopSVDFunctions
         // Histogram Manipulation
         static void SVD_MoveOFBins1D(TH1D* hist, int numHist = 1);
         static void SVD_MoveOFBins2D(TH2D* hist, int numHist = 1);
-        static void SVD_EmptyRecSideBins1D(TH1D* histo, int numHist = 1);
-        static void SVD_EmptyRecSideBins2D(TH2D* histo, int numHist = 1);
+        static void SVD_EmptyRecSideBins1D(TH1D* histo, bool cutLowerRecSideBin, bool cutUpperRecSideBin, int numHist = 1);
+        static void SVD_EmptyRecSideBins2D(TH2D* histo, bool cutLowerRecSideBin, bool cutUpperRecSideBin, int numHist = 1);
+        static void SVD_EmptyGenSideBins1D(TH1D* histo, bool cutLowerGenSideBin, bool cutUpperGenSideBin, int numHist = 1);
+        static void SVD_EmptyGenSideBins2D(TH2D* histo, bool cutLowerGenSideBin, bool cutUpperGenSideBin, int numHist = 1);
         static void SVD_EmptyHistogram1D(TH1D* histo, int numHist = 1);
         static void SVD_EmptyHistogram2D(TH2D* histo, int numHist = 1);
         static void SVD_EmptyHistoErrors1D(TH1D* histo, int numHist = 1);
         static void SVD_EmptyHistoErrors2D(TH2D* histo, int numHist = 1);  
         
         
+        // Rebinning
+        static int SVD_NumNewBins(int oldNumBins, bool addLowerSideBin, bool addUpperSideBin);
+        static void SVD_NewBins(double*& theNewBins, int newNumBins, const double* theOldBins, int oldNumBins, bool addLowerSideBin, bool addUpperSideBin); 
+        static TH1D* SVD_Rebin1D(TH1D* input, int nbinsx, const double* binsx, bool addLowerSideBin, bool addUpperSideBin, int numHist = 1);
+        static TH2D* SVD_Rebin2D(TH2D* input, int nbinsx, const double* binsx, int nbinsy, const double* binsy, bool addLowerSideBin, bool addUpperSideBin, int numHist = 1, bool transpose = false);
+        
         // Derived Histograms
-        static TH1D* SVD_Rebin1D(TH1D* input, int nbinsx, double* binsx, int numHist = 1);
-        static TH2D* SVD_Rebin2D(TH2D* input, int nbinsx, double* binsx, int nbinsy, double* binsy, int numHist = 1, bool transpose = false);
         static int SVD_FindBin(TAxis* axis, double bnd);
         static TH1D* SVD_DiagElements(TH2D* histo, int numHist = 1);
         static TH1D* SVD_HistoErrors1D(TH1D* histo, int numHist = 1);
@@ -186,8 +192,8 @@ class TopSVDFunctions
         // Scaling
         static double SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist);
         static void SVD_ArrayScale(TH1D* histo, double scale, int numHist = 1); 
-        static double SVD_Integral1D(TH1D* hist, bool doOF); 
-        static double SVD_Integral2D(TH2D* hist, bool doOF);
+        static double SVD_Integral1D(TH1D* hist, int syst, bool doOF); 
+        static double SVD_Integral2D(TH2D* hist, int syst, bool doOF);
         
         // Background
         static void SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist = 1);
@@ -225,7 +231,7 @@ class TopSVDFunctions
         
         
         // Misc
-        static int SVD_GetDigit(int number, int digit); 
+        static int SVD_GetDigit(TString steering, int digit, int standard); 
      
 };
 
