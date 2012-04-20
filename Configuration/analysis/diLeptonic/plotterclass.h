@@ -354,26 +354,16 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
 }
 
 void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
-  
-cout << "asdfasdfasdfasdf " << endl;
+   
   double Xbins[XAxisbins.size()];
-  for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
-cout << "asdfasdfasdfasdf " << endl;
-  setSystDataSet(Systematic);   
-cout << "asdfasdfasdfasdf " << endl;
-  fillSystHisto();  
-cout << "asdfasdfasdfasdf " << endl;
+  for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];} 
+  setSystDataSet(Systematic);    
+  fillSystHisto();   
   
-  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);  
-cout << "asdfasdfasdfasdf " << endl;
-cout << "datafiles = " << datafiles << endl;
-cout << "size - " << systhistsUp.size() << endl;
-cout << "adress=" << &(systhistsUp[datafiles]) << endl;
-  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins); 
-cout << "asdfasdfasdfasdf " << endl;
+  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);   
+  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins);  
   TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Rebin(bins,"stackdown",Xbins); 
-
-cout << "asdfasdfasdfasdf " << endl;
+ 
   TH2 *genReco2d=NULL;
   TH2 *genReco2dUp=NULL;
   TH2 *genReco2dDown=NULL;
@@ -687,8 +677,7 @@ cout << "asdfasdfasdfasdf " << endl;
 		TString theSpecialPostfix = "";
 		TString theSystematicName = Systematic;
 		
-		
-//cout << "asdfasdfasdfasdfasdfasfasdf5 " << endl;
+		 
 //cout << "theDataHist = " <<theDataHist << endl;
 //cout << "theBgrHist = " << theBgrHist<< endl;
 //cout << "theBgrHistUp = " << theBgrHistUp<< endl;
@@ -1674,7 +1663,7 @@ void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
     CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
-    //CalcDiffSystematics("PU_", 2); 
+    CalcDiffSystematics("PU_", 2); 
     CalcDiffSystematics("SCALE", 3); 
     CalcDiffSystematics("MATCH", 4);
     CalcDiffSystematics("MASS", 5);
