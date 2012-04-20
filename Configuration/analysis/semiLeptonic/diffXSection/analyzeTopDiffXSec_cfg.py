@@ -180,13 +180,16 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.MessageLogger.categories.append('TtSemiLepKinFitter')
 process.MessageLogger.categories.append('KinFitter')
+process.MessageLogger.categories.append('GenCandSelector')
 process.MessageLogger.cerr.TtSemiLepKinFitter = cms.untracked.PSet(
     limit = cms.untracked.int32(0)
 )
 process.MessageLogger.cerr.KinFitter = cms.untracked.PSet(
     limit = cms.untracked.int32(0)
 )
-
+process.MessageLogger.cerr.GenCandSelector = cms.untracked.PSet(
+    limit = cms.untracked.int32(0)
+)
 ## print memory infos to check for modules with memory leaks
 #process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck", ignoreTotal = cms.untracked.int32(0)) 
 
@@ -537,7 +540,7 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 from HLTrigger.HLTfilters.hltHighLevel_cfi import *
 process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::"+options.triggerTag, HLTPaths = ["HLT_IsoMu24_eta2p1_v*"], throw=False)
 if(options.mctag=="Summer11"):
-      process.hltFilter.HLTPaths=["HLT_IsoMu24_v*"]
+    process.hltFilter.HLTPaths=["HLT_IsoMu24_v*"]
 #process.hltFilter = hltHighLevel.clone(TriggerResultsTag = "TriggerResults::HLT", HLTPaths = ["HLT_Mu15_v*"], throw=False)
 #process.hltFilter.HLTPaths = ["HLT_Mu17_TriCentralJet30_v*"]
 
@@ -562,6 +565,9 @@ process.load("TopAnalysis.TopFilter.sequences.genSelection_cff")
 ## at ttGenEventLevel
 from TopAnalysis.TopFilter.filters.SemiLeptonicGenPhaseSpaceFilter_cfi import filterSemiLeptonicGenPhaseSpace
 process.filterGenPhaseSpace = filterSemiLeptonicGenPhaseSpace.clone(src = "genEvt")
+process.filterLeptonPhaseSpace = filterSemiLeptonicGenPhaseSpace.clone(src = "genEvt")
+process.filterLeptonPhaseSpace.partonMaxEta = cms.double(999.0)
+process.filterLeptonPhaseSpace.partonMinPt  = cms.double(0.0)
 
 ## Generator kinematics selection (https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html)
 ## Currently set to 5.0 to prevent bias in throwing out heavy flavours, see:
@@ -744,6 +750,7 @@ process.btagSelectionSSV=process.btagSelection.clone(src = 'simpleSecondaryVerte
 ## muon
 process.tightMuonKinematics        = process.analyzeMuonKinematics.clone (src = 'tightMuons')
 process.tightMuonQuality           = process.analyzeMuonQuality.clone    (src = 'tightMuons')
+
 process.tightMuonKinematicsTagged  = process.tightMuonKinematics.clone();
 process.tightMuonQualityTagged     = process.tightMuonQuality.clone();
 process.tightMuonKinematicsSSV  = process.analyzeMuonKinematics.clone (src = 'tightMuons'    )
@@ -1874,6 +1881,23 @@ if(runningOnData=="MC" and BtagReweigthing):
     for module in SSVModules:
         getattr(process,module).weight=cms.InputTag("eventWeightFinalSSV")
         
+## test isolation
+process.newvertexSelectedMuons=process.vertexSelectedMuons.clone(src="noCutPatMuons")
+process.newtrackMuons=process.trackMuons.clone(src="newvertexSelectedMuons")
+process.testIsoMuons=process.goldenMuons.clone(muons = "newtrackMuons")
+
+process.testIsoMuonSelection= process.muonSelection.clone (src = 'testIsoMuons', minNumber = 1, maxNumber = 99999999)
+process.testIsoMuonQuality  = process.tightMuonQualityTagged.clone(src = 'testIsoMuons')
+
+process.newvertexSelectedElectrons=process.vertexSelectedElectrons.clone(src="noCutPatElectrons")
+process.testIsoElectrons=process.tightElectronsEJ.clone(
+    src = "newvertexSelectedElectrons",
+    cut = 'et > 30. &abs(eta) <  2.1  &( abs(superCluster.eta) < 1.4442   |  abs(superCluster.eta) > 1.5660 ) &abs(dB)  <  0.02 &test_bit( electronID("eidHyperTight1MC"), 0 )'
+    )
+
+process.testIsoElectronSelection= process.convElecTrkRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
+process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src = 'testIsoElectrons')
+      
 ## ---
 ##    run the final sequences
 ## ---
@@ -1987,15 +2011,19 @@ if(runningOnData=="MC"):
                           process.genJetCuts                            *
                           ## investigate top reconstruction hadron level PS
                           process.kinFitGenPhaseSpaceHad                *
-                          ## new phase space cuts on the basis of genTtbarEvent
+                          ## parton level phase space cuts on the basis of genTtbarEvent
                           process.filterGenPhaseSpace   
                           )
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p3.remove(process.genFilterSequence)        
         process.p3.remove(process.filterGenPhaseSpace)
+        process.p3.remove(process.genMuonSelection)
+        process.p3.remove(process.genJetCuts)
     if(eventFilter=='background only'):
         process.p3.remove(process.filterGenPhaseSpace)
+        process.p3.remove(process.genMuonSelection)
+        process.p3.remove(process.genJetCuts)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p3.remove(process.dummy)
@@ -2031,12 +2059,48 @@ if(runningOnData=="MC"):
                           ## sequence with gen selection and histograms
                           process.s4
                           )
+    
+    process.p5 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
+                      process.filterSequence                        *
+                      ## PV event selection
+                      #process.PVSelection                           *
+                      ## introduce some collections
+                      process.semiLeptonicSelection                 *
+                      ## create PU event weights
+                      process.makeEventWeightsPU                    *
+		      ## create effSF eventWeight
+		      process.effSFMuonEventWeight                  *
+		      ## multiply event weights
+		      process.eventWeightNoBtagSFWeight             *
+                      ## jet selection and monitoring
+                      process.leadingJetSelectionNjets1             *
+                      process.leadingJetSelectionNjets2             *
+                      process.leadingJetSelectionNjets3             *
+                      process.leadingJetSelectionNjets4             *
+                      ## b-tagging
+                      process.btagSelection                         *
+                      ## mod. muon selection (>0 mu with all but isolation)
+                      process.newvertexSelectedMuons                *
+                      process.newtrackMuons                         *
+                      process.testIsoMuons                          *
+                      process.testIsoMuonSelection                  *
+                      ## create PU event weights
+                      process.bTagSFEventWeight                     *
+                      ## create combined weight
+                      process.eventWeightFinal                      *
+                      process.testIsoMuonQuality
+                      )  
+   
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p4.remove(process.genFilterSequence)
 	process.p4.remove(process.filterGenPhaseSpace)
+        process.p4.remove(process.genMuonSelection)
+        process.p4.remove(process.genJetCuts)
     if(eventFilter=='background only'):
         process.p4.remove(process.filterGenPhaseSpace)
+        process.p4.remove(process.genMuonSelection)
+        process.p4.remove(process.genJetCuts)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p4.remove(process.dummy)
@@ -2050,7 +2114,7 @@ from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 
 ## switch to PF objects
 if(jetType=="particleFlow"):
-    pathlist = [process.p1, process.p2, process.p3, process.p4]
+    pathlist = [process.p1, process.p2, process.p3, process.p4, process.p5]
     for path in pathlist:  
         massSearchReplaceAnyInputTag(path, 'tightLeadingJets', 'tightLeadingPFJets')
         massSearchReplaceAnyInputTag(path, 'tightBottomJets' , 'tightBottomPFJets' )
@@ -2105,14 +2169,14 @@ if(decayChannel=="electron"):
     process.noConstJetsPF.src ='noOverlapJetsPFelec'
     process.noCEFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNHFJetsPF.src   ='noOverlapJetsPFelec'
-    process.noNEFJetsPF .src  ='noOverlapJetsPFelec'
+    process.noNEFJetsPF.src   ='noOverlapJetsPFelec'
     process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
     process.noKinJetsPF.src   ='noOverlapJetsPFelec' 
     # gen selection
     process.p3.replace(process.genMuonSelection, process.genElectronSelection)
     process.p4.replace(process.genMuonSelection, process.genElectronSelection)
-    pathlist = [process.p1, process.p2, process.p3, process.p4]
+    pathlist = [process.p1, process.p2, process.p3, process.p4, process.p5]
     for path in pathlist:
         # replace jet lepton veto
         path.replace(process.noOverlapJetsPF, process.noOverlapJetsPFelec)
@@ -2138,16 +2202,19 @@ if(decayChannel=="electron"):
         path.replace(process.tightLead_0_JetKinematicsTagged, process.tightElectronKinematicsTagged * process.tightElectronQualityTagged  * process.tightLead_0_JetKinematicsTagged)
         path.replace(process.tightMuonKinematicsSSV, process.tightElectronKinematicsSSV)
         path.replace(process.tightMuonQualitySSV   , process.tightElectronQualitySSV   )
+        path.replace(process.newvertexSelectedMuons , process.newvertexSelectedElectrons)
+        path.remove(process.newtrackMuons)
+        path.replace(process.testIsoMuons, process.testIsoElectrons)
+        path.replace(process.testIsoMuonSelection, process.testIsoElectronSelection)
+        path.replace(process.testIsoMuonQuality, process.testIsoElectronQuality)
         # replace muon by electron in (remaining) kinfit analyzers
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
-
-
 allpaths  = process.paths_().keys()
 
 # switch to PF2PAT
 if(pfToPAT):
     from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
-    recoPaths=['p1','p2']
+    recoPaths=['p1','p2','p5']
     # define general options
     PFoptions = {
         'runOnMC': True,
@@ -2183,13 +2250,13 @@ if(pfToPAT):
         PFoptions['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
     # skip events (and jet calculation) if no lepton is found
     # only done in data, as in MC you need the events for parton truth plots
-        PFoptions['skipIfNoPFElec']=True
+        #PFoptions['skipIfNoPFElec']=True
     # collection without cuts is added
         PFoptions['addNoCutPFElec']=True
     # project no other leptons than the selected ones
         #PFoptions['noMuonTopProjection']=True
     elif(decayChannel=="muon"):
-        PFoptions['skipIfNoPFMuon']=True
+        #PFoptions['skipIfNoPFMuon']=True
         PFoptions['addNoCutPFMuon']=True
         #PFoptions['noElecTopProjection']=True
 	## option to change PF2PAT settings for cutflow excercise:
