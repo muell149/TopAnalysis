@@ -230,42 +230,42 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="Bkg"
     elif(options.sample=="ttbarMatchingDown"):        
-        usedSample="TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigMatchDown"
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgMatchDown"
     elif(options.sample=="ttbarMatchingUp"):        
-        usedSample="TopAnalysis/Configuration/ttjets_matching_up_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigMatchUp"
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgMatchUp"
     elif(options.sample=="ttbarScaleDown"):        
-        usedSample="TopAnalysis/Configuration/ttjets_scale_down_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_scale_down_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigScaleDown"
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgScaleDown"
     elif(options.sample=="ttbarScaleUp"):        
-        usedSample="TopAnalysis/Configuration/ttjets_scale_up_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigScaleUp"
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgScaleUp"
     elif(options.sample=="ttbarMassDown"):        
-        usedSample="TopAnalysis/Configuration/ttjets_mass169_5_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_mass161_5_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigTopMassDown"
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgTopMassDown"
     elif(options.sample=="ttbarMassUp"):        
-        usedSample="TopAnalysis/Configuration/ttjets_mass175_5_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_mass184_5_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigTopMassUp"
@@ -313,66 +313,70 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleTopS"
     elif(options.sample=="singleTopSScaleDown"):        
-        usedSample="TopAnalysis/Configuration/singleTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleTop_schannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False   
 	outputFileName+="SingleTopSScaleDown"
     elif(options.sample=="singleTopSScaleUp"):        
-        usedSample="TopAnalysis/Configuration/singleTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleTop_schannel_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleTopSScaleUp"
     elif(options.sample=="singleAntiTopS"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleAntiTopS"
     elif(options.sample=="singleAntiTopSScaleDown"):        
-        usedSample="TopAnalysis/Configuration/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopSScaleDown"
     elif(options.sample=="singleAntiTopSScaleUp"):        
-        usedSample="TopAnalysis/Configuration/singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_schannel_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopSScaleUp"
     elif(options.sample=="singleTopT"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleTopT"
     elif(options.sample=="singleTopTScaleDown"):        
-        usedSample="TopAnalysis/Configuration/singleTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleTopTScaleDown"
     elif(options.sample=="singleTopTScaleUp"):        
-        usedSample="TopAnalysis/Configuration/singleTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleTopTScaleUp"
     elif(options.sample=="singleAntiTopT"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleAntiTopT"
     elif(options.sample=="singleAntiTopTScaleDown"):        
-        usedSample="TopAnalysis/Configuration/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/11_AOD_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleTopTScaleDown"
+    elif(options.sample=="singleTopTScaleUp"):        
+        usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTScaleDown"
     elif(options.sample=="singleAntiTopTScaleUp"):        
-        usedSample="TopAnalysis/Configuration/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTScaleUp"
     elif(options.sample=="singleTopTw"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleTopTW"
     elif(options.sample=="singleTopTwScaleDown"):        
-        usedSample="TopAnalysis/Configuration/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleTopTWScaleDown"
     elif(options.sample=="singleTopTwScaleUp"):        
-        usedSample="TopAnalysis/Configuration/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleTopTWScaleUp"
     elif(options.sample=="singleAntiTopTw"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleAntiTopTW"
     elif(options.sample=="singleAntiTopTwScaleDown"):        
-        usedSample="TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTWScaleDown"
     elif(options.sample=="singleAntiTopTwScaleUp"):        
-        usedSample="TopAnalysis/Configuration/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTWScaleUp"
     elif(options.sample=="zprime_m500gev_w5000mev"):        
