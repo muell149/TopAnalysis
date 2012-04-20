@@ -45,7 +45,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   virtual void endJob();
 
   /// function to find types of jet-combinations in KinFits (1 right, 2 branches right, but inner-branche particles mixup, 3 inter-branch mixup, 4 missing jet)
-  int comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h);
+  int comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h, unsigned int whichCombo = 0);
 
   /// src's for the different infos
   edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
@@ -60,13 +60,18 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   /// define Tree for event content
   TTree * tree;
 
-  // Max possible number of jets in events
+  // should variables for pdf uncertainties be saved to the tree
+  bool DoPDFUncertainty_;
+
+  // max possible number of jets in events
   const unsigned short kMAX;
+
+  // max possible number of permutations per event
+  const unsigned int kMAXCombo;
 
   /// define variables for tree
   
   // bools
-  bool doPDFUncertainty;
 
   // shorts
   short * fitAssigns;
@@ -74,9 +79,12 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   short * partonFlavour;
   short * jetConst;
   short * chargeMulti;
+  short * comboTypes;
   short comboTypeValue;
-  short nPU;
+  short nPU   , nPUnext   , nPUprev   ;
+  short nPUTru, nPUnextTru, nPUprevTru;
   short nVertex;
+  short eventType;
 
   // unsigned shorts
   unsigned short TCHE_Bjets, TCHP_Bjets, SSVHE_Bjets, SSVHP_Bjets, CSV_Bjets, CSVMVA_Bjets, SM_Bjets;
@@ -86,6 +94,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   int id1, id2;
 
   // unsigend ints
+  unsigned int nCombos;
   unsigned int runNumber, luminosityBlockNumber, eventNumber;
 
   // longs
@@ -182,8 +191,10 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   // doubles
   double MCweight, PUweight;
   double prob, chi2, topMass, ttMass;
+  double * probs, * chi2s, * topMasses, * w1Mass, * w2Mass;
   double multiJetMVADisc;
   double x1, x2;
+  double ptHat;
   
   // TClonesArray(TLorentzVectors)
   TClonesArray * jets, * MET, * muons, * electrons, * fitVecs;
