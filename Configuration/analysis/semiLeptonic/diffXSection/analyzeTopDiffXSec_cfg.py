@@ -2098,39 +2098,7 @@ if(runningOnData=="MC"):
                           process.genFilterSequence                      *
                           ## sequence with gen selection and histograms
                           process.s4
-                          )
-    
-    process.p5 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
-                      process.filterSequence                        *
-                      ## PV event selection
-                      #process.PVSelection                           *
-                      ## introduce some collections
-                      process.semiLeptonicSelection                 *
-                      ## create PU event weights
-                      process.makeEventWeightsPU                    *
-		      ## create effSF eventWeight
-		      process.effSFMuonEventWeight                  *
-		      ## multiply event weights
-		      process.eventWeightNoBtagSFWeight             *
-                      ## jet selection and monitoring
-                      process.leadingJetSelectionNjets1             *
-                      process.leadingJetSelectionNjets2             *
-                      process.leadingJetSelectionNjets3             *
-                      process.leadingJetSelectionNjets4             *
-                      ## b-tagging
-                      process.btagSelection                         *
-                      ## mod. muon selection (>0 mu with all but isolation)
-                      process.newvertexSelectedMuons                *
-                      process.newtrackMuons                         *
-                      process.testIsoMuons                          *
-                      process.testIsoMuonSelection                  *
-                      ## create PU event weights
-                      process.bTagSFEventWeight                     *
-                      ## create combined weight
-                      process.eventWeightFinal                      *
-                      process.testIsoMuonQuality
-                      )  
-   
+                          )			   
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p4.remove(process.genFilterSequence)
@@ -2149,6 +2117,37 @@ elif(runningOnData=="data"):
     print "running on data, no gen-plots"
 else:
     print "choose runningOnData= data or MC, creating no gen-plots"
+    
+process.p5 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
+		  process.filterSequence                        *
+		  ## PV event selection
+		  #process.PVSelection                           *
+		  ## introduce some collections
+		  process.semiLeptonicSelection                 *
+		  ## create PU event weights
+		  process.makeEventWeightsPU                    *
+		  ## create effSF eventWeight
+		  process.effSFMuonEventWeight                  *
+		  ## multiply event weights
+		  process.eventWeightNoBtagSFWeight             *
+		  ## jet selection and monitoring
+		  process.leadingJetSelectionNjets1             *
+		  process.leadingJetSelectionNjets2             *
+		  process.leadingJetSelectionNjets3             *
+		  process.leadingJetSelectionNjets4             *
+		  ## b-tagging
+		  process.btagSelection                         *
+		  ## mod. muon selection (>0 mu with all but isolation)
+		  process.newvertexSelectedMuons                *
+		  process.newtrackMuons                         *
+		  process.testIsoMuons                          *
+		  process.testIsoMuonSelection                  *
+		  ## create PU event weights
+		  process.bTagSFEventWeight                     *
+		  ## create combined weight
+		  process.eventWeightFinal                      *
+		  process.testIsoMuonQuality
+		  )
 
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 
