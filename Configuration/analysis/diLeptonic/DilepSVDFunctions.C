@@ -19,14 +19,14 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     
     
     // Determine the Steering 
-    int flag_regmode = 2; //3=manual, 4=fromfile
+    int flag_regmode = 4; //3=manual, 4=fromfile
     int flag_regpar = 2; //2=tau, 1=k
     int flag_scan = 1; //2=doscan
     int flag_ps = 4; 
     int flag_root = 1;
     int flag_text = 2;
     int flag_verbose = 2;
-    int flag_scanpoints = 3;
+    int flag_scanpoints = 3; //3
     int flag_scanrange = 2;
     int flag_lowersidebin = 2; 
     int flag_uppersidebin = 2;
@@ -410,16 +410,10 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
     
     
     // Align Gen Dists
-    TH1D* arrGen = NULL;
-    if ( genUp == NULL || genDown == NULL ) { 
-        arrGen = new TH1D[1];
-        *(arrGen+0) = *genNom;
-    } else { 
-        arrGen = new TH1D[3];
-        *(arrGen+0) = *genNom;
-        *(arrGen+1) = *genUp;
-        *(arrGen+2) = *genDown;
-    }
+    TH1D* arrGen =  new TH1D[3];
+    *(arrGen+0) = *genNom;
+    *(arrGen+1) = *genUp;
+    *(arrGen+2) = *genDown; 
          
     
     // Align Rec Dists
@@ -529,7 +523,7 @@ double DilepSVDFunctions::SVD_DoUnfold(
     
 
     // Determine the right kValue
-    double regPar = -1.;
+    double regPar = -1.; 
     regPar = SVD_GetRegPar(channel, particle, quantity, special, (bool) (flag_regpar-1) );    
     
     // FileNames for output 
