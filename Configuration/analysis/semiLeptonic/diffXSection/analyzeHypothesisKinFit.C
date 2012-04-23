@@ -1529,7 +1529,7 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       //              specified with the second digit of this
       //              parameter.
       //              Note: The scan may take a while!
-      int scan =0;
+      int scan =1;
       if(redetermineopttau) scan=2;
       else scan=1;
       bool scanPlots=false;
@@ -1571,29 +1571,78 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
       //         2 means: text file with optimal reg. params. is written (default)
       int doTextFile=(regFile=="" ? 1 : 2);
       // Combine all options in one Steering Parameter
-      int steering=0;
+      TString steering="";
       // Steering options in parameter 'steering' 
-      //     (1) REGMODE (1. digit from right), see above
-      //     (2) REGULARIZATION PARAMETER (2. digit from right), see above
-      //     (3) SCAN ( 3. digit from right), see above    
-      //     (4) OUTPUT PS CONTENT  (4. digit from right), see above
-      //     (5) ROOT FILE ( 5. digit from right)
-      //     (6) TEXT FILE ( 6. digit from right)
-      //     (7) VERBOSITY (7. digit from right)
-      int verbosity=verbose+1;
-      if(redetermineopttau) verbosity+=1;
-      if(verbosity>3) verbosity=3;
+      //     (1) REGMODE, see above
+      steering=getTStringFromInt(regMode-1)+steering;
+      //     (2) REGULARIZATION PARAMETER, see above
+      steering=getTStringFromInt(scan)+steering;
+      //     (3) SCAN 
+      steering=getTStringFromInt(unfoldWithParameter)+steering;
+      //     (4) OUTPUT PS CONTENT, see above
+      steering=getTStringFromInt(plotting)+steering;
+      //     (5) ROOT FILE 
+      steering=getTStringFromInt(doRootFile)+steering;
+      //     (6) TEXT FILE 
+      steering=getTStringFromInt(doTextFile)+steering;
+      //     (7) VERBOSITY
       //         0 means: Default value, same as 2
       //         1 means: no output at all
       //         2 means: standard output (default)
       //         3 means: debugging output
-      steering +=       1*(regMode-1);
-      steering +=      10*unfoldWithParameter;
-      steering +=     100*scan;
-      steering +=    1000*plotting;
-      steering +=   10000*doRootFile;
-      steering +=  100000*doTextFile;
-      steering += 1000000*verbosity; 
+      int verbosity=verbose+1;
+      if(redetermineopttau) verbosity+=1;
+      if(verbosity>3) verbosity=3;
+      steering=getTStringFromInt(verbosity)+steering;
+      //     (8)  SCANPOINTS
+      //          0 means: Default value, same as 3
+      //          1 means: 5 scan points
+      //          2 means: 25 scan points
+      //          3 means: 125 scan points (default)
+      //          4 means: 625 scan points
+      int scanpoints= (scan==2 ? 4 : 0);
+      steering=getTStringFromInt(scanpoints)+steering;
+      //     (9)  SCANRANGE
+      //          0 means: Default value, same as 2
+      //          1 means: Tau+ / Tau- = 100  
+      //          2 means: Tau+ / Tau- = 10000
+      //          3 means: Tau+ / Tau- = 1000000
+      int scanrange = (scan==2 ? 3 : 0);
+      steering=getTStringFromInt(scanrange)+steering;
+      //     (10) LOWER SIDE BIN
+      //          0 means: Default value, same as 1
+      //          1 means: Regard as regular bin (not encouraged!)
+      //          2 means: Cut away on Rec Level, unfold to Gen Level (default)
+      //          3 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!) 
+      int lowsidebin=2;
+      steering=getTStringFromInt(lowsidebin)+steering;
+      //     (11) UPPER SIDE BIN 
+      //          0 means: Default value, same as 1
+      //          1 means: Regard as regular bin (not encouraged!)
+      //          2 means: Cut away on Rec Level, unfold to Gen Level (default)
+      //          3 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!)  
+      int upsidebin=2;
+      steering=getTStringFromInt(upsidebin)+steering;
+      //     (12) ORIENTATION OF RESPONSE MATRIX
+      //          0 means: Default value, same as 2
+      //          1 means: Do not transpose input response matrix during rebinning
+      //          2 means: Do transpose input response matrix during rebinning (default)
+      int matrixori=2;
+      steering=getTStringFromInt(matrixori)+steering;
+
+      // TString steering2=getTStringFromInt(matrixori);
+      // steering2+=getTStringFromInt(upsidebin);
+      // steering2+=getTStringFromInt(lowsidebin);
+      // steering2+=getTStringFromInt(scanrange);
+      // steering2+=getTStringFromInt(scanpoints);
+      // steering2+=getTStringFromInt(verbosity);
+      // steering2+=getTStringFromInt(doTextFile);
+      // steering2+=getTStringFromInt(doRootFile);
+      // steering2+=getTStringFromInt(plotting);
+      // steering2+=getTStringFromInt(scan);
+      // steering2+=getTStringFromInt(unfoldWithParameter);
+      // steering2+=getTStringFromInt(regMode-1);
+
       // -----------
       // get binning
       // -----------
