@@ -230,7 +230,7 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="Bkg"
     elif(options.sample=="ttbarMatchingDown"):        
-        usedSample="TopAnalysis/Configuration/Fall11/ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigMatchDown"
@@ -346,10 +346,6 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_PythiaPowhegZ2_Fall11_AOD_cff"
 	outputFileName+="SingleAntiTopT"
     elif(options.sample=="singleAntiTopTScaleDown"):        
-        usedSample="TopAnalysis/Configuration/11_AOD_cff"
-	additionalEventWeights=False
-	outputFileName+="SingleTopTScaleDown"
-    elif(options.sample=="singleTopTScaleUp"):        
         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTScaleDown"
