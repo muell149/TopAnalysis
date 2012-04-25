@@ -428,7 +428,7 @@ public :
    
    TH1D *h_NJetMatching;
 
-   TH1D *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti,*h_jetMulti_diLep, *h_BjetMulti,*h_jetMultiXSec,*h_jetMultiAll, *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_diLepMassFull;
+   TH1D *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti,*h_jetMulti_diLep, *h_BjetMulti,*h_jetMultiXSec,*h_jetMultiAll, *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_diLepMassFull, *h_diLepMassFull_fullSel;
 
    TH1D *h_HypTTBarMass, *h_HypTTBarRapidity, *h_HypTTBarpT;
    TH1D *h_HypLLBarMass, *h_HypLLBarpT;
@@ -445,13 +445,15 @@ public :
    TH1D *h_RecoLeptonpT,*h_RecoAntiLeptonpT,*h_RecoLeptonEta,*h_RecoAntiLeptonEta;
    TH1D *h_RecoBJetpT,*h_RecoAntiBJetpT, *h_RecoBJetRapidity,*h_RecoAntiBJetRapidity,*h_RecoBJetEta,*h_RecoAntiBJetEta;
 
-   TH1D *h_vertMulti, *h_MET;
+   TH1D *h_vertMulti, *h_vertMulti_noPU, *h_MET;
 
    TH1D *h_jetpT,*h_jetHT;
    TH1D *h_MuonpT, *h_MuonEta;
    TH1D *h_ElectronpT, *h_ElectronEta;
    TH1D *h_LeptonpT, *h_LeptonEta;
    TH1D *h_AntiLeptonpT, *h_AntiLeptonEta;
+   TH1D *h_LeptonpT_diLep, *h_LeptonEta_diLep;
+   TH1D *h_AntiLeptonpT_diLep, *h_AntiLeptonEta_diLep;
 
    TH1D *h_HypAntiToppT, *h_HypAntiTopEta, *h_HypAntiTopMass,*h_HypAntiTopRapidity;
    TH1D *h_HypToppT, *h_HypTopEta,*h_HypTopMass, *h_HypTopRapidity ;
