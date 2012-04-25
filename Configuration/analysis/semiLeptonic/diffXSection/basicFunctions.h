@@ -662,13 +662,13 @@ namespace semileptonic {
       crossSection=ttbarCrossSection; 
       // Fall11
       Nevents = 3697693;//3701947;
-      // Summer11 systematic samples
-      if(kSys==sysTopScaleUp  ) Nevents= 929319;// 930483;  
-      if(kSys==sysTopScaleDown) Nevents= 966082;// 967055;  
-      if(kSys==sysTopMatchUp  ) Nevents=1061531;//1062792; 
-      if(kSys==sysTopMatchDown) Nevents=1064250;//1065232;  
-      if(kSys==sysTopMassUp   ) Nevents=1536566;//1538301; 
-      if(kSys==sysTopMassDown ) Nevents=1604710;//1606570; 
+      // Systematic samples
+      if(kSys==sysTopScaleUp  ) Nevents=3691845;//3696269;  
+      if(kSys==sysTopScaleDown) Nevents=4000585;//4004587;  
+      if(kSys==sysTopMatchUp  ) Nevents=4025110;//4029823; 
+      if(kSys==sysTopMatchDown) Nevents=1064250;//1065232;  --> still Summer 11
+      if(kSys==sysTopMassUp   ) Nevents=1669928;//1671859; 
+      if(kSys==sysTopMassDown ) Nevents=1618341;//1620072; 
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
@@ -761,8 +761,8 @@ namespace semileptonic {
       Nevents     = 3891841;//3900171;
       // scale variation
       // FIXME: t channel single top scale samples after kinematics filter
-      if(kSys==sysTopScaleUp  ) Nevents = 1032197;
-      if(kSys==sysTopScaleDown) Nevents = 1041924;
+      if(kSys==sysTopScaleUp  ) Nevents = 1029915;//1032197;
+      if(kSys==sysTopScaleDown) Nevents = 1037460;//1039406;
     }
     else if(sample==kSAToptW){
       crossSection= 7.87;
@@ -970,11 +970,11 @@ namespace semileptonic {
     // they are located in dedicated subfolders
     // JES
     bool MCTagSummer11 = 0;
-    if(sys==sysJESUp  ){ fileName = "JESUp/"+fileName+"JESUp";     MCTagSummer11=1;}
-    if(sys==sysJESDown){ fileName = "JESDown/"+fileName+"JESDown"; MCTagSummer11=1;}
+    if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESUp";
+    if(sys==sysJESDown) fileName = "JESDown/"+fileName+"JESDown";
     // JER
-    if(sys==sysJERUp  ){ fileName = "JERUp/"+fileName+"JERUp";     MCTagSummer11=1;}
-    if(sys==sysJERDown){ fileName = "JERDown/"+fileName+"JERDown"; MCTagSummer11=1;}
+    if(sys==sysJERUp  ) fileName = "JERUp/"+fileName+"JERUp";
+    if(sys==sysJERDown) fileName = "JERDown/"+fileName+"JERDown";
     // Shape variation
     // only for new MC and ttbar signal
     if(sample==kSig){
@@ -989,23 +989,23 @@ namespace semileptonic {
     }
     // Scale
     // (a) top
-    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
-    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
+    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleUp/"+fileName+"ScaleUp";    
+    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleDown/"+fileName+"ScaleDown";
     // (b) V+jets
     if((sys==sysVBosonScaleUp  )&&((sample==kWjets)||(sample==kZjets))) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
     if((sys==sysVBosonScaleDown)&&((sample==kWjets)||(sample==kZjets))) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
     // (c) SingleTop
-    if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
-    if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
+    if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) fileName = "ScaleUp/"+fileName+"ScaleUp";   
+    if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) fileName = "ScaleDown/"+fileName+"ScaleDown";
     // (a) top   
-    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) {fileName = "MatchUp/"+fileName+"MatchUp";     MCTagSummer11=1;}
+    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg)))  fileName = "MatchUp/"+fileName+"MatchUp";   
     if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
     // (b) V+jets
     if((sys==sysVBosonMatchUp  )&&((sample==kWjets)||(sample==kZjets))) {fileName = "MatchUp/"+fileName+"MatchUp";     MCTagSummer11=1;}
     if((sys==sysVBosonMatchDown)&&((sample==kWjets)||(sample==kZjets))) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
     // Top Mass
-    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) {fileName = "TopMassUp/"+fileName+"TopMassUp";     MCTagSummer11=1;}
-    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) {fileName = "TopMassDown/"+fileName+"TopMassDown"; MCTagSummer11=1;}
+    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";    
+    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
     // Hadronization
     if((sys==sysHadUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationUp/"+fileName+"HadUp";
     if((sys==sysHadDown)&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationDown/"+fileName+"HadDown";
