@@ -1,13 +1,24 @@
-vertMulti N_{Events} N_{vtx} 0 0 0 0 0 0 0 0
-DIMFull N_{Events} M_{ll} 0 1 0.01 0 0 0 0 0
-HypjetMulti N_{Events} N_{jets} 0 0 0 0 0 0 0 0
-HypjetMulti_diLep N_{Events} N_{jets} 0 1 0.01 0 0 0 0 0
-MuonpT N_{Events} p_{T,#mu} 0 0 0 0 0 0 0 0
-ElectronpT N_{Events} p_{T,e} 0 0 0 0 0 0 0 0
-LeptonpT N_{Events} p_{T,l} 0 0 0 0 0 0 0 0
-MuonEta N_{Events} #eta_{T,#mu} 0 0 0 0 0 0 0 0
-ElectronEta N_{Events} #eta_{T,e} 0 0 0 0 0 0 0 0
-LeptonEta N_{Events} #eta_{T,l} 0 0 0 0 0 0 0 0
-jetpT N_{Events} p_{T,jet} 0 0 0 0 0 0 0 0
-jetHT N_{Events} H_{T,alljets} 0 0 0 0 0 0 0 0
-HypBjetMulti N_{Events} N_{b-jets} 0 0 0 0 0 0 0 0
+vertMulti N_{Events} N_{vtx} 0 0 0 0 0 0 0 0 0
+vertMulti_noPU N_{Events} N_{vtx} 0 0 0 0 0 0 0 0 0
+DIMFull N_{Events} M_{ll} 0 0 1 1.0 0 0 0 0 0
+DIMFull_fullSel N_{Events} M_{ll} 1 0 0 0 0 0 0 0 0
+Allh1 N_{Events} M_{ll} 1 0 0 0 0 0 0 0 0
+HypjetMulti N_{Events} N_{jets} 1 0 0 0 0 0 0 0 0
+HypjetMulti_diLep N_{Events} N_{jets} 0 0 1 1.0 0 0 0 0 0
+MuonpT N_{Events} p_{T,#mu} 1 0 0 0 0 0 0 0 0
+ElectronpT N_{Events} p_{T,e} 1 0 0 0 0 0 0 0 0
+LeptonpT N_{Events} p_{T,l} 1 0 0 0 0 0 0 0 0
+MuonEta N_{Events} #eta_{T,#mu} 1 0 0 0 0 0 0 0 0
+ElectronEta N_{Events} #eta_{T,e} 1 0 0 0 0 0 0 0 0
+LeptonEta N_{Events} #eta_{T,l} 1 0 0 0 0 0 0 0 0
+LeptonEta_diLep N_{Events} #eta_{T,l} 0 0 0 0 0 0 0 0 0
+jetpT N_{Events} p_{T,jet} 1 0 0 0 0 0 0 0 0
+jetHT N_{Events} H_{T,alljets} 1 0 0 0 0 0 0 0 0
+MET N_{Events} MET 0 0 0 0 0 0 0 0 0
+HypBjetMulti N_{Events} N_{b-jets} 1 0 0 0 0 0 0 0 0
+HypTopMass N_{Events} M_{t} 1 0 0 0 0 0 0 0 0
+HypTopRapidity N_{Events} y^{tand#bar{t}} 1 0 0 0 0 0 0 0 0
+HypToppT N_{Events} p_{T}^{tand#bar{t}} 1 0 0 0 0 0 0 0 0
+HypTTBarMass N_{Events} M^{t#bar{t}} 1 0 0 0 0 0 0 0 0
+HypTTBarRapidity N_{Events} y^{t#bar{t}} 1 0 0 0 0 0 0 0 0
+HypTTBarpT N_{Events} p_{T}^{t#bar{t}} 1 0 0 0 0 0 0 0 0
