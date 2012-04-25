@@ -1,17 +1,10 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, 
-				  //TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
-				  TString inputFolderName="RecentAnalysisRun/PU_2011Full",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full/analyzeDiffXData2011AllCombinedMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full/analyzeDiffXData2011AllCombinedElectron.root",
+				  TString inputFolderName="RecentAnalysisRun",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root",
-				  const std::string decayChannel = "muon", bool withRatioPlot = true)
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  const std::string decayChannel = "electron", bool withRatioPlot = true)
 {
   // ============================
   //  Set Root Style
@@ -64,6 +57,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // b) options to be configured only once
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
+  if(withRatioPlot==true) setQCDtoZero=false;
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
