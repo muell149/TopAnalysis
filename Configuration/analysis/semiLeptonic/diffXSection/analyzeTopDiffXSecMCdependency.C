@@ -5,9 +5,9 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
 TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b);
 
-void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string decayChannel="muon", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root"
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root"
+				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
                                     bool doPDFuncertainty=false)
 {
   // ---
@@ -587,7 +587,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 1143.22, std::string dec
     histo_[plotName][kData]->Add(histo_[plotName][kWjets],-1);
     histo_[plotName][kData]->Add(histo_[plotName][kZjets],-1);
     histo_[plotName][kData]->Add(histo_[plotName][kDiBos],-1);
-    histo_[plotName][kData]->Add(histo_[plotName][kQCD  ],-1);
+    //histo_[plotName][kData]->Add(histo_[plotName][kQCD  ],-1); // neglect QCD for the moment as its spiky and unphysical
     // normalize data to ttbar MC reco yield
     double areaMC = plots_[variable_[plot]]->Integral(0,plots_[variable_[plot]]->GetNbinsX()+1);
     double areaData = histo_[plotName][kData]->Integral(0,histo_[plotName][kData]->GetNbinsX()+1);
