@@ -7,7 +7,7 @@ void Histo::MakePlots(){
   std::vector<double> Xbins;
   std::vector<double> binCenters;
   Plotter h_XSecPlot;
-  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
+  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", false, false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
   h_XSecPlot.DYScaleFactor();
   h_XSecPlot.setDataSet("mumu");
   h_XSecPlot.fillHisto();
@@ -26,7 +26,7 @@ void Histo::MakePlots(){
   h_XSecPlot.CalcXSec();
   h_XSecPlot.MakeTable();
   h_XSecPlot.PlotXSec();
-  
+
   string histolist = "HistoList";
   ifstream HistStream;
   HistStream.open(histolist.c_str());
@@ -35,10 +35,10 @@ void Histo::MakePlots(){
   	
   	// Read HistoList-File
     TString name, YAxis, XAxis;
-    bool logX, logY;
+    bool logX, logY, DYScale;
     int bins;
     double ymin, ymax, xmin, xmax;
-    HistStream>>name>>YAxis>>XAxis>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
+    HistStream>>name>>YAxis>>XAxis>>DYScale>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
     
     // Avoid running over empty lines in 'HistoList'-File
     if ( name.CompareTo("") == 0 ) continue;
@@ -66,7 +66,7 @@ void Histo::MakePlots(){
     /////////////////////////////////////////////////////
     
     // Unfolding Options
-    bool doSVD = false;
+    bool doSVD = true;
     TString outpath = "";
     h_generalPlot.UnfoldingOptions(doSVD);
     h_generalPlot.SetOutpath("");
@@ -75,7 +75,7 @@ void Histo::MakePlots(){
     /////////////////////////////////////////////////////
     /////////////////////////////////////////////////////
     
-    h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
+    h_generalPlot.setOptions(name,YAxis,XAxis, DYScale, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();
@@ -107,10 +107,10 @@ void Histo::MakePlots(){
   while(!controlHistStream.eof()){
   	// Read HistoList-File
     TString name, YAxis, XAxis;
-    bool logX, logY;
+    bool logX, logY, DYScale;
     int bins;
     double ymin, ymax, xmin, xmax;
-    controlHistStream>>name>>YAxis>>XAxis>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
+    controlHistStream>>name>>YAxis>>XAxis>>DYScale>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
 
     // Avoid running over empty lines in 'HistoList'-File
     if ( name.CompareTo("") == 0 ) continue;
@@ -145,7 +145,7 @@ void Histo::MakePlots(){
     ///////////////////////////////////////////////////// 
     
 
-    h_generalPlot.setOptions(name,YAxis,XAxis, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
+    h_generalPlot.setOptions(name,YAxis,XAxis, DYScale, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();
@@ -172,3 +172,4 @@ Histo::Histo(){
 
 Histo::~Histo(){
 }
+
