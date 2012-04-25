@@ -6,13 +6,16 @@ TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbo
 double linSF(const double x, const double xmax, const double a, const double b);
 
 void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root"
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
                                     bool doPDFuncertainty=false)
 {
   // ---
   //     Configuration
   // ---
+  // take care that prescaling of muon channel for full 2011 datset was taken into account
+  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=4955;
+  if(luminosity==4955&&decayChannel=="electron") luminosity=4980;
   // set up common analysis style
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
