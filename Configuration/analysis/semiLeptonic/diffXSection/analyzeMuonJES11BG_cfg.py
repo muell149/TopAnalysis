@@ -19,5 +19,5 @@ else:
 
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXSecJESUp_testBkg.root'
-process.TFileService.fileName = outputFileName+"JESupPF.root"
+process.TFileService.fileName = outputFileNamePart+"JESUp"+options.mctag+"PF.root"
 print "output file name = ", process.TFileService.fileName

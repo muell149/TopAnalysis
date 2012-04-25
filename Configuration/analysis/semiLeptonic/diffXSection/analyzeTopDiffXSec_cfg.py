@@ -428,8 +428,8 @@ if(not options.sample=="none"):
     else:
         print "\n ERROR ---- Poolsource file does not exist.\n"
         os._exit(0)
-
-outputFileName+=options.mctag+"PF.root"
+outputFileNamePart=outputFileName
+outputFileName=outputFileNamePart+options.mctag+"PF.root"
 
 #### =================================================
 ####  Print out summary of configuration parameters
@@ -715,6 +715,28 @@ process.looseCuts = cms.Sequence(process.looseCentralJets*process.kinematicMuons
 ## ---
 ##    Set up selection steps for different (gen)-jet multiplicities
 ## ---
+from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
+
+process.noOverlapGenJetCollection = cms.EDProducer("PATGenJetCleaner",
+    src = cms.InputTag("selectedGenJetCollection"),
+    ## preselection (any string-based cut on pat::Jet)
+    preselection = cms.string(''),
+    ## overlap checking configurables
+    checkOverlaps = cms.PSet(
+       muons = cms.PSet(
+       src       = cms.InputTag("selectedGenMuonCollection"),
+       algorithm = cms.string("byDeltaR"),
+       preselection        = cms.string(''),
+       deltaR              = cms.double(0.4),
+       checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
+       pairCut             = cms.string(""),
+       requireNoOverlaps   = cms.bool(True), # overlaps don't cause the jet to be discared
+       )
+       ),
+    ## finalCut (any string-based cut on pat::Jet)
+    finalCut = cms.string(''),
+    )
+process.leadingCleanedGenJetSelectionNjets4 = process.leadingGenJetSelection.clone (src = 'noOverlapGenJetCollection', minNumber = 4)
 process.leadingGenJetSelectionNjets1 = process.leadingGenJetSelection.clone (src = 'selectedGenJetCollection', minNumber = 1)
 process.leadingGenJetSelectionNjets2 = process.leadingGenJetSelection.clone (src = 'selectedGenJetCollection', minNumber = 2)
 process.leadingGenJetSelectionNjets3 = process.leadingGenJetSelection.clone (src = 'selectedGenJetCollection', minNumber = 3)
@@ -724,6 +746,8 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   process.leadingGenJetSelectionNjets2 +
                                   process.leadingGenJetSelectionNjets3 +
                                   process.leadingGenJetSelectionNjets4 
+                                  #process.noOverlapGenJetCollection    +
+                                  #process.leadingCleanedGenJetSelectionNjets4 
                                   )
 process.selectedGenMuonCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
 process.selectedGenElectronCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
@@ -2048,16 +2072,19 @@ if(runningOnData=="MC"):
                           ## investigate top reconstruction hadron level PS
                           process.kinFitGenPhaseSpaceHad                *
                           ## parton level phase space cuts on the basis of genTtbarEvent
+                          process.filterLeptonPhaseSpace                *
                           process.filterGenPhaseSpace   
                           )
     ## delete gen filter
     if(removeGenTtbar==True):    
         process.p3.remove(process.genFilterSequence)        
         process.p3.remove(process.filterGenPhaseSpace)
+        process.p3.remove(process.filterLeptonPhaseSpace)
         process.p3.remove(process.genMuonSelection)
         process.p3.remove(process.genJetCuts)
     if(eventFilter=='background only'):
         process.p3.remove(process.filterGenPhaseSpace)
+        process.p3.remove(process.filterLeptonPhaseSpace)
         process.p3.remove(process.genMuonSelection)
         process.p3.remove(process.genJetCuts)
     ## delete dummy sequence
@@ -2080,6 +2107,7 @@ if(runningOnData=="MC"):
                               process.eventWeightPUupDistort                *
                               process.eventWeightPUdownDistort              *
 			      ## new phase space cuts on the basis of genTtbarEvent
+                              process.filterLeptonPhaseSpace                *  
 			      process.filterGenPhaseSpace                   *
                               ## investigate top reconstruction parton level PS
                               process.kinFitGenPhaseSpace                   *
@@ -2096,13 +2124,15 @@ if(runningOnData=="MC"):
                           process.s4
                           )			   
     ## delete gen filter
-    if(removeGenTtbar==True):    
+    if(removeGenTtbar==True):
         process.p4.remove(process.genFilterSequence)
+        process.p4.remove(process.filterLeptonPhaseSpace)
 	process.p4.remove(process.filterGenPhaseSpace)
         process.p4.remove(process.genMuonSelection)
         process.p4.remove(process.genJetCuts)
     if(eventFilter=='background only'):
         process.p4.remove(process.filterGenPhaseSpace)
+        process.p4.remove(process.filterLeptonPhaseSpace)
         process.p4.remove(process.genMuonSelection)
         process.p4.remove(process.genJetCuts)
     ## delete dummy sequence
@@ -2211,6 +2241,7 @@ if(decayChannel=="electron"):
     # gen selection
     process.p3.replace(process.genMuonSelection, process.genElectronSelection)
     process.p4.replace(process.genMuonSelection, process.genElectronSelection)
+    process.noOverlapGenJetCollection.checkOverlaps.muons.src=cms.InputTag("selectedGenElectronCollection")
     pathlist = [process.p1, process.p2, process.p3, process.p4, process.p5]
     for path in pathlist:
         # replace jet lepton veto

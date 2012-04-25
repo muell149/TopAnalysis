@@ -17,5 +17,5 @@ if(applyKinFit==True):
 
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXSecJERup_testBkg.root'
-process.TFileService.fileName = outputFileName+"JERupPF.root"
+process.TFileService.fileName = outputFileNamePart+"JERUp"+options.mctag+"PF.root"
 print "output file name = ", process.TFileService.fileName
