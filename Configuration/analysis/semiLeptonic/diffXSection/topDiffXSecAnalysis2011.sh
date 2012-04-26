@@ -52,24 +52,32 @@
 ########################
 ## configure settings ##
 ########################
+
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
 decayChannel=\"electron\" 
-## lumi [/pb]
+
+## Dataset and luminosity [/pb]
 ## has to fit to current dataset
-dataLuminosity=4980 # electron
-#dataLuminosity=4955 # muon
-## dataset: 2010 or 2011
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+if [ $decayChannel == \"electron\" ]; then
+    dataLuminosity=4980
+    dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
+   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root\"
+   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+else
+    if [ $decayChannel == \"muon\" ]; then
+	dataLuminosity=4955
+	dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
+       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
+       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+    else
+	dataLuminosity=4967.5   # mean value
+	dataSample=\"DefaultDummy.root\"
+    fi
+fi
+
 ## Data label, required for filename
 ## dataLabel=2011 (default)
 dataLabel=2011
@@ -89,7 +97,7 @@ inputFolderName=\"RecentAnalysisRun\"
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=false
+redoControlPlots=true
 
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
@@ -206,7 +214,7 @@ if [ $clean = true ]
 	    echo "./diffXSecTopSemiMu$dataLabel.root"
 	    rm ./diffXSecTopSemiMu$dataLabel.root
 	else
-	    if [ $decayChannel == \"combination\" ]
+	    if [ $decayChannel == \"combined\" ]
 		then
 		echo "./diffXSecTopSemiLep.root"
 		rm ./diffXSecTopSemiLep.root
