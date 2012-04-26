@@ -208,12 +208,12 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
       // exclude inclusive cross section
       // FIXME: exclude bquark quantities for the moment
       if(!xSecVariables_[var].Contains("inclusive")&&!xSecVariables_[var].Contains("bq")){
-	TString name=xSecVariables_[var];
+	TString name=xSecVariables_[var];       
 	name.ReplaceAll("Norm","");
 	// get plot 
 	hadUnc_[xSecVariables_[var]]=(TH1F*)(hadfile->Get(name)->Clone());
-	calculateError_[xSecVariables_[var]][sysHadUp  ]=true;
-	calculateError_[xSecVariables_[var]][sysHadDown]=true;
+	calculateError_[xSecVariables_[var]][sysHadUp  ]=true; 
+	calculateError_[xSecVariables_[var]][sysHadDown]=true; 
       }
     }
     
@@ -237,7 +237,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 	  if(plot){ 
 	    if(verbose>1) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
 	    // go to root directory, keep plot when closing rootfile
-	    gROOT->cd();
+	    gROOT->cd();	    
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
 	  }
@@ -366,7 +366,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 		  }
 
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
-		  if(sys==sysTopMassUp||sys==sysTopMassDown) sysDiff *= SF_TopMassUncertainty; // SF_TopMassUncertainty: defined in basicFunctions.h
+		  if      (sys==sysTopMassUp)   sysDiff *= SF_TopMassUpUncertainty;   // SF_TopMassUpUncertainty: defined in basicFunctions.h
+		  else if (sys==sysTopMassDown) sysDiff *= SF_TopMassDownUncertainty; // SF_TopMassDownUncertainty: defined in basicFunctions.h
 		}
 		else if(verbose>1) std::cout << "(not considered): ";
 		// print single systematic uncertainty absolut and relative for bin & variable
