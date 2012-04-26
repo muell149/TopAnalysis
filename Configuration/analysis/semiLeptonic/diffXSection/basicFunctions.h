@@ -2819,7 +2819,7 @@ namespace semileptonic {
     }
   }
 
-  double regParameter(TString variable, TString decayChannel, int verbose=0, bool tau=false){
+  double regParameter(TString variable, TString decayChannel, int verbose=0, bool fullPS=false, bool tau=false){
     // this function returns k/value for SVD 
     // unfolding for the corresponding variable
     // modified quantities: NONE
@@ -2835,108 +2835,162 @@ namespace semileptonic {
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=3.86619;
+	if(tau){
+	  k=3.86619; // hadron LV PS: 3.86443
+	  if(fullPS) k=30.6447;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=3.67321;
+	if(tau){
+	  k=3.67321; // hadron LV PS: 3.67205
+	  if(fullPS) k=16.4683;
+	}
       }
     }
     else if(variable.Contains("ttbarPt"  )){ 
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=3.4413;
+	if(tau){
+	  k=3.4413; // hadron LV PS: 3.44115
+	  if(fullPS) k=3.1544;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=3.2237;
+	if(tau){
+	  k=3.2237; // hadron LV PS: 3.22795
+	  if(fullPS) k=2.96841;
+	}
       }
     }
     else if(variable.Contains("ttbarY"   )){ 
       if(decayChannel.Contains("muon")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=3.31833;
+	if(tau){
+	  k=3.31833; // hadron LV PS: 3.31775
+	  if(fullPS) k=3.09977;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=3.10849;
+	if(tau){
+	  k=3.10849; // hadron LV PS: 3.10724
+	  if(fullPS) k=2.71239;
+	}
       }
     }
     else if(variable.Contains("topPt"    )){ 
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=6.27921;
+	if(tau){
+	  k=6.27921; // hadron LV PS: 6.27445
+	  if(fullPS) k=3.21603;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=6.13571;
+	if(tau){
+	  k=6.13571; // hadron LV PS: 6.13883
+	  if(fullPS) k=3.30734;
+	}
       }
     }
     else if(variable.Contains("topY"     )){ 
       if(decayChannel.Contains("muon")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=4.79079;
+	if(tau){
+	  k=4.79079; // hadron LV PS: 4.79208
+	  if(fullPS) k=4.78635;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=4.35233;
+	if(tau){
+	  k=4.35233; // hadron LV PS: 4.35451
+	  if(fullPS) k=4.2222;
+	}
       }
     }
     else if(variable.Contains("lepPt"    )){ 
       if(decayChannel.Contains("muon")){
 	k=13;
 	// Optimal Tau
-	if(tau) k=0.767378;
+	if(tau){
+	  k=0.767378; // hadron LV PS: 0.767349
+	  if(fullPS) k=1.2226;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=13; 
 	// Optimal Tau
-	if(tau) k=0.691769;
+	if(tau){
+	  k=0.691769; // hadron LV PS: 0.691907
+	  if(fullPS) k=2.336;
+	}
       }
     }
     else if(variable.Contains("lepEta"   )){ 
       if(decayChannel.Contains("muon")){
 	k=14;
 	// Optimal Tau
-	if(tau) k=1.52633;
+	if(tau){
+	  k=1.52633; // hadron LV PS: 1.52483
+	  if(fullPS) k=1.52226;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=14; 
 	// Optimal Tau
-	if(tau) k=1.09523;
+	if(tau){
+	  k=1.09523; // hadron LV PS: 1.09827
+	  if(fullPS) k=1.09098;
+	}
       }
     }
     else if(variable.Contains("bqPt"     )){ 
       if(decayChannel.Contains("muon")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=3.68081;
+	if(tau){
+	  k=3.68081; // hadron LV PS: 3.67791
+	  if(fullPS) k=4.08056;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
-	if(tau) k=3.71063;
+	if(tau){
+	  k=3.71063; // hadron LV PS: 3.70874
+	  if(fullPS) k=3.88479;
+	}
       }
     }
     else if(variable.Contains("bqEta"    )){ 
       if(decayChannel.Contains("muon")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=4.28004;
+	if(tau){
+	  k=4.28004; // hadron LV PS: 4.27399
+	  if(fullPS) k=4.27149;
+	}
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
-	if(tau) k=3.90018;
+	if(tau){
+	  k=3.90018; // hadron LV PS: 3.87991
+	  if(fullPS) k=3.79943;
+	}
       }
     }
     // output
