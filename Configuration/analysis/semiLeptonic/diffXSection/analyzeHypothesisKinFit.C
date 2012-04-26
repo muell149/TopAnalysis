@@ -1493,7 +1493,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
       // number of systematic samples to unfold 
       int numSys=0;
       // Regularization parameter
-      double regPar=regParameter(variable, decayChannel, verbose, true);
+      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true);
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding
@@ -2363,7 +2363,7 @@ for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	if(!title.Contains("canv")){
 	  // add additional label that indicates PS for all relevant plots
 	  TString universalplotLabel="";
-	  if(!title.Contains("analyzeTopRecoKinematicsKinFit")&&!title.Contains("legend")){
+	  if(title.Contains("0")||(!title.Contains("analyzeTopRecoKinematicsKinFit")&&!title.Contains("legend"))){
 	    if(extrapolate) universalplotLabel="FullPS";
 	    else universalplotLabel=LV+"LvPS";
 	  }
