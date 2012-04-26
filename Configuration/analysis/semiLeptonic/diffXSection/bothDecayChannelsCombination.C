@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut", bool pTPlotsLog=false){
+void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", bool pTPlotsLog=false, bool extrapolate=false, bool hadron=false){
 	
   // ============================
   //  Set Root Style
@@ -15,6 +15,13 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
   //  Setup
   // ============================
 
+  // take care of muon trigger prescaling for 2011 data
+  double luminosity2=luminosity;
+  if(luminosity==4980) luminosity2=4955;
+  if(luminosity==4955){ 
+    luminosity==4980
+    luminosity2=4955;
+  }
   // smooth instead of binned theory curves
   bool smoothcurves=true;
   // say if closure test with reweighted m(ttbar) on parton level is done
@@ -25,19 +32,31 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
   TString zprime="";
   // adjust data label
   TString dataLabel= (reweightClosure||zprime!="") ? "Pseudo-Data": "Data"; 
-  // choose if xSec are extrapolated to whole phase space
-  bool extrapolate=false;
+  // choose phase space
   TString PS="";
-  if(!extrapolate)PS="PhaseSpace";
-  // choose if hadron or parton level xSec is taken
-  bool hadron=true;
-  TString state="";
-  if(hadron) state="Hadron";
-  else state="Parton";
+  // a) for full PS use extrapolate=true;
+  if(!extrapolate) PS="PhaseSpace";
+  // b) for restricted phase space:
+  // b1) parton PS: hadron=false
+  // b2) hadron PS: hadron=true
+  TString LV="Parton";
+  if(!extrapolate&&hadron) LV="Hadron";
+  if(verbose>1){
+    if(extrapolate) std::cout << "full Phase Space will be used!" << std::endl; 
+    else std::cout << LV << " level Phase Space will be used!" << std::endl; 
+  }
+  TString universalplotLabel="";
+  if(extrapolate) universalplotLabel="FullPS";
+  else universalplotLabel=LV+"LvPS";
   // choose additional theory curves to plot
   bool DrawSmoothMadgraph = false;
   bool DrawMCAtNLOPlot = false;
   bool DrawPOWHEGPlot = false;
+  if(extrapolate==false&&hadron==false){
+    bool DrawSmoothMadgraph = true;
+    bool DrawMCAtNLOPlot = true;
+    bool DrawPOWHEGPlot = true;
+  }
   // GOSSIE quick fix: cut of m(ttbar) below 354 GeV
   bool cutTtbarMass=false;
   // decay channels
@@ -50,8 +69,8 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
   if(luminosity>50) dataSample="2011";
   // define muon and electron input rootfile
   std::map<unsigned int, TFile*> files_;
-  files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +dataSample+".root");
-  files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+dataSample+".root");
+  files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +dataSample+LV+PS+".root");
+  files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+dataSample+LV+PS+".root");
   // define variables for combination
   // NOTE: these must be included in xSecVariables_ 
   // in analyzeHypothesisKinFit.C and combineTopDiffXSecUncertainties.C
@@ -137,7 +156,7 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
 	    TFile* mufile = new (TFile)(muReweighted);
 	    TFile* elfile = new (TFile)(elReweighted);
 	    // get plot
-	    TString partonPlot="analyzeTop"+state+"LevelKinematics"+PS+"/"+plotName;
+	    TString partonPlot="analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName;
 	    histo_["reweighted"+plotName     ][kSig] = (TH1F*)(mufile->Get(partonPlot)->Clone("mu"+plotName));
 	    histo_["reweighted"+plotName+"El"][kSig] = (TH1F*)(elfile->Get(partonPlot)->Clone("el"+plotName));
 	    histo_["reweighted"+plotName     ][kSig]->Add(histo_["reweighted"+plotName+"El"][kSig]);
@@ -165,14 +184,14 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
 	    TFile* muZprimefile = new (TFile)(muZprime);
 	    TFile* elZprimefile = new (TFile)(elZprime);
 	     // get plot
-	    TString partonPlot="analyzeTop"+state+"LevelKinematics"+PS+"/"+plotName;
+	    TString partonPlot="analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName;
 	    histo_["modified"+plotName           ][kSig] = (TH1F*)(muSigfile   ->Get(partonPlot)->Clone("modified"+plotName));
 	    histo_["modified"+plotName+"ElSig"   ][kSig] = (TH1F*)(elSigfile   ->Get(partonPlot)->Clone("elSig"+plotName   ));
 	    histo_["modified"+plotName+"muZprime"][kSig] = (TH1F*)(muZprimefile->Get(partonPlot)->Clone("zprime"+plotName  ));
 	    histo_["modified"+plotName+"ElZprime"][kSig] = (TH1F*)(elZprimefile->Get(partonPlot)->Clone("zprime"+plotName  ));
 	    // relative apply lumiweight- needed because these are different samples
-	    histo_["modified"+plotName           ][kSig]->Scale(lumiweight(kSig, luminosity, 0, "muon"    ));
-	    histo_["modified"+plotName+"ElSig"   ][kSig]->Scale(lumiweight(kSig, luminosity, 0, "electron"));
+	    histo_["modified"+plotName           ][kSig]->Scale(lumiweight(kSig, luminosity2, 0, "muon"    ));
+	    histo_["modified"+plotName+"ElSig"   ][kSig]->Scale(lumiweight(kSig, luminosity , 0, "electron"));
 	    double zPrimeLumiWeight=1;
 	    if     (zprime=="500") zPrimeLumiWeight=(10*16.2208794979645*luminosity)/232074;
 	    else if(zprime=="750") zPrimeLumiWeight=(10*3.16951400706147*luminosity)/206525;
@@ -293,7 +312,7 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
 	    // configure configuration
 	    smoothFactor=0;
 	    rebinFactor=0;
-	    TString plotNamePOWHEG="analyzeTop"+state+"LevelKinematics"+PS+"/"+xSecVariables_[i];
+	    TString plotNamePOWHEG="analyzeTop"+LV+"LevelKinematics"+PS+"/"+xSecVariables_[i];
 	    plotNamePOWHEG.ReplaceAll("Norm","");
 	    rangeLow=-1.;
 	    rangeHigh=-1.;
@@ -320,7 +339,7 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
 	    // g) binned MadGraph Theory curve
 	    smoothFactor=0;
 	    rebinFactor=0;
-	    TString plotNameMadgraph="analyzeTop"+state+"LevelKinematics"+PS+"/"+plotName;
+	    TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName;
 	    plotNameMadgraph.ReplaceAll("Norm","");
 	    rangeLow=-1.;
 	    rangeHigh=-1.;
@@ -400,8 +419,8 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
 	    if(verbose>0) std::cout << "saving" << std::endl;
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
-	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+".eps"); 
-	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+".png");
+	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+universalplotLabel+".eps"); 
+	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+universalplotLabel+".png");
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	  // close Canvas
@@ -422,10 +441,10 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
       else{
 	std::cout << "ERROR in bothDecayChannelsCombination.C! " << std::endl;
 	if(!canvasMu||!canvasEl) std::cout << "canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
-	if(!canvasMu  ) std::cout << "muon file     diffXSecTopSemiMu"+dataSample+".root" << std::endl;
-	if(!canvasEl  ) std::cout << "electron file diffXSecTopSemiEl"+dataSample+".root" << std::endl;
+	if(!canvasMu  ) std::cout << "muon file     diffXSecTopSemiMu"+dataSample+LV+PS+".root" << std::endl;
+	if(!canvasEl  ) std::cout << "electron file diffXSecTopSemiEl"+dataSample+LV+PS+".root" << std::endl;
 	if(!canvasTheo){ 
-	  std::cout << "theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSample+".root";
+	  std::cout << "theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSampleLV+PS++".root";
 	}
 	exit(0);
       }
@@ -439,7 +458,7 @@ void bothDecayChannelsCombination(double luminosity=4964, bool save=false, unsig
     // loop systematic variations
     for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
       if(histo_[xSecVariables_[i]][sys]){
-	saveToRootFile("diffXSecTopSemiLep.root", canvas_[xSecVariables_[i]][sys], true, verbose,""+xSecFolder+"/"+sysLabel(sys));
+	saveToRootFile("diffXSecTopSemiLep"+LV+PS+".root", canvas_[xSecVariables_[i]][sys], true, verbose,""+xSecFolder+"/"+sysLabel(sys));
       }
     }
   }

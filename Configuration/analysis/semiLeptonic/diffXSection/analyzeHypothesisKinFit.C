@@ -2,12 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
-			     TString inputFolderName="RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root",
-			     //Ttring dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true)
+void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+			     TString inputFolderName="RecentAnalysisRun",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -72,15 +71,32 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   // 45: sysShapeUp                 46: sysShapeDown                
   // 47: ENDOFSYSENUM
   
+  // take care that prescaling of muon channel for full 2011 datset was taken into account
+  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=4955;
+  if(luminosity==4955&&decayChannel=="electron") luminosity=4980;
+  // luminosity uncertainties
   if(luminosity<40.&&systematicVariation==sysLumiUp  )      luminosity*=1.04;
   else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
-  if(luminosity>40.&&systematicVariation==sysLumiUp  )      luminosity*=1.045;
-  else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.955;
+  if(luminosity>40.&&systematicVariation==sysLumiUp  )      luminosity*=1.022;
+  else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.978;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
   // save: save plots?
   // SVDunfold: use SVD instead of bin to bin unfolding
+  // choose phase space
+  TString PS="";
+  // a) for full PS use extrapolate=true;
+  if(!extrapolate) PS="PhaseSpace";
+  // b) for restricted phase space:
+  // b1) parton PS: hadron=false
+  // b2) hadron PS: hadron=true
+  TString LV="Parton";
+  if(!extrapolate&&hadron) LV="Hadron";
+  if(verbose>1){
+    if(extrapolate) std::cout << "full Phase Space will be used!" << std::endl; 
+    else std::cout << LV << " level Phase Space will be used!" << std::endl; 
+  }
   // compare SVD and BBB results
   bool compare=false;
   if(!SVDunfold) compare=false;
@@ -100,22 +116,9 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
-  outputFileName+=dataSample+".root";
+  outputFileName+=dataSample+LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitHypothesis"+lumi+"pb";
-  // choose phase space
-  TString PS="";
-  // hadron level: LV="Hadron";
-  // parton level: LV="Parton";
-  TString LV="Hadron";
-  // full PS: extrapolate=true;
-  bool extrapolate=false;
-  if(LV=="Hadron") extrapolate=false;
-  if(!extrapolate) PS="PhaseSpace";
-  if(verbose>1){
-    if(extrapolate) std::cout << "full Phase Space will be used!" << std::endl; 
-    else std::cout << LV << " level Phase Space will be used!" << std::endl; 
-  }
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
@@ -142,13 +145,13 @@ void analyzeHypothesisKinFit(double luminosity = 4964, bool save = true, int sys
   int systematicVariationMod=systematicVariation;
   std::vector<int> ignoreSys_;
   // exclude JES and JER
-  for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude Scale matching and top mass 
-  for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
   // exclude Hadronization
-  for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
-  for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude shape variation
   for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
@@ -2358,9 +2361,13 @@ for(unsigned int plot=0; plot<plotList_.size(); ++plot){
        	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
 	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
 	if(!title.Contains("canv")){
+	  // add additional label that indicates PS for all relevant plots
 	  TString universalplotLabel="";
-	  if(extrapolate) universalplotLabel="FullPS";
-	  else if(LV=="Hadron") universalplotLabel=LV+"LvPS";
+	  if(!title.Contains("analyzeTopRecoKinematicsKinFit")&&!title.Contains("legend")){
+	    if(extrapolate) universalplotLabel="FullPS";
+	    else universalplotLabel=LV+"LvPS";
+	  }
+	  // do the saving
 	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+".eps"); 
 	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+".png");
 	}

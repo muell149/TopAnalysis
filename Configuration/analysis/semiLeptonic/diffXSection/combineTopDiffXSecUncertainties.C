@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun", TString decayChannel="muon", bool exclShapeVar="true"){
+void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar="true", bool extrapolate=false, bool hadron=false){
 
   // ============================
   //  Systematic Variations:
@@ -47,9 +47,28 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   //  Parameter Configuration
   // ============================
 
-  // set detail level of ouStput 
+  // verbose: set detail level of output 
   // 0: no output, 1: std output 2: output for debugging
   // save: enable saving
+  // take care that prescaling of muon channel for full 2011 datset was taken into account
+  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=4955;
+  if(luminosity==4955&&decayChannel=="electron") luminosity=4980;
+  // choose phase space
+  TString PS="";
+  // a) for full PS use extrapolate=true;
+  if(!extrapolate) PS="PhaseSpace";
+  // b) for restricted phase space:
+  // b1) parton PS: hadron=false
+  // b2) hadron PS: hadron=true
+  TString LV="Parton";
+  if(!extrapolate&&hadron) LV="Hadron";
+  if(verbose>1){
+    if(extrapolate) std::cout << "full Phase Space will be used!" << std::endl; 
+    else std::cout << LV << " level Phase Space will be used!" << std::endl; 
+  }
+  TString universalplotLabel="";
+  if(extrapolate) universalplotLabel="FullPS";
+  else universalplotLabel=LV+"LvPS";
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
   if(luminosity<50.) dataSample="2010";
@@ -59,10 +78,8 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   TString outputFile="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFile+="Mu"+dataSample;
   if(decayChannel=="electron") outputFile+="Elec"+dataSample;
-  if(decayChannel=="combined"){
-    outputFile+="Lep";
-  }
-  outputFile+=".root";
+  if(decayChannel=="combined") outputFile+="Lep";
+  outputFile+=LV+PS+".root";
   // define folder where XSec plots are stored
   TString xSecFolder = "xSec";
   // save all plots into the following folder
@@ -70,16 +87,6 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
   if(dataSample!="") outputFolder+=dataSample;
   // use BCC values?
   bool useBCC=false;
-  // choose phase space
-  TString PS="";
-  // hadron level: LV="Hadron";
-  // parton level: LV="Parton";
-  TString LV="Hadron";
-  // full PS: extrapolate=true;
-  bool extrapolate=false;
-  if(LV=="Hadron") extrapolate=false;
-  if(!extrapolate) PS="PhaseSpace";
-
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
   
@@ -524,6 +531,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    if(save){
 		TString saveName=outputFolder+"/uncertaintyDistributions/relativeUncertainties"+xSecVariables_[i]+"_"+label;
 		if(decayChannel=="combined") saveName+="Combined";
+		saveName+=universalplotLabel;
 		canvasUncertaintyDistributions->Print(saveName+".eps");
 		canvasUncertaintyDistributions->Print(saveName+".png");
 	    }
@@ -629,6 +637,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	      if(save){
 		TString saveName=outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin);
 		if(decayChannel=="combined") saveName+="Combined";
+		saveName+=universalplotLabel;
 		relUnCertaintyCanvas->Print(saveName+".eps");
 		relUnCertaintyCanvas->Print(saveName+".png");
 	      }
@@ -802,6 +811,7 @@ void combineTopDiffXSecUncertainties(double luminosity=1143, bool save=true, uns
 	    if(save){
 	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
 	      if(decayChannel=="combined") saveName+="Combined";
+	      saveName+=universalplotLabel;
 	      canvas->Print(saveName+".eps");
 	      canvas->Print(saveName+".png");
 	    }

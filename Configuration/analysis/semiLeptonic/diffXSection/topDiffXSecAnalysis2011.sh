@@ -54,13 +54,14 @@
 ########################
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"muon\" 
+decayChannel=\"electron\" 
 ## lumi [/pb]
 ## has to fit to current dataset
-dataLuminosity=4964
+dataLuminosity=4980 # electron
+#dataLuminosity=4955 # muon
 ## dataset: 2010 or 2011
-#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedMuon.root\"
-dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut/analyzeDiffXData2011AllCombinedElectron.root\"
+#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
 #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
@@ -84,11 +85,11 @@ verbose=0
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
 ## inputFolderName=\"RecentAnalysisRun\" (default)
-inputFolderName=\"RecentAnalysisRun/PU_2011Full_NoMassConstraint_NoKinFitCut\"
+inputFolderName=\"RecentAnalysisRun\"
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=true
+redoControlPlots=false
 
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
@@ -117,11 +118,19 @@ fast=true
 
 ## delete all (old) existing .eps, .png and .pdf plots?
 ## clean = true / false (default: false)
-clean=true
+clean=false
 
 ## use SVD unfolding?
 ## SVD = true / false (default: true)
 SVD=true
+
+## extrapolate xSec to full PS?
+## extrapolate = true / false (default: false)
+extrapolate=false
+
+## use hadron level PS instead of parton level PS?
+## hadron = true / false (default: false)
+hadron=false
 
 #####################
 ## prepare running ##
@@ -423,11 +432,11 @@ if [ $decayChannel != \"combined\" ]; then
     
 cat >> commandsNoSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel)
+analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
 EOF
 
     echo ""
-    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD)"
+    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
     root -l -b < commandsNoSysRun.cint
 fi
 
@@ -458,11 +467,12 @@ if [ $redoSystematics = true ]; then
     
 		cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
 		root -l -b < commandsSysRun.cint
+		#root -l -q -b 'analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD', '$extrapolate', '$hadron')'
 	    fi  
 	else
 	    echo "will be ignored, only done for decayChannel=muon/electron"
@@ -489,10 +499,10 @@ EOF
 	    
 		cat >> commandsSysShapeVarRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
 		root -l -b < commandsSysShapeVarRun.cint
 	    done
 	fi
@@ -513,7 +523,7 @@ if [ $decayChannel == \"combined\" ]
     echo "cross sections for all systematic variations"
     echo "and all decay channels"
     echo
-    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$makeLogPlots')'
+    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$makeLogPlots', '$extrapolate', '$hadron')'
 else
     echo "will be ignored, only done for decayChannel=combined"
 fi
@@ -543,7 +553,7 @@ cat >> commands.cint << EOF
 .L BCC_C.so
 .L combineTopDiffXSecUncertainties.C++g
 .L combineTopDiffXSecUncertainties_C.so
-combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar)
+combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron)
 EOF
 
 root -l -b < commands.cint
