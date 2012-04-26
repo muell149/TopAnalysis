@@ -59,6 +59,7 @@ decayChannel=\"electron\"
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
+
 if [ $decayChannel == \"electron\" ]; then
     dataLuminosity=4980
     dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
@@ -117,7 +118,7 @@ maxSys=46
 ##    shapeVar = true / false (default: true) 
 ## b) Exclude them from total systematic uncertainty 
 ##    exclShapeVar = true / false (default: true)
-shapeVar=false
+shapeVar=true
 exclShapeVar=true
 
 ## disable waiting time to read output
@@ -164,7 +165,7 @@ if [ $decayChannel == \"combined\" ]
 	echo "Re-do systematic uncertainties:             $redoSystematics "
 	echo "Number of considered systematics:           $maxSys          "
 	echo "Consider shape variation:                   $shapeVar        " 
-	echo "Add shape uncertainty to total uncertainty: $exclShapeVar    "
+	echo "Exclude shape unc. from total uncertainty:  $exclShapeVar    "
 	echo "Save plots:                                 $save            " 
 	echo
     else
