@@ -19,7 +19,7 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
   double luminosity2=luminosity;
   if(luminosity==4980) luminosity2=4955;
   if(luminosity==4955){ 
-    luminosity==4980
+    luminosity=4980;
     luminosity2=4955;
   }
   // smooth instead of binned theory curves
@@ -53,9 +53,9 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
   bool DrawMCAtNLOPlot = false;
   bool DrawPOWHEGPlot = false;
   if(extrapolate==false&&hadron==false){
-    bool DrawSmoothMadgraph = true;
-    bool DrawMCAtNLOPlot = true;
-    bool DrawPOWHEGPlot = true;
+    DrawSmoothMadgraph = true;
+    DrawMCAtNLOPlot = true;
+    DrawPOWHEGPlot = true;
   }
   // GOSSIE quick fix: cut of m(ttbar) below 354 GeV
   bool cutTtbarMass=false;
@@ -444,7 +444,7 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
 	if(!canvasMu  ) std::cout << "muon file     diffXSecTopSemiMu"+dataSample+LV+PS+".root" << std::endl;
 	if(!canvasEl  ) std::cout << "electron file diffXSecTopSemiEl"+dataSample+LV+PS+".root" << std::endl;
 	if(!canvasTheo){ 
-	  std::cout << "theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSampleLV+PS++".root";
+	  std::cout << "theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSample+LV+PS+".root";
 	}
 	exit(0);
       }
