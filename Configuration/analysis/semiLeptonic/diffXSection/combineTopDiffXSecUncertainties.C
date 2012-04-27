@@ -87,7 +87,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
   if(dataSample!="") outputFolder+=dataSample;
   // use BCC values?
   bool useBCC=false;
-  if(extrapolate==false&&hadron=false) useBCC=true;
+  if(extrapolate==false&&hadron==false) useBCC=true;
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
   
