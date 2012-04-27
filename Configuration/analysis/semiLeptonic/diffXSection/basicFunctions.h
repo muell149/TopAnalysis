@@ -1955,11 +1955,15 @@ namespace semileptonic {
     double value=0;
     if(verbose>0) std::cout << "histo: " << hist->GetTitle() << std::endl;
     for(int bin=0; bin<=hist->GetNbinsX()+1; ++bin){
+
       double binWidth=hist->GetBinWidth(bin);
-      if(binWidth==0.) binWidth=1.;
+      if(binWidth==0.||bin==0||bin==hist->GetNbinsX()+1) binWidth=1.;
       double thisBin=binWidth*hist->GetBinContent(bin);
       value+=thisBin;
-      if(verbose>1) std::cout << "xSec bin" << bin << ": " << thisBin << std::endl;
+      if(verbose>1){ 
+	std::cout << "xSec bin" << bin << ": " << thisBin << std::endl;
+	std::cout << "( with lower edge" << hist->GetBinLowEdge(bin) << ")" << std::endl;
+      }
     }
     if(verbose>0) std::cout << "integrated xSec: " << value << std::endl;
     return value;
