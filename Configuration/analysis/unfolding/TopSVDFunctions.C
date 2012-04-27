@@ -5014,9 +5014,8 @@ double TopSVDFunctions::SVD_Unfold(
  
 
     // Set Pointer
-    if ( flag_regmode == 1 ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
-    if ( flag_regmode > 1 ) unfolded =  SVD_CloneHists1D(bbbHist, numberSyst+1);
- 
+    if ( flag_regmode == 1 ) unfolded = SVD_CloneHists1D(bbbHist, numberSyst+1);
+    if ( flag_regmode > 1  ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
 
    
     ///////////////////////////////////////////////////////////////////
