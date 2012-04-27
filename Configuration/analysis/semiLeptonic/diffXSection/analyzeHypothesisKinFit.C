@@ -2,11 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=false, bool hadron=false)
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -1249,6 +1249,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
 	// a) differential norm XSec from data
 	// get data plot
 	TString name=TString(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetName())+"kData";
+	if(compare) name+="BBB";
 	histo_[xSec][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(name));
 	// total number of data events for this variable
 	double NdataVariable=getInclusiveXSec(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData],verbose-1);
@@ -1577,11 +1578,11 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
       TString steering="";
       // Steering options in parameter 'steering' 
       //     (1) REGMODE, see above
-      steering=getTStringFromInt(regMode-1)+steering;
+      steering=getTStringFromInt(regMode)+steering;
       //     (2) REGULARIZATION PARAMETER, see above
-      steering=getTStringFromInt(scan)+steering;
-      //     (3) SCAN 
       steering=getTStringFromInt(unfoldWithParameter)+steering;
+      //     (3) SCAN 
+      steering=getTStringFromInt(scan)+steering;
       //     (4) OUTPUT PS CONTENT, see above
       steering=getTStringFromInt(plotting)+steering;
       //     (5) ROOT FILE 
@@ -1593,9 +1594,11 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
       //         1 means: no output at all
       //         2 means: standard output (default)
       //         3 means: debugging output
-      int verbosity=verbose+1;
-      if(redetermineopttau) verbosity+=1;
-      if(verbosity>3) verbosity=3;
+      int verbosity=0;
+      if(verbose==0) verbosity=1;
+      if(verbose==1) verbosity=2;
+      if(redetermineopttau) verbosity=2;
+      if(verbose>1) verbosity=3;
       steering=getTStringFromInt(verbosity)+steering;
       //     (8)  SCANPOINTS
       //          0 means: Default value, same as 3
@@ -1603,7 +1606,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
       //          2 means: 25 scan points
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
-      int scanpoints= (scan==2 ? 4 : 0);
+      int scanpoints= (scan==2 ? 1 : 0);
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -1811,6 +1814,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
 	// ---------------------------------------------
 	// use unfolded event yield as input
 	histo_[xSec][kData+42]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	//histo_[xSec][kData+42]->SetBinContent(2, 2*histo_[xSec][kData+42]->GetBinContent(2));
 	// use reco yield plot clone to get correct and complete binning 
 	histo_[xSec][kData      ]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
 	histo_[xSec][kData      ]->Reset("icesm");
@@ -1846,7 +1850,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
 		found=true; 
 		if(verbose>1) std::cout << "-> bin " << bin << std::endl;
 		histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
-		histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(  bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+		histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
 	      }
 	    }
 	  }
@@ -1939,8 +1943,8 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
 	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
 	double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig],verbose-1);
-	// XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
-	// XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
+	//XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
+	//XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
 	histo_[xSecNorm][kSig]->Scale(1/(XSecInclTheoPS));
 	// style
 	histogramStyle(*histo_[xSec    ][kSig ], kSig , false);
@@ -1952,8 +1956,12 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
 	setXAxisRange(histo_[xSec    ][kSig ], variable);
 	setXAxisRange(histo_[xSecNorm][kSig ], variable);
 	if(verbose>1){
-	  std::cout << "mc abs:"   << getInclusiveXSec(histo_[xSec    ][kSig],2) << std::endl;
-	  std::cout << "mc norm: " << getInclusiveXSec(histo_[xSecNorm][kSig],2) << std::endl;
+	std::cout << std::endl << xSec << std::endl;
+	std::cout << "mc abs for normalization: "   << XSecInclTheoPS << std::endl << std::endl;
+	std::cout << "UF: "   << histo_[xSec][kSig]->GetBinContent(0) << std::endl;
+	std::cout << "OF: "   << histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1) << std::endl;
+	std::cout << "mc abs:"   << getInclusiveXSec(histo_[xSec    ][kSig],2) << std::endl;
+	std::cout << "mc norm: " << getInclusiveXSec(histo_[xSecNorm][kSig],2) << std::endl;
 	}
       }
     }
@@ -2139,10 +2147,10 @@ for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	// draw all pull distributions in same canvas if RecPartonTruth pull is called
 	if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
 	  if(verbose>1){
+	    unsigned int activeCanv =(plotCanvas_.size()==0 ? 1 : plotCanvas_.size()-1);
 	    std::cout << "plotting " << plotList_[plot];
 	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	    std::cout << " to canvas " << plotCanvas_.size()-1 << " ( ";
-	    std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )" << std::endl;
+	    std::cout << " to canvas " << activeCanv << std::endl;
 	  }
 	  // for efficiency plots: draw grid
 	  if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
@@ -2366,6 +2374,10 @@ for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	  if(title.Contains("0")||(!title.Contains("analyzeTopRecoKinematicsKinFit")&&!title.Contains("legend"))){
 	    if(extrapolate) universalplotLabel="FullPS";
 	    else universalplotLabel=LV+"LvPS";
+	  }
+	  if(title.Contains("xSec")){
+	    if(!SVDunfold) universalplotLabel+="BBB";
+	    if(compare   ) universalplotLabel+="BBBcomparison";
 	  }
 	  // do the saving
 	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+".eps"); 
