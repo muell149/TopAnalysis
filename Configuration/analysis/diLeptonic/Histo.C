@@ -7,7 +7,7 @@ void Histo::MakePlots(){
   std::vector<double> Xbins;
   std::vector<double> binCenters;
   Plotter h_XSecPlot;
-  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", false, false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
+  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", true, false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
   h_XSecPlot.DYScaleFactor();
   h_XSecPlot.setDataSet("mumu");
   h_XSecPlot.fillHisto();
