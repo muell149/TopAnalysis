@@ -55,7 +55,7 @@
 
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"electron\" 
+decayChannel=\"muon\" 
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
@@ -146,6 +146,21 @@ hadron=false
 #####################
 ## start the timer to stop the time needed for running the whole analysis
 START=$(date +%s)
+# get proper name of rootfile
+PS=""
+LV="Parton"
+if [ $extrapolate == false ] 
+    then 
+    PS="PhaseSpace"
+    echo $PS
+fi
+if [ $extrapolate == false -a $hadron == true ] 
+    then
+    LV="Hadron"
+fi
+muonFile=./diffXSecTopSemiMu$dataLabel$LV$PS.root
+elecFile=./diffXSecTopSemiElec$dataLabel$LV$PS.root
+combFile=./diffXSecTopSemiLep$dataLabel$LV$PS.root
 
 ## print out configuration
 clear
@@ -153,7 +168,7 @@ if [ $decayChannel == \"combined\" ]
     then
     echo
     echo "combining the electron and muon channel"
-    if [ -f diffXSecTopSemiMu2011.root -a -f diffXSecTopSemiElec2011.root ]; then
+    if [ -f $muonFile -a -f $elecFile ]; then
 	echo
 	echo "Doing the full differential top xSec analysis. "
 	echo 
@@ -171,8 +186,8 @@ if [ $decayChannel == \"combined\" ]
     else
 	echo
 	echo "NOTE: The combination requires two files"
-	echo "a) diffXSecTopSemiMu2011.root"
-        echo "b) diffXSecTopSemiElec2011.root"
+	echo "a) "$muonFile
+        echo "b) "$elecFile
 	echo
 	echo "Please get them by running the e/mu channel first"
 	echo
@@ -207,18 +222,18 @@ if [ $clean = true ]
      echo "Part A1: delete existing root file"
     if [ $decayChannel == \"electron\" ]
 	then
-	echo "./diffXSecTopSemiElec$dataLabel.root"
-	rm ./diffXSecTopSemiElec$dataLabel.root
+	echo $elecFile
+	rm $elecFile
     else
 	if [ $decayChannel == \"muon\" ]
 	    then
-	    echo "./diffXSecTopSemiMu$dataLabel.root"
-	    rm ./diffXSecTopSemiMu$dataLabel.root
+	    echo $muonFile
+	    rm $muonFile
 	else
 	    if [ $decayChannel == \"combined\" ]
 		then
-		echo "./diffXSecTopSemiLep.root"
-		rm ./diffXSecTopSemiLep.root
+		echo $muonFile
+		rm $combFile 
 		echo "none" 
 	    fi
 	fi
@@ -279,10 +294,10 @@ if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
 
     cat >> commandsMonRun1.cint << EOF
 .L analyzeTopDiffXSecMonitoring_C.so
-analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true) 
+analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron) 
 EOF
     echo ""
-    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true)"
+    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron)"
     root -l -b < commandsMonRun1.cint
 
     # without ratio plots
@@ -293,10 +308,10 @@ EOF
 
     cat >> commandsMonRun2.cint << EOF
 .L analyzeTopDiffXSecMonitoring_C.so
-analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false) 
+analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false, $extrapolate, $hadron) 
 EOF
     echo ""
-    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false)"
+    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false, $extrapolate, $hadron)"
     root -l -b < commandsMonRun2.cint
 fi
 
