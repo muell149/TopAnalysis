@@ -6,7 +6,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=false)
+			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=false, bool hadron=true)
 {
   // ============================
   //  Set ROOT Style
@@ -129,9 +129,24 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
   }
+  // normalization of differential normalized cross sections
+  // true: use integral of unfolded differential cross section ignoring UF/OF bins
+  // false: use all events and inclusive eff*A (no BR!) before unfolding
+  bool normToIntegral=true;
+  if(extrapolate)  normToIntegral=false;
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
+  // choose correct input folder for b-quark or b-jet
+  TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
+  TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
+  TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
+  TString genHadronBpath= "analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
+  TString recBpath = ( (!extrapolate&&hadron) ? recHadronBpath : recPartonBpath );
+  TString genBpath = ( (!extrapolate&&hadron) ? genHadronBpath : genPartonBpath );
+  TString recBlabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
+  TString genBlabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
   TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "bqPt", "bqEta"};
@@ -244,12 +259,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // generated lepton quantities
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepPt" , // XSec relevant! GEN
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepEta", // XSec relevant! GEN
-    // reconstructed b-quark quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqPt", // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqEta", // XSec relevant! REC
-    // generated b-quark quantities
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bqPt", // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bqEta" // XSec relevant! GEN
+    // reconstructed b-quark/b-jet quantities
+    recBpath+"/bqPt"+recBlabel,                                                // XSec relevant! REC
+    recBpath+"/bqEta"+recBlabel,                                               // XSec relevant! REC
+    // generated b-quark/b-jet quantities				      
+    genBpath+"/bqPt"+genBlabel,                                                // XSec relevant! GEN
+    genBpath+"/bqEta"+genBlabel                                                // XSec relevant! GEN
   };
  TString plots1Dadd[ ] = {
    // generated angular distributions
@@ -454,9 +469,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // d) response matrix lepton quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepPt_"      ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta_"     ,
-    // e) response matrix b-quark quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqPt_"       ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bqEta_"      ,   
+    // e) response matrix b-quark/b-jet quantities
+    recBpath+"/bqPt_"                                                       ,
+    recBpath+"/bqEta_"                                                      ,   
   };
 
   // b) list plot axes style
@@ -512,10 +527,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // generated lepton quantities
     "p_{T}^{l} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
     "#eta^{l} parton truth/events/0/1",
-    // reconstructed b-quark quantities
+    // reconstructed b-quark/b-jet quantities
     "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
     "#eta^{b and #bar{b}}/events/0/1" ,
-    // generated b-quark quantities
+    // generated b-quark/b-jet quantities
     "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
     "#eta^{b and #bar{b}} parton truth/events/0/1",
   };
@@ -539,7 +554,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // d) response matrix lepton quantities
     "p_{T}^{l} #left[#frac{GeV}{c}#right] gen/p_{T}^{l} #left[#frac{GeV}{c}#right] reco",
     "#eta^{l} gen/#eta^{l} reco",           
-    // e) response matrix b-quark quantities
+    // e) response matrix b-quark/b-jet quantities
     "p_{T}^{b or #bar{b}} #left[#frac{GeV}{c}#right] gen/p_{T}^{b or #bar{b}} #left[#frac{GeV}{c}#right] reco",
     "#eta^{b or #bar{b}} gen/#eta^{b or #bar{b}} reco",           
   };
@@ -773,6 +788,51 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back(sysInputFolderExtension);
   getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
+  // take care of rec level b quark plots from MC BG
+  // this is necessary because signal and background do have different input folders
+  if(!extrapolate&&hadron){
+    bool bqPtExistsInAnySample =false;
+    bool bqEtaExistsInAnySample=false;
+    // get input path/folder
+    TString path=recPartonBpath;
+    // loop samples
+    for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
+      if(sample==kData){
+	if (vecRedundantPartOfNameInData.size() != 0){
+	  std::vector<TString>::iterator iter;
+	  for (iter = (vecRedundantPartOfNameInData.begin()); iter != (vecRedundantPartOfNameInData.end()); iter++){
+	    path.ReplaceAll((*iter), ""); 
+	  }
+	}
+      }
+      // get plot
+      // create plot container
+      TH1* targetPlotBqPt;
+      TH1* targetPlotBqEta;
+      files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
+      files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
+      // Check existence of plot
+      if(targetPlotBqPt){ 
+	histo_[path+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
+	bqPtExistsInAnySample =true;
+      }
+      if(targetPlotBqEta){
+	histo_[path+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
+	bqEtaExistsInAnySample=true;
+      }
+    }
+    // check if plot exists at all
+    if(!bqPtExistsInAnySample){
+      std::cout << "no plot found with label " << path+"/bqPt for non ttbar signal" << std::endl;
+      exit(0);
+    }
+    if(!bqEtaExistsInAnySample){
+      std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
+      exit(0);
+    }
+  }
+
+
   // ---
   //    lumiweighting for choosen luminosity
   // ---
@@ -792,67 +852,65 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
 
   // ---
-  //    Renaming of PS to "PartonLevel" to unify naming 
+  //    Renaming of PS specific plot names to parton level PS names to unify naming
   // ---
-  // a) for hadron level PS configuration
-  if(LV=="Hadron"){
-    // loop plots
-    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-      // search for PS gen level plots
-      if(plotList_[plot].Contains(LV)&&plotList_[plot].Contains("PhaseSpace")){
-	// create unified name
-	TString newName=plotList_[plot];
-	newName.ReplaceAll(LV, "Parton");	
-	// loop samples
-	for(unsigned int sample=kSig; sample<=kData; ++sample){
-	  // check if plot exists 1D
-	  if(plotExists(histo_, plotList_[plot], sample)){
-	    // replace plot entry
-	    histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
-	    histo_[plotList_[plot]].erase(sample);
-	  }
-	  // check if plot exists 2D
-	  else if(plotExists(histo2_, plotList_[plot], sample)){
-	    histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
-	    histo2_[plotList_[plot]].erase(sample);
-	  }
-	  // finally delete the whole name entry
-	  if(sample==kSAToptW) histo_.erase(plotList_[plot]);
-	}
-	// replace plot list entry
-	plotList_[plot]=newName;
-      }
-    }
-  }
-  // b) for parton level full PS
-  else if(extrapolate==true){
-    // loop plots
-    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-      // search for gen level full PS plots
+  // loop plots
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    TString newName=plotList_[plot];
+    // ---
+    //    a) for parton level FULL PS configuration
+    // ---
+    if(extrapolate==true){
+      // change gen level full PS label to gen level PS label
       if(plotList_[plot].Contains("analyzePartonLevel")&&!plotList_[plot].Contains("PhaseSpace")){
 	// attention: topPt full PS plots still needed!!!
-	if(!plotList_[plot].Contains("topPt")||plotList_[plot].Contains("topPtLep")||plotList_[plot].Contains("topPtHad")){
-	  // create unified name
-	  TString newName=plotList_[plot];
-	  newName.ReplaceAll("analyzePartonLevelKinematics", "analyzePartonLevelKinematicsPhaseSpace");	
-	  // loop samples
-	  for(unsigned int sample=kSig; sample<=kData; ++sample){
-	    // check if plot exists 1D
-	    if(plotExists(histo_, plotList_[plot], sample)){
-	      // replace plot entry
-	      histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(newName); 
-	      histo_[plotList_[plot]].erase(sample);
-	    }
-	    // check if plot exists 2D
-	    else if(plotExists(histo2_, plotList_[plot], sample)){
-	      histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(newName); 
-	      histo2_[plotList_[plot]].erase(sample);
-	    }
-	    // finally delete the whole name entry
-	    // if(sample==kSAToptW) histo_.erase(plotList_[plot]); // attention: some full PS plots still needed!!!
-	  }
-	}
+	if(!plotList_[plot].Contains("topPt")||plotList_[plot].Contains("topPtLep")||plotList_[plot].Contains("topPtHad")) newName.ReplaceAll("analyzePartonLevelKinematics", "analyzePartonLevelKinematicsPhaseSpace");
       }
+    }
+    // ---
+    //    b) for hadron level PS configuration
+    // ---
+    else if(LV=="Hadron"){
+      //  b1) change b-jet to b-quark label
+      // for gen plots
+      if(plotList_[plot].Contains(recHadronBpath)){ 
+	newName.ReplaceAll(recHadronBpath, recPartonBpath);
+	newName.ReplaceAll("Rec", "");
+	newName.ReplaceAll("Topo", "TopReco");
+      }
+      // for rec plots
+      if(plotList_[plot].Contains(genHadronBpath)){ 
+	newName.ReplaceAll(genHadronBpath, genPartonBpath);
+	if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
+      }
+      // b2) change hadron PS gen level label to parton PS gen level label
+      if(newName.Contains(LV)&&newName.Contains("PhaseSpace")) newName.ReplaceAll(LV, "Parton");
+    }
+    // check if replacement is necessary
+    if(newName!=plotList_[plot]){
+      if(verbose>1) std::cout << plotList_[plot] << " -> " << newName << " for " << std::endl;
+      // loop samples
+      for(unsigned int sample=kSig; sample<=kData; ++sample){
+	// check if plot exists 1D
+	if(plotExists(histo_, plotList_[plot], sample)){
+	  if(verbose>1) std::cout << sampleLabel(sample) << "(1D)" << std::endl;
+	  // replace plot entry
+	  histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
+	  histo_[plotList_[plot]].erase(sample);
+	}
+	// check if plot exists 2D
+	else if(plotExists(histo2_, plotList_[plot], sample)){
+	  if(verbose>1) std::cout << sampleLabel(sample) << "(2D)" << std::endl;
+	  // replace plot entry
+	  histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
+	  histo2_[plotList_[plot]].erase(sample);
+	}
+	// finally delete the whole name entry
+	// attention: some full PS plots still needed!!!
+	if(sample==kSAToptW&&!extrapolate) histo_.erase(plotList_[plot]);
+      }
+      // replace plot list entry
+      plotList_[plot]=newName;
     }
   }
   
@@ -915,6 +973,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   int kAllMC=kSAToptW+1;
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
+    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << variable << std::endl;
     // ttbar BG yield for signal fraction
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
     // create combined BG reco plot
@@ -1197,7 +1256,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     std::cout << "BR MC:         " << BR    << std::endl;
     std::cout << "ttbar sigfrac: " << sigFrac << std::endl;
     std::cout << "inclusive cross section";
-    if(extrapolate) std::cout << " (extrapolated)";
     std::cout << " [pb]: ";
     std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
     std::cout << std::endl;
@@ -1429,6 +1487,29 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       else if(label2==" ") label2="[pb]";
       TString xSec ="xSec/"+variable;
       TString xSecNorm ="xSecNorm/"+variable;
+
+      // calculate cross section within the chosen PS
+      // used for normalization of diff. norm. cross sections
+      // NOTE: these cross sections do not include BR corrections!
+      TString recpath="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable;
+      TString genpath="analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable;
+      // data 
+      double Ndataplain= histo_[recpath][kData]->Integral(0, histo_[recpath][kData]->GetNbinsX()+1);
+      // inclusive eff*acceptance (PS)
+      double NgenSigPS= histo_[genpath][kSig]->Integral(0, histo_[genpath][kSig]->GetNbinsX()+1);
+      double NrecSig  = histo_[recpath][kSig]->Integral(0, histo_[recpath][kSig]->GetNbinsX()+1);
+      double effAPSforNorm=NrecSig/NgenSigPS;
+      // ttbar signal fraction
+      double NrecttbarBG = histo_[recpath][kBkg]->Integral(0, histo_[recpath][kBkg]->GetNbinsX()+1);
+      double signalFraction=NrecSig/ (NrecSig + NrecttbarBG);
+      // non ttbar BG 
+      double NrecMCBG = histo_[recpath][kAllMC]->Integral(0, histo_[recpath][kAllMC]->GetNbinsX()+1);
+      NrecMCBG-=NrecttbarBG;
+      // cross section 
+      double xSecPSforNorm= (Ndataplain - NrecMCBG)*signalFraction / (effAPSforNorm * luminosity);
+      if(verbose>0){
+	std::cout << "inclusive cross section (PS) for normalization: " << xSecPSforNorm << std::endl;
+      }
       // -----------------------------------
       // check availablility of input histos
       // -----------------------------------
@@ -1902,12 +1983,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
 	inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
 	inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
-	histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
-	if(verbose>1){
+	if(normToIntegral==true) histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
+	else histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
+	if(verbose>0){
 	  std::cout << std::endl << variable << std::endl;
-	  std::cout << "data abs:"   << getInclusiveXSec(histo_[xSec    ][kData],2) << std::endl;
-	  std::cout << "data norm: " << getInclusiveXSec(histo_[xSecNorm][kData],2) << std::endl;
-	}	     
+	  std::cout << "data preunfolded inclusive abs: " << xSecPSforNorm << std::endl;
+	  std::cout << "data unfolded sum abs: "  << getInclusiveXSec(histo_[xSec    ][kData],0) << std::endl;
+	  std::cout << "data norm sum: " << getInclusiveXSec(histo_[xSecNorm][kData],0) << std::endl;
+	}
 	// --------------
 	// styling issues
 	// --------------
@@ -2123,11 +2206,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     else createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
   }
   if(verbose>2) std::cout << std::endl;
-
-  // FIXME MARTIN BBB Cross check
-  //for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-  //  std::cout << plotList_[plot] << std::endl;
-  //}
 
   // ---
   //    do the printing
