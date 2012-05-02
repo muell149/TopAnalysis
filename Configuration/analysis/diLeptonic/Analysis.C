@@ -576,7 +576,7 @@ Bool_t Analysis::Process(Long64_t entry)
   
   if(MCSample->find("ttbarsignal")!=string::npos){  
     
-    h_GenAll->Fill(LVGenTop.M(),1);
+    h_GenAll->Fill(LVGenTop.M(),weightPU*lumiWeight);
     //    if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
      //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
       //if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
@@ -705,6 +705,7 @@ Bool_t Analysis::Process(Long64_t entry)
       }  
     }
   }
+
   //Control plots
   
   if(lepton_>1){  //two isolated leptons create dimass out of highest pt pair
