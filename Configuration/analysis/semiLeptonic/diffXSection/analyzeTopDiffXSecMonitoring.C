@@ -4,7 +4,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 				  TString inputFolderName="RecentAnalysisRun",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  const std::string decayChannel = "electron", bool withRatioPlot = true)
+				  const std::string decayChannel = "electron", bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
   //  Set Root Style
@@ -57,7 +57,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // b) options to be configured only once
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
-  if(withRatioPlot==true) setQCDtoZero=false;
+  //if(withRatioPlot==true) setQCDtoZero=false;
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
@@ -72,7 +72,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
-  outputFileName+=dataSample+".root";
+  // NOTE: reco plots are the same - whatever PS is chosen but its nice
+  //       to have them in the same output file like the cross sections
+  // choose phase space
+  TString PS="";
+  // a) for full PS use extrapolate=true;
+  if(!extrapolate) PS="PhaseSpace";
+  // b) for restricted phase space:
+  // b1) parton PS: hadron=false
+  // b2) hadron PS: hadron=true
+  TString LV="Parton";
+  if(!extrapolate&&hadron) LV="Hadron";
+  outputFileName+=dataSample+LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
   // chose wheter SSV instead of CSV btagging control plots should be shown 
