@@ -31,6 +31,7 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     int flag_lowersidebin = 2; 
     int flag_uppersidebin = 2;
     int flag_matrixorientation = 1; 
+    int flag_norm = 2; 
     
     // Alter the Gen Level Treatment for the PT-Quantities
     TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
@@ -52,6 +53,7 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     steering.Prepend(TString::Format("%i", flag_lowersidebin)); //10
     steering.Prepend(TString::Format("%i", flag_uppersidebin)); //11
     steering.Prepend(TString::Format("%i", flag_matrixorientation)); //12 
+    steering.Prepend(TString::Format("%i", flag_norm)); //13
     
     // Return it
     return steering;
@@ -379,7 +381,7 @@ TString DilepSVDFunctions::SVD_GetOutputFileNameRoot(TString channel, TString pa
  
 // Unfolding with systematics.
 // This takes "3 of each kind": Nominal, Up and Down
-// The return value will contain relative shifts !!!
+// The return value will contain absolute shifts !!!
 // For more information see function SVD_DoUnfold() 
 double DilepSVDFunctions::SVD_DoUnfoldSys(
         TH1D* dataInputHist,                            // DATA.
@@ -387,6 +389,10 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
         TH1D* genNom, TH1D* genUp, TH1D* genDown,        // Gen. Note: if genUp==NULL then genUp=genNom, etc. 
         TH1D* recNom, TH1D* recUp, TH1D* recDown,      // Rec
         TH2D* respNom, TH2D* respUp, TH2D* respDown,  // Response Matrices
+        double totalDataEventsNom,
+        double totalBgrEventsNom,  double totalBgrEventsUp,  double totalBgrEventsDown, 
+        double totalRecEventsNom,  double totalRecEventsUp,  double totalRecEventsDown, 
+        double totalGenEventsNom,  double totalGenEventsUp,  double totalGenEventsDown,     
         const double thebins[],                 
         const int numbins,                       
         TH1D*& unfolded,                        
@@ -429,6 +435,11 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
     *(arrResp+1) = *respUp;
     *(arrResp+2) = *respDown;
     
+    // Align Normalization Input
+    double totalDataEvents[1] = {totalDataEventsNom};
+    double totalBgrEvents[3] = {totalBgrEventsNom, totalBgrEventsUp, totalBgrEventsDown};
+    double totalRecEvents[3] = {totalRecEventsNom, totalRecEventsUp, totalRecEventsDown};
+    double totalGenEvents[3] = {totalGenEventsNom, totalGenEventsUp, totalGenEventsDown};
          
     // Create Pointer for Output 
     TH1D* arrUnfolded = NULL;
@@ -441,7 +452,11 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
         arrBgr,                       
         arrGen,                      
         arrRec,                    
-        arrResp,                     
+        arrResp, 
+        totalDataEvents, 
+        totalBgrEvents,  
+        totalRecEvents, 
+        totalGenEvents,                    
         thebins,                 
         numbins,                       
         arrUnfolded,    // Return value   
@@ -469,13 +484,11 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
     for ( int i = 1 ; i <= numbins+2 ; i++ ) {
         double valunfNom = unfNom->GetBinContent(i);
         double valunfUp = unfUp->GetBinContent(i);
-        double valunfDown = unfDown->GetBinContent(i);
-        double Sys_Error = 0.;
-        if ( valunfNom > 0. ) { 
-            double Sys_Error_Up   = TMath::Abs(valunfUp - valunfNom ) / valunfNom ;
-            double Sys_Error_Down   = TMath::Abs(valunfDown - valunfNom ) / valunfNom ; 
-            Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.;
-        } 
+        double valunfDown = unfDown->GetBinContent(i); 
+        
+        double Sys_Error_Up   = TMath::Abs(valunfUp - valunfNom );
+        double Sys_Error_Down   = TMath::Abs(valunfDown - valunfNom ); 
+        double Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.; 
         unfolded->SetBinContent(i, Sys_Error);
         unfolded->SetBinError(i, 0.);
     }
@@ -502,6 +515,10 @@ double DilepSVDFunctions::SVD_DoUnfold(
         TH1D* genInputHist,                      // Generated MC
         TH1D* recInputHist,                      // Reconstructed MC
         TH2D* respInputHist,                     // Response Matrix 
+        double* totalDataEvents,                 // For normalization. If zet to NULL, will be calculated from input distributions
+        double* totalBgrEvents,                  // For normalization. If zet to NULL, will be calculated from input distributions 
+        double* totalRecEvents,                  // For normalization. If zet to NULL, will be calculated from input distributions
+        double* totalGenEvents,                  // For normalization. If zet to NULL, will be calculated from input distributions
         const double thebins[],                  // Binning for the unfolding
         const int numbins,                       // Number of bins for unfolding (not counting OF bins !!!) 
         TH1D*& unfolded,                         // Returned: Unfolded Distribution.
@@ -550,6 +567,8 @@ double DilepSVDFunctions::SVD_DoUnfold(
     // Do the Unfolding 
     double optimalTauX = TopSVDFunctions::SVD_Unfold(dataInputHist, bgrInputHist, NULL, genInputHist, recInputHist, respInputHist,
         unfolded, 
+        //NULL, NULL, NULL, NULL, NULL,
+        totalDataEvents, totalBgrEvents, NULL, totalRecEvents, totalGenEvents,
         thebins, numbins, regPar, steering, numSys,
         channel, particle, quantity, special, syst,
         channelTex, particleTex, quantityTex, specialTex, systTex,

@@ -977,7 +977,18 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     //cout << "theSystematicName = " << theSystematicName<< endl; 
  
  
- 
+    // Get the integrals for the normalization
+    double totalDataEventsNom  = theDataHist->Integral(); 
+    double totalBgrEventsNom   = theBgrHist->Integral(); 
+    double totalBgrEventsUp    = theBgrHistUp->Integral();
+    double totalBgrEventsDown  = theBgrHistDown->Integral();
+    double totalRecEventsNom   = theRecHist->Integral(); 
+    double totalRecEventsUp    = theRecHistUp->Integral(); 
+    double totalRecEventsDown  = theRecHistDown->Integral(); 
+    double totalGenEventsNom   = theGenHist->Integral(); 
+    double totalGenEventsUp    = theGenHistUp->Integral(); 
+    double totalGenEventsDown  = theGenHistDown->Integral();  
+     
     // UNFOLDING OF SYSTEMATICS
     // Retrieve histograms with the unfolded quantities.
     // Note: The unfolded histograms have additional side bins!
@@ -989,6 +1000,10 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 				   theGenHist, theGenHistUp, theGenHistDown, 
 				   theRecHist, theRecHistUp, theRecHistDown, 
 				   theRespHist, theRespHistUp, theRespHistDown, 
+                   totalDataEventsNom, 
+                   totalBgrEventsNom,  totalBgrEventsUp,  totalBgrEventsDown, 
+                   totalRecEventsNom,  totalRecEventsUp,  totalRecEventsDown, 
+                   totalGenEventsNom,  totalGenEventsUp,  totalGenEventsDown,  
 				   theBins, numberBins,
 				   symmSysErrors,  
 				   theChannelName, theParticleName, theQuantityName, theSpecialPostfix, theSystematicName
@@ -2051,6 +2066,12 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     TString theSpecialPostfix = "";
  
 
+    double totalDataEventsNom[1]  = {theDataHist->Integral()}; 
+    double totalBgrEventsNom[1]   = {theBgrHist->Integral()};  
+    double totalRecEventsNom[1]   = {theRecHist->Integral()};  
+    double totalGenEventsNom[1]  = {theGenHist->Integral()};  
+    
+    
     // UNFOLDING 
     // Retrieve a histogram with the unfolded quantities.
     // Note: The unfolded histogram has additional side bins!
@@ -2063,6 +2084,10 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 				(TH1D*) theGenHist, 
 				(TH1D*) theRecHist, 
 				(TH2D*) theRespHist, 
+                totalDataEventsNom, 
+                totalBgrEventsNom,   
+                totalRecEventsNom,  
+                totalGenEventsNom,   
 				theBins, numberBins,  
 				unfoldedDistribution, numSystematics,
 				theChannelName, theParticleName, theQuantityName, theSpecialPostfix, "");
@@ -2079,7 +2104,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 		
 		 	
 		
-    // CROSS SECTION CALCULATION
+    // CROSS SECTION CALCULATION 
     for (Int_t i=0; i<bins; ++i) {
       if(channelType!=3){
 	binWidth[i] = Xbins[i+1]-Xbins[i];       
@@ -2167,7 +2192,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
     //    CalcDiffSystematics("JES", 0);
-    //CalcDiffSystematics("RES", 1);
+    CalcDiffSystematics("RES", 1);
     //CalcDiffSystematics("PU_", 2);
     //CalcDiffSystematics("SCALE", 3);
     //CalcDiffSystematics("MASS", 4);
